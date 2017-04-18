@@ -2,12 +2,11 @@
 #define MCV_VIEW_PLUGIN
 
 #include "UI_DockableWidget.h"
-
-#include <QObject>
+#include "PluginFactory.h"
 
 class UI_DockableWidget;
 
-class MCV_ViewPlugin : public UI_DockableWidget
+class MCV_ViewPlugin : public UI_DockableWidget, public Plugin
 {
     Q_OBJECT
     
@@ -15,22 +14,19 @@ public:
     
     virtual ~MCV_ViewPlugin() {};
     
-    virtual void init() = 0;
-    
     virtual void dataAdded() = 0;
     virtual void dataRefreshed() = 0;
 };
 
-
-class MCV_ViewPluginFactory : public QObject
+class MCV_ViewPluginFactory : public PluginFactory
 {
     Q_OBJECT
 
 public:
-    
+
     virtual ~MCV_ViewPluginFactory() {};
 
-    virtual QSharedPointer<MCV_ViewPlugin> produce() = 0;
+    virtual MCV_ViewPlugin* produce() = 0;
 };
 
 Q_DECLARE_INTERFACE(MCV_ViewPluginFactory, "cytosplore.MCV_ViewPluginFactory")

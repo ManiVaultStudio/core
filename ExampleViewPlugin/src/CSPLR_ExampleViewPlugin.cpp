@@ -39,7 +39,7 @@ void CSPLR_ExampleViewPlugin::dataRefreshed(void)
 // Factory
 // =============================================================================
 
-QSharedPointer<MCV_ViewPlugin> CSPLR_ExampleViewPluginFactory::produce()
+MCV_ViewPlugin* CSPLR_ExampleViewPluginFactory::produce()
 {
-	return QSharedPointer<CSPLR_ExampleViewPlugin>(new CSPLR_ExampleViewPlugin());
+    return new CSPLR_ExampleViewPlugin();
 }

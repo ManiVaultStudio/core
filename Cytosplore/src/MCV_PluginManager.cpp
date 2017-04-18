@@ -112,7 +112,7 @@ void MCV_PluginManager::pluginTriggered(int idx)
     {
     } else if ( qobject_cast<MCV_ViewPluginFactory*>(plugin) )
     {
-        QSharedPointer<MCV_ViewPlugin> instance = qobject_cast<MCV_ViewPluginFactory*>(plugin)->produce();
+        MCV_ViewPlugin* instance = qobject_cast<MCV_ViewPluginFactory*>(plugin)->produce();
         //test
         instance->dataRefreshed();
     }

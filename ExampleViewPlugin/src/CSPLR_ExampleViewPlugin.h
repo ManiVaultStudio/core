@@ -37,7 +37,7 @@ public:
 	CSPLR_ExampleViewPluginFactory(void) {}
 	~CSPLR_ExampleViewPluginFactory(void) {}
     
-    QSharedPointer<MCV_ViewPlugin> produce();
+    MCV_ViewPlugin* produce();
 };
 
 #endif // CSPLR_TEST_VIEW_PLUGIN

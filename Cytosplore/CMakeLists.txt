@@ -57,6 +57,8 @@ set( MCV_PLUGIN_HEADERS
     src/MCV_LoaderPlugin.h
     src/MCV_TransformationPlugin.h
     src/MCV_ViewPlugin.h
+    src/PluginFactory.h
+    src/Plugin.h
 )
 
 list(APPEND PRIVATE_HEADERS

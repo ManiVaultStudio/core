@@ -1,19 +1,17 @@
 #ifndef MCV_LOADER_PLUGIN
 #define MCV_LOADER_PLUGIN
 
-#include <QObject>
+#include "PluginFactory.h"
 
-class MCV_LoaderPlugin : public QObject
+class MCV_LoaderPlugin : public Plugin
 {
-    Q_OBJECT
-
 public:
     
     virtual ~MCV_LoaderPlugin() {};
 };
 
 
-class MCV_LoaderPluginFactory : public QObject
+class MCV_LoaderPluginFactory : public PluginFactory
 {
     Q_OBJECT
     
@@ -21,7 +19,7 @@ public:
     
     virtual ~MCV_LoaderPluginFactory() {};
     
-    virtual QSharedPointer<MCV_LoaderPlugin> produce() = 0;
+    virtual MCV_LoaderPlugin* produce() = 0;
 };
 
 Q_DECLARE_INTERFACE(MCV_LoaderPluginFactory, "cytosplore.MCV_LoaderPluginFactory")

@@ -1,19 +1,17 @@
 #ifndef MCV_TRANSFORMATION_PLUGIN
 #define MCV_TRANSFORMATION_PLUGIN
 
-#include <QObject>
+#include "PluginFactory.h"
 
-class MCV_TransformationPlugin : public QObject
+class MCV_TransformationPlugin : public Plugin
 {
-    Q_OBJECT
-    
 public:
     
     virtual ~MCV_TransformationPlugin() {};
 };
 
 
-class MCV_TransformationPluginFactory : public QObject
+class MCV_TransformationPluginFactory : public PluginFactory
 {
     Q_OBJECT
     
@@ -21,7 +19,7 @@ public:
     
     virtual ~MCV_TransformationPluginFactory() {};
     
-    virtual QSharedPointer<MCV_TransformationPluginFactory> produce() = 0;
+    virtual MCV_TransformationPlugin* produce() = 0;
 };
 
 Q_DECLARE_INTERFACE(MCV_TransformationPluginFactory, "cytosplore.MCV_TransformationPluginFactory")
