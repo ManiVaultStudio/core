@@ -87,12 +87,13 @@ void MCV_PluginManager::LoadPlugins(QSharedPointer<Ui::MainWindow> ui)
             
             if(action)
             {
-                QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MCV_PluginManager::pluginTriggered);
                 QObject::connect(action, &QAction::triggered, signalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
                 signalMapper->setMapping(action, _plugins.size()-1);
             }
         }
     }
+
+    QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MCV_PluginManager::pluginTriggered);
 }
 
 void MCV_PluginManager::pluginTriggered(int idx)
