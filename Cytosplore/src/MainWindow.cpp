@@ -1,29 +1,35 @@
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
 
 #include "PluginManager.h"
+#include "PluginType.h"
 
 #include <QDebug>
-#include <QDir>
-#include <QPluginLoader>
 
 namespace hdps {
 
 namespace gui {
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    _ui(NULL)
+    QMainWindow(parent)
 {
-    _ui = QSharedPointer<Ui::MainWindow>(new Ui::MainWindow());
-    _ui->setupUi(this);
+    //_ui = QSharedPointer<Ui::MainWindow>(new Ui::MainWindow());
+    setupUi(this);
     
-    _pluginManager = QSharedPointer<plugin::PluginManager>(new plugin::PluginManager());
-    _pluginManager->LoadPlugins(_ui);
+    _core = std::unique_ptr<Core>(new Core(*this));
+    _core->init();
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+QAction* MainWindow::addMenuAction(plugin::Type type, QString name) {
+    switch (type) {
+    case plugin::Type::ANALYSIS:      return menuAnalysis->addAction(name);
+    case plugin::Type::LOADER:        return menuFile->addAction(name);
+    case plugin::Type::TRANFORMATION: return menuTransformation->addAction(name);
+    case plugin::Type::VIEW:          return menuView->addAction(name);
+    }
 }
 
 } // namespace gui

@@ -30,7 +30,7 @@ public:
 
 class CSPLR_ExampleViewPluginFactory : public ViewPluginFactory
 {
-    Q_INTERFACES(hdps::plugin::ViewPluginFactory)
+    Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "nl.tudelft.CSPLR_ExampleViewPlugin"
                       FILE  "CSPLR_ExampleViewPlugin.json")

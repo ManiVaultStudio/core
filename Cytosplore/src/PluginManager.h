@@ -1,8 +1,11 @@
 #ifndef HDPS_PLUGIN_PLUGIN_MANAGER_H
 #define HDPS_PLUGIN_PLUGIN_MANAGER_H
 
-#include <QObject>
+#include "Core.h"
 
+#include "PluginFactory.h"
+
+#include <QObject>
 #include <QVector>
 
 namespace Ui
@@ -17,14 +20,14 @@ namespace plugin {
 class PluginManager : public QObject {
     
 public:
-    PluginManager(void);
+    PluginManager(const Core& core);
     ~PluginManager(void);
     
-    void LoadPlugins(QSharedPointer<Ui::MainWindow> ui);
+    void LoadPlugins();
     
 private:
-    
-    QVector< QObject* > _plugins;
+    const Core& _core;
+    QVector< PluginFactory* > _plugins;
     
 private slots:
     void pluginTriggered(int idx);

@@ -7,21 +7,22 @@
 #include <QPluginLoader>
 #include <QSignalMapper>
 
-#include "ui_MainWindow.h"
-
 #include <assert.h>
 
+#include "MainWindow.h"
 #include "AnalysisPlugin.h"
 #include "DataTypePlugin.h"
 #include "LoaderPlugin.h"
 #include "TransformationPlugin.h"
 #include "ViewPlugin.h"
+#include "PluginType.h"
 
 namespace hdps {
 
 namespace plugin {
 
-PluginManager::PluginManager(void)
+PluginManager::PluginManager(const Core& core)
+: _core(core)
 {
     
 }
@@ -31,7 +32,7 @@ PluginManager::~PluginManager(void)
     
 }
 
-void PluginManager::LoadPlugins(QSharedPointer<Ui::MainWindow> ui)
+void PluginManager::LoadPlugins()
 {
 	QDir pluginsDir(qApp->applicationDirPath());
     
@@ -55,33 +56,35 @@ void PluginManager::LoadPlugins(QSharedPointer<Ui::MainWindow> ui)
     {
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
         
+        gui::MainWindow& gui = _core.gui();
+
         // create an instance of the plugin, i.e. the factory
         QObject *plugin = pluginLoader.instance();
         if (plugin)
         {
-            _plugins.push_back(plugin);
+            _plugins.push_back(qobject_cast<PluginFactory*>(plugin));
             QAction* action = NULL;
             
             QString name = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
             
             if ( qobject_cast<AnalysisPluginFactory*>(plugin) )
             {
-                action = ui->menuTransformation->addAction(name);
+                action = gui.addMenuAction(plugin::Type::ANALYSIS, name);
             }
             else if ( qobject_cast<DataTypePluginFactory*>(plugin) )
             {
             }
             else if ( qobject_cast<LoaderPluginFactory*>(plugin) )
             {
-                action = ui->menuFile->addAction(name);
+                action = gui.addMenuAction(plugin::Type::LOADER, name);
             }
             else if ( qobject_cast<TransformationPluginFactory*>(plugin) )
             {
-                action = ui->menuTransformation->addAction(name);
+                action = gui.addMenuAction(plugin::Type::TRANFORMATION, name);
             }
             else if ( qobject_cast<ViewPluginFactory*>(plugin) )
             {
-                action = ui->menuVisualization->addAction(name);
+                action = gui.addMenuAction(plugin::Type::VIEW, name);
             }
             else
             {
@@ -104,23 +107,9 @@ void PluginManager::pluginTriggered(int idx)
 {
     assert(idx >= 0 && idx < _plugins.size());
     
-    QObject *plugin = _plugins[idx];
+    PluginFactory *plugin = _plugins[idx];
     
-    if ( qobject_cast<AnalysisPluginFactory*>(plugin) )
-    {
-    } else if ( qobject_cast<DataTypePluginFactory*>(plugin) )
-    {
-    } else if ( qobject_cast<LoaderPluginFactory*>(plugin) )
-    {
-    } else if ( qobject_cast<TransformationPluginFactory*>(plugin) )
-    {
-    } else if ( qobject_cast<ViewPluginFactory*>(plugin) )
-    {
-        ViewPlugin* instance = qobject_cast<ViewPluginFactory*>(plugin)->produce();
-        //test
-        //ui
-        instance->dataRefreshed();
-    }
+    Plugin* instance = plugin->produce();
 }
 
 } // namespace plugin
