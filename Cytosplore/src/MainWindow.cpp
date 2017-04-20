@@ -12,7 +12,6 @@ namespace gui {
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    //_ui = QSharedPointer<Ui::MainWindow>(new Ui::MainWindow());
     setupUi(this);
     
     _core = std::unique_ptr<Core>(new Core(*this));
@@ -29,6 +28,7 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name) {
     case plugin::Type::LOADER:        return menuFile->addAction(name);
     case plugin::Type::TRANFORMATION: return menuTransformation->addAction(name);
     case plugin::Type::VIEW:          return menuView->addAction(name);
+    default: return nullptr;
     }
 }
 
