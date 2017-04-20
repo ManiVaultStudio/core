@@ -1,14 +1,22 @@
-#ifndef MAIN_WINDOW
-#define MAIN_WINDOW
+#ifndef HDPS_GUI_MAIN_WINDOW_H
+#define HDPS_GUI_MAIN_WINDOW_H
 
 #include <QMainWindow>
 
-class MCV_PluginManager;
+
 
 namespace Ui
 {
     class MainWindow;
 }
+
+namespace hdps {
+
+namespace plugin {
+    class PluginManager;
+}
+
+namespace gui {
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -27,7 +35,11 @@ private:
 
 	QSharedPointer<Ui::MainWindow> _ui;
     
-    QSharedPointer<MCV_PluginManager> _pluginManager;
+    QSharedPointer<plugin::PluginManager> _pluginManager;
 };
 
-#endif // MAIN_WINDOW
+} // namespace gui
+
+} // namespace hdps
+
+#endif // HDPS_GUI_MAIN_WINDOW_H

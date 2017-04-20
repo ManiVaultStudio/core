@@ -1,10 +1,13 @@
-#ifndef PLUGIN_FACTORY_H
-#define PLUGIN_FACTORY_H
+#ifndef HDPS_PLUGIN_PLUGIN_FACTORY_H
+#define HDPS_PLUGIN_PLUGIN_FACTORY_H
 
 #include "Plugin.h"
 
 #include <QObject>
-#include <QSharedPointer>
+
+namespace hdps {
+
+namespace plugin {
 
 class PluginFactory : public QObject
 {
@@ -16,4 +19,8 @@ public:
     virtual Plugin* produce() = 0;
 };
 
-#endif // PLUGIN_FACTORY_H
+} // namespace plugin
+
+} // namespace hdps
+
+#endif // HDPS_PLUGIN_PLUGIN_FACTORY_H

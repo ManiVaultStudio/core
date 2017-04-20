@@ -1,4 +1,4 @@
-#include "UI_DockableWidget.h"
+#include "DockableWidget.h"
 
 #include <QLayout>
 #include <QFile>
@@ -6,7 +6,11 @@
 #include <QObject>
 #include <QAction>
 
-UI_DockableWidget::UI_DockableWidget(QWidget *parent) :
+namespace hdps {
+
+namespace gui {
+
+DockableWidget::DockableWidget(QWidget *parent) :
 	QDockWidget(parent),
 	_isVisible(false),
 	_mainLayout(NULL),
@@ -17,15 +21,15 @@ UI_DockableWidget::UI_DockableWidget(QWidget *parent) :
 	_mainLayout->setMargin(0);
 	setWidget(_mainWidget);
 
-	QObject::connect(toggleViewAction(), &QAction::toggled, this, &UI_DockableWidget::setVisibility);
+	QObject::connect(toggleViewAction(), &QAction::toggled, this, &DockableWidget::setVisibility);
 }
 
-QGridLayout* UI_DockableWidget::mainLayout()
+QGridLayout* DockableWidget::mainLayout()
 {
 	return _mainLayout;
 }
 
-bool UI_DockableWidget::setVisibility(bool visible)
+bool DockableWidget::setVisibility(bool visible)
 {
 	_isVisible = visible;
 	setVisible(_isVisible);
@@ -33,13 +37,17 @@ bool UI_DockableWidget::setVisibility(bool visible)
     return _isVisible;
 }
 
-bool UI_DockableWidget::toggleVisibility()
+bool DockableWidget::toggleVisibility()
 {
 	return setVisibility(!_isVisible);
 }
 
-UI_DockableWidget::~UI_DockableWidget()
+DockableWidget::~DockableWidget()
 {
 	if (_mainLayout) delete _mainLayout;
 	if (_mainWidget) delete _mainWidget;
 }
+
+} // namespace gui
+
+} // namespace hdps

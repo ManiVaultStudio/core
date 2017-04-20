@@ -1,4 +1,4 @@
-#include "MCV_PluginManager.h"
+#include "PluginManager.h"
 
 #include <QApplication>
 #include <QMenuBar>
@@ -11,23 +11,27 @@
 
 #include <assert.h>
 
-#include "MCV_AnalysisPlugin.h"
-#include "MCV_DataTypePlugin.h"
-#include "MCV_LoaderPlugin.h"
-#include "MCV_TransformationPlugin.h"
-#include "MCV_ViewPlugin.h"
+#include "AnalysisPlugin.h"
+#include "DataTypePlugin.h"
+#include "LoaderPlugin.h"
+#include "TransformationPlugin.h"
+#include "ViewPlugin.h"
 
-MCV_PluginManager::MCV_PluginManager(void)
+namespace hdps {
+
+namespace plugin {
+
+PluginManager::PluginManager(void)
 {
     
 }
 
-MCV_PluginManager::~MCV_PluginManager(void)
+PluginManager::~PluginManager(void)
 {
     
 }
 
-void MCV_PluginManager::LoadPlugins(QSharedPointer<Ui::MainWindow> ui)
+void PluginManager::LoadPlugins(QSharedPointer<Ui::MainWindow> ui)
 {
 	QDir pluginsDir(qApp->applicationDirPath());
     
@@ -60,22 +64,22 @@ void MCV_PluginManager::LoadPlugins(QSharedPointer<Ui::MainWindow> ui)
             
             QString name = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
             
-            if ( qobject_cast<MCV_AnalysisPluginFactory*>(plugin) )
+            if ( qobject_cast<AnalysisPluginFactory*>(plugin) )
             {
                 action = ui->menuTransformation->addAction(name);
             }
-            else if ( qobject_cast<MCV_DataTypePluginFactory*>(plugin) )
+            else if ( qobject_cast<DataTypePluginFactory*>(plugin) )
             {
             }
-            else if ( qobject_cast<MCV_LoaderPluginFactory*>(plugin) )
+            else if ( qobject_cast<LoaderPluginFactory*>(plugin) )
             {
                 action = ui->menuFile->addAction(name);
             }
-            else if ( qobject_cast<MCV_TransformationPluginFactory*>(plugin) )
+            else if ( qobject_cast<TransformationPluginFactory*>(plugin) )
             {
                 action = ui->menuTransformation->addAction(name);
             }
-            else if ( qobject_cast<MCV_ViewPluginFactory*>(plugin) )
+            else if ( qobject_cast<ViewPluginFactory*>(plugin) )
             {
                 action = ui->menuVisualization->addAction(name);
             }
@@ -93,27 +97,32 @@ void MCV_PluginManager::LoadPlugins(QSharedPointer<Ui::MainWindow> ui)
         }
     }
 
-    QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &MCV_PluginManager::pluginTriggered);
+    QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &PluginManager::pluginTriggered);
 }
 
-void MCV_PluginManager::pluginTriggered(int idx)
+void PluginManager::pluginTriggered(int idx)
 {
     assert(idx >= 0 && idx < _plugins.size());
     
     QObject *plugin = _plugins[idx];
     
-    if ( qobject_cast<MCV_AnalysisPluginFactory*>(plugin) )
+    if ( qobject_cast<AnalysisPluginFactory*>(plugin) )
     {
-    } else if ( qobject_cast<MCV_DataTypePluginFactory*>(plugin) )
+    } else if ( qobject_cast<DataTypePluginFactory*>(plugin) )
     {
-    } else if ( qobject_cast<MCV_LoaderPluginFactory*>(plugin) )
+    } else if ( qobject_cast<LoaderPluginFactory*>(plugin) )
     {
-    } else if ( qobject_cast<MCV_TransformationPluginFactory*>(plugin) )
+    } else if ( qobject_cast<TransformationPluginFactory*>(plugin) )
     {
-    } else if ( qobject_cast<MCV_ViewPluginFactory*>(plugin) )
+    } else if ( qobject_cast<ViewPluginFactory*>(plugin) )
     {
-        MCV_ViewPlugin* instance = qobject_cast<MCV_ViewPluginFactory*>(plugin)->produce();
+        ViewPlugin* instance = qobject_cast<ViewPluginFactory*>(plugin)->produce();
         //test
+        //ui
         instance->dataRefreshed();
     }
 }
+
+} // namespace plugin
+
+} // namespace hdps

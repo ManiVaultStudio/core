@@ -34,29 +34,29 @@ set( MAIN_SOURCES
 
 set( CORE_HEADERS
     src/MainWindow.h
-    src/MCV_PluginManager.h
+    src/PluginManager.h
 )
 
 set( CORE_SOURCES
     src/MainWindow.cpp
-    src/MCV_PluginManager.cpp
+    src/PluginManager.cpp
 )
 
 
-set( MCV_WIDGET_HEADERS
-    src/UI_DockableWidget.h
+set( WIDGET_HEADERS
+    src/DockableWidget.h
 )
 
-set( MCV_WIDGET_SOURCES
-    src/UI_DockableWidget.cpp
+set( WIDGET_SOURCES
+    src/DockableWidget.cpp
 )
 
-set( MCV_PLUGIN_HEADERS
-    src/MCV_AnalysisPlugin.h
-    src/MCV_DataTypePlugin.h
-    src/MCV_LoaderPlugin.h
-    src/MCV_TransformationPlugin.h
-    src/MCV_ViewPlugin.h
+set( PLUGIN_HEADERS
+    src/AnalysisPlugin.h
+    src/DataTypePlugin.h
+    src/LoaderPlugin.h
+    src/TransformationPlugin.h
+    src/ViewPlugin.h
     src/PluginFactory.h
     src/Plugin.h
 )
@@ -71,21 +71,21 @@ list(APPEND PRIVATE_SOURCES
 )
 
 list(APPEND PUBLIC_HEADERS
-	${MCV_WIDGET_HEADERS}
-	${MCV_PLUGIN_HEADERS}
+	${WIDGET_HEADERS}
+	${PLUGIN_HEADERS}
 )
 
 list(APPEND PUBLIC_SOURCES
-	${MCV_WIDGET_SOURCES}
+	${WIDGET_SOURCES}
 	${PUBLIC_HEADERS}
 )
 
 if(WIN32)
-    set(MCV_MAIN_SOURCES ${MCV_MAIN_SOURCES} win/cytosplore.rc)
+    set(MAIN_SOURCES ${MAIN_SOURCES} win/cytosplore.rc)
 endif(WIN32)
 
 if(APPLE)
-    set(MCV_MAIN_SOURCES ${MCV_MAIN_SOURCES} res/icons/AppIcon.icns)
+    set(MAIN_SOURCES ${MAIN_SOURCES} res/icons/AppIcon.icns)
     set_source_files_properties(res/icons/AppIcon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif(APPLE)
 

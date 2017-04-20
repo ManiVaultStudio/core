@@ -1,13 +1,15 @@
 #ifndef CSPLR_TEST_VIEW_PLUGIN
 #define CSPLR_TEST_VIEW_PLUGIN
 
-#include <MCV_ViewPlugin.h>
+#include <ViewPlugin.h>
+
+using namespace hdps::plugin;
 
 // =============================================================================
 // View
 // =============================================================================
 
-class CSPLR_ExampleViewPlugin : public MCV_ViewPlugin
+class CSPLR_ExampleViewPlugin : public ViewPlugin
 {
     Q_OBJECT
     
@@ -26,9 +28,9 @@ public:
 // Factory
 // =============================================================================
 
-class CSPLR_ExampleViewPluginFactory : public MCV_ViewPluginFactory
+class CSPLR_ExampleViewPluginFactory : public ViewPluginFactory
 {
-    Q_INTERFACES(MCV_ViewPluginFactory)
+    Q_INTERFACES(hdps::plugin::ViewPluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "nl.tudelft.CSPLR_ExampleViewPlugin"
                       FILE  "CSPLR_ExampleViewPlugin.json")
@@ -37,7 +39,7 @@ public:
 	CSPLR_ExampleViewPluginFactory(void) {}
 	~CSPLR_ExampleViewPluginFactory(void) {}
     
-    MCV_ViewPlugin* produce();
+    ViewPlugin* produce();
 };
 
 #endif // CSPLR_TEST_VIEW_PLUGIN

@@ -1,5 +1,9 @@
-#ifndef PLUGIN_H
-#define PLUGIN_H
+#ifndef HDPS_PLUGIN_PLUGIN_H
+#define HDPS_PLUGIN_PLUGIN_H
+
+namespace hdps {
+
+namespace plugin {
 
 class Plugin
 {
@@ -9,4 +13,8 @@ public:
     virtual void init() = 0;
 };
 
-#endif // PLUGIN_H
+} // namespace plugin
+
+} // namespace hdps
+
+#endif // HDPS_PLUGIN_PLUGIN_H

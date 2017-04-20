@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	appIcon.addFile(":/Icons/AppIcon1024");
     app.setWindowIcon(appIcon);
 
-    MainWindow mainWindow;
+    hdps::gui::MainWindow mainWindow;
 	mainWindow.show();
 
 	return app.exec();

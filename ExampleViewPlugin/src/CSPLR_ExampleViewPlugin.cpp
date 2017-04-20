@@ -1,7 +1,5 @@
 #include "CSPLR_ExampleViewPlugin.h"
 
-#include "UI_DockableWidget.h"
-
 #include <QtCore>
 #include <QtDebug>
 
@@ -39,7 +37,7 @@ void CSPLR_ExampleViewPlugin::dataRefreshed(void)
 // Factory
 // =============================================================================
 
-MCV_ViewPlugin* CSPLR_ExampleViewPluginFactory::produce()
+ViewPlugin* CSPLR_ExampleViewPluginFactory::produce()
 {
     return new CSPLR_ExampleViewPlugin();
 }
