@@ -10,7 +10,7 @@ namespace plugin {
 class TransformationPlugin : public Plugin
 {
 public:
-    
+    TransformationPlugin(QString name) : Plugin(name) { }
     virtual ~TransformationPlugin() {};
 };
 

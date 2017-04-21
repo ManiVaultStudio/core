@@ -9,11 +9,6 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.CSPLR_ExampleViewPlugin")
 // View
 // =============================================================================
 
-CSPLR_ExampleViewPlugin::CSPLR_ExampleViewPlugin(void)
-{
-    
-}
-
 CSPLR_ExampleViewPlugin::~CSPLR_ExampleViewPlugin(void)
 {
     

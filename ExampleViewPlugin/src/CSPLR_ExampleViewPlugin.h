@@ -14,7 +14,7 @@ class CSPLR_ExampleViewPlugin : public ViewPlugin
     Q_OBJECT
     
 public:
-    CSPLR_ExampleViewPlugin(void);
+    CSPLR_ExampleViewPlugin() : ViewPlugin("Example View") { }
 	~CSPLR_ExampleViewPlugin(void);
     
     void init();

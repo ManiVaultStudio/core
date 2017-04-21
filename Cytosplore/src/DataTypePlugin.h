@@ -10,7 +10,7 @@ namespace plugin {
 class DataTypePlugin : public Plugin
 {
 public:
-    
+    DataTypePlugin(QString name) : Plugin(name) { }
     virtual ~DataTypePlugin() {};
 };
 

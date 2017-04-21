@@ -110,6 +110,7 @@ void PluginManager::pluginTriggered(int idx)
     PluginFactory *plugin = _plugins[idx];
     
     Plugin* instance = plugin->produce();
+    qDebug() << "Added plugin" << instance->getName() << "with version" << instance->getVersion();
 }
 
 } // namespace plugin
