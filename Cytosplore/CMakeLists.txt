@@ -35,11 +35,14 @@ set( MAIN_SOURCES
 set( CORE_HEADERS
     src/MainWindow.h
     src/PluginManager.h
+    src/Core.h
+    src/PluginType.h
 )
 
 set( CORE_SOURCES
     src/MainWindow.cpp
     src/PluginManager.cpp
+    src/Core.cpp
 )
 
 
