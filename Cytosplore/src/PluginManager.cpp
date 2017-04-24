@@ -21,7 +21,7 @@ namespace hdps {
 
 namespace plugin {
 
-PluginManager::PluginManager(const Core& core)
+PluginManager::PluginManager(Core& core)
 : _core(core)
 {
     
@@ -110,6 +110,8 @@ void PluginManager::pluginTriggered(int idx)
     PluginFactory *plugin = _plugins[idx];
     
     Plugin* instance = plugin->produce();
+
+    _core.addPlugin(instance);
     qDebug() << "Added plugin" << instance->getName() << "with version" << instance->getVersion();
 }
 

@@ -20,13 +20,13 @@ namespace plugin {
 class PluginManager : public QObject {
     
 public:
-    PluginManager(const Core& core);
+    PluginManager(Core& core);
     ~PluginManager(void);
     
     void LoadPlugins();
     
 private:
-    const Core& _core;
+    Core& _core;
     QVector< PluginFactory* > _plugins;
     
 private slots:
