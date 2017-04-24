@@ -36,7 +36,6 @@ set( CORE_HEADERS
     src/MainWindow.h
     src/PluginManager.h
     src/Core.h
-    src/PluginType.h
 )
 
 set( CORE_SOURCES
@@ -62,6 +61,7 @@ set( PLUGIN_HEADERS
     src/ViewPlugin.h
     src/PluginFactory.h
     src/Plugin.h
+    src/PluginType.h
 )
 
 list(APPEND PRIVATE_HEADERS
