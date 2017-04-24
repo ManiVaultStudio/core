@@ -10,7 +10,7 @@ namespace plugin {
 class AnalysisPlugin : public Plugin
 {
 public:
-    AnalysisPlugin(QString name) : Plugin(name) { }
+    AnalysisPlugin(QString name) : Plugin(Type::ANALYSIS, name) { }
     virtual ~AnalysisPlugin() {};
 };
 

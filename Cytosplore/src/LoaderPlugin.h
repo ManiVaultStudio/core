@@ -10,7 +10,7 @@ namespace plugin {
 class LoaderPlugin : public Plugin
 {
 public:
-    LoaderPlugin(QString name) : Plugin(name) { }
+    LoaderPlugin(QString name) : Plugin(Type::LOADER, name) { }
     virtual ~LoaderPlugin() {};
 };
 

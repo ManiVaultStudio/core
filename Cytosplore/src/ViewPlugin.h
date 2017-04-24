@@ -13,7 +13,7 @@ class ViewPlugin : public gui::DockableWidget, public Plugin
     Q_OBJECT
     
 public:
-    ViewPlugin(QString name) : Plugin(name) { }
+    ViewPlugin(QString name) : Plugin(Type::VIEW, name) { }
     virtual ~ViewPlugin() {};
     
     virtual void dataAdded() = 0;
