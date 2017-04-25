@@ -15,7 +15,7 @@ public:
 };
 
 
-class DataTypePluginFactory : public QObject
+class DataTypePluginFactory : public PluginFactory
 {
     Q_OBJECT
     
