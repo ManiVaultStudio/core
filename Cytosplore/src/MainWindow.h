@@ -17,6 +17,7 @@ namespace hdps {
 
 namespace plugin {
     class PluginManager;
+    class Plugin;
     enum Type;
 }
 
@@ -30,6 +31,7 @@ public:
 	virtual ~MainWindow();
 
     QAction* addMenuAction(plugin::Type type, QString name);
+    void addView(plugin::Plugin* plugin);
 
 private:
 

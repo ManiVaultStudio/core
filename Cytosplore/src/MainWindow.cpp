@@ -3,6 +3,8 @@
 #include "PluginManager.h"
 #include "PluginType.h"
 
+#include "ViewPlugin.h"
+
 #include <QDebug>
 
 namespace hdps {
@@ -30,6 +32,10 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name) {
     case plugin::Type::VIEW:          return menuView->addAction(name);
     default: return nullptr;
     }
+}
+
+void MainWindow::addView(plugin::Plugin* plugin) {
+    addDockWidget(Qt::RightDockWidgetArea, dynamic_cast<plugin::ViewPlugin*>(plugin));
 }
 
 } // namespace gui
