@@ -28,6 +28,7 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name) {
     switch (type) {
     case plugin::Type::ANALYSIS:      return menuAnalysis->addAction(name);
     case plugin::Type::LOADER:        return menuFile->addAction(name);
+    case plugin::Type::WRITER:        return menuFile->addAction(name);
     case plugin::Type::TRANFORMATION: return menuTransformation->addAction(name);
     case plugin::Type::VIEW:          return menuView->addAction(name);
     default: return nullptr;

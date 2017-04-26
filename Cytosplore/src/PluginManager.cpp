@@ -13,6 +13,7 @@
 #include "AnalysisPlugin.h"
 #include "DataTypePlugin.h"
 #include "LoaderPlugin.h"
+#include "WriterPlugin.h"
 #include "TransformationPlugin.h"
 #include "ViewPlugin.h"
 #include "PluginType.h"
@@ -77,6 +78,10 @@ void PluginManager::LoadPlugins()
             else if ( qobject_cast<LoaderPluginFactory*>(plugin) )
             {
                 action = gui.addMenuAction(plugin::Type::LOADER, name);
+            }
+            else if ( qobject_cast<WriterPluginFactory*>(plugin) )
+            {
+                action = gui.addMenuAction(plugin::Type::WRITER, name);
             }
             else if ( qobject_cast<TransformationPluginFactory*>(plugin) )
             {
