@@ -3,6 +3,8 @@
 
 #include "PluginFactory.h"
 
+#include <QString>
+
 namespace hdps {
 
 namespace plugin {
@@ -11,6 +13,9 @@ class LoaderPlugin : public Plugin
 {
 public:
     LoaderPlugin(QString name) : Plugin(Type::LOADER, name) { }
+
+    virtual void loadDataFromFile(QString filename) = 0;
+
     virtual ~LoaderPlugin() {};
 };
 
