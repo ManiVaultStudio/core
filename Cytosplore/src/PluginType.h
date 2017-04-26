@@ -5,7 +5,7 @@ namespace hdps {
 
 namespace plugin {
 
-enum Type { ANALYSIS, DATA_TYPE, LOADER, TRANFORMATION, VIEW };
+enum Type { ANALYSIS, DATA_TYPE, LOADER, WRITER, TRANFORMATION, VIEW };
 
 } // namespace plugin
 

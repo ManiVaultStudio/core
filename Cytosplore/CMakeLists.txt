@@ -57,6 +57,7 @@ set( PLUGIN_HEADERS
     src/AnalysisPlugin.h
     src/DataTypePlugin.h
     src/LoaderPlugin.h
+    src/WriterPlugin.h
     src/TransformationPlugin.h
     src/ViewPlugin.h
     src/PluginFactory.h
