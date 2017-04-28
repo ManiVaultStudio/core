@@ -28,6 +28,9 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     }
 
     _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
+
+    // Initialize the plugin after it has been added to the core
+    plugin->init();
 }
 
 gui::MainWindow& Core::gui() const {
