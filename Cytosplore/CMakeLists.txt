@@ -63,6 +63,7 @@ set( PLUGIN_HEADERS
     src/PluginFactory.h
     src/Plugin.h
     src/PluginType.h
+    src/DataConsumer.h
 )
 
 list(APPEND PRIVATE_HEADERS
