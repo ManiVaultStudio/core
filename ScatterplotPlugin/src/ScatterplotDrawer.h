@@ -9,7 +9,6 @@ class ScatterplotDrawer : public QOpenGLWidget
 {
     Q_OBJECT
 public:
-    ScatterplotDrawer(QWidget* parent) : QOpenGLWidget(parent) { }
 
 protected:
     void initializeGL() Q_DECL_OVERRIDE;

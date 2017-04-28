@@ -20,12 +20,9 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
-    ScatterplotDrawer* drawer = new ScatterplotDrawer(this);
+    ScatterplotDrawer* drawer = new ScatterplotDrawer();
 
-    QHBoxLayout *layout = new QHBoxLayout;
-
-    layout->addWidget(drawer);
-    setLayout(layout);
+    setWidget(drawer);
 }
 
 void ScatterplotPlugin::dataAdded(const DataTypePlugin& data)
