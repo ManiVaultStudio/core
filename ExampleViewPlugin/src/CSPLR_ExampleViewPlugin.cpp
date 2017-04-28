@@ -18,15 +18,20 @@ void CSPLR_ExampleViewPlugin::init()
 {
 }
 
-void CSPLR_ExampleViewPlugin::dataAdded(void)
+void CSPLR_ExampleViewPlugin::dataAdded(const DataTypePlugin& data)
 {
+
 }
 
-void CSPLR_ExampleViewPlugin::dataRefreshed(void)
+void CSPLR_ExampleViewPlugin::dataChanged(const DataTypePlugin& data)
 {
-    qDebug() << "YEAH!!!" << this;
+
 }
 
+void CSPLR_ExampleViewPlugin::dataRemoved()
+{
+
+}
 
 // =============================================================================
 // Factory

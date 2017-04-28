@@ -3,21 +3,19 @@
 
 #include "DockableWidget.h"
 #include "PluginFactory.h"
+#include "DataConsumer.h"
 
 namespace hdps {
 
 namespace plugin {
 
-class ViewPlugin : public gui::DockableWidget, public Plugin
+class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsumer
 {
     Q_OBJECT
     
 public:
     ViewPlugin(QString name) : Plugin(Type::VIEW, name) { }
     virtual ~ViewPlugin() {};
-    
-    virtual void dataAdded() = 0;
-    virtual void dataRefreshed() = 0;
 };
 
 class ViewPluginFactory : public PluginFactory

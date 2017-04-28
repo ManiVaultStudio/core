@@ -19,8 +19,9 @@ public:
     
     void init();
     
-    void dataAdded(void);
-    void dataRefreshed(void);
+    void dataAdded(const DataTypePlugin& data);
+    void dataChanged(const DataTypePlugin& data);
+    void dataRemoved();
 };
 
 
