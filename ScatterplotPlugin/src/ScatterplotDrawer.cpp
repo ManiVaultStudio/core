@@ -3,12 +3,6 @@
 #include <QOpenGLFunctions>
 #include <QDebug>
 
-ScatterplotDrawer::ScatterplotDrawer(QWidget* parent)
-: QOpenGLWidget(parent)
-{
-
-}
-
 void ScatterplotDrawer::initializeGL()
 {
     QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();

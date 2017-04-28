@@ -21,6 +21,8 @@ set(SOURCES
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
     src/ScatterplotPlugin.json
+    src/ScatterplotDrawer.h
+    src/ScatterplotDrawer.cpp
 )
 
 source_group( Plugin FILES ${SOURCES})
