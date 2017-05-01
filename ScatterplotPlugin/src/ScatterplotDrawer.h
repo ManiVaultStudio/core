@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QWidget>
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions_3_2_Core>
+#include <QOpenGLFunctions_3_3_Core>
 
-class ScatterplotDrawer : public QOpenGLWidget, QOpenGLFunctions_3_2_Core
+class ScatterplotDrawer : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
