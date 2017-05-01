@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLShaderProgram>
 
 class ScatterplotDrawer : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
@@ -18,7 +19,7 @@ protected:
 
 private:
     GLuint vao;
-    GLuint shader;
+    QOpenGLShaderProgram shader;
 };
 
 #endif // SCATTERPLOT_DRAWER_H
