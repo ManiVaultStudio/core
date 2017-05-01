@@ -9,6 +9,8 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
+class ScatterplotDrawer;
+
 class ScatterplotPlugin : public ViewPlugin
 {
     Q_OBJECT
@@ -22,6 +24,8 @@ public:
     void dataAdded(const DataTypePlugin& data);
     void dataChanged(const DataTypePlugin& data);
     void dataRemoved();
+private:
+    ScatterplotDrawer* drawer;
 };
 
 

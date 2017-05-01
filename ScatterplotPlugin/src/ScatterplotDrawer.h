@@ -11,7 +11,7 @@ class ScatterplotDrawer : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
-
+    void setData(const std::vector<float>& data);
 protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
@@ -19,7 +19,10 @@ protected:
 
 private:
     GLuint vao;
+    GLuint positionBuffer;
     QOpenGLShaderProgram shader;
+
+    std::vector<float> positions;
 };
 
 #endif // SCATTERPLOT_DRAWER_H

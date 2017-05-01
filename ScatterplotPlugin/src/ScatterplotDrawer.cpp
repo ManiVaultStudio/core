@@ -6,8 +6,14 @@
 #include <vector>
 #include <cstdlib>
 
-#define sign(x) (x < 0 ? -1 : 1)
 #define GLSL(version, shader)  "#version " #version "\n" #shader
+
+void ScatterplotDrawer::setData(const std::vector<float>& positions) {
+    this->positions = positions;
+
+    glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, positions.size() * 2 * sizeof(float), positions.data(), GL_STATIC_DRAW);
+}
 
 void ScatterplotDrawer::initializeGL()
 {
@@ -69,18 +75,6 @@ void ScatterplotDrawer::initializeGL()
          1,  1
     };
 
-    std::vector<float> positions;
-
-    srand(0);
-    for (int i = 0; i < 1000; i++)
-    {
-        float x = (float) (rand() % 1000 - 500) / 500;
-        float y = (float) (rand() % 1000 - 500) / 500;
-        
-        positions.push_back(sign(x) * (x*x));
-        positions.push_back(sign(y) * (y*y));
-    }
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -98,9 +92,8 @@ void ScatterplotDrawer::initializeGL()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(1);
 
-    GLuint pbo;
-    glGenBuffers(1, &pbo);
-    glBindBuffer(GL_ARRAY_BUFFER, pbo);
+    glGenBuffers(1, &positionBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
     glBufferData(GL_ARRAY_BUFFER, positions.size() * 2 * sizeof(float), positions.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribDivisor(2, 1);
@@ -122,5 +115,5 @@ void ScatterplotDrawer::paintGL()
     qDebug() << "Rendering scatterplot";
 
     shader.bind();
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 1000);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size());
 }
