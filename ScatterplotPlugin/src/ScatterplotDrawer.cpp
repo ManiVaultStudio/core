@@ -3,8 +3,6 @@
 #include <QOpenGLFunctions>
 #include <QDebug>
 
-#include "ShaderLoader.h"
-
 #include <vector>
 #include <cstdlib>
 
@@ -42,9 +40,9 @@ void ScatterplotDrawer::initializeGL()
 
         void main()
         {
-            if (length(pass_texCoords) > 0.01)
+            if (length(pass_texCoords) > 0.05)
             {
-                //discard;
+                discard;
             }
             float a = smoothstep(0.05, 0.04, length(pass_texCoords));
             fragColor = vec4(0, 0.5, 1.0, a / 2.0);
@@ -107,8 +105,6 @@ void ScatterplotDrawer::initializeGL()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
-
-    //shader = ShaderLoader::loadShaderProgram();
 
     shader.addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
     shader.addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
