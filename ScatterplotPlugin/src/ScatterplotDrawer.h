@@ -4,8 +4,9 @@
 #include <QObject>
 #include <QWidget>
 #include <QOpenGLWidget>
+#include <QOpenGLFunctions_3_2_Core>
 
-class ScatterplotDrawer : public QOpenGLWidget
+class ScatterplotDrawer : public QOpenGLWidget, QOpenGLFunctions_3_2_Core
 {
     Q_OBJECT
 public:
@@ -14,6 +15,10 @@ protected:
     void initializeGL() Q_DECL_OVERRIDE;
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
     void paintGL() Q_DECL_OVERRIDE;
+
+private:
+    GLuint vao;
+    GLuint shader;
 };
 
 #endif // SCATTERPLOT_DRAWER_H
