@@ -5,8 +5,6 @@
 #include <QtCore>
 #include <QtDebug>
 
-#include <QHBoxLayout>
-
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
 // =============================================================================
