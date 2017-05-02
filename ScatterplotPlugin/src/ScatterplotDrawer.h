@@ -20,7 +20,7 @@ protected:
 private:
     GLuint vao;
     GLuint positionBuffer;
-    QOpenGLShaderProgram shader;
+    QOpenGLShaderProgram* shader;
 
     std::vector<float> positions;
 };
