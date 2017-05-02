@@ -21,9 +21,9 @@ public:
     
     void init();
     
-    void dataAdded(const DataTypePlugin& data);
-    void dataChanged(const DataTypePlugin& data);
-    void dataRemoved();
+    void dataAdded(const DataTypePlugin& data) Q_DECL_OVERRIDE;
+    void dataChanged(const DataTypePlugin& data) Q_DECL_OVERRIDE;
+    void dataRemoved() Q_DECL_OVERRIDE;
 private:
     ScatterplotDrawer* drawer;
 };
