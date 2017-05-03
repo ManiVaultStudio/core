@@ -14,7 +14,7 @@ class WriterPlugin : public Plugin
 public:
     WriterPlugin(QString name) : Plugin(Type::WRITER, name) { }
 
-    virtual void writeDataToFile(QString filename) = 0;
+    virtual void writeData() = 0;
 
     virtual ~WriterPlugin() {};
 };
