@@ -7,8 +7,6 @@
 
 #include <vector>
 
-#define sign(x) (x < 0 ? -1 : 1)
-
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
 // =============================================================================
@@ -49,8 +47,12 @@ void ScatterplotPlugin::dataRemoved()
         float x = (float)(rand() % 1000 - 500) / 500;
         float y = (float)(rand() % 1000 - 500) / 500;
 
-        positions.push_back(sign(x) * (x*x));
-        positions.push_back(sign(y) * (y*y));
+        float len = sqrt(x*x + y*y);
+        if (len > 0.8) {
+            continue;
+        }
+        positions.push_back(x);
+        positions.push_back(y);
     }
 
     drawer->setData(positions);
