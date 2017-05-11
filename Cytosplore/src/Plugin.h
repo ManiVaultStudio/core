@@ -17,12 +17,12 @@ public:
 
     virtual void init() = 0;
 	
-    Type getType() { return _type; }
-    QString getName() { return _name; }
-    virtual QString getVersion() { return "No Version"; }
+    Type getType() const { return _type; }
+    QString getName() const { return _name; }
+    virtual QString getVersion() const { return "No Version"; }
 private:
-    Type _type;
-    QString _name;
+    const Type _type;
+    const QString _name;
 };
 
 } // namespace plugin
