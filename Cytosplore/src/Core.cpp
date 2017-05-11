@@ -5,6 +5,7 @@
 
 #include "DataTypePlugin.h"
 #include "DataConsumer.h"
+
 namespace hdps {
 
 Core::Core(gui::MainWindow& mainWindow)
@@ -24,6 +25,8 @@ void Core::init() {
 }
 
 void Core::addPlugin(plugin::Plugin* plugin) {
+    plugin->setCore(this);
+
     // If is it a view plugin then it should be added to the main window
     if (plugin->getType() == plugin::Type::VIEW) {
         _mainWindow.addView(plugin);
