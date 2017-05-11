@@ -1,6 +1,8 @@
 #ifndef HDPS_CORE_H
 #define HDPS_CORE_H
 
+#include "CoreInterface.h"
+
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -17,7 +19,7 @@ namespace gui {
     class MainWindow;
 }
 
-class Core
+class Core : public CoreInterface
 {
 public:
     Core(gui::MainWindow& mainWindow);
