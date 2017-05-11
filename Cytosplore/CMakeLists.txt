@@ -54,6 +54,7 @@ set( WIDGET_SOURCES
 )
 
 set( PLUGIN_HEADERS
+    src/CoreInterface.h
     src/AnalysisPlugin.h
     src/DataTypePlugin.h
     src/LoaderPlugin.h
