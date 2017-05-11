@@ -56,7 +56,7 @@ void ScatterplotDrawer::initializeGL()
     glEnableVertexAttribArray(1);
 
     const char *vertexSource = GLSL(330,
-        uniform float scale;
+        uniform float pointSize;
 
         in vec2 vertex;
         in vec2 position;
@@ -66,12 +66,12 @@ void ScatterplotDrawer::initializeGL()
         void main()
         {
             pass_texCoords = vertex;
-            gl_Position = vec4(vertex * scale + position, 0, 1);
+            gl_Position = vec4(vertex * pointSize + position, 0, 1);
         }
     );
 
     const char *fragmentSource = GLSL(330,
-        uniform float scale;
+        uniform float pointSize;
 
         in vec2 pass_texCoords;
 
@@ -85,7 +85,7 @@ void ScatterplotDrawer::initializeGL()
                 discard;
 
             // Interpolate edge blending start depending on scale
-            float s = mix(0.75, 0.98, scale);
+            float s = mix(0.75, 0.98, pointSize);
             // Determine alpha based on distance from center
             float a = smoothstep(1.0, s, len);
             fragColor = vec4(0, 0.5, 1.0, a / 2.0);
@@ -109,6 +109,6 @@ void ScatterplotDrawer::paintGL()
     qDebug() << "Rendering scatterplot";
 
     shader->bind();
-    shader->setUniformValue("scale", _pointSize);
+    shader->setUniformValue("pointSize", _pointSize);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size());
 }
