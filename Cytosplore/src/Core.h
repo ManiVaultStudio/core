@@ -12,6 +12,7 @@ namespace hdps {
 namespace plugin {
     class PluginManager;
     class Plugin;
+    class DataTypePlugin;
     enum Type;
 }
 
@@ -29,9 +30,13 @@ public:
 
     void addPlugin(plugin::Plugin* plugin);
 
+    void addData(const QString kind) override;
+
     gui::MainWindow& gui() const;
 
 private:
+    void notifyDataAdded(const plugin::DataTypePlugin& plugin);
+
     gui::MainWindow& _mainWindow;
 
     std::unique_ptr<plugin::PluginManager> _pluginManager;
