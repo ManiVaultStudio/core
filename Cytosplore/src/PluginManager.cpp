@@ -49,7 +49,7 @@ void PluginManager::LoadPlugins()
 #endif
     pluginsDir.cd("Plugins");
     
-    _plugins.clear();
+    _pluginFactories.clear();
     
     QSignalMapper* signalMapper = new QSignalMapper(this);
     // for all items in the plugins directory
@@ -60,36 +60,36 @@ void PluginManager::LoadPlugins()
         gui::MainWindow& gui = _core.gui();
 
         // create an instance of the plugin, i.e. the factory
-        QObject *plugin = pluginLoader.instance();
-        if (plugin)
+        QObject *pluginFactory = pluginLoader.instance();
+        if (pluginFactory)
         {
-            _plugins.push_back(qobject_cast<PluginFactory*>(plugin));
+            QString kind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+            _pluginFactories[kind] = qobject_cast<PluginFactory*>(pluginFactory);
+
             QAction* action = NULL;
-            
-            QString name = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
-            
-            if ( qobject_cast<AnalysisPluginFactory*>(plugin) )
+
+            if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))
             {
-                action = gui.addMenuAction(plugin::Type::ANALYSIS, name);
+                action = gui.addMenuAction(plugin::Type::ANALYSIS, kind);
             }
-            else if ( qobject_cast<DataTypePluginFactory*>(plugin) )
+            else if (qobject_cast<DataTypePluginFactory*>(pluginFactory))
             {
             }
-            else if ( qobject_cast<LoaderPluginFactory*>(plugin) )
+            else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
             {
-                action = gui.addMenuAction(plugin::Type::LOADER, name);
+                action = gui.addMenuAction(plugin::Type::LOADER, kind);
             }
-            else if ( qobject_cast<WriterPluginFactory*>(plugin) )
+            else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
             {
-                action = gui.addMenuAction(plugin::Type::WRITER, name);
+                action = gui.addMenuAction(plugin::Type::WRITER, kind);
             }
-            else if ( qobject_cast<TransformationPluginFactory*>(plugin) )
+            else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
             {
-                action = gui.addMenuAction(plugin::Type::TRANFORMATION, name);
+                action = gui.addMenuAction(plugin::Type::TRANFORMATION, kind);
             }
-            else if ( qobject_cast<ViewPluginFactory*>(plugin) )
+            else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
             {
-                action = gui.addMenuAction(plugin::Type::VIEW, name);
+                action = gui.addMenuAction(plugin::Type::VIEW, kind);
             }
             else
             {
@@ -100,24 +100,26 @@ void PluginManager::LoadPlugins()
             if(action)
             {
                 QObject::connect(action, &QAction::triggered, signalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-                signalMapper->setMapping(action, _plugins.size()-1);
+                signalMapper->setMapping(action, kind);
             }
         }
     }
 
-    QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &PluginManager::pluginTriggered);
+    QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(const QString&)>(&QSignalMapper::mapped), this, &PluginManager::pluginTriggered);
 }
 
-void PluginManager::pluginTriggered(int idx)
+void PluginManager::AddPlugin(const QString kind)
 {
-    assert(idx >= 0 && idx < _plugins.size());
-    
-    PluginFactory *plugin = _plugins[idx];
-    
-    Plugin* instance = plugin->produce();
+    pluginTriggered(kind);
+}
 
-    _core.addPlugin(instance);
-    qDebug() << "Added plugin" << instance->getName() << "with version" << instance->getVersion();
+void PluginManager::pluginTriggered(const QString& kind)
+{
+    PluginFactory *pluginFactory = _pluginFactories[kind];
+    Plugin* plugin = pluginFactory->produce();
+
+    _core.addPlugin(plugin);
+    qDebug() << "Added plugin" << plugin->getName() << "with version" << plugin->getVersion();
 }
 
 } // namespace plugin

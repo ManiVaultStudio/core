@@ -6,7 +6,8 @@
 #include "PluginFactory.h"
 
 #include <QObject>
-#include <QVector>
+#include <QString>
+#include <QHash>
 
 namespace Ui
 {
@@ -24,13 +25,14 @@ public:
     ~PluginManager(void);
     
     void LoadPlugins();
+    void AddPlugin(const QString kind);
     
 private:
     Core& _core;
-    QVector< PluginFactory* > _plugins;
-    
+
+    QHash<QString, PluginFactory*> _pluginFactories;
 private slots:
-    void pluginTriggered(int idx);
+    void pluginTriggered(const QString& kind);
 };
 
 } // namespace plugin
