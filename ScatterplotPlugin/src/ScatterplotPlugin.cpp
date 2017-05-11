@@ -1,11 +1,10 @@
 #include "ScatterplotPlugin.h"
 
 #include "ScatterplotDrawer.h"
+#include "Points2DPlugin.h"
 
 #include <QtCore>
 #include <QtDebug>
-
-#include <vector>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
@@ -24,12 +23,17 @@ void ScatterplotPlugin::init()
 
     setWidget(drawer);
 
-    dataRemoved();
+    _core->addData("2D Points");
 }
 
 void ScatterplotPlugin::dataAdded(const DataTypePlugin& data)
 {
-
+    if (data.getName() == "2D Points") {
+        qDebug() << "Data Added";
+        const Points2DPlugin& points = dynamic_cast<const Points2DPlugin&>(data);
+        qDebug() << "Points: " << points.data.size();
+        drawer->setData(points.data);
+    }
 }
 
 void ScatterplotPlugin::dataChanged(const DataTypePlugin& data)
@@ -39,23 +43,7 @@ void ScatterplotPlugin::dataChanged(const DataTypePlugin& data)
 
 void ScatterplotPlugin::dataRemoved()
 {
-    std::vector<float> positions;
-
-    srand(0);
-    for (int i = 0; i < 1000; i++)
-    {
-        float x = (float)(rand() % 1000 - 500) / 500;
-        float y = (float)(rand() % 1000 - 500) / 500;
-
-        float len = sqrt(x*x + y*y);
-        if (len > 0.8) {
-            continue;
-        }
-        positions.push_back(x);
-        positions.push_back(y);
-    }
-
-    drawer->setData(positions);
+    
 }
 
 // =============================================================================
