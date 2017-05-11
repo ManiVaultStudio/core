@@ -14,6 +14,10 @@ void ScatterplotDrawer::setData(const std::vector<float>& positions) {
     glBufferData(GL_ARRAY_BUFFER, positions.size() * 2 * sizeof(float), positions.data(), GL_STATIC_DRAW);
 }
 
+void ScatterplotDrawer::setPointSize(const float size) {
+    _pointSize = size;
+}
+
 void ScatterplotDrawer::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -92,8 +96,6 @@ void ScatterplotDrawer::initializeGL()
     shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
     shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
     shader->link();
-    shader->bind();
-    shader->setUniformValue("scale", 0.02f);
 }
 
 void ScatterplotDrawer::resizeGL(int w, int h)
@@ -107,5 +109,6 @@ void ScatterplotDrawer::paintGL()
     qDebug() << "Rendering scatterplot";
 
     shader->bind();
+    shader->setUniformValue("scale", _pointSize);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size());
 }
