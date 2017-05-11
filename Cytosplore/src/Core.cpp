@@ -3,6 +3,9 @@
 #include "MainWindow.h"
 #include "PluginManager.h"
 
+#include "DataTypePlugin.h"
+#include "DataConsumer.h"
+
 namespace hdps {
 
 Core::Core(gui::MainWindow& mainWindow)
@@ -22,6 +25,8 @@ void Core::init() {
 }
 
 void Core::addPlugin(plugin::Plugin* plugin) {
+    plugin->setCore(this);
+
     // If is it a view plugin then it should be added to the main window
     if (plugin->getType() == plugin::Type::VIEW) {
         _mainWindow.addView(plugin);
@@ -31,6 +36,27 @@ void Core::addPlugin(plugin::Plugin* plugin) {
 
     // Initialize the plugin after it has been added to the core
     plugin->init();
+
+    // 
+    if (plugin->getType() == plugin::Type::DATA_TYPE) {
+        notifyDataAdded(*dynamic_cast<plugin::DataTypePlugin*>(plugin));
+    }
+}
+
+void Core::addData(const QString kind) {
+    _pluginManager->AddPlugin(kind);
+}
+
+void Core::notifyDataAdded(const plugin::DataTypePlugin& data) {
+    for (auto& kv : _plugins) {
+        for (int i = 0; i < kv.second.size(); ++i) {
+            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
+
+            if (dc) {
+                dc->dataAdded(data);
+            }
+        }
+    }
 }
 
 gui::MainWindow& Core::gui() const {

@@ -10,6 +10,7 @@ namespace plugin
 
 class DataConsumer
 {
+public:
     virtual void dataAdded(const DataTypePlugin& data) = 0;
     virtual void dataChanged(const DataTypePlugin& data) = 0;
     virtual void dataRemoved() = 0;
