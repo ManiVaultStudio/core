@@ -11,7 +11,7 @@ void ScatterplotWidget::setData(const std::vector<float>& positions)
     this->positions = positions;
 
     glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, positions.size() * 2 * sizeof(float), positions.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STATIC_DRAW);
     update();
 }
 
