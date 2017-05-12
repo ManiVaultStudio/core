@@ -27,6 +27,11 @@ void ScatterplotWidget::setAlpha(const float alpha)
     _alpha = _alpha < 0 ? 0 : _alpha;
 }
 
+void ScatterplotWidget::setPointScaling(PointScaling scalingMode)
+{
+    _scalingMode = scalingMode;
+}
+
 void ScatterplotWidget::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -76,7 +81,7 @@ void ScatterplotWidget::initializeGL()
         void main()
         {
             pass_texCoords = vertex;
-            gl_Position = vec4(vertex * pointSize/windowSize + position, 0, 1);
+            gl_Position = vec4(vertex * pointSize + position, 0, 1);
         }
     );
 
@@ -98,14 +103,6 @@ void ScatterplotWidget::initializeGL()
             float edge = fwidth(len);
             float a = smoothstep(1, 1 - edge, len);
             fragColor = vec4(0, 0.5, 1.0, a * alpha);
-
-            //// Determine alpha based on distance from center
-            //vec2 pointPix = windowSize * pointSize;
-            //vec2 pixel = 1.0 / vec2(pointPix.x, pointPix.y);
-            //float scale = windowSize.x / 128;
-            //float a = smoothstep(1, 1 - pixel.x*scale, len);
-            //fragColor = vec4(0, 0.5, 1.0, a / 2.0);
-
         }
     );
 
@@ -128,7 +125,14 @@ void ScatterplotWidget::paintGL()
 
     shader->bind();
     shader->setUniformValue("windowSize", _windowSize.width(), _windowSize.height());
-    shader->setUniformValue("pointSize", _pointSize);
+    if (_scalingMode == Relative)
+    {
+        shader->setUniformValue("pointSize", _pointSize / 800);
+    }
+    else if (_scalingMode == Absolute) {
+        shader->setUniformValue("pointSize", _pointSize / _windowSize.width());
+    }
+    
     shader->setUniformValue("alpha", _alpha);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size());
 }
