@@ -56,6 +56,7 @@ void ScatterplotDrawer::initializeGL()
     glEnableVertexAttribArray(1);
 
     const char *vertexSource = GLSL(330,
+        uniform vec2 windowSize;
         uniform float pointSize;
 
         in vec2 vertex;
@@ -66,11 +67,12 @@ void ScatterplotDrawer::initializeGL()
         void main()
         {
             pass_texCoords = vertex;
-            gl_Position = vec4(vertex * pointSize + position, 0, 1);
+            gl_Position = vec4(vertex * pointSize/windowSize + position, 0, 1);
         }
     );
 
     const char *fragmentSource = GLSL(330,
+        uniform vec2 windowSize;
         uniform float pointSize;
 
         in vec2 pass_texCoords;
@@ -84,11 +86,17 @@ void ScatterplotDrawer::initializeGL()
             if (len > 1)
                 discard;
 
-            // Interpolate edge blending start depending on scale
-            float s = mix(0.75, 0.98, pointSize);
-            // Determine alpha based on distance from center
-            float a = smoothstep(1.0, s, len);
+            float edge = fwidth(len);
+            float a = smoothstep(1, 1 - edge, len);
             fragColor = vec4(0, 0.5, 1.0, a / 2.0);
+
+            //// Determine alpha based on distance from center
+            //vec2 pointPix = windowSize * pointSize;
+            //vec2 pixel = 1.0 / vec2(pointPix.x, pointPix.y);
+            //float scale = windowSize.x / 128;
+            //float a = smoothstep(1, 1 - pixel.x*scale, len);
+            //fragColor = vec4(0, 0.5, 1.0, a / 2.0);
+
         }
     );
 
@@ -100,7 +108,9 @@ void ScatterplotDrawer::initializeGL()
 
 void ScatterplotDrawer::resizeGL(int w, int h)
 {
-
+    shader->bind();
+    shader->setUniformValue("windowSize", w, h);
+    shader->release();
 }
 
 void ScatterplotDrawer::paintGL()

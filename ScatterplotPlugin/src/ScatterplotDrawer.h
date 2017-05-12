@@ -19,7 +19,7 @@ protected:
     void paintGL() Q_DECL_OVERRIDE;
 
 private:
-    const float DEFAULT_POINT_SIZE = 0.02f;
+    const float DEFAULT_POINT_SIZE = 15;
 
     GLuint vao;
     GLuint positionBuffer;
