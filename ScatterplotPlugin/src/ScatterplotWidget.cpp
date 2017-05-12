@@ -1,4 +1,4 @@
-#include "ScatterplotDrawer.h"
+#include "ScatterplotWidget.h"
 
 #include <QDebug>
 
@@ -7,24 +7,24 @@
 
 #define GLSL(version, shader)  "#version " #version "\n" #shader
 
-void ScatterplotDrawer::setData(const std::vector<float>& positions) {
+void ScatterplotWidget::setData(const std::vector<float>& positions) {
     this->positions = positions;
 
     glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
     glBufferData(GL_ARRAY_BUFFER, positions.size() * 2 * sizeof(float), positions.data(), GL_STATIC_DRAW);
 }
 
-void ScatterplotDrawer::setPointSize(const float size) {
+void ScatterplotWidget::setPointSize(const float size) {
     _pointSize = size;
 }
 
-void ScatterplotDrawer::setAlpha(const float alpha) {
+void ScatterplotWidget::setAlpha(const float alpha) {
     _alpha = alpha;
     _alpha = _alpha > 1 ? 1 : _alpha;
     _alpha = _alpha < 0 ? 0 : _alpha;
 }
 
-void ScatterplotDrawer::initializeGL()
+void ScatterplotWidget::initializeGL()
 {
     initializeOpenGLFunctions();
 
@@ -112,14 +112,14 @@ void ScatterplotDrawer::initializeGL()
     shader->link();
 }
 
-void ScatterplotDrawer::resizeGL(int w, int h)
+void ScatterplotWidget::resizeGL(int w, int h)
 {
     shader->bind();
     shader->setUniformValue("windowSize", w, h);
     shader->release();
 }
 
-void ScatterplotDrawer::paintGL()
+void ScatterplotWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     qDebug() << "Rendering scatterplot";

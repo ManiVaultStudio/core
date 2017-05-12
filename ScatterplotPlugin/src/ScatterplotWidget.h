@@ -1,5 +1,5 @@
-#ifndef SCATTERPLOT_DRAWER_H
-#define SCATTERPLOT_DRAWER_H
+#ifndef SCATTERPLOT_WIDGET_H
+#define SCATTERPLOT_WIDGET_H
 
 #include <QObject>
 #include <QWidget>
@@ -7,7 +7,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 
-class ScatterplotDrawer : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
+class ScatterplotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
@@ -32,4 +32,4 @@ private:
     float _alpha = DEFAULT_ALPHA_VALUE;
 };
 
-#endif // SCATTERPLOT_DRAWER_H
+#endif // SCATTERPLOT_WIDGET_H

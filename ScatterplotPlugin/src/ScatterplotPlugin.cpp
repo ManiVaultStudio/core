@@ -1,6 +1,6 @@
 #include "ScatterplotPlugin.h"
 
-#include "ScatterplotDrawer.h"
+#include "ScatterplotWidget.h"
 #include "Points2DPlugin.h"
 
 #include <QtCore>
@@ -19,9 +19,9 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
-    drawer = new ScatterplotDrawer();
+    widget = new ScatterplotWidget();
 
-    setWidget(drawer);
+    setWidget(widget);
 
     _core->addData("2D Points");
 }
@@ -32,7 +32,7 @@ void ScatterplotPlugin::dataAdded(const DataTypePlugin& data)
         qDebug() << "Data Added";
         const Points2DPlugin& points = dynamic_cast<const Points2DPlugin&>(data);
         qDebug() << "Points: " << points.data.size();
-        drawer->setData(points.data);
+        widget->setData(points.data);
     }
 }
 
