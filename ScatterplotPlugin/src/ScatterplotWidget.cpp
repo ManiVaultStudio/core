@@ -70,7 +70,6 @@ void ScatterplotWidget::initializeGL()
     glEnableVertexAttribArray(1);
 
     const char *vertexSource = GLSL(330,
-        uniform vec2 windowSize;
         uniform float pointSize;
 
         in vec2 vertex;
@@ -86,7 +85,6 @@ void ScatterplotWidget::initializeGL()
     );
 
     const char *fragmentSource = GLSL(330,
-        uniform vec2 windowSize;
         uniform float alpha;
 
         in vec2 pass_texCoords;
@@ -97,8 +95,7 @@ void ScatterplotWidget::initializeGL()
         {
             float len = length(pass_texCoords);
             // If the fragment is outside of the circle discard it
-            if (len > 1)
-                discard;
+            if (len > 1) discard;
 
             float edge = fwidth(len);
             float a = smoothstep(1, 1 - edge, len);
@@ -124,7 +121,6 @@ void ScatterplotWidget::paintGL()
     qDebug() << "Rendering scatterplot";
 
     shader->bind();
-    shader->setUniformValue("windowSize", _windowSize.width(), _windowSize.height());
     if (_scalingMode == Relative)
     {
         shader->setUniformValue("pointSize", _pointSize / 800);
