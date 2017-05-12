@@ -18,6 +18,12 @@ void ScatterplotDrawer::setPointSize(const float size) {
     _pointSize = size;
 }
 
+void ScatterplotDrawer::setAlpha(const float alpha) {
+    _alpha = alpha;
+    _alpha = _alpha > 1 ? 1 : _alpha;
+    _alpha = _alpha < 0 ? 0 : _alpha;
+}
+
 void ScatterplotDrawer::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -73,7 +79,7 @@ void ScatterplotDrawer::initializeGL()
 
     const char *fragmentSource = GLSL(330,
         uniform vec2 windowSize;
-        uniform float pointSize;
+        uniform float alpha;
 
         in vec2 pass_texCoords;
 
@@ -88,7 +94,7 @@ void ScatterplotDrawer::initializeGL()
 
             float edge = fwidth(len);
             float a = smoothstep(1, 1 - edge, len);
-            fragColor = vec4(0, 0.5, 1.0, a / 2.0);
+            fragColor = vec4(0, 0.5, 1.0, a * alpha);
 
             //// Determine alpha based on distance from center
             //vec2 pointPix = windowSize * pointSize;
@@ -120,5 +126,6 @@ void ScatterplotDrawer::paintGL()
 
     shader->bind();
     shader->setUniformValue("pointSize", _pointSize);
+    shader->setUniformValue("alpha", _alpha);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size());
 }
