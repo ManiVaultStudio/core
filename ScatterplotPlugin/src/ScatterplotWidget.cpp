@@ -1,13 +1,13 @@
 #include "ScatterplotWidget.h"
 
-#include <QDebug>
-
 #include <vector>
-#include <cstdlib>
+
+#include <QDebug>
 
 #define GLSL(version, shader)  "#version " #version "\n" #shader
 
-void ScatterplotWidget::setData(const std::vector<float>& positions) {
+void ScatterplotWidget::setData(const std::vector<float>& positions)
+{
     this->positions = positions;
 
     glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
@@ -15,11 +15,13 @@ void ScatterplotWidget::setData(const std::vector<float>& positions) {
     update();
 }
 
-void ScatterplotWidget::setPointSize(const float size) {
+void ScatterplotWidget::setPointSize(const float size)
+{
     _pointSize = size;
 }
 
-void ScatterplotWidget::setAlpha(const float alpha) {
+void ScatterplotWidget::setAlpha(const float alpha)
+{
     _alpha = alpha;
     _alpha = _alpha > 1 ? 1 : _alpha;
     _alpha = _alpha < 0 ? 0 : _alpha;
