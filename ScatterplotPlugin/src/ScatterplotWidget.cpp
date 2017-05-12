@@ -64,7 +64,7 @@ void ScatterplotWidget::initializeGL()
 
     glGenBuffers(1, &positionBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, positions.size() * 2 * sizeof(float), positions.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribDivisor(1, 1);
     glEnableVertexAttribArray(1);
@@ -130,5 +130,5 @@ void ScatterplotWidget::paintGL()
     }
     
     shader->setUniformValue("alpha", _alpha);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size());
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size() / 2);
 }
