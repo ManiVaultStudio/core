@@ -114,9 +114,8 @@ void ScatterplotWidget::initializeGL()
 
 void ScatterplotWidget::resizeGL(int w, int h)
 {
-    shader->bind();
-    shader->setUniformValue("windowSize", w, h);
-    shader->release();
+    _windowSize.setWidth(w);
+    _windowSize.setHeight(h);
 }
 
 void ScatterplotWidget::paintGL()
@@ -125,6 +124,7 @@ void ScatterplotWidget::paintGL()
     qDebug() << "Rendering scatterplot";
 
     shader->bind();
+    shader->setUniformValue("windowSize", _windowSize.width(), _windowSize.height());
     shader->setUniformValue("pointSize", _pointSize);
     shader->setUniformValue("alpha", _alpha);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size());

@@ -28,6 +28,8 @@ private:
     QOpenGLShaderProgram* shader;
 
     std::vector<float> positions;
+
+    QSize _windowSize;
     float _pointSize = DEFAULT_POINT_SIZE;
     float _alpha = DEFAULT_ALPHA_VALUE;
 };
