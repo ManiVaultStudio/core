@@ -47,10 +47,12 @@ set( CORE_SOURCES
 
 set( WIDGET_HEADERS
     src/DockableWidget.h
+    src/widgets/ScatterplotWidget.h
 )
 
 set( WIDGET_SOURCES
     src/DockableWidget.cpp
+    src/widgets/ScatterplotWidget.cpp
 )
 
 set( PLUGIN_HEADERS
