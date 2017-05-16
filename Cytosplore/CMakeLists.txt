@@ -87,6 +87,10 @@ list(APPEND PUBLIC_SOURCES
 	${WIDGET_SOURCES}
 	${PUBLIC_HEADERS}
 )
+list(APPEND WIDGET_FILES
+	${WIDGET_SOURCES}
+	${WIDGET_HEADERS}
+)
 
 if(WIN32)
     set(MAIN_SOURCES ${MAIN_SOURCES} win/cytosplore.rc)
@@ -106,7 +110,8 @@ QT5_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
 source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
-source_group( Public FILES ${PUBLIC_SOURCES})
+source_group( Public FILES ${PLUGIN_HEADERS})
+source_group( Public\\Widgets FILES ${WIDGET_FILES})
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})
 source_group( Resources FILES win/cytosplore.rc)

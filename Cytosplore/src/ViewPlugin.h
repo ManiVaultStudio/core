@@ -1,7 +1,7 @@
 #ifndef HDPS_PLUGIN_VIEW_PLUGIN
 #define HDPS_PLUGIN_VIEW_PLUGIN
 
-#include "DockableWidget.h"
+#include "widgets/DockableWidget.h"
 #include "PluginFactory.h"
 #include "DataConsumer.h"
 
