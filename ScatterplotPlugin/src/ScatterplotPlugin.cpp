@@ -1,6 +1,6 @@
 #include "ScatterplotPlugin.h"
 
-#include "ScatterplotWidget.h"
+#include "widgets/ScatterplotWidget.h"
 #include "Points2DPlugin.h"
 
 #include <QtCore>
