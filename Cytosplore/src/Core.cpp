@@ -3,6 +3,7 @@
 #include "MainWindow.h"
 #include "PluginManager.h"
 
+#include "LoaderPlugin.h"
 #include "DataTypePlugin.h"
 #include "DataConsumer.h"
 
@@ -27,7 +28,12 @@ void Core::init() {
 void Core::addPlugin(plugin::Plugin* plugin) {
     plugin->setCore(this);
 
-    // If is it a view plugin then it should be added to the main window
+    // If it is a loader plugin it should call loadData
+    if (plugin->getType() == plugin::Type::LOADER) {
+        dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+    }
+
+    // If it is a view plugin then it should be added to the main window
     if (plugin->getType() == plugin::Type::VIEW) {
         _mainWindow.addView(plugin);
     }
