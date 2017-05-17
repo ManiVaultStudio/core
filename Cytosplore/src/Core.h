@@ -29,7 +29,7 @@ public:
 
     void addPlugin(plugin::Plugin* plugin);
 
-    const plugin::DataTypePlugin* addData(const QString kind) override;
+    plugin::DataTypePlugin* addData(const QString kind) override;
 
     gui::MainWindow& gui() const;
 

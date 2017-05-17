@@ -25,14 +25,14 @@ public:
     ~PluginManager(void);
     
     void LoadPlugins();
-    const Plugin* AddPlugin(const QString kind);
+    Plugin* AddPlugin(const QString kind);
     
 private:
     Core& _core;
 
     QHash<QString, PluginFactory*> _pluginFactories;
 private slots:
-    const Plugin* pluginTriggered(const QString& kind);
+    Plugin* pluginTriggered(const QString& kind);
 };
 
 } // namespace plugin

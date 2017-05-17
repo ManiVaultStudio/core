@@ -14,7 +14,7 @@ namespace plugin
 class CoreInterface
 {
 public:
-    virtual const plugin::DataTypePlugin* addData(const QString kind) = 0;
+    virtual plugin::DataTypePlugin* addData(const QString kind) = 0;
 };
 
 } // namespace hdps

@@ -49,7 +49,7 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     }
 }
 
-const plugin::DataTypePlugin* Core::addData(const QString kind) {
+plugin::DataTypePlugin* Core::addData(const QString kind) {
     return (plugin::DataTypePlugin*) _pluginManager->AddPlugin(kind);
 }
 
