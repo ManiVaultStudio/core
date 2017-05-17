@@ -6,10 +6,15 @@
 namespace hdps
 {
 
+namespace plugin
+{
+    class DataTypePlugin;
+}
+
 class CoreInterface
 {
 public:
-    virtual void addData(const QString kind) = 0;
+    virtual const plugin::DataTypePlugin* addData(const QString kind) = 0;
 };
 
 } // namespace hdps

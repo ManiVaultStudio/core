@@ -49,8 +49,8 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     }
 }
 
-void Core::addData(const QString kind) {
-    _pluginManager->AddPlugin(kind);
+const plugin::DataTypePlugin* Core::addData(const QString kind) {
+    return (plugin::DataTypePlugin*) _pluginManager->AddPlugin(kind);
 }
 
 void Core::notifyDataAdded(const plugin::DataTypePlugin& data) {
