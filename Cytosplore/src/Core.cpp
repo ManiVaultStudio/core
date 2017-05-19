@@ -65,6 +65,18 @@ void Core::notifyDataAdded(const plugin::DataTypePlugin& data) {
     }
 }
 
+void Core::notifyDataChanged(const plugin::DataTypePlugin& data) {
+    for (auto& kv : _plugins) {
+        for (int i = 0; i < kv.second.size(); ++i) {
+            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
+
+            if (dc) {
+                dc->dataChanged(data);
+            }
+        }
+    }
+}
+
 gui::MainWindow& Core::gui() const {
     return _mainWindow;
 }

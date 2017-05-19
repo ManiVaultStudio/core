@@ -31,11 +31,12 @@ public:
 
     plugin::DataTypePlugin* addData(const QString kind) override;
 
+    void notifyDataAdded(const plugin::DataTypePlugin& data);
+    void notifyDataChanged(const plugin::DataTypePlugin& data);
+
     gui::MainWindow& gui() const;
 
 private:
-    void notifyDataAdded(const plugin::DataTypePlugin& plugin);
-
     gui::MainWindow& _mainWindow;
 
     std::unique_ptr<plugin::PluginManager> _pluginManager;
