@@ -24,7 +24,14 @@ public:
     PluginManager(Core& core);
     ~PluginManager(void);
     
+    /**
+    * Loads all plugin factories from the plugin directory and adds them as menu items.
+    */
     void LoadPlugins();
+
+    /**
+    * Creates a new plugin instance of the given kind and adds it to the core.
+    */
     Plugin* AddPlugin(const QString kind);
     
 private:

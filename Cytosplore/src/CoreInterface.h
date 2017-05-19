@@ -14,9 +14,14 @@ namespace plugin
 class CoreInterface
 {
 public:
+    /**
+    * Create a new dataset instance of the given kind.
+    */
     virtual plugin::DataTypePlugin* addData(const QString kind) = 0;
 
+    /** Notify all data consumers that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const plugin::DataTypePlugin& data) = 0;
+    /** Notify all data consumers that a dataset has been changed. */
     virtual void notifyDataChanged(const plugin::DataTypePlugin& data) = 0;
 };
 
