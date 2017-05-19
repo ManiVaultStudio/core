@@ -30,7 +30,14 @@ public:
     MainWindow(QWidget *parent = 0);
 	virtual ~MainWindow();
 
+    /**
+    * Adds a new item to the menu drop-down for this particular type.
+    */
     QAction* addMenuAction(plugin::Type type, QString name);
+
+    /**
+    * Adds the given view plugin to the main area of the window as a dockable widget.
+    */
     void addView(plugin::Plugin* plugin);
 
 private:
