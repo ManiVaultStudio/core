@@ -1,6 +1,17 @@
 #ifndef HDPS_PLUGIN_TYPE_H
 #define HDPS_PLUGIN_TYPE_H
 
+/**
+ * Provides all possible types of plugins.
+ *
+ * Analysis       - A plugin to perform complex computation on a dataset.
+ * DataType       - A plugin that defines the structure of a dataset.
+ * Loader         - A plugin that loads a specific type of data into a dataset.
+ * Writer         - A plugin that writes a specific type of data to disk.
+ * Transformation - A plugin to transform data in a minimal way.
+ * View           - A plugin to display a dataset on screen.
+ */
+
 namespace hdps {
 
 namespace plugin {
