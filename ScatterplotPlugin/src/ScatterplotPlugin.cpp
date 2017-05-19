@@ -21,24 +21,28 @@ void ScatterplotPlugin::init()
 {
     widget = new ScatterplotWidget();
     widget->setPointSize(5);
-    widget->setAlpha(0.3f);
+    widget->setAlpha(0.01f);
     setWidget(widget);
-
-    _core->addData("2D Points");
 }
 
 void ScatterplotPlugin::dataAdded(const DataTypePlugin& data)
 {
     if (data.getName() == "2D Points") {
-        qDebug() << "Data Added";
+        qDebug() << "Data Added for scatterplot";
         const Points2DPlugin& points = dynamic_cast<const Points2DPlugin&>(data);
+        qDebug() << "Points: " << points.data.size();
         widget->setData(points.data);
     }
 }
 
 void ScatterplotPlugin::dataChanged(const DataTypePlugin& data)
 {
-
+    if (data.getName() == "2D Points") {
+        qDebug() << "Data Changed for scatterplot";
+        const Points2DPlugin& points = dynamic_cast<const Points2DPlugin&>(data);
+        qDebug() << "Points: " << points.data.size();
+        widget->setData(points.data);
+    }
 }
 
 void ScatterplotPlugin::dataRemoved()
