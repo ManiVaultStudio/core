@@ -23,6 +23,9 @@ public:
     
     virtual ~AnalysisPluginFactory() {};
     
+    /**
+    * Produces an instance of an analysis plugin. This function gets called by the plugin manager.
+    */
     virtual AnalysisPlugin* produce() = 0;
 };
 

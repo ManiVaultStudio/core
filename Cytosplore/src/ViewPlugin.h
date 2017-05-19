@@ -26,6 +26,9 @@ public:
 
     virtual ~ViewPluginFactory() {};
 
+    /**
+     * Produces an instance of a view plugin. This function gets called by the plugin manager.
+     */
     virtual ViewPlugin* produce() = 0;
 };
 

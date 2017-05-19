@@ -23,6 +23,9 @@ public:
     
     virtual ~TransformationPluginFactory() {};
     
+    /**
+    * Produces an instance of a transformation plugin. This function gets called by the plugin manager.
+    */
     virtual TransformationPlugin* produce() = 0;
 };
 
