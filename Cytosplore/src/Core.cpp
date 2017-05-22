@@ -28,11 +28,6 @@ void Core::init() {
 void Core::addPlugin(plugin::Plugin* plugin) {
     plugin->setCore(this);
 
-    // If it is a loader plugin it should call loadData
-    if (plugin->getType() == plugin::Type::LOADER) {
-        dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
-    }
-
     // If it is a view plugin then it should be added to the main window
     if (plugin->getType() == plugin::Type::VIEW) {
         _mainWindow.addView(plugin);
@@ -43,9 +38,14 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     // Initialize the plugin after it has been added to the core
     plugin->init();
 
-    // 
+    // Notify data consumers about the new data set
     if (plugin->getType() == plugin::Type::DATA_TYPE) {
         notifyDataAdded(*dynamic_cast<plugin::DataTypePlugin*>(plugin));
+    }
+
+    // If it is a loader plugin it should call loadData
+    if (plugin->getType() == plugin::Type::LOADER) {
+        dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
     }
 }
 
@@ -83,7 +83,7 @@ void Core::notifyDataRemoved() {
             plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
 
             if (dc) {
-                dc->dataChanged(data);
+                dc->dataRemoved();
             }
         }
     }
