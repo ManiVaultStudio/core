@@ -4,6 +4,7 @@
 #include "PluginManager.h"
 
 #include "LoaderPlugin.h"
+#include "WriterPlugin.h"
 #include "DataTypePlugin.h"
 #include "DataConsumer.h"
 
@@ -46,6 +47,10 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     // If it is a loader plugin it should call loadData
     if (plugin->getType() == plugin::Type::LOADER) {
         dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+    }
+    // If it is a writer plugin it should call writeData
+    if (plugin->getType() == plugin::Type::WRITER) {
+        dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
     }
 }
 
