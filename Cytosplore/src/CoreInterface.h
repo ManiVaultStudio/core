@@ -23,6 +23,8 @@ public:
     virtual void notifyDataAdded(const plugin::DataTypePlugin& data) = 0;
     /** Notify all data consumers that a dataset has been changed. */
     virtual void notifyDataChanged(const plugin::DataTypePlugin& data) = 0;
+    /** Notify all data consumers that a dataset has been removed. */
+    virtual void notifyDataRemoved() = 0;
 };
 
 } // namespace hdps

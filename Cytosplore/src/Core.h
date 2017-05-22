@@ -44,6 +44,8 @@ public:
     void notifyDataAdded(const plugin::DataTypePlugin& data);
     /** Notify all data consumers that a dataset has been changed. */
     void notifyDataChanged(const plugin::DataTypePlugin& data);
+    /** Notify all data consumers that a dataset has been removed. */
+    void notifyDataRemoved();
 
     /**
     * Returns a reference to the main window for adding widgets to it.
