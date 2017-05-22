@@ -17,7 +17,13 @@ Core::Core(gui::MainWindow& mainWindow)
 }
 
 Core::~Core() {
+    _pluginManager.reset();
 
+    for (auto& kv : _plugins) {
+        for (int i = 0; i < kv.second.size(); ++i) {
+            kv.second[i].reset();
+        }
+    }
 }
 
 void Core::init() {
