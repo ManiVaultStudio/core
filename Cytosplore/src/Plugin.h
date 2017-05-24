@@ -5,6 +5,7 @@
 #include "PluginType.h"
 
 #include <QString>
+#include <QUuid>
 
 namespace hdps {
 
@@ -13,7 +14,7 @@ namespace plugin {
 class Plugin
 {
 public:
-    Plugin(Type type, QString kind) : _type(type), _kind(kind), _name(kind) { }
+    Plugin(Type type, QString kind) : _type(type), _kind(kind), _name(kind + QUuid::createUuid().toString()) { }
     virtual ~Plugin() {};
 
     /**
