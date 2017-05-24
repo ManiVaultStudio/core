@@ -50,7 +50,7 @@ void Core::addPlugin(plugin::Plugin* plugin) {
 
     // Notify data consumers about the new data set
     if (plugin->getType() == plugin::Type::DATA_TYPE) {
-        notifyDataAdded(*dynamic_cast<plugin::DataTypePlugin*>(plugin));
+        notifyDataAdded(plugin->getName());
     }
 
     // If it is a loader plugin it should call loadData
@@ -63,29 +63,34 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     }
 }
 
-plugin::DataTypePlugin* Core::addData(const QString kind) {
-    return (plugin::DataTypePlugin*) _pluginManager->AddPlugin(kind);
+const QString Core::addData(const QString kind) {
+    return _pluginManager->AddPlugin(kind);
 }
 
-void Core::notifyDataAdded(const plugin::DataTypePlugin& data) {
+void Core::notifyDataAdded(const QString name) {
     for (auto& kv : _plugins) {
         for (int i = 0; i < kv.second.size(); ++i) {
             plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
 
             if (dc) {
-                dc->dataAdded(data);
+                dc->dataAdded(name);
+            }
+
+            plugin::ViewPlugin* vp = dynamic_cast<plugin::ViewPlugin*>(kv.second[i].get());
+            if (vp) {
+                vp->addData(name);
             }
         }
     }
 }
 
-void Core::notifyDataChanged(const plugin::DataTypePlugin& data) {
+void Core::notifyDataChanged(const QString name) {
     for (auto& kv : _plugins) {
         for (int i = 0; i < kv.second.size(); ++i) {
             plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
 
             if (dc) {
-                dc->dataChanged(data);
+                dc->dataChanged(name);
             }
         }
     }

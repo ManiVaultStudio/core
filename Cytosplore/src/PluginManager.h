@@ -32,14 +32,14 @@ public:
     /**
     * Creates a new plugin instance of the given kind and adds it to the core.
     */
-    Plugin* AddPlugin(const QString kind);
+    QString AddPlugin(const QString kind);
     
 private:
     Core& _core;
 
     QHash<QString, PluginFactory*> _pluginFactories;
 private slots:
-    Plugin* pluginTriggered(const QString& kind);
+    QString pluginTriggered(const QString& kind);
 };
 
 } // namespace plugin

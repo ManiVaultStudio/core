@@ -108,19 +108,19 @@ void PluginManager::LoadPlugins()
     QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(const QString&)>(&QSignalMapper::mapped), this, &PluginManager::pluginTriggered);
 }
 
-Plugin* PluginManager::AddPlugin(const QString kind)
+QString PluginManager::AddPlugin(const QString kind)
 {
     return pluginTriggered(kind);
 }
 
-Plugin* PluginManager::pluginTriggered(const QString& kind)
+QString PluginManager::pluginTriggered(const QString& kind)
 {
     PluginFactory *pluginFactory = _pluginFactories[kind];
     Plugin* plugin = pluginFactory->produce();
 
     _core.addPlugin(plugin);
     qDebug() << "Added plugin" << plugin->getKind() << "with version" << plugin->getVersion();
-    return plugin;
+    return plugin->getName();
 }
 
 } // namespace plugin

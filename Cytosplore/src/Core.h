@@ -38,12 +38,12 @@ public:
     /**
     * Create a new dataset instance of the given kind.
     */
-    plugin::DataTypePlugin* addData(const QString kind) override;
+    const QString addData(const QString kind) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
-    void notifyDataAdded(const plugin::DataTypePlugin& data);
+    void notifyDataAdded(const QString name);
     /** Notify all data consumers that a dataset has been changed. */
-    void notifyDataChanged(const plugin::DataTypePlugin& data);
+    void notifyDataChanged(const QString name);
     /** Notify all data consumers that a dataset has been removed. */
     void notifyDataRemoved();
 
