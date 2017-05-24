@@ -13,7 +13,7 @@ namespace plugin {
 class Plugin
 {
 public:
-    Plugin(Type type, QString name) : _type(type), _name(name) { }
+    Plugin(Type type, QString kind) : _type(type), _kind(kind), _name(kind) { }
     virtual ~Plugin() {};
 
     /**
