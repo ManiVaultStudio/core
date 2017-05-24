@@ -5,6 +5,7 @@
 
 #include "LoaderPlugin.h"
 #include "WriterPlugin.h"
+#include "ViewPlugin.h"
 #include "DataTypePlugin.h"
 #include "DataConsumer.h"
 
@@ -17,8 +18,10 @@ Core::Core(gui::MainWindow& mainWindow)
 }
 
 Core::~Core() {
+    // Delete the plugin manager
     _pluginManager.reset();
 
+    // Delete all plugins
     for (auto& kv : _plugins) {
         for (int i = 0; i < kv.second.size(); ++i) {
             kv.second[i].reset();
@@ -37,7 +40,7 @@ void Core::addPlugin(plugin::Plugin* plugin) {
 
     // If it is a view plugin then it should be added to the main window
     if (plugin->getType() == plugin::Type::VIEW) {
-        _mainWindow.addView(plugin);
+        _mainWindow.addView(dynamic_cast<plugin::ViewPlugin*>(plugin));
     }
 
     _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));

@@ -35,8 +35,8 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name) {
     }
 }
 
-void MainWindow::addView(plugin::Plugin* plugin) {
-    addDockWidget(Qt::RightDockWidgetArea, dynamic_cast<plugin::ViewPlugin*>(plugin));
+void MainWindow::addView(plugin::ViewPlugin* plugin) {
+    addDockWidget(Qt::RightDockWidgetArea, plugin);
 }
 
 } // namespace gui

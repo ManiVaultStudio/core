@@ -38,7 +38,7 @@ public:
     /**
     * Adds the given view plugin to the main area of the window as a dockable widget.
     */
-    void addView(plugin::Plugin* plugin);
+    void addView(plugin::ViewPlugin* plugin);
 
 private:
 
