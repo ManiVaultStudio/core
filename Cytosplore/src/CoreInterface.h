@@ -6,6 +6,11 @@
 namespace hdps
 {
 
+namespace plugin
+{
+    class DataTypePlugin;
+}
+
 class CoreInterface
 {
 public:
@@ -13,6 +18,11 @@ public:
     * Create a new dataset instance of the given kind.
     */
     virtual const QString addData(const QString kind) = 0;
+
+    /**
+    * Request a dataset from the core by its name.
+    */
+    virtual plugin::DataTypePlugin* requestData(const QString name) = 0;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString name) = 0;

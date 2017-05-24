@@ -5,6 +5,10 @@
 #include "PluginFactory.h"
 #include "DataConsumer.h"
 
+#include <QWidget>
+#include <QGridLayout>
+#include <QComboBox>
+
 namespace hdps {
 
 namespace plugin {
@@ -14,8 +18,22 @@ class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsume
     Q_OBJECT
     
 public:
-    ViewPlugin(QString name) : Plugin(Type::VIEW, name) { }
+    ViewPlugin(QString name) : Plugin(Type::VIEW, name) {
+        addWidget(&dataOptions);
+    }
+
     virtual ~ViewPlugin() {};
+
+    void addData(QString name) {
+        dataOptions.addItem(name);
+    }
+
+    void addWidget(QWidget* widget) {
+        mainLayout()->addWidget(widget);
+    }
+
+protected:
+    QComboBox dataOptions;
 };
 
 class ViewPluginFactory : public PluginFactory

@@ -67,6 +67,16 @@ const QString Core::addData(const QString kind) {
     return _pluginManager->AddPlugin(kind);
 }
 
+plugin::DataTypePlugin* Core::requestData(const QString name)
+{
+    for (std::unique_ptr<plugin::Plugin>& plugin : _plugins[plugin::Type::DATA_TYPE]) {
+        if (plugin->getName() == name) {
+            return dynamic_cast<plugin::DataTypePlugin*>(plugin.get());
+        }
+    }
+    qFatal((QString("Failed to find plugin with name: ") + name).toStdString().c_str());
+}
+
 void Core::notifyDataAdded(const QString name) {
     for (auto& kv : _plugins) {
         for (int i = 0; i < kv.second.size(); ++i) {

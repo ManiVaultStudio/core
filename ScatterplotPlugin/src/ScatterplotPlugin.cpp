@@ -26,8 +26,9 @@ void ScatterplotPlugin::init()
     addWidget(widget);
 }
 
-void ScatterplotPlugin::dataAdded(const DataTypePlugin& data)
+void ScatterplotPlugin::dataAdded(const QString name)
 {
+    
     if (data.getKind() == "2D Points") {
         qDebug() << "Data Added for scatterplot";
         const Points2DPlugin& points = dynamic_cast<const Points2DPlugin&>(data);
@@ -36,7 +37,7 @@ void ScatterplotPlugin::dataAdded(const DataTypePlugin& data)
     }
 }
 
-void ScatterplotPlugin::dataChanged(const DataTypePlugin& data)
+void ScatterplotPlugin::dataChanged(const QString name)
 {
     if (data.getKind() == "2D Points") {
         qDebug() << "Data Changed for scatterplot";
