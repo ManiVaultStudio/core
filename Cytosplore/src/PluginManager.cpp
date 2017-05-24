@@ -119,7 +119,7 @@ Plugin* PluginManager::pluginTriggered(const QString& kind)
     Plugin* plugin = pluginFactory->produce();
 
     _core.addPlugin(plugin);
-    qDebug() << "Added plugin" << plugin->getName() << "with version" << plugin->getVersion();
+    qDebug() << "Added plugin" << plugin->getKind() << "with version" << plugin->getVersion();
     return plugin;
 }
 

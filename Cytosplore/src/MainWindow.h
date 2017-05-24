@@ -17,7 +17,7 @@ namespace hdps {
 
 namespace plugin {
     class PluginManager;
-    class Plugin;
+    class ViewPlugin;
     enum Type;
 }
 

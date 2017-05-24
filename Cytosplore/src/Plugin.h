@@ -22,14 +22,21 @@ public:
      */
     virtual void init() = 0;
 	
-    /** Returns the type of plugin, see all types in PluginType */
-    Type getType() const { return _type; }
-
     /**
-     * Returns the kind of plugin. The kind is specific to the
-     * particular implementation of a plugin type.
+     * Returns the unique name of this plugin.
      */
     QString getName() const { return _name; }
+
+    /**
+    * Returns the kind of plugin. The kind is specific to the
+    * particular implementation of a plugin type.
+    */
+    QString getKind() const { return _kind; }
+
+    /**
+     * Returns the type of plugin, see all types in PluginType
+     */
+    Type getType() const { return _type; }
 
     /**
      * Returns the version of the plugin. If no version string is implemented 
@@ -48,8 +55,9 @@ protected:
     CoreInterface* _core;
 
 private:
-    const Type _type;
     const QString _name;
+    const QString _kind;
+    const Type _type;
 };
 
 } // namespace plugin
