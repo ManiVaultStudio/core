@@ -21,8 +21,8 @@ public:
     
     void init();
     
-    void dataAdded(const DataTypePlugin& data) Q_DECL_OVERRIDE;
-    void dataChanged(const DataTypePlugin& data) Q_DECL_OVERRIDE;
+    void dataAdded(const QString name) Q_DECL_OVERRIDE;
+    void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved() Q_DECL_OVERRIDE;
 private:
     ScatterplotWidget* widget;
