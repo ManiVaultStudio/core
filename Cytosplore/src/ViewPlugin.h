@@ -19,6 +19,7 @@ class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsume
     
 public:
     ViewPlugin(QString name) : Plugin(Type::VIEW, name) {
+        connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), SLOT(dataSetPicked(QString)));
         addWidget(&dataOptions);
     }
 
@@ -34,6 +35,9 @@ public:
 
 protected:
     QComboBox dataOptions;
+
+protected slots:
+    virtual void dataSetPicked(const QString& name) = 0;
 };
 
 class ViewPluginFactory : public PluginFactory
