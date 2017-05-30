@@ -53,6 +53,13 @@ void ScatterplotPlugin::dataRemoved()
     
 }
 
+void ScatterplotPlugin::dataSetPicked(const QString& name)
+{
+    DataTypePlugin* data = _core->requestData(name);
+    const Points2DPlugin* points = dynamic_cast<const Points2DPlugin*>(data);
+    widget->setData(points->data);
+}
+
 // =============================================================================
 // Factory
 // =============================================================================
