@@ -29,9 +29,11 @@ private:
 
     GLuint vao;
     GLuint positionBuffer;
+    GLuint colorBuffer;
     QOpenGLShaderProgram* shader;
 
     std::vector<float> positions;
+    std::vector<float> colors;
 
     QSize _windowSize;
     PointScaling _scalingMode = DEFAULT_POINT_SCALING;

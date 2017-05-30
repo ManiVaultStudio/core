@@ -9,9 +9,12 @@
 void ScatterplotWidget::setData(const std::vector<float>& positions)
 {
     this->positions = positions;
+    this->colors.resize(positions.size(), 0.5f);
 
     glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
     glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), positions.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float), colors.data(), GL_STATIC_DRAW);
     update();
 }
 
@@ -69,17 +72,27 @@ void ScatterplotWidget::initializeGL()
     glVertexAttribDivisor(1, 1);
     glEnableVertexAttribArray(1);
 
+    glGenBuffers(1, &colorBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float), colors.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribDivisor(2, 1);
+    glEnableVertexAttribArray(2);
+
     const char *vertexSource = GLSL(330,
         uniform float pointSize;
 
         in vec2 vertex;
         in vec2 position;
+        in vec3 color;
 
         out vec2 pass_texCoords;
+        out vec3 pass_color;
 
         void main()
         {
             pass_texCoords = vertex;
+            pass_color = color;
             gl_Position = vec4(vertex * pointSize + position, 0, 1);
         }
     );
@@ -88,6 +101,7 @@ void ScatterplotWidget::initializeGL()
         uniform float alpha;
 
         in vec2 pass_texCoords;
+        in vec3 pass_color;
 
         out vec4 fragColor;
 
@@ -99,7 +113,7 @@ void ScatterplotWidget::initializeGL()
 
             float edge = fwidth(len);
             float a = smoothstep(1, 1 - edge, len);
-            fragColor = vec4(0, 0.5, 1.0, a * alpha);
+            fragColor = vec4(pass_color, a * alpha);
         }
     );
 
