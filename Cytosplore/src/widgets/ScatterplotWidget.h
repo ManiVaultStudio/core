@@ -14,6 +14,7 @@ class ScatterplotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
     Q_OBJECT
 public:
     void setData(const std::vector<float>& data);
+    void setColors(const std::vector<float>& data);
     void setPointSize(const float size);
     void setAlpha(const float alpha);
     void setPointScaling(PointScaling scalingMode);

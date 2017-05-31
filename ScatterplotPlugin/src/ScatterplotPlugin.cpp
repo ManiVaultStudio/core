@@ -20,8 +20,8 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 void ScatterplotPlugin::init()
 {
     widget = new ScatterplotWidget();
-    widget->setPointSize(5);
-    widget->setAlpha(0.01f);
+    widget->setPointSize(10);
+    widget->setAlpha(0.5f);
 
     addWidget(widget);
 }
@@ -44,7 +44,18 @@ void ScatterplotPlugin::dataChanged(const QString name)
         qDebug() << "Data Changed for scatterplot";
         const Points2DPlugin* points = dynamic_cast<const Points2DPlugin*>(data);
         qDebug() << "Points: " << points->data.size();
-        widget->setData(points->data);
+        std::vector<float> data;
+        std::vector<float> colors;
+        for (int i = 0; i < points->data.size() / 5; i++) {
+            data.push_back(points->data[i * 5 + 0]);
+            data.push_back(points->data[i * 5 + 1]);
+            colors.push_back(points->data[i * 5 + 2]);
+            colors.push_back(points->data[i * 5 + 3]);
+            colors.push_back(points->data[i * 5 + 4]);
+        }
+
+        widget->setData(data);
+        widget->setColors(colors);
     }
 }
 
@@ -57,7 +68,19 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
     DataTypePlugin* data = _core->requestData(name);
     const Points2DPlugin* points = dynamic_cast<const Points2DPlugin*>(data);
-    widget->setData(points->data);
+
+    std::vector<float> pos;
+    std::vector<float> colors;
+    for (int i = 0; i < points->data.size() / 5; i++) {
+        pos.push_back(points->data[i * 5 + 0]);
+        pos.push_back(points->data[i * 5 + 1]);
+        colors.push_back(points->data[i * 5 + 2]);
+        colors.push_back(points->data[i * 5 + 3]);
+        colors.push_back(points->data[i * 5 + 4]);
+    }
+
+    widget->setData(pos);
+    widget->setColors(colors);
 }
 
 // =============================================================================

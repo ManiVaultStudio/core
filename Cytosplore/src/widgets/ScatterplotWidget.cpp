@@ -18,6 +18,14 @@ void ScatterplotWidget::setData(const std::vector<float>& positions)
     update();
 }
 
+void ScatterplotWidget::setColors(const std::vector<float>& colors) {
+    this->colors = colors;
+
+    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(float), colors.data(), GL_STATIC_DRAW);
+    update();
+}
+
 void ScatterplotWidget::setPointSize(const float size)
 {
     _pointSize = size;
