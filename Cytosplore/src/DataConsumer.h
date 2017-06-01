@@ -26,7 +26,7 @@ public:
     /**
     * Callback function which gets triggered when a dataset is removed.
     */
-    virtual void dataRemoved() = 0;
+    virtual void dataRemoved(const QString name) = 0;
 };
 
 } // namespace plugin

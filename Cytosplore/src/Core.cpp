@@ -101,13 +101,13 @@ void Core::notifyDataChanged(const QString name) {
     }
 }
 
-void Core::notifyDataRemoved() {
+void Core::notifyDataRemoved(const QString name) {
     for (auto& kv : _plugins) {
         for (int i = 0; i < kv.second.size(); ++i) {
             plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
 
             if (dc) {
-                dc->dataRemoved();
+                dc->dataRemoved(name);
             }
         }
     }

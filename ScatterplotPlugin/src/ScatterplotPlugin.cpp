@@ -62,7 +62,7 @@ void ScatterplotPlugin::dataChanged(const QString name)
     }
 }
 
-void ScatterplotPlugin::dataRemoved()
+void ScatterplotPlugin::dataRemoved(const QString name)
 {
     
 }

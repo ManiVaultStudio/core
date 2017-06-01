@@ -29,7 +29,7 @@ public:
     /** Notify all data consumers that a dataset has been changed. */
     virtual void notifyDataChanged(const QString name) = 0;
     /** Notify all data consumers that a dataset has been removed. */
-    virtual void notifyDataRemoved() = 0;
+    virtual void notifyDataRemoved(const QString name) = 0;
 };
 
 } // namespace hdps

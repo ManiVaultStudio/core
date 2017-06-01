@@ -25,7 +25,7 @@ public:
     
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
-    void dataRemoved() Q_DECL_OVERRIDE;
+    void dataRemoved(const QString name) Q_DECL_OVERRIDE;
 protected slots:
     void dataSetPicked(const QString& name);
 private:

@@ -50,7 +50,7 @@ public:
     /** Notify all data consumers that a dataset has been changed. */
     void notifyDataChanged(const QString name);
     /** Notify all data consumers that a dataset has been removed. */
-    void notifyDataRemoved();
+    void notifyDataRemoved(const QString name);
 
     /**
     * Returns a reference to the main window for adding widgets to it.
