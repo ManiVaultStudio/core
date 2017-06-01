@@ -43,6 +43,7 @@ void Core::addPlugin(plugin::Plugin* plugin) {
         _mainWindow.addView(dynamic_cast<plugin::ViewPlugin*>(plugin));
     }
 
+    // Add the plugin to a list of plugins of the same type
     _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
 
     // Initialize the plugin after it has been added to the core
@@ -63,10 +64,20 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     }
 }
 
+/**
+ * Requests the plugin manager to create a new plugin of the given kind.
+ * The manager will add the plugin instance to the core and return the
+ * unique name of the plugin.
+ */
 const QString Core::addData(const QString kind) {
     return _pluginManager->AddPlugin(kind);
 }
 
+/**
+ * Requests an instance of a data type plugin from the core which has the same
+ * unique name as the given parameter. If no such instance can be found a fatal
+ * error is thrown.
+ */
 plugin::DataTypePlugin* Core::requestData(const QString name)
 {
     for (std::unique_ptr<plugin::Plugin>& plugin : _plugins[plugin::Type::DATA_TYPE]) {
@@ -77,6 +88,10 @@ plugin::DataTypePlugin* Core::requestData(const QString name)
     qFatal((QString("Failed to find plugin with name: ") + name).toStdString().c_str());
 }
 
+/**
+ * Goes through all plugins stored in the core and calls the 'dataAdded' function
+ * on all plugins that inherit from the DataConsumer interface.
+ */
 void Core::notifyDataAdded(const QString name) {
     for (auto& kv : _plugins) {
         for (int i = 0; i < kv.second.size(); ++i) {
@@ -89,6 +104,10 @@ void Core::notifyDataAdded(const QString name) {
     }
 }
 
+/**
+* Goes through all plugins stored in the core and calls the 'dataChanged' function
+* on all plugins that inherit from the DataConsumer interface.
+*/
 void Core::notifyDataChanged(const QString name) {
     for (auto& kv : _plugins) {
         for (int i = 0; i < kv.second.size(); ++i) {
@@ -101,6 +120,10 @@ void Core::notifyDataChanged(const QString name) {
     }
 }
 
+/**
+* Goes through all plugins stored in the core and calls the 'dataRemoved' function
+* on all plugins that inherit from the DataConsumer interface.
+*/
 void Core::notifyDataRemoved(const QString name) {
     for (auto& kv : _plugins) {
         for (int i = 0; i < kv.second.size(); ++i) {
