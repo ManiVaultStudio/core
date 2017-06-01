@@ -85,11 +85,6 @@ void Core::notifyDataAdded(const QString name) {
             if (dc) {
                 dc->dataAdded(name);
             }
-
-            plugin::ViewPlugin* vp = dynamic_cast<plugin::ViewPlugin*>(kv.second[i].get());
-            if (vp) {
-                vp->addData(name);
-            }
         }
     }
 }

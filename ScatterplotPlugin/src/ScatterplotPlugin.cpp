@@ -23,6 +23,8 @@ void ScatterplotPlugin::init()
     widget->setPointSize(10);
     widget->setAlpha(0.5f);
 
+    connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), SLOT(dataSetPicked(QString)));
+    addWidget(&dataOptions);
     addWidget(widget);
 }
 
@@ -30,6 +32,7 @@ void ScatterplotPlugin::dataAdded(const QString name)
 {
     DataTypePlugin* data = _core->requestData(name);
     if (data->getKind() == "2D Points") {
+        dataOptions.addItem(name);
         qDebug() << "Data Added for scatterplot";
         const Points2DPlugin* points = dynamic_cast<const Points2DPlugin*>(data);
         qDebug() << "Points: " << points->data.size();

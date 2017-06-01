@@ -3,6 +3,8 @@
 
 #include <ViewPlugin.h>
 
+#include <QComboBox>
+
 using namespace hdps::plugin;
 
 // =============================================================================
@@ -28,6 +30,8 @@ protected slots:
     void dataSetPicked(const QString& name);
 private:
     ScatterplotWidget* widget;
+
+    QComboBox dataOptions;
 };
 
 

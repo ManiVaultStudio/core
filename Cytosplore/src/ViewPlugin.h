@@ -7,7 +7,6 @@
 
 #include <QWidget>
 #include <QGridLayout>
-#include <QComboBox>
 
 namespace hdps {
 
@@ -19,25 +18,14 @@ class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsume
     
 public:
     ViewPlugin(QString name) : Plugin(Type::VIEW, name) {
-        connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), SLOT(dataSetPicked(QString)));
-        addWidget(&dataOptions);
+        
     }
 
     virtual ~ViewPlugin() {};
 
-    void addData(QString name) {
-        dataOptions.addItem(name);
-    }
-
     void addWidget(QWidget* widget) {
         mainLayout()->addWidget(widget);
     }
-
-protected:
-    QComboBox dataOptions;
-
-protected slots:
-    virtual void dataSetPicked(const QString& name) = 0;
 };
 
 class ViewPluginFactory : public PluginFactory
