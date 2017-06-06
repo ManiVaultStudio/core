@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-set(PROJECT "Points2DPlugin")
+set(PROJECT "PointsPlugin")
 
 PROJECT(${PROJECT})
 
@@ -18,9 +18,9 @@ endif(MSVC)
 find_package(Qt5Widgets REQUIRED)
 
 set(SOURCES
-    src/Points2DPlugin.h
-    src/Points2DPlugin.cpp
-    src/Points2DPlugin.json
+    src/PointsPlugin.h
+    src/PointsPlugin.cpp
+    src/PointsPlugin.json
 )
 
 source_group( Plugin FILES ${SOURCES})

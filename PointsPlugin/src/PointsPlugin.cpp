@@ -1,20 +1,20 @@
-#include "Points2DPlugin.h"
+#include "PointsPlugin.h"
 
 #include <QtCore>
 #include <QtDebug>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.Points2DPlugin")
+Q_PLUGIN_METADATA(IID "nl.tudelft.PointsPlugin")
 
 // =============================================================================
 // View
 // =============================================================================
 
-Points2DPlugin::~Points2DPlugin(void)
+PointsPlugin::~PointsPlugin(void)
 {
     
 }
 
-void Points2DPlugin::init()
+void PointsPlugin::init()
 {
 
 }
@@ -23,7 +23,7 @@ void Points2DPlugin::init()
 // Factory
 // =============================================================================
 
-DataTypePlugin* Points2DPluginFactory::produce()
+DataTypePlugin* PointsPluginFactory::produce()
 {
-    return new Points2DPlugin();
+    return new PointsPlugin();
 }
