@@ -1,7 +1,7 @@
 #include "ScatterplotPlugin.h"
 
 #include "widgets/ScatterplotWidget.h"
-#include "Points2DPlugin.h"
+#include "PointsPlugin.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -31,10 +31,10 @@ void ScatterplotPlugin::init()
 void ScatterplotPlugin::dataAdded(const QString name)
 {
     DataTypePlugin* data = _core->requestData(name);
-    if (data->getKind() == "2D Points") {
+    if (data->getKind() == "Points") {
         dataOptions.addItem(name);
         qDebug() << "Data Added for scatterplot";
-        const Points2DPlugin* points = dynamic_cast<const Points2DPlugin*>(data);
+        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
         qDebug() << "Points: " << points->data.size();
         widget->setData(points->data);
     }
@@ -43,9 +43,9 @@ void ScatterplotPlugin::dataAdded(const QString name)
 void ScatterplotPlugin::dataChanged(const QString name)
 {
     DataTypePlugin* data = _core->requestData(name);
-    if (data->getKind() == "2D Points") {
+    if (data->getKind() == "Points") {
         qDebug() << "Data Changed for scatterplot";
-        const Points2DPlugin* points = dynamic_cast<const Points2DPlugin*>(data);
+        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
         qDebug() << "Points: " << points->data.size();
         std::vector<float> data;
         std::vector<float> colors;
@@ -70,7 +70,7 @@ void ScatterplotPlugin::dataRemoved(const QString name)
 void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
     DataTypePlugin* data = _core->requestData(name);
-    const Points2DPlugin* points = dynamic_cast<const Points2DPlugin*>(data);
+    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
 
     std::vector<float> pos;
     std::vector<float> colors;
