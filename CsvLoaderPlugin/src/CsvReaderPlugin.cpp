@@ -45,18 +45,23 @@ void CsvReaderPlugin::loadData()
         {
             if (tokens[i].isEmpty())
                 continue;
-            data.push_back(tokens[i].toFloat());
+            float f = tokens[i].toFloat();
+
+            data.push_back(f);
         }
     }
 
     QString name = _core->addData("Points");
     DataTypePlugin* dataSet = _core->requestData(name);
     PointsPlugin* points = dynamic_cast<PointsPlugin*>(dataSet);
-    points->data = data;
+    points->data.resize(data.size());
+    for (int i = 0; i < points->data.size(); i++) {
+        points->data[i] = data[i];
+    }
 
     _core->notifyDataChanged(name);
 
-    qDebug() << "CSV file loaded.";
+    qDebug() << "CSV file loaded. Num data points: " << points->data.size();
 }
 
 // =============================================================================
