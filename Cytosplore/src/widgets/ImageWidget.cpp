@@ -12,7 +12,7 @@ void ImageWidget::setImage(const std::vector<float>& pixels, int width, int heig
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_FLOAT, pixels.data());
 
     update();
 }
@@ -78,13 +78,15 @@ void ImageWidget::initializeGL()
     );
 
     const char *fragmentSource = GLSL(330,
+        uniform sampler2D image;
+
         in vec2 pass_texCoords;
 
         out vec4 fragColor;
 
         void main()
         {
-            fragColor = vec4(1, 0, 0, 1);
+            fragColor = texture(image, pass_texCoords);
         }
     );
 
@@ -107,6 +109,10 @@ void ImageWidget::paintGL()
 
     shader->bind();
     //shader->setUniformValue("pointSize", _pointSize / 800);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    shader->setUniformValue("image", 0);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
