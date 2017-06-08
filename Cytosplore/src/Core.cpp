@@ -62,6 +62,13 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     if (plugin->getType() == plugin::Type::WRITER) {
         dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
     }
+    // If the plugin is a data consumer, notify it about all the data present in the core
+    plugin::DataConsumer* dataConsumer = dynamic_cast<plugin::DataConsumer*>(plugin);
+    if (dataConsumer) {
+        for (std::unique_ptr<plugin::Plugin>& dataPlugin : _plugins[plugin::Type::DATA_TYPE]) {
+            dataConsumer->dataAdded(dataPlugin->getName());
+        }
+    }
 }
 
 /**
