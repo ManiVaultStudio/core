@@ -23,6 +23,8 @@ public:
     
     void init();
     
+    void updateData(const PointsPlugin& data);
+
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;

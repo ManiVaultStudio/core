@@ -28,15 +28,30 @@ void ScatterplotPlugin::init()
     addWidget(widget);
 }
 
+void ScatterplotPlugin::updateData(const PointsPlugin& points)
+{
+    std::vector<float> data;
+    std::vector<float> colors;
+    for (int i = 0; i < points.data.size() / 5; i++) {
+        data.push_back(points.data[i * 5 + 0]);
+        data.push_back(points.data[i * 5 + 1]);
+        colors.push_back(points.data[i * 5 + 2]);
+        colors.push_back(points.data[i * 5 + 3]);
+        colors.push_back(points.data[i * 5 + 4]);
+    }
+
+    widget->setData(data);
+    widget->setColors(colors);
+}
+
 void ScatterplotPlugin::dataAdded(const QString name)
 {
     DataTypePlugin* data = _core->requestData(name);
     if (data->getKind() == "Points") {
         dataOptions.addItem(name);
-        qDebug() << "Data Added for scatterplot";
         const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
-        qDebug() << "Points: " << points->data.size();
-        widget->setData(points->data);
+        qDebug() << "Data Added for scatterplot: " << points->data.size();
+        updateData(*points);
     }
 }
 
@@ -44,21 +59,9 @@ void ScatterplotPlugin::dataChanged(const QString name)
 {
     DataTypePlugin* data = _core->requestData(name);
     if (data->getKind() == "Points") {
-        qDebug() << "Data Changed for scatterplot";
         const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
-        qDebug() << "Points: " << points->data.size();
-        std::vector<float> data;
-        std::vector<float> colors;
-        for (int i = 0; i < points->data.size() / 5; i++) {
-            data.push_back(points->data[i * 5 + 0]);
-            data.push_back(points->data[i * 5 + 1]);
-            colors.push_back(points->data[i * 5 + 2]);
-            colors.push_back(points->data[i * 5 + 3]);
-            colors.push_back(points->data[i * 5 + 4]);
-        }
-
-        widget->setData(data);
-        widget->setColors(colors);
+        qDebug() << "Data Changed for scatterplot: " << points->data.size();
+        updateData(*points);
     }
 }
 
