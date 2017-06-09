@@ -100,14 +100,8 @@ plugin::DataTypePlugin* Core::requestData(const QString name)
  * on all plugins that inherit from the DataConsumer interface.
  */
 void Core::notifyDataAdded(const QString name) {
-    for (auto& kv : _plugins) {
-        for (int i = 0; i < kv.second.size(); ++i) {
-            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
-
-            if (dc) {
-                dc->dataAdded(name);
-            }
-        }
+    for (plugin::DataConsumer* dataConsumer : getDataConsumers()) {
+        dataConsumer->dataAdded(name);
     }
 }
 
@@ -116,14 +110,8 @@ void Core::notifyDataAdded(const QString name) {
 * on all plugins that inherit from the DataConsumer interface.
 */
 void Core::notifyDataChanged(const QString name) {
-    for (auto& kv : _plugins) {
-        for (int i = 0; i < kv.second.size(); ++i) {
-            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
-
-            if (dc) {
-                dc->dataChanged(name);
-            }
-        }
+    for (plugin::DataConsumer* dataConsumer : getDataConsumers()) {
+        dataConsumer->dataChanged(name);
     }
 }
 
@@ -132,19 +120,28 @@ void Core::notifyDataChanged(const QString name) {
 * on all plugins that inherit from the DataConsumer interface.
 */
 void Core::notifyDataRemoved(const QString name) {
-    for (auto& kv : _plugins) {
-        for (int i = 0; i < kv.second.size(); ++i) {
-            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
-
-            if (dc) {
-                dc->dataRemoved(name);
-            }
-        }
+    for (plugin::DataConsumer* dataConsumer : getDataConsumers()) {
+        dataConsumer->dataRemoved(name);
     }
 }
 
 gui::MainWindow& Core::gui() const {
     return _mainWindow;
+}
+
+std::vector<plugin::DataConsumer*> Core::getDataConsumers()
+{
+    std::vector<plugin::DataConsumer*> dataConsumers;
+    for (auto& kv : _plugins) {
+        for (int i = 0; i < kv.second.size(); ++i) {
+            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
+
+            if (dc) {
+                dataConsumers.push_back(dc);
+            }
+        }
+    }
+    return dataConsumers;
 }
 
 } // namespace hdps

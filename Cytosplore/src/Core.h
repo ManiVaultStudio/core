@@ -12,6 +12,7 @@ namespace hdps {
 namespace plugin {
     class PluginManager;
     class Plugin;
+    class DataConsumer;
     enum Type;
 }
 
@@ -56,6 +57,8 @@ public:
     * Returns a reference to the main window for adding widgets to it.
     */
     gui::MainWindow& gui() const;
+private:
+    std::vector<plugin::DataConsumer*> getDataConsumers();
 
 private:
     gui::MainWindow& _mainWindow;
