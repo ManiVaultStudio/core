@@ -23,6 +23,10 @@ protected:
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
     void paintGL()              Q_DECL_OVERRIDE;
 
+    void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
+    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+
 private:
     const float        DEFAULT_POINT_SIZE    = 15;
     const float        DEFAULT_ALPHA_VALUE   = 0.5f;
@@ -40,6 +44,8 @@ private:
     PointScaling _scalingMode = DEFAULT_POINT_SCALING;
     float _pointSize          = DEFAULT_POINT_SIZE;
     float _alpha              = DEFAULT_ALPHA_VALUE;
+
+    bool _selecting = false;
 };
 
 #endif // SCATTERPLOT_WIDGET_H

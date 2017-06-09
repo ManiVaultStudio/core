@@ -6,6 +6,60 @@
 
 #define GLSL(version, shader)  "#version " #version "\n" #shader
 
+const char *plotVertexSource = GLSL(330,
+    uniform float pointSize;
+
+    in vec2 vertex;
+    in vec2 position;
+    in vec3 color;
+
+    out vec2 pass_texCoords;
+    out vec3 pass_color;
+
+    void main()
+    {
+        pass_texCoords = vertex;
+        pass_color = color;
+        gl_Position = vec4(vertex * pointSize + position, 0, 1);
+    }
+);
+
+const char *plotFragmentSource = GLSL(330,
+    uniform float alpha;
+
+    in vec2 pass_texCoords;
+    in vec3 pass_color;
+
+    out vec4 fragColor;
+
+    void main()
+    {
+        float len = length(pass_texCoords);
+        // If the fragment is outside of the circle discard it
+        if (len > 1) discard;
+
+        float edge = fwidth(len);
+        float a = smoothstep(1, 1 - edge, len);
+        fragColor = vec4(pass_color, a * alpha);
+    }
+);
+
+const char *selectionVertexSource = GLSL(330,
+    in vec2 position;
+
+    void main()
+    {
+        gl_Position = vec4(position, 0, 1);
+    }
+);
+
+const char *selectionFragmentSource = GLSL(330,
+    void main()
+    {
+        fragColor = vec4(1, 0, 0, 1);
+    }
+);
+
 void ScatterplotWidget::setData(const std::vector<float>& positions)
 {
     this->positions = positions;
@@ -87,47 +141,9 @@ void ScatterplotWidget::initializeGL()
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
-    const char *vertexSource = GLSL(330,
-        uniform float pointSize;
-
-        in vec2 vertex;
-        in vec2 position;
-        in vec3 color;
-
-        out vec2 pass_texCoords;
-        out vec3 pass_color;
-
-        void main()
-        {
-            pass_texCoords = vertex;
-            pass_color = color;
-            gl_Position = vec4(vertex * pointSize + position, 0, 1);
-        }
-    );
-
-    const char *fragmentSource = GLSL(330,
-        uniform float alpha;
-
-        in vec2 pass_texCoords;
-        in vec3 pass_color;
-
-        out vec4 fragColor;
-
-        void main()
-        {
-            float len = length(pass_texCoords);
-            // If the fragment is outside of the circle discard it
-            if (len > 1) discard;
-
-            float edge = fwidth(len);
-            float a = smoothstep(1, 1 - edge, len);
-            fragColor = vec4(pass_color, a * alpha);
-        }
-    );
-
     shader = new QOpenGLShaderProgram();
-    shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
-    shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
+    shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
+    shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
     shader->link();
 }
 
@@ -153,4 +169,21 @@ void ScatterplotWidget::paintGL()
     
     shader->setUniformValue("alpha", _alpha);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size() / 2);
+}
+
+void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
+{
+    qDebug() << "Mouse clicky";
+    _selecting = true;
+}
+
+void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    qDebug() << "Mouse movey";
+}
+
+void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    qDebug() << "Mouse releasey";
+    _selecting = false;
 }
