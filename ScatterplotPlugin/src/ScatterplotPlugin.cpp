@@ -28,22 +28,6 @@ void ScatterplotPlugin::init()
     addWidget(widget);
 }
 
-void ScatterplotPlugin::updateData(const PointsPlugin& points)
-{
-    std::vector<float> data;
-    std::vector<float> colors;
-    for (int i = 0; i < points.data.size() / 5; i++) {
-        data.push_back(points.data[i * 5 + 0]);
-        data.push_back(points.data[i * 5 + 1]);
-        colors.push_back(points.data[i * 5 + 2]);
-        colors.push_back(points.data[i * 5 + 3]);
-        colors.push_back(points.data[i * 5 + 4]);
-    }
-
-    widget->setData(data);
-    widget->setColors(colors);
-}
-
 void ScatterplotPlugin::dataAdded(const QString name)
 {
     DataTypePlugin* data = _core->requestData(name);
@@ -70,6 +54,13 @@ void ScatterplotPlugin::dataRemoved(const QString name)
     
 }
 
+QStringList ScatterplotPlugin::supportedDataKinds()
+{
+    QStringList supportedKinds;
+    supportedKinds << "Points";
+    return supportedKinds;
+}
+
 void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
     DataTypePlugin* data = _core->requestData(name);
@@ -86,6 +77,22 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     }
 
     widget->setData(pos);
+    widget->setColors(colors);
+}
+
+void ScatterplotPlugin::updateData(const PointsPlugin& points)
+{
+    std::vector<float> data;
+    std::vector<float> colors;
+    for (int i = 0; i < points.data.size() / 5; i++) {
+        data.push_back(points.data[i * 5 + 0]);
+        data.push_back(points.data[i * 5 + 1]);
+        colors.push_back(points.data[i * 5 + 2]);
+        colors.push_back(points.data[i * 5 + 3]);
+        colors.push_back(points.data[i * 5 + 4]);
+    }
+
+    widget->setData(data);
     widget->setColors(colors);
 }
 

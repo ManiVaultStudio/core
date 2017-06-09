@@ -3,6 +3,8 @@
 
 #include "DataTypePlugin.h"
 
+#include <QStringList>
+
 namespace hdps
 {
 namespace plugin
@@ -12,21 +14,26 @@ class DataConsumer
 {
 public:
     /**
-    * Callback function which gets triggered when a new dataset is created.
-    * @param name - The name of the dataset which was created.
-    */
+     * Callback function which gets triggered when a new dataset is created.
+     * @param name - The name of the dataset which was created.
+     */
     virtual void dataAdded(const QString name) = 0;
 
     /**
-    * Callback function which gets triggered when a dataset is changed.
-    * @param name - The name of the dataset which was changed.
-    */
+     * Callback function which gets triggered when a dataset is changed.
+     * @param name - The name of the dataset which was changed.
+     */
     virtual void dataChanged(const QString name) = 0;
 
     /**
-    * Callback function which gets triggered when a dataset is removed.
-    */
+     * Callback function which gets triggered when a dataset is removed.
+     */
     virtual void dataRemoved(const QString name) = 0;
+
+    /**
+     * Returns a list of kinds of data that this data consumer can process.
+     */
+    virtual QStringList supportedDataKinds() = 0;
 };
 
 } // namespace plugin

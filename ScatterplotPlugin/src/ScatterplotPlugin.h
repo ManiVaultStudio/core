@@ -12,6 +12,7 @@ using namespace hdps::plugin;
 // =============================================================================
 
 class ScatterplotWidget;
+class PointsPlugin;
 
 class ScatterplotPlugin : public ViewPlugin
 {
@@ -22,15 +23,16 @@ public:
     ~ScatterplotPlugin(void);
     
     void init();
-    
-    void updateData(const PointsPlugin& data);
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
+    QStringList supportedDataKinds() Q_DECL_OVERRIDE;
 protected slots:
     void dataSetPicked(const QString& name);
 private:
+    void updateData(const PointsPlugin& data);
+
     ScatterplotWidget* widget;
 
     QComboBox dataOptions;
