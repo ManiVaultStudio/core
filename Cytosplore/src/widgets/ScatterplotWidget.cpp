@@ -229,5 +229,12 @@ void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
 
     selectionEnd.setX(event->x());
     selectionEnd.setY(event->y());
+
+    QRectF selection(selectionStart, selectionEnd);
+    onSelection(selection);
+}
+
+void ScatterplotWidget::onSelection(QRectF selection)
+{
     update();
 }
