@@ -1,6 +1,5 @@
 #include "ScatterplotPlugin.h"
 
-#include "widgets/ScatterplotWidget.h"
 #include "PointsPlugin.h"
 
 #include <QtCore>
@@ -19,10 +18,11 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
-    widget = new ScatterplotWidget();
+    widget = new hdps::gui::ScatterplotWidget();
     widget->setPointSize(10);
     widget->setAlpha(0.5f);
-
+    widget->addSelectionListener(this);
+    
     connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), SLOT(dataSetPicked(QString)));
     addWidget(&dataOptions);
     addWidget(widget);
@@ -66,27 +66,16 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     DataTypePlugin* data = _core->requestData(name);
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
 
-    std::vector<float> pos;
-    std::vector<float> colors;
-    for (int i = 0; i < points->data.size() / 5; i++) {
-        pos.push_back(points->data[i * 5 + 0]);
-        pos.push_back(points->data[i * 5 + 1]);
-        colors.push_back(points->data[i * 5 + 2]);
-        colors.push_back(points->data[i * 5 + 3]);
-        colors.push_back(points->data[i * 5 + 4]);
-    }
-
-    widget->setData(pos);
-    widget->setColors(colors);
+    updateData(*points);
 }
 
 void ScatterplotPlugin::updateData(const PointsPlugin& points)
 {
-    std::vector<float> data;
+    std::vector<float>* data = new std::vector<float>();
     std::vector<float> colors;
     for (int i = 0; i < points.data.size() / 5; i++) {
-        data.push_back(points.data[i * 5 + 0]);
-        data.push_back(points.data[i * 5 + 1]);
+        data->push_back(points.data[i * 5 + 0]);
+        data->push_back(points.data[i * 5 + 1]);
         colors.push_back(points.data[i * 5 + 2]);
         colors.push_back(points.data[i * 5 + 3]);
         colors.push_back(points.data[i * 5 + 4]);
@@ -94,6 +83,11 @@ void ScatterplotPlugin::updateData(const PointsPlugin& points)
 
     widget->setData(data);
     widget->setColors(colors);
+}
+
+void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
+{
+    _core->addData("Selection");
 }
 
 // =============================================================================

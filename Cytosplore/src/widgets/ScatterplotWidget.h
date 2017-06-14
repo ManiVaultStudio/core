@@ -1,6 +1,8 @@
 #ifndef SCATTERPLOT_WIDGET_H
 #define SCATTERPLOT_WIDGET_H
 
+#include "../SelectionListener.h"
+
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
@@ -13,6 +15,11 @@ enum PointScaling {
     Absolute, Relative
 };
 
+namespace hdps
+{
+namespace gui
+{
+
 class ScatterplotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
@@ -22,6 +29,7 @@ public:
     void setPointSize(const float size);
     void setAlpha(const float alpha);
     void setPointScaling(PointScaling scalingMode);
+    void addSelectionListener(const plugin::SelectionListener* listener);
 protected:
     void initializeGL()         Q_DECL_OVERRIDE;
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
@@ -56,6 +64,11 @@ private:
     bool _selecting = false;
     QPoint selectionStart;
     QPoint selectionEnd;
+    std::vector<const plugin::SelectionListener*> selectionListeners;
 };
+
+} // namespace gui
+
+} // namespace hdps
 
 #endif // SCATTERPLOT_WIDGET_H

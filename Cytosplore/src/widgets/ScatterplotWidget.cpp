@@ -75,6 +75,11 @@ const char *selectionFragmentSource = GLSL(330,
     }
 );
 
+namespace hdps
+{
+namespace gui
+{
+
 // Positions need to be passed as a pointer as we need to store them locally in order
 // to be able to find the subset of data that's part of a selection. If passed
 // by reference then we can upload the data to the GPU, but not store it in the widget.
@@ -114,6 +119,11 @@ void ScatterplotWidget::setAlpha(const float alpha)
 void ScatterplotWidget::setPointScaling(PointScaling scalingMode)
 {
     _scalingMode = scalingMode;
+}
+
+void ScatterplotWidget::addSelectionListener(const plugin::SelectionListener* listener)
+{
+    selectionListeners.push_back(listener);
 }
 
 void ScatterplotWidget::initializeGL()
@@ -241,4 +251,24 @@ void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
 void ScatterplotWidget::onSelection(QRectF selection)
 {
     update();
+
+    std::vector<unsigned int> indices;
+    for (int i = 0; i < numPoints; i++)
+    {
+        QPointF point((*positions)[i * 2 + 0], (*positions)[i * 2 + 1]);
+
+        if (selection.contains(point))
+        {
+            indices.push_back(i);
+        }
+    }
+
+    for (const plugin::SelectionListener* listener : selectionListeners)
+    {
+        listener->onSelection(indices);
+    }
 }
+
+} // namespace gui
+
+} // namespace hdps

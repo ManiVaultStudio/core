@@ -2,6 +2,7 @@
 #define SCATTERPLOT_PLUGIN_H
 
 #include <ViewPlugin.h>
+#include "widgets/ScatterplotWidget.h"
 
 #include <QComboBox>
 
@@ -11,10 +12,9 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class ScatterplotWidget;
 class PointsPlugin;
 
-class ScatterplotPlugin : public ViewPlugin
+class ScatterplotPlugin : public ViewPlugin, public SelectionListener
 {
     Q_OBJECT
     
@@ -28,12 +28,13 @@ public:
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
+    virtual void onSelection(const std::vector<unsigned int> selection) const;
 protected slots:
     void dataSetPicked(const QString& name);
 private:
     void updateData(const PointsPlugin& data);
 
-    ScatterplotWidget* widget;
+    hdps::gui::ScatterplotWidget* widget;
 
     QComboBox dataOptions;
 };

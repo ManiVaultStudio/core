@@ -69,6 +69,7 @@ set( PLUGIN_HEADERS
     src/Plugin.h
     src/PluginType.h
     src/DataConsumer.h
+    src/SelectionListener.h
 )
 
 list(APPEND PRIVATE_HEADERS
