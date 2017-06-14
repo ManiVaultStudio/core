@@ -5,6 +5,9 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 
+#include <QMouseEvent>
+#include <QPoint>
+
 enum PointScaling {
     Absolute, Relative
 };
@@ -45,7 +48,10 @@ private:
     float _pointSize          = DEFAULT_POINT_SIZE;
     float _alpha              = DEFAULT_ALPHA_VALUE;
 
+    QOpenGLShaderProgram* selectionShader;
     bool _selecting = false;
+    QPoint selectionStart;
+    QPoint selectionEnd;
 };
 
 #endif // SCATTERPLOT_WIDGET_H

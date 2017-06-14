@@ -45,18 +45,33 @@ const char *plotFragmentSource = GLSL(330,
 );
 
 const char *selectionVertexSource = GLSL(330,
-    in vec2 position;
+    vec2 vertices[4] = vec2[](
+    vec2(-1, -1),
+    vec2(1, -1),
+    vec2(-1, 1),
+    vec2(1, 1)
+    );
+
+    uniform vec2 start;
+    uniform vec2 end;
 
     void main()
     {
-        gl_Position = vec4(position, 0, 1);
+        vec2 vertex;// = vertices[gl_VertexID];
+        if (gl_VertexID == 0) { vertex = vec2(start.x, start.y); }
+        if (gl_VertexID == 1) { vertex = vec2(end.x, start.y); }
+        if (gl_VertexID == 2) { vertex = vec2(start.x, end.y); }
+        if (gl_VertexID == 3) { vertex = vec2(end.x, end.y); }
+        gl_Position = vec4(vertex, 0, 1);
     }
 );
 
 const char *selectionFragmentSource = GLSL(330,
+    out vec4 fragColor;
+
     void main()
     {
-        fragColor = vec4(1, 0, 0, 1);
+        fragColor = vec4(1, 0, 0, 0.1f);
     }
 );
 
@@ -145,6 +160,11 @@ void ScatterplotWidget::initializeGL()
     shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
     shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
     shader->link();
+
+    selectionShader = new QOpenGLShaderProgram();
+    selectionShader->addShaderFromSourceCode(QOpenGLShader::Vertex, selectionVertexSource);
+    selectionShader->addShaderFromSourceCode(QOpenGLShader::Fragment, selectionFragmentSource);
+    shader->link();
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)
@@ -169,21 +189,45 @@ void ScatterplotWidget::paintGL()
     
     shader->setUniformValue("alpha", _alpha);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, positions.size() / 2);
+
+    // Selection
+    selectionShader->bind();
+    QPointF s = QPointF((float) selectionStart.x() / _windowSize.width(), (float) selectionStart.y() / _windowSize.height());
+    QPointF e = QPointF((float) selectionEnd.x() / _windowSize.width(), (float) selectionEnd.y() / _windowSize.height());
+    s.setY(1 - s.y());
+    e.setY(1 - e.y());
+
+    qDebug() << s << e;
+    selectionShader->setUniformValue("start", s * 2 - QPointF(1, 1));
+    selectionShader->setUniformValue("end", e * 2 - QPointF(1, 1));
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
 {
     qDebug() << "Mouse clicky";
     _selecting = true;
+
+    selectionStart.setX(event->x());
+    selectionStart.setY(event->y());
 }
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    qDebug() << "Mouse movey";
+    //qDebug() << "Mouse movey";
+    if (_selecting) {
+        selectionEnd.setX(event->x());
+        selectionEnd.setY(event->y());
+        update();
+    }
 }
 
 void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     qDebug() << "Mouse releasey";
     _selecting = false;
+
+    selectionEnd.setX(event->x());
+    selectionEnd.setY(event->y());
+    update();
 }
