@@ -87,7 +87,7 @@ void ScatterplotPlugin::updateData(const PointsPlugin& points)
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
 {
-    _core->addData("Selection");
+    //_core->addData("Selection");
 }
 
 // =============================================================================

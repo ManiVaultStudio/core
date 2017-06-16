@@ -9,6 +9,9 @@
 const char *plotVertexSource = GLSL(330,
     uniform float pointSize;
 
+    uniform vec2 start;
+    uniform vec2 end;
+
     in vec2 vertex;
     in vec2 position;
     in vec3 color;
@@ -18,8 +21,14 @@ const char *plotVertexSource = GLSL(330,
 
     void main()
     {
+        if (position.x > start.x && position.x < end.x && position.y > start.y && position.y < end.y) {
+            pass_color = vec3(1, 0.5, 0);
+        }
+        else {
+            pass_color = color;
+        }
         pass_texCoords = vertex;
-        pass_color = color;
+        //pass_color = color;
         gl_Position = vec4(vertex * pointSize + position, 0, 1);
     }
 );
@@ -71,7 +80,7 @@ const char *selectionFragmentSource = GLSL(330,
 
     void main()
     {
-        fragColor = vec4(1, 0, 0, 0.1f);
+        fragColor = vec4(0.5, 0.5, 0.5, 0.1f);
     }
 );
 
@@ -191,6 +200,12 @@ void ScatterplotWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     qDebug() << "Rendering scatterplot";
+    QPointF s = QPointF((float)selectionStart.x() / _windowSize.width(), (float)selectionStart.y() / _windowSize.height());
+    QPointF e = QPointF((float)selectionEnd.x() / _windowSize.width(), (float)selectionEnd.y() / _windowSize.height());
+    s.setY(1 - s.y());
+    e.setY(1 - e.y());
+    QPointF ns(s.x() < e.x() ? s.x() : e.x(), s.y() < e.y() ? s.y() : e.y());
+    QPointF ne(s.x() < e.x() ? e.x() : s.x(), s.y() < e.y() ? e.y() : s.y());
 
     shader->bind();
     if (_scalingMode == Relative)
@@ -202,18 +217,16 @@ void ScatterplotWidget::paintGL()
     }
     
     shader->setUniformValue("alpha", _alpha);
+    shader->setUniformValue("start", ns * 2 - QPointF(1, 1));
+    shader->setUniformValue("end", ne * 2 - QPointF(1, 1));
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, numPoints);
 
     // Selection
     selectionShader->bind();
-    QPointF s = QPointF((float) selectionStart.x() / _windowSize.width(), (float) selectionStart.y() / _windowSize.height());
-    QPointF e = QPointF((float) selectionEnd.x() / _windowSize.width(), (float) selectionEnd.y() / _windowSize.height());
-    s.setY(1 - s.y());
-    e.setY(1 - e.y());
 
     qDebug() << s << e;
-    selectionShader->setUniformValue("start", s * 2 - QPointF(1, 1));
-    selectionShader->setUniformValue("end", e * 2 - QPointF(1, 1));
+    selectionShader->setUniformValue("start", ns * 2 - QPointF(1, 1));
+    selectionShader->setUniformValue("end", ne * 2 - QPointF(1, 1));
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
