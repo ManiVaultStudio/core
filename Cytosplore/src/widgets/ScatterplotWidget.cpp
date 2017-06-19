@@ -200,12 +200,10 @@ void ScatterplotWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     qDebug() << "Rendering scatterplot";
-    QPointF s = QPointF((float)selectionStart.x() / _windowSize.width(), (float)selectionStart.y() / _windowSize.height());
-    QPointF e = QPointF((float)selectionEnd.x() / _windowSize.width(), (float)selectionEnd.y() / _windowSize.height());
-    s.setY(1 - s.y());
-    e.setY(1 - e.y());
-    QPointF ns(s.x() < e.x() ? s.x() : e.x(), s.y() < e.y() ? s.y() : e.y());
-    QPointF ne(s.x() < e.x() ? e.x() : s.x(), s.y() < e.y() ? e.y() : s.y());
+    QPointF ns(selectionStart.x() < selectionEnd.x() ? selectionStart.x() : selectionEnd.x(), selectionStart.y() < selectionEnd.y() ? selectionStart.y() : selectionEnd.y());
+    QPointF ne(selectionStart.x() < selectionEnd.x() ? selectionEnd.x() : selectionStart.x(), selectionStart.y() < selectionEnd.y() ? selectionEnd.y() : selectionStart.y());
+
+    QRectF selection(ns, ne);
 
     shader->bind();
     if (_scalingMode == Relative)
@@ -217,16 +215,16 @@ void ScatterplotWidget::paintGL()
     }
     
     shader->setUniformValue("alpha", _alpha);
-    shader->setUniformValue("start", ns * 2 - QPointF(1, 1));
-    shader->setUniformValue("end", ne * 2 - QPointF(1, 1));
+    shader->setUniformValue("start", selection.topLeft());
+    shader->setUniformValue("end", selection.bottomRight());
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, numPoints);
 
     // Selection
     selectionShader->bind();
 
-    qDebug() << s << e;
-    selectionShader->setUniformValue("start", ns * 2 - QPointF(1, 1));
-    selectionShader->setUniformValue("end", ne * 2 - QPointF(1, 1));
+    //qDebug() << ns << ne;
+    selectionShader->setUniformValue("start", selection.topLeft());
+    selectionShader->setUniformValue("end", selection.bottomRight());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
@@ -235,16 +233,16 @@ void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
     qDebug() << "Mouse clicky";
     _selecting = true;
 
-    selectionStart.setX(event->x());
-    selectionStart.setY(event->y());
+    selectionStart = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+    selectionStart = selectionStart * 2 - QPointF(1, 1);
 }
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
     //qDebug() << "Mouse movey";
     if (_selecting) {
-        selectionEnd.setX(event->x());
-        selectionEnd.setY(event->y());
+        selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+        selectionEnd = selectionEnd * 2 - QPointF(1, 1);
         update();
     }
 }
@@ -254,8 +252,8 @@ void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
     qDebug() << "Mouse releasey";
     _selecting = false;
 
-    selectionEnd.setX(event->x());
-    selectionEnd.setY(event->y());
+    selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+    selectionEnd = selectionEnd * 2 - QPointF(1, 1);
 
     QRectF selection(selectionStart, selectionEnd);
     onSelection(selection);
