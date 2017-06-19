@@ -62,8 +62,8 @@ private:
 
     QOpenGLShaderProgram* selectionShader;
     bool _selecting = false;
-    QPoint selectionStart;
-    QPoint selectionEnd;
+    QPointF selectionStart;
+    QPointF selectionEnd;
     std::vector<const plugin::SelectionListener*> selectionListeners;
 };
 
