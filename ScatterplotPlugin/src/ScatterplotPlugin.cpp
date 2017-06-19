@@ -65,7 +65,7 @@ void ScatterplotPlugin::updateData(const QString name)
 {
     DataTypePlugin* data = _core->requestData(name);
     if (data->getKind() != "Points") {
-        qWarning((QString("Scatterplot plugin doesn't support data of kind: ") + data->getKind()).toStdString.c_str());
+        qWarning((QString("Scatterplot plugin doesn't support data of kind: ") + data->getKind()).toStdString().c_str());
         return;
     }
 
