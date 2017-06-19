@@ -32,7 +32,7 @@ public:
 protected slots:
     void dataSetPicked(const QString& name);
 private:
-    void updateData(const PointsPlugin& data);
+    void updateData(const QString name);
 
     hdps::gui::ScatterplotWidget* widget;
 
