@@ -25,8 +25,10 @@ void ScatterplotPlugin::init()
     widget->addSelectionListener(this);
     
     connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), SLOT(dataSetPicked(QString)));
+    connect(&pointSizeSlider, SIGNAL(valueChanged(int)), SLOT(pointSizeChanged(int)));
     addWidget(&dataOptions);
     addWidget(widget);
+    addWidget(&pointSizeSlider);
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -61,6 +63,12 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
     updateData(name);
 }
+
+void ScatterplotPlugin::pointSizeChanged(const int size)
+{
+    widget->setPointSize(size);
+}
+
 
 void ScatterplotPlugin::updateData(const QString name)
 {
@@ -109,25 +117,6 @@ void ScatterplotPlugin::updateData(const QString name)
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
 {
-    //QString name = _core->addData("Points");
-
-    //DataTypePlugin* currentData = _core->requestData(dataOptions.currentText());
-    //const PointsPlugin* currentPoints = dynamic_cast<const PointsPlugin*>(currentData);
-
-    //DataTypePlugin* selectionData = _core->requestData(name);
-    //PointsPlugin* selectionPoints = dynamic_cast<PointsPlugin*>(selectionData);
-
-    //for (unsigned int index : selection) {
-    //    selectionPoints->data.push_back(currentPoints->data[index * 5 + 0]);
-    //    selectionPoints->data.push_back(currentPoints->data[index * 5 + 1]);
-    //    selectionPoints->data.push_back(currentPoints->data[index * 5 + 2]);
-    //    selectionPoints->data.push_back(currentPoints->data[index * 5 + 3]);
-    //    selectionPoints->data.push_back(currentPoints->data[index * 5 + 4]);
-    //}
-
-    //_core->notifyDataChanged(name);
-
-
     QString name = _core->addData("Selection");
 
     DataTypePlugin* selectionData = _core->requestData(name);

@@ -116,6 +116,7 @@ void ScatterplotWidget::setColors(const std::vector<float>& colors) {
 void ScatterplotWidget::setPointSize(const float size)
 {
     _pointSize = size;
+    update();
 }
 
 void ScatterplotWidget::setAlpha(const float alpha)

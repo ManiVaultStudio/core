@@ -5,6 +5,7 @@
 #include "widgets/ScatterplotWidget.h"
 
 #include <QComboBox>
+#include <QSlider>
 
 using namespace hdps::plugin;
 
@@ -19,7 +20,7 @@ class ScatterplotPlugin : public ViewPlugin, public SelectionListener
     Q_OBJECT
     
 public:
-    ScatterplotPlugin() : ViewPlugin("Scatterplot View") { }
+    ScatterplotPlugin() : ViewPlugin("Scatterplot View"), pointSizeSlider(Qt::Horizontal) { }
     ~ScatterplotPlugin(void);
     
     void init();
@@ -31,12 +32,14 @@ public:
     virtual void onSelection(const std::vector<unsigned int> selection) const;
 protected slots:
     void dataSetPicked(const QString& name);
+    void pointSizeChanged(const int size);
 private:
     void updateData(const QString name);
 
     hdps::gui::ScatterplotWidget* widget;
 
     QComboBox dataOptions;
+    QSlider pointSizeSlider;
 };
 
 
