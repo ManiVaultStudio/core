@@ -9,6 +9,8 @@
 
 namespace hdps {
 
+class DataManager;
+
 namespace plugin {
     class PluginManager;
     class Plugin;
@@ -65,6 +67,9 @@ private:
 
     /** Plugin manager responsible for loading plugins and adding them to the core. */
     std::unique_ptr<plugin::PluginManager> _pluginManager;
+
+    /** Data manager responsible for storing data sets and data selections */
+    std::unique_ptr<DataManager> _dataManager;
 
     /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>> _plugins;

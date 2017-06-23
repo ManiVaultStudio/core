@@ -2,6 +2,7 @@
 
 #include "MainWindow.h"
 #include "PluginManager.h"
+#include "DataManager.h"
 
 #include "LoaderPlugin.h"
 #include "WriterPlugin.h"
@@ -30,7 +31,8 @@ Core::~Core() {
 }
 
 void Core::init() {
-    _pluginManager = std::unique_ptr<plugin::PluginManager>(new plugin::PluginManager(*this));
+    _pluginManager = std::make_unique<plugin::PluginManager>(*this);
+    _dataManager = std::make_unique<DataManager>();
 
     _pluginManager->LoadPlugins();
 }

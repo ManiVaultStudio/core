@@ -36,12 +36,14 @@ set( CORE_HEADERS
     src/MainWindow.h
     src/PluginManager.h
     src/Core.h
+    src/DataManager.h
 )
 
 set( CORE_SOURCES
     src/MainWindow.cpp
     src/PluginManager.cpp
     src/Core.cpp
+    src/DataManager.cpp
 )
 
 
@@ -70,6 +72,7 @@ set( PLUGIN_HEADERS
     src/PluginType.h
     src/DataConsumer.h
     src/SelectionListener.h
+    src/Set.h
 )
 
 list(APPEND PRIVATE_HEADERS
