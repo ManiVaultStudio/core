@@ -8,14 +8,14 @@ namespace hdps {
 
 class Set {
 public:
-    Set() {};
+    Set() : all(false) {};
 
-    QString getDataName();
+    QString getDataName() { return dataName; }
 
-
+    void setAll() { this->all = true; }
 private:
     QString dataName;
-    QVector<unsigned int> indices;
+    bool all;
 };
 
 } // namespace hdps

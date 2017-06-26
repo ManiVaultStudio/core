@@ -53,6 +53,12 @@ void Core::addPlugin(plugin::Plugin* plugin) {
 
     // Notify data consumers about the new data set
     if (plugin->getType() == plugin::Type::DATA_TYPE) {
+        plugin::DataTypePlugin* dataType = dynamic_cast<plugin::DataTypePlugin*>(plugin);
+        Set* fullSet = dataType->createSet();
+        fullSet->setAll();
+        Set* selection = dataType->createSet();
+        _dataManager->addSet(fullSet);
+        _dataManager->addSelection(plugin->getName(), selection);
         notifyDataAdded(plugin->getName());
     }
 

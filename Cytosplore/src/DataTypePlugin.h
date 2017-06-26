@@ -2,6 +2,7 @@
 #define HDPS_PLUGIN_DATA_TYPE_PLUGIN
 
 #include "PluginFactory.h"
+#include "Set.h"
 
 namespace hdps {
 
@@ -12,6 +13,8 @@ class DataTypePlugin : public Plugin
 public:
     DataTypePlugin(QString name) : Plugin(Type::DATA_TYPE, name) { }
     virtual ~DataTypePlugin() {};
+
+    virtual Set* createSet() = 0;
 };
 
 
