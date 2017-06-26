@@ -3,6 +3,7 @@
 
 #include <DataTypePlugin.h>
 
+#include "Set.h"
 #include <vector>
 
 using namespace hdps::plugin;
@@ -19,9 +20,16 @@ public:
     
     void init();
 
+    hdps::Set* createSet();
+
     std::vector<float> data;
 };
 
+class PointsSet : public hdps::Set
+{
+private:
+    std::vector<unsigned int> indices;
+};
 
 // =============================================================================
 // Factory
