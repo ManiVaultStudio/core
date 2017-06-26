@@ -15,8 +15,8 @@ public:
     void addSelection(QString dataName, Set* selection);
 
 private:
-    QVector<Set> dataSets;
-    QMap<QString, Set> selections;
+    QVector<Set*> dataSets;
+    QMap<QString, Set*> selections;
 };
 
 } // namespace hdps
