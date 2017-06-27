@@ -13,6 +13,7 @@ class DataManager {
 public:
     void addSet(Set* set);
     void addSelection(QString dataName, Set* selection);
+    Set* getSet(QString name);
 
 private:
     QVector<Set*> dataSets;
