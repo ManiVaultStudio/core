@@ -114,17 +114,14 @@ void ScatterplotPlugin::updateData(const QString name)
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
 {
-    //QString name = _core->addData("Selection");
+    PointsSet* selectionSet = dynamic_cast<PointsSet*>(_core->requestSelection(dataOptions.currentText()));
 
-    //DataTypePlugin* selectionData = _core->requestData(name);
-    //SelectionPlugin* selectionPlugin = dynamic_cast<SelectionPlugin*>(selectionData);
+    selectionSet->indices.clear();
+    for (unsigned int index : selection) {
+        selectionSet->indices.push_back(index);
+    }
 
-    //selectionPlugin->parentName = dataOptions.currentText();
-    //for (unsigned int index : selection) {
-    //    selectionPlugin->indices.push_back(index);
-    //}
-
-    //_core->notifyDataChanged(name);
+    _core->notifyDataChanged(dataOptions.currentText());
 }
 
 // =============================================================================
