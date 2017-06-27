@@ -26,6 +26,11 @@ public:
     virtual plugin::DataTypePlugin* requestPlugin(const QString name) = 0;
 
     /**
+    * Request a selection from the data manager by its name.
+    */
+    virtual Set* requestSelection(const QString name) = 0;
+
+    /**
     * Request a dataset from the core by its name.
     */
     virtual Set* requestData(const QString name) = 0;

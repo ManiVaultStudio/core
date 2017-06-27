@@ -109,6 +109,11 @@ Set* Core::requestData(const QString name)
     return set;
 }
 
+Set* Core::requestSelection(const QString name)
+{
+    return _dataManager->getSelection(name);
+}
+
 /**
  * Goes through all plugins stored in the core and calls the 'dataAdded' function
  * on all plugins that inherit from the DataConsumer interface.

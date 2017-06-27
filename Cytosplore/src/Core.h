@@ -49,9 +49,14 @@ public:
     plugin::DataTypePlugin* requestPlugin(const QString name) override;
 
     /**
-    * Request a dataset from the core by its name.
+    * Request a dataset from the data manager by its name.
     */
     Set* requestData(const QString name) override;
+
+    /**
+    * Request a selection from the data manager by its name.
+    */
+    Set* requestSelection(const QString name) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString name);

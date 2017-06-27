@@ -14,6 +14,7 @@ public:
     void addSet(Set* set);
     void addSelection(QString dataName, Set* selection);
     Set* getSet(QString name);
+    Set* getSelection(QString name);
 
 private:
     QVector<Set*> dataSets;
