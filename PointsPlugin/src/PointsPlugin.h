@@ -27,7 +27,9 @@ public:
 
 class PointsSet : public hdps::Set
 {
-private:
+public:
+    ~PointsSet() { }
+
     std::vector<unsigned int> indices;
 };
 

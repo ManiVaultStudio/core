@@ -33,8 +33,8 @@ void ScatterplotPlugin::init()
 
 void ScatterplotPlugin::dataAdded(const QString name)
 {
-    DataTypePlugin* data = _core->requestData(name);
-    if (data->getKind() == "Points" || data->getKind() == "Selection") {
+    DataTypePlugin* data = _core->requestPlugin(name);
+    if (data->getKind() == "Points") {
         dataOptions.addItem(name);
     }
 }
@@ -72,7 +72,8 @@ void ScatterplotPlugin::pointSizeChanged(const int size)
 
 void ScatterplotPlugin::updateData(const QString name)
 {
-    DataTypePlugin* data = _core->requestData(name);
+    const PointsSet* set = dynamic_cast<const PointsSet*>(_core->requestData(name));
+    DataTypePlugin* data = _core->requestPlugin(set->getDataName());
     
     std::vector<float>* positions = new std::vector<float>();
     std::vector<float> colors;
@@ -81,28 +82,24 @@ void ScatterplotPlugin::updateData(const QString name)
     {
         const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
 
-        for (int i = 0; i < points->data.size() / 5; i++)
-        {
-            positions->push_back(points->data[i * 5 + 0]);
-            positions->push_back(points->data[i * 5 + 1]);
-            colors.push_back(points->data[i * 5 + 2]);
-            colors.push_back(points->data[i * 5 + 3]);
-            colors.push_back(points->data[i * 5 + 4]);
+        if (set->isFull()) {
+            for (int i = 0; i < points->data.size() / 5; i++)
+            {
+                positions->push_back(points->data[i * 5 + 0]);
+                positions->push_back(points->data[i * 5 + 1]);
+                colors.push_back(points->data[i * 5 + 2]);
+                colors.push_back(points->data[i * 5 + 3]);
+                colors.push_back(points->data[i * 5 + 4]);
+            }
         }
-    }
-    else if (data->getKind() == "Selection")
-    {
-        const SelectionPlugin* selection = dynamic_cast<const SelectionPlugin*>(data);
-
-        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestData(selection->parentName));
-
-        for (unsigned int index : selection->indices)
-        {
-            positions->push_back(points->data[index * 5 + 0]);
-            positions->push_back(points->data[index * 5 + 1]);
-            colors.push_back(points->data[index * 5 + 2]);
-            colors.push_back(points->data[index * 5 + 3]);
-            colors.push_back(points->data[index * 5 + 4]);
+        else {
+            for (unsigned int index : set->indices) {
+                positions->push_back(points->data[index * 5 + 0]);
+                positions->push_back(points->data[index * 5 + 1]);
+                colors.push_back(points->data[index * 5 + 2]);
+                colors.push_back(points->data[index * 5 + 3]);
+                colors.push_back(points->data[index * 5 + 4]);
+            }
         }
     }
     else
@@ -117,17 +114,17 @@ void ScatterplotPlugin::updateData(const QString name)
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
 {
-    QString name = _core->addData("Selection");
+    //QString name = _core->addData("Selection");
 
-    DataTypePlugin* selectionData = _core->requestData(name);
-    SelectionPlugin* selectionPlugin = dynamic_cast<SelectionPlugin*>(selectionData);
+    //DataTypePlugin* selectionData = _core->requestData(name);
+    //SelectionPlugin* selectionPlugin = dynamic_cast<SelectionPlugin*>(selectionData);
 
-    selectionPlugin->parentName = dataOptions.currentText();
-    for (unsigned int index : selection) {
-        selectionPlugin->indices.push_back(index);
-    }
+    //selectionPlugin->parentName = dataOptions.currentText();
+    //for (unsigned int index : selection) {
+    //    selectionPlugin->indices.push_back(index);
+    //}
 
-    _core->notifyDataChanged(name);
+    //_core->notifyDataChanged(name);
 }
 
 // =============================================================================
