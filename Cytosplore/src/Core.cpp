@@ -56,7 +56,9 @@ void Core::addPlugin(plugin::Plugin* plugin) {
         plugin::DataTypePlugin* dataType = dynamic_cast<plugin::DataTypePlugin*>(plugin);
         Set* fullSet = dataType->createSet();
         fullSet->setAll();
+        fullSet->setDataName(dataType->getName());
         Set* selection = dataType->createSet();
+        selection->setDataName(dataType->getName());
         _dataManager->addSet(fullSet);
         _dataManager->addSelection(plugin->getName(), selection);
         notifyDataAdded(plugin->getName());

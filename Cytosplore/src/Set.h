@@ -14,6 +14,7 @@ public:
     QString getDataName() const { return dataName; }
     bool isFull() const { return all; }
 
+    void setDataName(QString name) { dataName = name; }
     void setAll() { this->all = true; }
 private:
     QString dataName;
