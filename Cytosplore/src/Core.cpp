@@ -93,7 +93,7 @@ const QString Core::addData(const QString kind) {
  * unique name as the given parameter. If no such instance can be found a fatal
  * error is thrown.
  */
-plugin::DataTypePlugin* Core::requestData(const QString name)
+plugin::DataTypePlugin* Core::requestPlugin(const QString name)
 {
     for (std::unique_ptr<plugin::Plugin>& plugin : _plugins[plugin::Type::DATA_TYPE]) {
         if (plugin->getName() == name) {
@@ -101,6 +101,12 @@ plugin::DataTypePlugin* Core::requestData(const QString name)
         }
     }
     qFatal((QString("Failed to find plugin with name: ") + name).toStdString().c_str());
+}
+
+Set* Core::requestData(const QString name)
+{
+    Set* set = _dataManager->getSet(name);
+    return set;
 }
 
 /**

@@ -44,9 +44,14 @@ public:
     const QString addData(const QString kind) override;
 
     /**
-     * Request a dataset from the core by its name.
+     * Request a plugin from the core by its name.
      */
-    plugin::DataTypePlugin* requestData(const QString name) override;
+    plugin::DataTypePlugin* requestPlugin(const QString name) override;
+
+    /**
+    * Request a dataset from the core by its name.
+    */
+    Set* requestData(const QString name) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString name);
