@@ -8,9 +8,11 @@ namespace hdps {
 
 class Set {
 public:
-    Set() : all(false) {};
+    Set() : all(false) {}
+    virtual ~Set() {}
 
-    QString getDataName() { return dataName; }
+    QString getDataName() const { return dataName; }
+    bool isFull() const { return all; }
 
     void setAll() { this->all = true; }
 private:
