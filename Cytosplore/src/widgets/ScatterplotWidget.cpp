@@ -9,6 +9,7 @@
 const char *plotVertexSource = GLSL(330,
     uniform float pointSize;
 
+    uniform bool selecting;
     uniform vec2 start;
     uniform vec2 end;
 
@@ -21,14 +22,15 @@ const char *plotVertexSource = GLSL(330,
 
     void main()
     {
-        if (position.x > start.x && position.x < end.x && position.y > start.y && position.y < end.y) {
-            pass_color = vec3(1, 0.5, 0);
+        pass_color = color;
+
+        if (selecting) {
+            if (position.x > start.x && position.x < end.x && position.y > start.y && position.y < end.y) {
+                pass_color = vec3(1, 0.5, 0);
+            }
         }
-        else {
-            pass_color = color;
-        }
+
         pass_texCoords = vertex;
-        //pass_color = color;
         gl_Position = vec4(vertex * pointSize + position, 0, 1);
     }
 );
@@ -214,6 +216,7 @@ void ScatterplotWidget::paintGL()
     }
     
     shader->setUniformValue("alpha", _alpha);
+    shader->setUniformValue("selecting", _selecting);
     shader->setUniformValue("start", selection.topLeft());
     shader->setUniformValue("end", selection.bottomRight());
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, numPoints);
