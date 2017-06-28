@@ -52,7 +52,7 @@ void CsvReaderPlugin::loadData()
     }
 
     QString name = _core->addData("Points");
-    DataTypePlugin* dataSet = _core->requestData(name);
+    DataTypePlugin* dataSet = _core->requestPlugin(name);
     PointsPlugin* points = dynamic_cast<PointsPlugin*>(dataSet);
     points->data.resize(data.size());
     for (int i = 0; i < points->data.size(); i++) {
