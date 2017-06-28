@@ -218,13 +218,16 @@ void ScatterplotWidget::paintGL()
     shader->setUniformValue("end", selection.bottomRight());
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, numPoints);
 
-    // Selection
-    selectionShader->bind();
+    if (_selecting)
+    {
+        // Selection
+        selectionShader->bind();
 
-    //qDebug() << ns << ne;
-    selectionShader->setUniformValue("start", selection.topLeft());
-    selectionShader->setUniformValue("end", selection.bottomRight());
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        //qDebug() << ns << ne;
+        selectionShader->setUniformValue("start", selection.topLeft());
+        selectionShader->setUniformValue("end", selection.bottomRight());
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
 }
 
 void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
