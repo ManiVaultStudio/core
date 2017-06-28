@@ -74,6 +74,7 @@ void ScatterplotPlugin::updateData(const QString name)
 {
     const PointsSet* set = dynamic_cast<const PointsSet*>(_core->requestData(name));
     DataTypePlugin* data = _core->requestPlugin(set->getDataName());
+    const PointsSet* selection = dynamic_cast<const PointsSet*>(_core->requestSelection(name));
     
     std::vector<float>* positions = new std::vector<float>();
     std::vector<float> colors;
@@ -90,6 +91,12 @@ void ScatterplotPlugin::updateData(const QString name)
                 colors.push_back(points->data[i * 5 + 2]);
                 colors.push_back(points->data[i * 5 + 3]);
                 colors.push_back(points->data[i * 5 + 4]);
+            }
+            for (unsigned int index : selection->indices)
+            {
+                colors[index * 3 + 0] = 1.0f;
+                colors[index * 3 + 1] = 0.5f;
+                colors[index * 3 + 2] = 1.0f;
             }
         }
         else {
