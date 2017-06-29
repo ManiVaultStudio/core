@@ -60,8 +60,8 @@ void Core::addPlugin(plugin::Plugin* plugin) {
         Set* selection = dataType->createSet();
         selection->setDataName(dataType->getName());
         _dataManager->addSet(fullSet);
-        _dataManager->addSelection(plugin->getName(), selection);
-        notifyDataAdded(plugin->getName());
+        _dataManager->addSelection(fullSet->getName(), selection);
+        notifyDataAdded(fullSet->getName());
     }
 
     // If it is a loader plugin it should call loadData
@@ -75,8 +75,8 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     // If the plugin is a data consumer, notify it about all the data present in the core
     plugin::DataConsumer* dataConsumer = dynamic_cast<plugin::DataConsumer*>(plugin);
     if (dataConsumer) {
-        for (std::unique_ptr<plugin::Plugin>& dataPlugin : _plugins[plugin::Type::DATA_TYPE]) {
-            dataConsumer->dataAdded(dataPlugin->getName());
+        for (const Set* set : _dataManager->allSets()) {
+            dataConsumer->dataAdded(set->getName());
         }
     }
 }
