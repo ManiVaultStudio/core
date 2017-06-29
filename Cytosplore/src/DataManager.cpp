@@ -27,4 +27,8 @@ Set* DataManager::getSelection(QString name)
     return selections[name];
 }
 
+const QVector<Set*>& DataManager::allSets() {
+    return dataSets;
+}
+
 } // namespace hdps
