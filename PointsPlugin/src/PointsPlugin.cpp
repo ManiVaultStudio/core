@@ -21,7 +21,7 @@ void PointsPlugin::init()
 
 hdps::Set* PointsPlugin::createSet()
 {
-    return new PointsSet();
+    return new PointsSet(name);
 }
 
 // =============================================================================

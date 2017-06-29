@@ -8,7 +8,7 @@ namespace hdps {
 
 class Set {
 public:
-    Set() : all(false) {}
+    Set(const QString name) : name(name), all(false) {}
     virtual ~Set() {}
 
     QString getName() const { return name; }

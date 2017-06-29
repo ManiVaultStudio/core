@@ -4,6 +4,7 @@
 #include <DataTypePlugin.h>
 
 #include "Set.h"
+#include <QString>
 #include <vector>
 
 using namespace hdps::plugin;
@@ -28,6 +29,7 @@ public:
 class PointsSet : public hdps::Set
 {
 public:
+    PointsSet(QString name) : Set(name) { }
     ~PointsSet() { }
 
     std::vector<unsigned int> indices;
