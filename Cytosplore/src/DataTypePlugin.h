@@ -14,7 +14,7 @@ public:
     DataTypePlugin(QString name) : Plugin(Type::DATA_TYPE, name) { }
     virtual ~DataTypePlugin() {};
 
-    virtual Set* createSet() = 0;
+    virtual Set* createSet() const = 0;
 };
 
 
