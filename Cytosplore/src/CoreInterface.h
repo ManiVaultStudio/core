@@ -18,7 +18,7 @@ public:
     /**
     * Create a new dataset instance of the given kind.
     */
-    virtual const QString addData(const QString kind) = 0;
+    virtual const QString addData(const QString kind, const QString name) = 0;
 
     /**
     * Request a plugin from the core by its name.

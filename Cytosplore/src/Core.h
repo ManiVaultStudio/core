@@ -41,7 +41,7 @@ public:
     /**
     * Create a new dataset instance of the given kind.
     */
-    const QString addData(const QString kind) override;
+    const QString addData(const QString kind, const QString name) override;
 
     /**
      * Request a plugin from the core by its name.
