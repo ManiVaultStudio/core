@@ -21,7 +21,7 @@ public:
     
     void init();
 
-    hdps::Set* createSet();
+    hdps::Set* createSet() const;
 
     std::vector<float> data;
 };
@@ -29,7 +29,7 @@ public:
 class PointsSet : public hdps::Set
 {
 public:
-    PointsSet(QString name) : Set(name) { }
+    PointsSet() { }
     ~PointsSet() { }
 
     std::vector<unsigned int> indices;

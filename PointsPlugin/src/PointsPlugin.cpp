@@ -19,9 +19,9 @@ void PointsPlugin::init()
 
 }
 
-hdps::Set* PointsPlugin::createSet()
+hdps::Set* PointsPlugin::createSet() const
 {
-    return new PointsSet(name);
+    return new PointsSet();
 }
 
 // =============================================================================
