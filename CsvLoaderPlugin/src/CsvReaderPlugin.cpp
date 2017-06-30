@@ -1,6 +1,7 @@
 #include "CsvReaderPlugin.h"
 
 #include "PointsPlugin.h"
+#include "Set.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -51,15 +52,16 @@ void CsvReaderPlugin::loadData()
         }
     }
 
-    QString name = _core->addData("Points");
-    DataTypePlugin* dataSet = _core->requestPlugin(name);
-    PointsPlugin* points = dynamic_cast<PointsPlugin*>(dataSet);
+    QString name = _core->addData("Points", "PointSet");
+    const hdps::Set* set = _core->requestData(name);
+    DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
+    PointsPlugin* points = dynamic_cast<PointsPlugin*>(dataPlugin);
     points->data.resize(data.size());
     for (int i = 0; i < points->data.size(); i++) {
         points->data[i] = data[i];
     }
 
-    _core->notifyDataChanged(name);
+    _core->notifyDataAdded(name);
 
     qDebug() << "CSV file loaded. Num data points: " << points->data.size();
 }
