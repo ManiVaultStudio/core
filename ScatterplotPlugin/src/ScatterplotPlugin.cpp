@@ -32,8 +32,10 @@ void ScatterplotPlugin::init()
 
 void ScatterplotPlugin::dataAdded(const QString name)
 {
-    DataTypePlugin* data = _core->requestPlugin(name);
-    if (data->getKind() == "Points") {
+    const hdps::Set* set = _core->requestData(name);
+    const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
+
+    if (dataPlugin->getKind() == "Points") {
         dataOptions.addItem(name);
     }
 }
