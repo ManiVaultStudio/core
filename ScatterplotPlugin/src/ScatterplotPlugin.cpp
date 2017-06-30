@@ -1,7 +1,6 @@
 #include "ScatterplotPlugin.h"
 
 #include "PointsPlugin.h"
-#include "SelectionPlugin.h"
 
 #include <QtCore>
 #include <QtDebug>
