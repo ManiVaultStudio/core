@@ -73,9 +73,9 @@ void ScatterplotPlugin::pointSizeChanged(const int size)
 
 void ScatterplotPlugin::updateData(const QString name)
 {
-    const PointsSet* set = dynamic_cast<const PointsSet*>(_core->requestData(name));
-    DataTypePlugin* data = _core->requestPlugin(set->getDataName());
-    const PointsSet* selection = dynamic_cast<const PointsSet*>(_core->requestSelection(name));
+    const PointsSet* dataSet = dynamic_cast<const PointsSet*>(_core->requestData(name));
+    const DataTypePlugin* data = _core->requestPlugin(dataSet->getDataName());
+    const PointsSet* selection = dynamic_cast<const PointsSet*>(_core->requestSelection(data->getName()));
     
     std::vector<float>* positions = new std::vector<float>();
     std::vector<float> colors;
@@ -84,7 +84,7 @@ void ScatterplotPlugin::updateData(const QString name)
     {
         const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
 
-        if (set->isFull()) {
+        if (dataSet->isFull()) {
             for (int i = 0; i < points->data.size() / 5; i++)
             {
                 positions->push_back(points->data[i * 5 + 0]);
@@ -101,7 +101,7 @@ void ScatterplotPlugin::updateData(const QString name)
             }
         }
         else {
-            for (unsigned int index : set->indices) {
+            for (unsigned int index : dataSet->indices) {
                 positions->push_back(points->data[index * 5 + 0]);
                 positions->push_back(points->data[index * 5 + 1]);
                 colors.push_back(points->data[index * 5 + 2]);
@@ -122,7 +122,8 @@ void ScatterplotPlugin::updateData(const QString name)
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
 {
-    PointsSet* selectionSet = dynamic_cast<PointsSet*>(_core->requestSelection(dataOptions.currentText()));
+    const hdps::Set* set = _core->requestData(dataOptions.currentText());
+    PointsSet* selectionSet = dynamic_cast<PointsSet*>(_core->requestSelection(set->getDataName()));
 
     selectionSet->indices.clear();
     for (unsigned int index : selection) {
