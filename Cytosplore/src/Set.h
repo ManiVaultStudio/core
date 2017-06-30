@@ -8,14 +8,15 @@ namespace hdps {
 
 class Set {
 public:
-    Set(const QString name) : name(name), all(false) {}
+    Set() : all(false) {}
     virtual ~Set() {}
 
     QString getName() const { return name; }
     QString getDataName() const { return dataName; }
     bool isFull() const { return all; }
 
-    void setDataName(QString name) { dataName = name; }
+    void setName(QString name) { this->name = name; }
+    void setDataName(QString name) { this->dataName = name; }
     void setAll() { this->all = true; }
 private:
     QString name;
