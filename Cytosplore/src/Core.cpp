@@ -51,19 +51,6 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     // Initialize the plugin after it has been added to the core
     plugin->init();
 
-    // Notify data consumers about the new data set
-    if (plugin->getType() == plugin::Type::DATA_TYPE) {
-        plugin::DataTypePlugin* dataType = dynamic_cast<plugin::DataTypePlugin*>(plugin);
-        Set* fullSet = dataType->createSet();
-        fullSet->setAll();
-        fullSet->setDataName(dataType->getName());
-        Set* selection = dataType->createSet();
-        selection->setDataName(dataType->getName());
-        _dataManager->addSet(fullSet);
-        _dataManager->addSelection(fullSet->getName(), selection);
-        notifyDataAdded(fullSet->getName());
-    }
-
     // If it is a loader plugin it should call loadData
     if (plugin->getType() == plugin::Type::LOADER) {
         dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
@@ -86,8 +73,22 @@ void Core::addPlugin(plugin::Plugin* plugin) {
  * The manager will add the plugin instance to the core and return the
  * unique name of the plugin.
  */
-const QString Core::addData(const QString kind) {
-    return _pluginManager->AddPlugin(kind);
+const QString Core::addData(const QString kind, const QString name) {
+    QString pluginName = _pluginManager->AddPlugin(kind);
+    const plugin::DataTypePlugin* dataType = dynamic_cast<plugin::DataTypePlugin*>(requestPlugin(pluginName));
+
+    Set* fullSet = dataType->createSet();
+    Set* selection = dataType->createSet();
+
+    fullSet->setName(name);
+    fullSet->setDataName(dataType->getName());
+    fullSet->setAll();
+    selection->setDataName(pluginName);
+
+    _dataManager->addSet(fullSet);
+    _dataManager->addSelection(pluginName, selection);
+    
+    return name;
 }
 
 /**
