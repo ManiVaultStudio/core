@@ -15,7 +15,7 @@ void DataManager::addSelection(QString dataName, Set* selection)
 Set* DataManager::getSet(QString name)
 {
     for (Set* set : dataSets) {
-        if (set->getDataName() == name) {
+        if (set->getName() == name) {
             return set;
         }
     }
