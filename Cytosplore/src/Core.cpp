@@ -80,7 +80,8 @@ const QString Core::addData(const QString kind, const QString name) {
     Set* fullSet = dataType->createSet();
     Set* selection = dataType->createSet();
 
-    fullSet->setName(name);
+    QString setName = _dataManager->getUniqueSetName(name);
+    fullSet->setName(setName);
     fullSet->setDataName(pluginName);
     fullSet->setAll();
     selection->setDataName(pluginName);
@@ -88,7 +89,7 @@ const QString Core::addData(const QString kind, const QString name) {
     _dataManager->addSet(fullSet);
     _dataManager->addSelection(pluginName, selection);
     
-    return name;
+    return setName;
 }
 
 /**

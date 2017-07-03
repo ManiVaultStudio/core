@@ -17,6 +17,8 @@ public:
     Set* getSelection(QString name);
     const QVector<Set*>& allSets();
 
+    const QString getUniqueSetName(QString request);
+
 private:
     QVector<Set*> dataSets;
     QMap<QString, Set*> selections;
