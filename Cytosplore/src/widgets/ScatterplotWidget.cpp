@@ -285,6 +285,16 @@ void ScatterplotWidget::onSelection(QRectF selection)
     }
 }
 
+void ScatterplotWidget::cleanup()
+{
+    qDebug() << "Deleting scatterplot widget, performing clean up...";
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &positionBuffer);
+    glDeleteBuffers(1, &colorBuffer);
+    delete shader;
+    delete selectionShader;
+}
+
 } // namespace gui
 
 } // namespace hdps

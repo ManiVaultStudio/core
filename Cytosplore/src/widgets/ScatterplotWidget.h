@@ -40,6 +40,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
     void onSelection(QRectF selection);
+    void cleanup();
 
 private:
     const float        DEFAULT_POINT_SIZE    = 15;
