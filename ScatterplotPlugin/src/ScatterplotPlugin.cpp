@@ -116,9 +116,23 @@ void ScatterplotPlugin::updateData()
             for (unsigned int index : dataSet->indices) {
                 positions->push_back(points->data[index * 5 + 0]);
                 positions->push_back(points->data[index * 5 + 1]);
-                colors.push_back(points->data[index * 5 + 2]);
-                colors.push_back(points->data[index * 5 + 3]);
-                colors.push_back(points->data[index * 5 + 4]);
+
+                bool selected = false;
+                for (unsigned int selectionIndex : selection->indices) {
+                    if (index == selectionIndex) {
+                        selected = true;
+                    }
+                }
+                if (selected) {
+                    colors.push_back(1.0f);
+                    colors.push_back(0.5f);
+                    colors.push_back(1.0f);
+                }
+                else {
+                    colors.push_back(points->data[index * 5 + 2]);
+                    colors.push_back(points->data[index * 5 + 3]);
+                    colors.push_back(points->data[index * 5 + 4]);
+                }
             }
         }
     }
