@@ -32,6 +32,8 @@ public:
     PointsSet() { }
     ~PointsSet() { }
 
+    Set* copy() const override;
+
     std::vector<unsigned int> indices;
 };
 

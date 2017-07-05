@@ -24,6 +24,15 @@ hdps::Set* PointsPlugin::createSet() const
     return new PointsSet();
 }
 
+hdps::Set* PointsSet::copy() const
+{
+    PointsSet* set = new PointsSet();
+    set->setName(getName());
+    set->setDataName(getDataName());
+    set->indices = indices;
+    return set;
+}
+
 // =============================================================================
 // Factory
 // =============================================================================

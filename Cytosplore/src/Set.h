@@ -11,6 +11,8 @@ public:
     Set() : all(false) {}
     virtual ~Set() {}
 
+    virtual Set* copy() const = 0;
+
     QString getName() const { return name; }
     QString getDataName() const { return dataName; }
     bool isFull() const { return all; }
