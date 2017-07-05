@@ -57,6 +57,12 @@ void ScatterplotPlugin::dataRemoved(const QString name)
     
 }
 
+void ScatterplotPlugin::selectionChanged(const QString dataName)
+{
+    qDebug() << getName() << "Selection updated";
+    updateData();
+}
+
 QStringList ScatterplotPlugin::supportedDataKinds()
 {
     QStringList supportedKinds;
@@ -85,7 +91,7 @@ void ScatterplotPlugin::subsetCreated()
 
 void ScatterplotPlugin::updateData()
 {
-    const PointsSet* dataSet = dynamic_cast<const PointsSet*>(_core->requestData(name));
+    const PointsSet* dataSet = dynamic_cast<const PointsSet*>(_core->requestData(dataOptions.currentText()));
     const DataTypePlugin* data = _core->requestPlugin(dataSet->getDataName());
     const PointsSet* selection = dynamic_cast<const PointsSet*>(_core->requestSelection(data->getName()));
     
@@ -169,7 +175,7 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
         }
     }
 
-    _core->notifyDataChanged(dataOptions.currentText());
+    _core->notifySelectionChanged(selectionSet->getDataName());
 }
 
 // =============================================================================
