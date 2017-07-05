@@ -21,6 +21,11 @@ public:
     virtual const QString addData(const QString kind, const QString name) = 0;
 
     /**
+     * Create a new dataset from the given selection.
+     */
+    virtual void createSubsetFromSelection(const Set* selection, const QString newSetName) = 0;
+
+    /**
     * Request a plugin from the core by its name.
     */
     virtual plugin::DataTypePlugin* requestPlugin(const QString name) = 0;

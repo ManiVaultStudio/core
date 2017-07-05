@@ -44,6 +44,11 @@ public:
     const QString addData(const QString kind, const QString name) override;
 
     /**
+    * Create a new dataset from the given selection.
+    */
+    void createSubsetFromSelection(const Set* selection, const QString newSetName) override;
+
+    /**
      * Request a plugin from the core by its name.
      */
     plugin::DataTypePlugin* requestPlugin(const QString name) override;

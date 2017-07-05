@@ -93,6 +93,20 @@ const QString Core::addData(const QString kind, const QString name) {
 }
 
 /**
+ * Creates a copy of the given selection set and gives it a unique name based
+ * on the name given to this function. Then adds the new set to the data manager
+ * and notifies all data consumers of the new set.
+ */
+void Core::createSubsetFromSelection(const Set* selection, const QString newSetName)
+{
+    Set* newSet = selection->copy();
+    newSet->setName(_dataManager->getUniqueSetName(newSetName));
+
+    _dataManager->addSet(newSet);
+    notifyDataAdded(newSet->getName());
+}
+
+/**
  * Requests an instance of a data type plugin from the core which has the same
  * unique name as the given parameter. If no such instance can be found a fatal
  * error is thrown.
