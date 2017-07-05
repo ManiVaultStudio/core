@@ -142,6 +142,8 @@ void ScatterplotWidget::initializeGL()
 {
     initializeOpenGLFunctions();
 
+    connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ScatterplotWidget::cleanup);
+
     glClearColor(1.0, 1.0, 1.0, 1.0);
     qDebug() << "Initializing scatterplot";
 
@@ -180,6 +182,13 @@ void ScatterplotWidget::initializeGL()
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
+    if (numPoints > 0) {
+        glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, numPoints * 2 * sizeof(float), positions->data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+        glBufferData(GL_ARRAY_BUFFER, numPoints * 3 * sizeof(float), colors.data(), GL_STATIC_DRAW);
+    }
+
     shader = new QOpenGLShaderProgram();
     shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
     shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
@@ -199,8 +208,9 @@ void ScatterplotWidget::resizeGL(int w, int h)
 
 void ScatterplotWidget::paintGL()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
     qDebug() << "Rendering scatterplot";
+    glClear(GL_COLOR_BUFFER_BIT);
+
     QPointF ns(selectionStart.x() < selectionEnd.x() ? selectionStart.x() : selectionEnd.x(), selectionStart.y() < selectionEnd.y() ? selectionStart.y() : selectionEnd.y());
     QPointF ne(selectionStart.x() < selectionEnd.x() ? selectionEnd.x() : selectionStart.x(), selectionStart.y() < selectionEnd.y() ? selectionEnd.y() : selectionStart.y());
 
@@ -214,7 +224,7 @@ void ScatterplotWidget::paintGL()
     else if (_scalingMode == Absolute) {
         shader->setUniformValue("pointSize", _pointSize / _windowSize.width());
     }
-    
+
     shader->setUniformValue("alpha", _alpha);
     shader->setUniformValue("selecting", _selecting);
     shader->setUniformValue("start", selection.topLeft());
@@ -244,7 +254,6 @@ void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    //qDebug() << "Mouse movey";
     if (_selecting) {
         selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
         selectionEnd = selectionEnd * 2 - QPointF(1, 1);
