@@ -77,7 +77,9 @@ void ScatterplotPlugin::pointSizeChanged(const int size)
 void ScatterplotPlugin::subsetCreated()
 {
     qDebug() << "Creating subset";
-    _core->createSubsetFromSelection(dataOptions.currentText(), "Subset");
+    const hdps::Set* set = _core->requestData(dataOptions.currentText());
+    const hdps::Set* selection = _core->requestSelection(set->getDataName());
+    _core->createSubsetFromSelection(selection, "Subset");
 }
 
 
