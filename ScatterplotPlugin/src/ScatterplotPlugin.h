@@ -6,6 +6,7 @@
 
 #include <QComboBox>
 #include <QSlider>
+#include <QPushButton>
 
 using namespace hdps::plugin;
 
@@ -33,6 +34,7 @@ public:
 protected slots:
     void dataSetPicked(const QString& name);
     void pointSizeChanged(const int size);
+    void subsetCreated();
 private:
     void updateData(const QString name);
 
@@ -40,6 +42,7 @@ private:
 
     QComboBox dataOptions;
     QSlider pointSizeSlider;
+    QPushButton subsetButton;
 };
 
 

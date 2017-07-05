@@ -22,12 +22,16 @@ void ScatterplotPlugin::init()
     widget->setPointSize(10);
     widget->setAlpha(0.5f);
     widget->addSelectionListener(this);
+
+    subsetButton.setText("Create Subset");
     
     connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), SLOT(dataSetPicked(QString)));
     connect(&pointSizeSlider, SIGNAL(valueChanged(int)), SLOT(pointSizeChanged(int)));
+    connect(&subsetButton, SIGNAL(clicked()), SLOT(subsetCreated()));
     addWidget(&dataOptions);
     addWidget(widget);
     addWidget(&pointSizeSlider);
+    addWidget(&subsetButton);
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -68,6 +72,12 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
 void ScatterplotPlugin::pointSizeChanged(const int size)
 {
     widget->setPointSize(size);
+}
+
+void ScatterplotPlugin::subsetCreated()
+{
+    qDebug() << "Creating subset";
+    _core->createSubsetFromSelection(dataOptions.currentText(), "Subset");
 }
 
 
