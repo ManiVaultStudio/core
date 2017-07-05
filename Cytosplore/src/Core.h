@@ -69,6 +69,8 @@ public:
     void notifyDataChanged(const QString name);
     /** Notify all data consumers that a dataset has been removed. */
     void notifyDataRemoved(const QString name);
+    /** Notify all data consumers that a selection has changed. */
+    void notifySelectionChanged(const QString dataName);
 
     /**
     * Returns a reference to the main window for adding widgets to it.

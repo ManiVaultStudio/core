@@ -162,6 +162,13 @@ void Core::notifyDataRemoved(const QString name) {
     }
 }
 
+/** Notify all data consumers that a selection has changed. */
+void Core::notifySelectionChanged(const QString dataName) {
+    for (plugin::DataConsumer* dataConsumer : getDataConsumers()) {
+        dataConsumer->selectionChanged(dataName);
+    }
+}
+
 gui::MainWindow& Core::gui() const {
     return _mainWindow;
 }

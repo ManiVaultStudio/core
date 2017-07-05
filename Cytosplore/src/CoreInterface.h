@@ -46,6 +46,8 @@ public:
     virtual void notifyDataChanged(const QString name) = 0;
     /** Notify all data consumers that a dataset has been removed. */
     virtual void notifyDataRemoved(const QString name) = 0;
+    /** Notify all data consumers that a selection has changed. */
+    virtual void notifySelectionChanged(const QString dataName) = 0;
 };
 
 } // namespace hdps

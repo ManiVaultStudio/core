@@ -31,6 +31,11 @@ public:
     virtual void dataRemoved(const QString name) = 0;
 
     /**
+     * Callback function which gets triggered when a selection changed.
+     */
+    virtual void selectionChanged(const QString dataName) = 0;
+
+    /**
      * Returns a list of kinds of data that this data consumer can process.
      */
     virtual QStringList supportedDataKinds() = 0;
