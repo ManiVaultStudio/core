@@ -49,7 +49,7 @@ void ScatterplotPlugin::dataChanged(const QString name)
     if (name != dataOptions.currentText()) {
         return;
     }
-    updateData(name);
+    updateData();
 }
 
 void ScatterplotPlugin::dataRemoved(const QString name)
@@ -66,7 +66,7 @@ QStringList ScatterplotPlugin::supportedDataKinds()
 
 void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
-    updateData(name);
+    updateData();
 }
 
 void ScatterplotPlugin::pointSizeChanged(const int size)
@@ -83,7 +83,7 @@ void ScatterplotPlugin::subsetCreated()
 }
 
 
-void ScatterplotPlugin::updateData(const QString name)
+void ScatterplotPlugin::updateData()
 {
     const PointsSet* dataSet = dynamic_cast<const PointsSet*>(_core->requestData(name));
     const DataTypePlugin* data = _core->requestPlugin(dataSet->getDataName());

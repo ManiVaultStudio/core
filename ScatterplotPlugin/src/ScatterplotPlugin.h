@@ -36,7 +36,7 @@ protected slots:
     void pointSizeChanged(const int size);
     void subsetCreated();
 private:
-    void updateData(const QString name);
+    void updateData();
 
     hdps::gui::ScatterplotWidget* widget;
 
