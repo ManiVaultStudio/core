@@ -134,12 +134,21 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
 {
-    const hdps::Set* set = _core->requestData(dataOptions.currentText());
+    const PointsSet* set = dynamic_cast<PointsSet*>(_core->requestData(dataOptions.currentText()));
     PointsSet* selectionSet = dynamic_cast<PointsSet*>(_core->requestSelection(set->getDataName()));
 
     selectionSet->indices.clear();
-    for (unsigned int index : selection) {
-        selectionSet->indices.push_back(index);
+    if (set->isFull())
+    {
+        for (unsigned int index : selection) {
+            selectionSet->indices.push_back(index);
+        }
+    }
+    else
+    {
+        for (unsigned int index : selection) {
+            selectionSet->indices.push_back(set->indices[index]);
+        }
     }
 
     _core->notifyDataChanged(dataOptions.currentText());
