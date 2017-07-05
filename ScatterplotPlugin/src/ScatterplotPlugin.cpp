@@ -148,6 +148,9 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
 {
+    if (dataOptions.count() == 0)
+        return;
+
     const PointsSet* set = dynamic_cast<PointsSet*>(_core->requestData(dataOptions.currentText()));
     PointsSet* selectionSet = dynamic_cast<PointsSet*>(_core->requestSelection(set->getDataName()));
 
