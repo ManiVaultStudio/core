@@ -24,6 +24,7 @@ public:
     hdps::Set* createSet() const;
 
     std::vector<float> data;
+    int numDimensions = 1;
 };
 
 class PointsSet : public hdps::Set

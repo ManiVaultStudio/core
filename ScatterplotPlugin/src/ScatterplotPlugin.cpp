@@ -95,15 +95,16 @@ void ScatterplotPlugin::updateData()
     if (data->getKind() == "Points")
     {
         const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
+        int nDim = points->numDimensions;
 
         if (dataSet->isFull()) {
-            for (int i = 0; i < points->data.size() / 5; i++)
+            for (int i = 0; i < points->data.size() / nDim; i++)
             {
-                positions->push_back(points->data[i * 5 + 0]);
-                positions->push_back(points->data[i * 5 + 1]);
-                colors.push_back(points->data[i * 5 + 2]);
-                colors.push_back(points->data[i * 5 + 3]);
-                colors.push_back(points->data[i * 5 + 4]);
+                positions->push_back(points->data[i * nDim + 0]);
+                positions->push_back(points->data[i * nDim + 1]);
+                colors.push_back(points->data[i * nDim + 2]);
+                colors.push_back(points->data[i * nDim + 3]);
+                colors.push_back(points->data[i * nDim + 4]);
             }
             for (unsigned int index : selection->indices)
             {
@@ -114,8 +115,8 @@ void ScatterplotPlugin::updateData()
         }
         else {
             for (unsigned int index : dataSet->indices) {
-                positions->push_back(points->data[index * 5 + 0]);
-                positions->push_back(points->data[index * 5 + 1]);
+                positions->push_back(points->data[index * nDim + 0]);
+                positions->push_back(points->data[index * nDim + 1]);
 
                 bool selected = false;
                 for (unsigned int selectionIndex : selection->indices) {
@@ -129,9 +130,9 @@ void ScatterplotPlugin::updateData()
                     colors.push_back(1.0f);
                 }
                 else {
-                    colors.push_back(points->data[index * 5 + 2]);
-                    colors.push_back(points->data[index * 5 + 3]);
-                    colors.push_back(points->data[index * 5 + 4]);
+                    colors.push_back(points->data[index * nDim + 2]);
+                    colors.push_back(points->data[index * nDim + 3]);
+                    colors.push_back(points->data[index * nDim + 4]);
                 }
             }
         }

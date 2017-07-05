@@ -35,6 +35,7 @@ void CsvReaderPlugin::loadData()
         return;
 
     std::vector<float> data;
+    int numDimensions = 1;
 
     QTextStream in(&file);
     while (!in.atEnd())
@@ -42,6 +43,7 @@ void CsvReaderPlugin::loadData()
         QString line = in.readLine();
         QStringList tokens = line.split(",");
 
+        numDimensions = tokens.size();
         for (int i = 0; i < tokens.size(); i++)
         {
             if (tokens[i].isEmpty())
@@ -60,6 +62,7 @@ void CsvReaderPlugin::loadData()
     for (int i = 0; i < points->data.size(); i++) {
         points->data[i] = data[i];
     }
+    points->numDimensions = numDimensions;
 
     _core->notifyDataAdded(name);
 
