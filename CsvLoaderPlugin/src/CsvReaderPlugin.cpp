@@ -8,6 +8,7 @@
 
 #include <QFileDialog>
 #include <vector>
+#include <QInputDialog>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.CsvReaderPlugin")
 
@@ -54,19 +55,25 @@ void CsvReaderPlugin::loadData()
         }
     }
 
-    QString name = _core->addData("Points", "PointSet");
-    const hdps::Set* set = _core->requestData(name);
-    DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
-    PointsPlugin* points = dynamic_cast<PointsPlugin*>(dataPlugin);
-    points->data.resize(data.size());
-    for (int i = 0; i < points->data.size(); i++) {
-        points->data[i] = data[i];
+    bool ok;
+    QString dataSetName = QInputDialog::getText(nullptr, "Add New Dataset",
+        "Dataset name:", QLineEdit::Normal, "DataSet", &ok);
+
+    if (ok && !dataSetName.isEmpty()) {
+        QString name = _core->addData("Points", dataSetName);
+        const hdps::Set* set = _core->requestData(name);
+        DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
+        PointsPlugin* points = dynamic_cast<PointsPlugin*>(dataPlugin);
+        points->data.resize(data.size());
+        for (int i = 0; i < points->data.size(); i++) {
+            points->data[i] = data[i];
+        }
+        points->numDimensions = numDimensions;
+
+        _core->notifyDataAdded(name);
+
+        qDebug() << "CSV file loaded. Num data points: " << points->data.size();
     }
-    points->numDimensions = numDimensions;
-
-    _core->notifyDataAdded(name);
-
-    qDebug() << "CSV file loaded. Num data points: " << points->data.size();
 }
 
 // =============================================================================
