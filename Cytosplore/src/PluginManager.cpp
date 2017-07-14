@@ -56,52 +56,54 @@ void PluginManager::LoadPlugins()
     foreach (QString fileName, pluginsDir.entryList(QDir::Files))
     {
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
-        
         gui::MainWindow& gui = _core.gui();
 
         // create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
-        if (pluginFactory)
+       
+        if (!pluginFactory) {
+            qDebug() << "Failed to load plugin: " << fileName << pluginLoader.errorString();
+            continue;
+        }
+
+        QString kind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+        _pluginFactories[kind] = qobject_cast<PluginFactory*>(pluginFactory);
+
+        QAction* action = NULL;
+
+        if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))
         {
-            QString kind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
-            _pluginFactories[kind] = qobject_cast<PluginFactory*>(pluginFactory);
-
-            QAction* action = NULL;
-
-            if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))
-            {
-                action = gui.addMenuAction(plugin::Type::ANALYSIS, kind);
-            }
-            else if (qobject_cast<DataTypePluginFactory*>(pluginFactory))
-            {
-            }
-            else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
-            {
-                action = gui.addMenuAction(plugin::Type::LOADER, kind);
-            }
-            else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
-            {
-                action = gui.addMenuAction(plugin::Type::WRITER, kind);
-            }
-            else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
-            {
-                action = gui.addMenuAction(plugin::Type::TRANFORMATION, kind);
-            }
-            else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
-            {
-                action = gui.addMenuAction(plugin::Type::VIEW, kind);
-            }
-            else
-            {
-                qDebug() << "Plugin " << fileName << " does not implement any of the possible interfaces!";
-                return;
-            }
+            action = gui.addMenuAction(plugin::Type::ANALYSIS, kind);
+        }
+        else if (qobject_cast<DataTypePluginFactory*>(pluginFactory))
+        {
+        }
+        else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
+        {
+            action = gui.addMenuAction(plugin::Type::LOADER, kind);
+        }
+        else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
+        {
+            action = gui.addMenuAction(plugin::Type::WRITER, kind);
+        }
+        else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
+        {
+            action = gui.addMenuAction(plugin::Type::TRANFORMATION, kind);
+        }
+        else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
+        {
+            action = gui.addMenuAction(plugin::Type::VIEW, kind);
+        }
+        else
+        {
+            qDebug() << "Plugin " << fileName << " does not implement any of the possible interfaces!";
+            return;
+        }
             
-            if(action)
-            {
-                QObject::connect(action, &QAction::triggered, signalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-                signalMapper->setMapping(action, kind);
-            }
+        if(action)
+        {
+            QObject::connect(action, &QAction::triggered, signalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
+            signalMapper->setMapping(action, kind);
         }
     }
 
