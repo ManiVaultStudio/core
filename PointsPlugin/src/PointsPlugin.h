@@ -27,11 +27,11 @@ public:
     int numDimensions = 1;
 };
 
-class PointsSet : public hdps::Set
+class IndexSet : public hdps::Set
 {
 public:
-    PointsSet() { }
-    ~PointsSet() { }
+    IndexSet() { }
+    ~IndexSet() { }
 
     Set* copy() const override;
 

@@ -51,12 +51,14 @@ set( WIDGET_HEADERS
     src/widgets/DockableWidget.h
     src/widgets/ScatterplotWidget.h
     src/widgets/ImageWidget.h
+    src/widgets/SettingsWidget.h
 )
 
 set( WIDGET_SOURCES
     src/widgets/DockableWidget.cpp
     src/widgets/ScatterplotWidget.cpp
     src/widgets/ImageWidget.cpp
+    src/widgets/SettingsWidget.cpp
 )
 
 set( PLUGIN_HEADERS

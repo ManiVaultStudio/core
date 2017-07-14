@@ -42,6 +42,11 @@ void ScatterplotPlugin::dataAdded(const QString name)
     if (dataPlugin->getKind() == "Points") {
         dataOptions.addItem(name);
     }
+    else
+    {
+        qWarning((QString("Scatterplot plugin doesn't support data of kind: ") + dataPlugin->getKind()).toStdString().c_str());
+        return;
+    }
 }
 
 void ScatterplotPlugin::dataChanged(const QString name)
@@ -92,50 +97,53 @@ void ScatterplotPlugin::subsetCreated()
 void ScatterplotPlugin::updateData()
 {
     const PointsSet* dataSet = dynamic_cast<const PointsSet*>(_core->requestData(dataOptions.currentText()));
-    const DataTypePlugin* data = _core->requestPlugin(dataSet->getDataName());
-    const PointsSet* selection = dynamic_cast<const PointsSet*>(_core->requestSelection(data->getName()));
+    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(dataSet->getDataName()));
+    const PointsSet* selection = dynamic_cast<const PointsSet*>(_core->requestSelection(points->getName()));
     
     std::vector<float>* positions = new std::vector<float>();
     std::vector<float> colors;
 
-    if (data->getKind() == "Points")
-    {
-        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(data);
-        int nDim = points->numDimensions;
+    int nDim = points->numDimensions;
 
-        if (dataSet->isFull()) {
-            for (int i = 0; i < points->data.size() / nDim; i++)
-            {
-                positions->push_back(points->data[i * nDim + 0]);
-                positions->push_back(points->data[i * nDim + 1]);
+    // Calculate data bounds
+    float maxLength = getMaxLength(&points->data, nDim);
+
+    if (dataSet->isFull()) {
+        for (int i = 0; i < points->data.size() / nDim; i++)
+        {
+            positions->push_back(points->data[i * nDim + 0] / maxLength);
+            positions->push_back(points->data[i * nDim + 1] / maxLength);
+            if (nDim >= 5) {
                 colors.push_back(points->data[i * nDim + 2]);
                 colors.push_back(points->data[i * nDim + 3]);
                 colors.push_back(points->data[i * nDim + 4]);
             }
-            for (unsigned int index : selection->indices)
-            {
-                colors[index * 3 + 0] = 1.0f;
-                colors[index * 3 + 1] = 0.5f;
-                colors[index * 3 + 2] = 1.0f;
-            }
         }
-        else {
-            for (unsigned int index : dataSet->indices) {
-                positions->push_back(points->data[index * nDim + 0]);
-                positions->push_back(points->data[index * nDim + 1]);
+        for (unsigned int index : selection->indices)
+        {
+            colors[index * 3 + 0] = 1.0f;
+            colors[index * 3 + 1] = 0.5f;
+            colors[index * 3 + 2] = 1.0f;
+        }
+    }
+    else {
+        for (unsigned int index : dataSet->indices) {
+            positions->push_back(points->data[index * nDim + 0] / maxLength);
+            positions->push_back(points->data[index * nDim + 1] / maxLength);
 
-                bool selected = false;
-                for (unsigned int selectionIndex : selection->indices) {
-                    if (index == selectionIndex) {
-                        selected = true;
-                    }
+            bool selected = false;
+            for (unsigned int selectionIndex : selection->indices) {
+                if (index == selectionIndex) {
+                    selected = true;
                 }
-                if (selected) {
-                    colors.push_back(1.0f);
-                    colors.push_back(0.5f);
-                    colors.push_back(1.0f);
-                }
-                else {
+            }
+            if (selected) {
+                colors.push_back(1.0f);
+                colors.push_back(0.5f);
+                colors.push_back(1.0f);
+            }
+            else {
+                if (nDim >= 5) {
                     colors.push_back(points->data[index * nDim + 2]);
                     colors.push_back(points->data[index * nDim + 3]);
                     colors.push_back(points->data[index * nDim + 4]);
@@ -143,14 +151,10 @@ void ScatterplotPlugin::updateData()
             }
         }
     }
-    else
-    {
-        qWarning((QString("Scatterplot plugin doesn't support data of kind: ") + data->getKind()).toStdString().c_str());
-        return;
-    }
-
     widget->setData(positions);
-    widget->setColors(colors);
+    if (nDim >= 5) {
+        widget->setColors(colors);
+    }
 }
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
@@ -176,6 +180,20 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
     }
 
     _core->notifySelectionChanged(selectionSet->getDataName());
+}
+
+float ScatterplotPlugin::getMaxLength(const std::vector<float>* data, const int nDim) const
+{
+    float maxLength = 0;
+    for (int i = 0; i < data->size() / nDim; i++) {
+        float x = data->at(i * nDim + 0);
+        float y = data->at(i * nDim + 1);
+        float length = x*x + y*y;
+
+        if (length > maxLength)
+            maxLength = length;
+    }
+    return sqrt(maxLength);
 }
 
 // =============================================================================

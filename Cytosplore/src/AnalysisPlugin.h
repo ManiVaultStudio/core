@@ -2,16 +2,23 @@
 #define HDPS_PLUGIN_ANALYSIS_PLUGIN
 
 #include "PluginFactory.h"
+#include "DataConsumer.h"
+#include "widgets/SettingsWidget.h"
+
+#include <memory>
 
 namespace hdps {
 
 namespace plugin {
 
-class AnalysisPlugin : public Plugin
+class AnalysisPlugin : public Plugin, public DataConsumer
 {
 public:
     AnalysisPlugin(QString name) : Plugin(Type::ANALYSIS, name) { }
     virtual ~AnalysisPlugin() {};
+
+protected:
+    std::unique_ptr<SettingsWidget> _settings;
 };
 
 

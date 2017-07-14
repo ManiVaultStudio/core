@@ -1,0 +1,116 @@
+#ifndef MCV_TSNE_ANALYSIS
+#define MCV_TSNE_ANALYSIS
+
+#include "gradient_descent.h"
+
+#include <vector>
+#include <string>
+
+class MCV_DerivedDataPoints;
+class MCV_DerivedDataClusters;
+
+class TsneAnalysisPlugin;
+
+class MCV_TsneAnalysis
+{
+public:
+    MCV_TsneAnalysis();
+    ~MCV_TsneAnalysis();
+
+    void init(std::string name);
+
+    inline bool verbose() { return _verbose; }
+    void setVerbose(bool verbose);
+    inline bool skipNormalization() { return _skipNormalization; }
+    void setSkipNormalization(bool skipNormalization);
+    inline int iterations() { return _iterations; }
+    void setIterations(int iterations);
+    inline int numTrees() { return _numTrees; }
+    void setNumTrees(int numTrees);
+    inline int numChecks() { return _numChecks; }
+    void setNumChecks(int numChecks);
+    inline int exaggerationIter() { return _exaggerationIter; }
+    void setExaggerationIter(int exaggerationIter);
+    inline int expDecay() { return _expDecay; }
+    void setExpDecay(int expDecay);
+    inline int perplexity() { return _perplexity; }
+    void setPerplexity(int perplexity);
+    inline int numDimensionsOutput() { return _numDimensionsOutput; }
+    void setNumDimensionsOutput(int numDimensionsOutput);
+
+    void softInit();
+    void computeTSNE();
+    void computeGradientDescent(const TsneAnalysisPlugin& plugin);
+    void initTSNE(const std::vector<float>* data, const int numDimensions);
+    void initGradientDescent();
+    void embed(const TsneAnalysisPlugin& plugin);
+    void removePoints();
+    void stopGradientDescent();
+    void markForDeletion();
+
+    int numDataPoints();
+
+    float radius();
+
+    std::vector<typename atsne::GradientDescent<>::flag_type>* flags();
+    std::vector<float>* output();
+    //std::vector<int>* outputFileIdxs();
+    //std::vector<float>* markers();
+    //std::vector< std::pair<int, int> >* pointReferences();
+
+    std::vector<float>* densityGradientMap();
+
+    //int numDiscreteMetaValues();
+
+    inline bool isTsneRunning() { return _isTsneRunning; }
+    inline bool isGradientDescentRunning() { return _isGradientDescentRunning; }
+    inline bool isMarkedForDeletion() { return _isMarkedForDeletion; }
+
+    MCV_DerivedDataClusters* updateClusters(std::vector< std::vector<unsigned int> >* indices, std::string namePrefix);
+
+private:
+
+    void writeTsneChannels();
+    void copyFloatOutput();
+
+protected:
+
+private:
+
+    // input
+    bool _verbose;
+    bool _skipNormalization;
+    int _iterations;
+    int _numTrees;
+    int _numChecks;
+    int _exaggerationIter;
+    int _expDecay;
+    int _perplexity;
+    int _numDimensionsOutput;
+    bool _isGradientDescentRunning;
+    bool _isTsneRunning;
+    bool _isMarkedForDeletion;
+
+    //std::vector< std::pair<int, int> > _pointReferences;
+    int _numDataPoints;
+
+    std::vector<float> _densityGradientMap;
+
+    int _continueFromIteration;
+
+    // results
+    float _radius;
+    std::vector<typename atsne::GradientDescent<>::flag_type> _flags;
+    std::vector<float> _output;
+    //std::vector<int> _fileIdxs;
+    std::vector<double> _outputDouble;
+    //int _numDiscreteMetaValues;
+
+    //std::vector<float> _markers;
+
+    KNNSparseMatrix<double> _sparseMatrix;
+    std::vector<double> _tSNEData;
+    atsne::GradientDescent<> _gradientDescent;
+};
+
+#endif // MCV_TSNE_ANALYSIS

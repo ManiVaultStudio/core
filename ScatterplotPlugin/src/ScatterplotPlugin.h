@@ -38,6 +38,7 @@ protected slots:
     void subsetCreated();
 private:
     void updateData();
+    float getMaxLength(const std::vector<float>* data, const int nDim) const;
 
     hdps::gui::ScatterplotWidget* widget;
 
