@@ -20,6 +20,7 @@
 
 #include "TsneAnalysisPlugin.h"
 #include <QDebug>
+#include <QApplication>
 
 #include "timings/scoped_timers.h"
 
@@ -224,6 +225,7 @@ void MCV_TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
             copyFloatOutput();
 
             plugin.onEmbeddingUpdate();
+            qApp->processEvents();
 
             if ((iter + 1) % 100 == 0){
                 TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);

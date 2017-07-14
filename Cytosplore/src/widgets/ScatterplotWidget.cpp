@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include <QApplication>
 #include <QDebug>
 
 #define GLSL(version, shader)  "#version " #version "\n" #shader
@@ -106,7 +105,6 @@ void ScatterplotWidget::setData(const std::vector<float>* positions)
     glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
     glBufferData(GL_ARRAY_BUFFER, numPoints * 3 * sizeof(float), colors.data(), GL_STATIC_DRAW);
     update();
-    qApp->processEvents();
 }
 
 void ScatterplotWidget::setColors(const std::vector<float>& colors) {
