@@ -18,7 +18,7 @@ public:
     virtual ~AnalysisPlugin() {};
 
 protected:
-    std::unique_ptr<SettingsWidget> _settings;
+    std::unique_ptr<gui::SettingsWidget> _settings;
 };
 
 
