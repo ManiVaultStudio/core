@@ -4,6 +4,7 @@
 #include "PluginType.h"
 
 #include "ViewPlugin.h"
+#include "widgets/SettingsWidget.h"
 
 #include <QDebug>
 
@@ -37,6 +38,10 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name) {
 
 void MainWindow::addView(plugin::ViewPlugin* plugin) {
     addDockWidget(Qt::RightDockWidgetArea, plugin);
+}
+
+void MainWindow::addSettings(gui::SettingsWidget* settings) {
+    addDockWidget(Qt::LeftDockWidgetArea, settings);
 }
 
 } // namespace gui

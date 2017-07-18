@@ -20,6 +20,9 @@ namespace plugin {
     class ViewPlugin;
     enum Type;
 }
+namespace gui {
+    class SettingsWidget;
+}
 
 namespace gui {
 
@@ -39,6 +42,11 @@ public:
     * Adds the given view plugin to the main area of the window as a dockable widget.
     */
     void addView(plugin::ViewPlugin* plugin);
+
+    /**
+    * Adds the given settings widget to the settings area of the window.
+    */
+    void addSettings(SettingsWidget* settings);
 
 private:
 
