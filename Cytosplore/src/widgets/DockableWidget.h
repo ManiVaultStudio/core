@@ -12,16 +12,17 @@ namespace gui {
 
 class DockableWidget : public QDockWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit DockableWidget(QWidget *parent = 0);
-	~DockableWidget();
+    explicit DockableWidget(QWidget *parent = 0);
+    ~DockableWidget();
 
-	QGridLayout* mainLayout();
+    void addWidget(QWidget* widget);
+    QGridLayout* mainLayout();
 
-public slots :
-	bool setVisibility(bool visible);
-	bool toggleVisibility();
+    public slots :
+    bool setVisibility(bool visible);
+    bool toggleVisibility();
 
 protected:
 
@@ -30,12 +31,12 @@ private:
 public:
 
 protected:
-	bool _isVisible;
+    bool _isVisible;
 
-	QGridLayout* _mainLayout;
+    QGridLayout* _mainLayout;
 
 private:
-	QWidget* _mainWidget;
+    QWidget* _mainWidget;
 };
 
 } // namespace gui

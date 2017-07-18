@@ -22,10 +22,6 @@ public:
     }
 
     virtual ~ViewPlugin() {};
-
-    void addWidget(QWidget* widget) {
-        mainLayout()->addWidget(widget);
-    }
 };
 
 class ViewPluginFactory : public PluginFactory

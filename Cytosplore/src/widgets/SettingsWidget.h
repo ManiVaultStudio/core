@@ -15,9 +15,7 @@ class SettingsWidget : public DockableWidget
 {
     Q_OBJECT
 public:
-    void addWidget(QWidget* widget) {
-        mainLayout()->addWidget(widget);
-    }
+
 };
 
 } // namespace gui

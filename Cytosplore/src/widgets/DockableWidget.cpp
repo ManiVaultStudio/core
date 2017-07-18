@@ -11,41 +11,45 @@ namespace hdps {
 namespace gui {
 
 DockableWidget::DockableWidget(QWidget *parent) :
-	QDockWidget(parent),
-	_isVisible(false),
-	_mainLayout(NULL),
-	_mainWidget(NULL)
+    QDockWidget(parent),
+    _isVisible(false),
+    _mainLayout(NULL),
+    _mainWidget(NULL)
 {
-	_mainWidget = new QWidget(this);
-	_mainLayout = new QGridLayout(_mainWidget);
-	_mainLayout->setMargin(0);
-	setWidget(_mainWidget);
+    _mainWidget = new QWidget(this);
+    _mainLayout = new QGridLayout(_mainWidget);
+    _mainLayout->setMargin(0);
+    setWidget(_mainWidget);
 
-	QObject::connect(toggleViewAction(), &QAction::toggled, this, &DockableWidget::setVisibility);
+    QObject::connect(toggleViewAction(), &QAction::toggled, this, &DockableWidget::setVisibility);
 }
 
 QGridLayout* DockableWidget::mainLayout()
 {
-	return _mainLayout;
+    return _mainLayout;
 }
 
 bool DockableWidget::setVisibility(bool visible)
 {
-	_isVisible = visible;
-	setVisible(_isVisible);
-    
+    _isVisible = visible;
+    setVisible(_isVisible);
+
     return _isVisible;
 }
 
 bool DockableWidget::toggleVisibility()
 {
-	return setVisibility(!_isVisible);
+    return setVisibility(!_isVisible);
+}
+
+void DockableWidget::addWidget(QWidget* widget) {
+    _mainLayout->addWidget(widget);
 }
 
 DockableWidget::~DockableWidget()
 {
-	if (_mainLayout) delete _mainLayout;
-	if (_mainWidget) delete _mainWidget;
+    if (_mainLayout) delete _mainLayout;
+    if (_mainWidget) delete _mainWidget;
 }
 
 } // namespace gui
