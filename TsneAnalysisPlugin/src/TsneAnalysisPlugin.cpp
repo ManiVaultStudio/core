@@ -3,6 +3,7 @@
 #include "PointsPlugin.h"
 
 #include <QtCore>
+#include <QMessageBox>
 #include <QtDebug>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.TsneAnalysisPlugin")
@@ -80,10 +81,29 @@ void TsneAnalysisPlugin::startComputation()
 {
     TsneSettingsWidget* tsneSettings = dynamic_cast<TsneSettingsWidget*>(_settings.get());
 
+    // Do nothing if we have no data set selected
     if (tsneSettings->dataOptions.currentText().isEmpty()) {
         return;
     }
 
+    // Check if the tSNE settings are valid before running the computation
+    if (!tsneSettings->hasValidSettings()) {
+        QMessageBox warningBox;
+        warningBox.setText(tr("Some settings are invalid or missing. Continue with default values?"));
+        QPushButton *continueButton = warningBox.addButton(tr("Continue"), QMessageBox::ActionRole);
+        QPushButton *abortButton = warningBox.addButton(QMessageBox::Abort);
+
+        warningBox.exec();
+
+        if (warningBox.clickedButton() == abortButton) {
+            return;
+        }
+    }
+
+    // Initialize the tSNE computation with the settings from the settings widget
+    tsne->setIterations(tsneSettings->numIterations.text().toInt());
+
+    // Run the computation
     QString setName = tsneSettings->dataOptions.currentText();
     const hdps::Set* set = _core->requestData(setName);
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
