@@ -52,6 +52,12 @@ public:
 
         addWidget(&startButton);
         addWidget(&dataOptions);
+    bool hasValidSettings() {
+        if (!numIterations.hasAcceptableInput())
+            return false;
+
+        return true;
+    }
     }
 public:
     QPushButton startButton;
