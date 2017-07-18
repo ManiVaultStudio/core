@@ -9,6 +9,9 @@
 #include <QObject>
 #include <QComboBox>
 #include <QPushButton>
+#include <QLineEdit>
+#include <QLabel>
+#include <QGroupBox>
 
 using namespace hdps::plugin;
 using namespace hdps::gui;
@@ -46,22 +49,51 @@ class TsneSettingsWidget : public SettingsWidget
 
 public:
     TsneSettingsWidget(const TsneAnalysisPlugin* const analysis) {
-        startButton.setText("Start tSNE");
+        setFixedWidth(200);
+
+        startButton.setText("Start Computation");
         connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
         connect(&startButton, SIGNAL(clicked()), analysis, SLOT(startComputation()));
+        connect(&numIterations, SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
 
-        addWidget(&startButton);
+        QGroupBox* settingsBox = new QGroupBox();
+        QLabel* iterationLabel = new QLabel("Iteration count");
+        numIterations.setFixedWidth(50);
+        numIterations.setValidator(new QIntValidator(1, 10000, this));
+        numIterations.setText("1000");
+        QVBoxLayout *settingsLayout = new QVBoxLayout;
+        settingsLayout->addWidget(iterationLabel);
+        settingsLayout->addWidget(&numIterations);
+        settingsLayout->addStretch(1);
+        settingsBox->setLayout(settingsLayout);
+
+        startButton.setFixedSize(QSize(150, 50));
+
         addWidget(&dataOptions);
+        addWidget(settingsBox);
+        addWidget(&startButton);
+    }
+
     bool hasValidSettings() {
         if (!numIterations.hasAcceptableInput())
             return false;
 
         return true;
     }
+
+private slots:
+    void numIterationsChanged(const QString &value) {
+        if (numIterations.hasAcceptableInput()) {
+            numIterations.setStyleSheet("");
+        }
+        else {
+            numIterations.setStyleSheet("border: 1px solid red");
+        }
     }
 public:
-    QPushButton startButton;
     QComboBox dataOptions;
+    QLineEdit numIterations;
+    QPushButton startButton;
 };
 
 // =============================================================================
