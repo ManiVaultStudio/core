@@ -6,13 +6,6 @@
 #include <fstream>
 #include <stdio.h>
 
-//#include "MCV_UiInterface.h"
-//#include "MCV_CytometryData.h"
-//#include "MCV_DerivedData.h"
-//#include "MCV_DerivedDataPoints.h"
-//#include "MCV_DerivedDataClusters.h"
-//#include "MCV_FcsHeader.h"
-
 // TSNE
 #include "vptree.h"
 #include "gradient_descent.h"
@@ -24,7 +17,7 @@
 
 #include "timings/scoped_timers.h"
 
-MCV_TsneAnalysis::MCV_TsneAnalysis() :
+TsneAnalysis::TsneAnalysis() :
 _verbose(false),
 _skipNormalization(false),
 _iterations(1000),
@@ -45,72 +38,39 @@ _radius(0.0f)
     //_type = MCV_ANALYSIS_TYPE_TSNE;
 }
 
-void MCV_TsneAnalysis::init(std::string name)
+void TsneAnalysis::init(std::string name)
 {
 }
 
-void MCV_TsneAnalysis::computeTSNE()
+void TsneAnalysis::computeTSNE()
 {
     //initTSNE();
 
     //computeGradientDescent();
 }
 
-void MCV_TsneAnalysis::computeGradientDescent(const TsneAnalysisPlugin& plugin)
+void TsneAnalysis::computeGradientDescent(const TsneAnalysisPlugin& plugin)
 {
     initGradientDescent();
 
     embed(plugin);
 }
 
-void MCV_TsneAnalysis::initTSNE(const std::vector<float>* data, const int numDimensions)
+void TsneAnalysis::initTSNE(const std::vector<float>* data, const int numDimensions)
 {
-    //_pointReferences = *(_dataSelection->data());
-
-    //if (_pointReferences.size() < 1) return;
-
-    //if (_perplexity * 4 > _pointReferences.size())
-    //{
-    //    _perplexity = (int)(_pointReferences.size() / 4);
-    //}
-
-    //// Test data
-    //std::vector<std::vector<float>> testData(5);
-    //testData[0] = std::vector<float> { 0.0f, 1.0f, 2.0f, 3.0f };
-    //testData[1] = std::vector<float> { 4.0f, 1.0f, 2.0f, 3.0f };
-    //testData[2] = std::vector<float> { 4.0f, 1.0f, 3.0f, 3.0f };
-    //testData[3] = std::vector<float> { 0.0f, 4.0f, 2.0f, 2.0f };
-    //testData[4] = std::vector<float> { 0.0f, 4.0f, 2.0f, 1.0f };
-    qDebug() << "Test data created.";
-    _numDataPoints = (*data).size() / numDimensions;// testData.size();// (int)(_pointReferences.size());
+    _numDataPoints = (*data).size() / numDimensions;
     // Number of total dimensions
-    int numMarkerDimensions = numDimensions;// testData[0].size();// cytoData->combinedHeader()->numVariables();
-    // Number of selected dimensions
-    //int numDimensions = testData[0].size();// (int)(_selectedMarkers.size());
+    int numMarkerDimensions = numDimensions;
     qDebug() << "Variables set. Num dims: " << numDimensions << " Num data points: " << _numDataPoints;
-    //// Collect raw data from all files in cytoData and add them to the tmpData array of float arrays
-    //std::vector<float*> tmpData = std::vector<float*>(cytoData->numFiles());
-    //for (int i = 0; i < tmpData.size(); i++)
-    //{
-    //    tmpData[i] = cytoData->rawData(i);
-    //}
 
     // Input data
     _tSNEData.clear();
     _tSNEData.resize(_numDataPoints * numDimensions);
     qDebug() << "TSNE data allocated.";
-    //_fileIdxs.resize(_numDataPoints);
-    //_markers.resize(_numDataPoints * numMarkerDimensions);
 
     // Fill tSNEData with points * dims
     for (int i = 0; i < _numDataPoints; i++)
     {
-        //int file = _pointReferences[i].first;
-        //_fileIdxs[i] = file;
-        //int idx = _pointReferences[i].second;
-        //int inOffset = idx * numMarkerDimensions;
-        //int outOffset = i * numDimensions;
-
         for (int j = 0; j < numDimensions; j++)
         {
             //int varIdx = _selectedMarkers[j];
@@ -157,7 +117,7 @@ void MCV_TsneAnalysis::initTSNE(const std::vector<float>* data, const int numDim
     //_uiInterface->tsneInitialized();
 }
 
-void MCV_TsneAnalysis::initGradientDescent()
+void TsneAnalysis::initGradientDescent()
 {
     _continueFromIteration = 0;
 
@@ -196,7 +156,7 @@ void MCV_TsneAnalysis::initGradientDescent()
 }
 
 // Computing gradient descent
-void MCV_TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
+void TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
 {
 
     double t = 0.0;
@@ -224,18 +184,14 @@ void MCV_TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
 
             copyFloatOutput();
 
-            plugin.onEmbeddingUpdate();
-            qApp->processEvents();
-
             if ((iter + 1) % 100 == 0){
                 TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
                 std::cout << "<Name goes here>" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld << std::endl;
             }
 
-            if (!_isMarkedForDeletion)
-            {
-                //_uiInterface->analysisUpdated((void*)this);
-            }
+            plugin.onEmbeddingUpdate();
+            qApp->processEvents();
+
             qDebug() << "Time: " << t;
         }
         
@@ -246,135 +202,100 @@ void MCV_TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
     std::cout << "--------------------------------------------------------------------------------\n";
     std::cout << "A-tSNE: Finished embedding of " << "<Name goes here>" << " in: " << t / 1000 << " seconds " << ".KL - divergence is : " << kld;
     std::cout << "\n================================================================================\n";
-
-
-    //if (_isMarkedForDeletion)
-    //{
-    //    _uiInterface->readyForDeletion((void*)this);
-    //}
-    //else
-    //{
-    //    _uiInterface->analysisFinished((void*)this);
-    //}
 }
 
 // Copy tSNE output to our output
-void MCV_TsneAnalysis::copyFloatOutput()
+void TsneAnalysis::copyFloatOutput()
 {
     _output.assign(_outputDouble.begin(), _outputDouble.end());
-
-    //std::cout << "Double: " << _outputDouble[0] << " " << _outputDouble[_outputDouble.size() - 1] << "\n";
-    //std::cout << "Float: " << _output[0] << " " << _output[_outputDouble.size() - 1] << "\n\n";
 }
 
-void MCV_TsneAnalysis::removePoints()
+void TsneAnalysis::removePoints()
 {
 }
 
-int MCV_TsneAnalysis::numDataPoints()
+int TsneAnalysis::numDataPoints()
 {
     return _numDataPoints;
 }
 
-float MCV_TsneAnalysis::radius()
+float TsneAnalysis::radius()
 {
     return _radius;
 }
 
-std::vector<typename atsne::GradientDescent<>::flag_type>* MCV_TsneAnalysis::flags()
+std::vector<typename atsne::GradientDescent<>::flag_type>* TsneAnalysis::flags()
 {
     return &_flags;
 }
 
-std::vector<float>* MCV_TsneAnalysis::output()
+std::vector<float>* TsneAnalysis::output()
 {
     return &_output;
 }
 
-//std::vector<int>* MCV_TsneAnalysis::outputFileIdxs()
-//{
-//    return &_fileIdxs;
-//}
-
-//std::vector<float>* MCV_TsneAnalysis::markers()
-//{
-//    return &_markers;
-//}
-
-
-std::vector<float>* MCV_TsneAnalysis::densityGradientMap()
+std::vector<float>* TsneAnalysis::densityGradientMap()
 {
     return &_densityGradientMap;
 }
 
-// FIXME: remove this and make users acces data via MCV_CytometryData::Instance()->derivedDataPoints(NAME)
-//std::vector< std::pair<int, int> >* MCV_TsneAnalysis::pointReferences()
-//{
-//    return &_pointReferences;
-//}
-
-//int MCV_TsneAnalysis::numDiscreteMetaValues()
-//{
-//    return _numDiscreteMetaValues;
-//}
-
-void MCV_TsneAnalysis::setVerbose(bool verbose)
+void TsneAnalysis::setVerbose(bool verbose)
 {
     _verbose = verbose;
 }
 
-void MCV_TsneAnalysis::setSkipNormalization(bool skipNormalization)
+void TsneAnalysis::setSkipNormalization(bool skipNormalization)
 {
     _skipNormalization = skipNormalization;
 }
 
-void MCV_TsneAnalysis::setIterations(int iterations)
+void TsneAnalysis::setIterations(int iterations)
 {
     _iterations = iterations;
 }
 
-void MCV_TsneAnalysis::setNumTrees(int numTrees)
+void TsneAnalysis::setNumTrees(int numTrees)
 {
     _numTrees = numTrees;
 }
 
-void MCV_TsneAnalysis::setNumChecks(int numChecks)
+void TsneAnalysis::setNumChecks(int numChecks)
 {
     _numChecks = numChecks;
 }
 
-void MCV_TsneAnalysis::setExaggerationIter(int exaggerationIter)
+void TsneAnalysis::setExaggerationIter(int exaggerationIter)
 {
     _exaggerationIter = exaggerationIter;
 }
 
-void MCV_TsneAnalysis::setExpDecay(int expDecay)
+void TsneAnalysis::setExpDecay(int expDecay)
 {
     _expDecay = expDecay;
 }
 
-void MCV_TsneAnalysis::setPerplexity(int perplexity)
+void TsneAnalysis::setPerplexity(int perplexity)
 {
     _perplexity = perplexity;
 }
 
-void MCV_TsneAnalysis::setNumDimensionsOutput(int numDimensionsOutput)
+void TsneAnalysis::setNumDimensionsOutput(int numDimensionsOutput)
 {
     _numDimensionsOutput = numDimensionsOutput;
 }
 
-void MCV_TsneAnalysis::stopGradientDescent()
+void TsneAnalysis::stopGradientDescent()
 {
     _isGradientDescentRunning = false;
 }
 
-void MCV_TsneAnalysis::markForDeletion()
+void TsneAnalysis::markForDeletion()
 {
     _isMarkedForDeletion = true;
 
     stopGradientDescent();
 }
 
-MCV_TsneAnalysis::~MCV_TsneAnalysis()
+TsneAnalysis::~TsneAnalysis()
 {
 }

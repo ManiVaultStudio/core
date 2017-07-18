@@ -35,7 +35,7 @@ public slots:
     void dataSetPicked(const QString& name);
     void startComputation();
 private:
-    std::unique_ptr<MCV_TsneAnalysis> tsne;
+    std::unique_ptr<TsneAnalysis> tsne;
     QString _embedSetName;
 };
 

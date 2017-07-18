@@ -20,7 +20,7 @@ void TsneAnalysisPlugin::init()
 {
     _settings = std::make_unique<TsneSettingsWidget>(this);
 
-    tsne = std::make_unique<MCV_TsneAnalysis>();
+    tsne = std::make_unique<TsneAnalysis>();
 }
 
 void TsneAnalysisPlugin::dataAdded(const QString name)

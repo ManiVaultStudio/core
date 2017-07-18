@@ -1,21 +1,18 @@
-#ifndef MCV_TSNE_ANALYSIS
-#define MCV_TSNE_ANALYSIS
+#ifndef TSNE_ANALYSIS_H
+#define TSNE_ANALYSIS_H
 
 #include "gradient_descent.h"
 
 #include <vector>
 #include <string>
 
-class MCV_DerivedDataPoints;
-class MCV_DerivedDataClusters;
-
 class TsneAnalysisPlugin;
 
-class MCV_TsneAnalysis
+class TsneAnalysis
 {
 public:
-    MCV_TsneAnalysis();
-    ~MCV_TsneAnalysis();
+    TsneAnalysis();
+    ~TsneAnalysis();
 
     void init(std::string name);
 
@@ -54,19 +51,12 @@ public:
 
     std::vector<typename atsne::GradientDescent<>::flag_type>* flags();
     std::vector<float>* output();
-    //std::vector<int>* outputFileIdxs();
-    //std::vector<float>* markers();
-    //std::vector< std::pair<int, int> >* pointReferences();
 
     std::vector<float>* densityGradientMap();
-
-    //int numDiscreteMetaValues();
 
     inline bool isTsneRunning() { return _isTsneRunning; }
     inline bool isGradientDescentRunning() { return _isGradientDescentRunning; }
     inline bool isMarkedForDeletion() { return _isMarkedForDeletion; }
-
-    MCV_DerivedDataClusters* updateClusters(std::vector< std::vector<unsigned int> >* indices, std::string namePrefix);
 
 private:
 
@@ -113,4 +103,4 @@ private:
     atsne::GradientDescent<> _gradientDescent;
 };
 
-#endif // MCV_TSNE_ANALYSIS
+#endif // TSNE_ANALYSIS_H
