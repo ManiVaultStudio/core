@@ -25,24 +25,13 @@ void TsneAnalysisPlugin::init()
 
 void TsneAnalysisPlugin::dataAdded(const QString name)
 {
-    if (name == "Embedding") {
-        return;
-    }
-
     const hdps::Set* set = _core->requestData(name);
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
-    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
 
-    _embedSetName = _core->addData("Points", "Embedding");
-    const hdps::Set* embedSet = _core->requestData(_embedSetName);
-    PointsPlugin* embedPoints = dynamic_cast<PointsPlugin*>(_core->requestPlugin(embedSet->getDataName()));
-
-    embedPoints->numDimensions = 2;
-    _core->notifyDataAdded(_embedSetName);
-
-    tsne->initTSNE(&points->data, points->numDimensions);
-
-    tsne->computeGradientDescent(*this);
+    TsneSettingsWidget* tsneSettings = dynamic_cast<TsneSettingsWidget*>(_settings.get());
+    if (dataPlugin->getKind() == "Points") {
+        tsneSettings->dataOptions.addItem(name);
+    }
 }
 
 void TsneAnalysisPlugin::dataChanged(const QString name)
@@ -89,7 +78,23 @@ void TsneAnalysisPlugin::dataSetPicked(const QString& name)
 
 void TsneAnalysisPlugin::startComputation()
 {
+    TsneSettingsWidget* tsneSettings = dynamic_cast<TsneSettingsWidget*>(_settings.get());
 
+    QString setName = tsneSettings->dataOptions.currentText();
+    const hdps::Set* set = _core->requestData(setName);
+    const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
+    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
+
+    _embedSetName = _core->addData("Points", "Embedding");
+    const hdps::Set* embedSet = _core->requestData(_embedSetName);
+    PointsPlugin* embedPoints = dynamic_cast<PointsPlugin*>(_core->requestPlugin(embedSet->getDataName()));
+
+    embedPoints->numDimensions = 2;
+    _core->notifyDataAdded(_embedSetName);
+
+    tsne->initTSNE(&points->data, points->numDimensions);
+
+    tsne->computeGradientDescent(*this);
 }
 
 // =============================================================================

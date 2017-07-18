@@ -49,6 +49,9 @@ public:
         startButton.setText("Start tSNE");
         connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
         connect(&startButton, SIGNAL(clicked()), analysis, SLOT(startComputation()));
+
+        addWidget(&startButton);
+        addWidget(&dataOptions);
     }
 public:
     QPushButton startButton;

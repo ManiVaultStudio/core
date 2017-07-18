@@ -3,6 +3,9 @@
 
 #include "DockableWidget.h"
 
+#include <QWidget>
+#include <QGridLayout>
+
 namespace hdps
 {
 namespace gui
@@ -12,7 +15,9 @@ class SettingsWidget : public DockableWidget
 {
     Q_OBJECT
 public:
-    
+    void addWidget(QWidget* widget) {
+        mainLayout()->addWidget(widget);
+    }
 };
 
 } // namespace gui
