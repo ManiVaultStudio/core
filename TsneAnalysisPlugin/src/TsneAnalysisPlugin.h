@@ -11,6 +11,7 @@
 #include <QPushButton>
 
 using namespace hdps::plugin;
+using namespace hdps::gui;
 
 // =============================================================================
 // View

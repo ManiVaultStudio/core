@@ -1,15 +1,14 @@
 #ifndef SETTINGS_WIDGET_H
 #define SETTINGS_WIDGET_H
 
-#include <QWidget>
-
+#include "DockableWidget.h"
 
 namespace hdps
 {
 namespace gui
 {
 
-class SettingsWidget : public QWidget
+class SettingsWidget : public DockableWidget
 {
     Q_OBJECT
 public:
