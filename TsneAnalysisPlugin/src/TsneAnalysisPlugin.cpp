@@ -80,6 +80,10 @@ void TsneAnalysisPlugin::startComputation()
 {
     TsneSettingsWidget* tsneSettings = dynamic_cast<TsneSettingsWidget*>(_settings.get());
 
+    if (tsneSettings->dataOptions.currentText().isEmpty()) {
+        return;
+    }
+
     QString setName = tsneSettings->dataOptions.currentText();
     const hdps::Set* set = _core->requestData(setName);
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
