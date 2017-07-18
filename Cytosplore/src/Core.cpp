@@ -4,6 +4,7 @@
 #include "PluginManager.h"
 #include "DataManager.h"
 
+#include "AnalysisPlugin.h"
 #include "LoaderPlugin.h"
 #include "WriterPlugin.h"
 #include "ViewPlugin.h"
@@ -51,6 +52,13 @@ void Core::addPlugin(plugin::Plugin* plugin) {
     // Initialize the plugin after it has been added to the core
     plugin->init();
 
+    // If it is an analysis plugin with a settings widget, add the settings to the main window
+    if (plugin->getType() == plugin::Type::ANALYSIS) {
+        plugin::AnalysisPlugin* analysis = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
+        if (analysis->hasSettings()) {
+            _mainWindow.addSettings(analysis->getSettings());
+        }
+    }
     // If it is a loader plugin it should call loadData
     if (plugin->getType() == plugin::Type::LOADER) {
         dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
