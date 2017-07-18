@@ -35,8 +35,6 @@ public:
     inline int numDimensionsOutput() { return _numDimensionsOutput; }
     void setNumDimensionsOutput(int numDimensionsOutput);
 
-    void softInit();
-    void computeTSNE();
     void computeGradientDescent(const TsneAnalysisPlugin& plugin);
     void initTSNE(const std::vector<float>* data, const int numDimensions);
     void initGradientDescent();
@@ -81,7 +79,6 @@ private:
     bool _isTsneRunning;
     bool _isMarkedForDeletion;
 
-    //std::vector< std::pair<int, int> > _pointReferences;
     int _numDataPoints;
 
     std::vector<float> _densityGradientMap;
@@ -92,11 +89,7 @@ private:
     float _radius;
     std::vector<typename atsne::GradientDescent<>::flag_type> _flags;
     std::vector<float> _output;
-    //std::vector<int> _fileIdxs;
     std::vector<double> _outputDouble;
-    //int _numDiscreteMetaValues;
-
-    //std::vector<float> _markers;
 
     KNNSparseMatrix<double> _sparseMatrix;
     std::vector<double> _tSNEData;

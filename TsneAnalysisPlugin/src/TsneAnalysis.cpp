@@ -2,9 +2,6 @@
 
 #include <vector>
 #include <assert.h>
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
 
 // TSNE
 #include "vptree.h"
@@ -33,20 +30,12 @@ _isMarkedForDeletion(false),
 _numDataPoints(0),
 _continueFromIteration(0),
 _radius(0.0f)
-//_numDiscreteMetaValues(0)
 {
-    //_type = MCV_ANALYSIS_TYPE_TSNE;
+    
 }
 
 void TsneAnalysis::init(std::string name)
 {
-}
-
-void TsneAnalysis::computeTSNE()
-{
-    //initTSNE();
-
-    //computeGradientDescent();
 }
 
 void TsneAnalysis::computeGradientDescent(const TsneAnalysisPlugin& plugin)
@@ -73,22 +62,15 @@ void TsneAnalysis::initTSNE(const std::vector<float>* data, const int numDimensi
     {
         for (int j = 0; j < numDimensions; j++)
         {
-            //int varIdx = _selectedMarkers[j];
-
-            _tSNEData[i * numDimensions + j] = static_cast<double>((*data)[i * numDimensions + j]);//tmpData[file][inOffset + varIdx]);
+            _tSNEData[i * numDimensions + j] = static_cast<double>((*data)[i * numDimensions + j]);
         }
-
-        //FIXME: should marker data belong to virtual datasets (?)
-        //memcpy(&(_markers[i * numMarkerDimensions]), &(tmpData[file][inOffset]), sizeof(float)* numMarkerDimensions);
     }
     qDebug() << "Data copied.";
-    //_numDiscreteMetaValues = _dataSelection->numDiscreteMetaValues();
     
     /// Computation of the high dimensional similarities
     _output.resize(_numDataPoints * _numDimensionsOutput);
     _outputDouble.resize(_numDataPoints * _numDimensionsOutput);
     qDebug() << "Output allocated.";
-    qDebug() << "Out before: " << _tSNEData[0];
     {
         TSNEApproxInitializer<> initializer;
 
@@ -109,12 +91,10 @@ void TsneAnalysis::initTSNE(const std::vector<float>* data, const int numDimensi
             initializer.ComputeHighDimensionalProbDistributions(_tSNEData.data(), _numDataPoints, numDimensions, _sparseMatrix);
         }
         qDebug() << "Probability distributions calculated.";
-        std::cout << "\n================================================================================\n";
-        std::cout << "A-tSNE: Compute probability distribution: " << t / 1000 << " seconds";
-        std::cout << "\n--------------------------------------------------------------------------------\n";
+        qDebug() << "================================================================================";
+        qDebug() << "A-tSNE: Compute probability distribution: " << t / 1000 << " seconds";
+        qDebug() << "--------------------------------------------------------------------------------";
     }
-    qDebug() << "Out after: " << _tSNEData[0];
-    //_uiInterface->tsneInitialized();
 }
 
 void TsneAnalysis::initGradientDescent()
@@ -165,7 +145,7 @@ void TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
     double kldmax = 0.0;
     {
         
-        std::cout << "A-tSNE: Computing gradient descent..\n";
+        qDebug() << "A-tSNE: Computing gradient descent..\n";
         _isGradientDescentRunning = true;
 
         // Performs gradient descent for every iteration
@@ -186,7 +166,7 @@ void TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
 
             if ((iter + 1) % 100 == 0){
                 TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
-                std::cout << "<Name goes here>" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld << std::endl;
+                qDebug() << "<Name goes here>" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld;
             }
 
             plugin.onEmbeddingUpdate();
@@ -199,9 +179,9 @@ void TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
         _isTsneRunning = false;
     }
     TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
-    std::cout << "--------------------------------------------------------------------------------\n";
-    std::cout << "A-tSNE: Finished embedding of " << "<Name goes here>" << " in: " << t / 1000 << " seconds " << ".KL - divergence is : " << kld;
-    std::cout << "\n================================================================================\n";
+    qDebug() << "--------------------------------------------------------------------------------";
+    qDebug() << "A-tSNE: Finished embedding of " << "<Name goes here>" << " in: " << t / 1000 << " seconds " << ".KL - divergence is : " << kld;
+    qDebug() << "================================================================================";
 }
 
 // Copy tSNE output to our output
