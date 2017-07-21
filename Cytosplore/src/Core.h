@@ -77,6 +77,7 @@ public:
     */
     gui::MainWindow& gui() const;
 private:
+    bool supportsSet(plugin::DataConsumer* dataConsumer, QString setName);
     std::vector<plugin::DataConsumer*> getDataConsumers();
 
 private:

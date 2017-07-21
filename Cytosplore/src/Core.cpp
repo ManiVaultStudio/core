@@ -144,9 +144,12 @@ Set* Core::requestSelection(const QString name)
  * Goes through all plugins stored in the core and calls the 'dataAdded' function
  * on all plugins that inherit from the DataConsumer interface.
  */
-void Core::notifyDataAdded(const QString name) {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers()) {
-        dataConsumer->dataAdded(name);
+void Core::notifyDataAdded(const QString name)
+{
+    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
+    {
+        if (supportsSet(dataConsumer, name))
+            dataConsumer->dataAdded(name);
     }
 }
 
@@ -154,9 +157,12 @@ void Core::notifyDataAdded(const QString name) {
 * Goes through all plugins stored in the core and calls the 'dataChanged' function
 * on all plugins that inherit from the DataConsumer interface.
 */
-void Core::notifyDataChanged(const QString name) {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers()) {
-        dataConsumer->dataChanged(name);
+void Core::notifyDataChanged(const QString name)
+{
+    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
+    {
+        if (supportsSet(dataConsumer, name))
+            dataConsumer->dataChanged(name);
     }
 }
 
@@ -165,8 +171,10 @@ void Core::notifyDataChanged(const QString name) {
 * on all plugins that inherit from the DataConsumer interface.
 */
 void Core::notifyDataRemoved(const QString name) {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers()) {
-        dataConsumer->dataRemoved(name);
+    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
+    {
+        if (supportsSet(dataConsumer, name))
+            dataConsumer->dataRemoved(name);
     }
 }
 
@@ -179,6 +187,14 @@ void Core::notifySelectionChanged(const QString dataName) {
 
 gui::MainWindow& Core::gui() const {
     return _mainWindow;
+}
+
+bool Core::supportsSet(plugin::DataConsumer* dataConsumer, QString setName)
+{
+    const hdps::Set* set = requestData(setName);
+    const plugin::DataTypePlugin* dataPlugin = requestPlugin(set->getDataName());
+
+    return dataConsumer->supportedDataKinds().contains(dataPlugin->getKind());
 }
 
 std::vector<plugin::DataConsumer*> Core::getDataConsumers()
