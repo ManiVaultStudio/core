@@ -17,8 +17,15 @@ public:
     AnalysisPlugin(QString name) : Plugin(Type::ANALYSIS, name) { }
     virtual ~AnalysisPlugin() {};
 
-    bool hasSettings() { return _settings != nullptr; }
-    gui::SettingsWidget* const getSettings() { return _settings.get(); }
+    bool hasSettings()
+    {
+        return _settings != nullptr;
+    }
+
+    gui::SettingsWidget* const getSettings()
+    {
+        return _settings.get();
+    }
 protected:
     std::unique_ptr<gui::SettingsWidget> _settings;
 };

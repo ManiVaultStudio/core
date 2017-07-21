@@ -24,8 +24,10 @@ const char *plotVertexSource = GLSL(330,
     {
         pass_color = color;
 
-        if (selecting) {
-            if (position.x > start.x && position.x < end.x && position.y > start.y && position.y < end.y) {
+        if (selecting)
+        {
+            if (position.x > start.x && position.x < end.x && position.y > start.y && position.y < end.y)
+            {
                 pass_color = vec3(1, 0.5, 0);
             }
         }
@@ -69,10 +71,10 @@ const char *selectionVertexSource = GLSL(330,
     void main()
     {
         vec2 vertex;// = vertices[gl_VertexID];
-        if (gl_VertexID == 0) { vertex = vec2(start.x, start.y); }
-        if (gl_VertexID == 1) { vertex = vec2(end.x, start.y); }
-        if (gl_VertexID == 2) { vertex = vec2(start.x, end.y); }
-        if (gl_VertexID == 3) { vertex = vec2(end.x, end.y); }
+        if (gl_VertexID == 0) vertex = vec2(start.x, start.y);
+        if (gl_VertexID == 1) vertex = vec2(end.x, start.y);
+        if (gl_VertexID == 2) vertex = vec2(start.x, end.y);
+        if (gl_VertexID == 3) vertex = vec2(end.x, end.y);
         gl_Position = vec4(vertex, 0, 1);
     }
 );
@@ -107,7 +109,8 @@ void ScatterplotWidget::setData(const std::vector<float>* positions)
     update();
 }
 
-void ScatterplotWidget::setColors(const std::vector<float>& colors) {
+void ScatterplotWidget::setColors(const std::vector<float>& colors)
+{
     this->colors = colors;
 
     glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
@@ -182,7 +185,8 @@ void ScatterplotWidget::initializeGL()
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
-    if (numPoints > 0) {
+    if (numPoints > 0)
+    {
         glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
         glBufferData(GL_ARRAY_BUFFER, numPoints * 2 * sizeof(float), positions->data(), GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
@@ -221,7 +225,8 @@ void ScatterplotWidget::paintGL()
     {
         shader->setUniformValue("pointSize", _pointSize / 800);
     }
-    else if (_scalingMode == Absolute) {
+    else if (_scalingMode == Absolute)
+    {
         shader->setUniformValue("pointSize", _pointSize / _windowSize.width());
     }
 
@@ -254,7 +259,8 @@ void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (_selecting) {
+    if (_selecting)
+    {
         selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
         selectionEnd = selectionEnd * 2 - QPointF(1, 1);
         update();

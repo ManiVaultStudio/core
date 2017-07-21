@@ -17,8 +17,10 @@ void DataManager::addSelection(QString dataName, Set* selection)
 
 Set* DataManager::getSet(QString name)
 {
-    for (Set* set : dataSets) {
-        if (set->getName() == name) {
+    for (Set* set : dataSets)
+    {
+        if (set->getName() == name)
+        {
             return set;
         }
     }
@@ -30,18 +32,23 @@ Set* DataManager::getSelection(QString name)
     return selections[name];
 }
 
-const QVector<Set*>& DataManager::allSets() {
+const QVector<Set*>& DataManager::allSets()
+{
     return dataSets;
 }
 
-const QString DataManager::getUniqueSetName(QString request) {
-    for (const Set* set : allSets()) {
-        if (set->getName() == request) {
+const QString DataManager::getUniqueSetName(QString request)
+{
+    for (const Set* set : allSets())
+    {
+        if (set->getName() == request)
+        {
             // Index in the string where the underscore followed by digits starts
             int index = request.lastIndexOf(QRegularExpression("_\\d+"));
 
             // If the regular expression was not found create the first copy
-            if (index == -1) {
+            if (index == -1)
+            {
                 return getUniqueSetName(request + "_1");
             }
             else {

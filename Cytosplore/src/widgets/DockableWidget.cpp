@@ -6,9 +6,10 @@
 #include <QObject>
 #include <QAction>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps
+{
+namespace gui
+{
 
 DockableWidget::DockableWidget(QWidget *parent) :
     QDockWidget(parent),
@@ -42,7 +43,8 @@ bool DockableWidget::toggleVisibility()
     return setVisibility(!_isVisible);
 }
 
-void DockableWidget::addWidget(QWidget* widget) {
+void DockableWidget::addWidget(QWidget* widget)
+{
     _mainLayout->addWidget(widget);
 }
 

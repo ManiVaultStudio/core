@@ -41,7 +41,8 @@ void PluginManager::LoadPlugins()
     //if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
     //    pluginsDir.cdUp();
 #elif defined(Q_OS_MAC)
-    if (pluginsDir.dirName() == "MacOS") {
+    if (pluginsDir.dirName() == "MacOS")
+    {
         pluginsDir.cdUp();
         pluginsDir.cdUp();
         pluginsDir.cdUp();
@@ -61,7 +62,8 @@ void PluginManager::LoadPlugins()
         // create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
        
-        if (!pluginFactory) {
+        if (!pluginFactory)
+        {
             qDebug() << "Failed to load plugin: " << fileName << pluginLoader.errorString();
             continue;
         }

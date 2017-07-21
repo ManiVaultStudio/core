@@ -26,30 +26,43 @@ public:
     /**
      * Returns the unique name of this plugin.
      */
-    QString getName() const { return _name; }
+    QString getName() const
+    {
+        return _name;
+    }
 
     /**
     * Returns the kind of plugin. The kind is specific to the
     * particular implementation of a plugin type.
     */
-    QString getKind() const { return _kind; }
+    QString getKind() const
+    {
+        return _kind;
+    }
 
     /**
      * Returns the type of plugin, see all types in PluginType
      */
-    Type getType() const { return _type; }
+    Type getType() const
+    {
+        return _type;
+    }
 
     /**
      * Returns the version of the plugin. If no version string is implemented 
      * by this particular plugin it will return the "No version" string.
      */
-    virtual QString getVersion() const { return "No Version"; }
+    virtual QString getVersion() const
+    {
+        return "No Version";
+    }
 
     /**
      * Stores a reference to the core in the plugin via the CoreInterface
      * class, which provides restricted access to the core.
      */
-    void setCore(CoreInterface* core) {
+    void setCore(CoreInterface* core)
+    {
         this->_core = core;
     }
 protected:

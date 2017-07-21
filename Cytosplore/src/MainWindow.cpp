@@ -8,9 +8,10 @@
 
 #include <QDebug>
 
-namespace hdps {
-
-namespace gui {
+namespace hdps
+{
+namespace gui
+{
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -25,8 +26,10 @@ MainWindow::~MainWindow()
 {
 }
 
-QAction* MainWindow::addMenuAction(plugin::Type type, QString name) {
-    switch (type) {
+QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
+{
+    switch (type)
+    {
     case plugin::Type::ANALYSIS:      return menuAnalysis->addAction(name);
     case plugin::Type::LOADER:        return menuFile->addAction(name);
     case plugin::Type::WRITER:        return menuFile->addAction(name);
@@ -36,11 +39,13 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name) {
     }
 }
 
-void MainWindow::addView(plugin::ViewPlugin* plugin) {
+void MainWindow::addView(plugin::ViewPlugin* plugin)
+{
     addDockWidget(Qt::RightDockWidgetArea, plugin);
 }
 
-void MainWindow::addSettings(gui::SettingsWidget* settings) {
+void MainWindow::addSettings(gui::SettingsWidget* settings)
+{
     addDockWidget(Qt::LeftDockWidgetArea, settings);
 }
 

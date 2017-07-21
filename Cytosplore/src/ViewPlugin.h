@@ -17,7 +17,8 @@ class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsume
     Q_OBJECT
     
 public:
-    ViewPlugin(QString name) : Plugin(Type::VIEW, name) {
+    ViewPlugin(QString name) : Plugin(Type::VIEW, name)
+    {
         
     }
 
