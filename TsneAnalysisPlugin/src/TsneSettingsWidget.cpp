@@ -18,6 +18,8 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
 
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
     QGroupBox* advancedSettingsBox = new QGroupBox("Advanced Settings");
+    advancedSettingsBox->setCheckable(true);
+    advancedSettingsBox->setChecked(false);
     QLabel* iterationLabel = new QLabel("Iteration Count");
     QLabel* perplexityLabel = new QLabel("Perplexity");
     QLabel* exaggerationLabel = new QLabel("Excaggeration");
