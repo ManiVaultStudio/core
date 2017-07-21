@@ -98,7 +98,7 @@ namespace gui
 // by reference then we can upload the data to the GPU, but not store it in the widget.
 void ScatterplotWidget::setData(const std::vector<float>* positions)
 {
-    _numPoints = positions->size() / 2;
+    _numPoints = (unsigned int) positions->size() / 2;
     _positions = positions;
     _colors.resize(_numPoints * 3, 0.5f);
 
@@ -284,7 +284,7 @@ void ScatterplotWidget::onSelection(QRectF selection)
     update();
 
     std::vector<unsigned int> indices;
-    for (int i = 0; i < _numPoints; i++)
+    for (unsigned int i = 0; i < _numPoints; i++)
     {
         QPointF point((*_positions)[i * 2 + 0], (*_positions)[i * 2 + 1]);
 

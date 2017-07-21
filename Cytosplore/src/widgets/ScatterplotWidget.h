@@ -52,7 +52,7 @@ private:
     GLuint _colorBuffer;
     QOpenGLShaderProgram* _shader;
 
-    int _numPoints = 0;
+    unsigned int _numPoints = 0;
     const std::vector<float>* _positions;
     std::vector<float> _colors;
 
