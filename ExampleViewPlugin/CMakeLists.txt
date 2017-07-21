@@ -25,16 +25,16 @@ set(SOURCES
 
 source_group( Plugin FILES ${SOURCES})
 
-include_directories("$ENV{CYTOSPLORE_INSTALL_DIR}/$<CONFIGURATION>/include/")
+include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${SOURCES})
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} "$ENV{CYTOSPLORE_INSTALL_DIR}/$<CONFIGURATION>/lib/Cytosplore_Public.lib")
+target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E copy
 	"$<TARGET_FILE:${PROJECT}>"
-	"$ENV{CYTOSPLORE_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PROJECT}>"
+	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PROJECT}>"
 )
