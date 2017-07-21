@@ -7,8 +7,6 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QLineEdit>
-#include <QLabel>
-#include <QGroupBox>
 
 using namespace hdps::gui;
 
@@ -28,6 +26,12 @@ private slots:
 public:
     QComboBox dataOptions;
     QLineEdit numIterations;
+    QLineEdit perplexity;
+    QLineEdit exaggeration;
+    QLineEdit expDecay;
+    QLineEdit numTrees;
+    QLineEdit numChecks;
+    QLineEdit theta;
     QPushButton startButton;
 };
 
