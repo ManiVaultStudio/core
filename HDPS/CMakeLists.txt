@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-set(PROJECT "Cytosplore")
+set(PROJECT "HDPS")
 project(${PROJECT})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-set(MACOSX_BUNDLE_BUNDLE_NAME "Cytosplore")
+set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
 set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
 set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
 set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
 set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2017. All rights reserved.")
-set(MACOSX_BUNDLE_GUI_IDENTIFIER "nl.tudelft.graphics.cytosplore")
+set(MACOSX_BUNDLE_GUI_IDENTIFIER "nl.tudelft.graphics.hdps")
 set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
 
 if(MSVC)
@@ -25,7 +25,7 @@ endif(MSVC)
 find_package(Qt5Widgets REQUIRED)
 find_package(OpenGL REQUIRED)
 
-set(INSTALL_DIR $ENV{CYTOSPLORE_INSTALL_DIR})
+set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
 #message(STATUS ${INSTALL_DIR})
 
 set( MAIN_SOURCES
@@ -101,7 +101,7 @@ list(APPEND WIDGET_FILES
 )
 
 if(WIN32)
-    set(MAIN_SOURCES ${MAIN_SOURCES} win/cytosplore.rc)
+    set(MAIN_SOURCES ${MAIN_SOURCES} win/hdps.rc)
 endif(WIN32)
 
 if(APPLE)
@@ -122,7 +122,7 @@ source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})
-source_group( Resources FILES win/cytosplore.rc)
+source_group( Resources FILES win/hdps.rc)
 source_group( Resources\\generated FILES ${UI_HEADERS})
 
 if(APPLE)

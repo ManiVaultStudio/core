@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
 	QCoreApplication::setOrganizationName("CGV TU Delft");
 	QCoreApplication::setOrganizationDomain("graphics.tudelft.nl");
-	QCoreApplication::setApplicationName("Cytosplore");
+	QCoreApplication::setApplicationName("HDPS");
 
     // Retina display support for Mac OS and X11:
     // AA_UseHighDpiPixmaps attribute is off by default in Qt 5.1 but will most
