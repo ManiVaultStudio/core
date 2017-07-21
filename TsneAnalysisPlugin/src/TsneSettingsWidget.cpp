@@ -12,7 +12,6 @@ using namespace hdps::plugin;
 TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     setFixedWidth(200);
 
-    startButton.setText("Start Computation");
     connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
     connect(&startButton, SIGNAL(clicked()), analysis, SLOT(startComputation()));
     connect(&numIterations, SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
@@ -64,6 +63,7 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     advancedSettingsLayout->addWidget(&numChecks, 3, 1);
     advancedSettingsBox->setLayout(advancedSettingsLayout);
 
+    startButton.setText("Start Computation");
     startButton.setFixedSize(QSize(150, 50));
 
     addWidget(&dataOptions);
@@ -76,6 +76,14 @@ bool TsneSettingsWidget::hasValidSettings() {
     if (!numIterations.hasAcceptableInput())
         return false;
     if (!perplexity.hasAcceptableInput())
+        return false;
+    if (!exaggeration.hasAcceptableInput())
+        return false;
+    if (!expDecay.hasAcceptableInput())
+        return false;
+    if (!numTrees.hasAcceptableInput())
+        return false;
+    if (!numChecks.hasAcceptableInput())
         return false;
 
     return true;
