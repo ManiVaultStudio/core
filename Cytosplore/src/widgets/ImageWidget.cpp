@@ -8,8 +8,8 @@
 
 void ImageWidget::setImage(const std::vector<float>& pixels, int width, int height)
 {
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glGenTextures(1, &_texture);
+    glBindTexture(GL_TEXTURE_2D, _texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_FLOAT, pixels.data());
@@ -24,8 +24,8 @@ void ImageWidget::initializeGL()
     glClearColor(1.0, 1.0, 1.0, 1.0);
     qDebug() << "Initializing image widget";
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    glGenVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
 
     float vertices[6 * 2] =
     {
@@ -90,10 +90,10 @@ void ImageWidget::initializeGL()
         }
     );
 
-    shader = new QOpenGLShaderProgram();
-    shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
-    shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
-    shader->link();
+    _shader = new QOpenGLShaderProgram();
+    _shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexSource);
+    _shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentSource);
+    _shader->link();
 }
 
 void ImageWidget::resizeGL(int w, int h)
@@ -107,12 +107,12 @@ void ImageWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT);
     qDebug() << "Rendering scatterplot";
 
-    shader->bind();
+    _shader->bind();
     //shader->setUniformValue("pointSize", _pointSize / 800);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    shader->setUniformValue("image", 0);
+    glBindTexture(GL_TEXTURE_2D, _texture);
+    _shader->setUniformValue("image", 0);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }

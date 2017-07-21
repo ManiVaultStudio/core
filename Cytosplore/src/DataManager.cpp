@@ -7,17 +7,17 @@ namespace hdps {
 
 void DataManager::addSet(Set* set)
 {
-    dataSets.append(set);
+    _dataSets.append(set);
 }
 
 void DataManager::addSelection(QString dataName, Set* selection)
 {
-    selections.insert(dataName, selection);
+    _selections.insert(dataName, selection);
 }
 
 Set* DataManager::getSet(QString name)
 {
-    for (Set* set : dataSets)
+    for (Set* set : _dataSets)
     {
         if (set->getName() == name)
         {
@@ -29,12 +29,12 @@ Set* DataManager::getSet(QString name)
 
 Set* DataManager::getSelection(QString name)
 {
-    return selections[name];
+    return _selections[name];
 }
 
 const QVector<Set*>& DataManager::allSets()
 {
-    return dataSets;
+    return _dataSets;
 }
 
 const QString DataManager::getUniqueSetName(QString request)

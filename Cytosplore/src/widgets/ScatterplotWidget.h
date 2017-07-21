@@ -47,25 +47,25 @@ private:
     const float        DEFAULT_ALPHA_VALUE   = 0.5f;
     const PointScaling DEFAULT_POINT_SCALING = PointScaling::Relative;
 
-    GLuint vao;
-    GLuint positionBuffer;
-    GLuint colorBuffer;
-    QOpenGLShaderProgram* shader;
+    GLuint _vao;
+    GLuint _positionBuffer;
+    GLuint _colorBuffer;
+    QOpenGLShaderProgram* _shader;
 
-    int numPoints = 0;
-    const std::vector<float>* positions;
-    std::vector<float> colors;
+    int _numPoints = 0;
+    const std::vector<float>* _positions;
+    std::vector<float> _colors;
 
     QSize _windowSize;
     PointScaling _scalingMode = DEFAULT_POINT_SCALING;
     float _pointSize          = DEFAULT_POINT_SIZE;
     float _alpha              = DEFAULT_ALPHA_VALUE;
 
-    QOpenGLShaderProgram* selectionShader;
+    QOpenGLShaderProgram* _selectionShader;
     bool _selecting = false;
-    QPointF selectionStart;
-    QPointF selectionEnd;
-    std::vector<const plugin::SelectionListener*> selectionListeners;
+    QPointF _selectionStart;
+    QPointF _selectionEnd;
+    std::vector<const plugin::SelectionListener*> _selectionListeners;
 };
 
 } // namespace gui

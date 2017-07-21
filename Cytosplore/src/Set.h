@@ -8,44 +8,44 @@ namespace hdps {
 
 class Set {
 public:
-    Set() : all(false) {}
+    Set() : _all(false) {}
     virtual ~Set() {}
 
     virtual Set* copy() const = 0;
 
     QString getName() const
     {
-        return name;
+        return _name;
     }
 
     QString getDataName() const
     {
-        return dataName;
+        return _dataName;
     }
 
     bool isFull() const
     {
-        return all;
+        return _all;
     }
 
     void setName(QString name)
     {
-        this->name = name;
+        _name = name;
     }
 
     void setDataName(QString name)
     {
-        this->dataName = name;
+        _dataName = name;
     }
 
     void setAll()
     {
-        this->all = true;
+        _all = true;
     }
 private:
-    QString name;
-    QString dataName;
-    bool all;
+    QString _name;
+    QString _dataName;
+    bool _all;
 };
 
 } // namespace hdps

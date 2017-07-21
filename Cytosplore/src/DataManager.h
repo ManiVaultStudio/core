@@ -20,8 +20,8 @@ public:
     const QString getUniqueSetName(QString request);
 
 private:
-    QVector<Set*> dataSets;
-    QMap<QString, Set*> selections;
+    QVector<Set*> _dataSets;
+    QMap<QString, Set*> _selections;
 };
 
 } // namespace hdps

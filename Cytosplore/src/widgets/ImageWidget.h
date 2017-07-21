@@ -16,10 +16,10 @@ protected:
     void paintGL()              Q_DECL_OVERRIDE;
 
 private:
-    QOpenGLShaderProgram* shader;
+    QOpenGLShaderProgram* _shader;
 
-    GLuint vao;
-    GLuint texture;
+    GLuint _vao;
+    GLuint _texture;
 
     QSize _windowSize;
 };

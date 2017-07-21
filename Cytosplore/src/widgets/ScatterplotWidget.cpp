@@ -98,23 +98,23 @@ namespace gui
 // by reference then we can upload the data to the GPU, but not store it in the widget.
 void ScatterplotWidget::setData(const std::vector<float>* positions)
 {
-    numPoints = positions->size() / 2;
-    this->positions = positions;
-    this->colors.resize(numPoints * 3, 0.5f);
+    _numPoints = positions->size() / 2;
+    _positions = positions;
+    _colors.resize(_numPoints * 3, 0.5f);
 
-    glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, numPoints * 2 * sizeof(float), positions->data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-    glBufferData(GL_ARRAY_BUFFER, numPoints * 3 * sizeof(float), colors.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, _positionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, _numPoints * 2 * sizeof(float), positions->data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, _numPoints * 3 * sizeof(float), _colors.data(), GL_STATIC_DRAW);
     update();
 }
 
 void ScatterplotWidget::setColors(const std::vector<float>& colors)
 {
-    this->colors = colors;
+    _colors = colors;
 
-    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-    glBufferData(GL_ARRAY_BUFFER, numPoints * 3 * sizeof(float), colors.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, _numPoints * 3 * sizeof(float), colors.data(), GL_STATIC_DRAW);
     update();
 }
 
@@ -138,7 +138,7 @@ void ScatterplotWidget::setPointScaling(PointScaling scalingMode)
 
 void ScatterplotWidget::addSelectionListener(const plugin::SelectionListener* listener)
 {
-    selectionListeners.push_back(listener);
+    _selectionListeners.push_back(listener);
 }
 
 void ScatterplotWidget::initializeGL()
@@ -150,8 +150,8 @@ void ScatterplotWidget::initializeGL()
     glClearColor(1.0, 1.0, 1.0, 1.0);
     qDebug() << "Initializing scatterplot";
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    glGenVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
 
     float vertices[6*2] = 
     {
@@ -173,35 +173,35 @@ void ScatterplotWidget::initializeGL()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
-    glGenBuffers(1, &positionBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+    glGenBuffers(1, &_positionBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _positionBuffer);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribDivisor(1, 1);
     glEnableVertexAttribArray(1);
 
-    glGenBuffers(1, &colorBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+    glGenBuffers(1, &_colorBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
-    if (numPoints > 0)
+    if (_numPoints > 0)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-        glBufferData(GL_ARRAY_BUFFER, numPoints * 2 * sizeof(float), positions->data(), GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-        glBufferData(GL_ARRAY_BUFFER, numPoints * 3 * sizeof(float), colors.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, _positionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, _numPoints * 2 * sizeof(float), _positions->data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
+        glBufferData(GL_ARRAY_BUFFER, _numPoints * 3 * sizeof(float), _colors.data(), GL_STATIC_DRAW);
     }
 
-    shader = new QOpenGLShaderProgram();
-    shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
-    shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
-    shader->link();
+    _shader = new QOpenGLShaderProgram();
+    _shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
+    _shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
+    _shader->link();
 
-    selectionShader = new QOpenGLShaderProgram();
-    selectionShader->addShaderFromSourceCode(QOpenGLShader::Vertex, selectionVertexSource);
-    selectionShader->addShaderFromSourceCode(QOpenGLShader::Fragment, selectionFragmentSource);
-    shader->link();
+    _selectionShader = new QOpenGLShaderProgram();
+    _selectionShader->addShaderFromSourceCode(QOpenGLShader::Vertex, selectionVertexSource);
+    _selectionShader->addShaderFromSourceCode(QOpenGLShader::Fragment, selectionFragmentSource);
+    _shader->link();
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)
@@ -215,35 +215,35 @@ void ScatterplotWidget::paintGL()
     qDebug() << "Rendering scatterplot";
     glClear(GL_COLOR_BUFFER_BIT);
 
-    QPointF ns(selectionStart.x() < selectionEnd.x() ? selectionStart.x() : selectionEnd.x(), selectionStart.y() < selectionEnd.y() ? selectionStart.y() : selectionEnd.y());
-    QPointF ne(selectionStart.x() < selectionEnd.x() ? selectionEnd.x() : selectionStart.x(), selectionStart.y() < selectionEnd.y() ? selectionEnd.y() : selectionStart.y());
+    QPointF ns(_selectionStart.x() < _selectionEnd.x() ? _selectionStart.x() : _selectionEnd.x(), _selectionStart.y() < _selectionEnd.y() ? _selectionStart.y() : _selectionEnd.y());
+    QPointF ne(_selectionStart.x() < _selectionEnd.x() ? _selectionEnd.x() : _selectionStart.x(), _selectionStart.y() < _selectionEnd.y() ? _selectionEnd.y() : _selectionStart.y());
 
     QRectF selection(ns, ne);
 
-    shader->bind();
+    _shader->bind();
     if (_scalingMode == Relative)
     {
-        shader->setUniformValue("pointSize", _pointSize / 800);
+        _shader->setUniformValue("pointSize", _pointSize / 800);
     }
     else if (_scalingMode == Absolute)
     {
-        shader->setUniformValue("pointSize", _pointSize / _windowSize.width());
+        _shader->setUniformValue("pointSize", _pointSize / _windowSize.width());
     }
 
-    shader->setUniformValue("alpha", _alpha);
-    shader->setUniformValue("selecting", _selecting);
-    shader->setUniformValue("start", selection.topLeft());
-    shader->setUniformValue("end", selection.bottomRight());
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, numPoints);
+    _shader->setUniformValue("alpha", _alpha);
+    _shader->setUniformValue("selecting", _selecting);
+    _shader->setUniformValue("start", selection.topLeft());
+    _shader->setUniformValue("end", selection.bottomRight());
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
 
     if (_selecting)
     {
         // Selection
-        selectionShader->bind();
+        _selectionShader->bind();
 
         //qDebug() << ns << ne;
-        selectionShader->setUniformValue("start", selection.topLeft());
-        selectionShader->setUniformValue("end", selection.bottomRight());
+        _selectionShader->setUniformValue("start", selection.topLeft());
+        _selectionShader->setUniformValue("end", selection.bottomRight());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 }
@@ -253,16 +253,16 @@ void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
     qDebug() << "Mouse clicky";
     _selecting = true;
 
-    selectionStart = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-    selectionStart = selectionStart * 2 - QPointF(1, 1);
+    _selectionStart = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+    _selectionStart = _selectionStart * 2 - QPointF(1, 1);
 }
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (_selecting)
     {
-        selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-        selectionEnd = selectionEnd * 2 - QPointF(1, 1);
+        _selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+        _selectionEnd = _selectionEnd * 2 - QPointF(1, 1);
         update();
     }
 }
@@ -272,10 +272,10 @@ void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
     qDebug() << "Mouse releasey";
     _selecting = false;
 
-    selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-    selectionEnd = selectionEnd * 2 - QPointF(1, 1);
+    _selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+    _selectionEnd = _selectionEnd * 2 - QPointF(1, 1);
 
-    QRectF selection(selectionStart, selectionEnd);
+    QRectF selection(_selectionStart, _selectionEnd);
     onSelection(selection);
 }
 
@@ -284,9 +284,9 @@ void ScatterplotWidget::onSelection(QRectF selection)
     update();
 
     std::vector<unsigned int> indices;
-    for (int i = 0; i < numPoints; i++)
+    for (int i = 0; i < _numPoints; i++)
     {
-        QPointF point((*positions)[i * 2 + 0], (*positions)[i * 2 + 1]);
+        QPointF point((*_positions)[i * 2 + 0], (*_positions)[i * 2 + 1]);
 
         if (selection.contains(point))
         {
@@ -294,7 +294,7 @@ void ScatterplotWidget::onSelection(QRectF selection)
         }
     }
 
-    for (const plugin::SelectionListener* listener : selectionListeners)
+    for (const plugin::SelectionListener* listener : _selectionListeners)
     {
         listener->onSelection(indices);
     }
@@ -305,11 +305,11 @@ void ScatterplotWidget::cleanup()
     qDebug() << "Deleting scatterplot widget, performing clean up...";
     makeCurrent();
 
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &positionBuffer);
-    glDeleteBuffers(1, &colorBuffer);
-    delete shader;
-    delete selectionShader;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_positionBuffer);
+    glDeleteBuffers(1, &_colorBuffer);
+    delete _shader;
+    delete _selectionShader;
 }
 
 } // namespace gui
