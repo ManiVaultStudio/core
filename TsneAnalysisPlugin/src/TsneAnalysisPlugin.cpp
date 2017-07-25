@@ -102,6 +102,11 @@ void TsneAnalysisPlugin::startComputation()
 
     // Initialize the tSNE computation with the settings from the settings widget
     tsne->setIterations(tsneSettings->numIterations.text().toInt());
+    tsne->setPerplexity(tsneSettings->perplexity.text().toInt());
+    tsne->setExaggerationIter(tsneSettings->exaggeration.text().toInt());
+    tsne->setExpDecay(tsneSettings->expDecay.text().toInt());
+    tsne->setNumTrees(tsneSettings->numTrees.text().toInt());
+    tsne->setNumChecks(tsneSettings->numChecks.text().toInt());
 
     // Run the computation
     QString setName = tsneSettings->dataOptions.currentText();
