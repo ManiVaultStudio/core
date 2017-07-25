@@ -1,7 +1,9 @@
 #ifndef TSNE_ANALYSIS_H
 #define TSNE_ANALYSIS_H
 
+#pragma warning(push, 0)
 #include "gradient_descent.h"
+#pragma warning pop
 
 #include <QThread>
 
