@@ -3,13 +3,16 @@
 
 #include "gradient_descent.h"
 
+#include <QThread>
+
 #include <vector>
 #include <string>
 
 class TsneAnalysisPlugin;
 
-class TsneAnalysis
+class TsneAnalysis : public QThread
 {
+    Q_OBJECT
 public:
     TsneAnalysis();
     ~TsneAnalysis();
@@ -35,10 +38,7 @@ public:
     inline int numDimensionsOutput() { return _numDimensionsOutput; }
     void setNumDimensionsOutput(int numDimensionsOutput);
 
-    void computeGradientDescent(const TsneAnalysisPlugin& plugin);
     void initTSNE(const std::vector<float>* data, const int numDimensions);
-    void initGradientDescent();
-    void embed(const TsneAnalysisPlugin& plugin);
     void removePoints();
     void stopGradientDescent();
     void markForDeletion();
@@ -57,11 +57,16 @@ public:
     inline bool isMarkedForDeletion() { return _isMarkedForDeletion; }
 
 private:
+    void run() override;
 
+    void computeGradientDescent();
+    void initGradientDescent();
+    void embed();
     void writeTsneChannels();
     void copyFloatOutput();
 
-protected:
+signals:
+    void newEmbedding();
 
 private:
 

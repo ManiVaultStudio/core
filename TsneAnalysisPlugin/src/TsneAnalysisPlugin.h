@@ -27,11 +27,13 @@ public:
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
-    void onEmbeddingUpdate() const;
 public slots:
     void dataSetPicked(const QString& name);
     void startComputation();
+    void onNewEmbedding();
 private:
+    void stopComputation();
+
     std::unique_ptr<TsneAnalysis> tsne;
     QString _embedSetName;
 };

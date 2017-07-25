@@ -10,7 +10,6 @@
 
 #include "TsneAnalysisPlugin.h"
 #include <QDebug>
-#include <QApplication>
 
 #include "timings/scoped_timers.h"
 
@@ -38,11 +37,11 @@ void TsneAnalysis::init(std::string name)
 {
 }
 
-void TsneAnalysis::computeGradientDescent(const TsneAnalysisPlugin& plugin)
+void TsneAnalysis::computeGradientDescent()
 {
     initGradientDescent();
 
-    embed(plugin);
+    embed();
 }
 
 void TsneAnalysis::initTSNE(const std::vector<float>* data, const int numDimensions)
@@ -136,7 +135,7 @@ void TsneAnalysis::initGradientDescent()
 }
 
 // Computing gradient descent
-void TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
+void TsneAnalysis::embed()
 {
 
     double t = 0.0;
@@ -169,8 +168,7 @@ void TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
                 qDebug() << "<Name goes here>" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld;
             }
 
-            plugin.onEmbeddingUpdate();
-            qApp->processEvents();
+            emit newEmbedding();
 
             qDebug() << "Time: " << t;
         }
@@ -182,6 +180,10 @@ void TsneAnalysis::embed(const TsneAnalysisPlugin& plugin)
     qDebug() << "--------------------------------------------------------------------------------";
     qDebug() << "A-tSNE: Finished embedding of " << "<Name goes here>" << " in: " << t / 1000 << " seconds " << ".KL - divergence is : " << kld;
     qDebug() << "================================================================================";
+}
+
+void TsneAnalysis::run() {
+    computeGradientDescent();
 }
 
 // Copy tSNE output to our output

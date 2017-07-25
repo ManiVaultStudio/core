@@ -14,7 +14,7 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.TsneAnalysisPlugin")
 
 TsneAnalysisPlugin::~TsneAnalysisPlugin(void)
 {
-    
+    stopComputation();
 }
 
 void TsneAnalysisPlugin::init()
@@ -59,17 +59,6 @@ QStringList TsneAnalysisPlugin::supportedDataKinds()
     QStringList supportedKinds;
     supportedKinds << "Points";
     return supportedKinds;
-}
-
-void TsneAnalysisPlugin::onEmbeddingUpdate() const
-{
-    std::vector<float>* output = tsne->output();
-    const hdps::Set* embedSet = _core->requestData(_embedSetName);
-    PointsPlugin* embedPoints = dynamic_cast<PointsPlugin*>(_core->requestPlugin(embedSet->getDataName()));
-
-    embedPoints->data = *output;
-
-    _core->notifyDataChanged(_embedSetName);
 }
 
 void TsneAnalysisPlugin::dataSetPicked(const QString& name)
@@ -122,8 +111,41 @@ void TsneAnalysisPlugin::startComputation()
     _core->notifyDataAdded(_embedSetName);
 
     tsne->initTSNE(&points->data, points->numDimensions);
+    
+    connect(tsne.get(), SIGNAL(newEmbedding()), this, SLOT(onNewEmbedding()));
 
-    tsne->computeGradientDescent(*this);
+    tsne->start();
+}
+
+void TsneAnalysisPlugin::onNewEmbedding() {
+    std::vector<float>* output = tsne->output();
+    const hdps::Set* embedSet = _core->requestData(_embedSetName);
+    PointsPlugin* embedPoints = dynamic_cast<PointsPlugin*>(_core->requestPlugin(embedSet->getDataName()));
+
+    embedPoints->data = *output;
+
+    _core->notifyDataChanged(_embedSetName);
+}
+
+void TsneAnalysisPlugin::stopComputation() {
+    if (tsne)
+    {
+        if (tsne->isRunning())
+        {
+            // Request interruption of the computation
+            tsne->stopGradientDescent();
+            tsne->exit();
+
+            // Wait until the thread has terminated (max. 3 seconds)
+            if (!tsne->wait(3000))
+            {
+                qDebug() << "tSNE computation thread did not close in time, terminating...";
+                tsne->terminate();
+                tsne->wait();
+            }
+            qDebug() << "tSNE computation stopped.";
+        }
+    }
 }
 
 // =============================================================================
