@@ -22,7 +22,7 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     advancedSettingsBox->setChecked(false);
     QLabel* iterationLabel = new QLabel("Iteration Count");
     QLabel* perplexityLabel = new QLabel("Perplexity");
-    QLabel* exaggerationLabel = new QLabel("Excaggeration");
+    QLabel* exaggerationLabel = new QLabel("Exaggeration");
     QLabel* expDecayLabel = new QLabel("Exponential Decay");
     QLabel* numTreesLabel = new QLabel("Number of Trees");
     QLabel* numChecksLabel = new QLabel("Number of Checks");
@@ -31,7 +31,7 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     numIterations.setValidator(new QIntValidator(1, 10000, this));
     numIterations.setText("1000");
     perplexity.setFixedWidth(50);
-    perplexity.setValidator(new QIntValidator(1, 10000, this));
+    perplexity.setValidator(new QIntValidator(2, 50, this));
     perplexity.setText("30");
     exaggeration.setFixedWidth(50);
     exaggeration.setValidator(new QIntValidator(1, 10000, this));
