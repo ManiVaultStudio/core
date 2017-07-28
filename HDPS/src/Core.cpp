@@ -25,14 +25,7 @@ Core::~Core()
     // Delete the plugin manager
     _pluginManager.reset();
 
-    // Delete all plugins
-    for (auto& kv : _plugins)
-    {
-        for (int i = 0; i < kv.second.size(); ++i)
-        {
-            kv.second[i].reset();
-        }
-    }
+    destroyPlugins();
 }
 
 void Core::init()
@@ -97,18 +90,23 @@ void Core::addPlugin(plugin::Plugin* plugin)
  */
 const QString Core::addData(const QString kind, const QString name)
 {
+    // Create a new plugin of the given kind
     QString pluginName = _pluginManager->AddPlugin(kind);
+    // Request it from the core
     const plugin::DataTypePlugin* dataType = dynamic_cast<plugin::DataTypePlugin*>(requestPlugin(pluginName));
 
+    // Create an initial full set and an empty selection belonging to the raw data
     Set* fullSet = dataType->createSet();
     Set* selection = dataType->createSet();
 
+    // Generate a unique set name and set the properties of the new sets
     QString setName = _dataManager->getUniqueSetName(name);
     fullSet->setName(setName);
     fullSet->setDataName(pluginName);
     fullSet->setAll();
     selection->setDataName(pluginName);
 
+    // Add them to the data manager
     _dataManager->addSet(fullSet);
     _dataManager->addSelection(pluginName, selection);
     
@@ -235,6 +233,18 @@ std::vector<plugin::DataConsumer*> Core::getDataConsumers()
         }
     }
     return dataConsumers;
+}
+
+/** Destroys all plugins kept by the core */
+void Core::destroyPlugins()
+{
+    for (auto& kv : _plugins)
+    {
+        for (int i = 0; i < kv.second.size(); ++i)
+        {
+            kv.second[i].reset();
+        }
+    }
 }
 
 } // namespace hdps
