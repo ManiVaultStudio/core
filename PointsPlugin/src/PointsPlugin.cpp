@@ -21,12 +21,12 @@ void PointsPlugin::init()
 
 hdps::Set* PointsPlugin::createSet() const
 {
-    return new PointsSet();
+    return new IndexSet();
 }
 
-hdps::Set* PointsSet::copy() const
+hdps::Set* IndexSet::copy() const
 {
-    PointsSet* set = new PointsSet();
+    IndexSet* set = new IndexSet();
     set->setName(getName());
     set->setDataName(getDataName());
     set->indices = indices;
