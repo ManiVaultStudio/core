@@ -36,17 +36,7 @@ void ScatterplotPlugin::init()
 
 void ScatterplotPlugin::dataAdded(const QString name)
 {
-    const hdps::Set* set = _core->requestData(name);
-    const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
-
-    if (dataPlugin->getKind() == "Points") {
-        dataOptions.addItem(name);
-    }
-    else
-    {
-        qWarning((QString("Scatterplot plugin doesn't support data of kind: ") + dataPlugin->getKind()).toStdString().c_str());
-        return;
-    }
+    dataOptions.addItem(name);
 }
 
 void ScatterplotPlugin::dataChanged(const QString name)

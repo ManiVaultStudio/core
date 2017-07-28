@@ -26,12 +26,7 @@ void TsneAnalysisPlugin::init()
 
 void TsneAnalysisPlugin::dataAdded(const QString name)
 {
-    const hdps::Set* set = _core->requestData(name);
-    const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
-
-    if (dataPlugin->getKind() == "Points") {
-        _settings->dataOptions.addItem(name);
-    }
+    _settings->dataOptions.addItem(name);
 }
 
 void TsneAnalysisPlugin::dataChanged(const QString name)
