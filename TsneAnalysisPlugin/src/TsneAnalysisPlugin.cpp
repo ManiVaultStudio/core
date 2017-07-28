@@ -22,6 +22,8 @@ void TsneAnalysisPlugin::init()
     _settings = std::make_unique<TsneSettingsWidget>(this);
 
     _tsne = std::make_unique<TsneAnalysis>();
+
+    connect(_tsne.get(), SIGNAL(newEmbedding()), this, SLOT(onNewEmbedding()));
 }
 
 void TsneAnalysisPlugin::dataAdded(const QString name)
@@ -99,8 +101,6 @@ void TsneAnalysisPlugin::startComputation()
     _core->notifyDataAdded(_embedSetName);
 
     _tsne->initTSNE(&points->data, points->numDimensions);
-    
-    connect(_tsne.get(), SIGNAL(newEmbedding()), this, SLOT(onNewEmbedding()));
 
     _tsne->start();
 }
