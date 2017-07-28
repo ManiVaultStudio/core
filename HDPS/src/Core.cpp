@@ -33,7 +33,7 @@ void Core::init()
     _pluginManager = std::make_unique<plugin::PluginManager>(*this);
     _dataManager = std::make_unique<DataManager>();
 
-    _pluginManager->LoadPlugins();
+    _pluginManager->loadPlugins();
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -91,7 +91,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
 const QString Core::addData(const QString kind, const QString name)
 {
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager->AddPlugin(kind);
+    QString pluginName = _pluginManager->createPlugin(kind);
     // Request it from the core
     const plugin::DataTypePlugin* dataType = dynamic_cast<plugin::DataTypePlugin*>(requestPlugin(pluginName));
 

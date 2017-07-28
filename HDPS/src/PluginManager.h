@@ -27,12 +27,12 @@ public:
     /**
     * Loads all plugin factories from the plugin directory and adds them as menu items.
     */
-    void LoadPlugins();
+    void loadPlugins();
 
     /**
     * Creates a new plugin instance of the given kind and adds it to the core.
     */
-    QString AddPlugin(const QString kind);
+    QString createPlugin(const QString kind);
     
 private:
     Core& _core;

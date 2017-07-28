@@ -33,7 +33,7 @@ PluginManager::~PluginManager(void)
     
 }
 
-void PluginManager::LoadPlugins()
+void PluginManager::loadPlugins()
 {
 	QDir pluginsDir(qApp->applicationDirPath());
     
@@ -112,7 +112,7 @@ void PluginManager::LoadPlugins()
     QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(const QString&)>(&QSignalMapper::mapped), this, &PluginManager::pluginTriggered);
 }
 
-QString PluginManager::AddPlugin(const QString kind)
+QString PluginManager::createPlugin(const QString kind)
 {
     return pluginTriggered(kind);
 }
