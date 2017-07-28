@@ -86,9 +86,9 @@ void ScatterplotPlugin::subsetCreated()
 
 void ScatterplotPlugin::updateData()
 {
-    const PointsSet* dataSet = dynamic_cast<const PointsSet*>(_core->requestData(dataOptions.currentText()));
+    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(dataOptions.currentText()));
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(dataSet->getDataName()));
-    const PointsSet* selection = dynamic_cast<const PointsSet*>(_core->requestSelection(points->getName()));
+    const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
     
     std::vector<float>* positions = new std::vector<float>();
     std::vector<float> colors;
@@ -152,8 +152,8 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
     if (dataOptions.count() == 0)
         return;
 
-    const PointsSet* set = dynamic_cast<PointsSet*>(_core->requestData(dataOptions.currentText()));
-    PointsSet* selectionSet = dynamic_cast<PointsSet*>(_core->requestSelection(set->getDataName()));
+    const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(dataOptions.currentText()));
+    IndexSet* selectionSet = dynamic_cast<IndexSet*>(_core->requestSelection(set->getDataName()));
 
     selectionSet->indices.clear();
     if (set->isFull())
