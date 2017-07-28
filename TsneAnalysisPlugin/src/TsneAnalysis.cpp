@@ -44,9 +44,9 @@ void TsneAnalysis::computeGradientDescent()
     embed();
 }
 
-void TsneAnalysis::initTSNE(const std::vector<float>* data, const int numDimensions)
+void TsneAnalysis::initTSNE(const std::vector<float>& data, const int numDimensions)
 {
-    _numDataPoints = (*data).size() / numDimensions;
+    _numDataPoints = data.size() / numDimensions;
     // Number of total dimensions
     int numMarkerDimensions = numDimensions;
     qDebug() << "Variables set. Num dims: " << numDimensions << " Num data points: " << _numDataPoints;
@@ -61,7 +61,7 @@ void TsneAnalysis::initTSNE(const std::vector<float>* data, const int numDimensi
     {
         for (int j = 0; j < numDimensions; j++)
         {
-            _tSNEData[i * numDimensions + j] = static_cast<double>((*data)[i * numDimensions + j]);
+            _tSNEData[i * numDimensions + j] = static_cast<double>(data[i * numDimensions + j]);
         }
     }
     qDebug() << "Data copied.";

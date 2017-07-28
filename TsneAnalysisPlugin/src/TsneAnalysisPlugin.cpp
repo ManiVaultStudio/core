@@ -100,7 +100,7 @@ void TsneAnalysisPlugin::startComputation()
     embedPoints->numDimensions = 2;
     _core->notifyDataAdded(_embedSetName);
 
-    _tsne->initTSNE(&points->data, points->numDimensions);
+    _tsne->initTSNE(points->data, points->numDimensions);
 
     _tsne->start();
 }

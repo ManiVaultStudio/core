@@ -1,6 +1,7 @@
 #ifndef TSNE_ANALYSIS_H
 #define TSNE_ANALYSIS_H
 
+// Suppress warnings from gradient descent library
 #pragma warning(push, 0)
 #include "gradient_descent.h"
 #pragma warning pop
@@ -9,8 +10,6 @@
 
 #include <vector>
 #include <string>
-
-class TsneAnalysisPlugin;
 
 class TsneAnalysis : public QThread
 {
@@ -40,7 +39,7 @@ public:
     inline int numDimensionsOutput() { return _numDimensionsOutput; }
     void setNumDimensionsOutput(int numDimensionsOutput);
 
-    void initTSNE(const std::vector<float>* data, const int numDimensions);
+    void initTSNE(const std::vector<float>& data, const int numDimensions);
     void removePoints();
     void stopGradientDescent();
     void markForDeletion();
