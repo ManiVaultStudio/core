@@ -146,12 +146,14 @@ plugin::DataTypePlugin* Core::requestPlugin(const QString name)
     qFatal((QString("Failed to find plugin with name: ") + name).toStdString().c_str());
 }
 
+/** Request a dataset from the data manager by its name. */
 Set* Core::requestData(const QString name)
 {
     Set* set = _dataManager->getSet(name);
     return set;
 }
 
+/** Requests the selection set for the name of a raw dataset. */
 Set* Core::requestSelection(const QString name)
 {
     return _dataManager->getSelection(name);
@@ -209,6 +211,7 @@ gui::MainWindow& Core::gui() const {
     return _mainWindow;
 }
 
+/** Checks if the given data consumer supports the kind data in the given set. */
 bool Core::supportsSet(plugin::DataConsumer* dataConsumer, QString setName)
 {
     const hdps::Set* set = requestData(setName);
@@ -217,6 +220,7 @@ bool Core::supportsSet(plugin::DataConsumer* dataConsumer, QString setName)
     return dataConsumer->supportedDataKinds().contains(dataPlugin->getKind());
 }
 
+/** Retrieves all data consumers from the plugin list. */
 std::vector<plugin::DataConsumer*> Core::getDataConsumers()
 {
     std::vector<plugin::DataConsumer*> dataConsumers;

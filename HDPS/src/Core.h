@@ -59,7 +59,7 @@ public:
     Set* requestData(const QString name) override;
 
     /**
-    * Request a selection from the data manager by its name.
+    * Requests the selection set belonging to the raw dataset with the given name.
     */
     Set* requestSelection(const QString name) override;
 
@@ -77,7 +77,9 @@ public:
     */
     gui::MainWindow& gui() const;
 private:
+    /** Checks if the given data consumer supports the kind data in the given set. */
     bool supportsSet(plugin::DataConsumer* dataConsumer, QString setName);
+    /** Retrieves all data consumers from the plugin list. */
     std::vector<plugin::DataConsumer*> getDataConsumers();
 
 private:
