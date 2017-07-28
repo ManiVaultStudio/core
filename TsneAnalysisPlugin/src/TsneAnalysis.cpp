@@ -33,10 +33,6 @@ _radius(0.0f)
     
 }
 
-void TsneAnalysis::init(std::string name)
-{
-}
-
 void TsneAnalysis::computeGradientDescent()
 {
     initGradientDescent();
@@ -159,7 +155,7 @@ void TsneAnalysis::embed()
 
             if ((iter + 1) % 100 == 0){
                 TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
-                qDebug() << "<Name goes here>" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld;
+                qDebug() << "tSNE Analysis" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld;
             }
 
             emit newEmbedding();
@@ -172,7 +168,7 @@ void TsneAnalysis::embed()
     }
     TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
     qDebug() << "--------------------------------------------------------------------------------";
-    qDebug() << "A-tSNE: Finished embedding of " << "<Name goes here>" << " in: " << t / 1000 << " seconds " << ".KL - divergence is : " << kld;
+    qDebug() << "A-tSNE: Finished embedding of " << "tSNE Analysis" << " in: " << t / 1000 << " seconds " << ".KL - divergence is : " << kld;
     qDebug() << "================================================================================";
 }
 

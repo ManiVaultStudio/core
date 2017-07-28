@@ -18,8 +18,6 @@ public:
     TsneAnalysis();
     ~TsneAnalysis();
 
-    void init(std::string name);
-
     inline bool verbose() { return _verbose; }
     void setVerbose(bool verbose);
     inline bool skipNormalization() { return _skipNormalization; }
