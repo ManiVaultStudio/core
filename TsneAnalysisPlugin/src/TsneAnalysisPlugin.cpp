@@ -36,10 +36,7 @@ void TsneAnalysisPlugin::dataAdded(const QString name)
 
 void TsneAnalysisPlugin::dataChanged(const QString name)
 {
-    TsneSettingsWidget* tsneSettings = dynamic_cast<TsneSettingsWidget*>(_settings.get());
-    if (name != tsneSettings->dataOptions.currentText()) {
-        return;
-    }
+
 }
 
 void TsneAnalysisPlugin::dataRemoved(const QString name)
