@@ -57,13 +57,7 @@ void TsneAnalysis::initTSNE(const std::vector<float>& data, const int numDimensi
     qDebug() << "TSNE data allocated.";
 
     // Fill tSNEData with points * dims
-    for (int i = 0; i < _numDataPoints; i++)
-    {
-        for (int j = 0; j < numDimensions; j++)
-        {
-            _tSNEData[i * numDimensions + j] = static_cast<double>(data[i * numDimensions + j]);
-        }
-    }
+    _tSNEData = std::vector<double>(data.begin(), data.end());
     qDebug() << "Data copied.";
     
     /// Computation of the high dimensional similarities
