@@ -21,7 +21,7 @@ void TsneAnalysisPlugin::init()
 {
     _settings = std::make_unique<TsneSettingsWidget>(this);
 
-    tsne = std::make_unique<TsneAnalysis>();
+    _tsne = std::make_unique<TsneAnalysis>();
 }
 
 void TsneAnalysisPlugin::dataAdded(const QString name)
@@ -61,6 +61,11 @@ QStringList TsneAnalysisPlugin::supportedDataKinds()
     return supportedKinds;
 }
 
+SettingsWidget* const TsneAnalysisPlugin::getSettings()
+{
+    return _settings.get();
+}
+
 void TsneAnalysisPlugin::dataSetPicked(const QString& name)
 {
 
@@ -68,15 +73,13 @@ void TsneAnalysisPlugin::dataSetPicked(const QString& name)
 
 void TsneAnalysisPlugin::startComputation()
 {
-    TsneSettingsWidget* tsneSettings = dynamic_cast<TsneSettingsWidget*>(_settings.get());
-
     // Do nothing if we have no data set selected
-    if (tsneSettings->dataOptions.currentText().isEmpty()) {
+    if (_settings->dataOptions.currentText().isEmpty()) {
         return;
     }
 
     // Check if the tSNE settings are valid before running the computation
-    if (!tsneSettings->hasValidSettings()) {
+    if (!_settings->hasValidSettings()) {
         QMessageBox warningBox;
         warningBox.setText(tr("Some settings are invalid or missing. Continue with default values?"));
         QPushButton *continueButton = warningBox.addButton(tr("Continue"), QMessageBox::ActionRole);
@@ -90,15 +93,15 @@ void TsneAnalysisPlugin::startComputation()
     }
 
     // Initialize the tSNE computation with the settings from the settings widget
-    tsne->setIterations(tsneSettings->numIterations.text().toInt());
-    tsne->setPerplexity(tsneSettings->perplexity.text().toInt());
-    tsne->setExaggerationIter(tsneSettings->exaggeration.text().toInt());
-    tsne->setExpDecay(tsneSettings->expDecay.text().toInt());
-    tsne->setNumTrees(tsneSettings->numTrees.text().toInt());
-    tsne->setNumChecks(tsneSettings->numChecks.text().toInt());
+    _tsne->setIterations(_settings->numIterations.text().toInt());
+    _tsne->setPerplexity(_settings->perplexity.text().toInt());
+    _tsne->setExaggerationIter(_settings->exaggeration.text().toInt());
+    _tsne->setExpDecay(_settings->expDecay.text().toInt());
+    _tsne->setNumTrees(_settings->numTrees.text().toInt());
+    _tsne->setNumChecks(_settings->numChecks.text().toInt());
 
     // Run the computation
-    QString setName = tsneSettings->dataOptions.currentText();
+    QString setName = _settings->dataOptions.currentText();
     const hdps::Set* set = _core->requestData(setName);
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
@@ -110,15 +113,15 @@ void TsneAnalysisPlugin::startComputation()
     embedPoints->numDimensions = 2;
     _core->notifyDataAdded(_embedSetName);
 
-    tsne->initTSNE(&points->data, points->numDimensions);
+    _tsne->initTSNE(&points->data, points->numDimensions);
     
-    connect(tsne.get(), SIGNAL(newEmbedding()), this, SLOT(onNewEmbedding()));
+    connect(_tsne.get(), SIGNAL(newEmbedding()), this, SLOT(onNewEmbedding()));
 
-    tsne->start();
+    _tsne->start();
 }
 
 void TsneAnalysisPlugin::onNewEmbedding() {
-    std::vector<float>* output = tsne->output();
+    std::vector<float>* output = _tsne->output();
     const hdps::Set* embedSet = _core->requestData(_embedSetName);
     PointsPlugin* embedPoints = dynamic_cast<PointsPlugin*>(_core->requestPlugin(embedSet->getDataName()));
 
@@ -128,20 +131,20 @@ void TsneAnalysisPlugin::onNewEmbedding() {
 }
 
 void TsneAnalysisPlugin::stopComputation() {
-    if (tsne)
+    if (_tsne)
     {
-        if (tsne->isRunning())
+        if (_tsne->isRunning())
         {
             // Request interruption of the computation
-            tsne->stopGradientDescent();
-            tsne->exit();
+            _tsne->stopGradientDescent();
+            _tsne->exit();
 
             // Wait until the thread has terminated (max. 3 seconds)
-            if (!tsne->wait(3000))
+            if (!_tsne->wait(3000))
             {
                 qDebug() << "tSNE computation thread did not close in time, terminating...";
-                tsne->terminate();
-                tsne->wait();
+                _tsne->terminate();
+                _tsne->wait();
             }
             qDebug() << "tSNE computation stopped.";
         }

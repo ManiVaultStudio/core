@@ -19,15 +19,10 @@ public:
 
     bool hasSettings()
     {
-        return _settings != nullptr;
+        return getSettings() != nullptr;
     }
 
-    gui::SettingsWidget* const getSettings()
-    {
-        return _settings.get();
-    }
-protected:
-    std::unique_ptr<gui::SettingsWidget> _settings;
+    virtual gui::SettingsWidget* const getSettings() = 0;
 };
 
 

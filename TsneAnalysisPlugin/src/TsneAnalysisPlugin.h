@@ -27,6 +27,8 @@ public:
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
+
+    SettingsWidget* const getSettings();
 public slots:
     void dataSetPicked(const QString& name);
     void startComputation();
@@ -34,7 +36,8 @@ public slots:
 private:
     void stopComputation();
 
-    std::unique_ptr<TsneAnalysis> tsne;
+    std::unique_ptr<TsneAnalysis> _tsne;
+    std::unique_ptr<TsneSettingsWidget> _settings;
     QString _embedSetName;
 };
 
