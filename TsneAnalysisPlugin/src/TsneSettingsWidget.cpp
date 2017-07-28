@@ -12,9 +12,16 @@ using namespace hdps::plugin;
 TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     setFixedWidth(200);
 
-    connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
-    connect(&startButton, SIGNAL(clicked()), analysis, SLOT(startComputation()));
+    connect(&dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
+    connect(&startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));
+
     connect(&numIterations, SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
+    connect(&perplexity,    SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
+    connect(&exaggeration,  SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
+    connect(&expDecay,      SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
+    connect(&numTrees,      SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
+    connect(&numChecks,     SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
+    connect(&theta,         SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
 
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
     QGroupBox* advancedSettingsBox = new QGroupBox("Advanced Settings");
@@ -91,11 +98,49 @@ bool TsneSettingsWidget::hasValidSettings() {
     return true;
 }
 
-void TsneSettingsWidget::numIterationsChanged(const QString &value) {
-    if (numIterations.hasAcceptableInput()) {
-        numIterations.setStyleSheet("");
+void TsneSettingsWidget::checkInputStyle(QLineEdit& input)
+{
+    if (input.hasAcceptableInput())
+    {
+        input.setStyleSheet("");
     }
-    else {
-        numIterations.setStyleSheet("border: 1px solid red");
+    else
+    {
+        input.setStyleSheet("border: 1px solid red");
     }
+}
+
+void TsneSettingsWidget::numIterationsChanged(const QString &value)
+{
+    checkInputStyle(numIterations);
+}
+
+void TsneSettingsWidget::perplexityChanged(const QString &value)
+{
+    checkInputStyle(perplexity);
+}
+
+void TsneSettingsWidget::exaggerationChanged(const QString &value)
+{
+    checkInputStyle(exaggeration);
+}
+
+void TsneSettingsWidget::expDecayChanged(const QString &value)
+{
+    checkInputStyle(expDecay);
+}
+
+void TsneSettingsWidget::numTreesChanged(const QString &value)
+{
+    checkInputStyle(numTrees);
+}
+
+void TsneSettingsWidget::numChecksChanged(const QString &value)
+{
+    checkInputStyle(numChecks);
+}
+
+void TsneSettingsWidget::thetaChanged(const QString& value)
+{
+    checkInputStyle(theta);
 }

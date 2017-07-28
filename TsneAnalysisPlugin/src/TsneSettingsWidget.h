@@ -20,9 +20,17 @@ public:
     TsneSettingsWidget(const TsneAnalysisPlugin* analysis);
 
     bool hasValidSettings();
+private:
+    void checkInputStyle(QLineEdit& input);
 
 private slots:
     void numIterationsChanged(const QString &value);
+    void perplexityChanged(const QString &value);
+    void exaggerationChanged(const QString &value);
+    void expDecayChanged(const QString &value);
+    void numTreesChanged(const QString &value);
+    void numChecksChanged(const QString &value);
+    void thetaChanged(const QString& value);
 public:
     QComboBox dataOptions;
     QLineEdit numIterations;
