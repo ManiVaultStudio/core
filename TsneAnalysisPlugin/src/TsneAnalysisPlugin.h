@@ -34,6 +34,7 @@ public slots:
     void startComputation();
     void onNewEmbedding();
 private:
+    void initializeTsne();
     void stopComputation();
 
     std::unique_ptr<TsneAnalysis> _tsne;

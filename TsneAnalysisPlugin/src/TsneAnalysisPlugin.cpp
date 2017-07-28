@@ -29,9 +29,8 @@ void TsneAnalysisPlugin::dataAdded(const QString name)
     const hdps::Set* set = _core->requestData(name);
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
 
-    TsneSettingsWidget* tsneSettings = dynamic_cast<TsneSettingsWidget*>(_settings.get());
     if (dataPlugin->getKind() == "Points") {
-        tsneSettings->dataOptions.addItem(name);
+        _settings->dataOptions.addItem(name);
     }
 }
 
@@ -92,13 +91,7 @@ void TsneAnalysisPlugin::startComputation()
         }
     }
 
-    // Initialize the tSNE computation with the settings from the settings widget
-    _tsne->setIterations(_settings->numIterations.text().toInt());
-    _tsne->setPerplexity(_settings->perplexity.text().toInt());
-    _tsne->setExaggerationIter(_settings->exaggeration.text().toInt());
-    _tsne->setExpDecay(_settings->expDecay.text().toInt());
-    _tsne->setNumTrees(_settings->numTrees.text().toInt());
-    _tsne->setNumChecks(_settings->numChecks.text().toInt());
+    initializeTsne();
 
     // Run the computation
     QString setName = _settings->dataOptions.currentText();
@@ -128,6 +121,16 @@ void TsneAnalysisPlugin::onNewEmbedding() {
     embedPoints->data = *output;
 
     _core->notifyDataChanged(_embedSetName);
+}
+
+void TsneAnalysisPlugin::initializeTsne() {
+    // Initialize the tSNE computation with the settings from the settings widget
+    _tsne->setIterations(_settings->numIterations.text().toInt());
+    _tsne->setPerplexity(_settings->perplexity.text().toInt());
+    _tsne->setExaggerationIter(_settings->exaggeration.text().toInt());
+    _tsne->setExpDecay(_settings->expDecay.text().toInt());
+    _tsne->setNumTrees(_settings->numTrees.text().toInt());
+    _tsne->setNumChecks(_settings->numChecks.text().toInt());
 }
 
 void TsneAnalysisPlugin::stopComputation() {
