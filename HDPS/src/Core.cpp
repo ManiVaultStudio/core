@@ -84,7 +84,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
     {
         for (const Set* set : _dataManager->allSets())
         {
-            dataConsumer->dataAdded(set->getName());
+            if (supportsSet(dataConsumer, set->getName()))
+                dataConsumer->dataAdded(set->getName());
         }
     }
 }
