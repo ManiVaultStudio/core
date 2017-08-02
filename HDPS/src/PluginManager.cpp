@@ -18,6 +18,10 @@
 #include "ViewPlugin.h"
 #include "PluginType.h"
 
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonArray>
+
 namespace hdps {
 
 namespace plugin {
@@ -51,13 +55,24 @@ void PluginManager::loadPlugins()
     pluginsDir.cd("Plugins");
     
     _pluginFactories.clear();
-    
+
     QSignalMapper* signalMapper = new QSignalMapper(this);
     // for all items in the plugins directory
     foreach (QString fileName, pluginsDir.entryList(QDir::Files))
     {
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
         gui::MainWindow& gui = _core.gui();
+
+        QJsonObject metaData = pluginLoader.metaData().value("MetaData").toObject();
+        QJsonArray dependencyData = metaData.value("dependencies").toArray();
+
+        qDebug() << metaData;
+        QStringList dependencies;
+        for (QJsonValue dependency : dependencyData) {
+            dependencies.append(dependency.toString());
+        }
+
+        qDebug() << dependencies;
 
         // create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
