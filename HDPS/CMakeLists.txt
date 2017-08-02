@@ -192,3 +192,10 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 	"$<TARGET_FILE:${PROJECT}>"
 	"${INSTALL_DIR}/$<CONFIGURATION>/$<TARGET_FILE_NAME:${PROJECT}>"
 )
+
+# Copy pointsplugin header
+add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy
+    "${CMAKE_CURRENT_SOURCE_DIR}/../PointsPlugin/src/PointsPlugin.h"
+    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointsPlugin.h"
+)
