@@ -56,23 +56,77 @@ void PluginManager::loadPlugins()
     
     _pluginFactories.clear();
 
+    QMap<QString, QStringList> dependencies;
+    QVector<QString> resolved;
+
     QSignalMapper* signalMapper = new QSignalMapper(this);
     // for all items in the plugins directory
-    foreach (QString fileName, pluginsDir.entryList(QDir::Files))
+    foreach(QString fileName, pluginsDir.entryList(QDir::Files))
+    {
+        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
+
+        QJsonObject metaData = pluginLoader.metaData().value("MetaData").toObject();
+        QString kind = metaData.value("name").toString();
+        QJsonArray dependencyData = metaData.value("dependencies").toArray();
+
+        if (dependencyData.size() == 0)
+        {
+            resolved.push_back(kind);
+            continue;
+        }
+
+        QStringList dependencyList;
+        for (QJsonValue dependency : dependencyData)
+        {
+            dependencyList.push_back(dependency.toString());
+        }
+        dependencies[kind] = dependencyList;
+    }
+    qDebug() << "Dependencies: " << dependencies;
+    qDebug() << "Resolved: " << resolved;
+    // Dependency resolution
+    while (dependencies.size() != 0)
+    {
+        bool removed = false;
+        for (QStringList& depList : dependencies)
+        {
+            QMutableListIterator<QString> it(depList);
+            while (it.hasNext()) {
+                QString dependency = it.next();
+                if (resolved.contains(dependency))
+                {
+                    it.remove();
+                    removed = true;
+                }
+            }
+        }
+        QStringList keys = dependencies.keys();
+        for (QString key : keys) {
+            QStringList depList = dependencies[key];
+
+            if (depList.size() == 0) {
+                dependencies.remove(key);
+                resolved.push_back(key);
+                qDebug() << "Resolved: " << key;
+            }
+        }
+        // If no dependencies were resolved this iteration we can stop
+        if (!removed)
+            break;
+    }
+
+    foreach(QString fileName, pluginsDir.entryList(QDir::Files))
     {
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
         gui::MainWindow& gui = _core.gui();
 
-        QJsonObject metaData = pluginLoader.metaData().value("MetaData").toObject();
-        QJsonArray dependencyData = metaData.value("dependencies").toArray();
+        QString kind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
 
-        qDebug() << metaData;
-        QStringList dependencies;
-        for (QJsonValue dependency : dependencyData) {
-            dependencies.append(dependency.toString());
+        // Check if this plugin has all its dependencies resolved
+        if (!resolved.contains(kind)) {
+            qWarning() << "Plugin: " << kind << " has unresolved dependencies.";
+            continue;
         }
-
-        qDebug() << dependencies;
 
         // create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
@@ -83,7 +137,7 @@ void PluginManager::loadPlugins()
             continue;
         }
 
-        QString kind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+
         _pluginFactories[kind] = qobject_cast<PluginFactory*>(pluginFactory);
 
         QAction* action = NULL;

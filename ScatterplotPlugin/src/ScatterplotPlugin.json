@@ -1,5 +1,5 @@
 {
     "name" : "Scatterplot View",
     "version" : "1",
-    "dependencies" : [Points]
+    "dependencies" : ["Points"]
 }
