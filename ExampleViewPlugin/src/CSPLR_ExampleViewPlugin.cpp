@@ -18,19 +18,31 @@ void CSPLR_ExampleViewPlugin::init()
 {
 }
 
-void CSPLR_ExampleViewPlugin::dataAdded(const DataTypePlugin& data)
+void CSPLR_ExampleViewPlugin::dataAdded(const QString name)
 {
 
 }
 
-void CSPLR_ExampleViewPlugin::dataChanged(const DataTypePlugin& data)
+void CSPLR_ExampleViewPlugin::dataChanged(const QString name)
 {
 
 }
 
-void CSPLR_ExampleViewPlugin::dataRemoved()
+void CSPLR_ExampleViewPlugin::dataRemoved(const QString name)
 {
 
+}
+
+void CSPLR_ExampleViewPlugin::selectionChanged(const QString dataName)
+{
+
+}
+
+QStringList CSPLR_ExampleViewPlugin::supportedDataKinds()
+{
+    QStringList supportedKinds;
+    supportedKinds << "Points";
+    return supportedKinds;
 }
 
 // =============================================================================
