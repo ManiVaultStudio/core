@@ -28,10 +28,16 @@ void ScatterplotPlugin::init()
     connect(&dataOptions, SIGNAL(currentIndexChanged(QString)), SLOT(dataSetPicked(QString)));
     connect(&pointSizeSlider, SIGNAL(valueChanged(int)), SLOT(pointSizeChanged(int)));
     connect(&subsetButton, SIGNAL(clicked()), SLOT(subsetCreated()));
+
+    connect(&xDimOptions, SIGNAL(currentIndexChanged(int)), SLOT(xDimPicked(int)));
+    connect(&yDimOptions, SIGNAL(currentIndexChanged(int)), SLOT(yDimPicked(int)));
+
     addWidget(&dataOptions);
     addWidget(widget);
     addWidget(&pointSizeSlider);
     addWidget(&subsetButton);
+    addWidget(&xDimOptions);
+    addWidget(&yDimOptions);
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -67,6 +73,25 @@ QStringList ScatterplotPlugin::supportedDataKinds()
 
 void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
+    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(dataOptions.currentText()));
+    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(dataSet->getDataName()));
+
+    int nDim = points->numDimensions;
+
+    xDimOptions.clear();
+    yDimOptions.clear();
+    for (int i = 0; i < nDim; i++)
+    {
+        xDimOptions.addItem(QString::number(i));
+        yDimOptions.addItem(QString::number(i));
+    }
+
+    if (nDim >= 2)
+    {
+        xDimOptions.setCurrentIndex(0);
+        yDimOptions.setCurrentIndex(1);
+    }
+
     updateData();
 }
 
@@ -83,9 +108,20 @@ void ScatterplotPlugin::subsetCreated()
     _core->createSubsetFromSelection(selection, "Subset");
 }
 
+void ScatterplotPlugin::xDimPicked(int index)
+{
+    updateData();
+}
+
+void ScatterplotPlugin::yDimPicked(int index)
+{
+    updateData();
+}
+
 
 void ScatterplotPlugin::updateData()
 {
+    qDebug() << "UPDATING";
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(dataOptions.currentText()));
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(dataSet->getDataName()));
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
@@ -95,14 +131,20 @@ void ScatterplotPlugin::updateData()
 
     int nDim = points->numDimensions;
 
+    int xIndex = xDimOptions.currentIndex();
+    int yIndex = yDimOptions.currentIndex();
+    qDebug() << "X: " << xIndex << " Y: " << yIndex;
+    if (xIndex < 0 || yIndex < 0)
+        return;
+
     // Calculate data bounds
     float maxLength = getMaxLength(&points->data, nDim);
 
     if (dataSet->isFull()) {
         for (int i = 0; i < points->data.size() / nDim; i++)
         {
-            positions->push_back(points->data[i * nDim + 0] / maxLength);
-            positions->push_back(points->data[i * nDim + 1] / maxLength);
+            positions->push_back(points->data[i * nDim + xIndex] / maxLength);
+            positions->push_back(points->data[i * nDim + yIndex] / maxLength);
             if (nDim >= 5) {
                 colors.push_back(points->data[i * nDim + 2]);
                 colors.push_back(points->data[i * nDim + 3]);
@@ -118,8 +160,8 @@ void ScatterplotPlugin::updateData()
     }
     else {
         for (unsigned int index : dataSet->indices) {
-            positions->push_back(points->data[index * nDim + 0] / maxLength);
-            positions->push_back(points->data[index * nDim + 1] / maxLength);
+            positions->push_back(points->data[index * nDim + xIndex] / maxLength);
+            positions->push_back(points->data[index * nDim + yIndex] / maxLength);
 
             bool selected = false;
             for (unsigned int selectionIndex : selection->indices) {
@@ -144,7 +186,7 @@ void ScatterplotPlugin::updateData()
     widget->setData(positions);
     if (nDim >= 5) {
         widget->setColors(colors);
-    }
+    }qDebug() << "DONE UPDATING";
 }
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
@@ -174,10 +216,13 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
 
 float ScatterplotPlugin::getMaxLength(const std::vector<float>* data, const int nDim) const
 {
+    int xIndex = xDimOptions.currentIndex();
+    int yIndex = yDimOptions.currentIndex();
+
     float maxLength = 0;
     for (int i = 0; i < data->size() / nDim; i++) {
-        float x = data->at(i * nDim + 0);
-        float y = data->at(i * nDim + 1);
+        float x = data->at(i * nDim + xIndex);
+        float y = data->at(i * nDim + yIndex);
         float length = x*x + y*y;
 
         if (length > maxLength)

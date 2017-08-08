@@ -36,6 +36,9 @@ protected slots:
     void dataSetPicked(const QString& name);
     void pointSizeChanged(const int size);
     void subsetCreated();
+
+    void xDimPicked(int index);
+    void yDimPicked(int index);
 private:
     void updateData();
     float getMaxLength(const std::vector<float>* data, const int nDim) const;
@@ -45,6 +48,9 @@ private:
     QComboBox dataOptions;
     QSlider pointSizeSlider;
     QPushButton subsetButton;
+
+    QComboBox xDimOptions;
+    QComboBox yDimOptions;
 };
 
 
