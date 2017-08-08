@@ -3,7 +3,6 @@
 
 #include <ViewPlugin.h>
 #include "widgets/ScatterplotWidget.h"
-#include "ScatterplotSettings.h"
 
 #include <QComboBox>
 #include <QSlider>
@@ -15,6 +14,7 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
+class ScatterplotSettings;
 class PointsPlugin;
 
 class ScatterplotPlugin : public ViewPlugin, public SelectionListener

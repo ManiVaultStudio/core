@@ -1,9 +1,11 @@
 #include "ScatterplotSettings.h"
 
+#include "ScatterplotPlugin.h"
+
 #include <QGridLayout>
 #include <QLabel>
 
-ScatterplotSettings::ScatterplotSettings()
+ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 :
     _pointSizeSlider(Qt::Horizontal)
 {
@@ -30,6 +32,13 @@ ScatterplotSettings::ScatterplotSettings()
     settingsLayout->addWidget(&_yDimOptions, 1, 4);
 
     setLayout(settingsLayout);
+
+    connect(&_dataOptions, SIGNAL(currentIndexChanged(QString)), plugin, SLOT(dataSetPicked(QString)));
+    connect(&_pointSizeSlider, SIGNAL(valueChanged(int)), plugin, SLOT(pointSizeChanged(int)));
+    connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
+
+    connect(&_xDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(xDimPicked(int)));
+    connect(&_yDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(yDimPicked(int)));
 }
 
 ScatterplotSettings::~ScatterplotSettings()

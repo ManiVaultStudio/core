@@ -6,12 +6,14 @@
 #include <QSlider>
 #include <QPushButton>
 
+class ScatterplotPlugin;
+
 class ScatterplotSettings : public QWidget
 {
     Q_OBJECT
 
 public:
-    ScatterplotSettings();
+    ScatterplotSettings(const ScatterplotPlugin* plugin);
     ~ScatterplotSettings();
 
     void xDimPicked(int index);

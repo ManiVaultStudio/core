@@ -1,5 +1,6 @@
 #include "ScatterplotPlugin.h"
 
+#include "ScatterplotSettings.h"
 #include "PointsPlugin.h"
 
 #include <QtCore>
@@ -23,14 +24,7 @@ void ScatterplotPlugin::init()
     widget->setAlpha(0.5f);
     widget->addSelectionListener(this);
 
-    settings = new ScatterplotSettings();
-    
-    connect(&settings->_dataOptions, SIGNAL(currentIndexChanged(QString)), SLOT(dataSetPicked(QString)));
-    connect(&settings->_pointSizeSlider, SIGNAL(valueChanged(int)), SLOT(pointSizeChanged(int)));
-    connect(&settings->_subsetButton, SIGNAL(clicked()), SLOT(subsetCreated()));
-
-    connect(&settings->_xDimOptions, SIGNAL(currentIndexChanged(int)), SLOT(xDimPicked(int)));
-    connect(&settings->_yDimOptions, SIGNAL(currentIndexChanged(int)), SLOT(yDimPicked(int)));
+    settings = new ScatterplotSettings(this);
 
     addWidget(widget);
     addWidget(settings);
