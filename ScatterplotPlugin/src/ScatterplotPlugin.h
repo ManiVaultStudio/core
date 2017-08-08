@@ -3,6 +3,7 @@
 
 #include <ViewPlugin.h>
 #include "widgets/ScatterplotWidget.h"
+#include "ScatterplotSettings.h"
 
 #include <QComboBox>
 #include <QSlider>
@@ -21,7 +22,7 @@ class ScatterplotPlugin : public ViewPlugin, public SelectionListener
     Q_OBJECT
     
 public:
-    ScatterplotPlugin() : ViewPlugin("Scatterplot View"), pointSizeSlider(Qt::Horizontal) { }
+    ScatterplotPlugin() : ViewPlugin("Scatterplot View") { }
     ~ScatterplotPlugin(void);
     
     void init();
@@ -45,12 +46,7 @@ private:
 
     hdps::gui::ScatterplotWidget* widget;
 
-    QComboBox dataOptions;
-    QSlider pointSizeSlider;
-    QPushButton subsetButton;
-
-    QComboBox xDimOptions;
-    QComboBox yDimOptions;
+    ScatterplotSettings* settings;
 };
 
 

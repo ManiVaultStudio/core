@@ -20,6 +20,8 @@ find_package(Qt5Widgets REQUIRED)
 set(SOURCES
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
+    src/ScatterplotSettings.h
+    src/ScatterplotSettings.cpp
     src/ScatterplotPlugin.json
 )
 
