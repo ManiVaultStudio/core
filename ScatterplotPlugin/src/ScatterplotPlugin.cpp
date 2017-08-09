@@ -119,16 +119,22 @@ void ScatterplotPlugin::updateData()
     float maxLength = getMaxLength(&points->data, nDim);
 
     if (dataSet->isFull()) {
-        for (int i = 0; i < points->data.size() / nDim; i++)
+        unsigned int numPoints = points->data.size() / nDim;
+
+        positions->resize(numPoints * 2);
+        colors.resize(numPoints * 3, 0.5f);
+
+        for (int i = 0; i < numPoints; i++)
         {
-            positions->push_back(points->data[i * nDim + xIndex] / maxLength);
-            positions->push_back(points->data[i * nDim + yIndex] / maxLength);
+            (*positions)[i * 2 + 0] = points->data[i * nDim + xIndex] / maxLength;
+            (*positions)[i * 2 + 1] = points->data[i * nDim + yIndex] / maxLength;
             if (nDim >= 5) {
-                colors.push_back(points->data[i * nDim + 2]);
-                colors.push_back(points->data[i * nDim + 3]);
-                colors.push_back(points->data[i * nDim + 4]);
+                colors[i * 3 + 0] = points->data[i * nDim + 2];
+                colors[i * 3 + 1] = points->data[i * nDim + 3];
+                colors[i * 3 + 2] = points->data[i * nDim + 4];
             }
         }
+
         for (unsigned int index : selection->indices)
         {
             colors[index * 3 + 0] = 1.0f;
@@ -137,9 +143,13 @@ void ScatterplotPlugin::updateData()
         }
     }
     else {
+        unsigned int numPoints = selection->indices.size();
+        positions->resize(numPoints * 2);
+        colors.resize(numPoints * 3, 0.5f);
+
         for (unsigned int index : dataSet->indices) {
-            positions->push_back(points->data[index * nDim + xIndex] / maxLength);
-            positions->push_back(points->data[index * nDim + yIndex] / maxLength);
+            (*positions)[index * 2 + 0] = points->data[index * nDim + xIndex] / maxLength;
+            (*positions)[index * 2 + 1] = points->data[index * nDim + yIndex] / maxLength;
 
             bool selected = false;
             for (unsigned int selectionIndex : selection->indices) {
@@ -148,23 +158,24 @@ void ScatterplotPlugin::updateData()
                 }
             }
             if (selected) {
-                colors.push_back(1.0f);
-                colors.push_back(0.5f);
-                colors.push_back(1.0f);
+                colors[index * 3 + 0] = 1.0f;
+                colors[index * 3 + 1] = 0.5f;
+                colors[index * 3 + 2] = 1.0f;
             }
             else {
                 if (nDim >= 5) {
-                    colors.push_back(points->data[index * nDim + 2]);
-                    colors.push_back(points->data[index * nDim + 3]);
-                    colors.push_back(points->data[index * nDim + 4]);
+                    colors[index * 3 + 0] = points->data[index * nDim + 2];
+                    colors[index * 3 + 1] = points->data[index * nDim + 3];
+                    colors[index * 3 + 2] = points->data[index * nDim + 4];
                 }
             }
         }
     }
+    qDebug() << "Setting positions";
     widget->setData(positions);
-    if (nDim >= 5) {
-        widget->setColors(colors);
-    }qDebug() << "DONE UPDATING";
+    qDebug() << "Setting colors";
+    widget->setColors(colors);
+    qDebug() << "DONE UPDATING";
 }
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
@@ -174,7 +185,7 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
 
     const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(settings->currentData()));
     IndexSet* selectionSet = dynamic_cast<IndexSet*>(_core->requestSelection(set->getDataName()));
-
+    qDebug() << "Selection size: " << selection.size();
     selectionSet->indices.clear();
     if (set->isFull())
     {
@@ -188,7 +199,7 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
             selectionSet->indices.push_back(set->indices[index]);
         }
     }
-
+    qDebug() << "Selection on: " << selectionSet->getDataName();
     _core->notifySelectionChanged(selectionSet->getDataName());
 }
 
