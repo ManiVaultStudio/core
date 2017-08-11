@@ -196,6 +196,47 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 # Copy pointsplugin header
 add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E copy
-    "${CMAKE_CURRENT_SOURCE_DIR}/../PointsPlugin/src/PointsPlugin.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/plugins/PointsPlugin.h"
     "${INSTALL_DIR}/$<CONFIGURATION>/include/PointsPlugin.h"
+)
+
+
+# Points Plugin
+set(PROJECT "PointsPlugin")
+#PROJECT(${PROJECT})
+
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN32 /EHsc /MP")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG /NODEFAULTLIB:LIBCMT")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+endif(MSVC)
+
+find_package(Qt5Widgets REQUIRED)
+
+set(POINTS_SOURCES
+    src/plugins/PointsPlugin.h
+    src/plugins/PointsPlugin.cpp
+    src/plugins/PointsPlugin.json
+)
+
+source_group( Plugin FILES ${POINTS_SOURCES})
+
+include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
+
+add_library(${PROJECT} SHARED ${POINTS_SOURCES})
+
+target_link_libraries(${PROJECT} Qt5::Widgets)
+target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
+
+
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy
+	"$<TARGET_FILE:${PROJECT}>"
+	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PROJECT}>"
 )
