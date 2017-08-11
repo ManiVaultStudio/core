@@ -58,19 +58,12 @@ const char *plotFragmentSource = GLSL(330,
 );
 
 const char *selectionVertexSource = GLSL(330,
-    vec2 vertices[4] = vec2[](
-    vec2(-1, -1),
-    vec2(1, -1),
-    vec2(-1, 1),
-    vec2(1, 1)
-    );
-
     uniform vec2 start;
     uniform vec2 end;
 
     void main()
     {
-        vec2 vertex;// = vertices[gl_VertexID];
+        vec2 vertex;
         if (gl_VertexID == 0) vertex = vec2(start.x, start.y);
         if (gl_VertexID == 1) vertex = vec2(end.x, start.y);
         if (gl_VertexID == 2) vertex = vec2(start.x, end.y);
@@ -100,6 +93,7 @@ void ScatterplotWidget::setData(const std::vector<float>* positions)
 {
     _numPoints = (unsigned int) positions->size() / 2;
     _positions = positions;
+    _colors.clear();
     _colors.resize(_numPoints * 3, 0.5f);
 
     glBindBuffer(GL_ARRAY_BUFFER, _positionBuffer);
