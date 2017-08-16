@@ -1,0 +1,5 @@
+{
+    "name" : "D3 View",
+    "version" : "1",
+    "dependencies" : ["Points"]
+}
