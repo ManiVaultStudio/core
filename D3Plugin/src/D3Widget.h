@@ -6,6 +6,9 @@
 #include <QWidget>
 #include <QMouseEvent>
 
+class QWebView;
+class QWebFrame;
+
 class D3Widget : public QWidget
 {
     Q_OBJECT
@@ -25,11 +28,18 @@ protected:
     void onSelection(QRectF selection);
     void cleanup();
 
+private slots:
+    void webViewLoaded(bool ok);
+    void connectJs();
+
 private:
     unsigned int _numPoints = 0;
     const std::vector<float>* _positions;
 
     QSize _windowSize;
+
+    QWebView* _webView;
+    QWebFrame* _mainFrame;
 
     std::vector<const hdps::plugin::SelectionListener*> _selectionListeners;
 };
