@@ -3,12 +3,18 @@
 #include <QWebView>
 #include <QWebFrame>
 
+#include <QVBoxLayout>
+
 #include <cassert>
 
 D3Widget::D3Widget()
 {
-    _webView = new QWebView(this);
+    _webView = new QWebView();
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->addWidget(_webView);
+    setLayout(layout);
 
+    _mainFrame = _webView->page()->mainFrame();
     QObject::connect(_webView, &QWebView::loadFinished, this, &D3Widget::webViewLoaded);
 
     QObject::connect(_mainFrame, &QWebFrame::javaScriptWindowObjectCleared, this, &D3Widget::connectJs);
@@ -16,6 +22,7 @@ D3Widget::D3Widget()
     assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
 
     QFile file("test.html");
+
     QString html = "";
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
