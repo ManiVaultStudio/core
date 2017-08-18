@@ -17,7 +17,7 @@ class D3Plugin : public ViewPlugin, public SelectionListener
     Q_OBJECT
     
 public:
-    D3Plugin() : ViewPlugin("Scatterplot View") { }
+    D3Plugin() : ViewPlugin("D3 View") { }
     ~D3Plugin(void);
     
     void init();

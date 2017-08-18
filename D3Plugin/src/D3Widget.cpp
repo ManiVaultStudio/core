@@ -1,5 +1,7 @@
 #include "D3Widget.h"
 
+#include "util/FileUtil.h"
+
 #include <QWebView>
 #include <QWebFrame>
 
@@ -21,16 +23,9 @@ D3Widget::D3Widget()
 
     assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
 
-    QFile file("test.html");
+    _webView->setHtml(hdps::util::loadFileContents("heatmap/heatmap.html"), QUrl("heatmap/"));
 
-    QString html = "";
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        QTextStream stream(&file);
-        html = stream.readAll();
-    }
-
-    _webView->setHtml(html, QUrl(""));
+    _css = "<style type=\"text/css\">" + hdps::util::loadFileContents("heatmap/heatmap.css") + "</style>";
 }
 
 D3Widget::~D3Widget()
@@ -39,11 +34,6 @@ D3Widget::~D3Widget()
 }
 
 void D3Widget::setData(const std::vector<float>* data)
-{
-
-}
-
-void D3Widget::setColors(const std::vector<float>& data)
 {
 
 }
@@ -85,5 +75,5 @@ void D3Widget::webViewLoaded(bool ok)
 
 void D3Widget::connectJs()
 {
-
+    _mainFrame->addToJavaScriptWindowObject("Qt", this);
 }

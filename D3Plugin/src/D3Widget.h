@@ -17,7 +17,6 @@ public:
     ~D3Widget();
 
     void setData(const std::vector<float>* data);
-    void setColors(const std::vector<float>& data);
 
     void addSelectionListener(const hdps::plugin::SelectionListener* listener);
 protected:
@@ -40,6 +39,8 @@ private:
 
     QWebView* _webView;
     QWebFrame* _mainFrame;
+
+    QString _css;
 
     std::vector<const hdps::plugin::SelectionListener*> _selectionListeners;
 };
