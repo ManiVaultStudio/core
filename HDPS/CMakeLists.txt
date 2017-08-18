@@ -61,6 +61,14 @@ set( WIDGET_SOURCES
     src/widgets/SettingsWidget.cpp
 )
 
+set( UTIL_HEADERS
+    src/util/FileUtil.h
+)
+
+set( UTIL_SOURCES
+    src/util/FileUtil.cpp
+)
+
 set( PLUGIN_HEADERS
     src/CoreInterface.h
     src/AnalysisPlugin.h
@@ -78,26 +86,32 @@ set( PLUGIN_HEADERS
 )
 
 list(APPEND PRIVATE_HEADERS
-	${CORE_HEADERS}
+    ${CORE_HEADERS}
 )
 
 list(APPEND PRIVATE_SOURCES
-	${CORE_SOURCES}
-	${PRIVATE_HEADERS}
+    ${CORE_SOURCES}
+    ${PRIVATE_HEADERS}
 )
 
 list(APPEND PUBLIC_HEADERS
-	${WIDGET_HEADERS}
-	${PLUGIN_HEADERS}
+    ${WIDGET_HEADERS}
+    ${UTIL_HEADERS}
+    ${PLUGIN_HEADERS}
 )
 
 list(APPEND PUBLIC_SOURCES
-	${WIDGET_SOURCES}
-	${PUBLIC_HEADERS}
+    ${WIDGET_SOURCES}
+    ${UTIL_SOURCES}
+    ${PUBLIC_HEADERS}
 )
 list(APPEND WIDGET_FILES
-	${WIDGET_SOURCES}
-	${WIDGET_HEADERS}
+    ${WIDGET_SOURCES}
+    ${WIDGET_HEADERS}
+)
+list(APPEND UTIL_FILES
+    ${UTIL_SOURCES}
+    ${UTIL_HEADERS}
 )
 
 if(WIN32)
@@ -120,6 +134,7 @@ source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
 source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
+source_group( Public\\Util FILES ${UTIL_FILES})
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})
 source_group( Resources FILES win/hdps.rc)
