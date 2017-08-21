@@ -22,8 +22,9 @@ D3Widget::D3Widget()
     QObject::connect(_mainFrame, &QWebFrame::javaScriptWindowObjectCleared, this, &D3Widget::connectJs);
 
     assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
-
-    _webView->setHtml(hdps::util::loadFileContents("heatmap/heatmap.html"), QUrl("heatmap/"));
+    QString html = hdps::util::loadFileContents(":/test.html");
+    qDebug() << html;
+    _webView->setHtml(hdps::util::loadFileContents(":/test.html"), QUrl("qrc:/"));
 
     _css = "<style type=\"text/css\">" + hdps::util::loadFileContents("heatmap/heatmap.css") + "</style>";
 }
