@@ -21,6 +21,8 @@ D3Widget::D3Widget()
 
     QObject::connect(_mainFrame, &QWebFrame::javaScriptWindowObjectCleared, this, &D3Widget::connectJs);
 
+    Q_INIT_RESOURCE(resources);
+
     assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
     QString html = hdps::util::loadFileContents(":/test.html");
     qDebug() << html;
