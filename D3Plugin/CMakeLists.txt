@@ -18,21 +18,31 @@ endif(MSVC)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5WebKitWidgets REQUIRED)
 
+qt5_add_resources(RESOURCE_FILES res/resources.qrc)
+
 set(SOURCES
     src/D3Plugin.h
     src/D3Plugin.cpp
     src/D3Widget.h
     src/D3Widget.cpp
     src/D3Plugin.json
+    res/test.html
+    res/test.css
+)
+
+set (RESOURCES
+    res/resources.qrc
 )
 
 source_group( Plugin FILES ${SOURCES})
+source_group( Resources FILES ${RESOURCES})
+source_group( Resources\\generated FILES ${CMAKE_CURRENT_BINARY_DIR}/qrc_resources.cpp)
 
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${RESOURCES})
 
-qt5_add_resources(RESOURCE_FILES res/resources.qrc)
+qt5_use_modules(${PROJECT} Widgets WebKitWidgets)
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
