@@ -27,8 +27,6 @@ set(SOURCES
     src/D3Widget.h
     src/D3Widget.cpp
     src/D3Plugin.json
-    res/test.html
-    res/test.css
 )
 
 set (RESOURCES
