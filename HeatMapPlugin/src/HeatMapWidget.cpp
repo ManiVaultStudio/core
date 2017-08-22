@@ -53,3 +53,8 @@ void HeatMapWidget::cleanup()
 {
 
 }
+
+void HeatMapWidget::connectJs()
+{
+    registerFunctions(this);
+}

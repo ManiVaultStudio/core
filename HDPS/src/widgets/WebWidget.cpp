@@ -39,14 +39,14 @@ void WebWidget::setPage(QString htmlPath, QString basePath)
     _webView->setHtml(hdps::util::loadFileContents(htmlPath), QUrl(basePath));
 }
 
+void WebWidget::registerFunctions(WebWidget* widget)
+{
+    _mainFrame->addToJavaScriptWindowObject("Qt", widget);
+}
+
 void WebWidget::webViewLoaded(bool ok)
 {
 
-}
-
-void WebWidget::connectJs()
-{
-    _mainFrame->addToJavaScriptWindowObject("Qt", this);
 }
 
 } // namespace gui

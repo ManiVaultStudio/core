@@ -20,9 +20,12 @@ public:
 
     void setPage(QString htmlPath, QString basePath);
 
+protected:
+    void registerFunctions(WebWidget* widget);
+
 private slots:
     void webViewLoaded(bool ok);
-    void connectJs();
+    virtual void connectJs() = 0;
 
 private:
     QWebView* _webView;

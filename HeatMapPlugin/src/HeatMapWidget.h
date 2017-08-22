@@ -34,6 +34,12 @@ private:
     QSize _windowSize;
 
     std::vector<const hdps::plugin::SelectionListener*> _selectionListeners;
+
+private slots:
+    virtual void connectJs();
+signals:
+    void qt_setData(QString data);
+    void qt_addAvailableData(QString name);
 };
 
 #endif // HEAT_MAP_WIDGET_H
