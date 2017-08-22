@@ -22,18 +22,20 @@ D3Widget::D3Widget()
     QObject::connect(_mainFrame, &QWebFrame::javaScriptWindowObjectCleared, this, &D3Widget::connectJs);
 
     Q_INIT_RESOURCE(resources);
-
-    assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
-    QString html = hdps::util::loadFileContents(":/test.html");
-    qDebug() << html;
-    _webView->setHtml(hdps::util::loadFileContents(":/test.html"), QUrl("qrc:/"));
-
-    _css = "<style type=\"text/css\">" + hdps::util::loadFileContents("heatmap/heatmap.css") + "</style>";
 }
 
 D3Widget::~D3Widget()
 {
 
+}
+
+void D3Widget::setPage(QString htmlPath, QString basePath)
+{
+    assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
+
+    _webView->setHtml(hdps::util::loadFileContents(htmlPath), QUrl(basePath));
+
+    //_css = "<style type=\"text/css\">" + hdps::util::loadFileContents("heatmap/heatmap.css") + "</style>";
 }
 
 void D3Widget::setData(const std::vector<float>* data)

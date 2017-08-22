@@ -16,6 +16,7 @@ public:
     D3Widget();
     ~D3Widget();
 
+    void setPage(QString htmlPath, QString basePath);
     void setData(const std::vector<float>* data);
 
     void addSelectionListener(const hdps::plugin::SelectionListener* listener);
