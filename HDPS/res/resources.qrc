@@ -1,10 +1,68 @@
 <RCC>
-	<qresource prefix="/Icons">
+    <qresource prefix="/Icons">
         <file alias="AppIcon32">icons/AppIcon32.png</file>
         <file alias="AppIcon64">icons/AppIcon64.png</file>
         <file alias="AppIcon128">icons/AppIcon128.png</file>
         <file alias="AppIcon256">icons/AppIcon256.png</file>
         <file alias="AppIcon512">icons/AppIcon512.png</file>
         <file alias="AppIcon1024">icons/AppIcon1024.png</file>
+    </qresource>
+    
+    <qresource prefix="">
+        <file>colormaps/Spectral.png</file>
+        <file>colormaps/Plasma.png</file>
+        <file>colormaps/Magma.png</file>
+        <file>colormaps/Viridis.png</file>
+        <file>colormaps/BrBG.png</file>
+        <file>colormaps/PiYG.png</file>
+        <file>colormaps/PuOr.png</file>
+        <file>colormaps/RdBu.png</file>
+        <file>colormaps/RdYlBu.png</file>
+        <file>colormaps/RdYlGn.png</file>
+        <file>colormaps/BuPu.png</file>
+        <file>colormaps/GnBu.png</file>
+        <file>colormaps/RdPu.png</file>
+        <file>colormaps/Reds.png</file>
+        <file>colormaps/YlGn.png</file>
+        <file>colormaps/YlGnBu.png</file>
+        <file>colormaps/YlOrBr.png</file>
+        <file>colormaps/YlOrRd.png</file>
+        <file>colormaps/qualitative.png</file>
+        <file>colormaps/Q_BlGrRd.png</file>
+        <file>colormaps/Spectral_vert.png</file>
+        <file>colormaps/Plasma_vert.png</file>
+        <file>colormaps/Magma_vert.png</file>
+        <file>colormaps/Viridis_vert.png</file>
+        <file>colormaps/BrBG_vert.png</file>
+        <file>colormaps/PiYG_vert.png</file>
+        <file>colormaps/PuOr_vert.png</file>
+        <file>colormaps/RdBu_vert.png</file>
+        <file>colormaps/RdYlBu_vert.png</file>
+        <file>colormaps/RdYlGn_vert.png</file>
+        <file>colormaps/BuPu_vert.png</file>
+        <file>colormaps/GnBu_vert.png</file>
+        <file>colormaps/RdPu_vert.png</file>
+        <file>colormaps/Reds_vert.png</file>
+        <file>colormaps/YlGn_vert.png</file>
+        <file>colormaps/YlGnBu_vert.png</file>
+        <file>colormaps/YlOrBr_vert.png</file>
+        <file>colormaps/YlOrRd_vert.png</file>
+        <file>colormaps/qualitative_vert.png</file>
+        <file>colormaps/Q_BlGrRd_vert.png</file>
+        <file>colormaps/Spectral_vert_disc.png</file>
+        <file>colormaps/Plasma_vert_disc.png</file>
+        <file>colormaps/Magma_vert_disc.png</file>
+        <file>colormaps/Viridis_vert_disc.png</file>
+        <file>colormaps/PiYG_vert_disc.png</file>
+        <file>colormaps/PuOr_vert_disc.png</file>
+        <file>colormaps/RdYlBu_vert_disc.png</file>
+        <file>colormaps/BuPu_vert_disc.png</file>
+        <file>colormaps/GnBu_vert_disc.png</file>
+        <file>colormaps/RdPu_vert_disc.png</file>
+        <file>colormaps/Reds_vert_disc.png</file>
+        <file>colormaps/YlGnBu_vert_disc.png</file>
+        <file>colormaps/YlOrRd_vert_disc.png</file>
+        <file>colormaps/qualitative_vert_disc.png</file>
+        <file>colormaps/Q_BlGrRd_vert_disc.png</file>
     </qresource>
 </RCC>
