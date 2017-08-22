@@ -1,5 +1,5 @@
-#ifndef D3_WIDGET_H
-#define D3_WIDGET_H
+#ifndef HEAT_MAP_WIDGET_H
+#define HEAT_MAP_WIDGET_H
 
 #include "SelectionListener.h"
 
@@ -9,12 +9,12 @@
 class QWebView;
 class QWebFrame;
 
-class D3Widget : public hdps::gui::WebWidget
+class HeatMapWidget : public hdps::gui::WebWidget
 {
     Q_OBJECT
 public:
-    D3Widget();
-    ~D3Widget();
+    HeatMapWidget();
+    ~HeatMapWidget();
 
     void setData(const std::vector<float>* data);
 
@@ -36,4 +36,4 @@ private:
     std::vector<const hdps::plugin::SelectionListener*> _selectionListeners;
 };
 
-#endif // D3_WIDGET_H
+#endif // HEAT_MAP_WIDGET_H

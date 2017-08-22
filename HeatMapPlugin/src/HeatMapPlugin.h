@@ -1,8 +1,8 @@
-#ifndef D3_PLUGIN_H
-#define D3_PLUGIN_H
+#ifndef HEAT_MAP_PLUGIN_H
+#define HEAT_MAP_PLUGIN_H
 
 #include <ViewPlugin.h>
-#include "D3Widget.h"
+#include "HeatMapWidget.h"
 
 using namespace hdps::plugin;
 
@@ -12,13 +12,13 @@ using namespace hdps::plugin;
 
 class PointsPlugin;
 
-class D3Plugin : public ViewPlugin, public SelectionListener
+class HeatMapPlugin : public ViewPlugin, public SelectionListener
 {
     Q_OBJECT
     
 public:
-    D3Plugin() : ViewPlugin("D3 View") { }
-    ~D3Plugin(void);
+    HeatMapPlugin() : ViewPlugin("Heatmap View") { }
+    ~HeatMapPlugin(void);
     
     void init();
 
@@ -34,7 +34,7 @@ protected slots:
 private:
     void updateData();
 
-    D3Widget* widget;
+    HeatMapWidget* widget;
 };
 
 
@@ -42,18 +42,18 @@ private:
 // Factory
 // =============================================================================
 
-class D3PluginFactory : public ViewPluginFactory
+class HeatMapPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.tudelft.D3Plugin"
-                      FILE  "D3Plugin.json")
+    Q_PLUGIN_METADATA(IID   "nl.tudelft.HeatMapPlugin"
+                      FILE  "HeatMapPlugin.json")
     
 public:
-    D3PluginFactory(void) {}
-    ~D3PluginFactory(void) {}
+    HeatMapPluginFactory(void) {}
+    ~HeatMapPluginFactory(void) {}
     
     ViewPlugin* produce();
 };
 
-#endif // D3_PLUGIN_H
+#endif // HEAT_MAP_PLUGIN_H

@@ -1,5 +1,5 @@
 {
-    "name" : "D3 View",
+    "name" : "Heatmap View",
     "version" : "1",
     "dependencies" : ["Points"]
 }

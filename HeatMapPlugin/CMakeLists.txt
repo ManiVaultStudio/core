@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-set(PROJECT "D3Plugin")
+set(PROJECT "HeatMapPlugin")
 
 PROJECT(${PROJECT})
 
@@ -22,11 +22,11 @@ find_package(Qt5WebKitWidgets REQUIRED)
 qt5_add_resources(RESOURCE_FILES res/resources.qrc)
 
 set(SOURCES
-    src/D3Plugin.h
-    src/D3Plugin.cpp
-    src/D3Widget.h
-    src/D3Widget.cpp
-    src/D3Plugin.json
+    src/HeatMapPlugin.h
+    src/HeatMapPlugin.cpp
+    src/HeatMapWidget.h
+    src/HeatMapWidget.cpp
+    src/HeatMapPlugin.json
 )
 
 set (RESOURCES
