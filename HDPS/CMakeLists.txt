@@ -23,6 +23,7 @@ if(MSVC)
 endif(MSVC)
 
 find_package(Qt5Widgets REQUIRED)
+find_package(Qt5WebKitWidgets REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
@@ -52,6 +53,7 @@ set( WIDGET_HEADERS
     src/widgets/ScatterplotWidget.h
     src/widgets/ImageWidget.h
     src/widgets/SettingsWidget.h
+    src/widgets/WebWidget.h
 )
 
 set( WIDGET_SOURCES
@@ -59,6 +61,7 @@ set( WIDGET_SOURCES
     src/widgets/ScatterplotWidget.cpp
     src/widgets/ImageWidget.cpp
     src/widgets/SettingsWidget.cpp
+    src/widgets/WebWidget.cpp
 )
 
 set( UTIL_HEADERS
@@ -152,11 +155,13 @@ add_library(${PROJECT}_Public ${LINK_TYPE}
     ${PUBLIC_SOURCES}
 )
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
+target_link_libraries(${PROJECT}_Public Qt5::WebKitWidgets)
 
 add_library(${PROJECT}_Private ${LINK_TYPE}
     ${PRIVATE_SOURCES}
 )
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
+target_link_libraries(${PROJECT}_Private Qt5::WebKitWidgets)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
@@ -169,6 +174,8 @@ add_executable(${PROJECT} MACOSX_BUNDLE
 )
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
+target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
+
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Public>")
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Private>")
 
@@ -232,6 +239,7 @@ if(MSVC)
 endif(MSVC)
 
 find_package(Qt5Widgets REQUIRED)
+find_package(Qt5WebKitWidgets REQUIRED)
 
 set(POINTS_SOURCES
     src/plugins/PointsPlugin.h
@@ -246,6 +254,7 @@ include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 add_library(${PROJECT} SHARED ${POINTS_SOURCES})
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
+target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
 target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 
 
