@@ -3,20 +3,19 @@
 
 #include "SelectionListener.h"
 
-#include <QWidget>
+#include "widgets/WebWidget.h"
 #include <QMouseEvent>
 
 class QWebView;
 class QWebFrame;
 
-class D3Widget : public QWidget
+class D3Widget : public hdps::gui::WebWidget
 {
     Q_OBJECT
 public:
     D3Widget();
     ~D3Widget();
 
-    void setPage(QString htmlPath, QString basePath);
     void setData(const std::vector<float>* data);
 
     void addSelectionListener(const hdps::plugin::SelectionListener* listener);
@@ -28,20 +27,11 @@ protected:
     void onSelection(QRectF selection);
     void cleanup();
 
-private slots:
-    void webViewLoaded(bool ok);
-    void connectJs();
-
 private:
     unsigned int _numPoints = 0;
     const std::vector<float>* _positions;
 
     QSize _windowSize;
-
-    QWebView* _webView;
-    QWebFrame* _mainFrame;
-
-    QString _css;
 
     std::vector<const hdps::plugin::SelectionListener*> _selectionListeners;
 };

@@ -11,31 +11,12 @@
 
 D3Widget::D3Widget()
 {
-    _webView = new QWebView();
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->addWidget(_webView);
-    setLayout(layout);
-
-    _mainFrame = _webView->page()->mainFrame();
-    QObject::connect(_webView, &QWebView::loadFinished, this, &D3Widget::webViewLoaded);
-
-    QObject::connect(_mainFrame, &QWebFrame::javaScriptWindowObjectCleared, this, &D3Widget::connectJs);
-
     Q_INIT_RESOURCE(resources);
 }
 
 D3Widget::~D3Widget()
 {
 
-}
-
-void D3Widget::setPage(QString htmlPath, QString basePath)
-{
-    assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
-
-    _webView->setHtml(hdps::util::loadFileContents(htmlPath), QUrl(basePath));
-
-    //_css = "<style type=\"text/css\">" + hdps::util::loadFileContents("heatmap/heatmap.css") + "</style>";
 }
 
 void D3Widget::setData(const std::vector<float>* data)
@@ -73,12 +54,3 @@ void D3Widget::cleanup()
 
 }
 
-void D3Widget::webViewLoaded(bool ok)
-{
-
-}
-
-void D3Widget::connectJs()
-{
-    _mainFrame->addToJavaScriptWindowObject("Qt", this);
-}
