@@ -23,6 +23,9 @@ public:
 protected:
     void registerFunctions(WebWidget* widget);
 
+public slots:
+    void js_debug(QString text);
+
 private slots:
     void webViewLoaded(bool ok);
     virtual void connectJs() = 0;
