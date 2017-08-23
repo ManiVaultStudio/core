@@ -40,6 +40,9 @@ private slots:
 signals:
     void qt_setData(QString data);
     void qt_addAvailableData(QString name);
+    void qt_setSelection(QList<int> selection);
+    void qt_setHighlight(int highlightId);
+    void qt_setMarkerSelection(QList<int> selection);
 };
 
 #endif // HEAT_MAP_WIDGET_H
