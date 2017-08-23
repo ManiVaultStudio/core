@@ -45,7 +45,6 @@ void WebWidget::registerFunctions(WebWidget* widget)
 }
 
 void WebWidget::js_debug(QString text)
-void WebWidget::webViewLoaded(bool ok)
 {
     qDebug() << "WebWidget Debug Info: " << text;
 }

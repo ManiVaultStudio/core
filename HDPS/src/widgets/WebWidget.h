@@ -26,8 +26,8 @@ protected:
 public slots:
     void js_debug(QString text);
 
-private slots:
-    void webViewLoaded(bool ok);
+protected slots:
+    virtual void webViewLoaded(bool ok) = 0;
     virtual void connectJs() = 0;
 
 private:
