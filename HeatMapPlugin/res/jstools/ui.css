@@ -1,0 +1,330 @@
+/* Modal Overlay */
+#d3-cyto-overlay {
+     visibility: hidden;
+     position: absolute;
+     left: 0px;
+     top: 0px;
+     width:100%;
+     height:100%;
+     z-index: 1000;
+}
+
+.d3-cyto-modal {
+	
+	width: 350px;
+	max-height: 300px;
+
+	background-color: rgba(245,245,245,0.95);
+
+	border: 1px solid #d4d4d4;
+	border-top: 0px;
+	border-radius: 1px;
+
+	font-family: sans-serif;
+	font-size: 16px;
+	line-height: 20px;
+
+   margin: 0px auto;
+   margin-top: -300px;
+	
+   padding:15px;
+
+	z-index:99999;
+}
+
+.d3-cyto-modal hr {
+	margin: 15px 0px;
+	height: 1px;
+	border-width: 0;
+	background-color: #d4d4d4;
+}
+
+.d3-cyto-modal .modal-header {
+	font-size: 22px;
+}
+
+.d3-cyto-modal .modal-body {
+	margin-bottom: 5px;
+}
+
+.d3-cyto-modal .modal-body form {
+	width: 200px;
+}
+
+.d3-cyto-modal .modal-footer {
+	text-align: right;
+}
+
+/* Context Menu */
+.d3-context-menu {
+	position: absolute;
+	display: none;
+	background-color: rgba(245,245,245,0.95);
+	border-radius: 2px;
+
+	min-width: 150px;
+	border: 1px solid #d4d4d4;
+
+	z-index:1200;
+}
+
+.d3-context-menu ul {
+	list-style-type: none;
+	margin: 0px 0px;
+	padding: 0px;
+	cursor: default;
+
+	font-family: sans-serif;
+	font-size: 12px;
+	line-height: 18px;
+}
+
+.d3-context-menu ul li {
+	padding: 4px 8px;
+}
+
+.d3-context-menu ul li.spacer {
+	padding: 2px 4px;
+}
+
+.d3-context-menu ul li hr {
+	padding: 0px;
+	margin: 0px;
+	height: 1px;
+	border-width: 0;
+	background-color: #d4d4d4;
+}
+
+.d3-context-menu ul li:hover {
+	background-color: rgba(60,150,250, 0.95);
+	color: #fefefe;
+}
+
+.d3-context-menu ul .is-divider:hover{
+	background-color: rgba(245,245,245,0.95);
+}
+
+/* main ui */
+#ui {
+	position: fixed;
+	bottom: 0px;
+	left: 0px;
+	height: 110px;
+	width: 100%;
+	background-color: rgba(0,0,0,0.75);
+}
+
+.uiContent {
+	margin: auto;
+	width: 80%;
+	text-align: center;
+	white-space: nowrap;
+}
+
+#uiContentMarkers {
+	padding-bottom: 25px;
+}
+
+#ui #drawer {
+	width: 100%;
+	height: 10px;
+}
+
+#uihover {
+	position: fixed;
+	bottom: 0px;
+	left: 0px;
+	height: 10px;
+	width: 100%;
+	z-index: 50;
+}
+
+/* ui Actors */
+.uiItem {
+	margin: 5px 2%;
+	color: #DDD;
+	font: 12px sans-serif;
+	font-weight: 400;
+	line-height: 18px;
+	white-space: normal;
+	display: inline-block;
+}
+
+/* expression dropdowns */
+.varSelector {
+	font: 12px;
+	color: black;
+	width: 14%;
+}
+
+/* expression sliders */
+.noUi-connect {
+	background: rgb(60,150,250);
+}
+
+.slider {
+	width: 28%;
+}
+
+/* When the slider is moved by tap,
+transition the connect bar like the handle. */
+.slider.noUi-state-tap .connect {
+	-webkit-transition: left 300ms, right 300ms;
+	transition: left 300ms, right 300ms;
+}
+
+#uncertaintySwitch, #hierarchicalLabelSwitch{
+	width: 80px;
+	text-align: left;
+}
+
+#hierarchicalSwitch{
+	width: 100px;
+	text-align: left;
+}
+
+.testbt  {
+	
+	margin: 5px 2%;
+	color: #111;
+	font: 12px sans-serif;
+	font-weight: 400;
+	line-height: 18px;
+	white-space: normal;
+	display: inline-block;
+}
+
+.mdl-switch__label {
+	font: 12px sans-serif;
+	color: #DDD;
+	vertical-align:-3px;
+}
+
+.mdl_light_back {
+	color: #000;
+}
+
+.mdl-switch__track {
+	background-color: #DDD;
+}
+
+/* ui handle */
+#drawerHandle {
+	position: relative;
+	margin: auto;
+	width: 50px;
+	height: 15px;
+}
+
+.drawerHandleSide {
+	position: absolute;
+	top: 5px;
+	width: 18px;
+	height: 5px;
+	border-radius: 5px;
+	background: white;
+}
+
+#leftDrawerHandle {
+	left: 9px;
+	-webkit-transform: rotate(0deg);
+	transform: rotate(0deg);
+}
+
+#rightDrawerHandle {
+	left: 24px;
+	-webkit-transform: rotate(0deg);
+	transform: rotate(0deg);
+}
+
+/* progress indicator */
+.spinner {
+		
+	width: 18px;
+	height: 18px;
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+	z-index: 150;
+	opacity: 1.0;
+	
+  -webkit-animation: rotation .6s infinite linear;
+  animation: rotation .6s infinite linear;
+  border-left: 3px solid rgba(60,150,250, 0.35);
+  border-right: 3px solid rgba(60,150,250, 0.35);
+  border-bottom: 3px solid rgba(60,150,250, 0.35);
+  border-top: 3px solid rgba(60,150,250, 0.85);
+  border-radius: 100%;
+}
+
+@-webkit-keyframes rotation {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(359deg);
+  }
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+/* colormap legend */
+#legendWrapper {
+	position: fixed;
+	top: 10px;
+	right: -490px;
+}
+
+.legendLabel {
+	position: absolute;
+	left: 4px;
+	margin: 0;
+	top: 4px;
+}
+
+#legendLabelBottom {    
+	top: 156px;
+}
+
+#legendSelector, #legend {
+	background: rgba(255,255,255,0.25);
+	display: inline-block;
+	border: solid 1px rgba(150,150,150,0.25);
+    vertical-align: top;
+}
+
+#legend {
+	margin-right: 10px;
+	padding-left: 30px;
+}
+
+#legendActive {
+	display: inline-block;
+	vertical-align: top;
+	margin: 4px;
+	padding: 0px;
+	/*background-color: red;*/
+}
+
+#legendAll {
+	display: inline-block;
+	vertical-align: top;
+	margin: 4px;
+	padding: 0px;
+	background-color: rgba(255, 255, 255, 0.0);
+	/*border: solid 1px #ccc;*/
+}
+
+.palette {
+	stroke: #ccc;
+    stroke-width: 1;
+}
+
+#discreteSwitch {
+}
