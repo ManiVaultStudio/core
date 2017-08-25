@@ -1,0 +1,179 @@
+/* global */
+body {
+	margin: 0;
+	/*background-color: rgb(237,237,237);*/
+	background-color: #fcfcfc;
+	cursor: default;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+svg {
+	/*background-color: rgb(237,237,237);*/
+	background-color: #fcfcfc;
+}
+
+.cellBound {
+	stroke: black;
+    stroke-width: 0.05px;
+	/*background-color: rgb(237,237,237);*/
+	background-color: #fcfcfc;
+}
+
+text {
+	font: 12px sans-serif;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	font-stretch: normal;
+	line-height: normal;
+	fill: #444;
+}
+
+.markerLabelText {
+	text-anchor: start;
+	dominant-baseline: middle;
+}
+
+.subsetLabelText {
+	text-anchor: end;
+	dominant-baseline: middle;
+}
+
+.columnSelect .columnBound, .columnSelectSingle .columnBound{
+    /*fill: white;
+    fill-opacity: 0.8;
+    transition: fill-opacity 0.4s ease-in;*/
+    fill-opacity: 0.0;
+    stroke: rgb(60,150,250);
+    stroke-width: 0px;
+    transition: stroke-width 0.4s ease-in;
+}
+
+.columnSelect.selected .columnBound{
+    /*fill-opacity: 0.0;
+    transition: fill-opacity 0.4s ease-in;*/
+    stroke-width: 3px;
+    transition: stroke-width 0.4s ease-out;
+}
+
+.columnBound.selected{
+    /*fill-opacity: 0.0;
+    transition: fill-opacity 0.4s ease-in;*/
+    stroke-width: 3px;
+    transition: stroke-width 0.4s ease-out;
+}
+
+.colNameDiv{
+    pointer-events: none;
+    margin-left: 10px;
+    background-color: transparent; 
+    border-style: none; 
+    border-width: 0px 0px 0px 0px; 
+    border-color:  #CCC;
+    font: 12px sans-serif;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	font-stretch: normal;
+	line-height: normal;
+	fill: #444;
+}
+
+.rotDiv{
+    background-color: transparent; 
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    -webkit-transform-origin: 0px 0px;
+    transform-origin: 0px 0px;
+}
+
+.colNameInput{
+    margin-left: 10px;
+    margin-right: 10px;
+    background-color: transparent; 
+    border-style: solid; 
+    border-width: 0px 0px 1px 0px; 
+    border-color:  #CCC;
+    font: 12px sans-serif;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	font-stretch: normal;
+	line-height: normal;
+	fill: #444;
+}
+
+.colNameInput:focus{
+    outline: none;
+    background-color: transparent; 
+    border-style: solid; 
+    border-width: 0px 0px 2px 0px; 
+    border-color: rgb(60,150,250);
+}
+
+#clusterSelector {
+	min-width: 120px;
+}
+
+.markerSelectCirc {
+}
+
+.dendrogramLink {
+  fill: none;
+  stroke: #444;
+  shape-rendering: crispEdges;
+	stroke-width: 1.0px;
+}
+
+/* overwrite noUI */
+.noUi-target {
+  border: 0px solid #D3D3D3;
+}
+.noUi-horizontal {
+  top: 5px;
+  height: 4px;
+}
+.noUi-horizontal .noUi-handle {
+  width: 14px;
+  height: 14px;
+  left: -7px;
+  top: -5px;
+}
+.noUi-connect {
+    background: rgb(60,150,250);
+}
+.noUi-handle {
+  border-radius: 7px;
+}
+.noUi-handle:before,
+.noUi-handle:after {
+  height: 0px;
+  width: 0px;
+}
+.noUi-pips {
+    font: 100 12px arial;
+}
+.noUi-marker {
+  background: #EFEFEF;
+}
+.noUi-pips-horizontal {
+  padding: 8px 0;
+  height: 10px;
+}
+.noUi-value-horizontal {
+  padding-top: 4px
+}
+.noUi-marker-horizontal.noUi-marker {
+  width: 1px;
+  height: 3px;
+}
+.noUi-marker-horizontal.noUi-marker-sub {
+  height: 7px;
+}
+.noUi-marker-horizontal.noUi-marker-large {
+  height: 10px;
+}
