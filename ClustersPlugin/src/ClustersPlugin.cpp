@@ -1,7 +1,5 @@
 #include "ClustersPlugin.h"
 
-#include "PointsPlugin.h"
-
 #include <QtCore>
 #include <QtDebug>
 
@@ -23,8 +21,23 @@ void ClustersPlugin::init()
 
 hdps::Set* ClustersPlugin::createSet() const
 {
-    return new IndexSet();
+    return new ClusterSet();
 }
+
+void ClustersPlugin::addCluster(IndexSet* cluster)
+{
+    clusters.push_back(cluster);
+}
+
+hdps::Set* ClusterSet::copy() const
+{
+    ClusterSet* set = new ClusterSet();
+    set->setName(getName());
+    set->setDataName(getDataName());
+    set->indices = indices;
+    return set;
+}
+
 
 // =============================================================================
 // Factory

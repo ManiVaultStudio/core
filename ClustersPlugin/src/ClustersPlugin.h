@@ -2,8 +2,9 @@
 #define CLUSTERS_PLUGIN_H
 
 #include <DataTypePlugin.h>
+#include <PointsPlugin.h>
+#include <Set.h>
 
-#include "Set.h"
 #include <QString>
 #include <vector>
 
@@ -23,8 +24,20 @@ public:
 
     hdps::Set* createSet() const;
 
-    std::vector<float> data;
-    int numDimensions = 1;
+    void addCluster(IndexSet* cluster);
+
+    std::vector<IndexSet*> clusters;
+};
+
+class ClusterSet : public hdps::Set
+{
+public:
+    ClusterSet() { }
+    ~ClusterSet() { }
+
+    Set* copy() const override;
+
+    std::vector<unsigned int> indices;
 };
 
 // =============================================================================
