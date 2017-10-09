@@ -34,7 +34,7 @@ protected slots:
 private:
     void updateData();
 
-    HeatMapWidget* widget;
+    HeatMapWidget* heatmap;
 };
 
 

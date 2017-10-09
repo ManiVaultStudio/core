@@ -9,6 +9,8 @@
 class QWebView;
 class QWebFrame;
 
+struct Cluster;
+
 class HeatMapWidget : public hdps::gui::WebWidget
 {
     Q_OBJECT
@@ -16,7 +18,8 @@ public:
     HeatMapWidget();
     ~HeatMapWidget();
 
-    void setData(const std::vector<float>* data);
+    void setData(const std::vector<Cluster>& data, const int numDimensions);
+    //void setData()
 
     void addSelectionListener(const hdps::plugin::SelectionListener* listener);
 protected:
