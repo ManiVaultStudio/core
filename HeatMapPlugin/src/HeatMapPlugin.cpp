@@ -112,7 +112,7 @@ void HeatMapPlugin::selectionChanged(const QString dataName)
 QStringList HeatMapPlugin::supportedDataKinds()
 {
     QStringList supportedKinds;
-    supportedKinds << "Points";
+    supportedKinds << "Clusters";
     return supportedKinds;
 }
 
