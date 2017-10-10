@@ -24,10 +24,10 @@ hdps::Set* ClustersPlugin::createSet() const
     return new ClusterSet();
 }
 
-void ClustersPlugin::addCluster(IndexSet* cluster)
-{
-    clusters.push_back(cluster);
-}
+//void ClustersPlugin::addCluster(IndexSet* cluster)
+//{
+//    clusters.push_back(cluster);
+//}
 
 hdps::Set* ClusterSet::copy() const
 {

@@ -24,7 +24,9 @@ public:
 
     hdps::Set* createSet() const;
 
-    void addCluster(IndexSet* cluster);
+    void addCluster(IndexSet* cluster) {
+        clusters.push_back(cluster);
+    }
 
     std::vector<IndexSet*> clusters;
 };
