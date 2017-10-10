@@ -1,7 +1,7 @@
 #include "HeatMapPlugin.h"
 
 #include "HeatMapWidget.h"
-#include "PointsPlugin.h"
+#include "ClustersPlugin.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -35,9 +35,9 @@ void HeatMapPlugin::dataAdded(const QString name)
 
     if (!clusterSet) return;
     qDebug() << "Requesting plugin";
-    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
+    const ClustersPlugin* clusters = dynamic_cast<const ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
 
-    qDebug() << "DATA SIZE: " << points->data.size();
+    qDebug() << "DATA SIZE: " << clusters->clusters.size();
 
     const std::vector<float>& data = points->data;
     qDebug() << "Calculating data";
