@@ -77,22 +77,12 @@ void ClusteringPlugin::startComputation()
     IndexSet* set1 = (IndexSet*) points->createSet();
     IndexSet* set2 = (IndexSet*) points->createSet();
     
-    QString pluginName = _core->addData("Clusters", "");
-    ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(pluginName));
+    QString clusterSetName = _core->addData("Clusters", "");
+    const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
+    ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
 
     plugin->addCluster(set1);
     plugin->addCluster(set2);
-
-    ClusterSet* fullSet = plugin.createSet();
-    ClusterSet* selection = plugin.createSet();
-
-    fullSet->setName(setName);
-    fullSet->setDataName(pluginName);
-    fullSet->setAll();
-    selection->setDataName(pluginName);
-
-    _core->addSet(fullSet);
-    _core->addSet(selection);
 }
 
 // =============================================================================
