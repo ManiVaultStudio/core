@@ -35,27 +35,27 @@ void HeatMapPlugin::dataAdded(const QString name)
 
     if (!clusterSet) return;
     qDebug() << "Requesting plugin";
-    const ClustersPlugin* clusters = dynamic_cast<const ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
+    const ClustersPlugin* clusterPlugin = dynamic_cast<const ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
 
-    qDebug() << "DATA SIZE: " << clusters->clusters.size();
+    qDebug() << "DATA SIZE: " << clusterPlugin->clusters.size();
 
     const std::vector<float>& data = points->data;
     qDebug() << "Calculating data";
     ////////////
-    for (int i = 0; i < data.size() / points->numDimensions; i++)
-    {
-        int cluster = data[i * points->numDimensions + points->numDimensions-1];
+    //for (int i = 0; i < data.size() / points->numDimensions; i++)
+    //{
+    //    int cluster = data[i * points->numDimensions + points->numDimensions-1];
 
-        if (clusterSet->clusters.size() < cluster + 1)
-            clusterSet->clusters.resize(cluster + 1, Cluster());
+    //    if (clusterSet->clusters.size() < cluster + 1)
+    //        clusterSet->clusters.resize(cluster + 1, Cluster());
 
-        clusterSet->clusters[cluster].indices.push_back(i);
-    }
+    //    clusterSet->clusters[cluster].indices.push_back(i);
+    //}
 
-    int numClusters = clusterSet->clusters.size();
+    int numClusters = clusterPlugin->clusters.size();
 
     // For every cluster initialize the median, mean, and stddev vectors with the number of dimensions
-    for (Cluster& cluster : clusterSet->clusters) {
+    for (IndexSet* cluster : clusterPlugin->clusters) {
         cluster._median.resize(points->numDimensions);
         cluster._mean.resize(points->numDimensions);
         cluster._stddev.resize(points->numDimensions);
