@@ -1,0 +1,5 @@
+{
+    "name" : "SPADE Analysis",
+    "version": "1",
+    "dependencies" : ["Points", "Clusters"]
+}
