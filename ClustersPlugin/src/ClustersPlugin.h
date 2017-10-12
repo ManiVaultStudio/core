@@ -31,6 +31,14 @@ public:
     std::vector<IndexSet*> clusters;
 };
 
+struct Cluster {
+    std::vector<unsigned int> indices;
+
+    std::vector<float> _median;
+    std::vector<float> _mean;
+    std::vector<float> _stddev;
+};
+
 class ClusterSet : public hdps::Set
 {
 public:
