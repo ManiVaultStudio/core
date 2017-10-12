@@ -99,6 +99,8 @@ void ClusteringPlugin::startComputation()
     set2->setDataName(points->getName());
     plugin->addCluster(set1);
     plugin->addCluster(set2);
+
+    _core->notifyDataAdded(clusterSetName);
 }
 
 // =============================================================================
