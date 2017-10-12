@@ -95,6 +95,8 @@ void ClusteringPlugin::startComputation()
     const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
     ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
 
+    set1->setDataName(points->getName());
+    set2->setDataName(points->getName());
     plugin->addCluster(set1);
     plugin->addCluster(set2);
 }
