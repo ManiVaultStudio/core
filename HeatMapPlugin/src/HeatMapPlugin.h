@@ -2,6 +2,7 @@
 #define HEAT_MAP_PLUGIN_H
 
 #include <ViewPlugin.h>
+
 #include "HeatMapWidget.h"
 
 using namespace hdps::plugin;

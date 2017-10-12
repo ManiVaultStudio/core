@@ -1,7 +1,6 @@
 #include "HeatMapPlugin.h"
 
 #include "ClustersPlugin.h"
-#include "HeatMapWidget.h"
 
 #include <QtCore>
 #include <QtDebug>
