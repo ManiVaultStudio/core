@@ -39,7 +39,7 @@ void HeatMapPlugin::dataAdded(const QString name)
 
     qDebug() << "DATA SIZE: " << clusterPlugin->clusters.size();
 
-    const std::vector<float>& data = points->data;
+    //const std::vector<float>& data = points->data;
     qDebug() << "Calculating data";
     ////////////
     //for (int i = 0; i < data.size() / points->numDimensions; i++)
@@ -53,37 +53,51 @@ void HeatMapPlugin::dataAdded(const QString name)
     //}
 
     int numClusters = clusterPlugin->clusters.size();
+    int numDimensions = 1;
+
+    //std::vector<float> _median;
+    //std::vector<float> _mean;
+    //std::vector<float> _stddev;
+    std::vector<Cluster> clusters;
+    clusters.resize(numClusters);
 
     // For every cluster initialize the median, mean, and stddev vectors with the number of dimensions
-    for (IndexSet* cluster : clusterPlugin->clusters) {
-        cluster._median.resize(points->numDimensions);
-        cluster._mean.resize(points->numDimensions);
-        cluster._stddev.resize(points->numDimensions);
+    for (int i = 0; i < numClusters; i++) {
+        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(clusterPlugin->clusters[i]->getDataName()));
+        clusters[i]._median.resize(points->numDimensions);
+        clusters[i]._mean.resize(points->numDimensions);
+        clusters[i]._stddev.resize(points->numDimensions);
+        numDimensions = points->numDimensions;
     }
 
-    for (Cluster& cluster : clusterSet->clusters)
+
+    for (int i = 0; i < numClusters; i++)
     {
+        IndexSet* cluster = clusterPlugin->clusters[i];
+
+        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(cluster->getDataName()));
+
         // FIXME remove -1 from iteration condition, we assume the last element is the clusterID here
         for (int d = 0; d < points->numDimensions - 1; d++)
         {
             // Mean calculation
             float mean = 0;
 
-            for (int index : cluster.indices)
-                mean += data[index * points->numDimensions + d];
+            for (int index : cluster->indices)
+                mean += points->data[index * points->numDimensions + d];
 
-            mean /= cluster.indices.size();
+            mean /= cluster->indices.size();
 
             // Standard deviation calculation
             float variance = 0;
 
-            for (int index : cluster.indices)
-                variance += pow(data[index * points->numDimensions + d] - mean, 2);
+            for (int index : cluster->indices)
+                variance += pow(points->data[index * points->numDimensions + d] - mean, 2);
 
-            float stddev = sqrt(variance / cluster.indices.size());
+            float stddev = sqrt(variance / cluster->indices.size());
 
-            cluster._mean[d] = mean;
-            cluster._stddev[d] = stddev;
+            clusters[i]._mean[d] = mean;
+            clusters[i]._stddev[d] = stddev;
         }
     }
 
@@ -91,7 +105,7 @@ void HeatMapPlugin::dataAdded(const QString name)
     qDebug() << "Done calculating data";
 
 
-    heatmap->setData(clusterSet->clusters, points->numDimensions);
+    heatmap->setData(clusters, numDimensions);
 }
 
 void HeatMapPlugin::dataChanged(const QString name)
