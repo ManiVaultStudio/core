@@ -86,9 +86,7 @@ void HeatMapPlugin::dataAdded(const QString name)
         }
     }
 
-    /////////////
     qDebug() << "Done calculating data";
-
 
     heatmap->setData(clusters, numDimensions);
 }
