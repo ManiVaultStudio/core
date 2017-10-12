@@ -36,40 +36,26 @@ void HeatMapPlugin::dataAdded(const QString name)
     qDebug() << "Requesting plugin";
     const ClustersPlugin* clusterPlugin = dynamic_cast<const ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
 
-    qDebug() << "DATA SIZE: " << clusterPlugin->clusters.size();
-
-    //const std::vector<float>& data = points->data;
     qDebug() << "Calculating data";
-    ////////////
-    //for (int i = 0; i < data.size() / points->numDimensions; i++)
-    //{
-    //    int cluster = data[i * points->numDimensions + points->numDimensions-1];
-
-    //    if (clusterSet->clusters.size() < cluster + 1)
-    //        clusterSet->clusters.resize(cluster + 1, Cluster());
-
-    //    clusterSet->clusters[cluster].indices.push_back(i);
-    //}
 
     int numClusters = clusterPlugin->clusters.size();
     int numDimensions = 1;
 
-    //std::vector<float> _median;
-    //std::vector<float> _mean;
-    //std::vector<float> _stddev;
     std::vector<Cluster> clusters;
     clusters.resize(numClusters);
-
+    qDebug() << "Initialize clusters" << numClusters;
     // For every cluster initialize the median, mean, and stddev vectors with the number of dimensions
     for (int i = 0; i < numClusters; i++) {
         const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(clusterPlugin->clusters[i]->getDataName()));
+        if (!points) { qDebug() << "Failed to cast clusters data to PointsPlugin in HeatMapPlugin"; return; }
+
         clusters[i]._median.resize(points->numDimensions);
         clusters[i]._mean.resize(points->numDimensions);
         clusters[i]._stddev.resize(points->numDimensions);
         numDimensions = points->numDimensions;
     }
 
-
+    qDebug() << "Calculate cluster statistics";
     for (int i = 0; i < numClusters; i++)
     {
         IndexSet* cluster = clusterPlugin->clusters[i];
