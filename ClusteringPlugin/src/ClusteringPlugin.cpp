@@ -7,6 +7,8 @@
 #include <QMessageBox>
 #include <QtDebug>
 
+#include <unordered_map>
+
 Q_PLUGIN_METADATA(IID "nl.tudelft.ClusteringPlugin")
 
 // =============================================================================
@@ -77,28 +79,30 @@ void ClusteringPlugin::startComputation()
     // Clustering
     IndexSet* set1 = (IndexSet*)points->createSet();
     IndexSet* set2 = (IndexSet*)points->createSet();
+    std::unordered_map<int, IndexSet*> clusters;
 
     unsigned int numPoints = points->data.size() / points->numDimensions;
-    for (int i = 0; i < numPoints; i++) {
-        if (i < numPoints / 2)
-        {
-            set1->indices.push_back(i);
-        }
-        else
-        {
-            set2->indices.push_back(i);
-        }
-    }
+    for (int i = 0; i < numPoints; i++)
+    {
+        int c = (int) points->data[i * points->numDimensions + points->numDimensions - 1];
 
+        if (clusters.find(c) == clusters.end())
+        {
+            clusters[c] = (IndexSet*) points->createSet();
+        }
+        clusters[c]->indices.push_back(i);
+    }
 
     QString clusterSetName = _core->addData("Clusters", "ClusterSet");
     const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
     ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
 
-    set1->setDataName(points->getName());
-    set2->setDataName(points->getName());
-    plugin->addCluster(set1);
-    plugin->addCluster(set2);
+    for (auto& it : clusters)
+    {
+        IndexSet* cluster = it.second;
+        cluster->setDataName(points->getName());
+        plugin->addCluster(cluster);
+    }
 
     _core->notifyDataAdded(clusterSetName);
 }
