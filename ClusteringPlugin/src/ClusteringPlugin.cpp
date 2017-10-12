@@ -74,9 +74,23 @@ void ClusteringPlugin::startComputation()
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
 
-    IndexSet* set1 = (IndexSet*) points->createSet();
-    IndexSet* set2 = (IndexSet*) points->createSet();
-    
+    // Clustering
+    IndexSet* set1 = (IndexSet*)points->createSet();
+    IndexSet* set2 = (IndexSet*)points->createSet();
+
+    unsigned int numPoints = points->data.size() / points->numDimensions;
+    for (int i = 0; i < numPoints; i++) {
+        if (i < numPoints / 2)
+        {
+            set1->indices.push_back(i);
+        }
+        else
+        {
+            set2->indices.push_back(i);
+        }
+    }
+
+
     QString clusterSetName = _core->addData("Clusters", "ClusterSet");
     const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
     ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
