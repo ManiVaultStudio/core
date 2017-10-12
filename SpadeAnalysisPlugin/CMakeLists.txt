@@ -27,6 +27,8 @@ set(SOURCES
 )
 
 set( EXTERNAL_SOURCES
+    external/hcluster/hcluster.h
+    external/hcluster/hcluster.cpp
     external/boruvka/boruvka.h
     external/boruvka/boruvka.cpp
 )
