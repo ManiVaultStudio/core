@@ -1,6 +1,6 @@
 #include "HeatMapWidget.h"
 
-#include "PointsPlugin.h"
+#include "ClustersPlugin.h"
 #include "util/FileUtil.h"
 
 #include <QWebView>
