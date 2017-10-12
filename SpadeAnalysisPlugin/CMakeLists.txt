@@ -22,15 +22,21 @@ set(SOURCES
     src/SpadeAnalysisPlugin.h
     src/SpadeAnalysisPlugin.cpp
     src/SpadeAnalysisPlugin.json
-	src/SpadeSettingsWidget.h
-	src/SpadeSettingsWidget.cpp
+    src/SpadeSettingsWidget.h
+    src/SpadeSettingsWidget.cpp
+)
+
+set( EXTERNAL_SOURCES
+    external/boruvka/boruvka.h
+    external/boruvka/boruvka.cpp
 )
 
 source_group( Plugin FILES ${SOURCES})
+source_group( External FILES ${EXTERNAL_SOURCES})
 
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${EXTERNAL_SOURCES})
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
