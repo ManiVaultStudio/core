@@ -1,6 +1,6 @@
-#include "ClusteringSettingsWidget.h"
+#include "SpadeSettingsWidget.h"
 
-#include "ClusteringPlugin.h"
+#include "SpadeAnalysisPlugin.h"
 
 #include <QGroupBox>
 #include <QLabel>
@@ -9,7 +9,7 @@
 
 using namespace hdps::plugin;
 
-ClusteringSettingsWidget::ClusteringSettingsWidget(const ClusteringPlugin* analysis) {
+SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis) {
     setFixedWidth(200);
 
     connect(&startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));

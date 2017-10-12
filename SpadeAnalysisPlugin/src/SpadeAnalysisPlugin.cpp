@@ -1,4 +1,4 @@
-#include "ClusteringPlugin.h"
+#include "SpadeAnalysisPlugin.h"
 
 #include "PointsPlugin.h"
 #include "ClustersPlugin.h"
@@ -15,55 +15,55 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.ClusteringPlugin")
 // View
 // =============================================================================
 
-ClusteringPlugin::~ClusteringPlugin(void)
+SpadeAnalysisPlugin::~SpadeAnalysisPlugin(void)
 {
     
 }
 
-void ClusteringPlugin::init()
+void SpadeAnalysisPlugin::init()
 {
-    _settings = std::make_unique<ClusteringSettingsWidget>(this);
+    _settings = std::make_unique<SpadeSettingsWidget>(this);
 }
 
-void ClusteringPlugin::dataAdded(const QString name)
+void SpadeAnalysisPlugin::dataAdded(const QString name)
 {
     _settings->dataOptions.addItem(name);
 }
 
-void ClusteringPlugin::dataChanged(const QString name)
+void SpadeAnalysisPlugin::dataChanged(const QString name)
 {
 
 }
 
-void ClusteringPlugin::dataRemoved(const QString name)
+void SpadeAnalysisPlugin::dataRemoved(const QString name)
 {
     
 }
 
-void ClusteringPlugin::selectionChanged(const QString dataName)
+void SpadeAnalysisPlugin::selectionChanged(const QString dataName)
 {
 
 }
 
 
-QStringList ClusteringPlugin::supportedDataKinds()
+QStringList SpadeAnalysisPlugin::supportedDataKinds()
 {
     QStringList supportedKinds;
     supportedKinds << "Points";
     return supportedKinds;
 }
 
-SettingsWidget* const ClusteringPlugin::getSettings()
+SettingsWidget* const SpadeAnalysisPlugin::getSettings()
 {
     return _settings.get();
 }
 
-void ClusteringPlugin::dataSetPicked(const QString& name)
+void SpadeAnalysisPlugin::dataSetPicked(const QString& name)
 {
 
 }
 
-void ClusteringPlugin::startComputation()
+void SpadeAnalysisPlugin::startComputation()
 {
     QString setName = _settings->dataOptions.currentText();
 
@@ -111,7 +111,7 @@ void ClusteringPlugin::startComputation()
 // Factory
 // =============================================================================
 
-AnalysisPlugin* ClusteringPluginFactory::produce()
+AnalysisPlugin* SpadeAnalysisPluginFactory::produce()
 {
-    return new ClusteringPlugin();
+    return new SpadeAnalysisPlugin();
 }

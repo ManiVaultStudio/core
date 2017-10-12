@@ -1,5 +1,5 @@
-#ifndef CLUSTERING_SETTINGS_WIDGET_H
-#define CLUSTERING_SETTINGS_WIDGET_H
+#ifndef SPADE_SETTINGS_WIDGET_H
+#define SPADE_SETTINGS_WIDGET_H
 
 #include <widgets/SettingsWidget.h>
 
@@ -9,18 +9,18 @@
 
 using namespace hdps::gui;
 
-class ClusteringPlugin;
+class SpadeAnalysisPlugin;
 
-class ClusteringSettingsWidget : public SettingsWidget
+class SpadeSettingsWidget : public SettingsWidget
 {
     Q_OBJECT
 
 public:
-    ClusteringSettingsWidget(const ClusteringPlugin* analysis);
+    SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis);
 
 public:
     QComboBox dataOptions;
     QPushButton startButton;
 };
 
-#endif // CLUSTERING_SETTINGS_WIDGET_H
+#endif // SPADE_SETTINGS_WIDGET_H

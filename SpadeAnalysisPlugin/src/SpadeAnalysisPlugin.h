@@ -1,9 +1,9 @@
-#ifndef CLUSTERING_PLUGIN_H
-#define CLUSTERING_PLUGIN_H
+#ifndef SPADE_ANALYSIS_PLUGIN_H
+#define SPADE_ANALYSIS_PLUGIN_H
 
 #include <AnalysisPlugin.h>
 
-#include "ClusteringSettingsWidget.h"
+#include "SpadeSettingsWidget.h"
 
 using namespace hdps::plugin;
 using namespace hdps::gui;
@@ -12,12 +12,12 @@ using namespace hdps::gui;
 // View
 // =============================================================================
 
-class ClusteringPlugin : public QObject, public AnalysisPlugin
+class SpadeAnalysisPlugin : public QObject, public AnalysisPlugin
 {
     Q_OBJECT   
 public:
-    ClusteringPlugin() : AnalysisPlugin("Clustering Analysis") { }
-    ~ClusteringPlugin(void);
+    SpadeAnalysisPlugin() : AnalysisPlugin("SPADE Analysis") { }
+    ~SpadeAnalysisPlugin(void);
     
     void init();
 
@@ -34,25 +34,25 @@ public slots:
     void startComputation();
 
 private:
-    std::unique_ptr<ClusteringSettingsWidget> _settings;
+    std::unique_ptr<SpadeSettingsWidget> _settings;
 };
 
 // =============================================================================
 // Factory
 // =============================================================================
 
-class ClusteringPluginFactory : public AnalysisPluginFactory
+class SpadeAnalysisPluginFactory : public AnalysisPluginFactory
 {
     Q_INTERFACES(hdps::plugin::AnalysisPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.tudelft.ClusteringPlugin"
-                      FILE  "ClusteringPlugin.json")
+    Q_PLUGIN_METADATA(IID   "nl.tudelft.SpadeAnalysisPlugin"
+                      FILE  "SpadeAnalysisPlugin.json")
     
 public:
-    ClusteringPluginFactory(void) {}
-    ~ClusteringPluginFactory(void) {}
+    SpadeAnalysisPluginFactory(void) {}
+    ~SpadeAnalysisPluginFactory(void) {}
     
     AnalysisPlugin* produce();
 };
 
-#endif // CLUSTERING_PLUGIN_H
+#endif // SPADE_ANALYSIS_PLUGIN_H
