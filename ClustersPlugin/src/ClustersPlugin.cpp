@@ -21,7 +21,7 @@ void ClustersPlugin::init()
 
 hdps::Set* ClustersPlugin::createSet() const
 {
-    return new ClusterSet();
+    return new ClusterSet(getName());
 }
 
 //void ClustersPlugin::addCluster(IndexSet* cluster)
@@ -31,9 +31,8 @@ hdps::Set* ClustersPlugin::createSet() const
 
 hdps::Set* ClusterSet::copy() const
 {
-    ClusterSet* set = new ClusterSet();
+    ClusterSet* set = new ClusterSet(getDataName());
     set->setName(getName());
-    set->setDataName(getDataName());
     set->indices = indices;
     return set;
 }

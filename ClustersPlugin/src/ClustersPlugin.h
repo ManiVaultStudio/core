@@ -42,7 +42,7 @@ struct Cluster {
 class ClusterSet : public hdps::Set
 {
 public:
-    ClusterSet() { }
+    ClusterSet(QString dataName) : Set(dataName) { }
     ~ClusterSet() { }
 
     Set* copy() const override;
