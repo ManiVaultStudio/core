@@ -77,8 +77,6 @@ void ClusteringPlugin::startComputation()
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
 
     // Clustering
-    IndexSet* set1 = (IndexSet*)points->createSet();
-    IndexSet* set2 = (IndexSet*)points->createSet();
     std::unordered_map<int, IndexSet*> clusters;
 
     unsigned int numPoints = points->data.size() / points->numDimensions;
@@ -100,7 +98,6 @@ void ClusteringPlugin::startComputation()
     for (auto& it : clusters)
     {
         IndexSet* cluster = it.second;
-        cluster->setDataName(points->getName());
         plugin->addCluster(cluster);
     }
 
