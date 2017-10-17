@@ -30,7 +30,7 @@ public:
 class IndexSet : public hdps::Set
 {
 public:
-    IndexSet() { }
+    IndexSet(QString dataName) : Set(dataName) { }
     ~IndexSet() { }
 
     Set* copy() const override;

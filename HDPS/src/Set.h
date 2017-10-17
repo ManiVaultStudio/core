@@ -8,7 +8,7 @@ namespace hdps {
 
 class Set {
 public:
-    Set() : _all(false) {}
+    Set(QString dataName) : _dataName(dataName), _all(false) {}
     virtual ~Set() {}
 
     virtual Set* copy() const = 0;
@@ -31,11 +31,6 @@ public:
     void setName(QString name)
     {
         _name = name;
-    }
-
-    void setDataName(QString name)
-    {
-        _dataName = name;
     }
 
     void setAll()

@@ -102,9 +102,7 @@ const QString Core::addData(const QString kind, const QString name)
     // Generate a unique set name and set the properties of the new sets
     QString setName = _dataManager->getUniqueSetName(name);
     fullSet->setName(setName);
-    fullSet->setDataName(pluginName);
     fullSet->setAll();
-    selection->setDataName(pluginName);
 
     // Add them to the data manager
     _dataManager->addSet(fullSet);
