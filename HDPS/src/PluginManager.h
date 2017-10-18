@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QString>
 #include <QHash>
+#include <QDir>
 
 namespace Ui
 {
@@ -35,6 +36,11 @@ public:
     QString createPlugin(const QString kind);
     
 private:
+    /**
+    * Resolves plugin dependencies, returns list of resolved plugin names.
+    */
+    QVector<QString> resolveDependencies(QDir pluginDir) const;
+
     Core& _core;
 
     QHash<QString, PluginFactory*> _pluginFactories;
