@@ -5,7 +5,9 @@
 
 #include <QString>
 #include <QVector>
-#include <QMap>
+
+#include <unordered_map>
+#include <memory>
 
 namespace hdps {
 
@@ -21,7 +23,11 @@ public:
 
 private:
     QVector<Set*> _dataSets;
-    QMap<QString, Set*> _selections;
+    /**
+     * Stores selection sets on all data plugins
+     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
+     */
+    std::unordered_map<std::string, std::unique_ptr<Set>> _selections;
 };
 
 } // namespace hdps

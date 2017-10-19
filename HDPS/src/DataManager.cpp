@@ -12,7 +12,7 @@ void DataManager::addSet(Set* set)
 
 void DataManager::addSelection(QString dataName, Set* selection)
 {
-    _selections.insert(dataName, selection);
+    _selections.emplace(dataName.toStdString(), std::move(std::unique_ptr<Set>(selection)));
 }
 
 Set* DataManager::getSet(QString name)
@@ -30,7 +30,7 @@ Set* DataManager::getSet(QString name)
 
 Set* DataManager::getSelection(QString name)
 {
-    return _selections[name];
+    return _selections[name.toStdString()].get();
 }
 
 const QVector<Set*>& DataManager::allSets()
