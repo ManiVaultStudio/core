@@ -4,10 +4,12 @@
 #include "Set.h"
 
 #include <QString>
-#include <QVector>
 
+#include <vector>
 #include <unordered_map>
 #include <memory>
+
+using namespace std;
 
 namespace hdps {
 
@@ -17,17 +19,18 @@ public:
     void addSelection(QString dataName, Set* selection);
     Set* getSet(QString name);
     Set* getSelection(QString name);
-    const QVector<Set*>& allSets();
+    const std::vector<std::unique_ptr<Set>>& allSets();
 
     const QString getUniqueSetName(QString request);
 
 private:
-    QVector<Set*> _dataSets;
+    std::vector<std::unique_ptr<Set>> _dataSets;
     /**
      * Stores selection sets on all data plugins
      * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
      */
     std::unordered_map<std::string, std::unique_ptr<Set>> _selections;
+    unordered_map<string, unique_ptr<Set>> _selections;
 };
 
 } // namespace hdps

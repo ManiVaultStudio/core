@@ -75,7 +75,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
     plugin::DataConsumer* dataConsumer = dynamic_cast<plugin::DataConsumer*>(plugin);
     if (dataConsumer)
     {
-        for (const Set* set : _dataManager->allSets())
+        for (const auto& set : _dataManager->allSets())
         {
             if (supportsSet(dataConsumer, set->getName()))
                 dataConsumer->dataAdded(set->getName());

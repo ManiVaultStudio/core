@@ -7,7 +7,7 @@ namespace hdps {
 
 void DataManager::addSet(Set* set)
 {
-    _dataSets.append(set);
+    _dataSets.push_back(std::move(std::unique_ptr<Set>(set)));
 }
 
 void DataManager::addSelection(QString dataName, Set* selection)
@@ -17,11 +17,11 @@ void DataManager::addSelection(QString dataName, Set* selection)
 
 Set* DataManager::getSet(QString name)
 {
-    for (Set* set : _dataSets)
+    for (const auto& set : _dataSets)
     {
         if (set->getName() == name)
         {
-            return set;
+            return set.get();
         }
     }
     qFatal((QString("Failed to find set with name: ") + name).toStdString().c_str());
@@ -33,14 +33,14 @@ Set* DataManager::getSelection(QString name)
     return _selections[name.toStdString()].get();
 }
 
-const QVector<Set*>& DataManager::allSets()
+const std::vector<std::unique_ptr<Set>>& DataManager::allSets()
 {
     return _dataSets;
 }
 
 const QString DataManager::getUniqueSetName(QString request)
 {
-    for (const Set* set : allSets())
+    for (const auto& set : allSets())
     {
         if (set->getName() == request)
         {
