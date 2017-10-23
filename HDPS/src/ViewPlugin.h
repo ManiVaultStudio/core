@@ -8,9 +8,10 @@
 #include <QWidget>
 #include <QGridLayout>
 
-namespace hdps {
-
-namespace plugin {
+namespace hdps
+{
+namespace plugin
+{
 
 class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsumer
 {

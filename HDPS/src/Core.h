@@ -7,20 +7,23 @@
 #include <unordered_map>
 #include <vector>
 
-namespace hdps {
+namespace hdps
+{
 
-class DataManager;
-
-namespace plugin {
+namespace plugin
+{
     class PluginManager;
     class Plugin;
     class DataConsumer;
     enum Type;
 }
 
-namespace gui {
+namespace gui
+{
     class MainWindow;
 }
+
+class DataManager;
 
 class Core : public CoreInterface
 {
@@ -49,8 +52,8 @@ public:
     void createSubsetFromSelection(const Set* selection, const QString newSetName) override;
 
     /**
-     * Request a plugin from the core by its name.
-     */
+        * Request a plugin from the core by its name.
+        */
     plugin::DataTypePlugin* requestPlugin(const QString name) override;
 
     /**

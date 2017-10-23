@@ -6,9 +6,10 @@
 class QWidget;
 class QGridLayout;
 
-namespace hdps {
-
-namespace gui {
+namespace hdps
+{
+namespace gui
+{
 
 class DockableWidget : public QDockWidget
 {
@@ -23,12 +24,6 @@ public:
     public slots :
     bool setVisibility(bool visible);
     bool toggleVisibility();
-
-protected:
-
-private:
-
-public:
 
 protected:
     bool _isVisible;

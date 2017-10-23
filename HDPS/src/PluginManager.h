@@ -15,12 +15,12 @@ namespace Ui
     class MainWindow;
 }
 
-namespace hdps {
-
-namespace plugin {
+namespace hdps
+{
+namespace plugin
+{
 
 class PluginManager : public QObject {
-    
 public:
     PluginManager(Core& core);
     ~PluginManager(void);

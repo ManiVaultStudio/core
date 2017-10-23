@@ -4,9 +4,11 @@
 #include <QString>
 #include <QVector>
 
-namespace hdps {
+namespace hdps
+{
 
-class Set {
+class Set
+{
 public:
     Set(QString dataName) : _dataName(dataName), _all(false) {}
     virtual ~Set() {}

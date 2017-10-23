@@ -3,7 +3,8 @@
 #include <QRegularExpression>
 #include <iostream>
 
-namespace hdps {
+namespace hdps
+{
 
 void DataManager::addSet(Set* set)
 {
@@ -52,7 +53,8 @@ const QString DataManager::getUniqueSetName(QString request)
             {
                 return getUniqueSetName(request + "_1");
             }
-            else {
+            else
+            {
                 // Number of characters used by the digits we need to replace
                 int numChars = request.length() - (index + 1);
                 // The digit we want to increment and place back

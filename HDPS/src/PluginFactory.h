@@ -5,9 +5,10 @@
 
 #include <QObject>
 
-namespace hdps {
-
-namespace plugin {
+namespace hdps
+{
+namespace plugin
+{
 
 class PluginFactory : public QObject
 {

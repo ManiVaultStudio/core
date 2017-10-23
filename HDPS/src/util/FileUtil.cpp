@@ -9,19 +9,22 @@ namespace hdps
 {
 namespace util
 {
-    QString loadFileContents(QString path) {
-        QFile file(path);
 
-        QString contents = "";
-        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            QTextStream stream(&file);
-            contents = stream.readAll();
-        }
+QString loadFileContents(QString path) {
+    QFile file(path);
 
-        return contents;
+    QString contents = "";
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream stream(&file);
+        contents = stream.readAll();
     }
+
+    return contents;
 }
+
+}
+
 }
 
 #endif // HDPS_UTIL_FILE_UTIL_H

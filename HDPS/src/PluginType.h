@@ -12,9 +12,10 @@
  * View           - A plugin to display a dataset on screen.
  */
 
-namespace hdps {
-
-namespace plugin {
+namespace hdps
+{
+namespace plugin
+{
 
 enum Type { ANALYSIS, DATA_TYPE, LOADER, WRITER, TRANFORMATION, VIEW };
 

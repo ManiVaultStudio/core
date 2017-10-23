@@ -5,9 +5,10 @@
 
 #include <QString>
 
-namespace hdps {
-
-namespace plugin {
+namespace hdps
+{
+namespace plugin
+{
 
 class WriterPlugin : public Plugin
 {

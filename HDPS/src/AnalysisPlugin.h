@@ -7,9 +7,10 @@
 
 #include <memory>
 
-namespace hdps {
-
-namespace plugin {
+namespace hdps
+{
+namespace plugin
+{
 
 class AnalysisPlugin : public Plugin, public DataConsumer
 {

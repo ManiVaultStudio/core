@@ -5,12 +5,12 @@
 
 namespace hdps
 {
-class Set;
-
 namespace plugin
 {
-class DataTypePlugin;
+    class DataTypePlugin;
 }
+
+class Set;
 
 class CoreInterface
 {

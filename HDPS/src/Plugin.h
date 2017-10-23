@@ -7,9 +7,10 @@
 #include <QString>
 #include <QUuid>
 
-namespace hdps {
-
-namespace plugin {
+namespace hdps
+{
+namespace plugin
+{
 
 class Plugin
 {

@@ -13,18 +13,20 @@ namespace Ui
     class MainWindow;
 }
 
-namespace hdps {
+namespace hdps
+{
 
-namespace plugin {
+namespace plugin
+{
     class PluginManager;
     class ViewPlugin;
     enum Type;
 }
-namespace gui {
-    class SettingsWidget;
-}
 
-namespace gui {
+namespace gui
+{
+
+class SettingsWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -47,12 +49,6 @@ public:
     * Adds the given settings widget to the settings area of the window.
     */
     void addSettings(SettingsWidget* settings);
-
-private:
-
-public slots:
-
-private slots:
 
 private:
     std::unique_ptr<Core> _core;

@@ -3,9 +3,10 @@
 
 #include "PluginFactory.h"
 
-namespace hdps {
-
-namespace plugin {
+namespace hdps
+{
+namespace plugin
+{
 
 class TransformationPlugin : public Plugin
 {

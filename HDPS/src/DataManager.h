@@ -11,9 +11,11 @@
 
 using namespace std;
 
-namespace hdps {
+namespace hdps
+{
 
-class DataManager {
+class DataManager
+{
 public:
     void addSet(Set* set);
     void addSelection(QString dataName, Set* selection);
@@ -26,9 +28,9 @@ public:
 private:
     std::vector<std::unique_ptr<Set>> _dataSets;
     /**
-     * Stores selection sets on all data plugins
-     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
-     */
+        * Stores selection sets on all data plugins
+        * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
+        */
     std::unordered_map<std::string, std::unique_ptr<Set>> _selections;
     unordered_map<string, unique_ptr<Set>> _selections;
 };
