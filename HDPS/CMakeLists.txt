@@ -64,6 +64,11 @@ set( WIDGET_SOURCES
     src/widgets/WebWidget.cpp
 )
 
+set( GRAPHICS_SOURCES
+    src/graphics/VBO.h
+    src/graphics/VBO.cpp
+)
+
 set( UTIL_HEADERS
     src/util/FileUtil.h
 )
@@ -135,6 +140,7 @@ QT5_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
 source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
+source_group( Private\\Graphics FILES ${GRAPHICS_SOURCES})
 source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
 source_group( Public\\Util FILES ${UTIL_FILES})
@@ -158,7 +164,7 @@ target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebKitWidgets)
 
 add_library(${PROJECT}_Private ${LINK_TYPE}
-    ${PRIVATE_SOURCES}
+    ${PRIVATE_SOURCES} ${GRAPHICS_SOURCES}
 )
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
 target_link_libraries(${PROJECT}_Private Qt5::WebKitWidgets)
