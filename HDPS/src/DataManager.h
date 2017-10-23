@@ -9,8 +9,6 @@
 #include <unordered_map>
 #include <memory>
 
-using namespace std;
-
 namespace hdps
 {
 
@@ -32,7 +30,6 @@ private:
         * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
         */
     std::unordered_map<std::string, std::unique_ptr<Set>> _selections;
-    unordered_map<string, unique_ptr<Set>> _selections;
 };
 
 } // namespace hdps
