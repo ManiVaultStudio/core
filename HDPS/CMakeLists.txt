@@ -64,8 +64,11 @@ set( WIDGET_SOURCES
     src/widgets/WebWidget.cpp
 )
 
-set( GRAPHICS_SOURCES
+set( GRAPHICS_HEADERS
     src/graphics/BufferObject.h
+)
+
+set( GRAPHICS_SOURCES
     src/graphics/BufferObject.cpp
 )
 
@@ -103,12 +106,14 @@ list(APPEND PRIVATE_SOURCES
 )
 
 list(APPEND PUBLIC_HEADERS
+    ${GRAPHICS_HEADERS}
     ${WIDGET_HEADERS}
     ${UTIL_HEADERS}
     ${PLUGIN_HEADERS}
 )
 
 list(APPEND PUBLIC_SOURCES
+    ${GRAPHICS_SOURCES}
     ${WIDGET_SOURCES}
     ${UTIL_SOURCES}
     ${PUBLIC_HEADERS}
@@ -158,7 +163,7 @@ endif(MSVC)
 
 
 add_library(${PROJECT}_Public ${LINK_TYPE}
-    ${PUBLIC_SOURCES} ${GRAPHICS_SOURCES}
+    ${PUBLIC_SOURCES}
 )
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebKitWidgets)
