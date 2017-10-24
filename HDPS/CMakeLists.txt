@@ -140,10 +140,10 @@ QT5_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
 source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
-source_group( Private\\Graphics FILES ${GRAPHICS_SOURCES})
 source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
 source_group( Public\\Util FILES ${UTIL_FILES})
+source_group( Public\\Graphics FILES ${GRAPHICS_SOURCES})
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})
 source_group( Resources FILES win/hdps.rc)
@@ -158,13 +158,13 @@ endif(MSVC)
 
 
 add_library(${PROJECT}_Public ${LINK_TYPE}
-    ${PUBLIC_SOURCES}
+    ${PUBLIC_SOURCES} ${GRAPHICS_SOURCES}
 )
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebKitWidgets)
 
 add_library(${PROJECT}_Private ${LINK_TYPE}
-    ${PRIVATE_SOURCES} ${GRAPHICS_SOURCES}
+    ${PRIVATE_SOURCES}
 )
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
 target_link_libraries(${PROJECT}_Private Qt5::WebKitWidgets)
