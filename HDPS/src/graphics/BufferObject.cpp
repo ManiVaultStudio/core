@@ -15,6 +15,7 @@ BufferObject::~BufferObject()
 
 void BufferObject::create()
 {
+    initializeOpenGLFunctions();
     glGenBuffers(1, &_object);
 }
 
