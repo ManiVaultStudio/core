@@ -14,8 +14,10 @@ public:
     BufferObject();
     ~BufferObject();
 
+    void create();
     void bind();
-    void setData(std::vector<float>& data);
+    void setData(const std::vector<float>& data);
+    void destroy();
 private:
     GLuint _object;
 };
