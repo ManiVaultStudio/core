@@ -3,22 +3,22 @@
 namespace hdps
 {
 
-VBO::VBO()
+BufferObject::BufferObject()
 {
     glGenBuffers(1, &_object);
 }
 
-VBO::~VBO()
+BufferObject::~BufferObject()
 {
     glDeleteBuffers(1, &_object);
 }
 
-void VBO::bind()
+void BufferObject::bind()
 {
     glBindBuffer(GL_ARRAY_BUFFER, _object);
 }
 
-void VBO::setData(std::vector<float>& data)
+void BufferObject::setData(std::vector<float>& data)
 {
     glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
 }

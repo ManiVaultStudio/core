@@ -65,8 +65,8 @@ set( WIDGET_SOURCES
 )
 
 set( GRAPHICS_SOURCES
-    src/graphics/VBO.h
-    src/graphics/VBO.cpp
+    src/graphics/BufferObject.h
+    src/graphics/BufferObject.cpp
 )
 
 set( UTIL_HEADERS

@@ -1,5 +1,5 @@
-#ifndef VBO_H
-#define VBO_H
+#ifndef BUFFER_OBJECT_H
+#define BUFFER_OBJECT_H
 
 #include <QOpenGLFunctions_3_3_Core>
 
@@ -8,11 +8,11 @@
 namespace hdps
 {
 
-class VBO : protected QOpenGLFunctions_3_3_Core
+class BufferObject : protected QOpenGLFunctions_3_3_Core
 {
 public:
-    VBO();
-    ~VBO();
+    BufferObject();
+    ~BufferObject();
 
     void bind();
     void setData(std::vector<float>& data);
@@ -22,4 +22,4 @@ private:
 
 } // namespace hdps
 
-#endif // VBO_H
+#endif // BUFFER_OBJECT_H
