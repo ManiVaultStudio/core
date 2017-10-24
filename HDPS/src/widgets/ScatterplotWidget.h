@@ -3,6 +3,8 @@
 
 #include "../SelectionListener.h"
 
+#include "../graphics/BufferObject.h"
+
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
@@ -48,8 +50,9 @@ private:
     const PointScaling DEFAULT_POINT_SCALING = PointScaling::Relative;
 
     GLuint _vao;
-    GLuint _positionBuffer;
-    GLuint _colorBuffer;
+
+    BufferObject _positionBuffer;
+    BufferObject _colorBuffer;
     QOpenGLShaderProgram* _shader;
 
     unsigned int _numPoints = 0;

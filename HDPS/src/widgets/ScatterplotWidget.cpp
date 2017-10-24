@@ -96,10 +96,10 @@ void ScatterplotWidget::setData(const std::vector<float>* positions)
     _colors.clear();
     _colors.resize(_numPoints * 3, 0.5f);
 
-    glBindBuffer(GL_ARRAY_BUFFER, _positionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, _numPoints * 2 * sizeof(float), positions->data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
-    glBufferData(GL_ARRAY_BUFFER, _numPoints * 3 * sizeof(float), _colors.data(), GL_STATIC_DRAW);
+    _positionBuffer.bind();
+    _positionBuffer.setData(*positions);
+    _colorBuffer.bind();
+    _colorBuffer.setData(_colors);
     update();
 }
 
@@ -107,8 +107,8 @@ void ScatterplotWidget::setColors(const std::vector<float>& colors)
 {
     _colors = colors;
 
-    glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
-    glBufferData(GL_ARRAY_BUFFER, _numPoints * 3 * sizeof(float), colors.data(), GL_STATIC_DRAW);
+    _colorBuffer.bind();
+    _colorBuffer.setData(colors);
     update();
 }
 
@@ -167,24 +167,24 @@ void ScatterplotWidget::initializeGL()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
-    glGenBuffers(1, &_positionBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _positionBuffer);
+    _positionBuffer.create();
+    _positionBuffer.bind();
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribDivisor(1, 1);
     glEnableVertexAttribArray(1);
 
-    glGenBuffers(1, &_colorBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
+    _colorBuffer.create();
+    _colorBuffer.bind();
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
     if (_numPoints > 0)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, _positionBuffer);
-        glBufferData(GL_ARRAY_BUFFER, _numPoints * 2 * sizeof(float), _positions->data(), GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
-        glBufferData(GL_ARRAY_BUFFER, _numPoints * 3 * sizeof(float), _colors.data(), GL_STATIC_DRAW);
+        _positionBuffer.bind();
+        _positionBuffer.setData(*_positions);
+        _colorBuffer.bind();
+        _colorBuffer.setData(_colors);
     }
 
     _shader = new QOpenGLShaderProgram();
@@ -300,8 +300,8 @@ void ScatterplotWidget::cleanup()
     makeCurrent();
 
     glDeleteVertexArrays(1, &_vao);
-    glDeleteBuffers(1, &_positionBuffer);
-    glDeleteBuffers(1, &_colorBuffer);
+    _positionBuffer.destroy();
+    _colorBuffer.destroy();
     delete _shader;
     delete _selectionShader;
 }
