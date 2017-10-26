@@ -69,6 +69,7 @@ void CsvReaderPlugin::loadData()
             points->data[i] = data[i];
         }
         points->numDimensions = numDimensions;
+        qDebug() << "Number of dimensions: " << points->numDimensions;
 
         _core->notifyDataAdded(name);
 

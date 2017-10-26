@@ -20,16 +20,18 @@ const char *plotVertexSource = GLSL(330,
     out vec2 pass_texCoords;
     out vec3 pass_color;
 
+    bool inRect(vec2 position, vec2 start, vec2 end)
+    {
+        return position.x > start.x && position.x < end.x && position.y > start.y && position.y < end.y;
+    }
+
     void main()
     {
         pass_color = color;
 
-        if (selecting)
+        if (selecting && inRect(position, start, end))
         {
-            if (position.x > start.x && position.x < end.x && position.y > start.y && position.y < end.y)
-            {
-                pass_color = vec3(1, 0.5, 0);
-            }
+            pass_color = vec3(1, 0.5, 0);
         }
 
         pass_texCoords = vertex;
