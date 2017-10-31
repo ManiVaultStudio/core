@@ -180,18 +180,14 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
     IndexSet* selectionSet = dynamic_cast<IndexSet*>(_core->requestSelection(set->getDataName()));
     qDebug() << "Selection size: " << selection.size();
     selectionSet->indices.clear();
-    if (set->isFull())
-    {
-        for (unsigned int index : selection) {
+
+    for (unsigned int index : selection) {
+        if (set->isFull())
             selectionSet->indices.push_back(index);
-        }
-    }
-    else
-    {
-        for (unsigned int index : selection) {
+        else
             selectionSet->indices.push_back(set->indices[index]);
-        }
     }
+
     qDebug() << "Selection on: " << selectionSet->getDataName();
     _core->notifySelectionChanged(selectionSet->getDataName());
 }
