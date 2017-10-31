@@ -149,23 +149,24 @@ void ScatterplotWidget::initializeGL()
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
 
-    float vertices[6*2] = 
+    std::vector<float> vertices(
     {
         -1, -1,
-         1, -1,
-        -1,  1,
-        -1,  1,
-         1, -1,
-         1,  1
-    };
+        1, -1,
+        -1, 1,
+        -1, 1,
+        1, -1,
+        1, 1
+    }
+    );
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), vertices, GL_STATIC_DRAW);
+    BufferObject quad;
+    quad.create();
+    quad.bind();
+    quad.setData(vertices);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
