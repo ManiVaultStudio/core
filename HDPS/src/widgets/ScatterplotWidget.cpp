@@ -96,7 +96,7 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* positions)
     _numPoints = (unsigned int)positions->size();
     _positions = positions;
     _colors.clear();
-    _colors.resize(_numPoints * 3, 0.5f);
+    _colors.resize(_numPoints, Vector3f(0.5f, 0.5f, 0.5f));
 
     _positionBuffer.bind();
     _positionBuffer.setData(*positions);
@@ -105,7 +105,7 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* positions)
     update();
 }
 
-void ScatterplotWidget::setColors(const std::vector<float>& colors)
+void ScatterplotWidget::setColors(const std::vector<Vector3f>& colors)
 {
     _colors = colors;
 

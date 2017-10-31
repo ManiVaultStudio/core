@@ -4,6 +4,7 @@
 #include "PointsPlugin.h"
 
 #include "graphics/Vector2f.h"
+#include "graphics/Vector3f.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -107,7 +108,7 @@ void ScatterplotPlugin::updateData()
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
     
     std::vector<hdps::Vector2f>* positions = new std::vector<hdps::Vector2f>();
-    std::vector<float> colors;
+    std::vector<hdps::Vector3f> colors;
 
     int nDim = points->numDimensions;
 
@@ -124,29 +125,25 @@ void ScatterplotPlugin::updateData()
         unsigned int numPoints = points->data.size() / nDim;
 
         positions->resize(numPoints);
-        colors.resize(numPoints * 3, 0.5f);
+        colors.resize(numPoints, hdps::Vector3f(0.5f, 0.5f, 0.5f));
 
         for (int i = 0; i < numPoints; i++)
         {
             (*positions)[i] = hdps::Vector2f(points->data[i * nDim + xIndex] / maxLength, points->data[i * nDim + yIndex] / maxLength);
             if (nDim >= 5) {
-                colors[i * 3 + 0] = points->data[i * nDim + 2];
-                colors[i * 3 + 1] = points->data[i * nDim + 3];
-                colors[i * 3 + 2] = points->data[i * nDim + 4];
+                colors[i] = hdps::Vector3f(points->data[i * nDim + 2], points->data[i * nDim + 3], points->data[i * nDim + 4]);
             }
         }
 
         for (unsigned int index : selection->indices)
         {
-            colors[index * 3 + 0] = 1.0f;
-            colors[index * 3 + 1] = 0.5f;
-            colors[index * 3 + 2] = 1.0f;
+            colors[index] = hdps::Vector3f(1.0f, 0.5f, 1.0f);
         }
     }
     else {
         unsigned int numPoints = selection->indices.size();
         positions->resize(numPoints * 2);
-        colors.resize(numPoints * 3, 0.5f);
+        colors.resize(numPoints, hdps::Vector3f(0.5f, 0.5f, 0.5f));
 
         for (unsigned int index : dataSet->indices) {
             (*positions)[index] = hdps::Vector2f(points->data[index * nDim + xIndex] / maxLength, points->data[index * nDim + yIndex] / maxLength);
@@ -158,15 +155,11 @@ void ScatterplotPlugin::updateData()
                 }
             }
             if (selected) {
-                colors[index * 3 + 0] = 1.0f;
-                colors[index * 3 + 1] = 0.5f;
-                colors[index * 3 + 2] = 1.0f;
+                colors[index] = hdps::Vector3f(1.0f, 0.5f, 1.0f);
             }
             else {
                 if (nDim >= 5) {
-                    colors[index * 3 + 0] = points->data[index * nDim + 2];
-                    colors[index * 3 + 1] = points->data[index * nDim + 3];
-                    colors[index * 3 + 2] = points->data[index * nDim + 4];
+                    colors[index] = hdps::Vector3f(points->data[index * nDim + 2], points->data[index * nDim + 3], points->data[index * nDim + 4]);
                 }
             }
         }

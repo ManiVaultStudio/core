@@ -5,6 +5,7 @@
 
 #include "../graphics/BufferObject.h"
 #include "../graphics/Vector2f.h"
+#include "../graphics/Vector3f.h"
 #include "../graphics/Selection.h"
 
 #include <QOpenGLWidget>
@@ -27,7 +28,7 @@ class ScatterplotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
     Q_OBJECT
 public:
     void setData(const std::vector<Vector2f>* data);
-    void setColors(const std::vector<float>& data);
+    void setColors(const std::vector<Vector3f>& data);
     void setPointSize(const float size);
     void setAlpha(const float alpha);
     void setPointScaling(PointScaling scalingMode);
@@ -59,7 +60,7 @@ private:
 
     unsigned int _numPoints = 0;
     const std::vector<Vector2f>* _positions;
-    std::vector<float> _colors;
+    std::vector<Vector3f> _colors;
 
     QSize _windowSize;
     PointScaling _scalingMode = DEFAULT_POINT_SCALING;
