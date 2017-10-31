@@ -142,11 +142,11 @@ void ScatterplotPlugin::updateData()
     }
     else {
         unsigned int numPoints = selection->indices.size();
-        positions->resize(numPoints * 2);
+        positions->resize(numPoints);
         colors.resize(numPoints, hdps::Vector3f(0.5f, 0.5f, 0.5f));
 
         for (unsigned int index : dataSet->indices) {
-            (*positions)[index] = hdps::Vector2f(points->data[index * nDim + xIndex] / maxLength, points->data[index * nDim + yIndex] / maxLength);
+            (*positions)[index] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]) / maxLength;
 
             bool selected = false;
             for (unsigned int selectionIndex : selection->indices) {
