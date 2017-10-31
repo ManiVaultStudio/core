@@ -10,7 +10,7 @@ namespace hdps
     public:
         Vector2f() : x(0), y(0) { }
         Vector2f(float x, float y) : x(x), y(y) { }
-        ~Vector2f();
+        ~Vector2f() { }
 
         inline void set(float x, float y)
         {
