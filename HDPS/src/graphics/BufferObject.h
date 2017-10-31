@@ -16,7 +16,8 @@ public:
 
     void create();
     void bind();
-    void setData(const std::vector<float>& data);
+    template<typename T>
+    void setData(const std::vector<T>& data);
     void destroy();
 private:
     GLuint _object;

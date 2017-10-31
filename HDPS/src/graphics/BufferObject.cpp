@@ -24,9 +24,10 @@ void BufferObject::bind()
     glBindBuffer(GL_ARRAY_BUFFER, _object);
 }
 
-void BufferObject::setData(const std::vector<float>& data)
+template<typename T>
+void BufferObject::setData(const std::vector<T>& data)
 {
-    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), &data[0], GL_STATIC_DRAW);
 }
 
 void BufferObject::destroy()
