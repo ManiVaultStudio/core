@@ -46,7 +46,7 @@ protected:
     void cleanup();
 
 private:
-    
+    Vector2f toClipCoordinates(Vector2f windowCoordinates) const;
 
     const float        DEFAULT_POINT_SIZE    = 15;
     const float        DEFAULT_ALPHA_VALUE   = 0.5f;

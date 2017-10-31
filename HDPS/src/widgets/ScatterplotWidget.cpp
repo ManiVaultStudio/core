@@ -239,8 +239,6 @@ void ScatterplotWidget::paintGL()
     {
         // Selection
         _selectionShader->bind();
-
-        //qDebug() << ns << ne;
         _selectionShader->setUniformValue("start", topLeft.x, topLeft.y);
         _selectionShader->setUniformValue("end", bottomRight.x, bottomRight.y);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -252,20 +250,18 @@ void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
     qDebug() << "Mouse clicky";
     _selecting = true;
 
-    Vector2f point = Vector2f((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-    point = point * 2 - Vector2f(1, 1);
+    Vector2f point(event->x(), event->y());
 
-    _selection.setStart(point);
+    _selection.setStart(toClipCoordinates(point));
 }
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (_selecting)
     {
-        Vector2f point = Vector2f((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-        point = point * 2 - Vector2f(1, 1);
+        Vector2f point(event->x(), event->y());
 
-        _selection.setEnd(point);
+        _selection.setEnd(toClipCoordinates(point));
 
         update();
     }
@@ -276,10 +272,9 @@ void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
     qDebug() << "Mouse releasey";
     _selecting = false;
 
-    Vector2f point = Vector2f((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-    point = point * 2 - Vector2f(1, 1);
+    Vector2f point(event->x(), event->y());
 
-    _selection.setEnd(point);
+    _selection.setEnd(toClipCoordinates(point));
 
     onSelection(_selection);
 }
@@ -315,6 +310,13 @@ void ScatterplotWidget::cleanup()
     _colorBuffer.destroy();
     delete _shader;
     delete _selectionShader;
+}
+
+Vector2f ScatterplotWidget::toClipCoordinates(Vector2f windowCoordinates) const
+{
+    windowCoordinates /= Vector2f(_windowSize.width(), _windowSize.height());
+    windowCoordinates.y = 1 - windowCoordinates.y;
+    return windowCoordinates * 2 - Vector2f(1, 1);
 }
 
 } // namespace gui
