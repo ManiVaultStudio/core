@@ -3,6 +3,8 @@
 #include "ScatterplotSettings.h"
 #include "PointsPlugin.h"
 
+#include "graphics/Vector2f.h"
+
 #include <QtCore>
 #include <QtDebug>
 
@@ -104,7 +106,7 @@ void ScatterplotPlugin::updateData()
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(dataSet->getDataName()));
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
     
-    std::vector<float>* positions = new std::vector<float>();
+    std::vector<hdps::Vector2f>* positions = new std::vector<hdps::Vector2f>();
     std::vector<float> colors;
 
     int nDim = points->numDimensions;
@@ -121,13 +123,12 @@ void ScatterplotPlugin::updateData()
     if (dataSet->isFull()) {
         unsigned int numPoints = points->data.size() / nDim;
 
-        positions->resize(numPoints * 2);
+        positions->resize(numPoints);
         colors.resize(numPoints * 3, 0.5f);
 
         for (int i = 0; i < numPoints; i++)
         {
-            (*positions)[i * 2 + 0] = points->data[i * nDim + xIndex] / maxLength;
-            (*positions)[i * 2 + 1] = points->data[i * nDim + yIndex] / maxLength;
+            (*positions)[i] = hdps::Vector2f(points->data[i * nDim + xIndex] / maxLength, points->data[i * nDim + yIndex] / maxLength);
             if (nDim >= 5) {
                 colors[i * 3 + 0] = points->data[i * nDim + 2];
                 colors[i * 3 + 1] = points->data[i * nDim + 3];
@@ -148,8 +149,7 @@ void ScatterplotPlugin::updateData()
         colors.resize(numPoints * 3, 0.5f);
 
         for (unsigned int index : dataSet->indices) {
-            (*positions)[index * 2 + 0] = points->data[index * nDim + xIndex] / maxLength;
-            (*positions)[index * 2 + 1] = points->data[index * nDim + yIndex] / maxLength;
+            (*positions)[index] = hdps::Vector2f(points->data[index * nDim + xIndex] / maxLength, points->data[index * nDim + yIndex] / maxLength);
 
             bool selected = false;
             for (unsigned int selectionIndex : selection->indices) {
