@@ -17,7 +17,11 @@ public:
     void create();
     void bind();
     template<typename T>
-    void setData(const std::vector<T>& data);
+    void setData(const std::vector<T>& data)
+    {
+        glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), &data[0], GL_STATIC_DRAW);
+    }
+
     void destroy();
 private:
     GLuint _object;
