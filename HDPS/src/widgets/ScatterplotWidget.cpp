@@ -22,7 +22,7 @@ const char *plotVertexSource = GLSL(330,
 
     bool inRect(vec2 position, vec2 start, vec2 end)
     {
-        return position.x > start.x && position.x < end.x && position.y > start.y && position.y < end.y;
+        return position.x > start.x && position.x < end.x && position.y < start.y && position.y > end.y;
     }
 
     void main()
@@ -212,10 +212,8 @@ void ScatterplotWidget::paintGL()
     qDebug() << "Rendering scatterplot";
     glClear(GL_COLOR_BUFFER_BIT);
 
-    QPointF ns(_selectionStart.x() < _selectionEnd.x() ? _selectionStart.x() : _selectionEnd.x(), _selectionStart.y() < _selectionEnd.y() ? _selectionStart.y() : _selectionEnd.y());
-    QPointF ne(_selectionStart.x() < _selectionEnd.x() ? _selectionEnd.x() : _selectionStart.x(), _selectionStart.y() < _selectionEnd.y() ? _selectionEnd.y() : _selectionStart.y());
-
-    QRectF selection(ns, ne);
+    Vector2f topLeft = _selection.topLeft();
+    Vector2f bottomRight = _selection.bottomRight();
 
     _shader->bind();
     if (_scalingMode == Relative)
@@ -229,8 +227,8 @@ void ScatterplotWidget::paintGL()
 
     _shader->setUniformValue("alpha", _alpha);
     _shader->setUniformValue("selecting", _selecting);
-    _shader->setUniformValue("start", selection.topLeft());
-    _shader->setUniformValue("end", selection.bottomRight());
+    _shader->setUniformValue("start", topLeft.x, topLeft.y);
+    _shader->setUniformValue("end", bottomRight.x, bottomRight.y);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
 
     if (_selecting)
@@ -239,8 +237,8 @@ void ScatterplotWidget::paintGL()
         _selectionShader->bind();
 
         //qDebug() << ns << ne;
-        _selectionShader->setUniformValue("start", selection.topLeft());
-        _selectionShader->setUniformValue("end", selection.bottomRight());
+        _selectionShader->setUniformValue("start", topLeft.x, topLeft.y);
+        _selectionShader->setUniformValue("end", bottomRight.x, bottomRight.y);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 }
@@ -250,16 +248,21 @@ void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
     qDebug() << "Mouse clicky";
     _selecting = true;
 
-    _selectionStart = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-    _selectionStart = _selectionStart * 2 - QPointF(1, 1);
+    Vector2f point = Vector2f((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+    point = point * 2 - Vector2f(1, 1);
+
+    _selection.setStart(point);
 }
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (_selecting)
     {
-        _selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-        _selectionEnd = _selectionEnd * 2 - QPointF(1, 1);
+        Vector2f point = Vector2f((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+        point = point * 2 - Vector2f(1, 1);
+
+        _selection.setEnd(point);
+
         update();
     }
 }
@@ -269,21 +272,22 @@ void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
     qDebug() << "Mouse releasey";
     _selecting = false;
 
-    _selectionEnd = QPointF((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
-    _selectionEnd = _selectionEnd * 2 - QPointF(1, 1);
+    Vector2f point = Vector2f((float)event->x() / _windowSize.width(), 1 - ((float)event->y() / _windowSize.height()));
+    point = point * 2 - Vector2f(1, 1);
 
-    QRectF selection(_selectionStart, _selectionEnd);
-    onSelection(selection);
+    _selection.setEnd(point);
+
+    onSelection(_selection);
 }
 
-void ScatterplotWidget::onSelection(QRectF selection)
+void ScatterplotWidget::onSelection(Selection selection)
 {
     update();
 
     std::vector<unsigned int> indices;
     for (unsigned int i = 0; i < _numPoints; i++)
     {
-        QPointF point((*_positions)[i * 2 + 0], (*_positions)[i * 2 + 1]);
+        Vector2f point((*_positions)[i * 2 + 0], (*_positions)[i * 2 + 1]);
 
         if (selection.contains(point))
         {

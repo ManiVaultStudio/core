@@ -4,14 +4,14 @@
 #include "../SelectionListener.h"
 
 #include "../graphics/BufferObject.h"
+#include "../graphics/Vector2f.h"
+#include "../graphics/Selection.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 
 #include <QMouseEvent>
-#include <QPoint>
-#include <QRectF>
 
 enum PointScaling {
     Absolute, Relative
@@ -41,10 +41,12 @@ protected:
     void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
-    void onSelection(QRectF selection);
+    void onSelection(Selection selection);
     void cleanup();
 
 private:
+    
+
     const float        DEFAULT_POINT_SIZE    = 15;
     const float        DEFAULT_ALPHA_VALUE   = 0.5f;
     const PointScaling DEFAULT_POINT_SCALING = PointScaling::Relative;
@@ -66,8 +68,7 @@ private:
 
     QOpenGLShaderProgram* _selectionShader;
     bool _selecting = false;
-    QPointF _selectionStart;
-    QPointF _selectionEnd;
+    Selection _selection;
     std::vector<const plugin::SelectionListener*> _selectionListeners;
 };
 

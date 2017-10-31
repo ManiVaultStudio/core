@@ -67,6 +67,7 @@ set( WIDGET_SOURCES
 set( GRAPHICS_HEADERS
     src/graphics/BufferObject.h
     src/graphics/Vector2f.h
+    src/graphics/Selection.h
 )
 
 set( GRAPHICS_SOURCES
