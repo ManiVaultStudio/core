@@ -247,33 +247,27 @@ void ScatterplotWidget::paintGL()
 
 void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
 {
-    qDebug() << "Mouse clicky";
     _selecting = true;
 
     Vector2f point(event->x(), event->y());
-
     _selection.setStart(toClipCoordinates(point));
 }
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (_selecting)
-    {
-        Vector2f point(event->x(), event->y());
+    if (!_selecting) return;
 
-        _selection.setEnd(toClipCoordinates(point));
+    Vector2f point(event->x(), event->y());
+    _selection.setEnd(toClipCoordinates(point));
 
-        update();
-    }
+    update();
 }
 
 void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    qDebug() << "Mouse releasey";
     _selecting = false;
 
     Vector2f point(event->x(), event->y());
-
     _selection.setEnd(toClipCoordinates(point));
 
     onSelection(_selection);
@@ -289,15 +283,11 @@ void ScatterplotWidget::onSelection(Selection selection)
         Vector2f point = (*_positions)[i];
 
         if (selection.contains(point))
-        {
             indices.push_back(i);
-        }
     }
 
     for (const plugin::SelectionListener* listener : _selectionListeners)
-    {
         listener->onSelection(indices);
-    }
 }
 
 void ScatterplotWidget::cleanup()
