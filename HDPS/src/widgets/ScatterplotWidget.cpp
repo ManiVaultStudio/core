@@ -91,9 +91,9 @@ namespace gui
 // Positions need to be passed as a pointer as we need to store them locally in order
 // to be able to find the subset of data that's part of a selection. If passed
 // by reference then we can upload the data to the GPU, but not store it in the widget.
-void ScatterplotWidget::setData(const std::vector<float>* positions)
+void ScatterplotWidget::setData(const std::vector<Vector2f>* positions)
 {
-    _numPoints = (unsigned int) positions->size() / 2;
+    _numPoints = (unsigned int)positions->size();
     _positions = positions;
     _colors.clear();
     _colors.resize(_numPoints * 3, 0.5f);
@@ -287,7 +287,7 @@ void ScatterplotWidget::onSelection(Selection selection)
     std::vector<unsigned int> indices;
     for (unsigned int i = 0; i < _numPoints; i++)
     {
-        Vector2f point((*_positions)[i * 2 + 0], (*_positions)[i * 2 + 1]);
+        Vector2f point = (*_positions)[i];
 
         if (selection.contains(point))
         {
