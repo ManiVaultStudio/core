@@ -66,10 +66,14 @@ const char *selectionVertexSource = GLSL(330,
     void main()
     {
         vec2 vertex;
-        if (gl_VertexID == 0) vertex = vec2(start.x, start.y);
-        if (gl_VertexID == 1) vertex = vec2(end.x, start.y);
-        if (gl_VertexID == 2) vertex = vec2(start.x, end.y);
-        if (gl_VertexID == 3) vertex = vec2(end.x, end.y);
+
+        switch (gl_VertexID) {
+        case 0: vertex = vec2(start.x, start.y); break;
+        case 1: vertex = vec2(end.x, start.y); break;
+        case 2: vertex = vec2(start.x, end.y); break;
+        case 3: vertex = vec2(end.x, end.y); break;
+        }
+
         gl_Position = vec4(vertex, 0, 1);
     }
 );
