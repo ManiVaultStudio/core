@@ -119,6 +119,10 @@ list(APPEND PUBLIC_SOURCES
     ${UTIL_SOURCES}
     ${PUBLIC_HEADERS}
 )
+list(APPEND GRAPHICS_FILES
+    ${GRAPHICS_HEADERS}
+    ${GRAPHICS_SOURCES}
+)
 list(APPEND WIDGET_FILES
     ${WIDGET_SOURCES}
     ${WIDGET_HEADERS}
@@ -149,7 +153,7 @@ source_group( Private FILES ${PRIVATE_SOURCES})
 source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
 source_group( Public\\Util FILES ${UTIL_FILES})
-source_group( Public\\Graphics FILES ${GRAPHICS_SOURCES})
+source_group( Public\\Graphics FILES ${GRAPHICS_FILES})
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})
 source_group( Resources FILES win/hdps.rc)
