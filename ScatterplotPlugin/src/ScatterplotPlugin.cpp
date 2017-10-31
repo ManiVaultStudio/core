@@ -182,12 +182,9 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
     selectionSet->indices.clear();
 
     for (unsigned int index : selection) {
-        if (set->isFull())
-            selectionSet->indices.push_back(index);
-        else
-            selectionSet->indices.push_back(set->indices[index]);
+        selectionSet->indices.push_back(set->isFull() ? index : set->indices[index]);
     }
-
+    
     qDebug() << "Selection on: " << selectionSet->getDataName();
     _core->notifySelectionChanged(selectionSet->getDataName());
 }
