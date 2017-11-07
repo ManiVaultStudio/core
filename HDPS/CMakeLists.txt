@@ -60,7 +60,6 @@ set( WIDGET_SOURCES
     src/widgets/DockableWidget.cpp
     src/widgets/ScatterplotWidget.cpp
     src/widgets/ImageWidget.cpp
-    src/widgets/SettingsWidget.cpp
     src/widgets/WebWidget.cpp
 )
 
