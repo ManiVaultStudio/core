@@ -13,6 +13,7 @@
 #include <QOpenGLShaderProgram>
 
 #include <QMouseEvent>
+#include <memory>
 
 enum PointScaling {
     Absolute, Relative
@@ -56,7 +57,7 @@ private:
 
     BufferObject _positionBuffer;
     BufferObject _colorBuffer;
-    QOpenGLShaderProgram* _shader;
+    std::unique_ptr<QOpenGLShaderProgram> _shader;
 
     unsigned int _numPoints = 0;
     const std::vector<Vector2f>* _positions;
@@ -67,7 +68,7 @@ private:
     float _pointSize          = DEFAULT_POINT_SIZE;
     float _alpha              = DEFAULT_ALPHA_VALUE;
 
-    QOpenGLShaderProgram* _selectionShader;
+    std::unique_ptr<QOpenGLShaderProgram> _selectionShader;
     bool _selecting = false;
     Selection _selection;
     std::vector<const plugin::SelectionListener*> _selectionListeners;

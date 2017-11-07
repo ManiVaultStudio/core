@@ -194,12 +194,12 @@ void ScatterplotWidget::initializeGL()
         _colorBuffer.setData(_colors);
     }
 
-    _shader = new QOpenGLShaderProgram();
+    _shader = std::make_unique<QOpenGLShaderProgram>();
     _shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
     _shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
     _shader->link();
 
-    _selectionShader = new QOpenGLShaderProgram();
+    _selectionShader = std::make_unique<QOpenGLShaderProgram>();
     _selectionShader->addShaderFromSourceCode(QOpenGLShader::Vertex, selectionVertexSource);
     _selectionShader->addShaderFromSourceCode(QOpenGLShader::Fragment, selectionFragmentSource);
     _shader->link();
@@ -298,8 +298,6 @@ void ScatterplotWidget::cleanup()
     glDeleteVertexArrays(1, &_vao);
     _positionBuffer.destroy();
     _colorBuffer.destroy();
-    delete _shader;
-    delete _selectionShader;
 }
 
 Vector2f ScatterplotWidget::toClipCoordinates(Vector2f windowCoordinates) const
