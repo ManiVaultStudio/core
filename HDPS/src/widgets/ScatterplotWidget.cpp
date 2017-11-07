@@ -220,13 +220,9 @@ void ScatterplotWidget::paintGL()
     Vector2f bottomRight = _selection.bottomRight();
 
     _shader->bind();
-    if (_scalingMode == Relative)
-    {
-        _shader->setUniformValue("pointSize", _pointSize / 800);
-    }
-    else if (_scalingMode == Absolute)
-    {
-        _shader->setUniformValue("pointSize", _pointSize / _windowSize.width());
+    switch (_scalingMode) {
+        case Relative: _shader->setUniformValue("pointSize", _pointSize / 800); break;
+        case Absolute: _shader->setUniformValue("pointSize", _pointSize / _windowSize.width()); break;
     }
 
     _shader->setUniformValue("alpha", _alpha);
@@ -304,7 +300,7 @@ Vector2f ScatterplotWidget::toClipCoordinates(Vector2f windowCoordinates) const
 {
     windowCoordinates /= Vector2f(_windowSize.width(), _windowSize.height());
     windowCoordinates.y = 1 - windowCoordinates.y;
-    return windowCoordinates * 2 - Vector2f(1, 1);
+    return windowCoordinates * 2 - 1;
 }
 
 } // namespace gui

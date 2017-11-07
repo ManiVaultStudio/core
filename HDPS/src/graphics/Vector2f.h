@@ -91,9 +91,19 @@ namespace hdps
             return Vector2f(x + v.x, y + v.y);
         }
 
+        Vector2f operator+(float value) const
+        {
+            return Vector2f(x + value, y + value);
+        }
+
         Vector2f operator-(const Vector2f& v) const
         {
             return Vector2f(x - v.x, y - v.y);
+        }
+
+        Vector2f operator-(float value) const
+        {
+            return Vector2f(x - value, y - value);
         }
 
         Vector2f operator-() const
