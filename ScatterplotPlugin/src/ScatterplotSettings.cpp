@@ -20,6 +20,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 
     QLabel* pointSizeLabel = new QLabel("Point Size:");
     settingsLayout->addWidget(pointSizeLabel, 1, 0);
+    _pointSizeSlider.setRange(1, 20);
     settingsLayout->addWidget(&_pointSizeSlider, 1, 1, 1, 2);
     settingsLayout->addWidget(&_subsetButton, 0, 1);
 
@@ -65,7 +66,7 @@ void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 {
     _xDimOptions.clear();
     _yDimOptions.clear();
-    for (int i = 0; i < nDim; i++)
+    for (unsigned int i = 0; i < nDim; i++)
     {
         _xDimOptions.addItem(QString::number(i));
         _yDimOptions.addItem(QString::number(i));

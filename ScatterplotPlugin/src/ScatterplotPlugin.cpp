@@ -28,6 +28,7 @@ void ScatterplotPlugin::init()
     widget->addSelectionListener(this);
 
     settings = new ScatterplotSettings(this);
+    settings->_pointSizeSlider.setValue(10);
 
     addWidget(widget);
     addWidget(settings);
