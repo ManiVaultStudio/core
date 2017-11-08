@@ -246,34 +246,25 @@ void SpadeAnalysisPlugin::createDerivedData(bool overwrite)
     finalClusters->setClusters(_clusters, _dataSelection, _edges);
 }
 
-bool SpadeAnalysisPlugin::computeMedianMinimumDistance(int fileIndex)
+// For a random sample of cells computes distance to other cells in high-dim space,
+// calculates the minimum of these distances and returns the median of these minima.
+bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& points)
 {
     if (!_baseIsDirty) return false;
 
     std::cout << "	Computing median minimum distance ..\n";
 
-    MCV_CytometryData* cytoData = MCV_CytometryData::Instance();
+    int numDimensions = points.numDimensions;
+    int numSamples = points.data.size() / numDimensions;
 
-    assert(cytoData);
-
-    float* rawData = cytoData->rawData(fileIndex);
-
-    int numSamples = cytoData->header(fileIndex)->numEvents();
-    int numVariables = cytoData->combinedHeader()->numVariables();
-
-    int randomSampleSize = std::min(_maxRandomSampleSize, cytoData->header(fileIndex)->numEvents());
+    // How many samples to take for our median calculation, either the value of the parameter, of the number of points if its lower
+    int randomSampleSize = std::min(_maxRandomSampleSize, numSamples);
 
     // select random samples
     qDebug() << "	Creating " << randomSampleSize << " random samples\n		";
 
-    //bool initFlag = false;
-    int numFlagFlips = randomSampleSize;
+    // Create a random sample of indices from our points
     std::vector<int> selectedSampleIdxs = std::vector<int>(randomSampleSize);
-    if (randomSampleSize * 2 > numSamples)
-    {
-        //initFlag = true;
-        numFlagFlips = numSamples - randomSampleSize;
-    }
 
     //std::vector<bool> selectedSamples = std::vector<bool>(numSamples, initFlag);
 
@@ -286,24 +277,20 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(int fileIndex)
     auto rng = std::bind(distribution, generator);
 
     int j = 0;
-    for (int i = 0; i < numFlagFlips; i++)
+    for (int i = 0; i < randomSampleSize; i++)
     {
         int randomIdx = rng();
-        //while (selectedSamples[randomIdx] != initFlag)
-        //{
-        //	randomIdx = rng();
-        //}
-        //selectedSamples[randomIdx] = !initFlag;
+
         selectedSampleIdxs[j++] = randomIdx;
 
-        if (i % (numFlagFlips / 10) == 0) std::cout << i / (numFlagFlips / 10) * 10 << "%..";
+        if (i % (randomSampleSize / 10) == 0) std::cout << i / (randomSampleSize / 10) * 10 << "%..";
     }
     qDebug() << " done.\n";
 
-    // compute median nearest neighbor distance
+    // Compute median nearest neighbor distance
     qDebug() << "	Computing median distance to nearest neighbor ";
 
-#ifndef __USE_GCD__
+
     std::vector<float> nearestNeighborDistances;
     nearestNeighborDistances.resize(randomSampleSize);
 
@@ -311,45 +298,41 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(int fileIndex)
 #pragma omp parallel for num_threads(omp_get_max_threads())
     for (int j = 0; j < randomSampleSize; j++) {
         if (j == 0) std::cout << "using " << omp_get_num_threads() << " threads ..\n		";
-#else
-    __block std::vector<float> nearestNeighborDistances;
-    nearestNeighborDistances.resize(randomSampleSize);
 
-    __block int threadTracker = 0;
-    dispatch_apply(randomSampleSize, dispatch_get_global_queue(0, 0), ^ (size_t j) {
-#endif //__USE_GCD__
 
         if (++threadTracker % (randomSampleSize / 10) == 0) std::cout << (int)(((float)threadTracker / randomSampleSize) * 100) << "%..";
 
         int i = selectedSampleIdxs[j];
 
+        // Compute minimum distance to other samples
         float minDistance = 99999999.9f;
         for (int s = 0; s < numSamples; s++)
         {
             // do not compare to myself
             if (s == i) continue;
 
-            float dist = distance(&rawData[numVariables*i], &rawData[numVariables*s], &_selectedMarkers);
+            float dist = distance(&points.data[numDimensions*i], &points.data[numDimensions*s], &_selectedMarkers);
             if (dist < minDistance) minDistance = dist;
         }
         nearestNeighborDistances[j] = minDistance;
     }
-#ifdef __USE_GCD__
-    );
-#endif //__USE_GCD__
 
+    // Sort distances
     std::sort(nearestNeighborDistances.begin(), nearestNeighborDistances.end());
 
-    _medianDistance[fileIndex] = nearestNeighborDistances[randomSampleSize / 2];
-    _scaledMedianDistance[fileIndex] = _medianDistance[fileIndex] * _alpha;
+    // Take the median distance
+    _medianDistance = nearestNeighborDistances[randomSampleSize / 2];
+    // Scale the median distance by some factor
+    _scaledMedianDistance = _medianDistance * _alpha;
 
     qDebug() << "done.\n";
-    qDebug() << "		Median distance is " << _medianDistance[fileIndex] << ". ";
-    qDebug() << "Scaled: " << _scaledMedianDistance[fileIndex] << ".\n";
+    qDebug() << "		Median distance is " << _medianDistance << ". ";
+    qDebug() << "Scaled: " << _scaledMedianDistance << ".\n";
 
     return true;
-    }
+}
 
+// Compute the densities of each cell based on how many of their neighbours are closer than the median distance
 bool SpadeAnalysisPlugin::computeLocalDensities(int fileIndex)
 {
     if (!_baseIsDirty) return false;
@@ -367,16 +350,14 @@ bool SpadeAnalysisPlugin::computeLocalDensities(int fileIndex)
     std::fill(_localDensity[fileIndex].begin(), _localDensity[fileIndex].end(), 0);
 
 
-#ifndef __USE_GCD__
     int threadTracker = 0;
 #pragma omp parallel for num_threads(omp_get_max_threads()-1)
     for (int i = 0; i < numSamples; i++) {
         if (i == 0) qDebug() << "using " << omp_get_num_threads() << " threads ..\n		";
-#else
-    __block int threadTracker = 0;
-    dispatch_apply(numSamples, dispatch_get_global_queue(0, 0), ^ (size_t i) {
-#endif //__USE_GCD__
 
+        // For every point calculate the distance to every other point and compare it to the median distance
+        // If it is closer than increment the density by 1
+        // TODO make this not calculate double
         for (int s = 0; s < numSamples; s++)
         {
             if (s == i) continue;
@@ -390,10 +371,8 @@ bool SpadeAnalysisPlugin::computeLocalDensities(int fileIndex)
         }
         if (++threadTracker % (numSamples / 10) == 0) qDebug() << (int)(((float)threadTracker / numSamples) * 100) << "%..";
     }
-#ifdef __USE_GCD__
-    );
-#endif //__USE_GCD__
 
+    // Sort the densities so we can take the low section of it in downsample()
     _localDensitySorted[fileIndex] = _localDensity[fileIndex];
     std::sort(_localDensitySorted[fileIndex].begin(), _localDensitySorted[fileIndex].end());
 
@@ -750,7 +729,7 @@ void SpadeAnalysisPlugin::computeMedianClusterExpression()
     //std::cout << ">\n";
 }
 
-float SpadeAnalysisPlugin::distance(float* v1, float* v2, std::vector<int>* idxs)
+float SpadeAnalysisPlugin::distance(const float* v1, const float* v2, std::vector<int>* idxs)
 {
     int n = static_cast<int>(idxs->size());
 

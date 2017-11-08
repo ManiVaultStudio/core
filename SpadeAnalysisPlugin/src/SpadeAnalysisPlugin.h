@@ -55,7 +55,7 @@ public slots:
     void startComputation();
 
 private:
-    bool computeMedianMinimumDistance(int fileIndex);
+    bool computeMedianMinimumDistance(const PointsPlugin& points);
     bool computeLocalDensities(int fileIndex);
     bool downsample(int fileIndex);
     bool clusterDownsampledData();
@@ -67,13 +67,14 @@ private:
 
     void computeMedianClusterExpression();
 
-    float distance(float* v1, float* v2, std::vector<int>* idxs);
+    float distance(const float* v1, const float* v2, std::vector<int>* idxs);
     float distance(std::vector<float>* v1, std::vector<float>* v2);
 
     std::vector<bool> _markerStates;
     std::vector<int> _selectedMarkers;
 
     // Parameters
+    // Maximum number of points you want to keep after downsampling
     int _maxRandomSampleSize;
     float _alpha;
     float _targetDensityPercentile;
@@ -90,8 +91,8 @@ private:
     bool _markersDirty;
 
     // Results
-    std::vector<float> _medianDistance;
-    std::vector<float> _scaledMedianDistance;
+    float _medianDistance;
+    float _scaledMedianDistance;
 
     std::vector< std::vector<int> > _localDensity;
     std::vector< std::vector<int> > _localDensitySorted;
