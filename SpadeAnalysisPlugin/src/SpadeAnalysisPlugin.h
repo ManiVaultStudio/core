@@ -57,7 +57,7 @@ public slots:
 private:
     bool computeMedianMinimumDistance(const PointsPlugin& points);
     bool computeLocalDensities(const PointsPlugin& points);
-    bool downsample(int fileIndex);
+    bool downsample(const PointsPlugin& points);
     bool clusterDownsampledData();
     bool extractClustersFromDendrogram();
     bool computeMinimumSpanningTree();

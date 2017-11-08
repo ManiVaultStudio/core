@@ -379,35 +379,36 @@ bool SpadeAnalysisPlugin::computeLocalDensities(const PointsPlugin& points)
     return true;
 }
 
-bool SpadeAnalysisPlugin::downsample(int fileIndex)
+bool SpadeAnalysisPlugin::downsample(const PointsPlugin& points)
 {
     if (!_baseIsDirty && !_downsampledDataIsDirty) return false;
 
-    MCV_CytometryData* cytoData = MCV_CytometryData::Instance();
-
-    int numSamples = cytoData->header(fileIndex)->numEvents();
+    int numDimensions = points.numDimensions;
+    int numSamples = points.data.size() / numDimensions;
 
     assert(_localDensitySorted[fileIndex].size() == numSamples);
 
     float percentileToIndex = (numSamples - 1) / 100.0f;
 
-    int outlierDensity = _localDensitySorted[fileIndex][(int)(percentileToIndex * _outlierDensityPercentile)];
-    int targetDensity = std::max(1, _localDensitySorted[fileIndex][(int)(percentileToIndex * _targetDensityPercentile)]);
+    int outlierDensity = _localDensitySorted[NO_FILE][(int)(percentileToIndex * _outlierDensityPercentile)];
+    int targetDensity = std::max(1, _localDensitySorted[NO_FILE][(int)(percentileToIndex * _targetDensityPercentile)]);
 
-    _selectedSamplesIdxs[fileIndex].resize(numSamples);
+    _selectedSamplesIdxs[NO_FILE].resize(numSamples);
 
+    // If we want to use all points, don't downsample
     if (_densityLimit > 99.9)
     {
         for (int i = 0; i < numSamples; i++)
         {
-            _selectedSamplesIdxs[fileIndex][i] = true;
+            _selectedSamplesIdxs[NO_FILE][i] = true;
         }
     }
     else
     {
+        // Target samples to reach after downsampling
         int numTargetSamples = (int)(numSamples * (0.01f * _densityLimit));
 
-        // find sampling within user define limits
+        // Find sampling within user defined limits
         int numSelectedSamples = numTargetSamples * 2;
         float probabilityScale = 1.0f;
         int curveExponent = 0;
@@ -421,7 +422,7 @@ bool SpadeAnalysisPlugin::downsample(int fileIndex)
 #pragma omp parallel for reduction(+ : numSelectedSamples)
             for (int i = 0; i < numSamples; i++)
             {
-                int density = _localDensity[fileIndex][i];
+                int density = _localDensity[NO_FILE][i];
 
                 bool isActive = false;
 
@@ -444,7 +445,7 @@ bool SpadeAnalysisPlugin::downsample(int fileIndex)
                     isActive = random < probability;
                 }
 
-                _selectedSamplesIdxs[fileIndex][i] = isActive;
+                _selectedSamplesIdxs[NO_FILE][i] = isActive;
                 if (isActive) numSelectedSamples++;
             }
 
@@ -452,34 +453,21 @@ bool SpadeAnalysisPlugin::downsample(int fileIndex)
 
             qDebug() << numSelectedSamples << " samples remain.\n";
 
-            //if (outlierDensity < targetDensity && targetDensity > 1)
-            //{
-            //	targetDensity -= std::max(1, static_cast<int>(targetDensity*0.05));
-            //	std::cout << "Reducing target density to " << targetDensity << ".\n";
-            //}
-            //else
-            //{
-            //	probabilityScale *= 0.95;
-            //	std::cout << "Reducing probability scale to " << std::setprecision(2) << probabilityScale << ".\n";
-            //}
-
-            //if (probabilityScale < 0.2) break;
-
             if (curveExponent > 10) break;
         }
     }
 
-    _selectedSamples[fileIndex].clear();
+    _selectedSamples[NO_FILE].clear();
     for (int i = 0; i < numSamples; i++)
     {
-        if (_selectedSamplesIdxs[fileIndex][i])
+        if (_selectedSamplesIdxs[NO_FILE][i])
         {
-            _selectedSamples[fileIndex].push_back(i);
+            _selectedSamples[NO_FILE].push_back(i);
         }
     }
 
     qDebug() << "		Done, ";
-    qDebug() << _selectedSamples[fileIndex].size() << " (" << _selectedSamples[fileIndex].size()*100.0f / numSamples << "%) active Samples remain.\n";
+    qDebug() << _selectedSamples[NO_FILE].size() << " (" << _selectedSamples[NO_FILE].size()*100.0f / numSamples << "%) active Samples remain.\n";
 
     return true;
 }
