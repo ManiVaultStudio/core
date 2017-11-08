@@ -56,7 +56,7 @@ public slots:
 
 private:
     bool computeMedianMinimumDistance(const PointsPlugin& points);
-    bool computeLocalDensities(int fileIndex);
+    bool computeLocalDensities(const PointsPlugin& points);
     bool downsample(int fileIndex);
     bool clusterDownsampledData();
     bool extractClustersFromDendrogram();
@@ -91,8 +91,8 @@ private:
     bool _markersDirty;
 
     // Results
-    float _medianDistance;
-    float _scaledMedianDistance;
+    std::vector<float> _medianDistance;
+    std::vector<float> _scaledMedianDistance;
 
     std::vector< std::vector<int> > _localDensity;
     std::vector< std::vector<int> > _localDensitySorted;

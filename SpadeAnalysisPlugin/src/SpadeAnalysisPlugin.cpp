@@ -22,6 +22,8 @@
 
 #include "external/boruvka/boruvka.h"
 
+#define NO_FILE 0
+
 Q_PLUGIN_METADATA(IID "nl.tudelft.ClusteringPlugin")
 
 // =============================================================================
@@ -321,33 +323,29 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
     std::sort(nearestNeighborDistances.begin(), nearestNeighborDistances.end());
 
     // Take the median distance
-    _medianDistance = nearestNeighborDistances[randomSampleSize / 2];
+    _medianDistance[NO_FILE] = nearestNeighborDistances[randomSampleSize / 2];
     // Scale the median distance by some factor
-    _scaledMedianDistance = _medianDistance * _alpha;
+    _scaledMedianDistance[NO_FILE] = _medianDistance[NO_FILE] * _alpha;
 
     qDebug() << "done.\n";
-    qDebug() << "		Median distance is " << _medianDistance << ". ";
-    qDebug() << "Scaled: " << _scaledMedianDistance << ".\n";
+    qDebug() << "		Median distance is " << _medianDistance[NO_FILE] << ". ";
+    qDebug() << "Scaled: " << _scaledMedianDistance[NO_FILE] << ".\n";
 
     return true;
 }
 
 // Compute the densities of each cell based on how many of their neighbours are closer than the median distance
-bool SpadeAnalysisPlugin::computeLocalDensities(int fileIndex)
+bool SpadeAnalysisPlugin::computeLocalDensities(const PointsPlugin& points)
 {
     if (!_baseIsDirty) return false;
 
-    MCV_CytometryData* cytoData = MCV_CytometryData::Instance();
-
     qDebug() << "	Computing local densities ";
 
-    float* rawData = cytoData->rawData(fileIndex);
+    int numDimensions = points.numDimensions;
+    int numSamples = points.data.size() / numDimensions;
 
-    int numSamples = cytoData->header(fileIndex)->numEvents();
-    int numVariables = cytoData->combinedHeader()->numVariables();
-
-    _localDensity[fileIndex].resize(numSamples);
-    std::fill(_localDensity[fileIndex].begin(), _localDensity[fileIndex].end(), 0);
+    _localDensity[NO_FILE].resize(numSamples);
+    std::fill(_localDensity[NO_FILE].begin(), _localDensity[NO_FILE].end(), 0);
 
 
     int threadTracker = 0;
@@ -362,10 +360,10 @@ bool SpadeAnalysisPlugin::computeLocalDensities(int fileIndex)
         {
             if (s == i) continue;
 
-            float dist = distance(&rawData[numVariables*i], &rawData[numVariables*s], &_selectedMarkers);
-            if (dist <= _scaledMedianDistance[fileIndex])
+            float dist = distance(&points.data[numDimensions*i], &points.data[numDimensions*s], &_selectedMarkers);
+            if (dist <= _scaledMedianDistance[NO_FILE])
             {
-                _localDensity[fileIndex][i]++;
+                _localDensity[NO_FILE][i]++;
                 //std::cout << "(" << s << "," << dist << "), ";
             }
         }
@@ -373,15 +371,13 @@ bool SpadeAnalysisPlugin::computeLocalDensities(int fileIndex)
     }
 
     // Sort the densities so we can take the low section of it in downsample()
-    _localDensitySorted[fileIndex] = _localDensity[fileIndex];
-    std::sort(_localDensitySorted[fileIndex].begin(), _localDensitySorted[fileIndex].end());
+    _localDensitySorted[NO_FILE] = _localDensity[NO_FILE];
+    std::sort(_localDensitySorted[NO_FILE].begin(), _localDensitySorted[NO_FILE].end());
 
     qDebug() << " done.\n";
 
-    cacheDensities(fileIndex);
-
     return true;
-    }
+}
 
 bool SpadeAnalysisPlugin::downsample(int fileIndex)
 {
