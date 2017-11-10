@@ -334,8 +334,7 @@ bool SpadeAnalysisPlugin::computeLocalDensities(const PointsPlugin& points)
 
         // For every point calculate the distance to every other point and compare it to the median distance
         // If it is closer than increment the density by 1
-        // TODO make this not calculate double
-        for (int s = 0; s < numSamples; s++)
+        for (int s = i; s < numSamples; s++)
         {
             if (s == i) continue;
 
@@ -343,6 +342,7 @@ bool SpadeAnalysisPlugin::computeLocalDensities(const PointsPlugin& points)
             if (dist <= _scaledMedianDistance[NO_FILE])
             {
                 _localDensity[NO_FILE][i]++;
+                _localDensity[NO_FILE][s]++;
                 //std::cout << "(" << s << "," << dist << "), ";
             }
         }
