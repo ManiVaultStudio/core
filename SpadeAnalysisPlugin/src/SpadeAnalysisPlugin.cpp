@@ -14,12 +14,7 @@
 
 #include <unordered_map>
 
-#ifdef __USE_GCD__
-#include <dispatch/dispatch.h>
-#else
 #include <omp.h>
-#endif
-
 #include "external/boruvka/boruvka.h"
 
 #define NO_FILE 0
@@ -38,6 +33,9 @@ SpadeAnalysisPlugin::~SpadeAnalysisPlugin(void)
 void SpadeAnalysisPlugin::init()
 {
     _settings = std::make_unique<SpadeSettingsWidget>(this);
+
+    _selectedMarkers.push_back(0);
+    _selectedMarkers.push_back(1);
 }
 
 void SpadeAnalysisPlugin::dataAdded(const QString name)
@@ -91,10 +89,6 @@ void SpadeAnalysisPlugin::startComputation()
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
 
-    _selectedMarkers.push_back(0);
-    _selectedMarkers.push_back(1);
-
-
     _baseIsDirty = _baseIsDirty || _markersDirty;
 
     bool somethingChanged = false;
@@ -117,23 +111,20 @@ void SpadeAnalysisPlugin::startComputation()
 
     for (int f = 0; f < numFiles; f++)
     {
+        std::cout << "\nProcessing File: " << f << " (File " << f + 1 << " of " << numFiles << ", containing " << points->data.size() / points->numDimensions << " data points)\n";
+        somethingChanged |= computeMedianMinimumDistance(*points);
+        somethingChanged |= computeLocalDensities(*points);
 
-        //if (!loadCachedDensities(f)){
-            std::cout << "\nProcessing File: " << f << " (File " << f + 1 << " of " << numFiles << ", containing " << points->data.size() / points->numDimensions << " data points)\n";
-            somethingChanged = computeMedianMinimumDistance(*points) || somethingChanged;
-            somethingChanged = computeLocalDensities(*points) || somethingChanged;
-        //}
-
-        somethingChanged = downsample(*points) || somethingChanged;
+        somethingChanged |= downsample(*points);
     }
-    somethingChanged = clusterDownsampledData(*points) || somethingChanged;
+    somethingChanged |= clusterDownsampledData(*points);
 
-    somethingChanged = extractClustersFromDendrogram(*points) || somethingChanged;
-    somethingChanged = computeMinimumSpanningTree() || somethingChanged;
+    somethingChanged |= extractClustersFromDendrogram(*points);
+    somethingChanged |= computeMinimumSpanningTree();
 
     for (int f = 0; f < numFiles; f++)
     {
-        somethingChanged = upsampleData(*points) || somethingChanged;
+        somethingChanged |= upsampleData(*points);
     }
     std::cout << "\n";
 
