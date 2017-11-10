@@ -80,16 +80,16 @@ void SpadeAnalysisPlugin::dataSetPicked(const QString& name)
 
 void SpadeAnalysisPlugin::startComputation()
 {
-    //QString setName = _settings->dataOptions.currentText();
+    QString setName = _settings->dataOptions.currentText();
 
-    //// Do nothing if we have no data set selected
-    //if (setName.isEmpty()) {
-    //    return;
-    //}
+    // Do nothing if we have no data set selected
+    if (setName.isEmpty()) {
+        return;
+    }
 
-    //const hdps::Set* set = _core->requestData(setName);
-    //const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
-    //const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
+    const hdps::Set* set = _core->requestData(setName);
+    const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
+    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
 
     //// Clustering
     //IndexSet* set1 = (IndexSet*)points->createSet();
@@ -132,7 +132,7 @@ void SpadeAnalysisPlugin::startComputation()
 
     bool somethingChanged = false;
 
-    int numFiles = cytoData->numFiles();
+    int numFiles = NO_FILE + 1;
     if (_baseIsDirty)
     {
         // reset result memory
@@ -151,29 +151,29 @@ void SpadeAnalysisPlugin::startComputation()
     for (int f = 0; f < numFiles; f++)
     {
 
-        if (!loadCachedDensities(f)){
-            std::cout << "\nProcessing File: " << cytoData->header(f)->fileName() << " (File " << f + 1 << " of " << cytoData->numFiles() << ", containing " << cytoData->header(f)->numEvents() << " data points)\n";
-            somethingChanged = computeMedianMinimumDistance(f) || somethingChanged;
-            somethingChanged = computeLocalDensities(f) || somethingChanged;
-        }
+        //if (!loadCachedDensities(f)){
+            std::cout << "\nProcessing File: " << f << " (File " << f + 1 << " of " << numFiles << ", containing " << points->data.size() / points->numDimensions << " data points)\n";
+            somethingChanged = computeMedianMinimumDistance(*points) || somethingChanged;
+            somethingChanged = computeLocalDensities(*points) || somethingChanged;
+        //}
 
-        somethingChanged = downsample(f) || somethingChanged;
+        somethingChanged = downsample(*points) || somethingChanged;
     }
-    somethingChanged = clusterDownsampledData() || somethingChanged;
+    somethingChanged = clusterDownsampledData(*points) || somethingChanged;
 
-    somethingChanged = extractClustersFromDendrogram() || somethingChanged;
+    somethingChanged = extractClustersFromDendrogram(*points) || somethingChanged;
     somethingChanged = computeMinimumSpanningTree() || somethingChanged;
 
     for (int f = 0; f < numFiles; f++)
     {
-        somethingChanged = upsampleData(f) || somethingChanged;
+        somethingChanged = upsampleData(*points) || somethingChanged;
     }
     std::cout << "\n";
 
     //computeJSONObject();
 
     if (somethingChanged) {
-        createDerivedData(true);
+        //createDerivedData(true);
     }
     else  {
         std::cout << "No parameters changed, no update necessary.\n";
@@ -185,26 +185,23 @@ void SpadeAnalysisPlugin::startComputation()
     _spanningTreeIsDirty = false;
 }
 
-bool SpadeAnalysisPlugin::upsampleData(int fileIndex)
+bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
 {
     if (!_baseIsDirty && !_downsampledDataIsDirty && !_spanningTreeIsDirty) return false;
 
-    if (fileIndex == 0){ std::cout << "\nUpsampling data .."; }
+    if (NO_FILE == 0){ std::cout << "\nUpsampling data .."; }
 
-    MCV_CytometryData* cytoData = MCV_CytometryData::Instance();
+    std::cout << "\n	File " << "FILENAME" << " (" << NO_FILE + 1 << " of " << NO_FILE+1 << ").\n	";
 
-    std::cout << "\n	File " << cytoData->fileName(fileIndex) << " (" << fileIndex + 1 << " of " << cytoData->numFiles() << ").\n	";
-
-    float* rawData = cytoData->rawData(fileIndex);
-    int numSamples = cytoData->header(fileIndex)->numEvents();
-    int numVariables = cytoData->combinedHeader()->numVariables();
+    int numDimensions = points.numDimensions;
+    int numSamples = points.data.size() / numDimensions;
 
     for (int i = 0; i < numSamples; i++)
     {
         if (i % (numSamples / 10) == 0) std::cout << i / (numSamples / 10) * 10 << "%..";
 
         // this is already contained in the clustering        
-        if (_selectedSamplesIdxs[fileIndex][i]) continue;
+        if (_selectedSamplesIdxs[NO_FILE][i]) continue;
 
         int numActiveVariables = static_cast<int>(_selectedMarkers.size());
         std::vector<float> currentExpression = std::vector<float>(numActiveVariables);
@@ -212,7 +209,7 @@ bool SpadeAnalysisPlugin::upsampleData(int fileIndex)
         for (int j = 0; j < numActiveVariables; j++)
         {
             int markerIdx = _selectedMarkers[j];
-            currentExpression[j] = rawData[numVariables*i + markerIdx];
+            currentExpression[j] = points.data[numDimensions*i + markerIdx];
         }
 
         //int idx = 0;
@@ -226,7 +223,7 @@ bool SpadeAnalysisPlugin::upsampleData(int fileIndex)
                 closestCluster = s;
             }
         }
-        _clusters[closestCluster].push_back(std::make_pair(fileIndex, i));
+        _clusters[closestCluster].push_back(std::make_pair(NO_FILE, i));
     }
     //computeMedianClusterExpression();
 
@@ -235,18 +232,18 @@ bool SpadeAnalysisPlugin::upsampleData(int fileIndex)
     return true;
 }
 
-void SpadeAnalysisPlugin::createDerivedData(bool overwrite)
-{
-    MCV_CytometryData* data = MCV_CytometryData::Instance();
-
-    MCV_DerivedDataClusters* finalClusters = data->derivedDataClusters(_name, overwrite);
-    _name = finalClusters->name();
-
-    assert(finalClusters);
-
-    //std::cout << "Updating SPADE.\n";
-    finalClusters->setClusters(_clusters, _dataSelection, _edges);
-}
+//void SpadeAnalysisPlugin::createDerivedData(bool overwrite)
+//{
+//    MCV_CytometryData* data = MCV_CytometryData::Instance();
+//
+//    MCV_DerivedDataClusters* finalClusters = data->derivedDataClusters(_name, overwrite);
+//    _name = finalClusters->name();
+//
+//    assert(finalClusters);
+//
+//    //std::cout << "Updating SPADE.\n";
+//    finalClusters->setClusters(_clusters, _dataSelection, _edges);
+//}
 
 // For a random sample of cells computes distance to other cells in high-dim space,
 // calculates the minimum of these distances and returns the median of these minima.
@@ -472,34 +469,31 @@ bool SpadeAnalysisPlugin::downsample(const PointsPlugin& points)
     return true;
 }
 
-bool SpadeAnalysisPlugin::clusterDownsampledData()
+bool SpadeAnalysisPlugin::clusterDownsampledData(const PointsPlugin& points)
 {
     if (!_baseIsDirty && !_downsampledDataIsDirty) return false;
 
     qDebug() << "\nFiles Combined.\n\nComputing hierachical clustering and Dendrogram ..";
 
-    MCV_CytometryData* cytoData = MCV_CytometryData::Instance();
-
     std::list<cPoint_t*> reducedInput;
 
-    for (int f = 0; f < cytoData->numFiles(); f++)
+    for (int f = 0; f < NO_FILE + 1; f++)
     {
-        float* rawData = cytoData->rawData(f);
-        int numVariables = cytoData->header(f)->numVariables();
+        int numDimensions = points.numDimensions;
 
         int numActiveSamples = static_cast<int>(_selectedSamples[f].size());
         int numActiveVariables = static_cast<int>(_selectedMarkers.size());
 
         if (numActiveSamples == 0)
         {
-            std::cout << "	No active samples in file " << cytoData->header(f)->fileName() << ".";
+            std::cout << "	No active samples in file ";// << cytoData->header(f)->fileName() << ".";
             continue;
         }
 
         for (int i = 0; i < numActiveSamples; i++)
         {
             int sIdx = _selectedSamples[f][i];
-            float* vec = &rawData[numVariables * sIdx];
+            const float* vec = &points.data[numDimensions * sIdx];
 
             cPoint_t* p = new cPoint_t();
             p->originalIndex = sIdx;
@@ -571,7 +565,7 @@ bool SpadeAnalysisPlugin::clusterDownsampledData()
     return true;
 }
 
-bool SpadeAnalysisPlugin::extractClustersFromDendrogram()
+bool SpadeAnalysisPlugin::extractClustersFromDendrogram(const PointsPlugin& points)
 {
     if (!_baseIsDirty && !_downsampledDataIsDirty && !_spanningTreeIsDirty) return false;
 
@@ -605,7 +599,7 @@ bool SpadeAnalysisPlugin::extractClustersFromDendrogram()
 
     qDebug() << "	Total number of points in clusters: " << numClusteredPoints << ".\n";
 
-    computeMedianClusterExpression();
+    computeMedianClusterExpression(points);
 
     //std::cout << "\n==============================\nClusters\n==============================\n";
     //for (int i = 0; i < clusterList.size(); i++)
@@ -644,19 +638,17 @@ bool SpadeAnalysisPlugin::computeMinimumSpanningTree()
     return true;
 }
 
-void SpadeAnalysisPlugin::computeMedianClusterExpression()
+void SpadeAnalysisPlugin::computeMedianClusterExpression(const PointsPlugin& points)
 {
     //std::cout << "\nComputing median cluster expression ..";
 
-    MCV_CytometryData* cytoData = MCV_CytometryData::Instance();
+    //std::vector<float*> rawData = std::vector<float*>(NO_FILE + 1);
+    //for (int i = 0; i < rawData.size(); i++)
+    //{
+    //    rawData[i] = cytoData->rawData(i);
+    //}
 
-    std::vector<float*> rawData = std::vector<float*>(cytoData->numFiles());
-    for (int i = 0; i < rawData.size(); i++)
-    {
-        rawData[i] = cytoData->rawData(i);
-    }
-
-    int numVariables = cytoData->combinedHeader()->numVariables();
+    int numDimensions = points.numDimensions;
     int numActiveVariables = static_cast<int>(_selectedMarkers.size());
     _medianClusterExpressions.resize(_clusters.size());
 
@@ -677,9 +669,9 @@ void SpadeAnalysisPlugin::computeMedianClusterExpression()
             for (int k = 0; k < values.size(); k++)
             {
                 int file = _clusters[i][k].first;
-                int idx = _clusters[i][k].second * numVariables + var;
+                int idx = _clusters[i][k].second * numDimensions + var;
 
-                values[k] = rawData[file][idx];
+                values[k] = points.data[idx];
             }
             std::sort(values.begin(), values.end());
             _medianClusterExpressions[i][j] = values[_clusters[i].size() / 2];

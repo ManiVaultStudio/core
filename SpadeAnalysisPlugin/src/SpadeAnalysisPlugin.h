@@ -20,6 +20,8 @@ class map;
 
 class Boruvka;
 
+class PointsPlugin;
+
 class SpadeAnalysisPlugin : public QObject, public AnalysisPlugin
 {
     Q_OBJECT   
@@ -58,14 +60,14 @@ private:
     bool computeMedianMinimumDistance(const PointsPlugin& points);
     bool computeLocalDensities(const PointsPlugin& points);
     bool downsample(const PointsPlugin& points);
-    bool clusterDownsampledData();
-    bool extractClustersFromDendrogram();
+    bool clusterDownsampledData(const PointsPlugin& points);
+    bool extractClustersFromDendrogram(const PointsPlugin& points);
     bool computeMinimumSpanningTree();
-    bool upsampleData(int fileIndex);
+    bool upsampleData(const PointsPlugin& points);
 
-    void createDerivedData(bool overwrite);
+    //void createDerivedData(bool overwrite);
 
-    void computeMedianClusterExpression();
+    void computeMedianClusterExpression(const PointsPlugin& points);
 
     float distance(const float* v1, const float* v2, std::vector<int>* idxs);
     float distance(std::vector<float>* v1, std::vector<float>* v2);
