@@ -65,8 +65,6 @@ private:
     bool computeMinimumSpanningTree();
     bool upsampleData(const PointsPlugin& points);
 
-    //void createDerivedData(bool overwrite);
-
     void computeMedianClusterExpression(const PointsPlugin& points);
 
     float distance(const float* v1, const float* v2, std::vector<int>* idxs);

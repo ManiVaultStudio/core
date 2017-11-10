@@ -94,10 +94,6 @@ void SpadeAnalysisPlugin::startComputation()
     _selectedMarkers.push_back(0);
     _selectedMarkers.push_back(1);
 
-    
-    //MCV_CytometryData* cytoData = MCV_CytometryData::Instance();
-
-    //if (!cytoData) return;
 
     _baseIsDirty = _baseIsDirty || _markersDirty;
 
@@ -141,10 +137,25 @@ void SpadeAnalysisPlugin::startComputation()
     }
     std::cout << "\n";
 
-    //computeJSONObject();
-
     if (somethingChanged) {
-        //createDerivedData(true);
+        // Clustering
+        QString clusterSetName = _core->addData("Clusters", "ClusterSet");
+        const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
+        ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
+
+        unsigned int numPoints = points->data.size() / points->numDimensions;
+        for (int i = 0; i < _clusters.size(); i++)
+        {
+            IndexSet* cluster = (IndexSet*)points->createSet();
+            for (int j = 0; j < _clusters[i].size(); j++)
+            {
+                int idx = _clusters[i][j].second;
+                cluster->indices.push_back(idx);
+            }
+            plugin->addCluster(cluster);
+        }
+
+        _core->notifyDataAdded(clusterSetName);
     }
     else  {
         std::cout << "No parameters changed, no update necessary.\n";
@@ -154,32 +165,6 @@ void SpadeAnalysisPlugin::startComputation()
     _baseIsDirty = false;
     _downsampledDataIsDirty = false;
     _spanningTreeIsDirty = false;
-
-    // Clustering
-    std::unordered_map<int, IndexSet*> clusters;
-
-    unsigned int numPoints = points->data.size() / points->numDimensions;
-    for (int i = 0; i < _clusters.size(); i++)
-    {
-        clusters[i] = (IndexSet*)points->createSet();
-        for (int j = 0; j < _clusters[i].size(); j++)
-        {
-            int idx = _clusters[i][j].second;
-            clusters[i]->indices.push_back(idx);
-        }
-    }
-
-    QString clusterSetName = _core->addData("Clusters", "ClusterSet");
-    const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
-    ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
-
-    for (auto& it : clusters)
-    {
-        IndexSet* cluster = it.second;
-        plugin->addCluster(cluster);
-    }
-
-    _core->notifyDataAdded(clusterSetName);
 }
 
 bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
@@ -223,7 +208,7 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
         }
         _clusters[closestCluster].push_back(std::make_pair(NO_FILE, i));
     }
-    //computeMedianClusterExpression();
+    computeMedianClusterExpression(points);
 
     std::cout << "\n==============================\nClusters\n==============================\n";
     for (int i = 0; i < _clusters.size(); i++)
@@ -232,8 +217,6 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
         
         std::vector<std::pair<int, int>> c = _clusters[i];
         for (auto p: c) {
-            //std::cout << ' ' << *it;
-            //std::cout << "(" << (*iter)->index << "," << (*iter)->min_dist_to_set << ") ";
             std::cout << p.second << ", ";
         }
         std::cout << ">\n\n";
@@ -243,19 +226,6 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
 
     return true;
 }
-
-//void SpadeAnalysisPlugin::createDerivedData(bool overwrite)
-//{
-//    MCV_CytometryData* data = MCV_CytometryData::Instance();
-//
-//    MCV_DerivedDataClusters* finalClusters = data->derivedDataClusters(_name, overwrite);
-//    _name = finalClusters->name();
-//
-//    assert(finalClusters);
-//
-//    //std::cout << "Updating SPADE.\n";
-//    finalClusters->setClusters(_clusters, _dataSelection, _edges);
-//}
 
 // For a random sample of cells computes distance to other cells in high-dim space,
 // calculates the minimum of these distances and returns the median of these minima.
@@ -528,51 +498,8 @@ bool SpadeAnalysisPlugin::clusterDownsampledData(const PointsPlugin& points)
 
     qDebug() << "\n	Input reduced, " << reducedInput.size() << " points remain.";
 
-    // print input points
-    //printf("Inputs:\n");
-    //printf("-------\n");
-    //int br = 0;
-    //for (std::list<cPoint_t*>::iterator iter = reducedInput.begin();
-    //	iter != reducedInput.end();
-    //	++iter) {
-    //	std::cout << "<" << (*iter)->expression[0];
-    //	for (int i = 1; i < (*iter)->expression.size(); i++)
-    //	{
-    //		std::cout << ", " << std::setprecision(3) << (*iter)->expression[i];
-    //	}
-    //	std::cout << ">\n";
-    //	if (br++ > 100) break;
-    //}
-    //printf("\n");
-
     _dendrogram.clear();
     hcluster_points(reducedInput, _dendrogram);
-
-    // print output points
-    //printf("Outputs:\n");
-    //printf("--------\n");
-    //br = 0;
-    //for (std::map<int, cPoint_t*>::iterator iter = clusteredOutput.begin();
-    //	iter != clusteredOutput.end();
-    //	++iter) {
-
-    //	std::cout << "[" << iter->first << "] ";
-    //	std::cout << "<" << iter->second->expression[0];
-    //	for (int i = 1; i < iter->second->expression.size(); i++)
-    //	{
-    //		std::cout << ", " << std::setprecision(3) << iter->second->expression[i];
-    //	}
-    //	std::cout << "> R = " << iter->second->min_dist_to_set << ", parent: " << iter->second->parent_index << ". Children: ";
-    //	for (std::list<int>::iterator citer = iter->second->children.begin();
-    //		citer != iter->second->children.end();
-
-    //		++citer) {
-    //		printf("%d ", *citer);
-    //	}
-    //	printf("\n");
-    //	if (br++ > 100) break;
-    //}
-    //printf("\n");
 
     return true;
 }
@@ -597,9 +524,6 @@ bool SpadeAnalysisPlugin::extractClustersFromDendrogram(const PointsPlugin& poin
 #pragma omp parallel for reduction(+ : numClusteredPoints)
     for (int i = 0; i < clusterList.size(); i++)
     {
-        //if (i == 0) std::cout << "using " << omp_get_num_threads() << " threads ";
-        //std::cout << "i =  " << i << "with thread" << omp_get_thread_num() << "\n";
-
         std::list<cPoint_t*> l = clusterList[i];
         for (std::list<cPoint_t*>::iterator iter = l.begin(); iter != l.end(); iter++){
 
@@ -612,20 +536,6 @@ bool SpadeAnalysisPlugin::extractClustersFromDendrogram(const PointsPlugin& poin
     qDebug() << "	Total number of points in clusters: " << numClusteredPoints << ".\n";
 
     computeMedianClusterExpression(points);
-
-    //std::cout << "\n==============================\nClusters\n==============================\n";
-    //for (int i = 0; i < clusterList.size(); i++)
-    //{
-    //	std::cout << "[" << i << "] < ";
-
-    //	std::list<cPoint_t*> l = clusterList[i];
-    //	for (std::list<cPoint_t*>::iterator iter = l.begin(); iter != l.end(); iter++){
-    //		//std::cout << ' ' << *it;
-    //		//std::cout << "(" << (*iter)->index << "," << (*iter)->min_dist_to_set << ") ";
-    //		std::cout << (*iter)->index-1 << ", ";
-    //	}
-    //	std::cout << ">\n\n";
-    //}
 
     return true;
 }
@@ -652,24 +562,14 @@ bool SpadeAnalysisPlugin::computeMinimumSpanningTree()
 
 void SpadeAnalysisPlugin::computeMedianClusterExpression(const PointsPlugin& points)
 {
-    //std::cout << "\nComputing median cluster expression ..";
-
-    //std::vector<float*> rawData = std::vector<float*>(NO_FILE + 1);
-    //for (int i = 0; i < rawData.size(); i++)
-    //{
-    //    rawData[i] = cytoData->rawData(i);
-    //}
+    std::cout << "\nComputing median cluster expression ..";
 
     int numDimensions = points.numDimensions;
     int numActiveVariables = static_cast<int>(_selectedMarkers.size());
     _medianClusterExpressions.resize(_clusters.size());
 
-#ifndef __USE_GCD__
 #pragma omp parallel for
     for (int i = 0; i < _medianClusterExpressions.size(); i++) {
-#else
-    dispatch_apply(_medianClusterExpressions.size(), dispatch_get_global_queue(0, 0), ^ (size_t i) {
-#endif //__USE_GCD__
 
         _medianClusterExpressions[i].resize(numActiveVariables);
         std::vector<float> values(_clusters[i].size());
@@ -689,32 +589,6 @@ void SpadeAnalysisPlugin::computeMedianClusterExpression(const PointsPlugin& poi
             _medianClusterExpressions[i][j] = values[_clusters[i].size() / 2];
         }
     }
-#ifdef __USE_GCD__
-    );
-#endif // __USE_GCD__
-    //std::cout << "finished.\n";
-
-    //std::cout << "\n==============================\nMedians\n==============================\n";
-    //std::cout << "\nCluster 0 Expressions:\n";
-    //for (int i = 0; i < _clusters[10].size(); i++)
-    //{
-    //	int sam = _selectedSamples[_clusters[10][i]];
-
-    //	std::cout << _clusters[10][i] << "//" << sam << " < ";
-    //	for (int j = 0; j < numActiveVariables; j++)
-    //	{
-    //		int var = _selectedMarkers[j];
-    //		int idx = sam * numVariables + var;
-    //		std::cout << rawData[idx] << " ";
-    //	}
-    //	std::cout << ">\n";
-    //}
-    //std::cout << "\n< ";
-    //for (int j = 0; j < _medianClusterExpressions[10].size(); j++)
-    //{
-    //	std::cout << _medianClusterExpressions[10][j] << " ";
-    //}
-    //std::cout << ">\n";
 }
 
 float SpadeAnalysisPlugin::distance(const float* v1, const float* v2, std::vector<int>* idxs)
