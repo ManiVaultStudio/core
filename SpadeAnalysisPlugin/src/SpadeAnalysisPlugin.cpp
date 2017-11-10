@@ -91,39 +91,10 @@ void SpadeAnalysisPlugin::startComputation()
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
 
-    //// Clustering
-    //IndexSet* set1 = (IndexSet*)points->createSet();
-    //IndexSet* set2 = (IndexSet*)points->createSet();
-    //std::unordered_map<int, IndexSet*> clusters;
+    _selectedMarkers.push_back(0);
+    _selectedMarkers.push_back(1);
 
-    //unsigned int numPoints = points->data.size() / points->numDimensions;
-    //for (int i = 0; i < numPoints; i++)
-    //{
-    //    int c = (int) points->data[i * points->numDimensions + points->numDimensions - 1];
-
-    //    if (clusters.find(c) == clusters.end())
-    //    {
-    //        clusters[c] = (IndexSet*) points->createSet();
-    //    }
-    //    clusters[c]->indices.push_back(i);
-    //}
-
-    //QString clusterSetName = _core->addData("Clusters", "ClusterSet");
-    //const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
-    //ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
-
-    //for (auto& it : clusters)
-    //{
-    //    IndexSet* cluster = it.second;
-    //    cluster->setDataName(points->getName());
-    //    plugin->addCluster(cluster);
-    //}
-
-    //_core->notifyDataAdded(clusterSetName);
-
-
-
-
+    
     //MCV_CytometryData* cytoData = MCV_CytometryData::Instance();
 
     //if (!cytoData) return;
@@ -183,6 +154,32 @@ void SpadeAnalysisPlugin::startComputation()
     _baseIsDirty = false;
     _downsampledDataIsDirty = false;
     _spanningTreeIsDirty = false;
+
+    // Clustering
+    std::unordered_map<int, IndexSet*> clusters;
+
+    unsigned int numPoints = points->data.size() / points->numDimensions;
+    for (int i = 0; i < _clusters.size(); i++)
+    {
+        clusters[i] = (IndexSet*)points->createSet();
+        for (int j = 0; j < _clusters[i].size(); j++)
+        {
+            int idx = _clusters[i][j].second;
+            clusters[i]->indices.push_back(idx);
+        }
+    }
+
+    QString clusterSetName = _core->addData("Clusters", "ClusterSet");
+    const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
+    ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
+
+    for (auto& it : clusters)
+    {
+        IndexSet* cluster = it.second;
+        plugin->addCluster(cluster);
+    }
+
+    _core->notifyDataAdded(clusterSetName);
 }
 
 bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
@@ -198,6 +195,7 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
 
     for (int i = 0; i < numSamples; i++)
     {
+        std::cout << "Upsampling: " << i << std::endl;
         if (i % (numSamples / 10) == 0) std::cout << i / (numSamples / 10) * 10 << "%..";
 
         // this is already contained in the clustering        
@@ -226,6 +224,20 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
         _clusters[closestCluster].push_back(std::make_pair(NO_FILE, i));
     }
     //computeMedianClusterExpression();
+
+    std::cout << "\n==============================\nClusters\n==============================\n";
+    for (int i = 0; i < _clusters.size(); i++)
+    {
+        std::cout << "[" << i << "] < ";
+        
+        std::vector<std::pair<int, int>> c = _clusters[i];
+        for (auto p: c) {
+            //std::cout << ' ' << *it;
+            //std::cout << "(" << (*iter)->index << "," << (*iter)->min_dist_to_set << ") ";
+            std::cout << p.second << ", ";
+        }
+        std::cout << ">\n\n";
+    }
 
     std::cout << " done.\n";
 
@@ -309,8 +321,8 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
         {
             // do not compare to myself
             if (s == i) continue;
-
             float dist = distance(&points.data[numDimensions*i], &points.data[numDimensions*s], &_selectedMarkers);
+            
             if (dist < minDistance) minDistance = dist;
         }
         nearestNeighborDistances[j] = minDistance;
@@ -728,6 +740,7 @@ float SpadeAnalysisPlugin::distance(std::vector<float>* v1, std::vector<float>* 
 
     float distance = 0.0f;
     int n = static_cast<int>(v1->size());
+    
     for (int i = 0; i < n; i++)
     {
         float dist = std::abs((*v1)[i] - (*v2)[i]);
