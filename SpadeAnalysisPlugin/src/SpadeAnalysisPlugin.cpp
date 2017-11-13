@@ -172,7 +172,7 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
     for (int i = 0; i < numSamples; i++)
     {
         std::cout << "Upsampling: " << i << std::endl;
-        if (i % (numSamples / 10) == 0) std::cout << i / (numSamples / 10) * 10 << "%..";
+        //if (i % (numSamples / 10) == 0) std::cout << i / (numSamples / 10) * 10 << "%..";
 
         // this is already contained in the clustering        
         if (_selectedSamplesIdxs[NO_FILE][i]) continue;
@@ -255,7 +255,7 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
 
         selectedSampleIdxs[j++] = randomIdx;
 
-        if (i % (randomSampleSize / 10) == 0) std::cout << i / (randomSampleSize / 10) * 10 << "%..";
+        //if (i % (randomSampleSize / 10) == 0) std::cout << i / (randomSampleSize / 10) * 10 << "%..";
     }
     qDebug() << " done.\n";
 
@@ -271,8 +271,7 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
     for (int j = 0; j < randomSampleSize; j++) {
         if (j == 0) std::cout << "using " << omp_get_num_threads() << " threads ..\n		";
 
-
-        if (++threadTracker % (randomSampleSize / 10) == 0) std::cout << (int)(((float)threadTracker / randomSampleSize) * 100) << "%..";
+        //if (++threadTracker % (randomSampleSize / 10) == 0) std::cout << (int)(((float)threadTracker / randomSampleSize) * 100) << "%..";
 
         int i = selectedSampleIdxs[j];
 
@@ -337,7 +336,7 @@ bool SpadeAnalysisPlugin::computeLocalDensities(const PointsPlugin& points)
                 //std::cout << "(" << s << "," << dist << "), ";
             }
         }
-        if (++threadTracker % (numSamples / 10) == 0) qDebug() << (int)(((float)threadTracker / numSamples) * 100) << "%..";
+        //if (++threadTracker % (numSamples / 10) == 0) qDebug() << (int)(((float)threadTracker / numSamples) * 100) << "%..";
     }
 
     // Sort the densities so we can take the low section of it in downsample()
