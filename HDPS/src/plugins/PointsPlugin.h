@@ -21,7 +21,11 @@ public:
     
     void init();
 
-    unsigned int getNumPoints() const;
+    unsigned int getNumPoints() const
+    {
+        return data.size() / numDimensions;
+    }
+
     hdps::Set* createSet() const;
 
     std::vector<float> data;

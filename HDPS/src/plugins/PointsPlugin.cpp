@@ -19,11 +19,6 @@ void PointsPlugin::init()
 
 }
 
-unsigned int PointsPlugin::getNumPoints() const
-{
-    return data.size() / numDimensions;
-}
-
 hdps::Set* PointsPlugin::createSet() const
 {
     return new IndexSet(getName());
