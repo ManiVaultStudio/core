@@ -227,7 +227,7 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
     std::cout << "	Computing median minimum distance ..\n";
 
     int numDimensions = points.numDimensions;
-    int numSamples = points.data.size() / numDimensions;
+    int numSamples = points.getNumPoints();
 
     // How many samples to take for our median calculation, either the value of the parameter, of the number of points if its lower
     int randomSampleSize = std::min(_maxRandomSampleSize, numSamples);

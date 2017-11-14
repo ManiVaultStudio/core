@@ -21,10 +21,11 @@ public:
     
     void init();
 
+    unsigned int getNumPoints() const;
     hdps::Set* createSet() const;
 
     std::vector<float> data;
-    int numDimensions = 1;
+    unsigned int numDimensions = 1;
 };
 
 class IndexSet : public hdps::Set
