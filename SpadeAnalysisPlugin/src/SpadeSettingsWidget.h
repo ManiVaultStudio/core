@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QComboBox>
 #include <QPushButton>
+#include <QLineEdit>
 
 using namespace hdps::gui;
 
@@ -19,8 +20,16 @@ public:
     SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis);
 
 public:
-    QComboBox dataOptions;
-    QPushButton startButton;
+    QComboBox _dataOptions;
+    QPushButton _startButton;
+
+    QLineEdit _targetEvents;
+    QLineEdit _targetNodes;
+
+    QLineEdit _heuristicSamples;
+    QLineEdit _alpha;
+    QLineEdit _targetDensity;
+    QLineEdit _outlierDensity;
 };
 
 #endif // SPADE_SETTINGS_WIDGET_H

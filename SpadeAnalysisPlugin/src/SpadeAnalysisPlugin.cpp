@@ -40,7 +40,7 @@ void SpadeAnalysisPlugin::init()
 
 void SpadeAnalysisPlugin::dataAdded(const QString name)
 {
-    _settings->dataOptions.addItem(name);
+    _settings->_dataOptions.addItem(name);
 }
 
 void SpadeAnalysisPlugin::dataChanged(const QString name)
@@ -78,7 +78,7 @@ void SpadeAnalysisPlugin::dataSetPicked(const QString& name)
 
 void SpadeAnalysisPlugin::startComputation()
 {
-    QString setName = _settings->dataOptions.currentText();
+    QString setName = _settings->_dataOptions.currentText();
 
     // Do nothing if we have no data set selected
     if (setName.isEmpty()) {
@@ -171,7 +171,6 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
 
     for (int i = 0; i < numSamples; i++)
     {
-        std::cout << "Upsampling: " << i << std::endl;
         //if (i % (numSamples / 10) == 0) std::cout << i / (numSamples / 10) * 10 << "%..";
 
         // this is already contained in the clustering        
