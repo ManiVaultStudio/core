@@ -16,12 +16,12 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     connect(&startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));
 
     connect(&numIterations, SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
-    connect(&perplexity,    SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
-    connect(&exaggeration,  SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
-    connect(&expDecay,      SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
-    connect(&numTrees,      SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
-    connect(&numChecks,     SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
-    connect(&theta,         SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
+    connect(&perplexity,    SIGNAL(textChanged(QString)), SLOT(perplexityChanged(QString)));
+    connect(&exaggeration,  SIGNAL(textChanged(QString)), SLOT(exaggerationChanged(QString)));
+    connect(&expDecay,      SIGNAL(textChanged(QString)), SLOT(expDecayChanged(QString)));
+    connect(&numTrees,      SIGNAL(textChanged(QString)), SLOT(numTreesChanged(QString)));
+    connect(&numChecks,     SIGNAL(textChanged(QString)), SLOT(numChecksChanged(QString)));
+    connect(&theta,         SIGNAL(textChanged(QString)), SLOT(thetaChanged(QString)));
 
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
     QGroupBox* advancedSettingsBox = new QGroupBox("Advanced Settings");
