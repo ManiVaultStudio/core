@@ -5,6 +5,8 @@
 
 #include "HeatMapWidget.h"
 
+#include <QList>
+
 using namespace hdps::plugin;
 
 // =============================================================================
@@ -29,8 +31,10 @@ public:
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
     virtual void onSelection(const std::vector<unsigned int> selection) const;
+    
 protected slots:
     void dataSetPicked(const QString& name);
+    void clusterSelected(QList<int> selectedClusters);
 
 private:
     void updateData();

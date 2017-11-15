@@ -38,6 +38,8 @@ private:
 
     std::vector<const hdps::plugin::SelectionListener*> _selectionListeners;
 
+signals:
+    void clusterSelectionChanged(QList<int> selectedClusters);
 private slots:
     virtual void connectJs() override;
     virtual void webViewLoaded(bool ok) override;

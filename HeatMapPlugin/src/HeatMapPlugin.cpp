@@ -24,7 +24,7 @@ void HeatMapPlugin::init()
 
     addWidget(heatmap);
 
-    //QString clusterName = _core->createClusterSet("SPADE Cluster");
+    connect(heatmap, SIGNAL(clusterSelectionChanged(QList<int>)), SLOT(clusterSelected(QList<int>)));
 }
 
 void HeatMapPlugin::dataAdded(const QString name)
@@ -116,6 +116,12 @@ QStringList HeatMapPlugin::supportedDataKinds()
 void HeatMapPlugin::dataSetPicked(const QString& name)
 {
 
+}
+
+void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
+{
+    qDebug() << "CLUSTER SELECTION";
+    qDebug() << selectedClusters;
 }
 
 void HeatMapPlugin::updateData()

@@ -121,7 +121,5 @@ void HeatMapWidget::js_highlightUpdated(int highlightId)
 
 void HeatMapWidget::js_selectionUpdated(QList<int> selectedClusters)
 {
-    
-
-    qDebug() << selectedClusters;
+    emit clusterSelectionChanged(selectedClusters);
 }
