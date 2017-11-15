@@ -51,9 +51,6 @@ void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numD
         else nodes = nodes + "]}\n]";
     }
 
-    //// Edges
-    std::string edges = "";
-
     // TODO: multi files
     std::string names = ",\n\"names\":[";
     for (int i = 0; i < numDimensions; i++) {
@@ -64,12 +61,10 @@ void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numD
         else names = names + "]";
     }
 
-    _jsonObject = "{\n" + nodes + edges + names + "\n}";
+    _jsonObject = "{\n" + nodes + names + "\n}";
 
 
     qt_addAvailableData(QString("Density Clusters - A-tSNE Analysis"));
-
-    //QString json = hdps::util::loadFileContents("cluster2.json");
 
     qDebug() << _jsonObject.c_str();
 
@@ -126,5 +121,7 @@ void HeatMapWidget::js_highlightUpdated(int highlightId)
 
 void HeatMapWidget::js_selectionUpdated(QList<int> selectedClusters)
 {
+    
+
     qDebug() << selectedClusters;
 }
