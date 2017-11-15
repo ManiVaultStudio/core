@@ -5,6 +5,7 @@
 
 #include "widgets/WebWidget.h"
 #include <QMouseEvent>
+#include <QComboBox>
 
 class QWebView;
 class QWebFrame;
@@ -18,10 +19,13 @@ public:
     HeatMapWidget();
     ~HeatMapWidget();
 
+    void addDataOption(const QString option);
     void setData(const std::vector<Cluster>& data, const int numDimensions);
     //void setData()
 
     void addSelectionListener(const hdps::plugin::SelectionListener* listener);
+
+    QComboBox _dataOptions;
 protected:
     void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
@@ -31,6 +35,8 @@ protected:
     void cleanup();
 
 private:
+    
+
     unsigned int _numPoints = 0;
     const std::vector<float>* _positions;
 

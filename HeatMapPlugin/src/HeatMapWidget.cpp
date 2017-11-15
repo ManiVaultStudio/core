@@ -20,6 +20,11 @@ HeatMapWidget::~HeatMapWidget()
 
 }
 
+void HeatMapWidget::addDataOption(const QString option)
+{
+    _dataOptions.addItem(option);
+}
+
 void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numDimensions)
 {
     std::string _jsonObject = "";
@@ -115,7 +120,6 @@ void HeatMapWidget::webViewLoaded(bool ok)
 void HeatMapWidget::js_highlightUpdated(int highlightId)
 {
     //if (!_data) return;
-    qDebug() << "Highlight";
     //_data->setHighlight(highlightId);
 }
 
