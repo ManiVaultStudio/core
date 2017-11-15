@@ -44,6 +44,13 @@ public:
     
     void init();
 
+    float targetEvents() const { return _densityLimit; }
+    float targetNumClusters() const { return _targetNumberOfClusters; }
+    float maxRandomSampleSize() const { return _maxRandomSampleSize; }
+    float alpha() const { return _alpha; }
+    float targetDensityPercentile() const { return _targetDensityPercentile; }
+    float outlierDensityPercentile() const { return _outlierDensityPercentile; }
+
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
@@ -103,6 +110,7 @@ private:
     std::map<int, cPoint_t*> _dendrogram;
 
     std::vector< std::vector< std::pair <int, int> > > _clusters;
+    // ClusterA, ClusterB, strength of connection
     std::vector< std::tuple<int, int, float> > _edges;
     std::vector< std::vector<float> > _medianClusterExpressions;
 

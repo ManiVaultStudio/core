@@ -6,7 +6,8 @@
 #include <QObject>
 #include <QComboBox>
 #include <QPushButton>
-#include <QLineEdit>
+#include <QDoubleSpinBox>
+#include <QSpinBox>
 
 using namespace hdps::gui;
 
@@ -23,13 +24,13 @@ public:
     QComboBox _dataOptions;
     QPushButton _startButton;
 
-    QLineEdit _targetEvents;
-    QLineEdit _targetNodes;
+    QDoubleSpinBox _targetEvents;
+    QSpinBox _targetNodes;
 
-    QLineEdit _heuristicSamples;
-    QLineEdit _alpha;
-    QLineEdit _targetDensity;
-    QLineEdit _outlierDensity;
+    QSpinBox _heuristicSamples;
+    QDoubleSpinBox _alpha;
+    QDoubleSpinBox _targetDensity;
+    QDoubleSpinBox _outlierDensity;
 };
 
 #endif // SPADE_SETTINGS_WIDGET_H

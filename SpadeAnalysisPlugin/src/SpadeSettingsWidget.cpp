@@ -18,12 +18,12 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis) {
     connect(&_dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
     connect(&_startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));
 
-    connect(&_targetEvents,     SIGNAL(textChanged(QString)), SLOT(targetEventsChanged(QString)));
-    connect(&_targetNodes,      SIGNAL(textChanged(QString)), SLOT(targetNodesChanged(QString)));
-    connect(&_heuristicSamples, SIGNAL(textChanged(QString)), SLOT(heuristicSamplesChanged(QString)));
-    connect(&_alpha,            SIGNAL(textChanged(QString)), SLOT(alphaChanged(QString)));
-    connect(&_targetDensity,    SIGNAL(textChanged(QString)), SLOT(targetDensityChanged(QString)));
-    connect(&_outlierDensity,   SIGNAL(textChanged(QString)), SLOT(outlierDensityChanged(QString)));
+    connect(&_targetEvents,     SIGNAL(valueChanged(double)), SLOT(targetEventsChanged(QString)));
+    connect(&_targetNodes,      SIGNAL(valueChanged(int)),    SLOT(targetNodesChanged(QString)));
+    connect(&_heuristicSamples, SIGNAL(valueChanged(int)), SLOT(heuristicSamplesChanged(QString)));
+    connect(&_alpha,            SIGNAL(valueChanged(double)), SLOT(alphaChanged(QString)));
+    connect(&_targetDensity,    SIGNAL(valueChanged(double)), SLOT(targetDensityChanged(QString)));
+    connect(&_outlierDensity,   SIGNAL(valueChanged(double)), SLOT(outlierDensityChanged(QString)));
 
 
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
@@ -39,46 +39,48 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis) {
     QLabel* targetDensityLabel = new QLabel("Target Density %");
     QLabel* outlierDensityLabel = new QLabel("Outlier Density %");
 
-    _targetEvents.setValidator(new QDoubleValidator(0, 100, 2, this));
-    _targetEvents.setText("10.0");
-    _targetEvents.setFixedWidth(50);
-    _targetNodes.setValidator(new QIntValidator(1, 100000, this));
-    _targetNodes.setText("50");
-    _targetNodes.setFixedWidth(50);
+    _targetEvents.setToolTip("Target number of points to keep after downsampling in percent.\nThe number might not be reached depending on the outlier and target density parameters.");
+    _targetEvents.setRange(0, 100.0);
+    _targetEvents.setValue(analysis->targetEvents());
+    _targetNodes.setToolTip("Target number of nodes in the SPADE tree.");
+    _targetNodes.setRange(0, 99999);
+    _targetNodes.setValue(analysis->targetNumClusters());
 
-    _heuristicSamples.setValidator(new QIntValidator(1, 10000000, this));
-    _heuristicSamples.setText("2000");
-    _heuristicSamples.setFixedWidth(50);
-    _alpha.setValidator(new QDoubleValidator(0, 100, 2, this));
-    _alpha.setText("3.00");
-    _alpha.setFixedWidth(50);
-    _targetDensity.setValidator(new QDoubleValidator(0, 100, 2, this));
-    _targetDensity.setText("3.00");
-    _targetDensity.setFixedWidth(50);
-    _outlierDensity.setValidator(new QDoubleValidator(0, 100, 2, this));
-    _outlierDensity.setText("1.00");
-    _outlierDensity.setFixedWidth(50);
+    _heuristicSamples.setToolTip("The number of random Points used to determine the median density.");
+    _heuristicSamples.setRange(0, 999999);
+    _heuristicSamples.setValue(analysis->maxRandomSampleSize());
+    _alpha.setToolTip("Scales the neighborhood size for the density computation for downsampling.");
+    _alpha.setValue(analysis->alpha());
+    _targetDensity.setToolTip("Percentile of the upper limit of the target density. Points with a density between the outlier density and the target density are considered rare, but not noise and kept.\n A value of 3.0 (and an outlier density of 1.0) means the cells in between the first and third percentile, ordered by density are considered rare and kept.\nPoints with a density above this value are kept only with a probability according to their density, the larger the density, the lower the probability.");
+    _targetDensity.setValue(analysis->targetDensityPercentile());
+    _outlierDensity.setToolTip("Percentile of the upper limit of the outlier density. Points with a density below this threshold are considered as noise.\nA value of 1.0 means the first percentile of the cells ordered by density is discarded. Use larger values if you expect more noise.");
+    _outlierDensity.setValue(analysis->outlierDensityPercentile());
 
     _startButton.setText("Cluster");
     _startButton.setFixedSize(QSize(150, 50));
 
-    QVBoxLayout *settingsLayout = new QVBoxLayout;
-    settingsLayout->addWidget(targetEventsLabel);
-    settingsLayout->addWidget(&_targetEvents);
-    settingsLayout->addWidget(targetNodesLabel);
+    QGridLayout *settingsLayout = new QGridLayout;
+    settingsLayout->setAlignment(Qt::AlignTop);
+    settingsLayout->addWidget(targetEventsLabel, 0, 0);
+    settingsLayout->addWidget(&_targetEvents, 0, 1);
+    settingsLayout->addWidget(targetNodesLabel, 1, 0);
     settingsLayout->addWidget(&_targetNodes);
-    settingsLayout->addStretch(1);
+    settingsLayout->setColumnStretch(0, 0);
+    settingsLayout->setColumnStretch(1, 1);
     settingsBox->setLayout(settingsLayout);
 
     QGridLayout* advancedSettingsLayout = new QGridLayout;
+    advancedSettingsLayout->setAlignment(Qt::AlignTop);
     advancedSettingsLayout->addWidget(heuristicSamplesLabel, 0, 0);
-    advancedSettingsLayout->addWidget(&_heuristicSamples, 1, 0);
-    advancedSettingsLayout->addWidget(alphaLabel, 0, 1);
+    advancedSettingsLayout->addWidget(&_heuristicSamples, 0, 1);
+    advancedSettingsLayout->addWidget(alphaLabel, 1, 0);
     advancedSettingsLayout->addWidget(&_alpha, 1, 1);
     advancedSettingsLayout->addWidget(targetDensityLabel, 2, 0);
-    advancedSettingsLayout->addWidget(&_targetDensity, 3, 0);
-    advancedSettingsLayout->addWidget(outlierDensityLabel, 2, 1);
+    advancedSettingsLayout->addWidget(&_targetDensity, 2, 1);
+    advancedSettingsLayout->addWidget(outlierDensityLabel, 3, 0);
     advancedSettingsLayout->addWidget(&_outlierDensity, 3, 1);
+    advancedSettingsLayout->setColumnStretch(0, 0);
+    advancedSettingsLayout->setColumnStretch(1, 1);
     advancedSettingsBox->setLayout(advancedSettingsLayout);
 
     addWidget(&_dataOptions);
