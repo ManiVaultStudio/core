@@ -19,12 +19,12 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
     connect(&_dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
     connect(&_startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));
 
-    connect(&_targetEvents,     SIGNAL(valueChanged(double)), SLOT(targetEventsChanged(QString)));
-    connect(&_targetNodes,      SIGNAL(valueChanged(int)),    SLOT(targetNodesChanged(QString)));
-    connect(&_heuristicSamples, SIGNAL(valueChanged(int)), SLOT(heuristicSamplesChanged(QString)));
-    connect(&_alpha,            SIGNAL(valueChanged(double)), SLOT(alphaChanged(QString)));
-    connect(&_targetDensity,    SIGNAL(valueChanged(double)), SLOT(targetDensityChanged(QString)));
-    connect(&_outlierDensity,   SIGNAL(valueChanged(double)), SLOT(outlierDensityChanged(QString)));
+    connect(&_targetEvents,     SIGNAL(valueChanged(double)), SLOT(targetEventsChanged(double)));
+    connect(&_targetNodes,      SIGNAL(valueChanged(int)),    SLOT(targetNodesChanged(int)));
+    connect(&_heuristicSamples, SIGNAL(valueChanged(int)), SLOT(heuristicSamplesChanged(int)));
+    connect(&_alpha,            SIGNAL(valueChanged(double)), SLOT(alphaChanged(double)));
+    connect(&_targetDensity,    SIGNAL(valueChanged(double)), SLOT(targetDensityChanged(double)));
+    connect(&_outlierDensity,   SIGNAL(valueChanged(double)), SLOT(outlierDensityChanged(double)));
 
 
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
