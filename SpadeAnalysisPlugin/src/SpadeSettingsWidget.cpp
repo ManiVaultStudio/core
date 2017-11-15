@@ -12,7 +12,8 @@
 
 using namespace hdps::plugin;
 
-SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis) {
+SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
+{
     setFixedWidth(200);
 
     connect(&_dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
@@ -87,4 +88,34 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis) {
     addWidget(settingsBox);
     addWidget(advancedSettingsBox);
     addWidget(&_startButton);
+}
+
+void SpadeSettingsWidget::targetEventsChanged(double value)
+{
+
+}
+
+void SpadeSettingsWidget::targetNodesChanged(int value)
+{
+
+}
+
+void SpadeSettingsWidget::heuristicSamplesChanged(int value)
+{
+
+}
+
+void SpadeSettingsWidget::alphaChanged(double value)
+{
+
+}
+
+void SpadeSettingsWidget::targetDensityChanged(double value)
+{
+
+}
+
+void SpadeSettingsWidget::outlierDensityChanged(double value)
+{
+
 }

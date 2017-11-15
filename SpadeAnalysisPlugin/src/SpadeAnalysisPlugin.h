@@ -64,6 +64,7 @@ public slots:
     void startComputation();
 
 private:
+    void initializeSpade();
     bool computeMedianMinimumDistance(const PointsPlugin& points);
     bool computeLocalDensities(const PointsPlugin& points);
     bool downsample(const PointsPlugin& points);

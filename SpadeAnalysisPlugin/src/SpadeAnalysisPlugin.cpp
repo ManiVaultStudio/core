@@ -76,6 +76,16 @@ void SpadeAnalysisPlugin::dataSetPicked(const QString& name)
 
 }
 
+void SpadeAnalysisPlugin::initializeSpade() {
+    // Initialize the SPADE computation with the settings from the settings widget
+    _maxRandomSampleSize = _settings->_targetEvents.value();
+    _targetNumberOfClusters = _settings->_targetNodes.value();
+    _densityLimit = _settings->_heuristicSamples.value();
+    _alpha = _settings->_alpha.value();
+    _targetDensityPercentile = _settings->_targetDensity.value();
+    _outlierDensityPercentile = _settings->_outlierDensity.value();
+}
+
 void SpadeAnalysisPlugin::startComputation()
 {
     QString setName = _settings->_dataOptions.currentText();
@@ -84,6 +94,8 @@ void SpadeAnalysisPlugin::startComputation()
     if (setName.isEmpty()) {
         return;
     }
+
+    initializeSpade();
 
     const hdps::Set* set = _core->requestData(setName);
     const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());

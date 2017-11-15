@@ -20,8 +20,17 @@ class SpadeSettingsWidget : public SettingsWidget
 public:
     SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis);
 
+private slots:
+    void targetEventsChanged(double value);
+    void targetNodesChanged(int value);
+    void heuristicSamplesChanged(int value);
+    void alphaChanged(double value);
+    void targetDensityChanged(double value);
+    void outlierDensityChanged(double value);
+
 public:
     QComboBox _dataOptions;
+
     QPushButton _startButton;
 
     QDoubleSpinBox _targetEvents;
