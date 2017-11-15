@@ -28,10 +28,14 @@ void ScatterplotPlugin::init()
     widget->addSelectionListener(this);
 
     settings = new ScatterplotSettings(this);
-    settings->_pointSizeSlider.setValue(10);
 
     addWidget(widget);
     addWidget(settings);
+}
+
+unsigned int ScatterplotPlugin::pointSize() const
+{
+    return _pointSize;
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -77,8 +81,9 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     updateData();
 }
 
-void ScatterplotPlugin::pointSizeChanged(const int size)
+void ScatterplotPlugin::pointSizeChanged(const unsigned int size)
 {
+    _pointSize = size;
     widget->setPointSize(size);
 }
 

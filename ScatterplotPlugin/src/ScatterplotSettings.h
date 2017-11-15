@@ -27,6 +27,7 @@ public:
     void addDataOption(const QString option);
     int numDataOptions();
 
+private:
     QComboBox _dataOptions;
     QSlider _pointSizeSlider;
     QPushButton _subsetButton;

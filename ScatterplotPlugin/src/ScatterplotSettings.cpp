@@ -21,6 +21,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     QLabel* pointSizeLabel = new QLabel("Point Size:");
     settingsLayout->addWidget(pointSizeLabel, 1, 0);
     _pointSizeSlider.setRange(1, 20);
+    _pointSizeSlider.setValue(plugin->pointSize());
     settingsLayout->addWidget(&_pointSizeSlider, 1, 1, 1, 2);
     settingsLayout->addWidget(&_subsetButton, 0, 1);
 

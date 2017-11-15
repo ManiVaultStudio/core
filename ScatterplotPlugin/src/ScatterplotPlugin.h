@@ -22,10 +22,16 @@ class ScatterplotPlugin : public ViewPlugin, public SelectionListener
     Q_OBJECT
     
 public:
-    ScatterplotPlugin() : ViewPlugin("Scatterplot View") { }
+    ScatterplotPlugin()
+    :
+        ViewPlugin("Scatterplot View"),
+        _pointSize(10)
+    { }
     ~ScatterplotPlugin(void);
     
     void init();
+
+    unsigned int pointSize() const;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
@@ -35,7 +41,7 @@ public:
     virtual void onSelection(const std::vector<unsigned int> selection) const;
 protected slots:
     void dataSetPicked(const QString& name);
-    void pointSizeChanged(const int size);
+    void pointSizeChanged(const unsigned int size);
     void subsetCreated();
 
     void xDimPicked(int index);
@@ -47,6 +53,8 @@ private:
     hdps::gui::ScatterplotWidget* widget;
 
     ScatterplotSettings* settings;
+
+    unsigned int _pointSize;
 };
 
 
