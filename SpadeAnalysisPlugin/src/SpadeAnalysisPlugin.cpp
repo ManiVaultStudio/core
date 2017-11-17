@@ -212,19 +212,19 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
     }
     computeMedianClusterExpression(points);
 
-    std::cout << "\n==============================\nClusters\n==============================\n";
-    for (int i = 0; i < _clusters.size(); i++)
-    {
-        std::cout << "[" << i << "] < ";
-        
-        std::vector<std::pair<int, int>> c = _clusters[i];
-        for (auto p: c) {
-            std::cout << p.second << ", ";
-        }
-        std::cout << ">\n\n";
-    }
+    //std::cout << "\n==============================\nClusters\n==============================\n";
+    //for (int i = 0; i < _clusters.size(); i++)
+    //{
+    //    std::cout << "[" << i << "] < ";
+    //    
+    //    std::vector<std::pair<int, int>> c = _clusters[i];
+    //    for (auto p: c) {
+    //        std::cout << p.second << ", ";
+    //    }
+    //    std::cout << ">\n\n";
+    //}
 
-    std::cout << " done.\n";
+    //std::cout << " done.\n";
 
     return true;
 }
