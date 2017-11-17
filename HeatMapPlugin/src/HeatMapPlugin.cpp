@@ -124,30 +124,21 @@ void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
 {
     qDebug() << "CLUSTER SELECTION";
     qDebug() << selectedClusters;
-
-    qDebug() << "Attempting cast to ClusterSet";
     ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(heatmap->_dataOptions.currentText()));
-
     if (!clusterSet) return;
-    qDebug() << "Requesting plugin";
+
     const ClustersPlugin* clusterPlugin = dynamic_cast<const ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
 
-    qDebug() << "Calculating data";
-
     int numClusters = clusterPlugin->clusters.size();
-    int numDimensions = 1;
-
-    qDebug() << "Calculate cluster statistics";
     for (int i = 0; i < numClusters; i++)
     {
         IndexSet* cluster = clusterPlugin->clusters[i];
-        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(cluster->getDataName()));
-        IndexSet* selection = dynamic_cast<IndexSet*>(_core->requestSelection(points->getName()));
+        IndexSet* selection = dynamic_cast<IndexSet*>(_core->requestSelection(cluster->getDataName()));
 
         selection->indices.clear();
-        if (selectedClusters[i] == 1) {
+        if (selectedClusters[i]) {
             selection->indices.insert(selection->indices.end(), cluster->indices.begin(), cluster->indices.end());
-            _core->notifySelectionChanged(points->getName());
+            _core->notifySelectionChanged(selection->getDataName());
         }
     }
 }
