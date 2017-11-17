@@ -129,13 +129,17 @@ void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
 
     const ClustersPlugin* clusterPlugin = dynamic_cast<const ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
 
+    IndexSet* selection = nullptr;
+
     int numClusters = clusterPlugin->clusters.size();
     for (int i = 0; i < numClusters; i++)
     {
         IndexSet* cluster = clusterPlugin->clusters[i];
-        IndexSet* selection = dynamic_cast<IndexSet*>(_core->requestSelection(cluster->getDataName()));
-
-        selection->indices.clear();
+        if (!selection) {
+            selection = dynamic_cast<IndexSet*>(_core->requestSelection(cluster->getDataName()));
+            selection->indices.clear();
+        }
+        
         if (selectedClusters[i]) {
             selection->indices.insert(selection->indices.end(), cluster->indices.begin(), cluster->indices.end());
             _core->notifySelectionChanged(selection->getDataName());
