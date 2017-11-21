@@ -26,6 +26,11 @@ public:
         return data.size() / numDimensions;
     }
 
+    unsigned int getNumDimensions() const
+    {
+        return numDimensions;
+    }
+
     hdps::Set* createSet() const;
 
     std::vector<float> data;
