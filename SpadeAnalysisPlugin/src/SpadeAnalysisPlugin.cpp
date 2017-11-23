@@ -144,15 +144,14 @@ void SpadeAnalysisPlugin::startComputation()
         // Clustering
         QString clusterSetName = _core->addData("Clusters", "ClusterSet");
         const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
-        ClustersPlugin* plugin = dynamic_cast<ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
+        ClustersPlugin* plugin = clusterSet->getData();
 
-        unsigned int numPoints = points->data.size() / points->numDimensions;
-        for (int i = 0; i < _clusters.size(); i++)
+        for (auto c : _clusters)
         {
             IndexSet* cluster = (IndexSet*)points->createSet();
-            for (int j = 0; j < _clusters[i].size(); j++)
+            for (int j = 0; j < c.size(); j++)
             {
-                int idx = _clusters[i][j].second;
+                int idx = c[j].second;
                 cluster->indices.push_back(idx);
             }
             plugin->addCluster(cluster);
