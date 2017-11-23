@@ -7,7 +7,9 @@
 
 ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 :
-    _pointSizeSlider(Qt::Horizontal)
+    _pointSizeSlider(Qt::Horizontal),
+    _baseColor(hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255)),
+    _selectionColor(hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255))
 {
     setFixedHeight(100);
 
@@ -56,6 +58,16 @@ int ScatterplotSettings::getXDimension()
 int ScatterplotSettings::getYDimension()
 {
     return _yDimOptions.currentIndex();
+}
+
+hdps::Vector3f ScatterplotSettings::getBaseColor()
+{
+    return _baseColor;
+}
+
+hdps::Vector3f ScatterplotSettings::getSelectionColor()
+{
+    return _selectionColor;
 }
 
 QString ScatterplotSettings::currentData()

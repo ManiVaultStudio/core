@@ -131,7 +131,7 @@ void ScatterplotPlugin::updateData()
         unsigned int numPoints = points->getNumPoints();
 
         positions->resize(numPoints);
-        colors.resize(numPoints, hdps::Vector3f(0.5f, 0.5f, 0.5f));
+        colors.resize(numPoints, settings->getBaseColor());
 
         for (int i = 0; i < numPoints; i++)
         {
@@ -143,13 +143,13 @@ void ScatterplotPlugin::updateData()
 
         for (unsigned int index : selection->indices)
         {
-            colors[index] = hdps::Vector3f(1.0f, 0.5f, 1.0f);
+            colors[index] = settings->getSelectionColor();
         }
     }
     else {
         unsigned int numPoints = selection->indices.size();
         positions->resize(numPoints);
-        colors.resize(numPoints, hdps::Vector3f(0.5f, 0.5f, 0.5f));
+        colors.resize(numPoints, settings->getBaseColor());
 
         for (unsigned int index : dataSet->indices) {
             (*positions)[index] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]) / maxLength;
@@ -161,7 +161,7 @@ void ScatterplotPlugin::updateData()
                 }
             }
             if (selected) {
-                colors[index] = hdps::Vector3f(1.0f, 0.5f, 1.0f);
+                colors[index] = settings->getSelectionColor();
             }
             else {
                 if (nDim >= 5) {

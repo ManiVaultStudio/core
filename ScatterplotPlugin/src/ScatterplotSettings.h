@@ -1,6 +1,8 @@
 #ifndef SCATTERPLOT_SETTINGS_H
 #define SCATTERPLOT_SETTINGS_H
 
+#include "graphics/Vector3f.h"
+
 #include <QWidget>
 #include <QComboBox>
 #include <QSlider>
@@ -21,6 +23,8 @@ public:
 
     int getXDimension();
     int getYDimension();
+    hdps::Vector3f getBaseColor();
+    hdps::Vector3f getSelectionColor();
     QString currentData();
 
     void initDimOptions(const unsigned int nDim);
@@ -34,6 +38,9 @@ private:
 
     QComboBox _xDimOptions;
     QComboBox _yDimOptions;
+
+    hdps::Vector3f _baseColor;
+    hdps::Vector3f _selectionColor;
 };
 
 #endif // SCATTERPLOT_SETTINGS_H
