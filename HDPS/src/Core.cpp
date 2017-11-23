@@ -93,7 +93,7 @@ const QString Core::addData(const QString kind, const QString name)
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    const plugin::DataTypePlugin* dataType = dynamic_cast<plugin::DataTypePlugin*>(requestPlugin(pluginName));
+    const plugin::DataTypePlugin* dataType = requestPlugin(pluginName);
 
     // Create an initial full set and an empty selection belonging to the raw data
     Set* fullSet = dataType->createSet();
