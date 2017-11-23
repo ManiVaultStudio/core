@@ -216,6 +216,11 @@ void ScatterplotWidget::paintGL()
     qDebug() << "Rendering scatterplot";
     glClear(GL_COLOR_BUFFER_BIT);
 
+    int w = _windowSize.width();
+    int h = _windowSize.height();
+    int size = w < h ? w : h;
+    glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
+
     Vector2f topLeft = _selection.topLeft();
     Vector2f bottomRight = _selection.bottomRight();
 
