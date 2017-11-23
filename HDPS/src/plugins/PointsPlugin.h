@@ -40,8 +40,13 @@ public:
 class IndexSet : public hdps::Set
 {
 public:
-    IndexSet(QString dataName) : Set(dataName) { }
+    IndexSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
     ~IndexSet() { }
+    
+    PointsPlugin* getData() const
+    {
+        return dynamic_cast<PointsPlugin*>(_core->requestPlugin(getDataName()));
+    }
 
     Set* copy() const override;
 

@@ -42,8 +42,13 @@ struct Cluster {
 class ClusterSet : public hdps::Set
 {
 public:
-    ClusterSet(QString dataName) : Set(dataName) { }
+    ClusterSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
     ~ClusterSet() { }
+
+    ClustersPlugin* getData() const
+    {
+        return dynamic_cast<ClustersPlugin*>(_core->requestPlugin(getDataName()));
+    }
 
     Set* copy() const override;
 
