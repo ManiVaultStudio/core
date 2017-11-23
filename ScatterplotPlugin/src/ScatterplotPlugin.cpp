@@ -74,7 +74,7 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(dataSet->getDataName()));
 
-    int nDim = points->numDimensions;
+    int nDim = points->getNumDimensions();
 
     settings->initDimOptions(nDim);
 
@@ -110,13 +110,13 @@ void ScatterplotPlugin::updateData()
 {
     qDebug() << "UPDATING";
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
-    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(dataSet->getDataName()));
+    const PointsPlugin* points = dataSet->getData();
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
     
     std::vector<hdps::Vector2f>* positions = new std::vector<hdps::Vector2f>();
     std::vector<hdps::Vector3f> colors;
 
-    int nDim = points->numDimensions;
+    int nDim = points->getNumDimensions();
 
     int xIndex = settings->getXDimension();
     int yIndex = settings->getYDimension();
@@ -128,7 +128,7 @@ void ScatterplotPlugin::updateData()
     float maxLength = getMaxLength(&points->data, nDim);
 
     if (dataSet->isFull()) {
-        unsigned int numPoints = points->data.size() / nDim;
+        unsigned int numPoints = points->getNumPoints();
 
         positions->resize(numPoints);
         colors.resize(numPoints, hdps::Vector3f(0.5f, 0.5f, 0.5f));
