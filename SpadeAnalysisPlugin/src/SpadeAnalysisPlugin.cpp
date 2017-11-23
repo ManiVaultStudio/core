@@ -97,9 +97,8 @@ void SpadeAnalysisPlugin::startComputation()
 
     initializeSpade();
 
-    const hdps::Set* set = _core->requestData(setName);
-    const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
-    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
+    const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(setName));
+    const PointsPlugin* points = set->getData();
 
     _baseIsDirty = _baseIsDirty || _markersDirty;
 
@@ -177,8 +176,8 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
 
     std::cout << "\n	File " << "FILENAME" << " (" << NO_FILE + 1 << " of " << NO_FILE+1 << ").\n	";
 
-    int numDimensions = points.numDimensions;
-    int numSamples = points.data.size() / numDimensions;
+    int numDimensions = points.getNumDimensions();
+    int numSamples = points.getNumPoints();
 
     for (int i = 0; i < numSamples; i++)
     {
@@ -236,7 +235,7 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
 
     std::cout << "	Computing median minimum distance ..\n";
 
-    int numDimensions = points.numDimensions;
+    int numDimensions = points.getNumDimensions();
     int numSamples = points.getNumPoints();
 
     // How many samples to take for our median calculation, either the value of the parameter, of the number of points if its lower
@@ -320,8 +319,8 @@ bool SpadeAnalysisPlugin::computeLocalDensities(const PointsPlugin& points)
 
     qDebug() << "	Computing local densities ";
 
-    int numDimensions = points.numDimensions;
-    int numSamples = points.data.size() / numDimensions;
+    int numDimensions = points.getNumDimensions();
+    int numSamples = points.getNumPoints();
 
     _localDensity[NO_FILE].resize(numSamples);
     std::fill(_localDensity[NO_FILE].begin(), _localDensity[NO_FILE].end(), 0);
@@ -362,8 +361,8 @@ bool SpadeAnalysisPlugin::downsample(const PointsPlugin& points)
 {
     if (!_baseIsDirty && !_downsampledDataIsDirty) return false;
 
-    int numDimensions = points.numDimensions;
-    int numSamples = points.data.size() / numDimensions;
+    int numDimensions = points.getNumDimensions();
+    int numSamples = points.getNumPoints();
 
     assert(_localDensitySorted[fileIndex].size() == numSamples);
 
@@ -461,7 +460,7 @@ bool SpadeAnalysisPlugin::clusterDownsampledData(const PointsPlugin& points)
 
     for (int f = 0; f < NO_FILE + 1; f++)
     {
-        int numDimensions = points.numDimensions;
+        int numDimensions = points.getNumDimensions();
 
         int numActiveSamples = static_cast<int>(_selectedSamples[f].size());
         int numActiveVariables = static_cast<int>(_selectedMarkers.size());
@@ -564,7 +563,7 @@ void SpadeAnalysisPlugin::computeMedianClusterExpression(const PointsPlugin& poi
 {
     std::cout << "\nComputing median cluster expression ..";
 
-    int numDimensions = points.numDimensions;
+    int numDimensions = points.getNumDimensions();
     int numActiveVariables = static_cast<int>(_selectedMarkers.size());
     _medianClusterExpressions.resize(_clusters.size());
 
