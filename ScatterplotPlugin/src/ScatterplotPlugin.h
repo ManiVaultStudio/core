@@ -41,7 +41,7 @@ public:
     virtual void onSelection(const std::vector<unsigned int> selection) const;
 protected slots:
     void dataSetPicked(const QString& name);
-    void pointSizeChanged(const unsigned int size);
+    void pointSizeChanged(const int size);
     void subsetCreated();
 
     void xDimPicked(int index);

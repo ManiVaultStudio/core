@@ -81,7 +81,7 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     updateData();
 }
 
-void ScatterplotPlugin::pointSizeChanged(const unsigned int size)
+void ScatterplotPlugin::pointSizeChanged(const int size)
 {
     _pointSize = size;
     widget->setPointSize(size);
