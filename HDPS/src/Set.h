@@ -1,6 +1,8 @@
 #ifndef HDPS_SET_H
 #define HDPS_SET_H
 
+#include <CoreInterface.h>
+
 #include <QString>
 #include <QVector>
 
@@ -10,7 +12,7 @@ namespace hdps
 class Set
 {
 public:
-    Set(QString dataName) : _dataName(dataName), _all(false) {}
+    Set(CoreInterface* core, QString dataName) : _core(core), _dataName(dataName), _all(false) {}
     virtual ~Set() {}
 
     virtual Set* copy() const = 0;
@@ -39,6 +41,9 @@ public:
     {
         _all = true;
     }
+
+protected:
+    CoreInterface* _core;
 private:
     QString _name;
     QString _dataName;
