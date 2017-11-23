@@ -64,8 +64,7 @@ void HeatMapPlugin::dataAdded(const QString name)
 
         const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(cluster->getDataName()));
 
-        // FIXME remove -1 from iteration condition, we assume the last element is the clusterID here
-        for (int d = 0; d < points->numDimensions - 1; d++)
+        for (int d = 0; d < points->numDimensions; d++)
         {
             // Mean calculation
             float mean = 0;
