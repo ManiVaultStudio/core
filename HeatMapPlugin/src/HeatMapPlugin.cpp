@@ -20,7 +20,6 @@ void HeatMapPlugin::init()
 {
     heatmap = new HeatMapWidget();
     heatmap->setPage(":/heatmap/heatmap.html", "qrc:/heatmap/");
-    heatmap->addSelectionListener(this);
 
     addWidget(heatmap);
 
@@ -31,8 +30,69 @@ void HeatMapPlugin::dataAdded(const QString name)
 {
     heatmap->addDataOption(name);
 
+    updateData();
+}
+
+void HeatMapPlugin::dataChanged(const QString name)
+{
+    
+}
+
+void HeatMapPlugin::dataRemoved(const QString name)
+{
+    
+}
+
+void HeatMapPlugin::selectionChanged(const QString dataName)
+{
+
+}
+
+QStringList HeatMapPlugin::supportedDataKinds()
+{
+    QStringList supportedKinds;
+    supportedKinds << "Clusters";
+    return supportedKinds;
+}
+
+void HeatMapPlugin::dataSetPicked(const QString& name)
+{
+    
+}
+
+void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
+{
+    qDebug() << "CLUSTER SELECTION";
+    qDebug() << selectedClusters;
+    ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(heatmap->_dataOptions.currentText()));
+    if (!clusterSet) return;
+
+    const ClustersPlugin* clusterPlugin = clusterSet->getData();
+
+    IndexSet* selection = nullptr;
+
+    int numClusters = clusterPlugin->clusters.size();
+    for (int i = 0; i < numClusters; i++)
+    {
+        IndexSet* cluster = clusterPlugin->clusters[i];
+        if (!selection) {
+            selection = dynamic_cast<IndexSet*>(_core->requestSelection(cluster->getDataName()));
+            selection->indices.clear();
+        }
+        
+        if (selectedClusters[i]) {
+            selection->indices.insert(selection->indices.end(), cluster->indices.begin(), cluster->indices.end());
+            _core->notifySelectionChanged(selection->getDataName());
+        }
+    }
+}
+
+void HeatMapPlugin::updateData()
+{
+    QString currentData = heatmap->getCurrentData();
+
     qDebug() << "Attempting cast to ClusterSet";
-    ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(name));
+    ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(currentData));
 
     if (!clusterSet) return;
     qDebug() << "Requesting plugin";
@@ -90,65 +150,6 @@ void HeatMapPlugin::dataAdded(const QString name)
     qDebug() << "Done calculating data";
 
     heatmap->setData(clusters, numDimensions);
-}
-
-void HeatMapPlugin::dataChanged(const QString name)
-{
-
-}
-
-void HeatMapPlugin::dataRemoved(const QString name)
-{
-    
-}
-
-void HeatMapPlugin::selectionChanged(const QString dataName)
-{
-
-}
-
-QStringList HeatMapPlugin::supportedDataKinds()
-{
-    QStringList supportedKinds;
-    supportedKinds << "Clusters";
-    return supportedKinds;
-}
-
-void HeatMapPlugin::dataSetPicked(const QString& name)
-{
-
-}
-
-void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
-{
-    qDebug() << "CLUSTER SELECTION";
-    qDebug() << selectedClusters;
-    ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(heatmap->_dataOptions.currentText()));
-    if (!clusterSet) return;
-
-    const ClustersPlugin* clusterPlugin = clusterSet->getData();
-
-    IndexSet* selection = nullptr;
-
-    int numClusters = clusterPlugin->clusters.size();
-    for (int i = 0; i < numClusters; i++)
-    {
-        IndexSet* cluster = clusterPlugin->clusters[i];
-        if (!selection) {
-            selection = dynamic_cast<IndexSet*>(_core->requestSelection(cluster->getDataName()));
-            selection->indices.clear();
-        }
-        
-        if (selectedClusters[i]) {
-            selection->indices.insert(selection->indices.end(), cluster->indices.begin(), cluster->indices.end());
-            _core->notifySelectionChanged(selection->getDataName());
-        }
-    }
-}
-
-void HeatMapPlugin::updateData()
-{
-
 }
 
 void HeatMapPlugin::onSelection(const std::vector<unsigned int> selection) const
