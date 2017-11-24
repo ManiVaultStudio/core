@@ -20,10 +20,8 @@ public:
     ~HeatMapWidget();
 
     void addDataOption(const QString option);
+    QString getCurrentData() const;
     void setData(const std::vector<Cluster>& data, const int numDimensions);
-    //void setData()
-
-    void addSelectionListener(const hdps::plugin::SelectionListener* listener);
 
     QComboBox _dataOptions;
 protected:
@@ -34,16 +32,6 @@ protected:
     void onSelection(QRectF selection);
     void cleanup();
 
-private:
-    
-
-    unsigned int _numPoints = 0;
-    const std::vector<float>* _positions;
-
-    QSize _windowSize;
-
-    std::vector<const hdps::plugin::SelectionListener*> _selectionListeners;
-
 signals:
     void clusterSelectionChanged(QList<int> selectedClusters);
 private slots:
@@ -51,7 +39,7 @@ private slots:
     virtual void webViewLoaded(bool ok) override;
 
 public slots:
-    //void js_selectData(QString text);
+    void js_selectData(QString text);
     void js_selectionUpdated(QList<int> selectedClusters);
     void js_highlightUpdated(int highlightId);
 signals:

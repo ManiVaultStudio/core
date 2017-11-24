@@ -23,6 +23,12 @@ HeatMapWidget::~HeatMapWidget()
 void HeatMapWidget::addDataOption(const QString option)
 {
     _dataOptions.addItem(option);
+    qt_addAvailableData(option);
+}
+
+QString HeatMapWidget::getCurrentData() const
+{
+    return _dataOptions.currentText();
 }
 
 void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numDimensions)
@@ -68,17 +74,9 @@ void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numD
 
     _jsonObject = "{\n" + nodes + names + "\n}";
 
-
-    qt_addAvailableData(QString("Density Clusters - A-tSNE Analysis"));
-
     qDebug() << _jsonObject.c_str();
 
     qt_setData(QString(_jsonObject.c_str()));
-}
-
-void HeatMapWidget::addSelectionListener(const hdps::plugin::SelectionListener* listener)
-{
-
 }
 
 void HeatMapWidget::mousePressEvent(QMouseEvent *event)
@@ -115,6 +113,13 @@ void HeatMapWidget::connectJs()
 void HeatMapWidget::webViewLoaded(bool ok)
 {
     qDebug() << "HEATMAP LOADED!" << ok;
+}
+
+void HeatMapWidget::js_selectData(QString name)
+{
+    qDebug() << "SELECTED SOME DATA: " << name;
+    int index = _dataOptions.findText(name);
+    _dataOptions.setCurrentIndex(index);
 }
 
 void HeatMapWidget::js_highlightUpdated(int highlightId)
