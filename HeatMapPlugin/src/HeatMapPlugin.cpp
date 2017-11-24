@@ -36,7 +36,7 @@ void HeatMapPlugin::dataAdded(const QString name)
 
     if (!clusterSet) return;
     qDebug() << "Requesting plugin";
-    const ClustersPlugin* clusterPlugin = dynamic_cast<const ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
+    const ClustersPlugin* clusterPlugin = clusterSet->getData();
 
     qDebug() << "Calculating data";
 
@@ -48,7 +48,7 @@ void HeatMapPlugin::dataAdded(const QString name)
     qDebug() << "Initialize clusters" << numClusters;
     // For every cluster initialize the median, mean, and stddev vectors with the number of dimensions
     for (int i = 0; i < numClusters; i++) {
-        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(clusterPlugin->clusters[i]->getDataName()));
+        const PointsPlugin* points = clusterPlugin->clusters[i]->getData();
         if (!points) { qDebug() << "Failed to cast clusters data to PointsPlugin in HeatMapPlugin"; return; }
 
         clusters[i]._median.resize(points->numDimensions);
@@ -62,7 +62,7 @@ void HeatMapPlugin::dataAdded(const QString name)
     {
         IndexSet* cluster = clusterPlugin->clusters[i];
 
-        const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(cluster->getDataName()));
+        const PointsPlugin* points = cluster->getData();
 
         for (int d = 0; d < points->numDimensions; d++)
         {
@@ -126,7 +126,7 @@ void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
     ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(heatmap->_dataOptions.currentText()));
     if (!clusterSet) return;
 
-    const ClustersPlugin* clusterPlugin = dynamic_cast<const ClustersPlugin*>(_core->requestPlugin(clusterSet->getDataName()));
+    const ClustersPlugin* clusterPlugin = clusterSet->getData();
 
     IndexSet* selection = nullptr;
 
