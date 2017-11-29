@@ -8,8 +8,8 @@
 ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 :
     _pointSizeSlider(Qt::Horizontal),
-    _baseColor(hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255)),
-    _selectionColor(hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255))
+    _baseColor(DEFAULT_BASE_COLOR),
+    _selectionColor(DEFAULT_SELECTION_COLOR)
 {
     setFixedHeight(100);
 
@@ -22,7 +22,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 
     QLabel* pointSizeLabel = new QLabel("Point Size:");
     settingsLayout->addWidget(pointSizeLabel, 1, 0);
-    _pointSizeSlider.setRange(1, 20);
+    _pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
     _pointSizeSlider.setValue(plugin->pointSize());
     settingsLayout->addWidget(&_pointSizeSlider, 1, 1, 1, 2);
     settingsLayout->addWidget(&_subsetButton, 0, 1);
