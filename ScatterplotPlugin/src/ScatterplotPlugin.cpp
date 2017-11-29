@@ -127,18 +127,17 @@ void ScatterplotPlugin::updateData()
     // Calculate data bounds
     float maxLength = getMaxLength(&points->data, nDim);
 
-    if (dataSet->isFull()) {
-        unsigned int numPoints = points->getNumPoints();
+    // Determine number of points depending on if its a full dataset or a subset
+    unsigned int numPoints = dataSet->isFull() ? points->getNumPoints() : selection->indices.size();
 
-        positions->resize(numPoints);
-        colors.resize(numPoints, settings->getBaseColor());
+    positions->resize(numPoints);
+    colors.resize(numPoints, settings->getBaseColor());
 
+    if (dataSet->isFull())
+    {
         for (int i = 0; i < numPoints; i++)
         {
-            (*positions)[i] = hdps::Vector2f(points->data[i * nDim + xIndex] / maxLength, points->data[i * nDim + yIndex] / maxLength);
-            if (nDim >= 5) {
-                colors[i] = hdps::Vector3f(points->data[i * nDim + 2], points->data[i * nDim + 3], points->data[i * nDim + 4]);
-            }
+            (*positions)[i] = hdps::Vector2f(points->data[i * nDim + xIndex], points->data[i * nDim + yIndex]) / maxLength;
         }
 
         for (unsigned int index : selection->indices)
@@ -146,30 +145,23 @@ void ScatterplotPlugin::updateData()
             colors[index] = settings->getSelectionColor();
         }
     }
-    else {
-        unsigned int numPoints = selection->indices.size();
-        positions->resize(numPoints);
-        colors.resize(numPoints, settings->getBaseColor());
-
-        for (unsigned int index : dataSet->indices) {
+    else
+    {
+        for (unsigned int index : dataSet->indices)
+        {
             (*positions)[index] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]) / maxLength;
 
             bool selected = false;
-            for (unsigned int selectionIndex : selection->indices) {
+            for (unsigned int selectionIndex : selection->indices)
+            {
                 if (index == selectionIndex) {
-                    selected = true;
-                }
-            }
-            if (selected) {
-                colors[index] = settings->getSelectionColor();
-            }
-            else {
-                if (nDim >= 5) {
-                    colors[index] = hdps::Vector3f(points->data[index * nDim + 2], points->data[index * nDim + 3], points->data[index * nDim + 4]);
+                    colors[index] = settings->getSelectionColor();
+                    break;
                 }
             }
         }
     }
+
     qDebug() << "Setting positions";
     widget->setData(positions);
     qDebug() << "Setting colors";
