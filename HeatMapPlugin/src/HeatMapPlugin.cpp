@@ -30,13 +30,12 @@ void HeatMapPlugin::init()
 void HeatMapPlugin::dataAdded(const QString name)
 {
     heatmap->addDataOption(name);
-
-    updateData();
+    qDebug() << "Heatmap Data added";
 }
 
 void HeatMapPlugin::dataChanged(const QString name)
 {
-    
+    updateData();
 }
 
 void HeatMapPlugin::dataRemoved(const QString name)
@@ -58,7 +57,8 @@ QStringList HeatMapPlugin::supportedDataKinds()
 
 void HeatMapPlugin::dataSetPicked(const QString& name)
 {
-    
+    qDebug() << "DATA PICKED IN HEATMAP";
+    updateData();
 }
 
 void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
@@ -92,6 +92,7 @@ void HeatMapPlugin::updateData()
 {
     QString currentData = heatmap->getCurrentData();
 
+    qDebug() << "Working on data: " << currentData;
     qDebug() << "Attempting cast to ClusterSet";
     ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(currentData));
 
