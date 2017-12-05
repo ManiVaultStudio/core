@@ -8,6 +8,7 @@
 
 const char *plotVertexSource = GLSL(330,
     uniform float pointSize;
+    uniform vec3 selectionColor;
 
     uniform bool selecting;
     uniform vec2 start;
@@ -31,7 +32,7 @@ const char *plotVertexSource = GLSL(330,
 
         if (selecting && inRect(position, start, end))
         {
-            pass_color = vec3(1, 0.5, 0);
+            pass_color = selectionColor;
         }
 
         pass_texCoords = vertex;
@@ -121,6 +122,12 @@ void ScatterplotWidget::setColors(const std::vector<Vector3f>& colors)
 void ScatterplotWidget::setPointSize(const float size)
 {
     _pointSize = size;
+    update();
+}
+
+void ScatterplotWidget::setSelectionColor(const Vector3f selectionColor)
+{
+    _selectionColor = selectionColor;
     update();
 }
 
@@ -230,6 +237,7 @@ void ScatterplotWidget::paintGL()
         case Absolute: _shader->setUniformValue("pointSize", _pointSize / _windowSize.width()); break;
     }
 
+    _shader->setUniformValue("selectionColor", _selectionColor.x, _selectionColor.y, _selectionColor.z);
     _shader->setUniformValue("alpha", _alpha);
     _shader->setUniformValue("selecting", _selecting);
     _shader->setUniformValue("start", topLeft.x, topLeft.y);
@@ -238,6 +246,8 @@ void ScatterplotWidget::paintGL()
 
     if (_selecting)
     {
+        glViewport(0, 0, w, h);
+
         // Selection
         _selectionShader->bind();
         _selectionShader->setUniformValue("start", topLeft.x, topLeft.y);
@@ -282,6 +292,7 @@ void ScatterplotWidget::onSelection(Selection selection)
     for (unsigned int i = 0; i < _numPoints; i++)
     {
         Vector2f point = (*_positions)[i];
+        point.x *= _windowSize.width() / _windowSize.height();
 
         if (selection.contains(point))
             indices.push_back(i);
@@ -303,9 +314,21 @@ void ScatterplotWidget::cleanup()
 
 Vector2f ScatterplotWidget::toClipCoordinates(Vector2f windowCoordinates) const
 {
-    windowCoordinates /= Vector2f(_windowSize.width(), _windowSize.height());
+    int w = _windowSize.width();
+    int h = _windowSize.height();
+    int size = w < h ? w : h;
+    float wAspect = (float) w / size;
+    float hAspect = (float) h / size;
+
+    windowCoordinates /= Vector2f(w, h);
     windowCoordinates.y = 1 - windowCoordinates.y;
-    return windowCoordinates * 2 - 1;
+    //return windowCoordinates * 2 - 1;
+    /////
+
+    windowCoordinates = windowCoordinates * 2 - 1;
+    windowCoordinates *= Vector2f(wAspect, hAspect);
+    windowCoordinates -= Vector2f((wAspect - 1) / 2, (hAspect - 1) / 2);
+    return windowCoordinates;
 }
 
 } // namespace gui

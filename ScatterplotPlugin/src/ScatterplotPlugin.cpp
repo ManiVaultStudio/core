@@ -22,12 +22,13 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
+    settings = new ScatterplotSettings(this);
+
     widget = new hdps::gui::ScatterplotWidget();
     widget->setPointSize(10);
+    widget->setSelectionColor(settings->getSelectionColor());
     widget->setAlpha(0.5f);
     widget->addSelectionListener(this);
-
-    settings = new ScatterplotSettings(this);
 
     addWidget(widget);
     addWidget(settings);
