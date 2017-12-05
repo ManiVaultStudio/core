@@ -1,6 +1,6 @@
 #include "WebWidget.h"
 
-#include "util/FileUtil.h"
+#include "../util/FileUtil.h"
 
 #include <QWebView>
 #include <QWebFrame>
