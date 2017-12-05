@@ -22,13 +22,12 @@ HeatMapWidget::~HeatMapWidget()
 
 void HeatMapWidget::addDataOption(const QString option)
 {
-    _dataOptions.addItem(option);
     qt_addAvailableData(option);
 }
 
 QString HeatMapWidget::getCurrentData() const
 {
-    return _dataOptions.currentText();
+    return _currentData;
 }
 
 void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numDimensions)
@@ -117,9 +116,9 @@ void HeatMapWidget::webViewLoaded(bool ok)
 
 void HeatMapWidget::js_selectData(QString name)
 {
-    qDebug() << "SELECTED SOME DATA: " << name;
-    int index = _dataOptions.findText(name);
-    _dataOptions.setCurrentIndex(index);
+    _currentData = name;
+
+    emit dataSetPicked(name);
 }
 
 void HeatMapWidget::js_highlightUpdated(int highlightId)

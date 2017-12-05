@@ -24,6 +24,7 @@ void HeatMapPlugin::init()
     addWidget(heatmap);
 
     connect(heatmap, SIGNAL(clusterSelectionChanged(QList<int>)), SLOT(clusterSelected(QList<int>)));
+    connect(heatmap, SIGNAL(dataSetPicked(QString)), SLOT(dataSetPicked(QString)));
 }
 
 void HeatMapPlugin::dataAdded(const QString name)
@@ -64,7 +65,7 @@ void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
 {
     qDebug() << "CLUSTER SELECTION";
     qDebug() << selectedClusters;
-    ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(heatmap->_dataOptions.currentText()));
+    ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(heatmap->getCurrentData()));
     if (!clusterSet) return;
 
     const ClustersPlugin* clusterPlugin = clusterSet->getData();

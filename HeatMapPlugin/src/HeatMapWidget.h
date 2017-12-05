@@ -23,7 +23,6 @@ public:
     QString getCurrentData() const;
     void setData(const std::vector<Cluster>& data, const int numDimensions);
 
-    QComboBox _dataOptions;
 protected:
     void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
@@ -34,6 +33,14 @@ protected:
 
 signals:
     void clusterSelectionChanged(QList<int> selectedClusters);
+    void dataSetPicked(QString name);
+
+    void qt_setData(QString data);
+    void qt_addAvailableData(QString name);
+    void qt_setSelection(QList<int> selection);
+    void qt_setHighlight(int highlightId);
+    void qt_setMarkerSelection(QList<int> selection);
+
 private slots:
     virtual void connectJs() override;
     virtual void webViewLoaded(bool ok) override;
@@ -42,12 +49,9 @@ public slots:
     void js_selectData(QString text);
     void js_selectionUpdated(QList<int> selectedClusters);
     void js_highlightUpdated(int highlightId);
-signals:
-    void qt_setData(QString data);
-    void qt_addAvailableData(QString name);
-    void qt_setSelection(QList<int> selection);
-    void qt_setHighlight(int highlightId);
-    void qt_setMarkerSelection(QList<int> selection);
+
+private:
+    QString _currentData;
 };
 
 #endif // HEAT_MAP_WIDGET_H
