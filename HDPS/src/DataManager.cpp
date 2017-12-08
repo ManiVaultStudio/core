@@ -25,7 +25,7 @@ Set* DataManager::getSet(QString name)
             return set.get();
         }
     }
-    qFatal((QString("Failed to find set with name: ") + name).toStdString().c_str());
+
     return nullptr;
 }
 

@@ -11,6 +11,8 @@
 #include "DataTypePlugin.h"
 #include "DataConsumer.h"
 
+#include <QMessageBox>
+
 namespace hdps
 {
 
@@ -139,13 +141,18 @@ plugin::DataTypePlugin* Core::requestPlugin(const QString name)
             return dynamic_cast<plugin::DataTypePlugin*>(plugin.get());
         }
     }
-    qFatal((QString("Failed to find plugin with name: ") + name).toStdString().c_str());
+
+    QMessageBox::critical(NULL, QString("HDPS"), QString("No plugin found with name: ").append(name), QMessageBox::Ok);
 }
 
 /** Request a dataset from the data manager by its name. */
 Set* Core::requestData(const QString name)
 {
     Set* set = _dataManager->getSet(name);
+
+    if (!set)
+        QMessageBox::critical(NULL, QString("HDPS"), QString("No dataset found with name: ").append(name), QMessageBox::Ok);
+
     return set;
 }
 
