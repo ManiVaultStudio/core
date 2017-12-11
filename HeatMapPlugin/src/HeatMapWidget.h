@@ -6,6 +6,7 @@
 #include "widgets/WebWidget.h"
 #include <QMouseEvent>
 #include <QComboBox>
+#include <QList>
 
 class QWebView;
 class QWebFrame;
@@ -52,6 +53,11 @@ public slots:
 
 private:
     QString _currentData;
+
+    /** Whether the web view has loaded and web-functions are ready to be called. */
+    bool loaded;
+    /** Temporary storage for added data options until webview is loaded */
+    QList<QString> dataOptionBuffer;
 };
 
 #endif // HEAT_MAP_WIDGET_H

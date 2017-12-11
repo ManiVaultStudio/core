@@ -11,6 +11,7 @@
 #include <cassert>
 
 HeatMapWidget::HeatMapWidget()
+    : loaded(false)
 {
     Q_INIT_RESOURCE(resources);
 }
@@ -22,7 +23,10 @@ HeatMapWidget::~HeatMapWidget()
 
 void HeatMapWidget::addDataOption(const QString option)
 {
-    qt_addAvailableData(option);
+    if (loaded)
+        qt_addAvailableData(option);
+    else
+        dataOptionBuffer.append(option);
 }
 
 QString HeatMapWidget::getCurrentData() const
@@ -111,6 +115,12 @@ void HeatMapWidget::connectJs()
 
 void HeatMapWidget::webViewLoaded(bool ok)
 {
+    loaded = true;
+
+    for (QString option : dataOptionBuffer) {
+        qt_addAvailableData(option);
+    }
+    
     qDebug() << "HEATMAP LOADED!" << ok;
 }
 
