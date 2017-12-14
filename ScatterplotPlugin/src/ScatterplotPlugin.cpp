@@ -129,7 +129,7 @@ void ScatterplotPlugin::updateData()
     float maxLength = getMaxLength(&points->data, nDim);
 
     // Determine number of points depending on if its a full dataset or a subset
-    unsigned int numPoints = dataSet->isFull() ? points->getNumPoints() : selection->indices.size();
+    unsigned int numPoints = dataSet->isFull() ? points->getNumPoints() : dataSet->indices.size();
 
     positions->resize(numPoints);
     colors.resize(numPoints, settings->getBaseColor());
@@ -148,15 +148,16 @@ void ScatterplotPlugin::updateData()
     }
     else
     {
-        for (unsigned int index : dataSet->indices)
+        for (int i = 0; i < numPoints; i++)
         {
-            (*positions)[index] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]) / maxLength;
+            int index = dataSet->indices[i];
+            (*positions)[i] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]) / maxLength;
 
             bool selected = false;
             for (unsigned int selectionIndex : selection->indices)
             {
                 if (index == selectionIndex) {
-                    colors[index] = settings->getSelectionColor();
+                    colors[i] = settings->getSelectionColor();
                     break;
                 }
             }
