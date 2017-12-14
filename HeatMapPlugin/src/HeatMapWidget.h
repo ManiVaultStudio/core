@@ -53,6 +53,7 @@ public slots:
 
 private:
     QString _currentData;
+    unsigned int _numClusters;
 
     /** Whether the web view has loaded and web-functions are ready to be called. */
     bool loaded;

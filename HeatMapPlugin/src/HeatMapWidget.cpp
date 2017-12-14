@@ -38,14 +38,14 @@ void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numD
 {
     std::string _jsonObject = "";
 
-    unsigned int numClusters = clusters.size();
+    _numClusters = clusters.size();
     qDebug() << "Setting data";
     //// Nodes
     std::string nodes = "\"nodes\":[\n";
-    for (int i = 0; i < numClusters; i++)
+    for (int i = 0; i < _numClusters; i++)
     {
         nodes = nodes + "{\"name\":\"" + "Cluster name " + std::to_string(i) + "\", ";
-        nodes = nodes + "\"size\":" + std::to_string(numClusters) + ", ";
+        nodes = nodes + "\"size\":" + std::to_string(_numClusters) + ", ";
         nodes = nodes + "\"expression\":[";
 
         for (int j = 0; j < numDimensions; j++)
@@ -61,7 +61,7 @@ void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numD
 
             if (j < numDimensions - 1) nodes = nodes + ",";
         }
-        if (i < numClusters - 1) nodes = nodes + "]},\n";
+        if (i < _numClusters - 1) nodes = nodes + "]},\n";
         else nodes = nodes + "]}\n]";
     }
 
@@ -84,22 +84,22 @@ void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numD
 
 void HeatMapWidget::mousePressEvent(QMouseEvent *event)
 {
-
+    // UNUSED
 }
 
 void HeatMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
-
+    // UNUSED
 }
 
 void HeatMapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-
+    // UNUSED
 }
 
 void HeatMapWidget::onSelection(QRectF selection)
 {
-
+    // UNUSED
 }
 
 void HeatMapWidget::cleanup()
@@ -133,8 +133,15 @@ void HeatMapWidget::js_selectData(QString name)
 
 void HeatMapWidget::js_highlightUpdated(int highlightId)
 {
-    //if (!_data) return;
-    //_data->setHighlight(highlightId);
+    QList<int> selectedClusters;
+
+    for (int i = 0; i < _numClusters; i++) {
+        selectedClusters.append(i == highlightId ? 1 : 0);
+    }
+
+    selectedClusters.append(highlightId);
+
+    emit clusterSelectionChanged(selectedClusters);
 }
 
 void HeatMapWidget::js_selectionUpdated(QList<int> selectedClusters)
