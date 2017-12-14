@@ -77,6 +77,9 @@ QString ScatterplotSettings::currentData()
 
 void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 {
+    _xDimOptions.blockSignals(true);
+    _yDimOptions.blockSignals(true);
+
     _xDimOptions.clear();
     _yDimOptions.clear();
     for (unsigned int i = 0; i < nDim; i++)
@@ -90,6 +93,9 @@ void ScatterplotSettings::initDimOptions(const unsigned int nDim)
         _xDimOptions.setCurrentIndex(0);
         _yDimOptions.setCurrentIndex(1);
     }
+
+    _xDimOptions.blockSignals(false);
+    _yDimOptions.blockSignals(false);
 }
 
 void ScatterplotSettings::addDataOption(const QString option)
