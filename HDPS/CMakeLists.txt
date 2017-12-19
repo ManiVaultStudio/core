@@ -67,6 +67,7 @@ set( GRAPHICS_HEADERS
     src/graphics/BufferObject.h
     src/graphics/Vector2f.h
     src/graphics/Vector3f.h
+    src/graphics/Matrix3f.h
     src/graphics/Selection.h
 )
 
