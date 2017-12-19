@@ -6,6 +6,7 @@
 #include "../graphics/BufferObject.h"
 #include "../graphics/Vector2f.h"
 #include "../graphics/Vector3f.h"
+#include "../graphics/Matrix3f.h"
 #include "../graphics/Selection.h"
 
 #include <QOpenGLWidget>
@@ -48,7 +49,9 @@ protected:
     void cleanup();
 
 private:
-    Vector2f toClipCoordinates(Vector2f windowCoordinates) const;
+    const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
+    Matrix3f toNormalisedCoordinates;
+    Matrix3f toIsotropicCoordinates;
 
     const float        DEFAULT_POINT_SIZE      = 15;
     const Vector3f     DEFAULT_SELECTION_COLOR = Vector3f(1.0f, 0.5f, 0.0f);

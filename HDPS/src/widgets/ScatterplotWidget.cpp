@@ -216,6 +216,16 @@ void ScatterplotWidget::resizeGL(int w, int h)
 {
     _windowSize.setWidth(w);
     _windowSize.setHeight(h);
+
+    int size = w < h ? w : h;
+
+    float wAspect = (float)w / size;
+    float hAspect = (float)h / size;
+    float wDiff = ((wAspect - 1) / 2.0);
+    float hDiff = ((hAspect - 1) / 2.0);
+
+    toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
+    toIsotropicCoordinates = Matrix3f(wAspect, 0, 0, hAspect, -wDiff, -hDiff);
 }
 
 void ScatterplotWidget::paintGL()
@@ -228,8 +238,8 @@ void ScatterplotWidget::paintGL()
     int size = w < h ? w : h;
     glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
 
-    Vector2f topLeft = _selection.topLeft();
-    Vector2f bottomRight = _selection.bottomRight();
+    Vector2f topLeft = toClipCoordinates * toIsotropicCoordinates * _selection.topLeft();
+    Vector2f bottomRight = toClipCoordinates * toIsotropicCoordinates * _selection.bottomRight();
 
     _shader->bind();
     switch (_scalingMode) {
@@ -246,6 +256,9 @@ void ScatterplotWidget::paintGL()
 
     if (_selecting)
     {
+        topLeft = toClipCoordinates * _selection.topLeft();
+        bottomRight = toClipCoordinates * _selection.bottomRight();
+
         glViewport(0, 0, w, h);
 
         // Selection
@@ -260,16 +273,16 @@ void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
 {
     _selecting = true;
 
-    Vector2f point(event->x(), event->y());
-    _selection.setStart(toClipCoordinates(point));
+    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
+    _selection.setStart(point);
 }
 
 void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (!_selecting) return;
 
-    Vector2f point(event->x(), event->y());
-    _selection.setEnd(toClipCoordinates(point));
+    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
+    _selection.setEnd(point);
 
     update();
 }
@@ -278,8 +291,8 @@ void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     _selecting = false;
 
-    Vector2f point(event->x(), event->y());
-    _selection.setEnd(toClipCoordinates(point));
+    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
+    _selection.setEnd(point);
 
     onSelection(_selection);
 }
@@ -310,25 +323,6 @@ void ScatterplotWidget::cleanup()
     glDeleteVertexArrays(1, &_vao);
     _positionBuffer.destroy();
     _colorBuffer.destroy();
-}
-
-Vector2f ScatterplotWidget::toClipCoordinates(Vector2f windowCoordinates) const
-{
-    int w = _windowSize.width();
-    int h = _windowSize.height();
-    int size = w < h ? w : h;
-    float wAspect = (float) w / size;
-    float hAspect = (float) h / size;
-
-    windowCoordinates /= Vector2f(w, h);
-    windowCoordinates.y = 1 - windowCoordinates.y;
-    //return windowCoordinates * 2 - 1;
-    /////
-
-    windowCoordinates = windowCoordinates * 2 - 1;
-    windowCoordinates *= Vector2f(wAspect, hAspect);
-    windowCoordinates -= Vector2f((wAspect - 1) / 2, (hAspect - 1) / 2);
-    return windowCoordinates;
 }
 
 } // namespace gui
