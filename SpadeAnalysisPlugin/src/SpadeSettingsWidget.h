@@ -20,7 +20,10 @@ class SpadeSettingsWidget : public SettingsWidget
 public:
     SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis);
 
-public:
+    void addDataOption(QString option);
+    QString getCurrentDataOption();
+
+private:
     QComboBox _dataOptions;
 
     QPushButton _startButton;

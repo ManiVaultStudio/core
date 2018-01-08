@@ -88,3 +88,13 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
     addWidget(advancedSettingsBox);
     addWidget(&_startButton);
 }
+
+void SpadeSettingsWidget::addDataOption(QString option)
+{
+    _dataOptions.addItem(option);
+}
+
+QString SpadeSettingsWidget::getCurrentDataOption()
+{
+    return _dataOptions.currentText();
+}

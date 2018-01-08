@@ -40,7 +40,7 @@ void SpadeAnalysisPlugin::init()
 
 void SpadeAnalysisPlugin::dataAdded(const QString name)
 {
-    _settings->_dataOptions.addItem(name);
+    _settings->addDataOption(name);
 }
 
 void SpadeAnalysisPlugin::dataChanged(const QString name)
@@ -108,7 +108,7 @@ void SpadeAnalysisPlugin::dataSetPicked(const QString& name)
 
 void SpadeAnalysisPlugin::startComputation()
 {
-    QString setName = _settings->_dataOptions.currentText();
+    QString setName = _settings->getCurrentDataOption();
 
     // Do nothing if we have no data set selected
     if (setName.isEmpty()) {
