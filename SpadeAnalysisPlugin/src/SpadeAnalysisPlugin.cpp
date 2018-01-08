@@ -71,6 +71,36 @@ SettingsWidget* const SpadeAnalysisPlugin::getSettings()
     return _settings.get();
 }
 
+void SpadeAnalysisPlugin::targetEventsChanged(double value)
+{
+    _maxRandomSampleSize = value;
+}
+
+void SpadeAnalysisPlugin::targetNodesChanged(int value)
+{
+    _targetNumberOfClusters = value;
+}
+
+void SpadeAnalysisPlugin::heuristicSamplesChanged(int value)
+{
+    _densityLimit = value;
+}
+
+void SpadeAnalysisPlugin::alphaChanged(double value)
+{
+    _alpha = value;
+}
+
+void SpadeAnalysisPlugin::targetDensityChanged(double value)
+{
+    _targetDensityPercentile = value;
+}
+
+void SpadeAnalysisPlugin::outlierDensityChanged(double value)
+{
+    _outlierDensityPercentile = value;
+}
+
 void SpadeAnalysisPlugin::dataSetPicked(const QString& name)
 {
 

@@ -61,6 +61,14 @@ public:
 public slots:
     void dataSetPicked(const QString& name);
 
+    void targetEventsChanged(double value);
+    void targetNodesChanged(int value);
+    void heuristicSamplesChanged(int value);
+    void alphaChanged(double value);
+    void targetDensityChanged(double value);
+    void outlierDensityChanged(double value);
+
+
     void startComputation();
 
 private:

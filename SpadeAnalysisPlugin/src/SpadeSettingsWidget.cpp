@@ -19,13 +19,12 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
     connect(&_dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
     connect(&_startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));
 
-    connect(&_targetEvents,     SIGNAL(valueChanged(double)), SLOT(targetEventsChanged(double)));
-    connect(&_targetNodes,      SIGNAL(valueChanged(int)),    SLOT(targetNodesChanged(int)));
-    connect(&_heuristicSamples, SIGNAL(valueChanged(int)), SLOT(heuristicSamplesChanged(int)));
-    connect(&_alpha,            SIGNAL(valueChanged(double)), SLOT(alphaChanged(double)));
-    connect(&_targetDensity,    SIGNAL(valueChanged(double)), SLOT(targetDensityChanged(double)));
-    connect(&_outlierDensity,   SIGNAL(valueChanged(double)), SLOT(outlierDensityChanged(double)));
-
+    connect(&_targetEvents,     SIGNAL(valueChanged(double)), analysis, SLOT(targetEventsChanged(double)));
+    connect(&_targetNodes,      SIGNAL(valueChanged(int)),    analysis, SLOT(targetNodesChanged(int)));
+    connect(&_heuristicSamples, SIGNAL(valueChanged(int)),    analysis, SLOT(heuristicSamplesChanged(int)));
+    connect(&_alpha,            SIGNAL(valueChanged(double)), analysis, SLOT(alphaChanged(double)));
+    connect(&_targetDensity,    SIGNAL(valueChanged(double)), analysis, SLOT(targetDensityChanged(double)));
+    connect(&_outlierDensity,   SIGNAL(valueChanged(double)), analysis, SLOT(outlierDensityChanged(double)));
 
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
     QGroupBox* advancedSettingsBox = new QGroupBox("Advanced Settings");
@@ -88,34 +87,4 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
     addWidget(settingsBox);
     addWidget(advancedSettingsBox);
     addWidget(&_startButton);
-}
-
-void SpadeSettingsWidget::targetEventsChanged(double value)
-{
-
-}
-
-void SpadeSettingsWidget::targetNodesChanged(int value)
-{
-
-}
-
-void SpadeSettingsWidget::heuristicSamplesChanged(int value)
-{
-
-}
-
-void SpadeSettingsWidget::alphaChanged(double value)
-{
-
-}
-
-void SpadeSettingsWidget::targetDensityChanged(double value)
-{
-
-}
-
-void SpadeSettingsWidget::outlierDensityChanged(double value)
-{
-
 }
