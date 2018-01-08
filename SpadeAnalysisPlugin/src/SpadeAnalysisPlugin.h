@@ -68,16 +68,14 @@ public slots:
     void targetDensityChanged(double value);
     void outlierDensityChanged(double value);
 
-
     void startComputation();
 
 private:
-    void initializeSpade();
-    bool computeMedianMinimumDistance(const PointsPlugin& points);
+    bool computeMedianMinimumDistance(const PointsPlugin& points, int maxRandomSampleSize, float alpha);
     bool computeLocalDensities(const PointsPlugin& points);
-    bool downsample(const PointsPlugin& points);
+    bool downsample(const PointsPlugin& points, float densityLimit, float targetDensityPercentile, float outlierDensityPercentile);
     bool clusterDownsampledData(const PointsPlugin& points);
-    bool extractClustersFromDendrogram(const PointsPlugin& points);
+    bool extractClustersFromDendrogram(const PointsPlugin& points, int targetClusters);
     bool computeMinimumSpanningTree();
     bool upsampleData(const PointsPlugin& points);
 

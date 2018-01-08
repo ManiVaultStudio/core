@@ -106,16 +106,6 @@ void SpadeAnalysisPlugin::dataSetPicked(const QString& name)
 
 }
 
-void SpadeAnalysisPlugin::initializeSpade() {
-    // Initialize the SPADE computation with the settings from the settings widget
-    _maxRandomSampleSize = _settings->_targetEvents.value();
-    _targetNumberOfClusters = _settings->_targetNodes.value();
-    _densityLimit = _settings->_heuristicSamples.value();
-    _alpha = _settings->_alpha.value();
-    _targetDensityPercentile = _settings->_targetDensity.value();
-    _outlierDensityPercentile = _settings->_outlierDensity.value();
-}
-
 void SpadeAnalysisPlugin::startComputation()
 {
     QString setName = _settings->_dataOptions.currentText();
@@ -125,8 +115,13 @@ void SpadeAnalysisPlugin::startComputation()
         return;
     }
 
-    initializeSpade();
-
+    // Initialize the SPADE computation with the settings from the settings widget
+    int maxRandomSampleSize = _maxRandomSampleSize;
+    int targetNumberOfClusters = _targetNumberOfClusters;
+    float densityLimit = _densityLimit;
+    float alpha = _alpha;
+    float targetDensityPercentile = _targetDensityPercentile;
+    float outlierDensityPercentile = _outlierDensityPercentile;
     const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(setName));
     const PointsPlugin* points = set->getData();
 
@@ -153,14 +148,14 @@ void SpadeAnalysisPlugin::startComputation()
     for (int f = 0; f < numFiles; f++)
     {
         std::cout << "\nProcessing File: " << f << " (File " << f + 1 << " of " << numFiles << ", containing " << points->data.size() / points->numDimensions << " data points)\n";
-        somethingChanged |= computeMedianMinimumDistance(*points);
+        somethingChanged |= computeMedianMinimumDistance(*points, maxRandomSampleSize, alpha);
         somethingChanged |= computeLocalDensities(*points);
 
-        somethingChanged |= downsample(*points);
+        somethingChanged |= downsample(*points, densityLimit, targetDensityPercentile, outlierDensityPercentile);
     }
     somethingChanged |= clusterDownsampledData(*points);
 
-    somethingChanged |= extractClustersFromDendrogram(*points);
+    somethingChanged |= extractClustersFromDendrogram(*points, targetNumberOfClusters);
     somethingChanged |= computeMinimumSpanningTree();
 
     for (int f = 0; f < numFiles; f++)
@@ -259,7 +254,7 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
 
 // For a random sample of cells computes distance to other cells in high-dim space,
 // calculates the minimum of these distances and returns the median of these minima.
-bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& points)
+bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& points, int maxRandomSampleSize, float alpha)
 {
     if (!_baseIsDirty) return false;
 
@@ -269,7 +264,7 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
     int numSamples = points.getNumPoints();
 
     // How many samples to take for our median calculation, either the value of the parameter, of the number of points if its lower
-    int randomSampleSize = std::min(_maxRandomSampleSize, numSamples);
+    int randomSampleSize = std::min(maxRandomSampleSize, numSamples);
 
     // select random samples
     qDebug() << "	Creating " << randomSampleSize << " random samples\n		";
@@ -333,7 +328,7 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
     // Take the median distance
     _medianDistance[NO_FILE] = nearestNeighborDistances[randomSampleSize / 2];
     // Scale the median distance by some factor
-    _scaledMedianDistance[NO_FILE] = _medianDistance[NO_FILE] * _alpha;
+    _scaledMedianDistance[NO_FILE] = _medianDistance[NO_FILE] * alpha;
 
     qDebug() << "done.\n";
     qDebug() << "		Median distance is " << _medianDistance[NO_FILE] << ". ";
@@ -387,7 +382,7 @@ bool SpadeAnalysisPlugin::computeLocalDensities(const PointsPlugin& points)
     return true;
 }
 
-bool SpadeAnalysisPlugin::downsample(const PointsPlugin& points)
+bool SpadeAnalysisPlugin::downsample(const PointsPlugin& points, float densityLimit, float targetDensityPercentile, float outlierDensityPercentile)
 {
     if (!_baseIsDirty && !_downsampledDataIsDirty) return false;
 
@@ -398,13 +393,13 @@ bool SpadeAnalysisPlugin::downsample(const PointsPlugin& points)
 
     float percentileToIndex = (numSamples - 1) / 100.0f;
 
-    int outlierDensity = _localDensitySorted[NO_FILE][(int)(percentileToIndex * _outlierDensityPercentile)];
-    int targetDensity = std::max(1, _localDensitySorted[NO_FILE][(int)(percentileToIndex * _targetDensityPercentile)]);
+    int outlierDensity = _localDensitySorted[NO_FILE][(int)(percentileToIndex * outlierDensityPercentile)];
+    int targetDensity = std::max(1, _localDensitySorted[NO_FILE][(int)(percentileToIndex * targetDensityPercentile)]);
 
     _selectedSamplesIdxs[NO_FILE].resize(numSamples);
 
     // If we want to use all points, don't downsample
-    if (_densityLimit > 99.9)
+    if (densityLimit > 99.9)
     {
         for (int i = 0; i < numSamples; i++)
         {
@@ -414,7 +409,7 @@ bool SpadeAnalysisPlugin::downsample(const PointsPlugin& points)
     else
     {
         // Target samples to reach after downsampling
-        int numTargetSamples = (int)(numSamples * (0.01f * _densityLimit));
+        int numTargetSamples = (int)(numSamples * (0.01f * densityLimit));
 
         // Find sampling within user defined limits
         int numSelectedSamples = numTargetSamples * 2;
@@ -533,14 +528,14 @@ bool SpadeAnalysisPlugin::clusterDownsampledData(const PointsPlugin& points)
     return true;
 }
 
-bool SpadeAnalysisPlugin::extractClustersFromDendrogram(const PointsPlugin& points)
+bool SpadeAnalysisPlugin::extractClustersFromDendrogram(const PointsPlugin& points, int targetClusters)
 {
     if (!_baseIsDirty && !_downsampledDataIsDirty && !_spanningTreeIsDirty) return false;
 
-    qDebug() << "	Targeting " << _targetNumberOfClusters << " clusters from Dendrogram .. ";
+    qDebug() << "	Targeting " << targetClusters << " clusters from Dendrogram .. ";
 
     std::vector<std::list<cPoint_t*> > clusterList;
-    compute_n_clusters(_targetNumberOfClusters, _dendrogram, clusterList);
+    compute_n_clusters(targetClusters, _dendrogram, clusterList);
 
     qDebug() << "done with " << clusterList.size() << " clusters.\n";
 
