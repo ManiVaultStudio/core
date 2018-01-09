@@ -94,10 +94,12 @@ void SpadeAnalysisPlugin::startComputation()
     float alpha = _settings->alpha();
     float targetDensityPercentile = _settings->targetDensityPercentile();
     float outlierDensityPercentile = _settings->outlierDensityPercentile();
+
     const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(setName));
     const PointsPlugin* points = set->getData();
 
-    _baseIsDirty = _baseIsDirty || _markersDirty;
+    // FIXME: _baseIsDirty seems to have no purpose, added || true to allow recomputation
+    _baseIsDirty = _baseIsDirty || _markersDirty || true;
 
     bool somethingChanged = false;
 
