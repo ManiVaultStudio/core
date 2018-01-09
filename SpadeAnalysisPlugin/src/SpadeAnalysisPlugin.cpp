@@ -90,11 +90,17 @@ void SpadeAnalysisPlugin::startComputation()
     // Initialize the SPADE computation with the settings from the settings widget
     const SpadeSettings spadeSettings = _settings->getSpadeSettings();
 
+    // Update flags
+    _baseIsDirty |= _markersDirty;
+    _baseIsDirty |= spadeSettings._maxRandomSampleSize != lastSettings._maxRandomSampleSize;
+    _baseIsDirty |= spadeSettings._alpha != lastSettings._alpha;
+    _downsampledDataIsDirty |= spadeSettings._densityLimit != lastSettings._densityLimit;
+    _downsampledDataIsDirty |= spadeSettings._targetDensityPercentile != lastSettings._targetDensityPercentile;
+    _downsampledDataIsDirty |= spadeSettings._outlierDensityPercentile != lastSettings._outlierDensityPercentile;
+    _spanningTreeIsDirty |= spadeSettings._targetNumClusters != lastSettings._targetNumClusters;
+
     const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(setName));
     const PointsPlugin* points = set->getData();
-
-    // FIXME: _baseIsDirty seems to have no purpose, added || true to allow recomputation
-    _baseIsDirty = _baseIsDirty || _markersDirty || true;
 
     bool somethingChanged = false;
 
@@ -156,6 +162,7 @@ void SpadeAnalysisPlugin::startComputation()
         std::cout << "No parameters changed, no update necessary.\n";
     }
 
+    lastSettings = spadeSettings;
     _markersDirty = false;
     _baseIsDirty = false;
     _downsampledDataIsDirty = false;
