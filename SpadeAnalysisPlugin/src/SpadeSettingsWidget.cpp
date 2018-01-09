@@ -12,13 +12,7 @@
 
 using namespace hdps::plugin;
 
-SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis) :
-    _maxRandomSampleSize(2000),
-    _alpha(3.0),
-    _targetDensityPercentile(3.0),
-    _outlierDensityPercentile(1.0),
-    _densityLimit(10.0),
-    _targetNumberOfClusters(50)
+SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
 {
     setFixedWidth(200);
 
@@ -103,34 +97,37 @@ void SpadeSettingsWidget::addDataOption(QString option)
 QString SpadeSettingsWidget::getCurrentDataOption()
 {
     return _dataOptions.currentText();
+const SpadeSettings& SpadeSettingsWidget::getSpadeSettings() const
+{
+    return spadeSettings;
 }
 
 void SpadeSettingsWidget::targetEventsChanged(double value)
 {
-    _maxRandomSampleSize = value;
+    spadeSettings._maxRandomSampleSize = value;
 }
 
 void SpadeSettingsWidget::targetNodesChanged(int value)
 {
-    _targetNumberOfClusters = value;
+    spadeSettings._targetNumClusters = value;
 }
 
 void SpadeSettingsWidget::heuristicSamplesChanged(int value)
 {
-    _densityLimit = value;
+    spadeSettings._densityLimit = value;
 }
 
 void SpadeSettingsWidget::alphaChanged(double value)
 {
-    _alpha = value;
+    spadeSettings._alpha = value;
 }
 
 void SpadeSettingsWidget::targetDensityChanged(double value)
 {
-    _targetDensityPercentile = value;
+    spadeSettings._targetDensityPercentile = value;
 }
 
 void SpadeSettingsWidget::outlierDensityChanged(double value)
 {
-    _outlierDensityPercentile = value;
+    spadeSettings._outlierDensityPercentile = value;
 }

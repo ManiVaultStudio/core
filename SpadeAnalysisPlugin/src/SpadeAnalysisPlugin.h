@@ -70,6 +70,7 @@ private:
     std::chrono::high_resolution_clock::time_point _timeCreated;
 
     // Selective Recomputation
+    SpadeSettings lastSettings;
     bool _baseIsDirty;
     bool _downsampledDataIsDirty;
     bool _spanningTreeIsDirty;

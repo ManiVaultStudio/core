@@ -88,12 +88,7 @@ void SpadeAnalysisPlugin::startComputation()
     }
 
     // Initialize the SPADE computation with the settings from the settings widget
-    int maxRandomSampleSize = _settings->maxRandomSampleSize();
-    int targetNumClusters = _settings->targetNumClusters();
-    float densityLimit = _settings->targetEvents();
-    float alpha = _settings->alpha();
-    float targetDensityPercentile = _settings->targetDensityPercentile();
-    float outlierDensityPercentile = _settings->outlierDensityPercentile();
+    const SpadeSettings spadeSettings = _settings->getSpadeSettings();
 
     const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(setName));
     const PointsPlugin* points = set->getData();
@@ -122,14 +117,14 @@ void SpadeAnalysisPlugin::startComputation()
     for (int f = 0; f < numFiles; f++)
     {
         std::cout << "\nProcessing File: " << f << " (File " << f + 1 << " of " << numFiles << ", containing " << points->data.size() / points->numDimensions << " data points)\n";
-        somethingChanged |= computeMedianMinimumDistance(*points, maxRandomSampleSize, alpha);
+        somethingChanged |= computeMedianMinimumDistance(*points, spadeSettings._maxRandomSampleSize, spadeSettings._alpha);
         somethingChanged |= computeLocalDensities(*points);
 
-        somethingChanged |= downsample(*points, densityLimit, targetDensityPercentile, outlierDensityPercentile);
+        somethingChanged |= downsample(*points, spadeSettings._densityLimit, spadeSettings._targetDensityPercentile, spadeSettings._outlierDensityPercentile);
     }
     somethingChanged |= clusterDownsampledData(*points);
 
-    somethingChanged |= extractClustersFromDendrogram(*points, targetNumClusters);
+    somethingChanged |= extractClustersFromDendrogram(*points, spadeSettings._targetNumClusters);
     somethingChanged |= computeMinimumSpanningTree();
 
     for (int f = 0; f < numFiles; f++)
