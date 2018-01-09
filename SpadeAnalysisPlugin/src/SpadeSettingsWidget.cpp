@@ -16,8 +16,8 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
 {
     setFixedWidth(200);
 
-    connect(&_dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
-    connect(&_startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));
+    connect(&ui_dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
+    connect(&ui_startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));
 
     connect(&ui_targetEvents,     SIGNAL(valueChanged(double)), SLOT(targetEventsChanged(double)));
     connect(&ui_targetNodes,      SIGNAL(valueChanged(int)),    SLOT(targetNodesChanged(int)));
@@ -41,23 +41,23 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
 
     ui_targetEvents.setToolTip("Target number of points to keep after downsampling in percent.\nThe number might not be reached depending on the outlier and target density parameters.");
     ui_targetEvents.setRange(0, 100.0);
-    ui_targetEvents.setValue(targetEvents());
+    ui_targetEvents.setValue(spadeSettings._densityLimit);
     ui_targetNodes.setToolTip("Target number of nodes in the SPADE tree.");
     ui_targetNodes.setRange(0, 99999);
-    ui_targetNodes.setValue(targetNumClusters());
+    ui_targetNodes.setValue(spadeSettings._targetNumClusters);
 
     ui_heuristicSamples.setToolTip("The number of random Points used to determine the median density.");
     ui_heuristicSamples.setRange(0, 999999);
-    ui_heuristicSamples.setValue(maxRandomSampleSize());
+    ui_heuristicSamples.setValue(spadeSettings._maxRandomSampleSize);
     ui_alpha.setToolTip("Scales the neighborhood size for the density computation for downsampling.");
-    ui_alpha.setValue(alpha());
+    ui_alpha.setValue(spadeSettings._alpha);
     ui_targetDensity.setToolTip("Percentile of the upper limit of the target density. Points with a density between the outlier density and the target density are considered rare, but not noise and kept.\n A value of 3.0 (and an outlier density of 1.0) means the cells in between the first and third percentile, ordered by density are considered rare and kept.\nPoints with a density above this value are kept only with a probability according to their density, the larger the density, the lower the probability.");
-    ui_targetDensity.setValue(targetDensityPercentile());
+    ui_targetDensity.setValue(spadeSettings._targetDensityPercentile);
     ui_outlierDensity.setToolTip("Percentile of the upper limit of the outlier density. Points with a density below this threshold are considered as noise.\nA value of 1.0 means the first percentile of the cells ordered by density is discarded. Use larger values if you expect more noise.");
-    ui_outlierDensity.setValue(outlierDensityPercentile());
+    ui_outlierDensity.setValue(spadeSettings._outlierDensityPercentile);
 
-    _startButton.setText("Cluster");
-    _startButton.setFixedSize(QSize(150, 50));
+    ui_startButton.setText("Cluster");
+    ui_startButton.setFixedSize(QSize(150, 50));
 
     QGridLayout *settingsLayout = new QGridLayout;
     settingsLayout->setAlignment(Qt::AlignTop);
@@ -83,20 +83,22 @@ SpadeSettingsWidget::SpadeSettingsWidget(const SpadeAnalysisPlugin* analysis)
     advancedSettingsLayout->setColumnStretch(1, 1);
     advancedSettingsBox->setLayout(advancedSettingsLayout);
 
-    addWidget(&_dataOptions);
+    addWidget(&ui_dataOptions);
     addWidget(settingsBox);
     addWidget(advancedSettingsBox);
-    addWidget(&_startButton);
+    addWidget(&ui_startButton);
 }
 
 void SpadeSettingsWidget::addDataOption(QString option)
 {
-    _dataOptions.addItem(option);
+    ui_dataOptions.addItem(option);
 }
 
 QString SpadeSettingsWidget::getCurrentDataOption()
 {
-    return _dataOptions.currentText();
+    return ui_dataOptions.currentText();
+}
+
 const SpadeSettings& SpadeSettingsWidget::getSpadeSettings() const
 {
     return spadeSettings;

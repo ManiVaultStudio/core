@@ -51,13 +51,12 @@ public:
 
 private:
     SpadeSettings spadeSettings;
-    QComboBox _dataOptions;
 
-    QPushButton _startButton;
+    QComboBox ui_dataOptions;
+    QPushButton ui_startButton;
 
     QDoubleSpinBox ui_targetEvents;
     QSpinBox ui_targetNodes;
-
     QSpinBox ui_heuristicSamples;
     QDoubleSpinBox ui_alpha;
     QDoubleSpinBox ui_targetDensity;
