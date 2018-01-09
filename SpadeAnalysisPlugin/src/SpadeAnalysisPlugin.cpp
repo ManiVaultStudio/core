@@ -71,35 +71,7 @@ SettingsWidget* const SpadeAnalysisPlugin::getSettings()
     return _settings.get();
 }
 
-void SpadeAnalysisPlugin::targetEventsChanged(double value)
-{
-    _maxRandomSampleSize = value;
-}
 
-void SpadeAnalysisPlugin::targetNodesChanged(int value)
-{
-    _targetNumberOfClusters = value;
-}
-
-void SpadeAnalysisPlugin::heuristicSamplesChanged(int value)
-{
-    _densityLimit = value;
-}
-
-void SpadeAnalysisPlugin::alphaChanged(double value)
-{
-    _alpha = value;
-}
-
-void SpadeAnalysisPlugin::targetDensityChanged(double value)
-{
-    _targetDensityPercentile = value;
-}
-
-void SpadeAnalysisPlugin::outlierDensityChanged(double value)
-{
-    _outlierDensityPercentile = value;
-}
 
 void SpadeAnalysisPlugin::dataSetPicked(const QString& name)
 {
@@ -116,12 +88,12 @@ void SpadeAnalysisPlugin::startComputation()
     }
 
     // Initialize the SPADE computation with the settings from the settings widget
-    int maxRandomSampleSize = _maxRandomSampleSize;
-    int targetNumberOfClusters = _targetNumberOfClusters;
-    float densityLimit = _densityLimit;
-    float alpha = _alpha;
-    float targetDensityPercentile = _targetDensityPercentile;
-    float outlierDensityPercentile = _outlierDensityPercentile;
+    int maxRandomSampleSize = _settings->maxRandomSampleSize();
+    int targetNumClusters = _settings->targetNumClusters();
+    float densityLimit = _settings->targetEvents();
+    float alpha = _settings->alpha();
+    float targetDensityPercentile = _settings->targetDensityPercentile();
+    float outlierDensityPercentile = _settings->outlierDensityPercentile();
     const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(setName));
     const PointsPlugin* points = set->getData();
 
@@ -155,7 +127,7 @@ void SpadeAnalysisPlugin::startComputation()
     }
     somethingChanged |= clusterDownsampledData(*points);
 
-    somethingChanged |= extractClustersFromDendrogram(*points, targetNumberOfClusters);
+    somethingChanged |= extractClustersFromDendrogram(*points, targetNumClusters);
     somethingChanged |= computeMinimumSpanningTree();
 
     for (int f = 0; f < numFiles; f++)

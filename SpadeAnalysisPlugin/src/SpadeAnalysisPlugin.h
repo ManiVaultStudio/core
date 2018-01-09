@@ -28,12 +28,6 @@ class SpadeAnalysisPlugin : public QObject, public AnalysisPlugin
 public:
     SpadeAnalysisPlugin() :
         AnalysisPlugin("SPADE Analysis"),
-        _maxRandomSampleSize(2000),
-        _alpha(3.0),
-        _targetDensityPercentile(3.0),
-        _outlierDensityPercentile(1.0),
-        _densityLimit(10.0),
-        _targetNumberOfClusters(50),
         _baseIsDirty(true),
         _downsampledDataIsDirty(true),
         _spanningTreeIsDirty(true),
@@ -44,13 +38,6 @@ public:
     
     void init();
 
-    float targetEvents() const { return _densityLimit; }
-    float targetNumClusters() const { return _targetNumberOfClusters; }
-    float maxRandomSampleSize() const { return _maxRandomSampleSize; }
-    float alpha() const { return _alpha; }
-    float targetDensityPercentile() const { return _targetDensityPercentile; }
-    float outlierDensityPercentile() const { return _outlierDensityPercentile; }
-
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
@@ -60,13 +47,6 @@ public:
     SettingsWidget* const getSettings();
 public slots:
     void dataSetPicked(const QString& name);
-
-    void targetEventsChanged(double value);
-    void targetNodesChanged(int value);
-    void heuristicSamplesChanged(int value);
-    void alphaChanged(double value);
-    void targetDensityChanged(double value);
-    void outlierDensityChanged(double value);
 
     void startComputation();
 
@@ -86,15 +66,6 @@ private:
 
     std::vector<bool> _markerStates;
     std::vector<int> _selectedMarkers;
-
-    // Parameters
-    // Maximum number of points you want to keep after downsampling
-    int _maxRandomSampleSize;
-    float _alpha;
-    float _targetDensityPercentile;
-    float _outlierDensityPercentile;
-    float _densityLimit;
-    int _targetNumberOfClusters;
 
     std::chrono::high_resolution_clock::time_point _timeCreated;
 
