@@ -51,6 +51,7 @@ set( CORE_SOURCES
 set( WIDGET_HEADERS
     src/widgets/DockableWidget.h
     src/widgets/ScatterplotWidget.h
+    src/widgets/DensityPlotWidget.h
     src/widgets/ImageWidget.h
     src/widgets/SettingsWidget.h
     src/widgets/WebWidget.h
@@ -59,6 +60,7 @@ set( WIDGET_HEADERS
 set( WIDGET_SOURCES
     src/widgets/DockableWidget.cpp
     src/widgets/ScatterplotWidget.cpp
+    src/widgets/DensityPlotWidget.cpp
     src/widgets/ImageWidget.cpp
     src/widgets/WebWidget.cpp
 )
@@ -69,10 +71,13 @@ set( GRAPHICS_HEADERS
     src/graphics/Vector3f.h
     src/graphics/Matrix3f.h
     src/graphics/Selection.h
+    src/graphics/Texture.h
+    src/graphics/Shader.h
 )
 
 set( GRAPHICS_SOURCES
     src/graphics/BufferObject.cpp
+    src/graphics/Shader.cpp
 )
 
 set( UTIL_HEADERS
