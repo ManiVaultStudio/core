@@ -9,6 +9,13 @@
     </qresource>
     
     <qresource prefix="">
+        <file>shaders/DensitySplat.vert</file>
+        <file>shaders/DensitySplat.frag</file>
+        <file>shaders/SimpleShader.vert</file>
+        <file>shaders/SimpleShader.frag</file>
+    </qresource>
+    
+    <qresource prefix="">
         <file>colormaps/Spectral.png</file>
         <file>colormaps/Plasma.png</file>
         <file>colormaps/Magma.png</file>
