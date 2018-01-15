@@ -142,7 +142,7 @@ bool ShaderProgram::loadShaderFromFile(QString vertPath, QString fragPath) {
 
     GLuint vertexShader, fragmentShader;
     success &= loadShader(vertPath, GL_VERTEX_SHADER, vertexShader);
-    success &= fragmentShader = loadShader(fragPath, GL_FRAGMENT_SHADER, fragmentShader);
+    success &= loadShader(fragPath, GL_FRAGMENT_SHADER, fragmentShader);
 
     if (!success) return false;
 
