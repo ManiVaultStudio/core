@@ -78,10 +78,11 @@ void DensityPlotWidget::initializeGL()
 
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &DensityPlotWidget::cleanup);
 
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(0.0, 0.0, 1.0, 1.0);
     qDebug() << "Initializing density plot";
 
     _gaussTexture = new GaussianTexture();
+    _gaussTexture->generate();
 
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
@@ -97,6 +98,17 @@ void DensityPlotWidget::initializeGL()
     }
     );
 
+    std::vector<float> texCoords(
+    {
+        0, 0,
+        1, 0,
+        0, 1,
+        0, 1,
+        1, 0,
+        1, 1
+    }
+    );
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -107,11 +119,18 @@ void DensityPlotWidget::initializeGL()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
+    BufferObject texQuad;
+    texQuad.create();
+    texQuad.bind();
+    texQuad.setData(texCoords);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
+
     _positionBuffer.create();
     _positionBuffer.bind();
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribDivisor(1, 1);
-    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribDivisor(2, 1);
+    glEnableVertexAttribArray(2);
 
     //_colorBuffer.create();
     //_colorBuffer.bind();
@@ -211,11 +230,11 @@ void DensityPlotWidget::drawDensityOffscreen()
     //glGenFramebuffers(1, &fbo);
     //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     //glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
     //TEMP
     GLsizei _msTexSize = 512;
     // <Q> Whats _msTexSize?
-    //glViewport(0, 0, _msTexSize, _msTexSize);
+    glViewport(0, 0, _msTexSize, _msTexSize);
 
     int w = _windowSize.width();
     int h = _windowSize.height();
@@ -223,13 +242,13 @@ void DensityPlotWidget::drawDensityOffscreen()
     glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
 
     // Set background color
-    glClearColor(0, 0, 0, 1);
+    //glClearColor(1, 0, 0, 1);
     // Clear fbo
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Enable additive blending
     glEnable(GL_BLEND);
-    //glBlendFunc(GL_ONE, GL_ONE);
+    glBlendFunc(GL_ONE, GL_ONE);
 
     // Bind shader
     _offscreenDensityShader.bind();
@@ -245,8 +264,8 @@ void DensityPlotWidget::drawDensityOffscreen()
     //>>>> _offscreenDensityShader.setParameter4fv(advancedParamsUniform, params);
 
     // Set gauss texture
-    //>>>>_gaussTexture->bind(0);
-    //>>>>_offscreenDensityShader.uniform1i("gaussSampler", 0);
+    _gaussTexture->bind(0);
+    _offscreenDensityShader.uniform1i("gaussSampler", 0);
 
     // Set the texture containing flags for the active state of each sample 
     //>>>> _offscreenDensityShader.uniform1i("activeSampleSampler", 1);
@@ -265,12 +284,13 @@ void DensityPlotWidget::drawDensityOffscreen()
     //}
     qDebug() << _numPoints;
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
+    //glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Unbind vao
-    //glBindVertexArray(0);
+    glBindVertexArray(0);
 
     // Unbind shader
-    //_offscreenDensityShader.release();
+    _offscreenDensityShader.release();
 
     // Read pixels from framebuffer
     //std::vector<float> kde(_msTexSize * _msTexSize * 3);
@@ -304,7 +324,7 @@ void DensityPlotWidget::drawDensityOffscreen()
     //std::cout << "	Binding Onscreen FBO = " << _defaultFBO << ".\n";
 
     // Bind the default fbo
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Reset blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

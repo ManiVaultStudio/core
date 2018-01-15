@@ -1,7 +1,12 @@
 #version 330 core
 
+uniform sampler2D gaussSampler;
+
+in vec2 pass_texCoord;
+
 out vec4 fragColor;
 
 void main() {
-	fragColor = vec4(1, 0, 1, 1);
+    float f = texture(gaussSampler, pass_texCoord).r;
+    fragColor = vec4(f, f, f, 1);
 }
