@@ -73,6 +73,7 @@ set( GRAPHICS_HEADERS
     src/graphics/Selection.h
     src/graphics/Texture.h
     src/graphics/Shader.h
+    src/graphics/Framebuffer.h
 )
 
 set( GRAPHICS_SOURCES
