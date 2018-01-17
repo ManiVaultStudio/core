@@ -61,7 +61,8 @@ namespace
         QString source = hdps::util::loadFileContents(path);
         if (source.isEmpty()) return false;
 
-        const char* csource = source.toStdString().c_str();
+        std::string ssource = source.toStdString();
+        const char* csource = ssource.c_str();
 
         // Create the shader
         shader = f->glCreateShader(type);
