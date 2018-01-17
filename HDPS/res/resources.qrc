@@ -11,8 +11,8 @@
     <qresource prefix="">
         <file>shaders/DensitySplat.vert</file>
         <file>shaders/DensitySplat.frag</file>
-        <file>shaders/SimpleShader.vert</file>
-        <file>shaders/SimpleShader.frag</file>
+        <file>shaders/Quad.vert</file>
+        <file>shaders/DensityDraw.frag</file>
     </qresource>
     
     <qresource prefix="">
