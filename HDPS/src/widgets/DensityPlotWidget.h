@@ -36,7 +36,6 @@ public:
     DensityPlotWidget() : _sigma(0.15f), _msTexSize(512) { }
 
     void setData(const std::vector<Vector2f>* data);
-    void setColors(const std::vector<Vector3f>& data);
     void addSelectionListener(const plugin::SelectionListener* listener);
 
     void createGaussianTexture();
@@ -74,7 +73,6 @@ private:
 
     unsigned int _numPoints = 0;
     const std::vector<Vector2f>* _positions;
-    std::vector<Vector3f> _colors;
 
     QSize _windowSize;
     Vector3f _selectionColor  = DEFAULT_SELECTION_COLOR;

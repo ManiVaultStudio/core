@@ -18,13 +18,11 @@ void DensityPlotWidget::setData(const std::vector<Vector2f>* positions)
 {
     _numPoints = (unsigned int)positions->size();
     _positions = positions;
-    //_colors.clear();
-    //_colors.resize(_numPoints, Vector3f(0.5f, 0.5f, 0.5f));
+
     qDebug() << "Setting position data";
     _positionBuffer.bind();
     _positionBuffer.setData(*positions);
-    //_colorBuffer.bind();
-    //_colorBuffer.setData(_colors);
+
     qDebug() << "Updating";
     update();
 }
@@ -56,15 +54,6 @@ void GaussianTexture::generate()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     delete[] data;
-}
-
-void DensityPlotWidget::setColors(const std::vector<Vector3f>& colors)
-{
-    _colors = colors;
-
-    _colorBuffer.bind();
-    _colorBuffer.setData(colors);
-    update();
 }
 
 void DensityPlotWidget::addSelectionListener(const plugin::SelectionListener* listener)
@@ -132,18 +121,10 @@ void DensityPlotWidget::initializeGL()
     glVertexAttribDivisor(2, 1);
     glEnableVertexAttribArray(2);
 
-    //_colorBuffer.create();
-    //_colorBuffer.bind();
-    //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    //glVertexAttribDivisor(2, 1);
-    //glEnableVertexAttribArray(2);
-
     if (_numPoints > 0)
     {
         _positionBuffer.bind();
         _positionBuffer.setData(*_positions);
-        //_colorBuffer.bind();
-        //_colorBuffer.setData(_colors);
     }
 
     bool loaded = _shaderDensitySplat.loadShaderFromFile(":shaders/DensitySplat.vert", ":shaders/DensitySplat.frag");
@@ -156,25 +137,11 @@ void DensityPlotWidget::initializeGL()
         qDebug() << "Failed to load DensityDraw";
     }
 
-    //_shader = std::make_unique<QOpenGLShaderProgram>();
-    //_shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
-    //_shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
-    //_shader->link();
-
-    //_selectionShader = std::make_unique<QOpenGLShaderProgram>();
-    //_selectionShader->addShaderFromSourceCode(QOpenGLShader::Vertex, selectionVertexSource);
-    //_selectionShader->addShaderFromSourceCode(QOpenGLShader::Fragment, selectionFragmentSource);
-    //_shader->link();
-
-
     _pdfFBO.create();
     _pdfFBO.bind();
 
     _pdfTexture.create();
     _pdfTexture.bind();
-
-    //TEMP
-    GLsizei _msTexSize = 512;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -376,7 +343,6 @@ void DensityPlotWidget::cleanup()
 
     glDeleteVertexArrays(1, &_vao);
     _positionBuffer.destroy();
-    //_colorBuffer.destroy();
 }
 
 } // namespace gui
