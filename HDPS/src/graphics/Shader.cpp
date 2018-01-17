@@ -152,6 +152,9 @@ bool ShaderProgram::loadShaderFromFile(QString vertPath, QString fragPath) {
     glAttachShader(_handle, vertexShader);
     glAttachShader(_handle, fragmentShader);
 
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
     success &= linkProgram(_handle);
     success &= validateProgram(_handle);
 
