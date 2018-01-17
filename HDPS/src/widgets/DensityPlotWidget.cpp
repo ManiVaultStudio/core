@@ -23,6 +23,7 @@ void DensityPlotWidget::setData(const std::vector<Vector2f>* positions)
     _positionBuffer.bind();
     _positionBuffer.setData(*positions);
 
+    _needsDensityMapUpdate = true;
     update();
 }
 
@@ -158,7 +159,8 @@ void DensityPlotWidget::resizeGL(int w, int h)
 void DensityPlotWidget::paintGL()
 {
     qDebug() << "Drawing density plot";
-    drawDensityOffscreen();
+    if (_needsDensityMapUpdate)
+        drawDensityOffscreen();
 
     drawDensity();
 }
@@ -232,6 +234,8 @@ void DensityPlotWidget::drawDensityOffscreen()
     qDebug() << "	Max KDE Value = " << _maxKDE << ".\n";
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+
+    _needsDensityMapUpdate = false;
 }
 
 void DensityPlotWidget::drawDensity()

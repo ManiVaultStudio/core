@@ -33,7 +33,7 @@ class DensityPlotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
-    DensityPlotWidget() : _sigma(0.15f), _msTexSize(512) { }
+    DensityPlotWidget() : _sigma(0.15f), _msTexSize(512), _needsDensityMapUpdate(true) {}
 
     void setData(const std::vector<Vector2f>* data);
     void addSelectionListener(const plugin::SelectionListener* listener);
@@ -86,6 +86,8 @@ private:
 
     float _maxKDE;
     size_t _msTexSize;
+
+    bool _needsDensityMapUpdate;
 };
 
 } // namespace gui
