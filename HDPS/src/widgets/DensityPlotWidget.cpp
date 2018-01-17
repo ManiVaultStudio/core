@@ -75,43 +75,27 @@ void DensityPlotWidget::initializeGL()
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
 
-    std::vector<float> vertices(
+    std::vector<float> quad(
     {
-        -1, -1,
-        1, -1,
-        -1, 1,
-        -1, 1,
-        1, -1,
-        1, 1
-    }
-    );
-
-    std::vector<float> texCoords(
-    {
-        0, 0,
-        1, 0,
-        0, 1,
-        0, 1,
-        1, 0,
-        1, 1
+        -1, -1, 0, 0,
+        1, -1, 1, 0,
+        -1, 1, 0, 1,
+        -1, 1, 0, 1,
+        1, -1, 1, 0,
+        1, 1, 1, 1
     }
     );
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    BufferObject quad;
-    quad.create();
-    quad.bind();
-    quad.setData(vertices);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    BufferObject quadBuffer;
+    quadBuffer.create();
+    quadBuffer.bind();
+    quadBuffer.setData(quad);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
     glEnableVertexAttribArray(0);
-
-    BufferObject texQuad;
-    texQuad.create();
-    texQuad.bind();
-    texQuad.setData(texCoords);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
     glEnableVertexAttribArray(1);
 
     _positionBuffer.create();
