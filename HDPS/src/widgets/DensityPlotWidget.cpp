@@ -14,7 +14,7 @@ namespace gui
 // Positions need to be passed as a pointer as we need to store them locally in order
 // to be able to find the subset of data that's part of a selection. If passed
 // by reference then we can upload the data to the GPU, but not store it in the widget.
-    void DensityPlotWidget::setData(const std::vector<Vector2f>* positions)
+void DensityPlotWidget::setData(const std::vector<Vector2f>* positions)
 {
     _numPoints = (unsigned int)positions->size();
     _positions = positions;
@@ -78,11 +78,11 @@ void DensityPlotWidget::initializeGL()
 
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &DensityPlotWidget::cleanup);
 
-    glClearColor(0.0, 0.0, 1.0, 1.0);
+    glClearColor(1, 1, 1, 1);
     qDebug() << "Initializing density plot";
 
-    _gaussTexture = new GaussianTexture();
-    _gaussTexture->generate();
+    _gaussTexture.create();
+    _gaussTexture.generate();
 
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
@@ -146,10 +146,16 @@ void DensityPlotWidget::initializeGL()
         //_colorBuffer.setData(_colors);
     }
 
-    bool loaded = _offscreenDensityShader.loadShaderFromFile(":shaders/SimpleShader.vert", ":shaders/SimpleShader.frag");
+    bool loaded = _shaderDensitySplat.loadShaderFromFile(":shaders/DensitySplat.vert", ":shaders/DensitySplat.frag");
     if (!loaded) {
-        qDebug() << "Failed to load SimpleShader";
+        qDebug() << "Failed to load DensitySplat";
     }
+
+    loaded = _shaderDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/DensityDraw.frag");
+    if (!loaded) {
+        qDebug() << "Failed to load DensityDraw";
+    }
+
     //_shader = std::make_unique<QOpenGLShaderProgram>();
     //_shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
     //_shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
@@ -159,6 +165,28 @@ void DensityPlotWidget::initializeGL()
     //_selectionShader->addShaderFromSourceCode(QOpenGLShader::Vertex, selectionVertexSource);
     //_selectionShader->addShaderFromSourceCode(QOpenGLShader::Fragment, selectionFragmentSource);
     //_shader->link();
+
+
+    _pdfFBO.create();
+    _pdfFBO.bind();
+
+    _pdfTexture.create();
+    _pdfTexture.bind();
+
+    //TEMP
+    GLsizei _msTexSize = 512;
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _msTexSize, _msTexSize, 0, GL_RGB, GL_FLOAT, NULL);
+    
+    _pdfFBO.addColorTexture(0, &_pdfTexture);
+
+    _pdfFBO.validate();
+
+    _pdfFBO.release();
 }
 
 void DensityPlotWidget::resizeGL(int w, int h)
@@ -179,93 +207,40 @@ void DensityPlotWidget::resizeGL(int w, int h)
 
 void DensityPlotWidget::paintGL()
 {
-    //qDebug() << "Rendering scatterplot";
-    //glClear(GL_COLOR_BUFFER_BIT);
-
-    //int w = _windowSize.width();
-    //int h = _windowSize.height();
-    //int size = w < h ? w : h;
-    //glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
-
-    //Vector2f topLeft = toClipCoordinates * toIsotropicCoordinates * _selection.topLeft();
-    //Vector2f bottomRight = toClipCoordinates * toIsotropicCoordinates * _selection.bottomRight();
-
-    //_shader->bind();
-
-    //_shader->setUniformValue("pointSize", _pointSize / _windowSize.width());
-
-    //_shader->setUniformValue("selectionColor", _selectionColor.x, _selectionColor.y, _selectionColor.z);
-    //_shader->setUniformValue("alpha", _alpha);
-    //_shader->setUniformValue("selecting", _selecting);
-    //_shader->setUniformValue("start", topLeft.x, topLeft.y);
-    //_shader->setUniformValue("end", bottomRight.x, bottomRight.y);
-    //glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
-
-    //if (_selecting)
-    //{
-    //    topLeft = toClipCoordinates * _selection.topLeft();
-    //    bottomRight = toClipCoordinates * _selection.bottomRight();
-
-    //    glViewport(0, 0, w, h);
-
-    //    // Selection
-    //    _selectionShader->bind();
-    //    _selectionShader->setUniformValue("start", topLeft.x, topLeft.y);
-    //    _selectionShader->setUniformValue("end", bottomRight.x, bottomRight.y);
-    //    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    //}
     drawDensityOffscreen();
+
+    drawDensity();
 }
 
 void DensityPlotWidget::drawDensityOffscreen()
 {
-    //std::cout << "drawing density with " << _numPoints << " vertices.\n";
-
-    //std::cout << "density offscreen pass\n";
-
-    //GLint fb;
-    //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fb);
-    //std::cout << "	Binding Offscreen FBO = " << _pdfFBO << ".\n";
-    //GLuint fbo;
-    //glGenFramebuffers(1, &fbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    //glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //TEMP
-    GLsizei _msTexSize = 512;
-    // <Q> Whats _msTexSize?
     glViewport(0, 0, _msTexSize, _msTexSize);
 
-    int w = _windowSize.width();
-    int h = _windowSize.height();
-    int size = w < h ? w : h;
-    glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
-
+    _pdfFBO.bind();
     // Set background color
-    //glClearColor(1, 0, 0, 1);
+    glClearColor(0, 0, 0, 1);
     // Clear fbo
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Enable additive blending
-    glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
     // Bind shader
-    _offscreenDensityShader.bind();
+    _shaderDensitySplat.bind();
 
     // Set mvp uniform
     //_offscreenDensityShader.uniformMatrix4f("modelViewProjectionMatrix", _mvp);
 
     // Set sigma uniform
-    //>>>>_offscreenDensityShader.uniform1f("sigma", _sigma);
+    _shaderDensitySplat.uniform1f("sigma", _sigma);
 
     // Set advanced parameters uniform
     //>>>> float params[4] = { (_isScaleAvailable ? 1.0f / _maxScale : -1.0f), 0.0f, 0.0f, 0.0f };
     //>>>> _offscreenDensityShader.setParameter4fv(advancedParamsUniform, params);
 
     // Set gauss texture
-    _gaussTexture->bind(0);
-    _offscreenDensityShader.uniform1i("gaussSampler", 0);
+    _gaussTexture.bind(0);
+    _shaderDensitySplat.uniform1i("gaussSampler", 0);
 
     // Set the texture containing flags for the active state of each sample 
     //>>>> _offscreenDensityShader.uniform1i("activeSampleSampler", 1);
@@ -282,52 +257,51 @@ void DensityPlotWidget::drawDensityOffscreen()
     //    glVertexAttribIPointer(sampleIdAttribute, 1, GL_INT, 0, 0);
     //    glEnableVertexAttribArray(sampleIdAttribute);
     //}
-    qDebug() << _numPoints;
+
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Unbind vao
     glBindVertexArray(0);
 
-    // Unbind shader
-    _offscreenDensityShader.release();
+
 
     // Read pixels from framebuffer
-    //std::vector<float> kde(_msTexSize * _msTexSize * 3);
+    std::vector<float> kde(_msTexSize * _msTexSize * 3);
 
-    //glReadBuffer(GL_COLOR_ATTACHMENT0);
-    //glReadPixels(0, 0, _msTexSize, _msTexSize, GL_RGB, GL_FLOAT, kde.data());
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glReadPixels(0, 0, _msTexSize, _msTexSize, GL_RGB, GL_FLOAT, kde.data());
 
     // Calculate max value for normalization
-    //>>>> _maxKDE = -99999999.9f;
-    //>>>> for (int i = 0; i < kde.size(); i += 3) // only lookup red channel
-    //>>>> {
-    //>>>>     _maxKDE = std::max(_maxKDE, kde[i]);
-    //>>>> }
+    _maxKDE = -99999999.9f;
+    for (int i = 0; i < kde.size(); i += 3) // only lookup red channel
+    {
+        _maxKDE = std::max(_maxKDE, kde[i]);
+    }
 
+    qDebug() << "	Max KDE Value = " << _maxKDE << ".\n";
 
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+}
 
+void DensityPlotWidget::drawDensity()
+{
+    glViewport(0, 0, _windowSize.width(), _windowSize.height());
 
-    //std::cout << "	Max KDE Value = " << _maxKDE << ".\n";
-
-    //QImage pluto(_msTexSize, _msTexSize, QImage::Format::Format_ARGB32);
-    //for (int j = 0; j < _msTexSize; ++j)
-    //{
-    //	for (int i = 0; i < _msTexSize; ++i)
-    //	{
-    //		int idx = j * _msTexSize + i;
-    //		pluto.setPixel(i, j, qRgb(pippo[idx * 3] * 255, pippo[idx * 3 + 1] * 255, pippo[idx * 3 + 2] * 255));
-    //	}
-    //}
-    //pluto.save("pluto.png");
-
-    //std::cout << "	Binding Onscreen FBO = " << _defaultFBO << ".\n";
-
-    // Bind the default fbo
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // Reset blending
+    glClearColor(1, 1, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    if (_numPoints > 0) {
+        _shaderDensityDraw.bind();
+
+        _pdfFBO.getColorTexture(0).bind(0);
+        _shaderDensityDraw.uniform1i("tex", 0);
+        _shaderDensityDraw.uniform1f("norm", 1 / _maxKDE);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        _shaderDensityDraw.release();
+    }
 }
 
 void DensityPlotWidget::createSampleSelectionTextureBuffer()
@@ -395,10 +369,10 @@ void DensityPlotWidget::onSelection(Selection selection)
 
 void DensityPlotWidget::cleanup()
 {
-    qDebug() << "Deleting scatterplot widget, performing clean up...";
+    qDebug() << "Deleting density plot widget, performing clean up...";
     makeCurrent();
 
-    delete _gaussTexture;
+    _gaussTexture.destroy();
 
     glDeleteVertexArrays(1, &_vao);
     _positionBuffer.destroy();

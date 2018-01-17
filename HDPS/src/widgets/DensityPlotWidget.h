@@ -4,6 +4,7 @@
 #include "../SelectionListener.h"
 
 #include "../graphics/BufferObject.h"
+#include "../graphics/Framebuffer.h"
 #include "../graphics/Vector2f.h"
 #include "../graphics/Vector3f.h"
 #include "../graphics/Matrix3f.h"
@@ -32,6 +33,8 @@ class DensityPlotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
+    DensityPlotWidget() : _sigma(0.15f), _msTexSize(512) { }
+
     void setData(const std::vector<Vector2f>* data);
     void setColors(const std::vector<Vector3f>& data);
     void addSelectionListener(const plugin::SelectionListener* listener);
@@ -42,6 +45,7 @@ protected:
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
     void paintGL()              Q_DECL_OVERRIDE;
     void drawDensityOffscreen();
+    void drawDensity();
     void createSampleSelectionTextureBuffer();
 
     void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
@@ -64,7 +68,9 @@ private:
 
     BufferObject _positionBuffer;
     BufferObject _colorBuffer;
-    ShaderProgram _offscreenDensityShader;
+
+    ShaderProgram _shaderDensitySplat;
+    ShaderProgram _shaderDensityDraw;
 
     unsigned int _numPoints = 0;
     const std::vector<Vector2f>* _positions;
@@ -82,10 +88,15 @@ private:
 
 
     /////////////////
-    GaussianTexture* _gaussTexture;
+    GaussianTexture _gaussTexture;
+    Framebuffer _pdfFBO;
+    Texture2D _pdfTexture;
 
     float _sigma;
     GLuint _activeSampleTexture;
+
+    float _maxKDE;
+    size_t _msTexSize;
 };
 
 } // namespace gui
