@@ -23,7 +23,6 @@ void DensityPlotWidget::setData(const std::vector<Vector2f>* positions)
     _positionBuffer.bind();
     _positionBuffer.setData(*positions);
 
-    qDebug() << "Updating";
     update();
 }
 
@@ -174,6 +173,7 @@ void DensityPlotWidget::resizeGL(int w, int h)
 
 void DensityPlotWidget::paintGL()
 {
+    qDebug() << "Drawing density plot";
     drawDensityOffscreen();
 
     drawDensity();

@@ -59,14 +59,9 @@ private:
     Matrix3f toNormalisedCoordinates;
     Matrix3f toIsotropicCoordinates;
 
-    const float        DEFAULT_POINT_SIZE      = 15;
-    const Vector3f     DEFAULT_SELECTION_COLOR = Vector3f(1.0f, 0.5f, 0.0f);
-    const float        DEFAULT_ALPHA_VALUE     = 0.5f;
-
     GLuint _vao;
 
     BufferObject _positionBuffer;
-    BufferObject _colorBuffer;
 
     ShaderProgram _shaderDensitySplat;
     ShaderProgram _shaderDensityDraw;
@@ -75,11 +70,7 @@ private:
     const std::vector<Vector2f>* _positions;
 
     QSize _windowSize;
-    Vector3f _selectionColor  = DEFAULT_SELECTION_COLOR;
-    float _pointSize          = DEFAULT_POINT_SIZE;
-    float _alpha              = DEFAULT_ALPHA_VALUE;
 
-    //std::unique_ptr<QOpenGLShaderProgram> _selectionShader;
     bool _selecting = false;
     Selection _selection;
     std::vector<const plugin::SelectionListener*> _selectionListeners;
