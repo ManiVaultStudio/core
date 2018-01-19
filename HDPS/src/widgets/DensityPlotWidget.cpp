@@ -134,10 +134,20 @@ void DensityPlotWidget::initializeGL()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _msTexSize, _msTexSize, 0, GL_RGB, GL_FLOAT, NULL);
     
     _pdfFBO.addColorTexture(0, &_pdfTexture);
-
     _pdfFBO.validate();
 
-    _pdfFBO.release();
+
+    _gradientTexture.create();
+    _gradientTexture.bind();
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _msTexSize, _msTexSize, 0, GL_RGB, GL_FLOAT, NULL);
+
+    _pdfFBO.addColorTexture(1, &_gradientTexture);
+    _pdfFBO.validate();
 }
 
 void DensityPlotWidget::resizeGL(int w, int h)

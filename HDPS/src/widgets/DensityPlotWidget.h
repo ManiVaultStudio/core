@@ -80,6 +80,7 @@ private:
     GaussianTexture _gaussTexture;
     Framebuffer _pdfFBO;
     Texture2D _pdfTexture;
+    Texture2D _gradientTexture;
 
     float _sigma;
     GLuint _activeSampleTexture;
