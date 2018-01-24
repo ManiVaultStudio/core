@@ -66,7 +66,7 @@ private:
 
     BufferObject _positionBuffer;
 
-    ShaderProgram _shaderDensitySplat;
+    ShaderProgram _shaderDensityCompute;
     ShaderProgram _shaderDensityDraw;
     ShaderProgram _shaderGradientCompute;
     ShaderProgram _shaderGradientDraw;

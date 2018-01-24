@@ -111,7 +111,7 @@ void DensityPlotWidget::initializeGL()
         _positionBuffer.setData(*_positions);
     }
 
-    bool loaded = _shaderDensitySplat.loadShaderFromFile(":shaders/DensityCompute.vert", ":shaders/DensityCompute.frag");
+    bool loaded = _shaderDensityCompute.loadShaderFromFile(":shaders/DensityCompute.vert", ":shaders/DensityCompute.frag");
     if (!loaded) {
         qDebug() << "Failed to load DensityCompute shader";
     }
@@ -184,8 +184,6 @@ void DensityPlotWidget::paintGL()
 
     drawGradientOffscreen();
 
-    drawDensity();
-}
     //drawDensity();
     drawGradient();
 }
@@ -205,13 +203,13 @@ void DensityPlotWidget::drawDensityOffscreen()
     glBlendFunc(GL_ONE, GL_ONE);
 
     // Bind shader
-    _shaderDensitySplat.bind();
+    _shaderDensityCompute.bind();
 
     // Set mvp uniform
     //_offscreenDensityShader.uniformMatrix4f("modelViewProjectionMatrix", _mvp);
 
     // Set sigma uniform
-    _shaderDensitySplat.uniform1f("sigma", _sigma);
+    _shaderDensityCompute.uniform1f("sigma", _sigma);
 
     // Set advanced parameters uniform
     //>>>> float params[4] = { (_isScaleAvailable ? 1.0f / _maxScale : -1.0f), 0.0f, 0.0f, 0.0f };
@@ -219,7 +217,7 @@ void DensityPlotWidget::drawDensityOffscreen()
 
     // Set gauss texture
     _gaussTexture.bind(0);
-    _shaderDensitySplat.uniform1i("gaussSampler", 0);
+    _shaderDensityCompute.uniform1i("gaussSampler", 0);
 
     // Set the texture containing flags for the active state of each sample 
     //>>>> _offscreenDensityShader.uniform1i("activeSampleSampler", 1);
