@@ -9,10 +9,11 @@
     </qresource>
     
     <qresource prefix="">
-        <file>shaders/DensitySplat.vert</file>
-        <file>shaders/DensitySplat.frag</file>
         <file>shaders/Quad.vert</file>
+        <file>shaders/DensityCompute.vert</file>
+        <file>shaders/DensityCompute.frag</file>
         <file>shaders/DensityDraw.frag</file>
+        <file>shaders/GradientCompute.frag</file>
     </qresource>
     
     <qresource prefix="">
