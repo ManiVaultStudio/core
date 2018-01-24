@@ -227,6 +227,7 @@ void DensityPlotWidget::drawDensityOffscreen()
     glViewport(0, 0, _msTexSize, _msTexSize);
 
     _pdfFBO.bind();
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
     // Set background color
     glClearColor(0, 0, 0, 1);
     // Clear fbo
