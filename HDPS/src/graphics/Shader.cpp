@@ -120,6 +120,10 @@ void ShaderProgram::uniform3fv(const char* name, int count, Vector3f* v) {
     glUniform3fv(location(name), count, (GLfloat*)v);
 }
 
+void ShaderProgram::uniform4f(const char* name, float v0, float v1, float v2, float v3) {
+    glUniform4f(location(name), v0, v1, v2, v3);
+}
+
 //void Shader::uniformMatrix4f(const char* name, Matrix4f& m) {
 //    glUniformMatrix4fv(location(name), 1, false, m.toArray());
 //}

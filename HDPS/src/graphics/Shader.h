@@ -28,6 +28,7 @@ public:
     void uniform3f(const char* name, float v0, float v1, float v2);
     void uniform3f(const char* name, Vector3f v);
     void uniform3fv(const char* name, int count, Vector3f* v);
+    void uniform4f(const char* name, float v0, float v1, float v2, float v3);
     void uniformMatrix4f(const char* name, Matrix4f& m);
 
     bool loadShaderFromFile(QString vertPath, QString fragPath);
