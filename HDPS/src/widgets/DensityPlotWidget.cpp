@@ -307,7 +307,7 @@ void DensityPlotWidget::drawDensity()
     if (_numPoints > 0) {
         _shaderDensityDraw.bind();
 
-        _pdfFBO.getColorTexture(0).bind(0);
+        _pdfTexture.bind(0);
         _shaderDensityDraw.uniform1i("tex", 0);
         _shaderDensityDraw.uniform1f("norm", 1 / _maxKDE);
 
