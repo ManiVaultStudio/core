@@ -43,8 +43,9 @@ protected:
     void initializeGL()         Q_DECL_OVERRIDE;
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
     void paintGL()              Q_DECL_OVERRIDE;
-    void drawGradientOffscreen();
+
     void drawDensityOffscreen();
+    void drawGradientOffscreen();
     void drawDensity();
     void createSampleSelectionTextureBuffer();
 
@@ -66,7 +67,7 @@ private:
 
     ShaderProgram _shaderDensitySplat;
     ShaderProgram _shaderDensityDraw;
-    ShaderProgram _shaderGradient;
+    ShaderProgram _shaderGradientCompute;
 
     unsigned int _numPoints = 0;
     const std::vector<Vector2f>* _positions;

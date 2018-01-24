@@ -14,17 +14,17 @@ void main()
     
     vec2 gradient;
     
-    if(texture(pdfSampler, vertexPosition.xy).r < renderParams.w)
+    if(texture(pdfTexture, pass_texCoord.xy).r < renderParams.w)
     {
         gradient = vec2(0.0);
     }
     else
     {
         vec4 neighborDensities;
-        neighborDensities.x = texture(pdfSampler, vertexPosition.xy + texelSize.xz).r;
-        neighborDensities.y = texture(pdfSampler, vertexPosition.xy - texelSize.xz).r;
-        neighborDensities.z = texture(pdfSampler, vertexPosition.xy + texelSize.zy).r;
-        neighborDensities.w = texture(pdfSampler, vertexPosition.xy - texelSize.zy).r;
+        neighborDensities.x = texture(pdfTexture, pass_texCoord.xy + texelSize.xz).r;
+        neighborDensities.y = texture(pdfTexture, pass_texCoord.xy - texelSize.xz).r;
+        neighborDensities.z = texture(pdfTexture, pass_texCoord.xy + texelSize.zy).r;
+        neighborDensities.w = texture(pdfTexture, pass_texCoord.xy - texelSize.zy).r;
         neighborDensities *= renderParams.z;
 
         gradient = vec2(neighborDensities.x - neighborDensities.y, neighborDensities.z - neighborDensities.w);

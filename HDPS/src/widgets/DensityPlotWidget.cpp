@@ -121,9 +121,10 @@ void DensityPlotWidget::initializeGL()
         qDebug() << "Failed to load DensityDraw shader";
     }
 
-    loaded = _shaderGradient.loadShaderFromFile(":shaders/Quad.vert", ":shaders/GradientCompute.frag");
+    loaded = _shaderGradientCompute.loadShaderFromFile(":shaders/Quad.vert", ":shaders/GradientCompute.frag");
     if (!loaded) {
-        qDebug() << "Failed to load Gradient shader";
+        qDebug() << "Failed to load GradientCompute shader";
+    }
     }
 
     _pdfFBO.create();
@@ -181,45 +182,8 @@ void DensityPlotWidget::paintGL()
 
     drawDensity();
 }
-
-void DensityPlotWidget::drawGradientOffscreen()
-{
-    _pdfFBO.bind();
-    glDrawBuffer(GL_COLOR_ATTACHMENT1);
-
-    glViewport(0, 0, _msTexSize, _msTexSize);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    _shaderGradient.bind();
-
-    // Attributes
-    //GLuint positionAttribute = shaderProgram->getAttributeLocation("position");
-
-    //Uniforms
-    //GLuint mvpUniform = shaderProgram->getUniformLocation("modelViewProjectionMatrix");
-    //GLuint renderParamsUniform = shaderProgram->getUniformLocation("renderParams");
-
-    // Textures
-    //GLuint pdfSampler = shaderProgram->getSamplerLocation("pdfSampler");
-
-    //shaderProgram->bindAndEnable();
-
-    //shaderProgram->setParameter4x4fv(mvpUniform, _mvp);
-
-    //shaderProgram->setParameter4f(renderParamsUniform, 1.0f / _maxKDE, 1.0f / 1000.0f, 1.0f / _msTexSize, 1.0f / _msTexSize);
-
-    _pdfTexture.bind(0);
-    _shaderGradient.uniform1i("pdfSampler", 0);
-
-    _shaderGradient.uniform4f("renderParams", 1.0f / _msTexSize, 1.0f / _msTexSize, 1.0f / _maxKDE, 1.0f / 1000);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    _shaderGradient.release();
-
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+    //drawDensity();
+    drawGradient();
 }
 
 void DensityPlotWidget::drawDensityOffscreen()
@@ -294,6 +258,49 @@ void DensityPlotWidget::drawDensityOffscreen()
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 
     _needsDensityMapUpdate = false;
+}
+
+
+void DensityPlotWidget::drawGradientOffscreen()
+{
+    _pdfFBO.bind();
+    glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+    glViewport(0, 0, _msTexSize, _msTexSize);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    _shaderGradientCompute.bind();
+
+    // Attributes
+    //GLuint positionAttribute = shaderProgram->getAttributeLocation("position");
+
+    //Uniforms
+    //GLuint mvpUniform = shaderProgram->getUniformLocation("modelViewProjectionMatrix");
+    //GLuint renderParamsUniform = shaderProgram->getUniformLocation("renderParams");
+
+    // Textures
+    //GLuint pdfSampler = shaderProgram->getSamplerLocation("pdfSampler");
+
+    //shaderProgram->bindAndEnable();
+
+    //shaderProgram->setParameter4x4fv(mvpUniform, _mvp);
+
+    //shaderProgram->setParameter4f(renderParamsUniform, 1.0f / _maxKDE, 1.0f / 1000.0f, 1.0f / _msTexSize, 1.0f / _msTexSize);
+
+    _pdfTexture.bind(0);
+    _shaderGradientCompute.uniform1i("pdfSampler", 0);
+
+    _shaderGradientCompute.uniform4f("renderParams", 1.0f / _msTexSize, 1.0f / _msTexSize, 1.0f / _maxKDE, 1.0f / 1000);
+
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
+
+    _shaderGradientCompute.release();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 }
 
 void DensityPlotWidget::drawDensity()
