@@ -47,6 +47,7 @@ protected:
     void drawDensityOffscreen();
     void drawGradientOffscreen();
     void drawDensity();
+    void drawGradient();
     void createSampleSelectionTextureBuffer();
 
     void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
@@ -68,6 +69,7 @@ private:
     ShaderProgram _shaderDensitySplat;
     ShaderProgram _shaderDensityDraw;
     ShaderProgram _shaderGradientCompute;
+    ShaderProgram _shaderGradientDraw;
 
     unsigned int _numPoints = 0;
     const std::vector<Vector2f>* _positions;

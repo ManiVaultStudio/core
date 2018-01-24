@@ -125,6 +125,10 @@ void DensityPlotWidget::initializeGL()
     if (!loaded) {
         qDebug() << "Failed to load GradientCompute shader";
     }
+
+    loaded = _shaderGradientDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/GradientDraw.frag");
+    if (!loaded) {
+        qDebug() << "Failed to load GradientDraw shader";
     }
 
     _pdfFBO.create();
@@ -321,6 +325,26 @@ void DensityPlotWidget::drawDensity()
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         _shaderDensityDraw.release();
+    }
+}
+
+void DensityPlotWidget::drawGradient()
+{
+    glViewport(0, 0, _windowSize.width(), _windowSize.height());
+
+    glClearColor(1, 1, 1, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    if (_numPoints > 0) {
+        _shaderGradientDraw.bind();
+
+        _gradientTexture.bind(0);
+        _shaderGradientDraw.uniform1i("tex", 0);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        _shaderGradientDraw.release();
     }
 }
 
