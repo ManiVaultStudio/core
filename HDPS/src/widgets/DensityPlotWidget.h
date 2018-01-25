@@ -46,6 +46,7 @@ protected:
 
     void drawDensityOffscreen();
     void drawGradientOffscreen();
+    void drawMeanshiftOffscreen();
     void drawDensity();
     void drawGradient();
     void createSampleSelectionTextureBuffer();
@@ -70,6 +71,7 @@ private:
     ShaderProgram _shaderDensityDraw;
     ShaderProgram _shaderGradientCompute;
     ShaderProgram _shaderGradientDraw;
+    ShaderProgram _shaderMeanshiftCompute;
 
     unsigned int _numPoints = 0;
     const std::vector<Vector2f>* _positions;
@@ -86,6 +88,7 @@ private:
     Framebuffer _pdfFBO;
     Texture2D _pdfTexture;
     Texture2D _gradientTexture;
+    Texture2D _meanshiftTexture;
 
     float _sigma;
     GLuint _activeSampleTexture;
@@ -94,6 +97,7 @@ private:
     size_t _msTexSize;
 
     bool _needsDensityMapUpdate;
+    std::vector<float> _meanShiftMapCPU;
 };
 
 } // namespace gui

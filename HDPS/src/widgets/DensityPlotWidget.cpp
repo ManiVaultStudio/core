@@ -131,6 +131,11 @@ void DensityPlotWidget::initializeGL()
         qDebug() << "Failed to load GradientDraw shader";
     }
 
+    loaded = _shaderMeanshiftCompute.loadShaderFromFile(":shaders/Quad.vert", ":shaders/MeanshiftCompute.frag");
+    if (!loaded) {
+        qDebug() << "Failed to load MeanshiftCompute shader";
+    }
+
     _pdfFBO.create();
     _pdfFBO.bind();
 
@@ -158,6 +163,18 @@ void DensityPlotWidget::initializeGL()
 
     _pdfFBO.addColorTexture(1, &_gradientTexture);
     _pdfFBO.validate();
+
+    _meanshiftTexture.create();
+    _meanshiftTexture.bind();
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _msTexSize, _msTexSize, 0, GL_RGB, GL_FLOAT, NULL);
+
+    _pdfFBO.addColorTexture(2, &_meanshiftTexture);
+    _pdfFBO.validate();
 }
 
 void DensityPlotWidget::resizeGL(int w, int h)
@@ -183,6 +200,7 @@ void DensityPlotWidget::paintGL()
         drawDensityOffscreen();
 
     drawGradientOffscreen();
+    drawMeanshiftOffscreen();
 
     //drawDensity();
     drawGradient();
@@ -286,20 +304,60 @@ void DensityPlotWidget::drawGradientOffscreen()
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 }
 
-    //shaderProgram->setParameter4f(renderParamsUniform, 1.0f / _maxKDE, 1.0f / 1000.0f, 1.0f / _msTexSize, 1.0f / _msTexSize);
+void DensityPlotWidget::drawMeanshiftOffscreen()
+{
+    _pdfFBO.bind();
+    glDrawBuffer(GL_COLOR_ATTACHMENT2);
 
-    _pdfTexture.bind(0);
-    _shaderGradientCompute.uniform1i("pdfSampler", 0);
+    glViewport(0, 0, _msTexSize, _msTexSize);
 
-    _shaderGradientCompute.uniform4f("renderParams", 1.0f / _msTexSize, 1.0f / _msTexSize, 1.0f / _maxKDE, 1.0f / 1000);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    _shaderMeanshiftCompute.bind();
+
+    _gradientTexture.bind(0);
+    _shaderMeanshiftCompute.uniform1i("gradientTexture", 0);
+
+    _shaderMeanshiftCompute.uniform4f("renderParams", 0.25f, 0.0f, 1.0f / _msTexSize, 1.0f / _msTexSize);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
 
-    _shaderGradientCompute.release();
+    _shaderMeanshiftCompute.release();
+
+    _meanShiftMapCPU.resize(_msTexSize * _msTexSize * 3);
+
+    glReadBuffer(GL_COLOR_ATTACHMENT2);
+    glReadPixels(0, 0, _msTexSize, _msTexSize, GL_RGB, GL_FLOAT, _meanShiftMapCPU.data());
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+
+    //{
+    //	double t = 0.0;
+    //	{
+    //		nut::ScopedTimer<double> timer(t);
+    //
+    //		for (int i = 0; i < 100; i++)
+    //		{
+    //			clusterOld();
+    //		}
+    //	}
+    //	std::cout << "	Clustered 100 times in old mode in " << t << "\n";
+    //	t = 0.0;
+    //	{
+    //		nut::ScopedTimer<double> timer(t);
+    //
+    //		for (int i = 0; i < 100; i++)
+    //		{
+    //			cluster();
+    //		}
+    //	}
+    //	std::cout << "	Clustered 100 times in new mode in " << t << "\n";
+    //}
+
+    //cluster();
 }
 
 void DensityPlotWidget::drawDensity()
