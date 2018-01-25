@@ -138,11 +138,11 @@ void DensityPlotWidget::initializeGL()
         qDebug() << "Failed to load MeanshiftCompute shader";
     }
 
-    _pdfFBO.create();
-    _pdfFBO.bind();
+    _meanshiftFramebuffer.create();
+    _meanshiftFramebuffer.bind();
 
-    _pdfTexture.create();
-    _pdfTexture.bind();
+    _densityTexture.create();
+    _densityTexture.bind();
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -150,8 +150,8 @@ void DensityPlotWidget::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _msTexSize, _msTexSize, 0, GL_RGB, GL_FLOAT, NULL);
     
-    _pdfFBO.addColorTexture(0, &_pdfTexture);
-    _pdfFBO.validate();
+    _meanshiftFramebuffer.addColorTexture(0, &_densityTexture);
+    _meanshiftFramebuffer.validate();
 
 
     _gradientTexture.create();
@@ -163,8 +163,8 @@ void DensityPlotWidget::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _msTexSize, _msTexSize, 0, GL_RGB, GL_FLOAT, NULL);
 
-    _pdfFBO.addColorTexture(1, &_gradientTexture);
-    _pdfFBO.validate();
+    _meanshiftFramebuffer.addColorTexture(1, &_gradientTexture);
+    _meanshiftFramebuffer.validate();
 
     _meanshiftTexture.create();
     _meanshiftTexture.bind();
@@ -175,8 +175,8 @@ void DensityPlotWidget::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _msTexSize, _msTexSize, 0, GL_RGB, GL_FLOAT, NULL);
 
-    _pdfFBO.addColorTexture(2, &_meanshiftTexture);
-    _pdfFBO.validate();
+    _meanshiftFramebuffer.addColorTexture(2, &_meanshiftTexture);
+    _meanshiftFramebuffer.validate();
 }
 
 void DensityPlotWidget::resizeGL(int w, int h)
@@ -219,7 +219,7 @@ void DensityPlotWidget::drawDensityOffscreen()
 {
     glViewport(0, 0, _msTexSize, _msTexSize);
 
-    _pdfFBO.bind();
+    _meanshiftFramebuffer.bind();
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     // Set background color
     glClearColor(0, 0, 0, 1);
@@ -289,7 +289,7 @@ void DensityPlotWidget::drawDensityOffscreen()
 
 void DensityPlotWidget::drawGradientOffscreen()
 {
-    _pdfFBO.bind();
+    _meanshiftFramebuffer.bind();
     glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
     glViewport(0, 0, _msTexSize, _msTexSize);
@@ -299,8 +299,8 @@ void DensityPlotWidget::drawGradientOffscreen()
 
     _shaderGradientCompute.bind();
 
-    _pdfTexture.bind(0);
-    _shaderGradientCompute.uniform1i("pdfTexture", 0);
+    _densityTexture.bind(0);
+    _shaderGradientCompute.uniform1i("densityTexture", 0);
 
     _shaderGradientCompute.uniform2f("renderParams", 1.0f / _maxKDE, 1.0f / 1000);
 
@@ -313,7 +313,7 @@ void DensityPlotWidget::drawGradientOffscreen()
 
 void DensityPlotWidget::drawMeanshiftOffscreen()
 {
-    _pdfFBO.bind();
+    _meanshiftFramebuffer.bind();
     glDrawBuffer(GL_COLOR_ATTACHMENT2);
 
     glViewport(0, 0, _msTexSize, _msTexSize);
@@ -376,7 +376,7 @@ void DensityPlotWidget::drawDensity()
     if (_numPoints > 0) {
         _shaderDensityDraw.bind();
 
-        _pdfTexture.bind(0);
+        _densityTexture.bind(0);
         _shaderDensityDraw.uniform1i("tex", 0);
         _shaderDensityDraw.uniform1f("norm", 1 / _maxKDE);
 

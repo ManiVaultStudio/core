@@ -87,8 +87,8 @@ private:
 
     /////////////////
     GaussianTexture _gaussTexture;
-    Framebuffer _pdfFBO;
-    Texture2D _pdfTexture;
+    Framebuffer _meanshiftFramebuffer;
+    Texture2D _densityTexture;
     Texture2D _gradientTexture;
     Texture2D _meanshiftTexture;
 
