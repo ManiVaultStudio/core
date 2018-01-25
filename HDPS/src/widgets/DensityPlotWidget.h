@@ -50,6 +50,7 @@ protected:
     void drawMeanshiftOffscreen();
     void drawDensity();
     void drawGradient();
+    void cluster();
     void createSampleSelectionTextureBuffer();
 
     void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
@@ -99,7 +100,12 @@ private:
     size_t _msTexSize;
 
     bool _needsDensityMapUpdate;
+
     std::vector<float> _meanShiftMapCPU;
+    std::vector<float> _clusterPositions;
+    std::vector<int> _clusterIds;
+    std::vector<int> _clusterIdsOriginal;
+    std::vector<GLfloat> _vtxIdxs;
 };
 
 } // namespace gui
