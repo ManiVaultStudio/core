@@ -205,9 +205,6 @@ void DensityPlotWidget::drawDensityOffscreen()
     // Bind shader
     _shaderDensityCompute.bind();
 
-    // Set mvp uniform
-    //_offscreenDensityShader.uniformMatrix4f("modelViewProjectionMatrix", _mvp);
-
     // Set sigma uniform
     _shaderDensityCompute.uniform1f("sigma", _sigma);
 
@@ -275,20 +272,19 @@ void DensityPlotWidget::drawGradientOffscreen()
 
     _shaderGradientCompute.bind();
 
-    // Attributes
-    //GLuint positionAttribute = shaderProgram->getAttributeLocation("position");
+    _pdfTexture.bind(0);
+    _shaderGradientCompute.uniform1i("pdfTexture", 0);
 
     _shaderGradientCompute.uniform2f("renderParams", 1.0f / _maxKDE, 1.0f / 1000);
-    //Uniforms
-    //GLuint mvpUniform = shaderProgram->getUniformLocation("modelViewProjectionMatrix");
-    //GLuint renderParamsUniform = shaderProgram->getUniformLocation("renderParams");
 
-    // Textures
-    //GLuint pdfSampler = shaderProgram->getSamplerLocation("pdfSampler");
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
 
-    //shaderProgram->bindAndEnable();
+    _shaderGradientCompute.release();
 
-    //shaderProgram->setParameter4x4fv(mvpUniform, _mvp);
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+}
 
     //shaderProgram->setParameter4f(renderParamsUniform, 1.0f / _maxKDE, 1.0f / 1000.0f, 1.0f / _msTexSize, 1.0f / _msTexSize);
 
