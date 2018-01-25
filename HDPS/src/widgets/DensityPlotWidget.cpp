@@ -278,6 +278,7 @@ void DensityPlotWidget::drawGradientOffscreen()
     // Attributes
     //GLuint positionAttribute = shaderProgram->getAttributeLocation("position");
 
+    _shaderGradientCompute.uniform2f("renderParams", 1.0f / _maxKDE, 1.0f / 1000);
     //Uniforms
     //GLuint mvpUniform = shaderProgram->getUniformLocation("modelViewProjectionMatrix");
     //GLuint renderParamsUniform = shaderProgram->getUniformLocation("renderParams");
