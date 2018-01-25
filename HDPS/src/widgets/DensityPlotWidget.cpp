@@ -73,6 +73,8 @@ void DensityPlotWidget::initializeGL()
     _gaussTexture.create();
     _gaussTexture.generate();
 
+    glGenVertexArrays(1, &_quad);
+
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
 
@@ -206,6 +208,13 @@ void DensityPlotWidget::paintGL()
     drawGradient();
 }
 
+void DensityPlotWidget::drawFullscreenQuad()
+{
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
+}
+
 void DensityPlotWidget::drawDensityOffscreen()
 {
     glViewport(0, 0, _msTexSize, _msTexSize);
@@ -295,9 +304,7 @@ void DensityPlotWidget::drawGradientOffscreen()
 
     _shaderGradientCompute.uniform2f("renderParams", 1.0f / _maxKDE, 1.0f / 1000);
 
-    glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
+    drawFullscreenQuad();
 
     _shaderGradientCompute.release();
 
@@ -321,9 +328,7 @@ void DensityPlotWidget::drawMeanshiftOffscreen()
 
     _shaderMeanshiftCompute.uniform4f("renderParams", 0.25f, 0.0f, 1.0f / _msTexSize, 1.0f / _msTexSize);
 
-    glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
+    drawFullscreenQuad();
 
     _shaderMeanshiftCompute.release();
 
@@ -375,7 +380,7 @@ void DensityPlotWidget::drawDensity()
         _shaderDensityDraw.uniform1i("tex", 0);
         _shaderDensityDraw.uniform1f("norm", 1 / _maxKDE);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        drawFullscreenQuad();
 
         _shaderDensityDraw.release();
     }
@@ -395,7 +400,7 @@ void DensityPlotWidget::drawGradient()
         _gradientTexture.bind(0);
         _shaderGradientDraw.uniform1i("tex", 0);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        drawFullscreenQuad();
 
         _shaderGradientDraw.release();
     }

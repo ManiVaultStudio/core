@@ -44,6 +44,7 @@ protected:
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
     void paintGL()              Q_DECL_OVERRIDE;
 
+    void drawFullscreenQuad();
     void drawDensityOffscreen();
     void drawGradientOffscreen();
     void drawMeanshiftOffscreen();
@@ -64,6 +65,7 @@ private:
     Matrix3f toIsotropicCoordinates;
 
     GLuint _vao;
+    GLuint _quad;
 
     BufferObject _positionBuffer;
 
