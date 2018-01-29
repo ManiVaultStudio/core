@@ -530,6 +530,26 @@ void DensityPlotWidget::createSampleSelectionTextureBuffer()
     glBindTexture(GL_TEXTURE_1D, 0);
 }
 
+bool DensityPlotWidget::equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon)
+{
+    if (p1.size() != p2.size()) return false;
+
+    bool equal = true;
+
+    //std::cout << "\nComparing Points: (" << p1[0] << ", " << p1[1] << ") and (" << p2[0] << ", " << p2[1] << ") with epsilon " << epsilon << ".\n";
+
+    for (int i = 0; i < p1.size(); i++)
+    {
+        equal = fabs(p1[i] - p2[i]) < epsilon;
+        //std::cout << "	" << i << ": abs(" << p1[i] << " - " << p2[i] << ") = " << std::abs(p1[i] - p2[i]) << " < " << epsilon << "? " << (equal ? "true" : "false\n");
+
+        if (!equal) break;
+    }
+
+    return equal;
+}
+
+
 void DensityPlotWidget::mousePressEvent(QMouseEvent *event)
 {
     _selecting = true;

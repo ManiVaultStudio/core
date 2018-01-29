@@ -52,6 +52,7 @@ protected:
     void drawGradient();
     void cluster();
     void createSampleSelectionTextureBuffer();
+    bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
 
     void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
