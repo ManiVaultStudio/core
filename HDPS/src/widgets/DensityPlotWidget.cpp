@@ -338,7 +338,7 @@ void DensityPlotWidget::drawMeanshiftOffscreen()
     glReadPixels(0, 0, _msTexSize, _msTexSize, GL_RGB, GL_FLOAT, _meanShiftMapCPU.data());
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
-
+    qDebug() << "Drawing meanshift";
     //{
     //	double t = 0.0;
     //	{
@@ -362,7 +362,7 @@ void DensityPlotWidget::drawMeanshiftOffscreen()
     //	std::cout << "	Clustered 100 times in new mode in " << t << "\n";
     //}
 
-    //cluster();
+    cluster();
 }
 
 void DensityPlotWidget::drawDensity()
@@ -408,109 +408,110 @@ void DensityPlotWidget::drawGradient()
 
 void DensityPlotWidget::cluster()
 {
-//    if (_vtxIdxs.size() <= 0) return;
-//
-//    _clusterIds.resize(_msTexSize * _msTexSize);
-//    _clusterIdsOriginal.resize(_msTexSize * _msTexSize);
-//    std::vector< std::vector< float > > clusterCenters;
-//
-//    float epsilon = (float)_msTexSize / (128 * 256);
-//    for (int i = 0; i < _meanShiftMapCPU.size(); i += 3) {
-//
-//        std::vector< float > center = { _meanShiftMapCPU[i], _meanShiftMapCPU[i + 1] };
-//
-//        if (center[0] < 0.00001 && center[1] < 0.00001)
-//        {
-//            _clusterIdsOriginal[i / 3] = -1;
-//            continue;
-//        }
-//
-//        int clusterId = -1;
-//        for (int c = 0; c < clusterCenters.size(); c++)
-//        {
-//            if (std::equal(center, clusterCenters[c], epsilon))
-//            {
-//                clusterId = c;
-//                break;
-//            }
-//        }
-//
-//        if (clusterId < 0)
-//        {
-//            clusterCenters.push_back(center);
-//            _clusterIdsOriginal[i / 3] = static_cast<int>(clusterCenters.size() - 1);
-//        }
-//        else
-//        {
-//            _clusterIdsOriginal[i / 3] = clusterId;
-//        }
-//
-//        //std::cout << center[0] << ", " << center[1];
-//    }
-//
-//    //// DEBUG ======================================================================
-//    //QImage pluto(_msTexSize, _msTexSize, QImage::Format::Format_ARGB32);
-//    //float scale = 255.0 / clusterCenters.size();
-//    //for (int j = 0; j < _msTexSize; ++j)
-//    //{
-//    //	for (int i = 0; i < _msTexSize; ++i)
-//    //	{
-//    //		int idx = j * _msTexSize + i;
-//    //		pluto.setPixel(i, j, qRgb(clusterIds[idx] * scale, clusterIds[idx] * scale, clusterIds[idx] * scale));
-//    //	}
-//    //}
-//    //pluto.save("meanshift_clusters.png");
-//    //// DEBUG ======================================================================
-//
-//    //std::vector< std::vector< std::pair <int, int> > > mcvClusters(clusterCenters.size());
-//    std::vector<int> activeIds(clusterCenters.size(), -1);
-//    int runningIdx = 0;
-//    _clusterPositions.clear();
-//    for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
-//
-//        int x = (int)(_vtxIdxs[2 * i] * (_msTexSize - 1) + 0.5);
-//        int y = (int)(_vtxIdxs[2 * i + 1] * (_msTexSize - 1) + 0.5);
-//
-//        int idx = (x + y * _msTexSize);
-//
-//        int cId = _clusterIdsOriginal[idx];
-//        if (cId >= 0 && activeIds[cId] < 0) {
-//
-//            std::vector< float > center = { clusterCenters[cId] };
-//            _clusterPositions.push_back(center[0]);
-//            _clusterPositions.push_back(center[1]);
-//
-//            activeIds[cId] = runningIdx++;
-//        }
-//    }
-//
-//#pragma omp parallel for
-//    for (int i = 0; i < _clusterIdsOriginal.size(); i++) {
-//        if (_clusterIdsOriginal[i] >= 0){ _clusterIdsOriginal[i] = activeIds[_clusterIdsOriginal[i]]; }
-//        _clusterIds[i] = _clusterIdsOriginal[i];
-//    }
-//
-//    std::vector< std::vector<unsigned int> > clusterIdxs(runningIdx);
-//    for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
-//
-//        int x = (int)(_vtxIdxs[2 * i] * (_msTexSize - 1) + 0.5);
-//        int y = (int)(_vtxIdxs[2 * i + 1] * (_msTexSize - 1) + 0.5);
-//
-//        int idx = (x + y * _msTexSize);
-//
-//        int cId = _clusterIdsOriginal[idx];
-//        if (cId >= 0) { clusterIdxs[cId].push_back(i); }
-//        ////mcvClusters[cId].push_back(_localPointReferences[i]);
-//    }
-//
-//    ////_meanShiftClusters = MCV_CytometryData::Instance()->derivedDataClusters("Density Clusters - " + _activeDataName);
-//    ////_meanShiftClusters->setClusters(mcvClusters);
-//
-//    //>>>_meanShiftClusters = _analysis->updateClusters(&clusterIdxs, "Density Clusters");
-//
-//    //>>>refreshClusterBuffers();
-//
-//    //>>>_clustersNeedRefresh = false;
+    if (_vtxIdxs.size() <= 0) return;
+
+    _clusterIds.resize(_msTexSize * _msTexSize);
+    _clusterIdsOriginal.resize(_msTexSize * _msTexSize);
+    std::vector< std::vector< float > > clusterCenters;
+
+    float epsilon = (float)_msTexSize / (128 * 256);
+    for (int i = 0; i < _meanShiftMapCPU.size(); i += 3) {
+
+        std::vector< float > center = { _meanShiftMapCPU[i], _meanShiftMapCPU[i + 1] };
+
+        if (center[0] < 0.00001 && center[1] < 0.00001)
+        {
+            _clusterIdsOriginal[i / 3] = -1;
+            continue;
+        }
+
+        int clusterId = -1;
+        for (int c = 0; c < clusterCenters.size(); c++)
+        {
+            if (equal(center, clusterCenters[c], epsilon))
+            {
+                clusterId = c;
+                break;
+            }
+        }
+
+        if (clusterId < 0)
+        {
+            clusterCenters.push_back(center);
+            _clusterIdsOriginal[i / 3] = static_cast<int>(clusterCenters.size() - 1);
+        }
+        else
+        {
+            _clusterIdsOriginal[i / 3] = clusterId;
+        }
+
+        //std::cout << center[0] << ", " << center[1];
+    }
+
+    // DEBUG ======================================================================
+    QImage pluto(_msTexSize, _msTexSize, QImage::Format::Format_ARGB32);
+    float scale = 255.0 / clusterCenters.size();
+    for (int j = 0; j < _msTexSize; ++j)
+    {
+    	for (int i = 0; i < _msTexSize; ++i)
+    	{
+    		int idx = j * _msTexSize + i;
+    		pluto.setPixel(i, j, qRgb(_clusterIds[idx] * scale, _clusterIds[idx] * scale, _clusterIds[idx] * scale));
+    	}
+    }
+    pluto.save("meanshift_clusters.png");
+    qDebug() << "Saved image of clusters";
+    // DEBUG ======================================================================
+
+    //std::vector< std::vector< std::pair <int, int> > > mcvClusters(clusterCenters.size());
+    std::vector<int> activeIds(clusterCenters.size(), -1);
+    int runningIdx = 0;
+    _clusterPositions.clear();
+    for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
+
+        int x = (int)(_vtxIdxs[2 * i] * (_msTexSize - 1) + 0.5);
+        int y = (int)(_vtxIdxs[2 * i + 1] * (_msTexSize - 1) + 0.5);
+
+        int idx = (x + y * _msTexSize);
+
+        int cId = _clusterIdsOriginal[idx];
+        if (cId >= 0 && activeIds[cId] < 0) {
+
+            std::vector< float > center = { clusterCenters[cId] };
+            _clusterPositions.push_back(center[0]);
+            _clusterPositions.push_back(center[1]);
+
+            activeIds[cId] = runningIdx++;
+        }
+    }
+
+#pragma omp parallel for
+    for (int i = 0; i < _clusterIdsOriginal.size(); i++) {
+        if (_clusterIdsOriginal[i] >= 0){ _clusterIdsOriginal[i] = activeIds[_clusterIdsOriginal[i]]; }
+        _clusterIds[i] = _clusterIdsOriginal[i];
+    }
+
+    std::vector< std::vector<unsigned int> > clusterIdxs(runningIdx);
+    for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
+
+        int x = (int)(_vtxIdxs[2 * i] * (_msTexSize - 1) + 0.5);
+        int y = (int)(_vtxIdxs[2 * i + 1] * (_msTexSize - 1) + 0.5);
+
+        int idx = (x + y * _msTexSize);
+
+        int cId = _clusterIdsOriginal[idx];
+        if (cId >= 0) { clusterIdxs[cId].push_back(i); }
+        ////mcvClusters[cId].push_back(_localPointReferences[i]);
+    }
+
+    ////_meanShiftClusters = MCV_CytometryData::Instance()->derivedDataClusters("Density Clusters - " + _activeDataName);
+    ////_meanShiftClusters->setClusters(mcvClusters);
+
+    //>>>_meanShiftClusters = _analysis->updateClusters(&clusterIdxs, "Density Clusters");
+
+    //>>>refreshClusterBuffers();
+
+    //>>>_clustersNeedRefresh = false;
 }
 
 void DensityPlotWidget::createSampleSelectionTextureBuffer()
