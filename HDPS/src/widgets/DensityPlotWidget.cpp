@@ -232,21 +232,17 @@ void DensityPlotWidget::cluster()
     //>>>_clustersNeedRefresh = false;
 }
 
+void DensityPlotWidget::drawMeanShift()
 void DensityPlotWidget::createSampleSelectionTextureBuffer()
 {
-    if (_activeSampleTexture == 0)
-        glGenTextures(1, &_activeSampleTexture);
+    if (_numPoints == 0) return;
 
-    glBindTexture(GL_TEXTURE_1D, _activeSampleTexture);
+    _shaderMeanShiftDraw.bind();
 
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    meanShift.getMeanShiftTexture().bind(0);
+    _shaderMeanShiftDraw.uniform1i("tex", 0);
 
-    //glTexImage1D(GL_TEXTURE_1D, 0, GL_R32I, _localSampleSelectionForBuffer.size(), 0, GL_RED_INTEGER, GL_INT, _localSampleSelectionForBuffer.data());
-
-    glBindTexture(GL_TEXTURE_1D, 0);
+    meanShift.drawFullscreenQuad();
 }
 
 bool DensityPlotWidget::equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon)

@@ -41,6 +41,7 @@ protected:
 
     void drawDensity();
     void drawGradient();
+    void drawMeanShift();
     void cluster();
     void createSampleSelectionTextureBuffer();
     bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
