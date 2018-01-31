@@ -12,10 +12,11 @@
         <file>shaders/Quad.vert</file>
         <file>shaders/DensityCompute.vert</file>
         <file>shaders/DensityCompute.frag</file>
-        <file>shaders/DensityDraw.frag</file>
         <file>shaders/GradientCompute.frag</file>
-        <file>shaders/GradientDraw.frag</file>
         <file>shaders/MeanshiftCompute.frag</file>
+        <file>shaders/DensityDraw.frag</file>
+        <file>shaders/GradientDraw.frag</file>
+        <file>shaders/Texture.frag</file>
     </qresource>
     
     <qresource prefix="">
