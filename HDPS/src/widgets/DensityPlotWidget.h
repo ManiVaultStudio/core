@@ -42,9 +42,8 @@ protected:
     void drawDensity();
     void drawGradient();
     void drawMeanShift();
-    void cluster();
-    void createSampleSelectionTextureBuffer();
-    bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
+
+    //void createSampleSelectionTextureBuffer();
 
     void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
@@ -75,11 +74,6 @@ private:
     MeanShift meanShift;
 
     bool _needsDensityMapUpdate;
-
-    //std::vector<float> _clusterPositions;
-    //std::vector<int> _clusterIds;
-    //std::vector<int> _clusterIdsOriginal;
-    //std::vector<GLfloat> _vtxIdxs;
 };
 
 } // namespace gui

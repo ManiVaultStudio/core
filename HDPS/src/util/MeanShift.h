@@ -31,6 +31,10 @@ public:
     void computeGradient();
     void computeMeanShift();
 
+    void cluster();
+    //void createSampleSelectionTextureBuffer();
+    bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
+
     Texture2D& getDensityTexture();
     Texture2D& getGradientTexture();
     Texture2D& getMeanShiftTexture();
@@ -56,6 +60,10 @@ private:
     size_t _msTexSize;
 
     std::vector<float> _meanShiftMapCPU;
+    std::vector<float> _clusterPositions;
+    std::vector<int> _clusterIds;
+    std::vector<int> _clusterIdsOriginal;
+    std::vector<GLfloat> _vtxIdxs;
 };
 
 } // namespace hdps

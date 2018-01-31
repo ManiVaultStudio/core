@@ -104,136 +104,32 @@ void DensityPlotWidget::paintGL()
     drawMeanShift();
 }
 
-void DensityPlotWidget::drawGradient()
+void DensityPlotWidget::drawDensity()
 {
-    glViewport(0, 0, _windowSize.width(), _windowSize.height());
+    if (_numPoints == 0) return;
 
-    glClearColor(1, 1, 1, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    _shaderDensityDraw.bind();
 
-    if (_numPoints > 0) {
-        _shaderGradientDraw.bind();
+    meanShift.getDensityTexture().bind(0);
+    _shaderDensityDraw.uniform1i("tex", 0);
+    _shaderDensityDraw.uniform1f("norm", 1 / meanShift._maxKDE);
 
-        _gradientTexture.bind(0);
-        _shaderGradientDraw.uniform1i("tex", 0);
-
-        drawFullscreenQuad();
-
-        _shaderGradientDraw.release();
-    }
+    meanShift.drawFullscreenQuad();
 }
 
-void DensityPlotWidget::cluster()
+void DensityPlotWidget::drawGradient()
 {
-    if (_vtxIdxs.size() <= 0) return;
+    if (_numPoints == 0) return;
 
-    _clusterIds.resize(_msTexSize * _msTexSize);
-    _clusterIdsOriginal.resize(_msTexSize * _msTexSize);
-    std::vector< std::vector< float > > clusterCenters;
+    _shaderGradientDraw.bind();
 
-    float epsilon = (float)_msTexSize / (128 * 256);
-    for (int i = 0; i < _meanShiftMapCPU.size(); i += 3) {
+    meanShift.getGradientTexture().bind(0);
+    _shaderGradientDraw.uniform1i("tex", 0);
 
-        std::vector< float > center = { _meanShiftMapCPU[i], _meanShiftMapCPU[i + 1] };
-
-        if (center[0] < 0.00001 && center[1] < 0.00001)
-        {
-            _clusterIdsOriginal[i / 3] = -1;
-            continue;
-        }
-
-        int clusterId = -1;
-        for (int c = 0; c < clusterCenters.size(); c++)
-        {
-            if (equal(center, clusterCenters[c], epsilon))
-            {
-                clusterId = c;
-                break;
-            }
-        }
-
-        if (clusterId < 0)
-        {
-            clusterCenters.push_back(center);
-            _clusterIdsOriginal[i / 3] = static_cast<int>(clusterCenters.size() - 1);
-        }
-        else
-        {
-            _clusterIdsOriginal[i / 3] = clusterId;
-        }
-
-        //std::cout << center[0] << ", " << center[1];
-    }
-
-    // DEBUG ======================================================================
-    QImage pluto(_msTexSize, _msTexSize, QImage::Format::Format_ARGB32);
-    float scale = 255.0 / clusterCenters.size();
-    for (int j = 0; j < _msTexSize; ++j)
-    {
-    	for (int i = 0; i < _msTexSize; ++i)
-    	{
-    		int idx = j * _msTexSize + i;
-    		pluto.setPixel(i, j, qRgb(_clusterIds[idx] * scale, _clusterIds[idx] * scale, _clusterIds[idx] * scale));
-    	}
-    }
-    pluto.save("meanshift_clusters.png");
-    qDebug() << "Saved image of clusters";
-    // DEBUG ======================================================================
-
-    //std::vector< std::vector< std::pair <int, int> > > mcvClusters(clusterCenters.size());
-    std::vector<int> activeIds(clusterCenters.size(), -1);
-    int runningIdx = 0;
-    _clusterPositions.clear();
-    for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
-
-        int x = (int)(_vtxIdxs[2 * i] * (_msTexSize - 1) + 0.5);
-        int y = (int)(_vtxIdxs[2 * i + 1] * (_msTexSize - 1) + 0.5);
-
-        int idx = (x + y * _msTexSize);
-
-        int cId = _clusterIdsOriginal[idx];
-        if (cId >= 0 && activeIds[cId] < 0) {
-
-            std::vector< float > center = { clusterCenters[cId] };
-            _clusterPositions.push_back(center[0]);
-            _clusterPositions.push_back(center[1]);
-
-            activeIds[cId] = runningIdx++;
-        }
-    }
-
-#pragma omp parallel for
-    for (int i = 0; i < _clusterIdsOriginal.size(); i++) {
-        if (_clusterIdsOriginal[i] >= 0){ _clusterIdsOriginal[i] = activeIds[_clusterIdsOriginal[i]]; }
-        _clusterIds[i] = _clusterIdsOriginal[i];
-    }
-
-    std::vector< std::vector<unsigned int> > clusterIdxs(runningIdx);
-    for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
-
-        int x = (int)(_vtxIdxs[2 * i] * (_msTexSize - 1) + 0.5);
-        int y = (int)(_vtxIdxs[2 * i + 1] * (_msTexSize - 1) + 0.5);
-
-        int idx = (x + y * _msTexSize);
-
-        int cId = _clusterIdsOriginal[idx];
-        if (cId >= 0) { clusterIdxs[cId].push_back(i); }
-        ////mcvClusters[cId].push_back(_localPointReferences[i]);
-    }
-
-    ////_meanShiftClusters = MCV_CytometryData::Instance()->derivedDataClusters("Density Clusters - " + _activeDataName);
-    ////_meanShiftClusters->setClusters(mcvClusters);
-
-    //>>>_meanShiftClusters = _analysis->updateClusters(&clusterIdxs, "Density Clusters");
-
-    //>>>refreshClusterBuffers();
-
-    //>>>_clustersNeedRefresh = false;
+    meanShift.drawFullscreenQuad();
 }
 
 void DensityPlotWidget::drawMeanShift()
-void DensityPlotWidget::createSampleSelectionTextureBuffer()
 {
     if (_numPoints == 0) return;
 
@@ -245,24 +141,23 @@ void DensityPlotWidget::createSampleSelectionTextureBuffer()
     meanShift.drawFullscreenQuad();
 }
 
-bool DensityPlotWidget::equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon)
-{
-    if (p1.size() != p2.size()) return false;
 
-    bool equal = true;
-
-    //std::cout << "\nComparing Points: (" << p1[0] << ", " << p1[1] << ") and (" << p2[0] << ", " << p2[1] << ") with epsilon " << epsilon << ".\n";
-
-    for (int i = 0; i < p1.size(); i++)
-    {
-        equal = fabs(p1[i] - p2[i]) < epsilon;
-        //std::cout << "	" << i << ": abs(" << p1[i] << " - " << p2[i] << ") = " << std::abs(p1[i] - p2[i]) << " < " << epsilon << "? " << (equal ? "true" : "false\n");
-
-        if (!equal) break;
-    }
-
-    return equal;
-}
+//void DensityPlotWidget::createSampleSelectionTextureBuffer()
+//{
+//    if (_activeSampleTexture == 0)
+//        glGenTextures(1, &_activeSampleTexture);
+//
+//    glBindTexture(GL_TEXTURE_1D, _activeSampleTexture);
+//
+//    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//
+//    //glTexImage1D(GL_TEXTURE_1D, 0, GL_R32I, _localSampleSelectionForBuffer.size(), 0, GL_RED_INTEGER, GL_INT, _localSampleSelectionForBuffer.data());
+//
+//    glBindTexture(GL_TEXTURE_1D, 0);
+//}
 
 
 void DensityPlotWidget::mousePressEvent(QMouseEvent *event)
