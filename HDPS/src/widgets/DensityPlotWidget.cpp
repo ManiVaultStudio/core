@@ -17,10 +17,9 @@ namespace gui
 void DensityPlotWidget::setData(const std::vector<Vector2f>* positions)
 {
     _numPoints = (unsigned int)positions->size();
-    _positions = positions;
 
     qDebug() << "Setting position data";
-    meanShift.setData(_positions);
+    meanShift.setData(positions);
 
     _needsDensityMapUpdate = true;
     update();
@@ -41,11 +40,6 @@ void DensityPlotWidget::initializeGL()
     qDebug() << "Initializing density plot";
 
     meanShift.init();
-
-    if (_numPoints > 0)
-    {
-        meanShift.setData(_positions);
-    }
 
     bool loaded = _shaderDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/DensityDraw.frag");
     if (!loaded) {
@@ -185,26 +179,26 @@ void DensityPlotWidget::mouseReleaseEvent(QMouseEvent *event)
     Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
     _selection.setEnd(point);
 
-    onSelection(_selection);
+    //onSelection(_selection);
 }
 
-void DensityPlotWidget::onSelection(Selection selection)
-{
-    update();
-
-    std::vector<unsigned int> indices;
-    for (unsigned int i = 0; i < _numPoints; i++)
-    {
-        Vector2f point = (*_positions)[i];
-        point.x *= _windowSize.width() / _windowSize.height();
-
-        if (selection.contains(point))
-            indices.push_back(i);
-    }
-
-    for (const plugin::SelectionListener* listener : _selectionListeners)
-        listener->onSelection(indices);
-}
+//void DensityPlotWidget::onSelection(Selection selection)
+//{
+//    update();
+//
+//    std::vector<unsigned int> indices;
+//    for (unsigned int i = 0; i < _numPoints; i++)
+//    {
+//        Vector2f point = (*_positions)[i];
+//        point.x *= _windowSize.width() / _windowSize.height();
+//
+//        if (selection.contains(point))
+//            indices.push_back(i);
+//    }
+//
+//    for (const plugin::SelectionListener* listener : _selectionListeners)
+//        listener->onSelection(indices);
+//}
 
 void DensityPlotWidget::cleanup()
 {

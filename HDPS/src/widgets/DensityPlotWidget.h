@@ -49,7 +49,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
-    void onSelection(Selection selection);
+    //void onSelection(Selection selection);
     void cleanup();
 
 private:
@@ -66,7 +66,6 @@ private:
     //GLuint _activeSampleTexture;
 
     unsigned int _numPoints = 0;
-    const std::vector<Vector2f>* _positions;
 
     ShaderProgram _shaderDensityDraw;
     ShaderProgram _shaderGradientDraw;
