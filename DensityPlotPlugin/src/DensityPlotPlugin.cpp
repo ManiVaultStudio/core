@@ -101,7 +101,6 @@ void DensityPlotPlugin::updateData()
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
     
     std::vector<hdps::Vector2f>* positions = new std::vector<hdps::Vector2f>();
-    //std::vector<hdps::Vector3f> colors;
 
     int nDim = points->getNumDimensions();
 
