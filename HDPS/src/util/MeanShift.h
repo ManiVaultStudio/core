@@ -52,6 +52,7 @@ private:
 
     BufferObject _positionBuffer;
     unsigned int _numPoints = 0;
+    const std::vector<Vector2f>* _points;
     GLuint _vao;
     GLuint _quad;
 

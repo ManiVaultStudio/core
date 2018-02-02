@@ -145,9 +145,7 @@ void MeanShift::cleanup()
 void MeanShift::setData(const std::vector<Vector2f>* points)
 {
     _numPoints = (unsigned int) points->size();
-
-    _positionBuffer.bind();
-    _positionBuffer.setData(*points);
+    _points = points;
 }
 
 void MeanShift::drawFullscreenQuad()
@@ -160,6 +158,10 @@ void MeanShift::drawFullscreenQuad()
 void MeanShift::computeDensity()
 {
     if (_numPoints == 0) return;
+
+    _positionBuffer.bind();
+    _positionBuffer.setData(*_points);
+
     qDebug() << "Computing density";
     glViewport(0, 0, _msTexSize, _msTexSize);
 
@@ -282,7 +284,6 @@ void MeanShift::computeMeanShift()
     glReadBuffer(GL_COLOR_ATTACHMENT2);
     glReadPixels(0, 0, _msTexSize, _msTexSize, GL_RGB, GL_FLOAT, _meanShiftMapCPU.data());
 
-    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
     qDebug() << "Computing meanshift";
     //{
     //	double t = 0.0;
@@ -309,7 +310,6 @@ void MeanShift::computeMeanShift()
 
     cluster();
 }
-
 
 void MeanShift::cluster()
 {
