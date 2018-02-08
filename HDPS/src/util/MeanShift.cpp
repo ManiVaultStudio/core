@@ -247,7 +247,7 @@ void MeanShift::computeGradient()
     _densityTexture.bind(0);
     _shaderGradientCompute.uniform1i("densityTexture", 0);
 
-    _shaderGradientCompute.uniform2f("renderParams", 1.0f / _maxKDE, 1.0f / 1000);
+    _shaderGradientCompute.uniform2f("renderParams", 1.0f / _maxKDE, 1.0f / 100000);
 
     drawFullscreenQuad();
 
