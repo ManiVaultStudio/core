@@ -315,21 +315,25 @@ void MeanShift::cluster()
 {
     if (_vtxIdxs.size() <= 0) return;
 
+    // Resize clusterID arrays to equal number of pixels
     _clusterIds.resize(_msTexSize * _msTexSize);
     _clusterIdsOriginal.resize(_msTexSize * _msTexSize);
     std::vector< std::vector< float > > clusterCenters;
 
     float epsilon = (float)_msTexSize / (128 * 256);
+    // For every pixel in Mean Shift Map
     for (int i = 0; i < _meanShiftMapCPU.size(); i += 3) {
-
+        // Set center to red and green component of pixel
         std::vector< float > center = { _meanShiftMapCPU[i], _meanShiftMapCPU[i + 1] };
 
+        // If either of the center components are 0 or lower, set clusterID for this pixel to -1
         if (center[0] < 0.00001 && center[1] < 0.00001)
         {
             _clusterIdsOriginal[i / 3] = -1;
             continue;
         }
 
+        // If the center already exist in clusterCenters set clusterID to that cluster
         int clusterId = -1;
         for (int c = 0; c < clusterCenters.size(); c++)
         {
@@ -340,13 +344,16 @@ void MeanShift::cluster()
             }
         }
 
+        // If clusterID was not found already, push the new center into clusterCenters
         if (clusterId < 0)
         {
             clusterCenters.push_back(center);
+            // Set the current pixel in clusterIdsOriginal to the number of cluster centers
             _clusterIdsOriginal[i / 3] = static_cast<int>(clusterCenters.size() - 1);
         }
         else
         {
+            // Set the current pixel in clusterIdsOriginal to the previously found clusterID
             _clusterIdsOriginal[i / 3] = clusterId;
         }
 
@@ -369,7 +376,10 @@ void MeanShift::cluster()
     // DEBUG ======================================================================
 
     //std::vector< std::vector< std::pair <int, int> > > mcvClusters(clusterCenters.size());
+
+    // Create a vector with the same size as the number of clusters, and set all IDs to -1
     std::vector<int> activeIds(clusterCenters.size(), -1);
+
     int runningIdx = 0;
     _clusterPositions.clear();
     for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
