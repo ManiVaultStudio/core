@@ -273,7 +273,7 @@ void MeanShift::computeMeanShift()
     _gradientTexture.bind(0);
     _shaderMeanshiftCompute.uniform1i("gradientTexture", 0);
 
-    _shaderMeanshiftCompute.uniform4f("renderParams", 0.25f, 0.0f, 1.0f / _msTexSize, 1.0f / _msTexSize);
+    _shaderMeanshiftCompute.uniform4f("renderParams", 0.25f, _maxKDE, 1.0f / _msTexSize, 1.0f / _msTexSize);
 
     drawFullscreenQuad();
 
