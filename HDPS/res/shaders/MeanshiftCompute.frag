@@ -1,7 +1,7 @@
 #version 330 core
 
-#define EPSILON 0.001
-#define MAX_STEPS 10000
+#define EPSILON 0.002
+#define MAX_STEPS 1000
 
 uniform sampler2D gradientTexture;
 
@@ -13,36 +13,37 @@ out vec4 fragColor;
 
 void main()
 {
-    vec3 texelSize = vec3(renderParams.zw, 0.0);
+    vec2 texelSize = renderParams.zw;
     
-    vec3 gradient = texture(gradientTexture, pass_texCoord).rgb;
+    vec3 t = texture(gradientTexture, pass_texCoord).xyz;
+    vec2 gradient = t.xy;
+    float density = t.z;
+    float threshold = EPSILON * renderParams.y;
     
-    if (gradient.xy == 0)
-    {
+    float len = length(gradient);
+    
+    if (density < threshold) {
         fragColor = vec4(0, 0, 0, 1);
+        return;
     }
-    else
+    
+    vec2 pos = pass_texCoord;
+    //vec2 nextPos = pos + normalize(gradient.xy) * texelSize.xy * renderParams.x;
+    
+    int count = 0;
+    for (int i = 0; i < MAX_STEPS; i++)
     {
-        float len = length(gradient);
+        //pos = nextPos;
+
+        vec2 ngradient = texture(gradientTexture, pos).xy;
+        if (dot(ngradient, gradient) < 0) break;
+        gradient = ngradient;
+        //len = length(gradient);
         
-        vec2 pos = pass_texCoord;
-        vec2 nextPos = pos + normalize(gradient.xy) * texelSize.xy * renderParams.x;
+        pos = pos + normalize(gradient) * texelSize;// * renderParams.x;
         
-        int count = 0;
-        for (int i = 0; i < MAX_STEPS; i++)
-        {
-            if (len < EPSILON && gradient.z > 0.5) break;
-            
-            pos = nextPos;
-            
-            gradient = texture(gradientTexture, pos).rgb;
-            len = length(gradient);
-            
-            nextPos = pos + normalize(gradient.xy) * texelSize.xy * renderParams.x;
-            
-            count = i;
-        }
-        
-        fragColor = vec4(pos, float(count) / (MAX_STEPS-1), 1);
+        count = i;
     }
+
+    fragColor = vec4(pos, count / (MAX_STEPS-1), 1);
 }
