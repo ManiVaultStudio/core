@@ -10,11 +10,12 @@ out vec4 fragColor;
 
 void main()
 {
-    vec2 gradient;
+    vec3 gradient;
     
-    if(texture(densityTexture, pass_texCoord.xy).r < renderParams.y)
+    float density = texture(densityTexture, pass_texCoord.xy).r;
+    if(density < renderParams.y)
     {
-        gradient = vec2(0.0);
+        gradient = vec3(0);
     }
     else
     {
@@ -25,8 +26,8 @@ void main()
         neighborDensities.w = textureOffset(densityTexture, pass_texCoord, ivec2(0, -1)).r;
         neighborDensities *= renderParams.x;
 
-        gradient = vec2(neighborDensities.x - neighborDensities.y, neighborDensities.z - neighborDensities.w);
+        gradient = vec3(neighborDensities.x - neighborDensities.y, neighborDensities.z - neighborDensities.w, 1);
     }
     
-    fragColor = vec4(gradient, 0, 1);
+    fragColor = vec4(gradient, density);
 }
