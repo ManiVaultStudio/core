@@ -313,7 +313,7 @@ void MeanShift::computeMeanShift()
 
 void MeanShift::cluster()
 {
-    if (_vtxIdxs.size() <= 0) return;
+    if (_points->size() <= 0) return;
 
     // Resize clusterID arrays to equal number of pixels
     _clusterIds.resize(_msTexSize * _msTexSize);
@@ -406,16 +406,18 @@ void MeanShift::cluster()
     }
 
 #pragma omp parallel for
+    // For every assigned clusterID, set it to the corresponding active ID and store it in clusterIds
     for (int i = 0; i < _clusterIdsOriginal.size(); i++) {
         if (_clusterIdsOriginal[i] >= 0){ _clusterIdsOriginal[i] = activeIds[_clusterIdsOriginal[i]]; }
         _clusterIds[i] = _clusterIdsOriginal[i];
     }
 
-    std::vector< std::vector<unsigned int> > clusterIdxs(runningIdx);
-    for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
 
-        int x = (int)(_vtxIdxs[2 * i] * (_msTexSize - 1) + 0.5);
-        int y = (int)(_vtxIdxs[2 * i + 1] * (_msTexSize - 1) + 0.5);
+    std::vector< std::vector<unsigned int> > clusterIdxs(runningIdx);
+    for (int i = 0; i < _points->size(); i++) {
+        const Vector2f& point = (*_points)[i];
+        int x = (int)(point.x * (_msTexSize - 1) + 0.5);
+        int y = (int)(point.y * (_msTexSize - 1) + 0.5);
 
         int idx = (x + y * _msTexSize);
 

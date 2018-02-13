@@ -61,7 +61,7 @@ private:
     size_t _msTexSize;
 
     std::vector<float> _meanShiftMapCPU;
-    std::vector<float> _clusterPositions;
+    std::vector<Vector2f> _clusterPositions;
     std::vector<int> _clusterIds;
     std::vector<int> _clusterIdsOriginal;
 };
