@@ -383,22 +383,23 @@ void MeanShift::cluster()
     int runningIdx = 0;
     _clusterPositions.clear();
     // For every point
-    for (int i = 0; i < _vtxIdxs.size() / 2; i++) {
-
-        int x = (int)(_vtxIdxs[2 * i] * (_msTexSize - 1) + 0.5);
-        int y = (int)(_vtxIdxs[2 * i + 1] * (_msTexSize - 1) + 0.5);
+    for (int i = 0; i < _points->size(); i++) {
+        // Calculate the coordinate of the pixel center on the texture
+        const Vector2f& point = (*_points)[i];
+        int x = (int)((point.x * 0.5 + 0.5) * (_msTexSize - 1) + 0.5);
+        int y = (int)((point.y * 0.5 + 0.5) * (_msTexSize - 1) + 0.5);
 
         // Calculate index into clusterID array this pixel belongs to
         int idx = (x + y * _msTexSize);
         // Get the clusterID
         int cId = _clusterIdsOriginal[idx];
         // If the clusterID is 0 or more and cluster is not active
+        //std::cout << "ClusterID: " << cId << " ActiveIds size: " << activeIds.size() << std::endl;
         if (cId >= 0 && activeIds[cId] < 0) {
             // Get the cluster center
             std::vector< float > center = { clusterCenters[cId] };
             // Store the cluster center as the position of the cluster
-            _clusterPositions.push_back(center[0]);
-            _clusterPositions.push_back(center[1]);
+            _clusterPositions.push_back(Vector2f(center[0], center[1]));
 
             activeIds[cId] = runningIdx++;
         }

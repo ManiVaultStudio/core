@@ -64,7 +64,6 @@ private:
     std::vector<float> _clusterPositions;
     std::vector<int> _clusterIds;
     std::vector<int> _clusterIdsOriginal;
-    std::vector<GLfloat> _vtxIdxs;
 };
 
 } // namespace hdps
