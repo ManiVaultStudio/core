@@ -26,8 +26,8 @@ void main()
         neighborDensities.w = textureOffset(densityTexture, pass_texCoord, ivec2(0, -1)).r;
         neighborDensities *= renderParams.x;
 
-        gradient = vec3(neighborDensities.x - neighborDensities.y, neighborDensities.z - neighborDensities.w, 1);
+        gradient = vec3(neighborDensities.x - neighborDensities.y, neighborDensities.z - neighborDensities.w, density);
     }
     
-    fragColor = vec4(gradient, density);
+    fragColor = vec4(gradient, 1);
 }
