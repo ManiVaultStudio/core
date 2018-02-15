@@ -28,8 +28,13 @@ namespace gui
 class DensityPlotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
+
 public:
-    DensityPlotWidget() : _needsDensityMapUpdate(true) {}
+    enum RenderMode {
+        DENSITY, GRADIENT, PARTITIONS
+    };
+
+    DensityPlotWidget(RenderMode renderMode) : _renderMode(renderMode) {}
 
     void setData(const std::vector<Vector2f>* data);
     void addSelectionListener(const plugin::SelectionListener* listener);
@@ -55,7 +60,7 @@ private:
     ShaderProgram _shaderMeanShiftDraw;
     MeanShift _meanShift;
 
-    bool _needsDensityMapUpdate;
+    RenderMode _renderMode;
 };
 
 } // namespace gui

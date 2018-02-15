@@ -63,9 +63,11 @@ void DensityPlotWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    //drawDensity();
-    //drawGradient();
-    drawMeanShift();
+    switch (_renderMode) {
+        case DENSITY: drawDensity(); break;
+        case GRADIENT: drawGradient(); break;
+        case PARTITIONS: drawMeanShift(); break;
+    }
 }
 
 void DensityPlotWidget::drawDensity()

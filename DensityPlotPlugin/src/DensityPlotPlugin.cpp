@@ -24,7 +24,7 @@ void DensityPlotPlugin::init()
 {
     settings = new DensityPlotSettings(this);
 
-    widget = new hdps::gui::DensityPlotWidget();
+    widget = new hdps::gui::DensityPlotWidget(hdps::gui::DensityPlotWidget::DENSITY);
 
     addWidget(widget);
     addWidget(settings);
