@@ -25,7 +25,6 @@ void DensityPlotPlugin::init()
     settings = new DensityPlotSettings(this);
 
     widget = new hdps::gui::DensityPlotWidget();
-    widget->addSelectionListener(this);
 
     addWidget(widget);
     addWidget(settings);

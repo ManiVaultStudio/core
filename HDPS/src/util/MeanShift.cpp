@@ -146,6 +146,7 @@ void MeanShift::setData(const std::vector<Vector2f>* points)
 {
     _numPoints = (unsigned int) points->size();
     _points = points;
+    _needsDensityMapUpdate = true;
 }
 
 void MeanShift::drawFullscreenQuad()
@@ -158,6 +159,7 @@ void MeanShift::drawFullscreenQuad()
 void MeanShift::computeDensity()
 {
     if (_numPoints == 0) return;
+    if (!_needsDensityMapUpdate) return;
 
     _positionBuffer.bind();
     _positionBuffer.setData(*_points);
@@ -228,6 +230,8 @@ void MeanShift::computeDensity()
     qDebug() << "	Max KDE Value = " << _maxKDE << ".\n";
     qDebug() << "Done computing density";
     //glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+
+    _needsDensityMapUpdate = false;
 }
 
 void MeanShift::computeGradient()

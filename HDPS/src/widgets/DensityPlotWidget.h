@@ -43,34 +43,17 @@ protected:
     void drawGradient();
     void drawMeanShift();
 
-    //void createSampleSelectionTextureBuffer();
-
-    void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
-    void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-
-    //void onSelection(Selection selection);
     void cleanup();
 
 private:
-    const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
-    Matrix3f toNormalisedCoordinates;
-    Matrix3f toIsotropicCoordinates;
-
     QSize _windowSize;
-
-    bool _selecting = false;
-    Selection _selection;
-    std::vector<const plugin::SelectionListener*> _selectionListeners;
-
-    //GLuint _activeSampleTexture;
 
     unsigned int _numPoints = 0;
 
     ShaderProgram _shaderDensityDraw;
     ShaderProgram _shaderGradientDraw;
     ShaderProgram _shaderMeanShiftDraw;
-    MeanShift meanShift;
+    MeanShift _meanShift;
 
     bool _needsDensityMapUpdate;
 };

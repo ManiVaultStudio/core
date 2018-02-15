@@ -20,7 +20,7 @@ public:
 class MeanShift : protected QOpenGLFunctions_3_3_Core
 {
 public:
-    MeanShift() : _sigma(0.15f), _msTexSize(512) { }
+    MeanShift() : _sigma(0.15f), _msTexSize(512), _needsDensityMapUpdate(true) { }
     void init();
     void cleanup();
 
@@ -32,7 +32,6 @@ public:
     void computeMeanShift();
 
     void cluster();
-    //void createSampleSelectionTextureBuffer();
     bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
 
     Texture2D& getDensityTexture();
@@ -56,6 +55,7 @@ private:
     GLuint _vao;
     GLuint _quad;
 
+    bool _needsDensityMapUpdate;
     float _sigma;
     
     size_t _msTexSize;
