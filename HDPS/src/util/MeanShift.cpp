@@ -312,12 +312,15 @@ void MeanShift::computeMeanShift()
     //	std::cout << "	Clustered 100 times in new mode in " << t << "\n";
     //}
 
-    cluster();
 }
 
-void MeanShift::cluster()
+void MeanShift::cluster(std::vector<std::vector<unsigned int>>& clusters)
 {
-    if (_points->size() <= 0) return;
+    if (_numPoints == 0) return;
+
+    computeDensity();
+    computeGradient();
+    computeMeanShift();
 
     // Resize clusterID arrays to equal number of pixels
     _clusterIds.resize(_msTexSize * _msTexSize);
@@ -352,7 +355,7 @@ void MeanShift::cluster()
         if (clusterId < 0)
         {
             clusterCenters.push_back(center);
-            // Set the current pixel in clusterIdsOriginal to the number of cluster centers
+            // Set the current pixel in clusterIdsOriginal to the latest cluster index
             _clusterIdsOriginal[i / 3] = static_cast<int>(clusterCenters.size() - 1);
         }
         else
@@ -389,14 +392,14 @@ void MeanShift::cluster()
     // For every point
     for (int i = 0; i < _points->size(); i++) {
         // Calculate the coordinate of the pixel center on the texture
-        const Vector2f& point = (*_points)[i];
-        int x = (int)((point.x * 0.5 + 0.5) * (_msTexSize - 1) + 0.5);
-        int y = (int)((point.y * 0.5 + 0.5) * (_msTexSize - 1) + 0.5);
+        const Vector2f& point = (*_points)[i] * 0.5 + 0.5;
+        int x = (int)(point.x * (_msTexSize - 1) + 0.5);
+        int y = (int)(point.y * (_msTexSize - 1) + 0.5);
 
         // Calculate index into clusterID array this pixel belongs to
-        int idx = (x + y * _msTexSize);
+        int pixelIndex = (x + y * _msTexSize);
         // Get the clusterID
-        int cId = _clusterIdsOriginal[idx];
+        int cId = _clusterIdsOriginal[pixelIndex];
         // If the clusterID is 0 or more and cluster is not active
         //std::cout << "ClusterID: " << cId << " ActiveIds size: " << activeIds.size() << std::endl;
         if (cId >= 0 && activeIds[cId] < 0) {
@@ -416,22 +419,18 @@ void MeanShift::cluster()
         _clusterIds[i] = _clusterIdsOriginal[i];
     }
 
-
-    std::vector< std::vector<unsigned int> > clusterIdxs(runningIdx);
+    // Divide points into their corresponding clusters
+    clusters.resize(runningIdx);
     for (int i = 0; i < _points->size(); i++) {
-        const Vector2f& point = (*_points)[i];
+        const Vector2f& point = (*_points)[i] * 0.5 + 0.5;
         int x = (int)(point.x * (_msTexSize - 1) + 0.5);
         int y = (int)(point.y * (_msTexSize - 1) + 0.5);
 
-        int idx = (x + y * _msTexSize);
+        int pixelIndex = (x + y * _msTexSize);
 
-        int cId = _clusterIdsOriginal[idx];
-        if (cId >= 0) { clusterIdxs[cId].push_back(i); }
-        ////mcvClusters[cId].push_back(_localPointReferences[i]);
+        int cId = _clusterIdsOriginal[pixelIndex];
+        if (cId >= 0) { clusters[cId].push_back(i); }
     }
-
-    ////_meanShiftClusters = MCV_CytometryData::Instance()->derivedDataClusters("Density Clusters - " + _activeDataName);
-    ////_meanShiftClusters->setClusters(mcvClusters);
 
     //>>>_meanShiftClusters = _analysis->updateClusters(&clusterIdxs, "Density Clusters");
 

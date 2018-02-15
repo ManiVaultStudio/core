@@ -31,7 +31,7 @@ public:
     void computeGradient();
     void computeMeanShift();
 
-    void cluster();
+    void cluster(std::vector<std::vector<unsigned int>>& clusters);
     bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
 
     Texture2D& getDensityTexture();

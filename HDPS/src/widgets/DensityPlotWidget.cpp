@@ -52,16 +52,9 @@ void DensityPlotWidget::resizeGL(int w, int h)
 
 void DensityPlotWidget::paintGL()
 {
-    qDebug() << "Drawing density plot";
+    std::vector<std::vector<unsigned int>> clusters;
 
-    if (_needsDensityMapUpdate)
-    {
-        meanShift.computeDensity();
-        _needsDensityMapUpdate = false;
-    }
-    
-    meanShift.computeGradient();
-    meanShift.computeMeanShift();
+    _meanShift.cluster(clusters);
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
     glViewport(0, 0, _windowSize.width(), _windowSize.height());
