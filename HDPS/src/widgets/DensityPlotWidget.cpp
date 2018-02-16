@@ -107,6 +107,18 @@ void DensityPlotWidget::drawMeanShift()
     _meanShift.drawFullscreenQuad();
 }
 
+void DensityPlotWidget::drawLandscape()
+{
+    if (_numPoints == 0) return;
+
+    _shaderMeanShiftDraw.bind();
+
+    _meanShift.getMeanShiftTexture().bind(0);
+    _shaderMeanShiftDraw.uniform1i("tex", 0);
+
+    _meanShift.drawFullscreenQuad();
+}
+
 void DensityPlotWidget::cleanup()
 {
     qDebug() << "Deleting density plot widget, performing clean up...";

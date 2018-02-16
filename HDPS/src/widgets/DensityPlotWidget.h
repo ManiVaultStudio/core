@@ -47,6 +47,7 @@ protected:
     void drawDensity();
     void drawGradient();
     void drawMeanShift();
+    void drawLandscape();
 
     void cleanup();
 
