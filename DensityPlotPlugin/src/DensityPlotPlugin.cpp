@@ -73,6 +73,16 @@ void DensityPlotPlugin::dataSetPicked(const QString& name)
     updateData();
 }
 
+void DensityPlotPlugin::renderModePicked(const int index)
+{
+    switch (index)
+    {
+    case 0: _widget->setRenderMode(hdps::gui::DensityPlotWidget::DENSITY); break;
+    case 1: _widget->setRenderMode(hdps::gui::DensityPlotWidget::GRADIENT); break;
+    case 2: _widget->setRenderMode(hdps::gui::DensityPlotWidget::PARTITIONS); break;
+    }
+}
+
 void DensityPlotPlugin::subsetCreated()
 {
     qDebug() << "Creating subset";

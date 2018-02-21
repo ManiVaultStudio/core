@@ -11,6 +11,13 @@ namespace hdps
 namespace gui
 {
 
+void DensityPlotWidget::setRenderMode(RenderMode renderMode)
+{
+    _renderMode = renderMode;
+
+    update();
+}
+
 // Positions need to be passed as a pointer as we need to store them locally in order
 // to be able to find the subset of data that's part of a selection. If passed
 // by reference then we can upload the data to the GPU, but not store it in the widget.

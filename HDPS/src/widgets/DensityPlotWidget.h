@@ -36,6 +36,7 @@ public:
 
     DensityPlotWidget(RenderMode renderMode) : _renderMode(renderMode) {}
 
+    void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data);
     void addSelectionListener(const plugin::SelectionListener* listener);
 

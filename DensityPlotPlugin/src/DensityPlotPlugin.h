@@ -38,6 +38,7 @@ public:
     virtual void onSelection(const std::vector<unsigned int> selection) const;
 protected slots:
     void dataSetPicked(const QString& name);
+    void renderModePicked(const int index);
     void subsetCreated();
 
     void xDimPicked(int index);

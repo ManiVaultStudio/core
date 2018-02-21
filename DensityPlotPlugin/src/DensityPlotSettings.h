@@ -35,6 +35,8 @@ private:
 
     QComboBox _xDimOptions;
     QComboBox _yDimOptions;
+
+    QComboBox _renderMode;
 };
 
 #endif // DENSITY_PLOT_SETTINGS_H
