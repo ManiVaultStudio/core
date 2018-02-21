@@ -46,9 +46,12 @@ void DensityPlotWidget::initializeGL()
     loaded &= _shaderDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/DensityDraw.frag");
     loaded &= _shaderGradientDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/GradientDraw.frag");
     loaded &= _shaderMeanShiftDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/Texture.frag");
+    loaded &= _shaderIsoDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/IsoDensityDraw.frag");
     if (!loaded) {
         qDebug() << "Failed to load one of the MeanShift shaders";
     }
+
+    colorMap.loadFromFile(":colormaps/Spectral.png");
 }
 
 void DensityPlotWidget::resizeGL(int w, int h)
@@ -70,6 +73,7 @@ void DensityPlotWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    drawLandscape();
     switch (_renderMode) {
         case DENSITY: drawDensity(); break;
         case GRADIENT: drawGradient(); break;
@@ -118,10 +122,15 @@ void DensityPlotWidget::drawLandscape()
 {
     if (_numPoints == 0) return;
 
-    _shaderMeanShiftDraw.bind();
+    _shaderIsoDensityDraw.bind();
 
-    _meanShift.getMeanShiftTexture().bind(0);
-    _shaderMeanShiftDraw.uniform1i("tex", 0);
+    _meanShift.getDensityTexture().bind(0);
+    _shaderIsoDensityDraw.uniform1i("tex", 0);
+
+    _shaderIsoDensityDraw.uniform4f("renderParams", 1.0f / _meanShift.getMaxDensity(), 0, 1.0f / _numPoints, 0);
+
+    colorMap.bind(1);
+    _shaderIsoDensityDraw.uniform1i("colorMap", 1);
 
     _meanShift.drawFullscreenQuad();
 }

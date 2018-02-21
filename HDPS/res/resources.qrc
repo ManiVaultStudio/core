@@ -17,6 +17,7 @@
         <file>shaders/DensityDraw.frag</file>
         <file>shaders/GradientDraw.frag</file>
         <file>shaders/Texture.frag</file>
+        <file>shaders/IsoDensityDraw.frag</file>
     </qresource>
     
     <qresource prefix="">

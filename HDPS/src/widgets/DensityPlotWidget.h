@@ -60,7 +60,9 @@ private:
     ShaderProgram _shaderDensityDraw;
     ShaderProgram _shaderGradientDraw;
     ShaderProgram _shaderMeanShiftDraw;
+    ShaderProgram _shaderIsoDensityDraw;
     MeanShift _meanShift;
+    Texture2D colorMap;
 
     RenderMode _renderMode;
 };
