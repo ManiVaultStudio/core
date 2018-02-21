@@ -28,19 +28,15 @@ void main()
     }
     
     vec2 pos = pass_texCoord;
-    //vec2 nextPos = pos + normalize(gradient.xy) * texelSize.xy * renderParams.x;
     
     int count = 0;
     for (int i = 0; i < MAX_STEPS; i++)
     {
-        //pos = nextPos;
-
         vec2 ngradient = texture(gradientTexture, pos).xy;
         if (dot(ngradient, gradient) < 0) break;
         gradient = ngradient;
-        //len = length(gradient);
         
-        pos = pos + normalize(gradient) * texelSize;// * renderParams.x;
+        pos = pos + normalize(gradient) * texelSize;
         
         count = i;
     }
