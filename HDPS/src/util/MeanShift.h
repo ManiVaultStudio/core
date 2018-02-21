@@ -34,10 +34,11 @@ public:
     void cluster(std::vector<std::vector<unsigned int>>& clusters);
     bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
 
+    float getMaxDensity() { return _maxKDE; }
     Texture2D& getDensityTexture();
     Texture2D& getGradientTexture();
     Texture2D& getMeanShiftTexture();
-    float _maxKDE;
+
 private:
     ShaderProgram _shaderDensityCompute;
     ShaderProgram _shaderGradientCompute;
@@ -59,6 +60,7 @@ private:
     float _sigma;
     
     size_t _msTexSize;
+    float _maxKDE;
 
     std::vector<float> _meanShiftMapCPU;
     std::vector<Vector2f> _clusterPositions;
