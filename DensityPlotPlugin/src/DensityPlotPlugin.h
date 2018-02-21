@@ -46,9 +46,9 @@ private:
     void updateData();
     float getMaxLength(const std::vector<float>* data, const int nDim) const;
 
-    hdps::gui::DensityPlotWidget* widget;
+    hdps::gui::DensityPlotWidget* _widget;
 
-    DensityPlotSettings* settings;
+    DensityPlotSettings* _settings;
 };
 
 

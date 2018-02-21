@@ -22,22 +22,22 @@ DensityPlotPlugin::~DensityPlotPlugin(void)
 
 void DensityPlotPlugin::init()
 {
-    settings = new DensityPlotSettings(this);
+    _settings = new DensityPlotSettings(this);
 
-    widget = new hdps::gui::DensityPlotWidget(hdps::gui::DensityPlotWidget::DENSITY);
+    _widget = new hdps::gui::DensityPlotWidget(hdps::gui::DensityPlotWidget::DENSITY);
 
-    addWidget(widget);
-    addWidget(settings);
+    addWidget(_widget);
+    addWidget(_settings);
 }
 
 void DensityPlotPlugin::dataAdded(const QString name)
 {
-    settings->addDataOption(name);
+    _settings->addDataOption(name);
 }
 
 void DensityPlotPlugin::dataChanged(const QString name)
 {
-    if (name != settings->currentData()) {
+    if (name != _settings->currentData()) {
         return;
     }
     updateData();
@@ -63,12 +63,12 @@ QStringList DensityPlotPlugin::supportedDataKinds()
 
 void DensityPlotPlugin::dataSetPicked(const QString& name)
 {
-    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
+    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(_settings->currentData()));
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(dataSet->getDataName()));
 
     int nDim = points->getNumDimensions();
 
-    settings->initDimOptions(nDim);
+    _settings->initDimOptions(nDim);
 
     updateData();
 }
@@ -76,7 +76,7 @@ void DensityPlotPlugin::dataSetPicked(const QString& name)
 void DensityPlotPlugin::subsetCreated()
 {
     qDebug() << "Creating subset";
-    const hdps::Set* set = _core->requestData(settings->currentData());
+    const hdps::Set* set = _core->requestData(_settings->currentData());
     const hdps::Set* selection = _core->requestSelection(set->getDataName());
     _core->createSubsetFromSelection(selection, "Subset");
     qDebug() << "Subset created.";
@@ -95,7 +95,7 @@ void DensityPlotPlugin::yDimPicked(int index)
 void DensityPlotPlugin::updateData()
 {
     qDebug() << "UPDATING";
-    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
+    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(_settings->currentData()));
     const PointsPlugin* points = dataSet->getData();
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
     
@@ -103,8 +103,8 @@ void DensityPlotPlugin::updateData()
 
     int nDim = points->getNumDimensions();
 
-    int xIndex = settings->getXDimension();
-    int yIndex = settings->getYDimension();
+    int xIndex = _settings->getXDimension();
+    int yIndex = _settings->getYDimension();
     qDebug() << "X: " << xIndex << " Y: " << yIndex;
     if (xIndex < 0 || yIndex < 0)
         return;
@@ -142,10 +142,10 @@ void DensityPlotPlugin::updateData()
 
 void DensityPlotPlugin::onSelection(const std::vector<unsigned int> selection) const
 {
-    if (settings->numDataOptions() == 0)
+    if (_settings->numDataOptions() == 0)
         return;
 
-    const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(settings->currentData()));
+    const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(_settings->currentData()));
     IndexSet* selectionSet = dynamic_cast<IndexSet*>(_core->requestSelection(set->getDataName()));
     qDebug() << "Selection size: " << selection.size();
     selectionSet->indices.clear();
@@ -160,8 +160,8 @@ void DensityPlotPlugin::onSelection(const std::vector<unsigned int> selection) c
 
 float DensityPlotPlugin::getMaxLength(const std::vector<float>* data, const int nDim) const
 {
-    int xIndex = settings->getXDimension();
-    int yIndex = settings->getYDimension();
+    int xIndex = _settings->getXDimension();
+    int yIndex = _settings->getYDimension();
 
     float maxLength = 0;
     for (int i = 0; i < data->size() / nDim; i++) {
