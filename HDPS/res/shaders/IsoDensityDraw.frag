@@ -43,14 +43,6 @@ void main() {
         texCoord = clamp(texCoord / numSteps, 0.0, 1.0);
     }
     
-    vec3 col2 = texture(colorMap, vec2(floor(density * numSteps) / numSteps, 0)).rgb;
-
-    fragColor = vec4(col2, 1);
-    if (abs((density * numSteps) - floor(density * numSteps)) < 0.05) {
-        fragColor = vec4(col2 * 0.75, 1); return;
-    }
-    return;
-    
     vec3 col = texture(colorMap, vec2(texCoord, 0)).rgb;
     if(isBoundary) 
     {
