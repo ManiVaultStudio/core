@@ -73,11 +73,11 @@ void DensityPlotWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    drawLandscape();
     switch (_renderMode) {
         case DENSITY: drawDensity(); break;
         case GRADIENT: drawGradient(); break;
         case PARTITIONS: drawMeanShift(); break;
+        case LANDSCAPE: drawLandscape(); break;
     }
 }
 
@@ -89,7 +89,7 @@ void DensityPlotWidget::drawDensity()
 
     _meanShift.getDensityTexture().bind(0);
     _shaderDensityDraw.uniform1i("tex", 0);
-    _shaderDensityDraw.uniform1f("norm", 1 / _meanShift._maxKDE);
+    _shaderDensityDraw.uniform1f("norm", 1 / _meanShift.getMaxDensity());
 
     _meanShift.drawFullscreenQuad();
 }

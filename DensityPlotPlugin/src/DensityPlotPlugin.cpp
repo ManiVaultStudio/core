@@ -80,6 +80,7 @@ void DensityPlotPlugin::renderModePicked(const int index)
     case 0: _widget->setRenderMode(hdps::gui::DensityPlotWidget::DENSITY); break;
     case 1: _widget->setRenderMode(hdps::gui::DensityPlotWidget::GRADIENT); break;
     case 2: _widget->setRenderMode(hdps::gui::DensityPlotWidget::PARTITIONS); break;
+    case 3: _widget->setRenderMode(hdps::gui::DensityPlotWidget::LANDSCAPE); break;
     }
 }
 
@@ -144,7 +145,7 @@ void DensityPlotPlugin::updateData()
     }
 
     qDebug() << "Setting positions";
-    widget->setData(positions);
+    _widget->setData(positions);
     qDebug() << "Setting colors";
     //widget->setColors(colors);
     qDebug() << "DONE UPDATING";
