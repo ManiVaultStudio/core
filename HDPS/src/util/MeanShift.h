@@ -27,9 +27,6 @@ public:
     void setData(const std::vector<Vector2f>* points);
 
     void drawFullscreenQuad();
-    void computeDensity();
-    void computeGradient();
-    void computeMeanShift();
 
     void cluster(std::vector<std::vector<unsigned int>>& clusters);
     bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
@@ -40,6 +37,10 @@ public:
     Texture2D& getMeanShiftTexture();
 
 private:
+    void computeDensity();
+    void computeGradient();
+    void computeMeanShift();
+
     ShaderProgram _shaderDensityCompute;
     ShaderProgram _shaderGradientCompute;
     ShaderProgram _shaderMeanshiftCompute;
