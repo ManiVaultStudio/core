@@ -22,11 +22,8 @@ class DensityPlotPlugin : public ViewPlugin, public SelectionListener
     Q_OBJECT
     
 public:
-    DensityPlotPlugin()
-    :
-        ViewPlugin("Density Plot")
-    { }
-    ~DensityPlotPlugin(void);
+    DensityPlotPlugin();
+    ~DensityPlotPlugin();
     
     void init();
 

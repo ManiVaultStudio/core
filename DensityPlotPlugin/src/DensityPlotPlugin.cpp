@@ -15,7 +15,17 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.DensityPlotPlugin")
 // View
 // =============================================================================
 
-DensityPlotPlugin::~DensityPlotPlugin(void)
+using RenderMode = hdps::gui::DensityPlotWidget::RenderMode;
+
+DensityPlotPlugin::DensityPlotPlugin()
+    :
+    ViewPlugin("Density Plot"),
+    _widget(RenderMode::DENSITY)
+{
+
+}
+
+DensityPlotPlugin::~DensityPlotPlugin()
 {
     
 }
