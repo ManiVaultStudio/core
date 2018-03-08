@@ -11,6 +11,19 @@ namespace hdps
 namespace gui
 {
 
+DensityPlotWidget::DensityPlotWidget(RenderMode renderMode)
+    :
+    _renderMode(renderMode)
+{
+    
+}
+
+DensityPlotWidget::~DensityPlotWidget()
+{
+    // Delete objects
+    _densityComputation.cleanup();
+}
+
 void DensityPlotWidget::setRenderMode(RenderMode renderMode)
 {
     _renderMode = renderMode;

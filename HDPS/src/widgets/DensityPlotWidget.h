@@ -34,7 +34,7 @@ public:
         DENSITY, LANDSCAPE
     };
 
-    DensityPlotWidget(RenderMode renderMode) : _renderMode(renderMode) {}
+    DensityPlotWidget(RenderMode renderMode);
 
     void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data);
@@ -45,26 +45,22 @@ protected:
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
     void paintGL()              Q_DECL_OVERRIDE;
 
+private:
     void drawDensity();
-    void drawGradient();
-    void drawMeanShift();
     void drawLandscape();
 
-    void cleanup();
+    void drawFullscreenQuad();
 
-private:
     QSize _windowSize;
 
-    unsigned int _numPoints = 0;
-
     ShaderProgram _shaderDensityDraw;
-    ShaderProgram _shaderGradientDraw;
-    ShaderProgram _shaderMeanShiftDraw;
     ShaderProgram _shaderIsoDensityDraw;
-    MeanShift _meanShift;
-    Texture2D colorMap;
+    DensityComputation _densityComputation;
+    Texture2D _colorMap;
 
     RenderMode _renderMode;
+
+    GLuint _quad;
 };
 
 } // namespace gui
