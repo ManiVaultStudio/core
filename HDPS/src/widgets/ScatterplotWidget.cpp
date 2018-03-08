@@ -4,90 +4,6 @@
 
 #include <QDebug>
 
-#define GLSL(version, shader)  "#version " #version "\n" #shader
-
-const char *plotVertexSource = GLSL(330,
-    uniform float pointSize;
-    uniform vec3 selectionColor;
-
-    uniform bool selecting;
-    uniform vec2 start;
-    uniform vec2 end;
-
-    in vec2 vertex;
-    in vec2 position;
-    in vec3 color;
-
-    out vec2 pass_texCoords;
-    out vec3 pass_color;
-
-    bool inRect(vec2 position, vec2 start, vec2 end)
-    {
-        return position.x > start.x && position.x < end.x && position.y < start.y && position.y > end.y;
-    }
-
-    void main()
-    {
-        pass_color = color;
-
-        if (selecting && inRect(position, start, end))
-        {
-            pass_color = selectionColor;
-        }
-
-        pass_texCoords = vertex;
-        gl_Position = vec4(vertex * pointSize + position, 0, 1);
-    }
-);
-
-const char *plotFragmentSource = GLSL(330,
-    uniform float alpha;
-
-    in vec2 pass_texCoords;
-    in vec3 pass_color;
-
-    out vec4 fragColor;
-
-    void main()
-    {
-        float len = length(pass_texCoords);
-        // If the fragment is outside of the circle discard it
-        if (len > 1) discard;
-
-        float edge = fwidth(len);
-        float a = smoothstep(1, 1 - edge, len);
-        fragColor = vec4(pass_color, a * alpha);
-    }
-);
-
-const char *selectionVertexSource = GLSL(330,
-    uniform vec2 start;
-    uniform vec2 end;
-
-    void main()
-    {
-        vec2 vertex;
-
-        switch (gl_VertexID) {
-        case 0: vertex = vec2(start.x, start.y); break;
-        case 1: vertex = vec2(end.x, start.y); break;
-        case 2: vertex = vec2(start.x, end.y); break;
-        case 3: vertex = vec2(end.x, end.y); break;
-        }
-
-        gl_Position = vec4(vertex, 0, 1);
-    }
-);
-
-const char *selectionFragmentSource = GLSL(330,
-    out vec4 fragColor;
-
-    void main()
-    {
-        fragColor = vec4(0.5, 0.5, 0.5, 0.1f);
-    }
-);
-
 namespace hdps
 {
 namespace gui
@@ -201,15 +117,12 @@ void ScatterplotWidget::initializeGL()
         _colorBuffer.setData(_colors);
     }
 
-    _shader = std::make_unique<QOpenGLShaderProgram>();
-    _shader->addShaderFromSourceCode(QOpenGLShader::Vertex, plotVertexSource);
-    _shader->addShaderFromSourceCode(QOpenGLShader::Fragment, plotFragmentSource);
-    _shader->link();
-
-    _selectionShader = std::make_unique<QOpenGLShaderProgram>();
-    _selectionShader->addShaderFromSourceCode(QOpenGLShader::Vertex, selectionVertexSource);
-    _selectionShader->addShaderFromSourceCode(QOpenGLShader::Fragment, selectionFragmentSource);
-    _shader->link();
+    bool loaded = true;
+    loaded &= _shader.loadShaderFromFile(":shaders/PointPlot.vert", ":shaders/PointPlot.frag");
+    loaded &= _selectionShader.loadShaderFromFile(":shaders/SelectionBox.vert", ":shaders/Color.frag");
+    if (!loaded) {
+        qDebug() << "Failed to load one of the Scatterplot shaders";
+    }
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)
@@ -241,17 +154,17 @@ void ScatterplotWidget::paintGL()
     Vector2f topLeft = toClipCoordinates * toIsotropicCoordinates * _selection.topLeft();
     Vector2f bottomRight = toClipCoordinates * toIsotropicCoordinates * _selection.bottomRight();
 
-    _shader->bind();
+    _shader.bind();
     switch (_scalingMode) {
-        case Relative: _shader->setUniformValue("pointSize", _pointSize / 800); break;
-        case Absolute: _shader->setUniformValue("pointSize", _pointSize / _windowSize.width()); break;
+        case Relative: _shader.uniform1f("pointSize", _pointSize / 800); break;
+        case Absolute: _shader.uniform1f("pointSize", _pointSize / _windowSize.width()); break;
     }
 
-    _shader->setUniformValue("selectionColor", _selectionColor.x, _selectionColor.y, _selectionColor.z);
-    _shader->setUniformValue("alpha", _alpha);
-    _shader->setUniformValue("selecting", _selecting);
-    _shader->setUniformValue("start", topLeft.x, topLeft.y);
-    _shader->setUniformValue("end", bottomRight.x, bottomRight.y);
+    _shader.uniform3f("selectionColor", _selectionColor.x, _selectionColor.y, _selectionColor.z);
+    _shader.uniform1f("alpha", _alpha);
+    _shader.uniform1i("selecting", _selecting);
+    _shader.uniform2f("start", topLeft.x, topLeft.y);
+    _shader.uniform2f("end", bottomRight.x, bottomRight.y);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
 
     if (_selecting)
@@ -262,9 +175,9 @@ void ScatterplotWidget::paintGL()
         glViewport(0, 0, w, h);
 
         // Selection
-        _selectionShader->bind();
-        _selectionShader->setUniformValue("start", topLeft.x, topLeft.y);
-        _selectionShader->setUniformValue("end", bottomRight.x, bottomRight.y);
+        _selectionShader.bind();
+        _selectionShader.uniform2f("start", topLeft.x, topLeft.y);
+        _selectionShader.uniform2f("end", bottomRight.x, bottomRight.y);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
     qDebug() << "Done rendering scatterplot";

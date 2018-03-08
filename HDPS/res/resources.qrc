@@ -18,6 +18,10 @@
         <file>shaders/GradientDraw.frag</file>
         <file>shaders/Texture.frag</file>
         <file>shaders/IsoDensityDraw.frag</file>
+        <file>shaders/PointPlot.vert</file>
+        <file>shaders/PointPlot.frag</file>
+        <file>shaders/SelectionBox.vert</file>
+        <file>shaders/Color.frag</file>
     </qresource>
     
     <qresource prefix="">

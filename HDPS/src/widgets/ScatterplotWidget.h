@@ -8,10 +8,10 @@
 #include "../graphics/Vector3f.h"
 #include "../graphics/Matrix3f.h"
 #include "../graphics/Selection.h"
+#include "../graphics/Shader.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
-#include <QOpenGLShaderProgram>
 
 #include <QMouseEvent>
 #include <memory>
@@ -62,7 +62,7 @@ private:
 
     BufferObject _positionBuffer;
     BufferObject _colorBuffer;
-    std::unique_ptr<QOpenGLShaderProgram> _shader;
+    ShaderProgram _shader;
 
     unsigned int _numPoints = 0;
     const std::vector<Vector2f>* _positions;
@@ -74,7 +74,7 @@ private:
     float _pointSize          = DEFAULT_POINT_SIZE;
     float _alpha              = DEFAULT_ALPHA_VALUE;
 
-    std::unique_ptr<QOpenGLShaderProgram> _selectionShader;
+    ShaderProgram _selectionShader;
     bool _selecting = false;
     Selection _selection;
     std::vector<const plugin::SelectionListener*> _selectionListeners;
