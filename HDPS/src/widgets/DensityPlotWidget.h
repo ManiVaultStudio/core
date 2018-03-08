@@ -31,7 +31,7 @@ class DensityPlotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 
 public:
     enum RenderMode {
-        DENSITY, GRADIENT, PARTITIONS, LANDSCAPE
+        DENSITY, LANDSCAPE
     };
 
     DensityPlotWidget(RenderMode renderMode) : _renderMode(renderMode) {}
