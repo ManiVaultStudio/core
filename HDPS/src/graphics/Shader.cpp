@@ -88,6 +88,10 @@ void ShaderProgram::release() {
     glUseProgram(0);
 }
 
+void ShaderProgram::destroy() {
+    glDeleteProgram(_handle);
+}
+
 void ShaderProgram::uniform1i(const char* name, int value) {
     glUniform1i(location(name), value);
 }

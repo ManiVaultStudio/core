@@ -19,6 +19,7 @@ public:
     ~ShaderProgram();
     void bind();
     void release();
+    void destroy();
 
     void uniform1i(const char* name, int value);
     void uniform1iv(const char* name, int count, int* values);
