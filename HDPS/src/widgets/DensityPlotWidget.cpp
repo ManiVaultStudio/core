@@ -146,14 +146,7 @@ void DensityPlotWidget::drawLandscape()
     _colorMap.bind(1);
     _shaderIsoDensityDraw.uniform1i("colorMap", 1);
 
-
-void DensityPlotWidget::cleanup()
-{
-    qDebug() << "Deleting density plot widget, performing clean up...";
-    makeCurrent();
-
-    // Delete objects
-    _meanShift.cleanup();
+    drawFullscreenQuad();
 }
 
 } // namespace gui

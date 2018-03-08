@@ -109,7 +109,7 @@ void ScatterplotPlugin::yDimPicked(int index)
 
 void ScatterplotPlugin::updateData()
 {
-    qDebug() << "UPDATING";
+    qDebug() << "UPDATING SCATTER PLUGIN";
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
     const PointsPlugin* points = dataSet->getData();
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
@@ -168,7 +168,7 @@ void ScatterplotPlugin::updateData()
     widget->setData(positions);
     qDebug() << "Setting colors";
     widget->setColors(colors);
-    qDebug() << "DONE UPDATING";
+    qDebug() << "DONE UPDATING SCATTER";
 }
 
 void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const

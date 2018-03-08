@@ -119,7 +119,7 @@ void DensityPlotPlugin::yDimPicked(int index)
 
 void DensityPlotPlugin::updateData()
 {
-    qDebug() << "UPDATING";
+    qDebug() << "UPDATING DENSITY PLUGIN";
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(_settings->currentData()));
     const PointsPlugin* points = dataSet->getData();
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
@@ -160,6 +160,8 @@ void DensityPlotPlugin::updateData()
 
     qDebug() << "Setting positions";
     _widget.setData(positions);
+
+    qDebug() << "DONE UPDATING DENSITY";
 }
 
 void DensityPlotPlugin::onSelection(const std::vector<unsigned int> selection) const

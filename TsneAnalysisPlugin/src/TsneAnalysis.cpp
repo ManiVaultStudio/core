@@ -74,6 +74,7 @@ void TsneAnalysis::initTSNE(const std::vector<float>& data, const int numDimensi
         _sparseMatrix.Clear();
         _sparseMatrix.Resize(_numDataPoints);
         qDebug() << "Sparse matrix allocated.";
+        qDebug() << "Computing high dimensional probability distributions.. Num dims: " << numDimensions << " Num data points: " << _numDataPoints;
         double t = 0.0;
         {
             nut::ScopedTimer<double> timer(t);

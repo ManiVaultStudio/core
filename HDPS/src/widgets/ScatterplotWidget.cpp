@@ -267,6 +267,7 @@ void ScatterplotWidget::paintGL()
         _selectionShader->setUniformValue("end", bottomRight.x, bottomRight.y);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
+    qDebug() << "Done rendering scatterplot";
 }
 
 void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
