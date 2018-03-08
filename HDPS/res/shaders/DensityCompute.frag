@@ -7,6 +7,5 @@ in vec2 pass_texCoord;
 out float value;
 
 void main() {
-    float f = texture(gaussSampler, pass_texCoord).r;
-    value = f;
+    value = texture(gaussSampler, pass_texCoord).r;
 }
