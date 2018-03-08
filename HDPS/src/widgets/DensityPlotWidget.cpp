@@ -51,7 +51,7 @@ void DensityPlotWidget::initializeGL()
 {
     initializeOpenGLFunctions();
 
-    connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &DensityPlotWidget::cleanup);
+    connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &DensityPlotWidget::terminateGL);
 
     glClearColor(1, 1, 1, 1);
     qDebug() << "Initializing density plot";
@@ -97,17 +97,18 @@ void DensityPlotWidget::paintGL()
     }
 }
 
+void DensityPlotWidget::terminateGL()
 void DensityPlotWidget::drawDensity()
 {
-    if (_numPoints == 0) return;
+    qDebug() << "Deleting density plot widget, performing clean up...";
+    makeCurrent();
 
-    _shaderDensityDraw.bind();
+    _shaderDensityDraw.destroy();
+    _shaderIsoDensityDraw.destroy();
+    _densityComputation.cleanup();
+    _colorMap.destroy();
 
-    _meanShift.getDensityTexture().bind(0);
-    _shaderDensityDraw.uniform1i("tex", 0);
-    _shaderDensityDraw.uniform1f("norm", 1 / _meanShift.getMaxDensity());
-
-    _meanShift.drawFullscreenQuad();
+    glDeleteVertexArrays(1, &_quad);
 }
 
 void DensityPlotWidget::drawGradient()
