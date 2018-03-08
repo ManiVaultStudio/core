@@ -44,7 +44,7 @@ private:
     const float DEFAULT_SIGMA = 0.15f;
 
     float _sigma = DEFAULT_SIGMA;
-    float _maxKDE = 0;
+    float _maxKDE = -1;
     unsigned int _numPoints = 0;
 
     ShaderProgram _shaderDensityCompute;

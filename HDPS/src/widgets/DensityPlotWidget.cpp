@@ -125,23 +125,29 @@ void DensityPlotWidget::drawFullscreenQuad()
 
 void DensityPlotWidget::drawDensity()
 {
+    float maxDensity = _densityComputation.getMaxDensity();
+    if (maxDensity <= 0) { return; }
+
     _shaderDensityDraw.bind();
 
     _densityComputation.getDensityTexture().bind(0);
     _shaderDensityDraw.uniform1i("tex", 0);
-    _shaderDensityDraw.uniform1f("norm", 1 / _densityComputation.getMaxDensity());
+    _shaderDensityDraw.uniform1f("norm", 1 / maxDensity);
 
     drawFullscreenQuad();
 }
 
 void DensityPlotWidget::drawLandscape()
 {
+    float maxDensity = _densityComputation.getMaxDensity();
+    if (maxDensity <= 0) { return; }
+
     _shaderIsoDensityDraw.bind();
 
     _densityComputation.getDensityTexture().bind(0);
     _shaderIsoDensityDraw.uniform1i("tex", 0);
 
-    _shaderIsoDensityDraw.uniform4f("renderParams", 1.0f / _densityComputation.getMaxDensity(), 0, 1.0f / _densityComputation.getNumPoints(), 0);
+    _shaderIsoDensityDraw.uniform4f("renderParams", 1.0f / maxDensity, 0, 1.0f / _densityComputation.getNumPoints(), 0);
 
     _colorMap.bind(1);
     _shaderIsoDensityDraw.uniform1i("colorMap", 1);
