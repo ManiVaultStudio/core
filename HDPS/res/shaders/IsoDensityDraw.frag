@@ -3,7 +3,7 @@
 uniform sampler2D colorMap;
 uniform sampler2D densityMap;
 
-uniform vec4 renderParams;
+uniform vec2 renderParams;
 
 in vec2 pass_texCoord;
 
@@ -11,7 +11,7 @@ out vec4 fragColor;
 
 void main() {
     float density = texture(densityMap, pass_texCoord).r * renderParams.x;
-    if (density < renderParams.z) discard;
+    if (density < renderParams.y) discard;
     
     vec3 texelSize = vec3(1.0 / 512, 1.0 / 512, 0.0) * 0.5;
     

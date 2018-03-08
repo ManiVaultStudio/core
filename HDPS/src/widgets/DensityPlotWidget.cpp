@@ -147,7 +147,7 @@ void DensityPlotWidget::drawLandscape()
     _densityComputation.getDensityTexture().bind(0);
     _shaderIsoDensityDraw.uniform1i("tex", 0);
 
-    _shaderIsoDensityDraw.uniform4f("renderParams", 1.0f / maxDensity, 0, 1.0f / _densityComputation.getNumPoints(), 0);
+    _shaderIsoDensityDraw.uniform2f("renderParams", 1.0f / maxDensity, 1.0f / _densityComputation.getNumPoints());
 
     _colorMap.bind(1);
     _shaderIsoDensityDraw.uniform1i("colorMap", 1);
