@@ -34,6 +34,7 @@ void DensityPlotPlugin::init()
 {
     _settings = new DensityPlotSettings(this);
 
+    _widget.setSigma(0.30f);
 
     addWidget(&_widget);
     addWidget(_settings);
