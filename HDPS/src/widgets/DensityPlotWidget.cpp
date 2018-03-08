@@ -49,25 +49,30 @@ void DensityPlotWidget::setSigma(const float sigma)
 
 void DensityPlotWidget::initializeGL()
 {
+    qDebug() << "Initializing density plot GL";
     initializeOpenGLFunctions();
 
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &DensityPlotWidget::terminateGL);
 
-    glClearColor(1, 1, 1, 1);
-    qDebug() << "Initializing density plot";
+    // Create a simple VAO for full-screen quad rendering
+    glGenVertexArrays(1, &_quad);
 
-    _meanShift.init();
-
+    // Load the necessary shaders for density drawing
     bool loaded = true;
     loaded &= _shaderDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/DensityDraw.frag");
-    loaded &= _shaderGradientDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/GradientDraw.frag");
-    loaded &= _shaderMeanShiftDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/Texture.frag");
     loaded &= _shaderIsoDensityDraw.loadShaderFromFile(":shaders/Quad.vert", ":shaders/IsoDensityDraw.frag");
     if (!loaded) {
-        qDebug() << "Failed to load one of the MeanShift shaders";
+        qDebug() << "Failed to load one of the Density shaders";
     }
 
-    colorMap.loadFromFile(":colormaps/Spectral.png");
+    // Load the color map
+    _colorMap.loadFromFile(":colormaps/Spectral.png");
+
+    // Initialize the density computation
+    _densityComputation.init(context());
+    // Compute the density in case data was already set
+    _densityComputation.compute();
+    qDebug() << "Initialized density plot GL";
 }
 
 void DensityPlotWidget::resizeGL(int w, int h)
