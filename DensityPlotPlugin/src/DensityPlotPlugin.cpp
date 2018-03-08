@@ -84,6 +84,12 @@ void DensityPlotPlugin::renderModePicked(const int index)
     }
 }
 
+void DensityPlotPlugin::sigmaChanged(const int size)
+{
+    _widget.setSigma(size / 100.f);
+    _widget.update();
+}
+
 void DensityPlotPlugin::subsetCreated()
 {
     qDebug() << "Creating subset";

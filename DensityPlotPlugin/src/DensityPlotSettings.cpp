@@ -6,6 +6,8 @@
 #include <QLabel>
 
 DensityPlotSettings::DensityPlotSettings(const DensityPlotPlugin* plugin)
+    :
+    _sigmaSlider(Qt::Horizontal)
 {
     setFixedHeight(100);
 
@@ -13,13 +15,17 @@ DensityPlotSettings::DensityPlotSettings(const DensityPlotPlugin* plugin)
     _subsetButton.setFixedWidth(100);
 
     _renderMode.addItem("Density");
-    _renderMode.addItem("Gradient");
-    _renderMode.addItem("Partitions");
     _renderMode.addItem("Landscape");
 
     QGridLayout *settingsLayout = new QGridLayout();
-    settingsLayout->setColumnStretch(2, 1);
+    settingsLayout->setColumnStretch(3, 1);
     settingsLayout->addWidget(&_dataOptions, 0, 0);
+
+    QLabel* sigmaLabel = new QLabel("Sigma:");
+    settingsLayout->addWidget(sigmaLabel, 0, 2);
+    _sigmaSlider.setRange(1, 50);
+    _sigmaSlider.setValue(30);
+    settingsLayout->addWidget(&_sigmaSlider, 0, 3, 1, 1);
 
     settingsLayout->addWidget(&_subsetButton, 1, 0);
 
@@ -28,14 +34,15 @@ DensityPlotSettings::DensityPlotSettings(const DensityPlotPlugin* plugin)
     QLabel* xDimLabel = new QLabel("X:");
     QLabel* yDimLabel = new QLabel("Y:");
 
-    settingsLayout->addWidget(xDimLabel, 0, 3);
-    settingsLayout->addWidget(&_xDimOptions, 0, 4);
-    settingsLayout->addWidget(yDimLabel, 1, 3);
-    settingsLayout->addWidget(&_yDimOptions, 1, 4);
+    settingsLayout->addWidget(xDimLabel, 0, 4);
+    settingsLayout->addWidget(&_xDimOptions, 0, 5);
+    settingsLayout->addWidget(yDimLabel, 1, 4);
+    settingsLayout->addWidget(&_yDimOptions, 1, 5);
 
     setLayout(settingsLayout);
 
     connect(&_dataOptions, SIGNAL(currentIndexChanged(QString)), plugin, SLOT(dataSetPicked(QString)));
+    connect(&_sigmaSlider, SIGNAL(valueChanged(int)), plugin, SLOT(sigmaChanged(int)));
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
 
     connect(&_xDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(xDimPicked(int)));

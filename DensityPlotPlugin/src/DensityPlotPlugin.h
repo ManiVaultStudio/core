@@ -39,6 +39,7 @@ public:
 protected slots:
     void dataSetPicked(const QString& name);
     void renderModePicked(const int index);
+    void sigmaChanged(const int size);
     void subsetCreated();
 
     void xDimPicked(int index);

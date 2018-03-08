@@ -31,6 +31,7 @@ public:
 
 private:
     QComboBox _dataOptions;
+    QSlider _sigmaSlider;
     QPushButton _subsetButton;
 
     QComboBox _xDimOptions;
