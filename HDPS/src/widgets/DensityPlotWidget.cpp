@@ -83,27 +83,27 @@ void DensityPlotWidget::resizeGL(int w, int h)
 
 void DensityPlotWidget::paintGL()
 {
-    std::vector<std::vector<unsigned int>> clusters;
+    qDebug() << "Rendering densityplot";
 
-    _meanShift.cluster(clusters);
-
+    // Bind the framebuffer belonging to the widget
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
     glViewport(0, 0, _windowSize.width(), _windowSize.height());
 
+    // Clear the widget to the background color
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Reset the blending function
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // Draw density or isolines map
     switch (_renderMode) {
         case DENSITY: drawDensity(); break;
-        case GRADIENT: drawGradient(); break;
-        case PARTITIONS: drawMeanShift(); break;
         case LANDSCAPE: drawLandscape(); break;
     }
+    qDebug() << "Done rendering densityplot";
 }
 
 void DensityPlotWidget::terminateGL()
-void DensityPlotWidget::drawDensity()
 {
     qDebug() << "Deleting density plot widget, performing clean up...";
     makeCurrent();
@@ -116,46 +116,36 @@ void DensityPlotWidget::drawDensity()
     glDeleteVertexArrays(1, &_quad);
 }
 
-void DensityPlotWidget::drawGradient()
+void DensityPlotWidget::drawFullscreenQuad()
 {
-    if (_numPoints == 0) return;
-
-    _shaderGradientDraw.bind();
-
-    _meanShift.getGradientTexture().bind(0);
-    _shaderGradientDraw.uniform1i("tex", 0);
-
-    _meanShift.drawFullscreenQuad();
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
 }
 
-void DensityPlotWidget::drawMeanShift()
+void DensityPlotWidget::drawDensity()
 {
-    if (_numPoints == 0) return;
+    _shaderDensityDraw.bind();
 
-    _shaderMeanShiftDraw.bind();
+    _densityComputation.getDensityTexture().bind(0);
+    _shaderDensityDraw.uniform1i("tex", 0);
+    _shaderDensityDraw.uniform1f("norm", 1 / _densityComputation.getMaxDensity());
 
-    _meanShift.getMeanShiftTexture().bind(0);
-    _shaderMeanShiftDraw.uniform1i("tex", 0);
-
-    _meanShift.drawFullscreenQuad();
+    drawFullscreenQuad();
 }
 
 void DensityPlotWidget::drawLandscape()
 {
-    if (_numPoints == 0) return;
-
     _shaderIsoDensityDraw.bind();
 
-    _meanShift.getDensityTexture().bind(0);
+    _densityComputation.getDensityTexture().bind(0);
     _shaderIsoDensityDraw.uniform1i("tex", 0);
 
-    _shaderIsoDensityDraw.uniform4f("renderParams", 1.0f / _meanShift.getMaxDensity(), 0, 1.0f / _numPoints, 0);
+    _shaderIsoDensityDraw.uniform4f("renderParams", 1.0f / _densityComputation.getMaxDensity(), 0, 1.0f / _densityComputation.getNumPoints(), 0);
 
-    colorMap.bind(1);
+    _colorMap.bind(1);
     _shaderIsoDensityDraw.uniform1i("colorMap", 1);
 
-    _meanShift.drawFullscreenQuad();
-}
 
 void DensityPlotWidget::cleanup()
 {
