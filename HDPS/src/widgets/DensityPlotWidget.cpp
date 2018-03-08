@@ -31,15 +31,15 @@ void DensityPlotWidget::setRenderMode(RenderMode renderMode)
     update();
 }
 
-// Positions need to be passed as a pointer as we need to store them locally in order
-// to be able to find the subset of data that's part of a selection. If passed
-// by reference then we can upload the data to the GPU, but not store it in the widget.
-void DensityPlotWidget::setData(const std::vector<Vector2f>* positions)
+// Points need to be passed as a pointer as we need to store them locally in order
+// to be able to recompute the densities when parameters change.
+void DensityPlotWidget::setData(const std::vector<Vector2f>* points)
 {
-    _numPoints = (unsigned int)positions->size();
+    _densityComputation.setData(points);
 
-    qDebug() << "Setting position data";
-    _meanShift.setData(positions);
+    update();
+}
+
 void DensityPlotWidget::setSigma(const float sigma)
 {
     _densityComputation.setSigma(sigma);
