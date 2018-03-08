@@ -40,6 +40,9 @@ void DensityPlotWidget::setData(const std::vector<Vector2f>* positions)
 
     qDebug() << "Setting position data";
     _meanShift.setData(positions);
+void DensityPlotWidget::setSigma(const float sigma)
+{
+    _densityComputation.setSigma(sigma);
 
     update();
 }

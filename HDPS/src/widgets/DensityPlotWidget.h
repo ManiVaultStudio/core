@@ -38,6 +38,7 @@ public:
 
     void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data);
+    void setSigma(const float sigma);
     void addSelectionListener(const plugin::SelectionListener* listener);
 
 protected:
