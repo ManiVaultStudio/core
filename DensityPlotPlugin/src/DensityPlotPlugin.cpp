@@ -34,9 +34,8 @@ void DensityPlotPlugin::init()
 {
     _settings = new DensityPlotSettings(this);
 
-    _widget = new hdps::gui::DensityPlotWidget(hdps::gui::DensityPlotWidget::DENSITY);
 
-    addWidget(_widget);
+    addWidget(&_widget);
     addWidget(_settings);
 }
 
@@ -161,10 +160,7 @@ void DensityPlotPlugin::updateData()
     }
 
     qDebug() << "Setting positions";
-    _widget->setData(positions);
-    qDebug() << "Setting colors";
-    //widget->setColors(colors);
-    qDebug() << "DONE UPDATING";
+    _widget.setData(positions);
 }
 
 void DensityPlotPlugin::onSelection(const std::vector<unsigned int> selection) const
