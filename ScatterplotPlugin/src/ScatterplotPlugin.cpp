@@ -136,9 +136,6 @@ void ScatterplotPlugin::updateData()
     if (xIndex < 0 || yIndex < 0)
         return;
 
-    // Calculate data bounds
-    float maxLength = getMaxLength(&points->data, nDim);
-
     // Determine number of points depending on if its a full dataset or a subset
     unsigned int numPoints = dataSet->isFull() ? points->getNumPoints() : dataSet->indices.size();
 
@@ -149,7 +146,7 @@ void ScatterplotPlugin::updateData()
     {
         for (int i = 0; i < numPoints; i++)
         {
-            (*positions)[i] = hdps::Vector2f(points->data[i * nDim + xIndex], points->data[i * nDim + yIndex]) / maxLength;
+            (*positions)[i] = hdps::Vector2f(points->data[i * nDim + xIndex], points->data[i * nDim + yIndex]);
         }
 
         for (unsigned int index : selection->indices)
@@ -162,7 +159,7 @@ void ScatterplotPlugin::updateData()
         for (int i = 0; i < numPoints; i++)
         {
             int index = dataSet->indices[i];
-            (*positions)[i] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]) / maxLength;
+            (*positions)[i] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]);
 
             bool selected = false;
             for (unsigned int selectionIndex : selection->indices)
@@ -198,23 +195,6 @@ void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) c
     
     qDebug() << "Selection on: " << selectionSet->getDataName();
     _core->notifySelectionChanged(selectionSet->getDataName());
-}
-
-float ScatterplotPlugin::getMaxLength(const std::vector<float>* data, const int nDim) const
-{
-    int xIndex = settings->getXDimension();
-    int yIndex = settings->getYDimension();
-
-    float maxLength = 0;
-    for (int i = 0; i < data->size() / nDim; i++) {
-        float x = data->at(i * nDim + xIndex);
-        float y = data->at(i * nDim + yIndex);
-        float length = x*x + y*y;
-
-        if (length > maxLength)
-            maxLength = length;
-    }
-    return sqrt(maxLength);
 }
 
 // =============================================================================
