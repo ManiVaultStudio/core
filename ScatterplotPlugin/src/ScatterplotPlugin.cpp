@@ -30,7 +30,10 @@ void ScatterplotPlugin::init()
     _scatterPlotWidget->setAlpha(0.5f);
     _scatterPlotWidget->addSelectionListener(this);
 
-    addWidget(widget);
+    _scatterPlotWidget->setSigma(0.30f);
+    _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::SCATTERPLOT);
+
+    addWidget(_scatterPlotWidget);
     addWidget(settings);
 }
 
@@ -85,7 +88,7 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
 void ScatterplotPlugin::pointSizeChanged(const int size)
 {
     _pointSize = size;
-    widget->setPointSize(size);
+    _scatterPlotWidget->setPointSize(size);
 }
 
 void ScatterplotPlugin::subsetCreated()
@@ -173,9 +176,9 @@ void ScatterplotPlugin::updateData()
     }
 
     qDebug() << "Setting positions";
-    widget->setData(positions);
+    _scatterPlotWidget->setData(positions);
     qDebug() << "Setting colors";
-    widget->setColors(colors);
+    _scatterPlotWidget->setColors(colors);
     qDebug() << "DONE UPDATING SCATTER";
 }
 
