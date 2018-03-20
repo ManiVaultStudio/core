@@ -222,7 +222,6 @@ void DensityComputation::compute()
 
     //_needsDensityMapUpdate = false;
 
-    _ctx->doneCurrent();
     qDebug() << "Done computing density";
 }
 
