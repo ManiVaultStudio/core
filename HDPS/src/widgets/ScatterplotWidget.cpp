@@ -9,6 +9,20 @@ namespace hdps
 namespace gui
 {
 
+ScatterplotWidget::ScatterplotWidget()
+    :
+    _densityRenderer(DensityRenderer::RenderMode::DENSITY)
+{
+
+}
+
+void ScatterplotWidget::setRenderMode(RenderMode renderMode)
+{
+    _renderMode = renderMode;
+
+    update();
+}
+
 // Positions need to be passed as a pointer as we need to store them locally in order
 // to be able to find the subset of data that's part of a selection. If passed
 // by reference then we can upload the data to the GPU, but not store it in the widget.
@@ -36,20 +50,26 @@ void ScatterplotWidget::setPointSize(const float size)
 
 void ScatterplotWidget::setSelectionColor(const Vector3f selectionColor)
 {
-    _selectionColor = selectionColor;
+    _pointRenderer.setSelectionColor(selectionColor);
+
     update();
 }
 
 void ScatterplotWidget::setAlpha(const float alpha)
 {
-    _alpha = alpha;
-    _alpha = _alpha > 1 ? 1 : _alpha;
-    _alpha = _alpha < 0 ? 0 : _alpha;
+    _pointRenderer.setAlpha(alpha);
 }
 
-void ScatterplotWidget::setPointScaling(PointScaling scalingMode)
+void ScatterplotWidget::setPointScaling(PointRenderer::PointScaling scalingMode)
 {
-    _scalingMode = scalingMode;
+    _pointRenderer.setPointScaling(scalingMode);
+}
+
+void ScatterplotWidget::setSigma(const float sigma)
+{
+    _densityRenderer.setSigma(sigma);
+
+    update();
 }
 
 void ScatterplotWidget::addSelectionListener(const plugin::SelectionListener* listener)
@@ -66,12 +86,14 @@ void ScatterplotWidget::initializeGL()
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ScatterplotWidget::cleanup);
 
     _pointRenderer.init();
+    _densityRenderer.init(context());
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)
 {
     qDebug() << "Resizing scatterplot";
     _pointRenderer.resize(w, h);
+    _densityRenderer.resize(w, h);
     qDebug() << "Done resizing scatterplot";
 }
 
@@ -150,6 +172,8 @@ void ScatterplotWidget::cleanup()
     makeCurrent();
 
     _pointRenderer.destroy();
+
+    _densityRenderer.terminate();
 }
 
 } // namespace gui

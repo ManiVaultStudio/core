@@ -1,6 +1,8 @@
 #pragma once
 
 #include "PointRenderer.h"
+#include "DensityRenderer.h"
+
 #include "../SelectionListener.h"
 
 #include "../graphics/BufferObject.h"
@@ -25,12 +27,19 @@ class ScatterplotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
+    enum RenderMode {
+        SCATTERPLOT, DENSITY, LANDSCAPE
+    };
+
+    ScatterplotWidget();
+    void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data);
     void setColors(const std::vector<Vector3f>& data);
     void setPointSize(const float size);
     void setSelectionColor(const Vector3f selectionColor);
     void setAlpha(const float alpha);
-    void setPointScaling(PointScaling scalingMode);
+    void setPointScaling(PointRenderer::PointScaling scalingMode);
+    void setSigma(const float sigma);
     void addSelectionListener(const plugin::SelectionListener* listener);
 protected:
     void initializeGL()         Q_DECL_OVERRIDE;
@@ -49,8 +58,10 @@ private:
     Matrix3f toNormalisedCoordinates;
     Matrix3f toIsotropicCoordinates;
 
+    RenderMode _renderMode = SCATTERPLOT;
 
     PointRenderer _pointRenderer;
+    DensityRenderer _densityRenderer;
 
     QSize _windowSize;
 
