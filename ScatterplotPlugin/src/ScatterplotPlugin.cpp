@@ -24,11 +24,11 @@ void ScatterplotPlugin::init()
 {
     settings = new ScatterplotSettings(this);
 
-    widget = new hdps::gui::ScatterplotWidget();
-    widget->setPointSize(10);
-    widget->setSelectionColor(settings->getSelectionColor());
-    widget->setAlpha(0.5f);
-    widget->addSelectionListener(this);
+    _scatterPlotWidget = new hdps::gui::ScatterplotWidget();
+    _scatterPlotWidget->setPointSize(10);
+    _scatterPlotWidget->setSelectionColor(settings->getSelectionColor());
+    _scatterPlotWidget->setAlpha(0.5f);
+    _scatterPlotWidget->addSelectionListener(this);
 
     addWidget(widget);
     addWidget(settings);
@@ -94,6 +94,17 @@ void ScatterplotPlugin::subsetCreated()
     const hdps::Set* set = _core->requestData(settings->currentData());
     const hdps::Set* selection = _core->requestSelection(set->getDataName());
     _core->createSubsetFromSelection(selection, "Subset");
+}
+
+void ScatterplotPlugin::renderModePicked(const int index)
+{
+    switch (index)
+    {
+    case 0: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::SCATTERPLOT); break;
+    case 1: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::DENSITY); break;
+    case 2: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::LANDSCAPE); break;
+    }
+    qDebug() << "Render Mode Picked";
 }
 
 void ScatterplotPlugin::xDimPicked(int index)

@@ -43,6 +43,7 @@ protected slots:
     void dataSetPicked(const QString& name);
     void pointSizeChanged(const int size);
     void subsetCreated();
+    void renderModePicked(const int index);
 
     void xDimPicked(int index);
     void yDimPicked(int index);
@@ -50,7 +51,7 @@ private:
     void updateData();
     float getMaxLength(const std::vector<float>* data, const int nDim) const;
 
-    hdps::gui::ScatterplotWidget* widget;
+    hdps::gui::ScatterplotWidget* _scatterPlotWidget;
 
     ScatterplotSettings* settings;
 

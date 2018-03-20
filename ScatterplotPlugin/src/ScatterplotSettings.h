@@ -42,6 +42,8 @@ private:
     QSlider _pointSizeSlider;
     QPushButton _subsetButton;
 
+    QComboBox _renderMode;
+
     QComboBox _xDimOptions;
     QComboBox _yDimOptions;
 
