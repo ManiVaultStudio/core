@@ -3,6 +3,21 @@
 namespace hdps
 {
 
+namespace
+{
+    float getMaxDimension(const std::vector<Vector2f>& points)
+    {
+        float maxDimension = 0;
+        for (const Vector2f& point : points)
+        {
+            float len = point.sqrMagnitude();
+
+            if (len > maxDimension) { maxDimension = len; }
+        }
+        return sqrt(maxDimension);
+    }
+}
+
 void GaussianTexture::generate()
 {
     create();
@@ -141,6 +156,8 @@ void DensityComputation::setData(const std::vector<Vector2f>* points)
 {
     _points = points;
 
+    _maxDimension = getMaxDimension(*_points);
+
     compute();
 }
 
@@ -191,6 +208,8 @@ void DensityComputation::compute()
 
     _gaussTexture.bind(0);
     _shaderDensityCompute.uniform1i("gaussSampler", 0);
+
+    _shaderDensityCompute.uniform1f("maxDimension", _maxDimension);
 
     // Draw the splats
     glBindVertexArray(_vao);
