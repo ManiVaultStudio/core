@@ -14,6 +14,8 @@
 
 #include "../util/MeanShift.h"
 
+#include "DensityRenderer.h"
+
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 
@@ -30,14 +32,9 @@ class DensityPlotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
     Q_OBJECT
 
 public:
-    enum RenderMode {
-        DENSITY, LANDSCAPE
-    };
-
-    DensityPlotWidget(RenderMode renderMode);
+    DensityPlotWidget();
     ~DensityPlotWidget();
 
-    void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data);
     void setSigma(const float sigma);
     void addSelectionListener(const plugin::SelectionListener* listener);
@@ -49,21 +46,7 @@ protected:
     void terminateGL();
 
 private:
-    void drawDensity();
-    void drawLandscape();
-
-    void drawFullscreenQuad();
-
-    QSize _windowSize;
-
-    ShaderProgram _shaderDensityDraw;
-    ShaderProgram _shaderIsoDensityDraw;
-    DensityComputation _densityComputation;
-    Texture2D _colorMap;
-
-    RenderMode _renderMode;
-
-    GLuint _quad;
+    DensityRenderer _densityRenderer;
 };
 
 } // namespace gui
