@@ -12,32 +12,25 @@ namespace gui
 // Positions need to be passed as a pointer as we need to store them locally in order
 // to be able to find the subset of data that's part of a selection. If passed
 // by reference then we can upload the data to the GPU, but not store it in the widget.
-void ScatterplotWidget::setData(const std::vector<Vector2f>* positions)
+void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
 {
-    _numPoints = (unsigned int)positions->size();
-    _positions = positions;
-    _colors.clear();
-    _colors.resize(_numPoints, Vector3f(0.5f, 0.5f, 0.5f));
+    _pointRenderer.setData(points);
+    _densityRenderer.setData(points);
 
-    _positionBuffer.bind();
-    _positionBuffer.setData(*positions);
-    _colorBuffer.bind();
-    _colorBuffer.setData(_colors);
     update();
 }
 
 void ScatterplotWidget::setColors(const std::vector<Vector3f>& colors)
 {
-    _colors = colors;
+    _pointRenderer.setColors(colors);
 
-    _colorBuffer.bind();
-    _colorBuffer.setData(colors);
     update();
 }
 
 void ScatterplotWidget::setPointSize(const float size)
 {
-    _pointSize = size;
+    _pointRenderer.setPointSize(size);
+
     update();
 }
 
@@ -66,121 +59,43 @@ void ScatterplotWidget::addSelectionListener(const plugin::SelectionListener* li
 
 void ScatterplotWidget::initializeGL()
 {
+    qDebug() << "Initializing scatterplot";
+
     initializeOpenGLFunctions();
 
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ScatterplotWidget::cleanup);
 
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-    qDebug() << "Initializing scatterplot";
-
-    glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
-
-    std::vector<float> vertices(
-    {
-        -1, -1,
-        1, -1,
-        -1, 1,
-        -1, 1,
-        1, -1,
-        1, 1
-    }
-    );
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    BufferObject quad;
-    quad.create();
-    quad.bind();
-    quad.setData(vertices);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
-    _positionBuffer.create();
-    _positionBuffer.bind();
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribDivisor(1, 1);
-    glEnableVertexAttribArray(1);
-
-    _colorBuffer.create();
-    _colorBuffer.bind();
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribDivisor(2, 1);
-    glEnableVertexAttribArray(2);
-
-    if (_numPoints > 0)
-    {
-        _positionBuffer.bind();
-        _positionBuffer.setData(*_positions);
-        _colorBuffer.bind();
-        _colorBuffer.setData(_colors);
-    }
-
-    bool loaded = true;
-    loaded &= _shader.loadShaderFromFile(":shaders/PointPlot.vert", ":shaders/PointPlot.frag");
-    loaded &= _selectionShader.loadShaderFromFile(":shaders/SelectionBox.vert", ":shaders/Color.frag");
-    if (!loaded) {
-        qDebug() << "Failed to load one of the Scatterplot shaders";
-    }
+    _pointRenderer.init();
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)
 {
-    _windowSize.setWidth(w);
-    _windowSize.setHeight(h);
-
-    int size = w < h ? w : h;
-
-    float wAspect = (float)w / size;
-    float hAspect = (float)h / size;
-    float wDiff = ((wAspect - 1) / 2.0);
-    float hDiff = ((hAspect - 1) / 2.0);
-
-    toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
-    toIsotropicCoordinates = Matrix3f(wAspect, 0, 0, hAspect, -wDiff, -hDiff);
+    qDebug() << "Resizing scatterplot";
+    _pointRenderer.resize(w, h);
+    qDebug() << "Done resizing scatterplot";
 }
 
 void ScatterplotWidget::paintGL()
 {
-    qDebug() << "Rendering scatterplot";
-    glClear(GL_COLOR_BUFFER_BIT);
+    // Bind the framebuffer belonging to the widget
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 
-    int w = _windowSize.width();
-    int h = _windowSize.height();
-    int size = w < h ? w : h;
-    glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
-
-    Vector2f topLeft = toClipCoordinates * toIsotropicCoordinates * _selection.topLeft();
-    Vector2f bottomRight = toClipCoordinates * toIsotropicCoordinates * _selection.bottomRight();
-
-    _shader.bind();
-    switch (_scalingMode) {
-        case Relative: _shader.uniform1f("pointSize", _pointSize / 800); break;
-        case Absolute: _shader.uniform1f("pointSize", _pointSize / _windowSize.width()); break;
-    }
-
-    _shader.uniform3f("selectionColor", _selectionColor.x, _selectionColor.y, _selectionColor.z);
-    _shader.uniform1f("alpha", _alpha);
-    _shader.uniform1i("selecting", _selecting);
-    _shader.uniform2f("start", topLeft.x, topLeft.y);
-    _shader.uniform2f("end", bottomRight.x, bottomRight.y);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
-
-    if (_selecting)
+    switch (_renderMode)
     {
-        topLeft = toClipCoordinates * _selection.topLeft();
-        bottomRight = toClipCoordinates * _selection.bottomRight();
-
-        glViewport(0, 0, w, h);
-
-        // Selection
-        _selectionShader.bind();
-        _selectionShader.uniform2f("start", topLeft.x, topLeft.y);
-        _selectionShader.uniform2f("end", bottomRight.x, bottomRight.y);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    case SCATTERPLOT: _pointRenderer.render(); break;
+    case DENSITY:
+    {
+        _densityRenderer.setRenderMode(DensityRenderer::DENSITY);
+        _densityRenderer.render();
+        break;
     }
-    qDebug() << "Done rendering scatterplot";
+    case LANDSCAPE:
+    {
+        _densityRenderer.setRenderMode(DensityRenderer::LANDSCAPE);
+        _densityRenderer.render();
+        break;
+    }
+    }
 }
 
 void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
@@ -234,9 +149,7 @@ void ScatterplotWidget::cleanup()
     qDebug() << "Deleting scatterplot widget, performing clean up...";
     makeCurrent();
 
-    glDeleteVertexArrays(1, &_vao);
-    _positionBuffer.destroy();
-    _colorBuffer.destroy();
+    _pointRenderer.destroy();
 }
 
 } // namespace gui
