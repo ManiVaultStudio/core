@@ -1,5 +1,4 @@
-#ifndef SCATTERPLOT_WIDGET_H
-#define SCATTERPLOT_WIDGET_H
+#pragma once
 
 #include "../SelectionListener.h"
 
@@ -83,5 +82,3 @@ private:
 } // namespace gui
 
 } // namespace hdps
-
-#endif // SCATTERPLOT_WIDGET_H
