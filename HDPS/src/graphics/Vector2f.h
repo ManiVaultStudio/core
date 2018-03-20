@@ -30,12 +30,12 @@ namespace hdps
             y -= v.y;
         }
 
-        inline float sqrMagnitude()
+        inline float sqrMagnitude() const
         {
             return x * x + y * y;
         }
 
-        inline float length()
+        inline float length() const
         {
             return sqrt(sqrMagnitude());
         }
