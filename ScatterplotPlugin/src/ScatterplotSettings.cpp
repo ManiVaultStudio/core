@@ -27,6 +27,11 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     settingsLayout->addWidget(&_pointSizeSlider, 1, 1, 1, 2);
     settingsLayout->addWidget(&_subsetButton, 0, 1);
 
+    _renderMode.addItem("Scatterplot");
+    _renderMode.addItem("Density map");
+    _renderMode.addItem("Contour map");
+    settingsLayout->addWidget(&_renderMode, 0, 2);
+
     QLabel* xDimLabel = new QLabel("X:");
     QLabel* yDimLabel = new QLabel("Y:");
 
@@ -40,6 +45,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     connect(&_dataOptions, SIGNAL(currentIndexChanged(QString)), plugin, SLOT(dataSetPicked(QString)));
     connect(&_pointSizeSlider, SIGNAL(valueChanged(int)), plugin, SLOT(pointSizeChanged(int)));
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
+    connect(&_renderMode, SIGNAL(currentIndexChanged(int)), plugin, SLOT(renderModePicked(int)));
 
     connect(&_xDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(xDimPicked(int)));
     connect(&_yDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(yDimPicked(int)));
