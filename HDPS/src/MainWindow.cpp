@@ -34,7 +34,7 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
     case plugin::Type::LOADER:        return menuFile->addAction(name);
     case plugin::Type::WRITER:        return menuFile->addAction(name);
     case plugin::Type::TRANFORMATION: return menuTransformation->addAction(name);
-    case plugin::Type::VIEW:          return menuView->addAction(name);
+    case plugin::Type::VIEW:          return menuVisualization->addAction(name);
     default: return nullptr;
     }
 }

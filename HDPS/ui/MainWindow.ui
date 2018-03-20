@@ -45,11 +45,6 @@
      <string>Visualization</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
@@ -59,7 +54,6 @@
    <addaction name="menuTransformation"/>
    <addaction name="menuAnalysis"/>
    <addaction name="menuVisualization"/>
-   <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
  </widget>
