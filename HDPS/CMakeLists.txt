@@ -52,8 +52,6 @@ set( WIDGET_HEADERS
     src/widgets/PointRenderer.h
     src/widgets/DensityRenderer.h
     src/widgets/DockableWidget.h
-    src/widgets/ScatterplotWidget.h
-    src/widgets/DensityPlotWidget.h
     src/widgets/ImageWidget.h
     src/widgets/SettingsWidget.h
     src/widgets/WebWidget.h
@@ -63,8 +61,6 @@ set( WIDGET_SOURCES
     src/widgets/PointRenderer.cpp
     src/widgets/DensityRenderer.cpp
     src/widgets/DockableWidget.cpp
-    src/widgets/ScatterplotWidget.cpp
-    src/widgets/DensityPlotWidget.cpp
     src/widgets/ImageWidget.cpp
     src/widgets/WebWidget.cpp
 )
