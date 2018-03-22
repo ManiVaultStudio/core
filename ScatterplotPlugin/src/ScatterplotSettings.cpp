@@ -7,7 +7,6 @@
 
 ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 :
-    _pointSizeSlider(Qt::Horizontal),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
@@ -16,34 +15,41 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _subsetButton.setText("Create Subset");
     _subsetButton.setFixedWidth(100);
 
-    QGridLayout *settingsLayout = new QGridLayout();
-    settingsLayout->setColumnStretch(2, 1);
-    settingsLayout->addWidget(&_dataOptions, 0, 0);
-
-    QLabel* pointSizeLabel = new QLabel("Point Size:");
-    settingsLayout->addWidget(pointSizeLabel, 1, 0);
-    _pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
-    _pointSizeSlider.setValue(plugin->pointSize());
-    settingsLayout->addWidget(&_pointSizeSlider, 1, 1, 1, 2);
-    settingsLayout->addWidget(&_subsetButton, 0, 1);
-
+    _settingsLayout = new QGridLayout();
+    _settingsLayout->setColumnStretch(2, 1);
+    _settingsLayout->addWidget(&_dataOptions, 0, 0);
+    
     _renderMode.addItem("Scatterplot");
     _renderMode.addItem("Density map");
     _renderMode.addItem("Contour map");
-    settingsLayout->addWidget(&_renderMode, 0, 2);
+    _settingsLayout->addWidget(&_renderMode, 1, 0);
+
+    _settingsLayout->addWidget(&_subsetButton, 0, 1);
+
+    _pointSettingsWidget._pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
+    _pointSettingsWidget._pointSizeSlider.setValue(plugin->pointSize());
+
+    _densitySettingsWidget._sigmaSlider.setRange(MIN_SIGMA, MAX_SIGMA);
+    _densitySettingsWidget._sigmaSlider.setValue(plugin->sigma());
+
+    _settingsStack = new QStackedWidget();
+    _settingsStack->addWidget(&_pointSettingsWidget);
+    _settingsStack->addWidget(&_densitySettingsWidget);
+    _settingsLayout->addWidget(_settingsStack, 1, 1, 1, 2);
 
     QLabel* xDimLabel = new QLabel("X:");
     QLabel* yDimLabel = new QLabel("Y:");
 
-    settingsLayout->addWidget(xDimLabel, 0, 3);
-    settingsLayout->addWidget(&_xDimOptions, 0, 4);
-    settingsLayout->addWidget(yDimLabel, 1, 3);
-    settingsLayout->addWidget(&_yDimOptions, 1, 4);
+    _settingsLayout->addWidget(xDimLabel, 0, 3);
+    _settingsLayout->addWidget(&_xDimOptions, 0, 4);
+    _settingsLayout->addWidget(yDimLabel, 1, 3);
+    _settingsLayout->addWidget(&_yDimOptions, 1, 4);
 
-    setLayout(settingsLayout);
+    setLayout(_settingsLayout);
 
     connect(&_dataOptions, SIGNAL(currentIndexChanged(QString)), plugin, SLOT(dataSetPicked(QString)));
-    connect(&_pointSizeSlider, SIGNAL(valueChanged(int)), plugin, SLOT(pointSizeChanged(int)));
+    connect(&_pointSettingsWidget._pointSizeSlider, SIGNAL(valueChanged(int)), plugin, SLOT(pointSizeChanged(int)));
+    connect(&_densitySettingsWidget._sigmaSlider, SIGNAL(valueChanged(int)), plugin, SLOT(sigmaChanged(int)));
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
     connect(&_renderMode, SIGNAL(currentIndexChanged(int)), plugin, SLOT(renderModePicked(int)));
 
