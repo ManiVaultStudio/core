@@ -6,7 +6,46 @@
 #include <QWidget>
 #include <QComboBox>
 #include <QSlider>
+#include <QLabel>
 #include <QPushButton>
+
+#include <QVBoxLayout>
+#include <QGridLayout>
+#include <QStackedWidget>
+
+struct PointSettingsWidget : public QWidget
+{
+    PointSettingsWidget()
+        :
+        _pointSizeLabel("Point Size:"),
+        _pointSizeSlider(Qt::Horizontal)
+    {
+        QVBoxLayout* pointSettingsLayout = new QVBoxLayout();
+        pointSettingsLayout->addWidget(&_pointSizeLabel);
+        pointSettingsLayout->addWidget(&_pointSizeSlider);
+        setLayout(pointSettingsLayout);
+    }
+
+    QLabel _pointSizeLabel;
+    QSlider _pointSizeSlider;
+};
+
+struct DensitySettingsWidget : public QWidget
+{
+    DensitySettingsWidget()
+        :
+        _sigmaLabel("Sigma:"),
+        _sigmaSlider(Qt::Horizontal)
+    {
+        QVBoxLayout* densitySettingsLayout = new QVBoxLayout();
+        densitySettingsLayout->addWidget(&_sigmaLabel);
+        densitySettingsLayout->addWidget(&_sigmaSlider);
+        setLayout(densitySettingsLayout);
+    }
+
+    QLabel _sigmaLabel;
+    QSlider _sigmaSlider;
+};
 
 class ScatterplotPlugin;
 
@@ -39,10 +78,13 @@ private:
     const int MAX_POINT_SIZE = 20;
 
     QComboBox _dataOptions;
-    QSlider _pointSizeSlider;
     QPushButton _subsetButton;
-
     QComboBox _renderMode;
+
+    QGridLayout* _settingsLayout;
+    QStackedWidget* _settingsStack;
+    PointSettingsWidget _pointSettingsWidget;
+    DensitySettingsWidget _densitySettingsWidget;
 
     QComboBox _xDimOptions;
     QComboBox _yDimOptions;
