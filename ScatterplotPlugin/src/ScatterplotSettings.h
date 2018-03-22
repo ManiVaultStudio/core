@@ -1,5 +1,4 @@
-#ifndef SCATTERPLOT_SETTINGS_H
-#define SCATTERPLOT_SETTINGS_H
+#pragma once
 
 #include "graphics/Vector3f.h"
 
@@ -92,5 +91,3 @@ private:
     hdps::Vector3f _baseColor;
     hdps::Vector3f _selectionColor;
 };
-
-#endif // SCATTERPLOT_SETTINGS_H
