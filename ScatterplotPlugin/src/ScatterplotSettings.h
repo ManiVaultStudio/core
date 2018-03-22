@@ -76,6 +76,8 @@ private:
     const int MIN_POINT_SIZE = 1;
     const int MAX_POINT_SIZE = 20;
 
+    const int MIN_SIGMA = 1;
+    const int MAX_SIGMA = 50;
     QComboBox _dataOptions;
     QPushButton _subsetButton;
     QComboBox _renderMode;

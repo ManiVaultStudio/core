@@ -25,13 +25,15 @@ public:
     ScatterplotPlugin()
     :
         ViewPlugin("Scatterplot View"),
-        _pointSize(10)
+        _pointSize(10),
+        _sigma(30)
     { }
     ~ScatterplotPlugin(void);
     
     void init();
 
     unsigned int pointSize() const;
+    unsigned int sigma() const;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
@@ -39,14 +41,17 @@ public:
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
     virtual void onSelection(const std::vector<unsigned int> selection) const;
+
 protected slots:
     void dataSetPicked(const QString& name);
     void pointSizeChanged(const int size);
+    void sigmaChanged(const int sigma);
     void subsetCreated();
     void renderModePicked(const int index);
 
     void xDimPicked(int index);
     void yDimPicked(int index);
+
 private:
     void updateData();
     float getMaxLength(const std::vector<float>* data, const int nDim) const;
@@ -56,6 +61,7 @@ private:
     ScatterplotSettings* settings;
 
     unsigned int _pointSize;
+    unsigned int _sigma;
 };
 
 

@@ -42,6 +42,11 @@ unsigned int ScatterplotPlugin::pointSize() const
     return _pointSize;
 }
 
+unsigned int ScatterplotPlugin::sigma() const
+{
+    return _sigma;
+}
+
 void ScatterplotPlugin::dataAdded(const QString name)
 {
     settings->addDataOption(name);
@@ -89,6 +94,11 @@ void ScatterplotPlugin::pointSizeChanged(const int size)
 {
     _pointSize = size;
     _scatterPlotWidget->setPointSize(size);
+}
+
+void ScatterplotPlugin::sigmaChanged(const int sigma)
+{
+    _scatterPlotWidget->setSigma(sigma / 100.0);
 }
 
 void ScatterplotPlugin::subsetCreated()
