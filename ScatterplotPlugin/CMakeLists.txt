@@ -21,6 +21,8 @@ find_package(Qt5WebKitWidgets REQUIRED)
 set(SOURCES
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
+    src/ScatterplotWidget.h
+    src/ScatterplotWidget.cpp
     src/ScatterplotSettings.h
     src/ScatterplotSettings.cpp
     src/ScatterplotPlugin.json

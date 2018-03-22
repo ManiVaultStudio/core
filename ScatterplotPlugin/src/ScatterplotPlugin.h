@@ -2,7 +2,7 @@
 #define SCATTERPLOT_PLUGIN_H
 
 #include <ViewPlugin.h>
-#include "widgets/ScatterplotWidget.h"
+#include "ScatterplotWidget.h"
 
 #include <QComboBox>
 #include <QSlider>
