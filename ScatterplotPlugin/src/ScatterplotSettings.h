@@ -63,6 +63,8 @@ public:
     int getYDimension();
     hdps::Vector3f getBaseColor();
     hdps::Vector3f getSelectionColor();
+    void showPointSettings();
+    void showDensitySettings();
     QString currentData();
 
     void initDimOptions(const unsigned int nDim);
@@ -78,6 +80,7 @@ private:
 
     const int MIN_SIGMA = 1;
     const int MAX_SIGMA = 50;
+
     QComboBox _dataOptions;
     QPushButton _subsetButton;
     QComboBox _renderMode;

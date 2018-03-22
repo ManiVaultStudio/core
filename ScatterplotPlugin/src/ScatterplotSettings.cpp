@@ -82,6 +82,16 @@ hdps::Vector3f ScatterplotSettings::getSelectionColor()
     return _selectionColor;
 }
 
+void ScatterplotSettings::showPointSettings()
+{
+    _settingsStack->setCurrentIndex(0);
+}
+
+void ScatterplotSettings::showDensitySettings()
+{
+    _settingsStack->setCurrentIndex(1);
+}
+
 QString ScatterplotSettings::currentData()
 {
     return _dataOptions.currentText();

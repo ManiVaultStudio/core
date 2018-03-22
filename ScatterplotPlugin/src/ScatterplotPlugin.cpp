@@ -113,9 +113,9 @@ void ScatterplotPlugin::renderModePicked(const int index)
 {
     switch (index)
     {
-    case 0: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::SCATTERPLOT); break;
-    case 1: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::DENSITY); break;
-    case 2: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::LANDSCAPE); break;
+    case 0: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::SCATTERPLOT); settings->showPointSettings(); break;
+    case 1: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::DENSITY); settings->showDensitySettings(); break;
+    case 2: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::LANDSCAPE); settings->showDensitySettings(); break;
     }
     qDebug() << "Render Mode Picked";
 }
