@@ -52,6 +52,7 @@ set( WIDGET_HEADERS
     src/widgets/Renderer.h
     src/widgets/PointRenderer.h
     src/widgets/DensityRenderer.h
+    src/widgets/SelectionRenderer.h
     src/widgets/DockableWidget.h
     src/widgets/ImageWidget.h
     src/widgets/SettingsWidget.h
@@ -61,6 +62,7 @@ set( WIDGET_HEADERS
 set( WIDGET_SOURCES
     src/widgets/PointRenderer.cpp
     src/widgets/DensityRenderer.cpp
+    src/widgets/SelectionRenderer.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/ImageWidget.cpp
     src/widgets/WebWidget.cpp

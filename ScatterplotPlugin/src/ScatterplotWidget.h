@@ -2,6 +2,7 @@
 
 #include "widgets/PointRenderer.h"
 #include "widgets/DensityRenderer.h"
+#include "widgets/SelectionRenderer.h"
 
 #include "SelectionListener.h"
 
@@ -62,6 +63,7 @@ namespace hdps
 
             PointRenderer _pointRenderer;
             DensityRenderer _densityRenderer;
+            SelectionRenderer _selectionRenderer;
 
             QSize _windowSize;
 

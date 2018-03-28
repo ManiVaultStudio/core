@@ -88,13 +88,18 @@ namespace hdps
 
             _pointRenderer.init();
             _densityRenderer.init(context());
+            _selectionRenderer.init();
         }
 
         void ScatterplotWidget::resizeGL(int w, int h)
         {
             qDebug() << "Resizing scatterplot";
+            _windowSize.setWidth(w);
+            _windowSize.setHeight(h);
+
             _pointRenderer.resize(QSize(w, h));
             _densityRenderer.resize(w, h);
+            _selectionRenderer.resize(QSize(w, h));
             qDebug() << "Done resizing scatterplot";
         }
 
@@ -119,13 +124,14 @@ namespace hdps
                 break;
             }
             }
+            _selectionRenderer.render();
         }
 
         void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
         {
             _selecting = true;
 
-            Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
+            Vector2f point = Vector2f(event->x(), _windowSize.height() - event->y());
             _selection.setStart(point);
         }
 
@@ -133,8 +139,10 @@ namespace hdps
         {
             if (!_selecting) return;
 
-            Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
+            Vector2f point = Vector2f(event->x(), _windowSize.height() - event->y());
             _selection.setEnd(point);
+
+            _selectionRenderer.onSelection(_selection);
 
             update();
         }
@@ -143,10 +151,12 @@ namespace hdps
         {
             _selecting = false;
 
-            Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
+            Vector2f point = Vector2f(event->x(), _windowSize.height() - event->y());
             _selection.setEnd(point);
 
-            onSelection(_selection);
+            _selectionRenderer.onSelection(_selection);
+
+            update();
         }
 
         void ScatterplotWidget::onSelection(Selection selection)
@@ -175,6 +185,8 @@ namespace hdps
             _pointRenderer.destroy();
 
             _densityRenderer.terminate();
+
+            _selectionRenderer.destroy();
         }
 
     } // namespace gui
