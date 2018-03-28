@@ -49,6 +49,7 @@ set( CORE_SOURCES
 
 
 set( WIDGET_HEADERS
+    src/widgets/Renderer.h
     src/widgets/PointRenderer.h
     src/widgets/DensityRenderer.h
     src/widgets/DockableWidget.h

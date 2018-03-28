@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include <QSize>
 #include <QDebug>
 
 namespace hdps
@@ -92,7 +93,7 @@ namespace hdps
         void ScatterplotWidget::resizeGL(int w, int h)
         {
             qDebug() << "Resizing scatterplot";
-            _pointRenderer.resize(w, h);
+            _pointRenderer.resize(QSize(w, h));
             _densityRenderer.resize(w, h);
             qDebug() << "Done resizing scatterplot";
         }

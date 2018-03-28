@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../graphics/Shader.h"
+#include "Renderer.h"
+
 #include "../graphics/BufferObject.h"
 
 #include "../graphics/Vector2f.h"
@@ -9,14 +10,11 @@
 
 #include "../graphics/Selection.h"
 
-#include <QOpenGLFunctions_3_3_Core>
-#include <QSize>
-
 namespace hdps
 {
     namespace gui
     {
-        class PointRenderer : protected QOpenGLFunctions_3_3_Core
+        class PointRenderer : protected Renderer
         {
         public:
             enum PointScaling {
@@ -30,10 +28,10 @@ namespace hdps
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
 
-            void init();
-            void resize(int w, int h);
-            void render();
-            void destroy();
+            virtual void init();
+            virtual void resize(QSize renderSize);
+            virtual void render();
+            virtual void destroy();
 
             void onSelection(Selection selection);
 

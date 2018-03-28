@@ -132,9 +132,12 @@ namespace hdps
             }
         }
 
-        void PointRenderer::resize(int w, int h)
+        void PointRenderer::resize(QSize renderSize)
         {
             qDebug() << "Resizing scatterplot";
+            int w = renderSize.width();
+            int h = renderSize.height();
+
             _windowSize.setWidth(w);
             _windowSize.setHeight(h);
 
