@@ -73,12 +73,6 @@ namespace hdps
 
             glViewport(0, 0, _windowSize.width(), _windowSize.height());
 
-            // Clear the widget to the background color
-            glClearColor(1, 1, 1, 1);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            // Reset the blending function
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
             int w = _windowSize.width();
             int h = _windowSize.height();
             int size = w < h ? w : h;

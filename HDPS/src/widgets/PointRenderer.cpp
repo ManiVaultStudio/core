@@ -156,12 +156,6 @@ namespace hdps
         void PointRenderer::render()
         {
             qDebug() << "Rendering points";
-            // Clear the widget to the background color
-            glClearColor(1, 1, 1, 1);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            // Reset the blending function
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             int w = _windowSize.width();
             int h = _windowSize.height();
