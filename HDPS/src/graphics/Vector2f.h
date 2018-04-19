@@ -2,6 +2,7 @@
 #define VECTOR2F_H
 
 #include <cmath>
+#include <string>
 
 namespace hdps
 {
@@ -38,6 +39,11 @@ namespace hdps
         inline float length() const
         {
             return sqrt(sqrMagnitude());
+        }
+
+        inline std::string str() const
+        {
+            return std::string("(" + std::to_string(x) + " " + std::to_string(y) + ")");
         }
 
         /* Operator overloads */
