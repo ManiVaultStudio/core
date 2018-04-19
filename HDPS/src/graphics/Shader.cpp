@@ -1,6 +1,7 @@
 #include "Shader.h"
 
 #include "Vector3f.h"
+#include "Matrix3f.h"
 //#include "Util/Matrix4f.h"
 #include "Util/FileUtil.h"
 
@@ -126,6 +127,10 @@ void ShaderProgram::uniform3fv(const char* name, int count, Vector3f* v) {
 
 void ShaderProgram::uniform4f(const char* name, float v0, float v1, float v2, float v3) {
     glUniform4f(location(name), v0, v1, v2, v3);
+}
+
+void ShaderProgram::uniformMatrix3f(const char* name, Matrix3f& m) {
+    glUniformMatrix3fv(location(name), 1, false, m.toArray());
 }
 
 //void Shader::uniformMatrix4f(const char* name, Matrix4f& m) {
