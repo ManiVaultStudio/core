@@ -39,6 +39,10 @@ namespace hdps
             a[5] *= scale.y;
         }
 
+        float* toArray() {
+            return a;
+        }
+
         float operator[](int i) const {
             return a[i];
         }
