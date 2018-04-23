@@ -1,9 +1,8 @@
-#ifndef HDPS_PLUGIN_SELECTION_LISTENER_H
-#define HDPS_PLUGIN_SELECTION_LISTENER_H
+#pragma once
+
+#include "graphics/Selection.h"
 
 #include <QObject>
-
-#include <vector>
 
 namespace hdps
 {
@@ -14,10 +13,16 @@ class SelectionListener
 {
 public:
     /**
-    * Callback function which gets triggered when a new dataset is created.
-    * @param name - The name of the dataset which was created.
+    * Callback function which gets triggered when a selection is being made.
+    * @param selection - The box selection which is being made
     */
-    virtual void onSelection(const std::vector<unsigned int> selection) const = 0;
+    virtual void onSelecting(Selection selection) = 0;
+
+    /**
+    * Callback function which gets triggered when a selection is made.
+    * @param selection - The box selection which was made
+    */
+    virtual void onSelection(Selection selection) = 0;
 };
 
 } // namespace plugin
@@ -25,5 +30,3 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::SelectionListener, "cytosplore.SelectionListener")
-
-#endif // HDPS_PLUGIN_SELECTION_LISTENER_H
