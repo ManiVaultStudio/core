@@ -82,6 +82,7 @@ set( GRAPHICS_HEADERS
 set( GRAPHICS_SOURCES
     src/graphics/BufferObject.cpp
     src/graphics/Shader.cpp
+    src/graphics/Selection.cpp
 )
 
 set( UTIL_HEADERS
