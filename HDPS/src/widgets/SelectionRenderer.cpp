@@ -21,14 +21,12 @@ namespace hdps
 
             int w = renderSize.width();
             int h = renderSize.height();
-
-            toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
         }
 
         void SelectionRenderer::render()
         {
-            Vector2f topLeft = toClipCoordinates * toNormalisedCoordinates * _selection.topLeft();
-            Vector2f bottomRight = toClipCoordinates * toNormalisedCoordinates * _selection.bottomRight();
+            Vector2f topLeft = toClipCoordinates * _selection.topLeft();
+            Vector2f bottomRight = toClipCoordinates * _selection.bottomRight();
 
             glViewport(0, 0, _renderSize.width(), _renderSize.height());
 
@@ -44,9 +42,19 @@ namespace hdps
             _shader.destroy();
         }
 
+        void SelectionRenderer::onSelecting(Selection selection)
+        {
+            _selection = selection;
+        }
+
         void SelectionRenderer::onSelection(Selection selection)
         {
             _selection = selection;
+        }
+
+        Matrix3f SelectionRenderer::getTransformMatrix()
+        {
+            return Matrix3f();
         }
     }
 }

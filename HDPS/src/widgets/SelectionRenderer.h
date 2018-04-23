@@ -1,15 +1,15 @@
 #pragma once
 
 #include "Renderer.h"
+#include "SelectionListener.h"
 
-#include "../graphics/Selection.h"
 #include "../graphics/Matrix3f.h"
 
 namespace hdps
 {
     namespace gui
     {
-        class SelectionRenderer : protected Renderer
+        class SelectionRenderer : protected Renderer, public plugin::SelectionListener
         {
         public:
             virtual void init();
@@ -17,11 +17,11 @@ namespace hdps
             virtual void render();
             virtual void destroy();
 
-            void onSelection(Selection selection);
+            virtual void onSelecting(Selection selection);
+            virtual void onSelection(Selection selection);
 
         private:
             const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
-            Matrix3f toNormalisedCoordinates;
 
             QSize _renderSize;
 
