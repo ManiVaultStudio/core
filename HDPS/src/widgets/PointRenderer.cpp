@@ -6,21 +6,6 @@ namespace hdps
 {
     namespace gui
     {
-        namespace
-        {
-            float getMaxDimension(const std::vector<Vector2f>& points)
-            {
-                float maxDimension = 0;
-                for (const Vector2f& point : points)
-                {
-                    float len = point.sqrMagnitude();
-
-                    if (len > maxDimension) { maxDimension = len; }
-                }
-                return sqrt(maxDimension);
-            }
-        }
-
         // Positions need to be passed as a pointer as we need to store them locally in order
         // to be able to find the subset of data that's part of a selection. If passed
         // by reference then we can upload the data to the GPU, but not store it in the widget.
@@ -29,7 +14,6 @@ namespace hdps
             qDebug() << "Setting data";
             _numPoints = (unsigned int) points->size();
             _positions = points;
-            _maxDimension = getMaxDimension(*points);
             _colors.clear();
             _colors.resize(_numPoints, Vector3f(0.5f, 0.5f, 0.5f));
 

@@ -53,7 +53,6 @@ namespace hdps
 
             unsigned int _numPoints = 0;
             const std::vector<Vector2f>* _positions;
-            float _maxDimension = 1;
             std::vector<Vector3f> _colors;
 
             QSize _windowSize;
