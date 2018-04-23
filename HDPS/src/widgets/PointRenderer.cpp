@@ -126,7 +126,6 @@ namespace hdps
 
         void PointRenderer::resize(QSize renderSize)
         {
-            qDebug() << "Resizing scatterplot";
             int w = renderSize.width();
             int h = renderSize.height();
 
@@ -140,9 +139,7 @@ namespace hdps
             float wDiff = ((wAspect - 1) / 2.0);
             float hDiff = ((hAspect - 1) / 2.0);
 
-            toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
             toIsotropicCoordinates = Matrix3f(wAspect, 0, 0, hAspect, -wDiff, -hDiff);
-            qDebug() << "Done resizing scatterplot";
         }
 
         void PointRenderer::render()
@@ -154,8 +151,12 @@ namespace hdps
             int size = w < h ? w : h;
             glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
 
-            Vector2f topLeft = toClipCoordinates * toIsotropicCoordinates * _selection.topLeft();
-            Vector2f bottomRight = toClipCoordinates * toIsotropicCoordinates * _selection.bottomRight();
+            // World to clip transformation
+            _ortho.setIdentity();
+            _ortho[0] = 2 / (_bounds.right() - _bounds.left());
+            _ortho[4] = 2 / (_bounds.top() - _bounds.bottom());
+            _ortho[6] = -((_bounds.right() + _bounds.left()) / (_bounds.right() - _bounds.left()));
+            _ortho[7] = -((_bounds.top() + _bounds.bottom()) / (_bounds.top() - _bounds.bottom()));
 
             _shader.bind();
             switch (_scalingMode) {

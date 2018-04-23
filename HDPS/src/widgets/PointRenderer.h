@@ -62,6 +62,7 @@ namespace hdps
             float _pointSize = DEFAULT_POINT_SIZE;
             float _alpha = DEFAULT_ALPHA_VALUE;
 
+            Matrix3f _ortho;
             ShaderProgram _selectionShader;
             Selection _selection;
         };
