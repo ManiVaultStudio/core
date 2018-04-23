@@ -23,6 +23,7 @@ namespace hdps
 
             void setData(const std::vector<Vector2f>* points);
             void setColors(const std::vector<Vector3f>& data);
+            void setBounds(float left, float right, float bottom, float top);
             void setPointSize(const float size);
             void setSelectionColor(const Vector3f selectionColor);
             void setAlpha(const float alpha);

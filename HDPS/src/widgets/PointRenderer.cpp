@@ -38,6 +38,14 @@ namespace hdps
             qDebug() << "Done setting colours";
         }
 
+        void PointRenderer::setBounds(float left, float right, float bottom, float top)
+        {
+            _bounds.setLeft(left);
+            _bounds.setRight(right);
+            _bounds.setBottom(bottom);
+            _bounds.setTop(top);
+        }
+
         void PointRenderer::setPointSize(const float size)
         {
             _pointSize = size;
