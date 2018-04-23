@@ -1,7 +1,7 @@
 #version 330 core
 
 uniform float pointSize;
-uniform float maxDimension;
+uniform mat3 projMatrix;
 uniform vec3 selectionColor;
 
 uniform bool selecting;
@@ -30,5 +30,6 @@ void main()
     }
 
     pass_texCoords = vertex;
-    gl_Position = vec4(vertex * pointSize + position * (1.0 / maxDimension), 0, 1);
+    
+    gl_Position = vec4(projMatrix * vec3(vertex * pointSize + position, 1), 1);
 }
