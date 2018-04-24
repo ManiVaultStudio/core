@@ -210,8 +210,7 @@ void ScatterplotPlugin::updateData()
 void ScatterplotPlugin::updateSelection()
 {
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
-    const PointsPlugin* points = dataSet->getData();
-    const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
+    const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(dataSet->getDataName()));
 
     std::vector<hdps::Vector3f> colors;
     colors.resize(_numPoints, settings->getBaseColor());
