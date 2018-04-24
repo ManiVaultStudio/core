@@ -22,6 +22,7 @@ namespace hdps
 
         Matrix3f operator*(const Matrix3f& m) const;
         Vector2f operator*(const Vector2f& v) const;
+        Selection operator*(const Selection& s) const;
     private:
         float a[9];
     };
