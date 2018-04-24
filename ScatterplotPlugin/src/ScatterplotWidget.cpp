@@ -92,6 +92,25 @@ namespace hdps
             _selectionListeners.push_back(listener);
         }
 
+        float lerp(float v0, float v1, float t) {
+            return (1 - t) * v0 + t * v1;
+        }
+
+        Selection ScatterplotWidget::getSelection()
+        {
+            qDebug() << "ORIGINAL SELECTION Bottom left: " << _selection.bottomLeft().str().c_str() << " Top right: " << _selection.topRight().str().c_str();
+
+            Vector2f bottomLeft = _selection.bottomLeft();
+            Vector2f topRight = _selection.topRight();
+            bottomLeft = toIsotropicCoordinates * bottomLeft;
+            topRight = toIsotropicCoordinates * topRight;
+
+            Vector2f bottomLeftData(lerp(_dataBounds.left(), _dataBounds.right(), bottomLeft.x), lerp(_dataBounds.bottom(), _dataBounds.top(), bottomLeft.y));
+            Vector2f topRightData(lerp(_dataBounds.left(), _dataBounds.right(), topRight.x), lerp(_dataBounds.bottom(), _dataBounds.top(), topRight.y));
+            
+            return Selection(bottomLeftData, topRightData);
+        }
+
         void ScatterplotWidget::initializeGL()
         {
             qDebug() << "Initializing scatterplot";
@@ -114,6 +133,17 @@ namespace hdps
             _pointRenderer.resize(QSize(w, h));
             _densityRenderer.resize(w, h);
             _selectionRenderer.resize(QSize(w, h));
+
+            toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
+
+            int size = w < h ? w : h;
+
+            float wAspect = (float)w / size;
+            float hAspect = (float)h / size;
+            float wDiff = ((wAspect - 1) / 2.0);
+            float hDiff = ((hAspect - 1) / 2.0);
+
+            toIsotropicCoordinates = Matrix3f(wAspect, 0, 0, hAspect, -wDiff, -hDiff);
             qDebug() << "Done resizing scatterplot";
         }
 
