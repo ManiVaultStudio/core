@@ -152,6 +152,14 @@ namespace hdps
             // Bind the framebuffer belonging to the widget
             glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 
+            // Clear the widget to the background color
+            glClearColor(1, 1, 1, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // Reset the blending function
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
             switch (_renderMode)
             {
             case SCATTERPLOT: _pointRenderer.render(); break;
