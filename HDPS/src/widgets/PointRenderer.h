@@ -50,12 +50,11 @@ namespace hdps
             ShaderProgram _selectionShader;
 
             Selection _selection;
+            bool _isSelecting = false;
 
             unsigned int _numPoints = 0;
             const std::vector<Vector2f>* _positions;
             std::vector<Vector3f> _colors;
-
-            bool _isSelecting = false;
 
             QSize _windowSize;
 

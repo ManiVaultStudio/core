@@ -118,7 +118,7 @@ namespace hdps
             connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ScatterplotWidget::cleanup);
 
             _pointRenderer.init();
-            _densityRenderer.init(context());
+            _densityRenderer.init();
             _selectionRenderer.init();
         }
 
@@ -129,7 +129,7 @@ namespace hdps
             _windowSize.setHeight(h);
 
             _pointRenderer.resize(QSize(w, h));
-            _densityRenderer.resize(w, h);
+            _densityRenderer.resize(QSize(w, h));
             _selectionRenderer.resize(QSize(w, h));
 
             toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
@@ -235,9 +235,7 @@ namespace hdps
             makeCurrent();
 
             _pointRenderer.destroy();
-
-            _densityRenderer.terminate();
-
+            _densityRenderer.destroy();
             _selectionRenderer.destroy();
         }
 

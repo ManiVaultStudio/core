@@ -35,7 +35,7 @@ namespace hdps
             _densityComputation.setSigma(sigma);
         }
 
-        void DensityRenderer::init(QOpenGLContext* context)
+        void DensityRenderer::init()
         {
             qDebug() << "Initializing density plot GL";
             initializeOpenGLFunctions();
@@ -55,14 +55,17 @@ namespace hdps
             _colorMap.loadFromFile(":colormaps/Spectral.png");
 
             // Initialize the density computation
-            _densityComputation.init(context);
+            _densityComputation.init(QOpenGLContext::currentContext());
             // Compute the density in case data was already set
             _densityComputation.compute();
             qDebug() << "Initialized density plot GL";
         }
 
-        void DensityRenderer::resize(int w, int h)
+        void DensityRenderer::resize(QSize renderSize)
         {
+            int w = renderSize.width();
+            int h = renderSize.height();
+
             _windowSize.setWidth(w);
             _windowSize.setHeight(h);
         }
@@ -86,7 +89,7 @@ namespace hdps
             qDebug() << "Done rendering densityplot";
         }
 
-        void DensityRenderer::terminate()
+        void DensityRenderer::destroy()
         {
             _shaderDensityDraw.destroy();
             _shaderIsoDensityDraw.destroy();
@@ -133,6 +136,18 @@ namespace hdps
             _shaderIsoDensityDraw.uniform1i("colorMap", 1);
 
             drawFullscreenQuad();
+        }
+
+        void DensityRenderer::onSelecting(Selection selection)
+        {
+            _selection = selection;
+
+            _isSelecting = true;
+        }
+
+        void DensityRenderer::onSelection(Selection selection)
+        {
+            _isSelecting = false;
         }
 
     } // namespace gui
