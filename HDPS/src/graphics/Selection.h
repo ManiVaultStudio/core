@@ -20,6 +20,10 @@ namespace hdps
         Vector2f getEnd() const;
         Vector2f getCenter() const;
 
+        float getLeft() const;
+        float getRight() const;
+        float getBottom() const;
+        float getTop() const;
         Vector2f topLeft() const;
         Vector2f bottomLeft() const;
         Vector2f bottomRight() const;
@@ -28,8 +32,11 @@ namespace hdps
         bool contains(Vector2f point) const;
 
     private:
-        Vector2f start, end;
+        void updateProperties();
+
+        Vector2f _start, _end;
+
+        float _left, _right, _bottom, _top;
     };
 
 } // namespace hdps
-
