@@ -41,7 +41,7 @@ namespace hdps
             void setAlpha(const float alpha);
             void setPointScaling(PointRenderer::PointScaling scalingMode);
             void setSigma(const float sigma);
-            void addSelectionListener(const plugin::SelectionListener* listener);
+            void addSelectionListener(plugin::SelectionListener* listener);
         protected:
             void initializeGL()         Q_DECL_OVERRIDE;
             void resizeGL(int w, int h) Q_DECL_OVERRIDE;
@@ -51,6 +51,7 @@ namespace hdps
             void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
             void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
+            void onSelecting(Selection selection);
             void onSelection(Selection selection);
             void cleanup();
 
@@ -72,7 +73,7 @@ namespace hdps
 
             bool _selecting = false;
             Selection _selection;
-            std::vector<const plugin::SelectionListener*> _selectionListeners;
+            std::vector<plugin::SelectionListener*> _selectionListeners;
         };
 
     } // namespace gui

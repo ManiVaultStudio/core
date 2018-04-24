@@ -132,7 +132,7 @@ namespace hdps
         {
             _selecting = true;
 
-            Vector2f point = Vector2f(event->x(), _windowSize.height() - event->y());
+            Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
             _selection.setStart(point);
         }
 
@@ -140,10 +140,10 @@ namespace hdps
         {
             if (!_selecting) return;
 
-            Vector2f point = Vector2f(event->x(), _windowSize.height() - event->y());
+            Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
             _selection.setEnd(point);
 
-            _selectionRenderer.onSelection(_selection);
+            onSelecting(_selection);
 
             update();
         }
@@ -152,30 +152,34 @@ namespace hdps
         {
             _selecting = false;
 
-            Vector2f point = Vector2f(event->x(), _windowSize.height() - event->y());
+            Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
             _selection.setEnd(point);
 
-            _selectionRenderer.onSelection(_selection);
+            onSelection(_selection);
+
+            update();
+        }
+
+        void ScatterplotWidget::onSelecting(Selection selection)
+        {
+            _selection.set(selection.getStart(), selection.getEnd());
+
+            qDebug() << "ON SELECTING";
+            for (plugin::SelectionListener* listener : _selectionListeners)
+                listener->onSelecting(selection);
 
             update();
         }
 
         void ScatterplotWidget::onSelection(Selection selection)
         {
+            _selection.set(selection.getStart(), selection.getEnd());
+
+            qDebug() << "ON SELECTION " << _selection.topRight().str().c_str();
+            for (plugin::SelectionListener* listener : _selectionListeners)
+                listener->onSelection(_selection);
+
             update();
-
-            std::vector<unsigned int> indices;
-            for (unsigned int i = 0; i < _numPoints; i++)
-            {
-                Vector2f point = (*_positions)[i];
-                point.x *= _windowSize.width() / _windowSize.height();
-
-                if (selection.contains(point))
-                    indices.push_back(i);
-            }
-
-            for (const plugin::SelectionListener* listener : _selectionListeners)
-                listener->onSelection(indices);
         }
 
         void ScatterplotWidget::cleanup()
