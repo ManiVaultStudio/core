@@ -61,6 +61,8 @@ private:
     void updateData();
     void updateSelection();
 
+    void makeSelection(hdps::Selection selection);
+
     hdps::gui::ScatterplotWidget* _scatterPlotWidget;
 
     ScatterplotSettings* settings;
