@@ -34,7 +34,7 @@ namespace hdps
 
             ScatterplotWidget();
             void setRenderMode(RenderMode renderMode);
-            void setData(const std::vector<Vector2f>* data);
+            void setData(const std::vector<Vector2f>* data, const QRectF bounds);
             void setColors(const std::vector<Vector3f>& data);
             void setPointSize(const float size);
             void setSelectionColor(const Vector3f selectionColor);
@@ -42,6 +42,8 @@ namespace hdps
             void setPointScaling(PointRenderer::PointScaling scalingMode);
             void setSigma(const float sigma);
             void addSelectionListener(plugin::SelectionListener* listener);
+
+            Selection getSelection();
         protected:
             void initializeGL()         Q_DECL_OVERRIDE;
             void resizeGL(int w, int h) Q_DECL_OVERRIDE;
@@ -69,7 +71,7 @@ namespace hdps
             QSize _windowSize;
 
             unsigned int _numPoints = 0;
-            const std::vector<Vector2f>* _positions;
+            QRectF _dataBounds;
 
             bool _selecting = false;
             Selection _selection;
