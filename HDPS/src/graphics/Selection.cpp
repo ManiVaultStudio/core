@@ -1,5 +1,7 @@
 #include "Selection.h"
 
+#include <algorithm>
+
 namespace hdps
 {
     Selection::Selection()
@@ -88,8 +90,8 @@ namespace hdps
 
     bool Selection::contains(Vector2f point) const
     {
-        Vector2f tl = topLeft();
-        Vector2f br = bottomRight();
+        return point.x >= _left && point.x <= _right && point.y >= _bottom && point.y <= _top;
+    }
 
     void Selection::updateProperties()
     {
@@ -97,7 +99,6 @@ namespace hdps
         _right = std::max(_start.x, _end.x);
         _bottom = std::min(_start.y, _end.y);
         _top = std::max(_start.y, _end.y);
-        return point.x >= tl.x && point.x <= br.x && point.y >= br.y && point.y <= tl.y;
     }
 
 } // namespace hdps
