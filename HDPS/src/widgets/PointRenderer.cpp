@@ -192,9 +192,6 @@ namespace hdps
         {
             _isSelecting = false;
         }
-
-        }
-
     } // namespace gui
 
 } // namespace hdps

@@ -51,10 +51,5 @@ namespace hdps
         {
             _selection = selection;
         }
-
-        Matrix3f SelectionRenderer::getTransformMatrix()
-        {
-            return Matrix3f();
-        }
     }
 }
