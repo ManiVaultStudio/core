@@ -9,6 +9,8 @@
 #include <QtCore>
 #include <QtDebug>
 
+#include <algorithm>
+
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
 using namespace hdps;
@@ -25,18 +27,10 @@ namespace
         float maxDimension = 0;
         for (const Vector2f& point : points)
         {
-            if (point.x < bounds.left()) {
-                bounds.setLeft(point.x);
-            }
-            if (point.x > bounds.right()) {
-                bounds.setRight(point.x);
-            }
-            if (point.y > bounds.top()) {
-                bounds.setTop(point.y);
-            }
-            if (point.y < bounds.bottom()) {
-                bounds.setBottom(point.y);
-            }
+            bounds.setLeft(std::min(point.x, (float) bounds.left()));
+            bounds.setRight(std::max(point.x, (float)bounds.right()));
+            bounds.setBottom(std::min(point.y, (float)bounds.bottom()));
+            bounds.setTop(std::max(point.y, (float)bounds.top()));
         }
         return bounds;
     }
