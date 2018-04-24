@@ -11,6 +11,37 @@
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
+using namespace hdps;
+
+namespace
+{
+    QRectF getDataBounds(const std::vector<Vector2f>& points)
+    {
+        QRectF bounds;
+        bounds.setLeft(10000);
+        bounds.setRight(-10000);
+        bounds.setTop(-10000);
+        bounds.setBottom(10000);
+        float maxDimension = 0;
+        for (const Vector2f& point : points)
+        {
+            if (point.x < bounds.left()) {
+                bounds.setLeft(point.x);
+            }
+            if (point.x > bounds.right()) {
+                bounds.setRight(point.x);
+            }
+            if (point.y > bounds.top()) {
+                bounds.setTop(point.y);
+            }
+            if (point.y < bounds.bottom()) {
+                bounds.setBottom(point.y);
+            }
+        }
+        return bounds;
+    }
+}
+
 // =============================================================================
 // View
 // =============================================================================
