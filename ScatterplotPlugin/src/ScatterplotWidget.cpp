@@ -28,8 +28,21 @@ namespace hdps
         // Positions need to be passed as a pointer as we need to store them locally in order
         // to be able to find the subset of data that's part of a selection. If passed
         // by reference then we can upload the data to the GPU, but not store it in the widget.
-        void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
+        void ScatterplotWidget::setData(const std::vector<Vector2f>* points, const QRectF bounds)
         {
+
+            float width = fabs(bounds.width());
+            float height = fabs(bounds.height());
+            float size = width > height ? width : height;
+            Vector2f center((bounds.left() + bounds.right()) / 2, (bounds.bottom() + bounds.top()) / 2);
+            QRectF uniformBounds;
+            uniformBounds.setLeft(center.x - size / 2);
+            uniformBounds.setRight(center.x + size / 2);
+            uniformBounds.setBottom(center.y - size / 2);
+            uniformBounds.setTop(center.y + size / 2);
+            _dataBounds = uniformBounds;
+
+            _pointRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
             _pointRenderer.setData(points);
             _densityRenderer.setData(points);
 
