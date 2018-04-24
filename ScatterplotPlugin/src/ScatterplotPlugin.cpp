@@ -164,12 +164,10 @@ void ScatterplotPlugin::yDimPicked(int index)
 
 void ScatterplotPlugin::updateData()
 {
-    qDebug() << "UPDATING SCATTER PLUGIN";
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
     const PointsPlugin* points = dataSet->getData();
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
     
-    std::vector<hdps::Vector2f>* positions = new std::vector<hdps::Vector2f>();
     std::vector<hdps::Vector3f> colors;
 
     int nDim = points->getNumDimensions();
@@ -181,16 +179,16 @@ void ScatterplotPlugin::updateData()
         return;
 
     // Determine number of points depending on if its a full dataset or a subset
-    unsigned int numPoints = dataSet->isFull() ? points->getNumPoints() : dataSet->indices.size();
+    _numPoints = dataSet->isFull() ? points->getNumPoints() : dataSet->indices.size();
 
-    positions->resize(numPoints);
-    colors.resize(numPoints, settings->getBaseColor());
+    _points.resize(_numPoints);
+    colors.resize(_numPoints, settings->getBaseColor());
 
     if (dataSet->isFull())
     {
-        for (int i = 0; i < numPoints; i++)
+        for (int i = 0; i < _numPoints; i++)
         {
-            (*positions)[i] = hdps::Vector2f(points->data[i * nDim + xIndex], points->data[i * nDim + yIndex]);
+            _points[i] = hdps::Vector2f(points->data[i * nDim + xIndex], points->data[i * nDim + yIndex]);
         }
 
         for (unsigned int index : selection->indices)
@@ -200,10 +198,10 @@ void ScatterplotPlugin::updateData()
     }
     else
     {
-        for (int i = 0; i < numPoints; i++)
+        for (int i = 0; i < _numPoints; i++)
         {
             int index = dataSet->indices[i];
-            (*positions)[i] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]);
+            _points[i] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]);
 
             bool selected = false;
             for (unsigned int selectionIndex : selection->indices)
@@ -216,11 +214,8 @@ void ScatterplotPlugin::updateData()
         }
     }
 
-    qDebug() << "Setting positions";
-    _scatterPlotWidget->setData(positions);
-    qDebug() << "Setting colors";
+    _scatterPlotWidget->setData(&_points, getDataBounds(_points));
     _scatterPlotWidget->setColors(colors);
-    qDebug() << "DONE UPDATING SCATTER";
 }
 
 void ScatterplotPlugin::onSelecting(hdps::Selection selection)

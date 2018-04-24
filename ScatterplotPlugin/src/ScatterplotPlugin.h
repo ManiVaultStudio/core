@@ -2,11 +2,14 @@
 #define SCATTERPLOT_PLUGIN_H
 
 #include <ViewPlugin.h>
+#include "SelectionListener.h"
+
 #include "ScatterplotWidget.h"
 
 #include <QComboBox>
 #include <QSlider>
 #include <QPushButton>
+#include <QRectF>
 
 using namespace hdps::plugin;
 
@@ -16,6 +19,7 @@ using namespace hdps::plugin;
 
 class ScatterplotSettings;
 class PointsPlugin;
+class hdps::Vector2f;
 
 class ScatterplotPlugin : public ViewPlugin, public SelectionListener
 {
@@ -55,11 +59,13 @@ protected slots:
 
 private:
     void updateData();
-    float getMaxLength(const std::vector<float>* data, const int nDim) const;
 
     hdps::gui::ScatterplotWidget* _scatterPlotWidget;
 
     ScatterplotSettings* settings;
+
+    std::vector<hdps::Vector2f> _points;
+    unsigned int _numPoints;
 
     unsigned int _pointSize;
     unsigned int _sigma;
