@@ -98,13 +98,10 @@ namespace hdps
 
         Selection ScatterplotWidget::getSelection()
         {
-            Vector2f bottomLeft = _selection.bottomLeft();
-            Vector2f topRight = _selection.topRight();
-            bottomLeft = toIsotropicCoordinates * bottomLeft;
-            topRight = toIsotropicCoordinates * topRight;
+            Selection isotropicSelection = toIsotropicCoordinates * _selection;
 
-            Vector2f bottomLeftData(lerp(_dataBounds.left(), _dataBounds.right(), bottomLeft.x), lerp(_dataBounds.bottom(), _dataBounds.top(), bottomLeft.y));
-            Vector2f topRightData(lerp(_dataBounds.left(), _dataBounds.right(), topRight.x), lerp(_dataBounds.bottom(), _dataBounds.top(), topRight.y));
+            Vector2f bottomLeftData(lerp(_dataBounds.left(), _dataBounds.right(), isotropicSelection.getLeft()), lerp(_dataBounds.bottom(), _dataBounds.top(), isotropicSelection.getBottom()));
+            Vector2f topRightData(lerp(_dataBounds.left(), _dataBounds.right(), isotropicSelection.getRight()), lerp(_dataBounds.bottom(), _dataBounds.top(), isotropicSelection.getTop()));
             
             return Selection(bottomLeftData, topRightData);
         }
