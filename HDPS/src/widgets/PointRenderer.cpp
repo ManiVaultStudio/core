@@ -11,7 +11,6 @@ namespace hdps
         // by reference then we can upload the data to the GPU, but not store it in the widget.
         void PointRenderer::setData(const std::vector<Vector2f>* points)
         {
-            qDebug() << "Setting data";
             _numPoints = (unsigned int) points->size();
             _positions = points;
             _colors.clear();
@@ -23,19 +22,16 @@ namespace hdps
             _colorBuffer.bind();
             _colorBuffer.setData(_colors);
             glBindVertexArray(0);
-            qDebug() << "Done setting data";
         }
 
         void PointRenderer::setColors(const std::vector<Vector3f>& colors)
         {
-            qDebug() << "Setting colours";
             _colors = colors;
 
             glBindVertexArray(_vao);
             _colorBuffer.bind();
             _colorBuffer.setData(colors);
             glBindVertexArray(0);
-            qDebug() << "Done setting colours";
         }
 
         void PointRenderer::setBounds(float left, float right, float bottom, float top)

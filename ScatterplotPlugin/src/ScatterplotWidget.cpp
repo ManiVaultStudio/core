@@ -98,8 +98,6 @@ namespace hdps
 
         Selection ScatterplotWidget::getSelection()
         {
-            qDebug() << "ORIGINAL SELECTION Bottom left: " << _selection.bottomLeft().str().c_str() << " Top right: " << _selection.topRight().str().c_str();
-
             Vector2f bottomLeft = _selection.bottomLeft();
             Vector2f topRight = _selection.topRight();
             bottomLeft = toIsotropicCoordinates * bottomLeft;
@@ -215,7 +213,6 @@ namespace hdps
         {
             _selection.set(selection.getStart(), selection.getEnd());
 
-            qDebug() << "ON SELECTING";
             for (plugin::SelectionListener* listener : _selectionListeners)
                 listener->onSelecting(selection);
 
@@ -226,7 +223,6 @@ namespace hdps
         {
             _selection.set(selection.getStart(), selection.getEnd());
 
-            qDebug() << "ON SELECTION " << _selection.topRight().str().c_str();
             for (plugin::SelectionListener* listener : _selectionListeners)
                 listener->onSelection(_selection);
 
