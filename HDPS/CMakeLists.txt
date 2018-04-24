@@ -83,6 +83,7 @@ set( GRAPHICS_SOURCES
     src/graphics/BufferObject.cpp
     src/graphics/Shader.cpp
     src/graphics/Selection.cpp
+    src/graphics/Matrix3f.cpp
 )
 
 set( UTIL_HEADERS
