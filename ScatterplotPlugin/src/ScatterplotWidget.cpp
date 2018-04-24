@@ -14,7 +14,8 @@ namespace hdps
             :
             _densityRenderer(DensityRenderer::RenderMode::DENSITY)
         {
-
+            addSelectionListener(&_selectionRenderer);
+            addSelectionListener(&_pointRenderer);
         }
 
         void ScatterplotWidget::setRenderMode(RenderMode renderMode)
@@ -73,7 +74,7 @@ namespace hdps
             update();
         }
 
-        void ScatterplotWidget::addSelectionListener(const plugin::SelectionListener* listener)
+        void ScatterplotWidget::addSelectionListener(plugin::SelectionListener* listener)
         {
             _selectionListeners.push_back(listener);
         }
