@@ -223,20 +223,39 @@ void ScatterplotPlugin::updateData()
     qDebug() << "DONE UPDATING SCATTER";
 }
 
-void ScatterplotPlugin::onSelection(const std::vector<unsigned int> selection) const
+void ScatterplotPlugin::onSelecting(hdps::Selection selection)
+{
+    
+}
+
+void ScatterplotPlugin::onSelection(hdps::Selection selection)
 {
     if (settings->numDataOptions() == 0)
         return;
 
+    Selection s = _scatterPlotWidget->getSelection();
+
+    qDebug() << "DATA SELECTION: " << s.bottomLeft().str().c_str() << s.topRight().str().c_str();
+
+    std::vector<unsigned int> indices;
+    for (unsigned int i = 0; i < _points.size(); i++)
+    {
+        hdps::Vector2f point = _points[i];
+
+        if (s.contains(point))
+            indices.push_back(i);
+    }
+
+    qDebug() << "INDICES SIZE: " << indices.size();
     const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(settings->currentData()));
     IndexSet* selectionSet = dynamic_cast<IndexSet*>(_core->requestSelection(set->getDataName()));
-    qDebug() << "Selection size: " << selection.size();
+    qDebug() << "Selection size: " << indices.size();
     selectionSet->indices.clear();
+    selectionSet->indices.reserve(indices.size());
 
-    for (unsigned int index : selection) {
+    for (unsigned int index : indices) {
         selectionSet->indices.push_back(set->isFull() ? index : set->indices[index]);
     }
-    
     qDebug() << "Selection on: " << selectionSet->getDataName();
     _core->notifySelectionChanged(selectionSet->getDataName());
 }

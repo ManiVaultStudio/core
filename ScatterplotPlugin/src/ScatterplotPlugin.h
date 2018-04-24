@@ -40,7 +40,8 @@ public:
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
-    virtual void onSelection(const std::vector<unsigned int> selection) const;
+    virtual void onSelecting(hdps::Selection selection);
+    virtual void onSelection(hdps::Selection selection);
 
 protected slots:
     void dataSetPicked(const QString& name);
