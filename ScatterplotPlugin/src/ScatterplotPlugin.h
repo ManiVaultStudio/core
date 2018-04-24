@@ -59,6 +59,7 @@ protected slots:
 
 private:
     void updateData();
+    void updateSelection();
 
     hdps::gui::ScatterplotWidget* _scatterPlotWidget;
 
