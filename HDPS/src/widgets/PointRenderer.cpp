@@ -15,12 +15,16 @@ namespace hdps
             _positions = points;
             _colors.clear();
             _colors.resize(_numPoints, Vector3f(0.5f, 0.5f, 0.5f));
+            _highlights.clear();
+            _highlights.resize(_numPoints, 0);
 
             glBindVertexArray(_vao);
             _positionBuffer.bind();
             _positionBuffer.setData(*points);
             _colorBuffer.bind();
             _colorBuffer.setData(_colors);
+            _highlightBuffer.bind();
+            _highlightBuffer.setData(_highlights);
             glBindVertexArray(0);
         }
 
@@ -31,6 +35,16 @@ namespace hdps
             glBindVertexArray(_vao);
             _colorBuffer.bind();
             _colorBuffer.setData(colors);
+            glBindVertexArray(0);
+        }
+
+        void PointRenderer::setHighlight(const std::vector<char>& highlights)
+        {
+            _highlights = highlights;
+
+            glBindVertexArray(_vao);
+            _highlightBuffer.bind();
+            _highlightBuffer.setData(highlights);
             glBindVertexArray(0);
         }
 
@@ -103,6 +117,12 @@ namespace hdps
             glVertexAttribDivisor(2, 1);
             glEnableVertexAttribArray(2);
 
+            _highlightBuffer.create();
+            _highlightBuffer.bind();
+            glVertexAttribIPointer(3, 1, GL_UNSIGNED_BYTE, 0, 0);
+            glVertexAttribDivisor(3, 1);
+            glEnableVertexAttribArray(3);
+
             if (_numPoints > 0)
             {
                 glBindVertexArray(_vao);
@@ -110,6 +130,8 @@ namespace hdps
                 _positionBuffer.setData(*_positions);
                 _colorBuffer.bind();
                 _colorBuffer.setData(_colors);
+                _highlightBuffer.bind();
+                _highlightBuffer.setData(_highlights);
             }
 
             bool loaded = true;

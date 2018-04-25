@@ -24,6 +24,7 @@ namespace hdps
 
             void setData(const std::vector<Vector2f>* points);
             void setColors(const std::vector<Vector3f>& data);
+            void setHighlight(const std::vector<char>& highlights);
             void setBounds(float left, float right, float bottom, float top);
             void setPointSize(const float size);
             void setSelectionColor(const Vector3f selectionColor);
@@ -46,6 +47,7 @@ namespace hdps
 
             BufferObject _positionBuffer;
             BufferObject _colorBuffer;
+            BufferObject _highlightBuffer;
             ShaderProgram _shader;
             ShaderProgram _selectionShader;
 
@@ -55,6 +57,7 @@ namespace hdps
             unsigned int _numPoints = 0;
             const std::vector<Vector2f>* _positions;
             std::vector<Vector3f> _colors;
+            std::vector<char> _highlights;
 
             QSize _windowSize;
 

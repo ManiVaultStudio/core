@@ -55,6 +55,13 @@ namespace hdps
 
             update();
         }
+        
+        void ScatterplotWidget::setHighlights(const std::vector<char>& highlights)
+        {
+            _pointRenderer.setHighlight(highlights);
+
+            update();
+        }
 
         void ScatterplotWidget::setPointSize(const float size)
         {

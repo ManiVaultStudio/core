@@ -36,6 +36,7 @@ namespace hdps
             void setRenderMode(RenderMode renderMode);
             void setData(const std::vector<Vector2f>* data, const QRectF bounds);
             void setColors(const std::vector<Vector3f>& data);
+            void setHighlights(const std::vector<char>& highlights);
             void setPointSize(const float size);
             void setSelectionColor(const Vector3f selectionColor);
             void setAlpha(const float alpha);

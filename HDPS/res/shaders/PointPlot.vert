@@ -11,9 +11,11 @@ uniform vec2 end;
 in vec2 vertex;
 in vec2 position;
 in vec3 color;
+in uint highlight;
 
 out vec2 pass_texCoords;
 out vec3 pass_color;
+flat out uint pass_highlight;
 
 bool inRect(vec2 position, vec2 start, vec2 end)
 {
@@ -23,6 +25,7 @@ bool inRect(vec2 position, vec2 start, vec2 end)
 void main()
 {
     pass_color = color;
+    pass_highlight = highlight;
 
     if (selecting && inRect(position, start, end))
     {
@@ -31,5 +34,11 @@ void main()
 
     pass_texCoords = vertex;
     
-    gl_Position = vec4(projMatrix * vec3(vertex * pointSize + position, 1), 1);
+    float scale = 1.0;
+    if (pass_highlight == 1u) {
+        scale = 1.2;
+    }
+    
+    vec2 pos = (projMatrix * vec3(position, 1)).xy;
+    gl_Position = vec4(vec3(vertex * pointSize * scale + pos, 1), 1);
 }
