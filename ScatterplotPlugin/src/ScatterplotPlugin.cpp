@@ -206,14 +206,14 @@ void ScatterplotPlugin::updateSelection()
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(dataSet->getDataName()));
 
-    std::vector<hdps::Vector3f> colors;
-    colors.resize(_numPoints, settings->getBaseColor());
+    std::vector<char> highlights;
+    highlights.resize(_numPoints, 0);
 
     if (dataSet->isFull())
     {
         for (unsigned int index : selection->indices)
         {
-            colors[index] = settings->getSelectionColor();
+            highlights[index] = 1;
         }
     }
     else
@@ -225,14 +225,14 @@ void ScatterplotPlugin::updateSelection()
             for (unsigned int selectionIndex : selection->indices)
             {
                 if (index == selectionIndex) {
-                    colors[i] = settings->getSelectionColor();
+                    highlights[i] = 1;
                     break;
                 }
             }
         }
     }
 
-    _scatterPlotWidget->setColors(colors);
+    _scatterPlotWidget->setHighlights(highlights);
 }
 
 void ScatterplotPlugin::makeSelection(hdps::Selection selection)
