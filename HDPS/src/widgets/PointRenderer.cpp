@@ -180,12 +180,8 @@ namespace hdps
             case Absolute: _shader.uniform1f("pointSize", _pointSize / _windowSize.width()); break;
             }
 
-            _shader.uniform3f("selectionColor", _selectionColor.x, _selectionColor.y, _selectionColor.z);
             _shader.uniform1f("alpha", _alpha);
             _shader.uniformMatrix3f("projMatrix", _ortho);
-            _shader.uniform1i("selecting", _isSelecting);
-            //_shader.uniform2f("start", topLeft.x, topLeft.y);
-            //_shader.uniform2f("end", bottomRight.x, bottomRight.y);
 
             glBindVertexArray(_vao);
             glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
