@@ -75,11 +75,6 @@ namespace hdps
             _pointSettings._pointSize = size;
         }
 
-        void PointRenderer::setSelectionColor(const Vector3f selectionColor)
-        {
-            _pointSettings._selectionColor = selectionColor;
-        }
-
         void PointRenderer::setAlpha(const float alpha)
         {
             _pointSettings._alpha = alpha;
