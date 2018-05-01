@@ -58,24 +58,24 @@ namespace hdps
 
         void PointRenderer::setPointSize(const float size)
         {
-            _pointSize = size;
+            _pointSettings._pointSize = size;
         }
 
         void PointRenderer::setSelectionColor(const Vector3f selectionColor)
         {
-            _selectionColor = selectionColor;
+            _pointSettings._selectionColor = selectionColor;
         }
 
         void PointRenderer::setAlpha(const float alpha)
         {
-            _alpha = alpha;
-            _alpha = _alpha > 1 ? 1 : _alpha;
-            _alpha = _alpha < 0 ? 0 : _alpha;
+            _pointSettings._alpha = alpha;
+            _pointSettings._alpha = _pointSettings._alpha > 1 ? 1 : _pointSettings._alpha;
+            _pointSettings._alpha = _pointSettings._alpha < 0 ? 0 : _pointSettings._alpha;
         }
 
         void PointRenderer::setPointScaling(PointScaling scalingMode)
         {
-            _scalingMode = scalingMode;
+            _pointSettings._scalingMode = scalingMode;
         }
 
         void PointRenderer::init()
@@ -175,12 +175,12 @@ namespace hdps
             _ortho[7] = -((_bounds.top() + _bounds.bottom()) / (_bounds.top() - _bounds.bottom()));
 
             _shader.bind();
-            switch (_scalingMode) {
-            case Relative: _shader.uniform1f("pointSize", _pointSize / 800); break;
-            case Absolute: _shader.uniform1f("pointSize", _pointSize / _windowSize.width()); break;
+            switch (_pointSettings._scalingMode) {
+            case Relative: _shader.uniform1f("pointSize", _pointSettings._pointSize / 800); break;
+            case Absolute: _shader.uniform1f("pointSize", _pointSettings._pointSize / _windowSize.width()); break;
             }
 
-            _shader.uniform1f("alpha", _alpha);
+            _shader.uniform1f("alpha", _pointSettings._alpha);
             _shader.uniformMatrix3f("projMatrix", _ortho);
 
             glBindVertexArray(_vao);

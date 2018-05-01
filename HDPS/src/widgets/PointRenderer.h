@@ -15,12 +15,28 @@ namespace hdps
 {
     namespace gui
     {
+        enum PointScaling {
+            Absolute, Relative
+        };
+
+        struct PointSettings
+        {
+            // Constants
+            const float        DEFAULT_POINT_SIZE = 15;
+            const Vector3f     DEFAULT_SELECTION_COLOR = Vector3f(1.0f, 0.5f, 0.0f);
+            const float        DEFAULT_ALPHA_VALUE = 0.5f;
+            const PointScaling DEFAULT_POINT_SCALING = PointScaling::Relative;
+
+            PointScaling _scalingMode = DEFAULT_POINT_SCALING;
+            Vector3f     _selectionColor = DEFAULT_SELECTION_COLOR;
+            float        _pointSize = DEFAULT_POINT_SIZE;
+            float        _alpha = DEFAULT_ALPHA_VALUE;
+        };
+
         class PointRenderer : public Renderer, public plugin::SelectionListener
         {
         public:
-            enum PointScaling {
-                Absolute, Relative
-            };
+            
 
             void setData(const std::vector<Vector2f>* points);
             void setColors(const std::vector<Vector3f>& data);
@@ -64,16 +80,8 @@ namespace hdps
             Matrix3f _ortho;
 
             /* Properties */
-            // Constants
-            const float        DEFAULT_POINT_SIZE      = 15;
-            const Vector3f     DEFAULT_SELECTION_COLOR = Vector3f(1.0f, 0.5f, 0.0f);
-            const float        DEFAULT_ALPHA_VALUE     = 0.5f;
-            const PointScaling DEFAULT_POINT_SCALING   = PointScaling::Relative;
+            PointSettings _pointSettings;
 
-            PointScaling _scalingMode    = DEFAULT_POINT_SCALING;
-            Vector3f     _selectionColor = DEFAULT_SELECTION_COLOR;
-            float        _pointSize      = DEFAULT_POINT_SIZE;
-            float        _alpha          = DEFAULT_ALPHA_VALUE;
             QRectF       _bounds         = QRectF(-1, 1, 2, 2);
         };
 
