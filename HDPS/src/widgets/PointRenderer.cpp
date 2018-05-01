@@ -6,6 +6,20 @@ namespace hdps
 {
     namespace gui
     {
+        namespace
+        {
+            Matrix3f createProjectionMatrix(QRectF bounds)
+            {
+                Matrix3f m;
+                m.setIdentity();
+                m[0] = 2 / (bounds.right() - bounds.left());
+                m[4] = 2 / (bounds.top() - bounds.bottom());
+                m[6] = -((bounds.right() + bounds.left()) / (bounds.right() - bounds.left()));
+                m[7] = -((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom()));
+                return m;
+            }
+        }
+
         // Positions need to be passed as a pointer as we need to store them locally in order
         // to be able to find the subset of data that's part of a selection. If passed
         // by reference then we can upload the data to the GPU, but not store it in the widget.
@@ -168,11 +182,7 @@ namespace hdps
             glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
 
             // World to clip transformation
-            _ortho.setIdentity();
-            _ortho[0] = 2 / (_bounds.right() - _bounds.left());
-            _ortho[4] = 2 / (_bounds.top() - _bounds.bottom());
-            _ortho[6] = -((_bounds.right() + _bounds.left()) / (_bounds.right() - _bounds.left()));
-            _ortho[7] = -((_bounds.top() + _bounds.bottom()) / (_bounds.top() - _bounds.bottom()));
+            _ortho = createProjectionMatrix(_bounds);
 
             _shader.bind();
             switch (_pointSettings._scalingMode) {
