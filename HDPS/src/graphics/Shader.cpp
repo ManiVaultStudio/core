@@ -40,7 +40,18 @@ namespace
         GLint status = 0;
         f->glGetProgramiv(program, GL_LINK_STATUS, &status);
 
-        return status == GL_TRUE;
+        if (status != GL_TRUE) {
+            GLint logLength = 0;
+            f->glGetShaderiv(program, GL_INFO_LOG_LENGTH, &logLength);
+            qDebug() << logLength;
+            std::vector<GLchar> infoLog(logLength);
+            f->glGetProgramInfoLog(program, logLength, &logLength, infoLog.data());
+            
+            qDebug() << "Shader program failed to link: " << std::string(infoLog.begin(), infoLog.end()).c_str();
+            return false;
+        }
+
+        return true;
     }
 
     bool validateProgram(const GLuint program)
