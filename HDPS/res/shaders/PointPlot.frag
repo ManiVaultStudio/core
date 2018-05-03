@@ -1,10 +1,12 @@
 #version 330 core
 
 uniform float alpha;
+uniform int scalarEffect;
 
 in vec2 pass_texCoords;
 in vec3 pass_color;
 flat in uint pass_highlight;
+in float pass_scalar;
 
 out vec4 fragColor;
 

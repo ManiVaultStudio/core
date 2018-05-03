@@ -63,16 +63,16 @@ namespace hdps
             update();
         }
 
-        void ScatterplotWidget::setPointSize(const float size)
+        void ScatterplotWidget::setScalarProperty(const std::vector<float>& scalarProperty)
         {
-            _pointRenderer.setPointSize(size);
-
+            _pointRenderer.setScalarProperty(scalarProperty);
+            
             update();
         }
 
-        void ScatterplotWidget::setSelectionColor(const Vector3f selectionColor)
+        void ScatterplotWidget::setPointSize(const float size)
         {
-            _pointRenderer.setSelectionColor(selectionColor);
+            _pointRenderer.setPointSize(size);
 
             update();
         }
@@ -82,7 +82,7 @@ namespace hdps
             _pointRenderer.setAlpha(alpha);
         }
 
-        void ScatterplotWidget::setPointScaling(PointRenderer::PointScaling scalingMode)
+        void ScatterplotWidget::setPointScaling(hdps::gui::PointScaling scalingMode)
         {
             _pointRenderer.setPointScaling(scalingMode);
         }

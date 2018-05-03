@@ -31,6 +31,8 @@ namespace hdps
             _colors.resize(_numPoints, Vector3f(0.5f, 0.5f, 0.5f));
             _highlights.clear();
             _highlights.resize(_numPoints, 0);
+            _scalarProperty.clear();
+            _scalarProperty.resize(_numPoints, 1);
 
             glBindVertexArray(_vao);
             _positionBuffer.bind();
@@ -39,6 +41,8 @@ namespace hdps
             _colorBuffer.setData(_colors);
             _highlightBuffer.bind();
             _highlightBuffer.setData(_highlights);
+            _scalarBuffer.bind();
+            _scalarBuffer.setData(_scalarProperty);
             glBindVertexArray(0);
         }
 
@@ -59,6 +63,16 @@ namespace hdps
             glBindVertexArray(_vao);
             _highlightBuffer.bind();
             _highlightBuffer.setData(highlights);
+            glBindVertexArray(0);
+        }
+
+        void PointRenderer::setScalarProperty(const std::vector<float>& scalarProperty)
+        {
+            _scalarProperty = scalarProperty;
+
+            glBindVertexArray(_vao);
+            _scalarBuffer.bind();
+            _scalarBuffer.setData(scalarProperty);
             glBindVertexArray(0);
         }
 
@@ -132,6 +146,12 @@ namespace hdps
             glVertexAttribDivisor(3, 1);
             glEnableVertexAttribArray(3);
 
+            _scalarBuffer.create();
+            _scalarBuffer.bind();
+            glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            glVertexAttribDivisor(4, 1);
+            glEnableVertexAttribArray(4);
+
             if (_numPoints > 0)
             {
                 glBindVertexArray(_vao);
@@ -141,6 +161,8 @@ namespace hdps
                 _colorBuffer.setData(_colors);
                 _highlightBuffer.bind();
                 _highlightBuffer.setData(_highlights);
+                _scalarBuffer.bind();
+                _scalarBuffer.setData(_scalarProperty);
             }
 
             bool loaded = true;
@@ -187,6 +209,7 @@ namespace hdps
 
             _shader.uniform1f("alpha", _pointSettings._alpha);
             _shader.uniformMatrix3f("projMatrix", _ortho);
+            _shader.uniform1i("scalarEffect", _pointEffect);
 
             glBindVertexArray(_vao);
             glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);

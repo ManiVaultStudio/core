@@ -19,6 +19,10 @@ namespace hdps
             Absolute, Relative
         };
 
+        enum PointEffect {
+            Colour, Size, Outline
+        };
+
         struct PointSettings
         {
             // Constants
@@ -37,6 +41,7 @@ namespace hdps
             void setData(const std::vector<Vector2f>* points);
             void setColors(const std::vector<Vector3f>& data);
             void setHighlight(const std::vector<char>& highlights);
+            void setScalarProperty(const std::vector<float>& scalarProperty);
             void setBounds(float left, float right, float bottom, float top);
             void setPointSize(const float size);
             void setAlpha(const float alpha);
@@ -59,6 +64,7 @@ namespace hdps
             BufferObject _positionBuffer;
             BufferObject _colorBuffer;
             BufferObject _highlightBuffer;
+            BufferObject _scalarBuffer;
             ShaderProgram _shader;
             ShaderProgram _selectionShader;
 
@@ -69,6 +75,7 @@ namespace hdps
             const std::vector<Vector2f>* _positions;
             std::vector<Vector3f> _colors;
             std::vector<char> _highlights;
+            std::vector<float> _scalarProperty;
 
             QSize _windowSize;
 
@@ -76,6 +83,7 @@ namespace hdps
 
             /* Properties */
             PointSettings _pointSettings;
+            PointEffect _pointEffect = PointEffect::Size;
 
             QRectF       _bounds         = QRectF(-1, 1, 2, 2);
         };

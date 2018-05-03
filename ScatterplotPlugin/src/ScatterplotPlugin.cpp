@@ -51,7 +51,7 @@ void ScatterplotPlugin::init()
 
     _scatterPlotWidget = new hdps::gui::ScatterplotWidget();
     _scatterPlotWidget->setPointSize(10);
-    _scatterPlotWidget->setSelectionColor(settings->getSelectionColor());
+    //_scatterPlotWidget->setSelectionColor(settings->getSelectionColor());
     _scatterPlotWidget->setAlpha(0.5f);
     _scatterPlotWidget->addSelectionListener(this);
 
@@ -195,8 +195,13 @@ void ScatterplotPlugin::updateData()
             _points[i] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]);
         }
     }
+    std::vector<float> scalars(_numPoints);
+    for (int i = 0; i < _numPoints; i++) {
+        scalars[i] = (float)i / _numPoints;
+    }
 
     _scatterPlotWidget->setData(&_points, getDataBounds(_points));
+    _scatterPlotWidget->setScalarProperty(scalars);
 
     std::vector<hdps::Vector3f> colors;
     colors.resize(_numPoints, settings->getBaseColor());
