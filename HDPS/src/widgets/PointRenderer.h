@@ -57,7 +57,6 @@ namespace hdps
 
         private:
             const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
-            Matrix3f toIsotropicCoordinates;
 
             GLuint _vao;
 

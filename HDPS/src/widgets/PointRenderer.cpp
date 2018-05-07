@@ -180,15 +180,6 @@ namespace hdps
 
             _windowSize.setWidth(w);
             _windowSize.setHeight(h);
-
-            int size = w < h ? w : h;
-
-            float wAspect = (float)w / size;
-            float hAspect = (float)h / size;
-            float wDiff = ((wAspect - 1) / 2.0);
-            float hDiff = ((hAspect - 1) / 2.0);
-
-            toIsotropicCoordinates = Matrix3f(wAspect, 0, 0, hAspect, -wDiff, -hDiff);
         }
 
         void PointRenderer::render()
