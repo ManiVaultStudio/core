@@ -202,9 +202,11 @@ namespace hdps
             _ortho = createProjectionMatrix(_bounds);
 
             _shader.bind();
+            
+            float minBound = _bounds.width() < _bounds.height() ? _bounds.width() : _bounds.height();
             switch (_pointSettings._scalingMode) {
-            case Relative: _shader.uniform1f("pointSize", _pointSettings._pointSize / 800); break;
-            case Absolute: _shader.uniform1f("pointSize", _pointSettings._pointSize / _windowSize.width()); break;
+            case Relative: _shader.uniform1f("pointSize", _pointSettings._pointSize * minBound / 800); break;
+            case Absolute: _shader.uniform1f("pointSize", _pointSettings._pointSize * minBound / size); break;
             }
 
             _shader.uniform1f("alpha", _pointSettings._alpha);
