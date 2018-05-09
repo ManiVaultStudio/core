@@ -35,7 +35,7 @@ namespace hdps
             float        _alpha = DEFAULT_ALPHA_VALUE;
         };
 
-        class PointRenderer : public Renderer, public plugin::SelectionListener
+        class PointRenderer : public Renderer
         {
         public:
             void setData(const std::vector<Vector2f>* points);
@@ -52,11 +52,7 @@ namespace hdps
             virtual void render();
             virtual void destroy();
 
-            virtual void onSelecting(Selection selection);
-            virtual void onSelection(Selection selection);
-
         private:
-            const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
 
             GLuint _vao;
 
@@ -66,9 +62,6 @@ namespace hdps
             BufferObject _scalarBuffer;
             ShaderProgram _shader;
             ShaderProgram _selectionShader;
-
-            Selection _selection;
-            bool _isSelecting = false;
 
             unsigned int _numPoints = 0;
             const std::vector<Vector2f>* _positions;

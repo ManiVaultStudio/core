@@ -15,7 +15,6 @@ namespace hdps
             _densityRenderer(DensityRenderer::RenderMode::DENSITY)
         {
             addSelectionListener(&_selectionRenderer);
-            addSelectionListener(&_pointRenderer);
         }
 
         void ScatterplotWidget::setRenderMode(RenderMode renderMode)

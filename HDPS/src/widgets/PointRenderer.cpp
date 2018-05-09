@@ -216,17 +216,6 @@ namespace hdps
             _colorBuffer.destroy();
         }
 
-        void PointRenderer::onSelecting(Selection selection)
-        {
-            _selection = selection;
-
-            _isSelecting = true;
-        }
-
-        void PointRenderer::onSelection(Selection selection)
-        {
-            _isSelecting = false;
-        }
     } // namespace gui
 
 } // namespace hdps
