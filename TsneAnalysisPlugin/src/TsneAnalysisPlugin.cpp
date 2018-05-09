@@ -90,8 +90,7 @@ void TsneAnalysisPlugin::startComputation()
     // Run the computation
     QString setName = _settings->dataOptions.currentText();
     const hdps::Set* set = _core->requestData(setName);
-    const DataTypePlugin* dataPlugin = _core->requestPlugin(set->getDataName());
-    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(dataPlugin);
+    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(set->getDataName()));
 
     _embedSetName = _core->addData("Points", "Embedding");
     const hdps::Set* embedSet = _core->requestData(_embedSetName);
@@ -100,6 +99,7 @@ void TsneAnalysisPlugin::startComputation()
     embedPoints->numDimensions = 2;
     _core->notifyDataAdded(_embedSetName);
 
+    // Compute t-SNE with the given data
     _tsne->initTSNE(points->data, points->numDimensions);
 
     _tsne->start();
