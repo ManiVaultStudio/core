@@ -23,6 +23,19 @@ namespace hdps
             Colour, Size, Outline
         };
 
+        struct PointArrayObject : private QOpenGLFunctions_3_3_Core
+        {
+            GLuint _handle;
+
+            BufferObject _positionBuffer;
+            BufferObject _colorBuffer;
+            BufferObject _highlightBuffer;
+            BufferObject _scalarBuffer;
+
+            void init();
+            void destroy();
+        };
+
         struct PointSettings
         {
             // Constants
@@ -53,13 +66,8 @@ namespace hdps
             virtual void destroy();
 
         private:
+            PointArrayObject _gpuPoints;
 
-            GLuint _vao;
-
-            BufferObject _positionBuffer;
-            BufferObject _colorBuffer;
-            BufferObject _highlightBuffer;
-            BufferObject _scalarBuffer;
             ShaderProgram _shader;
             ShaderProgram _selectionShader;
 
