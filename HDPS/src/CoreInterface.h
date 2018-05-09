@@ -20,6 +20,8 @@ public:
     */
     virtual const QString addData(const QString kind, const QString name) = 0;
 
+    virtual const QString createDerivedData(const QString kind, const QString name, const QString sourceName) = 0;
+
     /**
      * Create a new dataset from the given selection.
      */

@@ -92,7 +92,7 @@ void TsneAnalysisPlugin::startComputation()
     const hdps::Set* set = _core->requestData(setName);
     const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestPlugin(set->getDataName()));
 
-    _embedSetName = _core->addData("Points", "Embedding");
+    _embedSetName = _core->createDerivedData("Points", "Embedding", points->getName());
     const hdps::Set* embedSet = _core->requestData(_embedSetName);
     PointsPlugin* embedPoints = dynamic_cast<PointsPlugin*>(_core->requestPlugin(embedSet->getDataName()));
 

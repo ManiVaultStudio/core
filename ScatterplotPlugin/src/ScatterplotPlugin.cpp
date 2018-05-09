@@ -163,9 +163,9 @@ void ScatterplotPlugin::yDimPicked(int index)
 
 void ScatterplotPlugin::updateData()
 {
+    qDebug() << "UPdate data";
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
     const PointsPlugin* points = dataSet->getData();
-    const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(points->getName()));
     
     int nDim = points->getNumDimensions();
 
@@ -213,8 +213,16 @@ void ScatterplotPlugin::updateData()
 void ScatterplotPlugin::updateSelection()
 {
     const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestData(settings->currentData()));
-    const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(dataSet->getDataName()));
-
+    const DataTypePlugin* data = _core->requestPlugin(dataSet->getDataName());
+    const IndexSet* selection = nullptr;
+    qDebug() << "UPdate selection";
+    if (data->isDerivedData()) {
+        selection = dynamic_cast<const IndexSet*>(_core->requestSelection(data->getSourceData()));
+    }
+    else {
+        selection = dynamic_cast<const IndexSet*>(_core->requestSelection(dataSet->getDataName()));
+    }
+    qDebug() << "Past UPdate selection";
     std::vector<char> highlights;
     highlights.resize(_numPoints, 0);
 

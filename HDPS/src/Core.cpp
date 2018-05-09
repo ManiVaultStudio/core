@@ -113,6 +113,29 @@ const QString Core::addData(const QString kind, const QString name)
     return setName;
 }
 
+const QString Core::createDerivedData(const QString kind, const QString name, const QString sourceName)
+{
+    // Create a new plugin of the given kind
+    QString pluginName = _pluginManager->createPlugin(kind);
+    // Request it from the core
+    plugin::DataTypePlugin* dataType = requestPlugin(pluginName);
+
+    dataType->setDerived(sourceName);
+
+    // Create an initial full set and an empty selection belonging to the raw data
+    Set* fullSet = dataType->createSet();
+
+    // Generate a unique set name and set the properties of the new sets
+    QString setName = _dataManager->getUniqueSetName(name);
+    fullSet->setName(setName);
+    fullSet->setAll();
+
+    // Add them to the data manager
+    _dataManager->addSet(fullSet);
+
+    return setName;
+}
+
 /**
  * Creates a copy of the given selection set and gives it a unique name based
  * on the name given to this function. Then adds the new set to the data manager

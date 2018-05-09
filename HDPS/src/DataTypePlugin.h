@@ -15,6 +15,27 @@ public:
     virtual ~DataTypePlugin() {};
 
     virtual Set* createSet() const = 0;
+
+    bool isDerivedData() const
+    {
+        return derived;
+    }
+
+    QString getSourceData() const
+    {
+        return sourceDataName;
+    }
+
+    void setDerived(QString sourceData)
+    {
+        derived = true;
+        sourceDataName = sourceData;
+    }
+
+protected:
+    bool derived = false;
+
+    QString sourceDataName;
 };
 
 

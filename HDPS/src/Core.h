@@ -46,6 +46,8 @@ public:
     */
     const QString addData(const QString kind, const QString name) override;
 
+    const QString createDerivedData(const QString kind, const QString name, const QString sourceName) override;
+
     /**
     * Create a new dataset from the given selection.
     */
