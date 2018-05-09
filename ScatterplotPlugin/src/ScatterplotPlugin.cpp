@@ -50,7 +50,7 @@ void ScatterplotPlugin::init()
     settings = new ScatterplotSettings(this);
 
     _scatterPlotWidget = new hdps::gui::ScatterplotWidget();
-    _scatterPlotWidget->setPointSize(10);
+    _scatterPlotWidget->setPointSize(1);
     //_scatterPlotWidget->setSelectionColor(settings->getSelectionColor());
     _scatterPlotWidget->setAlpha(0.5f);
     _scatterPlotWidget->addSelectionListener(this);
@@ -123,12 +123,12 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
 void ScatterplotPlugin::pointSizeChanged(const int size)
 {
     _pointSize = size;
-    _scatterPlotWidget->setPointSize(size);
+    _scatterPlotWidget->setPointSize(size / 10.0f);
 }
 
 void ScatterplotPlugin::sigmaChanged(const int sigma)
 {
-    _scatterPlotWidget->setSigma(sigma / 100.0);
+    _scatterPlotWidget->setSigma(sigma / 100.0f);
 }
 
 void ScatterplotPlugin::subsetCreated()
