@@ -45,7 +45,7 @@ public:
     
     PointsPlugin* getData() const
     {
-        return dynamic_cast<PointsPlugin*>(_core->requestPlugin(getDataName()));
+        return dynamic_cast<PointsPlugin*>(_core->requestData(getDataName()));
     }
 
     Set* copy() const override;

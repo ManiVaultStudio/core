@@ -95,7 +95,7 @@ const QString Core::addData(const QString kind, const QString name)
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    const plugin::DataTypePlugin* dataType = requestPlugin(pluginName);
+    const plugin::DataTypePlugin* dataType = requestData(pluginName);
 
     // Create an initial full set and an empty selection belonging to the raw data
     Set* fullSet = dataType->createSet();
@@ -118,7 +118,7 @@ const QString Core::createDerivedData(const QString kind, const QString name, co
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    plugin::DataTypePlugin* dataType = requestPlugin(pluginName);
+    plugin::DataTypePlugin* dataType = requestData(pluginName);
 
     dataType->setDerived(sourceName);
 
@@ -155,7 +155,7 @@ void Core::createSubsetFromSelection(const Set* selection, const QString newSetN
  * unique name as the given parameter. If no such instance can be found a fatal
  * error is thrown.
  */
-plugin::DataTypePlugin* Core::requestPlugin(const QString name)
+plugin::DataTypePlugin* Core::requestData(const QString name)
 {
     for (std::unique_ptr<plugin::Plugin>& plugin : _plugins[plugin::Type::DATA_TYPE])
     {
@@ -169,7 +169,7 @@ plugin::DataTypePlugin* Core::requestPlugin(const QString name)
 }
 
 /** Request a dataset from the data manager by its name. */
-Set* Core::requestData(const QString name)
+Set* Core::requestSet(const QString name)
 {
     Set* set = _dataManager->getSet(name);
 
@@ -240,8 +240,8 @@ gui::MainWindow& Core::gui() const {
 /** Checks if the given data consumer supports the kind data in the given set. */
 bool Core::supportsSet(plugin::DataConsumer* dataConsumer, QString setName)
 {
-    const hdps::Set* set = requestData(setName);
-    const plugin::DataTypePlugin* dataPlugin = requestPlugin(set->getDataName());
+    const hdps::Set* set = requestSet(setName);
+    const plugin::DataTypePlugin* dataPlugin = requestData(set->getDataName());
 
     return dataConsumer->supportedDataKinds().contains(dataPlugin->getKind());
 }

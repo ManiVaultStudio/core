@@ -56,12 +56,12 @@ public:
     /**
         * Request a plugin from the core by its name.
         */
-    plugin::DataTypePlugin* requestPlugin(const QString name) override;
+    plugin::DataTypePlugin* requestData(const QString name) override;
 
     /**
     * Request a dataset from the data manager by its name.
     */
-    Set* requestData(const QString name) override;
+    Set* requestSet(const QString name) override;
 
     /**
     * Requests the selection set belonging to the raw dataset with the given name.
