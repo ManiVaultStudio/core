@@ -40,7 +40,7 @@ public:
     /**
     * Request a dataset from the core by its name.
     */
-    virtual Set* requestSet(const QString name) = 0;
+    virtual Set& requestSet(const QString name) = 0;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString name) = 0;

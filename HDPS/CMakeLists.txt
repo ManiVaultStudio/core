@@ -38,6 +38,7 @@ set( CORE_HEADERS
     src/PluginManager.h
     src/Core.h
     src/DataManager.h
+    src/exceptions/SetNotFoundException.h
 )
 
 set( CORE_SOURCES

@@ -61,9 +61,8 @@ void CsvReaderPlugin::loadData()
 
     if (ok && !dataSetName.isEmpty()) {
         QString name = _core->addData("Points", dataSetName);
-        const hdps::Set* set = _core->requestSet(name);
-        DataTypePlugin* dataPlugin = _core->requestData(set->getDataName());
-        PointsPlugin* points = dynamic_cast<PointsPlugin*>(dataPlugin);
+        const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(name));
+        PointsPlugin* points = set.getData();
         points->data.resize(data.size());
         for (int i = 0; i < points->data.size(); i++) {
             points->data[i] = data[i];

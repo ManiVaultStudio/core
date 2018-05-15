@@ -92,9 +92,9 @@ void ScatterplotPlugin::dataRemoved(const QString name)
 
 void ScatterplotPlugin::selectionChanged(const QString dataName)
 {
-    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestSet(settings->currentData()));
+    const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
     
-    if (dataName != dataSet->getDataName()) {
+    if (dataName != dataSet.getDataName()) {
         return;
     }
 
@@ -110,8 +110,8 @@ QStringList ScatterplotPlugin::supportedDataKinds()
 
 void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
-    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestSet(settings->currentData()));
-    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestData(dataSet->getDataName()));
+    const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
+    const PointsPlugin* points = dataSet.getData();
 
     int nDim = points->getNumDimensions();
 
@@ -134,8 +134,8 @@ void ScatterplotPlugin::sigmaChanged(const int sigma)
 void ScatterplotPlugin::subsetCreated()
 {
     qDebug() << "Creating subset";
-    const hdps::Set* set = _core->requestSet(settings->currentData());
-    const hdps::Set* selection = _core->requestSelection(set->getDataName());
+    const hdps::Set& set = _core->requestSet(settings->currentData());
+    const hdps::Set* selection = _core->requestSelection(set.getDataName());
     _core->createSubsetFromSelection(selection, "Subset");
 }
 
@@ -164,8 +164,8 @@ void ScatterplotPlugin::yDimPicked(int index)
 void ScatterplotPlugin::updateData()
 {
     qDebug() << "UPdate data";
-    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestSet(settings->currentData()));
-    const PointsPlugin* points = dataSet->getData();
+    const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
+    const PointsPlugin* points = dataSet.getData();
     
     int nDim = points->getNumDimensions();
 
@@ -176,11 +176,11 @@ void ScatterplotPlugin::updateData()
         return;
 
     // Determine number of points depending on if its a full dataset or a subset
-    _numPoints = dataSet->isFull() ? points->getNumPoints() : dataSet->indices.size();
+    _numPoints = dataSet.isFull() ? points->getNumPoints() : dataSet.indices.size();
 
     _points.resize(_numPoints);
 
-    if (dataSet->isFull())
+    if (dataSet.isFull())
     {
         for (int i = 0; i < _numPoints; i++)
         {
@@ -191,7 +191,7 @@ void ScatterplotPlugin::updateData()
     {
         for (int i = 0; i < _numPoints; i++)
         {
-            int index = dataSet->indices[i];
+            int index = dataSet.indices[i];
             _points[i] = hdps::Vector2f(points->data[index * nDim + xIndex], points->data[index * nDim + yIndex]);
         }
     }
@@ -212,14 +212,14 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::updateSelection()
 {
-    const IndexSet* dataSet = dynamic_cast<const IndexSet*>(_core->requestSet(settings->currentData()));
-    const DataTypePlugin* data = _core->requestData(dataSet->getDataName());
-    const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(data->isDerivedData() ? data->getSourceData() : dataSet->getDataName()));
+    const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
+    const DataTypePlugin* data = _core->requestData(dataSet.getDataName());
+    const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(data->isDerivedData() ? data->getSourceData() : dataSet.getDataName()));
 
     std::vector<char> highlights;
     highlights.resize(_numPoints, 0);
 
-    if (dataSet->isFull())
+    if (dataSet.isFull())
     {
         for (unsigned int index : selection->indices)
         {
@@ -230,7 +230,7 @@ void ScatterplotPlugin::updateSelection()
     {
         for (int i = 0; i < _numPoints; i++)
         {
-            int index = dataSet->indices[i];
+            int index = dataSet.indices[i];
             bool selected = false;
             for (unsigned int selectionIndex : selection->indices)
             {
@@ -261,22 +261,22 @@ void ScatterplotPlugin::makeSelection(hdps::Selection selection)
             indices.push_back(i);
     }
 
-    const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestSet(settings->currentData()));
-    const DataTypePlugin* data = _core->requestData(set->getDataName());
+    const IndexSet& set = dynamic_cast<IndexSet&>(_core->requestSet(settings->currentData()));
+    const DataTypePlugin* data = _core->requestData(set.getDataName());
 
     IndexSet* selectionSet = nullptr;
     if (data->isDerivedData()) {
         selectionSet = dynamic_cast<IndexSet*>(_core->requestSelection(data->getSourceData()));
     }
     else {
-        selectionSet = dynamic_cast<IndexSet*>(_core->requestSelection(set->getDataName()));
+        selectionSet = dynamic_cast<IndexSet*>(_core->requestSelection(set.getDataName()));
     }
 
     selectionSet->indices.clear();
     selectionSet->indices.reserve(indices.size());
 
     for (const unsigned int& index : indices) {
-        selectionSet->indices.push_back(set->isFull() ? index : set->indices[index]);
+        selectionSet->indices.push_back(set.isFull() ? index : set.indices[index]);
     }
 
     _core->notifySelectionChanged(selectionSet->getDataName());

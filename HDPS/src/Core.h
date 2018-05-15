@@ -61,7 +61,7 @@ public:
     /**
     * Request a dataset from the data manager by its name.
     */
-    Set* requestSet(const QString name) override;
+    Set& requestSet(const QString name) override;
 
     /**
     * Requests the selection set belonging to the raw dataset with the given name.

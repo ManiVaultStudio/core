@@ -17,7 +17,8 @@ class DataManager
 public:
     void addSet(Set* set);
     void addSelection(QString dataName, Set* selection);
-    Set* getSet(QString name);
+
+    Set& getSet(QString name);
     Set* getSelection(QString name);
     const std::vector<std::unique_ptr<Set>>& allSets();
 

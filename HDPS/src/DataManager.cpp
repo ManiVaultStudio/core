@@ -1,5 +1,7 @@
 #include "DataManager.h"
 
+#include "exceptions/SetNotFoundException.h"
+
 #include <QRegularExpression>
 #include <iostream>
 
@@ -16,17 +18,17 @@ void DataManager::addSelection(QString dataName, Set* selection)
     _selections.emplace(dataName.toStdString(), std::move(std::unique_ptr<Set>(selection)));
 }
 
-Set* DataManager::getSet(QString name)
+Set& DataManager::getSet(QString name)
 {
     for (const auto& set : _dataSets)
     {
         if (set->getName() == name)
         {
-            return set.get();
+            return *set.get();
         }
     }
 
-    return nullptr;
+    throw SetNotFoundException(name);
 }
 
 Set* DataManager::getSelection(QString name)

@@ -4,6 +4,8 @@
 #include "PluginManager.h"
 #include "DataManager.h"
 
+#include "exceptions/SetNotFoundException.h"
+
 #include "AnalysisPlugin.h"
 #include "LoaderPlugin.h"
 #include "WriterPlugin.h"
@@ -169,14 +171,16 @@ plugin::DataTypePlugin* Core::requestData(const QString name)
 }
 
 /** Request a dataset from the data manager by its name. */
-Set* Core::requestSet(const QString name)
+Set& Core::requestSet(const QString name)
 {
-    Set* set = _dataManager->getSet(name);
-
-    if (!set)
-        QMessageBox::critical(NULL, QString("HDPS"), QString("No dataset found with name: ").append(name), QMessageBox::Ok);
-
-    return set;
+    try
+    {
+        return _dataManager->getSet(name);
+    } 
+    catch (SetNotFoundException e)
+    {
+        QMessageBox::critical(NULL, QString("HDPS"), e.what(), QMessageBox::Ok);
+    }
 }
 
 /** Requests the selection set for the name of a raw dataset. */
@@ -240,8 +244,8 @@ gui::MainWindow& Core::gui() const {
 /** Checks if the given data consumer supports the kind data in the given set. */
 bool Core::supportsSet(plugin::DataConsumer* dataConsumer, QString setName)
 {
-    const hdps::Set* set = requestSet(setName);
-    const plugin::DataTypePlugin* dataPlugin = requestData(set->getDataName());
+    const hdps::Set& set = requestSet(setName);
+    const plugin::DataTypePlugin* dataPlugin = requestData(set.getDataName());
 
     return dataConsumer->supportedDataKinds().contains(dataPlugin->getKind());
 }
