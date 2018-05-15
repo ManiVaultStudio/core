@@ -43,9 +43,9 @@ public:
     IndexSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
     ~IndexSet() { }
     
-    PointsPlugin* getData() const
+    PointsPlugin& getData() const
     {
-        return dynamic_cast<PointsPlugin*>(_core->requestData(getDataName()));
+        return dynamic_cast<PointsPlugin&>(_core->requestData(getDataName()));
     }
 
     Set* copy() const override;

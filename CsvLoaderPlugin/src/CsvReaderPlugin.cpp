@@ -62,17 +62,17 @@ void CsvReaderPlugin::loadData()
     if (ok && !dataSetName.isEmpty()) {
         QString name = _core->addData("Points", dataSetName);
         const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(name));
-        PointsPlugin* points = set.getData();
-        points->data.resize(data.size());
-        for (int i = 0; i < points->data.size(); i++) {
-            points->data[i] = data[i];
+        PointsPlugin& points = set.getData();
+        points.data.resize(data.size());
+        for (int i = 0; i < points.data.size(); i++) {
+            points.data[i] = data[i];
         }
-        points->numDimensions = numDimensions;
-        qDebug() << "Number of dimensions: " << points->numDimensions;
+        points.numDimensions = numDimensions;
+        qDebug() << "Number of dimensions: " << points.numDimensions;
 
         _core->notifyDataAdded(name);
 
-        qDebug() << "CSV file loaded. Num data points: " << points->data.size();
+        qDebug() << "CSV file loaded. Num data points: " << points.data.size();
     }
 }
 

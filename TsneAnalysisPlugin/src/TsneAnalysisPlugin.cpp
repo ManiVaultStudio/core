@@ -89,28 +89,28 @@ void TsneAnalysisPlugin::startComputation()
 
     // Run the computation
     QString setName = _settings->dataOptions.currentText();
-    const hdps::Set& set = _core->requestSet(setName);
-    const PointsPlugin* points = dynamic_cast<const PointsPlugin*>(_core->requestData(set.getDataName()));
+    const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(setName));
+    const PointsPlugin& points = set.getData();
 
-    _embedSetName = _core->createDerivedData("Points", "Embedding", points->getName());
-    const hdps::Set& embedSet = _core->requestSet(_embedSetName);
-    PointsPlugin* embedPoints = dynamic_cast<PointsPlugin*>(_core->requestData(embedSet.getDataName()));
+    _embedSetName = _core->createDerivedData("Points", "Embedding", points.getName());
+    const IndexSet& embedSet = dynamic_cast<const IndexSet&>(_core->requestSet(_embedSetName));
+    PointsPlugin& embedPoints = embedSet.getData();
 
-    embedPoints->numDimensions = 2;
+    embedPoints.numDimensions = 2;
     _core->notifyDataAdded(_embedSetName);
 
     // Compute t-SNE with the given data
-    _tsne->initTSNE(points->data, points->numDimensions);
+    _tsne->initTSNE(points.data, points.numDimensions);
 
     _tsne->start();
 }
 
 void TsneAnalysisPlugin::onNewEmbedding() {
     std::vector<float>* output = _tsne->output();
-    const hdps::Set& embedSet = _core->requestSet(_embedSetName);
-    PointsPlugin* embedPoints = dynamic_cast<PointsPlugin*>(_core->requestData(embedSet.getDataName()));
+    const IndexSet& embedSet = dynamic_cast<const IndexSet&>(_core->requestSet(_embedSetName));
+    PointsPlugin& embedPoints = embedSet.getData();
 
-    embedPoints->data = *output;
+    embedPoints.data = *output;
 
     _core->notifyDataChanged(_embedSetName);
 }

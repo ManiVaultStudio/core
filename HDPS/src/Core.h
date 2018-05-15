@@ -56,7 +56,7 @@ public:
     /**
         * Request a plugin from the core by its name.
         */
-    plugin::DataTypePlugin* requestData(const QString name) override;
+    plugin::DataTypePlugin& requestData(const QString name) override;
 
     /**
     * Request a dataset from the data manager by its name.

@@ -97,11 +97,11 @@ const QString Core::addData(const QString kind, const QString name)
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    const plugin::DataTypePlugin* dataType = requestData(pluginName);
+    const plugin::DataTypePlugin& dataType = requestData(pluginName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    Set* fullSet = dataType->createSet();
-    Set* selection = dataType->createSet();
+    Set* fullSet = dataType.createSet();
+    Set* selection = dataType.createSet();
 
     // Generate a unique set name and set the properties of the new sets
     QString setName = _dataManager->getUniqueSetName(name);
@@ -120,12 +120,12 @@ const QString Core::createDerivedData(const QString kind, const QString name, co
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    plugin::DataTypePlugin* dataType = requestData(pluginName);
+    plugin::DataTypePlugin& dataType = requestData(pluginName);
 
-    dataType->setDerived(sourceName);
+    dataType.setDerived(sourceName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    Set* fullSet = dataType->createSet();
+    Set* fullSet = dataType.createSet();
 
     // Generate a unique set name and set the properties of the new sets
     QString setName = _dataManager->getUniqueSetName(name);
@@ -157,13 +157,13 @@ void Core::createSubsetFromSelection(const Set* selection, const QString newSetN
  * unique name as the given parameter. If no such instance can be found a fatal
  * error is thrown.
  */
-plugin::DataTypePlugin* Core::requestData(const QString name)
+plugin::DataTypePlugin& Core::requestData(const QString name)
 {
     for (std::unique_ptr<plugin::Plugin>& plugin : _plugins[plugin::Type::DATA_TYPE])
     {
         if (plugin->getName() == name)
         {
-            return dynamic_cast<plugin::DataTypePlugin*>(plugin.get());
+            return dynamic_cast<plugin::DataTypePlugin&>(*plugin.get());
         }
     }
 
@@ -245,9 +245,9 @@ gui::MainWindow& Core::gui() const {
 bool Core::supportsSet(plugin::DataConsumer* dataConsumer, QString setName)
 {
     const hdps::Set& set = requestSet(setName);
-    const plugin::DataTypePlugin* dataPlugin = requestData(set.getDataName());
+    const plugin::DataTypePlugin& dataPlugin = requestData(set.getDataName());
 
-    return dataConsumer->supportedDataKinds().contains(dataPlugin->getKind());
+    return dataConsumer->supportedDataKinds().contains(dataPlugin.getKind());
 }
 
 /** Retrieves all data consumers from the plugin list. */
