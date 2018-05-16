@@ -71,11 +71,14 @@ public:
     void addDataOption(const QString option);
     int numDataOptions();
 
+protected slots:
+    void renderModePicked(const int index);
+
 private:
     const hdps::Vector3f DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
     const hdps::Vector3f DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
 
-    const int MIN_POINT_SIZE = 1;
+    const int MIN_POINT_SIZE = 5;
     const int MAX_POINT_SIZE = 20;
 
     const int MIN_SIGMA = 1;

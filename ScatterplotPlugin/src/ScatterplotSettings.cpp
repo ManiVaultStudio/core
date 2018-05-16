@@ -27,10 +27,8 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsLayout->addWidget(&_subsetButton, 0, 1);
 
     _pointSettingsWidget._pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
-    _pointSettingsWidget._pointSizeSlider.setValue(plugin->pointSize());
-
     _densitySettingsWidget._sigmaSlider.setRange(MIN_SIGMA, MAX_SIGMA);
-    _densitySettingsWidget._sigmaSlider.setValue(plugin->sigma());
+
 
     _settingsStack = new QStackedWidget();
     _settingsStack->addWidget(&_pointSettingsWidget);
@@ -48,13 +46,17 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     setLayout(_settingsLayout);
 
     connect(&_dataOptions, SIGNAL(currentIndexChanged(QString)), plugin, SLOT(dataSetPicked(QString)));
-    connect(&_pointSettingsWidget._pointSizeSlider, SIGNAL(valueChanged(int)), plugin, SLOT(pointSizeChanged(int)));
-    connect(&_densitySettingsWidget._sigmaSlider, SIGNAL(valueChanged(int)), plugin, SLOT(sigmaChanged(int)));
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
-    connect(&_renderMode, SIGNAL(currentIndexChanged(int)), plugin, SLOT(renderModePicked(int)));
-
     connect(&_xDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(xDimPicked(int)));
     connect(&_yDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(yDimPicked(int)));
+
+    connect(&_renderMode, SIGNAL(currentIndexChanged(int)), plugin->_scatterPlotWidget, SLOT(renderModePicked(int)));
+    connect(&_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(renderModePicked(int)));
+    connect(&_densitySettingsWidget._sigmaSlider, SIGNAL(valueChanged(int)), plugin->_scatterPlotWidget, SLOT(sigmaChanged(int)));
+    connect(&_pointSettingsWidget._pointSizeSlider, SIGNAL(valueChanged(int)), plugin->_scatterPlotWidget, SLOT(pointSizeChanged(int)));
+
+    _pointSettingsWidget._pointSizeSlider.setValue(10);
+    _densitySettingsWidget._sigmaSlider.setValue(30);
 }
 
 ScatterplotSettings::~ScatterplotSettings()
@@ -128,4 +130,14 @@ void ScatterplotSettings::addDataOption(const QString option)
 int ScatterplotSettings::numDataOptions()
 {
     return _dataOptions.count();
+}
+
+void ScatterplotSettings::renderModePicked(const int index)
+{
+    switch (index)
+    {
+    case 0: showPointSettings(); break;
+    case 1: showDensitySettings(); break;
+    case 2: showDensitySettings(); break;
+    }
 }

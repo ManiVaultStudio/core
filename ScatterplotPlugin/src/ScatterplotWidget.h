@@ -58,6 +58,11 @@ namespace hdps
             void onSelection(Selection selection);
             void cleanup();
 
+        protected slots:
+            void renderModePicked(const int index);
+            void pointSizeChanged(const int size);
+            void sigmaChanged(const int sigma);
+
         private:
             const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
             Matrix3f toNormalisedCoordinates;

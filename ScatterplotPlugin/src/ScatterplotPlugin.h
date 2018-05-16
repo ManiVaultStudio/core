@@ -28,9 +28,7 @@ class ScatterplotPlugin : public ViewPlugin, public SelectionListener
 public:
     ScatterplotPlugin()
     :
-        ViewPlugin("Scatterplot View"),
-        _pointSize(10),
-        _sigma(30)
+        ViewPlugin("Scatterplot View")
     { }
     ~ScatterplotPlugin(void);
     
@@ -47,12 +45,12 @@ public:
     virtual void onSelecting(hdps::Selection selection);
     virtual void onSelection(hdps::Selection selection);
 
+    hdps::gui::ScatterplotWidget* _scatterPlotWidget;
+
 protected slots:
     void dataSetPicked(const QString& name);
-    void pointSizeChanged(const int size);
-    void sigmaChanged(const int sigma);
+
     void subsetCreated();
-    void renderModePicked(const int index);
 
     void xDimPicked(int index);
     void yDimPicked(int index);
@@ -63,15 +61,10 @@ private:
 
     void makeSelection(hdps::Selection selection);
 
-    hdps::gui::ScatterplotWidget* _scatterPlotWidget;
-
     ScatterplotSettings* settings;
 
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;
-
-    unsigned int _pointSize;
-    unsigned int _sigma;
 };
 
 

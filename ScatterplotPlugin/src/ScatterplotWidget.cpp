@@ -24,6 +24,29 @@ namespace hdps
             update();
         }
 
+        void ScatterplotWidget::renderModePicked(const int index)
+        {
+            switch (index)
+            {
+            case 0: setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::SCATTERPLOT); break;
+            case 1: setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::DENSITY); break;
+            case 2: setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::LANDSCAPE); break;
+            }
+            qDebug() << "Render Mode Picked";
+        }
+
+        void ScatterplotWidget::pointSizeChanged(const int size)
+        {
+            _pointRenderer.setPointSize(size / 1000.0f);
+            update();
+        }
+
+        void ScatterplotWidget::sigmaChanged(const int sigma)
+        {
+            _densityRenderer.setSigma(sigma / 100.0f);
+            update();
+        }
+
         // Positions need to be passed as a pointer as we need to store them locally in order
         // to be able to find the subset of data that's part of a selection. If passed
         // by reference then we can upload the data to the GPU, but not store it in the widget.

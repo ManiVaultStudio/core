@@ -47,29 +47,16 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
-    settings = new ScatterplotSettings(this);
-
     _scatterPlotWidget = new hdps::gui::ScatterplotWidget();
-    _scatterPlotWidget->setPointSize(1);
-    //_scatterPlotWidget->setSelectionColor(settings->getSelectionColor());
     _scatterPlotWidget->setAlpha(0.5f);
     _scatterPlotWidget->addSelectionListener(this);
 
-    _scatterPlotWidget->setSigma(0.30f);
     _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::SCATTERPLOT);
+
+    settings = new ScatterplotSettings(this);
 
     addWidget(_scatterPlotWidget);
     addWidget(settings);
-}
-
-unsigned int ScatterplotPlugin::pointSize() const
-{
-    return _pointSize;
-}
-
-unsigned int ScatterplotPlugin::sigma() const
-{
-    return _sigma;
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -120,34 +107,12 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     updateData();
 }
 
-void ScatterplotPlugin::pointSizeChanged(const int size)
-{
-    _pointSize = size;
-    _scatterPlotWidget->setPointSize(size / 10.0f);
-}
-
-void ScatterplotPlugin::sigmaChanged(const int sigma)
-{
-    _scatterPlotWidget->setSigma(sigma / 100.0f);
-}
-
 void ScatterplotPlugin::subsetCreated()
 {
     qDebug() << "Creating subset";
     const hdps::Set& set = _core->requestSet(settings->currentData());
     const hdps::Set* selection = _core->requestSelection(set.getDataName());
     _core->createSubsetFromSelection(selection, "Subset");
-}
-
-void ScatterplotPlugin::renderModePicked(const int index)
-{
-    switch (index)
-    {
-    case 0: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::SCATTERPLOT); settings->showPointSettings(); break;
-    case 1: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::DENSITY); settings->showDensitySettings(); break;
-    case 2: _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::LANDSCAPE); settings->showDensitySettings(); break;
-    }
-    qDebug() << "Render Mode Picked";
 }
 
 void ScatterplotPlugin::xDimPicked(int index)
