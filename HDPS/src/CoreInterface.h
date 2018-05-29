@@ -25,7 +25,7 @@ public:
     /**
      * Create a new dataset from the given selection.
      */
-    virtual void createSubsetFromSelection(const Set* selection, const QString newSetName) = 0;
+    virtual void createSubsetFromSelection(const Set& selection, const QString newSetName) = 0;
 
     /**
     * Request a plugin from the core by its name.

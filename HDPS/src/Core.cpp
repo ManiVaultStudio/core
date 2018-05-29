@@ -143,9 +143,9 @@ const QString Core::createDerivedData(const QString kind, const QString name, co
  * on the name given to this function. Then adds the new set to the data manager
  * and notifies all data consumers of the new set.
  */
-void Core::createSubsetFromSelection(const Set* selection, const QString newSetName)
+void Core::createSubsetFromSelection(const Set& selection, const QString newSetName)
 {
-    Set* newSet = selection->copy();
+    Set* newSet = selection.copy();
     newSet->setName(_dataManager->getUniqueSetName(newSetName));
 
     _dataManager->addSet(newSet);
