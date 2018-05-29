@@ -7,7 +7,7 @@ namespace hdps
 {
 namespace plugin
 {
-    class DataTypePlugin;
+    class RawData;
 }
 
 class Set;
@@ -30,7 +30,7 @@ public:
     /**
     * Request a plugin from the core by its name.
     */
-    virtual plugin::DataTypePlugin& requestData(const QString name) = 0;
+    virtual plugin::RawData& requestData(const QString name) = 0;
 
     /**
     * Request a selection from the data manager by its name.

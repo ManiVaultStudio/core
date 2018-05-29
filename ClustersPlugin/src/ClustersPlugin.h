@@ -1,7 +1,7 @@
 #ifndef CLUSTERS_PLUGIN_H
 #define CLUSTERS_PLUGIN_H
 
-#include <DataTypePlugin.h>
+#include <RawData.h>
 #include <PointsPlugin.h>
 #include <Set.h>
 
@@ -14,10 +14,10 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class ClustersPlugin : public DataTypePlugin
+class ClustersPlugin : public RawData
 {
 public:
-    ClustersPlugin() : DataTypePlugin("Clusters") { }
+    ClustersPlugin() : RawData("Clusters") { }
     ~ClustersPlugin(void);
     
     void init();
@@ -45,9 +45,9 @@ public:
     ClusterSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
     ~ClusterSet() { }
 
-    ClustersPlugin* getData() const
+    ClustersPlugin& getData() const
     {
-        return dynamic_cast<ClustersPlugin*>(_core->requestPlugin(getDataName()));
+        return dynamic_cast<ClustersPlugin&>(_core->requestData(getDataName()));
     }
 
     Set* copy() const override;
@@ -59,9 +59,9 @@ public:
 // Factory
 // =============================================================================
 
-class ClustersPluginFactory : public DataTypePluginFactory
+class ClustersPluginFactory : public RawDataFactory
 {
-    Q_INTERFACES(hdps::plugin::DataTypePluginFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "nl.tudelft.ClustersPlugin"
                       FILE  "ClustersPlugin.json")
@@ -70,7 +70,7 @@ public:
     ClustersPluginFactory(void) {}
     ~ClustersPluginFactory(void) {}
     
-    DataTypePlugin* produce();
+    RawData* produce();
 };
 
 #endif // CLUSTERS_PLUGIN_H

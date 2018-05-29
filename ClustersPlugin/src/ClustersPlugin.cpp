@@ -42,7 +42,7 @@ hdps::Set* ClusterSet::copy() const
 // Factory
 // =============================================================================
 
-DataTypePlugin* ClustersPluginFactory::produce()
+RawData* ClustersPluginFactory::produce()
 {
     return new ClustersPlugin();
 }

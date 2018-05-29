@@ -1,7 +1,7 @@
 #ifndef POINTS_PLUGIN_H
 #define POINTS_PLUGIN_H
 
-#include <DataTypePlugin.h>
+#include <RawData.h>
 
 #include "Set.h"
 #include <QString>
@@ -13,10 +13,10 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class PointsPlugin : public DataTypePlugin
+class PointsPlugin : public RawData
 {
 public:
-    PointsPlugin() : DataTypePlugin("Points") { }
+    PointsPlugin() : RawData("Points") { }
     ~PointsPlugin(void);
     
     void init();
@@ -57,9 +57,9 @@ public:
 // Factory
 // =============================================================================
 
-class PointsPluginFactory : public DataTypePluginFactory
+class PointsPluginFactory : public RawDataFactory
 {
-    Q_INTERFACES(hdps::plugin::DataTypePluginFactory hdps::plugin::PluginFactory)
+    Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID   "nl.tudelft.PointsPlugin"
                       FILE  "PointsPlugin.json")
@@ -68,7 +68,7 @@ public:
     PointsPluginFactory(void) {}
     ~PointsPluginFactory(void) {}
     
-    DataTypePlugin* produce();
+    RawData* produce();
 };
 
 #endif // POINTS_PLUGIN_H

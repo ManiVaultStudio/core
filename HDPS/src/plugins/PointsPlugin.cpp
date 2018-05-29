@@ -36,7 +36,7 @@ hdps::Set* IndexSet::copy() const
 // Factory
 // =============================================================================
 
-DataTypePlugin* PointsPluginFactory::produce()
+RawData* PointsPluginFactory::produce()
 {
     return new PointsPlugin();
 }

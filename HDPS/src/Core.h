@@ -54,9 +54,9 @@ public:
     void createSubsetFromSelection(const Set* selection, const QString newSetName) override;
 
     /**
-        * Request a plugin from the core by its name.
-        */
-    plugin::DataTypePlugin& requestData(const QString name) override;
+    * Request a plugin from the core by its name.
+    */
+    plugin::RawData& requestData(const QString name) override;
 
     /**
     * Request a dataset from the data manager by its name.

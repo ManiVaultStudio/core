@@ -102,7 +102,7 @@ set( UTIL_SOURCES
 set( PLUGIN_HEADERS
     src/CoreInterface.h
     src/AnalysisPlugin.h
-    src/DataTypePlugin.h
+    src/RawData.h
     src/LoaderPlugin.h
     src/WriterPlugin.h
     src/TransformationPlugin.h

@@ -1,5 +1,4 @@
-#ifndef HDPS_PLUGIN_DATA_TYPE_PLUGIN
-#define HDPS_PLUGIN_DATA_TYPE_PLUGIN
+#pragma once
 
 #include "PluginFactory.h"
 #include "Set.h"
@@ -8,11 +7,11 @@ namespace hdps {
 
 namespace plugin {
 
-class DataTypePlugin : public Plugin
+class RawData : public Plugin
 {
 public:
-    DataTypePlugin(QString name) : Plugin(Type::DATA_TYPE, name) { }
-    virtual ~DataTypePlugin() {};
+    RawData(QString name) : Plugin(Type::DATA, name) { }
+    virtual ~RawData() {};
 
     virtual Set* createSet() const = 0;
 
@@ -39,21 +38,19 @@ protected:
 };
 
 
-class DataTypePluginFactory : public PluginFactory
+class RawDataFactory : public PluginFactory
 {
     Q_OBJECT
     
 public:
     
-    virtual ~DataTypePluginFactory() {};
+    virtual ~RawDataFactory() {};
     
-    virtual DataTypePlugin* produce() = 0;
+    virtual RawData* produce() = 0;
 };
 
 } // namespace plugin
 
 } // namespace hdps
 
-Q_DECLARE_INTERFACE(hdps::plugin::DataTypePluginFactory, "cytosplore.DataTypePluginFactory")
-
-#endif // HDPS_PLUGIN_DATA_TYPE_PLUGIN
+Q_DECLARE_INTERFACE(hdps::plugin::RawDataFactory, "hdps.RawDataFactory")

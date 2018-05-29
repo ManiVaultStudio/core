@@ -10,7 +10,7 @@
 
 #include "MainWindow.h"
 #include "AnalysisPlugin.h"
-#include "DataTypePlugin.h"
+#include "RawData.h"
 #include "LoaderPlugin.h"
 #include "WriterPlugin.h"
 #include "TransformationPlugin.h"
@@ -90,7 +90,7 @@ void PluginManager::loadPlugins()
         {
             action = gui.addMenuAction(plugin::Type::ANALYSIS, kind);
         }
-        else if (qobject_cast<DataTypePluginFactory*>(pluginFactory))
+        else if (qobject_cast<RawDataFactory*>(pluginFactory))
         {
         }
         else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))

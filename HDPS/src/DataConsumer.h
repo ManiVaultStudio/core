@@ -1,7 +1,7 @@
 #ifndef HDPS_PLUGIN_DATA_CONSUMER_H
 #define HDPS_PLUGIN_DATA_CONSUMER_H
 
-#include "DataTypePlugin.h"
+#include "RawData.h"
 
 #include <QStringList>
 

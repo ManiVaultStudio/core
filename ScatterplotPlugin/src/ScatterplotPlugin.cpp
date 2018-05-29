@@ -178,7 +178,7 @@ void ScatterplotPlugin::updateData()
 void ScatterplotPlugin::updateSelection()
 {
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
-    const DataTypePlugin& data = _core->requestData(dataSet.getDataName());
+    const RawData& data = _core->requestData(dataSet.getDataName());
     const IndexSet* selection = dynamic_cast<const IndexSet*>(_core->requestSelection(data.isDerivedData() ? data.getSourceData() : dataSet.getDataName()));
 
     std::vector<char> highlights;
@@ -227,7 +227,7 @@ void ScatterplotPlugin::makeSelection(hdps::Selection selection)
     }
 
     const IndexSet& set = dynamic_cast<IndexSet&>(_core->requestSet(settings->currentData()));
-    const DataTypePlugin& data = _core->requestData(set.getDataName());
+    const RawData& data = _core->requestData(set.getDataName());
 
     IndexSet* selectionSet = nullptr;
     if (data.isDerivedData()) {
