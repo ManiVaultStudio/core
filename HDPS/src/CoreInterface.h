@@ -35,7 +35,7 @@ public:
     /**
     * Request a selection from the data manager by its name.
     */
-    virtual Set* requestSelection(const QString name) = 0;
+    virtual Set& requestSelection(const QString name) = 0;
 
     /**
     * Request a dataset from the core by its name.

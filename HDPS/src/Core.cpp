@@ -184,7 +184,7 @@ Set& Core::requestSet(const QString name)
 }
 
 /** Requests the selection set for the name of a raw dataset. */
-Set* Core::requestSelection(const QString name)
+Set& Core::requestSelection(const QString name)
 {
     return _dataManager->getSelection(name);
 }

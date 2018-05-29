@@ -66,7 +66,7 @@ public:
     /**
     * Requests the selection set belonging to the raw dataset with the given name.
     */
-    Set* requestSelection(const QString name) override;
+    Set& requestSelection(const QString name) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString name);

@@ -3,6 +3,7 @@
 #include "exceptions/SetNotFoundException.h"
 
 #include <QRegularExpression>
+#include <cassert>
 #include <iostream>
 
 namespace hdps
@@ -31,9 +32,11 @@ Set& DataManager::getSet(QString name)
     throw SetNotFoundException(name);
 }
 
-Set* DataManager::getSelection(QString name)
+Set& DataManager::getSelection(QString name)
 {
-    return _selections[name.toStdString()].get();
+    Set* selection = _selections[name.toStdString()].get();
+    assert(selection != nullptr);
+    return *selection;
 }
 
 const std::vector<std::unique_ptr<Set>>& DataManager::allSets()

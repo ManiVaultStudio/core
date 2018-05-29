@@ -19,7 +19,7 @@ public:
     void addSelection(QString dataName, Set* selection);
 
     Set& getSet(QString name);
-    Set* getSelection(QString name);
+    Set& getSelection(QString name);
     const std::vector<std::unique_ptr<Set>>& allSets();
 
     const QString getUniqueSetName(QString request);
