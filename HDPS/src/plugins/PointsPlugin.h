@@ -1,5 +1,4 @@
-#ifndef POINTS_PLUGIN_H
-#define POINTS_PLUGIN_H
+#pragma once
 
 #include <RawData.h>
 
@@ -70,5 +69,3 @@ public:
     
     RawData* produce();
 };
-
-#endif // POINTS_PLUGIN_H

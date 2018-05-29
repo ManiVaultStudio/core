@@ -1,5 +1,4 @@
-#ifndef CLUSTERS_PLUGIN_H
-#define CLUSTERS_PLUGIN_H
+#pragma once
 
 #include <RawData.h>
 #include <PointsPlugin.h>
@@ -72,5 +71,3 @@ public:
     
     RawData* produce();
 };
-
-#endif // CLUSTERS_PLUGIN_H

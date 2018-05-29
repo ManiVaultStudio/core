@@ -1,5 +1,4 @@
-#ifndef HDPS_UTIL_FILE_UTIL_H
-#define HDPS_UTIL_FILE_UTIL_H
+#pragma once
 
 #include <QString>
 #include <QFile>
@@ -26,5 +25,3 @@ QString loadFileContents(QString path) {
 }
 
 }
-
-#endif // HDPS_UTIL_FILE_UTIL_H

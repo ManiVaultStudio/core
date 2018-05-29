@@ -1,5 +1,4 @@
-#ifndef HDPS_PLUGIN_TYPE_H
-#define HDPS_PLUGIN_TYPE_H
+#pragma once
 
 /**
  * Provides all possible types of plugins.
@@ -22,5 +21,3 @@ enum Type { ANALYSIS, DATA, LOADER, WRITER, TRANFORMATION, VIEW };
 } // namespace plugin
 
 } // namespace hdps
-
-#endif // HDPS_PLUGIN_TYPE_H

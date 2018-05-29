@@ -1,5 +1,4 @@
-#ifndef HDPS_SET_H
-#define HDPS_SET_H
+#pragma once
 
 #include <CoreInterface.h>
 
@@ -51,5 +50,3 @@ private:
 };
 
 } // namespace hdps
-
-#endif // HDPS_SET_H

@@ -1,5 +1,4 @@
-#ifndef HDPS_PLUGIN_LOADER_PLUGIN
-#define HDPS_PLUGIN_LOADER_PLUGIN
+#pragma once
 
 #include "PluginFactory.h"
 
@@ -44,5 +43,3 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::LoaderPluginFactory, "cytosplore.LoaderPluginFactory")
-
-#endif // HDPS_PLUGIN_LOADER_PLUGIN

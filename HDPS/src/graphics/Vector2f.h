@@ -1,5 +1,4 @@
-#ifndef VECTOR2F_H
-#define VECTOR2F_H
+#pragma once
 
 #include <cmath>
 #include <string>
@@ -136,5 +135,3 @@ namespace hdps
     };
 
 } // namespace hdps
-
-#endif // VECTOR2F_H

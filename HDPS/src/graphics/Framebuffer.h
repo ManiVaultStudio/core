@@ -1,5 +1,4 @@
-#ifndef FRAMEBUFFER_H
-#define FRAMEBUFFER_H
+#pragma once
 
 #include "Texture.h"
 
@@ -96,5 +95,3 @@ namespace hdps
         std::vector<GLenum> drawBuffers;
     };
 } // namespace hdps
-
-#endif /* FRAMEBUFFER_H */

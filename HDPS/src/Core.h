@@ -1,5 +1,4 @@
-#ifndef HDPS_CORE_H
-#define HDPS_CORE_H
+#pragma once
 
 #include "CoreInterface.h"
 
@@ -104,5 +103,3 @@ private:
 };
 
 } // namespace hdps
-
-#endif // HDPS_CORE_H

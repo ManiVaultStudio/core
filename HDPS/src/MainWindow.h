@@ -1,5 +1,4 @@
-#ifndef HDPS_GUI_MAIN_WINDOW_H
-#define HDPS_GUI_MAIN_WINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include "ui_MainWindow.h"
@@ -57,5 +56,3 @@ private:
 } // namespace gui
 
 } // namespace hdps
-
-#endif // HDPS_GUI_MAIN_WINDOW_H

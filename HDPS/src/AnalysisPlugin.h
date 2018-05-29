@@ -1,5 +1,4 @@
-#ifndef HDPS_PLUGIN_ANALYSIS_PLUGIN
-#define HDPS_PLUGIN_ANALYSIS_PLUGIN
+#pragma once
 
 #include "PluginFactory.h"
 #include "DataConsumer.h"
@@ -46,5 +45,3 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::AnalysisPluginFactory, "cytosplore.AnalysisPluginFactory")
-
-#endif // HDPS_PLUGIN_ANALYSIS_PLUGIN

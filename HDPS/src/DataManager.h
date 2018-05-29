@@ -1,5 +1,4 @@
-#ifndef HDPS_DATA_MANAGER_H
-#define HDPS_DATA_MANAGER_H
+#pragma once
 
 #include "Set.h"
 
@@ -34,5 +33,3 @@ private:
 };
 
 } // namespace hdps
-
-#endif // HDPS_DATA_MANAGER_H

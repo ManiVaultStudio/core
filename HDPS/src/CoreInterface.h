@@ -1,5 +1,4 @@
-#ifndef HDPS_CORE_INTERFACE_H
-#define HDPS_CORE_INTERFACE_H
+#pragma once
 
 #include <QString>
 
@@ -53,5 +52,3 @@ public:
 };
 
 } // namespace hdps
-
-#endif // HDPS_CORE_INTERFACE_H

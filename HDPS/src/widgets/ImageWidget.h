@@ -1,5 +1,4 @@
-#ifndef IMAGE_WIDGET_H
-#define IMAGE_WIDGET_H
+#pragma once
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
@@ -23,5 +22,3 @@ private:
 
     QSize _windowSize;
 };
-
-#endif // IMAGE_WIDGET_H

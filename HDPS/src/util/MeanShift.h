@@ -1,5 +1,4 @@
-#ifndef HDPS_MEAN_SHIFT_H
-#define HDPS_MEAN_SHIFT_H
+#pragma once
 
 #include "DensityComputation.h"
 
@@ -58,5 +57,3 @@ private:
 };
 
 } // namespace hdps
-
-#endif // HDPS_MEAN_SHIFT_H

@@ -1,5 +1,4 @@
-#ifndef HDPS_UTIL_FILE_UTIL_H
-#define HDPS_UTIL_FILE_UTIL_H
+#pragma once
 
 #include <QString>
 
@@ -13,5 +12,3 @@ QString loadFileContents(QString path);
 } // namespace util
 
 } // namespace hdps
-
-#endif // HDPS_UTIL_FILE_UTIL_H

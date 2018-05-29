@@ -1,5 +1,4 @@
-#ifndef HDPS_GUI_DOCKABLE_WIDGET
-#define HDPS_GUI_DOCKABLE_WIDGET
+#pragma once
 
 #include <QDockWidget>
 
@@ -37,5 +36,3 @@ private:
 } // namespace gui
 
 } // namespace hdps
-
-#endif // HDPS_GUI_DOCKABLE_WIDGET

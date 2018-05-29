@@ -1,6 +1,4 @@
 #pragma once
-#ifndef SHADER_H
-#define SHADER_H
 
 #include <QOpenGLFunctions_3_3_Core>
 
@@ -42,5 +40,3 @@ private:
     std::unordered_map<std::string, int> _locationMap;
 };
 }
-
-#endif /* SHADER_H */

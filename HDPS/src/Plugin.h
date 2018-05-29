@@ -1,5 +1,4 @@
-#ifndef HDPS_PLUGIN_PLUGIN_H
-#define HDPS_PLUGIN_PLUGIN_H
+#pragma once
 
 #include "CoreInterface.h"
 #include "PluginType.h"
@@ -78,5 +77,3 @@ private:
 } // namespace plugin
 
 } // namespace hdps
-
-#endif // HDPS_PLUGIN_PLUGIN_H

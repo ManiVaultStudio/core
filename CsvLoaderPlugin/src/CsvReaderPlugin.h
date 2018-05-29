@@ -1,5 +1,4 @@
-#ifndef CSV_READER_PLUGIN_H
-#define CSV_READER_PLUGIN_H
+#pragma once
 
 #include <LoaderPlugin.h>
 
@@ -38,5 +37,3 @@ public:
     
     LoaderPlugin* produce();
 };
-
-#endif // CSV_READER_PLUGIN_H

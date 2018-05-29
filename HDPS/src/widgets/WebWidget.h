@@ -1,5 +1,4 @@
-#ifndef HDPS_GUI_WEB_WIDGET_H
-#define HDPS_GUI_WEB_WIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -40,5 +39,3 @@ private:
 } // namespace gui
 
 } // namespace hdps
-
-#endif // HDPS_GUI_WEB_WIDGET_H

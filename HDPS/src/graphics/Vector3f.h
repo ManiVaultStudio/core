@@ -1,5 +1,4 @@
-#ifndef VECTOR3F_H
-#define VECTOR3F_H
+#pragma once
 
 #include <cmath>
 
@@ -128,5 +127,3 @@ namespace hdps
     };
 
 } // namespace hdps
-
-#endif // VECTOR3F_H

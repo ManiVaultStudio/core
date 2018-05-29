@@ -1,5 +1,4 @@
-#ifndef HDPS_PLUGIN_VIEW_PLUGIN
-#define HDPS_PLUGIN_VIEW_PLUGIN
+#pragma once
 
 #include "widgets/DockableWidget.h"
 #include "PluginFactory.h"
@@ -45,5 +44,3 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::ViewPluginFactory, "cytosplore.ViewPluginFactory")
-
-#endif // HDPS_PLUGIN_VIEW_PLUGIN

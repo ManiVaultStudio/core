@@ -1,5 +1,4 @@
-#ifndef SETTINGS_WIDGET_H
-#define SETTINGS_WIDGET_H
+#pragma once
 
 #include "DockableWidget.h"
 
@@ -21,5 +20,3 @@ public:
 } // namespace gui
 
 } // namespace hdps
-
-#endif // SETTINGS_WIDGET_H
