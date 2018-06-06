@@ -12,34 +12,59 @@ namespace hdps
         Vector2f(float x, float y) : x(x), y(y) { }
         ~Vector2f() { }
 
+        /**
+        * Sets the x and y components of this vector to the given parameters.
+        * @param x the x-component of the vector
+        * @param y the y-component of the vector
+        */
         inline void set(float x, float y)
         {
             this->x = x;
             this->y = y;
         }
 
+        /**
+        * Adds the given vector to this vector.
+        * @param v the vector to be added
+        */
         inline void add(Vector2f v)
         {
             x += v.x;
             y += v.y;
         }
 
+        /**
+        * Subtracts the given vector from this vector.
+        * @param v the vector to be subtracted
+        */
         inline void sub(Vector2f v)
         {
             x -= v.x;
             y -= v.y;
         }
 
+        /**
+        * Returns the squared magnitude of this vector.
+        * @return the squared magnitude of this vector
+        */
         inline float sqrMagnitude() const
         {
             return x * x + y * y;
         }
 
+        /**
+        * Returns the magnitude of this vector.
+        * @return the magnitude of this vector
+        */
         inline float length() const
         {
             return sqrt(sqrMagnitude());
         }
 
+        /**
+        * Returns a string representation of this vector.
+        * @return the string representation
+        */
         inline std::string str() const
         {
             return std::string("(" + std::to_string(x) + " " + std::to_string(y) + ")");
