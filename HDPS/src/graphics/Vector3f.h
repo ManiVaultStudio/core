@@ -1,15 +1,15 @@
 #pragma once
 
-#include <cmath>
+#include <string>
 
 namespace hdps
 {
     class Vector3f
     {
     public:
-        Vector3f() : x(0), y(0), z(0) { }
-        Vector3f(float x, float y, float z) : x(x), y(y), z(z) { }
-        ~Vector3f() { }
+        Vector3f();
+        Vector3f(float x, float y, float z);
+        ~Vector3f();
 
         /**
         * Sets the x, y and z components of this vector to the given parameters.
@@ -42,6 +42,12 @@ namespace hdps
         * @return the magnitude of this vector
         */
         float length();
+
+        /**
+        * Returns a string representation of this vector.
+        * @return the string representation
+        */
+        std::string str() const;
 
         /* Operator overloads */
         bool operator==(const Vector3f& v) const;

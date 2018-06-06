@@ -52,6 +52,11 @@ namespace hdps
         return sqrt(sqrMagnitude());
     }
 
+    std::string Vector3f::str() const
+    {
+        return std::string("(" + std::to_string(x) + " " + std::to_string(y) + " " + std::to_string(z) + ")");
+    }
+
     /* Operator overloads */
     bool Vector3f::operator==(const Vector3f& v) const
     {
