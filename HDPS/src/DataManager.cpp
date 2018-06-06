@@ -1,13 +1,16 @@
 #include "DataManager.h"
 
-#include "exceptions/SetNotFoundException.h"
-
 #include <QRegularExpression>
 #include <cassert>
 #include <iostream>
 
 namespace hdps
 {
+
+void DataManager::addRawData(plugin::RawData* rawData)
+{
+    _rawData.push_back(std::move(std::unique_ptr<plugin::RawData>(rawData)));
+}
 
 void DataManager::addSet(Set* set)
 {
@@ -17,6 +20,19 @@ void DataManager::addSet(Set* set)
 void DataManager::addSelection(QString dataName, Set* selection)
 {
     _selections.emplace(dataName.toStdString(), std::move(std::unique_ptr<Set>(selection)));
+}
+
+plugin::RawData& DataManager::getRawData(QString name)
+{
+    for (const auto& rawData : _rawData)
+    {
+        if (rawData->getName() == name)
+        {
+            return *rawData.get();
+        }
+    }
+
+    throw DataNotFoundException(name);
 }
 
 Set& DataManager::getSet(QString name)
