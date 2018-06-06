@@ -17,133 +17,46 @@ namespace hdps
         * @param y the y-component of the vector
         * @param z the z-component of the vector
         */
-        inline void set(float x, float y, float z)
-        {
-            this->x = x;
-            this->y = y;
-            this->z = z;
-        }
+        void set(float x, float y, float z);
 
         /**
         * Adds the given vector to this vector.
         * @param v the vector to be added
         */
-        inline void add(Vector3f v)
-        {
-            x += v.x;
-            y += v.y;
-            z += v.z;
-        }
+        void add(Vector3f v);
 
         /**
         * Subtracts the given vector from this vector.
         * @param v the vector to be subtracted
         */
-        inline void sub(Vector3f v)
-        {
-            x -= v.x;
-            y -= v.y;
-            z -= v.z;
-        }
+        void sub(Vector3f v);
 
         /**
         * Returns the squared magnitude of this vector.
         * @return the squared magnitude of this vector
         */
-        inline float sqrMagnitude()
-        {
-            return x * x + y * y + z * z;
-        }
+        float sqrMagnitude();
 
         /**
         * Returns the magnitude of this vector.
         * @return the magnitude of this vector
         */
-        inline float length()
-        {
-            return sqrt(sqrMagnitude());
-        }
+        float length();
 
         /* Operator overloads */
-        bool operator==(const Vector3f& v) const
-        {
-            return x == v.x && y == v.y && z == v.z;
-        }
-
-        bool operator!=(const Vector3f& v) const
-        {
-            return x != v.x || y != v.y || z != v.z;
-        }
-
-        Vector3f& operator+=(const Vector3f& v)
-        {
-            x += v.x;
-            y += v.y;
-            z += v.z;
-            return *this;
-        }
-
-        Vector3f& operator-=(const Vector3f& v)
-        {
-            x -= v.x;
-            y -= v.y;
-            z -= v.z;
-            return *this;
-        }
-
-        Vector3f& operator*=(const Vector3f& v)
-        {
-            x *= v.x;
-            y *= v.y;
-            z *= v.z;
-            return *this;
-        }
-
-        Vector3f& operator*=(float scale)
-        {
-            x *= scale;
-            y *= scale;
-            z *= scale;
-            return *this;
-        }
-
-        Vector3f& operator/=(const Vector3f& v)
-        {
-            x /= v.x;
-            y /= v.y;
-            z /= v.z;
-            return *this;
-        }
-
-        Vector3f operator+(const Vector3f& v) const
-        {
-            return Vector3f(x + v.x, y + v.y, z + v.z);
-        }
-
-        Vector3f operator-(const Vector3f& v) const
-        {
-            return Vector3f(x - v.x, y - v.y, z - v.z);
-        }
-
-        Vector3f operator-() const
-        {
-            return Vector3f(-x, -y, -z);
-        }
-
-        Vector3f operator*(const Vector3f& v) const
-        {
-            return Vector3f(x * v.x, y * v.y, z * v.z);
-        }
-
-        Vector3f operator*(float scale) const
-        {
-            return Vector3f(x * scale, y * scale, z * scale);
-        }
-
-        Vector3f operator/(float divisor) const
-        {
-            return Vector3f(x / divisor, y / divisor, z / divisor);
-        }
+        bool operator==(const Vector3f& v) const;
+        bool operator!=(const Vector3f& v) const;
+        Vector3f& operator+=(const Vector3f& v);
+        Vector3f& operator-=(const Vector3f& v);
+        Vector3f& operator*=(const Vector3f& v);
+        Vector3f& operator*=(float scale);
+        Vector3f& operator/=(const Vector3f& v);
+        Vector3f operator+(const Vector3f& v) const;
+        Vector3f operator-(const Vector3f& v) const;
+        Vector3f operator-() const;
+        Vector3f operator*(const Vector3f& v) const;
+        Vector3f operator*(float scale) const;
+        Vector3f operator/(float divisor) const;
 
         float x, y, z;
     };
