@@ -48,25 +48,34 @@ set( CORE_SOURCES
     src/DataManager.cpp
 )
 
-
 set( WIDGET_HEADERS
-    src/widgets/Renderer.h
-    src/widgets/PointRenderer.h
-    src/widgets/DensityRenderer.h
-    src/widgets/SelectionRenderer.h
     src/widgets/DockableWidget.h
-    src/widgets/ImageWidget.h
     src/widgets/SettingsWidget.h
     src/widgets/WebWidget.h
+    src/widgets/ColorMapWidget.h
+    src/widgets/MaterialCheckBoxWidget.h
 )
 
 set( WIDGET_SOURCES
-    src/widgets/PointRenderer.cpp
-    src/widgets/DensityRenderer.cpp
-    src/widgets/SelectionRenderer.cpp
     src/widgets/DockableWidget.cpp
-    src/widgets/ImageWidget.cpp
     src/widgets/WebWidget.cpp
+    src/widgets/ColorMapWidget.cpp
+    src/widgets/MaterialCheckBoxWidget.cpp
+)
+
+set( RENDERER_HEADERS
+    src/renderers/Renderer.h
+    src/renderers/PointRenderer.h
+    src/renderers/DensityRenderer.h
+    src/renderers/SelectionRenderer.h
+    src/renderers/ImageRenderer.h
+)
+
+set( RENDERER_SOURCES
+    src/renderers/PointRenderer.cpp
+    src/renderers/DensityRenderer.cpp
+    src/renderers/SelectionRenderer.cpp
+    src/renderers/ImageRenderer.cpp
 )
 
 set( GRAPHICS_HEADERS
@@ -127,6 +136,7 @@ list(APPEND PRIVATE_SOURCES
 list(APPEND PUBLIC_HEADERS
     ${GRAPHICS_HEADERS}
     ${WIDGET_HEADERS}
+    ${RENDERER_HEADERS}
     ${UTIL_HEADERS}
     ${PLUGIN_HEADERS}
 )
@@ -134,6 +144,7 @@ list(APPEND PUBLIC_HEADERS
 list(APPEND PUBLIC_SOURCES
     ${GRAPHICS_SOURCES}
     ${WIDGET_SOURCES}
+    ${RENDERER_SOURCES}
     ${UTIL_SOURCES}
     ${PUBLIC_HEADERS}
 )
@@ -144,6 +155,10 @@ list(APPEND GRAPHICS_FILES
 list(APPEND WIDGET_FILES
     ${WIDGET_SOURCES}
     ${WIDGET_HEADERS}
+)
+list(APPEND RENDERER_FILES
+    ${RENDERER_HEADERS}
+    ${RENDERER_SOURCES}
 )
 list(APPEND UTIL_FILES
     ${UTIL_SOURCES}
@@ -170,6 +185,7 @@ source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
 source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
+source_group( Public\\Renderers FILES ${RENDERER_FILES})
 source_group( Public\\Util FILES ${UTIL_FILES})
 source_group( Public\\Graphics FILES ${GRAPHICS_FILES})
 source_group( Resources FILES res/resources.qrc)
