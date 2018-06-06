@@ -1,3 +1,9 @@
+/**
+ * Renderer.h
+ *
+ * Provides the interface for a Renderer which can be used in a QOpenGLWidget.
+ */
+
 #pragma once
 
 #include <QOpenGLFunctions_3_3_Core>
