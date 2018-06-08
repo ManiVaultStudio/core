@@ -94,6 +94,8 @@ set( GRAPHICS_SOURCES
     src/graphics/Shader.cpp
     src/graphics/Selection.cpp
     src/graphics/Matrix3f.cpp
+    src/graphics/Vector2f.cpp
+    src/graphics/Vector3f.cpp
 )
 
 set( UTIL_HEADERS
