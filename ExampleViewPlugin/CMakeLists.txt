@@ -19,9 +19,9 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5WebKitWidgets REQUIRED)
 
 set(SOURCES
-    src/CSPLR_ExampleViewPlugin.h
-    src/CSPLR_ExampleViewPlugin.cpp
-    src/CSPLR_ExampleViewPlugin.json
+    src/ExampleViewPlugin.h
+    src/ExampleViewPlugin.cpp
+    src/ExampleViewPlugin.json
 )
 
 source_group( Plugin FILES ${SOURCES})
