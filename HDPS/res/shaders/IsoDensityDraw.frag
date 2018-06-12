@@ -1,6 +1,6 @@
 #version 330 core
 
-uniform sampler2D colorMap;
+uniform sampler2D colormap;
 uniform sampler2D densityMap;
 
 uniform vec2 renderParams;
@@ -43,7 +43,7 @@ void main() {
         texCoord = clamp(texCoord / numSteps, 0.0, 1.0);
     }
     
-    vec3 col = texture(colorMap, vec2(texCoord, 0)).rgb;
+    vec3 col = texture(colormap, vec2(texCoord, 0)).rgb;
     if(isBoundary) 
     {
         col *= 0.75;

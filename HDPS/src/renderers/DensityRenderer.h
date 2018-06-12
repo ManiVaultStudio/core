@@ -53,7 +53,7 @@ namespace hdps
             ShaderProgram _shaderDensityDraw;
             ShaderProgram _shaderIsoDensityDraw;
             DensityComputation _densityComputation;
-            Texture2D _colorMap;
+            Texture2D _colormap;
 
             RenderMode _renderMode;
 

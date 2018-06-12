@@ -13,7 +13,7 @@
 #include "graphics/Selection.h"
 #include "graphics/Shader.h"
 
-#include "widgets/ColorMapWidget.h"
+#include "widgets/ColormapWidget.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
@@ -79,7 +79,7 @@ private:
 
     QSize _windowSize;
 
-    ColorMapWidget _colorMapWidget;
+    ColormapWidget _colormapWidget;
 
     unsigned int _numPoints = 0;
     QRectF _dataBounds;

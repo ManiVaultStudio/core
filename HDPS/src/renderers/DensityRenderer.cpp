@@ -52,7 +52,7 @@ namespace hdps
             }
 
             // Load the color map
-            _colorMap.loadFromFile(":colormaps/Spectral.png");
+            _colormap.loadFromFile(":colormaps/Spectral.png");
 
             // Initialize the density computation
             _densityComputation.init(QOpenGLContext::currentContext());
@@ -94,7 +94,7 @@ namespace hdps
             _shaderDensityDraw.destroy();
             _shaderIsoDensityDraw.destroy();
             _densityComputation.cleanup();
-            _colorMap.destroy();
+            _colormap.destroy();
 
             glDeleteVertexArrays(1, &_quad);
         }
@@ -132,8 +132,8 @@ namespace hdps
 
             _shaderIsoDensityDraw.uniform2f("renderParams", 1.0f / maxDensity, 1.0f / _densityComputation.getNumPoints());
 
-            _colorMap.bind(1);
-            _shaderIsoDensityDraw.uniform1i("colorMap", 1);
+            _colormap.bind(1);
+            _shaderIsoDensityDraw.uniform1i("colormap", 1);
 
             drawFullscreenQuad();
         }

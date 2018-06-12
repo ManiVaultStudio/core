@@ -52,14 +52,14 @@ set( WIDGET_HEADERS
     src/widgets/DockableWidget.h
     src/widgets/SettingsWidget.h
     src/widgets/WebWidget.h
-    src/widgets/ColorMapWidget.h
+    src/widgets/ColormapWidget.h
     src/widgets/MaterialCheckBoxWidget.h
 )
 
 set( WIDGET_SOURCES
     src/widgets/DockableWidget.cpp
     src/widgets/WebWidget.cpp
-    src/widgets/ColorMapWidget.cpp
+    src/widgets/ColormapWidget.cpp
     src/widgets/MaterialCheckBoxWidget.cpp
 )
 

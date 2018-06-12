@@ -7,7 +7,8 @@
 
 ScatterplotWidget::ScatterplotWidget()
     :
-    _densityRenderer(DensityRenderer::RenderMode::DENSITY)
+    _densityRenderer(DensityRenderer::RenderMode::DENSITY),
+    _colormapWidget(this)
 {
     addSelectionListener(&_selectionRenderer);
 }
@@ -152,11 +153,11 @@ void ScatterplotWidget::initializeGL()
 
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ScatterplotWidget::cleanup);
 
-    _colorMapWidget.move(width() - 71, 10);
-    _colorMapWidget.show();
+    _colormapWidget.move(width() - 71, 10);
+    _colormapWidget.show();
 
-    QObject::connect(&_colorMapWidget, &ColorMapWidget::colormapSelected, this, &ScatterplotWidget::colormapChanged);
-    QObject::connect(&_colorMapWidget, &ColorMapWidget::discreteSelected, this, &ScatterplotWidget::colormapdiscreteChanged);
+    QObject::connect(&_colormapWidget, &ColormapWidget::colormapSelected, this, &ScatterplotWidget::colormapChanged);
+    QObject::connect(&_colormapWidget, &ColormapWidget::discreteSelected, this, &ScatterplotWidget::colormapdiscreteChanged);
 
     _pointRenderer.init();
     _densityRenderer.init();
@@ -184,6 +185,15 @@ void ScatterplotWidget::resizeGL(int w, int h)
 
     toIsotropicCoordinates = Matrix3f(wAspect, 0, 0, hAspect, -wDiff, -hDiff);
     qDebug() << "Done resizing scatterplot";
+
+    if (_colormapWidget._isOpen)
+    {
+        _colormapWidget.move(width() - (64 + 14 + 15 * 36 + 15), 10);
+    }
+    else {
+        _colormapWidget.move(width() - 71, 10);
+    }
+    _colormapWidget.setColormap(0, true);
 }
 
 void ScatterplotWidget::paintGL()
