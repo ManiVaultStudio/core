@@ -1,3 +1,9 @@
+/**
+* View.h
+*
+* Base plugin class for plugins that visualize data.
+*/
+
 #pragma once
 
 #include "widgets/DockableWidget.h"

@@ -1,3 +1,9 @@
+/**
+* Writer.h
+*
+* Base plugin class for plugins that write data to a file.
+*/
+
 #pragma once
 
 #include "PluginFactory.h"
