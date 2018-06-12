@@ -11,6 +11,7 @@
 #include "WriterPlugin.h"
 #include "ViewPlugin.h"
 #include "RawData.h"
+#include "Set.h"
 #include "DataConsumer.h"
 
 #include <QMessageBox>

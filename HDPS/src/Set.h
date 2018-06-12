@@ -1,6 +1,6 @@
 #pragma once
 
-#include <CoreInterface.h>
+#include "CoreInterface.h"
 
 #include <QString>
 #include <QVector>

@@ -3,7 +3,7 @@
 #include "Vector3f.h"
 #include "Matrix3f.h"
 //#include "Util/Matrix4f.h"
-#include "Util/FileUtil.h"
+#include "../util/FileUtil.h"
 
 #include <QDebug>
 

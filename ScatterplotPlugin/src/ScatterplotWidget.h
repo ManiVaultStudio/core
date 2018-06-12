@@ -1,8 +1,8 @@
 #pragma once
 
-#include "widgets/PointRenderer.h"
-#include "widgets/DensityRenderer.h"
-#include "widgets/SelectionRenderer.h"
+#include "renderers/PointRenderer.h"
+#include "renderers/DensityRenderer.h"
+#include "renderers/SelectionRenderer.h"
 
 #include "SelectionListener.h"
 

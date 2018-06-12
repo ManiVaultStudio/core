@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer.h"
-#include "SelectionListener.h"
+#include "../SelectionListener.h"
 
 #include "../graphics/Vector2f.h"
 #include "../graphics/Texture.h"
