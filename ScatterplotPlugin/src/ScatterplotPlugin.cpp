@@ -47,11 +47,11 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
-    _scatterPlotWidget = new hdps::gui::ScatterplotWidget();
+    _scatterPlotWidget = new ScatterplotWidget();
     _scatterPlotWidget->setAlpha(0.5f);
     _scatterPlotWidget->addSelectionListener(this);
 
-    _scatterPlotWidget->setRenderMode(hdps::gui::ScatterplotWidget::RenderMode::SCATTERPLOT);
+    _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
 
     settings = new ScatterplotSettings(this);
 
@@ -128,7 +128,6 @@ void ScatterplotPlugin::yDimPicked(int index)
 
 void ScatterplotPlugin::updateData()
 {
-    qDebug() << "UPdate data";
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
     const PointsPlugin& points = dataSet.getData();
     

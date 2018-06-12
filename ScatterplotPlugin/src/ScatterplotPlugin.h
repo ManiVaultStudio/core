@@ -45,7 +45,7 @@ public:
     virtual void onSelecting(hdps::Selection selection);
     virtual void onSelection(hdps::Selection selection);
 
-    hdps::gui::ScatterplotWidget* _scatterPlotWidget;
+    ScatterplotWidget* _scatterPlotWidget;
 
 protected slots:
     void dataSetPicked(const QString& name);
