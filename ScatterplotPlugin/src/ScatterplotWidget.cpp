@@ -162,6 +162,9 @@ void ScatterplotWidget::initializeGL()
     _pointRenderer.init();
     _densityRenderer.init();
     _selectionRenderer.init();
+
+    _pointRenderer.setScalarEffect(PointEffect::Color);
+    _pointRenderer.setColormap(":colormaps/Spectral.png");
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)

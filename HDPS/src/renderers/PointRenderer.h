@@ -8,6 +8,7 @@
 #include "../graphics/Vector2f.h"
 #include "../graphics/Vector3f.h"
 #include "../graphics/Matrix3f.h"
+#include "../graphics/Texture.h"
 
 #include <QRectF>
 
@@ -20,7 +21,7 @@ namespace hdps
         };
 
         enum PointEffect {
-            Colour, Size, Outline
+            Color, Size, Outline
         };
 
         struct PointArrayObject : private QOpenGLFunctions_3_3_Core
@@ -53,8 +54,10 @@ namespace hdps
         public:
             void setData(const std::vector<Vector2f>* points);
             void setColors(const std::vector<Vector3f>& data);
+            void setColormap(const QString colormap);
             void setHighlight(const std::vector<char>& highlights);
             void setScalarProperty(const std::vector<float>& scalarProperty);
+            void setScalarEffect(const PointEffect effect);
             void setBounds(float left, float right, float bottom, float top);
             void setPointSize(const float size);
             void setAlpha(const float alpha);
@@ -84,6 +87,8 @@ namespace hdps
             /* Properties */
             PointSettings _pointSettings;
             PointEffect _pointEffect = PointEffect::Size;
+
+            Texture2D _colormap;
 
             QRectF       _bounds         = QRectF(-1, 1, 2, 2);
         };

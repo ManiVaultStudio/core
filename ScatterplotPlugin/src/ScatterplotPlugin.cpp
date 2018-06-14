@@ -161,7 +161,7 @@ void ScatterplotPlugin::updateData()
     }
     std::vector<float> scalars(_numPoints);
     for (int i = 0; i < _numPoints; i++) {
-        scalars[i] = (float)i / _numPoints;
+        scalars[i] = points.data[i * nDim + 2] / 6;
     }
 
     _scatterPlotWidget->setData(&_points, getDataBounds(_points));

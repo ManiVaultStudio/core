@@ -113,6 +113,11 @@ namespace hdps
             glBindVertexArray(0);
         }
 
+        void PointRenderer::setColormap(const QString colormap)
+        {
+            _colormap.loadFromFile(colormap);
+        }
+
         void PointRenderer::setHighlight(const std::vector<char>& highlights)
         {
             _highlights = highlights;
@@ -131,6 +136,11 @@ namespace hdps
             _gpuPoints._scalarBuffer.bind();
             _gpuPoints._scalarBuffer.setData(scalarProperty);
             glBindVertexArray(0);
+        }
+
+        void PointRenderer::setScalarEffect(const PointEffect effect)
+        {
+            _pointEffect = effect;
         }
 
         void PointRenderer::setBounds(float left, float right, float bottom, float top)
@@ -213,9 +223,14 @@ namespace hdps
             case Absolute: _shader.uniform1f("pointSize", _pointSettings._pointSize / size); break;
             }
 
-            _shader.uniform1f("alpha", _pointSettings._alpha);
             _shader.uniformMatrix3f("projMatrix", _ortho);
+            _shader.uniform1f("alpha", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
+
+            if (_pointEffect == PointEffect::Color) {
+                _colormap.bind(0);
+                _shader.uniform1i("colormap", 0);
+            }
 
             glBindVertexArray(_gpuPoints._handle);
             glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
