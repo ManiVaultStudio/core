@@ -13,7 +13,6 @@
 #include "RawData.h"
 #include "LoaderPlugin.h"
 #include "WriterPlugin.h"
-#include "TransformationPlugin.h"
 #include "ViewPlugin.h"
 #include "PluginType.h"
 
@@ -101,9 +100,6 @@ void PluginManager::loadPlugins()
         {
             action = gui.addMenuAction(plugin::Type::WRITER, kind);
         }
-        else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
-        {
-            action = gui.addMenuAction(plugin::Type::TRANFORMATION, kind);
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
@@ -114,7 +110,7 @@ void PluginManager::loadPlugins()
             qDebug() << "Plugin " << fileName << " does not implement any of the possible interfaces!";
             return;
         }
-            
+        
         if(action)
         {
             QObject::connect(action, &QAction::triggered, signalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));

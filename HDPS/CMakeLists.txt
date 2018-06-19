@@ -116,7 +116,6 @@ set( PLUGIN_HEADERS
     src/RawData.h
     src/LoaderPlugin.h
     src/WriterPlugin.h
-    src/TransformationPlugin.h
     src/ViewPlugin.h
     src/PluginFactory.h
     src/Plugin.h
