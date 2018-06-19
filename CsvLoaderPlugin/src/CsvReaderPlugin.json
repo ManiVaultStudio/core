@@ -1,5 +1,6 @@
 {
     "name" : "Csv Reader",
+    "menuName" : "CSV (.csv)",
     "version" : "1",
-    "dependencies" : []
+    "dependencies" : ["Points"]
 }

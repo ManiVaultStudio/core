@@ -64,6 +64,7 @@ void PluginManager::loadPlugins()
         gui::MainWindow& gui = _core.gui();
 
         QString kind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+        QString menuName = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
 
         // Check if this plugin has all its dependencies resolved
         if (!resolved.contains(kind)) {
@@ -94,12 +95,11 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::LOADER, kind);
+            action = gui.addMenuAction(plugin::Type::LOADER, menuName);
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::WRITER, kind);
-        }
+            action = gui.addMenuAction(plugin::Type::WRITER, menuName);
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
