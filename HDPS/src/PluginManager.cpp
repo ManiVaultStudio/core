@@ -63,12 +63,12 @@ void PluginManager::loadPlugins()
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
         gui::MainWindow& gui = _core.gui();
 
-        QString kind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+        QString pluginName = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
         QString menuName = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
 
         // Check if this plugin has all its dependencies resolved
-        if (!resolved.contains(kind)) {
-            qWarning() << "Plugin: " << kind << " has unresolved dependencies.";
+        if (!resolved.contains(pluginName)) {
+            qWarning() << "Plugin: " << pluginName << " has unresolved dependencies.";
             continue;
         }
 
@@ -82,13 +82,13 @@ void PluginManager::loadPlugins()
         }
 
 
-        _pluginFactories[kind] = qobject_cast<PluginFactory*>(pluginFactory);
+        _pluginFactories[pluginName] = qobject_cast<PluginFactory*>(pluginFactory);
 
         QAction* action = NULL;
 
         if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::ANALYSIS, kind);
+            action = gui.addMenuAction(plugin::Type::ANALYSIS, pluginName);
         }
         else if (qobject_cast<RawDataFactory*>(pluginFactory))
         {
@@ -103,7 +103,7 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::VIEW, kind);
+            action = gui.addMenuAction(plugin::Type::VIEW, pluginName);
         }
         else
         {
@@ -114,7 +114,7 @@ void PluginManager::loadPlugins()
         if(action)
         {
             QObject::connect(action, &QAction::triggered, signalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-            signalMapper->setMapping(action, kind);
+            signalMapper->setMapping(action, pluginName);
         }
     }
 
