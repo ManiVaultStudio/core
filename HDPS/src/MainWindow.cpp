@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
     
     _core = std::unique_ptr<Core>(new Core(*this));
     _core->init();
+
+    QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
 }
 
 MainWindow::~MainWindow()
