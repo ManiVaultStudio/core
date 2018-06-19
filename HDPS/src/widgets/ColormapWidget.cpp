@@ -176,7 +176,7 @@ void ColormapWidget::colormapClicked(int id)
 
     setColormap(id, _isCMDiscrete);
 
-    emit colormapSelected(_activeColormapIdx);
+    emit colormapSelected(_colormapNames[_activeColormapIdx]);
 
     slideOut();
 }

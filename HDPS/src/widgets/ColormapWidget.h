@@ -30,7 +30,7 @@ private slots:
     void discreteColormapClicked(int checked);
 
 signals:
-    void colormapSelected(int);
+    void colormapSelected(QString);
     void discreteSelected(bool);
 
 public:

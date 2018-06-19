@@ -63,7 +63,7 @@ protected slots:
     void pointSizeChanged(const int size);
     void sigmaChanged(const int sigma);
 
-    void colormapChanged(int idx);
+    void colormapChanged(QString colormapName);
     void colormapdiscreteChanged(bool isDiscrete);
 
 private:

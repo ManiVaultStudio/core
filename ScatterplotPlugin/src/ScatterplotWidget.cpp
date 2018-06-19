@@ -43,10 +43,10 @@ void ScatterplotWidget::sigmaChanged(const int sigma)
     update();
 }
 
-void ScatterplotWidget::colormapChanged(int idx)
+void ScatterplotWidget::colormapChanged(QString colormapName)
 {
     //_renderer->setColormap(idx);
-
+    _pointRenderer.setColormap(colormapName);
     update();
 }
 
