@@ -95,11 +95,11 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::LOADER, menuName);
+            action = gui.addImportOption(menuName);
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::WRITER, menuName);
+            action = gui.addExportOption(menuName);
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {

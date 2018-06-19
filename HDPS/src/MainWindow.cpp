@@ -26,13 +26,21 @@ MainWindow::~MainWindow()
 {
 }
 
+QAction* MainWindow::addImportOption(QString menuName)
+{
+    return importDataFileMenu->addAction(menuName);
+}
+
+QAction* MainWindow::addExportOption(QString menuName)
+{
+    return exportDataFileMenu->addAction(menuName);
+}
+
 QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
 {
     switch (type)
     {
     case plugin::Type::ANALYSIS:      return menuAnalysis->addAction(name);
-    case plugin::Type::LOADER:        return importDataFileMenu->addAction(name);
-    case plugin::Type::WRITER:        return exportDataFileMenu->addAction(name);
     case plugin::Type::VIEW:          return menuVisualization->addAction(name);
     default: return nullptr;
     }

@@ -35,6 +35,16 @@ public:
 	virtual ~MainWindow();
 
     /**
+    * Adds a new item to the import menu.
+    */
+    QAction* addImportOption(QString menuName);
+
+    /**
+    * Adds a new item to the export menu.
+    */
+    QAction* addExportOption(QString menuName);
+
+    /**
     * Adds a new item to the menu drop-down for this particular type.
     */
     QAction* addMenuAction(plugin::Type type, QString name);
