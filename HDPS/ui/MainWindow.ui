@@ -29,11 +29,21 @@
     <property name="title">
      <string>File</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menuTransformation">
-    <property name="title">
-     <string>Transform</string>
-    </property>
+    <widget class="QMenu" name="importDataFileMenu">
+     <property name="title">
+      <string>Import Data File</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="exportDataFileMenu">
+     <property name="title">
+      <string>Export Data File</string>
+     </property>
+    </widget>
+    <addaction name="addNewPluginAction"/>
+    <addaction name="importDataFileMenu"/>
+    <addaction name="exportDataFileMenu"/>
+    <addaction name="openProjectAction"/>
+    <addaction name="exitAction"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
@@ -55,6 +65,21 @@
    <addaction name="menuVisualization"/>
    <addaction name="menuHelp"/>
   </widget>
+  <action name="openProjectAction">
+   <property name="text">
+    <string>Open Project</string>
+   </property>
+  </action>
+  <action name="addNewPluginAction">
+   <property name="text">
+    <string>Add New Plugin</string>
+   </property>
+  </action>
+  <action name="exitAction">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
