@@ -10,6 +10,7 @@
 #include <QtDebug>
 
 #include <algorithm>
+#include <limits>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
@@ -125,6 +126,10 @@ void ScatterplotPlugin::yDimPicked(int index)
     updateData();
 }
 
+void ScatterplotPlugin::cDimPicked(int index)
+{
+    updateData();
+}
 
 void ScatterplotPlugin::updateData()
 {
@@ -135,6 +140,7 @@ void ScatterplotPlugin::updateData()
 
     int xIndex = settings->getXDimension();
     int yIndex = settings->getYDimension();
+    int colorIndex = settings->getColorDimension();
     qDebug() << "X: " << xIndex << " Y: " << yIndex;
     if (xIndex < 0 || yIndex < 0)
         return;
@@ -159,9 +165,22 @@ void ScatterplotPlugin::updateData()
             _points[i] = hdps::Vector2f(points.data[index * nDim + xIndex], points.data[index * nDim + yIndex]);
         }
     }
+
     std::vector<float> scalars(_numPoints);
-    for (int i = 0; i < _numPoints; i++) {
-        scalars[i] = points.data[i * nDim + 2] / 6;
+    if (colorIndex >= 0) {
+        float minScalar = FLT_MAX, maxScalar = FLT_MIN;
+        
+        for (int i = 0; i < _numPoints; i++) {
+            float scalar = points.data[i * nDim + colorIndex];
+            minScalar = scalar < minScalar ? scalar : minScalar;
+            maxScalar = scalar > maxScalar ? scalar : maxScalar;
+            scalars[i] = scalar;
+        }
+        // Normalize the scalars
+        float scalarRange = maxScalar - minScalar;
+        for (int i = 0; i < scalars.size(); i++) {
+            scalars[i] = (scalars[i] - minScalar) / scalarRange;
+        }
     }
 
     _scatterPlotWidget->setData(&_points, getDataBounds(_points));

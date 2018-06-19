@@ -54,6 +54,7 @@ protected slots:
 
     void xDimPicked(int index);
     void yDimPicked(int index);
+    void cDimPicked(int index);
 
 private:
     void updateData();
