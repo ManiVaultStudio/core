@@ -61,6 +61,7 @@ public:
 
     int getXDimension();
     int getYDimension();
+    int getColorDimension();
     hdps::Vector3f getBaseColor();
     hdps::Vector3f getSelectionColor();
     void showPointSettings();
@@ -95,6 +96,7 @@ private:
 
     QComboBox _xDimOptions;
     QComboBox _yDimOptions;
+    QComboBox _cDimOptions;
 
     hdps::Vector3f _baseColor;
     hdps::Vector3f _selectionColor;

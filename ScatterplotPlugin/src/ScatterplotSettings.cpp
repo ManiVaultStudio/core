@@ -37,11 +37,14 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 
     QLabel* xDimLabel = new QLabel("X:");
     QLabel* yDimLabel = new QLabel("Y:");
+    QLabel* cDimLabel = new QLabel("Color:");
 
     _settingsLayout->addWidget(xDimLabel, 0, 3);
     _settingsLayout->addWidget(&_xDimOptions, 0, 4);
     _settingsLayout->addWidget(yDimLabel, 1, 3);
     _settingsLayout->addWidget(&_yDimOptions, 1, 4);
+    _settingsLayout->addWidget(cDimLabel, 2, 3);
+    _settingsLayout->addWidget(&_cDimOptions, 2, 4);
 
     setLayout(_settingsLayout);
 
@@ -49,6 +52,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
     connect(&_xDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(xDimPicked(int)));
     connect(&_yDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(yDimPicked(int)));
+    connect(&_cDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(cDimPicked(int)));
 
     connect(&_renderMode, SIGNAL(currentIndexChanged(int)), plugin->_scatterPlotWidget, SLOT(renderModePicked(int)));
     connect(&_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(renderModePicked(int)));
@@ -72,6 +76,11 @@ int ScatterplotSettings::getXDimension()
 int ScatterplotSettings::getYDimension()
 {
     return _yDimOptions.currentIndex();
+}
+
+int ScatterplotSettings::getColorDimension()
+{
+    return _cDimOptions.currentIndex();
 }
 
 hdps::Vector3f ScatterplotSettings::getBaseColor()
@@ -103,13 +112,16 @@ void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 {
     _xDimOptions.blockSignals(true);
     _yDimOptions.blockSignals(true);
+    _cDimOptions.blockSignals(true);
 
     _xDimOptions.clear();
     _yDimOptions.clear();
+    _cDimOptions.clear();
     for (unsigned int i = 0; i < nDim; i++)
     {
         _xDimOptions.addItem(QString::number(i));
         _yDimOptions.addItem(QString::number(i));
+        _cDimOptions.addItem(QString::number(i));
     }
 
     if (nDim >= 2)
@@ -120,6 +132,7 @@ void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 
     _xDimOptions.blockSignals(false);
     _yDimOptions.blockSignals(false);
+    _cDimOptions.blockSignals(false);
 }
 
 void ScatterplotSettings::addDataOption(const QString option)
