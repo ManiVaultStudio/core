@@ -18,7 +18,7 @@ public:
      * This function will be called when the user clicks on the menu item for this loader.
      * The implementation is free to create file dialogs if desired.
      */
-    virtual void loadData() = 0;
+    virtual bool loadData() = 0;
 
     virtual ~LoaderPlugin() {};
 };
