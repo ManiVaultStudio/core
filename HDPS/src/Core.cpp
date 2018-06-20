@@ -69,7 +69,16 @@ void Core::addPlugin(plugin::Plugin* plugin)
     // If it is a loader plugin it should call loadData
     if (plugin->getType() == plugin::Type::LOADER)
     {
-        dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+        try
+        {
+            dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+        }
+        catch (plugin::DataLoadException e)
+        {
+            QMessageBox messageBox;
+            messageBox.critical(0, "Error", e.what());
+            messageBox.setFixedSize(500, 200);
+        }
     }
     // If it is a writer plugin it should call writeData
     if (plugin->getType() == plugin::Type::WRITER)

@@ -20,7 +20,7 @@ public:
     
     void init();
 
-    bool loadData() Q_DECL_OVERRIDE;
+    void loadData() Q_DECL_OVERRIDE;
 private:
     std::string fetchValueForKey(const std::string key);
 

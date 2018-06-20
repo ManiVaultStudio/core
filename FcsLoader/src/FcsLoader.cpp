@@ -42,7 +42,7 @@ void FcsLoader::init()
 
 }
 
-bool FcsLoader::loadData()
+void FcsLoader::loadData()
 {
     QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", "", "FCS Files (*.fcs *)");
     qDebug() << "Loading FCS file: " << fileName;
@@ -60,7 +60,8 @@ bool FcsLoader::loadData()
     std::ifstream file;
     file.open(_fileName, std::ios::binary | std::ios::in);
 
-    if (!file.is_open()) return false;
+    if (!file.is_open())
+        throw DataLoadException(fileName, "File was not found at location.");
 
     size_t bufferLength = 64;
     std::string buffer(bufferLength, '\0');
@@ -85,11 +86,11 @@ bool FcsLoader::loadData()
     }
     else if (version == "FCS1.0")
     {
-        return false; // Error code 1: FCS version 1.0 is not supported
+        throw DataLoadException(fileName, "FCS version 1.0 is not supported");
     }
     else
     {
-        return false; // Error code 2: Could not find FCS version in header
+        throw DataLoadException(fileName, "Could not find FCS version in header");
     }
 
     // =========================================================================
@@ -131,7 +132,7 @@ bool FcsLoader::loadData()
     _separator = _textHeader[0];
     if (_separator != '\\' && _separator != '!' && _separator != '|' && _separator != '/' && _separator != '\f')
     {
-        return false; // Error code 3: Unknown separator in file header
+        throw DataLoadException(fileName, "Unknown separator in file header");
     }
 
     header.setNumEvents(stoi(fetchValueForKey("$TOT")));
@@ -176,7 +177,7 @@ bool FcsLoader::loadData()
     }
     if (dataStartByte < 0)
     {
-        return false; // 6
+        throw DataLoadException(fileName, "Data start byte is less than 0.");
     }
     //	assert(dataStartByte == stoi(fetchValueForKey("$BEGINDATA")));
     int itemSize = (*variables)[0].numBits / 8;
@@ -228,7 +229,7 @@ bool FcsLoader::loadData()
     }
     else
     {
-        return false; // 2
+        throw DataLoadException(fileName, "Unsupported FCS version.");
     }
 
     file.close();
@@ -275,8 +276,6 @@ bool FcsLoader::loadData()
 
         qDebug() << "FCS file loaded. Num data points: " << points.data.size();
     }
-
-    return true;
 }
 
 std::string FcsLoader::fetchValueForKey(const std::string key)

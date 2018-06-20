@@ -4,9 +4,31 @@
 
 #include <QString>
 
+#include <exception>
+
 namespace hdps {
 
 namespace plugin {
+
+struct DataLoadException : public std::exception
+{
+public:
+    DataLoadException(QString filePath, QString reason)
+        : _filePath(filePath),
+        _reason(reason)
+    {
+    }
+
+    const char* what() const throw ()
+    {
+        return ("Failed to load file at: " + _filePath + "\nReason: " + _reason).toStdString().c_str();
+    }
+
+private:
+    QString _filePath;
+    QString _reason;
+};
+
 
 class LoaderPlugin : public Plugin
 {
@@ -18,7 +40,7 @@ public:
      * This function will be called when the user clicks on the menu item for this loader.
      * The implementation is free to create file dialogs if desired.
      */
-    virtual bool loadData() = 0;
+    virtual void loadData() = 0;
 
     virtual ~LoaderPlugin() {};
 };
