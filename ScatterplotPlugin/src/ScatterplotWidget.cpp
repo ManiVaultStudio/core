@@ -80,14 +80,7 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points, const QRect
 
     update();
 }
-
-void ScatterplotWidget::setColors(const std::vector<Vector3f>& colors)
-{
-    _pointRenderer.setColors(colors);
-
-    update();
-}
-        
+    
 void ScatterplotWidget::setHighlights(const std::vector<char>& highlights)
 {
     _pointRenderer.setHighlight(highlights);

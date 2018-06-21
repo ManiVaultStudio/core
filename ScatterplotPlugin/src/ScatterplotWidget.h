@@ -35,7 +35,6 @@ public:
     ScatterplotWidget();
     void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data, const QRectF bounds);
-    void setColors(const std::vector<Vector3f>& data);
     void setHighlights(const std::vector<char>& highlights);
     void setScalarProperty(const std::vector<float>& scalarProperty);
     void setPointSize(const float size);

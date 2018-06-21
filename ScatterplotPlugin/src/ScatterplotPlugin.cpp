@@ -186,10 +186,6 @@ void ScatterplotPlugin::updateData()
     _scatterPlotWidget->setData(&_points, getDataBounds(_points));
     _scatterPlotWidget->setScalarProperty(scalars);
 
-    std::vector<hdps::Vector3f> colors;
-    colors.resize(_numPoints, settings->getBaseColor());
-    _scatterPlotWidget->setColors(colors);
-
     updateSelection();
 }
 

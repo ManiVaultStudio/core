@@ -53,15 +53,15 @@ namespace hdps
 
             _highlightBuffer.create();
             _highlightBuffer.bind();
-            glVertexAttribIPointer(3, 1, GL_UNSIGNED_BYTE, 0, 0);
-            glVertexAttribDivisor(3, 1);
-            glEnableVertexAttribArray(3);
+            glVertexAttribIPointer(2, 1, GL_UNSIGNED_BYTE, 0, 0);
+            glVertexAttribDivisor(2, 1);
+            glEnableVertexAttribArray(2);
 
             _scalarBuffer.create();
             _scalarBuffer.bind();
-            glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 0, 0);
-            glVertexAttribDivisor(4, 1);
-            glEnableVertexAttribArray(4);
+            glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            glVertexAttribDivisor(3, 1);
+            glEnableVertexAttribArray(3);
         }
 
         void PointArrayObject::destroy()
