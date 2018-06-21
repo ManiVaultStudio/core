@@ -191,7 +191,7 @@ namespace hdps
 
             bool loaded = true;
             loaded &= _shader.loadShaderFromFile(":shaders/PointPlot.vert", ":shaders/PointPlot.frag");
-            loaded &= _selectionShader.loadShaderFromFile(":shaders/SelectionBox.vert", ":shaders/Color.frag");
+
             if (!loaded) {
                 qDebug() << "Failed to load one of the Scatterplot shaders";
             }
