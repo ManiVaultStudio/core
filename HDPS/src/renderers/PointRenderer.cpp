@@ -51,12 +51,6 @@ namespace hdps
             glVertexAttribDivisor(1, 1);
             glEnableVertexAttribArray(1);
 
-            _colorBuffer.create();
-            _colorBuffer.bind();
-            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-            glVertexAttribDivisor(2, 1);
-            glEnableVertexAttribArray(2);
-
             _highlightBuffer.create();
             _highlightBuffer.bind();
             glVertexAttribIPointer(3, 1, GL_UNSIGNED_BYTE, 0, 0);
@@ -74,7 +68,6 @@ namespace hdps
         {
             glDeleteVertexArrays(1, &_handle);
             _positionBuffer.destroy();
-            _colorBuffer.destroy();
         }
 
         // Positions need to be passed as a pointer as we need to store them locally in order
@@ -84,8 +77,6 @@ namespace hdps
         {
             _numPoints = (unsigned int) points->size();
             _positions = points;
-            _colors.clear();
-            _colors.resize(_numPoints, Vector3f(0.5f, 0.5f, 0.5f));
             _highlights.clear();
             _highlights.resize(_numPoints, 0);
             _scalarProperty.clear();
@@ -94,22 +85,10 @@ namespace hdps
             glBindVertexArray(_gpuPoints._handle);
             _gpuPoints._positionBuffer.bind();
             _gpuPoints._positionBuffer.setData(*points);
-            _gpuPoints._colorBuffer.bind();
-            _gpuPoints._colorBuffer.setData(_colors);
             _gpuPoints._highlightBuffer.bind();
             _gpuPoints._highlightBuffer.setData(_highlights);
             _gpuPoints._scalarBuffer.bind();
             _gpuPoints._scalarBuffer.setData(_scalarProperty);
-            glBindVertexArray(0);
-        }
-
-        void PointRenderer::setColors(const std::vector<Vector3f>& colors)
-        {
-            _colors = colors;
-
-            glBindVertexArray(_gpuPoints._handle);
-            _gpuPoints._colorBuffer.bind();
-            _gpuPoints._colorBuffer.setData(colors);
             glBindVertexArray(0);
         }
 
@@ -181,8 +160,6 @@ namespace hdps
                 glBindVertexArray(_gpuPoints._handle);
                 _gpuPoints._positionBuffer.bind();
                 _gpuPoints._positionBuffer.setData(*_positions);
-                _gpuPoints._colorBuffer.bind();
-                _gpuPoints._colorBuffer.setData(_colors);
                 _gpuPoints._highlightBuffer.bind();
                 _gpuPoints._highlightBuffer.setData(_highlights);
                 _gpuPoints._scalarBuffer.bind();

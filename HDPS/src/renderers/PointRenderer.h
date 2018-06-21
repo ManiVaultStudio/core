@@ -26,15 +26,18 @@ namespace hdps
 
         struct PointArrayObject : private QOpenGLFunctions_3_3_Core
         {
+        public:
             GLuint _handle;
 
             BufferObject _positionBuffer;
-            BufferObject _colorBuffer;
             BufferObject _highlightBuffer;
             BufferObject _scalarBuffer;
 
             void init();
             void destroy();
+
+        private:
+
         };
 
         struct PointSettings
@@ -53,11 +56,11 @@ namespace hdps
         {
         public:
             void setData(const std::vector<Vector2f>* points);
-            void setColors(const std::vector<Vector3f>& data);
             void setColormap(const QString colormap);
             void setHighlight(const std::vector<char>& highlights);
             void setScalarProperty(const std::vector<float>& scalarProperty);
             void setScalarEffect(const PointEffect effect);
+            void addScalarEffect(const PointEffect effect);
             void setBounds(float left, float right, float bottom, float top);
             void setPointSize(const float size);
             void setAlpha(const float alpha);
@@ -76,7 +79,6 @@ namespace hdps
 
             unsigned int _numPoints = 0;
             const std::vector<Vector2f>* _positions;
-            std::vector<Vector3f> _colors;
             std::vector<char> _highlights;
             std::vector<float> _scalarProperty;
 

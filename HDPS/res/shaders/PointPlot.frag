@@ -9,7 +9,6 @@ uniform int scalarEffect;
 uniform sampler2D colormap;
 
 in vec2 pass_texCoords;
-in vec3 pass_color;
 flat in uint pass_highlight;
 in float pass_scalar;
 
@@ -25,7 +24,7 @@ void main()
     float a = smoothstep(1, 1 - edge, len);
     
     // Set point color
-    vec3 color = pass_color;
+    vec3 color = vec3(0.5, 0.5, 0.5);
     if (scalarEffect == EFFECT_COLOR) {
         color = texture(colormap, vec2(pass_scalar, pass_scalar)).rgb;
     }
