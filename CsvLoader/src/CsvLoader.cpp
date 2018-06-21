@@ -1,4 +1,4 @@
-#include "CsvReaderPlugin.h"
+#include "CsvLoader.h"
 
 #include "PointsPlugin.h"
 #include "Set.h"
@@ -10,30 +10,30 @@
 #include <vector>
 #include <QInputDialog>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.CsvReaderPlugin")
+Q_PLUGIN_METADATA(IID "nl.tudelft.CsvLoader")
 
 // =============================================================================
 // View
 // =============================================================================
 
-CsvReaderPlugin::~CsvReaderPlugin(void)
+CsvLoader::~CsvLoader(void)
 {
     
 }
 
-void CsvReaderPlugin::init()
+void CsvLoader::init()
 {
 
 }
 
-void CsvReaderPlugin::loadData()
+void CsvLoader::loadData()
 {
     QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", "", "CSV Files (*.csv *)");
     qDebug() << "Loading CSV file: " << fileName;
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return;
+        throw DataLoadException(fileName, "File was not found at location.");
 
     std::vector<float> data;
     int numDimensions = 1;
@@ -80,7 +80,7 @@ void CsvReaderPlugin::loadData()
 // Factory
 // =============================================================================
 
-LoaderPlugin* CsvReaderPluginFactory::produce()
+LoaderPlugin* CsvLoaderFactory::produce()
 {
-    return new CsvReaderPlugin();
+    return new CsvLoader();
 }

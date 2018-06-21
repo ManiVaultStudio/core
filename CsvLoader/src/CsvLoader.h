@@ -8,11 +8,11 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class CsvReaderPlugin : public LoaderPlugin
+class CsvLoader : public LoaderPlugin
 {
 public:
-    CsvReaderPlugin() : LoaderPlugin("CsvLoader") { }
-    ~CsvReaderPlugin(void);
+    CsvLoader() : LoaderPlugin("CSV Loader") { }
+    ~CsvLoader(void);
     
     void init();
 
@@ -24,16 +24,16 @@ public:
 // Factory
 // =============================================================================
 
-class CsvReaderPluginFactory : public LoaderPluginFactory
+class CsvLoaderFactory : public LoaderPluginFactory
 {
     Q_INTERFACES(hdps::plugin::LoaderPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.tudelft.CsvReaderPlugin"
-                      FILE  "CsvReaderPlugin.json")
+    Q_PLUGIN_METADATA(IID   "nl.tudelft.CsvLoader"
+                      FILE  "CsvLoader.json")
     
 public:
-    CsvReaderPluginFactory(void) {}
-    ~CsvReaderPluginFactory(void) {}
+    CsvLoaderFactory(void) {}
+    ~CsvLoaderFactory(void) {}
     
     LoaderPlugin* produce();
 };

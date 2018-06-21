@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-set(PROJECT "CsvReaderPlugin")
+set(PROJECT "CsvLoader")
 
 PROJECT(${PROJECT})
 
@@ -19,9 +19,9 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5WebKitWidgets REQUIRED)
 
 set(SOURCES
-    src/CsvReaderPlugin.h
-    src/CsvReaderPlugin.cpp
-    src/CsvReaderPlugin.json
+    src/CsvLoader.h
+    src/CsvLoader.cpp
+    src/CsvLoader.json
 )
 
 source_group( Plugin FILES ${SOURCES})
