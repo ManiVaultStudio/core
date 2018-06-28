@@ -21,10 +21,10 @@ namespace
     QRectF getDataBounds(const std::vector<Vector2f>& points)
     {
         QRectF bounds;
-        bounds.setLeft(10000);
-        bounds.setRight(-10000);
-        bounds.setTop(-10000);
-        bounds.setBottom(10000);
+        bounds.setLeft(FLT_MAX);
+        bounds.setRight(FLT_MIN);
+        bounds.setTop(FLT_MIN);
+        bounds.setBottom(FLT_MAX);
         float maxDimension = 0;
         for (const Vector2f& point : points)
         {
