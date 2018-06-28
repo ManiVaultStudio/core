@@ -20,9 +20,9 @@ public:
         return derived;
     }
 
-    QString getSourceData() const
+    RawData& getSourceData() const
     {
-        return sourceDataName;
+        return _core->requestData(sourceDataName);
     }
 
     Set& getSelection() const
