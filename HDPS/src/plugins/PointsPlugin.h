@@ -32,6 +32,7 @@ public:
 
     hdps::Set* createSet() const;
 
+    std::vector<QString> dimNames;
     std::vector<float> data;
     unsigned int numDimensions = 1;
 };

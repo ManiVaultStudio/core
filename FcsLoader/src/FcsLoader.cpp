@@ -6,6 +6,7 @@
 
 #include <QtCore>
 #include <QtDebug>
+#include <QString>
 
 #include <QFileDialog>
 #include <QInputDialog>
@@ -239,6 +240,10 @@ void FcsLoader::loadData()
     ////////////////////////////////
     std::vector<float> data(*rawData, *rawData + numItems);
     int numDimensions = header.getNumVariables();
+    std::vector<QString> dimNames;
+    for (int i = 0; i < numDimensions; i++) {
+        dimNames.push_back(QString(header.getVariableName(i).c_str()));
+    }
 
     //QTextStream in(&file);
     //while (!in.atEnd())
@@ -269,6 +274,7 @@ void FcsLoader::loadData()
         for (int i = 0; i < points.data.size(); i++) {
             points.data[i] = data[i];
         }
+        points.dimNames = dimNames;
         points.numDimensions = numDimensions;
         qDebug() << "Number of dimensions: " << points.numDimensions;
 
