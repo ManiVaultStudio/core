@@ -25,6 +25,11 @@ public:
         return sourceDataName;
     }
 
+    Set& getSelection() const
+    {
+        return isDerivedData() ? _core->requestSelection(sourceDataName) : _core->requestSelection(getName());
+    }
+
     void setDerived(QString sourceData)
     {
         derived = true;
