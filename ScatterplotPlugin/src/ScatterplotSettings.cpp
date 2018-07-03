@@ -11,7 +11,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
     setFixedHeight(100);
-
+    
     _subsetButton.setText("Create Subset");
     _subsetButton.setFixedWidth(100);
 
@@ -119,12 +119,39 @@ void ScatterplotSettings::initDimOptions(const unsigned int nDim)
     _cDimOptions.clear();
     for (unsigned int i = 0; i < nDim; i++)
     {
-        _xDimOptions.addItem(QString::number(i));
-        _yDimOptions.addItem(QString::number(i));
-        _cDimOptions.addItem(QString::number(i));
+        _xDimOptions.addItem("Dim " + QString::number(i));
+        _yDimOptions.addItem("Dim " + QString::number(i));
+        _cDimOptions.addItem("Dim " + QString::number(i));
     }
 
     if (nDim >= 2)
+    {
+        _xDimOptions.setCurrentIndex(0);
+        _yDimOptions.setCurrentIndex(1);
+    }
+
+    _xDimOptions.blockSignals(false);
+    _yDimOptions.blockSignals(false);
+    _cDimOptions.blockSignals(false);
+}
+
+void ScatterplotSettings::initDimOptions(const std::vector<QString> dimNames)
+{
+    _xDimOptions.blockSignals(true);
+    _yDimOptions.blockSignals(true);
+    _cDimOptions.blockSignals(true);
+
+    _xDimOptions.clear();
+    _yDimOptions.clear();
+    _cDimOptions.clear();
+    for (unsigned int i = 0; i < dimNames.size(); i++)
+    {
+        _xDimOptions.addItem(dimNames[i]);
+        _yDimOptions.addItem(dimNames[i]);
+        _cDimOptions.addItem(dimNames[i]);
+    }
+
+    if (dimNames.size() >= 2)
     {
         _xDimOptions.setCurrentIndex(0);
         _yDimOptions.setCurrentIndex(1);

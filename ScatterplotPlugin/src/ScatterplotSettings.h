@@ -69,6 +69,7 @@ public:
     QString currentData();
 
     void initDimOptions(const unsigned int nDim);
+    void initDimOptions(const std::vector<QString> dimNames);
     void addDataOption(const QString option);
     int numDataOptions();
 

@@ -101,9 +101,20 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
     const PointsPlugin& points = dataSet.getData();
 
-    int nDim = points.getNumDimensions();
+    if (points.dimNames.size() == points.getNumDimensions()) {
+        if (points.isDerivedData()) {
+            const PointsPlugin& sourceData = dynamic_cast<const PointsPlugin&>(points.getSourceData());
 
-    settings->initDimOptions(nDim);
+            settings->initDimOptions(sourceData.dimNames);
+        }
+        else
+        {
+            settings->initDimOptions(points.dimNames);
+        }
+    }
+    else {
+        settings->initDimOptions(points.getNumDimensions());
+    }
 
     updateData();
 }
