@@ -27,6 +27,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _renderMode.addItem("Scatterplot");
     _renderMode.addItem("Density map");
     _renderMode.addItem("Contour map");
+    _renderMode.setFixedWidth(100);
     renderLayout->addWidget(&_renderMode);
 
     _pointSettingsWidget._pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
