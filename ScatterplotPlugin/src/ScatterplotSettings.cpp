@@ -3,6 +3,7 @@
 #include "ScatterplotPlugin.h"
 
 #include <QGridLayout>
+#include <QVBoxLayout>
 #include <QLabel>
 
 ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
@@ -16,35 +17,41 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _subsetButton.setFixedWidth(100);
 
     _settingsLayout = new QGridLayout();
-    _settingsLayout->setColumnStretch(2, 1);
-    _settingsLayout->addWidget(&_dataOptions, 0, 0);
+    _settingsLayout->setColumnStretch(1, 1);
+
+    QVBoxLayout* dataLayout = new QVBoxLayout();
+    dataLayout->addWidget(&_dataOptions);
+    dataLayout->addWidget(&_subsetButton);
     
+    QVBoxLayout* renderLayout = new QVBoxLayout();
     _renderMode.addItem("Scatterplot");
     _renderMode.addItem("Density map");
     _renderMode.addItem("Contour map");
-    _settingsLayout->addWidget(&_renderMode, 1, 0);
-
-    _settingsLayout->addWidget(&_subsetButton, 0, 1);
+    renderLayout->addWidget(&_renderMode);
 
     _pointSettingsWidget._pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
     _densitySettingsWidget._sigmaSlider.setRange(MIN_SIGMA, MAX_SIGMA);
-
-
     _settingsStack = new QStackedWidget();
     _settingsStack->addWidget(&_pointSettingsWidget);
     _settingsStack->addWidget(&_densitySettingsWidget);
-    _settingsLayout->addWidget(_settingsStack, 1, 1, 1, 2);
+    renderLayout->addWidget(_settingsStack);
 
+
+    QGridLayout* dimLayout = new QGridLayout();
     QLabel* xDimLabel = new QLabel("X:");
     QLabel* yDimLabel = new QLabel("Y:");
     QLabel* cDimLabel = new QLabel("Color:");
 
-    _settingsLayout->addWidget(xDimLabel, 0, 3);
-    _settingsLayout->addWidget(&_xDimOptions, 0, 4);
-    _settingsLayout->addWidget(yDimLabel, 1, 3);
-    _settingsLayout->addWidget(&_yDimOptions, 1, 4);
-    _settingsLayout->addWidget(cDimLabel, 2, 3);
-    _settingsLayout->addWidget(&_cDimOptions, 2, 4);
+    dimLayout->addWidget(xDimLabel, 0, 0);
+    dimLayout->addWidget(&_xDimOptions, 0, 1);
+    dimLayout->addWidget(yDimLabel, 1, 0);
+    dimLayout->addWidget(&_yDimOptions, 1, 1);
+    dimLayout->addWidget(cDimLabel, 2, 0);
+    dimLayout->addWidget(&_cDimOptions, 2, 1);
+
+    _settingsLayout->addLayout(dataLayout, 0, 0);
+    _settingsLayout->addLayout(renderLayout, 0, 1);
+    _settingsLayout->addLayout(dimLayout, 0, 2);
 
     setLayout(_settingsLayout);
 
