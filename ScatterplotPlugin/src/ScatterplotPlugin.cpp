@@ -149,15 +149,42 @@ void ScatterplotPlugin::updateData()
     
     int nDim = points.getNumDimensions();
 
-    int xIndex = settings->getXDimension();
-    int yIndex = settings->getYDimension();
-    int colorIndex = settings->getColorDimension();
-    qDebug() << "X: " << xIndex << " Y: " << yIndex;
-    if (xIndex < 0 || yIndex < 0)
+    int xDim = settings->getXDimension();
+    int yDim = settings->getYDimension();
+
+    qDebug() << "X: " << xDim << " Y: " << yDim;
+    if (xDim < 0 || yDim < 0)
         return;
 
     // Determine number of points depending on if its a full dataset or a subset
     _numPoints = dataSet.isFull() ? points.getNumPoints() : dataSet.indices.size();
+
+    calculatePositions(dataSet);
+
+    std::vector<float> scalars(_numPoints);
+    if (points.isDerivedData())
+    {
+        const PointsPlugin& sourceData = dynamic_cast<const PointsPlugin&>(points.getSourceData());
+        calculateScalars(scalars, sourceData);
+    }
+    else
+    {
+        calculateScalars(scalars, points);
+    }
+
+    _scatterPlotWidget->setData(&_points, getDataBounds(_points));
+    _scatterPlotWidget->setScalarProperty(scalars);
+
+    updateSelection();
+}
+
+void ScatterplotPlugin::calculatePositions(const IndexSet& dataSet)
+{
+    const PointsPlugin& points = dataSet.getData();
+
+    int numDims = points.getNumDimensions();
+    int xDim = settings->getXDimension();
+    int yDim = settings->getYDimension();
 
     _points.resize(_numPoints);
 
@@ -165,24 +192,30 @@ void ScatterplotPlugin::updateData()
     {
         for (int i = 0; i < _numPoints; i++)
         {
-            _points[i] = hdps::Vector2f(points.data[i * nDim + xIndex], points.data[i * nDim + yIndex]);
+            _points[i].set(points.data[i * numDims + xDim], points.data[i * numDims + yDim]);
         }
     }
     else
     {
         for (int i = 0; i < _numPoints; i++)
         {
-            int index = dataSet.indices[i];
-            _points[i] = hdps::Vector2f(points.data[index * nDim + xIndex], points.data[index * nDim + yIndex]);
+            int setIndex = dataSet.indices[i];
+            _points[i].set(points.data[setIndex * numDims + xDim], points.data[setIndex * numDims + yDim]);
         }
     }
+}
 
-    std::vector<float> scalars(_numPoints);
+void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const PointsPlugin& points)
+{
+    int colorIndex = settings->getColorDimension();
+
     if (colorIndex >= 0) {
+        int numDims = points.getNumDimensions();
         float minScalar = FLT_MAX, maxScalar = FLT_MIN;
-        
+
         for (int i = 0; i < _numPoints; i++) {
-            float scalar = points.data[i * nDim + colorIndex];
+            float scalar = points.data[i * numDims + colorIndex];
+
             minScalar = scalar < minScalar ? scalar : minScalar;
             maxScalar = scalar > maxScalar ? scalar : maxScalar;
             scalars[i] = scalar;
@@ -193,11 +226,6 @@ void ScatterplotPlugin::updateData()
             scalars[i] = (scalars[i] - minScalar) / scalarRange;
         }
     }
-
-    _scatterPlotWidget->setData(&_points, getDataBounds(_points));
-    _scatterPlotWidget->setScalarProperty(scalars);
-
-    updateSelection();
 }
 
 void ScatterplotPlugin::updateSelection()
@@ -252,7 +280,7 @@ void ScatterplotPlugin::makeSelection(hdps::Selection selection)
     }
 
     const IndexSet& set = dynamic_cast<IndexSet&>(_core->requestSet(settings->currentData()));
-    const RawData& data = _core->requestData(set.getDataName());
+    const RawData& data = set.getData();
 
     IndexSet& selectionSet = dynamic_cast<IndexSet&>(data.getSelection());
 

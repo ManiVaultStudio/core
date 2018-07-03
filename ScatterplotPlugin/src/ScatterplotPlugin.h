@@ -19,6 +19,7 @@ using namespace hdps::plugin;
 
 class ScatterplotSettings;
 class PointsPlugin;
+class IndexSet;
 class hdps::Vector2f;
 
 class ScatterplotPlugin : public ViewPlugin, public SelectionListener
@@ -58,6 +59,8 @@ protected slots:
 
 private:
     void updateData();
+    void calculatePositions(const IndexSet& dataSet);
+    void calculateScalars(std::vector<float>& scalars, const PointsPlugin& data);
     void updateSelection();
 
     void makeSelection(hdps::Selection selection);
