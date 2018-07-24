@@ -2,7 +2,7 @@
 
 uniform float sigma;
 
-uniform float maxDimension;
+uniform mat3 projMatrix;
 
 layout(location = 0) in vec2 vertex;
 layout(location = 1) in vec2 texCoord;
@@ -12,5 +12,6 @@ out vec2 pass_texCoord;
 
 void main() {
     pass_texCoord = texCoord;
-    gl_Position = vec4(vertex * sigma + position * (1.0 / maxDimension), 0, 1);
+    vec2 pos = (projMatrix * vec3(position, 1)).xy;
+    gl_Position = vec4(vertex * sigma + pos, 0, 1);
 }
