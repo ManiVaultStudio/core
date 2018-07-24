@@ -26,7 +26,7 @@ void main()
     // Set point color
     vec3 color = vec3(0.5, 0.5, 0.5);
     if (scalarEffect == EFFECT_COLOR) {
-        color = texture(colormap, vec2(pass_scalar, pass_scalar)).rgb;
+        color = texture(colormap, vec2(pass_scalar, 1-pass_scalar)).rgb;
     }
     vec3 outlineColor = vec3(0.0, 0.0, 1.0);
     
