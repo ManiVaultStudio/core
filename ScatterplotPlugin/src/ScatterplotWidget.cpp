@@ -45,8 +45,8 @@ void ScatterplotWidget::sigmaChanged(const int sigma)
 
 void ScatterplotWidget::colormapChanged(QString colormapName)
 {
-    //_renderer->setColormap(idx);
     _pointRenderer.setColormap(colormapName);
+    _densityRenderer.setColormap(colormapName);
     update();
 }
 
@@ -81,7 +81,7 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points, const QRect
 
     update();
 }
-    
+
 void ScatterplotWidget::setHighlights(const std::vector<char>& highlights)
 {
     _pointRenderer.setHighlight(highlights);
@@ -155,8 +155,10 @@ void ScatterplotWidget::initializeGL()
     _densityRenderer.init();
     _selectionRenderer.init();
 
+    // Set a default color map for both renderers
     _pointRenderer.setScalarEffect(PointEffect::Color);
-    _pointRenderer.setColormap(":colormaps/Spectral.png");
+    _pointRenderer.setColormap(_colormapWidget.getActiveColormap());
+    _densityRenderer.setColormap(_colormapWidget.getActiveColormap());
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)
