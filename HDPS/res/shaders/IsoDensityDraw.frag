@@ -43,7 +43,7 @@ void main() {
         texCoord = clamp(texCoord / numSteps, 0.0, 1.0);
     }
     
-    vec3 col = texture(colormap, vec2(texCoord, 0)).rgb;
+    vec3 col = texture(colormap, vec2(texCoord, 1-texCoord)).rgb;
     if(isBoundary) 
     {
         col *= 0.75;
