@@ -1,5 +1,4 @@
-#ifndef SCATTERPLOT_PLUGIN_H
-#define SCATTERPLOT_PLUGIN_H
+#pragma once
 
 #include <ViewPlugin.h>
 #include "SelectionListener.h"
@@ -89,5 +88,3 @@ public:
     
     ViewPlugin* produce();
 };
-
-#endif // SCATTERPLOT_PLUGIN_H
