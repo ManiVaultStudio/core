@@ -25,6 +25,9 @@ namespace hdps
 
         void SelectionRenderer::render()
         {
+            if (!_selecting)
+                return;
+
             Vector2f topLeft = toClipCoordinates * _selection.topLeft();
             Vector2f bottomRight = toClipCoordinates * _selection.bottomRight();
 
@@ -45,10 +48,12 @@ namespace hdps
         void SelectionRenderer::onSelecting(Selection selection)
         {
             _selection = selection;
+            _selecting = true;
         }
 
         void SelectionRenderer::onSelection(Selection selection)
         {
+            _selecting = false;
             _selection = selection;
         }
     }

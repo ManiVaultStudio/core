@@ -28,6 +28,8 @@ namespace hdps
             ShaderProgram _shader;
 
             Selection _selection;
+
+            bool _selecting = false;
         };
     }
 }
