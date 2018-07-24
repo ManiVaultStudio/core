@@ -10,7 +10,14 @@
 #include <QSignalMapper>
 
 ColormapWidget::ColormapWidget(QWidget *parent) :
-    QWidget(parent)
+    QWidget(parent),
+    _slideOutAnimation(nullptr),
+    _activeColormap(nullptr),
+    _leftBGWidget(nullptr),
+    _rightBGWidget(nullptr),
+    _activeColormapIdx(0),
+    _isCMDiscrete(false),
+    _discreteColormapCheckbox(nullptr)
 {
     for (int i = 0; i < NUM_COLOR_MAPS; i++)
     {
