@@ -27,6 +27,7 @@ public:
     void cleanup();
 
     void setData(const std::vector<Vector2f>* data);
+    void setBounds(float left, float right, float bottom, float top);
     void setSigma(float sigma);
 
     Texture2D& getDensityTexture() { return _densityTexture; }
@@ -46,7 +47,7 @@ private:
     float _sigma = DEFAULT_SIGMA;
     float _maxKDE = -1;
     unsigned int _numPoints = 0;
-    float _maxDimension = 1;
+    QRectF _bounds = QRectF(-1, 1, 2, 2);
 
     ShaderProgram _shaderDensityCompute;
     Framebuffer _densityBuffer;

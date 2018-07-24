@@ -30,6 +30,11 @@ namespace hdps
             _densityComputation.setData(points);
         }
 
+        void DensityRenderer::setBounds(float left, float right, float bottom, float top)
+        {
+            _densityComputation.setBounds(left, right, bottom, top);
+        }
+
         void DensityRenderer::setSigma(const float sigma)
         {
             _densityComputation.setSigma(sigma);

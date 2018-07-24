@@ -1,5 +1,7 @@
 #include "DensityComputation.h"
 
+#include "../graphics/Matrix3f.h"
+
 namespace hdps
 {
 
@@ -15,6 +17,17 @@ namespace
             if (len > maxDimension) { maxDimension = len; }
         }
         return sqrt(maxDimension);
+    }
+
+    Matrix3f createProjectionMatrix(QRectF bounds)
+    {
+        Matrix3f m;
+        m.setIdentity();
+        m[0] = 2 / (bounds.right() - bounds.left());
+        m[4] = 2 / (bounds.top() - bounds.bottom());
+        m[6] = -((bounds.right() + bounds.left()) / (bounds.right() - bounds.left()));
+        m[7] = -((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom()));
+        return m;
     }
 }
 
@@ -156,9 +169,15 @@ void DensityComputation::setData(const std::vector<Vector2f>* points)
 {
     _points = points;
 
-    _maxDimension = getMaxDimension(*_points);
-
     compute();
+}
+
+void DensityComputation::setBounds(float left, float right, float bottom, float top)
+{
+    _bounds.setLeft(left);
+    _bounds.setRight(right);
+    _bounds.setBottom(bottom);
+    _bounds.setTop(top);
 }
 
 void DensityComputation::setSigma(float sigma)
@@ -209,7 +228,8 @@ void DensityComputation::compute()
     _gaussTexture.bind(0);
     _shaderDensityCompute.uniform1i("gaussSampler", 0);
 
-    _shaderDensityCompute.uniform1f("maxDimension", _maxDimension);
+    Matrix3f ortho = createProjectionMatrix(_bounds);
+    _shaderDensityCompute.uniformMatrix3f("projMatrix", ortho);
 
     // Draw the splats
     glBindVertexArray(_vao);

@@ -75,6 +75,7 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points, const QRect
     _dataBounds = uniformBounds;
 
     _pointRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
+    _densityRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
     _pointRenderer.setData(points);
     _densityRenderer.setData(points);
 
