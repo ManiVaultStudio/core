@@ -35,6 +35,12 @@ namespace hdps
             _densityComputation.setSigma(sigma);
         }
 
+        void DensityRenderer::setColormap(const QString colormap)
+        {
+            _colormap.loadFromFile(colormap);
+            _hasColorMap = true;
+        }
+
         void DensityRenderer::init()
         {
             qDebug() << "Initializing density plot GL";
@@ -50,9 +56,6 @@ namespace hdps
             if (!loaded) {
                 qDebug() << "Failed to load one of the Density shaders";
             }
-
-            // Load the color map
-            _colormap.loadFromFile(":colormaps/Spectral.png");
 
             // Initialize the density computation
             _densityComputation.init(QOpenGLContext::currentContext());
@@ -122,6 +125,9 @@ namespace hdps
 
         void DensityRenderer::drawLandscape()
         {
+            if (!_hasColorMap)
+                return;
+
             float maxDensity = _densityComputation.getMaxDensity();
             if (maxDensity <= 0) { return; }
 

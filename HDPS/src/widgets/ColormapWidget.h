@@ -15,6 +15,7 @@ public:
     ColormapWidget(QWidget *parent = 0);
     ~ColormapWidget();
 
+    QString getActiveColormap();
     void setColormap(int colormapIdx, bool isDiscrete);
     int getNumColormaps();
 

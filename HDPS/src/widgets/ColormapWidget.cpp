@@ -128,6 +128,11 @@ void ColormapWidget::initUI()
     _slideOutAnimation->setEasingCurve(QEasingCurve::InOutCubic);
 }
 
+QString ColormapWidget::getActiveColormap()
+{
+    return _colormapNames[_activeColormapIdx];
+}
+
 void ColormapWidget::setColormap(int colormapIdx, bool isDiscrete)
 {
     QString discrete = isDiscrete ? "_disc" : "";
