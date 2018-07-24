@@ -140,8 +140,6 @@ Selection ScatterplotWidget::getSelection()
 
 void ScatterplotWidget::initializeGL()
 {
-    qDebug() << "Initializing scatterplot";
-
     initializeOpenGLFunctions();
 
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ScatterplotWidget::cleanup);

@@ -57,7 +57,7 @@ protected:
     void onSelection(Selection selection);
     void cleanup();
 
-protected slots:
+public slots:
     void renderModePicked(const int index);
     void pointSizeChanged(const int size);
     void sigmaChanged(const int sigma);

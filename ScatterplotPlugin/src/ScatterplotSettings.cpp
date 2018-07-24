@@ -4,7 +4,118 @@
 
 #include <QGridLayout>
 #include <QVBoxLayout>
-#include <QLabel>
+
+#include <cassert>
+
+PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin)
+    :
+    _pointSizeLabel("Point Size:"),
+    _pointSizeSlider(Qt::Horizontal)
+{
+    connect(&_pointSizeSlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::pointSizeChanged);
+    
+    _pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
+    _pointSizeSlider.setValue(10);
+
+    QVBoxLayout* pointSettingsLayout = new QVBoxLayout();
+    pointSettingsLayout->addWidget(&_pointSizeLabel);
+    pointSettingsLayout->addWidget(&_pointSizeSlider);
+    setLayout(pointSettingsLayout);
+}
+
+DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin)
+    :
+    _sigmaLabel("Sigma:"),
+    _sigmaSlider(Qt::Horizontal)
+{
+    connect(&_sigmaSlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::sigmaChanged);
+
+    _sigmaSlider.setRange(MIN_SIGMA, MAX_SIGMA);
+    _sigmaSlider.setValue(30);
+
+    QVBoxLayout* densitySettingsLayout = new QVBoxLayout();
+    densitySettingsLayout->addWidget(&_sigmaLabel);
+    densitySettingsLayout->addWidget(&_sigmaSlider);
+    setLayout(densitySettingsLayout);
+}
+
+PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin)
+    :
+    _pointSettingsWidget(plugin),
+    _densitySettingsWidget(plugin)
+{
+    addWidget(&_pointSettingsWidget);
+    addWidget(&_densitySettingsWidget);
+}
+
+DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin)
+    :
+    _xDimLabel("X:"),
+    _yDimLabel("Y:"),
+    _cDimLabel("Color:")
+{
+    _layout.addWidget(&_xDimLabel, 0, 0);
+    _layout.addWidget(&_yDimLabel, 1, 0);
+    _layout.addWidget(&_cDimLabel, 2, 0);
+
+    _layout.addWidget(&_xDimOptions, 0, 1);
+    _layout.addWidget(&_yDimOptions, 1, 1);
+    _layout.addWidget(&_cDimOptions, 2, 1);
+
+    connect(&_xDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(xDimPicked(int)));
+    connect(&_yDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(yDimPicked(int)));
+    connect(&_cDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(cDimPicked(int)));
+}
+
+QGridLayout& DimensionPicker::getLayout()
+{
+    return _layout;
+}
+
+void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QString> names)
+{
+    assert(numDimensions == names.size());
+
+    std::vector<QComboBox*> allBoxes = { &_xDimOptions, &_yDimOptions, &_cDimOptions };
+
+    for (auto* dimensionBox : allBoxes)
+    {
+        dimensionBox->blockSignals(true);
+        dimensionBox->clear();
+
+        for (unsigned int i = 0; i < numDimensions; i++)
+        {
+            dimensionBox->addItem(names[i]);
+        }
+        dimensionBox->blockSignals(true);
+    }
+
+    if (names.size() >= 2)
+    {
+        _xDimOptions.setCurrentIndex(0);
+        _yDimOptions.setCurrentIndex(1);
+    }
+
+    for (auto* dimensionBox : allBoxes)
+    {
+        dimensionBox->blockSignals(false);
+    }
+}
+
+int DimensionPicker::getDimensionX()
+{
+    return _xDimOptions.currentIndex();
+}
+
+int DimensionPicker::getDimensionY()
+{
+    return _yDimOptions.currentIndex();
+}
+
+int DimensionPicker::getDimensionColor()
+{
+    return _cDimOptions.currentIndex();
+}
 
 ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 :
@@ -16,8 +127,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _subsetButton.setText("Create Subset");
     _subsetButton.setFixedWidth(100);
 
-    _settingsLayout = new QGridLayout();
-    _settingsLayout->setColumnStretch(1, 1);
+    _settingsLayout = new QHBoxLayout();
 
     QVBoxLayout* dataLayout = new QVBoxLayout();
     dataLayout->addWidget(&_dataOptions);
@@ -30,45 +140,22 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _renderMode.setFixedWidth(100);
     renderLayout->addWidget(&_renderMode);
 
-    _pointSettingsWidget._pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
-    _densitySettingsWidget._sigmaSlider.setRange(MIN_SIGMA, MAX_SIGMA);
-    _settingsStack = new QStackedWidget();
-    _settingsStack->addWidget(&_pointSettingsWidget);
-    _settingsStack->addWidget(&_densitySettingsWidget);
+    _settingsStack = new PlotSettingsStack(*plugin);
     renderLayout->addWidget(_settingsStack);
 
+    _dimensionPicker = new DimensionPicker(plugin);
 
-    QGridLayout* dimLayout = new QGridLayout();
-    QLabel* xDimLabel = new QLabel("X:");
-    QLabel* yDimLabel = new QLabel("Y:");
-    QLabel* cDimLabel = new QLabel("Color:");
-
-    dimLayout->addWidget(xDimLabel, 0, 0);
-    dimLayout->addWidget(&_xDimOptions, 0, 1);
-    dimLayout->addWidget(yDimLabel, 1, 0);
-    dimLayout->addWidget(&_yDimOptions, 1, 1);
-    dimLayout->addWidget(cDimLabel, 2, 0);
-    dimLayout->addWidget(&_cDimOptions, 2, 1);
-
-    _settingsLayout->addLayout(dataLayout, 0, 0);
-    _settingsLayout->addLayout(renderLayout, 0, 1);
-    _settingsLayout->addLayout(dimLayout, 0, 2);
+    _settingsLayout->addLayout(dataLayout);
+    _settingsLayout->addLayout(renderLayout, 1);
+    _settingsLayout->addLayout(&_dimensionPicker->getLayout());
 
     setLayout(_settingsLayout);
 
     connect(&_dataOptions, SIGNAL(currentIndexChanged(QString)), plugin, SLOT(dataSetPicked(QString)));
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
-    connect(&_xDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(xDimPicked(int)));
-    connect(&_yDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(yDimPicked(int)));
-    connect(&_cDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(cDimPicked(int)));
 
     connect(&_renderMode, SIGNAL(currentIndexChanged(int)), plugin->_scatterPlotWidget, SLOT(renderModePicked(int)));
     connect(&_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(renderModePicked(int)));
-    connect(&_densitySettingsWidget._sigmaSlider, SIGNAL(valueChanged(int)), plugin->_scatterPlotWidget, SLOT(sigmaChanged(int)));
-    connect(&_pointSettingsWidget._pointSizeSlider, SIGNAL(valueChanged(int)), plugin->_scatterPlotWidget, SLOT(pointSizeChanged(int)));
-
-    _pointSettingsWidget._pointSizeSlider.setValue(10);
-    _densitySettingsWidget._sigmaSlider.setValue(30);
 }
 
 ScatterplotSettings::~ScatterplotSettings()
@@ -78,17 +165,17 @@ ScatterplotSettings::~ScatterplotSettings()
 
 int ScatterplotSettings::getXDimension()
 {
-    return _xDimOptions.currentIndex();
+    return _dimensionPicker->getDimensionX();
 }
 
 int ScatterplotSettings::getYDimension()
 {
-    return _yDimOptions.currentIndex();
+    return _dimensionPicker->getDimensionY();
 }
 
 int ScatterplotSettings::getColorDimension()
 {
-    return _cDimOptions.currentIndex();
+    return _dimensionPicker->getDimensionColor();
 }
 
 hdps::Vector3f ScatterplotSettings::getBaseColor()
@@ -118,56 +205,12 @@ QString ScatterplotSettings::currentData()
 
 void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 {
-    _xDimOptions.blockSignals(true);
-    _yDimOptions.blockSignals(true);
-    _cDimOptions.blockSignals(true);
-
-    _xDimOptions.clear();
-    _yDimOptions.clear();
-    _cDimOptions.clear();
-    for (unsigned int i = 0; i < nDim; i++)
-    {
-        _xDimOptions.addItem("Dim " + QString::number(i));
-        _yDimOptions.addItem("Dim " + QString::number(i));
-        _cDimOptions.addItem("Dim " + QString::number(i));
-    }
-
-    if (nDim >= 2)
-    {
-        _xDimOptions.setCurrentIndex(0);
-        _yDimOptions.setCurrentIndex(1);
-    }
-
-    _xDimOptions.blockSignals(false);
-    _yDimOptions.blockSignals(false);
-    _cDimOptions.blockSignals(false);
+    _dimensionPicker->setDimensions(nDim);
 }
 
 void ScatterplotSettings::initDimOptions(const std::vector<QString> dimNames)
 {
-    _xDimOptions.blockSignals(true);
-    _yDimOptions.blockSignals(true);
-    _cDimOptions.blockSignals(true);
-
-    _xDimOptions.clear();
-    _yDimOptions.clear();
-    _cDimOptions.clear();
-    for (unsigned int i = 0; i < dimNames.size(); i++)
-    {
-        _xDimOptions.addItem(dimNames[i]);
-        _yDimOptions.addItem(dimNames[i]);
-        _cDimOptions.addItem(dimNames[i]);
-    }
-
-    if (dimNames.size() >= 2)
-    {
-        _xDimOptions.setCurrentIndex(0);
-        _yDimOptions.setCurrentIndex(1);
-    }
-
-    _xDimOptions.blockSignals(false);
-    _yDimOptions.blockSignals(false);
-    _cDimOptions.blockSignals(false);
+    _dimensionPicker->setDimensions(dimNames.size(), dimNames);
 }
 
 void ScatterplotSettings::addDataOption(const QString option)

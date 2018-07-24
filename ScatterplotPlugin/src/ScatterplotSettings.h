@@ -12,18 +12,14 @@
 #include <QGridLayout>
 #include <QStackedWidget>
 
+class ScatterplotPlugin;
+
 struct PointSettingsWidget : public QWidget
 {
-    PointSettingsWidget()
-        :
-        _pointSizeLabel("Point Size:"),
-        _pointSizeSlider(Qt::Horizontal)
-    {
-        QVBoxLayout* pointSettingsLayout = new QVBoxLayout();
-        pointSettingsLayout->addWidget(&_pointSizeLabel);
-        pointSettingsLayout->addWidget(&_pointSizeSlider);
-        setLayout(pointSettingsLayout);
-    }
+    PointSettingsWidget(const ScatterplotPlugin& plugin);
+
+    const int MIN_POINT_SIZE = 5;
+    const int MAX_POINT_SIZE = 20;
 
     QLabel _pointSizeLabel;
     QSlider _pointSizeSlider;
@@ -31,22 +27,46 @@ struct PointSettingsWidget : public QWidget
 
 struct DensitySettingsWidget : public QWidget
 {
-    DensitySettingsWidget()
-        :
-        _sigmaLabel("Sigma:"),
-        _sigmaSlider(Qt::Horizontal)
-    {
-        QVBoxLayout* densitySettingsLayout = new QVBoxLayout();
-        densitySettingsLayout->addWidget(&_sigmaLabel);
-        densitySettingsLayout->addWidget(&_sigmaSlider);
-        setLayout(densitySettingsLayout);
-    }
+    DensitySettingsWidget(const ScatterplotPlugin& plugin);
+
+    const int MIN_SIGMA = 1;
+    const int MAX_SIGMA = 50;
 
     QLabel _sigmaLabel;
     QSlider _sigmaSlider;
 };
 
-class ScatterplotPlugin;
+struct PlotSettingsStack : public QStackedWidget
+{
+    PlotSettingsStack(const ScatterplotPlugin& plugin);
+
+private:
+    PointSettingsWidget _pointSettingsWidget;
+    DensitySettingsWidget _densitySettingsWidget;
+};
+
+struct DimensionPicker : public QWidget
+{
+    DimensionPicker(const ScatterplotPlugin* plugin);
+
+    QGridLayout& getLayout();
+
+    void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
+    int getDimensionX();
+    int getDimensionY();
+    int getDimensionColor();
+    
+private:
+    QLabel _xDimLabel;
+    QLabel _yDimLabel;
+    QLabel _cDimLabel;
+
+    QComboBox _xDimOptions;
+    QComboBox _yDimOptions;
+    QComboBox _cDimOptions;
+
+    QGridLayout _layout;
+};
 
 class ScatterplotSettings : public QWidget
 {
@@ -80,24 +100,14 @@ private:
     const hdps::Vector3f DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
     const hdps::Vector3f DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
 
-    const int MIN_POINT_SIZE = 5;
-    const int MAX_POINT_SIZE = 20;
-
-    const int MIN_SIGMA = 1;
-    const int MAX_SIGMA = 50;
-
     QComboBox _dataOptions;
     QPushButton _subsetButton;
     QComboBox _renderMode;
 
-    QGridLayout* _settingsLayout;
-    QStackedWidget* _settingsStack;
-    PointSettingsWidget _pointSettingsWidget;
-    DensitySettingsWidget _densitySettingsWidget;
+    QHBoxLayout* _settingsLayout;
+    PlotSettingsStack* _settingsStack;
 
-    QComboBox _xDimOptions;
-    QComboBox _yDimOptions;
-    QComboBox _cDimOptions;
+    DimensionPicker* _dimensionPicker;
 
     hdps::Vector3f _baseColor;
     hdps::Vector3f _selectionColor;
