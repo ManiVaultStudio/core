@@ -33,6 +33,7 @@ public slots:
     void dataSetPicked(const QString& name);
     void startComputation();
     void onNewEmbedding();
+    void dimensionToggled(int checkState, int id);
 private:
     void initializeTsne();
     void stopComputation();
@@ -40,6 +41,8 @@ private:
     std::unique_ptr<TsneAnalysis> _tsne;
     std::unique_ptr<TsneSettingsWidget> _settings;
     QString _embedSetName;
+
+    std::vector<bool> enabledDimensions;
 };
 
 // =============================================================================

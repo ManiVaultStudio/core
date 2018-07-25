@@ -2,10 +2,11 @@
 
 #include "TsneAnalysisPlugin.h"
 
-#include <QGroupBox>
+#include <QCheckBox>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QGridLayout>
+#include <QSignalMapper>
 
 using namespace hdps::plugin;
 
@@ -25,6 +26,7 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
 
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
     QGroupBox* advancedSettingsBox = new QGroupBox("Advanced Settings");
+    _dimensionSelectionBox = new QGroupBox("Dimension Selection");
     advancedSettingsBox->setCheckable(true);
     advancedSettingsBox->setChecked(false);
     QLabel* iterationLabel = new QLabel("Iteration Count");
@@ -77,8 +79,38 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
 
     addWidget(&dataOptions);
     addWidget(settingsBox);
+    addWidget(_dimensionSelectionBox);
     addWidget(advancedSettingsBox);
     addWidget(&startButton);
+}
+
+void TsneSettingsWidget::onNumDimensionsChanged(TsneAnalysisPlugin* analysis, unsigned int numDimensions, std::vector<QString> names)
+{
+    bool hasNames = names.size() == numDimensions;
+
+    QHBoxLayout* dimSelectionLayout = new QHBoxLayout();
+    QVBoxLayout* vLayout0 = new QVBoxLayout();
+    QVBoxLayout* vLayout1 = new QVBoxLayout();
+
+    for (int i = 0; i < numDimensions; i++)
+    {
+        QString name = hasNames ? names[i] : QString("Dim ") + QString::number(i);
+        QCheckBox* dimBox = new QCheckBox(name);
+        dimBox->setChecked(true);
+        connect(dimBox, &QCheckBox::stateChanged, [analysis, i](int checkState) {
+            analysis->dimensionToggled(checkState, i);
+        }
+        );
+
+        if (i < numDimensions / 2)
+            vLayout0->addWidget(dimBox);
+        else
+            vLayout1->addWidget(dimBox);
+    }
+
+    dimSelectionLayout->addLayout(vLayout0);
+    dimSelectionLayout->addLayout(vLayout1);
+    _dimensionSelectionBox->setLayout(dimSelectionLayout);
 }
 
 bool TsneSettingsWidget::hasValidSettings() {

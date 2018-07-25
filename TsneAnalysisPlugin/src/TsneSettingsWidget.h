@@ -4,6 +4,7 @@
 #include <widgets/SettingsWidget.h>
 
 #include <QObject>
+#include <QGroupBox>
 #include <QComboBox>
 #include <QPushButton>
 #include <QLineEdit>
@@ -20,6 +21,8 @@ public:
     TsneSettingsWidget(const TsneAnalysisPlugin* analysis);
 
     bool hasValidSettings();
+
+    void onNumDimensionsChanged(TsneAnalysisPlugin* analysis, unsigned int numDimensions, std::vector<QString> names);
 private:
     void checkInputStyle(QLineEdit& input);
 
@@ -31,7 +34,10 @@ private slots:
     void numTreesChanged(const QString &value);
     void numChecksChanged(const QString &value);
     void thetaChanged(const QString& value);
+
 public:
+    QGroupBox* _dimensionSelectionBox;
+
     QComboBox dataOptions;
     QLineEdit numIterations;
     QLineEdit perplexity;
