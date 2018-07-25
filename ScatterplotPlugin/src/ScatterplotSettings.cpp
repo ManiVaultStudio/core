@@ -74,7 +74,7 @@ QGridLayout& DimensionPicker::getLayout()
 
 void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QString> names)
 {
-    assert(numDimensions == names.size());
+    bool hasNames = numDimensions == names.size();
 
     std::vector<QComboBox*> allBoxes = { &_xDimOptions, &_yDimOptions, &_cDimOptions };
 
@@ -85,12 +85,13 @@ void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QStr
 
         for (unsigned int i = 0; i < numDimensions; i++)
         {
-            dimensionBox->addItem(names[i]);
+            QString name = hasNames ? names[i] : "Dim " + QString::number(i);
+            dimensionBox->addItem(name);
         }
         dimensionBox->blockSignals(true);
     }
 
-    if (names.size() >= 2)
+    if (numDimensions >= 2)
     {
         _xDimOptions.setCurrentIndex(0);
         _yDimOptions.setCurrentIndex(1);
