@@ -76,7 +76,7 @@ void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QStr
 {
     bool hasNames = numDimensions == names.size();
 
-    std::vector<QComboBox*> allBoxes = { &_xDimOptions, &_yDimOptions, &_cDimOptions };
+    std::vector<QComboBox*> allBoxes = { &_xDimOptions, &_yDimOptions };
 
     for (auto* dimensionBox : allBoxes)
     {
@@ -88,7 +88,6 @@ void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QStr
             QString name = hasNames ? names[i] : "Dim " + QString::number(i);
             dimensionBox->addItem(name);
         }
-        dimensionBox->blockSignals(true);
     }
 
     if (numDimensions >= 2)
@@ -101,6 +100,22 @@ void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QStr
     {
         dimensionBox->blockSignals(false);
     }
+}
+
+void DimensionPicker::setScalarDimensions(unsigned int numDimensions, std::vector<QString> names)
+{
+    bool hasNames = numDimensions == names.size();
+
+    _cDimOptions.blockSignals(true);
+    _cDimOptions.clear();
+
+    for (unsigned int i = 0; i < numDimensions; i++)
+    {
+        QString name = hasNames ? names[i] : "Dim " + QString::number(i);
+        _cDimOptions.addItem(name);
+    }
+
+    _cDimOptions.blockSignals(false);
 }
 
 int DimensionPicker::getDimensionX()
@@ -212,6 +227,16 @@ void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 void ScatterplotSettings::initDimOptions(const std::vector<QString> dimNames)
 {
     _dimensionPicker->setDimensions(dimNames.size(), dimNames);
+}
+
+void ScatterplotSettings::initScalarDimOptions(const unsigned int nDim)
+{
+    _dimensionPicker->setScalarDimensions(nDim);
+}
+
+void ScatterplotSettings::initScalarDimOptions(const std::vector<QString> dimNames)
+{
+    _dimensionPicker->setScalarDimensions(dimNames.size(), dimNames);
 }
 
 void ScatterplotSettings::addDataOption(const QString option)
