@@ -1,16 +1,18 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <meta charset="utf-8">
 
 <head>
 	<title>Heat Map</title>
 
+    <!-- qt connection -->
+    <script src="../jslibs/qwebchannel.js"></script>
 	<!-- number formatting -->
 	<script src="../jslibs/wNumb.min.js"></script>
 
 	<!-- double slider -->
 	<link rel="stylesheet" type="text/css" href="../jslibs/nouislider.css">
 	<script src="../jslibs/nouislider.min.js"></script>
-	
+
 	<!-- google material design lite -->
 	<link rel="stylesheet" type="text/css" href="../jslibs/material.min.css">
 	<script src="../jslibs/material.min.js"></script>
@@ -21,9 +23,12 @@
 
 	<!-- d3 context menu -->
 	<script src="../jslibs/d3-context-menu.js"></script>
-	
+
 	<!-- hierarchical clustering using clusterfck -->
 	<script src="../jslibs/clusterfck-0.1.js"></script>
+
+    <!-- circular buffer -->
+    <script src="../jslibs/cbuffer.js"></script>
 	
 	<!-- gloabal css -->
 	<link rel="stylesheet" type="text/css" href="../jstools/ui.css">
@@ -40,7 +45,7 @@
 		<div id="legendWrapper">
 			<div id="legend">
 				<span id="legendLabelTop" class="legendLabel">&nbsp; 5.0</span>
-				<span id="legendLabelBottom" class="legendLabel">&nbsp; 0.0</span>                
+				<span id="legendLabelBottom" class="legendLabel">&nbsp; 0.0</span>
 				<svg id="legendActive"></svg>
 			</div>
 			<div id="legendSelector">
@@ -64,7 +69,7 @@
 				</div>
 				<div class="uiContent" id="uiContentCluster">
 					<select name="Cluster" id="clusterSelector" class="varSelector uiItem" onchange="setActiveCluster(this.value)">
-						<option value="" disabled selected>Select clusters..</option>
+						<option value="" disabled selected>Clusters</option>
 					</select>
 					<div id="uncertaintySwitch" class="uiItem">
 						<label class="mdl-switch mdl-js-switch" for="showVariationCheckBox">
@@ -120,9 +125,10 @@
 	<script src="../jstools/debug_data.js"></script>
 	<script src="../jstools/colormaps.js"></script>
 	<script src="../jstools/globals.js"></script>
-	<script src="../jstools/tools.js"></script>
+	<script src="../jstools/tools.bridge.js"></script>
    <script src="../jstools/ui.js"></script>
    <script src="heatmap.keys.js"></script>
    <script src="heatmap.ui.js"></script>
+   <script src="heatmap.queue.js"></script>
 	<script src="heatmap.js"></script>
 </body>

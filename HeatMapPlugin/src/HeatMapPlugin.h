@@ -15,7 +15,7 @@ using namespace hdps::plugin;
 
 class PointsPlugin;
 
-class HeatMapPlugin : public ViewPlugin, public SelectionListener
+class HeatMapPlugin : public ViewPlugin
 {
     Q_OBJECT
     
@@ -30,7 +30,6 @@ public:
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
-    virtual void onSelection(const std::vector<unsigned int> selection) const;
     
 protected slots:
     void dataSetPicked(const QString& name);

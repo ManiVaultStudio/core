@@ -121,7 +121,15 @@ function initContextMenu() {
                 title: "Save Clusters as FCS...",
                 action: function () {
                     d3.select('.d3-context-menu').style('display', 'none');
-                    Qt.js_saveClusters();
+                    Qt.js_saveClusters(false);
+                }
+            });
+
+            m.push({
+                title: "Save Clusters (per Sample) as FCS...",
+                action: function () {
+                    d3.select('.d3-context-menu').style('display', 'none');
+                    Qt.js_saveClusters(true);
                 }
             });
 

@@ -6,6 +6,7 @@
         <file>heatmap/heatmap.dendrogram.js</file>
         <file>heatmap/heatmap.ui.js</file>
         <file>heatmap/heatmap.keys.js</file>
+        <file>heatmap/heatmap.queue.js</file>
     </qresource>
     <qresource prefix="">
         <file>jslibs/d3.v4.js</file>
@@ -17,11 +18,14 @@
         <file>jslibs/material.min.css</file>
         <file>jslibs/wNumb.min.js</file>
         <file>jslibs/clusterfck-0.1.js</file>
+        <file>jslibs/cbuffer.js</file>
+        <file>jslibs/qwebchannel.js</file>
     </qresource>
     <qresource prefix="">
         <file>jstools/debug_data.js</file>
         <file>jstools/globals.js</file>
         <file>jstools/tools.js</file>
+        <file>jstools/tools.bridge.js</file>
         <file>jstools/colormaps.js</file>
         <file>jstools/ui.js</file>
         <file>jstools/ui.css</file>

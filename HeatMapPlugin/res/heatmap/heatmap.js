@@ -1,13 +1,20 @@
 // =============================================================================
-// find out if the Qt object is available
+// find out if the QtBridge is available
 // otherwise we are running in the browser
 // =============================================================================
 try {
-	Qt.qt_setData.connect(setData);
-	Qt.qt_setSelection.connect(setSelection);
-	Qt.qt_setHighlight.connect(setHighlight);
-	Qt.qt_addAvailableData.connect(addAvailableData);
-	Qt.qt_setMarkerSelection.connect(initMarkerSelection); 
+    new QWebChannel(qt.webChannelTransport, function (channel) {
+
+        QtBridge = channel.objects.QtBridge;
+
+        QtBridge.qt_setData.connect(function () { setData(arguments[0]); });
+        QtBridge.qt_setSelection.connect(function () { setSelection(arguments[0]); });
+        QtBridge.qt_setHighlight.connect(function () { setHighlight(arguments[0]); });
+        QtBridge.qt_addAvailableData.connect(function () { addAvailableData(arguments[0]); });
+        QtBridge.qt_setMarkerSelection.connect(function () { initMarkerSelection(arguments[0]); });
+
+        notifyBridgeAvailable();
+    });
 } catch (error) {
 	isQtAvailable = false;
 	log("could not connect qt");
@@ -78,7 +85,7 @@ var _dendrogramScale = d3.scaleLinear()
                         .range([_dendrogramHeight, _dendrogramTopMargin]);
 
 // UI ==========================================================================
-const _bgcolor = "#fcfcfc";//rgb(237,237,237)":
+const _bgcolor = "#fcfcfc";
 const _contextMenu = initContextMenu();
 
 const _markerCircle = { "x": _labelColumnWidth + _markerSelectionUIWidth / 2.5, "y": -1, "r": 7.5 };
@@ -113,6 +120,8 @@ var _columnSelect = {left: null, right: null, top: null, bottom: null};
 var _columnSelectSorted = null;
 
 var _markerLabels = null;       // markerLabels
+
+var _dataQueue = new HeatmapDataQueue(1, queueData);
 
 // =============================================================================
 // Init
@@ -395,7 +404,7 @@ function drawColumns(dur) {
         })
 		.attr("height", function (d) { return _showVariation ? (cellSize.y * _variationScale(d.stddev)) : cellSize.y; })
 		.attr("fill", function (d) { return _color(d.expression); });
-    
+
     _columnLabelsGroup.transition()
         .duration(dur)
         .attr("height", _subsetLabelUIHeight)
@@ -628,7 +637,7 @@ function leftClickColumn(idx) {
     }
     _selection[idx] = newState;
     
-    if(isQtAvailable) {Qt.js_selectionUpdated(_selection);}
+    if (isQtAvailable) { QtBridge.js_selectionUpdated(_selection); }
     
 	updateSorting(_sortBy, false);
     
@@ -638,7 +647,7 @@ function leftClickColumn(idx) {
 
 function hoverColumn(idx) {
     
-    if (isQtAvailable) { Qt.js_highlightUpdated(idx); }
+    if (isQtAvailable) { QtBridge.js_highlightUpdated(idx); }
 
     return;
 
@@ -650,7 +659,7 @@ function hoverColumn(idx) {
 
 function leaveColumn(idx) {
     
-    if (isQtAvailable) { Qt.js_highlightUpdated(idx); }
+    if (isQtAvailable) { QtBridge.js_highlightUpdated(idx); }
 
     return;
 
@@ -670,7 +679,7 @@ function leftClickMarkerLabel(index, switchOrder) {
 
 function leftClickColormap(idx) {
     
-    setColormap(idx, true);
+    setColormap(idx);
     
     drawColumns(500);
 }
@@ -695,7 +704,7 @@ function toggleVariation() {
     drawColumns(500);
 }
 
-function toggleMarker(marker) {
+function toggleMarker( marker ) {
   
     _markerSelection[marker] = !_markerSelection[marker];
     
@@ -787,7 +796,7 @@ function moveSelection( moveTo )
         if( _sorting[i] == targetIdx ){ _selection[i] = 1; break; }
     }
 
-    if(isQtAvailable) {Qt.js_selectionUpdated(_selection);}
+    if (isQtAvailable) { QtBridge.js_selectionUpdated(_selection); }
 
     drawSelectionHighlights(d);
 }
@@ -998,13 +1007,14 @@ function addAvailableData(name) {
 	updateAvailableDataSelectionBox();
 }
 
-function setData(d) {
+function queueData(d) {
 
     //log(d);
 
     _data = JSON.parse(d);
 
     //log(_data);
+    //log("setting data");
 
     _labelColumnWidth = 0;
     for (var i = 0; i < _data.names.length; i++)
@@ -1040,7 +1050,16 @@ function setData(d) {
     rebuildRangeSlider();
 	initHeatMapLayout();
 
-	log("Data set.");
+	//log("Data set.");
+}
+
+function setData(d) {    
+
+    log("setting data");
+
+    _dataQueue.addData(d);
+
+    log("Data set.");
 }
 
 function setSelection(slct) {
@@ -1073,7 +1092,7 @@ function setActiveCluster(name) {
     
 	if(isQtAvailable)
 	{
-		Qt.js_selectData(name);
+	    QtBridge.js_selectData(name);
 	}
 }
 

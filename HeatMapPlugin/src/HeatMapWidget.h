@@ -8,10 +8,37 @@
 #include <QComboBox>
 #include <QList>
 
-class QWebView;
-class QWebFrame;
+class QWebEngineView;
+class QWebEnginePage;
+class QWebChannel;
 
 struct Cluster;
+
+//using namespace hdps::gui;
+
+class HeatMapWidget;
+
+class HeatMapCommunicationObject : public hdps::gui::WebCommunicationObject
+{
+    Q_OBJECT
+public:
+    HeatMapCommunicationObject(HeatMapWidget* parent);
+
+signals:
+    void qt_setData(QString data);
+    void qt_addAvailableData(QString name);
+    void qt_setSelection(QList<int> selection);
+    void qt_setHighlight(int highlightId);
+    void qt_setMarkerSelection(QList<int> selection);
+
+public slots:
+    void js_selectData(QString text);
+    void js_selectionUpdated(QList<int> selectedClusters);
+    void js_highlightUpdated(int highlightId);
+
+private:
+    HeatMapWidget* _parent;
+};
 
 class HeatMapWidget : public hdps::gui::WebWidget
 {
@@ -36,22 +63,17 @@ signals:
     void clusterSelectionChanged(QList<int> selectedClusters);
     void dataSetPicked(QString name);
 
-    void qt_setData(QString data);
-    void qt_addAvailableData(QString name);
-    void qt_setSelection(QList<int> selection);
-    void qt_setHighlight(int highlightId);
-    void qt_setMarkerSelection(QList<int> selection);
-
-private slots:
-    virtual void connectJs() override;
-    virtual void webViewLoaded(bool ok) override;
-
-public slots:
+public:
     void js_selectData(QString text);
     void js_selectionUpdated(QList<int> selectedClusters);
     void js_highlightUpdated(int highlightId);
 
+private slots:
+    virtual void initWebPage() override;
+
 private:
+    HeatMapCommunicationObject* _communicationObject;
+
     QString _currentData;
     unsigned int _numClusters;
 

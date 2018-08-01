@@ -65,19 +65,19 @@ void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
 {
     qDebug() << "CLUSTER SELECTION";
     qDebug() << selectedClusters;
-    ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(heatmap->getCurrentData()));
-    if (!clusterSet) return;
+    
+    ClusterSet& clusterSet = (ClusterSet&) _core->requestSet(heatmap->getCurrentData());
 
-    const ClustersPlugin* clusterPlugin = clusterSet->getData();
+    const ClustersPlugin& clusterPlugin = clusterSet.getData();
 
     IndexSet* selection = nullptr;
 
-    int numClusters = clusterPlugin->clusters.size();
+    int numClusters = clusterPlugin.clusters.size();
     for (int i = 0; i < numClusters; i++)
     {
-        IndexSet* cluster = clusterPlugin->clusters[i];
+        IndexSet* cluster = clusterPlugin.clusters[i];
         if (!selection) {
-            selection = dynamic_cast<IndexSet*>(_core->requestSelection(cluster->getDataName()));
+            selection = &dynamic_cast<IndexSet&>(_core->requestSelection(cluster->getDataName()));
             selection->indices.clear();
         }
         
@@ -94,15 +94,14 @@ void HeatMapPlugin::updateData()
 
     qDebug() << "Working on data: " << currentData;
     qDebug() << "Attempting cast to ClusterSet";
-    ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(currentData));
+    ClusterSet& clusterSet = (ClusterSet&) _core->requestData(currentData);
 
-    if (!clusterSet) return;
     qDebug() << "Requesting plugin";
-    const ClustersPlugin* clusterPlugin = clusterSet->getData();
+    const ClustersPlugin& clusterPlugin = clusterSet.getData();
 
     qDebug() << "Calculating data";
 
-    int numClusters = clusterPlugin->clusters.size();
+    int numClusters = clusterPlugin.clusters.size();
     int numDimensions = 1;
 
     std::vector<Cluster> clusters;
@@ -110,29 +109,28 @@ void HeatMapPlugin::updateData()
     qDebug() << "Initialize clusters" << numClusters;
     // For every cluster initialize the median, mean, and stddev vectors with the number of dimensions
     for (int i = 0; i < numClusters; i++) {
-        const PointsPlugin* points = clusterPlugin->clusters[i]->getData();
-        if (!points) { qDebug() << "Failed to cast clusters data to PointsPlugin in HeatMapPlugin"; return; }
+        const PointsPlugin& points = clusterPlugin.clusters[i]->getData();
 
-        clusters[i]._median.resize(points->numDimensions);
-        clusters[i]._mean.resize(points->numDimensions);
-        clusters[i]._stddev.resize(points->numDimensions);
-        numDimensions = points->numDimensions;
+        clusters[i]._median.resize(points.getNumDimensions());
+        clusters[i]._mean.resize(points.getNumDimensions());
+        clusters[i]._stddev.resize(points.getNumDimensions());
+        numDimensions = points.getNumDimensions();
     }
 
     qDebug() << "Calculate cluster statistics";
     for (int i = 0; i < numClusters; i++)
     {
-        IndexSet* cluster = clusterPlugin->clusters[i];
+        IndexSet* cluster = clusterPlugin.clusters[i];
 
-        const PointsPlugin* points = cluster->getData();
+        const PointsPlugin& points = cluster->getData();
 
-        for (int d = 0; d < points->numDimensions; d++)
+        for (int d = 0; d < points.getNumDimensions(); d++)
         {
             // Mean calculation
             float mean = 0;
 
             for (int index : cluster->indices)
-                mean += points->data[index * points->numDimensions + d];
+                mean += points.data[index * points.getNumDimensions() + d];
 
             mean /= cluster->indices.size();
 
@@ -140,7 +138,7 @@ void HeatMapPlugin::updateData()
             float variance = 0;
 
             for (int index : cluster->indices)
-                variance += pow(points->data[index * points->numDimensions + d] - mean, 2);
+                variance += pow(points.data[index * points.getNumDimensions() + d] - mean, 2);
 
             float stddev = sqrt(variance / cluster->indices.size());
 
@@ -152,11 +150,6 @@ void HeatMapPlugin::updateData()
     qDebug() << "Done calculating data";
 
     heatmap->setData(clusters, numDimensions);
-}
-
-void HeatMapPlugin::onSelection(const std::vector<unsigned int> selection) const
-{
-
 }
 
 // =============================================================================

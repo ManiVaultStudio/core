@@ -3,17 +3,40 @@
 #include "ClustersPlugin.h"
 #include "util/FileUtil.h"
 
-#include <QWebView>
-#include <QWebFrame>
-
 #include <QVBoxLayout>
 
 #include <cassert>
 
-HeatMapWidget::HeatMapWidget()
-    : loaded(false)
+HeatMapCommunicationObject::HeatMapCommunicationObject(HeatMapWidget* parent)
+    :
+    _parent(parent)
 {
-    Q_INIT_RESOURCE(resources);
+
+}
+
+void HeatMapCommunicationObject::js_selectData(QString text)
+{
+    _parent->js_selectData(text);
+}
+
+void HeatMapCommunicationObject::js_selectionUpdated(QList<int> selectedClusters)
+{
+    _parent->js_selectionUpdated(selectedClusters);
+}
+
+void HeatMapCommunicationObject::js_highlightUpdated(int highlightId)
+{
+    _parent->js_highlightUpdated(highlightId);
+}
+
+
+HeatMapWidget::HeatMapWidget()
+    :
+    loaded(false)
+{
+    Q_INIT_RESOURCE(heatmap_resources);
+    _communicationObject = new HeatMapCommunicationObject(this);
+    init(_communicationObject);
 }
 
 HeatMapWidget::~HeatMapWidget()
@@ -24,7 +47,7 @@ HeatMapWidget::~HeatMapWidget()
 void HeatMapWidget::addDataOption(const QString option)
 {
     if (loaded)
-        qt_addAvailableData(option);
+        emit _communicationObject->qt_addAvailableData(option);
     else
         dataOptionBuffer.append(option);
 }
@@ -79,7 +102,7 @@ void HeatMapWidget::setData(const std::vector<Cluster>& clusters, const int numD
 
     qDebug() << _jsonObject.c_str();
 
-    qt_setData(QString(_jsonObject.c_str()));
+    emit _communicationObject->qt_setData(QString(_jsonObject.c_str()));
 }
 
 void HeatMapWidget::mousePressEvent(QMouseEvent *event)
@@ -107,21 +130,15 @@ void HeatMapWidget::cleanup()
 
 }
 
-void HeatMapWidget::connectJs()
-{
-    qDebug() << "CONNECT JS";
-    registerFunctions(this);
-}
-
-void HeatMapWidget::webViewLoaded(bool ok)
+void HeatMapWidget::initWebPage()
 {
     loaded = true;
 
     for (QString option : dataOptionBuffer) {
-        qt_addAvailableData(option);
+        emit _communicationObject->qt_addAvailableData(option);
     }
     
-    qDebug() << "HEATMAP LOADED!" << ok;
+    qDebug() << "HEATMAP LOADED!";
 }
 
 void HeatMapWidget::js_selectData(QString name)

@@ -17,9 +17,9 @@ if(MSVC)
 endif(MSVC)
 
 find_package(Qt5Widgets REQUIRED)
-find_package(Qt5WebKitWidgets REQUIRED)
+find_package(Qt5WebEngineWidgets REQUIRED)
 
-qt5_add_resources(RESOURCE_FILES res/resources.qrc)
+qt5_add_resources(RESOURCE_FILES res/heatmap_resources.qrc)
 
 set(SOURCES
     src/HeatMapPlugin.h
@@ -30,23 +30,24 @@ set(SOURCES
 )
 
 set (RESOURCES
-    res/resources.qrc
+    res/heatmap_resources.qrc
 )
 
 source_group( Plugin FILES ${SOURCES})
 source_group( Resources FILES ${RESOURCES})
-source_group( Resources\\generated FILES ${CMAKE_CURRENT_BINARY_DIR}/qrc_resources.cpp)
+source_group( Resources\\generated FILES ${CMAKE_CURRENT_BINARY_DIR}/qrc_heatmap_resources.cpp)
 
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES} ${RESOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${RESOURCES} ${RESOURCE_FILES})
 
-qt5_use_modules(${PROJECT} Widgets WebKitWidgets)
+qt5_use_modules(${PROJECT} Widgets WebEngineWidgets)
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
+target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointsPlugin.lib")
+#target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/ClustersPlugin.lib")
 
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD

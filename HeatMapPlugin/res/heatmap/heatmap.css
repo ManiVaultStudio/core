@@ -67,9 +67,9 @@ text {
 .colNameDiv{
     pointer-events: none;
     margin-left: 10px;
-    background-color: transparent; 
-    border-style: none; 
-    border-width: 0px 0px 0px 0px; 
+    background-color: transparent;
+    border-style: none;
+    border-width: 0px 0px 0px 0px;
     border-color:  #CCC;
     font: 12px sans-serif;
 	font-style: normal;
@@ -81,7 +81,7 @@ text {
 }
 
 .rotDiv{
-    background-color: transparent; 
+    background-color: transparent;
     -webkit-transform: rotate(-90deg);
     -moz-transform: rotate(-90deg);
     -o-transform: rotate(-90deg);
@@ -94,9 +94,9 @@ text {
 .colNameInput{
     margin-left: 10px;
     margin-right: 10px;
-    background-color: transparent; 
-    border-style: solid; 
-    border-width: 0px 0px 1px 0px; 
+    background-color: transparent;
+    border-style: solid;
+    border-width: 0px 0px 1px 0px;
     border-color:  #CCC;
     font: 12px sans-serif;
 	font-style: normal;
@@ -109,9 +109,9 @@ text {
 
 .colNameInput:focus{
     outline: none;
-    background-color: transparent; 
-    border-style: solid; 
-    border-width: 0px 0px 2px 0px; 
+    background-color: transparent;
+    border-style: solid;
+    border-width: 0px 0px 2px 0px;
     border-color: rgb(60,150,250);
 }
 
