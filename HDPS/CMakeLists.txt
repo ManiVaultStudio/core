@@ -11,7 +11,7 @@ set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
 set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
 set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
 set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
-set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2017. All rights reserved.")
+set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2018. All rights reserved.")
 set(MACOSX_BUNDLE_GUI_IDENTIFIER "nl.tudelft.graphics.hdps")
 set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
 
@@ -23,7 +23,7 @@ if(MSVC)
 endif(MSVC)
 
 find_package(Qt5Widgets REQUIRED)
-find_package(Qt5WebKitWidgets REQUIRED)
+find_package(Qt5WebEngineWidgets REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
@@ -206,13 +206,12 @@ add_library(${PROJECT}_Public ${LINK_TYPE}
     ${PUBLIC_SOURCES}
 )
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
-target_link_libraries(${PROJECT}_Public Qt5::WebKitWidgets)
+target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
 
 add_library(${PROJECT}_Private ${LINK_TYPE}
     ${PRIVATE_SOURCES}
 )
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
-target_link_libraries(${PROJECT}_Private Qt5::WebKitWidgets)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
@@ -225,7 +224,6 @@ add_executable(${PROJECT} MACOSX_BUNDLE
 )
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
 
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Public>")
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Private>")
@@ -290,7 +288,6 @@ if(MSVC)
 endif(MSVC)
 
 find_package(Qt5Widgets REQUIRED)
-find_package(Qt5WebKitWidgets REQUIRED)
 
 set(POINTS_SOURCES
     src/plugins/PointsPlugin.h
@@ -305,7 +302,7 @@ include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 add_library(${PROJECT} SHARED ${POINTS_SOURCES})
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
+target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 
 

@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QLabel>
 
-class QWebView;
+class QWebEngineView;
 class QGridLayout;
 
 class MaterialCheckBoxWidget : public QWidget
@@ -30,13 +30,13 @@ signals :
 	void qt_setState(bool state);
 	
 public slots:
-	void connectJs();
+	//void connectJs();
 	void js_clicked();
 
 private:
 
 	QGridLayout* _layout;
-	QWebView* _switch;
+	QWebEngineView* _switch;
 	QLabel* _label;
 
 	bool _checked;

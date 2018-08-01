@@ -2,8 +2,9 @@
 
 #include "../util/FileUtil.h"
 
-#include <QWebView>
-#include <QWebFrame>
+#include <QWebEngineView>
+#include <QWebEnginePage>
+#include <QWebChannel>
 
 #include <QVBoxLayout>
 
@@ -16,15 +17,7 @@ namespace gui
 
 WebWidget::WebWidget()
 {
-    _webView = new QWebView();
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->addWidget(_webView);
-    setLayout(layout);
 
-    _mainFrame = _webView->page()->mainFrame();
-    QObject::connect(_webView, &QWebView::loadFinished, this, &WebWidget::webViewLoaded);
-
-    QObject::connect(_mainFrame, &QWebFrame::javaScriptWindowObjectCleared, this, &WebWidget::connectJs);
 }
 
 WebWidget::~WebWidget()
@@ -32,16 +25,45 @@ WebWidget::~WebWidget()
 
 }
 
-void WebWidget::setPage(QString htmlPath, QString basePath)
+void WebWidget::init(WebCommunicationObject* communicationObject)
 {
-    assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
+    _js = communicationObject;
+    QObject::connect(_js, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::initWebPage);
 
-    _webView->setHtml(hdps::util::loadFileContents(htmlPath), QUrl(basePath));
+    _webView = new QWebEngineView();
+    //assert(_webView->settings()->testAttribute(QWebEngineSettings::JavascriptEnabled));
+
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->addWidget(_webView);
+    setLayout(layout);
+
+    QWebChannel* channel = new QWebChannel(_webView->page());
+
+    _communicationChannel = new QWebChannel();
+    _webView->page()->setWebChannel(_communicationChannel);
 }
 
-void WebWidget::registerFunctions(WebWidget* widget)
+QWebEngineView* WebWidget::getView()
 {
-    _mainFrame->addToJavaScriptWindowObject("Qt", widget);
+    return _webView;
+}
+
+QWebEnginePage* WebWidget::getPage()
+{
+    return _webView->page();
+}
+
+void WebWidget::setPage(QString htmlPath, QString basePath)
+{
+    //assert(_webView->settings()->testAttribute(QWebSettings::JavascriptEnabled));
+    QString html = hdps::util::loadFileContents(htmlPath);
+
+    _webView->setHtml(html, QUrl(basePath));
+}
+
+void WebWidget::registerFunctions()
+{
+    _communicationChannel->registerObject("Qt", _js);
 }
 
 void WebWidget::js_debug(QString text)

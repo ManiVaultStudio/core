@@ -1,7 +1,7 @@
 #include "MaterialCheckBoxWidget.h"
 
-#include <QWebView>
-#include <QWebFrame>
+#include <QWebEngineView>
+#include <QWebChannel>
 #include <QLabel>
 #include <QLayout>
 
@@ -20,15 +20,17 @@ MaterialCheckBoxWidget::MaterialCheckBoxWidget(QString label, QWidget *parent, Q
 	setStyleSheet("background:transparent");
 	setAttribute(Qt::WA_TranslucentBackground);
 
-	_switch = new QWebView(this);
+	_switch = new QWebEngineView(this);
 
 	_switch->setFixedSize(36, 24);
 
-	QWebFrame* frame = _switch->page()->mainFrame();
-	frame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
-	frame->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+    QWebChannel* channel = new QWebChannel(_switch->page());
+    channel->registerObject("Qt", this);
+	//QWebFrame* frame = _switch->page()->mainFrame();
+	//frame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
+	//frame->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
 
-    QObject::connect(frame, &QWebFrame::javaScriptWindowObjectCleared, this, &MaterialCheckBoxWidget::connectJs);
+    //QObject::connect(frame, &QWebFrame::javaScriptWindowObjectCleared, this, &MaterialCheckBoxWidget::connectJs);
 
     QString html = hdps::util::loadFileContents(":/html_ui_elements/checkbox.html");
 
@@ -52,10 +54,10 @@ MaterialCheckBoxWidget::MaterialCheckBoxWidget(QString label, QWidget *parent, Q
 	_layout->addWidget(_label, 0, 1, Qt::AlignHCenter);
 }
 
-void MaterialCheckBoxWidget::connectJs()
-{
-	_switch->page()->mainFrame()->addToJavaScriptWindowObject("Qt", this);
-}
+//void MaterialCheckBoxWidget::connectJs()
+//{
+//	_switch->page()->mainFrame()->addToJavaScriptWindowObject("Qt", this);
+//}
 
 void MaterialCheckBoxWidget::js_clicked() {
 	

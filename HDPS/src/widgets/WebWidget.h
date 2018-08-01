@@ -2,13 +2,41 @@
 
 #include <QWidget>
 
-class QWebView;
-class QWebFrame;
+#include <QObject>
+#include <QDebug>
+
+class QWebEngineView;
+class QWebEnginePage;
+class QWebChannel;
 
 namespace hdps
 {
 namespace gui
 {
+
+class WebCommunicationObject : public QObject
+{
+    Q_OBJECT
+
+public:
+
+
+signals:
+    void qt_setData(QString data);
+
+    void notifyJsBridgeIsAvailable();
+
+public slots:
+    void js_debug(QString message)
+    {
+        qDebug() << "Javascript Debug Info: " << message;
+    }
+
+    void js_available()
+    {
+        emit notifyJsBridgeIsAvailable();
+    }
+};
 
 class WebWidget : public QWidget
 {
@@ -17,21 +45,26 @@ public:
     WebWidget();
     ~WebWidget();
 
+    void init(WebCommunicationObject* communicationObject);
+
+    QWebEngineView* getView();
+    QWebEnginePage* getPage();
     void setPage(QString htmlPath, QString basePath);
 
 protected:
-    void registerFunctions(WebWidget* widget);
+    void registerFunctions();
 
 public slots:
     void js_debug(QString text);
 
 protected slots:
-    virtual void webViewLoaded(bool ok) = 0;
-    virtual void connectJs() = 0;
+    virtual void initWebPage() = 0;
 
 private:
-    QWebView* _webView;
-    QWebFrame* _mainFrame;
+    QWebEngineView* _webView;
+    QWebChannel* _communicationChannel;
+
+    WebCommunicationObject* _js;
 
     QString _css;
 };
