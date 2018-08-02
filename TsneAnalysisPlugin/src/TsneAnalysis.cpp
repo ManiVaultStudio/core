@@ -4,14 +4,15 @@
 #include <assert.h>
 
 // TSNE
-#include "vptree.h"
-#include "gradient_descent.h"
-#include "tsne_errors.h"
+//#include "vptree.h"
+//#include "gradient_descent.h"
+
+//#include "tsne_errors.h"
 
 #include "TsneAnalysisPlugin.h"
 #include <QDebug>
 
-#include "timings/scoped_timers.h"
+#include "hdi/utils/scoped_timers.h"
 
 TsneAnalysis::TsneAnalysis() :
 _verbose(false),
@@ -27,8 +28,7 @@ _isGradientDescentRunning(false),
 _isTsneRunning(false),
 _isMarkedForDeletion(false),
 _numDataPoints(0),
-_continueFromIteration(0),
-_radius(0.0f)
+_continueFromIteration(0)
 {
     
 }
@@ -53,32 +53,32 @@ void TsneAnalysis::initTSNE(const std::vector<float>& data, const int numDimensi
     qDebug() << "TSNE data allocated.";
 
     // Fill tSNEData with points * dims
-    _tSNEData = std::vector<double>(data.begin(), data.end());
+    _tSNEData = std::vector<float>(data.begin(), data.end());
     qDebug() << "Data copied.";
     
     /// Computation of the high dimensional similarities
     _output.resize(_numDataPoints * _numDimensionsOutput);
-    _outputDouble.resize(_numDataPoints * _numDimensionsOutput);
+
     qDebug() << "Output allocated.";
     {
-        TSNEApproxInitializer<> initializer;
+        hdi::dr::HDJointProbabilityGenerator<float>::Parameters probGenParams;
+        probGenParams._perplexity = _perplexity;
+        probGenParams._perplexity_multiplier = 3;
+        probGenParams._num_trees = _numTrees;
+        probGenParams._num_checks = _numChecks;
 
-        //initializer._log = &_log;
-        initializer._verbose = _verbose;
-        initializer._param._perplexity = _perplexity;
-        initializer._param._perplexity_multiplier = 3;
-        initializer._param._num_trees = _numTrees;
-        initializer._param._num_checks = _numChecks;
-        initializer._param._skip_normalization = _skipNormalization;
         qDebug() << "tSNE initialized.";
-        _sparseMatrix.Clear();
-        _sparseMatrix.Resize(_numDataPoints);
+
+        _distribution.clear();
+        _distribution.resize(_numDataPoints);
         qDebug() << "Sparse matrix allocated.";
+
         qDebug() << "Computing high dimensional probability distributions.. Num dims: " << numDimensions << " Num data points: " << _numDataPoints;
+        hdi::dr::HDJointProbabilityGenerator<float> probabilityGenerator;
         double t = 0.0;
         {
-            nut::ScopedTimer<double> timer(t);
-            initializer.ComputeHighDimensionalProbDistributions(_tSNEData.data(), _numDataPoints, numDimensions, _sparseMatrix);
+            hdi::utils::ScopedTimer<double> timer(t);
+            probabilityGenerator.computeJointProbabilityDistribution(_tSNEData.data(), numDimensions, _numDataPoints, _distribution, probGenParams);
         }
         qDebug() << "Probability distributions calculated.";
         qDebug() << "================================================================================";
@@ -93,34 +93,17 @@ void TsneAnalysis::initGradientDescent()
 
     _isTsneRunning = true;
 
-    _gradientDescent = atsne::GradientDescent<>();
+    hdi::dr::SparseTSNEUserDefProbabilities<float>::Parameters tsneParams;
 
-    _flags.resize(_numDataPoints);
-    std::fill(_flags.begin(), _flags.end(), 0);
+    tsneParams._embedding_dimensionality = _numDimensionsOutput;
+    tsneParams._mom_switching_iter = _exaggerationIter;
+    tsneParams._remove_exaggeration_iter = _exaggerationIter;
+    tsneParams._exponential_decay_iter = 150;
+    tsneParams._exaggeration_factor = 10 + _numDataPoints / 5000.;
 
-    //_gradientDescent._log = &_log;
-    _gradientDescent._verbose = _verbose;
+    _tsne.setTheta(std::min(0.5, std::max(0.0, (_numDataPoints - 1000.0)*0.00005)));
 
-    _gradientDescent._param._stop_lying_iter = _exaggerationIter;
-    _gradientDescent._param._mom_switching_iter = _exaggerationIter;
-
-    if (_expDecay > 1){
-        double exaggeration_factor = 10 + _numDataPoints / 5000.;
-        double decay_factor = std::exp(std::log(1 / exaggeration_factor) / double(_expDecay));
-        //nut::SecureLogValue(&_log, "Decay factor", decay_factor, _verbose);
-
-        _gradientDescent._param._use_exponential_decay_as_early_exaggeration_removal = true;
-        _gradientDescent._param._exponential_decay = decay_factor;
-        _gradientDescent._param._stop_lying_iter = _exaggerationIter - _expDecay;
-    }
-    else{
-        _gradientDescent._param._use_exponential_decay_as_early_exaggeration_removal = false;
-        _gradientDescent._param._stop_lying_iter = _exaggerationIter;
-    }
-
-    _gradientDescent._param._theta = std::min(0.5, std::max(0.0, (_numDataPoints - 1000.0)*0.00005));
-
-    _gradientDescent.Initialize(&_sparseMatrix, _flags.data(), _tSNEData.data(), _outputDouble.data(), _numDimensionsOutput);
+    _tsne.initialize(_distribution, &_embedding, tsneParams);
 
     copyFloatOutput();
 }
@@ -140,24 +123,22 @@ void TsneAnalysis::embed()
 
         // Performs gradient descent for every iteration
         for (int iter = 0; iter < _iterations; ++iter){
-            nut::ScopedTimer<double> timer(t);
+            hdi::utils::ScopedTimer<double> timer(t);
             if (!_isGradientDescentRunning)
             {
                 _continueFromIteration = iter;
                 break;
             }
 
-            _gradientDescent.DoAnIteration();
+            _tsne.doAnIteration();
             //nut::SecureLogValue(&_log, "Iter", iter, _verbose);
-
-            _radius = (float)(std::max(_gradientDescent.max_per_dimension()[0] * 1.1, _gradientDescent.max_per_dimension()[1] * 1.1));
 
             copyFloatOutput();
 
-            if ((iter + 1) % 100 == 0){
-                TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
-                qDebug() << "tSNE Analysis" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld;
-            }
+            //if ((iter + 1) % 100 == 0){
+            //    TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
+            //    qDebug() << "tSNE Analysis" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld;
+            //}
 
             emit newEmbedding();
 
@@ -167,7 +148,7 @@ void TsneAnalysis::embed()
         _isGradientDescentRunning = false;
         _isTsneRunning = false;
     }
-    TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
+    //TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
     qDebug() << "--------------------------------------------------------------------------------";
     qDebug() << "A-tSNE: Finished embedding of " << "tSNE Analysis" << " in: " << t / 1000 << " seconds " << ".KL - divergence is : " << kld;
     qDebug() << "================================================================================";
@@ -180,7 +161,7 @@ void TsneAnalysis::run() {
 // Copy tSNE output to our output
 void TsneAnalysis::copyFloatOutput()
 {
-    _output.assign(_outputDouble.begin(), _outputDouble.end());
+    _output.assign(_embedding.getContainer().begin(), _embedding.getContainer().end());
 }
 
 void TsneAnalysis::removePoints()
@@ -192,15 +173,10 @@ int TsneAnalysis::numDataPoints()
     return _numDataPoints;
 }
 
-float TsneAnalysis::radius()
-{
-    return _radius;
-}
-
-std::vector<typename atsne::GradientDescent<>::flag_type>* TsneAnalysis::flags()
-{
-    return &_flags;
-}
+//std::vector<typename atsne::GradientDescent<>::flag_type>* TsneAnalysis::flags()
+//{
+//    return &_flags;
+//}
 
 std::vector<float>* TsneAnalysis::output()
 {

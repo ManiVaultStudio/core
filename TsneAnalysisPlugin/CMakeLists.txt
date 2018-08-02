@@ -16,7 +16,7 @@ if(MSVC)
 endif(MSVC)
 
 find_package(Qt5Widgets REQUIRED)
-find_package(Qt5WebKitWidgets REQUIRED)
+find_package(Qt5WebEngineWidgets REQUIRED)
 
 set(SOURCES
     src/TsneAnalysisPlugin.h
@@ -31,8 +31,7 @@ set(SOURCES
 source_group( Plugin FILES ${SOURCES})
 
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
-include_directories ("lib/AtSNE/include")
-include_directories ("lib/NUt/include")
+include_directories ("lib/HDI/include")
 
 if(MSVC)
     include_directories ("lib/Flann/Win/include")
@@ -49,15 +48,20 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 add_library(${PROJECT} SHARED ${SOURCES})
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
+target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 
 if(MSVC)
     MESSAGE( STATUS "Linking Windows libraries...")
-    target_link_libraries(${PROJECT} debug "${CMAKE_CURRENT_SOURCE_DIR}/lib/AtSNE/Win/Debug/bh_t_sne_library.lib")
-    target_link_libraries(${PROJECT} optimized "${CMAKE_CURRENT_SOURCE_DIR}/lib/AtSNE/Win/Release/bh_t_sne_library.lib")
+    target_link_libraries(${PROJECT} debug "${CMAKE_CURRENT_SOURCE_DIR}/lib/HDI/Win/Debug/hdidimensionalityreduction.lib")
+    target_link_libraries(${PROJECT} debug "${CMAKE_CURRENT_SOURCE_DIR}/lib/HDI/Win/Debug/hdidata.lib")
+    target_link_libraries(${PROJECT} debug "${CMAKE_CURRENT_SOURCE_DIR}/lib/HDI/Win/Debug/hdiutils.lib")
+    target_link_libraries(${PROJECT} optimized "${CMAKE_CURRENT_SOURCE_DIR}/lib/HDI/Win/Release/hdidimensionalityreduction.lib")
+    target_link_libraries(${PROJECT} optimized "${CMAKE_CURRENT_SOURCE_DIR}/lib/HDI/Win/Release/hdidata.lib")
+    target_link_libraries(${PROJECT} optimized "${CMAKE_CURRENT_SOURCE_DIR}/lib/HDI/Win/Release/hdiutils.lib")
 
-    target_link_libraries(${PROJECT} "${CMAKE_CURRENT_SOURCE_DIR}/lib/Flann/Win/flann_s.lib")
+    target_link_libraries(${PROJECT} debug "${CMAKE_CURRENT_SOURCE_DIR}/lib/Flann/Win/Debug/flann_cpp_s.lib")
+    target_link_libraries(${PROJECT} optimized "${CMAKE_CURRENT_SOURCE_DIR}/lib/Flann/Win/Release/flann_cpp_s.lib")
 endif(MSVC)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")

@@ -1,10 +1,8 @@
 #ifndef TSNE_ANALYSIS_H
 #define TSNE_ANALYSIS_H
 
-// Suppress warnings from gradient descent library
-#pragma warning(push, 0)
-#include "gradient_descent.h"
-#pragma warning pop
+#include "hdi/dimensionality_reduction/sparse_tsne_user_def_probabilities.h"
+#include "hdi/dimensionality_reduction/hd_joint_probability_generator.h"
 
 #include <QThread>
 
@@ -44,9 +42,7 @@ public:
 
     int numDataPoints();
 
-    float radius();
-
-    std::vector<typename atsne::GradientDescent<>::flag_type>* flags();
+    //std::vector<typename atsne::GradientDescent<>::flag_type>* flags();
     std::vector<float>* output();
 
     std::vector<float>* densityGradientMap();
@@ -90,14 +86,14 @@ private:
     int _continueFromIteration;
 
     // results
-    float _radius;
-    std::vector<typename atsne::GradientDescent<>::flag_type> _flags;
     std::vector<float> _output;
-    std::vector<double> _outputDouble;
 
-    KNNSparseMatrix<double> _sparseMatrix;
-    std::vector<double> _tSNEData;
-    atsne::GradientDescent<> _gradientDescent;
+    hdi::dr::HDJointProbabilityGenerator<float>::sparse_scalar_matrix_type _distribution;
+    std::vector<float> _tSNEData;
+
+    hdi::dr::SparseTSNEUserDefProbabilities<float> _tsne;
+
+    hdi::data::Embedding<float> _embedding;
 };
 
 #endif // TSNE_ANALYSIS_H
