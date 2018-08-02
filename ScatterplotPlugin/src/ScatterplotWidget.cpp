@@ -13,6 +13,11 @@ ScatterplotWidget::ScatterplotWidget()
     addSelectionListener(&_selectionRenderer);
 }
 
+bool ScatterplotWidget::isInitialized()
+{
+    return _isInitialized;
+}
+
 void ScatterplotWidget::setRenderMode(RenderMode renderMode)
 {
     _renderMode = renderMode;
@@ -159,6 +164,9 @@ void ScatterplotWidget::initializeGL()
     _pointRenderer.setScalarEffect(PointEffect::Color);
     _pointRenderer.setColormap(_colormapWidget.getActiveColormap());
     _densityRenderer.setColormap(_colormapWidget.getActiveColormap());
+
+    _isInitialized = true;
+    emit initialized();
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)
@@ -280,8 +288,9 @@ void ScatterplotWidget::onSelection(Selection selection)
 void ScatterplotWidget::cleanup()
 {
     qDebug() << "Deleting scatterplot widget, performing clean up...";
-    makeCurrent();
+    _isInitialized = false;
 
+    makeCurrent();
     _pointRenderer.destroy();
     _densityRenderer.destroy();
     _selectionRenderer.destroy();

@@ -58,6 +58,8 @@ void ScatterplotPlugin::init()
 
     addWidget(_scatterPlotWidget);
     addWidget(settings);
+
+    connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -154,6 +156,9 @@ void ScatterplotPlugin::cDimPicked(int index)
 
 void ScatterplotPlugin::updateData()
 {
+    if (!_scatterPlotWidget->isInitialized())
+        return;
+
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
     const PointsPlugin& points = dataSet.getData();
     

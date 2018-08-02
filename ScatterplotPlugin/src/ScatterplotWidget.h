@@ -33,6 +33,7 @@ public:
     };
 
     ScatterplotWidget();
+    bool isInitialized();
     void setRenderMode(RenderMode renderMode);
     void setData(const std::vector<Vector2f>* data, const QRectF bounds);
     void setHighlights(const std::vector<char>& highlights);
@@ -57,6 +58,9 @@ protected:
     void onSelection(Selection selection);
     void cleanup();
 
+signals:
+    void initialized();
+
 public slots:
     void renderModePicked(const int index);
     void pointSizeChanged(const int size);
@@ -69,6 +73,8 @@ private:
     const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
     Matrix3f toNormalisedCoordinates;
     Matrix3f toIsotropicCoordinates;
+
+    bool _isInitialized = false;
 
     RenderMode _renderMode = SCATTERPLOT;
 
