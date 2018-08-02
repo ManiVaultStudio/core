@@ -6,12 +6,64 @@
 #include <QObject>
 #include <QGroupBox>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QGridLayout>
+
+#include <vector>
 
 using namespace hdps::gui;
 
 class TsneAnalysisPlugin;
+
+struct DimensionPickerWidget : QWidget
+{
+    DimensionPickerWidget()
+    {
+        setLayout(&_layout);
+    }
+
+    std::vector<bool> getEnabledDimensions()
+    {
+        std::vector<bool> enabledDimensions;
+
+        for (QCheckBox* checkBox : _checkBoxes)
+        {
+            enabledDimensions.push_back(checkBox->isChecked());
+        }
+
+        return enabledDimensions;
+    }
+
+    void setDimensions(unsigned int numDimensions, std::vector<QString> names)
+    {
+        bool hasNames = names.size() == numDimensions;
+
+        for (QCheckBox* widget : _checkBoxes)
+        {
+            _layout.removeWidget(widget);
+            delete widget;
+        }
+
+        _checkBoxes.clear();
+        for (int i = 0; i < numDimensions; i++)
+        {
+            QString name = hasNames ? names[i] : QString("Dim ") + QString::number(i);
+            QCheckBox* widget = new QCheckBox(name);
+            widget->setChecked(true);
+
+            _checkBoxes.push_back(widget);
+            int row = i % (numDimensions / 2);
+            int column = i / (numDimensions / 2);
+            _layout.addWidget(widget, row, column);
+        }
+    }
+private:
+    std::vector<QCheckBox*> _checkBoxes;
+
+    QGridLayout _layout;
+};
 
 class TsneSettingsWidget : public SettingsWidget
 {
@@ -20,6 +72,7 @@ class TsneSettingsWidget : public SettingsWidget
 public:
     TsneSettingsWidget(const TsneAnalysisPlugin* analysis);
 
+    std::vector<bool> getEnabledDimensions();
     bool hasValidSettings();
 
     void onNumDimensionsChanged(TsneAnalysisPlugin* analysis, unsigned int numDimensions, std::vector<QString> names);
@@ -36,7 +89,7 @@ private slots:
     void thetaChanged(const QString& value);
 
 public:
-    QGroupBox* _dimensionSelectionBox;
+    DimensionPickerWidget _dimensionPickerWidget;
 
     QComboBox dataOptions;
     QLineEdit numIterations;

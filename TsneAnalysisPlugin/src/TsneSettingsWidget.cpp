@@ -26,7 +26,8 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
 
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
     QGroupBox* advancedSettingsBox = new QGroupBox("Advanced Settings");
-    _dimensionSelectionBox = new QGroupBox("Dimension Selection");
+    QGroupBox* dimensionSelectionBox = new QGroupBox("Dimension Selection");
+
     advancedSettingsBox->setCheckable(true);
     advancedSettingsBox->setChecked(false);
     QLabel* iterationLabel = new QLabel("Iteration Count");
@@ -55,7 +56,7 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     numChecks.setValidator(new QIntValidator(1, 10000, this));
     numChecks.setText("1024");
 
-    QVBoxLayout *settingsLayout = new QVBoxLayout;
+    QVBoxLayout* settingsLayout = new QVBoxLayout();
     settingsLayout->addWidget(iterationLabel);
     settingsLayout->addWidget(&numIterations);
     settingsLayout->addWidget(perplexityLabel);
@@ -63,7 +64,11 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     settingsLayout->addStretch(1);
     settingsBox->setLayout(settingsLayout);
 
-    QGridLayout* advancedSettingsLayout = new QGridLayout;
+    QVBoxLayout* dimensionSelectionLayout = new QVBoxLayout();
+    dimensionSelectionLayout->addWidget(&_dimensionPickerWidget);
+    dimensionSelectionBox->setLayout(dimensionSelectionLayout);
+
+    QGridLayout* advancedSettingsLayout = new QGridLayout();
     advancedSettingsLayout->addWidget(exaggerationLabel, 0, 0);
     advancedSettingsLayout->addWidget(&exaggeration, 1, 0);
     advancedSettingsLayout->addWidget(expDecayLabel, 0, 1);
@@ -79,41 +84,23 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
 
     addWidget(&dataOptions);
     addWidget(settingsBox);
-    addWidget(_dimensionSelectionBox);
+    addWidget(dimensionSelectionBox);
     addWidget(advancedSettingsBox);
     addWidget(&startButton);
 }
 
 void TsneSettingsWidget::onNumDimensionsChanged(TsneAnalysisPlugin* analysis, unsigned int numDimensions, std::vector<QString> names)
 {
-    bool hasNames = names.size() == numDimensions;
-
-    QHBoxLayout* dimSelectionLayout = new QHBoxLayout();
-    QVBoxLayout* vLayout0 = new QVBoxLayout();
-    QVBoxLayout* vLayout1 = new QVBoxLayout();
-
-    for (int i = 0; i < numDimensions; i++)
-    {
-        QString name = hasNames ? names[i] : QString("Dim ") + QString::number(i);
-        QCheckBox* dimBox = new QCheckBox(name);
-        dimBox->setChecked(true);
-        connect(dimBox, &QCheckBox::stateChanged, [analysis, i](int checkState) {
-            analysis->dimensionToggled(checkState, i);
-        }
-        );
-
-        if (i < numDimensions / 2)
-            vLayout0->addWidget(dimBox);
-        else
-            vLayout1->addWidget(dimBox);
-    }
-
-    dimSelectionLayout->addLayout(vLayout0);
-    dimSelectionLayout->addLayout(vLayout1);
-    _dimensionSelectionBox->setLayout(dimSelectionLayout);
+    _dimensionPickerWidget.setDimensions(numDimensions, names);
 }
 
-bool TsneSettingsWidget::hasValidSettings() {
+std::vector<bool> TsneSettingsWidget::getEnabledDimensions()
+{
+    return _dimensionPickerWidget.getEnabledDimensions();
+}
+
+bool TsneSettingsWidget::hasValidSettings()
+{
     if (!numIterations.hasAcceptableInput())
         return false;
     if (!perplexity.hasAcceptableInput())

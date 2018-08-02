@@ -33,7 +33,6 @@ void TsneAnalysisPlugin::dataAdded(const QString name)
     IndexSet& set = (IndexSet&)_core->requestSet(name);
     PointsPlugin& rawData = set.getData();
     
-    enabledDimensions.resize(rawData.getNumDimensions(), true);
     _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.dimNames);
 }
 
@@ -42,7 +41,6 @@ void TsneAnalysisPlugin::dataChanged(const QString name)
     IndexSet& set = (IndexSet&) _core->requestSet(name);
     PointsPlugin& rawData = set.getData();
 
-    enabledDimensions.resize(rawData.getNumDimensions(), true);
     _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.dimNames);
 }
 
@@ -72,17 +70,6 @@ SettingsWidget* const TsneAnalysisPlugin::getSettings()
 void TsneAnalysisPlugin::dataSetPicked(const QString& name)
 {
 
-}
-
-void TsneAnalysisPlugin::dimensionToggled(int checkState, int id)
-{
-    qDebug() << "Toggled dimension: " << id << " " << checkState;
-    // Do nothing if we have no data set selected
-    if (_settings->dataOptions.currentText().isEmpty()) {
-        return;
-    }
-
-    enabledDimensions[id] = checkState == Qt::CheckState::Checked;
 }
 
 void TsneAnalysisPlugin::startComputation()
@@ -116,6 +103,7 @@ void TsneAnalysisPlugin::startComputation()
     // Create list of data from the enabled dimensions
     std::vector<float> data;
     
+    std::vector<bool> enabledDimensions = _settings->getEnabledDimensions();
     for (int i = 0; i < points.getNumPoints(); i++)
     {
         for (int j = 0; j < points.getNumDimensions(); j++)
