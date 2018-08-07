@@ -26,6 +26,7 @@ set(SOURCES
     src/TsneAnalysis.cpp
     src/TsneSettingsWidget.h
     src/TsneSettingsWidget.cpp
+    src/TsneData.h
 )
 
 source_group( Plugin FILES ${SOURCES})

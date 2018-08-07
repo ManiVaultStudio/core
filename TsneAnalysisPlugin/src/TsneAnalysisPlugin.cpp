@@ -128,11 +128,11 @@ void TsneAnalysisPlugin::startComputation()
 }
 
 void TsneAnalysisPlugin::onNewEmbedding() {
-    std::vector<float>* output = _tsne->output();
+    const TsneData& outputData = _tsne->output();
     const IndexSet& embedSet = dynamic_cast<const IndexSet&>(_core->requestSet(_embedSetName));
     PointsPlugin& embedPoints = embedSet.getData();
 
-    embedPoints.data = *output;
+    embedPoints.data = outputData.getData();
 
     _core->notifyDataChanged(_embedSetName);
 }
@@ -142,7 +142,6 @@ void TsneAnalysisPlugin::initializeTsne() {
     _tsne->setIterations(_settings->numIterations.text().toInt());
     _tsne->setPerplexity(_settings->perplexity.text().toInt());
     _tsne->setExaggerationIter(_settings->exaggeration.text().toInt());
-    _tsne->setExpDecay(_settings->expDecay.text().toInt());
     _tsne->setNumTrees(_settings->numTrees.text().toInt());
     _tsne->setNumChecks(_settings->numChecks.text().toInt());
 }

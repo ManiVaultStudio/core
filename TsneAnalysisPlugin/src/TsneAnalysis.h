@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TsneData.h"
+
 #include "hdi/dimensionality_reduction/sparse_tsne_user_def_probabilities.h"
 #include "hdi/dimensionality_reduction/hd_joint_probability_generator.h"
 
@@ -15,36 +17,29 @@ public:
     TsneAnalysis();
     ~TsneAnalysis();
 
-    inline bool verbose() { return _verbose; }
     void setVerbose(bool verbose);
-    inline bool skipNormalization() { return _skipNormalization; }
     void setSkipNormalization(bool skipNormalization);
-    inline int iterations() { return _iterations; }
     void setIterations(int iterations);
-    inline int numTrees() { return _numTrees; }
     void setNumTrees(int numTrees);
-    inline int numChecks() { return _numChecks; }
     void setNumChecks(int numChecks);
-    inline int exaggerationIter() { return _exaggerationIter; }
     void setExaggerationIter(int exaggerationIter);
-    inline int expDecay() { return _expDecay; }
-    void setExpDecay(int expDecay);
-    inline int perplexity() { return _perplexity; }
     void setPerplexity(int perplexity);
-    inline int numDimensionsOutput() { return _numDimensionsOutput; }
     void setNumDimensionsOutput(int numDimensionsOutput);
 
+    inline bool verbose() { return _verbose; }
+    inline bool skipNormalization() { return _skipNormalization; }
+    inline int iterations() { return _iterations; }
+    inline int numTrees() { return _numTrees; }
+    inline int numChecks() { return _numChecks; }
+    inline int exaggerationIter() { return _exaggerationIter; }
+    inline int perplexity() { return _perplexity; }
+    inline int numDimensionsOutput() { return _numDimensionsOutput; }
+
     void initTSNE(const std::vector<float>& data, const int numDimensions);
-    void removePoints();
     void stopGradientDescent();
     void markForDeletion();
 
-    int numDataPoints();
-
-    //std::vector<typename atsne::GradientDescent<>::flag_type>* flags();
-    std::vector<float>* output();
-
-    std::vector<float>* densityGradientMap();
+    const TsneData& output();
 
     inline bool isTsneRunning() { return _isTsneRunning; }
     inline bool isGradientDescentRunning() { return _isGradientDescentRunning; }
@@ -56,41 +51,35 @@ private:
     void computeGradientDescent();
     void initGradientDescent();
     void embed();
-    void writeTsneChannels();
     void copyFloatOutput();
 
 signals:
     void newEmbedding();
 
 private:
+    // TSNE structures
+    hdi::dr::HDJointProbabilityGenerator<float>::sparse_scalar_matrix_type _probabilityDistribution;
+    hdi::dr::SparseTSNEUserDefProbabilities<float> _gradientDescent;
+    hdi::data::Embedding<float> _embedding;
 
-    // input
-    bool _verbose;
-    bool _skipNormalization;
+    // Data
+    TsneData _inputData;
+    TsneData _outputData;
+
+    // Options
     int _iterations;
     int _numTrees;
     int _numChecks;
     int _exaggerationIter;
-    int _expDecay;
     int _perplexity;
     int _numDimensionsOutput;
+
+    // Flags
+    bool _verbose;
+    bool _skipNormalization;
     bool _isGradientDescentRunning;
     bool _isTsneRunning;
     bool _isMarkedForDeletion;
 
-    int _numDataPoints;
-
-    std::vector<float> _densityGradientMap;
-
     int _continueFromIteration;
-
-    // results
-    std::vector<float> _output;
-
-    hdi::dr::HDJointProbabilityGenerator<float>::sparse_scalar_matrix_type _distribution;
-    std::vector<float> _tSNEData;
-
-    hdi::dr::SparseTSNEUserDefProbabilities<float> _tsne;
-
-    hdi::data::Embedding<float> _embedding;
 };
