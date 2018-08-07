@@ -18,7 +18,6 @@ public:
     ~TsneAnalysis();
 
     void setVerbose(bool verbose);
-    void setSkipNormalization(bool skipNormalization);
     void setIterations(int iterations);
     void setNumTrees(int numTrees);
     void setNumChecks(int numChecks);
@@ -27,7 +26,6 @@ public:
     void setNumDimensionsOutput(int numDimensionsOutput);
 
     inline bool verbose() { return _verbose; }
-    inline bool skipNormalization() { return _skipNormalization; }
     inline int iterations() { return _iterations; }
     inline int numTrees() { return _numTrees; }
     inline int numChecks() { return _numChecks; }
@@ -76,7 +74,6 @@ private:
 
     // Flags
     bool _verbose;
-    bool _skipNormalization;
     bool _isGradientDescentRunning;
     bool _isTsneRunning;
     bool _isMarkedForDeletion;

@@ -16,7 +16,6 @@ _exaggerationIter(250),
 _perplexity(30),
 _numDimensionsOutput(2),
 _verbose(false),
-_skipNormalization(false),
 _isGradientDescentRunning(false),
 _isTsneRunning(false),
 _isMarkedForDeletion(false),
@@ -97,18 +96,15 @@ void TsneAnalysis::initGradientDescent()
 // Computing gradient descent
 void TsneAnalysis::embed()
 {
-
     double t = 0.0;
-    double kld = 0.0;
-    double kldmin = 0.0;
-    double kldmax = 0.0;
     {
         
         qDebug() << "A-tSNE: Computing gradient descent..\n";
         _isGradientDescentRunning = true;
 
         // Performs gradient descent for every iteration
-        for (int iter = 0; iter < _iterations; ++iter){
+        for (int iter = 0; iter < _iterations; ++iter)
+        {
             hdi::utils::ScopedTimer<double> timer(t);
             if (!_isGradientDescentRunning)
             {
@@ -117,15 +113,7 @@ void TsneAnalysis::embed()
             }
 
             _gradientDescent.doAnIteration();
-            //nut::SecureLogValue(&_log, "Iter", iter, _verbose);
-
             copyFloatOutput();
-
-            //if ((iter + 1) % 100 == 0){
-            //    TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
-            //    qDebug() << "tSNE Analysis" << ": iteration: " << iter + 1 << ", KL-divergence: " << kld;
-            //}
-
             emit newEmbedding();
 
             qDebug() << "Time: " << t;
@@ -134,9 +122,9 @@ void TsneAnalysis::embed()
         _isGradientDescentRunning = false;
         _isTsneRunning = false;
     }
-    //TSNEErrorUtils<>::ComputeBarnesHutTSNEErrorWithTreeComputation(_sparseMatrix, _outputDouble.data(), 2, kld, kldmin, kldmax, _gradientDescent._param._theta);
+
     qDebug() << "--------------------------------------------------------------------------------";
-    qDebug() << "A-tSNE: Finished embedding of " << "tSNE Analysis" << " in: " << t / 1000 << " seconds " << ".KL - divergence is : " << kld;
+    qDebug() << "A-tSNE: Finished embedding of " << "tSNE Analysis" << " in: " << t / 1000 << " seconds ";
     qDebug() << "================================================================================";
 }
 
@@ -158,11 +146,6 @@ const TsneData& TsneAnalysis::output()
 void TsneAnalysis::setVerbose(bool verbose)
 {
     _verbose = verbose;
-}
-
-void TsneAnalysis::setSkipNormalization(bool skipNormalization)
-{
-    _skipNormalization = skipNormalization;
 }
 
 void TsneAnalysis::setIterations(int iterations)
