@@ -65,6 +65,7 @@ public:
     std::vector<bool> getEnabledDimensions();
     bool hasValidSettings();
 
+    QString currentData();
     void onNumDimensionsChanged(TsneAnalysisPlugin* analysis, unsigned int numDimensions, std::vector<QString> names);
 private:
     void checkInputStyle(QLineEdit& input);

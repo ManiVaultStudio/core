@@ -148,6 +148,11 @@ std::vector<bool> TsneSettingsWidget::getEnabledDimensions()
 }
 
 
+QString TsneSettingsWidget::currentData()
+{
+    return dataOptions.currentText();
+}
+
 // Check if all input values are valid
 bool TsneSettingsWidget::hasValidSettings()
 {

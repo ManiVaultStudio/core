@@ -29,16 +29,15 @@ void TsneAnalysisPlugin::init()
 void TsneAnalysisPlugin::dataAdded(const QString name)
 {
     _settings->dataOptions.addItem(name);
-
-    IndexSet& set = (IndexSet&)_core->requestSet(name);
-    PointsPlugin& rawData = set.getData();
-    
-    _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.dimNames);
 }
 
 void TsneAnalysisPlugin::dataChanged(const QString name)
 {
-    IndexSet& set = (IndexSet&) _core->requestSet(name);
+    if (name != _settings->currentData()) {
+        return;
+    }
+
+    IndexSet& set = (IndexSet&)_core->requestSet(name);
     PointsPlugin& rawData = set.getData();
 
     _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.dimNames);
@@ -69,7 +68,10 @@ SettingsWidget* const TsneAnalysisPlugin::getSettings()
 
 void TsneAnalysisPlugin::dataSetPicked(const QString& name)
 {
+    IndexSet& set = (IndexSet&)_core->requestSet(name);
+    PointsPlugin& rawData = set.getData();
 
+    _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.dimNames);
 }
 
 void TsneAnalysisPlugin::startComputation()
