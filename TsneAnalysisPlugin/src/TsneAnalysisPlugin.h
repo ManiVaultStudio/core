@@ -1,5 +1,4 @@
-#ifndef TSNE_ANALYSIS_PLUGIN_H
-#define TSNE_ANALYSIS_PLUGIN_H
+#pragma once
 
 #include <AnalysisPlugin.h>
 
@@ -60,5 +59,3 @@ public:
     
     AnalysisPlugin* produce();
 };
-
-#endif // TSNE_ANALYSIS_PLUGIN_H

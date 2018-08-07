@@ -1,5 +1,4 @@
-#ifndef TSNE_ANALYSIS_H
-#define TSNE_ANALYSIS_H
+#pragma once
 
 #include "hdi/dimensionality_reduction/sparse_tsne_user_def_probabilities.h"
 #include "hdi/dimensionality_reduction/hd_joint_probability_generator.h"
@@ -95,5 +94,3 @@ private:
 
     hdi::data::Embedding<float> _embedding;
 };
-
-#endif // TSNE_ANALYSIS_H

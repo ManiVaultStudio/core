@@ -1,5 +1,4 @@
-#ifndef TSNE_SETTINGS_WIDGET_H
-#define TSNE_SETTINGS_WIDGET_H
+#pragma once
 
 #include <widgets/SettingsWidget.h>
 
@@ -92,5 +91,3 @@ public:
     QLineEdit theta;
     QPushButton startButton;
 };
-
-#endif // TSNE_SETTINGS_WIDGET_H
