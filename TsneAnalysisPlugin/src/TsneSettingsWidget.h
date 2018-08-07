@@ -17,6 +17,9 @@ using namespace hdps::gui;
 
 class TsneAnalysisPlugin;
 
+/**
+ * Widget containing checkboxes for enabling/disabling certain dimensions of the data.
+ */
 struct DimensionPickerWidget : QWidget
 {
     DimensionPickerWidget()
@@ -24,47 +27,35 @@ struct DimensionPickerWidget : QWidget
         setLayout(&_layout);
     }
 
-    std::vector<bool> getEnabledDimensions()
-    {
-        std::vector<bool> enabledDimensions;
+    /**
+     * Returns a list of booleans that represent whether the dimension
+     * at that index is enabled or not.
+     *
+     * @return List of enabled dimensions
+     */
+    std::vector<bool> getEnabledDimensions() const;
 
-        for (QCheckBox* checkBox : _checkBoxes)
-        {
-            enabledDimensions.push_back(checkBox->isChecked());
-        }
+    /**
+     * Adds check boxes to the widgets for every dimension.
+     * Names for the dimensions can be provided. If no names are provided
+     * the dimensions will be named according to their index.
+     *
+     * @param numDimensions Number of checkboxes to add
+     * @param names         Names of the dimensions, can be an empty vector
+     */
+    void setDimensions(unsigned int numDimensions, std::vector<QString> names);
 
-        return enabledDimensions;
-    }
-
-    void setDimensions(unsigned int numDimensions, std::vector<QString> names)
-    {
-        bool hasNames = names.size() == numDimensions;
-
-        for (QCheckBox* widget : _checkBoxes)
-        {
-            _layout.removeWidget(widget);
-            delete widget;
-        }
-
-        _checkBoxes.clear();
-        for (int i = 0; i < numDimensions; i++)
-        {
-            QString name = hasNames ? names[i] : QString("Dim ") + QString::number(i);
-            QCheckBox* widget = new QCheckBox(name);
-            widget->setChecked(true);
-
-            _checkBoxes.push_back(widget);
-            int row = i % (numDimensions / 2);
-            int column = i / (numDimensions / 2);
-            _layout.addWidget(widget, row, column);
-        }
-    }
 private:
-    std::vector<QCheckBox*> _checkBoxes;
+    void clearWidget();
 
+    std::vector<QCheckBox*> _checkBoxes;
     QGridLayout _layout;
 };
 
+
+/**
+ * Main settings widget
+ */
 class TsneSettingsWidget : public SettingsWidget
 {
     Q_OBJECT

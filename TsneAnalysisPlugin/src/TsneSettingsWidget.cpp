@@ -2,13 +2,50 @@
 
 #include "TsneAnalysisPlugin.h"
 
-#include <QCheckBox>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <QGridLayout>
-#include <QSignalMapper>
 
 using namespace hdps::plugin;
+
+std::vector<bool> DimensionPickerWidget::getEnabledDimensions() const
+{
+    std::vector<bool> enabledDimensions(_checkBoxes.size());
+
+    for (unsigned int i = 0; i < _checkBoxes.size(); i++)
+        enabledDimensions[i] = _checkBoxes[i]->isChecked();
+
+    return enabledDimensions;
+}
+
+void DimensionPickerWidget::setDimensions(unsigned int numDimensions, std::vector<QString> names)
+{
+    bool hasNames = names.size() == numDimensions;
+
+    clearWidget();
+
+    for (int i = 0; i < numDimensions; i++)
+    {
+        QString name = hasNames ? names[i] : QString("Dim ") + QString::number(i);
+        QCheckBox* widget = new QCheckBox(name);
+        widget->setChecked(true);
+
+        _checkBoxes.push_back(widget);
+        int row = i % (numDimensions / 2);
+        int column = i / (numDimensions / 2);
+        _layout.addWidget(widget, row, column);
+    }
+}
+
+void DimensionPickerWidget::clearWidget()
+{
+    for (QCheckBox* widget : _checkBoxes)
+    {
+        _layout.removeWidget(widget);
+        delete widget;
+    }
+
+    _checkBoxes.clear();
+}
 
 TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     setFixedWidth(200);
@@ -24,12 +61,15 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     connect(&numChecks,     SIGNAL(textChanged(QString)), SLOT(numChecksChanged(QString)));
     connect(&theta,         SIGNAL(textChanged(QString)), SLOT(thetaChanged(QString)));
 
+    // Create group boxes for grouping together various settings
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
     QGroupBox* advancedSettingsBox = new QGroupBox("Advanced Settings");
     QGroupBox* dimensionSelectionBox = new QGroupBox("Dimension Selection");
 
     advancedSettingsBox->setCheckable(true);
     advancedSettingsBox->setChecked(false);
+    
+    // Build the labels for all the options
     QLabel* iterationLabel = new QLabel("Iteration Count");
     QLabel* perplexityLabel = new QLabel("Perplexity");
     QLabel* exaggerationLabel = new QLabel("Exaggeration");
@@ -37,25 +77,32 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     QLabel* numTreesLabel = new QLabel("Number of Trees");
     QLabel* numChecksLabel = new QLabel("Number of Checks");
 
+    // Set option default values
     numIterations.setFixedWidth(50);
-    numIterations.setValidator(new QIntValidator(1, 10000, this));
-    numIterations.setText("1000");
     perplexity.setFixedWidth(50);
-    perplexity.setValidator(new QIntValidator(2, 50, this));
-    perplexity.setText("30");
     exaggeration.setFixedWidth(50);
-    exaggeration.setValidator(new QIntValidator(1, 10000, this));
-    exaggeration.setText("250");
     expDecay.setFixedWidth(50);
-    expDecay.setValidator(new QIntValidator(1, 10000, this));
-    expDecay.setText("70");
     numTrees.setFixedWidth(50);
-    numTrees.setValidator(new QIntValidator(1, 10000, this));
-    numTrees.setText("4");
     numChecks.setFixedWidth(50);
+
+    numIterations.setValidator(new QIntValidator(1, 10000, this));
+    perplexity.setValidator(new QIntValidator(2, 50, this));
+    exaggeration.setValidator(new QIntValidator(1, 10000, this));
+    expDecay.setValidator(new QIntValidator(1, 10000, this));
+    numTrees.setValidator(new QIntValidator(1, 10000, this));
     numChecks.setValidator(new QIntValidator(1, 10000, this));
+
+    numIterations.setText("1000");
+    perplexity.setText("30");
+    exaggeration.setText("250");
+    expDecay.setText("70");
+    numTrees.setText("4");
     numChecks.setText("1024");
 
+    startButton.setText("Start Computation");
+    startButton.setFixedSize(QSize(150, 50));
+
+    // Add options to their appropriate group box
     QVBoxLayout* settingsLayout = new QVBoxLayout();
     settingsLayout->addWidget(iterationLabel);
     settingsLayout->addWidget(&numIterations);
@@ -79,9 +126,7 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     advancedSettingsLayout->addWidget(&numChecks, 3, 1);
     advancedSettingsBox->setLayout(advancedSettingsLayout);
 
-    startButton.setText("Start Computation");
-    startButton.setFixedSize(QSize(150, 50));
-
+    // Add all the parts of the settings widget together
     addWidget(&dataOptions);
     addWidget(settingsBox);
     addWidget(dimensionSelectionBox);
@@ -89,6 +134,9 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     addWidget(&startButton);
 }
 
+
+
+// Communication with the dimension picker widget
 void TsneSettingsWidget::onNumDimensionsChanged(TsneAnalysisPlugin* analysis, unsigned int numDimensions, std::vector<QString> names)
 {
     _dimensionPickerWidget.setDimensions(numDimensions, names);
@@ -99,6 +147,8 @@ std::vector<bool> TsneSettingsWidget::getEnabledDimensions()
     return _dimensionPickerWidget.getEnabledDimensions();
 }
 
+
+// Check if all input values are valid
 bool TsneSettingsWidget::hasValidSettings()
 {
     if (!numIterations.hasAcceptableInput())
@@ -129,6 +179,8 @@ void TsneSettingsWidget::checkInputStyle(QLineEdit& input)
     }
 }
 
+
+// SLOTS
 void TsneSettingsWidget::numIterationsChanged(const QString &value)
 {
     checkInputStyle(numIterations);
