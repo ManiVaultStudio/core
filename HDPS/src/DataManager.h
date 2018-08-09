@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <memory>
 #include <exception>
+#include <string>
 
 namespace hdps
 {
@@ -16,29 +17,32 @@ namespace hdps
 struct DataNotFoundException : public std::exception
 {
 public:
-    DataNotFoundException(QString dataName) : dataName(dataName) { }
+    DataNotFoundException(QString dataName) :
+        message((QString("Failed to find data with name: ") + dataName).toStdString()) { }
 
     const char* what() const throw ()
     {
-        return (QString("Failed to find data with name: ") + dataName).toStdString().c_str();
+        return message.c_str();
     }
 
 private:
-    QString dataName;
+    std::string message;
 };
 
 struct SetNotFoundException : public std::exception
 {
 public:
-    SetNotFoundException(QString setName) : setName(setName) { }
+    SetNotFoundException(QString setName) :
+        message((QString("Failed to find a set with name: ") + setName).toStdString())
+    { }
 
     const char* what() const throw ()
     {
-        return (QString("Failed to find a set with name: ") + setName).toStdString().c_str();
+        return message.c_str();
     }
 
 private:
-    QString setName;
+    std::string message;
 };
 
 class DataManager
