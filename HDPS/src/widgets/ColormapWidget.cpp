@@ -11,6 +11,7 @@
 
 ColormapWidget::ColormapWidget(QWidget *parent) :
     QWidget(parent),
+    _isOpen(false),
     _slideOutAnimation(nullptr),
     _activeColormap(nullptr),
     _leftBGWidget(nullptr),
