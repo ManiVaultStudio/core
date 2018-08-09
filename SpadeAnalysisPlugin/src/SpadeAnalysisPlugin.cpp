@@ -99,8 +99,8 @@ void SpadeAnalysisPlugin::startComputation()
     _downsampledDataIsDirty |= spadeSettings._outlierDensityPercentile != lastSettings._outlierDensityPercentile;
     _spanningTreeIsDirty |= spadeSettings._targetNumClusters != lastSettings._targetNumClusters;
 
-    const IndexSet* set = dynamic_cast<IndexSet*>(_core->requestData(setName));
-    const PointsPlugin* points = set->getData();
+    const IndexSet& set = dynamic_cast<IndexSet&>(_core->requestSet(setName));
+    const PointsPlugin& points = set.getData();
 
     bool somethingChanged = false;
 
@@ -122,38 +122,38 @@ void SpadeAnalysisPlugin::startComputation()
 
     for (int f = 0; f < numFiles; f++)
     {
-        std::cout << "\nProcessing File: " << f << " (File " << f + 1 << " of " << numFiles << ", containing " << points->data.size() / points->numDimensions << " data points)\n";
-        somethingChanged |= computeMedianMinimumDistance(*points, spadeSettings._maxRandomSampleSize, spadeSettings._alpha);
-        somethingChanged |= computeLocalDensities(*points);
+        std::cout << "\nProcessing File: " << f << " (File " << f + 1 << " of " << numFiles << ", containing " << points.getNumPoints() << " data points)\n";
+        somethingChanged |= computeMedianMinimumDistance(points, spadeSettings._maxRandomSampleSize, spadeSettings._alpha);
+        somethingChanged |= computeLocalDensities(points);
 
-        somethingChanged |= downsample(*points, spadeSettings._densityLimit, spadeSettings._targetDensityPercentile, spadeSettings._outlierDensityPercentile);
+        somethingChanged |= downsample(points, spadeSettings._densityLimit, spadeSettings._targetDensityPercentile, spadeSettings._outlierDensityPercentile);
     }
-    somethingChanged |= clusterDownsampledData(*points);
+    somethingChanged |= clusterDownsampledData(points);
 
-    somethingChanged |= extractClustersFromDendrogram(*points, spadeSettings._targetNumClusters);
+    somethingChanged |= extractClustersFromDendrogram(points, spadeSettings._targetNumClusters);
     somethingChanged |= computeMinimumSpanningTree();
 
     for (int f = 0; f < numFiles; f++)
     {
-        somethingChanged |= upsampleData(*points);
+        somethingChanged |= upsampleData(points);
     }
     std::cout << "\n";
 
     if (somethingChanged) {
         // Clustering
         QString clusterSetName = _core->addData("Clusters", "ClusterSet");
-        const ClusterSet* clusterSet = dynamic_cast<ClusterSet*>(_core->requestData(clusterSetName));
-        ClustersPlugin* plugin = clusterSet->getData();
+        const ClusterSet& clusterSet = dynamic_cast<ClusterSet&>(_core->requestSet(clusterSetName));
+        ClustersPlugin& plugin = clusterSet.getData();
 
         for (auto c : _clusters)
         {
-            IndexSet* cluster = (IndexSet*)points->createSet();
+            IndexSet* cluster = (IndexSet*)points.createSet();
             for (int j = 0; j < c.size(); j++)
             {
                 int idx = c[j].second;
                 cluster->indices.push_back(idx);
             }
-            plugin->addCluster(cluster);
+            plugin.addCluster(cluster);
         }
 
         _core->notifyDataAdded(clusterSetName);
