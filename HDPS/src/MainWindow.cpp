@@ -22,6 +22,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _core->init();
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
+
+
 }
 
 MainWindow::~MainWindow()
@@ -56,6 +58,40 @@ void MainWindow::addView(plugin::ViewPlugin* plugin)
 void MainWindow::addSettings(gui::SettingsWidget* settings)
 {
     addDockWidget(Qt::LeftDockWidgetArea, settings);
+}
+
+void MainWindow::storeLayout()
+{
+    _windowConfiguration = saveState();
+}
+
+void MainWindow::restoreLayout()
+{
+    restoreState(_windowConfiguration);
+}
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    storeLayout();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    storeLayout();
+}
+
+void MainWindow::hideEvent(QHideEvent *event)
+{
+    storeLayout();
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    restoreLayout();
+
+    QList<QDockWidget *> dockWidgets = findChildren<QDockWidget *>();
+    for (auto child : dockWidgets)
+        child->setVisible(true);
 }
 
 } // namespace gui

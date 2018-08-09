@@ -4,6 +4,7 @@
 #include "ui_MainWindow.h"
 
 #include <QAction>
+#include <QByteArray>
 
 #include "Core.h"
 
@@ -59,8 +60,27 @@ public:
     */
     void addSettings(SettingsWidget* settings);
 
+public slots:
+    /**
+    * Store the current window layout so we can restore it later
+    */
+    void storeLayout();
+
+    /**
+    * Restore the configuration of dockable widgets
+    */
+    void restoreLayout();
+
+private:
+    void changeEvent(QEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
+    void showEvent(QShowEvent *event) override;
+
 private:
     std::unique_ptr<Core> _core;
+
+    QByteArray _windowConfiguration;
 };
 
 } // namespace gui
