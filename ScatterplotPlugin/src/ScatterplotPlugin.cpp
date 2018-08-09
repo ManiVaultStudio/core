@@ -159,6 +159,9 @@ void ScatterplotPlugin::updateData()
     if (!_scatterPlotWidget->isInitialized())
         return;
 
+    if (settings->currentData().isEmpty())
+        return;
+
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
     const PointsPlugin& points = dataSet.getData();
     
