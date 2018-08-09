@@ -4,6 +4,8 @@
 
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QMessageBox>
+#include <QDebug>
 
 using namespace hdps::plugin;
 
@@ -51,7 +53,7 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
     setFixedWidth(200);
 
     connect(&dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
-    connect(&startButton,   SIGNAL(clicked()), analysis, SLOT(startComputation()));
+    connect(&startButton,   &QPushButton::clicked, this, &TsneSettingsWidget::onStartPressed);
 
     connect(&numIterations, SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
     connect(&perplexity,    SIGNAL(textChanged(QString)), SLOT(perplexityChanged(QString)));
@@ -186,6 +188,29 @@ void TsneSettingsWidget::checkInputStyle(QLineEdit& input)
 
 
 // SLOTS
+void TsneSettingsWidget::onStartPressed()
+{
+    // Do nothing if we have no data set selected
+    if (dataOptions.currentText().isEmpty()) {
+        return;
+    }
+
+    // Check if the tSNE settings are valid before running the computation
+    if (!hasValidSettings()) {
+        QMessageBox warningBox;
+        warningBox.setText(tr("Some settings are invalid or missing. Continue with default values?"));
+        QPushButton *continueButton = warningBox.addButton(tr("Continue"), QMessageBox::ActionRole);
+        QPushButton *abortButton = warningBox.addButton(QMessageBox::Abort);
+
+        warningBox.exec();
+
+        if (warningBox.clickedButton() == abortButton) {
+            return;
+        }
+    }
+    emit startComputation();
+}
+
 void TsneSettingsWidget::numIterationsChanged(const QString &value)
 {
     checkInputStyle(numIterations);

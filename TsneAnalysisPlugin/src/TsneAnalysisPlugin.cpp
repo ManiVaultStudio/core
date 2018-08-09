@@ -3,7 +3,6 @@
 #include "PointsPlugin.h"
 
 #include <QtCore>
-#include <QMessageBox>
 #include <QtDebug>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.TsneAnalysisPlugin")
@@ -21,6 +20,7 @@ void TsneAnalysisPlugin::init()
 {
     _settings = std::make_unique<TsneSettingsWidget>(this);
 
+    connect(_settings.get(), &TsneSettingsWidget::startComputation, this, &TsneAnalysisPlugin::startComputation);
     connect(&_tsne, SIGNAL(newEmbedding()), this, SLOT(onNewEmbedding()));
 }
 
@@ -74,25 +74,6 @@ void TsneAnalysisPlugin::dataSetPicked(const QString& name)
 
 void TsneAnalysisPlugin::startComputation()
 {
-    // Do nothing if we have no data set selected
-    if (_settings->dataOptions.currentText().isEmpty()) {
-        return;
-    }
-
-    // Check if the tSNE settings are valid before running the computation
-    if (!_settings->hasValidSettings()) {
-        QMessageBox warningBox;
-        warningBox.setText(tr("Some settings are invalid or missing. Continue with default values?"));
-        QPushButton *continueButton = warningBox.addButton(tr("Continue"), QMessageBox::ActionRole);
-        QPushButton *abortButton = warningBox.addButton(QMessageBox::Abort);
-
-        warningBox.exec();
-
-        if (warningBox.clickedButton() == abortButton) {
-            return;
-        }
-    }
-
     initializeTsne();
 
     // Run the computation

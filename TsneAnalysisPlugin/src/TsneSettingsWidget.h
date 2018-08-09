@@ -70,7 +70,11 @@ public:
 private:
     void checkInputStyle(QLineEdit& input);
 
+signals:
+    void startComputation();
+
 private slots:
+    void onStartPressed();
     void numIterationsChanged(const QString &value);
     void perplexityChanged(const QString &value);
     void exaggerationChanged(const QString &value);
