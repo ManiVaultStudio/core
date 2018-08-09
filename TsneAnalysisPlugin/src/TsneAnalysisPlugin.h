@@ -37,7 +37,7 @@ private:
     void initializeTsne();
     void stopComputation();
 
-    std::unique_ptr<TsneAnalysis> _tsne;
+    TsneAnalysis _tsne;
     std::unique_ptr<TsneSettingsWidget> _settings;
     QString _embedSetName;
 };

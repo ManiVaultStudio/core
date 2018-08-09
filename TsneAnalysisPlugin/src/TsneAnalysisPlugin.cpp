@@ -21,9 +21,7 @@ void TsneAnalysisPlugin::init()
 {
     _settings = std::make_unique<TsneSettingsWidget>(this);
 
-    _tsne = std::make_unique<TsneAnalysis>();
-
-    connect(_tsne.get(), SIGNAL(newEmbedding()), this, SLOT(onNewEmbedding()));
+    connect(&_tsne, SIGNAL(newEmbedding()), this, SLOT(onNewEmbedding()));
 }
 
 void TsneAnalysisPlugin::dataAdded(const QString name)
@@ -124,13 +122,13 @@ void TsneAnalysisPlugin::startComputation()
     _core->notifyDataAdded(_embedSetName);
 
     // Compute t-SNE with the given data
-    _tsne->initTSNE(data, numDimensions);
+    _tsne.initTSNE(data, numDimensions);
 
-    _tsne->start();
+    _tsne.start();
 }
 
 void TsneAnalysisPlugin::onNewEmbedding() {
-    const TsneData& outputData = _tsne->output();
+    const TsneData& outputData = _tsne.output();
     const IndexSet& embedSet = dynamic_cast<const IndexSet&>(_core->requestSet(_embedSetName));
     PointsPlugin& embedPoints = embedSet.getData();
 
@@ -141,31 +139,28 @@ void TsneAnalysisPlugin::onNewEmbedding() {
 
 void TsneAnalysisPlugin::initializeTsne() {
     // Initialize the tSNE computation with the settings from the settings widget
-    _tsne->setIterations(_settings->numIterations.text().toInt());
-    _tsne->setPerplexity(_settings->perplexity.text().toInt());
-    _tsne->setExaggerationIter(_settings->exaggeration.text().toInt());
-    _tsne->setNumTrees(_settings->numTrees.text().toInt());
-    _tsne->setNumChecks(_settings->numChecks.text().toInt());
+    _tsne.setIterations(_settings->numIterations.text().toInt());
+    _tsne.setPerplexity(_settings->perplexity.text().toInt());
+    _tsne.setExaggerationIter(_settings->exaggeration.text().toInt());
+    _tsne.setNumTrees(_settings->numTrees.text().toInt());
+    _tsne.setNumChecks(_settings->numChecks.text().toInt());
 }
 
 void TsneAnalysisPlugin::stopComputation() {
-    if (_tsne)
+    if (_tsne.isRunning())
     {
-        if (_tsne->isRunning())
-        {
-            // Request interruption of the computation
-            _tsne->stopGradientDescent();
-            _tsne->exit();
+        // Request interruption of the computation
+        _tsne.stopGradientDescent();
+        _tsne.exit();
 
-            // Wait until the thread has terminated (max. 3 seconds)
-            if (!_tsne->wait(3000))
-            {
-                qDebug() << "tSNE computation thread did not close in time, terminating...";
-                _tsne->terminate();
-                _tsne->wait();
-            }
-            qDebug() << "tSNE computation stopped.";
+        // Wait until the thread has terminated (max. 3 seconds)
+        if (!_tsne.wait(3000))
+        {
+            qDebug() << "tSNE computation thread did not close in time, terminating...";
+            _tsne.terminate();
+            _tsne.wait();
         }
+        qDebug() << "tSNE computation stopped.";
     }
 }
 
