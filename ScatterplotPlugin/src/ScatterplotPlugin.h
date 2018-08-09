@@ -34,9 +34,6 @@ public:
     
     void init();
 
-    unsigned int pointSize() const;
-    unsigned int sigma() const;
-
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
