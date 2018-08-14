@@ -1,5 +1,4 @@
-#ifndef HEAT_MAP_WIDGET_H
-#define HEAT_MAP_WIDGET_H
+#pragma once
 
 #include "SelectionListener.h"
 
@@ -13,8 +12,6 @@ class QWebEnginePage;
 class QWebChannel;
 
 struct Cluster;
-
-//using namespace hdps::gui;
 
 class HeatMapWidget;
 
@@ -82,5 +79,3 @@ private:
     /** Temporary storage for added data options until webview is loaded */
     QList<QString> dataOptionBuffer;
 };
-
-#endif // HEAT_MAP_WIDGET_H

@@ -94,7 +94,7 @@ void HeatMapPlugin::updateData()
 
     qDebug() << "Working on data: " << currentData;
     qDebug() << "Attempting cast to ClusterSet";
-    ClusterSet& clusterSet = (ClusterSet&) _core->requestData(currentData);
+    ClusterSet& clusterSet = (ClusterSet&) _core->requestSet(currentData);
 
     qDebug() << "Requesting plugin";
     const ClustersPlugin& clusterPlugin = clusterSet.getData();

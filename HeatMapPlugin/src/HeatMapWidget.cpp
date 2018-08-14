@@ -137,8 +137,7 @@ void HeatMapWidget::initWebPage()
     for (QString option : dataOptionBuffer) {
         emit _communicationObject->qt_addAvailableData(option);
     }
-    
-    qDebug() << "HEATMAP LOADED!";
+    dataOptionBuffer.clear();
 }
 
 void HeatMapWidget::js_selectData(QString name)

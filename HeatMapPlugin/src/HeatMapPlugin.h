@@ -1,5 +1,4 @@
-#ifndef HEAT_MAP_PLUGIN_H
-#define HEAT_MAP_PLUGIN_H
+#pragma once
 
 #include <ViewPlugin.h>
 
@@ -59,5 +58,3 @@ public:
     
     ViewPlugin* produce();
 };
-
-#endif // HEAT_MAP_PLUGIN_H

@@ -22,8 +22,6 @@ public:
 
 
 signals:
-    void qt_setData(QString data);
-
     void notifyJsBridgeIsAvailable();
 
 public slots:

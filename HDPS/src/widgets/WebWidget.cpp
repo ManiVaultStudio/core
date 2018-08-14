@@ -37,10 +37,10 @@ void WebWidget::init(WebCommunicationObject* communicationObject)
     layout->addWidget(_webView);
     setLayout(layout);
 
-    QWebChannel* channel = new QWebChannel(_webView->page());
-
     _communicationChannel = new QWebChannel();
     _webView->page()->setWebChannel(_communicationChannel);
+
+    _communicationChannel->registerObject("QtBridge", _js);
 }
 
 QWebEngineView* WebWidget::getView()
@@ -63,7 +63,7 @@ void WebWidget::setPage(QString htmlPath, QString basePath)
 
 void WebWidget::registerFunctions()
 {
-    _communicationChannel->registerObject("Qt", _js);
+    _communicationChannel->registerObject("QtBridge", _js);
 }
 
 void WebWidget::js_debug(QString text)
