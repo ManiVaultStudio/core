@@ -83,9 +83,17 @@ void ScatterplotPlugin::dataRemoved(const QString name)
 void ScatterplotPlugin::selectionChanged(const QString dataName)
 {
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
-    
-    if (dataName != dataSet.getDataName()) {
-        return;
+    const auto& data = dataSet.getData();
+
+    if (data.isDerivedData())
+    {
+        if (dataName != data.getSourceData().getName())
+            return;
+    }
+    else
+    {
+        if (dataName != data.getName())
+            return;
     }
 
     updateSelection();
