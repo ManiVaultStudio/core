@@ -1,5 +1,0 @@
-{
-    "name" : "Density Plot",
-    "version" : "1",
-    "dependencies" : ["Points"]
-}
