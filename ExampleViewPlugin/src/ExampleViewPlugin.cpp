@@ -16,6 +16,8 @@ ExampleViewPlugin::~ExampleViewPlugin(void)
 
 void ExampleViewPlugin::init()
 {
+    ExampleWidget* exampleWidget = new ExampleWidget();
+    addWidget(exampleWidget);
 }
 
 void ExampleViewPlugin::dataAdded(const QString name)

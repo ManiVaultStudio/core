@@ -2,7 +2,24 @@
 
 #include <ViewPlugin.h>
 
+#include <QPushButton>
+
 using namespace hdps::plugin;
+
+// =============================================================================
+// Example Widget
+// =============================================================================
+
+class ExampleWidget : public QPushButton
+{
+public:
+    ExampleWidget()
+    {
+        setFixedSize(300, 200);
+        setText("You successfully built the application!");
+    }
+};
+
 
 // =============================================================================
 // View
