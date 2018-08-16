@@ -46,13 +46,12 @@ void FcsLoader::init()
 void FcsLoader::loadData()
 {
     QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", "", "FCS Files (*.fcs *)");
+
+    // Don't try to load a file if the dialog was cancelled or the file name is empty
+    if (fileName.isNull() || fileName.isEmpty())
+        return;
+
     qDebug() << "Loading FCS file: " << fileName;
-    //QFile file(fileName);
-
-    //if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    //    return;
-
-    /////////////////////////
 
     float** rawData = new float*;
     FcsHeader header;

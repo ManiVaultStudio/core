@@ -29,6 +29,11 @@ void CsvLoader::init()
 void CsvLoader::loadData()
 {
     QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", "", "CSV Files (*.csv *)");
+    
+    // Don't try to load a file if the dialog was cancelled or the file name is empty
+    if (fileName.isNull() || fileName.isEmpty())
+        return;
+
     qDebug() << "Loading CSV file: " << fileName;
     QFile file(fileName);
 
