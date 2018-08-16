@@ -17,29 +17,42 @@ public:
 
     bool isDerivedData() const
     {
-        return derived;
+        return _derived;
     }
 
+    /**
+     * Returns the raw data this data is derived from. If this data isn't
+     * derived data then calling this function will throw an exception.
+     *
+     * @return A reference to the raw data this data is derived from
+     */
     RawData& getSourceData() const
     {
-        return _core->requestData(sourceDataName);
+        return _core->requestData(_sourceDataName);
     }
 
+    /**
+     * Gets the selection associated with this data set. If the data set is
+     * derived then the selection of the source data will be returned. Otherwise,
+     * the selection of the set's data will be returned.
+     *
+     * @return The selection associated with this data set
+     */
     Set& getSelection() const
     {
-        return isDerivedData() ? _core->requestSelection(sourceDataName) : _core->requestSelection(getName());
+        return isDerivedData() ? _core->requestSelection(_sourceDataName) : _core->requestSelection(getName());
     }
 
     void setDerived(QString sourceData)
     {
-        derived = true;
-        sourceDataName = sourceData;
+        _derived = true;
+        _sourceDataName = sourceData;
     }
 
-protected:
-    bool derived = false;
+private:
+    bool _derived = false;
 
-    QString sourceDataName;
+    QString _sourceDataName;
 };
 
 
