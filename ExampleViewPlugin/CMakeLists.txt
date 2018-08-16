@@ -16,7 +16,7 @@ if(MSVC)
 endif(MSVC)
 
 find_package(Qt5Widgets REQUIRED)
-find_package(Qt5WebKitWidgets REQUIRED)
+find_package(Qt5WebEngineWidgets REQUIRED)
 
 set(SOURCES
     src/ExampleViewPlugin.h
@@ -31,7 +31,7 @@ include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 add_library(${PROJECT} SHARED ${SOURCES})
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} Qt5::WebKitWidgets)
+target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
 
 
