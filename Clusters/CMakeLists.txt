@@ -15,6 +15,8 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
+set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
+
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5WebEngineWidgets REQUIRED)
 
@@ -39,4 +41,11 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E copy
 	"$<TARGET_FILE:${PROJECT}>"
 	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PROJECT}>"
+)
+
+# Copy clusters plugin header
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/ClustersPlugin.h"
+    "${INSTALL_DIR}/$<CONFIGURATION>/include/ClustersPlugin.h"
 )
