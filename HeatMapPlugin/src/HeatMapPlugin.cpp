@@ -109,28 +109,24 @@ void HeatMapPlugin::updateData()
     qDebug() << "Initialize clusters" << numClusters;
     // For every cluster initialize the median, mean, and stddev vectors with the number of dimensions
     for (int i = 0; i < numClusters; i++) {
-        const PointsPlugin& points = clusterPlugin.clusters[i]->getData();
-
-        clusters[i]._median.resize(points.getNumDimensions());
-        clusters[i]._mean.resize(points.getNumDimensions());
-        clusters[i]._stddev.resize(points.getNumDimensions());
-        numDimensions = points.getNumDimensions();
-    }
-
-    qDebug() << "Calculate cluster statistics";
-    for (int i = 0; i < numClusters; i++)
-    {
         IndexSet* cluster = clusterPlugin.clusters[i];
 
         const PointsPlugin& points = cluster->getData();
 
-        for (int d = 0; d < points.getNumDimensions(); d++)
+        numDimensions = points.getNumDimensions();
+        qDebug() << "Num dimensions: " << numDimensions;
+        clusters[i]._median.resize(numDimensions);
+        clusters[i]._mean.resize(numDimensions);
+        clusters[i]._stddev.resize(numDimensions);
+
+        // Cluster statistics
+        for (int d = 0; d < numDimensions; d++)
         {
             // Mean calculation
             float mean = 0;
 
             for (int index : cluster->indices)
-                mean += points.data[index * points.getNumDimensions() + d];
+                mean += points.data[index * numDimensions + d];
 
             mean /= cluster->indices.size();
 
@@ -138,7 +134,7 @@ void HeatMapPlugin::updateData()
             float variance = 0;
 
             for (int index : cluster->indices)
-                variance += pow(points.data[index * points.getNumDimensions() + d] - mean, 2);
+                variance += pow(points.data[index * numDimensions + d] - mean, 2);
 
             float stddev = sqrt(variance / cluster->indices.size());
 
