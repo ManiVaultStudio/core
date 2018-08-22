@@ -22,9 +22,7 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5WebEngineWidgets REQUIRED)
-find_package(OpenGL REQUIRED)
+find_package(Qt5 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 
 set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
 #message(STATUS ${INSTALL_DIR})

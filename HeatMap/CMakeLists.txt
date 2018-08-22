@@ -16,8 +16,7 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5WebEngineWidgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 qt5_add_resources(RESOURCE_FILES res/heatmap_resources.qrc)
 

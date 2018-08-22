@@ -17,8 +17,7 @@ endif(MSVC)
 
 set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
 
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5WebEngineWidgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(SOURCES
     src/ClustersPlugin.h
