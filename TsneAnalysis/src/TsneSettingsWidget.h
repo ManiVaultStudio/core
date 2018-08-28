@@ -72,6 +72,7 @@ private:
 
 signals:
     void startComputation();
+    void stopComputation();
     void dataSetPicked(QString);
 
 private slots:
