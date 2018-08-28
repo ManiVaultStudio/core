@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QComboBox>
 #include <QList>
+#include <QVariant>
 
 class QWebEngineView;
 class QWebEnginePage;
@@ -30,7 +31,7 @@ signals:
 
 public slots:
     void js_selectData(QString text);
-    void js_selectionUpdated(QList<int> selectedClusters);
+    void js_selectionUpdated(QVariant selectedClusters);
     void js_highlightUpdated(int highlightId);
 
 private:
@@ -62,7 +63,7 @@ signals:
 
 public:
     void js_selectData(QString text);
-    void js_selectionUpdated(QList<int> selectedClusters);
+    void js_selectionUpdated(QVariant selectedClusters);
     void js_highlightUpdated(int highlightId);
 
 private slots:

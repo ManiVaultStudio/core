@@ -19,7 +19,7 @@ void HeatMapCommunicationObject::js_selectData(QString text)
     _parent->js_selectData(text);
 }
 
-void HeatMapCommunicationObject::js_selectionUpdated(QList<int> selectedClusters)
+void HeatMapCommunicationObject::js_selectionUpdated(QVariant selectedClusters)
 {
     _parent->js_selectionUpdated(selectedClusters);
 }
@@ -160,7 +160,15 @@ void HeatMapWidget::js_highlightUpdated(int highlightId)
     //emit clusterSelectionChanged(selectedClusters);
 }
 
-void HeatMapWidget::js_selectionUpdated(QList<int> selectedClusters)
+void HeatMapWidget::js_selectionUpdated(QVariant selectedClusters)
 {
-    emit clusterSelectionChanged(selectedClusters);
+    QList<QVariant> selectedClustersList = selectedClusters.toList();
+
+    QList<int> selectedIndices;
+    for (const QVariant& variant : selectedClustersList)
+    {
+        selectedIndices.push_back(variant.toInt());
+    }
+
+    emit clusterSelectionChanged(selectedIndices);
 }
