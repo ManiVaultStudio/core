@@ -60,7 +60,7 @@ class TsneSettingsWidget : public SettingsWidget
     Q_OBJECT
 
 public:
-    TsneSettingsWidget(const TsneAnalysisPlugin* analysis);
+    TsneSettingsWidget();
 
     std::vector<bool> getEnabledDimensions();
     bool hasValidSettings();
@@ -72,9 +72,10 @@ private:
 
 signals:
     void startComputation();
+    void dataSetPicked(QString);
 
 private slots:
-    void onStartPressed();
+    void onStartToggled(bool pressed);
     void numIterationsChanged(const QString &value);
     void perplexityChanged(const QString &value);
     void exaggerationChanged(const QString &value);

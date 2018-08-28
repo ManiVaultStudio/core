@@ -1,13 +1,9 @@
 #include "TsneSettingsWidget.h"
 
-#include "TsneAnalysisPlugin.h"
-
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QDebug>
-
-using namespace hdps::plugin;
 
 std::vector<bool> DimensionPickerWidget::getEnabledDimensions() const
 {
@@ -49,11 +45,11 @@ void DimensionPickerWidget::clearWidget()
     _checkBoxes.clear();
 }
 
-TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
+TsneSettingsWidget::TsneSettingsWidget() {
     setFixedWidth(200);
 
-    connect(&dataOptions,   SIGNAL(currentIndexChanged(QString)), analysis, SLOT(dataSetPicked(QString)));
-    connect(&startButton,   &QPushButton::clicked, this, &TsneSettingsWidget::onStartPressed);
+    connect(&dataOptions,   SIGNAL(currentIndexChanged(QString)), this, SIGNAL(dataSetPicked(QString)));
+    connect(&startButton,   &QPushButton::toggled, this, &TsneSettingsWidget::onStartToggled);
 
     connect(&numIterations, SIGNAL(textChanged(QString)), SLOT(numIterationsChanged(QString)));
     connect(&perplexity,    SIGNAL(textChanged(QString)), SLOT(perplexityChanged(QString)));
@@ -103,6 +99,7 @@ TsneSettingsWidget::TsneSettingsWidget(const TsneAnalysisPlugin* analysis) {
 
     startButton.setText("Start Computation");
     startButton.setFixedSize(QSize(150, 50));
+    startButton.setCheckable(true);
 
     // Add options to their appropriate group box
     QVBoxLayout* settingsLayout = new QVBoxLayout();
@@ -188,7 +185,7 @@ void TsneSettingsWidget::checkInputStyle(QLineEdit& input)
 
 
 // SLOTS
-void TsneSettingsWidget::onStartPressed()
+void TsneSettingsWidget::onStartToggled(bool pressed)
 {
     // Do nothing if we have no data set selected
     if (dataOptions.currentText().isEmpty()) {
@@ -208,7 +205,8 @@ void TsneSettingsWidget::onStartPressed()
             return;
         }
     }
-    emit startComputation();
+    startButton.setText(pressed ? "Stop Computation" : "Start Computation");
+    emit pressed ? startComputation() : stopComputation();
 }
 
 void TsneSettingsWidget::numIterationsChanged(const QString &value)
