@@ -28,6 +28,7 @@ namespace hdps
         void DensityRenderer::setData(const std::vector<Vector2f>* points)
         {
             _densityComputation.setData(points);
+            _densityComputation.compute();
         }
 
         void DensityRenderer::setBounds(float left, float right, float bottom, float top)

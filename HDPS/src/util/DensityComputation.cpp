@@ -168,8 +168,6 @@ void DensityComputation::cleanup()
 void DensityComputation::setData(const std::vector<Vector2f>* points)
 {
     _points = points;
-
-    compute();
 }
 
 void DensityComputation::setBounds(float left, float right, float bottom, float top)
