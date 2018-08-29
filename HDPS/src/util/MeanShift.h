@@ -24,7 +24,7 @@ public:
     void drawFullscreenQuad();
 
     void cluster(const std::vector<Vector2f>& points, std::vector<std::vector<unsigned int>>& clusters);
-    bool equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon);
+    bool equal(const Vector2f& p1, const Vector2f& p2, float epsilon);
 
     Texture2D& getGradientTexture();
     Texture2D& getMeanShiftTexture();
@@ -45,12 +45,13 @@ private:
     Texture2D _meanshiftTexture;
 
     const std::vector<Vector2f>* _points;
+    QRectF _bounds = QRectF(-1, 1, 2, 2);
     GLuint _quad;
 
     bool _needsDensityMapUpdate;
     float _sigma;
 
-    std::vector<float> _meanShiftMapCPU;
+    std::vector<Vector2f> _meanshiftPixels;
     std::vector<Vector2f> _clusterPositions;
     std::vector<int> _clusterIds;
     std::vector<int> _clusterIdsOriginal;

@@ -1,6 +1,11 @@
 #include "MeanShift.h"
 
+#include "graphics/Matrix3f.h"
+
 #include <QImage>
+#include <QDebug>
+
+//#define MEANSHIFT_IMAGE_DEBUG
 
 namespace hdps
 {
@@ -10,7 +15,8 @@ void MeanShift::init()
     initializeOpenGLFunctions();
 
     glClearColor(1, 1, 1, 1);
-    qDebug() << "Initializing density plot";
+    
+    densityComputation.init(QOpenGLContext::currentContext());
 
     glGenVertexArrays(1, &_quad);
 
@@ -60,10 +66,32 @@ void MeanShift::cleanup()
 
 }
 
+QRectF getDataBounds(const std::vector<Vector2f>& points)
+{
+    QRectF bounds;
+    bounds.setLeft(FLT_MAX);
+    bounds.setRight(FLT_MIN);
+    bounds.setTop(FLT_MIN);
+    bounds.setBottom(FLT_MAX);
+    float maxDimension = 0;
+    for (const Vector2f& point : points)
+    {
+        bounds.setLeft(std::min(point.x, (float)bounds.left()));
+        bounds.setRight(std::max(point.x, (float)bounds.right()));
+        bounds.setBottom(std::min(point.y, (float)bounds.bottom()));
+        bounds.setTop(std::max(point.y, (float)bounds.top()));
+    }
+    return bounds;
+}
+
 void MeanShift::setData(const std::vector<Vector2f>* points)
 {
+    QRectF bounds = getDataBounds(*points);
     //_numPoints = (unsigned int) points->size();
     _points = points;
+    _bounds = bounds;
+    densityComputation.setData(points);
+    densityComputation.setBounds(bounds.left(), bounds.right(), bounds.bottom(), bounds.top());
     _needsDensityMapUpdate = true;
 }
 
@@ -95,7 +123,25 @@ void MeanShift::computeGradient()
 
     _shaderGradientCompute.release();
 
-    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+#ifdef MEANSHIFT_IMAGE_DEBUG
+    std::vector<float> gradientValues;
+    gradientValues.resize(RESOLUTION * RESOLUTION * 3);
+
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RGB, GL_FLOAT, gradientValues.data());
+
+    QImage pluto(RESOLUTION, RESOLUTION, QImage::Format::Format_ARGB32);
+    for (int j = 0; j < RESOLUTION; ++j)
+    {
+        for (int i = 0; i < RESOLUTION; ++i)
+        {
+            int idx = j * RESOLUTION + i;
+            pluto.setPixel(i, j, qRgb(gradientValues[idx * 3] * 255, gradientValues[idx * 3 + 1] * 255, gradientValues[idx * 3 + 2] * 255));
+        }
+    }
+    pluto.save("gradient.png");
+    qDebug() << "Saved gradients";
+#endif
 }
 
 void MeanShift::computeMeanShift()
@@ -116,55 +162,38 @@ void MeanShift::computeMeanShift()
     _shaderMeanshiftCompute.uniform4f("renderParams", 0.25f, densityComputation.getMaxDensity(), 1.0f / RESOLUTION, 1.0f / RESOLUTION);
 
     drawFullscreenQuad();
-
+    qDebug() << "Drawing meanshift";
     _shaderMeanshiftCompute.release();
 
-    _meanShiftMapCPU.resize(RESOLUTION * RESOLUTION * 3);
+    _meanshiftPixels.resize(RESOLUTION * RESOLUTION);
 
     glReadBuffer(GL_COLOR_ATTACHMENT2);
-    glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RGB, GL_FLOAT, _meanShiftMapCPU.data());
+    glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RG, GL_FLOAT, _meanshiftPixels.data());
 
-    // DEBUG ======================================================================
+#ifdef MEANSHIFT_IMAGE_DEBUG
     QImage pluto(RESOLUTION, RESOLUTION, QImage::Format::Format_ARGB32);
     for (int j = 0; j < RESOLUTION; ++j)
     {
         for (int i = 0; i < RESOLUTION; ++i)
     	{
             int idx = j * RESOLUTION + i;
-    		pluto.setPixel(i, j, qRgb(_meanShiftMapCPU[idx * 3] * 255, _meanShiftMapCPU[idx * 3 + 1] * 255, _meanShiftMapCPU[idx * 3 + 2] * 255));
+    		pluto.setPixel(i, j, qRgb(_meanshiftPixels[idx].x * 255, _meanshiftPixels[idx].y * 255, 0));
     	}
     }
     pluto.save("meanshift.png");
-    // DEBUG ======================================================================
+    qDebug() << "Saved meanshift";
+#endif
+}
 
-
-    //for (int i = 0; i < _meanShiftMapCPU.size(); i++) {
-    //    qDebug() << "Value: " << _meanShiftMapCPU[i] << std::endl;
-    //}
-    qDebug() << "Computing meanshift";
-    //{
-    //	double t = 0.0;
-    //	{
-    //		nut::ScopedTimer<double> timer(t);
-    //
-    //		for (int i = 0; i < 100; i++)
-    //		{
-    //			clusterOld();
-    //		}
-    //	}
-    //	std::cout << "	Clustered 100 times in old mode in " << t << "\n";
-    //	t = 0.0;
-    //	{
-    //		nut::ScopedTimer<double> timer(t);
-    //
-    //		for (int i = 0; i < 100; i++)
-    //		{
-    //			cluster();
-    //		}
-    //	}
-    //	std::cout << "	Clustered 100 times in new mode in " << t << "\n";
-    //}
-
+Matrix3f createProjectionMatrix(QRectF bounds)
+{
+    Matrix3f m;
+    m.setIdentity();
+    m[0] = 2 / (bounds.right() - bounds.left());
+    m[4] = 2 / (bounds.top() - bounds.bottom());
+    m[6] = -((bounds.right() + bounds.left()) / (bounds.right() - bounds.left()));
+    m[7] = -((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom()));
+    return m;
 }
 
 void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::vector<unsigned int>>& clusters)
@@ -179,54 +208,109 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
     _clusterIds.resize(RESOLUTION * RESOLUTION);
     _clusterIdsOriginal.resize(RESOLUTION * RESOLUTION);
     // Stores centers of all clusters that are found in meanshift segmentation
-    std::vector< std::vector< float > > clusterCenters;
+    std::vector<Vector2f> clusterCenters;
 
-    float epsilon = (float)RESOLUTION / (128 * 256);
+    float epsilon = (float) 0.05f;
     // For every pixel in Mean Shift Map
-    for (int i = 0; i < _meanShiftMapCPU.size(); i += 3) {
+    for (int i = 0; i < _meanshiftPixels.size(); i++) {
         // Set center to red and green component of pixel
-        std::vector< float > center = { _meanShiftMapCPU[i], _meanShiftMapCPU[i + 1] };
+        Vector2f center = _meanshiftPixels[i];
 
-        // If either of the center components are 0 or lower, set clusterID for this pixel to -1
-        if (center[0] < 0.00001 && center[1] < 0.00001)
+        // If center equals 0, set clusterID for this pixel to -1
+        if (center.sqrMagnitude() < 0.0001)
         {
-            _clusterIdsOriginal[i / 3] = -1;
+            _clusterIdsOriginal[i] = -1;
             continue;
         }
 
         // If the center already exist in clusterCenters set clusterID to that cluster
+        bool clusterFound = false;
         int clusterId = -1;
         for (int c = 0; c < clusterCenters.size(); c++)
         {
             if (equal(center, clusterCenters[c], epsilon))
             {
+                clusterFound = true;
                 clusterId = c;
                 break;
             }
         }
         
         // If clusterID was not found already, push the new center into clusterCenters
-        if (clusterId < 0)
+        if (!clusterFound)
         {
-            qDebug() << "Pushing: " << center[0] << " " << center[1];
             clusterCenters.push_back(center);
             // Set the current pixel in clusterIdsOriginal to the latest cluster index
-            _clusterIdsOriginal[i / 3] = static_cast<int>(clusterCenters.size() - 1);
+            _clusterIdsOriginal[i] = static_cast<int>(clusterCenters.size() - 1);
         }
         else
         {
             // Set the current pixel in clusterIdsOriginal to the previously found clusterID
-            _clusterIdsOriginal[i / 3] = clusterId;
+            _clusterIdsOriginal[i] = clusterId;
         }
-
-        //std::cout << center[0] << ", " << center[1];
     }
 
     for (int i = 0; i < clusterCenters.size(); i++) {
-        qDebug() << "Cluster center: " << clusterCenters[i][0] << " " << clusterCenters[i][1];
+        qDebug() << "Cluster center: " << clusterCenters[i].x << " " << clusterCenters[i].y;
     }
 
-    // DEBUG ======================================================================
+    // Create a vector with the same size as the number of clusters, and set all IDs to -1
+    std::vector<int> activeIds(clusterCenters.size(), -1);
+
+    Matrix3f ortho = createProjectionMatrix(_bounds);
+
+    int runningIdx = 0;
+    _clusterPositions.clear();
+    // For every point
+    for (int i = 0; i < _points->size(); i++) {
+        // Calculate the coordinate of the pixel center on the texture
+        Vector2f p = (ortho * (*_points)[i]);
+
+        const Vector2f point = p * 0.5 + 0.5;
+        int x = (int)(point.x * (RESOLUTION - 1) + 0.5);
+        int y = (int)(point.y * (RESOLUTION - 1) + 0.5);
+
+        // Calculate index into clusterID array this pixel belongs to
+        int pixelIndex = (x + y * RESOLUTION);
+        // Get the clusterID
+        int cId = _clusterIdsOriginal[pixelIndex];
+        // If the clusterID is 0 or more and cluster is not active
+        if (cId >= 0 && activeIds[cId] < 0) {
+            // Get the cluster center
+            std::vector<Vector2f> center = { clusterCenters[cId] };
+            // Store the cluster center as the position of the cluster
+            _clusterPositions.push_back(center[0]);
+
+            activeIds[cId] = runningIdx++;
+        }
+    }
+
+#pragma omp parallel for
+    // For every assigned clusterID, set it to the corresponding active ID and store it in clusterIds
+    for (int i = 0; i < _clusterIdsOriginal.size(); i++) {
+        if (_clusterIdsOriginal[i] >= 0){ _clusterIdsOriginal[i] = activeIds[_clusterIdsOriginal[i]]; }
+        _clusterIds[i] = _clusterIdsOriginal[i];
+    }
+    
+    // Divide points into their corresponding clusters
+    qDebug() << "Matrix: " << ortho[0] << "," << ortho[1] << "," << ortho[2] << "," << ortho[3] << "," << ortho[4] << "," << ortho[5] << "," << ortho[6] << "," << ortho[7] << "," << ortho[8];
+    clusters.resize(runningIdx);
+    for (int i = 0; i < _points->size(); i++) {
+        Vector2f p = (ortho * (*_points)[i]);
+
+        const Vector2f point = p * 0.5 + 0.5;
+        int x = (int)(point.x * (RESOLUTION - 1) + 0.5);
+        int y = (int)(point.y * (RESOLUTION - 1) + 0.5);
+
+        int pixelIndex = (x + y * RESOLUTION);
+        //_clusterIds[pixelIndex] = qRgb(255, 0, 0);
+
+        int cId = _clusterIdsOriginal[pixelIndex];
+        if (cId >= 0) { clusters[cId].push_back(i); }
+    }
+    qDebug() << "Final clusters size: " << clusters.size();
+
+#ifdef MEANSHIFT_IMAGE_DEBUG
     QImage pluto(RESOLUTION, RESOLUTION, QImage::Format::Format_ARGB32);
     float scale = 255.0 / clusterCenters.size();
     for (int j = 0; j < RESOLUTION; ++j)
@@ -239,82 +323,12 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
     }
     pluto.save("meanshift_clusters.png");
     qDebug() << "Saved image of clusters";
-    // DEBUG ======================================================================
-
-    //std::vector< std::vector< std::pair <int, int> > > mcvClusters(clusterCenters.size());
-
-    // Create a vector with the same size as the number of clusters, and set all IDs to -1
-    std::vector<int> activeIds(clusterCenters.size(), -1);
-
-    int runningIdx = 0;
-    _clusterPositions.clear();
-    // For every point
-    for (int i = 0; i < _points->size(); i++) {
-        // Calculate the coordinate of the pixel center on the texture
-        const Vector2f& point = (*_points)[i] * 0.5 + 0.5;
-        int x = (int)(point.x * (RESOLUTION - 1) + 0.5);
-        int y = (int)(point.y * (RESOLUTION - 1) + 0.5);
-
-        // Calculate index into clusterID array this pixel belongs to
-        int pixelIndex = (x + y * RESOLUTION);
-        // Get the clusterID
-        int cId = _clusterIdsOriginal[pixelIndex];
-        // If the clusterID is 0 or more and cluster is not active
-        //std::cout << "ClusterID: " << cId << " ActiveIds size: " << activeIds.size() << std::endl;
-        if (cId >= 0 && activeIds[cId] < 0) {
-            // Get the cluster center
-            std::vector< float > center = { clusterCenters[cId] };
-            // Store the cluster center as the position of the cluster
-            _clusterPositions.push_back(Vector2f(center[0], center[1]));
-
-            activeIds[cId] = runningIdx++;
-        }
-    }
-
-#pragma omp parallel for
-    // For every assigned clusterID, set it to the corresponding active ID and store it in clusterIds
-    for (int i = 0; i < _clusterIdsOriginal.size(); i++) {
-        if (_clusterIdsOriginal[i] >= 0){ _clusterIdsOriginal[i] = activeIds[_clusterIdsOriginal[i]]; }
-        _clusterIds[i] = _clusterIdsOriginal[i];
-    }
-
-    // Divide points into their corresponding clusters
-    clusters.resize(runningIdx);
-    for (int i = 0; i < _points->size(); i++) {
-        const Vector2f& point = (*_points)[i] * 0.5 + 0.5;
-        int x = (int)(point.x * (RESOLUTION - 1) + 0.5);
-        int y = (int)(point.y * (RESOLUTION - 1) + 0.5);
-
-        int pixelIndex = (x + y * RESOLUTION);
-
-        int cId = _clusterIdsOriginal[pixelIndex];
-        if (cId >= 0) { clusters[cId].push_back(i); }
-    }
-
-    //>>>_meanShiftClusters = _analysis->updateClusters(&clusterIdxs, "Density Clusters");
-
-    //>>>refreshClusterBuffers();
-
-    //>>>_clustersNeedRefresh = false;
+#endif
 }
 
-bool MeanShift::equal(const std::vector<float> &p1, const std::vector<float> &p2, float epsilon)
+bool MeanShift::equal(const Vector2f& p1, const Vector2f& p2, float epsilon)
 {
-    if (p1.size() != p2.size()) return false;
-
-    bool equal = true;
-
-    //std::cout << "\nComparing Points: (" << p1[0] << ", " << p1[1] << ") and (" << p2[0] << ", " << p2[1] << ") with epsilon " << epsilon << ".\n";
-
-    for (int i = 0; i < p1.size(); i++)
-    {
-        equal = fabs(p1[i] - p2[i]) < epsilon;
-        //std::cout << "	" << i << ": abs(" << p1[i] << " - " << p2[i] << ") = " << std::abs(p1[i] - p2[i]) << " < " << epsilon << "? " << (equal ? "true" : "false\n");
-
-        if (!equal) break;
-    }
-
-    return equal;
+    return fabs(p1.x - p2.x) < epsilon && fabs(p1.y - p2.y < epsilon);
 }
 
 Texture2D& MeanShift::getGradientTexture()
