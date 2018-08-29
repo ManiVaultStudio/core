@@ -85,6 +85,7 @@ set( GRAPHICS_HEADERS
     src/graphics/Texture.h
     src/graphics/Shader.h
     src/graphics/Framebuffer.h
+    src/graphics/OffscreenBuffer.h
 )
 
 set( GRAPHICS_SOURCES
