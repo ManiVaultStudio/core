@@ -18,9 +18,9 @@ endif(MSVC)
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(SOURCES
-    src/CSPLR_ExampleDataPlugin.h
-    src/CSPLR_ExampleDataPlugin.cpp
-    src/CSPLR_ExampleDataPlugin.json
+    src/ExampleDataPlugin.h
+    src/ExampleDataPlugin.cpp
+    src/ExampleDataPlugin.json
 )
 
 source_group( Plugin FILES ${SOURCES})

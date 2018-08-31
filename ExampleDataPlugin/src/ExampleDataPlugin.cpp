@@ -1,26 +1,31 @@
-#include "CSPLR_ExampleDataPlugin.h"
+#include "ExampleDataPlugin.h"
 
 #include <QtCore>
 #include <QtDebug>
 
 #include <QColor>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.CSPLR_ExampleDataPlugin")
+Q_PLUGIN_METADATA(IID "nl.tudelft.ExampleDataPlugin")
 
 // =============================================================================
 // Data
 // =============================================================================
 
-CSPLR_ExampleDataPlugin::~CSPLR_ExampleDataPlugin(void)
+ExampleDataPlugin::~ExampleDataPlugin(void)
 {
     
 }
 
-void CSPLR_ExampleDataPlugin::init()
+void ExampleDataPlugin::init()
 {
 }
 
-void CSPLR_ExampleDataPlugin::setData(QImage image) {
+hdps::Set* ExampleDataPlugin::createSet() const
+{
+    return new PixelSet(_core, getName());
+}
+
+void ExampleDataPlugin::setData(QImage image) {
     for (unsigned int y; y < image.height(); y++) {
         for (unsigned int x; x < image.width(); x++) {
             QRgb rgb = image.pixel(x, y);
@@ -30,11 +35,19 @@ void CSPLR_ExampleDataPlugin::setData(QImage image) {
     }
 }
 
+hdps::Set* PixelSet::copy() const
+{
+    PixelSet* set = new PixelSet(_core, getDataName());
+    set->setName(getName());
+    set->indices = indices;
+    return set;
+}
+
 // =============================================================================
 // Factory
 // =============================================================================
 
-DataTypePlugin* CSPLR_ExampleDataPluginFactory::produce()
+RawData* ExampleDataPluginFactory::produce()
 {
-    return new CSPLR_ExampleDataPlugin();
+    return new ExampleDataPlugin();
 }
