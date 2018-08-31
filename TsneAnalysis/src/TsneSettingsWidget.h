@@ -23,6 +23,9 @@ struct DimensionPickerWidget : QWidget
 {
     DimensionPickerWidget()
     {
+        setMinimumHeight(100);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+
         setLayout(&_layout);
     }
 

@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QDebug>
+#include <QScrollArea>
 
 std::vector<bool> DimensionPickerWidget::getEnabledDimensions() const
 {
@@ -25,13 +26,19 @@ void DimensionPickerWidget::setDimensions(unsigned int numDimensions, std::vecto
     {
         QString name = hasNames ? names[i] : QString("Dim ") + QString::number(i);
         QCheckBox* widget = new QCheckBox(name);
+        widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+        widget->setMinimumHeight(20);
+        widget->setToolTip(name);
         widget->setChecked(true);
 
         _checkBoxes.push_back(widget);
         int row = i % (numDimensions / 2);
         int column = i / (numDimensions / 2);
+
         _layout.addWidget(widget, row, column);
     }
+
+    resize(160, 20 * numDimensions / 2);
 }
 
 void DimensionPickerWidget::clearWidget()
@@ -63,7 +70,7 @@ TsneSettingsWidget::TsneSettingsWidget() {
     QGroupBox* settingsBox = new QGroupBox("Basic settings");
     QGroupBox* advancedSettingsBox = new QGroupBox("Advanced Settings");
     QGroupBox* dimensionSelectionBox = new QGroupBox("Dimension Selection");
-
+    
     advancedSettingsBox->setCheckable(true);
     advancedSettingsBox->setChecked(false);
     
@@ -107,11 +114,14 @@ TsneSettingsWidget::TsneSettingsWidget() {
     settingsLayout->addWidget(&numIterations);
     settingsLayout->addWidget(perplexityLabel);
     settingsLayout->addWidget(&perplexity);
-    settingsLayout->addStretch(1);
     settingsBox->setLayout(settingsLayout);
 
     QVBoxLayout* dimensionSelectionLayout = new QVBoxLayout();
-    dimensionSelectionLayout->addWidget(&_dimensionPickerWidget);
+    QScrollArea* scroller = new QScrollArea();
+    scroller->setMinimumHeight(50);
+    scroller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    scroller->setWidget(&_dimensionPickerWidget);
+    dimensionSelectionLayout->addWidget(scroller);
     dimensionSelectionBox->setLayout(dimensionSelectionLayout);
 
     QGridLayout* advancedSettingsLayout = new QGridLayout();
