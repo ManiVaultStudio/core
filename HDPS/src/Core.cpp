@@ -178,6 +178,7 @@ plugin::RawData& Core::requestData(const QString name)
     }
 
     QMessageBox::critical(NULL, QString("HDPS"), QString("No plugin found with name: ").append(name), QMessageBox::Ok);
+    throw PluginNotFoundException(name);
 }
 
 /** Request a dataset from the data manager by its name. */
@@ -190,6 +191,7 @@ Set& Core::requestSet(const QString name)
     catch (SetNotFoundException e)
     {
         QMessageBox::critical(NULL, QString("HDPS"), e.what(), QMessageBox::Ok);
+        throw;
     }
 }
 

@@ -2,12 +2,31 @@
 
 #include "CoreInterface.h"
 
+#include <exception>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace hdps
 {
+
+struct PluginNotFoundException : public std::exception
+{
+public:
+  explicit PluginNotFoundException(const QString& pluginName) :
+        message((QString::fromLatin1("Failed to find a plugin with name: ") + pluginName).toStdString())
+    { }
+
+    const char* what() const noexcept override
+    {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
+};
+
 
 namespace plugin
 {
