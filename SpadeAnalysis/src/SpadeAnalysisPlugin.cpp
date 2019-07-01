@@ -365,8 +365,6 @@ bool SpadeAnalysisPlugin::downsample(const PointsPlugin& points, float densityLi
     int numDimensions = points.getNumDimensions();
     int numSamples = points.getNumPoints();
 
-    assert(_localDensitySorted[fileIndex].size() == numSamples);
-
     float percentileToIndex = (numSamples - 1) / 100.0f;
 
     int outlierDensity = _localDensitySorted[NO_FILE][(int)(percentileToIndex * outlierDensityPercentile)];
