@@ -26,8 +26,8 @@ hdps::Set* ExampleDataPlugin::createSet() const
 }
 
 void ExampleDataPlugin::setData(QImage image) {
-    for (unsigned int y; y < image.height(); y++) {
-        for (unsigned int x; x < image.width(); x++) {
+    for (int y = 0; y < image.height(); y++) {
+        for (int x = 0; x < image.width(); x++) {
             QRgb rgb = image.pixel(x, y);
             QColor color = QColor::fromRgb(rgb);
             data.push_back(color);
