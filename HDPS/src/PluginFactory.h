@@ -14,7 +14,7 @@ class PluginFactory : public QObject
     Q_OBJECT
 
 public:
-    virtual ~PluginFactory() {};
+    ~PluginFactory() override {};
 
     virtual Plugin* produce() = 0;
 };

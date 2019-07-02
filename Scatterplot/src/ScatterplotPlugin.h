@@ -30,17 +30,17 @@ public:
     :
         ViewPlugin("Scatterplot View")
     { }
-    ~ScatterplotPlugin(void);
+    ~ScatterplotPlugin(void) override;
     
-    void init();
+    void init() override;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
-    virtual void onSelecting(hdps::Selection selection);
-    virtual void onSelection(hdps::Selection selection);
+    void onSelecting(hdps::Selection selection) override;
+    void onSelection(hdps::Selection selection) override;
 
     ScatterplotWidget* _scatterPlotWidget;
 
@@ -81,7 +81,7 @@ class ScatterplotPluginFactory : public ViewPluginFactory
     
 public:
     ScatterplotPluginFactory(void) {}
-    ~ScatterplotPluginFactory(void) {}
+    ~ScatterplotPluginFactory(void) override {}
     
-    ViewPlugin* produce();
+    ViewPlugin* produce() override;
 };

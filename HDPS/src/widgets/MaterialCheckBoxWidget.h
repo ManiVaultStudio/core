@@ -11,7 +11,7 @@ class MaterialCheckBoxWidget : public QWidget
 	Q_OBJECT
 public:
     explicit MaterialCheckBoxWidget(QString label = "", QWidget *parent = 0, QColor *basecolor = 0);
-    ~MaterialCheckBoxWidget();
+    ~MaterialCheckBoxWidget() override;
 
 	inline bool checked() { return _checked; }
 	void setChecked(bool checked);

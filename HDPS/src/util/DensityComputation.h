@@ -22,7 +22,7 @@ class DensityComputation : protected QOpenGLFunctions_3_3_Core
 {
 public:
     DensityComputation();
-    ~DensityComputation();
+    ~DensityComputation() override;
     void init(QOpenGLContext* ctx);
     void cleanup();
 

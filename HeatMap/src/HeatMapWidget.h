@@ -43,7 +43,7 @@ class HeatMapWidget : public hdps::gui::WebWidget
     Q_OBJECT
 public:
     HeatMapWidget();
-    ~HeatMapWidget();
+    ~HeatMapWidget() override;
 
     void addDataOption(const QString option);
     QString getCurrentData() const;
@@ -67,7 +67,7 @@ public:
     void js_highlightUpdated(int highlightId);
 
 private slots:
-    virtual void initWebPage() override;
+    void initWebPage() override;
 
 private:
     HeatMapCommunicationObject* _communicationObject;

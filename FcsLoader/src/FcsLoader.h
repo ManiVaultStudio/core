@@ -16,9 +16,9 @@ class FcsLoader : public LoaderPlugin
 {
 public:
     FcsLoader();
-    ~FcsLoader(void);
+    ~FcsLoader(void) override;
     
-    void init();
+    void init() override;
 
     void loadData() Q_DECL_OVERRIDE;
 private:
@@ -42,7 +42,7 @@ class FcsLoaderFactory : public LoaderPluginFactory
     
 public:
     FcsLoaderFactory(void) {}
-    ~FcsLoaderFactory(void) {}
+    ~FcsLoaderFactory(void) override {}
     
-    LoaderPlugin* produce();
+    LoaderPlugin* produce() override;
 };

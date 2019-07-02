@@ -31,9 +31,9 @@ class ExampleViewPlugin : public ViewPlugin
     
 public:
     ExampleViewPlugin() : ViewPlugin("Example View") { }
-    ~ExampleViewPlugin(void);
+    ~ExampleViewPlugin(void) override;
     
-    void init();
+    void init() override;
     
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
@@ -56,7 +56,7 @@ class ExampleViewPluginFactory : public ViewPluginFactory
     
 public:
     ExampleViewPluginFactory(void) {}
-    ~ExampleViewPluginFactory(void) {}
+    ~ExampleViewPluginFactory(void) override {}
     
-    ViewPlugin* produce();
+    ViewPlugin* produce() override;
 };

@@ -11,7 +11,7 @@ class BufferObject : protected QOpenGLFunctions_3_3_Core
 {
 public:
     BufferObject();
-    ~BufferObject();
+    ~BufferObject() override;
 
     void create();
     void bind();

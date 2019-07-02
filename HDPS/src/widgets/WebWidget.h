@@ -41,7 +41,7 @@ class WebWidget : public QWidget
     Q_OBJECT
 public:
     WebWidget();
-    ~WebWidget();
+    ~WebWidget() override;
 
     void init(WebCommunicationObject* communicationObject);
 

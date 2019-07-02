@@ -12,9 +12,9 @@ class CsvLoader : public LoaderPlugin
 {
 public:
     CsvLoader() : LoaderPlugin("CSV Loader") { }
-    ~CsvLoader(void);
+    ~CsvLoader(void) override;
     
-    void init();
+    void init() override;
 
     void loadData() Q_DECL_OVERRIDE;
 };
@@ -33,7 +33,7 @@ class CsvLoaderFactory : public LoaderPluginFactory
     
 public:
     CsvLoaderFactory(void) {}
-    ~CsvLoaderFactory(void) {}
+    ~CsvLoaderFactory(void) override {}
     
-    LoaderPlugin* produce();
+    LoaderPlugin* produce() override;
 };

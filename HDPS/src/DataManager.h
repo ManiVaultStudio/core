@@ -20,7 +20,7 @@ public:
     DataNotFoundException(QString dataName) :
         message((QString("Failed to find data with name: ") + dataName).toStdString()) { }
 
-    const char* what() const throw ()
+    const char* what() const throw () override
     {
         return message.c_str();
     }
@@ -36,7 +36,7 @@ public:
         message((QString("Failed to find a set with name: ") + setName).toStdString())
     { }
 
-    const char* what() const throw ()
+    const char* what() const throw () override
     {
         return message.c_str();
     }

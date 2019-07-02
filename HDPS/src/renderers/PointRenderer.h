@@ -66,10 +66,10 @@ namespace hdps
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
 
-            virtual void init() override;
-            virtual void resize(QSize renderSize) override;
-            virtual void render() override;
-            virtual void destroy() override;
+            void init() override;
+            void resize(QSize renderSize) override;
+            void render() override;
+            void destroy() override;
 
         private:
             PointArrayObject _gpuPoints;

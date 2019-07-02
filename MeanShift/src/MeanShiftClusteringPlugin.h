@@ -25,9 +25,9 @@ public:
 
     }
 
-    ~MeanShiftAnalysisPlugin(void);
+    ~MeanShiftAnalysisPlugin(void) override;
     
-    void init();
+    void init() override;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
@@ -35,7 +35,7 @@ public:
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
 
-    SettingsWidget* const getSettings();
+    SettingsWidget* const getSettings() override;
 public slots:
     void dataSetPicked(const QString& name);
 
@@ -61,7 +61,7 @@ class MeanShiftAnalysisPluginFactory : public AnalysisPluginFactory
     
 public:
     MeanShiftAnalysisPluginFactory(void) {}
-    ~MeanShiftAnalysisPluginFactory(void) {}
+    ~MeanShiftAnalysisPluginFactory(void) override {}
     
-    AnalysisPlugin* produce();
+    AnalysisPlugin* produce() override;
 };

@@ -17,9 +17,9 @@ class TsneAnalysisPlugin : public QObject, public AnalysisPlugin
     Q_OBJECT   
 public:
     TsneAnalysisPlugin() : AnalysisPlugin("tSNE Analysis") { }
-    ~TsneAnalysisPlugin(void);
+    ~TsneAnalysisPlugin(void) override;
     
-    void init();
+    void init() override;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
@@ -27,7 +27,7 @@ public:
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
 
-    SettingsWidget* const getSettings();
+    SettingsWidget* const getSettings() override;
 public slots:
     void dataSetPicked(const QString& name);
     void startComputation();
@@ -55,7 +55,7 @@ class TsneAnalysisPluginFactory : public AnalysisPluginFactory
     
 public:
     TsneAnalysisPluginFactory(void) {}
-    ~TsneAnalysisPluginFactory(void) {}
+    ~TsneAnalysisPluginFactory(void) override {}
     
-    AnalysisPlugin* produce();
+    AnalysisPlugin* produce() override;
 };

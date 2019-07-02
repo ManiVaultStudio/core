@@ -75,7 +75,7 @@ class ScatterplotSettings : public QWidget
 
 public:
     ScatterplotSettings(const ScatterplotPlugin* plugin);
-    ~ScatterplotSettings();
+    ~ScatterplotSettings() override;
 
     void xDimPicked(int index);
     void yDimPicked(int index);

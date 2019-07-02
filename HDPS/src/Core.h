@@ -68,13 +68,13 @@ public:
     Set& requestSelection(const QString name) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
-    void notifyDataAdded(const QString name);
+    void notifyDataAdded(const QString name) override;
     /** Notify all data consumers that a dataset has been changed. */
-    void notifyDataChanged(const QString name);
+    void notifyDataChanged(const QString name) override;
     /** Notify all data consumers that a dataset has been removed. */
-    void notifyDataRemoved(const QString name);
+    void notifyDataRemoved(const QString name) override;
     /** Notify all data consumers that a selection has changed. */
-    void notifySelectionChanged(const QString dataName);
+    void notifySelectionChanged(const QString dataName) override;
 
     /**
     * Returns a reference to the main window for adding widgets to it.

@@ -17,11 +17,11 @@ class ExampleDataPlugin : public RawData
 {
 public:
     ExampleDataPlugin() : RawData("Example Data") { }
-    ~ExampleDataPlugin(void);
+    ~ExampleDataPlugin(void) override;
     
-    void init();
+    void init() override;
 
-    virtual hdps::Set* createSet() const override;
+    hdps::Set* createSet() const override;
 
     void setData(QImage image);
 private:
@@ -32,7 +32,7 @@ class PixelSet : public hdps::Set
 {
 public:
     PixelSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
-    ~PixelSet() { }
+    ~PixelSet() override { }
 
     ExampleDataPlugin& getData() const
     {
@@ -58,7 +58,7 @@ class ExampleDataPluginFactory : public RawDataFactory
     
 public:
     ExampleDataPluginFactory(void) {}
-	~ExampleDataPluginFactory(void) {}
+	~ExampleDataPluginFactory(void) override {}
     
-    RawData* produce();
+    RawData* produce() override;
 };
