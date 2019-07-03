@@ -11,7 +11,7 @@ class RawData : public Plugin
 {
 public:
     RawData(QString name) : Plugin(Type::DATA, name) { }
-    virtual ~RawData() {};
+    ~RawData() override {};
 
     virtual Set* createSet() const = 0;
 
@@ -62,9 +62,9 @@ class RawDataFactory : public PluginFactory
     
 public:
     
-    virtual ~RawDataFactory() {};
+    ~RawDataFactory() override {};
     
-    virtual RawData* produce() = 0;
+    RawData* produce() override = 0;
 };
 
 } // namespace plugin

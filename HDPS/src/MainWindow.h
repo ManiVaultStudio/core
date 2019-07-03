@@ -33,7 +33,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow {
 
 public:
     MainWindow(QWidget *parent = 0);
-	virtual ~MainWindow();
+	~MainWindow() override;
 
     /**
     * Adds a new item to the import menu.

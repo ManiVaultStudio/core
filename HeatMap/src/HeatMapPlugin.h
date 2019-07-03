@@ -20,9 +20,9 @@ class HeatMapPlugin : public ViewPlugin
     
 public:
     HeatMapPlugin() : ViewPlugin("Heatmap View") { }
-    ~HeatMapPlugin(void);
+    ~HeatMapPlugin(void) override;
     
-    void init();
+    void init() override;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
@@ -54,7 +54,7 @@ class HeatMapPluginFactory : public ViewPluginFactory
     
 public:
     HeatMapPluginFactory(void) {}
-    ~HeatMapPluginFactory(void) {}
+    ~HeatMapPluginFactory(void) override {}
     
-    ViewPlugin* produce();
+    ViewPlugin* produce() override;
 };

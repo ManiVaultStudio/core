@@ -25,7 +25,7 @@ namespace hdps
             };
 
             DensityRenderer(RenderMode renderMode);
-            ~DensityRenderer();
+            ~DensityRenderer() override;
 
             void setRenderMode(RenderMode renderMode);
             void setData(const std::vector<Vector2f>* data);
@@ -39,13 +39,13 @@ namespace hdps
             */
             void setColormap(const QString colormap);
 
-            virtual void init();
-            virtual void resize(QSize renderSize);
-            virtual void render();
-            virtual void destroy();
+            void init() override;
+            void resize(QSize renderSize) override;
+            void render() override;
+            void destroy() override;
 
-            virtual void onSelecting(Selection selection);
-            virtual void onSelection(Selection selection);
+            void onSelecting(Selection selection) override;
+            void onSelection(Selection selection) override;
 
         private:
             void drawDensity();

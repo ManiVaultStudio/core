@@ -17,11 +17,11 @@ class ClustersPlugin : public RawData
 {
 public:
     ClustersPlugin() : RawData("Clusters") { }
-    ~ClustersPlugin(void);
+    ~ClustersPlugin(void) override;
     
-    void init();
+    void init() override;
 
-    hdps::Set* createSet() const;
+    hdps::Set* createSet() const override;
 
     void addCluster(IndexSet* cluster) {
         clusters.push_back(cluster);
@@ -42,7 +42,7 @@ class ClusterSet : public hdps::Set
 {
 public:
     ClusterSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
-    ~ClusterSet() { }
+    ~ClusterSet() override { }
 
     ClustersPlugin& getData() const
     {
@@ -67,7 +67,7 @@ class ClustersPluginFactory : public RawDataFactory
     
 public:
     ClustersPluginFactory(void) {}
-    ~ClustersPluginFactory(void) {}
+    ~ClustersPluginFactory(void) override {}
     
-    RawData* produce();
+    RawData* produce() override;
 };

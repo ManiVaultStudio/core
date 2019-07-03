@@ -15,7 +15,7 @@ class ShaderProgram : protected QOpenGLFunctions_3_3_Core
 {
 public:
     ShaderProgram();
-    ~ShaderProgram();
+    ~ShaderProgram() override;
     void bind();
     void release();
     void destroy();

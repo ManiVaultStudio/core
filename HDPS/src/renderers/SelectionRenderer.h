@@ -12,13 +12,13 @@ namespace hdps
         class SelectionRenderer : protected Renderer, public plugin::SelectionListener
         {
         public:
-            virtual void init();
-            virtual void resize(QSize renderSize);
-            virtual void render();
-            virtual void destroy();
+            void init() override;
+            void resize(QSize renderSize) override;
+            void render() override;
+            void destroy() override;
 
-            virtual void onSelecting(Selection selection);
-            virtual void onSelection(Selection selection);
+            void onSelecting(Selection selection) override;
+            void onSelection(Selection selection) override;
 
         private:
             const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);

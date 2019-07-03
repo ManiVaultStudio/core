@@ -22,7 +22,7 @@ namespace plugin
 class PluginManager : public QObject {
 public:
     PluginManager(Core& core);
-    ~PluginManager(void);
+    ~PluginManager(void) override;
     
     /**
     * Loads all plugin factories from the plugin directory and adds them as menu items.

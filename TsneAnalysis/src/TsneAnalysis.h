@@ -15,7 +15,7 @@ class TsneAnalysis : public QThread
     Q_OBJECT
 public:
     TsneAnalysis();
-    ~TsneAnalysis();
+    ~TsneAnalysis() override;
 
     void setVerbose(bool verbose);
     void setIterations(int iterations);

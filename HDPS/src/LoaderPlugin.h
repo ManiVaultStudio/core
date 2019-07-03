@@ -19,7 +19,7 @@ public:
     {
     }
 
-    const char* what() const throw ()
+    const char* what() const throw () override
     {
         return ("Failed to load file at: " + _filePath + "\nReason: " + _reason).toStdString().c_str();
     }
@@ -42,7 +42,7 @@ public:
      */
     virtual void loadData() = 0;
 
-    virtual ~LoaderPlugin() {};
+    ~LoaderPlugin() override {};
 };
 
 
@@ -52,12 +52,12 @@ class LoaderPluginFactory : public PluginFactory
     
 public:
     
-    virtual ~LoaderPluginFactory() {};
+    ~LoaderPluginFactory() override {};
     
     /**
     * Produces an instance of a loader plugin. This function gets called by the plugin manager.
     */
-    virtual LoaderPlugin* produce() = 0;
+    LoaderPlugin* produce() override = 0;
 };
 
 } // namespace plugin

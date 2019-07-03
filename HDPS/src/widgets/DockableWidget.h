@@ -15,7 +15,7 @@ class DockableWidget : public QDockWidget
     Q_OBJECT
 public:
     explicit DockableWidget(QWidget *parent = 0);
-    ~DockableWidget();
+    ~DockableWidget() override;
 
     void addWidget(QWidget* widget);
     QGridLayout* mainLayout();

@@ -22,7 +22,7 @@ public:
 
     virtual void writeData() = 0;
 
-    virtual ~WriterPlugin() {};
+    ~WriterPlugin() override {};
 };
 
 
@@ -32,9 +32,9 @@ class WriterPluginFactory : public PluginFactory
     
 public:
     
-    virtual ~WriterPluginFactory() {};
+    ~WriterPluginFactory() override {};
     
-    virtual WriterPlugin* produce() = 0;
+    WriterPlugin* produce() override = 0;
 };
 
 } // namespace plugin

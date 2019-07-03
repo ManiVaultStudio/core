@@ -16,9 +16,9 @@ class PointsPlugin : public RawData
 {
 public:
     PointsPlugin() : RawData("Points") { }
-    ~PointsPlugin(void);
+    ~PointsPlugin(void) override;
     
-    void init();
+    void init() override;
 
     unsigned int getNumPoints() const
     {
@@ -30,7 +30,7 @@ public:
         return numDimensions;
     }
 
-    hdps::Set* createSet() const;
+    hdps::Set* createSet() const override;
 
     std::vector<QString> dimNames;
     std::vector<float> data;
@@ -41,7 +41,7 @@ class IndexSet : public hdps::Set
 {
 public:
     IndexSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
-    ~IndexSet() { }
+    ~IndexSet() override { }
     
     PointsPlugin& getData() const
     {
@@ -66,7 +66,7 @@ class PointsPluginFactory : public RawDataFactory
     
 public:
     PointsPluginFactory(void) {}
-    ~PointsPluginFactory(void) {}
+    ~PointsPluginFactory(void) override {}
     
-    RawData* produce();
+    RawData* produce() override;
 };

@@ -9,7 +9,7 @@ struct SetNotFoundException : public std::exception
 public:
     SetNotFoundException(QString setName) : setName(setName) { }
 
-    const char* what() const throw ()
+    const char* what() const throw () override
     {
         return (QString("Failed to find a set with name: ") + setName).toStdString().c_str();
     }

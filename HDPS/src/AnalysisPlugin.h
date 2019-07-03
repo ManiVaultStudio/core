@@ -15,7 +15,7 @@ class AnalysisPlugin : public Plugin, public DataConsumer
 {
 public:
     AnalysisPlugin(QString name) : Plugin(Type::ANALYSIS, name) { }
-    virtual ~AnalysisPlugin() {};
+    ~AnalysisPlugin() override {};
 
     bool hasSettings()
     {
@@ -32,12 +32,12 @@ class AnalysisPluginFactory : public PluginFactory
     
 public:
     
-    virtual ~AnalysisPluginFactory() {};
+    ~AnalysisPluginFactory() override {};
     
     /**
     * Produces an instance of an analysis plugin. This function gets called by the plugin manager.
     */
-    virtual AnalysisPlugin* produce() = 0;
+    AnalysisPlugin* produce() override = 0;
 };
 
 } // namespace plugin

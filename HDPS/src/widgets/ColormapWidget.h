@@ -13,7 +13,7 @@ class ColormapWidget : public QWidget
     Q_OBJECT
 public:
     ColormapWidget(QWidget *parent = 0);
-    ~ColormapWidget();
+    ~ColormapWidget() override;
 
     QString getActiveColormap();
     void setColormap(int colormapIdx, bool isDiscrete);

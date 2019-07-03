@@ -34,9 +34,9 @@ public:
         _minimumSpanningTree(NULL),
         _jsonGraph("") { }
 
-    ~SpadeAnalysisPlugin(void);
+    ~SpadeAnalysisPlugin(void) override;
     
-    void init();
+    void init() override;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
@@ -44,7 +44,7 @@ public:
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     QStringList supportedDataKinds() Q_DECL_OVERRIDE;
 
-    SettingsWidget* const getSettings();
+    SettingsWidget* const getSettings() override;
 public slots:
     void dataSetPicked(const QString& name);
 
@@ -113,9 +113,9 @@ class SpadeAnalysisPluginFactory : public AnalysisPluginFactory
     
 public:
     SpadeAnalysisPluginFactory(void) {}
-    ~SpadeAnalysisPluginFactory(void) {}
+    ~SpadeAnalysisPluginFactory(void) override {}
     
-    AnalysisPlugin* produce();
+    AnalysisPlugin* produce() override;
 };
 
 #endif // SPADE_ANALYSIS_PLUGIN_H
