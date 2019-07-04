@@ -197,26 +197,39 @@ void TsneSettingsWidget::checkInputStyle(QLineEdit& input)
 // SLOTS
 void TsneSettingsWidget::onStartToggled(bool pressed)
 {
-    // Do nothing if we have no data set selected
-    if (dataOptions.currentText().isEmpty()) {
-        return;
-    }
-
-    // Check if the tSNE settings are valid before running the computation
-    if (!hasValidSettings()) {
-        QMessageBox warningBox;
-        warningBox.setText(tr("Some settings are invalid or missing. Continue with default values?"));
-        QPushButton *continueButton = warningBox.addButton(tr("Continue"), QMessageBox::ActionRole);
-        QPushButton *abortButton = warningBox.addButton(QMessageBox::Abort);
-
-        warningBox.exec();
-
-        if (warningBox.clickedButton() == abortButton) {
+    try
+    {
+        // Do nothing if we have no data set selected
+        if (dataOptions.currentText().isEmpty()) {
             return;
         }
+
+        // Check if the tSNE settings are valid before running the computation
+        if (!hasValidSettings()) {
+            QMessageBox warningBox;
+            warningBox.setText(tr("Some settings are invalid or missing. Continue with default values?"));
+            QPushButton *continueButton = warningBox.addButton(tr("Continue"), QMessageBox::ActionRole);
+            QPushButton *abortButton = warningBox.addButton(QMessageBox::Abort);
+
+            warningBox.exec();
+
+            if (warningBox.clickedButton() == abortButton) {
+                return;
+            }
+        }
+        startButton.setText(pressed ? "Stop Computation" : "Start Computation");
+        emit pressed ? startComputation() : stopComputation();
     }
-    startButton.setText(pressed ? "Stop Computation" : "Start Computation");
-    emit pressed ? startComputation() : stopComputation();
+    catch (const std::exception& stdException)
+    {
+        QMessageBox::critical(this,
+            tr("t-SNE Computation"),
+            tr("Error: An exception has occurred!\n"
+            "Exception type: '%1'\n"
+            "Description: %2")
+            .arg(typeid(stdException).name())
+            .arg(QString::fromLatin1(stdException.what())));
+    }
 }
 
 void TsneSettingsWidget::numIterationsChanged(const QString &value)
