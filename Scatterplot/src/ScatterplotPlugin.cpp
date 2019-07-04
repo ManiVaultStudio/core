@@ -274,7 +274,7 @@ void ScatterplotPlugin::updateSelection()
     {
         for (int i = 0; i < _numPoints; i++)
         {
-            int index = dataSet.indices[i];
+            unsigned int index = dataSet.indices[i];
             bool selected = false;
             for (unsigned int selectionIndex : selection.indices)
             {
