@@ -23,7 +23,7 @@ namespace hdps
 
     void Matrix3f::setIdentity() {
         for (int i = 0; i < 9; i++) {
-            a[i] = i % 4 == 0 ? 1 : 0;
+            a[i] = i % 4 == 0 ? 1.0f : 0.0f;
         }
     }
 

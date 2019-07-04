@@ -9,17 +9,17 @@ namespace hdps
 
 void DataManager::addRawData(plugin::RawData* rawData)
 {
-    _rawData.push_back(std::move(std::unique_ptr<plugin::RawData>(rawData)));
+    _rawData.push_back(std::unique_ptr<plugin::RawData>(rawData));
 }
 
 void DataManager::addSet(Set* set)
 {
-    _dataSets.push_back(std::move(std::unique_ptr<Set>(set)));
+    _dataSets.push_back(std::unique_ptr<Set>(set));
 }
 
 void DataManager::addSelection(QString dataName, Set* selection)
 {
-    _selections.emplace(dataName.toStdString(), std::move(std::unique_ptr<Set>(selection)));
+    _selections.emplace(dataName.toStdString(), std::unique_ptr<Set>(selection));
 }
 
 plugin::RawData& DataManager::getRawData(QString name)
