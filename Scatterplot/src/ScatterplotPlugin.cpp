@@ -25,7 +25,6 @@ namespace
         bounds.setRight(FLT_MIN);
         bounds.setTop(FLT_MIN);
         bounds.setBottom(FLT_MAX);
-        float maxDimension = 0;
         for (const Vector2f& point : points)
         {
             bounds.setLeft(std::min(point.x, (float) bounds.left()));
@@ -173,8 +172,6 @@ void ScatterplotPlugin::updateData()
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
     const PointsPlugin& points = dataSet.getData();
     
-    int nDim = points.getNumDimensions();
-
     int xDim = settings->getXDimension();
     int yDim = settings->getYDimension();
 
@@ -275,7 +272,6 @@ void ScatterplotPlugin::updateSelection()
         for (int i = 0; i < _numPoints; i++)
         {
             unsigned int index = dataSet.indices[i];
-            bool selected = false;
             for (unsigned int selectionIndex : selection.indices)
             {
                 if (index == selectionIndex) {
