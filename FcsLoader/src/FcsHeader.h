@@ -7,14 +7,13 @@ struct FcsVariable
 {
     bool operator==(const FcsVariable& rhs)
     {
-        return (name[0].compare(rhs.name[0]) == 0) && (name[0].compare(rhs.name[0]) == 0) && // FIXME why is this the same??
+        return (name[0] == rhs.name[0]) && (name[1] == rhs.name[1]) &&
                (numBits == rhs.numBits) && (exponent == rhs.exponent);
     }
 
     bool operator!=(const FcsVariable& rhs)
     {
-        return (name[0].compare(rhs.name[0]) != 0) || (name[0].compare(rhs.name[0]) != 0) || // FIXME why is this the same??
-               (numBits != rhs.numBits) || (exponent != rhs.exponent);
+        return !(*this == rhs);
     }
 
     std::string name[2];
