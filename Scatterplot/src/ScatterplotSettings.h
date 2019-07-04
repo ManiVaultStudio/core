@@ -51,8 +51,8 @@ struct DimensionPicker : public QWidget
 
     QGridLayout& getLayout();
 
-    void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
-    void DimensionPicker::setScalarDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
+    void setDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
+    void setScalarDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
     int getDimensionX();
     int getDimensionY();
     int getDimensionColor();
