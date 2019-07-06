@@ -1,4 +1,5 @@
 #include "TsneAnalysisPlugin.h"
+#include "TsneSettingsWidget.h"
 
 #include "PointsPlugin.h"
 
@@ -11,6 +12,12 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.TsneAnalysisPlugin")
 // View
 // =============================================================================
 
+TsneAnalysisPlugin::TsneAnalysisPlugin()
+:
+AnalysisPlugin("tSNE Analysis")
+{
+}
+
 TsneAnalysisPlugin::~TsneAnalysisPlugin(void)
 {
     stopComputation();
@@ -18,7 +25,7 @@ TsneAnalysisPlugin::~TsneAnalysisPlugin(void)
 
 void TsneAnalysisPlugin::init()
 {
-    _settings = std::make_unique<TsneSettingsWidget>();
+    _settings = std::make_unique<TsneSettingsWidget>(*this);
 
     connect(_settings.get(), &TsneSettingsWidget::dataSetPicked, this, &TsneAnalysisPlugin::dataSetPicked);
     connect(_settings.get(), &TsneSettingsWidget::startComputation, this, &TsneAnalysisPlugin::startComputation);

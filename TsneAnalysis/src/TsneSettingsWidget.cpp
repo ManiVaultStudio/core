@@ -1,4 +1,5 @@
 #include "TsneSettingsWidget.h"
+#include "TsneAnalysisPlugin.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -52,7 +53,10 @@ void DimensionPickerWidget::clearWidget()
     _checkBoxes.clear();
 }
 
-TsneSettingsWidget::TsneSettingsWidget() {
+TsneSettingsWidget::TsneSettingsWidget(TsneAnalysisPlugin& analysisPlugin)
+:
+_analysisPlugin(analysisPlugin)
+{
     setFixedWidth(200);
 
     connect(&dataOptions,   SIGNAL(currentIndexChanged(QString)), this, SIGNAL(dataSetPicked(QString)));
@@ -218,7 +222,7 @@ void TsneSettingsWidget::onStartToggled(bool pressed)
             }
         }
         startButton.setText(pressed ? "Stop Computation" : "Start Computation");
-        emit pressed ? startComputation() : stopComputation();
+        pressed ? _analysisPlugin.startComputation() : _analysisPlugin.stopComputation();;
     }
     catch (const std::exception& stdException)
     {

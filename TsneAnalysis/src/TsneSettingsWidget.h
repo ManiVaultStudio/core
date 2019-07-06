@@ -63,7 +63,7 @@ class TsneSettingsWidget : public SettingsWidget
     Q_OBJECT
 
 public:
-    TsneSettingsWidget();
+    explicit TsneSettingsWidget(TsneAnalysisPlugin&);
 
     std::vector<bool> getEnabledDimensions();
     bool hasValidSettings();
@@ -100,4 +100,6 @@ public:
     QLineEdit numChecks;
     QLineEdit theta;
     QPushButton startButton;
+private:
+  TsneAnalysisPlugin& _analysisPlugin;
 };
