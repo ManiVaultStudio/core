@@ -29,7 +29,7 @@ public:
 
     void assign(unsigned int numPoints, unsigned int numDimensions, const std::vector<float>& inputData)
     {
-        assert(inputData.size() == _numPoints * _numDimensions);
+        assert(inputData.size() == numPoints * numDimensions);
 
         _numPoints = numPoints;
         _numDimensions = numDimensions;
