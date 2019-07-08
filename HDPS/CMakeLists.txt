@@ -241,7 +241,7 @@ endif(MSVC)
 #copy after build
 # library
 add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
 	"$<TARGET_FILE:${PROJECT}_Public>"
 	"${INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_FILE_NAME:${PROJECT}_Public>"
 )
@@ -250,7 +250,7 @@ add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
 foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
 	STRING(REGEX REPLACE "^src/" "" STRIPPED_PUBLIC_HEADER ${PUBLIC_HEADER})
 	add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-		COMMAND "${CMAKE_COMMAND}" -E copy
+		COMMAND "${CMAKE_COMMAND}" -E copy_if_different
 		"${CMAKE_CURRENT_SOURCE_DIR}/${PUBLIC_HEADER}"
 		"${INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}"
 	)
@@ -258,14 +258,14 @@ endforeach(PUBLIC_HEADER)
 
 #executable
 add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
 	"$<TARGET_FILE:${PROJECT}>"
 	"${INSTALL_DIR}/$<CONFIGURATION>/$<TARGET_FILE_NAME:${PROJECT}>"
 )
 
 # Copy pointsplugin header
 add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "${CMAKE_CURRENT_SOURCE_DIR}/src/plugins/PointsPlugin.h"
     "${INSTALL_DIR}/$<CONFIGURATION>/include/PointsPlugin.h"
 )
@@ -306,7 +306,7 @@ target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HD
 
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
 	"$<TARGET_FILE:${PROJECT}>"
 	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PROJECT}>"
 )
