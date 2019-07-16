@@ -101,12 +101,14 @@ set( UTIL_HEADERS
     src/util/FileUtil.h
     src/util/MeanShift.h
     src/util/DensityComputation.h
+    src/util/Math.h
 )
 
 set( UTIL_SOURCES
     src/util/FileUtil.cpp
     src/util/MeanShift.cpp
     src/util/DensityComputation.cpp
+    src/util/Math.cpp
 )
 
 set( PLUGIN_HEADERS
