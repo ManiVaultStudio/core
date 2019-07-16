@@ -6,12 +6,10 @@
 
 #include "SelectionListener.h"
 
-#include "graphics/BufferObject.h"
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
 #include "graphics/Matrix3f.h"
 #include "graphics/Selection.h"
-#include "graphics/Shader.h"
 
 #include "widgets/ColormapWidget.h"
 
@@ -19,7 +17,6 @@
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <QMouseEvent>
-#include <memory>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -33,9 +30,20 @@ public:
     };
 
     ScatterplotWidget();
+
+    /** Returns true when the widget was initialized and is ready to be used. */
     bool isInitialized();
+
+    /**
+     * Change the rendering mode displayed in the widget.
+     * The options are defined by ScatterplotWidget::RenderMode.
+     */
     void setRenderMode(RenderMode renderMode);
-    void setData(const std::vector<Vector2f>* data, const QRectF bounds);
+
+    /**
+     * Feed 2-dimensional data to the scatterplot.
+     */
+    void setData(const std::vector<Vector2f>* data);
     void setHighlights(const std::vector<char>& highlights);
     void setScalarProperty(const std::vector<float>& scalarProperty);
     void setPointSize(const float size);
@@ -64,6 +72,7 @@ signals:
 public slots:
     void renderModePicked(const int index);
     void pointSizeChanged(const int size);
+    void pointOpacityChanged(const int opacity);
     void sigmaChanged(const int sigma);
 
     void colormapChanged(QString colormapName);
@@ -78,18 +87,22 @@ private:
 
     RenderMode _renderMode = SCATTERPLOT;
 
+    /* Renderers */
     PointRenderer _pointRenderer;
     DensityRenderer _densityRenderer;
     SelectionRenderer _selectionRenderer;
 
-    QSize _windowSize;
 
+    /* Auxiliary widgets */
     ColormapWidget _colormapWidget;
 
-    unsigned int _numPoints = 0;
-    QRectF _dataBounds;
-
+    /* Selection */
     bool _selecting = false;
     Selection _selection;
     std::vector<plugin::SelectionListener*> _selectionListeners;
+
+    /* Size of the scatterplot widget */
+    QSize _windowSize;
+
+    QRectF _dataBounds;
 };

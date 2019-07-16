@@ -1,9 +1,47 @@
 #include "ScatterplotWidget.h"
 
+#include "util/Math.h"
+
 #include <vector>
 
 #include <QSize>
 #include <QDebug>
+
+using namespace hdps::util;
+
+namespace
+{
+    QRectF getDataBounds(const std::vector<Vector2f>& points)
+    {
+        QRectF bounds(QPointF(FLT_MAX, FLT_MIN), QPointF(FLT_MIN, FLT_MAX));
+
+        for (const Vector2f& point : points)
+        {
+            bounds.setLeft(std::min(point.x, (float)bounds.left()));
+            bounds.setRight(std::max(point.x, (float)bounds.right()));
+            bounds.setBottom(std::min(point.y, (float)bounds.bottom()));
+            bounds.setTop(std::max(point.y, (float)bounds.top()));
+        }
+        return bounds;
+    }
+
+    QRectF centerAndSquareBounds(const QRectF& bounds, float offsetFraction)
+    {
+        float width = fabs(bounds.width());
+        float height = fabs(bounds.height());
+        float size = width > height ? width : height;
+        float offset = size * offsetFraction;
+        Vector2f center((bounds.left() + bounds.right()) / 2, (bounds.bottom() + bounds.top()) / 2);
+
+        QRectF squareBounds;
+        squareBounds.setLeft(center.x - size / 2 - offset);
+        squareBounds.setRight(center.x + size / 2 + offset);
+        squareBounds.setBottom(center.y - size / 2 - offset);
+        squareBounds.setTop(center.y + size / 2 + offset);
+
+        return squareBounds;
+    }
+}
 
 ScatterplotWidget::ScatterplotWidget()
     :
@@ -42,6 +80,12 @@ void ScatterplotWidget::pointSizeChanged(const int size)
     update();
 }
 
+void ScatterplotWidget::pointOpacityChanged(const int opacity)
+{
+    _pointRenderer.setAlpha(opacity / 100.0f);
+    update();
+}
+
 void ScatterplotWidget::sigmaChanged(const int sigma)
 {
     _densityRenderer.setSigma(sigma / 100.0f);
@@ -65,20 +109,13 @@ void ScatterplotWidget::colormapdiscreteChanged(bool isDiscrete)
 // Positions need to be passed as a pointer as we need to store them locally in order
 // to be able to find the subset of data that's part of a selection. If passed
 // by reference then we can upload the data to the GPU, but not store it in the widget.
-void ScatterplotWidget::setData(const std::vector<Vector2f>* points, const QRectF bounds)
+void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
 {
+    const QRectF bounds = getDataBounds(*points);
+    
+    _dataBounds = centerAndSquareBounds(bounds, 0.05f);
 
-    float width = fabs(bounds.width());
-    float height = fabs(bounds.height());
-    float size = width > height ? width : height;
-    Vector2f center((bounds.left() + bounds.right()) / 2, (bounds.bottom() + bounds.top()) / 2);
-    QRectF uniformBounds;
-    uniformBounds.setLeft(center.x - size / 2);
-    uniformBounds.setRight(center.x + size / 2);
-    uniformBounds.setBottom(center.y - size / 2);
-    uniformBounds.setTop(center.y + size / 2);
-    _dataBounds = uniformBounds;
-
+    // Pass bounds and data to renderers
     _pointRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
     _densityRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
     _pointRenderer.setData(points);
@@ -130,10 +167,6 @@ void ScatterplotWidget::addSelectionListener(plugin::SelectionListener* listener
     _selectionListeners.push_back(listener);
 }
 
-float lerp(float v0, float v1, float t) {
-    return (1 - t) * v0 + t * v1;
-}
-
 Selection ScatterplotWidget::getSelection()
 {
     Selection isotropicSelection = toIsotropicCoordinates * _selection;
@@ -171,7 +204,6 @@ void ScatterplotWidget::initializeGL()
 
 void ScatterplotWidget::resizeGL(int w, int h)
 {
-    qDebug() << "Resizing scatterplot";
     _windowSize.setWidth(w);
     _windowSize.setHeight(h);
 
@@ -179,8 +211,10 @@ void ScatterplotWidget::resizeGL(int w, int h)
     _densityRenderer.resize(QSize(w, h));
     _selectionRenderer.resize(QSize(w, h));
 
+    // Set matrix for normalizing from pixel coordinates to [0, 1]
     toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
 
+    // Take the smallest dimensions in order to calculate the aspect ratio
     int size = w < h ? w : h;
 
     float wAspect = (float)w / size;
@@ -188,8 +222,8 @@ void ScatterplotWidget::resizeGL(int w, int h)
     float wDiff = ((wAspect - 1) / 2.0);
     float hDiff = ((hAspect - 1) / 2.0);
 
+    
     toIsotropicCoordinates = Matrix3f(wAspect, 0, 0, hAspect, -wDiff, -hDiff);
-    qDebug() << "Done resizing scatterplot";
 
     if (_colormapWidget._isOpen)
     {

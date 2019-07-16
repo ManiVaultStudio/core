@@ -16,26 +16,6 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
 using namespace hdps;
 
-namespace
-{
-    QRectF getDataBounds(const std::vector<Vector2f>& points)
-    {
-        QRectF bounds;
-        bounds.setLeft(FLT_MAX);
-        bounds.setRight(FLT_MIN);
-        bounds.setTop(FLT_MIN);
-        bounds.setBottom(FLT_MAX);
-        for (const Vector2f& point : points)
-        {
-            bounds.setLeft(std::min(point.x, (float) bounds.left()));
-            bounds.setRight(std::max(point.x, (float)bounds.right()));
-            bounds.setBottom(std::min(point.y, (float)bounds.bottom()));
-            bounds.setTop(std::max(point.y, (float)bounds.top()));
-        }
-        return bounds;
-    }
-}
-
 // =============================================================================
 // View
 // =============================================================================
@@ -195,7 +175,7 @@ void ScatterplotPlugin::updateData()
         calculateScalars(scalars, points);
     }
 
-    _scatterPlotWidget->setData(&_points, getDataBounds(_points));
+    _scatterPlotWidget->setData(&_points);
     _scatterPlotWidget->setScalarProperty(scalars);
 
     updateSelection();
