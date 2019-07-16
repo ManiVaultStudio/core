@@ -20,9 +20,13 @@ struct PointSettingsWidget : public QWidget
 
     const int MIN_POINT_SIZE = 5;
     const int MAX_POINT_SIZE = 20;
+    const int MIN_POINT_OPACITY = 0;
+    const int MAX_POINT_OPACITY = 100;
 
     QLabel _pointSizeLabel;
     QSlider _pointSizeSlider;
+    QLabel _pointOpacityLabel;
+    QSlider _pointOpacitySlider;
 };
 
 struct DensitySettingsWidget : public QWidget

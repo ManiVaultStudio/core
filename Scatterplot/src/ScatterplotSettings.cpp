@@ -10,16 +10,24 @@
 PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin)
     :
     _pointSizeLabel("Point Size:"),
-    _pointSizeSlider(Qt::Horizontal)
+    _pointOpacityLabel("Point Opacity:"),
+    _pointSizeSlider(Qt::Horizontal),
+    _pointOpacitySlider(Qt::Horizontal)
 {
     connect(&_pointSizeSlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::pointSizeChanged);
-    
+    connect(&_pointOpacitySlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::pointOpacityChanged);
+
     _pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
     _pointSizeSlider.setValue(10);
+
+    _pointOpacitySlider.setRange(MIN_POINT_OPACITY, MAX_POINT_OPACITY);
+    _pointOpacitySlider.setValue(50);
 
     QVBoxLayout* pointSettingsLayout = new QVBoxLayout();
     pointSettingsLayout->addWidget(&_pointSizeLabel);
     pointSettingsLayout->addWidget(&_pointSizeSlider);
+    pointSettingsLayout->addWidget(&_pointOpacityLabel);
+    pointSettingsLayout->addWidget(&_pointOpacitySlider);
     setLayout(pointSettingsLayout);
 }
 
@@ -149,7 +157,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     dataLayout->addWidget(&_dataOptions);
     dataLayout->addWidget(&_subsetButton);
     
-    QVBoxLayout* renderLayout = new QVBoxLayout();
+    QHBoxLayout* renderLayout = new QHBoxLayout();
     _renderMode.addItem("Scatterplot");
     _renderMode.addItem("Density map");
     _renderMode.addItem("Contour map");
@@ -242,6 +250,7 @@ void ScatterplotSettings::initScalarDimOptions(const std::vector<QString> dimNam
 void ScatterplotSettings::addDataOption(const QString option)
 {
     _dataOptions.addItem(option);
+    _dataOptions.setCurrentIndex(_dataOptions.count()-1);
 }
 
 int ScatterplotSettings::numDataOptions()
