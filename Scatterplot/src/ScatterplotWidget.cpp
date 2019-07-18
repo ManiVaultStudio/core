@@ -13,7 +13,7 @@ namespace
 {
     QRectF getDataBounds(const std::vector<Vector2f>& points)
     {
-        QRectF bounds(QPointF(FLT_MAX, FLT_MIN), QPointF(FLT_MIN, FLT_MAX));
+        QRectF bounds(QPointF(FLT_MAX, -FLT_MAX), QPointF(-FLT_MAX, FLT_MAX));
 
         for (const Vector2f& point : points)
         {

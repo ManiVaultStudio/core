@@ -70,8 +70,8 @@ QRectF getDataBounds(const std::vector<Vector2f>& points)
 {
     QRectF bounds;
     bounds.setLeft(FLT_MAX);
-    bounds.setRight(FLT_MIN);
-    bounds.setTop(FLT_MIN);
+    bounds.setRight(-FLT_MAX);
+    bounds.setTop(-FLT_MAX);
     bounds.setBottom(FLT_MAX);
     float maxDimension = 0;
     for (const Vector2f& point : points)

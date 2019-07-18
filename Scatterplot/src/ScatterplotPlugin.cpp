@@ -214,7 +214,7 @@ void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Poin
 
     if (colorIndex >= 0) {
         int numDims = points.getNumDimensions();
-        float minScalar = FLT_MAX, maxScalar = FLT_MIN;
+        float minScalar = FLT_MAX, maxScalar = -FLT_MAX;
 
         for (int i = 0; i < _numPoints; i++) {
             float scalar = points.data[i * numDims + colorIndex];
