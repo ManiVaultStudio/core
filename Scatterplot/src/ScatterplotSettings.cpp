@@ -250,7 +250,6 @@ void ScatterplotSettings::initScalarDimOptions(const std::vector<QString> dimNam
 void ScatterplotSettings::addDataOption(const QString option)
 {
     _dataOptions.addItem(option);
-    _dataOptions.setCurrentIndex(_dataOptions.count()-1);
 }
 
 int ScatterplotSettings::numDataOptions()
