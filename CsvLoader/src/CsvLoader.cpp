@@ -73,11 +73,12 @@ void CsvLoader::loadData()
             points.data[i] = data[i];
         }
         points.numDimensions = numDimensions;
+
         qDebug() << "Number of dimensions: " << points.numDimensions;
 
         _core->notifyDataAdded(name);
 
-        qDebug() << "CSV file loaded. Num data points: " << points.data.size();
+        qDebug() << "CSV file loaded. Num data points: " << points.data.size() / points.getNumDimensions();
     }
 }
 
