@@ -4,6 +4,8 @@
 
 #include "Set.h"
 #include <QString>
+#include <QMap>
+#include <QVariant>
 #include <vector>
 
 using namespace hdps::plugin;
@@ -35,6 +37,14 @@ public:
     std::vector<QString> dimNames;
     std::vector<float> data;
     unsigned int numDimensions = 1;
+
+	QVariant getMetaProperty(const QString& propertyName) const;
+	void setMetaProperty(const QString& propertyName, const QVariant& propertyValue);
+	bool hasProperty(const QString& propertyName) const;
+	QStringList propertyNames() const;
+
+private:
+	QMap<QString, QVariant>		_metaData;
 };
 
 class IndexSet : public hdps::Set
