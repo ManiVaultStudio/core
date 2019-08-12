@@ -124,10 +124,7 @@ namespace hdps
 
         void PointRenderer::setBounds(float left, float right, float bottom, float top)
         {
-            _bounds.setLeft(left);
-            _bounds.setRight(right);
-            _bounds.setBottom(bottom);
-            _bounds.setTop(top);
+            _bounds.setCoords(left, top, right, bottom);
         }
 
         void PointRenderer::setPointSize(const float size)
