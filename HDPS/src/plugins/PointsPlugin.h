@@ -38,10 +38,28 @@ public:
     std::vector<float> data;
     unsigned int numDimensions = 1;
 
-	QVariant getMetaProperty(const QString& propertyName) const;
-	void setMetaProperty(const QString& propertyName, const QVariant& propertyValue);
-	bool hasProperty(const QString& propertyName) const;
-	QStringList propertyNames() const;
+	QVariant getMetaProperty(const QString & propertyName) const
+	{
+		if (!hasProperty(propertyName))
+			return QVariant();
+
+		return _metaData[propertyName];
+	}
+
+	void setMetaProperty(const QString & propertyName, const QVariant & propertyValue)
+	{
+		_metaData[propertyName] = propertyValue;
+	}
+
+	bool hasProperty(const QString & propertyName) const
+	{
+		return _metaData.contains(propertyName);
+	}
+
+	QStringList propertyNames() const
+	{
+		return _metaData.keys();
+	}
 
 private:
 	QMap<QString, QVariant>		_metaData;
