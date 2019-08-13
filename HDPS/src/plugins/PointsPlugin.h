@@ -38,31 +38,31 @@ public:
     std::vector<float> data;
     unsigned int numDimensions = 1;
 
-	QVariant getMetaProperty(const QString & propertyName) const
+	QVariant getProperty(const QString & name) const
 	{
-		if (!hasProperty(propertyName))
+		if (!hasProperty(name))
 			return QVariant();
 
-		return _metaData[propertyName];
+		return _properties[name];
 	}
 
-	void setMetaProperty(const QString & propertyName, const QVariant & propertyValue)
+	void setProperty(const QString & name, const QVariant & value)
 	{
-		_metaData[propertyName] = propertyValue;
+		_properties[name] = value;
 	}
 
-	bool hasProperty(const QString & propertyName) const
+	bool hasProperty(const QString & name) const
 	{
-		return _metaData.contains(propertyName);
+		return _properties.contains(name);
 	}
 
 	QStringList propertyNames() const
 	{
-		return _metaData.keys();
+		return _properties.keys();
 	}
 
 private:
-	QMap<QString, QVariant>		_metaData;
+	QMap<QString, QVariant>		_properties;
 };
 
 class IndexSet : public hdps::Set
