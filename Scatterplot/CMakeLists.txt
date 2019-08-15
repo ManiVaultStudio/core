@@ -36,6 +36,7 @@ add_library(${PROJECT} SHARED ${SOURCES})
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
+target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointsPlugin.lib")
 
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
