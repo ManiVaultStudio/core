@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pointsplugin_export.h"
+
 #include "RawData.h"
 
 #include "Set.h"
@@ -14,7 +16,7 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class PointsPlugin : public RawData
+class POINTSPLUGIN_EXPORT PointsPlugin : public RawData
 {
 public:
     PointsPlugin() : RawData("Points") { }
