@@ -18,8 +18,8 @@ add_subdirectory(Scatterplot)
 add_subdirectory(SpadeAnalysis)
 add_subdirectory(TsneAnalysis)
 
-add_dependencies(HeatMap Clusters)
-add_dependencies(SpadeAnalysis Clusters)
+add_dependencies(HeatMapPlugin ClustersPlugin)
+add_dependencies(SpadeAnalysisPlugin ClustersPlugin)
 
 # Note: The plugins BasicClustering and ImageView are not in used (as Julian Thijssen commented,
 # June 24, 2019), so this CMakeLists does not add those subdirectories.
