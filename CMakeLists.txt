@@ -11,12 +11,12 @@ add_subdirectory(CsvLoader)
 add_subdirectory(ExampleDataPlugin)
 add_subdirectory(ExampleViewPlugin)
 add_subdirectory(FcsLoader)
+add_subdirectory(BinLoader)
 add_subdirectory(HDPS)
 add_subdirectory(HeatMap)
 add_subdirectory(MeanShift)
 add_subdirectory(Scatterplot)
 add_subdirectory(SpadeAnalysis)
-add_subdirectory(TsneAnalysis)
 
 # Note: The plugins BasicClustering and ImageView are not in used (as Julian Thijssen commented,
 # June 24, 2019), so this CMakeLists does not add those subdirectories.
