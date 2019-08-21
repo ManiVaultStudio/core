@@ -21,12 +21,18 @@ add_subdirectory(TsneAnalysis)
 add_dependencies(ClustersPlugin HDPS)
 add_dependencies(PointsPlugin HDPS)
 add_dependencies(ScatterPlotPlugin HDPS)
+add_dependencies(ScatterPlotPlugin PointsPlugin)
 add_dependencies(CsvLoader HDPS)
+add_dependencies(CsvLoader PointsPlugin)
 add_dependencies(FcsLoader HDPS)
 add_dependencies(TsneAnalysisPlugin HDPS)
+add_dependencies(TsneAnalysisPlugin PointsPlugin)
 add_dependencies(MeanShiftClusteringPlugin HDPS)
+add_dependencies(MeanShiftClusteringPlugin PointsPlugin)
 add_dependencies(HeatMapPlugin ClustersPlugin)
+add_dependencies(HeatMapPlugin PointsPlugin)
 add_dependencies(SpadeAnalysisPlugin ClustersPlugin)
+add_dependencies(SpadeAnalysisPlugin PointsPlugin)
 
 # Note: The plugins BasicClustering and ImageView are not in used (as Julian Thijssen commented,
 # June 24, 2019), so this CMakeLists does not add those subdirectories.
