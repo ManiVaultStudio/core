@@ -18,6 +18,13 @@ add_subdirectory(Scatterplot)
 add_subdirectory(SpadeAnalysis)
 add_subdirectory(TsneAnalysis)
 
+add_dependencies(ClustersPlugin HDPS)
+add_dependencies(PointsPlugin HDPS)
+add_dependencies(ScatterPlotPlugin HDPS)
+add_dependencies(CsvLoader HDPS)
+add_dependencies(FcsLoader HDPS)
+add_dependencies(TsneAnalysisPlugin HDPS)
+add_dependencies(MeanShiftClusteringPlugin HDPS)
 add_dependencies(HeatMapPlugin ClustersPlugin)
 add_dependencies(SpadeAnalysisPlugin ClustersPlugin)
 
