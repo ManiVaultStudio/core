@@ -34,6 +34,7 @@ set( MAIN_SOURCES
 )
 
 set( CORE_HEADERS
+    ui/MainWindow.ui
     src/MainWindow.h
     src/PluginManager.h
     src/Core.h
