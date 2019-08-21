@@ -20,6 +20,8 @@ add_subdirectory(TsneAnalysis)
 
 add_dependencies(ClustersPlugin HDPS)
 add_dependencies(PointsPlugin HDPS)
+add_dependencies(ExampleDataPlugin HDPS)
+add_dependencies(ExampleViewPlugin HDPS)
 add_dependencies(ScatterplotPlugin HDPS)
 add_dependencies(ScatterplotPlugin PointsPlugin)
 add_dependencies(CsvLoader HDPS)
