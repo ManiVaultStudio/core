@@ -19,6 +19,7 @@ add_subdirectory(SpadeAnalysis)
 add_subdirectory(TsneAnalysis)
 
 add_dependencies(ClustersPlugin HDPS)
+add_dependencies(ClustersPlugin PointsPlugin)
 add_dependencies(PointsPlugin HDPS)
 add_dependencies(ExampleDataPlugin HDPS)
 add_dependencies(ExampleDataPlugin PointsPlugin)
