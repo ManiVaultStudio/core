@@ -93,21 +93,21 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     if (points.isDerivedData()) {
         const PointsPlugin& sourceData = dynamic_cast<const PointsPlugin&>(points.getSourceData());
 
-        if (points.dimNames.size() == points.getNumDimensions())
-            settings->initDimOptions(points.dimNames);
+        if (points.getDimensionNames().size() == points.getNumDimensions())
+            settings->initDimOptions(points.getDimensionNames());
         else
             settings->initDimOptions(points.getNumDimensions());
 
-        if (sourceData.dimNames.size() == sourceData.getNumDimensions())
-            settings->initScalarDimOptions(sourceData.dimNames);
+        if (sourceData.getDimensionNames().size() == sourceData.getNumDimensions())
+            settings->initScalarDimOptions(sourceData.getDimensionNames());
         else
             settings->initScalarDimOptions(sourceData.getNumDimensions());
     }
     else
     {
-        if (points.dimNames.size() == points.getNumDimensions()) {
-            settings->initDimOptions(points.dimNames);
-            settings->initScalarDimOptions(points.dimNames);
+        if (points.getDimensionNames().size() == points.getNumDimensions()) {
+            settings->initDimOptions(points.getDimensionNames());
+            settings->initScalarDimOptions(points.getDimensionNames());
         }
         else {
             settings->initDimOptions(points.getNumDimensions());
@@ -194,7 +194,7 @@ void ScatterplotPlugin::calculatePositions(const IndexSet& dataSet)
     {
         for (int i = 0; i < _numPoints; i++)
         {
-            _points[i].set(points.data[i * numDims + xDim], points.data[i * numDims + yDim]);
+            _points[i].set(points[i * numDims + xDim], points[i * numDims + yDim]);
         }
     }
     else
@@ -202,7 +202,7 @@ void ScatterplotPlugin::calculatePositions(const IndexSet& dataSet)
         for (int i = 0; i < _numPoints; i++)
         {
             int setIndex = dataSet.indices[i];
-            _points[i].set(points.data[setIndex * numDims + xDim], points.data[setIndex * numDims + yDim]);
+            _points[i].set(points[setIndex * numDims + xDim], points[setIndex * numDims + yDim]);
         }
     }
 }
@@ -216,7 +216,7 @@ void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Poin
         float minScalar = FLT_MAX, maxScalar = -FLT_MAX;
 
         for (int i = 0; i < _numPoints; i++) {
-            float scalar = points.data[i * numDims + colorIndex];
+            float scalar = points[i * numDims + colorIndex];
 
             minScalar = scalar < minScalar ? scalar : minScalar;
             maxScalar = scalar > maxScalar ? scalar : maxScalar;

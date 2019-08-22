@@ -90,17 +90,14 @@ void BinLoader::loadData()
         QString name = _core->addData("Points", _dataSetName);
         const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(name));
         PointsPlugin& points = set.getData();
-        points.data.resize(data.size());
-        for (int i = 0; i < points.data.size(); i++) {
-            points.data[i] = data[i];
-        }
-        points.numDimensions = _numDimensions;
 
-        qDebug() << "Number of dimensions: " << points.numDimensions;
+        points.setData(data.data(), data.size() / _numDimensions, _numDimensions);
+
+        qDebug() << "Number of dimensions: " << points.getNumDimensions();
 
         _core->notifyDataAdded(name);
 
-        qDebug() << "BIN file loaded. Num data points: " << points.data.size() / points.getNumDimensions();
+        qDebug() << "BIN file loaded. Num data points: " << points.getNumPoints();
     }
 }
 

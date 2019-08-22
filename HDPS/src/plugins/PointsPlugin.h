@@ -24,21 +24,32 @@ public:
     
     void init() override;
 
+    hdps::Set* createSet() const override;
+
     unsigned int getNumPoints() const
     {
-        return data.size() / numDimensions;
+        return _data.size() / _numDimensions;
     }
 
     unsigned int getNumDimensions() const
     {
-        return numDimensions;
+        return _numDimensions;
     }
 
-    hdps::Set* createSet() const override;
+    const std::vector<float>& getData() const;
 
-    std::vector<QString> dimNames;
-    std::vector<float> data;
-    unsigned int numDimensions = 1;
+    const std::vector<QString>& getDimensionNames() const;
+
+    void setData(float* data, unsigned int numPoints, unsigned int numDimensions);
+
+    void setDimensionNames(const std::vector<QString>& dimNames);
+
+    // Constant subscript indexing
+    const float& operator[](unsigned int index) const;
+
+    // Subscript indexing
+    float& operator[](unsigned int index);
+    
 
 	QVariant getProperty(const QString & name) const
 	{
@@ -64,6 +75,14 @@ public:
 	}
 
 private:
+    /** Main store of point data in dimension-major order */
+    std::vector<float> _data;
+
+    /** Number of features of each data point */
+    unsigned int _numDimensions = 1;
+
+    std::vector<QString> _dimNames;
+    
 	QMap<QString, QVariant>		_properties;
 };
 

@@ -269,17 +269,15 @@ void FcsLoader::loadData()
         QString name = _core->addData("Points", dataSetName);
         const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(name));
         PointsPlugin& points = set.getData();
-        points.data.resize(data.size());
-        for (int i = 0; i < points.data.size(); i++) {
-            points.data[i] = data[i];
-        }
-        points.dimNames = dimNames;
-        points.numDimensions = numDimensions;
-        qDebug() << "Number of dimensions: " << points.numDimensions;
+        
+        points.setData(data.data(), data.size() / numDimensions, numDimensions);
+        points.setDimensionNames(dimNames);
+
+        qDebug() << "Number of dimensions: " << points.getNumDimensions();
 
         _core->notifyDataAdded(name);
 
-        qDebug() << "FCS file loaded. Num data points: " << points.data.size();
+        qDebug() << "FCS file loaded. Num data points: " << points.getNumPoints();
     }
 }
 

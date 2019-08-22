@@ -193,7 +193,7 @@ bool SpadeAnalysisPlugin::upsampleData(const PointsPlugin& points)
         for (int j = 0; j < numActiveVariables; j++)
         {
             int markerIdx = _selectedMarkers[j];
-            currentExpression[j] = points.data[numDimensions*i + markerIdx];
+            currentExpression[j] = points[numDimensions*i + markerIdx];
         }
 
         //int idx = 0;
@@ -291,7 +291,7 @@ bool SpadeAnalysisPlugin::computeMedianMinimumDistance(const PointsPlugin& point
         {
             // do not compare to myself
             if (s == i) continue;
-            float dist = distance(&points.data[numDimensions*i], &points.data[numDimensions*s], &_selectedMarkers);
+            float dist = distance(&points[numDimensions*i], &points[numDimensions*s], &_selectedMarkers);
             
             if (dist < minDistance) minDistance = dist;
         }
@@ -338,7 +338,7 @@ bool SpadeAnalysisPlugin::computeLocalDensities(const PointsPlugin& points)
         {
             if (s == i) continue;
 
-            float dist = distance(&points.data[numDimensions*i], &points.data[numDimensions*s], &_selectedMarkers);
+            float dist = distance(&points[numDimensions*i], &points[numDimensions*s], &_selectedMarkers);
             if (dist <= _scaledMedianDistance[NO_FILE])
             {
                 _localDensity[NO_FILE][i]++;
@@ -473,7 +473,7 @@ bool SpadeAnalysisPlugin::clusterDownsampledData(const PointsPlugin& points)
         for (int i = 0; i < numActiveSamples; i++)
         {
             int sIdx = _selectedSamples[f][i];
-            const float* vec = &points.data[numDimensions * sIdx];
+            const float* vec = &points[numDimensions * sIdx];
 
             cPoint_t* p = new cPoint_t();
             p->originalIndex = sIdx;
@@ -581,7 +581,7 @@ void SpadeAnalysisPlugin::computeMedianClusterExpression(const PointsPlugin& poi
                 int file = _clusters[i][k].first;
                 int idx = _clusters[i][k].second * numDimensions + var;
 
-                values[k] = points.data[idx];
+                values[k] = points[idx];
             }
             std::sort(values.begin(), values.end());
             _medianClusterExpressions[i][j] = values[_clusters[i].size() / 2];

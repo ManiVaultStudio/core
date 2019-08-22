@@ -68,17 +68,14 @@ void CsvLoader::loadData()
         QString name = _core->addData("Points", dataSetName);
         const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(name));
         PointsPlugin& points = set.getData();
-        points.data.resize(data.size());
-        for (int i = 0; i < points.data.size(); i++) {
-            points.data[i] = data[i];
-        }
-        points.numDimensions = numDimensions;
+        
+        points.setData(data.data(), data.size() / numDimensions, numDimensions);
 
-        qDebug() << "Number of dimensions: " << points.numDimensions;
+        qDebug() << "Number of dimensions: " << points.getNumDimensions();
 
         _core->notifyDataAdded(name);
 
-        qDebug() << "CSV file loaded. Num data points: " << points.data.size() / points.getNumDimensions();
+        qDebug() << "CSV file loaded. Num data points: " << points.getNumPoints();
     }
 }
 
