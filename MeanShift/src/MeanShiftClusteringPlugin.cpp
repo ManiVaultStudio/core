@@ -99,7 +99,7 @@ void MeanShiftAnalysisPlugin::startComputation()
         return;
     }
 
-    std::vector<hdps::Vector2f>* points2D = (std::vector<hdps::Vector2f>*) &points.data;
+    std::vector<hdps::Vector2f>* points2D = (std::vector<hdps::Vector2f>*) &points.getData();
 
     _meanShift.setData(points2D);
 

@@ -126,7 +126,7 @@ void HeatMapPlugin::updateData()
             float mean = 0;
 
             for (int index : cluster->indices)
-                mean += points.data[index * numDimensions + d];
+                mean += points[index * numDimensions + d];
 
             mean /= cluster->indices.size();
 
@@ -134,7 +134,7 @@ void HeatMapPlugin::updateData()
             float variance = 0;
 
             for (int index : cluster->indices)
-                variance += pow(points.data[index * numDimensions + d] - mean, 2);
+                variance += pow(points[index * numDimensions + d] - mean, 2);
 
             float stddev = sqrt(variance / cluster->indices.size());
 
