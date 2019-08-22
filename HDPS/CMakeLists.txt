@@ -6,6 +6,8 @@ project(${PROJECT})
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
 set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
@@ -32,6 +34,7 @@ set( MAIN_SOURCES
 )
 
 set( CORE_HEADERS
+    ui/MainWindow.ui
     src/MainWindow.h
     src/PluginManager.h
     src/Core.h
