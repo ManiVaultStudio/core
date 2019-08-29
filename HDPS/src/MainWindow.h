@@ -27,6 +27,7 @@ namespace gui
 {
 
 class SettingsWidget;
+class LogDockWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -79,6 +80,7 @@ private:
 
 private:
     std::unique_ptr<Core> _core;
+    std::unique_ptr<LogDockWidget> _logDockWidget;
 
     QByteArray _windowConfiguration;
 };
