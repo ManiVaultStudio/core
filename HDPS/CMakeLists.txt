@@ -35,6 +35,9 @@ set( MAIN_SOURCES
 
 set( CORE_HEADERS
     ui/MainWindow.ui
+    src/Logger.h
+    src/LogItemModel.h
+    src/LogDockWidget.h
     src/MainWindow.h
     src/PluginManager.h
     src/Core.h
@@ -43,6 +46,9 @@ set( CORE_HEADERS
 )
 
 set( CORE_SOURCES
+    src/Logger.cpp
+    src/LogItemModel.cpp
+    src/LogDockWidget.cpp
     src/MainWindow.cpp
     src/PluginManager.cpp
     src/Core.cpp

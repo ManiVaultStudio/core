@@ -1,5 +1,7 @@
 #include "MainWindow.h"
 
+#include "Logger.h"
+#include "LogDockWidget.h"
 #include "PluginManager.h"
 #include "PluginType.h"
 
@@ -7,6 +9,72 @@
 #include "widgets/SettingsWidget.h"
 
 #include <QDebug>
+#include <QDesktopServices>
+#include <QMessageBox>
+#include <QProcess>
+#include <QUrl>
+
+namespace
+{
+    // TODO Move this function to a utility file.
+    bool ShowFileInFolder(const QString path)
+    {
+        const QFileInfo info(path);
+
+        if (!info.exists())
+        {
+            return false;
+        }
+
+        // Based upon: How to "Reveal in Finder" or “Show in Explorer” with Qt
+        // https://stackoverflow.com/questions/3490336/how-to-reveal-in-finder-or-show-in-explorer-with-qt
+        enum class Os { Windows, Mac, Other };
+
+        constexpr auto os =
+#if defined(Q_OS_WIN)
+            Os::Windows
+#elif defined(Q_OS_MAC)
+            Os::Mac
+#else
+            Os::Other
+#endif
+            ;
+
+        if (os == Os::Windows)
+        {
+            const auto args = QStringList{}
+                << "/select,"
+                << QDir::toNativeSeparators(path);
+
+            if (QProcess::startDetached("explorer.exe", args))
+            {
+                return true;
+            }
+        }
+        if (os == Os::Mac)
+        {
+            const auto args = QStringList{}
+                << "-e"
+                << "tell application \"Finder\""
+                << "-e"
+                << "activate"
+                << "-e"
+                << "select POSIX file \"" + path + "\""
+                << "-e"
+                << "end tell"
+                << "-e"
+                << "return";
+
+            if (QProcess::execute("/usr/bin/osascript", args) == 0)
+            {
+                return true;
+            }
+        }
+        QDesktopServices::openUrl(QUrl::fromLocalFile(info.path()));
+        return true;
+    }
+
+}
 
 namespace hdps
 {
@@ -22,8 +90,34 @@ MainWindow::MainWindow(QWidget *parent) :
     _core->init();
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
+    
+    Logger::Initialize();
 
+    QObject::connect(findLogFileAction, &QAction::triggered, [this](bool)
+    {
+        const auto filePath = Logger::GetFilePathName();
 
+        if ( !ShowFileInFolder(filePath))
+        {
+            QMessageBox::information(this,
+                QObject::tr("Log file not found"),
+                QObject::tr("The log file is not found:\n%1").arg(filePath));
+        }
+    });
+
+    QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked)
+    {
+        if (checked)
+        {
+            _logDockWidget = std::make_unique<LogDockWidget>(*this);
+            addDockWidget(Qt::BottomDockWidgetArea, _logDockWidget.get(), Qt::Horizontal);
+        }
+        else
+        {
+            removeDockWidget(_logDockWidget.get());
+            _logDockWidget.reset();
+        }
+    });
 }
 
 MainWindow::~MainWindow()
