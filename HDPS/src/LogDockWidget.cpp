@@ -5,6 +5,7 @@
 
 // Qt header files:
 #include <QAbstractEventDispatcher>
+#include <QHeaderView>
 #include <QMainWindow>
 #include <QTreeView>
 
@@ -31,6 +32,7 @@ public:
         treeView->setItemsExpandable(false);
         treeView->setSortingEnabled(true);
         treeView->setExpandsOnDoubleClick(false);
+        treeView->header()->setSortIndicator(-1, Qt::AscendingOrder);
         treeView->setModel(&_itemModel);
 
         const auto numberOfColumns = int{ LogItemModel::GetNumberOfColumns() };

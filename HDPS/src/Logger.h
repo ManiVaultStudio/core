@@ -1,6 +1,9 @@
 #pragma once
 
 #include <QString>
+
+// Standard C++ header files:
+#include <cstddef>
 #include <deque>
 #include <exception>
 
@@ -9,6 +12,7 @@ namespace hdps
 
 struct MessageRecord
 {
+    std::size_t number;
     QtMsgType type;
     int version;
     int line;
