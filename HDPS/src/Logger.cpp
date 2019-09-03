@@ -209,8 +209,10 @@ void MessageHandler(
         // MessageRecords and log file.
         const std::lock_guard<std::mutex> guard(GetMutex());
 
-        GetMessageRecords().push_back(
+        auto& messageRecords = GetMessageRecords();
+        messageRecords.push_back(
             {
+                messageRecords.size() + 1,
                 type,
                 context.version,
                 context.line,

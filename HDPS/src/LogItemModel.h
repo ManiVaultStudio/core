@@ -17,7 +17,10 @@ namespace gui
 class LogItemModel final : public QAbstractItemModel
 {
 private: // Data member:
-    std::deque<const MessageRecord*> m_deque;
+    std::deque<const MessageRecord*> _messageRecords;
+    std::deque<const MessageRecord*> _sortedMessageRecords;
+    bool _isSortedInDescendingOrder{ false };
+    int _sortedColumn{ -1 };
 
 public:
     LogItemModel();
@@ -38,6 +41,9 @@ private: // Member functions:
     QModelIndex parent(const QModelIndex &) const override;
     QVariant data(const QModelIndex &, int) const override;
     QVariant headerData(int, Qt::Orientation, int) const override;
+
+    // Overrides QAbstractItemModel.
+    void sort(int column, Qt::SortOrder order) override;
 };
 
 }   //namespace gui
