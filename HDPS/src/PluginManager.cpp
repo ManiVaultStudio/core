@@ -57,10 +57,10 @@ void PluginManager::loadPlugins()
     QSignalMapper* signalMapper = new QSignalMapper(this);
     
     // List of filenames of dependency resolved plugins
-    QStringList resolvedPlugins = resolveDependencies(pluginDir);
+    const QStringList resolvedPlugins = resolveDependencies(pluginDir);
 
     // For each of the plugin files which are resolved, load them and add them in their proper menu category
-    foreach(QString fileName, resolvedPlugins)
+    for (const QString& fileName: resolvedPlugins)
     {
         // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
@@ -135,7 +135,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
      * immediately add it to the list of resolved plugins. Dependencies are given by a list of plugin kinds
      * under the 'dependencies' key in the accompanying .json metadata file.
      */
-    foreach(QString fileName, pluginDir.entryList(QDir::Files))
+    for (QString fileName: pluginDir.entryList(QDir::Files))
     {
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
 
@@ -155,7 +155,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 
         // Store plugin dependency list in a map
         QStringList dependencyList;
-        for (QJsonValue dependency : dependencyData)
+        for (const QJsonValue& dependency : dependencyData)
         {
             dependencyList.push_back(dependency.toString());
         }
@@ -211,7 +211,7 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 
     // Form a list of resolved plugin file names rather than kinds and return it
     QStringList resolvedOrderedPluginNames;
-    for (QString kind : resolved)
+    for (const QString& kind : resolved)
     {
         resolvedOrderedPluginNames.push_back(kindToPluginNameMap[kind]);
     }
