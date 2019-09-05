@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QHash>
 #include <QDir>
 
@@ -36,9 +37,9 @@ public:
     
 private:
     /**
-    * Resolves plugin dependencies, returns list of resolved plugin names.
+    * Resolves plugin dependencies, returns list of resolved plugin filenames.
     */
-    QVector<QString> resolveDependencies(QDir pluginDir) const;
+    QStringList resolveDependencies(QDir pluginDir) const;
 
     Core& _core;
 
