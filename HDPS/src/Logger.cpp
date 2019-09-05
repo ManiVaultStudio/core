@@ -269,11 +269,24 @@ void hdps::Logger::GetMessageRecords(std::deque<const MessageRecord*>& messageRe
     const std::lock_guard<std::mutex> guard(GetMutex());
 
     const auto& messageRecords = ::GetMessageRecords();
+    const auto previousNumberOfMessages = messageRecordPointers.size();
     const auto numberOfMessages = messageRecords.size();
+
+    if (previousNumberOfMessages <= numberOfMessages)
+    {
+        for (auto i = 0; i < previousNumberOfMessages; ++i)
+        {
+            assert(messageRecordPointers[i] == &(messageRecords[i]));
+        }
+    }
+    else
+    {
+        assert(!"The number of messages should not be less than the previous time!");
+    }
 
     messageRecordPointers.resize(numberOfMessages);
 
-    for (std::size_t i{}; i < numberOfMessages; ++i)
+    for (auto i = previousNumberOfMessages; i < numberOfMessages; ++i)
     {
         messageRecordPointers[i] = &(messageRecords[i]);
     }
