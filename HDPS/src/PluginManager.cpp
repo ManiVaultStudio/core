@@ -56,39 +56,39 @@ void PluginManager::loadPlugins()
 
     QSignalMapper* signalMapper = new QSignalMapper(this);
     
-    QVector<QString> resolved = resolveDependencies(pluginDir);
+    // List of filenames of dependency resolved plugins
+    QStringList resolvedPlugins = resolveDependencies(pluginDir);
 
-    foreach(QString fileName, pluginDir.entryList(QDir::Files))
+    // For each of the plugin files which are resolved, load them and add them in their proper menu category
+    foreach(QString fileName, resolvedPlugins)
     {
+        // Dynamic loader of plugin shared library
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
         gui::MainWindow& gui = _core.gui();
 
-        QString pluginName = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+        // Get metadata about plugin from the accompanying .json file compiled in the shared library
+        QString pluginKind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
         QString menuName = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
 
-        // Check if this plugin has all its dependencies resolved
-        if (!resolved.contains(pluginName)) {
-            qWarning() << "Plugin: " << pluginName << " has unresolved dependencies.";
-            continue;
-        }
-
-        // create an instance of the plugin, i.e. the factory
+        // Create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
        
+        // If pluginFactory is a nullptr then loading of the plugin failed for some reason. Print the reason to output.
         if (!pluginFactory)
         {
-            qDebug() << "Failed to load plugin: " << fileName << pluginLoader.errorString();
+            qWarning() << "Failed to load plugin: " << fileName << pluginLoader.errorString();
             continue;
         }
 
+        // Loading of the plugin succeeded so cast it to its original class
+        _pluginFactories[pluginKind] = qobject_cast<PluginFactory*>(pluginFactory);
 
-        _pluginFactories[pluginName] = qobject_cast<PluginFactory*>(pluginFactory);
-
+        // Add the plugin to a menu item and link the triggering of the menu item to triggering of the plugin
         QAction* action = NULL;
 
         if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::ANALYSIS, pluginName);
+            action = gui.addMenuAction(plugin::Type::ANALYSIS, pluginKind);
         }
         else if (qobject_cast<RawDataFactory*>(pluginFactory))
         {
@@ -103,7 +103,7 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::VIEW, pluginName);
+            action = gui.addMenuAction(plugin::Type::VIEW, pluginKind);
         }
         else
         {
@@ -111,22 +111,30 @@ void PluginManager::loadPlugins()
             return;
         }
         
-        if(action)
+        if (action)
         {
             QObject::connect(action, &QAction::triggered, signalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-            signalMapper->setMapping(action, pluginName);
+            signalMapper->setMapping(action, pluginKind);
         }
     }
 
     QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(const QString&)>(&QSignalMapper::mapped), this, &PluginManager::pluginTriggered);
 }
 
-QVector<QString> PluginManager::resolveDependencies(QDir pluginDir) const
+QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 {
+    // Map keeping track of the list of plugin kinds on which a plugin is dependent
     QMap<QString, QStringList> dependencies;
-    QVector<QString> resolved;
+    // List of plugin kinds which have had their dependencies resolved
+    QStringList resolved;
+    // Map from plugin kinds to plugin file names
+    QMap<QString, QString> kindToPluginNameMap;
 
-    // for all items in the plugins directory
+    /*
+     * For each item in the plugin directory, store their dependencies. If a plugin has no dependencies,
+     * immediately add it to the list of resolved plugins. Dependencies are given by a list of plugin kinds
+     * under the 'dependencies' key in the accompanying .json metadata file.
+     */
     foreach(QString fileName, pluginDir.entryList(QDir::Files))
     {
         QPluginLoader pluginLoader(pluginDir.absoluteFilePath(fileName));
@@ -135,12 +143,17 @@ QVector<QString> PluginManager::resolveDependencies(QDir pluginDir) const
         QString kind = metaData.value("name").toString();
         QJsonArray dependencyData = metaData.value("dependencies").toArray();
 
+        // Map plugin kind to plugin file name
+        kindToPluginNameMap[kind] = fileName;
+
+        // If plugin has no dependencies, add it to the resolved list
         if (dependencyData.size() == 0)
         {
             resolved.push_back(kind);
             continue;
         }
 
+        // Store plugin dependency list in a map
         QStringList dependencyList;
         for (QJsonValue dependency : dependencyData)
         {
@@ -148,12 +161,17 @@ QVector<QString> PluginManager::resolveDependencies(QDir pluginDir) const
         }
         dependencies[kind] = dependencyList;
     }
+
     qDebug() << "Dependencies: " << dependencies;
     qDebug() << "Resolved: " << resolved;
-    // Dependency resolution
+
+    // Attempt to resolve all plugin dependencies in an iterative manner
     while (dependencies.size() != 0)
     {
         bool removed = false;
+
+        // For all dependencies of a plugin, check if any of its dependencies are already resolved.
+        // If so, remove that dependency from the list.
         for (QStringList& depList : dependencies)
         {
             QMutableListIterator<QString> it(depList);
@@ -166,6 +184,8 @@ QVector<QString> PluginManager::resolveDependencies(QDir pluginDir) const
                 }
             }
         }
+
+        // Check for unresolved plugins which now have zero dependencies and mark them as resolved
         QStringList keys = dependencies.keys();
         for (QString key : keys) {
             QStringList depList = dependencies[key];
@@ -176,12 +196,26 @@ QVector<QString> PluginManager::resolveDependencies(QDir pluginDir) const
                 qDebug() << "Resolved: " << key;
             }
         }
+
         // If no dependencies were resolved this iteration we can stop
         if (!removed)
             break;
     }
 
-    return resolved;
+    // TODO List all of the plugins which have unresolved dependencies and what they are
+    // Check if this plugin has all its dependencies resolved
+    /*if (!resolvedPlugins.contains(fileName)) {
+        qWarning() << "Plugin: " << pluginName << " has unresolved dependencies.";
+        continue;
+    }*/
+
+    // Form a list of resolved plugin file names rather than kinds and return it
+    QStringList resolvedOrderedPluginNames;
+    for (QString kind : resolved)
+    {
+        resolvedOrderedPluginNames.push_back(kindToPluginNameMap[kind]);
+    }
+    return resolvedOrderedPluginNames;
 }
 
 QString PluginManager::createPlugin(const QString kind)
