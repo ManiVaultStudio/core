@@ -155,7 +155,6 @@ void ScatterplotPlugin::updateData()
     int xDim = settings->getXDimension();
     int yDim = settings->getYDimension();
 
-    qDebug() << "X: " << xDim << " Y: " << yDim;
     if (xDim < 0 || yDim < 0)
         return;
 

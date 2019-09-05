@@ -190,8 +190,6 @@ void DensityComputation::compute()
     if (!_initialized) return;
     if (!hasData()) return;
 
-    qDebug() << "Computing density";
-
     // Bind the OpenGL context to an off-screen surface to draw on
     _offscreenSurface.setFormat(_ctx->format());
     _offscreenSurface.setScreen(_ctx->screen());
@@ -236,11 +234,11 @@ void DensityComputation::compute()
 
     _maxKDE = calculateMaxKDE();
 
-    qDebug() << "	Max KDE Value = " << _maxKDE << ".\n";
+    //qDebug() << "	Max KDE Value = " << _maxKDE << ".\n";
 
     //_needsDensityMapUpdate = false;
 
-    qDebug() << "Done computing density";
+    //qDebug() << "Done computing density";
 }
 
 bool DensityComputation::hasData()
