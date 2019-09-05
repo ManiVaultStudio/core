@@ -8,6 +8,7 @@
 #include <QHeaderView>
 #include <QMainWindow>
 #include <QTreeView>
+#include <QUuid>
 
 
 namespace hdps
@@ -67,6 +68,11 @@ LogDockWidget::LogDockWidget(QMainWindow& mainWindow)
     QDockWidget(&mainWindow),
     _data(std::make_unique<Data>(*this))
 {
+    // The following is copied from DockableWidget::DockableWidget, in
+    // "core\HDPS\src\widgets\DockableWidget.cpp":
+
+    // Generate a unique name for the widget to let Qt identify it and store/retrieve its state
+    setObjectName(QString("Dockable Widget ") + QUuid::createUuid().toString());
 }
 
 
