@@ -274,13 +274,6 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 	"${INSTALL_DIR}/$<CONFIGURATION>/$<TARGET_FILE_NAME:${PROJECT}>"
 )
 
-# Copy pointsplugin header
-add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/plugins/PointsPlugin.h"
-    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointsPlugin.h"
-)
-
 # Points Plugin
 set(PROJECT "PointsPlugin")
 #PROJECT(${PROJECT})
@@ -336,3 +329,11 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 	"${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME}"
 	"$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/${EXPORT_HEADER_FILE_NAME}"
 )
+
+# Copy pointsplugin header
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/plugins/PointsPlugin.h"
+    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointsPlugin.h"
+)
+
