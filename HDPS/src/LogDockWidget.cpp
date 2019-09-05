@@ -24,32 +24,34 @@ private:
 public:
     explicit Data(QDockWidget& dockWidget)
     {
-        auto* treeView = new QTreeView(&dockWidget);
-        dockWidget.setWidget(treeView);
+        auto& treeView = *new QTreeView(&dockWidget);
+        dockWidget.setWidget(&treeView);
 
-        treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-        treeView->setRootIsDecorated(false);
-        treeView->setItemsExpandable(false);
-        treeView->setSortingEnabled(true);
-        treeView->setExpandsOnDoubleClick(false);
-        treeView->header()->setSortIndicator(-1, Qt::AscendingOrder);
-        treeView->setModel(&_itemModel);
+        treeView.setEditTriggers(QAbstractItemView::NoEditTriggers);
+        treeView.setRootIsDecorated(false);
+        treeView.setItemsExpandable(false);
+        treeView.setSortingEnabled(true);
+        treeView.setExpandsOnDoubleClick(false);
+        treeView.header()->setSortIndicator(-1, Qt::AscendingOrder);
+        treeView.setModel(&_itemModel);
 
         const auto numberOfColumns = int{ LogItemModel::GetNumberOfColumns() };
 
         for (int column{}; column < numberOfColumns; ++column)
         {
-            treeView->resizeColumnToContents(column);
+            treeView.resizeColumnToContents(column);
         }
 
         // Reset the view "on idle".
         m_awakeConnection = connect(
             QAbstractEventDispatcher::instance(),
             &QAbstractEventDispatcher::awake,
-            [this, treeView]
+            [this, &treeView]
         {
-            _itemModel.Reload();
-            treeView->reset();
+            if (_itemModel.Reload())
+            {
+                treeView.reset();
+            }
         });
     }
 

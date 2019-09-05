@@ -29,7 +29,7 @@ public:
     LogItemModel(const LogItemModel&) = delete;
     LogItemModel& operator=(const LogItemModel&) = delete;
 
-    void Reload();
+    bool Reload();
     static std::uint16_t GetNumberOfColumns();
 
 private: // Member functions:

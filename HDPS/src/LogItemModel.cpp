@@ -60,14 +60,30 @@ LogItemModel::LogItemModel()
 }
 
 
-void LogItemModel::Reload()
+// Returns true when new messages were added.
+bool LogItemModel::Reload()
 {
+    const auto numberOfMessages = _messageRecords.size();
+
     Logger::GetMessageRecords(_messageRecords);
 
-    if (_sortedMessageRecords.size() != _messageRecords.size())
+    if (_messageRecords.size() > numberOfMessages)
     {
-        // Clear the sorted records, to trigger redoing the sort.
-        _sortedMessageRecords.clear();
+        if (_sortedMessageRecords.size() != _messageRecords.size())
+        {
+            // Clear the sorted records, to trigger redoing the sort.
+            _sortedMessageRecords.clear();
+        }
+        return true;
+    }
+    else
+    {
+        assert(_messageRecords.size() == numberOfMessages);
+        assert(_sortedMessageRecords.empty() ||
+            (_sortedMessageRecords.size() == numberOfMessages));
+
+        // There were no new messages.
+        return false;
     }
 }
 
