@@ -40,7 +40,7 @@ void TsneAnalysisPlugin::dataChanged(const QString name)
     IndexSet& set = (IndexSet&)_core->requestSet(name);
     PointsPlugin& rawData = set.getData();
 
-    _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.dimNames);
+    _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.getDimensionNames());
 }
 
 void TsneAnalysisPlugin::dataRemoved(const QString name)
@@ -71,7 +71,7 @@ void TsneAnalysisPlugin::dataSetPicked(const QString& name)
     IndexSet& set = (IndexSet&)_core->requestSet(name);
     PointsPlugin& rawData = set.getData();
 
-    _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.dimNames);
+    _settings->onNumDimensionsChanged(this, rawData.getNumDimensions(), rawData.getDimensionNames());
 }
 
 void TsneAnalysisPlugin::startComputation()
@@ -92,7 +92,7 @@ void TsneAnalysisPlugin::startComputation()
         for (int j = 0; j < points.getNumDimensions(); j++)
         {
             if (enabledDimensions[j])
-                data.push_back(points.data[i * points.getNumDimensions() + j]);
+                data.push_back(points[i * points.getNumDimensions() + j]);
         }
     }
     unsigned int numDimensions = count_if(enabledDimensions.begin(), enabledDimensions.end(), [](bool b) { return b; } );
@@ -101,7 +101,7 @@ void TsneAnalysisPlugin::startComputation()
     const IndexSet& embedSet = dynamic_cast<const IndexSet&>(_core->requestSet(_embedSetName));
     PointsPlugin& embedPoints = embedSet.getData();
 
-    embedPoints.numDimensions = 2;
+    embedPoints.setData(nullptr, 0, 2);
     _core->notifyDataAdded(_embedSetName);
 
     // Compute t-SNE with the given data
@@ -115,7 +115,7 @@ void TsneAnalysisPlugin::onNewEmbedding() {
     const IndexSet& embedSet = dynamic_cast<const IndexSet&>(_core->requestSet(_embedSetName));
     PointsPlugin& embedPoints = embedSet.getData();
 
-    embedPoints.data = outputData.getData();
+    embedPoints.setData(outputData.getData().data(), outputData.getNumPoints(), 2);
 
     _core->notifyDataChanged(_embedSetName);
 }
