@@ -6,6 +6,8 @@ set(PROJECT "HdpsAllInOne")
 
 PROJECT(${PROJECT})
 
+add_definitions(-DQT_MESSAGELOGCONTEXT)
+
 add_subdirectory(Clusters)
 add_subdirectory(CsvLoader)
 add_subdirectory(ExampleDataPlugin)

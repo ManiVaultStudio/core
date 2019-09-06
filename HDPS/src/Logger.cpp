@@ -148,12 +148,10 @@ public:
             << "number"
             << separator << "category"
             << separator << "type"
-#ifdef QT_MESSAGELOGCONTEXT
             << separator << "version"
             << separator << "file"
             << separator << "line"
             << separator << "function"
-#endif
             << separator << "message"
             << std::endl;
     }
@@ -246,12 +244,10 @@ void MessageHandler(
                 << messageNumber
                 << separator << MakeNullPrintable(context.category, "<category>")
                 << separator << MsgTypeToAsciiString(type)
-#ifdef QT_MESSAGELOGCONTEXT
                 << separator << context.version
                 << separator << MakeNullPrintable(context.file, "<file>")
                 << separator << context.line
                 << separator << MakeNullPrintable(context.function, "<function>")
-#endif
                 << separator << '"' << utf8MessageData << '"'
                 << std::endl;
         }

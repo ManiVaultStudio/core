@@ -24,6 +24,8 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
+add_definitions(-DQT_MESSAGELOGCONTEXT)
+
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 
 set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
