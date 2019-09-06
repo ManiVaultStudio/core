@@ -16,11 +16,25 @@ namespace gui
 
 class LogItemModel final : public QAbstractItemModel
 {
-private: // Data member:
+private:
+    enum class ColumnEnum
+    {
+        number,
+        category,
+        type,
+        fileAndLine,
+        function,
+        message,
+        numberOfColumns
+    };
+
+    // Data members:
     std::deque<const MessageRecord*> _messageRecords;
     std::deque<const MessageRecord*> _sortedMessageRecords;
     bool _isSortedInDescendingOrder{ false };
     int _sortedColumn{ -1 };
+
+    void SortMessageRecords(ColumnEnum);
 
 public:
     LogItemModel();
@@ -30,7 +44,8 @@ public:
     LogItemModel& operator=(const LogItemModel&) = delete;
 
     bool Reload();
-    static std::uint16_t GetNumberOfColumns();
+
+    static constexpr unsigned numberOfColumns{ static_cast<unsigned>(ColumnEnum::numberOfColumns) };
 
 private: // Member functions:
 

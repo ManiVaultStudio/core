@@ -20,20 +20,6 @@
 namespace
 {
 
-enum class ColumnEnum
-{
-    number,
-    category,
-    type,
-    fileAndLine,
-    function,
-    message,
-    numberOfColumns
-};
-
-constexpr auto numberOfColumns = static_cast<std::uintmax_t>(ColumnEnum::numberOfColumns);
-
-
 QString MsgTypeToString(const QtMsgType& msgType)
 {
     switch (msgType)
@@ -85,12 +71,6 @@ bool LogItemModel::Reload()
         // There were no new messages.
         return false;
     }
-}
-
-
-std::uint16_t LogItemModel::GetNumberOfColumns()
-{
-    return std::uint16_t{ numberOfColumns };
 }
 
 
@@ -246,55 +226,56 @@ namespace
             (rhs == nullptr) ? 1 :
             std::strcmp(lhs, rhs);
     }
+}
 
-    void Sort(std::deque<const MessageRecord*>& messageRecords, const ColumnEnum column)
+
+void LogItemModel::SortMessageRecords(const ColumnEnum column)
+{
+    switch (static_cast<ColumnEnum>(column))
     {
-        switch (static_cast<ColumnEnum>(column))
+    case ColumnEnum::category:
+    {
+        return Sort(_sortedMessageRecords,
+            [](const MessageRecord& lhs, const MessageRecord& rhs)
         {
-        case ColumnEnum::category:
-        {
-            return Sort(messageRecords,
-                [](const MessageRecord& lhs, const MessageRecord& rhs)
-            {
-                return CompareStrings(lhs.category, rhs.category);
-            });
-        }
-        case ColumnEnum::type:
-        {
-            return Sort(messageRecords,
-                [](const MessageRecord& lhs, const MessageRecord& rhs)
-            {
-                return CompareIntegers(lhs.type, rhs.type);
-            });
-        }
-        case ColumnEnum::fileAndLine:
-        {
-            return Sort(messageRecords,
-                [](const MessageRecord& lhs, const MessageRecord& rhs)
-            {
-                const auto comparison = CompareStrings(lhs.file, rhs.file);
-                return (comparison == 0) ? CompareIntegers(lhs.line, rhs.line) : comparison;
-            });
-        }
-        case ColumnEnum::function:
-        {
-            return Sort(messageRecords,
-                [](const MessageRecord& lhs, const MessageRecord& rhs)
-            {
-                return CompareStrings(lhs.function, rhs.function);
-            });
-        }
-        case ColumnEnum::message:
-        {
-            return Sort(messageRecords,
-                [](const MessageRecord& lhs, const MessageRecord& rhs)
-            {
-                return lhs.message.compare(rhs.message);
-            });
-        }
-        }
-        assert(!"Unhandled column!");
+            return CompareStrings(lhs.category, rhs.category);
+        });
     }
+    case ColumnEnum::type:
+    {
+        return Sort(_sortedMessageRecords,
+            [](const MessageRecord& lhs, const MessageRecord& rhs)
+        {
+            return CompareIntegers(lhs.type, rhs.type);
+        });
+    }
+    case ColumnEnum::fileAndLine:
+    {
+        return Sort(_sortedMessageRecords,
+            [](const MessageRecord& lhs, const MessageRecord& rhs)
+        {
+            const auto comparison = CompareStrings(lhs.file, rhs.file);
+            return (comparison == 0) ? CompareIntegers(lhs.line, rhs.line) : comparison;
+        });
+    }
+    case ColumnEnum::function:
+    {
+        return Sort(_sortedMessageRecords,
+            [](const MessageRecord& lhs, const MessageRecord& rhs)
+        {
+            return CompareStrings(lhs.function, rhs.function);
+        });
+    }
+    case ColumnEnum::message:
+    {
+        return Sort(_sortedMessageRecords,
+            [](const MessageRecord& lhs, const MessageRecord& rhs)
+        {
+            return lhs.message.compare(rhs.message);
+        });
+    }
+    }
+    assert(!"Unhandled column!");
 }
 
 
@@ -337,7 +318,7 @@ void LogItemModel::sort(const int column, const Qt::SortOrder order)
                 {
                     // All messages have been sorted before, but on a different column.
                     // Sort again!
-                    Sort(_sortedMessageRecords, columnEnum);
+                    SortMessageRecords(columnEnum);
                 }
             }
             else
@@ -347,7 +328,7 @@ void LogItemModel::sort(const int column, const Qt::SortOrder order)
                 // m_sortedMessageRecords does not (yet) have a record for each message,
                 // so copy all of them, and then sort.
                 _sortedMessageRecords = _messageRecords;
-                Sort(_sortedMessageRecords, columnEnum);
+                SortMessageRecords(columnEnum);
             }
         }
         _sortedColumn = column;
