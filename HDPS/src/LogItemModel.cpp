@@ -74,6 +74,67 @@ bool LogItemModel::Reload()
 }
 
 
+
+const MessageRecord* LogItemModel::GetMessageRecordAtRow(const unsigned row) const
+{
+    const auto numberOfMessages = _messageRecords.size();
+
+    if (row < numberOfMessages)
+    {
+        const auto index = _isSortedInDescendingOrder ?
+            (numberOfMessages - static_cast<unsigned>(row) - 1) : static_cast<unsigned>(row);
+
+        const auto& messageRecords = (_sortedMessageRecords.empty() ?
+            _messageRecords : _sortedMessageRecords);
+        return messageRecords[index];
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
+QVariant LogItemModel::GetDataValueAtColumn(const MessageRecord& messageRecord, const unsigned column)
+{
+    if (column < numberOfColumns)
+    {
+        switch (static_cast<ColumnEnum>(column))
+        {
+        case ColumnEnum::number:
+        {
+            return messageRecord.number;
+        }
+        case ColumnEnum::category:
+        {
+            return messageRecord.category;
+        }
+        case ColumnEnum::type:
+        {
+            return MsgTypeToString(messageRecord.type);
+        }
+        case ColumnEnum::fileAndLine:
+        {
+            return (messageRecord.file == nullptr) && (messageRecord.line == 0) ?
+                QString{} :
+                (QString("%1(%2)")
+                    .arg(messageRecord.file)
+                    .arg(messageRecord.line));
+        }
+        case ColumnEnum::function:
+        {
+            return messageRecord.function;
+        }
+        case ColumnEnum::message:
+        {
+            return messageRecord.message;
+        }
+        }
+    }
+    return {};
+}
+
+
 LogItemModel::~LogItemModel() = default;
 
 
@@ -112,49 +173,13 @@ QVariant LogItemModel::data(const QModelIndex & modelIndex, const int role) cons
 
             const auto numberOfMessages = _messageRecords.size();
 
-            if ((row >= 0) && (static_cast<std::uintmax_t>(row) < numberOfMessages)
-                && (column >= 0) && (static_cast<std::uintmax_t>(column) < numberOfColumns))
+            if ((row >= 0) && (column >= 0) )
             {
-                const auto index = _isSortedInDescendingOrder ?
-                    (numberOfMessages - static_cast<unsigned>(row) - 1) : static_cast<unsigned>(row);
-
-                const auto& messageRecords = (_sortedMessageRecords.empty() ?
-                    _messageRecords : _sortedMessageRecords);
-                const auto* const messageRecord = messageRecords[index];
+                const auto* const messageRecord = GetMessageRecordAtRow(static_cast<unsigned>(row));
 
                 if (messageRecord != nullptr)
                 {
-                    switch (static_cast<ColumnEnum>(column))
-                    { 
-                    case ColumnEnum::number:
-                    {
-                        return messageRecord->number;
-                    }
-                    case ColumnEnum::category:
-                    {
-                        return messageRecord->category;
-                    }
-                    case ColumnEnum::type:
-                    {
-                        return MsgTypeToString(messageRecord->type);
-                    }
-                    case ColumnEnum::fileAndLine:
-                    {
-                        return (messageRecord->file == nullptr) && (messageRecord->line == 0) ?
-                            QString{} :
-                            (QString("%1(%2)")
-                            .arg(messageRecord->file)
-                            .arg(messageRecord->line));
-                    }
-                    case ColumnEnum::function:
-                    {
-                        return messageRecord->function;
-                    }
-                    case ColumnEnum::message:
-                    {
-                        return messageRecord->message;
-                    }
-                    }
+                    return GetDataValueAtColumn(*messageRecord, static_cast<unsigned>(column));
                 }
             }
         }

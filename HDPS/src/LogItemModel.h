@@ -47,6 +47,10 @@ public:
 
     static constexpr unsigned numberOfColumns{ static_cast<unsigned>(ColumnEnum::numberOfColumns) };
 
+    const MessageRecord* GetMessageRecordAtRow(unsigned row) const;
+
+    static QVariant GetDataValueAtColumn(const MessageRecord&, unsigned column);
+
 private: // Member functions:
 
     // Implementation of pure virtual functions of QAbstractItemModel
