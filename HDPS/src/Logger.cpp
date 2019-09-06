@@ -26,6 +26,21 @@ namespace
 
 constexpr auto separator = '\t';
 
+
+std::string MsgTypeToAsciiString(const QtMsgType msgType)
+{
+    switch (msgType)
+    {
+    case QtDebugMsg: return "debug";
+    case QtWarningMsg: return "warning";
+    case QtCriticalMsg: return "critical";
+    case QtFatalMsg: return "fatal";
+    case QtInfoMsg: return "info";
+    }
+    return std::to_string(int{ msgType });
+}
+
+
 auto ConvertToQString(const char* const utf8Chars)
 {
     return QString::fromUtf8(utf8Chars);
@@ -230,7 +245,7 @@ void MessageHandler(
             logFile.GetOutputStream()
                 << messageNumber
                 << separator << MakeNullPrintable(context.category, "<category>")
-                << separator << type
+                << separator << MsgTypeToAsciiString(type)
 #ifdef QT_MESSAGELOGCONTEXT
                 << separator << context.version
                 << separator << MakeNullPrintable(context.file, "<file>")
@@ -245,6 +260,11 @@ void MessageHandler(
 
 }   // namespace
 
+
+QString hdps::Logger::MsgTypeToString(const QtMsgType msgType)
+{
+    return QString::fromLatin1(MsgTypeToAsciiString(msgType).c_str());
+}
 
 void hdps::Logger::Initialize()
 {
