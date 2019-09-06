@@ -5,11 +5,32 @@
 
 // Qt header files:
 #include <QAbstractEventDispatcher>
+#include <QClipboard>
+#include <QGuiApplication>
 #include <QHeaderView>
+#include <QMenu>
 #include <QMainWindow>
 #include <QTreeView>
 #include <QUuid>
 
+namespace
+{
+    int GetSelectedRow(const QAbstractItemView& view)
+    {
+        const auto* const selectionModel = view.selectionModel();
+
+        if (selectionModel != nullptr)
+        {
+            const auto selection = selectionModel->selection();
+
+            if (selection.size() == 1)
+            {
+                return selection.front().top();
+            }
+        }
+        return -1;
+    }
+}
 
 namespace hdps
 {
@@ -53,6 +74,36 @@ public:
             {
                 treeView.reset();
             }
+        });
+
+        treeView.setContextMenuPolicy(Qt::CustomContextMenu);
+
+        (void)connect(&treeView, &QTreeView::customContextMenuRequested,
+            [this, &treeView](const QPoint &)
+        {
+            const auto row = GetSelectedRow(treeView);
+            const auto* const messageRecord = (row < 0) ? nullptr : _itemModel.GetMessageRecordAtRow(row);
+
+            QMenu contextMenu;
+
+            auto* const copyAction = contextMenu.addAction(tr("&Copy"), [this, messageRecord]
+            {
+                if (messageRecord != nullptr)
+                {
+                    QString text;
+
+                    for (unsigned column{}; column < LogItemModel::numberOfColumns; ++column)
+                    {
+                        text.append(_itemModel.GetDataValueAtColumn(*messageRecord, column).toString())
+                            .append(QLatin1Char('\t'));
+                    }
+                    text.back() = QLatin1Char('\n');
+
+                    QGuiApplication::clipboard()->setText(text);
+                }
+            });
+            copyAction->setEnabled(messageRecord != nullptr);
+            contextMenu.exec(QCursor::pos());
         });
     }
 
