@@ -26,6 +26,7 @@ struct MessageRecord
 class Logger
 {
 public:
+    static QString MsgTypeToString(QtMsgType);
     static void Initialize();
     static QString GetFilePathName();
     static QString ExceptionToText(const std::exception& stdException);

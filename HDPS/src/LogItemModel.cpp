@@ -17,24 +17,6 @@
 #include <tuple>
 
 
-namespace
-{
-
-QString MsgTypeToString(const QtMsgType& msgType)
-{
-    switch (msgType)
-    {
-    case QtDebugMsg: return "debug";
-    case QtWarningMsg: return "warning";
-    case QtCriticalMsg: return "critical";
-    case QtFatalMsg: return "fatal";
-    case QtInfoMsg: return "info";
-    }
-    return QString{}.setNum(msgType);
-}
-
-}   // namespace
-
 namespace hdps
 {
 namespace gui
@@ -111,7 +93,7 @@ QVariant LogItemModel::GetDataValueAtColumn(const MessageRecord& messageRecord, 
         }
         case ColumnEnum::type:
         {
-            return MsgTypeToString(messageRecord.type);
+            return Logger::MsgTypeToString(messageRecord.type);
         }
         case ColumnEnum::fileAndLine:
         {
