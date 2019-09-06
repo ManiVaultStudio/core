@@ -130,7 +130,8 @@ public:
         m_outputStream.write(bom, sizeof(bom));
 
         m_outputStream
-            << "category"
+            << "number"
+            << separator << "category"
             << separator << "type"
 #ifdef QT_MESSAGELOGCONTEXT
             << separator << "version"
@@ -210,9 +211,11 @@ void MessageHandler(
         const std::lock_guard<std::mutex> guard(GetMutex());
 
         auto& messageRecords = GetMessageRecords();
+        const auto messageNumber = messageRecords.size() + 1;
+
         messageRecords.push_back(
             {
-                messageRecords.size() + 1,
+                messageNumber,
                 type,
                 context.version,
                 context.line,
@@ -225,7 +228,8 @@ void MessageHandler(
         if (logFile)
         {
             logFile.GetOutputStream()
-                << MakeNullPrintable(context.category, "<category>")
+                << messageNumber
+                << separator << MakeNullPrintable(context.category, "<category>")
                 << separator << type
 #ifdef QT_MESSAGELOGCONTEXT
                 << separator << context.version
