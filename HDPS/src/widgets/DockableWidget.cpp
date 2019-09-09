@@ -29,7 +29,7 @@ DockableWidget::DockableWidget(QWidget *parent) :
     QObject::connect(toggleViewAction(), &QAction::toggled, this, &DockableWidget::setVisibility);
 }
 
-QGridLayout* DockableWidget::mainLayout()
+QLayout* DockableWidget::mainLayout()
 {
     return _mainLayout;
 }
@@ -50,6 +50,18 @@ bool DockableWidget::toggleVisibility()
 void DockableWidget::addWidget(QWidget* widget)
 {
     _mainLayout->addWidget(widget);
+}
+
+void DockableWidget::setMainLayout(QLayout* layout)
+{
+    // Apparently not allowed ("A layout can only have another layout as a parent")
+    // layout->setParent(_mainWidget);
+
+    // Delete the previous layout before adding another
+    delete _mainLayout;
+
+    _mainLayout = layout;
+    _mainWidget->setLayout(_mainLayout);
 }
 
 DockableWidget::~DockableWidget()

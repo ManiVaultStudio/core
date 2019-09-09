@@ -18,7 +18,8 @@ public:
     ~DockableWidget() override;
 
     void addWidget(QWidget* widget);
-    QGridLayout* mainLayout();
+    void setMainLayout(QLayout* layout);
+    QLayout* mainLayout();
 
     public slots :
     bool setVisibility(bool visible);
@@ -27,7 +28,7 @@ public:
 protected:
     bool _isVisible;
 
-    QGridLayout* _mainLayout;
+    QLayout* _mainLayout;
 
 private:
     QWidget* _mainWidget;
