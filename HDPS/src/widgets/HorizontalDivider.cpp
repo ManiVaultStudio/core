@@ -4,8 +4,7 @@ namespace hdps
 {
     namespace gui
     {
-        HorizontalDivider::HorizontalDivider(QWidget* parent = 0) :
-            QHBoxLayout(parent)
+        HorizontalDivider::HorizontalDivider()
         {
             setMargin(0);
             _titleLabel = new QLabel();

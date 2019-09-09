@@ -61,6 +61,9 @@ set( WIDGET_HEADERS
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
     src/widgets/MaterialCheckBoxWidget.h
+    src/widgets/ComboBox.h
+    src/widgets/PushButton.h
+    src/widgets/HorizontalDivider.h
 )
 
 set( WIDGET_SOURCES
@@ -68,6 +71,9 @@ set( WIDGET_SOURCES
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
     src/widgets/MaterialCheckBoxWidget.cpp
+    src/widgets/ComboBox.cpp
+    src/widgets/PushButton.cpp
+    src/widgets/HorizontalDivider.cpp
 )
 
 set( RENDERER_HEADERS

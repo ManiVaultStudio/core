@@ -9,7 +9,7 @@ namespace hdps
         class PushButton : public QPushButton
         {
         public:
-            PushButton(QWidget* parent = 0);
+            PushButton();
         };
     }
 }

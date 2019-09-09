@@ -4,11 +4,11 @@
 
 #include <QGridLayout>
 #include <QVBoxLayout>
+#include <QPainter>
 
 #include <cassert>
 
-PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin)
-    :
+PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin) :
     _pointSizeLabel("Point Size:"),
     _pointOpacityLabel("Point Opacity:"),
     _pointSizeSlider(Qt::Horizontal),
@@ -24,15 +24,23 @@ PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin)
     _pointOpacitySlider.setValue(50);
 
     QVBoxLayout* pointSettingsLayout = new QVBoxLayout();
+    pointSettingsLayout->setMargin(0);
+
+    HorizontalDivider* dataDivider = new HorizontalDivider();
+    dataDivider->setTitle("DATA");
+
+    pointSettingsLayout->addLayout(dataDivider);
+
     pointSettingsLayout->addWidget(&_pointSizeLabel);
     pointSettingsLayout->addWidget(&_pointSizeSlider);
     pointSettingsLayout->addWidget(&_pointOpacityLabel);
     pointSettingsLayout->addWidget(&_pointOpacitySlider);
+
+    pointSettingsLayout->addStretch(1);
     setLayout(pointSettingsLayout);
 }
 
-DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin)
-    :
+DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin) :
     _sigmaLabel("Sigma:"),
     _sigmaSlider(Qt::Horizontal)
 {
@@ -47,8 +55,7 @@ DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin)
     setLayout(densitySettingsLayout);
 }
 
-PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin)
-    :
+PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) :
     _pointSettingsWidget(plugin),
     _densitySettingsWidget(plugin)
 {
@@ -56,8 +63,7 @@ PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin)
     addWidget(&_densitySettingsWidget);
 }
 
-DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin)
-    :
+DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin) :
     _xDimLabel("X:"),
     _yDimLabel("Y:"),
     _cDimLabel("Color:")
@@ -146,18 +152,18 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
-    setFixedHeight(100);
+    setFixedWidth(200);
     
     _subsetButton.setText("Create Subset");
     _subsetButton.setFixedWidth(100);
 
-    _settingsLayout = new QHBoxLayout();
+    _settingsLayout = new QVBoxLayout();
 
     QVBoxLayout* dataLayout = new QVBoxLayout();
     dataLayout->addWidget(&_dataOptions);
     dataLayout->addWidget(&_subsetButton);
     
-    QHBoxLayout* renderLayout = new QHBoxLayout();
+    QVBoxLayout* renderLayout = new QVBoxLayout();
     _renderMode.addItem("Scatterplot");
     _renderMode.addItem("Density map");
     _renderMode.addItem("Contour map");
@@ -174,6 +180,11 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsLayout->addLayout(&_dimensionPicker->getLayout());
 
     setLayout(_settingsLayout);
+
+    setStyleSheet(
+        "QWidget { background-color:#62656c; color: white; font-family: \"Open Sans\"; font-size: 11px; }"
+//        "QFrame { background-color: #888b93; }"
+    );
 
     connect(&_dataOptions, SIGNAL(currentIndexChanged(QString)), plugin, SLOT(dataSetPicked(QString)));
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
@@ -266,4 +277,14 @@ void ScatterplotSettings::renderModePicked(const int index)
     case 1: showDensitySettings(); break;
     case 2: showDensitySettings(); break;
     }
+}
+
+void ScatterplotSettings::paintEvent(QPaintEvent* event)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+
+    QWidget::paintEvent(event);
 }

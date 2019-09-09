@@ -35,6 +35,11 @@ void ScatterplotPlugin::init()
 
     settings = new ScatterplotSettings(this);
 
+    QHBoxLayout* layout = new QHBoxLayout();
+    layout->setMargin(0);
+    layout->setSpacing(0);
+
+    setMainLayout(layout);
     addWidget(_scatterPlotWidget);
     addWidget(settings);
 

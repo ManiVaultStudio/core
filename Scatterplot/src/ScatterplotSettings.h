@@ -2,11 +2,13 @@
 
 #include "graphics/Vector3f.h"
 
+#include "widgets/ComboBox.h"
+#include "widgets/PushButton.h"
+#include "widgets/HorizontalDivider.h"
+
 #include <QWidget>
-#include <QComboBox>
 #include <QSlider>
 #include <QLabel>
-#include <QPushButton>
 
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -60,15 +62,15 @@ struct DimensionPicker : public QWidget
     int getDimensionX();
     int getDimensionY();
     int getDimensionColor();
-    
+
 private:
     QLabel _xDimLabel;
     QLabel _yDimLabel;
     QLabel _cDimLabel;
 
-    QComboBox _xDimOptions;
-    QComboBox _yDimOptions;
-    QComboBox _cDimOptions;
+    hdps::gui::ComboBox _xDimOptions;
+    hdps::gui::ComboBox _yDimOptions;
+    hdps::gui::ComboBox _cDimOptions;
 
     QGridLayout _layout;
 };
@@ -100,6 +102,8 @@ public:
     void addDataOption(const QString option);
     int numDataOptions();
 
+    void paintEvent(QPaintEvent* event) override;
+
 protected slots:
     void renderModePicked(const int index);
 
@@ -107,11 +111,11 @@ private:
     const hdps::Vector3f DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
     const hdps::Vector3f DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
 
-    QComboBox _dataOptions;
-    QPushButton _subsetButton;
-    QComboBox _renderMode;
+    hdps::gui::ComboBox _dataOptions;
+    hdps::gui::PushButton _subsetButton;
+    hdps::gui::ComboBox _renderMode;
 
-    QHBoxLayout* _settingsLayout;
+    QVBoxLayout* _settingsLayout;
     PlotSettingsStack* _settingsStack;
 
     DimensionPicker* _dimensionPicker;

@@ -12,7 +12,7 @@ namespace hdps
         class HorizontalDivider : public QHBoxLayout
         {
         public:
-            HorizontalDivider(QWidget* parent = 0);
+            HorizontalDivider();
 
             void setTitle(QString title);
 

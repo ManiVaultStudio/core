@@ -9,7 +9,7 @@ namespace hdps
         class ComboBox : public QComboBox
         {
         public:
-            ComboBox(QWidget* parent = 0);
+            ComboBox();
         };
     }
 }

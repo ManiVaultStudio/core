@@ -4,8 +4,7 @@ namespace hdps
 {
     namespace gui
     {
-        PushButton::PushButton(QWidget* parent) :
-            QPushButton(parent)
+        PushButton::PushButton()
         {
             setMinimumHeight(30);
 

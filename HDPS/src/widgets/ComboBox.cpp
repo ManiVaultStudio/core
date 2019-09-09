@@ -4,8 +4,7 @@ namespace hdps
 {
     namespace gui
     {
-        ComboBox::ComboBox(QWidget* parent) :
-            QComboBox(parent)
+        ComboBox::ComboBox()
         {
             setMinimumHeight(30);
             
