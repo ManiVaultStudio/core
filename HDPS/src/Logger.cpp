@@ -13,6 +13,7 @@
 
 // Standard C++ header files:
 #include <atomic>
+#include <cassert>
 #include <cstdint> // For uint8_t.
 #include <deque>
 #include <fstream>
