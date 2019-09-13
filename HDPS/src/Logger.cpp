@@ -94,13 +94,13 @@ const auto& GetFilePathName()
 }
 
 
-const char* MakeNullPrintable(const char* const arg, const char* const nullText)
+const char* MakeNullPrintable(const char* const arg, const char* const nullText) noexcept
 {
     return (arg == nullptr) ? nullText : arg;
 }
 
 
-QtMessageHandler GetPreviousMessageHandler(const QtMessageHandler previousMessageHandler = nullptr)
+QtMessageHandler GetPreviousMessageHandler(const QtMessageHandler previousMessageHandler = nullptr) noexcept
 {
     const static auto result = previousMessageHandler;
 
@@ -161,7 +161,7 @@ public:
             << std::endl;
     }
 
-    std::ofstream& GetOutputStream()
+    std::ofstream& GetOutputStream() noexcept
     {
         return m_outputStream;
     }
@@ -182,7 +182,7 @@ public:
 };
 
 
-static auto& GetMutex()
+static auto& GetMutex() noexcept
 {
     static std::mutex result;
     return result;
