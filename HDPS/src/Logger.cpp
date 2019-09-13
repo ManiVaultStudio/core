@@ -38,7 +38,7 @@ std::string MsgTypeToAsciiString(const QtMsgType msgType)
     case QtFatalMsg: return "fatal";
     case QtInfoMsg: return "info";
     }
-    return std::to_string(int{ msgType });
+    return std::to_string(msgType);
 }
 
 
