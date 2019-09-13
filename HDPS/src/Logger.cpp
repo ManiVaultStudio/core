@@ -139,7 +139,7 @@ public:
     LogFile& operator=(const LogFile&) = delete;
     LogFile& operator=(LogFile&&) = delete;
 
-    LogFile()
+    LogFile() noexcept(false)
         :
         m_outputStream(GetFilePathName())
     {
