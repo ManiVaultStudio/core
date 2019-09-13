@@ -134,6 +134,10 @@ class LogFile
 private:
     std::ofstream m_outputStream;
 public:
+    LogFile(const LogFile&) = delete;
+    LogFile(LogFile&&) = delete;
+    LogFile& operator=(const LogFile&) = delete;
+    LogFile& operator=(LogFile&&) = delete;
 
     LogFile()
         :
