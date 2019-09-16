@@ -188,6 +188,30 @@ static auto& GetMutex() noexcept
     return result;
 }
 
+
+struct SetAtomicBoolFalseAtScopeExit
+{
+private:
+    std::atomic_bool& _atomicBool;
+public:
+    SetAtomicBoolFalseAtScopeExit(const SetAtomicBoolFalseAtScopeExit&) = delete;
+    SetAtomicBoolFalseAtScopeExit(SetAtomicBoolFalseAtScopeExit&&) = delete;
+    SetAtomicBoolFalseAtScopeExit& operator=(const SetAtomicBoolFalseAtScopeExit&) = delete;
+    SetAtomicBoolFalseAtScopeExit& operator=(SetAtomicBoolFalseAtScopeExit&&) = delete;
+
+    explicit SetAtomicBoolFalseAtScopeExit(std::atomic_bool& atomicBool) noexcept
+        :
+        _atomicBool{ atomicBool }
+    {
+    }
+
+    ~SetAtomicBoolFalseAtScopeExit()
+    {
+        _atomicBool = false;
+    }
+};
+
+
 void MessageHandler(
     const QtMsgType type,
     const QMessageLogContext &context,
@@ -200,17 +224,7 @@ void MessageHandler(
     {
         isExecutingMessageHandler = true;
 
-        struct ScopeGuard
-        {
-            std::atomic_bool& isExecutingMessageHandler;
-
-            ~ScopeGuard()
-            {
-                isExecutingMessageHandler = false;
-            }
-        };
-
-        const ScopeGuard scopeGuard{ isExecutingMessageHandler };
+        const SetAtomicBoolFalseAtScopeExit setAtomicBoolFalseAtScopeExit{ isExecutingMessageHandler };
 
         static LogFile logFile;
         const auto previousMessageHandler = GetPreviousMessageHandler();
