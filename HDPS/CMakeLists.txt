@@ -289,7 +289,6 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 set(PROJECT "PointsPlugin")
 #PROJECT(${PROJECT})
 
-
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -314,6 +313,7 @@ source_group( Plugin FILES ${POINTS_SOURCES})
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${POINTS_SOURCES})
+add_dependencies(${PROJECT} HDPS_Public)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
