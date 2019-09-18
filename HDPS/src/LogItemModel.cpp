@@ -85,7 +85,7 @@ QVariant LogItemModel::GetDataValueAtColumn(const MessageRecord& messageRecord, 
         {
         case ColumnEnum::number:
         {
-            return messageRecord.number;
+            return qulonglong{messageRecord.number};
         }
         case ColumnEnum::category:
         {
