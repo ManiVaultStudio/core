@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint> // For uintmax_t
+#include <cstring> // For std::strcmp
 #include <tuple>
 
 

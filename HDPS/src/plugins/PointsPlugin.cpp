@@ -3,6 +3,8 @@
 #include <QtCore>
 #include <QtDebug>
 
+#include <cstring>
+
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointsPlugin")
 
 // =============================================================================

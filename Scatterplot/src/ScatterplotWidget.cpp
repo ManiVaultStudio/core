@@ -6,6 +6,8 @@
 
 #include <QSize>
 #include <QDebug>
+#include <math.h>
+#include <float.h>
 
 using namespace hdps::util;
 
