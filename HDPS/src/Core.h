@@ -14,7 +14,7 @@ namespace plugin
     class PluginManager;
     class Plugin;
     class DataConsumer;
-    enum Type;
+    enum Type : unsigned int;
 }
 
 namespace gui
