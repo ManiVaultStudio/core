@@ -221,12 +221,14 @@ endif(MSVC)
 
 
 add_library(${PROJECT}_Public ${LINK_TYPE}
+    src/.editorconfig
     ${PUBLIC_SOURCES}
 )
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
 
 add_library(${PROJECT}_Private ${LINK_TYPE}
+    src/.editorconfig
     ${PRIVATE_SOURCES}
 )
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
@@ -235,6 +237,7 @@ target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
 
 add_executable(${PROJECT} MACOSX_BUNDLE
+    src/.editorconfig
     ${MAIN_SOURCES}
     ${UI_HEADERS}
     ${UI_FILES}
