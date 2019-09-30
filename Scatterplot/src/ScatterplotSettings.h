@@ -100,6 +100,7 @@ public:
     void initScalarDimOptions(const unsigned int nDim);
     void initScalarDimOptions(const std::vector<QString> dimNames);
     void addDataOption(const QString option);
+    void removeDataOption(const QString option);
     int numDataOptions();
 
     void paintEvent(QPaintEvent* event) override;

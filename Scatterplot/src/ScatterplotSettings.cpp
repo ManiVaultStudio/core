@@ -264,6 +264,22 @@ void ScatterplotSettings::addDataOption(const QString option)
     _dataOptions.setCurrentIndex(_dataOptions.count() - 1);
 }
 
+void ScatterplotSettings::removeDataOption(const QString option)
+{
+    int indexToRemove = -1;
+    for (int index = 0; index < _dataOptions.count(); index++)
+    {
+        if (_dataOptions.itemText(index) == option)
+        {
+            indexToRemove = index;
+            break;
+        }
+    }
+
+    if (indexToRemove != -1)
+        _dataOptions.removeItem(indexToRemove);
+}
+
 int ScatterplotSettings::numDataOptions()
 {
     return _dataOptions.count();
