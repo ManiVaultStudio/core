@@ -197,14 +197,21 @@ Set& Core::requestSet(const QString name)
     } 
     catch (SetNotFoundException e)
     {
-        QMessageBox::critical(NULL, QString("HDPS"), e.what(), QMessageBox::Ok);
+        QMessageBox::critical(nullptr, QString("HDPS"), e.what(), QMessageBox::Ok);
     }
 }
 
 /** Requests the selection set for the name of a raw dataset. */
 Set& Core::requestSelection(const QString name)
 {
-    return _dataManager->getSelection(name);
+    try
+    {
+        return _dataManager->getSelection(name);
+    }
+    catch (const SelectionNotFoundException e)
+    {
+        QMessageBox::critical(nullptr, QString("HDPS"), e.what(), QMessageBox::Ok);
+    }
 }
 
 /**

@@ -26,7 +26,7 @@ struct DataNotFoundException : public std::exception
 {
 public:
     DataNotFoundException(QString dataName) :
-        message((QString("Failed to find data with name: ") + dataName).toStdString()) { }
+        message((QString("Failed to find raw data with name: ") + dataName).toStdString()) { }
 
     const char* what() const throw () override
     {
@@ -42,6 +42,22 @@ struct SetNotFoundException : public std::exception
 public:
     SetNotFoundException(QString setName) :
         message((QString("Failed to find a set with name: ") + setName).toStdString())
+    { }
+
+    const char* what() const throw () override
+    {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
+};
+
+struct SelectionNotFoundException : public std::exception
+{
+public:
+    SelectionNotFoundException(QString name) :
+        message((QString("Failed to find a selection for raw data: ") + name).toStdString())
     { }
 
     const char* what() const throw () override
