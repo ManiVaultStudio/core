@@ -40,6 +40,12 @@ Set& DataManager::getSet(QString name)
 
 Set& DataManager::getSelection(QString name)
 {
+    plugin::RawData& rawData = getRawData(name);
+    if (rawData.isDerivedData())
+    {
+        return getSelection(rawData.getSourceData().getName());
+    }
+
     Set* selection = _selections[name.toStdString()].get();
 
     if (!selection)
