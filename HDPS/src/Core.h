@@ -50,7 +50,7 @@ public:
     /**
     * Create a new dataset from the given selection.
     */
-    void createSubsetFromSelection(const Set& selection, const QString newSetName) override;
+    void createSubsetFromSelection(const Set& selection, const QString dataName, const QString newSetName) override;
 
     /**
     * Request a plugin from the core by its name.

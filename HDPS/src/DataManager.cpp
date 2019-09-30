@@ -12,9 +12,12 @@ void DataManager::addRawData(plugin::RawData* rawData)
     _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
 }
 
-void DataManager::addSet(Set* set)
+QString DataManager::addSet(QString requestedName, Set* set)
 {
-    _dataSets.push_back(std::unique_ptr<Set>(set));
+    QString uniqueName = getUniqueSetName(requestedName);
+    set->setName(uniqueName);
+    _dataSetMap.emplace(set->getName(), std::unique_ptr<Set>(set));
+    return uniqueName;
 }
 
 void DataManager::addSelection(QString dataName, Set* selection)

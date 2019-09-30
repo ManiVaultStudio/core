@@ -47,6 +47,8 @@ private:
     QString _name;
     QString _dataName;
     bool _all;
+
+    friend class Core;
 };
 
 } // namespace hdps

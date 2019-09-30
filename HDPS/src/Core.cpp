@@ -111,7 +111,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
  * The manager will add the raw data to the core and return the
  * unique name of the data set linked with the raw data.
  */
-const QString Core::addData(const QString kind, const QString name)
+const QString Core::addData(const QString kind, const QString nameRequest)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
@@ -122,19 +122,17 @@ const QString Core::addData(const QString kind, const QString name)
     Set* fullSet = rawData.createSet();
     Set* selection = rawData.createSet();
 
-    // Generate a unique set name and set the properties of the new sets
-    QString setName = _dataManager->getUniqueSetName(name);
-    fullSet->setName(setName);
+    // Set the properties of the new sets
     fullSet->setAll();
 
     // Add them to the data manager
-    _dataManager->addSet(fullSet);
-    _dataManager->addSelection(pluginName, selection);
+    QString setName = _dataManager->addSet(nameRequest, fullSet);
+    _dataManager->addSelection(rawDataName, selection);
     
     return setName;
 }
 
-const QString Core::createDerivedData(const QString kind, const QString name, const QString sourceName)
+const QString Core::createDerivedData(const QString kind, const QString nameRequest, const QString sourceName)
 {
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(kind);
@@ -143,16 +141,14 @@ const QString Core::createDerivedData(const QString kind, const QString name, co
 
     rawData.setDerived(sourceName);
 
-    // Create an initial full set and an empty selection belonging to the raw data
+    // Create an initial full set, but no selection because it is shared with the source data
     Set* fullSet = rawData.createSet();
 
-    // Generate a unique set name and set the properties of the new sets
-    QString setName = _dataManager->getUniqueSetName(name);
-    fullSet->setName(setName);
+    // Set properties of the new set
     fullSet->setAll();
-
+    
     // Add them to the data manager
-    _dataManager->addSet(fullSet);
+    QString setName = _dataManager->addSet(nameRequest, fullSet);
 
     return setName;
 }
@@ -162,13 +158,16 @@ const QString Core::createDerivedData(const QString kind, const QString name, co
  * on the name given to this function. Then adds the new set to the data manager
  * and notifies all data consumers of the new set.
  */
-void Core::createSubsetFromSelection(const Set& selection, const QString newSetName)
+void Core::createSubsetFromSelection(const Set& selection, const QString dataName, const QString nameRequest)
 {
+    // Create a new set with only the indices that were part of the selection set
     Set* newSet = selection.copy();
-    newSet->setName(_dataManager->getUniqueSetName(newSetName));
 
-    _dataManager->addSet(newSet);
-    notifyDataAdded(newSet->getName());
+    newSet->_dataName = dataName;
+
+    // Add the set the core and publish the name of the set to all plug-ins
+    QString setName = _dataManager->addSet(nameRequest, newSet);
+    notifyDataAdded(setName);
 }
 
 /**
