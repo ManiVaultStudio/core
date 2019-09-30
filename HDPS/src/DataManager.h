@@ -10,6 +10,14 @@
 #include <memory>
 #include <exception>
 #include <string>
+// Hash specialization for QString so we can use it as a key in the data maps
+namespace std {
+    template<> struct hash<QString> {
+        std::size_t operator()(const QString& s) const {
+            return qHash(s);
+        }
+    };
+}
 
 namespace hdps
 {
@@ -49,20 +57,20 @@ class DataManager
 {
 public:
     void addRawData(plugin::RawData* rawData);
-    void addSet(Set* set);
+    QString addSet(QString requestedName, Set* set);
     void addSelection(QString dataName, Set* selection);
 
     plugin::RawData& getRawData(QString name);
     Set& getSet(QString name);
     Set& getSelection(QString name);
-    const std::vector<std::unique_ptr<Set>>& allSets();
+    const std::unordered_map<QString, std::unique_ptr<Set>>& allSets();
 
     const QString getUniqueSetName(QString request);
 
 private:
-    std::vector<std::unique_ptr<plugin::RawData>> _rawData;
+    std::unordered_map<QString, std::unique_ptr<plugin::RawData>> _rawDataMap;
+    std::unordered_map<QString, std::unique_ptr<Set>> _dataSetMap;
 
-    std::vector<std::unique_ptr<Set>> _dataSets;
     /**
     * Stores selection sets on all data plugins
     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr

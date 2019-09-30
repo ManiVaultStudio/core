@@ -9,7 +9,7 @@ namespace hdps
 
 void DataManager::addRawData(plugin::RawData* rawData)
 {
-    _rawData.push_back(std::unique_ptr<plugin::RawData>(rawData));
+    _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
 }
 
 void DataManager::addSet(Set* set)
@@ -24,47 +24,41 @@ void DataManager::addSelection(QString dataName, Set* selection)
 
 plugin::RawData& DataManager::getRawData(QString name)
 {
-    for (const auto& rawData : _rawData)
-    {
-        if (rawData->getName() == name)
-        {
-            return *rawData.get();
-        }
-    }
+    if (_rawDataMap.find(name) == _rawDataMap.end())
+        throw DataNotFoundException(name);
 
-    throw DataNotFoundException(name);
+    return *_rawDataMap[name];
 }
 
 Set& DataManager::getSet(QString name)
 {
-    for (const auto& set : _dataSets)
-    {
-        if (set->getName() == name)
-        {
-            return *set.get();
-        }
-    }
+    if (_dataSetMap.find(name) == _dataSetMap.end())
+        throw SetNotFoundException(name);
 
-    throw SetNotFoundException(name);
+    return *_dataSetMap[name];
 }
 
 Set& DataManager::getSelection(QString name)
 {
     Set* selection = _selections[name.toStdString()].get();
-    assert(selection != nullptr);
+
+    if (!selection)
+        throw SelectionNotFoundException(name);
+
     return *selection;
 }
 
-const std::vector<std::unique_ptr<Set>>& DataManager::allSets()
+const std::unordered_map<QString, std::unique_ptr<Set>>& DataManager::allSets()
 {
-    return _dataSets;
+    return _dataSetMap;
 }
 
 const QString DataManager::getUniqueSetName(QString request)
 {
-    for (const auto& set : allSets())
+    for (const auto& pair : allSets())
     {
-        if (set->getName() == request)
+        const Set& set = *pair.second;
+        if (set.getName() == request)
         {
             // Index in the string where the underscore followed by digits starts
             int index = request.lastIndexOf(QRegularExpression("_\\d+"));
