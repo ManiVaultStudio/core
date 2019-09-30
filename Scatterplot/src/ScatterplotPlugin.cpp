@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <float.h>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 

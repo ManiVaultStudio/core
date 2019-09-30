@@ -4,7 +4,8 @@
 
 #include <QImage>
 #include <QDebug>
-
+#include <math.h>
+#include <float.h>
 //#define MEANSHIFT_IMAGE_DEBUG
 
 namespace hdps

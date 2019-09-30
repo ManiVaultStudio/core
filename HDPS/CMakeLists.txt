@@ -289,7 +289,6 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 set(PROJECT "PointsPlugin")
 #PROJECT(${PROJECT})
 
-
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -314,6 +313,7 @@ source_group( Plugin FILES ${POINTS_SOURCES})
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${POINTS_SOURCES})
+add_dependencies(${PROJECT} HDPS_Public)
 
 # Generate a header file that contains the EXPORT macro for this library.
 include(GenerateExportHeader)
@@ -323,9 +323,16 @@ generate_export_header(${PROJECT})
 file(GLOB EXPORT_HEADER_FILE_NAME
 	RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
 
+if(MSVC)
+    set(LIB_LINK_SUFFIX ".lib") 
+else()
+    set(LIB_LINK_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif(MSVC)
+set(HDPS_LINK_LIBRARY "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
+
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
-target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
+target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
 
 # Copy the DLL, the LIB file and the export header of this library to the appropriate subdirectory
 # of the installation directory.

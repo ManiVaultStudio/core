@@ -19,7 +19,11 @@ using namespace hdps::plugin;
 class ScatterplotSettings;
 class PointsPlugin;
 class IndexSet;
-class hdps::Vector2f;
+
+namespace hdps
+{
+    class Vector2f;
+}
 
 class ScatterplotPlugin : public ViewPlugin, public SelectionListener
 {

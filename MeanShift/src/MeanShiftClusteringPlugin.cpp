@@ -88,7 +88,7 @@ void MeanShiftAnalysisPlugin::startComputation()
         return;
     }
 
-    IndexSet& set = (IndexSet&) _core->requestSet(setName);
+    IndexSet& set = dynamic_cast<IndexSet&>(_core->requestSet(setName));
     PointsPlugin& points = set.getData();
 
     if (points.getNumDimensions() != 2)

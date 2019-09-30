@@ -1,6 +1,7 @@
 #include "DensityComputation.h"
 
 #include "../graphics/Matrix3f.h"
+#include <math.h>
 
 namespace hdps
 {

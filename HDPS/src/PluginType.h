@@ -16,7 +16,7 @@ namespace hdps
 namespace plugin
 {
 
-enum Type { ANALYSIS, DATA, LOADER, WRITER, VIEW };
+enum Type : unsigned int { ANALYSIS, DATA, LOADER, WRITER, VIEW };
 
 } // namespace plugin
 

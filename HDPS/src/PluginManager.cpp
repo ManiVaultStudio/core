@@ -43,11 +43,11 @@ void PluginManager::loadPlugins()
     //if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
     //    pluginsDir.cdUp();
 #elif defined(Q_OS_MAC)
-    if (pluginsDir.dirName() == "MacOS")
+    if (pluginDir.dirName() == "MacOS")
     {
-        pluginsDir.cdUp();
-        pluginsDir.cdUp();
-        pluginsDir.cdUp();
+        pluginDir.cdUp();
+        pluginDir.cdUp();
+        pluginDir.cdUp();
     }
 #endif
     pluginDir.cd("Plugins");

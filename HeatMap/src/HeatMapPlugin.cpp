@@ -66,7 +66,7 @@ void HeatMapPlugin::clusterSelected(QList<int> selectedClusters)
     qDebug() << "CLUSTER SELECTION";
     qDebug() << selectedClusters;
     
-    ClusterSet& clusterSet = (ClusterSet&) _core->requestSet(heatmap->getCurrentData());
+    ClusterSet& clusterSet = dynamic_cast<ClusterSet&>(_core->requestSet(heatmap->getCurrentData()));
 
     const ClustersPlugin& clusterPlugin = clusterSet.getData();
 

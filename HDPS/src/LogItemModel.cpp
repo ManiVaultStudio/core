@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint> // For uintmax_t
+#include <cstring> // For std::strcmp
 #include <tuple>
 
 
@@ -85,7 +86,7 @@ QVariant LogItemModel::GetDataValueAtColumn(const MessageRecord& messageRecord, 
         {
         case ColumnEnum::number:
         {
-            return messageRecord.number;
+            return qulonglong{messageRecord.number};
         }
         case ColumnEnum::category:
         {
