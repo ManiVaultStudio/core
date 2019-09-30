@@ -15,6 +15,7 @@
 #include <QStackedWidget>
 
 class ScatterplotPlugin;
+class QStringListModel;
 
 struct PointSettingsWidget : public QWidget
 {
@@ -57,8 +58,10 @@ struct DimensionPicker : public QWidget
 
     QGridLayout& getLayout();
 
-    void setDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
-    void setScalarDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
+    
+    void setDimensions(const QStringList &names);
+	void setScalarDimensions(const QStringList &names);
+
     int getDimensionX();
     int getDimensionY();
     int getDimensionColor();
@@ -71,6 +74,8 @@ private:
     hdps::gui::ComboBox _xDimOptions;
     hdps::gui::ComboBox _yDimOptions;
     hdps::gui::ComboBox _cDimOptions;
+	QStringListModel *_dimNamesModel;
+	QStringListModel *_cDimNamesModel;
 
     QGridLayout _layout;
 };
@@ -95,10 +100,10 @@ public:
     void showDensitySettings();
     QString currentData();
 
-    void initDimOptions(const unsigned int nDim);
-    void initDimOptions(const std::vector<QString> dimNames);
-    void initScalarDimOptions(const unsigned int nDim);
-    void initScalarDimOptions(const std::vector<QString> dimNames);
+    
+    void initDimOptions(const QStringList &dimNames);
+    
+    void initScalarDimOptions(const QStringList &dimNames);
     void addDataOption(const QString option);
     int numDataOptions();
 

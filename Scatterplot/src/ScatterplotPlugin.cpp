@@ -96,29 +96,15 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
     const PointsPlugin& points = dataSet.getData();
 
+	settings->initDimOptions(points.getDimensionNames());
+
     if (points.isDerivedData()) {
         const PointsPlugin& sourceData = dynamic_cast<const PointsPlugin&>(points.getSourceData());
-
-        if (points.getDimensionNames().size() == points.getNumDimensions())
-            settings->initDimOptions(points.getDimensionNames());
-        else
-            settings->initDimOptions(points.getNumDimensions());
-
-        if (sourceData.getDimensionNames().size() == sourceData.getNumDimensions())
-            settings->initScalarDimOptions(sourceData.getDimensionNames());
-        else
-            settings->initScalarDimOptions(sourceData.getNumDimensions());
+		settings->initScalarDimOptions(sourceData.getDimensionNames());
     }
     else
     {
-        if (points.getDimensionNames().size() == points.getNumDimensions()) {
-            settings->initDimOptions(points.getDimensionNames());
-            settings->initScalarDimOptions(points.getDimensionNames());
-        }
-        else {
-            settings->initDimOptions(points.getNumDimensions());
-            settings->initScalarDimOptions(points.getNumDimensions());
-        }
+	   settings->initScalarDimOptions(points.getDimensionNames());
     }
 
     updateData();

@@ -9,6 +9,7 @@
 #include <QMap>
 #include <QVariant>
 #include <vector>
+#include <QStringList>
 
 using namespace hdps::plugin;
 
@@ -32,11 +33,12 @@ public:
 
     const std::vector<float>& getData() const;
 
-    const std::vector<QString>& getDimensionNames() const;
+    const QStringList& getDimensionNames() const;
 
-    void setData(const float* data, unsigned int numPoints, unsigned int numDimensions);
+    void setData(const float* data, unsigned int numPoints, unsigned int numDimensions, const QStringList& dimensionNames = QStringList());
 
     void setDimensionNames(const std::vector<QString>& dimNames);
+    void setDimensionNames(const QStringList& dimNames);
 
     // Constant subscript indexing
     const float& operator[](unsigned int index) const;
@@ -60,7 +62,7 @@ private:
     /** Number of features of each data point */
     unsigned int _numDimensions = 1;
 
-    std::vector<QString> _dimNames;
+    QStringList _dimNames;
 
     QMap<QString, QVariant>		_properties;
 };

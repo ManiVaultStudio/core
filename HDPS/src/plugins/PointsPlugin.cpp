@@ -41,15 +41,35 @@ const std::vector<float>& PointsPlugin::getData() const
     return _data;
 }
 
-const std::vector<QString>& PointsPlugin::getDimensionNames() const
+const QStringList& PointsPlugin::getDimensionNames() const
 {
+    assert(_numDimensions == _dimNames.size());
     return _dimNames;
 }
 
-void PointsPlugin::setData(const float* data, unsigned int numPoints, unsigned int numDimensions)
+void PointsPlugin::setData(const float* data, unsigned int numPoints, unsigned int numDimensions, const QStringList& dimensionNames)
 {
     _data.resize(numPoints * numDimensions);
     _numDimensions = numDimensions;
+    auto numDimensionNames = dimensionNames.size();
+    if (numDimensionNames != 0 && (numDimensionNames != _numDimensions))
+    {
+        qCritical() <<"The specified number of specified dimensions names differs from the specified number of dimensions";
+    }
+    if (numDimensionNames < _numDimensions)
+    {
+        _dimNames.reserve(_numDimensions);
+        for (auto i = numDimensionNames; i < _numDimensions; ++i)
+        {
+            QString name = "Dim " + QString::number(i);
+            _dimNames.push_back(name);
+        }
+    }
+    else if (numDimensionNames > _numDimensions)
+    {
+        while (_dimNames.size() > _numDimensions)
+            _dimNames.removeLast();
+    }
 
     if (data == nullptr)
         return;
@@ -59,7 +79,36 @@ void PointsPlugin::setData(const float* data, unsigned int numPoints, unsigned i
 
 void PointsPlugin::setDimensionNames(const std::vector<QString>& dimNames)
 {
+    const auto numStoredDimNames = _dimNames.size();
+    if (numStoredDimNames == 0 && _numDimensions==0)
+    {
+        _dimNames.reserve(dimNames.size());
+        std::copy(dimNames.cbegin(), dimNames.cend(), std::back_inserter(_dimNames));
+    }
+    else if ((numStoredDimNames == _numDimensions) && (dimNames.size() == numStoredDimNames))
+    {
+        std::copy(dimNames.cbegin(), dimNames.cend(), _dimNames.begin());
+    }
+    else
+    {
+        qCritical() << "The number of dimension names differs from the number of dimensions";
+    }
+}
+void PointsPlugin::setDimensionNames(const QStringList& dimNames)
+{
+    const auto numStoredDimNames = _dimNames.size();
+    if (numStoredDimNames == 0 && _numDimensions == 0)
+    {
+        _dimNames == dimNames;
+    }
+    else if ((numStoredDimNames == _numDimensions) && (dimNames.size() == numStoredDimNames))
+    {
     _dimNames = dimNames;
+    }
+    else
+    {
+        qCritical() << "The number of dimension names differs from the number of dimensions";
+    }
 }
 
 // Constant subscript indexing

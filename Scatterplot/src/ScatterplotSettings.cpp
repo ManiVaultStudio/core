@@ -5,6 +5,7 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QPainter>
+#include <QStringListModel>
 
 #include <cassert>
 
@@ -66,7 +67,9 @@ PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) :
 DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin) :
     _xDimLabel("X:"),
     _yDimLabel("Y:"),
-    _cDimLabel("Color:")
+    _cDimLabel("Color:"),
+	_dimNamesModel(nullptr),
+	_cDimNamesModel(nullptr)
 {
     _layout.addWidget(&_xDimLabel, 0, 0);
     _layout.addWidget(&_yDimLabel, 1, 0);
@@ -86,49 +89,48 @@ QGridLayout& DimensionPicker::getLayout()
     return _layout;
 }
 
-void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QString> names)
+void DimensionPicker::setDimensions(const QStringList &names)
 {
-    bool hasNames = numDimensions == names.size();
+	
 
     std::vector<QComboBox*> allBoxes = { &_xDimOptions, &_yDimOptions };
 
-    for (auto* dimensionBox : allBoxes)
+	if (_dimNamesModel == nullptr)
     {
-        dimensionBox->blockSignals(true);
-        dimensionBox->clear();
-
-        for (unsigned int i = 0; i < numDimensions; i++)
-        {
-            QString name = hasNames ? names[i] : "Dim " + QString::number(i);
-            dimensionBox->addItem(name);
-        }
+		_dimNamesModel = new QStringListModel(names, this);
+    }
+	else
+    {
+		_dimNamesModel->setStringList(names);
     }
 
-    if (numDimensions >= 2)
-    {
-        _xDimOptions.setCurrentIndex(0);
-        _yDimOptions.setCurrentIndex(1);
-    }
-
+	auto numDimensions = names.size();
+	int currentIndex = 0;
     for (auto* dimensionBox : allBoxes)
     {
+		dimensionBox->blockSignals(true);
+		dimensionBox->setModel(_dimNamesModel);
+		if (currentIndex >= numDimensions)
+			currentIndex = 0;
+		dimensionBox->setCurrentIndex(currentIndex++);
         dimensionBox->blockSignals(false);
     }
 }
 
-void DimensionPicker::setScalarDimensions(unsigned int numDimensions, std::vector<QString> names)
+void DimensionPicker::setScalarDimensions(const QStringList &names)
 {
-    bool hasNames = numDimensions == names.size();
 
     _cDimOptions.blockSignals(true);
-    _cDimOptions.clear();
-
-    for (unsigned int i = 0; i < numDimensions; i++)
+	if (_cDimNamesModel == nullptr)
+	{
+		_cDimNamesModel = new QStringListModel(names);
+	}
+	else
     {
-        QString name = hasNames ? names[i] : "Dim " + QString::number(i);
-        _cDimOptions.addItem(name);
+		
+		_cDimNamesModel->setStringList(names);
     }
-
+	_cDimOptions.setModel(_cDimNamesModel);
     _cDimOptions.blockSignals(false);
 }
 
@@ -238,24 +240,16 @@ QString ScatterplotSettings::currentData()
     return _dataOptions.currentText();
 }
 
-void ScatterplotSettings::initDimOptions(const unsigned int nDim)
+void ScatterplotSettings::initDimOptions(const QStringList &dimNames)
 {
-    _dimensionPicker->setDimensions(nDim);
+    _dimensionPicker->setDimensions(dimNames);
 }
 
-void ScatterplotSettings::initDimOptions(const std::vector<QString> dimNames)
+void ScatterplotSettings::initScalarDimOptions(const QStringList &dimNames)
 {
-    _dimensionPicker->setDimensions(dimNames.size(), dimNames);
-}
 
-void ScatterplotSettings::initScalarDimOptions(const unsigned int nDim)
-{
-    _dimensionPicker->setScalarDimensions(nDim);
-}
+    _dimensionPicker->setScalarDimensions(dimNames);
 
-void ScatterplotSettings::initScalarDimOptions(const std::vector<QString> dimNames)
-{
-    _dimensionPicker->setScalarDimensions(dimNames.size(), dimNames);
 }
 
 void ScatterplotSettings::addDataOption(const QString option)
