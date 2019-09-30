@@ -106,11 +106,6 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-/**
- * Requests the plugin manager to create new RawData of the given kind.
- * The manager will add the raw data to the core and return the
- * unique name of the data set linked with the raw data.
- */
 const QString Core::addData(const QString kind, const QString nameRequest)
 {
     // Create a new plugin of the given kind
@@ -153,11 +148,6 @@ const QString Core::createDerivedData(const QString kind, const QString nameRequ
     return setName;
 }
 
-/**
- * Creates a copy of the given selection set and gives it a unique name based
- * on the name given to this function. Then adds the new set to the data manager
- * and notifies all data consumers of the new set.
- */
 void Core::createSubsetFromSelection(const Set& selection, const QString dataName, const QString nameRequest)
 {
     // Create a new set with only the indices that were part of the selection set
@@ -170,11 +160,6 @@ void Core::createSubsetFromSelection(const Set& selection, const QString dataNam
     notifyDataAdded(setName);
 }
 
-/**
- * Requests an instance of a data type plugin from the core which has the same
- * unique name as the given parameter. If no such instance can be found a fatal
- * error is thrown.
- */
 plugin::RawData& Core::requestData(const QString name)
 {
     try
@@ -187,7 +172,6 @@ plugin::RawData& Core::requestData(const QString name)
     }
 }
 
-/** Request a dataset from the data manager by its name. */
 Set& Core::requestSet(const QString name)
 {
     try
@@ -200,7 +184,6 @@ Set& Core::requestSet(const QString name)
     }
 }
 
-/** Requests the selection set for the name of a raw dataset. */
 Set& Core::requestSelection(const QString name)
 {
     try
