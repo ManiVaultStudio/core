@@ -31,6 +31,11 @@ public:
         return _core->requestData(_sourceDataName);
     }
 
+    QString getSourceDataName() const
+    {
+        return _sourceDataName;
+    }
+
     /**
      * Gets the selection associated with this data set. If the data set is
      * derived then the selection of the source data will be returned. Otherwise,
