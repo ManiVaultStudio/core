@@ -5,11 +5,12 @@
 
 #include <QString>
 
-#include <vector>
-#include <unordered_map>
-#include <memory>
-#include <exception>
 #include <string>
+#include <unordered_map>    // Data is stored in maps
+#include <memory>           // Data is stored in unique pointers
+#include <exception>        // Used for defining custom exceptions
+#include <functional>       // Necessary for hash function
+
 // Hash specialization for QString so we can use it as a key in the data maps
 namespace std {
     template<> struct hash<QString> {
@@ -81,14 +82,29 @@ public:
     Set& getSelection(QString name);
     const std::unordered_map<QString, std::unique_ptr<Set>>& allSets();
 
+    /**
+     * Generates a unique set name based on a requested name.
+     * If the requested name already is the name of a stored data set, it will suffix
+     * the name with incrementing numbers until the name is unique and then return it.
+     * If the requested name is not in use, then the request will be returned as is.
+     */
     const QString getUniqueSetName(QString request);
 
 private:
+    /**
+     * Stores all raw data in the system. Raw data is stored by the name
+     * retrieved from their Plugin::getName() function.
+     */
     std::unordered_map<QString, std::unique_ptr<plugin::RawData>> _rawDataMap;
+
+    /**
+     * Stores all data sets in the system. Data sets are stored by the name
+     * retrieved from their Set::getName() function.
+     */
     std::unordered_map<QString, std::unique_ptr<Set>> _dataSetMap;
 
     /**
-    * Stores selection sets on all data plugins
+    * Stores selection sets on all data plug-ins
     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
     */
     std::unordered_map<std::string, std::unique_ptr<Set>> _selections;

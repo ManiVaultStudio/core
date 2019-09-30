@@ -86,7 +86,7 @@ private:
     /** Retrieves all data consumers from the plugin list. */
     std::vector<plugin::DataConsumer*> getDataConsumers();
 
-    /** Destroys all plugins kept by the core */
+    /** Destroys all plug-ins kept by the core */
     void destroyPlugins();
 
 private:

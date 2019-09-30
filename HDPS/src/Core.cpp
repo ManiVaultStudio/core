@@ -107,9 +107,9 @@ void Core::addPlugin(plugin::Plugin* plugin)
 }
 
 /**
- * Requests the plugin manager to create a new plugin of the given kind.
- * The manager will add the plugin instance to the core and return the
- * unique name of the plugin.
+ * Requests the plugin manager to create new RawData of the given kind.
+ * The manager will add the raw data to the core and return the
+ * unique name of the data set linked with the raw data.
  */
 const QString Core::addData(const QString kind, const QString name)
 {
@@ -215,8 +215,8 @@ Set& Core::requestSelection(const QString name)
 }
 
 /**
- * Goes through all plugins stored in the core and calls the 'dataAdded' function
- * on all plugins that inherit from the DataConsumer interface.
+ * Goes through all plug-ins stored in the core and calls the 'dataAdded' function
+ * on all plug-ins that inherit from the DataConsumer interface.
  */
 void Core::notifyDataAdded(const QString name)
 {
@@ -228,8 +228,8 @@ void Core::notifyDataAdded(const QString name)
 }
 
 /**
-* Goes through all plugins stored in the core and calls the 'dataChanged' function
-* on all plugins that inherit from the DataConsumer interface.
+* Goes through all plug-ins stored in the core and calls the 'dataChanged' function
+* on all plug-ins that inherit from the DataConsumer interface.
 */
 void Core::notifyDataChanged(const QString name)
 {
@@ -241,8 +241,8 @@ void Core::notifyDataChanged(const QString name)
 }
 
 /**
-* Goes through all plugins stored in the core and calls the 'dataRemoved' function
-* on all plugins that inherit from the DataConsumer interface.
+* Goes through all plug-ins stored in the core and calls the 'dataRemoved' function
+* on all plug-ins that inherit from the DataConsumer interface.
 */
 void Core::notifyDataRemoved(const QString name)
 {
@@ -275,7 +275,7 @@ bool Core::supportsSet(plugin::DataConsumer* dataConsumer, QString setName)
     return dataConsumer->supportedDataKinds().contains(rawData.getKind());
 }
 
-/** Retrieves all data consumers from the plugin list. */
+/** Retrieves all data consumers from the plug-in list. */
 std::vector<plugin::DataConsumer*> Core::getDataConsumers()
 {
     std::vector<plugin::DataConsumer*> dataConsumers;
@@ -292,7 +292,7 @@ std::vector<plugin::DataConsumer*> Core::getDataConsumers()
     return dataConsumers;
 }
 
-/** Destroys all plugins kept by the core */
+/** Destroys all plug-ins kept by the core */
 void Core::destroyPlugins()
 {
     for (auto& kv : _plugins)
