@@ -107,7 +107,7 @@ private:
     * Stores selection sets on all data plug-ins
     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
     */
-    std::unordered_map<std::string, std::unique_ptr<Set>> _selections;
+    std::unordered_map<QString, std::unique_ptr<Set>> _selections;
 };
 
 } // namespace hdps

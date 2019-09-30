@@ -22,7 +22,8 @@ QString DataManager::addSet(QString requestedName, Set* set)
 
 void DataManager::addSelection(QString dataName, Set* selection)
 {
-    _selections.emplace(dataName.toStdString(), std::unique_ptr<Set>(selection));
+    _selections.emplace(dataName, std::unique_ptr<Set>(selection));
+}
 }
 
 plugin::RawData& DataManager::getRawData(QString name)
@@ -49,7 +50,7 @@ Set& DataManager::getSelection(QString name)
         return getSelection(rawData.getSourceData().getName());
     }
 
-    Set* selection = _selections[name.toStdString()].get();
+    Set* selection = _selections[name].get();
 
     if (!selection)
         throw SelectionNotFoundException(name);
