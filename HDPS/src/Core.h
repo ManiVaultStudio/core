@@ -92,7 +92,7 @@ private:
 private:
     gui::MainWindow& _mainWindow;
 
-    /** Plugin manager responsible for loading plugins and adding them to the core. */
+    /** Plugin manager responsible for loading plug-ins and adding them to the core. */
     std::unique_ptr<plugin::PluginManager> _pluginManager;
 
     /** Data manager responsible for storing data sets and data selections */

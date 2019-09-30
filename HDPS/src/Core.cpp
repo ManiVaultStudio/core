@@ -51,9 +51,17 @@ void Core::addPlugin(plugin::Plugin* plugin)
         _mainWindow.addView(dynamic_cast<plugin::ViewPlugin*>(plugin));
     }
 
-    // Add the plugin to a list of plugins of the same type
-    _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
-
+    // Add the plugin to a list of plug-ins of the same type
+    // Unless the plugin is RawData, then add it to the data manager
+    if (plugin->getType() == plugin::Type::DATA)
+    {
+        _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin));
+    }
+    else
+    {
+        _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
+    }
+    
     // Initialize the plugin after it has been added to the core
     plugin->init();
 
@@ -89,10 +97,11 @@ void Core::addPlugin(plugin::Plugin* plugin)
     plugin::DataConsumer* dataConsumer = dynamic_cast<plugin::DataConsumer*>(plugin);
     if (dataConsumer)
     {
-        for (const auto& set : _dataManager->allSets())
+        for (const auto& pair : _dataManager->allSets())
         {
-            if (supportsSet(dataConsumer, set->getName()))
-                dataConsumer->dataAdded(set->getName());
+            const Set& set = *pair.second;
+            if (supportsSet(dataConsumer, set.getName()))
+                dataConsumer->dataAdded(set.getName());
         }
     }
 }
@@ -105,9 +114,9 @@ void Core::addPlugin(plugin::Plugin* plugin)
 const QString Core::addData(const QString kind, const QString name)
 {
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager->createPlugin(kind);
+    QString rawDataName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    const plugin::RawData& rawData = requestData(pluginName);
+    const plugin::RawData& rawData = requestData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
     Set* fullSet = rawData.createSet();
@@ -169,15 +178,14 @@ void Core::createSubsetFromSelection(const Set& selection, const QString newSetN
  */
 plugin::RawData& Core::requestData(const QString name)
 {
-    for (std::unique_ptr<plugin::Plugin>& plugin : _plugins[plugin::Type::DATA])
+    try
     {
-        if (plugin->getName() == name)
-        {
-            return dynamic_cast<plugin::RawData&>(*plugin.get());
-        }
+        return _dataManager->getRawData(name);
     }
-
-    QMessageBox::critical(NULL, QString("HDPS"), QString("No plugin found with name: ").append(name), QMessageBox::Ok);
+    catch (DataNotFoundException e)
+    {
+        QMessageBox::critical(nullptr, QString("HDPS"), e.what(), QMessageBox::Ok);
+    }
 }
 
 /** Request a dataset from the data manager by its name. */
