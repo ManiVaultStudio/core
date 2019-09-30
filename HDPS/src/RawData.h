@@ -43,9 +43,9 @@ public:
         return isDerivedData() ? _core->requestSelection(_sourceDataName) : _core->requestSelection(getName());
     }
 
-    void setDerived(QString sourceData)
+    void setDerived(bool derived, QString sourceData)
     {
-        _derived = true;
+        _derived = derived;
         _sourceDataName = sourceData;
     }
 
