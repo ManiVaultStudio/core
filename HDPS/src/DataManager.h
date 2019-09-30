@@ -77,6 +77,12 @@ public:
     QString addSet(QString requestedName, Set* set);
     void addSelection(QString dataName, Set* selection);
 
+    /**
+     * Removes raw data and all sets and selections belonging to this data.
+     * Returns a list of set names that have been removed as a result of this.
+     */
+    QStringList removeRawData(QString name);
+
     plugin::RawData& getRawData(QString name);
     Set& getSet(QString name);
     Set& getSelection(QString name);

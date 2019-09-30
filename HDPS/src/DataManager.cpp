@@ -24,6 +24,46 @@ void DataManager::addSelection(QString dataName, Set* selection)
 {
     _selections.emplace(dataName, std::unique_ptr<Set>(selection));
 }
+
+QStringList DataManager::removeRawData(QString name)
+{
+    // Convert any derived data referring to this data to non-derived data
+    for (auto& pair : _rawDataMap)
+    {
+        plugin::RawData& rawData = *pair.second;
+
+        // Set as non-derived data
+        if (rawData.isDerivedData() && rawData.getSourceDataName() == name)
+        {
+            rawData.setDerived(false, QString());
+        }
+        
+        // Generate a selection set for the previously derived data
+        Set* selection = rawData.createSet();
+        addSelection(rawData.getName(), selection);
+    }
+
+    // Remove any sets referring to this data, and keep track of the removed set names
+    QStringList removedSets;
+    for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
+    {
+        const Set& set = *it->second;
+        if (set.getDataName() == name)
+        {
+            removedSets.append(set.getName());
+            it = _dataSetMap.erase(it);
+        }
+        else
+            it++;
+    }
+
+    // Remove the selection belonging to the raw data
+    _selections.erase(name);
+
+    // Remove the raw data
+    _rawDataMap.erase(name);
+
+    return removedSets;
 }
 
 plugin::RawData& DataManager::getRawData(QString name)

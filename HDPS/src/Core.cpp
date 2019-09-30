@@ -127,6 +127,16 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     return setName;
 }
 
+void Core::removeData(const QString dataName)
+{
+    QStringList removedSets = _dataManager->removeRawData(dataName);
+
+    for (const QString& name : removedSets)
+    {
+        notifyDataRemoved(name);
+    }
+}
+
 const QString Core::createDerivedData(const QString kind, const QString nameRequest, const QString sourceName)
 {
     // Create a new plugin of the given kind
@@ -134,7 +144,7 @@ const QString Core::createDerivedData(const QString kind, const QString nameRequ
     // Request it from the core
     plugin::RawData& rawData = requestData(pluginName);
 
-    rawData.setDerived(sourceName);
+    rawData.setDerived(true, sourceName);
 
     // Create an initial full set, but no selection because it is shared with the source data
     Set* fullSet = rawData.createSet();
@@ -230,8 +240,7 @@ void Core::notifyDataRemoved(const QString name)
 {
     for (plugin::DataConsumer* dataConsumer : getDataConsumers())
     {
-        if (supportsSet(dataConsumer, name))
-            dataConsumer->dataRemoved(name);
+        dataConsumer->dataRemoved(name);
     }
 }
 
