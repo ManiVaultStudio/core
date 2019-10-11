@@ -86,7 +86,7 @@ public:
     plugin::RawData& getRawData(QString name);
     Set& getSet(QString name);
     Set& getSelection(QString name);
-    const std::unordered_map<QString, std::unique_ptr<Set>>& allSets();
+    const std::unordered_map<QString, std::unique_ptr<Set>>& allSets() const;
 
     /**
      * Generates a unique set name based on a requested name.

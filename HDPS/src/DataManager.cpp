@@ -98,7 +98,7 @@ Set& DataManager::getSelection(QString name)
     return *selection;
 }
 
-const std::unordered_map<QString, std::unique_ptr<Set>>& DataManager::allSets()
+const std::unordered_map<QString, std::unique_ptr<Set>>& DataManager::allSets() const
 {
     return _dataSetMap;
 }
