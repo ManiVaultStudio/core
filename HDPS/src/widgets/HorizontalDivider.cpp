@@ -24,10 +24,6 @@ namespace hdps
         {
             _title = title;
             _titleLabel->setText(title);
-
-            //removeWidget(_divider);
-            //addWidget(_titleLabel);
-            //addWidget(_divider);
         }
     }
 }
