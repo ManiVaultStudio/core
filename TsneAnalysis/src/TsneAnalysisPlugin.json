@@ -1,5 +1,0 @@
-{
-    "name" : "tSNE Analysis",
-    "version": "1",
-    "dependencies" : ["Points"]
-}
