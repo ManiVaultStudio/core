@@ -18,6 +18,7 @@ public:
     ~DockableWidget() override;
 
     void addWidget(QWidget* widget);
+    QWidget* getWidget();
     void setMainLayout(QLayout* layout);
     QLayout* mainLayout();
 

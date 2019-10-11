@@ -52,6 +52,11 @@ void DockableWidget::addWidget(QWidget* widget)
     _mainLayout->addWidget(widget);
 }
 
+QWidget* DockableWidget::getWidget()
+{
+    return _mainWidget;
+}
+
 void DockableWidget::setMainLayout(QLayout* layout)
 {
     // Apparently not allowed ("A layout can only have another layout as a parent")
