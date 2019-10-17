@@ -86,7 +86,7 @@ QGridLayout& DimensionPicker::getLayout()
     return _layout;
 }
 
-void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QString> names)
+void DimensionPicker::setDimensions(unsigned int numDimensions, const std::vector<QString>& names)
 {
     bool hasNames = numDimensions == names.size();
 
@@ -116,7 +116,7 @@ void DimensionPicker::setDimensions(unsigned int numDimensions, std::vector<QStr
     }
 }
 
-void DimensionPicker::setScalarDimensions(unsigned int numDimensions, std::vector<QString> names)
+void DimensionPicker::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)
 {
     bool hasNames = numDimensions == names.size();
 
@@ -243,7 +243,7 @@ void ScatterplotSettings::initDimOptions(const unsigned int nDim)
     _dimensionPicker->setDimensions(nDim);
 }
 
-void ScatterplotSettings::initDimOptions(const std::vector<QString> dimNames)
+void ScatterplotSettings::initDimOptions(const std::vector<QString>& dimNames)
 {
     _dimensionPicker->setDimensions(dimNames.size(), dimNames);
 }
@@ -253,7 +253,7 @@ void ScatterplotSettings::initScalarDimOptions(const unsigned int nDim)
     _dimensionPicker->setScalarDimensions(nDim);
 }
 
-void ScatterplotSettings::initScalarDimOptions(const std::vector<QString> dimNames)
+void ScatterplotSettings::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
     _dimensionPicker->setScalarDimensions(dimNames.size(), dimNames);
 }
