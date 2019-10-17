@@ -1,5 +1,0 @@
-{
-    "name" : "Mean Shift Analysis",
-    "version": "1",
-    "dependencies" : ["Points", "Clusters"]
-}
