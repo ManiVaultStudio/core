@@ -5,8 +5,37 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QPainter>
+#include <QStringListModel>
 
 #include <cassert>
+
+namespace
+{
+    QStringListModel& createStringListModel(const unsigned int numDimensions, const std::vector<QString>& names, QObject& parent)
+    {
+        QStringList stringList;
+
+        stringList.reserve(static_cast<int>(numDimensions));
+
+        if (numDimensions == names.size())
+        {
+            for (const auto& name : names)
+            {
+                stringList.append(name);
+            }
+        }
+        else
+        {
+            for (unsigned int i = 0; i < numDimensions; ++i)
+            {
+                stringList.append(QString::fromLatin1("Dim %1").arg(i));
+            }
+        }
+
+        auto* stringListModel = new QStringListModel(stringList, &parent);
+        return *stringListModel;
+    }
+}
 
 PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin) :
     _pointSizeLabel("Point Size:"),
@@ -88,20 +117,14 @@ QGridLayout& DimensionPicker::getLayout()
 
 void DimensionPicker::setDimensions(unsigned int numDimensions, const std::vector<QString>& names)
 {
-    bool hasNames = numDimensions == names.size();
+    auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
-    std::vector<QComboBox*> allBoxes = { &_xDimOptions, &_yDimOptions };
+    QComboBox* const allBoxes[] = { &_xDimOptions, &_yDimOptions };
 
-    for (auto* dimensionBox : allBoxes)
+    for (auto* const dimensionBox : allBoxes)
     {
         dimensionBox->blockSignals(true);
-        dimensionBox->clear();
-
-        for (unsigned int i = 0; i < numDimensions; i++)
-        {
-            QString name = hasNames ? names[i] : "Dim " + QString::number(i);
-            dimensionBox->addItem(name);
-        }
+        dimensionBox->setModel(&stringListModel);
     }
 
     if (numDimensions >= 2)
@@ -110,7 +133,7 @@ void DimensionPicker::setDimensions(unsigned int numDimensions, const std::vecto
         _yDimOptions.setCurrentIndex(1);
     }
 
-    for (auto* dimensionBox : allBoxes)
+    for (auto* const dimensionBox : allBoxes)
     {
         dimensionBox->blockSignals(false);
     }
@@ -118,17 +141,10 @@ void DimensionPicker::setDimensions(unsigned int numDimensions, const std::vecto
 
 void DimensionPicker::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)
 {
-    bool hasNames = numDimensions == names.size();
+    auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
     _cDimOptions.blockSignals(true);
-    _cDimOptions.clear();
-
-    for (unsigned int i = 0; i < numDimensions; i++)
-    {
-        QString name = hasNames ? names[i] : "Dim " + QString::number(i);
-        _cDimOptions.addItem(name);
-    }
-
+    _cDimOptions.setModel(&stringListModel);
     _cDimOptions.blockSignals(false);
 }
 
