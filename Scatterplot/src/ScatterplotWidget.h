@@ -44,6 +44,7 @@ public:
      * Feed 2-dimensional data to the scatterplot.
      */
     void setData(const std::vector<Vector2f>* data);
+    void setImageData(const std::vector<float>* data);
     void setHighlights(const std::vector<char>& highlights);
     void setScalarProperty(const std::vector<float>& scalarProperty);
     void setPointSize(const float size);

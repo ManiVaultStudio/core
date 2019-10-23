@@ -12,12 +12,14 @@ layout(location = 3) in float scalar;
 out vec2 pass_texCoords;
 flat out uint pass_highlight;
 out float pass_scalar;
+flat out int pass_instance_id;
 
 void main()
 {
     pass_texCoords = vertex;
     pass_highlight = highlight;
     pass_scalar = scalar;
+    pass_instance_id = gl_InstanceID;
     
     float scale = 1.0;
     if (pass_highlight == 1u) {

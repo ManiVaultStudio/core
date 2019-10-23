@@ -21,7 +21,7 @@ struct PointSettingsWidget : public QWidget
     PointSettingsWidget(const ScatterplotPlugin& plugin);
 
     const int MIN_POINT_SIZE = 5;
-    const int MAX_POINT_SIZE = 20;
+    const int MAX_POINT_SIZE = 40;
     const int MIN_POINT_OPACITY = 0;
     const int MAX_POINT_OPACITY = 100;
 

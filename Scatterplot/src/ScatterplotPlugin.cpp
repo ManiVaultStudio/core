@@ -147,7 +147,7 @@ void ScatterplotPlugin::cDimPicked(int index)
 {
     updateData();
 }
-
+bool setImage = false;
 void ScatterplotPlugin::updateData()
 {
     if (!_scatterPlotWidget->isInitialized())
@@ -175,6 +175,11 @@ void ScatterplotPlugin::updateData()
     {
         const PointsPlugin& sourceData = dynamic_cast<const PointsPlugin&>(points.getSourceData());
         calculateScalars(scalars, sourceData);
+        if (!setImage)
+        {
+            _scatterPlotWidget->setImageData(&sourceData.getData());
+            setImage = true;
+        }
     }
     else
     {
@@ -182,6 +187,7 @@ void ScatterplotPlugin::updateData()
     }
 
     _scatterPlotWidget->setData(&_points);
+    
     _scatterPlotWidget->setScalarProperty(scalars);
 
     updateSelection();

@@ -126,6 +126,11 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
     update();
 }
 
+void ScatterplotWidget::setImageData(const std::vector<float>* data)
+{
+    _pointRenderer.setImageData(data, 28, 28);
+}
+
 void ScatterplotWidget::setHighlights(const std::vector<char>& highlights)
 {
     _pointRenderer.setHighlight(highlights);
@@ -198,6 +203,7 @@ void ScatterplotWidget::initializeGL()
     // Set a default color map for both renderers
     _pointRenderer.setScalarEffect(PointEffect::Color);
     _pointRenderer.setColormap(_colormapWidget.getActiveColormap());
+    _pointRenderer.setPointMode(PointMode::Image);
     _densityRenderer.setColormap(_colormapWidget.getActiveColormap());
 
     _isInitialized = true;
@@ -243,7 +249,7 @@ void ScatterplotWidget::paintGL()
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 
     // Clear the widget to the background color
-    glClearColor(1, 1, 1, 1);
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Reset the blending function

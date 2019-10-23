@@ -1,6 +1,7 @@
 #include "PointRenderer.h"
 
 #include <QDebug>
+#include <iostream>
 
 namespace hdps
 {
@@ -92,6 +93,33 @@ namespace hdps
             glBindVertexArray(0);
         }
 
+        void PointRenderer::setImageData(const std::vector<float>* data, unsigned int width, unsigned int height)
+        {
+            glBindTexture(GL_TEXTURE_2D, _texAtlas);
+
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width * 250, height * 250, 0, GL_RED, GL_FLOAT, nullptr);
+
+            const float* pixels = (data->data() + 1);
+            for (int i = 0; i < 60000; i++)
+            {
+                int x = i % 250;
+                int y = i / 250;
+
+                glTexSubImage2D(GL_TEXTURE_2D, 0, x * width, y * height, width, height, GL_RED, GL_FLOAT, pixels);
+
+                pixels += (width * height) + 1;
+            }
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            GLenum error = glGetError();
+            qDebug() << "ERROR: " << error;
+        }
+
         void PointRenderer::setColormap(const QString colormap)
         {
             _colormap.loadFromFile(colormap);
@@ -144,6 +172,11 @@ namespace hdps
             _pointSettings._scalingMode = scalingMode;
         }
 
+        void PointRenderer::setPointMode(PointMode pointMode)
+        {
+            _pointMode = pointMode;
+        }
+
         void PointRenderer::init()
         {
             qDebug() << "Initializing scatterplot";
@@ -165,10 +198,14 @@ namespace hdps
 
             bool loaded = true;
             loaded &= _shader.loadShaderFromFile(":shaders/PointPlot.vert", ":shaders/PointPlot.frag");
+            loaded &= _texShader.loadShaderFromFile(":shaders/PointPlot.vert", ":shaders/ImagePlot.frag");
+            loaded &= _quadShader.loadShaderFromFile(":shaders/Quad.vert", ":shaders/Texture.frag");
 
             if (!loaded) {
                 qDebug() << "Failed to load one of the Scatterplot shaders";
             }
+
+            glGenTextures(1, &_texAtlas);
         }
 
         void PointRenderer::resize(QSize renderSize)
@@ -179,7 +216,7 @@ namespace hdps
             _windowSize.setWidth(w);
             _windowSize.setHeight(h);
         }
-
+        int iter = 1000;
         void PointRenderer::render()
         {
             int w = _windowSize.width();
@@ -190,25 +227,74 @@ namespace hdps
             // World to clip transformation
             _ortho = createProjectionMatrix(_bounds);
 
-            _shader.bind();
+            if (_pointMode == PointMode::Dot)
+            {
+                _shader.bind();
 
-            switch (_pointSettings._scalingMode) {
-            case Relative: _shader.uniform1f("pointSize", _pointSettings._pointSize); break;
-            case Absolute: _shader.uniform1f("pointSize", _pointSettings._pointSize / size); break;
+                switch (_pointSettings._scalingMode) {
+                case Relative: _shader.uniform1f("pointSize", _pointSettings._pointSize); break;
+                case Absolute: _shader.uniform1f("pointSize", _pointSettings._pointSize / size); break;
+                }
+
+                _shader.uniformMatrix3f("projMatrix", _ortho);
+                _shader.uniform1f("alpha", _pointSettings._alpha);
+                _shader.uniform1i("scalarEffect", _pointEffect);
+
+                if (_pointEffect == PointEffect::Color) {
+                    _colormap.bind(0);
+                    _shader.uniform1i("colormap", 0);
+                }
+
+                glBindVertexArray(_gpuPoints._handle);
+                glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
+                glBindVertexArray(0);
             }
+            else if (_pointMode == PointMode::Image)
+            {
+                _texShader.bind();
 
-            _shader.uniformMatrix3f("projMatrix", _ortho);
-            _shader.uniform1f("alpha", _pointSettings._alpha);
-            _shader.uniform1i("scalarEffect", _pointEffect);
+                switch (_pointSettings._scalingMode) {
+                case Relative: _texShader.uniform1f("pointSize", _pointSettings._pointSize); break;
+                case Absolute: _texShader.uniform1f("pointSize", _pointSettings._pointSize / size); break;
+                }
 
-            if (_pointEffect == PointEffect::Color) {
-                _colormap.bind(0);
-                _shader.uniform1i("colormap", 0);
+                _texShader.uniformMatrix3f("projMatrix", _ortho);
+                _texShader.uniform1f("alpha", _pointSettings._alpha);
+                //_texShader.uniform1i("scalarEffect", _pointEffect);
+
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, _texAtlas);
+                _texShader.uniform1i("texAtlas", 1);
+
+                if (_pointEffect == PointEffect::Color) {
+                    _colormap.bind(0);
+                    _texShader.uniform1i("colormap", 0);
+                }
+                qDebug() << "DRAWING POINTS";
+                glBindVertexArray(_gpuPoints._handle);
+                glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
+                glBindVertexArray(0);
+
+                //std::vector<float> pixelData(800 * 800 * 4);
+                //glReadPixels(330, 20, 800, 800, GL_RGBA, GL_FLOAT, pixelData.data());
+
+                //QImage pluto(800, 800, QImage::Format::Format_ARGB32);
+
+                //for (int j = 0; j < 800; ++j)
+                //{
+                //  for (int i = 0; i < 800; ++i)
+                //  {
+                //    int idx = j * 800 + i;
+                //    float r = (pixelData[idx * 4]);
+                //    float g = (pixelData[idx * 4 + 1]);
+                //    float b = (pixelData[idx * 4 + 2]);
+                //    pluto.setPixel(i, 800-1-j, qRgb(r * 255, g * 255, b * 255));
+                //  }
+                //}
+                
+                //pluto.save(QString("embImage_") + QString::number(int(iter)) + QString(".png"));
+                iter++;
             }
-
-            glBindVertexArray(_gpuPoints._handle);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
-            glBindVertexArray(0);
         }
 
         void PointRenderer::destroy()

@@ -18,10 +18,10 @@ PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin) :
     connect(&_pointOpacitySlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::pointOpacityChanged);
 
     _pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
-    _pointSizeSlider.setValue(10);
+    _pointSizeSlider.setValue(20);
 
     _pointOpacitySlider.setRange(MIN_POINT_OPACITY, MAX_POINT_OPACITY);
-    _pointOpacitySlider.setValue(50);
+    _pointOpacitySlider.setValue(100);
 
     QVBoxLayout* pointSettingsLayout = new QVBoxLayout();
     pointSettingsLayout->setMargin(0);

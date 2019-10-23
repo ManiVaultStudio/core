@@ -20,6 +20,7 @@
         <file>shaders/IsoDensityDraw.frag</file>
         <file>shaders/PointPlot.vert</file>
         <file>shaders/PointPlot.frag</file>
+        <file>shaders/ImagePlot.frag</file>
         <file>shaders/SelectionBox.vert</file>
         <file>shaders/Color.frag</file>
     </qresource>

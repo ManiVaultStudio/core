@@ -24,6 +24,10 @@ namespace hdps
             Color, Size, Outline
         };
 
+        enum PointMode {
+            Dot, Image
+        };
+
         struct PointArrayObject : private QOpenGLFunctions_3_3_Core
         {
         public:
@@ -56,6 +60,7 @@ namespace hdps
         {
         public:
             void setData(const std::vector<Vector2f>* points);
+            void setImageData(const std::vector<float>* data, unsigned int width, unsigned int height);
             void setColormap(const QString colormap);
             void setHighlight(const std::vector<char>& highlights);
             void setScalarProperty(const std::vector<float>& scalarProperty);
@@ -65,6 +70,7 @@ namespace hdps
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
+            void setPointMode(PointMode pointMode);
 
             void init() override;
             void resize(QSize renderSize) override;
@@ -73,8 +79,12 @@ namespace hdps
 
         private:
             PointArrayObject _gpuPoints;
+            //GLuint _texArray;
+            GLuint _texAtlas;
 
             ShaderProgram _shader;
+            ShaderProgram _texShader;
+            ShaderProgram _quadShader;
             ShaderProgram _selectionShader;
 
             unsigned int _numPoints = 0;
@@ -89,6 +99,7 @@ namespace hdps
             /* Properties */
             PointSettings _pointSettings;
             PointEffect _pointEffect = PointEffect::Size;
+            PointMode _pointMode = PointMode::Dot;
 
             Texture2D _colormap;
 
