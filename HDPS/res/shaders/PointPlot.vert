@@ -4,10 +4,10 @@ uniform float pointSize;
 uniform mat3 projMatrix;
 uniform int scalarEffect;
 
-in vec2 vertex;
-in vec2 position;
-in uint highlight;
-in float scalar;
+layout(location = 0) in vec2 vertex;
+layout(location = 1) in vec2 position;
+layout(location = 2) in uint highlight;
+layout(location = 3) in float scalar;
 
 out vec2 pass_texCoords;
 flat out uint pass_highlight;
