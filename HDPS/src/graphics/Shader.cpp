@@ -20,12 +20,13 @@ namespace
 
         f->glCompileShader(shader);
 
-        char log[LOG_SIZE];
         GLint status;
-        f->glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+        
+        f->glGetShaderiv(shader, GL_COMPILE_STATUS, &status); qDebug() << status;
         if (status == GL_FALSE) {
-            f->glGetShaderInfoLog(shader, LOG_SIZE, nullptr, log);
-            qDebug() << "Shader failed to compile: " << path << '\n' + log;
+            std::vector<GLchar> shaderLog(LOG_SIZE);
+            f->glGetShaderInfoLog(shader, LOG_SIZE, nullptr, shaderLog.data());
+            qCritical().noquote() << "Shader failed to compile: " << path << "\n" << shaderLog.data();
             return false;
         }
         return true;
@@ -43,11 +44,11 @@ namespace
         if (status != GL_TRUE) {
             GLint logLength = 0;
             f->glGetShaderiv(program, GL_INFO_LOG_LENGTH, &logLength);
-            qDebug() << logLength;
+            
             std::vector<GLchar> infoLog(logLength);
             f->glGetProgramInfoLog(program, logLength, &logLength, infoLog.data());
             
-            qDebug() << "Shader program failed to link: " << std::string(infoLog.begin(), infoLog.end()).c_str();
+            qCritical().noquote() << "Shader program failed to link: \n" << infoLog.data();
             return false;
         }
 
