@@ -22,7 +22,7 @@ namespace
 
         GLint status;
         
-        f->glGetShaderiv(shader, GL_COMPILE_STATUS, &status); qDebug() << status;
+        f->glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
         if (status == GL_FALSE) {
             std::vector<GLchar> shaderLog(LOG_SIZE);
             f->glGetShaderInfoLog(shader, LOG_SIZE, nullptr, shaderLog.data());
