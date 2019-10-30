@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     setupUi(this);
     
-    _core = std::unique_ptr<Core>(new Core(*this));
+    _core = std::make_unique<Core>(*this);
     _core->init();
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
