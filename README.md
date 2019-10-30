@@ -81,5 +81,5 @@ This depends on your IDE / compiler. Follow their instructions for compiling sou
 ## Notes
 After first time compiling on macOS it might be necessary to manually moc the MainWindow.ui file:
 
-uic MainWindow.ui -o ui_MainWindow.h
-mv ui_MainWindow.h ../build/
+`uic MainWindow.ui -o ui_MainWindow.h`  
+`mv ui_MainWindow.h ../Build/`
