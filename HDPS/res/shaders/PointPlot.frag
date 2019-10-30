@@ -8,6 +8,8 @@
 // Point properties
 uniform float alpha;
 uniform int   scalarEffect;
+uniform vec3  outlineColor;
+
 // Colormap to use if useColormap is enabled
 uniform bool      useColormap;
 uniform sampler2D colormap;
@@ -34,7 +36,6 @@ void main()
     if (scalarEffect == EFFECT_COLOR) {
         color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
     }
-    vec3 outlineColor = vec3(0.0, 0.0, 1.0);
     
     // Change color if point is highlighted
     if (vHighlight == 1) {

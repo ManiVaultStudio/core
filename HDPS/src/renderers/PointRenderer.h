@@ -67,6 +67,7 @@ namespace hdps
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
+            void setOutlineColor(Vector3f color);
 
             void init() override;
             void resize(QSize renderSize) override;
@@ -77,6 +78,7 @@ namespace hdps
             /* Point properties */
             PointSettings _pointSettings;
             PointEffect   _pointEffect = PointEffect::Size;
+            Vector3f      _outlineColor = Vector3f(0, 0, 1);
 
             /* Point attributes */
             std::vector<Vector2f> _positions;

@@ -171,9 +171,10 @@ namespace hdps
             _pointSettings._scalingMode = scalingMode;
         }
 
-        void PointRenderer::init()
+        void PointRenderer::setOutlineColor(Vector3f color)
         {
-            qDebug() << "Initializing scatterplot";
+            _outlineColor = color;
+        }
 
         void PointRenderer::init()
         {
@@ -218,6 +219,8 @@ namespace hdps
             _shader.uniformMatrix3f("orthoM", _orthoM);
             _shader.uniform1f("alpha", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
+            _shader.uniform3f("outlineColor", _outlineColor);
+
             _shader.uniform1i("hasHighlights", _hasHighlights);
             _shader.uniform1i("hasScalars", _hasScalars);
 
