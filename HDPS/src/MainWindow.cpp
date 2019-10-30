@@ -8,11 +8,13 @@
 #include "ViewPlugin.h"
 #include "widgets/SettingsWidget.h"
 
-#include <QDebug>
+#include <QApplication> // Used by centerAndResize
+#include <QDesktopWidget> // Used by centerAndResize
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QProcess>
 #include <QUrl>
+#include <QDebug>
 
 namespace
 {
@@ -152,6 +154,17 @@ void MainWindow::addView(plugin::ViewPlugin* plugin)
 void MainWindow::addSettings(gui::SettingsWidget* settings)
 {
     addDockWidget(Qt::LeftDockWidgetArea, settings);
+}
+
+void MainWindow::centerAndResize(float coverage) {
+    // Retrieve the dimensions available on the current screen
+    QSize availableSize = qApp->desktop()->availableGeometry().size();
+    QSize newSize(availableSize.width() * coverage, availableSize.height() * coverage);
+
+    qDebug() << "Available screen size " << availableSize.width() << "x" << availableSize.height();
+    qDebug() << "Initial application size " << newSize.width() << "x" << newSize.height();
+
+    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, qApp->desktop()->availableGeometry()));
 }
 
 void MainWindow::storeLayout()

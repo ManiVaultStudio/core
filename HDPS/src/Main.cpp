@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     app.setWindowIcon(appIcon);
 
     hdps::gui::MainWindow mainWindow;
+    mainWindow.centerAndResize(0.75f);
     mainWindow.show();
 
     return app.exec();

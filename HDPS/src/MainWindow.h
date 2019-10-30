@@ -61,6 +61,12 @@ public:
     */
     void addSettings(SettingsWidget* settings);
 
+    /**
+     * Moves the window to the center of the screen and resizes it to a fraction
+     * of the total screen size defined by 'coverage'.
+     */
+    void centerAndResize(float coverage);
+
 public slots:
     /**
     * Store the current window layout so we can restore it later
