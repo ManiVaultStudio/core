@@ -77,3 +77,9 @@ Press `Ctrl+X` to exit, `Y` for saving the buffer, and restart the terminal.
 
 ## Linux | Mac
 This depends on your IDE / compiler. Follow their instructions for compiling source code.
+
+## Notes
+After first time compiling on macOS it might be necessary to manually moc the MainWindow.ui file:
+
+uic MainWindow.ui -o ui_MainWindow.h
+mv ui_MainWindow.h ../build/
