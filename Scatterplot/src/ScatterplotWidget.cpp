@@ -120,7 +120,7 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
     // Pass bounds and data to renderers
     _pointRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
     _densityRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
-    _pointRenderer.setData(points);
+    _pointRenderer.setData(*points);
     _densityRenderer.setData(points);
 
     update();
@@ -128,14 +128,14 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
 
 void ScatterplotWidget::setHighlights(const std::vector<char>& highlights)
 {
-    _pointRenderer.setHighlight(highlights);
+    _pointRenderer.setHighlights(highlights);
 
     update();
 }
 
 void ScatterplotWidget::setScalarProperty(const std::vector<float>& scalarProperty)
 {
-    _pointRenderer.setScalarProperty(scalarProperty);
+    _pointRenderer.setScalars(scalarProperty);
             
     update();
 }

@@ -34,6 +34,8 @@ namespace hdps
             BufferObject _scalarBuffer;
 
             void init();
+            void enableHighlights(bool enable);
+            void enableScalars(bool enable);
             void destroy();
 
         private:
@@ -43,22 +45,22 @@ namespace hdps
         struct PointSettings
         {
             // Constants
-            const float        DEFAULT_POINT_SIZE = 15;
-            const float        DEFAULT_ALPHA_VALUE = 0.5f;
-            const PointScaling DEFAULT_POINT_SCALING = PointScaling::Relative;
+            const float         DEFAULT_POINT_SIZE       = 15;
+            const float         DEFAULT_ALPHA_VALUE      = 0.5f;
+            const PointScaling  DEFAULT_POINT_SCALING    = PointScaling::Relative;
 
-            PointScaling _scalingMode = DEFAULT_POINT_SCALING;
-            float        _pointSize = DEFAULT_POINT_SIZE;
-            float        _alpha = DEFAULT_ALPHA_VALUE;
+            PointScaling        _scalingMode             = DEFAULT_POINT_SCALING;
+            float               _pointSize               = DEFAULT_POINT_SIZE;
+            float               _alpha                   = DEFAULT_ALPHA_VALUE;
         };
 
         class PointRenderer : public Renderer
         {
         public:
-            void setData(const std::vector<Vector2f>* points);
+            void setData(const std::vector<Vector2f>& points);
             void setColormap(const QString colormap);
-            void setHighlight(const std::vector<char>& highlights);
-            void setScalarProperty(const std::vector<float>& scalarProperty);
+            void setHighlights(const std::vector<char>& highlights);
+            void setScalars(const std::vector<float>& scalars);
             void setScalarEffect(const PointEffect effect);
             void addScalarEffect(const PointEffect effect);
             void setBounds(float left, float right, float bottom, float top);
@@ -72,27 +74,31 @@ namespace hdps
             void destroy() override;
 
         private:
-            PointArrayObject _gpuPoints;
+            /* Point properties */
+            PointSettings _pointSettings;
+            PointEffect   _pointEffect = PointEffect::Size;
 
+            /* Point attributes */
+            std::vector<Vector2f> _positions;
+            std::vector<char>     _highlights;
+            std::vector<float>    _scalars;
+
+            bool _hasPositions     = false;
+            bool _hasHighlights = false;
+            bool _hasScalars    = false;
+
+            /* Window properties */
+            QSize _windowSize;
+
+            /* Rendering variables */
             ShaderProgram _shader;
             ShaderProgram _selectionShader;
 
-            unsigned int _numPoints = 0;
-            const std::vector<Vector2f>* _positions;
-            std::vector<char> _highlights;
-            std::vector<float> _scalarProperty;
-
-            QSize _windowSize;
-
-            Matrix3f _ortho;
-
-            /* Properties */
-            PointSettings _pointSettings;
-            PointEffect _pointEffect = PointEffect::Size;
-
+            PointArrayObject _gpuPoints;
             Texture2D _colormap;
 
-            QRectF       _bounds         = QRectF(-1, 1, 2, 2);
+            Matrix3f _orthoM;
+            QRectF _bounds = QRectF(-1, 1, 2, 2);
         };
 
     } // namespace gui

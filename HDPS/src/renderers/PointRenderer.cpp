@@ -8,6 +8,10 @@ namespace hdps
     {
         namespace
         {
+            /**
+             * Builds an orthographic projection matrix that transforms the given bounds
+             * to the range [-1, 1] in both directions.
+             */
             Matrix3f createProjectionMatrix(QRectF bounds)
             {
                 Matrix3f m;
@@ -24,6 +28,7 @@ namespace hdps
         {
             initializeOpenGLFunctions();
 
+            // Generate a VAO for all instanced points
             glGenVertexArrays(1, &_handle);
             glBindVertexArray(_handle);
 
@@ -38,30 +43,50 @@ namespace hdps
             }
             );
 
+            // Vertex buffer
             BufferObject quad;
             quad.create();
             quad.bind();
             quad.setData(vertices);
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
             glEnableVertexAttribArray(0);
 
+            // Position buffer
             _positionBuffer.create();
             _positionBuffer.bind();
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(1, 1);
             glEnableVertexAttribArray(1);
 
+            // Highlight buffer, disabled by default
             _highlightBuffer.create();
             _highlightBuffer.bind();
-            glVertexAttribIPointer(2, 1, GL_UNSIGNED_BYTE, 0, 0);
+            glVertexAttribIPointer(2, 1, GL_UNSIGNED_BYTE, 0, nullptr);
             glVertexAttribDivisor(2, 1);
-            glEnableVertexAttribArray(2);
 
+            // Scalar buffer, disabled by default
             _scalarBuffer.create();
             _scalarBuffer.bind();
-            glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(3, 1);
-            glEnableVertexAttribArray(3);
+        }
+
+        void PointArrayObject::enableHighlights(bool enable)
+        {
+            glBindVertexArray(_handle);
+            if (enable)
+                glEnableVertexAttribArray(2);
+            else
+                glDisableVertexAttribArray(2);
+        }
+
+        void PointArrayObject::enableScalars(bool enable)
+        {
+            glBindVertexArray(_handle);
+            if (enable)
+                glEnableVertexAttribArray(3);
+            else
+                glDisableVertexAttribArray(3);
         }
 
         void PointArrayObject::destroy()
@@ -73,23 +98,17 @@ namespace hdps
         // Positions need to be passed as a pointer as we need to store them locally in order
         // to be able to find the subset of data that's part of a selection. If passed
         // by reference then we can upload the data to the GPU, but not store it in the widget.
-        void PointRenderer::setData(const std::vector<Vector2f>* points)
+        void PointRenderer::setData(const std::vector<Vector2f>& positions)
         {
-            _numPoints = (unsigned int) points->size();
-            _positions = points;
-            _highlights.clear();
-            _highlights.resize(_numPoints, 0);
-            _scalarProperty.clear();
-            _scalarProperty.resize(_numPoints, 1);
+            if (positions.empty())
+                return;
 
-            glBindVertexArray(_gpuPoints._handle);
+            _positions = positions;
+
             _gpuPoints._positionBuffer.bind();
-            _gpuPoints._positionBuffer.setData(*points);
-            _gpuPoints._highlightBuffer.bind();
-            _gpuPoints._highlightBuffer.setData(_highlights);
-            _gpuPoints._scalarBuffer.bind();
-            _gpuPoints._scalarBuffer.setData(_scalarProperty);
-            glBindVertexArray(0);
+            _gpuPoints._positionBuffer.setData(_positions);
+
+            _hasPositions = true;
         }
 
         void PointRenderer::setColormap(const QString colormap)
@@ -97,24 +116,32 @@ namespace hdps
             _colormap.loadFromFile(colormap);
         }
 
-        void PointRenderer::setHighlight(const std::vector<char>& highlights)
+        void PointRenderer::setHighlights(const std::vector<char>& highlights)
         {
+            if (highlights.empty())
+                return;
+
             _highlights = highlights;
 
-            glBindVertexArray(_gpuPoints._handle);
             _gpuPoints._highlightBuffer.bind();
-            _gpuPoints._highlightBuffer.setData(highlights);
-            glBindVertexArray(0);
+            _gpuPoints._highlightBuffer.setData(_highlights);
+            _gpuPoints.enableHighlights(true);
+
+            _hasHighlights = true;
         }
 
-        void PointRenderer::setScalarProperty(const std::vector<float>& scalarProperty)
+        void PointRenderer::setScalars(const std::vector<float>& scalars)
         {
-            _scalarProperty = scalarProperty;
+            if (!scalars.empty())
+                return;
 
-            glBindVertexArray(_gpuPoints._handle);
+            _scalars = scalars;
+
             _gpuPoints._scalarBuffer.bind();
-            _gpuPoints._scalarBuffer.setData(scalarProperty);
-            glBindVertexArray(0);
+            _gpuPoints._scalarBuffer.setData(_scalars);
+            _gpuPoints.enableScalars(true);
+
+            _hasScalars = true;
         }
 
         void PointRenderer::setScalarEffect(const PointEffect effect)
@@ -148,26 +175,17 @@ namespace hdps
         {
             qDebug() << "Initializing scatterplot";
 
+        void PointRenderer::init()
+        {
             initializeOpenGLFunctions();
 
             _gpuPoints.init();
-
-            if (_numPoints > 0)
-            {
-                glBindVertexArray(_gpuPoints._handle);
-                _gpuPoints._positionBuffer.bind();
-                _gpuPoints._positionBuffer.setData(*_positions);
-                _gpuPoints._highlightBuffer.bind();
-                _gpuPoints._highlightBuffer.setData(_highlights);
-                _gpuPoints._scalarBuffer.bind();
-                _gpuPoints._scalarBuffer.setData(_scalarProperty);
-            }
 
             bool loaded = true;
             loaded &= _shader.loadShaderFromFile(":shaders/PointPlot.vert", ":shaders/PointPlot.frag");
 
             if (!loaded) {
-                qDebug() << "Failed to load one of the Scatterplot shaders";
+                qCritical() << "Failed to load one of the Scatterplot shaders";
             }
         }
 
@@ -188,7 +206,7 @@ namespace hdps
             glViewport(w / 2 - size / 2, h / 2 - size / 2, size, size);
 
             // World to clip transformation
-            _ortho = createProjectionMatrix(_bounds);
+            _orthoM = createProjectionMatrix(_bounds);
 
             _shader.bind();
 
@@ -197,9 +215,11 @@ namespace hdps
             case Absolute: _shader.uniform1f("pointSize", _pointSettings._pointSize / size); break;
             }
 
-            _shader.uniformMatrix3f("projMatrix", _ortho);
+            _shader.uniformMatrix3f("orthoM", _orthoM);
             _shader.uniform1f("alpha", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
+            _shader.uniform1i("hasHighlights", _hasHighlights);
+            _shader.uniform1i("hasScalars", _hasScalars);
 
             if (_pointEffect == PointEffect::Color) {
                 _colormap.bind(0);
@@ -207,7 +227,7 @@ namespace hdps
             }
 
             glBindVertexArray(_gpuPoints._handle);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _numPoints);
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _positions.size());
             glBindVertexArray(0);
         }
 

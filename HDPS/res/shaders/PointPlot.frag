@@ -1,22 +1,28 @@
 #version 330 core
 
+// Scalar effects
 #define EFFECT_COLOR   0
 #define EFFECT_SIZE    1
 #define EFFECT_OUTLINE 2
 
+// Point properties
 uniform float alpha;
-uniform int scalarEffect;
+uniform int   scalarEffect;
+// Colormap to use if useColormap is enabled
+uniform bool      useColormap;
 uniform sampler2D colormap;
 
-in vec2 pass_texCoords;
-flat in uint pass_highlight;
-in float pass_scalar;
+// Input variables
+smooth in vec2  vTexCoord;
+flat   in int   vHighlight;
+smooth in float vScalar;
 
+// Output color
 out vec4 fragColor;
 
 void main()
 {
-    float len = length(pass_texCoords);
+    float len = length(vTexCoord);
     // If the fragment is outside of the circle discard it
     if (len > 1) discard;
 
@@ -26,12 +32,12 @@ void main()
     // Set point color
     vec3 color = vec3(0.5, 0.5, 0.5);
     if (scalarEffect == EFFECT_COLOR) {
-        color = texture(colormap, vec2(pass_scalar, 1-pass_scalar)).rgb;
+        color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
     }
     vec3 outlineColor = vec3(0.0, 0.0, 1.0);
     
     // Change color if point is highlighted
-    if (pass_highlight == 1u) {
+    if (vHighlight == 1) {
         color = len > 0.5 ? outlineColor : color;
     }
     
