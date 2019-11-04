@@ -34,12 +34,29 @@ namespace hdps
             BufferObject _scalarBuffer;
 
             void init();
+            void setPositions(const std::vector<Vector2f>& positions);
+            void setHighlights(const std::vector<char>& highlights);
+            void setScalars(const std::vector<float>& scalars);
             void enableHighlights(bool enable);
             void enableScalars(bool enable);
+            bool hasHighlights() { return _hasHighlights; }
+            bool hasScalars() { return _hasScalars; }
+            void draw();
             void destroy();
 
         private:
+            /* Point attributes */
+            std::vector<Vector2f> _positions;
+            std::vector<char>     _highlights;
+            std::vector<float>    _scalars;
 
+            bool _hasPositions = false;
+            bool _hasHighlights = false;
+            bool _hasScalars = false;
+
+            bool _dirtyPositions = false;
+            bool _dirtyHighlights = false;
+            bool _dirtyScalars = false;
         };
 
         struct PointSettings
@@ -58,11 +75,11 @@ namespace hdps
         {
         public:
             void setData(const std::vector<Vector2f>& points);
-            void setColormap(const QString colormap);
             void setHighlights(const std::vector<char>& highlights);
             void setScalars(const std::vector<float>& scalars);
+
             void setScalarEffect(const PointEffect effect);
-            void addScalarEffect(const PointEffect effect);
+            void setColormap(const QString colormap);
             void setBounds(float left, float right, float bottom, float top);
             void setPointSize(const float size);
             void setAlpha(const float alpha);
@@ -80,21 +97,11 @@ namespace hdps
             PointEffect   _pointEffect = PointEffect::Size;
             Vector3f      _outlineColor = Vector3f(0, 0, 1);
 
-            /* Point attributes */
-            std::vector<Vector2f> _positions;
-            std::vector<char>     _highlights;
-            std::vector<float>    _scalars;
-
-            bool _hasPositions     = false;
-            bool _hasHighlights = false;
-            bool _hasScalars    = false;
-
             /* Window properties */
             QSize _windowSize;
 
             /* Rendering variables */
             ShaderProgram _shader;
-            ShaderProgram _selectionShader;
 
             PointArrayObject _gpuPoints;
             Texture2D _colormap;

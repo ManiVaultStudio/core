@@ -61,7 +61,7 @@ namespace hdps
             // Highlight buffer, disabled by default
             _highlightBuffer.create();
             _highlightBuffer.bind();
-            glVertexAttribIPointer(2, 1, GL_UNSIGNED_BYTE, 0, nullptr);
+            glVertexAttribIPointer(2, 1, GL_BYTE, 0, nullptr);
             glVertexAttribDivisor(2, 1);
 
             // Scalar buffer, disabled by default
@@ -69,6 +69,39 @@ namespace hdps
             _scalarBuffer.bind();
             glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(3, 1);
+        }
+
+        void PointArrayObject::setPositions(const std::vector<Vector2f>& positions)
+        {
+            if (positions.empty())
+                return;
+
+            _positions = positions;
+
+            _dirtyPositions = true;
+            _hasPositions = true;
+        }
+
+        void PointArrayObject::setHighlights(const std::vector<char>& highlights)
+        {
+            if (highlights.empty())
+                return;
+
+            _highlights = highlights;
+
+            _dirtyHighlights = true;
+            _hasHighlights = true;
+        }
+
+        void PointArrayObject::setScalars(const std::vector<float>& scalars)
+        {
+            if (scalars.empty())
+                return;
+
+            _scalars = scalars;
+
+            _dirtyScalars = true;
+            _hasScalars = true;
         }
 
         void PointArrayObject::enableHighlights(bool enable)
@@ -89,64 +122,64 @@ namespace hdps
                 glDisableVertexAttribArray(3);
         }
 
+        void PointArrayObject::draw()
+        {
+            glBindVertexArray(_handle);
+
+            if (_dirtyPositions)
+            {
+                _positionBuffer.bind();
+                _positionBuffer.setData(_positions);
+                _dirtyPositions = false;
+            }
+            if (_dirtyHighlights)
+            {
+                _highlightBuffer.bind();
+                _highlightBuffer.setData(_highlights);
+                enableHighlights(true);
+                _dirtyHighlights = false;
+            }
+            if (_dirtyScalars)
+            {
+                _scalarBuffer.bind();
+                _scalarBuffer.setData(_scalars);
+                enableScalars(true);
+                _dirtyScalars = false;
+            }
+
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _positions.size());
+            glBindVertexArray(0);
+        }
+
         void PointArrayObject::destroy()
         {
             glDeleteVertexArrays(1, &_handle);
             _positionBuffer.destroy();
         }
 
-        // Positions need to be passed as a pointer as we need to store them locally in order
-        // to be able to find the subset of data that's part of a selection. If passed
-        // by reference then we can upload the data to the GPU, but not store it in the widget.
         void PointRenderer::setData(const std::vector<Vector2f>& positions)
         {
-            if (positions.empty())
-                return;
-
-            _positions = positions;
-
-            _gpuPoints._positionBuffer.bind();
-            _gpuPoints._positionBuffer.setData(_positions);
-
-            _hasPositions = true;
-        }
-
-        void PointRenderer::setColormap(const QString colormap)
-        {
-            _colormap.loadFromFile(colormap);
+            _gpuPoints.setPositions(positions);
         }
 
         void PointRenderer::setHighlights(const std::vector<char>& highlights)
         {
-            if (highlights.empty())
-                return;
-
-            _highlights = highlights;
-
-            _gpuPoints._highlightBuffer.bind();
-            _gpuPoints._highlightBuffer.setData(_highlights);
-            _gpuPoints.enableHighlights(true);
-
-            _hasHighlights = true;
+            _gpuPoints.setHighlights(highlights);
         }
 
         void PointRenderer::setScalars(const std::vector<float>& scalars)
         {
-            if (!scalars.empty())
-                return;
-
-            _scalars = scalars;
-
-            _gpuPoints._scalarBuffer.bind();
-            _gpuPoints._scalarBuffer.setData(_scalars);
-            _gpuPoints.enableScalars(true);
-
-            _hasScalars = true;
+            _gpuPoints.setScalars(scalars);
         }
 
         void PointRenderer::setScalarEffect(const PointEffect effect)
         {
             _pointEffect = effect;
+        }
+
+        void PointRenderer::setColormap(const QString colormap)
+        {
+            _colormap.loadFromFile(colormap);
         }
 
         void PointRenderer::setBounds(float left, float right, float bottom, float top)
@@ -221,17 +254,15 @@ namespace hdps
             _shader.uniform1i("scalarEffect", _pointEffect);
             _shader.uniform3f("outlineColor", _outlineColor);
 
-            _shader.uniform1i("hasHighlights", _hasHighlights);
-            _shader.uniform1i("hasScalars", _hasScalars);
+            _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
+            _shader.uniform1i("hasScalars", _gpuPoints.hasScalars());
 
             if (_pointEffect == PointEffect::Color) {
                 _colormap.bind(0);
                 _shader.uniform1i("colormap", 0);
             }
 
-            glBindVertexArray(_gpuPoints._handle);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _positions.size());
-            glBindVertexArray(0);
+            _gpuPoints.draw();
         }
 
         void PointRenderer::destroy()
