@@ -1,52 +1,52 @@
-#include "PointsPlugin.h"
+#include "PointData.h"
 
 #include <QtCore>
 #include <QtDebug>
 
 #include <cstring>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.PointsPlugin")
+Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
 // =============================================================================
-// PointsPlugin
+// PointData
 // =============================================================================
 
-PointsPlugin::~PointsPlugin(void)
+PointData::~PointData(void)
 {
     
 }
 
-void PointsPlugin::init()
+void PointData::init()
 {
 
 }
 
-hdps::Set* PointsPlugin::createSet() const
+hdps::Set* PointData::createSet() const
 {
     return new IndexSet(_core, getName());
 }
 
-unsigned int PointsPlugin::getNumPoints() const
+unsigned int PointData::getNumPoints() const
 {
     return _data.size() / _numDimensions;
 }
 
-unsigned int PointsPlugin::getNumDimensions() const
+unsigned int PointData::getNumDimensions() const
 {
     return _numDimensions;
 }
 
-const std::vector<float>& PointsPlugin::getData() const
+const std::vector<float>& PointData::getData() const
 {
     return _data;
 }
 
-const std::vector<QString>& PointsPlugin::getDimensionNames() const
+const std::vector<QString>& PointData::getDimensionNames() const
 {
     return _dimNames;
 }
 
-void PointsPlugin::setData(const float* data, unsigned int numPoints, unsigned int numDimensions)
+void PointData::setData(const float* data, unsigned int numPoints, unsigned int numDimensions)
 {
     _data.resize(numPoints * numDimensions);
     _numDimensions = numDimensions;
@@ -57,25 +57,25 @@ void PointsPlugin::setData(const float* data, unsigned int numPoints, unsigned i
     std::memcpy(_data.data(), data, sizeof(float) * numPoints * numDimensions);
 }
 
-void PointsPlugin::setDimensionNames(const std::vector<QString>& dimNames)
+void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 {
     _dimNames = dimNames;
 }
 
 // Constant subscript indexing
-const float& PointsPlugin::operator[](unsigned int index) const
+const float& PointData::operator[](unsigned int index) const
 {
     return _data[index];
 }
 
 // Subscript indexing
-float& PointsPlugin::operator[](unsigned int index)
+float& PointData::operator[](unsigned int index)
 {
     return _data[index];
 }
 
 // Temporary property metadata
-QVariant PointsPlugin::getProperty(const QString & name) const
+QVariant PointData::getProperty(const QString & name) const
 {
     if (!hasProperty(name))
         return QVariant();
@@ -83,17 +83,17 @@ QVariant PointsPlugin::getProperty(const QString & name) const
     return _properties[name];
 }
 
-void PointsPlugin::setProperty(const QString & name, const QVariant & value)
+void PointData::setProperty(const QString & name, const QVariant & value)
 {
     _properties[name] = value;
 }
 
-bool PointsPlugin::hasProperty(const QString & name) const
+bool PointData::hasProperty(const QString & name) const
 {
     return _properties.contains(name);
 }
 
-QStringList PointsPlugin::propertyNames() const
+QStringList PointData::propertyNames() const
 {
     return _properties.keys();
 }
@@ -114,7 +114,7 @@ hdps::Set* IndexSet::copy() const
 // Factory
 // =============================================================================
 
-RawData* PointsPluginFactory::produce()
+RawData* PointDataFactory::produce()
 {
-    return new PointsPlugin();
+    return new PointData();
 }

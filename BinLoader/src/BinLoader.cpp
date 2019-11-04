@@ -1,6 +1,6 @@
 #include "BinLoader.h"
 
-#include "PointsPlugin.h"
+#include "PointData.h"
 #include "Set.h"
 
 #include <QtCore>
@@ -89,7 +89,7 @@ void BinLoader::loadData()
     if (ok && !_dataSetName.isEmpty()) {
         QString name = _core->addData("Points", _dataSetName);
         const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(name));
-        PointsPlugin& points = set.getData();
+        PointData& points = set.getData();
 
         points.setData(data.data(), data.size() / _numDimensions, _numDimensions);
 

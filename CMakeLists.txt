@@ -14,15 +14,15 @@ add_subdirectory(BinLoader)
 add_subdirectory(HDPS)
 add_subdirectory(Scatterplot)
 
-add_dependencies(PointsPlugin HDPS)
+add_dependencies(PointData HDPS)
 add_dependencies(ScatterplotPlugin HDPS)
-add_dependencies(ScatterplotPlugin PointsPlugin)
+add_dependencies(ScatterplotPlugin PointData)
 add_dependencies(CsvLoader HDPS)
-add_dependencies(CsvLoader PointsPlugin)
+add_dependencies(CsvLoader PointData)
 add_dependencies(FcsLoader HDPS)
-add_dependencies(FcsLoader PointsPlugin)
+add_dependencies(FcsLoader PointData)
 add_dependencies(BinLoader HDPS)
-add_dependencies(BinLoader PointsPlugin)
+add_dependencies(BinLoader PointData)
 
 # Note: The plugins BasicClustering and ImageView are not in used (as Julian Thijssen commented,
 # June 24, 2019), so this CMakeLists does not add those subdirectories.

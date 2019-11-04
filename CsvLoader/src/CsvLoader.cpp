@@ -1,6 +1,6 @@
 #include "CsvLoader.h"
 
-#include "PointsPlugin.h"
+#include "PointData.h"
 #include "Set.h"
 
 #include <QtCore>

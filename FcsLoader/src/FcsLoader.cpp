@@ -1,7 +1,7 @@
 #include "FcsLoader.h"
 
 #include "FcsHeader.h"
-#include "PointsPlugin.h"
+#include "PointData.h"
 #include "Set.h"
 
 #include <QtCore>
@@ -268,7 +268,7 @@ void FcsLoader::loadData()
     if (ok && !dataSetName.isEmpty()) {
         QString name = _core->addData("Points", dataSetName);
         const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(name));
-        PointsPlugin& points = set.getData();
+        PointData& points = set.getData();
         
         points.setData(data.data(), data.size() / numDimensions, numDimensions);
         points.setDimensionNames(dimNames);

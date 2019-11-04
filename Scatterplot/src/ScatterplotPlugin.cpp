@@ -1,7 +1,7 @@
 #include "ScatterplotPlugin.h"
 
 #include "ScatterplotSettings.h"
-#include "PointsPlugin.h"
+#include "PointData.h"
 
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
@@ -94,10 +94,10 @@ QStringList ScatterplotPlugin::supportedDataKinds()
 void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
-    const PointsPlugin& points = dataSet.getData();
+    const PointData& points = dataSet.getData();
 
     if (points.isDerivedData()) {
-        const PointsPlugin& sourceData = dynamic_cast<const PointsPlugin&>(points.getSourceData());
+        const PointData& sourceData = dynamic_cast<const PointData&>(points.getSourceData());
 
         if (points.getDimensionNames().size() == points.getNumDimensions())
             settings->initDimOptions(points.getDimensionNames());
@@ -157,8 +157,8 @@ void ScatterplotPlugin::updateData()
         return;
 
     const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
-    const PointsPlugin& points = dataSet.getData();
     
+    const PointData& points = dataSet.getData();
     int xDim = settings->getXDimension();
     int yDim = settings->getYDimension();
 
@@ -189,7 +189,7 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const IndexSet& dataSet)
 {
-    const PointsPlugin& points = dataSet.getData();
+    const PointData& points = dataSet.getData();
 
     int numDims = points.getNumDimensions();
     int xDim = settings->getXDimension();
@@ -214,7 +214,7 @@ void ScatterplotPlugin::calculatePositions(const IndexSet& dataSet)
     }
 }
 
-void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const PointsPlugin& points)
+void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const PointData& points)
 {
     int colorIndex = settings->getColorDimension();
 

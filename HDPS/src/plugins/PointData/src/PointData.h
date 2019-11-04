@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pointsplugin_export.h"
+#include "pointdata_export.h"
 
 #include "RawData.h"
 
@@ -16,11 +16,11 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class POINTSPLUGIN_EXPORT PointsPlugin : public RawData
+class POINTDATA_EXPORT PointData : public RawData
 {
 public:
-    PointsPlugin() : RawData("Points") { }
-    ~PointsPlugin(void) override;
+    PointData() : RawData("Points") { }
+    ~PointData(void) override;
 
     void init() override;
 
@@ -62,7 +62,7 @@ private:
 
     std::vector<QString> _dimNames;
 
-    QMap<QString, QVariant>		_properties;
+    QMap<QString, QVariant> _properties;
 };
 
 class IndexSet : public hdps::Set
@@ -71,9 +71,9 @@ public:
     IndexSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
     ~IndexSet() override { }
 
-    PointsPlugin& getData() const
+    PointData& getData() const
     {
-        return dynamic_cast<PointsPlugin&>(_core->requestData(getDataName()));
+        return dynamic_cast<PointData&>(_core->requestData(getDataName()));
     }
 
     Set* copy() const override;
@@ -85,16 +85,16 @@ public:
 // Factory
 // =============================================================================
 
-class PointsPluginFactory : public RawDataFactory
+class PointDataFactory : public RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
         Q_OBJECT
-        Q_PLUGIN_METADATA(IID   "nl.tudelft.PointsPlugin"
-            FILE  "PointsPlugin.json")
+        Q_PLUGIN_METADATA(IID   "nl.tudelft.PointData"
+            FILE  "PointData.json")
 
 public:
-    PointsPluginFactory(void) {}
-    ~PointsPluginFactory(void) override {}
+    PointDataFactory(void) {}
+    ~PointDataFactory(void) override {}
 
     RawData* produce() override;
 };
