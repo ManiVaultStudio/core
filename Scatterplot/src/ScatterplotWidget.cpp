@@ -29,17 +29,21 @@ namespace
 
     QRectF centerAndSquareBounds(const QRectF& bounds, float offsetFraction)
     {
+        float epsilon = 1e-07f;
         float width = fabs(bounds.width());
         float height = fabs(bounds.height());
         float size = width > height ? width : height;
-        float offset = size * offsetFraction;
-        Vector2f center((bounds.left() + bounds.right()) / 2, (bounds.bottom() + bounds.top()) / 2);
+        // If size is zero or almost zero, make it at least epsilon big
+        if (size < epsilon)
+            size = epsilon;
 
+        // Determine offset in units as a fraction of the size
+        float offset = size * offsetFraction;
+
+        QPointF center((bounds.left() + bounds.right()) / 2, (bounds.bottom() + bounds.top()) / 2);
         QRectF squareBounds;
-        squareBounds.setLeft(center.x - size / 2 - offset);
-        squareBounds.setRight(center.x + size / 2 + offset);
-        squareBounds.setBottom(center.y - size / 2 - offset);
-        squareBounds.setTop(center.y + size / 2 + offset);
+        squareBounds.setSize(QSizeF(size + offset, size + offset));
+        squareBounds.moveCenter(center);
 
         return squareBounds;
     }
@@ -136,7 +140,7 @@ void ScatterplotWidget::setHighlights(const std::vector<char>& highlights)
 void ScatterplotWidget::setScalarProperty(const std::vector<float>& scalarProperty)
 {
     _pointRenderer.setScalars(scalarProperty);
-            
+    
     update();
 }
 
