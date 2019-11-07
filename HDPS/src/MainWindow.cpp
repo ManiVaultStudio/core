@@ -1,7 +1,9 @@
 #include "MainWindow.h"
 
+#include "DataManager.h" // To connect changed data signal to dataHierarchy
 #include "Logger.h"
 #include "LogDockWidget.h"
+#include "DataHierarchy.h"
 #include "PluginManager.h"
 #include "PluginType.h"
 
@@ -123,6 +125,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _centralWidget = new CentralWidget();
     setCentralWidget(_centralWidget);
+    _dataHierarchy = std::make_unique<DataHierarchy>(_core->getDataManager());
+    connect(&_core->getDataManager(), &DataManager::dataChanged, _dataHierarchy.get(), &DataHierarchy::updateDataModel);
 }
 
 MainWindow::~MainWindow()

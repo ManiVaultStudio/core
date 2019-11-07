@@ -3,6 +3,7 @@
 #include "RawData.h"
 #include "Set.h"
 
+#include <QObject> // To support signals
 #include <QString>
 
 #include <string>
@@ -70,8 +71,9 @@ private:
     std::string message;
 };
 
-class DataManager
+class DataManager : public QObject
 {
+    Q_OBJECT
 public:
     void addRawData(plugin::RawData* rawData);
     QString addSet(QString requestedName, Set* set);
@@ -95,6 +97,9 @@ public:
      * If the requested name is not in use, then the request will be returned as is.
      */
     const QString getUniqueSetName(QString request);
+
+signals:
+    void dataChanged();
 
 private:
     /**

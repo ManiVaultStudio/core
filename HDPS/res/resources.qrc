@@ -7,7 +7,12 @@
         <file alias="AppIcon512">icons/AppIcon512.png</file>
         <file alias="AppIcon1024">icons/AppIcon1024.png</file>
     </qresource>
-    
+
+    <qresource>
+        <file>icons/DataIcon.png</file>
+        <file>icons/TextIcon.png</file>
+    </qresource>
+
     <qresource prefix="">
         <file>shaders/Quad.vert</file>
         <file>shaders/DensityCompute.vert</file>

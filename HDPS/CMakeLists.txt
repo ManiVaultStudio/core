@@ -40,6 +40,8 @@ set( CORE_HEADERS
     src/Logger.h
     src/LogItemModel.h
     src/LogDockWidget.h
+    src/DataHierarchyModel.h
+    src/DataHierarchy.h
     src/MainWindow.h
     src/CentralWidget.h
     src/PluginManager.h
@@ -52,6 +54,8 @@ set( CORE_SOURCES
     src/Logger.cpp
     src/LogItemModel.cpp
     src/LogDockWidget.cpp
+    src/DataHierarchyModel.cpp
+    src/DataHierarchy.cpp
     src/MainWindow.cpp
     src/CentralWidget.cpp
     src/PluginManager.cpp

@@ -28,6 +28,7 @@ namespace gui
 
 class SettingsWidget;
 class LogDockWidget;
+class DataHierarchy;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -89,6 +90,7 @@ private:
     std::unique_ptr<LogDockWidget> _logDockWidget;
 
     CentralWidget* _centralWidget;
+    std::unique_ptr<DataHierarchy> _dataHierarchy;
     QByteArray _windowConfiguration;
 };
 

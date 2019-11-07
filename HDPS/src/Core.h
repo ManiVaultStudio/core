@@ -36,6 +36,14 @@ public:
     void init();
 
     /**
+     * Returns a reference to the internal data manager
+     */
+    DataManager& getDataManager()
+    {
+        return *_dataManager;
+    }
+
+    /**
     * Adds the given plugin to the list of plugins kept by the core.
     */
     void addPlugin(plugin::Plugin* plugin);
