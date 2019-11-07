@@ -17,6 +17,8 @@ QString DataManager::addSet(QString requestedName, Set* set)
     QString uniqueName = getUniqueSetName(requestedName);
     set->setName(uniqueName);
     _dataSetMap.emplace(set->getName(), std::unique_ptr<Set>(set));
+
+    emit dataChanged();
     return uniqueName;
 }
 

@@ -91,6 +91,8 @@ private:
 
     CentralWidget* _centralWidget;
     std::unique_ptr<DataHierarchy> _dataHierarchy;
+    std::unique_ptr<SettingsWidget> _settingsWidget;
+
     QByteArray _windowConfiguration;
 };
 

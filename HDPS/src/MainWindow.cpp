@@ -125,8 +125,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _centralWidget = new CentralWidget();
     setCentralWidget(_centralWidget);
+
+    _settingsWidget = std::make_unique<SettingsWidget>();
+    _settingsWidget->setAllowedAreas(Qt::RightDockWidgetArea);
+
     _dataHierarchy = std::make_unique<DataHierarchy>(_core->getDataManager());
     connect(&_core->getDataManager(), &DataManager::dataChanged, _dataHierarchy.get(), &DataHierarchy::updateDataModel);
+    _settingsWidget->addWidget(_dataHierarchy.get());
+
+    addDockWidget(Qt::RightDockWidgetArea, _settingsWidget.get());
 }
 
 MainWindow::~MainWindow()
