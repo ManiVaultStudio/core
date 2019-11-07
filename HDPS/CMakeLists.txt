@@ -72,6 +72,7 @@ set( WIDGET_HEADERS
     src/widgets/ComboBox.h
     src/widgets/PushButton.h
     src/widgets/HorizontalDivider.h
+    src/widgets/DataSlot.h
 )
 
 set( WIDGET_SOURCES
@@ -82,6 +83,7 @@ set( WIDGET_SOURCES
     src/widgets/ComboBox.cpp
     src/widgets/PushButton.cpp
     src/widgets/HorizontalDivider.cpp
+    src/widgets/DataSlot.cpp
 )
 
 set( RENDERER_HEADERS
