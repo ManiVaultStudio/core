@@ -20,6 +20,8 @@ find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 set(SOURCES
     src/CsvLoader.h
     src/CsvLoader.cpp
+    src/InputDialog.h
+    src/InputDialog.cpp
     src/CsvLoader.json
 )
 
