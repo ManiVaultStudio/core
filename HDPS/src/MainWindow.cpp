@@ -120,6 +120,9 @@ MainWindow::MainWindow(QWidget *parent) :
             _logDockWidget.reset();
         }
     });
+
+    _centralWidget = new CentralWidget();
+    setCentralWidget(_centralWidget);
 }
 
 MainWindow::~MainWindow()
@@ -148,7 +151,7 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
 
 void MainWindow::addView(plugin::ViewPlugin* plugin)
 {
-    addDockWidget(Qt::RightDockWidgetArea, plugin);
+    _centralWidget->addView(plugin);
 }
 
 void MainWindow::addSettings(gui::SettingsWidget* settings)

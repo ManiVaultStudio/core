@@ -41,6 +41,7 @@ set( CORE_HEADERS
     src/LogItemModel.h
     src/LogDockWidget.h
     src/MainWindow.h
+    src/CentralWidget.h
     src/PluginManager.h
     src/Core.h
     src/DataManager.h
@@ -52,6 +53,7 @@ set( CORE_SOURCES
     src/LogItemModel.cpp
     src/LogDockWidget.cpp
     src/MainWindow.cpp
+    src/CentralWidget.cpp
     src/PluginManager.cpp
     src/Core.cpp
     src/DataManager.cpp

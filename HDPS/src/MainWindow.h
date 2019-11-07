@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QMainWindow>
 #include "ui_MainWindow.h"
+#include "Core.h"
+#include "CentralWidget.h"
 
+#include <QMainWindow>
 #include <QAction>
 #include <QByteArray>
-
-#include "Core.h"
 
 namespace Ui
 {
@@ -88,6 +88,7 @@ private:
     std::unique_ptr<Core> _core;
     std::unique_ptr<LogDockWidget> _logDockWidget;
 
+    CentralWidget* _centralWidget;
     QByteArray _windowConfiguration;
 };
 
