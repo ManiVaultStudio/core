@@ -2,14 +2,22 @@
 
 #include <LoaderPlugin.h>
 
+#include "InputDialog.h"
+
+#include <QObject>
+#include <QStringList>
+
+#include <vector>
+
 using namespace hdps::plugin;
 
 // =============================================================================
 // View
 // =============================================================================
 
-class CsvLoader : public LoaderPlugin
+class CsvLoader : public QObject, public LoaderPlugin
 {
+    Q_OBJECT
 public:
     CsvLoader() : LoaderPlugin("CSV Loader") { }
     ~CsvLoader(void) override;
@@ -17,6 +25,12 @@ public:
     void init() override;
 
     void loadData() Q_DECL_OVERRIDE;
+
+public slots:
+    void dialogClosed(QString dataSetName, bool hasHeaders);
+
+private:
+    std::vector<QStringList> _loadedData;
 };
 
 
