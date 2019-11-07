@@ -141,6 +141,11 @@ set( PLUGIN_HEADERS
     src/DataConsumer.h
     src/SelectionListener.h
     src/Set.h
+    src/IndexSet.h
+)
+
+set( PLUGIN_SOURCES
+    src/IndexSet.cpp
 )
 
 list(APPEND PRIVATE_HEADERS
@@ -165,6 +170,7 @@ list(APPEND PUBLIC_SOURCES
     ${WIDGET_SOURCES}
     ${RENDERER_SOURCES}
     ${UTIL_SOURCES}
+    ${PLUGIN_SOURCES}
     ${PUBLIC_HEADERS}
 )
 list(APPEND GRAPHICS_FILES
