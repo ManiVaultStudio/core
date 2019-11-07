@@ -288,3 +288,9 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 # Point Data
 add_subdirectory(src/plugins/PointData)
 
+# Color Data
+add_subdirectory(src/plugins/ColorData)
+
+# Text Data
+add_subdirectory(src/plugins/TextData)
+
