@@ -3,6 +3,7 @@
 #include "pointdata_export.h"
 
 #include "RawData.h"
+#include "IndexSet.h"
 
 #include "Set.h"
 #include <QString>
@@ -63,22 +64,6 @@ private:
     std::vector<QString> _dimNames;
 
     QMap<QString, QVariant> _properties;
-};
-
-class IndexSet : public hdps::Set
-{
-public:
-    IndexSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
-    ~IndexSet() override { }
-
-    PointData& getData() const
-    {
-        return dynamic_cast<PointData&>(_core->requestData(getDataName()));
-    }
-
-    Set* copy() const override;
-
-    std::vector<unsigned int> indices;
 };
 
 // =============================================================================

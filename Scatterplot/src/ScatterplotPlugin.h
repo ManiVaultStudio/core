@@ -18,10 +18,10 @@ using namespace hdps::plugin;
 
 class ScatterplotSettings;
 class PointData;
-class IndexSet;
 
 namespace hdps
 {
+    class IndexSet;
     class Vector2f;
 }
 

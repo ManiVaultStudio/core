@@ -23,7 +23,7 @@ void PointData::init()
 
 hdps::Set* PointData::createSet() const
 {
-    return new IndexSet(_core, getName());
+    return new hdps::IndexSet(_core, getName());
 }
 
 unsigned int PointData::getNumPoints() const
@@ -96,18 +96,6 @@ bool PointData::hasProperty(const QString & name) const
 QStringList PointData::propertyNames() const
 {
     return _properties.keys();
-}
-
-// =============================================================================
-// IndexSet
-// =============================================================================
-
-hdps::Set* IndexSet::copy() const
-{
-    IndexSet* set = new IndexSet(_core, getDataName());
-    set->setName(getName());
-    set->indices = indices;
-    return set;
 }
 
 // =============================================================================

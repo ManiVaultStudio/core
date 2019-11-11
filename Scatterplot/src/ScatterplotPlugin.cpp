@@ -67,7 +67,7 @@ void ScatterplotPlugin::dataRemoved(const QString name)
 
 void ScatterplotPlugin::selectionChanged(const QString dataName)
 {
-    const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
+    const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
     const auto& data = dataSet.getData();
 
     if (data.isDerivedData())
@@ -93,7 +93,7 @@ QStringList ScatterplotPlugin::supportedDataKinds()
 
 void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
-    const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
+    const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
     const PointData& points = dataSet.getData();
 
     if (points.isDerivedData()) {
@@ -156,9 +156,9 @@ void ScatterplotPlugin::updateData()
     if (settings->currentData().isEmpty())
         return;
 
-    const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
     
     const PointData& points = dataSet.getData();
+    const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
     int xDim = settings->getXDimension();
     int yDim = settings->getYDimension();
 
@@ -239,9 +239,9 @@ void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Poin
 
 void ScatterplotPlugin::updateSelection()
 {
-    const IndexSet& dataSet = dynamic_cast<const IndexSet&>(_core->requestSet(settings->currentData()));
+    const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
     const RawData& data = _core->requestData(dataSet.getDataName());
-    const IndexSet& selection = dynamic_cast<const IndexSet&>(data.getSelection());
+    const hdps::IndexSet& selection = dynamic_cast<const hdps::IndexSet&>(data.getSelection());
 
     std::vector<char> highlights;
     highlights.resize(_numPoints, 0);
@@ -287,10 +287,10 @@ void ScatterplotPlugin::makeSelection(hdps::Selection selection)
             indices.push_back(i);
     }
 
-    const IndexSet& set = dynamic_cast<IndexSet&>(_core->requestSet(settings->currentData()));
+    const hdps::IndexSet& set = _core->requestSet<hdps::IndexSet>(_currentDataSet);
     const RawData& data = set.getData();
 
-    IndexSet& selectionSet = dynamic_cast<IndexSet&>(data.getSelection());
+    hdps::IndexSet& selectionSet = dynamic_cast<hdps::IndexSet&>(data.getSelection());
 
     selectionSet.indices.clear();
     selectionSet.indices.reserve(indices.size());

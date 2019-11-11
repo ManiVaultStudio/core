@@ -54,6 +54,12 @@ public:
     */
     virtual Set& requestSet(const QString name) = 0;
 
+    template <class SetType>
+    SetType& requestSet(const QString name)
+    {
+        return dynamic_cast<SetType&>(requestSet(name));
+    }
+
     /** Notify all data consumers that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString name) = 0;
     /** Notify all data consumers that a dataset has been changed. */

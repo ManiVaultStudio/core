@@ -1,6 +1,7 @@
 #include "BinLoader.h"
 
 #include "PointData.h"
+#include "IndexSet.h"
 #include "Set.h"
 
 #include <QtCore>
@@ -88,8 +89,8 @@ void BinLoader::loadData()
 
     if (ok && !_dataSetName.isEmpty()) {
         QString name = _core->addData("Points", _dataSetName);
-        const IndexSet& set = dynamic_cast<const IndexSet&>(_core->requestSet(name));
         PointData& points = set.getData();
+        const hdps::IndexSet& set = _core->requestSet<hdps::IndexSet>(name);
 
         points.setData(data.data(), data.size() / _numDimensions, _numDimensions);
 
