@@ -98,6 +98,17 @@ namespace hdps
             if (scalars.empty())
                 return;
 
+            _scalarLow = FLT_MAX;
+            _scalarHigh = -FLT_MAX;
+
+            // Determine scalar range
+            for (const float& scalar : scalars)
+            {
+                if (scalar < _scalarLow) _scalarLow = scalar;
+                if (scalar > _scalarHigh) _scalarHigh = scalar;
+            }
+            _scalarRange = _scalarHigh - _scalarLow;
+
             _scalars = scalars;
 
             _dirtyScalars = true;
@@ -256,6 +267,11 @@ namespace hdps
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasScalars());
+
+            if (_gpuPoints.hasScalars())
+            {
+                _shader.uniform3f("scalarRange", _gpuPoints.getScalarRange());
+            }
 
             if (_pointEffect == PointEffect::Color) {
                 _colormap.bind(0);

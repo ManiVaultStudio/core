@@ -41,6 +41,7 @@ namespace hdps
             void enableScalars(bool enable);
             bool hasHighlights() { return _hasHighlights; }
             bool hasScalars() { return _hasScalars; }
+            Vector3f getScalarRange() { return Vector3f(_scalarLow, _scalarHigh, _scalarRange); }
             void draw();
             void destroy();
 
@@ -49,6 +50,10 @@ namespace hdps
             std::vector<Vector2f> _positions;
             std::vector<char>     _highlights;
             std::vector<float>    _scalars;
+
+            float _scalarLow;
+            float _scalarHigh;
+            float _scalarRange;
 
             bool _hasPositions = false;
             bool _hasHighlights = false;
