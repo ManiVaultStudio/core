@@ -66,6 +66,10 @@ set( WIDGET_HEADERS
     src/widgets/ComboBox.h
     src/widgets/PushButton.h
     src/widgets/HorizontalDivider.h
+    src/widgets/DimensionSelectionHolder.h
+    src/widgets/DimensionSelectionItemModel.h
+    src/widgets/DimensionSelectionWidget.h
+    src/widgets/ModelResetter.h
 )
 
 set( WIDGET_SOURCES
@@ -76,6 +80,10 @@ set( WIDGET_SOURCES
     src/widgets/ComboBox.cpp
     src/widgets/PushButton.cpp
     src/widgets/HorizontalDivider.cpp
+    src/widgets/DimensionSelectionHolder.cpp
+    src/widgets/DimensionSelectionItemModel.cpp
+    src/widgets/DimensionSelectionWidget.cpp
+    src/widgets/ModelResetter.cpp
 )
 
 set( RENDERER_HEADERS
@@ -194,6 +202,7 @@ if(APPLE)
 endif(APPLE)
 
 set(UI_FILES
+    ui/DimensionSelectionWidget.ui
     ui/MainWindow.ui
 )
 
@@ -224,6 +233,10 @@ add_library(${PROJECT}_Public ${LINK_TYPE}
     src/.editorconfig
     ${PUBLIC_SOURCES}
 )
+
+# Request C++17, in order to use std::for_each_n with std::execution::par_unseq.
+set_property(TARGET ${PROJECT}_Public PROPERTY CXX_STANDARD 17)
+
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
 
