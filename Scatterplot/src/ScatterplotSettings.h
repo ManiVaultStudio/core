@@ -93,15 +93,11 @@ public:
     hdps::Vector3f getSelectionColor();
     void showPointSettings();
     void showDensitySettings();
-    QString currentData();
 
     void initDimOptions(const unsigned int nDim);
     void initDimOptions(const std::vector<QString> dimNames);
     void initScalarDimOptions(const unsigned int nDim);
     void initScalarDimOptions(const std::vector<QString> dimNames);
-    void addDataOption(const QString option);
-    void removeDataOption(const QString option);
-    int numDataOptions();
 
     void paintEvent(QPaintEvent* event) override;
 
@@ -112,7 +108,6 @@ private:
     const hdps::Vector3f DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
     const hdps::Vector3f DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
 
-    hdps::gui::ComboBox _dataOptions;
     hdps::gui::PushButton _subsetButton;
     hdps::gui::ComboBox _renderMode;
 

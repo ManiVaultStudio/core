@@ -49,12 +49,12 @@ void ScatterplotPlugin::init()
 
 void ScatterplotPlugin::dataAdded(const QString name)
 {
-    settings->addDataOption(name);
+    
 }
 
 void ScatterplotPlugin::dataChanged(const QString name)
 {
-    if (name != settings->currentData()) {
+    if (name != _currentDataSet) {
         return;
     }
     updateData();
@@ -62,7 +62,7 @@ void ScatterplotPlugin::dataChanged(const QString name)
 
 void ScatterplotPlugin::dataRemoved(const QString name)
 {
-    settings->removeDataOption(name);
+    
 }
 
 void ScatterplotPlugin::selectionChanged(const QString dataName)
@@ -126,7 +126,6 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
 
 void ScatterplotPlugin::subsetCreated()
 {
-    qDebug() << "Creating subset";
     const hdps::Set& set = _core->requestSet(_currentDataSet);
     const hdps::Set& selection = _core->requestSelection(set.getDataName());
     
@@ -153,11 +152,11 @@ void ScatterplotPlugin::updateData()
     if (!_scatterPlotWidget->isInitialized())
         return;
 
-    if (settings->currentData().isEmpty())
+    // If no dataset has been selected, don't do anything
+    if (_currentDataSet.isEmpty())
         return;
 
-    
-    const PointData& points = dataSet.getData();
+    // Get the dataset and point data belonging to the currently selected dataset
     const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
     const PointData& points = dataSet.getData<PointData>();
     int xDim = settings->getXDimension();
@@ -274,9 +273,6 @@ void ScatterplotPlugin::updateSelection()
 
 void ScatterplotPlugin::makeSelection(hdps::Selection selection)
 {
-    if (settings->numDataOptions() == 0)
-        return;
-
     Selection s = _scatterPlotWidget->getSelection();
 
     std::vector<unsigned int> indices;

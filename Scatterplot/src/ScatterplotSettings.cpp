@@ -3,7 +3,6 @@
 #include "ScatterplotPlugin.h"
 
 #include <QGridLayout>
-#include <QVBoxLayout>
 #include <QPainter>
 
 #include <cassert>
@@ -160,7 +159,6 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsLayout = new QVBoxLayout();
 
     QVBoxLayout* dataLayout = new QVBoxLayout();
-    dataLayout->addWidget(&_dataOptions);
     dataLayout->addWidget(&_subsetButton);
     
     QVBoxLayout* renderLayout = new QVBoxLayout();
@@ -186,7 +184,6 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 //        "QFrame { background-color: #888b93; }"
     );
 
-    connect(&_dataOptions, SIGNAL(currentIndexChanged(QString)), plugin, SLOT(dataSetPicked(QString)));
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
 
     connect(&_renderMode, SIGNAL(currentIndexChanged(int)), plugin->_scatterPlotWidget, SLOT(renderModePicked(int)));
@@ -233,11 +230,6 @@ void ScatterplotSettings::showDensitySettings()
     _settingsStack->setCurrentIndex(1);
 }
 
-QString ScatterplotSettings::currentData()
-{
-    return _dataOptions.currentText();
-}
-
 void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 {
     _dimensionPicker->setDimensions(nDim);
@@ -256,33 +248,6 @@ void ScatterplotSettings::initScalarDimOptions(const unsigned int nDim)
 void ScatterplotSettings::initScalarDimOptions(const std::vector<QString> dimNames)
 {
     _dimensionPicker->setScalarDimensions(dimNames.size(), dimNames);
-}
-
-void ScatterplotSettings::addDataOption(const QString option)
-{
-    _dataOptions.addItem(option);
-    _dataOptions.setCurrentIndex(_dataOptions.count() - 1);
-}
-
-void ScatterplotSettings::removeDataOption(const QString option)
-{
-    int indexToRemove = -1;
-    for (int index = 0; index < _dataOptions.count(); index++)
-    {
-        if (_dataOptions.itemText(index) == option)
-        {
-            indexToRemove = index;
-            break;
-        }
-    }
-
-    if (indexToRemove != -1)
-        _dataOptions.removeItem(indexToRemove);
-}
-
-int ScatterplotSettings::numDataOptions()
-{
-    return _dataOptions.count();
 }
 
 void ScatterplotSettings::renderModePicked(const int index)
