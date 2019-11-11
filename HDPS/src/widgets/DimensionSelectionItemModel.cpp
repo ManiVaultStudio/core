@@ -68,9 +68,9 @@ namespace hdps
                 assert(row < _holder.getNumberOfDimensions());
                 const auto column = static_cast<unsigned>(modelIndex.column());
 
-                if (role == Qt::DisplayRole)
+                if ((role == Qt::DisplayRole) && (column < static_cast<unsigned>(ColumnEnum::count)))
                 {
-                    switch (column)
+                    switch (static_cast<ColumnEnum>(column))
                     {
                     case ColumnEnum::Name:
                         return _holder.getName(row);
@@ -138,9 +138,9 @@ namespace hdps
     {
         try
         {
-            if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+            if (orientation == Qt::Horizontal && role == Qt::DisplayRole && (section >= 0) && (section < static_cast<unsigned>(ColumnEnum::count) ))
             {
-                switch (section)
+                switch (static_cast<ColumnEnum>(section))
                 {
                 case ColumnEnum::Name: return tr("Name");
                 case ColumnEnum::Mean: return tr("Mean");
