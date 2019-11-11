@@ -308,3 +308,5 @@ add_subdirectory(src/plugins/ColorData)
 # Text Data
 add_subdirectory(src/plugins/TextData)
 
+# Cluster Data
+add_subdirectory(src/plugins/ClusterData)

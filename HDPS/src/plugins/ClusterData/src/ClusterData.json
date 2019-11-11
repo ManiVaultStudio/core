@@ -1,0 +1,5 @@
+{
+    "name" : "Cluster",
+    "version" : "1",
+    "dependencies" : ["Points"]
+}
