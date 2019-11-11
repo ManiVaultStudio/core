@@ -268,7 +268,7 @@ void FcsLoader::loadData()
     if (ok && !dataSetName.isEmpty()) {
         QString name = _core->addData("Points", dataSetName);
         const hdps::IndexSet& set = _core->requestSet<hdps::IndexSet>(name);
-        PointData& points = set.getData();
+        PointData& points = set.getData<PointData>();
         
         points.setData(data.data(), data.size() / numDimensions, numDimensions);
         points.setDimensionNames(dimNames);

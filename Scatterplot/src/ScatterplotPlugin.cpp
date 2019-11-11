@@ -68,7 +68,7 @@ void ScatterplotPlugin::dataRemoved(const QString name)
 void ScatterplotPlugin::selectionChanged(const QString dataName)
 {
     const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
-    const auto& data = dataSet.getData();
+    const auto& data = dataSet.getData<PointData>();
 
     if (data.isDerivedData())
     {
@@ -94,7 +94,7 @@ QStringList ScatterplotPlugin::supportedDataKinds()
 void ScatterplotPlugin::dataSetPicked(const QString& name)
 {
     const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
-    const PointData& points = dataSet.getData();
+    const PointData& points = dataSet.getData<PointData>();
 
     if (points.isDerivedData()) {
         const PointData& sourceData = dynamic_cast<const PointData&>(points.getSourceData());
@@ -127,7 +127,7 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
 void ScatterplotPlugin::subsetCreated()
 {
     qDebug() << "Creating subset";
-    const hdps::Set& set = _core->requestSet(settings->currentData());
+    const hdps::Set& set = _core->requestSet(_currentDataSet);
     const hdps::Set& selection = _core->requestSelection(set.getDataName());
     
     _core->createSubsetFromSelection(selection, set.getDataName(), "Subset");
@@ -159,6 +159,7 @@ void ScatterplotPlugin::updateData()
     
     const PointData& points = dataSet.getData();
     const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
+    const PointData& points = dataSet.getData<PointData>();
     int xDim = settings->getXDimension();
     int yDim = settings->getYDimension();
 
@@ -189,7 +190,7 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const IndexSet& dataSet)
 {
-    const PointData& points = dataSet.getData();
+    const PointData& points = dataSet.getData<PointData>();
 
     int numDims = points.getNumDimensions();
     int xDim = settings->getXDimension();
@@ -288,7 +289,7 @@ void ScatterplotPlugin::makeSelection(hdps::Selection selection)
     }
 
     const hdps::IndexSet& set = _core->requestSet<hdps::IndexSet>(_currentDataSet);
-    const RawData& data = set.getData();
+    const PointData& data = set.getData<PointData>();
 
     hdps::IndexSet& selectionSet = dynamic_cast<hdps::IndexSet&>(data.getSelection());
 

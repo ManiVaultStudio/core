@@ -89,8 +89,9 @@ void BinLoader::loadData()
 
     if (ok && !_dataSetName.isEmpty()) {
         QString name = _core->addData("Points", _dataSetName);
-        PointData& points = set.getData();
+        
         const hdps::IndexSet& set = _core->requestSet<hdps::IndexSet>(name);
+        PointData& points = set.getData<PointData>();
 
         points.setData(data.data(), data.size() / _numDimensions, _numDimensions);
 
