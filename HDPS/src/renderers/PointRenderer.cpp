@@ -1,5 +1,7 @@
 #include "PointRenderer.h"
 
+#include <limits>
+
 #include <QDebug>
 
 namespace hdps
@@ -98,8 +100,8 @@ namespace hdps
             if (scalars.empty())
                 return;
 
-            _scalarLow = FLT_MAX;
-            _scalarHigh = -FLT_MAX;
+            _scalarLow = std::numeric_limits<float>::max();
+            _scalarHigh = -std::numeric_limits<float>::max();
 
             // Determine scalar range
             for (const float& scalar : scalars)

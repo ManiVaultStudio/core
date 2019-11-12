@@ -30,6 +30,7 @@ source_group( Plugin FILES ${SOURCES})
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${SOURCES})
+add_dependencies(${PROJECT} HDPS_Public)
 
 if(MSVC)
     set(LIB_LINK_SUFFIX ".lib") 

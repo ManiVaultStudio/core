@@ -50,6 +50,5 @@ namespace hdps
                 event->ignore();
             }
         }
-        }
     }
 }

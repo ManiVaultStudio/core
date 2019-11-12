@@ -1,7 +1,6 @@
 #pragma once
 
 #include <RawData.h>
-#include <PointData.h>
 #include <Set.h>
 
 #include <QString>
