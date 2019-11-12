@@ -137,10 +137,17 @@ void ScatterplotWidget::setHighlights(const std::vector<char>& highlights)
     update();
 }
 
-void ScatterplotWidget::setScalarProperty(const std::vector<float>& scalarProperty)
+void ScatterplotWidget::setScalars(const std::vector<float>& scalars)
 {
-    _pointRenderer.setScalars(scalarProperty);
+    _pointRenderer.setScalars(scalars);
     
+    update();
+}
+
+void ScatterplotWidget::setColors(const std::vector<Vector3f>& colors)
+{
+    _pointRenderer.setColors(colors);
+
     update();
 }
 

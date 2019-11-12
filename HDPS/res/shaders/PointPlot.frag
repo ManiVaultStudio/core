@@ -1,23 +1,24 @@
 #version 330 core
 
 // Scalar effects
-#define EFFECT_COLOR   0
-#define EFFECT_SIZE    1
-#define EFFECT_OUTLINE 2
+#define EFFECT_NONE    0
+#define EFFECT_COLOR   1
+#define EFFECT_SIZE    2
+#define EFFECT_OUTLINE 3
 
 // Point properties
 uniform float alpha;
 uniform int   scalarEffect;
 uniform vec3  outlineColor;
 
-// Colormap to use if useColormap is enabled
-uniform bool      useColormap;
+// Colormap to use if current effect is EFFECT_COLOR
 uniform sampler2D colormap;
 
 // Input variables
 smooth in vec2  vTexCoord;
 flat   in int   vHighlight;
 smooth in float vScalar;
+smooth in vec3  vColor;
 
 // Output color
 out vec4 fragColor;
@@ -32,7 +33,7 @@ void main()
     float a = smoothstep(1, 1 - edge, len);
     
     // Set point color
-    vec3 color = vec3(0.5, 0.5, 0.5);
+    vec3 color = vColor;
     if (scalarEffect == EFFECT_COLOR) {
         color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
     }

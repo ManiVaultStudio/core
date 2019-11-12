@@ -50,27 +50,33 @@ namespace hdps
             quad.create();
             quad.bind();
             quad.setData(vertices);
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(ATTRIBUTE_VERTICES, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glEnableVertexAttribArray(ATTRIBUTE_VERTICES);
 
             // Position buffer
             _positionBuffer.create();
             _positionBuffer.bind();
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glVertexAttribDivisor(1, 1);
-            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(ATTRIBUTE_POSITIONS, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_POSITIONS, 1);
+            glEnableVertexAttribArray(ATTRIBUTE_POSITIONS);
 
             // Highlight buffer, disabled by default
             _highlightBuffer.create();
             _highlightBuffer.bind();
-            glVertexAttribIPointer(2, 1, GL_BYTE, 0, nullptr);
-            glVertexAttribDivisor(2, 1);
+            glVertexAttribIPointer(ATTRIBUTE_HIGHLIGHTS, 1, GL_BYTE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_HIGHLIGHTS, 1);
 
             // Scalar buffer, disabled by default
             _scalarBuffer.create();
             _scalarBuffer.bind();
-            glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glVertexAttribDivisor(3, 1);
+            glVertexAttribPointer(ATTRIBUTE_SCALARS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_SCALARS, 1);
+
+            // Color buffer, disabled by default
+            _colorBuffer.create();
+            _colorBuffer.bind();
+            glVertexAttribPointer(ATTRIBUTE_COLORS, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_COLORS, 1);
         }
 
         void PointArrayObject::setPositions(const std::vector<Vector2f>& positions)
@@ -117,22 +123,24 @@ namespace hdps
             _hasScalars = true;
         }
 
-        void PointArrayObject::enableHighlights(bool enable)
+        void PointArrayObject::setColors(const std::vector<Vector3f>& colors)
         {
-            glBindVertexArray(_handle);
-            if (enable)
-                glEnableVertexAttribArray(2);
-            else
-                glDisableVertexAttribArray(2);
+            if (colors.empty())
+                return;
+
+            _colors = colors;
+
+            _dirtyColors = true;
+            _hasColors = true;
         }
 
-        void PointArrayObject::enableScalars(bool enable)
+        void PointArrayObject::enableAttribute(uint index, bool enable)
         {
             glBindVertexArray(_handle);
             if (enable)
-                glEnableVertexAttribArray(3);
+                glEnableVertexAttribArray(index);
             else
-                glDisableVertexAttribArray(3);
+                glDisableVertexAttribArray(index);
         }
 
         void PointArrayObject::draw()
@@ -149,15 +157,22 @@ namespace hdps
             {
                 _highlightBuffer.bind();
                 _highlightBuffer.setData(_highlights);
-                enableHighlights(true);
+                enableAttribute(ATTRIBUTE_HIGHLIGHTS, true);
                 _dirtyHighlights = false;
             }
             if (_dirtyScalars)
             {
                 _scalarBuffer.bind();
                 _scalarBuffer.setData(_scalars);
-                enableScalars(true);
+                enableAttribute(ATTRIBUTE_SCALARS, true);
                 _dirtyScalars = false;
+            }
+            if (_dirtyColors)
+            {
+                _colorBuffer.bind();
+                _colorBuffer.setData(_colors);
+                enableAttribute(ATTRIBUTE_COLORS, true);
+                _dirtyColors = false;
             }
 
             glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _positions.size());
@@ -183,6 +198,11 @@ namespace hdps
         void PointRenderer::setScalars(const std::vector<float>& scalars)
         {
             _gpuPoints.setScalars(scalars);
+        }
+
+        void PointRenderer::setColors(const std::vector<Vector3f>& colors)
+        {
+            _gpuPoints.setColors(colors);
         }
 
         void PointRenderer::setScalarEffect(const PointEffect effect)
@@ -269,6 +289,7 @@ namespace hdps
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasScalars());
+            _shader.uniform1i("hasColors", _gpuPoints.hasColors());
 
             if (_gpuPoints.hasScalars())
             {

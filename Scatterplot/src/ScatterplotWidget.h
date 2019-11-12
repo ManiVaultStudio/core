@@ -45,7 +45,9 @@ public:
      */
     void setData(const std::vector<Vector2f>* data);
     void setHighlights(const std::vector<char>& highlights);
-    void setScalarProperty(const std::vector<float>& scalarProperty);
+    void setScalars(const std::vector<float>& scalars);
+    void setColors(const std::vector<Vector3f>& colors);
+
     void setPointSize(const float size);
     void setAlpha(const float alpha);
     void setPointScaling(hdps::gui::PointScaling scalingMode);

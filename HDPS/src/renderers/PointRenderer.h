@@ -21,7 +21,7 @@ namespace hdps
         };
 
         enum PointEffect {
-            Color, Size, Outline
+            None, Color, Size, Outline
         };
 
         struct PointArrayObject : private QOpenGLFunctions_3_3_Core
@@ -32,24 +32,36 @@ namespace hdps
             BufferObject _positionBuffer;
             BufferObject _highlightBuffer;
             BufferObject _scalarBuffer;
+            BufferObject _colorBuffer;
 
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
             void setScalars(const std::vector<float>& scalars);
-            void enableHighlights(bool enable);
-            void enableScalars(bool enable);
+            void setColors(const std::vector<Vector3f>& colors);
+
+            void enableAttribute(uint index, bool enable);
+
             bool hasHighlights() { return _hasHighlights; }
             bool hasScalars() { return _hasScalars; }
+            bool hasColors() { return _hasColors; }
             Vector3f getScalarRange() { return Vector3f(_scalarLow, _scalarHigh, _scalarRange); }
             void draw();
             void destroy();
 
         private:
+            // Vertex array indices
+            const uint ATTRIBUTE_VERTICES   = 0;
+            const uint ATTRIBUTE_POSITIONS  = 1;
+            const uint ATTRIBUTE_HIGHLIGHTS = 2;
+            const uint ATTRIBUTE_SCALARS    = 3;
+            const uint ATTRIBUTE_COLORS     = 4;
+
             /* Point attributes */
             std::vector<Vector2f> _positions;
             std::vector<char>     _highlights;
             std::vector<float>    _scalars;
+            std::vector<Vector3f> _colors;
 
             float _scalarLow;
             float _scalarHigh;
@@ -58,10 +70,12 @@ namespace hdps
             bool _hasPositions = false;
             bool _hasHighlights = false;
             bool _hasScalars = false;
+            bool _hasColors = false;
 
             bool _dirtyPositions = false;
             bool _dirtyHighlights = false;
             bool _dirtyScalars = false;
+            bool _dirtyColors = false;
         };
 
         struct PointSettings
@@ -82,6 +96,7 @@ namespace hdps
             void setData(const std::vector<Vector2f>& points);
             void setHighlights(const std::vector<char>& highlights);
             void setScalars(const std::vector<float>& scalars);
+            void setColors(const std::vector<Vector3f>& colors);
 
             void setScalarEffect(const PointEffect effect);
             void setColormap(const QString colormap);
