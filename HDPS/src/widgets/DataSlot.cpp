@@ -7,9 +7,12 @@ namespace hdps
 {
     namespace gui
     {
-        DataSlot::DataSlot()
+        DataSlot::DataSlot(QStringList supportedKinds)
         {
+            _supportedKinds = supportedKinds;
+
             setAcceptDrops(true);
+        }
         }
 
         void DataSlot::dragEnterEvent(QDragEnterEvent* event)
@@ -26,12 +29,21 @@ namespace hdps
             QString mimeText = mimeData->text();
             QStringList tokens = mimeText.split("\n");
 
-            if (tokens[1] == "SET")
+            if (tokens.size() < 2)
+                return;
+
+            QString kind = tokens[1];
+            if (_supportedKinds.contains(kind))
             {
                 emit onDataInput(tokens[0]);
 
                 event->accept();
             }
+            else
+            {
+                event->ignore();
+            }
+        }
         }
     }
 }

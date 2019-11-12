@@ -4,6 +4,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QString>
+#include <QStringList>
 
 namespace hdps
 {
@@ -23,6 +24,7 @@ namespace hdps
 
         private:
 
+            QStringList _supportedKinds;
         };
     }
 }
