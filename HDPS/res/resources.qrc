@@ -13,6 +13,7 @@
         <file>icons/TextIcon.png</file>
         <file>icons/ColorIcon.png</file>
         <file>icons/ClusterIcon.png</file>
+        <file>icons/DragDropWhite.png</file>
     </qresource>
 
     <qresource prefix="">

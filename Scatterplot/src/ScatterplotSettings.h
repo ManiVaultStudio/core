@@ -5,6 +5,7 @@
 #include "widgets/ComboBox.h"
 #include "widgets/PushButton.h"
 #include "widgets/HorizontalDivider.h"
+#include "widgets/DataSlot.h"
 
 #include <QWidget>
 #include <QSlider>
@@ -71,6 +72,7 @@ private:
     hdps::gui::ComboBox _xDimOptions;
     hdps::gui::ComboBox _yDimOptions;
     hdps::gui::ComboBox _cDimOptions;
+    hdps::gui::DataSlot _loadColorData;
 
     QGridLayout _layout;
 };

@@ -28,11 +28,14 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
+    _dataSlot = new DataSlot(QStringList("Points"));
+
     _scatterPlotWidget = new ScatterplotWidget();
     _scatterPlotWidget->setAlpha(0.5f);
     _scatterPlotWidget->addSelectionListener(this);
 
     _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
+    _dataSlot->addWidget(_scatterPlotWidget);
 
     settings = new ScatterplotSettings(this);
 
@@ -41,12 +44,13 @@ void ScatterplotPlugin::init()
     layout->setSpacing(0);
 
     setMainLayout(layout);
-    addWidget(_scatterPlotWidget);
+    addWidget(_dataSlot);
     addWidget(settings);
 
+    connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
 }
-
+ 
 void ScatterplotPlugin::dataAdded(const QString name)
 {
     
@@ -147,8 +151,70 @@ void ScatterplotPlugin::cDimPicked(int index)
     updateData();
 }
 
+void ScatterplotPlugin::onDataInput(QString setName)
+{
+    _currentDataSet = setName;
+
+    // Move this code to supportsSet in DataSlot
+    const hdps::Set& set = _core->requestSet(setName);
+    const plugin::RawData& rawData = _core->requestData(set.getDataName());
+
+    bool supported = supportedDataKinds().contains(rawData.getKind());
+    //
+
+    if (!supported)
+        return;
+
+    const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
+    const PointData& points = dataSet.getData<PointData>();
+
+    if (points.isDerivedData()) {
+        const PointData& sourceData = dynamic_cast<const PointData&>(points.getSourceData());
+
+        if (points.getDimensionNames().size() == points.getNumDimensions())
+            settings->initDimOptions(points.getDimensionNames());
+        else
+            settings->initDimOptions(points.getNumDimensions());
+
+        if (sourceData.getDimensionNames().size() == sourceData.getNumDimensions())
+            settings->initScalarDimOptions(sourceData.getDimensionNames());
+        else
+            settings->initScalarDimOptions(sourceData.getNumDimensions());
+    }
+    else
+    {
+        if (points.getDimensionNames().size() == points.getNumDimensions()) {
+            settings->initDimOptions(points.getDimensionNames());
+            settings->initScalarDimOptions(points.getDimensionNames());
+        }
+        else {
+            settings->initDimOptions(points.getNumDimensions());
+            settings->initScalarDimOptions(points.getNumDimensions());
+        }
+    }
+
+    updateData();
+}
+
+void ScatterplotPlugin::onColorDataInput(QString setName)
+{
+    const Set& set = _core->requestSet(setName);
+
+    PointData& pointData = dynamic_cast<PointData&>(_core->requestData(set.getDataName()));
+
+    std::vector<float> scalars;
+    if (pointData.getNumPoints() == _numPoints)
+    {
+        scalars.insert(scalars.begin(), pointData.getData().begin(), pointData.getData().end());
+    }
+
+    _scatterPlotWidget->setScalarProperty(scalars);
+    updateData();
+}
+
 void ScatterplotPlugin::updateData()
 {
+    // Check if the scatter plot is initialized, if not, don't do anything
     if (!_scatterPlotWidget->isInitialized())
         return;
 
@@ -159,35 +225,28 @@ void ScatterplotPlugin::updateData()
     // Get the dataset and point data belonging to the currently selected dataset
     const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
     const PointData& points = dataSet.getData<PointData>();
+
+    // Get the selected dimensions to use as X and Y dimension in the plot
     int xDim = settings->getXDimension();
     int yDim = settings->getYDimension();
 
+    // If one of the dimensions was not set, do not draw anything
     if (xDim < 0 || yDim < 0)
         return;
 
     // Determine number of points depending on if its a full dataset or a subset
     _numPoints = dataSet.isFull() ? points.getNumPoints() : dataSet.indices.size();
 
+    // Extract 2-dimensional points from the data set based on the selected dimensions
     calculatePositions(dataSet);
 
-    std::vector<float> scalars(_numPoints);
-    if (points.isDerivedData())
-    {
-        const PointsPlugin& sourceData = dynamic_cast<const PointsPlugin&>(points.getSourceData());
-        calculateScalars(scalars, sourceData);
-    }
-    else
-    {
-        calculateScalars(scalars, points);
-    }
-
+    // Pass the 2D points to the scatter plot widget
     _scatterPlotWidget->setData(&_points);
-    _scatterPlotWidget->setScalarProperty(scalars);
 
-    updateSelection();
+    //updateSelection();
 }
 
-void ScatterplotPlugin::calculatePositions(const IndexSet& dataSet)
+void ScatterplotPlugin::calculatePositions(const hdps::IndexSet& dataSet)
 {
     const PointData& points = dataSet.getData<PointData>();
 
@@ -273,6 +332,9 @@ void ScatterplotPlugin::updateSelection()
 
 void ScatterplotPlugin::makeSelection(hdps::Selection selection)
 {
+    if (_currentDataSet.isEmpty())
+        return;
+
     Selection s = _scatterPlotWidget->getSelection();
 
     std::vector<unsigned int> indices;

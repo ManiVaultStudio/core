@@ -4,6 +4,7 @@
 
 #include <QGridLayout>
 #include <QPainter>
+#include <QStringList>
 
 #include <cassert>
 
@@ -65,11 +66,21 @@ PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) :
 DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin) :
     _xDimLabel("X:"),
     _yDimLabel("Y:"),
-    _cDimLabel("Color:")
+    _cDimLabel("Color:"),
+    _loadColorData(QStringList({ "Points", "Color", "Cluster" }))
 {
+    QLabel* dropLabel = new QLabel();
+    dropLabel->setFixedSize(50, 50);
+    //dropLabel->setStyleSheet("background-color: #FFFFFF;");
+    dropLabel->setPixmap(QPixmap(":/icons/DragDropWhite.png").scaled(50, 50));
+    _loadColorData.addWidget(dropLabel);
+
+    connect(&_loadColorData, &hdps::gui::DataSlot::onDataInput, plugin, &ScatterplotPlugin::onColorDataInput);
+
     _layout.addWidget(&_xDimLabel, 0, 0);
     _layout.addWidget(&_yDimLabel, 1, 0);
     _layout.addWidget(&_cDimLabel, 2, 0);
+    _layout.addWidget(&_loadColorData, 3, 0);
 
     _layout.addWidget(&_xDimOptions, 0, 1);
     _layout.addWidget(&_yDimOptions, 1, 1);
@@ -152,7 +163,11 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
     setFixedWidth(200);
-    
+    setStyleSheet(
+        "QWidget { background-color:#62656c; color: white; font-family: \"Open Sans\"; font-size: 11px; }"
+        //        "QFrame { background-color: #888b93; }"
+    );
+
     _subsetButton.setText("Create Subset");
     _subsetButton.setFixedWidth(100);
 
@@ -178,11 +193,6 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsLayout->addLayout(&_dimensionPicker->getLayout());
 
     setLayout(_settingsLayout);
-
-    setStyleSheet(
-        "QWidget { background-color:#62656c; color: white; font-family: \"Open Sans\"; font-size: 11px; }"
-//        "QFrame { background-color: #888b93; }"
-    );
 
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
 

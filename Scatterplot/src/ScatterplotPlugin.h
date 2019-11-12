@@ -3,6 +3,7 @@
 #include <ViewPlugin.h>
 #include "SelectionListener.h"
 
+#include "widgets/DataSlot.h"
 #include "ScatterplotWidget.h"
 
 #include <QComboBox>
@@ -48,6 +49,10 @@ public:
 
     ScatterplotWidget* _scatterPlotWidget;
 
+public slots:
+    void onDataInput(QString setName);
+    void onColorDataInput(QString setName);
+
 protected slots:
     void dataSetPicked(const QString& name);
 
@@ -59,18 +64,19 @@ protected slots:
 
 private:
     void updateData();
-    void calculatePositions(const IndexSet& dataSet);
+    void calculatePositions(const hdps::IndexSet& dataSet);
     void calculateScalars(std::vector<float>& scalars, const PointData& data);
     void updateSelection();
 
     void makeSelection(hdps::Selection selection);
 
+    QString _currentDataSet;
+    DataSlot* _dataSlot;
     ScatterplotSettings* settings;
 
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;
 };
-
 
 // =============================================================================
 // Factory
