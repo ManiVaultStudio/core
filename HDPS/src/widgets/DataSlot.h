@@ -1,10 +1,12 @@
 #pragma once
 
-#include <QFrame>
+#include <QWidget>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QString>
 #include <QStringList>
+
+#include <QHBoxLayout>
 
 namespace hdps
 {
@@ -14,7 +16,9 @@ namespace hdps
         {
             Q_OBJECT
         public:
-            DataSlot();
+            DataSlot(QStringList supportedKinds);
+            
+            void addWidget(QWidget* widget);
 
             void dragEnterEvent(QDragEnterEvent* event) override;
             void dropEvent(QDropEvent* event) override;
@@ -23,6 +27,7 @@ namespace hdps
             void onDataInput(QString dataName);
 
         private:
+            QHBoxLayout* _layout;
 
             QStringList _supportedKinds;
         };

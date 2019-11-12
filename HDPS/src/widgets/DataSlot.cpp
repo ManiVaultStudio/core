@@ -12,14 +12,20 @@ namespace hdps
             _supportedKinds = supportedKinds;
 
             setAcceptDrops(true);
+
+            _layout = new QHBoxLayout(this);
         }
+
+        void DataSlot::addWidget(QWidget* widget)
+        {
+            _layout->addWidget(widget);
         }
 
         void DataSlot::dragEnterEvent(QDragEnterEvent* event)
         {
             const QMimeData* mimeData = event->mimeData();
 
-            event->accept();
+            event->acceptProposedAction();
         }
 
         void DataSlot::dropEvent(QDropEvent* event)
