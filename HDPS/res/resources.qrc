@@ -11,6 +11,8 @@
     <qresource>
         <file>icons/DataIcon.png</file>
         <file>icons/TextIcon.png</file>
+        <file>icons/ColorIcon.png</file>
+        <file>icons/ClusterIcon.png</file>
     </qresource>
 
     <qresource prefix="">

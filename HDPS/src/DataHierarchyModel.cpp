@@ -7,21 +7,24 @@ namespace hdps
     /////////////////////////
     // Data Hierarchy Item //
     /////////////////////////
-    DataHierarchyItem::DataHierarchyItem(const QString kind, DataHierarchyItem* parent) :
-        _itemData(kind),
+    DataHierarchyItem::DataHierarchyItem(QString setName, QString kind, DataHierarchyItem* parent) :
+        _setName(setName),
+        _dataKind(kind),
         _parentItem(parent)
     {
-    
+        if (kind == "Points")
+            setIcon(QIcon(":/icons/DataIcon.png"));
+        if (kind == "Text")
+            setIcon(QIcon(":/icons/TextIcon.png"));
+        if (kind == "Color")
+            setIcon(QIcon(":/icons/ColorIcon.png"));
+        if (kind == "Cluster")
+            setIcon(QIcon(":/icons/ClusterIcon.png"));
     }
 
     DataHierarchyItem::~DataHierarchyItem()
     {
         qDeleteAll(_childItems);
-    }
-
-    void DataHierarchyItem::setTypeOfData(TypeOfData typeOfData)
-    {
-        _typeOfData = typeOfData;
     }
 
     void DataHierarchyItem::addChild(DataHierarchyItem* item)
@@ -44,7 +47,7 @@ namespace hdps
     // String that gets displayed in the data hierarchy at the given column
     QString DataHierarchyItem::getDataAtColumn(int column) const
     {
-        return _itemData;
+        return _setName;
     }
 
     int DataHierarchyItem::row() const
@@ -66,10 +69,7 @@ namespace hdps
 
     QString DataHierarchyItem::serialize() const
     {
-        if (_typeOfData == SET)
-            return _itemData + "\n" + "SET";
-
-        return QString();
+        return _setName + "\n" + _dataKind;
     }
 
     //////////////////////////
@@ -79,7 +79,7 @@ namespace hdps
         QAbstractItemModel(parent),
         _dataManager(dataManager)
     {
-        _rootItem = new DataHierarchyItem("Data Hierarchy");
+        _rootItem = new DataHierarchyItem("Data Hierarchy", "None");
         setupModelData(dataManager, _rootItem);
     }
 
@@ -195,10 +195,6 @@ namespace hdps
 
     QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
     {
-        QStringList list;
-        foreach(const QModelIndex &index, indexes)
-            list << data(index, Qt::DisplayRole).toString();
-
         QVector<DataHierarchyItem*> items;
         foreach(const QModelIndex &index, indexes)
             items.push_back(getItem(index, Qt::DisplayRole));
@@ -218,14 +214,7 @@ namespace hdps
 
             plugin::RawData& rawData = dataManager.getRawData(set->getDataName());
 
-            DataHierarchyItem* setItem = new DataHierarchyItem(setName, _rootItem);
-            setItem->setTypeOfData(SET);
-            if (rawData.getKind() == "Points")
-                setItem->setIcon(QIcon(":/icons/DataIcon.png"));
-            if (rawData.getKind() == "Text")
-                setItem->setIcon(QIcon(":/icons/TextIcon.png"));
-            if (rawData.getKind() == "Color")
-                setItem->setIcon(QIcon(":/icons/ColorIcon.png"));
+            DataHierarchyItem* setItem = new DataHierarchyItem(setName, rawData.getKind(), _rootItem);
             
             _rootItem->addChild(setItem);
         }

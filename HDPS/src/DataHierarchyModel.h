@@ -18,7 +18,7 @@ namespace hdps
     class DataHierarchyItem
     {
     public:
-        explicit DataHierarchyItem(const QString kind, DataHierarchyItem* parent = nullptr);
+        explicit DataHierarchyItem(QString setName, QString kind, DataHierarchyItem* parent = nullptr);
 
         ~DataHierarchyItem();
 
@@ -49,11 +49,11 @@ namespace hdps
         /** Keep a list of pointers to child nodes */
         QVector<DataHierarchyItem*> _childItems;
 
-        /** Actual data stored in node */
-        QString _itemData;
+        /** Name of data set */
+        QString _setName;
 
-        /** Type of the data stored in node */
-        TypeOfData _typeOfData;
+        /** Kind of raw data linked to by set */
+        QString _dataKind;
 
         /** Stored icon for this item */
         QIcon _icon;
