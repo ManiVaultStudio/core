@@ -147,6 +147,7 @@ void ScatterplotWidget::setScalars(const std::vector<float>& scalars)
 void ScatterplotWidget::setColors(const std::vector<Vector3f>& colors)
 {
     _pointRenderer.setColors(colors);
+    _pointRenderer.setScalarEffect(None);
 
     update();
 }
