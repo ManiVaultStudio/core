@@ -18,6 +18,7 @@ struct Cluster
 {
     std::vector<unsigned int> indices;
 
+    QString _name;
     QColor _color;
     std::vector<float> _median;
     std::vector<float> _mean;
