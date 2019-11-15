@@ -58,8 +58,8 @@ struct DimensionPicker : public QWidget
 
     QGridLayout& getLayout();
 
-    void setDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
-    void setScalarDimensions(unsigned int numDimensions, std::vector<QString> names = std::vector<QString>());
+    void setDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
+    void setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
     int getDimensionX();
     int getDimensionY();
     int getDimensionColor();
@@ -97,9 +97,9 @@ public:
     void showDensitySettings();
 
     void initDimOptions(const unsigned int nDim);
-    void initDimOptions(const std::vector<QString> dimNames);
+    void initDimOptions(const std::vector<QString>& dimNames);
     void initScalarDimOptions(const unsigned int nDim);
-    void initScalarDimOptions(const std::vector<QString> dimNames);
+    void initScalarDimOptions(const std::vector<QString>& dimNames);
 
     void paintEvent(QPaintEvent* event) override;
 
