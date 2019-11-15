@@ -2,6 +2,7 @@
 
 #include "ScatterplotSettings.h"
 #include "PointData.h"
+#include "ClusterData.h"
 
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
@@ -198,18 +199,39 @@ void ScatterplotPlugin::onDataInput(QString setName)
 
 void ScatterplotPlugin::onColorDataInput(QString setName)
 {
-    const Set& set = _core->requestSet(setName);
+    const IndexSet& set = _core->requestSet<IndexSet>(setName);
+    const RawData& rawData = set.getData<RawData>();
+    QString kind = rawData.getKind();
 
-    PointData& pointData = dynamic_cast<PointData&>(_core->requestData(set.getDataName()));
-
-    std::vector<float> scalars;
-    if (pointData.getNumPoints() == _numPoints)
+    if (kind == "Points")
     {
-        scalars.insert(scalars.begin(), pointData.getData().begin(), pointData.getData().end());
-    }
+        PointData& pointData = set.getData<PointData>();
 
-    _scatterPlotWidget->setScalarProperty(scalars);
-    updateData();
+        std::vector<float> scalars;
+        if (pointData.getNumPoints() == _numPoints)
+        {
+            scalars.insert(scalars.begin(), pointData.getData().begin(), pointData.getData().end());
+        }
+
+        _scatterPlotWidget->setScalars(scalars);
+        updateData();
+    }
+    if (kind == "Cluster")
+    {
+        ClusterData& clusterData = set.getData<ClusterData>();
+
+        std::vector<Vector3f> colors(_points.size());
+        for (const Cluster& cluster : clusterData.clusters)
+        {
+            for (const int& index : cluster.indices)
+            {
+                colors[index] = Vector3f(cluster._color.redF(), cluster._color.greenF(), cluster._color.blueF());
+            }
+        }
+
+        _scatterPlotWidget->setColors(colors);
+        updateData();
+    }
 }
 
 void ScatterplotPlugin::updateData()
