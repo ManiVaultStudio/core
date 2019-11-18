@@ -42,8 +42,10 @@ namespace
 
         QPointF center((bounds.left() + bounds.right()) / 2, (bounds.bottom() + bounds.top()) / 2);
         QRectF squareBounds;
-        squareBounds.setSize(QSizeF(size + offset, size + offset));
-        squareBounds.moveCenter(center);
+        squareBounds.setLeft(center.x() - size / 2 - offset);
+        squareBounds.setRight(center.x() + size / 2 + offset);
+        squareBounds.setBottom(center.y() - size / 2 - offset);
+        squareBounds.setTop(center.y() + size / 2 + offset);
 
         return squareBounds;
     }
