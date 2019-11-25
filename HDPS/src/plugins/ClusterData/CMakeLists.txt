@@ -48,6 +48,9 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "$<TARGET_FILE:${PROJECT}>"
     "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PROJECT}>"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "$<TARGET_LINKER_FILE:${PROJECT}>"
+    "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_LINKER_FILE_NAME:${PROJECT}>"
 )
 
 # Copy clusters plugin header
