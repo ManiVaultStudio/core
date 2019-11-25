@@ -49,6 +49,7 @@ public:
     void setColors(const std::vector<Vector3f>& colors);
 
     void setPointSize(const float size);
+    void setScalarEffect(PointEffect effect);
     void setAlpha(const float alpha);
     void setPointScaling(hdps::gui::PointScaling scalingMode);
     void setSigma(const float sigma);

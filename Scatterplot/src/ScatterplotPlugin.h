@@ -65,7 +65,7 @@ protected slots:
 private:
     void updateData();
     void calculatePositions(const hdps::IndexSet& dataSet);
-    void calculateScalars(std::vector<float>& scalars, const PointData& data);
+    void calculateScalars(std::vector<float>& scalars, const PointData& data, int colorIndex);
     void updateSelection();
 
     void makeSelection(hdps::Selection selection);

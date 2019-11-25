@@ -52,8 +52,53 @@ private:
     DensitySettingsWidget _densitySettingsWidget;
 };
 
+struct ColorDimensionPicker : public QWidget
+{
+    Q_OBJECT
+public:
+    ColorDimensionPicker(const ScatterplotPlugin& plugin);
+
+    void setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names);
+private:
+    QVBoxLayout* _layout;
+
+    hdps::gui::ComboBox* _cDimOptions;
+};
+
+struct ColorDropSlot : public QWidget
+{
+    Q_OBJECT
+public:
+    ColorDropSlot(const ScatterplotPlugin& plugin);
+private:
+    QHBoxLayout* _layout;
+
+    hdps::gui::DataSlot _loadColorData;
+};
+
+struct ColorSettingsStack : public QStackedWidget
+{
+public:
+    ColorSettingsStack(const ScatterplotPlugin& plugin)
+    {
+        _colorDimensionPicker = new ColorDimensionPicker(plugin);
+        _colorDropSlot = new ColorDropSlot(plugin);
+
+        addWidget(_colorDimensionPicker);
+        addWidget(_colorDropSlot);
+    }
+
+    ColorDimensionPicker& getColorDimensionPicker() { return *_colorDimensionPicker; }
+    ColorDropSlot& getColorDropSlot() { return *_colorDropSlot; }
+private:
+    ColorDimensionPicker* _colorDimensionPicker;
+    ColorDropSlot* _colorDropSlot;
+};
+
 struct DimensionPicker : public QWidget
 {
+    Q_OBJECT
+public:
     DimensionPicker(const ScatterplotPlugin* plugin);
 
     QGridLayout& getLayout();
@@ -62,7 +107,9 @@ struct DimensionPicker : public QWidget
     void setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
     int getDimensionX();
     int getDimensionY();
-    int getDimensionColor();
+
+protected slots:
+    void colorOptionsPicked(const int index);
 
 private:
     QLabel _xDimLabel;
@@ -71,8 +118,8 @@ private:
 
     hdps::gui::ComboBox _xDimOptions;
     hdps::gui::ComboBox _yDimOptions;
-    hdps::gui::ComboBox _cDimOptions;
-    hdps::gui::DataSlot _loadColorData;
+    hdps::gui::ComboBox* _colorOptions;
+    ColorSettingsStack* _colorSettingsStack;
 
     QGridLayout _layout;
 };
@@ -85,12 +132,8 @@ public:
     ScatterplotSettings(const ScatterplotPlugin* plugin);
     ~ScatterplotSettings() override;
 
-    void xDimPicked(int index);
-    void yDimPicked(int index);
-
     int getXDimension();
     int getYDimension();
-    int getColorDimension();
     hdps::Vector3f getBaseColor();
     hdps::Vector3f getSelectionColor();
     void showPointSettings();

@@ -149,6 +149,14 @@ void ScatterplotPlugin::yDimPicked(int index)
 
 void ScatterplotPlugin::cDimPicked(int index)
 {
+    const IndexSet& set = _core->requestSet<IndexSet>(_currentDataSet);
+    const PointData& points = set.getData<PointData>();
+
+    std::vector<float> scalars;
+    calculateScalars(scalars, points, index);
+
+    _scatterPlotWidget->setScalars(scalars);
+    _scatterPlotWidget->setScalarEffect(PointEffect::Color);
     updateData();
 }
 
@@ -208,12 +216,15 @@ void ScatterplotPlugin::onColorDataInput(QString setName)
         PointData& pointData = set.getData<PointData>();
 
         std::vector<float> scalars;
-        if (pointData.getNumPoints() == _numPoints)
+        if (pointData.getNumPoints() != _numPoints)
         {
-            scalars.insert(scalars.begin(), pointData.getData().begin(), pointData.getData().end());
+            qWarning("Number of points used for coloring does not match number of points in data, aborting attempt to color plot");
+            return;
         }
+        scalars.insert(scalars.begin(), pointData.getData().begin(), pointData.getData().end());
 
         _scatterPlotWidget->setScalars(scalars);
+        _scatterPlotWidget->setScalarEffect(PointEffect::Color);
         updateData();
     }
     if (kind == "Cluster")
@@ -225,11 +236,17 @@ void ScatterplotPlugin::onColorDataInput(QString setName)
         {
             for (const int& index : cluster.indices)
             {
+                if (index < 0 || index > colors.size())
+                {
+                    qWarning("Cluster index is out of range of data, aborting attempt to color plot");
+                    return;
+                }
                 colors[index] = Vector3f(cluster._color.redF(), cluster._color.greenF(), cluster._color.blueF());
             }
         }
 
         _scatterPlotWidget->setColors(colors);
+
         updateData();
     }
 }
@@ -295,11 +312,10 @@ void ScatterplotPlugin::calculatePositions(const hdps::IndexSet& dataSet)
     }
 }
 
-void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const PointData& points)
+void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const PointData& points, int colorIndex)
 {
-    int colorIndex = settings->getColorDimension();
-
     if (colorIndex >= 0) {
+        scalars.resize(points.getNumPoints());
         int numDims = points.getNumDimensions();
         float minScalar = FLT_MAX, maxScalar = -FLT_MAX;
 

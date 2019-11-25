@@ -171,6 +171,11 @@ void ScatterplotWidget::setPointScaling(hdps::gui::PointScaling scalingMode)
     _pointRenderer.setPointScaling(scalingMode);
 }
 
+void ScatterplotWidget::setScalarEffect(PointEffect effect)
+{
+    _pointRenderer.setScalarEffect(effect);
+}
+
 void ScatterplotWidget::setSigma(const float sigma)
 {
     _densityRenderer.setSigma(sigma);
