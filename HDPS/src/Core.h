@@ -120,7 +120,7 @@ private:
     std::unique_ptr<DataManager> _dataManager;
 
     /** List of plugin instances currently present in the application. Instances are stored by type. */
-    std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>> _plugins;
+    std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>, std::hash<int>> _plugins;
 };
 
 } // namespace hdps
