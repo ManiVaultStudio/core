@@ -282,7 +282,7 @@ void ScatterplotPlugin::updateData()
     // Pass the 2D points to the scatter plot widget
     _scatterPlotWidget->setData(&_points);
 
-    //updateSelection();
+    updateSelection();
 }
 
 void ScatterplotPlugin::calculatePositions(const hdps::IndexSet& dataSet)
