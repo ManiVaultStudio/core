@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreInterface.h"
+#include "PluginType.h"
 
 #include <memory>
 #include <unordered_map>
@@ -14,7 +15,6 @@ namespace plugin
     class PluginManager;
     class Plugin;
     class DataConsumer;
-    enum Type : unsigned int;
 }
 
 namespace gui
@@ -120,7 +120,7 @@ private:
     std::unique_ptr<DataManager> _dataManager;
 
     /** List of plugin instances currently present in the application. Instances are stored by type. */
-    std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>, std::hash<int>> _plugins;
+    std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>, plugin::TypeHash> _plugins;
 };
 
 } // namespace hdps

@@ -15,8 +15,15 @@ namespace hdps
 {
 namespace plugin
 {
+    enum class Type { ANALYSIS, DATA, LOADER, WRITER, VIEW };
 
-enum Type : unsigned int { ANALYSIS, DATA, LOADER, WRITER, VIEW };
+    struct TypeHash
+    {
+        std::size_t operator()(Type type) const
+        {
+            return static_cast<std::size_t>(type);
+        }
+    };
 
 } // namespace plugin
 

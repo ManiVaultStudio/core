@@ -20,7 +20,7 @@ namespace plugin
 {
     class PluginManager;
     class ViewPlugin;
-    enum Type : unsigned int;
+    enum class Type;
 }
 
 namespace gui
