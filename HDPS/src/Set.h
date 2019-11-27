@@ -16,6 +16,8 @@ public:
 
     virtual Set* copy() const = 0;
 
+    virtual void createSubset() const = 0;
+
     QString getName() const
     {
         return _name;

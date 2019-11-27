@@ -9,4 +9,11 @@ namespace hdps
         set->indices = indices;
         return set;
     }
+
+    void IndexSet::createSubset() const
+    {
+        const hdps::Set& selection = _core->requestSelection(getDataName());
+
+        _core->createSubsetFromSelection(selection, getDataName(), "Subset");
+    }
 }

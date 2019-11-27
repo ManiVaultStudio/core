@@ -18,6 +18,8 @@ namespace hdps
 
         Set* copy() const override;
 
+        void createSubset() const override;
+
         std::vector<unsigned int> indices;
     };
 } // namespace hdps
