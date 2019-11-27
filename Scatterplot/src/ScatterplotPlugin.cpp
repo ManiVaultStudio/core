@@ -132,9 +132,8 @@ void ScatterplotPlugin::dataSetPicked(const QString& name)
 void ScatterplotPlugin::subsetCreated()
 {
     const hdps::Set& set = _core->requestSet(_currentDataSet);
-    const hdps::Set& selection = _core->requestSelection(set.getDataName());
-    
-    _core->createSubsetFromSelection(selection, set.getDataName(), "Subset");
+
+    set.createSubset();
 }
 
 void ScatterplotPlugin::xDimPicked(int index)
