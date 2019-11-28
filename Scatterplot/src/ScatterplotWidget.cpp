@@ -7,47 +7,24 @@
 #include <QSize>
 #include <QDebug>
 #include <math.h>
-#include <float.h>
 
 using namespace hdps::util;
 
 namespace
 {
-    QRectF getDataBounds(const std::vector<Vector2f>& points)
+    Bounds getDataBounds(const std::vector<Vector2f>& points)
     {
-        QRectF bounds(QPointF(FLT_MAX, -FLT_MAX), QPointF(-FLT_MAX, FLT_MAX));
+        Bounds bounds = Bounds::Max;
 
         for (const Vector2f& point : points)
         {
-            bounds.setLeft(std::min(point.x, (float)bounds.left()));
-            bounds.setRight(std::max(point.x, (float)bounds.right()));
-            bounds.setBottom(std::min(point.y, (float)bounds.bottom()));
-            bounds.setTop(std::max(point.y, (float)bounds.top()));
+            bounds.setLeft(std::min(point.x, bounds.getLeft()));
+            bounds.setRight(std::max(point.x, bounds.getRight()));
+            bounds.setBottom(std::min(point.y, bounds.getBottom()));
+            bounds.setTop(std::max(point.y, bounds.getTop()));
         }
+
         return bounds;
-    }
-
-    QRectF centerAndSquareBounds(const QRectF& bounds, float offsetFraction)
-    {
-        float epsilon = 1e-07f;
-        float width = fabs(bounds.width());
-        float height = fabs(bounds.height());
-        float size = width > height ? width : height;
-        // If size is zero or almost zero, make it at least epsilon big
-        if (size < epsilon)
-            size = epsilon;
-
-        // Determine offset in units as a fraction of the size
-        float offset = size * offsetFraction;
-
-        QPointF center((bounds.left() + bounds.right()) / 2, (bounds.bottom() + bounds.top()) / 2);
-        QRectF squareBounds;
-        squareBounds.setLeft(center.x() - size / 2 - offset);
-        squareBounds.setRight(center.x() + size / 2 + offset);
-        squareBounds.setBottom(center.y() - size / 2 - offset);
-        squareBounds.setTop(center.y() + size / 2 + offset);
-
-        return squareBounds;
     }
 }
 
@@ -119,13 +96,14 @@ void ScatterplotWidget::colormapdiscreteChanged(bool isDiscrete)
 // by reference then we can upload the data to the GPU, but not store it in the widget.
 void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
 {
-    const QRectF bounds = getDataBounds(*points);
-    
-    _dataBounds = centerAndSquareBounds(bounds, 0.05f);
+    Bounds bounds = getDataBounds(*points);
+    bounds.makeSquare();
+    bounds.expand(0.1f);
+    _dataBounds = bounds;
 
     // Pass bounds and data to renderers
-    _pointRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
-    _densityRenderer.setBounds(_dataBounds.left(), _dataBounds.right(), _dataBounds.bottom(), _dataBounds.top());
+    _pointRenderer.setBounds(_dataBounds);
+    _densityRenderer.setBounds(_dataBounds);
     _pointRenderer.setData(*points);
     _densityRenderer.setData(points);
 
@@ -192,9 +170,9 @@ Selection ScatterplotWidget::getSelection()
 {
     Selection isotropicSelection = toIsotropicCoordinates * _selection;
 
-    Vector2f bottomLeftData(lerp(_dataBounds.left(), _dataBounds.right(), isotropicSelection.getLeft()), lerp(_dataBounds.bottom(), _dataBounds.top(), isotropicSelection.getBottom()));
-    Vector2f topRightData(lerp(_dataBounds.left(), _dataBounds.right(), isotropicSelection.getRight()), lerp(_dataBounds.bottom(), _dataBounds.top(), isotropicSelection.getTop()));
-            
+    Vector2f bottomLeftData(lerp(_dataBounds.getLeft(), _dataBounds.getRight(), isotropicSelection.getLeft()), lerp(_dataBounds.getBottom(), _dataBounds.getTop(), isotropicSelection.getBottom()));
+    Vector2f topRightData(lerp(_dataBounds.getLeft(), _dataBounds.getRight(), isotropicSelection.getRight()), lerp(_dataBounds.getBottom(), _dataBounds.getTop(), isotropicSelection.getTop()));
+    
     return Selection(bottomLeftData, topRightData);
 }
 

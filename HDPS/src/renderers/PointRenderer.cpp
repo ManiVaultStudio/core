@@ -14,14 +14,14 @@ namespace hdps
              * Builds an orthographic projection matrix that transforms the given bounds
              * to the range [-1, 1] in both directions.
              */
-            Matrix3f createProjectionMatrix(QRectF bounds)
+            Matrix3f createProjectionMatrix(Bounds bounds)
             {
                 Matrix3f m;
                 m.setIdentity();
-                m[0] = 2 / (bounds.right() - bounds.left());
-                m[4] = 2 / (bounds.top() - bounds.bottom());
-                m[6] = -((bounds.right() + bounds.left()) / (bounds.right() - bounds.left()));
-                m[7] = -((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom()));
+                m[0] = 2 / bounds.getWidth();
+                m[4] = 2 / bounds.getHeight();
+                m[6] = -((bounds.getRight() + bounds.getLeft()) / bounds.getWidth());
+                m[7] = -((bounds.getTop() + bounds.getBottom()) / bounds.getHeight());
                 return m;
             }
         }
@@ -215,9 +215,9 @@ namespace hdps
             _colormap.loadFromFile(colormap);
         }
 
-        void PointRenderer::setBounds(float left, float right, float bottom, float top)
+        void PointRenderer::setBounds(const Bounds& bounds)
         {
-            _bounds.setCoords(left, top, right, bottom);
+            _bounds = bounds;
         }
 
         void PointRenderer::setPointSize(const float size)

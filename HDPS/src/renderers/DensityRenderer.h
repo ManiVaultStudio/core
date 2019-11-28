@@ -4,6 +4,7 @@
 #include "../SelectionListener.h"
 
 #include "../graphics/Vector2f.h"
+#include "../graphics/Bounds.h"
 #include "../graphics/Texture.h"
 #include "../graphics/Shader.h"
 
@@ -29,7 +30,7 @@ namespace hdps
 
             void setRenderMode(RenderMode renderMode);
             void setData(const std::vector<Vector2f>* data);
-            void setBounds(float left, float right, float bottom, float top);
+            void setBounds(const Bounds& bounds);
             void setSigma(const float sigma);
             /**
             * Loads a colormap from the given resource path and sets it

@@ -8,6 +8,7 @@
 #include "../graphics/Vector2f.h"
 #include "../graphics/Vector3f.h"
 #include "../graphics/Matrix3f.h"
+#include "../graphics/Bounds.h"
 #include "../graphics/Texture.h"
 
 #include <QRectF>
@@ -100,7 +101,7 @@ namespace hdps
 
             void setScalarEffect(const PointEffect effect);
             void setColormap(const QString colormap);
-            void setBounds(float left, float right, float bottom, float top);
+            void setBounds(const Bounds& bounds);
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
@@ -127,7 +128,7 @@ namespace hdps
             Texture2D _colormap;
 
             Matrix3f _orthoM;
-            QRectF _bounds = QRectF(-1, 1, 2, 2);
+            Bounds _bounds = Bounds(-1, 1, -1, 1);
         };
 
     } // namespace gui

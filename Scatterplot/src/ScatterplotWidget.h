@@ -9,6 +9,7 @@
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
 #include "graphics/Matrix3f.h"
+#include "graphics/Bounds.h"
 #include "graphics/Selection.h"
 
 #include "widgets/ColormapWidget.h"
@@ -107,5 +108,5 @@ private:
     /* Size of the scatterplot widget */
     QSize _windowSize;
 
-    QRectF _dataBounds;
+    Bounds _dataBounds;
 };

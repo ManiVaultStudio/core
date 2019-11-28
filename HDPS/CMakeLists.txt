@@ -115,6 +115,7 @@ set( GRAPHICS_HEADERS
     src/graphics/Shader.h
     src/graphics/Framebuffer.h
     src/graphics/OffscreenBuffer.h
+    src/graphics/Bounds.h
 )
 
 set( GRAPHICS_SOURCES
@@ -124,6 +125,7 @@ set( GRAPHICS_SOURCES
     src/graphics/Matrix3f.cpp
     src/graphics/Vector2f.cpp
     src/graphics/Vector3f.cpp
+    src/graphics/Bounds.cpp
 )
 
 set( UTIL_HEADERS
