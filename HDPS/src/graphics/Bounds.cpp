@@ -19,9 +19,7 @@ namespace hdps
         _left(left),
         _right(right),
         _bottom(bottom),
-        _top(top),
-        _minWidth(0),
-        _minHeight(0)
+        _top(top)
     { }
 
     void Bounds::setBounds(float left, float right, float bottom, float top)
@@ -30,6 +28,22 @@ namespace hdps
         _right = right;
         _bottom = bottom;
         _top = top;
+    }
+
+    void Bounds::ensureMinimumSize(float width, float height)
+    {
+        Vector2f center = getCenter();
+
+        if (getWidth() < width)
+        {
+            _left = center.x - width / 2;
+            _right = center.y + width / 2;
+        }
+        if (getHeight() < height)
+        {
+            _bottom = center.y - height / 2;
+            _top = center.y + height / 2;
+        }
     }
 
     void Bounds::moveToOrigin()
@@ -61,13 +75,5 @@ namespace hdps
         _right += widthOffset;
         _bottom -= heightOffset;
         _top += heightOffset;
-    }
-
-    void Bounds::ensureMinSize()
-    {
-        if (getWidth() < _minWidth)
-        {
-            _left = -_minWidth / 2;
-        }
     }
 }

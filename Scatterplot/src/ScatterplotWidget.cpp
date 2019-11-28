@@ -97,6 +97,7 @@ void ScatterplotWidget::colormapdiscreteChanged(bool isDiscrete)
 void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
 {
     Bounds bounds = getDataBounds(*points);
+    bounds.ensureMinimumSize(1e-07f, 1e-07f);
     bounds.makeSquare();
     bounds.expand(0.1f);
     _dataBounds = bounds;

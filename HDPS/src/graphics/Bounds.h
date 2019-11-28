@@ -22,7 +22,7 @@ namespace hdps
         Bounds(float left, float right, float bottom, float top);
 
         void setBounds(float left, float right, float bottom, float top);
-        void setMinimumSize(float width, float height);
+        void ensureMinimumSize(float width, float height);
         void moveToOrigin();
         void makeSquare();
         void expand(float fraction);
@@ -42,14 +42,9 @@ namespace hdps
         void setTop(float top) { _top = top; }
 
     private:
-        void ensureMinSize();
-
         float _left;
         float _right;
         float _bottom;
         float _top;
-
-        float _minWidth;
-        float _minHeight;
     };
 }
