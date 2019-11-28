@@ -45,21 +45,16 @@ void Core::addPlugin(plugin::Plugin* plugin)
 {
     plugin->setCore(this);
 
-    // If it is a view plugin then it should be added to the main window
-    if (plugin->getType() == plugin::Type::VIEW)
+    switch (plugin->getType())
     {
-        _mainWindow.addView(dynamic_cast<plugin::ViewPlugin*>(plugin));
-    }
+        // If the plugin is RawData, then add it to the data manager
+        case plugin::Type::DATA: _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin)); break;
 
-    // Add the plugin to a list of plug-ins of the same type
-    // Unless the plugin is RawData, then add it to the data manager
-    if (plugin->getType() == plugin::Type::DATA)
-    {
-        _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin));
-    }
-    else
-    {
-        _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
+        // If it is a view plugin then it should be added to the main window
+        case plugin::Type::VIEW: _mainWindow.addView(dynamic_cast<plugin::ViewPlugin*>(plugin)); // fallthrough
+
+        // Otherwise add the plugin to a list of plug-ins of the same type
+        default: _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
     }
     
     // Initialize the plugin after it has been added to the core
