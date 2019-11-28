@@ -51,7 +51,7 @@ void ScatterplotPlugin::init()
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
 }
- 
+
 void ScatterplotPlugin::dataAdded(const QString name)
 {
     
@@ -172,6 +172,8 @@ void ScatterplotPlugin::onDataInput(QString setName)
 
     if (!supported)
         return;
+
+    setWindowTitle(setName);
 
     const hdps::IndexSet& dataSet = _core->requestSet<hdps::IndexSet>(_currentDataSet);
     const PointData& points = dataSet.getData<PointData>();
