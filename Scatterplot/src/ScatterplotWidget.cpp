@@ -180,6 +180,9 @@ Selection ScatterplotWidget::getSelection()
 void ScatterplotWidget::initializeGL()
 {
     initializeOpenGLFunctions();
+    qDebug() << "Initializing scatterplot widget with context: " << context();
+    std::string versionString = std::string((const char*) glGetString(GL_VERSION));
+    qDebug() << versionString.c_str();
 
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ScatterplotWidget::cleanup);
 

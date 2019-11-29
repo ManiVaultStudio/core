@@ -81,7 +81,7 @@ DensityComputation::~DensityComputation()
 void DensityComputation::init(QOpenGLContext* ctx)
 {
     _ctx = ctx;
-    qDebug() << "Initializing density computation with context: " << ctx;
+
     initializeOpenGLFunctions();
 
     // Generate the gaussian rendering splat
