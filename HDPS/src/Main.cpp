@@ -1,5 +1,7 @@
-#include <QApplication>
 #include "MainWindow.h"
+
+#include <QApplication>
+#include <QSurfaceFormat>
 
 int main(int argc, char *argv[])
 {
@@ -8,6 +10,22 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("HDPS");
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
+
+#ifdef __APPLE__
+    // Ask for an OpenGL 3.3 Core Context as the default
+    QSurfaceFormat defaultFormat;
+    defaultFormat.setVersion(3, 3);
+    defaultFormat.setProfile(QSurfaceFormat::CoreProfile);
+    defaultFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    QSurfaceFormat::setDefaultFormat(defaultFormat);
+#else
+    // Ask for an OpenGL 4.3 Core Context as the default
+    QSurfaceFormat defaultFormat;
+    defaultFormat.setVersion(4, 3);
+    defaultFormat.setProfile(QSurfaceFormat::CoreProfile);
+    defaultFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    QSurfaceFormat::setDefaultFormat(defaultFormat);
+#endif
 
     QApplication app(argc, argv);
 
