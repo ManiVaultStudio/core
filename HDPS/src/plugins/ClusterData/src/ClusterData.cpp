@@ -1,7 +1,5 @@
 #include "ClusterData.h"
 
-#include "IndexSet.h"
-
 #include <QtCore>
 #include <QtDebug>
 
@@ -21,15 +19,10 @@ void ClusterData::init()
 
 }
 
-hdps::Set* ClusterData::createSet() const
+hdps::DataSet* ClusterData::createDataSet() const
 {
-    return new hdps::IndexSet(_core, getName());
+    return new Clusters(_core, getName());
 }
-
-//void ClusterData::addCluster(IndexSet* cluster)
-//{
-//    clusters.push_back(cluster);
-//}
 
 // =============================================================================
 // Factory

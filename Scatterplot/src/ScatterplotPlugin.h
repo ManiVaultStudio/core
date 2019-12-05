@@ -18,11 +18,10 @@ using namespace hdps::plugin;
 // =============================================================================
 
 class ScatterplotSettings;
-class PointData;
+class Points;
 
 namespace hdps
 {
-    class IndexSet;
     class Vector2f;
 }
 
@@ -50,12 +49,10 @@ public:
     ScatterplotWidget* _scatterPlotWidget;
 
 public slots:
-    void onDataInput(QString setName);
-    void onColorDataInput(QString setName);
+    void onDataInput(QString dataSetName);
+    void onColorDataInput(QString dataSetName);
 
 protected slots:
-    void dataSetPicked(const QString& name);
-
     void subsetCreated();
 
     void xDimPicked(int index);
@@ -64,8 +61,8 @@ protected slots:
 
 private:
     void updateData();
-    void calculatePositions(const hdps::IndexSet& dataSet);
-    void calculateScalars(std::vector<float>& scalars, const PointData& data, int colorIndex);
+    void calculatePositions(const Points& points);
+    void calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex);
     void updateSelection();
 
     void makeSelection(hdps::Selection selection);

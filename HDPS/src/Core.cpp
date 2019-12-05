@@ -94,8 +94,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
     {
         for (const auto& pair : _dataManager->allSets())
         {
-            const Set& set = *pair.second;
-            if (supportsSet(dataConsumer, set.getName()))
+            const DataSet& set = *pair.second;
+            if (supportsDataSet(dataConsumer, set.getName()))
                 dataConsumer->dataAdded(set.getName());
         }
     }
@@ -106,11 +106,11 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    const plugin::RawData& rawData = requestData(rawDataName);
+    const plugin::RawData& rawData = requestRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    Set* fullSet = rawData.createSet();
-    Set* selection = rawData.createSet();
+    DataSet* fullSet = rawData.createDataSet();
+    DataSet* selection = rawData.createDataSet();
 
     // Set the properties of the new sets
     fullSet->setAll();
@@ -132,17 +132,21 @@ void Core::removeData(const QString dataName)
     }
 }
 
-const QString Core::createDerivedData(const QString kind, const QString nameRequest, const QString sourceName)
+const QString Core::createDerivedData(const QString kind, const QString nameRequest, const QString sourceSetName)
 {
+    const DataSet& sourceSet = requestData(sourceSetName);
+
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    plugin::RawData& rawData = requestData(pluginName);
+    plugin::RawData& derivedData = requestRawData(pluginName);
 
-    rawData.setDerived(true, sourceName);
+    derivedData.setDerived(true, sourceSet.getDataName());
 
     // Create an initial full set, but no selection because it is shared with the source data
-    Set* fullSet = rawData.createSet();
+    DataSet* fullSet = derivedData.createDataSet();
+    fullSet->_sourceSetName = sourceSetName;
+    fullSet->_derived = true;
 
     // Set properties of the new set
     fullSet->setAll();
@@ -153,10 +157,10 @@ const QString Core::createDerivedData(const QString kind, const QString nameRequ
     return setName;
 }
 
-void Core::createSubsetFromSelection(const Set& selection, const QString dataName, const QString nameRequest)
+void Core::createSubsetFromSelection(const DataSet& selection, const QString dataName, const QString nameRequest)
 {
     // Create a new set with only the indices that were part of the selection set
-    Set* newSet = selection.copy();
+    DataSet* newSet = selection.copy();
 
     newSet->_dataName = dataName;
 
@@ -165,7 +169,7 @@ void Core::createSubsetFromSelection(const Set& selection, const QString dataNam
     notifyDataAdded(setName);
 }
 
-plugin::RawData& Core::requestData(const QString name)
+plugin::RawData& Core::requestRawData(const QString name)
 {
     try
     {
@@ -177,7 +181,7 @@ plugin::RawData& Core::requestData(const QString name)
     }
 }
 
-Set& Core::requestSet(const QString name)
+DataSet& Core::requestData(const QString name)
 {
     try
     {
@@ -189,7 +193,7 @@ Set& Core::requestSet(const QString name)
     }
 }
 
-Set& Core::requestSelection(const QString name)
+DataSet& Core::requestSelection(const QString name)
 {
     try
     {
@@ -209,7 +213,7 @@ void Core::notifyDataAdded(const QString name)
 {
     for (plugin::DataConsumer* dataConsumer : getDataConsumers())
     {
-        if (supportsSet(dataConsumer, name))
+        if (supportsDataSet(dataConsumer, name))
             dataConsumer->dataAdded(name);
     }
 }
@@ -222,7 +226,7 @@ void Core::notifyDataChanged(const QString name)
 {
     for (plugin::DataConsumer* dataConsumer : getDataConsumers())
     {
-        if (supportsSet(dataConsumer, name))
+        if (supportsDataSet(dataConsumer, name))
             dataConsumer->dataChanged(name);
     }
 }
@@ -253,10 +257,10 @@ gui::MainWindow& Core::gui() const {
 }
 
 /** Checks if the given data consumer supports the kind data in the given set. */
-bool Core::supportsSet(plugin::DataConsumer* dataConsumer, QString setName)
+bool Core::supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName)
 {
-    const hdps::Set& set = requestSet(setName);
-    const plugin::RawData& rawData = requestData(set.getDataName());
+    const hdps::DataSet& set = requestData(setName);
+    const plugin::RawData& rawData = requestRawData(set.getDataName());
 
     return dataConsumer->supportedDataKinds().contains(rawData.getKind());
 }

@@ -212,9 +212,9 @@ namespace hdps
             QString setName = setPair.first;
             auto& set = setPair.second;
 
-            plugin::RawData& rawData = dataManager.getRawData(set->getDataName());
+            //plugin::RawData& rawData = dataManager.getRawData(set->getDataName());
 
-            DataHierarchyItem* setItem = new DataHierarchyItem(setName, rawData.getKind(), _rootItem);
+            DataHierarchyItem* setItem = new DataHierarchyItem(setName, set->getDataType(), _rootItem);
             
             _rootItem->addChild(setItem);
         }

@@ -1,7 +1,5 @@
 #include "TextData.h"
 
-#include "IndexSet.h"
-
 #include <QtCore>
 #include <QtDebug>
 
@@ -21,9 +19,9 @@ void TextData::init()
 
 }
 
-hdps::Set* TextData::createSet() const
+hdps::DataSet* TextData::createDataSet() const
 {
-    return new hdps::IndexSet(_core, getName());
+    return new Text(_core, getName());
 }
 
 // =============================================================================

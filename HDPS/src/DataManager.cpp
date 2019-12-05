@@ -12,19 +12,19 @@ void DataManager::addRawData(plugin::RawData* rawData)
     _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
 }
 
-QString DataManager::addSet(QString requestedName, Set* set)
+QString DataManager::addSet(QString requestedName, DataSet* set)
 {
     QString uniqueName = getUniqueSetName(requestedName);
     set->setName(uniqueName);
-    _dataSetMap.emplace(set->getName(), std::unique_ptr<Set>(set));
+    _dataSetMap.emplace(set->getName(), std::unique_ptr<DataSet>(set));
 
     emit dataChanged();
     return uniqueName;
 }
 
-void DataManager::addSelection(QString dataName, Set* selection)
+void DataManager::addSelection(QString dataName, DataSet* selection)
 {
-    _selections.emplace(dataName, std::unique_ptr<Set>(selection));
+    _selections.emplace(dataName, std::unique_ptr<DataSet>(selection));
 }
 
 QStringList DataManager::removeRawData(QString name)
@@ -41,7 +41,7 @@ QStringList DataManager::removeRawData(QString name)
         }
         
         // Generate a selection set for the previously derived data
-        Set* selection = rawData.createSet();
+        DataSet* selection = rawData.createDataSet();
         addSelection(rawData.getName(), selection);
     }
 
@@ -49,7 +49,7 @@ QStringList DataManager::removeRawData(QString name)
     QStringList removedSets;
     for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
     {
-        const Set& set = *it->second;
+        const DataSet& set = *it->second;
         if (set.getDataName() == name)
         {
             removedSets.append(set.getName());
@@ -76,7 +76,7 @@ plugin::RawData& DataManager::getRawData(QString name)
     return *_rawDataMap[name];
 }
 
-Set& DataManager::getSet(QString name)
+DataSet& DataManager::getSet(QString name)
 {
     if (_dataSetMap.find(name) == _dataSetMap.end())
         throw SetNotFoundException(name);
@@ -84,7 +84,7 @@ Set& DataManager::getSet(QString name)
     return *_dataSetMap[name];
 }
 
-Set& DataManager::getSelection(QString name)
+DataSet& DataManager::getSelection(QString name)
 {
     plugin::RawData& rawData = getRawData(name);
     if (rawData.isDerivedData())
@@ -92,7 +92,7 @@ Set& DataManager::getSelection(QString name)
         return getSelection(rawData.getSourceData().getName());
     }
 
-    Set* selection = _selections[name].get();
+    DataSet* selection = _selections[name].get();
 
     if (!selection)
         throw SelectionNotFoundException(name);
@@ -100,7 +100,7 @@ Set& DataManager::getSelection(QString name)
     return *selection;
 }
 
-const std::unordered_map<QString, std::unique_ptr<Set>>& DataManager::allSets() const
+const std::unordered_map<QString, std::unique_ptr<DataSet>>& DataManager::allSets() const
 {
     return _dataSetMap;
 }
@@ -109,7 +109,7 @@ const QString DataManager::getUniqueSetName(QString request)
 {
     for (const auto& pair : allSets())
     {
-        const Set& set = *pair.second;
+        const DataSet& set = *pair.second;
         if (set.getName() == request)
         {
             // Index in the string where the underscore followed by digits starts

@@ -21,9 +21,9 @@ void PointData::init()
 
 }
 
-hdps::Set* PointData::createSet() const
+hdps::DataSet* PointData::createDataSet() const
 {
-    return new hdps::IndexSet(_core, getName());
+    return new Points(_core, getName());
 }
 
 unsigned int PointData::getNumPoints() const
@@ -96,6 +96,47 @@ bool PointData::hasProperty(const QString & name) const
 QStringList PointData::propertyNames() const
 {
     return _properties.keys();
+}
+
+// =============================================================================
+// Point Set
+// =============================================================================
+
+hdps::DataSet* Points::copy() const
+{
+    Points* set = new Points(_core, getDataName());
+    set->setName(getName());
+    set->indices = indices;
+    return set;
+}
+
+void Points::createSubset() const
+{
+    const hdps::DataSet& selection = _core->requestSelection(getDataName());
+
+    _core->createSubsetFromSelection(selection, getDataName(), "Subset");
+}
+
+const std::vector<QString>& Points::getDimensionNames() const
+{
+    return getRawData().getDimensionNames();
+}
+
+void Points::setDimensionNames(const std::vector<QString>& dimNames)
+{
+    getRawData().setDimensionNames(dimNames);
+}
+
+// Constant subscript indexing
+const float& Points::operator[](unsigned int index) const
+{
+    return getRawData()[index];
+}
+
+// Subscript indexing
+float& Points::operator[](unsigned int index)
+{
+    return getRawData()[index];
 }
 
 // =============================================================================

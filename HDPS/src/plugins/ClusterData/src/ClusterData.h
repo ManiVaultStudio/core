@@ -33,14 +33,64 @@ public:
     
     void init() override;
 
-    hdps::Set* createSet() const override;
+    hdps::DataSet* createDataSet() const override;
 
-    void addCluster(Cluster& cluster) {
-        clusters.push_back(cluster);
+    std::vector<Cluster>& getClusters()
+    {
+        return _clusters;
     }
 
-    std::vector<Cluster> clusters;
+    void addCluster(Cluster& cluster) {
+        _clusters.push_back(cluster);
+    }
+
+private:
+    std::vector<Cluster> _clusters;
 };
+
+// =============================================================================
+// Cluster Set
+// =============================================================================
+
+class Clusters : public hdps::DataSet
+{
+public:
+    Clusters(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
+    ~Clusters() override { }
+
+    ClusterData& getRawData() const
+    {
+        return dynamic_cast<ClusterData&>(_core->requestRawData(getDataName()));
+    }
+
+    std::vector<Cluster>& getClusters()
+    {
+        return getRawData().getClusters();
+    }
+
+    void addCluster(Cluster& cluster)
+    {
+        getRawData().addCluster(cluster);
+    }
+
+    DataSet* copy() const override
+    {
+        Clusters* clusters = new Clusters(_core, getDataName());
+        clusters->setName(getName());
+        clusters->indices = indices;
+        return clusters;
+    }
+
+    void createSubset() const override
+    {
+        const hdps::DataSet& selection = _core->requestSelection(getDataName());
+
+        _core->createSubsetFromSelection(selection, getDataName(), "Clusters");
+    }
+
+    std::vector<unsigned int> indices;
+};
+
 
 // =============================================================================
 // Factory

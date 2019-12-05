@@ -76,8 +76,8 @@ class DataManager : public QObject
     Q_OBJECT
 public:
     void addRawData(plugin::RawData* rawData);
-    QString addSet(QString requestedName, Set* set);
-    void addSelection(QString dataName, Set* selection);
+    QString addSet(QString requestedName, DataSet* set);
+    void addSelection(QString dataName, DataSet* selection);
 
     /**
      * Removes raw data and all sets and selections belonging to this data.
@@ -86,9 +86,9 @@ public:
     QStringList removeRawData(QString name);
 
     plugin::RawData& getRawData(QString name);
-    Set& getSet(QString name);
-    Set& getSelection(QString name);
-    const std::unordered_map<QString, std::unique_ptr<Set>>& allSets() const;
+    DataSet& getSet(QString name);
+    DataSet& getSelection(QString name);
+    const std::unordered_map<QString, std::unique_ptr<DataSet>>& allSets() const;
 
     /**
      * Generates a unique set name based on a requested name.
@@ -110,15 +110,15 @@ private:
 
     /**
      * Stores all data sets in the system. Data sets are stored by the name
-     * retrieved from their Set::getName() function.
+     * retrieved from their DataSet::getName() function.
      */
-    std::unordered_map<QString, std::unique_ptr<Set>> _dataSetMap;
+    std::unordered_map<QString, std::unique_ptr<DataSet>> _dataSetMap;
 
     /**
     * Stores selection sets on all data plug-ins
     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
     */
-    std::unordered_map<QString, std::unique_ptr<Set>> _selections;
+    std::unordered_map<QString, std::unique_ptr<DataSet>> _selections;
 };
 
 } // namespace hdps
