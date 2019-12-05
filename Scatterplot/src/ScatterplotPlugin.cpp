@@ -273,23 +273,60 @@ void ScatterplotPlugin::updateSelection()
     std::vector<char> highlights;
     highlights.resize(_numPoints, 0);
 
-    if (points.isFull())
+    if (points.isDerivedData())
     {
-        for (unsigned int index : selection.indices)
+        // If the dataset is derived from another, get the source data set
+        const Points& sourceSet = DataSet::getSourceData(points);
+
+        if (sourceSet.isFull())
         {
-            highlights[index] = 1;
+            // If the dataset is the full dataset no translation is necessary for selection
+            if (points.isFull())
+            {
+                for (unsigned int index : selection.indices)
+                {
+                    highlights[index] = 1;
+                }
+            }
+        }
+        else
+        {
+            // Use the indices from the source dataset to translate global selection to local selection
+            for (int i = 0; i < _numPoints; i++)
+            {
+                unsigned int index = sourceSet.indices[i];
+                for (unsigned int selectionIndex : selection.indices)
+                {
+                    if (index == selectionIndex) {
+                        highlights[i] = 1;
+                        break;
+                    }
+                }
+            }
         }
     }
     else
     {
-        for (int i = 0; i < _numPoints; i++)
+        // If the dataset is the full dataset no translation is necessary for selection
+        if (points.isFull())
         {
-            unsigned int index = points.indices[i];
-            for (unsigned int selectionIndex : selection.indices)
+            for (unsigned int index : selection.indices)
             {
-                if (index == selectionIndex) {
-                    highlights[i] = 1;
-                    break;
+                highlights[index] = 1;
+            }
+        }
+        else
+        {
+            // Use the indices from the subset to translate global selection to local selection
+            for (int i = 0; i < _numPoints; i++)
+            {
+                unsigned int index = points.indices[i];
+                for (unsigned int selectionIndex : selection.indices)
+                {
+                    if (index == selectionIndex) {
+                        highlights[i] = 1;
+                        break;
+                    }
                 }
             }
         }
@@ -300,11 +337,14 @@ void ScatterplotPlugin::updateSelection()
 
 void ScatterplotPlugin::makeSelection(hdps::Selection selection)
 {
+    // If theres no dataset being displayed, don't try to make any selection
     if (_currentDataSet.isEmpty())
         return;
 
+    // Get the selection box from the widget
     Selection s = _scatterPlotWidget->getSelection();
 
+    // Check which local indices of points lie in the selection box
     std::vector<unsigned int> indices;
     for (unsigned int i = 0; i < _points.size(); i++)
     {
@@ -314,15 +354,27 @@ void ScatterplotPlugin::makeSelection(hdps::Selection selection)
             indices.push_back(i);
     }
 
+    // Get the selection set associated with this dataset
     const Points& points = _core->requestData<Points>(_currentDataSet);
-
     Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
 
+    // Clear the selection and reserve as many indices as there are points in the selection box
     selectionSet.indices.clear();
     selectionSet.indices.reserve(indices.size());
 
-    for (const unsigned int& index : indices) {
-        selectionSet.indices.push_back(points.isFull() ? index : points.indices[index]);
+    // If the data is not derived then translate local indices to global indices and save them in the selection set
+    if (!points.isDerivedData())
+    {
+        for (const unsigned int& index : indices) {
+            selectionSet.indices.push_back(points.isFull() ? index : points.indices[index]);
+        }
+    }
+    else
+    {
+        const Points& sourceSet = DataSet::getSourceData(points);
+        for (const unsigned int& index : indices) {
+            selectionSet.indices.push_back(sourceSet.isFull() ? index : sourceSet.indices[index]);
+        }
     }
 
     _core->notifySelectionChanged(selectionSet.getDataName());
