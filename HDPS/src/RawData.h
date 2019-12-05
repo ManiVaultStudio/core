@@ -1,9 +1,9 @@
 #pragma once
 
 #include "PluginFactory.h"
-#include "Set.h"
 
 namespace hdps {
+    class DataSet;
 
 namespace plugin {
 
@@ -13,7 +13,19 @@ public:
     RawData(QString name) : Plugin(Type::DATA, name) { }
     ~RawData() override {};
 
-    virtual Set* createSet() const = 0;
+    ///**
+    // * Gets the selection associated with this data set. If the data set is
+    // * derived then the selection of the source data will be returned. Otherwise,
+    // * the selection of the set's data will be returned.
+    // *
+    // * @return The selection associated with this data set
+    // */
+    //DataSet& getSelection() const
+    //{
+    //    return isDerivedData() ? _core->requestSelection(_sourceDataName) : _core->requestSelection(getName());
+    //}
+
+    virtual DataSet* createDataSet() const = 0;
 
     bool isDerivedData() const
     {
@@ -28,24 +40,12 @@ public:
      */
     RawData& getSourceData() const
     {
-        return _core->requestData(_sourceDataName);
+        return _core->requestRawData(_sourceDataName);
     }
 
     QString getSourceDataName() const
     {
         return _sourceDataName;
-    }
-
-    /**
-     * Gets the selection associated with this data set. If the data set is
-     * derived then the selection of the source data will be returned. Otherwise,
-     * the selection of the set's data will be returned.
-     *
-     * @return The selection associated with this data set
-     */
-    Set& getSelection() const
-    {
-        return isDerivedData() ? _core->requestSelection(_sourceDataName) : _core->requestSelection(getName());
     }
 
     void setDerived(bool derived, QString sourceData)
@@ -59,7 +59,6 @@ private:
 
     QString _sourceDataName;
 };
-
 
 class RawDataFactory : public PluginFactory
 {

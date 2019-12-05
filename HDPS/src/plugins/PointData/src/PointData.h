@@ -3,7 +3,6 @@
 #include "pointdata_export.h"
 
 #include "RawData.h"
-#include "IndexSet.h"
 
 #include "Set.h"
 #include <QString>
@@ -25,7 +24,7 @@ public:
 
     void init() override;
 
-    hdps::Set* createSet() const override;
+    hdps::DataSet* createDataSet() const override;
 
     unsigned int getNumPoints() const;
 
@@ -64,6 +63,59 @@ private:
     std::vector<QString> _dimNames;
 
     QMap<QString, QVariant> _properties;
+};
+
+// =============================================================================
+// Point Set
+// =============================================================================
+
+class POINTDATA_EXPORT Points : public hdps::DataSet
+{
+public:
+    Points(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
+    ~Points() override { }
+
+    PointData& getRawData() const
+    {
+        return dynamic_cast<PointData&>(_core->requestRawData(getDataName()));
+    }
+
+    const std::vector<float>& getData() const
+    {
+        return getRawData().getData();
+    }
+
+    void setData(const float* data, unsigned int numPoints, unsigned int numDimensions)
+    {
+        getRawData().setData(data, numPoints, numDimensions);
+    }
+
+    unsigned int getNumPoints() const
+    {
+        if (isFull()) return getRawData().getNumPoints();
+        else return indices.size();
+    }
+
+    unsigned int getNumDimensions() const
+    {
+        return getRawData().getNumDimensions();
+    }
+
+    const std::vector<QString>& getDimensionNames() const;
+
+    void setDimensionNames(const std::vector<QString>& dimNames);
+
+    // Constant subscript indexing
+    const float& operator[](unsigned int index) const;
+
+    // Subscript indexing
+    float& operator[](unsigned int index);
+
+    DataSet* copy() const override;
+
+    void createSubset() const override;
+
+    std::vector<unsigned int> indices;
 };
 
 // =============================================================================

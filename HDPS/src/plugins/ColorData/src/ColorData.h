@@ -6,6 +6,7 @@
 #include <QColor>
 #include <vector>
 
+using namespace hdps;
 using namespace hdps::plugin;
 
 // =============================================================================
@@ -22,10 +23,38 @@ public:
 
     uint count();
 
-    hdps::Set* createSet() const override;
+    hdps::DataSet* createDataSet() const override;
 
 private:
     std::vector<QColor> _colors;
+};
+
+// =============================================================================
+// Color Data Set
+// =============================================================================
+
+class Colors : public DataSet
+{
+public:
+    Colors(hdps::CoreInterface* core, QString dataName) : DataSet(core, dataName) { }
+    ~Colors() override { }
+
+    DataSet* copy() const override
+    {
+        Colors* colors = new Colors(_core, getDataName());
+        colors->setName(getName());
+        colors->indices = indices;
+        return colors;
+    }
+
+    void createSubset() const override
+    {
+        const hdps::DataSet& selection = _core->requestSelection(getDataName());
+
+        _core->createSubsetFromSelection(selection, getDataName(), "Subset");
+    }
+
+    std::vector<unsigned int> indices;
 };
 
 // =============================================================================

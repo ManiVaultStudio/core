@@ -69,8 +69,7 @@ void CsvLoader::dialogClosed(QString dataSetName, bool hasHeaders)
     }
 
     QString name = _core->addData("Points", dataSetName);
-    const hdps::IndexSet& set = _core->requestSet<hdps::IndexSet>(name);
-    PointData& points = set.getData<PointData>();
+    Points& points = _core->requestData<Points>(name);
 
     std::vector<float> data;
     int numDimensions = 1;

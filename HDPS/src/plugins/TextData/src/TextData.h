@@ -6,6 +6,7 @@
 #include <QString>
 #include <vector>
 
+using namespace hdps;
 using namespace hdps::plugin;
 
 // =============================================================================
@@ -20,10 +21,38 @@ public:
     
     void init() override;
 
-    hdps::Set* createSet() const override;
+    hdps::DataSet* createDataSet() const override;
 
 private:
     std::vector<QString> _data;
+};
+
+// =============================================================================
+// Text Data Set
+// =============================================================================
+
+class Text : public DataSet
+{
+public:
+    Text(hdps::CoreInterface* core, QString dataName) : DataSet(core, dataName) { }
+    ~Text() override { }
+
+    DataSet* copy() const override
+    {
+        Text* text = new Text(_core, getDataName());
+        text->setName(getName());
+        text->indices = indices;
+        return text;
+    }
+
+    void createSubset() const override
+    {
+        const hdps::DataSet& selection = _core->requestSelection(getDataName());
+
+        _core->createSubsetFromSelection(selection, getDataName(), "Subset");
+    }
+
+    std::vector<unsigned int> indices;
 };
 
 // =============================================================================

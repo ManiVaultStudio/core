@@ -4,19 +4,13 @@
 
 namespace hdps
 {
-    class IndexSet : public Set
+    class IndexSet : public DataSet
     {
     public:
-        IndexSet(hdps::CoreInterface* core, QString dataName) : Set(core, dataName) { }
+        IndexSet(hdps::CoreInterface* core, QString dataName) : DataSet(core, dataName) { }
         ~IndexSet() override { }
 
-        template <class Data>
-        Data& getData() const
-        {
-            return dynamic_cast<Data&>(_core->requestData(getDataName()));
-        }
-
-        Set* copy() const override;
+        DataSet* copy() const override;
 
         void createSubset() const override;
 

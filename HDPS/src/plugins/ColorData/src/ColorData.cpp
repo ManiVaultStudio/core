@@ -1,7 +1,5 @@
 #include "ColorData.h"
 
-#include "IndexSet.h"
-
 #include <QtCore>
 #include <QtDebug>
 
@@ -26,9 +24,9 @@ uint ColorData::count()
     return _colors.size();
 }
 
-hdps::Set* ColorData::createSet() const
+hdps::DataSet* ColorData::createDataSet() const
 {
-    return new hdps::IndexSet(_core, getName());
+    return new Colors(_core, getName());
 }
 
 // =============================================================================

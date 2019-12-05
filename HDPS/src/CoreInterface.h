@@ -9,7 +9,7 @@ namespace plugin
     class RawData;
 }
 
-class Set;
+class DataSet;
 
 class CoreInterface
 {
@@ -26,38 +26,40 @@ public:
      * Other data objects derived from this data object are converted to non-derived data.
      * Notifies all plug-ins of the removed data sets automatically.
      */
-    virtual void removeData(const QString dataName) = 0;
+    //virtual void removeData(const QString dataName) = 0;
 
-    virtual const QString createDerivedData(const QString kind, const QString name, const QString sourceName) = 0;
+    virtual const QString createDerivedData(const QString dataType, const QString name, const QString sourceName) = 0;
 
     /**
      * Creates a copy of the given selection set and gives it a unique name based
      * on the name given to this function. Then adds the new set to the data manager
      * and notifies all data consumers of the new set.
      */
-    virtual void createSubsetFromSelection(const Set& selection, const QString dataName, const QString newSetName) = 0;
+    virtual void createSubsetFromSelection(const DataSet& selection, const QString dataName, const QString newSetName) = 0;
 
     /**
      * Requests an instance of a data type plugin from the core which has the same
      * unique name as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    virtual plugin::RawData& requestData(const QString name) = 0;
+    virtual plugin::RawData& requestRawData(const QString name) = 0;
 
     /**
     * Request a selection from the data manager by its name.
     */
-    virtual Set& requestSelection(const QString name) = 0;
+    virtual DataSet& requestSelection(const QString name) = 0;
 
     /**
-    * Request a dataset from the core by its name.
-    */
-    virtual Set& requestSet(const QString name) = 0;
+     * Requests a dataset from the core which has the same unique name
+     * as the given parameter. If no such instance can be found a fatal
+     * error is thrown.
+     */
+    virtual DataSet& requestData(const QString name) = 0;
 
     template <class SetType>
-    SetType& requestSet(const QString name)
+    SetType& requestData(const QString name)
     {
-        return dynamic_cast<SetType&>(requestSet(name));
+        return dynamic_cast<SetType&>(requestData(name));
     }
 
     /** Notify all data consumers that a new dataset has been added to the core. */

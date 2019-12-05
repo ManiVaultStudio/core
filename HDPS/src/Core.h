@@ -60,7 +60,7 @@ public:
      * Other data objects derived from this data object are converted to non-derived data.
      * Notifies all plug-ins of the removed data sets automatically.
      */
-    void removeData(const QString dataName) override;
+    void removeData(const QString dataName);// override;
 
     const QString createDerivedData(const QString kind, const QString name, const QString sourceName) override;
 
@@ -69,24 +69,24 @@ public:
      * on the name given to this function. Then adds the new set to the data manager
      * and notifies all data consumers of the new set.
      */
-    void createSubsetFromSelection(const Set& selection, const QString dataName, const QString newSetName) override;
+    void createSubsetFromSelection(const DataSet& selection, const QString dataName, const QString newSetName) override;
 
     /**
      * Requests an instance of a data type plugin from the core which has the same
      * unique name as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    plugin::RawData& requestData(const QString name) override;
+    plugin::RawData& requestRawData(const QString name) override;
 
     /**
     * Request a dataset from the data manager by its name.
     */
-    Set& requestSet(const QString name) override;
+    DataSet& requestData(const QString name) override;
 
     /**
     * Requests the selection set belonging to the raw dataset with the given name.
     */
-    Set& requestSelection(const QString name) override;
+    DataSet& requestSelection(const QString name) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString name) override;
@@ -103,7 +103,7 @@ public:
     gui::MainWindow& gui() const;
 private:
     /** Checks if the given data consumer supports the kind data in the given set. */
-    bool supportsSet(plugin::DataConsumer* dataConsumer, QString setName);
+    bool supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName);
     /** Retrieves all data consumers from the plugin list. */
     std::vector<plugin::DataConsumer*> getDataConsumers();
 
