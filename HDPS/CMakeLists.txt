@@ -1,9 +1,12 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.12.4)
 
 set(PROJECT "HDPS")
 project(${PROJECT})
 
-set(CMAKE_CXX_STANDARD 14)
+# No /nologo please:
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "[HDPS] Be verbose!" FORCE)
+
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -244,6 +247,10 @@ add_library(${PROJECT}_Public ${LINK_TYPE}
     src/.editorconfig
     ${PUBLIC_SOURCES}
 )
+
+# Request C++17
+set_property(TARGET ${PROJECT}_Public PROPERTY CXX_STANDARD 17)
+
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
 
@@ -251,6 +258,8 @@ add_library(${PROJECT}_Private ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
 )
+# Request C++17
+set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 17)
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
 target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
@@ -264,6 +273,8 @@ add_executable(${PROJECT} MACOSX_BUNDLE
     ${UI_FILES}
     ${RESOURCE_FILES}
 )
+# Request C++17
+set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)

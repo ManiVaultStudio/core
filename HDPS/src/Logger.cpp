@@ -12,6 +12,7 @@
 #include <QtGlobal> // For qInstallMessageHandler
 
 // Standard C++ header files:
+#include <algorithm>
 #include <atomic>
 #include <cassert>
 #include <cstdint> // For uint8_t.
@@ -217,10 +218,8 @@ void MessageHandler(
     const QMessageLogContext &context,
     const QString &message)
 {
-    // Avoid recursion.
-    static std::atomic_bool isExecutingMessageHandler{ false };
-
-    if (!isExecutingMessageHandler)
+    // Avoid recursion.  // TODO Just testing C++17 support
+    if (static std::atomic_bool isExecutingMessageHandler{ false }; !isExecutingMessageHandler)
     {
         isExecutingMessageHandler = true;
 
@@ -313,10 +312,19 @@ void hdps::Logger::GetMessageRecords(std::deque<const MessageRecord*>& messageRe
 
     if (previousNumberOfMessages <= numberOfMessages)
     {
-        for (auto i = 0; i < previousNumberOfMessages; ++i)
+#if defined(__clang__) || ! defined(__GNUC__)
+        // No Gcc compile because of https://travis-ci.com/bldrvnlw/conan-hdps-core/jobs/263538709
+/*
+error: no matching function for call to ‘for_each_n(std::deque<const hdps::MessageRecord*>::const_iterator, const long unsigned int&, hdps::Logger::GetMessageRecords(std::deque<const hdps::MessageRecord*>&)::<lambda(auto:1)>)’
+*/
+        // TODO Just testing C++17 support
+        std::size_t i{};
+        std::for_each_n(messageRecordPointers.cbegin(), previousNumberOfMessages, [&i, &messageRecords](const auto messageRecordPointer)
         {
-            assert(messageRecordPointers[i] == &(messageRecords[i]));
-        }
+            assert(messageRecordPointer == &(messageRecords[i]));
+            ++i;
+        });
+#endif
     }
     else
     {

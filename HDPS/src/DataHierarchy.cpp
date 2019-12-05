@@ -7,9 +7,23 @@ namespace hdps
 {
     namespace gui
     {
+        struct AggregateStruct { int x; float f; } ;
+
+        AggregateStruct GetAggregateStruct()
+        {
+            return { 42, 3.14f };
+        }
+
         DataHierarchy::DataHierarchy(DataManager& dataManager) :
             _dataManager(dataManager)
         {
+            auto[xx, ff] = GetAggregateStruct(); // TODO C++17 structured binding.
+
+            if (xx > 42 || ff < 3.1)
+            {
+                throw std::exception{};
+            }
+
             setFixedWidth(200);
 
             // FIXME

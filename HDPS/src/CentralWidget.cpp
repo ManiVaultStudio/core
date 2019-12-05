@@ -16,3 +16,8 @@ namespace hdps
         }
     }
 }
+
+#include <algorithm>
+
+const int clampedZero = std::clamp(0, 0, 0);
+

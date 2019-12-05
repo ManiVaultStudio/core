@@ -1,6 +1,6 @@
 # CMakeLists to generate a project that has all subprojects of the plugin system in one.
 
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.12.4)
 
 set(PROJECT "HdpsAllInOne")
 

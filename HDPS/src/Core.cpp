@@ -16,6 +16,40 @@
 
 #include <QMessageBox>
 
+#ifndef __GNUC__
+
+#ifdef __clang__
+# error "__clang__ should imply __GNUC__"
+#endif
+
+/*
+No Clang compile, because of https://travis-ci.com/bldrvnlw/conan-hdps-core/jobs/263538710
+
+cd /Users/travis/.conan/data/hdps-core/0.1.0/lkeb/stable/build/9294abb7efc47eb9a928ee29d3d66b71528142ba/HDPS && /Applications/Xcode-10.3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -DHDPS_Private_EXPORTS -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MESSAGELOGCONTEXT -DQT_NETWORK_LIB -DQT_NO_DEBUG -DQT_POSITIONING_LIB -DQT_PRINTSUPPORT_LIB -DQT_QML_LIB -DQT_QUICK_LIB -DQT_WEBCHANNEL_LIB -DQT_WEBENGINECORE_LIB -DQT_WEBENGINEWIDGETS_LIB -DQT_WIDGETS_LIB -I/Users/travis/.conan/data/hdps-core/0.1.0/lkeb/stable/build/9294abb7efc47eb9a928ee29d3d66b71528142ba/HDPS -I/Users/travis/.conan/data/hdps-core/0.1.0/lkeb/stable/build/9294abb7efc47eb9a928ee29d3d66b71528142ba/core/HDPS -I/Users/travis/.conan/data/hdps-core/0.1.0/lkeb/stable/build/9294abb7efc47eb9a928ee29d3d66b71528142ba/HDPS/HDPS_Private_autogen/include -iframework /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtWidgets.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtGui.framework/Headers -isystem /Applications/Xcode-10.3.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/OpenGL.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtCore.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/./mkspecs/macx-clang -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtWebEngineWidgets.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtWebEngineCore.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtQuick.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtQml.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtNetwork.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtWebChannel.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtPositioning.framework/Headers -isystem /Users/travis/.conan/data/qt/5.12.4/lkeb/stable/package/ab922693f8b78138fd6870b7eb238585bdde51bc/lib/QtPrintSupport.framework/Headers  -O3 -DNDEBUG -isysroot /Applications/Xcode-10.3.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk -fPIC   -fPIC -std=c++1z -o CMakeFiles/HDPS_Private.dir/src/Core.cpp.o -c /Users/travis/.conan/data/hdps-core/0.1.0/lkeb/stable/build/9294abb7efc47eb9a928ee29d3d66b71528142ba/core/HDPS/src/Core.cpp
+
+/Users/travis/.conan/data/hdps-core/0.1.0/lkeb/stable/build/9294abb7efc47eb9a928ee29d3d66b71528142ba/core/HDPS/src/Core.cpp:18:10: fatal error: 'execution' file not found
+
+No GCC build because of https://travis-ci.com/bldrvnlw/conan-hdps-core/jobs/263554477 
+cd /home/conan/.conan/data/hdps-core/0.1.0/lkeb/stable/build/05b936f4a20297a72984f1cfeff9f028e5d42576/HDPS && /usr/bin/g++  -DHDPS_Private_EXPORTS -DQT_CORE_LIB -DQT_GUI_LIB -DQT_MESSAGELOGCONTEXT -DQT_NETWORK_LIB -DQT_NO_DEBUG -DQT_POSITIONING_LIB -DQT_PRINTSUPPORT_LIB -DQT_QML_LIB -DQT_QUICK_LIB -DQT_WEBCHANNEL_LIB -DQT_WEBENGINECORE_LIB -DQT_WEBENGINEWIDGETS_LIB -DQT_WIDGETS_LIB -I/home/conan/.conan/data/hdps-core/0.1.0/lkeb/stable/build/05b936f4a20297a72984f1cfeff9f028e5d42576/HDPS -I/home/conan/.conan/data/hdps-core/0.1.0/lkeb/stable/build/05b936f4a20297a72984f1cfeff9f028e5d42576/core/HDPS -I/home/conan/.conan/data/hdps-core/0.1.0/lkeb/stable/build/05b936f4a20297a72984f1cfeff9f028e5d42576/HDPS/HDPS_Private_autogen/include -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtWidgets -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtGui -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtCore -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/./mkspecs/linux-g++ -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtWebEngineWidgets -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtWebEngineCore -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtQuick -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtQml -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtNetwork -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtWebChannel -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtPositioning -isystem /home/conan/.conan/data/qt/5.12.4/lkeb/stable/package/e46c6e02f2760cd2e42160a54432cf1e7354d4ec/include/QtPrintSupport  -O3 -DNDEBUG -fPIC   -fPIC -std=c++17 -o CMakeFiles/HDPS_Private.dir/src/Core.cpp.o -c /home/conan/.conan/data/hdps-core/0.1.0/lkeb/stable/build/05b936f4a20297a72984f1cfeff9f028e5d42576/core/HDPS/src/Core.cpp
+
+In file included from /usr/include/c++/9/pstl/parallel_backend.h:14,
+
+                 from /usr/include/c++/9/pstl/algorithm_impl.h:25,
+
+                 from /usr/include/c++/9/pstl/glue_execution_defs.h:52,
+
+                 from /usr/include/c++/9/execution:32,
+
+                 from /home/conan/.conan/data/hdps-core/0.1.0/lkeb/stable/build/05b936f4a20297a72984f1cfeff9f028e5d42576/core/HDPS/src/Core.cpp:27:
+
+/usr/include/c++/9/pstl/parallel_backend_tbb.h:19:10: fatal error: tbb/blocked_range.h: No such file or directory
+
+   19 | #include <tbb/blocked_range.h>
+
+*/
+#include <execution> // TODO Just testing C++17 support
+#endif
+
 namespace hdps
 {
 
@@ -267,9 +301,9 @@ std::vector<plugin::DataConsumer*> Core::getDataConsumers()
     std::vector<plugin::DataConsumer*> dataConsumers;
     for (auto& kv : _plugins)
     {
-        for (int i = 0; i < kv.second.size(); ++i)
+        for (auto&& plugin: kv.second)
         {
-            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
+            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(plugin.get());
 
             if (dc)
                 dataConsumers.push_back(dc);
