@@ -81,13 +81,11 @@ public:
     }
 
 protected:
-    //template <class DataType>
-    //DataType& getData() const
-    //{
-    //    return dynamic_cast<DataType&>(_core->requestRawData(getDataName()));
-    //}
-
-
+    template <class DataType>
+    DataType& getRawData() const
+    {
+        return dynamic_cast<DataType&>(_core->requestRawData(getDataName()));
+    }
 
     CoreInterface* _core;
 private:
