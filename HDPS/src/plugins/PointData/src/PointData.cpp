@@ -119,24 +119,24 @@ void Points::createSubset() const
 
 const std::vector<QString>& Points::getDimensionNames() const
 {
-    return getRawData().getDimensionNames();
+    return getRawData<PointData>().getDimensionNames();
 }
 
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
 {
-    getRawData().setDimensionNames(dimNames);
+    getRawData<PointData>().setDimensionNames(dimNames);
 }
 
 // Constant subscript indexing
 const float& Points::operator[](unsigned int index) const
 {
-    return getRawData()[index];
+    return getRawData<PointData>()[index];
 }
 
 // Subscript indexing
 float& Points::operator[](unsigned int index)
 {
-    return getRawData()[index];
+    return getRawData<PointData>()[index];
 }
 
 // =============================================================================

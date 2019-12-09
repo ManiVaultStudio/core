@@ -58,19 +58,14 @@ public:
     Clusters(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
     ~Clusters() override { }
 
-    ClusterData& getRawData() const
-    {
-        return dynamic_cast<ClusterData&>(_core->requestRawData(getDataName()));
-    }
-
     std::vector<Cluster>& getClusters()
     {
-        return getRawData().getClusters();
+        return getRawData<ClusterData>().getClusters();
     }
 
     void addCluster(Cluster& cluster)
     {
-        getRawData().addCluster(cluster);
+        getRawData<ClusterData>().addCluster(cluster);
     }
 
     DataSet* copy() const override
@@ -90,7 +85,6 @@ public:
 
     std::vector<unsigned int> indices;
 };
-
 
 // =============================================================================
 // Factory

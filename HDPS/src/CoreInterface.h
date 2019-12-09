@@ -4,6 +4,7 @@
 
 namespace hdps
 {
+    class DataSet;
 namespace plugin
 {
     class RawData;
@@ -38,13 +39,6 @@ public:
     virtual void createSubsetFromSelection(const DataSet& selection, const QString dataName, const QString newSetName) = 0;
 
     /**
-     * Requests an instance of a data type plugin from the core which has the same
-     * unique name as the given parameter. If no such instance can be found a fatal
-     * error is thrown.
-     */
-    virtual plugin::RawData& requestRawData(const QString name) = 0;
-
-    /**
     * Request a selection from the data manager by its name.
     */
     virtual DataSet& requestSelection(const QString name) = 0;
@@ -70,6 +64,18 @@ public:
     virtual void notifyDataRemoved(const QString name) = 0;
     /** Notify all data consumers that a selection has changed. */
     virtual void notifySelectionChanged(const QString dataName) = 0;
+
+protected:
+
+    /**
+     * Requests an instance of a data type plugin from the core which has the same
+     * unique name as the given parameter. If no such instance can be found a fatal
+     * error is thrown.
+     */
+    virtual plugin::RawData& requestRawData(const QString name) = 0;
+
+    friend class plugin::RawData;
+    friend class DataSet;
 };
 
 } // namespace hdps

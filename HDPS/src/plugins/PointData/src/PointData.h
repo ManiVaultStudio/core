@@ -75,30 +75,25 @@ public:
     Points(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
     ~Points() override { }
 
-    PointData& getRawData() const
-    {
-        return dynamic_cast<PointData&>(_core->requestRawData(getDataName()));
-    }
-
     const std::vector<float>& getData() const
     {
-        return getRawData().getData();
+        return getRawData<PointData>().getData();
     }
 
     void setData(const float* data, unsigned int numPoints, unsigned int numDimensions)
     {
-        getRawData().setData(data, numPoints, numDimensions);
+        getRawData<PointData>().setData(data, numPoints, numDimensions);
     }
 
     unsigned int getNumPoints() const
     {
-        if (isFull()) return getRawData().getNumPoints();
+        if (isFull()) return getRawData<PointData>().getNumPoints();
         else return indices.size();
     }
 
     unsigned int getNumDimensions() const
     {
-        return getRawData().getNumDimensions();
+        return getRawData<PointData>().getNumDimensions();
     }
 
     const std::vector<QString>& getDimensionNames() const;
