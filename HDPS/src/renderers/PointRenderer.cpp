@@ -116,6 +116,7 @@ namespace hdps
                 if (scalar > _scalarHigh) _scalarHigh = scalar;
             }
             _scalarRange = _scalarHigh - _scalarLow;
+            if (_scalarRange < 1e-07) _scalarRange = 1e-07;
 
             _scalars = scalars;
 
