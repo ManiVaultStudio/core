@@ -314,6 +314,7 @@ if(APPLE)
         COMMAND "${MACDEPLOYQT_EXECUTABLE}"
             "$<TARGET_FILE_DIR:${PROJECT}>/../.."
             -always-overwrite
+            -no-plugins
         COMMENT "Running macdeployqt..."
         #copy app bundle (this includes the libraries such as HDPS_Public in ${INSTALL_DIR}/$<CONFIGURATION>/${PROJECT}.app/Contents/Frameworks)
         COMMAND "${CMAKE_COMMAND}" -E copy_directory
