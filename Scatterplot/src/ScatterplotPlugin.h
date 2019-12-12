@@ -42,11 +42,12 @@ public:
     void dataChanged(const QString name) Q_DECL_OVERRIDE;
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
-    QStringList supportedDataKinds() Q_DECL_OVERRIDE;
+    DataTypes supportedDataTypes() const Q_DECL_OVERRIDE;
     void onSelecting(hdps::Selection selection) override;
     void onSelection(hdps::Selection selection) override;
 
     ScatterplotWidget* _scatterPlotWidget;
+    hdps::DataTypes supportedColorTypes;
 
 public slots:
     void onDataInput(QString dataSetName);

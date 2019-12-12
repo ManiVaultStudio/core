@@ -10,19 +10,13 @@
 
 namespace hdps
 {
-    enum TypeOfData
-    {
-        SET, RAW_DATA
-    };
-
     class DataHierarchyItem
     {
     public:
-        explicit DataHierarchyItem(QString setName, QString kind, DataHierarchyItem* parent = nullptr);
+        explicit DataHierarchyItem(QString setName, DataType dataType, DataHierarchyItem* parent = nullptr);
 
         ~DataHierarchyItem();
 
-        void setTypeOfData(TypeOfData typeOfData);
         void addChild(DataHierarchyItem* item);
 
         inline void setIcon(const QIcon &aicon)
@@ -52,8 +46,8 @@ namespace hdps
         /** Name of data set */
         QString _setName;
 
-        /** Kind of raw data linked to by set */
-        QString _dataKind;
+        /** Type of raw data linked to by set */
+        DataType _dataType;
 
         /** Stored icon for this item */
         QIcon _icon;

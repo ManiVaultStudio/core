@@ -7,9 +7,9 @@ namespace hdps
 {
     namespace gui
     {
-        DataSlot::DataSlot(QStringList supportedKinds)
+        DataSlot::DataSlot(hdps::DataTypes supportedTypes)
         {
-            _supportedKinds = supportedKinds;
+            _supportedTypes = supportedTypes;
 
             setAcceptDrops(true);
 
@@ -38,8 +38,9 @@ namespace hdps
             if (tokens.size() < 2)
                 return;
 
-            QString kind = tokens[1];
-            if (_supportedKinds.contains(kind))
+            DataType dataType = DataType(tokens[1]);
+
+            if (_supportedTypes.contains(dataType))
             {
                 emit onDataInput(tokens[0]);
 

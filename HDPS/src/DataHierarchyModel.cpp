@@ -7,19 +7,19 @@ namespace hdps
     /////////////////////////
     // Data Hierarchy Item //
     /////////////////////////
-    DataHierarchyItem::DataHierarchyItem(QString setName, QString kind, DataHierarchyItem* parent) :
+    DataHierarchyItem::DataHierarchyItem(QString setName, DataType dataType, DataHierarchyItem* parent) :
         _setName(setName),
-        _dataKind(kind),
+        _dataType(dataType),
         _parentItem(parent)
     {
-        if (kind == "Points")
-            setIcon(QIcon(":/icons/DataIcon.png"));
-        if (kind == "Text")
-            setIcon(QIcon(":/icons/TextIcon.png"));
-        if (kind == "Color")
-            setIcon(QIcon(":/icons/ColorIcon.png"));
-        if (kind == "Cluster")
-            setIcon(QIcon(":/icons/ClusterIcon.png"));
+        //if (dataType == "Points")
+        //    setIcon(QIcon(":/icons/DataIcon.png"));
+        //if (kind == "Text")
+        //    setIcon(QIcon(":/icons/TextIcon.png"));
+        //if (kind == "Color")
+        //    setIcon(QIcon(":/icons/ColorIcon.png"));
+        //if (kind == "Cluster")
+        //    setIcon(QIcon(":/icons/ClusterIcon.png"));
     }
 
     DataHierarchyItem::~DataHierarchyItem()
@@ -69,7 +69,7 @@ namespace hdps
 
     QString DataHierarchyItem::serialize() const
     {
-        return _setName + "\n" + _dataKind;
+        return _setName + "\n" + _dataType;
     }
 
     //////////////////////////
@@ -79,7 +79,7 @@ namespace hdps
         QAbstractItemModel(parent),
         _dataManager(dataManager)
     {
-        _rootItem = new DataHierarchyItem("Data Hierarchy", "None");
+        _rootItem = new DataHierarchyItem("Data Hierarchy", DataType("Root"));
         setupModelData(dataManager, _rootItem);
     }
 

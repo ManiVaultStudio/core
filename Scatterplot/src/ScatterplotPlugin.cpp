@@ -3,6 +3,7 @@
 #include "ScatterplotSettings.h"
 #include "PointData.h"
 #include "ClusterData.h"
+#include "ColorData.h"
 
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
@@ -28,7 +29,10 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
-    _dataSlot = new DataSlot(QStringList("Points"));
+    _dataSlot = new DataSlot(supportedDataTypes());
+    supportedColorTypes.append(PointType);
+    supportedColorTypes.append(ClusterType);
+    supportedColorTypes.append(ColorType);
 
     _scatterPlotWidget = new ScatterplotWidget();
     _scatterPlotWidget->setAlpha(0.5f);
@@ -79,11 +83,11 @@ void ScatterplotPlugin::selectionChanged(const QString dataName)
         updateSelection();
 }
 
-QStringList ScatterplotPlugin::supportedDataKinds()
+DataTypes ScatterplotPlugin::supportedDataTypes() const
 {
-    QStringList supportedKinds;
-    supportedKinds << "Points";
-    return supportedKinds;
+    DataTypes supportedTypes;
+    supportedTypes.append(PointType);
+    return supportedTypes;
 }
 
 void ScatterplotPlugin::subsetCreated()
@@ -117,14 +121,6 @@ void ScatterplotPlugin::cDimPicked(int index)
 
 void ScatterplotPlugin::onDataInput(QString dataSetName)
 {
-    // Move this code to supportsSet in DataSlot
-    const DataSet& dataSet = _core->requestData(dataSetName);
-
-    bool supported = supportedDataKinds().contains(dataSet.getDataType());
-
-    if (!supported)
-        return;
-
     _currentDataSet = dataSetName;
 
     setWindowTitle(_currentDataSet);
@@ -149,9 +145,9 @@ void ScatterplotPlugin::onColorDataInput(QString dataSetName)
 {
     DataSet& dataSet = _core->requestData(dataSetName);
 
-    QString dataType = dataSet.getDataType();
+    DataType dataType = dataSet.getDataType();
 
-    if (dataType == "Points")
+    if (dataType == PointType)
     {
         Points& points = static_cast<Points&>(dataSet);
 
@@ -167,7 +163,7 @@ void ScatterplotPlugin::onColorDataInput(QString dataSetName)
         _scatterPlotWidget->setScalarEffect(PointEffect::Color);
         updateData();
     }
-    if (dataType == "Cluster")
+    if (dataType == ClusterType)
     {
         Clusters& clusters = static_cast<Clusters&>(dataSet);
         

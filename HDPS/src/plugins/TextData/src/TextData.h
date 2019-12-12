@@ -10,13 +10,19 @@ using namespace hdps;
 using namespace hdps::plugin;
 
 // =============================================================================
-// Data
+// Data Type
+// =============================================================================
+
+const hdps::DataType TextType = hdps::DataType(QString("Text"));
+
+// =============================================================================
+// Raw Data
 // =============================================================================
 
 class TextData : public RawData
 {
 public:
-    TextData() : RawData("Text") { }
+    TextData() : RawData("Text", TextType) { }
     ~TextData(void) override;
     
     void init() override;

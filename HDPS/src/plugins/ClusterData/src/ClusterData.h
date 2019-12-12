@@ -8,9 +8,14 @@
 
 #include <vector>
 
+// =============================================================================
+// Data Type
+// =============================================================================
+
+const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
 
 // =============================================================================
-// View
+// Raw Data
 // =============================================================================
 
 struct Cluster
@@ -27,7 +32,7 @@ struct Cluster
 class ClusterData : public hdps::RawData
 {
 public:
-    ClusterData() : RawData("Cluster") { }
+    ClusterData() : hdps::RawData("Clusters", ClusterType) { }
     ~ClusterData(void) override;
     
     void init() override;

@@ -6,11 +6,14 @@
 #include <QColor>
 #include <vector>
 
-using namespace hdps;
-using namespace hdps::plugin;
+// =============================================================================
+// Data Type
+// =============================================================================
+
+const hdps::DataType ColorType = hdps::DataType(QString("Colors"));
 
 // =============================================================================
-// Data
+// Raw Data
 // =============================================================================
 
 class ColorData : public hdps::RawData

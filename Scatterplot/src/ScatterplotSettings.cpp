@@ -112,7 +112,7 @@ void ColorDimensionPicker::setScalarDimensions(unsigned int numDimensions, const
 }
 
 ColorDropSlot::ColorDropSlot(const ScatterplotPlugin& plugin) :
-    _loadColorData(QStringList({ "Points", "Color", "Cluster" }))
+    _loadColorData(plugin.supportedColorTypes)
 {
     QLabel* dropLabel = new QLabel();
     dropLabel->setFixedSize(20, 20);
