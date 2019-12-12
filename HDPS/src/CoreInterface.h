@@ -5,12 +5,7 @@
 namespace hdps
 {
     class DataSet;
-namespace plugin
-{
     class RawData;
-}
-
-class DataSet;
 
 class CoreInterface
 {
@@ -72,9 +67,9 @@ protected:
      * unique name as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    virtual plugin::RawData& requestRawData(const QString name) = 0;
+    virtual RawData& requestRawData(const QString name) = 0;
 
-    friend class plugin::RawData;
+    friend class RawData;
     friend class DataSet;
 };
 

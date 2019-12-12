@@ -7,9 +7,9 @@
 namespace hdps
 {
 
-void DataManager::addRawData(plugin::RawData* rawData)
+void DataManager::addRawData(RawData* rawData)
 {
-    _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
+    _rawDataMap.emplace(rawData->getName(), std::unique_ptr<RawData>(rawData));
 }
 
 QString DataManager::addSet(QString requestedName, DataSet* set)
@@ -32,7 +32,7 @@ QStringList DataManager::removeRawData(QString name)
     // Convert any derived data referring to this data to non-derived data
     for (auto& pair : _rawDataMap)
     {
-        plugin::RawData& rawData = *pair.second;
+        RawData& rawData = *pair.second;
 
         // Set as non-derived data
         if (rawData.isDerivedData() && rawData.getSourceDataName() == name)
@@ -68,7 +68,7 @@ QStringList DataManager::removeRawData(QString name)
     return removedSets;
 }
 
-plugin::RawData& DataManager::getRawData(QString name)
+RawData& DataManager::getRawData(QString name)
 {
     if (_rawDataMap.find(name) == _rawDataMap.end())
         throw DataNotFoundException(name);
@@ -86,7 +86,7 @@ DataSet& DataManager::getSet(QString name)
 
 DataSet& DataManager::getSelection(QString name)
 {
-    plugin::RawData& rawData = getRawData(name);
+    RawData& rawData = getRawData(name);
     if (rawData.isDerivedData())
     {
         return getSelection(rawData.getSourceData().getName());

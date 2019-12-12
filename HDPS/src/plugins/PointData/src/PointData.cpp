@@ -143,7 +143,7 @@ float& Points::operator[](unsigned int index)
 // Factory
 // =============================================================================
 
-RawData* PointDataFactory::produce()
+hdps::RawData* PointDataFactory::produce()
 {
     return new PointData();
 }

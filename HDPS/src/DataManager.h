@@ -75,7 +75,7 @@ class DataManager : public QObject
 {
     Q_OBJECT
 public:
-    void addRawData(plugin::RawData* rawData);
+    void addRawData(RawData* rawData);
     QString addSet(QString requestedName, DataSet* set);
     void addSelection(QString dataName, DataSet* selection);
 
@@ -85,7 +85,7 @@ public:
      */
     QStringList removeRawData(QString name);
 
-    plugin::RawData& getRawData(QString name);
+    RawData& getRawData(QString name);
     DataSet& getSet(QString name);
     DataSet& getSelection(QString name);
     const std::unordered_map<QString, std::unique_ptr<DataSet>>& allSets() const;
@@ -106,7 +106,7 @@ private:
      * Stores all raw data in the system. Raw data is stored by the name
      * retrieved from their Plugin::getName() function.
      */
-    std::unordered_map<QString, std::unique_ptr<plugin::RawData>> _rawDataMap;
+    std::unordered_map<QString, std::unique_ptr<RawData>> _rawDataMap;
 
     /**
      * Stores all data sets in the system. Data sets are stored by the name

@@ -76,7 +76,7 @@ public:
      * unique name as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    plugin::RawData& requestRawData(const QString name) override;
+    RawData& requestRawData(const QString name) override;
 
     /**
     * Request a dataset from the data manager by its name.

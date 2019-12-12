@@ -89,7 +89,7 @@ protected:
 
     CoreInterface* _core;
 private:
-    std::unique_ptr<plugin::RawData> _rawData;
+    std::unique_ptr<RawData> _rawData;
 
     QString _name;
     QString _dataName;

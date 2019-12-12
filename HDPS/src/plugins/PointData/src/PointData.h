@@ -16,7 +16,7 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class POINTDATA_EXPORT PointData : public RawData
+class POINTDATA_EXPORT PointData : public hdps::RawData
 {
 public:
     PointData() : RawData("Points") { }
@@ -128,5 +128,5 @@ public:
     PointDataFactory(void) {}
     ~PointDataFactory(void) override {}
 
-    RawData* produce() override;
+    hdps::RawData* produce() override;
 };
