@@ -20,6 +20,9 @@ Macos | x86_64 | clang 10
 
 On success the binary and include package is available at [hdps-core in the LKEB Artifactory database](http://cytosplore.lumc.nl:8081/artifactory/webapp/#/artifacts/browse/tree/General/conan-local/bvanlew/hdps-core)
 
+# Plugin State Table
+See the current state of available plugins at: https://github.com/hdps/PublicWiki/wiki#plugin-state-table
+
 # Building
 ### Requirements
 * Git (https://git-scm.com/)
