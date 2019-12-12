@@ -13,13 +13,19 @@
 using namespace hdps::plugin;
 
 // =============================================================================
-// View
+// Data Type
+// =============================================================================
+
+const hdps::DataType PointType = hdps::DataType(QString("Points"));
+
+// =============================================================================
+// Raw Data
 // =============================================================================
 
 class POINTDATA_EXPORT PointData : public hdps::RawData
 {
 public:
-    PointData() : RawData("Points") { }
+    PointData() : RawData("Points", PointType) { }
     ~PointData(void) override;
 
     void init() override;

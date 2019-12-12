@@ -14,7 +14,15 @@ namespace hdps
 class DataSet
 {
 public:
-    DataSet(CoreInterface* core, QString dataName) : _core(core), _dataName(dataName), _all(false), _rawData(nullptr) {}
+    DataSet(CoreInterface* core, QString dataName) :
+        _core(core),
+        _dataName(dataName),
+        _all(false),
+        _rawData(nullptr)
+    {
+        
+    }
+
     virtual ~DataSet() {}
 
     virtual DataSet* copy() const = 0;
@@ -46,11 +54,18 @@ public:
         return _derived;
     }
 
-    QString getDataType() const
+    /**
+     * Returns the data type of the raw data associated with this dataset.
+     */
+    DataType getDataType() const
     {
-        return _core->requestRawData(getDataName()).getKind();
+        return _core->requestRawData(getDataName()).getDataType();
     }
 
+    /**
+     * If the given set is derived from another set, then calls this function on the other set.
+     * If the given set is not derived from another set, then returns the given set.
+     */
     template <class T>
     static T& getSourceData(T& set)
     {

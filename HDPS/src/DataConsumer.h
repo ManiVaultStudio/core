@@ -2,10 +2,12 @@
 
 #include "RawData.h"
 
-#include <QStringList>
+#include <QVector>
 
 namespace hdps
 {
+    using DataTypes = QVector<DataType>;
+
 namespace plugin
 {
 
@@ -35,9 +37,9 @@ public:
     virtual void selectionChanged(const QString dataName) = 0;
 
     /**
-     * Returns a list of kinds of data that this data consumer can process.
+     * Returns a list of types of data that this data consumer can process.
      */
-    virtual QStringList supportedDataKinds() = 0;
+    virtual DataTypes supportedDataTypes() const = 0;
 };
 
 } // namespace plugin

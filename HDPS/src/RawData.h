@@ -2,6 +2,8 @@
 
 #include "PluginFactory.h"
 
+#include <QString>
+
 namespace hdps {
     class DataSet;
 

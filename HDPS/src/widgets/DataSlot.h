@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../DataConsumer.h"
+
 #include <QWidget>
 #include <QDragEnterEvent>
 #include <QDropEvent>
@@ -16,7 +18,7 @@ namespace hdps
         {
             Q_OBJECT
         public:
-            DataSlot(QStringList supportedKinds);
+            DataSlot(hdps::DataTypes supportedTypes);
             
             void addWidget(QWidget* widget);
 
@@ -29,7 +31,7 @@ namespace hdps
         private:
             QHBoxLayout* _layout;
 
-            QStringList _supportedKinds;
+            hdps::DataTypes _supportedTypes;
         };
     }
 }
