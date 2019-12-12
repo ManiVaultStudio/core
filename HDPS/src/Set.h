@@ -97,7 +97,9 @@ protected:
     template <class DataType>
     DataType& getRawData() const
     {
-        return dynamic_cast<DataType&>(_core->requestRawData(getDataName()));
+        if (_rawData == nullptr)
+            _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getDataName()));
+        return *static_cast<DataType*>(_rawData);
     }
 
     /**
@@ -110,7 +112,7 @@ protected:
 
     CoreInterface* _core;
 private:
-    std::unique_ptr<RawData> _rawData;
+    mutable RawData* _rawData;
 
     QString _name;
     QString _dataName;
