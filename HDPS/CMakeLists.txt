@@ -14,9 +14,9 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
-set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
-set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
-set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
+set(MACOSX_BUNDLE_BUNDLE_VERSION "0.1.0")
+set(MACOSX_BUNDLE_LONG_VERSION_STRING "0.1.0")
+set(MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1.0")
 set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2018. All rights reserved.")
 set(MACOSX_BUNDLE_GUI_IDENTIFIER "nl.tudelft.graphics.hdps")
 set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
@@ -257,12 +257,21 @@ target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
 
+if (APPLE)
+    set( FRAMEWORKS_FILES ${FRAMEWORKS_FILES}
+        "$<TARGET_FILE:${PROJECT}_Public>"
+        "$<TARGET_FILE:${PROJECT}_Private>"
+    )
+    set_source_files_properties(${FRAMEWORKS_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+endif (APPLE)
+
 add_executable(${PROJECT} MACOSX_BUNDLE
     src/.editorconfig
     ${MAIN_SOURCES}
     ${UI_HEADERS}
     ${UI_FILES}
     ${RESOURCE_FILES}
+    ${FRAMEWORKS_FILES}
 )
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
@@ -283,12 +292,6 @@ if(MSVC)
 endif(MSVC)
 
 #copy after build
-# library
-add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:${PROJECT}_Public>"
-    "${INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_FILE_NAME:${PROJECT}_Public>"
-)
 
 #headers
 foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
@@ -300,12 +303,37 @@ foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
     )
 endforeach(PUBLIC_HEADER)
 
-#executable
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:${PROJECT}>"
-    "${INSTALL_DIR}/$<CONFIGURATION>/$<TARGET_FILE_NAME:${PROJECT}>"
-)
+if(APPLE)
+    # Retrieve the absolute path to qmake and then use that path to find qts macdeply binaries
+    get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
+    
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        #use macdeply qt to add libraries to app bundle
+        COMMAND "${MACDEPLOYQT_EXECUTABLE}"
+            "$<TARGET_FILE_DIR:${PROJECT}>/../.."
+            -always-overwrite
+        COMMENT "Running macdeployqt..."
+        #copy app bundle (this includes the libraries such as HDPS_Public in ${INSTALL_DIR}/$<CONFIGURATION>/${PROJECT}.app/Contents/Frameworks)
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory
+        "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>/${PROJECT}.app"
+        "${INSTALL_DIR}/$<CONFIGURATION>/${PROJECT}.app")
+else(APPLE)
+    # library
+    add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "$<TARGET_FILE:${PROJECT}_Public>"
+        "${INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_FILE_NAME:${PROJECT}_Public>"
+    )
+
+    #executable
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "$<TARGET_FILE:${PROJECT}>"
+        "${INSTALL_DIR}/$<CONFIGURATION>/$<TARGET_FILE_NAME:${PROJECT}>"
+    )
+endif(APPLE)
 
 # Point Data
 add_subdirectory(src/plugins/PointData)
