@@ -113,7 +113,7 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     DataSet* selection = rawData.createDataSet();
 
     // Set the properties of the new sets
-    fullSet->setAll();
+    fullSet->setAll(true);
 
     // Add them to the data manager
     QString setName = _dataManager->addSet(nameRequest, fullSet);
@@ -149,7 +149,7 @@ const QString Core::createDerivedData(const QString kind, const QString nameRequ
     fullSet->_derived = true;
 
     // Set properties of the new set
-    fullSet->setAll();
+    fullSet->setAll(true);
     
     // Add them to the data manager
     QString setName = _dataManager->addSet(nameRequest, fullSet);
@@ -262,7 +262,7 @@ bool Core::supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName)
     const hdps::DataSet& set = requestData(setName);
     const RawData& rawData = requestRawData(set.getDataName());
 
-    return dataConsumer->supportedDataKinds().contains(rawData.getKind());
+    return dataConsumer->supportedDataTypes().contains(rawData.getDataType());
 }
 
 /** Retrieves all data consumers from the plug-in list. */

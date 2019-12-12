@@ -34,19 +34,17 @@ public:
         return _name;
     }
 
-    bool isFull() const
-    {
-        return _all;
-    }
-
     void setName(QString name)
     {
         _name = name;
     }
 
-    void setAll()
+    /**
+     * Returns true if this set represents the full data and false if it's a subset.
+     */
+    bool isFull() const
     {
-        _all = true;
+        return _all;
     }
 
     bool isDerivedData() const
@@ -100,6 +98,14 @@ protected:
     DataType& getRawData() const
     {
         return dynamic_cast<DataType&>(_core->requestRawData(getDataName()));
+    }
+
+    /**
+     * Set whether this set represents all the data or only a subset
+     */
+    void setAll(bool all)
+    {
+        _all = all;
     }
 
     CoreInterface* _core;
