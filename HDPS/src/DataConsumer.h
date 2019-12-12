@@ -2,11 +2,11 @@
 
 #include "RawData.h"
 
-#include <QVector>
+#include <QList>
 
 namespace hdps
 {
-    using DataTypes = QVector<DataType>;
+    using DataTypes = QList<DataType>;
 
 namespace plugin
 {

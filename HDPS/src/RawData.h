@@ -10,6 +10,8 @@ namespace hdps {
     class DataType
     {
     public:
+        DataType() = delete;
+
         DataType(QString type) :
             _type(type)
         { }
