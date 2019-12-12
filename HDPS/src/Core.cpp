@@ -48,7 +48,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
     switch (plugin->getType())
     {
         // If the plugin is RawData, then add it to the data manager
-        case plugin::Type::DATA: _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin)); break;
+        case plugin::Type::DATA: _dataManager->addRawData(dynamic_cast<RawData*>(plugin)); break;
 
         // If it is a view plugin then it should be added to the main window
         case plugin::Type::VIEW: _mainWindow.addView(dynamic_cast<plugin::ViewPlugin*>(plugin)); // fallthrough
@@ -106,7 +106,7 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    const plugin::RawData& rawData = requestRawData(rawDataName);
+    const RawData& rawData = requestRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
     DataSet* fullSet = rawData.createDataSet();
@@ -139,7 +139,7 @@ const QString Core::createDerivedData(const QString kind, const QString nameRequ
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(kind);
     // Request it from the core
-    plugin::RawData& derivedData = requestRawData(pluginName);
+    RawData& derivedData = requestRawData(pluginName);
 
     derivedData.setDerived(true, sourceSet.getDataName());
 
@@ -169,7 +169,7 @@ void Core::createSubsetFromSelection(const DataSet& selection, const QString dat
     notifyDataAdded(setName);
 }
 
-plugin::RawData& Core::requestRawData(const QString name)
+RawData& Core::requestRawData(const QString name)
 {
     try
     {
@@ -260,7 +260,7 @@ gui::MainWindow& Core::gui() const {
 bool Core::supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName)
 {
     const hdps::DataSet& set = requestData(setName);
-    const plugin::RawData& rawData = requestRawData(set.getDataName());
+    const RawData& rawData = requestRawData(set.getDataName());
 
     return dataConsumer->supportedDataKinds().contains(rawData.getKind());
 }

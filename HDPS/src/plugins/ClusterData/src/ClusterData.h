@@ -8,7 +8,6 @@
 
 #include <vector>
 
-using namespace hdps::plugin;
 
 // =============================================================================
 // View
@@ -25,7 +24,7 @@ struct Cluster
     std::vector<float> _stddev;
 };
 
-class ClusterData : public RawData
+class ClusterData : public hdps::RawData
 {
 public:
     ClusterData() : RawData("Cluster") { }
@@ -90,7 +89,7 @@ public:
 // Factory
 // =============================================================================
 
-class ClusterDataFactory : public RawDataFactory
+class ClusterDataFactory : public hdps::plugin::RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
@@ -101,5 +100,5 @@ public:
     ClusterDataFactory(void) {}
     ~ClusterDataFactory(void) override {}
     
-    RawData* produce() override;
+    hdps::RawData* produce() override;
 };

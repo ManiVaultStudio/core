@@ -28,7 +28,7 @@ hdps::DataSet* ClusterData::createDataSet() const
 // Factory
 // =============================================================================
 
-RawData* ClusterDataFactory::produce()
+hdps::RawData* ClusterDataFactory::produce()
 {
     return new ClusterData();
 }

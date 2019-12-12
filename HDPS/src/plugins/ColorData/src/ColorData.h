@@ -13,10 +13,10 @@ using namespace hdps::plugin;
 // Data
 // =============================================================================
 
-class ColorData : public RawData
+class ColorData : public hdps::RawData
 {
 public:
-    ColorData() : RawData("Color") { }
+    ColorData() : hdps::RawData("Colors", ColorType) { }
     ~ColorData(void) override;
     
     void init() override;
@@ -33,7 +33,7 @@ private:
 // Color Data Set
 // =============================================================================
 
-class Colors : public DataSet
+class Colors : public hdps::DataSet
 {
 public:
     Colors(hdps::CoreInterface* core, QString dataName) : DataSet(core, dataName) { }
@@ -61,7 +61,7 @@ public:
 // Factory
 // =============================================================================
 
-class ColorDataFactory : public RawDataFactory
+class ColorDataFactory : public hdps::plugin::RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
@@ -72,5 +72,5 @@ public:
     ColorDataFactory(void) {}
     ~ColorDataFactory(void) override {}
     
-    RawData* produce() override;
+    hdps::RawData* produce() override;
 };

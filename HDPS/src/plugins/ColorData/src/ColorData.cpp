@@ -33,7 +33,7 @@ hdps::DataSet* ColorData::createDataSet() const
 // Factory
 // =============================================================================
 
-RawData* ColorDataFactory::produce()
+hdps::RawData* ColorDataFactory::produce()
 {
     return new ColorData();
 }
