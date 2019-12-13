@@ -271,7 +271,7 @@ add_executable(${PROJECT} MACOSX_BUNDLE
     ${UI_HEADERS}
     ${UI_FILES}
     ${RESOURCE_FILES}
-    ${FRAMEWORKS_FILES}
+    #${FRAMEWORKS_FILES}
 )
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
