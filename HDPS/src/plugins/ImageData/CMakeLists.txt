@@ -41,10 +41,19 @@ file(GLOB EXPORT_HEADER_FILE_NAME RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_C
 
 target_compile_features(${PROJECT} PRIVATE cxx_std_17)
 
+if(MSVC)
+    set(LIB_LINK_SUFFIX ".lib") 
+else()
+    set(LIB_LINK_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif(MSVC)
+
+set(HDPS_LINK_LIBRARY "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
+set(POINTDATA_LINK_LIBRARY "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_LINK_SUFFIX}") 
+
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
-target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/HDPS_Public.lib")
-target_link_libraries(${PROJECT} "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/PointData.lib")
+target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
+target_link_libraries(${PROJECT} "${POINTDATA_LINK_LIBRARY}")
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
