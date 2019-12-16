@@ -318,3 +318,6 @@ add_subdirectory(src/plugins/TextData)
 
 # Cluster Data
 add_subdirectory(src/plugins/ClusterData)
+
+# Image Data
+add_subdirectory(src/plugins/ImageData)
