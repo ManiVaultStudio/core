@@ -12,8 +12,6 @@
 
 #include <vector>
 
-using namespace hdps::plugin;
-
 class Points;
 
 const hdps::DataType ImageType = hdps::DataType(QString("Images"));
