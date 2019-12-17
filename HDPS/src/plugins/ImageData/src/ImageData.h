@@ -66,7 +66,7 @@ private:
     Points*                 _points;
 };
 
-class ImageDataFactory : public RawDataFactory
+class ImageDataFactory : public hdps::plugin::RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
@@ -74,8 +74,8 @@ class ImageDataFactory : public RawDataFactory
                       FILE  "ImageData.json")
     
 public:
-    ImageDataFactory(void) {}
-    ~ImageDataFactory(void) override {}
+    ImageDataFactory() {}
+    ~ImageDataFactory() override {}
     
     hdps::RawData* produce() override;
 };
