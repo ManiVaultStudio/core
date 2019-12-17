@@ -18,7 +18,6 @@ endif(MSVC)
 set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
 
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
-find_package(OpenMP)
 
 file(GLOB H src/*.h)
 file(GLOB CPP src/*.cpp)
