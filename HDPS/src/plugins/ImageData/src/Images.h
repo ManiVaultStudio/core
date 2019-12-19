@@ -22,7 +22,6 @@ class IMAGEDATA_EXPORT Images : public hdps::DataSet
 {
 public:
     Images(hdps::CoreInterface* core, QString dataName);
-    ~Images() override { }
 
     virtual void createSubset() const override;
     
