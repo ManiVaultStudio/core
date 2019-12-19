@@ -20,7 +20,6 @@ class IMAGEDATA_EXPORT ImageData : public hdps::RawData
 {
 public:
     ImageData();
-    ~ImageData() override;
 
     void init() override;
 
