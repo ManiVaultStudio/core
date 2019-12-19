@@ -6,7 +6,6 @@
 #include <QInputDialog >
 
 #include <set>
-#include <execution>
 
 #include "Timer.h"
 
@@ -167,69 +166,63 @@ std::shared_ptr<QImage> Images::sequenceImage(const std::vector<std::uint32_t>& 
 
     imageData.resize(noPixels() * Images::noChannelsPerPixel());
 
-    std::vector<std::int32_t> yRange(height);
-    std::iota(std::begin(yRange), std::end(yRange), 0);
+    for (std::int32_t y = 0; y < height; y++)
+    {
+        for (std::int32_t x = 0; x < width; x++)
+        {
+            const auto imagePixelId = y * width + x;
+            const auto imageDataIdStart = imagePixelId * Images::noChannelsPerPixel();
 
-    std::for_each(
-            std::execution::par,
-            std::begin(yRange),
-            std::end(yRange),
-            [&](auto& y) {
-                for (std::int32_t x = 0; x < width; x++)
+            switch (_imageData->noComponents())
+            {
+                case 1:
                 {
-                    const auto imagePixelId     = y * width + x;
-                    const auto imageDataIdStart = imagePixelId * Images::noChannelsPerPixel();
+                    auto sum = 0.f;
 
-                    switch (_imageData->noComponents())
+                    for (const auto& imageId : imageIds)
                     {
-                        case 1:
-                        {
-                            auto sum = 0.f;
+                        const auto offset = imageId * noElementsPerImage;
+                        const auto pointDataId = offset + imagePixelId;
+                        const auto pointValue = _imageData->pointValue(pointDataId);
 
-                            for (const auto& imageId : imageIds)
-                            {
-                                const auto offset       = imageId * noElementsPerImage;
-                                const auto pointDataId  = offset + imagePixelId;
-                                const auto pointValue   = _imageData->pointValue(pointDataId);
-
-                                sum += pointValue;
-                            }
-                            
-                            const auto average = sum / static_cast<float>(noImages);
-
-                            for (std::uint32_t c = 0; c < 3; c++)
-                            {
-                                imageData[imageDataIdStart + c] = average;
-                            }
-
-                            break;
-                        }
-
-                        case 3:
-                        {
-                            for (std::uint32_t c = 0; c < _imageData->noComponents(); c++)
-                            {
-                                auto sum = 0.f;
-
-                                for (const auto& imageId : imageIds)
-                                {
-                                    const auto offset       = imageId * noElementsPerImage;
-                                    const auto pointDataId  = offset + imagePixelId * _imageData->noComponents() + c;
-                                    const auto pointValue   = _imageData->pointValue(pointDataId);
-
-                                    sum += pointValue;
-                                }
-
-                                imageData[imageDataIdStart + c] = sum / static_cast<float>(noImages);
-                            }
-
-                            break;
-                        }
+                        sum += pointValue;
                     }
 
-                    imageData[imageDataIdStart + (Images::noChannelsPerPixel() - 1)] = std::numeric_limits<std::uint16_t>::max();
+                    const auto average = sum / static_cast<float>(noImages);
+
+                    for (std::uint32_t c = 0; c < 3; c++)
+                    {
+                        imageData[imageDataIdStart + c] = average;
+                    }
+
+                    break;
                 }
-            });
+
+                case 3:
+                {
+                    for (std::uint32_t c = 0; c < _imageData->noComponents(); c++)
+                    {
+                        auto sum = 0.f;
+
+                        for (const auto& imageId : imageIds)
+                        {
+                            const auto offset = imageId * noElementsPerImage;
+                            const auto pointDataId = offset + imagePixelId * _imageData->noComponents() + c;
+                            const auto pointValue = _imageData->pointValue(pointDataId);
+
+                            sum += pointValue;
+                        }
+
+                        imageData[imageDataIdStart + c] = sum / static_cast<float>(noImages);
+                    }
+
+                    break;
+                }
+            }
+
+            imageData[imageDataIdStart + (Images::noChannelsPerPixel() - 1)] = std::numeric_limits<std::uint16_t>::max();
+        }
+    }
 
     auto image = std::make_shared<QImage>(width, height, QImage::Format::Format_RGBA64);
 
@@ -251,57 +244,51 @@ std::shared_ptr<QImage> Images::stackImage(const std::uint32_t& imageId)
 
     imageData.resize(noPixels() *  Images::noChannelsPerPixel());
 
-    std::vector<std::int32_t> yRange(height);
-    std::iota(std::begin(yRange), std::end(yRange), 0);
+    for (std::int32_t y = 0; y < height; y++)
+    {
+        for (std::int32_t x = 0; x < width; x++)
+        {
+            const auto imagePixelId = (y * width) + x;
+            const auto imageDataX = _roi.left() + x;
+            const auto imageDataY = _roi.top() + y;
+            const auto imageDataId = (imageDataY * _imageData->imageSize().width()) + imageDataX;
+            const auto imageDataIdStart = imagePixelId * Images::noChannelsPerPixel();
 
-    std::for_each(
-        std::execution::par,
-        std::begin(yRange),
-        std::end(yRange),
-        [&](auto& y) {
-            for (std::int32_t x = 0; x < width; x++)
+            switch (_imageData->noComponents())
             {
-                const auto imagePixelId     = (y * width) + x;
-                const auto imageDataX       = _roi.left() + x;
-                const auto imageDataY       = _roi.top() + y;
-                const auto imageDataId      = (imageDataY * _imageData->imageSize().width()) + imageDataX;
-                const auto imageDataIdStart = imagePixelId * Images::noChannelsPerPixel();
-
-                switch (_imageData->noComponents())
+                case 1:
                 {
-                    case 1:
+                    const auto pointDataId = (imageDataId * _imageData->noDimensions()) + (imageId * _imageData->noComponents());
+                    const auto pointValue = static_cast<std::uint16_t>(_imageData->pointValue(pointDataId));
+
+                    for (std::uint32_t c = 0; c < 3; c++)
                     {
-                        const auto pointDataId  = (imageDataId * _imageData->noDimensions()) + (imageId * _imageData->noComponents());
-                        const auto pointValue   = static_cast<std::uint16_t>(_imageData->pointValue(pointDataId));
-
-                        for (std::uint32_t c = 0; c < 3; c++)
-                        {
-                            imageData[imageDataIdStart + c] = pointValue;
-                        }
-
-                        break;
+                        imageData[imageDataIdStart + c] = pointValue;
                     }
 
-                    case 3:
-                    {
-                        for (std::uint32_t c = 0; c < _imageData->noComponents(); c++)
-                        {
-                            const auto pointDataId = (imageDataId *  _imageData->noDimensions()) + (imageId *  _imageData->noComponents()) + c;
-                            const auto pointValue = static_cast<std::uint16_t>(_imageData->pointValue(pointDataId));
-
-                            imageData[imageDataIdStart + c] = pointValue;
-                        }
-
-                        break;
-                    }
-
-                    default:
-                        break;
+                    break;
                 }
 
-                imageData[imageDataIdStart + (Images::noChannelsPerPixel() - 1)] = std::numeric_limits<std::uint16_t>::max();
+                case 3:
+                {
+                    for (std::uint32_t c = 0; c < _imageData->noComponents(); c++)
+                    {
+                        const auto pointDataId = (imageDataId *  _imageData->noDimensions()) + (imageId *  _imageData->noComponents()) + c;
+                        const auto pointValue = static_cast<std::uint16_t>(_imageData->pointValue(pointDataId));
+
+                        imageData[imageDataIdStart + c] = pointValue;
+                    }
+
+                    break;
+                }
+
+                default:
+                    break;
             }
-        });
+
+            imageData[imageDataIdStart + (Images::noChannelsPerPixel() - 1)] = std::numeric_limits<std::uint16_t>::max();
+        }
+    }
 
     auto image = std::make_shared<QImage>(width, height, QImage::Format::Format_RGBA64);
 
@@ -324,44 +311,25 @@ std::shared_ptr<QImage> Images::selectionImage(const QColor& color /*= QColor(25
 
     imageData.resize(noPixels() * Images::noChannelsPerPixel());
 
-    //const hdps::Set& selection = _core->requestSelection(_imageData->source()->getSourceDataName());
-
     auto& selection = dynamic_cast<Points&>(_core->requestSelection(_imageData->points()->getDataName()));
-
-    //qDebug() << selection.indices;
 
     const auto imageDataWidth = _imageData->imageSize().width();
 
-#ifdef PARALLEL_FOR_EACH
-    std::for_each(
-        std::execution::par,
-        std::begin(selection.indices),
-        std::end(selection.indices),
-        [&](auto& selectionId) {
-#else
-    for (const auto& selectionId : selection.indices) {
-#endif
+    for (const auto& selectionId : selection.indices)
+    {
         const auto x = selectionId % imageDataWidth;
         const auto y = static_cast<std::uint32_t>(floorf(static_cast<float>(selectionId) / static_cast<float>(imageDataWidth)));
 
-        //qDebug() << selectionId;
-        //qDebug() << imageDataWidth << selectionId << x << y << _roi;
-
         if (_roi.contains(x, y)) {
-            const auto pixelId = ((y - _roi.top()) * width) + (x - _roi.left());
-            //const auto pixelId = y * imageDataWidth + x;
-            const auto pixelOffset = pixelId * Images::noChannelsPerPixel();
+            const auto pixelId      = ((y - _roi.top()) * width) + (x - _roi.left());
+            const auto pixelOffset  = pixelId * Images::noChannelsPerPixel();
 
             imageData[pixelOffset + 0] = color.red();
             imageData[pixelOffset + 1] = color.green();
             imageData[pixelOffset + 2] = color.blue();
             imageData[pixelOffset + 3] = color.alpha();
         }
-#ifdef PARALLEL_FOR_EACH
-    });
-#else
     }
-#endif
 
     auto image = std::make_shared<QImage>(width, height, QImage::Format::Format_RGBA8888);
 
@@ -380,24 +348,6 @@ void Images::selectPixels(const std::vector<std::pair<std::uint32_t, std::uint32
 
     auto selectedPointIds = std::vector<std::uint32_t>();
 
-    //selectedPointIds.resize(pixelCoordinates.size());
-
-#ifdef PARALLEL_FOR_EACH
-    std::mutex mutex;
-
-    std::for_each(
-        std::execution::par,
-        std::begin(pixelCoordinates),
-        std::end(pixelCoordinates),
-        [&](auto& pixelCoordinate) {
-            const auto imageDataX = _roi.left() + pixelCoordinate.first;
-            const auto imageDataY = (_roi.bottom() - pixelCoordinate.second);
-            const auto pixelId = imageDataY * _imageData->imageSize().width() + imageDataX;
-
-            std::lock_guard lock(mutex);
-            selectedPointIds.push_back(pixelId);
-    });
-#else
     for (const auto& pixelCoordinate : pixelCoordinates) {
         const auto imageDataX = _roi.left() + pixelCoordinate.first;
         const auto imageDataY = (_roi.bottom() - pixelCoordinate.second);
@@ -405,7 +355,6 @@ void Images::selectPixels(const std::vector<std::pair<std::uint32_t, std::uint32
 
         selectedPointIds.push_back(pixelId);
     }
-#endif
 
     const auto& currentIndices = indices();
 

@@ -42,9 +42,6 @@ public:
     Points* points() const;
 
 public:
-    //void setSequence(const std::vector<Image>& images, const QSize& size);
-    //void setStack(const std::vector<Image>& images, const QSize& size);
-
     std::uint32_t noPoints() const;
     std::uint32_t noDimensions() const;
     
