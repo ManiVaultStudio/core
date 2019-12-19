@@ -25,6 +25,8 @@ add_dependencies(FcsLoader PointData)
 add_dependencies(BinLoader HDPS)
 add_dependencies(BinLoader PointData)
 
+add_dependencies(ImageData HDPS)
+add_dependencies(ImageData PointData)
 # Note: The plugins BasicClustering and ImageView are not in used (as Julian Thijssen commented,
 # June 24, 2019), so this CMakeLists does not add those subdirectories.
 
