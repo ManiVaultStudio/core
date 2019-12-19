@@ -12,108 +12,26 @@
 class IMAGEDATA_EXPORT Image
 {
 public:
-    Image(const QSize& size, const std::uint32_t& noComponents, const QString& imageFilePath) :
-        _data(),
-        _size(),
-        _noComponents(noComponents),
-        _imageFilePath(imageFilePath),
-        _dimensionName()
-    {
-        setSize(size);
-    }
+    Image(const QSize& size, const std::uint32_t& noComponents, const QString& imageFilePath);
 
-    std::uint16_t* data()
-    {
-        return _data.data();
-    }
+    std::uint16_t* data();
+    QSize size() const;
+    void setSize(const QSize& size);
+    std::uint32_t width() const;
+    std::uint32_t height() const;
+    std::uint32_t noComponents() const;
+    QString imageFilePath() const;
+    QString dimensionName() const;
+    void setDimensionName(const QString& dimensionName);
 
-    QSize size() const
-    {
-        return _size;
-    }
+    std::uint32_t noPixels() const;
+    std::uint32_t noElements() const;
+    std::uint32_t pixelIndex(const std::uint32_t& x, const std::uint32_t& y) const;
 
-    void setSize(const QSize& size)
-    {
-        if (size == _size)
-            return;
+    void getPixel(const std::uint32_t& x, const std::uint32_t& y, std::uint16_t* pixel) const;
+    void setPixel(const std::uint32_t& x, const std::uint32_t& y, const std::uint16_t* pixel);
 
-        _size = size;
-
-        _data.resize(noElements());
-    }
-
-    std::uint32_t width() const
-    {
-        return _size.width();
-    }
-
-    std::uint32_t height() const
-    {
-        return _size.height();
-    }
-
-    std::uint32_t noComponents() const
-    {
-        return _noComponents;
-    }
-
-    std::uint32_t noPixels() const
-    {
-        return _size.width() * _size.height();
-    }
-
-    std::uint32_t noElements() const
-    {
-        return noPixels() * _noComponents;
-    }
-
-    std::uint32_t pixelIndex(const std::uint32_t& x, const std::uint32_t& y) const
-    {
-        return (y * _size.width()) + x;
-    }
-
-    void getPixel(const std::uint32_t& x, const std::uint32_t& y, std::uint16_t* pixel) const
-    {
-        const auto startPixelIndex = pixelIndex(x, y) * _noComponents;
-
-        for (std::uint32_t c = 0; c < _noComponents; c++)
-        {
-            pixel[c] = static_cast<std::uint16_t>(_data[startPixelIndex + c]);
-        }
-    }
-
-    void setPixel(const std::uint32_t& x, const std::uint32_t& y, const std::uint16_t* pixel)
-    {
-        const auto startPixelIndex = pixelIndex(x, y) * _noComponents;
-
-        for (std::uint32_t c = 0; c < _noComponents; c++)
-        {
-            _data[startPixelIndex + c] = pixel[c];
-        }
-    }
-
-    void toFloatVector(std::vector<float>& pixels) const
-    {
-        pixels.reserve(noElements());
-
-        for (std::uint32_t i = 0; i < noElements(); i++)
-        {
-            pixels.push_back(static_cast<float>(_data[i]));
-        }
-    }
-
-    QString imageFilePath() const
-    {
-        return _imageFilePath;
-    }
-
-    QString dimensionName() const {
-        return _dimensionName;
-    }
-
-    void setDimensionName(const QString& dimensionName) {
-        _dimensionName = dimensionName;
-    }
+    void toFloatVector(std::vector<float>& pixels) const;
 
 private:
     std::vector<std::uint16_t>	_data;

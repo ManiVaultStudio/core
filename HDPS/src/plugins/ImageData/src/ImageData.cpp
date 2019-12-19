@@ -22,10 +22,6 @@ ImageData::ImageData() :
 {
 }
 
-ImageData::~ImageData()
-{
-}
-
 void ImageData::init()
 {
     _pointsName = _core->addData("Points", QString("imagepointdata"));

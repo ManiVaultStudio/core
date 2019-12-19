@@ -4,8 +4,8 @@
 
 #include <QString>
 
-using SteadyClock = std::chrono::time_point<std::chrono::steady_clock>;
-using MilliSeconds = std::chrono::microseconds;
+using SteadyClock   = std::chrono::time_point<std::chrono::steady_clock>;
+using MilliSeconds  = std::chrono::microseconds;
 
 // code inspired by: https://stackoverflow.com/questions/2808398/easily-measure-elapsed-time
 
