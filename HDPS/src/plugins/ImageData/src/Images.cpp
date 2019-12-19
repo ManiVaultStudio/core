@@ -3,9 +3,10 @@
 
 #include <QDebug>
 #include <QImage>
-#include <QInputDialog >
+#include <QInputDialog>
 
 #include <set>
+#include <cmath>
 
 #include "Timer.h"
 
