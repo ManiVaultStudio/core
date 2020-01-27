@@ -112,6 +112,28 @@ public:
     // Subscript indexing
     float& operator[](unsigned int index);
 
+    // Temporary property metadata
+    QVariant getProperty(const QString& name) const
+    {
+        return getRawData<PointData>().getProperty(name);
+    }
+
+    void setProperty(const QString& name, const QVariant& value)
+    {
+        getRawData<PointData>().setProperty(name, value);
+    }
+
+    bool hasProperty(const QString& name) const
+    {
+        return getRawData<PointData>().hasProperty(name);
+    }
+
+    QStringList propertyNames() const
+    {
+        return getRawData<PointData>().propertyNames();
+    }
+
+    // Set functions
     DataSet* copy() const override;
 
     void createSubset() const override;
