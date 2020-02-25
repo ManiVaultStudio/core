@@ -129,9 +129,11 @@ MainWindow::MainWindow(QWidget *parent) :
     _settingsWidget = std::make_unique<SettingsWidget>();
     _settingsWidget->setAllowedAreas(Qt::RightDockWidgetArea);
 
-    _dataHierarchy = std::make_unique<DataHierarchy>(_core->getDataManager());
-    connect(&_core->getDataManager(), &DataManager::dataChanged, _dataHierarchy.get(), &DataHierarchy::updateDataModel);
-    _settingsWidget->addWidget(_dataHierarchy.get());
+    auto dataHierarchy = std::make_unique<DataHierarchy>(_core->getDataManager());
+    connect(&_core->getDataManager(), &DataManager::dataChanged, dataHierarchy.get(), &DataHierarchy::updateDataModel);
+    // Note: addWidget takes the ownership of its argument, so it should be released from the unique_ptr.
+    _settingsWidget->addWidget(dataHierarchy.get());
+    _dataHierarchy = dataHierarchy.release();
 
     addDockWidget(Qt::RightDockWidgetArea, _settingsWidget.get());
 }
