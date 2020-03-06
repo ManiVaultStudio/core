@@ -43,6 +43,11 @@ void CsvLoader::loadData()
         return fileName;
     }();
 
+    if (fileName.isEmpty())
+    {
+        return;
+    }
+
     qDebug() << "Loading CSV file: " << fileName;
     QFile file(fileName);
 
