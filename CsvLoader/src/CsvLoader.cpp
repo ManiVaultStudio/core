@@ -33,7 +33,7 @@ void CsvLoader::loadData()
         QSettings settings(QString::fromLatin1("HDPS"), QString::fromLatin1("Plugins/CsvLoader"));
         const QLatin1String directoryPathKey("directoryPath");
         const QString directoryPath = settings.value(directoryPathKey).toString();
-        QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", directoryPath, "CSV Files (*.csv *)");
+        QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", directoryPath, "CSV Files (*.csv);;All Files (*)");
 
         // Don't try to load a file if the dialog was cancelled or the file name is empty
         if (fileName.isNull() || fileName.isEmpty())
