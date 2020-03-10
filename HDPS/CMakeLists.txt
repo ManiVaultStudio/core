@@ -160,6 +160,7 @@ set( PLUGIN_HEADERS
 
 set( PLUGIN_SOURCES
     src/IndexSet.cpp
+    src/LoaderPlugin.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

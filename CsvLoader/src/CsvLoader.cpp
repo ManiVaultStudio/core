@@ -6,7 +6,6 @@
 #include <QtCore>
 #include <QtDebug>
 
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QInputDialog>
 
@@ -28,20 +27,7 @@ void CsvLoader::init()
 
 void CsvLoader::loadData()
 {
-    const auto fileName = []
-    {
-        QSettings settings(QString::fromLatin1("HDPS"), QString::fromLatin1("Plugins/CsvLoader"));
-        const QLatin1String directoryPathKey("directoryPath");
-        const QString directoryPath = settings.value(directoryPathKey).toString();
-        QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", directoryPath, "CSV Files (*.csv);;All Files (*)");
-
-        // Don't try to load a file if the dialog was cancelled or the file name is empty
-        if (fileName.isNull() || fileName.isEmpty())
-            return fileName;
-
-        settings.setValue(directoryPathKey, QFileInfo(fileName).absolutePath());
-        return fileName;
-    }();
+    const auto fileName = AskForFileName(QObject::tr("CSV Files (*.csv)"));
 
     if (fileName.isEmpty())
     {

@@ -6,7 +6,6 @@
 #include <QtCore>
 #include <QtDebug>
 
-#include <QFileDialog>
 #include <vector>
 #include <QInputDialog>
 
@@ -32,7 +31,7 @@ void BinLoader::init()
 
 void BinLoader::loadData()
 {
-    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", "", "BIN Files (*.bin *)");
+    const QString fileName = AskForFileName(tr("BIN Files (*.bin)"));
     
     // Don't try to load a file if the dialog was cancelled or the file name is empty
     if (fileName.isNull() || fileName.isEmpty())
