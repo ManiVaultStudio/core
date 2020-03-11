@@ -176,7 +176,13 @@ namespace hdps
                 _dirtyColors = false;
             }
 
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _positions.size());
+            // Before calling glDrawArraysInstanced, check if _positions is non-empty, to
+            // prevent a crash on some (older) computers, see HDPS core pull request #42,
+            // "Fix issue #34: Crash when opening scatterplot plugin", March 2020.
+            if (!_positions.empty())
+            {
+                glDrawArraysInstanced(GL_TRIANGLES, 0, 6, _positions.size());
+            }
             glBindVertexArray(0);
         }
 
