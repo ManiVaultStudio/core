@@ -28,9 +28,9 @@ public:
     void setSequence(const std::vector<Image>& images, const QSize& size);
     void setStack(const std::vector<Image>& images, const QSize& size);
 
-    std::shared_ptr<QImage> sequenceImage(const std::vector<std::uint32_t>& imageIds);
-    std::shared_ptr<QImage> stackImage(const std::uint32_t& imageId);
-    std::shared_ptr<QImage> selectionImage(const QColor& color = QColor(255, 0, 0, 255)) const;
+    QImage sequenceImage(const std::vector<std::uint32_t>& imageIds);
+    QImage stackImage(const std::uint32_t& imageId);
+    QImage selectionImage() const;
 
     void selectPixels(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& pixelCoordinates, const SelectionModifier& selectionModifier);
     QRect selectionBounds(const bool& relative = false) const;

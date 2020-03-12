@@ -152,7 +152,7 @@ void Images::setStack(const std::vector<Image>& images, const QSize& size)
     _core->notifyDataChanged(_imageData->pointsName());
 }
 
-std::shared_ptr<QImage> Images::sequenceImage(const std::vector<std::uint32_t>& imageIds)
+QImage Images::sequenceImage(const std::vector<std::uint32_t>& imageIds)
 {
 #ifdef PROFILE
     auto timer = Timer("Compute sequence image");
@@ -225,14 +225,14 @@ std::shared_ptr<QImage> Images::sequenceImage(const std::vector<std::uint32_t>& 
         }
     }
 
-    auto image = std::make_shared<QImage>(width, height, QImage::Format::Format_RGBA64);
+    auto image = QImage(width, height, QImage::Format::Format_RGBA64);
 
-    memcpy(image->bits(), imageData.data(), imageData.size() * sizeof(std::uint16_t));
+    memcpy(image.bits(), imageData.data(), imageData.size() * sizeof(std::uint16_t));
 
     return image;
 }
 
-std::shared_ptr<QImage> Images::stackImage(const std::uint32_t& imageId)
+QImage Images::stackImage(const std::uint32_t& imageId)
 {
 #ifdef PROFILE
     auto timer = Timer("Compute stack image");
@@ -291,14 +291,14 @@ std::shared_ptr<QImage> Images::stackImage(const std::uint32_t& imageId)
         }
     }
 
-    auto image = std::make_shared<QImage>(width, height, QImage::Format::Format_RGBA64);
+    auto image = QImage(width, height, QImage::Format::Format_RGBA64);
 
-    memcpy(image->bits(), imageData.data(), imageData.size() * sizeof(std::uint16_t));
+    memcpy(image.bits(), imageData.data(), imageData.size() * sizeof(std::uint16_t));
 
     return image;
 }
 
-std::shared_ptr<QImage> Images::selectionImage(const QColor& color /*= QColor(255, 0, 0, 200)*/) const
+QImage Images::selectionImage() const
 {
 #ifdef PROFILE
     auto timer = Timer("Compute selection image");
@@ -310,7 +310,7 @@ std::shared_ptr<QImage> Images::selectionImage(const QColor& color /*= QColor(25
     
     auto imageData = std::vector<std::uint8_t>();
 
-    imageData.resize(noPixels() * Images::noChannelsPerPixel());
+    imageData.resize(noPixels() * 4);
 
     auto& selection = dynamic_cast<Points&>(_core->requestSelection(_imageData->points()->getDataName()));
 
@@ -323,18 +323,18 @@ std::shared_ptr<QImage> Images::selectionImage(const QColor& color /*= QColor(25
 
         if (_roi.contains(x, y)) {
             const auto pixelId      = ((y - _roi.top()) * width) + (x - _roi.left());
-            const auto pixelOffset  = pixelId * Images::noChannelsPerPixel();
+            const auto pixelOffset  = pixelId * 4;
 
-            imageData[pixelOffset + 0] = color.red();
-            imageData[pixelOffset + 1] = color.green();
-            imageData[pixelOffset + 2] = color.blue();
-            imageData[pixelOffset + 3] = color.alpha();
+            imageData[pixelOffset + 0] = 255;
+            imageData[pixelOffset + 1] = 255;
+            imageData[pixelOffset + 2] = 255;
+            imageData[pixelOffset + 3] = 255;
         }
     }
 
-    auto image = std::make_shared<QImage>(width, height, QImage::Format::Format_RGBA8888);
+    auto image = QImage(width, height, QImage::Format::Format_RGB32);
 
-    memcpy(image->bits(), imageData.data(), imageData.size() * sizeof(std::uint8_t));
+    memcpy(image.bits(), imageData.data(), imageData.size() * sizeof(std::uint8_t));
 
     return image;
 }
