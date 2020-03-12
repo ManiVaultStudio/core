@@ -4,34 +4,6 @@
 
 #include "imagedata_export.h"
 
-enum class ImageCollectionType
-{
-    Undefined,
-    Sequence,
-    Stack,
-    MultiPartSequence
-};
-
-inline QString imageCollectionTypeName(const ImageCollectionType& type)
-{
-    switch (type)
-    {
-        case ImageCollectionType::Sequence:
-            return "Sequence";
-
-        case ImageCollectionType::Stack:
-            return "Stack";
-
-        case ImageCollectionType::MultiPartSequence:
-            return "MultiPartSequence";
-
-        default:
-            break;
-    }
-
-    return "";
-}
-
 enum class SelectionModifier
 {
     Replace,

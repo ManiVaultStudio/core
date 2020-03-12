@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "Image.h"
+#include "ImageData.h"
 
 #include <Set.h>
 
@@ -16,7 +17,6 @@
 using namespace hdps::plugin;
 
 class Points;
-class ImageData;
 
 class IMAGEDATA_EXPORT Images : public hdps::DataSet
 {
@@ -37,7 +37,7 @@ public:
 
     hdps::DataSet* copy() const override;
 
-    ImageCollectionType imageCollectionType() const;
+    ImageData::Type type() const;
     std::uint32_t noImages() const;
     QSize imageSize() const;
     std::uint32_t noComponents() const;

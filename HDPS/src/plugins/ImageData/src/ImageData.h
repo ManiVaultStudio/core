@@ -19,13 +19,42 @@ const hdps::DataType ImageType = hdps::DataType(QString("Images"));
 class IMAGEDATA_EXPORT ImageData : public hdps::RawData
 {
 public:
+    enum Type
+    {
+        Undefined,
+        Sequence,
+        Stack,
+        MultiPartSequence
+    };
+
+    static QString typeName(const Type& type)
+    {
+        switch (type)
+        {
+            case Type::Sequence:
+                return "Sequence";
+
+            case Type::Stack:
+                return "Stack";
+
+            case Type::MultiPartSequence:
+                return "MultiPartSequence";
+
+            default:
+                break;
+        }
+
+        return "";
+    }
+
+public:
     ImageData();
 
     void init() override;
 
 public:
-    ImageCollectionType imageCollectionType() const;
-    void setImageCollectionType(const ImageCollectionType& imageCollectionType);
+    Type type() const;
+    void setType(const Type& type);
     std::uint32_t noImages() const;
     void setNoImages(const std::uint32_t& noImages);
     QSize imageSize() const;
@@ -50,7 +79,7 @@ public:
     hdps::DataSet* createDataSet() const override;
 
 private:
-    ImageCollectionType     _imageCollectionType;
+    Type                    _type;
     std::uint32_t           _noImages;
     QSize                   _imageSize;
     std::uint32_t           _noComponents;

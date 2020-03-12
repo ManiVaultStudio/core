@@ -13,7 +13,7 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.ImageData")
 
 ImageData::ImageData() :
     hdps::RawData("Image Data", ImageType),
-    _imageCollectionType(ImageCollectionType::Undefined),
+    _type(Type::Undefined),
     _noImages(0),
     _imageSize(),
     _noComponents(0),
@@ -31,14 +31,14 @@ void ImageData::init()
     _core->notifyDataAdded(_pointsName);
 }
 
-ImageCollectionType ImageData::imageCollectionType() const
+ImageData::Type ImageData::type() const
 {
-    return _imageCollectionType;
+    return _type;
 }
 
-void ImageData::setImageCollectionType(const ImageCollectionType& imageCollectionType)
+void ImageData::setType(const ImageData::Type& type)
 {
-    _imageCollectionType = imageCollectionType;
+    _type = type;
 }
 
 QSize ImageData::imageSize() const

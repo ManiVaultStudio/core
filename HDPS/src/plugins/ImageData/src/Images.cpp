@@ -13,7 +13,6 @@
 #include "PointData.h"
 
 #define PROFILE
-//#define PARALLEL_FOR_EACH
 
 Images::Images(hdps::CoreInterface* core, QString dataName) :
     DataSet(core, dataName),
@@ -62,7 +61,7 @@ void Images::createSubset() const
 
 void Images::setSequence(const std::vector<Image>& images, const QSize& size)
 {
-    _imageData->setImageCollectionType(ImageCollectionType::Sequence);
+    _imageData->setType(ImageData::Type::Sequence);
     _imageData->setNoImages(static_cast<std::uint32_t>(images.size()));
     _imageData->setImageSize(size);
     _imageData->setNoComponents(images.front().noComponents());
@@ -99,7 +98,7 @@ void Images::setSequence(const std::vector<Image>& images, const QSize& size)
 
 void Images::setStack(const std::vector<Image>& images, const QSize& size)
 {
-    _imageData->setImageCollectionType(ImageCollectionType::Stack);
+    _imageData->setType(ImageData::Type::Stack);
     _imageData->setNoImages(static_cast<std::uint32_t>(images.size()));
     _imageData->setImageSize(size);
     _imageData->setNoComponents(images.front().noComponents());
@@ -509,9 +508,9 @@ hdps::DataSet* Images::copy() const
     return images;
 }
 
-ImageCollectionType Images::imageCollectionType() const
+ImageData::Type Images::type() const
 {
-    return _imageData->imageCollectionType();
+    return _imageData->type();
 }
 
 std::uint32_t Images::noImages() const
