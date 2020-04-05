@@ -21,10 +21,10 @@ struct PointSettingsWidget : public QWidget
 {
     PointSettingsWidget(const ScatterplotPlugin& plugin);
 
-    const int MIN_POINT_SIZE = 5;
-    const int MAX_POINT_SIZE = 20;
-    const int MIN_POINT_OPACITY = 0;
-    const int MAX_POINT_OPACITY = 100;
+    static constexpr int MIN_POINT_SIZE = 5;
+    static constexpr int MAX_POINT_SIZE = 20;
+    static constexpr int MIN_POINT_OPACITY = 0;
+    static constexpr int MAX_POINT_OPACITY = 100;
 
     QLabel& _pointSizeLabel;
     QSlider& _pointSizeSlider;
@@ -36,8 +36,8 @@ struct DensitySettingsWidget : public QWidget
 {
     DensitySettingsWidget(const ScatterplotPlugin& plugin);
 
-    const int MIN_SIGMA = 1;
-    const int MAX_SIGMA = 50;
+    static constexpr int MIN_SIGMA = 1;
+    static constexpr int MAX_SIGMA = 50;
 
     QLabel& _sigmaLabel;
     QSlider& _sigmaSlider;
