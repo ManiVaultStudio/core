@@ -10,7 +10,7 @@ Linux & Macos (Travis) | Windows (Appveyor)
 
 Pushing to the hdps/core develop wil trigger the conan CI_CD to start a build via the configured Webhook.
 
-Currently the following build marix is performed
+Currently the following build matrix is performed
 
 OS | Architecture | Compiler
 --- | --- | ---
@@ -38,7 +38,7 @@ The first step is to pull the repository from GitHub. You can do this in any way
 3. Execute the command `git init` to initialize the Git repository
 4. Execute the command `git remote add origin git@github.com:hdps/core.git` to link your local repository to the remote GitHub one.
 5. Fetch all branches from the repository using `git fetch -a`
-5. Now you can pull in the source files from the `develop` branch by executing `git pull origin develop`
+5. Now you can pull in the source files from the `develop` branch by executing `git pull origin master`
 6. If you get a permission denied message on the last step be sure that you have an SSH-key pair and have added the public one to your GitHub account. See: https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
 
 ### Building
@@ -72,9 +72,10 @@ Press `Ctrl+X` to exit, `Y` for saving the buffer, and restart the terminal.
 
 ## Windows
 1. At the top of Visual Studio set the build mode (where it says `Debug`) to `Release`.
+2. Right click the solution and press `Build Solution`, if this does not produce errors, continue to the next step.
 2. Right click the project `HDPS` in the Solution Explorer and select Set as StartUp Project.
 3. Right click the project again and select Properties.
-4. In the Configuration Properties -> Debugging set the `Command` by browsing to your `HDPS.exe` file. Set the `Working Directory` field by browsing to the folder containing the `HDPS.exe` file.
+4. In the Configuration Properties -> Debugging set the `Command` by browsing to the `HDPS.exe` file in the HDPS_INSTALL_DIR folder. Set the `Working Directory` field by browsing to the HDPS_INSTALL_DIR folder.
 5. Press Apply and OK and right click the project in the Solution Explorer and press Build.
 6. If all is well the build should succeed and if you run the project with Ctrl+F5 it will launch `HDPS.exe`.
 

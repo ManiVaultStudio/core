@@ -8,7 +8,6 @@
 #include <QtDebug>
 #include <QString>
 
-#include <QFileDialog>
 #include <QInputDialog>
 
 #include <vector>
@@ -45,7 +44,7 @@ void FcsLoader::init()
 
 void FcsLoader::loadData()
 {
-    QString fileName = QFileDialog::getOpenFileName(Q_NULLPTR, "Load File", "", "FCS Files (*.fcs *)");
+    const QString fileName = AskForFileName(QObject::tr("FCS Files (*.fcs)"));
 
     // Don't try to load a file if the dialog was cancelled or the file name is empty
     if (fileName.isNull() || fileName.isEmpty())

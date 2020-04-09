@@ -332,3 +332,9 @@ void ScatterplotWidget::cleanup()
     _densityRenderer.destroy();
     _selectionRenderer.destroy();
 }
+
+ScatterplotWidget::~ScatterplotWidget()
+{
+    disconnect(QOpenGLWidget::context(), &QOpenGLContext::aboutToBeDestroyed, this, &ScatterplotWidget::cleanup);
+    cleanup();
+}

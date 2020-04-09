@@ -43,6 +43,15 @@ public:
     virtual void loadData() = 0;
 
     ~LoaderPlugin() override {};
+
+protected:
+    /**
+     * Asks the user for the name of a file to load data from. Opens a file dialog at the
+     * directory of the last loaded file. The path of this directory is stored with the
+     * application settings (in the registry, on Windows).
+     * `fileNameFilter` could be something like "Text Files (*.txt)".
+     */
+    QString AskForFileName(const QString& fileNameFilter);
 };
 
 

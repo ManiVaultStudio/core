@@ -32,6 +32,8 @@ public:
 
     ScatterplotWidget();
 
+    ~ScatterplotWidget();
+
     /** Returns true when the widget was initialized and is ready to be used. */
     bool isInitialized();
 

@@ -30,7 +30,7 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-find_package(Qt5 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
+find_package(Qt5 5.12 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 
 set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
 #message(STATUS ${INSTALL_DIR})
@@ -160,6 +160,7 @@ set( PLUGIN_HEADERS
 
 set( PLUGIN_SOURCES
     src/IndexSet.cpp
+    src/LoaderPlugin.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

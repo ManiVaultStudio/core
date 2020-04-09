@@ -18,13 +18,6 @@ int main(int argc, char *argv[])
     defaultFormat.setProfile(QSurfaceFormat::CoreProfile);
     defaultFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     QSurfaceFormat::setDefaultFormat(defaultFormat);
-#else
-    // Ask for an OpenGL 4.3 Core Context as the default
-    QSurfaceFormat defaultFormat;
-    defaultFormat.setVersion(4, 3);
-    defaultFormat.setProfile(QSurfaceFormat::CoreProfile);
-    defaultFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    QSurfaceFormat::setDefaultFormat(defaultFormat);
 #endif
 
     QApplication app(argc, argv);
