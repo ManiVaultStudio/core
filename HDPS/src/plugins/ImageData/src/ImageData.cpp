@@ -105,6 +105,8 @@ std::vector<QString> ImageData::dimensionNames() const
 void ImageData::setDimensionNames(const std::vector<QString>& dimensionNames)
 {
     _dimensionNames = dimensionNames;
+
+    _points->setDimensionNames(dimensionNames);
 }
 
 std::uint32_t ImageData::noImages() const
