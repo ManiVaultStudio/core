@@ -75,7 +75,6 @@ DensityComputation::DensityComputation()
 
 DensityComputation::~DensityComputation()
 {
-    delete _points;
 }
 
 void DensityComputation::init(QOpenGLContext* ctx)

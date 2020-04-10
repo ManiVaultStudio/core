@@ -26,6 +26,7 @@ public:
     void init(QOpenGLContext* ctx);
     void cleanup();
 
+    // Note: setData does not take the ownership of the vector specified by the argument.
     void setData(const std::vector<Vector2f>* data);
     void setBounds(float left, float right, float bottom, float top);
     void setSigma(float sigma);
