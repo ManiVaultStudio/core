@@ -12,6 +12,12 @@
 
 using namespace hdps::plugin;
 
+namespace hdps
+{
+    // From "graphics/Vector2f.h"
+    class Vector2f;
+}
+
 // =============================================================================
 // Data Type
 // =============================================================================
@@ -90,6 +96,10 @@ public:
     {
         getRawData<PointData>().setData(data, numPoints, numDimensions);
     }
+
+    void extractDimensions(std::vector<float>& result, const int dimensionIndex) const;
+
+    void extractDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
 
     unsigned int getNumPoints() const
     {

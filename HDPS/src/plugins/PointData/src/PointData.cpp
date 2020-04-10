@@ -5,6 +5,9 @@
 
 #include <cstring>
 
+#include "graphics/Vector2f.h"
+
+
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
 // =============================================================================
@@ -101,6 +104,67 @@ QStringList PointData::propertyNames() const
 // =============================================================================
 // Point Set
 // =============================================================================
+
+
+void Points::extractDimensions(std::vector<float>& result, const int dimensionIndex) const
+{
+    // This overload assumes that the data set is "full".
+    // Please remove the assert once non-full support is implemented (if necessary).
+    assert(isFull());
+
+    const auto& rawPointData = getRawData<PointData>();
+    const std::ptrdiff_t numDimensions{ rawPointData.getNumDimensions() };
+
+    assert(dimensionIndex >= 0);
+    assert(dimensionIndex < numDimensions);
+
+    const std::ptrdiff_t numPoints{ rawPointData.getNumPoints() };
+
+    result.resize(numPoints);
+
+    const auto& data = rawPointData.getData();
+
+    for (std::ptrdiff_t i{}; i < numPoints; ++i)
+    {
+        result[i] = data[i * numDimensions + dimensionIndex];
+    }
+}
+
+
+void Points::extractDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
+{
+    const auto& rawPointData = getRawData<PointData>();
+    const std::ptrdiff_t numDimensions{ rawPointData.getNumDimensions() };
+
+    assert(dimensionIndex1 >= 0);
+    assert(dimensionIndex1 < numDimensions);
+    assert(dimensionIndex2 >= 0);
+    assert(dimensionIndex2 < numDimensions);
+
+    // Note that Points::getNumPoints() returns the number of indices when the data set is not full.
+    const std::ptrdiff_t numPoints{ getNumPoints() };
+    result.resize(numPoints);
+
+    const auto& data = rawPointData.getData();
+
+    if (isFull())
+    {
+        for (std::ptrdiff_t i{}; i < numPoints; ++i)
+        {
+            const std::ptrdiff_t n{ i * numDimensions };
+            result[i].set(data[n + dimensionIndex1], data[n + dimensionIndex2]);
+        }
+    }
+    else
+    {
+        for (std::ptrdiff_t i{}; i < numPoints; ++i)
+        {
+            const std::ptrdiff_t n{ indices[i] * numDimensions };
+            result[i].set(data[n + dimensionIndex1], data[n + dimensionIndex2]);
+        }
+    }
+}
+
 
 hdps::DataSet* Points::copy() const
 {
