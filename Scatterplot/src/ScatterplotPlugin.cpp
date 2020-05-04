@@ -222,42 +222,13 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const Points& points)
 {
-    int numDims = points.getNumDimensions();
-    int xDim = settings->getXDimension();
-    int yDim = settings->getYDimension();
-
-    _points.resize(_numPoints);
-
-    // TODO This logic should move to Points
-    if (points.isFull())
-    {
-        for (int i = 0; i < _numPoints; i++)
-        {
-            _points[i].set(points[i * numDims + xDim], points[i * numDims + yDim]);
-        }
-    }
-    else
-    {
-        for (int i = 0; i < _numPoints; i++)
-        {
-            int setIndex = points.indices[i];
-            _points[i].set(points[setIndex * numDims + xDim], points[setIndex * numDims + yDim]);
-        }
-    }
+    points.extractDimensions(_points, settings->getXDimension(), settings->getYDimension());
 }
 
 void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex)
 {
-    // TODO This logic should move to Points
     if (colorIndex >= 0) {
-        scalars.resize(_numPoints);
-        int numDims = points.getNumDimensions();
-
-        for (int i = 0; i < _numPoints; i++) {
-            float scalar = points[i * numDims + colorIndex];
-
-            scalars[i] = scalar;
-        }
+        points.extractDimensions(scalars, colorIndex);
     }
 }
 

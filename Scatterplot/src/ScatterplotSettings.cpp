@@ -37,10 +37,10 @@ namespace
 }
 
 PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin) :
-    _pointSizeLabel("Point Size:"),
-    _pointOpacityLabel("Point Opacity:"),
-    _pointSizeSlider(Qt::Horizontal),
-    _pointOpacitySlider(Qt::Horizontal)
+    _pointSizeLabel(*new QLabel("Point Size:")),
+    _pointOpacityLabel(*new QLabel("Point Opacity:")),
+    _pointSizeSlider(*new QSlider(Qt::Horizontal)),
+    _pointOpacitySlider(*new QSlider(Qt::Horizontal))
 {
     connect(&_pointSizeSlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::pointSizeChanged);
     connect(&_pointOpacitySlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::pointOpacityChanged);
@@ -69,8 +69,8 @@ PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin) :
 }
 
 DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin) :
-    _sigmaLabel("Sigma:"),
-    _sigmaSlider(Qt::Horizontal)
+    _sigmaLabel(*new QLabel("Sigma:")),
+    _sigmaSlider(*new QSlider(Qt::Horizontal))
 {
     connect(&_sigmaSlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::sigmaChanged);
 
@@ -84,8 +84,8 @@ DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin) :
 }
 
 PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) :
-    _pointSettingsWidget(plugin),
-    _densitySettingsWidget(plugin)
+    _pointSettingsWidget(*new PointSettingsWidget(plugin)),
+    _densitySettingsWidget(*new DensitySettingsWidget(plugin))
 {
     addWidget(&_pointSettingsWidget);
     addWidget(&_densitySettingsWidget);
@@ -112,7 +112,7 @@ void ColorDimensionPicker::setScalarDimensions(unsigned int numDimensions, const
 }
 
 ColorDropSlot::ColorDropSlot(const ScatterplotPlugin& plugin) :
-    _loadColorData(plugin.supportedColorTypes)
+    _loadColorData(*new hdps::gui::DataSlot(plugin.supportedColorTypes))
 {
     QLabel* dropLabel = new QLabel();
     dropLabel->setFixedSize(20, 20);
@@ -132,9 +132,9 @@ ColorDropSlot::ColorDropSlot(const ScatterplotPlugin& plugin) :
 }
 
 DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin) :
-    _xDimLabel("X:"),
-    _yDimLabel("Y:"),
-    _cDimLabel("Color:")
+    _xDimLabel(*new QLabel( "X:")),
+    _yDimLabel(*new QLabel("Y:")),
+    _cDimLabel(*new QLabel("Color:"))
 {
     _layout.addWidget(&_xDimLabel, 0, 0);
     _layout.addWidget(&_yDimLabel, 1, 0);
