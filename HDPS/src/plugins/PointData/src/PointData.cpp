@@ -106,7 +106,7 @@ QStringList PointData::propertyNames() const
 // =============================================================================
 
 
-void Points::extractDimensions(std::vector<float>& result, const int dimensionIndex) const
+void Points::extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const
 {
     // This overload assumes that the data set is "full".
     // Please remove the assert once non-full support is implemented (if necessary).
@@ -131,7 +131,7 @@ void Points::extractDimensions(std::vector<float>& result, const int dimensionIn
 }
 
 
-void Points::extractDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
+void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
     const auto& rawPointData = getRawData<PointData>();
     const std::ptrdiff_t numDimensions{ rawPointData.getNumDimensions() };
