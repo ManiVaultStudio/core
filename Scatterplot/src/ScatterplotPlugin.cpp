@@ -222,13 +222,13 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const Points& points)
 {
-    points.extractDimensions(_points, settings->getXDimension(), settings->getYDimension());
+    points.extractDataForDimensions(_points, settings->getXDimension(), settings->getYDimension());
 }
 
 void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex)
 {
     if (colorIndex >= 0) {
-        points.extractDimensions(scalars, colorIndex);
+        points.extractDataForDimension(scalars, colorIndex);
     }
 }
 
