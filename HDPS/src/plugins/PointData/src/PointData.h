@@ -8,6 +8,8 @@
 #include <QString>
 #include <QMap>
 #include <QVariant>
+
+#include <cassert>
 #include <vector>
 
 using namespace hdps::plugin;
@@ -100,6 +102,60 @@ public:
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
 
     void extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
+
+    /// Populates the specified result container with the data for the
+    /// dimensions specified by the dimension indices.
+    /// \note This function does not do any allocation. It assumes that the
+    /// specified result container is large enough to store all the data.
+    template <typename ResultContainer, typename DimensionIndices>
+    void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
+    {
+        const auto& rawPointData = getRawData<PointData>();
+        const std::ptrdiff_t numDimensions{ rawPointData.getNumDimensions() };
+
+        for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+        {
+            assert(dimensionIndex >= 0);
+            assert(dimensionIndex < numDimensions);
+        }
+
+        // Note that Points::getNumPoints() returns the number of indices when the data set is not full.
+        const std::ptrdiff_t numPoints{ getNumPoints() };
+
+        const auto& data = rawPointData.getData();
+
+        if (isFull())
+        {
+            std::ptrdiff_t resultIndex{};
+
+            for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+            {
+                const std::ptrdiff_t n{ pointIndex * numDimensions };
+
+                for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                {
+                    resultContainer[resultIndex] = data[n + dimensionIndex];
+                    ++resultIndex;
+                }
+            }
+        }
+        else
+        {
+            std::ptrdiff_t resultIndex{};
+
+            for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+            {
+                const std::ptrdiff_t n{ indices[pointIndex] * numDimensions };
+
+                for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                {
+                    resultContainer[resultIndex] = data[n + dimensionIndex];
+                    ++resultIndex;
+                }
+            }
+        }
+    }
+
 
     unsigned int getNumPoints() const
     {
