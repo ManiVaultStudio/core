@@ -302,11 +302,12 @@ void ScatterplotPlugin::updateSelection()
     _scatterPlotWidget->setHighlights(highlights);
 }
 
-void ScatterplotPlugin::makeSelection(hdps::Selection selection)
+// Returns the selection set associated with this dataset
+const Points* ScatterplotPlugin::makeSelection(hdps::Selection selection)
 {
     // If theres no dataset being displayed, don't try to make any selection
     if (_currentDataSet.isEmpty())
-        return;
+        return nullptr;
 
     // Get the selection box from the widget
     Selection s = _scatterPlotWidget->getSelection();
@@ -343,18 +344,31 @@ void ScatterplotPlugin::makeSelection(hdps::Selection selection)
             selectionSet.indices.push_back(sourceSet.isFull() ? index : sourceSet.indices[index]);
         }
     }
-
-    _core->notifySelectionChanged(selectionSet.getDataName());
+    return &selectionSet;
 }
 
 void ScatterplotPlugin::onSelecting(hdps::Selection selection)
 {
-    makeSelection(selection);
+    const Points* const selectionSet = makeSelection(selection);
+
+    if ((selectionSet != nullptr) && (settings != nullptr) && (settings->IsNotifyingOnSelecting()))
+    {
+        _core->notifySelectionChanged(selectionSet->getDataName());
+    }
+    else
+    {
+        updateSelection();
+    }
 }
 
 void ScatterplotPlugin::onSelection(hdps::Selection selection)
 {
-    makeSelection(selection);
+    const Points* const selectionSet = makeSelection(selection);
+
+    if (selectionSet != nullptr)
+    {
+        _core->notifySelectionChanged(selectionSet->getDataName());
+    }
 }
 
 // =============================================================================

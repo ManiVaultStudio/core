@@ -66,7 +66,7 @@ private:
     void calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex);
     void updateSelection();
 
-    void makeSelection(hdps::Selection selection);
+    const Points* makeSelection(hdps::Selection selection);
 
     QString _currentDataSet;
     DataSlot* _dataSlot;
