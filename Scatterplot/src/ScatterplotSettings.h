@@ -16,6 +16,7 @@
 #include <QStackedWidget>
 
 class ScatterplotPlugin;
+class QCheckBox;
 
 struct PointSettingsWidget : public QWidget
 {
@@ -146,6 +147,8 @@ public:
 
     void paintEvent(QPaintEvent* event) override;
 
+    bool IsNotifyingOnSelecting() const;
+
 protected slots:
     void renderModePicked(const int index);
 
@@ -163,4 +166,6 @@ private:
 
     hdps::Vector3f _baseColor;
     hdps::Vector3f _selectionColor;
+
+    const QCheckBox* _notifyOnSelectingCheckBox{ nullptr };
 };
