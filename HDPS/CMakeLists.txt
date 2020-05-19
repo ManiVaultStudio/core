@@ -133,6 +133,7 @@ set( UTIL_HEADERS
     src/util/MeanShift.h
     src/util/DensityComputation.h
     src/util/Math.h
+    src/util/Timer.h
 )
 
 set( UTIL_SOURCES
@@ -140,6 +141,7 @@ set( UTIL_SOURCES
     src/util/MeanShift.cpp
     src/util/DensityComputation.cpp
     src/util/Math.cpp
+    src/util/Timer.cpp
 )
 
 set( PLUGIN_HEADERS
