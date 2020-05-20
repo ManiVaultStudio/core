@@ -33,6 +33,10 @@ include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${SOURCES})
 
+# Set CXX_STANDARD to avoid osx 10.14.4/xcode10.3 build error "no member named 'make_unique'..."
+# (C++14 should be sufficient to avoid the error, but C++17 is even better!)
+set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 17)
+
 if(MSVC)
     set(LIB_LINK_SUFFIX ".lib") 
 else()
