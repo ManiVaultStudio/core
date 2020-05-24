@@ -7,9 +7,14 @@ namespace hdps
     class Vector2f
     {
     public:
-        Vector2f();
-        Vector2f(float x, float y);
-        ~Vector2f();
+        // C++ Rule of Zero: Implicitly defined destructor and copy member functions are fine for this class.
+
+        Vector2f() = default;
+
+        constexpr Vector2f(float x, float y)
+            : x(x), y(y)
+        {
+        }
 
         /**
         * Sets the x and y components of this vector to the given parameters.
@@ -34,7 +39,11 @@ namespace hdps
         * Returns the squared magnitude of this vector.
         * @return the squared magnitude of this vector
         */
-        float sqrMagnitude() const;
+        constexpr float sqrMagnitude() const
+        {
+            return x * x + y * y;
+        }
+
 
         /**
         * Returns the magnitude of this vector.
@@ -49,23 +58,63 @@ namespace hdps
         std::string str() const;
 
         /* Operator overloads */
-        bool operator==(const Vector2f& v) const;
-        bool operator!=(const Vector2f& v) const;
+        constexpr bool operator==(const Vector2f& v) const
+        {
+            return x == v.x && y == v.y;
+        }
+
+        constexpr bool operator!=(const Vector2f& v) const
+        {
+            return x != v.x || y != v.y;
+        }
+
         Vector2f& operator+=(const Vector2f& v);
         Vector2f& operator-=(const Vector2f& v);
         Vector2f& operator*=(const Vector2f& v);
         Vector2f& operator*=(float scale);
         Vector2f& operator/=(const Vector2f& v);
-        Vector2f operator+(const Vector2f& v) const;
-        Vector2f operator+(float value) const;
-        Vector2f operator-(const Vector2f& v) const;
-        Vector2f operator-(float value) const;
-        Vector2f operator-() const;
-        Vector2f operator*(const Vector2f& v) const;
-        Vector2f operator*(float scale) const;
-        Vector2f operator/(float divisor) const;
 
-        float x, y;
+        constexpr Vector2f operator+(const Vector2f& v) const
+        {
+            return Vector2f(x + v.x, y + v.y);
+        }
+
+        constexpr Vector2f operator+(float value) const
+        {
+            return Vector2f(x + value, y + value);
+        }
+
+        constexpr Vector2f operator-(const Vector2f& v) const
+        {
+            return Vector2f(x - v.x, y - v.y);
+        }
+
+        constexpr Vector2f operator-(float value) const
+        {
+            return Vector2f(x - value, y - value);
+        }
+
+        constexpr Vector2f operator-() const
+        {
+            return Vector2f(-x, -y);
+        }
+
+        constexpr Vector2f operator*(const Vector2f& v) const
+        {
+            return Vector2f(x * v.x, y * v.y);
+        }
+
+        constexpr Vector2f operator*(float scale) const
+        {
+            return Vector2f(x * scale, y * scale);
+        }
+
+        constexpr Vector2f operator/(float divisor) const
+        {
+            return Vector2f(x / divisor, y / divisor);
+        }
+
+        float x{}, y{};
     };
 
 } // namespace hdps
