@@ -43,9 +43,9 @@ namespace hdps
 
             void enableAttribute(uint index, bool enable);
 
-            bool hasHighlights() { return _hasHighlights; }
-            bool hasScalars() { return _hasScalars; }
-            bool hasColors() { return _hasColors; }
+            bool hasHighlights() const { return !_highlights.empty(); }
+            bool hasScalars() const { return !_scalars.empty(); }
+            bool hasColors() const { return !_colors.empty(); }
             Vector3f getScalarRange() { return Vector3f(_scalarLow, _scalarHigh, _scalarRange); }
             void draw();
             void destroy();
@@ -67,11 +67,6 @@ namespace hdps
             float _scalarLow;
             float _scalarHigh;
             float _scalarRange;
-
-            bool _hasPositions = false;
-            bool _hasHighlights = false;
-            bool _hasScalars = false;
-            bool _hasColors = false;
 
             bool _dirtyPositions = false;
             bool _dirtyHighlights = false;
