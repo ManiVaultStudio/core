@@ -4,23 +4,6 @@
 
 namespace hdps
 {
-    Vector2f::Vector2f()
-        : x(0), y(0)
-    {
-
-    }
-
-    Vector2f::Vector2f(float x, float y)
-        : x(x), y(y)
-    {
-
-    }
-
-    Vector2f::~Vector2f()
-    {
-
-    }
-
     void Vector2f::set(float x, float y)
     {
         this->x = x;
@@ -39,11 +22,6 @@ namespace hdps
         y -= v.y;
     }
 
-    float Vector2f::sqrMagnitude() const
-    {
-        return x * x + y * y;
-    }
-
     float Vector2f::length() const
     {
         return sqrt(sqrMagnitude());
@@ -55,16 +33,6 @@ namespace hdps
     }
 
     /* Operator overloads */
-    bool Vector2f::operator==(const Vector2f& v) const
-    {
-        return x == v.x && y == v.y;
-    }
-
-    bool Vector2f::operator!=(const Vector2f& v) const
-    {
-        return x != v.x || y != v.y;
-    }
-
     Vector2f& Vector2f::operator+=(const Vector2f& v)
     {
         x += v.x;
@@ -100,43 +68,24 @@ namespace hdps
         return *this;
     }
 
-    Vector2f Vector2f::operator+(const Vector2f& v) const
-    {
-        return Vector2f(x + v.x, y + v.y);
-    }
 
-    Vector2f Vector2f::operator+(float value) const
-    {
-        return Vector2f(x + value, y + value);
-    }
+    static_assert(Vector2f{}.x == 0.0f, "Compile-time unit test");
+    static_assert(Vector2f{}.y == 0.0f, "Compile-time unit test");
+    static_assert(Vector2f{} == Vector2f{}, "Compile-time unit test");
+    static_assert(! (Vector2f{} != Vector2f{}), "Compile-time unit test");
+    static_assert(Vector2f(0.0f, 0.0f) == Vector2f{}, "Compile-time unit test");
+    static_assert(Vector2f(0.5f, 0.5f) != Vector2f{}, "Compile-time unit test");
+    static_assert(! (Vector2f(0.5f, 0.5f) == Vector2f{}), "Compile-time unit test");
+    static_assert(Vector2f(0.5f, 0.0f).x == 0.5f, "Compile-time unit test");
+    static_assert(Vector2f(0.0f, 0.5f).y == 0.5f, "Compile-time unit test");
+    static_assert(Vector2f(0.5f, 1.0f).sqrMagnitude() == 1.25f, "Compile-time unit test");
+    static_assert(Vector2f(0.5f, 1.5f) + Vector2f(1.0f, 2.0f) == Vector2f(1.5f, 3.5f), "Compile-time unit test");
+    static_assert(Vector2f(1.0f, 2.0f) + 0.5f == Vector2f(1.5f, 2.5f), "Compile-time unit test");
+    static_assert(Vector2f(3.0f, 4.0f) - Vector2f(1.5f, 0.5f) == Vector2f(1.5f, 3.5f), "Compile-time unit test");
+    static_assert(Vector2f(2.0f, 3.0f) - 0.5f == Vector2f(1.5f, 2.5f), "Compile-time unit test");
+    static_assert(-Vector2f(0.5f, -1.5f) == Vector2f(-0.5f, 1.5f), "Compile-time unit test");
+    static_assert(Vector2f(2.0f, 3.0f) * Vector2f(1.5f, 0.5f) == Vector2f(3.0f, 1.5f), "Compile-time unit test");
+    static_assert(Vector2f(2.0f, 3.0f) * 1.5f == Vector2f(3.0f, 4.5f), "Compile-time unit test");
+    static_assert(Vector2f(1.0f, 2.0f) / 2.0f == Vector2f(0.5f, 1.0f), "Compile-time unit test");
 
-    Vector2f Vector2f::operator-(const Vector2f& v) const
-    {
-        return Vector2f(x - v.x, y - v.y);
-    }
-
-    Vector2f Vector2f::operator-(float value) const
-    {
-        return Vector2f(x - value, y - value);
-    }
-
-    Vector2f Vector2f::operator-() const
-    {
-        return Vector2f(-x, -y);
-    }
-
-    Vector2f Vector2f::operator*(const Vector2f& v) const
-    {
-        return Vector2f(x * v.x, y * v.y);
-    }
-
-    Vector2f Vector2f::operator*(float scale) const
-    {
-        return Vector2f(x * scale, y * scale);
-    }
-
-    Vector2f Vector2f::operator/(float divisor) const
-    {
-        return Vector2f(x / divisor, y / divisor);
-    }
 }
