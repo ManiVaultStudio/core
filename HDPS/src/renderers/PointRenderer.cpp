@@ -81,9 +81,6 @@ namespace hdps
 
         void PointArrayObject::setPositions(const std::vector<Vector2f>& positions)
         {
-            if (positions.empty())
-                return;
-
             _positions = positions;
 
             _dirtyPositions = true;
@@ -91,9 +88,6 @@ namespace hdps
 
         void PointArrayObject::setHighlights(const std::vector<char>& highlights)
         {
-            if (highlights.empty())
-                return;
-
             _highlights = highlights;
 
             _dirtyHighlights = true;
@@ -101,9 +95,6 @@ namespace hdps
 
         void PointArrayObject::setScalars(const std::vector<float>& scalars)
         {
-            if (scalars.empty())
-                return;
-
             _scalarLow = std::numeric_limits<float>::max();
             _scalarHigh = -std::numeric_limits<float>::max();
 
@@ -123,9 +114,6 @@ namespace hdps
 
         void PointArrayObject::setColors(const std::vector<Vector3f>& colors)
         {
-            if (colors.empty())
-                return;
-
             _colors = colors;
 
             _dirtyColors = true;
