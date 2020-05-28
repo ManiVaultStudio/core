@@ -32,6 +32,8 @@ namespace hdps
             void setData(const std::vector<Vector2f>* data);
             void setBounds(const Bounds& bounds);
             void setSigma(const float sigma);
+            void computeDensity();
+
             /**
             * Loads a colormap from the given resource path and sets it
             * as the current colormap for the landscape view.

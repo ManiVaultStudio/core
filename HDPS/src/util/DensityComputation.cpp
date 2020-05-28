@@ -1,6 +1,8 @@
 #include "DensityComputation.h"
 
 #include "../graphics/Matrix3f.h"
+#include "../graphics/Bounds.h"
+
 #include <math.h>
 
 namespace hdps
@@ -20,14 +22,14 @@ namespace
         return sqrt(maxDimension);
     }
 
-    Matrix3f createProjectionMatrix(QRectF bounds)
+    Matrix3f createProjectionMatrix(Bounds bounds)
     {
         Matrix3f m;
         m.setIdentity();
-        m[0] = 2 / (bounds.right() - bounds.left());
-        m[4] = 2 / (bounds.top() - bounds.bottom());
-        m[6] = -((bounds.right() + bounds.left()) / (bounds.right() - bounds.left()));
-        m[7] = -((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom()));
+        m[0] = 2 / (bounds.getRight() - bounds.getLeft());
+        m[4] = 2 / (bounds.getTop() - bounds.getBottom());
+        m[6] = -((bounds.getRight() + bounds.getLeft()) / (bounds.getRight() - bounds.getLeft()));
+        m[7] = -((bounds.getTop() + bounds.getBottom()) / (bounds.getTop() - bounds.getBottom()));
         return m;
     }
 }

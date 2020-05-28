@@ -42,6 +42,7 @@ struct DensitySettingsWidget : public QWidget
 
     QLabel& _sigmaLabel;
     QSlider& _sigmaSlider;
+    QPushButton& _computeDensityButton;
 };
 
 struct PlotSettingsStack : public QStackedWidget

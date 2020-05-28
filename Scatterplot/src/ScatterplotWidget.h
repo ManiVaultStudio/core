@@ -80,6 +80,7 @@ public slots:
     void pointSizeChanged(const int size);
     void pointOpacityChanged(const int opacity);
     void sigmaChanged(const int sigma);
+    void computeDensity();
 
     void colormapChanged(QString colormapName);
     void colormapdiscreteChanged(bool isDiscrete);

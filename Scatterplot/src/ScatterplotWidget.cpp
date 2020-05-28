@@ -77,6 +77,12 @@ void ScatterplotWidget::sigmaChanged(const int sigma)
     update();
 }
 
+void ScatterplotWidget::computeDensity()
+{
+    _densityRenderer.computeDensity();
+    update();
+}
+
 void ScatterplotWidget::colormapChanged(QString colormapName)
 {
     _pointRenderer.setColormap(colormapName);
@@ -105,6 +111,7 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
     // Pass bounds and data to renderers
     _pointRenderer.setBounds(_dataBounds);
     _densityRenderer.setBounds(_dataBounds);
+
     _pointRenderer.setData(*points);
     _densityRenderer.setData(points);
 
