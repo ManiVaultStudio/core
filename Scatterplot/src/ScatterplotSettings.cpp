@@ -71,9 +71,11 @@ PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin) :
 
 DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin) :
     _sigmaLabel(*new QLabel("Sigma:")),
-    _sigmaSlider(*new QSlider(Qt::Horizontal))
+    _sigmaSlider(*new QSlider(Qt::Horizontal)),
+    _computeDensityButton(*new QPushButton("Compute density"))
 {
     connect(&_sigmaSlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::sigmaChanged);
+    connect(&_computeDensityButton, &QPushButton::pressed, plugin._scatterPlotWidget, &ScatterplotWidget::computeDensity);
 
     _sigmaSlider.setRange(MIN_SIGMA, MAX_SIGMA);
     _sigmaSlider.setValue(30);
@@ -81,6 +83,9 @@ DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin) :
     QVBoxLayout* densitySettingsLayout = new QVBoxLayout();
     densitySettingsLayout->addWidget(&_sigmaLabel);
     densitySettingsLayout->addWidget(&_sigmaSlider);
+    densitySettingsLayout->addWidget(&_computeDensityButton);
+
+    densitySettingsLayout->addStretch(1);
     setLayout(densitySettingsLayout);
 }
 

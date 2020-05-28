@@ -28,7 +28,6 @@ namespace hdps
         void DensityRenderer::setData(const std::vector<Vector2f>* points)
         {
             _densityComputation.setData(points);
-            _densityComputation.compute();
         }
 
         void DensityRenderer::setBounds(const Bounds& bounds)
@@ -41,6 +40,11 @@ namespace hdps
             _densityComputation.setSigma(sigma);
         }
 
+        void DensityRenderer::computeDensity()
+        {
+            _densityComputation.compute();
+        }
+
         void DensityRenderer::setColormap(const QString colormap)
         {
             _colormap.loadFromFile(colormap);
@@ -49,7 +53,6 @@ namespace hdps
 
         void DensityRenderer::init()
         {
-            qDebug() << "Initializing density plot GL";
             initializeOpenGLFunctions();
 
             // Create a simple VAO for full-screen quad rendering
@@ -65,9 +68,6 @@ namespace hdps
 
             // Initialize the density computation
             _densityComputation.init(QOpenGLContext::currentContext());
-            // Compute the density in case data was already set
-            _densityComputation.compute();
-            qDebug() << "Initialized density plot GL";
         }
 
         void DensityRenderer::resize(QSize renderSize)
@@ -81,8 +81,6 @@ namespace hdps
 
         void DensityRenderer::render()
         {
-            qDebug() << "Rendering densityplot";
-
             glViewport(0, 0, _windowSize.width(), _windowSize.height());
 
             int w = _windowSize.width();
@@ -95,7 +93,6 @@ namespace hdps
             case DENSITY: drawDensity(); break;
             case LANDSCAPE: drawLandscape(); break;
             }
-            qDebug() << "Done rendering densityplot";
         }
 
         void DensityRenderer::destroy()

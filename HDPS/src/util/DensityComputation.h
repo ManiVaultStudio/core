@@ -4,6 +4,7 @@
 #include "../graphics/Texture.h"
 #include "../graphics/Shader.h"
 #include "../graphics/BufferObject.h"
+#include "../graphics/Bounds.h"
 
 #include "../graphics/Vector2f.h"
 
@@ -48,7 +49,7 @@ private:
     float _sigma = DEFAULT_SIGMA;
     float _maxKDE = -1;
     unsigned int _numPoints = 0;
-    QRectF _bounds = QRectF(-1, 1, 2, 2);
+    Bounds _bounds = Bounds(-1, 1, 2, 2);
 
     ShaderProgram _shaderDensityCompute;
     Framebuffer _densityBuffer;
