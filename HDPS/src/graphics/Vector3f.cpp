@@ -4,23 +4,6 @@
 
 namespace hdps
 {
-    Vector3f::Vector3f()
-        : x(0), y(0), z(0)
-    {
-
-    }
-
-    Vector3f::Vector3f(float x, float y, float z)
-        : x(x), y(y), z(z)
-    {
-
-    }
-
-    Vector3f::~Vector3f()
-    {
-
-    }
-
     void Vector3f::set(float x, float y, float z)
     {
         this->x = x;
@@ -42,11 +25,6 @@ namespace hdps
         z -= v.z;
     }
 
-    float Vector3f::sqrMagnitude()
-    {
-        return x * x + y * y + z * z;
-    }
-
     float Vector3f::length()
     {
         return sqrt(sqrMagnitude());
@@ -58,15 +36,6 @@ namespace hdps
     }
 
     /* Operator overloads */
-    bool Vector3f::operator==(const Vector3f& v) const
-    {
-        return x == v.x && y == v.y && z == v.z;
-    }
-
-    bool Vector3f::operator!=(const Vector3f& v) const
-    {
-        return x != v.x || y != v.y || z != v.z;
-    }
 
     Vector3f& Vector3f::operator+=(const Vector3f& v)
     {
@@ -108,33 +77,24 @@ namespace hdps
         return *this;
     }
 
-    Vector3f Vector3f::operator+(const Vector3f& v) const
-    {
-        return Vector3f(x + v.x, y + v.y, z + v.z);
-    }
 
-    Vector3f Vector3f::operator-(const Vector3f& v) const
-    {
-        return Vector3f(x - v.x, y - v.y, z - v.z);
-    }
+    static_assert(Vector3f{}.x == 0.0f, "Compile-time unit test");
+    static_assert(Vector3f{}.y == 0.0f, "Compile-time unit test");
+    static_assert(Vector3f{}.z == 0.0f, "Compile-time unit test");
+    static_assert(Vector3f{} == Vector3f{}, "Compile-time unit test");
+    static_assert(!(Vector3f{} != Vector3f{}), "Compile-time unit test");
+    static_assert(Vector3f(0.0f, 0.0f, 0.0f) == Vector3f{}, "Compile-time unit test");
+    static_assert(Vector3f(0.5f, 0.5f, 0.5f) != Vector3f{}, "Compile-time unit test");
+    static_assert(!(Vector3f(0.5f, 0.5f, 0.5f) == Vector3f{}), "Compile-time unit test");
+    static_assert(Vector3f(0.5f, 0.0f, 0.0f).x == 0.5f, "Compile-time unit test");
+    static_assert(Vector3f(0.0f, 0.5f, 0.0f).y == 0.5f, "Compile-time unit test");
+    static_assert(Vector3f(0.0f, 0.0f, 0.5f).z == 0.5f, "Compile-time unit test");
+    static_assert(Vector3f(0.5f, 1.0f, 1.5f).sqrMagnitude() == 3.5f, "Compile-time unit test");
+    static_assert(Vector3f(0.5f, 1.5f, 2.5) + Vector3f(1.0f, 2.0f, 3.0f) == Vector3f(1.5f, 3.5f, 5.5), "Compile-time unit test");
+    static_assert(Vector3f(3.0f, 4.0f, 5.0f) - Vector3f(1.5f, 0.5f, -0.5f) == Vector3f(1.5f, 3.5f, 5.5f), "Compile-time unit test");
+    static_assert(-Vector3f(0.5f, -1.5f, 2.5f) == Vector3f(-0.5f, 1.5f, -2.5f), "Compile-time unit test");
+    static_assert(Vector3f(2.0f, 3.0f, 4.0f) * Vector3f(1.5f, 0.5f, -0.5f) == Vector3f(3.0f, 1.5f, -2.0), "Compile-time unit test");
+    static_assert(Vector3f(2.0f, 3.0f, 4.0f) * 1.5f == Vector3f(3.0f, 4.5f, 6.0f), "Compile-time unit test");
+    static_assert(Vector3f(1.0f, 2.0f, 3.0f) / 2.0f == Vector3f(0.5f, 1.0f, 1.5f), "Compile-time unit test");
 
-    Vector3f Vector3f::operator-() const
-    {
-        return Vector3f(-x, -y, -z);
-    }
-
-    Vector3f Vector3f::operator*(const Vector3f& v) const
-    {
-        return Vector3f(x * v.x, y * v.y, z * v.z);
-    }
-
-    Vector3f Vector3f::operator*(float scale) const
-    {
-        return Vector3f(x * scale, y * scale, z * scale);
-    }
-
-    Vector3f Vector3f::operator/(float divisor) const
-    {
-        return Vector3f(x / divisor, y / divisor, z / divisor);
-    }
 }
