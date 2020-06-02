@@ -311,7 +311,7 @@ void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void ScatterplotWidget::onSelecting(Selection selection)
 {
-    _selection.set(selection.getStart(), selection.getEnd());
+    _selection = selection;
 
     for (plugin::SelectionListener* listener : _selectionListeners)
         listener->onSelecting(selection);
@@ -321,7 +321,7 @@ void ScatterplotWidget::onSelecting(Selection selection)
 
 void ScatterplotWidget::onSelection(Selection selection)
 {
-    _selection.set(selection.getStart(), selection.getEnd());
+    _selection = selection;
 
     for (plugin::SelectionListener* listener : _selectionListeners)
         listener->onSelection(_selection);
