@@ -21,7 +21,7 @@ class IMAGEDATA_EXPORT ImageData : public hdps::RawData
 public:
     enum Type
     {
-        Undefined,
+        Undefined = -1,
         Sequence,
         Stack,
         MultiPartSequence
