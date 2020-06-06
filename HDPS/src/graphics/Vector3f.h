@@ -7,9 +7,14 @@ namespace hdps
     class Vector3f
     {
     public:
-        Vector3f();
-        Vector3f(float x, float y, float z);
-        ~Vector3f();
+        // C++ Rule of Zero: Implicitly defined destructor and copy member functions are fine for this class.
+
+        Vector3f() = default;
+
+        constexpr Vector3f(float x, float y, float z)
+            : x(x), y(y), z(z)
+        {
+        }
 
         /**
         * Sets the x, y and z components of this vector to the given parameters.
@@ -35,7 +40,10 @@ namespace hdps
         * Returns the squared magnitude of this vector.
         * @return the squared magnitude of this vector
         */
-        float sqrMagnitude();
+        constexpr float sqrMagnitude() const
+        {
+            return x * x + y * y + z * z;
+        }
 
         /**
         * Returns the magnitude of this vector.
@@ -50,21 +58,53 @@ namespace hdps
         std::string str() const;
 
         /* Operator overloads */
-        bool operator==(const Vector3f& v) const;
-        bool operator!=(const Vector3f& v) const;
+        constexpr bool operator==(const Vector3f& v) const
+        {
+            return x == v.x && y == v.y && z == v.z;
+        }
+
+        constexpr bool operator!=(const Vector3f& v) const
+        {
+            return x != v.x || y != v.y || z != v.z;
+        }
+
         Vector3f& operator+=(const Vector3f& v);
         Vector3f& operator-=(const Vector3f& v);
         Vector3f& operator*=(const Vector3f& v);
         Vector3f& operator*=(float scale);
         Vector3f& operator/=(const Vector3f& v);
-        Vector3f operator+(const Vector3f& v) const;
-        Vector3f operator-(const Vector3f& v) const;
-        Vector3f operator-() const;
-        Vector3f operator*(const Vector3f& v) const;
-        Vector3f operator*(float scale) const;
-        Vector3f operator/(float divisor) const;
 
-        float x, y, z;
+        constexpr Vector3f operator+(const Vector3f& v) const
+        {
+            return Vector3f(x + v.x, y + v.y, z + v.z);
+        }
+
+        constexpr Vector3f operator-(const Vector3f& v) const
+        {
+            return Vector3f(x - v.x, y - v.y, z - v.z);
+        }
+
+        constexpr Vector3f operator-() const
+        {
+            return Vector3f(-x, -y, -z);
+        }
+
+        constexpr Vector3f operator*(const Vector3f& v) const
+        {
+            return Vector3f(x * v.x, y * v.y, z * v.z);
+        }
+
+        constexpr Vector3f operator*(float scale) const
+        {
+            return Vector3f(x * scale, y * scale, z * scale);
+        }
+
+        constexpr Vector3f operator/(float divisor) const
+        {
+            return Vector3f(x / divisor, y / divisor, z / divisor);
+        }
+
+        float x{}, y{}, z{};
     };
 
 } // namespace hdps
