@@ -246,7 +246,10 @@ add_library(${PROJECT}_Public ${LINK_TYPE}
     ${PUBLIC_SOURCES}
 )
 
-set_property(TARGET ${PROJECT}_Public PROPERTY CXX_STANDARD 14)
+set_target_properties(${PROJECT}_Public PROPERTIES
+    CXX_STANDARD 14
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+)
 
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
@@ -256,7 +259,11 @@ add_library(${PROJECT}_Private ${LINK_TYPE}
     ${PRIVATE_SOURCES}
 )
 
-set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 14)
+set_target_properties(${PROJECT}_Private PROPERTIES
+    CXX_STANDARD 14
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+)
+
 
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
 target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
@@ -272,7 +279,10 @@ add_executable(${PROJECT} MACOSX_BUNDLE
     ${RESOURCE_FILES}
 )
 
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+set_target_properties(${PROJECT} PROPERTIES
+    CXX_STANDARD 14
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+)
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)

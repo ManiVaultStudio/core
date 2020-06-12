@@ -29,7 +29,10 @@ include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${POINTS_SOURCES})
 
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+set_target_properties(${PROJECT} PROPERTIES
+    CXX_STANDARD 14
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+)
 
 target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16)
 

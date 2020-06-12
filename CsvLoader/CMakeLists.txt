@@ -31,7 +31,10 @@ include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${SOURCES})
 
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+set_target_properties(${PROJECT} PROPERTIES
+    CXX_STANDARD 14
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+)
 
 if(MSVC)
     set(LIB_LINK_SUFFIX ".lib") 
