@@ -78,28 +78,16 @@ float& PointData::operator[](unsigned int index)
 }
 
 // Temporary property metadata
-QVariant PointData::getProperty(const QString & name) const
+const QMap<QString, QVariant>& PointData::properties() const
 {
-    if (!hasProperty(name))
-        return QVariant();
-
-    return _properties[name];
+    return _properties;
 }
 
-void PointData::setProperty(const QString & name, const QVariant & value)
+void PointData::setProperties(const QMap<QString, QVariant>& properties)
 {
-    _properties[name] = value;
+    _properties = properties;
 }
 
-bool PointData::hasProperty(const QString & name) const
-{
-    return _properties.contains(name);
-}
-
-QStringList PointData::propertyNames() const
-{
-    return _properties.keys();
-}
 
 // =============================================================================
 // Point Set
@@ -201,6 +189,16 @@ const float& Points::operator[](unsigned int index) const
 float& Points::operator[](unsigned int index)
 {
     return getRawData<PointData>()[index];
+}
+
+const QMap<QString, QVariant>& Points::properties() const
+{
+    return getRawData<PointData>().properties();
+}
+
+void Points::setProperties(const QMap<QString, QVariant>& properties)
+{
+    return getRawData<PointData>().setProperties(properties);
 }
 
 // =============================================================================

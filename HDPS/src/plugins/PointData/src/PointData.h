@@ -58,14 +58,16 @@ public:
     // Subscript indexing
     float& operator[](unsigned int index);
 
-    // Temporary property metadata
-    QVariant getProperty(const QString & name) const;
+public: // Properties
 
-    void setProperty(const QString & name, const QVariant & value);
+    /** Get properties map */
+    const QMap<QString, QVariant>& properties() const;
 
-    bool hasProperty(const QString & name) const;
-
-    QStringList propertyNames() const;
+    /**
+     * Set properties
+     * @param properties Properties map
+     */
+    void setProperties(const QMap<QString, QVariant>& properties);
 
 private:
     /** Main store of point data in dimension-major order */
@@ -76,7 +78,7 @@ private:
 
     std::vector<QString> _dimNames;
 
-    QMap<QString, QVariant> _properties;
+    QMap<QString, QVariant>    _properties;    /** Properties map */
 };
 
 // =============================================================================
@@ -178,26 +180,16 @@ public:
     // Subscript indexing
     float& operator[](unsigned int index);
 
-    // Temporary property metadata
-    QVariant getProperty(const QString& name) const
-    {
-        return getRawData<PointData>().getProperty(name);
-    }
+public: // Properties
 
-    void setProperty(const QString& name, const QVariant& value)
-    {
-        getRawData<PointData>().setProperty(name, value);
-    }
+/** Get properties in variant form */
+    const QMap<QString, QVariant>& properties() const;
 
-    bool hasProperty(const QString& name) const
-    {
-        return getRawData<PointData>().hasProperty(name);
-    }
-
-    QStringList propertyNames() const
-    {
-        return getRawData<PointData>().propertyNames();
-    }
+    /**
+     * Set properties
+     * @param properties Properties map
+     */
+    void setProperties(const QMap<QString, QVariant>& properties);
 
     // Set functions
     DataSet* copy() const override;
