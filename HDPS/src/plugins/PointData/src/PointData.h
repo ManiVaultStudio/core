@@ -60,14 +60,45 @@ public:
 
 public: // Properties
 
-    /** Get properties map */
-    const QMap<QString, QVariant>& properties() const;
+    /**
+     * Get property in variant form
+     * @param name Name of the property
+     * @param default Default value
+     * @return Property in variant form
+     */
+    QVariant getProperty(const QString& name, const QVariant& default = QVariant()) const
+    {
+        if (!hasProperty(name))
+            return QVariant();
+
+        return _properties[name];
+    }
 
     /**
-     * Set properties
-     * @param properties Properties map
-     */
-    void setProperties(const QMap<QString, QVariant>& properties);
+    * Set property
+    * @param name Name of the property
+    * @param value Property value
+    */
+    void setProperty(const QString& name, const QVariant& value)
+    {
+        _properties[name] = value;
+    }
+
+    /**
+    * Determines whether a property with a give name exists
+    * @param name Name of the property
+    * @param value If property with the given name exists
+    */
+    bool hasProperty(const QString& name) const
+    {
+        return _properties.contains(name);
+    }
+
+    /** Returns a list of available property names */
+    QStringList propertyNames() const
+    {
+        return _properties.keys();
+    }
 
 private:
     /** Main store of point data in dimension-major order */
@@ -182,14 +213,42 @@ public:
 
 public: // Properties
 
-/** Get properties in variant form */
-    const QMap<QString, QVariant>& properties() const;
+    /**
+     * Get property in variant form
+     * @param name Name of the property
+     * @param default Default value
+     * @return Property in variant form
+     */
+    QVariant getProperty(const QString& name, const QVariant& default = QVariant()) const
+    {
+        return getRawData<PointData>().getProperty(name, default);
+    }
 
     /**
-     * Set properties
-     * @param properties Properties map
-     */
-    void setProperties(const QMap<QString, QVariant>& properties);
+    * Set property
+    * @param name Name of the property
+    * @param value Property value
+    */
+    void setProperty(const QString& name, const QVariant& value)
+    {
+        getRawData<PointData>().setProperty(name, value);
+    }
+
+    /**
+    * Determines whether a property with a give name exists
+    * @param name Name of the property
+    * @param value If property with the given name exists
+    */
+    bool hasProperty(const QString& name) const
+    {
+        return getRawData<PointData>().hasProperty(name);
+    }
+
+    /** Returns a list of available property names */
+    QStringList propertyNames() const
+    {
+        return getRawData<PointData>().propertyNames();
+    }
 
     // Set functions
     DataSet* copy() const override;
