@@ -5,11 +5,16 @@
 #include "RawData.h"
 
 #include "Set.h"
+
+#include <biovault_bfloat16.h>
+
 #include <QString>
 #include <QMap>
 #include <QVariant>
 
+#include <array>
 #include <cassert>
+#include <utility> // For tuple.
 #include <vector>
 
 using namespace hdps::plugin;
@@ -32,7 +37,231 @@ const hdps::DataType PointType = hdps::DataType(QString("Points"));
 
 class POINTDATA_EXPORT PointData : public hdps::RawData
 {
+private:
+
+    class VectorHolder
+    {
+    private:
+        using TupleOfVectors = std::tuple <
+            std::vector<float>,
+            std::vector<biovault::bfloat16_t>>;
+
+    public:
+        enum class ElementTypeSpecifier
+        {
+            float32,
+            bfloat16
+        };
+
+        static constexpr std::array<const char*, std::tuple_size<TupleOfVectors>::value> getElementTypeNames()
+        {
+            return
+            {{
+                "float32",
+                "bfloat16"
+            }};
+        }
+
+    private:
+         // Tuple of vectors. Only the vector whose value_type corresponds to _elementTypeSpecifier
+        // is selected. (The other vector is ignored, and could be cleared.) The vector stores the
+        // point data in dimension-major order
+        // Note: Instead of std::tuple, std::variant (from C++17) might be more appropriate, but at
+        // the moment of writing, C++17 may not yet be enabled system wide.
+        TupleOfVectors _tupleOfVectors;
+
+        // Specifies which vector is selected, based on its value_type.
+        ElementTypeSpecifier _elementTypeSpecifier{};
+
+        // Tries to find the element type specifier that corresponds to ElementType.
+        template <typename ElementType, typename Head, typename... Tail>
+        constexpr static ElementTypeSpecifier recursiveFindElementTypeSpecifier(
+            const std::tuple<Head, Tail...>*,
+            const int temp = 0)
+        {
+            using HeadValueType = typename Head::value_type;
+
+            if (std::is_same<ElementType, HeadValueType>::value)
+            {
+                return static_cast<ElementTypeSpecifier>(temp);
+            }
+            else
+            {
+                constexpr const std::tuple<Tail...>* tailNullptr{ nullptr };
+                return recursiveFindElementTypeSpecifier<ElementType>(tailNullptr, temp + 1);
+            }
+        }
+
+
+        template <typename ElementType>
+        constexpr static ElementTypeSpecifier recursiveFindElementTypeSpecifier(const std::tuple<>*, const int)
+        {
+            return ElementTypeSpecifier{}; // Should not occur!
+        }
+
+        template <typename ReturnType, typename VectorHolderType, typename FunctionObject, typename Head, typename... Tail>
+        static ReturnType recursiveVisit(VectorHolderType& vectorHolder, FunctionObject functionObject, const std::tuple<Head, Tail...>*)
+        {
+            using HeadValueType = typename Head::value_type;
+
+            if (vectorHolder.template isSameElementType<HeadValueType>())
+            {
+                return functionObject(vectorHolder.template getVector<HeadValueType>());
+            }
+            else
+            {
+                constexpr const std::tuple<Tail...>* tailNullptr{nullptr};
+                return recursiveVisit<ReturnType>(vectorHolder, functionObject, tailNullptr);
+            }
+        }
+
+        template <typename ReturnType, typename VectorHolderType, typename FunctionObject>
+        static ReturnType recursiveVisit(VectorHolderType&, FunctionObject&, const std::tuple<>*)
+        {
+            struct VisitException : std::exception
+            {
+                const char* what() const noexcept override
+                {
+                    return "visit error!";
+                }
+            };
+            throw VisitException{};
+        }
+
+    public:
+
+        // Similar to C++17 std::visit.
+        template <typename ReturnType = void, typename FunctionObject>
+        ReturnType constVisit(FunctionObject functionObject) const
+        {
+            constexpr const TupleOfVectors* const tupleNullptr{nullptr};
+            return recursiveVisit<ReturnType>(*this, functionObject, tupleNullptr);
+        }
+
+
+        // Similar to C++17 std::visit.
+        template <typename ReturnType = void, typename FunctionObject>
+        ReturnType visit(FunctionObject functionObject)
+        {
+            constexpr const TupleOfVectors* const tupleNullptr{nullptr};
+            return recursiveVisit<ReturnType>(*this, functionObject, tupleNullptr);
+        }
+
+        template <typename T>
+        static constexpr ElementTypeSpecifier getElementTypeSpecifier()
+        {
+            constexpr const TupleOfVectors* const tupleNullptr{ nullptr };
+            return recursiveFindElementTypeSpecifier<T>(tupleNullptr);
+        }
+
+        template <typename T>
+        bool isSameElementType() const
+        {
+            constexpr auto elementTypeSpecifier = getElementTypeSpecifier<T>();
+            return elementTypeSpecifier == _elementTypeSpecifier;
+        }
+
+        template <typename T>
+        const std::vector<T>& getConstVector() const
+        {
+            // This function should only be used to access the currently selected vector.
+            assert(isSameElementType<T>());
+            return std::get<std::vector<T>>(_tupleOfVectors);
+        }
+
+        template <typename T>
+        const std::vector<T>& getVector() const
+        {
+            return getConstVector<T>();
+        }
+
+        template <typename T>
+        std::vector<T>& getVector()
+        {
+            return const_cast<std::vector<T>&>(getConstVector<T>());
+        }
+
+        /// Just forwarding to the corresponding member function of the currently selected std::vector.
+        std::size_t size() const
+        {
+            return constVisit<std::size_t>([] (const auto& vec){ return vec.size(); });
+        }
+
+        /// Just forwarding to the corresponding member function of the currently selected std::vector.
+        void resize(const std::size_t newSize)
+        {
+            visit([newSize](auto& vec) { vec.resize(newSize); });
+        }
+ 
+        /// Just forwarding to the corresponding member function of the currently selected std::vector.
+        void clear()
+        {
+            visit([](auto& vec) { return vec.clear(); });
+        }
+
+        /// Just forwarding to the corresponding member function of the currently selected std::vector.
+        void shrink_to_fit()
+        {
+            visit([](auto& vec) { return vec.shrink_to_fit(); });
+        }
+
+        void setElementTypeSpecifier(const ElementTypeSpecifier elementTypeSpecifier)
+        {
+            _elementTypeSpecifier = elementTypeSpecifier;
+        }
+ 
+        ElementTypeSpecifier getElementTypeSpecifier() const
+        {
+            return _elementTypeSpecifier;
+        }
+
+        template <typename T>
+        void copyData(const T* const data, const std::size_t numberOfElements)
+        {
+            resize(numberOfElements);
+
+            if (data != nullptr)
+            {
+                if (isSameElementType<T>())
+                {
+                    std::memcpy(getVector<T>().data(), data, sizeof(T) * numberOfElements);
+                }
+                else
+                {
+                    visit([data](auto& vec)
+                        {
+                            std::size_t i{};
+                            for (auto& elem: vec)
+                            {
+                                elem = static_cast<std::remove_reference_t<decltype(elem)>>(data[i]);
+                                ++i;
+                            }
+                        });
+                }
+            }
+        }
+    };
+
+
+    template <typename DimensionIndex>
+    void CheckDimensionIndex(const DimensionIndex& dimensionIndex) const
+    {
+        assert(dimensionIndex >= 0);
+        assert(static_cast<std::uintmax_t>(dimensionIndex) < _numDimensions);
+    }
+
+    template <typename DimensionIndices>
+    void CheckDimensionIndices(const DimensionIndices& dimensionIndices) const
+    {
+        for (const auto dimensionIndex : dimensionIndices)
+        {
+            CheckDimensionIndex(dimensionIndex);
+        }
+    }
+
 public:
+    using ElementTypeSpecifier = VectorHolder::ElementTypeSpecifier;
+
     PointData() : RawData("Points", PointType) { }
     ~PointData(void) override;
 
@@ -46,9 +275,87 @@ public:
 
     const std::vector<float>& getData() const;
 
+    void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
+    void extractFullDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
+    void extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
+
+    template <typename ResultContainer, typename DimensionIndices>
+    void populateFullDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
+    {
+        CheckDimensionIndices(dimensionIndices);
+        _vectorHolder.constVisit([&resultContainer, this, &dimensionIndices](const auto& vec)
+            {
+                const std::ptrdiff_t numPoints{ getNumPoints() };
+                std::ptrdiff_t resultIndex{};
+
+                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+                {
+                    const std::ptrdiff_t n{ pointIndex * _numDimensions };
+
+                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                    {
+                        resultContainer[resultIndex] = vec[n + dimensionIndex];
+                        ++resultIndex;
+                    }
+                }
+            });
+    }
+
+    template <typename ResultContainer, typename DimensionIndices>
+    void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const std::vector<unsigned>& indices) const
+    {
+        CheckDimensionIndices(dimensionIndices);
+
+        _vectorHolder.constVisit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
+            {
+                const std::ptrdiff_t numPoints{ getNumPoints() };
+                std::ptrdiff_t resultIndex{};
+
+                for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
+                {
+                    const std::ptrdiff_t n{ indices[pointIndex] * _numDimensions };
+
+                    for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
+                    {
+                        resultContainer[resultIndex] = vec[n + dimensionIndex];
+                        ++resultIndex;
+                    }
+                }
+            });
+    }
+
     const std::vector<QString>& getDimensionNames() const;
 
-    void setData(const float* data, unsigned int numPoints, unsigned int numDimensions);
+    static constexpr auto getElementTypeNames()
+    {
+        return VectorHolder::getElementTypeNames();
+    }
+
+    void setElementType(const ElementTypeSpecifier elementTypSpecifier)
+    {
+        if (_vectorHolder.getElementTypeSpecifier() != elementTypSpecifier)
+        {
+            _vectorHolder.clear();
+            _vectorHolder.shrink_to_fit();
+            _vectorHolder.setElementTypeSpecifier(elementTypSpecifier);
+        }
+    }
+
+    template <typename T>
+    void setElementType()
+    {
+        constexpr auto elementTypSpecifier = VectorHolder::getElementTypeSpecifier<T>();
+        setElementType(elementTypSpecifier);
+    }
+
+    template <typename T>
+    void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
+    {
+         _vectorHolder.copyData(data, numPoints * numDimensions);
+         _numDimensions = numDimensions;
+    }
+
+    void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
@@ -101,8 +408,7 @@ public: // Properties
     }
 
 private:
-    /** Main store of point data in dimension-major order */
-    std::vector<float> _data;
+    VectorHolder _vectorHolder;
 
     /** Number of features of each data point */
     unsigned int _numDimensions = 1;
@@ -122,15 +428,22 @@ public:
     Points(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
     ~Points() override { }
 
-    const std::vector<float>& getData() const
+    const std::vector<float>& getData() const;
+
+    template <typename T>
+    void setDataElementType()
     {
-        return getRawData<PointData>().getData();
+        getRawData<PointData>().setElementType<T>();
     }
 
-    void setData(const float* data, unsigned int numPoints, unsigned int numDimensions)
+
+    template <typename T>
+    void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
         getRawData<PointData>().setData(data, numPoints, numDimensions);
     }
+
+    void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
 
@@ -144,48 +457,14 @@ public:
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
         const auto& rawPointData = getRawData<PointData>();
-        const std::ptrdiff_t numDimensions{ rawPointData.getNumDimensions() };
-
-        for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
-        {
-            assert(dimensionIndex >= 0);
-            assert(dimensionIndex < numDimensions);
-        }
-
-        // Note that Points::getNumPoints() returns the number of indices when the data set is not full.
-        const std::ptrdiff_t numPoints{ getNumPoints() };
-
-        const auto& data = rawPointData.getData();
 
         if (isFull())
         {
-            std::ptrdiff_t resultIndex{};
-
-            for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
-            {
-                const std::ptrdiff_t n{ pointIndex * numDimensions };
-
-                for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
-                {
-                    resultContainer[resultIndex] = data[n + dimensionIndex];
-                    ++resultIndex;
-                }
-            }
+            rawPointData.populateFullDataForDimensions(resultContainer, dimensionIndices);
         }
         else
         {
-            std::ptrdiff_t resultIndex{};
-
-            for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
-            {
-                const std::ptrdiff_t n{ indices[pointIndex] * numDimensions };
-
-                for (const std::ptrdiff_t dimensionIndex : dimensionIndices)
-                {
-                    resultContainer[resultIndex] = data[n + dimensionIndex];
-                    ++resultIndex;
-                }
-            }
+            rawPointData.populateDataForDimensions(resultContainer, dimensionIndices, indices);
         }
     }
 

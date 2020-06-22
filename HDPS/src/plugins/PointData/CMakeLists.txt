@@ -27,6 +27,8 @@ add_library(${PROJECT} SHARED ${POINTS_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 
+target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../biovault_bfloat16)
+
 add_dependencies(${PROJECT} HDPS_Public)
 
 # Generate a header file that contains the EXPORT macro for this library.
@@ -62,9 +64,12 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
     "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/${EXPORT_HEADER_FILE_NAME}"
 )
 
-# Copy point data header
+# Copy point data header and its depending bfloat16 header
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "${CMAKE_CURRENT_SOURCE_DIR}/src/PointData.h"
     "${INSTALL_DIR}/$<CONFIGURATION>/include/PointData.h"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../biovault_bfloat16/biovault_bfloat16.h"
+    "${INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16.h"
 )
