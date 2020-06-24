@@ -30,6 +30,9 @@ source_group( Plugin FILES ${SOURCES})
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${SOURCES})
+
+set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+
 add_dependencies(${PROJECT} HDPS_Public)
 
 if(MSVC)
