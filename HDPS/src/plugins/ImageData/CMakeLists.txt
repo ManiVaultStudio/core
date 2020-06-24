@@ -33,6 +33,8 @@ include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${SOURCES} ${AUX})
 
+set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+
 include(GenerateExportHeader)
 generate_export_header(${PROJECT})
 

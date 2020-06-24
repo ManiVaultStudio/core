@@ -24,6 +24,9 @@ source_group( Plugin FILES ${POINTS_SOURCES})
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${POINTS_SOURCES})
+
+set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+
 add_dependencies(${PROJECT} HDPS_Public)
 
 # Generate a header file that contains the EXPORT macro for this library.
