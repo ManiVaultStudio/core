@@ -44,13 +44,20 @@ private:
     private:
         using TupleOfVectors = std::tuple <
             std::vector<float>,
-            std::vector<biovault::bfloat16_t>>;
-
+            std::vector<biovault::bfloat16_t>,
+            std::vector<std::int16_t>,
+            std::vector<std::uint16_t>,
+            std::vector<std::int8_t>,
+            std::vector<std::uint8_t> >;
     public:
         enum class ElementTypeSpecifier
         {
             float32,
-            bfloat16
+            bfloat16,
+            int16,
+            uint16,
+            int8,
+            uint8
         };
 
         static constexpr std::array<const char*, std::tuple_size<TupleOfVectors>::value> getElementTypeNames()
@@ -58,7 +65,11 @@ private:
             return
             {{
                 "float32",
-                "bfloat16"
+                "bfloat16",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
             }};
         }
 
