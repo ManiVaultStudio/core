@@ -284,6 +284,26 @@ public:
 
     unsigned int getNumDimensions() const;
 
+    // Similar to C++17 std::visit.
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
+    {
+        return _vectorHolder.constVisit<ReturnType>([functionObject](const auto& vec)
+            {
+                return functionObject(std::cbegin(vec), std::cend(vec));
+            });
+    }
+
+    // Similar to C++17 std::visit.
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType visitFromBeginToEnd(FunctionObject functionObject)
+    {
+        return _vectorHolder.visit<ReturnType>([functionObject](auto& vec)
+            {
+                return functionObject(std::begin(vec), std::end(vec));
+            });
+    }
+
     const std::vector<float>& getData() const;
 
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
@@ -438,6 +458,29 @@ class POINTDATA_EXPORT Points : public hdps::DataSet
 public:
     Points(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
     ~Points() override { }
+
+    /// Allows read-only access to the internal point data vector, from its begin to its end.
+    /// Similar to C++17 std::visit.
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
+    {
+        return getRawData<PointData>().constVisitFromBeginToEnd<ReturnType>(functionObject);
+    }
+
+    /// Convenience member function, just calling constVisitFromBeginToEnd.
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType visitFromBeginToEnd(FunctionObject functionObject) const
+    {
+        return constVisitFromBeginToEnd<ReturnType>(functionObject);
+    }
+
+    /// Non-const overload, allowing read + write access to the internal point data vector, from its begin to its end.
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType visitFromBeginToEnd(FunctionObject functionObject)
+    {
+        return getRawData<PointData>().visitFromBeginToEnd<ReturnType>(functionObject);
+    }
+
 
     const std::vector<float>& getData() const;
 
