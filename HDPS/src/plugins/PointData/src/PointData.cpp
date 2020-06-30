@@ -1,3 +1,8 @@
+#ifndef HDPS_ASSUME_FLOAT32_POINT_DATA
+// Avoid warnings about calls to deprecated PointData member functions.
+#define HDPS_ASSUME_FLOAT32_POINT_DATA
+#endif
+
 #include "PointData.h"
 
 #include <QtCore>
