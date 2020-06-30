@@ -35,6 +35,10 @@ const hdps::DataType PointType = hdps::DataType(QString("Points"));
 // Raw Data
 // =============================================================================
 
+#ifndef HDPS_ASSUME_FLOAT32_POINT_DATA
+#define HDPS_ASSUME_FLOAT32_POINT_DATA [[deprecated("Deprecated: Assumes that point data is always 32-bit float!")]]
+#endif
+
 class POINTDATA_EXPORT PointData : public hdps::RawData
 {
 private:
@@ -304,7 +308,7 @@ public:
             });
     }
 
-    const std::vector<float>& getData() const;
+    HDPS_ASSUME_FLOAT32_POINT_DATA const std::vector<float>& getData() const;
 
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
     void extractFullDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
@@ -391,10 +395,10 @@ public:
     void setDimensionNames(const std::vector<QString>& dimNames);
 
     // Constant subscript indexing
-    const float& operator[](unsigned int index) const;
+    HDPS_ASSUME_FLOAT32_POINT_DATA const float& operator[](unsigned int index) const;
 
     // Subscript indexing
-    float& operator[](unsigned int index);
+    HDPS_ASSUME_FLOAT32_POINT_DATA float& operator[](unsigned int index);
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
@@ -494,7 +498,7 @@ public:
     }
 
 
-    const std::vector<float>& getData() const;
+    HDPS_ASSUME_FLOAT32_POINT_DATA const std::vector<float>& getData() const;
 
     template <typename T>
     void setDataElementType()
@@ -551,10 +555,10 @@ public:
     void setDimensionNames(const std::vector<QString>& dimNames);
 
     // Constant subscript indexing
-    const float& operator[](unsigned int index) const;
+    HDPS_ASSUME_FLOAT32_POINT_DATA const float& operator[](unsigned int index) const;
 
     // Subscript indexing
-    float& operator[](unsigned int index);
+    HDPS_ASSUME_FLOAT32_POINT_DATA float& operator[](unsigned int index);
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
