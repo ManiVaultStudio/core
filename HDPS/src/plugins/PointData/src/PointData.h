@@ -396,18 +396,30 @@ public:
     // Subscript indexing
     float& operator[](unsigned int index);
 
+    // Returns the value of the element at the specified position in the current
+    // data vector, converted to float.
+    // Will work fine, even when the internal data element type is not float.
+    // However, may not perform well when retrieving a large number of values.
+    float getValueAt(std::size_t index) const;
+
+    // Sets the value of the element at the specified position in the current
+    // data vector, converted to the internal data element type. 
+    // Will work fine, even when the internal data element type is not float.
+    // However, may not perform well when setting a large number of values.
+    void setValueAt(std::size_t index, float newValue);
+
 public: // Properties
 
     /**
      * Get property in variant form
      * @param name Name of the property
-     * @param default Default value
+     * @param defaultValue Default value
      * @return Property in variant form
      */
-    QVariant getProperty(const QString& name, const QVariant& default = QVariant()) const
+    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const
     {
         if (!hasProperty(name))
-            return QVariant();
+            return defaultValue;
 
         return _properties[name];
     }
@@ -544,17 +556,29 @@ public:
     // Subscript indexing
     float& operator[](unsigned int index);
 
+    // Returns the value of the element at the specified position in the current
+    // data vector, converted to float.
+    // Will work fine, even when the internal data element type is not float.
+    // However, may not perform well when retrieving a large number of values.
+    float getValueAt(std::size_t index) const;
+
+    // Sets the value of the element at the specified position in the current
+    // data vector, converted to the internal data element type. 
+    // Will work fine, even when the internal data element type is not float.
+    // However, may not perform well when setting a large number of values.
+    void setValueAt(std::size_t index, float newValue);
+
 public: // Properties
 
     /**
      * Get property in variant form
      * @param name Name of the property
-     * @param default Default value
+     * @param defaultValue Default value
      * @return Property in variant form
      */
-    QVariant getProperty(const QString& name, const QVariant& default = QVariant()) const
+    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const
     {
-        return getRawData<PointData>().getProperty(name, default);
+        return getRawData<PointData>().getProperty(name, defaultValue);
     }
 
     /**

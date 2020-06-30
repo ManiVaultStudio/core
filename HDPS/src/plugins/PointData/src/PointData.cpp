@@ -4,6 +4,7 @@
 #include <QtDebug>
 
 #include <cstring>
+#include <type_traits>
 
 #include "graphics/Vector2f.h"
 
@@ -70,6 +71,23 @@ const float& PointData::operator[](unsigned int index) const
 float& PointData::operator[](unsigned int index)
 {
     return _vectorHolder.getVector<float>()[index];
+}
+
+float PointData::getValueAt(const std::size_t index) const
+{
+    return _vectorHolder.constVisit<float>([index](const auto& vec)
+        {
+            return vec[index];
+        });
+}
+
+void PointData::setValueAt(const std::size_t index, const float newValue)
+{
+    _vectorHolder.visit([index, newValue](auto& vec)
+        {
+            using value_type = typename std::remove_reference_t<decltype(vec)>::value_type;
+            vec[index] = static_cast<value_type>(newValue);
+        });
 }
 
 void PointData::extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const
@@ -209,6 +227,16 @@ const float& Points::operator[](unsigned int index) const
 float& Points::operator[](unsigned int index)
 {
     return getRawData<PointData>()[index];
+}
+
+float Points::getValueAt(const std::size_t index) const
+{
+    return getRawData<PointData>().getValueAt(index);
+}
+
+void Points::setValueAt(const std::size_t index, const float newValue)
+{
+    getRawData<PointData>().setValueAt(index, newValue);
 }
 
 // =============================================================================
