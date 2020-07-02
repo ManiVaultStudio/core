@@ -41,37 +41,7 @@ public: // Subsets
     /** Create an image subset (not implemented at this point) */
     virtual void createSubset() const override {};
 
-public: // Functions for populating the set with images
-
-    /**
-     * Populates the set with a sequence of images (each image is a dimension)
-     * @param images Sequence images
-     * @param size Size of the images
-     */
-    void setSequence(const std::vector<Image>& images, const QSize& size);
-
-    /**
-     * Populates the set with a stack of images (each pixel is a dimension)
-     * @param images Stack of images
-     * @param size Size of the images
-     */
-    void setStack(const std::vector<Image>& images, const QSize& size);
-
 public: // Image retrieval functions
-
-    /**
-     * Retrieves one or more images from a sequence of images
-     * @param imageIds Identifiers of the images to retrieve
-     * @return Average of images
-     */
-    QImage sequenceImage(const std::vector<std::uint32_t>& imageIds);
-
-    /**
-     * Retrieves a single image from a stack of images
-     * @param imageId Identifier of the image to retrieve
-     * @return Stack image
-     */
-    QImage stackImage(const std::uint32_t& imageId);
 
     /** Obtain a copy of this dataset */
     hdps::DataSet* copy() const override;

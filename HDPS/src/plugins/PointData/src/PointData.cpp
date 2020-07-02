@@ -77,30 +77,6 @@ float& PointData::operator[](unsigned int index)
     return _data[index];
 }
 
-// Temporary property metadata
-QVariant PointData::getProperty(const QString & name) const
-{
-    if (!hasProperty(name))
-        return QVariant();
-
-    return _properties[name];
-}
-
-void PointData::setProperty(const QString & name, const QVariant & value)
-{
-    _properties[name] = value;
-}
-
-bool PointData::hasProperty(const QString & name) const
-{
-    return _properties.contains(name);
-}
-
-QStringList PointData::propertyNames() const
-{
-    return _properties.keys();
-}
-
 // =============================================================================
 // Point Set
 // =============================================================================
