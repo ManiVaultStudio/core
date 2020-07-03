@@ -145,6 +145,34 @@ private:
 
     public:
 
+        /// Defaulted default-constructor. Ensures that the element type
+        /// specifier is default-initialized (to "float32").
+        VectorHolder() = default;
+
+        /// Explicit constructor that copies the specified vector into the
+        /// internal data structure. Ensures that the element type specifier
+        /// matches the value type of the vector.
+        template <typename T>
+        explicit VectorHolder(const std::vector<T>& vec)
+            :
+            _elementTypeSpecifier{ getElementTypeSpecifier<T>() }
+        {
+            std::get<std::vector<T>>(_tupleOfVectors) = vec;
+        }
+
+
+        /// Explicit constructor that efficiently "moves" the specified vector
+        /// into the internal data structure. Ensures that the element type
+        /// specifier matches the value type of the vector.
+        template <typename T>
+        explicit VectorHolder(std::vector<T>&& vec)
+            :
+            _elementTypeSpecifier{ getElementTypeSpecifier<T>() }
+        {
+            std::get<std::vector<T>>(_tupleOfVectors) = std::move(vec);
+        }
+
+
         // Similar to C++17 std::visit.
         template <typename ReturnType = void, typename FunctionObject>
         ReturnType constVisit(FunctionObject functionObject) const
@@ -230,30 +258,24 @@ private:
             return _elementTypeSpecifier;
         }
 
+
+        /// Resizes the currently active internal data vector to the specified
+        /// number of elements, and converts the elements of the specified data
+        /// to the internal data element type, by static_cast. 
         template <typename T>
-        void copyData(const T* const data, const std::size_t numberOfElements)
+        void convertData(const T* const data, const std::size_t numberOfElements)
         {
             resize(numberOfElements);
 
-            if (data != nullptr)
+            visit([data](auto& vec)
             {
-                if (isSameElementType<T>())
+                std::size_t i{};
+                for (auto& elem: vec)
                 {
-                    std::memcpy(getVector<T>().data(), data, sizeof(T) * numberOfElements);
+                    elem = static_cast<std::remove_reference_t<decltype(elem)>>(data[i]);
+                    ++i;
                 }
-                else
-                {
-                    visit([data](auto& vec)
-                        {
-                            std::size_t i{};
-                            for (auto& elem: vec)
-                            {
-                                elem = static_cast<std::remove_reference_t<decltype(elem)>>(data[i]);
-                                ++i;
-                            }
-                        });
-                }
-            }
+            });
         }
     };
 
@@ -383,14 +405,62 @@ public:
         setElementType(elementTypSpecifier);
     }
 
+    /// Converts the specified data to the internal data, using static_cast for
+    /// each data element. Sets the number of dimensions as specified. Ensures
+    /// that the size of the internal data buffer corresponds to the number of
+    /// points.
+    /// \note This function does not affect the selected internal data type.
+    template <typename T>
+    void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
+    {
+        _vectorHolder.convertData(data, numPoints * numDimensions);
+        _numDimensions = numDimensions;
+    }
+
+    /// Converts the specified data to the internal data, using static_cast for each data element.
+    /// Convenience overload, allowing an std::vector or an std::array as
+    /// input data container.
+    template <typename T>
+    void convertData(const T& inputDataContainer, const std::size_t numDimensions)
+    {
+        _vectorHolder.convertData(inputDataContainer.data(), inputDataContainer.size());
+        _numDimensions = numDimensions;
+    }
+
+    /// Copies the specified data into the internal data, sets the number of
+    /// dimensions as specified, and sets the selected internal data type
+    /// according to the specified data type T.
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
-         _vectorHolder.copyData(data, numPoints * numDimensions);
+         _vectorHolder = VectorHolder( std::vector<T>(data, data + numPoints * numDimensions) );
          _numDimensions = numDimensions;
     }
 
+
+    /// Convenience overload to allow clearing the data by setData(nullptr, 0, numDimensions). 
     void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
+
+
+    /// Copies the data from the specified vector into the internal data, sets
+    /// the number of dimensions as specified, and sets the selected internal
+    /// data type according to the specified data type T.
+    template <typename T>
+    void setData(const std::vector<T>& data, const std::size_t numDimensions)
+    {
+        _vectorHolder = VectorHolder(data);
+        _numDimensions = numDimensions;
+    }
+
+    /// Efficiently "moves" the data from the specified vector into the internal
+    /// data, sets the number of dimensions as specified, and sets the selected
+    /// internal data type according to the specified data type T.
+    template <typename T>
+    void setData(std::vector<T>&& data, const std::size_t numDimensions)
+    {
+        _vectorHolder = VectorHolder(std::move(data));
+        _numDimensions = numDimensions;
+    }
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
@@ -500,6 +570,21 @@ public:
 
     HDPS_ASSUME_FLOAT32_POINT_DATA const std::vector<float>& getData() const;
 
+    /// Just calls the corresponding member function of its PointData.
+    template <typename T>
+    void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
+    {
+        getRawData<PointData>().convertData(data, numPoints, numDimensions);
+    }
+
+
+    /// Just calls the corresponding member function of its PointData.
+    template <typename T>
+    void convertData(const T& inputDataContainer, const std::size_t numDimensions)
+    {
+        getRawData<PointData>().convertData(inputDataContainer, numDimensions);
+    }
+
     template <typename T>
     void setDataElementType()
     {
@@ -507,13 +592,29 @@ public:
     }
 
 
+    /// Just calls the corresponding member function of its PointData.
     template <typename T>
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
         getRawData<PointData>().setData(data, numPoints, numDimensions);
     }
 
+    /// Just calls the corresponding member function of its PointData.
     void setData(std::nullptr_t data, std::size_t numPoints, std::size_t numDimensions);
+
+    /// Just calls the corresponding member function of its PointData.
+    template <typename T>
+    void setData(const std::vector<T>& data, const std::size_t numDimensions)
+    {
+        getRawData<PointData>().setData(data, numDimensions);
+    }
+
+    /// Just calls the corresponding member function of its PointData.
+    template <typename T>
+    void setData(std::vector<T>&& data, const std::size_t numDimensions)
+    {
+        getRawData<PointData>().setData(std::move(data), numDimensions);
+    }
 
     void extractDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
 

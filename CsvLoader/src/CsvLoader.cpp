@@ -88,7 +88,7 @@ void CsvLoader::dialogClosed(QString dataSetName, bool hasHeaders)
         }
     }
 
-    points.setData(data.data(), data.size() / numDimensions, numDimensions);
+    points.setData(std::move(data), numDimensions);
 
     qDebug() << "Number of dimensions: " << points.getNumDimensions();
 
