@@ -336,8 +336,8 @@ public:
             });
     }
 
-    template <typename ResultContainer, typename DimensionIndices>
-    void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const std::vector<unsigned>& indices) const
+    template <typename ResultContainer, typename DimensionIndices, typename Indices>
+    void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices) const
     {
         CheckDimensionIndices(dimensionIndices);
 
