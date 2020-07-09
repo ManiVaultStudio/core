@@ -3,6 +3,7 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QSpinBox>
 #include <QLabel>
 #include <QPushButton>
@@ -19,7 +20,7 @@ public:
     InputDialog(QWidget* parent);
 
 signals:
-    void closeDialog(QString dataSetName, bool hasHeaders);
+    void closeDialog(QString dataSetName, bool hasHeaders, QString dataType);
 
 public slots:
     void closeDialogAction();
@@ -27,6 +28,7 @@ public slots:
 private:
     QLineEdit* _dataNameInput;
     QCheckBox* _headerCheckbox;
+    QComboBox* const _dataTypeComboBox = new QComboBox{};
 
     QPushButton* loadButton;
 };

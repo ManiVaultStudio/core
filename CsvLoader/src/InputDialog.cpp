@@ -1,4 +1,5 @@
 #include "InputDialog.h"
+#include "PointData.h"
 
 InputDialog::InputDialog(QWidget* parent) :
     QDialog(parent)
@@ -10,6 +11,11 @@ InputDialog::InputDialog(QWidget* parent) :
 
     _headerCheckbox = new QCheckBox("Has Headers");
 
+
+    for (const char* const typeName : PointData::getElementTypeNames())
+    {
+        _dataTypeComboBox->addItem(QString::fromLatin1(typeName));
+    }
     loadButton = new QPushButton(tr("Load file"));
     loadButton->setDefault(true);
 
@@ -19,6 +25,10 @@ InputDialog::InputDialog(QWidget* parent) :
     QHBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(_dataNameInput);
     layout->addWidget(_headerCheckbox);
+    auto label = std::make_unique<QLabel>(tr("&Store as: "));
+    label->setBuddy(_dataTypeComboBox);
+    layout->addWidget(label.release());
+    layout->addWidget(_dataTypeComboBox);
     layout->addWidget(loadButton);
     setLayout(layout);
 }
@@ -26,5 +36,5 @@ InputDialog::InputDialog(QWidget* parent) :
 void InputDialog::closeDialogAction()
 {
     bool hasHeaders = _headerCheckbox->isChecked();
-    emit closeDialog(_dataNameInput->text(), hasHeaders);
+    emit closeDialog(_dataNameInput->text(), hasHeaders, _dataTypeComboBox->currentText());
 }
