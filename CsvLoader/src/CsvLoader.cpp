@@ -15,6 +15,116 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.CsvLoader")
 // Loader
 // =============================================================================
 
+namespace
+{
+    // Generic template, wrapping QString "toType(&ok)" member functions. 
+    template <typename T> T ConvertString(const QString&, bool& ok);
+
+    template <> float ConvertString(const QString& str, bool& ok)
+    {
+        return str.toFloat(&ok);
+    }
+
+    template <> biovault::bfloat16_t ConvertString(const QString& str, bool& ok)
+    {
+        return biovault::bfloat16_t{ str.toFloat(&ok) };
+    }
+
+    template <> std::int16_t ConvertString(const QString& str, bool& ok)
+    {
+        return str.toShort(&ok);
+    }
+
+    template <> std::uint16_t ConvertString(const QString& str, bool& ok)
+    {
+        return str.toUShort(&ok);
+    }
+
+    template <> std::uint8_t ConvertString(const QString& str, bool& ok)
+    {
+        const auto temp = str.toUShort();
+        ok = temp <= std::numeric_limits<uint16_t>::max();
+        return ok ? static_cast<std::uint8_t>(temp) : std::uint8_t{};
+    }
+
+    template <> std::int8_t ConvertString(const QString& str, bool& ok)
+    {
+        const auto temp = str.toShort();
+        ok = ((temp >= std::numeric_limits<int8_t>::min()) && (temp <= std::numeric_limits<int8_t>::max()));
+        return ok ? static_cast<std::int8_t>(temp) : std::int8_t{};
+    }
+
+
+    // Converts the strings from the string lists to the PointData, converting
+    // each string to data element type T.
+    template <typename T>
+    void convertStringsToPointData(
+        Points& points,
+        const std::vector<QStringList>& stringLists,
+        const bool hasHeaders)
+    {
+        std::vector<T> data;
+        std::size_t numDimensions = 1;
+        const auto numberOfStringLists = stringLists.size();
+        const std::size_t startIndex{ hasHeaders ? 1U : 0U };
+
+        if (numberOfStringLists > startIndex)
+        {
+            const auto expectedNumberOfDataElements = (numberOfStringLists - startIndex) * stringLists.front().size();
+            data.reserve(expectedNumberOfDataElements);
+
+            for (auto i = startIndex; i < numberOfStringLists; ++i)
+            {
+                const QStringList& items = stringLists[i];
+                numDimensions = static_cast<std::size_t>(items.size());
+
+                for (const auto& item : items)
+                {
+                    if (!item.isEmpty())
+                    {
+                        auto ok = false;
+                        data.push_back(ConvertString<T>(item, ok));
+                        if (!ok)
+                        {
+                            qDebug() << "Conversion error at row" << i << "! Input value:" << item << "Output value: zero";
+                        }
+                    }
+                }
+            }
+        }
+        points.setData(std::move(data), numDimensions);
+    }
+
+
+    // Recursively searches for the data element type that is specified by the selectedDataElementType parameter. 
+    template <unsigned N = 0>
+    void recursiveConvertStringsToPointData(
+        const QString& selectedDataElementType,
+        Points& points,
+        const std::vector<QStringList>& stringLists,
+        const bool hasHeaders)
+    {
+        const QLatin1String nthDataElementTypeName(std::get<N>(PointData::getElementTypeNames()));
+
+        if (selectedDataElementType == nthDataElementTypeName)
+        {
+            convertStringsToPointData<PointData::ElementTypeAt<N>>(points, stringLists, hasHeaders);
+        }
+        else
+        {
+            recursiveConvertStringsToPointData<N + 1>(selectedDataElementType, points, stringLists, hasHeaders);
+        }
+    }
+
+    template <>
+    void recursiveConvertStringsToPointData<PointData::getNumberOfSupportedElementTypes()>(const QString&, Points&, const std::vector<QStringList>&, bool)
+    {
+        // This specialization does nothing, intensionally! 
+    }
+
+}   // End of unnamed namespace
+
+
 CsvLoader::~CsvLoader(void)
 {
     
@@ -58,37 +168,19 @@ void CsvLoader::loadData()
     int inputOk = inputDialog.exec();
 }
 
-void CsvLoader::dialogClosed(QString dataSetName, bool hasHeaders)
+void CsvLoader::dialogClosed(QString dataSetName, bool hasHeaders, QString selectedDataElementType)
 {
     QStringList headers;
-    int startIndex = 0;
 
     if (hasHeaders)
     {
         headers = _loadedData[0];
-        startIndex = 1;
     }
 
     QString name = _core->addData("Points", dataSetName);
     Points& points = _core->requestData<Points>(name);
 
-    std::vector<float> data;
-    int numDimensions = 1;
-    for (int i = startIndex; i < _loadedData.size(); i++)
-    {
-        QStringList items = _loadedData[i];
-        numDimensions = items.size();
-        for (int i = 0; i < items.size(); i++)
-        {
-            if (items[i].isEmpty())
-                continue;
-            float f = items[i].toFloat();
-
-            data.push_back(f);
-        }
-    }
-
-    points.setData(std::move(data), numDimensions);
+    recursiveConvertStringsToPointData(selectedDataElementType, points, _loadedData, hasHeaders);
 
     qDebug() << "Number of dimensions: " << points.getNumDimensions();
 

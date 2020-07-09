@@ -27,7 +27,7 @@ public:
     void loadData() Q_DECL_OVERRIDE;
 
 public slots:
-    void dialogClosed(QString dataSetName, bool hasHeaders);
+    void dialogClosed(QString dataSetName, bool hasHeaders, QString selectedDataElementType);
 
 private:
     std::vector<QStringList> _loadedData;

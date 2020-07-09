@@ -145,6 +145,10 @@ private:
 
     public:
 
+        /// Yields the n-th supported element type.
+        template <std::size_t N>
+        using ElementTypeAt = typename std::tuple_element_t<N, TupleOfVectors>::value_type;
+
         /// Defaulted default-constructor. Ensures that the element type
         /// specifier is default-initialized (to "float32").
         VectorHolder() = default;
@@ -299,6 +303,11 @@ private:
 public:
     using ElementTypeSpecifier = VectorHolder::ElementTypeSpecifier;
 
+    /// Yields the n-th supported element type. Corresponds to the n-th entry
+    /// in the array of type names, returned by getElementTypeNames().
+    template <std::size_t N>
+    using ElementTypeAt = VectorHolder::ElementTypeAt<N>;
+
     PointData() : RawData("Points", PointType) { }
     ~PointData(void) override;
 
@@ -386,6 +395,12 @@ public:
     static constexpr auto getElementTypeNames()
     {
         return VectorHolder::getElementTypeNames();
+    }
+
+    /// Returns the number of types, supported as element type of the internal data storage. 
+    static constexpr auto getNumberOfSupportedElementTypes()
+    {
+        return VectorHolder::getElementTypeNames().size();
     }
 
     void setElementType(const ElementTypeSpecifier elementTypSpecifier)
