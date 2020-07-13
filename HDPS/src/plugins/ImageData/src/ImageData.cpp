@@ -121,7 +121,7 @@ void ImageData::setNoImages(const std::uint32_t& noImages)
 
 float ImageData::pointValue(const std::uint32_t& index) const
 {
-    return (*_points)[index];
+    return _points->getValueAt(index);
 }
 
 float ImageData::pointValue(const std::uint32_t& x, const std::uint32_t& y) const
