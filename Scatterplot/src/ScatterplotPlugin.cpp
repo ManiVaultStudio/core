@@ -157,7 +157,11 @@ void ScatterplotPlugin::onColorDataInput(QString dataSetName)
             qWarning("Number of points used for coloring does not match number of points in data, aborting attempt to color plot");
             return;
         }
-        scalars.insert(scalars.begin(), points.getData().begin(), points.getData().end());
+
+        points.visitFromBeginToEnd([&scalars](auto begin, auto end)
+            {
+                scalars.insert(scalars.begin(), begin, end);
+            });
 
         _scatterPlotWidget->setScalars(scalars);
         _scatterPlotWidget->setScalarEffect(PointEffect::Color);
