@@ -75,7 +75,7 @@ Press `Ctrl+X` to exit, `Y` for saving the buffer, and restart the terminal.
 2. Right click the solution and press `Build Solution`, if this does not produce errors, continue to the next step.
 2. Right click the project `HDPS` in the Solution Explorer and select Set as StartUp Project.
 3. Right click the project again and select Properties.
-4. In the Configuration Properties -> Debugging set the `Command` by browsing to the `HDPS.exe` file in the HDPS_INSTALL_DIR folder. Set the `Working Directory` field by browsing to the HDPS_INSTALL_DIR folder.
+4. In the Configuration Properties -> Debugging set the `Command` to `HDPS.exe`. Set the `Working Directory` to `$(HDPS_INSTALL_DIR)/Release`.
 5. Press Apply and OK and right click the project in the Solution Explorer and press Build.
 6. If all is well the build should succeed and if you run the project with Ctrl+F5 it will launch `HDPS.exe`.
 
