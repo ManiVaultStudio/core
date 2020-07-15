@@ -27,7 +27,7 @@ add_library(${PROJECT} SHARED ${POINTS_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 
-target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../biovault_bfloat16)
+target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16)
 
 add_dependencies(${PROJECT} HDPS_Public)
 
@@ -70,6 +70,6 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
     "${CMAKE_CURRENT_SOURCE_DIR}/src/PointData.h"
     "${INSTALL_DIR}/$<CONFIGURATION>/include/PointData.h"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../biovault_bfloat16/biovault_bfloat16.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h"
     "${INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16.h"
 )
