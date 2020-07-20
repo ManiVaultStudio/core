@@ -73,3 +73,7 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h"
     "${INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16.h"
 )
+
+if (HDPS_USE_GTEST)
+    add_subdirectory(gtest)
+endif()
