@@ -8,6 +8,13 @@ PROJECT(${PROJECT})
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
+option(HDPS_USE_GTEST "Use GoogleTest" OFF)
+
+if (HDPS_USE_GTEST)
+    enable_testing()
+    add_subdirectory(external/googletest)
+endif()
+
 add_subdirectory(CsvLoader)
 add_subdirectory(FcsLoader)
 add_subdirectory(BinLoader)
