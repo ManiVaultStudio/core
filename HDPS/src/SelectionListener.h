@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_SELECTIONLISTENER_H
+#define HDPS_SELECTIONLISTENER_H
 
 #include "graphics/Selection.h"
 
@@ -30,3 +31,5 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::SelectionListener, "cytosplore.SelectionListener")
+
+#endif // HDPS_SELECTIONLISTENER_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_LOGITEMMODEL_H
+#define HDPS_LOGITEMMODEL_H
 
 // Qt header file:
 #include <QAbstractItemModel>
@@ -67,3 +68,5 @@ private: // Member functions:
 
 }   //namespace gui
 }   // namespace hdps
+
+#endif // HDPS_LOGITEMMODEL_H

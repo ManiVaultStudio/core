@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_DATAHIERARCHYMODEL_H
+#define HDPS_DATAHIERARCHYMODEL_H
 
 #include "DataManager.h"
 
@@ -117,3 +118,5 @@ namespace hdps
         DataManager& _dataManager;
     };
 }
+
+#endif // HDPS_DATAHIERARCHYMODEL_H

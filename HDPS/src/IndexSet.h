@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_INDEXSET_H
+#define HDPS_INDEXSET_H
 
 #include "Set.h"
 
@@ -17,3 +18,5 @@ namespace hdps
         std::vector<unsigned int> indices;
     };
 } // namespace hdps
+
+#endif // HDPS_INDEXSET_H

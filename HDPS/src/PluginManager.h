@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_PLUGINMANAGER_H
+#define HDPS_PLUGINMANAGER_H
 
 #include "Core.h"
 
@@ -51,3 +52,5 @@ private slots:
 } // namespace plugin
 
 } // namespace hdps
+
+#endif // HDPS_PLUGINMANAGER_H

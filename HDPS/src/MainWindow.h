@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_MAINWINDOW_H
+#define HDPS_MAINWINDOW_H
 
 #include "ui_MainWindow.h"
 #include "Core.h"
@@ -99,3 +100,5 @@ private:
 } // namespace gui
 
 } // namespace hdps
+
+#endif // HDPS_MAINWINDOW_H

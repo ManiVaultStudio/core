@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_DATAHIERARCHY_H
+#define HDPS_DATAHIERARCHY_H
 
 #include <QWidget>
 #include <QTreeView>
@@ -31,3 +32,5 @@ namespace hdps
         };
     }
 }
+
+#endif // HDPS_DATAHIERARCHY_H
