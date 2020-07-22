@@ -68,6 +68,12 @@ public:
      */
     void centerAndResize(float coverage);
 
+    /**
+    * Allows access to the core, which is created by this MainWindow. Useful for
+    * unit tests that may need to call addData and requestData.
+    */
+    CoreInterface& getCore() { return *_core;  }
+
 public slots:
     /**
     * Store the current window layout so we can restore it later
