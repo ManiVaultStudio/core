@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_DATACONSUMER_H
+#define HDPS_DATACONSUMER_H
 
 #include "RawData.h"
 
@@ -47,3 +48,5 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::DataConsumer, "cytosplore.DataConsumer")
+
+#endif // HDPS_DATACONSUMER_H

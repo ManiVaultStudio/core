@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_SET_H
+#define HDPS_SET_H
 
 #include "RawData.h"
 
@@ -125,3 +126,5 @@ private:
 };
 
 } // namespace hdps
+
+#endif // HDPS_SET_H

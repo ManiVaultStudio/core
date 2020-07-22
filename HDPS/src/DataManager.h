@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_DATAMANAGER_H
+#define HDPS_DATAMANAGER_H
 
 #include "RawData.h"
 #include "Set.h"
@@ -126,3 +127,5 @@ private:
 };
 
 } // namespace hdps
+
+#endif // HDPS_DATAMANAGER_H

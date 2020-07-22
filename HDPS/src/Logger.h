@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_LOGGER_H
+#define HDPS_LOGGER_H
 
 #include <QString>
 
@@ -38,3 +39,5 @@ public:
 #define HDPS_LOG_EXCEPTION(stdException) qCritical().noquote() << \
   ::hdps::Logger::ExceptionToText(stdException)
 
+
+#endif // HDPS_LOGGER_H

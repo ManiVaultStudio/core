@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_RAWDATA_H
+#define HDPS_RAWDATA_H
 
 #include "PluginFactory.h"
 
@@ -96,3 +97,5 @@ namespace plugin {
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::RawDataFactory, "hdps.RawDataFactory")
+
+#endif // HDPS_RAWDATA_H
