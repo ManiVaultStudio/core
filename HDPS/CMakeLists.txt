@@ -157,11 +157,9 @@ set( PLUGIN_HEADERS
     src/DataConsumer.h
     src/SelectionListener.h
     src/Set.h
-    #src/IndexSet.h
 )
 
 set( PLUGIN_SOURCES
-    #src/IndexSet.cpp
     src/LoaderPlugin.cpp
 )
 
