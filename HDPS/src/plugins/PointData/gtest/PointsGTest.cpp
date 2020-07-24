@@ -23,7 +23,7 @@ namespace
 
 GTEST_TEST(Points, hasZeroPointsByDefault)
 {
-    TestPoints([](auto& points)
+    testPoints([](auto& points)
         {
             ASSERT_EQ(points.getNumPoints(), 0U);
         });
@@ -32,7 +32,7 @@ GTEST_TEST(Points, hasZeroPointsByDefault)
 
 GTEST_TEST(Points, hasOneDimensionByDefault)
 {
-    TestPoints([](auto& points)
+    testPoints([](auto& points)
         {
             ASSERT_EQ(points.getNumDimensions(), 1U);
         });
