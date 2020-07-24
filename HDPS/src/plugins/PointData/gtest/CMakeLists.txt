@@ -4,8 +4,9 @@ add_executable(PointDataGTest
     PointsGTest.cpp
 )
 
-target_include_directories(PointDataGTest PRIVATE 
+target_include_directories(PointDataGTest BEFORE PRIVATE 
     ${CMAKE_SOURCE_DIR}/HDPS/src # For <MainWindow.h>
+    ${CMAKE_SOURCE_DIR}/HDPS/src/plugins/PointData/src # For the header files to be tested
     ${CMAKE_BINARY_DIR}/HDPS # For <ui_MainWindow.h>
 )
 
