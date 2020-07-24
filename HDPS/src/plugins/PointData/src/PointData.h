@@ -5,6 +5,7 @@
 #include "RawData.h"
 
 #include "Set.h"
+#include "PointDataRange.h"
 
 #include <biovault_bfloat16.h>
 
@@ -568,6 +569,51 @@ public:
     ReturnType visitFromBeginToEnd(FunctionObject functionObject)
     {
         return getRawData<PointData>().visitFromBeginToEnd<ReturnType>(functionObject);
+    }
+
+
+    /* Allows visiting the point data, which is either _all_ data (if this data
+     * set is full), or (otherwise) the subset specifified by its indices.
+    */
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType visitData(FunctionObject functionObject) const
+    {
+        return
+            getRawData<PointData>().constVisitFromBeginToEnd<ReturnType>(
+                [this, functionObject](auto begin, auto end) -> ReturnType
+                {
+                    if (isFull())
+                    {
+                        return functionObject(hdps::makePointDataRange(begin, end, getNumDimensions()));
+                    }
+                    else
+                    {
+                        // In this case, this Points object represents a subset.
+                        return functionObject(hdps::makePointDataRange(begin, indices, getNumDimensions()));
+                    }
+                });
+    }
+
+
+    /* Non-const overload, allowing write access to the point data.
+    */
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType visitData(FunctionObject functionObject)
+    {
+        return
+            getRawData<PointData>().visitFromBeginToEnd<ReturnType>(
+                [this, functionObject](auto begin, auto end) -> ReturnType
+                {
+                    if (isFull())
+                    {
+                        return functionObject(hdps::makePointDataRange(begin, end, getNumDimensions()));
+                    }
+                    else
+                    {
+                        // In this case, this Points object represents a subset.
+                        return functionObject(hdps::makePointDataRange(begin, indices, getNumDimensions()));
+                    }
+                });
     }
 
 
