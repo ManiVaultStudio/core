@@ -17,6 +17,10 @@ set(POINTS_SOURCES
     src/PointData.h
     src/PointData.cpp
     src/PointData.json
+    src/PointDataIterator.h
+    src/PointDataRange.h
+    src/PointView.h
+    src/RandomAccessRange.h
 )
 
 source_group( Plugin FILES ${POINTS_SOURCES})
@@ -69,6 +73,18 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "${CMAKE_CURRENT_SOURCE_DIR}/src/PointData.h"
     "${INSTALL_DIR}/$<CONFIGURATION>/include/PointData.h"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/PointDataIterator.h"
+    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointDataIterator.h"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/PointDataRange.h"
+    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointDataRange.h"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/PointView.h"
+    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointView.h"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/RandomAccessRange.h"
+    "${INSTALL_DIR}/$<CONFIGURATION>/include/RandomAccessRange.h"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h"
     "${INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16.h"
