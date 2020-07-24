@@ -5,13 +5,13 @@
 #include <gtest/gtest.h>
 
 
-GTEST_TEST(PointData, HasZeroPointsByDefault)
+GTEST_TEST(PointData, hasZeroPointsByDefault)
 {
     ASSERT_EQ(PointData{}.getNumPoints(), 0);
 }
 
 
-GTEST_TEST(PointData, HasOneDimensionByDefault)
+GTEST_TEST(PointData, hasOneDimensionByDefault)
 {
     ASSERT_EQ(PointData{}.getNumDimensions(), 1);
 }

@@ -9,7 +9,7 @@
 namespace
 {
     template <typename T>
-    void TestPoints(T testFunction)
+    void testPoints(T testFunction)
     {
         int argc = 0;
         QApplication dummyApplication(argc, nullptr);
@@ -21,7 +21,7 @@ namespace
     }
 }
 
-GTEST_TEST(Points, HasZeroPointsByDefault)
+GTEST_TEST(Points, hasZeroPointsByDefault)
 {
     TestPoints([](auto& points)
         {
@@ -30,7 +30,7 @@ GTEST_TEST(Points, HasZeroPointsByDefault)
 }
 
 
-GTEST_TEST(Points, HasOneDimensionByDefault)
+GTEST_TEST(Points, hasOneDimensionByDefault)
 {
     TestPoints([](auto& points)
         {
