@@ -157,12 +157,14 @@ const QString Core::createDerivedData(const QString kind, const QString nameRequ
     return setName;
 }
 
-void Core::createSubsetFromSelection(const DataSet& selection, const QString dataName, const QString nameRequest)
+void Core::createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString nameRequest)
 {
     // Create a new set with only the indices that were part of the selection set
     DataSet* newSet = selection.copy();
 
-    newSet->_dataName = dataName;
+    newSet->_dataName = parentSet._dataName;
+    newSet->_sourceSetName = parentSet._sourceSetName;
+    newSet->_derived = parentSet._derived;
 
     // Add the set the core and publish the name of the set to all plug-ins
     QString setName = _dataManager->addSet(nameRequest, newSet);

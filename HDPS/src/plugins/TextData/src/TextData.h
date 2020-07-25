@@ -55,7 +55,7 @@ public:
     {
         const hdps::DataSet& selection = _core->requestSelection(getDataName());
 
-        _core->createSubsetFromSelection(selection, getDataName(), "Subset");
+        _core->createSubsetFromSelection(selection, *this, "Subset");
     }
 
     std::vector<unsigned int> indices;

@@ -84,7 +84,7 @@ public:
     {
         const hdps::DataSet& selection = _core->requestSelection(getDataName());
 
-        _core->createSubsetFromSelection(selection, getDataName(), "Clusters");
+        _core->createSubsetFromSelection(selection, *this, "Clusters");
     }
 
     std::vector<unsigned int> indices;

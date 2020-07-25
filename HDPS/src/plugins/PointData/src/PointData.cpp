@@ -186,7 +186,7 @@ void Points::createSubset() const
 {
     const hdps::DataSet& selection = _core->requestSelection(getDataName());
 
-    _core->createSubsetFromSelection(selection, getDataName(), "Subset");
+    _core->createSubsetFromSelection(selection, *this, "Subset");
 }
 
 const std::vector<QString>& Points::getDimensionNames() const
