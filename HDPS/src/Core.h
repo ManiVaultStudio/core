@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_CORE_H
+#define HDPS_CORE_H
 
 #include "CoreInterface.h"
 #include "PluginType.h"
@@ -124,3 +125,5 @@ private:
 };
 
 } // namespace hdps
+
+#endif // HDPS_CORE_H

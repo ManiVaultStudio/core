@@ -45,11 +45,6 @@ unsigned int PointData::getNumDimensions() const
     return _numDimensions;
 }
 
-const std::vector<float>& PointData::getData() const
-{
-    return _vectorHolder.getConstVector<float>();
-}
-
 const std::vector<QString>& PointData::getDimensionNames() const
 {
     return _dimNames;
@@ -64,18 +59,6 @@ void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)
 {
     _dimNames = dimNames;
-}
-
-// Constant subscript indexing
-const float& PointData::operator[](unsigned int index) const
-{
-    return _vectorHolder.getConstVector<float>()[index];
-}
-
-// Subscript indexing
-float& PointData::operator[](unsigned int index)
-{
-    return _vectorHolder.getVector<float>()[index];
 }
 
 float PointData::getValueAt(const std::size_t index) const
@@ -160,12 +143,6 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
 // =============================================================================
 
 
-const std::vector<float>& Points::getData() const
-{
-    return getRawData<PointData>().getData();
-}
-
-
 void Points::setData(std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
     getRawData<PointData>().setData(nullptr, numPoints, numDimensions);
@@ -220,18 +197,6 @@ const std::vector<QString>& Points::getDimensionNames() const
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
 {
     getRawData<PointData>().setDimensionNames(dimNames);
-}
-
-// Constant subscript indexing
-const float& Points::operator[](unsigned int index) const
-{
-    return getRawData<PointData>()[index];
-}
-
-// Subscript indexing
-float& Points::operator[](unsigned int index)
-{
-    return getRawData<PointData>()[index];
 }
 
 float Points::getValueAt(const std::size_t index) const

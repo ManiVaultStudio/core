@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_PLUGINTYPE_H
+#define HDPS_PLUGINTYPE_H
 
 /**
  * Provides all possible types of plugins.
@@ -28,3 +29,5 @@ namespace plugin
 } // namespace plugin
 
 } // namespace hdps
+
+#endif // HDPS_PLUGINTYPE_H

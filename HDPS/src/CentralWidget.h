@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_CENTRALWIDGET_H
+#define HDPS_CENTRALWIDGET_H
 
 #include <QSplitter>
 
@@ -18,3 +19,5 @@ namespace hdps
         };
     }
 }
+
+#endif // HDPS_CENTRALWIDGET_H

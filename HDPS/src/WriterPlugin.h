@@ -1,10 +1,11 @@
+#ifndef HDPS_WRITERPLUGIN_H
+#define HDPS_WRITERPLUGIN_H
 /**
 * Writer.h
 *
 * Base plugin class for plugins that write data to a file.
 */
 
-#pragma once
 
 #include "PluginFactory.h"
 
@@ -42,3 +43,5 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::WriterPluginFactory, "cytosplore.WriterPluginFactory")
+
+#endif // HDPS_WRITERPLUGIN_H

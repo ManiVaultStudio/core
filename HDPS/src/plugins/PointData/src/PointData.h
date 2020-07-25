@@ -35,10 +35,6 @@ const hdps::DataType PointType = hdps::DataType(QString("Points"));
 // Raw Data
 // =============================================================================
 
-#ifndef HDPS_ASSUME_FLOAT32_POINT_DATA
-#define HDPS_ASSUME_FLOAT32_POINT_DATA [[deprecated("Deprecated: Assumes that point data is always 32-bit float!")]]
-#endif
-
 class POINTDATA_EXPORT PointData : public hdps::RawData
 {
 private:
@@ -339,8 +335,6 @@ public:
             });
     }
 
-    HDPS_ASSUME_FLOAT32_POINT_DATA const std::vector<float>& getData() const;
-
     void extractFullDataForDimension(std::vector<float>& result, const int dimensionIndex) const;
     void extractFullDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const;
     void extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2, const std::vector<unsigned int>& indices) const;
@@ -479,12 +473,6 @@ public:
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
-    // Constant subscript indexing
-    HDPS_ASSUME_FLOAT32_POINT_DATA const float& operator[](unsigned int index) const;
-
-    // Subscript indexing
-    HDPS_ASSUME_FLOAT32_POINT_DATA float& operator[](unsigned int index);
-
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.
@@ -583,8 +571,6 @@ public:
     }
 
 
-    HDPS_ASSUME_FLOAT32_POINT_DATA const std::vector<float>& getData() const;
-
     /// Just calls the corresponding member function of its PointData.
     template <typename T>
     void convertData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
@@ -669,12 +655,6 @@ public:
     const std::vector<QString>& getDimensionNames() const;
 
     void setDimensionNames(const std::vector<QString>& dimNames);
-
-    // Constant subscript indexing
-    HDPS_ASSUME_FLOAT32_POINT_DATA const float& operator[](unsigned int index) const;
-
-    // Subscript indexing
-    HDPS_ASSUME_FLOAT32_POINT_DATA float& operator[](unsigned int index);
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.

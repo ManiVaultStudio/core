@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HDPS_MAINWINDOW_H
+#define HDPS_MAINWINDOW_H
 
 #include "ui_MainWindow.h"
 #include "Core.h"
@@ -68,6 +69,12 @@ public:
      */
     void centerAndResize(float coverage);
 
+    /**
+    * Allows access to the core, which is created by this MainWindow. Useful for
+    * unit tests that may need to call addData and requestData.
+    */
+    CoreInterface& getCore() { return *_core;  }
+
 public slots:
     /**
     * Store the current window layout so we can restore it later
@@ -99,3 +106,5 @@ private:
 } // namespace gui
 
 } // namespace hdps
+
+#endif // HDPS_MAINWINDOW_H
