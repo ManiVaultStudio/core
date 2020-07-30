@@ -188,7 +188,7 @@ namespace hdps
         friend bool operator>(const PointDataIterator& it1, const PointDataIterator& it2)
         {
             // Implemented just like the corresponding std::rel_ops operator.
-            return it2 < it2;
+            return it2 < it1;
         }
 
 
