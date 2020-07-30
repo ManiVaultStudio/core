@@ -80,11 +80,11 @@ public:
         return clusters;
     }
 
-    void createSubset() const override
+    QString createSubset() const override
     {
         const hdps::DataSet& selection = _core->requestSelection(getDataName());
 
-        _core->createSubsetFromSelection(selection, *this, "Clusters");
+        return _core->createSubsetFromSelection(selection, *this, "Clusters");
     }
 
     std::vector<unsigned int> indices;

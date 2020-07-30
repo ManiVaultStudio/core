@@ -756,7 +756,7 @@ public: // Properties
     // Set functions
     DataSet* copy() const override;
 
-    void createSubset() const override;
+    QString createSubset() const override;
 
     std::vector<unsigned int> indices;
 };
