@@ -28,7 +28,7 @@ public:
 
     virtual DataSet* copy() const = 0;
 
-    virtual void createSubset() const = 0;
+    virtual QString createSubset() const = 0;
 
     QString getName() const
     {

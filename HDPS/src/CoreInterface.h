@@ -32,7 +32,7 @@ public:
      * on the name given to this function. Then adds the new set to the data manager
      * and notifies all data consumers of the new set.
      */
-    virtual void createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) = 0;
+    virtual QString createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) = 0;
 
     /**
     * Request a selection from the data manager by its name.

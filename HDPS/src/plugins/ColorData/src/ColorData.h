@@ -50,11 +50,11 @@ public:
         return colors;
     }
 
-    void createSubset() const override
+    QString createSubset() const override
     {
         const hdps::DataSet& selection = _core->requestSelection(getDataName());
 
-        _core->createSubsetFromSelection(selection, *this, "Subset");
+        return _core->createSubsetFromSelection(selection, *this, "Subset");
     }
 
     std::vector<unsigned int> indices;

@@ -70,7 +70,7 @@ public:
      * on the name given to this function. Then adds the new set to the data manager
      * and notifies all data consumers of the new set.
      */
-    void createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) override;
+    QString createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) override;
 
     /**
      * Requests an instance of a data type plugin from the core which has the same
