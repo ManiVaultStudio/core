@@ -1,6 +1,7 @@
 
 add_executable(PointDataGTest
     PointDataGTest.cpp
+    PointDataIteratorGTest.cpp
     PointsGTest.cpp
 )
 
