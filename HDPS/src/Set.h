@@ -68,7 +68,7 @@ public:
     template <class T>
     static T& getSourceData(T& set)
     {
-        return set.isDerivedData() ? getSourceData(static_cast<T&>(set._core->requestData(set._sourceSetName))) : static_cast<T&>(set._core->requestData(set._name));
+        return set.isDerivedData() ? getSourceData(static_cast<T&>(set._core->requestData(set._sourceSetName))) : set;
     }
 
     /**
