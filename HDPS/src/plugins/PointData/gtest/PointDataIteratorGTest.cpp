@@ -7,11 +7,11 @@
 #include <vector>
 
 // Test template instantiations for the most common template arguments:
-template class hdps::PointDataIterator<float*, unsigned*>;
-template class hdps::PointDataIterator<std::vector<float>::iterator, unsigned*>;
-template class hdps::PointDataIterator<std::vector<float>::iterator, std::vector<unsigned>::const_iterator>;
-template class hdps::PointDataIterator<std::vector<float>::const_iterator, unsigned*>;
-template class hdps::PointDataIterator<std::vector<float>::const_iterator, std::vector<unsigned>::const_iterator>;
+template class hdps::PointDataIterator<float*, const unsigned*, unsigned(*)(const unsigned*)>;
+template class hdps::PointDataIterator<std::vector<float>::iterator, const unsigned*, unsigned(*)(const unsigned*)>;
+template class hdps::PointDataIterator<std::vector<float>::iterator, std::vector<unsigned>::const_iterator, unsigned(*)(std::vector<unsigned>::const_iterator)>;
+template class hdps::PointDataIterator<std::vector<float>::const_iterator, const unsigned*, unsigned(*)(const unsigned*)>;
+template class hdps::PointDataIterator<std::vector<float>::const_iterator, std::vector<unsigned>::const_iterator, unsigned(*)(std::vector<unsigned>::const_iterator)>;
 
 using hdps::PointDataIterator;
 
@@ -31,11 +31,12 @@ TEST(PointDataIterator, satisfiesRandomAccessIteratorRequirements)
 
     // Note: The 1-letter identifiers (X, a, b, n, r) and the operational semantics
     // are directly from the C++11 Standard.
-    using X = PointDataIterator<float*, const unsigned*>;
-    X a(inputData.data(), indices.data() + indices.size(), numberOfDimensions);
-    X b(inputData.data(), indices.data(), numberOfDimensions);
+    const auto indexFunction = [](const unsigned* ptr) {return *ptr; };
+    using X = PointDataIterator<float*, const unsigned*, unsigned(*)(const unsigned*)>;
+    X a(inputData.data(), indices.data() + indices.size(), numberOfDimensions, indexFunction);
+    X b(inputData.data(), indices.data(), numberOfDimensions, indexFunction);
 
-    const X initialIterator(inputData.data(), indices.data(), numberOfDimensions);
+    const X initialIterator(inputData.data(), indices.data(), numberOfDimensions, indexFunction);
     X       mutableIterator = initialIterator;
     X& r = mutableIterator;
 
