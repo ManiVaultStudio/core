@@ -19,7 +19,7 @@ namespace hdps
     * second parameter.
     */
     template <typename ValueIteratorType, typename IndexContainerType>
-    auto makePointDataRange(
+    auto makePointDataRangeOfSubset(
         const ValueIteratorType beginOfValueContainer,
         const IndexContainerType& indices,
         const unsigned numberOfDimensions)
@@ -38,7 +38,7 @@ namespace hdps
     /* Makes a PointDataRange object for a full set of values.
     */
     template <typename ValueIteratorType>
-    auto makePointDataRange(
+    auto makePointDataRangeOfFullSet(
         const ValueIteratorType beginOfValueContainer,
         const ValueIteratorType endOfValueContainer,
         const unsigned numberOfDimensions)

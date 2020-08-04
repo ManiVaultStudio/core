@@ -584,12 +584,12 @@ public:
                 {
                     if (isFull())
                     {
-                        return functionObject(hdps::makePointDataRange(begin, end, getNumDimensions()));
+                        return functionObject(hdps::makePointDataRangeOfFullSet(begin, end, getNumDimensions()));
                     }
                     else
                     {
                         // In this case, this Points object represents a subset.
-                        return functionObject(hdps::makePointDataRange(begin, indices, getNumDimensions()));
+                        return functionObject(hdps::makePointDataRangeOfSubset(begin, indices, getNumDimensions()));
                     }
                 });
     }
@@ -606,12 +606,12 @@ public:
                 {
                     if (isFull())
                     {
-                        return functionObject(hdps::makePointDataRange(begin, end, getNumDimensions()));
+                        return functionObject(hdps::makePointDataRangeOfFullSet(begin, end, getNumDimensions()));
                     }
                     else
                     {
                         // In this case, this Points object represents a subset.
-                        return functionObject(hdps::makePointDataRange(begin, indices, getNumDimensions()));
+                        return functionObject(hdps::makePointDataRangeOfSubset(begin, indices, getNumDimensions()));
                     }
                 });
     }
