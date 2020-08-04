@@ -545,6 +545,100 @@ private:
 
 class POINTDATA_EXPORT Points : public hdps::DataSet
 {
+private:
+    /* Private helper function for visitData. Helps to reduces duplicate
+    * code between const and non-const overloads of visitData.
+    */
+    template <typename ReturnType = void, typename FunctionObject, typename PointsType>
+    static ReturnType privateVisitData(PointsType& points, const FunctionObject functionObject)
+    {
+        return points.template visitFromBeginToEnd<ReturnType>(
+                [&points, functionObject](const auto begin, const auto end) -> ReturnType
+                {
+                    const auto numberOfDimensions = points.getNumDimensions();
+
+                    if (points.isFull())
+                    {
+                        const auto indexFunction = [](const auto index)
+                        {
+                            // Simply return the index value that is passed as argument.
+                            return index;
+                        };
+
+                        return functionObject(hdps::makePointDataRangeOfFullSet(
+                            begin, end, numberOfDimensions, indexFunction));
+                    }
+                    else
+                    {
+                        // In this case, this Points object represents a subset.
+                        const auto indexFunction = [](const auto indexIterator)
+                        {
+                            // Get the index by dereferencing the iterator.
+                            return *indexIterator;
+                        };
+
+                        return functionObject(hdps::makePointDataRangeOfSubset(
+                            begin, points.indices, numberOfDimensions, indexFunction));
+                    }
+                });
+    }
+
+
+    /* Private helper function for visitSourceData. Helps to reduces duplicate
+    * code between const and non-const overloads of visitSourceData.
+    */
+    template <typename ReturnType = void, typename FunctionObject, typename PointsType>
+    static ReturnType privateVisitSourceData(PointsType& points, const FunctionObject functionObject)
+    {
+        // Note that PointsType may or may not be "const".
+        PointsType& sourceData = Points::getSourceData(points);
+
+        if ((&sourceData == &points) || points.isFull())
+        {
+            // In this case, this (points) is itself a source data, or it is a full set.
+            // Basically just do sourceData.visitData:
+            return privateVisitData<ReturnType>(sourceData, functionObject);
+        }
+        else
+        {
+            // In this case, this (points) is a derived data set, and it is a subset.
+
+            if (sourceData.isFull())
+            {
+                return sourceData.template visitFromBeginToEnd<ReturnType>(
+                    [&points, functionObject](const auto begin, const auto end) -> ReturnType
+                    {
+                        const auto indexFunction = [](const auto indexIterator)
+                        {
+                            // Get the index by dereferencing the iterator.
+                            return *indexIterator;
+                        };
+
+                        // Its source data is a full set, so it is sufficient to use its own (points) indices.
+                        return functionObject(hdps::makePointDataRangeOfSubset(
+                            begin, points.indices, points.getNumDimensions(), indexFunction));
+                    });
+            }
+            else
+            {
+                // In this case, this (points) is a subset, and its source data is also a subset.
+
+                // Define an index function that translates a derived subset index to a source data index.
+                const auto indexFunction = [&sourceData](const auto indexIterator)
+                {
+                    return sourceData.indices[*indexIterator];
+                };
+
+                return sourceData.template visitFromBeginToEnd<ReturnType>(
+                    [&points, functionObject, indexFunction](const auto begin, const auto end) -> ReturnType
+                    {
+                        return functionObject(hdps::makePointDataRangeOfSubset(
+                            begin, points.indices, points.getNumDimensions(), indexFunction));
+                    });
+            }
+        }
+    }
+
 public:
     Points(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
     ~Points() override { }
@@ -578,20 +672,7 @@ public:
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType visitData(FunctionObject functionObject) const
     {
-        return
-            getRawData<PointData>().constVisitFromBeginToEnd<ReturnType>(
-                [this, functionObject](auto begin, auto end) -> ReturnType
-                {
-                    if (isFull())
-                    {
-                        return functionObject(hdps::makePointDataRangeOfFullSet(begin, end, getNumDimensions()));
-                    }
-                    else
-                    {
-                        // In this case, this Points object represents a subset.
-                        return functionObject(hdps::makePointDataRangeOfSubset(begin, indices, getNumDimensions()));
-                    }
-                });
+        return privateVisitData<ReturnType>(*this, functionObject);
     }
 
 
@@ -600,20 +681,25 @@ public:
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType visitData(FunctionObject functionObject)
     {
-        return
-            getRawData<PointData>().visitFromBeginToEnd<ReturnType>(
-                [this, functionObject](auto begin, auto end) -> ReturnType
-                {
-                    if (isFull())
-                    {
-                        return functionObject(hdps::makePointDataRangeOfFullSet(begin, end, getNumDimensions()));
-                    }
-                    else
-                    {
-                        // In this case, this Points object represents a subset.
-                        return functionObject(hdps::makePointDataRangeOfSubset(begin, indices, getNumDimensions()));
-                    }
-                });
+        return privateVisitData<ReturnType>(*this, functionObject);
+    }
+
+
+    /* Allows visiting the source point data.
+    */
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType visitSourceData(const FunctionObject functionObject) const
+    {
+        return privateVisitSourceData<ReturnType>(*this, functionObject);
+    }
+
+
+    /* Non-const overload, allowing write access to the source point data.
+    */
+    template <typename ReturnType = void, typename FunctionObject>
+    ReturnType visitSourceData(const FunctionObject functionObject)
+    {
+        return privateVisitSourceData<ReturnType>(*this, functionObject);
     }
 
 

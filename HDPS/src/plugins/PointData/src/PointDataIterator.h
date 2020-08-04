@@ -7,29 +7,14 @@
 
 namespace hdps
 {
-    template <typename ValueIteratorType, typename IndexIteratorType>
+    template <typename ValueIteratorType, typename IndexIteratorType, typename IndexFunctionType>
     class PointDataIterator
     {
-        /* For an unsigned index argument, the value of the index is the value of the argument.
-        */
-        static auto valueOfIndex(const unsigned index)
-        {
-            return index;
-        }
-
-        /* For an iterator, the value of the index comes from dereferencing the iterator.
-        */
-        template <typename T>
-        static auto valueOfIndex(T indexIterator)
-        {
-            return *indexIterator;
-        }
-
-
         // Its data members: 
         ValueIteratorType _valueIterator{};
         IndexIteratorType _indexIterator{};
         unsigned _numberOfDimensions{};
+        IndexFunctionType _indexFunction;
 
         using PointViewType = PointView<ValueIteratorType>;
     public:
@@ -49,11 +34,13 @@ namespace hdps
         PointDataIterator(
             const ValueIteratorType valueIterator,
             const IndexIteratorType indexIterator,
-            const unsigned numberOfDimensions)
+            const unsigned numberOfDimensions,
+            const IndexFunctionType indexFunction)
             :
             _valueIterator{ valueIterator },
             _indexIterator{ indexIterator },
-            _numberOfDimensions{ numberOfDimensions }
+            _numberOfDimensions{ numberOfDimensions },
+            _indexFunction{ indexFunction }
         {
         }
 
@@ -62,7 +49,7 @@ namespace hdps
         */
         auto operator*() const
         {
-            const auto index = valueOfIndex(_indexIterator);
+            const auto index = _indexFunction(_indexIterator);
             const auto begin = _valueIterator + (index * _numberOfDimensions);
             const auto end = begin + _numberOfDimensions;
             return PointViewType(begin, end, index);
@@ -223,7 +210,7 @@ namespace hdps
         */
         friend auto index(const PointDataIterator& arg)
         {
-            return valueOfIndex(arg._indexIterator);
+            return arg._indexFunction(arg._indexIterator);
         }
 
     };
