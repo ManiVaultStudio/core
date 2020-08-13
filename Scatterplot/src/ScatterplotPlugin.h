@@ -30,10 +30,7 @@ class ScatterplotPlugin : public ViewPlugin, public SelectionListener
     Q_OBJECT
     
 public:
-    ScatterplotPlugin()
-    :
-        ViewPlugin("Scatterplot View")
-    { }
+    ScatterplotPlugin();
     ~ScatterplotPlugin(void) override;
     
     void init() override;
@@ -48,6 +45,10 @@ public:
 
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;
+
+#ifndef QT_NO_CONTEXTMENU
+    void contextMenuEvent(QContextMenuEvent *event) override;
+#endif // QT_NO_CONTEXTMENU
 
 public slots:
     void onDataInput(QString dataSetName);

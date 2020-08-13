@@ -10,6 +10,8 @@
 
 #include <QtCore>
 #include <QtDebug>
+#include <QMenu>
+#include <QAction>
 
 #include <algorithm>
 #include <limits>
@@ -17,6 +19,12 @@
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
 using namespace hdps;
+
+ScatterplotPlugin::ScatterplotPlugin() :
+    ViewPlugin("Scatterplot View")
+{
+    setWindowTitle(getGuiName());
+}
 
 // =============================================================================
 // View
@@ -119,11 +127,33 @@ void ScatterplotPlugin::cDimPicked(int index)
     updateData();
 }
 
+#ifndef QT_NO_CONTEXTMENU
+void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent *event)
+{
+    if (_currentDataSet.isEmpty())
+        return;
+
+    QMenu menu(this);
+    
+    DataSet& dataSet = _core->requestData(_currentDataSet);
+   
+    const auto analyses = dataSet.getProperty("Analyses", QVariantList()).toList();
+    
+    for (auto analysis : analyses)
+    {
+        auto& analysisPlugin = _core->requestAnalysis(analysis.toString());
+        menu.addMenu(analysisPlugin.contextMenu(getKind()));
+    }
+    
+    menu.exec(event->globalPos());
+}
+#endif // QT_NO_CONTEXTMENU
+
 void ScatterplotPlugin::onDataInput(QString dataSetName)
 {
     _currentDataSet = dataSetName;
 
-    setWindowTitle(_currentDataSet);
+    setWindowTitle(QString("%1: %2").arg(getGuiName(), _currentDataSet));
 
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
