@@ -486,48 +486,6 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
-public: // Properties
-
-    /**
-     * Get property in variant form
-     * @param name Name of the property
-     * @param defaultValue Default value
-     * @return Property in variant form
-     */
-    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const
-    {
-        if (!hasProperty(name))
-            return defaultValue;
-
-        return _properties[name];
-    }
-
-    /**
-    * Set property
-    * @param name Name of the property
-    * @param value Property value
-    */
-    void setProperty(const QString& name, const QVariant& value)
-    {
-        _properties[name] = value;
-    }
-
-    /**
-    * Determines whether a property with a give name exists
-    * @param name Name of the property
-    * @param value If property with the given name exists
-    */
-    bool hasProperty(const QString& name) const
-    {
-        return _properties.contains(name);
-    }
-
-    /** Returns a list of available property names */
-    QStringList propertyNames() const
-    {
-        return _properties.keys();
-    }
-
 private:
     VectorHolder _vectorHolder;
 
@@ -535,8 +493,6 @@ private:
     unsigned int _numDimensions = 1;
 
     std::vector<QString> _dimNames;
-
-    QMap<QString, QVariant>    _properties;    /** Properties map */
 };
 
 // =============================================================================
@@ -799,45 +755,6 @@ public:
     // Will work fine, even when the internal data element type is not float.
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
-
-public: // Properties
-
-    /**
-     * Get property in variant form
-     * @param name Name of the property
-     * @param defaultValue Default value
-     * @return Property in variant form
-     */
-    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const
-    {
-        return getRawData<PointData>().getProperty(name, defaultValue);
-    }
-
-    /**
-    * Set property
-    * @param name Name of the property
-    * @param value Property value
-    */
-    void setProperty(const QString& name, const QVariant& value)
-    {
-        getRawData<PointData>().setProperty(name, value);
-    }
-
-    /**
-    * Determines whether a property with a give name exists
-    * @param name Name of the property
-    * @param value If property with the given name exists
-    */
-    bool hasProperty(const QString& name) const
-    {
-        return getRawData<PointData>().hasProperty(name);
-    }
-
-    /** Returns a list of available property names */
-    QStringList propertyNames() const
-    {
-        return getRawData<PointData>().propertyNames();
-    }
 
     // Set functions
     DataSet* copy() const override;

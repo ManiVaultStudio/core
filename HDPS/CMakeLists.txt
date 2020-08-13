@@ -160,6 +160,7 @@ set( PLUGIN_HEADERS
 )
 
 set( PLUGIN_SOURCES
+	src/Plugin.cpp
     src/LoaderPlugin.cpp
 )
 

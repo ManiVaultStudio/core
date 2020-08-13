@@ -8,6 +8,11 @@ namespace hdps
     class DataSet;
     class RawData;
 
+    namespace plugin
+    {
+        class Plugin;
+    }
+
 class CoreInterface
 {
 public:
@@ -51,6 +56,8 @@ public:
     {
         return dynamic_cast<SetType&>(requestData(name));
     }
+
+    virtual plugin::Plugin& requestAnalysis(const QString name) = 0;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString name) = 0;
