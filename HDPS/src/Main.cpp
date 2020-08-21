@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QSurfaceFormat>
+#include <QFontDatabase>
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +22,8 @@ int main(int argc, char *argv[])
 #endif
 
     QApplication app(argc, argv);
+
+    QFontDatabase::addApplicationFont(":/Fonts/fonts/FontAwesome.otf");
 
     // Retina display support for Mac OS and X11:
     // AA_UseHighDpiPixmaps attribute is off by default in Qt 5.1 but will most
