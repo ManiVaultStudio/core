@@ -279,6 +279,9 @@ void ScatterplotWidget::paintGL()
 
 void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
 {
+    // Ignore all mouse presses except from the left mouse button
+    if (event->button() != Qt::LeftButton) return;
+
     _selecting = true;
 
     Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
@@ -299,6 +302,9 @@ void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
 
 void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+    // Ignore all mouse presses except from the left mouse button
+    if (event->button() != Qt::LeftButton) return;
+
     _selecting = false;
 
     Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
