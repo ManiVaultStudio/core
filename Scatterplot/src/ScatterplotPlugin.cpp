@@ -142,7 +142,13 @@ void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent *event)
     for (auto analysis : analyses)
     {
         auto& analysisPlugin = _core->requestAnalysis(analysis.toString());
-        menu.addMenu(analysisPlugin.contextMenu(getKind()));
+
+        QMap<QString, QString> context;
+
+        context["Kind"]             = "ScatterPlotPlugin";
+        context["CurrentDataset"]   = _currentDataSet;
+
+        menu.addMenu(analysisPlugin.contextMenu(QVariant::fromValue(context)));
     }
     
     menu.exec(event->globalPos());

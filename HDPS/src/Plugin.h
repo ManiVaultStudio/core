@@ -125,10 +125,10 @@ public: // GUI
 
     /**
      * Generates a context menu for display in other (view) plugins
-     * @param kind Kind of plugin in which the context menu will be shown
+     * @param context Context of the plugin that requested the context menu
      * @return Context menu
      */
-    virtual QMenu* contextMenu(const QString& kind) { return nullptr; };
+    virtual QMenu* contextMenu(const QVariant& context) { return nullptr; };
 
 protected:
     CoreInterface* _core;
