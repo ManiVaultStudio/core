@@ -134,6 +134,9 @@ set( UTIL_HEADERS
     src/util/DensityComputation.h
     src/util/Math.h
     src/util/Timer.h
+	src/util/IconFont.h
+    src/util/IconFonts.h
+    src/util/FontAwesome.h
 )
 
 set( UTIL_SOURCES
@@ -142,6 +145,9 @@ set( UTIL_SOURCES
     src/util/DensityComputation.cpp
     src/util/Math.cpp
     src/util/Timer.cpp
+	src/util/IconFont.cpp
+    src/util/IconFonts.cpp
+    src/util/FontAwesome.cpp
 )
 
 set( PLUGIN_HEADERS
@@ -157,10 +163,12 @@ set( PLUGIN_HEADERS
     src/DataConsumer.h
     src/SelectionListener.h
     src/Set.h
+	src/Application.h
 )
 
 set( PLUGIN_SOURCES
     src/LoaderPlugin.cpp
+	src/Application.cpp
 )
 
 list(APPEND PRIVATE_HEADERS
