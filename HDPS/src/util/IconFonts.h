@@ -42,9 +42,6 @@ public: // Exceptions
             std::runtime_error(QString("%1-%2 not found").arg(iconFontName, IconFont::getSearchVersionString(majorVersion, minorVersion)).toLatin1())
         {
         }
-
-    protected:
-        QByteArray  _message;      /** Exception message */
     };
 
 public: // Construction
