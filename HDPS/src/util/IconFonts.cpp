@@ -76,9 +76,6 @@ void IconFonts::add(const QSharedPointer<IconFont>& iconFont)
 {
     try
     {
-        if (!_iconFonts.contains(iconFont->getName()))
-            _iconFonts[iconFont->getName()] = QVector<QSharedPointer<IconFont>>();
-
         _iconFonts[iconFont->getName()].append(iconFont);
 
         std::sort(_iconFonts[iconFont->getName()].begin(), _iconFonts[iconFont->getName()].end(), [] (auto iconFontA, auto iconFontB) {
