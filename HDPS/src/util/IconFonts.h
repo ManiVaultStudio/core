@@ -39,16 +39,8 @@ public: // Exceptions
          * @param minorVersion Minor version of the icon font that was not found
          */
         IconFontNotFoundException(const QString& iconFontName, const std::int32_t& majorVersion, const std::int32_t& minorVersion) :
-            std::runtime_error(""),
-            _message()
+            std::runtime_error(QString("%1-%2 not found").arg(iconFontName, IconFont::getSearchVersionString(majorVersion, minorVersion)).toLatin1())
         {
-            _message = QString("%1-%2 not found").arg(iconFontName, IconFont::getSearchVersionString(majorVersion, minorVersion)).toLatin1();
-        }
-
-        /** Returns the exception message */
-        const char* what() const throw () override
-        {
-            return _message;
         }
 
     protected:
