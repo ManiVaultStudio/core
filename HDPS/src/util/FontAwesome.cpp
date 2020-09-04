@@ -1,5 +1,7 @@
 #include "FontAwesome.h"
 
+#include <stdexcept>
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QFile>

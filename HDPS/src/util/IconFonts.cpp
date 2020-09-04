@@ -67,6 +67,8 @@ hdps::IconFonts::Fonts IconFonts::getIconFonts(const QString& fontName) const
     }
     catch (...) {
         QMessageBox::critical(nullptr, "An icon fonts error occurred", "Failed to fetch icon font due to an unhandled exception");
+
+        return Fonts();
     }
 }
 
