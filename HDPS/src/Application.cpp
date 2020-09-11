@@ -89,14 +89,4 @@ void Application::setSetting(const QString& path, const QVariant& value)
     _settings.setValue(path, value);
 }
 
-QVariant Application::getPluginSetting(const QString& pluginName, const QString& path, const QVariant& defaultValue /*= QVariant()*/)
-{
-    return current()->getSetting(QString("%1/%2").arg(pluginName, path), defaultValue);
-}
-
-void Application::setPluginSetting(const QString& pluginName, const QString& path, const QVariant& value)
-{
-    current()->setSetting(QString("%1/%2").arg(pluginName, path), value);
-}
-
 }

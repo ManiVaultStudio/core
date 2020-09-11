@@ -58,23 +58,6 @@ public: // Settings API
      */
     void setSetting(const QString& path, const QVariant& value);
 
-    /**
-     * Load plugin setting for \p pluginName
-     * @param pluginName Name of the plugin for which to load the setting
-     * @param path Path of the setting (e.g. General/Computation/NumberOfIterations)
-     * @param defaultValue Value to return if the setting with \p path was not found
-     * @return Plugin setting in variant form
-     */
-    static QVariant getPluginSetting(const QString& pluginName, const QString& path, const QVariant& defaultValue = QVariant());
-
-    /**
-     * Save plugin setting for \p pluginName
-     * @param pluginName Name of the plugin for which to save the setting
-     * @param path Path of the setting (e.g. General/Computation/NumberOfIterations)
-     * @param value Value in variant form
-     */
-    static void setPluginSetting(const QString& pluginName, const QString& path, const QVariant& value);
-
 protected:
     IconFonts       _iconFonts;     /** Icon fonts resource */
     QSettings       _settings;
