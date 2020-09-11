@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setOrganizationName("CGV TU Delft");
+    QCoreApplication::setOrganizationName("BioVault");
     QCoreApplication::setOrganizationDomain("graphics.tudelft.nl");
     QCoreApplication::setApplicationName("HDPS");
     // Necessary to instantiate QWebEngine from a plugin

@@ -169,6 +169,7 @@ set( PLUGIN_HEADERS
 set( PLUGIN_SOURCES
     src/LoaderPlugin.cpp
 	src/Application.cpp
+	src/Plugin.cpp
 )
 
 list(APPEND PRIVATE_HEADERS
