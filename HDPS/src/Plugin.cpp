@@ -10,12 +10,12 @@ namespace plugin
 
 QVariant Plugin::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
 {
-    return Application::getPluginSetting(_kind, path, defaultValue);
+    return Application::current()->getSetting(QString("%1/%2").arg(_kind, path), defaultValue);
 }
 
 void Plugin::setSetting(const QString& path, const QVariant& value)
 {
-    Application::setPluginSetting(_kind, path, value);
+    Application::current()->setSetting(QString("%1/%2").arg(_kind, path), value);
 }
 
 }
