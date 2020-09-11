@@ -9,7 +9,8 @@
 namespace hdps {
 
 hdps::Application::Application(int& argc, char** argv) :
-    QApplication(argc, argv)
+    QApplication(argc, argv),
+    _settings()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
 
@@ -51,6 +52,8 @@ hdps::Application::Application(int& argc, char** argv) :
     testIconFont("FontAwesome", 3, 0);
     testIconFont("FontAwesome", 5, 14);
     */
+
+    _settings.setValue("test", 1);
 }
 
 hdps::Application* hdps::Application::current()
@@ -74,6 +77,26 @@ hdps::Application* hdps::Application::current()
 const IconFont& hdps::Application::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/)
 {
     return current()->_iconFonts.getIconFont(name, majorVersion, minorVersion);
+}
+
+QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
+{
+    return _settings.value(path, defaultValue);
+}
+
+void Application::setSetting(const QString& path, const QVariant& value)
+{
+    _settings.setValue(path, value);
+}
+
+QVariant Application::getPluginSetting(const QString& pluginName, const QString& path, const QVariant& defaultValue /*= QVariant()*/)
+{
+    return current()->getSetting(QString("%1/%2").arg(pluginName, path), defaultValue);
+}
+
+void Application::setPluginSetting(const QString& pluginName, const QString& path, const QVariant& value)
+{
+    current()->setSetting(QString("%1/%2").arg(pluginName, path), value);
 }
 
 }

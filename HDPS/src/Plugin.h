@@ -6,6 +6,7 @@
 
 #include <QString>
 #include <QUuid>
+#include <QVariant>
 
 namespace hdps
 {
@@ -66,6 +67,24 @@ public:
     {
         this->_core = core;
     }
+
+public: // Settings
+
+    /**
+     * Load setting
+     * @param path Path of the setting (e.g. General/Computation/NumberOfIterations)
+     * @param defaultValue Value to return if the setting with \p path was not found
+     * @return Plugin setting in variant form
+     */
+    QVariant getSetting(const QString& path, const QVariant& defaultValue = QVariant()) const;
+
+    /**
+     * Save setting
+     * @param path Path of the setting (e.g. General/Computation/NumberOfIterations)
+     * @param value Value in variant form
+     */
+    void setSetting(const QString& path, const QVariant& value);
+
 protected:
     CoreInterface* _core;
 
