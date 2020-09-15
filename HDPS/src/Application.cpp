@@ -52,8 +52,6 @@ hdps::Application::Application(int& argc, char** argv) :
     testIconFont("FontAwesome", 3, 0);
     testIconFont("FontAwesome", 5, 14);
     */
-
-    _settings.setValue("test", 1);
 }
 
 hdps::Application* hdps::Application::current()
