@@ -26,6 +26,7 @@ jobs:
         - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
                 
     steps:
+      - uses: actions/checkout@v2
       - uses: ./.github/actions/action-conan-build
         with:
           conan-visual-versions: ${{matrix.compiler}}
