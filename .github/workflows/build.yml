@@ -26,12 +26,12 @@ jobs:
         - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
                 
     steps:
-      - name: Update the submodules
-        run: git submodule update --init --recursive
       - uses: ./.github/actions/action-conan-build
         with:
           conan-visual-versions: ${{matrix.compiler}}
           conan-visual-runtimes: ${matrix.build-runtime}
           conan-build-types: ${matrix.build-runtime}
+      - name: Update the submodules
+        run: git submodule update --init --recursive
       - name: Build the target
         run: python build.py
