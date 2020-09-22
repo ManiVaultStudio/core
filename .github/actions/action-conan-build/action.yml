@@ -14,7 +14,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-
     - name: Install conan
       # Some projects don't allow in-source building, so create a separate build directory
       # We'll use this as our working directory for all subsequent commands
@@ -22,6 +21,7 @@ runs:
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         conan user
+      shell: ''
       env:
         CONAN_VISUAL_VERSIONS: ${{ inputs.conan-visual-versions }}
         CONAN_VISUAL_RUNTIMES: ${{ inputs.conan-visual-runtimes }}
