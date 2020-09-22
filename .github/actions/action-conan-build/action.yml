@@ -17,11 +17,14 @@ runs:
     - name: Install conan
       # Some projects don't allow in-source building, so create a separate build directory
       # We'll use this as our working directory for all subsequent commands
+      # bash for windows https://github.com/codecov/codecov-bash
       run: |
+        curl -s https://codecov.io/bash -o codecov.bash
+        ./codecov.bash
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         conan user
-      shell: ''
+      shell: bash
       env:
         CONAN_VISUAL_VERSIONS: ${{ inputs.conan-visual-versions }}
         CONAN_VISUAL_RUNTIMES: ${{ inputs.conan-visual-runtimes }}
