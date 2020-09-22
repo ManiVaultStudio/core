@@ -13,6 +13,7 @@ jobs:
    
   # job-id = build
   x86_64-pc-windows-msvc:
+    name: Windows conan build
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
@@ -29,10 +30,12 @@ jobs:
               - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
                 
     steps:
-      - run: git submodule update --init --recursive
+      - name: Update the submodules
+        run: git submodule update --init --recursive
       - uses: ./.github/actions/action-conan-build
         with:
           conan-visual-versions: ${{matrix.compiler}}
           conan-visual-runtimes: ${matrix.build-runtime}
           conan-build-types: ${matrix.build-runtime}
-      - run: python build.py
+      - name: Build the target
+        run: python build.py
