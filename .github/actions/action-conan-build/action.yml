@@ -11,15 +11,11 @@ inputs:
     description: 'Debug or Release'
     required: true
 
-#outputs:
-#  random-number: 
-#    description: "Random number"
-#    value: ${{ steps.random-number-generator.outputs.random-id }}
-
 runs:
   using: "composite"
-  steps: 
-    - uses: actions/setup-python@v1
+  steps:
+    - name: Setup python version
+      uses: actions/setup-python@v1
         with:
             python-version: "3.7"
     - name: Install conan
