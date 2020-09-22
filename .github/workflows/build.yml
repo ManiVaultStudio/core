@@ -8,10 +8,6 @@ env:
 
 # for matrix check https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners
 jobs:
-
-  conan-install:
-   
-  # job-id = build
   x86_64-pc-windows-msvc:
     name: Windows conan build
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -20,14 +16,14 @@ jobs:
     # See: https://docs.github.com/en/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on:  ${{ matrix.os }}
     strategy:
-        matrix:
-            os: [windows-2016]
-            compiler: [msvc-2017]
-            include: 
-              - {os: windows-2016, compiler: msvc-2017, build-runtime: MD, build-config: Release}
-              - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
-              - {os: windows-2016, compiler: msvc-2017, build-runtime: MD, build-config: Release}
-              - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
+      matrix:
+        os: [windows-2016]
+        compiler: [msvc-2017]
+        include: 
+        - {os: windows-2016, compiler: msvc-2017, build-runtime: MD, build-config: Release}
+        - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
+        - {os: windows-2016, compiler: msvc-2017, build-runtime: MD, build-config: Release}
+        - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
                 
     steps:
       - name: Update the submodules
