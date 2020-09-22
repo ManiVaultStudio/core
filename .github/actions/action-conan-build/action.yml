@@ -1,0 +1,42 @@
+name: 'Common cmake steps'
+description: 'Encapsulate cmake steps that are common for Windows, Linux and Mac'
+inputs:
+  conan-visual-versions: 
+    description: 'MSVC version: 15, 16 represent msvc-2017 or msvc-2019'
+    required: true
+  conan-visual-runtimes: 
+    description: 'MD or MDd'
+    required: true
+  conan-build-types:
+    description: 'Debug or Release'
+    required: true
+
+#outputs:
+#  random-number: 
+#    description: "Random number"
+#    value: ${{ steps.random-number-generator.outputs.random-id }}
+
+runs:
+  using: "composite"
+  steps: 
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+        with:
+            python-version: "3.7"
+    - name: Install conan
+      # Some projects don't allow in-source building, so create a separate build directory
+      # We'll use this as our working directory for all subsequent commands
+      run: |
+        pip install conan
+        pip install conan_package_tools bincrafters_package_tools
+        conan user
+      env:
+        CONAN_VISUAL_VERSIONS: ${{ inputs.conan-visual-versions }}
+        CONAN_VISUAL_RUNTIMES: ${{ inputs.conan-visual-runtimes }}
+        CONAN_ARCHS: x86_64
+        CONAN_BUILD_TYPES: ${{ inputs.conan-build-types }}
+        BUILD_SHARED: True
+        CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
+        CONAN_REMOTE: lkebconan
+        CONAN_STABLE_BRANCH_PATTERN: "release/*|master"
+        CONAN_UPLOAD_ONLY_WHEN_STABLE: 1        
