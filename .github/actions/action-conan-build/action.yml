@@ -24,7 +24,8 @@ runs:
         echo CMake version:
         cmake --version
         where cmake > tmpFile.txt
-        set /p CONAN_CMAKE_PROGRAM=< tmpFile.txt
+        set /p TEMP_CMAKE_PROGRAM=< tmpFile.txt
+        set CONAN_CMAKE_PROGRAM="%TEMP_CMAKE_PROGRAM%"
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
