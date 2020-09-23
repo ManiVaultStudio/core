@@ -37,5 +37,5 @@ jobs:
         with:
           conan-visual-versions: ${{matrix.build_cversion}}
           conan-visual-runtimes: ${{matrix.build-runtime}}
-          conan-build-types: ${{matrix.build-runtime}}
+          conan-build-types: ${{matrix.build-config}}
 

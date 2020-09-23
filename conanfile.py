@@ -27,7 +27,7 @@ class HdpsCoreConan(ConanFile):
     default_options = {"shared": True, "fPIC": True}
 
     # Custom attributes for Bincrafters recipe conventions
-    _source_subfolder = "core"
+    _source_subfolder = "."
     _build_subfolder = "build_subfolder"
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
