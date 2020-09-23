@@ -36,6 +36,6 @@ jobs:
       - uses: ./.github/actions/action-conan-build
         with:
           conan-visual-versions: ${{matrix.build_cversion}}
-          conan-visual-runtimes: ${matrix.build-runtime}
-          conan-build-types: ${matrix.build-runtime}
+          conan-visual-runtimes: ${{matrix.build-runtime}}
+          conan-build-types: ${{matrix.build-runtime}}
 
