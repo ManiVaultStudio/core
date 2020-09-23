@@ -21,11 +21,11 @@ runs:
       #         curl -s https://codecov.io/bash -o codecov.bash
       #   ./codecov.bash
       run: |
+        echo CMake version:
+        cmake --version
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
-        echo CMake version:
-        cmake --version
         conan user
         python build.py
       shell: cmd
