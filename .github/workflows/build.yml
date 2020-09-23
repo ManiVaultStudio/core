@@ -20,10 +20,10 @@ jobs:
         os: [windows-2016]
         compiler: [msvc-2017]
         include: 
-        - {os: windows-2016, compiler: msvc-2017, build-runtime: MD, build-config: Release}
-        - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
-        - {os: windows-2016, compiler: msvc-2017, build-runtime: MD, build-config: Release}
-        - {os: windows-2016, compiler: msvc-2017, build-runtime: MDd, build-config: Debug}
+        - {os: windows-2016, compiler: msvc-2017, build_cversion: 15, build-runtime: MD, build-config: Release}
+        - {os: windows-2016, compiler: msvc-2017, build_cversion: 15, build-runtime: MDd, build-config: Debug}
+        - {os: windows-2016, compiler: msvc-2019, build_cversion: 16, build-runtime: MD, build-config: Release}
+        - {os: windows-2016, compiler: msvc-2019, build_cversion: 16, build-runtime: MDd, build-config: Debug}
                 
     steps:
       - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
         run: git submodule update --init --recursive
       - uses: ./.github/actions/action-conan-build
         with:
-          conan-visual-versions: ${{matrix.compiler}}
+          conan-visual-versions: ${{matrix.build_cversion}}
           conan-visual-runtimes: ${matrix.build-runtime}
           conan-build-types: ${matrix.build-runtime}
           runner-shell: cmd
