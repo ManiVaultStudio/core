@@ -23,6 +23,7 @@ runs:
       run: |
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
+        pip install -Iv cmake>=3.17
         conan user
         python build.py
       shell: cmd
