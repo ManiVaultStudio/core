@@ -9,6 +9,6 @@ def _is_not_shared(build):
     
 if __name__ == "__main__":
 
-    builder = build_template_default.get_builder(reference="hdps/0.1.0") 
+    builder = build_template_default.get_builder(reference="hdps-core/0.1.0") 
     builder.remove_build_if(_is_not_shared)  
     builder.run()
