@@ -10,9 +10,6 @@ inputs:
   conan-build-types:
     description: 'Debug or Release'
     required: true
-  runner-shell:
-    description: 'Which shell: cmd bash pwsh'
-    required: true
 
 runs:
   using: "composite"
@@ -27,7 +24,8 @@ runs:
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         conan user
-      shell: bash
+        python build.py
+      shell: cmd
       env:
         CONAN_VISUAL_VERSIONS: ${{ inputs.conan-visual-versions }}
         CONAN_VISUAL_RUNTIMES: ${{ inputs.conan-visual-runtimes }}

@@ -38,6 +38,4 @@ jobs:
           conan-visual-versions: ${{matrix.build_cversion}}
           conan-visual-runtimes: ${matrix.build-runtime}
           conan-build-types: ${matrix.build-runtime}
-          runner-shell: cmd
-      - name: Build the target
-        run: python build.py
+
