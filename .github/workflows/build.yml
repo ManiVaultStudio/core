@@ -33,6 +33,8 @@ jobs:
           python-version: "3.7"
       - name: Update the submodules
         run: git submodule update --init --recursive
+      - name: Get CMake 3.17.2 (need at least 3.17 for hdps)
+        uses: lukka/get-cmake@v3.17.2
       - uses: ./.github/actions/action-conan-build
         with:
           conan-visual-versions: ${{matrix.build_cversion}}
