@@ -30,6 +30,7 @@ runs:
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
         conan user
+        mkdir _build
         python build.py
       shell: cmd
       env:
@@ -39,6 +40,7 @@ runs:
         CONAN_BUILD_TYPES: ${{ inputs.conan-build-types }}
         BUILD_SHARED: True
         CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
+        CONAN_USERNAME: lkeb
         CONAN_REMOTE: lkebconan
         CONAN_STABLE_BRANCH_PATTERN: "release/*|master"
         CONAN_UPLOAD_ONLY_WHEN_STABLE: 1        
