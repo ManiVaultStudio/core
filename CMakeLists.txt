@@ -2,6 +2,10 @@
 
 cmake_minimum_required(VERSION 3.17)
 
+file(GLOB LS_DIR *)
+string(REPLACE ";" "\n" LLS_DIR "${LS_DIR}")
+message("${LLS_DIR}")
+
 set(PROJECT "HdpsAllInOne")
 
 PROJECT(${PROJECT})
