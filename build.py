@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 
-from bincrafters import build_template_default
+from cpt.packager import ConanMultiPackager
 import os
 def _is_not_shared(build):
     return build.options['hdps-core:shared'] == False
     
 if __name__ == "__main__":
 
-    builder = build_template_default.get_builder(reference="hdps-core/0.1.0") 
+    builder = ConanMultiPackager(reference="hdps-core/0.1.0")
+    builder.add_common_builds()
     builder.remove_build_if(_is_not_shared)  
     builder.run()

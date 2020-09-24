@@ -18,7 +18,7 @@ class HdpsCoreConan(ConanFile):
     license = "MIT"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
     exports = ["LICENSE.md"]      # Packages the license for the conanfile.py
     # Remove following lines if the target lib does not use cmake.
-    exports_sources = ["CMakeLists.txt", "build_trigger.json"]
+    exports_sources = "*"
     generators = "cmake"
 
     # Options may need to change depending on the packaged library
@@ -27,8 +27,6 @@ class HdpsCoreConan(ConanFile):
     default_options = {"shared": True, "fPIC": True}
 
     # Custom attributes for Bincrafters recipe conventions
-    _source_subfolder = "."
-    _build_subfolder = "build_subfolder"
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -75,7 +73,8 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Linux" or self.settings.os == "Macos":
             # cmake.definitions["CMAKE_CXX_STANDARD"] = 14
             cmake.definitions["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
-        cmake.configure()  # (source_folder=self._source_subfolder)
+        # print("Source folder {}".format(self.source_folder))
+        cmake.configure(source_folder=self.source_folder)  # (source_folder=self._source_subfolder)
         cmake.verbose = True
         return cmake
 
@@ -89,7 +88,7 @@ class HdpsCoreConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses")  #, src=self._source_subfolder
         # If the CMakeLists.txt has a proper install method, the steps below may be redundant
         # If so, you can just remove the lines below
         self.copy(pattern="*", src=os.path.join(self.install_dir, 'Release'))
