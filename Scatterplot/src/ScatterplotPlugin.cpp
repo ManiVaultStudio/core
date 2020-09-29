@@ -355,13 +355,14 @@ void ScatterplotPlugin::onSelecting(hdps::Selection selection)
 {
     const Points* const selectionSet = makeSelection(selection);
 
-    if ((selectionSet != nullptr) && (settings != nullptr) && (settings->IsNotifyingOnSelecting()))
+    if (selectionSet != nullptr)
     {
-        _core->notifySelectionChanged(selectionSet->getDataName());
-    }
-    else
-    {
-        updateSelection();
+        // Only notify other plugins of the selection changes if enabled in the settings
+        // This prevents plugins that take a long time to process selections to deteriorate performance
+        if ((settings != nullptr) && settings->IsNotifyingOnSelecting())
+            _core->notifySelectionChanged(selectionSet->getDataName());
+        else
+            updateSelection();
     }
 }
 
