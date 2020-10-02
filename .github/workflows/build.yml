@@ -21,8 +21,9 @@ jobs:
         compiler: [msvc-2017]
         include: 
         - {os: windows-2016, compiler: msvc-2017, build_cversion: 15, build-runtime: MD, build-config: Release}
-        - {os: windows-2016, compiler: msvc-2017, build_cversion: 15, build-runtime: MDd, build-config: Debug}
-        # - {os: windows-2016, compiler: msvc-2019, build_cversion: 16, build-runtime: MD, build-config: Release}
+        # Conan tries to pull debug Qt - disable this 
+        # - {os: windows-2016, compiler: msvc-2017, build_cversion: 15, build-runtime: MDd, build-config: Debug}
+        - {os: windows-2016, compiler: msvc-2019, build_cversion: 16, build-runtime: MD, build-config: Release}
         #- {os: windows-2016, compiler: msvc-2019, build_cversion: 16, build-runtime: MDd, build-config: Debug}
                 
     steps:
