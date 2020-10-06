@@ -30,6 +30,8 @@ runs:
         python build.py
       shell: bash
       env:
+        CC: gcc-${{ inputs.conan-gcc-versions }}
+        CXX: gcc-${{ inputs.conan-gcc-versions }}
         CONAN_GCC_VERSIONS: ${{ inputs.conan-gcc-versions }}
         CONAN_ARCHS: x86_64
         CONAN_BUILD_TYPES: ${{ inputs.conan-build-types }}
