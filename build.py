@@ -12,4 +12,4 @@ if __name__ == "__main__":
     builder = ConanMultiPackager(reference="hdps-core/0.1.0")
     builder.add_common_builds()
     builder.remove_build_if(_is_not_shared)  
-    builder.run()
+    builder.run('action_build')
