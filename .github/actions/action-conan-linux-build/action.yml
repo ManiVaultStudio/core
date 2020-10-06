@@ -25,12 +25,12 @@ runs:
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
-        conan profile new default
-        conan profile update settings.compiler=gcc default
-        conan profile update settings.compiler.version=${{ inputs.conan-gcc-version }} default
-        conan profile update settings.arch=x86_64 default
-        conan profile update settings.build_type=${{ inputs.conan-built-types }} default
-        conan profile show default
+        conan profile new action_build
+        conan profile update settings.compiler=gcc action_build
+        conan profile update settings.compiler.version=${{ inputs.conan-gcc-version }} action_build
+        conan profile update settings.arch=x86_64 action_build
+        conan profile update settings.build_type=${{ inputs.conan-build-types }} action_build
+        conan profile show action_build
         conan user
         mkdir _build
         python build.py
@@ -38,6 +38,7 @@ runs:
       env:
         CC: gcc-${{ inputs.conan-gcc-versions }}
         CXX: gcc-${{ inputs.conan-gcc-versions }}
+        CONAN_BASE_PROFILE : action_build
         CONAN_GCC_VERSIONS: ${{ inputs.conan-gcc-versions }}
         CONAN_DOCKER_IMAGE: conanio/gcc${{ inputs.conan-gcc-version }}
         CONAN_ARCHS: x86_64
