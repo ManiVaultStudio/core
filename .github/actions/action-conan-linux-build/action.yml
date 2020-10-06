@@ -3,7 +3,7 @@ description: 'Encapsulate cmake composite run steps that are common for Linux an
 # reference https://docs.github.com/en/free-pro-team@latest/actions/creating-actions/creating-a-composite-run-steps-action
 inputs:
   conan-gcc-version: 
-    description: 'A number [gcc: 5 to 10 included] [clang: 7.3, 8.0, 8.1]'
+    description: 'A number [gcc: 5 6 7 8 9 ] [clang: 39 40 50 60 7 8 9]'
     required: true
   conan-build-types:
     description: 'Debug or Release'
@@ -27,7 +27,7 @@ runs:
         pip install -Iv cmake>=3.17
         conan profile new default
         conan profile update settings.compiler=gcc default
-        conan profile update settings.compiler.version=${{ inputs.conan-gcc-versions }} default
+        conan profile update settings.compiler.version=${{ inputs.conan-gcc-version }} default
         conan profile update settings.arch=x86_64 default
         conan profile update settings.build_type=${{ inputs.conan-built-types }} default
         conan profile show default
@@ -39,6 +39,7 @@ runs:
         CC: gcc-${{ inputs.conan-gcc-versions }}
         CXX: gcc-${{ inputs.conan-gcc-versions }}
         CONAN_GCC_VERSIONS: ${{ inputs.conan-gcc-versions }}
+        CONAN_DOCKER_IMAGE=conanio/gcc${{ inputs.conan-gcc-version }}
         CONAN_ARCHS: x86_64
         CONAN_BUILD_TYPES: ${{ inputs.conan-build-types }}
         BUILD_SHARED: True

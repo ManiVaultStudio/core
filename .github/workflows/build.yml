@@ -30,7 +30,7 @@ jobs:
         - name: Linux_gcc9
           os: ubuntu-18.04
           build-compiler: gcc
-          build-cversion: "9"
+          build-cversion: 9
           build-config: Release
                 
     steps:
