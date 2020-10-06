@@ -25,6 +25,9 @@ runs:
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
+        conan profile new default --detect
+        conan profile update settings.compiler=gcc default
+        conan profile update settings.compiler.version=${{ inputs.conan-gcc-versions }}
         conan user
         mkdir _build
         python build.py
