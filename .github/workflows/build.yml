@@ -20,11 +20,18 @@ jobs:
         #os: [windows-2016]
         #compiler: [msvc-2017]
         include: 
-        - {os: windows-2016, compiler: msvc-2017, build_cversion: 15, build-runtime: MD, build-config: Release}
-        # Conan tries to pull debug Qt - disable this 
-        # - {os: windows-2016, compiler: msvc-2017, build_cversion: 15, build-runtime: MDd, build-config: Debug}
-        - {os: windows-2019, compiler: msvc-2019, build_cversion: 16, build-runtime: MD, build-config: Release}
-        #- {os: windows-2016, compiler: msvc-2019, build_cversion: 16, build-runtime: MDd, build-config: Debug}
+        - name: Windows-msvc2017
+          os: windows-2019
+          compiler: msvc-2017
+          build-cversion: 15
+          build-runtime: MD
+          build-config: Release
+          
+        - name: Linux_gcc9
+          os: ubuntu-18.04
+          build-compiler: gcc
+          build-cversion: "9"
+          build-config: Release
                 
     steps:
       - uses: actions/checkout@v2
@@ -38,9 +45,17 @@ jobs:
       #  uses: jwlawson/actions-setup-cmake@v1.3
       #  with:
       #    cmake-version: 3.17
-      - uses: ./.github/actions/action-conan-build
+      - name: Windows build
+        uses: ./.github/actions/action-conan-build
         with:
-          conan-visual-versions: ${{matrix.build_cversion}}
+          conan-visual-versions: ${{matrix.build-cversion}}
           conan-visual-runtimes: ${{matrix.build-runtime}}
+          conan-build-types: ${{matrix.build-config}}
+          
+      - name: Linux/Mac build
+        uses: ./.github/actions/action-conan-linux-build
+        if: !startsWith(runner.os, 'Windows')
+        with:
+          conan-gcc-version: ${{matrix.build-cversion}}
           conan-build-types: ${{matrix.build-config}}
 

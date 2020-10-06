@@ -1,12 +1,9 @@
 name: 'Common cmake steps'
-description: 'Encapsulate cmake composite run steps that are common for Windows, Linux and Mac'
+description: 'Encapsulate cmake composite run steps that are common for Linux and Mac'
 # reference https://docs.github.com/en/free-pro-team@latest/actions/creating-actions/creating-a-composite-run-steps-action
 inputs:
-  conan-visual-versions: 
-    description: 'MSVC version: 15, 16 represent msvc-2017 or msvc-2019'
-    required: true
-  conan-visual-runtimes: 
-    description: 'MD or MDd'
+  conan-gcc-versions: 
+    description: 'A number [gcc: 5 to 10 included] [clang: 7.3, 8.0, 8.1]'
     required: true
   conan-build-types:
     description: 'Debug or Release'
@@ -24,19 +21,16 @@ runs:
       run: |
         echo CMake version:
         cmake --version
-        where cmake > tmpFile.txt
-        set /p TEMP_CMAKE_PROGRAM=< tmpFile.txt
-        set CONAN_CMAKE_PROGRAM="%TEMP_CMAKE_PROGRAM%"
+        export CONAN_CMAKE_PROGRAM=`which cmake`
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
         conan user
         mkdir _build
         python build.py
-      shell: cmd
+      shell: bash
       env:
-        CONAN_VISUAL_VERSIONS: ${{ inputs.conan-visual-versions }}
-        CONAN_VISUAL_RUNTIMES: ${{ inputs.conan-visual-runtimes }}
+        CONAN_GCC_VERSIONS: ${{ inputs.conan-gcc-versions }}
         CONAN_ARCHS: x86_64
         CONAN_BUILD_TYPES: ${{ inputs.conan-build-types }}
         BUILD_SHARED: True
