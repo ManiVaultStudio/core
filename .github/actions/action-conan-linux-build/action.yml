@@ -39,7 +39,7 @@ runs:
         CC: gcc-${{ inputs.conan-gcc-versions }}
         CXX: gcc-${{ inputs.conan-gcc-versions }}
         CONAN_GCC_VERSIONS: ${{ inputs.conan-gcc-versions }}
-        CONAN_DOCKER_IMAGE=conanio/gcc${{ inputs.conan-gcc-version }}
+        CONAN_DOCKER_IMAGE: conanio/gcc${{ inputs.conan-gcc-version }}
         CONAN_ARCHS: x86_64
         CONAN_BUILD_TYPES: ${{ inputs.conan-build-types }}
         BUILD_SHARED: True
