@@ -2,7 +2,7 @@ name: 'Common cmake steps'
 description: 'Encapsulate cmake composite run steps that are common for Linux and Mac'
 # reference https://docs.github.com/en/free-pro-team@latest/actions/creating-actions/creating-a-composite-run-steps-action
 inputs:
-  conan-gcc-versions: 
+  conan-gcc-version: 
     description: 'A number [gcc: 5 to 10 included] [clang: 7.3, 8.0, 8.1]'
     required: true
   conan-build-types:
