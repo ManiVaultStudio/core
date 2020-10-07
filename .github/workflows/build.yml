@@ -33,6 +33,14 @@ jobs:
           build-cversion: 9
           build-config: Release
           build-os: Linux
+          
+        - name: Macos_xcode10.3
+          os: macos-10.15
+          build-compiler: apple-clang
+          build-cversion: 10.0
+          build-config: Release
+          build-os: Macos
+          build-xcode-version: 10.3
                 
     steps:
       - uses: actions/checkout@v2
@@ -54,6 +62,10 @@ jobs:
           
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
+        - name: Set Xcode
+          run: |
+            sudo xcode-select -switch /Applications/Xcode${{matrix.build-xcode-version}}.app
+            
         uses: ./.github/actions/action-conan-linux-build
         with:
           conan-compiler: ${{matrix.build-compiler}}
