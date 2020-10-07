@@ -2,12 +2,17 @@ name: 'Common cmake steps'
 description: 'Encapsulate cmake composite run steps that are common for Linux and Mac'
 # reference https://docs.github.com/en/free-pro-team@latest/actions/creating-actions/creating-a-composite-run-steps-action
 inputs:
-  conan-gcc-version: 
-    description: 'A number [gcc: 5 6 7 8 9 ] [clang: 39 40 50 60 7 8 9]'
+  conan-compiler: 
+    description: 'gcc clang apple-clang'
+    required: true
+  conan-compiler-version: 
+    description: 'A number [gcc: 5 6 7 8 9 ] [clang: 39 40 50 60 7 8 9] [10.0]'
     required: true
   conan-build-type:
     description: 'Debug or Release'
     required: true
+  conan-build-os:
+    description: 'Linux or Macos'
 
 runs:
   using: "composite"
@@ -18,11 +23,6 @@ runs:
     #    sudo apt install gcc-${{ inputs.conan-gcc-versions }} g++-${{ inputs.conan-gcc-versions }}
         
     - name: Install conan
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
-      # bash for windows https://github.com/codecov/codecov-bash
-      #         curl -s https://codecov.io/bash -o codecov.bash
-      #   ./codecov.bash
       run: |
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
@@ -34,12 +34,12 @@ runs:
         export CONAN_USER_HOME=`pwd`/_conan
         
         conan profile new action_build
-        conan profile update settings.os=Linux action_build
-        conan profile update settings.os_build=Linux action_build
+        conan profile update settings.os=${{ inputs.conan-build-os }} action_build
+        conan profile update settings.os_build=${{ inputs.conan-build-os }} action_build
         conan profile update settings.arch=x86_64 action_build
         conan profile update settings.arch_build=x86_64 action_build
-        conan profile update settings.compiler=gcc action_build
-        conan profile update settings.compiler.version=${{ inputs.conan-gcc-version }} action_build
+        conan profile update settings.compiler=${{ inputs.conan-compiler }} action_build
+        conan profile update settings.compiler.version=${{ inputs.conan-compiler-version }} action_build
         conan profile update settings.compiler.libcxx=libstdc++ action_build
         conan profile update settings.build_type=${{ inputs.conan-build-type }} action_build
         conan profile update options.hdps-core:shared=True action_build
@@ -49,8 +49,6 @@ runs:
         python build.py
       shell: bash
       env:
-        #CC: gcc-${{ inputs.conan-gcc-version }}
-        #CXX: gcc-${{ inputs.conan-gcc-version }}
         BUILD_SHARED: True
         CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
         CONAN_USERNAME: lkeb

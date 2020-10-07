@@ -32,6 +32,7 @@ jobs:
           build-compiler: gcc
           build-cversion: 9
           build-config: Release
+          build-os: Linux
                 
     steps:
       - uses: actions/checkout@v2
@@ -55,6 +56,8 @@ jobs:
         if: "!startsWith(runner.os, 'Windows')"
         uses: ./.github/actions/action-conan-linux-build
         with:
-          conan-gcc-version: ${{matrix.build-cversion}}
+          conan-compiler-version: ${{matrix.build-compiler}}
+          conan-compiler-version: ${{matrix.build-cversion}}
           conan-build-type: ${{matrix.build-config}}
+          conan-build-os: ${{matrix.build-os}}
 
