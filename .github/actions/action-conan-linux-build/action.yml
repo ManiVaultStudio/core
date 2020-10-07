@@ -49,8 +49,8 @@ runs:
         python build.py
       shell: bash
       env:
-        CC: gcc-${{ inputs.conan-gcc-version }}
-        CXX: gcc-${{ inputs.conan-gcc-version }}
+        #CC: gcc-${{ inputs.conan-gcc-version }}
+        #CXX: gcc-${{ inputs.conan-gcc-version }}
         BUILD_SHARED: True
         CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
         CONAN_USERNAME: lkeb
