@@ -40,7 +40,7 @@ jobs:
           build-cversion: 10.0
           build-config: Release
           build-os: Macos
-          build-xcode-version: 10.3
+          build-xcode-version: 10
                 
     steps:
       - uses: actions/checkout@v2
@@ -63,7 +63,7 @@ jobs:
       - name: Select Xcode
         if: startsWith(runner.os, 'macOS')
         run: |
-          sudo xcode-select -switch /Applications/Xcode${{matrix.build-xcode-version}}.app
+          sudo xcode-select -switch /Applications/Xcode${{matrix.build-xcode-version}}.app/Contents/Developer
             
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
