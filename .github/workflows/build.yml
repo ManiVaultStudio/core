@@ -56,7 +56,7 @@ jobs:
         if: "!startsWith(runner.os, 'Windows')"
         uses: ./.github/actions/action-conan-linux-build
         with:
-          conan-compiler-version: ${{matrix.build-compiler}}
+          conan-compiler: ${{matrix.build-compiler}}
           conan-compiler-version: ${{matrix.build-cversion}}
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
