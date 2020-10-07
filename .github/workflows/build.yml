@@ -8,8 +8,8 @@ env:
 
 # for matrix check https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners
 jobs:
-  x86_64-pc-windows-msvc:
-    name: Windows conan build
+  x86_64-win-lin-mac:
+    name: Windows-Linux-Mac conan build
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
@@ -59,13 +59,14 @@ jobs:
           conan-visual-version: ${{matrix.build-cversion}}
           conan-visual-runtime: ${{matrix.build-runtime}}
           conan-build-type: ${{matrix.build-config}}
-          
+
+      - name: Select Xcode
+        if: startsWith(runner.os, 'macOS')
+        run: |
+          sudo xcode-select -switch /Applications/Xcode${{matrix.build-xcode-version}}.app
+            
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
-        - name: Set Xcode
-          run: |
-            sudo xcode-select -switch /Applications/Xcode${{matrix.build-xcode-version}}.app
-            
         uses: ./.github/actions/action-conan-linux-build
         with:
           conan-compiler: ${{matrix.build-compiler}}
