@@ -13,4 +13,4 @@ if __name__ == "__main__":
     # builder.add_common_builds()
     builder.add()
     # builder.remove_build_if(_is_not_shared)  
-    builder.run('/tmp/conan/action_build')
+    builder.run('./_conan/action_build')
