@@ -25,13 +25,19 @@ runs:
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
+        export CONAN_USER_HOME=/tmp/conan
+        
         conan profile new action_build
+        conan profile update settings.os=Linux
+        conan profile update settings.os_buildr=Linux
+        conan profile update settings.arch=x86_64 action_build
+        conan profile update settings.arch_build=x86_64 action_build
         conan profile update settings.compiler=gcc action_build
         conan profile update settings.compiler.version=${{ inputs.conan-gcc-version }} action_build
-        conan profile update settings.arch=x86_64 action_build
+        conan profile update settings.compiler.libcxx=libstdc++ action_build
         conan profile update settings.build_type=${{ inputs.conan-build-types }} action_build
         conan profile show action_build
-        conan user
+        
         mkdir _build
         python build.py
       shell: bash
