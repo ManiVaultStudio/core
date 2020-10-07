@@ -33,6 +33,7 @@ jobs:
           build-cversion: 9
           build-config: Release
           build-os: Linux
+          build-libcxx: libstdc++
           
         - name: Macos_xcode10.3
           os: macos-10.15
@@ -41,6 +42,7 @@ jobs:
           build-config: Release
           build-os: Macos
           build-xcode-version: 10.3
+          build-libcxx: libc++
                 
     steps:
       - uses: actions/checkout@v2
@@ -71,6 +73,7 @@ jobs:
         with:
           conan-compiler: ${{matrix.build-compiler}}
           conan-compiler-version: ${{matrix.build-cversion}}
+          conan-libcxx-version: ${{matrix.build-libcxx}}
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
 

@@ -8,6 +8,9 @@ inputs:
   conan-compiler-version: 
     description: 'A number [gcc: 5 6 7 8 9 ] [clang: 39 40 50 60 7 8 9] [10.0]'
     required: true
+  conan-libcxx-version: 
+    description: 'Linux: libstdc++ or Macos: libc++ '
+    required: true
   conan-build-type:
     description: 'Debug or Release'
     required: true
@@ -40,7 +43,7 @@ runs:
         conan profile update settings.arch_build=x86_64 action_build
         conan profile update settings.compiler=${{ inputs.conan-compiler }} action_build
         conan profile update settings.compiler.version=${{ inputs.conan-compiler-version }} action_build
-        conan profile update settings.compiler.libcxx=libstdc++ action_build
+        conan profile update settings.compiler.libcxx=${{ inputs.conan-libcxx-version}} action_build
         conan profile update settings.build_type=${{ inputs.conan-build-type }} action_build
         conan profile update options.hdps-core:shared=True action_build
         conan profile show action_build
