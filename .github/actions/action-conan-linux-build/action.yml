@@ -25,8 +25,8 @@ runs:
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
-        mkdir _conan
-        export CONAN_USER_HOME=_conan
+        mkdir `pwd`/_conan
+        export CONAN_USER_HOME=`pwd`/_conan
         
         conan profile new action_build
         conan profile update settings.os=Linux action_build
