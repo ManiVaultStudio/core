@@ -33,7 +33,10 @@ runs:
         mkdir %CONAN_USER_HOME%
 
         conan profile new action_build
+        conan profile update settings.os=Windows action_build
+        conan profile update settings.os_build=Windows action_build
         conan profile update settings.arch=x86_64 action_build
+        conan profile update settings.arch_build=x86_64 action_build
         conan profile update settings.compiler="Visual Studio" action_build
         conan profile update settings.compiler.runtime=${{ inputs.conan-visual-runtime }} action_build
         conan profile update settings.compiler.version=${{ inputs.conan-visual-version }} action_build
