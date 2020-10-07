@@ -40,7 +40,7 @@ runs:
         conan profile update settings.arch_build=x86_64 action_build
         conan profile update settings.compiler=gcc action_build
         conan profile update settings.compiler.version=${{ inputs.conan-gcc-version }} action_build
-        conan profile update settings.compiler.libcxx=libstdc++ action_build
+        conan profile update settings.compiler.libcxx=libstdc++11 action_build
         conan profile update settings.build_type=${{ inputs.conan-build-type }} action_build
         conan profile update options.hdps-core:shared=True action_build
         conan profile show action_build
