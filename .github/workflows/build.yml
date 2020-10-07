@@ -37,7 +37,7 @@ jobs:
         - name: Macos_xcode10.3
           os: macos-10.15
           build-compiler: apple-clang
-          build-cversion: 10.0
+          build-cversion: "10.0"
           build-config: Release
           build-os: Macos
           build-xcode-version: 10.3
