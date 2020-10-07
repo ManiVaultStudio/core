@@ -28,7 +28,7 @@ runs:
         pip install -Iv cmake>=3.17
         echo CMake version:
         cmake --version
-        for /f %%i in ('where cmake') do set CONAN_CMAKE_PROGRAM="%%i"
+        for /f "delims=" %%i in ('where cmake') do set CONAN_CMAKE_PROGRAM="%%i"
         set CONAN_USER_HOME=%cd%\_conan
         mkdir %CONAN_USER_HOME%
 
