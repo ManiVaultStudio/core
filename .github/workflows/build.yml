@@ -21,7 +21,7 @@ jobs:
         #compiler: [msvc-2017]
         include: 
         - name: Windows-msvc2017
-          os: windows-2019
+          os: windows-2016
           compiler: msvc-2017
           build-cversion: 15
           build-runtime: MD
