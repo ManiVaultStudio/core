@@ -2,13 +2,13 @@ name: 'Common cmake steps'
 description: 'Encapsulate cmake composite run steps that are common for Windows, Linux and Mac'
 # reference https://docs.github.com/en/free-pro-team@latest/actions/creating-actions/creating-a-composite-run-steps-action
 inputs:
-  conan-visual-versions: 
+  conan-visual-version: 
     description: 'MSVC version: 15, 16 represent msvc-2017 or msvc-2019'
     required: true
-  conan-visual-runtimes: 
+  conan-visual-runtime: 
     description: 'MD or MDd'
     required: true
-  conan-build-types:
+  conan-build-type:
     description: 'Debug or Release'
     required: true
 
@@ -22,23 +22,29 @@ runs:
       #         curl -s https://codecov.io/bash -o codecov.bash
       #   ./codecov.bash
       run: |
-        echo CMake version:
-        cmake --version
-        where cmake > tmpFile.txt
-        set /p TEMP_CMAKE_PROGRAM=< tmpFile.txt
-        set CONAN_CMAKE_PROGRAM="%TEMP_CMAKE_PROGRAM%"
+
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
-        conan user
+        echo CMake version:
+        cmake --version
+        for /f %i in ('where cmake') do set CONAN_CMAKE_PROGRAM=%i
+        set CONAN_USER_HOME=%cd%\_conan
+        mkdir %CONAN_USER_HOME%
+
+        conan profile new action_build
+        conan profile update settings.arch=x86_64 action_build
+        conan profile update settings.compiler="Visual Studio" action_build
+        conan profile update settings.compiler.runtime=${{ inputs.conan-visual-runtime }} action_build
+        conan profile update settings.compiler.version=${{ inputs.conan-visual-version }} action_build
+        conan profile update settings.build_type=${{ inputs.conan-build-type }} action_build
+        conan profile update options.hdps-core:shared=True action_build
+        conan profile show action_build
+
         mkdir _build
         python build.py
       shell: cmd
       env:
-        CONAN_VISUAL_VERSIONS: ${{ inputs.conan-visual-versions }}
-        CONAN_VISUAL_RUNTIMES: ${{ inputs.conan-visual-runtimes }}
-        CONAN_ARCHS: x86_64
-        CONAN_BUILD_TYPES: ${{ inputs.conan-build-types }}
         BUILD_SHARED: True
         CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
         CONAN_USERNAME: lkeb

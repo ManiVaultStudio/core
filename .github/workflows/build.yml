@@ -45,16 +45,16 @@ jobs:
 
       - name: Windows build
         if: startsWith(runner.os, 'Windows')
-        uses: ./.github/actions/action-conan-build
+        uses: ./.github/actions/action-conan-windows-build
         with:
-          conan-visual-versions: ${{matrix.build-cversion}}
-          conan-visual-runtimes: ${{matrix.build-runtime}}
-          conan-build-types: ${{matrix.build-config}}
+          conan-visual-version: ${{matrix.build-cversion}}
+          conan-visual-runtime: ${{matrix.build-runtime}}
+          conan-build-type: ${{matrix.build-config}}
           
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
         uses: ./.github/actions/action-conan-linux-build
         with:
           conan-gcc-version: ${{matrix.build-cversion}}
-          conan-build-types: ${{matrix.build-config}}
+          conan-build-type: ${{matrix.build-config}}
 

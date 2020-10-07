@@ -5,7 +5,7 @@ inputs:
   conan-gcc-version: 
     description: 'A number [gcc: 5 6 7 8 9 ] [clang: 39 40 50 60 7 8 9]'
     required: true
-  conan-build-types:
+  conan-build-type:
     description: 'Debug or Release'
     required: true
 
@@ -24,12 +24,12 @@ runs:
       #         curl -s https://codecov.io/bash -o codecov.bash
       #   ./codecov.bash
       run: |
-        echo CMake version:
-        cmake --version
-        export CONAN_CMAKE_PROGRAM=`which cmake`
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
+        export CONAN_CMAKE_PROGRAM=`which cmake`
+        echo CMake version:
+        cmake --version
         mkdir `pwd`/_conan
         export CONAN_USER_HOME=`pwd`/_conan
         
@@ -41,7 +41,7 @@ runs:
         conan profile update settings.compiler=gcc action_build
         conan profile update settings.compiler.version=${{ inputs.conan-gcc-version }} action_build
         conan profile update settings.compiler.libcxx=libstdc++ action_build
-        conan profile update settings.build_type=${{ inputs.conan-build-types }} action_build
+        conan profile update settings.build_type=${{ inputs.conan-build-type }} action_build
         conan profile update options.hdps-core:shared=True action_build
         conan profile show action_build
         
@@ -51,9 +51,6 @@ runs:
       env:
         CC: gcc-${{ inputs.conan-gcc-version }}
         CXX: gcc-${{ inputs.conan-gcc-version }}
-        CONAN_GCC_VERSIONS: ${{ inputs.conan-gcc-versions }}
-        CONAN_ARCHS: x86_64
-        CONAN_BUILD_TYPES: ${{ inputs.conan-build-types }}
         BUILD_SHARED: True
         CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
         CONAN_USERNAME: lkeb
