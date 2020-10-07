@@ -28,8 +28,8 @@ runs:
         export CONAN_USER_HOME=/tmp/conan
         
         conan profile new action_build
-        conan profile update settings.os=Linux
-        conan profile update settings.os_buildr=Linux
+        conan profile update settings.os=Linux action_build
+        conan profile update settings.os_build=Linux action_build
         conan profile update settings.arch=x86_64 action_build
         conan profile update settings.arch_build=x86_64 action_build
         conan profile update settings.compiler=gcc action_build
