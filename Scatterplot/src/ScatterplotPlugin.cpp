@@ -127,16 +127,17 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
+    // For source data determine whether to use dimension names or make them up
     if (points.getDimensionNames().size() == points.getNumDimensions())
-    {
         settings->initDimOptions(points.getDimensionNames());
-        settings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
-    }
     else
-    {
         settings->initDimOptions(points.getNumDimensions());
+
+    // For derived data determine whether to use dimension names or make them up
+    if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
+        settings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
+    else
         settings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
-    }
 
     updateData();
 }
