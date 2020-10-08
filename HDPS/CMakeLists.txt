@@ -30,7 +30,7 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-find_package(Qt5 5.12 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
+find_package(Qt5 5.14 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 
 set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
 #message(STATUS ${INSTALL_DIR})

@@ -45,14 +45,16 @@ jobs:
           build-libcxx: libc++
                 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout the source
+        uses: actions/checkout@v2
+
+      - name: Update the submodules
+        run: git submodule update --init --recursive
+
       - name: Setup python version
         uses: actions/setup-python@v1
         with:
           python-version: "3.7"
-          
-      - name: Update the submodules
-        run: git submodule update --init --recursive
 
       - name: Windows build
         if: startsWith(runner.os, 'Windows')
@@ -62,7 +64,7 @@ jobs:
           conan-visual-runtime: ${{matrix.build-runtime}}
           conan-build-type: ${{matrix.build-config}}
 
-      - name: Select Xcode
+      - name: Select Xcode for Mac only
         if: startsWith(runner.os, 'macOS')
         run: |
           sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app

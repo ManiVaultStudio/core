@@ -20,11 +20,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    #- name: Set compiler
-    #  run: |
-    #    sudo apt update
-    #    sudo apt install gcc-${{ inputs.conan-gcc-versions }} g++-${{ inputs.conan-gcc-versions }}
-        
     - name: Install conan
       run: |
         pip install conan
@@ -57,4 +52,5 @@ runs:
         CONAN_USERNAME: lkeb
         CONAN_REMOTE: lkebconan
         CONAN_STABLE_BRANCH_PATTERN: "release/*|master"
-        CONAN_UPLOAD_ONLY_WHEN_STABLE: 1        
+        CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
+        CONAN_CHANNEL: stable
