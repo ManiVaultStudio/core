@@ -262,17 +262,23 @@ void ScatterplotPlugin::updateSelection()
         }
         else
         {
-            // Use the indices from the source dataset to translate global selection to local selection
+            // Find the common global indices selected and its local index in the subset indices
+            std::vector<bool> selectedPoints(sourceSet.getNumRawPoints(), false);
+            for (const unsigned int& selectionIndex : selection.indices)
+                selectedPoints[selectionIndex] = true;
+            
+            // Translate from derived data indices to subset indices
+            std::vector<unsigned int> sourceIndices(_numPoints);
             for (int i = 0; i < _numPoints; i++)
             {
-                unsigned int index = sourceSet.indices[i];
-                for (unsigned int selectionIndex : selection.indices)
-                {
-                    if (index == selectionIndex) {
-                        highlights[i] = 1;
-                        break;
-                    }
-                }
+                const unsigned int& derivedIndex = points.indices[i];
+                sourceIndices[i] = sourceSet.indices[derivedIndex];
+            }
+            
+            for (int i = 0; i < _numPoints; i++)
+            {
+                if (selectedPoints[sourceIndices[i]])
+                    highlights[i] = 1;
             }
         }
     }
@@ -288,17 +294,15 @@ void ScatterplotPlugin::updateSelection()
         }
         else
         {
-            // Use the indices from the subset to translate global selection to local selection
+            // Find the common global indices selected and its local index in the subset indices
+            std::vector<bool> selectedPoints(points.getNumRawPoints(), false);
+            for (const unsigned int& selectionIndex : selection.indices)
+                selectedPoints[selectionIndex] = true;
+
             for (int i = 0; i < _numPoints; i++)
             {
-                unsigned int index = points.indices[i];
-                for (unsigned int selectionIndex : selection.indices)
-                {
-                    if (index == selectionIndex) {
-                        highlights[i] = 1;
-                        break;
-                    }
-                }
+                if (selectedPoints[points.indices[i]])
+                    highlights[i] = 1;
             }
         }
     }
