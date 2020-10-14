@@ -44,14 +44,12 @@ runs:
         conan profile show action_build
         
         mkdir _build
-        conan create . hdps-core/0.1.0@lkeb/stable --profile action_build
+        conan create . hdps-core/0.1.0@lkeb/stable --remote $CONAN_REMOTE --profile action_build
 #        python build.py
       shell: bash
       env:
         BUILD_SHARED: True
         CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
-        CONAN_USERNAME: lkeb
         CONAN_REMOTE: lkebconan
         CONAN_STABLE_BRANCH_PATTERN: "release/*|master"
         CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
-        CONAN_CHANNEL: stable
