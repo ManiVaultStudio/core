@@ -45,7 +45,7 @@ runs:
         conan profile show action_build
 
         mkdir _build
-        conan create . hdps-core/0.1.0 --profile action_build
+        conan create . hdps-core/0.1.0@lkeb/stable --profile action_build
 #        python build.py
       shell: cmd
       env:
