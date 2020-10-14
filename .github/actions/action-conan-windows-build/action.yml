@@ -32,6 +32,7 @@ runs:
         set CONAN_USER_HOME=%cd%\_conan
         mkdir %CONAN_USER_HOME%
         conan user
+        conan remote add conan-center https://conan.bintray.com
         conan remote add %CONAN_REMOTE% %CONAN_UPLOAD%
         conan profile new action_build
         conan profile update settings.os=Windows action_build
