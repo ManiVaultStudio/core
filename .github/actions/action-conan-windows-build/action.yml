@@ -45,7 +45,8 @@ runs:
         conan profile show action_build
 
         mkdir _build
-        python build.py
+        conan create . hdps-core/0.1.0 --profile action_build
+#        python build.py
       shell: cmd
       env:
         BUILD_SHARED: True
