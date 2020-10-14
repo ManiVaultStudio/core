@@ -30,7 +30,7 @@ runs:
         cmake --version
         mkdir `pwd`/_conan
         export CONAN_USER_HOME=`pwd`/_conan
-        
+        conan remote add $CONAN_REMOTE $CONAN_UPLOAD
         conan profile new action_build
         conan profile update settings.os=${{ inputs.conan-build-os }} action_build
         conan profile update settings.os_build=${{ inputs.conan-build-os }} action_build

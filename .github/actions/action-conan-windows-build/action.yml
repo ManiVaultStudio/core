@@ -31,7 +31,7 @@ runs:
         for /f "delims=" %%i in ('where cmake') do set CONAN_CMAKE_PROGRAM="%%i"
         set CONAN_USER_HOME=%cd%\_conan
         mkdir %CONAN_USER_HOME%
-
+        conan remote add %CONAN_REMOTE% %CONAN_UPLOAD%
         conan profile new action_build
         conan profile update settings.os=Windows action_build
         conan profile update settings.os_build=Windows action_build
