@@ -31,7 +31,6 @@ runs:
         mkdir `pwd`/_conan
         export CONAN_USER_HOME=`pwd`/_conan
         conan user
-        conan remote update conan-center https://conan.bintray.com
         conan remote add $CONAN_REMOTE $CONAN_UPLOAD
         conan profile new action_build
         conan profile update settings.os=${{ inputs.conan-build-os }} action_build
@@ -46,7 +45,7 @@ runs:
         conan profile show action_build
         
         mkdir _build
-        conan create . hdps-core/0.1.0@lkeb/stable --remote $CONAN_REMOTE --profile action_build
+        conan create . hdps-core/0.1.0@lkeb/stable --profile action_build
 #        python build.py
       shell: bash
       env:
