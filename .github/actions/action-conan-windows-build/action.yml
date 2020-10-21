@@ -41,7 +41,7 @@ runs:
         conan profile show action_build
 
         mkdir _build
-        conan create . hdps-core/0.1.0@lkeb/stable --profile action_build
+        conan create . hdps-core/latest@lkeb/stable --profile action_build
 
       shell: cmd
       env:
