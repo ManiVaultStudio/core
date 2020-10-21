@@ -5,10 +5,11 @@ import os
 import json
 import subprocess
 
+#Packages both RELEASE and DEBUG
 
 class HdpsCoreConan(ConanFile):
     name = "hdps-core"
-    version = "0.1.0"
+    version = "latest"
     description = "Core libraries and plugind for the High Dimensional Plugin System a.k.a. TBD"
     # topics can get used for searches, GitHub topics, Bintray tags etc. Add here keywords about the library
     topics = ("conan", "analysis", "n-dimensional", "plugin")
@@ -35,6 +36,11 @@ class HdpsCoreConan(ConanFile):
         "bzip2/1.0.8@conan/stable"
     )
 
+    # Remove runtime and use always default (MD/MDd)
+    def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            del self.settings.compiler.runtime
+            
     def system_requirements(self):
         if tools.os_info.is_linux:
             if tools.os_info.with_apt:
@@ -66,8 +72,8 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
+    def _configure_cmake(self, build_type):
+        cmake = CMake(self, build_type=build_type)
         if self.settings.os == "Windows" and self.options.shared:
             cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if self.settings.os == "Linux" or self.settings.os == "Macos":
@@ -84,8 +90,11 @@ class HdpsCoreConan(ConanFile):
             os.environ['HDPS_INSTALL_DIR'] = os.path.join(self.build_folder, "install")
         print('HDPS_INSTALL_DIR: ', os.environ['HDPS_INSTALL_DIR']) 
         self.install_dir = os.environ['HDPS_INSTALL_DIR']
-        cmake = self._configure_cmake()
-        cmake.build()
+        cmake_debug = self._configure_cmake('Debug')
+        cmake_debug.build()
+        
+        cmake_debug = self._configure_cmake('Release')
+        cmake_debug.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses")  #, src=self._source_subfolder

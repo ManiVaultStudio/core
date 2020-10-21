@@ -20,7 +20,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install conan
+    - name: Install conan & build configuration
       run: |
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
@@ -46,7 +46,7 @@ runs:
         
         mkdir _build
         conan create . hdps-core/0.1.0@lkeb/stable --profile action_build
-#        python build.py
+
       shell: bash
       env:
         BUILD_SHARED: True
