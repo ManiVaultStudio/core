@@ -46,7 +46,7 @@ runs:
         echo Add LKEB artifactory as remote
         conan remote add $CONAN_LKEB_ARTIFACTORY $CONAN_UPLOAD
         echo Extend conan cacert.pem
-        pem = ${{ inputs.conan-pem }}
+        pem=${{ inputs.conan-pem }}
         echo -e "$pem" >> ~/.conan/cacert.pem
         type ~/.conan\cacert.pem
         echo Add upload user
