@@ -50,6 +50,16 @@ jobs:
         with:
             submodules: recursive
 
+      - name: Select Xcode for Mac only
+        if: startsWith(runner.os, 'macOS')
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
+          # Fix macOS 10.15 env bug 
+          brew uninstall openssl@1.0.2t
+          brew uninstall python@2.7.17
+          brew untap local/openssl
+          brew untap local/python2
+          brew update
 
       - name: Setup python version
         uses: actions/setup-python@v1
@@ -64,16 +74,6 @@ jobs:
           conan-visual-runtime: ${{matrix.build-runtime}}
           conan-build-type: ${{matrix.build-config}}
 
-      - name: Select Xcode for Mac only
-        if: startsWith(runner.os, 'macOS')
-        run: |
-          sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
-          # Fix macOS 10.15 env bug https://github.com/actions/virtual-environments/issues/1811
-          brew uninstall openssl@1.0.2t
-          brew uninstall python@2.7.17
-          brew untap local/openssl
-          brew untap local/python2
-          brew update
             
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
