@@ -37,9 +37,9 @@ void ColorPickerPushButton::setColor(const QColor& color)
 
 	icon.fill(color);
 
-	auto painter = QPainter(&icon);
+	auto painter = new QPainter(&icon);
 
-	painter.setPen(QPen(QBrush(QColor(30, 30, 30)), 1.5f));
+	painter->setPen(QPen(QBrush(QColor(30, 30, 30)), 1.5f));
 
 	QPointF points[5] = {
 		QPointF(0.0f, 0.0f),
@@ -49,10 +49,12 @@ void ColorPickerPushButton::setColor(const QColor& color)
 		QPointF(0.0f, 0.0f)
 	};
 
-	painter.drawPolyline(points, 5);
+	painter->drawPolyline(points, 5);
 
 	setIcon(icon);
 		
+	delete painter;
+	
     if (_showText) {
         const auto colorString = QString("rgb(%1, %2, %3)").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()));
 
