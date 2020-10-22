@@ -100,7 +100,7 @@ class HdpsCoreConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses")  #, src=self._source_subfolder
         # If the CMakeLists.txt has a proper install method, the steps below may be redundant
         # If so, you can just remove the lines below
-        self.copy(pattern="*", src=os.path.join(self.install_dir, 'Release'))
+        self.copy(pattern="*", src=self.install_dir)
 
 
     def package_info(self):

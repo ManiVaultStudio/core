@@ -26,8 +26,9 @@ runs:
         for /f "delims=" %%i in ('where cmake') do set CONAN_CMAKE_PROGRAM="%%i"
         set CONAN_USER_HOME=%cd%\_conan
         mkdir %CONAN_USER_HOME%
-        conan user
-        conan remote add %CONAN_REMOTE% %CONAN_UPLOAD%
+        conan user -r %CONAN_LKEB_ARTIFACTORY% -p %LKEB_ARTIFACTORY_PASSWORD% %LKEB_ARTIFACTORY_USER%
+        echo %LKEB_CERT_CHAIN% >> %USERPROFILE%\.conan\cacert.pem
+        conan remote add %CONAN_LKEB_ARTIFACTORY% %CONAN_UPLOAD%
         conan profile new action_build
         conan profile update settings.os=Windows action_build
         conan profile update settings.os_build=Windows action_build
@@ -42,11 +43,12 @@ runs:
 
         mkdir _build
         conan create . hdps-core/latest@lkeb/stable --profile action_build
+        conan upload hdps-core/* -r %CONAN_LKEB_ARTIFACTORY%
 
       shell: cmd
       env:
         BUILD_SHARED: True
-        CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
-        CONAN_REMOTE: lkebconan
-        CONAN_STABLE_BRANCH_PATTERN: "release/*|master"
-        CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
+        CONAN_OLDARTIFACTORY: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
+        CONAN_OLDREMOTE: lkebconan
+        CONAN_UPLOAD: https://lkeb-artifactory.lumc.nl/artifactory/api/conan/conan-local
+        CONAN_LKEB_ARTIFACTORY: lkeb-artifactory

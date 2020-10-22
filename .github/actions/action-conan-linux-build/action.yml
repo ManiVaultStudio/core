@@ -32,8 +32,10 @@ runs:
         mkdir `pwd`/_conan
         export CONAN_USER_HOME=`pwd`/_conan
         export HOMEBREW_NO_AUTO_UPDATE=1
-        conan user
-        conan remote add $CONAN_REMOTE $CONAN_UPLOAD
+        conan user -r $CONAN_LKEB_ARTIFACTORY -p $LKEB_ARTIFACTORY_PASSWORD $LKEB_ARTIFACTORY_USER
+        echo $LKEB_CERT_CHAIN >> ~/.conan/cacert.pem
+        conan remote add $CONAN_LKEB_ARTIFACTORY $CONAN_UPLOAD
+        conan remote add 
         conan profile new action_build
         conan profile update settings.os=${{ inputs.conan-build-os }} action_build
         conan profile update settings.os_build=${{ inputs.conan-build-os }} action_build
@@ -48,11 +50,12 @@ runs:
         
         mkdir _build
         conan create . hdps-core/latest@lkeb/stable --profile action_build
+        conan upload hdps-core/* -r $CONAN_LKEB_ARTIFACTORY
 
       shell: bash
       env:
         BUILD_SHARED: True
-        CONAN_UPLOAD: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
-        CONAN_REMOTE: lkebconan
-        CONAN_STABLE_BRANCH_PATTERN: "release/*|master"
-        CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
+        CONAN_OLDARTIFACTORY: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
+        CONAN_OLDREMOTE: lkebconan
+        CONAN_UPLOAD: https://lkeb-artifactory.lumc.nl/artifactory/api/conan/conan-local
+        CONAN_LKEB_ARTIFACTORY: lkeb-artifactory
