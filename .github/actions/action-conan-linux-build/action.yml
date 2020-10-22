@@ -16,7 +16,17 @@ inputs:
     required: true
   conan-build-os:
     description: 'Linux or Macos'
-
+    required: true
+  conan-user:  
+    description: 'pass secrets.LKEB_ARTIFACTORY_USER'
+    required: true
+  conan-password: 
+    description: 'pass secrets.LKEB_ARTIFACTORY_PASSWORD'
+    required: true
+  conan-pem: 
+    description: 'pass secrets.LKEB_CERT_CHAIN'
+    required: true
+          
 runs:
   using: "composite"
   steps:
@@ -36,7 +46,7 @@ runs:
         echo Add LKEB artifactory as remote
         conan remote add $CONAN_LKEB_ARTIFACTORY $CONAN_UPLOAD
         echo Add upload user
-        conan user -r $CONAN_LKEB_ARTIFACTORY -p ${{ secrets.LKEB_ARTIFACTORY_PASSWORD }} ${{ secrets.LKEB_ARTIFACTORY_USER }}
+        conan user -r $CONAN_LKEB_ARTIFACTORY -p ${{ inputs.conan-password }} ${{ inputs.conan-user }}
         echo $CONAN_PEM >> ~/.conan/cacert.pem
         conan remote add 
         conan profile new action_build
@@ -62,4 +72,4 @@ runs:
         CONAN_OLDREMOTE: lkebconan
         CONAN_UPLOAD: https://lkeb-artifactory.lumc.nl/artifactory/api/conan/conan-local
         CONAN_LKEB_ARTIFACTORY: lkeb-artifactory
-        CONAN_PEM: ${{ secrets.LKEB_CERT_CHAIN }}
+        CONAN_PEM: ${{ inputs.conan-pem }}
