@@ -68,8 +68,8 @@ jobs:
           conan-visual-runtime: ${{matrix.build-runtime}}
           conan-build-type: ${{matrix.build-config}}
           conan-user: ${{secrets.LKEB_ARTIFACTORY_USER}}
-          conan-password: {{secrets.LKEB_ARTIFACTORY_PASSWORD}}
-          conan-pem: ${{secrets.LKEB_CERT_CHAIN }}
+          conan-password: ${{secrets.LKEB_ARTIFACTORY_PASSWORD}}
+          conan-pem: ${{secrets.LKEB_CERT_CHAIN}}
             
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
@@ -81,7 +81,7 @@ jobs:
           conan-build-type: ${{matrix.build-config}}
           conan-build-os: ${{matrix.build-os}}
           conan-user: ${{secrets.LKEB_ARTIFACTORY_USER}}
-          conan-password: {{secrets.LKEB_ARTIFACTORY_PASSWORD}}
+          conan-password: ${{secrets.LKEB_ARTIFACTORY_PASSWORD}}
           conan-pem: ${{secrets.LKEB_CERT_CHAIN}}
 
 
