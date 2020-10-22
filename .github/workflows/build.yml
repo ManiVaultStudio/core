@@ -36,7 +36,7 @@ jobs:
           build-libcxx: libstdc++
           
         - name: Macos_xcode10.3
-          os: macos-10.15
+          os: macos-10.14
           build-compiler: apple-clang
           build-cversion: "10.0"
           build-config: Release
@@ -54,12 +54,6 @@ jobs:
         if: startsWith(runner.os, 'macOS')
         run: |
           sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
-          # Fix macOS 10.15 env bug 
-          brew uninstall openssl@1.0.2t
-          brew uninstall python@2.7.17
-          brew untap local/openssl
-          brew untap local/python2
-          brew update
 
       - name: Setup python version
         uses: actions/setup-python@v1
