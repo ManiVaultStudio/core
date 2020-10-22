@@ -23,6 +23,7 @@ runs:
     - name: Install conan & build configuration
       run: |
         python -m pip install --upgrade pip
+        pip install pyopenssl
         pip install conan
         pip install conan_package_tools bincrafters_package_tools
         pip install -Iv cmake>=3.17
