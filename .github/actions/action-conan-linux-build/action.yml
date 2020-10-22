@@ -32,6 +32,7 @@ runs:
         mkdir `pwd`/_conan
         export CONAN_USER_HOME=`pwd`/_conan
         export HOMEBREW_NO_AUTO_UPDATE=1
+        conan user
         conan remote add $CONAN_LKEB_ARTIFACTORY $CONAN_UPLOAD
         conan user -r $CONAN_LKEB_ARTIFACTORY -p $LKEB_ARTIFACTORY_PASSWORD $LKEB_ARTIFACTORY_USER
         echo $LKEB_CERT_CHAIN >> ~/.conan/cacert.pem
