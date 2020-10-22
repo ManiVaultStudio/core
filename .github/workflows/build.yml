@@ -54,7 +54,6 @@ jobs:
         if: startsWith(runner.os, 'macOS')
         run: |
           sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
-          brew update
 
       - name: Setup python version
         uses: actions/setup-python@v1
