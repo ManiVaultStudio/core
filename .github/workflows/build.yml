@@ -70,6 +70,9 @@ jobs:
           sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
             
       - name: Linux Mac build
+        # Fix macOS 10.15 env bug https://github.com/actions/virtual-environments/issues/1811
+        if: startsWIth(runner.os, 'macOS')
+          brew uninstall openssl@1.0.2t
         if: "!startsWith(runner.os, 'Windows')"
         uses: ./.github/actions/action-conan-linux-build
         with:
