@@ -75,6 +75,7 @@ jobs:
           brew untap local/python2
           brew cask install xquartz
           brew update
+          brew reinstall python
           
             
       - name: Linux Mac build
