@@ -70,6 +70,11 @@ jobs:
           sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
           # Fix macOS 10.15 env bug https://github.com/actions/virtual-environments/issues/1811
           brew uninstall openssl@1.0.2t
+          brew uninstall python@2.7.17
+          brew untap local/openssl
+          brew untap local/python2
+          brew update
+          
             
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
