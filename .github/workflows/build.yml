@@ -73,10 +73,7 @@ jobs:
           brew uninstall python@2.7.17
           brew untap local/openssl
           brew untap local/python2
-          brew cask install xquartz
           brew update
-          brew reinstall python
-          
             
       - name: Linux Mac build
         if: "!startsWith(runner.os, 'Windows')"
