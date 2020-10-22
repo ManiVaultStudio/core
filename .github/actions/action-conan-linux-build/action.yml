@@ -48,7 +48,7 @@ runs:
         echo Extend conan cacert.pem
         conanhome=`conan config home`
         echo -e "$CONAN_PEM" >> $conanhome/cacert.pem
-        type ~/.conan\cacert.pem
+        type $conanhome/cacert.pem
         echo Add upload user
         conan user -r $CONAN_LKEB_ARTIFACTORY -p ${{ inputs.conan-password }} ${{ inputs.conan-user }}
         conan profile new action_build
