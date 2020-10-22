@@ -37,7 +37,7 @@ void ColorPickerPushButton::setColor(const QColor& color)
 
 	icon.fill(color);
 
-	auto& painter = QPainter(&icon);
+	auto painter = QPainter(&icon);
 
 	painter.setPen(QPen(QBrush(QColor(30, 30, 30)), 1.5f));
 
