@@ -43,7 +43,6 @@ runs:
         SETLOCAL EnableDelayedExpansion
         echo !CONAN_PEM! >> %CONANHOME%\cacert.pem
         ENDLOCAL
-        type %CONANHOME%\cacert.pem
         echo Add upload user
         conan user -r %CONAN_LKEB_ARTIFACTORY% -p ${{ inputs.conan-password }} ${{ inputs.conan-user }}
         
