@@ -45,6 +45,7 @@ runs:
         conan user
         echo Add LKEB artifactory as remote
         conan remote add $CONAN_LKEB_ARTIFACTORY $CONAN_UPLOAD
+        conan remote add $CONAN_OLDREMOTE $CONAN_OLDARTIFACTORY
         echo Extend conan cacert.pem
         conanhome=`conan config home`
         echo -e "$CONAN_PEM" >> $conanhome/cacert.pem
@@ -65,7 +66,7 @@ runs:
         
         mkdir _build
         conan create . hdps-core/latest@lkeb/stable --profile action_build
-        conan upload --confirm -r $CONAN_LKEB_ARTIFACTORY hdps-core/*
+        conan upload --all --confirm -r $CONAN_LKEB_ARTIFACTORY hdps-core/*
 
       shell: bash
       env:

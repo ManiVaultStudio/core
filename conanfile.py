@@ -3,6 +3,7 @@
 from conans import ConanFile, CMake, tools
 import os
 import json
+import pathlib
 import subprocess
 
 #Packages both RELEASE and DEBUG
@@ -17,10 +18,9 @@ class HdpsCoreConan(ConanFile):
     branch = "develop"  # should come from profile
     author = "B. van Lew <b.van_lew@lumc.nl>"
     license = "MIT"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
-    exports = ["LICENSE.md"]      # Packages the license for the conanfile.py
-    # Remove following lines if the target lib does not use cmake.
-    exports_sources = "*"
-    generators = "cmake"
+    # exports_sources = "README.md"
+    # exports = "*"
+    generators = ("cmake")
 
     # Options may need to change depending on the packaged library
     settings = {"os": None, "build_type": None, "compiler": None, "arch": None}
@@ -32,9 +32,16 @@ class HdpsCoreConan(ConanFile):
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
     requires = (
-        "qt/5.14.2@lkeb/stable",
+        "qt/5.15.1@lkeb/stable",
         "bzip2/1.0.8@conan/stable"
     )
+    
+    scm = {
+        "type": "git",
+        "subfolder": "hdps/core",
+        "url": "auto",
+        "revision": "auto"
+    }
 
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
@@ -73,14 +80,19 @@ class HdpsCoreConan(ConanFile):
             del self.options.fPIC
 
     def _configure_cmake(self, build_type):
+            # locate Qt root to allow find_package to work
+        qtpath = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
+        qt_root = str(list(qtpath.glob('**/Qt5Config.cmake'))[0].parents[3])
+        print("Qt root ", qt_root)
+        
         cmake = CMake(self, build_type=build_type)
         if self.settings.os == "Windows" and self.options.shared:
             cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if self.settings.os == "Linux" or self.settings.os == "Macos":
-            # cmake.definitions["CMAKE_CXX_STANDARD"] = 14
             cmake.definitions["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
         # print("Source folder {}".format(self.source_folder))
-        cmake.configure(source_folder=self.source_folder)  # (source_folder=self._source_subfolder)
+        cmake.definitions["CMAKE_PREFIX_PATH"] = qt_root
+        cmake.configure(source_folder="hdps/core")  # needed for scm 
         cmake.verbose = True
         return cmake
 
@@ -90,18 +102,21 @@ class HdpsCoreConan(ConanFile):
             os.environ['HDPS_INSTALL_DIR'] = os.path.join(self.build_folder, "install")
         print('HDPS_INSTALL_DIR: ', os.environ['HDPS_INSTALL_DIR']) 
         self.install_dir = os.environ['HDPS_INSTALL_DIR']
+
         cmake_debug = self._configure_cmake('Debug')
         cmake_debug.build()
         
-        cmake_debug = self._configure_cmake('Release')
-        cmake_debug.build()
+        cmake_release = self._configure_cmake('Release')
+        cmake_release.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses")  #, src=self._source_subfolder
-        # If the CMakeLists.txt has a proper install method, the steps below may be redundant
-        # If so, you can just remove the lines below
-        self.copy(pattern="*", src=os.path.join(self.install_dir, 'Release'), dst='Release')
-        self.copy(pattern="*", src=os.path.join(self.install_dir, 'Debug'), dst='Debug')
+        print('Packaging install dir: ', self.install_dir)
+        self.copy(pattern="*", src=self.install_dir)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.debug.libdirs = ['Debug/lib']
+        self.cpp_info.debug.bindirs = ['Debug/Plugins', 'Debug']
+        self.cpp_info.debug.includedirs = ['Debug/include', 'Debug']
+        self.cpp_info.release.libdirs = ['Release/lib']
+        self.cpp_info.release.bindirs = ['Release/Plugins', 'Release']
+        self.cpp_info.release.includedirs = ['Release/include', 'Release']
