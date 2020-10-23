@@ -39,6 +39,7 @@ runs:
         echo Add LKEB artifactory as remote
         conan remote add %CONAN_LKEB_ARTIFACTORY% %CONAN_UPLOAD%
         conan remote add %CONAN_OLDREMOTE% %CONAN_OLDARTIFACTORY%
+        conan remote add_ref qt/5.15.1@lkeb/stable %CONAN_OLDREMOTE%
         echo Extend conan cacert.pem
         for /f "delims=" %%i in ('conan config home') do set CONANHOME=%%i
         SETLOCAL EnableDelayedExpansion
