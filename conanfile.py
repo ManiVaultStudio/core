@@ -97,6 +97,7 @@ class HdpsCoreConan(ConanFile):
         return cmake
 
     def build(self):
+        print('Build OS is : ', self.settings.os)
         # If the user has no preference in HDPS_INSTALL_DIR simply set the install dir
         if not os.environ.get('HDPS_INSTALL_DIR', None):
             os.environ['HDPS_INSTALL_DIR'] = os.path.join(self.build_folder, "install")
