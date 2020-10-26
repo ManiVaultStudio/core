@@ -36,12 +36,12 @@ class HdpsCoreConan(ConanFile):
         "bzip2/1.0.8@conan/stable"
     )
     
-    scm = {
-        "type": "git",
-        "subfolder": "hdps/core",
-        "url": "auto",
-        "revision": "auto"
-    }
+    #scm = {
+    #    "type": "git",
+    #    "subfolder": "hdps/core",
+    #    "url": "auto",
+    #    "revision": "auto"
+    #}
 
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
