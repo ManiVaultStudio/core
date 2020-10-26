@@ -67,7 +67,7 @@ runs:
         
         mkdir _build
         conan create . hdps-core/latest@lkeb/stable --profile action_build
-        conan upload --all --confirm -r $CONAN_LKEB_ARTIFACTORY hdps-core/*
+        conan upload --all --force --confirm -r $CONAN_LKEB_ARTIFACTORY hdps-core/*
 
       shell: bash
       env:
