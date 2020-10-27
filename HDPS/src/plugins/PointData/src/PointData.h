@@ -772,6 +772,10 @@ public:
         }
     }
 
+    unsigned int getNumRawPoints() const
+    {
+        return getRawData<PointData>().getNumPoints();
+    }
 
     unsigned int getNumPoints() const
     {

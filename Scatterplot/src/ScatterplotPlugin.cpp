@@ -127,16 +127,17 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
+    // For source data determine whether to use dimension names or make them up
     if (points.getDimensionNames().size() == points.getNumDimensions())
-    {
         settings->initDimOptions(points.getDimensionNames());
-        settings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
-    }
     else
-    {
         settings->initDimOptions(points.getNumDimensions());
+
+    // For derived data determine whether to use dimension names or make them up
+    if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
+        settings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
+    else
         settings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
-    }
 
     updateData();
 }
@@ -262,17 +263,23 @@ void ScatterplotPlugin::updateSelection()
         }
         else
         {
-            // Use the indices from the source dataset to translate global selection to local selection
+            // Find the common global indices selected and its local index in the subset indices
+            std::vector<bool> selectedPoints(sourceSet.getNumRawPoints(), false);
+            for (const unsigned int& selectionIndex : selection.indices)
+                selectedPoints[selectionIndex] = true;
+            
+            // Translate from derived data indices to subset indices
+            std::vector<unsigned int> sourceIndices(_numPoints);
             for (int i = 0; i < _numPoints; i++)
             {
-                unsigned int index = sourceSet.indices[i];
-                for (unsigned int selectionIndex : selection.indices)
-                {
-                    if (index == selectionIndex) {
-                        highlights[i] = 1;
-                        break;
-                    }
-                }
+                const unsigned int& derivedIndex = points.indices[i];
+                sourceIndices[i] = sourceSet.indices[derivedIndex];
+            }
+            
+            for (int i = 0; i < _numPoints; i++)
+            {
+                if (selectedPoints[sourceIndices[i]])
+                    highlights[i] = 1;
             }
         }
     }
@@ -288,17 +295,15 @@ void ScatterplotPlugin::updateSelection()
         }
         else
         {
-            // Use the indices from the subset to translate global selection to local selection
+            // Find the common global indices selected and its local index in the subset indices
+            std::vector<bool> selectedPoints(points.getNumRawPoints(), false);
+            for (const unsigned int& selectionIndex : selection.indices)
+                selectedPoints[selectionIndex] = true;
+
             for (int i = 0; i < _numPoints; i++)
             {
-                unsigned int index = points.indices[i];
-                for (unsigned int selectionIndex : selection.indices)
-                {
-                    if (index == selectionIndex) {
-                        highlights[i] = 1;
-                        break;
-                    }
-                }
+                if (selectedPoints[points.indices[i]])
+                    highlights[i] = 1;
             }
         }
     }
@@ -355,13 +360,14 @@ void ScatterplotPlugin::onSelecting(hdps::Selection selection)
 {
     const Points* const selectionSet = makeSelection(selection);
 
-    if ((selectionSet != nullptr) && (settings != nullptr) && (settings->IsNotifyingOnSelecting()))
+    if (selectionSet != nullptr)
     {
-        _core->notifySelectionChanged(selectionSet->getDataName());
-    }
-    else
-    {
-        updateSelection();
+        // Only notify other plugins of the selection changes if enabled in the settings
+        // This prevents plugins that take a long time to process selections to deteriorate performance
+        if ((settings != nullptr) && settings->IsNotifyingOnSelecting())
+            _core->notifySelectionChanged(selectionSet->getDataName());
+        else
+            updateSelection();
     }
 }
 
