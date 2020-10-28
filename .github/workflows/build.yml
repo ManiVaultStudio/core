@@ -9,7 +9,7 @@ env:
 # for matrix check https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners
 jobs:
   cross-platform-build:
-    name: Cross platform buid
+    name: Cross platform build
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
