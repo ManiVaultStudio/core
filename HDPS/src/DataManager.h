@@ -84,6 +84,8 @@ public:
     QString addSet(QString requestedName, DataSet* set);
     void addSelection(QString dataName, DataSet* selection);
 
+    void renameSet(QString oldName, QString requestedName);
+
     /**
      * Removes raw data and all sets and selections belonging to this data.
      * Returns a list of set names that have been removed as a result of this.

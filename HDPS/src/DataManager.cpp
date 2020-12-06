@@ -27,6 +27,23 @@ void DataManager::addSelection(QString dataName, DataSet* selection)
     _selections.emplace(dataName, std::unique_ptr<DataSet>(selection));
 }
 
+void DataManager::renameSet(QString oldName, QString requestedName)
+{
+    auto& dataSet = _dataSetMap[oldName];
+
+    // Find a unique name from the requested name and set it in the dataset
+    QString newName = getUniqueSetName(requestedName);
+    dataSet->setName(newName);
+
+    // Put the renamed set back into the map
+    _dataSetMap.emplace(newName, std::unique_ptr<DataSet>(dataSet.release()));
+
+    // Erase the old entry in the map
+    _dataSetMap.erase(oldName);
+
+    emit dataChanged();
+}
+
 QStringList DataManager::removeRawData(QString name)
 {
     // Convert any derived data referring to this data to non-derived data
