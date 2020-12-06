@@ -10,7 +10,7 @@ namespace hdps
         DataHierarchy::DataHierarchy(DataManager& dataManager) :
             _dataManager(dataManager)
         {
-            setFixedWidth(200);
+            setMinimumWidth(200);
 
             // FIXME
             connect(&dataManager, &DataManager::dataChanged, this, &DataHierarchy::updateDataModel);
