@@ -1,6 +1,8 @@
 #pragma once
 
 #include <ViewPlugin.h>
+
+#include "SelectionTool.h"
 #include "SelectionListener.h"
 
 #include "widgets/DataSlot.h"
@@ -30,10 +32,13 @@ class ScatterplotPlugin : public ViewPlugin, public SelectionListener
     Q_OBJECT
     
 public:
-    ScatterplotPlugin()
-    :
-        ViewPlugin("Scatterplot View")
-    { }
+    ScatterplotPlugin() :
+        ViewPlugin("Scatterplot View"),
+        _selectionTool(new SelectionTool(this))
+    {
+        //_selectionTool->installEventFilter(this);
+    }
+
     ~ScatterplotPlugin(void) override;
     
     void init() override;
@@ -48,6 +53,8 @@ public:
 
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;
+
+    bool eventFilter(QObject* target, QEvent* event) override;
 
 public slots:
     void onDataInput(QString dataSetName);
@@ -74,6 +81,8 @@ private:
 
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;
+
+    SelectionTool*               _selectionTool;     /** Point selection tool */
 };
 
 // =============================================================================

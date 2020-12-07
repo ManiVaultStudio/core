@@ -20,11 +20,13 @@ find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 set(PLUGIN
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
-    src/ScatterplotPlugin.json
+	src/SelectionTool.h
+    src/SelectionTool.cpp
 )
 
 file(GLOB WIDGETS src/*Widget.*)
 file(GLOB SHADERS src/*.glsl)
+file(GLOB JSON src/*.json)
 file(GLOB UIS src/*.ui)
 
 QT5_WRAP_UI(UI_HEADERS ${UIS})

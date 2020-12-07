@@ -59,6 +59,14 @@ public:
     void addSelectionListener(plugin::SelectionListener* listener);
 
     Selection getSelection();
+
+    /**
+     * Event filter
+     *@param target Target object
+     *@param event Event that occurred
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
 protected:
     void initializeGL()         Q_DECL_OVERRIDE;
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
