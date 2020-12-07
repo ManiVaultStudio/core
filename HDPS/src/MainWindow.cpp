@@ -180,7 +180,7 @@ void MainWindow::centerAndResize(float coverage) {
     qDebug() << "Available screen size " << availableSize.width() << "x" << availableSize.height();
     qDebug() << "Initial application size " << newSize.width() << "x" << newSize.height();
 
-    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, qApp->desktop()->availableGeometry()));
+    //setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, qApp->desktop()->availableGeometry()));
 }
 
 void MainWindow::storeLayout()
