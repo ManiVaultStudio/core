@@ -13,11 +13,11 @@ namespace Ui {
  *
  * @author Thomas Kroes
  */
-class SelectionLayerWidget : public QWidget
+class SelectionWidget : public QWidget
 {
 public: // Construction/destruction
 
-	SelectionLayerWidget(QWidget* parent);
+    SelectionWidget(QWidget* parent);
 
 private:
 	std::unique_ptr<Ui::SelectionWidget>	_ui;        /** User interface as produced by Qt designer */

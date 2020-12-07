@@ -5,9 +5,9 @@
 #include "ui_SelectionWidget.h"
 
 #include <QDebug>
-#include <QImage>
 
-SelectionLayerWidget::SelectionLayerWidget(QWidget* parent) :
+SelectionWidget::SelectionWidget(QWidget* parent) :
 	_ui{ std::make_unique<Ui::SelectionWidget>() }
 {
+    _ui->setupUi(this);
 }

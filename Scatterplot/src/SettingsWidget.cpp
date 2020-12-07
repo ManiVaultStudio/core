@@ -1,4 +1,5 @@
 #include "SettingsWidget.h"
+#include "SelectionWidget.h"
 
 #include "ScatterplotPlugin.h"
 
@@ -256,6 +257,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsLayout->addLayout(dataLayout);
     _settingsLayout->addLayout(renderLayout, 1);
     _settingsLayout->addLayout(&_dimensionPicker->getLayout());
+    _settingsLayout->addWidget(new SelectionWidget(this));
 
     setLayout(_settingsLayout);
 
