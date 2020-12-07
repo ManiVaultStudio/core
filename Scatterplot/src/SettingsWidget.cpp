@@ -101,7 +101,7 @@ PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) :
 ColorDimensionPicker::ColorDimensionPicker(const ScatterplotPlugin& plugin)
 {
     _layout = new QVBoxLayout();
-    _cDimOptions = new hdps::gui::ComboBox();
+    _cDimOptions = new QComboBox();
     _cDimOptions->setFixedWidth(100);
     _layout->addWidget(_cDimOptions);
     setLayout(_layout);
@@ -147,7 +147,7 @@ DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin) :
     _layout.addWidget(&_yDimLabel, 1, 0);
     _layout.addWidget(&_cDimLabel, 2, 0);
 
-    _colorOptions = new hdps::gui::ComboBox();
+    _colorOptions = new QComboBox();
     _colorOptions->addItem("Color By Dimension");
     _colorOptions->addItem("Color By Data");
     _layout.addWidget(&_xDimOptions, 0, 1);

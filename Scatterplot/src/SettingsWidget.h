@@ -16,7 +16,9 @@
 #include <QStackedWidget>
 
 class ScatterplotPlugin;
+class QComboBox;
 class QCheckBox;
+class QPushButton;
 
 struct PointSettingsWidget : public QWidget
 {
@@ -64,7 +66,7 @@ public:
 private:
     QVBoxLayout* _layout;
 
-    hdps::gui::ComboBox* _cDimOptions;
+    QComboBox* _cDimOptions;
 };
 
 struct ColorDropSlot : public QWidget
@@ -118,9 +120,9 @@ private:
     QLabel& _yDimLabel;
     QLabel& _cDimLabel;
 
-    hdps::gui::ComboBox& _xDimOptions = *new hdps::gui::ComboBox;
-    hdps::gui::ComboBox& _yDimOptions = *new hdps::gui::ComboBox;
-    hdps::gui::ComboBox* _colorOptions;
+    QComboBox& _xDimOptions = *new QComboBox;
+    QComboBox& _yDimOptions = *new QComboBox;
+    QComboBox* _colorOptions;
     ColorSettingsStack* _colorSettingsStack;
 
     QGridLayout& _layout = *new QGridLayout;
@@ -157,8 +159,8 @@ private:
     const hdps::Vector3f DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
     const hdps::Vector3f DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
 
-    hdps::gui::PushButton& _subsetButton = *new hdps::gui::PushButton;
-    hdps::gui::ComboBox& _renderMode = *new hdps::gui::ComboBox;
+    QPushButton& _subsetButton = *new QPushButton;
+    QComboBox& _renderMode = *new QComboBox;
 
     QVBoxLayout* _settingsLayout;
     PlotSettingsStack* _settingsStack;

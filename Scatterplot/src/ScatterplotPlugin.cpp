@@ -423,6 +423,11 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
     return QWidget::eventFilter(target, event);
 }
 
+SelectionTool& ScatterplotPlugin::getSelectionTool()
+{
+    return *_selectionTool;
+}
+
 // =============================================================================
 // Factory
 // =============================================================================

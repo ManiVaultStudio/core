@@ -7,6 +7,7 @@
 const QMap<QString, SelectionTool::Type> SelectionTool::types = {
     { "None", SelectionTool::Type::None },
     { "Rectangle", SelectionTool::Type::Rectangle },
+    { "Circle", SelectionTool::Type::Circle },
     { "Brush", SelectionTool::Type::Brush },
     { "Lasso", SelectionTool::Type::Lasso },
     { "Polygon", SelectionTool::Type::Polygon },
@@ -25,11 +26,56 @@ SelectionTool::SelectionTool(QObject* parent) :
     QObject(parent),
     _type(Type::Rectangle),
     _modifier(Modifier::Replace),
-    _brushRadius(DEFAULT_BRUSH_RADIUS),
+    _radius(DEFAULT_RADIUS),
     _mousePositions(),
     _mouseButtons()
 {
     parent->installEventFilter(this);
+}
+
+SelectionTool::Type SelectionTool::getType() const
+{
+    return _type;
+}
+
+void SelectionTool::setType(const Type& type)
+{
+    if (type == _type)
+        return;
+
+    _type = type;
+
+    emit typeChanged(_type);
+}
+
+SelectionTool::Modifier SelectionTool::getModifier() const
+{
+    return _modifier;
+}
+
+void SelectionTool::setModifier(const Modifier& modifier)
+{
+    if (modifier == _modifier)
+        return;
+
+    _modifier = modifier;
+
+    emit modifierChanged(_modifier);
+}
+
+float SelectionTool::getRadius() const
+{
+    return _radius;
+}
+
+void SelectionTool::setRadius(const float& radius)
+{
+    if (radius == _radius)
+        return;
+
+    _radius = radius;
+
+    emit radiusChanged(_radius);
 }
 
 bool SelectionTool::eventFilter(QObject* target, QEvent* event)
@@ -183,6 +229,22 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
+                case Type::Circle:
+                {
+                    /*
+                    if (mouseEvent->buttons() & Qt::LeftButton) {
+                        if (_mousePositions.size() != 2)
+                            _mousePositions << mouseEvent->pos();
+                        else
+                            _mousePositions.last() = mouseEvent->pos();
+
+                        shouldComputePixelSelection = true;
+                    }
+                    */
+
+                    break;
+                }
+
                 case Type::Brush:
                 {
                     if (mouseEvent->buttons() & Qt::LeftButton) {
@@ -241,9 +303,9 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                 case Type::Brush:
                 {
                     if (wheelEvent->delta() < 0)
-                        setBrushRadius(_brushRadius - 5.0f);
+                        setRadius(_radius - 5.0f);
                     else
-                        setBrushRadius(_brushRadius + 5.0f);
+                        setRadius(_radius + 5.0f);
 
                     break;
                 }
@@ -261,80 +323,86 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::KeyPress:
         {
-            /*
+            
             auto keyEvent = static_cast<QKeyEvent*>(event);
 
             switch (keyEvent->key())
             {
                 case Qt::Key::Key_R:
-                    setPixelSelectionType(SelectionType::Rectangle);
+                {
+                    setType(Type::Rectangle);
                     break;
+                }
+
+                case Qt::Key::Key_C:
+                {
+                    setType(Type::Circle);
+                    break;
+                }
 
                 case Qt::Key::Key_B:
-                    setPixelSelectionType(SelectionType::Brush);
+                {
+                    setType(Type::Brush);
                     break;
+                }
 
                 case Qt::Key::Key_P:
-                    setPixelSelectionType(SelectionType::Polygon);
+                {
+                    setType(Type::Polygon);
                     break;
+                }
 
                 case Qt::Key::Key_L:
-                    setPixelSelectionType(SelectionType::Lasso);
+                {
+                    setType(Type::Lasso);
                     break;
-
-                case Qt::Key::Key_S:
-                    setPixelSelectionType(SelectionType::Sample);
-                    break;
+                }
 
                 case Qt::Key::Key_A:
                 {
-                    selectAll();
+                    //selectAll();
                     break;
                 }
 
                 case Qt::Key::Key_D:
                 {
-                    selectNone();
+                    //selectNone();
                     break;
                 }
 
                 case Qt::Key::Key_I:
                 {
-                    invertSelection();
-                    break;
-                }
-
-                case Qt::Key::Key_Z:
-                {
-                    zoomToSelection();
+                    //invertSelection();
                     break;
                 }
 
                 case Qt::Key::Key_Shift:
                 {
-                    getPixelSelectionModifier(SelectionModifier::Add);
+                    setModifier(Modifier::Add);
                     break;
                 }
 
                 case Qt::Key::Key_Control:
                 {
-                    getPixelSelectionModifier(SelectionModifier::Remove);
+                    setModifier(Modifier::Remove);
                     break;
                 }
 
                 case Qt::Key::Key_Escape:
                 {
-                    switch (_selectionType)
+                    switch (_type)
                     {
-                        case SelectionType::None:
-                        case SelectionType::Rectangle:
-                        case SelectionType::Brush:
+                        case Type::None:
+                        case Type::Rectangle:
+                        case Type::Brush:
                             break;
 
-                        case SelectionType::Lasso:
-                        case SelectionType::Polygon:
+                        case Type::Lasso:
+                        case Type::Polygon:
+                        {
                             _mousePositions.clear();
                             break;
+                        }
 
                         default:
                             break;
@@ -347,56 +415,11 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
             }
 
-            switch (keyEvent->key())
-            {
-                case Qt::Key::Key_R: {
-                    affectedIds << index.siblingAtColumn(ult(Column::PixelSelectionType));
-                    break;
-                }
-
-                case Qt::Key::Key_B: {
-                    affectedIds << index.siblingAtColumn(ult(Column::BrushRadius));
-                    affectedIds << index.siblingAtColumn(ult(Column::PixelSelectionType));
-                    break;
-                }
-
-                case Qt::Key::Key_L: {
-                    affectedIds << index.siblingAtColumn(ult(Column::PixelSelectionType));
-                    break;
-                }
-
-                case Qt::Key::Key_P: {
-                    affectedIds << index.siblingAtColumn(ult(Column::PixelSelectionType));
-                    break;
-                }
-
-                case Qt::Key::Key_S: {
-                    affectedIds << index.siblingAtColumn(ult(Column::PixelSelectionType));
-                    break;
-                }
-
-                case Qt::Key::Key_A:
-                case Qt::Key::Key_D:
-                case Qt::Key::Key_I:
-                    affectedIds << index.siblingAtColumn(ult(Layer::Column::Selection));
-                    break;
-
-                case Qt::Key::Key_Shift:
-                case Qt::Key::Key_Control:
-                    affectedIds << index.siblingAtColumn(ult(Column::PixelSelectionModifier));
-                    break;
-
-                default:
-                    break;
-            }
-            */
-
             break;
         }
 
         case QEvent::KeyRelease:
         {
-            /*
             auto keyEvent = static_cast<QKeyEvent*>(event);
 
             switch (keyEvent->key())
@@ -414,16 +437,13 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                 case Qt::Key::Key_Shift:
                 case Qt::Key::Key_Control:
                 {
-                    getPixelSelectionModifier(SelectionModifier::Replace);
-
-                    affectedIds << index.siblingAtColumn(ult(Column::PixelSelectionModifier));
+                    setModifier(Modifier::Replace);
                     break;
                 }
 
                 default:
                     break;
             }
-            */
 
             break;
         }

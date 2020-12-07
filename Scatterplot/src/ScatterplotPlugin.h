@@ -56,6 +56,8 @@ public:
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    SelectionTool& getSelectionTool();
+
 public slots:
     void onDataInput(QString dataSetName);
     void onColorDataInput(QString dataSetName);

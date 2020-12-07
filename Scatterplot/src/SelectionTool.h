@@ -6,12 +6,14 @@
 #include <QMap>
 
 /**
- * TODO
+ * Selection tool class
  *
  * @author Thomas Kroes
  */
 class SelectionTool : public QObject
 {
+    Q_OBJECT
+
 public:
 
     /** Types */
@@ -19,6 +21,7 @@ public:
     {
         None = -1,		/** Not set */
         Rectangle,		/** Select points within a rectangle */
+        Circle,		    /** Select points within a circle */
         Brush,			/** A brush is used the paint the selection */
         Lasso,			/** A lasso tool is used to enclose points */
         Polygon		    /** Select points in the interior of a polygon */
@@ -67,28 +70,36 @@ public: // Construction/destruction
 
 public: // Getters/setters
 
-    Type getSelectionType() const { return _type; }
-    void setSelectionType(const Type& selectionType) { _type = selectionType; }
+    Type getType() const;
+    void setType(const Type& type);
 
-    Modifier getModifier() const { return _modifier; }
-    void setModifier(const Modifier& modifier) { _modifier = modifier; }
+    Modifier getModifier() const;
+    void setModifier(const Modifier& modifier);
 
-    float getBrushRadius() const { return _brushRadius; }
-    void setBrushRadius(const float& brushRadius) { _brushRadius = brushRadius; }
+    float getRadius() const;
+    void setRadius(const float& radius);
 
 public: // Event handling
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
+signals:
+
+    void typeChanged(const Type& type);
+
+    void modifierChanged(const Modifier& modifier);
+
+    void radiusChanged(const float& radius);
+
 protected:
     Type                _type;              /** Current selection type */
     Modifier            _modifier;          /** Selection modifier */
-    float               _brushRadius;       /** Brush radius */
+    float               _radius;            /** Brush/circle radius */
     QVector<QPoint>     _mousePositions;    /** Recorded mouse positions */
     int                 _mouseButtons;      /** State of the left, middle and right mouse buttons */
 
-    static constexpr float MIN_BRUSH_RADIUS = 1.0f;         /** Minimum brush radius */
-    static constexpr float MAX_BRUSH_RADIUS = 1000.0f;      /** Maximum brush radius */
-    static constexpr float DEFAULT_BRUSH_RADIUS = 10.0f;    /** Default brush radius */
+    static constexpr float MIN_RADIUS       = 1.0f;         /** Minimum brush radius */
+    static constexpr float MAX_RADIUS       = 1000.0f;      /** Maximum brush radius */
+    static constexpr float DEFAULT_RADIUS   = 10.0f;        /** Default brush radius */
 
 };
