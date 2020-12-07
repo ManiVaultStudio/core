@@ -1,6 +1,6 @@
 #include "ScatterplotPlugin.h"
 
-#include "ScatterplotSettings.h"
+#include "SettingsWidget.h"
 #include "PointData.h"
 #include "ClusterData.h"
 #include "ColorData.h"

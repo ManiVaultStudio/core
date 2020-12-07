@@ -17,17 +17,26 @@ endif(MSVC)
 
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-set(SOURCES
+set(PLUGIN
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
-    src/ScatterplotWidget.h
-    src/ScatterplotWidget.cpp
-    src/ScatterplotSettings.h
-    src/ScatterplotSettings.cpp
     src/ScatterplotPlugin.json
 )
 
-source_group( Plugin FILES ${SOURCES})
+file(GLOB WIDGETS src/*Widget.*)
+file(GLOB SHADERS src/*.glsl)
+file(GLOB UIS src/*.ui)
+
+QT5_WRAP_UI(UI_HEADERS ${UIS})
+
+set(SOURCES ${PLUGIN} ${WIDGETS})
+set(AUX ${JSON} ${QRC})
+
+source_group(Plugin FILES ${PLUGIN})
+source_group(Widgets FILES ${WIDGETS})
+source_group(UI FILES ${UIS})
+source_group(Shaders FILES ${SHADERS})
+source_group(Aux FILES ${AUX})
 
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 

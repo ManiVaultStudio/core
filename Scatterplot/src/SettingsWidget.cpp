@@ -1,4 +1,4 @@
-#include "ScatterplotSettings.h"
+#include "SettingsWidget.h"
 
 #include "ScatterplotPlugin.h"
 
@@ -219,10 +219,12 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
     setFixedWidth(200);
+    /*
     setStyleSheet(
         "QWidget { background-color:#62656c; color: white; font-family: \"Open Sans\"; font-size: 11px; }"
         //        "QFrame { background-color: #888b93; }"
     );
+    */
 
     _subsetButton.setText("Create Subset");
     _subsetButton.setFixedWidth(100);
