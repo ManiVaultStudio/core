@@ -219,13 +219,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
-    setFixedWidth(200);
-    /*
-    setStyleSheet(
-        "QWidget { background-color:#62656c; color: white; font-family: \"Open Sans\"; font-size: 11px; }"
-        //        "QFrame { background-color: #888b93; }"
-    );
-    */
+    setMinimumWidth(250);
 
     _subsetButton.setText("Create Subset");
     _subsetButton.setFixedWidth(100);

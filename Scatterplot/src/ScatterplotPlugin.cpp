@@ -10,6 +10,7 @@
 
 #include <QtCore>
 #include <QtDebug>
+#include <QSplitter>
 
 #include <algorithm>
 #include <limits>
@@ -43,16 +44,20 @@ void ScatterplotPlugin::init()
 
     settings = new ScatterplotSettings(this);
 
-    QHBoxLayout* layout = new QHBoxLayout();
-    layout->setMargin(0);
-    layout->setSpacing(0);
+    auto splitter = new QSplitter();
 
-    setMainLayout(layout);
-    addWidget(_dataSlot);
-    addWidget(settings);
+    splitter->addWidget(_dataSlot);
+    splitter->addWidget(settings);
+
+    splitter->setStretchFactor(0, 1);
+    splitter->setStretchFactor(1, 0);
+    splitter->setCollapsible(1, true);
+
+    addWidget(splitter);
 
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
+    
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
