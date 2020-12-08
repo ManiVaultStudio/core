@@ -75,6 +75,13 @@ void SelectionTool::setRadius(const float& radius)
     emit radiusChanged(_radius);
 }
 
+bool SelectionTool::canSelect() const
+{
+    Q_ASSERT(_scatterplotPlugin != nullptr);
+
+    return !_scatterplotPlugin->getCurrentDataset().isEmpty() && _scatterplotPlugin->getNumPoints() >= 0;
+}
+
 void SelectionTool::finish()
 {
     _mousePositions.clear();

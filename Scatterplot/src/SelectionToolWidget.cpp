@@ -60,11 +60,15 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
     });
 
     const auto updateTypeUI = [this]() {
-        //_ui->typeLabel->setEnabled(_selectionTool.getNumPoints() > 0);
-        //_ui->typeComboBox->setEnabled(_selectionTool.getNumPoints() > 0);
+        const auto canSelect = _selectionTool.canSelect();
+
+        _ui->typeLabel->setEnabled(canSelect);
+        _ui->typeComboBox->setEnabled(canSelect);
     };
 
     const auto updateModifierUI = [this]() {
+        const auto canSelect = _selectionTool.canSelect();
+
         switch (_selectionTool.getModifier())
         {
             case SelectionTool::Modifier::Replace:
@@ -92,15 +96,14 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
                 break;
         }
 
-        //_ui->modifierAddPushButton->setEnabled(_selectionTool.getNumPoints() > 0);
-        //_ui->modifierRemovePushButton->setEnabled(_selectionTool.getNumPoints() > 0);
+        _ui->modifierAddPushButton->setEnabled(canSelect);
+        _ui->modifierRemovePushButton->setEnabled(canSelect);
     };
 
     const auto updateRadiusUI = [this]() {
         auto radiusEnabled = false;
 
-        /*
-        if (_selectionTool.getNumPoints() > 0) {
+        if (_selectionTool.canSelect()) {
             switch (_selectionTool.getType())
             {
                 case SelectionTool::Type::Rectangle:
@@ -121,7 +124,6 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
                     break;
             }
         }
-        */
 
         _ui->radiusLabel->setEnabled(radiusEnabled);
         _ui->radiusSpinBox->setEnabled(radiusEnabled);

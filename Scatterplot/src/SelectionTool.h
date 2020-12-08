@@ -77,6 +77,8 @@ public: // Getters/setters
     float getRadius() const;
     void setRadius(const float& radius);
 
+    bool canSelect() const;
+
     void finish();
 
     void setChanged();

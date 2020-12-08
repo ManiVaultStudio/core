@@ -447,19 +447,19 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
 
                 case Qt::Key::Key_A:
                 {
-                    //selectAll();
+                    selectAll();
                     break;
                 }
 
                 case Qt::Key::Key_D:
                 {
-                    //selectNone();
+                    clearSelection();
                     break;
                 }
 
                 case Qt::Key::Key_I:
                 {
-                    //invertSelection();
+                    invertSelection();
                     break;
                 }
 
@@ -560,6 +560,9 @@ std::uint32_t ScatterplotPlugin::getNumSelectedPoints() const
 
 void ScatterplotPlugin::selectAll()
 {
+    if (_currentDataSet.isEmpty())
+        return;
+
     const Points& points = _core->requestData<Points>(_currentDataSet);
     Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
 
@@ -573,6 +576,9 @@ void ScatterplotPlugin::selectAll()
 
 void ScatterplotPlugin::clearSelection()
 {
+    if (_currentDataSet.isEmpty())
+        return;
+
     const Points& points = _core->requestData<Points>(_currentDataSet);
     Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
 
@@ -583,6 +589,9 @@ void ScatterplotPlugin::clearSelection()
 
 void ScatterplotPlugin::invertSelection()
 {
+    if (_currentDataSet.isEmpty())
+        return;
+
     const Points& points = _core->requestData<Points>(_currentDataSet);
     Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
 
