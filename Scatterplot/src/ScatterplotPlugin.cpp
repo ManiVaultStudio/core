@@ -150,6 +150,8 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
         _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
+
+    _selectionTool->setNumPoints(points.getNumPoints());
 }
 
 void ScatterplotPlugin::onColorDataInput(QString dataSetName)
@@ -251,6 +253,8 @@ void ScatterplotPlugin::updateSelection()
 {
     const Points& points = _core->requestData<Points>(_currentDataSet);
     const Points& selection = static_cast<Points&>(points.getSelection());
+
+    _selectionTool->setSelectionSize(selection.indices.size());
 
     std::vector<char> highlights;
     highlights.resize(_numPoints, 0);

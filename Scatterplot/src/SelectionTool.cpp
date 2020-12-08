@@ -23,6 +23,8 @@ SelectionTool::SelectionTool(QObject* parent) :
     _type(Type::Rectangle),
     _modifier(Modifier::Replace),
     _radius(RADIUS_DEFAULT),
+    _numPoints(-1),
+    _selectionSize(-1),
     _mousePositions(),
     _mouseButtons()
 {
@@ -73,6 +75,36 @@ void SelectionTool::setRadius(const float& radius)
     emit radiusChanged(_radius);
 }
 
+std::int32_t SelectionTool::getNumPoints() const
+{
+    return _numPoints;
+}
+
+void SelectionTool::setNumPoints(const std::int32_t& numPoints)
+{
+    if (numPoints == _numPoints)
+        return;
+
+    _numPoints = numPoints;
+
+    emit selectionChanged(_selectionSize, _numPoints);
+}
+
+std::int32_t SelectionTool::getSelectionSize() const
+{
+    return _selectionSize;
+}
+
+void SelectionTool::setSelectionSize(const std::int32_t& selectionSize)
+{
+    if (selectionSize == _selectionSize)
+        return;
+
+    _selectionSize = selectionSize;
+
+    emit selectionChanged(_selectionSize, _numPoints);
+}
+
 void SelectionTool::finish()
 {
     _mousePositions.clear();
@@ -83,6 +115,7 @@ void SelectionTool::setChanged()
     emit typeChanged(_type);
     emit modifierChanged(_modifier);
     emit radiusChanged(_radius);
+    emit selectionChanged(_selectionSize, _numPoints);
 }
 
 void SelectionTool::selectAll()
@@ -102,8 +135,6 @@ void SelectionTool::invertSelection()
 
 bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 {
-    //qDebug("EventFilter type: %d", event->type());
-
     switch (event->type())
     {
         // Prevent recursive paint events
@@ -112,8 +143,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::MouseButtonPress:
         {
-            //qDebug() << "MouseButtonPress";
-
             auto mouseEvent = static_cast<QMouseEvent*>(event);
 
             _mouseButtons = mouseEvent->buttons();

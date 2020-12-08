@@ -124,5 +124,11 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
         _ui->radiusSlider->setValue(selectionTool.getRadius() * 1000.0f);
     });
 
+    QObject::connect(&_selectionTool, &SelectionTool::selectionChanged, [this, &selectionTool](const std::int32_t& selectionSize, const std::int32_t& numPoints) {
+        _ui->selectAllPushButton->setEnabled(numPoints == -1 ? false : selectionSize != numPoints);
+        _ui->clearSelectionPushButton->setEnabled(numPoints == -1 ? false : selectionSize >= 1);
+        _ui->invertSelectionPushButton->setEnabled(numPoints >= 0);
+    });
+
     _selectionTool.setChanged();
 }
