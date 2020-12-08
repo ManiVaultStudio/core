@@ -25,9 +25,9 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
     _ui->radiusSlider->setMinimum(SelectionTool::RADIUS_MIN * 1000.0f);
     _ui->radiusSlider->setMaximum(SelectionTool::RADIUS_MAX * 1000.0f);
 
-    _ui->selectionTypeComboBox->addItems(QStringList(SelectionTool::types.keys()));
+    _ui->typeComboBox->addItems(QStringList(SelectionTool::types.keys()));
 
-    QObject::connect(_ui->selectionTypeComboBox, &QComboBox::currentTextChanged, [this, &selectionTool](QString currentText) {
+    QObject::connect(_ui->typeComboBox, &QComboBox::currentTextChanged, [this, &selectionTool](QString currentText) {
         selectionTool.setType(SelectionTool::getTypeEnum(currentText));
     });
 
@@ -59,38 +59,13 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
         selectionTool.invertSelection();
     });
 
-    QObject::connect(&_selectionTool, &SelectionTool::typeChanged, [this](const SelectionTool::Type& type) {
-        _ui->selectionTypeComboBox->setCurrentText(SelectionTool::getTypeName(type));
+    const auto updateTypeUI = [this]() {
+        _ui->typeLabel->setEnabled(_selectionTool.getNumPoints() > 0);
+        _ui->typeComboBox->setEnabled(_selectionTool.getNumPoints() > 0);
+    };
 
-        auto radiusEnabled = false;
-
-        switch (type)
-        {
-            case SelectionTool::Type::Rectangle:
-            case SelectionTool::Type::Circle:
-                break;
-
-            case SelectionTool::Type::Brush:
-            {
-                radiusEnabled = true;
-                break;
-            }
-
-            case SelectionTool::Type::Lasso:
-            case SelectionTool::Type::Polygon:
-                break;
-
-            default:
-                break;
-        }
-
-        _ui->radiusLabel->setEnabled(radiusEnabled);
-        _ui->radiusSpinBox->setEnabled(radiusEnabled);
-        _ui->radiusSlider->setEnabled(radiusEnabled);
-    });
-
-    QObject::connect(&_selectionTool, &SelectionTool::modifierChanged, [this](const SelectionTool::Modifier& modifier) {
-        switch (modifier)
+    const auto updateModifierUI = [this]() {
+        switch (_selectionTool.getModifier())
         {
             case SelectionTool::Modifier::Replace:
             {
@@ -116,17 +91,63 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
             default:
                 break;
         }
-        _ui->selectionTypeComboBox->setCurrentText(SelectionTool::getModifierName(modifier));
+
+        _ui->modifierAddPushButton->setEnabled(_selectionTool.getNumPoints() > 0);
+        _ui->modifierRemovePushButton->setEnabled(_selectionTool.getNumPoints() > 0);
+    };
+
+    const auto updateRadiusUI = [this]() {
+        auto radiusEnabled = false;
+
+        if (_selectionTool.getNumPoints() > 0) {
+            switch (_selectionTool.getType())
+            {
+                case SelectionTool::Type::Rectangle:
+                case SelectionTool::Type::Circle:
+                    break;
+
+                case SelectionTool::Type::Brush:
+                {
+                    radiusEnabled = true;
+                    break;
+                }
+
+                case SelectionTool::Type::Lasso:
+                case SelectionTool::Type::Polygon:
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        _ui->radiusLabel->setEnabled(radiusEnabled);
+        _ui->radiusSpinBox->setEnabled(radiusEnabled);
+        _ui->radiusSlider->setEnabled(radiusEnabled);
+    };
+
+    QObject::connect(&_selectionTool, &SelectionTool::typeChanged, [this, updateRadiusUI](const SelectionTool::Type& type) {
+        _ui->typeComboBox->setCurrentText(SelectionTool::getTypeName(type));
+
+        updateRadiusUI();
     });
 
-    QObject::connect(&_selectionTool, &SelectionTool::radiusChanged, [this, &selectionTool](const float& radius) {
-        _ui->radiusSpinBox->setValue(selectionTool.getRadius());
-        _ui->radiusSlider->setValue(selectionTool.getRadius() * 1000.0f);
+    QObject::connect(&_selectionTool, &SelectionTool::modifierChanged, [this, updateModifierUI](const SelectionTool::Modifier& modifier) {
+        updateModifierUI();
     });
 
-    QObject::connect(&_selectionTool, &SelectionTool::selectionChanged, [this, &selectionTool](const std::int32_t& selectionSize, const std::int32_t& numPoints) {
-        _ui->selectAllPushButton->setEnabled(numPoints == -1 ? false : selectionSize != numPoints);
-        _ui->clearSelectionPushButton->setEnabled(numPoints == -1 ? false : selectionSize >= 1);
+    QObject::connect(&_selectionTool, &SelectionTool::radiusChanged, [this](const float& radius) {
+        _ui->radiusSpinBox->setValue(_selectionTool.getRadius());
+        _ui->radiusSlider->setValue(_selectionTool.getRadius() * 1000.0f);
+    });
+
+    QObject::connect(&_selectionTool, &SelectionTool::selectionChanged, [this, updateTypeUI, updateModifierUI, updateRadiusUI](const std::int32_t& numSelectedPoints, const std::int32_t& numPoints) {
+        updateTypeUI();
+        updateModifierUI();
+        updateRadiusUI();
+
+        _ui->selectAllPushButton->setEnabled(numPoints == -1 ? false : numSelectedPoints != numPoints);
+        _ui->clearSelectionPushButton->setEnabled(numPoints == -1 ? false : numSelectedPoints >= 1);
         _ui->invertSelectionPushButton->setEnabled(numPoints >= 0);
     });
 

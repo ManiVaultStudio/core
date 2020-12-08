@@ -254,7 +254,7 @@ void ScatterplotPlugin::updateSelection()
     const Points& points = _core->requestData<Points>(_currentDataSet);
     const Points& selection = static_cast<Points&>(points.getSelection());
 
-    _selectionTool->setSelectionSize(selection.indices.size());
+    _selectionTool->setNumSelectedPoints(selection.indices.size());
 
     std::vector<char> highlights;
     highlights.resize(_numPoints, 0);

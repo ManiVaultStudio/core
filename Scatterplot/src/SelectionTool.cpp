@@ -24,7 +24,7 @@ SelectionTool::SelectionTool(QObject* parent) :
     _modifier(Modifier::Replace),
     _radius(RADIUS_DEFAULT),
     _numPoints(-1),
-    _selectionSize(-1),
+    _numSelectedPoints(-1),
     _mousePositions(),
     _mouseButtons()
 {
@@ -87,22 +87,22 @@ void SelectionTool::setNumPoints(const std::int32_t& numPoints)
 
     _numPoints = numPoints;
 
-    emit selectionChanged(_selectionSize, _numPoints);
+    emit selectionChanged(_numSelectedPoints, _numPoints);
 }
 
-std::int32_t SelectionTool::getSelectionSize() const
+std::int32_t SelectionTool::getNumSelectedPoints() const
 {
-    return _selectionSize;
+    return _numSelectedPoints;
 }
 
-void SelectionTool::setSelectionSize(const std::int32_t& selectionSize)
+void SelectionTool::setNumSelectedPoints(const std::int32_t& numSelectedPoints)
 {
-    if (selectionSize == _selectionSize)
+    if (numSelectedPoints == _numSelectedPoints)
         return;
 
-    _selectionSize = selectionSize;
+    _numSelectedPoints = numSelectedPoints;
 
-    emit selectionChanged(_selectionSize, _numPoints);
+    emit selectionChanged(_numSelectedPoints, _numPoints);
 }
 
 void SelectionTool::finish()
@@ -115,7 +115,7 @@ void SelectionTool::setChanged()
     emit typeChanged(_type);
     emit modifierChanged(_modifier);
     emit radiusChanged(_radius);
-    emit selectionChanged(_selectionSize, _numPoints);
+    emit selectionChanged(_numSelectedPoints, _numPoints);
 }
 
 void SelectionTool::selectAll()

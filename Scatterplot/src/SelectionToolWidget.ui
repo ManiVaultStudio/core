@@ -59,7 +59,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QComboBox" name="selectionTypeComboBox">
+         <widget class="QComboBox" name="typeComboBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>5</horstretch>
@@ -178,7 +178,7 @@
       <item row="3" column="0">
        <widget class="QLabel" name="typeLabel">
         <property name="text">
-         <string>Selection type</string>
+         <string>Type</string>
         </property>
        </widget>
       </item>
