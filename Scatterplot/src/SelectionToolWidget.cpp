@@ -60,8 +60,8 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
     });
 
     const auto updateTypeUI = [this]() {
-        _ui->typeLabel->setEnabled(_selectionTool.getNumPoints() > 0);
-        _ui->typeComboBox->setEnabled(_selectionTool.getNumPoints() > 0);
+        //_ui->typeLabel->setEnabled(_selectionTool.getNumPoints() > 0);
+        //_ui->typeComboBox->setEnabled(_selectionTool.getNumPoints() > 0);
     };
 
     const auto updateModifierUI = [this]() {
@@ -92,13 +92,14 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
                 break;
         }
 
-        _ui->modifierAddPushButton->setEnabled(_selectionTool.getNumPoints() > 0);
-        _ui->modifierRemovePushButton->setEnabled(_selectionTool.getNumPoints() > 0);
+        //_ui->modifierAddPushButton->setEnabled(_selectionTool.getNumPoints() > 0);
+        //_ui->modifierRemovePushButton->setEnabled(_selectionTool.getNumPoints() > 0);
     };
 
     const auto updateRadiusUI = [this]() {
         auto radiusEnabled = false;
 
+        /*
         if (_selectionTool.getNumPoints() > 0) {
             switch (_selectionTool.getType())
             {
@@ -120,6 +121,7 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
                     break;
             }
         }
+        */
 
         _ui->radiusLabel->setEnabled(radiusEnabled);
         _ui->radiusSpinBox->setEnabled(radiusEnabled);
@@ -141,6 +143,7 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
         _ui->radiusSlider->setValue(_selectionTool.getRadius() * 1000.0f);
     });
 
+    /*
     QObject::connect(&_selectionTool, &SelectionTool::selectionChanged, [this, updateTypeUI, updateModifierUI, updateRadiusUI](const std::int32_t& numSelectedPoints, const std::int32_t& numPoints) {
         updateTypeUI();
         updateModifierUI();
@@ -150,6 +153,7 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
         _ui->clearSelectionPushButton->setEnabled(numPoints == -1 ? false : numSelectedPoints >= 1);
         _ui->invertSelectionPushButton->setEnabled(numPoints >= 0);
     });
+    */
 
     _selectionTool.setChanged();
 }

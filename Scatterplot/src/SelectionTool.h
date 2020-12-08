@@ -5,6 +5,8 @@
 #include <QWidget>
 #include <QMap>
 
+class ScatterplotPlugin;
+
 /**
  * Selection tool class
  *
@@ -62,7 +64,7 @@ public:
 
 public: // Construction/destruction
 
-    SelectionTool(QObject* parent);
+    SelectionTool(ScatterplotPlugin* scatterplotPlugin);
 
 public: // Getters/setters
 
@@ -74,14 +76,6 @@ public: // Getters/setters
 
     float getRadius() const;
     void setRadius(const float& radius);
-
-    std::int32_t getNumPoints() const;
-
-    void setNumPoints(const std::int32_t& numPoints);
-
-    std::int32_t getNumSelectedPoints() const;
-
-    void setNumSelectedPoints(const std::int32_t& numSelectedPoints);
 
     void finish();
 
@@ -105,14 +99,11 @@ signals:
 
     void radiusChanged(const float& radius);
 
-    void selectionChanged(const std::int32_t& numSelectedPoints, const std::int32_t& numPoints);
-
 protected:
+    ScatterplotPlugin*  _scatterplotPlugin;     /** Scatter plot plugin */
     Type                _type;                  /** Current selection type */
     Modifier            _modifier;              /** Selection modifier */
     float               _radius;                /** Brush/circle radius */
-    std::int32_t        _numPoints;             /** Number of points */
-    std::int32_t        _numSelectedPoints;     /** Number of selected points */
     QVector<QPoint>     _mousePositions;        /** Recorded mouse positions */
     int                 _mouseButtons;          /** State of the left, middle and right mouse buttons */
 

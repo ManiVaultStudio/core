@@ -1,4 +1,5 @@
 #include "SelectionTool.h"
+#include "ScatterplotPlugin.h"
 
 #include <QDebug>
 #include <QEvent>
@@ -9,7 +10,7 @@ const QMap<QString, SelectionTool::Type> SelectionTool::types = {
     { "Circle", SelectionTool::Type::Circle },
     { "Brush", SelectionTool::Type::Brush },
     { "Lasso", SelectionTool::Type::Lasso },
-    { "Polygon", SelectionTool::Type::Polygon },
+    { "Polygon", SelectionTool::Type::Polygon }
 };
 
 const QMap<QString, SelectionTool::Modifier> SelectionTool::modifiers = {
@@ -18,13 +19,12 @@ const QMap<QString, SelectionTool::Modifier> SelectionTool::modifiers = {
     { "Remove", SelectionTool::Modifier::Remove }
 };
 
-SelectionTool::SelectionTool(QObject* parent) :
-    QObject(parent),
+SelectionTool::SelectionTool(ScatterplotPlugin* scatterplotPlugin) :
+    QObject(reinterpret_cast<QObject*>(scatterplotPlugin)),
+    _scatterplotPlugin(scatterplotPlugin),
     _type(Type::Rectangle),
     _modifier(Modifier::Replace),
     _radius(RADIUS_DEFAULT),
-    _numPoints(-1),
-    _numSelectedPoints(-1),
     _mousePositions(),
     _mouseButtons()
 {
@@ -75,36 +75,6 @@ void SelectionTool::setRadius(const float& radius)
     emit radiusChanged(_radius);
 }
 
-std::int32_t SelectionTool::getNumPoints() const
-{
-    return _numPoints;
-}
-
-void SelectionTool::setNumPoints(const std::int32_t& numPoints)
-{
-    if (numPoints == _numPoints)
-        return;
-
-    _numPoints = numPoints;
-
-    emit selectionChanged(_numSelectedPoints, _numPoints);
-}
-
-std::int32_t SelectionTool::getNumSelectedPoints() const
-{
-    return _numSelectedPoints;
-}
-
-void SelectionTool::setNumSelectedPoints(const std::int32_t& numSelectedPoints)
-{
-    if (numSelectedPoints == _numSelectedPoints)
-        return;
-
-    _numSelectedPoints = numSelectedPoints;
-
-    emit selectionChanged(_numSelectedPoints, _numPoints);
-}
-
 void SelectionTool::finish()
 {
     _mousePositions.clear();
@@ -115,22 +85,27 @@ void SelectionTool::setChanged()
     emit typeChanged(_type);
     emit modifierChanged(_modifier);
     emit radiusChanged(_radius);
-    emit selectionChanged(_numSelectedPoints, _numPoints);
 }
 
 void SelectionTool::selectAll()
 {
+    Q_ASSERT(_scatterplotPlugin != nullptr);
 
+    _scatterplotPlugin->selectAll();
 }
 
 void SelectionTool::clearSelection()
 {
+    Q_ASSERT(_scatterplotPlugin != nullptr);
 
+    _scatterplotPlugin->clearSelection();
 }
 
 void SelectionTool::invertSelection()
 {
+    Q_ASSERT(_scatterplotPlugin != nullptr);
 
+    _scatterplotPlugin->invertSelection();
 }
 
 bool SelectionTool::eventFilter(QObject* target, QEvent* event)

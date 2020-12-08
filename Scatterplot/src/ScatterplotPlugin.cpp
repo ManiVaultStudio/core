@@ -135,6 +135,8 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     setWindowTitle(_currentDataSet);
 
+    emit currentDatasetChanged(_currentDataSet);
+
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
     // For source data determine whether to use dimension names or make them up
@@ -150,8 +152,6 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
         _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
-
-    _selectionTool->setNumPoints(points.getNumPoints());
 }
 
 void ScatterplotPlugin::onColorDataInput(QString dataSetName)
@@ -209,7 +209,7 @@ void ScatterplotPlugin::updateData()
     // Check if the scatter plot is initialized, if not, don't do anything
     if (!_scatterPlotWidget->isInitialized())
         return;
-
+    
     // If no dataset has been selected, don't do anything
     if (_currentDataSet.isEmpty())
         return;
@@ -253,8 +253,6 @@ void ScatterplotPlugin::updateSelection()
 {
     const Points& points = _core->requestData<Points>(_currentDataSet);
     const Points& selection = static_cast<Points&>(points.getSelection());
-
-    _selectionTool->setNumSelectedPoints(selection.indices.size());
 
     std::vector<char> highlights;
     highlights.resize(_numPoints, 0);
@@ -323,6 +321,8 @@ void ScatterplotPlugin::updateSelection()
     }
 
     _scatterPlotWidget->setHighlights(highlights);
+
+    emit selectionChanged();
 }
 
 // Returns the selection set associated with this dataset
@@ -536,6 +536,71 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
     }
 
     return QWidget::eventFilter(target, event);
+}
+
+QString ScatterplotPlugin::getCurrentDataset() const
+{
+    return _currentDataSet;
+}
+
+std::uint32_t ScatterplotPlugin::getNumPoints() const
+{
+    const Points& points = _core->requestData<Points>(_currentDataSet);
+
+    return points.getNumPoints();
+}
+
+std::uint32_t ScatterplotPlugin::getNumSelectedPoints() const
+{
+    const Points& points    = _core->requestData<Points>(_currentDataSet);
+    const Points& selection = static_cast<Points&>(points.getSelection());
+
+    return selection.indices.size();
+}
+
+void ScatterplotPlugin::selectAll()
+{
+    const Points& points = _core->requestData<Points>(_currentDataSet);
+    Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+
+    selectionSet.indices.clear();
+    selectionSet.indices.resize(points.getNumPoints());
+
+    std::iota(selectionSet.indices.begin(), selectionSet.indices.end(), 0);
+
+    _core->notifySelectionChanged(selectionSet.getDataName());
+}
+
+void ScatterplotPlugin::clearSelection()
+{
+    const Points& points = _core->requestData<Points>(_currentDataSet);
+    Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+
+    selectionSet.indices.clear();
+
+    _core->notifySelectionChanged(selectionSet.getDataName());
+}
+
+void ScatterplotPlugin::invertSelection()
+{
+    const Points& points = _core->requestData<Points>(_currentDataSet);
+    Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+
+    auto& indices = selectionSet.indices;
+
+    const auto indicesSet = QSet<std::uint32_t>(indices.begin(), indices.end());
+
+    indices.clear();
+    indices.reserve(points.getNumPoints());
+
+    for (int p = 0; p < points.getNumPoints(); ++p) {
+        if (indicesSet.contains(p))
+            continue;
+
+        indices.push_back(p);
+    }
+
+    _core->notifySelectionChanged(selectionSet.getDataName());
 }
 
 // =============================================================================

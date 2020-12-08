@@ -57,6 +57,16 @@ public:
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    QString getCurrentDataset() const;
+    std::uint32_t getNumPoints() const;
+    std::uint32_t getNumSelectedPoints() const;
+
+public: // Selection
+
+    void selectAll();
+    void clearSelection();
+    void invertSelection();
+
 public slots:
     void onDataInput(QString dataSetName);
     void onColorDataInput(QString dataSetName);
@@ -67,6 +77,10 @@ protected slots:
     void xDimPicked(int index);
     void yDimPicked(int index);
     void cDimPicked(int index);
+
+signals:
+    void currentDatasetChanged(const QString& datasetName);
+    void selectionChanged();
 
 private:
     void updateData();
