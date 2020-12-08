@@ -5,7 +5,6 @@
 #include <QMouseEvent>
 
 const QMap<QString, SelectionTool::Type> SelectionTool::types = {
-    { "None", SelectionTool::Type::None },
     { "Rectangle", SelectionTool::Type::Rectangle },
     { "Circle", SelectionTool::Type::Circle },
     { "Brush", SelectionTool::Type::Brush },
@@ -16,21 +15,17 @@ const QMap<QString, SelectionTool::Type> SelectionTool::types = {
 const QMap<QString, SelectionTool::Modifier> SelectionTool::modifiers = {
     { "Replace", SelectionTool::Modifier::Replace },
     { "Add", SelectionTool::Modifier::Add },
-    { "Remove", SelectionTool::Modifier::Remove },
-    { "All", SelectionTool::Modifier::All },
-    { "None", SelectionTool::Modifier::None },
-    { "Invert", SelectionTool::Modifier::Invert }
+    { "Remove", SelectionTool::Modifier::Remove }
 };
 
 SelectionTool::SelectionTool(QObject* parent) :
     QObject(parent),
     _type(Type::Rectangle),
     _modifier(Modifier::Replace),
-    _radius(DEFAULT_RADIUS),
+    _radius(RADIUS_DEFAULT),
     _mousePositions(),
     _mouseButtons()
 {
-    parent->installEventFilter(this);
 }
 
 SelectionTool::Type SelectionTool::getType() const
@@ -73,13 +68,42 @@ void SelectionTool::setRadius(const float& radius)
     if (radius == _radius)
         return;
 
-    _radius = radius;
+    _radius = std::clamp(radius, RADIUS_MIN, RADIUS_MAX);
 
     emit radiusChanged(_radius);
 }
 
+void SelectionTool::finish()
+{
+    _mousePositions.clear();
+}
+
+void SelectionTool::setChanged()
+{
+    emit typeChanged(_type);
+    emit modifierChanged(_modifier);
+    emit radiusChanged(_radius);
+}
+
+void SelectionTool::selectAll()
+{
+
+}
+
+void SelectionTool::clearSelection()
+{
+
+}
+
+void SelectionTool::invertSelection()
+{
+
+}
+
 bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 {
+    //qDebug("EventFilter type: %d", event->type());
+
     switch (event->type())
     {
         // Prevent recursive paint events
@@ -88,14 +112,14 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::MouseButtonPress:
         {
-            
+            //qDebug() << "MouseButtonPress";
+
             auto mouseEvent = static_cast<QMouseEvent*>(event);
 
             _mouseButtons = mouseEvent->buttons();
 
             switch (_type)
             {
-                case Type::None:
                 case Type::Rectangle:
                 {
                     _mousePositions.clear();
@@ -155,9 +179,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-                case Type::None:
-                    break;
-
                 case Type::Rectangle:
                 {
                     if (mouseEvent->button() == Qt::LeftButton) {
@@ -212,9 +233,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-                case Type::None:
-                    break;
-
                 case Type::Rectangle:
                 {
                     if (mouseEvent->buttons() & Qt::LeftButton) {
@@ -296,16 +314,15 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-                case Type::None:
                 case Type::Rectangle:
                     break;
 
                 case Type::Brush:
                 {
                     if (wheelEvent->delta() < 0)
-                        setRadius(_radius - 5.0f);
+                        setRadius(_radius - RADIUS_DELTA);
                     else
-                        setRadius(_radius + 5.0f);
+                        setRadius(_radius + RADIUS_DELTA);
 
                     break;
                 }
@@ -313,133 +330,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                 case Type::Lasso:
                 case Type::Polygon:
                     break;
-
-                default:
-                    break;
-            }
-
-            break;
-        }
-
-        case QEvent::KeyPress:
-        {
-            
-            auto keyEvent = static_cast<QKeyEvent*>(event);
-
-            switch (keyEvent->key())
-            {
-                case Qt::Key::Key_R:
-                {
-                    setType(Type::Rectangle);
-                    break;
-                }
-
-                case Qt::Key::Key_C:
-                {
-                    setType(Type::Circle);
-                    break;
-                }
-
-                case Qt::Key::Key_B:
-                {
-                    setType(Type::Brush);
-                    break;
-                }
-
-                case Qt::Key::Key_P:
-                {
-                    setType(Type::Polygon);
-                    break;
-                }
-
-                case Qt::Key::Key_L:
-                {
-                    setType(Type::Lasso);
-                    break;
-                }
-
-                case Qt::Key::Key_A:
-                {
-                    //selectAll();
-                    break;
-                }
-
-                case Qt::Key::Key_D:
-                {
-                    //selectNone();
-                    break;
-                }
-
-                case Qt::Key::Key_I:
-                {
-                    //invertSelection();
-                    break;
-                }
-
-                case Qt::Key::Key_Shift:
-                {
-                    setModifier(Modifier::Add);
-                    break;
-                }
-
-                case Qt::Key::Key_Control:
-                {
-                    setModifier(Modifier::Remove);
-                    break;
-                }
-
-                case Qt::Key::Key_Escape:
-                {
-                    switch (_type)
-                    {
-                        case Type::None:
-                        case Type::Rectangle:
-                        case Type::Brush:
-                            break;
-
-                        case Type::Lasso:
-                        case Type::Polygon:
-                        {
-                            _mousePositions.clear();
-                            break;
-                        }
-
-                        default:
-                            break;
-                    }
-
-                    break;
-                }
-
-                default:
-                    break;
-            }
-
-            break;
-        }
-
-        case QEvent::KeyRelease:
-        {
-            auto keyEvent = static_cast<QKeyEvent*>(event);
-
-            switch (keyEvent->key())
-            {
-                case Qt::Key::Key_R:
-                case Qt::Key::Key_B:
-                case Qt::Key::Key_L:
-                case Qt::Key::Key_P:
-                case Qt::Key::Key_A:
-                case Qt::Key::Key_D:
-                case Qt::Key::Key_I:
-                case Qt::Key::Key_Z:
-                    break;
-
-                case Qt::Key::Key_Shift:
-                case Qt::Key::Key_Control:
-                {
-                    setModifier(Modifier::Replace);
-                    break;
-                }
 
                 default:
                     break;

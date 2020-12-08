@@ -9,6 +9,7 @@
 #include "graphics/Vector3f.h"
 
 #include <QtCore>
+#include <QApplication>
 #include <QtDebug>
 #include <QSplitter>
 
@@ -42,12 +43,12 @@ void ScatterplotPlugin::init()
     _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     _dataSlot->addWidget(_scatterPlotWidget);
 
-    settings = new ScatterplotSettings(this);
+    _scatterPlotSettings = new ScatterplotSettings(this);
 
     auto splitter = new QSplitter();
 
     splitter->addWidget(_dataSlot);
-    splitter->addWidget(settings);
+    splitter->addWidget(_scatterPlotSettings);
 
     splitter->setStretchFactor(0, 1);
     splitter->setStretchFactor(1, 0);
@@ -55,9 +56,13 @@ void ScatterplotPlugin::init()
 
     addWidget(splitter);
 
+    _scatterPlotWidget->installEventFilter(_selectionTool);
+    _scatterPlotSettings->installEventFilter(_selectionTool);
+
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
     
+    qApp->installEventFilter(this);
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -134,15 +139,15 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     // For source data determine whether to use dimension names or make them up
     if (points.getDimensionNames().size() == points.getNumDimensions())
-        settings->initDimOptions(points.getDimensionNames());
+        _scatterPlotSettings->initDimOptions(points.getDimensionNames());
     else
-        settings->initDimOptions(points.getNumDimensions());
+        _scatterPlotSettings->initDimOptions(points.getNumDimensions());
 
     // For derived data determine whether to use dimension names or make them up
     if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
-        settings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
+        _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
     else
-        settings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
+        _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
 }
@@ -211,8 +216,8 @@ void ScatterplotPlugin::updateData()
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
     // Get the selected dimensions to use as X and Y dimension in the plot
-    int xDim = settings->getXDimension();
-    int yDim = settings->getYDimension();
+    int xDim = _scatterPlotSettings->getXDimension();
+    int yDim = _scatterPlotSettings->getYDimension();
 
     // If one of the dimensions was not set, do not draw anything
     if (xDim < 0 || yDim < 0)
@@ -232,7 +237,7 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const Points& points)
 {
-    points.extractDataForDimensions(_points, settings->getXDimension(), settings->getYDimension());
+    points.extractDataForDimensions(_points, _scatterPlotSettings->getXDimension(), _scatterPlotSettings->getYDimension());
 }
 
 void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex)
@@ -369,7 +374,7 @@ void ScatterplotPlugin::onSelecting(hdps::Selection selection)
     {
         // Only notify other plugins of the selection changes if enabled in the settings
         // This prevents plugins that take a long time to process selections to deteriorate performance
-        if ((settings != nullptr) && settings->IsNotifyingOnSelecting())
+        if ((_scatterPlotSettings != nullptr) && _scatterPlotSettings->IsNotifyingOnSelecting())
             _core->notifySelectionChanged(selectionSet->getDataName());
         else
             updateSelection();
@@ -386,19 +391,110 @@ void ScatterplotPlugin::onSelection(hdps::Selection selection)
     }
 }
 
+SelectionTool& ScatterplotPlugin::getSelectionTool()
+{
+    return *_selectionTool;
+}
+
 bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
 {
-    qDebug() << "eventFilter() in ScatterplotPlugin";
+    auto widgetBeneathCursor = QApplication::widgetAt(QCursor::pos());
 
-    /*
+    if (!isAncestorOf(widgetBeneathCursor))
+        return QWidget::eventFilter(target, event);
+
     switch (event->type())
     {
         case QEvent::KeyPress:
         {
-            auto keyEvent = static_cast<QKeyEvent*>(event);
+            auto keyEvent = static_cast<QKeyEvent *>(event);
 
-            if (!keyEvent->isAutoRepeat() && keyEvent->key() == Qt::Key_Space) {
-                _layersModel.dispatchEventToSelectedLayer(event);
+            switch (keyEvent->key())
+            {
+                case Qt::Key::Key_R:
+                {
+                    _selectionTool->setType(SelectionTool::Type::Rectangle);
+                    break;
+                }
+
+                case Qt::Key::Key_C:
+                {
+                    _selectionTool->setType(SelectionTool::Type::Circle);
+                    break;
+                }
+
+                case Qt::Key::Key_B:
+                {
+                    _selectionTool->setType(SelectionTool::Type::Brush);
+                    break;
+                }
+
+                case Qt::Key::Key_P:
+                {
+                    _selectionTool->setType(SelectionTool::Type::Polygon);
+                    break;
+                }
+
+                case Qt::Key::Key_L:
+                {
+                    _selectionTool->setType(SelectionTool::Type::Lasso);
+                    break;
+                }
+
+                case Qt::Key::Key_A:
+                {
+                    //selectAll();
+                    break;
+                }
+
+                case Qt::Key::Key_D:
+                {
+                    //selectNone();
+                    break;
+                }
+
+                case Qt::Key::Key_I:
+                {
+                    //invertSelection();
+                    break;
+                }
+
+                case Qt::Key::Key_Shift:
+                {
+                    _selectionTool->setModifier(SelectionTool::Modifier::Add);
+                    break;
+                }
+
+                case Qt::Key::Key_Control:
+                {
+                    _selectionTool->setModifier(SelectionTool::Modifier::Remove);
+                    break;
+                }
+
+                case Qt::Key::Key_Escape:
+                {
+                    switch (_selectionTool->getType())
+                    {
+                        case SelectionTool::Type::Rectangle:
+                        case SelectionTool::Type::Brush:
+                            break;
+
+                        case SelectionTool::Type::Lasso:
+                        case SelectionTool::Type::Polygon:
+                        {
+                            _selectionTool->finish();
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+
+                    break;
+                }
+
+                default:
+                    break;
             }
 
             break;
@@ -408,24 +504,34 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
         {
             auto keyEvent = static_cast<QKeyEvent*>(event);
 
-            if (!keyEvent->isAutoRepeat() && keyEvent->key() == Qt::Key_Space) {
-                _layersModel.dispatchEventToSelectedLayer(event);
+            switch (keyEvent->key())
+            {
+                case Qt::Key::Key_R:
+                case Qt::Key::Key_B:
+                case Qt::Key::Key_L:
+                case Qt::Key::Key_P:
+                case Qt::Key::Key_A:
+                case Qt::Key::Key_D:
+                case Qt::Key::Key_I:
+                case Qt::Key::Key_Z:
+                    break;
+
+                case Qt::Key::Key_Shift:
+                case Qt::Key::Key_Control:
+                {
+                    _selectionTool->setModifier(SelectionTool::Modifier::Replace);
+                    break;
+                }
+
+                default:
+                    break;
             }
 
             break;
         }
-
-        default:
-            break;
     }
-    */
 
     return QWidget::eventFilter(target, event);
-}
-
-SelectionTool& ScatterplotPlugin::getSelectionTool()
-{
-    return *_selectionTool;
 }
 
 // =============================================================================

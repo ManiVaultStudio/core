@@ -186,6 +186,7 @@ Selection ScatterplotWidget::getSelection()
 
 bool ScatterplotWidget::eventFilter(QObject* target, QEvent* event)
 {
+    return QWidget::eventFilter(target, event);
 }
 
 void ScatterplotWidget::initializeGL()

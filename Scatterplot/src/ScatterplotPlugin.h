@@ -36,7 +36,6 @@ public:
         ViewPlugin("Scatterplot View"),
         _selectionTool(new SelectionTool(this))
     {
-        //_selectionTool->installEventFilter(this);
     }
 
     ~ScatterplotPlugin(void) override;
@@ -54,9 +53,9 @@ public:
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;
 
-    bool eventFilter(QObject* target, QEvent* event) override;
-
     SelectionTool& getSelectionTool();
+
+    bool eventFilter(QObject* target, QEvent* event) override;
 
 public slots:
     void onDataInput(QString dataSetName);
@@ -79,7 +78,7 @@ private:
 
     QString _currentDataSet;
     DataSlot* _dataSlot;
-    ScatterplotSettings* settings;
+    ScatterplotSettings* _scatterPlotSettings;
 
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;

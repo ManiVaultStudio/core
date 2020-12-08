@@ -19,7 +19,6 @@ public:
     /** Types */
     enum class Type
     {
-        None = -1,		/** Not set */
         Rectangle,		/** Select points within a rectangle */
         Circle,		    /** Select points within a circle */
         Brush,			/** A brush is used the paint the selection */
@@ -45,10 +44,7 @@ public:
     {
         Replace,        /** Replace selection */
         Add,            /** Add to selection */
-        Remove,         /** Remove from selection */
-        All,            /** Select all */
-        None,           /** Deselect all points */
-        Invert          /** Invert point selection */
+        Remove          /** Remove from selection */
     };
 
     /** Maps modifier name to modifier enum and vice versa */
@@ -79,6 +75,16 @@ public: // Getters/setters
     float getRadius() const;
     void setRadius(const float& radius);
 
+    void finish();
+
+    void setChanged();
+
+    void selectAll();
+
+    void clearSelection();
+
+    void invertSelection();
+
 public: // Event handling
 
     bool eventFilter(QObject* target, QEvent* event) override;
@@ -98,8 +104,10 @@ protected:
     QVector<QPoint>     _mousePositions;    /** Recorded mouse positions */
     int                 _mouseButtons;      /** State of the left, middle and right mouse buttons */
 
-    static constexpr float MIN_RADIUS       = 1.0f;         /** Minimum brush radius */
-    static constexpr float MAX_RADIUS       = 1000.0f;      /** Maximum brush radius */
-    static constexpr float DEFAULT_RADIUS   = 10.0f;        /** Default brush radius */
+public:
+    static constexpr float RADIUS_MIN       = 10.0f;        /** Minimum radius */
+    static constexpr float RADIUS_MAX       = 1000.0f;      /** Maximum radius */
+    static constexpr float RADIUS_DEFAULT   = 10.0f;        /** Default radius */
+    static constexpr float RADIUS_DELTA     = 10.0f;        /** Radius increment */
 
 };

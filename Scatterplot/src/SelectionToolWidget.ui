@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SelectionWidget</class>
- <widget class="QWidget" name="SelectionWidget">
+ <class>SelectionToolWidget</class>
+ <widget class="QWidget" name="SelectionToolWidget">
   <property name="enabled">
    <bool>true</bool>
   </property>
@@ -54,7 +54,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="3" column="1">
-       <layout class="QHBoxLayout" name="selectionModifiersHorizontalLayout">
+       <layout class="QHBoxLayout" name="selectionHorizontalLayout">
         <property name="bottomMargin">
          <number>0</number>
         </property>
@@ -69,35 +69,10 @@
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of pixel selection&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;R&lt;/span&gt; Rectangle&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;B&lt;/span&gt; Brush&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;L&lt;/span&gt; Lasso&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;P&lt;/span&gt; Polygon&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
-          <item>
-           <property name="text">
-            <string>Rectangle</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Brush</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Lasso</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Polygon</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Sample</string>
-           </property>
-          </item>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="selectionModifierAddPushButton">
+         <widget class="QPushButton" name="modifierAddPushButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>1</horstretch>
@@ -120,7 +95,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add to current selection&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SHIFT&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
-           <string>+</string>
+           <string/>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -131,7 +106,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="selectionModifierRemovePushButton">
+         <widget class="QPushButton" name="modifierRemovePushButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>1</horstretch>
@@ -154,7 +129,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remove from current selection&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;CTRL&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
-           <string>-</string>
+           <string/>
           </property>
           <property name="checkable">
            <bool>true</bool>
@@ -164,16 +139,16 @@
        </layout>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="brushRadiusLabel">
+       <widget class="QLabel" name="radiusLabel">
         <property name="text">
-         <string>Brush radius</string>
+         <string>Radius</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <layout class="QHBoxLayout" name="brushRadiusHorizontalLayout">
+       <layout class="QHBoxLayout" name="radiusHorizontalLayout">
         <item>
-         <widget class="QDoubleSpinBox" name="brushRadiusDoubleSpinBox">
+         <widget class="QDoubleSpinBox" name="radiusSpinBox">
           <property name="decimals">
            <number>1</number>
           </property>
@@ -186,7 +161,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="brushRadiusHorizontalSlider">
+         <widget class="QSlider" name="radiusSlider">
           <property name="maximum">
            <number>100</number>
           </property>
@@ -201,7 +176,7 @@
        </layout>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="selectionTypeLabel">
+       <widget class="QLabel" name="typeLabel">
         <property name="text">
          <string>Selection type</string>
         </property>
@@ -235,7 +210,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="selectNonePushButton">
+         <widget class="QPushButton" name="clearSelectionPushButton">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
