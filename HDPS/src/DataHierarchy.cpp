@@ -71,7 +71,7 @@ namespace hdps
             bool ok;
             QString newDatasetName = QInputDialog::getText(this, tr("Rename Dataset"),
                 tr("Dataset name:"), QLineEdit::Normal,
-                nullptr, &ok);
+                datasetName, &ok);
             if (ok && !newDatasetName.isEmpty())
             {
                 _dataManager.renameSet(datasetName, newDatasetName);
