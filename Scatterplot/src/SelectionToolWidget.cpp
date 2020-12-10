@@ -5,11 +5,10 @@
 #include "ui_SelectionToolWidget.h"
 
 #include <QDebug>
-#include <QShortcut>
 
-SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selectionTool) :
-    QWidget(parent),
-    _selectionTool(selectionTool),
+SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
+    QWidget(scatterplotPlugin),
+    _scatterplotPlugin(scatterplotPlugin),
 	_ui{ std::make_unique<Ui::SelectionToolWidget>() }
 {
     _ui->setupUi(this);
@@ -27,49 +26,49 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
 
     _ui->typeComboBox->addItems(QStringList(SelectionTool::types.keys()));
 
-    QObject::connect(_ui->typeComboBox, &QComboBox::currentTextChanged, [this, &selectionTool](QString currentText) {
-        selectionTool.setType(SelectionTool::getTypeEnum(currentText));
+    QObject::connect(_ui->typeComboBox, &QComboBox::currentTextChanged, [this](QString currentText) {
+        getSelectionTool().setType(SelectionTool::getTypeEnum(currentText));
     });
 
-    QObject::connect(_ui->modifierAddPushButton, &QPushButton::toggled, [this, &selectionTool](bool checked) {
-        selectionTool.setModifier(checked ? SelectionTool::Modifier::Add : SelectionTool::Modifier::Replace);
+    QObject::connect(_ui->modifierAddPushButton, &QPushButton::toggled, [this](bool checked) {
+        getSelectionTool().setModifier(checked ? SelectionTool::Modifier::Add : SelectionTool::Modifier::Replace);
     });
 
-    QObject::connect(_ui->modifierRemovePushButton, &QPushButton::toggled, [this, &selectionTool](bool checked) {
-        selectionTool.setModifier(checked ? SelectionTool::Modifier::Remove : SelectionTool::Modifier::Replace);
+    QObject::connect(_ui->modifierRemovePushButton, &QPushButton::toggled, [this](bool checked) {
+        getSelectionTool().setModifier(checked ? SelectionTool::Modifier::Remove : SelectionTool::Modifier::Replace);
     });
 
-    QObject::connect(_ui->radiusSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, &selectionTool](double value) {
-        selectionTool.setRadius(static_cast<float>(value));
+    QObject::connect(_ui->radiusSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
+        getSelectionTool().setRadius(static_cast<float>(value));
     });
 
-    QObject::connect(_ui->radiusSlider, qOverload<int>(&QSlider::valueChanged), [this, &selectionTool](int value) {
-        selectionTool.setRadius(SelectionTool::RADIUS_MIN + ((static_cast<float>(value) - _ui->radiusSlider->minimum()) / 1000.0f));
+    QObject::connect(_ui->radiusSlider, qOverload<int>(&QSlider::valueChanged), [this](int value) {
+        getSelectionTool().setRadius(SelectionTool::RADIUS_MIN + ((static_cast<float>(value) - _ui->radiusSlider->minimum()) / 1000.0f));
     });
 
-    QObject::connect(_ui->selectAllPushButton, &QPushButton::clicked, [this, &selectionTool]() {
-        selectionTool.selectAll();
+    QObject::connect(_ui->selectAllPushButton, &QPushButton::clicked, [this]() {
+        getSelectionTool().selectAll();
     });
 
-    QObject::connect(_ui->clearSelectionPushButton, &QPushButton::clicked, [this, &selectionTool]() {
-        selectionTool.clearSelection();
+    QObject::connect(_ui->clearSelectionPushButton, &QPushButton::clicked, [this]() {
+        getSelectionTool().clearSelection();
     });
 
-    QObject::connect(_ui->invertSelectionPushButton, &QPushButton::clicked, [this, &selectionTool]() {
-        selectionTool.invertSelection();
+    QObject::connect(_ui->invertSelectionPushButton, &QPushButton::clicked, [this]() {
+        getSelectionTool().invertSelection();
     });
 
     const auto updateTypeUI = [this]() {
-        const auto canSelect = _selectionTool.canSelect();
+        const auto canSelect = getSelectionTool().canSelect();
 
         _ui->typeLabel->setEnabled(canSelect);
         _ui->typeComboBox->setEnabled(canSelect);
     };
 
     const auto updateModifierUI = [this]() {
-        const auto canSelect = _selectionTool.canSelect();
+        const auto canSelect = getSelectionTool().canSelect();
 
-        switch (_selectionTool.getModifier())
+        switch (getSelectionTool().getModifier())
         {
             case SelectionTool::Modifier::Replace:
             {
@@ -103,8 +102,8 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
     const auto updateRadiusUI = [this]() {
         auto radiusEnabled = false;
 
-        if (_selectionTool.canSelect()) {
-            switch (_selectionTool.getType())
+        if (getSelectionTool().canSelect()) {
+            switch (getSelectionTool().getType())
             {
                 case SelectionTool::Type::Rectangle:
                 case SelectionTool::Type::Circle:
@@ -130,32 +129,41 @@ SelectionToolWidget::SelectionToolWidget(QWidget* parent, SelectionTool& selecti
         _ui->radiusSlider->setEnabled(radiusEnabled);
     };
 
-    QObject::connect(&_selectionTool, &SelectionTool::typeChanged, [this, updateRadiusUI](const SelectionTool::Type& type) {
+    QObject::connect(&getSelectionTool(), &SelectionTool::typeChanged, [this, updateRadiusUI](const SelectionTool::Type& type) {
         _ui->typeComboBox->setCurrentText(SelectionTool::getTypeName(type));
 
         updateRadiusUI();
     });
 
-    QObject::connect(&_selectionTool, &SelectionTool::modifierChanged, [this, updateModifierUI](const SelectionTool::Modifier& modifier) {
+    QObject::connect(&getSelectionTool(), &SelectionTool::modifierChanged, [this, updateModifierUI](const SelectionTool::Modifier& modifier) {
         updateModifierUI();
     });
 
-    QObject::connect(&_selectionTool, &SelectionTool::radiusChanged, [this](const float& radius) {
-        _ui->radiusSpinBox->setValue(_selectionTool.getRadius());
-        _ui->radiusSlider->setValue(_selectionTool.getRadius() * 1000.0f);
+    QObject::connect(&getSelectionTool(), &SelectionTool::radiusChanged, [this](const float& radius) {
+        _ui->radiusSpinBox->setValue(getSelectionTool().getRadius());
+        _ui->radiusSlider->setValue(getSelectionTool().getRadius() * 1000.0f);
     });
 
-    /*
-    QObject::connect(&_selectionTool, &SelectionTool::selectionChanged, [this, updateTypeUI, updateModifierUI, updateRadiusUI](const std::int32_t& numSelectedPoints, const std::int32_t& numPoints) {
+    QObject::connect(_scatterplotPlugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
+        _ui->selectionGroupBox->setEnabled(!currentDataset.isEmpty());
+    });
+
+    QObject::connect(_scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, updateTypeUI, updateModifierUI, updateRadiusUI]() {
         updateTypeUI();
         updateModifierUI();
         updateRadiusUI();
 
-        _ui->selectAllPushButton->setEnabled(numPoints == -1 ? false : numSelectedPoints != numPoints);
-        _ui->clearSelectionPushButton->setEnabled(numPoints == -1 ? false : numSelectedPoints >= 1);
-        _ui->invertSelectionPushButton->setEnabled(numPoints >= 0);
+        _ui->selectAllPushButton->setEnabled(getSelectionTool().canSelectAll());
+        _ui->clearSelectionPushButton->setEnabled(getSelectionTool().canClearSelection());
+        _ui->invertSelectionPushButton->setEnabled(getSelectionTool().canInvertSelection());
     });
-    */
+    
+    getSelectionTool().setChanged();
+}
 
-    _selectionTool.setChanged();
+SelectionTool& SelectionToolWidget::getSelectionTool()
+{
+    Q_ASSERT(_scatterplotPlugin != nullptr);
+
+    return _scatterplotPlugin->getSelectionTool();
 }

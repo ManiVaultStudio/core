@@ -36,7 +36,7 @@ void ScatterplotPlugin::init()
     supportedColorTypes.append(ClusterType);
     supportedColorTypes.append(ColorType);
 
-    _scatterPlotWidget = new ScatterplotWidget();
+    _scatterPlotWidget = new ScatterplotWidget(*_selectionTool);
     _scatterPlotWidget->setAlpha(0.5f);
     _scatterPlotWidget->addSelectionListener(this);
 
@@ -57,7 +57,6 @@ void ScatterplotPlugin::init()
     addWidget(splitter);
 
     _scatterPlotWidget->installEventFilter(_selectionTool);
-    _scatterPlotSettings->installEventFilter(_selectionTool);
 
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);

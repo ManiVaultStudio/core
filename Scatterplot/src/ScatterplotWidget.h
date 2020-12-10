@@ -19,6 +19,8 @@
 
 #include <QMouseEvent>
 
+class SelectionTool;
+
 using namespace hdps;
 using namespace hdps::gui;
 
@@ -30,7 +32,7 @@ public:
         SCATTERPLOT, DENSITY, LANDSCAPE
     };
 
-    ScatterplotWidget();
+    ScatterplotWidget(SelectionTool& selectionTool);
 
     ~ScatterplotWidget();
 
@@ -120,4 +122,6 @@ private:
     QSize _windowSize;
 
     Bounds _dataBounds;
+
+    SelectionTool& _selectionTool;
 };

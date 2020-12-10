@@ -251,7 +251,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsLayout->addLayout(dataLayout);
     _settingsLayout->addLayout(renderLayout, 1);
     _settingsLayout->addLayout(&_dimensionPicker->getLayout());
-    _settingsLayout->addWidget(new SelectionToolWidget(this, const_cast<ScatterplotPlugin*>(plugin)->getSelectionTool()));
+    _settingsLayout->addWidget(new SelectionToolWidget(const_cast<ScatterplotPlugin*>(plugin)));
 
     setLayout(_settingsLayout);
 

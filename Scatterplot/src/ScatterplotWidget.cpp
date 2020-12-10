@@ -1,4 +1,5 @@
 #include "ScatterplotWidget.h"
+#include "SelectionTool.h"
 
 #include "util/Math.h"
 
@@ -7,6 +8,7 @@
 #include <QSize>
 #include <QDebug>
 #include <math.h>
+#include <QPainter>
 
 using namespace hdps::util;
 
@@ -28,10 +30,10 @@ namespace
     }
 }
 
-ScatterplotWidget::ScatterplotWidget()
-    :
+ScatterplotWidget::ScatterplotWidget(SelectionTool& selectionTool) :
     _densityRenderer(DensityRenderer::RenderMode::DENSITY),
-    _colormapWidget(this)
+    _colormapWidget(this),
+    _selectionTool(selectionTool)
 {
     addSelectionListener(&_selectionRenderer);
 }
@@ -258,7 +260,7 @@ void ScatterplotWidget::paintGL()
     // Clear the widget to the background color
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
     // Reset the blending function
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

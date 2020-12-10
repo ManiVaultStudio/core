@@ -4,8 +4,11 @@
 
 #include <QWidget>
 #include <QMap>
+#include <QPen>
 
 class ScatterplotPlugin;
+
+class QPainter;
 
 /**
  * Selection tool class
@@ -83,15 +86,20 @@ public: // Getters/setters
 
     void setChanged();
 
+    
     void selectAll();
-
     void clearSelection();
-
     void invertSelection();
+
+    bool canSelectAll() const;
+    bool canClearSelection() const;
+    bool canInvertSelection() const;
 
 public: // Event handling
 
     bool eventFilter(QObject* target, QEvent* event) override;
+
+    void paint(QPainter* painter);
 
 signals:
 
@@ -110,9 +118,17 @@ protected:
     int                 _mouseButtons;          /** State of the left, middle and right mouse buttons */
 
 public:
+
+    // Brush/circle radius 
     static constexpr float RADIUS_MIN       = 10.0f;        /** Minimum radius */
     static constexpr float RADIUS_MAX       = 1000.0f;      /** Maximum radius */
     static constexpr float RADIUS_DEFAULT   = 10.0f;        /** Default radius */
     static constexpr float RADIUS_DELTA     = 10.0f;        /** Radius increment */
 
+    // Drawing constants
+    static const QColor COLOR_MAIN;
+    static const QColor COLOR_FILL;
+    static const QPen PEN_FOREGROUND;
+    static const QPen PEN_BACKGROUND;
+    static const QPen PEN_CONTROL_POINT;
 };

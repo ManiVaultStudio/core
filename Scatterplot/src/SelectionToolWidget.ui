@@ -46,6 +46,9 @@
    </property>
    <item row="2" column="0">
     <widget class="QGroupBox" name="selectionGroupBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="toolTip">
       <string>Pixel selection</string>
      </property>

@@ -4,6 +4,7 @@
 
 #include <QWidget>
 
+class ScatterplotPlugin;
 class SelectionTool;
 
 namespace Ui {
@@ -19,9 +20,12 @@ class SelectionToolWidget : public QWidget
 {
 public: // Construction/destruction
 
-    SelectionToolWidget(QWidget* parent, SelectionTool& selectionTool);
+    SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin);
 
 private:
-    SelectionTool&                              _selectionTool;     /** Selection tool */
-	std::unique_ptr<Ui::SelectionToolWidget>	_ui;                /** User interface as produced by Qt designer */
+    SelectionTool& getSelectionTool();
+
+private:
+    ScatterplotPlugin*                          _scatterplotPlugin;     /** Scatter plot plugin instance */
+	std::unique_ptr<Ui::SelectionToolWidget>	_ui;                    /** User interface as produced by Qt designer */
 };
