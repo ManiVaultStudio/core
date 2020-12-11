@@ -2,9 +2,6 @@
 
 #include "renderers/PointRenderer.h"
 #include "renderers/DensityRenderer.h"
-#include "renderers/SelectionRenderer.h"
-
-#include "SelectionListener.h"
 
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
@@ -13,6 +10,8 @@
 #include "graphics/Selection.h"
 
 #include "widgets/ColormapWidget.h"
+
+#include "SelectionToolRenderer.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
@@ -58,9 +57,6 @@ public:
     void setAlpha(const float alpha);
     void setPointScaling(hdps::gui::PointScaling scalingMode);
     void setSigma(const float sigma);
-    void addSelectionListener(plugin::SelectionListener* listener);
-
-    Selection getSelection();
 
     /**
      * Event filter
@@ -74,12 +70,6 @@ protected:
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;
     void paintGL()              Q_DECL_OVERRIDE;
 
-    void mousePressEvent(QMouseEvent *event)   Q_DECL_OVERRIDE;
-    void mouseMoveEvent(QMouseEvent *event)    Q_DECL_OVERRIDE;
-    void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
-
-    void onSelecting(Selection selection);
-    void onSelection(Selection selection);
     void cleanup();
 
 signals:
@@ -105,18 +95,13 @@ private:
     RenderMode _renderMode = SCATTERPLOT;
 
     /* Renderers */
-    PointRenderer _pointRenderer;
-    DensityRenderer _densityRenderer;
-    SelectionRenderer _selectionRenderer;
+    PointRenderer           _pointRenderer;
+    DensityRenderer         _densityRenderer;
+    SelectionToolRenderer   _selectionToolRenderer;
 
 
     /* Auxiliary widgets */
     ColormapWidget _colormapWidget;
-
-    /* Selection */
-    bool _selecting = false;
-    Selection _selection;
-    std::vector<plugin::SelectionListener*> _selectionListeners;
 
     /* Size of the scatterplot widget */
     QSize _windowSize;

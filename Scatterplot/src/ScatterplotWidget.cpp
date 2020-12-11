@@ -33,9 +33,10 @@ namespace
 ScatterplotWidget::ScatterplotWidget(SelectionTool& selectionTool) :
     _densityRenderer(DensityRenderer::RenderMode::DENSITY),
     _colormapWidget(this),
+    _pointRenderer(),
+    _selectionToolRenderer(selectionTool),
     _selectionTool(selectionTool)
 {
-    addSelectionListener(&_selectionRenderer);
 }
 
 bool ScatterplotWidget::isInitialized()
@@ -171,21 +172,6 @@ void ScatterplotWidget::setSigma(const float sigma)
     update();
 }
 
-void ScatterplotWidget::addSelectionListener(plugin::SelectionListener* listener)
-{
-    _selectionListeners.push_back(listener);
-}
-
-Selection ScatterplotWidget::getSelection()
-{
-    Selection isotropicSelection = toIsotropicCoordinates * _selection;
-
-    Vector2f bottomLeftData(lerp(_dataBounds.getLeft(), _dataBounds.getRight(), isotropicSelection.getLeft()), lerp(_dataBounds.getBottom(), _dataBounds.getTop(), isotropicSelection.getBottom()));
-    Vector2f topRightData(lerp(_dataBounds.getLeft(), _dataBounds.getRight(), isotropicSelection.getRight()), lerp(_dataBounds.getBottom(), _dataBounds.getTop(), isotropicSelection.getTop()));
-    
-    return Selection(bottomLeftData, topRightData);
-}
-
 bool ScatterplotWidget::eventFilter(QObject* target, QEvent* event)
 {
     return QWidget::eventFilter(target, event);
@@ -208,7 +194,7 @@ void ScatterplotWidget::initializeGL()
 
     _pointRenderer.init();
     _densityRenderer.init();
-    _selectionRenderer.init();
+    _selectionToolRenderer.init();
 
     // Set a default color map for both renderers
     _pointRenderer.setScalarEffect(PointEffect::Color);
@@ -226,7 +212,7 @@ void ScatterplotWidget::resizeGL(int w, int h)
 
     _pointRenderer.resize(QSize(w, h));
     _densityRenderer.resize(QSize(w, h));
-    _selectionRenderer.resize(QSize(w, h));
+    _selectionToolRenderer.resize(QSize(w, h));
 
     // Set matrix for normalizing from pixel coordinates to [0, 1]
     toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
@@ -281,9 +267,10 @@ void ScatterplotWidget::paintGL()
         break;
     }
     }
-    _selectionRenderer.render();
+    _selectionToolRenderer.render();
 }
 
+/*
 void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
 {
     _selecting = true;
@@ -335,6 +322,7 @@ void ScatterplotWidget::onSelection(Selection selection)
 
     update();
 }
+*/
 
 void ScatterplotWidget::cleanup()
 {
@@ -344,7 +332,7 @@ void ScatterplotWidget::cleanup()
     makeCurrent();
     _pointRenderer.destroy();
     _densityRenderer.destroy();
-    _selectionRenderer.destroy();
+    _selectionToolRenderer.destroy();
 }
 
 ScatterplotWidget::~ScatterplotWidget()

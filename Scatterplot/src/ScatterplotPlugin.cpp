@@ -38,7 +38,6 @@ void ScatterplotPlugin::init()
 
     _scatterPlotWidget = new ScatterplotWidget(*_selectionTool);
     _scatterPlotWidget->setAlpha(0.5f);
-    _scatterPlotWidget->addSelectionListener(this);
 
     _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     _dataSlot->addWidget(_scatterPlotWidget);
@@ -324,6 +323,7 @@ void ScatterplotPlugin::updateSelection()
     emit selectionChanged();
 }
 
+/*
 // Returns the selection set associated with this dataset
 const Points* ScatterplotPlugin::makeSelection(hdps::Selection selection)
 {
@@ -393,6 +393,7 @@ void ScatterplotPlugin::onSelection(hdps::Selection selection)
         _core->notifySelectionChanged(selectionSet->getDataName());
     }
 }
+*/
 
 SelectionTool& ScatterplotPlugin::getSelectionTool()
 {

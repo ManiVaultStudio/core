@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file alias="SelectionToolFragment.glsl">SelectionToolFragment.glsl</file>
+        <file alias="SelectionToolVertex.glsl">SelectionToolVertex.glsl</file>
+    </qresource>
+</RCC>

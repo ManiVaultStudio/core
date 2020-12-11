@@ -3,7 +3,6 @@
 #include <ViewPlugin.h>
 
 #include "SelectionTool.h"
-#include "SelectionListener.h"
 
 #include "widgets/DataSlot.h"
 #include "ScatterplotWidget.h"
@@ -27,7 +26,7 @@ namespace hdps
     class Vector2f;
 }
 
-class ScatterplotPlugin : public ViewPlugin, public SelectionListener
+class ScatterplotPlugin : public ViewPlugin
 {
     Q_OBJECT
     
@@ -47,8 +46,8 @@ public:
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     DataTypes supportedDataTypes() const Q_DECL_OVERRIDE;
-    void onSelecting(hdps::Selection selection) override;
-    void onSelection(hdps::Selection selection) override;
+    //void onSelecting(hdps::Selection selection) override;
+    //void onSelection(hdps::Selection selection) override;
 
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;
@@ -88,7 +87,7 @@ private:
     void calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex);
     void updateSelection();
 
-    const Points* makeSelection(hdps::Selection selection);
+    //const Points* makeSelection(hdps::Selection selection);
 
     QString _currentDataSet;
     DataSlot* _dataSlot;

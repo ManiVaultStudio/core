@@ -109,6 +109,8 @@ signals:
 
     void radiusChanged(const float& radius);
 
+    void geometryChanged();
+
 protected:
     ScatterplotPlugin*  _scatterplotPlugin;     /** Scatter plot plugin */
     Type                _type;                  /** Current selection type */

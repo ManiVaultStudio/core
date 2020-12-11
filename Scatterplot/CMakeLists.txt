@@ -22,12 +22,16 @@ set(PLUGIN
     src/ScatterplotPlugin.cpp
 	src/SelectionTool.h
     src/SelectionTool.cpp
+	src/SelectionToolRenderer.h
+    src/SelectionToolRenderer.cpp
 )
 
 file(GLOB WIDGETS src/*Widget.*)
 file(GLOB SHADERS src/*.glsl)
 file(GLOB JSON src/*.json)
 file(GLOB UIS src/*.ui)
+file(GLOB SHADERS src/*.glsl)
+file(GLOB QRC src/*.qrc)
 
 QT5_WRAP_UI(UI_HEADERS ${UIS})
 
@@ -42,7 +46,7 @@ source_group(Aux FILES ${AUX})
 
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${SHADERS} ${AUX})
 
 # Set CXX_STANDARD to avoid osx 10.14.4/xcode10.3 build error "no member named 'make_unique'..."
 # (C++14 should be sufficient to avoid the error, but C++17 is even better!)
