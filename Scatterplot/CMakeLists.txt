@@ -6,6 +6,7 @@ PROJECT(${PROJECT})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
 
 if(MSVC)
@@ -30,8 +31,8 @@ file(GLOB WIDGETS src/*Widget.*)
 file(GLOB SHADERS src/*.glsl)
 file(GLOB JSON src/*.json)
 file(GLOB UIS src/*.ui)
-file(GLOB SHADERS src/*.glsl)
-file(GLOB QRC src/*.qrc)
+file(GLOB SHADERS res/shaders/*.vert res/shaders/*.frag)
+file(GLOB QRC res/*.qrc)
 
 QT5_WRAP_UI(UI_HEADERS ${UIS})
 
