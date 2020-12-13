@@ -6,28 +6,23 @@
 #include <QDebug>
 #include <QFile>
 #include <QPainter>
+#include <QLabel>
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsBlurEffect>
 
 namespace hdps
 {
 namespace gui
 {
 
-std::uint32_t SelectionToolRenderer::VERTEX_ATTRIBUTE_LOCATION  = 0;
-std::uint32_t SelectionToolRenderer::UV_ATTRIBUTE_LOCATION      = 1;
-
 SelectionToolRenderer::SelectionToolRenderer(SelectionTool& selectionTool) :
     _selectionTool(selectionTool),
     _renderSize(),
     _pixmap(),
     _shaderProgram(QSharedPointer<QOpenGLShaderProgram>::create()),
-    _texture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
-    _vao(),
-    _vbo(),
-    _vertexData()
+    _texture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D))
 {
-    QObject::connect(&_selectionTool, &SelectionTool::geometryChanged, [this]() {
-        updateTexture();
-    });
 }
 
 void SelectionToolRenderer::init()
@@ -37,7 +32,6 @@ void SelectionToolRenderer::init()
         if (!initializeOpenGLFunctions())
             throw std::runtime_error("Unable to initialize OpenGL functions");
 
-        createQuad();
         createShaderProgram();
     }
     catch (std::exception& e)
@@ -58,9 +52,8 @@ void SelectionToolRenderer::resize(QSize renderSize)
 
     _pixmap = QPixmap(_renderSize);
 
-    _pixmap.fill(Qt::green);
+    _pixmap.fill(Qt::transparent);
 
-    updateQuad();
     updateTexture();
 }
 
@@ -98,59 +91,6 @@ void SelectionToolRenderer::render()
 
 void SelectionToolRenderer::destroy()
 {
-    _vao.destroy();
-    _vao.release();
-
-    _vbo.destroy();
-    _vbo.release();
-}
-
-void SelectionToolRenderer::createQuad()
-{
-    _vao.create();
-    _vbo.create();
-    _vertexData.resize(20);
-
-    _vao.bind();
-    {
-        _vbo.bind();
-        {
-            _vbo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-            _vbo.allocate(_vertexData.constData(), _vertexData.count() * sizeof(GLfloat));
-        }
-        _vbo.release();
-    }
-}
-
-void SelectionToolRenderer::updateQuad()
-{
-    const auto halfSize = QSizeF(0.5f * _renderSize.width(), 0.5f * _renderSize.height());
-
-    const auto left     = -halfSize.width();
-    const auto right    = halfSize.width();
-    const auto bottom   = halfSize.height();
-    const auto top      = -halfSize.height();
-
-    const float coordinates[4][3] = {
-        { left,		top,	0.0f },
-        { right,	top,	0.0f },
-        { right,	bottom,	0.0f },
-        { left,		bottom,	0.0f }
-    };
-
-    for (int j = 0; j < 4; ++j)
-    {
-        _vertexData[j * 5 + 0] = coordinates[j][0];
-        _vertexData[j * 5 + 1] = coordinates[j][1];
-        _vertexData[j * 5 + 2] = coordinates[j][2];
-
-        _vertexData[j * 5 + 3] = (j == 0 || j == 3) * 10.0f;
-        _vertexData[j * 5 + 4] = j == 2 || j == 3;
-    }
-
-    _vbo.bind();
-    _vbo.allocate(_vertexData.constData(), _vertexData.count() * sizeof(GLfloat));
-    _vbo.release();
 }
 
 void SelectionToolRenderer::createShaderProgram()
@@ -174,25 +114,22 @@ void SelectionToolRenderer::createShaderProgram()
     if (!_shaderProgram->link())
         throw std::runtime_error("Unable to link quad shader program");
 
-    _vao.bind();
-    _vbo.bind();
-
-    const auto stride = 5 * sizeof(GLfloat);
-
-    _shaderProgram->enableAttributeArray(VERTEX_ATTRIBUTE_LOCATION);
-    _shaderProgram->enableAttributeArray(UV_ATTRIBUTE_LOCATION);
-    _shaderProgram->setAttributeBuffer(VERTEX_ATTRIBUTE_LOCATION, GL_FLOAT, 0, 3, stride);
-    _shaderProgram->setAttributeBuffer(UV_ATTRIBUTE_LOCATION, GL_FLOAT, 3 * sizeof(GLfloat), 2, stride);
-
-    _vao.release();
-    _vbo.release();
-
     _shaderProgram->release();
 }
 
 void SelectionToolRenderer::updateTexture()
 {
+    qDebug() << "updateTexture()";
+
+    if (_pixmap.isNull())
+        return;
+
     QPainter painter(&_pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    //painter.setRenderHint(QPainter::HighQualityAntialiasing);
+
+    _pixmap.fill(Qt::transparent);
 
     _selectionTool.paint(&painter);
 
@@ -202,8 +139,6 @@ void SelectionToolRenderer::updateTexture()
         _texture->create();
 
     _texture->setWrapMode(QOpenGLTexture::ClampToBorder);
-
-    _pixmap.toImage().save("thomas.jpg");
 }
 
 }

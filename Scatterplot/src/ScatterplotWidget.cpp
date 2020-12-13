@@ -37,6 +37,12 @@ ScatterplotWidget::ScatterplotWidget(SelectionTool& selectionTool) :
     _selectionToolRenderer(selectionTool),
     _selectionTool(selectionTool)
 {
+    setMouseTracking(true);
+
+    QObject::connect(&_selectionTool, &SelectionTool::geometryChanged, [this]() {
+        _selectionToolRenderer.updateTexture();
+        update();
+    });
 }
 
 bool ScatterplotWidget::isInitialized()

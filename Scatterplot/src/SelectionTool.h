@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QMap>
 #include <QPen>
+#include <QBrush>
 
 class ScatterplotPlugin;
 
@@ -130,7 +131,8 @@ public:
     // Drawing constants
     static const QColor COLOR_MAIN;
     static const QColor COLOR_FILL;
-    static const QPen PEN_FOREGROUND;
-    static const QPen PEN_BACKGROUND;
-    static const QPen PEN_CONTROL_POINT;
+    static const QBrush AREA_BRUSH;
+    static const QPen PEN_LINE_FG;
+    static const QPen PEN_LINE_BG;
+    static const QPen PEN_CP;
 };
