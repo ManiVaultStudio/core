@@ -388,6 +388,7 @@ void SelectionTool::paint(QPainter* painter)
 
     QVector<QPoint> controlPoints;
 
+    painter->fillRect(0, 0, 100, 100, QBrush(Qt::red));
     
     switch (_type)
     {

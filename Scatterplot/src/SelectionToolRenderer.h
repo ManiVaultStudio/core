@@ -35,6 +35,11 @@ private:
     /** Updates the quad vertices after a resize */
     void updateQuad();
 
+    /** Creates the shader program for displaying the selection tool overlay */
+    void createShaderProgram();
+
+    void updateTexture();
+
 private:
     SelectionTool&                          _selectionTool;         /** Selection tool to visualize */
     QSize                                   _renderSize;            /** Size of the renderer */
