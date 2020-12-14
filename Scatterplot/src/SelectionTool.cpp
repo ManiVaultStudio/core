@@ -23,7 +23,7 @@ const QMap<QString, SelectionTool::Modifier> SelectionTool::modifiers = {
 };
 
 const QColor SelectionTool::COLOR_MAIN      = Qt::black;
-const QColor SelectionTool::COLOR_FILL      = QColor(150, 150, 150, 100);
+const QColor SelectionTool::COLOR_FILL      = QColor(70, 70, 70, 100);
 const QBrush SelectionTool::AREA_BRUSH      = QBrush(COLOR_FILL);
 const QPen SelectionTool::PEN_LINE_FG       = QPen(COLOR_MAIN, 1.5f, Qt::SolidLine);
 const QPen SelectionTool::PEN_LINE_BG       = QPen(QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 140), 1.5f, Qt::DotLine);
@@ -419,20 +419,11 @@ void SelectionTool::paint()
     _areaPixmap = QPixmap(_shapePixmap.size());
     _areaPixmap.fill(Qt::transparent);
 
-    /*
-    if (_type != Type::Brush) {
-        _areaPixmap = QPixmap(_shapePixmap.size());
-        _areaPixmap.fill(Qt::transparent);
-    }
-    */
-
     QPainter shapePainter(&_shapePixmap), areaPainter(&_areaPixmap);
 
     shapePainter.setFont(QFont("Font Awesome 5 Free Solid", 9));
 
     auto textRectangle = QRectF();
-
-    auto fillBrush = QBrush(COLOR_FILL);
 
     QVector<QPoint> controlPoints;
 
@@ -474,12 +465,12 @@ void SelectionTool::paint()
 
                 if (noMousePositions > 1) {
                     areaPainter.setBrush(Qt::NoBrush);
-                    areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _radius, Qt::SolidLine, Qt::RoundCap));
+                    areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _radius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
                     areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
                 }
                 
                 shapePainter.setPen(Qt::NoPen);
-                shapePainter.setBrush(fillBrush);
+                shapePainter.setBrush(AREA_BRUSH);
 
                 shapePainter.drawPoint(brushCenter);
 
