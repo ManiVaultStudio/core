@@ -96,11 +96,21 @@ public: // Getters/setters
     bool canClearSelection() const;
     bool canInvertSelection() const;
 
+    QPixmap& getShapePixmap() {
+        return _shapePixmap;
+    }
+
+    QPixmap& getAreaPixmap() {
+        return _areaPixmap;
+    }
+
 public: // Event handling
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
-    void paint(QPainter* painter);
+private:
+
+    void paint();
 
 signals:
 
@@ -110,7 +120,7 @@ signals:
 
     void radiusChanged(const float& radius);
 
-    void geometryChanged();
+    void overlayChanged();
 
 protected:
     ScatterplotPlugin*  _scatterplotPlugin;     /** Scatter plot plugin */
@@ -119,7 +129,7 @@ protected:
     float               _radius;                /** Brush/circle radius */
     QVector<QPoint>     _mousePositions;        /** Recorded mouse positions */
     int                 _mouseButtons;          /** State of the left, middle and right mouse buttons */
-    QPixmap             _overlayPixmap;         /** Pixmap for the overlay */
+    QPixmap             _shapePixmap;           /** Pixmap for the selection tool shape */
     QPixmap             _areaPixmap;            /** Pixmap for the selection area */
 
 public:

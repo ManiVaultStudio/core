@@ -27,7 +27,7 @@ public:
 
 public:
 
-    void updateTexture();
+    void update();
 
 private:
 
@@ -37,9 +37,9 @@ private:
 private:
     SelectionTool&                          _selectionTool;         /** Selection tool to visualize */
     QSize                                   _renderSize;            /** Size of the renderer */
-    QPixmap                                 _pixmap;                /** Pixmap for the overlay */
-    QSharedPointer<QOpenGLShaderProgram>	_shaderProgram;         /** OpenGL shader programs */
-    QSharedPointer<QOpenGLTexture>          _texture;               /** OpenGL texture */
+    QSharedPointer<QOpenGLShaderProgram>    _shaderProgram;         /** OpenGL shader programs */
+    QSharedPointer<QOpenGLTexture>          _shapeTexture;          /** OpenGL texture for selection tool shape */
+    QSharedPointer<QOpenGLTexture>          _areaTexture;           /** OpenGL texture for selected area */
 };
 
 }

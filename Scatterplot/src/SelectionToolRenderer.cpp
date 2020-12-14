@@ -19,9 +19,9 @@ namespace gui
 SelectionToolRenderer::SelectionToolRenderer(SelectionTool& selectionTool) :
     _selectionTool(selectionTool),
     _renderSize(),
-    _pixmap(),
     _shaderProgram(QSharedPointer<QOpenGLShaderProgram>::create()),
-    _texture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D))
+    _shapeTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
+    _areaTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D))
 {
 }
 
@@ -49,12 +49,6 @@ void SelectionToolRenderer::resize(QSize renderSize)
         return;
 
     _renderSize = renderSize;
-
-    _pixmap = QPixmap(_renderSize);
-
-    _pixmap.fill(Qt::transparent);
-
-    updateTexture();
 }
 
 void SelectionToolRenderer::render()
@@ -62,21 +56,27 @@ void SelectionToolRenderer::render()
     try {
         glEnable(GL_TEXTURE_2D);
         {
-            if (!_texture->isCreated())
-                throw std::runtime_error("Texture is not created");
+            if (!_shapeTexture->isCreated())
+                throw std::runtime_error("Shape texture is not created");
+
+            if (!_areaTexture->isCreated())
+                throw std::runtime_error("Area texture is not created");
 
             if (!_shaderProgram->bind())
                 throw std::runtime_error("Unable to bind shader program");
 
-            _texture->bind();
+            glViewport(0, 0, _renderSize.width(), _renderSize.height());
 
             _shaderProgram->setUniformValue("overlayTexture", 0);
 
-            glViewport(0, 0, _renderSize.width(), _renderSize.height());
+            _areaTexture->bind();
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+            _shapeTexture->bind();
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
             _shaderProgram->release();
-            _texture->release();
+            _shapeTexture->release();
         }
         glDisable(GL_TEXTURE_2D);
     }
@@ -91,6 +91,24 @@ void SelectionToolRenderer::render()
 
 void SelectionToolRenderer::destroy()
 {
+}
+
+void SelectionToolRenderer::update()
+{
+    qDebug() << "update()";
+
+    _shapeTexture.reset(new QOpenGLTexture(_selectionTool.getShapePixmap().toImage()));
+    _areaTexture.reset(new QOpenGLTexture(_selectionTool.getAreaPixmap().toImage()));
+
+    if (!_shapeTexture->isCreated())
+        _shapeTexture->create();
+
+    _shapeTexture->setWrapMode(QOpenGLTexture::ClampToBorder);
+
+    if (!_areaTexture->isCreated())
+        _areaTexture->create();
+
+    _areaTexture->setWrapMode(QOpenGLTexture::ClampToBorder);
 }
 
 void SelectionToolRenderer::createShaderProgram()
@@ -115,28 +133,6 @@ void SelectionToolRenderer::createShaderProgram()
         throw std::runtime_error("Unable to link quad shader program");
 
     _shaderProgram->release();
-}
-
-void SelectionToolRenderer::updateTexture()
-{
-    if (_pixmap.isNull())
-        return;
-
-    QPainter painter(&_pixmap);
-
-    painter.setRenderHint(QPainter::Antialiasing);
-    //painter.setRenderHint(QPainter::HighQualityAntialiasing);
-
-    _pixmap.fill(Qt::transparent);
-
-    _selectionTool.paint(&painter);
-
-    _texture.reset(new QOpenGLTexture(_pixmap.toImage()));
-
-    if (!_texture->isCreated())
-        _texture->create();
-
-    _texture->setWrapMode(QOpenGLTexture::ClampToBorder);
 }
 
 }

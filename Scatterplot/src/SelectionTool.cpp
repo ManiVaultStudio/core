@@ -7,7 +7,6 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QtMath>
-#include <QGraphicsDropShadowEffect >
 
 const QMap<QString, SelectionTool::Type> SelectionTool::types = {
     { "Rectangle", SelectionTool::Type::Rectangle },
@@ -38,7 +37,7 @@ SelectionTool::SelectionTool(ScatterplotPlugin* scatterplotPlugin) :
     _radius(RADIUS_DEFAULT),
     _mousePositions(),
     _mouseButtons(),
-    _overlayPixmap(),
+    _shapePixmap(),
     _areaPixmap()
 {
 }
@@ -56,7 +55,8 @@ void SelectionTool::setType(const Type& type)
     _type = type;
 
     emit typeChanged(_type);
-    emit geometryChanged();
+    
+    paint();
 }
 
 SelectionTool::Modifier SelectionTool::getModifier() const
@@ -72,7 +72,8 @@ void SelectionTool::setModifier(const Modifier& modifier)
     _modifier = modifier;
 
     emit modifierChanged(_modifier);
-    emit geometryChanged();
+    
+    paint();
 }
 
 float SelectionTool::getRadius() const
@@ -88,7 +89,8 @@ void SelectionTool::setRadius(const float& radius)
     _radius = std::clamp(radius, RADIUS_MIN, RADIUS_MAX);
 
     emit radiusChanged(_radius);
-    emit geometryChanged();
+    
+    paint();
 }
 
 bool SelectionTool::canSelect() const
@@ -148,7 +150,7 @@ bool SelectionTool::canInvertSelection() const
 
 bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 {
-    auto shouldDraw = true;
+    auto shouldPaint = true;
 
     switch (event->type())
     {
@@ -158,10 +160,13 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Resize:
         {
-            auto resizeEvent = static_cast<QResizeEvent*>(event);
+            const auto resizeEvent = static_cast<QResizeEvent*>(event);
 
-            _overlayPixmap = QPixmap(resizeEvent->size());
-            _areaPixmap = QPixmap(resizeEvent->size());
+            _shapePixmap    = QPixmap(resizeEvent->size());
+            _areaPixmap     = QPixmap(resizeEvent->size());
+
+            _shapePixmap.fill(Qt::transparent);
+            _areaPixmap.fill(Qt::transparent);
 
             break;
         }
@@ -325,7 +330,8 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                     }
                     else {
                         if (_mousePositions.isEmpty())
-                            _mousePositions << mouseEvent->pos();
+                            if (mouseEvent->pos() != _mousePositions.last())
+                                _mousePositions << mouseEvent->pos();
 
                         _mousePositions.last() = mouseEvent->pos();
                     }
@@ -396,18 +402,33 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
             break;
     }
 
-    if (shouldDraw)
-        emit geometryChanged();
+    if (shouldPaint)
+        paint();
 
     return QObject::eventFilter(target, event);
 }
 
-void SelectionTool::paint(QPainter* painter)
+void SelectionTool::paint()
 {
     if (!canSelect())
         return;
 
-    painter->setFont(QFont("Font Awesome 5 Free Solid", 9));
+    _shapePixmap = QPixmap(_shapePixmap.size());
+    _shapePixmap.fill(Qt::transparent);
+
+    _areaPixmap = QPixmap(_shapePixmap.size());
+    _areaPixmap.fill(Qt::transparent);
+
+    /*
+    if (_type != Type::Brush) {
+        _areaPixmap = QPixmap(_shapePixmap.size());
+        _areaPixmap.fill(Qt::transparent);
+    }
+    */
+
+    QPainter shapePainter(&_shapePixmap), areaPainter(&_areaPixmap);
+
+    shapePainter.setFont(QFont("Font Awesome 5 Free Solid", 9));
 
     auto textRectangle = QRectF();
 
@@ -415,11 +436,13 @@ void SelectionTool::paint(QPainter* painter)
 
     QVector<QPoint> controlPoints;
 
+    const auto noMousePositions = _mousePositions.size();
+
     switch (_type)
     {
         case Type::Rectangle:
         {
-            if (_mousePositions.size() == 2) {
+            if (noMousePositions == 2) {
                 const auto topLeft      = QPointF(std::min(_mousePositions.first().x(), _mousePositions.last().x()), std::min(_mousePositions.first().y(), _mousePositions.last().y()));
                 const auto bottomRight  = QPointF(std::max(_mousePositions.first().x(), _mousePositions.last().x()), std::max(_mousePositions.first().y(), _mousePositions.last().y()));
                 const auto rectangle    = QRectF(topLeft, bottomRight);
@@ -427,9 +450,12 @@ void SelectionTool::paint(QPainter* painter)
                 controlPoints << _mousePositions.first();
                 controlPoints << _mousePositions.last();
                 
-                painter->setBrush(AREA_BRUSH);
-                painter->setPen(PEN_LINE_FG);
-                painter->drawRect(rectangle);
+                areaPainter.setBrush(AREA_BRUSH);
+                areaPainter.setPen(Qt::NoPen);
+                areaPainter.drawRect(rectangle);
+
+                shapePainter.setPen(PEN_LINE_FG);
+                shapePainter.drawRect(rectangle);
 
                 const auto size         = 8.0f;
                 const auto textCenter   = rectangle.topRight() + QPoint(size, -size);
@@ -443,18 +469,24 @@ void SelectionTool::paint(QPainter* painter)
         
         case Type::Brush:
         {
-            if (_mousePositions.size() >= 1) {
+            if (noMousePositions >= 1) {
                 const auto brushCenter = _mousePositions.last();
 
-                painter->setPen(Qt::NoPen);
-                painter->setBrush(fillBrush);
+                if (noMousePositions > 1) {
+                    areaPainter.setBrush(Qt::NoBrush);
+                    areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _radius, Qt::SolidLine, Qt::RoundCap));
+                    areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+                }
+                
+                shapePainter.setPen(Qt::NoPen);
+                shapePainter.setBrush(fillBrush);
 
-                painter->drawPoint(brushCenter);
+                shapePainter.drawPoint(brushCenter);
 
-                painter->setPen(_mouseButtons & Qt::LeftButton ? PEN_LINE_FG : PEN_LINE_BG);
+                shapePainter.setPen(_mouseButtons & Qt::LeftButton ? PEN_LINE_FG : PEN_LINE_BG);
 
-                painter->setBrush(Qt::NoBrush);
-                painter->drawEllipse(QPointF(brushCenter), _radius, _radius);
+                shapePainter.setBrush(Qt::NoBrush);
+                shapePainter.drawEllipse(QPointF(brushCenter), _radius, _radius);
 
                 controlPoints << _mousePositions.last();
 
@@ -470,22 +502,22 @@ void SelectionTool::paint(QPainter* painter)
         
         case Type::Lasso:
         {
-            if (_mousePositions.size() >= 2) {
-                painter->setBrush(AREA_BRUSH);
-                painter->setPen(Qt::NoPen);
-                painter->drawPolygon(_mousePositions.constData(), _mousePositions.count());
+            if (noMousePositions >= 2) {
+                shapePainter.setBrush(AREA_BRUSH);
+                shapePainter.setPen(Qt::NoPen);
+                shapePainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
-                painter->setBrush(Qt::NoBrush);
+                shapePainter.setBrush(Qt::NoBrush);
 
-                painter->setPen(PEN_LINE_FG);
-                painter->drawPolyline(_mousePositions.constData(), _mousePositions.count());
+                shapePainter.setPen(PEN_LINE_FG);
+                shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
 
                 controlPoints << _mousePositions.first();
                 controlPoints << _mousePositions.last();
 
-                painter->setBrush(AREA_BRUSH);
-                painter->setPen(PEN_LINE_BG);
-                painter->drawPolyline(controlPoints.constData(), controlPoints.count());
+                shapePainter.setBrush(AREA_BRUSH);
+                shapePainter.setPen(PEN_LINE_BG);
+                shapePainter.drawPolyline(controlPoints.constData(), controlPoints.count());
 
                 const auto size = 8.0f;
                 const auto textCenter = _mousePositions.first() - QPoint(size, size);
@@ -498,23 +530,23 @@ void SelectionTool::paint(QPainter* painter)
         
         case Type::Polygon:
         {
-            if (_mousePositions.size() >= 2) {
-                painter->setBrush(AREA_BRUSH);
-                painter->setPen(Qt::NoPen);
-                painter->drawPolygon(_mousePositions.constData(), _mousePositions.count());
+            if (noMousePositions >= 2) {
+                shapePainter.setBrush(AREA_BRUSH);
+                shapePainter.setPen(Qt::NoPen);
+                shapePainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
-                painter->setBrush(Qt::NoBrush);
+                shapePainter.setBrush(Qt::NoBrush);
 
-                painter->setPen(PEN_LINE_FG);
-                painter->drawPolyline(_mousePositions.constData(), _mousePositions.count());
+                shapePainter.setPen(PEN_LINE_FG);
+                shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
 
                 QVector<QPoint> connectingPoints;
 
                 connectingPoints << _mousePositions.first();
                 connectingPoints << _mousePositions.last();
 
-                painter->setPen(PEN_LINE_BG);
-                painter->drawPolyline(connectingPoints.constData(), connectingPoints.count());
+                shapePainter.setPen(PEN_LINE_BG);
+                shapePainter.drawPolyline(connectingPoints.constData(), connectingPoints.count());
 
                 controlPoints << _mousePositions;
 
@@ -531,8 +563,8 @@ void SelectionTool::paint(QPainter* painter)
             break;
     }
     
-    painter->setPen(PEN_CP);
-    painter->drawPoints(controlPoints);
+    shapePainter.setPen(PEN_CP);
+    shapePainter.drawPoints(controlPoints);
     
     switch (_type)
     {
@@ -548,15 +580,15 @@ void SelectionTool::paint(QPainter* painter)
 
                 case Modifier::Add:
                 {
-                    painter->setPen(PEN_LINE_FG);
-                    painter->drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
+                    shapePainter.setPen(PEN_LINE_FG);
+                    shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
                     break;
                 }
 
                 case Modifier::Remove:
                 {
-                    painter->setPen(PEN_LINE_FG);
-                    painter->drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
+                    shapePainter.setPen(PEN_LINE_FG);
+                    shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
                     break;
                 }
 
@@ -571,5 +603,5 @@ void SelectionTool::paint(QPainter* painter)
             break;
     }
 
-    auto effect = new QGraphicsDropShadowEffect(this);
+    emit overlayChanged();
 }
