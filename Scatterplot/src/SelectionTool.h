@@ -96,6 +96,10 @@ public: // Getters/setters
     bool canClearSelection() const;
     bool canInvertSelection() const;
 
+    bool isSelecting() const {
+        return !_mousePositions.isEmpty();
+    }
+
     QPixmap& getShapePixmap() {
         return _shapePixmap;
     }

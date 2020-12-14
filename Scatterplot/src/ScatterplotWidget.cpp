@@ -111,11 +111,13 @@ void ScatterplotWidget::colormapdiscreteChanged(bool isDiscrete)
 // by reference then we can upload the data to the GPU, but not store it in the widget.
 void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
 {
-    Bounds bounds = getDataBounds(*points);
-    bounds.ensureMinimumSize(1e-07f, 1e-07f);
-    bounds.makeSquare();
-    bounds.expand(0.1f);
-    _dataBounds = bounds;
+    auto dataBounds = getDataBounds(*points);
+
+    dataBounds.ensureMinimumSize(1e-07f, 1e-07f);
+    dataBounds.makeSquare();
+    dataBounds.expand(0.1f);
+
+    _dataBounds = dataBounds;
 
     // Pass bounds and data to renderers
     _pointRenderer.setBounds(_dataBounds);
@@ -275,60 +277,6 @@ void ScatterplotWidget::paintGL()
     }
     _selectionToolRenderer.render();
 }
-
-/*
-void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
-{
-    _selecting = true;
-
-    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
-    _selection.setStart(point);
-}
-
-void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
-{
-    if (!_selecting) return;
-
-    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
-    _selection.setEnd(point);
-
-    onSelecting(_selection);
-
-    update();
-}
-
-void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
-{
-    _selecting = false;
-
-    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
-    _selection.setEnd(point);
-
-    onSelection(_selection);
-
-    update();
-}
-
-void ScatterplotWidget::onSelecting(Selection selection)
-{
-    _selection = selection;
-
-    for (plugin::SelectionListener* listener : _selectionListeners)
-        listener->onSelecting(selection);
-
-    update();
-}
-
-void ScatterplotWidget::onSelection(Selection selection)
-{
-    _selection = selection;
-
-    for (plugin::SelectionListener* listener : _selectionListeners)
-        listener->onSelection(_selection);
-
-    update();
-}
-*/
 
 void ScatterplotWidget::cleanup()
 {

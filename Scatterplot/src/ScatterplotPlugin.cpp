@@ -61,6 +61,57 @@ void ScatterplotPlugin::init()
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
     
     qApp->installEventFilter(this);
+
+    QObject::connect(_selectionTool, &SelectionTool::overlayChanged, [this]() {
+        if (_currentDataSet.isEmpty() || !_selectionTool->isSelecting())
+            return;
+
+        auto selectionAreaImage = _selectionTool->getAreaPixmap().toImage();
+
+        std::vector<unsigned int> indices;
+
+        const auto dataBounds = _scatterPlotWidget->getBounds();
+
+        const auto width    = selectionAreaImage.width();
+        const auto height   = selectionAreaImage.height();
+        const auto size     = width < height ? width : height;
+
+        for (unsigned int i = 0; i < _points.size(); i++) {
+            const auto uvNormalized = QPointF((_points[i].x - dataBounds.getLeft()) / dataBounds.getWidth(), (dataBounds.getTop() - _points[i].y) / dataBounds.getHeight());
+            const auto uvOffset     = QPoint((selectionAreaImage.width() - size) / 2.0f, (selectionAreaImage.height() - size) / 2.0f);
+            const auto uv           = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
+
+            if (selectionAreaImage.pixelColor(uv).alpha() > 0)
+                indices.push_back(i);
+        }
+
+        const Points& points = _core->requestData<Points>(_currentDataSet);
+        Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+
+        selectionSet.indices.clear();
+        selectionSet.indices.reserve(indices.size());
+
+        if (!points.isDerivedData())
+        {
+            for (const unsigned int& index : indices) {
+                selectionSet.indices.push_back(points.isFull() ? index : points.indices[index]);
+            }
+        }
+        else
+        {
+            const Points& sourceSet = DataSet::getSourceData(points);
+            for (const unsigned int& index : indices) {
+                selectionSet.indices.push_back(sourceSet.isFull() ? index : sourceSet.indices[index]);
+            }
+        }
+        
+        if ((_scatterPlotSettings != nullptr) && _scatterPlotSettings->IsNotifyingOnSelecting())
+            _core->notifySelectionChanged(points.getDataName());
+/*
+        */
+        /*else
+            updateSelection();*/
+    });
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)

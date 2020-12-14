@@ -65,6 +65,10 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    Bounds getBounds() const {
+        return _dataBounds;
+    }
+
 protected:
     void initializeGL()         Q_DECL_OVERRIDE;
     void resizeGL(int w, int h) Q_DECL_OVERRIDE;

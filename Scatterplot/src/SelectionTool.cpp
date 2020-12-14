@@ -494,9 +494,9 @@ void SelectionTool::paint()
         case Type::Lasso:
         {
             if (noMousePositions >= 2) {
-                shapePainter.setBrush(AREA_BRUSH);
-                shapePainter.setPen(Qt::NoPen);
-                shapePainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
+                areaPainter.setBrush(AREA_BRUSH);
+                areaPainter.setPen(Qt::NoPen);
+                areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
                 shapePainter.setBrush(Qt::NoBrush);
 
@@ -522,9 +522,9 @@ void SelectionTool::paint()
         case Type::Polygon:
         {
             if (noMousePositions >= 2) {
-                shapePainter.setBrush(AREA_BRUSH);
-                shapePainter.setPen(Qt::NoPen);
-                shapePainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
+                areaPainter.setBrush(AREA_BRUSH);
+                areaPainter.setPen(Qt::NoPen);
+                areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
                 shapePainter.setBrush(Qt::NoBrush);
 
