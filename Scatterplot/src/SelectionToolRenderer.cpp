@@ -119,8 +119,6 @@ void SelectionToolRenderer::createShaderProgram()
 
 void SelectionToolRenderer::updateTexture()
 {
-    qDebug() << "updateTexture()";
-
     if (_pixmap.isNull())
         return;
 

@@ -37,7 +37,9 @@ SelectionTool::SelectionTool(ScatterplotPlugin* scatterplotPlugin) :
     _modifier(Modifier::Replace),
     _radius(RADIUS_DEFAULT),
     _mousePositions(),
-    _mouseButtons()
+    _mouseButtons(),
+    _overlayPixmap(),
+    _areaPixmap()
 {
 }
 
@@ -154,6 +156,16 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
         case QEvent::Paint:
             return false;
 
+        case QEvent::Resize:
+        {
+            auto resizeEvent = static_cast<QResizeEvent*>(event);
+
+            _overlayPixmap = QPixmap(resizeEvent->size());
+            _areaPixmap = QPixmap(resizeEvent->size());
+
+            break;
+        }
+        
         case QEvent::MouseButtonPress:
         {
             auto mouseEvent = static_cast<QMouseEvent*>(event);
@@ -392,6 +404,9 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
 void SelectionTool::paint(QPainter* painter)
 {
+    if (!canSelect())
+        return;
+
     painter->setFont(QFont("Font Awesome 5 Free Solid", 9));
 
     auto textRectangle = QRectF();

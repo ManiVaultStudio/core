@@ -119,6 +119,8 @@ protected:
     float               _radius;                /** Brush/circle radius */
     QVector<QPoint>     _mousePositions;        /** Recorded mouse positions */
     int                 _mouseButtons;          /** State of the left, middle and right mouse buttons */
+    QPixmap             _overlayPixmap;         /** Pixmap for the overlay */
+    QPixmap             _areaPixmap;            /** Pixmap for the selection area */
 
 public:
 
