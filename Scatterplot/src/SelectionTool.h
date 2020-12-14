@@ -97,6 +97,12 @@ public: // Getters/setters
     bool canInvertSelection() const;
 
     bool isSelecting() const {
+        if (_type == Type::Brush && _mousePositions.size() == 1)
+            return false;
+
+        if (_type == Type::Polygon && _mousePositions.size() == 1)
+            return false;
+
         return !_mousePositions.isEmpty();
     }
 

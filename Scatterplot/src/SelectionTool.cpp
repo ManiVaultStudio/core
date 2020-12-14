@@ -261,8 +261,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                 case Type::Polygon:
                 {
                     if (mouseEvent->button() == Qt::RightButton) {
-                        _mousePositions.removeLast();
-                        //publishSelection();
                         _mousePositions.clear();
                     }
 
@@ -288,8 +286,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
         {
             auto mouseEvent = static_cast<QMouseEvent*>(event);
 
-            auto shouldComputePixelSelection = false;
-
             switch (_type)
             {
                 case Type::Rectangle:
@@ -299,8 +295,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                             _mousePositions << mouseEvent->pos();
                         else
                             _mousePositions.last() = mouseEvent->pos();
-
-                        shouldComputePixelSelection = true;
                     }
 
                     break;
@@ -326,7 +320,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                 {
                     if (mouseEvent->buttons() & Qt::LeftButton) {
                         _mousePositions << mouseEvent->pos();
-                        shouldComputePixelSelection = true;
                     }
                     else {
                         if (_mousePositions.isEmpty())
@@ -344,8 +337,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                     if (mouseEvent->buttons() & Qt::LeftButton)
                         _mousePositions << mouseEvent->pos();
 
-                    shouldComputePixelSelection = true;
-
                     break;
                 }
 
@@ -355,8 +346,6 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
                         _mousePositions << mouseEvent->pos();
                     else
                         _mousePositions.last() = mouseEvent->pos();
-
-                    shouldComputePixelSelection = true;
 
                     break;
                 }
