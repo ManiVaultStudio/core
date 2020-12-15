@@ -58,6 +58,10 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
         getSelectionTool().invertSelection();
     });
 
+    QObject::connect(_ui->notifyDuringSelectionCheckBox, &QCheckBox::toggled, [this](bool checked) {
+        getSelectionTool().setNotifyDuringSelection(checked);
+    });
+
     const auto updateTypeUI = [this]() {
         const auto canSelect = getSelectionTool().canSelect();
 
@@ -141,6 +145,10 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
     QObject::connect(&getSelectionTool(), &SelectionTool::radiusChanged, [this](const float& radius) {
         _ui->radiusSpinBox->setValue(getSelectionTool().getRadius());
         _ui->radiusSlider->setValue(getSelectionTool().getRadius() * 1000.0f);
+    });
+
+    QObject::connect(&getSelectionTool(), &SelectionTool::notifyDuringSelectionChanged, [this](const bool& notifyDuringSelection) {
+        _ui->notifyDuringSelectionCheckBox->setChecked(notifyDuringSelection);
     });
 
     QObject::connect(_scatterplotPlugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {

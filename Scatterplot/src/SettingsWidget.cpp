@@ -236,13 +236,6 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _renderMode.setFixedWidth(100);
     renderLayout->addWidget(&_renderMode);
 
-    {
-        auto checkBox = std::make_unique<QCheckBox>(QLatin1String("Notify on selecting"));
-        checkBox->setChecked(true);
-        _notifyOnSelectingCheckBox = &*checkBox;
-        renderLayout->addWidget(checkBox.release());
-    }
-
     _settingsStack = new PlotSettingsStack(*plugin);
     renderLayout->addWidget(_settingsStack);
 
@@ -334,9 +327,4 @@ void ScatterplotSettings::paintEvent(QPaintEvent* event)
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 
     QWidget::paintEvent(event);
-}
-
-bool ScatterplotSettings::IsNotifyingOnSelecting() const
-{
-    return (_notifyOnSelectingCheckBox != nullptr) && _notifyOnSelectingCheckBox->isChecked();
 }

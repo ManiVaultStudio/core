@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>317</width>
-    <height>119</height>
+    <height>148</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -56,6 +56,42 @@
       <string>Selection</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <item row="5" column="1">
+       <layout class="QHBoxLayout" name="radiusHorizontalLayout">
+        <item>
+         <widget class="QDoubleSpinBox" name="radiusSpinBox">
+          <property name="toolTip">
+           <string>Brush radius</string>
+          </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <double>100.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>5.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="radiusSlider">
+          <property name="toolTip">
+           <string>Brush radius</string>
+          </property>
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="singleStep">
+           <number>5</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="3" column="1">
        <layout class="QHBoxLayout" name="selectionHorizontalLayout">
         <property name="bottomMargin">
@@ -70,7 +106,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of pixel selection&lt;br/&gt;&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;R&lt;/span&gt; Rectangle&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;B&lt;/span&gt; Brush&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;L&lt;/span&gt; Lasso&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;P&lt;/span&gt; Polygon&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Selection type</string>
           </property>
          </widget>
         </item>
@@ -95,7 +131,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add to current selection&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SHIFT&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Add to current selection</string>
           </property>
           <property name="text">
            <string/>
@@ -129,7 +165,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remove from current selection&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;CTRL&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Remove from current selection</string>
           </property>
           <property name="text">
            <string/>
@@ -141,42 +177,12 @@
         </item>
        </layout>
       </item>
-      <item row="4" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="radiusLabel">
         <property name="text">
-         <string>Radius</string>
+         <string>Brush radius</string>
         </property>
        </widget>
-      </item>
-      <item row="4" column="1">
-       <layout class="QHBoxLayout" name="radiusHorizontalLayout">
-        <item>
-         <widget class="QDoubleSpinBox" name="radiusSpinBox">
-          <property name="decimals">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <double>100.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>5.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSlider" name="radiusSlider">
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="singleStep">
-           <number>5</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="typeLabel">
@@ -185,7 +191,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="7" column="1">
        <layout class="QHBoxLayout" name="selectionCommandsHorizontalLayout">
         <property name="bottomMargin">
          <number>0</number>
@@ -205,7 +211,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select all pixels&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;A&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Select all data points</string>
           </property>
           <property name="text">
            <string>All</string>
@@ -227,7 +233,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;De-select all pixels&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;D&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Deselect all data points</string>
           </property>
           <property name="text">
            <string>None</string>
@@ -249,7 +255,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Invert the pixel selection&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;I&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Invert the data point selection</string>
           </property>
           <property name="text">
            <string>Invert</string>
@@ -270,6 +276,16 @@
          </spacer>
         </item>
        </layout>
+      </item>
+      <item row="8" column="1">
+       <widget class="QCheckBox" name="notifyDuringSelectionCheckBox">
+        <property name="toolTip">
+         <string>Publish selection updates continuously or at end</string>
+        </property>
+        <property name="text">
+         <string>Notify during selection</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

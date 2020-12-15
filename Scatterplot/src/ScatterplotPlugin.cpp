@@ -64,14 +64,14 @@ void ScatterplotPlugin::init()
     qApp->installEventFilter(this);
 
     QObject::connect(_selectionTool, &SelectionTool::areaChanged, [this]() {
-        if (!_scatterPlotSettings->IsNotifyingOnSelecting())
+        if (!_selectionTool->isNotifyDuringSelection())
             return;
 
         selectPoints();
     });
 
     QObject::connect(_selectionTool, &SelectionTool::ended, [this]() {
-        if (_scatterPlotSettings->IsNotifyingOnSelecting())
+        if (_selectionTool->isNotifyDuringSelection())
             return;
 
         selectPoints();

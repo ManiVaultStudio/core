@@ -22,7 +22,7 @@ const QMap<QString, SelectionTool::Modifier> SelectionTool::modifiers = {
 };
 
 const QColor SelectionTool::COLOR_MAIN      = Qt::black;
-const QColor SelectionTool::COLOR_FILL      = QColor(70, 70, 70, 100);
+const QColor SelectionTool::COLOR_FILL      = QColor(70, 70, 70, 50);
 const QBrush SelectionTool::AREA_BRUSH      = QBrush(COLOR_FILL);
 const QPen SelectionTool::PEN_LINE_FG       = QPen(COLOR_MAIN, 1.5f, Qt::SolidLine);
 const QPen SelectionTool::PEN_LINE_BG       = QPen(QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 140), 1.5f, Qt::DotLine);
@@ -34,6 +34,7 @@ SelectionTool::SelectionTool(ScatterplotPlugin* scatterplotPlugin) :
     _type(Type::Rectangle),
     _modifier(Modifier::Replace),
     _active(false),
+    _notifyDuringSelection(true),
     _radius(RADIUS_DEFAULT),
     _mousePosition(),
     _mousePositions(),
@@ -78,6 +79,21 @@ void SelectionTool::setModifier(const Modifier& modifier)
     paint();
 }
 
+bool SelectionTool::isNotifyDuringSelection() const
+{
+    return _notifyDuringSelection;
+}
+
+void SelectionTool::setNotifyDuringSelection(const bool& notifyDuringSelection)
+{
+    if (notifyDuringSelection == _notifyDuringSelection)
+        return;
+
+    _notifyDuringSelection = notifyDuringSelection;
+
+    emit notifyDuringSelectionChanged(_notifyDuringSelection);
+}
+
 float SelectionTool::getRadius() const
 {
     return _radius;
@@ -106,6 +122,7 @@ void SelectionTool::setChanged()
 {
     emit typeChanged(_type);
     emit modifierChanged(_modifier);
+    emit notifyDuringSelectionChanged(_notifyDuringSelection);
     emit radiusChanged(_radius);
 }
 

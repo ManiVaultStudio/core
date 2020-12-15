@@ -77,6 +77,9 @@ public: // Getters/setters
     Modifier getModifier() const;
     void setModifier(const Modifier& modifier);
 
+    bool isNotifyDuringSelection() const;
+    void setNotifyDuringSelection(const bool& notifyDuringSelection);
+
     float getRadius() const;
     void setRadius(const float& radius);
 
@@ -126,6 +129,8 @@ signals:
 
     void modifierChanged(const Modifier& modifier);
 
+    void notifyDuringSelectionChanged(const bool& notifyDuringSelection);
+
     void radiusChanged(const float& radius);
 
     /** Signals that the selection shape changed */
@@ -141,16 +146,17 @@ signals:
     void ended();
 
 protected:
-    ScatterplotPlugin*  _scatterplotPlugin;     /** Scatter plot plugin */
-    Type                _type;                  /** Current selection type */
-    Modifier            _modifier;              /** Selection modifier */
-    bool                _active;                /** Whether the selection process is active */
-    float               _radius;                /** Brush/circle radius */
-    QPoint              _mousePosition;         /** Current mouse position */
-    QVector<QPoint>     _mousePositions;        /** Recorded mouse positions */
-    int                 _mouseButtons;          /** State of the left, middle and right mouse buttons */
-    QPixmap             _shapePixmap;           /** Pixmap for the selection tool shape */
-    QPixmap             _areaPixmap;            /** Pixmap for the selection area */
+    ScatterplotPlugin*  _scatterplotPlugin;         /** Scatter plot plugin */
+    Type                _type;                      /** Current selection type */
+    Modifier            _modifier;                  /** Selection modifier */
+    bool                _active;                    /** Whether the selection process is active */
+    bool                _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
+    float               _radius;                    /** Brush/circle radius */
+    QPoint              _mousePosition;             /** Current mouse position */
+    QVector<QPoint>     _mousePositions;            /** Recorded mouse positions */
+    int                 _mouseButtons;              /** State of the left, middle and right mouse buttons */
+    QPixmap             _shapePixmap;               /** Pixmap for the selection tool shape */
+    QPixmap             _areaPixmap;                /** Pixmap for the selection area */
 
 public:
 
