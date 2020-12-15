@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <set>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
@@ -68,7 +69,12 @@ void ScatterplotPlugin::init()
 
         auto selectionAreaImage = _selectionTool->getAreaPixmap().toImage();
 
-        std::vector<unsigned int> indices;
+        const Points& points = _core->requestData<Points>(_currentDataSet);
+        Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+
+        std::vector<std::uint32_t> areaIndices;
+
+        areaIndices.reserve(points.getNumPoints());
 
         const auto dataBounds = _scatterPlotWidget->getBounds();
 
@@ -82,14 +88,57 @@ void ScatterplotPlugin::init()
             const auto uv           = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
 
             if (selectionAreaImage.pixelColor(uv).alpha() > 0)
-                indices.push_back(i);
+                areaIndices.push_back(i);
         }
 
-        const Points& points = _core->requestData<Points>(_currentDataSet);
-        Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+        std::vector<std::uint32_t> indices;
+
+        switch (_selectionTool->getModifier())
+        {
+            case SelectionTool::Modifier::Replace:
+            {
+                selectionSet.indices.clear();
+                indices = areaIndices;
+                break;
+            }
+
+            case SelectionTool::Modifier::Add:
+            case SelectionTool::Modifier::Remove:
+            {
+                QSet<std::uint32_t> set(selectionSet.indices.begin(), selectionSet.indices.end());
+
+                switch (_selectionTool->getModifier())
+                {
+                    case SelectionTool::Modifier::Add:
+                    {
+                        for (auto& index : areaIndices)
+                            set.insert(index);
+
+                        break;
+                    }
+
+                    case SelectionTool::Modifier::Remove:
+                    {
+                        for (auto& index : areaIndices)
+                            set.remove(index);
+
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+                
+                indices = std::vector<std::uint32_t>(set.begin(), set.end());
+
+                break;
+            }
+
+            default:
+                break;
+        }
 
         selectionSet.indices.clear();
-        selectionSet.indices.reserve(indices.size());
 
         if (!points.isDerivedData())
         {

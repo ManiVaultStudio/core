@@ -410,6 +410,9 @@ void SelectionTool::paint()
 
     QPainter shapePainter(&_shapePixmap), areaPainter(&_areaPixmap);
 
+    shapePainter.setRenderHint(QPainter::Antialiasing);
+    areaPainter.setRenderHint(QPainter::Antialiasing);
+
     shapePainter.setFont(QFont("Font Awesome 5 Free Solid", 9));
 
     auto textRectangle = QRectF();
