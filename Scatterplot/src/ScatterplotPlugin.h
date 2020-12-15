@@ -46,8 +46,6 @@ public:
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     DataTypes supportedDataTypes() const Q_DECL_OVERRIDE;
-    //void onSelecting(hdps::Selection selection) override;
-    //void onSelection(hdps::Selection selection) override;
 
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;
@@ -76,6 +74,8 @@ protected slots:
     void xDimPicked(int index);
     void yDimPicked(int index);
     void cDimPicked(int index);
+
+    void selectPoints();
 
 signals:
     void currentDatasetChanged(const QString& datasetName);

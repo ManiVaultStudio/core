@@ -26,7 +26,6 @@ public:
     enum class Type
     {
         Rectangle,		/** Select points within a rectangle */
-        Circle,		    /** Select points within a circle */
         Brush,			/** A brush is used the paint the selection */
         Lasso,			/** A lasso tool is used to enclose points */
         Polygon		    /** Select points in the interior of a polygon */
@@ -83,8 +82,6 @@ public: // Getters/setters
 
     bool canSelect() const;
 
-    void finish();
-
     void setChanged();
 
     
@@ -96,15 +93,12 @@ public: // Getters/setters
     bool canClearSelection() const;
     bool canInvertSelection() const;
 
-    bool isSelecting() const {
-        if (_type == Type::Brush && _mousePositions.size() == 1)
-            return false;
-
-        if (_type == Type::Polygon && _mousePositions.size() == 1)
-            return false;
-
-        return !_mousePositions.isEmpty();
+    bool isActive() const {
+        return _active;
     }
+
+    /** Aborts the selection process */
+    void abort();
 
     QPixmap& getShapePixmap() {
         return _shapePixmap;
@@ -122,6 +116,10 @@ private:
 
     void paint();
 
+    void startSelection();
+
+    void endSelection();
+
 signals:
 
     void typeChanged(const Type& type);
@@ -130,13 +128,25 @@ signals:
 
     void radiusChanged(const float& radius);
 
-    void overlayChanged();
+    /** Signals that the selection shape changed */
+    void shapeChanged();
+
+    /** Signals that the selection area changed */
+    void areaChanged();
+
+    /** Signals that the selection process has started */
+    void started();
+
+    /** Signals that the selection process has ended */
+    void ended();
 
 protected:
     ScatterplotPlugin*  _scatterplotPlugin;     /** Scatter plot plugin */
     Type                _type;                  /** Current selection type */
     Modifier            _modifier;              /** Selection modifier */
+    bool                _active;                /** Whether the selection process is active */
     float               _radius;                /** Brush/circle radius */
+    QPoint              _mousePosition;         /** Current mouse position */
     QVector<QPoint>     _mousePositions;        /** Recorded mouse positions */
     int                 _mouseButtons;          /** State of the left, middle and right mouse buttons */
     QPixmap             _shapePixmap;           /** Pixmap for the selection tool shape */
@@ -147,7 +157,7 @@ public:
     // Brush/circle radius 
     static constexpr float RADIUS_MIN       = 10.0f;        /** Minimum radius */
     static constexpr float RADIUS_MAX       = 1000.0f;      /** Maximum radius */
-    static constexpr float RADIUS_DEFAULT   = 10.0f;        /** Default radius */
+    static constexpr float RADIUS_DEFAULT   = 25.0f;        /** Default radius */
     static constexpr float RADIUS_DELTA     = 10.0f;        /** Radius increment */
 
     // Drawing constants

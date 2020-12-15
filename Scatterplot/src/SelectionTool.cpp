@@ -10,7 +10,6 @@
 
 const QMap<QString, SelectionTool::Type> SelectionTool::types = {
     { "Rectangle", SelectionTool::Type::Rectangle },
-    { "Circle", SelectionTool::Type::Circle },
     { "Brush", SelectionTool::Type::Brush },
     { "Lasso", SelectionTool::Type::Lasso },
     { "Polygon", SelectionTool::Type::Polygon }
@@ -34,7 +33,9 @@ SelectionTool::SelectionTool(ScatterplotPlugin* scatterplotPlugin) :
     _scatterplotPlugin(scatterplotPlugin),
     _type(Type::Rectangle),
     _modifier(Modifier::Replace),
+    _active(false),
     _radius(RADIUS_DEFAULT),
+    _mousePosition(),
     _mousePositions(),
     _mouseButtons(),
     _shapePixmap(),
@@ -56,6 +57,7 @@ void SelectionTool::setType(const Type& type)
 
     emit typeChanged(_type);
     
+    abort();
     paint();
 }
 
@@ -98,11 +100,6 @@ bool SelectionTool::canSelect() const
     Q_ASSERT(_scatterplotPlugin != nullptr);
 
     return !_scatterplotPlugin->getCurrentDataset().isEmpty() && _scatterplotPlugin->getNumPoints() >= 0;
-}
-
-void SelectionTool::finish()
-{
-    _mousePositions.clear();
 }
 
 void SelectionTool::setChanged()
@@ -148,6 +145,13 @@ bool SelectionTool::canInvertSelection() const
     return _scatterplotPlugin->getNumPoints() >= 0;
 }
 
+void SelectionTool::abort()
+{
+    endSelection();
+    
+    //_mousePositions << _scatterplotPlugin->mapFromGlobal(QCursor::pos());
+}
+
 bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 {
     auto shouldPaint = true;
@@ -180,46 +184,44 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
             switch (_type)
             {
                 case Type::Rectangle:
-                {
-                    _mousePositions.clear();
-                    _mousePositions << mouseEvent->pos();
-                    break;
-                }
-
+                case Type::Brush:
                 case Type::Lasso:
                 {
-                    _mousePositions.clear();
-                    _mousePositions << mouseEvent->pos();
+                    startSelection();
+
+                    switch (mouseEvent->button())
+                    {
+                        case Qt::LeftButton:
+                            _mousePositions.clear();
+                            _mousePositions << mouseEvent->pos();
+                            break;
+
+                        case Qt::RightButton:
+                            break;
+
+                        default:
+                            break;
+                    }
+                    
                     break;
                 }
 
                 case Type::Polygon:
                 {
+                    if (_mousePositions.isEmpty())
+                        startSelection();
+
                     switch (mouseEvent->button())
                     {
                         case Qt::LeftButton:
-                        {
-                            _mousePositions << mouseEvent->pos();
-                            break;
-                        }
-
                         case Qt::RightButton:
-                        {
-                            _mousePositions << mouseEvent->pos();
+                            _mousePositions << mouseEvent->pos() << mouseEvent->pos();
                             break;
-                        }
 
                         default:
                             break;
                     }
 
-                    break;
-                }
-
-                case Type::Brush:
-                {
-                    _mousePositions.clear();
-                    _mousePositions << mouseEvent->pos();
                     break;
                 }
 
@@ -239,20 +241,20 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
             switch (_type)
             {
                 case Type::Rectangle:
-                {
-                    if (mouseEvent->button() == Qt::LeftButton) {
-                        //publishSelection();
-                        _mousePositions.clear();
-                    }
-
-                    break;
-                }
-
+                case Type::Brush:
                 case Type::Lasso:
                 {
-                    if (mouseEvent->button() == Qt::LeftButton) {
-                        //publishSelection();
-                        _mousePositions.clear();
+                    switch (mouseEvent->button())
+                    {
+                        case Qt::LeftButton:
+                            endSelection();
+                            break;
+
+                        case Qt::RightButton:
+                            break;
+
+                        default:
+                            break;
                     }
 
                     break;
@@ -260,17 +262,18 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
                 case Type::Polygon:
                 {
-                    if (mouseEvent->button() == Qt::RightButton) {
-                        _mousePositions.clear();
+                    switch (mouseEvent->button())
+                    {
+                        case Qt::LeftButton:
+                            break;
+
+                        case Qt::RightButton:
+                            endSelection();
+                            break;
+
+                        default:
+                            break;
                     }
-
-                    break;
-                }
-
-                case Type::Brush:
-                {
-                    //publishSelection();
-                    _mousePositions.clear();
 
                     break;
                 }
@@ -286,49 +289,27 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
         {
             auto mouseEvent = static_cast<QMouseEvent*>(event);
 
+            _mousePosition = mouseEvent->pos();
+
             switch (_type)
             {
                 case Type::Rectangle:
                 {
                     if (mouseEvent->buttons() & Qt::LeftButton) {
-                        if (_mousePositions.size() != 2)
-                            _mousePositions << mouseEvent->pos();
+                        if (_mousePositions.size() == 1)
+                            _mousePositions << _mousePosition;
                         else
-                            _mousePositions.last() = mouseEvent->pos();
+                            _mousePositions.last() = _mousePosition;
                     }
-
-                    break;
-                }
-
-                case Type::Circle:
-                {
-                    /*
-                    if (mouseEvent->buttons() & Qt::LeftButton) {
-                        if (_mousePositions.size() != 2)
-                            _mousePositions << mouseEvent->pos();
-                        else
-                            _mousePositions.last() = mouseEvent->pos();
-
-                        shouldComputePixelSelection = true;
-                    }
-                    */
 
                     break;
                 }
 
                 case Type::Brush:
                 {
-                    if (mouseEvent->buttons() & Qt::LeftButton) {
-                        _mousePositions << mouseEvent->pos();
-                    }
-                    else {
-                        if (_mousePositions.isEmpty())
-                            if (mouseEvent->pos() != _mousePositions.last())
-                                _mousePositions << mouseEvent->pos();
-
-                        _mousePositions.last() = mouseEvent->pos();
-                    }
-
+                    if (mouseEvent->buttons() & Qt::LeftButton)
+                        _mousePositions << _mousePosition;
+                    
                     break;
                 }
 
@@ -425,120 +406,115 @@ void SelectionTool::paint()
     {
         case Type::Rectangle:
         {
-            if (noMousePositions == 2) {
-                const auto topLeft      = QPointF(std::min(_mousePositions.first().x(), _mousePositions.last().x()), std::min(_mousePositions.first().y(), _mousePositions.last().y()));
-                const auto bottomRight  = QPointF(std::max(_mousePositions.first().x(), _mousePositions.last().x()), std::max(_mousePositions.first().y(), _mousePositions.last().y()));
-                const auto rectangle    = QRectF(topLeft, bottomRight);
+            if (noMousePositions != 2)
+                break;
 
-                controlPoints << _mousePositions.first();
-                controlPoints << _mousePositions.last();
+            const auto topLeft      = QPointF(std::min(_mousePositions.first().x(), _mousePositions.last().x()), std::min(_mousePositions.first().y(), _mousePositions.last().y()));
+            const auto bottomRight  = QPointF(std::max(_mousePositions.first().x(), _mousePositions.last().x()), std::max(_mousePositions.first().y(), _mousePositions.last().y()));
+            const auto rectangle    = QRectF(topLeft, bottomRight);
+
+            controlPoints << _mousePositions.first();
+            controlPoints << _mousePositions.last();
                 
-                areaPainter.setBrush(AREA_BRUSH);
-                areaPainter.setPen(Qt::NoPen);
-                areaPainter.drawRect(rectangle);
+            areaPainter.setBrush(AREA_BRUSH);
+            areaPainter.setPen(Qt::NoPen);
+            areaPainter.drawRect(rectangle);
 
-                shapePainter.setPen(PEN_LINE_FG);
-                shapePainter.drawRect(rectangle);
+            shapePainter.setPen(PEN_LINE_FG);
+            shapePainter.drawRect(rectangle);
 
-                const auto size         = 8.0f;
-                const auto textCenter   = rectangle.topRight() + QPoint(size, -size);
+            const auto size         = 8.0f;
+            const auto textCenter   = rectangle.topRight() + QPoint(size, -size);
 
-                textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
-            }
-
+            textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
             break;
         }
-
         
         case Type::Brush:
         {
-            if (noMousePositions >= 1) {
-                const auto brushCenter = _mousePositions.last();
+            const auto brushCenter = _mousePosition;
 
-                if (noMousePositions > 1) {
-                    areaPainter.setBrush(Qt::NoBrush);
-                    areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _radius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-                    areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
-                }
-                
-                shapePainter.setPen(Qt::NoPen);
-                shapePainter.setBrush(AREA_BRUSH);
-
-                shapePainter.drawPoint(brushCenter);
-
-                shapePainter.setPen(_mouseButtons & Qt::LeftButton ? PEN_LINE_FG : PEN_LINE_BG);
-
-                shapePainter.setBrush(Qt::NoBrush);
-                shapePainter.drawEllipse(QPointF(brushCenter), _radius, _radius);
-
-                controlPoints << _mousePositions.last();
-
-                const auto textAngle    = 0.75f * M_PI;
-                const auto size         = 12.0f;
-                const auto textCenter   = brushCenter + (_radius + size) * QPointF(sin(textAngle), cos(textAngle));
-
-                textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+            if (noMousePositions >= 2) {
+                areaPainter.setBrush(Qt::NoBrush);
+                areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _radius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+                areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
             }
 
+            shapePainter.setPen(Qt::NoPen);
+            shapePainter.setBrush(AREA_BRUSH);
+
+            shapePainter.drawPoint(brushCenter);
+
+            shapePainter.setPen(_mouseButtons & Qt::LeftButton ? PEN_LINE_FG : PEN_LINE_BG);
+            shapePainter.setBrush(Qt::NoBrush);
+            shapePainter.drawEllipse(QPointF(brushCenter), _radius, _radius);
+
+            controlPoints << brushCenter;
+
+            const auto textAngle    = 0.75f * M_PI;
+            const auto size         = 12.0f;
+            const auto textCenter   = brushCenter + (_radius + size) * QPointF(sin(textAngle), cos(textAngle));
+
+            textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
             break;
         }
         
         case Type::Lasso:
         {
-            if (noMousePositions >= 2) {
-                areaPainter.setBrush(AREA_BRUSH);
-                areaPainter.setPen(Qt::NoPen);
-                areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
+            if (noMousePositions < 2)
+                break;
 
-                shapePainter.setBrush(Qt::NoBrush);
+            areaPainter.setBrush(AREA_BRUSH);
+            areaPainter.setPen(Qt::NoPen);
+            areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
-                shapePainter.setPen(PEN_LINE_FG);
-                shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+            shapePainter.setBrush(Qt::NoBrush);
 
-                controlPoints << _mousePositions.first();
-                controlPoints << _mousePositions.last();
+            shapePainter.setPen(PEN_LINE_FG);
+            shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
 
-                shapePainter.setBrush(AREA_BRUSH);
-                shapePainter.setPen(PEN_LINE_BG);
-                shapePainter.drawPolyline(controlPoints.constData(), controlPoints.count());
+            controlPoints << _mousePositions.first();
+            controlPoints << _mousePositions.last();
 
-                const auto size = 8.0f;
-                const auto textCenter = _mousePositions.first() - QPoint(size, size);
+            shapePainter.setBrush(AREA_BRUSH);
+            shapePainter.setPen(PEN_LINE_BG);
+            shapePainter.drawPolyline(controlPoints.constData(), controlPoints.count());
 
-                textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
-            }
+            const auto size = 8.0f;
+            const auto textCenter = _mousePositions.first() - QPoint(size, size);
 
+            textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
             break;
         }
         
         case Type::Polygon:
         {
-            if (noMousePositions >= 2) {
-                areaPainter.setBrush(AREA_BRUSH);
-                areaPainter.setPen(Qt::NoPen);
-                areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
+            if (noMousePositions < 2)
+                break;
 
-                shapePainter.setBrush(Qt::NoBrush);
+            areaPainter.setBrush(AREA_BRUSH);
+            areaPainter.setPen(Qt::NoPen);
+            areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
-                shapePainter.setPen(PEN_LINE_FG);
-                shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+            shapePainter.setBrush(Qt::NoBrush);
 
-                QVector<QPoint> connectingPoints;
+            shapePainter.setPen(PEN_LINE_FG);
+            shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
 
-                connectingPoints << _mousePositions.first();
-                connectingPoints << _mousePositions.last();
+            QVector<QPoint> connectingPoints;
 
-                shapePainter.setPen(PEN_LINE_BG);
-                shapePainter.drawPolyline(connectingPoints.constData(), connectingPoints.count());
+            connectingPoints << _mousePositions.first();
+            connectingPoints << _mousePositions.last();
 
-                controlPoints << _mousePositions;
+            shapePainter.setPen(PEN_LINE_BG);
+            shapePainter.drawPolyline(connectingPoints.constData(), connectingPoints.count());
 
-                const auto size = 8.0f;
-                const auto textCenter = _mousePositions.first() - QPoint(size, size);
+            controlPoints << _mousePositions;
 
-                textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
-            }
+            const auto size = 8.0f;
+            const auto textCenter = _mousePositions.first() - QPoint(size, size);
 
+            textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
             break;
         }
        
@@ -562,18 +538,14 @@ void SelectionTool::paint()
                     break;
 
                 case Modifier::Add:
-                {
                     shapePainter.setPen(PEN_LINE_FG);
                     shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
                     break;
-                }
 
                 case Modifier::Remove:
-                {
                     shapePainter.setPen(PEN_LINE_FG);
                     shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
                     break;
-                }
 
                 default:
                     break;
@@ -586,5 +558,23 @@ void SelectionTool::paint()
             break;
     }
 
-    emit overlayChanged();
+    emit shapeChanged();
+    emit areaChanged();
+}
+
+void SelectionTool::startSelection()
+{
+    _active = true;
+
+    emit started();
+    //emit shapeChanged();
+    //emit areaChanged();
+}
+
+void SelectionTool::endSelection()
+{
+    emit ended();
+
+    _mousePositions.clear();
+    _active = false;
 }

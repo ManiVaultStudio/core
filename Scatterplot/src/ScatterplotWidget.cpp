@@ -39,7 +39,7 @@ ScatterplotWidget::ScatterplotWidget(SelectionTool& selectionTool) :
 {
     setMouseTracking(true);
 
-    QObject::connect(&_selectionTool, &SelectionTool::overlayChanged, [this]() {
+    QObject::connect(&_selectionTool, &SelectionTool::shapeChanged, [this]() {
         _selectionToolRenderer.update();
         update();
     });

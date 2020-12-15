@@ -95,8 +95,6 @@ void SelectionToolRenderer::destroy()
 
 void SelectionToolRenderer::update()
 {
-    qDebug() << "update()";
-
     _shapeTexture.reset(new QOpenGLTexture(_selectionTool.getShapePixmap().toImage()));
     _areaTexture.reset(new QOpenGLTexture(_selectionTool.getAreaPixmap().toImage()));
 

@@ -106,7 +106,6 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
             switch (getSelectionTool().getType())
             {
                 case SelectionTool::Type::Rectangle:
-                case SelectionTool::Type::Circle:
                     break;
 
                 case SelectionTool::Type::Brush:
