@@ -315,7 +315,7 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
                 case Type::Lasso:
                 {
-                    if (mouseEvent->buttons() & Qt::LeftButton)
+                    if (mouseEvent->buttons() & Qt::LeftButton && !_mousePositions.isEmpty())
                         _mousePositions << mouseEvent->pos();
 
                     break;
@@ -323,9 +323,7 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
 
                 case Type::Polygon:
                 {
-                    if (_mousePositions.isEmpty())
-                        _mousePositions << mouseEvent->pos();
-                    else
+                    if (!_mousePositions.isEmpty())
                         _mousePositions.last() = mouseEvent->pos();
 
                     break;
