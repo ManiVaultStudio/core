@@ -8,7 +8,6 @@
 #include <QSize>
 #include <QDebug>
 #include <math.h>
-#include <QPainter>
 
 using namespace hdps::util;
 

@@ -21,7 +21,8 @@ SelectionToolRenderer::SelectionToolRenderer(SelectionTool& selectionTool) :
     _renderSize(),
     _shaderProgram(QSharedPointer<QOpenGLShaderProgram>::create()),
     _shapeTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
-    _areaTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D))
+    _areaTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
+    _dummyVAO()
 {
 }
 
@@ -33,6 +34,8 @@ void SelectionToolRenderer::init()
             throw std::runtime_error("Unable to initialize OpenGL functions");
 
         createShaderProgram();
+
+        _dummyVAO.create();
     }
     catch (std::exception& e)
     {
@@ -67,11 +70,15 @@ void SelectionToolRenderer::render()
 
         _shaderProgram->setUniformValue("overlayTexture", 0);
 
-        _areaTexture->bind();
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        _dummyVAO.bind();
+        {
+            _areaTexture->bind();
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-        _shapeTexture->bind();
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            _shapeTexture->bind();
+            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        }
+        _dummyVAO.release();
 
         _shaderProgram->release();
         _shapeTexture->release();
@@ -87,6 +94,7 @@ void SelectionToolRenderer::render()
 
 void SelectionToolRenderer::destroy()
 {
+    _dummyVAO.destroy();
 }
 
 void SelectionToolRenderer::update()
