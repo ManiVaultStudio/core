@@ -54,31 +54,27 @@ void SelectionToolRenderer::resize(QSize renderSize)
 void SelectionToolRenderer::render()
 {
     try {
-        glEnable(GL_TEXTURE_2D);
-        {
-            if (!_shapeTexture->isCreated())
-                throw std::runtime_error("Shape texture is not created");
+        if (!_shapeTexture->isCreated())
+            throw std::runtime_error("Shape texture is not created");
 
-            if (!_areaTexture->isCreated())
-                throw std::runtime_error("Area texture is not created");
+        if (!_areaTexture->isCreated())
+            throw std::runtime_error("Area texture is not created");
 
-            if (!_shaderProgram->bind())
-                throw std::runtime_error("Unable to bind shader program");
+        if (!_shaderProgram->bind())
+            throw std::runtime_error("Unable to bind shader program");
 
-            glViewport(0, 0, _renderSize.width(), _renderSize.height());
+        glViewport(0, 0, _renderSize.width(), _renderSize.height());
 
-            _shaderProgram->setUniformValue("overlayTexture", 0);
+        _shaderProgram->setUniformValue("overlayTexture", 0);
 
-            _areaTexture->bind();
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        _areaTexture->bind();
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-            _shapeTexture->bind();
-            glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        _shapeTexture->bind();
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-            _shaderProgram->release();
-            _shapeTexture->release();
-        }
-        glDisable(GL_TEXTURE_2D);
+        _shaderProgram->release();
+        _shapeTexture->release();
     }
     catch (std::exception& e)
     {
