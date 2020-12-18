@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTreeView>
+#include <QMenu>
 
 namespace hdps
 {
@@ -22,6 +23,9 @@ namespace hdps
             
         public slots:
             void updateDataModel();
+            void itemContextMenu(const QPoint& pos);
+
+            void dataRenamed();
 
         private:
             /** Stores a reference to the DataManager so it can query about data in the system */
@@ -29,6 +33,9 @@ namespace hdps
 
             /** Model containing data to be displayed in the hierarchy */
             DataHierarchyModel* _model;
+
+            /** Context menu for items containing possible item operations */
+            QMenu* _contextMenu;
         };
     }
 }
