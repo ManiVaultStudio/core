@@ -97,7 +97,7 @@ void SelectionToolRenderer::destroy()
 void SelectionToolRenderer::update()
 {
     const auto areaImage = _selectionTool.getAreaPixmap().toImage();
-    const auto shapeImage = _selectionTool.getShapePixmap().toImage();// .convertToFormat(QImage::Format_RGBA8888);
+    const auto shapeImage = _selectionTool.getShapePixmap().toImage();
     
     if (areaImage.isNull() || shapeImage.isNull())
         return;
