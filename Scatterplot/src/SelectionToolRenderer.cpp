@@ -17,11 +17,10 @@ SelectionToolRenderer::SelectionToolRenderer(SelectionTool& selectionTool) :
     _selectionTool(selectionTool),
     _renderSize(),
     _shaderProgram(QSharedPointer<QOpenGLShaderProgram>::create()),
-    _shapeTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
     _areaTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
+    _shapeTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
     _dummyVAO()
 {
-    
 }
 
 void SelectionToolRenderer::init()
@@ -97,32 +96,25 @@ void SelectionToolRenderer::destroy()
 
 void SelectionToolRenderer::update()
 {
-    const auto shapeImage   = _selectionTool.getShapePixmap().toImage().convertToFormat(QImage::Format_RGBA8888);
-    const auto areaImage    = _selectionTool.getAreaPixmap().toImage();
+    const auto areaImage = _selectionTool.getAreaPixmap().toImage();
+    const auto shapeImage = _selectionTool.getShapePixmap().toImage();// .convertToFormat(QImage::Format_RGBA8888);
     
-    if (shapeImage.isNull() || areaImage.isNull())
+    if (areaImage.isNull() || shapeImage.isNull())
         return;
 
     const auto updateTexture = [](QSharedPointer<QOpenGLTexture>& texture, const QImage& image) {
-
+        if (texture->isStorageAllocated()) {
+            texture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, image.bits());
+        }
+        else {
+            texture.reset(new QOpenGLTexture(image));
+            texture->create();
+            texture->setWrapMode(QOpenGLTexture::ClampToBorder);
+        }
     };
 
-    if (_shapeTexture->isStorageAllocated()) {
-        _shapeTexture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, shapeImage.bits());
-    } else {
-        _shapeTexture.reset(new QOpenGLTexture(shapeImage));
-        _shapeTexture->create();
-        _shapeTexture->setWrapMode(QOpenGLTexture::ClampToBorder);
-    }
-
-    if (_areaTexture->isStorageAllocated()) {
-        _areaTexture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, areaImage.bits());
-    }
-    else {
-        _areaTexture.reset(new QOpenGLTexture(areaImage));
-        _areaTexture->create();
-        _areaTexture->setWrapMode(QOpenGLTexture::ClampToBorder);
-    }
+    updateTexture(_areaTexture, areaImage);
+    updateTexture(_shapeTexture, shapeImage);
 }
 
 void SelectionToolRenderer::createShaderProgram()

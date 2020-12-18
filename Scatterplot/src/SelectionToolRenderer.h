@@ -39,8 +39,8 @@ private:
     SelectionTool&                          _selectionTool;         /** Selection tool to visualize */
     QSize                                   _renderSize;            /** Size of the renderer */
     QSharedPointer<QOpenGLShaderProgram>    _shaderProgram;         /** OpenGL shader programs */
-    QSharedPointer<QOpenGLTexture>          _shapeTexture;          /** OpenGL texture for selection tool shape */
     QSharedPointer<QOpenGLTexture>          _areaTexture;           /** OpenGL texture for selected area */
+    QSharedPointer<QOpenGLTexture>          _shapeTexture;          /** OpenGL texture for selection tool shape */
     QOpenGLVertexArrayObject                _dummyVAO;              /** Dummy Vertex Array Object*/
 };
 

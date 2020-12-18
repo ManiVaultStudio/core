@@ -26,7 +26,7 @@ const QColor SelectionTool::COLOR_FILL      = QColor(70, 70, 70, 50);
 const QBrush SelectionTool::AREA_BRUSH      = QBrush(COLOR_FILL);
 const QPen SelectionTool::PEN_LINE_FG       = QPen(COLOR_MAIN, 1.5f, Qt::SolidLine);
 const QPen SelectionTool::PEN_LINE_BG       = QPen(QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 140), 1.5f, Qt::DotLine);
-const QPen SelectionTool::PEN_CP            = QPen(COLOR_MAIN, 5.0f, Qt::SolidLine, Qt::RoundCap);
+const QPen SelectionTool::PEN_CP            = QPen(COLOR_MAIN, 7.0f, Qt::SolidLine, Qt::RoundCap);
 
 SelectionTool::SelectionTool(ScatterplotPlugin* scatterplotPlugin) :
     QObject(reinterpret_cast<QObject*>(scatterplotPlugin)),
@@ -165,8 +165,6 @@ bool SelectionTool::canInvertSelection() const
 void SelectionTool::abort()
 {
     endSelection();
-    
-    //_mousePositions << _scatterplotPlugin->mapFromGlobal(QCursor::pos());
 }
 
 bool SelectionTool::eventFilter(QObject* target, QEvent* event)
@@ -582,8 +580,6 @@ void SelectionTool::startSelection()
     _active = true;
 
     emit started();
-    //emit shapeChanged();
-    //emit areaChanged();
 }
 
 void SelectionTool::endSelection()
