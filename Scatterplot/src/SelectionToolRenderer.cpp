@@ -7,9 +7,6 @@
 #include <QFile>
 #include <QPainter>
 #include <QLabel>
-#include <QGraphicsScene>
-#include <QGraphicsPixmapItem>
-#include <QGraphicsBlurEffect>
 
 namespace hdps
 {
@@ -24,6 +21,7 @@ SelectionToolRenderer::SelectionToolRenderer(SelectionTool& selectionTool) :
     _areaTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
     _dummyVAO()
 {
+    
 }
 
 void SelectionToolRenderer::init()
@@ -57,11 +55,11 @@ void SelectionToolRenderer::resize(QSize renderSize)
 void SelectionToolRenderer::render()
 {
     try {
-        if (!_shapeTexture->isCreated())
-            throw std::runtime_error("Shape texture is not created");
-
         if (!_areaTexture->isCreated())
             throw std::runtime_error("Area texture is not created");
+
+        if (!_shapeTexture->isCreated())
+            throw std::runtime_error("Shape texture is not created");
 
         if (!_shaderProgram->bind())
             throw std::runtime_error("Unable to bind shader program");
@@ -99,18 +97,32 @@ void SelectionToolRenderer::destroy()
 
 void SelectionToolRenderer::update()
 {
-    _shapeTexture.reset(new QOpenGLTexture(_selectionTool.getShapePixmap().toImage()));
-    _areaTexture.reset(new QOpenGLTexture(_selectionTool.getAreaPixmap().toImage()));
+    const auto shapeImage   = _selectionTool.getShapePixmap().toImage().convertToFormat(QImage::Format_RGBA8888);
+    const auto areaImage    = _selectionTool.getAreaPixmap().toImage();
+    
+    if (shapeImage.isNull() || areaImage.isNull())
+        return;
 
-    if (!_shapeTexture->isCreated())
+    const auto updateTexture = [](QSharedPointer<QOpenGLTexture>& texture, const QImage& image) {
+
+    };
+
+    if (_shapeTexture->isStorageAllocated()) {
+        _shapeTexture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, shapeImage.bits());
+    } else {
+        _shapeTexture.reset(new QOpenGLTexture(shapeImage));
         _shapeTexture->create();
+        _shapeTexture->setWrapMode(QOpenGLTexture::ClampToBorder);
+    }
 
-    _shapeTexture->setWrapMode(QOpenGLTexture::ClampToBorder);
-
-    if (!_areaTexture->isCreated())
+    if (_areaTexture->isStorageAllocated()) {
+        _areaTexture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, areaImage.bits());
+    }
+    else {
+        _areaTexture.reset(new QOpenGLTexture(areaImage));
         _areaTexture->create();
-
-    _areaTexture->setWrapMode(QOpenGLTexture::ClampToBorder);
+        _areaTexture->setWrapMode(QOpenGLTexture::ClampToBorder);
+    }
 }
 
 void SelectionToolRenderer::createShaderProgram()

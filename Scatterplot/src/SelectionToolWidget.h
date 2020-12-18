@@ -27,5 +27,5 @@ private:
 
 private:
     ScatterplotPlugin*                          _scatterplotPlugin;     /** Scatter plot plugin instance */
-	std::unique_ptr<Ui::SelectionToolWidget>	_ui;                    /** User interface as produced by Qt designer */
+    std::unique_ptr<Ui::SelectionToolWidget>    _ui;                    /** User interface as produced by Qt designer */
 };
