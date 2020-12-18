@@ -38,8 +38,6 @@ runs:
         conan user
         echo Add LKEB artifactory as remote
         conan remote add %CONAN_LKEB_ARTIFACTORY% %CONAN_UPLOAD%
-        conan remote add %CONAN_OLDREMOTE% %CONAN_OLDARTIFACTORY%
-        conan remote add_ref qt/5.15.1@lkeb/stable %CONAN_OLDREMOTE%
         echo Extend conan cacert.pem
         for /f "delims=" %%i in ('conan config home') do set CONANHOME=%%i
         SETLOCAL EnableDelayedExpansion
@@ -67,8 +65,6 @@ runs:
       shell: cmd
       env:
         BUILD_SHARED: True
-        CONAN_OLDARTIFACTORY: http://cytosplore.lumc.nl:8081/artifactory/api/conan/conan-local
-        CONAN_OLDREMOTE: lkebconan
         CONAN_UPLOAD: https://lkeb-artifactory.lumc.nl/artifactory/api/conan/conan-local
         CONAN_LKEB_ARTIFACTORY: lkeb-artifactory
         CONAN_PEM: ${{ inputs.conan-pem }}
