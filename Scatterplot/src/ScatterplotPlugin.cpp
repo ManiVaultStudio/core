@@ -150,54 +150,56 @@ void ScatterplotPlugin::selectPoints()
     const Points& points = _core->requestData<Points>(_currentDataSet);
     Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
 
-    std::vector<std::uint32_t> areaIndices;
+    std::vector<std::uint32_t> targetIndices;
 
-    areaIndices.reserve(points.getNumPoints());
+    targetIndices.reserve(points.getNumPoints());
 
-    const auto dataBounds = _scatterPlotWidget->getBounds();
-    const auto width = selectionAreaImage.width();
-    const auto height = selectionAreaImage.height();
-    const auto size = width < height ? width : height;
+    const auto dataBounds   = _scatterPlotWidget->getBounds();
+    const auto width        = selectionAreaImage.width();
+    const auto height       = selectionAreaImage.height();
+    const auto size         = width < height ? width : height;
+
+    const auto& setIndices = points.isDerivedData() ? DataSet::getSourceData(points).indices : points.indices;
 
     for (unsigned int i = 0; i < _points.size(); i++) {
         const auto uvNormalized     = QPointF((_points[i].x - dataBounds.getLeft()) / dataBounds.getWidth(), (dataBounds.getTop() - _points[i].y) / dataBounds.getHeight());
         const auto uvOffset         = QPoint((selectionAreaImage.width() - size) / 2.0f, (selectionAreaImage.height() - size) / 2.0f);
         const auto uv               = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
 
-        if (selectionAreaImage.pixelColor(uv).alpha() > 0)
-            areaIndices.push_back(i);
+        if (selectionAreaImage.pixelColor(uv).alpha() > 0) {
+            if (points.isFull())
+                targetIndices.push_back(i);
+            else
+                targetIndices.push_back(setIndices[i]);
+        }
     }
-
-    std::vector<std::uint32_t> indices;
+    
+    auto& selectionSetIndices = selectionSet.indices;
 
     switch (_pixelSelectionTool->getModifier())
     {
         case PixelSelectionTool::Modifier::Replace:
-        {
-            selectionSet.indices.clear();
-            indices = areaIndices;
             break;
-        }
 
         case PixelSelectionTool::Modifier::Add:
         case PixelSelectionTool::Modifier::Remove:
         {
-            QSet<std::uint32_t> set(selectionSet.indices.begin(), selectionSet.indices.end());
+            QSet<std::uint32_t> set(selectionSetIndices.begin(), selectionSetIndices.end());
 
             switch (_pixelSelectionTool->getModifier())
             {
                 case PixelSelectionTool::Modifier::Add:
                 {
-                    for (const auto& areaIndex : areaIndices)
-                        set.insert(areaIndex);
+                    for (const auto& targetIndex : targetIndices)
+                        set.insert(targetIndex);
 
                     break;
                 }
 
                 case PixelSelectionTool::Modifier::Remove:
                 {
-                    for (const auto& areaIndex : areaIndices)
-                        set.remove(areaIndex);
+                    for (const auto& targetIndex : targetIndices)
+                        set.remove(targetIndex);
 
                     break;
                 }
@@ -206,7 +208,7 @@ void ScatterplotPlugin::selectPoints()
                     break;
             }
 
-            indices = std::vector<std::uint32_t>(set.begin(), set.end());
+            targetIndices = std::vector<std::uint32_t>(set.begin(), set.end());
 
             break;
         }
@@ -215,28 +217,9 @@ void ScatterplotPlugin::selectPoints()
             break;
     }
 
-    selectionSet.indices.clear();
+    selectionSetIndices = targetIndices;
 
-    QString dataName;
-
-    if (!points.isDerivedData())
-    {
-        for (const auto& index : indices)
-            selectionSet.indices.push_back(points.isFull() ? index : points.indices[index]);
-
-        dataName = points.getDataName();
-    }
-    else
-    {
-        const Points& sourceSet = DataSet::getSourceData(points);
-
-        for (const auto& index : indices)
-            selectionSet.indices.push_back(sourceSet.isFull() ? index : sourceSet.indices[index]);
-
-        dataName = DataSet::getSourceData(points).getDataName();
-    }
-    
-    _core->notifySelectionChanged(dataName);
+    _core->notifySelectionChanged(points.isDerivedData() ? DataSet::getSourceData(points).getDataName() : points.getDataName());
 }
 
 void ScatterplotPlugin::onDataInput(QString dataSetName)
@@ -620,13 +603,20 @@ void ScatterplotPlugin::selectAll()
     if (_currentDataSet.isEmpty())
         return;
 
-    const Points& points = _core->requestData<Points>(_currentDataSet);
-    Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+    const auto& points = _core->requestData<Points>(_currentDataSet);
 
-    selectionSet.indices.clear();
-    selectionSet.indices.resize(points.getNumPoints());
+    auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
+    auto& selectionSetIndices   = selectionSet.indices;
 
-    std::iota(selectionSet.indices.begin(), selectionSet.indices.end(), 0);
+    const auto& setIndices = points.isDerivedData() ? DataSet::getSourceData(points).indices : points.indices;
+
+    selectionSetIndices.clear();
+    selectionSetIndices.resize(points.getNumPoints());
+
+    if (points.isFull())
+        std::iota(selectionSetIndices.begin(), selectionSetIndices.end(), 0);
+    else
+        selectionSetIndices = setIndices;
 
     _core->notifySelectionChanged(selectionSet.getDataName());
 }
@@ -636,10 +626,12 @@ void ScatterplotPlugin::clearSelection()
     if (_currentDataSet.isEmpty())
         return;
 
-    const Points& points = _core->requestData<Points>(_currentDataSet);
-    Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+    const auto& points = _core->requestData<Points>(_currentDataSet);
 
-    selectionSet.indices.clear();
+    auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
+    auto& selectionSetIndices   = selectionSet.indices;
+
+    selectionSetIndices.clear();
 
     _core->notifySelectionChanged(selectionSet.getDataName());
 }
@@ -649,21 +641,25 @@ void ScatterplotPlugin::invertSelection()
     if (_currentDataSet.isEmpty())
         return;
 
-    const Points& points = _core->requestData<Points>(_currentDataSet);
-    Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+    const auto& points = _core->requestData<Points>(_currentDataSet);
 
-    auto& indices = selectionSet.indices;
+    auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
+    auto& selectionSetIndices   = selectionSet.indices;
 
-    const auto indicesSet = QSet<std::uint32_t>(indices.begin(), indices.end());
+    const auto& pointsIndices = points.isDerivedData() ? DataSet::getSourceData(points).indices : points.indices;
 
-    indices.clear();
-    indices.reserve(points.getNumPoints());
+    const auto selectionIndicesSet = QSet<std::uint32_t>(selectionSetIndices.begin(), selectionSetIndices.end());
+
+    selectionSetIndices.clear();
+    selectionSetIndices.reserve(points.getNumPoints());
 
     for (int p = 0; p < points.getNumPoints(); ++p) {
-        if (indicesSet.contains(p))
+        const auto setIndex = pointsIndices[p];
+
+        if (selectionIndicesSet.contains(setIndex))
             continue;
 
-        indices.push_back(p);
+        selectionSetIndices.push_back(setIndex);
     }
 
     _core->notifySelectionChanged(selectionSet.getDataName());

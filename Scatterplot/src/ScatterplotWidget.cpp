@@ -274,6 +274,7 @@ void ScatterplotWidget::paintGL()
         break;
     }
     }
+    
     _pixelSelectionToolRenderer.render();
 }
 
