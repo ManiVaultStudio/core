@@ -33,7 +33,7 @@ class ScatterplotPlugin : public ViewPlugin
 public:
     ScatterplotPlugin() :
         ViewPlugin("Scatterplot View"),
-        _selectionTool(new PixelSelectionTool(this))
+        _pixelSelectionTool(new PixelSelectionTool(this, false))
     {
     }
 
@@ -59,6 +59,11 @@ public:
     std::uint32_t getNumSelectedPoints() const;
 
 public: // Selection
+
+    bool canSelect() const;
+    bool canSelectAll() const;
+    bool canClearSelection() const;
+    bool canInvertSelection() const;
 
     void selectAll();
     void clearSelection();
@@ -96,7 +101,7 @@ private:
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;
 
-    PixelSelectionTool*     _selectionTool;     /** Pixel selection tool */
+    PixelSelectionTool*     _pixelSelectionTool;     /** Pixel selection tool */
 };
 
 // =============================================================================

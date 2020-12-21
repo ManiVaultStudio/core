@@ -37,7 +37,7 @@ void ScatterplotPlugin::init()
     supportedColorTypes.append(ClusterType);
     supportedColorTypes.append(ColorType);
 
-    _scatterPlotWidget = new ScatterplotWidget(*_selectionTool);
+    _scatterPlotWidget = new ScatterplotWidget(*_pixelSelectionTool);
     _scatterPlotWidget->setAlpha(0.5f);
 
     _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
@@ -56,22 +56,22 @@ void ScatterplotPlugin::init()
 
     addWidget(splitter);
 
-    _scatterPlotWidget->installEventFilter(_selectionTool);
+    _scatterPlotWidget->installEventFilter(_pixelSelectionTool);
 
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
     
     qApp->installEventFilter(this);
 
-    QObject::connect(_selectionTool, &PixelSelectionTool::areaChanged, [this]() {
-        if (!_selectionTool->isNotifyDuringSelection())
+    QObject::connect(_pixelSelectionTool, &PixelSelectionTool::areaChanged, [this]() {
+        if (!_pixelSelectionTool->isNotifyDuringSelection())
             return;
 
         selectPoints();
     });
 
-    QObject::connect(_selectionTool, &PixelSelectionTool::ended, [this]() {
-        if (_selectionTool->isNotifyDuringSelection())
+    QObject::connect(_pixelSelectionTool, &PixelSelectionTool::ended, [this]() {
+        if (_pixelSelectionTool->isNotifyDuringSelection())
             return;
 
         selectPoints();
@@ -142,10 +142,10 @@ void ScatterplotPlugin::cDimPicked(int index)
 
 void ScatterplotPlugin::selectPoints()
 {
-    if (_currentDataSet.isEmpty() || !_selectionTool->isActive())
+    if (_currentDataSet.isEmpty() || !_pixelSelectionTool->isActive())
         return;
 
-    auto selectionAreaImage = _selectionTool->getAreaPixmap().toImage();
+    auto selectionAreaImage = _pixelSelectionTool->getAreaPixmap().toImage();
 
     const Points& points = _core->requestData<Points>(_currentDataSet);
     Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
@@ -160,9 +160,9 @@ void ScatterplotPlugin::selectPoints()
     const auto size = width < height ? width : height;
 
     for (unsigned int i = 0; i < _points.size(); i++) {
-        const auto uvNormalized = QPointF((_points[i].x - dataBounds.getLeft()) / dataBounds.getWidth(), (dataBounds.getTop() - _points[i].y) / dataBounds.getHeight());
-        const auto uvOffset = QPoint((selectionAreaImage.width() - size) / 2.0f, (selectionAreaImage.height() - size) / 2.0f);
-        const auto uv = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
+        const auto uvNormalized     = QPointF((_points[i].x - dataBounds.getLeft()) / dataBounds.getWidth(), (dataBounds.getTop() - _points[i].y) / dataBounds.getHeight());
+        const auto uvOffset         = QPoint((selectionAreaImage.width() - size) / 2.0f, (selectionAreaImage.height() - size) / 2.0f);
+        const auto uv               = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
 
         if (selectionAreaImage.pixelColor(uv).alpha() > 0)
             areaIndices.push_back(i);
@@ -170,7 +170,7 @@ void ScatterplotPlugin::selectPoints()
 
     std::vector<std::uint32_t> indices;
 
-    switch (_selectionTool->getModifier())
+    switch (_pixelSelectionTool->getModifier())
     {
         case PixelSelectionTool::Modifier::Replace:
         {
@@ -184,7 +184,7 @@ void ScatterplotPlugin::selectPoints()
         {
             QSet<std::uint32_t> set(selectionSet.indices.begin(), selectionSet.indices.end());
 
-            switch (_selectionTool->getModifier())
+            switch (_pixelSelectionTool->getModifier())
             {
                 case PixelSelectionTool::Modifier::Add:
                 {
@@ -262,6 +262,8 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
         _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
+
+    _pixelSelectionTool->setEnabled(!_currentDataSet.isEmpty());
 }
 
 void ScatterplotPlugin::onColorDataInput(QString dataSetName)
@@ -437,7 +439,7 @@ void ScatterplotPlugin::updateSelection()
 
 PixelSelectionTool& ScatterplotPlugin::getSelectionTool()
 {
-    return *_selectionTool;
+    return *_pixelSelectionTool;
 }
 
 bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
@@ -457,25 +459,25 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
             {
                 case Qt::Key::Key_R:
                 {
-                    _selectionTool->setType(PixelSelectionTool::Type::Rectangle);
+                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Rectangle);
                     break;
                 }
 
                 case Qt::Key::Key_B:
                 {
-                    _selectionTool->setType(PixelSelectionTool::Type::Brush);
+                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Brush);
                     break;
                 }
 
                 case Qt::Key::Key_P:
                 {
-                    _selectionTool->setType(PixelSelectionTool::Type::Polygon);
+                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Polygon);
                     break;
                 }
 
                 case Qt::Key::Key_L:
                 {
-                    _selectionTool->setType(PixelSelectionTool::Type::Lasso);
+                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Lasso);
                     break;
                 }
 
@@ -499,19 +501,19 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
 
                 case Qt::Key::Key_Shift:
                 {
-                    _selectionTool->setModifier(PixelSelectionTool::Modifier::Add);
+                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Add);
                     break;
                 }
 
                 case Qt::Key::Key_Control:
                 {
-                    _selectionTool->setModifier(PixelSelectionTool::Modifier::Remove);
+                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Remove);
                     break;
                 }
 
                 case Qt::Key::Key_Escape:
                 {
-                    switch (_selectionTool->getType())
+                    switch (_pixelSelectionTool->getType())
                     {
                         case PixelSelectionTool::Type::Rectangle:
                         case PixelSelectionTool::Type::Brush:
@@ -519,7 +521,7 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
 
                         case PixelSelectionTool::Type::Lasso:
                         case PixelSelectionTool::Type::Polygon:
-                            _selectionTool->abort();
+                            _pixelSelectionTool->abort();
                             break;
 
                         default:
@@ -555,7 +557,7 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
                 case Qt::Key::Key_Shift:
                 case Qt::Key::Key_Control:
                 {
-                    _selectionTool->setModifier(PixelSelectionTool::Modifier::Replace);
+                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Replace);
                     break;
                 }
 
@@ -577,6 +579,9 @@ QString ScatterplotPlugin::getCurrentDataset() const
 
 std::uint32_t ScatterplotPlugin::getNumPoints() const
 {
+    if (_currentDataSet.isEmpty())
+        return 0;
+
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
     return points.getNumPoints();
@@ -588,6 +593,26 @@ std::uint32_t ScatterplotPlugin::getNumSelectedPoints() const
     const Points& selection = static_cast<Points&>(points.getSelection());
 
     return selection.indices.size();
+}
+
+bool ScatterplotPlugin::canSelect() const
+{
+    return !getCurrentDataset().isEmpty() && getNumPoints() >= 0;
+}
+
+bool ScatterplotPlugin::canSelectAll() const
+{
+    return getNumPoints() == -1 ? false : getNumSelectedPoints() != getNumPoints();
+}
+
+bool ScatterplotPlugin::canClearSelection() const
+{
+    return getNumPoints() == -1 ? false : getNumSelectedPoints() >= 1;
+}
+
+bool ScatterplotPlugin::canInvertSelection() const
+{
+    return getNumPoints() >= 0;
 }
 
 void ScatterplotPlugin::selectAll()

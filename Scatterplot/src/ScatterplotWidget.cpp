@@ -29,17 +29,17 @@ namespace
     }
 }
 
-ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& selectionTool) :
+ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _densityRenderer(DensityRenderer::RenderMode::DENSITY),
     _colormapWidget(this),
     _pointRenderer(),
-    _selectionToolRenderer(selectionTool),
-    _pixelSelectionTool(selectionTool)
+    _pixelSelectionToolRenderer(pixelSelectionTool),
+    _pixelSelectionTool(pixelSelectionTool)
 {
     setMouseTracking(true);
 
     QObject::connect(&_pixelSelectionTool, &PixelSelectionTool::shapeChanged, [this]() {
-        _selectionToolRenderer.update();
+        _pixelSelectionToolRenderer.update();
         update();
     });
 }
@@ -201,7 +201,7 @@ void ScatterplotWidget::initializeGL()
 
     _pointRenderer.init();
     _densityRenderer.init();
-    _selectionToolRenderer.init();
+    _pixelSelectionToolRenderer.init();
 
     // Set a default color map for both renderers
     _pointRenderer.setScalarEffect(PointEffect::Color);
@@ -219,7 +219,7 @@ void ScatterplotWidget::resizeGL(int w, int h)
 
     _pointRenderer.resize(QSize(w, h));
     _densityRenderer.resize(QSize(w, h));
-    _selectionToolRenderer.resize(QSize(w, h));
+    _pixelSelectionToolRenderer.resize(QSize(w, h));
 
     // Set matrix for normalizing from pixel coordinates to [0, 1]
     toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
@@ -274,7 +274,7 @@ void ScatterplotWidget::paintGL()
         break;
     }
     }
-    _selectionToolRenderer.render();
+    _pixelSelectionToolRenderer.render();
 }
 
 void ScatterplotWidget::cleanup()
@@ -285,7 +285,7 @@ void ScatterplotWidget::cleanup()
     makeCurrent();
     _pointRenderer.destroy();
     _densityRenderer.destroy();
-    _selectionToolRenderer.destroy();
+    _pixelSelectionToolRenderer.destroy();
 }
 
 ScatterplotWidget::~ScatterplotWidget()

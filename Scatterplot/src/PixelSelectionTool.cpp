@@ -22,15 +22,15 @@ const QMap<QString, PixelSelectionTool::Modifier> PixelSelectionTool::modifiers 
 };
 
 const QColor PixelSelectionTool::COLOR_MAIN      = Qt::black;
-const QColor PixelSelectionTool::COLOR_FILL      = QColor(70, 70, 70, 50);
+const QColor PixelSelectionTool::COLOR_FILL      = QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 50);
 const QBrush PixelSelectionTool::AREA_BRUSH      = QBrush(COLOR_FILL);
 const QPen PixelSelectionTool::PEN_LINE_FG       = QPen(COLOR_MAIN, 1.7f, Qt::SolidLine);
 const QPen PixelSelectionTool::PEN_LINE_BG       = QPen(QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 140), 1.7f, Qt::DotLine);
 const QPen PixelSelectionTool::PEN_CP            = QPen(COLOR_MAIN, 7.0f, Qt::SolidLine, Qt::RoundCap);
 
-PixelSelectionTool::PixelSelectionTool(ScatterplotPlugin* scatterplotPlugin) :
-    QObject(reinterpret_cast<QObject*>(scatterplotPlugin)),
-    _scatterplotPlugin(scatterplotPlugin),
+PixelSelectionTool::PixelSelectionTool(QObject* parent, const bool& enabled /*= true*/) :
+    QObject(parent),
+    _enabled(enabled),
     _type(Type::Rectangle),
     _modifier(Modifier::Replace),
     _active(false),
@@ -42,6 +42,16 @@ PixelSelectionTool::PixelSelectionTool(ScatterplotPlugin* scatterplotPlugin) :
     _shapePixmap(),
     _areaPixmap()
 {
+}
+
+bool PixelSelectionTool::isEnabled() const
+{
+    return _enabled;
+}
+
+void PixelSelectionTool::setEnabled(const bool& enabled)
+{
+    _enabled = enabled;
 }
 
 PixelSelectionTool::Type PixelSelectionTool::getType() const
@@ -111,55 +121,12 @@ void PixelSelectionTool::setRadius(const float& radius)
     paint();
 }
 
-bool PixelSelectionTool::canSelect() const
-{
-    Q_ASSERT(_scatterplotPlugin != nullptr);
-
-    return !_scatterplotPlugin->getCurrentDataset().isEmpty() && _scatterplotPlugin->getNumPoints() >= 0;
-}
-
 void PixelSelectionTool::setChanged()
 {
     emit typeChanged(_type);
     emit modifierChanged(_modifier);
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
     emit radiusChanged(_radius);
-}
-
-void PixelSelectionTool::selectAll()
-{
-    Q_ASSERT(_scatterplotPlugin != nullptr);
-
-    _scatterplotPlugin->selectAll();
-}
-
-void PixelSelectionTool::clearSelection()
-{
-    Q_ASSERT(_scatterplotPlugin != nullptr);
-
-    _scatterplotPlugin->clearSelection();
-}
-
-void PixelSelectionTool::invertSelection()
-{
-    Q_ASSERT(_scatterplotPlugin != nullptr);
-
-    _scatterplotPlugin->invertSelection();
-}
-
-bool PixelSelectionTool::canSelectAll() const
-{
-    return _scatterplotPlugin->getNumPoints() == -1 ? false : _scatterplotPlugin->getNumSelectedPoints() != _scatterplotPlugin->getNumPoints();
-}
-
-bool PixelSelectionTool::canClearSelection() const
-{
-    return _scatterplotPlugin->getNumPoints() == -1 ? false : _scatterplotPlugin->getNumSelectedPoints() >= 1;
-}
-
-bool PixelSelectionTool::canInvertSelection() const
-{
-    return _scatterplotPlugin->getNumPoints() >= 0;
 }
 
 void PixelSelectionTool::abort()
@@ -393,7 +360,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
 void PixelSelectionTool::paint()
 {
-    if (!canSelect())
+    if (!_enabled)
         return;
 
     _shapePixmap = QPixmap(_shapePixmap.size());

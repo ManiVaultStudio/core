@@ -31,7 +31,7 @@ public:
         SCATTERPLOT, DENSITY, LANDSCAPE
     };
 
-    ScatterplotWidget(PixelSelectionTool& selectionTool);
+    ScatterplotWidget(PixelSelectionTool& pixelSelectionTool);
 
     ~ScatterplotWidget();
 
@@ -101,7 +101,7 @@ private:
     /* Renderers */
     PointRenderer           _pointRenderer;
     DensityRenderer         _densityRenderer;
-    PixelSelectionToolRenderer   _selectionToolRenderer;
+    PixelSelectionToolRenderer   _pixelSelectionToolRenderer;
 
 
     /* Auxiliary widgets */

@@ -5,8 +5,6 @@
 #include <QPen>
 #include <QBrush>
 
-class ScatterplotPlugin;
-
 class QPainter;
 
 /**
@@ -69,35 +67,39 @@ public:
 
 public: // Construction/destruction
 
-    PixelSelectionTool(ScatterplotPlugin* scatterplotPlugin);
+    /**
+     * Constructor
+     * @param parent Parent object
+     * @param enabled Whether the tool is enabled or not
+     */
+    PixelSelectionTool(QObject* parent, const bool& enabled = true);
 
 public: // Getters/setters
 
+    /** Get/set whether the tool is enabled or not */
+    bool isEnabled() const;
+    void setEnabled(const bool& enabled);
+
+    /** Get/set the current pixel selection shape type */
     Type getType() const;
     void setType(const Type& type);
 
+    /** Get/set the current pixel selection modifier */
     Modifier getModifier() const;
     void setModifier(const Modifier& modifier);
 
+    /** Get/set whether notifications should be fired continuously or only at the end of selection */
     bool isNotifyDuringSelection() const;
     void setNotifyDuringSelection(const bool& notifyDuringSelection);
 
+    /** Get/set (brush) radius */
     float getRadius() const;
     void setRadius(const float& radius);
 
-    bool canSelect() const;
-
+    /** Trigger signals */
     void setChanged();
 
-    
-    void selectAll();
-    void clearSelection();
-    void invertSelection();
-
-    bool canSelectAll() const;
-    bool canClearSelection() const;
-    bool canInvertSelection() const;
-
+    /** Returns whether the selection process is currently active */
     bool isActive() const {
         return _active;
     }
@@ -105,34 +107,48 @@ public: // Getters/setters
     /** Aborts the selection process */
     void abort();
 
+    /** Get the pixmap overlay that contains the selection tool visualization */
     QPixmap& getShapePixmap() {
         return _shapePixmap;
     }
 
+    /** Get the pixmap overlay that contains the selected pixels*/
     QPixmap& getAreaPixmap() {
         return _areaPixmap;
     }
 
 public: // Event handling
 
+    /**
+     * Listens to the events of \p target
+     * @param target Target object to watch for events
+     * @param event Event that occurred
+     */
     bool eventFilter(QObject* target, QEvent* event) override;
 
 private:
 
+    /** Paints the selection tool pixmaps */
     void paint();
 
+    /** Initiates the selection process */
     void startSelection();
 
+    /** Ends the selection process */
     void endSelection();
 
 signals:
 
+    /** Signals that the type has changed */
     void typeChanged(const Type& type);
 
+    /** Signals that the selection modifier has changed */
     void modifierChanged(const Modifier& modifier);
 
+    /** Signals that the notify during selection property has changed */
     void notifyDuringSelectionChanged(const bool& notifyDuringSelection);
 
+    /** Signals that the radius has changed */
     void radiusChanged(const float& radius);
 
     /** Signals that the selection shape changed */
@@ -148,9 +164,9 @@ signals:
     void ended();
 
 protected:
-    ScatterplotPlugin*  _scatterplotPlugin;         /** Scatter plot plugin */
+    bool                _enabled;                   /** Whether the tool is enabled or not */
     Type                _type;                      /** Current selection type */
-    Modifier            _modifier;                  /** Selection modifier */
+    Modifier            _modifier;                  /** Current selection modifier */
     bool                _active;                    /** Whether the selection process is active */
     bool                _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
     float               _radius;                    /** Brush/circle radius */
@@ -169,10 +185,10 @@ public:
     static constexpr float RADIUS_DELTA     = 10.0f;        /** Radius increment */
 
     // Drawing constants
-    static const QColor COLOR_MAIN;
-    static const QColor COLOR_FILL;
-    static const QBrush AREA_BRUSH;
-    static const QPen PEN_LINE_FG;
-    static const QPen PEN_LINE_BG;
-    static const QPen PEN_CP;
+    static const QColor COLOR_MAIN;         /** Main color */
+    static const QColor COLOR_FILL;         /** Selection area fill color (based on main color) */
+    static const QBrush AREA_BRUSH;         /** Selection area brush */
+    static const QPen PEN_LINE_FG;          /** Foreground pen */
+    static const QPen PEN_LINE_BG;          /** Background pen */
+    static const QPen PEN_CP;               /** Control point pen */
 };
