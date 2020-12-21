@@ -38,7 +38,14 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
 {
     setMouseTracking(true);
 
+    this->installEventFilter(&_pixelSelectionTool);
+
     QObject::connect(&_pixelSelectionTool, &PixelSelectionTool::shapeChanged, [this]() {
+        if (!isInitialized())
+            return;
+
+        makeCurrent();
+
         _pixelSelectionToolRenderer.update();
         update();
     });

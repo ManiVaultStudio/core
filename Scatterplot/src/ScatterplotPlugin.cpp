@@ -56,8 +56,6 @@ void ScatterplotPlugin::init()
 
     addWidget(splitter);
 
-    _scatterPlotWidget->installEventFilter(_pixelSelectionTool);
-
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
     
@@ -158,8 +156,8 @@ void ScatterplotPlugin::selectPoints()
     const auto width        = selectionAreaImage.width();
     const auto height       = selectionAreaImage.height();
     const auto size         = width < height ? width : height;
-
-    const auto& setIndices = points.isDerivedData() ? DataSet::getSourceData(points).indices : points.indices;
+    const auto& set         = points.isDerivedData() ? DataSet::getSourceData(points) : points;
+    const auto& setIndices  = set.indices;
 
     for (unsigned int i = 0; i < _points.size(); i++) {
         const auto uvNormalized     = QPointF((_points[i].x - dataBounds.getLeft()) / dataBounds.getWidth(), (dataBounds.getTop() - _points[i].y) / dataBounds.getHeight());
@@ -167,7 +165,7 @@ void ScatterplotPlugin::selectPoints()
         const auto uv               = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
 
         if (selectionAreaImage.pixelColor(uv).alpha() > 0) {
-            if (points.isFull())
+            if (set.isFull())
                 targetIndices.push_back(i);
             else
                 targetIndices.push_back(setIndices[i]);
@@ -429,7 +427,7 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
 {
     auto widgetBeneathCursor = QApplication::widgetAt(QCursor::pos());
 
-    if (!isAncestorOf(widgetBeneathCursor))
+    if (!isAncestorOf(widgetBeneathCursor) || _currentDataSet.isEmpty())
         return QWidget::eventFilter(target, event);
 
     switch (event->type())
@@ -527,16 +525,6 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
 
             switch (keyEvent->key())
             {
-                case Qt::Key::Key_R:
-                case Qt::Key::Key_B:
-                case Qt::Key::Key_L:
-                case Qt::Key::Key_P:
-                case Qt::Key::Key_A:
-                case Qt::Key::Key_D:
-                case Qt::Key::Key_I:
-                case Qt::Key::Key_Z:
-                    break;
-
                 case Qt::Key::Key_Shift:
                 case Qt::Key::Key_Control:
                 {
@@ -654,7 +642,7 @@ void ScatterplotPlugin::invertSelection()
     selectionSetIndices.reserve(points.getNumPoints());
 
     for (int p = 0; p < points.getNumPoints(); ++p) {
-        const auto setIndex = pointsIndices[p];
+        const auto setIndex = points.isFull() ? p : pointsIndices[p];
 
         if (selectionIndicesSet.contains(setIndex))
             continue;

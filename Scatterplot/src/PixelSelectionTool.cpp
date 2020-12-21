@@ -136,7 +136,7 @@ void PixelSelectionTool::abort()
 
 bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 {
-    auto shouldPaint = true;
+    auto shouldPaint = false;
 
     switch (event->type())
     {
@@ -153,6 +153,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
             _shapePixmap.fill(Qt::transparent);
             _areaPixmap.fill(Qt::transparent);
+
+            shouldPaint = true;
 
             break;
         }
@@ -211,6 +213,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
             }
 
+            shouldPaint = true;
+
             break;
         }
 
@@ -264,6 +268,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
             }
 
+            shouldPaint = true;
+
             break;
         }
 
@@ -284,6 +290,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                             _mousePositions.last() = _mousePosition;
                     }
 
+                    if (isActive())
+                        shouldPaint = true;
+
                     break;
                 }
 
@@ -292,6 +301,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     if (mouseEvent->buttons() & Qt::LeftButton)
                         _mousePositions << _mousePosition;
                     
+                    shouldPaint = true;
+
                     break;
                 }
 
@@ -300,6 +311,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     if (mouseEvent->buttons() & Qt::LeftButton && !_mousePositions.isEmpty())
                         _mousePositions << mouseEvent->pos();
 
+                    if (isActive())
+                        shouldPaint = true;
+
                     break;
                 }
 
@@ -307,6 +321,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                 {
                     if (!_mousePositions.isEmpty())
                         _mousePositions.last() = mouseEvent->pos();
+
+                    if (isActive())
+                        shouldPaint = true;
 
                     break;
                 }
@@ -333,6 +350,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                         setRadius(_radius - RADIUS_DELTA);
                     else
                         setRadius(_radius + RADIUS_DELTA);
+
+                    shouldPaint = true;
 
                     break;
                 }
@@ -407,6 +426,7 @@ void PixelSelectionTool::paint()
             const auto textCenter   = rectangle.topRight() + QPoint(size, -size);
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+
             break;
         }
         
@@ -414,10 +434,16 @@ void PixelSelectionTool::paint()
         {
             const auto brushCenter = _mousePosition;
 
-            if (noMousePositions >= 2) {
-                areaPainter.setBrush(Qt::NoBrush);
-                areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _radius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-                areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+            if (noMousePositions >= 1) {
+                if (noMousePositions == 1) {
+                    areaPainter.setBrush(AREA_BRUSH);
+                    areaPainter.drawEllipse(QPointF(brushCenter), _radius, _radius);
+                }
+                else {
+                    areaPainter.setBrush(Qt::NoBrush);
+                    areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _radius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+                    areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
+                }
             }
 
             shapePainter.setPen(Qt::NoPen);
@@ -436,6 +462,7 @@ void PixelSelectionTool::paint()
             const auto textCenter   = brushCenter + (_radius + size) * QPointF(sin(textAngle), cos(textAngle));
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+
             break;
         }
         
@@ -464,6 +491,7 @@ void PixelSelectionTool::paint()
             const auto textCenter = _mousePositions.first() - QPoint(size, size);
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+
             break;
         }
         
@@ -495,6 +523,7 @@ void PixelSelectionTool::paint()
             const auto textCenter = _mousePositions.first() - QPoint(size, size);
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+
             break;
         }
        

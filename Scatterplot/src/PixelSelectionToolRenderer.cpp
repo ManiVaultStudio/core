@@ -53,13 +53,10 @@ void PixelSelectionToolRenderer::resize(QSize renderSize)
 
 void PixelSelectionToolRenderer::render()
 {
+    if (!_areaTexture->isCreated() || !_shapeTexture->isCreated())
+        return;
+
     try {
-        if (!_areaTexture->isCreated())
-            throw std::runtime_error("Area texture is not created");
-
-        if (!_shapeTexture->isCreated())
-            throw std::runtime_error("Shape texture is not created");
-
         if (!_shaderProgram->bind())
             throw std::runtime_error("Unable to bind shader program");
 
@@ -96,20 +93,23 @@ void PixelSelectionToolRenderer::destroy()
 
 void PixelSelectionToolRenderer::update()
 {
-    const auto areaImage = _pixelSelectionTool.getAreaPixmap().toImage();
-    const auto shapeImage = _pixelSelectionTool.getShapePixmap().toImage();
+    const auto areaImage    = _pixelSelectionTool.getAreaPixmap().toImage();
+    const auto shapeImage   = _pixelSelectionTool.getShapePixmap().toImage();
     
     if (areaImage.isNull() || shapeImage.isNull())
         return;
 
     const auto updateTexture = [](QSharedPointer<QOpenGLTexture>& texture, const QImage& image) {
-        if (texture->isStorageAllocated()) {
-            texture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, image.bits());
-        }
-        else {
+        const auto sizeChanged = image.size() != QSize(texture->width(), texture->height());
+
+        if (!texture->isCreated() || sizeChanged) {
             texture.reset(new QOpenGLTexture(image));
             texture->create();
             texture->setWrapMode(QOpenGLTexture::ClampToBorder);
+        }
+        else {
+            if (texture->isStorageAllocated())
+                texture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, image.bits());
         }
     };
 
