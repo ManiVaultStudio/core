@@ -1,5 +1,5 @@
 #include "SelectionToolRenderer.h"
-#include "SelectionTool.h"
+#include "PixelSelectionTool.h"
 
 #include "util/FileUtil.h"
 
@@ -13,7 +13,7 @@ namespace hdps
 namespace gui
 {
 
-SelectionToolRenderer::SelectionToolRenderer(SelectionTool& selectionTool) :
+SelectionToolRenderer::SelectionToolRenderer(PixelSelectionTool& selectionTool) :
     _selectionTool(selectionTool),
     _renderSize(),
     _shaderProgram(QSharedPointer<QOpenGLShaderProgram>::create()),

@@ -1,4 +1,4 @@
-#include "SelectionTool.h"
+#include "PixelSelectionTool.h"
 #include "ScatterplotPlugin.h"
 #include "Application.h"
 
@@ -8,27 +8,27 @@
 #include <QPainter>
 #include <QtMath>
 
-const QMap<QString, SelectionTool::Type> SelectionTool::types = {
-    { "Rectangle", SelectionTool::Type::Rectangle },
-    { "Brush", SelectionTool::Type::Brush },
-    { "Lasso", SelectionTool::Type::Lasso },
-    { "Polygon", SelectionTool::Type::Polygon }
+const QMap<QString, PixelSelectionTool::Type> PixelSelectionTool::types = {
+    { "Rectangle", PixelSelectionTool::Type::Rectangle },
+    { "Brush", PixelSelectionTool::Type::Brush },
+    { "Lasso", PixelSelectionTool::Type::Lasso },
+    { "Polygon", PixelSelectionTool::Type::Polygon }
 };
 
-const QMap<QString, SelectionTool::Modifier> SelectionTool::modifiers = {
-    { "Replace", SelectionTool::Modifier::Replace },
-    { "Add", SelectionTool::Modifier::Add },
-    { "Remove", SelectionTool::Modifier::Remove }
+const QMap<QString, PixelSelectionTool::Modifier> PixelSelectionTool::modifiers = {
+    { "Replace", PixelSelectionTool::Modifier::Replace },
+    { "Add", PixelSelectionTool::Modifier::Add },
+    { "Remove", PixelSelectionTool::Modifier::Remove }
 };
 
-const QColor SelectionTool::COLOR_MAIN      = Qt::black;
-const QColor SelectionTool::COLOR_FILL      = QColor(70, 70, 70, 50);
-const QBrush SelectionTool::AREA_BRUSH      = QBrush(COLOR_FILL);
-const QPen SelectionTool::PEN_LINE_FG       = QPen(COLOR_MAIN, 1.7f, Qt::SolidLine);
-const QPen SelectionTool::PEN_LINE_BG       = QPen(QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 140), 1.7f, Qt::DotLine);
-const QPen SelectionTool::PEN_CP            = QPen(COLOR_MAIN, 7.0f, Qt::SolidLine, Qt::RoundCap);
+const QColor PixelSelectionTool::COLOR_MAIN      = Qt::black;
+const QColor PixelSelectionTool::COLOR_FILL      = QColor(70, 70, 70, 50);
+const QBrush PixelSelectionTool::AREA_BRUSH      = QBrush(COLOR_FILL);
+const QPen PixelSelectionTool::PEN_LINE_FG       = QPen(COLOR_MAIN, 1.7f, Qt::SolidLine);
+const QPen PixelSelectionTool::PEN_LINE_BG       = QPen(QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 140), 1.7f, Qt::DotLine);
+const QPen PixelSelectionTool::PEN_CP            = QPen(COLOR_MAIN, 7.0f, Qt::SolidLine, Qt::RoundCap);
 
-SelectionTool::SelectionTool(ScatterplotPlugin* scatterplotPlugin) :
+PixelSelectionTool::PixelSelectionTool(ScatterplotPlugin* scatterplotPlugin) :
     QObject(reinterpret_cast<QObject*>(scatterplotPlugin)),
     _scatterplotPlugin(scatterplotPlugin),
     _type(Type::Rectangle),
@@ -44,12 +44,12 @@ SelectionTool::SelectionTool(ScatterplotPlugin* scatterplotPlugin) :
 {
 }
 
-SelectionTool::Type SelectionTool::getType() const
+PixelSelectionTool::Type PixelSelectionTool::getType() const
 {
     return _type;
 }
 
-void SelectionTool::setType(const Type& type)
+void PixelSelectionTool::setType(const Type& type)
 {
     if (type == _type)
         return;
@@ -62,12 +62,12 @@ void SelectionTool::setType(const Type& type)
     paint();
 }
 
-SelectionTool::Modifier SelectionTool::getModifier() const
+PixelSelectionTool::Modifier PixelSelectionTool::getModifier() const
 {
     return _modifier;
 }
 
-void SelectionTool::setModifier(const Modifier& modifier)
+void PixelSelectionTool::setModifier(const Modifier& modifier)
 {
     if (modifier == _modifier)
         return;
@@ -79,12 +79,12 @@ void SelectionTool::setModifier(const Modifier& modifier)
     paint();
 }
 
-bool SelectionTool::isNotifyDuringSelection() const
+bool PixelSelectionTool::isNotifyDuringSelection() const
 {
     return _notifyDuringSelection;
 }
 
-void SelectionTool::setNotifyDuringSelection(const bool& notifyDuringSelection)
+void PixelSelectionTool::setNotifyDuringSelection(const bool& notifyDuringSelection)
 {
     if (notifyDuringSelection == _notifyDuringSelection)
         return;
@@ -94,12 +94,12 @@ void SelectionTool::setNotifyDuringSelection(const bool& notifyDuringSelection)
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
 }
 
-float SelectionTool::getRadius() const
+float PixelSelectionTool::getRadius() const
 {
     return _radius;
 }
 
-void SelectionTool::setRadius(const float& radius)
+void PixelSelectionTool::setRadius(const float& radius)
 {
     if (radius == _radius)
         return;
@@ -111,14 +111,14 @@ void SelectionTool::setRadius(const float& radius)
     paint();
 }
 
-bool SelectionTool::canSelect() const
+bool PixelSelectionTool::canSelect() const
 {
     Q_ASSERT(_scatterplotPlugin != nullptr);
 
     return !_scatterplotPlugin->getCurrentDataset().isEmpty() && _scatterplotPlugin->getNumPoints() >= 0;
 }
 
-void SelectionTool::setChanged()
+void PixelSelectionTool::setChanged()
 {
     emit typeChanged(_type);
     emit modifierChanged(_modifier);
@@ -126,48 +126,48 @@ void SelectionTool::setChanged()
     emit radiusChanged(_radius);
 }
 
-void SelectionTool::selectAll()
+void PixelSelectionTool::selectAll()
 {
     Q_ASSERT(_scatterplotPlugin != nullptr);
 
     _scatterplotPlugin->selectAll();
 }
 
-void SelectionTool::clearSelection()
+void PixelSelectionTool::clearSelection()
 {
     Q_ASSERT(_scatterplotPlugin != nullptr);
 
     _scatterplotPlugin->clearSelection();
 }
 
-void SelectionTool::invertSelection()
+void PixelSelectionTool::invertSelection()
 {
     Q_ASSERT(_scatterplotPlugin != nullptr);
 
     _scatterplotPlugin->invertSelection();
 }
 
-bool SelectionTool::canSelectAll() const
+bool PixelSelectionTool::canSelectAll() const
 {
     return _scatterplotPlugin->getNumPoints() == -1 ? false : _scatterplotPlugin->getNumSelectedPoints() != _scatterplotPlugin->getNumPoints();
 }
 
-bool SelectionTool::canClearSelection() const
+bool PixelSelectionTool::canClearSelection() const
 {
     return _scatterplotPlugin->getNumPoints() == -1 ? false : _scatterplotPlugin->getNumSelectedPoints() >= 1;
 }
 
-bool SelectionTool::canInvertSelection() const
+bool PixelSelectionTool::canInvertSelection() const
 {
     return _scatterplotPlugin->getNumPoints() >= 0;
 }
 
-void SelectionTool::abort()
+void PixelSelectionTool::abort()
 {
     endSelection();
 }
 
-bool SelectionTool::eventFilter(QObject* target, QEvent* event)
+bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 {
     auto shouldPaint = true;
 
@@ -391,7 +391,7 @@ bool SelectionTool::eventFilter(QObject* target, QEvent* event)
     return QObject::eventFilter(target, event);
 }
 
-void SelectionTool::paint()
+void PixelSelectionTool::paint()
 {
     if (!canSelect())
         return;
@@ -575,14 +575,14 @@ void SelectionTool::paint()
     emit areaChanged();
 }
 
-void SelectionTool::startSelection()
+void PixelSelectionTool::startSelection()
 {
     _active = true;
 
     emit started();
 }
 
-void SelectionTool::endSelection()
+void PixelSelectionTool::endSelection()
 {
     emit ended();
 

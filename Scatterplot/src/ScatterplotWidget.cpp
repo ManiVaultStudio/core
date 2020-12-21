@@ -1,5 +1,5 @@
 #include "ScatterplotWidget.h"
-#include "SelectionTool.h"
+#include "PixelSelectionTool.h"
 
 #include "util/Math.h"
 
@@ -29,7 +29,7 @@ namespace
     }
 }
 
-ScatterplotWidget::ScatterplotWidget(SelectionTool& selectionTool) :
+ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& selectionTool) :
     _densityRenderer(DensityRenderer::RenderMode::DENSITY),
     _colormapWidget(this),
     _pointRenderer(),
@@ -38,7 +38,7 @@ ScatterplotWidget::ScatterplotWidget(SelectionTool& selectionTool) :
 {
     setMouseTracking(true);
 
-    QObject::connect(&_selectionTool, &SelectionTool::shapeChanged, [this]() {
+    QObject::connect(&_selectionTool, &PixelSelectionTool::shapeChanged, [this]() {
         _selectionToolRenderer.update();
         update();
     });

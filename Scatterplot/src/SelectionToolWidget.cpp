@@ -19,23 +19,23 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
     _ui->modifierAddPushButton->setText(fontAwesome.getIconCharacter("plus"));
     _ui->modifierRemovePushButton->setFont(fontAwesome.getFont(8));
     _ui->modifierRemovePushButton->setText(fontAwesome.getIconCharacter("minus"));
-    _ui->radiusSpinBox->setMinimum(SelectionTool::RADIUS_MIN);
-    _ui->radiusSpinBox->setMaximum(SelectionTool::RADIUS_MAX);
-    _ui->radiusSlider->setMinimum(SelectionTool::RADIUS_MIN * 1000.0f);
-    _ui->radiusSlider->setMaximum(SelectionTool::RADIUS_MAX * 1000.0f);
+    _ui->radiusSpinBox->setMinimum(PixelSelectionTool::RADIUS_MIN);
+    _ui->radiusSpinBox->setMaximum(PixelSelectionTool::RADIUS_MAX);
+    _ui->radiusSlider->setMinimum(PixelSelectionTool::RADIUS_MIN * 1000.0f);
+    _ui->radiusSlider->setMaximum(PixelSelectionTool::RADIUS_MAX * 1000.0f);
 
-    _ui->typeComboBox->addItems(QStringList(SelectionTool::types.keys()));
+    _ui->typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
 
     QObject::connect(_ui->typeComboBox, &QComboBox::currentTextChanged, [this](QString currentText) {
-        getSelectionTool().setType(SelectionTool::getTypeEnum(currentText));
+        getSelectionTool().setType(PixelSelectionTool::getTypeEnum(currentText));
     });
 
     QObject::connect(_ui->modifierAddPushButton, &QPushButton::toggled, [this](bool checked) {
-        getSelectionTool().setModifier(checked ? SelectionTool::Modifier::Add : SelectionTool::Modifier::Replace);
+        getSelectionTool().setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
     });
 
     QObject::connect(_ui->modifierRemovePushButton, &QPushButton::toggled, [this](bool checked) {
-        getSelectionTool().setModifier(checked ? SelectionTool::Modifier::Remove : SelectionTool::Modifier::Replace);
+        getSelectionTool().setModifier(checked ? PixelSelectionTool::Modifier::Remove : PixelSelectionTool::Modifier::Replace);
     });
 
     QObject::connect(_ui->radiusSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
@@ -43,7 +43,7 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
     });
 
     QObject::connect(_ui->radiusSlider, qOverload<int>(&QSlider::valueChanged), [this](int value) {
-        getSelectionTool().setRadius(SelectionTool::RADIUS_MIN + ((static_cast<float>(value) - _ui->radiusSlider->minimum()) / 1000.0f));
+        getSelectionTool().setRadius(PixelSelectionTool::RADIUS_MIN + ((static_cast<float>(value) - _ui->radiusSlider->minimum()) / 1000.0f));
     });
 
     QObject::connect(_ui->selectAllPushButton, &QPushButton::clicked, [this]() {
@@ -74,21 +74,21 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
 
         switch (getSelectionTool().getModifier())
         {
-            case SelectionTool::Modifier::Replace:
+            case PixelSelectionTool::Modifier::Replace:
             {
                 _ui->modifierAddPushButton->setChecked(false);
                 _ui->modifierRemovePushButton->setChecked(false);
                 break;
             }
 
-            case SelectionTool::Modifier::Add:
+            case PixelSelectionTool::Modifier::Add:
             {
                 _ui->modifierAddPushButton->setChecked(true);
                 _ui->modifierRemovePushButton->setChecked(false);
                 break;
             }
 
-            case SelectionTool::Modifier::Remove:
+            case PixelSelectionTool::Modifier::Remove:
             {
                 _ui->modifierAddPushButton->setChecked(false);
                 _ui->modifierRemovePushButton->setChecked(true);
@@ -109,17 +109,17 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
         if (getSelectionTool().canSelect()) {
             switch (getSelectionTool().getType())
             {
-                case SelectionTool::Type::Rectangle:
+                case PixelSelectionTool::Type::Rectangle:
                     break;
 
-                case SelectionTool::Type::Brush:
+                case PixelSelectionTool::Type::Brush:
                 {
                     radiusEnabled = true;
                     break;
                 }
 
-                case SelectionTool::Type::Lasso:
-                case SelectionTool::Type::Polygon:
+                case PixelSelectionTool::Type::Lasso:
+                case PixelSelectionTool::Type::Polygon:
                     break;
 
                 default:
@@ -132,22 +132,22 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
         _ui->radiusSlider->setEnabled(radiusEnabled);
     };
 
-    QObject::connect(&getSelectionTool(), &SelectionTool::typeChanged, [this, updateRadiusUI](const SelectionTool::Type& type) {
-        _ui->typeComboBox->setCurrentText(SelectionTool::getTypeName(type));
+    QObject::connect(&getSelectionTool(), &PixelSelectionTool::typeChanged, [this, updateRadiusUI](const PixelSelectionTool::Type& type) {
+        _ui->typeComboBox->setCurrentText(PixelSelectionTool::getTypeName(type));
 
         updateRadiusUI();
     });
 
-    QObject::connect(&getSelectionTool(), &SelectionTool::modifierChanged, [this, updateModifierUI](const SelectionTool::Modifier& modifier) {
+    QObject::connect(&getSelectionTool(), &PixelSelectionTool::modifierChanged, [this, updateModifierUI](const PixelSelectionTool::Modifier& modifier) {
         updateModifierUI();
     });
 
-    QObject::connect(&getSelectionTool(), &SelectionTool::radiusChanged, [this](const float& radius) {
+    QObject::connect(&getSelectionTool(), &PixelSelectionTool::radiusChanged, [this](const float& radius) {
         _ui->radiusSpinBox->setValue(getSelectionTool().getRadius());
         _ui->radiusSlider->setValue(getSelectionTool().getRadius() * 1000.0f);
     });
 
-    QObject::connect(&getSelectionTool(), &SelectionTool::notifyDuringSelectionChanged, [this](const bool& notifyDuringSelection) {
+    QObject::connect(&getSelectionTool(), &PixelSelectionTool::notifyDuringSelectionChanged, [this](const bool& notifyDuringSelection) {
         _ui->notifyDuringSelectionCheckBox->setChecked(notifyDuringSelection);
     });
 
@@ -168,7 +168,7 @@ SelectionToolWidget::SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin) :
     getSelectionTool().setChanged();
 }
 
-SelectionTool& SelectionToolWidget::getSelectionTool()
+PixelSelectionTool& SelectionToolWidget::getSelectionTool()
 {
     Q_ASSERT(_scatterplotPlugin != nullptr);
 

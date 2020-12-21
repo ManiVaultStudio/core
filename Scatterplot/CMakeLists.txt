@@ -21,8 +21,8 @@ find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 set(PLUGIN
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
-	src/SelectionTool.h
-    src/SelectionTool.cpp
+	src/PixelSelectionTool.h
+    src/PixelSelectionTool.cpp
 	src/SelectionToolRenderer.h
     src/SelectionToolRenderer.cpp
 )

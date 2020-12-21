@@ -63,14 +63,14 @@ void ScatterplotPlugin::init()
     
     qApp->installEventFilter(this);
 
-    QObject::connect(_selectionTool, &SelectionTool::areaChanged, [this]() {
+    QObject::connect(_selectionTool, &PixelSelectionTool::areaChanged, [this]() {
         if (!_selectionTool->isNotifyDuringSelection())
             return;
 
         selectPoints();
     });
 
-    QObject::connect(_selectionTool, &SelectionTool::ended, [this]() {
+    QObject::connect(_selectionTool, &PixelSelectionTool::ended, [this]() {
         if (_selectionTool->isNotifyDuringSelection())
             return;
 
@@ -172,21 +172,21 @@ void ScatterplotPlugin::selectPoints()
 
     switch (_selectionTool->getModifier())
     {
-        case SelectionTool::Modifier::Replace:
+        case PixelSelectionTool::Modifier::Replace:
         {
             selectionSet.indices.clear();
             indices = areaIndices;
             break;
         }
 
-        case SelectionTool::Modifier::Add:
-        case SelectionTool::Modifier::Remove:
+        case PixelSelectionTool::Modifier::Add:
+        case PixelSelectionTool::Modifier::Remove:
         {
             QSet<std::uint32_t> set(selectionSet.indices.begin(), selectionSet.indices.end());
 
             switch (_selectionTool->getModifier())
             {
-                case SelectionTool::Modifier::Add:
+                case PixelSelectionTool::Modifier::Add:
                 {
                     for (const auto& areaIndex : areaIndices)
                         set.insert(areaIndex);
@@ -194,7 +194,7 @@ void ScatterplotPlugin::selectPoints()
                     break;
                 }
 
-                case SelectionTool::Modifier::Remove:
+                case PixelSelectionTool::Modifier::Remove:
                 {
                     for (const auto& areaIndex : areaIndices)
                         set.remove(areaIndex);
@@ -435,7 +435,7 @@ void ScatterplotPlugin::updateSelection()
     emit selectionChanged();
 }
 
-SelectionTool& ScatterplotPlugin::getSelectionTool()
+PixelSelectionTool& ScatterplotPlugin::getSelectionTool()
 {
     return *_selectionTool;
 }
@@ -457,25 +457,25 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
             {
                 case Qt::Key::Key_R:
                 {
-                    _selectionTool->setType(SelectionTool::Type::Rectangle);
+                    _selectionTool->setType(PixelSelectionTool::Type::Rectangle);
                     break;
                 }
 
                 case Qt::Key::Key_B:
                 {
-                    _selectionTool->setType(SelectionTool::Type::Brush);
+                    _selectionTool->setType(PixelSelectionTool::Type::Brush);
                     break;
                 }
 
                 case Qt::Key::Key_P:
                 {
-                    _selectionTool->setType(SelectionTool::Type::Polygon);
+                    _selectionTool->setType(PixelSelectionTool::Type::Polygon);
                     break;
                 }
 
                 case Qt::Key::Key_L:
                 {
-                    _selectionTool->setType(SelectionTool::Type::Lasso);
+                    _selectionTool->setType(PixelSelectionTool::Type::Lasso);
                     break;
                 }
 
@@ -499,13 +499,13 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
 
                 case Qt::Key::Key_Shift:
                 {
-                    _selectionTool->setModifier(SelectionTool::Modifier::Add);
+                    _selectionTool->setModifier(PixelSelectionTool::Modifier::Add);
                     break;
                 }
 
                 case Qt::Key::Key_Control:
                 {
-                    _selectionTool->setModifier(SelectionTool::Modifier::Remove);
+                    _selectionTool->setModifier(PixelSelectionTool::Modifier::Remove);
                     break;
                 }
 
@@ -513,12 +513,12 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
                 {
                     switch (_selectionTool->getType())
                     {
-                        case SelectionTool::Type::Rectangle:
-                        case SelectionTool::Type::Brush:
+                        case PixelSelectionTool::Type::Rectangle:
+                        case PixelSelectionTool::Type::Brush:
                             break;
 
-                        case SelectionTool::Type::Lasso:
-                        case SelectionTool::Type::Polygon:
+                        case PixelSelectionTool::Type::Lasso:
+                        case PixelSelectionTool::Type::Polygon:
                             _selectionTool->abort();
                             break;
 
@@ -555,7 +555,7 @@ bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
                 case Qt::Key::Key_Shift:
                 case Qt::Key::Key_Control:
                 {
-                    _selectionTool->setModifier(SelectionTool::Modifier::Replace);
+                    _selectionTool->setModifier(PixelSelectionTool::Modifier::Replace);
                     break;
                 }
 

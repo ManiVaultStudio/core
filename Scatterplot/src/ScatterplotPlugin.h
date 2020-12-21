@@ -2,7 +2,7 @@
 
 #include <ViewPlugin.h>
 
-#include "SelectionTool.h"
+#include "PixelSelectionTool.h"
 
 #include "widgets/DataSlot.h"
 #include "ScatterplotWidget.h"
@@ -33,7 +33,7 @@ class ScatterplotPlugin : public ViewPlugin
 public:
     ScatterplotPlugin() :
         ViewPlugin("Scatterplot View"),
-        _selectionTool(new SelectionTool(this))
+        _selectionTool(new PixelSelectionTool(this))
     {
     }
 
@@ -50,7 +50,7 @@ public:
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;
 
-    SelectionTool& getSelectionTool();
+    PixelSelectionTool& getSelectionTool();
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
@@ -96,7 +96,7 @@ private:
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;
 
-    SelectionTool*               _selectionTool;     /** Point selection tool */
+    PixelSelectionTool*               _selectionTool;     /** Point selection tool */
 };
 
 // =============================================================================

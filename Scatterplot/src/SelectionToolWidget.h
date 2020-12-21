@@ -5,7 +5,7 @@
 #include <QWidget>
 
 class ScatterplotPlugin;
-class SelectionTool;
+class PixelSelectionTool;
 
 namespace Ui {
 	class SelectionToolWidget;
@@ -23,7 +23,7 @@ public: // Construction/destruction
     SelectionToolWidget(ScatterplotPlugin* scatterplotPlugin);
 
 private:
-    SelectionTool& getSelectionTool();
+    PixelSelectionTool& getSelectionTool();
 
 private:
     ScatterplotPlugin*                          _scatterplotPlugin;     /** Scatter plot plugin instance */

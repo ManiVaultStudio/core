@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <QWidget>
 #include <QMap>
 #include <QPen>
@@ -12,11 +10,15 @@ class ScatterplotPlugin;
 class QPainter;
 
 /**
- * Selection tool class
+ * Pixel selection tool class
+ *
+ * Class for 2D pixel selection using various tools (e.g. brush, rectangle and lasso)
+ * It handles mouse/keyboard events to switch between tools and perform the selection itself
+ * It draws an overlay of the selection shape \p _shapePixmap and the selected area \p _areaPixmap
  *
  * @author Thomas Kroes
  */
-class SelectionTool : public QObject
+class PixelSelectionTool : public QObject
 {
     Q_OBJECT
 
@@ -25,10 +27,10 @@ public:
     /** Types */
     enum class Type
     {
-        Rectangle,		/** Select points within a rectangle */
-        Brush,			/** A brush is used the paint the selection */
-        Lasso,			/** A lasso tool is used to enclose points */
-        Polygon		    /** Select points in the interior of a polygon */
+        Rectangle,      /** Select points within a rectangle */
+        Brush,          /** A brush is used the paint the selection */
+        Lasso,          /** A lasso tool is used to select points */
+        Polygon         /** Select points in the interior of a polygon */
     };
 
     /** Maps type name to type enum and vice versa */
@@ -67,7 +69,7 @@ public:
 
 public: // Construction/destruction
 
-    SelectionTool(ScatterplotPlugin* scatterplotPlugin);
+    PixelSelectionTool(ScatterplotPlugin* scatterplotPlugin);
 
 public: // Getters/setters
 

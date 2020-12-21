@@ -8,7 +8,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
 
-class SelectionTool;
+class PixelSelectionTool;
 
 namespace hdps
 {
@@ -18,7 +18,7 @@ namespace gui
 class SelectionToolRenderer : protected Renderer
 {
 public:
-    SelectionToolRenderer(SelectionTool& selectionTool);
+    SelectionToolRenderer(PixelSelectionTool& selectionTool);
 
 public:
     void init() override;
@@ -36,7 +36,7 @@ private:
     void createShaderProgram();
 
 private:
-    SelectionTool&                          _selectionTool;         /** Selection tool to visualize */
+    PixelSelectionTool&                          _selectionTool;         /** Selection tool to visualize */
     QSize                                   _renderSize;            /** Size of the renderer */
     QSharedPointer<QOpenGLShaderProgram>    _shaderProgram;         /** OpenGL shader programs */
     QSharedPointer<QOpenGLTexture>          _areaTexture;           /** OpenGL texture for selected area */
