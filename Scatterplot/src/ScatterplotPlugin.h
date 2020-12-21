@@ -1,7 +1,8 @@
 #pragma once
 
 #include <ViewPlugin.h>
-#include "SelectionListener.h"
+
+#include "PixelSelectionTool.h"
 
 #include "widgets/DataSlot.h"
 #include "ScatterplotWidget.h"
@@ -25,15 +26,17 @@ namespace hdps
     class Vector2f;
 }
 
-class ScatterplotPlugin : public ViewPlugin, public SelectionListener
+class ScatterplotPlugin : public ViewPlugin
 {
     Q_OBJECT
     
 public:
-    ScatterplotPlugin()
-    :
-        ViewPlugin("Scatterplot View")
-    { }
+    ScatterplotPlugin() :
+        ViewPlugin("Scatterplot View"),
+        _pixelSelectionTool(new PixelSelectionTool(this, false))
+    {
+    }
+
     ~ScatterplotPlugin(void) override;
     
     void init() override;
@@ -43,11 +46,28 @@ public:
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     DataTypes supportedDataTypes() const Q_DECL_OVERRIDE;
-    void onSelecting(hdps::Selection selection) override;
-    void onSelection(hdps::Selection selection) override;
 
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;
+
+    PixelSelectionTool& getSelectionTool();
+
+    bool eventFilter(QObject* target, QEvent* event) override;
+
+    QString getCurrentDataset() const;
+    std::uint32_t getNumPoints() const;
+    std::uint32_t getNumSelectedPoints() const;
+
+public: // Selection
+
+    bool canSelect() const;
+    bool canSelectAll() const;
+    bool canClearSelection() const;
+    bool canInvertSelection() const;
+
+    void selectAll();
+    void clearSelection();
+    void invertSelection();
 
 public slots:
     void onDataInput(QString dataSetName);
@@ -60,20 +80,28 @@ protected slots:
     void yDimPicked(int index);
     void cDimPicked(int index);
 
+    void selectPoints();
+
+signals:
+    void currentDatasetChanged(const QString& datasetName);
+    void selectionChanged();
+
 private:
     void updateData();
     void calculatePositions(const Points& points);
     void calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex);
     void updateSelection();
 
-    const Points* makeSelection(hdps::Selection selection);
+    //const Points* makeSelection(hdps::Selection selection);
 
     QString _currentDataSet;
     DataSlot* _dataSlot;
-    ScatterplotSettings* settings;
+    ScatterplotSettings* _scatterPlotSettings;
 
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;
+
+    PixelSelectionTool*     _pixelSelectionTool;     /** Pixel selection tool */
 };
 
 // =============================================================================

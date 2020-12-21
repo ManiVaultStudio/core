@@ -1,4 +1,5 @@
 #include "ScatterplotWidget.h"
+#include "PixelSelectionTool.h"
 
 #include "util/Math.h"
 
@@ -28,12 +29,26 @@ namespace
     }
 }
 
-ScatterplotWidget::ScatterplotWidget()
-    :
+ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _densityRenderer(DensityRenderer::RenderMode::DENSITY),
-    _colormapWidget(this)
+    _colormapWidget(this),
+    _pointRenderer(),
+    _pixelSelectionToolRenderer(pixelSelectionTool),
+    _pixelSelectionTool(pixelSelectionTool)
 {
-    addSelectionListener(&_selectionRenderer);
+    setMouseTracking(true);
+
+    this->installEventFilter(&_pixelSelectionTool);
+
+    QObject::connect(&_pixelSelectionTool, &PixelSelectionTool::shapeChanged, [this]() {
+        if (!isInitialized())
+            return;
+
+        makeCurrent();
+
+        _pixelSelectionToolRenderer.update();
+        update();
+    });
 }
 
 bool ScatterplotWidget::isInitialized()
@@ -102,11 +117,13 @@ void ScatterplotWidget::colormapdiscreteChanged(bool isDiscrete)
 // by reference then we can upload the data to the GPU, but not store it in the widget.
 void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
 {
-    Bounds bounds = getDataBounds(*points);
-    bounds.ensureMinimumSize(1e-07f, 1e-07f);
-    bounds.makeSquare();
-    bounds.expand(0.1f);
-    _dataBounds = bounds;
+    auto dataBounds = getDataBounds(*points);
+
+    dataBounds.ensureMinimumSize(1e-07f, 1e-07f);
+    dataBounds.makeSquare();
+    dataBounds.expand(0.1f);
+
+    _dataBounds = dataBounds;
 
     // Pass bounds and data to renderers
     _pointRenderer.setBounds(_dataBounds);
@@ -169,19 +186,9 @@ void ScatterplotWidget::setSigma(const float sigma)
     update();
 }
 
-void ScatterplotWidget::addSelectionListener(plugin::SelectionListener* listener)
+bool ScatterplotWidget::eventFilter(QObject* target, QEvent* event)
 {
-    _selectionListeners.push_back(listener);
-}
-
-Selection ScatterplotWidget::getSelection()
-{
-    Selection isotropicSelection = toIsotropicCoordinates * _selection;
-
-    Vector2f bottomLeftData(lerp(_dataBounds.getLeft(), _dataBounds.getRight(), isotropicSelection.getLeft()), lerp(_dataBounds.getBottom(), _dataBounds.getTop(), isotropicSelection.getBottom()));
-    Vector2f topRightData(lerp(_dataBounds.getLeft(), _dataBounds.getRight(), isotropicSelection.getRight()), lerp(_dataBounds.getBottom(), _dataBounds.getTop(), isotropicSelection.getTop()));
-    
-    return Selection(bottomLeftData, topRightData);
+    return QWidget::eventFilter(target, event);
 }
 
 void ScatterplotWidget::initializeGL()
@@ -201,7 +208,7 @@ void ScatterplotWidget::initializeGL()
 
     _pointRenderer.init();
     _densityRenderer.init();
-    _selectionRenderer.init();
+    _pixelSelectionToolRenderer.init();
 
     // Set a default color map for both renderers
     _pointRenderer.setScalarEffect(PointEffect::Color);
@@ -219,7 +226,7 @@ void ScatterplotWidget::resizeGL(int w, int h)
 
     _pointRenderer.resize(QSize(w, h));
     _densityRenderer.resize(QSize(w, h));
-    _selectionRenderer.resize(QSize(w, h));
+    _pixelSelectionToolRenderer.resize(QSize(w, h));
 
     // Set matrix for normalizing from pixel coordinates to [0, 1]
     toNormalisedCoordinates = Matrix3f(1.0f / w, 0, 0, 1.0f / h, 0, 0);
@@ -253,7 +260,7 @@ void ScatterplotWidget::paintGL()
     // Clear the widget to the background color
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
     // Reset the blending function
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -274,59 +281,8 @@ void ScatterplotWidget::paintGL()
         break;
     }
     }
-    _selectionRenderer.render();
-}
-
-void ScatterplotWidget::mousePressEvent(QMouseEvent *event)
-{
-    _selecting = true;
-
-    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
-    _selection.setStart(point);
-}
-
-void ScatterplotWidget::mouseMoveEvent(QMouseEvent *event)
-{
-    if (!_selecting) return;
-
-    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
-    _selection.setEnd(point);
-
-    onSelecting(_selection);
-
-    update();
-}
-
-void ScatterplotWidget::mouseReleaseEvent(QMouseEvent *event)
-{
-    _selecting = false;
-
-    Vector2f point = toNormalisedCoordinates * Vector2f(event->x(), _windowSize.height() - event->y());
-    _selection.setEnd(point);
-
-    onSelection(_selection);
-
-    update();
-}
-
-void ScatterplotWidget::onSelecting(Selection selection)
-{
-    _selection = selection;
-
-    for (plugin::SelectionListener* listener : _selectionListeners)
-        listener->onSelecting(selection);
-
-    update();
-}
-
-void ScatterplotWidget::onSelection(Selection selection)
-{
-    _selection = selection;
-
-    for (plugin::SelectionListener* listener : _selectionListeners)
-        listener->onSelection(_selection);
-
-    update();
+    
+    _pixelSelectionToolRenderer.render();
 }
 
 void ScatterplotWidget::cleanup()
@@ -337,7 +293,7 @@ void ScatterplotWidget::cleanup()
     makeCurrent();
     _pointRenderer.destroy();
     _densityRenderer.destroy();
-    _selectionRenderer.destroy();
+    _pixelSelectionToolRenderer.destroy();
 }
 
 ScatterplotWidget::~ScatterplotWidget()

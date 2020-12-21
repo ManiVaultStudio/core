@@ -1,6 +1,6 @@
 #include "ScatterplotPlugin.h"
 
-#include "ScatterplotSettings.h"
+#include "SettingsWidget.h"
 #include "PointData.h"
 #include "ClusterData.h"
 #include "ColorData.h"
@@ -9,10 +9,13 @@
 #include "graphics/Vector3f.h"
 
 #include <QtCore>
+#include <QApplication>
 #include <QtDebug>
+#include <QSplitter>
 
 #include <algorithm>
 #include <limits>
+#include <set>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
@@ -34,30 +37,47 @@ void ScatterplotPlugin::init()
     supportedColorTypes.append(ClusterType);
     supportedColorTypes.append(ColorType);
 
-    _scatterPlotWidget = new ScatterplotWidget();
+    _scatterPlotWidget = new ScatterplotWidget(*_pixelSelectionTool);
     _scatterPlotWidget->setAlpha(0.5f);
-    _scatterPlotWidget->addSelectionListener(this);
 
     _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     _dataSlot->addWidget(_scatterPlotWidget);
 
-    settings = new ScatterplotSettings(this);
+    _scatterPlotSettings = new ScatterplotSettings(this);
 
-    QHBoxLayout* layout = new QHBoxLayout();
-    layout->setMargin(0);
-    layout->setSpacing(0);
+    auto splitter = new QSplitter();
 
-    setMainLayout(layout);
-    addWidget(_dataSlot);
-    addWidget(settings);
+    splitter->addWidget(_dataSlot);
+    splitter->addWidget(_scatterPlotSettings);
+
+    splitter->setStretchFactor(0, 1);
+    splitter->setStretchFactor(1, 0);
+    splitter->setCollapsible(1, true);
+
+    addWidget(splitter);
 
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
+    
+    qApp->installEventFilter(this);
+
+    QObject::connect(_pixelSelectionTool, &PixelSelectionTool::areaChanged, [this]() {
+        if (!_pixelSelectionTool->isNotifyDuringSelection())
+            return;
+
+        selectPoints();
+    });
+
+    QObject::connect(_pixelSelectionTool, &PixelSelectionTool::ended, [this]() {
+        if (_pixelSelectionTool->isNotifyDuringSelection())
+            return;
+
+        selectPoints();
+    });
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
 {
-    
 }
 
 void ScatterplotPlugin::dataChanged(const QString name)
@@ -70,7 +90,6 @@ void ScatterplotPlugin::dataChanged(const QString name)
 
 void ScatterplotPlugin::dataRemoved(const QString name)
 {
-    
 }
 
 void ScatterplotPlugin::selectionChanged(const QString dataName)
@@ -119,27 +138,113 @@ void ScatterplotPlugin::cDimPicked(int index)
     updateData();
 }
 
+void ScatterplotPlugin::selectPoints()
+{
+    if (_currentDataSet.isEmpty() || !_pixelSelectionTool->isActive())
+        return;
+
+    auto selectionAreaImage = _pixelSelectionTool->getAreaPixmap().toImage();
+
+    const Points& points = _core->requestData<Points>(_currentDataSet);
+    Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
+
+    std::vector<std::uint32_t> targetIndices;
+
+    targetIndices.reserve(points.getNumPoints());
+
+    const auto dataBounds   = _scatterPlotWidget->getBounds();
+    const auto width        = selectionAreaImage.width();
+    const auto height       = selectionAreaImage.height();
+    const auto size         = width < height ? width : height;
+    const auto& set         = points.isDerivedData() ? DataSet::getSourceData(points) : points;
+    const auto& setIndices  = set.indices;
+
+    for (unsigned int i = 0; i < _points.size(); i++) {
+        const auto uvNormalized     = QPointF((_points[i].x - dataBounds.getLeft()) / dataBounds.getWidth(), (dataBounds.getTop() - _points[i].y) / dataBounds.getHeight());
+        const auto uvOffset         = QPoint((selectionAreaImage.width() - size) / 2.0f, (selectionAreaImage.height() - size) / 2.0f);
+        const auto uv               = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
+
+        if (selectionAreaImage.pixelColor(uv).alpha() > 0) {
+            if (set.isFull())
+                targetIndices.push_back(i);
+            else
+                targetIndices.push_back(setIndices[i]);
+        }
+    }
+    
+    auto& selectionSetIndices = selectionSet.indices;
+
+    switch (_pixelSelectionTool->getModifier())
+    {
+        case PixelSelectionTool::Modifier::Replace:
+            break;
+
+        case PixelSelectionTool::Modifier::Add:
+        case PixelSelectionTool::Modifier::Remove:
+        {
+            QSet<std::uint32_t> set(selectionSetIndices.begin(), selectionSetIndices.end());
+
+            switch (_pixelSelectionTool->getModifier())
+            {
+                case PixelSelectionTool::Modifier::Add:
+                {
+                    for (const auto& targetIndex : targetIndices)
+                        set.insert(targetIndex);
+
+                    break;
+                }
+
+                case PixelSelectionTool::Modifier::Remove:
+                {
+                    for (const auto& targetIndex : targetIndices)
+                        set.remove(targetIndex);
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+            targetIndices = std::vector<std::uint32_t>(set.begin(), set.end());
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    selectionSetIndices = targetIndices;
+
+    _core->notifySelectionChanged(points.isDerivedData() ? DataSet::getSourceData(points).getDataName() : points.getDataName());
+}
+
 void ScatterplotPlugin::onDataInput(QString dataSetName)
 {
     _currentDataSet = dataSetName;
 
     setWindowTitle(_currentDataSet);
 
+    emit currentDatasetChanged(_currentDataSet);
+
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
     // For source data determine whether to use dimension names or make them up
     if (points.getDimensionNames().size() == points.getNumDimensions())
-        settings->initDimOptions(points.getDimensionNames());
+        _scatterPlotSettings->initDimOptions(points.getDimensionNames());
     else
-        settings->initDimOptions(points.getNumDimensions());
+        _scatterPlotSettings->initDimOptions(points.getNumDimensions());
 
     // For derived data determine whether to use dimension names or make them up
     if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
-        settings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
+        _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
     else
-        settings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
+        _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
+
+    _pixelSelectionTool->setEnabled(!_currentDataSet.isEmpty());
 }
 
 void ScatterplotPlugin::onColorDataInput(QString dataSetName)
@@ -197,7 +302,7 @@ void ScatterplotPlugin::updateData()
     // Check if the scatter plot is initialized, if not, don't do anything
     if (!_scatterPlotWidget->isInitialized())
         return;
-
+    
     // If no dataset has been selected, don't do anything
     if (_currentDataSet.isEmpty())
         return;
@@ -206,8 +311,8 @@ void ScatterplotPlugin::updateData()
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
     // Get the selected dimensions to use as X and Y dimension in the plot
-    int xDim = settings->getXDimension();
-    int yDim = settings->getYDimension();
+    int xDim = _scatterPlotSettings->getXDimension();
+    int yDim = _scatterPlotSettings->getYDimension();
 
     // If one of the dimensions was not set, do not draw anything
     if (xDim < 0 || yDim < 0)
@@ -227,7 +332,7 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const Points& points)
 {
-    points.extractDataForDimensions(_points, settings->getXDimension(), settings->getYDimension());
+    points.extractDataForDimensions(_points, _scatterPlotSettings->getXDimension(), _scatterPlotSettings->getYDimension());
 }
 
 void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex)
@@ -309,76 +414,243 @@ void ScatterplotPlugin::updateSelection()
     }
 
     _scatterPlotWidget->setHighlights(highlights);
+
+    emit selectionChanged();
 }
 
-// Returns the selection set associated with this dataset
-const Points* ScatterplotPlugin::makeSelection(hdps::Selection selection)
+PixelSelectionTool& ScatterplotPlugin::getSelectionTool()
 {
-    // If theres no dataset being displayed, don't try to make any selection
+    return *_pixelSelectionTool;
+}
+
+bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
+{
+    auto widgetBeneathCursor = QApplication::widgetAt(QCursor::pos());
+
+    if (!isAncestorOf(widgetBeneathCursor) || _currentDataSet.isEmpty())
+        return QWidget::eventFilter(target, event);
+
+    switch (event->type())
+    {
+        case QEvent::KeyPress:
+        {
+            auto keyEvent = static_cast<QKeyEvent *>(event);
+
+            switch (keyEvent->key())
+            {
+                case Qt::Key::Key_R:
+                {
+                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Rectangle);
+                    break;
+                }
+
+                case Qt::Key::Key_B:
+                {
+                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Brush);
+                    break;
+                }
+
+                case Qt::Key::Key_P:
+                {
+                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Polygon);
+                    break;
+                }
+
+                case Qt::Key::Key_L:
+                {
+                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Lasso);
+                    break;
+                }
+
+                case Qt::Key::Key_A:
+                {
+                    selectAll();
+                    break;
+                }
+
+                case Qt::Key::Key_D:
+                {
+                    clearSelection();
+                    break;
+                }
+
+                case Qt::Key::Key_I:
+                {
+                    invertSelection();
+                    break;
+                }
+
+                case Qt::Key::Key_Shift:
+                {
+                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Add);
+                    break;
+                }
+
+                case Qt::Key::Key_Control:
+                {
+                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Remove);
+                    break;
+                }
+
+                case Qt::Key::Key_Escape:
+                {
+                    switch (_pixelSelectionTool->getType())
+                    {
+                        case PixelSelectionTool::Type::Rectangle:
+                        case PixelSelectionTool::Type::Brush:
+                            break;
+
+                        case PixelSelectionTool::Type::Lasso:
+                        case PixelSelectionTool::Type::Polygon:
+                            _pixelSelectionTool->abort();
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        case QEvent::KeyRelease:
+        {
+            auto keyEvent = static_cast<QKeyEvent*>(event);
+
+            switch (keyEvent->key())
+            {
+                case Qt::Key::Key_Shift:
+                case Qt::Key::Key_Control:
+                {
+                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Replace);
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+    }
+
+    return QWidget::eventFilter(target, event);
+}
+
+QString ScatterplotPlugin::getCurrentDataset() const
+{
+    return _currentDataSet;
+}
+
+std::uint32_t ScatterplotPlugin::getNumPoints() const
+{
     if (_currentDataSet.isEmpty())
-        return nullptr;
+        return 0;
 
-    // Get the selection box from the widget
-    Selection s = _scatterPlotWidget->getSelection();
-
-    // Check which local indices of points lie in the selection box
-    std::vector<unsigned int> indices;
-    for (unsigned int i = 0; i < _points.size(); i++)
-    {
-        const hdps::Vector2f& point = _points[i];
-
-        if (s.contains(point))
-            indices.push_back(i);
-    }
-
-    // Get the selection set associated with this dataset
     const Points& points = _core->requestData<Points>(_currentDataSet);
-    Points& selectionSet = dynamic_cast<Points&>(points.getSelection());
 
-    // Clear the selection and reserve as many indices as there are points in the selection box
-    selectionSet.indices.clear();
-    selectionSet.indices.reserve(indices.size());
+    return points.getNumPoints();
+}
 
-    // If the data is not derived then translate local indices to global indices and save them in the selection set
-    if (!points.isDerivedData())
-    {
-        for (const unsigned int& index : indices) {
-            selectionSet.indices.push_back(points.isFull() ? index : points.indices[index]);
-        }
-    }
+std::uint32_t ScatterplotPlugin::getNumSelectedPoints() const
+{
+    const Points& points    = _core->requestData<Points>(_currentDataSet);
+    const Points& selection = static_cast<Points&>(points.getSelection());
+
+    return selection.indices.size();
+}
+
+bool ScatterplotPlugin::canSelect() const
+{
+    return !getCurrentDataset().isEmpty() && getNumPoints() >= 0;
+}
+
+bool ScatterplotPlugin::canSelectAll() const
+{
+    return getNumPoints() == -1 ? false : getNumSelectedPoints() != getNumPoints();
+}
+
+bool ScatterplotPlugin::canClearSelection() const
+{
+    return getNumPoints() == -1 ? false : getNumSelectedPoints() >= 1;
+}
+
+bool ScatterplotPlugin::canInvertSelection() const
+{
+    return getNumPoints() >= 0;
+}
+
+void ScatterplotPlugin::selectAll()
+{
+    if (_currentDataSet.isEmpty())
+        return;
+
+    const auto& points = _core->requestData<Points>(_currentDataSet);
+
+    auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
+    auto& selectionSetIndices   = selectionSet.indices;
+
+    const auto& setIndices = points.isDerivedData() ? DataSet::getSourceData(points).indices : points.indices;
+
+    selectionSetIndices.clear();
+    selectionSetIndices.resize(points.getNumPoints());
+
+    if (points.isFull())
+        std::iota(selectionSetIndices.begin(), selectionSetIndices.end(), 0);
     else
-    {
-        const Points& sourceSet = DataSet::getSourceData(points);
-        for (const unsigned int& index : indices) {
-            selectionSet.indices.push_back(sourceSet.isFull() ? index : sourceSet.indices[index]);
-        }
-    }
-    return &selectionSet;
+        selectionSetIndices = setIndices;
+
+    _core->notifySelectionChanged(selectionSet.getDataName());
 }
 
-void ScatterplotPlugin::onSelecting(hdps::Selection selection)
+void ScatterplotPlugin::clearSelection()
 {
-    const Points* const selectionSet = makeSelection(selection);
+    if (_currentDataSet.isEmpty())
+        return;
 
-    if (selectionSet != nullptr)
-    {
-        // Only notify other plugins of the selection changes if enabled in the settings
-        // This prevents plugins that take a long time to process selections to deteriorate performance
-        if ((settings != nullptr) && settings->IsNotifyingOnSelecting())
-            _core->notifySelectionChanged(selectionSet->getDataName());
-        else
-            updateSelection();
-    }
+    const auto& points = _core->requestData<Points>(_currentDataSet);
+
+    auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
+    auto& selectionSetIndices   = selectionSet.indices;
+
+    selectionSetIndices.clear();
+
+    _core->notifySelectionChanged(selectionSet.getDataName());
 }
 
-void ScatterplotPlugin::onSelection(hdps::Selection selection)
+void ScatterplotPlugin::invertSelection()
 {
-    const Points* const selectionSet = makeSelection(selection);
+    if (_currentDataSet.isEmpty())
+        return;
 
-    if (selectionSet != nullptr)
-    {
-        _core->notifySelectionChanged(selectionSet->getDataName());
+    const auto& points = _core->requestData<Points>(_currentDataSet);
+
+    auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
+    auto& selectionSetIndices   = selectionSet.indices;
+
+    const auto& pointsIndices = points.isDerivedData() ? DataSet::getSourceData(points).indices : points.indices;
+
+    const auto selectionIndicesSet = QSet<std::uint32_t>(selectionSetIndices.begin(), selectionSetIndices.end());
+
+    selectionSetIndices.clear();
+    selectionSetIndices.reserve(points.getNumPoints());
+
+    for (int p = 0; p < points.getNumPoints(); ++p) {
+        const auto setIndex = points.isFull() ? p : pointsIndices[p];
+
+        if (selectionIndicesSet.contains(setIndex))
+            continue;
+
+        selectionSetIndices.push_back(setIndex);
     }
+
+    _core->notifySelectionChanged(selectionSet.getDataName());
 }
 
 // =============================================================================

@@ -1,4 +1,5 @@
-#include "ScatterplotSettings.h"
+#include "SettingsWidget.h"
+#include "SelectionToolWidget.h"
 
 #include "ScatterplotPlugin.h"
 
@@ -100,7 +101,7 @@ PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) :
 ColorDimensionPicker::ColorDimensionPicker(const ScatterplotPlugin& plugin)
 {
     _layout = new QVBoxLayout();
-    _cDimOptions = new hdps::gui::ComboBox();
+    _cDimOptions = new QComboBox();
     _cDimOptions->setFixedWidth(100);
     _layout->addWidget(_cDimOptions);
     setLayout(_layout);
@@ -146,7 +147,7 @@ DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin) :
     _layout.addWidget(&_yDimLabel, 1, 0);
     _layout.addWidget(&_cDimLabel, 2, 0);
 
-    _colorOptions = new hdps::gui::ComboBox();
+    _colorOptions = new QComboBox();
     _colorOptions->addItem("Color By Dimension");
     _colorOptions->addItem("Color By Data");
     _layout.addWidget(&_xDimOptions, 0, 1);
@@ -218,11 +219,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
-    setFixedWidth(200);
-    setStyleSheet(
-        "QWidget { background-color:#62656c; color: white; font-family: \"Open Sans\"; font-size: 11px; }"
-        //        "QFrame { background-color: #888b93; }"
-    );
+    setMinimumWidth(250);
 
     _subsetButton.setText("Create Subset");
     _subsetButton.setFixedWidth(100);
@@ -239,13 +236,6 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _renderMode.setFixedWidth(100);
     renderLayout->addWidget(&_renderMode);
 
-    {
-        auto checkBox = std::make_unique<QCheckBox>(QLatin1String("Notify on selecting"));
-        checkBox->setChecked(true);
-        _notifyOnSelectingCheckBox = &*checkBox;
-        renderLayout->addWidget(checkBox.release());
-    }
-
     _settingsStack = new PlotSettingsStack(*plugin);
     renderLayout->addWidget(_settingsStack);
 
@@ -254,6 +244,7 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsLayout->addLayout(dataLayout);
     _settingsLayout->addLayout(renderLayout, 1);
     _settingsLayout->addLayout(&_dimensionPicker->getLayout());
+    _settingsLayout->addWidget(new SelectionToolWidget(const_cast<ScatterplotPlugin*>(plugin)));
 
     setLayout(_settingsLayout);
 
@@ -336,9 +327,4 @@ void ScatterplotSettings::paintEvent(QPaintEvent* event)
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 
     QWidget::paintEvent(event);
-}
-
-bool ScatterplotSettings::IsNotifyingOnSelecting() const
-{
-    return (_notifyOnSelectingCheckBox != nullptr) && _notifyOnSelectingCheckBox->isChecked();
 }

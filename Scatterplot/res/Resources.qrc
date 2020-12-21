@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/SelectionTool.frag</file>
+        <file>shaders/SelectionTool.vert</file>
+    </qresource>
+</RCC>
