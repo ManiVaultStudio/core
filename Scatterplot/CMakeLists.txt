@@ -23,8 +23,8 @@ set(PLUGIN
     src/ScatterplotPlugin.cpp
 	src/PixelSelectionTool.h
     src/PixelSelectionTool.cpp
-	src/SelectionToolRenderer.h
-    src/SelectionToolRenderer.cpp
+	src/PixelSelectionToolRenderer.h
+    src/PixelSelectionToolRenderer.cpp
 )
 
 file(GLOB WIDGETS src/*Widget.*)

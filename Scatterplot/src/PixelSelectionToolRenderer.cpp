@@ -1,4 +1,4 @@
-#include "SelectionToolRenderer.h"
+#include "PixelSelectionToolRenderer.h"
 #include "PixelSelectionTool.h"
 
 #include "util/FileUtil.h"
@@ -13,8 +13,8 @@ namespace hdps
 namespace gui
 {
 
-SelectionToolRenderer::SelectionToolRenderer(PixelSelectionTool& selectionTool) :
-    _selectionTool(selectionTool),
+PixelSelectionToolRenderer::PixelSelectionToolRenderer(PixelSelectionTool& pixelSelectionTool) :
+    _pixelSelectionTool(pixelSelectionTool),
     _renderSize(),
     _shaderProgram(QSharedPointer<QOpenGLShaderProgram>::create()),
     _areaTexture(QSharedPointer<QOpenGLTexture>::create(QOpenGLTexture::Target::Target2D)),
@@ -23,7 +23,7 @@ SelectionToolRenderer::SelectionToolRenderer(PixelSelectionTool& selectionTool) 
 {
 }
 
-void SelectionToolRenderer::init()
+void PixelSelectionToolRenderer::init()
 {
     try
     {
@@ -43,7 +43,7 @@ void SelectionToolRenderer::init()
     }
 }
 
-void SelectionToolRenderer::resize(QSize renderSize)
+void PixelSelectionToolRenderer::resize(QSize renderSize)
 {
     if (renderSize == _renderSize)
         return;
@@ -51,7 +51,7 @@ void SelectionToolRenderer::resize(QSize renderSize)
     _renderSize = renderSize;
 }
 
-void SelectionToolRenderer::render()
+void PixelSelectionToolRenderer::render()
 {
     try {
         if (!_areaTexture->isCreated())
@@ -89,15 +89,15 @@ void SelectionToolRenderer::render()
     }
 }
 
-void SelectionToolRenderer::destroy()
+void PixelSelectionToolRenderer::destroy()
 {
     _dummyVAO.destroy();
 }
 
-void SelectionToolRenderer::update()
+void PixelSelectionToolRenderer::update()
 {
-    const auto areaImage = _selectionTool.getAreaPixmap().toImage();
-    const auto shapeImage = _selectionTool.getShapePixmap().toImage();
+    const auto areaImage = _pixelSelectionTool.getAreaPixmap().toImage();
+    const auto shapeImage = _pixelSelectionTool.getShapePixmap().toImage();
     
     if (areaImage.isNull() || shapeImage.isNull())
         return;
@@ -117,7 +117,7 @@ void SelectionToolRenderer::update()
     updateTexture(_shapeTexture, shapeImage);
 }
 
-void SelectionToolRenderer::createShaderProgram()
+void PixelSelectionToolRenderer::createShaderProgram()
 {
     const auto selectionToolVert = hdps::util::loadFileContents(":shaders/SelectionTool.vert");
 

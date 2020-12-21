@@ -34,11 +34,11 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& selectionTool) :
     _colormapWidget(this),
     _pointRenderer(),
     _selectionToolRenderer(selectionTool),
-    _selectionTool(selectionTool)
+    _pixelSelectionTool(selectionTool)
 {
     setMouseTracking(true);
 
-    QObject::connect(&_selectionTool, &PixelSelectionTool::shapeChanged, [this]() {
+    QObject::connect(&_pixelSelectionTool, &PixelSelectionTool::shapeChanged, [this]() {
         _selectionToolRenderer.update();
         update();
     });

@@ -11,7 +11,7 @@
 
 #include "widgets/ColormapWidget.h"
 
-#include "SelectionToolRenderer.h"
+#include "PixelSelectionToolRenderer.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
@@ -101,7 +101,7 @@ private:
     /* Renderers */
     PointRenderer           _pointRenderer;
     DensityRenderer         _densityRenderer;
-    SelectionToolRenderer   _selectionToolRenderer;
+    PixelSelectionToolRenderer   _selectionToolRenderer;
 
 
     /* Auxiliary widgets */
@@ -112,5 +112,5 @@ private:
 
     Bounds _dataBounds;
 
-    PixelSelectionTool& _selectionTool;
+    PixelSelectionTool&     _pixelSelectionTool;
 };

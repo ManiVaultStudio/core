@@ -96,7 +96,7 @@ private:
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;
 
-    PixelSelectionTool*               _selectionTool;     /** Point selection tool */
+    PixelSelectionTool*     _selectionTool;     /** Pixel selection tool */
 };
 
 // =============================================================================
