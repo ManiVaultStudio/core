@@ -35,11 +35,6 @@ public:
     virtual QString createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) = 0;
 
     /**
-    * Request a selection from the data manager by its name.
-    */
-    virtual DataSet& requestSelection(const QString name) = 0;
-
-    /**
      * Requests a dataset from the core which has the same unique name
      * as the given parameter. If no such instance can be found a fatal
      * error is thrown.

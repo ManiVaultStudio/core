@@ -52,7 +52,7 @@ public:
 
     QString createSubset() const override
     {
-        const hdps::DataSet& selection = _core->requestSelection(getDataName());
+        const hdps::DataSet& selection = getSelection();
 
         return _core->createSubsetFromSelection(selection, *this, "Subset");
     }
