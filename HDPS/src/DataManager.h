@@ -86,11 +86,7 @@ public:
 
     void renameSet(QString oldName, QString requestedName);
 
-    /**
-     * Removes raw data and all sets and selections belonging to this data.
-     * Returns a list of set names that have been removed as a result of this.
-     */
-    QStringList removeRawData(QString name);
+    void removeDataset(QString datasetName);
 
     RawData& getRawData(QString name);
     DataSet& getSet(QString name);
