@@ -88,12 +88,6 @@ public:
 
     }
 
-    // Should be protected, but can't because of DataManager needing access to the data
-    QString getDataName() const
-    {
-        return _dataName;
-    }
-
 protected:
     template <class DataType>
     DataType& getRawData() const
@@ -101,6 +95,16 @@ protected:
         if (_rawData == nullptr)
             _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getDataName()));
         return *static_cast<DataType*>(_rawData);
+    }
+
+    QString getDataName() const
+    {
+        return _dataName;
+    }
+
+    QString getSourceName() const
+    {
+        return _sourceSetName;
     }
 
     /**
@@ -123,6 +127,7 @@ private:
     QString _sourceSetName;
 
     friend class Core;
+    friend class DataManager;
 };
 
 } // namespace hdps
