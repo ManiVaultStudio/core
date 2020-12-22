@@ -16,7 +16,8 @@ namespace plugin
 class Plugin
 {
 public:
-    Plugin(Type type, QString kind) : _type(type), _kind(kind), _name(kind + QUuid::createUuid().toString()) { }
+    Plugin(Type type, QString kind);
+    
     virtual ~Plugin() {};
 
     /**
@@ -25,12 +26,14 @@ public:
      */
     virtual void init() = 0;
 	
-    /**
-     * Returns the unique name of this plugin.
-     */
-    QString getName() const
-    {
+    /** Returns the unique name of this plugin */
+    QString getName() const {
         return _name;
+    }
+
+    /** Returns the GUI name of this plugin */
+    QString getGuiName() const {
+        return _guiName;
     }
 
     /**
@@ -89,9 +92,14 @@ protected:
     CoreInterface* _core;
 
 private:
-    const QString _name;
-    const QString _kind;
-    const Type _type;
+    const QString               _name;          /** Unique plugin name */
+    const QString               _guiName;       /** Name in the GUI */
+    const QString               _kind;          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
+    const Type                  _type;          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+    QMap<QString, QVariant>     _properties;    /** Properties map */
+
+    /** Keeps track of how many instance have been created per plugin kind */
+    static QMap<QString, std::int32_t> _noInstances;
 };
 
 } // namespace plugin
