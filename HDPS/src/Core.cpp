@@ -66,6 +66,10 @@ void Core::addPlugin(plugin::Plugin* plugin)
         plugin::AnalysisPlugin* analysis = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
         if (analysis->hasSettings())
         {
+            auto analysisSettingsWidget = analysis->getSettings();
+
+            analysisSettingsWidget->setWindowTitle(plugin->getGuiName());
+
             _mainWindow.addSettings(analysis->getSettings());
         }
     }

@@ -26,7 +26,7 @@ class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsume
 public:
     ViewPlugin(QString name) : Plugin(Type::VIEW, name)
     {
-        
+        setWindowTitle(getGuiName());
     }
 
     ~ViewPlugin() override {};
