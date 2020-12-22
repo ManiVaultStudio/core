@@ -8,6 +8,8 @@
 #include <QPainter>
 #include <QLabel>
 
+#include <stdexcept>
+
 namespace hdps
 {
 namespace gui
