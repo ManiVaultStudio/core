@@ -25,7 +25,12 @@ public:
      */
     //virtual void removeData(const QString dataName) = 0;
 
-    virtual const QString createDerivedData(const QString dataType, const QString name, const QString sourceName) = 0;
+    /**
+     * Creates a dataset derived from a source dataset.
+     * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
+     * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
+     */
+    virtual const QString createDerivedData(const QString nameRequest, const QString sourceDatasetName) = 0;
 
     /**
      * Creates a copy of the given selection set and gives it a unique name based

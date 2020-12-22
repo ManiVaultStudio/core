@@ -143,20 +143,19 @@ void Core::removeData(const QString dataName)
     }
 }
 
-const QString Core::createDerivedData(const QString kind, const QString nameRequest, const QString sourceSetName)
+const QString Core::createDerivedData(const QString nameRequest, const QString sourceDatasetName)
 {
-    const DataSet& sourceSet = requestData(sourceSetName);
+    const DataSet& sourceSet = requestData(sourceDatasetName);
+    DataType dataType = sourceSet.getDataType();
 
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager->createPlugin(kind);
+    QString pluginName = _pluginManager->createPlugin(dataType._type);
     // Request it from the core
-    RawData& derivedData = requestRawData(pluginName);
-
-    derivedData.setDerived(true, sourceSet.getDataName());
+    RawData& rawData = requestRawData(pluginName);
 
     // Create an initial full set, but no selection because it is shared with the source data
-    DataSet* fullSet = derivedData.createDataSet();
-    fullSet->_sourceSetName = sourceSetName;
+    DataSet* fullSet = rawData.createDataSet();
+    fullSet->_sourceSetName = sourceDatasetName;
     fullSet->_derived = true;
 
     // Set properties of the new set

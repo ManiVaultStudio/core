@@ -63,7 +63,7 @@ public:
      */
     void removeData(const QString dataName);// override;
 
-    const QString createDerivedData(const QString kind, const QString name, const QString sourceName) override;
+    const QString createDerivedData(const QString nameRequest, const QString sourceDatasetName) override;
 
     /**
      * Creates a copy of the given selection set and gives it a unique name based
