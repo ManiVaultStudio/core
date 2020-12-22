@@ -133,14 +133,11 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     return setName;
 }
 
-void Core::removeData(const QString dataName)
+void Core::removeDataset(const QString datasetName)
 {
-    QStringList removedSets = _dataManager->removeRawData(dataName);
+    _dataManager->removeDataset(datasetName);
 
-    for (const QString& name : removedSets)
-    {
-        notifyDataRemoved(name);
-    }
+    notifyDataRemoved(datasetName);
 }
 
 const QString Core::createDerivedData(const QString nameRequest, const QString sourceDatasetName)
@@ -258,11 +255,11 @@ void Core::notifyDataRemoved(const QString name)
 }
 
 /** Notify all data consumers that a selection has changed. */
-void Core::notifySelectionChanged(const QString dataName)
+void Core::notifySelectionChanged(const QString datasetName)
 {
     for (plugin::DataConsumer* dataConsumer : getDataConsumers())
     {
-        dataConsumer->selectionChanged(dataName);
+        dataConsumer->selectionChanged(datasetName);
     }
 }
 

@@ -57,11 +57,11 @@ public:
     const QString addData(const QString kind, const QString nameRequest) override;
 
     /**
-     * Removes a RawData object and all of the data sets associated with this data.
-     * Other data objects derived from this data object are converted to non-derived data.
-     * Notifies all plug-ins of the removed data sets automatically.
+     * Removes a Dataset object. Other datasets derived from this datasets are
+     * converted to non-derived data.
+     * Notifies all plug-ins of the removed data set automatically.
      */
-    void removeData(const QString dataName);// override;
+    void removeDataset(const QString datasetName);// override;
 
     const QString createDerivedData(const QString nameRequest, const QString sourceDatasetName) override;
 
@@ -84,17 +84,11 @@ public:
     */
     DataSet& requestData(const QString name) override;
 
-    /**
-    * Requests the selection set belonging to the raw dataset with the given name.
-    */
-    DataSet& requestSelection(const QString name) override;
-
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString name) override;
     /** Notify all data consumers that a dataset has been changed. */
     void notifyDataChanged(const QString name) override;
-    /** Notify all data consumers that a dataset has been removed. */
-    void notifyDataRemoved(const QString name) override;
+
     /** Notify all data consumers that a selection has changed. */
     void notifySelectionChanged(const QString dataName) override;
 
@@ -102,11 +96,21 @@ public:
     * Returns a reference to the main window for adding widgets to it.
     */
     gui::MainWindow& gui() const;
+
+protected:
+    /**
+    * Requests the selection set belonging to the raw dataset with the given name.
+    */
+    DataSet& requestSelection(const QString rawdataName) override;
+
 private:
     /** Checks if the given data consumer supports the kind data in the given set. */
     bool supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName);
     /** Retrieves all data consumers from the plugin list. */
     std::vector<plugin::DataConsumer*> getDataConsumers();
+
+    /** Notify all data consumers that a dataset has been removed. */
+    void notifyDataRemoved(const QString name);
 
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();
