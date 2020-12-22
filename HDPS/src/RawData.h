@@ -25,6 +25,7 @@ namespace hdps {
         QString _type;
 
         friend class RawData;
+        friend class Core;
     };
 
     class RawData : public plugin::Plugin
@@ -44,39 +45,8 @@ namespace hdps {
 
         virtual DataSet* createDataSet() const = 0;
 
-        bool isDerivedData() const
-        {
-            return _derived;
-        }
-
-        /**
-         * Returns the raw data this data is derived from. If this data isn't
-         * derived data then calling this function will throw an exception.
-         *
-         * @return A reference to the raw data this data is derived from
-         */
-        RawData& getSourceData() const
-        {
-            return _core->requestRawData(_sourceDataName);
-        }
-
-        QString getSourceDataName() const
-        {
-            return _sourceDataName;
-        }
-
-        void setDerived(bool derived, QString sourceData)
-        {
-            _derived = derived;
-            _sourceDataName = sourceData;
-        }
-
     private:
         DataType _dataType;
-
-        bool _derived = false;
-
-        QString _sourceDataName;
     };
 
 namespace plugin {
