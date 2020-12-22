@@ -100,13 +100,13 @@ void ScatterplotPlugin::dataRemoved(const QString name)
 {
 }
 
-void ScatterplotPlugin::selectionChanged(const QString dataName)
+void ScatterplotPlugin::selectionChanged(const QString datasetName)
 {
     if (_currentDataSet.isEmpty()) return;
 
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
-    if (DataSet::getSourceData(points).getDataName() == dataName)
+    if (points.getName() == datasetName)
         updateSelection();
 }
 
@@ -225,7 +225,7 @@ void ScatterplotPlugin::selectPoints()
 
     selectionSetIndices = targetIndices;
 
-    _core->notifySelectionChanged(points.isDerivedData() ? DataSet::getSourceData(points).getDataName() : points.getDataName());
+    _core->notifySelectionChanged(points.getName());
 }
 
 void ScatterplotPlugin::onDataInput(QString dataSetName)
@@ -616,7 +616,7 @@ void ScatterplotPlugin::selectAll()
     else
         selectionSetIndices = setIndices;
 
-    _core->notifySelectionChanged(selectionSet.getDataName());
+    _core->notifySelectionChanged(selectionSet.getName());
 }
 
 void ScatterplotPlugin::clearSelection()
@@ -631,7 +631,7 @@ void ScatterplotPlugin::clearSelection()
 
     selectionSetIndices.clear();
 
-    _core->notifySelectionChanged(selectionSet.getDataName());
+    _core->notifySelectionChanged(selectionSet.getName());
 }
 
 void ScatterplotPlugin::invertSelection()
@@ -660,7 +660,7 @@ void ScatterplotPlugin::invertSelection()
         selectionSetIndices.push_back(setIndex);
     }
 
-    _core->notifySelectionChanged(selectionSet.getDataName());
+    _core->notifySelectionChanged(selectionSet.getName());
 }
 
 void ScatterplotPlugin::updateWindowTitle()
