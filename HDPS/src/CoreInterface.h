@@ -19,11 +19,10 @@ public:
     virtual const QString addData(const QString kind, const QString name) = 0;
 
     /**
-     * Removes a RawData object and all of the data sets associated with this data.
-     * Other data objects derived from this data object are converted to non-derived data.
-     * Notifies all plug-ins of the removed data sets automatically.
+     * Removes a Dataset. Other datasets derived from this dataset are converted to non-derived data.
+     * Notifies all plug-ins of the removed dataset automatically.
      */
-    //virtual void removeData(const QString dataName) = 0;
+    virtual void removeDataset(const QString dataName) = 0;
 
     /**
      * Creates a dataset derived from a source dataset.
@@ -56,8 +55,7 @@ public:
     virtual void notifyDataAdded(const QString name) = 0;
     /** Notify all data consumers that a dataset has been changed. */
     virtual void notifyDataChanged(const QString name) = 0;
-    /** Notify all data consumers that a dataset has been removed. */
-    virtual void notifyDataRemoved(const QString name) = 0;
+
     /** Notify all data consumers that a selection has changed. */
     virtual void notifySelectionChanged(const QString dataName) = 0;
 
@@ -69,6 +67,11 @@ protected:
      * error is thrown.
      */
     virtual RawData& requestRawData(const QString name) = 0;
+
+    /**
+    * Request a selection from the data manager by its corresponding raw data name.
+    */
+    virtual DataSet& requestSelection(const QString rawdataName) = 0;
 
     friend class RawData;
     friend class DataSet;
