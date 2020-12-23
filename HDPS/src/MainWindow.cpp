@@ -87,22 +87,31 @@ namespace gui
 {
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent),
+    _core(nullptr),
+    _logDockWidget(nullptr),
+    _dataHierarchy(nullptr),
+    _settingsWidget(nullptr),
+    _dockManager(new ads::CDockManager(this)),
+    _centralDockArea(nullptr),
+    _centralDockWidget(new ads::CDockWidget("Central Dock Widget")),
+    _viewPluginDockWidgets(),
+    _analysisDockingArea(nullptr)
 {
     setupUi(this);
-    
+
     _core = std::make_unique<Core>(*this);
     _core->init();
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
-    
+
     Logger::Initialize();
 
     QObject::connect(findLogFileAction, &QAction::triggered, [this](bool)
     {
         const auto filePath = Logger::GetFilePathName();
 
-        if ( !ShowFileInFolder(filePath))
+        if (!ShowFileInFolder(filePath))
         {
             QMessageBox::information(this,
                 QObject::tr("Log file not found"),
@@ -124,11 +133,7 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
 
-    _centralWidget = new CentralWidget();
-    setCentralWidget(_centralWidget);
-
     _settingsWidget = std::make_unique<SettingsWidget>();
-    _settingsWidget->setAllowedAreas(Qt::RightDockWidgetArea);
 
     auto dataHierarchy = std::make_unique<DataHierarchy>(_core->getDataManager());
     connect(&_core->getDataManager(), &DataManager::dataChanged, dataHierarchy.get(), &DataHierarchy::updateDataModel);
@@ -138,13 +143,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
     addDockWidget(Qt::RightDockWidgetArea, _settingsWidget.get());
 
-    QObject::connect(this, &QMainWindow::destroyed, [this](QObject* object) {
-        Application::current()->setSetting("MainWindow/Geometry", saveGeometry());
-    });
-}
+    // Advanced docking system
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewIsDynamic, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewHasWindowFrame, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
 
-MainWindow::~MainWindow()
-{
+    //_dockManager->setStyleSheet("focus_highlighting");
+    _centralDockArea = _dockManager->setCentralWidget(_centralDockWidget);
+    //_centralDockArea->setAllowedAreas(ads::DockWidgetArea::OuterDockAreas);
+    //_dockManager->centralWidget()->hide();
+    //_centralDockArea->titleBar()->hide();
+
+    //_settingsWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
+
+    //_dockManager->addDockWidget(ads::RightDockWidgetArea, _settingsWidget.get());
 }
 
 QAction* MainWindow::addImportOption(QString menuName)
@@ -169,7 +183,7 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
 
 void MainWindow::addView(plugin::ViewPlugin* plugin)
 {
-    _centralWidget->addView(plugin);
+    //_centralWidget->addView(plugin);
 }
 
 void MainWindow::addSettings(gui::SettingsWidget* settings)
@@ -193,54 +207,18 @@ void MainWindow::centerAndResize(float coverage) {
     }
 }
 
-void MainWindow::storeLayout()
-{
-    _windowConfiguration = saveState();
-}
-
-void MainWindow::restoreLayout()
-{
-    restoreState(_windowConfiguration);
-}
-
-void MainWindow::changeEvent(QEvent *event)
-{
-    storeLayout();
-}
-
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-    storeLayout();
-
-    QWidget::closeEvent(event);
-}
-
-void MainWindow::hideEvent(QHideEvent *event)
-{
-    storeLayout();
-}
-
-void MainWindow::showEvent(QShowEvent *event)
-{
-    restoreLayout();
-
-    QList<QDockWidget *> dockWidgets = findChildren<QDockWidget *>();
-    for (auto child : dockWidgets)
-        child->setVisible(true);
-}
-
-void MainWindow::moveEvent(QMoveEvent *event)
+void MainWindow::moveEvent(QMoveEvent* moveEvent)
 {
     saveGeometryToSettings();
 
-    QWidget::moveEvent(event);
+    QWidget::moveEvent(moveEvent);
 }
 
-void MainWindow::resizeEvent(QResizeEvent* event)
+void MainWindow::resizeEvent(QResizeEvent* resizeEvent)
 {
     saveGeometryToSettings();
 
-    QWidget::resizeEvent(event);
+    QWidget::resizeEvent(resizeEvent);
 }
 
 void MainWindow::saveGeometryToSettings()

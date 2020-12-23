@@ -9,6 +9,10 @@
 #include <QAction>
 #include <QByteArray>
 
+// Advanced docking system
+#include "DockManager.h"
+#include "DockAreaWidget.h"
+
 namespace Ui
 {
     class MainWindow;
@@ -87,24 +91,37 @@ public slots:
     void restoreLayout();
 
 private:
-    void changeEvent(QEvent *event) override;
-    void closeEvent(QCloseEvent *event) override;
-    void hideEvent(QHideEvent *event) override;
-    void showEvent(QShowEvent *event) override;
-    void moveEvent(QMoveEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
+    
 
+private: // Window geometry persistence
+
+    /** Save window position and size to application settings */
     void saveGeometryToSettings();
 
+    /**
+     * Invoked when the window position changes
+     * @param moveEvent Move event that occurred
+     */
+    void moveEvent(QMoveEvent* moveEvent) override;
+
+    /**
+     * Invoked when the window size changes
+     * @param resizeEvent Resize event that occurred
+     */
+    void resizeEvent(QResizeEvent* resizeEvent) override;
+
 private:
-    std::unique_ptr<Core> _core;
-    std::unique_ptr<LogDockWidget> _logDockWidget;
+    std::unique_ptr<Core>               _core;                  /** HDPS core */
+    std::unique_ptr<LogDockWidget>      _logDockWidget;         /** HDPS log dock widget */
+    DataHierarchy*                      _dataHierarchy;         /** Data hierarchy viewer */
+    std::unique_ptr<SettingsWidget>     _settingsWidget;        /** Settings widget */
 
-    CentralWidget* _centralWidget;
-    DataHierarchy* _dataHierarchy;
-    std::unique_ptr<SettingsWidget> _settingsWidget;
-
-    QByteArray _windowConfiguration;
+private: // Advanced docking system
+    ads::CDockManager*          _dockManager;               /** ADS Manager for docking */
+    ads::CDockAreaWidget*       _centralDockArea;           /** ADS Central docking area */
+    ads::CDockWidget*           _centralDockWidget;         /** ADS Central docking widget */
+    QList<ads::CDockWidget*>    _viewPluginDockWidgets;     /** ADS Docking area for view plugins */
+    ads::CDockAreaWidget*       _analysisDockingArea;       /** ADS Docking area for analysis plugins */
 };
 
 } // namespace gui
