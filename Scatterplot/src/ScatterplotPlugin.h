@@ -39,6 +39,11 @@ public:
 
     ~ScatterplotPlugin(void) override;
     
+    /** Returns the icon of this plugin */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("braille");
+    }
+
     void init() override;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;

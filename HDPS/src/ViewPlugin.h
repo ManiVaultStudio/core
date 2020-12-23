@@ -29,6 +29,11 @@ public:
     }
 
     ~ViewPlugin() override {};
+
+    /** Returns the icon of this plugin */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("binoculars");
+    }
 };
 
 class ViewPluginFactory : public PluginFactory

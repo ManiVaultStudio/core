@@ -200,6 +200,8 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
     auto dockWidget = new ads::CDockWidget(plugin->getGuiName());
 
+    dockWidget->setIcon(plugin->getIcon());
+
     switch (pluginType)
     {
         case plugin::Type::ANALYSIS:
@@ -225,7 +227,9 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
         case plugin::Type::VIEW:
         {
-            dockWidget->setWidget(dynamic_cast<plugin::ViewPlugin*>(plugin), ads::CDockWidget::ForceNoScrollArea);
+            auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(plugin);
+
+            dockWidget->setWidget(viewPlugin, ads::CDockWidget::ForceNoScrollArea);
             
             _dockManager->addDockWidget(ads::LeftDockWidgetArea, dockWidget, _centralDockArea);
 

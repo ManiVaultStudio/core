@@ -4,6 +4,7 @@
 #include "PointData.h"
 #include "ClusterData.h"
 #include "ColorData.h"
+#include "Application.h"
 
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"

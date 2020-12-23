@@ -19,6 +19,11 @@ public:
     AnalysisPlugin(QString name) : Plugin(Type::ANALYSIS, name) { }
     ~AnalysisPlugin() override {};
 
+    /** Returns the icon of this plugin */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("chart-line");
+    }
+
     bool hasSettings()
     {
         return getSettings() != nullptr;

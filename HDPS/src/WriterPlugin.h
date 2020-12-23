@@ -24,6 +24,11 @@ public:
     virtual void writeData() = 0;
 
     ~WriterPlugin() override {};
+
+    /** Returns the icon of this plugin */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-export");
+    }
 };
 
 
