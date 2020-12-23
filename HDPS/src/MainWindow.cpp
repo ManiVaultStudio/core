@@ -18,7 +18,6 @@
 #include <QProcess>
 #include <QUrl>
 #include <QDebug>
-#include <QVector2D>
 
 namespace
 {
