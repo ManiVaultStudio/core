@@ -273,6 +273,8 @@ target_link_libraries(${PROJECT}_Private Qt5::Widgets)
 target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
+target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/Qt-Advanced-Docking-System/src)
+
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
 
 add_executable(${PROJECT} MACOSX_BUNDLE
@@ -287,6 +289,7 @@ set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
+target_link_libraries(${PROJECT}_Public qtadvanceddocking)
 
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Public>")
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Private>")
