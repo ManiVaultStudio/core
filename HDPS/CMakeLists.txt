@@ -341,3 +341,7 @@ add_subdirectory(src/plugins/ClusterData)
 
 # Image Data
 add_subdirectory(src/plugins/ImageData)
+
+# Qt Advanced docking system
+set(VERSION_SHORT 3.6.0)
+add_subdirectory(external/Qt-Advanced-Docking-System)
