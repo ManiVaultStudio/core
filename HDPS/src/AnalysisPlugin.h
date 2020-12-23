@@ -3,9 +3,10 @@
 
 #include "PluginFactory.h"
 #include "DataConsumer.h"
-#include "widgets/SettingsWidget.h"
 
 #include <memory>
+
+class QWidget;
 
 namespace hdps
 {
@@ -23,7 +24,7 @@ public:
         return getSettings() != nullptr;
     }
 
-    virtual gui::SettingsWidget* const getSettings() = 0;
+    virtual QWidget* const getSettings() = 0;
 };
 
 

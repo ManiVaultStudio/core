@@ -2,14 +2,13 @@
 
 #include "DataManager.h" // To connect changed data signal to dataHierarchy
 #include "Logger.h"
-#include "LogDockWidget.h"
-#include "DataHierarchy.h"
+
 #include "PluginManager.h"
 #include "PluginType.h"
 #include "Application.h"
 
 #include "ViewPlugin.h"
-#include "widgets/SettingsWidget.h"
+#include "AnalysisPlugin.h"
 
 #include <QApplication> // Used by centerAndResize
 #include <QDesktopWidget> // Used by centerAndResize
@@ -18,6 +17,8 @@
 #include <QProcess>
 #include <QUrl>
 #include <QDebug>
+
+#include <QLineEdit>
 
 namespace
 {
@@ -86,22 +87,24 @@ namespace hdps
 namespace gui
 {
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
     _core(nullptr),
     _logDockWidget(nullptr),
     _dataHierarchy(nullptr),
-    _settingsWidget(nullptr),
     _dockManager(new ads::CDockManager(this)),
     _centralDockArea(nullptr),
     _centralDockWidget(new ads::CDockWidget("Central Dock Widget")),
     _viewPluginDockWidgets(),
-    _analysisDockingArea(nullptr)
+    _analysisDockingArea()
 {
     setupUi(this);
 
-    _core = std::make_unique<Core>(*this);
+    // Create and initialize HDPS core
+    _core = QSharedPointer<Core>::create(*this);
     _core->init();
+
+    //_dataHierarchy = QSharedPointer<DataHierarchy>::create(_core->getDataManager());
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -123,25 +126,23 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         if (checked)
         {
-            _logDockWidget = std::make_unique<LogDockWidget>(*this);
-            addDockWidget(Qt::BottomDockWidgetArea, _logDockWidget.get(), Qt::Horizontal);
+            _logDockWidget = QSharedPointer<LogDockWidget>::create(*this);
+            
+            //addDockWidget(Qt::BottomDockWidgetArea, TODO, _logDockWidget.get(), Qt::Horizontal);
         }
         else
         {
-            removeDockWidget(_logDockWidget.get());
-            _logDockWidget.reset();
+            //removeDockWidget(_logDockWidget.get());
+            //_logDockWidget.reset();
         }
     });
 
-    _settingsWidget = std::make_unique<SettingsWidget>();
-
-    auto dataHierarchy = std::make_unique<DataHierarchy>(_core->getDataManager());
-    connect(&_core->getDataManager(), &DataManager::dataChanged, dataHierarchy.get(), &DataHierarchy::updateDataModel);
+    connect(&_core->getDataManager(), &DataManager::dataChanged, _dataHierarchy.get(), &DataHierarchy::updateDataModel);
     // Note: addWidget takes the ownership of its argument, so it should be released from the unique_ptr.
-    _settingsWidget->addWidget(dataHierarchy.get());
-    _dataHierarchy = dataHierarchy.release();
+    //_settingsWidget->addWidget(dataHierarchy.get());
+    //_dataHierarchy = dataHierarchy.release();
 
-    addDockWidget(Qt::RightDockWidgetArea, _settingsWidget.get());
+    //addDockWidget(Qt::RightDockWidgetArea, _settingsWidget.get());
 
     // Advanced docking system
     ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewIsDynamic, true);
@@ -159,6 +160,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //_settingsWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
 
     //_dockManager->addDockWidget(ads::RightDockWidgetArea, _settingsWidget.get());
+
+    //addDockWidget(_settingsWidget.get(), "Settings", ads::RightDockWidgetArea);
+
+    restoreWindowGeometryFromSettings();
 }
 
 QAction* MainWindow::addImportOption(QString menuName)
@@ -175,57 +180,108 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
 {
     switch (type)
     {
-    case plugin::Type::ANALYSIS:      return menuAnalysis->addAction(name);
-    case plugin::Type::VIEW:          return menuVisualization->addAction(name);
-    default: return nullptr;
+        case plugin::Type::ANALYSIS:
+            return menuAnalysis->addAction(name);
+
+        case plugin::Type::VIEW:
+            return menuVisualization->addAction(name);
+
+        default:
+            return nullptr;
     }
 }
 
-void MainWindow::addView(plugin::ViewPlugin* plugin)
+void MainWindow::addPlugin(plugin::Plugin* plugin)
 {
-    //_centralWidget->addView(plugin);
+    const auto pluginType = plugin->getType();
+
+    if (pluginType != plugin::Type::ANALYSIS && pluginType != plugin::Type::VIEW)
+        return;
+
+    auto dockWidget = new ads::CDockWidget(plugin->getGuiName());
+
+    switch (pluginType)
+    {
+        case plugin::Type::ANALYSIS:
+        {
+            auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
+            auto settingsWidget = analysisPlugin->getSettings();
+
+            settingsWidget->setWindowTitle(plugin->getGuiName());
+
+            dockWidget->setFeature(ads::CDockWidget::DockWidgetMovable, false);
+            dockWidget->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
+            dockWidget->setWidget(settingsWidget);
+
+            if (_analysisDockingArea) {
+                _dockManager->addDockWidgetTabToArea(dockWidget, _analysisDockingArea);
+            } else {
+                _analysisDockingArea = _dockManager->addDockWidgetTab(ads::LeftDockWidgetArea, dockWidget);
+                _analysisDockingArea->setAllowedAreas(ads::DockWidgetArea::NoDockWidgetArea);
+            }
+
+            break;
+        }
+
+        case plugin::Type::VIEW:
+        {
+            dockWidget->setWidget(dynamic_cast<plugin::ViewPlugin*>(plugin), ads::CDockWidget::ForceNoScrollArea);
+            
+            _dockManager->addDockWidget(ads::LeftDockWidgetArea, dockWidget, _centralDockArea);
+
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
-void MainWindow::addSettings(gui::SettingsWidget* settings)
+void MainWindow::addDockWidget(QWidget* widget, const QString& windowTitle, const ads::DockWidgetArea& dockWidgetArea, ads::CDockAreaWidget* dockAreaWidget)
 {
-    addDockWidget(Qt::LeftDockWidgetArea, settings);
-}
+    auto dockWidget = new ads::CDockWidget(windowTitle);
 
-void MainWindow::centerAndResize(float coverage) {
-    const auto storedMainWindowGeometry = Application::current()->getSetting("MainWindow/Geometry", QVariant());
-
-    QRect mainWindowRect;
-
-    if (storedMainWindowGeometry.isValid()) {
-        restoreGeometry(storedMainWindowGeometry.toByteArray());
-    }
-    else {
-        const auto availableSize    = qApp->desktop()->availableGeometry().size();
-        const auto newSize          = QSize(availableSize.width() * coverage, availableSize.height() * coverage);
-
-        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, qApp->desktop()->availableGeometry()));
-    }
+    _dockManager->addDockWidget(dockWidgetArea, dockWidget, dockAreaWidget);
 }
 
 void MainWindow::moveEvent(QMoveEvent* moveEvent)
 {
-    saveGeometryToSettings();
+    saveWindowGeometryToSettings();
 
     QWidget::moveEvent(moveEvent);
 }
 
 void MainWindow::resizeEvent(QResizeEvent* resizeEvent)
 {
-    saveGeometryToSettings();
+    saveWindowGeometryToSettings();
 
     QWidget::resizeEvent(resizeEvent);
 }
 
-void MainWindow::saveGeometryToSettings()
+void MainWindow::restoreWindowGeometryFromSettings()
+{
+    const auto storedMainWindowGeometry = Application::current()->getSetting("MainWindow/Geometry", QVariant());
+
+    QRect mainWindowRect;
+
+    if (storedMainWindowGeometry.isValid())
+        restoreGeometry(storedMainWindowGeometry.toByteArray());
+    else
+        setDefaultWindowGeometry();
+}
+
+void MainWindow::saveWindowGeometryToSettings()
 {
     Application::current()->setSetting("MainWindow/Geometry", saveGeometry());
 }
 
-} // namespace gui
+void MainWindow::setDefaultWindowGeometry(const float& coverage /*= 0.7f*/) {
+    const auto availableSize    = qApp->desktop()->availableGeometry().size();
+    const auto newSize          = QSize(availableSize.width() * coverage, availableSize.height() * coverage);
+    
+    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, qApp->desktop()->availableGeometry()));
+}
 
-} // namespace hdps
+}
+
+}

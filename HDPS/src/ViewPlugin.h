@@ -7,7 +7,6 @@
 */
 
 
-#include "widgets/DockableWidget.h"
 #include "PluginFactory.h"
 #include "DataConsumer.h"
 
@@ -19,7 +18,7 @@ namespace hdps
 namespace plugin
 {
 
-class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsumer
+class ViewPlugin : public QWidget, public Plugin, public DataConsumer
 {
     Q_OBJECT
     
