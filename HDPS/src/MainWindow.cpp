@@ -6,6 +6,7 @@
 #include "DataHierarchy.h"
 #include "PluginManager.h"
 #include "PluginType.h"
+#include "Application.h"
 
 #include "ViewPlugin.h"
 #include "widgets/SettingsWidget.h"
@@ -136,6 +137,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _dataHierarchy = dataHierarchy.release();
 
     addDockWidget(Qt::RightDockWidgetArea, _settingsWidget.get());
+
+    QObject::connect(this, &QMainWindow::destroyed, [this](QObject* object) {
+        Application::current()->setSetting("MainWindow/Geometry", saveGeometry());
+    });
 }
 
 MainWindow::~MainWindow()
@@ -173,14 +178,19 @@ void MainWindow::addSettings(gui::SettingsWidget* settings)
 }
 
 void MainWindow::centerAndResize(float coverage) {
-    // Retrieve the dimensions available on the current screen
-    QSize availableSize = qApp->desktop()->availableGeometry().size();
-    QSize newSize(availableSize.width() * coverage, availableSize.height() * coverage);
+    const auto storedMainWindowGeometry = Application::current()->getSetting("MainWindow/Geometry", QVariant());
 
-    qDebug() << "Available screen size " << availableSize.width() << "x" << availableSize.height();
-    qDebug() << "Initial application size " << newSize.width() << "x" << newSize.height();
+    QRect mainWindowRect;
 
-    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, qApp->desktop()->availableGeometry()));
+    if (storedMainWindowGeometry.isValid()) {
+        restoreGeometry(storedMainWindowGeometry.toByteArray());
+    }
+    else {
+        const auto availableSize    = qApp->desktop()->availableGeometry().size();
+        const auto newSize          = QSize(availableSize.width() * coverage, availableSize.height() * coverage);
+
+        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, qApp->desktop()->availableGeometry()));
+    }
 }
 
 void MainWindow::storeLayout()
@@ -201,6 +211,8 @@ void MainWindow::changeEvent(QEvent *event)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     storeLayout();
+
+    QWidget::closeEvent(event);
 }
 
 void MainWindow::hideEvent(QHideEvent *event)
@@ -215,6 +227,25 @@ void MainWindow::showEvent(QShowEvent *event)
     QList<QDockWidget *> dockWidgets = findChildren<QDockWidget *>();
     for (auto child : dockWidgets)
         child->setVisible(true);
+}
+
+void MainWindow::moveEvent(QMoveEvent *event)
+{
+    saveGeometryToSettings();
+
+    QWidget::moveEvent(event);
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+    saveGeometryToSettings();
+
+    QWidget::resizeEvent(event);
+}
+
+void MainWindow::saveGeometryToSettings()
+{
+    Application::current()->setSetting("MainWindow/Geometry", saveGeometry());
 }
 
 } // namespace gui

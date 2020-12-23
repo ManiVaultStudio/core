@@ -91,6 +91,10 @@ private:
     void closeEvent(QCloseEvent *event) override;
     void hideEvent(QHideEvent *event) override;
     void showEvent(QShowEvent *event) override;
+    void moveEvent(QMoveEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+
+    void saveGeometryToSettings();
 
 private:
     std::unique_ptr<Core> _core;
