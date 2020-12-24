@@ -31,6 +31,23 @@ public:
     void setWidget(QWidget* widget);
     void setIcon(const QIcon& icon);
 
+public: // Expand collapse
+
+    void expand();
+    void collapse();
+
+    void setExpanded(const bool& expanded);
+
+    bool isExpanded() const;
+
+private:
+
+    void updateExpansionStateIcon();
+
+signals:
+
+    void expandedChanged(const bool& expanded);
+
 private:
     QVBoxLayout                 _mainLayout;
     QFrame                      _frame;

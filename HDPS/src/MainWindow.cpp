@@ -152,6 +152,8 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _viewPluginsDockArea = _dockManager->setCentralWidget(_viewPluginsDockWidget);
 
     _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion);
+    _analysisPluginsDockWidget->setMinimumWidth(300);
+    _analysisPluginsDockWidget->setMaximumWidth(500);
 
     _dockManager->addDockWidget(ads::LeftDockWidgetArea, _analysisPluginsDockWidget);
 

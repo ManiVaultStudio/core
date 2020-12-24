@@ -47,19 +47,11 @@ AccordionSection::AccordionSection(const QString & title /*= ""*/, QWidget* pare
     
     _toggleButton.setLayout(&_frameLayout);
 
-    const auto updateRightAlignedIcon = [this]() {
-        const auto iconName = _toggleButton.isChecked() ? "angle-right" : "angle-down";
-        const auto icon     = hdps::Application::getIconFont("FontAwesome").getIcon(iconName);
-
-        _leftIconLabel.setPixmap(icon.pixmap(ICON_SIZE));
-    };
-
-    QObject::connect(&_toggleButton, &QPushButton::toggled, [this, updateRightAlignedIcon](bool checked) {
-        _widget->setVisible(checked);
-        updateRightAlignedIcon();
+    QObject::connect(&_toggleButton, &QPushButton::toggled, [this](bool checked) {
+        setExpanded(checked);
     });
 
-    updateRightAlignedIcon();
+    updateExpansionStateIcon();
 }
 
 void AccordionSection::setWidget(QWidget* widget)
@@ -72,6 +64,42 @@ void AccordionSection::setWidget(QWidget* widget)
 void AccordionSection::setIcon(const QIcon& icon)
 {
     _rightIconLabel.setPixmap(icon.pixmap(ICON_SIZE));
+}
+
+void AccordionSection::expand()
+{
+    setExpanded(true);
+}
+
+void AccordionSection::collapse()
+{
+    setExpanded(false);
+}
+
+void AccordionSection::setExpanded(const bool& expanded)
+{
+    QSignalBlocker toggleButtonBlocker(&_toggleButton);
+
+    _toggleButton.setChecked(expanded);
+
+    _widget->setVisible(expanded);
+
+    updateExpansionStateIcon();
+
+    emit expandedChanged(isExpanded());
+}
+
+bool AccordionSection::isExpanded() const
+{
+    return _toggleButton.isChecked();
+}
+
+void AccordionSection::updateExpansionStateIcon()
+{
+    const auto iconName = _toggleButton.isChecked() ? "angle-right" : "angle-down";
+    const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
+
+    _leftIconLabel.setPixmap(icon.pixmap(ICON_SIZE));
 }
 
 }
