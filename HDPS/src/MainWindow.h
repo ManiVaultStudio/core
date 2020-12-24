@@ -1,5 +1,4 @@
-#ifndef HDPS_MAINWINDOW_H
-#define HDPS_MAINWINDOW_H
+#pragma once
 
 #include "ui_MainWindow.h"
 #include "Core.h"
@@ -8,7 +7,6 @@
 
 #include <QMainWindow>
 #include <QAction>
-#include <QByteArray>
 #include <QSharedPointer>
 
 // Advanced docking system
@@ -111,16 +109,14 @@ private:
     QSharedPointer<LogDockWidget>   _logDockWidget;         /** HDPS log dock widget */
     QSharedPointer<DataHierarchy>   _dataHierarchy;         /** Data hierarchy viewer */
 
-private: // Advanced docking system
-    ads::CDockManager*          _dockManager;               /** ADS Manager for docking */
-    ads::CDockAreaWidget*       _centralDockArea;           /** ADS Central docking area */
-    ads::CDockWidget*           _centralDockWidget;         /** ADS Central docking widget */
-    QList<ads::CDockWidget*>    _viewPluginDockWidgets;     /** ADS Docking area for view plugins */
-    ads::CDockAreaWidget*       _analysisDockingArea;       /** ADS Docking area for analysis plugins */
+private: // Docking
+    ads::CDockManager*          _dockManager;                   /** ADS Manager for docking */
+    ads::CDockAreaWidget*       _analysisPluginsDockArea;       /** ADS Docking area for analysis plugins */
+    ads::CDockAreaWidget*       _viewPluginsDockArea;           /** ADS Docking area for view plugins */
+    ads::CDockAreaWidget*       _settingsDockArea;              /** ADS Settings docking area */
+    ads::CDockWidget*           _viewPluginsDockWidget;         /** ADS Central docking widget */
+    
 };
 
-} // namespace gui
-
-} // namespace hdps
-
-#endif // HDPS_MAINWINDOW_H
+}
+}

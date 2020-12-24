@@ -93,10 +93,9 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _logDockWidget(nullptr),
     _dataHierarchy(nullptr),
     _dockManager(new ads::CDockManager(this)),
-    _centralDockArea(nullptr),
-    _centralDockWidget(new ads::CDockWidget("Central Dock Widget")),
-    _viewPluginDockWidgets(),
-    _analysisDockingArea()
+    _analysisPluginsDockArea(nullptr),
+    _settingsDockArea(nullptr),
+    _viewPluginsDockWidget(new ads::CDockWidget("Central Dock Widget"))
 {
     setupUi(this);
 
@@ -142,8 +141,6 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     //_settingsWidget->addWidget(dataHierarchy.get());
     //_dataHierarchy = dataHierarchy.release();
 
-    //addDockWidget(Qt::RightDockWidgetArea, _settingsWidget.get());
-
     // Advanced docking system
     ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewIsDynamic, true);
     ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
@@ -151,17 +148,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, true);
     ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
 
-    //_dockManager->setStyleSheet("focus_highlighting");
-    _centralDockArea = _dockManager->setCentralWidget(_centralDockWidget);
-    //_centralDockArea->setAllowedAreas(ads::DockWidgetArea::OuterDockAreas);
-    //_dockManager->centralWidget()->hide();
-    //_centralDockArea->titleBar()->hide();
-
-    //_settingsWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
-
-    //_dockManager->addDockWidget(ads::RightDockWidgetArea, _settingsWidget.get());
-
-    //addDockWidget(_settingsWidget.get(), "Settings", ads::RightDockWidgetArea);
+    _viewPluginsDockArea = _dockManager->setCentralWidget(_viewPluginsDockWidget);
 
     restoreWindowGeometryFromSettings();
 }
@@ -215,11 +202,11 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             dockWidget->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
             dockWidget->setWidget(settingsWidget);
 
-            if (_analysisDockingArea) {
-                _dockManager->addDockWidgetTabToArea(dockWidget, _analysisDockingArea);
+            if (_analysisPluginsDockArea) {
+                _dockManager->addDockWidgetTabToArea(dockWidget, _analysisPluginsDockArea);
             } else {
-                _analysisDockingArea = _dockManager->addDockWidgetTab(ads::LeftDockWidgetArea, dockWidget);
-                _analysisDockingArea->setAllowedAreas(ads::DockWidgetArea::NoDockWidgetArea);
+                _analysisPluginsDockArea = _dockManager->addDockWidgetTab(ads::LeftDockWidgetArea, dockWidget);
+                _analysisPluginsDockArea->setAllowedAreas(ads::DockWidgetArea::NoDockWidgetArea);
             }
 
             break;
@@ -231,7 +218,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
             dockWidget->setWidget(viewPlugin, ads::CDockWidget::ForceNoScrollArea);
             
-            _dockManager->addDockWidget(ads::LeftDockWidgetArea, dockWidget, _centralDockArea);
+            _dockManager->addDockWidget(ads::LeftDockWidgetArea, dockWidget, _viewPluginsDockArea);
 
             break;
         }
