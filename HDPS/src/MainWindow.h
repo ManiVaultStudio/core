@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "LogDockWidget.h"
 #include "DataHierarchy.h"
+#include "widgets/Accordion.h"
 
 #include <QMainWindow>
 #include <QAction>
@@ -111,7 +112,8 @@ private:
 
 private: // Docking
     ads::CDockManager*          _dockManager;                   /** ADS Manager for docking */
-    ads::CDockAreaWidget*       _analysisPluginsDockArea;       /** ADS Docking area for analysis plugins */
+    Accordion*                  _analysisPluginsAccordion;      /** Analysis plugin accordion */
+    ads::CDockWidget*           _analysisPluginsDockWidget;     /** Analysis plugin dock widget */
     ads::CDockAreaWidget*       _viewPluginsDockArea;           /** ADS Docking area for view plugins */
     ads::CDockAreaWidget*       _settingsDockArea;              /** ADS Settings docking area */
     ads::CDockWidget*           _viewPluginsDockWidget;         /** ADS Central docking widget */

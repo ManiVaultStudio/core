@@ -74,6 +74,8 @@ set( WIDGET_HEADERS
     src/widgets/PushButton.h
     src/widgets/HorizontalDivider.h
     src/widgets/DataSlot.h
+    src/widgets/Accordion.h
+    src/widgets/AccordionSection.h
 )
 
 set( WIDGET_SOURCES
@@ -85,6 +87,8 @@ set( WIDGET_SOURCES
     src/widgets/PushButton.cpp
     src/widgets/HorizontalDivider.cpp
     src/widgets/DataSlot.cpp
+	src/widgets/Accordion.cpp
+    src/widgets/AccordionSection.cpp
 )
 
 set( RENDERER_HEADERS

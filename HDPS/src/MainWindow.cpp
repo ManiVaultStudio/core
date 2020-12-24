@@ -93,7 +93,8 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _logDockWidget(nullptr),
     _dataHierarchy(nullptr),
     _dockManager(new ads::CDockManager(this)),
-    _analysisPluginsDockArea(nullptr),
+    _analysisPluginsAccordion(new Accordion(this)),
+    _analysisPluginsDockWidget(new ads::CDockWidget("Analysis")),
     _settingsDockArea(nullptr),
     _viewPluginsDockWidget(new ads::CDockWidget("Central Dock Widget"))
 {
@@ -150,6 +151,10 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     _viewPluginsDockArea = _dockManager->setCentralWidget(_viewPluginsDockWidget);
 
+    _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion);
+
+    _dockManager->addDockWidget(ads::LeftDockWidgetArea, _analysisPluginsDockWidget);
+
     restoreWindowGeometryFromSettings();
 }
 
@@ -194,10 +199,9 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         case plugin::Type::ANALYSIS:
         {
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
-            auto settingsWidget = analysisPlugin->getSettings();
 
-            settingsWidget->setWindowTitle(plugin->getGuiName());
-
+            _analysisPluginsAccordion->addSection(analysisPlugin->getSettings(), plugin->getGuiName(), plugin->getIcon());
+            /*
             dockWidget->setFeature(ads::CDockWidget::DockWidgetMovable, false);
             dockWidget->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
             dockWidget->setWidget(settingsWidget);
@@ -208,6 +212,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 _analysisPluginsDockArea = _dockManager->addDockWidgetTab(ads::LeftDockWidgetArea, dockWidget);
                 _analysisPluginsDockArea->setAllowedAreas(ads::DockWidgetArea::NoDockWidgetArea);
             }
+            */
 
             break;
         }
