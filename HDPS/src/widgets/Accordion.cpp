@@ -168,7 +168,9 @@ void Accordion::goToSection(const QString& title)
         }
     }
 
-    //_toSectionComboBox.setEditText(JUMP_TO_SECTION_TEXT);
+    QSignalBlocker toSectionComboBoxBlocker(&_toSectionComboBox);
+
+    _toSectionComboBox.setCurrentText(JUMP_TO_SECTION_TEXT);
 }
 
 void Accordion::showToolbar(const bool& show)
@@ -190,8 +192,11 @@ std::uint32_t Accordion::getNumExpandedSections() const
 
 void Accordion::updateExpansionUI()
 {
+    qApp->processEvents();
+    
     _expandAllPushButton.setEnabled(canExpandAll());
     _collapseAllPushButton.setEnabled(canCollapseAll());
+    _toSectionComboBox.setEnabled(_sectionsScrollArea.verticalScrollBar()->isVisible());
 }
 
 void Accordion::updateToSectionUI()
