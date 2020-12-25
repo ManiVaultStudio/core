@@ -26,10 +26,9 @@ class AccordionSection : public QWidget
     Q_OBJECT
 
 public:
-    explicit AccordionSection(const QString & title = "", QWidget* parent = nullptr);
+    explicit AccordionSection(const QString& title, QWidget* parent = nullptr);
 
     void setWidget(QWidget* widget);
-    void setIcon(const QIcon& icon);
 
 public: // Expand collapse
 
@@ -40,12 +39,14 @@ public: // Expand collapse
 
     bool isExpanded() const;
 
+    QString getTitle() const;
+
 private:
-
-    void updateExpansionStateIcon();
-
+    void updateLeftLabel();
+    void updateTitleLabel();
+    void updateRightLabel();
+    
 signals:
-
     void expandedChanged(const bool& expanded);
 
 private:

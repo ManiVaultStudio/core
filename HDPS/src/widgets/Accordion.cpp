@@ -7,6 +7,8 @@ namespace hdps
 namespace gui
 {
 
+const QString Accordion::JUMP_TO_SECTION_TEXT = "Go to...";
+
 Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _mainLayout(),
@@ -27,7 +29,7 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     resize(QSize(600, 400));
 
     _mainLayout.setMargin(5);
-    _mainLayout.setSpacing(2);
+    _mainLayout.setSpacing(4);
     _mainLayout.setAlignment(Qt::AlignTop);
     _mainLayout.addWidget(&_toolbar);
     //_mainLayout.addLayout(&_sectionsLayout);
@@ -59,10 +61,15 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
         collapseAll();
     });
 
+    QObject::connect(&_toSectionComboBox, &QComboBox::currentTextChanged, [this](const QString& currentText) {
+        goToSection(currentText);
+
+        _toSectionComboBox.setCurrentText(JUMP_TO_SECTION_TEXT);
+    });
+
     _sectionsScrollArea.setLayout(&_sectionsLayout);
     _sectionsScrollArea.setStyleSheet("QScrollArea { border: none; }");
     _sectionsScrollArea.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    //_sectionsScrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _sectionsScrollArea.setWidgetResizable(true);
     _sectionsScrollArea.setWidget(&_sectionsWidget);
 
@@ -70,31 +77,31 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
 
     _sectionsLayout.setAlignment(Qt::AlignTop);
     _sectionsLayout.setMargin(0);
-    _sectionsLayout.setSpacing(0);
+    _sectionsLayout.setSpacing(2);
 
     setLayout(&_mainLayout);
 
-    updateExpansionButtons();
+    updateExpansionUI();
+    updateToSectionUI();
 }
 
 void Accordion::addSection(QWidget* widget, const QString& title, const QIcon& icon /*= QIcon()*/)
 {
     Q_ASSERT(widget != nullptr);
-    Q_ASSERT(!title.isEmpty());
 
-    auto accordionSection = new AccordionSection(title);
+    auto accordionSection = new AccordionSection(title, this);
     
     accordionSection->setWidget(widget);
-    accordionSection->setIcon(icon);
 
     _sectionsLayout.addWidget(accordionSection);
     
     _sections.insert(widget, accordionSection);
 
-    updateExpansionButtons();
+    updateExpansionUI();
+    updateToSectionUI();
 
     QObject::connect(accordionSection, &AccordionSection::expandedChanged, [this]() {
-        updateExpansionButtons();
+        updateExpansionUI();
     });
 }
 
@@ -137,6 +144,20 @@ void Accordion::collapseAll()
         section->collapse();
 }
 
+void Accordion::goToSection(const QString& title)
+{
+    Q_ASSERT(!title.isEmpty());
+
+    for (const auto section : _sections.values()) {
+        if (section->getTitle() == title) {
+            section->expand();
+            _sectionsScrollArea.ensureWidgetVisible(section);
+        }
+    }
+
+    _toSectionComboBox.setEditText(JUMP_TO_SECTION_TEXT);
+}
+
 void Accordion::showToolbar(const bool& show)
 {
     _toolbar.setVisible(show);
@@ -154,10 +175,22 @@ std::uint32_t Accordion::getNumExpandedSections() const
     return numExpandedSections;
 }
 
-void Accordion::updateExpansionButtons()
+void Accordion::updateExpansionUI()
 {
     _expandAllPushButton.setEnabled(canExpandAll());
     _collapseAllPushButton.setEnabled(canCollapseAll());
+}
+
+void Accordion::updateToSectionUI()
+{
+    _toSectionComboBox.clear();
+    _toSectionComboBox.addItem(JUMP_TO_SECTION_TEXT);
+
+    for (const auto section : _sections.values())
+        _toSectionComboBox.addItem(section->getTitle());
+
+    _toSectionComboBox.setEnabled(!_sections.isEmpty());
+    _toSectionComboBox.setCurrentText(JUMP_TO_SECTION_TEXT);
 }
 
 }

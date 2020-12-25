@@ -10,7 +10,7 @@ namespace hdps
 namespace gui
 {
 
-AccordionSection::AccordionSection(const QString & title /*= ""*/, QWidget* parent /*= nullptr*/) :
+AccordionSection::AccordionSection(const QString& title, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _mainLayout(),
     _frame(),
@@ -38,9 +38,8 @@ AccordionSection::AccordionSection(const QString & title /*= ""*/, QWidget* pare
     _frameLayout.setMargin(4);
     _frameLayout.setContentsMargins(5, 0, 5, 0);
 
-    _titleLabel.setText(title);
-
     _contentLayout.setMargin(0);
+    _contentLayout.setContentsMargins(0, 0, 0, 0);
 
     _toggleButton.setCheckable(true);
     _toggleButton.setChecked(true);
@@ -51,19 +50,27 @@ AccordionSection::AccordionSection(const QString & title /*= ""*/, QWidget* pare
         setExpanded(checked);
     });
 
-    updateExpansionStateIcon();
+    updateLeftLabel();
 }
 
 void AccordionSection::setWidget(QWidget* widget)
 {
+    Q_ASSERT(widget != nullptr);
+
     _widget = widget;
 
     _contentLayout.addWidget(widget);
-}
 
-void AccordionSection::setIcon(const QIcon& icon)
-{
-    _rightIconLabel.setPixmap(icon.pixmap(ICON_SIZE));
+    updateTitleLabel();
+    updateRightLabel();
+
+    QObject::connect(widget, &QWidget::windowTitleChanged, [this](const QString& title) {
+        updateTitleLabel();
+    });
+
+    QObject::connect(widget, &QWidget::windowIconChanged, [this](const QIcon& icon) {
+        updateRightLabel();
+    });
 }
 
 void AccordionSection::expand()
@@ -84,7 +91,7 @@ void AccordionSection::setExpanded(const bool& expanded)
 
     _widget->setVisible(expanded);
 
-    updateExpansionStateIcon();
+    updateLeftLabel();
 
     emit expandedChanged(isExpanded());
 }
@@ -94,12 +101,29 @@ bool AccordionSection::isExpanded() const
     return _toggleButton.isChecked();
 }
 
-void AccordionSection::updateExpansionStateIcon()
+QString AccordionSection::getTitle() const
+{
+    Q_ASSERT(_widget != nullptr);
+
+    return _widget->windowTitle();
+}
+
+void AccordionSection::updateLeftLabel()
 {
     const auto iconName = _toggleButton.isChecked() ? "angle-right" : "angle-down";
     const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
 
     _leftIconLabel.setPixmap(icon.pixmap(ICON_SIZE));
+}
+
+void AccordionSection::updateTitleLabel()
+{
+    _titleLabel.setText(_widget->windowTitle());
+}
+
+void AccordionSection::updateRightLabel()
+{
+    _rightIconLabel.setPixmap(_widget->windowIcon().pixmap(ICON_SIZE));
 }
 
 }

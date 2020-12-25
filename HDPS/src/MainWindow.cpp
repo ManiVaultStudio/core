@@ -202,19 +202,12 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         {
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
-            _analysisPluginsAccordion->addSection(analysisPlugin->getSettings(), plugin->getGuiName(), plugin->getIcon());
-            /*
-            dockWidget->setFeature(ads::CDockWidget::DockWidgetMovable, false);
-            dockWidget->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
-            dockWidget->setWidget(settingsWidget);
+            auto settingsWidget = analysisPlugin->getSettings();
 
-            if (_analysisPluginsDockArea) {
-                _dockManager->addDockWidgetTabToArea(dockWidget, _analysisPluginsDockArea);
-            } else {
-                _analysisPluginsDockArea = _dockManager->addDockWidgetTab(ads::LeftDockWidgetArea, dockWidget);
-                _analysisPluginsDockArea->setAllowedAreas(ads::DockWidgetArea::NoDockWidgetArea);
-            }
-            */
+            settingsWidget->setWindowTitle(plugin->getGuiName());
+            settingsWidget->setWindowIcon(plugin->getIcon());
+
+            _analysisPluginsAccordion->addSection(settingsWidget, plugin->getGuiName());
 
             break;
         }

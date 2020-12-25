@@ -36,6 +36,7 @@ public: // Expand/collapse
     bool canCollapseAll() const;
     void expandAll();
     void collapseAll();
+    void goToSection(const QString& title);
 
 public: // Toolbar
 
@@ -45,7 +46,8 @@ private:
 
     std::uint32_t getNumExpandedSections() const;
 
-    void updateExpansionButtons();
+    void updateExpansionUI();
+    void updateToSectionUI();
 
 public:
     QVBoxLayout                         _mainLayout;
@@ -59,6 +61,8 @@ public:
     QWidget                             _sectionsWidget;
     QVBoxLayout                         _sectionsLayout;
     QMap<QWidget*, AccordionSection*>   _sections;
+
+    static const QString JUMP_TO_SECTION_TEXT;
 };
 
 }
