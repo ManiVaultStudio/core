@@ -106,17 +106,18 @@ private: // Window geometry persistence
     void setDefaultWindowGeometry(const float& coverage = 0.7f);
 
 private:
-    QSharedPointer<Core>            _core;                  /** HDPS core */
-    QSharedPointer<LogDockWidget>   _logDockWidget;         /** HDPS log dock widget */
-    QSharedPointer<DataHierarchy>   _dataHierarchy;         /** Data hierarchy viewer */
+    QSharedPointer<Core>            _core;                          /** HDPS core */
+    QSharedPointer<LogDockWidget>   _logDockWidget;                 /** HDPS log dock widget */
+    QSharedPointer<DataHierarchy>   _dataHierarchy;                 /** Data hierarchy viewer */
 
 private: // Docking
-    ads::CDockManager*          _dockManager;                   /** ADS Manager for docking */
-    Accordion*                  _analysisPluginsAccordion;      /** Analysis plugin accordion */
-    ads::CDockWidget*           _analysisPluginsDockWidget;     /** Analysis plugin dock widget */
-    ads::CDockAreaWidget*       _viewPluginsDockArea;           /** ADS Docking area for view plugins */
-    ads::CDockAreaWidget*       _settingsDockArea;              /** ADS Settings docking area */
-    ads::CDockWidget*           _viewPluginsDockWidget;         /** ADS Central docking widget */
+    ads::CDockManager*              _dockManager;                   /** Manager for docking */
+    ads::CDockAreaWidget*           _analysisPluginsDockArea;       /** Docking area for analysis plugins */
+    ads::CDockAreaWidget*           _viewPluginsDockArea;           /** Docking area for view plugins */
+    ads::CDockAreaWidget*           _settingsDockArea;              /** Docking area for settings */
+    ads::CDockWidget*               _analysisPluginsDockWidget;     /** Dock widget for analysis plugins */
+    ads::CDockWidget*               _viewPluginsDockWidget;         /** Dock widget for view plugins */
+    Accordion*                      _analysisPluginsAccordion;      /** Analysis plugins accordion */
     
 };
 

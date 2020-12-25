@@ -93,10 +93,12 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _logDockWidget(nullptr),
     _dataHierarchy(nullptr),
     _dockManager(new ads::CDockManager(this)),
-    _analysisPluginsAccordion(new Accordion(this)),
-    _analysisPluginsDockWidget(new ads::CDockWidget("Analysis")),
+    _analysisPluginsDockArea(nullptr),
+    _viewPluginsDockArea(nullptr),
     _settingsDockArea(nullptr),
-    _viewPluginsDockWidget(new ads::CDockWidget("Central Dock Widget"))
+    _analysisPluginsDockWidget(new ads::CDockWidget("Analysis")),
+    _viewPluginsDockWidget(new ads::CDockWidget("Central Dock Widget")),
+    _analysisPluginsAccordion(new Accordion(this))
 {
     setupUi(this);
 
@@ -145,18 +147,21 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     // Advanced docking system
     ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewIsDynamic, true);
     ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
     ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewHasWindowFrame, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, false);
     ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
 
     _viewPluginsDockArea = _dockManager->setCentralWidget(_viewPluginsDockWidget);
-
+    
     _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion);
-    _analysisPluginsDockWidget->setMinimumWidth(300);
-    _analysisPluginsDockWidget->setMaximumWidth(1200);
 
-    _dockManager->addDockWidget(ads::LeftDockWidgetArea, _analysisPluginsDockWidget);
+    _analysisPluginsDockArea = _dockManager->addDockWidget(ads::LeftDockWidgetArea, _analysisPluginsDockWidget);
 
+    _analysisPluginsDockArea->setMinimumWidth(200);
+    _analysisPluginsDockArea->setMaximumWidth(600);
+    _analysisPluginsDockArea->resize(QSize(400, 0));
+    
     restoreWindowGeometryFromSettings();
 }
 
