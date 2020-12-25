@@ -27,7 +27,7 @@ public:
 
 public:
 
-    void addSection(QWidget* widget, const QString& title, const QIcon& icon = QIcon());
+    void addSection(QWidget* widget);
     void removeSection(QWidget* widget);
 
 public: // Expand/collapse
@@ -50,17 +50,17 @@ private:
     void updateToSectionUI();
 
 public:
-    QVBoxLayout                         _mainLayout;
-    QWidget                             _toolbar;
-    QHBoxLayout                         _toolbarLayout;
-    QPushButton                         _expandAllPushButton;
-    QPushButton                         _collapseAllPushButton;
-    QComboBox                           _toSectionComboBox;
-    QLineEdit                           _toSectionLineEdit;
-    QScrollArea                         _sectionsScrollArea;
-    QWidget                             _sectionsWidget;
-    QVBoxLayout                         _sectionsLayout;
-    QMap<QWidget*, AccordionSection*>   _sections;
+    QVBoxLayout                 _mainLayout;
+    QWidget                     _toolbar;
+    QHBoxLayout                 _toolbarLayout;
+    QPushButton                 _expandAllPushButton;
+    QPushButton                 _collapseAllPushButton;
+    QComboBox                   _toSectionComboBox;
+    QScrollArea                 _sectionsScrollArea;
+    QWidget                     _sectionsWidget;
+    QVBoxLayout                 _sectionsLayout;
+    QList<AccordionSection*>    _sections;
+    QString                     _toSection;
 
     static const QString JUMP_TO_SECTION_TEXT;
 };

@@ -1,6 +1,9 @@
 #include "Accordion.h"
 #include "../Application.h"
 
+#include <QScrollBar>
+#include <QResizeEvent>
+
 namespace hdps
 {
 
@@ -17,7 +20,6 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     _expandAllPushButton(),
     _collapseAllPushButton(),
     _toSectionComboBox(),
-    _toSectionLineEdit(),
     _sectionsScrollArea(),
     _sectionsWidget(),
     _sectionsLayout(),
@@ -42,8 +44,6 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     _toolbarLayout.addWidget(&_collapseAllPushButton);
     _toolbarLayout.addWidget(&_expandAllPushButton);
     _toolbarLayout.addWidget(&_toSectionComboBox);
-    //_toolbarLayout.addWidget(&_toSectionLineEdit);
-    //_toolbarLayout.addStretch(1);
 
     const auto iconSize = QSize(12, 12);
 
@@ -63,8 +63,6 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
 
     QObject::connect(&_toSectionComboBox, &QComboBox::currentTextChanged, [this](const QString& currentText) {
         goToSection(currentText);
-
-        _toSectionComboBox.setCurrentText(JUMP_TO_SECTION_TEXT);
     });
 
     _sectionsScrollArea.setLayout(&_sectionsLayout);
@@ -83,19 +81,28 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
 
     updateExpansionUI();
     updateToSectionUI();
+
+    QObject::connect(_sectionsScrollArea.verticalScrollBar(), &QScrollBar::rangeChanged, [this](int min, int max) {
+        if (_toSection.isEmpty())
+            return;
+
+        goToSection(_toSection);
+
+        _toSection = "";
+    });
 }
 
-void Accordion::addSection(QWidget* widget, const QString& title, const QIcon& icon /*= QIcon()*/)
+void Accordion::addSection(QWidget* widget)
 {
     Q_ASSERT(widget != nullptr);
 
-    auto accordionSection = new AccordionSection(title, this);
+    auto accordionSection = new AccordionSection(this);
     
     accordionSection->setWidget(widget);
 
     _sectionsLayout.addWidget(accordionSection);
     
-    _sections.insert(widget, accordionSection);
+    _sections << accordionSection;
 
     updateExpansionUI();
     updateToSectionUI();
@@ -103,6 +110,8 @@ void Accordion::addSection(QWidget* widget, const QString& title, const QIcon& i
     QObject::connect(accordionSection, &AccordionSection::expandedChanged, [this]() {
         updateExpansionUI();
     });
+
+    _toSection = widget->windowTitle();
 }
 
 void Accordion::removeSection(QWidget* widget)
@@ -111,9 +120,12 @@ void Accordion::removeSection(QWidget* widget)
 
     _sectionsLayout.removeWidget(widget);
 
-    delete _sections[widget];
-
-    _sections.remove(widget);
+    for (const auto section : _sections) {
+        if (section->getWidget() == widget) {
+            _sections.removeOne(section);
+            delete section;
+        }
+    }
 }
 
 bool Accordion::canExpandAll() const
@@ -134,13 +146,13 @@ bool Accordion::canCollapseAll() const
 
 void Accordion::expandAll()
 {
-    for (const auto section : _sections.values())
+    for (const auto section : _sections)
         section->expand();
 }
 
 void Accordion::collapseAll()
 {
-    for (const auto section : _sections.values())
+    for (const auto section : _sections)
         section->collapse();
 }
 
@@ -148,14 +160,15 @@ void Accordion::goToSection(const QString& title)
 {
     Q_ASSERT(!title.isEmpty());
 
-    for (const auto section : _sections.values()) {
+    for (const auto section : _sections) {
         if (section->getTitle() == title) {
-            section->expand();
-            _sectionsScrollArea.ensureWidgetVisible(section);
+            const auto pointRelativeToScrollArea = section->mapTo(&_sectionsScrollArea, QPoint(0, 0));
+
+            _sectionsScrollArea.verticalScrollBar()->setValue(pointRelativeToScrollArea.y() + _sectionsScrollArea.verticalScrollBar()->value());
         }
     }
 
-    _toSectionComboBox.setEditText(JUMP_TO_SECTION_TEXT);
+    //_toSectionComboBox.setEditText(JUMP_TO_SECTION_TEXT);
 }
 
 void Accordion::showToolbar(const bool& show)
@@ -167,7 +180,7 @@ std::uint32_t Accordion::getNumExpandedSections() const
 {
     auto numExpandedSections = 0;
 
-    for (const auto section : _sections.values()) {
+    for (const auto section : _sections) {
         if (section->isExpanded())
             numExpandedSections++;
     }
@@ -183,14 +196,16 @@ void Accordion::updateExpansionUI()
 
 void Accordion::updateToSectionUI()
 {
+    QSignalBlocker toSectionComboBoxBlocker(&_toSectionComboBox);
+
     _toSectionComboBox.clear();
     _toSectionComboBox.addItem(JUMP_TO_SECTION_TEXT);
 
-    for (const auto section : _sections.values())
+    for (const auto section : _sections)
         _toSectionComboBox.addItem(section->getTitle());
 
     _toSectionComboBox.setEnabled(!_sections.isEmpty());
-    _toSectionComboBox.setCurrentText(JUMP_TO_SECTION_TEXT);
+    //_toSectionComboBox.setCurrentText(JUMP_TO_SECTION_TEXT);
 }
 
 }

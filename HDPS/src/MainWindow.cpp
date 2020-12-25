@@ -207,7 +207,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             settingsWidget->setWindowTitle(plugin->getGuiName());
             settingsWidget->setWindowIcon(plugin->getIcon());
 
-            _analysisPluginsAccordion->addSection(settingsWidget, plugin->getGuiName());
+            _analysisPluginsAccordion->addSection(settingsWidget);
 
             break;
         }

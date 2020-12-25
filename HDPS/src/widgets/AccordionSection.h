@@ -26,8 +26,9 @@ class AccordionSection : public QWidget
     Q_OBJECT
 
 public:
-    explicit AccordionSection(const QString& title, QWidget* parent = nullptr);
+    explicit AccordionSection(QWidget* parent = nullptr);
 
+    QWidget* getWidget();
     void setWidget(QWidget* widget);
 
 public: // Expand collapse
@@ -50,15 +51,15 @@ signals:
     void expandedChanged(const bool& expanded);
 
 private:
-    QVBoxLayout                 _mainLayout;
-    QFrame                      _frame;
-    QHBoxLayout                 _frameLayout;
-    QLabel                      _leftIconLabel;
-    QLabel                      _titleLabel;
-    QLabel                      _rightIconLabel;
-    QVBoxLayout                 _contentLayout;
-    QPushButton                 _toggleButton;
-    QWidget*                    _widget;
+    QVBoxLayout      _mainLayout;
+    QFrame           _frame;
+    QHBoxLayout      _frameLayout;
+    QLabel           _leftIconLabel;
+    QLabel          _titleLabel;
+    QLabel          _rightIconLabel;
+    QVBoxLayout     _contentLayout;
+    QPushButton     _toggleButton;
+    QWidget*        _widget;
 
     static const std::uint32_t ICON_SIZE = 10;
 };

@@ -10,7 +10,7 @@ namespace hdps
 namespace gui
 {
 
-AccordionSection::AccordionSection(const QString& title, QWidget* parent /*= nullptr*/) :
+AccordionSection::AccordionSection(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _mainLayout(),
     _frame(),
@@ -51,6 +51,11 @@ AccordionSection::AccordionSection(const QString& title, QWidget* parent /*= nul
     });
 
     updateLeftLabel();
+}
+
+QWidget* AccordionSection::getWidget()
+{
+    return _widget;
 }
 
 void AccordionSection::setWidget(QWidget* widget)
