@@ -51,10 +51,10 @@ signals:
     void expandedChanged(const bool& expanded);
 
 private:
-    QVBoxLayout      _mainLayout;
-    QFrame           _frame;
-    QHBoxLayout      _frameLayout;
-    QLabel           _leftIconLabel;
+    QVBoxLayout     _mainLayout;
+    QFrame          _frame;
+    QHBoxLayout     _frameLayout;
+    QLabel          _leftIconLabel;
     QLabel          _titleLabel;
     QLabel          _rightIconLabel;
     QVBoxLayout     _contentLayout;

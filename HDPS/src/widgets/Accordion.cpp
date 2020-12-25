@@ -26,10 +26,7 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     _sections(),
     _toSection()
 {
-    setMinimumWidth(300);
-    setMaximumWidth(600);
-    
-    resize(QSize(600, 400));
+    setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     _mainLayout.setMargin(5);
     _mainLayout.setSpacing(4);
@@ -93,7 +90,7 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     });
 
     _sectionsScrollArea.verticalScrollBar()->setStyleSheet(QString::fromUtf8("QScrollBar:vertical {"
-        "    background: rgb(210, 210, 210);"
+        "    background: rgb(190, 190, 190);"
         "    width: 9px;"
         "    margin: 1px 0px 0px 2px;"
         "}"
