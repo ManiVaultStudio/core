@@ -42,6 +42,15 @@ public: // Toolbar
 
     void showToolbar(const bool& show);
 
+public: // Event handling
+
+    /**
+     * Listens to the events of \p target
+     * @param target Target object to watch for events
+     * @param event Event that occurred
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
 private:
 
     std::uint32_t getNumExpandedSections() const;

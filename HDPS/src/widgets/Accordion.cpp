@@ -23,7 +23,8 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     _sectionsScrollArea(),
     _sectionsWidget(),
     _sectionsLayout(),
-    _sections()
+    _sections(),
+    _toSection()
 {
     setMinimumWidth(300);
     setMaximumWidth(600);
@@ -90,6 +91,25 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
 
         _toSection = "";
     });
+
+    _sectionsScrollArea.verticalScrollBar()->setStyleSheet(QString::fromUtf8("QScrollBar:vertical {"
+        "    background: rgb(210, 210, 210);"
+        "    width: 9px;"
+        "    margin: 1px 0px 0px 2px;"
+        "}"
+        "QScrollBar::handle:vertical {"
+        "    background: rgb(150, 150, 150);"
+        "    min-height: 0px;"
+        "}"
+        "QScrollBar::add-line:vertical {"
+        "    height: 0px;"
+        "}"
+        "QScrollBar::sub-line:vertical {"
+        "    height: 0px;"
+        "}"
+    ));
+
+    _sectionsScrollArea.verticalScrollBar()->installEventFilter(this);
 }
 
 void Accordion::addSection(QWidget* widget)
@@ -178,6 +198,22 @@ void Accordion::showToolbar(const bool& show)
     _toolbar.setVisible(show);
 }
 
+bool Accordion::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Show:
+        case QEvent::Hide:
+            updateToSectionUI();
+            break;
+
+        default:
+            break;
+    }
+
+    return QObject::eventFilter(target, event);
+}
+
 std::uint32_t Accordion::getNumExpandedSections() const
 {
     auto numExpandedSections = 0;
@@ -192,11 +228,8 @@ std::uint32_t Accordion::getNumExpandedSections() const
 
 void Accordion::updateExpansionUI()
 {
-    qApp->processEvents();
-    
     _expandAllPushButton.setEnabled(canExpandAll());
     _collapseAllPushButton.setEnabled(canCollapseAll());
-    _toSectionComboBox.setEnabled(_sectionsScrollArea.verticalScrollBar()->isVisible());
 }
 
 void Accordion::updateToSectionUI()
@@ -211,6 +244,8 @@ void Accordion::updateToSectionUI()
 
     _toSectionComboBox.setEnabled(!_sections.isEmpty());
     //_toSectionComboBox.setCurrentText(JUMP_TO_SECTION_TEXT);
+
+    _toSectionComboBox.setEnabled(_sectionsScrollArea.verticalScrollBar()->isVisible());
 }
 
 }
