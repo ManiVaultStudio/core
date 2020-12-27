@@ -173,12 +173,12 @@ void Accordion::collapseAll()
         section->collapse();
 }
 
-void Accordion::goToSection(const QString& title)
+void Accordion::goToSection(const QString& name)
 {
-    Q_ASSERT(!title.isEmpty());
+    Q_ASSERT(!name.isEmpty());
 
     for (const auto section : _sections) {
-        if (section->getName() == title) {
+        if (section->getName() == name) {
             const auto pointRelativeToScrollArea = section->mapTo(&_sectionsScrollArea, QPoint(0, 0));
 
             _sectionsScrollArea.verticalScrollBar()->setValue(pointRelativeToScrollArea.y() + _sectionsScrollArea.verticalScrollBar()->value());
@@ -238,8 +238,6 @@ void Accordion::updateToSectionUI()
 
     for (const auto section : _sections)
         _toSectionComboBox.addItem(section->getName());
-
-    _toSectionComboBox.setEnabled(!_sections.isEmpty());
 
     _toSectionComboBox.setEnabled(_sectionsScrollArea.verticalScrollBar()->isVisible());
 }

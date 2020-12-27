@@ -92,7 +92,12 @@ void AccordionSection::setWidget(QWidget* widget)
 
 bool AccordionSection::eventFilter(QObject* object, QEvent* event)
 {
-    if(event->type() == QEvent::DynamicPropertyChange) {
+    auto widget = dynamic_cast<QWidget*>(object);
+
+    if (widget == nullptr)
+        return QObject::eventFilter(object, event);
+
+    if(widget == _widget && event->type() == QEvent::DynamicPropertyChange) {
         
         const auto propertyEvent = static_cast<QDynamicPropertyChangeEvent*>(event);
 
