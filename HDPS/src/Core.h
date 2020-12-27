@@ -84,6 +84,11 @@ public:
     */
     DataSet& requestData(const QString name) override;
 
+    /**
+     * Request a list of all datasets in the core
+     */
+    const std::vector<const DataSet*> requestDatasets() override;
+
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString name) override;
     /** Notify all data consumers that a dataset has been changed. */
@@ -96,7 +101,7 @@ public:
     * Returns a reference to the main window for adding widgets to it.
     */
     gui::MainWindow& gui() const;
-
+    
 protected:
     /**
     * Requests the selection set belonging to the raw dataset with the given name.
