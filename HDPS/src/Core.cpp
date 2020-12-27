@@ -204,6 +204,19 @@ DataSet& Core::requestData(const QString name)
     }
 }
 
+const std::vector<const DataSet*> Core::requestDatasets()
+{
+    const auto& datasetMap = _dataManager->allSets();
+
+    std::vector<const DataSet*> datasets(datasetMap.size());
+
+    int i = 0;
+    for (auto it = datasetMap.begin(); it != datasetMap.end(); ++it, i++) {
+        datasets[i] = it->second.get();
+    }
+    return datasets;
+}
+
 DataSet& Core::requestSelection(const QString name)
 {
     try

@@ -2,6 +2,7 @@
 #define HDPS_COREINTERFACE_H
 
 #include <QString>
+#include <vector>
 
 namespace hdps
 {
@@ -44,6 +45,11 @@ public:
      * error is thrown.
      */
     virtual DataSet& requestData(const QString name) = 0;
+
+    /**
+     * Request a list of all datasets in the core
+     */
+    virtual const std::vector<const DataSet*> requestDatasets() = 0;
 
     template <class SetType>
     SetType& requestData(const QString name)
