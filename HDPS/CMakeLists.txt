@@ -76,6 +76,7 @@ set( WIDGET_HEADERS
     src/widgets/DataSlot.h
     src/widgets/Accordion.h
     src/widgets/AccordionSection.h
+    src/widgets/DockableWidget.h
 )
 
 set( WIDGET_SOURCES
@@ -89,6 +90,7 @@ set( WIDGET_SOURCES
     src/widgets/DataSlot.cpp
 	src/widgets/Accordion.cpp
     src/widgets/AccordionSection.cpp
+	src/widgets/DockableWidget.cpp
 )
 
 set( RENDERER_HEADERS
