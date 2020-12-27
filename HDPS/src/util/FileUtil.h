@@ -8,7 +8,8 @@ namespace util
 {
 
 QString loadFileContents(QString path);
-    
-} // namespace util
+bool ShowFileInFolder(const QString path);
 
-} // namespace hdps
+}
+
+}

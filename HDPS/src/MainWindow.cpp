@@ -10,80 +10,17 @@
 #include "ViewPlugin.h"
 #include "AnalysisPlugin.h"
 
-#include <QApplication> // Used by centerAndResize
-#include <QDesktopWidget> // Used by centerAndResize
-#include <QDesktopServices>
+#include "util/FileUtil.h"
+
+#include <QDesktopWidget>
 #include <QMessageBox>
-#include <QProcess>
-#include <QUrl>
-#include <QDebug>
-
 #include <QLineEdit>
-
-namespace
-{
-    // TODO Move this function to a utility file.
-    bool ShowFileInFolder(const QString path)
-    {
-        const QFileInfo info(path);
-
-        if (!info.exists())
-        {
-            return false;
-        }
-
-        // Based upon: How to "Reveal in Finder" or “Show in Explorer” with Qt
-        // https://stackoverflow.com/questions/3490336/how-to-reveal-in-finder-or-show-in-explorer-with-qt
-        enum class Os { Windows, Mac, Other };
-
-        constexpr auto os =
-#if defined(Q_OS_WIN)
-            Os::Windows
-#elif defined(Q_OS_MAC)
-            Os::Mac
-#else
-            Os::Other
-#endif
-            ;
-
-        if (os == Os::Windows)
-        {
-            const auto args = QStringList{}
-                << "/select,"
-                << QDir::toNativeSeparators(path);
-
-            if (QProcess::startDetached("explorer.exe", args))
-            {
-                return true;
-            }
-        }
-        if (os == Os::Mac)
-        {
-            const auto args = QStringList{}
-                << "-e"
-                << "tell application \"Finder\""
-                << "-e"
-                << "activate"
-                << "-e"
-                << "select POSIX file \"" + path + "\""
-                << "-e"
-                << "end tell"
-                << "-e"
-                << "return";
-
-            if (QProcess::execute("/usr/bin/osascript", args) == 0)
-            {
-                return true;
-            }
-        }
-        QDesktopServices::openUrl(QUrl::fromLocalFile(info.path()));
-        return true;
-    }
-
-}
+#include <QScreen>
+#include <QDebug>
 
 namespace hdps
 {
+
 namespace gui
 {
 
@@ -116,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     {
         const auto filePath = Logger::GetFilePathName();
 
-        if (!ShowFileInFolder(filePath))
+        if (!hdps::util::ShowFileInFolder(filePath))
         {
             QMessageBox::information(this,
                 QObject::tr("Log file not found"),
@@ -272,10 +209,12 @@ void MainWindow::saveWindowGeometryToSettings()
 }
 
 void MainWindow::setDefaultWindowGeometry(const float& coverage /*= 0.7f*/) {
-    const auto availableSize    = qApp->desktop()->availableGeometry().size();
-    const auto newSize          = QSize(availableSize.width() * coverage, availableSize.height() * coverage);
+    const auto primaryScreen        = qApp->primaryScreen();
+    const auto availableGeometry    = primaryScreen->availableGeometry();
+    const auto availableSize        = availableGeometry.size();
+    const auto newSize              = QSize(availableSize.width() * coverage, availableSize.height() * coverage);
     
-    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, qApp->desktop()->availableGeometry()));
+    setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, availableGeometry));
 }
 
 }
