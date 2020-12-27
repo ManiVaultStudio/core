@@ -17,6 +17,7 @@ AccordionSection::AccordionSection(QWidget* parent /*= nullptr*/) :
     _frameLayout(),
     _leftIconLabel(),
     _titleLabel(),
+    _subtitleLabel(),
     _rightIconLabel(),
     _toggleButton(),
     _widget(nullptr)
@@ -30,13 +31,15 @@ AccordionSection::AccordionSection(QWidget* parent /*= nullptr*/) :
     _frame.setLayout(&_frameLayout);
 
     _frameLayout.addWidget(&_leftIconLabel);
-    _frameLayout.addStretch(1);
     _frameLayout.addWidget(&_titleLabel);
     _frameLayout.addStretch(1);
+    _frameLayout.addWidget(&_subtitleLabel);
     _frameLayout.addWidget(&_rightIconLabel);
 
     _frameLayout.setMargin(4);
     _frameLayout.setContentsMargins(5, 0, 5, 0);
+
+    //_subtitleLabel.setStyleSheet("QLabel { color: rgb(100, 100, 100); }");
 
     _contentLayout.setMargin(0);
     _contentLayout.setContentsMargins(0, 0, 0, 0);
@@ -50,7 +53,14 @@ AccordionSection::AccordionSection(QWidget* parent /*= nullptr*/) :
         setExpanded(checked);
     });
 
-    updateLeftLabel();
+    updateLeftIcon();
+}
+
+QString AccordionSection::getName() const
+{
+    Q_ASSERT(_widget != nullptr);
+
+    return _widget->objectName();
 }
 
 QWidget* AccordionSection::getWidget()
@@ -67,15 +77,40 @@ void AccordionSection::setWidget(QWidget* widget)
     _contentLayout.addWidget(widget);
 
     updateTitleLabel();
-    updateRightLabel();
+    updateRightIcon();
 
-    QObject::connect(widget, &QWidget::windowTitleChanged, [this](const QString& title) {
+    QObject::connect(widget, &QWidget::objectNameChanged, [this](const QString& objectName) {
         updateTitleLabel();
     });
 
     QObject::connect(widget, &QWidget::windowIconChanged, [this](const QIcon& icon) {
-        updateRightLabel();
+        updateRightIcon();
     });
+
+    widget->installEventFilter(this);
+}
+
+bool AccordionSection::eventFilter(QObject* object, QEvent* event)
+{
+    if(event->type() == QEvent::DynamicPropertyChange) {
+        
+        const auto propertyEvent = static_cast<QDynamicPropertyChangeEvent*>(event);
+
+        if (propertyEvent) {
+            const auto propertyName = QString::fromLatin1(propertyEvent->propertyName().data());
+
+            if (propertyName == "SectionTitle")
+                updateTitleLabel();
+
+            if (propertyName == "SectionSubtitle")
+                updateSubtitleLabel();
+
+            if (propertyName == "SectionIcon")
+                updateRightIcon();
+        }
+    }
+
+    return QObject::eventFilter(object, event);
 }
 
 void AccordionSection::expand()
@@ -96,7 +131,7 @@ void AccordionSection::setExpanded(const bool& expanded)
 
     _widget->setVisible(expanded);
 
-    updateLeftLabel();
+    updateLeftIcon();
 
     emit expandedChanged(isExpanded());
 }
@@ -106,14 +141,7 @@ bool AccordionSection::isExpanded() const
     return _toggleButton.isChecked();
 }
 
-QString AccordionSection::getTitle() const
-{
-    Q_ASSERT(_widget != nullptr);
-
-    return _widget->windowTitle();
-}
-
-void AccordionSection::updateLeftLabel()
+void AccordionSection::updateLeftIcon()
 {
     const auto iconName = _toggleButton.isChecked() ? "angle-right" : "angle-down";
     const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
@@ -123,14 +151,33 @@ void AccordionSection::updateLeftLabel()
 
 void AccordionSection::updateTitleLabel()
 {
-    _titleLabel.setText(_widget->windowTitle());
+    const auto title = _widget->property("SectionTitle");
+
+    if (!title.isValid())
+        return;
+
+    _titleLabel.setText(title.toString());
 }
 
-void AccordionSection::updateRightLabel()
+void AccordionSection::updateSubtitleLabel()
 {
-    _rightIconLabel.setPixmap(_widget->windowIcon().pixmap(ICON_SIZE));
+    const auto subtitle = _widget->property("SectionSubtitle");
+
+    if (!subtitle.isValid())
+        return;
+
+    _subtitleLabel.setText(subtitle.toString());
+}
+
+void AccordionSection::updateRightIcon()
+{
+    const auto icon = _widget->property("SectionIcon");
+
+    if (!icon.isValid())
+        return;
+
+    _rightIconLabel.setPixmap(icon.value<QIcon>().pixmap(ICON_SIZE));
 }
 
 }
-
 }

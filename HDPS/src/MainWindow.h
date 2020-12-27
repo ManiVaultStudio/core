@@ -105,20 +105,39 @@ private: // Window geometry persistence
      */
     void setDefaultWindowGeometry(const float& coverage = 0.7f);
 
+private: // Docking
+
+    /** Sets up docking */
+    void initializeDocking();
+
+    /** Sets up the docking area for view plugins (central widget) */
+    void initializeViewPluginsDockingArea();
+
+    /** Sets up the docking area for analysis plugins */
+    void initializeAnalysisPluginsDockingArea();
+
+    /** Sets up the docking area for settings */
+    void initializeSettingsDockingArea();
+
+    /** Sets up the docking area for logging */
+    void initializeLoggingDockingArea();
+    
 private:
     QSharedPointer<Core>            _core;                          /** HDPS core */
-    QSharedPointer<LogDockWidget>   _logDockWidget;                 /** HDPS log dock widget */
-    QSharedPointer<DataHierarchy>   _dataHierarchy;                 /** Data hierarchy viewer */
+    QSharedPointer<Accordion>       _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
+    QSharedPointer<DataHierarchy>   _dataHierarchy;                 /** Data hierarchy viewer widget */
 
 private: // Docking
     ads::CDockManager*              _dockManager;                   /** Manager for docking */
     ads::CDockAreaWidget*           _analysisPluginsDockArea;       /** Docking area for analysis plugins */
     ads::CDockAreaWidget*           _viewPluginsDockArea;           /** Docking area for view plugins */
+    ads::CDockAreaWidget*           _lastViewPluginDockArea;        /** Docking area for last added view plugin */
     ads::CDockAreaWidget*           _settingsDockArea;              /** Docking area for settings */
+    ads::CDockAreaWidget*           _loggingDockArea;               /** Docking area for logging */
     ads::CDockWidget*               _analysisPluginsDockWidget;     /** Dock widget for analysis plugins */
     ads::CDockWidget*               _viewPluginsDockWidget;         /** Dock widget for view plugins */
-    Accordion*                      _analysisPluginsAccordion;      /** Analysis plugins accordion */
-    
+    ads::CDockWidget*               _settingsDockWidget;            /** Dock widget for settings */
+    ads::CDockWidget*               _loggingDockWidget;             /** Dock widget for logging */
 };
 
 }

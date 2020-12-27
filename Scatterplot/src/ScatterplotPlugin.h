@@ -35,6 +35,7 @@ public:
         ViewPlugin("Scatterplot View"),
         _pixelSelectionTool(new PixelSelectionTool(this, false))
     {
+        setDockingLocation(DockableWidget::DockingLocation::Left);
     }
 
     ~ScatterplotPlugin(void) override;

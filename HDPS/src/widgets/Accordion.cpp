@@ -128,7 +128,7 @@ void Accordion::addSection(QWidget* widget)
         updateExpansionUI();
     });
 
-    _toSection = widget->windowTitle();
+    _toSection = widget->objectName();
 }
 
 void Accordion::removeSection(QWidget* widget)
@@ -178,7 +178,7 @@ void Accordion::goToSection(const QString& title)
     Q_ASSERT(!title.isEmpty());
 
     for (const auto section : _sections) {
-        if (section->getTitle() == title) {
+        if (section->getName() == title) {
             const auto pointRelativeToScrollArea = section->mapTo(&_sectionsScrollArea, QPoint(0, 0));
 
             _sectionsScrollArea.verticalScrollBar()->setValue(pointRelativeToScrollArea.y() + _sectionsScrollArea.verticalScrollBar()->value());
@@ -237,14 +237,12 @@ void Accordion::updateToSectionUI()
     _toSectionComboBox.addItem(JUMP_TO_SECTION_TEXT);
 
     for (const auto section : _sections)
-        _toSectionComboBox.addItem(section->getTitle());
+        _toSectionComboBox.addItem(section->getName());
 
     _toSectionComboBox.setEnabled(!_sections.isEmpty());
-    //_toSectionComboBox.setCurrentText(JUMP_TO_SECTION_TEXT);
 
     _toSectionComboBox.setEnabled(_sectionsScrollArea.verticalScrollBar()->isVisible());
 }
 
 }
-
 }

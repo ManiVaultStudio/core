@@ -1,14 +1,8 @@
-#ifndef HDPS_VIEWPLUGIN_H
-#define HDPS_VIEWPLUGIN_H
-/**
-* View.h
-*
-* Base plugin class for plugins that visualize data.
-*/
-
+#pragma once
 
 #include "PluginFactory.h"
 #include "DataConsumer.h"
+#include "widgets/DockableWidget.h"
 
 #include <QWidget>
 #include <QGridLayout>
@@ -18,14 +12,14 @@ namespace hdps
 namespace plugin
 {
 
-class ViewPlugin : public QWidget, public Plugin, public DataConsumer
+class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsumer
 {
     Q_OBJECT
     
 public:
     ViewPlugin(QString name) : Plugin(Type::VIEW, name)
     {
-        setWindowTitle(getGuiName());
+        setObjectName(getGuiName());
     }
 
     ~ViewPlugin() override {};
@@ -55,5 +49,3 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::ViewPluginFactory, "cytosplore.ViewPluginFactory")
-
-#endif // HDPS_VIEWPLUGIN_H

@@ -28,8 +28,14 @@ class AccordionSection : public QWidget
 public:
     explicit AccordionSection(QWidget* parent = nullptr);
 
+    QString getName() const;
+
     QWidget* getWidget();
     void setWidget(QWidget* widget);
+
+public: // Events
+
+    bool eventFilter(QObject* object, QEvent* event);
 
 public: // Expand collapse
 
@@ -40,12 +46,11 @@ public: // Expand collapse
 
     bool isExpanded() const;
 
-    QString getTitle() const;
-
 private:
-    void updateLeftLabel();
+    void updateLeftIcon();
     void updateTitleLabel();
-    void updateRightLabel();
+    void updateSubtitleLabel();
+    void updateRightIcon();
     
 signals:
     void expandedChanged(const bool& expanded);
@@ -56,6 +61,7 @@ private:
     QHBoxLayout     _frameLayout;
     QLabel          _leftIconLabel;
     QLabel          _titleLabel;
+    QLabel          _subtitleLabel;
     QLabel          _rightIconLabel;
     QVBoxLayout     _contentLayout;
     QPushButton     _toggleButton;

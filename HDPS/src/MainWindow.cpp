@@ -18,6 +18,8 @@
 #include <QScreen>
 #include <QDebug>
 
+#include "DockWidgetTab.h"
+
 namespace hdps
 {
 
@@ -27,30 +29,31 @@ namespace gui
 MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
     _core(nullptr),
-    _logDockWidget(nullptr),
+    _analysisPluginsAccordion(QSharedPointer<Accordion>::create()),
     _dataHierarchy(nullptr),
     _dockManager(new ads::CDockManager(this)),
     _analysisPluginsDockArea(nullptr),
     _viewPluginsDockArea(nullptr),
+    _lastViewPluginDockArea(nullptr),
     _settingsDockArea(nullptr),
-    _analysisPluginsDockWidget(new ads::CDockWidget("Analysis")),
-    _viewPluginsDockWidget(new ads::CDockWidget("Central Dock Widget")),
-    _analysisPluginsAccordion(new Accordion(this))
+    _loggingDockArea(nullptr),
+    _analysisPluginsDockWidget(new ads::CDockWidget("Analyses")),
+    _viewPluginsDockWidget(new ads::CDockWidget("Central")),
+    _settingsDockWidget(new ads::CDockWidget("Settings")),
+    _loggingDockWidget(new ads::CDockWidget("Logging"))
 {
     setupUi(this);
 
-    // Create and initialize HDPS core
     _core = QSharedPointer<Core>::create(*this);
     _core->init();
 
-    //_dataHierarchy = QSharedPointer<DataHierarchy>::create(_core->getDataManager());
+    _dataHierarchy = QSharedPointer<DataHierarchy>::create(_core->getDataManager());
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
     Logger::Initialize();
 
-    QObject::connect(findLogFileAction, &QAction::triggered, [this](bool)
-    {
+    QObject::connect(findLogFileAction, &QAction::triggered, [this](bool) {
         const auto filePath = Logger::GetFilePathName();
 
         if (!hdps::util::ShowFileInFolder(filePath))
@@ -61,44 +64,19 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
         }
     });
 
-    QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked)
-    {
-        if (checked)
-        {
-            _logDockWidget = QSharedPointer<LogDockWidget>::create(*this);
-            
-            //addDockWidget(Qt::BottomDockWidgetArea, TODO, _logDockWidget.get(), Qt::Horizontal);
-        }
-        else
-        {
-            //removeDockWidget(_logDockWidget.get());
-            //_logDockWidget.reset();
+    QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked) {
+        if (checked) {
+            _loggingDockWidget->setWidget(new LogDockWidget(*this));
+            _loggingDockArea->show();
+        } else {
+            delete _loggingDockWidget->takeWidget();
+            _loggingDockArea->hide();
         }
     });
 
     connect(&_core->getDataManager(), &DataManager::dataChanged, _dataHierarchy.get(), &DataHierarchy::updateDataModel);
-    // Note: addWidget takes the ownership of its argument, so it should be released from the unique_ptr.
-    //_settingsWidget->addWidget(dataHierarchy.get());
-    //_dataHierarchy = dataHierarchy.release();
 
-    // Advanced docking system
-    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewIsDynamic, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewHasWindowFrame, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, false);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
-
-    _viewPluginsDockArea = _dockManager->setCentralWidget(_viewPluginsDockWidget);
-    
-    _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion);
-
-    _analysisPluginsDockArea = _dockManager->addDockWidget(ads::LeftDockWidgetArea, _analysisPluginsDockWidget);
-
-    _analysisPluginsDockArea->setMinimumWidth(200);
-    _analysisPluginsDockArea->setMaximumWidth(600);
-    _analysisPluginsDockArea->resize(QSize(400, 0));
-    
+    initializeDocking();
     restoreWindowGeometryFromSettings();
 }
 
@@ -144,12 +122,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         {
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
-            auto settingsWidget = analysisPlugin->getSettings();
-
-            settingsWidget->setWindowTitle(plugin->getGuiName());
-            settingsWidget->setWindowIcon(plugin->getIcon());
-
-            _analysisPluginsAccordion->addSection(settingsWidget);
+            _analysisPluginsAccordion->addSection(analysisPlugin->getSettings());
 
             break;
         }
@@ -158,10 +131,44 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         {
             auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(plugin);
 
-            dockWidget->setWidget(viewPlugin, ads::CDockWidget::ForceNoScrollArea);
+            dockWidget->setWidget(viewPlugin);
             
-            _dockManager->addDockWidget(ads::LeftDockWidgetArea, dockWidget, _viewPluginsDockArea);
+            auto dockWidgetArea = ads::LeftDockWidgetArea;
 
+            switch (viewPlugin->getDockingLocation())
+            {
+                case plugin::ViewPlugin::DockingLocation::Left:
+                    dockWidgetArea = ads::LeftDockWidgetArea;
+                    break;
+
+                case plugin::ViewPlugin::DockingLocation::Right:
+                    dockWidgetArea = ads::RightDockWidgetArea;
+                    break;
+
+                case plugin::ViewPlugin::DockingLocation::Top:
+                    dockWidgetArea = ads::TopDockWidgetArea;
+                    break;
+
+                case plugin::ViewPlugin::DockingLocation::Bottom:
+                    dockWidgetArea = ads::BottomDockWidgetArea;
+                    break;
+
+                case plugin::ViewPlugin::DockingLocation::Center:
+                    dockWidgetArea = ads::CenterDockWidgetArea;
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (_lastViewPluginDockArea == nullptr)
+                dockWidgetArea = ads::CenterDockWidgetArea;
+
+            _lastViewPluginDockArea = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _lastViewPluginDockArea ? _lastViewPluginDockArea : _viewPluginsDockArea);
+
+            _lastViewPluginDockArea->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+            _viewPluginsDockWidget->hide();
+            _viewPluginsDockWidget->tabWidget()->setVisible(false);
             break;
         }
 
@@ -217,6 +224,73 @@ void MainWindow::setDefaultWindowGeometry(const float& coverage /*= 0.7f*/) {
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, availableGeometry));
 }
 
+void MainWindow::initializeDocking()
+{
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewIsDynamic, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewHasWindowFrame, true);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, false);
+    ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
+
+    initializeViewPluginsDockingArea();
+    initializeAnalysisPluginsDockingArea();
+    initializeSettingsDockingArea();
+    initializeLoggingDockingArea();
 }
 
+void MainWindow::initializeViewPluginsDockingArea()
+{
+    _viewPluginsDockArea = _dockManager->setCentralWidget(_viewPluginsDockWidget);
+
+    _viewPluginsDockWidget->tabWidget()->setVisible(false);
+}
+
+void MainWindow::initializeAnalysisPluginsDockingArea()
+{
+    _analysisPluginsDockWidget->setFeature(ads::CDockWidget::DockWidgetClosable, false);
+    _analysisPluginsDockWidget->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
+    _analysisPluginsDockWidget->setFeature(ads::CDockWidget::DockWidgetMovable, false);
+    _analysisPluginsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
+    _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion.get());
+
+    _analysisPluginsDockArea = _dockManager->addDockWidget(ads::LeftDockWidgetArea, _analysisPluginsDockWidget);
+
+    //_analysisPluginsDockArea->setDockAreaFlag(ads::CDockAreaWidget::HideSingleWidgetTitleBar, true);
+    _analysisPluginsDockArea->setMinimumWidth(300);
+    _analysisPluginsDockArea->setMaximumWidth(600);
+    _analysisPluginsDockArea->resize(QSize(400, 0));
+    
+}
+
+void MainWindow::initializeSettingsDockingArea()
+{
+    _settingsDockWidget->setFeature(ads::CDockWidget::DockWidgetClosable, false);
+    _settingsDockWidget->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
+    _settingsDockWidget->setFeature(ads::CDockWidget::DockWidgetMovable, false);
+    _settingsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
+
+    _settingsDockWidget->setWidget(_dataHierarchy.get());
+
+    _settingsDockArea = _dockManager->addDockWidget(ads::RightDockWidgetArea, _settingsDockWidget);
+
+    //_settingsDockArea->setDockAreaFlag(ads::CDockAreaWidget::HideSingleWidgetTitleBar, true);
+    _settingsDockArea->setMinimumWidth(200);
+    _settingsDockArea->setMaximumWidth(400);
+    _settingsDockArea->resize(QSize(300, 0));
+}
+
+void MainWindow::initializeLoggingDockingArea()
+{
+    _loggingDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("scroll"));
+
+    _loggingDockArea = _dockManager->addDockWidget(ads::DockWidgetArea::BottomDockWidgetArea, _loggingDockWidget, _viewPluginsDockArea);
+
+    _loggingDockArea->hide();
+    _loggingDockArea->setMinimumHeight(100);
+    _loggingDockArea->setMaximumHeight(300);
+    _loggingDockArea->resize(QSize(0, 150));
+}
+
+}
 }
