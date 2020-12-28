@@ -1,8 +1,8 @@
-#ifndef HDPS_ANALYSISPLUGIN_H
-#define HDPS_ANALYSISPLUGIN_H
+#pragma once
 
 #include "PluginFactory.h"
 #include "DataConsumer.h"
+#include "widgets/SettingsWidget.h"
 
 #include <memory>
 
@@ -29,7 +29,7 @@ public:
         return getSettings() != nullptr;
     }
 
-    virtual QWidget* const getSettings() = 0;
+    virtual gui::SettingsWidget* const getSettings() = 0;
 };
 
 
@@ -52,5 +52,3 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::AnalysisPluginFactory, "cytosplore.AnalysisPluginFactory")
-
-#endif // HDPS_ANALYSISPLUGIN_H
