@@ -33,7 +33,20 @@ void DockableWidget::setTitle(const QString& title)
 
 QString DockableWidget::getTitle() const
 {
-    return property(qPrintable(DockableWidget::TITLE_PROPERTY_NAME)).toString();
+    const auto title = property(qPrintable(DockableWidget::TITLE_PROPERTY_NAME));
+
+    auto defaultToWindowTitle = false;
+
+    if (!title.isValid())
+        defaultToWindowTitle = true;
+
+    if (title.toString().isEmpty())
+        defaultToWindowTitle = true;
+
+    if (defaultToWindowTitle)
+        return windowTitle();
+
+    return title.toString();
 }
 
 void DockableWidget::setSubtitle(const QString& subtitle)
@@ -59,7 +72,7 @@ QIcon DockableWidget::getIcon() const
     const auto icon = property(qPrintable(DockableWidget::ICON_PROPERTY_NAME));
 
     if (!icon.isValid())
-        return hdps::Application::getIconFont("FontAwesome").getIcon("circle");
+        return windowIcon();
 
     return icon.value<QIcon>();
 }

@@ -1,4 +1,5 @@
 #include "Accordion.h"
+#include "DockableWidget.h"
 #include "../Application.h"
 
 #include <QScrollBar>
@@ -45,6 +46,7 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
 
     const auto iconSize = QSize(12, 12);
 
+    _expandAllPushButton.setToolTip("Expand all sections");
     _expandAllPushButton.setFixedSize(22, 22);
     _expandAllPushButton.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down", iconSize));
 
@@ -52,12 +54,15 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
         expandAll();
     });
 
+    _collapseAllPushButton.setToolTip("Collapse all sections");
     _collapseAllPushButton.setFixedSize(22, 22);
     _collapseAllPushButton.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up", iconSize));
 
     QObject::connect(&_collapseAllPushButton, &QPushButton::clicked, [this]() {
         collapseAll();
     });
+
+    _toSectionComboBox.setToolTip("Navigate to section");
 
     QObject::connect(&_toSectionComboBox, &QComboBox::currentTextChanged, [this](const QString& currentText) {
         goToSection(currentText);
@@ -92,7 +97,7 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     _sectionsScrollArea.verticalScrollBar()->setStyleSheet(QString::fromUtf8("QScrollBar:vertical {"
         "    background: rgb(190, 190, 190);"
         "    width: 9px;"
-        "    margin: 1px 0px 0px 2px;"
+        "    margin: 1px 0px 0px 3px;"
         "}"
         "QScrollBar::handle:vertical {"
         "    background: rgb(150, 150, 150);"
@@ -109,13 +114,13 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     _sectionsScrollArea.verticalScrollBar()->installEventFilter(this);
 }
 
-void Accordion::addSection(QWidget* widget)
+void Accordion::addSection(DockableWidget* dockableWidget)
 {
-    Q_ASSERT(widget != nullptr);
+    Q_ASSERT(dockableWidget != nullptr);
 
     auto accordionSection = new AccordionSection(this);
     
-    accordionSection->setWidget(widget);
+    accordionSection->setDockableWidget(dockableWidget);
 
     _sectionsLayout.addWidget(accordionSection);
     
@@ -128,17 +133,17 @@ void Accordion::addSection(QWidget* widget)
         updateExpansionUI();
     });
 
-    _toSection = widget->objectName();
+    _toSection = dockableWidget->objectName();
 }
 
-void Accordion::removeSection(QWidget* widget)
+void Accordion::removeSection(DockableWidget* dockableWidget)
 {
-    Q_ASSERT(widget != nullptr);
+    Q_ASSERT(dockableWidget != nullptr);
 
-    _sectionsLayout.removeWidget(widget);
+    _sectionsLayout.removeWidget(dockableWidget);
 
     for (const auto section : _sections) {
-        if (section->getWidget() == widget) {
+        if (section->getDockableWidget() == dockableWidget) {
             _sections.removeOne(section);
             delete section;
         }

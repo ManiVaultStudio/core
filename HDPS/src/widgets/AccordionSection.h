@@ -15,6 +15,8 @@ namespace hdps
 namespace gui
 {
 
+class DockableWidget;
+
 /**
  * Accordion section class
  * 
@@ -48,9 +50,9 @@ protected:
     /** Get section name (target widget object name) */
     QString getName() const;
 
-    /** Get/set contained widget */
-    QWidget* getWidget();
-    void setWidget(QWidget* widget);
+    /** Get/set dockable widget */
+    DockableWidget* getDockableWidget();
+    void setDockableWidget(DockableWidget* dockableWidget);
 
 public: // Events
 
@@ -71,7 +73,7 @@ public: // Expand collapse
     /** Returns whether the section is expanded */
     bool isExpanded() const;
 
-private: // Header content
+private: // Toggle button
 
     /** Update the expansion icon on the left */
     void updateLeftIcon();
@@ -85,22 +87,25 @@ private: // Header content
     /** Update the miscellaneous icon on the right */
     void updateRightIcon();
     
+    /** Updates the toggle button tooltip */
+    void updateToggleButtonTooltip();
+
 signals:
 
     /** Signals that the expansion has changed */
     void expandedChanged(const bool& expanded);
 
 private:
-    QVBoxLayout     _mainLayout;            /** Main layout */
-    QFrame          _frame;                 /** Frame for the toggle button */
-    QHBoxLayout     _frameLayout;           /** Frame layout */
-    QLabel          _leftIconLabel;         /** Expansion icon label */
-    QLabel          _titleLabel;            /** Title label */
-    QLabel          _subtitleLabel;         /** Subtitle label */
-    QLabel          _rightIconLabel;        /** Miscellaneous icon label */
-    QVBoxLayout     _contentLayout;         /** Context layout */
-    QPushButton     _toggleButton;          /** Toggle button for expansion */
-    QWidget*        _widget;                /** Target widget */
+    QVBoxLayout         _mainLayout;            /** Main layout */
+    QFrame              _frame;                 /** Frame for the toggle button */
+    QHBoxLayout         _frameLayout;           /** Frame layout */
+    QLabel              _leftIconLabel;         /** Expansion icon label */
+    QLabel              _titleLabel;            /** Title label */
+    QLabel              _subtitleLabel;         /** Subtitle label */
+    QLabel              _rightIconLabel;        /** Miscellaneous icon label */
+    QVBoxLayout         _contentLayout;         /** Context layout */
+    QPushButton         _toggleButton;          /** Toggle button for expansion */
+    DockableWidget*     _dockableWidget;        /** Content dockable widget */
 
     /** Toggle button icon size */
     static const std::uint32_t ICON_SIZE = 10;

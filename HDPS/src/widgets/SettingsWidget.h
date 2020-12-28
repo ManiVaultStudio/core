@@ -17,6 +17,22 @@ namespace gui
 class SettingsWidget : public DockableWidget
 {
     Q_OBJECT
+
+public:
+
+    /**
+     * Constructor
+     * @param parent Parent widget
+     */
+    SettingsWidget(QWidget* parent = nullptr);
+
+public: // 
+
+    /**
+     * Add widget to the layout
+     * @param widget Widget to add
+     */
+    void addWidget(QWidget* widget);
 };
 
 }

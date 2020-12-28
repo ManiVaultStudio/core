@@ -16,6 +16,8 @@ namespace hdps
 namespace gui
 {
 
+class DockableWidget;
+
 /**
  * Accordion class
  * 
@@ -40,10 +42,10 @@ public:
 
     /**
      * Add/remove section to/from the accordion
-     * @param widget Widget to add/remove
+     * @param dockableWidget Dockable widget to add/remove
      */
-    void addSection(QWidget* widget);
-    void removeSection(QWidget* widget);
+    void addSection(DockableWidget* dockableWidget);
+    void removeSection(DockableWidget* dockableWidget);
 
 public: // Expand/collapse
 

@@ -21,9 +21,11 @@ AccordionSection::AccordionSection(QWidget* parent /*= nullptr*/) :
     _subtitleLabel(),
     _rightIconLabel(),
     _toggleButton(),
-    _widget(nullptr)
+    _dockableWidget(nullptr)
 {
+    _mainLayout.setMargin(0);
     _mainLayout.setContentsMargins(0, 0, 0, 0);
+    _mainLayout.setSpacing(0);
     _mainLayout.addWidget(&_toggleButton);
     _mainLayout.addLayout(&_contentLayout);
 
@@ -47,7 +49,6 @@ AccordionSection::AccordionSection(QWidget* parent /*= nullptr*/) :
 
     _toggleButton.setCheckable(true);
     _toggleButton.setChecked(true);
-    
     _toggleButton.setLayout(&_frameLayout);
 
     QObject::connect(&_toggleButton, &QPushButton::toggled, [this](bool checked) {
@@ -59,36 +60,37 @@ AccordionSection::AccordionSection(QWidget* parent /*= nullptr*/) :
 
 QString AccordionSection::getName() const
 {
-    Q_ASSERT(_widget != nullptr);
+    Q_ASSERT(_dockableWidget != nullptr);
 
-    return _widget->objectName();
+    return _dockableWidget->objectName();
 }
 
-QWidget* AccordionSection::getWidget()
+hdps::gui::DockableWidget* AccordionSection::getDockableWidget()
 {
-    return _widget;
+    return _dockableWidget;
 }
 
-void AccordionSection::setWidget(QWidget* widget)
+void AccordionSection::setDockableWidget(DockableWidget* dockableWidget)
 {
-    Q_ASSERT(widget != nullptr);
+    Q_ASSERT(dockableWidget != nullptr);
 
-    _widget = widget;
+    _dockableWidget = dockableWidget;
 
-    _contentLayout.addWidget(widget);
+    _contentLayout.addWidget(dockableWidget);
 
     updateTitleLabel();
     updateRightIcon();
+    updateToggleButtonTooltip();
 
-    QObject::connect(widget, &QWidget::objectNameChanged, [this](const QString& objectName) {
+    QObject::connect(dockableWidget, &QWidget::objectNameChanged, [this](const QString& objectName) {
         updateTitleLabel();
     });
 
-    QObject::connect(widget, &QWidget::windowIconChanged, [this](const QIcon& icon) {
+    QObject::connect(dockableWidget, &QWidget::windowIconChanged, [this](const QIcon& icon) {
         updateRightIcon();
     });
 
-    widget->installEventFilter(this);
+    dockableWidget->installEventFilter(this);
 }
 
 bool AccordionSection::eventFilter(QObject* object, QEvent* event)
@@ -98,7 +100,7 @@ bool AccordionSection::eventFilter(QObject* object, QEvent* event)
     if (widget == nullptr)
         return QObject::eventFilter(object, event);
 
-    if(widget == _widget && event->type() == QEvent::DynamicPropertyChange) {
+    if(widget == _dockableWidget && event->type() == QEvent::DynamicPropertyChange) {
         
         const auto propertyEvent = static_cast<QDynamicPropertyChangeEvent*>(event);
 
@@ -135,9 +137,10 @@ void AccordionSection::setExpanded(const bool& expanded)
 
     _toggleButton.setChecked(expanded);
 
-    _widget->setVisible(expanded);
+    _dockableWidget->setVisible(expanded);
 
     updateLeftIcon();
+    updateToggleButtonTooltip();
 
     emit expandedChanged(isExpanded());
 }
@@ -157,40 +160,27 @@ void AccordionSection::updateLeftIcon()
 
 void AccordionSection::updateTitleLabel()
 {
-    const auto title = _widget->property(qPrintable(DockableWidget::TITLE_PROPERTY_NAME));
-
-    auto defaultToWindowTitle = false;
-
-    if (!title.isValid())
-        defaultToWindowTitle = true;
-
-    if (title.toString().isEmpty())
-        defaultToWindowTitle = true;
-
-    if (defaultToWindowTitle)
-        _titleLabel.setText(_widget->windowTitle());
-    else
-        _titleLabel.setText(title.toString());
+    _titleLabel.setText(_dockableWidget->getTitle());
 }
 
 void AccordionSection::updateSubtitleLabel()
 {
-    const auto subtitle = _widget->property(qPrintable(DockableWidget::SUBTITLE_PROPERTY_NAME));
-
-    if (!subtitle.isValid())
-        return;
-
-    _subtitleLabel.setText(subtitle.toString());
+    _subtitleLabel.setText(_dockableWidget->getSubtitle());
 }
 
 void AccordionSection::updateRightIcon()
 {
-    const auto icon = _widget->property(qPrintable(DockableWidget::ICON_PROPERTY_NAME));
+    _rightIconLabel.setPixmap(_dockableWidget->getIcon().pixmap(ICON_SIZE));
+}
 
-    if (!icon.isValid())
-        return;
+void AccordionSection::updateToggleButtonTooltip()
+{
+    Q_ASSERT(_dockableWidget != nullptr);
 
-    _rightIconLabel.setPixmap(icon.value<QIcon>().pixmap(ICON_SIZE));
+    const auto expandCollapse   = _toggleButton.isChecked() ? "collapse" : "expand";
+    const auto title            = _dockableWidget->property(qPrintable(DockableWidget::TITLE_PROPERTY_NAME));
+
+    _toggleButton.setToolTip(QString("Click to %1 %2").arg(expandCollapse, _dockableWidget->objectName()));
 }
 
 }
