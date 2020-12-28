@@ -1,80 +1,91 @@
 #include "DockableWidget.h"
+#include "../Application.h"
 
-#include <QLayout>
-#include <QFile>
-#include <QTextStream>
-#include <QObject>
-#include <QAction>
-#include <QUuid>
+#include <QVariant>
 
 namespace hdps
 {
+
 namespace gui
 {
 
-DockableWidget::DockableWidget(QWidget *parent) :
-    QDockWidget(parent),
-    _isVisible(false),
-    _mainLayout(NULL),
-    _mainWidget(NULL)
+const QString DockableWidget::TITLE_PROPERTY_NAME       = "Title";
+const QString DockableWidget::SUBTITLE_PROPERTY_NAME    = "Subtitle";
+const QString DockableWidget::ICON_PROPERTY_NAME        = "Icon";
+
+DockableWidget::DockableWidget(const DockingLocation& location /*= Location::Left*/, QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
+    _dockingLocation(location)
 {
-    _mainWidget = new QWidget(this);
-    _mainLayout = new QGridLayout(_mainWidget);
-    _mainLayout->setMargin(0);
-    setWidget(_mainWidget);
-
-    // Generate a unique name for the widget to let Qt identify it and store/retrieve its state
-    setObjectName(QString("Dockable Widget ") + QUuid::createUuid().toString());
-
-    QObject::connect(toggleViewAction(), &QAction::toggled, this, &DockableWidget::setVisibility);
-}
-
-QLayout* DockableWidget::mainLayout()
-{
-    return _mainLayout;
-}
-
-bool DockableWidget::setVisibility(bool visible)
-{
-    _isVisible = visible;
-    setVisible(_isVisible);
-
-    return _isVisible;
-}
-
-bool DockableWidget::toggleVisibility()
-{
-    return setVisibility(!_isVisible);
-}
-
-void DockableWidget::addWidget(QWidget* widget)
-{
-    _mainLayout->addWidget(widget);
-}
-
-QWidget* DockableWidget::getWidget()
-{
-    return _mainWidget;
-}
-
-void DockableWidget::setMainLayout(QLayout* layout)
-{
-    // Apparently not allowed ("A layout can only have another layout as a parent")
-    // layout->setParent(_mainWidget);
-
-    // Delete the previous layout before adding another
-    delete _mainLayout;
-
-    _mainLayout = layout;
-    _mainWidget->setLayout(_mainLayout);
 }
 
 DockableWidget::~DockableWidget()
 {
-    if (_mainLayout) delete _mainLayout;
-    if (_mainWidget) delete _mainWidget;
 }
 
-} // namespace gui
+void DockableWidget::setTitle(const QString& title)
+{
+    if (title == getTitle())
+        return;
 
-} // namespace hdps
+    setProperty(qPrintable(DockableWidget::TITLE_PROPERTY_NAME), title);
+}
+
+QString DockableWidget::getTitle() const
+{
+    const auto title = property(qPrintable(DockableWidget::TITLE_PROPERTY_NAME));
+
+    auto defaultToWindowTitle = false;
+
+    if (!title.isValid())
+        defaultToWindowTitle = true;
+
+    if (title.toString().isEmpty())
+        defaultToWindowTitle = true;
+
+    if (defaultToWindowTitle)
+        return windowTitle();
+
+    return title.toString();
+}
+
+void DockableWidget::setSubtitle(const QString& subtitle)
+{
+    if (subtitle == getSubtitle())
+        return;
+
+    setProperty(qPrintable(DockableWidget::SUBTITLE_PROPERTY_NAME), subtitle);
+}
+
+QString DockableWidget::getSubtitle() const
+{
+    return property(qPrintable(DockableWidget::SUBTITLE_PROPERTY_NAME)).toString();
+}
+
+void DockableWidget::setIcon(const QIcon& icon)
+{
+    setProperty(qPrintable(DockableWidget::ICON_PROPERTY_NAME), icon);
+}
+
+QIcon DockableWidget::getIcon() const
+{
+    const auto icon = property(qPrintable(DockableWidget::ICON_PROPERTY_NAME));
+
+    if (!icon.isValid())
+        return windowIcon();
+
+    return icon.value<QIcon>();
+}
+
+hdps::gui::DockableWidget::DockingLocation DockableWidget::getDockingLocation() const
+{
+    return _dockingLocation;
+}
+
+void DockableWidget::setDockingLocation(const DockingLocation& location)
+{
+    _dockingLocation = location;
+}
+
+}
+}

@@ -3,10 +3,12 @@
 
 #include "CoreInterface.h"
 #include "PluginType.h"
+#include "Application.h"
 
 #include <QString>
 #include <QUuid>
 #include <QVariant>
+#include <QIcon>
 
 namespace hdps
 {
@@ -34,6 +36,11 @@ public:
     /** Returns the GUI name of this plugin */
     QString getGuiName() const {
         return _guiName;
+    }
+
+    /** Returns the icon of this plugin */
+    virtual QIcon getIcon() const {
+        return Application::getIconFont("FontAwesome").getIcon("plug");
     }
 
     /**

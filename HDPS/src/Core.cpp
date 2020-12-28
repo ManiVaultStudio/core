@@ -48,13 +48,24 @@ void Core::addPlugin(plugin::Plugin* plugin)
     switch (plugin->getType())
     {
         // If the plugin is RawData, then add it to the data manager
-        case plugin::Type::DATA: _dataManager->addRawData(dynamic_cast<RawData*>(plugin)); break;
+        case plugin::Type::DATA:
+        {
+            _dataManager->addRawData(dynamic_cast<RawData*>(plugin));
+            break;
+        }
 
         // If it is a view plugin then it should be added to the main window
-        case plugin::Type::VIEW: _mainWindow.addView(dynamic_cast<plugin::ViewPlugin*>(plugin)); // fallthrough
+        case plugin::Type::VIEW:
+        {
+            _mainWindow.addPlugin(plugin);
+            // fallthrough
+        }
 
         // Otherwise add the plugin to a list of plug-ins of the same type
-        default: _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
+        default:
+        {
+            _plugins[plugin->getType()].push_back(std::unique_ptr<plugin::Plugin>(plugin));
+        }
     }
     
     // Initialize the plugin after it has been added to the core
@@ -66,11 +77,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
         plugin::AnalysisPlugin* analysis = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
         if (analysis->hasSettings())
         {
-            auto analysisSettingsWidget = analysis->getSettings();
-
-            analysisSettingsWidget->setWindowTitle(plugin->getGuiName());
-
-            _mainWindow.addSettings(analysis->getSettings());
+            _mainWindow.addPlugin(analysis);
         }
     }
     // If it is a loader plugin it should call loadData

@@ -4,6 +4,7 @@
 #include "PointData.h"
 #include "ClusterData.h"
 #include "ColorData.h"
+#include "Application.h"
 
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
@@ -54,7 +55,12 @@ void ScatterplotPlugin::init()
     splitter->setStretchFactor(1, 0);
     splitter->setCollapsible(1, true);
 
-    addWidget(splitter);
+    auto layout = new QVBoxLayout();
+
+    layout->setMargin(0);
+    layout->addWidget(splitter);
+
+    setLayout(layout);
 
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);

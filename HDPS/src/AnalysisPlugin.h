@@ -1,11 +1,12 @@
-#ifndef HDPS_ANALYSISPLUGIN_H
-#define HDPS_ANALYSISPLUGIN_H
+#pragma once
 
 #include "PluginFactory.h"
 #include "DataConsumer.h"
 #include "widgets/SettingsWidget.h"
 
 #include <memory>
+
+class QWidget;
 
 namespace hdps
 {
@@ -17,6 +18,11 @@ class AnalysisPlugin : public Plugin, public DataConsumer
 public:
     AnalysisPlugin(QString name) : Plugin(Type::ANALYSIS, name) { }
     ~AnalysisPlugin() override {};
+
+    /** Returns the icon of this plugin */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("chart-line");
+    }
 
     bool hasSettings()
     {
@@ -46,5 +52,3 @@ public:
 } // namespace hdps
 
 Q_DECLARE_INTERFACE(hdps::plugin::AnalysisPluginFactory, "cytosplore.AnalysisPluginFactory")
-
-#endif // HDPS_ANALYSISPLUGIN_H

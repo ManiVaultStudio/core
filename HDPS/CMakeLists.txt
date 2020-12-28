@@ -47,7 +47,6 @@ set( CORE_HEADERS
     src/DataHierarchyModel.h
     src/DataHierarchy.h
     src/MainWindow.h
-    src/CentralWidget.h
     src/PluginManager.h
     src/Core.h
     src/DataManager.h
@@ -61,15 +60,12 @@ set( CORE_SOURCES
     src/DataHierarchyModel.cpp
     src/DataHierarchy.cpp
     src/MainWindow.cpp
-    src/CentralWidget.cpp
     src/PluginManager.cpp
     src/Core.cpp
     src/DataManager.cpp
 )
 
 set( WIDGET_HEADERS
-    src/widgets/DockableWidget.h
-    src/widgets/SettingsWidget.h
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
     src/widgets/ColorPickerPushButton.h
@@ -78,10 +74,13 @@ set( WIDGET_HEADERS
     src/widgets/PushButton.h
     src/widgets/HorizontalDivider.h
     src/widgets/DataSlot.h
+    src/widgets/Accordion.h
+    src/widgets/AccordionSection.h
+    src/widgets/DockableWidget.h
+    src/widgets/SettingsWidget.h
 )
 
 set( WIDGET_SOURCES
-    src/widgets/DockableWidget.cpp
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
 	src/widgets/ColorPickerPushButton.cpp
@@ -90,6 +89,10 @@ set( WIDGET_SOURCES
     src/widgets/PushButton.cpp
     src/widgets/HorizontalDivider.cpp
     src/widgets/DataSlot.cpp
+	src/widgets/Accordion.cpp
+    src/widgets/AccordionSection.cpp
+	src/widgets/DockableWidget.cpp
+	src/widgets/SettingsWidget.cpp
 )
 
 set( RENDERER_HEADERS
@@ -271,7 +274,10 @@ set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 14)
 
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
 target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
+target_link_libraries(${PROJECT}_Private qtadvanceddocking)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
+
+target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/Qt-Advanced-Docking-System/src)
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
 
@@ -287,6 +293,7 @@ set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
+target_link_libraries(${PROJECT} qtadvanceddocking)
 
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Public>")
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Private>")
@@ -341,3 +348,14 @@ add_subdirectory(src/plugins/ClusterData)
 
 # Image Data
 add_subdirectory(src/plugins/ImageData)
+
+# Qt Advanced docking system
+set(VERSION_SHORT 3.6.0)
+set(ads_PlatformDir "${INSTALL_DIR}/$<CONFIGURATION>/")
+add_subdirectory(external/Qt-Advanced-Docking-System)
+
+# Copy ADS library after the HDPS public project has been built
+add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	"${CMAKE_BINARY_DIR}/x64/bin/$<CONFIGURATION>/qtadvanceddocking.dll"
+	"${INSTALL_DIR}/$<CONFIGURATION>/qtadvanceddocking.dll")
