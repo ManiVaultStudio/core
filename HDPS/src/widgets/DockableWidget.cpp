@@ -1,4 +1,5 @@
 #include "DockableWidget.h"
+#include "../Application.h"
 
 #include <QVariant>
 
@@ -55,7 +56,12 @@ void DockableWidget::setIcon(const QIcon& icon)
 
 QIcon DockableWidget::getIcon() const
 {
-    return property(qPrintable(DockableWidget::ICON_PROPERTY_NAME)).value<QIcon>();
+    const auto icon = property(qPrintable(DockableWidget::ICON_PROPERTY_NAME));
+
+    if (!icon.isValid())
+        return hdps::Application::getIconFont("FontAwesome").getIcon("circle");
+
+    return icon.value<QIcon>();
 }
 
 hdps::gui::DockableWidget::DockingLocation DockableWidget::getDockingLocation() const
