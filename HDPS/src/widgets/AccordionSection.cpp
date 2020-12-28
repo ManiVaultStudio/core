@@ -1,4 +1,5 @@
 #include "AccordionSection.h"
+#include "DockableWidget.h"
 #include "../Application.h"
 
 #include <QDebug>
@@ -9,10 +10,6 @@ namespace hdps
 
 namespace gui
 {
-
-const QString AccordionSection::TITLE_PROPERTY_NAME     = "Title";
-const QString AccordionSection::SUBTITLE_PROPERTY_NAME  = "Subtitle";
-const QString AccordionSection::ICON_PROPERTY_NAME      = "Icon";
 
 AccordionSection::AccordionSection(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
@@ -108,13 +105,13 @@ bool AccordionSection::eventFilter(QObject* object, QEvent* event)
         if (propertyEvent) {
             const auto propertyName = QString::fromLatin1(propertyEvent->propertyName().data());
 
-            if (propertyName == TITLE_PROPERTY_NAME)
+            if (propertyName == DockableWidget::TITLE_PROPERTY_NAME)
                 updateTitleLabel();
 
-            if (propertyName == SUBTITLE_PROPERTY_NAME)
+            if (propertyName == DockableWidget::SUBTITLE_PROPERTY_NAME)
                 updateSubtitleLabel();
 
-            if (propertyName == ICON_PROPERTY_NAME)
+            if (propertyName == DockableWidget::ICON_PROPERTY_NAME)
                 updateRightIcon();
         }
     }
@@ -160,7 +157,7 @@ void AccordionSection::updateLeftIcon()
 
 void AccordionSection::updateTitleLabel()
 {
-    const auto title = _widget->property(qPrintable(TITLE_PROPERTY_NAME));
+    const auto title = _widget->property(qPrintable(DockableWidget::TITLE_PROPERTY_NAME));
 
     auto defaultToWindowTitle = false;
 
@@ -178,7 +175,7 @@ void AccordionSection::updateTitleLabel()
 
 void AccordionSection::updateSubtitleLabel()
 {
-    const auto subtitle = _widget->property(qPrintable(SUBTITLE_PROPERTY_NAME));
+    const auto subtitle = _widget->property(qPrintable(DockableWidget::SUBTITLE_PROPERTY_NAME));
 
     if (!subtitle.isValid())
         return;
@@ -188,7 +185,7 @@ void AccordionSection::updateSubtitleLabel()
 
 void AccordionSection::updateRightIcon()
 {
-    const auto icon = _widget->property(qPrintable(ICON_PROPERTY_NAME));
+    const auto icon = _widget->property(qPrintable(DockableWidget::ICON_PROPERTY_NAME));
 
     if (!icon.isValid())
         return;

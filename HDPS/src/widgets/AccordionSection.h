@@ -104,11 +104,6 @@ private:
 
     /** Toggle button icon size */
     static const std::uint32_t ICON_SIZE = 10;
-
-public:
-    static const QString TITLE_PROPERTY_NAME;       /** Title property name */
-    static const QString SUBTITLE_PROPERTY_NAME;    /** Subtitle property name */
-    static const QString ICON_PROPERTY_NAME;        /** Icon property name */
 };
 
 }

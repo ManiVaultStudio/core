@@ -1,8 +1,7 @@
 #pragma once
 
-#include <QDockWidget>
-
-class QWidget;
+#include <QWidget>
+#include <QIcon>
 
 namespace hdps
 {
@@ -16,7 +15,7 @@ class DockableWidget : public QWidget
 
 public: // Enumerations
 
-    /** This enumeration determines where the dock widget will be placed when added to the GUI */
+    /** Preferred docking location */
     enum class DockingLocation {
         Left,       /** Position at the left */
         Right,      /** Position at the right */
@@ -25,7 +24,7 @@ public: // Enumerations
         Center      /** Position at the center (as a tab) */
     };
 
-public:
+public: // Construction/destruction
 
     /**
      * Constructor
@@ -37,6 +36,35 @@ public:
     /** Destructor */
     ~DockableWidget() override;
 
+public: // Dynamic property wrapper functions
+
+    /**
+     * Set title
+     * @param title Title
+     */
+    void setTitle(const QString& title);
+
+    /** Returns the title */
+    QString getTitle() const;
+
+    /**
+     * Set subtitle
+     * @param subtitle Subtitle
+     */
+    void setSubtitle(const QString& subtitle);
+
+    /** Returns the subtitle */
+    QString getSubtitle() const;
+
+    /**
+     * Set icon
+     * @param icon Icon
+     */
+    void setIcon(const QIcon& icon);
+
+    /** Returns the icon */
+    QIcon getIcon() const;
+
 public: // Docking location
     
     /** Get preferred docking location */
@@ -45,6 +73,11 @@ public: // Docking location
 
 private:
     DockingLocation     _dockingLocation;     /** Preferred docking location */
+
+public:
+    static const QString TITLE_PROPERTY_NAME;       /** Title property name */
+    static const QString SUBTITLE_PROPERTY_NAME;    /** Subtitle property name */
+    static const QString ICON_PROPERTY_NAME;        /** Icon property name */
 };
 
 }
