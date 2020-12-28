@@ -77,6 +77,7 @@ set( WIDGET_HEADERS
     src/widgets/Accordion.h
     src/widgets/AccordionSection.h
     src/widgets/DockableWidget.h
+    src/widgets/SettingsWidget.h
 )
 
 set( WIDGET_SOURCES
@@ -91,6 +92,7 @@ set( WIDGET_SOURCES
 	src/widgets/Accordion.cpp
     src/widgets/AccordionSection.cpp
 	src/widgets/DockableWidget.cpp
+	src/widgets/SettingsWidget.cpp
 )
 
 set( RENDERER_HEADERS

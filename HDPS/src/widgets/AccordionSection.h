@@ -19,6 +19,14 @@ namespace gui
  * Accordion section class
  * 
  * Collapsible section which is part of an accordion control
+ * At the top is a toggle button for expanding/collapsing the section. It displays (from left to right):
+ * 1. An icon which show the expansion state
+ * 2. The title of the widget (synchronized with `Title` dynamic QObject property, uses windowTitle() if empty)
+ * 3. The subtitle of the widget (synchronized with `Subtitle` dynamic QObject property)
+ * 4. Section icon (synchronized with `Icon` dynamic QObject property)
+ *
+ * Below the toggle button it displays the contents of the target widget
+ *
  * Inspired by: https://stackoverflow.com/questions/32476006/how-to-make-an-expandable-collapsable-section-widget-in-qt
  *
  * @author Thomas Kroes
@@ -96,6 +104,11 @@ private:
 
     /** Toggle button icon size */
     static const std::uint32_t ICON_SIZE = 10;
+
+public:
+    static const QString TITLE_PROPERTY_NAME;       /** Title property name */
+    static const QString SUBTITLE_PROPERTY_NAME;    /** Subtitle property name */
+    static const QString ICON_PROPERTY_NAME;        /** Icon property name */
 };
 
 }
