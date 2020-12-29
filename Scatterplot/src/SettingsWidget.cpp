@@ -1,6 +1,7 @@
 #include "SettingsWidget.h"
 #include "PointSettingsWidget.h"
 #include "DensitySettingsWidget.h"
+#include "DimensionPickerWidget.h"
 #include "SelectionToolWidget.h"
 
 #include "ScatterplotPlugin.h"
@@ -8,157 +9,12 @@
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QPainter>
-#include <QStringListModel>
 
 #include <cassert>
-
-namespace
-{
-    QStringListModel& createStringListModel(const unsigned int numDimensions, const std::vector<QString>& names, QObject& parent)
-    {
-        QStringList stringList;
-
-        stringList.reserve(static_cast<int>(numDimensions));
-
-        if (numDimensions == names.size())
-        {
-            for (const auto& name : names)
-            {
-                stringList.append(name);
-            }
-        }
-        else
-        {
-            for (unsigned int i = 0; i < numDimensions; ++i)
-            {
-                stringList.append(QString::fromLatin1("Dim %1").arg(i));
-            }
-        }
-
-        auto* stringListModel = new QStringListModel(stringList, &parent);
-        return *stringListModel;
-    }
-}
 
 PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) {
     addWidget(new PointSettingsWidget(plugin));
     addWidget(new DensitySettingsWidget(plugin));
-}
-
-ColorDimensionPicker::ColorDimensionPicker(const ScatterplotPlugin& plugin)
-{
-    _layout = new QVBoxLayout();
-    _cDimOptions = new QComboBox();
-    _cDimOptions->setFixedWidth(100);
-    _layout->addWidget(_cDimOptions);
-    setLayout(_layout);
-
-    connect(_cDimOptions, SIGNAL(currentIndexChanged(int)), &plugin, SLOT(cDimPicked(int)));
-}
-
-void ColorDimensionPicker::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)
-{
-    auto& stringListModel = createStringListModel(numDimensions, names, *this);
-
-    _cDimOptions->blockSignals(true);
-    _cDimOptions->setModel(&stringListModel);
-    _cDimOptions->blockSignals(false);
-}
-
-ColorDropSlot::ColorDropSlot(const ScatterplotPlugin& plugin) :
-    _loadColorData(*new hdps::gui::DataSlot(plugin.supportedColorTypes))
-{
-    QLabel* dropLabel = new QLabel();
-    dropLabel->setFixedSize(20, 20);
-    dropLabel->setPixmap(QPixmap(":/icons/DragDropWhite.png").scaled(20, 20));
-    QLabel* dropBox = new QLabel();
-    dropBox->setFixedSize(100, 30);
-    dropBox->setStyleSheet("QLabel { background-color: white; color: #696969; border: none; border-radius: 2px; font-family: \"Open Sans\",Helvetica,Arial,sans-serif; font-size: 12px; }");
-    
-    _loadColorData.addWidget(dropBox);
-
-    connect(&_loadColorData, &hdps::gui::DataSlot::onDataInput, &plugin, &ScatterplotPlugin::onColorDataInput);
-
-    _layout = new QHBoxLayout();
-    _layout->addWidget(dropLabel);
-    _layout->addWidget(&_loadColorData);
-    setLayout(_layout);
-}
-
-DimensionPicker::DimensionPicker(const ScatterplotPlugin* plugin) :
-    _xDimLabel(*new QLabel( "X:")),
-    _yDimLabel(*new QLabel("Y:")),
-    _cDimLabel(*new QLabel("Color:"))
-{
-    _layout.addWidget(&_xDimLabel, 0, 0);
-    _layout.addWidget(&_yDimLabel, 1, 0);
-    _layout.addWidget(&_cDimLabel, 2, 0);
-
-    _colorOptions = new QComboBox();
-    _colorOptions->addItem("Color By Dimension");
-    _colorOptions->addItem("Color By Data");
-    _layout.addWidget(&_xDimOptions, 0, 1);
-    _layout.addWidget(&_yDimOptions, 1, 1);
-    _layout.addWidget(_colorOptions, 2, 1);
-    _colorSettingsStack = new ColorSettingsStack(*plugin);
-    _layout.addWidget(_colorSettingsStack, 3, 1);
-
-    connect(&_xDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(xDimPicked(int)));
-    connect(&_yDimOptions, SIGNAL(currentIndexChanged(int)), plugin, SLOT(yDimPicked(int)));
-    connect(_colorOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(colorOptionsPicked(int)));
-}
-
-QGridLayout& DimensionPicker::getLayout()
-{
-    return _layout;
-}
-
-void DimensionPicker::setDimensions(unsigned int numDimensions, const std::vector<QString>& names)
-{
-    auto& stringListModel = createStringListModel(numDimensions, names, *this);
-
-    QComboBox* const allBoxes[] = { &_xDimOptions, &_yDimOptions };
-
-    for (auto* const dimensionBox : allBoxes)
-    {
-        dimensionBox->blockSignals(true);
-        dimensionBox->setModel(&stringListModel);
-    }
-
-    if (numDimensions >= 2)
-    {
-        _xDimOptions.setCurrentIndex(0);
-        _yDimOptions.setCurrentIndex(1);
-    }
-
-    for (auto* const dimensionBox : allBoxes)
-    {
-        dimensionBox->blockSignals(false);
-    }
-}
-
-void DimensionPicker::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)
-{
-    _colorSettingsStack->getColorDimensionPicker().setScalarDimensions(numDimensions, names);
-}
-
-int DimensionPicker::getDimensionX()
-{
-    return _xDimOptions.currentIndex();
-}
-
-int DimensionPicker::getDimensionY()
-{
-    return _yDimOptions.currentIndex();
-}
-
-void DimensionPicker::colorOptionsPicked(const int index)
-{
-    switch (index)
-    {
-    case 0: _colorSettingsStack->setCurrentIndex(0); break;
-    case 1: _colorSettingsStack->setCurrentIndex(1); break;
-    }
 }
 
 ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
@@ -186,11 +42,11 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsStack = new PlotSettingsStack(*plugin);
     renderLayout->addWidget(_settingsStack);
 
-    _dimensionPicker = new DimensionPicker(plugin);
+    _dimensionPickerWidget = new DimensionPickerWidget(*plugin);
 
     _settingsLayout->addLayout(dataLayout);
     _settingsLayout->addLayout(renderLayout, 1);
-    _settingsLayout->addLayout(&_dimensionPicker->getLayout());
+    _settingsLayout->addWidget(_dimensionPickerWidget);
     _settingsLayout->addWidget(new SelectionToolWidget(const_cast<ScatterplotPlugin*>(plugin)));
 
     setLayout(_settingsLayout);
@@ -208,12 +64,12 @@ ScatterplotSettings::~ScatterplotSettings()
 
 int ScatterplotSettings::getXDimension()
 {
-    return _dimensionPicker->getDimensionX();
+    return _dimensionPickerWidget->getDimensionX();
 }
 
 int ScatterplotSettings::getYDimension()
 {
-    return _dimensionPicker->getDimensionY();
+    return _dimensionPickerWidget->getDimensionY();
 }
 
 hdps::Vector3f ScatterplotSettings::getBaseColor()
@@ -238,22 +94,22 @@ void ScatterplotSettings::showDensitySettings()
 
 void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 {
-    _dimensionPicker->setDimensions(nDim);
+    _dimensionPickerWidget->setDimensions(nDim);
 }
 
 void ScatterplotSettings::initDimOptions(const std::vector<QString>& dimNames)
 {
-    _dimensionPicker->setDimensions(dimNames.size(), dimNames);
+    _dimensionPickerWidget->setDimensions(dimNames.size(), dimNames);
 }
 
 void ScatterplotSettings::initScalarDimOptions(const unsigned int nDim)
 {
-    _dimensionPicker->setScalarDimensions(nDim);
+    _dimensionPickerWidget->setScalarDimensions(nDim);
 }
 
 void ScatterplotSettings::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
-    _dimensionPicker->setScalarDimensions(dimNames.size(), dimNames);
+    _dimensionPickerWidget->setScalarDimensions(dimNames.size(), dimNames);
 }
 
 void ScatterplotSettings::renderModePicked(const int index)

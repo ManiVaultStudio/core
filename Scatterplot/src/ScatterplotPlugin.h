@@ -82,6 +82,7 @@ public slots:
 protected slots:
     void subsetCreated();
 
+public:
     void xDimPicked(int index);
     void yDimPicked(int index);
     void cDimPicked(int index);
