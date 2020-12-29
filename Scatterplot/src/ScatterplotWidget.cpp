@@ -82,12 +82,6 @@ void ScatterplotWidget::pointOpacityChanged(const int opacity)
     update();
 }
 
-void ScatterplotWidget::sigmaChanged(const int sigma)
-{
-    _densityRenderer.setSigma(sigma / 100.0f);
-    update();
-}
-
 void ScatterplotWidget::computeDensity()
 {
     _densityRenderer.computeDensity();

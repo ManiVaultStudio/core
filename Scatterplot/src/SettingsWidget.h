@@ -20,24 +20,9 @@ class QComboBox;
 class QCheckBox;
 class QPushButton;
 
-struct DensitySettingsWidget : public QWidget
-{
-    DensitySettingsWidget(const ScatterplotPlugin& plugin);
-
-    static constexpr int MIN_SIGMA = 1;
-    static constexpr int MAX_SIGMA = 50;
-
-    QLabel& _sigmaLabel;
-    QSlider& _sigmaSlider;
-    QPushButton& _computeDensityButton;
-};
-
 struct PlotSettingsStack : public QStackedWidget
 {
     PlotSettingsStack(const ScatterplotPlugin& plugin);
-
-private:
-    DensitySettingsWidget& _densitySettingsWidget;
 };
 
 struct ColorDimensionPicker : public QWidget

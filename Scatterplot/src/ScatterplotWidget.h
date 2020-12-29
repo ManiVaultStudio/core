@@ -86,7 +86,6 @@ signals:
 public slots:
     void renderModePicked(const int index);
     void pointOpacityChanged(const int opacity);
-    void sigmaChanged(const int sigma);
     void computeDensity();
 
     void colormapChanged(QString colormapName);

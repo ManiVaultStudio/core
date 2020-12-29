@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Toolbar</class>
- <widget class="QWidget" name="Toolbar">
+ <class>DensitySettingsWidget</class>
+ <widget class="QWidget" name="DensitySettingsWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1020</width>
+    <width>183</width>
     <height>32</height>
    </rect>
   </property>
@@ -27,114 +27,55 @@
     <number>5</number>
    </property>
    <item>
-    <widget class="QPushButton" name="scatterplotPushButton">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>22</height>
-      </size>
-     </property>
+    <widget class="QLabel" name="label">
      <property name="text">
-      <string>Scatterplot</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
+      <string>Sigma:</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="densityMapPushButton">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>22</height>
-      </size>
+    <widget class="QDoubleSpinBox" name="doubleSpinBox">
+     <property name="decimals">
+      <number>1</number>
      </property>
-     <property name="text">
-      <string>Density map</string>
+     <property name="maximum">
+      <double>50.000000000000000</double>
      </property>
-     <property name="checkable">
-      <bool>true</bool>
+     <property name="value">
+      <double>30.000000000000000</double>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="contourMapPushButton">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>22</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Contour map</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="verticalLine1">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="xDimensionLabel">
-     <property name="text">
-      <string>X:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="xDimensionComboBox"/>
-   </item>
-   <item>
-    <widget class="QLabel" name="yDimensionLabel">
-     <property name="text">
-      <string>Y:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="yDimensionComboBox"/>
-   </item>
-   <item>
-    <widget class="QComboBox" name="colorByDimensionComboBox">
+    <widget class="QSlider" name="horizontalSlider">
      <property name="minimumSize">
       <size>
-       <width>120</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="baseSize">
-      <size>
-       <width>120</width>
+       <width>50</width>
        <height>0</height>
       </size>
      </property>
-     <item>
-      <property name="text">
-       <string>Color by dimension</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Color by data</string>
-      </property>
-     </item>
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>50</number>
+     </property>
+     <property name="value">
+      <number>30</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="dropColorDataPushButton">
+    <widget class="QPushButton" name="computePushButton">
      <property name="minimumSize">
       <size>
        <width>22</width>
@@ -151,45 +92,6 @@
       <string/>
      </property>
     </widget>
-   </item>
-   <item>
-    <widget class="Line" name="verticalLine2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="selectionToolButton">
-     <property name="minimumSize">
-      <size>
-       <width>22</width>
-       <height>22</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>22</width>
-       <height>22</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>
