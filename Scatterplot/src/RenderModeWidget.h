@@ -5,14 +5,14 @@
 class ScatterplotPlugin;
 
 namespace Ui {
-    class DensitySettingsWidget;
+    class RenderModeWidget;
 }
 
-class DensitySettingsWidget : public QWidget
+class RenderModeWidget : public QWidget
 {
 public:
-    DensitySettingsWidget(const ScatterplotPlugin& plugin);
+    RenderModeWidget(const ScatterplotPlugin& plugin);
 
 private:
-    std::unique_ptr<Ui::DensitySettingsWidget>        _ui;        /** Externally loaded UI */
+    std::unique_ptr<Ui::RenderModeWidget>        _ui;        /** Externally loaded UI */
 };

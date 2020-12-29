@@ -5,14 +5,14 @@
 class ScatterplotPlugin;
 
 namespace Ui {
-    class PointSettingsWidget;
+    class RenderSettingsWidget;
 }
 
-class PointSettingsWidget : public QWidget
+class RenderSettingsWidget : public QWidget
 {
 public:
-    PointSettingsWidget(const ScatterplotPlugin& plugin);
+    RenderSettingsWidget(const ScatterplotPlugin& plugin);
 
 private:
-    std::unique_ptr<Ui::PointSettingsWidget>        _ui;        /** Externally loaded UI */
+    std::unique_ptr<Ui::RenderSettingsWidget>        _ui;        /** Externally loaded UI */
 };
