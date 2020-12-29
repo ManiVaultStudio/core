@@ -27,7 +27,7 @@
     <number>5</number>
    </property>
    <item>
-    <widget class="QPushButton" name="scatterPushButton">
+    <widget class="QPushButton" name="scatterPlotPushButton">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -52,7 +52,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="densityPushButton">
+    <widget class="QPushButton" name="densityPlotPushButton">
      <property name="toolTip">
       <string>Set render mode to density plot</string>
      </property>
@@ -65,7 +65,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="contourPushButton">
+    <widget class="QPushButton" name="contourPlotPushButton">
      <property name="toolTip">
       <string>Set render mode to contour plot</string>
      </property>

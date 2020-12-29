@@ -1,6 +1,7 @@
 #include "SettingsWidget.h"
 #include "PointSettingsWidget.h"
 #include "DensitySettingsWidget.h"
+#include "RenderModeWidget.h"
 #include "DimensionPickerWidget.h"
 #include "SelectionToolWidget.h"
 
@@ -42,10 +43,12 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _settingsStack = new PlotSettingsStack(*plugin);
     renderLayout->addWidget(_settingsStack);
 
+    _renderModeWidget = new RenderModeWidget(*plugin);
     _dimensionPickerWidget = new DimensionPickerWidget(*plugin);
 
     _settingsLayout->addLayout(dataLayout);
     _settingsLayout->addLayout(renderLayout, 1);
+    _settingsLayout->addWidget(_renderModeWidget);
     _settingsLayout->addWidget(_dimensionPickerWidget);
     _settingsLayout->addWidget(new SelectionToolWidget(const_cast<ScatterplotPlugin*>(plugin)));
 
@@ -53,8 +56,24 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 
     connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
 
-    connect(&_renderMode, SIGNAL(currentIndexChanged(int)), plugin->_scatterPlotWidget, SLOT(renderModePicked(int)));
-    connect(&_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(renderModePicked(int)));
+    connect(&_renderMode, qOverload<int>(&QComboBox::currentIndexChanged), [this, plugin](int index) {
+        plugin->_scatterPlotWidget->setRenderMode(static_cast<ScatterplotWidget::RenderMode>(index));
+
+        switch (index)
+        {
+            case 0:
+                showPointSettings();
+                break;
+
+            case 1:
+                showDensitySettings();
+                break;
+
+            case 2:
+                showDensitySettings();
+                break;
+        }
+    });
 }
 
 ScatterplotSettings::~ScatterplotSettings()
@@ -110,16 +129,6 @@ void ScatterplotSettings::initScalarDimOptions(const unsigned int nDim)
 void ScatterplotSettings::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
     _dimensionPickerWidget->setScalarDimensions(dimNames.size(), dimNames);
-}
-
-void ScatterplotSettings::renderModePicked(const int index)
-{
-    switch (index)
-    {
-    case 0: showPointSettings(); break;
-    case 1: showDensitySettings(); break;
-    case 2: showDensitySettings(); break;
-    }
 }
 
 void ScatterplotSettings::paintEvent(QPaintEvent* event)

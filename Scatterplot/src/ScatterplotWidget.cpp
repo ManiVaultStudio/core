@@ -58,28 +58,16 @@ bool ScatterplotWidget::isInitialized()
     return _isInitialized;
 }
 
-void ScatterplotWidget::setRenderMode(RenderMode renderMode)
+void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
 {
+    if (renderMode == _renderMode)
+        return;
+
     _renderMode = renderMode;
 
     update();
-}
 
-void ScatterplotWidget::renderModePicked(const int index)
-{
-    switch (index)
-    {
-    case 0: setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT); break;
-    case 1: setRenderMode(ScatterplotWidget::RenderMode::DENSITY); break;
-    case 2: setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE); break;
-    }
-    qDebug() << "Render Mode Picked";
-}
-
-void ScatterplotWidget::pointOpacityChanged(const int opacity)
-{
-    _pointRenderer.setAlpha(opacity / 100.0f);
-    update();
+    emit renderModeChanged(_renderMode);
 }
 
 void ScatterplotWidget::computeDensity()

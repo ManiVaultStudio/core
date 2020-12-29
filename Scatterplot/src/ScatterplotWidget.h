@@ -38,11 +38,15 @@ public:
     /** Returns true when the widget was initialized and is ready to be used. */
     bool isInitialized();
 
+    RenderMode getRenderMode() const {
+        return _renderMode;
+    };
+
     /**
      * Change the rendering mode displayed in the widget.
      * The options are defined by ScatterplotWidget::RenderMode.
      */
-    void setRenderMode(RenderMode renderMode);
+    void setRenderMode(const RenderMode& renderMode);
 
     /**
      * Feed 2-dimensional data to the scatterplot.
@@ -82,10 +86,9 @@ protected:
 
 signals:
     void initialized();
+    void renderModeChanged(const RenderMode& renderMode);
 
 public slots:
-    void renderModePicked(const int index);
-    void pointOpacityChanged(const int opacity);
     void computeDensity();
 
     void colormapChanged(QString colormapName);
