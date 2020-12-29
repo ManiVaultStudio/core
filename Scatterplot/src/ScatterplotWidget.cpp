@@ -49,6 +49,8 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
         _pixelSelectionToolRenderer.update();
         update();
     });
+
+    _pointRenderer.setPointScaling(Absolute);
 }
 
 bool ScatterplotWidget::isInitialized()
@@ -72,12 +74,6 @@ void ScatterplotWidget::renderModePicked(const int index)
     case 2: setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE); break;
     }
     qDebug() << "Render Mode Picked";
-}
-
-void ScatterplotWidget::pointSizeChanged(const int size)
-{
-    _pointRenderer.setPointSize(size / 1000.0f);
-    update();
 }
 
 void ScatterplotWidget::pointOpacityChanged(const int opacity)
@@ -157,9 +153,9 @@ void ScatterplotWidget::setColors(const std::vector<Vector3f>& colors)
     update();
 }
 
-void ScatterplotWidget::setPointSize(const float size)
+void ScatterplotWidget::setPointSize(const float& pointSize)
 {
-    _pointRenderer.setPointSize(size);
+    _pointRenderer.setPointSize(pointSize);
 
     update();
 }
@@ -167,6 +163,8 @@ void ScatterplotWidget::setPointSize(const float size)
 void ScatterplotWidget::setAlpha(const float alpha)
 {
     _pointRenderer.setAlpha(alpha);
+
+    update();
 }
 
 void ScatterplotWidget::setPointScaling(hdps::gui::PointScaling scalingMode)
@@ -217,6 +215,7 @@ void ScatterplotWidget::initializeGL()
 
     _isInitialized = true;
     emit initialized();
+
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)

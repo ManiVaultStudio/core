@@ -20,21 +20,6 @@ class QComboBox;
 class QCheckBox;
 class QPushButton;
 
-struct PointSettingsWidget : public QWidget
-{
-    PointSettingsWidget(const ScatterplotPlugin& plugin);
-
-    static constexpr int MIN_POINT_SIZE = 5;
-    static constexpr int MAX_POINT_SIZE = 20;
-    static constexpr int MIN_POINT_OPACITY = 0;
-    static constexpr int MAX_POINT_OPACITY = 100;
-
-    QLabel& _pointSizeLabel;
-    QSlider& _pointSizeSlider;
-    QLabel& _pointOpacityLabel;
-    QSlider& _pointOpacitySlider;
-};
-
 struct DensitySettingsWidget : public QWidget
 {
     DensitySettingsWidget(const ScatterplotPlugin& plugin);
@@ -52,7 +37,6 @@ struct PlotSettingsStack : public QStackedWidget
     PlotSettingsStack(const ScatterplotPlugin& plugin);
 
 private:
-    PointSettingsWidget& _pointSettingsWidget;
     DensitySettingsWidget& _densitySettingsWidget;
 };
 

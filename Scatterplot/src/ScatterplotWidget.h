@@ -52,7 +52,11 @@ public:
     void setScalars(const std::vector<float>& scalars);
     void setColors(const std::vector<Vector3f>& colors);
 
-    void setPointSize(const float size);
+    /**
+     * Set point size in pixels
+     * @param pointSize Point size in pixels
+     */
+    void setPointSize(const float& pointSize);
     void setScalarEffect(PointEffect effect);
     void setAlpha(const float alpha);
     void setPointScaling(hdps::gui::PointScaling scalingMode);
@@ -81,7 +85,6 @@ signals:
 
 public slots:
     void renderModePicked(const int index);
-    void pointSizeChanged(const int size);
     void pointOpacityChanged(const int opacity);
     void sigmaChanged(const int sigma);
     void computeDensity();

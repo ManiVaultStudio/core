@@ -1,0 +1,18 @@
+#pragma once
+
+#include <QWidget>
+
+class ScatterplotPlugin;
+
+namespace Ui {
+    class PointSettingsWidget;
+}
+
+class PointSettingsWidget : public QWidget
+{
+public:
+    PointSettingsWidget(const ScatterplotPlugin& plugin);
+
+private:
+    std::unique_ptr<Ui::PointSettingsWidget>        _ui;        /** Externally loaded UI */
+};

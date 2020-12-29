@@ -1,4 +1,5 @@
 #include "SettingsWidget.h"
+#include "PointSettingsWidget.h"
 #include "SelectionToolWidget.h"
 
 #include "ScatterplotPlugin.h"
@@ -38,38 +39,6 @@ namespace
     }
 }
 
-PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin) :
-    _pointSizeLabel(*new QLabel("Point Size:")),
-    _pointOpacityLabel(*new QLabel("Point Opacity:")),
-    _pointSizeSlider(*new QSlider(Qt::Horizontal)),
-    _pointOpacitySlider(*new QSlider(Qt::Horizontal))
-{
-    connect(&_pointSizeSlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::pointSizeChanged);
-    connect(&_pointOpacitySlider, &QSlider::valueChanged, plugin._scatterPlotWidget, &ScatterplotWidget::pointOpacityChanged);
-
-    _pointSizeSlider.setRange(MIN_POINT_SIZE, MAX_POINT_SIZE);
-    _pointSizeSlider.setValue(10);
-
-    _pointOpacitySlider.setRange(MIN_POINT_OPACITY, MAX_POINT_OPACITY);
-    _pointOpacitySlider.setValue(50);
-
-    QVBoxLayout* pointSettingsLayout = new QVBoxLayout();
-    pointSettingsLayout->setMargin(0);
-
-    HorizontalDivider* dataDivider = new HorizontalDivider();
-    dataDivider->setTitle("DATA");
-
-    pointSettingsLayout->addLayout(dataDivider);
-
-    pointSettingsLayout->addWidget(&_pointSizeLabel);
-    pointSettingsLayout->addWidget(&_pointSizeSlider);
-    pointSettingsLayout->addWidget(&_pointOpacityLabel);
-    pointSettingsLayout->addWidget(&_pointOpacitySlider);
-
-    pointSettingsLayout->addStretch(1);
-    setLayout(pointSettingsLayout);
-}
-
 DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin) :
     _sigmaLabel(*new QLabel("Sigma:")),
     _sigmaSlider(*new QSlider(Qt::Horizontal)),
@@ -91,10 +60,9 @@ DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin) :
 }
 
 PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) :
-    _pointSettingsWidget(*new PointSettingsWidget(plugin)),
     _densitySettingsWidget(*new DensitySettingsWidget(plugin))
 {
-    addWidget(&_pointSettingsWidget);
+    addWidget(new PointSettingsWidget(plugin));
     addWidget(&_densitySettingsWidget);
 }
 
