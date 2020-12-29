@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>403</width>
+    <width>439</width>
     <height>32</height>
    </rect>
   </property>
@@ -41,6 +41,12 @@
    </item>
    <item>
     <widget class="QComboBox" name="xDimensionComboBox">
+     <property name="minimumSize">
+      <size>
+       <width>80</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="toolTip">
       <string>X dimension</string>
      </property>
@@ -61,6 +67,12 @@
    </item>
    <item>
     <widget class="QComboBox" name="yDimensionComboBox">
+     <property name="minimumSize">
+      <size>
+       <width>80</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="toolTip">
       <string>Y dimension</string>
      </property>
@@ -81,10 +93,22 @@
    </item>
    <item>
     <widget class="QComboBox" name="colorOptionsComboBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
-       <width>120</width>
+       <width>90</width>
        <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>90</width>
+       <height>16777215</height>
       </size>
      </property>
      <property name="toolTip">
@@ -92,12 +116,12 @@
      </property>
      <item>
       <property name="text">
-       <string>Color by dimension</string>
+       <string>by dimension</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Color by data</string>
+       <string>by data</string>
       </property>
      </item>
     </widget>
@@ -110,14 +134,46 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>120</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="toolTip">
       <string>Pick color dimension</string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="colorDropSlotPage">
       <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QComboBox" name="colorDimensionComboBox">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="colorDimensionPage">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -151,25 +207,6 @@
           <string/>
          </property>
         </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="colorDimensionPage">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QComboBox" name="colorDimensionComboBox"/>
        </item>
       </layout>
      </widget>

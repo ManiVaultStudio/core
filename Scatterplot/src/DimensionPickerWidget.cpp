@@ -67,28 +67,17 @@ DimensionPickerWidget::DimensionPickerWidget(const ScatterplotPlugin& plugin) :
 
 void DimensionPickerWidget::setDimensions(unsigned int numDimensions, const std::vector<QString>& names)
 {
-    
     auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
-    QComboBox* const allBoxes[] = { _ui->xDimensionComboBox, _ui->yDimensionComboBox };
+    QSignalBlocker xDimensionComboBoxSignalBlocker(_ui->xDimensionComboBox), yDimensionComboBoxSignalBlocker(_ui->yDimensionComboBox);
 
-    for (auto* const dimensionBox : allBoxes)
-    {
-        dimensionBox->blockSignals(true);
-        dimensionBox->setModel(&stringListModel);
-    }
+    _ui->xDimensionComboBox->setModel(&stringListModel);
+    _ui->yDimensionComboBox->setModel(&stringListModel);
 
-    if (numDimensions >= 2)
-    {
+    if (numDimensions >= 2) {
         _ui->xDimensionComboBox->setCurrentIndex(0);
         _ui->yDimensionComboBox->setCurrentIndex(1);
     }
-
-    for (auto* const dimensionBox : allBoxes)
-    {
-        dimensionBox->blockSignals(false);
-    }
-    /**/
 }
 
 void DimensionPickerWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)
