@@ -3,12 +3,15 @@
 
 #include "ui_DensitySettingsWidget.h"
 
-DensitySettingsWidget::DensitySettingsWidget(const ScatterplotPlugin& plugin) :
-    QWidget(),
+DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
     _ui{ std::make_unique<Ui::DensitySettingsWidget>() }
 {
     _ui->setupUi(this);
+}
 
+void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
+{
     connect(_ui->horizontalSlider, &QSlider::valueChanged, [this, &plugin](int value) {
         const auto sigma = static_cast<float>(value);
 

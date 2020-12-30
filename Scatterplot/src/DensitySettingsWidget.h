@@ -11,7 +11,9 @@ namespace Ui {
 class DensitySettingsWidget : public QWidget
 {
 public:
-    DensitySettingsWidget(const ScatterplotPlugin& plugin);
+    DensitySettingsWidget(QWidget* parent = nullptr);
+
+    void initialize(const ScatterplotPlugin& plugin);
 
 private:
     std::unique_ptr<Ui::DensitySettingsWidget>        _ui;        /** Externally loaded UI */

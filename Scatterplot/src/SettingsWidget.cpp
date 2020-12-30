@@ -2,6 +2,7 @@
 #include "PointSettingsWidget.h"
 #include "DensitySettingsWidget.h"
 #include "RenderModeWidget.h"
+#include "PlotSettingsWidget.h"
 #include "DimensionPickerWidget.h"
 #include "SelectionToolWidget.h"
 
@@ -12,11 +13,6 @@
 #include <QPainter>
 
 #include <cassert>
-
-PlotSettingsStack::PlotSettingsStack(const ScatterplotPlugin& plugin) {
-    addWidget(new PointSettingsWidget(plugin));
-    addWidget(new DensitySettingsWidget(plugin));
-}
 
 ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 :
@@ -40,8 +36,8 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
     _renderMode.setFixedWidth(100);
     renderLayout->addWidget(&_renderMode);
 
-    _settingsStack = new PlotSettingsStack(*plugin);
-    renderLayout->addWidget(_settingsStack);
+    _plotSettingsWidget = new PlotSettingsWidget(*plugin);
+    renderLayout->addWidget(_plotSettingsWidget);
 
     _renderModeWidget = new RenderModeWidget(*plugin);
     _dimensionPickerWidget = new DimensionPickerWidget(*plugin);
@@ -58,21 +54,6 @@ ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
 
     connect(&_renderMode, qOverload<int>(&QComboBox::currentIndexChanged), [this, plugin](int index) {
         plugin->_scatterPlotWidget->setRenderMode(static_cast<ScatterplotWidget::RenderMode>(index));
-
-        switch (index)
-        {
-            case 0:
-                showPointSettings();
-                break;
-
-            case 1:
-                showDensitySettings();
-                break;
-
-            case 2:
-                showDensitySettings();
-                break;
-        }
     });
 }
 
@@ -101,15 +82,6 @@ hdps::Vector3f ScatterplotSettings::getSelectionColor()
     return _selectionColor;
 }
 
-void ScatterplotSettings::showPointSettings()
-{
-    _settingsStack->setCurrentIndex(0);
-}
-
-void ScatterplotSettings::showDensitySettings()
-{
-    _settingsStack->setCurrentIndex(1);
-}
 
 void ScatterplotSettings::initDimOptions(const unsigned int nDim)
 {

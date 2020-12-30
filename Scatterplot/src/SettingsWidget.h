@@ -20,11 +20,7 @@ class QCheckBox;
 class QPushButton;
 class DimensionPickerWidget;
 class RenderModeWidget;
-
-struct PlotSettingsStack : public QStackedWidget
-{
-    PlotSettingsStack(const ScatterplotPlugin& plugin);
-};
+class PlotSettingsWidget;
 
 class ScatterplotSettings : public QWidget
 {
@@ -38,8 +34,6 @@ public:
     int getYDimension();
     hdps::Vector3f getBaseColor();
     hdps::Vector3f getSelectionColor();
-    void showPointSettings();
-    void showDensitySettings();
 
     void initDimOptions(const unsigned int nDim);
     void initDimOptions(const std::vector<QString>& dimNames);
@@ -56,7 +50,7 @@ private:
     QComboBox& _renderMode = *new QComboBox;
 
     QVBoxLayout* _settingsLayout;
-    PlotSettingsStack*      _settingsStack;
+    PlotSettingsWidget*      _plotSettingsWidget;
     RenderModeWidget*  _renderModeWidget;
     DimensionPickerWidget*  _dimensionPickerWidget;
 

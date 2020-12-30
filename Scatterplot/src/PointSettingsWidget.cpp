@@ -3,12 +3,15 @@
 
 #include "ui_PointSettingsWidget.h"
 
-PointSettingsWidget::PointSettingsWidget(const ScatterplotPlugin& plugin) :
-    QWidget(),
+PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
     _ui{ std::make_unique<Ui::PointSettingsWidget>() }
 {
     _ui->setupUi(this);
+}
 
+void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
+{
     connect(_ui->sizeHorizontalSlider, &QSlider::valueChanged, [this, &plugin](int value) {
         const auto pointSize = static_cast<float>(value) / 1000.0f;
 
