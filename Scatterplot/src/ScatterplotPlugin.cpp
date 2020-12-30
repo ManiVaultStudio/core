@@ -151,6 +151,8 @@ void ScatterplotPlugin::selectPoints()
     std::vector<std::uint32_t> targetIndices;
 
     targetIndices.reserve(points.getNumPoints());
+    std::vector<unsigned int> localGlobalIndices;
+    points.getGlobalIndices(localGlobalIndices);
 
     const auto dataBounds   = _scatterPlotWidget->getBounds();
     const auto width        = selectionAreaImage.width();
@@ -165,10 +167,8 @@ void ScatterplotPlugin::selectPoints()
         const auto uv               = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
 
         if (selectionAreaImage.pixelColor(uv).alpha() > 0) {
-            if (set.isFull())
-                targetIndices.push_back(i);
-            else
-                targetIndices.push_back(setIndices[i]);
+            int globalIndex = localGlobalIndices[i];
+            targetIndices.push_back(globalIndex);
         }
     }
     
