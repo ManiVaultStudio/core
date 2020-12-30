@@ -296,8 +296,20 @@ void Core::notifyDataRemoved(const QString name)
 /** Notify all data consumers that a selection has changed. */
 void Core::notifySelectionChanged(const QString datasetName)
 {
-    for (SelectionChangedFunction& callback : selectionChangedListeners[datasetName])
-        callback(datasetName);
+    DataSet& baseDataSet1 = DataSet::getSourceData(requestData(datasetName));
+    QString dataName1 = baseDataSet1.getDataName();
+
+    for (auto& kv : selectionChangedListeners)
+    {
+        DataSet& baseDataSet2 = DataSet::getSourceData(requestData(kv.first));
+        QString dataName2 = baseDataSet2.getDataName();
+
+        if (dataName1 == dataName2)
+        {
+            for (SelectionChangedFunction& callback : kv.second)
+                callback(kv.first);
+        }
+    }
 }
 
 gui::MainWindow& Core::gui() const {

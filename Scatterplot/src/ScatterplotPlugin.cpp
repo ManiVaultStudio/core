@@ -348,70 +348,15 @@ void ScatterplotPlugin::updateSelection()
     const Points& points = _core->requestData<Points>(_currentDataSet);
     const Points& selection = static_cast<Points&>(points.getSelection());
 
+    std::vector<bool> selected;
     std::vector<char> highlights;
-    highlights.resize(_numPoints, 0);
 
-    if (points.isDerivedData())
+    points.selectedLocalIndices(selection.indices, selected);
+
+    highlights.resize(points.getNumPoints(), 0);
+    for (int i = 0; i < selected.size(); i++)
     {
-        // If the dataset is derived from another, get the source data set
-        const Points& sourceSet = DataSet::getSourceData(points);
-
-        if (sourceSet.isFull())
-        {
-            // If the dataset is the full dataset no translation is necessary for selection
-            if (points.isFull())
-            {
-                for (unsigned int index : selection.indices)
-                {
-                    highlights[index] = 1;
-                }
-            }
-        }
-        else
-        {
-            // Find the common global indices selected and its local index in the subset indices
-            std::vector<bool> selectedPoints(sourceSet.getNumRawPoints(), false);
-            for (const unsigned int& selectionIndex : selection.indices)
-                selectedPoints[selectionIndex] = true;
-            
-            // Translate from derived data indices to subset indices
-            std::vector<unsigned int> sourceIndices(_numPoints);
-            for (int i = 0; i < _numPoints; i++)
-            {
-                const unsigned int& derivedIndex = points.indices[i];
-                sourceIndices[i] = sourceSet.indices[derivedIndex];
-            }
-            
-            for (int i = 0; i < _numPoints; i++)
-            {
-                if (selectedPoints[sourceIndices[i]])
-                    highlights[i] = 1;
-            }
-        }
-    }
-    else
-    {
-        // If the dataset is the full dataset no translation is necessary for selection
-        if (points.isFull())
-        {
-            for (unsigned int index : selection.indices)
-            {
-                highlights[index] = 1;
-            }
-        }
-        else
-        {
-            // Find the common global indices selected and its local index in the subset indices
-            std::vector<bool> selectedPoints(points.getNumRawPoints(), false);
-            for (const unsigned int& selectionIndex : selection.indices)
-                selectedPoints[selectionIndex] = true;
-
-            for (int i = 0; i < _numPoints; i++)
-            {
-                if (selectedPoints[points.indices[i]])
-                    highlights[i] = 1;
-            }
-        }
+        highlights[i] = selected[i] ? 1 : 0;
     }
 
     _scatterPlotWidget->setHighlights(highlights);

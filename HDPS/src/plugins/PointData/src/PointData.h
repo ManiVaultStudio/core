@@ -772,6 +772,9 @@ public:
         }
     }
 
+    void getGlobalIndices(std::vector<unsigned int>& globalIndices) const;
+    void selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const;
+
     unsigned int getNumRawPoints() const
     {
         return getRawData<PointData>().getNumPoints();

@@ -59,7 +59,6 @@ public:
         return dynamic_cast<SetType&>(requestData(name));
     }
 
-
     /** Register for data added events */
     using DataAddedFunction = std::function<void(QString)>;//void (*)(QString);
     using DataChangedFunction = std::function<void(QString)>;//void (*)(QString);
