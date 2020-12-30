@@ -61,8 +61,13 @@ public:
      * converted to non-derived data.
      * Notifies all plug-ins of the removed data set automatically.
      */
-    void removeDataset(const QString datasetName);// override;
+    void removeDataset(const QString datasetName) override;
 
+    /**
+     * Creates a dataset derived from a source dataset.
+     * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
+     * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
+     */
     const QString createDerivedData(const QString nameRequest, const QString sourceDatasetName) override;
 
     /**
@@ -73,9 +78,11 @@ public:
     QString createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) override;
 
     /**
-    * Request a dataset from the data manager by its name.
-    */
-    DataSet& requestData(const QString name) override;
+     * Requests a dataset from the core which has the same unique name
+     * as the given parameter. If no such instance can be found a fatal
+     * error is thrown.
+     */
+    DataSet& requestData(const QString datasetName) override;
 
     /**
      * Request a list of all datasets in the core
@@ -90,12 +97,12 @@ public:
     void registerDataTypeRemoved(DataType dataType, DataRemovedFunction func) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
-    void notifyDataAdded(const QString name) override;
+    void notifyDataAdded(const QString datasetName) override;
     /** Notify all data consumers that a dataset has been changed. */
-    void notifyDataChanged(const QString name) override;
+    void notifyDataChanged(const QString datasetName) override;
 
     /** Notify all data consumers that a selection has changed. */
-    void notifySelectionChanged(const QString dataName) override;
+    void notifySelectionChanged(const QString datasetName) override;
 
     /**
     * Returns a reference to the main window for adding widgets to it.

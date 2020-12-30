@@ -211,13 +211,16 @@ void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 
 void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
 {
+    // Find the global indices of this dataset
     std::vector<unsigned int> localGlobalIndices;
     getGlobalIndices(localGlobalIndices);
 
+    // In an array the size of the full raw data, mark selected points as true
     std::vector<bool> globalSelection(Points::getSourceData(*this).getNumRawPoints(), false);
     for (const unsigned int& selectionIndex : selectionIndices)
         globalSelection[selectionIndex] = true;
 
+    // For all local points find out which are selected
     selected.resize(localGlobalIndices.size(), false);
     for (int i = 0; i < localGlobalIndices.size(); i++)
     {
