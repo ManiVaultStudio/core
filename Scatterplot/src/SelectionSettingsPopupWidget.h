@@ -8,7 +8,7 @@ class ScatterplotPlugin;
 class PixelSelectionTool;
 
 namespace Ui {
-	class AdvancedSelectionSettingsWidget;
+	class SelectionSettingsPopupWidget;
 }
 
 /**
@@ -18,14 +18,14 @@ namespace Ui {
  *
  * @author Thomas Kroes
  */
-class AdvancedSelectionSettingsWidget : public QWidget
+class SelectionSettingsPopupWidget : public QWidget
 {
 public: // Construction/destruction
 
-    AdvancedSelectionSettingsWidget(QWidget* parent = nullptr);
+    SelectionSettingsPopupWidget(QWidget* parent = nullptr);
 
     void initialize(const ScatterplotPlugin& plugin);
 
 private:
-    std::unique_ptr<Ui::AdvancedSelectionSettingsWidget>    _ui;        /** User interface as produced by Qt designer */
+    std::unique_ptr<Ui::SelectionSettingsPopupWidget>    _ui;        /** User interface as produced by Qt designer */
 };

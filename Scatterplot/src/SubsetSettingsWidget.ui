@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>203</width>
-    <height>43</height>
+    <width>199</width>
+    <height>32</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,22 +33,19 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Subset</string>
-     </property>
+    <widget class="QWidget" name="widget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <property name="leftMargin">
-       <number>6</number>
+       <number>5</number>
       </property>
       <property name="topMargin">
-       <number>2</number>
+       <number>5</number>
       </property>
       <property name="rightMargin">
-       <number>6</number>
+       <number>5</number>
       </property>
       <property name="bottomMargin">
-       <number>4</number>
+       <number>5</number>
       </property>
       <item>
        <widget class="QPushButton" name="createPushButton">
@@ -68,7 +65,7 @@
          <string>Create subset from selection</string>
         </property>
         <property name="text">
-         <string>Create</string>
+         <string>Create subset</string>
         </property>
        </widget>
       </item>

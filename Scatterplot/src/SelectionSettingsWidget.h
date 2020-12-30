@@ -11,16 +11,9 @@ namespace Ui {
 	class SelectionSettingsWidget;
 }
 
-/**
- * Selection tool widget class
- *
- * Provides the user interface for the pixel selection tool
- *
- * @author Thomas Kroes
- */
 class SelectionSettingsWidget : public QWidget
 {
-public: // Construction/destruction
+public:
 
     SelectionSettingsWidget(QWidget* parent = nullptr);
 

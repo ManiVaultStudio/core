@@ -14,6 +14,7 @@ void PlotSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
     _ui->plotSettingsStackedWidget->initialize(plugin);
 
+    /*
     const auto updateGroupBoxTitle = [this, &plugin]() {
         const auto renderMode = plugin._scatterPlotWidget->getRenderMode();
 
@@ -39,4 +40,5 @@ void PlotSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     });
 
     updateGroupBoxTitle();
+    */
 }

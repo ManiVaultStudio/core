@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>933</width>
-    <height>30</height>
+    <height>22</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,16 +21,16 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="RenderModeWidget" name="renderModeWidget" native="true">

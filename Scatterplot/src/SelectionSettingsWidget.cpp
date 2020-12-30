@@ -1,4 +1,5 @@
 #include "SelectionSettingsWidget.h"
+#include "SelectionSettingsPopupWidget.h"
 #include "ScatterplotPlugin.h"
 #include "Application.h"
 
@@ -10,33 +11,32 @@
 
 SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-	_ui{ std::make_unique<Ui::SelectionSettingsWidget>() }
+    _ui{ std::make_unique<Ui::SelectionSettingsWidget>() }
 {
     _ui->setupUi(this);
 }
 
 void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
+    //resize(QSize(10, 10));
+
+    setFixedHeight(32);
+    setFixedWidth(32);
+
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
-    _ui->advancedPushButton->setFont(fontAwesome.getFont(6));
-    _ui->advancedPushButton->setText(fontAwesome.getIconCharacter("ellipsis-h"));
+    _ui->popupPushButton->setStyleSheet("text-align: center");
+    _ui->popupPushButton->setFont(fontAwesome.getFont(8));
+    _ui->popupPushButton->setText(fontAwesome.getIconCharacter("mouse-pointer"));
 
-    _ui->typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
+    const auto showSelectionSettingsPopupWidget = [this, &plugin](QWidget* parent) {
+        auto windowLevelWidget = new SelectionSettingsPopupWidget(parent);
 
-    auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
-    auto& pixelSelectionTool = scatterplotPlugin.getSelectionTool();
-
-    QObject::connect(_ui->typeComboBox, &QComboBox::currentTextChanged, [this, &pixelSelectionTool](QString currentText) {
-        pixelSelectionTool.setType(PixelSelectionTool::getTypeEnum(currentText));
-    });
-
-    const auto updateTypeUI = [this, &scatterplotPlugin]() {
-        const auto canSelect = scatterplotPlugin.canSelect();
-
-        _ui->typeLabel->setEnabled(canSelect);
-        _ui->typeComboBox->setEnabled(canSelect);
+        windowLevelWidget->initialize(plugin);
+        windowLevelWidget->show();
     };
-    
-    pixelSelectionTool.setChanged();
+
+    QObject::connect(_ui->popupPushButton, &QPushButton::clicked, [this, &plugin, showSelectionSettingsPopupWidget]() {
+        showSelectionSettingsPopupWidget(_ui->popupPushButton);
+    });
 }

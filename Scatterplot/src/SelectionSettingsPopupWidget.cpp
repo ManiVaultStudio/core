@@ -1,35 +1,55 @@
-#include "AdvancedSelectionSettingsWidget.h"
+#include "SelectionSettingsPopupWidget.h"
 #include "ScatterplotPlugin.h"
 #include "Application.h"
 
-#include "ui_AdvancedSelectionSettingsWidget.h"
+#include "ui_SelectionSettingsPopupWidget.h"
 
 #include <QDebug>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
 
-AdvancedSelectionSettingsWidget::AdvancedSelectionSettingsWidget(QWidget* parent /*= nullptr*/) :
+SelectionSettingsPopupWidget::SelectionSettingsPopupWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-	_ui{ std::make_unique<Ui::AdvancedSelectionSettingsWidget>() }
+	_ui{ std::make_unique<Ui::SelectionSettingsPopupWidget>() }
 {
+    setWindowFlags(Qt::Popup);
+    setObjectName("SelectionSettingsPopupWidget");
+    setStyleSheet("QWidget#SelectionSettingsPopupWidget { border: 1px solid grey; }");
+
     _ui->setupUi(this);
+
+    move(parent->mapToGlobal(parent->rect().bottomRight()) - QPoint(width(), 0));
 }
 
-void AdvancedSelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
+void SelectionSettingsPopupWidget::initialize(const ScatterplotPlugin& plugin)
 {
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
-    _ui->modifierAddPushButton->setFont(fontAwesome.getFont(6));
+    _ui->typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
+
+    auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
+    auto& pixelSelectionTool = scatterplotPlugin.getSelectionTool();
+
+    QObject::connect(_ui->typeComboBox, &QComboBox::currentTextChanged, [this, &pixelSelectionTool](QString currentText) {
+        pixelSelectionTool.setType(PixelSelectionTool::getTypeEnum(currentText));
+    });
+
+    const auto updateTypeUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
+        const auto canSelect = scatterplotPlugin.canSelect();
+
+        _ui->typeLabel->setEnabled(canSelect);
+        _ui->typeComboBox->setEnabled(canSelect);
+        _ui->typeComboBox->setCurrentText(PixelSelectionTool::getTypeName(pixelSelectionTool.getType()));
+    };
+
+    _ui->modifierAddPushButton->setFont(fontAwesome.getFont(8));
     _ui->modifierAddPushButton->setText(fontAwesome.getIconCharacter("plus"));
-    _ui->modifierRemovePushButton->setFont(fontAwesome.getFont(6));
+    _ui->modifierRemovePushButton->setFont(fontAwesome.getFont(8));
     _ui->modifierRemovePushButton->setText(fontAwesome.getIconCharacter("minus"));
     _ui->radiusSpinBox->setMinimum(PixelSelectionTool::RADIUS_MIN);
     _ui->radiusSpinBox->setMaximum(PixelSelectionTool::RADIUS_MAX);
     _ui->radiusSlider->setMinimum(PixelSelectionTool::RADIUS_MIN * 1000.0f);
     _ui->radiusSlider->setMaximum(PixelSelectionTool::RADIUS_MAX * 1000.0f);
-
-    auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
-    auto& pixelSelectionTool = scatterplotPlugin.getSelectionTool();
 
     QObject::connect(_ui->modifierAddPushButton, &QPushButton::toggled, [this, &pixelSelectionTool](bool checked) {
         pixelSelectionTool.setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
@@ -143,14 +163,21 @@ void AdvancedSelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin
         _ui->notifyDuringSelectionCheckBox->setChecked(notifyDuringSelection);
     });
 
-    QObject::connect(&scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, &scatterplotPlugin, updateModifierUI, updateRadiusUI]() {
-        updateModifierUI();
-        updateRadiusUI();
-
+    const auto updateSelectionButtons = [this, &scatterplotPlugin]() {
         _ui->selectAllPushButton->setEnabled(scatterplotPlugin.canSelectAll());
         _ui->clearSelectionPushButton->setEnabled(scatterplotPlugin.canClearSelection());
         _ui->invertSelectionPushButton->setEnabled(scatterplotPlugin.canInvertSelection());
+    };
+
+    QObject::connect(&scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, &scatterplotPlugin, updateModifierUI, updateRadiusUI, updateSelectionButtons]() {
+        updateModifierUI();
+        updateRadiusUI();
+        updateSelectionButtons();
     });
     
+    updateTypeUI();
+    updateRadiusUI();
+    updateSelectionButtons();
+
     pixelSelectionTool.setChanged();
 }

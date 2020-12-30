@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>45</height>
+    <width>263</width>
+    <height>32</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,40 +18,19 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Plot settings</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <property name="leftMargin">
-       <number>6</number>
-      </property>
-      <property name="topMargin">
-       <number>2</number>
-      </property>
-      <property name="rightMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>4</number>
-      </property>
-      <item>
-       <widget class="PlotSettingsStackedWidget" name="plotSettingsStackedWidget" native="true"/>
-      </item>
-     </layout>
-    </widget>
+    <widget class="PlotSettingsStackedWidget" name="plotSettingsStackedWidget" native="true"/>
    </item>
   </layout>
  </widget>
