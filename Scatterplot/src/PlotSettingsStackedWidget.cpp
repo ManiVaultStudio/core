@@ -1,27 +1,27 @@
-#include "PlotSettingsWidget.h"
+#include "PlotSettingsStackedWidget.h"
 #include "ScatterplotPlugin.h"
 
-#include "ui_PlotSettingsWidget.h"
+#include "ui_PlotSettingsStackedWidget.h"
 
-PlotSettingsWidget::PlotSettingsWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _ui{ std::make_unique<Ui::PlotSettingsWidget>() }
+PlotSettingsStackedWidget::PlotSettingsStackedWidget(QWidget* parent /*= nullptr*/) :
+    QStackedWidget(parent),
+    _ui{ std::make_unique<Ui::PlotSettingsStackedWidget>() }
 {
     _ui->setupUi(this);
 }
 
-void PlotSettingsWidget::initialize(const ScatterplotPlugin& plugin)
+void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
 {
     QObject::connect(plugin._scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this](const ScatterplotWidget::RenderMode& renderMode) {
         switch (renderMode)
         {
             case ScatterplotWidget::RenderMode::SCATTERPLOT:
-                _ui->stackedWidget->setCurrentIndex(0);
+                setCurrentIndex(0);
                 break;
 
             case ScatterplotWidget::RenderMode::DENSITY:
             case ScatterplotWidget::RenderMode::LANDSCAPE:
-                _ui->stackedWidget->setCurrentIndex(1);
+                setCurrentIndex(1);
                 break;
         }
     });

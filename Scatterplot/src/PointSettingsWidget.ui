@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
+    <width>359</width>
     <height>22</height>
    </rect>
   </property>
@@ -29,7 +29,7 @@
    <item>
     <widget class="QLabel" name="sizeLabel">
      <property name="text">
-      <string>Pt size</string>
+      <string>Point size</string>
      </property>
     </widget>
    </item>
@@ -37,15 +37,18 @@
     <widget class="QDoubleSpinBox" name="sizeDoubleSpinBox">
      <property name="minimumSize">
       <size>
-       <width>60</width>
+       <width>0</width>
        <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>60</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
+     </property>
+     <property name="prefix">
+      <string/>
      </property>
      <property name="suffix">
       <string>px</string>
@@ -101,7 +104,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Pt opacity</string>
+      <string>Point opacity</string>
      </property>
     </widget>
    </item>
