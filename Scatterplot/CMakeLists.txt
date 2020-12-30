@@ -19,6 +19,7 @@ endif(MSVC)
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(PLUGIN
+    src/Common.h
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
 	src/PixelSelectionTool.h

@@ -2,6 +2,8 @@
 
 #include <ViewPlugin.h>
 
+#include "Common.h"
+
 #include "PixelSelectionTool.h"
 
 #include "widgets/DataSlot.h"

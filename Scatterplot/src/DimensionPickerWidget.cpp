@@ -3,36 +3,6 @@
 
 #include "ui_DimensionPickerWidget.h"
 
-#include <QStringListModel>
-
-namespace
-{
-    QStringListModel& createStringListModel(const unsigned int numDimensions, const std::vector<QString>& names, QObject& parent)
-    {
-        QStringList stringList;
-
-        stringList.reserve(static_cast<int>(numDimensions));
-
-        if (numDimensions == names.size())
-        {
-            for (const auto& name : names)
-            {
-                stringList.append(name);
-            }
-        }
-        else
-        {
-            for (unsigned int i = 0; i < numDimensions; ++i)
-            {
-                stringList.append(QString::fromLatin1("Dim %1").arg(i));
-            }
-        }
-
-        auto* stringListModel = new QStringListModel(stringList, &parent);
-        return *stringListModel;
-    }
-}
-
 DimensionPickerWidget::DimensionPickerWidget(QWidget* parent /*= nullptr*/) :
     QWidget(),
     _ui{ std::make_unique<Ui::DimensionPickerWidget>() }
@@ -54,21 +24,29 @@ void DimensionPickerWidget::initialize(const ScatterplotPlugin& plugin)
         switch (index)
         {
             case 0:
-                _ui->colorSettingsStackedWidget->setCurrentIndex(0);
+                _ui->colorDimensionStackedWidget->setCurrentIndex(0);
                 break;
 
             case 1:
-                _ui->colorSettingsStackedWidget->setCurrentIndex(1);
+                _ui->colorDimensionStackedWidget->setCurrentIndex(1);
                 break;
         }
     });
 
-    QObject::connect(_ui->colorDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
-        const_cast<ScatterplotPlugin&>(plugin).cDimPicked(index);
-    });
+    _ui->colorDimensionStackedWidget->initialize(plugin);
 }
 
-void DimensionPickerWidget::setDimensions(unsigned int numDimensions, const std::vector<QString>& names)
+int DimensionPickerWidget::getDimensionX()
+{
+    return _ui->xDimensionComboBox->currentIndex();
+}
+
+int DimensionPickerWidget::getDimensionY()
+{
+    return _ui->yDimensionComboBox->currentIndex();
+}
+
+void DimensionPickerWidget::setDimensions(unsigned int numDimensions, const std::vector<QString>& names /*= std::vector<QString>()*/)
 {
     auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
@@ -83,21 +61,13 @@ void DimensionPickerWidget::setDimensions(unsigned int numDimensions, const std:
     }
 }
 
-void DimensionPickerWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)
+void DimensionPickerWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names /*= std::vector<QString>()*/)
 {
     auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
-    QSignalBlocker signalBlocker(_ui->colorDimensionComboBox);
+    auto colorByDimensionComboBox = _ui->colorDimensionStackedWidget->getColorByDimensionComboBox();
 
-    _ui->colorDimensionComboBox->setModel(&stringListModel);
-}
+    QSignalBlocker signalBlocker(colorByDimensionComboBox);
 
-int DimensionPickerWidget::getDimensionX()
-{
-    return _ui->xDimensionComboBox->currentIndex();
-}
-
-int DimensionPickerWidget::getDimensionY()
-{
-    return _ui->yDimensionComboBox->currentIndex();
+    colorByDimensionComboBox->setModel(&stringListModel);
 }
