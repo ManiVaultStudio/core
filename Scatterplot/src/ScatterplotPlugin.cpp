@@ -51,6 +51,7 @@ void ScatterplotPlugin::init()
     auto layout = new QVBoxLayout();
 
     layout->setMargin(0);
+    layout->setSpacing(0);
     layout->addWidget(_scatterPlotSettings);
     layout->addWidget(_dataSlot, 1);
 

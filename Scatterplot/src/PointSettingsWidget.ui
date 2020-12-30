@@ -6,18 +6,30 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>377</width>
-    <height>40</height>
+    <width>336</width>
+    <height>22</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QLabel" name="sizeLabel">
      <property name="text">
-      <string>Point size</string>
+      <string>Pt size</string>
      </property>
     </widget>
    </item>
@@ -82,8 +94,14 @@
    </item>
    <item>
     <widget class="QLabel" name="opacityLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
-      <string>Point opacity</string>
+      <string>Pt opacity</string>
      </property>
     </widget>
    </item>
