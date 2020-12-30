@@ -2,31 +2,12 @@
 #define HDPS_RAWDATA_H
 
 #include "PluginFactory.h"
+#include "DataType.h"
 
 #include <QString>
 
 namespace hdps {
     class DataSet;
-
-    class DataType
-    {
-    public:
-        DataType() = delete;
-
-        DataType(QString type) :
-            _type(type)
-        { }
-
-        inline friend bool operator==(const DataType& lhs, const DataType& rhs) { return lhs._type == rhs._type; }
-        inline friend bool operator!=(const DataType& lhs, const DataType& rhs) { return !(lhs == rhs); }
-        inline friend QString operator+(const QString& lhs, const DataType& rhs) { return lhs + rhs._type; }
-
-    private:
-        QString _type;
-
-        friend class RawData;
-        friend class Core;
-    };
 
     class RawData : public plugin::Plugin
     {

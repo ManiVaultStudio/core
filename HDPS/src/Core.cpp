@@ -2,7 +2,6 @@
 
 #include "MainWindow.h"
 #include "PluginManager.h"
-#include "DataManager.h"
 
 #include "exceptions/SetNotFoundException.h"
 
@@ -12,7 +11,6 @@
 #include "ViewPlugin.h"
 #include "RawData.h"
 #include "Set.h"
-#include "DataConsumer.h"
 
 #include <QMessageBox>
 
@@ -98,17 +96,6 @@ void Core::addPlugin(plugin::Plugin* plugin)
     if (plugin->getType() == plugin::Type::WRITER)
     {
         dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
-    }
-    // If the plugin is a data consumer, notify it about all the data present in the core
-    plugin::DataConsumer* dataConsumer = dynamic_cast<plugin::DataConsumer*>(plugin);
-    if (dataConsumer)
-    {
-        for (const auto& pair : _dataManager->allSets())
-        {
-            const DataSet& set = *pair.second;
-            if (supportsDataSet(dataConsumer, set.getName()))
-                dataConsumer->dataAdded(set.getName());
-        }
     }
 }
 
@@ -229,17 +216,55 @@ DataSet& Core::requestSelection(const QString name)
     }
 }
 
+// Utility function for inserting value into a map with std::vector values
+// and creating the key and the empty std::vector if it didnt exist yet.
+template <typename K, typename V>
+void insertIntoVectorMap(std::unordered_map<K, std::vector<V>>& map, K k, V v)
+{
+    if (map.find(k) != map.end())
+        map[k].push_back(v);
+    else
+    {
+        std::vector<V> vec{ v };
+        map[k] = vec;
+    }
+}
+
+void Core::registerDatasetChanged(QString datasetName, DataChangedFunction func)
+{
+    insertIntoVectorMap<QString, DataChangedFunction>(datasetChangedListeners, datasetName, func);
+}
+
+void Core::registerSelectionChanged(QString datasetName, SelectionChangedFunction func)
+{
+    insertIntoVectorMap<QString, SelectionChangedFunction>(selectionChangedListeners, datasetName, func);
+}
+
+void Core::registerDataTypeAdded(DataType dataType, DataAddedFunction func)
+{
+    insertIntoVectorMap<DataType, DataAddedFunction>(dataTypeAddedListeners, dataType, func);
+}
+
+void Core::registerDataTypeChanged(DataType dataType, DataChangedFunction func)
+{
+    insertIntoVectorMap<DataType, DataChangedFunction>(dataTypeChangedListeners, dataType, func);
+}
+
+void Core::registerDataTypeRemoved(DataType dataType, DataRemovedFunction func)
+{
+    insertIntoVectorMap<DataType, DataRemovedFunction>(dataTypeRemovedListeners, dataType, func);
+}
+
 /**
  * Goes through all plug-ins stored in the core and calls the 'dataAdded' function
  * on all plug-ins that inherit from the DataConsumer interface.
  */
 void Core::notifyDataAdded(const QString name)
 {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
-    {
-        if (supportsDataSet(dataConsumer, name))
-            dataConsumer->dataAdded(name);
-    }
+    DataType dt = requestData(name).getDataType();
+
+    for (DataAddedFunction& callback : dataTypeAddedListeners[dt])
+        callback(name);
 }
 
 /**
@@ -248,11 +273,12 @@ void Core::notifyDataAdded(const QString name)
 */
 void Core::notifyDataChanged(const QString name)
 {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
-    {
-        if (supportsDataSet(dataConsumer, name))
-            dataConsumer->dataChanged(name);
-    }
+    DataType dt = requestData(name).getDataType();
+
+    for (DataChangedFunction& callback : datasetChangedListeners[name])
+        callback(name);
+    for (DataChangedFunction& callback : dataTypeChangedListeners[dt])
+        callback(name);
 }
 
 /**
@@ -261,49 +287,21 @@ void Core::notifyDataChanged(const QString name)
 */
 void Core::notifyDataRemoved(const QString name)
 {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
-    {
-        dataConsumer->dataRemoved(name);
-    }
+    DataType dt = requestData(name).getDataType();
+
+    for (DataRemovedFunction& callback : dataTypeRemovedListeners[dt])
+        callback(name);
 }
 
 /** Notify all data consumers that a selection has changed. */
 void Core::notifySelectionChanged(const QString datasetName)
 {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
-    {
-        dataConsumer->selectionChanged(datasetName);
-    }
+    for (SelectionChangedFunction& callback : selectionChangedListeners[datasetName])
+        callback(datasetName);
 }
 
 gui::MainWindow& Core::gui() const {
     return _mainWindow;
-}
-
-/** Checks if the given data consumer supports the kind data in the given set. */
-bool Core::supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName)
-{
-    const hdps::DataSet& set = requestData(setName);
-    const RawData& rawData = requestRawData(set.getDataName());
-
-    return dataConsumer->supportedDataTypes().contains(rawData.getDataType());
-}
-
-/** Retrieves all data consumers from the plug-in list. */
-std::vector<plugin::DataConsumer*> Core::getDataConsumers()
-{
-    std::vector<plugin::DataConsumer*> dataConsumers;
-    for (auto& kv : _plugins)
-    {
-        for (int i = 0; i < kv.second.size(); ++i)
-        {
-            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
-
-            if (dc)
-                dataConsumers.push_back(dc);
-        }
-    }
-    return dataConsumers;
 }
 
 /** Destroys all plug-ins kept by the core */

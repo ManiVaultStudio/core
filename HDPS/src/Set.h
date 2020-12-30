@@ -1,5 +1,5 @@
-#ifndef HDPS_SET_H
-#define HDPS_SET_H
+#ifndef HDPS_DATASET_H
+#define HDPS_DATASET_H
 
 #include "RawData.h"
 
@@ -132,4 +132,4 @@ private:
 
 } // namespace hdps
 
-#endif // HDPS_SET_H
+#endif // HDPS_DATASET_H

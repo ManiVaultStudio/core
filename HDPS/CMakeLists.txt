@@ -158,6 +158,7 @@ set( UTIL_SOURCES
 set( PLUGIN_HEADERS
     src/CoreInterface.h
     src/AnalysisPlugin.h
+    src/DataType.h
     src/RawData.h
     src/LoaderPlugin.h
     src/WriterPlugin.h
@@ -165,7 +166,6 @@ set( PLUGIN_HEADERS
     src/PluginFactory.h
     src/Plugin.h
     src/PluginType.h
-    src/DataConsumer.h
     src/SelectionListener.h
     src/Set.h
 	src/Application.h

@@ -15,6 +15,7 @@
 #include <QSplitter>
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 #include <set>
 
@@ -33,7 +34,9 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
-    _dataSlot = new DataSlot(supportedDataTypes());
+    DataTypes supportedDataTypes;
+    supportedDataTypes.append(PointType);
+    _dataSlot = new DataSlot(supportedDataTypes);
     supportedColorTypes.append(PointType);
     supportedColorTypes.append(ClusterType);
     supportedColorTypes.append(ColorType);
@@ -64,7 +67,7 @@ void ScatterplotPlugin::init()
 
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
-    
+
     qApp->installEventFilter(this);
 
     QObject::connect(_pixelSelectionTool, &PixelSelectionTool::areaChanged, [this]() {
@@ -84,11 +87,7 @@ void ScatterplotPlugin::init()
     updateWindowTitle();
 }
 
-void ScatterplotPlugin::dataAdded(const QString name)
-{
-}
-
-void ScatterplotPlugin::dataChanged(const QString name)
+void ScatterplotPlugin::onDataChanged(QString name)
 {
     if (name != _currentDataSet) {
         return;
@@ -96,25 +95,18 @@ void ScatterplotPlugin::dataChanged(const QString name)
     updateData();
 }
 
-void ScatterplotPlugin::dataRemoved(const QString name)
+void ScatterplotPlugin::onDataRemoved(QString name)
 {
 }
 
-void ScatterplotPlugin::selectionChanged(const QString datasetName)
+void ScatterplotPlugin::onSelectionChanged(QString name)
 {
     if (_currentDataSet.isEmpty()) return;
 
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
-    if (points.getName() == datasetName)
+    if (points.getName() == name)
         updateSelection();
-}
-
-DataTypes ScatterplotPlugin::supportedDataTypes() const
-{
-    DataTypes supportedTypes;
-    supportedTypes.append(PointType);
-    return supportedTypes;
 }
 
 void ScatterplotPlugin::subsetCreated()
@@ -231,6 +223,9 @@ void ScatterplotPlugin::selectPoints()
 void ScatterplotPlugin::onDataInput(QString dataSetName)
 {
     _currentDataSet = dataSetName;
+
+    _core->registerDatasetChanged(_currentDataSet, std::bind(&ScatterplotPlugin::onDataChanged, this, std::placeholders::_1));
+    _core->registerSelectionChanged(_currentDataSet, std::bind(&ScatterplotPlugin::onSelectionChanged, this, std::placeholders::_1));
 
     setWindowTitle(_currentDataSet);
 
