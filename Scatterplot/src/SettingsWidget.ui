@@ -56,7 +56,7 @@
     </widget>
    </item>
    <item>
-    <widget class="PlotSettingsWidget" name="plotSettingsWidget" native="true">
+    <widget class="PlotSettingsStackedWidget" name="plotSettingsStackedWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -127,9 +127,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PlotSettingsWidget</class>
+   <class>PlotSettingsStackedWidget</class>
    <extends>QWidget</extends>
-   <header>PlotSettingsWidget.h</header>
+   <header>PlotSettingsStackedWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

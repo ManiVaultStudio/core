@@ -1,18 +1,7 @@
 #include "SettingsWidget.h"
-#include "PointSettingsWidget.h"
-#include "DensitySettingsWidget.h"
-#include "RenderModeWidget.h"
-#include "PlotSettingsWidget.h"
-#include "DimensionPickerWidget.h"
-#include "SelectionToolWidget.h"
-
 #include "ScatterplotPlugin.h"
 
-#include <QCheckBox>
-#include <QGridLayout>
 #include <QPainter>
-
-#include <cassert>
 
 #include "ui_SettingsWidget.h"
 
@@ -28,7 +17,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _ui->setupUi(this);
 
     _ui->renderModeWidget->initialize(plugin);
-    _ui->plotSettingsWidget->initialize(plugin);
+    _ui->plotSettingsStackedWidget->initialize(plugin);
     _ui->dimensionPickerWidget->initialize(plugin);
 }
 
