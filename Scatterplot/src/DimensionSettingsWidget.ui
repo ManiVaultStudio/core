@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>341</width>
-    <height>20</height>
+    <width>361</width>
+    <height>41</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -39,116 +39,137 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="xDimensionLabel">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Dimensions</string>
      </property>
-     <property name="toolTip">
-      <string>X dimension</string>
-     </property>
-     <property name="text">
-      <string>X:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="xDimensionComboBox">
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string>X dimension</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="yDimensionLabel">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>Y dimension</string>
-     </property>
-     <property name="text">
-      <string>Y:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="yDimensionComboBox">
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string>Y dimension</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="colorOptionsLabel">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>Color options</string>
-     </property>
-     <property name="text">
-      <string>Color:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="colorOptionsComboBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>90</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>90</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string>Color options</string>
-     </property>
-     <item>
-      <property name="text">
-       <string>by dimension</string>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="leftMargin">
+       <number>6</number>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>by data</string>
+      <property name="topMargin">
+       <number>2</number>
       </property>
-     </item>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
+       <number>4</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="xDimensionLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>X dimension</string>
+        </property>
+        <property name="text">
+         <string>X:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="xDimensionComboBox">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>X dimension</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="yDimensionLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Y dimension</string>
+        </property>
+        <property name="text">
+         <string>Y:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="yDimensionComboBox">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Y dimension</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="colorOptionsLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Color options</string>
+        </property>
+        <property name="text">
+         <string>Color:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="colorOptionsComboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>90</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>90</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Color options</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>by dimension</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>by data</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="ColorDimensionStackedWidget" name="colorDimensionStackedWidget" native="true"/>
+      </item>
+     </layout>
     </widget>
-   </item>
-   <item>
-    <widget class="ColorDimensionStackedWidget" name="colorDimensionStackedWidget" native="true"/>
    </item>
   </layout>
  </widget>

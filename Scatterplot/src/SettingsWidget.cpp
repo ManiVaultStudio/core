@@ -17,8 +17,15 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _ui->setupUi(this);
 
     _ui->renderModeWidget->initialize(plugin);
-    _ui->plotSettingsStackedWidget->initialize(plugin);
+    _ui->plotSettingsWidget->initialize(plugin);
     _ui->dimensionSettingsWidget->initialize(plugin);
+    _ui->selectionSettingsWidget->initialize(plugin);
+
+    setEnabled(false);
+
+    QObject::connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
+        setEnabled(!currentDataset.isEmpty());
+    });
 }
 
 SettingsWidget::~SettingsWidget()

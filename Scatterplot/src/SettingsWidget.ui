@@ -20,9 +20,6 @@
    <string>Settings</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
-   <property name="spacing">
-    <number>5</number>
-   </property>
    <property name="leftMargin">
     <number>5</number>
    </property>
@@ -45,21 +42,14 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>0</width>
+       <width>50</width>
        <height>0</height>
       </size>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="Line" name="verticalLine1">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="PlotSettingsStackedWidget" name="plotSettingsStackedWidget" native="true">
+    <widget class="PlotSettingsWidget" name="plotSettingsWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -68,16 +58,9 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>0</width>
+       <width>50</width>
        <height>0</height>
       </size>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="verticalLine2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
      </property>
     </widget>
    </item>
@@ -91,16 +74,19 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>0</width>
+       <width>50</width>
        <height>0</height>
       </size>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="SelectionSettingsWidget" name="selectionSettingsWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>0</height>
+      </size>
      </property>
     </widget>
    </item>
@@ -130,15 +116,21 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PlotSettingsStackedWidget</class>
+   <class>PlotSettingsWidget</class>
    <extends>QWidget</extends>
-   <header>PlotSettingsStackedWidget.h</header>
+   <header>PlotSettingsWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>DimensionSettingsWidget</class>
    <extends>QWidget</extends>
    <header>DimensionSettingsWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SelectionSettingsWidget</class>
+   <extends>QWidget</extends>
+   <header>SelectionSettingsWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
