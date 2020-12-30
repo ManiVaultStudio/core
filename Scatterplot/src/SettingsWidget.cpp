@@ -20,6 +20,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _ui->plotSettingsWidget->initialize(plugin);
     _ui->dimensionSettingsWidget->initialize(plugin);
     _ui->selectionSettingsWidget->initialize(plugin);
+    _ui->subsetSettingsWidget->initialize(plugin);
 
     setEnabled(false);
 
