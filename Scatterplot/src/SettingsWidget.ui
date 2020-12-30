@@ -20,17 +20,20 @@
    <string>Settings</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>5</number>
    </property>
    <item>
     <widget class="RenderModeWidget" name="renderModeWidget" native="true">
@@ -79,7 +82,7 @@
     </widget>
    </item>
    <item>
-    <widget class="DimensionPickerWidget" name="dimensionPickerWidget" native="true">
+    <widget class="DimensionSettingsWidget" name="dimensionSettingsWidget" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
        <horstretch>0</horstretch>
@@ -133,9 +136,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>DimensionPickerWidget</class>
+   <class>DimensionSettingsWidget</class>
    <extends>QWidget</extends>
-   <header>DimensionPickerWidget.h</header>
+   <header>DimensionSettingsWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -18,7 +18,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     _ui->renderModeWidget->initialize(plugin);
     _ui->plotSettingsStackedWidget->initialize(plugin);
-    _ui->dimensionPickerWidget->initialize(plugin);
+    _ui->dimensionSettingsWidget->initialize(plugin);
 }
 
 SettingsWidget::~SettingsWidget()
@@ -27,12 +27,12 @@ SettingsWidget::~SettingsWidget()
 
 int SettingsWidget::getXDimension()
 {
-    return _ui->dimensionPickerWidget->getDimensionX();
+    return _ui->dimensionSettingsWidget->getDimensionX();
 }
 
 int SettingsWidget::getYDimension()
 {
-    return _ui->dimensionPickerWidget->getDimensionY();
+    return _ui->dimensionSettingsWidget->getDimensionY();
 }
 
 hdps::Vector3f SettingsWidget::getBaseColor()
@@ -47,22 +47,22 @@ hdps::Vector3f SettingsWidget::getSelectionColor()
 
 void SettingsWidget::initDimOptions(const unsigned int nDim)
 {
-    _ui->dimensionPickerWidget->setDimensions(nDim);
+    _ui->dimensionSettingsWidget->setDimensions(nDim);
 }
 
 void SettingsWidget::initDimOptions(const std::vector<QString>& dimNames)
 {
-    _ui->dimensionPickerWidget->setDimensions(dimNames.size(), dimNames);
+    _ui->dimensionSettingsWidget->setDimensions(dimNames.size(), dimNames);
 }
 
 void SettingsWidget::initScalarDimOptions(const unsigned int nDim)
 {
-    _ui->dimensionPickerWidget->setScalarDimensions(nDim);
+    _ui->dimensionSettingsWidget->setScalarDimensions(nDim);
 }
 
 void SettingsWidget::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
-    _ui->dimensionPickerWidget->setScalarDimensions(dimNames.size(), dimNames);
+    _ui->dimensionSettingsWidget->setScalarDimensions(dimNames.size(), dimNames);
 }
 
 void SettingsWidget::paintEvent(QPaintEvent* event)

@@ -5,13 +5,13 @@
 class ScatterplotPlugin;
 
 namespace Ui {
-    class DimensionPickerWidget;
+    class DimensionSettingsWidget;
 }
 
-class DimensionPickerWidget : public QWidget
+class DimensionSettingsWidget : public QWidget
 {
 public:
-    DimensionPickerWidget(QWidget* parent = nullptr);
+    DimensionSettingsWidget(QWidget* parent = nullptr);
 
     void initialize(const ScatterplotPlugin& plugin);
 
@@ -22,5 +22,5 @@ public:
     void setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
 
 private:
-    std::unique_ptr<Ui::DimensionPickerWidget>        _ui;        /** Externally loaded UI */
+    std::unique_ptr<Ui::DimensionSettingsWidget>        _ui;        /** Externally loaded UI */
 };

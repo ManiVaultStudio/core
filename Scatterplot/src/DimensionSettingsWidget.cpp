@@ -1,16 +1,16 @@
-#include "DimensionPickerWidget.h"
+#include "DimensionSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
-#include "ui_DimensionPickerWidget.h"
+#include "ui_DimensionSettingsWidget.h"
 
-DimensionPickerWidget::DimensionPickerWidget(QWidget* parent /*= nullptr*/) :
+DimensionSettingsWidget::DimensionSettingsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(),
-    _ui{ std::make_unique<Ui::DimensionPickerWidget>() }
+    _ui{ std::make_unique<Ui::DimensionSettingsWidget>() }
 {
     _ui->setupUi(this);
 }
 
-void DimensionPickerWidget::initialize(const ScatterplotPlugin& plugin)
+void DimensionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
     QObject::connect(_ui->xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
         const_cast<ScatterplotPlugin&>(plugin).xDimPicked(index);
@@ -36,17 +36,17 @@ void DimensionPickerWidget::initialize(const ScatterplotPlugin& plugin)
     _ui->colorDimensionStackedWidget->initialize(plugin);
 }
 
-int DimensionPickerWidget::getDimensionX()
+int DimensionSettingsWidget::getDimensionX()
 {
     return _ui->xDimensionComboBox->currentIndex();
 }
 
-int DimensionPickerWidget::getDimensionY()
+int DimensionSettingsWidget::getDimensionY()
 {
     return _ui->yDimensionComboBox->currentIndex();
 }
 
-void DimensionPickerWidget::setDimensions(unsigned int numDimensions, const std::vector<QString>& names /*= std::vector<QString>()*/)
+void DimensionSettingsWidget::setDimensions(unsigned int numDimensions, const std::vector<QString>& names /*= std::vector<QString>()*/)
 {
     auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
@@ -61,7 +61,7 @@ void DimensionPickerWidget::setDimensions(unsigned int numDimensions, const std:
     }
 }
 
-void DimensionPickerWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names /*= std::vector<QString>()*/)
+void DimensionSettingsWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names /*= std::vector<QString>()*/)
 {
     auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
