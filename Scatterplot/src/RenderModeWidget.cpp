@@ -3,12 +3,15 @@
 
 #include "ui_RenderModeWidget.h"
 
-RenderModeWidget::RenderModeWidget(const ScatterplotPlugin& plugin) :
-    QWidget(),
+RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
     _ui{ std::make_unique<Ui::RenderModeWidget>() }
 {
     _ui->setupUi(this);
+}
 
+void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
+{
     const auto updateToggles = [this, &plugin]() {
         const auto renderMode = plugin._scatterPlotWidget->getRenderMode();
 

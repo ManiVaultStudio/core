@@ -11,7 +11,9 @@ namespace Ui {
 class RenderModeWidget : public QWidget
 {
 public:
-    RenderModeWidget(const ScatterplotPlugin& plugin);
+    RenderModeWidget(QWidget* parent = nullptr);
+
+    void initialize(const ScatterplotPlugin& plugin);
 
 private:
     std::unique_ptr<Ui::RenderModeWidget>        _ui;        /** Externally loaded UI */

@@ -18,7 +18,7 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class ScatterplotSettings;
+class SettingsWidget;
 class Points;
 
 namespace hdps
@@ -103,7 +103,7 @@ private:
 
     QString _currentDataSet;
     DataSlot* _dataSlot;
-    ScatterplotSettings* _scatterPlotSettings;
+    SettingsWidget* _scatterPlotSettings;
 
     std::vector<hdps::Vector2f> _points;
     unsigned int _numPoints;

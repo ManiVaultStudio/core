@@ -3,12 +3,15 @@
 
 #include "ui_PlotSettingsWidget.h"
 
-PlotSettingsWidget::PlotSettingsWidget(const ScatterplotPlugin& plugin) :
-    QWidget(),
+PlotSettingsWidget::PlotSettingsWidget(QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
     _ui{ std::make_unique<Ui::PlotSettingsWidget>() }
 {
     _ui->setupUi(this);
+}
 
+void PlotSettingsWidget::initialize(const ScatterplotPlugin& plugin)
+{
     QObject::connect(plugin._scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this](const ScatterplotWidget::RenderMode& renderMode) {
         switch (renderMode)
         {

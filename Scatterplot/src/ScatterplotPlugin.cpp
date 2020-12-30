@@ -44,21 +44,15 @@ void ScatterplotPlugin::init()
     _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     _dataSlot->addWidget(_scatterPlotWidget);
 
-    _scatterPlotSettings = new ScatterplotSettings(this);
+    _dataSlot->layout()->setMargin(0);
 
-    auto splitter = new QSplitter();
-
-    splitter->addWidget(_dataSlot);
-    splitter->addWidget(_scatterPlotSettings);
-
-    splitter->setStretchFactor(0, 1);
-    splitter->setStretchFactor(1, 0);
-    splitter->setCollapsible(1, true);
+    _scatterPlotSettings = new SettingsWidget(*this);
 
     auto layout = new QVBoxLayout();
 
     layout->setMargin(0);
-    layout->addWidget(splitter);
+    layout->addWidget(_scatterPlotSettings);
+    layout->addWidget(_dataSlot, 1);
 
     setLayout(layout);
 

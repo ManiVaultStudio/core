@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Toolbar</class>
- <widget class="QWidget" name="Toolbar">
+ <class>SettingsWidget</class>
+ <widget class="QWidget" name="SettingsWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,21 +10,27 @@
     <height>32</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Settings</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="RenderModeWidget" name="renderModeWidget" native="true">
@@ -44,7 +50,7 @@
     </widget>
    </item>
    <item>
-    <widget class="RenderSettingsWidget" name="renderSettingsWidget" native="true">
+    <widget class="PlotSettingsWidget" name="plotSettingsWidget" native="true">
      <property name="minimumSize">
       <size>
        <width>100</width>
@@ -78,16 +84,6 @@
     </widget>
    </item>
    <item>
-    <widget class="SelectionToolWidget" name="selectionToolWidget" native="true">
-     <property name="minimumSize">
-      <size>
-       <width>100</width>
-       <height>0</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item>
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -110,21 +106,15 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>RenderSettingsWidget</class>
+   <class>PlotSettingsWidget</class>
    <extends>QWidget</extends>
-   <header>RenderSettingsWidget.h</header>
+   <header>PlotSettingsWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>DimensionPickerWidget</class>
    <extends>QWidget</extends>
    <header>DimensionPickerWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>SelectionToolWidget</class>
-   <extends>QWidget</extends>
-   <header>SelectionToolWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -11,7 +11,9 @@ namespace Ui {
 class PlotSettingsWidget : public QWidget
 {
 public:
-    PlotSettingsWidget(const ScatterplotPlugin& plugin);
+    PlotSettingsWidget(QWidget* parent = nullptr);
+
+    void initialize(const ScatterplotPlugin& plugin);
 
 private:
     std::unique_ptr<Ui::PlotSettingsWidget>        _ui;        /** Externally loaded UI */

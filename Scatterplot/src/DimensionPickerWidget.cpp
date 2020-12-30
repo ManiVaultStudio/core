@@ -33,12 +33,15 @@ namespace
     }
 }
 
-DimensionPickerWidget::DimensionPickerWidget(const ScatterplotPlugin& plugin) :
+DimensionPickerWidget::DimensionPickerWidget(QWidget* parent /*= nullptr*/) :
     QWidget(),
     _ui{ std::make_unique<Ui::DimensionPickerWidget>() }
 {
     _ui->setupUi(this);
+}
 
+void DimensionPickerWidget::initialize(const ScatterplotPlugin& plugin)
+{
     QObject::connect(_ui->xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
         const_cast<ScatterplotPlugin&>(plugin).xDimPicked(index);
     });

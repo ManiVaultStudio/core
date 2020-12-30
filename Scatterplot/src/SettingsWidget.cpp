@@ -14,96 +14,69 @@
 
 #include <cassert>
 
-ScatterplotSettings::ScatterplotSettings(const ScatterplotPlugin* plugin)
-:
+#include "ui_SettingsWidget.h"
+
+const hdps::Vector3f SettingsWidget::DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
+const hdps::Vector3f SettingsWidget::DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
+
+SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
+    QWidget(),
     _baseColor(DEFAULT_BASE_COLOR),
-    _selectionColor(DEFAULT_SELECTION_COLOR)
+    _selectionColor(DEFAULT_SELECTION_COLOR),
+    _ui{ std::make_unique<Ui::SettingsWidget>() }
 {
-    setMinimumWidth(250);
+    _ui->setupUi(this);
 
-    _subsetButton.setText("Create Subset");
-    _subsetButton.setFixedWidth(100);
-
-    _settingsLayout = new QVBoxLayout();
-
-    QVBoxLayout* dataLayout = new QVBoxLayout();
-    dataLayout->addWidget(&_subsetButton);
-    
-    QVBoxLayout* renderLayout = new QVBoxLayout();
-    _renderMode.addItem("Scatterplot");
-    _renderMode.addItem("Density map");
-    _renderMode.addItem("Contour map");
-    _renderMode.setFixedWidth(100);
-    renderLayout->addWidget(&_renderMode);
-
-    _plotSettingsWidget = new PlotSettingsWidget(*plugin);
-    renderLayout->addWidget(_plotSettingsWidget);
-
-    _renderModeWidget = new RenderModeWidget(*plugin);
-    _dimensionPickerWidget = new DimensionPickerWidget(*plugin);
-
-    _settingsLayout->addLayout(dataLayout);
-    _settingsLayout->addLayout(renderLayout, 1);
-    _settingsLayout->addWidget(_renderModeWidget);
-    _settingsLayout->addWidget(_dimensionPickerWidget);
-    _settingsLayout->addWidget(new SelectionToolWidget(const_cast<ScatterplotPlugin*>(plugin)));
-
-    setLayout(_settingsLayout);
-
-    connect(&_subsetButton, SIGNAL(clicked()), plugin, SLOT(subsetCreated()));
-
-    connect(&_renderMode, qOverload<int>(&QComboBox::currentIndexChanged), [this, plugin](int index) {
-        plugin->_scatterPlotWidget->setRenderMode(static_cast<ScatterplotWidget::RenderMode>(index));
-    });
+    _ui->renderModeWidget->initialize(plugin);
+    _ui->plotSettingsWidget->initialize(plugin);
+    _ui->dimensionPickerWidget->initialize(plugin);
 }
 
-ScatterplotSettings::~ScatterplotSettings()
+SettingsWidget::~SettingsWidget()
 {
-
 }
 
-int ScatterplotSettings::getXDimension()
+int SettingsWidget::getXDimension()
 {
-    return _dimensionPickerWidget->getDimensionX();
+    return _ui->dimensionPickerWidget->getDimensionX();
 }
 
-int ScatterplotSettings::getYDimension()
+int SettingsWidget::getYDimension()
 {
-    return _dimensionPickerWidget->getDimensionY();
+    return _ui->dimensionPickerWidget->getDimensionY();
 }
 
-hdps::Vector3f ScatterplotSettings::getBaseColor()
+hdps::Vector3f SettingsWidget::getBaseColor()
 {
     return _baseColor;
 }
 
-hdps::Vector3f ScatterplotSettings::getSelectionColor()
+hdps::Vector3f SettingsWidget::getSelectionColor()
 {
     return _selectionColor;
 }
 
-
-void ScatterplotSettings::initDimOptions(const unsigned int nDim)
+void SettingsWidget::initDimOptions(const unsigned int nDim)
 {
-    _dimensionPickerWidget->setDimensions(nDim);
+    _ui->dimensionPickerWidget->setDimensions(nDim);
 }
 
-void ScatterplotSettings::initDimOptions(const std::vector<QString>& dimNames)
+void SettingsWidget::initDimOptions(const std::vector<QString>& dimNames)
 {
-    _dimensionPickerWidget->setDimensions(dimNames.size(), dimNames);
+    _ui->dimensionPickerWidget->setDimensions(dimNames.size(), dimNames);
 }
 
-void ScatterplotSettings::initScalarDimOptions(const unsigned int nDim)
+void SettingsWidget::initScalarDimOptions(const unsigned int nDim)
 {
-    _dimensionPickerWidget->setScalarDimensions(nDim);
+    _ui->dimensionPickerWidget->setScalarDimensions(nDim);
 }
 
-void ScatterplotSettings::initScalarDimOptions(const std::vector<QString>& dimNames)
+void SettingsWidget::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
-    _dimensionPickerWidget->setScalarDimensions(dimNames.size(), dimNames);
+    _ui->dimensionPickerWidget->setScalarDimensions(dimNames.size(), dimNames);
 }
 
-void ScatterplotSettings::paintEvent(QPaintEvent* event)
+void SettingsWidget::paintEvent(QPaintEvent* event)
 {
     QStyleOption opt;
     opt.init(this);

@@ -2,36 +2,25 @@
 
 #include "graphics/Vector3f.h"
 
-#include "widgets/ComboBox.h"
-#include "widgets/PushButton.h"
-#include "widgets/HorizontalDivider.h"
-
 #include <QWidget>
-#include <QSlider>
-#include <QLabel>
-
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QStackedWidget>
 
 class ScatterplotPlugin;
-class QComboBox;
-class QCheckBox;
-class QPushButton;
-class DimensionPickerWidget;
-class RenderModeWidget;
-class PlotSettingsWidget;
 
-class ScatterplotSettings : public QWidget
+namespace Ui {
+    class SettingsWidget;
+}
+
+class SettingsWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    ScatterplotSettings(const ScatterplotPlugin* plugin);
-    ~ScatterplotSettings() override;
+    SettingsWidget(const ScatterplotPlugin& plugin);
+    ~SettingsWidget() override;
 
     int getXDimension();
     int getYDimension();
+
     hdps::Vector3f getBaseColor();
     hdps::Vector3f getSelectionColor();
 
@@ -43,17 +32,10 @@ public:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    const hdps::Vector3f DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
-    const hdps::Vector3f DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
+    hdps::Vector3f                          _baseColor;         /** Base color */
+    hdps::Vector3f                          _selectionColor;    /** Selection color */
+    std::unique_ptr<Ui::SettingsWidget>     _ui;                /** Externally loaded UI */
 
-    QPushButton& _subsetButton = *new QPushButton;
-    QComboBox& _renderMode = *new QComboBox;
-
-    QVBoxLayout* _settingsLayout;
-    PlotSettingsWidget*      _plotSettingsWidget;
-    RenderModeWidget*  _renderModeWidget;
-    DimensionPickerWidget*  _dimensionPickerWidget;
-
-    hdps::Vector3f _baseColor;
-    hdps::Vector3f _selectionColor;
+    static const hdps::Vector3f DEFAULT_BASE_COLOR;
+    static const hdps::Vector3f DEFAULT_SELECTION_COLOR;
 };
