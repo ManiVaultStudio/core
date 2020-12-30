@@ -73,13 +73,6 @@ public:
     QString createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) override;
 
     /**
-     * Requests an instance of a data type plugin from the core which has the same
-     * unique name as the given parameter. If no such instance can be found a fatal
-     * error is thrown.
-     */
-    RawData& requestRawData(const QString name) override;
-
-    /**
     * Request a dataset from the data manager by its name.
     */
     DataSet& requestData(const QString name) override;
@@ -110,6 +103,14 @@ public:
     gui::MainWindow& gui() const;
     
 protected:
+    /**
+     * Requests an instance of a data type plugin from the core which has the same
+     * unique name as the given parameter. If no such instance can be found a fatal
+     * error is thrown.
+     */
+    RawData& requestRawData(const QString name) override;
+
+
     /**
     * Requests the selection set belonging to the raw dataset with the given name.
     */
