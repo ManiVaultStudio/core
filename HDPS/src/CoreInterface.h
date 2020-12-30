@@ -14,6 +14,12 @@ namespace hdps
 class CoreInterface
 {
 public:
+    /** Event registration function signatures */
+    using DataAddedFunction = std::function<void(QString)>;
+    using DataChangedFunction = std::function<void(QString)>;
+    using DataRemovedFunction = std::function<void(QString)>;
+    using SelectionChangedFunction = std::function<void(QString)>;
+
     /**
      * Requests the plugin manager to create new RawData of the given kind.
      * The manager will add the raw data to the core and return the
@@ -22,10 +28,11 @@ public:
     virtual const QString addData(const QString kind, const QString name) = 0;
 
     /**
-     * Removes a Dataset. Other datasets derived from this dataset are converted to non-derived data.
+     * Removes a Dataset. Other datasets derived from this dataset are 
+     * converted to non-derived data.
      * Notifies all plug-ins of the removed dataset automatically.
      */
-    virtual void removeDataset(const QString dataName) = 0;
+    virtual void removeDataset(const QString datasetName) = 0;
 
     /**
      * Creates a dataset derived from a source dataset.
@@ -59,26 +66,48 @@ public:
         return dynamic_cast<SetType&>(requestData(name));
     }
 
-    /** Register for data added events */
-    using DataAddedFunction = std::function<void(QString)>;//void (*)(QString);
-    using DataChangedFunction = std::function<void(QString)>;//void (*)(QString);
-    using DataRemovedFunction = std::function<void(QString)>;
-    using SelectionChangedFunction = std::function<void(QString)>;
-
+    /**
+     * Register for changes in the raw data of the given dataset
+     * @param datasetName Name of the dataset to register for
+     * @param func Function or lambda reacting to the data change event
+     */
     virtual void registerDatasetChanged(QString datasetName, DataChangedFunction func) = 0;
+
+    /**
+     * Register for changes in the selection of the given dataset
+     * @param datasetName Name of the dataset to register for
+     * @param func Function or lambda reacting to the selection change event
+     */
     virtual void registerSelectionChanged(QString datasetName, SelectionChangedFunction func) = 0;
 
+    /**
+     * Register for datasets of the given type added to the system
+     * @param dataType Type of datasets to register for
+     * @param func Function or lambda reacting to the data added event
+     */
     virtual void registerDataTypeAdded(DataType dataType, DataAddedFunction func) = 0;
+
+    /**
+     * Register for datasets of the given type changed in the system
+     * @param dataType Type of datasets to register for
+     * @param func Function or lambda reacting to the data changed event
+     */
     virtual void registerDataTypeChanged(DataType dataType, DataChangedFunction func) = 0;
+
+    /**
+     * Register for datasets of the given type removed from the system
+     * @param dataType Type of datasets to register for
+     * @param func Function or lambda reacting to the data removed event
+     */
     virtual void registerDataTypeRemoved(DataType dataType, DataRemovedFunction func) = 0;
 
-    /** Notify all data consumers that a new dataset has been added to the core. */
-    virtual void notifyDataAdded(const QString name) = 0;
-    /** Notify all data consumers that a dataset has been changed. */
-    virtual void notifyDataChanged(const QString name) = 0;
+    /** Notify registered listeners that a new dataset has been added to the core. */
+    virtual void notifyDataAdded(const QString datasetName) = 0;
+    /** Notify registered listeners that a dataset has been changed. */
+    virtual void notifyDataChanged(const QString datasetName) = 0;
 
-    /** Notify all data consumers that a selection has changed. */
-    virtual void notifySelectionChanged(const QString dataName) = 0;
+    /** Notify registered listeners that a selection has changed. */
+    virtual void notifySelectionChanged(const QString datasetName) = 0;
 
 protected:
 
@@ -87,7 +116,7 @@ protected:
      * unique name as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    virtual RawData& requestRawData(const QString name) = 0;
+    virtual RawData& requestRawData(const QString datasetName) = 0;
 
     /**
     * Request a selection from the data manager by its corresponding raw data name.

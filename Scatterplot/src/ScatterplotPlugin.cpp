@@ -556,7 +556,7 @@ void ScatterplotPlugin::selectAll()
     else
         selectionSetIndices = setIndices;
 
-    _core->notifySelectionChanged(selectionSet.getName());
+    _core->notifySelectionChanged(_currentDataSet);
 }
 
 void ScatterplotPlugin::clearSelection()
@@ -571,7 +571,7 @@ void ScatterplotPlugin::clearSelection()
 
     selectionSetIndices.clear();
 
-    _core->notifySelectionChanged(selectionSet.getName());
+    _core->notifySelectionChanged(_currentDataSet);
 }
 
 void ScatterplotPlugin::invertSelection()
@@ -600,7 +600,7 @@ void ScatterplotPlugin::invertSelection()
         selectionSetIndices.push_back(setIndex);
     }
 
-    _core->notifySelectionChanged(selectionSet.getName());
+    _core->notifySelectionChanged(_currentDataSet);
 }
 
 void ScatterplotPlugin::updateWindowTitle()
