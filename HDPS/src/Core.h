@@ -3,6 +3,8 @@
 
 #include "CoreInterface.h"
 #include "PluginType.h"
+#include "DataType.h"
+#include "DataManager.h"
 
 #include <memory>
 #include <unordered_map>
@@ -22,8 +24,6 @@ namespace gui
 {
     class MainWindow;
 }
-
-class DataManager;
 
 class Core : public CoreInterface
 {
@@ -89,6 +89,13 @@ public:
      */
     const std::vector<const DataSet*> requestDatasets() override;
 
+    void registerDatasetChanged(QString datasetName, DataChangedFunction func) override;
+    void registerSelectionChanged(QString datasetName, SelectionChangedFunction func) override;
+
+    void registerDataTypeAdded(DataType dataType, DataAddedFunction func) override;
+    void registerDataTypeChanged(DataType dataType, DataChangedFunction func) override;
+    void registerDataTypeRemoved(DataType dataType, DataRemovedFunction func) override;
+
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString name) override;
     /** Notify all data consumers that a dataset has been changed. */
@@ -109,11 +116,6 @@ protected:
     DataSet& requestSelection(const QString rawdataName) override;
 
 private:
-    /** Checks if the given data consumer supports the kind data in the given set. */
-    bool supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName);
-    /** Retrieves all data consumers from the plugin list. */
-    std::vector<plugin::DataConsumer*> getDataConsumers();
-
     /** Notify all data consumers that a dataset has been removed. */
     void notifyDataRemoved(const QString name);
 
@@ -131,6 +133,12 @@ private:
 
     /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>, plugin::TypeHash> _plugins;
+
+    std::unordered_map<QString, std::vector<DataChangedFunction>> datasetChangedListeners;
+    std::unordered_map<QString, std::vector<SelectionChangedFunction>> selectionChangedListeners;
+    std::unordered_map<DataType, std::vector<DataAddedFunction>> dataTypeAddedListeners;
+    std::unordered_map<DataType, std::vector<DataChangedFunction>> dataTypeChangedListeners;
+    std::unordered_map<DataType, std::vector<DataRemovedFunction>> dataTypeRemovedListeners;
 };
 
 } // namespace hdps

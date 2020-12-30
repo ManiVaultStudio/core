@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../DataConsumer.h"
-
 #include <QWidget>
 #include <QDragEnterEvent>
 #include <QDropEvent>
@@ -9,6 +7,8 @@
 #include <QStringList>
 
 #include <QHBoxLayout>
+
+#include "../DataType.h"
 
 namespace hdps
 {

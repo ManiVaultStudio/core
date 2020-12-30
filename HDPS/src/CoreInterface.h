@@ -3,11 +3,13 @@
 
 #include <QString>
 #include <vector>
+#include <functional>
 
 namespace hdps
 {
     class DataSet;
     class RawData;
+    class DataType;
 
 class CoreInterface
 {
@@ -56,6 +58,20 @@ public:
     {
         return dynamic_cast<SetType&>(requestData(name));
     }
+
+
+    /** Register for data added events */
+    using DataAddedFunction = std::function<void(QString)>;//void (*)(QString);
+    using DataChangedFunction = std::function<void(QString)>;//void (*)(QString);
+    using DataRemovedFunction = std::function<void(QString)>;
+    using SelectionChangedFunction = std::function<void(QString)>;
+
+    virtual void registerDatasetChanged(QString datasetName, DataChangedFunction func) = 0;
+    virtual void registerSelectionChanged(QString datasetName, SelectionChangedFunction func) = 0;
+
+    virtual void registerDataTypeAdded(DataType dataType, DataAddedFunction func) = 0;
+    virtual void registerDataTypeChanged(DataType dataType, DataChangedFunction func) = 0;
+    virtual void registerDataTypeRemoved(DataType dataType, DataRemovedFunction func) = 0;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString name) = 0;
