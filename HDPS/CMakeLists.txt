@@ -352,7 +352,7 @@ add_subdirectory(src/plugins/ImageData)
 # Qt Advanced docking system
 set(VERSION_SHORT 3.6.0)
 set(ads_PlatformDir "${INSTALL_DIR}/$<CONFIGURATION>/")
-add_subdirectory(external/Qt-Advanced-Docking-System)
+add_subdirectory(external/advanced_docking)
 
 # Copy ADS library after the HDPS public project has been built
 add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
