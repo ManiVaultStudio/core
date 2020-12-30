@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>251</width>
+    <width>94</width>
     <height>44</height>
    </rect>
   </property>
@@ -54,13 +54,13 @@
        <widget class="QPushButton" name="scatterPlotPushButton">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>22</width>
           <height>22</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>16777215</width>
+          <width>22</width>
           <height>22</height>
          </size>
         </property>
@@ -68,20 +68,7 @@
          <string>Set render mode to scatter plot</string>
         </property>
         <property name="text">
-         <string>Scatter</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="contourPlotPushButton">
-        <property name="toolTip">
-         <string>Set render mode to contour plot</string>
-        </property>
-        <property name="text">
-         <string>Contour</string>
+         <string/>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -90,11 +77,48 @@
       </item>
       <item>
        <widget class="QPushButton" name="densityPlotPushButton">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Set render mode to density plot</string>
         </property>
         <property name="text">
-         <string>Density</string>
+         <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="contourPlotPushButton">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Set render mode to contour plot</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
         <property name="checkable">
          <bool>true</bool>

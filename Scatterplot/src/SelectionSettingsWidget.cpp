@@ -19,6 +19,9 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
+    _ui->advancedPushButton->setFont(fontAwesome.getFont(6));
+    _ui->advancedPushButton->setText(fontAwesome.getIconCharacter("ellipsis-h"));
+
     _ui->typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
 
     auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);

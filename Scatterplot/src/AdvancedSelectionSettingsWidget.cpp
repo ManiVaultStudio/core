@@ -19,9 +19,9 @@ void AdvancedSelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin
 {
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
-    _ui->modifierAddPushButton->setFont(fontAwesome.getFont(8));
+    _ui->modifierAddPushButton->setFont(fontAwesome.getFont(6));
     _ui->modifierAddPushButton->setText(fontAwesome.getIconCharacter("plus"));
-    _ui->modifierRemovePushButton->setFont(fontAwesome.getFont(8));
+    _ui->modifierRemovePushButton->setFont(fontAwesome.getFont(6));
     _ui->modifierRemovePushButton->setText(fontAwesome.getIconCharacter("minus"));
     _ui->radiusSpinBox->setMinimum(PixelSelectionTool::RADIUS_MIN);
     _ui->radiusSpinBox->setMaximum(PixelSelectionTool::RADIUS_MAX);

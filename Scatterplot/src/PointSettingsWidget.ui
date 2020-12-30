@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>358</width>
+    <width>306</width>
     <height>22</height>
    </rect>
   </property>
@@ -32,7 +32,7 @@
    <item>
     <widget class="QLabel" name="sizeLabel">
      <property name="text">
-      <string>Point size:</string>
+      <string>Size:</string>
      </property>
     </widget>
    </item>
@@ -107,7 +107,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Point opacity:</string>
+      <string>Opacity:</string>
      </property>
     </widget>
    </item>
