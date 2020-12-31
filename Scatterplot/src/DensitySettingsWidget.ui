@@ -47,13 +47,13 @@
      <property name="minimumSize">
       <size>
        <width>45</width>
-       <height>22</height>
+       <height>20</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>45</width>
-       <height>22</height>
+       <height>20</height>
       </size>
      </property>
      <property name="toolTip">
@@ -111,8 +111,14 @@
      </property>
      <property name="maximumSize">
       <size>
-       <width>20</width>
-       <height>20</height>
+       <width>22</width>
+       <height>22</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>22</width>
+       <height>22</height>
       </size>
      </property>
      <property name="toolTip">

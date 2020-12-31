@@ -12,6 +12,11 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
+    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
+
+    _ui->computePushButton->setFont(fontAwesome.getFont(7));
+    _ui->computePushButton->setText(fontAwesome.getIconCharacter("play"));
+
     connect(_ui->horizontalSlider, &QSlider::valueChanged, [this, &plugin](int value) {
         const auto sigma = static_cast<float>(value);
 

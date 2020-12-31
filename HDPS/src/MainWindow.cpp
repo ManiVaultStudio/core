@@ -131,7 +131,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         {
             auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(plugin);
 
-            dockWidget->setWidget(viewPlugin);
+            dockWidget->setWidget(viewPlugin, ads::CDockWidget::ForceNoScrollArea);
             
             auto dockWidgetArea = ads::LeftDockWidgetArea;
 
@@ -166,7 +166,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
             _lastViewPluginDockArea = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _lastViewPluginDockArea ? _lastViewPluginDockArea : _viewPluginsDockArea);
 
-            _lastViewPluginDockArea->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+            //_lastViewPluginDockArea->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
             _viewPluginsDockWidget->hide();
             _viewPluginsDockWidget->tabWidget()->setVisible(false);
             break;

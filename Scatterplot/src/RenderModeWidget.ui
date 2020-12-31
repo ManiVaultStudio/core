@@ -6,40 +6,49 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>94</width>
-    <height>32</height>
+    <width>225</width>
+    <height>22</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>225</width>
+    <height>16777215</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
-   <property name="spacing">
-    <number>5</number>
-   </property>
    <property name="leftMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>5</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="QPushButton" name="scatterPlotPushButton">
      <property name="minimumSize">
       <size>
-       <width>22</width>
+       <width>0</width>
        <height>22</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>22</width>
+       <width>16777215</width>
        <height>22</height>
       </size>
      </property>
@@ -47,7 +56,7 @@
       <string>Set render mode to scatter plot</string>
      </property>
      <property name="text">
-      <string/>
+      <string>Scatter</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -58,13 +67,13 @@
     <widget class="QPushButton" name="densityPlotPushButton">
      <property name="minimumSize">
       <size>
-       <width>22</width>
+       <width>0</width>
        <height>22</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>22</width>
+       <width>16777215</width>
        <height>22</height>
       </size>
      </property>
@@ -72,7 +81,7 @@
       <string>Set render mode to density plot</string>
      </property>
      <property name="text">
-      <string/>
+      <string>Density</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -83,13 +92,13 @@
     <widget class="QPushButton" name="contourPlotPushButton">
      <property name="minimumSize">
       <size>
-       <width>22</width>
+       <width>0</width>
        <height>22</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>22</width>
+       <width>16777215</width>
        <height>22</height>
       </size>
      </property>
@@ -97,7 +106,7 @@
       <string>Set render mode to contour plot</string>
      </property>
      <property name="text">
-      <string/>
+      <string>Contour</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
