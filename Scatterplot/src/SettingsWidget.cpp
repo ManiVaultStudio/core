@@ -29,7 +29,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     _renderModeWidget->initialize(plugin, 1200, fontAwesome.getIcon("eye"), "Render mode", "Render mode settings");
     _plotSettinsWidget->initialize(plugin, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
-    _dimensionSettinsWidget->initialize(plugin, 900, fontAwesome.getIcon("layer-group"), "Dimension settings", "Dimension settings");
+    _dimensionSettinsWidget->initialize(plugin, 700, fontAwesome.getIcon("layer-group"), "Dimension settings", "Dimension settings");
     _subsetSettingsWidget->initialize(plugin, 1100, fontAwesome.getIcon("vector-square"), "Subset settings", "Subset settings");
 
     _ui->horizontalLayout->addWidget(_renderModeWidget);
