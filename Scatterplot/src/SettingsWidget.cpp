@@ -7,6 +7,7 @@
 #include "SubsetSettingsWidget.h"
 
 #include <QPainter>
+#include <QStyleOption>
 
 #include "ui_SettingsWidget.h"
 
@@ -15,13 +16,13 @@ const hdps::Vector3f SettingsWidget::DEFAULT_SELECTION_COLOR = hdps::Vector3f(72
 
 SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     QWidget(static_cast<QWidget*>(&const_cast<ScatterplotPlugin&>(plugin))),
-    _baseColor(DEFAULT_BASE_COLOR),
-    _selectionColor(DEFAULT_SELECTION_COLOR),
     _ui{ std::make_unique<Ui::SettingsWidget>() },
     _renderModeWidget(new ResponsiveSectionWidget<RenderModeWidget>(this)),
     _plotSettinsWidget(new ResponsiveSectionWidget<PlotSettingsWidget>(this)),
     _dimensionSettinsWidget(new ResponsiveSectionWidget<DimensionSettingsWidget>(this)),
-    _subsetSettingsWidget(new ResponsiveSectionWidget<SubsetSettingsWidget>(this))
+    _subsetSettingsWidget(new ResponsiveSectionWidget<SubsetSettingsWidget>(this)),
+    _baseColor(DEFAULT_BASE_COLOR),
+    _selectionColor(DEFAULT_SELECTION_COLOR)
 {
     _ui->setupUi(this);
 

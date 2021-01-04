@@ -1,8 +1,10 @@
 #include "ColorDropSlotWidget.h"
 #include "ScatterplotPlugin.h"
 
-ColorDropSlotWidget::ColorDropSlotWidget(ScatterplotPlugin& plugin) :
-    _loadColorData(*new hdps::gui::DataSlot(plugin.supportedColorTypes))
+#include <QPushButton>
+
+ColorDropSlotWidget::ColorDropSlotWidget(const ScatterplotPlugin& plugin) :
+    _loadColorData(*new hdps::gui::DataSlot(plugin.getSupportedColorTypes()))
 {
     auto dropPushButton = new QPushButton();
 

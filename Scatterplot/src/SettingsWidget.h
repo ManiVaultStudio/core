@@ -8,14 +8,14 @@
 
 class ScatterplotPlugin;
 
+namespace Ui {
+    class SettingsWidget;
+}
+
 class RenderModeWidget;
 class PlotSettingsWidget;
 class DimensionSettingsWidget;
 class SubsetSettingsWidget;
-
-namespace Ui {
-    class SettingsWidget;
-}
 
 class SettingsWidget : public QWidget
 {
@@ -39,14 +39,13 @@ public:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    hdps::Vector3f                          _baseColor;         /** Base color */
-    hdps::Vector3f                          _selectionColor;    /** Selection color */
-    std::unique_ptr<Ui::SettingsWidget>     _ui;                /** Externally loaded UI */
-
-    ResponsiveSectionWidget<RenderModeWidget>*          _renderModeWidget;
-    ResponsiveSectionWidget<PlotSettingsWidget>*        _plotSettinsWidget;
-    ResponsiveSectionWidget<DimensionSettingsWidget>*   _dimensionSettinsWidget;
-    ResponsiveSectionWidget<SubsetSettingsWidget>*      _subsetSettingsWidget;
+    std::unique_ptr<Ui::SettingsWidget>                 _ui;                            /** Externally loaded UI */
+    ResponsiveSectionWidget<RenderModeWidget>*          _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
+    ResponsiveSectionWidget<PlotSettingsWidget>*        _plotSettinsWidget;             /** Widget for plot settings (depends on the render mode) */
+    ResponsiveSectionWidget<DimensionSettingsWidget>*   _dimensionSettinsWidget;        /** Widget for selection position and color dimensions */
+    ResponsiveSectionWidget<SubsetSettingsWidget>*      _subsetSettingsWidget;          /** Widget for creating subsets from selected points */
+    hdps::Vector3f                                      _baseColor;                     /** Base color */
+    hdps::Vector3f                                      _selectionColor;                /** Selection color */
 
     static const hdps::Vector3f DEFAULT_BASE_COLOR;
     static const hdps::Vector3f DEFAULT_SELECTION_COLOR;

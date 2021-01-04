@@ -4,15 +4,9 @@
 
 #include "Common.h"
 
-#include "PixelSelectionTool.h"
-
 #include "widgets/DataSlot.h"
+#include "PixelSelectionTool.h"
 #include "ScatterplotWidget.h"
-
-#include <QComboBox>
-#include <QSlider>
-#include <QPushButton>
-#include <QRectF>
 
 using namespace hdps::plugin;
 
@@ -20,8 +14,10 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class SettingsWidget;
+class QToolBar;
+
 class Points;
+class SettingsWidget;
 
 namespace hdps
 {
@@ -33,12 +29,7 @@ class ScatterplotPlugin : public ViewPlugin
     Q_OBJECT
     
 public:
-    ScatterplotPlugin() :
-        ViewPlugin("Scatterplot View"),
-        _pixelSelectionTool(new PixelSelectionTool(this, false))
-    {
-        setDockingLocation(DockableWidget::DockingLocation::Right);
-    }
+    ScatterplotPlugin();
 
     ~ScatterplotPlugin(void) override;
     
@@ -47,6 +38,9 @@ public:
         return Application::getIconFont("FontAwesome").getIcon("braille");
     }
 
+    /** Returns the toolbar which is shown at the top of the view plugin (dock) widget */
+    QToolBar* getToolBar();
+
     void init() override;
 
     void dataAdded(const QString name) Q_DECL_OVERRIDE;
@@ -54,9 +48,6 @@ public:
     void dataRemoved(const QString name) Q_DECL_OVERRIDE;
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     DataTypes supportedDataTypes() const Q_DECL_OVERRIDE;
-
-    ScatterplotWidget* _scatterPlotWidget;
-    hdps::DataTypes supportedColorTypes;
 
     PixelSelectionTool& getSelectionTool();
 
@@ -95,22 +86,34 @@ signals:
     void currentDatasetChanged(const QString& datasetName);
     void selectionChanged();
 
+public:
+
+    /** Returns the supported drop color types */
+    hdps::DataTypes getSupportedColorTypes() const {
+        return _supportedColorTypes;
+    }
+
+    /** Returns the scatter plot widget */
+    ScatterplotWidget* getScatterplotWidget() {
+        return _scatterPlotWidget;
+    }
+
 private:
     void updateData();
     void calculatePositions(const Points& points);
     void calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex);
     void updateSelection();
 
-    //const Points* makeSelection(hdps::Selection selection);
-
-    QString _currentDataSet;
-    DataSlot* _dataSlot;
-    SettingsWidget* _scatterPlotSettings;
-
-    std::vector<hdps::Vector2f> _points;
-    unsigned int _numPoints;
-
-    PixelSelectionTool*     _pixelSelectionTool;     /** Pixel selection tool */
+private:
+    QString                         _currentDataSet;
+    hdps::DataTypes                 _supportedColorTypes;
+    DataSlot*                       _dataSlot;
+    std::vector<hdps::Vector2f>     _points;
+    unsigned int                    _numPoints;
+    PixelSelectionTool*             _pixelSelectionTool;        /** Pixel selection tool */
+    ScatterplotWidget*              _scatterPlotWidget;         /**  */
+    SettingsWidget*                 _settingsWidget;
+    QToolBar*                       _toolBar;
 };
 
 // =============================================================================

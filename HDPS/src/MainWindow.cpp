@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QScreen>
+#include <QToolBar>
 #include <QDebug>
 
 #include "DockWidgetTab.h"
@@ -165,6 +166,14 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 dockWidgetArea = ads::CenterDockWidgetArea;
 
             _lastViewPluginDockArea = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _lastViewPluginDockArea ? _lastViewPluginDockArea : _viewPluginsDockArea);
+
+            auto toolBar = viewPlugin->getToolBar();
+
+            if (toolBar) {
+                toolBar->setAutoFillBackground(true);
+                toolBar->setMovable(true);
+                dockWidget->setToolBar(toolBar);
+            }
 
             //_lastViewPluginDockArea->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
             _viewPluginsDockWidget->hide();

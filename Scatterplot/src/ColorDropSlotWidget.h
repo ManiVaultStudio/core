@@ -8,9 +8,8 @@ class ScatterplotPlugin;
 
 struct ColorDropSlotWidget : public QWidget
 {
-    Q_OBJECT
 public:
-    ColorDropSlotWidget(ScatterplotPlugin& plugin);
+    ColorDropSlotWidget(const ScatterplotPlugin& plugin);
 
 private:
     hdps::gui::DataSlot& _loadColorData;

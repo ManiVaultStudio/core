@@ -12,35 +12,37 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
-    QObject::connect(_ui->horizontalSlider, &QSlider::sliderReleased, [this, &plugin]() {
+    auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+
+    QObject::connect(_ui->horizontalSlider, &QSlider::sliderReleased, [this, scatterPlotWidget]() {
         const auto sigma = static_cast<float>(_ui->horizontalSlider->value());
 
         QSignalBlocker spinBoxBlocker(_ui->doubleSpinBox);
 
         _ui->doubleSpinBox->setValue(static_cast<double>(sigma));
 
-        plugin._scatterPlotWidget->setSigma(0.01f * sigma);
+        scatterPlotWidget->setSigma(0.01f * sigma);
     });
 
-    QObject::connect(_ui->doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, &plugin](double value) {
+    QObject::connect(_ui->doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, scatterPlotWidget](double value) {
         const auto sigma = static_cast<float>(value);
 
         QSignalBlocker sliderBlocker(_ui->horizontalSlider);
 
         _ui->horizontalSlider->setValue(static_cast<int>(sigma));
 
-        plugin._scatterPlotWidget->setSigma(0.01f * sigma);
+        scatterPlotWidget->setSigma(0.01f * sigma);
     });
 
-    QObject::connect(plugin._scatterPlotWidget, &ScatterplotWidget::densityComputationStarted, [this]() {
-        //setEnabled(false);
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::densityComputationStarted, [this]() {
+        setEnabled(false);
     });
 
-    QObject::connect(plugin._scatterPlotWidget, &ScatterplotWidget::densityComputationEnded, [this]() {
-        //setEnabled(true);
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::densityComputationEnded, [this]() {
+        setEnabled(true);
     });
 
-    //setEnabled(false);
+    setEnabled(false);
 
     _ui->doubleSpinBox->setValue(30.0);
 }

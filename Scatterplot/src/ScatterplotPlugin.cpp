@@ -11,16 +11,27 @@
 
 #include <QtCore>
 #include <QApplication>
-#include <QtDebug>
-#include <QSplitter>
-
-#include <algorithm>
-#include <limits>
-#include <set>
+#include <QToolBar>
+#include <QDebug>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
 using namespace hdps;
+
+ScatterplotPlugin::ScatterplotPlugin() :
+    ViewPlugin("Scatterplot View"),
+    _currentDataSet(),
+    _supportedColorTypes(),
+    _dataSlot(nullptr),
+    _points(),
+    _numPoints(0),
+    _pixelSelectionTool(new PixelSelectionTool(this, false)),
+    _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
+    _settingsWidget(new SettingsWidget(*this)),
+    _toolBar(new QToolBar(this))
+{
+    setDockingLocation(DockableWidget::DockingLocation::Right);
+}
 
 // =============================================================================
 // View
@@ -31,14 +42,18 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
     
 }
 
+QToolBar* ScatterplotPlugin::getToolBar()
+{
+    return _toolBar;
+}
+
 void ScatterplotPlugin::init()
 {
     _dataSlot = new DataSlot(supportedDataTypes());
-    supportedColorTypes.append(PointType);
-    supportedColorTypes.append(ClusterType);
-    supportedColorTypes.append(ColorType);
+    _supportedColorTypes.append(PointType);
+    _supportedColorTypes.append(ClusterType);
+    _supportedColorTypes.append(ColorType);
 
-    _scatterPlotWidget = new ScatterplotWidget(*_pixelSelectionTool);
     _scatterPlotWidget->setAlpha(0.5f);
 
     _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
@@ -46,13 +61,10 @@ void ScatterplotPlugin::init()
 
     _dataSlot->layout()->setMargin(0);
 
-    _scatterPlotSettings = new SettingsWidget(*this);
-
     auto layout = new QVBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(0);
-    layout->addWidget(_scatterPlotSettings);
     layout->addWidget(_dataSlot, 1);
 
     setLayout(layout);
@@ -75,6 +87,8 @@ void ScatterplotPlugin::init()
 
         selectPoints();
     });
+
+    _toolBar->addWidget(_settingsWidget);
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -233,15 +247,15 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     // For source data determine whether to use dimension names or make them up
     if (points.getDimensionNames().size() == points.getNumDimensions())
-        _scatterPlotSettings->initDimOptions(points.getDimensionNames());
+        _settingsWidget->initDimOptions(points.getDimensionNames());
     else
-        _scatterPlotSettings->initDimOptions(points.getNumDimensions());
+        _settingsWidget->initDimOptions(points.getNumDimensions());
 
     // For derived data determine whether to use dimension names or make them up
     if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
-        _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
+        _settingsWidget->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
     else
-        _scatterPlotSettings->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
+        _settingsWidget->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
 
@@ -312,8 +326,8 @@ void ScatterplotPlugin::updateData()
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
     // Get the selected dimensions to use as X and Y dimension in the plot
-    int xDim = _scatterPlotSettings->getXDimension();
-    int yDim = _scatterPlotSettings->getYDimension();
+    int xDim = _settingsWidget->getXDimension();
+    int yDim = _settingsWidget->getYDimension();
 
     // If one of the dimensions was not set, do not draw anything
     if (xDim < 0 || yDim < 0)
@@ -333,7 +347,7 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const Points& points)
 {
-    points.extractDataForDimensions(_points, _scatterPlotSettings->getXDimension(), _scatterPlotSettings->getYDimension());
+    points.extractDataForDimensions(_points, _settingsWidget->getXDimension(), _settingsWidget->getYDimension());
 }
 
 void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex)

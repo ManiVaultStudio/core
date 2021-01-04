@@ -12,8 +12,10 @@ PlotSettingsStackedWidget::PlotSettingsStackedWidget(QWidget* parent /*= nullptr
 
 void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
 {
-    const auto updateCurrentPage = [this, &plugin]() {
-        const auto renderMode = plugin._scatterPlotWidget->getRenderMode();
+    auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+
+    const auto updateCurrentPage = [this, scatterPlotWidget]() {
+        const auto renderMode = scatterPlotWidget->getRenderMode();
 
         switch (renderMode)
         {
@@ -28,7 +30,7 @@ void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
         }
     };
 
-    QObject::connect(plugin._scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updateCurrentPage](const ScatterplotWidget::RenderMode& renderMode) {
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updateCurrentPage](const ScatterplotWidget::RenderMode& renderMode) {
         updateCurrentPage();
     });
 

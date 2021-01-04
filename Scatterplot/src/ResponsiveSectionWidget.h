@@ -100,21 +100,19 @@ public: // Listen to events from the target widget
      * @param event Event that occurred
      */
     bool eventFilter(QObject* target, QEvent* event) override {
+        
         switch (event->type())
         {
             case QEvent::Resize:
                 targetWidthChanged(static_cast<QResizeEvent*>(event)->size().width());
                 break;
         }
-
+        
         return QWidget::eventFilter(target, event);
     };
 
 private:
 
-    /**
-     * 
-     */
     void targetWidthChanged(const std::uint32_t& targetWidth) {
         const auto compact = targetWidth < _simplificationThreshold;
 

@@ -73,11 +73,11 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
             break;
         
         case ScatterplotWidget::DENSITY:
-        case ScatterplotWidget::LANDSCAPE:
-        {
             computeDensity();
             break;
-        }
+
+        case ScatterplotWidget::LANDSCAPE:
+            break;
 
         default:
             break;
@@ -88,8 +88,6 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
 
 void ScatterplotWidget::computeDensity()
 {
-    qDebug() << "computeDensity";
-
     emit densityComputationStarted();
 
     _densityRenderer.computeDensity();
@@ -133,6 +131,21 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
     _pointRenderer.setData(*points);
     _densityRenderer.setData(points);
 
+    switch (_renderMode)
+    {
+        case ScatterplotWidget::SCATTERPLOT:
+            break;
+        
+        case ScatterplotWidget::DENSITY:
+        case ScatterplotWidget::LANDSCAPE:
+        {
+            _densityRenderer.computeDensity();
+            break;
+        }
+
+        default:
+            break;
+    }
     update();
 }
 

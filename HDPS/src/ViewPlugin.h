@@ -7,6 +7,8 @@
 #include <QWidget>
 #include <QGridLayout>
 
+class QToolBar;
+
 namespace hdps
 {
 namespace plugin
@@ -17,7 +19,8 @@ class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsume
     Q_OBJECT
     
 public:
-    ViewPlugin(QString name) : Plugin(Type::VIEW, name)
+    ViewPlugin(QString name) :
+        Plugin(Type::VIEW, name)
     {
         setObjectName(getGuiName());
     }
@@ -28,6 +31,11 @@ public:
     QIcon getIcon() const override {
         return Application::getIconFont("FontAwesome").getIcon("binoculars");
     }
+
+    /** Returns the toolbar which is shown at the top of the view plugin (dock) widget */
+    virtual QToolBar* getToolBar() {
+        return nullptr;
+    };
 };
 
 class ViewPluginFactory : public PluginFactory
