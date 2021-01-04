@@ -65,6 +65,22 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
 
     _renderMode = renderMode;
 
+    switch (_renderMode)
+    {
+        case ScatterplotWidget::SCATTERPLOT:
+            break;
+        
+        case ScatterplotWidget::DENSITY:
+        case ScatterplotWidget::LANDSCAPE:
+        {
+            _densityRenderer.computeDensity();
+            break;
+        }
+
+        default:
+            break;
+    }
+
     update();
 
     emit renderModeChanged(_renderMode);
