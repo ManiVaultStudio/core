@@ -277,7 +277,7 @@ target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT}_Private qtadvanceddocking)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
-target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/Qt-Advanced-Docking-System/src)
+target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
 
@@ -352,7 +352,7 @@ add_subdirectory(src/plugins/ImageData)
 # Qt Advanced docking system
 set(VERSION_SHORT 3.6.0)
 set(ads_PlatformDir "${INSTALL_DIR}/$<CONFIGURATION>/")
-add_subdirectory(external/Qt-Advanced-Docking-System)
+add_subdirectory(external/advanced_docking)
 
 # Copy ADS library after the HDPS public project has been built
 add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
