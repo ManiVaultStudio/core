@@ -86,7 +86,18 @@ protected:
 
 signals:
     void initialized();
+
+    /**
+     * Signals that the density computation has started
+     * @param renderMode Signals that the render mode has changed
+     */
     void renderModeChanged(const RenderMode& renderMode);
+
+    /** Signals that the density computation has started */
+    void densityComputationStarted();
+
+    /** Signals that the density computation has ended */
+    void densityComputationEnded();
 
 public slots:
     void computeDensity();

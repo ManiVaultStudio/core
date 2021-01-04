@@ -65,6 +65,8 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
 
     _renderMode = renderMode;
 
+    emit renderModeChanged(_renderMode);
+
     switch (_renderMode)
     {
         case ScatterplotWidget::SCATTERPLOT:
@@ -73,7 +75,7 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
         case ScatterplotWidget::DENSITY:
         case ScatterplotWidget::LANDSCAPE:
         {
-            _densityRenderer.computeDensity();
+            computeDensity();
             break;
         }
 
@@ -82,13 +84,18 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
     }
 
     update();
-
-    emit renderModeChanged(_renderMode);
 }
 
 void ScatterplotWidget::computeDensity()
 {
+    qDebug() << "computeDensity";
+
+    emit densityComputationStarted();
+
     _densityRenderer.computeDensity();
+
+    emit densityComputationEnded();
+
     update();
 }
 

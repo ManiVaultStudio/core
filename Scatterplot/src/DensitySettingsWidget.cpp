@@ -12,13 +12,8 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
-    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
-
-    _ui->computePushButton->setFont(fontAwesome.getFont(7));
-    _ui->computePushButton->setText(fontAwesome.getIconCharacter("play"));
-
-    connect(_ui->horizontalSlider, &QSlider::valueChanged, [this, &plugin](int value) {
-        const auto sigma = static_cast<float>(value);
+    QObject::connect(_ui->horizontalSlider, &QSlider::sliderReleased, [this, &plugin]() {
+        const auto sigma = static_cast<float>(_ui->horizontalSlider->value());
 
         QSignalBlocker spinBoxBlocker(_ui->doubleSpinBox);
 
@@ -27,7 +22,7 @@ void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
         plugin._scatterPlotWidget->setSigma(0.01f * sigma);
     });
 
-    connect(_ui->doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, &plugin](double value) {
+    QObject::connect(_ui->doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, &plugin](double value) {
         const auto sigma = static_cast<float>(value);
 
         QSignalBlocker sliderBlocker(_ui->horizontalSlider);
@@ -37,9 +32,15 @@ void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
         plugin._scatterPlotWidget->setSigma(0.01f * sigma);
     });
 
-    connect(_ui->computePushButton, &QPushButton::clicked, [this, &plugin]() {
-        plugin._scatterPlotWidget->computeDensity();
+    QObject::connect(plugin._scatterPlotWidget, &ScatterplotWidget::densityComputationStarted, [this]() {
+        //setEnabled(false);
     });
+
+    QObject::connect(plugin._scatterPlotWidget, &ScatterplotWidget::densityComputationEnded, [this]() {
+        //setEnabled(true);
+    });
+
+    //setEnabled(false);
 
     _ui->doubleSpinBox->setValue(30.0);
 }
