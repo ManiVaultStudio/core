@@ -90,6 +90,7 @@ QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(24, 24)
 
         QPainter painter(&pixmap);
 
+        painter.setRenderHint(QPainter::Antialiasing);
         painter.setPen(foregroundColor);
         painter.setFont(getFont(10));
 

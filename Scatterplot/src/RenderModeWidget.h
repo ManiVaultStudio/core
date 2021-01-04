@@ -1,6 +1,9 @@
 #pragma once
 
-#include <QGroupBox>
+#include "ScatterplotWidget.h"
+
+#include <QWidget>
+#include <QIcon>
 
 class ScatterplotPlugin;
 
@@ -16,5 +19,10 @@ public:
     void initialize(const ScatterplotPlugin& plugin);
 
 private:
+
+    QIcon getIcon(const ScatterplotWidget::RenderMode& renderMode) const;
+
+private:
     std::unique_ptr<Ui::RenderModeWidget>        _ui;        /** Externally loaded UI */
+    QSize                                           _iconSize;  /** Icon size  */
 };

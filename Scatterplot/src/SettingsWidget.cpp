@@ -38,7 +38,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _ui->horizontalLayout->addWidget(_dimensionSettinsWidget);
     _ui->horizontalLayout->addWidget(_subsetSettingsWidget);
 
-    setEnabled(false);
+    //setEnabled(false);
 
     QObject::connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
         setEnabled(!currentDataset.isEmpty());

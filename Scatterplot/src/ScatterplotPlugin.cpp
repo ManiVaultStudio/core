@@ -88,7 +88,11 @@ void ScatterplotPlugin::init()
         selectPoints();
     });
 
+    auto widget = new QWidget();
+    widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+
     _toolBar->addWidget(_settingsWidget);
+    _toolBar->addWidget(widget);
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
