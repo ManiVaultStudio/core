@@ -71,8 +71,6 @@ set( WIDGET_HEADERS
     src/widgets/ColorPickerPushButton.h
     src/widgets/MaterialCheckBoxWidget.h
     src/widgets/ComboBox.h
-    src/widgets/PushButton.h
-    src/widgets/HorizontalDivider.h
     src/widgets/DataSlot.h
     src/widgets/Accordion.h
     src/widgets/AccordionSection.h
@@ -86,8 +84,6 @@ set( WIDGET_SOURCES
 	src/widgets/ColorPickerPushButton.cpp
     src/widgets/MaterialCheckBoxWidget.cpp
     src/widgets/ComboBox.cpp
-    src/widgets/PushButton.cpp
-    src/widgets/HorizontalDivider.cpp
     src/widgets/DataSlot.cpp
 	src/widgets/Accordion.cpp
     src/widgets/AccordionSection.cpp
