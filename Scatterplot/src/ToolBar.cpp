@@ -1,4 +1,4 @@
-#include "SettingsWidget.h"
+#include "ToolBar.h"
 #include "ScatterplotPlugin.h"
 
 #include "RenderModeWidget.h"
@@ -11,8 +11,8 @@
 
 #include "ui_SettingsWidget.h"
 
-const hdps::Vector3f SettingsWidget::DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
-const hdps::Vector3f SettingsWidget::DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
+//const hdps::Vector3f SettingsWidget::DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
+//const hdps::Vector3f SettingsWidget::DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
 
 SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     QWidget(static_cast<QWidget*>(&const_cast<ScatterplotPlugin&>(plugin))),
@@ -87,14 +87,4 @@ void SettingsWidget::initScalarDimOptions(const unsigned int nDim)
 void SettingsWidget::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
     return _dimensionSettinsWidget->getSectionWidget()->setScalarDimensions(dimNames.size(), dimNames);
-}
-
-void SettingsWidget::paintEvent(QPaintEvent* event)
-{
-    QStyleOption opt;
-    opt.init(this);
-    QPainter p(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
-
-    QWidget::paintEvent(event);
 }
