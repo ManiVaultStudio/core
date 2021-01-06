@@ -75,8 +75,7 @@ set( WIDGET_HEADERS
     src/widgets/AccordionSection.h
     src/widgets/DockableWidget.h
     src/widgets/SettingsWidget.h
-    src/widgets/ResponsiveStackedWidget.h
-    src/widgets/ResponsiveToolBar.h
+    src/widgets/ResponsiveWidget.h
     src/widgets/PopupWidget.h
     src/widgets/PopupPushButton.h
 )
@@ -91,8 +90,7 @@ set( WIDGET_SOURCES
     src/widgets/AccordionSection.cpp
 	src/widgets/DockableWidget.cpp
 	src/widgets/SettingsWidget.cpp
-	src/widgets/ResponsiveStackedWidget.cpp
-	src/widgets/ResponsiveToolBar.cpp
+	src/widgets/ResponsiveWidget.cpp
 	src/widgets/PopupWidget.cpp
 	src/widgets/PopupPushButton.cpp
 )
