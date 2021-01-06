@@ -28,21 +28,21 @@ set(PLUGIN
     src/PixelSelectionToolRenderer.cpp
 )
 
-file(GLOB WIDGETS src/*Widget.*)
+file(GLOB UI src/*Widget.* src/*ToolBar.*)
 file(GLOB SHADERS src/*.glsl)
 file(GLOB JSON src/*.json)
-file(GLOB UIS src/*.ui)
+file(GLOB Creator src/*.ui)
 file(GLOB SHADERS res/shaders/*.vert res/shaders/*.frag)
 file(GLOB QRC res/*.qrc)
 
-QT5_WRAP_UI(UI_HEADERS ${UIS})
+QT5_WRAP_UI(UI_HEADERS ${Creator})
 
-set(SOURCES ${PLUGIN} ${WIDGETS})
+set(SOURCES ${PLUGIN} ${UI})
 set(AUX ${JSON} ${QRC})
 
 source_group(Plugin FILES ${PLUGIN})
-source_group(Widgets FILES ${WIDGETS})
-source_group(UI FILES ${UIS})
+source_group(UI FILES ${UI})
+source_group(Creator FILES ${Creator})
 source_group(Shaders FILES ${SHADERS})
 source_group(Aux FILES ${AUX})
 

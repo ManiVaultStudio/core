@@ -8,10 +8,10 @@
 class ScatterplotPlugin;
 
 template<typename SectionWidget>
-class ResponsiveSectionWidget : public QStackedWidget
+class ResponsiveStackedWidget : public QStackedWidget
 {
 public:
-    ResponsiveSectionWidget(QWidget* parent) :
+    ResponsiveStackedWidget(QWidget* parent) :
         QStackedWidget(parent),
         _sectionWidget(new SectionWidget(this)),
         _popupPushButton(new QPushButton()),
