@@ -27,8 +27,7 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
-    _settingsWidget(new SettingsWidget(*this)),
-    _toolBar(new QToolBar(this))
+    _settingsWidget(new SettingsWidget(*this))
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
 }
@@ -40,11 +39,6 @@ ScatterplotPlugin::ScatterplotPlugin() :
 ScatterplotPlugin::~ScatterplotPlugin(void)
 {
     
-}
-
-QToolBar* ScatterplotPlugin::getToolBar()
-{
-    return _toolBar;
 }
 
 void ScatterplotPlugin::init()
@@ -65,6 +59,7 @@ void ScatterplotPlugin::init()
 
     layout->setMargin(0);
     layout->setSpacing(0);
+    layout->addWidget(_settingsWidget);
     layout->addWidget(_dataSlot, 1);
 
     setLayout(layout);
@@ -87,12 +82,6 @@ void ScatterplotPlugin::init()
 
         selectPoints();
     });
-
-    auto widget = new QWidget();
-    widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-
-    _toolBar->addWidget(_settingsWidget);
-    _toolBar->addWidget(widget);
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)

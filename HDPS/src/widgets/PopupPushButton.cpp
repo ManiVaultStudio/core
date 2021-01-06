@@ -1,7 +1,13 @@
 #include "PopupPushButton.h"
 #include "PopupWidget.h"
 
-hdps::gui::PopupPushButton::PopupPushButton(QWidget* parent) :
+namespace hdps
+{
+
+namespace gui
+{
+
+PopupPushButton::PopupPushButton(QWidget* parent) :
     QPushButton(parent),
     _popupWidget(nullptr),
     _alignment(Qt::AlignLeft)
@@ -42,16 +48,17 @@ hdps::gui::PopupPushButton::PopupPushButton(QWidget* parent) :
         }
         */
 
-        _popupWidget->move(mapToGlobal(rect().bottomLeft()) - QPoint(width(), 0));
+        //_popupWidget->move(mapToGlobal(rect().bottomLeft()) - QPoint(width(), 0));
+        _popupWidget->show();
     });
 }
 
-QWidget* hdps::gui::PopupPushButton::getPopupWidget()
+QWidget* PopupPushButton::getPopupWidget()
 {
     return _popupWidget;
 }
 
-void hdps::gui::PopupPushButton::setPopupWidget(QWidget* popupWidget)
+void PopupPushButton::setPopupWidget(QWidget* popupWidget)
 {
     Q_ASSERT(popupWidget != nullptr);
 
@@ -61,15 +68,18 @@ void hdps::gui::PopupPushButton::setPopupWidget(QWidget* popupWidget)
     _popupWidget = popupWidget;
 }
 
-Qt::AlignmentFlag hdps::gui::PopupPushButton::getPopupWidgetAlignment() const
+Qt::AlignmentFlag PopupPushButton::getPopupWidgetAlignment() const
 {
     return _alignment;
 }
 
-void hdps::gui::PopupPushButton::setPopupWidgetAlignment(const Qt::AlignmentFlag& alignment)
+void PopupPushButton::setPopupWidgetAlignment(const Qt::AlignmentFlag& alignment)
 {
     if (alignment == _alignment)
         return;
 
     _alignment = alignment;
+}
+
+}
 }

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "ResponsiveSectionWidget.h"
-
 #include "graphics/Vector3f.h"
+
+#include "widgets/ResponsiveStackedWidget.h"
+#include "widgets/ResponsiveStackedWidget.h"
 
 #include <QWidget>
 
@@ -36,16 +37,14 @@ public:
     void initScalarDimOptions(const unsigned int nDim);
     void initScalarDimOptions(const std::vector<QString>& dimNames);
 
-    void paintEvent(QPaintEvent* event) override;
-
 private:
-    std::unique_ptr<Ui::SettingsWidget>                 _ui;                            /** Externally loaded UI */
-    ResponsiveSectionWidget<RenderModeWidget>*          _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
-    ResponsiveSectionWidget<PlotSettingsWidget>*        _plotSettinsWidget;             /** Widget for plot settings (depends on the render mode) */
-    ResponsiveSectionWidget<DimensionSettingsWidget>*   _dimensionSettinsWidget;        /** Widget for selection position and color dimensions */
-    ResponsiveSectionWidget<SubsetSettingsWidget>*      _subsetSettingsWidget;          /** Widget for creating subsets from selected points */
-    hdps::Vector3f                                      _baseColor;                     /** Base color */
-    hdps::Vector3f                                      _selectionColor;                /** Selection color */
+    std::unique_ptr<Ui::SettingsWidget>     _ui;                            /** Externally loaded UI */
+    hdps::gui::ResponsiveStackedWidget<RenderModeWidget>*      _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
+    PlotSettingsWidget*                         _plotSettinsWidget;             /** Widget for plot settings (depends on the render mode) */
+    DimensionSettingsWidget*                _dimensionSettinsWidget;        /** Widget for selection position and color dimensions */
+    SubsetSettingsWidget*                   _subsetSettingsWidget;          /** Widget for creating subsets from selected points */
+    hdps::Vector3f                          _baseColor;                     /** Base color */
+    hdps::Vector3f                          _selectionColor;                /** Selection color */
 
     static const hdps::Vector3f DEFAULT_BASE_COLOR;
     static const hdps::Vector3f DEFAULT_SELECTION_COLOR;

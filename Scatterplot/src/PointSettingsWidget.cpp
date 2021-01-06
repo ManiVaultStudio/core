@@ -56,4 +56,26 @@ void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
     _ui->sizeDoubleSpinBox->setValue(5.0);
     _ui->opacityDoubleSpinBox->setValue(50.0);
+
+    const_cast<ScatterplotPlugin&>(plugin).installEventFilter(this);
+}
+
+bool PointSettingsWidget::eventFilter(QObject* target, QEvent* event)
+{
+    if (event->type() != QEvent::Resize)
+        return QWidget::eventFilter(target, event);
+
+    const auto sourceWidgetWidth = static_cast<QResizeEvent*>(event)->size().width();
+
+    auto compact = sourceWidgetWidth <= 1000;
+
+    _ui->popupPushButton->setVisible(compact);
+    _ui->sizeLabel->setVisible(!compact);
+    _ui->sizeDoubleSpinBox->setVisible(!compact);
+    _ui->sizeHorizontalSlider->setVisible(!compact);
+    _ui->opacityLabel->setVisible(!compact);
+    _ui->opacityDoubleSpinBox->setVisible(!compact);
+    _ui->opacityHorizontalSlider->setVisible(!compact);
+
+    return QWidget::eventFilter(target, event);
 }

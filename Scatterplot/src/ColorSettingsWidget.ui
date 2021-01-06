@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>388</width>
+    <width>360</width>
     <height>23</height>
    </rect>
   </property>
@@ -54,7 +54,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QPushButton" name="positionPopupPushButton">
+       <widget class="QPushButton" name="popupPushButton">
         <property name="minimumSize">
          <size>
           <width>22</width>
@@ -139,25 +139,6 @@
         </property>
         <property name="toolTip">
          <string>Y dimension</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="colorPopupPushButton">
-        <property name="minimumSize">
-         <size>
-          <width>22</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string/>
         </property>
        </widget>
       </item>

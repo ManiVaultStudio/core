@@ -45,4 +45,23 @@ void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
     setEnabled(false);
 
     _ui->doubleSpinBox->setValue(30.0);
+
+    const_cast<ScatterplotPlugin&>(plugin).installEventFilter(this);
+}
+
+bool DensitySettingsWidget::eventFilter(QObject* target, QEvent* event)
+{
+    if (event->type() != QEvent::Resize)
+        return QWidget::eventFilter(target, event);
+
+    const auto sourceWidgetWidth = static_cast<QResizeEvent*>(event)->size().width();
+
+    auto compact = sourceWidgetWidth <= 1000;
+
+    _ui->popupPushButton->setVisible(compact);
+    _ui->label->setVisible(!compact);
+    _ui->doubleSpinBox->setVisible(!compact);
+    _ui->horizontalSlider->setVisible(!compact);
+
+    return QWidget::eventFilter(target, event);
 }

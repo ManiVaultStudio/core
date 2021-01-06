@@ -14,8 +14,6 @@ using namespace hdps::plugin;
 // View
 // =============================================================================
 
-class QToolBar;
-
 class Points;
 class SettingsWidget;
 
@@ -37,9 +35,6 @@ public:
     QIcon getIcon() const override {
         return Application::getIconFont("FontAwesome").getIcon("braille");
     }
-
-    /** Returns the toolbar which is shown at the top of the view plugin (dock) widget */
-    QToolBar* getToolBar();
 
     void init() override;
 
@@ -113,7 +108,6 @@ private:
     PixelSelectionTool*             _pixelSelectionTool;        /** Pixel selection tool */
     ScatterplotWidget*              _scatterPlotWidget;         /**  */
     SettingsWidget*                 _settingsWidget;
-    QToolBar*                       _toolBar;
 };
 
 // =============================================================================

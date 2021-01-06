@@ -17,29 +17,31 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
 {
     auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
 
-    _ui->scatterPlotToolButton->setIcon(getIcon(ScatterplotWidget::RenderMode::SCATTERPLOT));
-    _ui->densityPlotToolButton->setIcon(getIcon(ScatterplotWidget::RenderMode::DENSITY));
-    _ui->contourPlotToolButton->setIcon(getIcon(ScatterplotWidget::RenderMode::LANDSCAPE));
+    /*
+    _ui->scatterPlotPushButton->setIcon(getIcon(ScatterplotWidget::RenderMode::SCATTERPLOT));
+    _ui->densityPlotPushButton->setIcon(getIcon(ScatterplotWidget::RenderMode::DENSITY));
+    _ui->contourPlotPushButton->setIcon(getIcon(ScatterplotWidget::RenderMode::LANDSCAPE));
+    */
 
     const auto updateToggles = [this, scatterPlotWidget]() {
         const auto renderMode = scatterPlotWidget->getRenderMode();
 
-        _ui->scatterPlotToolButton->setChecked(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
-        _ui->densityPlotToolButton->setChecked(renderMode == ScatterplotWidget::RenderMode::DENSITY);
-        _ui->contourPlotToolButton->setChecked(renderMode == ScatterplotWidget::RenderMode::LANDSCAPE);
+        _ui->scatterPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
+        _ui->densityPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::DENSITY);
+        _ui->contourPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::LANDSCAPE);
     };
 
-    QObject::connect(_ui->scatterPlotToolButton, &QToolButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_ui->scatterPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
         updateToggles();
     });
 
-    QObject::connect(_ui->densityPlotToolButton, &QToolButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_ui->densityPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
         updateToggles();
     });
 
-    QObject::connect(_ui->contourPlotToolButton, &QToolButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_ui->contourPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
         updateToggles();
     });

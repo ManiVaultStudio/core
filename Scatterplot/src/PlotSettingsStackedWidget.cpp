@@ -1,13 +1,15 @@
 #include "PlotSettingsStackedWidget.h"
 #include "ScatterplotPlugin.h"
-
-#include "ui_PlotSettingsStackedWidget.h"
+#include "PointSettingsWidget.h"
+#include "DensitySettingsWidget.h"
 
 PlotSettingsStackedWidget::PlotSettingsStackedWidget(QWidget* parent /*= nullptr*/) :
     QStackedWidget(parent),
-    _ui{ std::make_unique<Ui::PlotSettingsStackedWidget>() }
+    _pointSettingsWidget(new PointSettingsWidget(this)),
+    _densitySettingsWidget(new DensitySettingsWidget(this))
 {
-    _ui->setupUi(this);
+    addWidget(_pointSettingsWidget);
+    addWidget(_densitySettingsWidget);
 }
 
 void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
@@ -34,8 +36,18 @@ void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
         updateCurrentPage();
     });
 
-    _ui->pointSettingsWidget->initialize(plugin);
-    _ui->densitySettingsWidget->initialize(plugin);
+    _pointSettingsWidget->initialize(plugin);
+    _densitySettingsWidget->initialize(plugin);
 
     updateCurrentPage();
+}
+
+PointSettingsWidget* PlotSettingsStackedWidget::getPointSettingsWidget()
+{
+    return _pointSettingsWidget;
+}
+
+DensitySettingsWidget* PlotSettingsStackedWidget::getDensitySettingsWidget()
+{
+    return _densitySettingsWidget;
 }

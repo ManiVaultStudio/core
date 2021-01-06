@@ -3,10 +3,8 @@
 #include <QStackedWidget>
 
 class ScatterplotPlugin;
-
-namespace Ui {
-    class PlotSettingsStackedWidget;
-}
+class PointSettingsWidget;
+class DensitySettingsWidget;
 
 class PlotSettingsStackedWidget : public QStackedWidget
 {
@@ -23,6 +21,10 @@ public:
         return currentWidget()->minimumSizeHint();
     }
 
+    PointSettingsWidget* getPointSettingsWidget();
+    DensitySettingsWidget* getDensitySettingsWidget();
+
 private:
-    std::unique_ptr<Ui::PlotSettingsStackedWidget>        _ui;        /** Externally loaded UI */
+    PointSettingsWidget*        _pointSettingsWidget;
+    DensitySettingsWidget*      _densitySettingsWidget;
 };

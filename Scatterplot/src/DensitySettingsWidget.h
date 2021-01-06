@@ -15,6 +15,8 @@ public:
 
     void initialize(const ScatterplotPlugin& plugin);
 
+    bool eventFilter(QObject* target, QEvent* event) override;
+
 private:
     std::unique_ptr<Ui::DensitySettingsWidget>        _ui;        /** Externally loaded UI */
 };
