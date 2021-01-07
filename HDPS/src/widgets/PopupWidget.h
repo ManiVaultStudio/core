@@ -17,7 +17,6 @@ namespace gui
  *
  * @author Thomas Kroes
  */
-template<typename WidgetType>
 class PopupWidget : public QWidget
 {
 public:
@@ -26,9 +25,9 @@ public:
      * Constructor
      * @param parent Parent widget
      */
-    PopupWidget(QWidget* parent) :
+    PopupWidget(QWidget* parent, QWidget* widget) :
         QWidget(parent),
-        _widget(new WidgetType(this)),
+        _widget(widget),
         _popupGroupBox(new QGroupBox()),
         _popupLayout(new QVBoxLayout())
     {
@@ -51,7 +50,7 @@ public:
     }
 
 private:
-    WidgetType*     _widget;            /** Popup widget content */
+    QWidget*        _widget;            /** Popup widget content */
     QGroupBox*      _popupGroupBox;     /** Group box */
     QVBoxLayout*    _popupLayout;       /** Layout for the group box */
 };

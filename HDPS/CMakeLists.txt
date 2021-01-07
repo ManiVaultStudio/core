@@ -77,7 +77,6 @@ set( WIDGET_HEADERS
     src/widgets/SettingsWidget.h
     src/widgets/PopupWidget.h
     src/widgets/PopupPushButton.h
-    src/widgets/ResponsiveStackedWidget.h
 )
 
 set( WIDGET_SOURCES
@@ -92,7 +91,6 @@ set( WIDGET_SOURCES
 	src/widgets/SettingsWidget.cpp
 	src/widgets/PopupWidget.cpp
 	src/widgets/PopupPushButton.cpp
-	src/widgets/ResponsiveStackedWidget.cpp
 )
 
 set( RENDERER_HEADERS
@@ -142,6 +140,7 @@ set( UTIL_HEADERS
 	src/util/IconFont.h
     src/util/IconFonts.h
     src/util/FontAwesome.h
+    src/util/WidgetResizeEventProxy.h
 )
 
 set( UTIL_SOURCES
@@ -153,6 +152,7 @@ set( UTIL_SOURCES
 	src/util/IconFont.cpp
     src/util/IconFonts.cpp
     src/util/FontAwesome.cpp
+    src/util/WidgetResizeEventProxy.cpp
 )
 
 set( PLUGIN_HEADERS

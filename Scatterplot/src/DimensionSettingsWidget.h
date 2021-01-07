@@ -15,8 +15,6 @@ public:
 
     void initialize(const ScatterplotPlugin& plugin);
 
-    bool eventFilter(QObject* target, QEvent* event) override;
-
     int getDimensionX();
     int getDimensionY();
 

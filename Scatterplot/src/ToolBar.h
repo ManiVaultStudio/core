@@ -2,9 +2,7 @@
 
 #include "graphics/Vector3f.h"
 
-#include "widgets/ResponsiveStackedWidget.h"
-#include "widgets/ResponsiveStackedWidget.h"
-
+#include "RenderModeWidget.h"
 #include <QWidget>
 
 class ScatterplotPlugin;
@@ -39,8 +37,8 @@ public:
 
 private:
     std::unique_ptr<Ui::SettingsWidget>     _ui;                            /** Externally loaded UI */
-    hdps::gui::ResponsiveWidget<RenderModeWidget>*      _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
-    PlotSettingsWidget*                         _plotSettinsWidget;             /** Widget for plot settings (depends on the render mode) */
+    StateWidget<RenderModeWidget>*          _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
+    PlotSettingsWidget*                     _plotSettinsWidget;             /** Widget for plot settings (depends on the render mode) */
     DimensionSettingsWidget*                _dimensionSettinsWidget;        /** Widget for selection position and color dimensions */
     SubsetSettingsWidget*                   _subsetSettingsWidget;          /** Widget for creating subsets from selected points */
     hdps::Vector3f                          _baseColor;                     /** Base color */

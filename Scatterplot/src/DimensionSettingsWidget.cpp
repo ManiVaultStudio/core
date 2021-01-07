@@ -34,32 +34,6 @@ void DimensionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     });
 
     _ui->colorDimensionStackedWidget->initialize(plugin);
-
-    const_cast<ScatterplotPlugin&>(plugin).installEventFilter(this);
-}
-
-bool DimensionSettingsWidget::eventFilter(QObject* target, QEvent* event)
-{
-    if (event->type() != QEvent::Resize)
-        return QWidget::eventFilter(target, event);
-
-    const auto sourceWidgetWidth = static_cast<QResizeEvent*>(event)->size().width();
-
-    const auto positionCompact = sourceWidgetWidth <= 800;
-
-    _ui->positionPopupPushButton->setVisible(positionCompact);
-    _ui->xDimensionLabel->setVisible(!positionCompact);
-    _ui->xDimensionComboBox->setVisible(!positionCompact);
-    _ui->yDimensionLabel->setVisible(!positionCompact);
-    _ui->yDimensionComboBox->setVisible(!positionCompact);
-
-    const auto colorCompact = sourceWidgetWidth <= 1000;
-
-    _ui->colorPopupPushButton->setVisible(colorCompact);
-    _ui->colorOptionsComboBox->setVisible(!colorCompact);
-    _ui->colorDimensionStackedWidget->setVisible(!colorCompact);
-
-    return QWidget::eventFilter(target, event);
 }
 
 int DimensionSettingsWidget::getDimensionX()
