@@ -115,3 +115,23 @@ QIcon RenderModeWidget::getIcon(const ScatterplotWidget::RenderMode& renderMode)
 
     return QIcon(pixmap);
 }
+
+hdps::gui::PopupPushButton& RenderModeWidget::getPopupPushButton()
+{
+    return *_ui->popupPushButton;
+}
+
+QPushButton& RenderModeWidget::getScatterPlotPushButton()
+{
+    return *_ui->scatterPlotPushButton;
+}
+
+QPushButton& RenderModeWidget::getDensityPlotPushButton()
+{
+    return *_ui->densityPlotPushButton;
+}
+
+QPushButton& RenderModeWidget::getContourPlotPushButton()
+{
+    return *_ui->contourPlotPushButton;
+}

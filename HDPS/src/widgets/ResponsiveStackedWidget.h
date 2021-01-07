@@ -1,9 +1,7 @@
 #pragma once
 
-#include "PopupPushButton.h"
-#include "PopupWidget.h"
-
-#include <QStackedWidget>
+#include <QWidget>
+#include <QHBoxLayout>
 #include <QResizeEvent>
 
 namespace hdps
@@ -17,26 +15,34 @@ namespace gui
  *
  * @author Thomas Kroes
  */
-template<typename WidgetType>
-class ResponsiveStackedWidget : public QStackedWidget
+class ResponsiveWidget : public QWidget
 {
+public:
+    
+    /**
+     * Callback function which is called when the size of the source widget changes
+     * @param size New size of the source widget
+     * @param widget Reference to the contained widget
+     */
+    typedef std::function<void(const QSize& size, WidgetType& widget)> Callback;
+
 public:
 
     /**
      * Constructor
      * @param parent Parent widget
      */
-    ResponsiveStackedWidget(QWidget* parent) :
-        QStackedWidget(parent),
+    ResponsiveWidget(QWidget* parent) :
+        QWidget(parent),
         _sourceWidget(nullptr),
-        _popupPushButton(new PopupPushButton(this)),
         _widget(new WidgetType(this)),
-        _compactThreshold(500)
+        _callBack()
     {
-        addWidget(_popupPushButton);
-        addWidget(_widget);
+        auto layout = new QHBoxLayout();
 
-        _popupPushButton->setPopupWidget(new PopupWidget<WidgetType>(this));
+        layout->addWidget(_widget);
+
+        setLayout(layout);
     }
 
     /**
@@ -49,7 +55,8 @@ public:
         if (event->type() != QEvent::Resize)
             return QWidget::eventFilter(target, event);
 
-        sourceWidgetWidthChanged();
+        if (_sourceWidget != nullptr && _callBack)
+            _callBack(_sourceWidget->size(), *_widget);
 
         return QWidget::eventFilter(target, event);
     }
@@ -74,57 +81,27 @@ public: // Getters/setters
 
         _sourceWidget->installEventFilter(this);
 
-        sourceWidgetWidthChanged();
+        if (_sourceWidget != nullptr && _callBack)
+            _callBack(_sourceWidget->size(), *_widget);
     }
 
-    /** Get/set main widget */
-    QWidget* getMainWidget() {
+    /** Get widget */
+    QWidget* getWidget() {
         return _widget;
     }
 
-    /** Set main widget
-    void setMainWidget(QWidget* mainWidget) {
-        Q_ASSERT(mainWidget != nullptr);
-
-        if (mainWidget == _mainWidget)
-            return;
-
-        _mainWidget = mainWidget;
-
-        _popupPushButton->setPopupWidget(_mainWidget);
-    }
-    */
-
-    /** Get/set compact threshold */
-    std::uint32_t getCompactThreshold() const {
-        return _compactThreshold;
-    }
-
-    void setCompactThreshold(const std::uint32_t& compactThreshold) {
-        if (compactThreshold == _compactThreshold)
-            return;
-
-        _compactThreshold = compactThreshold;
-
-        sourceWidgetWidthChanged();
+    /**
+     * Set callback function which is called when the size of the source widget changes
+     * @param callback Callback function
+     */
+    void setCallback(Callback callback) {
+        _callBack = callback;
     }
 
 private:
-
-    /** Invoked when the width of the source widget has changed */
-    void sourceWidgetWidthChanged() {
-        const auto sourceWidgetWidth    = static_cast<std::uint32_t>(_sourceWidget->size().width());
-        const auto compact              = sourceWidgetWidth <= _compactThreshold;
-        const auto currentPage          = compact ? 0 : 1;
-
-        setCurrentIndex(currentPage);
-    }
-
-private:
-    QWidget*                    _sourceWidget;          /** Widget that governs the current page */
-    PopupPushButton*            _popupPushButton;       /** Popup push button that shows the main window when clicked (in compact mode) */
-    WidgetType*                 _widget;            /** Main widget */
-    std::uint32_t               _compactThreshold;      /** Below this threshold, the main widget is replaced by a popup push button */
+    QWidget*        _sourceWidget;      /** Widget that governs the current page */
+    WidgetType*     _widget;            /** Main widget */
+    Callback        _callBack;          /** Function which is called when the size of the source widget changes */
 };
 
 }

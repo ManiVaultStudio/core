@@ -8,6 +8,7 @@
 
 #include <QPainter>
 #include <QStyleOption>
+#include <QPushButton>
 
 #include "ui_SettingsWidget.h"
 
@@ -17,7 +18,7 @@ const hdps::Vector3f SettingsWidget::DEFAULT_SELECTION_COLOR = hdps::Vector3f(72
 SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     QWidget(static_cast<QWidget*>(&const_cast<ScatterplotPlugin&>(plugin))),
     _ui{ std::make_unique<Ui::SettingsWidget>() },
-    _renderModeWidget(new hdps::gui::ResponsiveStackedWidget<RenderModeWidget>(this)),
+    _renderModeWidget(new hdps::gui::ResponsiveWidget<RenderModeWidget>(this)),
     _plotSettinsWidget(new PlotSettingsWidget(this)),
     _dimensionSettinsWidget(new DimensionSettingsWidget(this)),
     _subsetSettingsWidget(new SubsetSettingsWidget(this)),
@@ -36,6 +37,55 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _plotSettinsWidget->initialize(plugin);//, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
     _dimensionSettinsWidget->initialize(plugin);//, 700, fontAwesome.getIcon("layer-group"), "Dimension settings", "Dimension settings");
     _subsetSettingsWidget->initialize(plugin);//, 1100, fontAwesome.getIcon("vector-square"), "Subset settings", "Subset settings");
+
+    _renderModeWidget->setCallback([this](const QSize& size, RenderModeWidget& renderModeWidget) {
+        const auto width        = size.width();
+        const auto state    = width < 300 ? RenderModeWidget::State::PopupButton : width < 600 ? RenderModeWidget::State::IconsOnly : RenderModeWidget::State::Full;
+
+        switch (state)
+        {
+            case RenderModeWidget::State::PopupButton:
+            {
+                renderModeWidget.getPopupPushButton().setVisible(true);
+                renderModeWidget.getScatterPlotPushButton().setVisible(false);
+                renderModeWidget.getDensityPlotPushButton().setVisible(false);
+                renderModeWidget.getContourPlotPushButton().setVisible(false);
+
+                break;
+            }
+
+            case RenderModeWidget::State::IconsOnly:
+            {
+                renderModeWidget.getPopupPushButton().setVisible(false);
+                
+                renderModeWidget.getScatterPlotPushButton().setText(false);
+                renderModeWidget.getDensityPlotPushButton().setText(false);
+                renderModeWidget.getContourPlotPushButton().setText(false);
+
+                renderModeWidget.getScatterPlotPushButton().setVisible(false);
+                renderModeWidget.getDensityPlotPushButton().setVisible(false);
+                renderModeWidget.getContourPlotPushButton().setVisible(false);
+
+                break;
+            }
+
+            default:
+                break;
+        }
+        
+
+
+        /*
+        renderModeWidget.getScatterPlotPushButton().setFixedWidth(buttonWidth);
+        renderModeWidget.getScatterPlotPushButton().setFixedWidth(buttonWidth);
+        renderModeWidget.getScatterPlotPushButton().setFixedWidth(buttonWidth);
+
+        
+        renderModeWidget.getScatterPlotPushButton().setVisible(buttonWidth);
+        renderModeWidget.getScatterPlotPushButton().setVisible(buttonWidth);
+        renderModeWidget.getScatterPlotPushButton().setVisible(buttonWidth);
+        */
+    });
 
     horizontalLayout->addWidget(_renderModeWidget);
     horizontalLayout->addWidget(_plotSettinsWidget);

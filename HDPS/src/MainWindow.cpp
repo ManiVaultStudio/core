@@ -133,7 +133,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(plugin);
 
             dockWidget->setWidget(viewPlugin, ads::CDockWidget::ForceNoScrollArea);
-            
+
             auto dockWidgetArea = ads::LeftDockWidgetArea;
 
             switch (viewPlugin->getDockingLocation())

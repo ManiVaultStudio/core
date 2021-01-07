@@ -42,6 +42,25 @@
     <number>0</number>
    </property>
    <item>
+    <widget class="PopupPushButton" name="popupPushButton">
+     <property name="minimumSize">
+      <size>
+       <width>22</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>22</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="scatterPlotPushButton">
      <property name="minimumSize">
       <size>
@@ -100,6 +119,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PopupPushButton</class>
+   <extends>QPushButton</extends>
+   <header>widgets/PopupPushButton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

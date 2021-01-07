@@ -39,7 +39,7 @@ public:
 
 private:
     std::unique_ptr<Ui::SettingsWidget>     _ui;                            /** Externally loaded UI */
-    hdps::gui::ResponsiveStackedWidget<RenderModeWidget>*      _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
+    hdps::gui::ResponsiveWidget<RenderModeWidget>*      _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
     PlotSettingsWidget*                         _plotSettinsWidget;             /** Widget for plot settings (depends on the render mode) */
     DimensionSettingsWidget*                _dimensionSettinsWidget;        /** Widget for selection position and color dimensions */
     SubsetSettingsWidget*                   _subsetSettingsWidget;          /** Widget for creating subsets from selected points */
