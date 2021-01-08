@@ -2,8 +2,6 @@
 #include "ScatterplotPlugin.h"
 #include "widgets/PopupWidget.h"
 
-#include "ui_RenderModeWidget.h"
-
 #include <QPainter>
 #include <QVBoxLayout>
 
@@ -12,24 +10,60 @@
 const QSize RenderModeWidget::BUTTON_SIZE_COMPACT = QSize(22, 22);
 const QSize RenderModeWidget::BUTTON_SIZE_FULL = QSize(60, 22);
 
-RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
+RenderModeWidget::RenderModeWidget(const WidgetStateMixin::State& state, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _ui{ std::make_unique<Ui::RenderModeWidget>() },
-    _iconSize(16, 16)
+    WidgetStateMixin(state),
+    _scatterPlotPushButton(new QPushButton()),
+    _densityPlotPushButton(new QPushButton()),
+    _contourPlotPushButton(new QPushButton())
 {
-    _ui->setupUi(this);
+    switch (_state)
+    {
+        case State::Popup:
+            setLayout(new QVBoxLayout());
+            break;
+
+        case State::Compact:
+        {
+            setLayout(new QHBoxLayout());
+
+            _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+            _densityPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+            _contourPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+            _scatterPlotPushButton->setText("S");
+            _densityPlotPushButton->setText("D");
+            _contourPlotPushButton->setText("C");
+            break;
+        }
+
+        
+        case State::Full:
+        {
+            setLayout(new QHBoxLayout());
+
+            _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+            _densityPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+            _contourPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+            _scatterPlotPushButton->setText("Scatter");
+            _densityPlotPushButton->setText("Density");
+            _contourPlotPushButton->setText("Contour");
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    layout()->addWidget(_scatterPlotPushButton);
+    layout()->addWidget(_densityPlotPushButton);
+    layout()->addWidget(_contourPlotPushButton);
 }
 
 void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
 {
     auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
-
+    
     /*
-    _ui->scatterPlotPushButton->setIcon(getIcon(ScatterplotWidget::RenderMode::SCATTERPLOT));
-    _ui->densityPlotPushButton->setIcon(getIcon(ScatterplotWidget::RenderMode::DENSITY));
-    _ui->contourPlotPushButton->setIcon(getIcon(ScatterplotWidget::RenderMode::LANDSCAPE));
-    */
-
     const auto updateToggles = [this, scatterPlotWidget]() {
         const auto renderMode = scatterPlotWidget->getRenderMode();
 
@@ -58,7 +92,7 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
     });
 
     updateToggles();
-
+    */
     /*
     const auto setButtonsState = [this](const State& state) {
         switch (state)
@@ -99,39 +133,70 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
         if (width >= 1500)
             state = RenderModeWidget::State::Full;
 
-        switch (state)
-        {
-            case State::Popup:
-            {
-                _ui->popupPushButton->setVisible(true);
-                _ui->widget->setVisible(false);
-                //layout()->removeWidget(_ui->widget);
-                _ui->popupPushButton->setPopupWidget(new hdps::gui::PopupWidget(this, _ui->widget));
-                setButtonsState(State::Popup);
-                break;
-            }
-
-            case RenderModeWidget::State::Compact:
-                _ui->popupPushButton->setVisible(false);
-                _ui->widget->setVisible(true);
-                setButtonsState(State::Compact);
-                break;
-
-            case RenderModeWidget::State::Full:
-                _ui->popupPushButton->setVisible(false);
-                _ui->widget->setVisible(true);
-                setButtonsState(State::Full);
-                break;
-
-            default:
-                break;
-        }
+        
     });
     */
 }
 
+/*
+WidgetStateMixin::State RenderModeWidget::getState(const QSize& sourceWidgetSize) const
+{
+    const auto width = sourceWidgetSize.width();
+
+    auto state = State::Popup;
+
+    if (width >= 800 && width < 1500)
+        state = RenderModeWidget::State::Compact;
+
+    if (width >= 1500)
+        state = RenderModeWidget::State::Full;
+
+    return state;
+}
+
+void RenderModeWidget::setState(const WidgetStateMixin::State& state)
+{
+    switch (state)
+    {
+        case State::Popup:
+        {
+            //layout()->removeWidget(_ui->widget);
+            //setButtonsState(State::Popup);
+            break;
+        }
+
+        case RenderModeWidget::State::Compact:
+            //setButtonsState(State::Compact);
+
+            _ui->scatterPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+            _ui->densityPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+            _ui->contourPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+            _ui->scatterPlotPushButton->setText("S");
+            _ui->densityPlotPushButton->setText("D");
+            _ui->contourPlotPushButton->setText("C");
+
+            break;
+
+        case RenderModeWidget::State::Full:
+            //setButtonsState(State::Full);
+
+            _ui->scatterPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+            _ui->densityPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+            _ui->contourPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+            _ui->scatterPlotPushButton->setText("Scatter");
+            _ui->densityPlotPushButton->setText("Density");
+            _ui->contourPlotPushButton->setText("Contour");
+            break;
+
+        default:
+            break;
+    }
+}
+
+
 QIcon RenderModeWidget::getIcon(const ScatterplotWidget::RenderMode& renderMode) const
 {
+    
     QPixmap pixmap(_iconSize);
 
     pixmap.fill(Qt::transparent);
@@ -189,8 +254,8 @@ QIcon RenderModeWidget::getIcon(const ScatterplotWidget::RenderMode& renderMode)
         default:
             break;
     }
+    
 
     return QIcon(pixmap);
 }
-
-
+*/

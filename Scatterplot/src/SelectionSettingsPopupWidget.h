@@ -14,8 +14,6 @@ namespace Ui {
 /**
  * Selection tool widget class
  *
- * Provides the user interface for the pixel selection tool
- *
  * @author Thomas Kroes
  */
 class SelectionSettingsPopupWidget : public QWidget

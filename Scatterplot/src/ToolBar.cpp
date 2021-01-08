@@ -33,10 +33,25 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
-    _renderModeWidget->initialize(plugin);//, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
+    //_renderModeWidget->initialize(plugin);//, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
     _plotSettinsWidget->initialize(plugin);//, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
     _dimensionSettinsWidget->initialize(plugin);//, 700, fontAwesome.getIcon("layer-group"), "Dimension settings", "Dimension settings");
     _subsetSettingsWidget->initialize(plugin);//, 1100, fontAwesome.getIcon("vector-square"), "Subset settings", "Subset settings");
+
+    _renderModeWidget->initialize(&const_cast<ScatterplotPlugin&>(plugin), [this](const QSize& sourceWidgetSize) {
+            const auto width = sourceWidgetSize.width();
+
+            auto state = WidgetStateMixin::State::Popup;
+
+            if (width >= 800 && width < 1500)
+                state = WidgetStateMixin::State::Compact;
+
+            if (width >= 1500)
+                state = WidgetStateMixin::State::Full;
+
+            return state;
+    }, [this](RenderModeWidget* renderModeWidget) {
+    });
 
     horizontalLayout->addWidget(_renderModeWidget);
     horizontalLayout->addWidget(_plotSettinsWidget);

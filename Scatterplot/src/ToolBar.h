@@ -2,7 +2,9 @@
 
 #include "graphics/Vector3f.h"
 
+#include "StateWidget.h"
 #include "RenderModeWidget.h"
+
 #include <QWidget>
 
 class ScatterplotPlugin;

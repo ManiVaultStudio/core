@@ -28,7 +28,7 @@ set(PLUGIN
     src/PixelSelectionToolRenderer.cpp
 )
 
-file(GLOB UI src/*Widget.* src/*ToolBar.*)
+file(GLOB UI src/*Widget*.* src/*ToolBar.*)
 file(GLOB SHADERS src/*.glsl)
 file(GLOB JSON src/*.json)
 file(GLOB Creator src/*.ui)
