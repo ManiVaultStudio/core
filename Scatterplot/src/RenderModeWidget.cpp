@@ -1,88 +1,88 @@
 #include "RenderModeWidget.h"
 #include "ScatterplotPlugin.h"
-#include "widgets/PopupWidget.h"
 
-#include <QPainter>
 #include <QVBoxLayout>
-
-
+#include <QPushButton>
 
 const QSize RenderModeWidget::BUTTON_SIZE_COMPACT = QSize(22, 22);
 const QSize RenderModeWidget::BUTTON_SIZE_FULL = QSize(60, 22);
 
 RenderModeWidget::RenderModeWidget(const WidgetStateMixin::State& state, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    WidgetStateMixin(state),
+    WidgetStateMixin(state, "Render mode"),
     _scatterPlotPushButton(new QPushButton()),
     _densityPlotPushButton(new QPushButton()),
     _contourPlotPushButton(new QPushButton())
 {
+    _scatterPlotPushButton->setCheckable(true);
+    _densityPlotPushButton->setCheckable(true);
+    _contourPlotPushButton->setCheckable(true);
+
+    QLayout* layout = nullptr;
+
     switch (_state)
     {
         case State::Popup:
-            setLayout(new QVBoxLayout());
+            layout = new QVBoxLayout();
             break;
 
         case State::Compact:
-        {
-            setLayout(new QHBoxLayout());
-
-            _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-            _densityPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-            _contourPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-            _scatterPlotPushButton->setText("S");
-            _densityPlotPushButton->setText("D");
-            _contourPlotPushButton->setText("C");
-            break;
-        }
-
-        
         case State::Full:
-        {
-            setLayout(new QHBoxLayout());
-
-            _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-            _densityPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-            _contourPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-            _scatterPlotPushButton->setText("Scatter");
-            _densityPlotPushButton->setText("Density");
-            _contourPlotPushButton->setText("Contour");
+            layout = new QHBoxLayout();
             break;
-        }
 
         default:
             break;
     }
 
-    layout()->addWidget(_scatterPlotPushButton);
-    layout()->addWidget(_densityPlotPushButton);
-    layout()->addWidget(_contourPlotPushButton);
+    if (_state == State::Popup || _state == State::Full) {
+        _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+        _densityPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+        _contourPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
+        _scatterPlotPushButton->setText("Scatter");
+        _densityPlotPushButton->setText("Density");
+        _contourPlotPushButton->setText("Contour");
+    }
+    else {
+        _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+        _densityPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+        _contourPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
+        _scatterPlotPushButton->setText("S");
+        _densityPlotPushButton->setText("D");
+        _contourPlotPushButton->setText("C");
+    }
+
+    layout->setMargin(0);
+    layout->addWidget(_scatterPlotPushButton);
+    layout->addWidget(_densityPlotPushButton);
+    layout->addWidget(_contourPlotPushButton);
+
+    setLayout(layout);
 }
 
 void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
 {
     auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
     
-    /*
     const auto updateToggles = [this, scatterPlotWidget]() {
         const auto renderMode = scatterPlotWidget->getRenderMode();
 
-        _ui->scatterPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
-        _ui->densityPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::DENSITY);
-        _ui->contourPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::LANDSCAPE);
+        _scatterPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
+        _densityPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::DENSITY);
+        _contourPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::LANDSCAPE);
     };
 
-    QObject::connect(_ui->scatterPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_scatterPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
         updateToggles();
     });
 
-    QObject::connect(_ui->densityPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_densityPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
         updateToggles();
     });
 
-    QObject::connect(_ui->contourPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_contourPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
         updateToggles();
     });
@@ -92,108 +92,9 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
     });
 
     updateToggles();
-    */
-    /*
-    const auto setButtonsState = [this](const State& state) {
-        switch (state)
-        {
-            case State::Compact:
-                _ui->scatterPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-                _ui->densityPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-                _ui->contourPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-                _ui->scatterPlotPushButton->setText("S");
-                _ui->densityPlotPushButton->setText("D");
-                _ui->contourPlotPushButton->setText("C");
-                break;
-
-            case State::Popup:
-            case State::Full:
-                _ui->scatterPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-                _ui->densityPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-                _ui->contourPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-                _ui->scatterPlotPushButton->setText("Scatter");
-                _ui->densityPlotPushButton->setText("Density");
-                _ui->contourPlotPushButton->setText("Contour");
-                break;
-
-            default:
-                break;
-        }
-    };
-
-    
-
-    _widgetEventProxy.initialize(&const_cast<ScatterplotPlugin&>(plugin), [this, setButtonsState](const QSize& size) {
-        const auto width = size.width();
-        auto state = State::Popup;
-        
-        if (width >= 800 && width < 1500)
-            state = RenderModeWidget::State::Compact;
-        
-        if (width >= 1500)
-            state = RenderModeWidget::State::Full;
-
-        
-    });
-    */
 }
 
 /*
-WidgetStateMixin::State RenderModeWidget::getState(const QSize& sourceWidgetSize) const
-{
-    const auto width = sourceWidgetSize.width();
-
-    auto state = State::Popup;
-
-    if (width >= 800 && width < 1500)
-        state = RenderModeWidget::State::Compact;
-
-    if (width >= 1500)
-        state = RenderModeWidget::State::Full;
-
-    return state;
-}
-
-void RenderModeWidget::setState(const WidgetStateMixin::State& state)
-{
-    switch (state)
-    {
-        case State::Popup:
-        {
-            //layout()->removeWidget(_ui->widget);
-            //setButtonsState(State::Popup);
-            break;
-        }
-
-        case RenderModeWidget::State::Compact:
-            //setButtonsState(State::Compact);
-
-            _ui->scatterPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-            _ui->densityPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-            _ui->contourPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-            _ui->scatterPlotPushButton->setText("S");
-            _ui->densityPlotPushButton->setText("D");
-            _ui->contourPlotPushButton->setText("C");
-
-            break;
-
-        case RenderModeWidget::State::Full:
-            //setButtonsState(State::Full);
-
-            _ui->scatterPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-            _ui->densityPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-            _ui->contourPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-            _ui->scatterPlotPushButton->setText("Scatter");
-            _ui->densityPlotPushButton->setText("Density");
-            _ui->contourPlotPushButton->setText("Contour");
-            break;
-
-        default:
-            break;
-    }
-}
-
-
 QIcon RenderModeWidget::getIcon(const ScatterplotWidget::RenderMode& renderMode) const
 {
     

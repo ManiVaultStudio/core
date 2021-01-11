@@ -1,20 +1,27 @@
 #pragma once
 
+#include "WidgetStateMixin.h"
+
 #include <QWidget>
 
 class ScatterplotPlugin;
 
-namespace Ui {
-    class PointSettingsWidget;
-}
+class QLabel;
+class QDoubleSpinBox;
+class QSlider;
 
-class PointSettingsWidget : public QWidget
+class PointSettingsWidget : public QWidget, public WidgetStateMixin
 {
 public:
-    PointSettingsWidget(QWidget* parent = nullptr);
+    PointSettingsWidget(const WidgetStateMixin::State& state, QWidget* parent = nullptr);
 
     void initialize(const ScatterplotPlugin& plugin);
 
 private:
-    std::unique_ptr<Ui::PointSettingsWidget>        _ui;        /** Externally loaded UI */
+    QLabel*             _sizeLabel;
+    QDoubleSpinBox*     _sizeDoubleSpinBox;
+    QSlider*            _sizeSlider;
+    QLabel*             _opacityLabel;
+    QDoubleSpinBox*     _opacityDoubleSpinBox;
+    QSlider*            _opacitySlider;
 };

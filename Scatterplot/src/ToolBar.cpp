@@ -50,7 +50,8 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
                 state = WidgetStateMixin::State::Full;
 
             return state;
-    }, [this](RenderModeWidget* renderModeWidget) {
+    }, [this, &plugin](RenderModeWidget* renderModeWidget) {
+        renderModeWidget->initialize(plugin);
     });
 
     horizontalLayout->addWidget(_renderModeWidget);

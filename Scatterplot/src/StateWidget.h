@@ -6,6 +6,7 @@
 
 #include <QStackedWidget>
 #include <QPushButton>
+#include <QGroupBox>
 
 template<typename WidgetType>
 class StateWidget : public QStackedWidget
@@ -16,7 +17,6 @@ public:
     typedef std::function<void(WidgetType* widget)> WidgetInitializerFn;
 
 public:
-
     StateWidget(QWidget* parent = nullptr) :
         QStackedWidget(parent),
         _widgetEventProxy(this),
@@ -25,6 +25,37 @@ public:
         _widgets(),
         _popupPushButton(new QPushButton())
     {
+        setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
+
+        _popupPushButton->setFixedSize(22, 22);
+
+        QObject::connect(_popupPushButton, &QPushButton::clicked, [this]() {
+            auto popupWidget = new QWidget(this);
+
+            popupWidget->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
+
+            auto groupBox = new QGroupBox();
+            auto groupBoxLayout = new QVBoxLayout();
+
+            groupBoxLayout->addWidget(_widgets.first());
+
+            groupBox->setTitle(_widgets.first()->getTitle());
+            groupBox->setLayout(groupBoxLayout);
+
+            popupWidget->setLayout(new QVBoxLayout());
+            
+            popupWidget->layout()->setMargin(7);
+            popupWidget->layout()->addWidget(groupBox);
+
+            popupWidget->setWindowFlags(Qt::Popup);
+            popupWidget->setObjectName("PopupWidget");
+            popupWidget->setStyleSheet("QWidget#PopupWidget { border: 1px solid grey; }");
+            popupWidget->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+
+            popupWidget->move(mapToGlobal(_popupPushButton->rect().bottomLeft()) - popupWidget->rect().topLeft());
+            popupWidget->show();
+        });
+
         _widgets << new WidgetType(WidgetStateMixin::State::Popup) << new WidgetType(WidgetStateMixin::State::Compact) << new WidgetType(WidgetStateMixin::State::Full);
 
         addWidget(_popupPushButton);
@@ -50,31 +81,7 @@ public:
         /*
         _widget->initialize(plugin);
 
-        QObject::connect(_popupPushButton, &QPushButton::clicked, [this, &plugin]() {
-            auto popupWidget = new QWidget(this);
-
-            auto groupBox = new QGroupBox();
-            auto groupBoxLayout = new QVBoxLayout();
-
-            auto stateWidget = new WidgetType(this);
-
-            groupBoxLayout->addWidget(stateWidget);
-
-            stateWidget->initialize(plugin);
-
-            groupBox->setLayout(groupBoxLayout);
-
-            popupWidget->setLayout(new QVBoxLayout());
-            popupWidget->layout()->addWidget(groupBox);
-
-            popupWidget->setWindowFlags(Qt::Popup);
-            popupWidget->setObjectName("PopupWidget");
-            popupWidget->setStyleSheet("QWidget#PopupWidget { border: 1px solid grey; }");
-            popupWidget->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
-
-            popupWidget->move(mapToGlobal(_popupPushButton->rect().bottomLeft()) - popupWidget->rect().topLeft());
-            popupWidget->show();
-        });
+        
         */
     }
 

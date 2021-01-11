@@ -5,11 +5,14 @@
 
 PlotSettingsStackedWidget::PlotSettingsStackedWidget(QWidget* parent /*= nullptr*/) :
     QStackedWidget(parent),
-    _pointSettingsWidget(new PointSettingsWidget(this)),
+    _pointSettingsWidget(new StateWidget<PointSettingsWidget>(this)),
     _densitySettingsWidget(new DensitySettingsWidget(this))
 {
+    
+
     addWidget(_pointSettingsWidget);
     addWidget(_densitySettingsWidget);
+
 }
 
 void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
@@ -36,7 +39,22 @@ void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
         updateCurrentPage();
     });
 
-    _pointSettingsWidget->initialize(plugin);
+    _pointSettingsWidget->initialize(&const_cast<ScatterplotPlugin&>(plugin), [this](const QSize& sourceWidgetSize) {
+        const auto width = sourceWidgetSize.width();
+
+        auto state = WidgetStateMixin::State::Popup;
+
+        if (width >= 800 && width < 1500)
+            state = WidgetStateMixin::State::Compact;
+
+        if (width >= 1500)
+            state = WidgetStateMixin::State::Full;
+
+        return state;
+    }, [this, &plugin](PointSettingsWidget* pointSettingsWidget) {
+        pointSettingsWidget->initialize(plugin);
+    });
+
     _densitySettingsWidget->initialize(plugin);
 
     updateCurrentPage();
@@ -44,7 +62,8 @@ void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
 
 PointSettingsWidget* PlotSettingsStackedWidget::getPointSettingsWidget()
 {
-    return _pointSettingsWidget;
+    return nullptr;
+    //return _pointSettingsWidget;
 }
 
 DensitySettingsWidget* PlotSettingsStackedWidget::getDensitySettingsWidget()

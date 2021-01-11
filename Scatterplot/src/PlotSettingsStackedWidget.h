@@ -1,5 +1,7 @@
 #pragma once
 
+#include "StateWidget.h"
+
 #include <QStackedWidget>
 
 class ScatterplotPlugin;
@@ -25,6 +27,6 @@ public:
     DensitySettingsWidget* getDensitySettingsWidget();
 
 private:
-    PointSettingsWidget*        _pointSettingsWidget;
+    StateWidget<PointSettingsWidget>*        _pointSettingsWidget;
     DensitySettingsWidget*      _densitySettingsWidget;
 };

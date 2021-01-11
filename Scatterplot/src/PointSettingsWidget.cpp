@@ -1,17 +1,88 @@
 #include "PointSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
-#include "ui_PointSettingsWidget.h"
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QDoubleSpinBox>
+#include <QSlider>
 
-PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
+PointSettingsWidget::PointSettingsWidget(const WidgetStateMixin::State& state, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _ui{ std::make_unique<Ui::PointSettingsWidget>() }
+    WidgetStateMixin(state, "Point settings"),
+    _sizeLabel(new QLabel()),
+    _sizeDoubleSpinBox(new QDoubleSpinBox()),
+    _sizeSlider(new QSlider()),
+    _opacityLabel(new QLabel()),
+    _opacityDoubleSpinBox(new QDoubleSpinBox()),
+    _opacitySlider(new QSlider())
 {
-    _ui->setupUi(this);
+    _sizeSlider->setOrientation(Qt::Horizontal);
+    _opacitySlider->setOrientation(Qt::Horizontal);
+
+    QString sizeLabelText, opacityLabelText;
+
+    switch (_state)
+    {
+        case State::Popup:
+        {
+            auto layout = new QGridLayout();
+
+            sizeLabelText       = "Size:";
+            opacityLabelText    = "Opacity:";
+
+            layout->addWidget(_sizeLabel, 0, 0);
+            layout->addWidget(_sizeDoubleSpinBox, 0, 1);
+            layout->addWidget(_sizeSlider, 0, 2);
+
+            layout->addWidget(_opacityLabel, 1, 0);
+            layout->addWidget(_opacityDoubleSpinBox, 1, 1);
+            layout->addWidget(_opacitySlider, 1, 2);
+
+            setLayout(layout);
+            break;
+        }
+
+        case State::Compact:
+        case State::Full:
+        {
+            sizeLabelText       = "Point size:";
+            opacityLabelText    = "Point opacity:";
+
+            auto layout = new QHBoxLayout();
+
+            layout->addWidget(_sizeLabel);
+
+            if (_state == State::Full)
+                layout->addWidget(_sizeDoubleSpinBox);
+
+            layout->addWidget(_sizeSlider);
+
+            layout->addWidget(_opacityLabel);
+
+            if (_state == State::Full)
+                layout->addWidget(_opacityDoubleSpinBox);
+
+            layout->addWidget(_opacitySlider);
+            
+            setLayout(layout);
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    _sizeLabel->setText(sizeLabelText);
+    _opacityLabel->setText(opacityLabelText);
+
+    layout()->setMargin(0);
+    layout()->setSpacing(3);
 }
 
 void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
+    /*
     auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
 
     connect(_ui->sizeHorizontalSlider, &QSlider::valueChanged, [this, scatterPlotWidget](int value) {
@@ -56,4 +127,5 @@ void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
     _ui->sizeDoubleSpinBox->setValue(5.0);
     _ui->opacityDoubleSpinBox->setValue(50.0);
+    */
 }
