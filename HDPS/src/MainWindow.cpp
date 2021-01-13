@@ -183,9 +183,8 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 if (noOpenViewPluginDockWidgets == 0) {
                     _centralDockArea->dockWidget(0)->toggleView(true);
                 } else {
-                    if (_centralDockArea->dockWidgets().size() >= 2 && _centralDockArea->dockWidgets()[1] == dockWidget) {
+                    if (_centralDockArea->dockWidgets().size() >= 2 && _centralDockArea->dockWidgets()[1] == dockWidget)
                         _centralDockArea->dockWidget(0)->toggleView(false);
-                    }
                 }
 
                 _dockManager->removeDockWidget(dockWidget);
@@ -283,9 +282,9 @@ void MainWindow::initializeCentralDockingArea()
 
 void MainWindow::initializeAnalysisPluginsDockingArea()
 {
-    //_analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    //_analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
-    //_analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
+    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
     _analysisPluginsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
     _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion.get());
 
