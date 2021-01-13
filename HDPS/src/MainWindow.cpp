@@ -183,7 +183,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 if (noOpenViewPluginDockWidgets == 0) {
                     _centralDockArea->dockWidget(0)->toggleView(true);
                 } else {
-                    if (_centralDockArea->dockWidgets()[1] == dockWidget) {
+                    if (_centralDockArea->dockWidgets().size() >= 2 && _centralDockArea->dockWidgets()[1] == dockWidget) {
                         _centralDockArea->dockWidget(0)->toggleView(false);
                     }
                 }
