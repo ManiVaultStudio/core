@@ -19,6 +19,9 @@
 #include <QDebug>
 
 #include "DockWidgetTab.h"
+#include "DockAreaTitleBar.h"
+
+using namespace ads;
 
 namespace hdps
 {
@@ -31,16 +34,16 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _core(nullptr),
     _analysisPluginsAccordion(QSharedPointer<Accordion>::create()),
     _dataHierarchy(nullptr),
-    _dockManager(new ads::CDockManager(this)),
+    _dockManager(new CDockManager(this)),
     _analysisPluginsDockArea(nullptr),
-    _viewPluginsDockArea(nullptr),
+    _centralDockArea(nullptr),
     _lastViewPluginDockArea(nullptr),
     _settingsDockArea(nullptr),
     _loggingDockArea(nullptr),
-    _analysisPluginsDockWidget(new ads::CDockWidget("Analyses")),
-    _viewPluginsDockWidget(new ads::CDockWidget("Central")),
-    _settingsDockWidget(new ads::CDockWidget("Settings")),
-    _loggingDockWidget(new ads::CDockWidget("Logging"))
+    _analysisPluginsDockWidget(new CDockWidget("Analyses")),
+    _centralDockWidget(new CDockWidget("Views")),
+    _settingsDockWidget(new CDockWidget("Settings")),
+    _loggingDockWidget(new CDockWidget("Logging"))
 {
     setupUi(this);
 
@@ -112,7 +115,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
     if (pluginType != plugin::Type::ANALYSIS && pluginType != plugin::Type::VIEW)
         return;
 
-    auto dockWidget = new ads::CDockWidget(plugin->getGuiName());
+    auto dockWidget = new CDockWidget(plugin->getGuiName());
 
     dockWidget->setIcon(plugin->getIcon());
 
@@ -121,6 +124,8 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         case plugin::Type::ANALYSIS:
         {
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
+
+            dockWidget->setProperty("PluginType", "Analysis");
 
             _analysisPluginsAccordion->addSection(analysisPlugin->getSettings());
 
@@ -131,44 +136,61 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         {
             auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(plugin);
 
-            dockWidget->setWidget(viewPlugin);
-            
-            auto dockWidgetArea = ads::LeftDockWidgetArea;
+            dockWidget->setWidget(viewPlugin, CDockWidget::ForceNoScrollArea);
+            dockWidget->setProperty("PluginType", "View");
+
+            auto dockWidgetArea = LeftDockWidgetArea;
 
             switch (viewPlugin->getDockingLocation())
             {
                 case plugin::ViewPlugin::DockingLocation::Left:
-                    dockWidgetArea = ads::LeftDockWidgetArea;
+                    dockWidgetArea = LeftDockWidgetArea;
                     break;
 
                 case plugin::ViewPlugin::DockingLocation::Right:
-                    dockWidgetArea = ads::RightDockWidgetArea;
+                    dockWidgetArea = RightDockWidgetArea;
                     break;
 
                 case plugin::ViewPlugin::DockingLocation::Top:
-                    dockWidgetArea = ads::TopDockWidgetArea;
+                    dockWidgetArea = TopDockWidgetArea;
                     break;
 
                 case plugin::ViewPlugin::DockingLocation::Bottom:
-                    dockWidgetArea = ads::BottomDockWidgetArea;
+                    dockWidgetArea = BottomDockWidgetArea;
                     break;
 
                 case plugin::ViewPlugin::DockingLocation::Center:
-                    dockWidgetArea = ads::CenterDockWidgetArea;
+                    dockWidgetArea = CenterDockWidgetArea;
                     break;
 
                 default:
                     break;
             }
 
-            if (_lastViewPluginDockArea == nullptr)
-                dockWidgetArea = ads::CenterDockWidgetArea;
+            const auto noOpenedDockWidgets  = _centralDockArea->openedDockWidgets().count();
+            const auto shouldBeInCenter     = noOpenedDockWidgets == 1;
 
-            _lastViewPluginDockArea = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _lastViewPluginDockArea ? _lastViewPluginDockArea : _viewPluginsDockArea);
+            if (shouldBeInCenter)
+                dockWidgetArea = CenterDockWidgetArea;
 
-            _lastViewPluginDockArea->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-            _viewPluginsDockWidget->hide();
-            _viewPluginsDockWidget->tabWidget()->setVisible(false);
+            auto dockAreaWidget = shouldBeInCenter ? _centralDockArea : _lastViewPluginDockArea;
+            
+            _lastViewPluginDockArea = _dockManager->addDockWidget(dockWidgetArea, dockWidget, dockAreaWidget);
+
+            QObject::connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
+                const auto noOpenViewPluginDockWidgets = getViewPluginDockWidgets().count();
+                
+                if (noOpenViewPluginDockWidgets == 0) {
+                    _centralDockArea->dockWidget(0)->toggleView(true);
+                } else {
+                    if (_centralDockArea->dockWidgets()[1] == dockWidget) {
+                        _centralDockArea->dockWidget(0)->toggleView(false);
+                    }
+                }
+
+                _dockManager->removeDockWidget(dockWidget);
+            });
+
             break;
         }
 
@@ -177,9 +199,9 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-void MainWindow::addDockWidget(QWidget* widget, const QString& windowTitle, const ads::DockWidgetArea& dockWidgetArea, ads::CDockAreaWidget* dockAreaWidget)
+void MainWindow::addDockWidget(QWidget* widget, const QString& windowTitle, const DockWidgetArea& dockWidgetArea, CDockAreaWidget* dockAreaWidget)
 {
-    auto dockWidget = new ads::CDockWidget(windowTitle);
+    auto dockWidget = new CDockWidget(windowTitle);
 
     _dockManager->addDockWidget(dockWidgetArea, dockWidget, dockAreaWidget);
 }
@@ -226,37 +248,50 @@ void MainWindow::setDefaultWindowGeometry(const float& coverage /*= 0.7f*/) {
 
 void MainWindow::initializeDocking()
 {
-    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewIsDynamic, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewShowsContentPixmap, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::DragPreviewHasWindowFrame, true);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::OpaqueSplitterResize, false);
-    ads::CDockManager::setConfigFlag(ads::CDockManager::FocusHighlighting, true);
+    CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
+    CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
+    CDockManager::setConfigFlag(CDockManager::DragPreviewShowsContentPixmap, true);
+    CDockManager::setConfigFlag(CDockManager::DragPreviewHasWindowFrame, true);
+    CDockManager::setConfigFlag(CDockManager::OpaqueSplitterResize, false);
+    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+    CDockManager::setConfigFlag(CDockManager::EqualSplitOnInsertion, true);
+    CDockManager::setConfigFlag(CDockManager::DockAreaHasUndockButton, true);
 
-    initializeViewPluginsDockingArea();
+    initializeCentralDockingArea();
     initializeAnalysisPluginsDockingArea();
     initializeSettingsDockingArea();
     initializeLoggingDockingArea();
 }
 
-void MainWindow::initializeViewPluginsDockingArea()
+void MainWindow::initializeCentralDockingArea()
 {
-    _viewPluginsDockArea = _dockManager->setCentralWidget(_viewPluginsDockWidget);
+    QLabel* welcomeLabel = new QLabel();
 
-    _viewPluginsDockWidget->tabWidget()->setVisible(false);
+    welcomeLabel->setText("Welcome to HDPS");
+    welcomeLabel->setAlignment(Qt::AlignCenter);
+
+    _centralDockWidget->setWidget(welcomeLabel);
+
+    _centralDockArea = _dockManager->setCentralWidget(_centralDockWidget);
+   
+    _centralDockWidget->setFeature(CDockWidget::DockWidgetClosable, true);
+    _centralDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _centralDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
+    _centralDockWidget->setFeature(CDockWidget::NoTab, true);
+    _centralDockWidget->tabWidget()->setVisible(false);
 }
 
 void MainWindow::initializeAnalysisPluginsDockingArea()
 {
-    _analysisPluginsDockWidget->setFeature(ads::CDockWidget::DockWidgetClosable, false);
-    _analysisPluginsDockWidget->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
-    _analysisPluginsDockWidget->setFeature(ads::CDockWidget::DockWidgetMovable, false);
+    //_analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    //_analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+    //_analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
     _analysisPluginsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
     _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion.get());
 
-    _analysisPluginsDockArea = _dockManager->addDockWidget(ads::LeftDockWidgetArea, _analysisPluginsDockWidget);
+    _analysisPluginsDockArea = _dockManager->addDockWidget(LeftDockWidgetArea, _analysisPluginsDockWidget);
 
-    //_analysisPluginsDockArea->setDockAreaFlag(ads::CDockAreaWidget::HideSingleWidgetTitleBar, true);
+    //_analysisPluginsDockArea->setDockAreaFlag(CDockAreaWidget::HideSingleWidgetTitleBar, true);
     _analysisPluginsDockArea->setMinimumWidth(300);
     _analysisPluginsDockArea->setMaximumWidth(600);
     _analysisPluginsDockArea->resize(QSize(400, 0));
@@ -265,16 +300,16 @@ void MainWindow::initializeAnalysisPluginsDockingArea()
 
 void MainWindow::initializeSettingsDockingArea()
 {
-    _settingsDockWidget->setFeature(ads::CDockWidget::DockWidgetClosable, false);
-    _settingsDockWidget->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
-    _settingsDockWidget->setFeature(ads::CDockWidget::DockWidgetMovable, false);
+    _settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+    _settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
     _settingsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
 
     _settingsDockWidget->setWidget(_dataHierarchy.get());
 
-    _settingsDockArea = _dockManager->addDockWidget(ads::RightDockWidgetArea, _settingsDockWidget);
+    _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _settingsDockWidget);
 
-    //_settingsDockArea->setDockAreaFlag(ads::CDockAreaWidget::HideSingleWidgetTitleBar, true);
+    //_settingsDockArea->setDockAreaFlag(CDockAreaWidget::HideSingleWidgetTitleBar, true);
     _settingsDockArea->setMinimumWidth(200);
     _settingsDockArea->setMaximumWidth(400);
     _settingsDockArea->resize(QSize(300, 0));
@@ -284,12 +319,32 @@ void MainWindow::initializeLoggingDockingArea()
 {
     _loggingDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("scroll"));
 
-    _loggingDockArea = _dockManager->addDockWidget(ads::DockWidgetArea::BottomDockWidgetArea, _loggingDockWidget, _viewPluginsDockArea);
+    _loggingDockArea = _dockManager->addDockWidget(DockWidgetArea::BottomDockWidgetArea, _loggingDockWidget, _centralDockArea);
 
     _loggingDockArea->hide();
     _loggingDockArea->setMinimumHeight(100);
     _loggingDockArea->setMaximumHeight(300);
     _loggingDockArea->resize(QSize(0, 150));
+}
+
+QList<ads::CDockWidget*> MainWindow::getViewPluginDockWidgets(const bool& openOnly /*= true*/)
+{
+    QList<ads::CDockWidget*> viewPluginDockWidgets;
+
+    for (auto viewPluginDockWidget : _dockManager->dockWidgetsMap().values()) {
+        if (viewPluginDockWidget->property("PluginType").toString() != "View")
+            continue;
+
+        if (openOnly) {
+            if (!viewPluginDockWidget->isClosed())
+                viewPluginDockWidgets << viewPluginDockWidget;
+        }
+        else {
+            viewPluginDockWidgets << viewPluginDockWidget;
+        }
+    }
+
+    return viewPluginDockWidgets;
 }
 
 }
