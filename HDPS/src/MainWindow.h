@@ -122,6 +122,9 @@ private: // Docking
     /** Sets up the docking area for logging */
     void initializeLoggingDockingArea();
     
+    /** Updates the visibility of the central dock widget (depending on its content) */
+    void updateCentralWidgetVisibility();
+
     /**
      * Return a list of (open) view plugin dock widgets
      * @param open Whether to only include open dock widgets

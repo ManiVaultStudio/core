@@ -167,27 +167,22 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                     break;
             }
 
-            const auto noOpenedDockWidgets  = _centralDockArea->openedDockWidgets().count();
-            const auto shouldBeInCenter     = noOpenedDockWidgets == 1;
+            const auto dockInCenterOfCentralWidget = getViewPluginDockWidgets().isEmpty();
 
-            if (shouldBeInCenter)
+            if (getViewPluginDockWidgets().isEmpty())
                 dockWidgetArea = CenterDockWidgetArea;
 
-            auto dockAreaWidget = shouldBeInCenter ? _centralDockArea : _lastViewPluginDockArea;
+            auto dockAreaWidget = dockInCenterOfCentralWidget ? _centralDockArea : _lastViewPluginDockArea;
             
             _lastViewPluginDockArea = _dockManager->addDockWidget(dockWidgetArea, dockWidget, dockAreaWidget);
+            
+            QObject::connect(_lastViewPluginDockArea, &CDockAreaWidget::currentChanged, [this](int index) {
+                updateCentralWidgetVisibility();
+            });
 
             QObject::connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
-                const auto noOpenViewPluginDockWidgets = getViewPluginDockWidgets().count();
-                
-                if (noOpenViewPluginDockWidgets == 0) {
-                    _centralDockArea->dockWidget(0)->toggleView(true);
-                } else {
-                    if (_centralDockArea->dockWidgets().size() >= 2 && _centralDockArea->dockWidgets()[1] == dockWidget)
-                        _centralDockArea->dockWidget(0)->toggleView(false);
-                }
-
                 _dockManager->removeDockWidget(dockWidget);
+                updateCentralWidgetVisibility();
             });
 
             break;
@@ -260,6 +255,9 @@ void MainWindow::initializeDocking()
     initializeAnalysisPluginsDockingArea();
     initializeSettingsDockingArea();
     initializeLoggingDockingArea();
+
+    QObject::connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidgetVisibility);
+    QObject::connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidgetVisibility);
 }
 
 void MainWindow::initializeCentralDockingArea()
@@ -294,7 +292,6 @@ void MainWindow::initializeAnalysisPluginsDockingArea()
     _analysisPluginsDockArea->setMinimumWidth(300);
     _analysisPluginsDockArea->setMaximumWidth(600);
     _analysisPluginsDockArea->resize(QSize(400, 0));
-    
 }
 
 void MainWindow::initializeSettingsDockingArea()
@@ -324,6 +321,17 @@ void MainWindow::initializeLoggingDockingArea()
     _loggingDockArea->setMinimumHeight(100);
     _loggingDockArea->setMaximumHeight(300);
     _loggingDockArea->resize(QSize(0, 150));
+}
+
+void MainWindow::updateCentralWidgetVisibility()
+{
+    if (getViewPluginDockWidgets().count() == 0) {
+        _centralDockArea->dockWidget(0)->toggleView(true);
+    }
+    else {
+        if (_centralDockArea->dockWidgets().size() == 1)
+            _centralDockArea->dockWidget(0)->toggleView(false);
+    }
 }
 
 QList<ads::CDockWidget*> MainWindow::getViewPluginDockWidgets(const bool& openOnly /*= true*/)
