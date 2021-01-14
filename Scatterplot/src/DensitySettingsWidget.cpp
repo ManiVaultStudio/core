@@ -10,12 +10,15 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
     _doubleSpinBox(new QDoubleSpinBox()),
     _slider(new QSlider())
 {
-    _label->setText("Density:");
+    _label->setText("Sigma:");
+    
     _doubleSpinBox->setMinimum(1.0);
     _doubleSpinBox->setMaximum(50.0);
     _doubleSpinBox->setDecimals(1);
-    _slider->setMinimum(1.0);
-    _slider->setMaximum(50.0);
+
+    _slider->setOrientation(Qt::Horizontal);
+    _slider->setMinimum(1);
+    _slider->setMaximum(50);
 
     const auto toolTipText = "Density sigma";
 
@@ -63,6 +66,21 @@ void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
     const_cast<ScatterplotPlugin&>(plugin).installEventFilter(this);
 }
 
+WidgetStateMixin::State DensitySettingsWidget::getState(const QSize& sourceWidgetSize) const
+{
+    const auto width = sourceWidgetSize.width();
+
+    auto state = WidgetStateMixin::State::Popup;
+
+    if (width >= 1000 && width < 1500)
+        state = WidgetStateMixin::State::Compact;
+
+    if (width >= 1500)
+        state = WidgetStateMixin::State::Full;
+
+    return state;
+}
+
 void DensitySettingsWidget::updateState()
 {
     auto stateLayout = new QHBoxLayout();
@@ -72,6 +90,8 @@ void DensitySettingsWidget::updateState()
     stateLayout->addWidget(_slider);
 
     _doubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
+
+    _slider->setFixedWidth(_state == WidgetStateMixin::State::Popup ? 100 : 40);
 
     if (layout())
         delete layout();

@@ -12,14 +12,9 @@ template<typename WidgetType>
 class StateWidget : public QStackedWidget
 {
 public:
-
-    typedef std::function<WidgetStateMixin::State(const QSize& sourceWidgetSize)> StateFn;
-
-public:
     StateWidget(QWidget* parent = nullptr) :
         QStackedWidget(parent),
         _widgetEventProxy(this),
-        _stateFn(),
         _widget(new WidgetType(this)),
         _popupPushButton(new QPushButton())
     {
@@ -60,14 +55,9 @@ public:
         addWidget(_widget);
     }
 
-    void initialize(QWidget* sourceWidget, StateFn stateFn) {
-        _stateFn = stateFn;
-
-        _widgetEventProxy.initialize(sourceWidget, [this](const QSize& sourceWidgetSize) {
-            if (!_stateFn)
-                return;
-
-            const auto state = _stateFn(sourceWidgetSize);
+    void setListenWidget(QWidget* listenWidget) {
+        _widgetEventProxy.initialize(listenWidget, [this](const QSize& sourceWidgetSize) {
+            const auto state = _widget->getState(sourceWidgetSize);
 
             switch (state)
             {
@@ -104,7 +94,6 @@ public:
 
 protected:
     hdps::util::WidgetResizeEventProxy      _widgetEventProxy;          /** TODO */
-    StateFn                                 _stateFn;                   /** TODO */
     WidgetType*                             _widget;                    /** TODO */
     QPushButton*                            _popupPushButton;           /** TODO */
 };

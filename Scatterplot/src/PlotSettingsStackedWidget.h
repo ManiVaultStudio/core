@@ -27,6 +27,6 @@ public:
     DensitySettingsWidget* getDensitySettingsWidget();
 
 private:
-    StateWidget<PointSettingsWidget>*        _pointSettingsWidget;
-    DensitySettingsWidget*      _densitySettingsWidget;
+    StateWidget<PointSettingsWidget>*       _pointSettingsWidget;
+    StateWidget<DensitySettingsWidget>*     _densitySettingsWidget;
 };

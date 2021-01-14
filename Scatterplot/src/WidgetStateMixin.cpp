@@ -10,11 +10,6 @@ WidgetStateMixin::WidgetStateMixin(const QString& title) :
 {
 }
 
-WidgetStateMixin::State WidgetStateMixin::getState() const
-{
-    return _state;
-}
-
 void WidgetStateMixin::setState(const State& state)
 {
     if (state == _state)

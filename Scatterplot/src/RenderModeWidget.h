@@ -15,6 +15,10 @@ public:
 
     void initialize(const ScatterplotPlugin& plugin);
     
+    State getState(const QSize& sourceWidgetSize) const override;
+
+protected:
+
     void updateState() override;
 
 private:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QSize>
 #include <QVBoxLayout>
 #include <QGroupBox>
 
@@ -20,9 +21,10 @@ public:
     
 public: // State management
 
-    State getState() const;
-
+    virtual State getState(const QSize& sourceWidgetSize) const = 0;
     void setState(const State& state);
+
+protected:
 
     virtual void updateState() = 0;
 

@@ -17,58 +17,98 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
     _opacityDoubleSpinBox(new QDoubleSpinBox()),
     _opacitySlider(new QSlider())
 {
+    _sizeDoubleSpinBox->setMinimum(1.0);
+    _sizeDoubleSpinBox->setMaximum(20.0);
+    _sizeDoubleSpinBox->setDecimals(1);
+    _sizeDoubleSpinBox->setSuffix("px");
+
     _sizeSlider->setOrientation(Qt::Horizontal);
+    _sizeSlider->setMinimum(1000);
+    _sizeSlider->setMaximum(20000);
+
+    _opacityDoubleSpinBox->setMinimum(1.0);
+    _opacityDoubleSpinBox->setMaximum(100.0);
+    _opacityDoubleSpinBox->setDecimals(1);
+    _opacityDoubleSpinBox->setSuffix("%");
+
     _opacitySlider->setOrientation(Qt::Horizontal);
+    _opacitySlider->setMinimum(1);
+    _opacitySlider->setMaximum(100);
+
+    const auto sizeToolTipText = "Point size";
+
+    _sizeLabel->setToolTip(sizeToolTipText);
+    _sizeDoubleSpinBox->setToolTip(sizeToolTipText);
+    _sizeSlider->setToolTip(sizeToolTipText);
+
+    const auto opacityToolTipText = "Point opacity";
+
+    _opacityLabel->setToolTip(opacityToolTipText);
+    _opacityDoubleSpinBox->setToolTip(opacityToolTipText);
+    _opacitySlider->setToolTip(opacityToolTipText);
 }
 
 void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
-    /*
     auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
 
-    connect(_ui->sizeHorizontalSlider, &QSlider::valueChanged, [this, scatterPlotWidget](int value) {
+    connect(_sizeSlider, &QSlider::valueChanged, [this, scatterPlotWidget](int value) {
         const auto pointSize = static_cast<float>(value) / 1000.0f;
 
-        QSignalBlocker spinBoxBlocker(_ui->sizeDoubleSpinBox);
+        QSignalBlocker spinBoxBlocker(_sizeDoubleSpinBox);
 
-        _ui->sizeDoubleSpinBox->setValue(static_cast<double>(pointSize));
+        _sizeDoubleSpinBox->setValue(static_cast<double>(pointSize));
 
         scatterPlotWidget->setPointSize(pointSize);
     });
 
-    connect(_ui->sizeDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, scatterPlotWidget](double value) {
+    connect(_sizeDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, scatterPlotWidget](double value) {
         const auto pointSize = static_cast<float>(value);
 
-        QSignalBlocker sliderBlocker(_ui->sizeHorizontalSlider);
+        QSignalBlocker sliderBlocker(_sizeSlider);
 
-        _ui->sizeHorizontalSlider->setValue(static_cast<int>(pointSize * 1000.0f));
+        _sizeSlider->setValue(static_cast<int>(pointSize * 1000.0f));
 
         scatterPlotWidget->setPointSize(pointSize);
     });
 
-    connect(_ui->opacityHorizontalSlider, &QSlider::valueChanged, [this, scatterPlotWidget](int value) {
+    connect(_opacitySlider, &QSlider::valueChanged, [this, scatterPlotWidget](int value) {
         const auto opacity = static_cast<float>(value);
 
-        QSignalBlocker spinBoxBlocker(_ui->opacityDoubleSpinBox);
+        QSignalBlocker spinBoxBlocker(_opacityDoubleSpinBox);
 
-        _ui->opacityDoubleSpinBox->setValue(static_cast<double>(opacity));
+        _opacityDoubleSpinBox->setValue(static_cast<double>(opacity));
 
         scatterPlotWidget->setAlpha(0.01f * opacity);
     });
 
-    connect(_ui->opacityDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, scatterPlotWidget](double value) {
+    connect(_opacityDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, scatterPlotWidget](double value) {
         const auto opacity = static_cast<float>(value);
 
-        QSignalBlocker sliderBlocker(_ui->opacityHorizontalSlider);
+        QSignalBlocker sliderBlocker(_opacitySlider);
 
-        _ui->opacityHorizontalSlider->setValue(static_cast<int>(opacity));
+        _opacitySlider->setValue(static_cast<int>(opacity));
 
         scatterPlotWidget->setAlpha(0.01f * opacity);
     });
 
-    _ui->sizeDoubleSpinBox->setValue(5.0);
-    _ui->opacityDoubleSpinBox->setValue(50.0);
-    */
+    _sizeDoubleSpinBox->setValue(5.0);
+    _opacityDoubleSpinBox->setValue(50.0);
+}
+
+WidgetStateMixin::State PointSettingsWidget::getState(const QSize& sourceWidgetSize) const
+{
+    const auto width = sourceWidgetSize.width();
+
+    auto state = WidgetStateMixin::State::Popup;
+
+    if (width >= 1000 && width < 1500)
+        state = WidgetStateMixin::State::Compact;
+
+    if (width >= 1500)
+        state = WidgetStateMixin::State::Full;
+
+    return state;
 }
 
 void PointSettingsWidget::updateState()
@@ -85,6 +125,12 @@ void PointSettingsWidget::updateState()
 
         setLayout(stateLayout);
     };
+
+    _sizeDoubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
+    _opacityDoubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
+
+    _sizeSlider->setFixedWidth(_state == WidgetStateMixin::State::Popup ? 100 : 40);
+    _opacitySlider->setFixedWidth(_state == WidgetStateMixin::State::Popup ? 100 : 40);
 
     switch (_state)
     {
@@ -109,6 +155,25 @@ void PointSettingsWidget::updateState()
         }
 
         case State::Compact:
+        {
+            sizeLabelText       = "Size:";
+            opacityLabelText    = "Opacity:";
+
+            auto stateLayout = new QHBoxLayout();
+
+            stateLayout->addWidget(_sizeLabel);
+            stateLayout->addWidget(_sizeDoubleSpinBox);
+            stateLayout->addWidget(_sizeSlider);
+
+            stateLayout->addWidget(_opacityLabel);
+            stateLayout->addWidget(_opacityDoubleSpinBox);
+            stateLayout->addWidget(_opacitySlider);
+
+            applyLayout(stateLayout);
+
+            break;
+        }
+
         case State::Full:
         {
             sizeLabelText       = "Point size:";
@@ -117,17 +182,11 @@ void PointSettingsWidget::updateState()
             auto stateLayout = new QHBoxLayout();
 
             stateLayout->addWidget(_sizeLabel);
-
-            if (_state == State::Full)
-                stateLayout->addWidget(_sizeDoubleSpinBox);
-
+            stateLayout->addWidget(_sizeDoubleSpinBox);
             stateLayout->addWidget(_sizeSlider);
 
             stateLayout->addWidget(_opacityLabel);
-
-            if (_state == State::Full)
-                stateLayout->addWidget(_opacityDoubleSpinBox);
-
+            stateLayout->addWidget(_opacityDoubleSpinBox);
             stateLayout->addWidget(_opacitySlider);
 
             applyLayout(stateLayout);

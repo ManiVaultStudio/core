@@ -20,8 +20,8 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _ui{ std::make_unique<Ui::SettingsWidget>() },
     _renderModeWidget(new StateWidget<RenderModeWidget>(this)),
     _plotSettinsWidget(new PlotSettingsWidget(this)),
-    _dimensionSettinsWidget(new DimensionSettingsWidget(this)),
-    _subsetSettingsWidget(new SubsetSettingsWidget(this)),
+    _dimensionSettinsWidget(),
+    _subsetSettingsWidget(),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
@@ -35,29 +35,17 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     //_renderModeWidget->initialize(plugin);//, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
     _plotSettinsWidget->initialize(plugin);//, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
-    _dimensionSettinsWidget->initialize(plugin);//, 700, fontAwesome.getIcon("layer-group"), "Dimension settings", "Dimension settings");
-    _subsetSettingsWidget->initialize(plugin);//, 1100, fontAwesome.getIcon("vector-square"), "Subset settings", "Subset settings");
+    //_dimensionSettinsWidget->initialize(plugin);//, 700, fontAwesome.getIcon("layer-group"), "Dimension settings", "Dimension settings");
+    //_subsetSettingsWidget->initialize(plugin);//, 1100, fontAwesome.getIcon("vector-square"), "Subset settings", "Subset settings");
 
-    _renderModeWidget->initialize(&const_cast<ScatterplotPlugin&>(plugin), [this](const QSize& sourceWidgetSize) {
-            const auto width = sourceWidgetSize.width();
-
-            auto state = WidgetStateMixin::State::Popup;
-
-            if (width >= 800 && width < 1500)
-                state = WidgetStateMixin::State::Compact;
-
-            if (width >= 1500)
-                state = WidgetStateMixin::State::Full;
-
-            return state;
-    });
-
+    _renderModeWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
     _renderModeWidget->getWidget()->initialize(plugin);
 
     horizontalLayout->addWidget(_renderModeWidget);
     horizontalLayout->addWidget(_plotSettinsWidget);
-    horizontalLayout->addWidget(_dimensionSettinsWidget);
-    horizontalLayout->addWidget(_subsetSettingsWidget);
+    horizontalLayout->addStretch(1);
+    //horizontalLayout->addWidget(_dimensionSettinsWidget);
+    //horizontalLayout->addWidget(_subsetSettingsWidget);
 
     //setEnabled(false);
 

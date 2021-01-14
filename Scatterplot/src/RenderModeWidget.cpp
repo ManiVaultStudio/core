@@ -53,6 +53,21 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
     updateToggles();
 }
 
+WidgetStateMixin::State RenderModeWidget::getState(const QSize& sourceWidgetSize) const
+{
+    const auto width = sourceWidgetSize.width();
+
+    auto state = WidgetStateMixin::State::Popup;
+
+    if (width >= 1000 && width < 1500)
+        state = WidgetStateMixin::State::Compact;
+
+    if (width >= 1500)
+        state = WidgetStateMixin::State::Full;
+
+    return state;
+}
+
 void RenderModeWidget::updateState()
 {
     QLayout* stateLayout = nullptr;
