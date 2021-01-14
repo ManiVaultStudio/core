@@ -51,9 +51,9 @@ void PlotSettingsStackedWidget::initialize(const ScatterplotPlugin& plugin)
             state = WidgetStateMixin::State::Full;
 
         return state;
-    }, [this, &plugin](PointSettingsWidget* pointSettingsWidget) {
-        pointSettingsWidget->initialize(plugin);
     });
+
+    _pointSettingsWidget->getWidget()->initialize(plugin);
 
     _densitySettingsWidget->initialize(plugin);
 

@@ -26,7 +26,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
     ////_ui->setupUi(this);
-
+    setAutoFillBackground(true);
     auto horizontalLayout = new QHBoxLayout();
 
     setLayout(horizontalLayout);
@@ -50,9 +50,9 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
                 state = WidgetStateMixin::State::Full;
 
             return state;
-    }, [this, &plugin](RenderModeWidget* renderModeWidget) {
-        renderModeWidget->initialize(plugin);
     });
+
+    _renderModeWidget->getWidget()->initialize(plugin);
 
     horizontalLayout->addWidget(_renderModeWidget);
     horizontalLayout->addWidget(_plotSettinsWidget);

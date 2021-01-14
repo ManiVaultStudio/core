@@ -14,15 +14,13 @@ class StateWidget : public QStackedWidget
 public:
 
     typedef std::function<WidgetStateMixin::State(const QSize& sourceWidgetSize)> StateFn;
-    typedef std::function<void(WidgetType* widget)> WidgetInitializerFn;
 
 public:
     StateWidget(QWidget* parent = nullptr) :
         QStackedWidget(parent),
         _widgetEventProxy(this),
         _stateFn(),
-        _widgetInitializerFn(),
-        _widgets(),
+        _widget(new WidgetType(this)),
         _popupPushButton(new QPushButton())
     {
         setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
@@ -37,13 +35,15 @@ public:
             auto groupBox = new QGroupBox();
             auto groupBoxLayout = new QVBoxLayout();
 
-            groupBoxLayout->addWidget(_widgets.first());
+            groupBoxLayout->addWidget(_widget);
 
-            groupBox->setTitle(_widgets.first()->getTitle());
+            _widget->show();
+
+            groupBox->setTitle(_widget->getTitle());
             groupBox->setLayout(groupBoxLayout);
 
             popupWidget->setLayout(new QVBoxLayout());
-            
+
             popupWidget->layout()->setMargin(7);
             popupWidget->layout()->addWidget(groupBox);
 
@@ -56,33 +56,40 @@ public:
             popupWidget->show();
         });
 
-        _widgets << new WidgetType(WidgetStateMixin::State::Popup) << new WidgetType(WidgetStateMixin::State::Compact) << new WidgetType(WidgetStateMixin::State::Full);
-
         addWidget(_popupPushButton);
-        addWidget(_widgets[1]);
-        addWidget(_widgets[2]);
+        addWidget(_widget);
     }
 
-    void initialize(QWidget* sourceWidget, StateFn stateFn, WidgetInitializerFn widgetInitializerFn) {
+    void initialize(QWidget* sourceWidget, StateFn stateFn) {
         _stateFn = stateFn;
-        _widgetInitializerFn = widgetInitializerFn;
 
         _widgetEventProxy.initialize(sourceWidget, [this](const QSize& sourceWidgetSize) {
             if (!_stateFn)
                 return;
 
-            setCurrentIndex(static_cast<int>(_stateFn(sourceWidgetSize)));
+            const auto state = _stateFn(sourceWidgetSize);
+
+            switch (state)
+            {
+                case WidgetStateMixin::State::Popup:
+                    setCurrentIndex(0);
+                    break;
+
+                case WidgetStateMixin::State::Compact:
+                case WidgetStateMixin::State::Full:
+                    setCurrentIndex(1);
+                    break;
+
+                default:
+                    break;
+            }
+
+            _widget->setState(state);
         });
+    }
 
-        for (auto widget : _widgets)
-            _widgetInitializerFn(widget);
-
-
-        /*
-        _widget->initialize(plugin);
-
-        
-        */
+    WidgetType* getWidget() {
+        return _widget;
     }
 
 public:
@@ -98,7 +105,6 @@ public:
 protected:
     hdps::util::WidgetResizeEventProxy      _widgetEventProxy;          /** TODO */
     StateFn                                 _stateFn;                   /** TODO */
-    WidgetInitializerFn                     _widgetInitializerFn;       /** TODO */
-    QList<WidgetType*>                      _widgets;                   /** TODO */
+    WidgetType*                             _widget;                    /** TODO */
     QPushButton*                            _popupPushButton;           /** TODO */
 };

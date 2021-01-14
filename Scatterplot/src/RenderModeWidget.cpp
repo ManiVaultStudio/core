@@ -7,7 +7,7 @@
 const QSize RenderModeWidget::BUTTON_SIZE_COMPACT = QSize(22, 22);
 const QSize RenderModeWidget::BUTTON_SIZE_FULL = QSize(60, 22);
 
-RenderModeWidget::RenderModeWidget(const WidgetStateMixin::State& state, QWidget* parent /*= nullptr*/) :
+RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     WidgetStateMixin("Render mode"),
     _scatterPlotPushButton(new QPushButton()),
@@ -17,8 +17,6 @@ RenderModeWidget::RenderModeWidget(const WidgetStateMixin::State& state, QWidget
     _scatterPlotPushButton->setCheckable(true);
     _densityPlotPushButton->setCheckable(true);
     _contourPlotPushButton->setCheckable(true);
-
-    setState(state);
 }
 
 void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
@@ -57,17 +55,17 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
 
 void RenderModeWidget::updateState()
 {
-    QLayout* layout = nullptr;
+    QLayout* stateLayout = nullptr;
 
     switch (_state)
     {
         case State::Popup:
-            layout = new QVBoxLayout();
+            stateLayout = new QVBoxLayout();
             break;
 
         case State::Compact:
         case State::Full:
-            layout = new QHBoxLayout();
+            stateLayout = new QHBoxLayout();
             break;
 
         default:
@@ -91,12 +89,15 @@ void RenderModeWidget::updateState()
         _contourPlotPushButton->setText("C");
     }
 
-    layout->setMargin(0);
-    layout->addWidget(_scatterPlotPushButton);
-    layout->addWidget(_densityPlotPushButton);
-    layout->addWidget(_contourPlotPushButton);
+    stateLayout->setMargin(0);
+    stateLayout->addWidget(_scatterPlotPushButton);
+    stateLayout->addWidget(_densityPlotPushButton);
+    stateLayout->addWidget(_contourPlotPushButton);
 
-    setLayout(layout);
+    if (layout())
+        delete layout();
+
+    setLayout(stateLayout);
 }
 
 /*

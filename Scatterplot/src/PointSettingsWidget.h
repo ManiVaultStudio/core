@@ -13,7 +13,7 @@ class QSlider;
 class PointSettingsWidget : public QWidget, public WidgetStateMixin
 {
 public:
-    PointSettingsWidget(const WidgetStateMixin::State& state, QWidget* parent = nullptr);
+    PointSettingsWidget(QWidget* parent = nullptr);
 
     void initialize(const ScatterplotPlugin& plugin);
 

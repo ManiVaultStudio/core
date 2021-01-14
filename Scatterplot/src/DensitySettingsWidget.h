@@ -1,22 +1,26 @@
 #pragma once
 
+#include "WidgetStateMixin.h"
+
 #include <QWidget>
 
 class ScatterplotPlugin;
 
-namespace Ui {
-    class DensitySettingsWidget;
-}
+class QLabel;
+class QDoubleSpinBox;
+class QSlider;
 
-class DensitySettingsWidget : public QWidget
+class DensitySettingsWidget : public QWidget, public WidgetStateMixin
 {
 public:
     DensitySettingsWidget(QWidget* parent = nullptr);
 
     void initialize(const ScatterplotPlugin& plugin);
 
-    bool eventFilter(QObject* target, QEvent* event) override;
+    void updateState() override;
 
 private:
-    std::unique_ptr<Ui::DensitySettingsWidget>        _ui;        /** Externally loaded UI */
+    QLabel*             _label;
+    QDoubleSpinBox*     _doubleSpinBox;
+    QSlider*            _slider;
 };

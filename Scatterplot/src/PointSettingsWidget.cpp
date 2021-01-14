@@ -7,7 +7,7 @@
 #include <QDoubleSpinBox>
 #include <QSlider>
 
-PointSettingsWidget::PointSettingsWidget(const WidgetStateMixin::State& state, QWidget* parent /*= nullptr*/) :
+PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     WidgetStateMixin("Point settings"),
     _sizeLabel(new QLabel()),
@@ -19,8 +19,6 @@ PointSettingsWidget::PointSettingsWidget(const WidgetStateMixin::State& state, Q
 {
     _sizeSlider->setOrientation(Qt::Horizontal);
     _opacitySlider->setOrientation(Qt::Horizontal);
-
-    setState(state);
 }
 
 void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
@@ -77,24 +75,36 @@ void PointSettingsWidget::updateState()
 {
     QString sizeLabelText, opacityLabelText;
 
+    const auto applyLayout = [this](QLayout* stateLayout) {
+        Q_ASSERT(stateLayout != nullptr);
+
+        if (layout())
+            delete layout();
+
+        stateLayout->setMargin(0);
+
+        setLayout(stateLayout);
+    };
+
     switch (_state)
     {
         case State::Popup:
         {
-            auto layout = new QGridLayout();
+            auto stateLayout = new QGridLayout();
 
-            sizeLabelText = "Size:";
-            opacityLabelText = "Opacity:";
+            sizeLabelText       = "Size:";
+            opacityLabelText    = "Opacity:";
 
-            layout->addWidget(_sizeLabel, 0, 0);
-            layout->addWidget(_sizeDoubleSpinBox, 0, 1);
-            layout->addWidget(_sizeSlider, 0, 2);
+            stateLayout->addWidget(_sizeLabel, 0, 0);
+            stateLayout->addWidget(_sizeDoubleSpinBox, 0, 1);
+            stateLayout->addWidget(_sizeSlider, 0, 2);
 
-            layout->addWidget(_opacityLabel, 1, 0);
-            layout->addWidget(_opacityDoubleSpinBox, 1, 1);
-            layout->addWidget(_opacitySlider, 1, 2);
+            stateLayout->addWidget(_opacityLabel, 1, 0);
+            stateLayout->addWidget(_opacityDoubleSpinBox, 1, 1);
+            stateLayout->addWidget(_opacitySlider, 1, 2);
 
-            setLayout(layout);
+            applyLayout(stateLayout);
+
             break;
         }
 
@@ -104,23 +114,24 @@ void PointSettingsWidget::updateState()
             sizeLabelText       = "Point size:";
             opacityLabelText    = "Point opacity:";
 
-            auto layout = new QHBoxLayout();
+            auto stateLayout = new QHBoxLayout();
 
-            layout->addWidget(_sizeLabel);
-
-            if (_state == State::Full)
-                layout->addWidget(_sizeDoubleSpinBox);
-
-            layout->addWidget(_sizeSlider);
-
-            layout->addWidget(_opacityLabel);
+            stateLayout->addWidget(_sizeLabel);
 
             if (_state == State::Full)
-                layout->addWidget(_opacityDoubleSpinBox);
+                stateLayout->addWidget(_sizeDoubleSpinBox);
 
-            layout->addWidget(_opacitySlider);
+            stateLayout->addWidget(_sizeSlider);
 
-            setLayout(layout);
+            stateLayout->addWidget(_opacityLabel);
+
+            if (_state == State::Full)
+                stateLayout->addWidget(_opacityDoubleSpinBox);
+
+            stateLayout->addWidget(_opacitySlider);
+
+            applyLayout(stateLayout);
+
             break;
         }
 
@@ -130,7 +141,4 @@ void PointSettingsWidget::updateState()
 
     _sizeLabel->setText(sizeLabelText);
     _opacityLabel->setText(opacityLabelText);
-
-    layout()->setMargin(0);
-    layout()->setSpacing(3);
 }
