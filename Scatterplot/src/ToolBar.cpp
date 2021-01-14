@@ -3,7 +3,7 @@
 
 #include "RenderModeWidget.h"
 #include "PlotSettingsWidget.h"
-#include "DimensionSettingsWidget.h"
+#include "PositionSettingsWidget.h"
 #include "SubsetSettingsWidget.h"
 
 #include <QPainter>
@@ -20,7 +20,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _ui{ std::make_unique<Ui::SettingsWidget>() },
     _renderModeWidget(new StateWidget<RenderModeWidget>(this)),
     _plotSettinsWidget(new PlotSettingsWidget(this)),
-    _dimensionSettinsWidget(),
+    _positionSettingsWidget(new StateWidget<PositionSettingsWidget>(this)),
     _subsetSettingsWidget(),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
@@ -41,8 +41,12 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _renderModeWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
     _renderModeWidget->getWidget()->initialize(plugin);
 
+    _positionSettingsWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
+    _positionSettingsWidget->getWidget()->initialize(plugin);
+
     horizontalLayout->addWidget(_renderModeWidget);
     horizontalLayout->addWidget(_plotSettinsWidget);
+    horizontalLayout->addWidget(_positionSettingsWidget);
     horizontalLayout->addStretch(1);
     //horizontalLayout->addWidget(_dimensionSettinsWidget);
     //horizontalLayout->addWidget(_subsetSettingsWidget);
@@ -60,12 +64,12 @@ SettingsWidget::~SettingsWidget()
 
 int SettingsWidget::getXDimension()
 {
-    return _dimensionSettinsWidget->getDimensionX();
+    return _positionSettingsWidget->getWidget()->getDimensionX();
 }
 
 int SettingsWidget::getYDimension()
 {
-    return _dimensionSettinsWidget->getDimensionY();
+    return _positionSettingsWidget->getWidget()->getDimensionY();
 }
 
 hdps::Vector3f SettingsWidget::getBaseColor()
@@ -80,20 +84,20 @@ hdps::Vector3f SettingsWidget::getSelectionColor()
 
 void SettingsWidget::initDimOptions(const unsigned int nDim)
 {
-    return _dimensionSettinsWidget->setDimensions(nDim);
+    return _positionSettingsWidget->getWidget()->setDimensions(nDim);
 }
 
 void SettingsWidget::initDimOptions(const std::vector<QString>& dimNames)
 {
-    return _dimensionSettinsWidget->setDimensions(dimNames.size(), dimNames);
+    return _positionSettingsWidget->getWidget()->setDimensions(dimNames.size(), dimNames);
 }
 
 void SettingsWidget::initScalarDimOptions(const unsigned int nDim)
 {
-    return _dimensionSettinsWidget->setScalarDimensions(nDim);
+    //_dimensionSettinsWidget->setScalarDimensions(nDim);
 }
 
 void SettingsWidget::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
-    return _dimensionSettinsWidget->setScalarDimensions(dimNames.size(), dimNames);
+    //_dimensionSettinsWidget->setScalarDimensions(dimNames.size(), dimNames);
 }
