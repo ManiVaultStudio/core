@@ -68,11 +68,6 @@ WidgetStateMixin::State RenderModeWidget::getState(const QSize& sourceWidgetSize
     return state;
 }
 
-QIcon RenderModeWidget::getIcon() const
-{
-    return hdps::Application::getIconFont("FontAwesome").getIcon("toggle-on");
-}
-
 void RenderModeWidget::updateState()
 {
     if (layout())

@@ -83,11 +83,6 @@ WidgetStateMixin::State DensitySettingsWidget::getState(const QSize& sourceWidge
     return state;
 }
 
-QIcon DensitySettingsWidget::getIcon() const
-{
-    return hdps::Application::getIconFont("FontAwesome").getIcon("circle");
-}
-
 void DensitySettingsWidget::updateState()
 {
     if (layout())

@@ -4,7 +4,7 @@
 #include "RenderModeWidget.h"
 #include "PlotSettingsWidget.h"
 #include "PositionSettingsWidget.h"
-#include "SubsetSettingsWidget.h"
+#include "SelectionSettingsWidget.h"
 
 #include <QPainter>
 #include <QStyleOption>
@@ -21,7 +21,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _renderModeWidget(new StateWidget<RenderModeWidget>(this)),
     _plotSettinsWidget(new PlotSettingsWidget(this)),
     _positionSettingsWidget(new StateWidget<PositionSettingsWidget>(this)),
-    _subsetSettingsWidget(new StateWidget<SubsetSettingsWidget>(this)),
+    _selectionSettingsWidget(new StateWidget<SelectionSettingsWidget>(this)),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
@@ -45,12 +45,13 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _positionSettingsWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
     _positionSettingsWidget->getWidget()->initialize(plugin);
 
-    _positionSettingsWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
-    _positionSettingsWidget->getWidget()->initialize(plugin);
+    _selectionSettingsWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
+    _selectionSettingsWidget->getWidget()->initialize(plugin);
 
     horizontalLayout->addWidget(_renderModeWidget);
     horizontalLayout->addWidget(_plotSettinsWidget);
     horizontalLayout->addWidget(_positionSettingsWidget);
+    horizontalLayout->addWidget(_selectionSettingsWidget);
     horizontalLayout->addStretch(1);
     //horizontalLayout->addWidget(_dimensionSettinsWidget);
     //horizontalLayout->addWidget(_subsetSettingsWidget);

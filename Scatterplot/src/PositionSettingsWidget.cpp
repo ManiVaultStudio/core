@@ -69,11 +69,6 @@ WidgetStateMixin::State PositionSettingsWidget::getState(const QSize& sourceWidg
     return state;
 }
 
-QIcon PositionSettingsWidget::getIcon() const
-{
-    return hdps::Application::getIconFont("FontAwesome").getIcon("map-marker");
-}
-
 void PositionSettingsWidget::updateState()
 {
     if (layout())

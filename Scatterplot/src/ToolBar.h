@@ -3,7 +3,6 @@
 #include "graphics/Vector3f.h"
 
 #include "StateWidget.h"
-#include "RenderModeWidget.h"
 
 #include <QWidget>
 
@@ -16,7 +15,7 @@ namespace Ui {
 class RenderModeWidget;
 class PlotSettingsWidget;
 class PositionSettingsWidget;
-class SubsetSettingsWidget;
+class SelectionSettingsWidget;
 
 class SettingsWidget : public QWidget
 {
@@ -41,8 +40,8 @@ private:
     std::unique_ptr<Ui::SettingsWidget>     _ui;                            /** Externally loaded UI */
     StateWidget<RenderModeWidget>*          _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
     PlotSettingsWidget*                     _plotSettinsWidget;             /** Widget for plot settings (depends on the render mode) */
-    StateWidget<PositionSettingsWidget>*   _positionSettingsWidget;        /** Widget for selection position and color dimensions */
-    StateWidget<SubsetSettingsWidget>*                   _subsetSettingsWidget;          /** Widget for creating subsets from selected points */
+    StateWidget<PositionSettingsWidget>*    _positionSettingsWidget;        /** Widget for selection position and color dimensions */
+    StateWidget<SelectionSettingsWidget>*   _selectionSettingsWidget;       /** Widget for creating subsets from selected points */
     hdps::Vector3f                          _baseColor;                     /** Base color */
     hdps::Vector3f                          _selectionColor;                /** Selection color */
 

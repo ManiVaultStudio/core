@@ -28,7 +28,6 @@ class ScatterplotPlugin : public ViewPlugin
     
 public:
     ScatterplotPlugin();
-
     ~ScatterplotPlugin(void) override;
     
     /** Returns the icon of this plugin */

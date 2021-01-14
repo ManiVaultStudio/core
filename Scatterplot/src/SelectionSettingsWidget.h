@@ -12,7 +12,7 @@ class QComboBox;
 class QPushButton;
 class QDoubleSpinBox;
 class QSlider;
-class QCheckbox;
+class QCheckBox;
 
 class SelectionSettingsWidget : public QWidget, public WidgetStateMixin
 {

@@ -19,8 +19,6 @@ public:
 
     State getState(const QSize& sourceWidgetSize) const override;
 
-    QIcon getIcon() const override;
-
 protected:
 
     void updateState() override;
