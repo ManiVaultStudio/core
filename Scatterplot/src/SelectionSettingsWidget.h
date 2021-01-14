@@ -1,17 +1,20 @@
 #pragma once
 
-#include <memory>
+#include "WidgetStateMixin.h"
 
 #include <QWidget>
 
 class ScatterplotPlugin;
 class PixelSelectionTool;
 
-namespace Ui {
-	class SelectionSettingsWidget;
-}
+class QLabel;
+class QComboBox;
+class QPushButton;
+class QDoubleSpinBox;
+class QSlider;
+class QCheckbox;
 
-class SelectionSettingsWidget : public QWidget
+class SelectionSettingsWidget : public QWidget, public WidgetStateMixin
 {
 public:
 
@@ -19,6 +22,23 @@ public:
 
     void initialize(const ScatterplotPlugin& plugin);
 
+    State getState(const QSize& sourceWidgetSize) const override;
+
+protected:
+
+    void updateState() override;
+
 private:
-    std::unique_ptr<Ui::SelectionSettingsWidget>    _ui;        /** User interface as produced by Qt designer */
+    QLabel*             _typeLabel;
+    QComboBox*          _typeComboBox;
+    QPushButton*        _modifierAddPushButton;
+    QPushButton*        _modifierRemovePushButton;
+    QLabel*             _radiusLabel;
+    QDoubleSpinBox*     _radiusDoubleSpinBox;
+    QSlider*            _radiusSlider;
+    QLabel*             _selectLabel;
+    QPushButton*        _clearSelectionPushButton;
+    QPushButton*        _selectAllPushButton;
+    QPushButton*        _invertSelectionPushButton;
+    QCheckBox*          _notifyDuringSelectionCheckBox;
 };

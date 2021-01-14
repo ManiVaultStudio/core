@@ -68,8 +68,16 @@ WidgetStateMixin::State RenderModeWidget::getState(const QSize& sourceWidgetSize
     return state;
 }
 
+QIcon RenderModeWidget::getIcon() const
+{
+    return hdps::Application::getIconFont("FontAwesome").getIcon("toggle-on");
+}
+
 void RenderModeWidget::updateState()
 {
+    if (layout())
+        delete layout();
+
     QLayout* stateLayout = nullptr;
 
     switch (_state)
@@ -99,20 +107,17 @@ void RenderModeWidget::updateState()
         _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
         _densityPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
         _contourPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-        _scatterPlotPushButton->setText("S");
-        _densityPlotPushButton->setText("D");
-        _contourPlotPushButton->setText("C");
+        _scatterPlotPushButton->setText("SP");
+        _densityPlotPushButton->setText("DP");
+        _contourPlotPushButton->setText("CP");
     }
+
+    setLayout(stateLayout);
 
     stateLayout->setMargin(0);
     stateLayout->addWidget(_scatterPlotPushButton);
     stateLayout->addWidget(_densityPlotPushButton);
     stateLayout->addWidget(_contourPlotPushButton);
-
-    if (layout())
-        delete layout();
-
-    setLayout(stateLayout);
 }
 
 /*

@@ -4,6 +4,7 @@
 #include <QSize>
 #include <QVBoxLayout>
 #include <QGroupBox>
+#include <QIcon>
 
 class WidgetStateMixin
 {
@@ -31,20 +32,6 @@ protected:
 public:
 
     QString getTitle() const;
-
-    template<typename GroupBoxLayoutType>
-    std::pair<QVBoxLayout*, GroupBoxLayoutType*> getPopupLayout(QWidget* parent) {
-        auto popupLayout    = new QVBoxLayout();
-        auto groupBox       = new QGroupBox(parent);
-        auto groupBoxLayout = new GroupBoxLayoutType();
-
-        groupBox->setTitle(getTitle());
-        groupBox->setLayout(groupBoxLayout);
-
-        popupLayout->addWidget(groupBox);
-
-        return std::pair<QVBoxLayout*, GroupBoxLayoutType*>(popupLayout, groupBoxLayout);
-    }
 
 protected:
     State       _state;

@@ -7,7 +7,7 @@
 
 DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    WidgetStateMixin("Density settings"),
+    WidgetStateMixin("Plot"),
     _label(new QLabel()),
     _doubleSpinBox(new QDoubleSpinBox()),
     _slider(new QSlider())
@@ -83,9 +83,19 @@ WidgetStateMixin::State DensitySettingsWidget::getState(const QSize& sourceWidge
     return state;
 }
 
+QIcon DensitySettingsWidget::getIcon() const
+{
+    return hdps::Application::getIconFont("FontAwesome").getIcon("circle");
+}
+
 void DensitySettingsWidget::updateState()
 {
+    if (layout())
+        delete layout();
+
     auto stateLayout = new QHBoxLayout();
+
+    setLayout(stateLayout);
 
     stateLayout->addWidget(_label);
     stateLayout->addWidget(_doubleSpinBox);
@@ -95,10 +105,5 @@ void DensitySettingsWidget::updateState()
 
     _slider->setFixedWidth(_state == WidgetStateMixin::State::Popup ? 100 : 40);
 
-    if (layout())
-        delete layout();
-
     stateLayout->setMargin(0);
-
-    setLayout(stateLayout);
 }

@@ -21,7 +21,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _renderModeWidget(new StateWidget<RenderModeWidget>(this)),
     _plotSettinsWidget(new PlotSettingsWidget(this)),
     _positionSettingsWidget(new StateWidget<PositionSettingsWidget>(this)),
-    _subsetSettingsWidget(),
+    _subsetSettingsWidget(new StateWidget<SubsetSettingsWidget>(this)),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
@@ -29,9 +29,10 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     setAutoFillBackground(true);
     auto horizontalLayout = new QHBoxLayout();
 
-    setLayout(horizontalLayout);
+    horizontalLayout->setMargin(4);
+    horizontalLayout->setSpacing(5);
 
-    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
+    setLayout(horizontalLayout);
 
     //_renderModeWidget->initialize(plugin);//, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
     _plotSettinsWidget->initialize(plugin);//, 400, fontAwesome.getIcon("cog"), "Plot settings", "Plot settings");
@@ -44,6 +45,9 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _positionSettingsWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
     _positionSettingsWidget->getWidget()->initialize(plugin);
 
+    _positionSettingsWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
+    _positionSettingsWidget->getWidget()->initialize(plugin);
+
     horizontalLayout->addWidget(_renderModeWidget);
     horizontalLayout->addWidget(_plotSettinsWidget);
     horizontalLayout->addWidget(_positionSettingsWidget);
@@ -51,7 +55,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     //horizontalLayout->addWidget(_dimensionSettinsWidget);
     //horizontalLayout->addWidget(_subsetSettingsWidget);
 
-    //setEnabled(false);
+    setEnabled(false);
 
     QObject::connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
         setEnabled(!currentDataset.isEmpty());

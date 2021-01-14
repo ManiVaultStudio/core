@@ -12,12 +12,6 @@ PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
     _yDimensionLabel(new QLabel()),
     _yDimensionComboBox(new QComboBox())
 {
-    _xDimensionLabel->setText("X:");
-    _yDimensionLabel->setText("Y:");
-
-    _xDimensionComboBox->setFixedWidth(100);
-    _yDimensionComboBox->setFixedWidth(100);
-
     const auto xDimensionToolTipText = "X dimension";
 
     _xDimensionLabel->setToolTip(xDimensionToolTipText);
@@ -63,22 +57,30 @@ WidgetStateMixin::State PositionSettingsWidget::getState(const QSize& sourceWidg
 
     auto state = WidgetStateMixin::State::Popup;
 
-    if (width >= 1000 && width < 1500)
+    if (width < 500)
+        state = WidgetStateMixin::State::Popup;
+
+    if (width >= 500 && width < 2000)
         state = WidgetStateMixin::State::Compact;
 
-    if (width >= 1500)
+    if (width >= 2000)
         state = WidgetStateMixin::State::Full;
 
     return state;
 }
 
+QIcon PositionSettingsWidget::getIcon() const
+{
+    return hdps::Application::getIconFont("FontAwesome").getIcon("map-marker");
+}
+
 void PositionSettingsWidget::updateState()
 {
+    if (layout())
+        delete layout();
+
     const auto applyLayout = [this](QLayout* stateLayout) {
         Q_ASSERT(stateLayout != nullptr);
-
-        if (layout())
-            delete layout();
 
         stateLayout->setMargin(0);
 
@@ -93,6 +95,8 @@ void PositionSettingsWidget::updateState()
         {
             auto stateLayout = new QGridLayout();
 
+            applyLayout(stateLayout);
+
             xDimensionLabelText = "X dimension:";
             yDimensionLabelText = "Y dimension:";
 
@@ -101,41 +105,36 @@ void PositionSettingsWidget::updateState()
             stateLayout->addWidget(_yDimensionLabel, 1, 0);
             stateLayout->addWidget(_yDimensionComboBox, 1, 1);
 
-            applyLayout(stateLayout);
-
             break;
         }
 
         case State::Compact:
         {
-            xDimensionLabelText = "X dim.:";
-            yDimensionLabelText = "Y dim.:";
-
             auto stateLayout = new QHBoxLayout();
+
+            applyLayout(stateLayout);
 
             stateLayout->addWidget(_xDimensionLabel);
             stateLayout->addWidget(_xDimensionComboBox);
             stateLayout->addWidget(_yDimensionLabel);
             stateLayout->addWidget(_yDimensionComboBox);
-
-            applyLayout(stateLayout);
 
             break;
         }
 
         case State::Full:
         {
-            xDimensionLabelText = "X dimension:";
-            yDimensionLabelText = "Y dimension:";
+            xDimensionLabelText = "X:";
+            yDimensionLabelText = "Y:";
 
             auto stateLayout = new QHBoxLayout();
+
+            applyLayout(stateLayout);
 
             stateLayout->addWidget(_xDimensionLabel);
             stateLayout->addWidget(_xDimensionComboBox);
             stateLayout->addWidget(_yDimensionLabel);
             stateLayout->addWidget(_yDimensionComboBox);
-
-            applyLayout(stateLayout);
 
             break;
         }
@@ -144,13 +143,18 @@ void PositionSettingsWidget::updateState()
             break;
     }
 
+    const auto labelsVisible = _state != WidgetStateMixin::State::Compact;
+
+    _xDimensionLabel->setVisible(labelsVisible);
+    _yDimensionLabel->setVisible(labelsVisible);
+
     _xDimensionLabel->setText(xDimensionLabelText);
     _yDimensionLabel->setText(yDimensionLabelText);
 
-    /*
-    _doubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
-    _slider->setFixedWidth(_state == WidgetStateMixin::State::Popup ? 100 : 40);
-    */
+    const auto fixedComboBoxWidth = _state == WidgetStateMixin::State::Compact ? 75 : 150;
+
+    _xDimensionComboBox->setFixedWidth(fixedComboBoxWidth);
+    _yDimensionComboBox->setFixedWidth(fixedComboBoxWidth);
 }
 
 int PositionSettingsWidget::getDimensionX()
