@@ -37,7 +37,6 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dockManager(new CDockManager(this)),
     _analysisPluginsDockArea(nullptr),
     _centralDockArea(nullptr),
-    _lastViewPluginDockArea(nullptr),
     _settingsDockArea(nullptr),
     _loggingDockArea(nullptr),
     _analysisPluginsDockWidget(new CDockWidget("Analyses")),
@@ -138,6 +137,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
             dockWidget->setWidget(viewPlugin, CDockWidget::ForceNoScrollArea);
             dockWidget->setProperty("PluginType", "View");
+            dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
 
             auto dockWidgetArea = LeftDockWidgetArea;
 
@@ -167,19 +167,15 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                     break;
             }
 
-            const auto dockInCenterOfCentralWidget = getViewPluginDockWidgets().isEmpty();
-
             if (getViewPluginDockWidgets().isEmpty())
                 dockWidgetArea = CenterDockWidgetArea;
 
-            auto dockAreaWidget = dockInCenterOfCentralWidget ? _centralDockArea : _lastViewPluginDockArea;
+            _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
             
-            _lastViewPluginDockArea = _dockManager->addDockWidget(dockWidgetArea, dockWidget, dockAreaWidget);
-            
-            QObject::connect(_lastViewPluginDockArea, &CDockAreaWidget::currentChanged, [this](int index) {
+            QObject::connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
                 updateCentralWidgetVisibility();
             });
-
+            
             QObject::connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
                 _dockManager->removeDockWidget(dockWidget);
                 updateCentralWidgetVisibility();
@@ -343,7 +339,7 @@ QList<ads::CDockWidget*> MainWindow::getViewPluginDockWidgets(const bool& openOn
             continue;
 
         if (openOnly) {
-            if (!viewPluginDockWidget->isClosed())
+            if (!viewPluginDockWidget->isClosed() && !viewPluginDockWidget->isFloating())
                 viewPluginDockWidgets << viewPluginDockWidget;
         }
         else {
