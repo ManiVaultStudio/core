@@ -58,6 +58,8 @@ public:
         _widgetEventProxy.initialize(listenWidget, [this](const QSize& sourceWidgetSize) {
             const auto state = _widget->getState(sourceWidgetSize);
 
+            _widget->setState(state);
+
             switch (state)
             {
                 case WidgetStateMixin::State::Popup:
@@ -78,8 +80,6 @@ public:
                 default:
                     break;
             }
-
-            _widget->setState(state);
         });
     }
 
