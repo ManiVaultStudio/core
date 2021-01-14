@@ -52,7 +52,6 @@ public:
         });
 
         addWidget(_popupPushButton);
-        addWidget(_widget);
     }
 
     void setListenWidget(QWidget* listenWidget) {
@@ -62,13 +61,19 @@ public:
             switch (state)
             {
                 case WidgetStateMixin::State::Popup:
+                {
                     setCurrentIndex(0);
+                    removeWidget(_widget);
                     break;
+                }
 
                 case WidgetStateMixin::State::Compact:
                 case WidgetStateMixin::State::Full:
+                {
+                    addWidget(_widget);
                     setCurrentIndex(1);
                     break;
+                }
 
                 default:
                     break;

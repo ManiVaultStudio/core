@@ -1,7 +1,9 @@
 #include "DensitySettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
-#include "ui_DensitySettingsWidget.h"
+#include <QLabel>
+#include <QDoubleSpinBox>
+#include <QSlider>
 
 DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
