@@ -15,6 +15,8 @@ public:
 
     void initialize(const ScatterplotPlugin& plugin);
     
+    void updateState() override;
+
 private:
     QPushButton*        _scatterPlotPushButton;
     QPushButton*        _densityPlotPushButton;

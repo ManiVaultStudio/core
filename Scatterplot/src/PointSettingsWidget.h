@@ -17,6 +17,8 @@ public:
 
     void initialize(const ScatterplotPlugin& plugin);
 
+    void updateState() override;
+
 private:
     QLabel*             _sizeLabel;
     QDoubleSpinBox*     _sizeDoubleSpinBox;
