@@ -111,7 +111,7 @@ private: // Docking
     void initializeDocking();
 
     /** Sets up the docking area for view plugins (central widget) */
-    void initializeViewPluginsDockingArea();
+    void initializeCentralDockingArea();
 
     /** Sets up the docking area for analysis plugins */
     void initializeAnalysisPluginsDockingArea();
@@ -122,22 +122,31 @@ private: // Docking
     /** Sets up the docking area for logging */
     void initializeLoggingDockingArea();
     
+    /** Updates the visibility of the central dock widget (depending on its content) */
+    void updateCentralWidgetVisibility();
+
+    /**
+     * Return a list of (open) view plugin dock widgets
+     * @param open Whether to only include open dock widgets
+     * @return View plugin dock area widgets
+     */
+    QList<ads::CDockWidget*> getViewPluginDockWidgets(const bool& openOnly = true);
+
 private:
     QSharedPointer<Core>            _core;                          /** HDPS core */
     QSharedPointer<Accordion>       _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
     QSharedPointer<DataHierarchy>   _dataHierarchy;                 /** Data hierarchy viewer widget */
 
 private: // Docking
-    ads::CDockManager*              _dockManager;                   /** Manager for docking */
-    ads::CDockAreaWidget*           _analysisPluginsDockArea;       /** Docking area for analysis plugins */
-    ads::CDockAreaWidget*           _viewPluginsDockArea;           /** Docking area for view plugins */
-    ads::CDockAreaWidget*           _lastViewPluginDockArea;        /** Docking area for last added view plugin */
-    ads::CDockAreaWidget*           _settingsDockArea;              /** Docking area for settings */
-    ads::CDockAreaWidget*           _loggingDockArea;               /** Docking area for logging */
-    ads::CDockWidget*               _analysisPluginsDockWidget;     /** Dock widget for analysis plugins */
-    ads::CDockWidget*               _viewPluginsDockWidget;         /** Dock widget for view plugins */
-    ads::CDockWidget*               _settingsDockWidget;            /** Dock widget for settings */
-    ads::CDockWidget*               _loggingDockWidget;             /** Dock widget for logging */
+    ads::CDockManager*      _dockManager;                   /** Manager for docking */
+    ads::CDockAreaWidget*   _analysisPluginsDockArea;       /** Docking area for analysis plugins */
+    ads::CDockAreaWidget*   _centralDockArea;               /** Docking area for view plugins */
+    ads::CDockAreaWidget*   _settingsDockArea;              /** Docking area for settings */
+    ads::CDockAreaWidget*   _loggingDockArea;               /** Docking area for logging */
+    ads::CDockWidget*       _analysisPluginsDockWidget;     /** Dock widget for analysis plugins */
+    ads::CDockWidget*       _centralDockWidget;             /** Dock widget for view plugins */
+    ads::CDockWidget*       _settingsDockWidget;            /** Dock widget for settings */
+    ads::CDockWidget*       _loggingDockWidget;             /** Dock widget for logging */
 };
 
 }
