@@ -80,6 +80,8 @@ void ScatterplotPlugin::init()
 
         selectPoints();
     });
+
+    updateWindowTitle();
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -251,6 +253,8 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
     updateData();
 
     _pixelSelectionTool->setEnabled(!_currentDataSet.isEmpty());
+
+    updateWindowTitle();
 }
 
 void ScatterplotPlugin::onColorDataInput(QString dataSetName)
@@ -657,6 +661,14 @@ void ScatterplotPlugin::invertSelection()
     }
 
     _core->notifySelectionChanged(selectionSet.getDataName());
+}
+
+void ScatterplotPlugin::updateWindowTitle()
+{
+    if (_currentDataSet.isEmpty())
+        setWindowTitle(getGuiName());
+    else
+        setWindowTitle(QString("%1: %2").arg(getGuiName(), _currentDataSet));
 }
 
 // =============================================================================
