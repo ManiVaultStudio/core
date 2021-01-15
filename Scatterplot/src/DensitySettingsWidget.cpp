@@ -98,7 +98,7 @@ void DensitySettingsWidget::updateState()
 
     _doubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
 
-    _slider->setFixedWidth(_state == WidgetStateMixin::State::Popup ? 100 : 40);
+    _slider->setFixedWidth(_state == WidgetStateMixin::State::Compact ? 50 : 110);
 
     stateLayout->setMargin(0);
 }

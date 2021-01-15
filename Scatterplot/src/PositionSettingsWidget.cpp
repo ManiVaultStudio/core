@@ -16,11 +16,13 @@ PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
 
     _xDimensionLabel->setToolTip(xDimensionToolTipText);
     _xDimensionComboBox->setToolTip(xDimensionToolTipText);
+    _xDimensionComboBox->setFixedHeight(20);
 
     const auto yDimensionToolTipText = "Y dimension";
 
     _yDimensionLabel->setToolTip(yDimensionToolTipText);
     _yDimensionComboBox->setToolTip(yDimensionToolTipText);
+    _yDimensionComboBox->setFixedHeight(20);
 }
 
 void PositionSettingsWidget::initialize(const ScatterplotPlugin& plugin)

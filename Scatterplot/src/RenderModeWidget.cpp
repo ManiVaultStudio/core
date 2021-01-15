@@ -4,7 +4,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 
-const QSize RenderModeWidget::BUTTON_SIZE_COMPACT = QSize(22, 22);
+const QSize RenderModeWidget::BUTTON_SIZE_COMPACT = QSize(25, 22);
 const QSize RenderModeWidget::BUTTON_SIZE_FULL = QSize(60, 22);
 
 RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :

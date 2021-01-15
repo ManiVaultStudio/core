@@ -196,8 +196,8 @@ void PointSettingsWidget::updateState()
     _sizeDoubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
     _opacityDoubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
 
-    _sizeSlider->setFixedWidth(_state == WidgetStateMixin::State::Popup ? 100 : 40);
-    _opacitySlider->setFixedWidth(_state == WidgetStateMixin::State::Popup ? 100 : 40);
+    _sizeSlider->setFixedWidth(_state == WidgetStateMixin::State::Compact ? 50 : 110);
+    _opacitySlider->setFixedWidth(_state == WidgetStateMixin::State::Compact ? 50 : 110);
 
     _sizeLabel->setText(sizeLabelText);
     _opacityLabel->setText(opacityLabelText);
