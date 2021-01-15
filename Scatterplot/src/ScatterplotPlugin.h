@@ -62,6 +62,11 @@ public: // Selection
     void clearSelection();
     void invertSelection();
 
+private:
+
+    /** Updates the window title (includes the name of the loaded dataset) */
+    void updateWindowTitle();
+
 public slots:
     void onDataInput(QString dataSetName);
     void onColorDataInput(QString dataSetName);

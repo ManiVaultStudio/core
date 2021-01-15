@@ -140,6 +140,10 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             dockWidget->setProperty("PluginType", "View");
             dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
 
+            connect(viewPlugin, &QWidget::windowTitleChanged, [this, dockWidget](const QString& title) {
+                dockWidget->setWindowTitle(title);
+            });
+
             auto dockWidgetArea = LeftDockWidgetArea;
 
             switch (viewPlugin->getDockingLocation())
