@@ -122,7 +122,8 @@ void PointSettingsWidget::updateState()
     const auto applyLayout = [this](QLayout* stateLayout) {
         Q_ASSERT(stateLayout != nullptr);
 
-        stateLayout->setMargin(0);
+        stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
+        stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
 
         setLayout(stateLayout);
     };

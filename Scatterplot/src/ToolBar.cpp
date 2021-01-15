@@ -4,6 +4,7 @@
 #include "RenderModeWidget.h"
 #include "PlotSettingsWidget.h"
 #include "PositionSettingsWidget.h"
+#include "SubsetSettingsWidget.h"
 #include "SelectionSettingsWidget.h"
 
 #include <QPainter>
@@ -21,6 +22,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _renderModeWidget(new StateWidget<RenderModeWidget>(this)),
     _plotSettinsWidget(new PlotSettingsWidget(this)),
     _positionSettingsWidget(new StateWidget<PositionSettingsWidget>(this)),
+    _subsetSettingsWidget(new StateWidget<SubsetSettingsWidget>(this)),
     _selectionSettingsWidget(new StateWidget<SelectionSettingsWidget>(this)),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
@@ -29,8 +31,8 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     setAutoFillBackground(true);
     auto horizontalLayout = new QHBoxLayout();
 
-    horizontalLayout->setMargin(4);
-    horizontalLayout->setSpacing(5);
+    horizontalLayout->setMargin(6);
+    horizontalLayout->setSpacing(7);
 
     setLayout(horizontalLayout);
 
@@ -48,15 +50,30 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _selectionSettingsWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
     _selectionSettingsWidget->getWidget()->initialize(plugin);
 
+    _subsetSettingsWidget->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
+    _subsetSettingsWidget->getWidget()->initialize(plugin);
+
+    const auto getVerticalLine = []() -> QFrame* {
+        auto verticalLine = new QFrame();
+        
+        verticalLine->setFrameShape(QFrame::VLine);
+        verticalLine->setFrameShadow(QFrame::Sunken);
+
+        return verticalLine;
+    };
+
     horizontalLayout->addWidget(_renderModeWidget);
+    horizontalLayout->addWidget(getVerticalLine());
     horizontalLayout->addWidget(_plotSettinsWidget);
+    horizontalLayout->addWidget(getVerticalLine());
     horizontalLayout->addWidget(_positionSettingsWidget);
+    horizontalLayout->addWidget(getVerticalLine());
+    horizontalLayout->addWidget(_subsetSettingsWidget);
+    horizontalLayout->addWidget(getVerticalLine());
     horizontalLayout->addWidget(_selectionSettingsWidget);
     horizontalLayout->addStretch(1);
-    //horizontalLayout->addWidget(_dimensionSettinsWidget);
-    //horizontalLayout->addWidget(_subsetSettingsWidget);
 
-    //setEnabled(false);
+    setEnabled(false);
 
     QObject::connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
         setEnabled(!currentDataset.isEmpty());

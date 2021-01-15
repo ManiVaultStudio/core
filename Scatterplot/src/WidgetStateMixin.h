@@ -2,9 +2,6 @@
 
 #include <QString>
 #include <QSize>
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QIcon>
 
 class WidgetStateMixin
 {
@@ -36,4 +33,8 @@ public:
 protected:
     State       _state;
     QString     _title;
+
+public:
+    const std::int32_t  LAYOUT_MARGIN   = 0;
+    const std::int32_t  LAYOUT_SPACING  = 4;
 };

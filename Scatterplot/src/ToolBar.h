@@ -15,6 +15,7 @@ namespace Ui {
 class RenderModeWidget;
 class PlotSettingsWidget;
 class PositionSettingsWidget;
+class SubsetSettingsWidget;
 class SelectionSettingsWidget;
 
 class SettingsWidget : public QWidget
@@ -38,10 +39,11 @@ public:
 
 private:
     std::unique_ptr<Ui::SettingsWidget>     _ui;                            /** Externally loaded UI */
-    StateWidget<RenderModeWidget>*          _renderModeWidget;              /** Widget for picking a render mode (scatter plot, density and contour map) */
-    PlotSettingsWidget*                     _plotSettinsWidget;             /** Widget for plot settings (depends on the render mode) */
-    StateWidget<PositionSettingsWidget>*    _positionSettingsWidget;        /** Widget for selection position and color dimensions */
-    StateWidget<SelectionSettingsWidget>*   _selectionSettingsWidget;       /** Widget for creating subsets from selected points */
+    StateWidget<RenderModeWidget>*          _renderModeWidget;              /** TODO */
+    PlotSettingsWidget*                     _plotSettinsWidget;             /** TODO */
+    StateWidget<PositionSettingsWidget>*    _positionSettingsWidget;        /** TODO */
+    StateWidget<SubsetSettingsWidget>*      _subsetSettingsWidget;          /** TODO */
+    StateWidget<SelectionSettingsWidget>*   _selectionSettingsWidget;       /** TODO */
     hdps::Vector3f                          _baseColor;                     /** Base color */
     hdps::Vector3f                          _selectionColor;                /** Selection color */
 

@@ -572,6 +572,9 @@ std::uint32_t ScatterplotPlugin::getNumPoints() const
 
 std::uint32_t ScatterplotPlugin::getNumSelectedPoints() const
 {
+    if (_currentDataSet.isEmpty())
+        return 0;
+
     const Points& points    = _core->requestData<Points>(_currentDataSet);
     const Points& selection = static_cast<Points&>(points.getSelection());
 

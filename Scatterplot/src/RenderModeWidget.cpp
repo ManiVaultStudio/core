@@ -109,7 +109,9 @@ void RenderModeWidget::updateState()
 
     setLayout(stateLayout);
 
-    stateLayout->setMargin(0);
+    stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
+    stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
+
     stateLayout->addWidget(_scatterPlotPushButton);
     stateLayout->addWidget(_densityPlotPushButton);
     stateLayout->addWidget(_contourPlotPushButton);

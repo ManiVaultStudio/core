@@ -79,7 +79,8 @@ void PositionSettingsWidget::updateState()
     const auto applyLayout = [this](QLayout* stateLayout) {
         Q_ASSERT(stateLayout != nullptr);
 
-        stateLayout->setMargin(0);
+        stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
+        stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
 
         setLayout(stateLayout);
     };
@@ -148,7 +149,7 @@ void PositionSettingsWidget::updateState()
     _xDimensionLabel->setText(xDimensionLabelText);
     _yDimensionLabel->setText(yDimensionLabelText);
 
-    const auto fixedComboBoxWidth = _state == WidgetStateMixin::State::Compact ? 75 : 150;
+    const auto fixedComboBoxWidth = _state == WidgetStateMixin::State::Compact ? 60 : 120;
 
     _xDimensionComboBox->setFixedWidth(fixedComboBoxWidth);
     _yDimensionComboBox->setFixedWidth(fixedComboBoxWidth);

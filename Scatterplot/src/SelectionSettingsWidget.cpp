@@ -37,7 +37,9 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _typeLabel->hide();
     _typeLabel->setToolTip("Selection type");
 
-    _typeLayout->setMargin(0);
+    _typeLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
+    _typeLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
+
     _typeLayout->addWidget(_typeComboBox);
     _typeLayout->addWidget(_modifierAddPushButton);
     _typeLayout->addWidget(_modifierRemovePushButton);
@@ -60,7 +62,9 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 
     _radiusLabel->setToolTip("Brush radius");
 
-    _radiusLayout->setMargin(0);
+    _radiusLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
+    _radiusLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
+
     _radiusLayout->addWidget(_radiusDoubleSpinBox);
     _radiusLayout->addWidget(_radiusSlider);
 
@@ -81,7 +85,9 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 
     _selectLabel->setToolTip("Select");
 
-    _selectLayout->setMargin(0);
+    _selectLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
+    _selectLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
+
     _selectLayout->addWidget(_clearSelectionPushButton);
     _selectLayout->addWidget(_selectAllPushButton);
     _selectLayout->addWidget(_invertSelectionPushButton);
@@ -90,80 +96,66 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _selectWidget->setLayout(_selectLayout);
 
     _clearSelectionPushButton->setToolTip("Removes all items from the selection");
-    _clearSelectionPushButton->setFixedHeight(22);
+    _clearSelectionPushButton->setFixedSize(50, 22);
 
     _selectAllPushButton->setToolTip("Select all items");
-    _selectAllPushButton->setFixedHeight(22);
+    _selectAllPushButton->setFixedSize(50, 22);
 
     _invertSelectionPushButton->setToolTip("Invert the selection");
-    _invertSelectionPushButton->setFixedHeight(22);
+    _invertSelectionPushButton->setFixedSize(50, 22);
 
     _notifyDuringSelectionCheckBox->setToolTip("Whether the selection updates are published continuously or at end of the selection process");
 }
 
 void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
-    /*
-     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
-
-    _ui->typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
-
     auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
     auto& pixelSelectionTool = scatterplotPlugin.getSelectionTool();
 
-    QObject::connect(_ui->typeComboBox, &QComboBox::currentTextChanged, [this, &pixelSelectionTool](QString currentText) {
+    QObject::connect(_typeComboBox, &QComboBox::currentTextChanged, [this, &pixelSelectionTool](QString currentText) {
         pixelSelectionTool.setType(PixelSelectionTool::getTypeEnum(currentText));
     });
-
+    
     const auto updateTypeUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
         const auto canSelect = scatterplotPlugin.canSelect();
 
-        _ui->typeLabel->setEnabled(canSelect);
-        _ui->typeComboBox->setEnabled(canSelect);
-        _ui->typeComboBox->setCurrentText(PixelSelectionTool::getTypeName(pixelSelectionTool.getType()));
+        _typeLabel->setEnabled(canSelect);
+        _typeComboBox->setEnabled(canSelect);
+        _typeComboBox->setCurrentText(PixelSelectionTool::getTypeName(pixelSelectionTool.getType()));
     };
 
-    _ui->modifierAddPushButton->setFont(fontAwesome.getFont(8));
-    _ui->modifierAddPushButton->setText(fontAwesome.getIconCharacter("plus"));
-    _ui->modifierRemovePushButton->setFont(fontAwesome.getFont(8));
-    _ui->modifierRemovePushButton->setText(fontAwesome.getIconCharacter("minus"));
-    _ui->radiusSpinBox->setMinimum(PixelSelectionTool::RADIUS_MIN);
-    _ui->radiusSpinBox->setMaximum(PixelSelectionTool::RADIUS_MAX);
-    _ui->radiusSlider->setMinimum(PixelSelectionTool::RADIUS_MIN * 1000.0f);
-    _ui->radiusSlider->setMaximum(PixelSelectionTool::RADIUS_MAX * 1000.0f);
-
-    QObject::connect(_ui->modifierAddPushButton, &QPushButton::toggled, [this, &pixelSelectionTool](bool checked) {
+    QObject::connect(_modifierAddPushButton, &QPushButton::toggled, [this, &pixelSelectionTool](bool checked) {
         pixelSelectionTool.setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
     });
 
-    QObject::connect(_ui->modifierRemovePushButton, &QPushButton::toggled, [this, &pixelSelectionTool](bool checked) {
+    QObject::connect(_modifierRemovePushButton, &QPushButton::toggled, [this, &pixelSelectionTool](bool checked) {
         pixelSelectionTool.setModifier(checked ? PixelSelectionTool::Modifier::Remove : PixelSelectionTool::Modifier::Replace);
     });
 
-    QObject::connect(_ui->radiusSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, &pixelSelectionTool](double value) {
+    QObject::connect(_radiusDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), [this, &pixelSelectionTool](double value) {
         pixelSelectionTool.setRadius(static_cast<float>(value));
     });
 
-    QObject::connect(_ui->radiusSlider, qOverload<int>(&QSlider::valueChanged), [this, &pixelSelectionTool](int value) {
-        pixelSelectionTool.setRadius(PixelSelectionTool::RADIUS_MIN + ((static_cast<float>(value) - _ui->radiusSlider->minimum()) / 1000.0f));
+    QObject::connect(_radiusSlider, qOverload<int>(&QSlider::valueChanged), [this, &pixelSelectionTool](int value) {
+        pixelSelectionTool.setRadius(PixelSelectionTool::RADIUS_MIN + ((static_cast<float>(value) - _radiusSlider->minimum()) / 1000.0f));
     });
 
-    QObject::connect(_ui->selectAllPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
+    QObject::connect(_selectAllPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
         scatterplotPlugin.selectAll();
     });
 
-    QObject::connect(_ui->clearSelectionPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
+    QObject::connect(_clearSelectionPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
         scatterplotPlugin.clearSelection();
     });
 
-    QObject::connect(_ui->invertSelectionPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
+    QObject::connect(_invertSelectionPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
         scatterplotPlugin.invertSelection();
     });
 
-    QObject::connect(_ui->notifyDuringSelectionCheckBox, &QCheckBox::toggled, [this, &pixelSelectionTool](bool checked) {
+    QObject::connect(_notifyDuringSelectionCheckBox, &QCheckBox::toggled, [this, &pixelSelectionTool](bool checked) {
         pixelSelectionTool.setNotifyDuringSelection(checked);
     });
-
+    
     const auto updateModifierUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
         const auto canSelect = scatterplotPlugin.canSelect();
 
@@ -171,22 +163,22 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
         {
             case PixelSelectionTool::Modifier::Replace:
             {
-                _ui->modifierAddPushButton->setChecked(false);
-                _ui->modifierRemovePushButton->setChecked(false);
+                _modifierAddPushButton->setChecked(false);
+                _modifierRemovePushButton->setChecked(false);
                 break;
             }
 
             case PixelSelectionTool::Modifier::Add:
             {
-                _ui->modifierAddPushButton->setChecked(true);
-                _ui->modifierRemovePushButton->setChecked(false);
+                _modifierAddPushButton->setChecked(true);
+                _modifierRemovePushButton->setChecked(false);
                 break;
             }
 
             case PixelSelectionTool::Modifier::Remove:
             {
-                _ui->modifierAddPushButton->setChecked(false);
-                _ui->modifierRemovePushButton->setChecked(true);
+                _modifierAddPushButton->setChecked(false);
+                _modifierRemovePushButton->setChecked(true);
                 break;
             }
 
@@ -194,8 +186,8 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
                 break;
         }
 
-        _ui->modifierAddPushButton->setEnabled(canSelect);
-        _ui->modifierRemovePushButton->setEnabled(canSelect);
+        _modifierAddPushButton->setEnabled(canSelect);
+        _modifierRemovePushButton->setEnabled(canSelect);
     };
 
     const auto updateRadiusUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
@@ -222,9 +214,9 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
             }
         }
 
-        _ui->radiusLabel->setEnabled(radiusEnabled);
-        _ui->radiusSpinBox->setEnabled(radiusEnabled);
-        _ui->radiusSlider->setEnabled(radiusEnabled);
+        _radiusLabel->setEnabled(radiusEnabled);
+        _radiusDoubleSpinBox->setEnabled(radiusEnabled);
+        _radiusSlider->setEnabled(radiusEnabled);
     };
 
     QObject::connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, [this, updateRadiusUI](const PixelSelectionTool::Type& type) {
@@ -236,18 +228,18 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     });
 
     QObject::connect(&pixelSelectionTool, &PixelSelectionTool::radiusChanged, [this, &pixelSelectionTool](const float& radius) {
-        _ui->radiusSpinBox->setValue(pixelSelectionTool.getRadius());
-        _ui->radiusSlider->setValue(pixelSelectionTool.getRadius() * 1000.0f);
+        _radiusDoubleSpinBox->setValue(pixelSelectionTool.getRadius());
+        _radiusSlider->setValue(pixelSelectionTool.getRadius() * 1000.0f);
     });
 
     QObject::connect(&pixelSelectionTool, &PixelSelectionTool::notifyDuringSelectionChanged, [this](const bool& notifyDuringSelection) {
-        _ui->notifyDuringSelectionCheckBox->setChecked(notifyDuringSelection);
+        _notifyDuringSelectionCheckBox->setChecked(notifyDuringSelection);
     });
 
     const auto updateSelectionButtons = [this, &scatterplotPlugin]() {
-        _ui->selectAllPushButton->setEnabled(scatterplotPlugin.canSelectAll());
-        _ui->clearSelectionPushButton->setEnabled(scatterplotPlugin.canClearSelection());
-        _ui->invertSelectionPushButton->setEnabled(scatterplotPlugin.canInvertSelection());
+        _selectAllPushButton->setEnabled(scatterplotPlugin.canSelectAll());
+        _clearSelectionPushButton->setEnabled(scatterplotPlugin.canClearSelection());
+        _invertSelectionPushButton->setEnabled(scatterplotPlugin.canInvertSelection());
     };
 
     QObject::connect(&scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, &scatterplotPlugin, updateModifierUI, updateRadiusUI, updateSelectionButtons]() {
@@ -261,7 +253,6 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     updateSelectionButtons();
 
     pixelSelectionTool.setChanged();
-    */
 }
 
 WidgetStateMixin::State SelectionSettingsWidget::getState(const QSize& sourceWidgetSize) const
@@ -288,7 +279,8 @@ void SelectionSettingsWidget::updateState()
     const auto applyLayout = [this](QLayout* stateLayout) {
         Q_ASSERT(stateLayout != nullptr);
 
-        stateLayout->setMargin(0);
+        stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
+        stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
 
         setLayout(stateLayout);
     };

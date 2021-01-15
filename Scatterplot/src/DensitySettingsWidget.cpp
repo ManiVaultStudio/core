@@ -91,6 +91,9 @@ void DensitySettingsWidget::updateState()
     auto stateLayout = new QHBoxLayout();
 
     setLayout(stateLayout);
+    
+    stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
+    stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
 
     stateLayout->addWidget(_label);
     stateLayout->addWidget(_doubleSpinBox);
@@ -99,6 +102,4 @@ void DensitySettingsWidget::updateState()
     _doubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
 
     _slider->setFixedWidth(_state == WidgetStateMixin::State::Compact ? 50 : 110);
-
-    stateLayout->setMargin(0);
 }
