@@ -4,9 +4,6 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 
-const QSize RenderModeWidget::BUTTON_SIZE_COMPACT = QSize(25, 22);
-const QSize RenderModeWidget::BUTTON_SIZE_FULL = QSize(60, 22);
-
 RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     WidgetStateMixin("Render mode"),
@@ -75,37 +72,56 @@ void RenderModeWidget::updateState()
 
     QLayout* stateLayout = nullptr;
 
+    QSize buttonSize;
+
     switch (_state)
     {
         case State::Popup:
+        {
             stateLayout = new QVBoxLayout();
+
+            _scatterPlotPushButton->setText("Scatter Plot");
+            _densityPlotPushButton->setText("Density Plot");
+            _contourPlotPushButton->setText("Contour Plot");
+
+            buttonSize = QSize(90, 22);
+
             break;
+        }
 
         case State::Compact:
-        case State::Full:
+        {
             stateLayout = new QHBoxLayout();
+
+            _scatterPlotPushButton->setText("SP");
+            _densityPlotPushButton->setText("DP");
+            _contourPlotPushButton->setText("CP");
+
+            buttonSize = QSize(25, 22);
+
             break;
+        }
+
+        case State::Full:
+        {
+            stateLayout = new QHBoxLayout();
+
+            _scatterPlotPushButton->setText("Scatter");
+            _densityPlotPushButton->setText("Density");
+            _contourPlotPushButton->setText("Contour");
+
+            buttonSize = QSize(60, 22);
+
+            break;
+        }
 
         default:
             break;
     }
 
-    if (_state == State::Popup || _state == State::Full) {
-        _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-        _densityPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-        _contourPlotPushButton->setFixedSize(BUTTON_SIZE_FULL);
-        _scatterPlotPushButton->setText("Scatter");
-        _densityPlotPushButton->setText("Density");
-        _contourPlotPushButton->setText("Contour");
-    }
-    else {
-        _scatterPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-        _densityPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-        _contourPlotPushButton->setFixedSize(BUTTON_SIZE_COMPACT);
-        _scatterPlotPushButton->setText("SP");
-        _densityPlotPushButton->setText("DP");
-        _contourPlotPushButton->setText("CP");
-    }
+    _scatterPlotPushButton->setFixedSize(buttonSize);
+    _densityPlotPushButton->setFixedSize(buttonSize);
+    _contourPlotPushButton->setFixedSize(buttonSize);
 
     setLayout(stateLayout);
 

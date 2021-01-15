@@ -149,7 +149,7 @@ void PositionSettingsWidget::updateState()
     _xDimensionLabel->setText(xDimensionLabelText);
     _yDimensionLabel->setText(yDimensionLabelText);
 
-    const auto fixedComboBoxWidth = _state == WidgetStateMixin::State::Compact ? 60 : 120;
+    const auto fixedComboBoxWidth = _state == WidgetStateMixin::State::Compact ? 80 : 120;
 
     _xDimensionComboBox->setFixedWidth(fixedComboBoxWidth);
     _yDimensionComboBox->setFixedWidth(fixedComboBoxWidth);

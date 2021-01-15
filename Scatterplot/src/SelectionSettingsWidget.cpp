@@ -54,11 +54,13 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _modifierAddPushButton->setFixedSize(22, 22);
     _modifierAddPushButton->setIcon(fontAwesome.getIcon("plus"));
     _modifierAddPushButton->setIconSize(QSize(10, 10));
+    _modifierAddPushButton->setCheckable(true);
     
     _modifierRemovePushButton->setToolTip("Remove items from the existing selection");
     _modifierRemovePushButton->setFixedSize(22, 22);
     _modifierRemovePushButton->setIcon(fontAwesome.getIcon("minus", QSize(16, 16)));
     _modifierRemovePushButton->setIconSize(QSize(10, 10));
+    _modifierRemovePushButton->setCheckable(true);
 
     _radiusLabel->setToolTip("Brush radius");
 
@@ -73,15 +75,15 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _radiusDoubleSpinBox->setToolTip("Brush radius");
     _radiusDoubleSpinBox->setDecimals(1);
     _radiusDoubleSpinBox->setSuffix("px");
-    _radiusDoubleSpinBox->setMinimum(0.0);
-    _radiusDoubleSpinBox->setMaximum(100.0);
+    _radiusDoubleSpinBox->setMinimum(static_cast<double>(PixelSelectionTool::RADIUS_MIN));
+    _radiusDoubleSpinBox->setMaximum(static_cast<double>(PixelSelectionTool::RADIUS_MAX));
     _radiusDoubleSpinBox->setSingleStep(5.0);
 
     _radiusSlider->setToolTip("Brush radius");
     _radiusSlider->setOrientation(Qt::Horizontal);
-    _radiusSlider->setMinimum(0);
-    _radiusSlider->setMaximum(100);
-    _radiusSlider->setSingleStep(5);
+    _radiusSlider->setMinimum(static_cast<int>(1000.0 * PixelSelectionTool::RADIUS_MIN));
+    _radiusSlider->setMaximum(static_cast<int>(1000.0 * PixelSelectionTool::RADIUS_MAX));
+    _radiusSlider->setSingleStep(5000);
 
     _selectLabel->setToolTip("Select");
 
@@ -115,14 +117,6 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     QObject::connect(_typeComboBox, &QComboBox::currentTextChanged, [this, &pixelSelectionTool](QString currentText) {
         pixelSelectionTool.setType(PixelSelectionTool::getTypeEnum(currentText));
     });
-    
-    const auto updateTypeUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
-        const auto canSelect = scatterplotPlugin.canSelect();
-
-        _typeLabel->setEnabled(canSelect);
-        _typeComboBox->setEnabled(canSelect);
-        _typeComboBox->setCurrentText(PixelSelectionTool::getTypeName(pixelSelectionTool.getType()));
-    };
 
     QObject::connect(_modifierAddPushButton, &QPushButton::toggled, [this, &pixelSelectionTool](bool checked) {
         pixelSelectionTool.setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
@@ -156,6 +150,14 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
         pixelSelectionTool.setNotifyDuringSelection(checked);
     });
     
+    const auto updateTypeUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
+        const auto canSelect = scatterplotPlugin.canSelect();
+
+        _typeLabel->setEnabled(canSelect);
+        _typeComboBox->setEnabled(canSelect);
+        _typeComboBox->setCurrentText(PixelSelectionTool::getTypeName(pixelSelectionTool.getType()));
+    };
+
     const auto updateModifierUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
         const auto canSelect = scatterplotPlugin.canSelect();
 
@@ -219,7 +221,8 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
         _radiusSlider->setEnabled(radiusEnabled);
     };
 
-    QObject::connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, [this, updateRadiusUI](const PixelSelectionTool::Type& type) {
+    QObject::connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, [this, updateTypeUI, updateRadiusUI](const PixelSelectionTool::Type& type) {
+        updateTypeUI();
         updateRadiusUI();
     });
 

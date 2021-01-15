@@ -25,7 +25,4 @@ private:
     QPushButton*    _scatterPlotPushButton;
     QPushButton*    _densityPlotPushButton;
     QPushButton*    _contourPlotPushButton;
-
-    static const QSize BUTTON_SIZE_COMPACT;
-    static const QSize BUTTON_SIZE_FULL;
 };
