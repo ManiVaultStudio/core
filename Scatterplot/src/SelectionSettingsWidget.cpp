@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QLabel>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QDoubleSpinBox>
 #include <QSlider>
@@ -47,17 +48,21 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _typeWidget->setLayout(_typeLayout);
 
     _typeComboBox->setToolTip("Choose the selection type");
-    _typeComboBox->setFixedHeight(20);
+    _typeComboBox->setFixedHeight(22);
     _typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
+    _typeComboBox->setStyleSheet("QComboBox { padding-top: 2px; padding-bottom: 1px; }");
+    _typeComboBox->setEditable(true);
+    _typeComboBox->lineEdit()->setReadOnly(true);
+    _typeComboBox->lineEdit()->setAlignment(Qt::AlignCenter);
 
     _modifierAddPushButton->setToolTip("Add items to the existing selection");
-    _modifierAddPushButton->setFixedSize(22, 22);
+    _modifierAddPushButton->setFixedSize(24, 24);
     _modifierAddPushButton->setIcon(fontAwesome.getIcon("plus"));
     _modifierAddPushButton->setIconSize(QSize(10, 10));
     _modifierAddPushButton->setCheckable(true);
     
     _modifierRemovePushButton->setToolTip("Remove items from the existing selection");
-    _modifierRemovePushButton->setFixedSize(22, 22);
+    _modifierRemovePushButton->setFixedSize(24, 24);
     _modifierRemovePushButton->setIcon(fontAwesome.getIcon("minus", QSize(16, 16)));
     _modifierRemovePushButton->setIconSize(QSize(10, 10));
     _modifierRemovePushButton->setCheckable(true);
@@ -98,13 +103,13 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _selectWidget->setLayout(_selectLayout);
 
     _clearSelectionPushButton->setToolTip("Removes all items from the selection");
-    _clearSelectionPushButton->setFixedSize(50, 22);
+    _clearSelectionPushButton->setFixedSize(50, 24);
 
     _selectAllPushButton->setToolTip("Select all items");
-    _selectAllPushButton->setFixedSize(50, 22);
+    _selectAllPushButton->setFixedSize(50, 24);
 
     _invertSelectionPushButton->setToolTip("Invert the selection");
-    _invertSelectionPushButton->setFixedSize(50, 22);
+    _invertSelectionPushButton->setFixedSize(50, 24);
 
     _notifyDuringSelectionCheckBox->setToolTip("Whether the selection updates are published continuously or at end of the selection process");
 }
