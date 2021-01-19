@@ -41,8 +41,8 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _typeLabel->hide();
     _typeLabel->setToolTip("Selection type");
 
-    _typeLayout->setMargin(LAYOUT_MARGIN);
-    _typeLayout->setSpacing(LAYOUT_SPACING);
+    _typeLayout->setMargin(ResponsiveToolBar::Widget::LAYOUT_MARGIN);
+    _typeLayout->setSpacing(ResponsiveToolBar::Widget::LAYOUT_SPACING);
 
     _typeLayout->addWidget(_typeComboBox);
     _typeLayout->addWidget(_modifierAddPushButton);
@@ -69,8 +69,8 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 
     _radiusLabel->setToolTip("Brush radius");
 
-    _radiusLayout->setMargin(LAYOUT_MARGIN);
-    _radiusLayout->setSpacing(LAYOUT_SPACING);
+    _radiusLayout->setMargin(ResponsiveToolBar::Widget::LAYOUT_MARGIN);
+    _radiusLayout->setSpacing(ResponsiveToolBar::Widget::LAYOUT_SPACING);
 
     _radiusLayout->addWidget(_radiusDoubleSpinBox);
     _radiusLayout->addWidget(_radiusSlider);
@@ -92,8 +92,8 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 
     _selectLabel->setToolTip("Select");
 
-    _selectLayout->setMargin(LAYOUT_MARGIN);
-    _selectLayout->setSpacing(LAYOUT_SPACING);
+    _selectLayout->setMargin(ResponsiveToolBar::Widget::LAYOUT_MARGIN);
+    _selectLayout->setSpacing(ResponsiveToolBar::Widget::LAYOUT_SPACING);
 
     _selectLayout->addWidget(_clearSelectionPushButton);
     _selectLayout->addWidget(_selectAllPushButton);

@@ -77,8 +77,8 @@ public:
         QWidget*                _widget;
 
     public:
-        const std::int32_t  LAYOUT_MARGIN = 0;
-        const std::int32_t  LAYOUT_SPACING = 6;
+        static const std::int32_t LAYOUT_MARGIN;
+        static const std::int32_t LAYOUT_SPACING;
     };
 
 public:
@@ -97,6 +97,9 @@ private:
     QWidget*            _listenWidget;      /** TODO */
     QHBoxLayout*        _layout;            /** TODO */
     QList<Widget*>      _widgets;           /** TODO */
+
+public:
+    static const QSize ICON_SIZE;
 };
 
 }

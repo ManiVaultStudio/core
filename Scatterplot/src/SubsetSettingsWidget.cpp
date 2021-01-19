@@ -23,11 +23,20 @@ SubsetSettingsWidget::SubsetSettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void SubsetSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
-    const auto updateUI = [this, &plugin]() {
-        setEnabled(const_cast<ScatterplotPlugin&>(plugin).getNumSelectedPoints() >= 1);
+    auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
+    auto scatterPlotWidget  = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+
+    const auto updateUI = [this, &scatterplotPlugin, scatterPlotWidget]() {
+        const auto isScatterPlot = scatterPlotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT;
+
+        setEnabled(isScatterPlot && scatterplotPlugin.getNumSelectedPoints() >= 1);
     };
 
     QObject::connect(&plugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, updateUI]() {
+        updateUI();
+    });
+
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updateUI](const ScatterplotWidget::RenderMode& renderMode) {
         updateUI();
     });
 

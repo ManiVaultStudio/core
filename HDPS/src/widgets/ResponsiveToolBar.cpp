@@ -8,6 +8,11 @@ namespace hdps {
 
 namespace gui {
 
+const std::int32_t ResponsiveToolBar::Widget::LAYOUT_MARGIN     = 0;
+const std::int32_t ResponsiveToolBar::Widget::LAYOUT_SPACING    = 6;
+
+const QSize ResponsiveToolBar::ICON_SIZE = QSize(12, 12);
+
 ResponsiveToolBar::Widget::Widget(const QString& title, const std::int32_t& priority /*= 0*/) :
     QStackedWidget(),
     _priority(priority),
@@ -21,7 +26,7 @@ ResponsiveToolBar::Widget::Widget(const QString& title, const std::int32_t& prio
     _sizes[State::Compact] = QSize();
     _sizes[State::Full] = QSize();
 
-    _popupPushButton->setIconSize(QSize(12, 12));
+    _popupPushButton->setIconSize(ICON_SIZE);
     _popupPushButton->setToolTip(QString("%1 settings").arg(_title));
 
     _widget->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
