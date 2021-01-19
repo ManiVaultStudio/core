@@ -24,8 +24,8 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _densitySettingsWidget(new DensitySettingsWidget(this)),
     _positionSettingsWidget(new PositionSettingsWidget(this)),
     //_colorSettingsWidget(new StateWidget<ColorSettingsWidget>(this)),
-    //_subsetSettingsWidget(new SubsetSettingsWidget(this)),
-    //_selectionSettingsWidget(new SelectionSettingsWidget(this)),
+    _subsetSettingsWidget(new SubsetSettingsWidget(this)),
+    _selectionSettingsWidget(new SelectionSettingsWidget(this)),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
@@ -40,16 +40,38 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     _responsiveToolBar->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
 
+    _renderModeWidget->initialize(plugin);
+    _pointSettingsWidget->initialize(plugin);
+    _densitySettingsWidget->initialize(plugin);
+
     _responsiveToolBar->addWidget(_renderModeWidget);
     _responsiveToolBar->addWidget(_pointSettingsWidget);
     _responsiveToolBar->addWidget(_densitySettingsWidget);
     _responsiveToolBar->addWidget(_positionSettingsWidget);
+    _responsiveToolBar->addWidget(_subsetSettingsWidget);
+    _responsiveToolBar->addWidget(_selectionSettingsWidget);
 
-    setEnabled(false);
+    
+    //setEnabled(false);
 
     QObject::connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
         setEnabled(!currentDataset.isEmpty());
     });
+
+    auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+
+    const auto updatePlotSettingsUI = [this, scatterPlotWidget]() {
+        const auto renderMode = scatterPlotWidget->getRenderMode();
+
+        _pointSettingsWidget->setVisible(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
+        _densitySettingsWidget->setVisible(renderMode != ScatterplotWidget::RenderMode::SCATTERPLOT);
+    };
+
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updatePlotSettingsUI](const ScatterplotWidget::RenderMode& renderMode) {
+        updatePlotSettingsUI();
+    });
+
+    updatePlotSettingsUI();
 }
 
 int SettingsWidget::getXDimension()

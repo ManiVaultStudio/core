@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../util/WidgetResizeEventProxy.h"
-
 #include <QWidget>
 #include <QString>
+#include <QMap>
+#include <QSize>
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QHBoxLayout>
@@ -100,12 +100,17 @@ public:
 
     void setListenWidget(QWidget* listenWidget);
 
+    bool eventFilter(QObject* target, QEvent* event);
+
     void addWidget(Widget* widget);
 
 private:
-    QHBoxLayout*                            _layout;                /** TODO */
-    hdps::util::WidgetResizeEventProxy      _widgetEventProxy;      /** TODO */
-    QList<Widget*>                          _widgets;               /** TODO */
+    void updateLayout();
+
+private:
+    QWidget*            _listenWidget;      /** TODO */
+    QHBoxLayout*        _layout;            /** TODO */
+    QList<Widget*>      _widgets;           /** TODO */
 };
 
 }

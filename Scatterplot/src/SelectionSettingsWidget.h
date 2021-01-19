@@ -21,8 +21,6 @@ public:
 
     void initialize(const ScatterplotPlugin& plugin);
 
-protected:
-
     void updateState() override;
 
 private:

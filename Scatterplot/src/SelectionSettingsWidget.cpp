@@ -50,9 +50,10 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 
     _typeComboBox->setToolTip("Choose the selection type");
     _typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
-    _typeComboBox->setEditable(true);
-    _typeComboBox->lineEdit()->setReadOnly(true);
-    _typeComboBox->lineEdit()->setAlignment(Qt::AlignCenter);
+    _typeComboBox->setFixedWidth(70);
+    //_typeComboBox->setEditable(true);
+    //_typeComboBox->lineEdit()->setReadOnly(true);
+    //_typeComboBox->lineEdit()->setAlignment(Qt::AlignCenter);
 
     _modifierAddPushButton->setToolTip("Add items to the existing selection");
     _modifierAddPushButton->setIcon(fontAwesome.getIcon("plus"));
@@ -109,6 +110,8 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _invertSelectionPushButton->setFixedWidth(50);
 
     _notifyDuringSelectionCheckBox->setToolTip("Whether the selection updates are published continuously or at end of the selection process");
+
+    computeStateSizes();
 }
 
 void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
@@ -262,61 +265,50 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
 void SelectionSettingsWidget::updateState()
 {
-    /*
-    if (layout()) {
-        delete layout();
-    }
-
-    const auto applyLayout = [this](QLayout* stateLayout) {
-        Q_ASSERT(stateLayout != nullptr);
-
-        stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
-        stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
-
-        setLayout(stateLayout);
-    };
-
     switch (_state)
     {
         case State::Popup:
         {
-            auto stateLayout = new QGridLayout();
+            auto layout = new QGridLayout();
 
-            applyLayout(stateLayout);
+            setWidgetLayout(layout);
 
-            stateLayout->addWidget(_typeLabel, 0, 0);
-            stateLayout->addWidget(_typeWidget, 0, 1);
-
-            stateLayout->addWidget(_radiusLabel, 1, 0);
-            stateLayout->addWidget(_radiusWidget, 1, 1);
-
-            stateLayout->addWidget(_selectLabel, 2, 0);
-            stateLayout->addWidget(_selectWidget, 2, 1);
-
-            stateLayout->addWidget(_notifyDuringSelectionCheckBox, 3, 1);
+            layout->addWidget(_typeLabel, 0, 0);
+            layout->addWidget(_typeWidget, 0, 1);
+            layout->addWidget(_radiusLabel, 1, 0);
+            layout->addWidget(_radiusWidget, 1, 1);
+            layout->addWidget(_selectLabel, 2, 0);
+            layout->addWidget(_selectWidget, 2, 1);
+            layout->addWidget(_notifyDuringSelectionCheckBox, 3, 1);
             
+            setCurrentIndex(0);
+
             break;
         }
 
         case State::Compact:
         {
-            auto stateLayout = new QHBoxLayout();
+            auto layout = new QHBoxLayout();
 
-            applyLayout(stateLayout);
+            setWidgetLayout(layout);
 
-            stateLayout->addWidget(_typeWidget);
+            layout->addWidget(_typeWidget);
+
+            setCurrentIndex(1);
 
             break;
         }
 
         case State::Full:
         {
-            auto stateLayout = new QHBoxLayout();
+            auto layout = new QHBoxLayout();
 
-            applyLayout(stateLayout);
+            setWidgetLayout(layout);
 
-            stateLayout->addWidget(_typeWidget);
-            stateLayout->addWidget(_selectWidget);
+            layout->addWidget(_typeWidget);
+            layout->addWidget(_selectWidget);
+
+            setCurrentIndex(1);
 
             break;
         }
@@ -325,12 +317,11 @@ void SelectionSettingsWidget::updateState()
             break;
     }
 
-    _typeLabel->setVisible(_state == WidgetStateMixin::State::Popup);
+    _typeLabel->setVisible(_state == State::Popup);
     _typeWidget->setVisible(true);
-    _radiusLabel->setVisible(_state == WidgetStateMixin::State::Popup);
-    _radiusWidget->setVisible(_state == WidgetStateMixin::State::Popup);
-    _selectLabel->setVisible(_state == WidgetStateMixin::State::Popup);
-    _selectWidget->setVisible(_state != WidgetStateMixin::State::Compact);
-    _notifyDuringSelectionCheckBox->setVisible(_state == WidgetStateMixin::State::Popup);
-    */
+    _radiusLabel->setVisible(_state == State::Popup);
+    _radiusWidget->setVisible(_state == State::Popup);
+    _selectLabel->setVisible(_state == State::Popup);
+    _selectWidget->setVisible(_state != State::Compact);
+    _notifyDuringSelectionCheckBox->setVisible(_state == State::Popup);
 }

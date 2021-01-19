@@ -45,8 +45,8 @@ private:
     PointSettingsWidget*            _pointSettingsWidget;           /** TODO */
     DensitySettingsWidget*          _densitySettingsWidget;         /** TODO */
     PositionSettingsWidget*         _positionSettingsWidget;        /** TODO */
-    //SubsetSettingsWidget*         _subsetSettingsWidget;          /** TODO */
-    //SelectionSettingsWidget*      _selectionSettingsWidget;       /** TODO */
+    SubsetSettingsWidget*           _subsetSettingsWidget;          /** TODO */
+    SelectionSettingsWidget*        _selectionSettingsWidget;       /** TODO */
     hdps::Vector3f                  _baseColor;                     /** Base color */
     hdps::Vector3f                  _selectionColor;                /** Selection color */
 

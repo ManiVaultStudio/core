@@ -81,24 +81,11 @@ void DensitySettingsWidget::updateState()
     layout->addWidget(_doubleSpinBox);
     layout->addWidget(_slider);
 
-    layout->invalidate();
-    layout->activate();
-
-    switch (_state)
-    {
-        case State::Popup:
-            setCurrentIndex(0);
-            break;
-
-        case State::Compact:
-        case State::Full:
-            setCurrentIndex(1);
-            break;
-
-        default:
-            break;
-    }
+    setCurrentIndex(_state == State::Popup ? 0 : 1);
 
     _doubleSpinBox->setVisible(_state != State::Compact);
     _slider->setFixedWidth(_state == State::Compact ? 50 : 80);
+
+    layout->invalidate();
+    layout->activate();
 }
