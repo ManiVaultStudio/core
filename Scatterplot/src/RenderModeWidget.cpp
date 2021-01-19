@@ -13,6 +13,8 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
     _densityPlotPushButton(new QPushButton()),
     _contourPlotPushButton(new QPushButton())
 {
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
+
     _scatterPlotPushButton->setCheckable(true);
     _densityPlotPushButton->setCheckable(true);
     _contourPlotPushButton->setCheckable(true);

@@ -56,10 +56,9 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _responsiveToolBar->addWidget(_subsetSettingsWidget);
     _responsiveToolBar->addWidget(_selectionSettingsWidget);
 
-    
-    //setEnabled(false);
+    setEnabled(false);
 
-    QObject::connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
+    connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
         setEnabled(!currentDataset.isEmpty());
     });
 
@@ -72,7 +71,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
         _densitySettingsWidget->setVisible(renderMode != ScatterplotWidget::RenderMode::SCATTERPLOT);
     };
 
-    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updatePlotSettingsUI](const ScatterplotWidget::RenderMode& renderMode) {
+    connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updatePlotSettingsUI](const ScatterplotWidget::RenderMode& renderMode) {
         updatePlotSettingsUI();
     });
 

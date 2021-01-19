@@ -18,6 +18,8 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
     _opacityDoubleSpinBox(new QDoubleSpinBox()),
     _opacitySlider(new QSlider())
 {
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+
     _sizeDoubleSpinBox->setMinimum(1.0);
     _sizeDoubleSpinBox->setMaximum(20.0);
     _sizeDoubleSpinBox->setDecimals(1);

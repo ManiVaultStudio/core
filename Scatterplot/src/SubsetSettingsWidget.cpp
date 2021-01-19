@@ -11,6 +11,8 @@ SubsetSettingsWidget::SubsetSettingsWidget(QWidget* parent /*= nullptr*/) :
     _createSubsetPushButton(new QPushButton()),
     _fromSourceCheckBox(new QCheckBox())
 {
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("crop-alt"));
+
     _createSubsetPushButton->setToolTip("Create a subset from the selected data points");
 
     _fromSourceCheckBox->setToolTip("Create a subset from source or derived data");
@@ -21,8 +23,15 @@ SubsetSettingsWidget::SubsetSettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void SubsetSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
-    QObject::connect(&plugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this]() {
+    const auto updateUI = [this, &plugin]() {
+        setEnabled(const_cast<ScatterplotPlugin&>(plugin).getNumSelectedPoints() >= 1);
+    };
+
+    QObject::connect(&plugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, updateUI]() {
+        updateUI();
     });
+
+    updateUI();
 }
 
 void SubsetSettingsWidget::updateState()

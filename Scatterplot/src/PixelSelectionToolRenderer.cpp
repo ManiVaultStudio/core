@@ -64,6 +64,7 @@ void PixelSelectionToolRenderer::render()
 
         glViewport(0, 0, _renderSize.width(), _renderSize.height());
 
+        
         _shaderProgram->setUniformValue("overlayTexture", 0);
 
         _dummyVAO.bind();
@@ -73,11 +74,13 @@ void PixelSelectionToolRenderer::render()
 
             _shapeTexture->bind();
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+            
         }
         _dummyVAO.release();
 
         _shaderProgram->release();
         _shapeTexture->release();
+        
     }
     catch (std::exception& e)
     {

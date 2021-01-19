@@ -12,6 +12,8 @@ ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
     _colorByComboBox(new QComboBox()),
     _colorDimensionComboBox(new QComboBox())
 {
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
+
     _colorByLabel->setToolTip("Color by");
     _colorByLabel->setText("Color by:");
 
@@ -25,22 +27,25 @@ ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void ColorSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 {
-    /*
-    QObject::connect(_xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
-        const_cast<ScatterplotPlugin&>(plugin).xDimPicked(index);
-    });
-
-    QObject::connect(_yDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
-        const_cast<ScatterplotPlugin&>(plugin).yDimPicked(index);
-    });
-    */
-
-    QObject::connect(_colorByComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
+    connect(_colorByComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
         _colorDimensionComboBox->setVisible(index == 0);
     });
+
+    connect(_colorDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this, &plugin](int index) {
+        const_cast<ScatterplotPlugin&>(plugin).cDimPicked(index);
+    });
     
-    //_ui->colorDimensionStackedWidget->initialize(plugin);
-    
+    auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+
+    const auto renderModeChanged = [this, scatterPlotWidget]() {
+        setEnabled(scatterPlotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT);
+    };
+
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, renderModeChanged](const ScatterplotWidget::RenderMode& renderMode) {
+        renderModeChanged();
+    });
+
+    renderModeChanged();
 }
 
 void ColorSettingsWidget::updateState()

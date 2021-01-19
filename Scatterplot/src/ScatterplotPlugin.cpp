@@ -38,7 +38,6 @@ ScatterplotPlugin::ScatterplotPlugin() :
 
 ScatterplotPlugin::~ScatterplotPlugin(void)
 {
-    
 }
 
 void ScatterplotPlugin::init()

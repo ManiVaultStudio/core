@@ -91,7 +91,7 @@ public:
     void addWidget(Widget* widget);
 
 private:
-    void updateLayout();
+    void updateLayout(Widget* widget = nullptr);
 
 private:
     QWidget*            _listenWidget;      /** TODO */

@@ -77,6 +77,7 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
             break;
 
         case ScatterplotWidget::LANDSCAPE:
+            //computeDensity();
             break;
 
         default:
@@ -284,22 +285,27 @@ void ScatterplotWidget::paintGL()
 
     switch (_renderMode)
     {
-    case SCATTERPLOT: _pointRenderer.render(); break;
-    case DENSITY:
-    {
-        _densityRenderer.setRenderMode(DensityRenderer::DENSITY);
-        _densityRenderer.render();
-        break;
+        case SCATTERPLOT:
+        {
+            _pointRenderer.render();
+            _pixelSelectionToolRenderer.render();
+            break;
+        }
+
+        case DENSITY:
+        {
+            _densityRenderer.setRenderMode(DensityRenderer::DENSITY);
+            _densityRenderer.render();
+            break;
+        }
+
+        case LANDSCAPE:
+        {
+            _densityRenderer.setRenderMode(DensityRenderer::LANDSCAPE);
+            _densityRenderer.render();
+            break;
+        }
     }
-    case LANDSCAPE:
-    {
-        _densityRenderer.setRenderMode(DensityRenderer::LANDSCAPE);
-        _densityRenderer.render();
-        break;
-    }
-    }
-    
-    _pixelSelectionToolRenderer.render();
 }
 
 void ScatterplotWidget::cleanup()

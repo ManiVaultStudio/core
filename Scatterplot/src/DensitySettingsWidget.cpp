@@ -8,11 +8,13 @@
 using namespace hdps::gui;
 
 DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::Widget("Plot", 100),
+    ResponsiveToolBar::Widget("Density", 100),
     _label(new QLabel()),
     _doubleSpinBox(new QDoubleSpinBox()),
     _slider(new QSlider())
 {
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+
     _label->setText("Sigma:");
     
     _doubleSpinBox->setMinimum(1.0);
