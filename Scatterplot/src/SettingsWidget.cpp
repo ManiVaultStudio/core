@@ -43,6 +43,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _renderModeWidget->initialize(plugin);
     _pointSettingsWidget->initialize(plugin);
     _densitySettingsWidget->initialize(plugin);
+    _positionSettingsWidget->initialize(plugin);
 
     _responsiveToolBar->addWidget(_renderModeWidget);
     _responsiveToolBar->addWidget(_pointSettingsWidget);
@@ -76,14 +77,12 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
 int SettingsWidget::getXDimension()
 {
-    return 0;
-    //return _positionSettingsWidget->getDimensionX();
+    return _positionSettingsWidget->getDimensionX();
 }
 
 int SettingsWidget::getYDimension()
 {
-    return 0;
-    //return _positionSettingsWidget->getDimensionY();
+    return _positionSettingsWidget->getDimensionY();
 }
 
 hdps::Vector3f SettingsWidget::getBaseColor()
@@ -98,12 +97,12 @@ hdps::Vector3f SettingsWidget::getSelectionColor()
 
 void SettingsWidget::initDimOptions(const unsigned int nDim)
 {
-    //return _positionSettingsWidget->setDimensions(nDim);
+    _positionSettingsWidget->setDimensions(nDim);
 }
 
 void SettingsWidget::initDimOptions(const std::vector<QString>& dimNames)
 {
-    //return _positionSettingsWidget->setDimensions(dimNames.size(), dimNames);
+    _positionSettingsWidget->setDimensions(dimNames.size(), dimNames);
 }
 
 void SettingsWidget::initScalarDimOptions(const unsigned int nDim)
