@@ -11,9 +11,10 @@
 #include <QSlider>
 #include <QCheckBox>
 
+using namespace hdps::gui;
+
 SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    WidgetStateMixin("Selection"),
+    ResponsiveToolBar::Widget("Selection"),
     _typeLabel(new QLabel("Type:")),
     _typeLayout(new QHBoxLayout()),
     _typeWidget(new QWidget()),
@@ -38,8 +39,8 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _typeLabel->hide();
     _typeLabel->setToolTip("Selection type");
 
-    _typeLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
-    _typeLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
+    _typeLayout->setMargin(LAYOUT_MARGIN);
+    _typeLayout->setSpacing(LAYOUT_SPACING);
 
     _typeLayout->addWidget(_typeComboBox);
     _typeLayout->addWidget(_modifierAddPushButton);
@@ -48,29 +49,25 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _typeWidget->setLayout(_typeLayout);
 
     _typeComboBox->setToolTip("Choose the selection type");
-    _typeComboBox->setFixedHeight(22);
     _typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
-    _typeComboBox->setStyleSheet("QComboBox { padding-top: 2px; padding-bottom: 1px; }");
     _typeComboBox->setEditable(true);
     _typeComboBox->lineEdit()->setReadOnly(true);
     _typeComboBox->lineEdit()->setAlignment(Qt::AlignCenter);
 
     _modifierAddPushButton->setToolTip("Add items to the existing selection");
-    _modifierAddPushButton->setFixedSize(24, 24);
     _modifierAddPushButton->setIcon(fontAwesome.getIcon("plus"));
     _modifierAddPushButton->setIconSize(QSize(10, 10));
     _modifierAddPushButton->setCheckable(true);
     
     _modifierRemovePushButton->setToolTip("Remove items from the existing selection");
-    _modifierRemovePushButton->setFixedSize(24, 24);
     _modifierRemovePushButton->setIcon(fontAwesome.getIcon("minus", QSize(16, 16)));
     _modifierRemovePushButton->setIconSize(QSize(10, 10));
     _modifierRemovePushButton->setCheckable(true);
 
     _radiusLabel->setToolTip("Brush radius");
 
-    _radiusLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
-    _radiusLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
+    _radiusLayout->setMargin(LAYOUT_MARGIN);
+    _radiusLayout->setSpacing(LAYOUT_SPACING);
 
     _radiusLayout->addWidget(_radiusDoubleSpinBox);
     _radiusLayout->addWidget(_radiusSlider);
@@ -92,8 +89,8 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 
     _selectLabel->setToolTip("Select");
 
-    _selectLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
-    _selectLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
+    _selectLayout->setMargin(LAYOUT_MARGIN);
+    _selectLayout->setSpacing(LAYOUT_SPACING);
 
     _selectLayout->addWidget(_clearSelectionPushButton);
     _selectLayout->addWidget(_selectAllPushButton);
@@ -103,13 +100,13 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _selectWidget->setLayout(_selectLayout);
 
     _clearSelectionPushButton->setToolTip("Removes all items from the selection");
-    _clearSelectionPushButton->setFixedSize(50, 24);
+    _clearSelectionPushButton->setFixedWidth(50);
 
     _selectAllPushButton->setToolTip("Select all items");
-    _selectAllPushButton->setFixedSize(50, 24);
+    _selectAllPushButton->setFixedWidth(50);
 
     _invertSelectionPushButton->setToolTip("Invert the selection");
-    _invertSelectionPushButton->setFixedSize(50, 24);
+    _invertSelectionPushButton->setFixedWidth(50);
 
     _notifyDuringSelectionCheckBox->setToolTip("Whether the selection updates are published continuously or at end of the selection process");
 }
@@ -263,23 +260,9 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     pixelSelectionTool.setChanged();
 }
 
-WidgetStateMixin::State SelectionSettingsWidget::getState(const QSize& sourceWidgetSize) const
-{
-    const auto width = sourceWidgetSize.width();
-
-    auto state = WidgetStateMixin::State::Popup;
-
-    if (width >= 1000 && width < 1500)
-        state = WidgetStateMixin::State::Compact;
-
-    if (width >= 1500)
-        state = WidgetStateMixin::State::Full;
-
-    return state;
-}
-
 void SelectionSettingsWidget::updateState()
 {
+    /*
     if (layout()) {
         delete layout();
     }
@@ -349,4 +332,5 @@ void SelectionSettingsWidget::updateState()
     _selectLabel->setVisible(_state == WidgetStateMixin::State::Popup);
     _selectWidget->setVisible(_state != WidgetStateMixin::State::Compact);
     _notifyDuringSelectionCheckBox->setVisible(_state == WidgetStateMixin::State::Popup);
+    */
 }

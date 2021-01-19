@@ -1,0 +1,17 @@
+QPushButton {
+    padding-left: 7px;
+    padding-right: 7px;
+    height: 22px;
+}
+
+QPushButton[cssClass="icon"] {
+    padding-left: 1px;
+    padding-right: 1px;
+}
+
+QComboBox {
+    margin: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 20px;
+}

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "WidgetStateMixin.h"
-
-#include <QWidget>
+#include "widgets/ResponsiveToolBar.h"
 
 class ScatterplotPlugin;
 
@@ -10,14 +8,12 @@ class QLabel;
 class QDoubleSpinBox;
 class QSlider;
 
-class DensitySettingsWidget : public QWidget, public WidgetStateMixin
+class DensitySettingsWidget : public hdps::gui::ResponsiveToolBar::Widget
 {
 public:
     DensitySettingsWidget(QWidget* parent = nullptr);
 
     void initialize(const ScatterplotPlugin& plugin);
-
-    State getState(const QSize& sourceWidgetSize) const override;
 
 protected:
 

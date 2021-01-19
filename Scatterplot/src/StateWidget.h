@@ -56,8 +56,9 @@ public:
     }
 
     void setListenWidget(QWidget* listenWidget) {
+        /*
         _widgetEventProxy.initialize(listenWidget, [this](const QSize& sourceWidgetSize) {
-            const auto state = _widget->getState(sourceWidgetSize);
+            const auto state = WidgetStateMixin::State::Compact;
 
             //_widget->hide();
             _widget->setState(state);
@@ -84,6 +85,7 @@ public:
                     break;
             }
         });
+        */
     }
 
     WidgetType* getWidget() {

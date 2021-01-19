@@ -7,9 +7,10 @@
 #include <QDoubleSpinBox>
 #include <QSlider>
 
+using namespace hdps::gui;
+
 PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    WidgetStateMixin("Plot"),
+    ResponsiveToolBar::Widget("Point", 100),
     _sizeLabel(new QLabel()),
     _sizeDoubleSpinBox(new QDoubleSpinBox()),
     _sizeSlider(new QSlider()),
@@ -46,6 +47,8 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
     _opacityLabel->setToolTip(opacityToolTipText);
     _opacityDoubleSpinBox->setToolTip(opacityToolTipText);
     _opacitySlider->setToolTip(opacityToolTipText);
+
+    computeStateSizes();
 }
 
 void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
@@ -96,97 +99,47 @@ void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     _opacityDoubleSpinBox->setValue(50.0);
 }
 
-WidgetStateMixin::State PointSettingsWidget::getState(const QSize& sourceWidgetSize) const
-{
-    const auto width = sourceWidgetSize.width();
-
-    auto state = WidgetStateMixin::State::Popup;
-
-    if (width >= 1000 && width < 1500)
-        state = WidgetStateMixin::State::Compact;
-
-    if (width >= 1500)
-        state = WidgetStateMixin::State::Full;
-
-    return state;
-}
-
 void PointSettingsWidget::updateState()
 {
-    if (layout()) {
-        delete layout();
-    }
-
-    QString sizeLabelText, opacityLabelText;
-
-    const auto applyLayout = [this](QLayout* stateLayout) {
-        Q_ASSERT(stateLayout != nullptr);
-
-        stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
-        stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
-
-        setLayout(stateLayout);
-    };
-
     switch (_state)
     {
         case State::Popup:
         {
-            auto stateLayout = new QGridLayout();
+            auto layout = new QHBoxLayout();
 
-            applyLayout(stateLayout);
+            setWidgetLayout(layout);
 
-            sizeLabelText       = "Size:";
-            opacityLabelText    = "Opacity:";
+            layout->addWidget(_sizeLabel);
+            layout->addWidget(_sizeDoubleSpinBox);
+            layout->addWidget(_sizeSlider);
 
-            stateLayout->addWidget(_sizeLabel, 0, 0);
-            stateLayout->addWidget(_sizeDoubleSpinBox, 0, 1);
-            stateLayout->addWidget(_sizeSlider, 0, 2);
+            layout->addWidget(_opacityLabel);
+            layout->addWidget(_opacityDoubleSpinBox);
+            layout->addWidget(_opacitySlider);
 
-            stateLayout->addWidget(_opacityLabel, 1, 0);
-            stateLayout->addWidget(_opacityDoubleSpinBox, 1, 1);
-            stateLayout->addWidget(_opacitySlider, 1, 2);
-
+            setCurrentIndex(0);
             break;
         }
 
         case State::Compact:
-        {
-            sizeLabelText       = "Size:";
-            opacityLabelText    = "Opacity:";
-
-            auto stateLayout = new QHBoxLayout();
-
-            applyLayout(stateLayout);
-
-            stateLayout->addWidget(_sizeLabel);
-            stateLayout->addWidget(_sizeDoubleSpinBox);
-            stateLayout->addWidget(_sizeSlider);
-
-            stateLayout->addWidget(_opacityLabel);
-            stateLayout->addWidget(_opacityDoubleSpinBox);
-            stateLayout->addWidget(_opacitySlider);
-
-            break;
-        }
-
         case State::Full:
         {
-            sizeLabelText       = "Point size:";
-            opacityLabelText    = "Point opacity:";
+            auto layout = new QHBoxLayout();
 
-            auto stateLayout = new QHBoxLayout();
+            setWidgetLayout(layout);
 
-            applyLayout(stateLayout);
+            layout->addWidget(_sizeLabel);
+            layout->addWidget(_sizeDoubleSpinBox);
+            layout->addWidget(_sizeSlider);
 
-            stateLayout->addWidget(_sizeLabel);
-            stateLayout->addWidget(_sizeDoubleSpinBox);
-            stateLayout->addWidget(_sizeSlider);
+            layout->addWidget(_opacityLabel);
+            layout->addWidget(_opacityDoubleSpinBox);
+            layout->addWidget(_opacitySlider);
 
-            stateLayout->addWidget(_opacityLabel);
-            stateLayout->addWidget(_opacityDoubleSpinBox);
-            stateLayout->addWidget(_opacitySlider);
+            layout->invalidate();
+            layout->activate();
 
+            setCurrentIndex(1);
             break;
         }
 
@@ -194,12 +147,12 @@ void PointSettingsWidget::updateState()
             break;
     }
 
-    _sizeDoubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
-    _opacityDoubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
+    _sizeLabel->setText(_state == State::Full ? "Point size:" : "Size:");
+    _opacityLabel->setText(_state == State::Full ? "Point opacity:" : "Opacity:");
+    
+    _sizeSlider->setFixedWidth(_state == State::Compact ? 50 : 80);
+    _opacitySlider->setFixedWidth(_state == State::Compact ? 50 : 80);
 
-    _sizeSlider->setFixedWidth(_state == WidgetStateMixin::State::Compact ? 50 : 80);
-    _opacitySlider->setFixedWidth(_state == WidgetStateMixin::State::Compact ? 50 : 80);
-
-    _sizeLabel->setText(sizeLabelText);
-    _opacityLabel->setText(opacityLabelText);
+    _sizeDoubleSpinBox->setVisible(_state != State::Compact);
+    _opacityDoubleSpinBox->setVisible(_state != State::Compact);
 }

@@ -5,9 +5,10 @@
 #include <QDoubleSpinBox>
 #include <QSlider>
 
+using namespace hdps::gui;
+
 DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    WidgetStateMixin("Plot"),
+    ResponsiveToolBar::Widget("Plot", 100),
     _label(new QLabel()),
     _doubleSpinBox(new QDoubleSpinBox()),
     _slider(new QSlider())
@@ -27,6 +28,8 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
     _label->setToolTip(toolTipText);
     _doubleSpinBox->setToolTip(toolTipText);
     _slider->setToolTip(toolTipText);
+
+    computeStateSizes();
 }
 
 void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
@@ -68,38 +71,34 @@ void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
     const_cast<ScatterplotPlugin&>(plugin).installEventFilter(this);
 }
 
-WidgetStateMixin::State DensitySettingsWidget::getState(const QSize& sourceWidgetSize) const
-{
-    const auto width = sourceWidgetSize.width();
-
-    auto state = WidgetStateMixin::State::Popup;
-
-    if (width >= 1000 && width < 1500)
-        state = WidgetStateMixin::State::Compact;
-
-    if (width >= 1500)
-        state = WidgetStateMixin::State::Full;
-
-    return state;
-}
-
 void DensitySettingsWidget::updateState()
 {
-    if (layout())
-        delete layout();
+    auto layout = new QHBoxLayout();
 
-    auto stateLayout = new QHBoxLayout();
+    setWidgetLayout(layout);
 
-    setLayout(stateLayout);
-    
-    stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
-    stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
+    layout->addWidget(_label);
+    layout->addWidget(_doubleSpinBox);
+    layout->addWidget(_slider);
 
-    stateLayout->addWidget(_label);
-    stateLayout->addWidget(_doubleSpinBox);
-    stateLayout->addWidget(_slider);
+    layout->invalidate();
+    layout->activate();
 
-    _doubleSpinBox->setVisible(_state != WidgetStateMixin::State::Compact);
+    switch (_state)
+    {
+        case State::Popup:
+            setCurrentIndex(0);
+            break;
 
-    _slider->setFixedWidth(_state == WidgetStateMixin::State::Compact ? 50 : 110);
+        case State::Compact:
+        case State::Full:
+            setCurrentIndex(1);
+            break;
+
+        default:
+            break;
+    }
+
+    _doubleSpinBox->setVisible(_state != State::Compact);
+    _slider->setFixedWidth(_state == State::Compact ? 50 : 80);
 }

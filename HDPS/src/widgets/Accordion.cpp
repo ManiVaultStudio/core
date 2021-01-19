@@ -29,8 +29,8 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
 {
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    _mainLayout.setMargin(5);
-    _mainLayout.setSpacing(4);
+    //_mainLayout.setMargin(5);
+    //_mainLayout.setSpacing(4);
     _mainLayout.setAlignment(Qt::AlignTop);
     _mainLayout.addWidget(&_toolbar);
     //_mainLayout.addLayout(&_sectionsLayout);
@@ -44,25 +44,28 @@ Accordion::Accordion(QWidget* parent /*= nullptr*/) :
     _toolbarLayout.addWidget(&_expandAllPushButton);
     _toolbarLayout.addWidget(&_toSectionComboBox);
 
-    const auto iconSize = QSize(12, 12);
+    const auto iconSize = QSize(10, 10);
 
+    //_expandAllPushButton.setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
     _expandAllPushButton.setToolTip("Expand all sections");
-    _expandAllPushButton.setFixedSize(22, 22);
-    _expandAllPushButton.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down", iconSize));
+    _expandAllPushButton.setProperty("cssClass", "icon");
+    _expandAllPushButton.setIcon(Application::getIconFont("FontAwesome").getIcon("caret-down", iconSize));
 
     QObject::connect(&_expandAllPushButton, &QPushButton::clicked, [this]() {
         expandAll();
     });
 
+    //_collapseAllPushButton.setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
     _collapseAllPushButton.setToolTip("Collapse all sections");
-    _collapseAllPushButton.setFixedSize(22, 22);
-    _collapseAllPushButton.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up", iconSize));
+    _collapseAllPushButton.setProperty("cssClass", "icon");
+    _collapseAllPushButton.setIcon(Application::getIconFont("FontAwesome").getIcon("caret-up", iconSize));
 
     QObject::connect(&_collapseAllPushButton, &QPushButton::clicked, [this]() {
         collapseAll();
     });
 
     _toSectionComboBox.setToolTip("Navigate to section");
+    _toSectionComboBox.setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred));
 
     QObject::connect(&_toSectionComboBox, &QComboBox::currentTextChanged, [this](const QString& currentText) {
         goToSection(currentText);

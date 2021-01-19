@@ -138,7 +138,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
             dockWidget->setWidget(viewPlugin, CDockWidget::ForceNoScrollArea);
             dockWidget->setProperty("PluginType", "View");
-            dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+            //dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
 
             connect(viewPlugin, &QWidget::windowTitleChanged, [this, dockWidget](const QString& title) {
                 dockWidget->setWindowTitle(title);

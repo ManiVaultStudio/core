@@ -1,12 +1,14 @@
 #include "RenderModeWidget.h"
 #include "ScatterplotPlugin.h"
 
+#include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
 
+using namespace hdps::gui;
+
 RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    WidgetStateMixin("Render mode"),
+    ResponsiveToolBar::Widget("Render mode", 50),
     _scatterPlotPushButton(new QPushButton()),
     _densityPlotPushButton(new QPushButton()),
     _contourPlotPushButton(new QPushButton())
@@ -14,6 +16,8 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
     _scatterPlotPushButton->setCheckable(true);
     _densityPlotPushButton->setCheckable(true);
     _contourPlotPushButton->setCheckable(true);
+
+    computeStateSizes();
 }
 
 void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
@@ -50,87 +54,47 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
     updateToggles();
 }
 
-WidgetStateMixin::State RenderModeWidget::getState(const QSize& sourceWidgetSize) const
-{
-    const auto width = sourceWidgetSize.width();
-
-    auto state = WidgetStateMixin::State::Popup;
-
-    if (width >= 1000 && width < 1500)
-        state = WidgetStateMixin::State::Compact;
-
-    if (width >= 1500)
-        state = WidgetStateMixin::State::Full;
-
-    return state;
-}
-
 void RenderModeWidget::updateState()
 {
-    if (layout())
-        delete layout();
-
-    QLayout* stateLayout = nullptr;
-
-    QSize buttonSize;
-
     switch (_state)
     {
         case State::Popup:
         {
-            stateLayout = new QVBoxLayout();
-
             _scatterPlotPushButton->setText("Scatter Plot");
             _densityPlotPushButton->setText("Density Plot");
             _contourPlotPushButton->setText("Contour Plot");
 
-            buttonSize = QSize(90, 22);
-
+            setCurrentIndex(0);
             break;
         }
 
         case State::Compact:
-        {
-            stateLayout = new QHBoxLayout();
-
-            _scatterPlotPushButton->setText("SP");
-            _densityPlotPushButton->setText("DP");
-            _contourPlotPushButton->setText("CP");
-
-            buttonSize = QSize(25, 22);
-
-            break;
-        }
-
         case State::Full:
         {
-            stateLayout = new QHBoxLayout();
+            auto layout = new QHBoxLayout();
 
-            _scatterPlotPushButton->setText("Scatter");
-            _densityPlotPushButton->setText("Density");
-            _contourPlotPushButton->setText("Contour");
+            setWidgetLayout(layout);
 
-            buttonSize = QSize(60, 22);
+            layout->addWidget(_scatterPlotPushButton);
+            layout->addWidget(_densityPlotPushButton);
+            layout->addWidget(_contourPlotPushButton);
 
+            const auto isCompact = _state == State::Compact;
+
+            _scatterPlotPushButton->setText(isCompact ? "SP" : "Scatter Plot");
+            _densityPlotPushButton->setText(isCompact ? "DP" : "Density Plot");
+            _contourPlotPushButton->setText(isCompact ? "CP" : "Contour Plot");
+
+            layout->invalidate();
+            layout->activate();
+
+            setCurrentIndex(1);
             break;
         }
 
         default:
             break;
     }
-
-    _scatterPlotPushButton->setFixedSize(buttonSize);
-    _densityPlotPushButton->setFixedSize(buttonSize);
-    _contourPlotPushButton->setFixedSize(buttonSize);
-
-    setLayout(stateLayout);
-
-    stateLayout->setMargin(WidgetStateMixin::LAYOUT_MARGIN);
-    stateLayout->setSpacing(WidgetStateMixin::LAYOUT_SPACING);
-
-    stateLayout->addWidget(_scatterPlotPushButton);
-    stateLayout->addWidget(_densityPlotPushButton);
-    stateLayout->addWidget(_contourPlotPushButton);
 }
 
 /*

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "WidgetStateMixin.h"
-
-#include <QWidget>
+#include "widgets/ResponsiveToolBar.h"
 
 class ScatterplotPlugin;
 class PixelSelectionTool;
@@ -15,15 +13,13 @@ class QDoubleSpinBox;
 class QSlider;
 class QCheckBox;
 
-class SelectionSettingsWidget : public QWidget, public WidgetStateMixin
+class SelectionSettingsWidget : public hdps::gui::ResponsiveToolBar::Widget
 {
 public:
 
     SelectionSettingsWidget(QWidget* parent = nullptr);
 
     void initialize(const ScatterplotPlugin& plugin);
-
-    State getState(const QSize& sourceWidgetSize) const override;
 
 protected:
 

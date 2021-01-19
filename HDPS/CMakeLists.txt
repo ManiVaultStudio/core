@@ -37,6 +37,7 @@ set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
 
 set( MAIN_SOURCES
     src/Main.cpp
+    res/styles/default.qss
 )
 
 set( CORE_HEADERS
@@ -77,6 +78,7 @@ set( WIDGET_HEADERS
     src/widgets/SettingsWidget.h
     src/widgets/PopupWidget.h
     src/widgets/PopupPushButton.h
+    src/widgets/ResponsiveToolBar.h
 )
 
 set( WIDGET_SOURCES
@@ -91,6 +93,7 @@ set( WIDGET_SOURCES
 	src/widgets/SettingsWidget.cpp
 	src/widgets/PopupWidget.cpp
 	src/widgets/PopupPushButton.cpp
+	src/widgets/ResponsiveToolBar.cpp
 )
 
 set( RENDERER_HEADERS

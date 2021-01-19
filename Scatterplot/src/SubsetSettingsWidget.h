@@ -1,22 +1,18 @@
 #pragma once
 
-#include "WidgetStateMixin.h"
-
-#include <QWidget>
+#include "widgets/ResponsiveToolBar.h"
 
 class ScatterplotPlugin;
 
 class QPushButton;
 class QCheckBox;
 
-class SubsetSettingsWidget : public QWidget, public WidgetStateMixin
+class SubsetSettingsWidget : public hdps::gui::ResponsiveToolBar::Widget
 {
 public:
     SubsetSettingsWidget(QWidget* parent = nullptr);
 
     void initialize(const ScatterplotPlugin& plugin);
-
-    State getState(const QSize& sourceWidgetSize) const override;
 
 protected:
 
