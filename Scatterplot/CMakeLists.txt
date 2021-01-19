@@ -22,27 +22,21 @@ set(PLUGIN
     src/Common.h
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
-	src/PixelSelectionTool.h
-    src/PixelSelectionTool.cpp
-	src/PixelSelectionToolRenderer.h
-    src/PixelSelectionToolRenderer.cpp
 )
 
+file(GLOB PixelSelectionTool src/*PixelSelectionTool*.*)
 file(GLOB UI src/*Widget*.*)
 file(GLOB SHADERS src/*.glsl)
 file(GLOB JSON src/*.json)
-file(GLOB Creator src/*.ui)
 file(GLOB SHADERS res/shaders/*.vert res/shaders/*.frag)
 file(GLOB QRC res/*.qrc)
 
-QT5_WRAP_UI(UI_HEADERS ${Creator})
-
-set(SOURCES ${PLUGIN} ${UI})
+set(SOURCES ${PLUGIN} ${PixelSelectionTool} ${UI})
 set(AUX ${JSON} ${QRC})
 
 source_group(Plugin FILES ${PLUGIN})
+source_group(PixelSelectionTool FILES ${PixelSelectionTool})
 source_group(UI FILES ${UI})
-source_group(Creator FILES ${Creator})
 source_group(Shaders FILES ${SHADERS})
 source_group(Aux FILES ${AUX})
 

@@ -77,7 +77,7 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
             break;
 
         case ScatterplotWidget::LANDSCAPE:
-            //computeDensity();
+            computeDensity();
             break;
 
         default:
