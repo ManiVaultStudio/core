@@ -23,7 +23,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _pointSettingsWidget(new PointSettingsWidget(this)),
     _densitySettingsWidget(new DensitySettingsWidget(this)),
     _positionSettingsWidget(new PositionSettingsWidget(this)),
-    //_colorSettingsWidget(new StateWidget<ColorSettingsWidget>(this)),
+    _colorSettingsWidget(new ColorSettingsWidget(this)),
     _subsetSettingsWidget(new SubsetSettingsWidget(this)),
     _selectionSettingsWidget(new SelectionSettingsWidget(this)),
     _baseColor(DEFAULT_BASE_COLOR),
@@ -44,11 +44,15 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _pointSettingsWidget->initialize(plugin);
     _densitySettingsWidget->initialize(plugin);
     _positionSettingsWidget->initialize(plugin);
+    _colorSettingsWidget->initialize(plugin);
+    _subsetSettingsWidget->initialize(plugin);
+    _selectionSettingsWidget->initialize(plugin);
 
     _responsiveToolBar->addWidget(_renderModeWidget);
     _responsiveToolBar->addWidget(_pointSettingsWidget);
     _responsiveToolBar->addWidget(_densitySettingsWidget);
     _responsiveToolBar->addWidget(_positionSettingsWidget);
+    _responsiveToolBar->addWidget(_colorSettingsWidget);
     _responsiveToolBar->addWidget(_subsetSettingsWidget);
     _responsiveToolBar->addWidget(_selectionSettingsWidget);
 
@@ -107,10 +111,10 @@ void SettingsWidget::initDimOptions(const std::vector<QString>& dimNames)
 
 void SettingsWidget::initScalarDimOptions(const unsigned int nDim)
 {
-    //_dimensionSettinsWidget->setScalarDimensions(nDim);
+    _colorSettingsWidget->setScalarDimensions(nDim);
 }
 
 void SettingsWidget::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
-    //_dimensionSettinsWidget->setScalarDimensions(dimNames.size(), dimNames);
+    _colorSettingsWidget->setScalarDimensions(dimNames.size(), dimNames);
 }

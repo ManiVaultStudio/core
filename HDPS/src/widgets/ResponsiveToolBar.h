@@ -66,20 +66,6 @@ public:
             return getSize(state).width();
         };
 
-        bool canCollapse() const {
-            if (_state == State::Undefined)
-                return false;
-
-            return static_cast<std::int32_t>(_state) > static_cast<std::int32_t>(State::Popup);
-        }
-
-        bool canExpand() const {
-            if (_state == State::Undefined)
-                return false;
-
-            return static_cast<std::int32_t>(_state) < static_cast<std::int32_t>(State::Full);
-        }
-
         void setWidgetLayout(QLayout* layout);
 
     protected:

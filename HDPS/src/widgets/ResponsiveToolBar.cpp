@@ -114,6 +114,7 @@ bool ResponsiveToolBar::eventFilter(QObject* target, QEvent* event)
     if (event->type() != QEvent::Resize)
         return QObject::eventFilter(target, event);
 
+    qDebug() << "Resize event";
     updateLayout();
 
     return QObject::eventFilter(target, event);
@@ -124,6 +125,8 @@ void ResponsiveToolBar::addWidget(Widget* widget)
     Q_ASSERT(widget != nullptr);
 
     _widgets << widget;
+
+    widget->installEventFilter(this);
 
     _layout->insertWidget(_layout->count() - 1, widget);
 

@@ -4,13 +4,23 @@
 #include <QLabel>
 #include <QComboBox>
 
+using namespace hdps::gui;
+
 ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(),
+    ResponsiveToolBar::Widget("Color"),
     _colorByLabel(new QLabel()),
-    _colorByComboBox(new QComboBox())
+    _colorByComboBox(new QComboBox()),
+    _colorDimensionComboBox(new QComboBox())
 {
     _colorByLabel->setToolTip("Color by");
+    _colorByLabel->setText("Color by:");
+
     _colorByComboBox->setToolTip("Color by");
+    _colorByComboBox->setFixedWidth(75);
+    _colorByComboBox->addItem("Dimension");
+    _colorByComboBox->addItem("Data");
+
+    computeStateSizes();
 }
 
 void ColorSettingsWidget::initialize(const ScatterplotPlugin& plugin)
@@ -23,58 +33,52 @@ void ColorSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     QObject::connect(_yDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
         const_cast<ScatterplotPlugin&>(plugin).yDimPicked(index);
     });
-    
-    QObject::connect(_ui->colorOptionsComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        switch (index)
-        {
-            case 0:
-                _ui->colorDimensionStackedWidget->setCurrentIndex(0);
-                break;
+    */
 
-            case 1:
-                _ui->colorDimensionStackedWidget->setCurrentIndex(1);
-                break;
-        }
+    QObject::connect(_colorByComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
+        _colorDimensionComboBox->setVisible(index == 0);
     });
     
-    _ui->colorDimensionStackedWidget->initialize(plugin);
-    */
+    //_ui->colorDimensionStackedWidget->initialize(plugin);
+    
 }
 
-/*
-int ColorSettingsWidget::getDimensionX()
+void ColorSettingsWidget::updateState()
 {
-    return _xDimensionComboBox->currentIndex();
-}
+    auto layout = new QHBoxLayout();
 
-int ColorSettingsWidget::getDimensionY()
-{
-    return _yDimensionComboBox->currentIndex();
-}
+    setWidgetLayout(layout);
 
-void ColorSettingsWidget::setDimensions(unsigned int numDimensions, const std::vector<QString>& names)
-{
-    auto& stringListModel = createStringListModel(numDimensions, names, *this);
+    layout->addWidget(_colorByLabel);
+    layout->addWidget(_colorByComboBox);
+    layout->addWidget(_colorDimensionComboBox);
 
-    QSignalBlocker xDimensionComboBoxSignalBlocker(_xDimensionComboBox), yDimensionComboBoxSignalBlocker(_yDimensionComboBox);
+    layout->invalidate();
+    layout->activate();
 
-    _xDimensionComboBox->setModel(&stringListModel);
-    _yDimensionComboBox->setModel(&stringListModel);
+    switch (_state)
+    {
+        case State::Popup:
+            setCurrentIndex(0);
+            break;
 
-    if (numDimensions >= 2) {
-        _xDimensionComboBox->setCurrentIndex(0);
-        _yDimensionComboBox->setCurrentIndex(1);
+        case State::Compact:
+        case State::Full:
+            setCurrentIndex(1);
+            break;
+
+        default:
+            break;
     }
+
+    _colorDimensionComboBox->setFixedWidth(_state == State::Compact ? 80 : 120);
 }
 
 void ColorSettingsWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)
 {
     auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
-    auto colorByDimensionComboBox = _ui->colorDimensionStackedWidget->getColorByDimensionComboBox();
+    QSignalBlocker signalBlocker(_colorDimensionComboBox);
 
-    QSignalBlocker signalBlocker(colorByDimensionComboBox);
-
-    colorByDimensionComboBox->setModel(&stringListModel);
+    _colorDimensionComboBox->setModel(&stringListModel);
 }
-*/
