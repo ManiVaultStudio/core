@@ -75,6 +75,7 @@ void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
 void DensitySettingsWidget::updateState()
 {
+    /*
     auto layout = new QHBoxLayout();
 
     setWidgetLayout(layout);
@@ -90,4 +91,5 @@ void DensitySettingsWidget::updateState()
 
     layout->invalidate();
     layout->activate();
+    */
 }

@@ -1,6 +1,8 @@
 #include "RenderModeWidget.h"
 #include "ScatterplotPlugin.h"
 
+#include "widgets/ResponsiveToolBar.h"
+
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -8,7 +10,10 @@
 using namespace hdps::gui;
 
 RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::Widget("Render mode", 50),
+    QStackedWidget(parent),
+    _widgetState(this),
+    _popupPushButton(new QPushButton()),
+    _widget(new QWidget()),
     _scatterPlotPushButton(new QPushButton()),
     _densityPlotPushButton(new QPushButton()),
     _contourPlotPushButton(new QPushButton())
@@ -23,7 +28,77 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
     _densityPlotPushButton->setCheckable(true);
     _contourPlotPushButton->setCheckable(true);
 
-    computeStateSizes();
+    addWidget(_popupPushButton);
+    addWidget(_widget);
+
+    connect(&_widgetState, &hdps::gui::WidgetState::updateState, [this](const hdps::gui::WidgetState::State& state) {
+        auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+        const auto setWidgetLayout = [this](QLayout* layout) -> void {
+            if (_widget->layout())
+                delete _widget->layout();
+
+            layout->setMargin(ResponsiveToolBar::Widget::LAYOUT_MARGIN);
+            layout->setSpacing(ResponsiveToolBar::Widget::LAYOUT_SPACING);
+
+            _widget->setLayout(layout);
+        };
+
+        switch (state)
+        {
+            case WidgetState::State::Popup:
+            {
+                /*
+                auto layout = new QHBoxLayout();
+
+                setWidgetLayout(layout);
+
+                layout->addWidget(_scatterPlotPushButton);
+                layout->addWidget(_densityPlotPushButton);
+                layout->addWidget(_contourPlotPushButton);
+
+                _scatterPlotPushButton->setText("Scatter Plot");
+                _densityPlotPushButton->setText("Density Plot");
+                _contourPlotPushButton->setText("Contour Plot");
+                */
+                setCurrentWidget(_popupPushButton);
+                break;
+            }
+
+            case WidgetState::State::Compact:
+            case WidgetState::State::Full:
+            {
+                auto layout = new QHBoxLayout();
+
+                setWidgetLayout(layout);
+
+                layout->addWidget(_scatterPlotPushButton);
+                layout->addWidget(_densityPlotPushButton);
+                layout->addWidget(_contourPlotPushButton);
+
+                const auto isCompact = state == WidgetState::State::Compact;
+
+                _scatterPlotPushButton->setText(isCompact ? "" : "Scatter Plot");
+                _densityPlotPushButton->setText(isCompact ? "" : "Density Plot");
+                _contourPlotPushButton->setText(isCompact ? "" : "Contour Plot");
+
+                _scatterPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("braille") : QIcon());
+                _densityPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("cloud") : QIcon());
+                _contourPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("mountain") : QIcon());
+
+                layout->invalidate();
+                layout->activate();
+
+                setCurrentWidget(_widget);
+                break;
+            }
+
+            default:
+                break;
+        }
+    });
+    
+    _widgetState.initialize();
 }
 
 void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
@@ -58,55 +133,6 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
     });
 
     updateToggles();
-}
-
-void RenderModeWidget::updateState()
-{
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    switch (_state)
-    {
-        case State::Popup:
-        {
-            _scatterPlotPushButton->setText("Scatter Plot");
-            _densityPlotPushButton->setText("Density Plot");
-            _contourPlotPushButton->setText("Contour Plot");
-
-            setCurrentIndex(0);
-            break;
-        }
-
-        case State::Compact:
-        case State::Full:
-        {
-            auto layout = new QHBoxLayout();
-
-            setWidgetLayout(layout);
-
-            layout->addWidget(_scatterPlotPushButton);
-            layout->addWidget(_densityPlotPushButton);
-            layout->addWidget(_contourPlotPushButton);
-
-            const auto isCompact = _state == State::Compact;
-
-            _scatterPlotPushButton->setText(isCompact ? "" : "Scatter Plot");
-            _densityPlotPushButton->setText(isCompact ? "" : "Density Plot");
-            _contourPlotPushButton->setText(isCompact ? "" : "Contour Plot");
-
-            _scatterPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("braille") : QIcon());
-            _densityPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("cloud") : QIcon());
-            _contourPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("mountain") : QIcon());
-
-            layout->invalidate();
-            layout->activate();
-
-            setCurrentIndex(1);
-            break;
-        }
-
-        default:
-            break;
-    }
 }
 
 /*

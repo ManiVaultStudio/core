@@ -58,6 +58,7 @@ void PositionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
 void PositionSettingsWidget::updateState()
 {
+    /*
     switch (_state)
     {
         case State::Popup:
@@ -109,6 +110,7 @@ void PositionSettingsWidget::updateState()
         default:
             break;
     }
+    */
 }
 
 int PositionSettingsWidget::getDimensionX()

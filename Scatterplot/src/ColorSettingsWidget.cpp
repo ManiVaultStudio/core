@@ -83,6 +83,7 @@ void ColorSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
 void ColorSettingsWidget::updateState()
 {
+    /*
     auto layout = new QHBoxLayout();
 
     setWidgetLayout(layout);
@@ -113,6 +114,7 @@ void ColorSettingsWidget::updateState()
         default:
             break;
     }
+    */
 }
 
 void ColorSettingsWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)

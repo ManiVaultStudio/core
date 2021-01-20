@@ -283,6 +283,7 @@ void SelectionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
 void SelectionSettingsWidget::updateState()
 {
+    /*
     switch (_state)
     {
         case State::Popup:
@@ -344,4 +345,5 @@ void SelectionSettingsWidget::updateState()
     _selectLabel->setVisible(_state == State::Popup);
     _selectWidget->setVisible(_state != State::Compact);
     _notifyDuringSelectionCheckBox->setVisible(_state != State::Compact);
+    */
 }

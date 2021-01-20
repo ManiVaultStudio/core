@@ -103,6 +103,7 @@ void PointSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
 void PointSettingsWidget::updateState()
 {
+    /*
     switch (_state)
     {
         case State::Popup:
@@ -157,4 +158,5 @@ void PointSettingsWidget::updateState()
 
     _sizeDoubleSpinBox->setVisible(_state != State::Compact);
     _opacityDoubleSpinBox->setVisible(_state != State::Compact);
+    */
 }

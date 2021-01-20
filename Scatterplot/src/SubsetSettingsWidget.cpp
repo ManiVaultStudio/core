@@ -45,6 +45,7 @@ void SubsetSettingsWidget::initialize(const ScatterplotPlugin& plugin)
 
 void SubsetSettingsWidget::updateState()
 {
+    /*
     auto layout = new QHBoxLayout();
 
     setWidgetLayout(layout);
@@ -77,4 +78,5 @@ void SubsetSettingsWidget::updateState()
         default:
             break;
     }
+    */
 }

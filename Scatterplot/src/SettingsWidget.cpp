@@ -49,12 +49,15 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _selectionSettingsWidget->initialize(plugin);
 
     _responsiveToolBar->addWidget(_renderModeWidget);
+
+    /*
     _responsiveToolBar->addWidget(_pointSettingsWidget);
     _responsiveToolBar->addWidget(_densitySettingsWidget);
     _responsiveToolBar->addWidget(_positionSettingsWidget);
     _responsiveToolBar->addWidget(_colorSettingsWidget);
     _responsiveToolBar->addWidget(_subsetSettingsWidget);
     _responsiveToolBar->addWidget(_selectionSettingsWidget);
+    */
 
     setEnabled(false);
 
