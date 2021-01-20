@@ -77,6 +77,4 @@ void SubsetSettingsWidget::updateState()
         default:
             break;
     }
-    
-    _fromSourceCheckBox->setVisible(_state != State::Compact);
 }

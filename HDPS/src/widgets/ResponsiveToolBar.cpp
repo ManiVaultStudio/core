@@ -151,7 +151,7 @@ void ResponsiveToolBar::addWidget(Widget* widget)
 
     _widgets << widget;
 
-    //widget->installEventFilter(this);
+    widget->installEventFilter(this);
 
     _layout->insertWidget(_layout->count() - 1, widget);
 

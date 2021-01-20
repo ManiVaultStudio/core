@@ -15,6 +15,10 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
 {
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
 
+    _scatterPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
+    _densityPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
+    _contourPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
+
     _scatterPlotPushButton->setCheckable(true);
     _densityPlotPushButton->setCheckable(true);
     _contourPlotPushButton->setCheckable(true);
@@ -58,6 +62,8 @@ void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
 
 void RenderModeWidget::updateState()
 {
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
     switch (_state)
     {
         case State::Popup:
@@ -83,9 +89,13 @@ void RenderModeWidget::updateState()
 
             const auto isCompact = _state == State::Compact;
 
-            _scatterPlotPushButton->setText(isCompact ? "SP" : "Scatter Plot");
-            _densityPlotPushButton->setText(isCompact ? "DP" : "Density Plot");
-            _contourPlotPushButton->setText(isCompact ? "CP" : "Contour Plot");
+            _scatterPlotPushButton->setText(isCompact ? "" : "Scatter Plot");
+            _densityPlotPushButton->setText(isCompact ? "" : "Density Plot");
+            _contourPlotPushButton->setText(isCompact ? "" : "Contour Plot");
+
+            _scatterPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("braille") : QIcon());
+            _densityPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("cloud") : QIcon());
+            _contourPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("mountain") : QIcon());
 
             layout->invalidate();
             layout->activate();

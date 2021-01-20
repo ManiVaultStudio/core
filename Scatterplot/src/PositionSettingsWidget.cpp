@@ -13,6 +13,8 @@ PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
     _yDimensionLabel(new QLabel()),
     _yDimensionComboBox(new QComboBox())
 {
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("ruler-combined"));
+
     const auto xDimensionToolTipText = "X dimension";
 
     _xDimensionLabel->setToolTip(xDimensionToolTipText);

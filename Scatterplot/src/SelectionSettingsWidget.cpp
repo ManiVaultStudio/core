@@ -32,7 +32,8 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _clearSelectionPushButton(new QPushButton("None")),
     _selectAllPushButton(new QPushButton("All")),
     _invertSelectionPushButton(new QPushButton("Invert")),
-    _notifyDuringSelectionCheckBox(new QCheckBox("Notify during selection"))
+    _notifyDuringSelectionCheckBox(new QCheckBox("Notify during selection")),
+    _advancedSettingsPushButton(new QPushButton(""))
 {
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
@@ -112,6 +113,10 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _invertSelectionPushButton->setFixedWidth(50);
 
     _notifyDuringSelectionCheckBox->setToolTip("Whether the selection updates are published continuously or at end of the selection process");
+
+    _advancedSettingsPushButton->setToolTip("Advanced selection settings");
+    _advancedSettingsPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
+    _advancedSettingsPushButton->setIcon(fontAwesome.getIcon("ellipsis-h"));
 
     computeStateSizes();
 }
@@ -306,6 +311,7 @@ void SelectionSettingsWidget::updateState()
             setWidgetLayout(layout);
 
             layout->addWidget(_typeWidget);
+            layout->addWidget(_advancedSettingsPushButton);
 
             setCurrentIndex(1);
 
