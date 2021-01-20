@@ -135,16 +135,3 @@ void PositionSettingsWidget::setDimensions(unsigned int numDimensions, const std
         _yDimensionComboBox->setCurrentIndex(1);
     }
 }
-
-void PositionSettingsWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names /*= std::vector<QString>()*/)
-{
-    /*
-    auto& stringListModel = createStringListModel(numDimensions, names, *this);
-
-    auto colorByDimensionComboBox = _ui->colorDimensionStackedWidget->getColorByDimensionComboBox();
-
-    QSignalBlocker signalBlocker(colorByDimensionComboBox);
-
-    colorByDimensionComboBox->setModel(&stringListModel);
-    */
-}
