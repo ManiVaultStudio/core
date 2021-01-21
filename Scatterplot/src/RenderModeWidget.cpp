@@ -12,37 +12,26 @@ using namespace hdps::gui;
 RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
     QStackedWidget(parent),
     _widgetState(this),
-    _popupPushButton(new QPushButton()),
+    _popupPushButton(new PopupPushButton()),
     _widget(new QWidget()),
     _scatterPlotPushButton(new QPushButton()),
     _densityPlotPushButton(new QPushButton()),
     _contourPlotPushButton(new QPushButton())
 {
-    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
+    initializeUI();
 
-    _scatterPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
-    _densityPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
-    _contourPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
-
-    _scatterPlotPushButton->setCheckable(true);
-    _densityPlotPushButton->setCheckable(true);
-    _contourPlotPushButton->setCheckable(true);
-
-    addWidget(_popupPushButton);
-    addWidget(_widget);
-
-    connect(&_widgetState, &hdps::gui::WidgetState::updateState, [this](const hdps::gui::WidgetState::State& state) {
-        auto& fontAwesome = Application::getIconFont("FontAwesome");
-
+    connect(&_widgetState, &WidgetState::updateState, [this](const WidgetState::State& state) {
         const auto setWidgetLayout = [this](QLayout* layout) -> void {
             if (_widget->layout())
                 delete _widget->layout();
 
-            layout->setMargin(ResponsiveToolBar::Widget::LAYOUT_MARGIN);
-            layout->setSpacing(ResponsiveToolBar::Widget::LAYOUT_SPACING);
+            layout->setMargin(ResponsiveToolBar::LAYOUT_MARGIN);
+            layout->setSpacing(ResponsiveToolBar::LAYOUT_SPACING);
 
             _widget->setLayout(layout);
         };
+
+        auto& fontAwesome = Application::getIconFont("FontAwesome");
 
         switch (state)
         {
@@ -86,9 +75,6 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
                 _densityPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("cloud") : QIcon());
                 _contourPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("mountain") : QIcon());
 
-                layout->invalidate();
-                layout->activate();
-
                 setCurrentWidget(_widget);
                 break;
             }
@@ -101,7 +87,25 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
     _widgetState.initialize();
 }
 
-void RenderModeWidget::initialize(const ScatterplotPlugin& plugin)
+void RenderModeWidget::initializeUI()
+{
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
+
+    _scatterPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
+    _densityPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
+    _contourPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
+
+    _scatterPlotPushButton->setCheckable(true);
+    _densityPlotPushButton->setCheckable(true);
+    _contourPlotPushButton->setCheckable(true);
+
+    addWidget(_popupPushButton);
+    addWidget(_widget);
+}
+
+void RenderModeWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 {
     auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
     

@@ -2,7 +2,6 @@
 
 #include "widgets/ResponsiveToolBar.h"
 
-#include <QWidget>
 #include <QSize>
 
 class ScatterplotPlugin;
@@ -14,7 +13,8 @@ class RenderModeWidget : public QStackedWidget
 public:
     RenderModeWidget(QWidget* parent = nullptr);
 
-    void initialize(const ScatterplotPlugin& plugin);
+    void initializeUI();
+    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
     QSize sizeHint() const override {
         return currentWidget()->sizeHint();
@@ -25,10 +25,10 @@ public:
     }
 
 private:
-    hdps::gui::WidgetState  _widgetState;
-    QPushButton*            _popupPushButton;
-    QWidget*                _widget;
-    QPushButton*            _scatterPlotPushButton;
-    QPushButton*            _densityPlotPushButton;
-    QPushButton*            _contourPlotPushButton;
+    hdps::gui::WidgetState      _widgetState;
+    hdps::gui::PopupPushButton* _popupPushButton;
+    QWidget*                    _widget;
+    QPushButton*                _scatterPlotPushButton;
+    QPushButton*                _densityPlotPushButton;
+    QPushButton*                _contourPlotPushButton;
 };

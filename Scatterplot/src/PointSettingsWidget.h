@@ -4,24 +4,35 @@
 
 class ScatterplotPlugin;
 
+class QPushButton;
 class QLabel;
 class QDoubleSpinBox;
 class QSlider;
 
-class PointSettingsWidget : public hdps::gui::ResponsiveToolBar::Widget
+class PointSettingsWidget : public QStackedWidget
 {
 public:
     PointSettingsWidget(QWidget* parent = nullptr);
 
-    void initialize(const ScatterplotPlugin& plugin);
+    void initializeUI();
+    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
-    void updateState() override;
+    QSize sizeHint() const override {
+        return currentWidget()->sizeHint();
+    }
+
+    QSize minimumSizeHint() const override {
+        return currentWidget()->minimumSizeHint();
+    }
 
 private:
-    QLabel*             _sizeLabel;
-    QDoubleSpinBox*     _sizeDoubleSpinBox;
-    QSlider*            _sizeSlider;
-    QLabel*             _opacityLabel;
-    QDoubleSpinBox*     _opacityDoubleSpinBox;
-    QSlider*            _opacitySlider;
+    hdps::gui::WidgetState          _widgetState;
+    hdps::gui::PopupPushButton*     _popupPushButton;
+    QWidget*                        _widget;
+    QLabel*                         _sizeLabel;
+    QDoubleSpinBox*                 _sizeDoubleSpinBox;
+    QSlider*                        _sizeSlider;
+    QLabel*                         _opacityLabel;
+    QDoubleSpinBox*                 _opacityDoubleSpinBox;
+    QSlider*                        _opacitySlider;
 };

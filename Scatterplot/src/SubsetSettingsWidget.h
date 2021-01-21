@@ -7,18 +7,18 @@ class ScatterplotPlugin;
 class QPushButton;
 class QCheckBox;
 
-class SubsetSettingsWidget : public hdps::gui::ResponsiveToolBar::Widget
+class SubsetSettingsWidget : public QStackedWidget
 {
 public:
     SubsetSettingsWidget(QWidget* parent = nullptr);
 
-    void initialize(const ScatterplotPlugin& plugin);
-
-protected:
-
-    void updateState() override;
+    void initializeUI();
+    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
 private:
-    QPushButton*    _createSubsetPushButton;
-    QCheckBox*      _fromSourceCheckBox;
+    hdps::gui::WidgetState          _widgetState;
+    hdps::gui::PopupPushButton*     _popupPushButton;
+    QWidget*                        _widget;
+    QPushButton*                    _createSubsetPushButton;
+    QCheckBox*                      _fromSourceCheckBox;
 };

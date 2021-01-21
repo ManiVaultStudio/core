@@ -7,12 +7,85 @@
 using namespace hdps::gui;
 
 PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::Widget("Position", 1000),
+    QStackedWidget(parent),
+    _widgetState(this),
+    _popupPushButton(new PopupPushButton()),
+    _widget(new QWidget()),
     _xDimensionLabel(new QLabel()),
     _xDimensionComboBox(new QComboBox()),
     _yDimensionLabel(new QLabel()),
     _yDimensionComboBox(new QComboBox())
 {
+    initializeUI();
+
+    connect(&_widgetState, &WidgetState::updateState, [this](const WidgetState::State& state) {
+        const auto setWidgetLayout = [this](QLayout* layout) -> void {
+            if (_widget->layout())
+                delete _widget->layout();
+
+            layout->setMargin(ResponsiveToolBar::LAYOUT_MARGIN);
+            layout->setSpacing(ResponsiveToolBar::LAYOUT_SPACING);
+
+            _widget->setLayout(layout);
+        };
+
+        switch (state)
+        {
+            case WidgetState::State::Popup:
+            {
+                setCurrentWidget(_popupPushButton);
+                break;
+            }
+
+            case WidgetState::State::Compact:
+            case WidgetState::State::Full:
+            {
+                auto layout = new QHBoxLayout();
+
+                setWidgetLayout(layout);
+
+                layout->addWidget(_xDimensionLabel);
+                layout->addWidget(_xDimensionComboBox);
+                layout->addWidget(_yDimensionLabel);
+                layout->addWidget(_yDimensionComboBox);
+
+                setCurrentWidget(_widget);
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        switch (state)
+        {
+            case WidgetState::State::Compact:
+                _xDimensionLabel->setText("X:");
+                _yDimensionLabel->setText("Y:");
+                _xDimensionComboBox->setFixedWidth(80);
+                _yDimensionComboBox->setFixedWidth(80);
+                break;
+
+            case WidgetState::State::Popup:
+            case WidgetState::State::Full:
+                _xDimensionLabel->setText("X dimension:");
+                _yDimensionLabel->setText("Y dimension:");
+                _xDimensionComboBox->setFixedWidth(120);
+                _yDimensionComboBox->setFixedWidth(120);
+                break;
+
+            default:
+                break;
+        }
+    });
+
+    _widgetState.initialize();
+}
+
+void PositionSettingsWidget::initializeUI()
+{
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("ruler-combined"));
 
     const auto xDimensionToolTipText = "X dimension";
@@ -25,10 +98,11 @@ PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
     _yDimensionLabel->setToolTip(yDimensionToolTipText);
     _yDimensionComboBox->setToolTip(yDimensionToolTipText);
 
-    computeStateSizes();
+    addWidget(_popupPushButton);
+    addWidget(_widget);
 }
 
-void PositionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
+void PositionSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 {
     QObject::connect(_xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
         const_cast<ScatterplotPlugin&>(plugin).xDimPicked(index);
@@ -53,63 +127,6 @@ void PositionSettingsWidget::initialize(const ScatterplotPlugin& plugin)
     });
     
     _ui->colorDimensionStackedWidget->initialize(plugin);
-    */
-}
-
-void PositionSettingsWidget::updateState()
-{
-    /*
-    switch (_state)
-    {
-        case State::Popup:
-        {
-            setCurrentIndex(0);
-            break;
-        }
-
-        case State::Compact:
-        case State::Full:
-        {
-            auto layout = new QHBoxLayout();
-
-            setWidgetLayout(layout);
-
-            layout->addWidget(_xDimensionLabel);
-            layout->addWidget(_xDimensionComboBox);
-            layout->addWidget(_yDimensionLabel);
-            layout->addWidget(_yDimensionComboBox);
-
-            layout->invalidate();
-            layout->activate();
-
-            setCurrentIndex(1);
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    switch (_state)
-    {
-        case State::Compact:
-            _xDimensionLabel->setText("X:");
-            _yDimensionLabel->setText("Y:");
-            _xDimensionComboBox->setFixedWidth(80);
-            _yDimensionComboBox->setFixedWidth(80);
-            break;
-
-        case State::Popup:
-        case State::Full:
-            _xDimensionLabel->setText("X dimension:");
-            _yDimensionLabel->setText("Y dimension:");
-            _xDimensionComboBox->setFixedWidth(120);
-            _yDimensionComboBox->setFixedWidth(120);
-            break;
-
-        default:
-            break;
-    }
     */
 }
 

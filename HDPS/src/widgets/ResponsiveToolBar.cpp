@@ -8,9 +8,8 @@ namespace hdps {
 
 namespace gui {
 
-const std::int32_t ResponsiveToolBar::Widget::LAYOUT_MARGIN     = 0;
-const std::int32_t ResponsiveToolBar::Widget::LAYOUT_SPACING    = 6;
-
+const std::int32_t ResponsiveToolBar::LAYOUT_MARGIN = 0;
+const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 6;
 const QSize ResponsiveToolBar::ICON_SIZE = QSize(12, 12);
 
 const QMap<QString, WidgetState::State> WidgetState::states = {
@@ -65,6 +64,8 @@ void WidgetState::updateStateSize(const State& state)
 {
     Q_ASSERT(_widget != nullptr);
 
+    _widget->adjustSize();
+
     _sizes[static_cast<std::int32_t>(state)] = _widget->sizeHint();
 
     qDebug() << "Current state:" << WidgetState::getStateName(state) << _sizes[static_cast<std::int32_t>(state)];
@@ -76,104 +77,6 @@ void WidgetState::changeState(const State& state)
 {
     emit updateState(state);
     updateStateSize(state);
-}
-
-ResponsiveToolBar::Widget::Widget(const QString& title, const std::int32_t& priority /*= 0*/) :
-    QStackedWidget(),
-    _priority(priority),
-    _state(WidgetState::State::Undefined),
-    _title(title),
-    _sizes(),
-    _popupPushButton(new QPushButton()),
-    _widget(new QWidget())
-{
-    _sizes[WidgetState::State::Popup] = QSize();
-    _sizes[WidgetState::State::Compact] = QSize();
-    _sizes[WidgetState::State::Full] = QSize();
-
-    _popupPushButton->setIconSize(ICON_SIZE);
-    _popupPushButton->setToolTip(QString("%1 settings").arg(_title));
-
-    _widget->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-
-    addWidget(_popupPushButton);
-    addWidget(_widget);
-}
-
-void ResponsiveToolBar::Widget::setState(const WidgetState::State& state, const bool& update /*= true*/)
-{
-    if (state == _state)
-        return;
-
-    _state = state;
-
-    if (update)
-        updateState();
-
-    /*
-    switch (_state)
-    {
-        case State::Undefined:
-            break;
-
-        case State::Popup:
-            _sizes[_state] = _popupPushButton->sizeHint();
-            break;
-
-        case State::Compact:
-        case State::Full:
-            _sizes[_state] = _widget->sizeHint();
-            break;
-
-        default:
-            break;
-    }
-    */
-}
-
-std::int32_t ResponsiveToolBar::Widget::getPriority() const
-{
-    return _priority;
-}
-
-void ResponsiveToolBar::Widget::setPriority(const std::int32_t& priority)
-{
-    _priority = priority;
-}
-
-QString ResponsiveToolBar::Widget::getTitle() const
-{
-    return _title;
-}
-
-void ResponsiveToolBar::Widget::setWidgetLayout(QLayout* layout)
-{
-    Q_ASSERT(layout != nullptr);
-
-    layout->setMargin(ResponsiveToolBar::Widget::LAYOUT_MARGIN);
-    layout->setSpacing(ResponsiveToolBar::Widget::LAYOUT_SPACING);
-
-    if (_widget->layout())
-        delete _widget->layout();
-
-    _widget->setLayout(layout);
-}
-
-void ResponsiveToolBar::Widget::computeStateSizes()
-{
-    setAttribute(Qt::WA_DontShowOnScreen, true);
-    show();
-
-    setState(WidgetState::State::Popup);
-    _sizes[_state] = _popupPushButton->sizeHint();
-
-    setState(WidgetState::State::Compact);
-    _sizes[_state] = _widget->sizeHint();
-
-    setState(WidgetState::State::Full);
-    _sizes[_state] = _widget->sizeHint();
-
-    setAttribute(Qt::WA_DontShowOnScreen, false);
 }
 
 ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
@@ -205,7 +108,19 @@ bool ResponsiveToolBar::eventFilter(QObject* target, QEvent* event)
     if (event->type() != QEvent::Resize)
         return QObject::eventFilter(target, event);
 
-    updateLayout(dynamic_cast<Widget*>(target));
+    if (target == _listenWidget) {
+        updateLayout(dynamic_cast<QWidget*>(target));
+    } else {
+        switch (event->type()) {
+            case QEvent::Hide:
+            case QEvent::Show:
+                updateLayout(dynamic_cast<QWidget*>(target));
+                break;
+
+            default:
+                break;
+        }
+    }
 
     return QObject::eventFilter(target, event);
 }
@@ -216,7 +131,7 @@ void ResponsiveToolBar::addWidget(QWidget* widget)
 
     _widgets << widget;
 
-    //widget->installEventFilter(this);
+    widget->installEventFilter(this);
 
     _layout->insertWidget(_layout->count() - 1, widget);
 
@@ -225,6 +140,11 @@ void ResponsiveToolBar::addWidget(QWidget* widget)
         return left->getPriority() > right->getPriority();
     });
     */
+}
+
+void ResponsiveToolBar::addStretch(const std::int32_t& stretch /*= 0*/)
+{
+    _layout->addStretch(stretch);
 }
 
 void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
@@ -288,8 +208,6 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
     
     for (auto widget : _widgets)
         widget->setProperty("state", static_cast<std::int32_t>(widgetsState[widget]));
-
-    qDebug() << static_cast<std::int32_t>(widgetsState.first());
 
     update();
 }

@@ -40,24 +40,22 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     _responsiveToolBar->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
 
-    _renderModeWidget->initialize(plugin);
-    _pointSettingsWidget->initialize(plugin);
-    _densitySettingsWidget->initialize(plugin);
-    _positionSettingsWidget->initialize(plugin);
-    _colorSettingsWidget->initialize(plugin);
-    _subsetSettingsWidget->initialize(plugin);
-    _selectionSettingsWidget->initialize(plugin);
+    _renderModeWidget->setScatterPlotPlugin(plugin);
+    _pointSettingsWidget->setScatterPlotPlugin(plugin);
+    _densitySettingsWidget->setScatterPlotPlugin(plugin);
+    _positionSettingsWidget->setScatterPlotPlugin(plugin);
+    _colorSettingsWidget->setScatterPlotPlugin(plugin);
+    _subsetSettingsWidget->setScatterPlotPlugin(plugin);
+    _selectionSettingsWidget->setScatterPlotPlugin(plugin);
 
     _responsiveToolBar->addWidget(_renderModeWidget);
-
-    /*
     _responsiveToolBar->addWidget(_pointSettingsWidget);
     _responsiveToolBar->addWidget(_densitySettingsWidget);
     _responsiveToolBar->addWidget(_positionSettingsWidget);
     _responsiveToolBar->addWidget(_colorSettingsWidget);
     _responsiveToolBar->addWidget(_subsetSettingsWidget);
     _responsiveToolBar->addWidget(_selectionSettingsWidget);
-    */
+    _responsiveToolBar->addStretch();
 
     setEnabled(false);
 

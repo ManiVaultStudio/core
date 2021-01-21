@@ -8,15 +8,86 @@
 using namespace hdps::gui;
 
 DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::Widget("Density", 100),
+    QStackedWidget(parent),
+    _widgetState(this),
+    _popupPushButton(new PopupPushButton()),
+    _widget(new QWidget()),
     _label(new QLabel()),
     _doubleSpinBox(new QDoubleSpinBox()),
     _slider(new QSlider())
 {
+    initializeUI();
+
+    connect(&_widgetState, &WidgetState::updateState, [this](const WidgetState::State& state) {
+        auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+        const auto setWidgetLayout = [this](QLayout* layout) -> void {
+            if (_widget->layout())
+                delete _widget->layout();
+
+            layout->setMargin(ResponsiveToolBar::LAYOUT_MARGIN);
+            layout->setSpacing(ResponsiveToolBar::LAYOUT_SPACING);
+
+            _widget->setLayout(layout);
+        };
+
+        switch (state)
+        {
+            case WidgetState::State::Popup:
+            {
+                /*
+                auto layout = new QHBoxLayout();
+
+                setWidgetLayout(layout);
+
+                layout->addWidget(_scatterPlotPushButton);
+                layout->addWidget(_densityPlotPushButton);
+                layout->addWidget(_contourPlotPushButton);
+
+                _scatterPlotPushButton->setText("Scatter Plot");
+                _densityPlotPushButton->setText("Density Plot");
+                _contourPlotPushButton->setText("Contour Plot");
+                */
+                setCurrentWidget(_popupPushButton);
+                break;
+            }
+
+            case WidgetState::State::Compact:
+            case WidgetState::State::Full:
+            {
+                auto layout = new QHBoxLayout();
+
+                setWidgetLayout(layout);
+
+                layout->addWidget(_label);
+                layout->addWidget(_doubleSpinBox);
+                layout->addWidget(_slider);
+
+                setCurrentIndex(state == WidgetState::State::Popup ? 0 : 1);
+
+                _doubleSpinBox->setVisible(state != WidgetState::State::Compact);
+                _slider->setFixedWidth(state == WidgetState::State::Compact ? 50 : 80);
+
+                setCurrentWidget(_widget);
+                break;
+            }
+
+            default:
+                break;
+        }
+    });
+
+    _widgetState.initialize();
+}
+
+void DensitySettingsWidget::initializeUI()
+{
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
 
     _label->setText("Sigma:");
-    
+
     _doubleSpinBox->setMinimum(1.0);
     _doubleSpinBox->setMaximum(50.0);
     _doubleSpinBox->setDecimals(1);
@@ -31,10 +102,11 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
     _doubleSpinBox->setToolTip(toolTipText);
     _slider->setToolTip(toolTipText);
 
-    computeStateSizes();
+    addWidget(_popupPushButton);
+    addWidget(_widget);
 }
 
-void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
+void DensitySettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 {
     auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
 
@@ -71,25 +143,4 @@ void DensitySettingsWidget::initialize(const ScatterplotPlugin& plugin)
     _doubleSpinBox->setValue(30.0);
 
     const_cast<ScatterplotPlugin&>(plugin).installEventFilter(this);
-}
-
-void DensitySettingsWidget::updateState()
-{
-    /*
-    auto layout = new QHBoxLayout();
-
-    setWidgetLayout(layout);
-
-    layout->addWidget(_label);
-    layout->addWidget(_doubleSpinBox);
-    layout->addWidget(_slider);
-
-    setCurrentIndex(_state == State::Popup ? 0 : 1);
-
-    _doubleSpinBox->setVisible(_state != State::Compact);
-    _slider->setFixedWidth(_state == State::Compact ? 50 : 80);
-
-    layout->invalidate();
-    layout->activate();
-    */
 }

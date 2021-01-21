@@ -2,8 +2,6 @@
 
 #include "widgets/ResponsiveToolBar.h"
 
-#include <QStackedWidget>
-
 class ScatterplotPlugin;
 
 class QLabel;
@@ -11,7 +9,7 @@ class QComboBox;
 class QLineEdit;
 class QPushButton;
 
-class ColorSettingsWidget : public hdps::gui::ResponsiveToolBar::Widget
+class ColorSettingsWidget : public QStackedWidget
 {
 public:
     class ColorDimensionWidget : public QStackedWidget {
@@ -19,14 +17,6 @@ public:
         ColorDimensionWidget();
 
         QComboBox* getColorDimensionComboBox();
-
-        QSize sizeHint() const override {
-            return currentWidget()->sizeHint();
-        }
-
-        QSize minimumSizeHint() const override {
-            return currentWidget()->minimumSizeHint();
-        }
 
     protected:
         QComboBox*      _colorDimensionComboBox;
@@ -41,16 +31,25 @@ public:
 public:
     ColorSettingsWidget(QWidget* parent = nullptr);
 
-    void initialize(const ScatterplotPlugin& plugin);
+    void initializeUI();
+    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
-    void updateState() override;
+    QSize sizeHint() const override {
+        return currentWidget()->sizeHint();
+    }
+
+    QSize minimumSizeHint() const override {
+        return currentWidget()->minimumSizeHint();
+    }
 
 public:
-
     void setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
 
 private:
-    QLabel*                 _colorByLabel;
-    QComboBox*              _colorByComboBox;
-    ColorDimensionWidget*   _colorDimensionWidget;
+    hdps::gui::WidgetState          _widgetState;
+    hdps::gui::PopupPushButton*     _popupPushButton;
+    QWidget*                        _widget;
+    QLabel*                         _colorByLabel;
+    QComboBox*                      _colorByComboBox;
+    ColorDimensionWidget*           _colorDimensionWidget;
 };

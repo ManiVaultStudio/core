@@ -10,6 +10,7 @@
 #include <QHBoxLayout>
 #include <QVariant>
 #include <QEvent>
+#include <QPainter>
 
 namespace hdps {
 
@@ -60,68 +61,39 @@ protected:
     QList<QSize>    _sizes;
 };
 
+class PopupPushButton : public QPushButton {
+public:
+
+    PopupPushButton() :
+        QPushButton()
+    {
+        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        setProperty("cssClass", "popup");
+    }
+
+    void paintEvent(QPaintEvent* paintEvent)
+    {
+        QPushButton::paintEvent(paintEvent);
+
+        QPainter painter(this);
+        
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        const auto size         = 3.0f;
+        const auto bottomRight  = QPointF(rect().bottomRight()) - QPointF(2.0f, 2.0f);
+        const auto topLeft      = bottomRight - QPointF(size, size);
+
+        const QVector<QPointF> points{ topLeft, topLeft + QPointF(size, 0.0f), bottomRight - QPointF(size / 2.0f, 0.0f) };
+
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QBrush(isEnabled() ? Qt::black : Qt::gray));
+        painter.drawPolygon(points.constData(), points.count());
+    }
+};
+
 class ResponsiveToolBar : public QWidget
 {
     Q_OBJECT
-public:
-    
-
-public:
-
-    class Widget : public QStackedWidget
-    {
-    public:
-        Widget(const QString& title, const std::int32_t& priority = 0);
-
-    public:
-
-        QSize sizeHint() const override {
-            return currentWidget()->sizeHint();
-        }
-
-        QSize minimumSizeHint() const override {
-            return currentWidget()->minimumSizeHint();
-        }
-
-    public: // State management
-
-        void setState(const WidgetState::State& state, const bool& update = true);
-
-        virtual void updateState() = 0;
-
-    protected:
-
-        void computeStateSizes();
-
-    public:
-
-        std::int32_t getPriority() const;
-        void setPriority(const std::int32_t& priority);
-
-        QString getTitle() const;
-
-        QSize getSize(const WidgetState::State& state) const {
-            return _sizes[state];
-        };
-
-        std::int32_t getWidth(const WidgetState::State& state) const {
-            return getSize(state).width();
-        };
-
-        void setWidgetLayout(QLayout* layout);
-
-    protected:
-        std::int32_t                _priority;
-        WidgetState::State                 _state;
-        QString                     _title;
-        QMap<WidgetState::State, QSize>    _sizes;
-        QPushButton*                _popupPushButton;
-        QWidget*                    _widget;
-
-    public:
-        static const std::int32_t LAYOUT_MARGIN;
-        static const std::int32_t LAYOUT_SPACING;
-    };
 
 public:
     ResponsiveToolBar(QWidget* parent = nullptr);
@@ -131,6 +103,7 @@ public:
     bool eventFilter(QObject* target, QEvent* event);
 
     void addWidget(QWidget* widget);
+    void addStretch(const std::int32_t& stretch = 0);
 
 private:
     void updateLayout(QWidget* widget = nullptr);
@@ -141,10 +114,10 @@ private:
     QList<QWidget*>     _widgets;           /** TODO */
 
 public:
+    static const std::int32_t LAYOUT_MARGIN;
+    static const std::int32_t LAYOUT_SPACING;
     static const QSize ICON_SIZE;
 };
-
-
 
 }
 }

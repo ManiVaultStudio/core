@@ -8,19 +8,27 @@ class QLabel;
 class QDoubleSpinBox;
 class QSlider;
 
-class DensitySettingsWidget : public hdps::gui::ResponsiveToolBar::Widget
+class DensitySettingsWidget : public QStackedWidget
 {
 public:
     DensitySettingsWidget(QWidget* parent = nullptr);
 
-    void initialize(const ScatterplotPlugin& plugin);
+    void initializeUI();
+    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
-protected:
+    QSize sizeHint() const override {
+        return currentWidget()->sizeHint();
+    }
 
-    void updateState() override;
+    QSize minimumSizeHint() const override {
+        return currentWidget()->minimumSizeHint();
+    }
 
 private:
-    QLabel*             _label;
-    QDoubleSpinBox*     _doubleSpinBox;
-    QSlider*            _slider;
+    hdps::gui::WidgetState          _widgetState;
+    hdps::gui::PopupPushButton*     _popupPushButton;
+    QWidget*                        _widget;
+    QLabel*                         _label;
+    QDoubleSpinBox*                 _doubleSpinBox;
+    QSlider*                        _slider;
 };

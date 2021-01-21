@@ -7,16 +7,21 @@ class ScatterplotPlugin;
 class QLabel;
 class QComboBox;
 
-class PositionSettingsWidget : public hdps::gui::ResponsiveToolBar::Widget
+class PositionSettingsWidget : public QStackedWidget
 {
 public:
     PositionSettingsWidget(QWidget* parent = nullptr);
 
-    void initialize(const ScatterplotPlugin& plugin);
+    void initializeUI();
+    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
-protected:
+    QSize sizeHint() const override {
+        return currentWidget()->sizeHint();
+    }
 
-    void updateState() override;
+    QSize minimumSizeHint() const override {
+        return currentWidget()->minimumSizeHint();
+    }
 
 public:
 
@@ -26,8 +31,11 @@ public:
     void setDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
 
 private:
-    QLabel*     _xDimensionLabel;
-    QComboBox*  _xDimensionComboBox;
-    QLabel*     _yDimensionLabel;
-    QComboBox*  _yDimensionComboBox;
+    hdps::gui::WidgetState          _widgetState;
+    hdps::gui::PopupPushButton*     _popupPushButton;
+    QWidget*                        _widget;
+    QLabel*                         _xDimensionLabel;
+    QComboBox*                      _xDimensionComboBox;
+    QLabel*                         _yDimensionLabel;
+    QComboBox*                      _yDimensionComboBox;
 };
