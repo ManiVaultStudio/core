@@ -16,23 +16,14 @@ class QPushButton;
 class ColorSettingsWidget : public QStackedWidget
 {
 public:
-    class ColorDimensionWidget : public QStackedWidget {
+    class ColorDimensionWidget : public QWidget {
     public:
         ColorDimensionWidget();
-
-        QSize sizeHint() const override {
-            return currentWidget()->sizeHint();
-        }
-
-        QSize minimumSizeHint() const override {
-            return currentWidget()->minimumSizeHint();
-        }
 
         QComboBox* getColorDimensionComboBox();
 
     protected:
         QComboBox*      _colorDimensionComboBox;
-        QWidget*        _widget;
         QHBoxLayout*    _layout;
         QLineEdit*      _colorDataLineEdit;
         QPushButton*    _removeColorDataPushButton;

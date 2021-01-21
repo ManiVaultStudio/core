@@ -63,7 +63,8 @@ public:
     void setPopupAlignment(const PopupAlignment& alignment);
 
 signals:
-    void popupClosed();
+    void popupOpen();
+    void popupClose();
 
 protected:
     QWidget*            _widget;

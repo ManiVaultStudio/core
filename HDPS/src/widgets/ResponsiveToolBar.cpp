@@ -10,7 +10,7 @@ namespace hdps {
 namespace gui {
 
 const std::int32_t ResponsiveToolBar::LAYOUT_MARGIN = 0;
-const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 6;
+const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 5;
 const QSize ResponsiveToolBar::ICON_SIZE = QSize(12, 12);
 
 ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :

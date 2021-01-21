@@ -70,6 +70,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
                 layout->addWidget(_notifyDuringSelectionCheckBox, 3, 1);
 
                 setCurrentWidget(_popupPushButton);
+                removeWidget(_widget);
                 break;
             }
 
@@ -84,7 +85,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
                 layout->addWidget(_selectWidget);
                 layout->addWidget(_notifyDuringSelectionCheckBox);
 
-                qDebug() << "setCurrentWidget" << count();
+                addWidget(_widget);
                 setCurrentWidget(_widget);
                 break;
             }
@@ -112,12 +113,7 @@ void SelectionSettingsWidget::initializeUI()
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
     _popupPushButton->setWidget(_widget);
-    //_popupPushButton->setPopupAlignment(Qt::AlignHCenter);
     _popupPushButton->setIcon(fontAwesome.getIcon("mouse-pointer"));
-
-    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
-        addWidget(_widget);
-    });
 
     _widget->setWindowTitle("Selection");
     
@@ -145,7 +141,7 @@ void SelectionSettingsWidget::initializeUI()
     _modifierAddPushButton->setCheckable(true);
 
     _modifierRemovePushButton->setToolTip("Remove items from the existing selection");
-    _modifierRemovePushButton->setIcon(fontAwesome.getIcon("minus", QSize(16, 16)));
+    _modifierRemovePushButton->setIcon(fontAwesome.getIcon("minus"));
     _modifierRemovePushButton->setCheckable(true);
 
     _radiusLabel->setToolTip("Brush radius");

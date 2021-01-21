@@ -41,6 +41,7 @@ SubsetSettingsWidget::SubsetSettingsWidget(QWidget* parent /*= nullptr*/) :
                 _fromSourceCheckBox->setText("From source dataset");
                 
                 setCurrentWidget(_popupPushButton);
+                removeWidget(_widget);
                 break;
             }
 
@@ -53,6 +54,7 @@ SubsetSettingsWidget::SubsetSettingsWidget(QWidget* parent /*= nullptr*/) :
                 _createSubsetPushButton->setText("Create subset");
                 _fromSourceCheckBox->setText(state == WidgetState::State::Compact ? "Source" : "From source");
 
+                addWidget(_widget);
                 setCurrentWidget(_widget);
                 break;
             }
@@ -72,10 +74,6 @@ void SubsetSettingsWidget::initializeUI()
     _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("crop-alt"));
     
-    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
-        addWidget(_widget);
-    });
-
     _widget->setWindowTitle("Subset");
 
     _createSubsetPushButton->setToolTip("Create a subset from the selected data points");

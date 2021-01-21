@@ -35,7 +35,17 @@ PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
         {
             case WidgetState::State::Popup:
             {
+                auto layout = new QGridLayout();
+
+                setWidgetLayout(layout);
+
+                layout->addWidget(_xDimensionLabel, 0, 0);
+                layout->addWidget(_xDimensionComboBox, 0, 1);
+                layout->addWidget(_yDimensionLabel, 1, 0);
+                layout->addWidget(_yDimensionComboBox, 1, 1);
+
                 setCurrentWidget(_popupPushButton);
+                removeWidget(_widget);
                 break;
             }
 
@@ -51,6 +61,7 @@ PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
                 layout->addWidget(_yDimensionLabel);
                 layout->addWidget(_yDimensionComboBox);
 
+                addWidget(_widget);
                 setCurrentWidget(_widget);
                 break;
             }
@@ -91,10 +102,6 @@ void PositionSettingsWidget::initializeUI()
     _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("ruler-combined"));
     
-    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
-        addWidget(_widget);
-    });
-
     _widget->setWindowTitle("Position");
 
     const auto xDimensionToolTipText = "X dimension";

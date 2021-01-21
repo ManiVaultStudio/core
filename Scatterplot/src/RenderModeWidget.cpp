@@ -50,6 +50,7 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
                 _contourPlotPushButton->setText("Contour Plot");
                 
                 setCurrentWidget(_popupPushButton);
+                removeWidget(_widget);
                 break;
             }
 
@@ -64,6 +65,7 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
                 layout->addWidget(_densityPlotPushButton);
                 layout->addWidget(_contourPlotPushButton);
 
+                addWidget(_widget);
                 setCurrentWidget(_widget);
                 break;
             }
@@ -92,10 +94,6 @@ void RenderModeWidget::initializeUI()
 
     _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
-
-    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
-        addWidget(_widget);
-    });
 
     _widget->setWindowTitle("Render mode");
 

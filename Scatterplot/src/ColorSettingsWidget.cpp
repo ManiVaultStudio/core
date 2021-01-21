@@ -11,28 +11,29 @@
 using namespace hdps::gui;
 
 ColorSettingsWidget::ColorDimensionWidget::ColorDimensionWidget() :
-    QStackedWidget(),
+    QWidget(),
     _colorDimensionComboBox(new QComboBox()),
-    _widget(new QWidget()),
     _layout(new QHBoxLayout()),
     _colorDataLineEdit(new QLineEdit()),
     _removeColorDataPushButton(new QPushButton())
 {
-    addWidget(_colorDimensionComboBox);
-    addWidget(_widget);
-
-    _widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
-    _widget->setLayout(_layout);
+    //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    
+    setLayout(_layout);
 
     _layout->setMargin(ResponsiveToolBar::LAYOUT_MARGIN);
     _layout->setSpacing(ResponsiveToolBar::LAYOUT_SPACING);
 
-    _colorDataLineEdit->setEnabled(false);
-
-    _removeColorDataPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
-
+    _layout->addWidget(_colorDimensionComboBox);
     _layout->addWidget(_colorDataLineEdit);
     _layout->addWidget(_removeColorDataPushButton);
+
+    _colorDataLineEdit->setEnabled(false);
+    _colorDataLineEdit->setReadOnly(true);
+    _colorDataLineEdit->setText("No color data...");
+    _colorDataLineEdit->setTextMargins(5, 0, 0, 0);
+
+    _removeColorDataPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
 }
 
 QComboBox* ColorSettingsWidget::ColorDimensionWidget::getColorDimensionComboBox()
@@ -73,17 +74,29 @@ ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
         switch (state)
         {
             case WidgetState::State::Popup:
+            {
+                _colorByLabel->setText("By:");
+
                 setCurrentWidget(_popupPushButton);
+                removeWidget(_widget);
                 break;
+            }
 
             case WidgetState::State::Compact:
-                _colorDimensionWidget->setFixedWidth(state == WidgetState::State::Compact ? 80 : 120);
+            case WidgetState::State::Full:
+            {
+                _colorByLabel->setText("Color by:");
+
+                addWidget(_widget);
                 setCurrentWidget(_widget);
                 break;
+            }
 
             default:
                 break;
         }
+
+        //_colorDimensionWidget->setFixedWidth(state == WidgetState::State::Compact ? 80 : 120);
     });
 
     _widgetState.initialize();
@@ -91,14 +104,8 @@ ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void ColorSettingsWidget::initializeUI()
 {
-    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-
     _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
-
-    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
-        addWidget(_widget);
-    });
 
     _widget->setWindowTitle("Color");
 
@@ -117,7 +124,8 @@ void ColorSettingsWidget::initializeUI()
 void ColorSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 {
     connect(_colorByComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        _colorDimensionWidget->setCurrentIndex(index);
+        //_colorDimensionWidget->setCurrentIndex(index);
+        _colorDimensionWidget->adjustSize();
     });
 
     connect(_colorDimensionWidget->getColorDimensionComboBox(), qOverload<int>(&QComboBox::currentIndexChanged), [this, &plugin](int index) {

@@ -3,20 +3,17 @@ QWidget#PopupWidget {
 }
 
 QPushButton {
-    padding-left: 4px;
-    padding-right: 4px;
-    height: 20px;
-    qproperty-iconSize: 10px;
+    margin: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 22px;
+    qproperty-iconSize: 12px;
 }
 
-QPushButton[cssClass="popup"] {
+QPushButton[cssClass="square"] {
     padding-left: 1px;
     padding-right: 1px;
-    width: 20px;
-}
-
-QWidget[cssClass="test"] {
-    background-color: red;
+    width: 22px;
 }
 
 QComboBox {
@@ -26,6 +23,9 @@ QComboBox {
 }
 
 QLineEdit {
-    margin: 0px;
-    height: 20px;
+    height: 18px;
+}
+
+QLineEdit:read-only {
+    background: rgb(230, 230, 230);
 }

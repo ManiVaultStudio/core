@@ -37,10 +37,12 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
         {
             case WidgetState::State::Popup:
                 setCurrentWidget(_popupPushButton);
+                removeWidget(_widget);
                 break;
 
             case WidgetState::State::Compact:
             case WidgetState::State::Full:
+                addWidget(_widget);
                 setCurrentWidget(_widget);
                 break;
 
@@ -69,10 +71,6 @@ void DensitySettingsWidget::initializeUI()
 
     _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-
-    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
-        addWidget(_widget);
-    });
 
     _widget->setWindowTitle("Density rendering");
 

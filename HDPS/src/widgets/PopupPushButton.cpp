@@ -21,24 +21,29 @@ PopupPushButton::PopupPushButton() :
     _groupBoxLayout(new QVBoxLayout())
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    setProperty("cssClass", "popup");
+    setProperty("cssClass", "square");
 
     _popupWidget->installEventFilter(this);
     _popupWidget->setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     _popupWidget->setObjectName("PopupWidget");
-    _popupWidget->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+    _popupWidget->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
     _popupWidget->setLayout(_popupLayout);
 
     _popupLayout->setMargin(7);
     _popupLayout->addWidget(_groupBox);
+    _popupLayout->setSizeConstraint(QLayout::SetMinimumSize);
 
     _groupBox->setLayout(_groupBoxLayout);
+    _groupBox->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 
     connect(this, &QPushButton::clicked, [this]() {
         _groupBoxLayout->takeAt(0);
         _groupBoxLayout->addWidget(_widget);
 
+        emit popupOpen();
+
         _widget->show();
+        _popupWidget->adjustSize();
         _popupWidget->show();
 
         QPoint move;
@@ -107,7 +112,7 @@ bool PopupPushButton::eventFilter(QObject* object, QEvent* event)
         case QEvent::FocusOut:
         case QEvent::Close:
             _groupBoxLayout->takeAt(0);
-            emit popupClosed();
+            emit popupClose();
             break;
 
         default:
@@ -125,15 +130,47 @@ void PopupPushButton::paintEvent(QPaintEvent* paintEvent)
 
     painter.setRenderHint(QPainter::Antialiasing);
 
-    const auto size = 3.0f;
-    const auto bottomRight = QPointF(rect().bottomRight()) - QPointF(2.0f, 2.0f);
-    const auto topLeft = bottomRight - QPointF(size, size);
+    const auto margin = 5.0f;
 
-    const QVector<QPointF> points{ topLeft, topLeft + QPointF(size, 0.0f), bottomRight - QPointF(size / 2.0f, 0.0f) };
+    QPointF center;
 
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(QBrush(isEnabled() ? Qt::black : Qt::gray));
-    painter.drawPolygon(points.constData(), points.count());
+    if (_alignment.testFlag(PopupAlignmentFlag::DockTop) || _alignment.testFlag(PopupAlignmentFlag::DockBottom)) {
+        if (_alignment.testFlag(PopupAlignmentFlag::DockTop))
+            center.setY(margin);
+
+        if (_alignment.testFlag(PopupAlignmentFlag::DockBottom))
+            center.setY(height() - margin);
+
+        if (_alignment.testFlag(PopupAlignmentFlag::AnchorLeft))
+            center.setX(margin);
+
+        if (_alignment.testFlag(PopupAlignmentFlag::AnchorCenter))
+            center.setX(rect().center().x());
+
+        if (_alignment.testFlag(PopupAlignmentFlag::AnchorRight))
+            center.setX(width() - margin);
+    }
+
+    if (_alignment.testFlag(PopupAlignmentFlag::DockLeft) || _alignment.testFlag(PopupAlignmentFlag::DockRight)) {
+        if (_alignment.testFlag(PopupAlignmentFlag::DockLeft))
+            center.setX(margin);
+
+        if (_alignment.testFlag(PopupAlignmentFlag::DockRight))
+            center.setX(width() - margin);
+
+        if (_alignment.testFlag(PopupAlignmentFlag::AnchorTop))
+            center.setY(margin);
+
+        if (_alignment.testFlag(PopupAlignmentFlag::AnchorCenter))
+            center.setY(rect().center().y());
+
+        if (_alignment.testFlag(PopupAlignmentFlag::AnchorBottom))
+            center.setY(height() - margin);
+    }
+
+    painter.setPen(QPen(QBrush(isEnabled() ? Qt::black : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
+    painter.setBrush(Qt::NoBrush);
+    painter.drawPoint(center);
 }
 
 PopupPushButton::PopupAlignment PopupPushButton::getPopupAlignment() const
