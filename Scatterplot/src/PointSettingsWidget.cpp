@@ -1,6 +1,8 @@
 #include "PointSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
+#include "widgets/ResponsiveToolBar.h"
+
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -96,10 +98,14 @@ void PointSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    _popupPushButton->setPopupWidget(_widget);
+    _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     
-    _widget->setWindowTitle("Point");
+    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
+        addWidget(_widget);
+    });
+
+    _widget->setWindowTitle("Point rendering");
 
     _sizeLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     

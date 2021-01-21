@@ -1,7 +1,8 @@
 #include "ResponsiveToolBar.h"
+#include "WidgetState.h"
 
 #include <QDebug>
-#include <QPushButton>
+#include <QHBoxLayout>
 #include <QEvent>
 
 namespace hdps {
@@ -11,73 +12,6 @@ namespace gui {
 const std::int32_t ResponsiveToolBar::LAYOUT_MARGIN = 0;
 const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 6;
 const QSize ResponsiveToolBar::ICON_SIZE = QSize(12, 12);
-
-const QMap<QString, WidgetState::State> WidgetState::states = {
-    { "Undefined", WidgetState::State::Undefined },
-    { "Popup", WidgetState::State::Popup },
-    { "Compact", WidgetState::State::Compact },
-    { "Full", WidgetState::State::Full }
-};
-
-WidgetState::WidgetState(QWidget* widget) :
-    QObject(widget),
-    _widget(widget),
-    _sizes({ QSize(), QSize(), QSize() })
-{
-    _widget->installEventFilter(this);
-}
-
-bool WidgetState::eventFilter(QObject* object, QEvent* event)
-{
-    if (event->type() == QEvent::DynamicPropertyChange)
-    {
-        auto propertyChangeEvent = static_cast<QDynamicPropertyChangeEvent*>(event);
-
-        if (propertyChangeEvent) {
-            const auto propertyName = QString(propertyChangeEvent->propertyName().data());
-
-            if (propertyName == "state")
-                changeState(getState());
-        }
-    }
-
-    return QObject::eventFilter(object, event);
-}
-
-void WidgetState::setSize(const State& state, const QSize& size)
-{
-    _sizes[static_cast<std::int32_t>(state)] = size;
-}
-
-void WidgetState::initialize()
-{
-    Q_ASSERT(_widget != nullptr);
-
-    changeState(State::Popup);
-    changeState(State::Compact);
-    changeState(State::Full);
-
-    qDebug() << _sizes;
-}
-
-void WidgetState::updateStateSize(const State& state)
-{
-    Q_ASSERT(_widget != nullptr);
-
-    _widget->adjustSize();
-
-    _sizes[static_cast<std::int32_t>(state)] = _widget->sizeHint();
-
-    qDebug() << "Current state:" << WidgetState::getStateName(state) << _sizes[static_cast<std::int32_t>(state)];
-
-    _widget->setProperty("sizes", QVariant::fromValue(_sizes));
-}
-
-void WidgetState::changeState(const State& state)
-{
-    emit updateState(state);
-    updateStateSize(state);
-}
 
 ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
     QWidget(parent),

@@ -79,6 +79,7 @@ set( WIDGET_HEADERS
     src/widgets/PopupWidget.h
     src/widgets/PopupPushButton.h
     src/widgets/ResponsiveToolBar.h
+    src/widgets/WidgetState.h
 )
 
 set( WIDGET_SOURCES
@@ -94,6 +95,7 @@ set( WIDGET_SOURCES
 	src/widgets/PopupWidget.cpp
 	src/widgets/PopupPushButton.cpp
 	src/widgets/ResponsiveToolBar.cpp
+	src/widgets/WidgetState.cpp
 )
 
 set( RENDERER_HEADERS

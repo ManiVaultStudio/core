@@ -1,6 +1,8 @@
 #include "ColorSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
+#include "widgets/ResponsiveToolBar.h"
+
 #include <QLabel>
 #include <QComboBox>
 #include <QLineEdit>
@@ -91,8 +93,12 @@ void ColorSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    _popupPushButton->setPopupWidget(_widget);
+    _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
+
+    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
+        addWidget(_widget);
+    });
 
     _widget->setWindowTitle("Color");
 

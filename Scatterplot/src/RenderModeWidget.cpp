@@ -90,8 +90,12 @@ void RenderModeWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    _popupPushButton->setPopupWidget(_widget);
+    _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
+
+    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
+        addWidget(_widget);
+    });
 
     _widget->setWindowTitle("Render mode");
 

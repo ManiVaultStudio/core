@@ -1,11 +1,15 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "widgets/WidgetState.h"
+#include "widgets/PopupPushButton.h"
+
+#include <QStackedWidget>
 
 class ScatterplotPlugin;
 
 class QLabel;
 class QComboBox;
+class QHBoxLayout;
 class QLineEdit;
 class QPushButton;
 

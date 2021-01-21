@@ -1,6 +1,9 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "widgets/WidgetState.h"
+#include "widgets/PopupPushButton.h"
+
+#include <QStackedWidget>
 
 class ScatterplotPlugin;
 class PixelSelectionTool;

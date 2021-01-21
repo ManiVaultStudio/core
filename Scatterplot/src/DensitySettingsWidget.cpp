@@ -1,6 +1,8 @@
 #include "DensitySettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
+#include "widgets/ResponsiveToolBar.h"
+
 #include <QLabel>
 #include <QDoubleSpinBox>
 #include <QSlider>
@@ -65,10 +67,14 @@ void DensitySettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    _popupPushButton->setPopupWidget(_widget);
+    _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
 
-    _widget->setWindowTitle("Density");
+    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
+        addWidget(_widget);
+    });
+
+    _widget->setWindowTitle("Density rendering");
 
     _label->setText("Sigma:");
 

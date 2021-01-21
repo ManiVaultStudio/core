@@ -1,6 +1,8 @@
 #include "SubsetSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
+#include "widgets/ResponsiveToolBar.h"
+
 #include <QPushButton>
 #include <QCheckBox>
 
@@ -67,9 +69,13 @@ void SubsetSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    _popupPushButton->setPopupWidget(_widget);
+    _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("crop-alt"));
     
+    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
+        addWidget(_widget);
+    });
+
     _widget->setWindowTitle("Subset");
 
     _createSubsetPushButton->setToolTip("Create a subset from the selected data points");

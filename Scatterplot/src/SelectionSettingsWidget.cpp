@@ -2,6 +2,8 @@
 #include "ScatterplotPlugin.h"
 #include "Application.h"
 
+#include "widgets/ResponsiveToolBar.h"
+
 #include <QDebug>
 #include <QLabel>
 #include <QComboBox>
@@ -50,8 +52,6 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 
             _widget->setLayout(layout);
         };
-
-        qDebug() << WidgetState::getStateName(state);
 
         switch (state)
         {
@@ -111,7 +111,8 @@ void SelectionSettingsWidget::initializeUI()
 
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
-    _popupPushButton->setPopupWidget(_widget);
+    _popupPushButton->setWidget(_widget);
+    //_popupPushButton->setPopupAlignment(Qt::AlignHCenter);
     _popupPushButton->setIcon(fontAwesome.getIcon("mouse-pointer"));
 
     connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {

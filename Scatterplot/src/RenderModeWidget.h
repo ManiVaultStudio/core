@@ -1,8 +1,9 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "widgets/WidgetState.h"
+#include "widgets/PopupPushButton.h"
 
-#include <QSize>
+#include <QStackedWidget>
 
 class ScatterplotPlugin;
 
@@ -25,10 +26,10 @@ public:
     }
 
 private:
-    hdps::gui::WidgetState      _widgetState;
-    hdps::gui::PopupPushButton* _popupPushButton;
-    QWidget*                    _widget;
-    QPushButton*                _scatterPlotPushButton;
-    QPushButton*                _densityPlotPushButton;
-    QPushButton*                _contourPlotPushButton;
+    hdps::gui::WidgetState          _widgetState;
+    hdps::gui::PopupPushButton*     _popupPushButton;
+    QWidget*                        _widget;
+    QPushButton*                    _scatterPlotPushButton;
+    QPushButton*                    _densityPlotPushButton;
+    QPushButton*                    _contourPlotPushButton;
 };

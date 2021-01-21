@@ -1,6 +1,8 @@
 #include "PositionSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
+#include "widgets/ResponsiveToolBar.h"
+
 #include <QLabel>
 #include <QComboBox>
 
@@ -86,9 +88,13 @@ void PositionSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    _popupPushButton->setPopupWidget(_widget);
+    _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("ruler-combined"));
     
+    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
+        addWidget(_widget);
+    });
+
     _widget->setWindowTitle("Position");
 
     const auto xDimensionToolTipText = "X dimension";
