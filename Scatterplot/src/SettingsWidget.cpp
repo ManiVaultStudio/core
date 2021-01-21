@@ -57,7 +57,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _responsiveToolBar->addWidget(_selectionSettingsWidget);
     _responsiveToolBar->addStretch();
 
-    setEnabled(false);
+    //setEnabled(false);
 
     connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
         setEnabled(!currentDataset.isEmpty());

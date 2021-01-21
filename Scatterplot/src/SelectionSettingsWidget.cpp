@@ -51,11 +51,12 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
             _widget->setLayout(layout);
         };
 
+        qDebug() << WidgetState::getStateName(state);
+
         switch (state)
         {
             case WidgetState::State::Popup:
             {
-                /*
                 auto layout = new QGridLayout();
 
                 setWidgetLayout(layout);
@@ -67,7 +68,6 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
                 layout->addWidget(_selectLabel, 2, 0);
                 layout->addWidget(_selectWidget, 2, 1);
                 layout->addWidget(_notifyDuringSelectionCheckBox, 3, 1);
-                */
 
                 setCurrentWidget(_popupPushButton);
                 break;
@@ -84,14 +84,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
                 layout->addWidget(_selectWidget);
                 layout->addWidget(_notifyDuringSelectionCheckBox);
 
-                _typeLabel->setVisible(state == WidgetState::State::Popup);
-                _typeWidget->setVisible(true);
-                _radiusLabel->setVisible(state == WidgetState::State::Popup);
-                _radiusWidget->setVisible(state == WidgetState::State::Popup);
-                _selectLabel->setVisible(state == WidgetState::State::Popup);
-                _selectWidget->setVisible(state != WidgetState::State::Compact);
-                _notifyDuringSelectionCheckBox->setVisible(state != WidgetState::State::Compact);
-
+                qDebug() << "setCurrentWidget" << count();
                 setCurrentWidget(_widget);
                 break;
             }
@@ -99,6 +92,14 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
             default:
                 break;
         }
+
+        _typeLabel->setVisible(state == WidgetState::State::Popup);
+        _typeWidget->setVisible(true);
+        _radiusLabel->setVisible(state == WidgetState::State::Popup);
+        _radiusWidget->setVisible(state == WidgetState::State::Popup);
+        _selectLabel->setVisible(state == WidgetState::State::Popup);
+        _selectWidget->setVisible(state != WidgetState::State::Compact);
+        _notifyDuringSelectionCheckBox->setVisible(state != WidgetState::State::Compact);
     });
 
     _widgetState.initialize();
@@ -110,8 +111,15 @@ void SelectionSettingsWidget::initializeUI()
 
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
+    _popupPushButton->setPopupWidget(_widget);
     _popupPushButton->setIcon(fontAwesome.getIcon("mouse-pointer"));
 
+    connect(_popupPushButton, &PopupPushButton::popupClosed, [this]() {
+        addWidget(_widget);
+    });
+
+    _widget->setWindowTitle("Selection");
+    
     _typeLabel->hide();
     _typeLabel->setToolTip("Selection type");
 
@@ -133,12 +141,10 @@ void SelectionSettingsWidget::initializeUI()
 
     _modifierAddPushButton->setToolTip("Add items to the existing selection");
     _modifierAddPushButton->setIcon(fontAwesome.getIcon("plus"));
-    _modifierAddPushButton->setIconSize(QSize(10, 10));
     _modifierAddPushButton->setCheckable(true);
 
     _modifierRemovePushButton->setToolTip("Remove items from the existing selection");
     _modifierRemovePushButton->setIcon(fontAwesome.getIcon("minus", QSize(16, 16)));
-    _modifierRemovePushButton->setIconSize(QSize(10, 10));
     _modifierRemovePushButton->setCheckable(true);
 
     _radiusLabel->setToolTip("Brush radius");
@@ -177,13 +183,8 @@ void SelectionSettingsWidget::initializeUI()
     _selectWidget->setLayout(_selectLayout);
 
     _clearSelectionPushButton->setToolTip("Removes all items from the selection");
-    _clearSelectionPushButton->setFixedWidth(50);
-
     _selectAllPushButton->setToolTip("Select all items");
-    _selectAllPushButton->setFixedWidth(50);
-
     _invertSelectionPushButton->setToolTip("Invert the selection");
-    _invertSelectionPushButton->setFixedWidth(50);
 
     _notifyDuringSelectionCheckBox->setToolTip("Whether the selection updates are published continuously or at end of the selection process");
 

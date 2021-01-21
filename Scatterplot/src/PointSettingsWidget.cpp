@@ -40,19 +40,18 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
         {
             case WidgetState::State::Popup:
             {
-                /*
-                auto layout = new QHBoxLayout();
+                auto layout = new QGridLayout();
 
                 setWidgetLayout(layout);
 
-                layout->addWidget(_scatterPlotPushButton);
-                layout->addWidget(_densityPlotPushButton);
-                layout->addWidget(_contourPlotPushButton);
+                layout->addWidget(_sizeLabel, 0, 0);
+                layout->addWidget(_sizeDoubleSpinBox, 0, 1);
+                layout->addWidget(_sizeSlider, 0, 2);
 
-                _scatterPlotPushButton->setText("Scatter Plot");
-                _densityPlotPushButton->setText("Density Plot");
-                _contourPlotPushButton->setText("Contour Plot");
-                */
+                layout->addWidget(_opacityLabel, 1, 0);
+                layout->addWidget(_opacityDoubleSpinBox, 1, 1);
+                layout->addWidget(_opacitySlider, 1, 2);
+
                 setCurrentWidget(_popupPushButton);
                 break;
             }
@@ -72,15 +71,6 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
                 layout->addWidget(_opacityDoubleSpinBox);
                 layout->addWidget(_opacitySlider);
 
-                _sizeLabel->setText(state == WidgetState::State::Full ? "Point size:" : "Size:");
-                _opacityLabel->setText(state == WidgetState::State::Full ? "Point opacity:" : "Opacity:");
-
-                _sizeSlider->setFixedWidth(state == WidgetState::State::Compact ? 50 : 80);
-                _opacitySlider->setFixedWidth(state == WidgetState::State::Compact ? 50 : 80);
-
-                _sizeDoubleSpinBox->setVisible(state != WidgetState::State::Compact);
-                _opacityDoubleSpinBox->setVisible(state != WidgetState::State::Compact);
-
                 setCurrentWidget(_widget);
                 break;
             }
@@ -88,6 +78,15 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
             default:
                 break;
         }
+
+        _sizeLabel->setText(state == WidgetState::State::Full ? "Point size:" : "Size:");
+        _opacityLabel->setText(state == WidgetState::State::Full ? "Point opacity:" : "Opacity:");
+
+        _sizeSlider->setFixedWidth(state == WidgetState::State::Compact ? 50 : 80);
+        _opacitySlider->setFixedWidth(state == WidgetState::State::Compact ? 50 : 80);
+
+        _sizeDoubleSpinBox->setVisible(state != WidgetState::State::Compact);
+        _opacityDoubleSpinBox->setVisible(state != WidgetState::State::Compact);
     });
 
     _widgetState.initialize();
@@ -97,8 +96,13 @@ void PointSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
+    _popupPushButton->setPopupWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    
+    _widget->setWindowTitle("Point");
 
+    _sizeLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    
     _sizeDoubleSpinBox->setMinimum(1.0);
     _sizeDoubleSpinBox->setMaximum(20.0);
     _sizeDoubleSpinBox->setDecimals(1);
@@ -107,6 +111,8 @@ void PointSettingsWidget::initializeUI()
     _sizeSlider->setOrientation(Qt::Horizontal);
     _sizeSlider->setMinimum(1000);
     _sizeSlider->setMaximum(20000);
+
+    _opacityLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
     _opacityDoubleSpinBox->setMinimum(1.0);
     _opacityDoubleSpinBox->setMaximum(100.0);

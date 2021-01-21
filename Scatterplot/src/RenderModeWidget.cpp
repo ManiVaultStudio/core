@@ -3,8 +3,8 @@
 
 #include "widgets/ResponsiveToolBar.h"
 
-#include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QPushButton>
 
 using namespace hdps::gui;
@@ -37,8 +37,7 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
         {
             case WidgetState::State::Popup:
             {
-                /*
-                auto layout = new QHBoxLayout();
+                auto layout = new QVBoxLayout();
 
                 setWidgetLayout(layout);
 
@@ -49,7 +48,7 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
                 _scatterPlotPushButton->setText("Scatter Plot");
                 _densityPlotPushButton->setText("Density Plot");
                 _contourPlotPushButton->setText("Contour Plot");
-                */
+                
                 setCurrentWidget(_popupPushButton);
                 break;
             }
@@ -65,16 +64,6 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
                 layout->addWidget(_densityPlotPushButton);
                 layout->addWidget(_contourPlotPushButton);
 
-                const auto isCompact = state == WidgetState::State::Compact;
-
-                _scatterPlotPushButton->setText(isCompact ? "" : "Scatter Plot");
-                _densityPlotPushButton->setText(isCompact ? "" : "Density Plot");
-                _contourPlotPushButton->setText(isCompact ? "" : "Contour Plot");
-
-                _scatterPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("braille") : QIcon());
-                _densityPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("cloud") : QIcon());
-                _contourPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("mountain") : QIcon());
-
                 setCurrentWidget(_widget);
                 break;
             }
@@ -82,6 +71,16 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
             default:
                 break;
         }
+
+        const auto isCompact = state == WidgetState::State::Compact;
+
+        _scatterPlotPushButton->setText(isCompact ? "" : "Scatter Plot");
+        _densityPlotPushButton->setText(isCompact ? "" : "Density Plot");
+        _contourPlotPushButton->setText(isCompact ? "" : "Contour Plot");
+
+        _scatterPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("braille") : QIcon());
+        _densityPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("cloud") : QIcon());
+        _contourPlotPushButton->setIcon(isCompact ? fontAwesome.getIcon("mountain") : QIcon());
     });
     
     _widgetState.initialize();
@@ -91,7 +90,10 @@ void RenderModeWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
+    _popupPushButton->setPopupWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
+
+    _widget->setWindowTitle("Render mode");
 
     _scatterPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
     _densityPlotPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);

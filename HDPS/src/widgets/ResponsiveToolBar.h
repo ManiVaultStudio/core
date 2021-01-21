@@ -11,6 +11,8 @@
 #include <QVariant>
 #include <QEvent>
 #include <QPainter>
+#include <QGroupBox>
+#include <QDebug>
 
 namespace hdps {
 
@@ -62,13 +64,66 @@ protected:
 };
 
 class PopupPushButton : public QPushButton {
-public:
+    Q_OBJECT
 
+public:
     PopupPushButton() :
-        QPushButton()
+        QPushButton(),
+        _popupWidget(nullptr)
     {
         setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
         setProperty("cssClass", "popup");
+    }
+
+    void setPopupWidget(QWidget* widget) {
+        Q_ASSERT(widget != nullptr);
+
+        _popupWidget = widget;
+
+        connect(_popupWidget, &QWidget::windowTitleChanged, [this]() {
+            setToolTip(QString("Click to edit %1 settings").arg(_popupWidget->windowTitle().toLower()));
+        });
+
+        connect(this, &QPushButton::clicked, [this]() {
+            auto popupWidget    = new QWidget(this);
+            auto popupLayout    = new QVBoxLayout();
+            auto groupBox       = new QGroupBox();
+            auto groupBoxLayout = new QVBoxLayout();
+
+            popupWidget->installEventFilter(this);
+            popupWidget->setWindowFlags(Qt::Popup);
+            popupWidget->setObjectName("PopupWidget");
+            popupWidget->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+            popupWidget->setLayout(popupLayout);
+
+            popupLayout->setMargin(7);
+            popupLayout->addWidget(groupBox);
+
+            groupBox->setTitle(_popupWidget->windowTitle());
+            groupBox->setLayout(groupBoxLayout);
+
+            groupBoxLayout->addWidget(_popupWidget);
+
+            _popupWidget->show();
+
+            popupWidget->move(mapToGlobal(rect().bottomLeft()) - popupWidget->rect().topLeft());
+            popupWidget->show();
+        });
+    }
+
+    bool eventFilter(QObject* object, QEvent* event) {
+        switch (event->type())
+        {
+            case QEvent::FocusOut:
+            case QEvent::Close:
+                emit popupClosed();
+                break;
+
+            default:
+                break;
+        }
+
+        return QObject::eventFilter(object, event);
     }
 
     void paintEvent(QPaintEvent* paintEvent)
@@ -89,6 +144,12 @@ public:
         painter.setBrush(QBrush(isEnabled() ? Qt::black : Qt::gray));
         painter.drawPolygon(points.constData(), points.count());
     }
+
+signals:
+    void popupClosed();
+
+protected:
+    QWidget*    _popupWidget;
 };
 
 class ResponsiveToolBar : public QWidget
@@ -107,6 +168,7 @@ public:
 
 private:
     void updateLayout(QWidget* widget = nullptr);
+    QList<QWidget*> getVisibleWidgets();
 
 private:
     QWidget*            _listenWidget;      /** TODO */

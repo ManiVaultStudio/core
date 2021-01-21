@@ -88,7 +88,7 @@ ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
     setAutoFillBackground(true);
 
     _layout->setMargin(5);
-    _layout->setSpacing(6);
+    _layout->setSpacing(4);
     _layout->addStretch(1);
 
     setLayout(_layout);
@@ -114,6 +114,7 @@ bool ResponsiveToolBar::eventFilter(QObject* target, QEvent* event)
         switch (event->type()) {
             case QEvent::Hide:
             case QEvent::Show:
+            case QEvent::Resize:
                 updateLayout(dynamic_cast<QWidget*>(target));
                 break;
 
@@ -169,10 +170,9 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
         return widget->sizeHint().width();
     };
 
-    for (auto widget : _widgets) {
-        if (widget->isHidden())
-            continue;
+    auto visibleWidgets = getVisibleWidgets();
 
+    for (auto widget : visibleWidgets) {
         runningWidth += widgetWidth(widget, WidgetState::State::Popup);
 
         if (runningWidth > sourceWidgetWidth)
@@ -180,12 +180,8 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
         
         widgetsState[widget] = WidgetState::State::Popup;
     }
-
     
-    for (auto widget : _widgets) {
-        if (widget->isHidden())
-            continue;
-        
+    for (auto widget : visibleWidgets) {
         runningWidth += widgetWidth(widget, WidgetState::State::Compact) - widgetWidth(widget, WidgetState::State::Popup);
 
         if (runningWidth > sourceWidgetWidth)
@@ -194,10 +190,7 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
         widgetsState[widget] = WidgetState::State::Compact;
     }
     
-    for (auto widget : _widgets) {
-        if (widget->isHidden())
-            continue;
-
+    for (auto widget : visibleWidgets) {
         runningWidth += widgetWidth(widget, WidgetState::State::Full) - widgetWidth(widget, WidgetState::State::Compact);
 
         if (runningWidth > sourceWidgetWidth)
@@ -206,10 +199,24 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
         widgetsState[widget] = WidgetState::State::Full;
     }
     
-    for (auto widget : _widgets)
+    for (auto widget : visibleWidgets)
         widget->setProperty("state", static_cast<std::int32_t>(widgetsState[widget]));
 
     update();
+}
+
+QList<QWidget*> ResponsiveToolBar::getVisibleWidgets()
+{
+    QList<QWidget*> visibleWidgets;
+
+    for (auto widget : _widgets) {
+        if (widget->isHidden())
+            continue;
+
+        visibleWidgets << widget;
+    }
+
+    return visibleWidgets;
 }
 
 }

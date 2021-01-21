@@ -34,47 +34,28 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
         switch (state)
         {
             case WidgetState::State::Popup:
-            {
-                /*
-                auto layout = new QHBoxLayout();
-
-                setWidgetLayout(layout);
-
-                layout->addWidget(_scatterPlotPushButton);
-                layout->addWidget(_densityPlotPushButton);
-                layout->addWidget(_contourPlotPushButton);
-
-                _scatterPlotPushButton->setText("Scatter Plot");
-                _densityPlotPushButton->setText("Density Plot");
-                _contourPlotPushButton->setText("Contour Plot");
-                */
                 setCurrentWidget(_popupPushButton);
                 break;
-            }
 
             case WidgetState::State::Compact:
             case WidgetState::State::Full:
-            {
-                auto layout = new QHBoxLayout();
-
-                setWidgetLayout(layout);
-
-                layout->addWidget(_label);
-                layout->addWidget(_doubleSpinBox);
-                layout->addWidget(_slider);
-
-                setCurrentIndex(state == WidgetState::State::Popup ? 0 : 1);
-
-                _doubleSpinBox->setVisible(state != WidgetState::State::Compact);
-                _slider->setFixedWidth(state == WidgetState::State::Compact ? 50 : 80);
-
                 setCurrentWidget(_widget);
                 break;
-            }
 
             default:
                 break;
         }
+
+        auto layout = new QHBoxLayout();
+
+        setWidgetLayout(layout);
+
+        layout->addWidget(_label);
+        layout->addWidget(_doubleSpinBox);
+        layout->addWidget(_slider);
+
+        _doubleSpinBox->setVisible(state != WidgetState::State::Compact);
+        _slider->setFixedWidth(state == WidgetState::State::Compact ? 50 : 80);
     });
 
     _widgetState.initialize();
@@ -84,7 +65,10 @@ void DensitySettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
+    _popupPushButton->setPopupWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+
+    _widget->setWindowTitle("Density");
 
     _label->setText("Sigma:");
 

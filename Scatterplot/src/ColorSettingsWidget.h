@@ -16,6 +16,14 @@ public:
     public:
         ColorDimensionWidget();
 
+        QSize sizeHint() const override {
+            return currentWidget()->sizeHint();
+        }
+
+        QSize minimumSizeHint() const override {
+            return currentWidget()->minimumSizeHint();
+        }
+
         QComboBox* getColorDimensionComboBox();
 
     protected:

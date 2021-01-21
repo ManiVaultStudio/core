@@ -86,7 +86,10 @@ void PositionSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
+    _popupPushButton->setPopupWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("ruler-combined"));
+    
+    _widget->setWindowTitle("Position");
 
     const auto xDimensionToolTipText = "X dimension";
 

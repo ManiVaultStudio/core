@@ -19,7 +19,7 @@ ColorSettingsWidget::ColorDimensionWidget::ColorDimensionWidget() :
     addWidget(_colorDimensionComboBox);
     addWidget(_widget);
 
-    _widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    _widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
     _widget->setLayout(_layout);
 
     _layout->setMargin(ResponsiveToolBar::LAYOUT_MARGIN);
@@ -27,7 +27,6 @@ ColorSettingsWidget::ColorDimensionWidget::ColorDimensionWidget() :
 
     _colorDataLineEdit->setEnabled(false);
 
-    _removeColorDataPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
     _removeColorDataPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
 
     _layout->addWidget(_colorDataLineEdit);
@@ -92,7 +91,10 @@ void ColorSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
+    _popupPushButton->setPopupWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
+
+    _widget->setWindowTitle("Color");
 
     _colorByLabel->setToolTip("Color by");
     _colorByLabel->setText("Color by:");

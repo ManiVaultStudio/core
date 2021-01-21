@@ -67,7 +67,10 @@ void SubsetSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
+    _popupPushButton->setPopupWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("crop-alt"));
+    
+    _widget->setWindowTitle("Subset");
 
     _createSubsetPushButton->setToolTip("Create a subset from the selected data points");
 
