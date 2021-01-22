@@ -109,6 +109,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 void SelectionSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setToolTip("Selection settings");
 
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 

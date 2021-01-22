@@ -70,11 +70,18 @@ void ResponsiveToolBar::addWidget(QWidget* widget)
 
     _layout->insertWidget(_layout->count() - 1, widget);
 
-    /*
-    std::sort(_widgets.begin(), _widgets.end(), [](QWidget* left, QWidget* right) {
-        return left->getPriority() > right->getPriority();
+    const auto getPriority = [this](QWidget* widget) -> std::int32_t {
+        const auto priorityProperty = widget->property("priority");
+
+        if (priorityProperty.isValid())
+            return priorityProperty.toInt();
+
+        return 0;
+    };
+
+    std::sort(_widgets.begin(), _widgets.end(), [getPriority](QWidget* left, QWidget* right) {
+        return getPriority(left) > getPriority(right);
     });
-    */
 }
 
 void ResponsiveToolBar::addStretch(const std::int32_t& stretch /*= 0*/)
@@ -95,7 +102,7 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
 
     QMap<QWidget*, WidgetState::State> widgetsState;
 
-    const auto widgetWidth = [this](QWidget* widget, const WidgetState::State& state) -> std::int32_t {
+    const auto getWidgetWidth = [this](QWidget* widget, const WidgetState::State& state) -> std::int32_t {
         const auto sizesProperty = widget->property("sizes");
 
         if (sizesProperty.isValid())
@@ -107,7 +114,7 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
     auto visibleWidgets = getVisibleWidgets();
 
     for (auto widget : visibleWidgets) {
-        runningWidth += widgetWidth(widget, WidgetState::State::Popup);
+        runningWidth += getWidgetWidth(widget, WidgetState::State::Popup);
 
         if (runningWidth > sourceWidgetWidth)
             break;
@@ -116,7 +123,7 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
     }
     
     for (auto widget : visibleWidgets) {
-        runningWidth += widgetWidth(widget, WidgetState::State::Compact) - widgetWidth(widget, WidgetState::State::Popup);
+        runningWidth += getWidgetWidth(widget, WidgetState::State::Compact) - getWidgetWidth(widget, WidgetState::State::Popup);
 
         if (runningWidth > sourceWidgetWidth)
             break;
@@ -125,7 +132,7 @@ void ResponsiveToolBar::updateLayout(QWidget* widget /*= nullptr*/)
     }
     
     for (auto widget : visibleWidgets) {
-        runningWidth += widgetWidth(widget, WidgetState::State::Full) - widgetWidth(widget, WidgetState::State::Compact);
+        runningWidth += getWidgetWidth(widget, WidgetState::State::Full) - getWidgetWidth(widget, WidgetState::State::Compact);
 
         if (runningWidth > sourceWidgetWidth)
             break;

@@ -99,6 +99,7 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
 void PointSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setToolTip("Point settings");
 
     _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));

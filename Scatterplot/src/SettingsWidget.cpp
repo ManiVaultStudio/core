@@ -48,6 +48,14 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _subsetSettingsWidget->setScatterPlotPlugin(plugin);
     _selectionSettingsWidget->setScatterPlotPlugin(plugin);
 
+    _renderModeWidget->setProperty("priority", 100);
+    _pointSettingsWidget->setProperty("priority", 200);
+    _densitySettingsWidget->setProperty("priority", 200);
+    _positionSettingsWidget->setProperty("priority", 1500);
+    _colorSettingsWidget->setProperty("priority", 1200);
+    _subsetSettingsWidget->setProperty("priority", 600);
+    _selectionSettingsWidget->setProperty("priority", 800);
+
     _responsiveToolBar->addWidget(_renderModeWidget);
     _responsiveToolBar->addWidget(_pointSettingsWidget);
     _responsiveToolBar->addWidget(_densitySettingsWidget);

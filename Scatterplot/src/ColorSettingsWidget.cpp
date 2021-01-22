@@ -104,6 +104,8 @@ ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void ColorSettingsWidget::initializeUI()
 {
+    setToolTip("Color settings");
+
     _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
 

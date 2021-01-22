@@ -91,6 +91,7 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
 void RenderModeWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setToolTip("Render mode settings");
 
     _popupPushButton->setWidget(_widget);
     _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
