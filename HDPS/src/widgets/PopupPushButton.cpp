@@ -111,7 +111,6 @@ bool PopupPushButton::eventFilter(QObject* object, QEvent* event)
     {
         case QEvent::FocusOut:
         case QEvent::Close:
-            _groupBoxLayout->takeAt(0);
             emit popupClose();
             break;
 

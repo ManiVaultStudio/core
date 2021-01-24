@@ -54,7 +54,9 @@ SubsetSettingsWidget::SubsetSettingsWidget(QWidget* parent /*= nullptr*/) :
                 _createSubsetPushButton->setText("Create subset");
                 _fromSourceCheckBox->setText(state == WidgetState::State::Compact ? "Source" : "From source");
 
-                addWidget(_widget);
+                if (count() == 1)
+                    addWidget(_widget);
+
                 setCurrentWidget(_widget);
                 break;
             }
@@ -70,6 +72,7 @@ SubsetSettingsWidget::SubsetSettingsWidget(QWidget* parent /*= nullptr*/) :
 void SubsetSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setWindowTitle("Subset settings");
     setToolTip("Subset settings");
 
     _popupPushButton->setWidget(_widget);

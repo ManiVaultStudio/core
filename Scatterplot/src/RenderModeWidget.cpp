@@ -65,7 +65,9 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
                 layout->addWidget(_densityPlotPushButton);
                 layout->addWidget(_contourPlotPushButton);
 
-                addWidget(_widget);
+                if (count() == 1)
+                    addWidget(_widget);
+
                 setCurrentWidget(_widget);
                 break;
             }
@@ -91,6 +93,7 @@ RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
 void RenderModeWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setWindowTitle("Render mode settings");
     setToolTip("Render mode settings");
 
     _popupPushButton->setWidget(_widget);

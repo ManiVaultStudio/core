@@ -87,7 +87,9 @@ ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
             {
                 _colorByLabel->setText("Color by:");
 
-                addWidget(_widget);
+                if (count() == 1)
+                    addWidget(_widget);
+
                 setCurrentWidget(_widget);
                 break;
             }
@@ -104,6 +106,8 @@ ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
 
 void ColorSettingsWidget::initializeUI()
 {
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    setWindowTitle("Color settings");
     setToolTip("Color settings");
 
     _popupPushButton->setWidget(_widget);

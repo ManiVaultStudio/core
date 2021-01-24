@@ -61,7 +61,9 @@ PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
                 layout->addWidget(_yDimensionLabel);
                 layout->addWidget(_yDimensionComboBox);
 
-                addWidget(_widget);
+                if (count() == 1)
+                    addWidget(_widget);
+
                 setCurrentWidget(_widget);
                 break;
             }
@@ -98,6 +100,7 @@ PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
 void PositionSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setWindowTitle("Position settings");
     setToolTip("Position settings");
 
     _popupPushButton->setWidget(_widget);

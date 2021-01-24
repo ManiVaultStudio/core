@@ -36,15 +36,21 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
         switch (state)
         {
             case WidgetState::State::Popup:
+            {
                 setCurrentWidget(_popupPushButton);
                 removeWidget(_widget);
                 break;
+            }
 
             case WidgetState::State::Compact:
             case WidgetState::State::Full:
-                addWidget(_widget);
+            {
+                if (count() == 1)
+                    addWidget(_widget);
+
                 setCurrentWidget(_widget);
                 break;
+            }
 
             default:
                 break;
@@ -68,10 +74,11 @@ DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
 void DensitySettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setWindowTitle("Density settings");
     setToolTip("Density settings");
 
     _popupPushButton->setWidget(_widget);
-    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("paint-brush"));
 
     _widget->setWindowTitle("Density rendering");
 

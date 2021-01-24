@@ -85,7 +85,9 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
                 layout->addWidget(_selectWidget);
                 layout->addWidget(_notifyDuringSelectionCheckBox);
 
-                addWidget(_widget);
+                if (count() == 1)
+                    addWidget(_widget);
+
                 setCurrentWidget(_widget);
                 break;
             }
@@ -109,6 +111,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
 void SelectionSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setWindowTitle("Selection settings");
     setToolTip("Selection settings");
 
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");

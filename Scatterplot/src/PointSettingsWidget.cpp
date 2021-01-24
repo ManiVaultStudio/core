@@ -74,7 +74,9 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
                 layout->addWidget(_opacityDoubleSpinBox);
                 layout->addWidget(_opacitySlider);
 
-                addWidget(_widget);
+                if (count() == 1)
+                    addWidget(_widget);
+
                 setCurrentWidget(_widget);
                 break;
             }
@@ -99,10 +101,11 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
 void PointSettingsWidget::initializeUI()
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    setWindowTitle("Point settings");
     setToolTip("Point settings");
 
     _popupPushButton->setWidget(_widget);
-    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("paint-brush"));
     
     _widget->setWindowTitle("Point rendering");
 

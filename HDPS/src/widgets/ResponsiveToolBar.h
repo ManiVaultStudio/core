@@ -3,6 +3,7 @@
 #include <QWidget>
 
 class QHBoxLayout;
+class QFrame;
 
 namespace hdps {
 
@@ -11,6 +12,22 @@ namespace gui {
 class ResponsiveToolBar : public QWidget
 {
     Q_OBJECT
+public:
+    class QSpacer : public QWidget {
+    public:
+        QSpacer(QWidget* left, QWidget* right);
+
+        bool eventFilter(QObject* target, QEvent* event);
+
+    private:
+        void updateState();
+
+    protected:
+        QWidget*        _left;
+        QWidget*        _right;
+        QHBoxLayout*    _layout;
+        QFrame*         _verticalLine;
+    };
 
 public:
     ResponsiveToolBar(QWidget* parent = nullptr);
