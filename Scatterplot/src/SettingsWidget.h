@@ -8,8 +8,7 @@ class ScatterplotPlugin;
 
 class ResponsiveToolBar;
 class RenderModeWidget;
-class PointSettingsWidget;
-class DensitySettingsWidget;
+class PlotSettingsWidget;
 class PositionSettingsWidget;
 class ColorSettingsWidget;
 class SubsetSettingsWidget;
@@ -42,8 +41,7 @@ public:
 private:
     hdps::gui::ResponsiveToolBar*   _responsiveToolBar;             /** TODO */
     RenderModeWidget*               _renderModeWidget;              /** TODO */
-    PointSettingsWidget*            _pointSettingsWidget;           /** TODO */
-    DensitySettingsWidget*          _densitySettingsWidget;         /** TODO */
+    PlotSettingsWidget*             _plotSettingsWidget;            /** TODO */
     PositionSettingsWidget*         _positionSettingsWidget;        /** TODO */
     ColorSettingsWidget*            _colorSettingsWidget;           /** TODO */
     SubsetSettingsWidget*           _subsetSettingsWidget;          /** TODO */

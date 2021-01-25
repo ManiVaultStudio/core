@@ -76,13 +76,12 @@ void ResponsiveToolBar::QSpacer::updateState()
 
 const std::int32_t ResponsiveToolBar::LAYOUT_MARGIN = 0;
 const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 5;
-const QSize ResponsiveToolBar::ICON_SIZE = QSize(12, 12);
 
 ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
     QWidget(parent),
     _listenWidget(nullptr),
     _layout(new QHBoxLayout()),
-    _widgets()
+    _sectionWidgets()
 {
     setAutoFillBackground(true);
 
@@ -139,9 +138,9 @@ bool ResponsiveToolBar::eventFilter(QObject* target, QEvent* event)
     return QObject::eventFilter(target, event);
 }
 
-void ResponsiveToolBar::addWidget(QWidget* widget)
+void ResponsiveToolBar::addStatefulWidget(StatefulWidget* statefulWidget)
 {
-    Q_ASSERT(widget != nullptr);
+    Q_ASSERT(statefulWidget != nullptr);
 
     /*
     if (!_widgets.isEmpty()) {
@@ -151,12 +150,15 @@ void ResponsiveToolBar::addWidget(QWidget* widget)
     }
     */
 
-    _widgets << widget;
+    auto sectionWidget = new SectionWidget(statefulWidget);
 
-    widget->installEventFilter(this);
+    _sectionWidgets << sectionWidget;
 
-    _layout->addWidget(widget);
+    statefulWidget->installEventFilter(this);
 
+    _layout->addWidget(sectionWidget);
+
+    /*
     const auto getPriority = [this](QWidget* widget) -> std::int32_t {
         const auto priorityProperty = widget->property("priority");
 
@@ -166,9 +168,10 @@ void ResponsiveToolBar::addWidget(QWidget* widget)
         return 0;
     };
 
-    std::sort(_widgets.begin(), _widgets.end(), [getPriority](QWidget* left, QWidget* right) {
+    std::sort(_sectionWidgets.begin(), _sectionWidgets.end(), [getPriority](QWidget* left, QWidget* right) {
         return getPriority(left) > getPriority(right);
     });
+    */
 }
 
 void ResponsiveToolBar::addStretch(const std::int32_t& stretch /*= 0*/)
@@ -186,7 +189,7 @@ const auto printWidgets = [this](QList<QWidget*> widgets) {
 void ResponsiveToolBar::updateLayout(QWidget* sourceWidget /*= nullptr*/)
 {
     Q_ASSERT(_listenWidget != nullptr);
-
+    /*
     QMap<QWidget*, std::int32_t> widgetStates;
 
     QList<QWidget*> visibleWidgets = getVisibleWidgets();
@@ -203,13 +206,6 @@ void ResponsiveToolBar::updateLayout(QWidget* sourceWidget /*= nullptr*/)
         widgetStates[widget] = std::max(0, std::min(newState, 2));
     };
 
-    /*
-    if (sourceWidget != nullptr) {
-        visibleWidgets.removeOne(sourceWidget);
-        visibleWidgets.append(sourceWidget);
-    }
-    */
-    
     const auto getWidgetWidth = [this](QWidget* widget, const std::int32_t& state) -> std::int32_t {
         const auto sizesProperty = widget->property("sizes");
 
@@ -248,13 +244,39 @@ void ResponsiveToolBar::updateLayout(QWidget* sourceWidget /*= nullptr*/)
         widget->setProperty("state", widgetStates[widget]);
 
     update();
+    */
+
+    QMap<QWidget*, WidgetState> widgetStates;
+
+    for (auto sectionWidget : _sectionWidgets)
+        widgetStates[sectionWidget] = WidgetState::Popup;
+    
+    auto runningWidth = 0;
+
+    for (auto sectionWidget : _sectionWidgets)
+        runningWidth += sectionWidget->getWidth(WidgetState::Popup);
+
+    const auto listenWidgetWidth    = _listenWidget->width();
+    const auto preferredState       = listenWidgetWidth < 500 ? WidgetState::Compact : WidgetState::Full;
+
+    for (auto sectionWidget : _sectionWidgets) {
+        runningWidth += sectionWidget->getWidth(preferredState);
+
+        if (runningWidth > _listenWidget->width())
+            break;
+
+        widgetStates[sectionWidget] = preferredState;
+    }
+
+    for (auto sectionWidget : _sectionWidgets)
+        sectionWidget->setState(widgetStates[sectionWidget]);
 }
 
 QList<QWidget*> ResponsiveToolBar::getVisibleWidgets()
 {
     QList<QWidget*> visibleWidgets;
 
-    for (auto widget : _widgets) {
+    for (auto widget : _sectionWidgets) {
         if (widget->isHidden())
             continue;
 

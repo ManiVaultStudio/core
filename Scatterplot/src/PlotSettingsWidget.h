@@ -4,12 +4,13 @@
 
 class ScatterplotPlugin;
 
-class QPushButton;
+class PointSettingsWidget;
+class DensitySettingsWidget;
 
-class RenderModeWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class PlotSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
 {
 public:
-    RenderModeWidget(QWidget* parent = nullptr);
+    PlotSettingsWidget(QWidget* parent = nullptr);
 
     void initializeUI();
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
@@ -20,7 +21,6 @@ protected:
     QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
 
 private:
-    QPushButton*    _scatterPlotPushButton;
-    QPushButton*    _densityPlotPushButton;
-    QPushButton*    _contourPlotPushButton;
+    PointSettingsWidget*        _pointSettingsWidget;
+    DensitySettingsWidget*      _densitySettingsWidget;
 };

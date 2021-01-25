@@ -190,7 +190,6 @@ void SelectionSettingsWidget::initializeUI()
     _notifyDuringSelectionCheckBox->setToolTip("Whether the selection updates are published continuously or at end of the selection process");
 
     _advancedSettingsPushButton->setToolTip("Advanced selection settings");
-    _advancedSettingsPushButton->setIconSize(ResponsiveToolBar::ICON_SIZE);
     _advancedSettingsPushButton->setIcon(fontAwesome.getIcon("ellipsis-h"));
 
     addWidget(_popupPushButton);
