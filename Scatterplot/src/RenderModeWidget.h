@@ -15,8 +15,6 @@ public:
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
 protected:
-
-    QIcon getIcon() const override;
     QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
 
 private:

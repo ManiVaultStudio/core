@@ -1,92 +1,26 @@
 #include "SubsetSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
-#include "widgets/ResponsiveToolBar.h"
-
+#include <QDebug>
 #include <QPushButton>
 #include <QCheckBox>
 
 using namespace hdps::gui;
 
 SubsetSettingsWidget::SubsetSettingsWidget(QWidget* parent /*= nullptr*/) :
-    QStackedWidget(parent),
-    _widgetState(this),
-    _popupPushButton(new PopupPushButton()),
-    _widget(new QWidget()),
+    ResponsiveToolBar::StatefulWidget(parent, "Subset"),
     _createSubsetPushButton(new QPushButton()),
     _fromSourceCheckBox(new QCheckBox())
 {
     initializeUI();
-
-    connect(&_widgetState, &WidgetState::updateState, [this](const WidgetState::State& state) {
-        const auto setWidgetLayout = [this](QLayout* layout) -> void {
-            if (_widget->layout())
-                delete _widget->layout();
-
-            layout->setMargin(ResponsiveToolBar::LAYOUT_MARGIN);
-            layout->setSpacing(ResponsiveToolBar::LAYOUT_SPACING);
-
-            _widget->setLayout(layout);
-        };
-
-        auto layout = new QHBoxLayout();
-
-        setWidgetLayout(layout);
-
-        switch (state)
-        {
-            case WidgetState::State::Popup:
-            {
-                _createSubsetPushButton->setText("Create");
-                _fromSourceCheckBox->setText("From source dataset");
-                
-                setCurrentWidget(_popupPushButton);
-                removeWidget(_widget);
-                break;
-            }
-
-            case WidgetState::State::Compact:
-            case WidgetState::State::Full:
-            {
-                layout->addWidget(_createSubsetPushButton);
-                layout->addWidget(_fromSourceCheckBox);
-
-                _createSubsetPushButton->setText("Create subset");
-                _fromSourceCheckBox->setText(state == WidgetState::State::Compact ? "Source" : "From source");
-
-                if (count() == 1)
-                    addWidget(_widget);
-
-                setCurrentWidget(_widget);
-                break;
-            }
-
-            default:
-                break;
-        }
-    });
-
-    _widgetState.initialize();
 }
 
 void SubsetSettingsWidget::initializeUI()
 {
-    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-    setWindowTitle("Subset settings");
-    setToolTip("Subset settings");
-
-    _popupPushButton->setWidget(_widget);
-    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("crop-alt"));
-    
-    _widget->setWindowTitle("Subset");
-
     _createSubsetPushButton->setToolTip("Create a subset from the selected data points");
 
     _fromSourceCheckBox->setToolTip("Create a subset from source or derived data");
     _fromSourceCheckBox->setText("From source");
-
-    addWidget(_popupPushButton);
-    addWidget(_widget);
 }
 
 void SubsetSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
@@ -96,8 +30,8 @@ void SubsetSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 
     const auto updateUI = [this, &scatterplotPlugin, scatterPlotWidget]() {
         const auto isScatterPlot = scatterPlotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT;
-
         setEnabled(isScatterPlot && scatterplotPlugin.getNumSelectedPoints() >= 1);
+        qDebug() << isEnabled();
     };
 
     QObject::connect(&plugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, updateUI]() {
@@ -109,4 +43,31 @@ void SubsetSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
     });
 
     updateUI();
+}
+
+QLayout* SubsetSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
+{
+    auto layout = new QHBoxLayout();
+
+    layout->addWidget(_createSubsetPushButton);
+    layout->addWidget(_fromSourceCheckBox);
+
+    switch (state)
+    {
+        case ResponsiveToolBar::WidgetState::Popup:
+            _createSubsetPushButton->setText("Create");
+            _fromSourceCheckBox->setText("From source dataset");
+            break;
+
+        case ResponsiveToolBar::WidgetState::Compact:
+        case ResponsiveToolBar::WidgetState::Full:
+            _createSubsetPushButton->setText("Create subset");
+            _fromSourceCheckBox->setText(state == ResponsiveToolBar::WidgetState::Compact ? "Source" : "From source");
+            break;
+
+        default:
+            break;
+    }
+
+    return layout;
 }

@@ -1,9 +1,6 @@
 #pragma once
 
-#include "widgets/WidgetState.h"
-#include "widgets/PopupPushButton.h"
-
-#include <QStackedWidget>
+#include "widgets/ResponsiveToolBar.h"
 
 class ScatterplotPlugin;
 class PixelSelectionTool;
@@ -16,7 +13,7 @@ class QDoubleSpinBox;
 class QSlider;
 class QCheckBox;
 
-class SelectionSettingsWidget : public QStackedWidget
+class SelectionSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
 {
 public:
     SelectionSettingsWidget(QWidget* parent = nullptr);
@@ -24,18 +21,10 @@ public:
     void initializeUI();
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
-    QSize sizeHint() const override {
-        return currentWidget()->sizeHint();
-    }
-
-    QSize minimumSizeHint() const override {
-        return currentWidget()->minimumSizeHint();
-    }
+protected:
+    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
 
 private:
-    hdps::gui::WidgetState          _widgetState;
-    hdps::gui::PopupPushButton*     _popupPushButton;
-    QWidget*                        _widget;
     QLabel*                         _typeLabel;
     QWidget*                        _typeWidget;
     QHBoxLayout*                    _typeLayout;

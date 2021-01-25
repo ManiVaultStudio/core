@@ -1,16 +1,13 @@
 #pragma once
 
-#include "widgets/WidgetState.h"
-#include "widgets/PopupPushButton.h"
-
-#include <QStackedWidget>
+#include "widgets/ResponsiveToolBar.h"
 
 class ScatterplotPlugin;
 
 class QPushButton;
 class QCheckBox;
 
-class SubsetSettingsWidget : public QStackedWidget
+class SubsetSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
 {
 public:
     SubsetSettingsWidget(QWidget* parent = nullptr);
@@ -18,10 +15,10 @@ public:
     void initializeUI();
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
+protected:
+    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
+
 private:
-    hdps::gui::WidgetState          _widgetState;
-    hdps::gui::PopupPushButton*     _popupPushButton;
-    QWidget*                        _widget;
-    QPushButton*                    _createSubsetPushButton;
-    QCheckBox*                      _fromSourceCheckBox;
+    QPushButton*    _createSubsetPushButton;
+    QCheckBox*      _fromSourceCheckBox;
 };

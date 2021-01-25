@@ -1,8 +1,6 @@
 #include "ColorSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
-#include "widgets/ResponsiveToolBar.h"
-
 #include <QLabel>
 #include <QComboBox>
 #include <QLineEdit>
@@ -42,79 +40,16 @@ QComboBox* ColorSettingsWidget::ColorDimensionWidget::getColorDimensionComboBox(
 }
 
 ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
-    QStackedWidget(parent),
-    _widgetState(this),
-    _popupPushButton(new PopupPushButton()),
-    _widget(new QWidget()),
+    ResponsiveToolBar::StatefulWidget(parent, "Color"),
     _colorByLabel(new QLabel()),
     _colorByComboBox(new QComboBox()),
     _colorDimensionWidget(new ColorDimensionWidget())
 {
     initializeUI();
-
-    connect(&_widgetState, &WidgetState::updateState, [this](const WidgetState::State& state) {
-        const auto setWidgetLayout = [this](QLayout* layout) -> void {
-            if (_widget->layout())
-                delete _widget->layout();
-
-            layout->setMargin(ResponsiveToolBar::LAYOUT_MARGIN);
-            layout->setSpacing(ResponsiveToolBar::LAYOUT_SPACING);
-
-            _widget->setLayout(layout);
-        };
-        
-        auto layout = new QHBoxLayout();
-
-        setWidgetLayout(layout);
-
-        layout->addWidget(_colorByLabel);
-        layout->addWidget(_colorByComboBox);
-        layout->addWidget(_colorDimensionWidget);
-
-        switch (state)
-        {
-            case WidgetState::State::Popup:
-            {
-                _colorByLabel->setText("By:");
-
-                setCurrentWidget(_popupPushButton);
-                removeWidget(_widget);
-                break;
-            }
-
-            case WidgetState::State::Compact:
-            case WidgetState::State::Full:
-            {
-                _colorByLabel->setText("Color by:");
-
-                if (count() == 1)
-                    addWidget(_widget);
-
-                setCurrentWidget(_widget);
-                break;
-            }
-
-            default:
-                break;
-        }
-
-        //_colorDimensionWidget->setFixedWidth(state == WidgetState::State::Compact ? 80 : 120);
-    });
-
-    _widgetState.initialize();
 }
 
 void ColorSettingsWidget::initializeUI()
 {
-    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-    setWindowTitle("Color settings");
-    setToolTip("Color settings");
-
-    _popupPushButton->setWidget(_widget);
-    _popupPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
-
-    _widget->setWindowTitle("Color");
-
     _colorByLabel->setToolTip("Color by");
     _colorByLabel->setText("Color by:");
 
@@ -122,9 +57,6 @@ void ColorSettingsWidget::initializeUI()
     _colorByComboBox->setFixedWidth(75);
     _colorByComboBox->addItem("Dimension");
     _colorByComboBox->addItem("Data");
-
-    addWidget(_popupPushButton);
-    addWidget(_widget);
 }
 
 void ColorSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
@@ -158,4 +90,15 @@ void ColorSettingsWidget::setScalarDimensions(unsigned int numDimensions, const 
     QSignalBlocker signalBlocker(_colorDimensionWidget->getColorDimensionComboBox());
 
     _colorDimensionWidget->getColorDimensionComboBox()->setModel(&stringListModel);
+}
+
+QLayout* ColorSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
+{
+    auto layout = new QHBoxLayout();
+
+    layout->addWidget(_colorByLabel);
+    layout->addWidget(_colorByComboBox);
+    layout->addWidget(_colorDimensionWidget);
+
+    return layout;
 }

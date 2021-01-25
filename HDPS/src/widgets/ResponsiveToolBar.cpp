@@ -31,7 +31,7 @@ ResponsiveToolBar::QSpacer::QSpacer(QWidget* left, QWidget* right) :
     _verticalLine->setFrameShadow(QFrame::Sunken);
 
     _layout->setMargin(0);
-    _layout->setSpacing(15);
+    _layout->setSpacing(0);
     _layout->addWidget(_verticalLine);
 }
 
@@ -138,7 +138,7 @@ bool ResponsiveToolBar::eventFilter(QObject* target, QEvent* event)
     return QObject::eventFilter(target, event);
 }
 
-void ResponsiveToolBar::addStatefulWidget(StatefulWidget* statefulWidget)
+void ResponsiveToolBar::addSection(StatefulWidget* statefulWidget, const QIcon& icon /*= QIcon()*/, const std::int32_t& priority /*= 0*/)
 {
     Q_ASSERT(statefulWidget != nullptr);
 
@@ -150,7 +150,7 @@ void ResponsiveToolBar::addStatefulWidget(StatefulWidget* statefulWidget)
     }
     */
 
-    auto sectionWidget = new SectionWidget(statefulWidget);
+    auto sectionWidget = new SectionWidget(statefulWidget, icon, priority);
 
     _sectionWidgets << sectionWidget;
 
@@ -251,13 +251,13 @@ void ResponsiveToolBar::updateLayout(QWidget* sourceWidget /*= nullptr*/)
     for (auto sectionWidget : _sectionWidgets)
         widgetStates[sectionWidget] = WidgetState::Popup;
     
-    auto runningWidth = 0;
+    auto runningWidth = 10;
 
     for (auto sectionWidget : _sectionWidgets)
         runningWidth += sectionWidget->getWidth(WidgetState::Popup);
 
     const auto listenWidgetWidth    = _listenWidget->width();
-    const auto preferredState       = listenWidgetWidth < 500 ? WidgetState::Compact : WidgetState::Full;
+    const auto preferredState       = listenWidgetWidth < 1000 ? WidgetState::Compact : WidgetState::Full;
 
     for (auto sectionWidget : _sectionWidgets) {
         runningWidth += sectionWidget->getWidth(preferredState);

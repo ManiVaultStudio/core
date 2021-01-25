@@ -1,8 +1,6 @@
 #include "RenderModeWidget.h"
 #include "ScatterplotPlugin.h"
 
-#include "widgets/ResponsiveToolBar.h"
-
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -57,11 +55,6 @@ void RenderModeWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
     });
 
     updateToggles();
-}
-
-QIcon RenderModeWidget::getIcon() const
-{
-    return Application::getIconFont("FontAwesome").getIcon("toggle-on");
 }
 
 QLayout* RenderModeWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
