@@ -43,5 +43,5 @@ private:
     QPushButton*                    _selectAllPushButton;
     QPushButton*                    _invertSelectionPushButton;
     QCheckBox*                      _notifyDuringSelectionCheckBox;
-    QPushButton*                    _advancedSettingsPushButton;
+    hdps::gui::PopupPushButton*     _additionalSettingsPopupPushButton;
 };

@@ -21,7 +21,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     QWidget(static_cast<QWidget*>(&const_cast<ScatterplotPlugin&>(plugin))),
     _responsiveToolBar(new hdps::gui::ResponsiveToolBar(this)),
     _renderModeWidget(new RenderModeWidget(this)),
-    _plotSettingsWidget(new PlotSettingsWidget(this)),
+    //_plotSettingsWidget(new PlotSettingsWidget(this)),
     _positionSettingsWidget(new PositionSettingsWidget(this)),
     _colorSettingsWidget(new ColorSettingsWidget(this)),
     _subsetSettingsWidget(new SubsetSettingsWidget(this)),
@@ -41,23 +41,23 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _responsiveToolBar->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
 
     _renderModeWidget->setScatterPlotPlugin(plugin);
-    _plotSettingsWidget->setScatterPlotPlugin(plugin);
-    _positionSettingsWidget->setScatterPlotPlugin(plugin);
-    _colorSettingsWidget->setScatterPlotPlugin(plugin);
+    //_plotSettingsWidget->setScatterPlotPlugin(plugin);
+    //_positionSettingsWidget->setScatterPlotPlugin(plugin);
+    //_colorSettingsWidget->setScatterPlotPlugin(plugin);
     _subsetSettingsWidget->setScatterPlotPlugin(plugin);
     _selectionSettingsWidget->setScatterPlotPlugin(plugin);
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _responsiveToolBar->addSection(_renderModeWidget, fontAwesome.getIcon("toggle-on"));
-    _responsiveToolBar->addSection(_plotSettingsWidget, fontAwesome.getIcon("cogs"));
+    //_responsiveToolBar->addSection(_plotSettingsWidget, fontAwesome.getIcon("cogs"));
     _responsiveToolBar->addSection(_positionSettingsWidget, fontAwesome.getIcon("ruler-combined"));
     _responsiveToolBar->addSection(_colorSettingsWidget, fontAwesome.getIcon("palette"));
     _responsiveToolBar->addSection(_subsetSettingsWidget, fontAwesome.getIcon("crop"));
     _responsiveToolBar->addSection(_selectionSettingsWidget, fontAwesome.getIcon("mouse-pointer"));
     _responsiveToolBar->addStretch();
 
-    setEnabled(false);
+    //setEnabled(false);
 
     connect(&plugin, &ScatterplotPlugin::currentDatasetChanged, [this](const QString& currentDataset) {
         setEnabled(!currentDataset.isEmpty());

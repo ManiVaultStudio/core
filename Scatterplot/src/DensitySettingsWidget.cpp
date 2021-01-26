@@ -84,12 +84,14 @@ QLayout* DensitySettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& 
 {
     auto layout = new QHBoxLayout();
 
+    /*
     layout->addWidget(_label);
     layout->addWidget(_doubleSpinBox);
     layout->addWidget(_slider);
 
     _doubleSpinBox->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
     _slider->setFixedWidth(state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
+    */
 
     return layout;
 }

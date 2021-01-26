@@ -46,12 +46,6 @@ void PointSettingsWidget::initializeUI()
     _opacitySlider->setOrientation(Qt::Horizontal);
     _opacitySlider->setMinimum(1);
     _opacitySlider->setMaximum(100);
-
-    const auto opacityToolTipText = "Point opacity";
-
-    _opacityLabel->setToolTip(opacityToolTipText);
-    _opacityDoubleSpinBox->setToolTip(opacityToolTipText);
-    _opacitySlider->setToolTip(opacityToolTipText);
 }
 
 void PointSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
@@ -169,6 +163,7 @@ QLayout* PointSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& st
             break;
     }
 
+    /*
     _sizeLabel->setText(state == ResponsiveToolBar::WidgetState::Full ? "Point size:" : "Size:");
     _opacityLabel->setText(state == ResponsiveToolBar::WidgetState::Full ? "Point opacity:" : "Opacity:");
 
@@ -177,6 +172,7 @@ QLayout* PointSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& st
 
     _sizeDoubleSpinBox->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
     _opacityDoubleSpinBox->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
+    */
 
     return stateLayout;
 }

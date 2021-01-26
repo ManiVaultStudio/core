@@ -33,7 +33,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) 
     _selectAllPushButton(new QPushButton("All")),
     _invertSelectionPushButton(new QPushButton("Invert")),
     _notifyDuringSelectionCheckBox(new QCheckBox("Notify during selection")),
-    _advancedSettingsPushButton(new QPushButton(""))
+    _additionalSettingsPopupPushButton(new PopupPushButton())
 {
     initializeUI();
 }
@@ -110,8 +110,8 @@ void SelectionSettingsWidget::initializeUI()
 
     _notifyDuringSelectionCheckBox->setToolTip("Whether the selection updates are published continuously or at end of the selection process");
 
-    _advancedSettingsPushButton->setToolTip("Advanced selection settings");
-    _advancedSettingsPushButton->setIcon(fontAwesome.getIcon("ellipsis-h"));
+    _additionalSettingsPopupPushButton->setToolTip("Additional selection settings");
+    _additionalSettingsPopupPushButton->setIcon(fontAwesome.getIcon("ellipsis-h"));
 }
 
 void SelectionSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
@@ -297,12 +297,23 @@ QLayout* SelectionSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState
         }
 
         case ResponsiveToolBar::WidgetState::Compact:
+        {
+            auto layout = new QHBoxLayout();
+
+            layout->addWidget(_typeWidget);
+            layout->addWidget(_additionalSettingsPopupPushButton);
+
+            stateLayout = layout;
+            break;
+        }
+
         case ResponsiveToolBar::WidgetState::Full:
         {
             auto layout = new QHBoxLayout();
 
             layout->addWidget(_typeWidget);
             layout->addWidget(_selectWidget);
+            layout->addWidget(_radiusWidget);
             layout->addWidget(_notifyDuringSelectionCheckBox);
 
             stateLayout = layout;
@@ -313,11 +324,11 @@ QLayout* SelectionSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState
             break;
     }
 
-    _typeLabel->setVisible(state == ResponsiveToolBar::WidgetState::Popup);
     _typeWidget->setVisible(true);
+    _typeLabel->setVisible(state == ResponsiveToolBar::WidgetState::Popup);
     _radiusLabel->setVisible(state == ResponsiveToolBar::WidgetState::Popup);
-    _radiusWidget->setVisible(state == ResponsiveToolBar::WidgetState::Popup);
-    _selectLabel->setVisible(state == ResponsiveToolBar::WidgetState::Popup);
+    _radiusWidget->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
+    _selectLabel->setVisible(state != ResponsiveToolBar::WidgetState::Popup);
     _selectWidget->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
     _notifyDuringSelectionCheckBox->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
 

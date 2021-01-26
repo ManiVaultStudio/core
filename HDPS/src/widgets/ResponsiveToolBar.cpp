@@ -22,7 +22,7 @@ ResponsiveToolBar::QSpacer::QSpacer(QWidget* left, QWidget* right) :
     _left->installEventFilter(this);
     _right->installEventFilter(this);
 
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding);
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::MinimumExpanding);
     //setFixedWidth(50);
     setLayout(_layout);
 

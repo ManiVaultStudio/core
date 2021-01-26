@@ -21,6 +21,10 @@ void RenderModeWidget::initializeUI()
     _scatterPlotPushButton->setCheckable(true);
     _densityPlotPushButton->setCheckable(true);
     _contourPlotPushButton->setCheckable(true);
+
+    _scatterPlotPushButton->setToolTip("Change render mode to scatter plot");
+    _densityPlotPushButton->setToolTip("Change render mode to density map plot");
+    _contourPlotPushButton->setToolTip("Change render mode to contour map plot");
 }
 
 void RenderModeWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
@@ -99,9 +103,9 @@ QLayout* RenderModeWidget::getLayout(const ResponsiveToolBar::WidgetState& state
         {
             layout = new QHBoxLayout();
 
-            _scatterPlotPushButton->setText("Scatter Plot");
-            _densityPlotPushButton->setText("Density Plot");
-            _contourPlotPushButton->setText("Contour Plot");
+            _scatterPlotPushButton->setText("Scatter");
+            _densityPlotPushButton->setText("Density");
+            _contourPlotPushButton->setText("Contour");
 
             _scatterPlotPushButton->setIcon(QIcon());
             _densityPlotPushButton->setIcon(QIcon());

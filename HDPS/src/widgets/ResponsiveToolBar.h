@@ -6,6 +6,8 @@
 #include <QHBoxLayout>
 #include <QEvent>
 #include <QDebug>
+#include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
 
 class QFrame;
 
@@ -121,14 +123,15 @@ public:
         {
             _popupPushButton->setIcon(icon);
             _popupPushButton->setWidget(_statefulWidget);
+            //_popupPushButton->setWindowOpacity(0);
 
             _layout->setMargin(0);
             _layout->addWidget(_popupPushButton);
             _layout->addWidget(_statefulWidget);
 
             _statefulWidget->initialize();
-
             _statefulWidget->installEventFilter(this);
+            //_statefulWidget->setWindowOpacity(0);
 
             setLayout(_layout);
             setState(WidgetState::Full);
@@ -152,34 +155,51 @@ public:
             if (state == _state)
                 return;
 
-            _state = state;
+            auto previousState = _state;
 
-            _statefulWidget->setVisible(_state != WidgetState::Popup);
-            _statefulWidget->setState(_state);
+            _state = state;
 
             switch (_state)
             {
                 case WidgetState::Popup:
                 {
-                    _popupPushButton->show();
-                    _layout->removeWidget(_statefulWidget);
+                    //animateOpacity(_statefulWidget, 1, 0, 2000, [this]() {
+                        _layout->removeWidget(_statefulWidget);
+
+                        _statefulWidget->hide();
+                        _statefulWidget->setState(_state);
+                        
+                        _popupPushButton->show();
+
+                        
+                    //});
+                    
+                    //animateOpacity(_popupPushButton, 0, 1, 2000, [this]() {
+                    //});
+
                     break;
                 }
 
                 case WidgetState::Compact:
                 case WidgetState::Full:
                 {
-                    _popupPushButton->hide();
+                    //animateOpacity(_popupPushButton, 1, 0, 2000, [this]() {
+                        _popupPushButton->hide();
+                        
+                        _layout->addWidget(_statefulWidget);
 
-                    _layout->addWidget(_statefulWidget);
+                        _statefulWidget->setState(_state);
+                        _statefulWidget->show();
+
+                        //animateOpacity(_statefulWidget, 0, 1, 2000);
+                    //});
+                    
                     break;
                 }
 
                 default:
                     break;
             }
-
-            _statefulWidget->setState(_state);
         }
 
         bool isPopup() const {
@@ -220,6 +240,26 @@ public:
 
             return 0;
         };
+
+    private:
+        void animateOpacity(QWidget* widget, const float& startOpacity, const float& endOpacity, const std::int32_t& duration, std::function<void()> finishedCallback = std::function<void()>()) {
+            QGraphicsOpacityEffect* graphicsOpacityEffect = new QGraphicsOpacityEffect(widget);
+
+            widget->setGraphicsEffect(graphicsOpacityEffect);
+            
+            QPropertyAnimation* propertyAnimation = new QPropertyAnimation(graphicsOpacityEffect, "opacity");
+
+            propertyAnimation->setDuration(duration);
+            propertyAnimation->setStartValue(startOpacity);
+            propertyAnimation->setEndValue(endOpacity);
+            //propertyAnimation->setEasingCurve(QEasingCurve::InBack);
+            propertyAnimation->start(QPropertyAnimation::DeleteWhenStopped);
+
+            connect(propertyAnimation, &QPropertyAnimation::finished, [finishedCallback]() {
+                if (finishedCallback)
+                    finishedCallback();
+            });
+        }
 
     protected:
         StatefulWidget*     _statefulWidget;
