@@ -37,6 +37,8 @@ PopupPushButton::PopupPushButton() :
     _groupBox->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 
     connect(this, &QPushButton::clicked, [this]() {
+        Q_ASSERT(_widget != nullptr);
+
         _groupBoxLayout->takeAt(0);
         _groupBoxLayout->addWidget(_widget);
 

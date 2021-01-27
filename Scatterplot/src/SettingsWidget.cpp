@@ -25,16 +25,19 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _positionSettingsWidget(new PositionSettingsWidget(this)),
     _colorSettingsWidget(new ColorSettingsWidget(this)),
     _subsetSettingsWidget(new SubsetSettingsWidget(this)),
-    _selectionSettingsWidget(new SelectionSettingsWidget(this)),
+    //_selectionSettingsWidget(new SelectionSettingsWidget(this)),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
     setAutoFillBackground(true);
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+
     auto horizontalLayout = new QHBoxLayout();
 
     horizontalLayout->setMargin(0);
     horizontalLayout->setSpacing(0);
     horizontalLayout->addWidget(_responsiveToolBar);
+    horizontalLayout->setSizeConstraint(QLayout::SetMaximumSize);
 
     setLayout(horizontalLayout);
 
@@ -42,19 +45,19 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     _renderModeWidget->setScatterPlotPlugin(plugin);
     //_plotSettingsWidget->setScatterPlotPlugin(plugin);
-    //_positionSettingsWidget->setScatterPlotPlugin(plugin);
-    //_colorSettingsWidget->setScatterPlotPlugin(plugin);
+    _positionSettingsWidget->setScatterPlotPlugin(plugin);
+    _colorSettingsWidget->setScatterPlotPlugin(plugin);
     _subsetSettingsWidget->setScatterPlotPlugin(plugin);
-    _selectionSettingsWidget->setScatterPlotPlugin(plugin);
+    //_selectionSettingsWidget->setScatterPlotPlugin(plugin);
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _responsiveToolBar->addSection(_renderModeWidget, fontAwesome.getIcon("toggle-on"));
+    _responsiveToolBar->addSection(_renderModeWidget, fontAwesome.getIcon("toggle-on"), 10);
     //_responsiveToolBar->addSection(_plotSettingsWidget, fontAwesome.getIcon("cogs"));
-    _responsiveToolBar->addSection(_positionSettingsWidget, fontAwesome.getIcon("ruler-combined"));
-    _responsiveToolBar->addSection(_colorSettingsWidget, fontAwesome.getIcon("palette"));
-    _responsiveToolBar->addSection(_subsetSettingsWidget, fontAwesome.getIcon("crop"));
-    _responsiveToolBar->addSection(_selectionSettingsWidget, fontAwesome.getIcon("mouse-pointer"));
+    _responsiveToolBar->addSection(_positionSettingsWidget, fontAwesome.getIcon("ruler-combined"), 250);
+    _responsiveToolBar->addSection(_colorSettingsWidget, fontAwesome.getIcon("palette"), 250);
+    _responsiveToolBar->addSection(_subsetSettingsWidget, fontAwesome.getIcon("crop"), 50);
+    //_responsiveToolBar->addSection(_selectionSettingsWidget, fontAwesome.getIcon("mouse-pointer"), 5);
     _responsiveToolBar->addStretch();
 
     //setEnabled(false);

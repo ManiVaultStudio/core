@@ -52,35 +52,42 @@ public:
             QWidget(parent),
             _name(name),
             _sizeHintWidget(new QWidget()),
-            _sizeHints({ QSize(), QSize(), QSize() })
+            _sizeHints({QSize(), QSize(), QSize() })
         {
-            setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
             setWindowTitle(_name);
             setToolTip(QString("%1 settings").arg(_name));
-        }
+            //setObjectName("ResponsiveToolBar");
+            //setStyleSheet("QWidget#ResponsiveToolBar { background-color:red; }");
 
-        void initialize() {
-            _sizeHints[0] = getStateSizeHint(WidgetState::Popup);
-            _sizeHints[1] = getStateSizeHint(WidgetState::Compact);
-            _sizeHints[2] = getStateSizeHint(WidgetState::Full);
+            setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+
+            //_sizeHintWidget->setAttribute(Qt::WA_DontShowOnScreen);
         }
 
         virtual void setState(const WidgetState& state) {
+            auto stateLayout = getLayout(state);
+
             if (layout())
                 delete layout();
 
-            auto layout = getLayout(state);
+            stateLayout->setMargin(0);
+            stateLayout->setSpacing(4);
 
-            layout->setMargin(0);
-            layout->setSpacing(4);
+            setLayout(stateLayout);
+        }
 
-            setLayout(layout);
+        void computeSizeHints() {
+            computeStateSizeHint(WidgetState::Popup);
+            computeStateSizeHint(WidgetState::Compact);
+            computeStateSizeHint(WidgetState::Full);
+
+            qDebug() << _sizeHints;
         }
 
     protected:
         virtual QLayout* getLayout(const WidgetState& state) = 0;
 
-        std::int32_t getWidth(const WidgetState& state) const {
+        std::int32_t getWidth(const WidgetState& state) {
             switch (state)
             {
                 case WidgetState::Compact:
@@ -95,13 +102,19 @@ public:
         };
 
     private:
-        QSize getStateSizeHint(const WidgetState& state) {
+        void computeStateSizeHint(const WidgetState& state) {
             if (_sizeHintWidget->layout())
                 delete _sizeHintWidget->layout();
 
-            _sizeHintWidget->setLayout(getLayout(state));
+            auto stateLayout = getLayout(state);
 
-            return _sizeHintWidget->sizeHint();
+            stateLayout->setMargin(0);
+            stateLayout->setSpacing(4);
+
+            _sizeHintWidget->setLayout(stateLayout);
+            _sizeHintWidget->adjustSize();
+
+            _sizeHints[static_cast<std::int32_t>(state)] = _sizeHintWidget->sizeHint();
         }
 
     protected:
@@ -118,6 +131,7 @@ public:
             _statefulWidget(statefulWidget),
             _state(WidgetState::Undefined),
             _priority(priority),
+            _modified(-1),
             _layout(new QHBoxLayout()),
             _popupPushButton(new PopupPushButton())
         {
@@ -126,15 +140,16 @@ public:
             //_popupPushButton->setWindowOpacity(0);
 
             _layout->setMargin(0);
+            _layout->setSpacing(0);
             _layout->addWidget(_popupPushButton);
             _layout->addWidget(_statefulWidget);
 
-            _statefulWidget->initialize();
             _statefulWidget->installEventFilter(this);
             //_statefulWidget->setWindowOpacity(0);
 
             setLayout(_layout);
-            setState(WidgetState::Full);
+
+            _statefulWidget->computeSizeHints();
         }
 
         bool eventFilter(QObject* object, QEvent* event)
@@ -143,6 +158,9 @@ public:
 
             if (widget == _statefulWidget && event->type() == QEvent::EnabledChange)
                 _popupPushButton->setEnabled(_statefulWidget->isEnabled());
+
+            if (widget == _statefulWidget && event->type() == QEvent::Resize)
+                _modified++;
 
             return QObject::eventFilter(object, event);
         }
@@ -159,23 +177,17 @@ public:
 
             _state = state;
 
+            _modified++;
+            
             switch (_state)
             {
                 case WidgetState::Popup:
                 {
-                    //animateOpacity(_statefulWidget, 1, 0, 2000, [this]() {
-                        _layout->removeWidget(_statefulWidget);
+                    _layout->removeWidget(_statefulWidget);
 
-                        _statefulWidget->hide();
-                        _statefulWidget->setState(_state);
-                        
-                        _popupPushButton->show();
-
-                        
-                    //});
-                    
-                    //animateOpacity(_popupPushButton, 0, 1, 2000, [this]() {
-                    //});
+                    _statefulWidget->hide();
+                    _statefulWidget->setState(_state);
+                    _popupPushButton->show();
 
                     break;
                 }
@@ -183,16 +195,13 @@ public:
                 case WidgetState::Compact:
                 case WidgetState::Full:
                 {
-                    //animateOpacity(_popupPushButton, 1, 0, 2000, [this]() {
-                        _popupPushButton->hide();
+                    _popupPushButton->hide();
                         
-                        _layout->addWidget(_statefulWidget);
-
-                        _statefulWidget->setState(_state);
-                        _statefulWidget->show();
-
-                        //animateOpacity(_statefulWidget, 0, 1, 2000);
-                    //});
+                    _layout->addWidget(_statefulWidget);
+                    
+                    _statefulWidget->setState(_state);
+                    _statefulWidget->show();
+                    
                     
                     break;
                 }
@@ -224,11 +233,26 @@ public:
             setState(WidgetState::Compact);
         }
 
+        std::int32_t getPriority() const {
+            return _priority;
+        }
+
+        void setPriority(const std::int32_t& priority) {
+            if (priority == _priority)
+                return;
+
+            _priority = priority;
+        }
+
+        std::int32_t getModified() const {
+            return _modified;
+        }
+
         std::int32_t getWidth(const WidgetState& state) const {
             switch (state)
             {
                 case WidgetState::Popup:
-                    return _popupPushButton->width();
+                    return _popupPushButton->sizeHint().width();
 
                 case WidgetState::Compact:
                 case WidgetState::Full:
@@ -239,7 +263,7 @@ public:
             }
 
             return 0;
-        };
+        }
 
     private:
         void animateOpacity(QWidget* widget, const float& startOpacity, const float& endOpacity, const std::int32_t& duration, std::function<void()> finishedCallback = std::function<void()>()) {
@@ -265,6 +289,7 @@ public:
         StatefulWidget*     _statefulWidget;
         WidgetState         _state;
         std::int32_t        _priority;
+        std::int32_t        _modified;
         QHBoxLayout*        _layout;
         PopupPushButton*    _popupPushButton;
     };
@@ -274,19 +299,20 @@ public:
 
     void setListenWidget(QWidget* listenWidget);
 
-    bool eventFilter(QObject* target, QEvent* event);
+    bool eventFilter(QObject* object, QEvent* event);
 
     void addSection(StatefulWidget* statefulWidget, const QIcon& icon = QIcon(), const std::int32_t& priority = 0);
     void addStretch(const std::int32_t& stretch = 0);
 
 private:
-    void updateLayout(QWidget* widget = nullptr);
+    void computeLayout(SectionWidget* sectionWidget = nullptr);
     QList<QWidget*> getVisibleWidgets();
 
 private:
-    QWidget*                _listenWidget;      /** TODO */
-    QHBoxLayout*            _layout;            /** TODO */
-    QList<SectionWidget*>   _sectionWidgets;    /** TODO */
+    QWidget*                _listenWidget;
+    QHBoxLayout*            _layout;
+    QList<SectionWidget*>   _sectionWidgets;
+    std::int32_t            _modified;
 
 public:
     static const std::int32_t LAYOUT_MARGIN;

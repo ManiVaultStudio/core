@@ -9,9 +9,9 @@ using namespace hdps::gui;
 
 RenderModeWidget::RenderModeWidget(QWidget* parent /*= nullptr*/) :
     ResponsiveToolBar::StatefulWidget(parent, "Render mode"),
-    _scatterPlotPushButton(new QPushButton()),
-    _densityPlotPushButton(new QPushButton()),
-    _contourPlotPushButton(new QPushButton())
+    _scatterPlotPushButton(new QPushButton(this)),
+    _densityPlotPushButton(new QPushButton(this)),
+    _contourPlotPushButton(new QPushButton(this))
 {
     initializeUI();
 }
@@ -117,10 +117,10 @@ QLayout* RenderModeWidget::getLayout(const ResponsiveToolBar::WidgetState& state
         default:
             break;
     }
-
+    
     layout->addWidget(_scatterPlotPushButton);
     layout->addWidget(_densityPlotPushButton);
     layout->addWidget(_contourPlotPushButton);
-
+    
     return layout;
 }
