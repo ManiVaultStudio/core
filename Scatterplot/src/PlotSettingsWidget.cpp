@@ -38,7 +38,7 @@ void PlotSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
     updatePlotSettingsUI();
 }
 
-void PlotSettingsWidget::setState(const ResponsiveToolBar::WidgetState& state)
+void PlotSettingsWidget::setState(const hdps::gui::ResponsiveToolBar::WidgetState& state, const bool& forceUpdate /*= false*/)
 {
     StatefulWidget::setState(state);
 

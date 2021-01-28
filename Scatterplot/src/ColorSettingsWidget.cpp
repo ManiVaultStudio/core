@@ -1,4 +1,6 @@
 #include "ColorSettingsWidget.h"
+#include "ColorByDimensionSettingsWidget.h"
+#include "ColorByDataSettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
 #include <QLabel>
@@ -8,42 +10,13 @@
 
 using namespace hdps::gui;
 
-ColorSettingsWidget::ColorDimensionWidget::ColorDimensionWidget() :
-    QWidget(),
-    _colorDimensionComboBox(new QComboBox()),
-    _layout(new QHBoxLayout()),
-    _colorDataLineEdit(new QLineEdit()),
-    _removeColorDataPushButton(new QPushButton())
-{
-    //setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    
-    setLayout(_layout);
-
-    _layout->setMargin(ResponsiveToolBar::LAYOUT_MARGIN);
-    _layout->setSpacing(ResponsiveToolBar::LAYOUT_SPACING);
-
-    _layout->addWidget(_colorDimensionComboBox);
-    _layout->addWidget(_colorDataLineEdit);
-    _layout->addWidget(_removeColorDataPushButton);
-
-    _colorDataLineEdit->setEnabled(false);
-    _colorDataLineEdit->setReadOnly(true);
-    _colorDataLineEdit->setText("No color data...");
-    _colorDataLineEdit->setTextMargins(5, 0, 0, 0);
-
-    _removeColorDataPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
-}
-
-QComboBox* ColorSettingsWidget::ColorDimensionWidget::getColorDimensionComboBox()
-{
-    return _colorDimensionComboBox;
-}
-
 ColorSettingsWidget::ColorSettingsWidget(QWidget* parent /*= nullptr*/) :
     ResponsiveToolBar::StatefulWidget(parent, "Color"),
     _colorByLabel(new QLabel()),
     _colorByComboBox(new QComboBox()),
-    _colorDimensionWidget(new ColorDimensionWidget())
+    _stackedWidget(new StackedWidget()),
+    _colorByDimensionSettingsWidget(new ColorByDimensionSettingsWidget()),
+    _colorByDataSettingsWidget(new ColorByDataSettingsWidget())
 {
     initializeUI();
 }
@@ -57,16 +30,22 @@ void ColorSettingsWidget::initializeUI()
     _colorByComboBox->setFixedWidth(75);
     _colorByComboBox->addItem("Dimension");
     _colorByComboBox->addItem("Data");
+
+    _stackedWidget->addWidget(_colorByDimensionSettingsWidget);
+    _stackedWidget->addWidget(_colorByDataSettingsWidget);
 }
 
 void ColorSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 {
+    _colorByDimensionSettingsWidget->setScatterPlotPlugin(plugin);
+    _colorByDataSettingsWidget->setScatterPlotPlugin(plugin);
+
     connect(_colorByComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        //_colorDimensionWidget->setCurrentIndex(index);
-        _colorDimensionWidget->adjustSize();
+        _stackedWidget->setCurrentIndex(index);
+        computeSizeHints();
     });
 
-    connect(_colorDimensionWidget->getColorDimensionComboBox(), qOverload<int>(&QComboBox::currentIndexChanged), [this, &plugin](int index) {
+    connect(_colorByDimensionSettingsWidget->getColorDimensionComboBox(), qOverload<int>(&QComboBox::currentIndexChanged), [this, &plugin](int index) {
         const_cast<ScatterplotPlugin&>(plugin).cDimPicked(index);
     });
 
@@ -80,16 +59,26 @@ void ColorSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
         renderModeChanged();
     });
 
+    computeSizeHints();
+
     renderModeChanged();
+}
+
+void ColorSettingsWidget::setState(const hdps::gui::ResponsiveToolBar::WidgetState& state, const bool& forceUpdate /*= false*/)
+{
+    StatefulWidget::setState(state);
+
+    _colorByDimensionSettingsWidget->setState(state, true);
+    _colorByDataSettingsWidget->setState(state, true);
 }
 
 void ColorSettingsWidget::setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names)
 {
     auto& stringListModel = createStringListModel(numDimensions, names, *this);
 
-    QSignalBlocker signalBlocker(_colorDimensionWidget->getColorDimensionComboBox());
+    QSignalBlocker signalBlocker(_colorByDimensionSettingsWidget->getColorDimensionComboBox());
 
-    _colorDimensionWidget->getColorDimensionComboBox()->setModel(&stringListModel);
+    _colorByDimensionSettingsWidget->getColorDimensionComboBox()->setModel(&stringListModel);
 }
 
 QLayout* ColorSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
@@ -98,7 +87,7 @@ QLayout* ColorSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& st
 
     layout->addWidget(_colorByLabel);
     layout->addWidget(_colorByComboBox);
-    layout->addWidget(_colorDimensionWidget);
+    layout->addWidget(_stackedWidget);
 
     return layout;
 }

@@ -29,7 +29,7 @@ public:
     void initializeUI();
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
-    void setState(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
+    void setState(const hdps::gui::ResponsiveToolBar::WidgetState& state, const bool& forceUpdate = false) override;
 
 protected:
     QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;

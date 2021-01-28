@@ -139,7 +139,7 @@ void ResponsiveToolBar::addSection(StatefulWidget* statefulWidget, const QIcon& 
 
     _sectionWidgets << sectionWidget;
 
-    //sectionWidget->installEventFilter(this);
+    sectionWidget->installEventFilter(this);
 
     _layout->addWidget(sectionWidget);
 
@@ -171,16 +171,26 @@ const auto printWidgets = [this](QList<QWidget*> widgets) {
 };
 */
 
-void ResponsiveToolBar::computeLayout(SectionWidget* sectionWidget /*= nullptr*/)
+void ResponsiveToolBar::computeLayout(SectionWidget* resizedSectionWidget /*= nullptr*/)
 {
     Q_ASSERT(_listenWidget != nullptr);
-    
-    qDebug() << "Compute layout" << sectionWidget;
 
-    if (sectionWidget)
-        _modified = sectionWidget->getModified();
+    if (resizedSectionWidget)
+        qDebug() << QString("%1 resized").arg(resizedSectionWidget->getName());
     else
-        _modified++;
+        qDebug() << "Listen widget has resized";
+
+    if (_ignoreSectionWidgets.contains(resizedSectionWidget)) {
+        _ignoreSectionWidgets.removeOne(resizedSectionWidget);
+        return;
+    }
+
+    for (auto sectionWidget : _sectionWidgets) {
+        if (sectionWidget != resizedSectionWidget)
+            _ignoreSectionWidgets << sectionWidget;
+    }
+
+    //qDebug() << sectionWidget->getName() << sectionWidget->getModified();
 
     auto sortedSectionWidgets = _sectionWidgets;
 
@@ -218,8 +228,6 @@ void ResponsiveToolBar::computeLayout(SectionWidget* sectionWidget /*= nullptr*/
             }
         }
     }
-
-    qDebug() << availableWidth << width() << getSectionsWidth();;
 
     for (auto sectionWidget : _sectionWidgets)
         sectionWidget->setState(static_cast<WidgetState>(widgetStates[sectionWidget]));
