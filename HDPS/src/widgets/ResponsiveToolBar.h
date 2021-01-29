@@ -41,16 +41,17 @@ public:
             _name(name),
             _priority(priority),
             _layout(new QHBoxLayout()),
-            _popupPushButton(new PopupPushButton()),
+            _popupPushButton(QSharedPointer<PopupPushButton>::create()),
             _stateWidget(nullptr),
             _stateSizeHints({ QSize(), QSize() , QSize() })
         {
             _popupPushButton->setIcon(icon);
-            _popupPushButton->setWidget(getWidgetState(WidgetState::Popup));
+                        
+            hideWidget(_popupPushButton.get());
 
             _layout->setMargin(0);
             _layout->setSpacing(0);
-            _layout->addWidget(_popupPushButton);
+            _layout->addWidget(_popupPushButton.get());
 
             setLayout(_layout);
 
@@ -98,29 +99,66 @@ public:
             {
                 case WidgetState::Popup:
                 {
-                    _popupPushButton->show();
-
-                    _stateWidget = QSharedPointer<QWidget>();
-
+                    hideWidget(_stateWidget.get(), false);
+                    showWidget(_popupPushButton.get(), false);
+                    setStateWidget(getWidget(_state));
+                    _popupPushButton->setWidget(_stateWidget.get());
+                    
                     break;
                 }
 
                 case WidgetState::Compact:
                 case WidgetState::Full:
                 {
-                    _popupPushButton->hide();
-
-                    _stateWidget = QSharedPointer<QWidget>(getWidgetState(_state));
-
+                    hideWidget(_popupPushButton.get(), false);
+                    setStateWidget(getWidget(_state));
                     _layout->addWidget(_stateWidget.get());
-
-                    _stateWidget->installEventFilter(this);
+                    showWidget(_stateWidget.get(), false);
                     break;
                 }
 
                 default:
                     break;
             }
+
+            qDebug() << QString("%1 state changed to:").arg(_name.toLower()) << static_cast<std::int32_t>(_state);
+        }
+
+        void showWidget(QWidget* widget, const bool& animate = false) {
+            if (widget == nullptr)
+                return;
+
+            if (animate) {
+                widget->show();
+                animateOpacity(widget, 0, 1, 300);
+            }
+            else {
+                widget->show();
+            }
+        }
+
+        void hideWidget(QWidget* widget, const bool& animate = false) {
+            if (widget == nullptr)
+                return;
+
+            if (animate) {
+                animateOpacity(widget, 1, 0, 300, [this, widget]() {
+                    widget->hide();
+                });
+            }
+            else {
+                widget->hide();
+            }
+        }
+
+        void setStateWidget(QWidget* widget = nullptr) {
+            if (widget == nullptr)
+                return;
+
+            _stateWidget = QSharedPointer<QWidget>(widget);
+                
+            _stateWidget->setWindowOpacity(0);
+            _stateWidget->installEventFilter(this);
         }
 
         std::int32_t getPriority() const {
@@ -139,7 +177,7 @@ public:
         }
 
     private:
-        QWidget* getWidgetState(const WidgetState& state) {
+        QWidget* getWidget(const WidgetState& state) {
             auto widget = _getWidgetStateFn(state);
 
             widget->setWindowTitle(_name);
@@ -162,7 +200,7 @@ public:
             if (state == WidgetState::Popup)
                 return _popupPushButton->sizeHint();
 
-            const auto stateWidget      = getWidgetState(state);
+            const auto stateWidget      = getWidget(state);
             const auto stateSizeHint    = stateWidget->sizeHint();
 
             delete stateWidget;
@@ -190,15 +228,15 @@ public:
         }
 
     protected:
-        GetWidgetStateFn            _getWidgetStateFn;
-        InitializeWidgetFn          _initializeWidgetFn;
-        WidgetState                 _state;
-        QString                     _name;
-        std::int32_t                _priority;
-        QHBoxLayout*                _layout;
-        PopupPushButton*            _popupPushButton;
-        QSharedPointer<QWidget>     _stateWidget;
-        QList<QSize>                _stateSizeHints;
+        GetWidgetStateFn                    _getWidgetStateFn;
+        InitializeWidgetFn                  _initializeWidgetFn;
+        WidgetState                         _state;
+        QString                             _name;
+        std::int32_t                        _priority;
+        QHBoxLayout*                        _layout;
+        QSharedPointer<PopupPushButton>     _popupPushButton;
+        QSharedPointer<QWidget>             _stateWidget;
+        QList<QSize>                        _stateSizeHints;
     };
 
 public:
@@ -218,7 +256,7 @@ public:
         auto sectionWidget = new SectionWidget(getWidgetState, name, icon, priority);
 
         sectionWidget->setInitializeWidgetFunction(initializeWidgetFn);
-        //sectionWidget->installEventFilter(this);
+        sectionWidget->installEventFilter(this);
 
         _sectionWidgets << sectionWidget;
 

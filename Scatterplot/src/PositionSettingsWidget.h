@@ -10,8 +10,7 @@ class PositionSettingsWidget : public ScatterplotSettingsWidget
 public:
     PositionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
-protected:
-    void connectToPlugin() override;
+    void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 
 public:
 

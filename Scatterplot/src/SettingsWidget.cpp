@@ -28,8 +28,6 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     setAutoFillBackground(true);
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
-    ScatterplotSettingsWidget::scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
-
     auto horizontalLayout = new QHBoxLayout();
 
     horizontalLayout->setMargin(0);
@@ -58,6 +56,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     _responsiveToolBar->addWidget<ColorSettingsWidget>(initializeWidgetFunction, "Color", fontAwesome.getIcon("palette"), 250);
     _responsiveToolBar->addWidget<SubsetSettingsWidget>(initializeWidgetFunction, "Color", fontAwesome.getIcon("crop"), 50);
     _responsiveToolBar->addWidget<SelectionSettingsWidget>(initializeWidgetFunction, "Selection", fontAwesome.getIcon("mouse-pointer"), 5);
+    
 
     //setEnabled(false);
 

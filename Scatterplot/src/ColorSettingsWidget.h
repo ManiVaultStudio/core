@@ -27,8 +27,7 @@ public:
 public:
     ColorSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
-protected:
-    void connectToPlugin() override;
+    void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 
 public:
     void setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());

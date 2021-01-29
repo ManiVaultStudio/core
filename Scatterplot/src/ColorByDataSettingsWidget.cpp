@@ -47,6 +47,6 @@ ColorByDataSettingsWidget::ColorByDataSettingsWidget(const hdps::gui::Responsive
     setLayout(layout);
 }
 
-void ColorByDataSettingsWidget::connectToPlugin()
+void ColorByDataSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
 }

@@ -9,8 +9,7 @@ class RenderModeWidget : public ScatterplotSettingsWidget
 public:
     RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
-protected:
-    void connectToPlugin() override;
+    void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 
 private:
     QPushButton*    _scatterPlotPushButton;

@@ -37,6 +37,6 @@ ColorByDimensionSettingsWidget::ColorByDimensionSettingsWidget(const hdps::gui::
     setLayout(layout);
 }
 
-void ColorByDimensionSettingsWidget::connectToPlugin()
+void ColorByDimensionSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
 }

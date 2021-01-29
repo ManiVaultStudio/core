@@ -53,8 +53,14 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
 
     switch (event->type()) {
         case QEvent::Resize:
-            computeLayout();
+        {
+            if (widget == _listenWidget)
+                computeLayout();
+            else
+                _layout->invalidate();
+
             break;
+        }
 
         default:
             break;
@@ -88,13 +94,14 @@ void ResponsiveToolBar::computeLayout(QWidget* resizedWidget /*= nullptr*/)
     
 
     //qDebug() << sectionWidget->getName() << sectionWidget->getModified();
+    */
 
     auto sortedSectionWidgets = _sectionWidgets;
 
     std::sort(sortedSectionWidgets.begin(), sortedSectionWidgets.end(), [](SectionWidget* left, SectionWidget* right) {
         return left->getPriority() > right->getPriority();
     });
-    */
+    
     
     const auto marginTotal  = 2 * _layout->margin();
     const auto spacingTotal = std::max(_sectionWidgets.count() - 1, 0) * _layout->spacing();
@@ -105,16 +112,16 @@ void ResponsiveToolBar::computeLayout(QWidget* resizedWidget /*= nullptr*/)
 
     states.resize(_sectionWidgets.count());
 
-    const auto getSectionsWidth = [this, &states]() -> std::int32_t {
+    const auto getSectionsWidth = [this, &states, sortedSectionWidgets]() -> std::int32_t {
         auto sectionsWidth = 0;
 
-        for (auto sectionWidget : _sectionWidgets)
+        for (auto sectionWidget : sortedSectionWidgets)
             sectionsWidth += sectionWidget->getStateSizeHint(static_cast<WidgetState>(states[_sectionWidgets.indexOf(sectionWidget)])).width();
 
         return sectionsWidth;
     };
 
-    auto sectionWidgets = _sectionWidgets + _sectionWidgets;
+    auto sectionWidgets = sortedSectionWidgets + sortedSectionWidgets;
 
     for (auto sectionWidget : sectionWidgets) {
         const auto oldWidgetStates = states;
@@ -131,6 +138,8 @@ void ResponsiveToolBar::computeLayout(QWidget* resizedWidget /*= nullptr*/)
 
     for (auto sectionWidget : _sectionWidgets)
         sectionWidget->setState(static_cast<WidgetState>(states[_sectionWidgets.indexOf(sectionWidget)]));
+
+    
 }
 
 }

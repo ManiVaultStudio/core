@@ -87,19 +87,17 @@ PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveToolBa
     setLayout(stateLayout);
 }
 
-void PositionSettingsWidget::connectToPlugin()
+void PositionSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
-    /*
-    _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
+    _scatterplotPlugin = scatterplotPlugin;
 
-    QObject::connect(_xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
-        const_cast<ScatterplotPlugin&>(plugin).xDimPicked(index);
+    QObject::connect(_xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
+        _scatterplotPlugin->xDimPicked(index);
     });
 
-    QObject::connect(_yDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
-        const_cast<ScatterplotPlugin&>(plugin).yDimPicked(index);
+    QObject::connect(_yDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
+        _scatterplotPlugin->yDimPicked(index);
     });
-    */
 }
 
 int PositionSettingsWidget::getDimensionX()

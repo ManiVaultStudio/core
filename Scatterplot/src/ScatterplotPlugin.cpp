@@ -28,13 +28,9 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
-    _settingsWidget()
+    _settingsWidget(new SettingsWidget(*this))
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
-
-    ScatterplotSettingsWidget::scatterplotPlugin = this;
-
-    _settingsWidget = new SettingsWidget(*this);
 }
 
 // =============================================================================

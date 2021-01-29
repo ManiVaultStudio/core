@@ -24,9 +24,14 @@ PlotSettingsWidget::PlotSettingsWidget(const hdps::gui::ResponsiveToolBar::Widge
     setLayout(layout);
 }
 
-void PlotSettingsWidget::connectToPlugin()
+void PlotSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
-    auto scatterplotWidget = scatterplotPlugin->getScatterplotWidget();
+    _scatterplotPlugin = scatterplotPlugin;
+
+    _pointSettingsWidget->setScatterplotPlugin(scatterplotPlugin);
+    _densitySettingsWidget->setScatterplotPlugin(scatterplotPlugin);
+
+    auto scatterplotWidget = _scatterplotPlugin->getScatterplotWidget();
 
     const auto updatePlotSettingsUI = [this, scatterplotWidget]() {
         _stackedWidget->setCurrentIndex(scatterplotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT ? 0 : 1);

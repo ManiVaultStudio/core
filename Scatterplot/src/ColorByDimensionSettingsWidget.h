@@ -13,8 +13,7 @@ public:
         return _colorDimensionComboBox;
     }
 
-protected:
-    void connectToPlugin() override;
+    void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 
 private:
     QComboBox*  _colorDimensionComboBox;

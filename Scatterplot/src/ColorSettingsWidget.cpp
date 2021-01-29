@@ -41,35 +41,30 @@ ColorSettingsWidget::ColorSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
     setLayout(layout);
 }
 
-void ColorSettingsWidget::connectToPlugin()
+void ColorSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
-    /*
-    _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
+    _scatterplotPlugin = scatterplotPlugin;
 
-    _colorByDimensionSettingsWidget->setScatterPlotPlugin(plugin);
-    _colorByDataSettingsWidget->setScatterPlotPlugin(plugin);
+    _colorByDimensionSettingsWidget->setScatterplotPlugin(_scatterplotPlugin);
+    _colorByDataSettingsWidget->setScatterplotPlugin(_scatterplotPlugin);
 
     connect(_colorByComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
         _stackedWidget->setCurrentIndex(index);
-        computeSizeHints();
     });
 
-    connect(_colorByDimensionSettingsWidget->getColorDimensionComboBox(), qOverload<int>(&QComboBox::currentIndexChanged), [this, &plugin](int index) {
-        const_cast<ScatterplotPlugin&>(plugin).cDimPicked(index);
+    connect(_colorByDimensionSettingsWidget->getColorDimensionComboBox(), qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
+        _scatterplotPlugin->cDimPicked(index);
     });
 
-    auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+    auto scatterPlotWidget = _scatterplotPlugin->getScatterplotWidget();
 
     const auto renderModeChanged = [this, scatterPlotWidget]() {
         setEnabled(scatterPlotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT);
     };
 
-    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, renderModeChanged](const ScatterplotWidget::RenderMode& renderMode) {
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, this, [this, renderModeChanged](const ScatterplotWidget::RenderMode& renderMode) {
         renderModeChanged();
     });
 
-    computeSizeHints();
-
     renderModeChanged();
-    */
 }

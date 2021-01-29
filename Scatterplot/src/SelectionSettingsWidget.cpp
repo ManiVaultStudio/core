@@ -173,11 +173,13 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveTool
     setLayout(stateLayout);
 }
 
-void SelectionSettingsWidget::connectToPlugin()
+void SelectionSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
-    /*
-    auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
-    auto& pixelSelectionTool = scatterplotPlugin.getSelectionTool();
+    Q_ASSERT(scatterplotPlugin != nullptr);
+
+    _scatterplotPlugin = scatterplotPlugin;
+
+    auto& pixelSelectionTool = _scatterplotPlugin->getSelectionTool();
 
     connect(_typeComboBox, &QComboBox::currentTextChanged, [this, &pixelSelectionTool](QString currentText) {
         pixelSelectionTool.setType(PixelSelectionTool::getTypeEnum(currentText));
@@ -199,31 +201,31 @@ void SelectionSettingsWidget::connectToPlugin()
         pixelSelectionTool.setRadius(PixelSelectionTool::RADIUS_MIN + ((static_cast<float>(value) - _radiusSlider->minimum()) / 1000.0f));
     });
 
-    connect(_selectAllPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
-        scatterplotPlugin.selectAll();
+    connect(_selectAllPushButton, &QPushButton::clicked, [this]() {
+        _scatterplotPlugin->selectAll();
     });
 
-    connect(_clearSelectionPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
-        scatterplotPlugin.clearSelection();
+    connect(_clearSelectionPushButton, &QPushButton::clicked, [this]() {
+        _scatterplotPlugin->clearSelection();
     });
 
-    connect(_invertSelectionPushButton, &QPushButton::clicked, [this, &scatterplotPlugin]() {
-        scatterplotPlugin.invertSelection();
+    connect(_invertSelectionPushButton, &QPushButton::clicked, [this]() {
+        _scatterplotPlugin->invertSelection();
     });
 
     connect(_notifyDuringSelectionCheckBox, &QCheckBox::toggled, [this, &pixelSelectionTool](bool checked) {
         pixelSelectionTool.setNotifyDuringSelection(checked);
     });
     
-    const auto updateTypeUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
-        const auto canSelect = scatterplotPlugin.canSelect();
+    const auto updateTypeUI = [this, &pixelSelectionTool]() {
+        const auto canSelect = _scatterplotPlugin->canSelect();
 
         _typeLabel->setEnabled(canSelect);
         _typeComboBox->setCurrentText(PixelSelectionTool::getTypeName(pixelSelectionTool.getType()));
     };
 
-    const auto updateModifierUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
-        const auto canSelect = scatterplotPlugin.canSelect();
+    const auto updateModifierUI = [this, &pixelSelectionTool]() {
+        const auto canSelect = _scatterplotPlugin->canSelect();
 
         switch (pixelSelectionTool.getModifier())
         {
@@ -256,10 +258,10 @@ void SelectionSettingsWidget::connectToPlugin()
         _modifierRemovePushButton->setEnabled(canSelect);
     };
 
-    const auto updateRadiusUI = [this, &scatterplotPlugin, &pixelSelectionTool]() {
+    const auto updateRadiusUI = [this, &pixelSelectionTool]() {
         auto radiusEnabled = false;
 
-        if (scatterplotPlugin.canSelect()) {
+        if (_scatterplotPlugin->canSelect()) {
             switch (pixelSelectionTool.getType())
             {
                 case PixelSelectionTool::Type::Rectangle:
@@ -285,31 +287,31 @@ void SelectionSettingsWidget::connectToPlugin()
         _radiusSlider->setEnabled(radiusEnabled);
     };
 
-    connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, [this, updateTypeUI, updateRadiusUI](const PixelSelectionTool::Type& type) {
+    connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, this, [this, updateTypeUI, updateRadiusUI](const PixelSelectionTool::Type& type) {
         updateTypeUI();
         updateRadiusUI();
     });
 
-    connect(&pixelSelectionTool, &PixelSelectionTool::modifierChanged, [this, updateModifierUI](const PixelSelectionTool::Modifier& modifier) {
+    connect(&pixelSelectionTool, &PixelSelectionTool::modifierChanged, this, [this, updateModifierUI](const PixelSelectionTool::Modifier& modifier) {
         updateModifierUI();
     });
 
-    connect(&pixelSelectionTool, &PixelSelectionTool::radiusChanged, [this, &pixelSelectionTool](const float& radius) {
+    connect(&pixelSelectionTool, &PixelSelectionTool::radiusChanged, this, [this, &pixelSelectionTool](const float& radius) {
         _radiusDoubleSpinBox->setValue(pixelSelectionTool.getRadius());
         _radiusSlider->setValue(pixelSelectionTool.getRadius() * 1000.0f);
     });
 
-    connect(&pixelSelectionTool, &PixelSelectionTool::notifyDuringSelectionChanged, [this](const bool& notifyDuringSelection) {
+    connect(&pixelSelectionTool, &PixelSelectionTool::notifyDuringSelectionChanged, this, [this](const bool& notifyDuringSelection) {
         _notifyDuringSelectionCheckBox->setChecked(notifyDuringSelection);
     });
 
-    const auto updateSelectionButtons = [this, &scatterplotPlugin]() {
-        _selectAllPushButton->setEnabled(scatterplotPlugin.canSelectAll());
-        _clearSelectionPushButton->setEnabled(scatterplotPlugin.canClearSelection());
-        _invertSelectionPushButton->setEnabled(scatterplotPlugin.canInvertSelection());
+    const auto updateSelectionButtons = [this]() {
+        _selectAllPushButton->setEnabled(_scatterplotPlugin->canSelectAll());
+        _clearSelectionPushButton->setEnabled(_scatterplotPlugin->canClearSelection());
+        _invertSelectionPushButton->setEnabled(_scatterplotPlugin->canInvertSelection());
     };
 
-    connect(&scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, &scatterplotPlugin, updateModifierUI, updateRadiusUI, updateSelectionButtons]() {
+    connect(_scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), this, [this, updateModifierUI, updateRadiusUI, updateSelectionButtons]() {
         updateModifierUI();
         updateRadiusUI();
         updateSelectionButtons();
@@ -319,18 +321,17 @@ void SelectionSettingsWidget::connectToPlugin()
     updateRadiusUI();
     updateSelectionButtons();
 
-    auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+    auto scatterPlotWidget = _scatterplotPlugin->getScatterplotWidget();
 
     const auto updateEnabled = [this, scatterPlotWidget, &pixelSelectionTool]() {
         setEnabled(scatterPlotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT);
     };
 
-    connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updateEnabled](const ScatterplotWidget::RenderMode& renderMode) {
+    connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateEnabled](const ScatterplotWidget::RenderMode& renderMode) {
         updateEnabled();
     });
 
     updateEnabled();
 
     pixelSelectionTool.setChanged();
-    */
 }

@@ -38,9 +38,11 @@ DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveToolBar:
     setLayout(layout);
 }
 
-void DensitySettingsWidget::connectToPlugin()
+void DensitySettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
-    auto scatterPlotWidget = scatterplotPlugin->getScatterplotWidget();
+    _scatterplotPlugin = scatterplotPlugin;
+
+    auto scatterPlotWidget = _scatterplotPlugin->getScatterplotWidget();
 
     const auto setTooltip = [this](const float& sigma) {
         const auto toolTip = QString("Sigma: %1").arg(QString::number(sigma, 'f', 1));

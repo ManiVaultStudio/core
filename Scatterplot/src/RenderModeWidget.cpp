@@ -86,9 +86,11 @@ RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetSta
     setLayout(layout);
 }
 
-void RenderModeWidget::connectToPlugin()
+void RenderModeWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
-    auto scatterPlotWidget = scatterplotPlugin->getScatterplotWidget();
+    _scatterplotPlugin = scatterplotPlugin;
+
+    auto scatterPlotWidget = _scatterplotPlugin->getScatterplotWidget();
 
     const auto updateToggles = [this, scatterPlotWidget]() {
         const auto renderMode = scatterPlotWidget->getRenderMode();

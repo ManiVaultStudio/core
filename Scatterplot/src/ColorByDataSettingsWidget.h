@@ -10,8 +10,7 @@ class ColorByDataSettingsWidget : public ScatterplotSettingsWidget
 public:
     ColorByDataSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
-protected:
-    void connectToPlugin() override;
+    void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 
 private:
     QLineEdit*      _colorDataLineEdit;

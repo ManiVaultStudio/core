@@ -17,16 +17,11 @@ protected:
     ScatterplotSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
 public:
-    void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin);
-
-protected:
-    virtual void connectToPlugin() = 0;
+    virtual void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) = 0;
 
 protected:
     hdps::gui::ResponsiveToolBar::WidgetState   _state;
-
-public:
-    static ScatterplotPlugin* scatterplotPlugin;
+    ScatterplotPlugin*                          _scatterplotPlugin;
 
     friend class ScatterplotPlugin;
 };

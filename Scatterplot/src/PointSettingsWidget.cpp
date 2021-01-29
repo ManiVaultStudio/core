@@ -85,13 +85,14 @@ PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
             break;
     }
 
-    /*
+    
     _sizeLabel->setText(_state == ResponsiveToolBar::WidgetState::Full ? "Point size:" : "Size:");
     _opacityLabel->setText(_state == ResponsiveToolBar::WidgetState::Full ? "Point opacity:" : "Opacity:");
-
+    
     _sizeSlider->setFixedWidth(_state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
     _opacitySlider->setFixedWidth(_state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
-
+    
+    /*
     _sizeDoubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
     _opacityDoubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
     */
@@ -102,8 +103,10 @@ PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
     setLayout(stateLayout);
 }
 
-void PointSettingsWidget::connectToPlugin()
+void PointSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
+    _scatterplotPlugin = scatterplotPlugin;
+
     const auto setSizeTooltip = [this](const float& pointSize) {
         const auto toolTip = QString("Point size: %1").arg(QString::number(pointSize, 'f', 1));
 
@@ -118,7 +121,7 @@ void PointSettingsWidget::connectToPlugin()
         _opacitySlider->setToolTip(toolTip);
     };
 
-    auto scatterPlotWidget = scatterplotPlugin->getScatterplotWidget();
+    auto scatterPlotWidget = _scatterplotPlugin->getScatterplotWidget();
 
     connect(_sizeSlider, &QSlider::valueChanged, [this, scatterPlotWidget, setSizeTooltip](int value) {
         const auto pointSize = static_cast<float>(value) / 1000.0f;

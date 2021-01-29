@@ -45,26 +45,25 @@ SubsetSettingsWidget::SubsetSettingsWidget(const hdps::gui::ResponsiveToolBar::W
     setLayout(layout);
 }
 
-void SubsetSettingsWidget::connectToPlugin()
+void SubsetSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
-    /*
-    auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
-    auto scatterPlotWidget  = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+    _scatterplotPlugin = scatterplotPlugin;
 
-    const auto updateUI = [this, &scatterplotPlugin, scatterPlotWidget]() {
+    auto scatterPlotWidget  = _scatterplotPlugin->getScatterplotWidget();
+
+    const auto updateUI = [this, scatterPlotWidget]() {
         const auto isScatterPlot = scatterPlotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT;
-        setEnabled(isScatterPlot && scatterplotPlugin.getNumSelectedPoints() >= 1);
+        setEnabled(isScatterPlot && _scatterplotPlugin->getNumSelectedPoints() >= 1);
         qDebug() << isEnabled();
     };
 
-    QObject::connect(&plugin, qOverload<>(&ScatterplotPlugin::selectionChanged), [this, updateUI]() {
+    QObject::connect(_scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), this, [this, updateUI]() {
         updateUI();
     });
 
-    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updateUI](const ScatterplotWidget::RenderMode& renderMode) {
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateUI](const ScatterplotWidget::RenderMode& renderMode) {
         updateUI();
     });
 
     updateUI();
-    */
 }
