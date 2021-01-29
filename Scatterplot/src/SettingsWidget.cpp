@@ -43,12 +43,21 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _responsiveToolBar->addWidget<RenderModeWidget>("Render mode", fontAwesome.getIcon("toggle-on"), 10);
-    _responsiveToolBar->addWidget<PlotSettingsWidget>("Plot", fontAwesome.getIcon("cogs"), 250);
-    _responsiveToolBar->addWidget<PositionSettingsWidget>("Position", fontAwesome.getIcon("ruler-combined"), 250);
-    _responsiveToolBar->addWidget<ColorSettingsWidget>("Color", fontAwesome.getIcon("palette"), 250);
-    _responsiveToolBar->addWidget<SubsetSettingsWidget>("Color", fontAwesome.getIcon("crop"), 50);
-    _responsiveToolBar->addWidget<SelectionSettingsWidget>("Selection", fontAwesome.getIcon("mouse-pointer"), 5);
+    const auto initializeWidgetFunction = [&plugin](QWidget* widget) {
+        auto scatterplotSettingsWidget = dynamic_cast<ScatterplotSettingsWidget*>(widget);
+
+        if (!scatterplotSettingsWidget)
+            return;
+
+        scatterplotSettingsWidget->setScatterplotPlugin(&const_cast<ScatterplotPlugin&>(plugin));
+    };
+
+    _responsiveToolBar->addWidget<RenderModeWidget>(initializeWidgetFunction, "Render mode", fontAwesome.getIcon("toggle-on"), 10);
+    _responsiveToolBar->addWidget<PlotSettingsWidget>(initializeWidgetFunction, "Plot", fontAwesome.getIcon("cogs"), 250);
+    _responsiveToolBar->addWidget<PositionSettingsWidget>(initializeWidgetFunction, "Position", fontAwesome.getIcon("ruler-combined"), 250);
+    _responsiveToolBar->addWidget<ColorSettingsWidget>(initializeWidgetFunction, "Color", fontAwesome.getIcon("palette"), 250);
+    _responsiveToolBar->addWidget<SubsetSettingsWidget>(initializeWidgetFunction, "Color", fontAwesome.getIcon("crop"), 50);
+    _responsiveToolBar->addWidget<SelectionSettingsWidget>(initializeWidgetFunction, "Selection", fontAwesome.getIcon("mouse-pointer"), 5);
 
     //setEnabled(false);
 

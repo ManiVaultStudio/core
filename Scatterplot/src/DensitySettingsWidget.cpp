@@ -33,7 +33,7 @@ DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveToolBar:
     layout->addWidget(_doubleSpinBox);
     layout->addWidget(_slider);
 
-    _doubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    //_doubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
 
     setLayout(layout);
 }

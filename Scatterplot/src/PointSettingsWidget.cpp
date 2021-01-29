@@ -85,6 +85,7 @@ PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
             break;
     }
 
+    /*
     _sizeLabel->setText(_state == ResponsiveToolBar::WidgetState::Full ? "Point size:" : "Size:");
     _opacityLabel->setText(_state == ResponsiveToolBar::WidgetState::Full ? "Point opacity:" : "Opacity:");
 
@@ -93,6 +94,7 @@ PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
 
     _sizeDoubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
     _opacityDoubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    */
 
     stateLayout->setMargin(0);
     stateLayout->setSpacing(4);

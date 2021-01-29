@@ -114,21 +114,19 @@ void ResponsiveToolBar::computeLayout(QWidget* resizedWidget /*= nullptr*/)
         return sectionsWidth;
     };
 
-    for (int targetState = 0; targetState < 2; targetState++) {
-        for (auto sectionWidget : _sectionWidgets) {
-            const auto oldWidgetStates = states;
+    auto sectionWidgets = _sectionWidgets + _sectionWidgets;
 
-            states[_sectionWidgets.indexOf(sectionWidget)]++;
+    for (auto sectionWidget : sectionWidgets) {
+        const auto oldWidgetStates = states;
 
-            const auto sectionsWidth = getSectionsWidth();
+        states[_sectionWidgets.indexOf(sectionWidget)]++;
 
-            if (sectionsWidth > availableWidth) {
-                states = oldWidgetStates;
-                break;
-            }
+        const auto sectionsWidth = getSectionsWidth();
+
+        if (sectionsWidth > availableWidth) {
+            states = oldWidgetStates;
+            break;
         }
-
-        //qDebug() << availableWidth << getSectionsWidth() << states;
     }
 
     for (auto sectionWidget : _sectionWidgets)
