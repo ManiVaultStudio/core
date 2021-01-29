@@ -16,7 +16,7 @@ public:
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
+    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state);
 
 private:
     QLineEdit*      _colorDataLineEdit;

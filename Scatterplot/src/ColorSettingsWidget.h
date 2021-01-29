@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "ScatterplotSettingsWidget.h"
 
 #include <QStackedWidget>
 
@@ -12,7 +12,7 @@ class ColorByDataSettingsWidget;
 class QLabel;
 class QComboBox;
 
-class ColorSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class ColorSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
     class StackedWidget : public QStackedWidget {
@@ -27,20 +27,16 @@ public:
     };
 
 public:
-    ColorSettingsWidget(QWidget* parent = nullptr);
+    ColorSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
     void initializeUI();
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
-    void setState(const hdps::gui::ResponsiveToolBar::WidgetState& state, const bool& forceUpdate = false) override;
-
 public:
     void setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
 
-protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
-
 private:
+    ScatterplotPlugin*                  _scatterplotPlugin;
     QLabel*                             _colorByLabel;
     QComboBox*                          _colorByComboBox;
     StackedWidget*                      _stackedWidget;

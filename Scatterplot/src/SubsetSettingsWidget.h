@@ -1,22 +1,19 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "ScatterplotSettingsWidget.h"
 
 class ScatterplotPlugin;
 
 class QPushButton;
 class QCheckBox;
 
-class SubsetSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class SubsetSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    SubsetSettingsWidget(QWidget* parent = nullptr);
+    SubsetSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
     void initializeUI();
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
-
-protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
 
 private:
     QPushButton*    _createSubsetPushButton;

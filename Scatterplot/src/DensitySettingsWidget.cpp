@@ -12,6 +12,7 @@ using namespace hdps::gui;
 
 DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
     ResponsiveToolBar::StatefulWidget(parent, "Density"),
+    _scatterplotPlugin(nullptr),
     _label(new QLabel("Sigma")),
     _doubleSpinBox(new QDoubleSpinBox()),
     _slider(new QSlider())
@@ -32,6 +33,8 @@ void DensitySettingsWidget::initializeUI()
 
 void DensitySettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 {
+    _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
+
     auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
 
     const auto setTooltip = [this](const float& sigma) {
@@ -94,4 +97,14 @@ QLayout* DensitySettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& 
     */
 
     return layout;
+}
+
+QSize DensitySettingsWidget::getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state)
+{
+    auto densitySettingsWidget = QSharedPointer<DensitySettingsWidget>::create();
+
+    densitySettingsWidget->setScatterPlotPlugin(*_scatterplotPlugin);
+    densitySettingsWidget->setState(state);
+
+    return densitySettingsWidget->sizeHint();
 }

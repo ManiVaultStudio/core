@@ -17,9 +17,11 @@ public:
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
+    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state);
+    QSize getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state);
 
 private:
+    ScatterplotPlugin*  _scatterplotPlugin;
     QLabel*             _label;
     QDoubleSpinBox*     _doubleSpinBox;
     QSlider*            _slider;

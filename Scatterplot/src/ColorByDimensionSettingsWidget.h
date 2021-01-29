@@ -19,7 +19,7 @@ public:
     }
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
+    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state);
 
 private:
     QComboBox*  _colorDimensionComboBox;

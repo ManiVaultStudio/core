@@ -6,14 +6,6 @@
 
 class ScatterplotPlugin;
 
-class ResponsiveToolBar;
-class RenderModeWidget;
-class PlotSettingsWidget;
-class PositionSettingsWidget;
-class ColorSettingsWidget;
-class SubsetSettingsWidget;
-class SelectionSettingsWidget;
-
 namespace hdps {
     namespace gui {
         class ResponsiveToolBar;
@@ -23,7 +15,15 @@ namespace hdps {
 class SettingsWidget : public QWidget
 {
     Q_OBJECT
+public:
+    struct object {
+        template <class T>
+        object(T t)
+            : someFunction([t = std::move(t)]() { return t.someFunction(); })
+        { }
 
+        std::function<bool()> someFunction;
+    };
 public:
     SettingsWidget(const ScatterplotPlugin& plugin);
 
@@ -40,12 +40,6 @@ public:
 
 private:
     hdps::gui::ResponsiveToolBar*   _responsiveToolBar;             /** TODO */
-    RenderModeWidget*               _renderModeWidget;              /** TODO */
-    PlotSettingsWidget*             _plotSettingsWidget;            /** TODO */
-    PositionSettingsWidget*         _positionSettingsWidget;        /** TODO */
-    ColorSettingsWidget*            _colorSettingsWidget;           /** TODO */
-    SubsetSettingsWidget*           _subsetSettingsWidget;          /** TODO */
-    SelectionSettingsWidget*        _selectionSettingsWidget;       /** TODO */
     hdps::Vector3f                  _baseColor;                     /** Base color */
     hdps::Vector3f                  _selectionColor;                /** Selection color */
 

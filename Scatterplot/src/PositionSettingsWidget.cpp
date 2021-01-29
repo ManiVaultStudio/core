@@ -8,8 +8,8 @@
 
 using namespace hdps::gui;
 
-PositionSettingsWidget::PositionSettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::StatefulWidget(parent, "Position"),
+PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(state, parent),
     _xDimensionLabel(new QLabel()),
     _xDimensionComboBox(new QComboBox()),
     _yDimensionLabel(new QLabel()),
@@ -29,10 +29,73 @@ void PositionSettingsWidget::initializeUI()
 
     _yDimensionLabel->setToolTip(yDimensionToolTipText);
     _yDimensionComboBox->setToolTip(yDimensionToolTipText);
+
+    QLayout* stateLayout = nullptr;
+
+    switch (_state)
+    {
+        case ResponsiveToolBar::WidgetState::Popup:
+        {
+            auto layout = new QGridLayout();
+
+            layout->addWidget(_xDimensionLabel, 0, 0);
+            layout->addWidget(_xDimensionComboBox, 0, 1);
+            layout->addWidget(_yDimensionLabel, 1, 0);
+            layout->addWidget(_yDimensionComboBox, 1, 1);
+
+            stateLayout = layout;
+            break;
+        }
+
+        case ResponsiveToolBar::WidgetState::Compact:
+        case ResponsiveToolBar::WidgetState::Full:
+        {
+            auto layout = new QHBoxLayout();
+
+            layout->addWidget(_xDimensionLabel);
+            layout->addWidget(_xDimensionComboBox);
+            layout->addWidget(_yDimensionLabel);
+            layout->addWidget(_yDimensionComboBox);
+
+            stateLayout = layout;
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    switch (_state)
+    {
+        case ResponsiveToolBar::WidgetState::Compact:
+            _xDimensionLabel->setText("X:");
+            _yDimensionLabel->setText("Y:");
+            _xDimensionComboBox->setFixedWidth(80);
+            _yDimensionComboBox->setFixedWidth(80);
+            break;
+
+        case ResponsiveToolBar::WidgetState::Popup:
+        case ResponsiveToolBar::WidgetState::Full:
+            _xDimensionLabel->setText("X dimension:");
+            _yDimensionLabel->setText("Y dimension:");
+            _xDimensionComboBox->setFixedWidth(120);
+            _yDimensionComboBox->setFixedWidth(120);
+            break;
+
+        default:
+            break;
+    }
+
+    stateLayout->setMargin(0);
+    stateLayout->setSpacing(4);
+
+    setLayout(stateLayout);
 }
 
 void PositionSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 {
+    _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
+
     QObject::connect(_xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
         const_cast<ScatterplotPlugin&>(plugin).xDimPicked(index);
     });
@@ -82,65 +145,4 @@ void PositionSettingsWidget::setDimensions(unsigned int numDimensions, const std
         _xDimensionComboBox->setCurrentIndex(0);
         _yDimensionComboBox->setCurrentIndex(1);
     }
-}
-
-QLayout* PositionSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
-{
-    QLayout* stateLayout = nullptr;
-
-    switch (state)
-    {
-        case ResponsiveToolBar::WidgetState::Popup:
-        {
-            auto layout = new QGridLayout();
-
-            layout->addWidget(_xDimensionLabel, 0, 0);
-            layout->addWidget(_xDimensionComboBox, 0, 1);
-            layout->addWidget(_yDimensionLabel, 1, 0);
-            layout->addWidget(_yDimensionComboBox, 1, 1);
-
-            stateLayout = layout;
-            break;
-        }
-
-        case ResponsiveToolBar::WidgetState::Compact:
-        case ResponsiveToolBar::WidgetState::Full:
-        {
-            auto layout = new QHBoxLayout();
-
-            layout->addWidget(_xDimensionLabel);
-            layout->addWidget(_xDimensionComboBox);
-            layout->addWidget(_yDimensionLabel);
-            layout->addWidget(_yDimensionComboBox);
-
-            stateLayout = layout;
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    switch (state)
-    {
-        case ResponsiveToolBar::WidgetState::Compact:
-            _xDimensionLabel->setText("X:");
-            _yDimensionLabel->setText("Y:");
-            _xDimensionComboBox->setFixedWidth(80);
-            _yDimensionComboBox->setFixedWidth(80);
-            break;
-
-        case ResponsiveToolBar::WidgetState::Popup:
-        case ResponsiveToolBar::WidgetState::Full:
-            _xDimensionLabel->setText("X dimension:");
-            _yDimensionLabel->setText("Y dimension:");
-            _xDimensionComboBox->setFixedWidth(120);
-            _yDimensionComboBox->setFixedWidth(120);
-            break;
-
-        default:
-            break;
-    }
-
-    return stateLayout;
 }

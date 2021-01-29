@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "ScatterplotSettingsWidget.h"
 
 class ScatterplotPlugin;
 class PixelSelectionTool;
@@ -13,16 +13,13 @@ class QDoubleSpinBox;
 class QSlider;
 class QCheckBox;
 
-class SelectionSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class SelectionSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    SelectionSettingsWidget(QWidget* parent = nullptr);
+    SelectionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
     void initializeUI();
-    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
-
-protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
+    void connectToPlugin();
 
 private:
     QLabel*                         _typeLabel;

@@ -3,13 +3,14 @@
 #include "PopupPushButton.h"
 
 #include <QWidget>
-#include <QHBoxLayout>
 #include <QEvent>
 #include <QDebug>
+#include <QHBoxLayout>
 #include <QPropertyAnimation>
 #include <QGraphicsOpacityEffect>
 
 class QFrame;
+class QGridLayout;
 
 namespace hdps {
 
@@ -21,38 +22,19 @@ namespace hdps {
 
         public:
             enum class WidgetState {
+                Undefined = -1,
                 Popup,
                 Compact,
                 Full
             };
 
         public:
-            class QSpacer : public QWidget {
-            public:
-                QSpacer(QWidget* left, QWidget* right);
-
-                bool eventFilter(QObject* target, QEvent* event);
-
-            private:
-                void updateState();
-
-            protected:
-                QWidget*        _left;
-                QWidget*        _right;
-                QHBoxLayout*    _layout;
-                QFrame*         _verticalLine;
-            };
-
-            class SectionWidget;
-
             class StatefulWidget : public QWidget {
             public:
                 StatefulWidget(QWidget* parent, const QString& name) :
                     QWidget(parent),
                     _name(name),
-                    _state(WidgetState::Full),
-                    _sizeHintWidget(new QWidget()),
-                    _sizeHints({ QSize(), QSize(), QSize() })
+                    _state(WidgetState::Full)
                 {
                     setWindowTitle(_name);
                     setToolTip(QString("%1 settings").arg(_name));
@@ -73,144 +55,87 @@ namespace hdps {
                 }
 
                 virtual void setState(const WidgetState& state, const bool& forceUpdate = false) {
+                    /*
                     if (!forceUpdate && state == _state)
                         return;
 
                     _state = state;
 
                     applyLayout(_state);
-                }
-
-                void computeSizeHints() {
-                    computeStateSizeHint(WidgetState::Popup);
-                    computeStateSizeHint(WidgetState::Compact);
-                    computeStateSizeHint(WidgetState::Full);
-
-                    applyLayout(_state);
-
-                    qDebug() << QString("Computed %1 size hints:").arg(_name) << _sizeHints;
-                }
-
-            protected:
-                virtual QLayout* getLayout(const WidgetState& state) = 0;
-
-                std::int32_t getWidth(const WidgetState& state) {
-                    switch (state)
-                    {
-                        case WidgetState::Compact:
-                        case WidgetState::Full:
-                            return _sizeHints[static_cast<std::int32_t>(state)].width();
-
-                        default:
-                            break;
-                    }
-
-                    return 0;
-                };
-
-            private:
-                void applyLayout(const WidgetState& state) {
-                    qDebug() << "A";
-
-                    auto stateLayout = getLayout(state);
-
-
-                    stateLayout->setMargin(0);
-                    stateLayout->setSpacing(4);
-
-                    if (layout())
-                        delete layout();
-
-                    qDebug() << "B";
-
-                    setLayout(stateLayout);
-
-                    qDebug() << "C";
-                }
-
-                void computeStateSizeHint(const WidgetState& state) {
-                    if (_sizeHintWidget->layout())
-                        delete _sizeHintWidget->layout();
-
-                    auto stateLayout = getLayout(state);
-
-                    stateLayout->setMargin(0);
-                    stateLayout->setSpacing(4);
-
-                    _sizeHintWidget->setLayout(stateLayout);
-                    _sizeHintWidget->adjustSize();
-
-                    _sizeHints[static_cast<std::int32_t>(state)] = _sizeHintWidget->sizeHint();
+                    */
                 }
 
             protected:
                 QString         _name;
                 WidgetState     _state;
-                QWidget*        _sizeHintWidget;
-                QList<QSize>    _sizeHints;
-
-                friend class SectionWidget;
             };
+
+            using GetWidgetStateFn = std::function<QWidget*(const WidgetState& state)>;
 
             class SectionWidget : public QWidget {
             public:
-                SectionWidget(StatefulWidget* statefulWidget, const QIcon& icon = QIcon(), const std::int32_t& priority = 0) :
-                    _statefulWidget(statefulWidget),
+                SectionWidget(GetWidgetStateFn getWidgetStateFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0) :
+                    _getWidgetStateFn(getWidgetStateFn),
+                    _state(WidgetState::Undefined),
+                    _name(name),
                     _priority(priority),
-                    _modified(-1),
                     _layout(new QHBoxLayout()),
-                    _popupPushButton(new PopupPushButton())
+                    _popupPushButton(new PopupPushButton()),
+                    _stateWidget(nullptr),
+                    _stateSizeHints({ QSize(), QSize() , QSize() })
                 {
                     _popupPushButton->setIcon(icon);
-                    _popupPushButton->setWidget(_statefulWidget);
-                    //_popupPushButton->setWindowOpacity(0);
+                    _popupPushButton->setWidget(getWidgetState(WidgetState::Popup));
 
                     _layout->setMargin(0);
                     _layout->setSpacing(0);
                     _layout->addWidget(_popupPushButton);
-                    _layout->addWidget(_statefulWidget);
-
-                    _statefulWidget->installEventFilter(this);
-                    //_statefulWidget->setWindowOpacity(0);
 
                     setLayout(_layout);
 
-                    _statefulWidget->computeSizeHints();
+                    computeSizeHints();
                 }
 
                 bool eventFilter(QObject* object, QEvent* event)
                 {
                     auto widget = dynamic_cast<QWidget*>(object);
 
-                    if (widget == _statefulWidget && event->type() == QEvent::EnabledChange)
-                        _popupPushButton->setEnabled(_statefulWidget->isEnabled());
+                    if (widget == _stateWidget) {
+                        switch (event->type())
+                        {
+                            case QEvent::EnabledChange:
+                                _popupPushButton->setEnabled(_stateWidget->isEnabled());
+                                break;
 
-                    if (widget == _statefulWidget && event->type() == QEvent::Resize)
-                        _modified++;
+                            case QEvent::Resize:
+                                //computeSizeHints();
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
 
                     return QObject::eventFilter(object, event);
                 }
 
                 QString getName() const {
-                    Q_ASSERT(_statefulWidget != nullptr);
-
-                    return _statefulWidget->getName();
+                    return _name;
                 }
 
                 void setState(const WidgetState& state) {
-                    Q_ASSERT(_statefulWidget != nullptr);
+                    if (state == _state)
+                        return;
 
-                    _modified++;
+                    _state = state;
 
-                    switch (state)
+                    switch (_state)
                     {
                         case WidgetState::Popup:
                         {
-                            _layout->removeWidget(_statefulWidget);
-
-                            _statefulWidget->hide();
-                            _statefulWidget->setState(state);
                             _popupPushButton->show();
+
+                            _stateWidget = QSharedPointer<QWidget>();
 
                             break;
                         }
@@ -220,12 +145,11 @@ namespace hdps {
                         {
                             _popupPushButton->hide();
 
-                            _layout->addWidget(_statefulWidget);
+                            _stateWidget = QSharedPointer<QWidget>(_getWidgetStateFn(_state));
 
-                            _statefulWidget->setState(state);
-                            _statefulWidget->show();
+                            _stateWidget->installEventFilter(this);
 
-
+                            _layout->addWidget(_stateWidget.get());
                             break;
                         }
 
@@ -245,28 +169,38 @@ namespace hdps {
                     _priority = priority;
                 }
 
-                std::int32_t getModified() const {
-                    return _modified;
-                }
-
-                std::int32_t getWidth(const WidgetState& state) const {
-                    switch (state)
-                    {
-                        case WidgetState::Popup:
-                            return _popupPushButton->sizeHint().width();
-
-                        case WidgetState::Compact:
-                        case WidgetState::Full:
-                            return _statefulWidget->getWidth(state);
-
-                        default:
-                            break;
-                    }
-
-                    return 0;
+                QSize getStateSizeHint(const WidgetState& state) const {
+                    return _stateSizeHints[static_cast<std::int32_t>(state)];
                 }
 
             private:
+                QWidget* getWidgetState(const WidgetState& state) {
+                    auto widget = _getWidgetStateFn(WidgetState::Popup);
+                    widget->setWindowTitle(_name);
+
+                    return widget;
+                }
+
+                void computeSizeHints() {
+                    _stateSizeHints[static_cast<std::int32_t>(WidgetState::Popup)]      = computeStateSizeHint(WidgetState::Popup);
+                    _stateSizeHints[static_cast<std::int32_t>(WidgetState::Compact)]    = computeStateSizeHint(WidgetState::Compact);
+                    _stateSizeHints[static_cast<std::int32_t>(WidgetState::Full)]       = computeStateSizeHint(WidgetState::Full);
+
+                    qDebug() << QString("Computed %1 size hints:").arg(_name) << _stateSizeHints;
+                }
+
+                QSize computeStateSizeHint(const WidgetState& state) const {
+                    if (state == WidgetState::Popup)
+                        return _popupPushButton->sizeHint();
+
+                    const auto stateWidget = _getWidgetStateFn(state);
+                    const auto stateSizeHint = stateWidget->sizeHint();
+
+                    delete stateWidget;
+
+                    return stateSizeHint;
+                }
+
                 void animateOpacity(QWidget* widget, const float& startOpacity, const float& endOpacity, const std::int32_t& duration, std::function<void()> finishedCallback = std::function<void()>()) {
                     QGraphicsOpacityEffect* graphicsOpacityEffect = new QGraphicsOpacityEffect(widget);
 
@@ -287,11 +221,14 @@ namespace hdps {
                 }
 
             protected:
-                StatefulWidget*     _statefulWidget;
-                std::int32_t        _priority;
-                std::int32_t        _modified;
-                QHBoxLayout*        _layout;
-                PopupPushButton*    _popupPushButton;
+                GetWidgetStateFn            _getWidgetStateFn;
+                WidgetState                 _state;
+                QString                     _name;
+                std::int32_t                _priority;
+                QHBoxLayout*                _layout;
+                PopupPushButton*            _popupPushButton;
+                QSharedPointer<QWidget>     _stateWidget;
+                QList<QSize>                _stateSizeHints;
             };
 
         public:
@@ -301,19 +238,33 @@ namespace hdps {
 
             bool eventFilter(QObject* object, QEvent* event);
 
-            void addSection(StatefulWidget* statefulWidget, const QIcon& icon = QIcon(), const std::int32_t& priority = 0);
-            void addStretch(const std::int32_t& stretch = 0);
+            template<typename StatefulWidgetType>
+            void addWidget(const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0)
+            {
+                const auto getWidgetState = [](const WidgetState& state) -> QWidget* {
+                    return new StatefulWidgetType(state);
+                };
+
+                auto sectionWidget = new SectionWidget(getWidgetState, name, icon, priority);
+
+                _sectionWidgets << sectionWidget;
+
+                _layout->addWidget(sectionWidget, 1, _sectionWidgets.count());
+            }
+
+            void addWidget(QWidget* widget)
+            {
+                _layout->addWidget(widget, 1, _sectionWidgets.count());
+            }
 
         private:
-            void computeLayout(SectionWidget* sectionWidget = nullptr);
-            QList<QWidget*> getVisibleWidgets();
+            void computeLayout(QWidget* resizedWidget = nullptr);
 
         private:
-            QWidget*                _listenWidget;
-            QHBoxLayout*            _layout;
-            QList<SectionWidget*>   _sectionWidgets;
-            QList<SectionWidget*>   _ignoreSectionWidgets;
-            std::int32_t            _modified;
+            QWidget*                        _listenWidget;
+            QGridLayout*                    _layout;
+            QVector<SectionWidget*>         _sectionWidgets;
+            std::int32_t                    _modified;
 
         public:
             static const std::int32_t LAYOUT_MARGIN;

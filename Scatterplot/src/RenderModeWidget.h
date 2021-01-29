@@ -1,21 +1,19 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "ScatterplotSettingsWidget.h"
 
 class ScatterplotPlugin;
 
 class QPushButton;
 
-class RenderModeWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class RenderModeWidget : public ScatterplotSettingsWidget
 {
 public:
-    RenderModeWidget(QWidget* parent = nullptr);
-
-    void initializeUI();
-    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
+    RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
+    void initializeUI() override;
+    void connect() override;
 
 private:
     QPushButton*    _scatterPlotPushButton;

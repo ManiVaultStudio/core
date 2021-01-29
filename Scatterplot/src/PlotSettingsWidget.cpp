@@ -7,6 +7,7 @@ using namespace hdps::gui;
 
 PlotSettingsWidget::PlotSettingsWidget(QWidget* parent /*= nullptr*/) :
     ResponsiveToolBar::StatefulWidget(parent, "Plot"),
+    _scatterplotPlugin(nullptr),
     _stackedWidget(new StackedWidget()),
     _pointSettingsWidget(new PointSettingsWidget(this)),
     _densitySettingsWidget(new DensitySettingsWidget(this))
@@ -53,4 +54,14 @@ QLayout* PlotSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& sta
     layout->addWidget(_stackedWidget);
 
     return layout;
+}
+
+QSize PlotSettingsWidget::getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state)
+{
+    auto plotSettingsWidget = QSharedPointer<PlotSettingsWidget>::create();
+
+    plotSettingsWidget->setScatterPlotPlugin(*_scatterplotPlugin);
+    plotSettingsWidget->setState(state);
+
+    return plotSettingsWidget->sizeHint();
 }

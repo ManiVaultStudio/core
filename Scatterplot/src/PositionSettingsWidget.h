@@ -1,16 +1,16 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "ScatterplotSettingsWidget.h"
 
 class ScatterplotPlugin;
 
 class QLabel;
 class QComboBox;
 
-class PositionSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class PositionSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    PositionSettingsWidget(QWidget* parent = nullptr);
+    PositionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
     void initializeUI();
     void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
@@ -22,12 +22,10 @@ public:
 
     void setDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
 
-protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
-
 private:
-    QLabel*         _xDimensionLabel;
-    QComboBox*      _xDimensionComboBox;
-    QLabel*         _yDimensionLabel;
-    QComboBox*      _yDimensionComboBox;
+    ScatterplotPlugin*  _scatterplotPlugin;
+    QLabel*             _xDimensionLabel;
+    QComboBox*          _xDimensionComboBox;
+    QLabel*             _yDimensionLabel;
+    QComboBox*          _yDimensionComboBox;
 };

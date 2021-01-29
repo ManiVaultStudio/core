@@ -32,9 +32,11 @@ public:
     void setState(const hdps::gui::ResponsiveToolBar::WidgetState& state, const bool& forceUpdate = false) override;
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state) override;
+    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state);
+    QSize getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state);
 
 private:
+    ScatterplotPlugin*          _scatterplotPlugin;
     StackedWidget*              _stackedWidget;
     PointSettingsWidget*        _pointSettingsWidget;
     DensitySettingsWidget*      _densitySettingsWidget;

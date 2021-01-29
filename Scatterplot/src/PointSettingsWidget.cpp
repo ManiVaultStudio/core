@@ -13,6 +13,7 @@ using namespace hdps::gui;
 
 PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
     ResponsiveToolBar::StatefulWidget(parent, "Point"),
+    _scatterplotPlugin(nullptr),
     _sizeLabel(new QLabel()),
     _sizeDoubleSpinBox(new QDoubleSpinBox()),
     _sizeSlider(new QSlider()),
@@ -50,6 +51,8 @@ void PointSettingsWidget::initializeUI()
 
 void PointSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 {
+    _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
+
     const auto setSizeTooltip = [this](const float& pointSize) {
         const auto toolTip = QString("Point size: %1").arg(QString::number(pointSize, 'f', 1));
 
@@ -64,7 +67,7 @@ void PointSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
         _opacitySlider->setToolTip(toolTip);
     };
 
-    auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+    auto scatterPlotWidget = _scatterplotPlugin->getScatterplotWidget();
 
     connect(_sizeSlider, &QSlider::valueChanged, [this, scatterPlotWidget, setSizeTooltip](int value) {
         const auto pointSize = static_cast<float>(value) / 1000.0f;
@@ -175,4 +178,14 @@ QLayout* PointSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& st
     */
 
     return stateLayout;
+}
+
+QSize PointSettingsWidget::getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state)
+{
+    auto pointSettingsWidget = QSharedPointer<PointSettingsWidget>::create();
+
+    pointSettingsWidget->setScatterPlotPlugin(*_scatterplotPlugin);
+    pointSettingsWidget->setState(state);
+
+    return pointSettingsWidget->sizeHint();
 }

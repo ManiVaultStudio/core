@@ -13,8 +13,8 @@
 
 using namespace hdps::gui;
 
-SelectionSettingsWidget::SelectionSettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::StatefulWidget(parent, "Selection"),
+SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(state, parent),
     _typeLabel(new QLabel("Type:")),
     _typeLayout(new QHBoxLayout()),
     _typeWidget(new QWidget()),
@@ -56,7 +56,7 @@ void SelectionSettingsWidget::initializeUI()
 
     _typeComboBox->setToolTip("Choose the selection type");
     _typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
-    _typeComboBox->setFixedWidth(70);
+    //_typeComboBox->setFixedWidth(70);
     //_typeComboBox->setEditable(true);
     //_typeComboBox->lineEdit()->setReadOnly(true);
     //_typeComboBox->lineEdit()->setAlignment(Qt::AlignCenter);
@@ -112,10 +112,75 @@ void SelectionSettingsWidget::initializeUI()
 
     _additionalSettingsPopupPushButton->setToolTip("Additional selection settings");
     _additionalSettingsPopupPushButton->setIcon(fontAwesome.getIcon("ellipsis-h"));
+
+    QLayout* stateLayout = nullptr;
+
+    switch (_state)
+    {
+        case ResponsiveToolBar::WidgetState::Popup:
+        {
+            auto layout = new QGridLayout();
+
+            layout->addWidget(_typeLabel, 0, 0);
+            layout->addWidget(_typeWidget, 0, 1);
+            layout->addWidget(_radiusLabel, 1, 0);
+            layout->addWidget(_radiusWidget, 1, 1);
+            layout->addWidget(_selectLabel, 2, 0);
+            layout->addWidget(_selectWidget, 2, 1);
+            layout->addWidget(_notifyDuringSelectionCheckBox, 3, 1);
+
+            stateLayout = layout;
+            break;
+        }
+
+        case ResponsiveToolBar::WidgetState::Compact:
+        {
+            auto layout = new QHBoxLayout();
+
+            layout->addWidget(_typeWidget);
+            layout->addWidget(_additionalSettingsPopupPushButton);
+
+            stateLayout = layout;
+            break;
+        }
+
+        case ResponsiveToolBar::WidgetState::Full:
+        {
+            auto layout = new QHBoxLayout();
+
+            layout->addWidget(_typeWidget);
+            layout->addWidget(_selectWidget);
+            layout->addWidget(_radiusWidget);
+            layout->addWidget(_notifyDuringSelectionCheckBox);
+
+            stateLayout = layout;
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    stateLayout->setMargin(0);
+    stateLayout->setSpacing(4);
+
+    
+    /*
+    _typeWidget->setVisible(true);
+    _typeLabel->setVisible(_state == ResponsiveToolBar::WidgetState::Popup);
+    _radiusLabel->setVisible(_state == ResponsiveToolBar::WidgetState::Popup);
+    _radiusWidget->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    //_selectLabel->setVisible(_state != ResponsiveToolBar::WidgetState::Popup);
+    //_selectWidget->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    _notifyDuringSelectionCheckBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    */
+
+    setLayout(stateLayout);
 }
 
-void SelectionSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
+void SelectionSettingsWidget::connectToPlugin()
 {
+    /*
     auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
     auto& pixelSelectionTool = scatterplotPlugin.getSelectionTool();
 
@@ -272,65 +337,5 @@ void SelectionSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plug
     updateEnabled();
 
     pixelSelectionTool.setChanged();
-}
-
-QLayout* SelectionSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
-{
-    QLayout* stateLayout = nullptr;
-
-    switch (state)
-    {
-        case ResponsiveToolBar::WidgetState::Popup:
-        {
-            auto layout = new QGridLayout();
-
-            layout->addWidget(_typeLabel, 0, 0);
-            layout->addWidget(_typeWidget, 0, 1);
-            layout->addWidget(_radiusLabel, 1, 0);
-            layout->addWidget(_radiusWidget, 1, 1);
-            layout->addWidget(_selectLabel, 2, 0);
-            layout->addWidget(_selectWidget, 2, 1);
-            layout->addWidget(_notifyDuringSelectionCheckBox, 3, 1);
-
-            stateLayout = layout;
-            break;
-        }
-
-        case ResponsiveToolBar::WidgetState::Compact:
-        {
-            auto layout = new QHBoxLayout();
-
-            layout->addWidget(_typeWidget);
-            layout->addWidget(_additionalSettingsPopupPushButton);
-
-            stateLayout = layout;
-            break;
-        }
-
-        case ResponsiveToolBar::WidgetState::Full:
-        {
-            auto layout = new QHBoxLayout();
-
-            layout->addWidget(_typeWidget);
-            layout->addWidget(_selectWidget);
-            layout->addWidget(_radiusWidget);
-            layout->addWidget(_notifyDuringSelectionCheckBox);
-
-            stateLayout = layout;
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    _typeWidget->setVisible(true);
-    _typeLabel->setVisible(state == ResponsiveToolBar::WidgetState::Popup);
-    _radiusLabel->setVisible(state == ResponsiveToolBar::WidgetState::Popup);
-    _radiusWidget->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
-    _selectLabel->setVisible(state != ResponsiveToolBar::WidgetState::Popup);
-    _selectWidget->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
-    _notifyDuringSelectionCheckBox->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
-
-    return stateLayout;
+    */
 }

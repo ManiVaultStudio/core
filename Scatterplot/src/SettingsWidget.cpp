@@ -2,7 +2,9 @@
 #include "ScatterplotPlugin.h"
 
 #include "RenderModeWidget.h"
+/*
 #include "PlotSettingsWidget.h"
+*/
 #include "PositionSettingsWidget.h"
 #include "ColorSettingsWidget.h"
 #include "SubsetSettingsWidget.h"
@@ -14,23 +16,21 @@
 #include <QDialog>
 #include <QPropertyAnimation>
 
+using namespace hdps::gui;
+
 const hdps::Vector3f SettingsWidget::DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
 const hdps::Vector3f SettingsWidget::DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
 
 SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     QWidget(static_cast<QWidget*>(&const_cast<ScatterplotPlugin&>(plugin))),
-    _responsiveToolBar(new hdps::gui::ResponsiveToolBar(this)),
-    _renderModeWidget(new RenderModeWidget(this)),
-    //_plotSettingsWidget(new PlotSettingsWidget(this)),
-    _positionSettingsWidget(new PositionSettingsWidget(this)),
-    _colorSettingsWidget(new ColorSettingsWidget(this)),
-    _subsetSettingsWidget(new SubsetSettingsWidget(this)),
-    //_selectionSettingsWidget(new SelectionSettingsWidget(this)),
+    _responsiveToolBar(new ResponsiveToolBar(this)),
     _baseColor(DEFAULT_BASE_COLOR),
     _selectionColor(DEFAULT_SELECTION_COLOR)
 {
     setAutoFillBackground(true);
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+
+    ScatterplotSettingsWidget::scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
 
     auto horizontalLayout = new QHBoxLayout();
 
@@ -43,22 +43,14 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     _responsiveToolBar->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
 
-    _renderModeWidget->setScatterPlotPlugin(plugin);
-    //_plotSettingsWidget->setScatterPlotPlugin(plugin);
-    _positionSettingsWidget->setScatterPlotPlugin(plugin);
-    _colorSettingsWidget->setScatterPlotPlugin(plugin);
-    _subsetSettingsWidget->setScatterPlotPlugin(plugin);
-    //_selectionSettingsWidget->setScatterPlotPlugin(plugin);
-
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _responsiveToolBar->addSection(_renderModeWidget, fontAwesome.getIcon("toggle-on"), 10);
+    _responsiveToolBar->addWidget<RenderModeWidget>("Render mode", fontAwesome.getIcon("toggle-on"), 10);
+    _responsiveToolBar->addWidget<PositionSettingsWidget>("Position", fontAwesome.getIcon("ruler-combined"), 250);
+    _responsiveToolBar->addWidget<ColorSettingsWidget>("Color", fontAwesome.getIcon("palette"), 250);
+    _responsiveToolBar->addWidget<SubsetSettingsWidget>("Color", fontAwesome.getIcon("crop"), 50);
+    _responsiveToolBar->addWidget<SelectionSettingsWidget>("Selection", fontAwesome.getIcon("mouse-pointer"), 5);
     //_responsiveToolBar->addSection(_plotSettingsWidget, fontAwesome.getIcon("cogs"));
-    _responsiveToolBar->addSection(_positionSettingsWidget, fontAwesome.getIcon("ruler-combined"), 250);
-    _responsiveToolBar->addSection(_colorSettingsWidget, fontAwesome.getIcon("palette"), 250);
-    _responsiveToolBar->addSection(_subsetSettingsWidget, fontAwesome.getIcon("crop"), 50);
-    //_responsiveToolBar->addSection(_selectionSettingsWidget, fontAwesome.getIcon("mouse-pointer"), 5);
-    _responsiveToolBar->addStretch();
 
     //setEnabled(false);
 
@@ -69,12 +61,14 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
 int SettingsWidget::getXDimension()
 {
-    return _positionSettingsWidget->getDimensionX();
+    return 0;
+    //return _positionSettingsWidget->getDimensionX();
 }
 
 int SettingsWidget::getYDimension()
 {
-    return _positionSettingsWidget->getDimensionY();
+    return 0;
+    //return _positionSettingsWidget->getDimensionY();
 }
 
 hdps::Vector3f SettingsWidget::getBaseColor()
@@ -89,20 +83,20 @@ hdps::Vector3f SettingsWidget::getSelectionColor()
 
 void SettingsWidget::initDimOptions(const unsigned int nDim)
 {
-    _positionSettingsWidget->setDimensions(nDim);
+    //_positionSettingsWidget->setDimensions(nDim);
 }
 
 void SettingsWidget::initDimOptions(const std::vector<QString>& dimNames)
 {
-    _positionSettingsWidget->setDimensions(dimNames.size(), dimNames);
+    //_positionSettingsWidget->setDimensions(dimNames.size(), dimNames);
 }
 
 void SettingsWidget::initScalarDimOptions(const unsigned int nDim)
 {
-    _colorSettingsWidget->setScalarDimensions(nDim);
+    //_colorSettingsWidget->setScalarDimensions(nDim);
 }
 
 void SettingsWidget::initScalarDimOptions(const std::vector<QString>& dimNames)
 {
-    _colorSettingsWidget->setScalarDimensions(dimNames.size(), dimNames);
+    //_colorSettingsWidget->setScalarDimensions(dimNames.size(), dimNames);
 }
