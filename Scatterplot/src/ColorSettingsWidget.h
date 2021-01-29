@@ -4,8 +4,6 @@
 
 #include <QStackedWidget>
 
-class ScatterplotPlugin;
-
 class ColorByDimensionSettingsWidget;
 class ColorByDataSettingsWidget;
 
@@ -29,14 +27,13 @@ public:
 public:
     ColorSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
-    void initializeUI();
-    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
+protected:
+    void connectToPlugin() override;
 
 public:
     void setScalarDimensions(unsigned int numDimensions, const std::vector<QString>& names = std::vector<QString>());
 
 private:
-    ScatterplotPlugin*                  _scatterplotPlugin;
     QLabel*                             _colorByLabel;
     QComboBox*                          _colorByComboBox;
     StackedWidget*                      _stackedWidget;

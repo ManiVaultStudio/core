@@ -6,29 +6,20 @@
 
 using namespace hdps::gui;
 
-ColorByDimensionSettingsWidget::ColorByDimensionSettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::StatefulWidget(parent, "Color dimension"),
+ColorByDimensionSettingsWidget::ColorByDimensionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(state, parent),
     _colorDimensionComboBox(new QComboBox())
 {
-    initializeUI();
-}
-
-void ColorByDimensionSettingsWidget::initializeUI()
-{
     _colorDimensionComboBox->setToolTip("Pick color dimension to color point data");
-}
 
-void ColorByDimensionSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
-{
-}
-
-QLayout* ColorByDimensionSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
-{
     auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(4);
 
     layout->addWidget(_colorDimensionComboBox);
 
-    switch (state)
+    switch (_state)
     {
         case ResponsiveToolBar::WidgetState::Compact:
             _colorDimensionComboBox->setFixedWidth(80);
@@ -43,5 +34,9 @@ QLayout* ColorByDimensionSettingsWidget::getLayout(const ResponsiveToolBar::Widg
             break;
     }
 
-    return layout;
+    setLayout(layout);
+}
+
+void ColorByDimensionSettingsWidget::connectToPlugin()
+{
 }

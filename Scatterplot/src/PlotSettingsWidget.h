@@ -1,15 +1,13 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "ScatterplotSettingsWidget.h"
 
 #include <QStackedWidget>
-
-class ScatterplotPlugin;
 
 class PointSettingsWidget;
 class DensitySettingsWidget;
 
-class PlotSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class PlotSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
     class StackedWidget : public QStackedWidget {
@@ -24,19 +22,12 @@ public:
     };
     
 public:
-    PlotSettingsWidget(QWidget* parent = nullptr);
-
-    void initializeUI();
-    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
-
-    void setState(const hdps::gui::ResponsiveToolBar::WidgetState& state, const bool& forceUpdate = false) override;
+    PlotSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state);
-    QSize getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state);
+    void connectToPlugin() override;
 
 private:
-    ScatterplotPlugin*          _scatterplotPlugin;
     StackedWidget*              _stackedWidget;
     PointSettingsWidget*        _pointSettingsWidget;
     DensitySettingsWidget*      _densitySettingsWidget;

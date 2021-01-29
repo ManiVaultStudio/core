@@ -1,25 +1,20 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
-
-class ScatterplotPlugin;
+#include "ScatterplotSettingsWidget.h"
 
 class QComboBox;
 
-class ColorByDimensionSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class ColorByDimensionSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    ColorByDimensionSettingsWidget(QWidget* parent = nullptr);
-
-    void initializeUI();
-    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
+    ColorByDimensionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
     QComboBox* getColorDimensionComboBox() {
         return _colorDimensionComboBox;
     }
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state);
+    void connectToPlugin() override;
 
 private:
     QComboBox*  _colorDimensionComboBox;

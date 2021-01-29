@@ -1,30 +1,22 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
+#include "ScatterplotSettingsWidget.h"
 
 #include <QStackedWidget>
 
-class ScatterplotPlugin;
-
-class QPushButton;
 class QLabel;
 class QDoubleSpinBox;
 class QSlider;
 
-class PointSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class PointSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    PointSettingsWidget(QWidget* parent = nullptr);
-
-    void initializeUI();
-    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
+    PointSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state);
-    QSize getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state);
+    void connectToPlugin() override;
 
 private:
-    ScatterplotPlugin*  _scatterplotPlugin;
     QLabel*             _sizeLabel;
     QDoubleSpinBox*     _sizeDoubleSpinBox;
     QSlider*            _sizeSlider;

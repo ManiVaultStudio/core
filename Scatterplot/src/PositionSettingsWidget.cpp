@@ -15,11 +15,6 @@ PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveToolBa
     _yDimensionLabel(new QLabel()),
     _yDimensionComboBox(new QComboBox())
 {
-    initializeUI();
-}
-
-void PositionSettingsWidget::initializeUI()
-{
     const auto xDimensionToolTipText = "X dimension";
 
     _xDimensionLabel->setToolTip(xDimensionToolTipText);
@@ -92,8 +87,9 @@ void PositionSettingsWidget::initializeUI()
     setLayout(stateLayout);
 }
 
-void PositionSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
+void PositionSettingsWidget::connectToPlugin()
 {
+    /*
     _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
 
     QObject::connect(_xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
@@ -103,22 +99,6 @@ void PositionSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugi
     QObject::connect(_yDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [&plugin](int index) {
         const_cast<ScatterplotPlugin&>(plugin).yDimPicked(index);
     });
-
-    /*
-    QObject::connect(_ui->colorOptionsComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        switch (index)
-        {
-            case 0:
-                _ui->colorDimensionStackedWidget->setCurrentIndex(0);
-                break;
-
-            case 1:
-                _ui->colorDimensionStackedWidget->setCurrentIndex(1);
-                break;
-        }
-    });
-    
-    _ui->colorDimensionStackedWidget->initialize(plugin);
     */
 }
 

@@ -2,9 +2,7 @@
 #include "ScatterplotPlugin.h"
 
 #include "RenderModeWidget.h"
-/*
 #include "PlotSettingsWidget.h"
-*/
 #include "PositionSettingsWidget.h"
 #include "ColorSettingsWidget.h"
 #include "SubsetSettingsWidget.h"
@@ -46,11 +44,11 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _responsiveToolBar->addWidget<RenderModeWidget>("Render mode", fontAwesome.getIcon("toggle-on"), 10);
+    _responsiveToolBar->addWidget<PlotSettingsWidget>("Plot", fontAwesome.getIcon("cogs"), 250);
     _responsiveToolBar->addWidget<PositionSettingsWidget>("Position", fontAwesome.getIcon("ruler-combined"), 250);
     _responsiveToolBar->addWidget<ColorSettingsWidget>("Color", fontAwesome.getIcon("palette"), 250);
     _responsiveToolBar->addWidget<SubsetSettingsWidget>("Color", fontAwesome.getIcon("crop"), 50);
     _responsiveToolBar->addWidget<SelectionSettingsWidget>("Selection", fontAwesome.getIcon("mouse-pointer"), 5);
-    //_responsiveToolBar->addSection(_plotSettingsWidget, fontAwesome.getIcon("cogs"));
 
     //setEnabled(false);
 

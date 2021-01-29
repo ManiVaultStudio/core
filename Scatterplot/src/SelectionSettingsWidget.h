@@ -2,7 +2,6 @@
 
 #include "ScatterplotSettingsWidget.h"
 
-class ScatterplotPlugin;
 class PixelSelectionTool;
 
 class QHBoxLayout;
@@ -18,8 +17,8 @@ class SelectionSettingsWidget : public ScatterplotSettingsWidget
 public:
     SelectionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
-    void initializeUI();
-    void connectToPlugin();
+protected:
+    void connectToPlugin() override;
 
 private:
     QLabel*                         _typeLabel;

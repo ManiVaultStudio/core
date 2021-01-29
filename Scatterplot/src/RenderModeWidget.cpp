@@ -13,11 +13,6 @@ RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetSta
     _densityPlotPushButton(new QPushButton(this)),
     _contourPlotPushButton(new QPushButton(this))
 {
-    initializeUI();
-}
-
-void RenderModeWidget::initializeUI()
-{
     _scatterPlotPushButton->setCheckable(true);
     _densityPlotPushButton->setCheckable(true);
     _contourPlotPushButton->setCheckable(true);
@@ -91,7 +86,7 @@ void RenderModeWidget::initializeUI()
     setLayout(layout);
 }
 
-void RenderModeWidget::connect()
+void RenderModeWidget::connectToPlugin()
 {
     auto scatterPlotWidget = scatterplotPlugin->getScatterplotWidget();
 
@@ -103,22 +98,22 @@ void RenderModeWidget::connect()
         _contourPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::LANDSCAPE);
     };
 
-    QObject::connect(_scatterPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_scatterPlotPushButton, &QPushButton::clicked, this, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
         updateToggles();
     });
 
-    QObject::connect(_densityPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_densityPlotPushButton, &QPushButton::clicked, this, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
         updateToggles();
     });
 
-    QObject::connect(_contourPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_contourPlotPushButton, &QPushButton::clicked, this, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
         updateToggles();
     });
 
-    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, [this, updateToggles](const ScatterplotWidget::RenderMode& renderMode) {
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateToggles](const ScatterplotWidget::RenderMode& renderMode) {
         updateToggles();
     });
 

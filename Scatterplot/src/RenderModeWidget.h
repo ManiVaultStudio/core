@@ -2,8 +2,6 @@
 
 #include "ScatterplotSettingsWidget.h"
 
-class ScatterplotPlugin;
-
 class QPushButton;
 
 class RenderModeWidget : public ScatterplotSettingsWidget
@@ -12,8 +10,7 @@ public:
     RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
 protected:
-    void initializeUI() override;
-    void connect() override;
+    void connectToPlugin() override;
 
 private:
     QPushButton*    _scatterPlotPushButton;

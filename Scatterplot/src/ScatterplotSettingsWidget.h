@@ -17,11 +17,10 @@ protected:
     ScatterplotSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
 public:
-    static ScatterplotSettingsWidget* get();
+    void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin);
 
 protected:
-    virtual void initializeUI() {};
-    virtual void connect() {};
+    virtual void connectToPlugin() = 0;
 
 protected:
     hdps::gui::ResponsiveToolBar::WidgetState   _state;

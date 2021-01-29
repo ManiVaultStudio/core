@@ -7,15 +7,10 @@
 
 using namespace hdps::gui;
 
-ColorByDataSettingsWidget::ColorByDataSettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::StatefulWidget(parent, "Color dimension"),
+ColorByDataSettingsWidget::ColorByDataSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(state, parent),
     _colorDataLineEdit(new QLineEdit()),
     _removeColorDataPushButton(new QPushButton())
-{
-    initializeUI();
-}
-
-void ColorByDataSettingsWidget::initializeUI()
 {
     _colorDataLineEdit->setToolTip("Name of the assigned color data set");
     _colorDataLineEdit->setEnabled(false);
@@ -25,15 +20,11 @@ void ColorByDataSettingsWidget::initializeUI()
 
     _removeColorDataPushButton->setToolTip("Removed assigned color data");
     _removeColorDataPushButton->setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
-}
 
-void ColorByDataSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
-{
-}
-
-QLayout* ColorByDataSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
-{
     auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(4);
 
     layout->addWidget(_colorDataLineEdit);
     layout->addWidget(_removeColorDataPushButton);
@@ -53,5 +44,9 @@ QLayout* ColorByDataSettingsWidget::getLayout(const ResponsiveToolBar::WidgetSta
             break;
     }
 
-    return layout;
+    setLayout(layout);
+}
+
+void ColorByDataSettingsWidget::connectToPlugin()
+{
 }

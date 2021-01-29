@@ -1,22 +1,17 @@
 #pragma once
 
-#include "widgets/ResponsiveToolBar.h"
-
-class ScatterplotPlugin;
+#include "ScatterplotSettingsWidget.h"
 
 class QLineEdit;
 class QPushButton;
 
-class ColorByDataSettingsWidget : public hdps::gui::ResponsiveToolBar::StatefulWidget
+class ColorByDataSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    ColorByDataSettingsWidget(QWidget* parent = nullptr);
-
-    void initializeUI();
-    void setScatterPlotPlugin(const ScatterplotPlugin& plugin);
+    ColorByDataSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
 
 protected:
-    QLayout* getLayout(const hdps::gui::ResponsiveToolBar::WidgetState& state);
+    void connectToPlugin() override;
 
 private:
     QLineEdit*      _colorDataLineEdit;

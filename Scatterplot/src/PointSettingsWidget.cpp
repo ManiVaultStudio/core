@@ -11,9 +11,8 @@
 
 using namespace hdps::gui;
 
-PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::StatefulWidget(parent, "Point"),
-    _scatterplotPlugin(nullptr),
+PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(state, parent),
     _sizeLabel(new QLabel()),
     _sizeDoubleSpinBox(new QDoubleSpinBox()),
     _sizeSlider(new QSlider()),
@@ -21,13 +20,8 @@ PointSettingsWidget::PointSettingsWidget(QWidget* parent /*= nullptr*/) :
     _opacityDoubleSpinBox(new QDoubleSpinBox()),
     _opacitySlider(new QSlider())
 {
-    initializeUI();
-}
-
-void PointSettingsWidget::initializeUI()
-{
     _sizeLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-    
+
     _sizeDoubleSpinBox->setMinimum(1.0);
     _sizeDoubleSpinBox->setMaximum(20.0);
     _sizeDoubleSpinBox->setDecimals(1);
@@ -47,12 +41,67 @@ void PointSettingsWidget::initializeUI()
     _opacitySlider->setOrientation(Qt::Horizontal);
     _opacitySlider->setMinimum(1);
     _opacitySlider->setMaximum(100);
+
+    QLayout* stateLayout = nullptr;
+
+    switch (_state)
+    {
+        case ResponsiveToolBar::WidgetState::Popup:
+        {
+            auto layout = new QGridLayout();
+
+            layout->addWidget(_sizeLabel, 0, 0);
+            layout->addWidget(_sizeDoubleSpinBox, 0, 1);
+            layout->addWidget(_sizeSlider, 0, 2);
+
+            layout->addWidget(_opacityLabel, 1, 0);
+            layout->addWidget(_opacityDoubleSpinBox, 1, 1);
+            layout->addWidget(_opacitySlider, 1, 2);
+
+            stateLayout = layout;
+
+            break;
+        }
+
+        case ResponsiveToolBar::WidgetState::Compact:
+        case ResponsiveToolBar::WidgetState::Full:
+        {
+            auto layout = new QHBoxLayout();
+
+            layout->addWidget(_sizeLabel);
+            layout->addWidget(_sizeDoubleSpinBox);
+            layout->addWidget(_sizeSlider);
+
+            layout->addWidget(_opacityLabel);
+            layout->addWidget(_opacityDoubleSpinBox);
+            layout->addWidget(_opacitySlider);
+
+            stateLayout = layout;
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    _sizeLabel->setText(_state == ResponsiveToolBar::WidgetState::Full ? "Point size:" : "Size:");
+    _opacityLabel->setText(_state == ResponsiveToolBar::WidgetState::Full ? "Point opacity:" : "Opacity:");
+
+    _sizeSlider->setFixedWidth(_state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
+    _opacitySlider->setFixedWidth(_state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
+
+    _sizeDoubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    _opacityDoubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+
+    stateLayout->setMargin(0);
+    stateLayout->setSpacing(4);
+
+    setLayout(stateLayout);
 }
 
-void PointSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
+void PointSettingsWidget::connectToPlugin()
 {
-    _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
-
     const auto setSizeTooltip = [this](const float& pointSize) {
         const auto toolTip = QString("Point size: %1").arg(QString::number(pointSize, 'f', 1));
 
@@ -67,7 +116,7 @@ void PointSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
         _opacitySlider->setToolTip(toolTip);
     };
 
-    auto scatterPlotWidget = _scatterplotPlugin->getScatterplotWidget();
+    auto scatterPlotWidget = scatterplotPlugin->getScatterplotWidget();
 
     connect(_sizeSlider, &QSlider::valueChanged, [this, scatterPlotWidget, setSizeTooltip](int value) {
         const auto pointSize = static_cast<float>(value) / 1000.0f;
@@ -119,73 +168,4 @@ void PointSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
 
     _sizeDoubleSpinBox->setValue(5.0);
     _opacityDoubleSpinBox->setValue(50.0);
-}
-
-QLayout* PointSettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
-{
-    QLayout* stateLayout = nullptr;
-
-    switch (state)
-    {
-        case ResponsiveToolBar::WidgetState::Popup:
-        {
-            auto layout = new QGridLayout();
-
-            layout->addWidget(_sizeLabel, 0, 0);
-            layout->addWidget(_sizeDoubleSpinBox, 0, 1);
-            layout->addWidget(_sizeSlider, 0, 2);
-
-            layout->addWidget(_opacityLabel, 1, 0);
-            layout->addWidget(_opacityDoubleSpinBox, 1, 1);
-            layout->addWidget(_opacitySlider, 1, 2);
-
-            stateLayout = layout;
-
-            break;
-        }
-
-        case ResponsiveToolBar::WidgetState::Compact:
-        case ResponsiveToolBar::WidgetState::Full:
-        {
-            auto layout = new QHBoxLayout();
-
-            layout->addWidget(_sizeLabel);
-            layout->addWidget(_sizeDoubleSpinBox);
-            layout->addWidget(_sizeSlider);
-
-            layout->addWidget(_opacityLabel);
-            layout->addWidget(_opacityDoubleSpinBox);
-            layout->addWidget(_opacitySlider);
-
-            stateLayout = layout;
-
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    /*
-    _sizeLabel->setText(state == ResponsiveToolBar::WidgetState::Full ? "Point size:" : "Size:");
-    _opacityLabel->setText(state == ResponsiveToolBar::WidgetState::Full ? "Point opacity:" : "Opacity:");
-
-    _sizeSlider->setFixedWidth(state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
-    _opacitySlider->setFixedWidth(state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
-
-    _sizeDoubleSpinBox->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
-    _opacityDoubleSpinBox->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
-    */
-
-    return stateLayout;
-}
-
-QSize PointSettingsWidget::getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state)
-{
-    auto pointSettingsWidget = QSharedPointer<PointSettingsWidget>::create();
-
-    pointSettingsWidget->setScatterPlotPlugin(*_scatterplotPlugin);
-    pointSettingsWidget->setState(state);
-
-    return pointSettingsWidget->sizeHint();
 }

@@ -12,11 +12,6 @@ SubsetSettingsWidget::SubsetSettingsWidget(const hdps::gui::ResponsiveToolBar::W
     _createSubsetPushButton(new QPushButton()),
     _fromSourceCheckBox(new QCheckBox())
 {
-    initializeUI();
-}
-
-void SubsetSettingsWidget::initializeUI()
-{
     _createSubsetPushButton->setToolTip("Create a subset from the selected data points");
 
     _fromSourceCheckBox->setToolTip("Create a subset from source or derived data");
@@ -50,8 +45,9 @@ void SubsetSettingsWidget::initializeUI()
     setLayout(layout);
 }
 
-void SubsetSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
+void SubsetSettingsWidget::connectToPlugin()
 {
+    /*
     auto& scatterplotPlugin = const_cast<ScatterplotPlugin&>(plugin);
     auto scatterPlotWidget  = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
 
@@ -70,4 +66,5 @@ void SubsetSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
     });
 
     updateUI();
+    */
 }

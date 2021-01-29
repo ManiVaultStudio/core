@@ -15,13 +15,8 @@ ColorSettingsWidget::ColorSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
     _colorByLabel(new QLabel()),
     _colorByComboBox(new QComboBox()),
     _stackedWidget(new StackedWidget()),
-    _colorByDimensionSettingsWidget(new ColorByDimensionSettingsWidget()),
-    _colorByDataSettingsWidget(new ColorByDataSettingsWidget())
-{
-    initializeUI();
-}
-
-void ColorSettingsWidget::initializeUI()
+    _colorByDimensionSettingsWidget(new ColorByDimensionSettingsWidget(state)),
+    _colorByDataSettingsWidget(new ColorByDataSettingsWidget(state))
 {
     _colorByLabel->setToolTip("Color by");
     _colorByLabel->setText("Color by:");
@@ -46,7 +41,7 @@ void ColorSettingsWidget::initializeUI()
     setLayout(layout);
 }
 
-void ColorSettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
+void ColorSettingsWidget::connectToPlugin()
 {
     /*
     _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);

@@ -1,5 +1,6 @@
 #include "ScatterplotPlugin.h"
 
+#include "ScatterplotSettingsWidget.h"
 #include "SettingsWidget.h"
 #include "PointData.h"
 #include "ClusterData.h"
@@ -27,9 +28,13 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
-    _settingsWidget(new SettingsWidget(*this))
+    _settingsWidget()
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
+
+    ScatterplotSettingsWidget::scatterplotPlugin = this;
+
+    _settingsWidget = new SettingsWidget(*this);
 }
 
 // =============================================================================

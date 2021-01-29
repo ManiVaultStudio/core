@@ -6,6 +6,13 @@ ScatterplotSettingsWidget::ScatterplotSettingsWidget(const hdps::gui::Responsive
     QWidget(parent),
     _state(state)
 {
-    initializeUI();
-    connect();
+}
+
+void ScatterplotSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
+{
+    Q_ASSERT(scatterplotPlugin != nullptr);
+
+    scatterplotPlugin = scatterplotPlugin;
+
+    connectToPlugin();
 }

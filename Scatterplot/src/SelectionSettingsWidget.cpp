@@ -34,12 +34,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveTool
     _invertSelectionPushButton(new QPushButton("Invert")),
     _notifyDuringSelectionCheckBox(new QCheckBox("Notify during selection")),
     _additionalSettingsPopupPushButton(new PopupPushButton())
-{
-    initializeUI();
-}
-
-void SelectionSettingsWidget::initializeUI()
-{  
+{ 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _typeLabel->hide();

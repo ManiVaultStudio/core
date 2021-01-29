@@ -10,17 +10,11 @@
 
 using namespace hdps::gui;
 
-DensitySettingsWidget::DensitySettingsWidget(QWidget* parent /*= nullptr*/) :
-    ResponsiveToolBar::StatefulWidget(parent, "Density"),
-    _scatterplotPlugin(nullptr),
+DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(state, parent),
     _label(new QLabel("Sigma")),
     _doubleSpinBox(new QDoubleSpinBox()),
     _slider(new QSlider())
-{
-    initializeUI();
-}
-
-void DensitySettingsWidget::initializeUI()
 {
     _doubleSpinBox->setMinimum(1.0);
     _doubleSpinBox->setMaximum(50.0);
@@ -29,13 +23,24 @@ void DensitySettingsWidget::initializeUI()
     _slider->setOrientation(Qt::Horizontal);
     _slider->setMinimum(1);
     _slider->setMaximum(50);
+
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(4);
+
+    layout->addWidget(_label);
+    layout->addWidget(_doubleSpinBox);
+    layout->addWidget(_slider);
+
+    _doubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+
+    setLayout(layout);
 }
 
-void DensitySettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin)
+void DensitySettingsWidget::connectToPlugin()
 {
-    _scatterplotPlugin = &const_cast<ScatterplotPlugin&>(plugin);
-
-    auto scatterPlotWidget = const_cast<ScatterplotPlugin&>(plugin).getScatterplotWidget();
+    auto scatterPlotWidget = scatterplotPlugin->getScatterplotWidget();
 
     const auto setTooltip = [this](const float& sigma) {
         const auto toolTip = QString("Sigma: %1").arg(QString::number(sigma, 'f', 1));
@@ -68,43 +73,15 @@ void DensitySettingsWidget::setScatterPlotPlugin(const ScatterplotPlugin& plugin
         setTooltip(sigma);
     });
 
-    QObject::connect(scatterPlotWidget, &ScatterplotWidget::densityComputationStarted, [this]() {
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::densityComputationStarted, this, [this]() {
         setEnabled(false);
     });
 
-    QObject::connect(scatterPlotWidget, &ScatterplotWidget::densityComputationEnded, [this]() {
+    QObject::connect(scatterPlotWidget, &ScatterplotWidget::densityComputationEnded, this, [this]() {
         setEnabled(true);
     });
 
     setEnabled(false);
 
     _doubleSpinBox->setValue(30.0);
-
-    const_cast<ScatterplotPlugin&>(plugin).installEventFilter(this);
-}
-
-QLayout* DensitySettingsWidget::getLayout(const ResponsiveToolBar::WidgetState& state)
-{
-    auto layout = new QHBoxLayout();
-
-    /*
-    layout->addWidget(_label);
-    layout->addWidget(_doubleSpinBox);
-    layout->addWidget(_slider);
-
-    _doubleSpinBox->setVisible(state != ResponsiveToolBar::WidgetState::Compact);
-    _slider->setFixedWidth(state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
-    */
-
-    return layout;
-}
-
-QSize DensitySettingsWidget::getSizeHint(const hdps::gui::ResponsiveToolBar::WidgetState& state)
-{
-    auto densitySettingsWidget = QSharedPointer<DensitySettingsWidget>::create();
-
-    densitySettingsWidget->setScatterPlotPlugin(*_scatterplotPlugin);
-    densitySettingsWidget->setState(state);
-
-    return densitySettingsWidget->sizeHint();
 }
