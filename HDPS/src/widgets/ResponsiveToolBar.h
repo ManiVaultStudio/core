@@ -89,6 +89,10 @@ public:
             return _name;
         }
 
+        WidgetState getState() const {
+            return _state;
+        }
+
         void setState(const WidgetState& state) {
             if (state == _state)
                 return;
@@ -239,6 +243,30 @@ public:
         QList<QSize>                        _stateSizeHints;
     };
 
+    class Spacer : public QWidget {
+    public:
+        enum class Type {
+            Divider,
+            Spacer
+        };
+
+    public:
+        Spacer(const Type& type = Type::Divider);
+
+        void setType(const Type& type);
+
+        static std::int32_t getWidth(const Type& type);
+
+        static Type getType(const WidgetState& stateBefore, const WidgetState& stateAfter);
+
+        static Type getType(const SectionWidget* sectionBefore, const SectionWidget* sectionAfter);
+
+    protected:
+        Type            _type;
+        QHBoxLayout*    _layout;
+        QFrame*         _verticalLine;
+    };
+
 public:
     ResponsiveToolBar(QWidget* parent = nullptr);
 
@@ -258,24 +286,28 @@ public:
         sectionWidget->setInitializeWidgetFunction(initializeWidgetFn);
         sectionWidget->installEventFilter(this);
 
-        _sectionWidgets << sectionWidget;
+        _sections << sectionWidget;
 
-        _layout->addWidget(sectionWidget, 1, _sectionWidgets.count());
-    }
+        if (_sections.count() >= 2) {
+            auto spacer = new Spacer();
 
-    void addWidget(QWidget* widget)
-    {
-        _layout->addWidget(widget, 1, _sectionWidgets.count());
+            _spacers << spacer;
+
+            _layout->addWidget(spacer);
+        }
+        
+        _layout->addWidget(sectionWidget);
     }
 
 private:
     void computeLayout(QWidget* resizedWidget = nullptr);
 
 private:
-    QWidget*                        _listenWidget;
-    QGridLayout*                    _layout;
-    QVector<SectionWidget*>         _sectionWidgets;
-    std::int32_t                    _modified;
+    QWidget*                    _listenWidget;
+    QHBoxLayout*                _layout;
+    QVector<SectionWidget*>     _sections;
+    QVector<Spacer*>            _spacers;
+    std::int32_t                _modified;
 
 public:
     static const std::int32_t LAYOUT_MARGIN;
