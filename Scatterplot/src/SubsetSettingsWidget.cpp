@@ -7,7 +7,7 @@
 
 using namespace hdps::gui;
 
-SubsetSettingsWidget::SubsetSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+SubsetSettingsWidget::SubsetSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _createSubsetPushButton(new QPushButton()),
     _fromSourceCheckBox(new QCheckBox())
@@ -21,15 +21,15 @@ SubsetSettingsWidget::SubsetSettingsWidget(const hdps::gui::ResponsiveToolBar::W
 
     switch (_state)
     {
-        case ResponsiveToolBar::WidgetState::Popup:
+        case ResponsiveSectionWidget::State::Popup:
             _createSubsetPushButton->setText("Create");
             _fromSourceCheckBox->setText("From source dataset");
             break;
 
-        case ResponsiveToolBar::WidgetState::Compact:
-        case ResponsiveToolBar::WidgetState::Full:
+        case ResponsiveSectionWidget::State::Compact:
+        case ResponsiveSectionWidget::State::Full:
             _createSubsetPushButton->setText("Create subset");
-            _fromSourceCheckBox->setText(_state == ResponsiveToolBar::WidgetState::Compact ? "Source" : "From source");
+            _fromSourceCheckBox->setText(_state == ResponsiveSectionWidget::State::Compact ? "Source" : "From source");
             break;
 
         default:

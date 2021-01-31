@@ -8,7 +8,7 @@ class QComboBox;
 class PositionSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    PositionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
+    PositionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
 
     void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 

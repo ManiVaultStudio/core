@@ -15,7 +15,7 @@ class QCheckBox;
 class SelectionSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    SelectionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
+    SelectionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
 
     void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 

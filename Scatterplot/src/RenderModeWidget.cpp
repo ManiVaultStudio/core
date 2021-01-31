@@ -7,7 +7,7 @@
 
 using namespace hdps::gui;
 
-RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _scatterPlotPushButton(new QPushButton(this)),
     _densityPlotPushButton(new QPushButton(this)),
@@ -27,7 +27,7 @@ RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetSta
 
     switch (_state)
     {
-        case ResponsiveToolBar::WidgetState::Popup:
+        case ResponsiveSectionWidget::State::Popup:
         {
             layout = new QVBoxLayout();
 
@@ -42,7 +42,7 @@ RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetSta
             break;
         }
 
-        case ResponsiveToolBar::WidgetState::Compact:
+        case ResponsiveSectionWidget::State::Compact:
         {
             layout = new QHBoxLayout();
 
@@ -57,7 +57,7 @@ RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveToolBar::WidgetSta
             break;
         }
 
-        case ResponsiveToolBar::WidgetState::Full:
+        case ResponsiveSectionWidget::State::Full:
         {
             layout = new QHBoxLayout();
 

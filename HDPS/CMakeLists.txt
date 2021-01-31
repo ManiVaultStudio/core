@@ -78,6 +78,7 @@ set( WIDGET_HEADERS
     src/widgets/SettingsWidget.h
     src/widgets/PopupWidget.h
     src/widgets/PopupPushButton.h
+    src/widgets/ResponsiveSection.h
     src/widgets/ResponsiveToolBar.h
     src/widgets/WidgetState.h
 )
@@ -94,6 +95,7 @@ set( WIDGET_SOURCES
 	src/widgets/SettingsWidget.cpp
 	src/widgets/PopupWidget.cpp
 	src/widgets/PopupPushButton.cpp
+	src/widgets/ResponsiveSection.cpp
 	src/widgets/ResponsiveToolBar.cpp
 	src/widgets/WidgetState.cpp
 )

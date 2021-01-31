@@ -8,7 +8,7 @@
 
 using namespace hdps::gui;
 
-PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _xDimensionLabel(new QLabel()),
     _xDimensionComboBox(new QComboBox()),
@@ -29,7 +29,7 @@ PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveToolBa
 
     switch (_state)
     {
-        case ResponsiveToolBar::WidgetState::Popup:
+        case ResponsiveSectionWidget::State::Popup:
         {
             auto layout = new QGridLayout();
 
@@ -42,8 +42,8 @@ PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveToolBa
             break;
         }
 
-        case ResponsiveToolBar::WidgetState::Compact:
-        case ResponsiveToolBar::WidgetState::Full:
+        case ResponsiveSectionWidget::State::Compact:
+        case ResponsiveSectionWidget::State::Full:
         {
             auto layout = new QHBoxLayout();
 
@@ -62,15 +62,15 @@ PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveToolBa
 
     switch (_state)
     {
-        case ResponsiveToolBar::WidgetState::Compact:
+        case ResponsiveSectionWidget::State::Compact:
             _xDimensionLabel->setText("X:");
             _yDimensionLabel->setText("Y:");
             _xDimensionComboBox->setFixedWidth(80);
             _yDimensionComboBox->setFixedWidth(80);
             break;
 
-        case ResponsiveToolBar::WidgetState::Popup:
-        case ResponsiveToolBar::WidgetState::Full:
+        case ResponsiveSectionWidget::State::Popup:
+        case ResponsiveSectionWidget::State::Full:
             _xDimensionLabel->setText("X dimension:");
             _yDimensionLabel->setText("Y dimension:");
             _xDimensionComboBox->setFixedWidth(120);

@@ -8,7 +8,7 @@ class QCheckBox;
 class SubsetSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    SubsetSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
+    SubsetSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
 
     void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 

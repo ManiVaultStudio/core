@@ -10,7 +10,7 @@
 
 using namespace hdps::gui;
 
-ColorSettingsWidget::ColorSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+ColorSettingsWidget::ColorSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _colorByLabel(new QLabel()),
     _colorByComboBox(new QComboBox()),

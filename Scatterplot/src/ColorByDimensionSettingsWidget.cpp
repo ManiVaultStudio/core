@@ -6,7 +6,7 @@
 
 using namespace hdps::gui;
 
-ColorByDimensionSettingsWidget::ColorByDimensionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+ColorByDimensionSettingsWidget::ColorByDimensionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _colorDimensionComboBox(new QComboBox())
 {
@@ -21,12 +21,12 @@ ColorByDimensionSettingsWidget::ColorByDimensionSettingsWidget(const hdps::gui::
 
     switch (_state)
     {
-        case ResponsiveToolBar::WidgetState::Compact:
+        case ResponsiveSectionWidget::State::Compact:
             _colorDimensionComboBox->setFixedWidth(80);
             break;
 
-        case ResponsiveToolBar::WidgetState::Popup:
-        case ResponsiveToolBar::WidgetState::Full:
+        case ResponsiveSectionWidget::State::Popup:
+        case ResponsiveSectionWidget::State::Full:
             _colorDimensionComboBox->setFixedWidth(120);
             break;
 

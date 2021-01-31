@@ -5,7 +5,7 @@
 
 using namespace hdps::gui;
 
-PlotSettingsWidget::PlotSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+PlotSettingsWidget::PlotSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _stackedWidget(new StackedWidget()),
     _pointSettingsWidget(new PointSettingsWidget(state, this)),

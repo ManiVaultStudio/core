@@ -11,7 +11,7 @@
 
 using namespace hdps::gui;
 
-PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _sizeLabel(new QLabel()),
     _sizeDoubleSpinBox(new QDoubleSpinBox()),
@@ -46,7 +46,7 @@ PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
 
     switch (_state)
     {
-        case ResponsiveToolBar::WidgetState::Popup:
+        case ResponsiveSectionWidget::State::Popup:
         {
             auto layout = new QGridLayout();
 
@@ -63,8 +63,8 @@ PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
             break;
         }
 
-        case ResponsiveToolBar::WidgetState::Compact:
-        case ResponsiveToolBar::WidgetState::Full:
+        case ResponsiveSectionWidget::State::Compact:
+        case ResponsiveSectionWidget::State::Full:
         {
             auto layout = new QHBoxLayout();
 
@@ -86,15 +86,15 @@ PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveToolBar::Wid
     }
 
     
-    _sizeLabel->setText(_state == ResponsiveToolBar::WidgetState::Full ? "Point size:" : "Size:");
-    _opacityLabel->setText(_state == ResponsiveToolBar::WidgetState::Full ? "Point opacity:" : "Opacity:");
+    _sizeLabel->setText(_state == ResponsiveSectionWidget::State::Full ? "Point size:" : "Size:");
+    _opacityLabel->setText(_state == ResponsiveSectionWidget::State::Full ? "Point opacity:" : "Opacity:");
     
-    _sizeSlider->setFixedWidth(_state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
-    _opacitySlider->setFixedWidth(_state == ResponsiveToolBar::WidgetState::Compact ? 50 : 80);
+    _sizeSlider->setFixedWidth(_state == ResponsiveSectionWidget::State::Compact ? 50 : 80);
+    _opacitySlider->setFixedWidth(_state == ResponsiveSectionWidget::State::Compact ? 50 : 80);
     
     /*
-    _sizeDoubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
-    _opacityDoubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    _sizeDoubleSpinBox->setVisible(_state != ResponsiveSectionWidget::State::Compact);
+    _opacityDoubleSpinBox->setVisible(_state != ResponsiveSectionWidget::State::Compact);
     */
 
     stateLayout->setMargin(0);

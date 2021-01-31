@@ -9,7 +9,7 @@ class QSlider;
 class DensitySettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    DensitySettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
+    DensitySettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
 
     void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 

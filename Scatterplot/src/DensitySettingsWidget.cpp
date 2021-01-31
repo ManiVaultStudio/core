@@ -10,7 +10,7 @@
 
 using namespace hdps::gui;
 
-DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _label(new QLabel("Sigma")),
     _doubleSpinBox(new QDoubleSpinBox()),
@@ -33,7 +33,7 @@ DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveToolBar:
     layout->addWidget(_doubleSpinBox);
     layout->addWidget(_slider);
 
-    //_doubleSpinBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    //_doubleSpinBox->setVisible(_state != ResponsiveSectionWidget::State::Compact);
 
     setLayout(layout);
 }

@@ -14,13 +14,13 @@ public:
     using SizeHints = QList<QSize>;
 
 protected:
-    ScatterplotSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent = nullptr);
+    ScatterplotSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
 
 public:
     virtual void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) = 0;
 
 protected:
-    hdps::gui::ResponsiveToolBar::WidgetState   _state;
+    hdps::gui::ResponsiveSectionWidget::State   _state;
     ScatterplotPlugin*                          _scatterplotPlugin;
 
     friend class ScatterplotPlugin;

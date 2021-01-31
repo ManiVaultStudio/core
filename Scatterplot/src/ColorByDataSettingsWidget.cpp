@@ -7,7 +7,7 @@
 
 using namespace hdps::gui;
 
-ColorByDataSettingsWidget::ColorByDataSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+ColorByDataSettingsWidget::ColorByDataSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _colorDataLineEdit(new QLineEdit()),
     _removeColorDataPushButton(new QPushButton())
@@ -31,12 +31,12 @@ ColorByDataSettingsWidget::ColorByDataSettingsWidget(const hdps::gui::Responsive
 
     switch (state)
     {
-        case ResponsiveToolBar::WidgetState::Compact:
+        case ResponsiveSectionWidget::State::Compact:
             _colorDataLineEdit->setFixedWidth(80);
             break;
 
-        case ResponsiveToolBar::WidgetState::Popup:
-        case ResponsiveToolBar::WidgetState::Full:
+        case ResponsiveSectionWidget::State::Popup:
+        case ResponsiveSectionWidget::State::Full:
             _colorDataLineEdit->setFixedWidth(120);
             break;
 

@@ -13,7 +13,7 @@
 
 using namespace hdps::gui;
 
-SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveToolBar::WidgetState& state, QWidget* parent /*= nullptr*/) :
+SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
     ScatterplotSettingsWidget(state, parent),
     _typeLabel(new QLabel("Type:")),
     _typeLayout(new QHBoxLayout()),
@@ -112,7 +112,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveTool
 
     switch (_state)
     {
-        case ResponsiveToolBar::WidgetState::Popup:
+        case ResponsiveSectionWidget::State::Popup:
         {
             auto layout = new QGridLayout();
 
@@ -128,7 +128,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveTool
             break;
         }
 
-        case ResponsiveToolBar::WidgetState::Compact:
+        case ResponsiveSectionWidget::State::Compact:
         {
             auto layout = new QHBoxLayout();
 
@@ -139,7 +139,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveTool
             break;
         }
 
-        case ResponsiveToolBar::WidgetState::Full:
+        case ResponsiveSectionWidget::State::Full:
         {
             auto layout = new QHBoxLayout();
 
@@ -162,12 +162,12 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveTool
     
     /*
     _typeWidget->setVisible(true);
-    _typeLabel->setVisible(_state == ResponsiveToolBar::WidgetState::Popup);
-    _radiusLabel->setVisible(_state == ResponsiveToolBar::WidgetState::Popup);
-    _radiusWidget->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
-    //_selectLabel->setVisible(_state != ResponsiveToolBar::WidgetState::Popup);
-    //_selectWidget->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
-    _notifyDuringSelectionCheckBox->setVisible(_state != ResponsiveToolBar::WidgetState::Compact);
+    _typeLabel->setVisible(_state == ResponsiveSectionWidget::State::Popup);
+    _radiusLabel->setVisible(_state == ResponsiveSectionWidget::State::Popup);
+    _radiusWidget->setVisible(_state != ResponsiveSectionWidget::State::Compact);
+    //_selectLabel->setVisible(_state != ResponsiveSectionWidget::State::Popup);
+    //_selectWidget->setVisible(_state != ResponsiveSectionWidget::State::Compact);
+    _notifyDuringSelectionCheckBox->setVisible(_state != ResponsiveSectionWidget::State::Compact);
     */
 
     setLayout(stateLayout);
