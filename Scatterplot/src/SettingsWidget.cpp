@@ -50,7 +50,7 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
         scatterplotSettingsWidget->setScatterplotPlugin(&const_cast<ScatterplotPlugin&>(plugin));
     };
 
-    _responsiveToolBar->addWidget<RenderModeWidget>(initializeWidgetFunction, "Render mode", fontAwesome.getIcon("toggle-on"), 10);
+    _responsiveToolBar->addWidget<RenderModeWidget>(initializeWidgetFunction, "Render mode", fontAwesome.getIcon("image"), 10);
     _responsiveToolBar->addWidget<PlotSettingsWidget>(initializeWidgetFunction, "Plot", fontAwesome.getIcon("cogs"), 250);
     _responsiveToolBar->addWidget<PositionSettingsWidget>(initializeWidgetFunction, "Position", fontAwesome.getIcon("ruler-combined"), 250);
     _responsiveToolBar->addWidget<ColorSettingsWidget>(initializeWidgetFunction, "Color", fontAwesome.getIcon("palette"), 250);

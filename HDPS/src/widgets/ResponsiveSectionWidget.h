@@ -3,14 +3,8 @@
 #include "PopupPushButton.h"
 
 #include <QWidget>
-#include <QEvent>
-#include <QDebug>
-#include <QHBoxLayout>
-#include <QPropertyAnimation>
-#include <QGraphicsOpacityEffect>
 
-class QFrame;
-class QGridLayout;
+class QHBoxLayout;
 
 namespace hdps {
 
@@ -31,9 +25,10 @@ public:
     using GetWidgetForStateFn = std::function<QWidget*(const State& state)>;
     using InitializeWidgetFn = std::function<void(QWidget* widget)>;
 
-public:
+protected:
     ResponsiveSectionWidget(GetWidgetForStateFn getWidgetStateFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0);
 
+public:
     bool eventFilter(QObject* object, QEvent* event);
 
     void setInitializeWidgetFunction(InitializeWidgetFn initializeWidgetFn);
@@ -68,15 +63,17 @@ private:
     void animateOpacity(QWidget* widget, const float& startOpacity, const float& endOpacity, const std::int32_t& duration, std::function<void()> finishedCallback = std::function<void()>());
 
 protected:
-    GetWidgetForStateFn                    _getWidgetStateFn;
+    GetWidgetForStateFn                 _getWidgetStateFn;
     InitializeWidgetFn                  _initializeWidgetFn;
-    State                         _state;
+    State                               _state;
     QString                             _name;
     std::int32_t                        _priority;
     QHBoxLayout*                        _layout;
     QSharedPointer<PopupPushButton>     _popupPushButton;
     QSharedPointer<QWidget>             _stateWidget;
     QList<QSize>                        _stateSizeHints;
+
+    friend class ResponsiveToolBar;
 };
 
 }

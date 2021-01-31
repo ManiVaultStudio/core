@@ -54,7 +54,6 @@ void SubsetSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPl
     const auto updateUI = [this, scatterPlotWidget]() {
         const auto isScatterPlot = scatterPlotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT;
         setEnabled(isScatterPlot && _scatterplotPlugin->getNumSelectedPoints() >= 1);
-        qDebug() << isEnabled();
     };
 
     QObject::connect(_scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), this, [this, updateUI]() {

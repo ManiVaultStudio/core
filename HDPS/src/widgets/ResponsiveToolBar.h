@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PopupPushButton.h"
-#include "ResponsiveSection.h"
+#include "ResponsiveSectionWidget.h"
 
 #include <QWidget>
 #include <QEvent>
@@ -54,11 +54,11 @@ public:
     template<typename StatefulWidgetType>
     void addWidget(ResponsiveSectionWidget::InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0)
     {
-        const auto getWidgetState = [](const WidgetState& state) -> QWidget* {
+        const auto getWidgetState = [](const ResponsiveSectionWidget::State& state) -> QWidget* {
             return new StatefulWidgetType(state);
         };
 
-        auto sectionWidget = new SectionWidget(getWidgetState, name, icon, priority);
+        auto sectionWidget = new ResponsiveSectionWidget(getWidgetState, name, icon, priority);
 
         sectionWidget->setInitializeWidgetFunction(initializeWidgetFn);
         sectionWidget->installEventFilter(this);
@@ -77,7 +77,7 @@ public:
     }
 
 private:
-    void computeLayout(QWidget* resizedWidget = nullptr);
+    void computeLayout(ResponsiveSectionWidget* resizedSectionWidget = nullptr);
 
 private:
     QWidget*                            _listenWidget;

@@ -1,6 +1,10 @@
-#include "ResponsiveSection.h"
+#include "ResponsiveSectionWidget.h"
 
 #include <QDebug>
+#include <QHBoxLayout>
+#include <QEvent>
+#include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
 
 namespace hdps {
 
@@ -101,7 +105,7 @@ void ResponsiveSectionWidget::setState(const State& state)
             break;
     }
 
-    qDebug() << QString("%1 state changed to:").arg(_name.toLower()) << static_cast<std::int32_t>(_state);
+    //qDebug() << QString("%1 state changed to:").arg(_name.toLower()) << static_cast<std::int32_t>(_state);
 }
 
 void ResponsiveSectionWidget::showWidget(QWidget* widget, const bool& animate /*= false*/)
@@ -185,7 +189,7 @@ void ResponsiveSectionWidget::computeSizeHints()
     _stateSizeHints[static_cast<std::int32_t>(State::Compact)]    = computeStateSizeHint(State::Compact);
     _stateSizeHints[static_cast<std::int32_t>(State::Full)]       = computeStateSizeHint(State::Full);
 
-    qDebug() << QString("Computed %1 size hints:").arg(_name.toLower()) << _stateSizeHints;
+    //qDebug() << QString("Computed %1 size hints:").arg(_name.toLower()) << _stateSizeHints;
 }
 
 QSize ResponsiveSectionWidget::computeStateSizeHint(const State& state)
