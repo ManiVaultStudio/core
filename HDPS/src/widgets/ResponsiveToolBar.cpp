@@ -76,7 +76,6 @@ ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
     _listenWidget(nullptr),
     _layout(new QHBoxLayout()),
     _sections(),
-    _ignoreSections(),
     _spacers(),
     _modified(-1)
 {
@@ -105,6 +104,7 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
     switch (event->type()) {
         case QEvent::Resize:
         {
+            /*
             if (dynamic_cast<QWidget*>(object) == _listenWidget)
                 computeLayout();
 
@@ -112,6 +112,7 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
 
             if (responsiveSectionWidget)
                 computeLayout(responsiveSectionWidget);
+            */
 
             break;
         }
@@ -123,21 +124,22 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
     return QObject::eventFilter(object, event);
 }
 
-void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWidget /*= nullptr*/)
+void ResponsiveToolBar::computeLayout()
 {
     Q_ASSERT(_listenWidget != nullptr);
 
     const auto printIgnoredSections = [this]() {
-        for (auto ignoreSection : _ignoreSections)
-            qDebug() << QString("Ignoring %1").arg(ignoreSection->getName());
+        //for (auto ignoreSection : _ignoreSections)
+            //qDebug() << QString("Ignoring %1").arg(ignoreSection->getName());
     };
-
+/*
     if (resizedSectionWidget == nullptr) {
         qDebug() << "Toolbar resized";
     }
     else {
         qDebug() << QString("%1 resized").arg(resizedSectionWidget->getName());
 
+        
         if (_ignoreSections.contains(resizedSectionWidget)) {
             qDebug() << QString("%1 ignored, not re-computing the layout").arg(resizedSectionWidget->getName());
 
@@ -147,7 +149,10 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
 
             return;
         }
+        
     }
+*/
+    //qDebug() << width();
 
     Timer timer("Compute layout");
 
@@ -209,18 +214,6 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
         }
     }
     */
-
-    _ignoreSections.clear();
-
-    for (auto section : _sections) {
-        const auto oldState = section->getState();
-        const auto newState = static_cast<ResponsiveSectionWidget::State>(states[_sections.indexOf(section)]);
-
-        if (newState != oldState)
-            _ignoreSections << section;
-    }
-
-    _ignoreSections = _sections;
 
     for (auto section : _sections)
         section->setState(static_cast<ResponsiveSectionWidget::State>(states[_sections.indexOf(section)]));

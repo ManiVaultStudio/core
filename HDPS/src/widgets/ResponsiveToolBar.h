@@ -60,9 +60,8 @@ public:
 
         auto sectionWidget = new ResponsiveSectionWidget(getWidgetState, name, icon, priority);
 
-        sectionWidget->setInitializeWidgetFunction(initializeWidgetFn);
-        sectionWidget->installEventFilter(this);
-
+        sectionWidget->initialize(initializeWidgetFn);
+        
         _sections << sectionWidget;
 
         if (_sections.count() >= 2) {
@@ -74,16 +73,19 @@ public:
         }
         
         _layout->addWidget(sectionWidget);
+
+        //sectionWidget->installEventFilter(this);
+
+        computeLayout();
     }
 
 private:
-    void computeLayout(ResponsiveSectionWidget* resizedSectionWidget = nullptr);
+    void computeLayout();
 
 private:
     QWidget*                            _listenWidget;
     QHBoxLayout*                        _layout;
     QVector<ResponsiveSectionWidget*>   _sections;
-    QVector<ResponsiveSectionWidget*>   _ignoreSections;
     QVector<Spacer*>                    _spacers;
     std::int32_t                        _modified;
 

@@ -31,7 +31,7 @@ protected:
 public:
     bool eventFilter(QObject* object, QEvent* event);
 
-    void setInitializeWidgetFunction(InitializeWidgetFn initializeWidgetFn);
+    void initialize(InitializeWidgetFn initializeWidgetFn);
 
     QString getName() const;
 
@@ -50,8 +50,6 @@ public:
     void setPriority(const std::int32_t& priority);
 
     QSize getStateSizeHint(const State& state) const;
-
-    QWidget* getWidget();
 
 private:
     QWidget* getWidget(const State& state);

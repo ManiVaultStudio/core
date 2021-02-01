@@ -30,8 +30,6 @@ ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetForStateFn getWidgetSt
     _layout->addWidget(_popupPushButton.get());
 
     setLayout(_layout);
-
-    computeSizeHints();
 }
 
 bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
@@ -46,8 +44,11 @@ bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
                 break;
 
             case QEvent::Resize:
+            {
+                qDebug() << QString("%1 size has changed, re-computing size hints").arg(_name.toLower());
                 computeSizeHints();
                 break;
+            }
 
             default:
                 break;
@@ -57,9 +58,11 @@ bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
     return QObject::eventFilter(object, event);
 }
 
-void ResponsiveSectionWidget::setInitializeWidgetFunction(InitializeWidgetFn initializeWidgetFn)
+void ResponsiveSectionWidget::initialize(InitializeWidgetFn initializeWidgetFn)
 {
     _initializeWidgetFn = initializeWidgetFn;
+
+    computeSizeHints();
 }
 
 QString ResponsiveSectionWidget::getName() const
@@ -178,11 +181,6 @@ QWidget* ResponsiveSectionWidget::getWidget(const State& state)
     return widget;
 }
 
-QWidget* ResponsiveSectionWidget::getWidget()
-{
-    return _stateWidget.get();
-}
-
 void ResponsiveSectionWidget::computeSizeHints()
 {
     _stateSizeHints[static_cast<std::int32_t>(State::Popup)]      = computeStateSizeHint(State::Popup);
@@ -194,11 +192,15 @@ void ResponsiveSectionWidget::computeSizeHints()
 
 QSize ResponsiveSectionWidget::computeStateSizeHint(const State& state)
 {
+    //qDebug() << QString("Computing state %1 size hints %2").arg(_name.toLower(), QString::number(static_cast<std::int32_t>(state))) << _stateSizeHints;
+
     if (state == State::Popup)
         return _popupPushButton->sizeHint();
 
     const auto stateWidget = getWidget(state);
     const auto stateSizeHint = stateWidget->sizeHint();
+
+    QObject::disconnect(stateWidget, nullptr, nullptr, nullptr);
 
     delete stateWidget;
 
