@@ -26,11 +26,6 @@ PlotSettingsWidget::PlotSettingsWidget(const hdps::gui::ResponsiveSectionWidget:
     setLayout(layout);
 }
 
-PlotSettingsWidget::~PlotSettingsWidget()
-{
-    qDebug() << "Delete" << objectName();
-}
-
 void PlotSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
     _scatterplotPlugin = scatterplotPlugin;

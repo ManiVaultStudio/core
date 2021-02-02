@@ -65,9 +65,8 @@ public:
             return new StatefulWidgetType(state);
         };
 
-        auto sectionWidget = new ResponsiveSectionWidget(getWidgetState, name, icon, priority);
+        auto sectionWidget = new ResponsiveSectionWidget(getWidgetState, initializeWidgetFn, name, icon, priority);
 
-        sectionWidget->setInitializeWidgetFunction(initializeWidgetFn);
         sectionWidget->installEventFilter(this);
 
         _sections << sectionWidget;

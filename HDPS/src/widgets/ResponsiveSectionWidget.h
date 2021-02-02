@@ -3,6 +3,7 @@
 #include "PopupPushButton.h"
 
 #include <QWidget>
+#include <QMap>
 
 class QHBoxLayout;
 
@@ -21,6 +22,19 @@ public:
         Compact,
         Full
     };
+
+    /** Maps state name to state enum and vice versa */
+    static QMap<QString, State> const states;
+
+    /** Get string representation of state enum */
+    static QString getStateName(const State& state) {
+        return states.key(state);
+    }
+
+    /** Get enum representation from state name */
+    static State getStateEnum(const QString& stateName) {
+        return states[stateName];
+    }
 
     using GetWidgetForStateFn = std::function<QWidget*(const State& state)>;
     using InitializeWidgetFn = std::function<void(QWidget* widget)>;
@@ -44,11 +58,19 @@ public:
     QSize getStateSizeHint(const State& state) const;
 
 private:
-    QWidget* getWidgetForState(const State& state);
 
-    void computeSizeHints();
+    /**
+     * Get widget for \p state
+     * @param state State to query the widget for
+     * @return Pointer to widget for \p state
+     */
+    QSharedPointer<QWidget> getWidgetForState(const State& state);
 
-    QSize computeStateSizeHint(const State& state);
+    /**
+     * Precomputes the size hint for \p state
+     * @param state State to precompute the size hint for
+     */
+    void precomputeSizeHintForState(const State& state);
 
 protected:
     GetWidgetForStateFn                 _getWidgetStateFn;
@@ -60,7 +82,7 @@ protected:
     QSharedPointer<PopupPushButton>     _popupPushButton;
     QSharedPointer<QWidget>             _popupWidget;
     QSharedPointer<QWidget>             _stateWidget;
-    QList<QSize>                        _stateSizeHints;
+    QMap<State, QSize>                  _stateSizeHints;
 
     friend class ResponsiveToolBar;
 };

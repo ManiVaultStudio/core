@@ -10,6 +10,13 @@ namespace hdps {
 
 namespace gui {
 
+const QMap<QString, ResponsiveSectionWidget::State> ResponsiveSectionWidget::states = {
+    { "Undefined", ResponsiveSectionWidget::State::Undefined },
+    { "Popup", ResponsiveSectionWidget::State::Popup },
+    { "Compact", ResponsiveSectionWidget::State::Compact },
+    { "Full", ResponsiveSectionWidget::State::Full },
+    };
+
 ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetForStateFn getWidgetStateFn, InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon /*= QIcon()*/, const std::int32_t& priority /*= 0*/) :
     _getWidgetStateFn(getWidgetStateFn),
     _initializeWidgetFn(initializeWidgetFn),
@@ -20,7 +27,7 @@ ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetForStateFn getWidgetSt
     _popupPushButton(QSharedPointer<PopupPushButton>::create()),
     _popupWidget(),
     _stateWidget(),
-    _stateSizeHints({ QSize(), QSize() , QSize() })
+    _stateSizeHints({{State::Popup, QSize()}, {State::Compact, QSize()}, {State::Full, QSize()}})
 {
     _layout->setMargin(0);
     _layout->setSpacing(0);
@@ -32,7 +39,10 @@ ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetForStateFn getWidgetSt
 
     _stateWidget = QSharedPointer<QWidget>(getWidgetForState(State::Full));
 
-    computeSizeHints();
+    // Precompute the initial size hint for each state
+    precomputeSizeHintForState(State::Popup);
+    precomputeSizeHintForState(State::Compact);
+    precomputeSizeHintForState(State::Full);
 }
 
 bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
@@ -47,7 +57,7 @@ bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
                 break;
 
             case QEvent::Resize:
-                computeSizeHints();
+                //computeSizeHints();
                 break;
 
             default:
@@ -133,10 +143,10 @@ void ResponsiveSectionWidget::setPriority(const std::int32_t& priority)
 
 QSize ResponsiveSectionWidget::getStateSizeHint(const State& state) const
 {
-    return _stateSizeHints[static_cast<std::int32_t>(state)];
+    return _stateSizeHints[state];
 }
 
-QWidget* ResponsiveSectionWidget::getWidgetForState(const State& state)
+QSharedPointer<QWidget> ResponsiveSectionWidget::getWidgetForState(const State& state)
 {
     auto widget = _getWidgetStateFn(state);
 
@@ -145,29 +155,27 @@ QWidget* ResponsiveSectionWidget::getWidgetForState(const State& state)
     if (_initializeWidgetFn)
         _initializeWidgetFn(widget);
 
-    return widget;
+    return QSharedPointer<QWidget>(widget);
 }
 
-void ResponsiveSectionWidget::computeSizeHints()
+void ResponsiveSectionWidget::precomputeSizeHintForState(const State& state)
 {
-    _stateSizeHints[static_cast<std::int32_t>(State::Popup)] = computeStateSizeHint(State::Popup);
-    _stateSizeHints[static_cast<std::int32_t>(State::Compact)] = computeStateSizeHint(State::Compact);
-    _stateSizeHints[static_cast<std::int32_t>(State::Full)] = computeStateSizeHint(State::Full);
+    switch (state)
+    {
+        case State::Popup:
+            _stateSizeHints[state] = _popupPushButton->sizeHint();
+            break;
 
-    //qDebug() << QString("Computed %1 size hints:").arg(_name.toLower()) << _stateSizeHints;
-}
+        case State::Compact:
+        case State::Full:
+            _stateSizeHints[state] = getWidgetForState(state)->sizeHint();
+            break;
 
-QSize ResponsiveSectionWidget::computeStateSizeHint(const State& state)
-{
-    if (state == State::Popup)
-        return _popupPushButton->sizeHint();
+        default:
+            break;
+    }
 
-    const auto stateWidget = getWidgetForState(state);
-    const auto stateSizeHint = stateWidget->sizeHint();
-
-    delete stateWidget;
-
-    return stateSizeHint;
+    qDebug() << QString("%1 initial %2 size hint: [%3,%4] ").arg(_name, getStateName(state), QString::number(_stateSizeHints[state].width()), QString::number(_stateSizeHints[state].height()));
 }
 }
 }
