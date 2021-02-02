@@ -26,41 +26,29 @@ public:
     using InitializeWidgetFn = std::function<void(QWidget* widget)>;
 
 protected:
-    ResponsiveSectionWidget(GetWidgetForStateFn getWidgetStateFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0);
+    ResponsiveSectionWidget(GetWidgetForStateFn getWidgetStateFn, InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0);
 
 public:
     bool eventFilter(QObject* object, QEvent* event);
 
-    void setInitializeWidgetFunction(InitializeWidgetFn initializeWidgetFn);
-
     QString getName() const;
-
+    
+    /** Get/set state */
     State getState() const;
-
     void setState(const State& state);
 
-    void showWidget(QWidget* widget, const bool& animate = false);
-
-    void hideWidget(QWidget* widget, const bool& animate = false);
-
-    void setStateWidget(QWidget* widget = nullptr);
-
+    /** Get/set priority */
     std::int32_t getPriority() const;
-
     void setPriority(const std::int32_t& priority);
 
     QSize getStateSizeHint(const State& state) const;
 
-    QWidget* getWidget();
-
 private:
-    QWidget* getWidget(const State& state);
+    QWidget* getWidgetForState(const State& state);
 
     void computeSizeHints();
 
     QSize computeStateSizeHint(const State& state);
-
-    void animateOpacity(QWidget* widget, const float& startOpacity, const float& endOpacity, const std::int32_t& duration, std::function<void()> finishedCallback = std::function<void()>());
 
 protected:
     GetWidgetForStateFn                 _getWidgetStateFn;
@@ -70,6 +58,7 @@ protected:
     std::int32_t                        _priority;
     QHBoxLayout*                        _layout;
     QSharedPointer<PopupPushButton>     _popupPushButton;
+    QSharedPointer<QWidget>             _popupWidget;
     QSharedPointer<QWidget>             _stateWidget;
     QList<QSize>                        _stateSizeHints;
 
