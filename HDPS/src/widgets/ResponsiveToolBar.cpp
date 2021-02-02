@@ -102,7 +102,7 @@ ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
     setLayout(_layout);
 
     this->installEventFilter(this);
-    _sectionsWidget->installEventFilter(this);
+    //_sectionsWidget->installEventFilter(this);
 }
 
 bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
@@ -115,13 +115,10 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
             if (resizedWidget == this)
                 computeLayout();
 
-            /*
             if (resizedWidget == _sectionsWidget) {
                 qDebug() << "Resize section widget";
-                computeLayout();
-
+                //computeLayout();
             }
-            */
 
             break;
         }

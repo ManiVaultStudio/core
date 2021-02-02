@@ -50,9 +50,6 @@ private:
 
     QSize computeStateSizeHint(const State& state);
 
-signals:
-    void sizeHintsChanged();
-
 protected:
     GetWidgetForStateFn                 _getWidgetStateFn;
     InitializeWidgetFn                  _initializeWidgetFn;

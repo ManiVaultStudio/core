@@ -68,10 +68,7 @@ public:
         auto sectionWidget = new ResponsiveSectionWidget(getWidgetState, name, icon, priority);
 
         sectionWidget->initialize(initializeWidgetFn);
-        
-        connect(sectionWidget, &ResponsiveSectionWidget::sizeHintsChanged, [this]() {
-            computeLayout();
-        });
+        sectionWidget->installEventFilter(this);
 
         _sections << sectionWidget;
 

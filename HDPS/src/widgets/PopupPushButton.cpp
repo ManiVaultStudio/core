@@ -1,6 +1,8 @@
 #include "PopupPushButton.h"
-#include "PopupWidget.h"
 
+#include <QDebug>
+#include <QVBoxLayout>
+#include <QGroupBox>
 #include <QEvent>
 #include <QPainter>
 #include <QVariant>

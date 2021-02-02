@@ -3,8 +3,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QEvent>
-#include <QPropertyAnimation>
-#include <QGraphicsOpacityEffect>
+#include <QResizeEvent>
 
 namespace hdps {
 
@@ -37,10 +36,19 @@ bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
                 break;
 
             case QEvent::Resize:
-                qDebug() << "Resize state widget";
-                //computeSizeHints();
-                emit sizeHintsChanged();
+            {
+                /*
+                if (widget == _stateWidget.get()) {
+                    auto* resizeEvent = static_cast<QResizeEvent*>(event);
+
+                    qDebug() << QString("Resize %1 (%2)").arg(_name.toLower(), QString::number(static_cast<std::int32_t>(_state))) << resizeEvent->size();
+
+                    _stateSizeHints[static_cast<std::int32_t>(_state)] = resizeEvent->size();
+                }
+                */
+                
                 break;
+            }
 
             default:
                 break;
@@ -93,18 +101,19 @@ void ResponsiveSectionWidget::setState(const State& state)
         {
             _popupWidget = QSharedPointer<QWidget>(getWidget(State::Popup));
             _popupPushButton->setWidget(_popupWidget.get());
-            
             break;
         }
 
         case State::Compact:
         case State::Full:
         {
+            if (!_stateWidget.isNull())
+                _stateWidget->removeEventFilter(this);
+
             _popupWidget.reset();
             _stateWidget = QSharedPointer<QWidget>(getWidget(_state));
             _layout->addWidget(_stateWidget.get());
             _stateWidget->installEventFilter(this);
-
             break;
         }
 
