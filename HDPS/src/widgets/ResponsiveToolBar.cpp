@@ -68,35 +68,41 @@ std::int32_t ResponsiveToolBar::Spacer::getWidth(const Type& type)
     return 0;
 }
 
-const std::int32_t ResponsiveToolBar::LAYOUT_MARGIN = 0;
-const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 5;
-
-ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
-    QWidget(parent),
-    _listenWidget(nullptr),
-    _layout(new QHBoxLayout()),
-    _sections(),
-    _spacers(),
-    _modified(-1)
+ResponsiveToolBar::SectionsWidget::SectionsWidget(QWidget* parent /*= nullptr*/) :
+    _layout(new QHBoxLayout())
 {
-    setAutoFillBackground(true);
-    setObjectName("ResponsiveToolBar");
-    setStyleSheet("QWidget#ResponsiveToolBar { background-color:red; }");
-
-    _layout->setMargin(5);
+    _layout->setMargin(0);
     _layout->setSpacing(0);
     _layout->setSizeConstraint(QLayout::SetFixedSize);
 
     setLayout(_layout);
 }
 
-void ResponsiveToolBar::setListenWidget(QWidget* listenWidget)
+void ResponsiveToolBar::SectionsWidget::addSectionWidget(QWidget* widget)
 {
-    Q_ASSERT(listenWidget != nullptr);
+    _layout->addWidget(widget);
+}
 
-    _listenWidget = listenWidget;
+const std::int32_t ResponsiveToolBar::LAYOUT_MARGIN = 0;
+const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 5;
 
-    _listenWidget->installEventFilter(this);
+ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
+    QWidget(parent),
+    _layout(new QHBoxLayout()),
+    _sectionsWidget(new SectionsWidget()),
+    _sections(),
+    _spacers(),
+    _dirty(false)
+{
+    _layout->setMargin(0);
+    _layout->setSpacing(0);
+    _layout->addWidget(_sectionsWidget);
+    _layout->addStretch(1);
+
+    setLayout(_layout);
+
+    this->installEventFilter(this);
+    _sectionsWidget->installEventFilter(this);
 }
 
 bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
@@ -104,14 +110,17 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
     switch (event->type()) {
         case QEvent::Resize:
         {
-            /*
-            if (dynamic_cast<QWidget*>(object) == _listenWidget)
+            const auto resizedWidget = dynamic_cast<QWidget*>(object);
+
+            if (resizedWidget == this)
                 computeLayout();
 
-            const auto responsiveSectionWidget = dynamic_cast<ResponsiveSectionWidget*>(object);
+            /*
+            if (resizedWidget == _sectionsWidget) {
+                qDebug() << "Resize section widget";
+                computeLayout();
 
-            if (responsiveSectionWidget)
-                computeLayout(responsiveSectionWidget);
+            }
             */
 
             break;
@@ -126,39 +135,9 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
 
 void ResponsiveToolBar::computeLayout()
 {
-    Q_ASSERT(_listenWidget != nullptr);
-
-    const auto printIgnoredSections = [this]() {
-        //for (auto ignoreSection : _ignoreSections)
-            //qDebug() << QString("Ignoring %1").arg(ignoreSection->getName());
-    };
-/*
-    if (resizedSectionWidget == nullptr) {
-        qDebug() << "Toolbar resized";
-    }
-    else {
-        qDebug() << QString("%1 resized").arg(resizedSectionWidget->getName());
-
-        
-        if (_ignoreSections.contains(resizedSectionWidget)) {
-            qDebug() << QString("%1 ignored, not re-computing the layout").arg(resizedSectionWidget->getName());
-
-            _ignoreSections.removeOne(resizedSectionWidget);
-
-            printIgnoredSections();
-
-            return;
-        }
-        
-    }
-*/
-    //qDebug() << width();
-
     Timer timer("Compute layout");
 
-    const auto marginTotal  = 2 * _layout->margin();
-    
-    const auto availableWidth = _listenWidget->rect().width() - marginTotal;
+    const auto availableWidth = width();
     
     QVector<std::int32_t> states;
 
@@ -202,17 +181,18 @@ void ResponsiveToolBar::computeLayout()
     }
 
     /*
-    if (resizedSectionWidget == nullptr) {
-        
+    _dirty = false;
 
-        //_ignoreSections = _sections;
+    for (auto section : _sections) {
+        const auto oldState = section->getState();
+        const auto newState = static_cast<ResponsiveSectionWidget::State>(states[_sections.indexOf(section)]);
+
+        if (newState != oldState)
+            _dirty = true;
     }
-    else {
-        for (auto section : _sections) {
-            if (resizedSectionWidget != section)
-                _ignoreSections << section;
-        }
-    }
+
+    if (!_dirty)
+        return;
     */
 
     for (auto section : _sections)
@@ -224,6 +204,8 @@ void ResponsiveToolBar::computeLayout()
 
         spacer->setType(spacerType);
     }
+
+    _dirty = false;
 }
 
 }

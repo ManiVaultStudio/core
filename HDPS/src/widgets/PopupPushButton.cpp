@@ -31,7 +31,7 @@ PopupPushButton::PopupPushButton() :
 
     _popupLayout->setMargin(7);
     _popupLayout->addWidget(_groupBox);
-    _popupLayout->setSizeConstraint(QLayout::SetMinimumSize);
+    _popupLayout->setSizeConstraint(QLayout::SetFixedSize);
 
     _groupBox->setLayout(_groupBoxLayout);
     _groupBox->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
@@ -45,7 +45,6 @@ PopupPushButton::PopupPushButton() :
         emit popupOpen();
 
         _widget->show();
-        _popupWidget->adjustSize();
         _popupWidget->show();
 
         QPoint move;

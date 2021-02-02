@@ -36,17 +36,9 @@ public:
     QString getName() const;
 
     State getState() const;
-
     void setState(const State& state);
 
-    void showWidget(QWidget* widget, const bool& animate = false);
-
-    void hideWidget(QWidget* widget, const bool& animate = false);
-
-    void setStateWidget(QWidget* widget = nullptr);
-
     std::int32_t getPriority() const;
-
     void setPriority(const std::int32_t& priority);
 
     QSize getStateSizeHint(const State& state) const;
@@ -58,7 +50,8 @@ private:
 
     QSize computeStateSizeHint(const State& state);
 
-    void animateOpacity(QWidget* widget, const float& startOpacity, const float& endOpacity, const std::int32_t& duration, std::function<void()> finishedCallback = std::function<void()>());
+signals:
+    void sizeHintsChanged();
 
 protected:
     GetWidgetForStateFn                 _getWidgetStateFn;
@@ -67,8 +60,9 @@ protected:
     QString                             _name;
     std::int32_t                        _priority;
     QHBoxLayout*                        _layout;
-    QSharedPointer<PopupPushButton>     _popupPushButton;
+    QSharedPointer<QWidget>             _popupWidget;
     QSharedPointer<QWidget>             _stateWidget;
+    QSharedPointer<PopupPushButton>     _popupPushButton;
     QList<QSize>                        _stateSizeHints;
 
     friend class ResponsiveToolBar;

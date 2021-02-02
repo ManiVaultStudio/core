@@ -29,14 +29,13 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     auto horizontalLayout = new QHBoxLayout();
 
-    horizontalLayout->setMargin(0);
+    horizontalLayout->setMargin(5);
     horizontalLayout->setSpacing(0);
     horizontalLayout->addWidget(_responsiveToolBar);
-    horizontalLayout->addStretch(1);
 
     setLayout(horizontalLayout);
 
-    _responsiveToolBar->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
+    //_responsiveToolBar->setListenWidget(&const_cast<ScatterplotPlugin&>(plugin));
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
@@ -51,12 +50,12 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
 
     _responsiveToolBar->addWidget<RenderModeWidget>(initializeWidgetFunction, "Render mode", fontAwesome.getIcon("image"), 10);
     _responsiveToolBar->addWidget<PlotSettingsWidget>(initializeWidgetFunction, "Plot", fontAwesome.getIcon("cogs"), 250);
-    /*
+    
     _responsiveToolBar->addWidget<PositionSettingsWidget>(initializeWidgetFunction, "Position", fontAwesome.getIcon("ruler-combined"), 250);
     _responsiveToolBar->addWidget<ColorSettingsWidget>(initializeWidgetFunction, "Color", fontAwesome.getIcon("palette"), 250);
     _responsiveToolBar->addWidget<SubsetSettingsWidget>(initializeWidgetFunction, "Subset", fontAwesome.getIcon("crop"), 50);
     _responsiveToolBar->addWidget<SelectionSettingsWidget>(initializeWidgetFunction, "Selection", fontAwesome.getIcon("mouse-pointer"), 5);
-    */
+    /**/
 
     //setEnabled(false);
 

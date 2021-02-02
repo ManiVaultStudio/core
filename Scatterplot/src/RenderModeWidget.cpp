@@ -90,7 +90,7 @@ RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveSectionWidget::Sta
 
 RenderModeWidget::~RenderModeWidget()
 {
-    //qDebug() << "~RenderModeWidget::RenderModeWidget()";
+    qDebug() << "Delete" << objectName();
 }
 
 void RenderModeWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
@@ -113,22 +113,23 @@ void RenderModeWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin
         _contourPlotPushButton->setChecked(renderMode == ScatterplotWidget::RenderMode::LANDSCAPE);
     };
 
-    QObject::connect(_scatterPlotPushButton, &QPushButton::clicked, this, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_scatterPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
         updateToggles();
     });
 
-    QObject::connect(_densityPlotPushButton, &QPushButton::clicked, this, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_densityPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
         updateToggles();
     });
 
-    QObject::connect(_contourPlotPushButton, &QPushButton::clicked, this, [this, scatterPlotWidget, updateToggles]() {
+    QObject::connect(_contourPlotPushButton, &QPushButton::clicked, [this, scatterPlotWidget, updateToggles]() {
         scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
         updateToggles();
     });
 
     QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateToggles](const ScatterplotWidget::RenderMode& renderMode) {
+        qDebug() << "RenderModeWidget::renderModeChanged()";
         updateToggles();
     });
 

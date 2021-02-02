@@ -28,7 +28,7 @@ PlotSettingsWidget::PlotSettingsWidget(const hdps::gui::ResponsiveSectionWidget:
 
 PlotSettingsWidget::~PlotSettingsWidget()
 {
-    //qDebug() << "~PlotSettingsWidget::PlotSettingsWidget()";
+    qDebug() << "Delete" << objectName();
 }
 
 void PlotSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
@@ -38,15 +38,16 @@ void PlotSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlug
     _pointSettingsWidget->setScatterplotPlugin(scatterplotPlugin);
     _densitySettingsWidget->setScatterplotPlugin(scatterplotPlugin);
 
-    auto scatterplotWidget = _scatterplotPlugin->getScatterplotWidget();
-
-    const auto updatePlotSettingsUI = [this, scatterplotWidget]() {
-        _stackedWidget->setCurrentIndex(scatterplotWidget->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT ? 0 : 1);
+    const auto updatePlotSettingsUI = [this]() {
+        _stackedWidget->setCurrentIndex(_scatterplotPlugin->getScatterplotWidget()->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT ? 0 : 1);
     };
-
-    connect(scatterplotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updatePlotSettingsUI](const ScatterplotWidget::RenderMode& renderMode) {
+     
+    connect(_scatterplotPlugin->getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updatePlotSettingsUI](const ScatterplotWidget::RenderMode& renderMode) {
+        qDebug() << "PlotSettingsWidget::renderModeChanged()";
         updatePlotSettingsUI();
+        auto test = "asdasd";
+        qDebug() << test;
     });
-
+    
     updatePlotSettingsUI();
 }

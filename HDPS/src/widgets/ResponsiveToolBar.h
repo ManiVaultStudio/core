@@ -11,7 +11,6 @@
 #include <QGraphicsOpacityEffect>
 
 class QFrame;
-class QGridLayout;
 
 namespace hdps {
 
@@ -44,10 +43,18 @@ public:
         QFrame*         _verticalLine;
     };
 
+    class SectionsWidget : public QWidget {
+    public:
+        SectionsWidget(QWidget* parent = nullptr);
+
+        void addSectionWidget(QWidget* widget);
+
+    protected:
+        QHBoxLayout*    _layout;
+    };
+
 public:
     ResponsiveToolBar(QWidget* parent = nullptr);
-
-    void setListenWidget(QWidget* listenWidget);
 
     bool eventFilter(QObject* object, QEvent* event);
 
@@ -62,6 +69,10 @@ public:
 
         sectionWidget->initialize(initializeWidgetFn);
         
+        connect(sectionWidget, &ResponsiveSectionWidget::sizeHintsChanged, [this]() {
+            computeLayout();
+        });
+
         _sections << sectionWidget;
 
         if (_sections.count() >= 2) {
@@ -69,12 +80,10 @@ public:
 
             _spacers << spacer;
 
-            _layout->addWidget(spacer);
+            _sectionsWidget->layout()->addWidget(spacer);
         }
-        
-        _layout->addWidget(sectionWidget);
 
-        //sectionWidget->installEventFilter(this);
+        _sectionsWidget->layout()->addWidget(sectionWidget);
 
         computeLayout();
     }
@@ -83,11 +92,11 @@ private:
     void computeLayout();
 
 private:
-    QWidget*                            _listenWidget;
     QHBoxLayout*                        _layout;
+    QWidget*                            _sectionsWidget;
     QVector<ResponsiveSectionWidget*>   _sections;
     QVector<Spacer*>                    _spacers;
-    std::int32_t                        _modified;
+    bool                                _dirty;
 
 public:
     static const std::int32_t LAYOUT_MARGIN;

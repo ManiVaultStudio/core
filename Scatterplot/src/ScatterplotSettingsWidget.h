@@ -7,6 +7,7 @@
 #include <QSize>
 
 class ScatterplotPlugin;
+class ScatterplotWidget;
 
 class ScatterplotSettingsWidget : public QWidget
 {
@@ -18,6 +19,8 @@ protected:
 
 public:
     virtual void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) = 0;
+
+    ScatterplotWidget* getScatterplotWidget();
 
 protected:
     hdps::gui::ResponsiveSectionWidget::State   _state;
