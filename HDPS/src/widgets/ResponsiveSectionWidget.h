@@ -31,17 +31,27 @@ protected:
 public:
     bool eventFilter(QObject* object, QEvent* event);
 
-    void initialize(InitializeWidgetFn initializeWidgetFn);
+    void setInitializeWidgetFunction(InitializeWidgetFn initializeWidgetFn);
 
     QString getName() const;
 
     State getState() const;
+
     void setState(const State& state);
 
+    void showWidget(QWidget* widget, const bool& animate = false);
+
+    void hideWidget(QWidget* widget, const bool& animate = false);
+
+    void setStateWidget(QWidget* widget = nullptr);
+
     std::int32_t getPriority() const;
+
     void setPriority(const std::int32_t& priority);
 
     QSize getStateSizeHint(const State& state) const;
+
+    QWidget* getWidget();
 
 private:
     QWidget* getWidget(const State& state);
@@ -50,6 +60,8 @@ private:
 
     QSize computeStateSizeHint(const State& state);
 
+    void animateOpacity(QWidget* widget, const float& startOpacity, const float& endOpacity, const std::int32_t& duration, std::function<void()> finishedCallback = std::function<void()>());
+
 protected:
     GetWidgetForStateFn                 _getWidgetStateFn;
     InitializeWidgetFn                  _initializeWidgetFn;
@@ -57,9 +69,8 @@ protected:
     QString                             _name;
     std::int32_t                        _priority;
     QHBoxLayout*                        _layout;
-    QSharedPointer<QWidget>             _popupWidget;
-    QSharedPointer<QWidget>             _stateWidget;
     QSharedPointer<PopupPushButton>     _popupPushButton;
+    QSharedPointer<QWidget>             _stateWidget;
     QList<QSize>                        _stateSizeHints;
 
     friend class ResponsiveToolBar;

@@ -3,7 +3,8 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QEvent>
-#include <QResizeEvent>
+#include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
 
 namespace hdps {
 
@@ -16,12 +17,21 @@ ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetForStateFn getWidgetSt
     _name(name),
     _priority(priority),
     _layout(new QHBoxLayout()),
-    _popupWidget(),
-    _stateWidget(),
     _popupPushButton(QSharedPointer<PopupPushButton>::create()),
+    _stateWidget(nullptr),
     _stateSizeHints({ QSize(), QSize() , QSize() })
 {
     _popupPushButton->setIcon(icon);
+
+    hideWidget(_popupPushButton.get());
+
+    _layout->setMargin(0);
+    _layout->setSpacing(0);
+    _layout->addWidget(_popupPushButton.get());
+
+    setLayout(_layout);
+
+    computeSizeHints();
 }
 
 bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
@@ -36,19 +46,8 @@ bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
                 break;
 
             case QEvent::Resize:
-            {
-                /*
-                if (widget == _stateWidget.get()) {
-                    auto* resizeEvent = static_cast<QResizeEvent*>(event);
-
-                    qDebug() << QString("Resize %1 (%2)").arg(_name.toLower(), QString::number(static_cast<std::int32_t>(_state))) << resizeEvent->size();
-
-                    _stateSizeHints[static_cast<std::int32_t>(_state)] = resizeEvent->size();
-                }
-                */
-                
+                computeSizeHints();
                 break;
-            }
 
             default:
                 break;
@@ -58,17 +57,9 @@ bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
     return QObject::eventFilter(object, event);
 }
 
-void ResponsiveSectionWidget::initialize(InitializeWidgetFn initializeWidgetFn)
+void ResponsiveSectionWidget::setInitializeWidgetFunction(InitializeWidgetFn initializeWidgetFn)
 {
     _initializeWidgetFn = initializeWidgetFn;
-
-    _layout->setMargin(0);
-    _layout->setSpacing(0);
-    _layout->addWidget(_popupPushButton.get());
-
-    setLayout(_layout);
-
-    computeSizeHints();
 }
 
 QString ResponsiveSectionWidget::getName() const
@@ -88,32 +79,25 @@ void ResponsiveSectionWidget::setState(const State& state)
 
     _state = state;
 
-    const auto isPopup = _state == State::Popup;
-
-    _popupPushButton->setVisible(isPopup);
-
-    if (!_stateWidget.isNull())
-        _stateWidget->setVisible(!isPopup);
-
     switch (_state)
     {
         case State::Popup:
         {
-            _popupWidget = QSharedPointer<QWidget>(getWidget(State::Popup));
-            _popupPushButton->setWidget(_popupWidget.get());
+            hideWidget(_stateWidget.get(), false);
+            showWidget(_popupPushButton.get(), false);
+            setStateWidget(getWidget(_state));
+            _popupPushButton->setWidget(_stateWidget.get());
+
             break;
         }
 
         case State::Compact:
         case State::Full:
         {
-            if (!_stateWidget.isNull())
-                _stateWidget->removeEventFilter(this);
-
-            _popupWidget.reset();
-            _stateWidget = QSharedPointer<QWidget>(getWidget(_state));
+            hideWidget(_popupPushButton.get(), false);
+            setStateWidget(getWidget(_state));
             _layout->addWidget(_stateWidget.get());
-            _stateWidget->installEventFilter(this);
+            showWidget(_stateWidget.get(), false);
             break;
         }
 
@@ -122,6 +106,33 @@ void ResponsiveSectionWidget::setState(const State& state)
     }
 
     //qDebug() << QString("%1 state changed to:").arg(_name.toLower()) << static_cast<std::int32_t>(_state);
+}
+
+void ResponsiveSectionWidget::showWidget(QWidget* widget, const bool& animate /*= false*/)
+{
+    if (!widget)
+        return;
+
+    widget->show();
+}
+
+void ResponsiveSectionWidget::hideWidget(QWidget* widget, const bool& animate /*= false*/)
+{
+    if (!widget)
+        return;
+
+    widget->hide();
+}
+
+void ResponsiveSectionWidget::setStateWidget(QWidget* widget /*= nullptr*/)
+{
+    if (widget == nullptr)
+        return;
+
+    _stateWidget = QSharedPointer<QWidget>(widget);
+
+    _stateWidget->setWindowOpacity(0);
+    _stateWidget->installEventFilter(this);
 }
 
 std::int32_t ResponsiveSectionWidget::getPriority() const
@@ -144,8 +155,6 @@ QSize ResponsiveSectionWidget::getStateSizeHint(const State& state) const
 
 QWidget* ResponsiveSectionWidget::getWidget(const State& state)
 {
-    qDebug() << QString("Create %1 state widget: %2").arg(_name, QString::number(static_cast<std::int32_t>(state)));
-
     auto widget = _getWidgetStateFn(state);
 
     widget->setWindowTitle(_name);
@@ -156,29 +165,31 @@ QWidget* ResponsiveSectionWidget::getWidget(const State& state)
     return widget;
 }
 
+QWidget* ResponsiveSectionWidget::getWidget()
+{
+    return _stateWidget.get();
+}
+
 void ResponsiveSectionWidget::computeSizeHints()
 {
-    _stateSizeHints[static_cast<std::int32_t>(State::Compact)]    = computeStateSizeHint(State::Compact);
-    _stateSizeHints[static_cast<std::int32_t>(State::Full)]       = computeStateSizeHint(State::Full);
+    _stateSizeHints[static_cast<std::int32_t>(State::Popup)] = computeStateSizeHint(State::Popup);
+    _stateSizeHints[static_cast<std::int32_t>(State::Compact)] = computeStateSizeHint(State::Compact);
+    _stateSizeHints[static_cast<std::int32_t>(State::Full)] = computeStateSizeHint(State::Full);
 
-    qDebug() << QString("Computed %1 size hints:").arg(_name.toLower()) << _stateSizeHints;
+    //qDebug() << QString("Computed %1 size hints:").arg(_name.toLower()) << _stateSizeHints;
 }
 
 QSize ResponsiveSectionWidget::computeStateSizeHint(const State& state)
 {
-    //qDebug() << QString("Computing state %1 size hints %2").arg(_name.toLower(), QString::number(static_cast<std::int32_t>(state))) << _stateSizeHints;
-    
     if (state == State::Popup)
         return _popupPushButton->sizeHint();
 
-    auto stateWidget = QSharedPointer<QWidget>(getWidget(state));
-    
-    stateWidget->setObjectName(QString("Size hint widget: %1").arg(static_cast<std::int32_t>(state)));
-    stateWidget->setAttribute(Qt::WA_DontShowOnScreen);
-    stateWidget->show();
+    const auto stateWidget = getWidget(state);
+    const auto stateSizeHint = stateWidget->sizeHint();
 
-    return stateWidget->sizeHint();
+    delete stateWidget;
+
+    return stateSizeHint;
 }
-
 }
 }
