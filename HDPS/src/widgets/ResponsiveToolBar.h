@@ -69,9 +69,9 @@ public:
 
         sectionWidget->installEventFilter(this);
 
-        _sections << sectionWidget;
+        _sectionWidgets << sectionWidget;
 
-        if (_sections.count() >= 2) {
+        if (_sectionWidgets.count() >= 2) {
             auto spacer = new Spacer();
 
             _spacers << spacer;
@@ -85,12 +85,13 @@ public:
     }
 
 private:
-    void computeLayout();
+    void computeLayout(ResponsiveSectionWidget* resizedSectionWidget = nullptr);
 
 private:
     QHBoxLayout*                        _layout;
     QWidget*                            _sectionsWidget;
-    QVector<ResponsiveSectionWidget*>   _sections;
+    QVector<ResponsiveSectionWidget*>   _sectionWidgets;
+    QVector<ResponsiveSectionWidget*>   _ignoreSectionWidgets;
     QVector<Spacer*>                    _spacers;
     bool                                _dirty;
 

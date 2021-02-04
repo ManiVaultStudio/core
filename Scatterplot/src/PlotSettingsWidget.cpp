@@ -11,8 +11,6 @@ PlotSettingsWidget::PlotSettingsWidget(const hdps::gui::ResponsiveSectionWidget:
     _pointSettingsWidget(new PointSettingsWidget(state, this)),
     _densitySettingsWidget(new DensitySettingsWidget(state, this))
 {
-    //qDebug() << QString("PlotSettingsWidget::PlotSettingsWidget(state=%1)").arg(QString::number(static_cast<std::int32_t>(state)));
-
     _stackedWidget->addWidget(_pointSettingsWidget);
     _stackedWidget->addWidget(_densitySettingsWidget);
 
@@ -38,10 +36,7 @@ void PlotSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlug
     };
      
     connect(_scatterplotPlugin->getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updatePlotSettingsUI](const ScatterplotWidget::RenderMode& renderMode) {
-        qDebug() << "PlotSettingsWidget::renderModeChanged()";
         updatePlotSettingsUI();
-        auto test = "asdasd";
-        qDebug() << test;
     });
     
     updatePlotSettingsUI();

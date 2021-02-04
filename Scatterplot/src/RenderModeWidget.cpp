@@ -13,8 +13,6 @@ RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveSectionWidget::Sta
     _densityPlotPushButton(new QPushButton(this)),
     _contourPlotPushButton(new QPushButton(this))
 {
-    //qDebug() << QString("RenderModeWidget::RenderModeWidget(state=%1)").arg(QString::number(static_cast<std::int32_t>(state)));
-
     _scatterPlotPushButton->setCheckable(true);
     _densityPlotPushButton->setCheckable(true);
     _contourPlotPushButton->setCheckable(true);
@@ -88,15 +86,8 @@ RenderModeWidget::RenderModeWidget(const hdps::gui::ResponsiveSectionWidget::Sta
     setLayout(layout);
 }
 
-RenderModeWidget::~RenderModeWidget()
-{
-    qDebug() << "Delete" << objectName();
-}
-
 void RenderModeWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)
 {
-    //qDebug() << "RenderModeWidget::setScatterplotPlugin";
-
     _scatterplotPlugin = scatterplotPlugin;
 
     auto scatterPlotWidget = _scatterplotPlugin->getScatterplotWidget();
@@ -129,7 +120,6 @@ void RenderModeWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin
     });
 
     QObject::connect(scatterPlotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateToggles](const ScatterplotWidget::RenderMode& renderMode) {
-        qDebug() << "RenderModeWidget::renderModeChanged()";
         updateToggles();
     });
 

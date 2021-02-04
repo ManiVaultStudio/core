@@ -8,7 +8,6 @@ class RenderModeWidget : public ScatterplotSettingsWidget
 {
 public:
     RenderModeWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
-    ~RenderModeWidget();
 
     void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 

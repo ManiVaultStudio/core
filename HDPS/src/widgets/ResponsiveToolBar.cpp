@@ -90,7 +90,7 @@ ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
     QWidget(parent),
     _layout(new QHBoxLayout()),
     _sectionsWidget(new SectionsWidget()),
-    _sections(),
+    _sectionWidgets(),
     _spacers(),
     _dirty(false)
 {
@@ -102,26 +102,19 @@ ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
     setLayout(_layout);
 
     this->installEventFilter(this);
-    //_sectionsWidget->installEventFilter(this);
 }
 
 bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
 {
+    const auto widget = dynamic_cast<QWidget*>(object);
+
+    if (widget == nullptr)
+        return QObject::eventFilter(object, event);
+
     switch (event->type()) {
         case QEvent::Resize:
-        {
-            const auto resizedWidget = dynamic_cast<QWidget*>(object);
-
-            if (resizedWidget == this)
-                computeLayout();
-
-            if (resizedWidget == _sectionsWidget) {
-                qDebug() << "Resize section widget";
-                //computeLayout();
-            }
-
+            computeLayout(dynamic_cast<ResponsiveSectionWidget*>(widget));
             break;
-        }
 
         default:
             break;
@@ -130,74 +123,106 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
     return QObject::eventFilter(object, event);
 }
 
-void ResponsiveToolBar::computeLayout()
+void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWidget /*= nullptr*/)
 {
+    if (resizedSectionWidget)
+        return;
+
+    // Don't compute the layout if the resized widget is on the ignore list
+    if (_ignoreSectionWidgets.contains(resizedSectionWidget)) {
+        _ignoreSectionWidgets.removeOne(resizedSectionWidget);
+        return;
+    }
+
     Timer timer("Compute layout");
+
+    /*
+    if (resizedSectionWidget)
+        qDebug() << resizedSectionWidget->getName() << "resized";
+    */
 
     const auto availableWidth = width();
     
-    QVector<std::int32_t> states;
+    QMap<ResponsiveSectionWidget*, ResponsiveSectionWidget::State> states;
+    
+    const auto printSectionWidgets = [&states]() {
+        for (auto sectionWidget : states.keys())
+            qDebug() << sectionWidget->getName() << ResponsiveSectionWidget::getStateName(states[sectionWidget]) << sectionWidget->getSizeHints().values();
+    };
 
-    states.resize(_sections.count());
+    for (auto sectionWidget : _sectionWidgets)
+        states[sectionWidget] = ResponsiveSectionWidget::State::Popup;
 
-    const auto getSectionsWidth = [this, &states]() -> std::int32_t {
-        auto sectionsWidth = 0;
+    // Initialize the state for the ignored section (if any)
+    /*
+    if (resizedSectionWidget != nullptr) {
+        const auto resizedSectionWidgetIndex = _sectionWidgets.indexOf(resizedSectionWidget);
 
-        for (auto section : _sections)
-            sectionsWidth += section->getStateSizeHint(static_cast<ResponsiveSectionWidget::State>(states[_sections.indexOf(section)])).width();
+        if (resizedSectionWidgetIndex >= 0)
+            states[resizedSectionWidgetIndex] = resizedSectionWidget->getState();
+
+        for (auto sectionWidget : _sectionWidgets) {
+            if (sectionWidget != resizedSectionWidget)
+                _ignoreSectionWidgets << sectionWidget;
+        }
+    }
+    */
+
+    const auto getOccupiedWidth = [this, &states]() -> std::int32_t {
+        auto occupiedWidth = 0;
+
+        for (auto sectionWidget : _sectionWidgets)
+            occupiedWidth += sectionWidget->getSizeHintForState(states[sectionWidget]).width();
 
         for (auto spacer : _spacers) {
             const auto spacerIndex  = _spacers.indexOf(spacer);
-            const auto spacerType   = Spacer::getType(static_cast<ResponsiveSectionWidget::State>(states[spacerIndex]), static_cast<ResponsiveSectionWidget::State>(states[spacerIndex + 1]));
+            const auto spacerType   = Spacer::getType(_sectionWidgets[spacerIndex], _sectionWidgets[spacerIndex + 1]);
             
-            sectionsWidth += Spacer::getWidth(spacerType);
+            occupiedWidth += Spacer::getWidth(spacerType);
         }
 
-        return sectionsWidth;
+        return occupiedWidth;
     };
 
-    auto sortedSections = _sections;
+    auto sortedSectionWidgets = _sectionWidgets;
 
-    std::sort(sortedSections.begin(), sortedSections.end(), [](ResponsiveSectionWidget* left, ResponsiveSectionWidget* right) {
+    // Sort section widgets based on priority
+    std::sort(sortedSectionWidgets.begin(), sortedSectionWidgets.end(), [](ResponsiveSectionWidget* left, ResponsiveSectionWidget* right) {
         return left->getPriority() > right->getPriority();
     });
 
-    auto sections = sortedSections + sortedSections;
+    // Establish state for each section widget
+    for (auto sectionWidget : sortedSectionWidgets + sortedSectionWidgets) {
+        //if (section == resizedSectionWidget)
+            //continue;
 
-    for (auto section : sections) {
-        const auto oldWidgetStates = states;
+        const auto oldWidgetStates  = states;
+        const auto stateIntegral    = static_cast<std::int32_t>(states[sectionWidget]);
 
-        states[_sections.indexOf(section)]++;
+        states[sectionWidget] = static_cast<ResponsiveSectionWidget::State>(stateIntegral + 1);
 
-        const auto sectionsWidth = getSectionsWidth();
+        const auto occupiedWidth = getOccupiedWidth();
 
-        if (sectionsWidth > availableWidth) {
+        if (occupiedWidth > availableWidth) {
             states = oldWidgetStates;
             break;
         }
     }
 
+    auto updateSectionWidgets = _sectionWidgets;
+
     /*
-    _dirty = false;
-
-    for (auto section : _sections) {
-        const auto oldState = section->getState();
-        const auto newState = static_cast<ResponsiveSectionWidget::State>(states[_sections.indexOf(section)]);
-
-        if (newState != oldState)
-            _dirty = true;
-    }
-
-    if (!_dirty)
-        return;
+    for (auto sectionWidget : _sectionWidgets)
+        if (sectionWidget != resizedSectionWidget)
+            _ignoreSectionWidgets << sectionWidget;
     */
 
-    for (auto section : _sections)
-        section->setState(static_cast<ResponsiveSectionWidget::State>(states[_sections.indexOf(section)]));
+    for (auto sectionWidget : _sectionWidgets)
+        sectionWidget->setState(states[sectionWidget]);
 
     for (auto spacer : _spacers) {
         const auto spacerIndex  = _spacers.indexOf(spacer);
-        const auto spacerType   = Spacer::getType(_sections[spacerIndex], _sections[spacerIndex + 1]);
+        const auto spacerType   = Spacer::getType(_sectionWidgets[spacerIndex], _sectionWidgets[spacerIndex + 1]);
 
         spacer->setType(spacerType);
     }

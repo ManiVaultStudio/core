@@ -40,6 +40,9 @@ public:
     using InitializeWidgetFn = std::function<void(QWidget* widget)>;
 
 protected:
+    /**
+     * Constructor
+     */
     ResponsiveSectionWidget(GetWidgetForStateFn getWidgetStateFn, InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0);
 
 public:
@@ -55,7 +58,9 @@ public:
     std::int32_t getPriority() const;
     void setPriority(const std::int32_t& priority);
 
-    QSize getStateSizeHint(const State& state) const;
+    QMap<State, QSize> getSizeHints() const;
+    QSize getSizeHintForState(const State& state) const;
+    QSize getSizeHintForState(const std::int32_t& state) const;
 
 private:
 
@@ -82,7 +87,7 @@ protected:
     QSharedPointer<PopupPushButton>     _popupPushButton;
     QSharedPointer<QWidget>             _popupWidget;
     QSharedPointer<QWidget>             _stateWidget;
-    QMap<State, QSize>                  _stateSizeHints;
+    QMap<State, QSize>                  _sizeHints;
 
     friend class ResponsiveToolBar;
 };
