@@ -147,7 +147,8 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
     
     const auto printSectionWidgets = [&states]() {
         for (auto sectionWidget : states.keys())
-            qDebug() << sectionWidget->getName() << ResponsiveSectionWidget::getStateName(states[sectionWidget]) << sectionWidget->getSizeHints().values();
+            if (sectionWidget->getName() == "Render mode" || sectionWidget->getName() == "Plot")
+                qDebug() << sectionWidget->getName() << ResponsiveSectionWidget::getStateName(states[sectionWidget]) << sectionWidget->getSizeHints().values();
     };
 
     for (auto sectionWidget : _sectionWidgets)
@@ -176,7 +177,7 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
 
         for (auto spacer : _spacers) {
             const auto spacerIndex  = _spacers.indexOf(spacer);
-            const auto spacerType   = Spacer::getType(_sectionWidgets[spacerIndex], _sectionWidgets[spacerIndex + 1]);
+            const auto spacerType   = Spacer::getType(states[_sectionWidgets[spacerIndex]], states[_sectionWidgets[spacerIndex + 1]]);
             
             occupiedWidth += Spacer::getWidth(spacerType);
         }
@@ -203,13 +204,13 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
 
         const auto occupiedWidth = getOccupiedWidth();
 
-        if (occupiedWidth > availableWidth) {
+        if (occupiedWidth >= availableWidth) {
             states = oldWidgetStates;
             break;
         }
     }
-
-    auto updateSectionWidgets = _sectionWidgets;
+    
+    
 
     /*
     for (auto sectionWidget : _sectionWidgets)
