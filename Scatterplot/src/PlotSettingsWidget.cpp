@@ -5,19 +5,18 @@
 
 using namespace hdps::gui;
 
-PlotSettingsWidget::PlotSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
-    ScatterplotSettingsWidget(state, parent),
+PlotSettingsWidget::PlotSettingsWidget(const ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(widgetState, parent),
     _stackedWidget(new StackedWidget()),
-    _pointSettingsWidget(new PointSettingsWidget(state, this)),
-    _densitySettingsWidget(new DensitySettingsWidget(state, this))
+    _pointSettingsWidget(new PointSettingsWidget(widgetState, this)),
+    _densitySettingsWidget(new DensitySettingsWidget(widgetState, this))
 {
     _stackedWidget->addWidget(_pointSettingsWidget);
     _stackedWidget->addWidget(_densitySettingsWidget);
 
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
-    layout->setSpacing(4);
+    applyLayout(layout);
 
     layout->addWidget(_stackedWidget);
 

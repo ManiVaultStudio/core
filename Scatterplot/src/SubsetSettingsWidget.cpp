@@ -7,8 +7,8 @@
 
 using namespace hdps::gui;
 
-SubsetSettingsWidget::SubsetSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
-    ScatterplotSettingsWidget(state, parent),
+SubsetSettingsWidget::SubsetSettingsWidget(const hdps::gui::ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(widgetState, parent),
     _createSubsetPushButton(new QPushButton()),
     _fromSourceCheckBox(new QCheckBox())
 {
@@ -17,32 +17,16 @@ SubsetSettingsWidget::SubsetSettingsWidget(const hdps::gui::ResponsiveSectionWid
     _fromSourceCheckBox->setToolTip("Create a subset from source or derived data");
     _fromSourceCheckBox->setText("From source");
 
+    
     auto layout = new QHBoxLayout();
 
-    switch (_state)
-    {
-        case ResponsiveSectionWidget::State::Popup:
-            _createSubsetPushButton->setText("Create");
-            _fromSourceCheckBox->setText("From source dataset");
-            break;
-
-        case ResponsiveSectionWidget::State::Compact:
-        case ResponsiveSectionWidget::State::Full:
-            _createSubsetPushButton->setText("Create subset");
-            _fromSourceCheckBox->setText(_state == ResponsiveSectionWidget::State::Compact ? "Source" : "From source");
-            break;
-
-        default:
-            break;
-    }
-
-    layout->setMargin(0);
-    layout->setSpacing(4);
+    applyLayout(layout); (layout);
 
     layout->addWidget(_createSubsetPushButton);
     layout->addWidget(_fromSourceCheckBox);
 
-    setLayout(layout);
+    _createSubsetPushButton->setText(isForm() ? "Create" : "Create subset");
+    _fromSourceCheckBox->setText(isCompact() ? "Source" : "From source");
 }
 
 void SubsetSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)

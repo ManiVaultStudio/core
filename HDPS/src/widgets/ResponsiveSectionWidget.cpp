@@ -10,22 +10,31 @@ namespace gui {
 
 const QMap<QString, ResponsiveSectionWidget::State> ResponsiveSectionWidget::states = {
     { "Undefined", ResponsiveSectionWidget::State::Undefined },
-    { "Popup", ResponsiveSectionWidget::State::Popup },
+    { "Collapsed", ResponsiveSectionWidget::State::Collapsed },
     { "Compact", ResponsiveSectionWidget::State::Compact },
     { "Full", ResponsiveSectionWidget::State::Full },
-    };
+};
 
-ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetForStateFn getWidgetStateFn, InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon /*= QIcon()*/, const std::int32_t& priority /*= 0*/) :
-    _getWidgetStateFn(getWidgetStateFn),
+const QMap<QString, ResponsiveSectionWidget::WidgetStateFlag> ResponsiveSectionWidget::widgetStates = {
+    { "Sequential", ResponsiveSectionWidget::WidgetStateFlag::Sequential },
+    { "Form", ResponsiveSectionWidget::WidgetStateFlag::Form },
+    { "Basic sequential", ResponsiveSectionWidget::WidgetStateFlag::CompactSequential },
+    { "Full sequential", ResponsiveSectionWidget::WidgetStateFlag::FullSequential },
+    { "Compact form", ResponsiveSectionWidget::WidgetStateFlag::CompactForm },
+    { "Full form", ResponsiveSectionWidget::WidgetStateFlag::FullForm }
+};
+
+ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetFn getWidgetFn, InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon /*= QIcon()*/, const std::int32_t& priority /*= 0*/) :
+    _getWidgetFn(getWidgetFn),
     _initializeWidgetFn(initializeWidgetFn),
     _state(State::Undefined),
     _name(name),
     _priority(priority),
     _layout(new QHBoxLayout()),
     _popupPushButton(QSharedPointer<PopupPushButton>::create()),
-    _popupWidget(),
-    _stateWidget(),
-    _sizeHints({{State::Popup, QSize()}, {State::Compact, QSize()}, {State::Full, QSize()}})
+    _formWidget(),
+    _sequentialWidget(),
+    _sizeHints()
 {
     _layout->setMargin(0);
     _layout->setSpacing(0);
@@ -35,26 +44,33 @@ ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetForStateFn getWidgetSt
 
     _popupPushButton->setIcon(icon);
 
-    _stateWidget = QSharedPointer<QWidget>(getWidgetForState(State::Full));
+    _formWidget         = QSharedPointer<QWidget>(getWidget(WidgetStateFlag::FullForm));
+    _sequentialWidget   = QSharedPointer<QWidget>(getWidget(WidgetStateFlag::FullSequential));
 
     computeSizeHints();
+
+    qDebug() << _sizeHints.values();
 }
 
 bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
 {
     auto widget = dynamic_cast<QWidget*>(object);
 
-    if (widget == _stateWidget) {
+    if (widget == _sequentialWidget) {
         switch (event->type())
         {
             case QEvent::EnabledChange:
-                _popupPushButton->setEnabled(_stateWidget->isEnabled());
+                _popupPushButton->setEnabled(_sequentialWidget->isEnabled());
                 break;
 
             case QEvent::Resize:
-                qDebug() << _name << "resized";
-                computeSizeHints();
+            {
+                //if (_state.testFlag() & WidgetStateFlag::Sequential)
+                    //computeSizeHints();
+
                 break;
+            }
+                
         }
     }
 
@@ -66,67 +82,31 @@ QString ResponsiveSectionWidget::getName() const
     return _name;
 }
 
-hdps::gui::ResponsiveSectionWidget::State ResponsiveSectionWidget::getState() const
+ResponsiveSectionWidget::State ResponsiveSectionWidget::getState() const
 {
     return _state;
 }
 
 void ResponsiveSectionWidget::setState(const State& state)
 {
-    if (state == _state)
+    if (state == _state || state == State::Undefined)
         return;
 
     _state = state;
 
-    switch (_state)
-    {
-        case State::Popup:
-        {
-            // Create temporary popup widget, assign it to the popup push button and show the popup push button
-            _popupWidget = QSharedPointer<QWidget>(getWidgetForState(State::Popup));
-            _popupPushButton->setWidget(_popupWidget.get());
-            _popupPushButton->show();
+    _formWidget = QSharedPointer<QWidget>(getWidget(WidgetState(static_cast<int>(state)) | WidgetStateFlag::Form));
 
-            // In popup mode, only the popup push button is visible, so hide the state widget
-            _stateWidget->hide();
+    _popupPushButton->setWidget(_formWidget.get());
+    _popupPushButton->setVisible(state == State::Collapsed);
 
-            break;
-        }
+    _sequentialWidget = QSharedPointer<QWidget>(getWidget(WidgetState(static_cast<int>(state)) | WidgetStateFlag::Sequential));
+    
+    _layout->addWidget(_sequentialWidget.get());
 
-        case State::Compact:
-        case State::Full:
-        {
-            // Remove the temporary popup widget and hide the popup push button
-            _popupWidget.reset();
-            _popupPushButton->hide();
+    _sequentialWidget->setVisible(state != State::Collapsed);
+    _sequentialWidget->installEventFilter(this);
 
-            // Remove event filter (if any)
-            if (!_stateWidget.isNull())
-                _stateWidget->removeEventFilter(this);
-
-            qDebug() << "A";
-
-            // Create a new state widget for the state
-            _stateWidget = QSharedPointer<QWidget>(getWidgetForState(_state));
-            _stateWidget->setWindowOpacity(0);
-            _stateWidget->installEventFilter(this);
-
-            qDebug() << "B";
-
-            // And add the state widget to the layout
-            _layout->addWidget(_stateWidget.get());
-
-            // Show the state widget
-            _stateWidget->show();
-
-            qDebug() << "C";
-
-            break;
-        }
-
-        default:
-            break;
-    }
+    
 
     //qDebug() << QString("%1 state changed to:").arg(_name.toLower()) << static_cast<std::int32_t>(_state);
 }
@@ -144,7 +124,7 @@ void ResponsiveSectionWidget::setPriority(const std::int32_t& priority)
     _priority = priority;
 }
 
-QMap<hdps::gui::ResponsiveSectionWidget::State, QSize> ResponsiveSectionWidget::getSizeHints() const
+QMap<ResponsiveSectionWidget::State, QSize> ResponsiveSectionWidget::getSizeHints() const
 {
     return _sizeHints;
 }
@@ -154,14 +134,9 @@ QSize ResponsiveSectionWidget::getSizeHintForState(const State& state) const
     return _sizeHints[state];
 }
 
-QSize ResponsiveSectionWidget::getSizeHintForState(const std::int32_t& state) const
+QSharedPointer<QWidget> ResponsiveSectionWidget::getWidget(const WidgetState& widgetState)
 {
-    return getSizeHintForState(static_cast<State>(state));
-}
-
-QSharedPointer<QWidget> ResponsiveSectionWidget::getWidgetForState(const State& state)
-{
-    auto widget = _getWidgetStateFn(state);
+    auto widget = _getWidgetFn(widgetState);
 
     widget->setWindowTitle(_name);
 
@@ -175,25 +150,26 @@ void ResponsiveSectionWidget::computeSizeHintForState(const State& state)
 {
     switch (state)
     {
-        case State::Popup:
+        case State::Undefined:
+            break;
+
+        case State::Collapsed:
             _sizeHints[state] = _popupPushButton->sizeHint();
             break;
 
         case State::Compact:
         case State::Full:
-            _sizeHints[state] = getWidgetForState(state)->sizeHint();
+            _sizeHints[state] = getWidget(WidgetState(static_cast<int>(state)) | WidgetStateFlag::Sequential)->sizeHint();
             break;
 
         default:
             break;
     }
-
-    //qDebug() << QString("%1 initial %2 size hint: [%3,%4] ").arg(_name, getStateName(state), QString::number(_sizeHints[state].width()), QString::number(_sizeHints[state].height()));
 }
 
 void ResponsiveSectionWidget::computeSizeHints()
 {
-    computeSizeHintForState(State::Popup);
+    computeSizeHintForState(State::Collapsed);
     computeSizeHintForState(State::Compact);
     computeSizeHintForState(State::Full);
 }

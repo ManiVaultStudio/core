@@ -11,8 +11,8 @@
 
 using namespace hdps::gui;
 
-PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
-    ScatterplotSettingsWidget(state, parent),
+PointSettingsWidget::PointSettingsWidget(const ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(widgetState, parent),
     _sizeLabel(new QLabel()),
     _sizeDoubleSpinBox(new QDoubleSpinBox()),
     _sizeSlider(new QSlider()),
@@ -42,65 +42,45 @@ PointSettingsWidget::PointSettingsWidget(const hdps::gui::ResponsiveSectionWidge
     _opacitySlider->setMinimum(1);
     _opacitySlider->setMaximum(100);
 
-    QLayout* stateLayout = nullptr;
+    if (isForm()) {
+        auto layout = new QGridLayout();
 
-    switch (_state)
-    {
-        case ResponsiveSectionWidget::State::Popup:
-        {
-            auto layout = new QGridLayout();
+        applyLayout(layout);
 
-            layout->addWidget(_sizeLabel, 0, 0);
-            layout->addWidget(_sizeDoubleSpinBox, 0, 1);
-            layout->addWidget(_sizeSlider, 0, 2);
+        layout->addWidget(_sizeLabel, 0, 0);
+        layout->addWidget(_sizeDoubleSpinBox, 0, 1);
+        layout->addWidget(_sizeSlider, 0, 2);
 
-            layout->addWidget(_opacityLabel, 1, 0);
-            layout->addWidget(_opacityDoubleSpinBox, 1, 1);
-            layout->addWidget(_opacitySlider, 1, 2);
-
-            stateLayout = layout;
-
-            break;
-        }
-
-        case ResponsiveSectionWidget::State::Compact:
-        case ResponsiveSectionWidget::State::Full:
-        {
-            auto layout = new QHBoxLayout();
-
-            layout->addWidget(_sizeLabel);
-            layout->addWidget(_sizeDoubleSpinBox);
-            layout->addWidget(_sizeSlider);
-
-            layout->addWidget(_opacityLabel);
-            layout->addWidget(_opacityDoubleSpinBox);
-            layout->addWidget(_opacitySlider);
-
-            stateLayout = layout;
-
-            break;
-        }
-
-        default:
-            break;
+        layout->addWidget(_opacityLabel, 1, 0);
+        layout->addWidget(_opacityDoubleSpinBox, 1, 1);
+        layout->addWidget(_opacitySlider, 1, 2);
     }
 
-    
-    _sizeLabel->setText(_state == ResponsiveSectionWidget::State::Full ? "Point size:" : "Size:");
-    _opacityLabel->setText(_state == ResponsiveSectionWidget::State::Full ? "Point opacity:" : "Opacity:");
-    
-    _sizeSlider->setFixedWidth(_state == ResponsiveSectionWidget::State::Compact ? 50 : 80);
-    _opacitySlider->setFixedWidth(_state == ResponsiveSectionWidget::State::Compact ? 50 : 80);
-    
-    /*
-    _sizeDoubleSpinBox->setVisible(_state != ResponsiveSectionWidget::State::Compact);
-    _opacityDoubleSpinBox->setVisible(_state != ResponsiveSectionWidget::State::Compact);
-    */
+    if (isSequential()) {
+        auto layout = new QHBoxLayout();
 
-    stateLayout->setMargin(0);
-    stateLayout->setSpacing(4);
+        applyLayout(layout);
 
-    setLayout(stateLayout);
+        layout->addWidget(_sizeLabel);
+
+        if (!isCompact())
+            layout->addWidget(_sizeDoubleSpinBox);
+
+        layout->addWidget(_sizeSlider);
+
+        layout->addWidget(_opacityLabel);
+
+        if (!isCompact())
+            layout->addWidget(_opacityDoubleSpinBox);
+
+        layout->addWidget(_opacitySlider);
+    }
+    
+    _sizeLabel->setText(isFull() ? "Point size:" : "Size:");
+    _opacityLabel->setText(isFull() ? "Point opacity:" : "Opacity:");
+    
+    _sizeSlider->setFixedWidth(isCompact() ? 50 : 80);
+    _opacitySlider->setFixedWidth(isCompact() ? 50 : 80);
 }
 
 void PointSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)

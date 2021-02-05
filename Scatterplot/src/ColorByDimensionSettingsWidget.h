@@ -7,7 +7,7 @@ class QComboBox;
 class ColorByDimensionSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    ColorByDimensionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
+    ColorByDimensionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent = nullptr);
 
     QComboBox* getColorDimensionComboBox() {
         return _colorDimensionComboBox;

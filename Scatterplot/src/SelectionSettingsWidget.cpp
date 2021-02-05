@@ -13,8 +13,8 @@
 
 using namespace hdps::gui;
 
-SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
-    ScatterplotSettingsWidget(state, parent),
+SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(widgetState, parent),
     _typeLabel(new QLabel("Type:")),
     _typeLayout(new QHBoxLayout()),
     _typeWidget(new QWidget()),
@@ -51,6 +51,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveSect
 
     _typeComboBox->setToolTip("Choose the selection type");
     _typeComboBox->addItems(QStringList(PixelSelectionTool::types.keys()));
+    _typeComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum));
     //_typeComboBox->setFixedWidth(70);
     //_typeComboBox->setEditable(true);
     //_typeComboBox->lineEdit()->setReadOnly(true);
@@ -108,58 +109,42 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveSect
     _additionalSettingsPopupPushButton->setToolTip("Additional selection settings");
     _additionalSettingsPopupPushButton->setIcon(fontAwesome.getIcon("ellipsis-h"));
 
-    QLayout* stateLayout = nullptr;
+    if (isForm()) {
+        auto layout = new QGridLayout();
 
-    switch (_state)
-    {
-        case ResponsiveSectionWidget::State::Popup:
-        {
-            auto layout = new QGridLayout();
+        applyLayout(layout);
 
-            layout->addWidget(_typeLabel, 0, 0);
-            layout->addWidget(_typeWidget, 0, 1);
-            layout->addWidget(_radiusLabel, 1, 0);
-            layout->addWidget(_radiusWidget, 1, 1);
-            layout->addWidget(_selectLabel, 2, 0);
-            layout->addWidget(_selectWidget, 2, 1);
-            layout->addWidget(_notifyDuringSelectionCheckBox, 3, 1);
+        layout->addWidget(_typeLabel, 0, 0);
+        layout->addWidget(_typeWidget, 0, 1);
+        layout->addWidget(_radiusLabel, 1, 0);
+        layout->addWidget(_radiusWidget, 1, 1);
+        layout->addWidget(_selectLabel, 2, 0);
+        layout->addWidget(_selectWidget, 2, 1);
+        layout->addWidget(_notifyDuringSelectionCheckBox, 3, 1);
+    }
 
-            stateLayout = layout;
-            break;
-        }
-
-        case ResponsiveSectionWidget::State::Compact:
-        {
+    if (isSequential()) {
+        if (isCompact()) {
             auto layout = new QHBoxLayout();
+
+            applyLayout(layout);
 
             layout->addWidget(_typeWidget);
             layout->addWidget(_additionalSettingsPopupPushButton);
-
-            stateLayout = layout;
-            break;
         }
 
-        case ResponsiveSectionWidget::State::Full:
-        {
+        if (isFull()) {
             auto layout = new QHBoxLayout();
+
+            applyLayout(layout);
 
             layout->addWidget(_typeWidget);
             layout->addWidget(_selectWidget);
             layout->addWidget(_radiusWidget);
             layout->addWidget(_notifyDuringSelectionCheckBox);
-
-            stateLayout = layout;
-            break;
         }
-
-        default:
-            break;
     }
 
-    stateLayout->setMargin(0);
-    stateLayout->setSpacing(4);
-
-    
     /*
     _typeWidget->setVisible(true);
     _typeLabel->setVisible(_state == ResponsiveSectionWidget::State::Popup);
@@ -170,7 +155,7 @@ SelectionSettingsWidget::SelectionSettingsWidget(const hdps::gui::ResponsiveSect
     _notifyDuringSelectionCheckBox->setVisible(_state != ResponsiveSectionWidget::State::Compact);
     */
 
-    setLayout(stateLayout);
+    //setLayout(stateLayout);
 }
 
 void SelectionSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)

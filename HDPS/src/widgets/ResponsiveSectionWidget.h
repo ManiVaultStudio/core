@@ -15,57 +15,84 @@ class ResponsiveSectionWidget : public QWidget {
     Q_OBJECT
 
 public:
-    enum class State
-    {
-        Undefined = -1,
-        Popup,
-        Compact,
-        Full,
-
-        // Layout type: single line or form
-        Sequential,
-        Form
+    /** State enumeration flags */
+    enum class State {
+        Undefined   = 0x0001,   /** Undefined */
+        Collapsed   = 0x0002,   /** Single popup push button */
+        Compact     = 0x0004,   /** Compact */
+        Full        = 0x0008,   /** Show entire user interface */
     };
 
-    /*
-    enum class StateFlag {
-
-        // Docking side
-        Compact = 0x0002,
-        Full = 0x0002,
-
-        // Anchor location
-        Popup = 0x0010,
-
-        CompactPopup = DockLeft | AnchorTop,
-        LeftCenter = DockLeft | AnchorCenter,
-        LeftBottom = DockLeft | AnchorBottom,
-    };
-
-    Q_DECLARE_FLAGS(PopupAlignment, PopupAlignmentFlag)
-    */
-
-    /** Maps state name to state enum and vice versa */
+    /** Maps state name to state enum */
     static QMap<QString, State> const states;
 
-    /** Get string representation of state enum */
-    static QString getStateName(const State& state) {
-        return states.key(state);
+    /** Get string/enum representation of state */
+    static QString getStateName(const State& state) { return states.key(state); }
+    static State getStateEnum(const QString& stateName) { return states[stateName]; }
+
+    /** Determines whether shrink/grow is possible */
+    static bool canShrink(const State& state) { return state == State::Compact || state == State::Full; }
+    static bool canGrow(const State& state) { return state == State::Collapsed || state == State::Compact; }
+
+    /** Shrink */
+    static State shrink(const State& state) { 
+        switch (state)
+        {
+            case State::Collapsed:  return State::Collapsed;
+            case State::Compact:    return State::Collapsed;
+            case State::Full:       return State::Compact;
+
+            default:
+                break;
+        }
+
+        return State::Undefined;
     }
 
-    /** Get enum representation from state name */
-    static State getStateEnum(const QString& stateName) {
-        return states[stateName];
+    /** Grow */
+    static State grow(const State& state) {
+        switch (state)
+        {
+            case State::Collapsed:  return State::Compact;
+            case State::Compact:    return State::Full;
+            case State::Full:       return State::Full;
+
+            default:
+                break;
+        }
+
+        return State::Undefined;
     }
 
-    using GetWidgetForStateFn = std::function<QWidget*(const State& state)>;
+    /** Widget state enumeration flags */
+    enum class WidgetStateFlag {
+        Sequential  = 0x0010,                   /** Horizontal box layout */
+        Form        = 0x0020,                   /** Form layout */
+
+        CompactSequential   = static_cast<int>(State::Compact) | Sequential,
+        FullSequential      = static_cast<int>(State::Full) | Sequential,
+
+        CompactForm         = static_cast<int>(State::Compact) | Form,
+        FullForm            = static_cast<int>(State::Collapsed) | Form,
+    };
+
+    Q_DECLARE_FLAGS(WidgetState, WidgetStateFlag)
+
+    /** Maps widget state name to widget state enum */
+    static QMap<QString, WidgetStateFlag> const widgetStates;
+
+    /** Get string/enum representation of widget state */
+    static QString getWidgetStateName(const WidgetStateFlag& widgetState) { return widgetStates.key(widgetState); }
+    static WidgetStateFlag getWidgetStateEnum(const QString& widgetStateName) { return widgetStates[widgetStateName]; }
+
+    using GetWidgetFn = std::function<QWidget*(const WidgetState& widgetState)>;
     using InitializeWidgetFn = std::function<void(QWidget* widget)>;
 
 protected:
     /**
      * Constructor
      */
-    ResponsiveSectionWidget(GetWidgetForStateFn getWidgetStateFn, InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0);
+    ResponsiveSectionWidget(GetWidgetFn getWidgetFn, InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0);
 
 public:
     bool eventFilter(QObject* object, QEvent* event);
@@ -82,20 +109,19 @@ public:
 
     QMap<State, QSize> getSizeHints() const;
     QSize getSizeHintForState(const State& state) const;
-    QSize getSizeHintForState(const std::int32_t& state) const;
 
 private:
 
     /**
-     * Get widget for \p state
+     * Get widget for \p widgetState
      * @param state State to query the widget for
-     * @return Pointer to widget for \p state
+     * @return Pointer to widget for \p widgetState
      */
-    QSharedPointer<QWidget> getWidgetForState(const State& state);
+    QSharedPointer<QWidget> getWidget(const WidgetState& widgetState);
 
     /**
-     * Computes the size hint for \p state
-     * @param state State to compute the size hint for
+     * Computes the size hint for \p widgetState
+     * @param widgetState Widget state to compute the size hint for
      */
     void computeSizeHintForState(const State& state);
 
@@ -103,15 +129,15 @@ private:
     void computeSizeHints();
 
 protected:
-    GetWidgetForStateFn                 _getWidgetStateFn;
+    GetWidgetFn                         _getWidgetFn;
     InitializeWidgetFn                  _initializeWidgetFn;
     State                               _state;
     QString                             _name;
     std::int32_t                        _priority;
     QHBoxLayout*                        _layout;
     QSharedPointer<PopupPushButton>     _popupPushButton;
-    QSharedPointer<QWidget>             _popupWidget;
-    QSharedPointer<QWidget>             _stateWidget;
+    QSharedPointer<QWidget>             _formWidget;
+    QSharedPointer<QWidget>             _sequentialWidget;
     QMap<State, QSize>                  _sizeHints;
 
     friend class ResponsiveToolBar;

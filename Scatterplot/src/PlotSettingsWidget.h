@@ -22,7 +22,7 @@ public:
     };
     
 public:
-    PlotSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
+    PlotSettingsWidget(const hdps::gui::ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent = nullptr);
 
     void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 

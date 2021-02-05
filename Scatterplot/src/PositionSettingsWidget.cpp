@@ -8,8 +8,8 @@
 
 using namespace hdps::gui;
 
-PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
-    ScatterplotSettingsWidget(state, parent),
+PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(widgetState, parent),
     _xDimensionLabel(new QLabel()),
     _xDimensionComboBox(new QComboBox()),
     _yDimensionLabel(new QLabel()),
@@ -25,66 +25,46 @@ PositionSettingsWidget::PositionSettingsWidget(const hdps::gui::ResponsiveSectio
     _yDimensionLabel->setToolTip(yDimensionToolTipText);
     _yDimensionComboBox->setToolTip(yDimensionToolTipText);
 
-    QLayout* stateLayout = nullptr;
+    if (isForm()) {
+        auto layout = new QGridLayout();
 
-    switch (_state)
-    {
-        case ResponsiveSectionWidget::State::Popup:
-        {
-            auto layout = new QGridLayout();
+        applyLayout(layout);
 
-            layout->addWidget(_xDimensionLabel, 0, 0);
-            layout->addWidget(_xDimensionComboBox, 0, 1);
-            layout->addWidget(_yDimensionLabel, 1, 0);
-            layout->addWidget(_yDimensionComboBox, 1, 1);
+        layout->addWidget(_xDimensionLabel, 0, 0);
+        layout->addWidget(_xDimensionComboBox, 0, 1);
+        layout->addWidget(_yDimensionLabel, 1, 0);
+        layout->addWidget(_yDimensionComboBox, 1, 1);
 
-            stateLayout = layout;
-            break;
-        }
-
-        case ResponsiveSectionWidget::State::Compact:
-        case ResponsiveSectionWidget::State::Full:
-        {
-            auto layout = new QHBoxLayout();
-
-            layout->addWidget(_xDimensionLabel);
-            layout->addWidget(_xDimensionComboBox);
-            layout->addWidget(_yDimensionLabel);
-            layout->addWidget(_yDimensionComboBox);
-
-            stateLayout = layout;
-            break;
-        }
-
-        default:
-            break;
+        _xDimensionLabel->setText("X dimension:");
+        _yDimensionLabel->setText("Y dimension:");
+        _xDimensionComboBox->setFixedWidth(120);
+        _yDimensionComboBox->setFixedWidth(120);
     }
 
-    switch (_state)
-    {
-        case ResponsiveSectionWidget::State::Compact:
+    if (isSequential()) {
+        auto layout = new QHBoxLayout();
+
+        applyLayout(layout);
+
+        layout->addWidget(_xDimensionLabel);
+        layout->addWidget(_xDimensionComboBox);
+        layout->addWidget(_yDimensionLabel);
+        layout->addWidget(_yDimensionComboBox);
+
+        if (isCompact()) {
             _xDimensionLabel->setText("X:");
             _yDimensionLabel->setText("Y:");
             _xDimensionComboBox->setFixedWidth(80);
             _yDimensionComboBox->setFixedWidth(80);
-            break;
+        }
 
-        case ResponsiveSectionWidget::State::Popup:
-        case ResponsiveSectionWidget::State::Full:
+        if (isFull()) {
             _xDimensionLabel->setText("X dimension:");
             _yDimensionLabel->setText("Y dimension:");
             _xDimensionComboBox->setFixedWidth(120);
             _yDimensionComboBox->setFixedWidth(120);
-            break;
-
-        default:
-            break;
+        }
     }
-
-    stateLayout->setMargin(0);
-    stateLayout->setSpacing(4);
-
-    setLayout(stateLayout);
 }
 
 void PositionSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)

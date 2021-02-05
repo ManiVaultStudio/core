@@ -8,7 +8,7 @@ class QPushButton;
 class ColorByDataSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    ColorByDataSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
+    ColorByDataSettingsWidget(const hdps::gui::ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent = nullptr);
 
     void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 

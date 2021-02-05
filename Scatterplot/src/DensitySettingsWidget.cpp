@@ -10,9 +10,9 @@
 
 using namespace hdps::gui;
 
-DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
-    ScatterplotSettingsWidget(state, parent),
-    _label(new QLabel("Sigma")),
+DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(widgetState, parent),
+    _label(new QLabel("Sigma:")),
     _doubleSpinBox(new QDoubleSpinBox()),
     _slider(new QSlider())
 {
@@ -26,16 +26,14 @@ DensitySettingsWidget::DensitySettingsWidget(const hdps::gui::ResponsiveSectionW
 
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
-    layout->setSpacing(4);
+    applyLayout(layout);
 
     layout->addWidget(_label);
     layout->addWidget(_doubleSpinBox);
     layout->addWidget(_slider);
 
-    //_doubleSpinBox->setVisible(_state != ResponsiveSectionWidget::State::Compact);
-
-    setLayout(layout);
+    _doubleSpinBox->setVisible(!isCompact());
+    _slider->setFixedWidth(isCompact() ? 50 : 80);
 }
 
 void DensitySettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)

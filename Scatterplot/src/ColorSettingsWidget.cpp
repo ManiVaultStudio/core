@@ -10,13 +10,13 @@
 
 using namespace hdps::gui;
 
-ColorSettingsWidget::ColorSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent /*= nullptr*/) :
-    ScatterplotSettingsWidget(state, parent),
+ColorSettingsWidget::ColorSettingsWidget(const ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent /*= nullptr*/) :
+    ScatterplotSettingsWidget(widgetState, parent),
     _colorByLabel(new QLabel()),
     _colorByComboBox(new QComboBox()),
     _stackedWidget(new StackedWidget()),
-    _colorByDimensionSettingsWidget(new ColorByDimensionSettingsWidget(state)),
-    _colorByDataSettingsWidget(new ColorByDataSettingsWidget(state))
+    _colorByDimensionSettingsWidget(new ColorByDimensionSettingsWidget(widgetState)),
+    _colorByDataSettingsWidget(new ColorByDataSettingsWidget(widgetState))
 {
     _colorByLabel->setToolTip("Color by");
     _colorByLabel->setText("Color by:");
@@ -31,14 +31,11 @@ ColorSettingsWidget::ColorSettingsWidget(const hdps::gui::ResponsiveSectionWidge
 
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
-    layout->setSpacing(4);
+    applyLayout(layout);
 
     layout->addWidget(_colorByLabel);
     layout->addWidget(_colorByComboBox);
     layout->addWidget(_stackedWidget);
-
-    setLayout(layout);
 }
 
 void ColorSettingsWidget::setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin)

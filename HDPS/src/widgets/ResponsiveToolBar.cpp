@@ -33,7 +33,7 @@ ResponsiveToolBar::Spacer::Spacer(const Type& type /*= State::Divider*/) :
 
 ResponsiveToolBar::Spacer::Type ResponsiveToolBar::Spacer::getType(const ResponsiveSectionWidget::State& stateBefore, const ResponsiveSectionWidget::State& stateAfter)
 {
-    return stateBefore == ResponsiveSectionWidget::State::Popup && stateAfter == ResponsiveSectionWidget::State::Popup ? Spacer::Type::Spacer : Spacer::Type::Divider;
+    return stateBefore == ResponsiveSectionWidget::State::Collapsed && stateAfter == ResponsiveSectionWidget::State::Collapsed ? Spacer::Type::Spacer : Spacer::Type::Divider;
 }
 
 ResponsiveToolBar::Spacer::Type ResponsiveToolBar::Spacer::getType(const ResponsiveSectionWidget* sectionBefore, const ResponsiveSectionWidget* sectionAfter)
@@ -56,10 +56,10 @@ std::int32_t ResponsiveToolBar::Spacer::getWidth(const Type& type)
     switch (type)
     {
         case Type::Divider:
-            return 14;
+            return 20;
 
         case Type::Spacer:
-            return 6;
+            return 8;
 
         default:
             break;
@@ -84,7 +84,7 @@ void ResponsiveToolBar::SectionsWidget::addSectionWidget(QWidget* widget)
 }
 
 const std::int32_t ResponsiveToolBar::LAYOUT_MARGIN = 0;
-const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 5;
+const std::int32_t ResponsiveToolBar::LAYOUT_SPACING = 4;
 
 ResponsiveToolBar::ResponsiveToolBar(QWidget* parent) :
     QWidget(parent),
@@ -145,16 +145,20 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
     
     QMap<ResponsiveSectionWidget*, ResponsiveSectionWidget::State> states;
     
+    /*
     const auto printSectionWidgets = [&states]() {
         for (auto sectionWidget : states.keys())
             if (sectionWidget->getName() == "Render mode" || sectionWidget->getName() == "Plot")
                 qDebug() << sectionWidget->getName() << ResponsiveSectionWidget::getStateName(states[sectionWidget]) << sectionWidget->getSizeHints().values();
     };
-
-    /*
-    for (auto sectionWidget : _sectionWidgets)
-        states[sectionWidget] = ResponsiveSectionWidget::State::Popup;
     */
+    
+    /**/
+
+    // Start collapsed
+    for (auto sectionWidget : _sectionWidgets)
+        states[sectionWidget] = ResponsiveSectionWidget::State::Collapsed;
+    
 
     // Initialize the state for the ignored section (if any)
     //if (resizedSectionWidget != nullptr)
@@ -190,10 +194,8 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
     // Establish state for each section widget
     for (auto sectionWidget : sortedSectionWidgets + sortedSectionWidgets) {
         const auto oldWidgetStates  = states;
-        const auto stateIntegral    = static_cast<std::int32_t>(states[sectionWidget]);
 
-        //if (sectionWidget != resizedSectionWidget)
-        states[sectionWidget] = static_cast<ResponsiveSectionWidget::State>(stateIntegral + 1);
+        states[sectionWidget] = ResponsiveSectionWidget::grow(states[sectionWidget]);
 
         const auto occupiedWidth = getOccupiedWidth();
 

@@ -11,7 +11,7 @@ class QSlider;
 class PointSettingsWidget : public ScatterplotSettingsWidget
 {
 public:
-    PointSettingsWidget(const hdps::gui::ResponsiveSectionWidget::State& state, QWidget* parent = nullptr);
+    PointSettingsWidget(const hdps::gui::ResponsiveSectionWidget::WidgetState& widgetState, QWidget* parent = nullptr);
 
     void setScatterplotPlugin(ScatterplotPlugin* scatterplotPlugin) override;
 

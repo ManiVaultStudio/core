@@ -61,13 +61,13 @@ public:
     template<typename StatefulWidgetType>
     void addWidget(ResponsiveSectionWidget::InitializeWidgetFn initializeWidgetFn, const QString& name, const QIcon& icon = QIcon(), const std::int32_t& priority = 0)
     {
-        const auto getWidgetState = [](const ResponsiveSectionWidget::State& state) -> QWidget* {
-            return new StatefulWidgetType(state);
+        const auto getWidgetFn = [](const ResponsiveSectionWidget::WidgetState& widgetState) -> QWidget* {
+            return new StatefulWidgetType(widgetState);
         };
 
-        auto sectionWidget = new ResponsiveSectionWidget(getWidgetState, initializeWidgetFn, name, icon, priority);
+        auto sectionWidget = new ResponsiveSectionWidget(getWidgetFn, initializeWidgetFn, name, icon, priority);
 
-        sectionWidget->installEventFilter(this);
+        //sectionWidget->installEventFilter(this);
 
         _sectionWidgets << sectionWidget;
 
