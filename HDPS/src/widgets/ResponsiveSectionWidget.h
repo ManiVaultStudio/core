@@ -20,8 +20,30 @@ public:
         Undefined = -1,
         Popup,
         Compact,
-        Full
+        Full,
+
+        // Layout type: single line or form
+        Sequential,
+        Form
     };
+
+    /*
+    enum class StateFlag {
+
+        // Docking side
+        Compact = 0x0002,
+        Full = 0x0002,
+
+        // Anchor location
+        Popup = 0x0010,
+
+        CompactPopup = DockLeft | AnchorTop,
+        LeftCenter = DockLeft | AnchorCenter,
+        LeftBottom = DockLeft | AnchorBottom,
+    };
+
+    Q_DECLARE_FLAGS(PopupAlignment, PopupAlignmentFlag)
+    */
 
     /** Maps state name to state enum and vice versa */
     static QMap<QString, State> const states;
@@ -72,10 +94,13 @@ private:
     QSharedPointer<QWidget> getWidgetForState(const State& state);
 
     /**
-     * Precomputes the size hint for \p state
-     * @param state State to precompute the size hint for
+     * Computes the size hint for \p state
+     * @param state State to compute the size hint for
      */
-    void precomputeSizeHintForState(const State& state);
+    void computeSizeHintForState(const State& state);
+
+    /** Compute size hints for all states */
+    void computeSizeHints();
 
 protected:
     GetWidgetForStateFn                 _getWidgetStateFn;

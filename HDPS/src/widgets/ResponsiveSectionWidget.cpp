@@ -37,10 +37,7 @@ ResponsiveSectionWidget::ResponsiveSectionWidget(GetWidgetForStateFn getWidgetSt
 
     _stateWidget = QSharedPointer<QWidget>(getWidgetForState(State::Full));
 
-    // Precompute the initial size hint for each state
-    precomputeSizeHintForState(State::Popup);
-    precomputeSizeHintForState(State::Compact);
-    precomputeSizeHintForState(State::Full);
+    computeSizeHints();
 }
 
 bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
@@ -55,23 +52,9 @@ bool ResponsiveSectionWidget::eventFilter(QObject* object, QEvent* event)
                 break;
 
             case QEvent::Resize:
-            {
-                switch (_state)
-                {
-                    case State::Undefined:
-                    case State::Popup:
-                        break;
-
-                    case State::Compact:
-                    case State::Full:
-                        _sizeHints[_state] = _stateWidget->sizeHint();
-                        break;
-
-                    default:
-                        break;
-                }
+                qDebug() << _name << "resized";
+                computeSizeHints();
                 break;
-            }
         }
     }
 
@@ -117,16 +100,26 @@ void ResponsiveSectionWidget::setState(const State& state)
             _popupWidget.reset();
             _popupPushButton->hide();
 
+            // Remove event filter (if any)
+            if (!_stateWidget.isNull())
+                _stateWidget->removeEventFilter(this);
+
+            qDebug() << "A";
+
             // Create a new state widget for the state
             _stateWidget = QSharedPointer<QWidget>(getWidgetForState(_state));
             _stateWidget->setWindowOpacity(0);
             _stateWidget->installEventFilter(this);
+
+            qDebug() << "B";
 
             // And add the state widget to the layout
             _layout->addWidget(_stateWidget.get());
 
             // Show the state widget
             _stateWidget->show();
+
+            qDebug() << "C";
 
             break;
         }
@@ -178,7 +171,7 @@ QSharedPointer<QWidget> ResponsiveSectionWidget::getWidgetForState(const State& 
     return QSharedPointer<QWidget>(widget);
 }
 
-void ResponsiveSectionWidget::precomputeSizeHintForState(const State& state)
+void ResponsiveSectionWidget::computeSizeHintForState(const State& state)
 {
     switch (state)
     {
@@ -195,7 +188,15 @@ void ResponsiveSectionWidget::precomputeSizeHintForState(const State& state)
             break;
     }
 
-    qDebug() << QString("%1 initial %2 size hint: [%3,%4] ").arg(_name, getStateName(state), QString::number(_sizeHints[state].width()), QString::number(_sizeHints[state].height()));
+    //qDebug() << QString("%1 initial %2 size hint: [%3,%4] ").arg(_name, getStateName(state), QString::number(_sizeHints[state].width()), QString::number(_sizeHints[state].height()));
 }
+
+void ResponsiveSectionWidget::computeSizeHints()
+{
+    computeSizeHintForState(State::Popup);
+    computeSizeHintForState(State::Compact);
+    computeSizeHintForState(State::Full);
+}
+
 }
 }

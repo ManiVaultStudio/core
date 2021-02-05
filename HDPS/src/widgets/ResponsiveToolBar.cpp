@@ -125,21 +125,21 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
 
 void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWidget /*= nullptr*/)
 {
-    if (resizedSectionWidget)
-        return;
-
     // Don't compute the layout if the resized widget is on the ignore list
+    /*
     if (_ignoreSectionWidgets.contains(resizedSectionWidget)) {
         _ignoreSectionWidgets.removeOne(resizedSectionWidget);
         return;
     }
+    */
+
+    if (resizedSectionWidget)
+        return;
 
     Timer timer("Compute layout");
 
-    /*
     if (resizedSectionWidget)
         qDebug() << resizedSectionWidget->getName() << "resized";
-    */
 
     const auto availableWidth = width();
     
@@ -151,23 +151,18 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
                 qDebug() << sectionWidget->getName() << ResponsiveSectionWidget::getStateName(states[sectionWidget]) << sectionWidget->getSizeHints().values();
     };
 
+    /*
     for (auto sectionWidget : _sectionWidgets)
         states[sectionWidget] = ResponsiveSectionWidget::State::Popup;
+    */
 
     // Initialize the state for the ignored section (if any)
-    /*
-    if (resizedSectionWidget != nullptr) {
-        const auto resizedSectionWidgetIndex = _sectionWidgets.indexOf(resizedSectionWidget);
+    //if (resizedSectionWidget != nullptr)
+        //states[resizedSectionWidget] = resizedSectionWidget->getState();
 
-        if (resizedSectionWidgetIndex >= 0)
-            states[resizedSectionWidgetIndex] = resizedSectionWidget->getState();
+    //_ignoreSectionWidgets = _sectionWidgets;
 
-        for (auto sectionWidget : _sectionWidgets) {
-            if (sectionWidget != resizedSectionWidget)
-                _ignoreSectionWidgets << sectionWidget;
-        }
-    }
-    */
+    //_ignoreSectionWidgets.removeOne(resizedSectionWidget);
 
     const auto getOccupiedWidth = [this, &states]() -> std::int32_t {
         auto occupiedWidth = 0;
@@ -194,12 +189,10 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
 
     // Establish state for each section widget
     for (auto sectionWidget : sortedSectionWidgets + sortedSectionWidgets) {
-        //if (section == resizedSectionWidget)
-            //continue;
-
         const auto oldWidgetStates  = states;
         const auto stateIntegral    = static_cast<std::int32_t>(states[sectionWidget]);
 
+        //if (sectionWidget != resizedSectionWidget)
         states[sectionWidget] = static_cast<ResponsiveSectionWidget::State>(stateIntegral + 1);
 
         const auto occupiedWidth = getOccupiedWidth();
@@ -209,14 +202,16 @@ void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWid
             break;
         }
     }
-    
-    
 
     /*
     for (auto sectionWidget : _sectionWidgets)
         if (sectionWidget != resizedSectionWidget)
             _ignoreSectionWidgets << sectionWidget;
     */
+
+    auto updateSectionWidgets = _sectionWidgets;
+
+    //updateSectionWidgets.removeOne(resizedSectionWidget);
 
     for (auto sectionWidget : _sectionWidgets)
         sectionWidget->setState(states[sectionWidget]);
