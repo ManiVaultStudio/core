@@ -1,3 +1,4 @@
+/*
 QWidget#PopupWidget {
     border: 1px solid grey;
 }
@@ -29,3 +30,4 @@ QLineEdit {
 QLineEdit:read-only {
     background: rgb(230, 230, 230);
 }
+*/

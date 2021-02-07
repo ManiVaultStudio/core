@@ -14,6 +14,9 @@
 #include <QApplication>
 #include <QToolBar>
 #include <QDebug>
+#include <QToolBar>
+#include <QMenu>
+
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
@@ -28,7 +31,11 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
-    _settingsWidget(new SettingsWidget(*this))
+    _settingsWidget(new SettingsWidget(*this)),
+    _createSubsetAction("Subset"),
+    _createSubsetFromSourceDataAction("Subset (from source)"),
+    _xDimensionAction(this, "X dimension"),
+    _yDimensionAction(this, "Y dimension")
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
 }
@@ -59,7 +66,17 @@ void ScatterplotPlugin::init()
 
     layout->setMargin(0);
     layout->setSpacing(0);
-    layout->addWidget(_settingsWidget);
+    //layout->addWidget(_settingsWidget);
+    
+    auto toolBar = new QWidget();
+
+    toolBar->setAutoFillBackground(true);
+    toolBar->setLayout(new QHBoxLayout());
+    
+    toolBar->layout()->addWidget(&_scatterPlotWidget->getRenderModeWidget());
+    toolBar->layout()->addWidget(&_scatterPlotWidget->getPlotSettingsWidget());
+
+    layout->addWidget(toolBar);
     layout->addWidget(_dataSlot, 1);
 
     setLayout(layout);
@@ -84,6 +101,7 @@ void ScatterplotPlugin::init()
     });
 
     updateWindowTitle();
+    setupActions();
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -100,6 +118,19 @@ void ScatterplotPlugin::dataChanged(const QString name)
 
 void ScatterplotPlugin::dataRemoved(const QString name)
 {
+}
+
+void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent* contextMenuEvent)
+{
+    QMenu menu(this);
+
+    menu.addMenu(_scatterPlotWidget->getRenderModeMenu());
+    menu.addMenu(_scatterPlotWidget->getPlotMenu());
+    menu.addSeparator();
+    menu.addMenu(getPositionMenu());
+    menu.addSeparator();
+
+    menu.exec(contextMenuEvent->globalPos());
 }
 
 void ScatterplotPlugin::selectionChanged(const QString dataName)
@@ -428,6 +459,46 @@ void ScatterplotPlugin::updateSelection()
     _scatterPlotWidget->setHighlights(highlights);
 
     emit selectionChanged();
+}
+
+void ScatterplotPlugin::setupActions()
+{
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    _subsetToolButton.setToolButtonStyle(Qt::ToolButtonIconOnly);
+    _subsetToolButton.setPopupMode(QToolButton::InstantPopup);
+    _subsetToolButton.setIcon(fontAwesome.getIcon("crop"));
+
+    auto menu = new QMenu;
+    menu->addAction(&_createSubsetAction);
+    menu->addAction(&_createSubsetFromSourceDataAction);
+
+    _subsetToolButton.setMenu(menu);
+    _subsetToolButton.setDefaultAction(&_createSubsetAction);
+
+    _createSubsetAction.setIcon(fontAwesome.getIcon("crop", QSize(64, 64)));
+    _createSubsetFromSourceDataAction.setIcon(fontAwesome.getIcon("th"));
+
+    _createSubsetAction.setToolTip("Create subset from selected data points");
+    _createSubsetFromSourceDataAction.setToolTip("Create subset from selected source data points");
+
+    connect(&_createSubsetAction, &QAction::triggered, this, [this]() {
+        qDebug() << "Create subset";
+    });
+
+    connect(&_createSubsetFromSourceDataAction, &QAction::triggered, this, [this]() {
+        qDebug() << "Create subset from source data";
+    });
+}
+
+QMenu* ScatterplotPlugin::getPositionMenu()
+{
+    auto menu = new QMenu("Position");
+
+    menu->addAction(&_xDimensionAction);
+    menu->addAction(&_yDimensionAction);
+
+    return menu;
 }
 
 PixelSelectionTool& ScatterplotPlugin::getSelectionTool()

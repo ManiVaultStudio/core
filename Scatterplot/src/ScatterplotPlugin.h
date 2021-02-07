@@ -8,6 +8,8 @@
 #include "PixelSelectionTool.h"
 #include "ScatterplotWidget.h"
 
+#include <QToolButton>
+
 using namespace hdps::plugin;
 
 // =============================================================================
@@ -81,6 +83,12 @@ public:
 
     void selectPoints();
 
+protected:
+
+#ifndef QT_NO_CONTEXTMENU
+    void contextMenuEvent(QContextMenuEvent* contextMenuEvent) override;
+#endif // QT_NO_CONTEXTMENU
+
 signals:
     void currentDatasetChanged(const QString& datasetName);
     void selectionChanged();
@@ -102,6 +110,12 @@ private:
     void calculatePositions(const Points& points);
     void calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex);
     void updateSelection();
+    
+protected: // Menus & actions
+
+    void setupActions();
+
+    QMenu* getPositionMenu();
 
 private:
     QString                         _currentDataSet;
@@ -112,6 +126,11 @@ private:
     PixelSelectionTool*             _pixelSelectionTool;        /** Pixel selection tool */
     ScatterplotWidget*              _scatterPlotWidget;         /**  */
     SettingsWidget*                 _settingsWidget;
+    QToolButton                     _subsetToolButton;
+    QAction                         _createSubsetAction;
+    QAction                         _createSubsetFromSourceDataAction;
+    OptionAction                    _xDimensionAction;
+    OptionAction                    _yDimensionAction;
 };
 
 // =============================================================================

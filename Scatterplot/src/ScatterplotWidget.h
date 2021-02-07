@@ -12,11 +12,13 @@
 #include "widgets/ColormapWidget.h"
 
 #include "PixelSelectionToolRenderer.h"
+#include "Actions.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <QMouseEvent>
+#include <QMenu>
 
 class PixelSelectionTool;
 
@@ -104,6 +106,38 @@ public slots:
 
     void colormapChanged(QString colormapName);
     void colormapdiscreteChanged(bool isDiscrete);
+
+public: // Menus & actions
+
+    QMenu* getRenderModeMenu();
+    QMenu* getPlotMenu();
+
+    QAction& getScatterplotAction() { return _scatterPlotAction; }
+    QAction& getDensityPlotAction() { return _densityPlotAction; }
+    QAction& getContourPlotAction() { return _contourPlotAction; }
+    FloatAction& getPointSizeAction() { return _pointSizeAction; }
+    FloatAction& getPointOpacityAction() { return _pointOpacityAction; }
+    FloatAction& getSigmaAction() { return _sigmaAction; }
+    PlotPopupAction& getPlotPopupAction() { return _plotPopupAction; }
+    RenderModePopupAction& getRenderModePopupAction() { return _renderModePopupAction; }
+
+    RenderModeW& getRenderModeWidget() { return _renderModeWidget; }
+    PlotSettingsW& getPlotSettingsWidget() { return _plotSettingsWidget; }
+
+protected: // Menus & actions
+    QAction                 _scatterPlotAction;
+    QAction                 _densityPlotAction;
+    QAction                 _contourPlotAction;
+    FloatAction             _pointSizeAction;
+    FloatAction             _pointOpacityAction;
+    FloatAction             _sigmaAction;
+    PlotPopupAction         _plotPopupAction;
+    RenderModePopupAction   _renderModePopupAction;
+    RenderModeW             _renderModeWidget;
+    PlotSettingsW           _plotSettingsWidget;
+
+private:  // Menus & actions
+    void setupActions();
 
 private:
     const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);

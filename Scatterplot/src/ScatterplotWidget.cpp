@@ -1,5 +1,6 @@
 #include "ScatterplotWidget.h"
 #include "PixelSelectionTool.h"
+#include "Application.h"
 
 #include "util/Math.h"
 
@@ -32,6 +33,16 @@ namespace
 ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _densityRenderer(DensityRenderer::RenderMode::DENSITY),
     _colormapWidget(this),
+    _scatterPlotAction("Scatter plot"),
+    _densityPlotAction("Density plot"),
+    _contourPlotAction("Contour plot"),
+    _pointSizeAction(this, "Point size"),
+    _pointOpacityAction(this, "Point opacity"),
+    _sigmaAction(this, "Sigma"),
+    _plotPopupAction(this),
+    _renderModePopupAction(this),
+    _renderModeWidget(this),
+    _plotSettingsWidget(this),
     _pointRenderer(),
     _pixelSelectionToolRenderer(pixelSelectionTool),
     _pixelSelectionTool(pixelSelectionTool)
@@ -51,6 +62,8 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     });
 
     _pointRenderer.setPointScaling(Absolute);
+
+    setupActions();
 }
 
 bool ScatterplotWidget::isInitialized()
@@ -110,6 +123,85 @@ void ScatterplotWidget::colormapdiscreteChanged(bool isDiscrete)
     //_renderer->setColormapDiscrete(isDiscrete);
 
     update();
+}
+
+QMenu* ScatterplotWidget::getRenderModeMenu()
+{
+    auto menu = new QMenu("Render mode");
+
+    menu->addAction(&_scatterPlotAction);
+    menu->addAction(&_densityPlotAction);
+    menu->addAction(&_contourPlotAction);
+
+    return menu;
+}
+
+QMenu* ScatterplotWidget::getPlotMenu()
+{
+    auto menu = new QMenu("Plot");
+
+    switch (_renderMode)
+    {
+        case ScatterplotWidget::SCATTERPLOT:
+            menu->addAction(&_pointSizeAction);
+            menu->addAction(&_pointOpacityAction);
+            break;
+
+        case ScatterplotWidget::DENSITY:
+        case ScatterplotWidget::LANDSCAPE:
+            menu->addAction(&_sigmaAction);
+            break;
+
+        default:
+            break;
+    }
+
+    return menu;
+}
+
+void ScatterplotWidget::setupActions()
+{
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    _scatterPlotAction.setIcon(fontAwesome.getIcon("braille"));
+    _densityPlotAction.setIcon(fontAwesome.getIcon("cloud"));
+    _contourPlotAction.setIcon(fontAwesome.getIcon("mountain"));
+
+    _scatterPlotAction.setToolTip("Set render mode to scatter plot");
+    _densityPlotAction.setToolTip("Set render mode to density plot");
+    _contourPlotAction.setToolTip("Set render mode to contour plot");
+
+    _scatterPlotAction.setCheckable(true);
+    _densityPlotAction.setCheckable(true);
+    _contourPlotAction.setCheckable(true);
+
+    connect(&_scatterPlotAction, &QAction::triggered, this, [this]() {
+        setRenderMode(RenderMode::SCATTERPLOT);
+    });
+
+    connect(&_densityPlotAction, &QAction::triggered, this, [this]() {
+        setRenderMode(RenderMode::DENSITY);
+    });
+
+    connect(&_contourPlotAction, &QAction::triggered, this, [this]() {
+        setRenderMode(RenderMode::LANDSCAPE);
+    });
+
+    const auto updateRenderMode = [this]() {
+        _scatterPlotAction.setChecked(_renderMode == ScatterplotWidget::SCATTERPLOT);
+        _densityPlotAction.setChecked(_renderMode == ScatterplotWidget::DENSITY);
+        _contourPlotAction.setChecked(_renderMode == ScatterplotWidget::LANDSCAPE);
+
+        _pointSizeAction.setVisible(_renderMode == ScatterplotWidget::SCATTERPLOT);
+        _pointOpacityAction.setVisible(_renderMode == ScatterplotWidget::SCATTERPLOT);
+        _sigmaAction.setVisible(_renderMode != ScatterplotWidget::SCATTERPLOT);
+    };
+
+    connect(this, &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const RenderMode& renderMode) {
+        updateRenderMode();
+    });
+
+    updateRenderMode();
 }
 
 // Positions need to be passed as a pointer as we need to store them locally in order
