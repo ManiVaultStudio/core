@@ -39,10 +39,8 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _pointSizeAction(this, "Point size"),
     _pointOpacityAction(this, "Point opacity"),
     _sigmaAction(this, "Sigma"),
-    _plotPopupAction(this),
-    _renderModePopupAction(this),
-    _renderModeWidget(this),
-    _plotSettingsWidget(this),
+    _renderModeAction(this),
+    _selectionAction(this),
     _pointRenderer(),
     _pixelSelectionToolRenderer(pixelSelectionTool),
     _pixelSelectionTool(pixelSelectionTool)
@@ -200,6 +198,10 @@ void ScatterplotWidget::setupActions()
     connect(this, &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const RenderMode& renderMode) {
         updateRenderMode();
     });
+
+    _pointSizeAction.setDisabled(true);
+    _pointSizeAction.setSuffix("px");
+    _pointOpacityAction.setSuffix("%");
 
     updateRenderMode();
 }

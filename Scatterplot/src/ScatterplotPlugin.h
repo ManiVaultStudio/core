@@ -131,6 +131,7 @@ private:
     QAction                         _createSubsetFromSourceDataAction;
     OptionAction                    _xDimensionAction;
     OptionAction                    _yDimensionAction;
+    PositionAction                  _positionAction;
 };
 
 // =============================================================================

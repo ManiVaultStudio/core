@@ -115,26 +115,14 @@ public: // Menus & actions
     QAction& getScatterplotAction() { return _scatterPlotAction; }
     QAction& getDensityPlotAction() { return _densityPlotAction; }
     QAction& getContourPlotAction() { return _contourPlotAction; }
-    FloatAction& getPointSizeAction() { return _pointSizeAction; }
-    FloatAction& getPointOpacityAction() { return _pointOpacityAction; }
-    FloatAction& getSigmaAction() { return _sigmaAction; }
-    PlotPopupAction& getPlotPopupAction() { return _plotPopupAction; }
-    RenderModePopupAction& getRenderModePopupAction() { return _renderModePopupAction; }
+    DoubleAction& getPointSizeAction() { return _pointSizeAction; }
+    DoubleAction& getPointOpacityAction() { return _pointOpacityAction; }
+    DoubleAction& getSigmaAction() { return _sigmaAction; }
+    
+    RenderModeAction& getRenderModeAction() { return _renderModeAction; }
+    SelectionAction& getSelectionAction() { return _selectionAction; }
 
-    RenderModeW& getRenderModeWidget() { return _renderModeWidget; }
-    PlotSettingsW& getPlotSettingsWidget() { return _plotSettingsWidget; }
 
-protected: // Menus & actions
-    QAction                 _scatterPlotAction;
-    QAction                 _densityPlotAction;
-    QAction                 _contourPlotAction;
-    FloatAction             _pointSizeAction;
-    FloatAction             _pointOpacityAction;
-    FloatAction             _sigmaAction;
-    PlotPopupAction         _plotPopupAction;
-    RenderModePopupAction   _renderModePopupAction;
-    RenderModeW             _renderModeWidget;
-    PlotSettingsW           _plotSettingsWidget;
 
 private:  // Menus & actions
     void setupActions();
@@ -163,4 +151,14 @@ private:
     Bounds _dataBounds;
 
     PixelSelectionTool&     _pixelSelectionTool;
+
+protected: // Menus & actions
+    QAction                 _scatterPlotAction;
+    QAction                 _densityPlotAction;
+    QAction                 _contourPlotAction;
+    DoubleAction            _pointSizeAction;
+    DoubleAction            _pointOpacityAction;
+    DoubleAction            _sigmaAction;
+    RenderModeAction        _renderModeAction;
+    SelectionAction         _selectionAction;
 };

@@ -35,7 +35,8 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _createSubsetAction("Subset"),
     _createSubsetFromSourceDataAction("Subset (from source)"),
     _xDimensionAction(this, "X dimension"),
-    _yDimensionAction(this, "Y dimension")
+    _yDimensionAction(this, "Y dimension"),
+    _positionAction(this, &_xDimensionAction, &_yDimensionAction)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
 }
@@ -68,13 +69,15 @@ void ScatterplotPlugin::init()
     layout->setSpacing(0);
     //layout->addWidget(_settingsWidget);
     
-    auto toolBar = new QWidget();
+    auto toolBar = new QToolBar();
 
     toolBar->setAutoFillBackground(true);
-    toolBar->setLayout(new QHBoxLayout());
     
-    toolBar->layout()->addWidget(&_scatterPlotWidget->getRenderModeWidget());
-    toolBar->layout()->addWidget(&_scatterPlotWidget->getPlotSettingsWidget());
+    //toolBar->layout()->addWidget(&_scatterPlotWidget->getRenderModeWidget());
+    //toolBar->layout()->addWidget(&_scatterPlotWidget->getPlotSettingsWidget());
+    //toolBar->layout()->addWidget(_positionAction.createWidget(toolBar));
+    toolBar->addAction(&_scatterPlotWidget->getRenderModeAction());
+    toolBar->addAction(&_scatterPlotWidget->getSelectionAction());
 
     layout->addWidget(toolBar);
     layout->addWidget(_dataSlot, 1);
@@ -124,10 +127,10 @@ void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent* contextMenuEvent)
 {
     QMenu menu(this);
 
-    menu.addMenu(_scatterPlotWidget->getRenderModeMenu());
-    menu.addMenu(_scatterPlotWidget->getPlotMenu());
+    menu.addMenu(_scatterPlotWidget->getRenderModeAction().getContextMenu());
+    menu.addMenu(_scatterPlotWidget->getSelectionAction().getContextMenu());
     menu.addSeparator();
-    menu.addMenu(getPositionMenu());
+    //menu.addMenu(getPositionMenu());
     menu.addSeparator();
 
     menu.exec(contextMenuEvent->globalPos());
