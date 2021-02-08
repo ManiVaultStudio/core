@@ -108,24 +108,9 @@ public slots:
     void colormapdiscreteChanged(bool isDiscrete);
 
 public: // Menus & actions
-
-    QMenu* getRenderModeMenu();
-    QMenu* getPlotMenu();
-
-    QAction& getScatterplotAction() { return _scatterPlotAction; }
-    QAction& getDensityPlotAction() { return _densityPlotAction; }
-    QAction& getContourPlotAction() { return _contourPlotAction; }
-    DoubleAction& getPointSizeAction() { return _pointSizeAction; }
-    DoubleAction& getPointOpacityAction() { return _pointOpacityAction; }
-    DoubleAction& getSigmaAction() { return _sigmaAction; }
-    
     RenderModeAction& getRenderModeAction() { return _renderModeAction; }
+    PlotAction& getPlotAction() { return _plotAction; }
     SelectionAction& getSelectionAction() { return _selectionAction; }
-
-
-
-private:  // Menus & actions
-    void setupActions();
 
 private:
     const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
@@ -153,12 +138,7 @@ private:
     PixelSelectionTool&     _pixelSelectionTool;
 
 protected: // Menus & actions
-    QAction                 _scatterPlotAction;
-    QAction                 _densityPlotAction;
-    QAction                 _contourPlotAction;
-    DoubleAction            _pointSizeAction;
-    DoubleAction            _pointOpacityAction;
-    DoubleAction            _sigmaAction;
     RenderModeAction        _renderModeAction;
+    PlotAction              _plotAction;
     SelectionAction         _selectionAction;
 };

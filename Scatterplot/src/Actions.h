@@ -113,11 +113,11 @@ public:
 
     QWidget* createWidget(QWidget* parent) override;
 
-    float getValue() const {
+    double getValue() const {
         return _value;
     }
 
-    void DoubleAction::setValue(const float& value) {
+    void DoubleAction::setValue(const double& value) {
         if (value == _value)
             return;
 
@@ -219,14 +219,6 @@ public:
     QWidget* createWidget(QWidget* parent) override;
 };
 
-class PlotPopupWidget : public PopupWidget {
-public:
-    PlotPopupWidget(QWidget* parent, ScatterplotWidget* scatterplotWidget);
-
-private:
-    QVBoxLayout     _layout;
-};
-
 template<typename WidgetType>
 class CustomAction : public QWidgetAction
 {
@@ -244,8 +236,6 @@ public:
 protected:
     ScatterplotWidget*  _scatterplotWidget;
 };
-
-using PlotPopupAction = CustomAction<PlotPopupWidget>;
 
 class PositionAction : public QWidgetAction
 {
@@ -308,6 +298,41 @@ protected:
     QAction     _scatterPlotAction;
     QAction     _densityPlotAction;
     QAction     _contourPlotAction;
+
+    friend class Widget;
+};
+
+class PlotAction : public QWidgetAction
+{
+    Q_OBJECT
+
+public:
+    class Widget : public ActionWidget {
+    public:
+        Widget(QWidget* parent, PlotAction* plotAction);
+
+    private:
+        QHBoxLayout         _layout;
+        QToolBar            _toolBar;
+        QToolButton         _toolButton;
+        PopupWidget         _popupWidget;
+        QWidgetAction       _popupWidgetAction;
+    };
+
+public:
+    PlotAction(ScatterplotWidget* scatterplotWidget);
+
+    QWidget* createWidget(QWidget* parent) override {
+        return new Widget(parent, this);
+    }
+
+    QMenu* getContextMenu();
+
+protected:
+    ScatterplotWidget*  _scatterplotWidget;
+    DoubleAction        _pointSizeAction;
+    DoubleAction        _pointOpacityAction;
+    DoubleAction        _sigmaAction;
 
     friend class Widget;
 };

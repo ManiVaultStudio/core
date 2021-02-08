@@ -125,6 +125,8 @@ bool ResponsiveToolBar::eventFilter(QObject* object, QEvent* event)
 
 void ResponsiveToolBar::computeLayout(ResponsiveSectionWidget* resizedSectionWidget /*= nullptr*/)
 {
+    return;
+
     // Don't compute the layout if the resized widget is on the ignore list
     /*
     if (_ignoreSectionWidgets.contains(resizedSectionWidget)) {

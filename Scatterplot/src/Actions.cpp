@@ -1,4 +1,5 @@
 #include "Actions.h"
+#include "Application.h"
 
 #include "ScatterplotWidget.h"
 
@@ -105,11 +106,13 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
     const auto updateValue = [this, doubleAction, setToolTips]() {
         QSignalBlocker spinBoxBlocker(&_spinBox), sliderBlocker(&_slider);
 
-        if (doubleAction->getValue() != _spinBox.value())
-            _spinBox.setValue(doubleAction->getValue());
+        const auto value = doubleAction->getValue();
 
-        if (doubleAction->getValue() != _slider.value())
-            _slider.setValue(doubleAction->getValue() * SLIDER_MULTIPLIER);
+        if (value != _spinBox.value())
+            _spinBox.setValue(value);
+
+        if (value * SLIDER_MULTIPLIER != _slider.value())
+            _slider.setValue(value * static_cast<double>(SLIDER_MULTIPLIER));
 
         setToolTips();
     };
@@ -162,8 +165,8 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
         updateDecimals();
     });
 
-    updateValue();
     updateValueRange();
+    updateValue();
     updateSuffix();
     updateDecimals();
     setToolTips();
@@ -247,32 +250,6 @@ void PopupWidget::setContentLayout(QLayout* layout)
     _groupBox.setLayout(layout);
 }
 
-PlotPopupWidget::PlotPopupWidget(QWidget* parent, ScatterplotWidget* scatterplotWidget) :
-    PopupWidget(parent, "Plot"),
-    _layout()
-{
-    const auto renderMode = scatterplotWidget->getRenderMode();
-
-    switch (renderMode)
-    {
-        case ScatterplotWidget::SCATTERPLOT:
-            _layout.addWidget(scatterplotWidget->getPointSizeAction().createWidget(this));
-            _layout.addWidget(scatterplotWidget->getPointOpacityAction().createWidget(this));
-            break;
-
-        case ScatterplotWidget::DENSITY:
-        case ScatterplotWidget::LANDSCAPE:
-            _layout.addWidget(scatterplotWidget->getSigmaAction().createWidget(this));
-            break;
-
-        default:
-            break;
-    }
-
-    setContentLayout(&_layout);
-}
-
-
 PositionAction::Widget::Widget(QWidget* parent, PositionAction* positionAction) :
     ActionWidget(parent, positionAction),
     _layout(),
@@ -309,6 +286,128 @@ PositionAction::PositionAction(QObject* parent, OptionAction* xDimensionAction, 
 {
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+PlotAction::PlotAction(ScatterplotWidget* scatterplotWidget) :
+    QWidgetAction(scatterplotWidget),
+    _scatterplotWidget(scatterplotWidget),
+    _pointSizeAction(this, "Point size"),
+    _pointOpacityAction(this, "Point opacity"),
+    _sigmaAction(this, "Sigma")
+{
+    _pointSizeAction.setDisabled(true);
+    _pointSizeAction.setSuffix("px");
+    _pointOpacityAction.setSuffix("%");
+
+    const auto updateRenderMode = [this, scatterplotWidget]() {
+        const auto renderMode = scatterplotWidget->getRenderMode();
+
+        _pointSizeAction.setVisible(renderMode == ScatterplotWidget::SCATTERPLOT);
+        _pointOpacityAction.setVisible(renderMode == ScatterplotWidget::SCATTERPLOT);
+        _sigmaAction.setVisible(renderMode != ScatterplotWidget::SCATTERPLOT);
+    };
+
+    connect(scatterplotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const ScatterplotWidget::RenderMode& renderMode) {
+        updateRenderMode();
+    });
+
+    updateRenderMode();
+}
+
+QMenu* PlotAction::getContextMenu()
+{
+    auto menu = new QMenu("Plot");
+
+    const auto renderMode = _scatterplotWidget->getRenderMode();
+
+    switch (renderMode)
+    {
+        case ScatterplotWidget::RenderMode::SCATTERPLOT:
+            menu->addAction(&_pointSizeAction);
+            menu->addAction(&_pointOpacityAction);
+            break;
+
+        case ScatterplotWidget::RenderMode::DENSITY:
+        case ScatterplotWidget::RenderMode::LANDSCAPE:
+            menu->addAction(&_sigmaAction);
+            break;
+
+        default:
+            break;
+    }
+
+    return menu;
+}
+
+PlotAction::Widget::Widget(QWidget* parent, PlotAction* plotAction) :
+    ActionWidget(parent, plotAction),
+    _layout(),
+    _toolBar(),
+    _toolButton(),
+    _popupWidget(this, "Plot"),
+    _popupWidgetAction(this)
+{
+    _layout.addWidget(&_toolBar);
+
+    _toolBar.addAction(&plotAction->_pointSizeAction);
+    _toolBar.addAction(&plotAction->_pointOpacityAction);
+    _toolBar.addAction(&plotAction->_sigmaAction);
+
+    _popupWidgetAction.setDefaultWidget(&_popupWidget);
+
+    _toolButton.setPopupMode(QToolButton::InstantPopup);
+    _toolButton.addAction(&_popupWidgetAction);
+
+    setLayout(&_layout);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 RenderModeAction::RenderModeAction(ScatterplotWidget* scatterplotWidget) :
     QWidgetAction(scatterplotWidget),
     _scatterPlotAction("Scatter plot"),
@@ -322,6 +421,16 @@ RenderModeAction::RenderModeAction(ScatterplotWidget* scatterplotWidget) :
     _scatterPlotAction.setShortcut(QKeySequence("S"));
     _densityPlotAction.setShortcut(QKeySequence("D"));
     _contourPlotAction.setShortcut(QKeySequence("C"));
+
+    _scatterPlotAction.setToolTip("Set render mode to scatter plot");
+    _densityPlotAction.setToolTip("Set render mode to density plot");
+    _contourPlotAction.setToolTip("Set render mode to contour plot");
+
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    _scatterPlotAction.setIcon(fontAwesome.getIcon("braille"));
+    _densityPlotAction.setIcon(fontAwesome.getIcon("cloud"));
+    _contourPlotAction.setIcon(fontAwesome.getIcon("mountain"));
 
     connect(&_scatterPlotAction, &QAction::triggered, this, [this, scatterplotWidget]() {
         scatterplotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
@@ -337,6 +446,8 @@ RenderModeAction::RenderModeAction(ScatterplotWidget* scatterplotWidget) :
 
     const auto updateButtons = [this, scatterplotWidget]() {
         const auto renderMode = scatterplotWidget->getRenderMode();
+
+        QSignalBlocker scatterPlotActionBlocker(&_scatterPlotAction), densityPlotAction(&_densityPlotAction), contourPlotAction(&_contourPlotAction);
 
         _scatterPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
         _densityPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::DENSITY);

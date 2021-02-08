@@ -73,10 +73,8 @@ void ScatterplotPlugin::init()
 
     toolBar->setAutoFillBackground(true);
     
-    //toolBar->layout()->addWidget(&_scatterPlotWidget->getRenderModeWidget());
-    //toolBar->layout()->addWidget(&_scatterPlotWidget->getPlotSettingsWidget());
-    //toolBar->layout()->addWidget(_positionAction.createWidget(toolBar));
     toolBar->addAction(&_scatterPlotWidget->getRenderModeAction());
+    toolBar->addAction(&_scatterPlotWidget->getPlotAction());
     toolBar->addAction(&_scatterPlotWidget->getSelectionAction());
 
     layout->addWidget(toolBar);
@@ -128,6 +126,7 @@ void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent* contextMenuEvent)
     QMenu menu(this);
 
     menu.addMenu(_scatterPlotWidget->getRenderModeAction().getContextMenu());
+    menu.addMenu(_scatterPlotWidget->getPlotAction().getContextMenu());
     menu.addMenu(_scatterPlotWidget->getSelectionAction().getContextMenu());
     menu.addSeparator();
     //menu.addMenu(getPositionMenu());
