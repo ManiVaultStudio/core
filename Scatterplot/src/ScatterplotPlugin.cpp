@@ -354,8 +354,8 @@ void ScatterplotPlugin::updateData()
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
     // Get the selected dimensions to use as X and Y dimension in the plot
-    int xDim = _settingsWidget->getXDimension();
-    int yDim = _settingsWidget->getYDimension();
+    int xDim = _positionAction.getXDimension();
+    int yDim = _positionAction.getYDimension();
 
     // If one of the dimensions was not set, do not draw anything
     if (xDim < 0 || yDim < 0)
@@ -375,7 +375,7 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const Points& points)
 {
-    points.extractDataForDimensions(_points, _settingsWidget->getXDimension(), _settingsWidget->getYDimension());
+    points.extractDataForDimensions(_points, _positionAction.getXDimension(), _positionAction.getYDimension());
 }
 
 void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex)

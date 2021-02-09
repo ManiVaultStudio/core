@@ -56,18 +56,6 @@ SettingsWidget::SettingsWidget(const ScatterplotPlugin& plugin) :
     });
 }
 
-int SettingsWidget::getXDimension()
-{
-    return 0;
-    //return _positionSettingsWidget->getDimensionX();
-}
-
-int SettingsWidget::getYDimension()
-{
-    return 0;
-    //return _positionSettingsWidget->getDimensionY();
-}
-
 hdps::Vector3f SettingsWidget::getBaseColor()
 {
     return _baseColor;

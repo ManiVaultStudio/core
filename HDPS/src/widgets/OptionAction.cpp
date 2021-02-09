@@ -17,12 +17,38 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     if (childOfMenu())
         _comboBox.setFixedWidth(120);
 
-    connect(optionAction, &OptionAction::optionsChanged, this, [this, optionAction](const QStringList& options) {
+    const auto populateComboBox = [this, optionAction]() {
         QSignalBlocker comboBoxSignalBlocker(&_comboBox);
 
+        const auto options = optionAction->getOptions();
+
         _comboBox.addItems(options);
-        _comboBox.setCurrentIndex(optionAction->getCurrentIndex());
+        _comboBox.setEnabled(!options.isEmpty());
+    };
+
+    connect(optionAction, &OptionAction::optionsChanged, this, [this, populateComboBox](const QStringList& options) {
+        populateComboBox();
     });
+
+    const auto updateComboBoxSelection = [this, optionAction]() {
+        QSignalBlocker comboBoxSignalBlocker(&_comboBox);
+        _comboBox.setCurrentIndex(optionAction->getCurrentIndex());
+    };
+
+    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, updateComboBoxSelection](const std::int32_t& currentIndex) {
+        updateComboBoxSelection();
+    });
+
+    connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection](const QString& currentText) {
+        updateComboBoxSelection();
+    });
+
+    connect(&_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
+        optionAction->setCurrentIndex(currentIndex);
+    });
+
+    populateComboBox();
+    updateComboBoxSelection();
 }
 
 OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/) :
@@ -51,6 +77,8 @@ void OptionAction::setOptions(const QStringList& options)
         return;
 
     _options = options;
+
+    emit optionsChanged(_options);
 
     setCurrentIndex(0);
 }

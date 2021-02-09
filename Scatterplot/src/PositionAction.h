@@ -46,6 +46,9 @@ public:
 
     void setDimensions(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames = std::vector<QString>());
 
+    std::int32_t getXDimension() const;
+    std::int32_t getYDimension() const;
+
 private:
     QStringList getDimensionNamesStringList(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames) const;
 

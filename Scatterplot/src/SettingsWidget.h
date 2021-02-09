@@ -27,9 +27,6 @@ public:
 public:
     SettingsWidget(const ScatterplotPlugin& plugin);
 
-    int getXDimension();
-    int getYDimension();
-
     hdps::Vector3f getBaseColor();
     hdps::Vector3f getSelectionColor();
 

@@ -1,7 +1,7 @@
 #include "PositionAction.h"
 #include "Application.h"
 
-#include "ScatterplotWidget.h"
+#include "ScatterplotPlugin.h"
 
 using namespace hdps::gui;
 
@@ -13,45 +13,13 @@ PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     _xDimensionAction.setToolTip("X dimension");
     _yDimensionAction.setToolTip("Y dimension");
 
-    /*
-    connect(&_scatterPlotAction, &QAction::triggered, this, [this, scatterplotWidget]() {
-        scatterplotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
+    connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin](const std::int32_t& currentIndex) {
+        scatterplotPlugin->xDimPicked(currentIndex);
     });
 
-    connect(&_densityPlotAction, &QAction::triggered, this, [this, scatterplotWidget]() {
-        scatterplotWidget->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
+    connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin](const std::int32_t& currentIndex) {
+        scatterplotPlugin->yDimPicked(currentIndex);
     });
-
-    connect(&_contourPlotAction, &QAction::triggered, this, [this, scatterplotWidget]() {
-        scatterplotWidget->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
-    });
-
-    const auto updateButtons = [this, scatterplotWidget]() {
-        const auto renderMode = scatterplotWidget->getRenderMode();
-
-        QSignalBlocker scatterPlotActionBlocker(&_scatterPlotAction), densityPlotAction(&_densityPlotAction), contourPlotAction(&_contourPlotAction);
-
-        _scatterPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
-        _densityPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::DENSITY);
-        _contourPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::LANDSCAPE);
-    };
-
-    connect(scatterplotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateButtons](const ScatterplotWidget::RenderMode& renderMode) {
-        updateButtons();
-    });
-
-    updateButtons();
-
-    _scatterplotPlugin = scatterplotPlugin;
-
-    QObject::connect(_xDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        _scatterplotPlugin->xDimPicked(index);
-    });
-
-    QObject::connect(_yDimensionComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        _scatterplotPlugin->yDimPicked(index);
-    });
-    */
 }
 
 QMenu* PositionAction::getContextMenu()
@@ -83,6 +51,16 @@ void PositionAction::setDimensions(const std::uint32_t& numberOfDimensions, cons
         _xDimensionAction.setCurrentIndex(0);
         _yDimensionAction.setCurrentIndex(1);
     }
+}
+
+std::int32_t PositionAction::getXDimension() const
+{
+    return _xDimensionAction.getCurrentIndex();
+}
+
+std::int32_t PositionAction::getYDimension() const
+{
+    return _yDimensionAction.getCurrentIndex();
 }
 
 QStringList PositionAction::getDimensionNamesStringList(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames /*= std::vector<QString>()*/) const
