@@ -33,8 +33,6 @@ public:
     hdps::Vector3f getBaseColor();
     hdps::Vector3f getSelectionColor();
 
-    void initDimOptions(const unsigned int nDim);
-    void initDimOptions(const std::vector<QString>& dimNames);
     void initScalarDimOptions(const unsigned int nDim);
     void initScalarDimOptions(const std::vector<QString>& dimNames);
 

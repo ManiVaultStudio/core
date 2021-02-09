@@ -32,11 +32,8 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
     _settingsWidget(new SettingsWidget(*this)),
-    _createSubsetAction("Subset"),
-    _createSubsetFromSourceDataAction("Subset (from source)"),
-    _xDimensionAction(this, "X dimension"),
-    _yDimensionAction(this, "Y dimension"),
-    _positionAction(this, &_xDimensionAction, &_yDimensionAction)
+    _positionAction(this),
+    _subsetAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
 }
@@ -75,6 +72,8 @@ void ScatterplotPlugin::init()
     
     toolBar->addAction(&_scatterPlotWidget->getRenderModeAction());
     toolBar->addAction(&_scatterPlotWidget->getPlotAction());
+    toolBar->addAction(&_subsetAction);
+    //toolBar->addAction(&_positionAction);
     toolBar->addAction(&_scatterPlotWidget->getSelectionAction());
 
     layout->addWidget(toolBar);
@@ -102,7 +101,6 @@ void ScatterplotPlugin::init()
     });
 
     updateWindowTitle();
-    setupActions();
 }
 
 void ScatterplotPlugin::dataAdded(const QString name)
@@ -129,7 +127,7 @@ void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent* contextMenuEvent)
     menu.addMenu(_scatterPlotWidget->getPlotAction().getContextMenu());
     menu.addMenu(_scatterPlotWidget->getSelectionAction().getContextMenu());
     menu.addSeparator();
-    //menu.addMenu(getPositionMenu());
+    menu.addMenu(_positionAction.getContextMenu());
     menu.addSeparator();
 
     menu.exec(contextMenuEvent->globalPos());
@@ -275,9 +273,9 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     // For source data determine whether to use dimension names or make them up
     if (points.getDimensionNames().size() == points.getNumDimensions())
-        _settingsWidget->initDimOptions(points.getDimensionNames());
+        _positionAction.setDimensions(points.getDimensionNames().size(), points.getDimensionNames());
     else
-        _settingsWidget->initDimOptions(points.getNumDimensions());
+        _positionAction.setDimensions(points.getNumDimensions());
 
     // For derived data determine whether to use dimension names or make them up
     if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
@@ -461,46 +459,6 @@ void ScatterplotPlugin::updateSelection()
     _scatterPlotWidget->setHighlights(highlights);
 
     emit selectionChanged();
-}
-
-void ScatterplotPlugin::setupActions()
-{
-    const auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    _subsetToolButton.setToolButtonStyle(Qt::ToolButtonIconOnly);
-    _subsetToolButton.setPopupMode(QToolButton::InstantPopup);
-    _subsetToolButton.setIcon(fontAwesome.getIcon("crop"));
-
-    auto menu = new QMenu;
-    menu->addAction(&_createSubsetAction);
-    menu->addAction(&_createSubsetFromSourceDataAction);
-
-    _subsetToolButton.setMenu(menu);
-    _subsetToolButton.setDefaultAction(&_createSubsetAction);
-
-    _createSubsetAction.setIcon(fontAwesome.getIcon("crop", QSize(64, 64)));
-    _createSubsetFromSourceDataAction.setIcon(fontAwesome.getIcon("th"));
-
-    _createSubsetAction.setToolTip("Create subset from selected data points");
-    _createSubsetFromSourceDataAction.setToolTip("Create subset from selected source data points");
-
-    connect(&_createSubsetAction, &QAction::triggered, this, [this]() {
-        qDebug() << "Create subset";
-    });
-
-    connect(&_createSubsetFromSourceDataAction, &QAction::triggered, this, [this]() {
-        qDebug() << "Create subset from source data";
-    });
-}
-
-QMenu* ScatterplotPlugin::getPositionMenu()
-{
-    auto menu = new QMenu("Position");
-
-    menu->addAction(&_xDimensionAction);
-    menu->addAction(&_yDimensionAction);
-
-    return menu;
 }
 
 PixelSelectionTool& ScatterplotPlugin::getSelectionTool()

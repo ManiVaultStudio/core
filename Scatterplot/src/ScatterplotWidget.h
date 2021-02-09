@@ -11,8 +11,11 @@
 
 #include "widgets/ColormapWidget.h"
 
+#include "RenderModeAction.h"
+#include "PlotAction.h"
+#include "SelectionAction.h"
+
 #include "PixelSelectionToolRenderer.h"
-#include "Actions.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>

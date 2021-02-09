@@ -79,7 +79,11 @@ set( WIDGET_HEADERS
     src/widgets/PopupPushButton.h
     src/widgets/ResponsiveSectionWidget.h
     src/widgets/ResponsiveToolBar.h
-    src/widgets/WidgetState.h
+    src/widgets/WidgetAction.h
+    src/widgets/ActionPushButton.h
+    src/widgets/DoubleAction.h
+    src/widgets/OptionAction.h
+    src/widgets/BooleanAction.h
 )
 
 set( WIDGET_SOURCES
@@ -95,7 +99,11 @@ set( WIDGET_SOURCES
 	src/widgets/PopupPushButton.cpp
 	src/widgets/ResponsiveSectionWidget.cpp
 	src/widgets/ResponsiveToolBar.cpp
-	src/widgets/WidgetState.cpp
+	src/widgets/WidgetAction.cpp
+	src/widgets/ActionPushButton.cpp
+    src/widgets/DoubleAction.cpp
+    src/widgets/OptionAction.cpp
+    src/widgets/BooleanAction.cpp
 )
 
 set( RENDERER_HEADERS

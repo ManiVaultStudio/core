@@ -1,12 +1,7 @@
 #include "SettingsWidget.h"
 #include "ScatterplotPlugin.h"
 
-#include "RenderModeWidget.h"
-#include "PlotSettingsWidget.h"
-#include "PositionSettingsWidget.h"
 #include "ColorSettingsWidget.h"
-#include "SubsetSettingsWidget.h"
-#include "SelectionSettingsWidget.h"
 
 #include "widgets/ResponsiveToolBar.h"
 
@@ -81,16 +76,6 @@ hdps::Vector3f SettingsWidget::getBaseColor()
 hdps::Vector3f SettingsWidget::getSelectionColor()
 {
     return _selectionColor;
-}
-
-void SettingsWidget::initDimOptions(const unsigned int nDim)
-{
-    //_positionSettingsWidget->setDimensions(nDim);
-}
-
-void SettingsWidget::initDimOptions(const std::vector<QString>& dimNames)
-{
-    //_positionSettingsWidget->setDimensions(dimNames.size(), dimNames);
 }
 
 void SettingsWidget::initScalarDimOptions(const unsigned int nDim)

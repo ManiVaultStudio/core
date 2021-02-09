@@ -1,5 +1,4 @@
 #include "ResponsiveToolBar.h"
-#include "WidgetState.h"
 
 #include "../util/Timer.h"
 
