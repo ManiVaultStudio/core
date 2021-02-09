@@ -1,28 +1,16 @@
 #pragma once
 
-#include "widgets/WidgetAction.h"
+#include "PluginAction.h"
 
-#include <QAction>
-#include <QWidgetAction>
-#include <QMenu>
-#include <QComboBox>
 #include <QHBoxLayout>
-#include <QGroupBox>
-#include <QLabel>
-#include <QDoubleSpinBox>
-#include <QSlider>
-#include <QToolBar>
 #include <QToolButton>
-#include <QEvent>
 
-class ScatterplotPlugin;
-
-class SubsetAction : public hdps::gui::WidgetAction
+class SubsetAction : public PluginAction
 {
     Q_OBJECT
 
 public:
-    class Widget : public hdps::gui::WidgetAction::Widget {
+    class Widget : public PluginAction::Widget {
     public:
         Widget(QWidget* parent, SubsetAction* subsetAction);
 

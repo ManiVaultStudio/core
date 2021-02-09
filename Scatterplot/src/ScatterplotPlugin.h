@@ -8,11 +8,12 @@
 #include "PixelSelectionTool.h"
 #include "ScatterplotWidget.h"
 
+#include "RenderModeAction.h"
+#include "PlotAction.h"
 #include "PositionAction.h"
 #include "ColorAction.h"
 #include "SubsetAction.h"
-
-#include <QToolButton>
+#include "SelectionAction.h"
 
 using namespace hdps::plugin;
 
@@ -124,6 +125,11 @@ private:
     PixelSelectionTool*             _pixelSelectionTool;        /** Pixel selection tool */
     ScatterplotWidget*              _scatterPlotWidget;         /**  */
     SettingsWidget*                 _settingsWidget;
+
+protected: // Menus & actions
+    RenderModeAction                _renderModeAction;
+    PlotAction                      _plotAction;
+    SelectionAction                 _selectionAction;
     PositionAction                  _positionAction;
     ColorAction                     _colorAction;
     SubsetAction                    _subsetAction;

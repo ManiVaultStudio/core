@@ -1,6 +1,5 @@
 #include "ScatterplotPlugin.h"
 
-#include "ScatterplotSettingsWidget.h"
 #include "SettingsWidget.h"
 #include "PointData.h"
 #include "ClusterData.h"
@@ -32,6 +31,9 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
     _settingsWidget(new SettingsWidget(*this)),
+    _renderModeAction(this),
+    _plotAction(this),
+    _selectionAction(this),
     _positionAction(this),
     _colorAction(this),
     _subsetAction(this)
@@ -69,11 +71,12 @@ void ScatterplotPlugin::init()
 
     toolBar->setAutoFillBackground(true);
     
-    toolBar->addAction(&_scatterPlotWidget->getRenderModeAction());
-    toolBar->addAction(&_scatterPlotWidget->getPlotAction());
+    toolBar->addAction(&_renderModeAction);
+    toolBar->addAction(&_plotAction);
     toolBar->addAction(&_subsetAction);
     toolBar->addAction(&_positionAction);
-    toolBar->addAction(&_scatterPlotWidget->getSelectionAction());
+    toolBar->addAction(&_colorAction);
+    toolBar->addAction(&_selectionAction);
 
     layout->addWidget(toolBar);
     layout->addWidget(_dataSlot, 1);
@@ -120,14 +123,18 @@ void ScatterplotPlugin::dataRemoved(const QString name)
 
 void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent* contextMenuEvent)
 {
+    if (_currentDataSet.isEmpty())
+        return;
+
     QMenu menu(this);
 
-    menu.addMenu(_scatterPlotWidget->getRenderModeAction().getContextMenu());
-    menu.addMenu(_scatterPlotWidget->getPlotAction().getContextMenu());
-    menu.addMenu(_scatterPlotWidget->getSelectionAction().getContextMenu());
+    menu.addMenu(_renderModeAction.getContextMenu());
+    menu.addMenu(_plotAction.getContextMenu());
     menu.addSeparator();
     menu.addMenu(_positionAction.getContextMenu());
+    menu.addMenu(_colorAction.getContextMenu());
     menu.addSeparator();
+    menu.addMenu(_selectionAction.getContextMenu());
 
     menu.exec(contextMenuEvent->globalPos());
 }

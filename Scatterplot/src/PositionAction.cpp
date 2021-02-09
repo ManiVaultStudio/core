@@ -6,7 +6,7 @@
 using namespace hdps::gui;
 
 PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
-    WidgetAction(reinterpret_cast<QObject*>(scatterplotPlugin)),
+    PluginAction(scatterplotPlugin),
     _xDimensionAction(this, "X"),
     _yDimensionAction(this, "Y"),
     _resetAction("Reset")

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "widgets/WidgetAction.h"
+#include "PluginAction.h"
+
 #include "widgets/OptionAction.h"
 #include "widgets/StringAction.h"
 
@@ -9,14 +10,12 @@
 #include <QToolBar>
 #include <QToolButton>
 
-class ScatterplotPlugin;
-
-class ColorAction : public hdps::gui::WidgetAction
+class ColorAction : public PluginAction
 {
     Q_OBJECT
 
 public:
-    class Widget : public hdps::gui::WidgetAction::Widget {
+    class Widget : public PluginAction::Widget {
     public:
         Widget(QWidget* parent, ColorAction* colorAction);
 
@@ -39,6 +38,8 @@ public:
 
 protected:
     hdps::gui::OptionAction     _colorByAction;
+    QAction                     _colorByDimensionAction;
+    QAction                     _colorByDataAction;
     hdps::gui::OptionAction     _colorDimensionAction;
     hdps::gui::StringAction     _colorDataAction;
     QAction                     _removeColorDataAction;

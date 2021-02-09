@@ -1,30 +1,22 @@
 #pragma once
 
-#include "widgets/WidgetAction.h"
+#include "PluginAction.h"
+
 #include "widgets/OptionAction.h"
 #include "widgets/DoubleAction.h"
 
 #include <QAction>
-#include <QWidgetAction>
-#include <QMenu>
-#include <QComboBox>
+#include <QActionGroup>
 #include <QHBoxLayout>
-#include <QGroupBox>
-#include <QLabel>
-#include <QDoubleSpinBox>
-#include <QSlider>
 #include <QToolBar>
 #include <QToolButton>
-#include <QEvent>
 
-class ScatterplotWidget;
-
-class SelectionAction : public hdps::gui::WidgetAction
+class SelectionAction : public PluginAction
 {
     Q_OBJECT
 
 public:
-    class Widget : public hdps::gui::WidgetAction::Widget {
+    class Widget : public PluginAction::Widget {
     public:
         Widget(QWidget* parent, SelectionAction* selectionAction);
 
@@ -37,7 +29,7 @@ public:
     };
 
 public:
-    SelectionAction(QObject* parent);
+    SelectionAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override {
         return new Widget(parent, this);
@@ -51,6 +43,7 @@ protected:
     QAction                     _lassoAction;
     QAction                     _polygonAction;
     QAction                     _rectangleAction;
+    QActionGroup                _typeActionGroup;
     QAction                     _modifierAddAction;
     QAction                     _modifierRemoveAction;
     hdps::gui::DoubleAction     _brushRadiusAction;

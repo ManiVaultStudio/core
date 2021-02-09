@@ -11,10 +11,6 @@
 
 #include "widgets/ColormapWidget.h"
 
-#include "RenderModeAction.h"
-#include "PlotAction.h"
-#include "SelectionAction.h"
-
 #include "PixelSelectionToolRenderer.h"
 
 #include <QOpenGLWidget>
@@ -110,11 +106,6 @@ public slots:
     void colormapChanged(QString colormapName);
     void colormapdiscreteChanged(bool isDiscrete);
 
-public: // Menus & actions
-    RenderModeAction& getRenderModeAction() { return _renderModeAction; }
-    PlotAction& getPlotAction() { return _plotAction; }
-    SelectionAction& getSelectionAction() { return _selectionAction; }
-
 private:
     const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
     Matrix3f toNormalisedCoordinates;
@@ -139,9 +130,4 @@ private:
     Bounds _dataBounds;
 
     PixelSelectionTool&     _pixelSelectionTool;
-
-protected: // Menus & actions
-    RenderModeAction        _renderModeAction;
-    PlotAction              _plotAction;
-    SelectionAction         _selectionAction;
 };

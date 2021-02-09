@@ -1,24 +1,21 @@
 #pragma once
 
-#include "widgets/WidgetAction.h"
+#include "PluginAction.h"
 
 #include <QAction>
-#include <QActionGroup >
+#include <QActionGroup>
 #include <QHBoxLayout>
-#include <QGroupBox>
 #include <QToolBar>
 #include <QToolButton>
 
-class ScatterplotWidget;
-
 class QMenu;
 
-class RenderModeAction : public hdps::gui::WidgetAction
+class RenderModeAction : public PluginAction
 {
     Q_OBJECT
 
 public:
-    class Widget : public hdps::gui::WidgetAction::Widget {
+    class Widget : public PluginAction::Widget {
     public:
         Widget(QWidget* parent, RenderModeAction* renderModeAction);
 
@@ -31,7 +28,7 @@ public:
     };
 
 public:
-    RenderModeAction(ScatterplotWidget* scatterplotWidget);
+    RenderModeAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override {
         return new Widget(parent, this);

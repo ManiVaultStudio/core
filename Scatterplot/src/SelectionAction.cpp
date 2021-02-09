@@ -1,41 +1,70 @@
 #include "SelectionAction.h"
 #include "Application.h"
 
-#include "ScatterplotWidget.h"
+#include "ScatterplotPlugin.h"
 
 #include "widgets/ActionPushButton.h"
 
 using namespace hdps::gui;
 
-SelectionAction::SelectionAction(QObject* parent) :
-    WidgetAction(parent),
+SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
+    PluginAction(scatterplotPlugin),
     _typeAction(this, "Type"),
     _brushAction("Brush"),
     _lassoAction("Lasso"),
     _polygonAction("Polygon"),
     _rectangleAction("Rectangle"),
-    _modifierAddAction("+"),
-    _modifierRemoveAction("-"),
+    _typeActionGroup(this),
+    _modifierAddAction(this),
+    _modifierRemoveAction(""),
     _brushRadiusAction(this, "Brush radius"),
     _clearSelectionAction("Select none"),
     _selectAllAction("Select all"),
     _invertSelectionAction("Invert selection"),
     _notifyDuringSelectionAction("Notify during selection")
 {
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    //_modifierAddAction.setAutoRepeat(false);
+
     _brushAction.setShortcut(QKeySequence("B"));
     _lassoAction.setShortcut(QKeySequence("L"));
     _polygonAction.setShortcut(QKeySequence("P"));
     _rectangleAction.setShortcut(QKeySequence("R"));
+    _modifierAddAction.setShortcut(QKeySequence("Shift"));
+    _modifierRemoveAction.setShortcut(QKeySequence(Qt::Key_Control));
     _clearSelectionAction.setShortcut(QKeySequence("E"));
     _selectAllAction.setShortcut(QKeySequence("A"));
     _invertSelectionAction.setShortcut(QKeySequence("I"));
     _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
 
+    _brushAction.setToolTip("Select data points using a brush tool");
+    _lassoAction.setToolTip("Select data points using a lasso");
+    _polygonAction.setToolTip("Select data points by drawing a polygon");
+    _rectangleAction.setToolTip("Select data points inside a rectangle");
+    _modifierAddAction.setToolTip("Add items to the existing selection");
+    _modifierRemoveAction.setToolTip("Remove items from the existing selection");
+    _brushRadiusAction.setToolTip("Brush selection tool radius");
+    _clearSelectionAction.setToolTip("Clears the selection");
+    _selectAllAction.setToolTip("Select all data points");
+    _invertSelectionAction.setToolTip("Invert the selection");
+    _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process");
+
+    _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
+    _modifierRemoveAction.setIcon(fontAwesome.getIcon("minus"));
+    
     _brushAction.setCheckable(true);
     _lassoAction.setCheckable(true);
     _polygonAction.setCheckable(true);
     _rectangleAction.setCheckable(true);
+    _modifierAddAction.setCheckable(true);
+    _modifierRemoveAction.setCheckable(true);
     _notifyDuringSelectionAction.setCheckable(true);
+
+    _typeActionGroup.addAction(&_brushAction);
+    _typeActionGroup.addAction(&_lassoAction);
+    _typeActionGroup.addAction(&_polygonAction);
+    _typeActionGroup.addAction(&_rectangleAction);
 }
 
 QMenu* SelectionAction::getContextMenu()
@@ -168,13 +197,7 @@ _additionalSettingsPopupPushButton(new PopupPushButton())
     //_typeComboBox->lineEdit()->setReadOnly(true);
     //_typeComboBox->lineEdit()->setAlignment(Qt::AlignCenter);
 
-    _modifierAddPushButton->setToolTip("Add items to the existing selection");
-    _modifierAddPushButton->setIcon(fontAwesome.getIcon("plus"));
-    _modifierAddPushButton->setCheckable(true);
-
-    _modifierRemovePushButton->setToolTip("Remove items from the existing selection");
-    _modifierRemovePushButton->setIcon(fontAwesome.getIcon("minus"));
-    _modifierRemovePushButton->setCheckable(true);
+    
 
     _radiusLabel->setToolTip("Brush radius");
 

@@ -6,8 +6,10 @@
 using namespace hdps::gui;
 
 ColorAction::ColorAction(ScatterplotPlugin* scatterplotPlugin) :
-    WidgetAction(reinterpret_cast<QObject*>(scatterplotPlugin)),
+    PluginAction(scatterplotPlugin),
     _colorByAction(this, "Color by"),
+    _colorByDimensionAction("Color by dimension"),
+    _colorByDataAction("Color by data"),
     _colorDimensionAction(this, "Color dimension"),
     _colorDataAction(this, "Color data"),
     _removeColorDataAction("Remove"),
@@ -45,11 +47,21 @@ ColorAction::ColorAction(ScatterplotPlugin* scatterplotPlugin) :
 
     updateResetAction();
     */
+
+    connect(&_colorByDimensionAction, &QAction::triggered, this, [this]() {
+        //_xDimensionAction.setCurrentIndex(0);
+        //_yDimensionAction.setCurrentIndex(1);
+    });
 }
 
 QMenu* ColorAction::getContextMenu()
 {
     auto menu = new QMenu("Color");
+
+    menu->addAction(&_colorByDimensionAction);
+    menu->addAction(&_colorByDataAction);
+    
+    menu->addSeparator();
 
     /*
     auto xDimensionMenu = new QMenu("X dimension");

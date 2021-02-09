@@ -33,9 +33,6 @@ namespace
 ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _densityRenderer(DensityRenderer::RenderMode::DENSITY),
     _colormapWidget(this),
-    _renderModeAction(this),
-    _plotAction(this),
-    _selectionAction(this),
     _pointRenderer(),
     _pixelSelectionToolRenderer(pixelSelectionTool),
     _pixelSelectionTool(pixelSelectionTool)

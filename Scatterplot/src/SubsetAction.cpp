@@ -7,7 +7,7 @@
 using namespace hdps::gui;
 
 SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
-    WidgetAction(scatterplotPlugin),
+    PluginAction(scatterplotPlugin),
     _createSubsetAction("Create subset"),
     _fromSourceDataAction("From source data")
 {

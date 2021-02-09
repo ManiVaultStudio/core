@@ -1,6 +1,7 @@
 #pragma once
 
-#include "widgets/WidgetAction.h"
+#include "PluginAction.h"
+
 #include "widgets/OptionAction.h"
 
 #include <QHBoxLayout>
@@ -8,14 +9,12 @@
 #include <QToolBar>
 #include <QToolButton>
 
-class ScatterplotPlugin;
-
-class PositionAction : public hdps::gui::WidgetAction
+class PositionAction : public PluginAction
 {
     Q_OBJECT
 
 public:
-    class Widget : public hdps::gui::WidgetAction::Widget {
+    class Widget : public PluginAction::Widget {
     public:
         Widget(QWidget* parent, PositionAction* positionAction);
 

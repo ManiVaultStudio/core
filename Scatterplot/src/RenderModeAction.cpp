@@ -1,12 +1,12 @@
 #include "RenderModeAction.h"
 #include "Application.h"
 
-#include "ScatterplotWidget.h"
+#include "ScatterplotPlugin.h"
 
 using namespace hdps::gui;
 
-RenderModeAction::RenderModeAction(ScatterplotWidget* scatterplotWidget) :
-    WidgetAction(scatterplotWidget),
+RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
+    PluginAction(scatterplotPlugin),
     _scatterPlotAction("Scatter plot"),
     _densityPlotAction("Density plot"),
     _contourPlotAction("Contour plot"),
@@ -34,20 +34,20 @@ RenderModeAction::RenderModeAction(ScatterplotWidget* scatterplotWidget) :
     _densityPlotAction.setIcon(fontAwesome.getIcon("cloud"));
     _contourPlotAction.setIcon(fontAwesome.getIcon("mountain"));
 
-    connect(&_scatterPlotAction, &QAction::triggered, this, [this, scatterplotWidget]() {
-        scatterplotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
+    connect(&_scatterPlotAction, &QAction::triggered, this, [this]() {
+        getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     });
 
-    connect(&_densityPlotAction, &QAction::triggered, this, [this, scatterplotWidget]() {
-        scatterplotWidget->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
+    connect(&_densityPlotAction, &QAction::triggered, this, [this]() {
+        getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
     });
 
-    connect(&_contourPlotAction, &QAction::triggered, this, [this, scatterplotWidget]() {
-        scatterplotWidget->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
+    connect(&_contourPlotAction, &QAction::triggered, this, [this]() {
+        getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
     });
 
-    const auto updateButtons = [this, scatterplotWidget]() {
-        const auto renderMode = scatterplotWidget->getRenderMode();
+    const auto updateButtons = [this]() {
+        const auto renderMode = getScatterplotWidget()->getRenderMode();
 
         QSignalBlocker scatterPlotActionBlocker(&_scatterPlotAction), densityPlotAction(&_densityPlotAction), contourPlotAction(&_contourPlotAction);
 
@@ -56,7 +56,7 @@ RenderModeAction::RenderModeAction(ScatterplotWidget* scatterplotWidget) :
         _contourPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::LANDSCAPE);
     };
 
-    connect(scatterplotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateButtons](const ScatterplotWidget::RenderMode& renderMode) {
+    connect(getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updateButtons](const ScatterplotWidget::RenderMode& renderMode) {
         updateButtons();
     });
 
