@@ -37,6 +37,11 @@ PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     updateResetAction();
 }
 
+QWidget* PositionAction::createWidget(QWidget* parent)
+{
+    return new Widget(parent, this);
+}
+
 QMenu* PositionAction::getContextMenu()
 {
     auto menu = new QMenu("Position");
@@ -99,21 +104,10 @@ QStringList PositionAction::getDimensionNamesStringList(const std::uint32_t& num
 
 PositionAction::Widget::Widget(QWidget* parent, PositionAction* positionAction) :
     WidgetAction::Widget(parent, positionAction),
-    _layout(),
-    _toolBar(),
-    _toolButton(),
-    _popupWidget(this, "Position"),
-    _popupWidgetAction(this)
+    _layout()
 {
-    _layout.addWidget(&_toolBar);
-
-    _toolBar.addAction(&positionAction->_xDimensionAction);
-    _toolBar.addAction(&positionAction->_yDimensionAction);
-
-    _popupWidgetAction.setDefaultWidget(&_popupWidget);
-
-    _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.addAction(&_popupWidgetAction);
+    _layout.addWidget(positionAction->_xDimensionAction.createWidget(this));
+    _layout.addWidget(positionAction->_yDimensionAction.createWidget(this));
 
     setLayout(&_layout);
 }

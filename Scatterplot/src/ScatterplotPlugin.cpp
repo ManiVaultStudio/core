@@ -31,12 +31,12 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
     _settingsWidget(new SettingsWidget(*this)),
-    _renderModeAction(this),
-    _plotAction(this),
-    _selectionAction(this),
-    _positionAction(this),
-    _colorAction(this),
-    _subsetAction(this)
+    //_renderModeAction(this),
+    //_plotAction(this),
+    //_selectionAction(this),
+    _positionAction(this)
+    //_colorAction(this),
+    //_subsetAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
 }
@@ -71,12 +71,12 @@ void ScatterplotPlugin::init()
 
     toolBar->setAutoFillBackground(true);
     
-    toolBar->addAction(&_renderModeAction);
-    toolBar->addAction(&_plotAction);
-    toolBar->addAction(&_subsetAction);
+    //toolBar->addAction(&_renderModeAction);
+    //toolBar->addAction(&_plotAction);
+    //toolBar->addAction(&_subsetAction);
     toolBar->addAction(&_positionAction);
-    toolBar->addAction(&_colorAction);
-    toolBar->addAction(&_selectionAction);
+    //toolBar->addAction(&_colorAction);
+    //toolBar->addAction(&_selectionAction);
 
     layout->addWidget(toolBar);
     layout->addWidget(_dataSlot, 1);
@@ -127,15 +127,16 @@ void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent* contextMenuEvent)
         return;
 
     QMenu menu(this);
-
+    /*
     menu.addMenu(_renderModeAction.getContextMenu());
     menu.addMenu(_plotAction.getContextMenu());
     menu.addSeparator();
     menu.addMenu(_positionAction.getContextMenu());
     menu.addMenu(_colorAction.getContextMenu());
     menu.addSeparator();
+    menu.addMenu(_subsetAction.getContextMenu());
     menu.addMenu(_selectionAction.getContextMenu());
-
+    */
     menu.exec(contextMenuEvent->globalPos());
 }
 
@@ -607,7 +608,7 @@ std::uint32_t ScatterplotPlugin::getNumPoints() const
     return points.getNumPoints();
 }
 
-std::uint32_t ScatterplotPlugin::getNumSelectedPoints() const
+std::uint32_t ScatterplotPlugin::getNumberOfSelectedPoints() const
 {
     if (_currentDataSet.isEmpty())
         return 0;
@@ -625,12 +626,12 @@ bool ScatterplotPlugin::canSelect() const
 
 bool ScatterplotPlugin::canSelectAll() const
 {
-    return getNumPoints() == -1 ? false : getNumSelectedPoints() != getNumPoints();
+    return getNumPoints() == -1 ? false : getNumberOfSelectedPoints() != getNumPoints();
 }
 
 bool ScatterplotPlugin::canClearSelection() const
 {
-    return getNumPoints() == -1 ? false : getNumSelectedPoints() >= 1;
+    return getNumPoints() == -1 ? false : getNumberOfSelectedPoints() >= 1;
 }
 
 bool ScatterplotPlugin::canInvertSelection() const

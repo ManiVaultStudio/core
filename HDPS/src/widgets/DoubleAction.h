@@ -20,13 +20,13 @@ class DoubleAction : public WidgetAction
 public:
     class Widget : public WidgetAction::Widget
     {
-        public:
-            Widget(QWidget* parent, DoubleAction* floatAction);
+    public:
+        Widget(QWidget* parent, DoubleAction* floatAction);
 
-        private:
-            QHBoxLayout     _layout;
-            QDoubleSpinBox  _spinBox;
-            QSlider         _slider;
+    private:
+        QHBoxLayout     _layout;
+        QDoubleSpinBox  _spinBox;
+        QSlider         _slider;
     };
 
 public:

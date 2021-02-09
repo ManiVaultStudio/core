@@ -9,8 +9,6 @@
 
 class PlotAction : public PluginAction
 {
-    Q_OBJECT
-
 public:
     class Widget : public PluginAction::Widget {
     public:

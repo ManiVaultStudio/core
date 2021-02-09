@@ -56,7 +56,7 @@ public:
 
     QString getCurrentDataset() const;
     std::uint32_t getNumPoints() const;
-    std::uint32_t getNumSelectedPoints() const;
+    std::uint32_t getNumberOfSelectedPoints() const;
 
 public: // Selection
 
@@ -127,12 +127,12 @@ private:
     SettingsWidget*                 _settingsWidget;
 
 protected: // Menus & actions
-    RenderModeAction                _renderModeAction;
-    PlotAction                      _plotAction;
-    SelectionAction                 _selectionAction;
+    //RenderModeAction                _renderModeAction;
+    //PlotAction                      _plotAction;
+    //SelectionAction                 _selectionAction;
     PositionAction                  _positionAction;
-    ColorAction                     _colorAction;
-    SubsetAction                    _subsetAction;
+    //ColorAction                     _colorAction;
+    //SubsetAction                    _subsetAction;
 };
 
 // =============================================================================

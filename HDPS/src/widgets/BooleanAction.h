@@ -48,7 +48,6 @@ signals:
 
 protected:
     bool    _value;
-
 };
 
 }

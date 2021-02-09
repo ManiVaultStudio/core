@@ -7,8 +7,6 @@
 
 class SubsetAction : public PluginAction
 {
-    Q_OBJECT
-
 public:
     class Widget : public PluginAction::Widget {
     public:
@@ -32,7 +30,7 @@ public:
 
 protected:
     QAction     _createSubsetAction;
-    QAction     _fromSourceDataAction;
+    QAction     _createFromSourceDataAction;
 
     friend class Widget;
 };

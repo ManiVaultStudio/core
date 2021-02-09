@@ -4,22 +4,6 @@ namespace hdps {
 
 namespace gui {
 
-DoubleAction::DoubleAction(QObject * parent, const QString& title, const double& minimum /*= DEFAULT_MIN_VALUE*/, const double& maximum /*= DEFAULT_MAX_VALUE*/, const double& value /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DEFAULT_DECIMALS*/) :
-    WidgetAction(parent),
-    _value(0.0f),
-    _minimum(0.0),
-    _maximum(0.0),
-    _suffix(),
-    _decimals(1),
-    _updateDuringDrag(true)
-{
-    setText(title);
-    setMinimum(minimum);
-    setMaximum(maximum);
-    setValue(value);
-    setDecimals(decimals);
-}
-
 QWidget* DoubleAction::createWidget(QWidget* parent)
 {
     auto widget = new Widget(parent, this);
@@ -245,6 +229,22 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
     updateSuffix();
     updateDecimals();
     setToolTips();
+}
+
+DoubleAction::DoubleAction(QObject * parent, const QString& title, const double& minimum /*= DEFAULT_MIN_VALUE*/, const double& maximum /*= DEFAULT_MAX_VALUE*/, const double& value /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DEFAULT_DECIMALS*/) :
+    WidgetAction(parent),
+    _value(0.0f),
+    _minimum(0.0),
+    _maximum(0.0),
+    _suffix(),
+    _decimals(1),
+    _updateDuringDrag(true)
+{
+    setText(title);
+    setMinimum(minimum);
+    setMaximum(maximum);
+    setValue(value);
+    setDecimals(decimals);
 }
 
 }

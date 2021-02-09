@@ -4,17 +4,6 @@ namespace hdps {
 
 namespace gui {
 
-BooleanAction::Widget::Widget(QWidget* widget, BooleanAction* optionAction) :
-    WidgetAction::Widget(widget, optionAction),
-    _layout(),
-    _checkbox()
-{
-    _layout.setMargin(0);
-    _layout.addWidget(&_checkbox);
-
-    setLayout(&_layout);
-}
-
 BooleanAction::BooleanAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent)
 {
@@ -28,6 +17,17 @@ QWidget* BooleanAction::createWidget(QWidget* parent)
     widget->show();
 
     return widget;
+}
+
+BooleanAction::Widget::Widget(QWidget* widget, BooleanAction* optionAction) :
+    WidgetAction::Widget(widget, optionAction),
+    _layout(),
+    _checkbox()
+{
+    _layout.setMargin(0);
+    _layout.addWidget(&_checkbox);
+
+    setLayout(&_layout);
 }
 
 }
