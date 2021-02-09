@@ -3,20 +3,14 @@
 #include "widgets/WidgetAction.h"
 #include "widgets/OptionAction.h"
 
-#include <QAction>
-#include <QWidgetAction>
-#include <QMenu>
-#include <QComboBox>
 #include <QHBoxLayout>
 #include <QGroupBox>
-#include <QLabel>
-#include <QDoubleSpinBox>
-#include <QSlider>
 #include <QToolBar>
 #include <QToolButton>
-#include <QEvent>
 
 class ScatterplotPlugin;
+
+class QMenu;
 
 class PositionAction : public hdps::gui::WidgetAction
 {
