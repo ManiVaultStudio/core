@@ -33,6 +33,7 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
     _settingsWidget(new SettingsWidget(*this)),
     _positionAction(this),
+    _colorAction(this),
     _subsetAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
@@ -71,7 +72,7 @@ void ScatterplotPlugin::init()
     toolBar->addAction(&_scatterPlotWidget->getRenderModeAction());
     toolBar->addAction(&_scatterPlotWidget->getPlotAction());
     toolBar->addAction(&_subsetAction);
-    //toolBar->addAction(&_positionAction);
+    toolBar->addAction(&_positionAction);
     toolBar->addAction(&_scatterPlotWidget->getSelectionAction());
 
     layout->addWidget(toolBar);

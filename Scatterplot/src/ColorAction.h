@@ -2,6 +2,7 @@
 
 #include "widgets/WidgetAction.h"
 #include "widgets/OptionAction.h"
+#include "widgets/StringAction.h"
 
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -10,14 +11,14 @@
 
 class ScatterplotPlugin;
 
-class PositionAction : public hdps::gui::WidgetAction
+class ColorAction : public hdps::gui::WidgetAction
 {
     Q_OBJECT
 
 public:
     class Widget : public hdps::gui::WidgetAction::Widget {
     public:
-        Widget(QWidget* parent, PositionAction* positionAction);
+        Widget(QWidget* parent, ColorAction* colorAction);
 
     private:
         QHBoxLayout         _layout;
@@ -28,7 +29,7 @@ public:
     };
 
 public:
-    PositionAction(ScatterplotPlugin* scatterplotPlugin);
+    ColorAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override {
         return new Widget(parent, this);
@@ -36,17 +37,11 @@ public:
 
     QMenu* getContextMenu();
 
-    void setDimensions(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames = std::vector<QString>());
-
-    std::int32_t getXDimension() const;
-    std::int32_t getYDimension() const;
-
-private:
-    QStringList getDimensionNamesStringList(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames) const;
-
 protected:
-    hdps::gui::OptionAction     _xDimensionAction;
-    hdps::gui::OptionAction     _yDimensionAction;
+    hdps::gui::OptionAction     _colorByAction;
+    hdps::gui::OptionAction     _colorDimensionAction;
+    hdps::gui::StringAction     _colorDataAction;
+    QAction                     _removeColorDataAction;
     QAction                     _resetAction;
 
     friend class Widget;

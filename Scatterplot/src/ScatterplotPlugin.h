@@ -9,6 +9,7 @@
 #include "ScatterplotWidget.h"
 
 #include "PositionAction.h"
+#include "ColorAction.h"
 #include "SubsetAction.h"
 
 #include <QToolButton>
@@ -124,6 +125,7 @@ private:
     ScatterplotWidget*              _scatterPlotWidget;         /**  */
     SettingsWidget*                 _settingsWidget;
     PositionAction                  _positionAction;
+    ColorAction                     _colorAction;
     SubsetAction                    _subsetAction;
 };
 

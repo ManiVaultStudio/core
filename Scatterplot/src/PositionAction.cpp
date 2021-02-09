@@ -8,18 +8,33 @@ using namespace hdps::gui;
 PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     WidgetAction(reinterpret_cast<QObject*>(scatterplotPlugin)),
     _xDimensionAction(this, "X"),
-    _yDimensionAction(this, "Y")
+    _yDimensionAction(this, "Y"),
+    _resetAction("Reset")
 {
     _xDimensionAction.setToolTip("X dimension");
     _yDimensionAction.setToolTip("Y dimension");
+    _resetAction.setToolTip("Reset position settings");
 
-    connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin](const std::int32_t& currentIndex) {
+    const auto updateResetAction = [this, scatterplotPlugin]() {
+        _resetAction.setEnabled(!scatterplotPlugin->getCurrentDataset().isEmpty() && !(_xDimensionAction.getCurrentIndex() == 0 && _yDimensionAction.getCurrentIndex() == 1));
+    };
+
+    connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::int32_t& currentIndex) {
         scatterplotPlugin->xDimPicked(currentIndex);
+        updateResetAction();
     });
 
-    connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin](const std::int32_t& currentIndex) {
+    connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::int32_t& currentIndex) {
         scatterplotPlugin->yDimPicked(currentIndex);
+        updateResetAction();
     });
+
+    connect(&_resetAction, &QAction::triggered, this, [this]() {
+        _xDimensionAction.setCurrentIndex(0);
+        _yDimensionAction.setCurrentIndex(1);
+    });
+
+    updateResetAction();
 }
 
 QMenu* PositionAction::getContextMenu()
@@ -34,6 +49,8 @@ QMenu* PositionAction::getContextMenu()
 
     menu->addMenu(xDimensionMenu);
     menu->addMenu(yDimensionMenu);
+    menu->addSeparator();
+    menu->addAction(&_resetAction);
 
     return menu;
 }

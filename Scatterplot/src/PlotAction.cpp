@@ -17,6 +17,8 @@ PlotAction::PlotAction(ScatterplotWidget* scatterplotWidget) :
     _pointOpacityAction.setSuffix("%");
     _sigmaAction.setUpdateDuringDrag(false);
 
+    _resetAction.setToolTip("Reset plot settings");
+
     const auto updateRenderMode = [this, scatterplotWidget]() {
         const auto renderMode = scatterplotWidget->getRenderMode();
 

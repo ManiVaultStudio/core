@@ -4,7 +4,6 @@
 
 #include <QHBoxLayout>
 #include <QComboBox>
-#include <QVector>
 
 class QWidget;
 
