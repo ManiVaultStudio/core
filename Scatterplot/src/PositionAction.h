@@ -10,8 +10,6 @@
 
 class ScatterplotPlugin;
 
-class QMenu;
-
 class PositionAction : public hdps::gui::WidgetAction
 {
     Q_OBJECT

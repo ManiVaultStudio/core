@@ -8,13 +8,14 @@ using namespace hdps::gui;
 PlotAction::PlotAction(ScatterplotWidget* scatterplotWidget) :
     WidgetAction(scatterplotWidget),
     _scatterplotWidget(scatterplotWidget),
-    _pointSizeAction(this, "Point size"),
-    _pointOpacityAction(this, "Point opacity"),
-    _sigmaAction(this, "Sigma")
+    _pointSizeAction(this, "Point size", 0.0, 50.0, DEFAULT_POINT_SIZE),
+    _pointOpacityAction(this, "Point opacity", 0.0, 100.0, DEFAULT_POINT_OPACITY),
+    _sigmaAction(this, "Sigma", 0.0, 50.0, DEFAULT_SIGMA),
+    _resetAction("Reset")
 {
-    _pointSizeAction.setDisabled(true);
     _pointSizeAction.setSuffix("px");
     _pointOpacityAction.setSuffix("%");
+    _sigmaAction.setUpdateDuringDrag(false);
 
     const auto updateRenderMode = [this, scatterplotWidget]() {
         const auto renderMode = scatterplotWidget->getRenderMode();
@@ -24,11 +25,86 @@ PlotAction::PlotAction(ScatterplotWidget* scatterplotWidget) :
         _sigmaAction.setVisible(renderMode != ScatterplotWidget::SCATTERPLOT);
     };
 
-    connect(scatterplotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const ScatterplotWidget::RenderMode& renderMode) {
+    const auto updatePointSize = [this, scatterplotWidget]() {
+        scatterplotWidget->setPointSize(_pointSizeAction.getValue());
+    };
+
+    const auto updatePointOpacity = [this, scatterplotWidget]() {
+        scatterplotWidget->setAlpha(0.01 * _pointOpacityAction.getValue());
+    };
+
+    const auto updateSigma = [this, scatterplotWidget]() {
+        scatterplotWidget->setSigma(0.01 * _sigmaAction.getValue());
+    };
+
+    const auto updateResetAction = [this, scatterplotWidget]() {
+        const auto renderMode = scatterplotWidget->getRenderMode();
+
+        auto enabled = false;
+
+        switch (renderMode)
+        {
+            case ScatterplotWidget::SCATTERPLOT:
+                enabled = !(_pointSizeAction.getValue() == DEFAULT_POINT_SIZE && _pointOpacityAction.getValue() == DEFAULT_POINT_OPACITY);
+                break;
+
+            case ScatterplotWidget::DENSITY:
+            case ScatterplotWidget::LANDSCAPE:
+                enabled = _sigmaAction.getValue() != DEFAULT_SIGMA;
+                break;
+
+            default:
+                break;
+        }
+
+        _resetAction.setEnabled(enabled);
+    };
+
+    connect(scatterplotWidget, &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode, updateResetAction](const ScatterplotWidget::RenderMode& renderMode) {
         updateRenderMode();
+        updateResetAction();
+    });
+
+    connect(&_pointSizeAction, &DoubleAction::valueChanged, this, [this, updatePointSize, updateResetAction](const double& value) {
+        updatePointSize();
+        updateResetAction();
+    });
+
+    connect(&_pointOpacityAction, &DoubleAction::valueChanged, this, [this, updatePointOpacity, updateResetAction](const double& value) {
+        updatePointOpacity();
+        updateResetAction();
+    });
+
+    connect(&_sigmaAction, &DoubleAction::valueChanged, this, [this, updateSigma, updateResetAction](const double& value) {
+        updateSigma();
+        updateResetAction();
+    });
+
+    connect(&_resetAction, &QAction::triggered, this, [this, scatterplotWidget]() {
+        const auto renderMode = scatterplotWidget->getRenderMode();
+
+        switch (renderMode)
+        {
+            case ScatterplotWidget::SCATTERPLOT:
+                _pointSizeAction.setValue(DEFAULT_POINT_SIZE);
+                _pointOpacityAction.setValue(DEFAULT_POINT_OPACITY);
+                break;
+
+            case ScatterplotWidget::DENSITY:
+            case ScatterplotWidget::LANDSCAPE:
+                _sigmaAction.setValue(DEFAULT_SIGMA);
+                break;
+
+            default:
+                break;
+        }
     });
 
     updateRenderMode();
+    updatePointSize();
+    updatePointOpacity();
+    updateSigma();
+    updateResetAction();
 }
 
 QMenu* PlotAction::getContextMenu()
@@ -37,21 +113,32 @@ QMenu* PlotAction::getContextMenu()
 
     const auto renderMode = _scatterplotWidget->getRenderMode();
 
+    const auto addActionToMenu = [menu](QAction* action) {
+        auto actionMenu = new QMenu(action->text());
+
+        actionMenu->addAction(action);
+
+        menu->addMenu(actionMenu);
+    };
+
     switch (renderMode)
     {
         case ScatterplotWidget::RenderMode::SCATTERPLOT:
-            menu->addAction(&_pointSizeAction);
-            menu->addAction(&_pointOpacityAction);
+            addActionToMenu(&_pointSizeAction);
+            addActionToMenu(&_pointOpacityAction);
             break;
 
         case ScatterplotWidget::RenderMode::DENSITY:
         case ScatterplotWidget::RenderMode::LANDSCAPE:
-            menu->addAction(&_sigmaAction);
+            addActionToMenu(&_sigmaAction);
             break;
 
         default:
             break;
     }
+
+    menu->addSeparator();
+    menu->addAction(&_resetAction);
 
     return menu;
 }

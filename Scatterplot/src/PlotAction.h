@@ -39,6 +39,11 @@ protected:
     hdps::gui::DoubleAction     _pointSizeAction;
     hdps::gui::DoubleAction     _pointOpacityAction;
     hdps::gui::DoubleAction     _sigmaAction;
+    QAction                     _resetAction;
+
+    static constexpr double DEFAULT_POINT_SIZE = 10.0;
+    static constexpr double DEFAULT_POINT_OPACITY = 50.0;
+    static constexpr double DEFAULT_SIGMA = 5.0;
 
     friend class Widget;
 };

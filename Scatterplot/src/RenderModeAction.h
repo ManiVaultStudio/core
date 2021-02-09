@@ -3,6 +3,7 @@
 #include "widgets/WidgetAction.h"
 
 #include <QAction>
+#include <QActionGroup >
 #include <QHBoxLayout>
 #include <QGroupBox>
 #include <QToolBar>
@@ -39,9 +40,10 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    QAction     _scatterPlotAction;
-    QAction     _densityPlotAction;
-    QAction     _contourPlotAction;
+    QAction         _scatterPlotAction;
+    QAction         _densityPlotAction;
+    QAction         _contourPlotAction;
+    QActionGroup    _actionGroup;
 
     friend class Widget;
 };

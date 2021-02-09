@@ -9,8 +9,13 @@ RenderModeAction::RenderModeAction(ScatterplotWidget* scatterplotWidget) :
     WidgetAction(scatterplotWidget),
     _scatterPlotAction("Scatter plot"),
     _densityPlotAction("Density plot"),
-    _contourPlotAction("Contour plot")
+    _contourPlotAction("Contour plot"),
+    _actionGroup(this)
 {
+    _actionGroup.addAction(&_scatterPlotAction);
+    _actionGroup.addAction(&_densityPlotAction);
+    _actionGroup.addAction(&_contourPlotAction);
+
     _scatterPlotAction.setCheckable(true);
     _densityPlotAction.setCheckable(true);
     _contourPlotAction.setCheckable(true);

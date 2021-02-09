@@ -53,8 +53,6 @@ void ScatterplotPlugin::init()
     _supportedColorTypes.append(ClusterType);
     _supportedColorTypes.append(ColorType);
 
-    _scatterPlotWidget->setAlpha(0.5f);
-
     _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     _dataSlot->addWidget(_scatterPlotWidget);
 

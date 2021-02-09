@@ -4,32 +4,144 @@ namespace hdps {
 
 namespace gui {
 
+DoubleAction::DoubleAction(QObject * parent, const QString& title, const double& minimum /*= DEFAULT_MIN_VALUE*/, const double& maximum /*= DEFAULT_MAX_VALUE*/, const double& value /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DEFAULT_DECIMALS*/) :
+    WidgetAction(parent),
+    _value(0.0f),
+    _minimum(0.0),
+    _maximum(0.0),
+    _suffix(),
+    _decimals(1),
+    _updateDuringDrag(true)
+{
+    setText(title);
+    setMinimum(minimum);
+    setMaximum(maximum);
+    setValue(value);
+    setDecimals(decimals);
+}
+
+QWidget* DoubleAction::createWidget(QWidget* parent)
+{
+    auto widget = new Widget(parent, this);
+
+    widget->show();
+
+    return widget;
+}
+
+double DoubleAction::getValue() const
+{
+    return _value;
+}
+
+void DoubleAction::setValue(const double& value)
+{
+    if (value == _value)
+        return;
+
+    _value = std::max(_minimum, std::min(value, _maximum));
+
+    emit valueChanged(_value);
+}
+
+float DoubleAction::getMinimum() const
+{
+    return _minimum;
+}
+
+void DoubleAction::setMinimum(const double& minimum)
+{
+    if (minimum == _minimum)
+        return;
+
+    _minimum = std::min(minimum, _maximum);
+
+    emit minimumChanged(_minimum);
+}
+
+float DoubleAction::getMaximum() const
+{
+    return _maximum;
+}
+
+void DoubleAction::setMaximum(const double& maximum)
+{
+    if (maximum == _maximum)
+        return;
+
+    _maximum = std::max(maximum, _minimum);
+
+    emit maximumChanged(_maximum);
+}
+
+void DoubleAction::setRange(const double& min, const double& max)
+{
+    setMinimum(min);
+    setMaximum(max);
+}
+
+QString DoubleAction::getSuffix() const
+{
+    return _suffix;
+}
+
+void DoubleAction::setSuffix(const QString& suffix)
+{
+    if (suffix == _suffix)
+        return;
+
+    _suffix = suffix;
+
+    emit suffixChanged(_suffix);
+}
+
+std::int32_t DoubleAction::getDecimals() const
+{
+    return _decimals;
+}
+
+void DoubleAction::setDecimals(const std::int32_t& decimals)
+{
+    if (decimals == _decimals)
+        return;
+
+    _decimals = decimals;
+
+    emit decimalsChanged(_decimals);
+}
+
+bool DoubleAction::getUpdateDuringDrag() const
+{
+    return _updateDuringDrag;
+}
+
+void DoubleAction::setUpdateDuringDrag(const bool& updateDuringDrag)
+{
+    if (updateDuringDrag == _updateDuringDrag)
+        return;
+
+    _updateDuringDrag = updateDuringDrag;
+}
+
 DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
     WidgetAction::Widget(parent, doubleAction),
     _layout(),
-    _label(QString("%1:").arg(doubleAction->text())),
     _spinBox(),
     _slider(Qt::Horizontal)
 {
     setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
 
-    if (childOfWidget()) {
-        _label.setFixedWidth(80);
-    }
-
     if (childOfMenu()) {
-        _label.setFixedWidth(80);
         _spinBox.setFixedWidth(60);
         _slider.setFixedWidth(100);
     }
-    
+
     if (childOfToolbar()) {
         _spinBox.setFixedWidth(60);
         _slider.setFixedWidth(60);
     }
 
     _layout.setMargin(0);
-    _layout.addWidget(&_label);
     _layout.addWidget(&_spinBox);
     _layout.addWidget(&_slider);
 
@@ -38,8 +150,6 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
     //_label.setVisible(childOfMenu());
 
     const auto setToolTips = [this, doubleAction]() {
-        _label.setToolTip(doubleAction->text());
-
         const auto toolTip = QString("%1: %2%3").arg(doubleAction->text(), QString::number(doubleAction->getValue(), 'f', doubleAction->getDecimals()), doubleAction->getSuffix());
 
         _spinBox.setToolTip(toolTip);
@@ -50,8 +160,22 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
         doubleAction->setValue(value);
     });
 
-    connect(&_slider, &QSlider::valueChanged, this, [this, doubleAction](int value) {
-        doubleAction->setValue(static_cast<double>(value) / static_cast<double>(SLIDER_MULTIPLIER));
+    const auto updateAction = [this, doubleAction]() {
+        doubleAction->setValue(static_cast<double>(_slider.value()) / static_cast<double>(SLIDER_MULTIPLIER));
+    };
+
+    connect(&_slider, &QSlider::valueChanged, this, [this, doubleAction, updateAction](int value) {
+        if (!doubleAction->getUpdateDuringDrag())
+            return;
+
+        updateAction();
+    });
+
+    connect(&_slider, &QSlider::sliderReleased, this, [this, doubleAction, updateAction]() {
+        if (doubleAction->getUpdateDuringDrag())
+            return;
+
+        updateAction();
     });
 
     const auto updateValue = [this, doubleAction, setToolTips]() {
@@ -75,22 +199,22 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
     const auto updateValueRange = [this, doubleAction]() {
         QSignalBlocker spinBoxBlocker(&_spinBox), sliderBlocker(&_slider);
 
-        const auto minValue = doubleAction->getMinValue();
+        const auto minimum = doubleAction->getMinimum();
 
-        _spinBox.setMinimum(minValue);
-        _slider.setMinimum(minValue * SLIDER_MULTIPLIER);
+        _spinBox.setMinimum(minimum);
+        _slider.setMinimum(minimum * SLIDER_MULTIPLIER);
 
-        const auto maxValue = doubleAction->getMaxValue();
+        const auto maximum = doubleAction->getMaximum();
 
-        _spinBox.setMaximum(maxValue);
-        _slider.setMaximum(maxValue * SLIDER_MULTIPLIER);
+        _spinBox.setMaximum(maximum);
+        _slider.setMaximum(maximum * SLIDER_MULTIPLIER);
     };
 
-    connect(doubleAction, &DoubleAction::minValueChanged, this, [this, doubleAction, updateValueRange](const double& minValue) {
+    connect(doubleAction, &DoubleAction::minimumChanged, this, [this, doubleAction, updateValueRange](const double& minimum) {
         updateValueRange();
     });
 
-    connect(doubleAction, &DoubleAction::maxValueChanged, this, [this, doubleAction, updateValueRange](const double& maxValue) {
+    connect(doubleAction, &DoubleAction::maximumChanged, this, [this, doubleAction, updateValueRange](const double& maximum) {
         updateValueRange();
     });
 
@@ -101,7 +225,7 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
 
         setToolTips();
     };
-    
+
     connect(doubleAction, &DoubleAction::suffixChanged, this, [this, doubleAction, updateSuffix](const QString& suffix) {
         updateSuffix();
     });
@@ -121,25 +245,6 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
     updateSuffix();
     updateDecimals();
     setToolTips();
-}
-
-DoubleAction::DoubleAction(QObject * parent, const QString& title /*= ""*/) :
-    WidgetAction(parent),
-    _value(0.0f)
-{
-    setText(title);
-    setMinValue(DEFAULT_MIN_VALUE);
-    setMaxValue(DEFAULT_MAX_VALUE);
-    setDecimals(DEFAULT_DECIMALS);
-}
-
-QWidget* DoubleAction::createWidget(QWidget* parent)
-{
-    auto widget = new Widget(parent, this);
-
-    widget->show();
-
-    return widget;
 }
 
 }
