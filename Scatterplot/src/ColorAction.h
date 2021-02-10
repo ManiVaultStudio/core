@@ -6,9 +6,6 @@
 #include "widgets/StringAction.h"
 
 #include <QHBoxLayout>
-#include <QGroupBox>
-#include <QToolBar>
-#include <QToolButton>
 
 class ColorAction : public PluginAction
 {
@@ -19,10 +16,6 @@ public:
 
     private:
         QHBoxLayout         _layout;
-        QToolBar            _toolBar;
-        QToolButton         _toolButton;
-        PopupWidget         _popupWidget;
-        QWidgetAction       _popupWidgetAction;
     };
 
 public:
@@ -41,6 +34,7 @@ protected:
     hdps::gui::OptionAction     _colorByAction;
     QAction                     _colorByDimensionAction;
     QAction                     _colorByDataAction;
+    QActionGroup                _colorByActionGroup;
     hdps::gui::OptionAction     _colorDimensionAction;
     hdps::gui::StringAction     _colorDataAction;
     QAction                     _removeColorDataAction;

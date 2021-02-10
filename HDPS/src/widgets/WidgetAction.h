@@ -29,6 +29,8 @@ public:
     public:
         Widget(QWidget* parent, QAction* action);
 
+        void setLayout(QLayout* layout);
+
         bool isChildOfMenu() const;
         bool childOfToolbar() const;
         bool childOfWidget() const;

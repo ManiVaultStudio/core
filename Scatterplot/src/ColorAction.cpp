@@ -10,16 +10,33 @@ ColorAction::ColorAction(ScatterplotPlugin* scatterplotPlugin) :
     _colorByAction(this, "Color by"),
     _colorByDimensionAction("Color by dimension"),
     _colorByDataAction("Color by data"),
+    _colorByActionGroup(this),
     _colorDimensionAction(this, "Color dimension"),
     _colorDataAction(this, "Color data"),
     _removeColorDataAction("Remove"),
     _resetAction("Reset")
 {
+    scatterplotPlugin->addAction(&_colorByAction);
+    scatterplotPlugin->addAction(&_colorByDimensionAction);
+    scatterplotPlugin->addAction(&_colorByDataAction);
+    scatterplotPlugin->addAction(&_colorDimensionAction);
+    scatterplotPlugin->addAction(&_colorDataAction);
+    scatterplotPlugin->addAction(&_removeColorDataAction);
+    scatterplotPlugin->addAction(&_resetAction);
+
+    _colorByAction.setOptions(QStringList() << "By dimension" << "By data");
+
     _colorByAction.setToolTip("Color by");
     _colorDimensionAction.setToolTip("Color dimension");
     _colorDataAction.setToolTip("Color data");
     _removeColorDataAction.setToolTip("Remove color data");
     _resetAction.setToolTip("Reset color settings");
+
+    _colorByDimensionAction.setCheckable(true);
+    _colorByDataAction.setCheckable(true);
+
+    _colorByActionGroup.addAction(&_colorByDimensionAction);
+    _colorByActionGroup.addAction(&_colorByDataAction);
 
     /*
     _xDimensionAction.setToolTip("X dimension");
@@ -58,12 +75,25 @@ QMenu* ColorAction::getContextMenu()
 {
     auto menu = new QMenu("Color");
 
+    const auto addActionToMenu = [menu](QAction* action) -> void {
+        auto actionMenu = new QMenu(action->text());
+
+        actionMenu->addAction(action);
+
+        menu->addMenu(actionMenu);
+    };
+
     menu->setEnabled(_scatterplotPlugin->getScatterplotWidget()->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT);
 
     menu->addAction(&_colorByDimensionAction);
     menu->addAction(&_colorByDataAction);
     
     menu->addSeparator();
+
+    addActionToMenu(&_colorDimensionAction);
+    addActionToMenu(&_colorDataAction);
+
+
 
     /*
     auto xDimensionMenu = new QMenu("X dimension");
@@ -83,23 +113,9 @@ QMenu* ColorAction::getContextMenu()
 
 ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction) :
     WidgetAction::Widget(parent, colorAction),
-    _layout(),
-    _toolBar(),
-    _toolButton(),
-    _popupWidget(this, "Color"),
-    _popupWidgetAction(this)
+    _layout()
 {
-    _layout.addWidget(&_toolBar);
-
-    /*
-    _toolBar.addAction(&colorAction->_xDimensionAction);
-    _toolBar.addAction(&colorAction->_yDimensionAction);
-    */
-
-    _popupWidgetAction.setDefaultWidget(&_popupWidget);
-
-    _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.addAction(&_popupWidgetAction);
+    _layout.addWidget(colorAction->_colorByAction.createWidget(this));
 
     setLayout(&_layout);
 }

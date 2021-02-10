@@ -22,6 +22,27 @@ public:
         QHBoxLayout     _layout;
     };
 
+    class Spacer : public QWidget {
+    public:
+        enum class Type {
+            Divider,
+            Spacer
+        };
+
+    public:
+        Spacer(const Type& type = Type::Divider);
+
+        //static Type getType(const ResponsiveSectionWidget::State& stateBefore, const ResponsiveSectionWidget::State& stateAfter);
+        //static Type getType(const ResponsiveSectionWidget* sectionBefore, const ResponsiveSectionWidget* sectionAfter);
+        void setType(const Type& type);
+        static std::int32_t getWidth(const Type& type);
+
+    protected:
+        Type            _type;
+        QHBoxLayout*    _layout;
+        QFrame*         _verticalLine;
+    };
+
 public:
     SettingsAction(ScatterplotPlugin* scatterplotPlugin);
 

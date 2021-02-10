@@ -46,16 +46,76 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
 {
     setAutoFillBackground(true);
 
-    _layout.setMargin(4);
-    _layout.setMargin(0);
-
     _layout.addWidget(settingsAction->_renderModeAction.createWidget(this));
+    _layout.addWidget(new Spacer());
     _layout.addWidget(settingsAction->_plotAction.createWidget(this));
+    _layout.addWidget(new Spacer());
     _layout.addWidget(settingsAction->_positionAction.createWidget(this));
+    _layout.addWidget(new Spacer());
     _layout.addWidget(settingsAction->_colorAction.createWidget(this));
+    _layout.addWidget(new Spacer());
     _layout.addWidget(settingsAction->_subsetAction.createWidget(this));
+    _layout.addWidget(new Spacer());
     _layout.addWidget(settingsAction->_selectionAction.createWidget(this));
     _layout.addStretch(1);
 
     setLayout(&_layout);
+
+    _layout.setMargin(4);
+}
+
+SettingsAction::Spacer::Spacer(const Type& type /*= State::Divider*/) :
+    QWidget(),
+    _type(Type::Divider),
+    _layout(new QHBoxLayout()),
+    _verticalLine(new QFrame())
+{
+    _verticalLine->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    _verticalLine->setFrameShape(QFrame::VLine);
+    _verticalLine->setFrameShadow(QFrame::Sunken);
+
+    _layout->setMargin(2);
+    _layout->setSpacing(0);
+    _layout->addWidget(_verticalLine);
+
+    setType(type);
+}
+
+/*
+ResponsiveToolBar::Spacer::Type ResponsiveToolBar::Spacer::getType(const ResponsiveSectionWidget::State& stateBefore, const ResponsiveSectionWidget::State& stateAfter)
+{
+    return stateBefore == ResponsiveSectionWidget::State::Collapsed && stateAfter == ResponsiveSectionWidget::State::Collapsed ? Spacer::Type::Spacer : Spacer::Type::Divider;
+}
+
+ResponsiveToolBar::Spacer::Type ResponsiveToolBar::Spacer::getType(const ResponsiveSectionWidget* sectionBefore, const ResponsiveSectionWidget* sectionAfter)
+{
+    return getType(sectionBefore->getState(), sectionAfter->getState());
+}
+*/
+
+void SettingsAction::Spacer::setType(const Type& type)
+{
+    _type = type;
+
+    setLayout(_layout);
+    setFixedWidth(getWidth(_type));
+
+    _verticalLine->setVisible(_type == Type::Divider ? true : false);
+}
+
+std::int32_t SettingsAction::Spacer::getWidth(const Type& type)
+{
+    switch (type)
+    {
+        case Type::Divider:
+            return 14;
+
+        case Type::Spacer:
+            return 8;
+
+        default:
+            break;
+    }
+
+    return 0;
 }

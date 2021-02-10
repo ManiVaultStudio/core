@@ -39,6 +39,14 @@ WidgetAction::Widget::Widget(QWidget* parent, QAction* action) :
     updateAction();
 }
 
+void WidgetAction::Widget::setLayout(QLayout* layout)
+{
+    layout->setMargin(0);
+    layout->setSpacing(4);
+
+    QWidget::setLayout(layout);
+}
+
 bool WidgetAction::Widget::isChildOfMenu() const
 {
     return dynamic_cast<QMenu*>(parent());

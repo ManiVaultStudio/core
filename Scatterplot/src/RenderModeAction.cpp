@@ -9,9 +9,9 @@ using namespace hdps::gui;
 
 RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
-    _scatterPlotAction("Scatter plot"),
-    _densityPlotAction("Density plot"),
-    _contourPlotAction("Contour plot"),
+    _scatterPlotAction("Scatter"),
+    _densityPlotAction("Density"),
+    _contourPlotAction("Contour"),
     _actionGroup(this)
 {
     _scatterplotPlugin->addAction(&_scatterPlotAction);
