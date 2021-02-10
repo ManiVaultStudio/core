@@ -1,6 +1,5 @@
 #include "ScatterplotPlugin.h"
 
-#include "SettingsWidget.h"
 #include "PointData.h"
 #include "ClusterData.h"
 #include "ColorData.h"
@@ -11,11 +10,8 @@
 
 #include <QtCore>
 #include <QApplication>
-#include <QToolBar>
 #include <QDebug>
-#include <QToolBar>
 #include <QMenu>
-
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
@@ -30,33 +26,16 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
-    _settingsWidget(new SettingsWidget(*this)),
-    _renderModeAction(this),
-    _plotAction(this),
-    _positionAction(this),
-    //_colorAction(this),
-    _subsetAction(this),
-    _selectionAction(this)
+    _settingsAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint& point) {
-        if (_currentDataSet.isEmpty() || _pixelSelectionTool->isActive())
-            return;
+        //if (_currentDataSet.isEmpty() || _pixelSelectionTool->isActive())
+            //return;
 
-        QMenu menu(this);
-
-        //menu.addMenu(_renderModeAction.getContextMenu());
-        //menu.addMenu(_plotAction.getContextMenu());
-        menu.addSeparator();
-        menu.addMenu(_positionAction.getContextMenu());
-        //menu.addMenu(_colorAction.getContextMenu());
-        menu.addSeparator();
-        menu.addMenu(_subsetAction.getContextMenu());
-        menu.addMenu(_selectionAction.getContextMenu());
-
-        menu.exec(mapToGlobal(point));
+        _settingsAction.getContextMenu()->exec(mapToGlobal(point));
     });
 }
 
@@ -75,7 +54,6 @@ void ScatterplotPlugin::init()
     _supportedColorTypes.append(ClusterType);
     _supportedColorTypes.append(ColorType);
 
-    //_scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     _dataSlot->addWidget(_scatterPlotWidget);
 
     _dataSlot->layout()->setMargin(0);
@@ -84,20 +62,7 @@ void ScatterplotPlugin::init()
 
     layout->setMargin(0);
     layout->setSpacing(0);
-    //layout->addWidget(_settingsWidget);
-    
-    auto toolBar = new QToolBar();
-
-    toolBar->setAutoFillBackground(true);
-    
-    toolBar->addAction(&_renderModeAction);
-    toolBar->addAction(&_plotAction);
-    toolBar->addAction(&_positionAction);
-    toolBar->addAction(&_subsetAction);
-    //toolBar->addAction(&_colorAction);
-    toolBar->addAction(&_selectionAction);
-
-    layout->addWidget(toolBar);
+    layout->addWidget(_settingsAction.createWidget(this));
     layout->addWidget(_dataSlot, 1);
 
     setLayout(layout);
@@ -278,15 +243,15 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     // For source data determine whether to use dimension names or make them up
     if (points.getDimensionNames().size() == points.getNumDimensions())
-        _positionAction.setDimensions(points.getDimensionNames().size(), points.getDimensionNames());
+        _settingsAction.getPositionAction().setDimensions(points.getDimensionNames().size(), points.getDimensionNames());
     else
-        _positionAction.setDimensions(points.getNumDimensions());
+        _settingsAction.getPositionAction().setDimensions(points.getNumDimensions());
 
     // For derived data determine whether to use dimension names or make them up
     if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
-        _settingsWidget->initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
+        _settingsAction.getColorAction().initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
     else
-        _settingsWidget->initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
+        _settingsAction.getColorAction().initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
 
@@ -359,8 +324,8 @@ void ScatterplotPlugin::updateData()
     const Points& points = _core->requestData<Points>(_currentDataSet);
 
     // Get the selected dimensions to use as X and Y dimension in the plot
-    int xDim = _positionAction.getXDimension();
-    int yDim = _positionAction.getYDimension();
+    int xDim = _settingsAction.getPositionAction().getXDimension();
+    int yDim = _settingsAction.getPositionAction().getYDimension();
 
     // If one of the dimensions was not set, do not draw anything
     if (xDim < 0 || yDim < 0)
@@ -380,7 +345,7 @@ void ScatterplotPlugin::updateData()
 
 void ScatterplotPlugin::calculatePositions(const Points& points)
 {
-    points.extractDataForDimensions(_points, _positionAction.getXDimension(), _positionAction.getYDimension());
+    points.extractDataForDimensions(_points, _settingsAction.getPositionAction().getXDimension(), _settingsAction.getPositionAction().getYDimension());
 }
 
 void ScatterplotPlugin::calculateScalars(std::vector<float>& scalars, const Points& points, int colorIndex)

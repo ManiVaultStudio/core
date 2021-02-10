@@ -28,8 +28,15 @@ WidgetAction::Widget::Widget(QWidget* parent, QAction* action) :
     QWidget(parent),
     _action(action)
 {
-    setEnabled(action->isEnabled());
-    action->installEventFilter(this);
+    const auto updateAction = [this, action]() -> void {
+        setEnabled(action->isEnabled());
+    };
+
+    connect(action, &QAction::changed, this, [this, updateAction]() {
+        updateAction();
+    });
+
+    updateAction();
 }
 
 bool WidgetAction::Widget::isChildOfMenu() const
@@ -45,25 +52,6 @@ bool WidgetAction::Widget::childOfToolbar() const
 bool WidgetAction::Widget::childOfWidget() const
 {
     return isChildOfMenu() || childOfToolbar();
-}
-
-bool WidgetAction::Widget::eventFilter(QObject* object, QEvent* event)
-{
-    auto widget = dynamic_cast<QWidget*>(object);
-
-    if (widget != nullptr) {
-        switch (event->type())
-        {
-            case QEvent::EnabledChange:
-                setEnabled(_action->isEnabled());
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    return QObject::eventFilter(object, event);
 }
 
 WidgetAction::WidgetAction(QObject* parent) :

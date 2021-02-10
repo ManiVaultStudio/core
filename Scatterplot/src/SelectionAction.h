@@ -38,9 +38,9 @@ protected:
     QAction                     _lassoAction;
     QAction                     _polygonAction;
     QActionGroup                _typeActionGroup;
+    hdps::gui::DoubleAction     _brushRadiusAction;
     QAction                     _modifierAddAction;
     QAction                     _modifierRemoveAction;
-    hdps::gui::DoubleAction     _brushRadiusAction;
     QAction                     _clearSelectionAction;
     QAction                     _selectAllAction;
     QAction                     _invertSelectionAction;

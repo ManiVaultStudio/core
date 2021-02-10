@@ -34,6 +34,9 @@ public:
 
     QMenu* getContextMenu();
 
+    void initScalarDimOptions(const unsigned int nDim) {};
+    void initScalarDimOptions(const std::vector<QString>& dimNames) {};
+
 protected:
     hdps::gui::OptionAction     _colorByAction;
     QAction                     _colorByDimensionAction;

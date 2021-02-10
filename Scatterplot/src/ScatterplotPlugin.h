@@ -6,14 +6,9 @@
 
 #include "widgets/DataSlot.h"
 #include "PixelSelectionTool.h"
-#include "ScatterplotWidget.h"
 
-#include "RenderModeAction.h"
-#include "PlotAction.h"
-#include "PositionAction.h"
-#include "ColorAction.h"
-#include "SubsetAction.h"
-#include "SelectionAction.h"
+#include "ScatterplotWidget.h"
+#include "SettingsAction.h"
 
 using namespace hdps::plugin;
 
@@ -35,7 +30,7 @@ class ScatterplotPlugin : public ViewPlugin
     
 public:
     ScatterplotPlugin();
-    ~ScatterplotPlugin(void) override;
+    ~ScatterplotPlugin() override;
     
     /** Returns the icon of this plugin */
     QIcon getIcon() const override {
@@ -115,16 +110,10 @@ private:
     std::vector<hdps::Vector2f>     _points;
     unsigned int                    _numPoints;
     PixelSelectionTool*             _pixelSelectionTool;        /** Pixel selection tool */
-    ScatterplotWidget*              _scatterPlotWidget;         /**  */
-    SettingsWidget*                 _settingsWidget;
-
-protected: // Menus & actions
-    RenderModeAction                _renderModeAction;
-    PlotAction                      _plotAction;
-    PositionAction                  _positionAction;
-    //ColorAction                     _colorAction;
-    SubsetAction                    _subsetAction;
-    SelectionAction                 _selectionAction;
+    
+protected:// Widgets
+    ScatterplotWidget*              _scatterPlotWidget;
+    SettingsAction                  _settingsAction;
 };
 
 // =============================================================================

@@ -35,7 +35,7 @@ PixelSelectionTool::PixelSelectionTool(QObject* parent, const bool& enabled /*= 
     _modifier(Modifier::Replace),
     _active(false),
     _notifyDuringSelection(true),
-    _radius(RADIUS_DEFAULT),
+    _brushRadius(BRUSH_RADIUS_DEFAULT),
     _mousePosition(),
     _mousePositions(),
     _mouseButtons(),
@@ -105,19 +105,19 @@ void PixelSelectionTool::setNotifyDuringSelection(const bool& notifyDuringSelect
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
 }
 
-float PixelSelectionTool::getRadius() const
+float PixelSelectionTool::getBrushRadius() const
 {
-    return _radius;
+    return _brushRadius;
 }
 
-void PixelSelectionTool::setRadius(const float& radius)
+void PixelSelectionTool::setBrushRadius(const float& brushRadius)
 {
-    if (radius == _radius)
+    if (brushRadius == _brushRadius)
         return;
 
-    _radius = std::clamp(radius, RADIUS_MIN, RADIUS_MAX);
+    _brushRadius = std::clamp(brushRadius, BRUSH_RADIUS_MIN, BRUSH_RADIUS_MAX);
 
-    emit radiusChanged(_radius);
+    emit brushRadiusChanged(_brushRadius);
     
     paint();
 }
@@ -127,7 +127,7 @@ void PixelSelectionTool::setChanged()
     emit typeChanged(_type);
     emit modifierChanged(_modifier);
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
-    emit radiusChanged(_radius);
+    emit brushRadiusChanged(_brushRadius);
 }
 
 void PixelSelectionTool::abort()
@@ -154,7 +154,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             }
             */
 
-            return true;
+            //return true;
             qDebug() << "ContextMenu";
             
             break;
@@ -366,9 +366,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                 case Type::Brush:
                 {
                     if (wheelEvent->delta() < 0)
-                        setRadius(_radius - RADIUS_DELTA);
+                        setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
                     else
-                        setRadius(_radius + RADIUS_DELTA);
+                        setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
 
                     shouldPaint = true;
 
@@ -456,11 +456,11 @@ void PixelSelectionTool::paint()
             if (noMousePositions >= 1) {
                 if (noMousePositions == 1) {
                     areaPainter.setBrush(AREA_BRUSH);
-                    areaPainter.drawEllipse(QPointF(brushCenter), _radius, _radius);
+                    areaPainter.drawEllipse(QPointF(brushCenter), _brushRadius, _brushRadius);
                 }
                 else {
                     areaPainter.setBrush(Qt::NoBrush);
-                    areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _radius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+                    areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _brushRadius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
                     areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
                 }
             }
@@ -472,13 +472,13 @@ void PixelSelectionTool::paint()
 
             shapePainter.setPen(_mouseButtons & Qt::LeftButton ? PEN_LINE_FG : PEN_LINE_BG);
             shapePainter.setBrush(Qt::NoBrush);
-            shapePainter.drawEllipse(QPointF(brushCenter), _radius, _radius);
+            shapePainter.drawEllipse(QPointF(brushCenter), _brushRadius, _brushRadius);
 
             controlPoints << brushCenter;
 
             const auto textAngle    = 0.75f * M_PI;
             const auto size         = 12.0f;
-            const auto textCenter   = brushCenter + (_radius + size) * QPointF(sin(textAngle), cos(textAngle));
+            const auto textCenter   = brushCenter + (_brushRadius + size) * QPointF(sin(textAngle), cos(textAngle));
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 

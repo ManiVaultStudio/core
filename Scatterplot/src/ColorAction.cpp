@@ -58,6 +58,8 @@ QMenu* ColorAction::getContextMenu()
 {
     auto menu = new QMenu("Color");
 
+    menu->setEnabled(_scatterplotPlugin->getScatterplotWidget()->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT);
+
     menu->addAction(&_colorByDimensionAction);
     menu->addAction(&_colorByDataAction);
     
