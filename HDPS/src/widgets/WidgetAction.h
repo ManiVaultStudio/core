@@ -29,7 +29,7 @@ public:
     public:
         Widget(QWidget* parent, QAction* action);
 
-        bool childOfMenu() const;
+        bool isChildOfMenu() const;
         bool childOfToolbar() const;
         bool childOfWidget() const;
 

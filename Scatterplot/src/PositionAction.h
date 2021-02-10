@@ -3,6 +3,7 @@
 #include "PluginAction.h"
 
 #include "widgets/OptionAction.h"
+#include "widgets/DoubleAction.h"
 
 #include <QHBoxLayout>
 #include <QGroupBox>

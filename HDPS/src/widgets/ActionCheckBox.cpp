@@ -20,20 +20,20 @@ ActionCheckBox::ActionCheckBox(QAction *action) :
 void ActionCheckBox::setAction(QAction* action) {
 
     if (_actionOwner && _actionOwner != action) {
-        disconnect(_actionOwner, &QAction::changed, this, &ActionCheckBox::updateButtonStatusFromAction);
+        disconnect(_actionOwner, &QAction::changed, this, &ActionCheckBox::updateFromAction);
         disconnect(this, &ActionCheckBox::clicked, _actionOwner, &QAction::trigger);
     }
 
     _actionOwner = action;
 
     
-    updateButtonStatusFromAction();
+    updateFromAction();
     
-    connect(action, &QAction::changed, this, &ActionCheckBox::updateButtonStatusFromAction);
+    connect(action, &QAction::changed, this, &ActionCheckBox::updateFromAction);
     connect(this, &ActionCheckBox::clicked, _actionOwner, &QAction::trigger);
 }
 
-void ActionCheckBox::updateButtonStatusFromAction() {
+void ActionCheckBox::updateFromAction() {
 
     if (!_actionOwner)
         return;
@@ -42,7 +42,6 @@ void ActionCheckBox::updateButtonStatusFromAction() {
     setStatusTip(_actionOwner->statusTip());
     setToolTip(_actionOwner->toolTip());
     setEnabled(_actionOwner->isEnabled());
-    setCheckable(_actionOwner->isCheckable());
     setChecked(_actionOwner->isChecked());
 }
 

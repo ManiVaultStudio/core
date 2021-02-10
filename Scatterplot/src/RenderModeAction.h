@@ -19,10 +19,6 @@ public:
 
     private:
         QHBoxLayout         _layout;
-        QToolBar            _toolBar;
-        QToolButton         _toolButton;
-        PopupWidget         _popupWidget;
-        QWidgetAction       _popupWidgetAction;
     };
 
 public:

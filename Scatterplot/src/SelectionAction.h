@@ -20,10 +20,6 @@ public:
 
     private:
         QHBoxLayout         _layout;
-        QToolBar            _toolBar;
-        QToolButton         _toolButton;
-        PopupWidget         _popupWidget;
-        QWidgetAction       _popupWidgetAction;
     };
 
 public:
@@ -37,10 +33,10 @@ public:
 
 protected:
     hdps::gui::OptionAction     _typeAction;
+    QAction                     _rectangleAction;
     QAction                     _brushAction;
     QAction                     _lassoAction;
     QAction                     _polygonAction;
-    QAction                     _rectangleAction;
     QActionGroup                _typeActionGroup;
     QAction                     _modifierAddAction;
     QAction                     _modifierRemoveAction;

@@ -81,6 +81,7 @@ set( WIDGET_HEADERS
     src/widgets/ResponsiveToolBar.h
     src/widgets/WidgetAction.h
     src/widgets/ActionPushButton.h
+    src/widgets/ActionCheckBox.h
     src/widgets/DoubleAction.h
     src/widgets/OptionAction.h
     src/widgets/BooleanAction.h
@@ -102,6 +103,7 @@ set( WIDGET_SOURCES
 	src/widgets/ResponsiveToolBar.cpp
 	src/widgets/WidgetAction.cpp
 	src/widgets/ActionPushButton.cpp
+	src/widgets/ActionCheckBox.cpp
     src/widgets/DoubleAction.cpp
     src/widgets/OptionAction.cpp
     src/widgets/BooleanAction.cpp

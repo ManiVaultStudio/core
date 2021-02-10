@@ -40,7 +40,8 @@ PixelSelectionTool::PixelSelectionTool(QObject* parent, const bool& enabled /*= 
     _mousePositions(),
     _mouseButtons(),
     _shapePixmap(),
-    _areaPixmap()
+    _areaPixmap(),
+    _preventContextMenu(false)
 {
 }
 
@@ -144,6 +145,21 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
         case QEvent::Paint:
             return false;
 
+        case QEvent::ContextMenu:
+        {
+            /*
+            if (_preventContextMenu) {
+                _preventContextMenu = false;
+                return true;
+            }
+            */
+
+            return true;
+            qDebug() << "ContextMenu";
+            
+            break;
+        }
+
         case QEvent::Resize:
         {
             const auto resizeEvent = static_cast<QResizeEvent*>(event);
@@ -171,11 +187,10 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                 case Type::Brush:
                 case Type::Lasso:
                 {
-                    startSelection();
-
                     switch (mouseEvent->button())
                     {
                         case Qt::LeftButton:
+                            startSelection();
                             _mousePositions.clear();
                             _mousePositions << mouseEvent->pos();
                             break;
@@ -192,14 +207,18 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
                 case Type::Polygon:
                 {
-                    if (_mousePositions.isEmpty())
+                    if (_mousePositions.isEmpty() && mouseEvent->button() == Qt::LeftButton)
                         startSelection();
 
                     switch (mouseEvent->button())
                     {
                         case Qt::LeftButton:
-                        case Qt::RightButton:
                             _mousePositions << mouseEvent->pos() << mouseEvent->pos();
+                            break;
+
+                        case Qt::RightButton:
+                            _mousePositions << mouseEvent->pos();
+                            return true;
                             break;
 
                         default:
@@ -256,7 +275,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                         case Qt::RightButton:
                             endSelection();
                             break;
-
+ 
                         default:
                             break;
                     }
@@ -373,7 +392,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
     if (shouldPaint)
         paint();
-
+    
     return QObject::eventFilter(target, event);
 }
 

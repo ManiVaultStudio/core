@@ -14,9 +14,6 @@ public:
 
     private:
         QHBoxLayout         _layout;
-        QToolButton         _toolButton;
-        PopupWidget         _popupWidget;
-        QWidgetAction       _popupWidgetAction;
     };
 
 public:
@@ -30,7 +27,7 @@ public:
 
 protected:
     QAction     _createSubsetAction;
-    QAction     _createFromSourceDataAction;
+    QAction     _fromSourceDataAction;
 
     friend class Widget;
 };

@@ -19,12 +19,12 @@ PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
         _resetAction.setEnabled(!scatterplotPlugin->getCurrentDataset().isEmpty() && !(_xDimensionAction.getCurrentIndex() == 0 && _yDimensionAction.getCurrentIndex() == 1));
     };
 
-    connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::int32_t& currentIndex) {
+    connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::uint32_t& currentIndex) {
         scatterplotPlugin->xDimPicked(currentIndex);
         updateResetAction();
     });
 
-    connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::int32_t& currentIndex) {
+    connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::uint32_t& currentIndex) {
         scatterplotPlugin->yDimPicked(currentIndex);
         updateResetAction();
     });
@@ -64,15 +64,8 @@ void PositionAction::setDimensions(const std::uint32_t& numberOfDimensions, cons
 {
     auto dimensionNamesStringList = getDimensionNamesStringList(numberOfDimensions, dimensionNames);
 
-    QSignalBlocker xDimensionActionSignalBlocker(&_xDimensionAction), yDimensionActionSignalBlocker(&_yDimensionAction);
-
     _xDimensionAction.setOptions(dimensionNamesStringList);
-    _yDimensionAction.setOptions(dimensionNamesStringList);
-
-    if (numberOfDimensions >= 2) {
-        _xDimensionAction.setCurrentIndex(0);
-        _yDimensionAction.setCurrentIndex(1);
-    }
+    _yDimensionAction.setOptions(dimensionNamesStringList, numberOfDimensions >= 2 ? 1 : 0);
 }
 
 std::int32_t PositionAction::getXDimension() const

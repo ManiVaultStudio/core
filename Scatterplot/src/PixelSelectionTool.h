@@ -175,6 +175,7 @@ protected:
     int                 _mouseButtons;              /** State of the left, middle and right mouse buttons */
     QPixmap             _shapePixmap;               /** Pixmap for the selection tool shape */
     QPixmap             _areaPixmap;                /** Pixmap for the selection area */
+    bool                _preventContextMenu;        /** Whether to prevent a context menu */
 
 public:
 

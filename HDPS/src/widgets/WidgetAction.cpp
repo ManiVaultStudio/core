@@ -32,7 +32,7 @@ WidgetAction::Widget::Widget(QWidget* parent, QAction* action) :
     action->installEventFilter(this);
 }
 
-bool WidgetAction::Widget::childOfMenu() const
+bool WidgetAction::Widget::isChildOfMenu() const
 {
     return dynamic_cast<QMenu*>(parent());
 }
@@ -44,7 +44,7 @@ bool WidgetAction::Widget::childOfToolbar() const
 
 bool WidgetAction::Widget::childOfWidget() const
 {
-    return childOfMenu() || childOfToolbar();
+    return isChildOfMenu() || childOfToolbar();
 }
 
 bool WidgetAction::Widget::eventFilter(QObject* object, QEvent* event)

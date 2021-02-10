@@ -52,8 +52,6 @@ public:
 
     PixelSelectionTool& getSelectionTool();
 
-    bool eventFilter(QObject* target, QEvent* event) override;
-
     QString getCurrentDataset() const;
     std::uint32_t getNumPoints() const;
     std::uint32_t getNumberOfSelectedPoints() const;
@@ -88,12 +86,6 @@ public:
 
     void selectPoints();
 
-protected:
-
-#ifndef QT_NO_CONTEXTMENU
-    void contextMenuEvent(QContextMenuEvent* contextMenuEvent) override;
-#endif // QT_NO_CONTEXTMENU
-
 signals:
     void currentDatasetChanged(const QString& datasetName);
     void selectionChanged();
@@ -127,12 +119,12 @@ private:
     SettingsWidget*                 _settingsWidget;
 
 protected: // Menus & actions
-    //RenderModeAction                _renderModeAction;
-    //PlotAction                      _plotAction;
-    //SelectionAction                 _selectionAction;
+    RenderModeAction                _renderModeAction;
+    PlotAction                      _plotAction;
     PositionAction                  _positionAction;
     //ColorAction                     _colorAction;
-    //SubsetAction                    _subsetAction;
+    SubsetAction                    _subsetAction;
+    SelectionAction                 _selectionAction;
 };
 
 // =============================================================================

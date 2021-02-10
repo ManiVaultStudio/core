@@ -3,6 +3,8 @@
 
 #include "ScatterplotPlugin.h"
 
+#include "widgets/ActionPushButton.h"
+
 using namespace hdps::gui;
 
 RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
@@ -12,6 +14,10 @@ RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
     _contourPlotAction("Contour plot"),
     _actionGroup(this)
 {
+    _scatterplotPlugin->addAction(&_scatterPlotAction);
+    _scatterplotPlugin->addAction(&_densityPlotAction);
+    _scatterplotPlugin->addAction(&_contourPlotAction);
+
     _actionGroup.addAction(&_scatterPlotAction);
     _actionGroup.addAction(&_densityPlotAction);
     _actionGroup.addAction(&_contourPlotAction);
@@ -28,11 +34,13 @@ RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
     _densityPlotAction.setToolTip("Set render mode to density plot");
     _contourPlotAction.setToolTip("Set render mode to contour plot");
 
+    /*
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _scatterPlotAction.setIcon(fontAwesome.getIcon("braille"));
     _densityPlotAction.setIcon(fontAwesome.getIcon("cloud"));
     _contourPlotAction.setIcon(fontAwesome.getIcon("mountain"));
+    */
 
     connect(&_scatterPlotAction, &QAction::triggered, this, [this]() {
         getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
@@ -48,8 +56,6 @@ RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
 
     const auto updateButtons = [this]() {
         const auto renderMode = getScatterplotWidget()->getRenderMode();
-
-        QSignalBlocker scatterPlotActionBlocker(&_scatterPlotAction), densityPlotAction(&_densityPlotAction), contourPlotAction(&_contourPlotAction);
 
         _scatterPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
         _densityPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::DENSITY);
@@ -76,22 +82,11 @@ QMenu* RenderModeAction::getContextMenu()
 
 RenderModeAction::Widget::Widget(QWidget* parent, RenderModeAction* renderModeAction) :
     WidgetAction::Widget(parent, renderModeAction),
-    _layout(),
-    _toolBar(),
-    _toolButton(),
-    _popupWidget(this, "Render mode"),
-    _popupWidgetAction(this)
+    _layout()
 {
-    _layout.addWidget(&_toolBar);
-
-    _toolBar.addAction(&renderModeAction->_scatterPlotAction);
-    _toolBar.addAction(&renderModeAction->_densityPlotAction);
-    _toolBar.addAction(&renderModeAction->_contourPlotAction);
-
-    _popupWidgetAction.setDefaultWidget(&_popupWidget);
-
-    _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.addAction(&_popupWidgetAction);
+    _layout.addWidget(new ActionPushButton(&renderModeAction->_scatterPlotAction));
+    _layout.addWidget(new ActionPushButton(&renderModeAction->_densityPlotAction));
+    _layout.addWidget(new ActionPushButton(&renderModeAction->_contourPlotAction));
 
     setLayout(&_layout);
 }

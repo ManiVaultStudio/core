@@ -4,16 +4,17 @@
 #include "ScatterplotPlugin.h"
 
 #include "widgets/ActionPushButton.h"
+#include "widgets/ActionCheckBox.h"
 
 using namespace hdps::gui;
 
 SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
     _typeAction(this, "Type"),
+    _rectangleAction("Rectangle"),
     _brushAction("Brush"),
     _lassoAction("Lasso"),
     _polygonAction("Polygon"),
-    _rectangleAction("Rectangle"),
     _typeActionGroup(this),
     _modifierAddAction(this),
     _modifierRemoveAction(""),
@@ -23,14 +24,29 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _invertSelectionAction("Invert selection"),
     _notifyDuringSelectionAction("Notify during selection")
 {
-    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+    scatterplotPlugin->addAction(&_rectangleAction);
+    scatterplotPlugin->addAction(&_brushAction);
+    scatterplotPlugin->addAction(&_lassoAction);
+    scatterplotPlugin->addAction(&_polygonAction);
+    scatterplotPlugin->addAction(&_modifierAddAction);
+    scatterplotPlugin->addAction(&_modifierRemoveAction);
+    scatterplotPlugin->addAction(&_clearSelectionAction);
+    scatterplotPlugin->addAction(&_selectAllAction);
+    scatterplotPlugin->addAction(&_invertSelectionAction);
+    scatterplotPlugin->addAction(&_notifyDuringSelectionAction);
 
-    //_modifierAddAction.setAutoRepeat(false);
+    _rectangleAction.setCheckable(true);
+    _brushAction.setCheckable(true);
+    _lassoAction.setCheckable(true);
+    _polygonAction.setCheckable(true);
+    _modifierAddAction.setCheckable(true);
+    _modifierRemoveAction.setCheckable(true);
+    _notifyDuringSelectionAction.setCheckable(true);
 
+    _rectangleAction.setShortcut(QKeySequence("R"));
     _brushAction.setShortcut(QKeySequence("B"));
     _lassoAction.setShortcut(QKeySequence("L"));
     _polygonAction.setShortcut(QKeySequence("P"));
-    _rectangleAction.setShortcut(QKeySequence("R"));
     _modifierAddAction.setShortcut(QKeySequence("Shift"));
     _modifierRemoveAction.setShortcut(QKeySequence(Qt::Key_Control));
     _clearSelectionAction.setShortcut(QKeySequence("E"));
@@ -38,10 +54,10 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _invertSelectionAction.setShortcut(QKeySequence("I"));
     _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
 
+    _rectangleAction.setToolTip("Select data points inside a rectangle");
     _brushAction.setToolTip("Select data points using a brush tool");
     _lassoAction.setToolTip("Select data points using a lasso");
     _polygonAction.setToolTip("Select data points by drawing a polygon");
-    _rectangleAction.setToolTip("Select data points inside a rectangle");
     _modifierAddAction.setToolTip("Add items to the existing selection");
     _modifierRemoveAction.setToolTip("Remove items from the existing selection");
     _brushRadiusAction.setToolTip("Brush selection tool radius");
@@ -50,31 +66,56 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _invertSelectionAction.setToolTip("Invert the selection");
     _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process");
 
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
     _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
     _modifierRemoveAction.setIcon(fontAwesome.getIcon("minus"));
-    
-    _brushAction.setCheckable(true);
-    _lassoAction.setCheckable(true);
-    _polygonAction.setCheckable(true);
-    _rectangleAction.setCheckable(true);
-    _modifierAddAction.setCheckable(true);
-    _modifierRemoveAction.setCheckable(true);
-    _notifyDuringSelectionAction.setCheckable(true);
 
+    _typeActionGroup.addAction(&_rectangleAction);
     _typeActionGroup.addAction(&_brushAction);
     _typeActionGroup.addAction(&_lassoAction);
     _typeActionGroup.addAction(&_polygonAction);
-    _typeActionGroup.addAction(&_rectangleAction);
+    
+    connect(&_rectangleAction, &QAction::triggered, this, [this]() {
+        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::Type::Rectangle);
+    });
+
+    connect(&_brushAction, &QAction::triggered, this, [this]() {
+        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::Type::Brush);
+    });
+
+    connect(&_lassoAction, &QAction::triggered, this, [this]() {
+        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::Type::Lasso);
+    });
+
+    connect(&_polygonAction, &QAction::triggered, this, [this]() {
+        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::Type::Polygon);
+    });
+
+    const auto updateType = [this]() {
+        const auto type = _scatterplotPlugin->getSelectionTool().getType();
+
+        _rectangleAction.setChecked(type == PixelSelectionTool::Type::Rectangle);
+        _brushAction.setChecked(type == PixelSelectionTool::Type::Brush);
+        _lassoAction.setChecked(type == PixelSelectionTool::Type::Lasso);
+        _polygonAction.setChecked(type == PixelSelectionTool::Type::Polygon);
+    };
+
+    connect(&_scatterplotPlugin->getSelectionTool(), &PixelSelectionTool::typeChanged, this, [this, updateType](const PixelSelectionTool::Type& type) {
+        updateType();
+    });
+
+    updateType();
 }
 
 QMenu* SelectionAction::getContextMenu()
 {
     auto menu = new QMenu("Selection");
 
+    menu->addAction(&_rectangleAction);
     menu->addAction(&_brushAction);
     menu->addAction(&_lassoAction);
     menu->addAction(&_polygonAction);
-    menu->addAction(&_rectangleAction);
 
     menu->addSeparator();
 
@@ -91,24 +132,15 @@ QMenu* SelectionAction::getContextMenu()
 
 SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionAction) :
     WidgetAction::Widget(parent, selectionAction),
-    _layout(),
-    _toolBar(),
-    _toolButton(),
-    _popupWidget(this, "Selection"),
-    _popupWidgetAction(this)
+    _layout()
 {
-    _layout.addWidget(&_toolBar);
-
-    _toolBar.addAction(&selectionAction->_typeAction);
-    _toolBar.addAction(&selectionAction->_modifierAddAction);
-    _toolBar.addAction(&selectionAction->_modifierRemoveAction);
-    _toolBar.addAction(&selectionAction->_brushRadiusAction);
-    _toolBar.addAction(&selectionAction->_clearSelectionAction);
-    _toolBar.addAction(&selectionAction->_selectAllAction);
-    _toolBar.addAction(&selectionAction->_invertSelectionAction);
-    _toolBar.addAction(&selectionAction->_notifyDuringSelectionAction);
-    _toolBar.addWidget(&_toolButton);
-
+    
+    _layout.addWidget(new ActionPushButton(&selectionAction->_rectangleAction));
+    _layout.addWidget(new ActionPushButton(&selectionAction->_brushAction));
+    _layout.addWidget(new ActionPushButton(&selectionAction->_lassoAction));
+    _layout.addWidget(new ActionPushButton(&selectionAction->_polygonAction));
+    _layout.addWidget(new ActionCheckBox(&selectionAction->_notifyDuringSelectionAction));
+    /*
     auto popupLayout = new QGridLayout();
 
     auto typeWidget = new QWidget();
@@ -148,6 +180,7 @@ SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionActio
 
     _toolButton.setPopupMode(QToolButton::InstantPopup);
     _toolButton.addAction(&_popupWidgetAction);
+    */
 
     setLayout(&_layout);
 }

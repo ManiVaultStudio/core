@@ -19,7 +19,7 @@ public:
     void setAction(QAction* action);
 
 public slots:
-    void updateButtonStatusFromAction();
+    void updateFromAction();
 
 private:
     QAction*    _actionOwner = nullptr;

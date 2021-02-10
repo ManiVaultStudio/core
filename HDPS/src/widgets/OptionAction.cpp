@@ -1,5 +1,7 @@
 #include "OptionAction.h"
 
+#include <QDebug>
+
 namespace hdps {
 
 namespace gui {
@@ -27,7 +29,7 @@ QStringList OptionAction::getOptions() const
     return _options;
 }
 
-void OptionAction::setOptions(const QStringList& options)
+void OptionAction::setOptions(const QStringList& options, const std::uint32_t& currentIndex /*= 0*/)
 {
     if (options == _options)
         return;
@@ -36,15 +38,15 @@ void OptionAction::setOptions(const QStringList& options)
 
     emit optionsChanged(_options);
 
-    setCurrentIndex(15);
+    setCurrentIndex(currentIndex);
 }
 
-std::int32_t OptionAction::getCurrentIndex() const
+std::uint32_t OptionAction::getCurrentIndex() const
 {
     return _currentIndex;
 }
 
-void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
+void OptionAction::setCurrentIndex(const std::uint32_t& currentIndex)
 {
     if (currentIndex == _currentIndex)
         return;
@@ -87,8 +89,8 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
 
     setLayout(&_layout);
 
-    if (childOfMenu())
-        _comboBox.setFixedWidth(120);
+    if (isChildOfMenu())
+        _comboBox.setFixedWidth(150);
 
     const auto populateComboBox = [this, optionAction]() {
         QSignalBlocker comboBoxSignalBlocker(&_comboBox);
@@ -99,7 +101,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         _comboBox.setEnabled(!options.isEmpty());
     };
 
-    connect(optionAction, &OptionAction::optionsChanged, this, [this, populateComboBox](const QStringList& options) {
+    const auto connected = connect(optionAction, &OptionAction::optionsChanged, this, [this, populateComboBox](const QStringList& options) {
         populateComboBox();
     });
 
@@ -108,7 +110,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         _comboBox.setCurrentIndex(optionAction->getCurrentIndex());
     };
 
-    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, updateComboBoxSelection](const std::int32_t& currentIndex) {
+    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, updateComboBoxSelection](const std::uint32_t& currentIndex) {
         updateComboBoxSelection();
     });
 

@@ -31,14 +31,33 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
     _settingsWidget(new SettingsWidget(*this)),
-    //_renderModeAction(this),
-    //_plotAction(this),
-    //_selectionAction(this),
-    _positionAction(this)
+    _renderModeAction(this),
+    _plotAction(this),
+    _positionAction(this),
     //_colorAction(this),
-    //_subsetAction(this)
+    _subsetAction(this),
+    _selectionAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint& point) {
+        if (_currentDataSet.isEmpty() || _pixelSelectionTool->isActive())
+            return;
+
+        QMenu menu(this);
+
+        //menu.addMenu(_renderModeAction.getContextMenu());
+        //menu.addMenu(_plotAction.getContextMenu());
+        menu.addSeparator();
+        menu.addMenu(_positionAction.getContextMenu());
+        //menu.addMenu(_colorAction.getContextMenu());
+        menu.addSeparator();
+        menu.addMenu(_subsetAction.getContextMenu());
+        menu.addMenu(_selectionAction.getContextMenu());
+
+        menu.exec(mapToGlobal(point));
+    });
 }
 
 // =============================================================================
@@ -56,7 +75,7 @@ void ScatterplotPlugin::init()
     _supportedColorTypes.append(ClusterType);
     _supportedColorTypes.append(ColorType);
 
-    _scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
+    //_scatterPlotWidget->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     _dataSlot->addWidget(_scatterPlotWidget);
 
     _dataSlot->layout()->setMargin(0);
@@ -71,12 +90,12 @@ void ScatterplotPlugin::init()
 
     toolBar->setAutoFillBackground(true);
     
-    //toolBar->addAction(&_renderModeAction);
-    //toolBar->addAction(&_plotAction);
-    //toolBar->addAction(&_subsetAction);
+    toolBar->addAction(&_renderModeAction);
+    toolBar->addAction(&_plotAction);
     toolBar->addAction(&_positionAction);
+    toolBar->addAction(&_subsetAction);
     //toolBar->addAction(&_colorAction);
-    //toolBar->addAction(&_selectionAction);
+    toolBar->addAction(&_selectionAction);
 
     layout->addWidget(toolBar);
     layout->addWidget(_dataSlot, 1);
@@ -86,8 +105,6 @@ void ScatterplotPlugin::init()
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
     
-    qApp->installEventFilter(this);
-
     QObject::connect(_pixelSelectionTool, &PixelSelectionTool::areaChanged, [this]() {
         if (!_pixelSelectionTool->isNotifyDuringSelection())
             return;
@@ -119,25 +136,6 @@ void ScatterplotPlugin::dataChanged(const QString name)
 
 void ScatterplotPlugin::dataRemoved(const QString name)
 {
-}
-
-void ScatterplotPlugin::contextMenuEvent(QContextMenuEvent* contextMenuEvent)
-{
-    if (_currentDataSet.isEmpty())
-        return;
-
-    QMenu menu(this);
-    /*
-    menu.addMenu(_renderModeAction.getContextMenu());
-    menu.addMenu(_plotAction.getContextMenu());
-    menu.addSeparator();
-    menu.addMenu(_positionAction.getContextMenu());
-    menu.addMenu(_colorAction.getContextMenu());
-    menu.addSeparator();
-    menu.addMenu(_subsetAction.getContextMenu());
-    menu.addMenu(_selectionAction.getContextMenu());
-    */
-    menu.exec(contextMenuEvent->globalPos());
 }
 
 void ScatterplotPlugin::selectionChanged(const QString dataName)
@@ -471,126 +469,6 @@ void ScatterplotPlugin::updateSelection()
 PixelSelectionTool& ScatterplotPlugin::getSelectionTool()
 {
     return *_pixelSelectionTool;
-}
-
-bool ScatterplotPlugin::eventFilter(QObject* target, QEvent* event)
-{
-    auto widgetBeneathCursor = QApplication::widgetAt(QCursor::pos());
-
-    if (!isAncestorOf(widgetBeneathCursor) || _currentDataSet.isEmpty())
-        return QWidget::eventFilter(target, event);
-
-    switch (event->type())
-    {
-        case QEvent::KeyPress:
-        {
-            auto keyEvent = static_cast<QKeyEvent *>(event);
-
-            switch (keyEvent->key())
-            {
-                case Qt::Key::Key_R:
-                {
-                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Rectangle);
-                    break;
-                }
-
-                case Qt::Key::Key_B:
-                {
-                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Brush);
-                    break;
-                }
-
-                case Qt::Key::Key_P:
-                {
-                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Polygon);
-                    break;
-                }
-
-                case Qt::Key::Key_L:
-                {
-                    _pixelSelectionTool->setType(PixelSelectionTool::Type::Lasso);
-                    break;
-                }
-
-                case Qt::Key::Key_A:
-                {
-                    selectAll();
-                    break;
-                }
-
-                case Qt::Key::Key_D:
-                {
-                    clearSelection();
-                    break;
-                }
-
-                case Qt::Key::Key_I:
-                {
-                    invertSelection();
-                    break;
-                }
-
-                case Qt::Key::Key_Shift:
-                {
-                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Add);
-                    break;
-                }
-
-                case Qt::Key::Key_Control:
-                {
-                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Remove);
-                    break;
-                }
-
-                case Qt::Key::Key_Escape:
-                {
-                    switch (_pixelSelectionTool->getType())
-                    {
-                        case PixelSelectionTool::Type::Rectangle:
-                        case PixelSelectionTool::Type::Brush:
-                            break;
-
-                        case PixelSelectionTool::Type::Lasso:
-                        case PixelSelectionTool::Type::Polygon:
-                            _pixelSelectionTool->abort();
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                    break;
-                }
-
-                default:
-                    break;
-            }
-
-            break;
-        }
-
-        case QEvent::KeyRelease:
-        {
-            auto keyEvent = static_cast<QKeyEvent*>(event);
-
-            switch (keyEvent->key())
-            {
-                case Qt::Key::Key_Shift:
-                case Qt::Key::Key_Control:
-                {
-                    _pixelSelectionTool->setModifier(PixelSelectionTool::Modifier::Replace);
-                    break;
-                }
-
-                default:
-                    break;
-            }
-
-            break;
-        }
-    }
-
-    return QWidget::eventFilter(target, event);
 }
 
 QString ScatterplotPlugin::getCurrentDataset() const
