@@ -62,10 +62,15 @@ QMenu* PositionAction::getContextMenu()
 
 void PositionAction::setDimensions(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames /*= std::vector<QString>()*/)
 {
-    auto dimensionNamesStringList = getDimensionNamesStringList(numberOfDimensions, dimensionNames);
+    auto dimensionNamesStringList = common::getDimensionNamesStringList(numberOfDimensions, dimensionNames);
 
     _xDimensionAction.setOptions(dimensionNamesStringList);
     _yDimensionAction.setOptions(dimensionNamesStringList, numberOfDimensions >= 2 ? 1 : 0);
+}
+
+void PositionAction::setDimensions(const std::vector<QString>& dimensionNames)
+{
+    setDimensions(dimensionNames.size(), dimensionNames);
 }
 
 std::int32_t PositionAction::getXDimension() const
@@ -76,23 +81,6 @@ std::int32_t PositionAction::getXDimension() const
 std::int32_t PositionAction::getYDimension() const
 {
     return _yDimensionAction.getCurrentIndex();
-}
-
-QStringList PositionAction::getDimensionNamesStringList(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames /*= std::vector<QString>()*/) const
-{
-    QStringList dimensionNamesStringList;
-
-    dimensionNamesStringList.reserve(static_cast<int>(numberOfDimensions));
-
-    if (numberOfDimensions == dimensionNames.size()) {
-        for (const auto& name : dimensionNames)
-            dimensionNamesStringList.append(name);
-    } else {
-        for (unsigned int i = 0; i < numberOfDimensions; ++i)
-            dimensionNamesStringList.append(QString::fromLatin1("Dim %1").arg(i));
-    }
-
-    return dimensionNamesStringList;
 }
 
 PositionAction::Widget::Widget(QWidget* parent, PositionAction* positionAction) :

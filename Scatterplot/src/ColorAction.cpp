@@ -35,39 +35,13 @@ ColorAction::ColorAction(ScatterplotPlugin* scatterplotPlugin) :
     _colorByDimensionAction.setCheckable(true);
     _colorByDataAction.setCheckable(true);
 
+    _colorDataAction.setEnabled(false);
+
     _colorByActionGroup.addAction(&_colorByDimensionAction);
     _colorByActionGroup.addAction(&_colorByDataAction);
 
-    /*
-    _xDimensionAction.setToolTip("X dimension");
-    _yDimensionAction.setToolTip("Y dimension");
-    _resetAction.setToolTip("Reset position settings");
-
-    const auto updateResetAction = [this, scatterplotPlugin]() {
-        _resetAction.setEnabled(!scatterplotPlugin->getCurrentDataset().isEmpty() && !(_xDimensionAction.getCurrentIndex() == 0 && _yDimensionAction.getCurrentIndex() == 1));
-    };
-
-    connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::int32_t& currentIndex) {
-        scatterplotPlugin->xDimPicked(currentIndex);
-        updateResetAction();
-    });
-
-    connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::int32_t& currentIndex) {
-        scatterplotPlugin->yDimPicked(currentIndex);
-        updateResetAction();
-    });
-
-    connect(&_resetAction, &QAction::triggered, this, [this]() {
-        _xDimensionAction.setCurrentIndex(0);
-        _yDimensionAction.setCurrentIndex(1);
-    });
-
-    updateResetAction();
-    */
-
-    connect(&_colorByDimensionAction, &QAction::triggered, this, [this]() {
-        //_xDimensionAction.setCurrentIndex(0);
-        //_yDimensionAction.setCurrentIndex(1);
+    connect(&_colorDimensionAction, &OptionAction::currentIndexChanged, this, [this](const std::uint32_t& currentIndex) {
+        _scatterplotPlugin->cDimPicked(currentIndex);
     });
 }
 
@@ -111,11 +85,23 @@ QMenu* ColorAction::getContextMenu()
     return menu;
 }
 
+void ColorAction::setDimensions(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames /*= std::vector<QString>()*/)
+{
+    _colorDimensionAction.setOptions(common::getDimensionNamesStringList(numberOfDimensions, dimensionNames));
+}
+
+void ColorAction::setDimensions(const std::vector<QString>& dimensionNames)
+{
+    setDimensions(dimensionNames.size(), dimensionNames);
+}
+
 ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction) :
     WidgetAction::Widget(parent, colorAction),
     _layout()
 {
     _layout.addWidget(colorAction->_colorByAction.createWidget(this));
+    _layout.addWidget(colorAction->_colorDimensionAction.createWidget(this));
+    _layout.addWidget(colorAction->_colorDataAction.createWidget(this));
 
     setLayout(&_layout);
 }

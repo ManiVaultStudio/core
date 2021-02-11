@@ -29,12 +29,10 @@ public:
     QMenu* getContextMenu();
 
     void setDimensions(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames = std::vector<QString>());
+    void setDimensions(const std::vector<QString>& dimensionNames);
 
     std::int32_t getXDimension() const;
     std::int32_t getYDimension() const;
-
-private:
-    QStringList getDimensionNamesStringList(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames) const;
 
 protected:
     hdps::gui::OptionAction     _xDimensionAction;

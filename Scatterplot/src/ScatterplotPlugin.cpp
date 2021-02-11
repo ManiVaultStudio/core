@@ -243,15 +243,15 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     // For source data determine whether to use dimension names or make them up
     if (points.getDimensionNames().size() == points.getNumDimensions())
-        _settingsAction.getPositionAction().setDimensions(points.getDimensionNames().size(), points.getDimensionNames());
+        _settingsAction.getPositionAction().setDimensions(points.getDimensionNames());
     else
         _settingsAction.getPositionAction().setDimensions(points.getNumDimensions());
 
     // For derived data determine whether to use dimension names or make them up
     if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
-        _settingsAction.getColorAction().initScalarDimOptions(DataSet::getSourceData(points).getDimensionNames());
+        _settingsAction.getColorAction().setDimensions(DataSet::getSourceData(points).getDimensionNames());
     else
-        _settingsAction.getColorAction().initScalarDimOptions(DataSet::getSourceData(points).getNumDimensions());
+        _settingsAction.getColorAction().setDimensions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
 
