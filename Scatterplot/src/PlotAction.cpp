@@ -146,11 +146,39 @@ QMenu* PlotAction::getContextMenu()
 
 PlotAction::Widget::Widget(QWidget* parent, PlotAction* plotAction) :
     WidgetAction::Widget(parent, plotAction),
-    _layout()
+    _layout(),
+    _pointSizelabel("Point size:"),
+    _pointOpacitylabel("Point opacity:"),
+    _sigmalabel("Sigma:")
 {
+    _layout.addWidget(&_pointSizelabel);
     _layout.addWidget(plotAction->_pointSizeAction.createWidget(this));
+
+    _layout.addWidget(&_pointOpacitylabel);
     _layout.addWidget(plotAction->_pointOpacityAction.createWidget(this));
+
+    _layout.addWidget(&_sigmalabel);
     _layout.addWidget(plotAction->_sigmaAction.createWidget(this));
 
+    const auto updateLabels = [this, plotAction]() -> void {
+        _pointSizelabel.setVisible(plotAction->_pointSizeAction.isVisible());
+        _pointOpacitylabel.setVisible(plotAction->_pointOpacityAction.isVisible());
+        _sigmalabel.setVisible(plotAction->_sigmaAction.isVisible());
+    };
+
+    connect(&plotAction->_pointSizeAction, &QAction::changed, this, [this, plotAction, updateLabels]() {
+        updateLabels();
+    });
+
+    connect(&plotAction->_pointOpacityAction, &QAction::changed, this, [this, plotAction, updateLabels]() {
+        updateLabels();
+    });
+
+    connect(&plotAction->_sigmaAction, &QAction::changed, this, [this, plotAction, updateLabels]() {
+        updateLabels();
+    });
+
     setLayout(&_layout);
+
+    updateLabels();
 }

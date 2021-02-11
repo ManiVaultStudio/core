@@ -29,25 +29,32 @@ class ScatterplotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
     Q_OBJECT
 public:
     enum RenderMode {
-        SCATTERPLOT, DENSITY, LANDSCAPE
+        SCATTERPLOT,
+        DENSITY,
+        LANDSCAPE
     };
 
-    ScatterplotWidget(PixelSelectionTool& pixelSelectionTool);
+    /** The way that point colors are determined */
+    enum class ColoringMode {
+        ConstantColor,      /** Point color is a constant color */
+        Dimension,          /** Data dimension drives the color */
+        ColorData           /** Determined by external color dataset */
+    };
 
+public:
+    ScatterplotWidget(PixelSelectionTool& pixelSelectionTool);
     ~ScatterplotWidget();
 
     /** Returns true when the widget was initialized and is ready to be used. */
     bool isInitialized();
 
-    RenderMode getRenderMode() const {
-        return _renderMode;
-    };
-
-    /**
-     * Change the rendering mode displayed in the widget.
-     * The options are defined by ScatterplotWidget::RenderMode.
-     */
+    /** Get/set render mode */
+    RenderMode getRenderMode() const;
     void setRenderMode(const RenderMode& renderMode);
+
+    /** Get/set coloring mode */
+    ColoringMode getColoringMode() const;
+    void setColoringMode(const ColoringMode& coloringMode);
 
     /**
      * Feed 2-dimensional data to the scatterplot.
@@ -89,10 +96,16 @@ signals:
     void initialized();
 
     /**
-     * Signals that the density computation has started
+     * Signals that the render mode changed
      * @param renderMode Signals that the render mode has changed
      */
     void renderModeChanged(const RenderMode& renderMode);
+
+    /**
+     * Signals that the coloring mode changed
+     * @param coloringMode Signals that the coloring mode has changed
+     */
+    void coloringModeChanged(const ColoringMode& coloringMode);
 
     /** Signals that the density computation has started */
     void densityComputationStarted();
@@ -113,11 +126,12 @@ private:
 
     bool _isInitialized = false;
 
-    RenderMode _renderMode = SCATTERPLOT;
+    RenderMode                  _renderMode = SCATTERPLOT;
+    ColoringMode                _coloringMode = ColoringMode::ConstantColor;
 
     /* Renderers */
-    PointRenderer           _pointRenderer;
-    DensityRenderer         _densityRenderer;
+    PointRenderer               _pointRenderer;
+    DensityRenderer             _densityRenderer;
     PixelSelectionToolRenderer   _pixelSelectionToolRenderer;
 
 
@@ -127,7 +141,7 @@ private:
     /* Size of the scatterplot widget */
     QSize _windowSize;
 
-    Bounds _dataBounds;
+    Bounds                  _dataBounds;
 
     PixelSelectionTool&     _pixelSelectionTool;
 };

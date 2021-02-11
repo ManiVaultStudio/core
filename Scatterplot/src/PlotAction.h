@@ -12,7 +12,10 @@ public:
         Widget(QWidget* parent, PlotAction* plotAction);
 
     private:
-        QHBoxLayout _layout;
+        QHBoxLayout     _layout;
+        QLabel          _pointSizelabel;
+        QLabel          _pointOpacitylabel;
+        QLabel          _sigmalabel;
     };
 
 public:

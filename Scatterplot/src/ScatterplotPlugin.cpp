@@ -228,9 +228,9 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
 
     // For derived data determine whether to use dimension names or make them up
     if (DataSet::getSourceData(points).getDimensionNames().size() == DataSet::getSourceData(points).getNumDimensions())
-        _settingsAction.getColorAction().setDimensions(DataSet::getSourceData(points).getDimensionNames());
+        _settingsAction.getColoringAction().setDimensions(DataSet::getSourceData(points).getDimensionNames());
     else
-        _settingsAction.getColorAction().setDimensions(DataSet::getSourceData(points).getNumDimensions());
+        _settingsAction.getColoringAction().setDimensions(DataSet::getSourceData(points).getNumDimensions());
 
     updateData();
 
@@ -460,6 +460,7 @@ void ScatterplotPlugin::setColorDimension(const std::int32_t& dimensionIndex)
 
     _scatterPlotWidget->setScalars(scalars);
     _scatterPlotWidget->setScalarEffect(PointEffect::Color);
+
     updateData();
 }
 

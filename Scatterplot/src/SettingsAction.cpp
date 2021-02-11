@@ -9,7 +9,7 @@ SettingsAction::SettingsAction(ScatterplotPlugin* scatterplotPlugin) :
     _renderModeAction(scatterplotPlugin),
     _plotAction(scatterplotPlugin),
     _positionAction(scatterplotPlugin),
-    _colorAction(scatterplotPlugin),
+    _coloringAction(scatterplotPlugin),
     _subsetAction(scatterplotPlugin),
     _selectionAction(scatterplotPlugin)
 {
@@ -32,7 +32,7 @@ QMenu* SettingsAction::getContextMenu()
     menu->addMenu(_plotAction.getContextMenu());
     menu->addSeparator();
     menu->addMenu(_positionAction.getContextMenu());
-    menu->addMenu(_colorAction.getContextMenu());
+    menu->addMenu(_coloringAction.getContextMenu());
     menu->addSeparator();
     menu->addMenu(_subsetAction.getContextMenu());
     menu->addMenu(_selectionAction.getContextMenu());
@@ -52,7 +52,7 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
     _layout.addWidget(new Spacer());
     _layout.addWidget(settingsAction->_positionAction.createWidget(this));
     _layout.addWidget(new Spacer());
-    _layout.addWidget(settingsAction->_colorAction.createWidget(this));
+    _layout.addWidget(settingsAction->_coloringAction.createWidget(this));
     _layout.addWidget(new Spacer());
     _layout.addWidget(settingsAction->_subsetAction.createWidget(this));
     _layout.addWidget(new Spacer());
@@ -108,10 +108,10 @@ std::int32_t SettingsAction::Spacer::getWidth(const Type& type)
     switch (type)
     {
         case Type::Divider:
-            return 14;
+            return 6;
 
         case Type::Spacer:
-            return 8;
+            return 6;
 
         default:
             break;

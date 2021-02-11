@@ -22,11 +22,7 @@ DoubleAction::DoubleAction(QObject * parent, const QString& title, const double&
 
 QWidget* DoubleAction::createWidget(QWidget* parent)
 {
-    auto widget = new Widget(parent, this);
-
-    //widget->show();
-
-    return widget;
+    return new Widget(parent, this);
 }
 
 double DoubleAction::getValue() const

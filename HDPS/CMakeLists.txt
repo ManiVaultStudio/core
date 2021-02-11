@@ -86,6 +86,7 @@ set( WIDGET_HEADERS
     src/widgets/OptionAction.h
     src/widgets/BooleanAction.h
     src/widgets/StringAction.h
+    src/widgets/ColorAction.h
 )
 
 set( WIDGET_SOURCES
@@ -108,6 +109,7 @@ set( WIDGET_SOURCES
     src/widgets/OptionAction.cpp
     src/widgets/BooleanAction.cpp
     src/widgets/StringAction.cpp
+    src/widgets/ColorAction.cpp
 )
 
 set( RENDERER_HEADERS

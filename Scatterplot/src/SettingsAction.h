@@ -5,7 +5,7 @@
 #include "RenderModeAction.h"
 #include "PlotAction.h"
 #include "PositionAction.h"
-#include "ColorAction.h"
+#include "ColoringAction.h"
 #include "SubsetAction.h"
 #include "SelectionAction.h"
 
@@ -55,7 +55,7 @@ public:
     RenderModeAction& getRenderModeAction() { return _renderModeAction; }
     PlotAction& getPlotAction() { return _plotAction; }
     PositionAction& getPositionAction() { return _positionAction; }
-    ColorAction& getColorAction() { return _colorAction; }
+    ColoringAction& getColoringAction() { return _coloringAction; }
     SubsetAction& getSubsetAction() { return _subsetAction; }
     SelectionAction& getSelectionAction() { return _selectionAction; }
 
@@ -63,7 +63,7 @@ protected:
     RenderModeAction    _renderModeAction;
     PlotAction          _plotAction;
     PositionAction      _positionAction;
-    ColorAction         _colorAction;
+    ColoringAction      _coloringAction;
     SubsetAction        _subsetAction;
     SelectionAction     _selectionAction;
 };

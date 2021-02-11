@@ -3,23 +3,26 @@
 #include "PluginAction.h"
 
 #include "widgets/OptionAction.h"
+#include "widgets/ColorAction.h"
 #include "widgets/StringAction.h"
 
 #include <QHBoxLayout>
+#include <QLabel>
 
-class ColorAction : public PluginAction
+class ColoringAction : public PluginAction
 {
 public:
     class Widget : public PluginAction::Widget {
     public:
-        Widget(QWidget* parent, ColorAction* colorAction);
+        Widget(QWidget* parent, ColoringAction* coloringAction);
 
     private:
-        QHBoxLayout         _layout;
+        QHBoxLayout     _layout;
+        QLabel          _colorByLabel;
     };
 
 public:
-    ColorAction(ScatterplotPlugin* scatterplotPlugin);
+    ColoringAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override {
         return new Widget(parent, this);
@@ -32,10 +35,12 @@ public:
 
 protected:
     hdps::gui::OptionAction     _colorByAction;
+    QAction                     _colorByConstantColorAction;
     QAction                     _colorByDimensionAction;
-    QAction                     _colorByDataAction;
+    QAction                     _colorByColorDataAction;
     QActionGroup                _colorByActionGroup;
-    hdps::gui::OptionAction     _colorDimensionAction;
+    hdps::gui::ColorAction      _constantColorAction;
+    hdps::gui::OptionAction     _dimensionAction;
     hdps::gui::StringAction     _colorDataAction;
     QAction                     _removeColorDataAction;
     QAction                     _resetAction;

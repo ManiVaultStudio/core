@@ -13,26 +13,26 @@ class QColorDialog;
  */
 class ColorPickerPushButton : public QPushButton
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
 
-	/**
-	 * Constructor
-	 * @param parent Pointer to parent widget
-	 */
-	ColorPickerPushButton(QWidget* parent);
+    /**
+     * Constructor
+     * @param parent Pointer to parent widget
+     */
+    ColorPickerPushButton(QWidget* parent);
 
 public: // Getters/setters
 
-	/** Returns the currently selected color */
-	QColor getColor() const;
+    /** Returns the currently selected color */
+    QColor getColor() const;
 
-	/**
-	 * Sets the current color
-	 * @param color Color
-	 */
-	void setColor(const QColor& color);
+    /**
+     * Sets the current color
+     * @param color Color
+     */
+    void setColor(const QColor& color);
 
     /** Returns whether the RGB color code is shown */
     bool getShowText() const;
@@ -43,16 +43,16 @@ public: // Getters/setters
      */
     void setShowText(const bool& showText);
 
+    void paintEvent(QPaintEvent* paintEvent) override;
+
 signals:
 
-	/** Signals that the current color has changed
-	 * @param currentColor Currently selected color
-	 */
-	void colorChanged(const QColor& color);
+    /** Signals that the current color has changed
+     * @param currentColor Currently selected color
+     */
+    void colorChanged(const QColor& color);
 
 private:
-	QColorDialog*	_colorDialog;		/** Qt color picker dialog */
+    QColorDialog*   _colorDialog;       /** Qt color picker dialog */
     bool            _showText;          /** Whether to show RGB color code */
-	
-	static const QSize _iconSize;
 };

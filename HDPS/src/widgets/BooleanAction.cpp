@@ -12,11 +12,7 @@ BooleanAction::BooleanAction(QObject* parent, const QString& title /*= ""*/) :
 
 QWidget* BooleanAction::createWidget(QWidget* parent)
 {
-    auto widget = new Widget(parent, this);
-
-    widget->show();
-
-    return widget;
+    return new Widget(parent, this);
 }
 
 BooleanAction::Widget::Widget(QWidget* widget, BooleanAction* optionAction) :

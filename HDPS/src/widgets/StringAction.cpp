@@ -37,11 +37,7 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/) :
 
 QWidget* StringAction::createWidget(QWidget* parent)
 {
-    auto widget = new Widget(parent, this);
-
-    widget->show();
-
-    return widget;
+    return new Widget(parent, this);
 }
 
 QString StringAction::getValue() const

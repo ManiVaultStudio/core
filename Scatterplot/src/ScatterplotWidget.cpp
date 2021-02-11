@@ -59,6 +59,11 @@ bool ScatterplotWidget::isInitialized()
     return _isInitialized;
 }
 
+ScatterplotWidget::RenderMode ScatterplotWidget::getRenderMode() const
+{
+    return _renderMode;
+}
+
 void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
 {
     if (renderMode == _renderMode)
@@ -86,6 +91,21 @@ void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
     }
 
     update();
+}
+
+ScatterplotWidget::ColoringMode ScatterplotWidget::getColoringMode() const
+{
+    return _coloringMode;
+}
+
+void ScatterplotWidget::setColoringMode(const ColoringMode& coloringMode)
+{
+    if (coloringMode == _coloringMode)
+        return;
+
+    _coloringMode = coloringMode;
+
+    emit coloringModeChanged(_coloringMode);
 }
 
 void ScatterplotWidget::computeDensity()

@@ -45,7 +45,7 @@ public:
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     DataTypes supportedDataTypes() const Q_DECL_OVERRIDE;
 
-    PixelSelectionTool& getSelectionTool();
+    
 
     QString getCurrentDataset() const;
     std::uint32_t getNumPoints() const;
@@ -68,7 +68,7 @@ public: // Selection
     void clearSelection();
     void invertSelection();
 
-
+    PixelSelectionTool& getSelectionTool();
 
 private:
 

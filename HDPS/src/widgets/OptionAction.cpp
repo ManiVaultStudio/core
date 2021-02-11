@@ -17,11 +17,7 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/) :
 
 QWidget* OptionAction::createWidget(QWidget* parent)
 {
-    auto widget = new Widget(parent, this);
-
-    widget->show();
-
-    return widget;
+    return new Widget(parent, this);
 }
 
 QStringList OptionAction::getOptions() const
