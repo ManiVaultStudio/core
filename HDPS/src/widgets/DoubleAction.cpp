@@ -24,7 +24,7 @@ QWidget* DoubleAction::createWidget(QWidget* parent)
 {
     auto widget = new Widget(parent, this);
 
-    widget->show();
+    //widget->show();
 
     return widget;
 }
@@ -160,7 +160,7 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
         doubleAction->setValue(value);
     });
 
-    const auto updateAction = [this, doubleAction]() {
+    const auto updateAction = [this, doubleAction]() -> void {
         doubleAction->setValue(static_cast<double>(_slider.value()) / static_cast<double>(SLIDER_MULTIPLIER));
     };
 
@@ -179,8 +179,6 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
     });
 
     const auto updateValue = [this, doubleAction, setToolTips]() {
-        QSignalBlocker spinBoxBlocker(&_spinBox), sliderBlocker(&_slider);
-
         const auto value = doubleAction->getValue();
 
         if (value != _spinBox.value())

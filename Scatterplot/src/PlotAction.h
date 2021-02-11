@@ -4,9 +4,6 @@
 
 #include "widgets/DoubleAction.h"
 
-#include <QToolBar>
-#include <QToolButton>
-
 class PlotAction : public PluginAction
 {
 public:
@@ -15,11 +12,7 @@ public:
         Widget(QWidget* parent, PlotAction* plotAction);
 
     private:
-        QHBoxLayout                             _layout;
-        QToolBar                                _toolBar;
-        QToolButton                             _toolButton;
-        hdps::gui::WidgetAction::PopupWidget    _popupWidget;
-        QWidgetAction                           _popupWidgetAction;
+        QHBoxLayout _layout;
     };
 
 public:

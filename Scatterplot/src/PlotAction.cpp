@@ -18,7 +18,7 @@ PlotAction::PlotAction(ScatterplotPlugin* scatterplotPlugin) :
 
     _resetAction.setToolTip("Reset plot settings");
 
-    const auto updateRenderMode = [this]() {
+    const auto updateRenderMode = [this]() -> void {
         const auto renderMode = getScatterplotWidget()->getRenderMode();
 
         _pointSizeAction.setVisible(renderMode == ScatterplotWidget::SCATTERPLOT);
@@ -26,19 +26,19 @@ PlotAction::PlotAction(ScatterplotPlugin* scatterplotPlugin) :
         _sigmaAction.setVisible(renderMode != ScatterplotWidget::SCATTERPLOT);
     };
 
-    const auto updatePointSize = [this]() {
+    const auto updatePointSize = [this]() -> void {
         getScatterplotWidget()->setPointSize(_pointSizeAction.getValue());
     };
 
-    const auto updatePointOpacity = [this]() {
+    const auto updatePointOpacity = [this]() -> void {
         getScatterplotWidget()->setAlpha(0.01 * _pointOpacityAction.getValue());
     };
 
-    const auto updateSigma = [this]() {
+    const auto updateSigma = [this]() -> void {
         getScatterplotWidget()->setSigma(0.01 * _sigmaAction.getValue());
     };
 
-    const auto updateResetAction = [this]() {
+    const auto updateResetAction = [this]() -> void {
         const auto renderMode = getScatterplotWidget()->getRenderMode();
 
         auto enabled = false;
@@ -146,22 +146,11 @@ QMenu* PlotAction::getContextMenu()
 
 PlotAction::Widget::Widget(QWidget* parent, PlotAction* plotAction) :
     WidgetAction::Widget(parent, plotAction),
-    _layout(),
-    _toolBar(),
-    _toolButton(),
-    _popupWidget(this, "Plot"),
-    _popupWidgetAction(this)
+    _layout()
 {
-    _layout.addWidget(&_toolBar);
-
-    _toolBar.addAction(&plotAction->_pointSizeAction);
-    _toolBar.addAction(&plotAction->_pointOpacityAction);
-    _toolBar.addAction(&plotAction->_sigmaAction);
-
-    _popupWidgetAction.setDefaultWidget(&_popupWidget);
-
-    _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.addAction(&_popupWidgetAction);
+    _layout.addWidget(plotAction->_pointSizeAction.createWidget(this));
+    _layout.addWidget(plotAction->_pointOpacityAction.createWidget(this));
+    _layout.addWidget(plotAction->_sigmaAction.createWidget(this));
 
     setLayout(&_layout);
 }

@@ -91,7 +91,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     if (isChildOfMenu())
         _comboBox.setFixedWidth(150);
 
-    const auto populateComboBox = [this, optionAction]() {
+    const auto populateComboBox = [this, optionAction]() -> void {
         QSignalBlocker comboBoxSignalBlocker(&_comboBox);
 
         const auto options = optionAction->getOptions();
@@ -105,8 +105,10 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         populateComboBox();
     });
 
-    const auto updateComboBoxSelection = [this, optionAction]() {
-        //QSignalBlocker comboBoxSignalBlocker(&_comboBox);
+    const auto updateComboBoxSelection = [this, optionAction]() -> void {
+        if (optionAction->getCurrentIndex() == _comboBox.currentIndex())
+            return;
+        
         _comboBox.setCurrentIndex(optionAction->getCurrentIndex());
     };
 
