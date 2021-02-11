@@ -41,8 +41,18 @@ ColorAction::ColorAction(ScatterplotPlugin* scatterplotPlugin) :
     _colorByActionGroup.addAction(&_colorByDataAction);
 
     connect(&_colorDimensionAction, &OptionAction::currentIndexChanged, this, [this](const std::uint32_t& currentIndex) {
-        _scatterplotPlugin->cDimPicked(currentIndex);
+        _scatterplotPlugin->setColorDimension(currentIndex);
     });
+
+    const auto renderModeChanged = [this]() -> void {
+        setEnabled(getScatterplotWidget()->getRenderMode() == ScatterplotWidget::SCATTERPLOT);
+    };
+
+    connect(getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, renderModeChanged](const ScatterplotWidget::RenderMode& renderMode) {
+        renderModeChanged();
+    });
+
+    renderModeChanged();
 }
 
 QMenu* ColorAction::getContextMenu()

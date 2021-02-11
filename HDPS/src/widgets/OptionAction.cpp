@@ -29,7 +29,7 @@ QStringList OptionAction::getOptions() const
     return _options;
 }
 
-void OptionAction::setOptions(const QStringList& options, const std::uint32_t& currentIndex /*= 0*/)
+void OptionAction::setOptions(const QStringList& options)
 {
     if (options == _options)
         return;
@@ -38,7 +38,7 @@ void OptionAction::setOptions(const QStringList& options, const std::uint32_t& c
 
     emit optionsChanged(_options);
 
-    setCurrentIndex(currentIndex);
+    setCurrentIndex(0);
 }
 
 std::uint32_t OptionAction::getCurrentIndex() const
@@ -48,15 +48,14 @@ std::uint32_t OptionAction::getCurrentIndex() const
 
 void OptionAction::setCurrentIndex(const std::uint32_t& currentIndex)
 {
-    if (currentIndex == _currentIndex)
+    if (currentIndex == _currentIndex || currentIndex >= _options.count())
         return;
 
     _currentIndex = currentIndex;
     
     emit currentIndexChanged(_currentIndex);
 
-    if (_currentIndex < _options.count())
-        setCurrentText(_options[_currentIndex]);
+    setCurrentText(_options[_currentIndex]);
 }
 
 QString OptionAction::getCurrentText() const
@@ -97,6 +96,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
 
         const auto options = optionAction->getOptions();
 
+        _comboBox.clear();
         _comboBox.addItems(options);
         _comboBox.setEnabled(!options.isEmpty());
     };
@@ -106,7 +106,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     });
 
     const auto updateComboBoxSelection = [this, optionAction]() {
-        QSignalBlocker comboBoxSignalBlocker(&_comboBox);
+        //QSignalBlocker comboBoxSignalBlocker(&_comboBox);
         _comboBox.setCurrentIndex(optionAction->getCurrentIndex());
     };
 

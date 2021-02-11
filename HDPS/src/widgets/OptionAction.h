@@ -31,7 +31,7 @@ public:
     QWidget* createWidget(QWidget* parent) override;
 
     QStringList getOptions() const;
-    void setOptions(const QStringList& options, const std::uint32_t& currentIndex = 0);
+    void setOptions(const QStringList& options);
 
     std::uint32_t getCurrentIndex() const;
     void setCurrentIndex(const std::uint32_t& currentIndex);

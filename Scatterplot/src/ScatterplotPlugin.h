@@ -51,16 +51,24 @@ public:
     std::uint32_t getNumPoints() const;
     std::uint32_t getNumberOfSelectedPoints() const;
 
-public: // Selection
+public:
+    void createSubset(const bool& fromSourceData = false);
 
+public: // Dimension picking
+    void setXDimension(const std::int32_t& dimensionIndex);
+    void setYDimension(const std::int32_t& dimensionIndex);
+    void setColorDimension(const std::int32_t& dimensionIndex);
+
+public: // Selection
     bool canSelect() const;
     bool canSelectAll() const;
     bool canClearSelection() const;
     bool canInvertSelection() const;
-
     void selectAll();
     void clearSelection();
     void invertSelection();
+
+
 
 private:
 
@@ -70,14 +78,6 @@ private:
 public slots:
     void onDataInput(QString dataSetName);
     void onColorDataInput(QString dataSetName);
-
-protected slots:
-    void subsetCreated();
-
-public:
-    void xDimPicked(int index);
-    void yDimPicked(int index);
-    void cDimPicked(int index);
 
     void selectPoints();
 

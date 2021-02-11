@@ -120,33 +120,12 @@ DataTypes ScatterplotPlugin::supportedDataTypes() const
     return supportedTypes;
 }
 
-void ScatterplotPlugin::subsetCreated()
+void ScatterplotPlugin::createSubset(const bool& fromSourceData /*= false*/)
 {
-    const Points& points = _core->requestData<Points>(_currentDataSet);
+    auto& loadedPoints  = _core->requestData<Points>(_currentDataSet);
+    auto& subsetPoints  = loadedPoints.isDerivedData() && fromSourceData ? DataSet::getSourceData(loadedPoints) : loadedPoints;
 
-    points.createSubset();
-}
-
-void ScatterplotPlugin::xDimPicked(int index)
-{
-    updateData();
-}
-
-void ScatterplotPlugin::yDimPicked(int index)
-{
-    updateData();
-}
-
-void ScatterplotPlugin::cDimPicked(int index)
-{
-    const Points& points = DataSet::getSourceData(_core->requestData<Points>(_currentDataSet));
-
-    std::vector<float> scalars;
-    calculateScalars(scalars, points, index);
-
-    _scatterPlotWidget->setScalars(scalars);
-    _scatterPlotWidget->setScalarEffect(PointEffect::Color);
-    updateData();
+    subsetPoints.createSubset();
 }
 
 void ScatterplotPlugin::selectPoints()
@@ -460,6 +439,28 @@ std::uint32_t ScatterplotPlugin::getNumberOfSelectedPoints() const
     const Points& selection = static_cast<Points&>(points.getSelection());
 
     return selection.indices.size();
+}
+
+void ScatterplotPlugin::setXDimension(const std::int32_t& dimensionIndex)
+{
+    updateData();
+}
+
+void ScatterplotPlugin::setYDimension(const std::int32_t& dimensionIndex)
+{
+    updateData();
+}
+
+void ScatterplotPlugin::setColorDimension(const std::int32_t& dimensionIndex)
+{
+    const Points& points = DataSet::getSourceData(_core->requestData<Points>(_currentDataSet));
+
+    std::vector<float> scalars;
+    calculateScalars(scalars, points, dimensionIndex);
+
+    _scatterPlotWidget->setScalars(scalars);
+    _scatterPlotWidget->setScalarEffect(PointEffect::Color);
+    updateData();
 }
 
 bool ScatterplotPlugin::canSelect() const

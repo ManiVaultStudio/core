@@ -15,6 +15,9 @@ SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
     _createSubsetAction.setToolTip("Create subset from selected data points");
     _fromSourceDataAction.setToolTip("Create subset from source data");
 
+    _fromSourceDataAction.setCheckable(true);
+    _fromSourceDataAction.setChecked(true);
+
     const auto updateActions = [this]() -> void {
         const auto canCreateSubset = _scatterplotPlugin->getNumberOfSelectedPoints() >= 1;
 
@@ -23,6 +26,10 @@ SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
     };
 
     connect(_scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), this, updateActions);
+
+    connect(&_createSubsetAction, &QAction::triggered, this, [this]() {
+        _scatterplotPlugin->createSubset(_fromSourceDataAction.isChecked());
+    });
 
     updateActions();
 }

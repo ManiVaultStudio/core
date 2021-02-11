@@ -20,12 +20,12 @@ PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     };
 
     connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::uint32_t& currentIndex) {
-        scatterplotPlugin->xDimPicked(currentIndex);
+        scatterplotPlugin->setXDimension(currentIndex);
         updateResetAction();
     });
 
     connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::uint32_t& currentIndex) {
-        scatterplotPlugin->yDimPicked(currentIndex);
+        scatterplotPlugin->setYDimension(currentIndex);
         updateResetAction();
     });
 
@@ -65,7 +65,10 @@ void PositionAction::setDimensions(const std::uint32_t& numberOfDimensions, cons
     auto dimensionNamesStringList = common::getDimensionNamesStringList(numberOfDimensions, dimensionNames);
 
     _xDimensionAction.setOptions(dimensionNamesStringList);
-    _yDimensionAction.setOptions(dimensionNamesStringList, numberOfDimensions >= 2 ? 1 : 0);
+    _yDimensionAction.setOptions(dimensionNamesStringList);
+
+    _xDimensionAction.setCurrentIndex(0);
+    _yDimensionAction.setCurrentIndex(numberOfDimensions >= 2 ? 1 : 0);
 }
 
 void PositionAction::setDimensions(const std::vector<QString>& dimensionNames)
