@@ -12,34 +12,22 @@ PlotAction::PlotAction(ScatterplotPlugin* scatterplotPlugin) :
 
 QMenu* PlotAction::getContextMenu()
 {
-    auto menu = new QMenu("Plot");
-
-    const auto renderMode = getScatterplotWidget()->getRenderMode();
-
-    const auto addActionToMenu = [menu](QAction* action) {
-        auto actionMenu = new QMenu(action->text());
-
-        actionMenu->addAction(action);
-
-        menu->addMenu(actionMenu);
-    };
-
-    switch (renderMode)
+    switch (getScatterplotWidget()->getRenderMode())
     {
         case ScatterplotWidget::RenderMode::SCATTERPLOT:
-            addActionToMenu(&_pointPlotAction);
+            return _pointPlotAction.getContextMenu();
             break;
 
         case ScatterplotWidget::RenderMode::DENSITY:
         case ScatterplotWidget::RenderMode::LANDSCAPE:
-            addActionToMenu(&_densityPlotAction);
+            return _densityPlotAction.getContextMenu();
             break;
 
         default:
             break;
     }
 
-    return menu;
+    return new QMenu("Plot");
 }
 
 PlotAction::Widget::Widget(QWidget* parent, PlotAction* plotAction) :

@@ -111,7 +111,9 @@ QMenu* ColoringAction::getContextMenu()
         menu->addMenu(actionMenu);
     };
 
-    menu->setEnabled(_scatterplotPlugin->getScatterplotWidget()->getRenderMode() == ScatterplotWidget::RenderMode::SCATTERPLOT);
+    const auto renderMode = _scatterplotPlugin->getScatterplotWidget()->getRenderMode();
+
+    menu->setEnabled(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
 
     menu->addAction(&_colorByConstantColorAction);
     menu->addAction(&_colorByDimensionAction);
@@ -119,47 +121,23 @@ QMenu* ColoringAction::getContextMenu()
     
     menu->addSeparator();
 
-    /*
-    switch (renderMode)
+    switch (_scatterplotPlugin->getScatterplotWidget()->getColoringMode())
     {
-        case ScatterplotWidget::RenderMode::SCATTERPLOT:
-        {
+        case ScatterplotWidget::ColoringMode::ConstantColor:
+            addActionToMenu(&_constantColorAction);
             break;
-        }
 
-        case ScatterplotWidget::RenderMode::DENSITY:
-        {
+        case ScatterplotWidget::ColoringMode::Dimension:
+            addActionToMenu(&_dimensionAction);
             break;
-        }
 
-        case ScatterplotWidget::RenderMode::SCATTERPLOT:
-        {
+        case ScatterplotWidget::ColoringMode::ColorData:
+            addActionToMenu(&_colorDataAction);
             break;
-        }
 
         default:
             break;
     }
-    */
-
-    addActionToMenu(&_constantColorAction);
-    addActionToMenu(&_dimensionAction);
-    addActionToMenu(&_colorDataAction);
-
-
-
-    /*
-    auto xDimensionMenu = new QMenu("X dimension");
-    auto yDimensionMenu = new QMenu("Y dimension");
-
-    xDimensionMenu->addAction(&_xDimensionAction);
-    yDimensionMenu->addAction(&_yDimensionAction);
-
-    menu->addMenu(xDimensionMenu);
-    menu->addMenu(yDimensionMenu);
-    menu->addSeparator();
-    menu->addAction(&_resetAction);
-    */
 
     return menu;
 }

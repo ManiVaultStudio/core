@@ -7,7 +7,7 @@ using namespace hdps::gui;
 
 DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
-    _sigmaAction(this, "Sigma", 0.0, 50.0, DEFAULT_SIGMA),
+    _sigmaAction(this, "Sigma", 1.0, 50.0, DEFAULT_SIGMA),
     _resetAction("Reset")
 {
     setToolTip("Density plot settings");
@@ -17,7 +17,7 @@ DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     _resetAction.setToolTip("Reset plot settings");
 
     const auto updateRenderMode = [this]() -> void {
-        _sigmaAction.setVisible(getScatterplotWidget()->getRenderMode() != ScatterplotWidget::SCATTERPLOT);
+        setVisible(getScatterplotWidget()->getRenderMode() != ScatterplotWidget::SCATTERPLOT);
     };
 
     const auto updateSigma = [this]() -> void {
@@ -38,6 +38,10 @@ DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
         updateResetAction();
     });
 
+    connect(&_resetAction, &QAction::triggered, this, [this]() {
+        reset();
+    });
+
     updateRenderMode();
     updateSigma();
     updateResetAction();
@@ -45,7 +49,7 @@ DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
 
 QMenu* DensityPlotAction::getContextMenu()
 {
-    auto menu = new QMenu("Plot");
+    auto menu = new QMenu("Plot settings");
 
     const auto renderMode = getScatterplotWidget()->getRenderMode();
 
@@ -58,7 +62,9 @@ QMenu* DensityPlotAction::getContextMenu()
     };
 
     addActionToMenu(&_sigmaAction);
+
     menu->addSeparator();
+
     menu->addAction(&_resetAction);
 
     return menu;
@@ -81,4 +87,6 @@ DensityPlotAction::Widget::Widget(QWidget* parent, DensityPlotAction* densityPlo
 {
     _layout.addWidget(&_sigmaLabel);
     _layout.addWidget(densityPlotAction->_sigmaAction.createWidget(this));
+
+    setLayout(&_layout);
 }

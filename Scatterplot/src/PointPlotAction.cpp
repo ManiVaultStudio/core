@@ -13,9 +13,13 @@ PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     _pointOpacityAction(this, "Point opacity", 0.0, 100.0, DEFAULT_POINT_OPACITY),
     _resetAction("Reset")
 {
+    _pointSizeByAction.setVisible(false);
+    _pointOpacityByAction.setVisible(false);
+
     _pointSizeByAction.setOptions(QStringList() << "Constant" << "Dimension");
-    _pointSizeAction.setSuffix("px");
     _pointOpacityByAction.setOptions(QStringList() << "Constant" << "Dimension");
+
+    _pointSizeAction.setSuffix("px");
     _pointOpacityAction.setSuffix("%");
     
     _resetAction.setToolTip("Reset point plot settings");
@@ -51,6 +55,10 @@ PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
         updateResetAction();
     });
 
+    connect(&_resetAction, &QAction::triggered, this, [this]() {
+        reset();
+    });
+
     updateRenderMode();
     updatePointSize();
     updatePointOpacity();
@@ -59,7 +67,7 @@ PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
 
 QMenu* PointPlotAction::getContextMenu()
 {
-    auto menu = new QMenu("Plot");
+    auto menu = new QMenu("Plot settings");
 
     const auto renderMode = getScatterplotWidget()->getRenderMode();
 
@@ -74,6 +82,8 @@ QMenu* PointPlotAction::getContextMenu()
     addActionToMenu(&_pointSizeAction);
     addActionToMenu(&_pointOpacityAction);
     
+    menu->addSeparator();
+
     menu->addAction(&_resetAction);
 
     return menu;
@@ -93,8 +103,8 @@ void PointPlotAction::reset()
 PointPlotAction::Widget::Widget(QWidget* parent, PointPlotAction* pointPlotAction) :
     WidgetAction::Widget(parent, pointPlotAction),
     _layout(),
-    _pointSizelabel("Point size by:"),
-    _pointOpacitylabel("Point opacity by:")
+    _pointSizelabel("Point size:"),
+    _pointOpacitylabel("Point opacity:")
 {
     setToolTip("Point plot settings");
 

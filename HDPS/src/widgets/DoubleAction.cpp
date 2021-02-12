@@ -6,11 +6,11 @@ namespace gui {
 
 DoubleAction::DoubleAction(QObject * parent, const QString& title, const double& minimum /*= DEFAULT_MIN_VALUE*/, const double& maximum /*= DEFAULT_MAX_VALUE*/, const double& value /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DEFAULT_DECIMALS*/) :
     WidgetAction(parent),
-    _value(0.0f),
-    _minimum(0.0),
-    _maximum(0.0),
+    _value(),
+    _minimum(std::numeric_limits<double>::max()),
+    _maximum(std::numeric_limits<double>::min()),
     _suffix(),
-    _decimals(1),
+    _decimals(),
     _updateDuringDrag(true)
 {
     setText(title);
