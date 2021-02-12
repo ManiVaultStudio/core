@@ -21,6 +21,10 @@ public:
     public:
         Widget(QWidget* widget, ColorAction* colorAction);
 
+        ColorPickerPushButton& getColorPickerPushButton() {
+            return _colorPickerPushButton;
+        }
+
     private:
         QHBoxLayout             _layout;
         ColorPickerPushButton   _colorPickerPushButton;

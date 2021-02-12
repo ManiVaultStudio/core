@@ -1,8 +1,7 @@
 #pragma once
 
 #include <QPushButton>
-
-class QColorDialog;
+#include <QColorDialog>
 
 /**
  * Color picker push button class
@@ -15,6 +14,13 @@ class ColorPickerPushButton : public QPushButton
 {
     Q_OBJECT
 
+    /** Ways to display color string */
+    enum class TextMode {
+        NoText,         /** Show no color text information */
+        RGB,            /** Show color in RGB format */
+        Hexadecimal,    /** Show color in hexadecimal format */
+    };
+
 public:
 
     /**
@@ -25,34 +31,29 @@ public:
 
 public: // Getters/setters
 
-    /** Returns the currently selected color */
+    /** Gets/sets the current color */
     QColor getColor() const;
-
-    /**
-     * Sets the current color
-     * @param color Color
-     */
     void setColor(const QColor& color);
 
-    /** Returns whether the RGB color code is shown */
-    bool getShowText() const;
+    /** Gets/sets the text mode */
+    TextMode getTextMode() const;
+    void setTextMode(const TextMode& textMode);
 
     /**
-     * Sets whether the RGB color code is shown
-     * @param showText Show color text
+     * Override paint event for drawing color square and color text
+     * @param paintEvent Paint event that occurred
      */
-    void setShowText(const bool& showText);
-
     void paintEvent(QPaintEvent* paintEvent) override;
 
 signals:
 
     /** Signals that the current color has changed
-     * @param currentColor Currently selected color
+     * @param color Currently selected color
      */
     void colorChanged(const QColor& color);
 
 private:
-    QColorDialog*   _colorDialog;       /** Qt color picker dialog */
-    bool            _showText;          /** Whether to show RGB color code */
+    QColorDialog    _colorDialog;       /** Qt color picker dialog */
+    QColor          _color;             /** Current color */
+    TextMode        _textMode;          /** If, and how to the render the color as a string */
 };

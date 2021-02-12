@@ -1,8 +1,8 @@
 #pragma once
 
 #include "PluginAction.h"
-
-#include "widgets/DoubleAction.h"
+#include "PointPlotAction.h"
+#include "DensityPlotAction.h"
 
 class PlotAction : public PluginAction
 {
@@ -13,9 +13,6 @@ public:
 
     private:
         QHBoxLayout     _layout;
-        QLabel          _pointSizelabel;
-        QLabel          _pointOpacitylabel;
-        QLabel          _sigmalabel;
     };
 
 public:
@@ -28,14 +25,8 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    hdps::gui::DoubleAction     _pointSizeAction;
-    hdps::gui::DoubleAction     _pointOpacityAction;
-    hdps::gui::DoubleAction     _sigmaAction;
-    QAction                     _resetAction;
-
-    static constexpr double DEFAULT_POINT_SIZE = 10.0;
-    static constexpr double DEFAULT_POINT_OPACITY = 50.0;
-    static constexpr double DEFAULT_SIGMA = 25.0;
+    PointPlotAction     _pointPlotAction;
+    DensityPlotAction   _densityPlotAction;
 
     friend class Widget;
 };

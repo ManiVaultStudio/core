@@ -48,9 +48,10 @@ ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
     _colorByActionGroup.addAction(&_colorByDimensionAction);
     _colorByActionGroup.addAction(&_colorByColorDataAction);
 
-    connect(&_dimensionAction, &OptionAction::currentIndexChanged, this, [this](const std::uint32_t& currentIndex) {
-        _scatterplotPlugin->setColorDimension(currentIndex);
-    });
+    //const hdps::Vector3f SettingsWidget::DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
+    //const hdps::Vector3f SettingsWidget::DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
+
+    _constantColorAction.setColor(QColor(255, 99, 71));
 
     const auto renderModeChanged = [this]() -> void {
         setEnabled(getScatterplotWidget()->getRenderMode() == ScatterplotWidget::SCATTERPLOT);
@@ -88,6 +89,10 @@ ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
 
     connect(getScatterplotWidget(), &ScatterplotWidget::coloringModeChanged, this, [this, coloringModeChanged](const ScatterplotWidget::ColoringMode& coloringMode) {
         coloringModeChanged();
+    });
+
+    connect(&_dimensionAction, &OptionAction::currentIndexChanged, this, [this](const std::uint32_t& currentIndex) {
+        _scatterplotPlugin->setColorDimension(currentIndex);
     });
 
     renderModeChanged();
