@@ -10,16 +10,11 @@ namespace hdps
     class DataSet;
     class RawData;
     class DataType;
+    class EventListener;
 
 class CoreInterface
 {
 public:
-    /** Event registration function signatures */
-    using DataAddedFunction = std::function<void(QString)>;
-    using DataChangedFunction = std::function<void(QString)>;
-    using DataRemovedFunction = std::function<void(QString)>;
-    using SelectionChangedFunction = std::function<void(QString)>;
-
     /**
      * Requests the plugin manager to create new RawData of the given kind.
      * The manager will add the raw data to the core and return the
@@ -66,41 +61,6 @@ public:
         return dynamic_cast<SetType&>(requestData(name));
     }
 
-    /**
-     * Register for changes in the raw data of the given dataset
-     * @param datasetName Name of the dataset to register for
-     * @param func Function or lambda reacting to the data change event
-     */
-    virtual void registerDatasetChanged(QString datasetName, DataChangedFunction func) = 0;
-
-    /**
-     * Register for changes in the selection of the given dataset
-     * @param datasetName Name of the dataset to register for
-     * @param func Function or lambda reacting to the selection change event
-     */
-    virtual void registerSelectionChanged(QString datasetName, SelectionChangedFunction func) = 0;
-
-    /**
-     * Register for datasets of the given type added to the system
-     * @param dataType Type of datasets to register for
-     * @param func Function or lambda reacting to the data added event
-     */
-    virtual void registerDataTypeAdded(DataType dataType, DataAddedFunction func) = 0;
-
-    /**
-     * Register for datasets of the given type changed in the system
-     * @param dataType Type of datasets to register for
-     * @param func Function or lambda reacting to the data changed event
-     */
-    virtual void registerDataTypeChanged(DataType dataType, DataChangedFunction func) = 0;
-
-    /**
-     * Register for datasets of the given type removed from the system
-     * @param dataType Type of datasets to register for
-     * @param func Function or lambda reacting to the data removed event
-     */
-    virtual void registerDataTypeRemoved(DataType dataType, DataRemovedFunction func) = 0;
-
     /** Notify registered listeners that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString datasetName) = 0;
     /** Notify registered listeners that a dataset has been changed. */
@@ -123,8 +83,13 @@ protected:
     */
     virtual DataSet& requestSelection(const QString rawdataName) = 0;
 
+    virtual void registerEventListener(EventListener* eventListener) = 0;
+
+    virtual void unregisterEventListener(EventListener* eventListener) = 0;
+
     friend class RawData;
     friend class DataSet;
+    friend class EventListener;
 };
 
 } // namespace hdps

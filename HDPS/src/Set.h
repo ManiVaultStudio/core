@@ -128,6 +128,7 @@ private:
 
     friend class Core;
     friend class DataManager;
+    friend class EventListener;
 };
 
 } // namespace hdps

@@ -13,6 +13,7 @@
 #include "Set.h"
 
 #include <QMessageBox>
+#include <algorithm>
 
 namespace hdps
 {
@@ -56,6 +57,11 @@ void Core::addPlugin(plugin::Plugin* plugin)
         case plugin::Type::VIEW:
         {
             _mainWindow.addPlugin(plugin);
+
+            // Notify of datasets in system
+            for (auto& set : _dataManager->allSets())
+                notifyDataAdded(set.first);
+
             // fallthrough
         }
 
@@ -77,6 +83,9 @@ void Core::addPlugin(plugin::Plugin* plugin)
         {
             _mainWindow.addPlugin(analysis);
         }
+        // Notify of datasets in system
+        for (auto& set : _dataManager->allSets())
+            notifyDataAdded(set.first);
     }
     // If it is a loader plugin it should call loadData
     if (plugin->getType() == plugin::Type::LOADER)
@@ -216,100 +225,75 @@ DataSet& Core::requestSelection(const QString name)
     }
 }
 
-// Utility function for inserting value into a map with std::vector values
-// and creating the key and the empty std::vector if it didnt exist yet.
-template <typename K, typename V>
-void insertIntoVectorMap(std::unordered_map<K, std::vector<V>>& map, K k, V v)
+void Core::registerEventListener(EventListener* eventListener)
 {
-    if (map.find(k) != map.end())
-        map[k].push_back(v);
-    else
-    {
-        std::vector<V> vec{ v };
-        map[k] = vec;
-    }
+    _eventListeners.push_back(eventListener);
 }
 
-void Core::registerDatasetChanged(QString datasetName, DataChangedFunction func)
+void Core::unregisterEventListener(EventListener* eventListener)
 {
-    insertIntoVectorMap<QString, DataChangedFunction>(datasetChangedListeners, datasetName, func);
-}
-
-void Core::registerSelectionChanged(QString datasetName, SelectionChangedFunction func)
-{
-    insertIntoVectorMap<QString, SelectionChangedFunction>(selectionChangedListeners, datasetName, func);
-}
-
-void Core::registerDataTypeAdded(DataType dataType, DataAddedFunction func)
-{
-    insertIntoVectorMap<DataType, DataAddedFunction>(dataTypeAddedListeners, dataType, func);
-}
-
-void Core::registerDataTypeChanged(DataType dataType, DataChangedFunction func)
-{
-    insertIntoVectorMap<DataType, DataChangedFunction>(dataTypeChangedListeners, dataType, func);
-}
-
-void Core::registerDataTypeRemoved(DataType dataType, DataRemovedFunction func)
-{
-    insertIntoVectorMap<DataType, DataRemovedFunction>(dataTypeRemovedListeners, dataType, func);
+    _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
 }
 
 /**
  * Goes through all plug-ins stored in the core and calls the 'dataAdded' function
  * on all plug-ins that inherit from the DataConsumer interface.
  */
-void Core::notifyDataAdded(const QString name)
+void Core::notifyDataAdded(const QString datasetName)
 {
-    DataType dt = requestData(name).getDataType();
+    DataType dt = requestData(datasetName).getDataType();
 
-    for (DataAddedFunction& callback : dataTypeAddedListeners[dt])
-        callback(name);
+    DataAddedEvent dataEvent;
+    dataEvent.dataSetName = datasetName;
+    dataEvent.dataType = dt;
+    
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(dataEvent);
 }
 
 /**
 * Goes through all plug-ins stored in the core and calls the 'dataChanged' function
 * on all plug-ins that inherit from the DataConsumer interface.
 */
-void Core::notifyDataChanged(const QString name)
+void Core::notifyDataChanged(const QString datasetName)
 {
-    DataType dt = requestData(name).getDataType();
+    DataType dt = requestData(datasetName).getDataType();
 
-    for (DataChangedFunction& callback : datasetChangedListeners[name])
-        callback(name);
-    for (DataChangedFunction& callback : dataTypeChangedListeners[dt])
-        callback(name);
+    DataChangedEvent dataEvent;
+    dataEvent.dataSetName = datasetName;
+    dataEvent.dataType = dt;
+
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(dataEvent);
 }
 
 /**
 * Goes through all plug-ins stored in the core and calls the 'dataRemoved' function
 * on all plug-ins that inherit from the DataConsumer interface.
 */
-void Core::notifyDataRemoved(const QString name)
+void Core::notifyDataRemoved(const QString datasetName)
 {
-    DataType dt = requestData(name).getDataType();
+    DataType dt = requestData(datasetName).getDataType();
 
-    for (DataRemovedFunction& callback : dataTypeRemovedListeners[dt])
-        callback(name);
+    DataRemovedEvent dataEvent;
+    dataEvent.dataSetName = datasetName;
+    dataEvent.dataType = dt;
+
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(dataEvent);
 }
 
 /** Notify all data consumers that a selection has changed. */
 void Core::notifySelectionChanged(const QString datasetName)
 {
-    DataSet& baseDataSet1 = DataSet::getSourceData(requestData(datasetName));
-    QString dataName1 = baseDataSet1.getDataName();
+    DataType dt = requestData(datasetName).getDataType();
 
-    for (auto& kv : selectionChangedListeners)
-    {
-        DataSet& baseDataSet2 = DataSet::getSourceData(requestData(kv.first));
-        QString dataName2 = baseDataSet2.getDataName();
+    SelectionChangedEvent dataEvent;
+    dataEvent.dataSetName = datasetName;
+    dataEvent.dataType = dt;
 
-        if (dataName1 == dataName2)
-        {
-            for (SelectionChangedFunction& callback : kv.second)
-                callback(kv.first);
-        }
-    }
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(dataEvent);
 }
 
 gui::MainWindow& Core::gui() const {

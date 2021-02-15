@@ -5,6 +5,7 @@
 #include "PluginType.h"
 #include "DataType.h"
 #include "DataManager.h"
+#include "event/EventListener.h"
 
 #include <memory>
 #include <unordered_map>
@@ -89,13 +90,6 @@ public:
      */
     const std::vector<const DataSet*> requestDatasets() override;
 
-    void registerDatasetChanged(QString datasetName, DataChangedFunction func) override;
-    void registerSelectionChanged(QString datasetName, SelectionChangedFunction func) override;
-
-    void registerDataTypeAdded(DataType dataType, DataAddedFunction func) override;
-    void registerDataTypeChanged(DataType dataType, DataChangedFunction func) override;
-    void registerDataTypeRemoved(DataType dataType, DataRemovedFunction func) override;
-
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString datasetName) override;
     /** Notify all data consumers that a dataset has been changed. */
@@ -117,11 +111,14 @@ protected:
      */
     RawData& requestRawData(const QString name) override;
 
-
     /**
     * Requests the selection set belonging to the raw dataset with the given name.
     */
     DataSet& requestSelection(const QString rawdataName) override;
+
+    void registerEventListener(EventListener* eventListener) override;
+
+    void unregisterEventListener(EventListener* eventListener) override;
 
 private:
     /** Notify all data consumers that a dataset has been removed. */
@@ -142,11 +139,8 @@ private:
     /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>, plugin::TypeHash> _plugins;
 
-    std::unordered_map<QString, std::vector<DataChangedFunction>> datasetChangedListeners;
-    std::unordered_map<QString, std::vector<SelectionChangedFunction>> selectionChangedListeners;
-    std::unordered_map<DataType, std::vector<DataAddedFunction>> dataTypeAddedListeners;
-    std::unordered_map<DataType, std::vector<DataChangedFunction>> dataTypeChangedListeners;
-    std::unordered_map<DataType, std::vector<DataRemovedFunction>> dataTypeRemovedListeners;
+    /** List of classes listening for core events */
+    std::vector<EventListener*> _eventListeners;
 };
 
 } // namespace hdps

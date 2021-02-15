@@ -68,6 +68,8 @@ void ScatterplotPlugin::init()
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
 
+    registerDataEventByType(PointType, std::bind(&ScatterplotPlugin::onDataEvent, this, std::placeholders::_1));
+
     qApp->installEventFilter(this);
 
     QObject::connect(_pixelSelectionTool, &PixelSelectionTool::areaChanged, [this]() {
@@ -85,26 +87,23 @@ void ScatterplotPlugin::init()
     });
 }
 
-void ScatterplotPlugin::onDataChanged(QString name)
+void ScatterplotPlugin::onDataEvent(DataEvent dataEvent)
 {
-    if (name != _currentDataSet) {
-        return;
+    if (dataEvent.getType() == EventType::DataChanged)
+    {
+        if (dataEvent.dataSetName != _currentDataSet) {
+            return;
+        }
+
+        updateData();
     }
-    updateData();
-}
-
-void ScatterplotPlugin::onDataRemoved(QString name)
-{
-}
-
-void ScatterplotPlugin::onSelectionChanged(QString name)
-{
-    if (_currentDataSet.isEmpty()) return;
-
-    const Points& points = _core->requestData<Points>(_currentDataSet);
-
-    if (points.getName() == name)
-        updateSelection();
+    if (dataEvent.getType() == EventType::SelectionChanged)
+    {
+        if (_currentDataSet.isEmpty()) return;
+        
+        if (_currentDataSet == dataEvent.dataSetName)
+            updateSelection();
+    }
 }
 
 void ScatterplotPlugin::subsetCreated()
@@ -221,9 +220,6 @@ void ScatterplotPlugin::selectPoints()
 void ScatterplotPlugin::onDataInput(QString dataSetName)
 {
     _currentDataSet = dataSetName;
-
-    _core->registerDatasetChanged(_currentDataSet, std::bind(&ScatterplotPlugin::onDataChanged, this, std::placeholders::_1));
-    _core->registerSelectionChanged(_currentDataSet, std::bind(&ScatterplotPlugin::onSelectionChanged, this, std::placeholders::_1));
 
     setWindowTitle(_currentDataSet);
 

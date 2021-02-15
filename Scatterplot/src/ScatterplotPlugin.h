@@ -47,9 +47,7 @@ public:
 
     void init() override;
 
-    void onDataChanged(QString name);
-    void onDataRemoved(QString name);
-    void onSelectionChanged(QString name);
+    void onDataEvent(DataEvent dataEvent);
 
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;
