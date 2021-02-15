@@ -5,10 +5,12 @@
 
 using namespace hdps::gui;
 
-PluginAction::PluginAction(ScatterplotPlugin* scatterplotPlugin) :
+PluginAction::PluginAction(ScatterplotPlugin* scatterplotPlugin, const QString& title) :
     WidgetAction(reinterpret_cast<QObject*>(scatterplotPlugin)),
     _scatterplotPlugin(scatterplotPlugin)
 {
+    setText(title);
+    setToolTip(title);
 }
 
 ScatterplotWidget* PluginAction::getScatterplotWidget()

@@ -51,7 +51,7 @@ public:
     Q_DECLARE_FLAGS(PopupAlignment, PopupAlignmentFlag)
 
 public:
-    PopupPushButton();
+    PopupPushButton(QWidget* parent = nullptr);
 
     void setWidget(QWidget* widget);
 

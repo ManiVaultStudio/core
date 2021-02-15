@@ -20,12 +20,21 @@ public:
         QLabel          _pointOpacitylabel;
     };
 
+    class PopupWidget : public PluginAction::PopupWidget {
+    public:
+        PopupWidget(QWidget* parent, PointPlotAction* pointPlotAction);
+    };
+
 public:
     PointPlotAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override {
         return new Widget(parent, this);
     }
+
+    QWidget* getPopupWidget(QWidget* parent) override {
+        return new PopupWidget(parent, this);
+    };
 
     QMenu* getContextMenu();
 

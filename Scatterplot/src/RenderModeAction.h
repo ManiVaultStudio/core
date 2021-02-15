@@ -4,8 +4,6 @@
 
 #include <QActionGroup>
 #include <QHBoxLayout>
-#include <QToolBar>
-#include <QToolButton>
 
 class QMenu;
 
@@ -20,12 +18,24 @@ public:
         QHBoxLayout         _layout;
     };
 
+    class PopupWidget : public PluginAction::PopupWidget {
+    public:
+        PopupWidget(QWidget* parent, RenderModeAction* renderModeAction);
+
+    private:
+        QHBoxLayout         _layout;
+    };
+
 public:
     RenderModeAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override {
         return new Widget(parent, this);
     }
+
+    QWidget* getPopupWidget(QWidget* parent) override {
+        return new PopupWidget(parent, this);
+    };
 
     QMenu* getContextMenu();
 

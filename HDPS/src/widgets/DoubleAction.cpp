@@ -123,27 +123,19 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
     WidgetAction::Widget(parent, doubleAction),
     _layout(),
     _spinBox(),
+    //_resetPushButton("R"),
     _slider(Qt::Horizontal)
 {
     setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
 
-    if (isChildOfMenu()) {
-        _spinBox.setFixedWidth(60);
-        _slider.setFixedWidth(100);
-    }
-
-    if (childOfToolbar()) {
-        _spinBox.setFixedWidth(60);
-        _slider.setFixedWidth(60);
-    }
+    _spinBox.setFixedWidth(60);
 
     _layout.setMargin(0);
     _layout.addWidget(&_spinBox);
+    //_layout.addWidget(&_resetPushButton);
     _layout.addWidget(&_slider);
 
     setLayout(&_layout);
-
-    //_label.setVisible(childOfMenu());
 
     const auto setToolTips = [this, doubleAction]() {
         const auto toolTip = QString("%1: %2%3").arg(doubleAction->text(), QString::number(doubleAction->getValue(), 'f', doubleAction->getDecimals()), doubleAction->getSuffix());

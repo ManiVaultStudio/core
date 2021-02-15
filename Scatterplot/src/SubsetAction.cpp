@@ -8,7 +8,7 @@
 using namespace hdps::gui;
 
 SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
-    PluginAction(scatterplotPlugin),
+    PluginAction(scatterplotPlugin, "Subset"),
     _createSubsetAction("Create subset"),
     _fromSourceDataAction("From source data")
 {
@@ -52,4 +52,14 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     _layout.addWidget(new ActionCheckBox(this, &subsetAction->_fromSourceDataAction));
 
     setLayout(&_layout);
+}
+
+SubsetAction::PopupWidget::PopupWidget(QWidget* parent, SubsetAction* subsetAction) :
+    WidgetAction::PopupWidget(parent, subsetAction)
+{
+    auto layout = new QVBoxLayout();
+
+    layout->addWidget(new SubsetAction::Widget(this, subsetAction));
+
+    setLayout(layout);
 }

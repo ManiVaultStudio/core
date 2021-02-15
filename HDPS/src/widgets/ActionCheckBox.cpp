@@ -22,6 +22,7 @@ ActionCheckBox::ActionCheckBox(QWidget* parent, QAction* action) :
     });
 
     const auto updateCheckBox = [this, action]() -> void {
+        _checkBox.setToolTip(action->toolTip());
         _checkBox.setChecked(action->isChecked());
     };
 

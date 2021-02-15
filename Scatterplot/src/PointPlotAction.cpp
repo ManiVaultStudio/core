@@ -3,10 +3,12 @@
 
 #include "ScatterplotWidget.h"
 
+#include "widgets/ActionPushButton.h"
+
 using namespace hdps::gui;
 
 PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
-    PluginAction(scatterplotPlugin),
+    PluginAction(scatterplotPlugin, "Point"),
     _pointSizeByAction(this, "Point size by"),
     _pointSizeAction(this, "Point size", 1.0, 50.0, DEFAULT_POINT_SIZE),
     _pointOpacityByAction(this, "Point opacity by"),
@@ -117,4 +119,22 @@ PointPlotAction::Widget::Widget(QWidget* parent, PointPlotAction* pointPlotActio
     _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction));
 
     setLayout(&_layout);
+}
+
+PointPlotAction::PopupWidget::PopupWidget(QWidget* parent, PointPlotAction* pointPlotAction) :
+    WidgetAction::PopupWidget(parent, pointPlotAction)
+{
+    auto layout = new QGridLayout();
+
+    layout->addWidget(new QLabel("Size:"), 0, 0);
+    layout->addWidget(new OptionAction::Widget(this, &pointPlotAction->_pointSizeByAction), 0, 1);
+    layout->addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointSizeAction), 0, 2);
+
+    layout->addWidget(new QLabel("Opacity:"), 1, 0);
+    layout->addWidget(new OptionAction::Widget(this, &pointPlotAction->_pointOpacityByAction), 1, 1);
+    layout->addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction), 1, 2);
+
+    //layout->addWidget(new ActionPushButton(this, &pointPlotAction->_resetAction), 2, 1, 1, 2);
+
+    setLayout(layout);
 }

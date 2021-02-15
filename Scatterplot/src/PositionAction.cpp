@@ -3,10 +3,12 @@
 
 #include "ScatterplotPlugin.h"
 
+#include "widgets/ActionPushButton.h"
+
 using namespace hdps::gui;
 
 PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
-    PluginAction(scatterplotPlugin),
+    PluginAction(scatterplotPlugin, "Position"),
     _xDimensionAction(this, "X"),
     _yDimensionAction(this, "Y"),
     _resetAction("Reset")
@@ -94,4 +96,20 @@ PositionAction::Widget::Widget(QWidget* parent, PositionAction* positionAction) 
     _layout.addWidget(new OptionAction::Widget(this, &positionAction->_yDimensionAction));
 
     setLayout(&_layout);
+}
+
+PositionAction::PopupWidget::PopupWidget(QWidget* parent, PositionAction* positionAction):
+    WidgetAction::PopupWidget(parent, positionAction)
+{
+    auto layout = new QGridLayout();
+
+    layout->addWidget(new QLabel("X-dimension:"), 0, 0);
+    layout->addWidget(new OptionAction::Widget(this, &positionAction->_xDimensionAction), 0, 1);
+
+    layout->addWidget(new QLabel("Y-dimension:"), 1, 0);
+    layout->addWidget(new OptionAction::Widget(this, &positionAction->_yDimensionAction), 1, 1);
+    
+    layout->addWidget(new ActionPushButton(this, &positionAction->_resetAction), 2, 1);
+
+    setLayout(layout);
 }

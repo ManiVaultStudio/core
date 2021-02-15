@@ -6,7 +6,7 @@
 using namespace hdps::gui;
 
 ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
-    PluginAction(scatterplotPlugin),
+    PluginAction(scatterplotPlugin, "Coloring"),
     _colorByAction(this, "Color by"),
     _colorByConstantColorAction("Color by constant color"),
     _colorByDimensionAction("Color by dimension"),
@@ -215,4 +215,14 @@ ColoringAction::Widget::Widget(QWidget* parent, ColoringAction* coloringAction) 
     });
 
     coloringModeChanged();
+}
+
+ColoringAction::PopupWidget::PopupWidget(QWidget* parent, ColoringAction* coloringAction) :
+    WidgetAction::PopupWidget(parent, coloringAction)
+{
+    auto layout = new QVBoxLayout();
+
+    layout->addWidget(new ColoringAction::Widget(this, coloringAction));
+
+    setLayout(layout);
 }

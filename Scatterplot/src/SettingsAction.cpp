@@ -5,7 +5,7 @@
 using namespace hdps::gui;
 
 SettingsAction::SettingsAction(ScatterplotPlugin* scatterplotPlugin) :
-    PluginAction(scatterplotPlugin),
+    PluginAction(scatterplotPlugin, "Settings"),
     _renderModeAction(scatterplotPlugin),
     _plotAction(scatterplotPlugin),
     _positionAction(scatterplotPlugin),
@@ -13,6 +13,15 @@ SettingsAction::SettingsAction(ScatterplotPlugin* scatterplotPlugin) :
     _subsetAction(scatterplotPlugin),
     _selectionAction(scatterplotPlugin)
 {
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    _renderModeAction.setIcon(fontAwesome.getIcon("image"));
+    _plotAction.setIcon(fontAwesome.getIcon("paint-brush"));
+    _positionAction.setIcon(fontAwesome.getIcon("ruler-combined"));
+    _coloringAction.setIcon(fontAwesome.getIcon("palette"));
+    _subsetAction.setIcon(fontAwesome.getIcon("crop"));
+    _selectionAction.setIcon(fontAwesome.getIcon("mouse-pointer"));
+
     const auto updateEnabled = [this]() {
         setEnabled(!_scatterplotPlugin->getCurrentDataset().isEmpty());
     };
@@ -46,17 +55,17 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
 {
     setAutoFillBackground(true);
 
-    _layout.addWidget(new RenderModeAction::Widget(this, &settingsAction->_renderModeAction));
-    _layout.addWidget(new Spacer());
+    _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_renderModeAction));
+    //_layout.addWidget(new Spacer());
     _layout.addWidget(new PlotAction::Widget(this, &settingsAction->_plotAction));
-    _layout.addWidget(new Spacer());
+    //_layout.addWidget(new Spacer());
     _layout.addWidget(new PositionAction::Widget(this, &settingsAction->_positionAction));
-    _layout.addWidget(new Spacer());
-    _layout.addWidget(new ColoringAction::Widget(this, &settingsAction->_coloringAction));
-    _layout.addWidget(new Spacer());
-    _layout.addWidget(new SubsetAction::Widget(this, &settingsAction->_subsetAction));
-    _layout.addWidget(new Spacer());
-    _layout.addWidget(new SelectionAction::Widget(this, &settingsAction->_selectionAction));
+    //_layout.addWidget(new Spacer());
+    _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_coloringAction));
+    //_layout.addWidget(new Spacer());
+    _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_subsetAction));
+    //_layout.addWidget(new Spacer());
+    _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_selectionAction));
     _layout.addStretch(1);
 
     setLayout(&_layout);

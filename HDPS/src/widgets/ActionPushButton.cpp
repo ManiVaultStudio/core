@@ -30,12 +30,9 @@ ActionPushButton::ActionPushButton(QWidget* parent, QAction* action) :
     });
 
     const auto updatePushButton = [this, action]() -> void {
-        const auto actionIsCheckable = action->isCheckable();
-
-        _pushButton.setCheckable(actionIsCheckable);
-
-        if (actionIsCheckable)
-            _pushButton.setChecked(action->isChecked());
+        _pushButton.setToolTip(action->toolTip());
+        _pushButton.setCheckable(action->isCheckable());
+        _pushButton.setChecked(action->isChecked());
     };
 
     connect(action, &QAction::changed, this, [this, updatePushButton]() {

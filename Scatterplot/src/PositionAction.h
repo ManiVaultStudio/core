@@ -21,10 +21,19 @@ public:
         QHBoxLayout     _layout;
     };
 
+    class PopupWidget : public PluginAction::PopupWidget {
+    public:
+        PopupWidget(QWidget* parent, PositionAction* positionAction);
+    };
+
 public:
     PositionAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override;
+
+    QWidget* getPopupWidget(QWidget* parent) override {
+        return new PopupWidget(parent, this);
+    };
 
     QMenu* getContextMenu();
 

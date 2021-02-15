@@ -13,8 +13,8 @@ namespace hdps
 namespace gui
 {
 
-PopupPushButton::PopupPushButton() :
-    QPushButton(),
+PopupPushButton::PopupPushButton(QWidget* parent /*= nullptr*/) :
+    QPushButton(parent),
     _widget(nullptr),
     _alignment(PopupAlignmentFlag::BottomLeft),
     _popupWidget(new QWidget()),
@@ -94,6 +94,8 @@ void PopupPushButton::setWidget(QWidget* widget)
     Q_ASSERT(widget != nullptr);
 
     _widget = widget;
+
+    _widget->hide();
 
     _groupBox->setTitle(_widget->windowTitle());
 

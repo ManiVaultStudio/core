@@ -21,12 +21,21 @@ public:
         QLabel          _colorByLabel;
     };
 
+    class PopupWidget : public PluginAction::PopupWidget {
+    public:
+        PopupWidget(QWidget* parent, ColoringAction* coloringAction);
+    };
+
 public:
     ColoringAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override {
         return new Widget(parent, this);
     }
+
+    QWidget* getPopupWidget(QWidget* parent) override {
+        return new PopupWidget(parent, this);
+    };
 
     QMenu* getContextMenu();
 

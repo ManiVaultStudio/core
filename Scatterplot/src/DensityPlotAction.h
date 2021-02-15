@@ -19,12 +19,21 @@ public:
         QLabel          _sigmaLabel;
     };
 
+    class PopupWidget : public PluginAction::PopupWidget {
+    public:
+        PopupWidget(QWidget* parent, DensityPlotAction* densityPlotAction);
+    };
+
 public:
     DensityPlotAction(ScatterplotPlugin* scatterplotPlugin);
 
     QWidget* createWidget(QWidget* parent) override {
         return new Widget(parent, this);
     }
+
+    QWidget* getPopupWidget(QWidget* parent) override {
+        return new PopupWidget(parent, this);
+    };
 
     QMenu* getContextMenu();
 

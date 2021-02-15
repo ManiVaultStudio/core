@@ -1,8 +1,11 @@
 #pragma once
 
+#include "PopupPushButton.h"
+
 #include <QWidgetAction>
 #include <QVBoxLayout>
 #include <QGroupBox>
+#include <QToolButton>
 
 namespace hdps {
 
@@ -13,17 +16,6 @@ class WidgetAction : public QWidgetAction
     Q_OBJECT
 
 public:
-    class PopupWidget : public QWidget {
-    public:
-        PopupWidget(QWidget* parent, const QString& title);
-
-        void setContentLayout(QLayout* layout);
-
-    private:
-        QVBoxLayout     _mainLayout;
-        QGroupBox       _groupBox;
-    };
-
     class Widget : public QWidget
     {
     public:
@@ -32,14 +24,30 @@ public:
         void setLayout(QLayout* layout);
 
         bool isChildOfMenu() const;
-        bool childOfToolbar() const;
-        bool childOfWidget() const;
 
     protected:
         QAction*  _action;
     };
 
+    class PopupWidget : public Widget {
+    public:
+        PopupWidget(QWidget* parent, QAction* action);
+    };
+
+    class CompactWidget : public Widget {
+    public:
+        CompactWidget(QWidget* parent, WidgetAction* widgetAction);
+
+    private:
+        QHBoxLayout         _layout;
+        PopupPushButton     _popupPushButton;
+    };
+
     explicit WidgetAction(QObject* parent);
+
+    virtual QWidget* getPopupWidget(QWidget* parent) {
+        return createWidget(parent);
+    };
 };
 
 }

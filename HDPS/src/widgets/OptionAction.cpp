@@ -44,7 +44,7 @@ std::uint32_t OptionAction::getCurrentIndex() const
 
 void OptionAction::setCurrentIndex(const std::uint32_t& currentIndex)
 {
-    if (currentIndex == _currentIndex || currentIndex >= _options.count())
+    if (currentIndex == _currentIndex || currentIndex >= static_cast<std::uint32_t>(_options.count()))
         return;
 
     _currentIndex = currentIndex;

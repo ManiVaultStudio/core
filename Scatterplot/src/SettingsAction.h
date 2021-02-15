@@ -50,6 +50,10 @@ public:
         return new Widget(parent, this);
     }
 
+    QWidget* getPopupWidget(QWidget* parent) override {
+        return new PopupWidget(parent, this);
+    };
+
     QMenu* getContextMenu();
 
     RenderModeAction& getRenderModeAction() { return _renderModeAction; }

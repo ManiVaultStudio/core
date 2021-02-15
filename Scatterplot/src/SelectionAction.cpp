@@ -9,7 +9,7 @@
 using namespace hdps::gui;
 
 SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
-    PluginAction(scatterplotPlugin),
+    PluginAction(scatterplotPlugin, "Selection"),
     _typeAction(this, "Type"),
     _rectangleAction("Rectangle"),
     _brushAction("Brush"),
@@ -300,47 +300,56 @@ SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionActio
     _layout.addWidget(new ActionPushButton(this, &selectionAction->_invertSelectionAction));
     _layout.addWidget(new ActionCheckBox(this, &selectionAction->_notifyDuringSelectionAction));
 
-    /*
-    auto popupLayout = new QGridLayout();
-
-    auto typeWidget = new QWidget();
-
-    auto typeWidgetLayout = new QHBoxLayout();
-
-    typeWidgetLayout->addWidget(selectionAction->_typeAction.createWidget(this));
-    typeWidgetLayout->addWidget(new ActionPushButton(&selectionAction->_modifierAddAction));
-    typeWidgetLayout->addWidget(new ActionPushButton(&selectionAction->_modifierRemoveAction));
-
-    typeWidget->setLayout(typeWidgetLayout);
-
-    popupLayout->addWidget(new QLabel("Type:"), 0, 0);
-    popupLayout->addWidget(typeWidget, 0, 1);
-
-    popupLayout->addWidget(new QLabel("Brush radius:"), 1, 0);
-    popupLayout->addWidget(selectionAction->_brushRadiusAction.createWidget(this), 1, 1);
-
-    auto selectWidget = new QWidget();
-
-    auto selectWidgetLayout = new QHBoxLayout();
-
-    selectWidgetLayout->addWidget(new ActionPushButton(&selectionAction->_clearSelectionAction));
-    selectWidgetLayout->addWidget(new ActionPushButton(&selectionAction->_selectAllAction));
-    selectWidgetLayout->addWidget(new ActionPushButton(&selectionAction->_invertSelectionAction));
-
-    selectWidget->setLayout(selectWidgetLayout);
-
-    popupLayout->addWidget(new QLabel("Select:"), 2, 0);
-    popupLayout->addWidget(selectWidget, 2, 1);
-
-    popupLayout->addWidget(selectWidget, 3, 1);
-
-    _popupWidget.setContentLayout(popupLayout);
-
-    _popupWidgetAction.setDefaultWidget(&_popupWidget);
-
-    _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.addAction(&_popupWidgetAction);
-    */
-
     setLayout(&_layout);
+}
+
+SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* selectionAction) :
+    WidgetAction::PopupWidget(parent, selectionAction)
+{
+    auto layout = new QGridLayout();
+
+    const auto getTypeWidget = [this, selectionAction]() -> QWidget* {
+        auto layout = new QHBoxLayout();
+
+        layout->setMargin(0);
+
+        layout->addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction));
+        layout->addWidget(new ActionPushButton(this, &selectionAction->_modifierAddAction));
+        layout->addWidget(new ActionPushButton(this, &selectionAction->_modifierRemoveAction));
+
+        auto widget = new QWidget();
+
+        widget->setLayout(layout);
+
+        return widget;
+    };
+
+    const auto getSelectWidget = [this, selectionAction]() -> QWidget* {
+        auto layout = new QHBoxLayout();
+
+        layout->setMargin(0);
+
+        layout->addWidget(new ActionPushButton(this, &selectionAction->_clearSelectionAction));
+        layout->addWidget(new ActionPushButton(this, &selectionAction->_selectAllAction));
+        layout->addWidget(new ActionPushButton(this, &selectionAction->_invertSelectionAction));
+        layout->addStretch(1);
+
+        auto widget = new QWidget();
+
+        widget->setLayout(layout);
+
+        return widget;
+    };
+
+    layout->addWidget(new QLabel("Type:"), 0, 0);
+    layout->addWidget(getTypeWidget(), 0, 1);
+    
+    layout->addWidget(new QLabel("Brush radius:"), 1, 0);
+    layout->addWidget(new DoubleAction::Widget(this, &selectionAction->_brushRadiusAction), 1, 1);
+
+    layout->addWidget(getSelectWidget(), 2, 1);
+
+    layout->addWidget(new ActionCheckBox(this, &selectionAction->_notifyDuringSelectionAction), 3, 1);
+
+    setLayout(layout);
 }

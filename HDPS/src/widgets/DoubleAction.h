@@ -4,6 +4,7 @@
 
 #include <QHBoxLayout>
 #include <QDoubleSpinBox>
+#include <QPushButton>
 #include <QSlider>
 
 class QWidget;
@@ -25,6 +26,7 @@ public:
     private:
         QHBoxLayout     _layout;
         QDoubleSpinBox  _spinBox;
+        //QPushButton     _resetPushButton;
         QSlider         _slider;
     };
 
