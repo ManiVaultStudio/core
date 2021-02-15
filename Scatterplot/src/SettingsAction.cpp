@@ -46,17 +46,17 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
 {
     setAutoFillBackground(true);
 
-    _layout.addWidget(settingsAction->_renderModeAction.createWidget(this));
+    _layout.addWidget(new RenderModeAction::Widget(this, &settingsAction->_renderModeAction));
     _layout.addWidget(new Spacer());
-    _layout.addWidget(settingsAction->_plotAction.createWidget(this));
+    _layout.addWidget(new PlotAction::Widget(this, &settingsAction->_plotAction));
     _layout.addWidget(new Spacer());
-    _layout.addWidget(settingsAction->_positionAction.createWidget(this));
+    _layout.addWidget(new PositionAction::Widget(this, &settingsAction->_positionAction));
     _layout.addWidget(new Spacer());
-    _layout.addWidget(settingsAction->_coloringAction.createWidget(this));
+    _layout.addWidget(new ColoringAction::Widget(this, &settingsAction->_coloringAction));
     _layout.addWidget(new Spacer());
-    _layout.addWidget(settingsAction->_subsetAction.createWidget(this));
+    _layout.addWidget(new SubsetAction::Widget(this, &settingsAction->_subsetAction));
     _layout.addWidget(new Spacer());
-    _layout.addWidget(settingsAction->_selectionAction.createWidget(this));
+    _layout.addWidget(new SelectionAction::Widget(this, &settingsAction->_selectionAction));
     _layout.addStretch(1);
 
     setLayout(&_layout);
