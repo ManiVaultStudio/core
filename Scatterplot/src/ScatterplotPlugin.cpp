@@ -30,6 +30,7 @@ ScatterplotPlugin::ScatterplotPlugin() :
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
     setContextMenuPolicy(Qt::CustomContextMenu);
+    setFocusPolicy(Qt::StrongFocus);
 
     connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint& point) {
         //if (_currentDataSet.isEmpty() || _pixelSelectionTool->isActive())

@@ -8,8 +8,6 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QHBoxLayout>
-#include <QToolBar>
-#include <QToolButton>
 
 class SelectionAction : public PluginAction
 {

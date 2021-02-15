@@ -45,8 +45,6 @@ public:
     void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
     DataTypes supportedDataTypes() const Q_DECL_OVERRIDE;
 
-    
-
     QString getCurrentDataset() const;
     std::uint32_t getNumberOfPoints() const;
     std::uint32_t getNumberOfSelectedPoints() const;

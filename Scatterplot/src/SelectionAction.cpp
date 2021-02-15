@@ -127,15 +127,13 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
         _scatterplotPlugin->getSelectionTool().setBrushRadius(value);
     });
 
-    /*
-    connect(_modifierAddPushButton, &QPushButton::toggled, [this, &pixelSelectionTool](bool checked) {
-        pixelSelectionTool.setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
+    connect(&_modifierAddAction, &QAction::toggled, [this](bool checked) {
+        _scatterplotPlugin->getSelectionTool().setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
     });
 
-    connect(_modifierRemovePushButton, &QPushButton::toggled, [this, &pixelSelectionTool](bool checked) {
-        pixelSelectionTool.setModifier(checked ? PixelSelectionTool::Modifier::Remove : PixelSelectionTool::Modifier::Replace);
+    connect(&_modifierRemoveAction, &QAction::toggled, [this](bool checked) {
+        _scatterplotPlugin->getSelectionTool().setModifier(checked ? PixelSelectionTool::Modifier::Remove : PixelSelectionTool::Modifier::Replace);
     });
-    */
 
     connect(&_selectAllAction, &QAction::triggered, [this]() {
         _scatterplotPlugin->selectAll();
@@ -226,12 +224,18 @@ QMenu* SelectionAction::getContextMenu()
 
 bool SelectionAction::eventFilter(QObject* object, QEvent* event)
 {
-    switch (event->type())
+    const auto keyEvent = dynamic_cast<QKeyEvent*>(event);
+
+    if (!keyEvent)
+        return QObject::eventFilter(object, event);
+
+    if (keyEvent->isAutoRepeat())
+        return QObject::eventFilter(object, event);
+
+    switch (keyEvent->type())
     {
         case QEvent::KeyPress:
         {
-            const auto keyEvent = static_cast<QKeyEvent*>(event);
-
             switch (keyEvent->key())
             {
                 case Qt::Key_Shift:
@@ -251,8 +255,6 @@ bool SelectionAction::eventFilter(QObject* object, QEvent* event)
 
         case QEvent::KeyRelease:
         {
-            const auto keyEvent = static_cast<QKeyEvent*>(event);
-
             switch (keyEvent->key())
             {
                 case Qt::Key_Shift:
