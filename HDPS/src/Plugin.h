@@ -4,6 +4,7 @@
 #include "CoreInterface.h"
 #include "PluginType.h"
 #include "Application.h"
+#include "event/EventListener.h"
 
 #include <QString>
 #include <QUuid>
@@ -15,7 +16,7 @@ namespace hdps
 namespace plugin
 {
 
-class Plugin
+class Plugin : public hdps::EventListener
 {
 public:
     Plugin(Type type, QString kind);
@@ -76,6 +77,8 @@ public:
     void setCore(CoreInterface* core)
     {
         this->_core = core;
+
+        setEventCore(core);
     }
 
 public: // Settings

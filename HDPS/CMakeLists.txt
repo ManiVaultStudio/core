@@ -65,6 +65,12 @@ set( CORE_SOURCES
     src/DataManager.cpp
 )
 
+set( EVENT_HEADERS
+    src/event/Event.h
+    src/event/EventListener.h
+    src/event/EventListener.cpp
+)
+
 set( WIDGET_HEADERS
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
@@ -192,6 +198,7 @@ list(APPEND PUBLIC_HEADERS
     ${RENDERER_HEADERS}
     ${UTIL_HEADERS}
     ${PLUGIN_HEADERS}
+    ${EVENT_HEADERS}
 )
 
 list(APPEND PUBLIC_SOURCES
@@ -242,6 +249,7 @@ source_group( Public\\Widgets FILES ${WIDGET_FILES})
 source_group( Public\\Renderers FILES ${RENDERER_FILES})
 source_group( Public\\Util FILES ${UTIL_FILES})
 source_group( Public\\Graphics FILES ${GRAPHICS_FILES})
+source_group( Public\\Event FILES ${EVENT_HEADERS})
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})
 source_group( Resources FILES win/hdps.rc)
@@ -254,6 +262,7 @@ if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_library(${PROJECT}_Public ${LINK_TYPE}
     src/.editorconfig
