@@ -8,7 +8,7 @@ using namespace hdps::gui;
 DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
     _sigmaAction(this, "Sigma", 1.0, 50.0, DEFAULT_SIGMA),
-    _resetAction("Reset")
+    _resetAction(this, "Reset")
 {
     setToolTip("Density plot settings");
 

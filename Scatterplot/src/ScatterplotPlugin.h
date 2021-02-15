@@ -48,7 +48,7 @@ public:
     
 
     QString getCurrentDataset() const;
-    std::uint32_t getNumPoints() const;
+    std::uint32_t getNumberOfPoints() const;
     std::uint32_t getNumberOfSelectedPoints() const;
 
 public:

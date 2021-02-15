@@ -6,11 +6,12 @@ namespace hdps {
 
 namespace gui {
 
-ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/) :
+ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const QColor& color /*= Qt::gray*/) :
     WidgetAction(parent),
-    _color(Qt::black)
+    _color()
 {
     setText(title);
+    setColor(color);
 }
 
 QWidget* ColorAction::createWidget(QWidget* parent)

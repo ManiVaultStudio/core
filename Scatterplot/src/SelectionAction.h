@@ -2,6 +2,7 @@
 
 #include "PluginAction.h"
 
+#include "widgets/StandardAction.h"
 #include "widgets/OptionAction.h"
 #include "widgets/DoubleAction.h"
 
@@ -31,20 +32,29 @@ public:
 
     QMenu* getContextMenu();
 
+public: // Event handling
+
+    /**
+     * Listens to the events of target \p object
+     * @param object Target object to watch for events
+     * @param event Event that occurred
+     */
+    bool eventFilter(QObject* object, QEvent* event) override;
+
 protected:
     hdps::gui::OptionAction     _typeAction;
-    QAction                     _rectangleAction;
-    QAction                     _brushAction;
-    QAction                     _lassoAction;
-    QAction                     _polygonAction;
+    hdps::gui::StandardAction   _rectangleAction;
+    hdps::gui::StandardAction   _brushAction;
+    hdps::gui::StandardAction   _lassoAction;
+    hdps::gui::StandardAction   _polygonAction;
     QActionGroup                _typeActionGroup;
     hdps::gui::DoubleAction     _brushRadiusAction;
-    QAction                     _modifierAddAction;
-    QAction                     _modifierRemoveAction;
-    QAction                     _clearSelectionAction;
-    QAction                     _selectAllAction;
-    QAction                     _invertSelectionAction;
-    QAction                     _notifyDuringSelectionAction;
+    hdps::gui::StandardAction   _modifierAddAction;
+    hdps::gui::StandardAction   _modifierRemoveAction;
+    hdps::gui::StandardAction   _clearSelectionAction;
+    hdps::gui::StandardAction   _selectAllAction;
+    hdps::gui::StandardAction   _invertSelectionAction;
+    hdps::gui::StandardAction   _notifyDuringSelectionAction;
 
     friend class Widget;
 };

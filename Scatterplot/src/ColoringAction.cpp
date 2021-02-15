@@ -8,15 +8,15 @@ using namespace hdps::gui;
 ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
     _colorByAction(this, "Color by"),
-    _colorByConstantColorAction("Color by constant color"),
-    _colorByDimensionAction("Color by dimension"),
-    _colorByColorDataAction("Color by color data"),
+    _colorByConstantColorAction(this, "Color by constant color"),
+    _colorByDimensionAction(this, "Color by dimension"),
+    _colorByColorDataAction(this, "Color by color data"),
     _colorByActionGroup(this),
-    _constantColorAction(this, "Constant color"),
+    _constantColorAction(this, "Constant color", qRgb(93, 93, 225)),
     _dimensionAction(this, "Color dimension"),
     _colorDataAction(this, "Color data"),
-    _removeColorDataAction("Remove"),
-    _resetAction("Reset")
+    _removeColorDataAction(this, "Remove"),
+    _resetAction(this, "Reset")
 {
     scatterplotPlugin->addAction(&_colorByAction);
     scatterplotPlugin->addAction(&_colorByDimensionAction);
@@ -48,11 +48,6 @@ ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
     _colorByActionGroup.addAction(&_colorByDimensionAction);
     _colorByActionGroup.addAction(&_colorByColorDataAction);
 
-    //const hdps::Vector3f SettingsWidget::DEFAULT_BASE_COLOR = hdps::Vector3f(255.f / 255, 99.f / 255, 71.f / 255);
-    //const hdps::Vector3f SettingsWidget::DEFAULT_SELECTION_COLOR = hdps::Vector3f(72.f / 255, 61.f / 255, 139.f / 255);
-
-    _constantColorAction.setColor(QColor(255, 99, 71));
-
     const auto renderModeChanged = [this]() -> void {
         setEnabled(getScatterplotWidget()->getRenderMode() == ScatterplotWidget::SCATTERPLOT);
     };
@@ -77,7 +72,24 @@ ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
         getScatterplotWidget()->setColoringMode(ScatterplotWidget::ColoringMode::ColorData);
     });
 
-    const auto coloringModeChanged = [this]() -> void {
+    const auto updateConstantColor = [this]() -> void {
+        if (_scatterplotPlugin->getNumberOfPoints() == 0)
+            return;
+
+        std::vector<Vector3f> colors(_scatterplotPlugin->getNumberOfPoints());
+
+        const auto color = _constantColorAction.getColor();
+
+        std::fill(colors.begin(), colors.end(), Vector3f(color.redF(), color.greenF(), color.blueF()));
+
+        getScatterplotWidget()->setColors(colors);
+    };
+
+    const auto updateDimension = [this]() -> void {
+        _scatterplotPlugin->setColorDimension(_dimensionAction.getCurrentIndex());
+    };
+
+    const auto coloringModeChanged = [this, updateConstantColor, updateDimension]() -> void {
         const auto coloringMode = getScatterplotWidget()->getColoringMode();
 
         _colorByAction.setCurrentIndex(static_cast<std::int32_t>(coloringMode));
@@ -85,14 +97,39 @@ ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
         _colorByConstantColorAction.setChecked(coloringMode == ScatterplotWidget::ColoringMode::ConstantColor);
         _colorByDimensionAction.setChecked(coloringMode == ScatterplotWidget::ColoringMode::Dimension);
         _colorByColorDataAction.setChecked(coloringMode == ScatterplotWidget::ColoringMode::ColorData);
+
+        switch (coloringMode)
+        {
+            case ScatterplotWidget::ColoringMode::ConstantColor:
+                updateConstantColor();
+                break;
+
+            case ScatterplotWidget::ColoringMode::Dimension:
+                updateDimension();
+                break;
+
+            case ScatterplotWidget::ColoringMode::ColorData:
+                break;
+
+            default:
+                break;
+        }
     };
 
     connect(getScatterplotWidget(), &ScatterplotWidget::coloringModeChanged, this, [this, coloringModeChanged](const ScatterplotWidget::ColoringMode& coloringMode) {
         coloringModeChanged();
     });
 
+    connect(&_constantColorAction, &ColorAction::colorChanged, this, [this, updateConstantColor](const QColor& color) {
+        updateConstantColor();
+    });
+
     connect(&_dimensionAction, &OptionAction::currentIndexChanged, this, [this](const std::uint32_t& currentIndex) {
         _scatterplotPlugin->setColorDimension(currentIndex);
+    });
+
+    connect(_scatterplotPlugin, &ScatterplotPlugin::currentDatasetChanged, this, [this, coloringModeChanged](const QString& datasetName) {
+        coloringModeChanged();
     });
 
     renderModeChanged();
@@ -149,7 +186,7 @@ void ColoringAction::setDimensions(const std::uint32_t& numberOfDimensions, cons
 
 void ColoringAction::setDimensions(const std::vector<QString>& dimensionNames)
 {
-    setDimensions(dimensionNames.size(), dimensionNames);
+    setDimensions(static_cast<std::uint32_t>(dimensionNames.size()), dimensionNames);
 }
 
 ColoringAction::Widget::Widget(QWidget* parent, ColoringAction* coloringAction) :
@@ -168,7 +205,7 @@ ColoringAction::Widget::Widget(QWidget* parent, ColoringAction* coloringAction) 
     const auto coloringModeChanged = [this, coloringAction]() -> void {
         const auto coloringMode = static_cast<ScatterplotWidget::ColoringMode>(coloringAction->_colorByAction.getCurrentIndex());
 
-        //_colorByConstantColorAction.setVisible(coloringMode == ScatterplotWidget::ColoringMode::ConstantColor);
+        coloringAction->_constantColorAction.setVisible(coloringMode == ScatterplotWidget::ColoringMode::ConstantColor);
         coloringAction->_dimensionAction.setVisible(coloringMode == ScatterplotWidget::ColoringMode::Dimension);
         coloringAction->_colorDataAction.setVisible(coloringMode == ScatterplotWidget::ColoringMode::ColorData);
     };

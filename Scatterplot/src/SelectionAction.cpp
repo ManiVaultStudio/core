@@ -11,18 +11,18 @@ using namespace hdps::gui;
 SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
     _typeAction(this, "Type"),
-    _rectangleAction("Rectangle"),
-    _brushAction("Brush"),
-    _lassoAction("Lasso"),
-    _polygonAction("Polygon"),
+    _rectangleAction(this, "Rectangle"),
+    _brushAction(this, "Brush"),
+    _lassoAction(this, "Lasso"),
+    _polygonAction(this, "Polygon"),
     _typeActionGroup(this),
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
-    _modifierAddAction(this),
-    _modifierRemoveAction(""),
-    _clearSelectionAction("Select none"),
-    _selectAllAction("Select all"),
-    _invertSelectionAction("Invert selection"),
-    _notifyDuringSelectionAction("Notify during selection")
+    _modifierAddAction(this, ""),
+    _modifierRemoveAction(this, ""),
+    _clearSelectionAction(this, "Select none"),
+    _selectAllAction(this, "Select all"),
+    _invertSelectionAction(this, "Invert selection"),
+    _notifyDuringSelectionAction(this, "Notify during selection")
 {
     scatterplotPlugin->addAction(&_rectangleAction);
     scatterplotPlugin->addAction(&_brushAction);
@@ -184,6 +184,8 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     });
 
     updateRenderMode();
+
+    _scatterplotPlugin->installEventFilter(this);
 }
 
 QMenu* SelectionAction::getContextMenu()
@@ -222,6 +224,59 @@ QMenu* SelectionAction::getContextMenu()
     return menu;
 }
 
+bool SelectionAction::eventFilter(QObject* object, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::KeyPress:
+        {
+            const auto keyEvent = static_cast<QKeyEvent*>(event);
+
+            switch (keyEvent->key())
+            {
+                case Qt::Key_Shift:
+                    _modifierAddAction.setChecked(true);
+                    break;
+
+                case Qt::Key_Control:
+                    _modifierRemoveAction.setChecked(true);
+                    break;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        case QEvent::KeyRelease:
+        {
+            const auto keyEvent = static_cast<QKeyEvent*>(event);
+
+            switch (keyEvent->key())
+            {
+                case Qt::Key_Shift:
+                    _modifierAddAction.setChecked(false);
+                    break;
+
+                case Qt::Key_Control:
+                    _modifierRemoveAction.setChecked(false);
+                    break;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QObject::eventFilter(object, event);
+}
+
 SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionAction) :
     WidgetAction::Widget(parent, selectionAction),
     _layout()
@@ -229,10 +284,12 @@ SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionActio
     
     _layout.addWidget(selectionAction->_typeAction.createWidget(this));
     _layout.addWidget(selectionAction->_brushRadiusAction.createWidget(this));
-    _layout.addWidget(new ActionPushButton(&selectionAction->_clearSelectionAction));
-    _layout.addWidget(new ActionPushButton(&selectionAction->_selectAllAction));
-    _layout.addWidget(new ActionPushButton(&selectionAction->_invertSelectionAction));
-    _layout.addWidget(new ActionCheckBox(&selectionAction->_notifyDuringSelectionAction));
+    _layout.addWidget(selectionAction->_modifierAddAction.createWidget(this));
+    _layout.addWidget(selectionAction->_modifierRemoveAction.createWidget(this));
+    _layout.addWidget(selectionAction->_clearSelectionAction.createWidget(this));
+    _layout.addWidget(selectionAction->_selectAllAction.createWidget(this));
+    _layout.addWidget(selectionAction->_invertSelectionAction.createWidget(this));
+    _layout.addWidget(selectionAction->_notifyDuringSelectionAction.createWidget(this));
     /*
     auto popupLayout = new QGridLayout();
 

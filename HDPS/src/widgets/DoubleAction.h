@@ -3,7 +3,6 @@
 #include "WidgetAction.h"
 
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QDoubleSpinBox>
 #include <QSlider>
 

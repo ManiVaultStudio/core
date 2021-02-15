@@ -31,7 +31,7 @@ public:
     };
 
 public:
-    ColorAction(QObject* parent, const QString& title = "");
+    ColorAction(QObject* parent, const QString& title = "", const QColor& color = Qt::gray);
 
     QWidget* createWidget(QWidget* parent) override;
 

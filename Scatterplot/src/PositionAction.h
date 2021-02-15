@@ -2,6 +2,7 @@
 
 #include "PluginAction.h"
 
+#include "widgets/StandardAction.h"
 #include "widgets/OptionAction.h"
 #include "widgets/DoubleAction.h"
 
@@ -18,7 +19,7 @@ public:
         Widget(QWidget* parent, PositionAction* positionAction);
 
     private:
-        QHBoxLayout         _layout;
+        QHBoxLayout     _layout;
     };
 
 public:
@@ -37,7 +38,7 @@ public:
 protected:
     hdps::gui::OptionAction     _xDimensionAction;
     hdps::gui::OptionAction     _yDimensionAction;
-    QAction                     _resetAction;
+    hdps::gui::StandardAction   _resetAction;
 
     friend class Widget;
 };

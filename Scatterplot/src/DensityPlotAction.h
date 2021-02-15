@@ -2,8 +2,11 @@
 
 #include "PluginAction.h"
 
+#include "widgets/StandardAction.h"
 #include "widgets/OptionAction.h"
 #include "widgets/DoubleAction.h"
+
+#include <QLabel>
 
 class DensityPlotAction : public PluginAction
 {
@@ -31,7 +34,7 @@ public:
 
 protected:
     hdps::gui::DoubleAction     _sigmaAction;
-    QAction                     _resetAction;
+    hdps::gui::StandardAction   _resetAction;
 
     static constexpr double DEFAULT_SIGMA = 25.0;
 

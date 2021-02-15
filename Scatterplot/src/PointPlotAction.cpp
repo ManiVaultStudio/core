@@ -11,7 +11,7 @@ PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     _pointSizeAction(this, "Point size", 1.0, 50.0, DEFAULT_POINT_SIZE),
     _pointOpacityByAction(this, "Point opacity by"),
     _pointOpacityAction(this, "Point opacity", 0.0, 100.0, DEFAULT_POINT_OPACITY),
-    _resetAction("Reset")
+    _resetAction(this, "Reset")
 {
     _pointSizeByAction.setVisible(false);
     _pointOpacityByAction.setVisible(false);

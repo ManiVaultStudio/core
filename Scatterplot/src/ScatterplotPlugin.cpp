@@ -367,13 +367,13 @@ void ScatterplotPlugin::updateSelection()
             
             // Translate from derived data indices to subset indices
             std::vector<unsigned int> sourceIndices(_numPoints);
-            for (int i = 0; i < _numPoints; i++)
+            for (std::uint32_t i = 0; i < _numPoints; i++)
             {
                 const unsigned int& derivedIndex = points.indices[i];
                 sourceIndices[i] = sourceSet.indices[derivedIndex];
             }
             
-            for (int i = 0; i < _numPoints; i++)
+            for (std::uint32_t i = 0; i < _numPoints; i++)
             {
                 if (selectedPoints[sourceIndices[i]])
                     highlights[i] = 1;
@@ -397,7 +397,7 @@ void ScatterplotPlugin::updateSelection()
             for (const unsigned int& selectionIndex : selection.indices)
                 selectedPoints[selectionIndex] = true;
 
-            for (int i = 0; i < _numPoints; i++)
+            for (std::uint32_t  i = 0; i < _numPoints; i++)
             {
                 if (selectedPoints[points.indices[i]])
                     highlights[i] = 1;
@@ -420,7 +420,7 @@ QString ScatterplotPlugin::getCurrentDataset() const
     return _currentDataSet;
 }
 
-std::uint32_t ScatterplotPlugin::getNumPoints() const
+std::uint32_t ScatterplotPlugin::getNumberOfPoints() const
 {
     if (_currentDataSet.isEmpty())
         return 0;
@@ -438,7 +438,7 @@ std::uint32_t ScatterplotPlugin::getNumberOfSelectedPoints() const
     const Points& points    = _core->requestData<Points>(_currentDataSet);
     const Points& selection = static_cast<Points&>(points.getSelection());
 
-    return selection.indices.size();
+    return static_cast<std::uint32_t>(selection.indices.size());
 }
 
 void ScatterplotPlugin::setXDimension(const std::int32_t& dimensionIndex)
@@ -466,22 +466,22 @@ void ScatterplotPlugin::setColorDimension(const std::int32_t& dimensionIndex)
 
 bool ScatterplotPlugin::canSelect() const
 {
-    return !getCurrentDataset().isEmpty() && getNumPoints() >= 0;
+    return !getCurrentDataset().isEmpty() && getNumberOfPoints() >= 0;
 }
 
 bool ScatterplotPlugin::canSelectAll() const
 {
-    return getNumPoints() == -1 ? false : getNumberOfSelectedPoints() != getNumPoints();
+    return getNumberOfPoints() == -1 ? false : getNumberOfSelectedPoints() != getNumberOfPoints();
 }
 
 bool ScatterplotPlugin::canClearSelection() const
 {
-    return getNumPoints() == -1 ? false : getNumberOfSelectedPoints() >= 1;
+    return getNumberOfPoints() == -1 ? false : getNumberOfSelectedPoints() >= 1;
 }
 
 bool ScatterplotPlugin::canInvertSelection() const
 {
-    return getNumPoints() >= 0;
+    return getNumberOfPoints() >= 0;
 }
 
 void ScatterplotPlugin::selectAll()
@@ -539,7 +539,7 @@ void ScatterplotPlugin::invertSelection()
     selectionSetIndices.clear();
     selectionSetIndices.reserve(points.getNumPoints());
 
-    for (int p = 0; p < points.getNumPoints(); ++p) {
+    for (std::uint32_t p = 0; p < points.getNumPoints(); ++p) {
         const auto setIndex = points.isFull() ? p : pointsIndices[p];
 
         if (selectionIndicesSet.contains(setIndex))

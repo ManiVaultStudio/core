@@ -9,9 +9,9 @@ using namespace hdps::gui;
 
 RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
-    _scatterPlotAction("Scatter"),
-    _densityPlotAction("Density"),
-    _contourPlotAction("Contour"),
+    _scatterPlotAction(this, "Scatter"),
+    _densityPlotAction(this, "Density"),
+    _contourPlotAction(this, "Contour"),
     _actionGroup(this)
 {
     _scatterplotPlugin->addAction(&_scatterPlotAction);
@@ -42,19 +42,22 @@ RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
     _contourPlotAction.setIcon(fontAwesome.getIcon("mountain"));
     */
 
-    connect(&_scatterPlotAction, &QAction::triggered, this, [this]() {
-        getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
+    connect(&_scatterPlotAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT);
     });
 
-    connect(&_densityPlotAction, &QAction::triggered, this, [this]() {
-        getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
+    connect(&_densityPlotAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::DENSITY);
     });
 
-    connect(&_contourPlotAction, &QAction::triggered, this, [this]() {
-        getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
+    connect(&_contourPlotAction, &QAction::toggled, this, [this](bool toggled) {
+        if (toggled)
+            getScatterplotWidget()->setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE);
     });
 
-    const auto updateButtons = [this]() {
+    const auto updateButtons = [this]() -> void {
         const auto renderMode = getScatterplotWidget()->getRenderMode();
 
         _scatterPlotAction.setChecked(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
@@ -84,9 +87,9 @@ RenderModeAction::Widget::Widget(QWidget* parent, RenderModeAction* renderModeAc
     WidgetAction::Widget(parent, renderModeAction),
     _layout()
 {
-    _layout.addWidget(new ActionPushButton(&renderModeAction->_scatterPlotAction));
-    _layout.addWidget(new ActionPushButton(&renderModeAction->_densityPlotAction));
-    _layout.addWidget(new ActionPushButton(&renderModeAction->_contourPlotAction));
+    _layout.addWidget(renderModeAction->_scatterPlotAction.createWidget(this));
+    _layout.addWidget(renderModeAction->_densityPlotAction.createWidget(this));
+    _layout.addWidget(renderModeAction->_contourPlotAction.createWidget(this));
 
     setLayout(&_layout);
 }

@@ -9,7 +9,7 @@ PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
     _xDimensionAction(this, "X"),
     _yDimensionAction(this, "Y"),
-    _resetAction("Reset")
+    _resetAction(this, "Reset")
 {
     _xDimensionAction.setToolTip("X dimension");
     _yDimensionAction.setToolTip("Y dimension");
@@ -73,7 +73,7 @@ void PositionAction::setDimensions(const std::uint32_t& numberOfDimensions, cons
 
 void PositionAction::setDimensions(const std::vector<QString>& dimensionNames)
 {
-    setDimensions(dimensionNames.size(), dimensionNames);
+    setDimensions(static_cast<std::uint32_t>(dimensionNames.size()), dimensionNames);
 }
 
 std::int32_t PositionAction::getXDimension() const

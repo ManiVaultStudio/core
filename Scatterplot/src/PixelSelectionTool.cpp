@@ -155,7 +155,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             */
 
             //return true;
-            qDebug() << "ContextMenu";
+            qDebug() << "PixelSelectionTool::eventFilter";
             
             break;
         }

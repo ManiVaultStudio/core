@@ -9,8 +9,8 @@ using namespace hdps::gui;
 
 SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
-    _createSubsetAction("Create subset"),
-    _fromSourceDataAction("From source data")
+    _createSubsetAction(this, "Create subset"),
+    _fromSourceDataAction(this, "From source data")
 {
     _createSubsetAction.setToolTip("Create subset from selected data points");
     _fromSourceDataAction.setToolTip("Create subset from source data");
@@ -48,8 +48,8 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     WidgetAction::Widget(parent, subsetAction),
     _layout()
 {
-    _layout.addWidget(new ActionPushButton(&subsetAction->_createSubsetAction));
-    _layout.addWidget(new ActionCheckBox(&subsetAction->_fromSourceDataAction));
+    _layout.addWidget(subsetAction->_createSubsetAction.createWidget(this));
+    _layout.addWidget(subsetAction->_fromSourceDataAction.createWidget(this, StandardAction::WidgetType::CheckBox));
 
     setLayout(&_layout);
 }
