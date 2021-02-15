@@ -41,11 +41,13 @@ namespace hdps
 
             const std::vector<const DataSet*>& dataSets = _eventCore->requestDatasets();
 
+            // Go through all datasets in the systen and find datasets with the same source data
             for (const DataSet* dataSet : dataSets)
             {
                 DataSet& baseDataSet2 = DataSet::getSourceData(_eventCore->requestData(dataSet->getName()));
                 QString dataName2 = baseDataSet2.getDataName();
 
+                // Fire selection events for datasets with the same source data as the original event
                 if (dataName1 == dataName2)
                 {
                     DataEvent sourceDataEvent = dataEvent;
