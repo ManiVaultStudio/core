@@ -17,8 +17,9 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _polygonAction("Polygon"),
     _typeActionGroup(this),
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
-    _modifierAddAction(""),
-    _modifierRemoveAction(""),
+    _modifierAddAction("Add to selection"),
+    _modifierRemoveAction("Remove from selection"),
+    _modifierActionGroup(this),
     _clearSelectionAction("Select none"),
     _selectAllAction("Select all"),
     _invertSelectionAction("Invert selection"),
@@ -47,8 +48,6 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _brushAction.setShortcut(QKeySequence("B"));
     _lassoAction.setShortcut(QKeySequence("L"));
     _polygonAction.setShortcut(QKeySequence("P"));
-    _modifierAddAction.setShortcut(QKeySequence("Shift"));
-    _modifierRemoveAction.setShortcut(QKeySequence(Qt::Key_Control));
     _clearSelectionAction.setShortcut(QKeySequence("E"));
     _selectAllAction.setShortcut(QKeySequence("A"));
     _invertSelectionAction.setShortcut(QKeySequence("I"));
@@ -81,6 +80,9 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _typeActionGroup.addAction(&_polygonAction);
     
     _brushRadiusAction.setSuffix("px");
+
+    _modifierActionGroup.addAction(&_modifierAddAction);
+    _modifierActionGroup.addAction(&_modifierRemoveAction);
 
     connect(&_typeAction, &OptionAction::currentTextChanged, [this](const QString& currentText) {
         _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::getTypeEnum(currentText));
@@ -208,6 +210,11 @@ QMenu* SelectionAction::getContextMenu()
     menu->addSeparator();
 
     addActionToMenu(&_brushRadiusAction);
+
+    menu->addSeparator();
+
+    menu->addAction(&_modifierAddAction);
+    menu->addAction(&_modifierRemoveAction);
 
     menu->addSeparator();
 

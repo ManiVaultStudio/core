@@ -48,6 +48,7 @@ protected:
     hdps::gui::DoubleAction     _brushRadiusAction;
     QAction                     _modifierAddAction;
     QAction                     _modifierRemoveAction;
+    QActionGroup                _modifierActionGroup;
     QAction                     _clearSelectionAction;
     QAction                     _selectAllAction;
     QAction                     _invertSelectionAction;
