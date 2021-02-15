@@ -2,10 +2,7 @@
 
 #include "PluginAction.h"
 
-#include "widgets/StandardAction.h"
-
 #include <QHBoxLayout>
-#include <QToolButton>
 
 class SubsetAction : public PluginAction
 {
@@ -28,8 +25,8 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    hdps::gui::StandardAction   _createSubsetAction;
-    hdps::gui::StandardAction   _fromSourceDataAction;
+    QAction   _createSubsetAction;
+    QAction   _fromSourceDataAction;
 
     friend class Widget;
 };

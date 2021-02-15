@@ -2,7 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/StandardAction.h"
 #include "widgets/OptionAction.h"
 #include "widgets/DoubleAction.h"
 
@@ -38,7 +37,7 @@ public:
 protected:
     hdps::gui::OptionAction     _xDimensionAction;
     hdps::gui::OptionAction     _yDimensionAction;
-    hdps::gui::StandardAction   _resetAction;
+    QAction                     _resetAction;
 
     friend class Widget;
 };

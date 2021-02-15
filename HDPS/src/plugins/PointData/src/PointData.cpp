@@ -37,7 +37,7 @@ hdps::DataSet* PointData::createDataSet() const
 
 unsigned int PointData::getNumPoints() const
 {
-    return _vectorHolder.size() / _numDimensions;
+    return static_cast<unsigned int>(_vectorHolder.size() / _numDimensions);
 }
 
 unsigned int PointData::getNumDimensions() const
@@ -53,7 +53,7 @@ const std::vector<QString>& PointData::getDimensionNames() const
 void PointData::setData(const std::nullptr_t, const std::size_t numPoints, const std::size_t numDimensions)
 {
     _vectorHolder.resize(numPoints * numDimensions);
-    _numDimensions = numDimensions;
+    _numDimensions = static_cast<unsigned int>(numDimensions);
 }
 
 void PointData::setDimensionNames(const std::vector<QString>& dimNames)

@@ -3,7 +3,7 @@
 #include "WidgetAction.h"
 
 #include <QHBoxLayout>
-#include <QCheckBox>
+#include <QPushButton>
 
 class QWidget;
 
@@ -11,13 +11,13 @@ namespace hdps {
 
 namespace gui {
 
-class ActionCheckBox : public WidgetAction::Widget {
+class ActionPushButton : public WidgetAction::Widget {
 public:
-    ActionCheckBox(QWidget* parent, QAction* action);
+    ActionPushButton(QWidget* parent, QAction* action);
 
 private:
     QHBoxLayout     _layout;
-    QCheckBox       _checkBox;
+    QPushButton     _pushButton;
 };
 
 }

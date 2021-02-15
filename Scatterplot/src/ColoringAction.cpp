@@ -8,15 +8,15 @@ using namespace hdps::gui;
 ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
     _colorByAction(this, "Color by"),
-    _colorByConstantColorAction(this, "Color by constant color"),
-    _colorByDimensionAction(this, "Color by dimension"),
-    _colorByColorDataAction(this, "Color by color data"),
+    _colorByConstantColorAction("Color by constant color"),
+    _colorByDimensionAction("Color by dimension"),
+    _colorByColorDataAction("Color by color data"),
     _colorByActionGroup(this),
     _constantColorAction(this, "Constant color", qRgb(93, 93, 225)),
     _dimensionAction(this, "Color dimension"),
     _colorDataAction(this, "Color data"),
-    _removeColorDataAction(this, "Remove"),
-    _resetAction(this, "Reset")
+    _removeColorDataAction("Remove"),
+    _resetAction("Reset")
 {
     scatterplotPlugin->addAction(&_colorByAction);
     scatterplotPlugin->addAction(&_colorByDimensionAction);
@@ -195,10 +195,10 @@ ColoringAction::Widget::Widget(QWidget* parent, ColoringAction* coloringAction) 
     _colorByLabel("Color by:")
 {
     _layout.addWidget(&_colorByLabel);
-    _layout.addWidget(coloringAction->_colorByAction.createWidget(this));
-    _layout.addWidget(coloringAction->_constantColorAction.createWidget(this));
-    _layout.addWidget(coloringAction->_dimensionAction.createWidget(this));
-    _layout.addWidget(coloringAction->_colorDataAction.createWidget(this));
+    _layout.addWidget(new OptionAction::Widget(this, &coloringAction->_colorByAction));
+    _layout.addWidget(new ColorAction::Widget(this, &coloringAction->_constantColorAction));
+    _layout.addWidget(new OptionAction::Widget(this, &coloringAction->_dimensionAction));
+    _layout.addWidget(new StringAction::Widget(this, &coloringAction->_colorDataAction));
 
     setLayout(&_layout);
 

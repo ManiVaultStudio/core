@@ -2,8 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/StandardAction.h"
-
 #include <QActionGroup>
 #include <QHBoxLayout>
 #include <QToolBar>
@@ -32,10 +30,10 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    hdps::gui::StandardAction   _scatterPlotAction;
-    hdps::gui::StandardAction   _densityPlotAction;
-    hdps::gui::StandardAction   _contourPlotAction;
-    QActionGroup                _actionGroup;
+    QAction         _scatterPlotAction;
+    QAction         _densityPlotAction;
+    QAction         _contourPlotAction;
+    QActionGroup    _actionGroup;
 
     friend class Widget;
 };

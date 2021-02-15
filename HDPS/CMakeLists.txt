@@ -80,12 +80,13 @@ set( WIDGET_HEADERS
     src/widgets/ResponsiveSectionWidget.h
     src/widgets/ResponsiveToolBar.h
     src/widgets/WidgetAction.h
-    src/widgets/StandardAction.h
     src/widgets/DoubleAction.h
     src/widgets/OptionAction.h
     src/widgets/BooleanAction.h
     src/widgets/StringAction.h
     src/widgets/ColorAction.h
+    src/widgets/ActionPushButton.h
+    src/widgets/ActionCheckBox.h
 )
 
 set( WIDGET_SOURCES
@@ -102,12 +103,13 @@ set( WIDGET_SOURCES
 	src/widgets/ResponsiveSectionWidget.cpp
 	src/widgets/ResponsiveToolBar.cpp
 	src/widgets/WidgetAction.cpp
-	src/widgets/StandardAction.cpp
     src/widgets/DoubleAction.cpp
     src/widgets/OptionAction.cpp
     src/widgets/BooleanAction.cpp
     src/widgets/StringAction.cpp
     src/widgets/ColorAction.cpp
+    src/widgets/ActionPushButton.cpp
+    src/widgets/ActionCheckBox.cpp
 )
 
 set( RENDERER_HEADERS

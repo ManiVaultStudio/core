@@ -11,18 +11,18 @@ using namespace hdps::gui;
 SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
     _typeAction(this, "Type"),
-    _rectangleAction(this, "Rectangle"),
-    _brushAction(this, "Brush"),
-    _lassoAction(this, "Lasso"),
-    _polygonAction(this, "Polygon"),
+    _rectangleAction("Rectangle"),
+    _brushAction("Brush"),
+    _lassoAction("Lasso"),
+    _polygonAction("Polygon"),
     _typeActionGroup(this),
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
-    _modifierAddAction(this, ""),
-    _modifierRemoveAction(this, ""),
-    _clearSelectionAction(this, "Select none"),
-    _selectAllAction(this, "Select all"),
-    _invertSelectionAction(this, "Invert selection"),
-    _notifyDuringSelectionAction(this, "Notify during selection")
+    _modifierAddAction(""),
+    _modifierRemoveAction(""),
+    _clearSelectionAction("Select none"),
+    _selectAllAction("Select all"),
+    _invertSelectionAction("Invert selection"),
+    _notifyDuringSelectionAction("Notify during selection")
 {
     scatterplotPlugin->addAction(&_rectangleAction);
     scatterplotPlugin->addAction(&_brushAction);
@@ -282,14 +282,15 @@ SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionActio
     _layout()
 {
     
-    _layout.addWidget(selectionAction->_typeAction.createWidget(this));
-    _layout.addWidget(selectionAction->_brushRadiusAction.createWidget(this));
-    _layout.addWidget(selectionAction->_modifierAddAction.createWidget(this));
-    _layout.addWidget(selectionAction->_modifierRemoveAction.createWidget(this));
-    _layout.addWidget(selectionAction->_clearSelectionAction.createWidget(this));
-    _layout.addWidget(selectionAction->_selectAllAction.createWidget(this));
-    _layout.addWidget(selectionAction->_invertSelectionAction.createWidget(this));
-    _layout.addWidget(selectionAction->_notifyDuringSelectionAction.createWidget(this));
+    _layout.addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction));
+    _layout.addWidget(new DoubleAction::Widget(this, &selectionAction->_brushRadiusAction));
+    _layout.addWidget(new ActionPushButton(this, &selectionAction->_modifierAddAction));
+    _layout.addWidget(new ActionPushButton(this, &selectionAction->_modifierRemoveAction));
+    _layout.addWidget(new ActionPushButton(this, &selectionAction->_clearSelectionAction));
+    _layout.addWidget(new ActionPushButton(this, &selectionAction->_selectAllAction));
+    _layout.addWidget(new ActionPushButton(this, &selectionAction->_invertSelectionAction));
+    _layout.addWidget(new ActionCheckBox(this, &selectionAction->_notifyDuringSelectionAction));
+
     /*
     auto popupLayout = new QGridLayout();
 

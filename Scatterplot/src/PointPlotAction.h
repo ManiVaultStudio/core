@@ -2,7 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/StandardAction.h"
 #include "widgets/OptionAction.h"
 #include "widgets/DoubleAction.h"
 
@@ -38,7 +37,7 @@ protected:
     hdps::gui::DoubleAction     _pointSizeAction;
     hdps::gui::OptionAction     _pointOpacityByAction;
     hdps::gui::DoubleAction     _pointOpacityAction;
-    hdps::gui::StandardAction   _resetAction;
+    QAction                     _resetAction;
 
     static constexpr double DEFAULT_POINT_SIZE = 10.0;
     static constexpr double DEFAULT_POINT_OPACITY = 50.0;

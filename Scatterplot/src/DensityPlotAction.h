@@ -2,7 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/StandardAction.h"
 #include "widgets/OptionAction.h"
 #include "widgets/DoubleAction.h"
 
@@ -34,7 +33,7 @@ public:
 
 protected:
     hdps::gui::DoubleAction     _sigmaAction;
-    hdps::gui::StandardAction   _resetAction;
+    QAction                     _resetAction;
 
     static constexpr double DEFAULT_SIGMA = 25.0;
 

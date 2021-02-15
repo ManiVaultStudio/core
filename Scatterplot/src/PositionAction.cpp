@@ -9,7 +9,7 @@ PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
     _xDimensionAction(this, "X"),
     _yDimensionAction(this, "Y"),
-    _resetAction(this, "Reset")
+    _resetAction("Reset")
 {
     _xDimensionAction.setToolTip("X dimension");
     _yDimensionAction.setToolTip("Y dimension");
@@ -90,8 +90,8 @@ PositionAction::Widget::Widget(QWidget* parent, PositionAction* positionAction) 
     WidgetAction::Widget(parent, positionAction),
     _layout()
 {
-    _layout.addWidget(positionAction->_xDimensionAction.createWidget(this));
-    _layout.addWidget(positionAction->_yDimensionAction.createWidget(this));
+    _layout.addWidget(new OptionAction::Widget(this, &positionAction->_xDimensionAction));
+    _layout.addWidget(new OptionAction::Widget(this, &positionAction->_yDimensionAction));
 
     setLayout(&_layout);
 }

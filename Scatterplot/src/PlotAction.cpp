@@ -34,8 +34,8 @@ PlotAction::Widget::Widget(QWidget* parent, PlotAction* plotAction) :
     WidgetAction::Widget(parent, plotAction),
     _layout()
 {
-    _layout.addWidget(plotAction->_pointPlotAction.createWidget(this));
-    _layout.addWidget(plotAction->_densityPlotAction.createWidget(this));
+    _layout.addWidget(new PointPlotAction::Widget(this, &plotAction->_pointPlotAction));
+    _layout.addWidget(new DensityPlotAction::Widget(this, &plotAction->_densityPlotAction));
 
     setLayout(&_layout);
 }

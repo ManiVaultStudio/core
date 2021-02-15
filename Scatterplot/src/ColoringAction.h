@@ -2,7 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/StandardAction.h"
 #include "widgets/OptionAction.h"
 #include "widgets/ColorAction.h"
 #include "widgets/StringAction.h"
@@ -36,15 +35,15 @@ public:
 
 protected:
     hdps::gui::OptionAction     _colorByAction;
-    hdps::gui::StandardAction   _colorByConstantColorAction;
-    hdps::gui::StandardAction   _colorByDimensionAction;
-    hdps::gui::StandardAction   _colorByColorDataAction;
+    QAction                     _colorByConstantColorAction;
+    QAction                     _colorByDimensionAction;
+    QAction                     _colorByColorDataAction;
     QActionGroup                _colorByActionGroup;
     hdps::gui::ColorAction      _constantColorAction;
     hdps::gui::OptionAction     _dimensionAction;
     hdps::gui::StringAction     _colorDataAction;
-    hdps::gui::StandardAction   _removeColorDataAction;
-    hdps::gui::StandardAction   _resetAction;
+    QAction                     _removeColorDataAction;
+    QAction                     _resetAction;
 
     friend class Widget;
 };

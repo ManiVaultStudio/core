@@ -11,7 +11,7 @@ PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     _pointSizeAction(this, "Point size", 1.0, 50.0, DEFAULT_POINT_SIZE),
     _pointOpacityByAction(this, "Point opacity by"),
     _pointOpacityAction(this, "Point opacity", 0.0, 100.0, DEFAULT_POINT_OPACITY),
-    _resetAction(this, "Reset")
+    _resetAction("Reset")
 {
     _pointSizeByAction.setVisible(false);
     _pointOpacityByAction.setVisible(false);
@@ -109,12 +109,12 @@ PointPlotAction::Widget::Widget(QWidget* parent, PointPlotAction* pointPlotActio
     setToolTip("Point plot settings");
 
     _layout.addWidget(&_pointSizelabel);
-    _layout.addWidget(pointPlotAction->_pointSizeByAction.createWidget(this));
-    _layout.addWidget(pointPlotAction->_pointSizeAction.createWidget(this));
+    _layout.addWidget(new OptionAction::Widget(this, &pointPlotAction->_pointSizeByAction));
+    _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointSizeAction));
 
     _layout.addWidget(&_pointOpacitylabel);
-    _layout.addWidget(pointPlotAction->_pointOpacityByAction.createWidget(this));
-    _layout.addWidget(pointPlotAction->_pointOpacityAction.createWidget(this));
+    _layout.addWidget(new OptionAction::Widget(this, &pointPlotAction->_pointOpacityByAction));
+    _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction));
 
     setLayout(&_layout);
 }

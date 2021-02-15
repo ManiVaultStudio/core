@@ -9,9 +9,9 @@ using namespace hdps::gui;
 
 RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin),
-    _scatterPlotAction(this, "Scatter"),
-    _densityPlotAction(this, "Density"),
-    _contourPlotAction(this, "Contour"),
+    _scatterPlotAction("Scatter"),
+    _densityPlotAction("Density"),
+    _contourPlotAction("Contour"),
     _actionGroup(this)
 {
     _scatterplotPlugin->addAction(&_scatterPlotAction);
@@ -87,9 +87,9 @@ RenderModeAction::Widget::Widget(QWidget* parent, RenderModeAction* renderModeAc
     WidgetAction::Widget(parent, renderModeAction),
     _layout()
 {
-    _layout.addWidget(renderModeAction->_scatterPlotAction.createWidget(this));
-    _layout.addWidget(renderModeAction->_densityPlotAction.createWidget(this));
-    _layout.addWidget(renderModeAction->_contourPlotAction.createWidget(this));
+    _layout.addWidget(new ActionPushButton(this, &renderModeAction->_scatterPlotAction));
+    _layout.addWidget(new ActionPushButton(this, &renderModeAction->_densityPlotAction));
+    _layout.addWidget(new ActionPushButton(this, &renderModeAction->_contourPlotAction));
 
     setLayout(&_layout);
 }
