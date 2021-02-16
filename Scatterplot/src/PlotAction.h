@@ -12,7 +12,9 @@ public:
         Widget(QWidget* parent, PlotAction* plotAction);
 
     private:
-        QHBoxLayout     _layout;
+        QHBoxLayout                 _layout;
+        PointPlotAction::Widget     _pointPlotWidget;
+        DensityPlotAction::Widget   _densityPlotWidget;
     };
 
     class PopupWidget : public PluginAction::PopupWidget {

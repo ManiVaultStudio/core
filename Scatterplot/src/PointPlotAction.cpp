@@ -9,18 +9,10 @@ using namespace hdps::gui;
 
 PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Point"),
-    _pointSizeByAction(this, "Point size by"),
     _pointSizeAction(this, "Point size", 1.0, 50.0, DEFAULT_POINT_SIZE),
-    _pointOpacityByAction(this, "Point opacity by"),
     _pointOpacityAction(this, "Point opacity", 0.0, 100.0, DEFAULT_POINT_OPACITY),
     _resetAction("Reset")
 {
-    _pointSizeByAction.setVisible(false);
-    _pointOpacityByAction.setVisible(false);
-
-    _pointSizeByAction.setOptions(QStringList() << "Constant" << "Dimension");
-    _pointOpacityByAction.setOptions(QStringList() << "Constant" << "Dimension");
-
     _pointSizeAction.setSuffix("px");
     _pointOpacityAction.setSuffix("%");
     
@@ -111,11 +103,9 @@ PointPlotAction::Widget::Widget(QWidget* parent, PointPlotAction* pointPlotActio
     setToolTip("Point plot settings");
 
     _layout.addWidget(&_pointSizelabel);
-    _layout.addWidget(new OptionAction::Widget(this, &pointPlotAction->_pointSizeByAction));
     _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointSizeAction));
 
     _layout.addWidget(&_pointOpacitylabel);
-    _layout.addWidget(new OptionAction::Widget(this, &pointPlotAction->_pointOpacityByAction));
     _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction));
 
     setLayout(&_layout);
@@ -127,11 +117,9 @@ PointPlotAction::PopupWidget::PopupWidget(QWidget* parent, PointPlotAction* poin
     auto layout = new QGridLayout();
 
     layout->addWidget(new QLabel("Size:"), 0, 0);
-    layout->addWidget(new OptionAction::Widget(this, &pointPlotAction->_pointSizeByAction), 0, 1);
     layout->addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointSizeAction), 0, 2);
 
     layout->addWidget(new QLabel("Opacity:"), 1, 0);
-    layout->addWidget(new OptionAction::Widget(this, &pointPlotAction->_pointOpacityByAction), 1, 1);
     layout->addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction), 1, 2);
 
     //layout->addWidget(new ActionPushButton(this, &pointPlotAction->_resetAction), 2, 1, 1, 2);

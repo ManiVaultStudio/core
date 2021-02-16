@@ -53,9 +53,7 @@ public:
     void reset();
 
 protected:
-    hdps::gui::OptionAction     _pointSizeByAction;
     hdps::gui::DoubleAction     _pointSizeAction;
-    hdps::gui::OptionAction     _pointOpacityByAction;
     hdps::gui::DoubleAction     _pointOpacityAction;
     QAction                     _resetAction;
 

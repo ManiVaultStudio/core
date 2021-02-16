@@ -32,10 +32,25 @@ QMenu* PlotAction::getContextMenu()
 
 PlotAction::Widget::Widget(QWidget* parent, PlotAction* plotAction) :
     WidgetAction::Widget(parent, plotAction),
-    _layout()
+    _layout(),
+    _pointPlotWidget(this, &plotAction->_pointPlotAction),
+    _densityPlotWidget(this, &plotAction->_densityPlotAction)
 {
-    _layout.addWidget(new PointPlotAction::Widget(this, &plotAction->_pointPlotAction));
-    _layout.addWidget(new DensityPlotAction::Widget(this, &plotAction->_densityPlotAction));
+    _layout.addWidget(&_pointPlotWidget);
+    _layout.addWidget(&_densityPlotWidget);
+
+    const auto updateRenderMode = [this, plotAction]() -> void {
+        const auto renderMode = plotAction->getScatterplotWidget()->getRenderMode();
+
+        _pointPlotWidget.setVisible(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
+        _densityPlotWidget.setVisible(renderMode != ScatterplotWidget::RenderMode::SCATTERPLOT);
+    };
+
+    connect(plotAction->getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const ScatterplotWidget::RenderMode& renderMode) {
+        updateRenderMode();
+    });
+
+    updateRenderMode();
 
     setLayout(&_layout);
 }

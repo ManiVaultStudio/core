@@ -52,18 +52,22 @@ public:
 
     class StateWidget : public Widget {
     public:
-        StateWidget(QWidget* parent, WidgetAction* widgetAction) :
-            Widget(parent, widgetAction),
-            _layout()
-        {
-            _layout.addWidget(widgetAction->createWidget(this, WidgetType::Standard));
-            _layout.addWidget(widgetAction->createWidget(this, WidgetType::Compact));
+        StateWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& priority = 0, const WidgetType& state = WidgetType::Compact);
 
-            setLayout(&_layout);
-        }
+        WidgetType getState() const;
+        void setState(const WidgetType& state);
+
+        std::int32_t getPriority() const;
+        void setPriority(const std::int32_t& priority);
+
+        QSize getSizeHint(const WidgetType& state) const;
 
     private:
+        WidgetType      _state;
+        std::int32_t    _priority;
         QHBoxLayout     _layout;
+        QWidget*        _standardWidget;
+        QWidget*        _compactWidget;
     };
 
     explicit WidgetAction(QObject* parent);

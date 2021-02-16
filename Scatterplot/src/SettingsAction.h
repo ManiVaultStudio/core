@@ -14,15 +14,7 @@ class ScatterplotPlugin;
 class SettingsAction : public PluginAction
 {
 public:
-    class Widget : public PluginAction::Widget {
-    public:
-        Widget(QWidget* parent, SettingsAction* settingsAction);
-
-    private:
-        QHBoxLayout     _layout;
-    };
-
-    class Spacer : public QWidget {
+    class SpacerWidget : public QWidget {
     public:
         enum class Type {
             Divider,
@@ -30,10 +22,11 @@ public:
         };
 
     public:
-        Spacer(const Type& type = Type::Divider);
+        SpacerWidget(const Type& type = Type::Divider);
 
-        //static Type getType(const ResponsiveSectionWidget::State& stateBefore, const ResponsiveSectionWidget::State& stateAfter);
-        //static Type getType(const ResponsiveSectionWidget* sectionBefore, const ResponsiveSectionWidget* sectionAfter);
+        static Type getType(const WidgetAction::WidgetType& widgetTypeLeft, const WidgetAction::WidgetType& widgetTypeRight);
+        static Type getType(const WidgetAction::StateWidget* stateWidgetLeft, const WidgetAction::StateWidget* stateWidgetRight);
+
         void setType(const Type& type);
         static std::int32_t getWidth(const Type& type);
 
@@ -41,6 +34,23 @@ public:
         Type            _type;
         QHBoxLayout*    _layout;
         QFrame*         _verticalLine;
+    };
+
+    class Widget : public PluginAction::Widget {
+    public:
+        Widget(QWidget* parent, SettingsAction* settingsAction);
+
+        bool eventFilter(QObject* object, QEvent* event);
+
+    protected:
+        void addStateWidget(WidgetAction* widgetAction, const std::int32_t& priority = 0);
+
+    private:
+        QHBoxLayout             _layout;
+        QWidget                 _toolBarWidget;
+        QHBoxLayout             _toolBarLayout;
+        QVector<StateWidget*>   _stateWidgets;
+        QVector<SpacerWidget*>  _spacerWidgets;
     };
 
 public:

@@ -51,31 +51,121 @@ QMenu* SettingsAction::getContextMenu()
 
 SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) :
     WidgetAction::Widget(parent, settingsAction),
-    _layout()
+    _layout(),
+    _toolBarWidget(),
+    _toolBarLayout(),
+    _stateWidgets(),
+    _spacerWidgets()
 {
     setAutoFillBackground(true);
 
-    _layout.setSizeConstraint(QLayout::SetFixedSize);
+    _toolBarLayout.setMargin(0);
+    _toolBarLayout.setSpacing(0);
+    _toolBarLayout.setSizeConstraint(QLayout::SetFixedSize);
 
-    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_renderModeAction));
-    //_layout.addWidget(new Spacer());
-    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_plotAction));
-    //_layout.addWidget(new Spacer());
-    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_positionAction));
-    //_layout.addWidget(new Spacer());
-    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_coloringAction));
-    //_layout.addWidget(new Spacer());
-    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_subsetAction));
-    //_layout.addWidget(new Spacer());
-    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_selectionAction));
+    addStateWidget(&settingsAction->_renderModeAction, 4);
+    addStateWidget(&settingsAction->_plotAction, 7);
+    addStateWidget(&settingsAction->_positionAction, 10);
+    addStateWidget(&settingsAction->_coloringAction, 8);
+    addStateWidget(&settingsAction->_subsetAction, 3);
+    addStateWidget(&settingsAction->_selectionAction, 2);
+
+    _toolBarLayout.addStretch(1);
+
+    _toolBarWidget.setLayout(&_toolBarLayout);
+
+    _layout.addWidget(&_toolBarWidget);
     _layout.addStretch(1);
 
     setLayout(&_layout);
 
     _layout.setMargin(4);
+
+    this->installEventFilter(this);
 }
 
-SettingsAction::Spacer::Spacer(const Type& type /*= State::Divider*/) :
+bool SettingsAction::Widget::eventFilter(QObject* object, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Resize:
+        {
+            QMap<StateWidget*, WidgetType> states;
+
+            for (auto stateWidget : _stateWidgets)
+                states[stateWidget] = WidgetType::Compact;
+
+            const auto getWidth = [this, &states]() -> std::uint32_t {
+                std::uint32_t width = 2 * _layout.margin();
+
+                for (auto stateWidget : _stateWidgets)
+                    width += stateWidget->getSizeHint(states[stateWidget]).width();
+
+                for (auto spacerWidget : _spacerWidgets) {
+                    const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
+                    const auto stateWidgetLeft      = _stateWidgets[spacerWidgetIndex];
+                    const auto stateWidgetRight     = _stateWidgets[spacerWidgetIndex + 1];
+                    const auto spacerWidgetType     = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
+                    const auto spacerWidgetWidth    = SpacerWidget::getWidth(spacerWidgetType);
+
+                    width += spacerWidgetWidth;
+                }
+
+                return width;
+            };
+
+            auto prioritySortedStateWidgets = _stateWidgets;
+
+            std::sort(prioritySortedStateWidgets.begin(), prioritySortedStateWidgets.end(), [](StateWidget* stateWidgetA, StateWidget* stateWidgetB) {
+                return stateWidgetA->getPriority() > stateWidgetB->getPriority();
+            });
+
+            for (auto stateWidget : prioritySortedStateWidgets) {
+                auto cachedStates = states;
+
+                states[stateWidget] = WidgetType::Standard;
+
+                if (getWidth() > static_cast<std::uint32_t>(width())) {
+                    states = cachedStates;
+                    break;
+                }
+            }
+
+            for (auto stateWidget : _stateWidgets)
+                stateWidget->setState(states[stateWidget]);
+
+            for (auto spacerWidget : _spacerWidgets) {
+                const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
+                const auto stateWidgetLeft      = _stateWidgets[spacerWidgetIndex];
+                const auto stateWidgetRight     = _stateWidgets[spacerWidgetIndex + 1];
+                const auto spacerWidgetType     = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
+
+                spacerWidget->setType(spacerWidgetType);
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QObject::eventFilter(object, event);
+}
+
+void SettingsAction::Widget::addStateWidget(WidgetAction* widgetAction, const std::int32_t& priority /*= 0*/)
+{
+    _stateWidgets << new WidgetAction::StateWidget(this, widgetAction, priority);
+
+    if (_stateWidgets.count() >= 2) {
+        _spacerWidgets << new SpacerWidget();
+        _toolBarLayout.addWidget(_spacerWidgets.back());
+    }
+    
+    _toolBarLayout.addWidget(_stateWidgets.back());
+}
+
+SettingsAction::SpacerWidget::SpacerWidget(const Type& type /*= State::Divider*/) :
     QWidget(),
     _type(Type::Divider),
     _layout(new QHBoxLayout()),
@@ -92,19 +182,17 @@ SettingsAction::Spacer::Spacer(const Type& type /*= State::Divider*/) :
     setType(type);
 }
 
-/*
-ResponsiveToolBar::Spacer::Type ResponsiveToolBar::Spacer::getType(const ResponsiveSectionWidget::State& stateBefore, const ResponsiveSectionWidget::State& stateAfter)
+SettingsAction::SpacerWidget::Type SettingsAction::SpacerWidget::getType(const WidgetAction::WidgetType& widgetTypeLeft, const WidgetAction::WidgetType& widgetTypeRight)
 {
-    return stateBefore == ResponsiveSectionWidget::State::Collapsed && stateAfter == ResponsiveSectionWidget::State::Collapsed ? Spacer::Type::Spacer : Spacer::Type::Divider;
+    return widgetTypeLeft == WidgetAction::WidgetType::Compact && widgetTypeRight == WidgetAction::WidgetType::Compact ? Type::Spacer : Type::Divider;
 }
 
-ResponsiveToolBar::Spacer::Type ResponsiveToolBar::Spacer::getType(const ResponsiveSectionWidget* sectionBefore, const ResponsiveSectionWidget* sectionAfter)
+SettingsAction::SpacerWidget::Type SettingsAction::SpacerWidget::getType(const WidgetAction::StateWidget* stateWidgetLeft, const WidgetAction::StateWidget* stateWidgetRight)
 {
-    return getType(sectionBefore->getState(), sectionAfter->getState());
+    return getType(stateWidgetLeft->getState(), stateWidgetRight->getState());
 }
-*/
 
-void SettingsAction::Spacer::setType(const Type& type)
+void SettingsAction::SpacerWidget::setType(const Type& type)
 {
     _type = type;
 
@@ -114,12 +202,12 @@ void SettingsAction::Spacer::setType(const Type& type)
     _verticalLine->setVisible(_type == Type::Divider ? true : false);
 }
 
-std::int32_t SettingsAction::Spacer::getWidth(const Type& type)
+std::int32_t SettingsAction::SpacerWidget::getWidth(const Type& type)
 {
     switch (type)
     {
         case Type::Divider:
-            return 6;
+            return 20;
 
         case Type::Spacer:
             return 6;
