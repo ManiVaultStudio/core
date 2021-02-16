@@ -40,6 +40,8 @@ public:
     QString getCurrentText() const;
     void setCurrentText(const QString& currentText);
 
+    bool hasSelection() const;
+
 signals:
     void optionsChanged(const QStringList& options);
     void currentIndexChanged(const std::int32_t& currentIndex);

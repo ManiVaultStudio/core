@@ -37,7 +37,7 @@ public:
     /** The way that point colors are determined */
     enum class ColoringMode {
         ConstantColor,      /** Point color is a constant color */
-        Dimension,          /** Data dimension drives the color */
+        ColorDimension,          /** Data dimension drives the color */
         ColorData           /** Determined by external color dataset */
     };
 

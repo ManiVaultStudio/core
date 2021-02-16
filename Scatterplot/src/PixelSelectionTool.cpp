@@ -146,19 +146,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             return false;
 
         case QEvent::ContextMenu:
-        {
-            /*
-            if (_preventContextMenu) {
-                _preventContextMenu = false;
-                return true;
-            }
-            */
-
-            //return true;
-            qDebug() << "PixelSelectionTool::eventFilter";
-            
             break;
-        }
 
         case QEvent::Resize:
         {

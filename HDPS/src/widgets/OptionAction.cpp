@@ -79,6 +79,11 @@ void OptionAction::setCurrentText(const QString& currentText)
     setCurrentIndex(_options.indexOf(_currentText));
 }
 
+bool OptionAction::hasSelection() const
+{
+    return _currentIndex >= 0;
+}
+
 OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     WidgetAction::Widget(parent, optionAction),
     _layout(),

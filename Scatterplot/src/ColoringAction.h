@@ -2,23 +2,38 @@
 
 #include "PluginAction.h"
 
+#include "ConstantColorAction.h"
+#include "ColorDimensionAction.h"
+#include "ColorDataAction.h"
+
 #include "widgets/OptionAction.h"
-#include "widgets/ColorAction.h"
-#include "widgets/StringAction.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QStackedWidget>
 
 class ColoringAction : public PluginAction
 {
 public:
     class Widget : public PluginAction::Widget {
     public:
+        class StackedWidget : public QStackedWidget {
+        public:
+            QSize sizeHint() const override { return currentWidget()->sizeHint(); }
+            QSize minimumSizeHint() const override { return currentWidget()->minimumSizeHint(); }
+        };
+
+    public:
         Widget(QWidget* parent, ColoringAction* coloringAction);
 
     private:
-        QHBoxLayout     _layout;
-        QLabel          _colorByLabel;
+        QHBoxLayout                         _layout;
+        QLabel                              _colorByLabel;
+        hdps::gui::OptionAction::Widget     _colorByWidget;
+        StackedWidget                       _stackedWidget;
+        ConstantColorAction::Widget         _constantColorWidget;
+        ColorDimensionAction::Widget        _colorDimensionWidget;
+        ColorDataAction::Widget             _colorDataWidget;
     };
 
     class PopupWidget : public PluginAction::PopupWidget {
@@ -59,11 +74,9 @@ protected:
     QAction                     _colorByDimensionAction;
     QAction                     _colorByColorDataAction;
     QActionGroup                _colorByActionGroup;
-    hdps::gui::ColorAction      _constantColorAction;
-    hdps::gui::OptionAction     _dimensionAction;
-    hdps::gui::StringAction     _colorDataAction;
-    QAction                     _removeColorDataAction;
-    QAction                     _resetAction;
+    ConstantColorAction         _constantColorAction;
+    ColorDimensionAction        _colorDimensionAction;
+    ColorDataAction             _colorDataAction;
 
     friend class Widget;
 };

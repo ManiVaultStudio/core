@@ -2,6 +2,8 @@
 
 #include "ScatterplotPlugin.h"
 
+#include "util/Timer.h"
+
 using namespace hdps::gui;
 
 SettingsAction::SettingsAction(ScatterplotPlugin* scatterplotPlugin) :
@@ -90,6 +92,8 @@ bool SettingsAction::Widget::eventFilter(QObject* object, QEvent* event)
     {
         case QEvent::Resize:
         {
+            Timer timer("Handle resize event");
+
             QMap<StateWidget*, WidgetType> states;
 
             for (auto stateWidget : _stateWidgets)
@@ -207,7 +211,7 @@ std::int32_t SettingsAction::SpacerWidget::getWidth(const Type& type)
     switch (type)
     {
         case Type::Divider:
-            return 20;
+            return 14;
 
         case Type::Spacer:
             return 6;
