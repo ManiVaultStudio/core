@@ -28,13 +28,24 @@ public:
 public:
     SelectionAction(ScatterplotPlugin* scatterplotPlugin);
 
-    QWidget* createWidget(QWidget* parent) override {
-        return new Widget(parent, this);
-    }
+    QWidget* createWidget(QWidget* parent, const WidgetType& widgetType = WidgetType::Standard) override {
+        switch (widgetType)
+        {
+            case WidgetType::Standard:
+                return new Widget(parent, this);
 
-    QWidget* getPopupWidget(QWidget* parent) override {
-        return new PopupWidget(parent, this);
-    };
+            case WidgetType::Compact:
+                return new CompactWidget(parent, this);
+
+            case WidgetType::Popup:
+                return new PopupWidget(parent, this);
+
+            default:
+                break;
+        }
+
+        return nullptr;
+    }
 
     QMenu* getContextMenu();
 

@@ -53,7 +53,7 @@ WidgetAction::CompactWidget::CompactWidget(QWidget* parent, WidgetAction* widget
 {
     _popupPushButton.setIcon(widgetAction->icon());
     _popupPushButton.setToolTip(widgetAction->toolTip());
-    _popupPushButton.setWidget(widgetAction->getPopupWidget(this));
+    _popupPushButton.setWidget(widgetAction->createWidget(this, WidgetType::Popup));
 
     _layout.addWidget(&_popupPushButton);
 

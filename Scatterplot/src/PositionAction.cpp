@@ -39,11 +39,6 @@ PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     updateResetAction();
 }
 
-QWidget* PositionAction::createWidget(QWidget* parent)
-{
-    return new Widget(parent, this);
-}
-
 QMenu* PositionAction::getContextMenu()
 {
     auto menu = new QMenu("Position");

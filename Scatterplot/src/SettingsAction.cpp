@@ -57,17 +57,17 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
 
     _layout.setSizeConstraint(QLayout::SetFixedSize);
 
-    _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_renderModeAction));
+    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_renderModeAction));
     //_layout.addWidget(new Spacer());
-    _layout.addWidget(new PlotAction::Widget(this, &settingsAction->_plotAction));
+    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_plotAction));
     //_layout.addWidget(new Spacer());
-    _layout.addWidget(new PositionAction::Widget(this, &settingsAction->_positionAction));
+    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_positionAction));
     //_layout.addWidget(new Spacer());
-    _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_coloringAction));
+    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_coloringAction));
     //_layout.addWidget(new Spacer());
-    _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_subsetAction));
+    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_subsetAction));
     //_layout.addWidget(new Spacer());
-    _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_selectionAction));
+    _layout.addWidget(new WidgetAction::StateWidget(this, &settingsAction->_selectionAction));
     _layout.addStretch(1);
 
     setLayout(&_layout);

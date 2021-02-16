@@ -16,6 +16,13 @@ class WidgetAction : public QWidgetAction
     Q_OBJECT
 
 public:
+    enum class WidgetType {
+        Standard,
+        Compact,
+        Popup
+    };
+
+public:
     class Widget : public QWidget
     {
     public:
@@ -43,11 +50,46 @@ public:
         PopupPushButton     _popupPushButton;
     };
 
+    class StateWidget : public Widget {
+    public:
+        StateWidget(QWidget* parent, WidgetAction* widgetAction) :
+            Widget(parent, widgetAction),
+            _layout()
+        {
+            _layout.addWidget(widgetAction->createWidget(this, WidgetType::Standard));
+            _layout.addWidget(widgetAction->createWidget(this, WidgetType::Compact));
+
+            setLayout(&_layout);
+        }
+
+    private:
+        QHBoxLayout     _layout;
+    };
+
     explicit WidgetAction(QObject* parent);
 
-    virtual QWidget* getPopupWidget(QWidget* parent) {
-        return createWidget(parent);
-    };
+    QWidget* createWidget(QWidget* parent) override {
+        return new Widget(parent, this);
+    }
+
+    virtual QWidget* createWidget(QWidget* parent, const WidgetType& widgetType = WidgetType::Standard) {
+        switch (widgetType)
+        {
+            case WidgetType::Standard:
+                return new Widget(parent, this);
+
+            case WidgetType::Compact:
+                return new CompactWidget(parent, this);
+
+            case WidgetType::Popup:
+                return new PopupWidget(parent, this);
+
+            default:
+                break;
+        }
+
+        return nullptr;
+    }
 };
 
 }
