@@ -90,9 +90,17 @@ std::int32_t PositionAction::getYDimension() const
 
 PositionAction::Widget::Widget(QWidget* parent, PositionAction* positionAction) :
     WidgetAction::Widget(parent, positionAction),
-    _layout()
+    _layout(),
+    _xDimensionLabel(QString("%1:").arg(positionAction->_xDimensionAction.text())),
+    _yDimensionLabel(QString("%1:").arg(positionAction->_yDimensionAction.text()))
 {
+    _xDimensionLabel.setToolTip(positionAction->_xDimensionAction.toolTip());
+    _yDimensionLabel.setToolTip(positionAction->_yDimensionAction.toolTip());
+
+    _layout.addWidget(&_xDimensionLabel);
     _layout.addWidget(new OptionAction::Widget(this, &positionAction->_xDimensionAction));
+
+    _layout.addWidget(&_yDimensionLabel);
     _layout.addWidget(new OptionAction::Widget(this, &positionAction->_yDimensionAction));
 
     setLayout(&_layout);

@@ -31,22 +31,23 @@ public:
     QWidget* createWidget(QWidget* parent) override;
 
     QStringList getOptions() const;
+    bool hasOptions() const;
     void setOptions(const QStringList& options);
 
-    std::uint32_t getCurrentIndex() const;
-    void setCurrentIndex(const std::uint32_t& currentIndex);
+    std::int32_t getCurrentIndex() const;
+    void setCurrentIndex(const std::int32_t& currentIndex);
 
     QString getCurrentText() const;
     void setCurrentText(const QString& currentText);
 
 signals:
     void optionsChanged(const QStringList& options);
-    void currentIndexChanged(const std::uint32_t& currentIndex);
+    void currentIndexChanged(const std::int32_t& currentIndex);
     void currentTextChanged(const QString& currentText);
 
 protected:
     QStringList     _options;
-    std::uint32_t   _currentIndex;
+    std::int32_t    _currentIndex;
     QString         _currentText;
 };
 

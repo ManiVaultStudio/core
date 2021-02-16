@@ -9,7 +9,7 @@ namespace gui {
 OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent),
     _options(),
-    _currentIndex(0),
+    _currentIndex(-1),
     _currentText()
 {
     setText(title);
@@ -25,6 +25,11 @@ QStringList OptionAction::getOptions() const
     return _options;
 }
 
+bool OptionAction::hasOptions() const
+{
+    return !_options.isEmpty();
+}
+
 void OptionAction::setOptions(const QStringList& options)
 {
     if (options == _options)
@@ -37,14 +42,14 @@ void OptionAction::setOptions(const QStringList& options)
     setCurrentIndex(0);
 }
 
-std::uint32_t OptionAction::getCurrentIndex() const
+std::int32_t OptionAction::getCurrentIndex() const
 {
     return _currentIndex;
 }
 
-void OptionAction::setCurrentIndex(const std::uint32_t& currentIndex)
+void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
 {
-    if (currentIndex == _currentIndex || currentIndex >= static_cast<std::uint32_t>(_options.count()))
+    if (currentIndex == _currentIndex || currentIndex >= static_cast<std::int32_t>(_options.count()))
         return;
 
     _currentIndex = currentIndex;
@@ -84,10 +89,11 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
 
     setLayout(&_layout);
 
-    if (isChildOfMenu())
-        _comboBox.setFixedWidth(150);
+    const auto updateToolTip = [this, optionAction]() -> void {
+        _comboBox.setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
+    };
 
-    const auto populateComboBox = [this, optionAction]() -> void {
+    const auto populateComboBox = [this, optionAction, updateToolTip]() -> void {
         QSignalBlocker comboBoxSignalBlocker(&_comboBox);
 
         const auto options = optionAction->getOptions();
@@ -95,6 +101,8 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         _comboBox.clear();
         _comboBox.addItems(options);
         _comboBox.setEnabled(!options.isEmpty());
+
+        updateToolTip();
     };
 
     const auto connected = connect(optionAction, &OptionAction::optionsChanged, this, [this, populateComboBox](const QStringList& options) {
@@ -108,12 +116,13 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         _comboBox.setCurrentIndex(optionAction->getCurrentIndex());
     };
 
-    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, updateComboBoxSelection](const std::uint32_t& currentIndex) {
+    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, updateComboBoxSelection](const std::int32_t& currentIndex) {
         updateComboBoxSelection();
     });
 
-    connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection](const QString& currentText) {
+    connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection, updateToolTip](const QString& currentText) {
         updateComboBoxSelection();
+        updateToolTip();
     });
 
     connect(&_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
@@ -122,6 +131,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
 
     populateComboBox();
     updateComboBoxSelection();
+    updateToolTip();
 }
 
 }

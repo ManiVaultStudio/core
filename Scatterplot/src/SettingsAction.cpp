@@ -55,6 +55,8 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
 {
     setAutoFillBackground(true);
 
+    _layout.setSizeConstraint(QLayout::SetFixedSize);
+
     _layout.addWidget(new WidgetAction::CompactWidget(this, &settingsAction->_renderModeAction));
     //_layout.addWidget(new Spacer());
     _layout.addWidget(new PlotAction::Widget(this, &settingsAction->_plotAction));

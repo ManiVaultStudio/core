@@ -6,9 +6,7 @@
 #include "widgets/DoubleAction.h"
 
 #include <QHBoxLayout>
-#include <QGroupBox>
-#include <QToolBar>
-#include <QToolButton>
+#include <QLabel>
 
 class PositionAction : public PluginAction
 {
@@ -19,6 +17,8 @@ public:
 
     private:
         QHBoxLayout     _layout;
+        QLabel          _xDimensionLabel;
+        QLabel          _yDimensionLabel;
     };
 
     class PopupWidget : public PluginAction::PopupWidget {
