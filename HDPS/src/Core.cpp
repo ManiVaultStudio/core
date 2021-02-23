@@ -35,7 +35,7 @@ Core::~Core()
 void Core::init()
 {
     _pluginManager = std::make_unique<plugin::PluginManager>(*this);
-    _dataManager = std::make_unique<DataManager>();
+    _dataManager = std::make_unique<DataManager>(this);
 
     _pluginManager->loadPlugins();
 }
@@ -200,17 +200,38 @@ DataSet& Core::requestData(const QString name)
     }
 }
 
-const std::vector<const DataSet*> Core::requestDatasets()
+std::vector<QString> Core::requestAllDataNames()
 {
     const auto& datasetMap = _dataManager->allSets();
 
-    std::vector<const DataSet*> datasets(datasetMap.size());
+    std::vector<QString> datasetNames(datasetMap.size());
 
     int i = 0;
-    for (auto it = datasetMap.begin(); it != datasetMap.end(); ++it, i++) {
-        datasets[i] = it->second.get();
+    for (auto it = datasetMap.begin(); it != datasetMap.end(); ++it, i++)
+    {
+        datasetNames[i] = it->second.get()->getName();
     }
-    return datasets;
+    return datasetNames;
+}
+
+std::vector<QString> Core::requestAllDataNames(const std::vector<DataType> dataTypes)
+{
+    const auto& datasetMap = _dataManager->allSets();
+
+    std::vector<QString> datasetNames(datasetMap.size());
+
+    int i = 0;
+    for (auto it = datasetMap.begin(); it != datasetMap.end(); ++it, i++)
+    {
+        for (DataType dt : dataTypes)
+        {
+            if (it->second.get()->getDataType() == dt)
+            {
+                datasetNames[i] = it->second.get()->getName();
+            }
+        }
+    }
+    return datasetNames;
 }
 
 DataSet& Core::requestSelection(const QString name)
@@ -248,7 +269,7 @@ void Core::notifyDataAdded(const QString datasetName)
     dataEvent.dataType = dt;
     
     for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(dataEvent);
+        listener->onDataEvent(&dataEvent);
 }
 
 /**
@@ -264,7 +285,7 @@ void Core::notifyDataChanged(const QString datasetName)
     dataEvent.dataType = dt;
 
     for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(dataEvent);
+        listener->onDataEvent(&dataEvent);
 }
 
 /**
@@ -280,7 +301,7 @@ void Core::notifyDataRemoved(const QString datasetName)
     dataEvent.dataType = dt;
 
     for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(dataEvent);
+        listener->onDataEvent(&dataEvent);
 }
 
 /** Notify all data consumers that a selection has changed. */
@@ -293,7 +314,21 @@ void Core::notifySelectionChanged(const QString datasetName)
     dataEvent.dataType = dt;
 
     for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(dataEvent);
+        listener->onDataEvent(&dataEvent);
+}
+
+/** Notify all event listeners that a dataset has been renamed. */
+void Core::notifyDataRenamed(const QString oldName, const QString newName)
+{
+    DataType dt = requestData(newName).getDataType();
+
+    DataRenamedEvent dataEvent;
+    dataEvent.oldName = oldName;
+    dataEvent.dataSetName = newName;
+    dataEvent.dataType = dt;
+
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(&dataEvent);
 }
 
 gui::MainWindow& Core::gui() const {

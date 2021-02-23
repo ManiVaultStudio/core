@@ -47,7 +47,7 @@ public:
 
     void init() override;
 
-    void onDataEvent(DataEvent dataEvent);
+    void onDataEvent(DataEvent* dataEvent);
 
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;

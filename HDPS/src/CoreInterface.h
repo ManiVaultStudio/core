@@ -51,9 +51,14 @@ public:
     virtual DataSet& requestData(const QString name) = 0;
 
     /**
-     * Request a list of all datasets in the core
-     */
-    virtual const std::vector<const DataSet*> requestDatasets() = 0;
+    * Request all data set names.
+    */
+    virtual std::vector<QString> requestAllDataNames() = 0;
+
+    /**
+    * Request names for data sets of a specific type.
+    */
+    virtual std::vector<QString> requestAllDataNames(const std::vector<DataType> dataTypes) = 0;
 
     template <class SetType>
     SetType& requestData(const QString name)
@@ -68,6 +73,9 @@ public:
 
     /** Notify registered listeners that a selection has changed. */
     virtual void notifySelectionChanged(const QString datasetName) = 0;
+
+    /** Notify all event listeners that a dataset has been renamed. */
+    virtual void notifyDataRenamed(const QString oldName, const QString newName) = 0;
 
 protected:
 
