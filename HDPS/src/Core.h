@@ -86,9 +86,14 @@ public:
     DataSet& requestData(const QString datasetName) override;
 
     /**
-     * Request a list of all datasets in the core
-     */
-    const std::vector<const DataSet*> requestDatasets() override;
+    * Request all data set names.
+    */
+    virtual std::vector<QString> requestAllDataNames() override;
+
+    /**
+    * Request names for data sets of a specific type.
+    */
+    virtual std::vector<QString> requestAllDataNames(const std::vector<DataType> dataTypes) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString datasetName) override;
@@ -97,6 +102,9 @@ public:
 
     /** Notify all data consumers that a selection has changed. */
     void notifySelectionChanged(const QString datasetName) override;
+
+    /** Notify all event listeners that a dataset has been renamed. */
+    void notifyDataRenamed(const QString oldName, const QString newName) override;
 
     /**
     * Returns a reference to the main window for adding widgets to it.

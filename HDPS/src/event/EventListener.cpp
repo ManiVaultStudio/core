@@ -31,42 +31,42 @@ namespace hdps
         _dataEventHandlersByType[dataType] = callback;
     }
 
-    void EventListener::onDataEvent(DataEvent& dataEvent)
+    void EventListener::onDataEvent(DataEvent* dataEvent)
     {
-        if (dataEvent.getType() == EventType::SelectionChanged)
+        if (dataEvent->getType() == EventType::SelectionChanged)
         {
             // Fire events for linked datasets
-            DataSet& baseDataSet1 = DataSet::getSourceData(_eventCore->requestData(dataEvent.dataSetName));
+            DataSet& baseDataSet1 = DataSet::getSourceData(_eventCore->requestData(dataEvent->dataSetName));
             QString dataName1 = baseDataSet1.getDataName();
 
-            const std::vector<const DataSet*>& dataSets = _eventCore->requestDatasets();
+            const std::vector<QString>& dataSetNames = _eventCore->requestAllDataNames();
 
             // Go through all datasets in the systen and find datasets with the same source data
-            for (const DataSet* dataSet : dataSets)
+            for (const QString& dataSetName : dataSetNames)
             {
-                DataSet& baseDataSet2 = DataSet::getSourceData(_eventCore->requestData(dataSet->getName()));
+                DataSet& baseDataSet2 = DataSet::getSourceData(_eventCore->requestData(dataSetName));
                 QString dataName2 = baseDataSet2.getDataName();
 
                 // Fire selection events for datasets with the same source data as the original event
                 if (dataName1 == dataName2)
                 {
-                    DataEvent sourceDataEvent = dataEvent;
-                    sourceDataEvent.dataSetName = dataSet->getName();
+                    DataEvent sourceDataEvent = *dataEvent;
+                    sourceDataEvent.dataSetName = dataSetName;
                     
                     if (_dataEventHandlersByName.find(sourceDataEvent.dataSetName) != _dataEventHandlersByName.end())
-                        _dataEventHandlersByName[sourceDataEvent.dataSetName](sourceDataEvent);
+                        _dataEventHandlersByName[sourceDataEvent.dataSetName](&sourceDataEvent);
 
                     if (_dataEventHandlersByType.find(sourceDataEvent.dataType) != _dataEventHandlersByType.end())
-                        _dataEventHandlersByType[sourceDataEvent.dataType](sourceDataEvent);
+                        _dataEventHandlersByType[sourceDataEvent.dataType](&sourceDataEvent);
                 }
             }
             return;
         }
         
-        if (_dataEventHandlersByName.find(dataEvent.dataSetName) != _dataEventHandlersByName.end())
-            _dataEventHandlersByName[dataEvent.dataSetName](dataEvent);
+        if (_dataEventHandlersByName.find(dataEvent->dataSetName) != _dataEventHandlersByName.end())
+            _dataEventHandlersByName[dataEvent->dataSetName](dataEvent);
 
-        if (_dataEventHandlersByType.find(dataEvent.dataType) != _dataEventHandlersByType.end())
-            _dataEventHandlersByType[dataEvent.dataType](dataEvent);
+        if (_dataEventHandlersByType.find(dataEvent->dataType) != _dataEventHandlersByType.end())
+            _dataEventHandlersByType[dataEvent->dataType](dataEvent);
     }
 }

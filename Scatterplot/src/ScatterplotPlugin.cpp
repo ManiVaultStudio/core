@@ -89,22 +89,29 @@ void ScatterplotPlugin::init()
     updateWindowTitle();
 }
 
-void ScatterplotPlugin::onDataEvent(DataEvent dataEvent)
+void ScatterplotPlugin::onDataEvent(DataEvent* dataEvent)
 {
-    if (dataEvent.getType() == EventType::DataChanged)
+    if (dataEvent->getType() == EventType::DataChanged)
     {
-        if (dataEvent.dataSetName != _currentDataSet) {
+        if (dataEvent->dataSetName != _currentDataSet) {
             return;
         }
 
         updateData();
     }
-    if (dataEvent.getType() == EventType::SelectionChanged)
+    if (dataEvent->getType() == EventType::SelectionChanged)
     {
         if (_currentDataSet.isEmpty()) return;
         
-        if (_currentDataSet == dataEvent.dataSetName)
+        if (_currentDataSet == dataEvent->dataSetName)
             updateSelection();
+    }
+    if (dataEvent->getType() == EventType::DataRenamed)
+    {
+        DataRenamedEvent* renamedEvent = (DataRenamedEvent*) dataEvent;
+
+        if (renamedEvent->oldName == _currentDataSet)
+            onDataInput(renamedEvent->dataSetName);
     }
 }
 

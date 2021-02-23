@@ -12,7 +12,7 @@ namespace hdps
     {
     public:
         /** Event registration function signatures */
-        using DataEventHandler = std::function<void(DataEvent)>;
+        using DataEventHandler = std::function<void(DataEvent*)>;
 
         // Disabled until a better solution can be found as currently it requires
         // plugins to manually unregister if they are no longer interested in a dataset.
@@ -28,7 +28,7 @@ namespace hdps
         ~EventListener();
 
     private:
-        void onDataEvent(DataEvent& dataEvent);
+        void onDataEvent(DataEvent* dataEvent);
 
         std::unordered_map<QString, DataEventHandler> _dataEventHandlersByName;
         std::unordered_map<DataType, DataEventHandler> _dataEventHandlersByType;

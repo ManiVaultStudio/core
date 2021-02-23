@@ -12,7 +12,8 @@ namespace hdps
         DataAdded,
         DataChanged,
         DataRemoved,
-        SelectionChanged
+        SelectionChanged,
+        DataRenamed
     };
 
     class HdpsEvent
@@ -69,6 +70,14 @@ namespace hdps
     {
     public:
         SelectionChangedEvent() : DataEvent(EventType::SelectionChanged) {}
+    };
+
+    class DataRenamedEvent : public DataEvent
+    {
+    public:
+        DataRenamedEvent() : DataEvent(EventType::DataRenamed) {}
+
+        QString oldName;
     };
 }
 

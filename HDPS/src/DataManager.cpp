@@ -35,6 +35,15 @@ void DataManager::renameSet(QString oldName, QString requestedName)
     QString newName = getUniqueSetName(requestedName);
     dataSet->setName(newName);
 
+    // Update source set references
+    for (auto& kv : allSets())
+    {
+        if (kv.second->getSourceName() == oldName)
+        {
+            kv.second->_sourceSetName = newName;
+        }
+    }
+
     // Put the renamed set back into the map
     _dataSetMap.emplace(newName, std::unique_ptr<DataSet>(dataSet.release()));
 
@@ -42,6 +51,8 @@ void DataManager::renameSet(QString oldName, QString requestedName)
     _dataSetMap.erase(oldName);
 
     emit dataChanged();
+
+    _core->notifyDataRenamed(oldName, newName);
 }
 
 void DataManager::removeDataset(QString datasetName)
