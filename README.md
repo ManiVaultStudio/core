@@ -87,3 +87,6 @@ After first time compiling on macOS it might be necessary to manually moc the Ma
 
 `uic MainWindow.ui -o ui_MainWindow.h`  
 `mv ui_MainWindow.h ../Build/`
+
+HDPS might not run properly on integrated/old graphics hardware (in some cases the application crashes). The solution is to run on high-performance (recent) graphics hardware. The link below demontrates how to do this:
+https://pureinfotech.com/set-gpu-app-windows-10/
