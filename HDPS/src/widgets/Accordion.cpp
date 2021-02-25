@@ -158,7 +158,7 @@ bool Accordion::canExpandAll() const
     if (_sections.isEmpty())
         return false;
 
-    return getNumExpandedSections() < _sections.count();
+    return getNumExpandedSections() < static_cast<std::uint32_t>(_sections.count());
 }
 
 bool Accordion::canCollapseAll() const

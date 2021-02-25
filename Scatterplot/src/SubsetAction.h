@@ -12,7 +12,7 @@ public:
         Widget(QWidget* parent, SubsetAction* subsetAction);
 
     private:
-        QHBoxLayout         _layout;
+        QHBoxLayout     _layout;
     };
 
     class PopupWidget : public PluginAction::PopupWidget {
@@ -45,8 +45,8 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    QAction   _createSubsetAction;
-    QAction   _fromSourceDataAction;
+    hdps::gui::StandardAction   _createSubsetAction;
+    hdps::gui::StandardAction   _fromSourceDataAction;
 
     friend class Widget;
 };

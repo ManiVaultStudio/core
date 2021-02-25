@@ -51,10 +51,10 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    QAction         _scatterPlotAction;
-    QAction         _densityPlotAction;
-    QAction         _contourPlotAction;
-    QActionGroup    _actionGroup;
+    hdps::gui::StandardAction   _scatterPlotAction;
+    hdps::gui::StandardAction   _densityPlotAction;
+    hdps::gui::StandardAction   _contourPlotAction;
+    QActionGroup                _actionGroup;
 
     friend class Widget;
 };

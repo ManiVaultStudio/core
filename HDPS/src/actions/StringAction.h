@@ -11,6 +11,13 @@ namespace hdps {
 
 namespace gui {
 
+/**
+ * String widget action class
+ *
+ * Stores a string creates widgets to interact with it
+ *
+ * @author Thomas Kroes
+ */
 class StringAction : public WidgetAction
 {
     Q_OBJECT

@@ -11,6 +11,13 @@ namespace hdps {
 
 namespace gui {
 
+/**
+ * Option widget action class
+ *
+ * Stores options and creates widgets to interact with these
+ *
+ * @author Thomas Kroes
+ */
 class OptionAction : public WidgetAction
 {
     Q_OBJECT

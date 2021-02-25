@@ -8,9 +8,9 @@ using namespace hdps::gui;
 ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Coloring"),
     _colorByAction(this, "Color by"),
-    _colorByConstantColorAction("Color by constant color"),
-    _colorByDimensionAction("Color by dimension"),
-    _colorByColorDataAction("Color by color data"),
+    _colorByConstantColorAction(this, "Color by constant color"),
+    _colorByDimensionAction(this, "Color by dimension"),
+    _colorByColorDataAction(this, "Color by color data"),
     _colorByActionGroup(this),
     _constantColorAction(scatterplotPlugin),
     _colorDimensionAction(scatterplotPlugin),

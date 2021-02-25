@@ -1,7 +1,8 @@
 #pragma once
 
 #include "WidgetAction.h"
-#include "ColorPickerPushButton.h"
+
+#include "../widgets/ColorPickerPushButton.h"
 
 #include <QHBoxLayout>
 #include <QComboBox>
@@ -12,6 +13,13 @@ namespace hdps {
 
 namespace gui {
 
+/**
+ * Color widget action class
+ *
+ * Stores a color and creates widgets to interact with it
+ *
+ * @author Thomas Kroes
+ */
 class ColorAction : public WidgetAction
 {
     Q_OBJECT

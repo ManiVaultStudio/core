@@ -2,8 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/ColorAction.h"
-
 #include <QHBoxLayout>
 #include <QLabel>
 
@@ -43,8 +41,8 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    hdps::gui::ColorAction  _constantColorAction;
-    QAction                 _resetAction;
+    hdps::gui::ColorAction      _constantColorAction;
+    hdps::gui::StandardAction   _resetAction;
 
     static const QColor DEFAULT_COLOR;
 

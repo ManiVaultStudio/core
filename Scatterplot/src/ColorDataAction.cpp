@@ -8,7 +8,7 @@ using namespace hdps::gui;
 ColorDataAction::ColorDataAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Coloring"),
     _colorDataAction(this, "Color data"),
-    _resetAction("Reset")
+    _resetAction(this, "Reset")
 {
     scatterplotPlugin->addAction(&_colorDataAction);
     scatterplotPlugin->addAction(&_resetAction);

@@ -47,7 +47,7 @@ WidgetAction::PopupWidget::PopupWidget(QWidget* parent, QAction* action) :
 }
 
 WidgetAction::CompactWidget::CompactWidget(QWidget* parent, WidgetAction* widgetAction) :
-    WidgetAction::Widget(parent, widgetAction),
+    Widget(parent, widgetAction),
     _layout(),
     _popupPushButton()
 {

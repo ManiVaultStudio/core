@@ -13,6 +13,13 @@ namespace hdps {
 
 namespace gui {
 
+/**
+ * Double widget action class
+ *
+ * Stores a double and creates widgets to interact with it
+ *
+ * @author Thomas Kroes
+ */
 class DoubleAction : public WidgetAction
 {
     Q_OBJECT

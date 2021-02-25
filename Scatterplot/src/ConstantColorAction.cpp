@@ -10,7 +10,7 @@ const QColor ConstantColorAction::DEFAULT_COLOR = qRgb(93, 93, 225);
 ConstantColorAction::ConstantColorAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Coloring"),
     _constantColorAction(this, "Constant color", DEFAULT_COLOR),
-    _resetAction("Reset")
+    _resetAction(this, "Reset")
 {
     _constantColorAction.setToolTip("Constant color");
     _resetAction.setToolTip("Reset color settings");

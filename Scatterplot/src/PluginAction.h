@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/WidgetAction.h"
+#include "actions/Actions.h"
 
 class ScatterplotPlugin;
 class ScatterplotWidget;

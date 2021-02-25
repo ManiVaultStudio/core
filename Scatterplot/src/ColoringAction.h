@@ -6,8 +6,6 @@
 #include "ColorDimensionAction.h"
 #include "ColorDataAction.h"
 
-#include "widgets/OptionAction.h"
-
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QStackedWidget>
@@ -70,9 +68,9 @@ public:
 
 protected:
     hdps::gui::OptionAction     _colorByAction;
-    QAction                     _colorByConstantColorAction;
-    QAction                     _colorByDimensionAction;
-    QAction                     _colorByColorDataAction;
+    hdps::gui::StandardAction   _colorByConstantColorAction;
+    hdps::gui::StandardAction   _colorByDimensionAction;
+    hdps::gui::StandardAction   _colorByColorDataAction;
     QActionGroup                _colorByActionGroup;
     ConstantColorAction         _constantColorAction;
     ColorDimensionAction        _colorDimensionAction;

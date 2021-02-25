@@ -2,10 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/OptionAction.h"
-#include "widgets/ColorAction.h"
-#include "widgets/StringAction.h"
-
 #include <QHBoxLayout>
 #include <QLabel>
 
@@ -47,7 +43,7 @@ public:
 
 protected:
     hdps::gui::StringAction     _colorDataAction;
-    QAction                     _resetAction;
+    hdps::gui::StandardAction   _resetAction;
 
     friend class Widget;
 };

@@ -2,10 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/OptionAction.h"
-#include "widgets/ColorAction.h"
-#include "widgets/StringAction.h"
-
 #include <QHBoxLayout>
 #include <QLabel>
 

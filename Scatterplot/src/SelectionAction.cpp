@@ -3,27 +3,24 @@
 
 #include "ScatterplotPlugin.h"
 
-#include "widgets/ActionPushButton.h"
-#include "widgets/ActionCheckBox.h"
-
 using namespace hdps::gui;
 
 SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Selection"),
     _typeAction(this, "Type"),
-    _rectangleAction("Rectangle"),
-    _brushAction("Brush"),
-    _lassoAction("Lasso"),
-    _polygonAction("Polygon"),
+    _rectangleAction(this, "Rectangle"),
+    _brushAction(this, "Brush"),
+    _lassoAction(this, "Lasso"),
+    _polygonAction(this, "Polygon"),
     _typeActionGroup(this),
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
-    _modifierAddAction("Add to selection"),
-    _modifierRemoveAction("Remove from selection"),
+    _modifierAddAction(this, "Add to selection"),
+    _modifierRemoveAction(this, "Remove from selection"),
     _modifierActionGroup(this),
-    _clearSelectionAction("Select none"),
-    _selectAllAction("Select all"),
-    _invertSelectionAction("Invert selection"),
-    _notifyDuringSelectionAction("Notify during selection")
+    _clearSelectionAction(this, "Select none"),
+    _selectAllAction(this, "Select all"),
+    _invertSelectionAction(this, "Invert selection"),
+    _notifyDuringSelectionAction(this, "Notify during selection")
 {
     scatterplotPlugin->addAction(&_rectangleAction);
     scatterplotPlugin->addAction(&_brushAction);
@@ -293,12 +290,12 @@ SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionActio
     
     _layout.addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction));
     _layout.addWidget(new DoubleAction::Widget(this, &selectionAction->_brushRadiusAction));
-    _layout.addWidget(new ActionPushButton(this, &selectionAction->_modifierAddAction));
-    _layout.addWidget(new ActionPushButton(this, &selectionAction->_modifierRemoveAction));
-    _layout.addWidget(new ActionPushButton(this, &selectionAction->_clearSelectionAction));
-    _layout.addWidget(new ActionPushButton(this, &selectionAction->_selectAllAction));
-    _layout.addWidget(new ActionPushButton(this, &selectionAction->_invertSelectionAction));
-    _layout.addWidget(new ActionCheckBox(this, &selectionAction->_notifyDuringSelectionAction));
+    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction));
+    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction));
+    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_clearSelectionAction));
+    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_selectAllAction));
+    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_invertSelectionAction));
+    _layout.addWidget(new StandardAction::CheckBox(this, &selectionAction->_notifyDuringSelectionAction));
 
     setLayout(&_layout);
 }
@@ -314,8 +311,8 @@ SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* sele
         layout->setMargin(0);
 
         layout->addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction));
-        layout->addWidget(new ActionPushButton(this, &selectionAction->_modifierAddAction));
-        layout->addWidget(new ActionPushButton(this, &selectionAction->_modifierRemoveAction));
+        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction));
+        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction));
 
         auto widget = new QWidget();
 
@@ -329,9 +326,9 @@ SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* sele
 
         layout->setMargin(0);
 
-        layout->addWidget(new ActionPushButton(this, &selectionAction->_clearSelectionAction));
-        layout->addWidget(new ActionPushButton(this, &selectionAction->_selectAllAction));
-        layout->addWidget(new ActionPushButton(this, &selectionAction->_invertSelectionAction));
+        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_clearSelectionAction));
+        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_selectAllAction));
+        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_invertSelectionAction));
         layout->addStretch(1);
 
         auto widget = new QWidget();
@@ -349,7 +346,7 @@ SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* sele
 
     layout->addWidget(getSelectWidget(), 2, 1);
 
-    layout->addWidget(new ActionCheckBox(this, &selectionAction->_notifyDuringSelectionAction), 3, 1);
+    layout->addWidget(new StandardAction::CheckBox(this, &selectionAction->_notifyDuringSelectionAction), 3, 1);
 
     setLayout(layout);
 }

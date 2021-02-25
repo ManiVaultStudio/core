@@ -3,14 +3,12 @@
 
 #include "ScatterplotWidget.h"
 
-#include "widgets/ActionPushButton.h"
-
 using namespace hdps::gui;
 
 DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Density"),
     _sigmaAction(this, "Sigma", 1.0, 50.0, DEFAULT_SIGMA),
-    _resetAction("Reset")
+    _resetAction(this, "Reset")
 {
     setToolTip("Density plot settings");
 
@@ -101,7 +99,7 @@ DensityPlotAction::PopupWidget::PopupWidget(QWidget* parent, DensityPlotAction* 
     layout->addWidget(new QLabel("Sigma:"), 0, 0);
     layout->addWidget(new DoubleAction::Widget(this, &densityPlotAction->_sigmaAction), 0, 1);
 
-    //layout->addWidget(new ActionPushButton(this, &densityPlotAction->_resetAction), 1, 1, 1, 2);
+    layout->addWidget(new StandardAction::PushButton(this, &densityPlotAction->_resetAction), 1, 1, 1, 2);
 
     setLayout(layout);
 }

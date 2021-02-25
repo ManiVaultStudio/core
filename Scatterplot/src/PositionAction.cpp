@@ -3,15 +3,13 @@
 
 #include "ScatterplotPlugin.h"
 
-#include "widgets/ActionPushButton.h"
-
 using namespace hdps::gui;
 
 PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Position"),
     _xDimensionAction(this, "X"),
     _yDimensionAction(this, "Y"),
-    _resetAction("Reset")
+    _resetAction(this, "Reset")
 {
     _xDimensionAction.setToolTip("X dimension");
     _yDimensionAction.setToolTip("Y dimension");
@@ -112,7 +110,7 @@ PositionAction::PopupWidget::PopupWidget(QWidget* parent, PositionAction* positi
     layout->addWidget(new QLabel("Y-dimension:"), 1, 0);
     layout->addWidget(new OptionAction::Widget(this, &positionAction->_yDimensionAction), 1, 1);
     
-    layout->addWidget(new ActionPushButton(this, &positionAction->_resetAction), 2, 1);
+    layout->addWidget(new StandardAction::PushButton(this, &positionAction->_resetAction), 2, 1);
 
     setLayout(layout);
 }

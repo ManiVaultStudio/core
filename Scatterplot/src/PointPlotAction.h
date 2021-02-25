@@ -2,8 +2,8 @@
 
 #include "PluginAction.h"
 
-#include "widgets/OptionAction.h"
-#include "widgets/DoubleAction.h"
+#include "actions/OptionAction.h"
+#include "actions/DoubleAction.h"
 
 #include <QLabel>
 
@@ -55,7 +55,7 @@ public:
 protected:
     hdps::gui::DoubleAction     _pointSizeAction;
     hdps::gui::DoubleAction     _pointOpacityAction;
-    QAction                     _resetAction;
+    hdps::gui::StandardAction   _resetAction;
 
     static constexpr double DEFAULT_POINT_SIZE = 10.0;
     static constexpr double DEFAULT_POINT_OPACITY = 50.0;

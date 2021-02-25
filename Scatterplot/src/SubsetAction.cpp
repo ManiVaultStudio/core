@@ -2,15 +2,12 @@
 
 #include "ScatterplotPlugin.h"
 
-#include "widgets/ActionPushButton.h"
-#include "widgets/ActionCheckBox.h"
-
 using namespace hdps::gui;
 
 SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Subset"),
-    _createSubsetAction("Create subset"),
-    _fromSourceDataAction("From source data")
+    _createSubsetAction(this, "Create subset"),
+    _fromSourceDataAction(this, "From source data")
 {
     _createSubsetAction.setToolTip("Create subset from selected data points");
     _fromSourceDataAction.setToolTip("Create subset from source data");
@@ -48,8 +45,8 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     WidgetAction::Widget(parent, subsetAction),
     _layout()
 {
-    _layout.addWidget(new ActionPushButton(this, &subsetAction->_createSubsetAction));
-    _layout.addWidget(new ActionCheckBox(this, &subsetAction->_fromSourceDataAction));
+    _layout.addWidget(new StandardAction::PushButton(this, &subsetAction->_createSubsetAction));
+    _layout.addWidget(new StandardAction::CheckBox(this, &subsetAction->_fromSourceDataAction));
 
     setLayout(&_layout);
 }

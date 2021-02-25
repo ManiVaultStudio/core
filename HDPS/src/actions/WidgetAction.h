@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PopupPushButton.h"
+#include "../widgets/PopupPushButton.h"
 
 #include <QWidgetAction>
 #include <QVBoxLayout>
@@ -11,6 +11,13 @@ namespace hdps {
 
 namespace gui {
 
+/**
+ * Widget action class
+ *
+ * This widget action class creates widgets for user defined actions
+ * 
+ * @author Thomas Kroes
+ */
 class WidgetAction : public QWidgetAction
 {
     Q_OBJECT
@@ -46,8 +53,8 @@ public:
         CompactWidget(QWidget* parent, WidgetAction* widgetAction);
 
     private:
-        QHBoxLayout         _layout;
-        PopupPushButton     _popupPushButton;
+        QHBoxLayout             _layout;
+        gui::PopupPushButton    _popupPushButton;
     };
 
     class StateWidget : public Widget {

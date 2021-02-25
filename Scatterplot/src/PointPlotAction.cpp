@@ -3,15 +3,13 @@
 
 #include "ScatterplotWidget.h"
 
-#include "widgets/ActionPushButton.h"
-
 using namespace hdps::gui;
 
 PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Point"),
     _pointSizeAction(this, "Point size", 1.0, 50.0, DEFAULT_POINT_SIZE),
     _pointOpacityAction(this, "Point opacity", 0.0, 100.0, DEFAULT_POINT_OPACITY),
-    _resetAction("Reset")
+    _resetAction(this, "Reset")
 {
     _pointSizeAction.setSuffix("px");
     _pointOpacityAction.setSuffix("%");
@@ -122,7 +120,7 @@ PointPlotAction::PopupWidget::PopupWidget(QWidget* parent, PointPlotAction* poin
     layout->addWidget(new QLabel("Opacity:"), 1, 0);
     layout->addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction), 1, 2);
 
-    //layout->addWidget(new ActionPushButton(this, &pointPlotAction->_resetAction), 2, 1, 1, 2);
+    layout->addWidget(new StandardAction::PushButton(this, &pointPlotAction->_resetAction), 2, 1, 1, 2);
 
     setLayout(layout);
 }

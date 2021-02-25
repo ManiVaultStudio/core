@@ -2,9 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "widgets/OptionAction.h"
-#include "widgets/DoubleAction.h"
-
 #include <QHBoxLayout>
 #include <QLabel>
 
@@ -59,7 +56,7 @@ public:
 protected:
     hdps::gui::OptionAction     _xDimensionAction;
     hdps::gui::OptionAction     _yDimensionAction;
-    QAction                     _resetAction;
+    hdps::gui::StandardAction   _resetAction;
 
     friend class Widget;
 };

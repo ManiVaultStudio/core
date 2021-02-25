@@ -11,6 +11,13 @@ namespace hdps {
 
 namespace gui {
 
+/**
+ * Boolean widget action class
+ *
+ * Stores a boolean and creates widgets to interact with it
+ *
+ * @author Thomas Kroes
+ */
 class BooleanAction : public WidgetAction
 {
     Q_OBJECT
