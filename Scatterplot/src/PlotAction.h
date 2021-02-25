@@ -20,6 +20,10 @@ public:
     class PopupWidget : public PluginAction::PopupWidget {
     public:
         PopupWidget(QWidget* parent, PlotAction* plotAction);
+
+    private:
+        PointPlotAction::PopupWidget    _pointPlotWidget;
+        DensityPlotAction::PopupWidget  _densityPlotWidget;
     };
 
 public:

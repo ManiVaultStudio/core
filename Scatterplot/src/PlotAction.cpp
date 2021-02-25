@@ -56,12 +56,27 @@ PlotAction::Widget::Widget(QWidget* parent, PlotAction* plotAction) :
 }
 
 PlotAction::PopupWidget::PopupWidget(QWidget* parent, PlotAction* plotAction) :
-    WidgetAction::PopupWidget(parent, plotAction)
+    WidgetAction::PopupWidget(parent, plotAction),
+    _pointPlotWidget(this, &plotAction->_pointPlotAction),
+    _densityPlotWidget(this, &plotAction->_densityPlotAction)
 {
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(new PointPlotAction::PopupWidget(this, &plotAction->_pointPlotAction));
-    layout->addWidget(new DensityPlotAction::PopupWidget(this, &plotAction->_densityPlotAction));
+    layout->addWidget(&_pointPlotWidget);
+    layout->addWidget(&_densityPlotWidget);
+
+    const auto updateRenderMode = [this, plotAction]() -> void {
+        const auto renderMode = plotAction->getScatterplotWidget()->getRenderMode();
+
+        _pointPlotWidget.setVisible(renderMode == ScatterplotWidget::RenderMode::SCATTERPLOT);
+        _densityPlotWidget.setVisible(renderMode != ScatterplotWidget::RenderMode::SCATTERPLOT);
+    };
+
+    connect(plotAction->getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const ScatterplotWidget::RenderMode& renderMode) {
+        updateRenderMode();
+    });
+
+    updateRenderMode();
 
     setLayout(layout);
 }

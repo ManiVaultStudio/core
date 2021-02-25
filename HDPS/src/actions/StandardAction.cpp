@@ -24,6 +24,7 @@ StandardAction::PushButton::PushButton(QWidget* parent, QAction* action) :
     });
 
     const auto updateUI = [this, action]() -> void {
+        setEnabled(action->isEnabled());
         setText(action->text());
         setIcon(action->icon().isNull() ? QIcon() : action->icon());
         setCheckable(action->isCheckable());
@@ -47,6 +48,7 @@ StandardAction::CheckBox::CheckBox(QWidget* parent, QAction* action) :
     });
 
     const auto updateUI = [this, action]() -> void {
+        setEnabled(action->isEnabled());
         setText(action->text());
         setToolTip(action->toolTip());
         setChecked(action->isChecked());
