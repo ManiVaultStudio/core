@@ -3,3 +3,4 @@ build/
 *.dir
 Doxygen/
 .idea
+.vscode
