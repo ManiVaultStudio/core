@@ -357,5 +357,5 @@ add_subdirectory(external/advanced_docking)
 # Copy ADS library after the HDPS public project has been built
 add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	"${CMAKE_BINARY_DIR}/x64/bin/$<CONFIGURATION>/qtadvanceddocking.dll"
-	"${INSTALL_DIR}/$<CONFIGURATION>/qtadvanceddocking.dll")
+	"${CMAKE_BINARY_DIR}/x64/bin/$<CONFIGURATION>/${CMAKE_SHARED_MODULE_PREFIX}qtadvanceddocking${CMAKE_SHARED_MODULE_SUFFIX}"
+	"${INSTALL_DIR}/$<CONFIGURATION>/${CMAKE_SHARED_MODULE_PREFIX}qtadvanceddocking${CMAKE_SHARED_MODULE_SUFFIX}")
