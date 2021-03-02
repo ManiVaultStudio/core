@@ -1,12 +1,15 @@
 #include "DoubleAction.h"
 
+#include "../Application.h"
+
 namespace hdps {
 
 namespace gui {
 
-DoubleAction::DoubleAction(QObject * parent, const QString& title, const double& minimum /*= DEFAULT_MIN_VALUE*/, const double& maximum /*= DEFAULT_MAX_VALUE*/, const double& value /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DEFAULT_DECIMALS*/) :
+DoubleAction::DoubleAction(QObject * parent, const QString& title, const double& minimum /*= MIN_VALUE*/, const double& maximum /*= MAX_VALUE*/, const double& value /*= VALUE*/, const double& defaultValue /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DECIMALS*/) :
     WidgetAction(parent),
     _value(),
+    _defaultValue(),
     _minimum(std::numeric_limits<double>::max()),
     _maximum(std::numeric_limits<double>::min()),
     _suffix(),
@@ -17,6 +20,7 @@ DoubleAction::DoubleAction(QObject * parent, const QString& title, const double&
     setMinimum(minimum);
     setMaximum(maximum);
     setValue(value);
+    setDefaultValue(defaultValue);
     setDecimals(decimals);
 }
 
@@ -38,6 +42,26 @@ void DoubleAction::setValue(const double& value)
     _value = std::max(_minimum, std::min(value, _maximum));
 
     emit valueChanged(_value);
+}
+
+double DoubleAction::getDefaultValue() const
+{
+    return _defaultValue;
+}
+
+void DoubleAction::setDefaultValue(const double& defaultValue)
+{
+    if (defaultValue == _defaultValue)
+        return;
+
+    _defaultValue = std::max(_minimum, std::min(defaultValue, _maximum));
+
+    emit defaultValueChanged(_defaultValue);
+}
+
+void DoubleAction::reset()
+{
+    setValue(_defaultValue);
 }
 
 float DoubleAction::getMinimum() const
@@ -91,12 +115,12 @@ void DoubleAction::setSuffix(const QString& suffix)
     emit suffixChanged(_suffix);
 }
 
-std::int32_t DoubleAction::getDecimals() const
+std::uint32_t DoubleAction::getDecimals() const
 {
     return _decimals;
 }
 
-void DoubleAction::setDecimals(const std::int32_t& decimals)
+void DoubleAction::setDecimals(const std::uint32_t& decimals)
 {
     if (decimals == _decimals)
         return;
@@ -119,117 +143,149 @@ void DoubleAction::setUpdateDuringDrag(const bool& updateDuringDrag)
     _updateDuringDrag = updateDuringDrag;
 }
 
-DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction) :
+DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const Configuration& configuration /*= Configuration::All*/) :
     WidgetAction::Widget(parent, doubleAction),
     _layout(),
-    _spinBox(),
-    //_resetPushButton("R"),
-    _slider(Qt::Horizontal)
+    _valueDoubleSpinBox(),
+    _valueSlider(Qt::Horizontal),
+    _resetPushButton("")
 {
     setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
 
-    _spinBox.setFixedWidth(60);
+    _valueDoubleSpinBox.setFixedWidth(60);
+    _resetPushButton.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
 
     _layout.setMargin(0);
-    _layout.addWidget(&_spinBox);
-    //_layout.addWidget(&_resetPushButton);
-    _layout.addWidget(&_slider);
+
+    if (configuration & Configuration::SpinBox)
+        _layout.addWidget(&_valueDoubleSpinBox);
+    else
+        _valueDoubleSpinBox.hide();
+
+    if (configuration & Configuration::Slider)
+        _layout.addWidget(&_valueSlider);
+    else
+        _valueSlider.hide();
+
+    if (configuration & Configuration::Reset)
+        _layout.addWidget(&_resetPushButton);
+    else
+        _resetPushButton.hide();
 
     setLayout(&_layout);
 
-    const auto setToolTips = [this, doubleAction]() {
-        const auto toolTip = QString("%1: %2%3").arg(doubleAction->text(), QString::number(doubleAction->getValue(), 'f', doubleAction->getDecimals()), doubleAction->getSuffix());
-
-        _spinBox.setToolTip(toolTip);
-        _slider.setToolTip(toolTip);
+    const auto valueString = [](const double& value, const std::uint32_t& decimals) -> QString {
+        return QString::number(value, 'f', decimals);
     };
 
-    connect(&_spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, doubleAction](double value) {
+    const auto setToolTips = [this, doubleAction, valueString]() {
+        const auto toolTip = QString("%1: %2%3").arg(doubleAction->text(), valueString(doubleAction->getValue(), doubleAction->getDecimals()), doubleAction->getSuffix());
+
+        _valueDoubleSpinBox.setToolTip(toolTip);
+        _valueSlider.setToolTip(toolTip);
+    };
+
+    connect(&_valueDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, doubleAction](double value) {
         doubleAction->setValue(value);
     });
 
-    const auto updateAction = [this, doubleAction]() -> void {
-        doubleAction->setValue(static_cast<double>(_slider.value()) / static_cast<double>(SLIDER_MULTIPLIER));
+    const auto onUpdateAction = [this, doubleAction]() -> void {
+        doubleAction->setValue(static_cast<double>(_valueSlider.value()) / static_cast<double>(SLIDER_MULTIPLIER));
     };
 
-    connect(&_slider, &QSlider::valueChanged, this, [this, doubleAction, updateAction](int value) {
+    connect(&_valueSlider, &QSlider::valueChanged, this, [this, doubleAction, onUpdateAction](int value) {
         if (!doubleAction->getUpdateDuringDrag())
             return;
 
-        updateAction();
+        onUpdateAction();
     });
 
-    connect(&_slider, &QSlider::sliderReleased, this, [this, doubleAction, updateAction]() {
+    connect(&_valueSlider, &QSlider::sliderReleased, this, [this, doubleAction, onUpdateAction]() {
         if (doubleAction->getUpdateDuringDrag())
             return;
 
-        updateAction();
+        onUpdateAction();
     });
 
-    const auto updateValue = [this, doubleAction, setToolTips]() {
+    const auto onUpdateValue = [this, doubleAction, setToolTips]() {
         const auto value = doubleAction->getValue();
 
-        if (value != _spinBox.value())
-            _spinBox.setValue(value);
+        if (value != _valueDoubleSpinBox.value())
+            _valueDoubleSpinBox.setValue(value);
 
-        if (value * SLIDER_MULTIPLIER != _slider.value())
-            _slider.setValue(value * static_cast<double>(SLIDER_MULTIPLIER));
+        if (value * SLIDER_MULTIPLIER != _valueSlider.value())
+            _valueSlider.setValue(value * static_cast<double>(SLIDER_MULTIPLIER));
+
+        _resetPushButton.setEnabled(doubleAction->getValue() != doubleAction->getDefaultValue());
 
         setToolTips();
     };
 
-    connect(doubleAction, &DoubleAction::valueChanged, this, [this, doubleAction, updateValue](const double& value) {
-        updateValue();
-    });
-
-    const auto updateValueRange = [this, doubleAction]() {
-        QSignalBlocker spinBoxBlocker(&_spinBox), sliderBlocker(&_slider);
+    const auto onUpdateValueRange = [this, doubleAction]() {
+        QSignalBlocker spinBoxBlocker(&_valueDoubleSpinBox), sliderBlocker(&_valueSlider);
 
         const auto minimum = doubleAction->getMinimum();
 
-        _spinBox.setMinimum(minimum);
-        _slider.setMinimum(minimum * SLIDER_MULTIPLIER);
+        _valueDoubleSpinBox.setMinimum(minimum);
+        _valueSlider.setMinimum(minimum * SLIDER_MULTIPLIER);
 
         const auto maximum = doubleAction->getMaximum();
 
-        _spinBox.setMaximum(maximum);
-        _slider.setMaximum(maximum * SLIDER_MULTIPLIER);
+        _valueDoubleSpinBox.setMaximum(maximum);
+        _valueSlider.setMaximum(maximum * SLIDER_MULTIPLIER);
     };
 
-    connect(doubleAction, &DoubleAction::minimumChanged, this, [this, doubleAction, updateValueRange](const double& minimum) {
-        updateValueRange();
+    connect(doubleAction, &DoubleAction::minimumChanged, this, [this, doubleAction, onUpdateValueRange](const double& minimum) {
+        onUpdateValueRange();
     });
 
-    connect(doubleAction, &DoubleAction::maximumChanged, this, [this, doubleAction, updateValueRange](const double& maximum) {
-        updateValueRange();
+    connect(doubleAction, &DoubleAction::maximumChanged, this, [this, doubleAction, onUpdateValueRange](const double& maximum) {
+        onUpdateValueRange();
     });
 
-    const auto updateSuffix = [this, doubleAction, setToolTips]() {
-        QSignalBlocker spinBoxBlocker(&_spinBox);
+    const auto onUpdateSuffix = [this, doubleAction, setToolTips]() {
+        QSignalBlocker spinBoxBlocker(&_valueDoubleSpinBox);
 
-        _spinBox.setSuffix(doubleAction->getSuffix());
+        _valueDoubleSpinBox.setSuffix(doubleAction->getSuffix());
 
         setToolTips();
     };
 
-    connect(doubleAction, &DoubleAction::suffixChanged, this, [this, doubleAction, updateSuffix](const QString& suffix) {
-        updateSuffix();
+    connect(doubleAction, &DoubleAction::suffixChanged, this, [this, doubleAction, onUpdateSuffix](const QString& suffix) {
+        onUpdateSuffix();
     });
 
-    const auto updateDecimals = [this, doubleAction]() {
-        QSignalBlocker spinBoxBlocker(&_spinBox);
+    const auto onUpdateDecimals = [this, doubleAction]() {
+        QSignalBlocker spinBoxBlocker(&_valueDoubleSpinBox);
 
-        _spinBox.setDecimals(doubleAction->getDecimals());
+        _valueDoubleSpinBox.setDecimals(doubleAction->getDecimals());
     };
 
-    connect(doubleAction, &DoubleAction::decimalsChanged, this, [this, doubleAction, updateDecimals](const std::int32_t& decimals) {
-        updateDecimals();
+    connect(doubleAction, &DoubleAction::decimalsChanged, this, [this, doubleAction, onUpdateDecimals](const std::int32_t& decimals) {
+        onUpdateDecimals();
+    });
+    
+    const auto onUpdateDefaultValue = [this, valueString, doubleAction]() -> void {
+        _resetPushButton.setToolTip(QString("Reset %1 to: %2").arg(doubleAction->text(), valueString(doubleAction->getDefaultValue(), doubleAction->getDecimals())));
+    };
+
+    connect(&_resetPushButton, &QPushButton::clicked, this, [this, doubleAction]() {
+        doubleAction->reset();
     });
 
-    updateValueRange();
-    updateValue();
-    updateSuffix();
-    updateDecimals();
+    connect(doubleAction, &DoubleAction::valueChanged, this, [this, doubleAction, onUpdateValue](const double& value) {
+        onUpdateValue();
+    });
+
+    connect(doubleAction, &DoubleAction::defaultValueChanged, this, [this, onUpdateDefaultValue](const double& value) {
+        onUpdateDefaultValue();
+    });
+
+    onUpdateValueRange();
+    onUpdateValue();
+    onUpdateDefaultValue();
+    onUpdateSuffix();
+    onUpdateDecimals();
     setToolTips();
 }
 

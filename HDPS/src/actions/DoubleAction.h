@@ -28,22 +28,37 @@ public:
     class Widget : public WidgetAction::Widget
     {
     public:
-        Widget(QWidget* parent, DoubleAction* floatAction);
+        enum Configuration {
+            SpinBox = 0x0001,
+            Slider  = 0x0002,
+            Reset   = 0x0004,
+
+            SpinBoxSlider   = SpinBox | Slider,
+            All             = SpinBox | Slider | Reset
+        };
+
+    public:
+        Widget(QWidget* parent, DoubleAction* floatAction, const Configuration& configuration = Configuration::All);
 
     private:
         QHBoxLayout     _layout;
-        QDoubleSpinBox  _spinBox;
-        //QPushButton     _resetPushButton;
-        QSlider         _slider;
+        QDoubleSpinBox  _valueDoubleSpinBox;
+        QSlider         _valueSlider;
+        QPushButton     _resetPushButton;
     };
 
 public:
-    DoubleAction(QObject * parent, const QString& title, const double& minimum = DEFAULT_MIN_VALUE, const double& maximum = DEFAULT_MAX_VALUE, const double& value = 0.0, const std::int32_t& decimals = DEFAULT_DECIMALS);
+    DoubleAction(QObject * parent, const QString& title, const double& minimum = MIN_VALUE, const double& maximum = MAX_VALUE, const double& value = VALUE, const double& defaultValue = DEFAULT_VALUE, const std::int32_t& decimals = DECIMALS);
 
     QWidget* createWidget(QWidget* parent) override;
 
     double getValue() const;
     void setValue(const double& value);
+
+    double getDefaultValue() const;
+    void setDefaultValue(const double& defaultValue);
+
+    void reset();
 
     float getMinimum() const;
     void setMinimum(const double& minimum);
@@ -56,32 +71,35 @@ public:
     QString getSuffix() const;
     void setSuffix(const QString& suffix);
 
-    std::int32_t getDecimals() const;
-    void setDecimals(const std::int32_t& decimals);
+    std::uint32_t getDecimals() const;
+    void setDecimals(const std::uint32_t& decimals);
 
     bool getUpdateDuringDrag() const;
     void setUpdateDuringDrag(const bool& updateDuringDrag);
 
 signals:
     void valueChanged(const double& value);
+    void defaultValueChanged(const double& defaultValue);
     void minimumChanged(const double& minimum);
     void maximumChanged(const double& maximum);
     void suffixChanged(const QString& suffix);
-    void decimalsChanged(const std::int32_t& decimals);
+    void decimalsChanged(const std::uint32_t& decimals);
 
 protected:
     double          _value;
+    double          _defaultValue;
     double          _minimum;
     double          _maximum;
     QString         _suffix;
-    std::int32_t    _decimals;
+    std::uint32_t   _decimals;
     bool            _updateDuringDrag;
 
     static constexpr int SLIDER_MULTIPLIER = 1000;
-    static constexpr double DEFAULT_MIN_VALUE = 0.0;
-    static constexpr double DEFAULT_MAX_VALUE = 100.0;
+    static constexpr double MIN_VALUE = 0.0;
+    static constexpr double MAX_VALUE = 100.0;
+    static constexpr double VALUE = 0.0;
     static constexpr double DEFAULT_VALUE = 0.0;
-    static constexpr int DEFAULT_DECIMALS = 1;
+    static constexpr int DECIMALS = 1;
 };
 
 }

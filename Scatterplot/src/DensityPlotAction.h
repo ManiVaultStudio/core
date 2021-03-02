@@ -45,12 +45,8 @@ public:
 
     QMenu* getContextMenu();
 
-    bool canReset() const;
-    void reset();
-
 protected:
     hdps::gui::DoubleAction     _sigmaAction;
-    hdps::gui::StandardAction   _resetAction;
 
     static constexpr double DEFAULT_SIGMA = 25.0;
 

@@ -7,14 +7,11 @@ using namespace hdps::gui;
 
 DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Density"),
-    _sigmaAction(this, "Sigma", 1.0, 50.0, DEFAULT_SIGMA),
-    _resetAction(this, "Reset")
+    _sigmaAction(this, "Sigma", 1.0, 50.0, DEFAULT_SIGMA, DEFAULT_SIGMA)
 {
     setToolTip("Density plot settings");
 
     _sigmaAction.setUpdateDuringDrag(false);
-
-    _resetAction.setToolTip("Reset plot settings");
 
     const auto updateRenderMode = [this]() -> void {
         setVisible(getScatterplotWidget()->getRenderMode() != ScatterplotWidget::SCATTERPLOT);
@@ -24,27 +21,16 @@ DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
         getScatterplotWidget()->setSigma(0.01 * _sigmaAction.getValue());
     };
 
-    const auto updateResetAction = [this]() -> void {
-        _resetAction.setEnabled(canReset());
-    };
-
-    connect(getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode, updateResetAction](const ScatterplotWidget::RenderMode& renderMode) {
+    connect(getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const ScatterplotWidget::RenderMode& renderMode) {
         updateRenderMode();
-        updateResetAction();
     });
 
-    connect(&_sigmaAction, &DoubleAction::valueChanged, this, [this, updateSigma, updateResetAction](const double& value) {
+    connect(&_sigmaAction, &DoubleAction::valueChanged, this, [this, updateSigma](const double& value) {
         updateSigma();
-        updateResetAction();
-    });
-
-    connect(&_resetAction, &QAction::triggered, this, [this]() {
-        reset();
     });
 
     updateRenderMode();
     updateSigma();
-    updateResetAction();
 }
 
 QMenu* DensityPlotAction::getContextMenu()
@@ -63,21 +49,7 @@ QMenu* DensityPlotAction::getContextMenu()
 
     addActionToMenu(&_sigmaAction);
 
-    menu->addSeparator();
-
-    menu->addAction(&_resetAction);
-
     return menu;
-}
-
-bool DensityPlotAction::canReset() const
-{
-    return _sigmaAction.getValue() != DEFAULT_SIGMA;
-}
-
-void DensityPlotAction::reset()
-{
-    _sigmaAction.setValue(DEFAULT_SIGMA);
 }
 
 DensityPlotAction::Widget::Widget(QWidget* parent, DensityPlotAction* densityPlotAction) :
@@ -86,7 +58,7 @@ DensityPlotAction::Widget::Widget(QWidget* parent, DensityPlotAction* densityPlo
     _sigmaLabel("Sigma:")
 {
     _layout.addWidget(&_sigmaLabel);
-    _layout.addWidget(new DoubleAction::Widget(this, &densityPlotAction->_sigmaAction));
+    _layout.addWidget(new DoubleAction::Widget(this, &densityPlotAction->_sigmaAction, DoubleAction::Widget::Configuration::Slider));
 
     setLayout(&_layout);
 }
@@ -98,8 +70,6 @@ DensityPlotAction::PopupWidget::PopupWidget(QWidget* parent, DensityPlotAction* 
 
     layout->addWidget(new QLabel("Sigma:"), 0, 0);
     layout->addWidget(new DoubleAction::Widget(this, &densityPlotAction->_sigmaAction), 0, 1);
-
-    layout->addWidget(new StandardAction::PushButton(this, &densityPlotAction->_resetAction), 1, 1, 1, 2);
 
     setLayout(layout);
 }

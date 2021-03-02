@@ -7,14 +7,11 @@ using namespace hdps::gui;
 
 PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Point"),
-    _pointSizeAction(this, "Point size", 1.0, 50.0, DEFAULT_POINT_SIZE),
-    _pointOpacityAction(this, "Point opacity", 0.0, 100.0, DEFAULT_POINT_OPACITY),
-    _resetAction(this, "Reset")
+    _pointSizeAction(this, "Point size", 1.0, 50.0, DEFAULT_POINT_SIZE, DEFAULT_POINT_SIZE),
+    _pointOpacityAction(this, "Point opacity", 0.0, 100.0, DEFAULT_POINT_OPACITY, DEFAULT_POINT_OPACITY)
 {
     _pointSizeAction.setSuffix("px");
     _pointOpacityAction.setSuffix("%");
-    
-    _resetAction.setToolTip("Reset point plot settings");
 
     const auto updateRenderMode = [this]() -> void {
         setVisible(getScatterplotWidget()->getRenderMode() == ScatterplotWidget::SCATTERPLOT);
@@ -28,33 +25,21 @@ PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
         getScatterplotWidget()->setAlpha(0.01 * _pointOpacityAction.getValue());
     };
 
-    const auto updateResetAction = [this]() -> void {
-        _resetAction.setEnabled(canReset());
-    };
-
-    connect(getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode, updateResetAction](const ScatterplotWidget::RenderMode& renderMode) {
+    connect(getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const ScatterplotWidget::RenderMode& renderMode) {
         updateRenderMode();
-        updateResetAction();
     });
 
-    connect(&_pointSizeAction, &DoubleAction::valueChanged, this, [this, updatePointSize, updateResetAction](const double& value) {
+    connect(&_pointSizeAction, &DoubleAction::valueChanged, this, [this, updatePointSize](const double& value) {
         updatePointSize();
-        updateResetAction();
     });
 
-    connect(&_pointOpacityAction, &DoubleAction::valueChanged, this, [this, updatePointOpacity, updateResetAction](const double& value) {
+    connect(&_pointOpacityAction, &DoubleAction::valueChanged, this, [this, updatePointOpacity](const double& value) {
         updatePointOpacity();
-        updateResetAction();
-    });
-
-    connect(&_resetAction, &QAction::triggered, this, [this]() {
-        reset();
     });
 
     updateRenderMode();
     updatePointSize();
     updatePointOpacity();
-    updateResetAction();
 }
 
 QMenu* PointPlotAction::getContextMenu()
@@ -73,23 +58,8 @@ QMenu* PointPlotAction::getContextMenu()
 
     addActionToMenu(&_pointSizeAction);
     addActionToMenu(&_pointOpacityAction);
-    
-    menu->addSeparator();
-
-    menu->addAction(&_resetAction);
 
     return menu;
-}
-
-bool PointPlotAction::canReset() const
-{
-    return _pointSizeAction.getValue() != DEFAULT_POINT_SIZE || _pointOpacityAction.getValue() != DEFAULT_POINT_OPACITY;
-}
-
-void PointPlotAction::reset()
-{
-    _pointSizeAction.setValue(DEFAULT_POINT_SIZE);
-    _pointOpacityAction.setValue(DEFAULT_POINT_OPACITY);
 }
 
 PointPlotAction::Widget::Widget(QWidget* parent, PointPlotAction* pointPlotAction) :
@@ -101,10 +71,10 @@ PointPlotAction::Widget::Widget(QWidget* parent, PointPlotAction* pointPlotActio
     setToolTip("Point plot settings");
 
     _layout.addWidget(&_pointSizelabel);
-    _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointSizeAction));
+    _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointSizeAction, DoubleAction::Widget::Configuration::Slider));
 
     _layout.addWidget(&_pointOpacitylabel);
-    _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction));
+    _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction, DoubleAction::Widget::Configuration::Slider));
 
     setLayout(&_layout);
 }
@@ -119,8 +89,6 @@ PointPlotAction::PopupWidget::PopupWidget(QWidget* parent, PointPlotAction* poin
 
     layout->addWidget(new QLabel("Opacity:"), 1, 0);
     layout->addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction), 1, 2);
-
-    layout->addWidget(new StandardAction::PushButton(this, &pointPlotAction->_resetAction), 2, 1, 1, 2);
 
     setLayout(layout);
 }
