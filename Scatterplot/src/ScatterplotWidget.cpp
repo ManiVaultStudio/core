@@ -42,10 +42,8 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     this->installEventFilter(&_pixelSelectionTool);
 
     QObject::connect(&_pixelSelectionTool, &PixelSelectionTool::shapeChanged, [this]() {
-        if (!isInitialized())
+        if (!isInitialized() || _renderMode != SCATTERPLOT)
             return;
-
-        makeCurrent();
 
         _pixelSelectionToolRenderer.update();
         update();
@@ -317,15 +315,9 @@ void ScatterplotWidget::paintGL()
         }
 
         case DENSITY:
-        {
-            _densityRenderer.setRenderMode(DensityRenderer::DENSITY);
-            _densityRenderer.render();
-            break;
-        }
-
         case LANDSCAPE:
         {
-            _densityRenderer.setRenderMode(DensityRenderer::LANDSCAPE);
+            _densityRenderer.setRenderMode(_renderMode == DENSITY ? DensityRenderer::DENSITY : DensityRenderer::LANDSCAPE);
             _densityRenderer.render();
             break;
         }
