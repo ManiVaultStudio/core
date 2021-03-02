@@ -93,7 +93,6 @@ set( WIDGET_SOURCES
 )
 
 set(ACTIONS_HEADERS
-    src/actions/BooleanAction.h
     src/actions/ColorAction.h
     src/actions/DoubleAction.h
     src/actions/OptionAction.h
@@ -104,7 +103,6 @@ set(ACTIONS_HEADERS
 )
 
 set(ACTIONS_SOURCES
-    src/actions/BooleanAction.cpp
     src/actions/ColorAction.cpp
     src/actions/DoubleAction.cpp
     src/actions/OptionAction.cpp

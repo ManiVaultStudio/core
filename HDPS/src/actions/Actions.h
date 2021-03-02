@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BooleanAction.h"
 #include "ColorAction.h"
 #include "DoubleAction.h"
 #include "OptionAction.h"
