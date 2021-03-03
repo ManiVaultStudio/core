@@ -35,6 +35,15 @@ void DataManager::renameSet(QString oldName, QString requestedName)
     QString newName = getUniqueSetName(requestedName);
     dataSet->setName(newName);
 
+    // Update source set references
+    for (auto& kv : allSets())
+    {
+        if (kv.second->getSourceName() == oldName)
+        {
+            kv.second->_sourceSetName = newName;
+        }
+    }
+
     // Put the renamed set back into the map
     _dataSetMap.emplace(newName, std::unique_ptr<DataSet>(dataSet.release()));
 
@@ -42,47 +51,26 @@ void DataManager::renameSet(QString oldName, QString requestedName)
     _dataSetMap.erase(oldName);
 
     emit dataChanged();
+
+    _core->notifyDataRenamed(oldName, newName);
 }
 
-QStringList DataManager::removeRawData(QString name)
+void DataManager::removeDataset(QString datasetName)
 {
-    // Convert any derived data referring to this data to non-derived data
-    for (auto& pair : _rawDataMap)
-    {
-        RawData& rawData = *pair.second;
-
-        // Set as non-derived data
-        if (rawData.isDerivedData() && rawData.getSourceDataName() == name)
-        {
-            rawData.setDerived(false, QString());
-        }
-        
-        // Generate a selection set for the previously derived data
-        DataSet* selection = rawData.createDataSet();
-        addSelection(rawData.getName(), selection);
-    }
-
-    // Remove any sets referring to this data, and keep track of the removed set names
-    QStringList removedSets;
+    // Turn all derived datasets referring to the dataset to be removed to non-derived
     for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
     {
-        const DataSet& set = *it->second;
-        if (set.getDataName() == name)
+        DataSet& set = *it->second;
+        if (set.isDerivedData() && set.getSourceName() == datasetName)
         {
-            removedSets.append(set.getName());
-            it = _dataSetMap.erase(it);
+            set._derived = false;
+            set._sourceSetName = "";
         }
-        else
-            it++;
+        it++;
     }
 
-    // Remove the selection belonging to the raw data
-    _selections.erase(name);
-
-    // Remove the raw data
-    _rawDataMap.erase(name);
-
-    return removedSets;
+    // Remove dataset
+    _dataSetMap.erase(datasetName);
 }
 
 RawData& DataManager::getRawData(QString name)
@@ -103,12 +91,6 @@ DataSet& DataManager::getSet(QString name)
 
 DataSet& DataManager::getSelection(QString name)
 {
-    RawData& rawData = getRawData(name);
-    if (rawData.isDerivedData())
-    {
-        return getSelection(rawData.getSourceData().getName());
-    }
-
     DataSet* selection = _selections[name].get();
 
     if (!selection)

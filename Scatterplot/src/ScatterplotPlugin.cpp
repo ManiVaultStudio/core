@@ -13,6 +13,11 @@
 #include <QDebug>
 #include <QMenu>
 
+#include <algorithm>
+#include <functional>
+#include <limits>
+#include <set>
+
 Q_PLUGIN_METADATA(IID "nl.tudelft.ScatterplotPlugin")
 
 using namespace hdps;
@@ -50,10 +55,14 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 
 void ScatterplotPlugin::init()
 {
-    _dataSlot = new DataSlot(supportedDataTypes());
+    DataTypes supportedDataTypes;
+    supportedDataTypes.append(PointType);
+    _dataSlot = new DataSlot(supportedDataTypes);
     _supportedColorTypes.append(PointType);
     _supportedColorTypes.append(ClusterType);
     _supportedColorTypes.append(ColorType);
+
+    _scatterPlotWidget = new ScatterplotWidget(*_pixelSelectionTool);
 
     _dataSlot->addWidget(_scatterPlotWidget);
 
@@ -70,7 +79,11 @@ void ScatterplotPlugin::init()
 
     connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
-    
+
+    registerDataEventByType(PointType, std::bind(&ScatterplotPlugin::onDataEvent, this, std::placeholders::_1));
+
+    qApp->installEventFilter(this);
+
     QObject::connect(_pixelSelectionTool, &PixelSelectionTool::areaChanged, [this]() {
         if (!_pixelSelectionTool->isNotifyDuringSelection())
             return;
@@ -88,37 +101,30 @@ void ScatterplotPlugin::init()
     updateWindowTitle();
 }
 
-void ScatterplotPlugin::dataAdded(const QString name)
+void ScatterplotPlugin::onDataEvent(DataEvent* dataEvent)
 {
-}
+    if (dataEvent->getType() == EventType::DataChanged)
+    {
+        if (dataEvent->dataSetName != _currentDataSet) {
+            return;
+        }
 
-void ScatterplotPlugin::dataChanged(const QString name)
-{
-    if (name != _currentDataSet) {
-        return;
+        updateData();
     }
-    updateData();
-}
+    if (dataEvent->getType() == EventType::SelectionChanged)
+    {
+        if (_currentDataSet.isEmpty()) return;
+        
+        if (_currentDataSet == dataEvent->dataSetName)
+            updateSelection();
+    }
+    if (dataEvent->getType() == EventType::DataRenamed)
+    {
+        DataRenamedEvent* renamedEvent = (DataRenamedEvent*) dataEvent;
 
-void ScatterplotPlugin::dataRemoved(const QString name)
-{
-}
-
-void ScatterplotPlugin::selectionChanged(const QString dataName)
-{
-    if (_currentDataSet.isEmpty()) return;
-
-    const Points& points = _core->requestData<Points>(_currentDataSet);
-
-    if (DataSet::getSourceData(points).getDataName() == dataName)
-        updateSelection();
-}
-
-DataTypes ScatterplotPlugin::supportedDataTypes() const
-{
-    DataTypes supportedTypes;
-    supportedTypes.append(PointType);
-    return supportedTypes;
+        if (renamedEvent->oldName == _currentDataSet)
+            onDataInput(renamedEvent->dataSetName);
+    }
 }
 
 void ScatterplotPlugin::createSubset(const bool& fromSourceData /*= false*/)
@@ -142,6 +148,8 @@ void ScatterplotPlugin::selectPoints()
     std::vector<std::uint32_t> targetIndices;
 
     targetIndices.reserve(points.getNumPoints());
+    std::vector<unsigned int> localGlobalIndices;
+    points.getGlobalIndices(localGlobalIndices);
 
     const auto dataBounds   = _scatterPlotWidget->getBounds();
     const auto width        = selectionAreaImage.width();
@@ -156,10 +164,8 @@ void ScatterplotPlugin::selectPoints()
         const auto uv               = uvOffset + QPoint(uvNormalized.x() * size, uvNormalized.y() * size);
 
         if (selectionAreaImage.pixelColor(uv).alpha() > 0) {
-            if (set.isFull())
-                targetIndices.push_back(i);
-            else
-                targetIndices.push_back(setIndices[i]);
+            int globalIndex = localGlobalIndices[i];
+            targetIndices.push_back(globalIndex);
         }
     }
     
@@ -208,7 +214,7 @@ void ScatterplotPlugin::selectPoints()
 
     selectionSetIndices = targetIndices;
 
-    _core->notifySelectionChanged(points.isDerivedData() ? DataSet::getSourceData(points).getDataName() : points.getDataName());
+    _core->notifySelectionChanged(points.getName());
 }
 
 void ScatterplotPlugin::onDataInput(QString dataSetName)
@@ -340,71 +346,15 @@ void ScatterplotPlugin::updateSelection()
     const Points& points = _core->requestData<Points>(_currentDataSet);
     const Points& selection = static_cast<Points&>(points.getSelection());
 
+    std::vector<bool> selected;
     std::vector<char> highlights;
-    highlights.resize(_numPoints, 0);
 
-    if (points.isDerivedData())
-    {
-        // If the dataset is derived from another, get the source data set
-        const Points& sourceSet = DataSet::getSourceData(points);
+    points.selectedLocalIndices(selection.indices, selected);
 
-        if (sourceSet.isFull())
-        {
-            // If the dataset is the full dataset no translation is necessary for selection
-            if (points.isFull())
-            {
-                for (unsigned int index : selection.indices)
-                {
-                    highlights[index] = 1;
-                }
-            }
-        }
-        else
-        {
-            // Find the common global indices selected and its local index in the subset indices
-            std::vector<bool> selectedPoints(sourceSet.getNumRawPoints(), false);
-            for (const unsigned int& selectionIndex : selection.indices)
-                selectedPoints[selectionIndex] = true;
-            
-            // Translate from derived data indices to subset indices
-            std::vector<unsigned int> sourceIndices(_numPoints);
-            for (std::uint32_t i = 0; i < _numPoints; i++)
-            {
-                const unsigned int& derivedIndex = points.indices[i];
-                sourceIndices[i] = sourceSet.indices[derivedIndex];
-            }
-            
-            for (std::uint32_t i = 0; i < _numPoints; i++)
-            {
-                if (selectedPoints[sourceIndices[i]])
-                    highlights[i] = 1;
-            }
-        }
-    }
-    else
-    {
-        // If the dataset is the full dataset no translation is necessary for selection
-        if (points.isFull())
-        {
-            for (unsigned int index : selection.indices)
-            {
-                highlights[index] = 1;
-            }
-        }
-        else
-        {
-            // Find the common global indices selected and its local index in the subset indices
-            std::vector<bool> selectedPoints(points.getNumRawPoints(), false);
-            for (const unsigned int& selectionIndex : selection.indices)
-                selectedPoints[selectionIndex] = true;
+    highlights.resize(points.getNumPoints(), 0);
 
-            for (std::uint32_t  i = 0; i < _numPoints; i++)
-            {
-                if (selectedPoints[points.indices[i]])
-                    highlights[i] = 1;
-            }
-        }
-    }
+    for (int i = 0; i < selected.size(); i++)
+        highlights[i] = selected[i] ? 1 : 0;
 
     _scatterPlotWidget->setHighlights(highlights);
 
@@ -505,7 +455,7 @@ void ScatterplotPlugin::selectAll()
     else
         selectionSetIndices = setIndices;
 
-    _core->notifySelectionChanged(selectionSet.getDataName());
+    _core->notifySelectionChanged(_currentDataSet);
 }
 
 void ScatterplotPlugin::clearSelection()
@@ -520,7 +470,7 @@ void ScatterplotPlugin::clearSelection()
 
     selectionSetIndices.clear();
 
-    _core->notifySelectionChanged(selectionSet.getDataName());
+    _core->notifySelectionChanged(_currentDataSet);
 }
 
 void ScatterplotPlugin::invertSelection()
@@ -549,7 +499,7 @@ void ScatterplotPlugin::invertSelection()
         selectionSetIndices.push_back(setIndex);
     }
 
-    _core->notifySelectionChanged(selectionSet.getDataName());
+    _core->notifySelectionChanged(_currentDataSet);
 }
 
 void ScatterplotPlugin::updateWindowTitle()

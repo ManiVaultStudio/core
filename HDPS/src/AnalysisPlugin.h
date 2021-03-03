@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PluginFactory.h"
-#include "DataConsumer.h"
 #include "widgets/SettingsWidget.h"
 
 #include <memory>
@@ -13,7 +12,7 @@ namespace hdps
 namespace plugin
 {
 
-class AnalysisPlugin : public Plugin, public DataConsumer
+class AnalysisPlugin : public Plugin
 {
 public:
     AnalysisPlugin(QString name) :

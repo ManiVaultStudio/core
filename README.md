@@ -2,10 +2,9 @@
 
 # CI-CD
 
-Linux & Macos (Travis) | Windows (Appveyor)
---- | ---
-[![Build Status](https://travis-ci.com/bldrvnlw/conan-hdps-core.svg?branch=master)](https://travis-ci.com/bldrvnlw/conan-hdps-core) | [![Build status](https://ci.appveyor.com/api/projects/status/wmef9pb28ma6gv79?svg=true)](https://ci.appveyor.com/project/bldrvnlw/conan-hdps-core)
+Linux, Macos, Windows - GithubActions
 
+![Build Status](https://github.com/hdps/core/actions/workflows/build.yml/badge.svg)
 
 
 Pushing to the hdps/core develop wil trigger the conan CI_CD to start a build via the configured Webhook.
@@ -26,8 +25,8 @@ See the current state of available plugins at: https://github.com/hdps/PublicWik
 # Building
 ### Requirements
 * Git (https://git-scm.com/)
-* CMake 3.1+ (https://cmake.org/)
-* Qt 5.13 (https://www.qt.io/download)
+* CMake 3.12+ (https://cmake.org/)
+* Qt 5.15.1 (https://www.qt.io/download)
 * Visual Studio 2017 (Windows https://visualstudio.microsoft.com/downloads/)
 
 ### Setting up
@@ -87,3 +86,6 @@ After first time compiling on macOS it might be necessary to manually moc the Ma
 
 `uic MainWindow.ui -o ui_MainWindow.h`  
 `mv ui_MainWindow.h ../Build/`
+
+HDPS might not run properly on integrated/old graphics hardware (in some cases the application crashes). The solution is to run on high-performance (recent) graphics hardware. The link below demontrates how to do this:
+https://pureinfotech.com/set-gpu-app-windows-10/

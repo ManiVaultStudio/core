@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC_PATH_PREFIX ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
@@ -32,7 +33,8 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 find_package(Qt5 5.12 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
+# Normalize the incoming install path
+file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 #message(STATUS ${INSTALL_DIR})
 
 set( MAIN_SOURCES
@@ -64,6 +66,12 @@ set( CORE_SOURCES
     src/PluginManager.cpp
     src/Core.cpp
     src/DataManager.cpp
+)
+
+set( EVENT_HEADERS
+    src/event/Event.h
+    src/event/EventListener.h
+    src/event/EventListener.cpp
 )
 
 set( WIDGET_HEADERS
@@ -174,6 +182,7 @@ set( UTIL_SOURCES
 set( PLUGIN_HEADERS
     src/CoreInterface.h
     src/AnalysisPlugin.h
+    src/DataType.h
     src/RawData.h
     src/LoaderPlugin.h
     src/WriterPlugin.h
@@ -181,7 +190,6 @@ set( PLUGIN_HEADERS
     src/PluginFactory.h
     src/Plugin.h
     src/PluginType.h
-    src/DataConsumer.h
     src/SelectionListener.h
     src/Set.h
 	src/Application.h
@@ -209,6 +217,7 @@ list(APPEND PUBLIC_HEADERS
     ${RENDERER_HEADERS}
     ${UTIL_HEADERS}
     ${PLUGIN_HEADERS}
+    ${EVENT_HEADERS}
 )
 
 list(APPEND PUBLIC_SOURCES
@@ -262,18 +271,19 @@ set(UI_FILES
 QT5_WRAP_UI(UI_HEADERS ${UI_FILES})
 QT5_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
-source_group(GUI FILES ${CORE_SOURCES})
-source_group(Private FILES ${PRIVATE_SOURCES})
-source_group(Public FILES ${PLUGIN_HEADERS})
-source_group(Public\\Widgets FILES ${WIDGET_FILES})
+source_group( GUI FILES ${CORE_SOURCES})
+source_group( Private FILES ${PRIVATE_SOURCES})
+source_group( Public FILES ${PLUGIN_HEADERS})
+source_group( Public\\Widgets FILES ${WIDGET_FILES})
 source_group(Public\\Actions FILES ${ACTIONS_FILES})
-source_group(Public\\Renderers FILES ${RENDERER_FILES})
-source_group(Public\\Util FILES ${UTIL_FILES})
-source_group(Public\\Graphics FILES ${GRAPHICS_FILES})
-source_group(Resources FILES res/resources.qrc)
-source_group(Resources FILES ${UI_FILES})
-source_group(Resources FILES win/hdps.rc)
-source_group(Resources\\generated FILES ${UI_HEADERS})
+source_group( Public\\Renderers FILES ${RENDERER_FILES})
+source_group( Public\\Util FILES ${UTIL_FILES})
+source_group( Public\\Graphics FILES ${GRAPHICS_FILES})
+source_group( Public\\Event FILES ${EVENT_HEADERS})
+source_group( Resources FILES res/resources.qrc)
+source_group( Resources FILES ${UI_FILES})
+source_group( Resources FILES win/hdps.rc)
+source_group( Resources\\generated FILES ${UI_HEADERS})
 
 if(APPLE)
     set(LINK_TYPE SHARED)
@@ -282,6 +292,7 @@ if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_library(${PROJECT}_Public ${LINK_TYPE}
     src/.editorconfig
@@ -337,29 +348,53 @@ if(MSVC)
     )
 endif(MSVC)
 
-#copy after build
-# library
-add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:${PROJECT}_Public>"
-    "${INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_FILE_NAME:${PROJECT}_Public>"
+#headers - Would it be better to refactor the headers to allow "install(DIRECTORY)"?
+install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
+        string(REGEX REPLACE \"^src/\" \"\" STRIPPED_PUBLIC_HEADER \${PUBLIC_HEADER})
+        execute_process(
+            COMMAND \"${CMAKE_COMMAND}\" -E copy_if_different 
+                \"${CMAKE_CURRENT_SOURCE_DIR}/\${PUBLIC_HEADER}\" 
+                \"${INSTALL_DIR}/$<CONFIGURATION>/include/\${STRIPPED_PUBLIC_HEADER}\"
+        )
+
+    endforeach(PUBLIC_HEADER)"
+    COMPONENT HDPS_HEADERS
 )
 
-#headers
-foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
-    STRING(REGEX REPLACE "^src/" "" STRIPPED_PUBLIC_HEADER ${PUBLIC_HEADER})
-    add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/${PUBLIC_HEADER}"
-        "${INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}"
-    )
-endforeach(PUBLIC_HEADER)
-
 #executable
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:${PROJECT}>"
-    "${INSTALL_DIR}/$<CONFIGURATION>/$<TARGET_FILE_NAME:${PROJECT}>"
+install(TARGETS ${PROJECT}
+    RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
+)
+
+install(TARGETS ${PROJECT}_Public
+    ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+)
+
+# Install the components neededfor the Plugin builds
+add_custom_command(
+    TARGET ${PROJECT}_Public
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPS_HEADERS
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPS_LINKLIB
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+)
+add_custom_command(
+    TARGET ${PROJECT} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPS_EXECUTABLE
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+
 )
 
 # Point Data
@@ -379,11 +414,17 @@ add_subdirectory(src/plugins/ImageData)
 
 # Qt Advanced docking system
 set(VERSION_SHORT 3.7.0)
-set(ads_PlatformDir "${INSTALL_DIR}/$<CONFIGURATION>/")
+set(ads_PlatformDir ${INSTALL_DIR}/$<CONFIGURATION>/)
 add_subdirectory(external/advanced_docking)
 
-# Copy ADS library after the HDPS public project has been built
-add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	"${CMAKE_BINARY_DIR}/x64/bin/$<CONFIGURATION>/qtadvanceddocking.dll"
-	"${INSTALL_DIR}/$<CONFIGURATION>/qtadvanceddocking.dll")
+
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" 
+        --install ${CMAKE_BINARY_DIR}/hdps/external/advanced_docking
+        --config $<CONFIGURATION> 
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+    COMMAND "${CMAKE_COMMAND}" -E copy_directory
+        ${INSTALL_DIR}/$<CONFIGURATION>/bin
+        ${INSTALL_DIR}/$<CONFIGURATION>
+)
+
