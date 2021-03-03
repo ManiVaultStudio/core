@@ -114,28 +114,29 @@ bool OptionAction::hasSelection() const
 }
 
 OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const bool& resettable /*= true*/) :
-    WidgetAction::Widget(parent, optionAction),
-    _comboBox(new QComboBox())
+    WidgetAction::Widget(parent, optionAction)
 {
     auto layout = new QHBoxLayout();
 
+    auto comboBox = new QComboBox();
+
     layout->setMargin(0);
-    layout->addWidget(_comboBox);
+    layout->addWidget(comboBox);
 
     setLayout(layout);
 
-    const auto updateToolTip = [this, optionAction]() -> void {
-        _comboBox->setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
+    const auto updateToolTip = [this, optionAction, comboBox]() -> void {
+        comboBox->setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
     };
 
-    const auto populateComboBox = [this, optionAction, updateToolTip]() -> void {
-        QSignalBlocker comboBoxSignalBlocker(_comboBox);
+    const auto populateComboBox = [this, optionAction, updateToolTip, comboBox]() -> void {
+        QSignalBlocker comboBoxSignalBlocker(comboBox);
 
         const auto options = optionAction->getOptions();
 
-        _comboBox->clear();
-        _comboBox->addItems(options);
-        _comboBox->setEnabled(!options.isEmpty());
+        comboBox->clear();
+        comboBox->addItems(options);
+        comboBox->setEnabled(!options.isEmpty());
 
         updateToolTip();
     };
@@ -144,11 +145,11 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const 
         populateComboBox();
     });
 
-    const auto updateComboBoxSelection = [this, optionAction]() -> void {
-        if (optionAction->getCurrentIndex() == _comboBox->currentIndex())
+    const auto updateComboBoxSelection = [this, optionAction, comboBox]() -> void {
+        if (optionAction->getCurrentIndex() == comboBox->currentIndex())
             return;
         
-        _comboBox->setCurrentIndex(optionAction->getCurrentIndex());
+        comboBox->setCurrentIndex(optionAction->getCurrentIndex());
     };
 
     connect(optionAction, &OptionAction::currentIndexChanged, this, [this, updateComboBoxSelection](const std::int32_t& currentIndex) {
@@ -160,7 +161,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const 
         updateToolTip();
     });
 
-    connect(_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
+    connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
         optionAction->setCurrentIndex(currentIndex);
     });
 

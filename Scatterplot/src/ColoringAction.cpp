@@ -42,14 +42,6 @@ ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
     _colorByActionGroup.addAction(&_colorByDimensionAction);
     _colorByActionGroup.addAction(&_colorByColorDataAction);
 
-    const auto renderModeChanged = [this]() -> void {
-        setEnabled(getScatterplotWidget()->getRenderMode() == ScatterplotWidget::SCATTERPLOT);
-    };
-
-    connect(getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, renderModeChanged](const ScatterplotWidget::RenderMode& renderMode) {
-        renderModeChanged();
-    });
-
     const auto updateColoringMode = [this]() {
         getScatterplotWidget()->setColoringMode(static_cast<ScatterplotWidget::ColoringMode>(_colorByAction.getCurrentIndex()));
     };
@@ -89,7 +81,6 @@ ColoringAction::ColoringAction(ScatterplotPlugin* scatterplotPlugin) :
     });
 
     updateColoringMode();
-    renderModeChanged();
     coloringModeChanged();
 }
 
@@ -174,6 +165,15 @@ ColoringAction::Widget::Widget(QWidget* parent, ColoringAction* coloringAction) 
         coloringModeChanged();
     });
 
+    const auto renderModeChanged = [this, coloringAction]() {
+        setEnabled(coloringAction->getScatterplotWidget()->getRenderMode() == ScatterplotWidget::SCATTERPLOT);
+    };
+
+    connect(coloringAction->getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, renderModeChanged](const ScatterplotWidget::RenderMode& renderMode) {
+        renderModeChanged();
+    });
+
+    renderModeChanged();
     coloringModeChanged();
 }
 

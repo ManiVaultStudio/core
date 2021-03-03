@@ -3,8 +3,6 @@
 #include "WidgetAction.h"
 
 class QWidget;
-class QComboBox;
-class QPushButton;
 
 namespace hdps {
 
@@ -25,9 +23,6 @@ public:
     class Widget : public WidgetAction::Widget {
     public:
         Widget(QWidget* widget, OptionAction* optionAction, const bool& resettable = true);
-
-    private:
-        QComboBox*  _comboBox;
     };
 
 public:
