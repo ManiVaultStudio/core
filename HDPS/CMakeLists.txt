@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC_PATH_PREFIX ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
@@ -32,7 +33,8 @@ add_definitions(-DQT_MESSAGELOGCONTEXT)
 
 find_package(Qt5 5.12 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
+# Normalize the incoming install path
+file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 #message(STATUS ${INSTALL_DIR})
 
 set( MAIN_SOURCES
@@ -309,29 +311,53 @@ if(MSVC)
     )
 endif(MSVC)
 
-#copy after build
-# library
-add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:${PROJECT}_Public>"
-    "${INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_FILE_NAME:${PROJECT}_Public>"
+#headers - Would it be better to refactor the headers to allow "install(DIRECTORY)"?
+install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
+        string(REGEX REPLACE \"^src/\" \"\" STRIPPED_PUBLIC_HEADER \${PUBLIC_HEADER})
+        execute_process(
+            COMMAND \"${CMAKE_COMMAND}\" -E copy_if_different 
+                \"${CMAKE_CURRENT_SOURCE_DIR}/\${PUBLIC_HEADER}\" 
+                \"${INSTALL_DIR}/$<CONFIGURATION>/include/\${STRIPPED_PUBLIC_HEADER}\"
+        )
+
+    endforeach(PUBLIC_HEADER)"
+    COMPONENT HDPS_HEADERS
 )
 
-#headers
-foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
-    STRING(REGEX REPLACE "^src/" "" STRIPPED_PUBLIC_HEADER ${PUBLIC_HEADER})
-    add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/${PUBLIC_HEADER}"
-        "${INSTALL_DIR}/$<CONFIGURATION>/include/${STRIPPED_PUBLIC_HEADER}"
-    )
-endforeach(PUBLIC_HEADER)
-
 #executable
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:${PROJECT}>"
-    "${INSTALL_DIR}/$<CONFIGURATION>/$<TARGET_FILE_NAME:${PROJECT}>"
+install(TARGETS ${PROJECT}
+    RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
+)
+
+install(TARGETS ${PROJECT}_Public
+    ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+)
+
+# Install the components neededfor the Plugin builds
+add_custom_command(
+    TARGET ${PROJECT}_Public
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPS_HEADERS
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPS_LINKLIB
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+)
+add_custom_command(
+    TARGET ${PROJECT} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPS_EXECUTABLE
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+
 )
 
 # Point Data
@@ -351,11 +377,17 @@ add_subdirectory(src/plugins/ImageData)
 
 # Qt Advanced docking system
 set(VERSION_SHORT 3.7.0)
-set(ads_PlatformDir "${INSTALL_DIR}/$<CONFIGURATION>/")
+set(ads_PlatformDir ${INSTALL_DIR}/$<CONFIGURATION>/)
 add_subdirectory(external/advanced_docking)
 
-# Copy ADS library after the HDPS public project has been built
-add_custom_command(TARGET ${PROJECT}_Public POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	"${CMAKE_BINARY_DIR}/x64/bin/$<CONFIGURATION>/${CMAKE_SHARED_MODULE_PREFIX}qtadvanceddocking${CMAKE_SHARED_MODULE_SUFFIX}"
-	"${INSTALL_DIR}/$<CONFIGURATION>/${CMAKE_SHARED_MODULE_PREFIX}qtadvanceddocking${CMAKE_SHARED_MODULE_SUFFIX}")
+
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" 
+        --install ${CMAKE_BINARY_DIR}/hdps/external/advanced_docking
+        --config $<CONFIGURATION> 
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+    COMMAND "${CMAKE_COMMAND}" -E copy_directory
+        ${INSTALL_DIR}/$<CONFIGURATION>/bin
+        ${INSTALL_DIR}/$<CONFIGURATION>
+)
+

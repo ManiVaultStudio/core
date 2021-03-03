@@ -27,9 +27,14 @@ endif()
 add_test(NAME PointDataGTest COMMAND PointDataGTest)
 
 
-add_custom_command(TARGET PointDataGTest POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:PointDataGTest>"
-    "${INSTALL_DIR}/$<CONFIGURATION>/$<TARGET_FILE_NAME:PointDataGTest>"
+install(TARGETS ${PROJECT}
+    RUNTIME DESTINATION . COMPONENT EXECUTABLE
+)
+
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )
 

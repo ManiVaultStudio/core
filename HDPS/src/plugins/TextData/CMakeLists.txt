@@ -15,7 +15,7 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
-set(INSTALL_DIR $ENV{HDPS_INSTALL_DIR})
+file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
@@ -25,9 +25,13 @@ set(SOURCES
     src/TextData.json
 )
 
+set(TEXTDATA_HEADERS
+    src/TextData.h
+)
+
 source_group( Plugin FILES ${SOURCES})
 
-include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
+include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${SOURCES})
 
@@ -40,22 +44,24 @@ if(MSVC)
 else()
     set(LIB_LINK_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif(MSVC)
-set(HDPS_LINK_LIBRARY "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
+set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
 
+set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${TEXTDATA_HEADERS}")
 
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:${PROJECT}>"
-    "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PROJECT}>"
+install(TARGETS ${PROJECT}
+    RUNTIME DESTINATION Plugins COMPONENT SHAREDLIB
+    LIBRARY DESTINATION lib COMPONENT LINKLIB
+    ARCHIVE DESTINATION lib COMPONENT LINKLIB
+    PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
 )
 
-# Copy textdata header
 add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/TextData.h"
-    "${INSTALL_DIR}/$<CONFIGURATION>/include/TextData.h"
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}/hdps/src/plugins/TextData
+        --config $<CONFIGURATION>
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )
