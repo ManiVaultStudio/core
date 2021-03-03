@@ -150,7 +150,7 @@ ColoringAction::Widget::Widget(QWidget* parent, ColoringAction* coloringAction) 
     WidgetAction::Widget(parent, coloringAction),
     _layout(),
     _colorByLabel("Color by:"),
-    _colorByWidget(this, &coloringAction->_colorByAction),
+    _colorByWidget(this, &coloringAction->_colorByAction, false),
     _stackedWidget(),
     _constantColorWidget(this, &coloringAction->_constantColorAction),
     _colorDimensionWidget(this, &coloringAction->_colorDimensionAction),
@@ -159,8 +159,6 @@ ColoringAction::Widget::Widget(QWidget* parent, ColoringAction* coloringAction) 
     _layout.addWidget(&_colorByLabel);
     _layout.addWidget(&_colorByWidget);
     _layout.addWidget(&_stackedWidget);
-
-    //_stackedWidget.setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
     _stackedWidget.addWidget(&_constantColorWidget);
     _stackedWidget.addWidget(&_colorDimensionWidget);
@@ -180,11 +178,32 @@ ColoringAction::Widget::Widget(QWidget* parent, ColoringAction* coloringAction) 
 }
 
 ColoringAction::PopupWidget::PopupWidget(QWidget* parent, ColoringAction* coloringAction) :
-    WidgetAction::PopupWidget(parent, coloringAction)
+    WidgetAction::PopupWidget(parent, coloringAction),
+    _layout(),
+    _colorByLabel("Color by:"),
+    _colorByWidget(this, &coloringAction->_colorByAction),
+    _stackedWidget(),
+    _constantColorWidget(this, &coloringAction->_constantColorAction),
+    _colorDimensionWidget(this, &coloringAction->_colorDimensionAction),
+    _colorDataWidget(this, &coloringAction->_colorDataAction)
 {
-    auto layout = new QVBoxLayout();
+    _layout.addWidget(&_colorByLabel);
+    _layout.addWidget(&_colorByWidget);
+    _layout.addWidget(&_stackedWidget);
 
-    layout->addWidget(new ColoringAction::Widget(this, coloringAction));
+    _stackedWidget.addWidget(&_constantColorWidget);
+    _stackedWidget.addWidget(&_colorDimensionWidget);
+    _stackedWidget.addWidget(&_colorDataWidget);
 
-    setLayout(layout);
+    setLayout(&_layout);
+
+    const auto coloringModeChanged = [this, coloringAction]() -> void {
+        _stackedWidget.setCurrentIndex(coloringAction->_colorByAction.getCurrentIndex());
+    };
+
+    connect(&coloringAction->_colorByAction, &OptionAction::currentIndexChanged, this, [this, coloringModeChanged](const std::uint32_t& currentIndex) {
+        coloringModeChanged();
+    });
+
+    coloringModeChanged();
 }

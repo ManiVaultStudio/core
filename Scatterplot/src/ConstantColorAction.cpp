@@ -3,6 +3,8 @@
 
 #include "ScatterplotPlugin.h"
 
+#include <QHBoxLayout>
+
 using namespace hdps::gui;
 
 const QColor ConstantColorAction::DEFAULT_COLOR = qRgb(93, 93, 225);
@@ -65,11 +67,22 @@ QMenu* ConstantColorAction::getContextMenu()
     return menu;
 }
 
-ConstantColorAction::Widget::Widget(QWidget* parent, ConstantColorAction* coloringAction) :
-    WidgetAction::Widget(parent, coloringAction),
-    _layout()
+ConstantColorAction::Widget::Widget(QWidget* parent, ConstantColorAction* constantColorAction) :
+    WidgetAction::Widget(parent, constantColorAction)
 {
-    _layout.addWidget(new ColorAction::Widget(this, &coloringAction->_constantColorAction));
+    auto layout = new QHBoxLayout();
 
-    setLayout(&_layout);
+    layout->addWidget(new ColorAction::Widget(this, &constantColorAction->_constantColorAction, false));
+
+    setLayout(layout);
+}
+
+ConstantColorAction::PopupWidget::PopupWidget(QWidget* parent, ConstantColorAction* constantColorAction) :
+    WidgetAction::Widget(parent, constantColorAction)
+{
+    auto layout = new QHBoxLayout();
+
+    layout->addWidget(new ColorAction::PopupWidget(this, &constantColorAction->_constantColorAction));
+
+    setLayout(layout);
 }

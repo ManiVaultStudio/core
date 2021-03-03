@@ -3,6 +3,8 @@
 
 #include "ScatterplotPlugin.h"
 
+#include <QHBoxLayout>
+
 using namespace hdps::gui;
 
 SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
@@ -284,20 +286,20 @@ bool SelectionAction::eventFilter(QObject* object, QEvent* event)
 }
 
 SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionAction) :
-    WidgetAction::Widget(parent, selectionAction),
-    _layout()
+    WidgetAction::Widget(parent, selectionAction)
 {
-    
-    _layout.addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction));
-    _layout.addWidget(new DoubleAction::Widget(this, &selectionAction->_brushRadiusAction));
-    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction));
-    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction));
-    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_clearSelectionAction));
-    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_selectAllAction));
-    _layout.addWidget(new StandardAction::PushButton(this, &selectionAction->_invertSelectionAction));
-    _layout.addWidget(new StandardAction::CheckBox(this, &selectionAction->_notifyDuringSelectionAction));
+    auto layout = new QHBoxLayout();
 
-    setLayout(&_layout);
+    layout->addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction, false));
+    layout->addWidget(new DoubleAction::Widget(this, &selectionAction->_brushRadiusAction, DoubleAction::Widget::Slider));
+    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction));
+    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction));
+    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_clearSelectionAction));
+    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_selectAllAction));
+    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_invertSelectionAction));
+    layout->addWidget(new StandardAction::CheckBox(this, &selectionAction->_notifyDuringSelectionAction));
+
+    setLayout(layout);
 }
 
 SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* selectionAction) :

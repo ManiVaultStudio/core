@@ -36,6 +36,15 @@ public:
     class PopupWidget : public PluginAction::PopupWidget {
     public:
         PopupWidget(QWidget* parent, ColoringAction* coloringAction);
+
+    protected:
+        QHBoxLayout                             _layout;
+        QLabel                                  _colorByLabel;
+        hdps::gui::OptionAction::PopupWidget    _colorByWidget;
+        StackedWidget                           _stackedWidget;
+        ConstantColorAction::PopupWidget        _constantColorWidget;
+        ColorDimensionAction::PopupWidget       _colorDimensionWidget;
+        ColorDataAction::PopupWidget            _colorDataWidget;
     };
 
 public:

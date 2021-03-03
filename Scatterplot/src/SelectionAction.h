@@ -3,7 +3,6 @@
 #include "PluginAction.h"
 
 #include <QActionGroup>
-#include <QHBoxLayout>
 
 class SelectionAction : public PluginAction
 {
@@ -11,9 +10,6 @@ public:
     class Widget : public PluginAction::Widget {
     public:
         Widget(QWidget* parent, SelectionAction* selectionAction);
-
-    private:
-        QHBoxLayout         _layout;
     };
 
     class PopupWidget : public PluginAction::PopupWidget {

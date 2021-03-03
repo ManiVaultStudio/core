@@ -2,18 +2,17 @@
 
 #include "PluginAction.h"
 
-#include <QHBoxLayout>
-#include <QLabel>
-
 class ConstantColorAction : public PluginAction
 {
 public:
     class Widget : public PluginAction::Widget {
     public:
         Widget(QWidget* parent, ConstantColorAction* colorByConstantAction);
+    };
 
-    private:
-        QHBoxLayout     _layout;
+    class PopupWidget : public PluginAction::Widget {
+    public:
+        PopupWidget(QWidget* parent, ConstantColorAction* colorByConstantAction);
     };
 
 public:
