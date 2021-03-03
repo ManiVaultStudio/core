@@ -27,6 +27,7 @@ class HdpsCoreConan(ConanFile):
     license = "MIT"  # Indicates license: use SPDX Identifiers https://spdx.org/licenses/
     # exports_sources = "README.md"
     # exports = "*"
+    short_paths = True
     generators = ("cmake")
 
     # Options may need to change depending on the packaged library
