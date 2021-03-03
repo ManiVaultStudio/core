@@ -3,7 +3,6 @@
 
 #include <QDebug>
 #include <QHBoxLayout>
-#include <QComboBox>
 
 namespace hdps {
 
