@@ -2,12 +2,10 @@
 
 #include "WidgetAction.h"
 
-#include <QHBoxLayout>
-#include <QDoubleSpinBox>
-#include <QPushButton>
-#include <QSlider>
-
 class QWidget;
+class QDoubleSpinBox;
+class QSlider;
+class QPushButton;
 
 namespace hdps {
 
@@ -40,11 +38,10 @@ public:
     public:
         Widget(QWidget* parent, DoubleAction* floatAction, const Configuration& configuration = Configuration::All);
 
-    private:
-        QHBoxLayout     _layout;
-        QDoubleSpinBox  _valueDoubleSpinBox;
-        QSlider         _valueSlider;
-        QPushButton     _resetPushButton;
+    protected:
+        QDoubleSpinBox*     _valueDoubleSpinBox;
+        QSlider*            _valueSlider;
+        QPushButton*        _resetPushButton;
     };
 
 public:

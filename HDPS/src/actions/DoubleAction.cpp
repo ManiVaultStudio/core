@@ -2,6 +2,11 @@
 
 #include "../Application.h"
 
+#include <QHBoxLayout>
+#include <QDoubleSpinBox>
+#include <QPushButton>
+#include <QSlider>
+
 namespace hdps {
 
 namespace gui {
@@ -150,34 +155,65 @@ void DoubleAction::setUpdateDuringDrag(const bool& updateDuringDrag)
 
 DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const Configuration& configuration /*= Configuration::All*/) :
     WidgetAction::Widget(parent, doubleAction),
-    _layout(),
-    _valueDoubleSpinBox(),
-    _valueSlider(Qt::Horizontal),
-    _resetPushButton("")
+    _valueDoubleSpinBox(nullptr),
+    _valueSlider(nullptr),
+    _resetPushButton(nullptr)
 {
     setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
 
-    _valueDoubleSpinBox.setFixedWidth(60);
-    _resetPushButton.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
+    auto layout = new QHBoxLayout();
 
-    _layout.setMargin(0);
+    setLayout(layout);
 
-    if (configuration & Configuration::SpinBox)
-        _layout.addWidget(&_valueDoubleSpinBox);
-    else
-        _valueDoubleSpinBox.hide();
+    layout->setMargin(0);
 
-    if (configuration & Configuration::Slider)
-        _layout.addWidget(&_valueSlider);
-    else
-        _valueSlider.hide();
+    if (configuration & Configuration::SpinBox) {
+        _valueDoubleSpinBox = new QDoubleSpinBox();
+        
+        _valueDoubleSpinBox->setFixedWidth(60);
 
-    if (configuration & Configuration::Reset)
-        _layout.addWidget(&_resetPushButton);
-    else
-        _resetPushButton.hide();
+        layout->addWidget(_valueDoubleSpinBox);
 
-    setLayout(&_layout);
+        connect(_valueDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, doubleAction](double value) {
+            doubleAction->setValue(value);
+        });
+    }
+
+    if (configuration & Configuration::Slider) {
+        _valueSlider = new QSlider(Qt::Horizontal);
+        
+        layout->addWidget(_valueSlider);
+
+        const auto onUpdateAction = [this, doubleAction]() -> void {
+            doubleAction->setValue(static_cast<double>(_valueSlider->value()) / static_cast<double>(SLIDER_MULTIPLIER));
+        };
+
+        connect(_valueSlider, &QSlider::valueChanged, this, [this, doubleAction, onUpdateAction](int value) {
+            if (!doubleAction->getUpdateDuringDrag())
+                return;
+
+            onUpdateAction();
+        });
+
+        connect(_valueSlider, &QSlider::sliderReleased, this, [this, doubleAction, onUpdateAction]() {
+            if (doubleAction->getUpdateDuringDrag())
+                return;
+
+            onUpdateAction();
+        });
+    }
+
+    if (configuration & Configuration::Reset) {
+        _resetPushButton = new QPushButton();
+
+        layout->addWidget(_resetPushButton);
+
+        _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
+
+        connect(_resetPushButton, &QPushButton::clicked, this, [this, doubleAction]() {
+            doubleAction->reset();
+        });
+    }
 
     const auto valueString = [](const double& value, const std::uint32_t& decimals) -> QString {
         return QString::number(value, 'f', decimals);
@@ -186,58 +222,43 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
     const auto setToolTips = [this, doubleAction, valueString]() {
         const auto toolTip = QString("%1: %2%3").arg(doubleAction->text(), valueString(doubleAction->getValue(), doubleAction->getDecimals()), doubleAction->getSuffix());
 
-        _valueDoubleSpinBox.setToolTip(toolTip);
-        _valueSlider.setToolTip(toolTip);
+        if (_valueDoubleSpinBox)
+            _valueDoubleSpinBox->setToolTip(toolTip);
+
+        if (_valueSlider)
+            _valueSlider->setToolTip(toolTip);
     };
-
-    connect(&_valueDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, doubleAction](double value) {
-        doubleAction->setValue(value);
-    });
-
-    const auto onUpdateAction = [this, doubleAction]() -> void {
-        doubleAction->setValue(static_cast<double>(_valueSlider.value()) / static_cast<double>(SLIDER_MULTIPLIER));
-    };
-
-    connect(&_valueSlider, &QSlider::valueChanged, this, [this, doubleAction, onUpdateAction](int value) {
-        if (!doubleAction->getUpdateDuringDrag())
-            return;
-
-        onUpdateAction();
-    });
-
-    connect(&_valueSlider, &QSlider::sliderReleased, this, [this, doubleAction, onUpdateAction]() {
-        if (doubleAction->getUpdateDuringDrag())
-            return;
-
-        onUpdateAction();
-    });
 
     const auto onUpdateValue = [this, doubleAction, setToolTips]() {
         const auto value = doubleAction->getValue();
 
-        if (value != _valueDoubleSpinBox.value())
-            _valueDoubleSpinBox.setValue(value);
+        if (_valueDoubleSpinBox && value != _valueDoubleSpinBox->value())
+            _valueDoubleSpinBox->setValue(value);
 
-        if (value * SLIDER_MULTIPLIER != _valueSlider.value())
-            _valueSlider.setValue(value * static_cast<double>(SLIDER_MULTIPLIER));
+        if (_valueSlider && value * SLIDER_MULTIPLIER != _valueSlider->value())
+            _valueSlider->setValue(value * static_cast<double>(SLIDER_MULTIPLIER));
 
-        _resetPushButton.setEnabled(doubleAction->canReset());
+        if (_resetPushButton)
+            _resetPushButton->setEnabled(doubleAction->canReset());
 
         setToolTips();
     };
 
     const auto onUpdateValueRange = [this, doubleAction]() {
-        QSignalBlocker spinBoxBlocker(&_valueDoubleSpinBox), sliderBlocker(&_valueSlider);
+        QSignalBlocker spinBoxBlocker(_valueDoubleSpinBox), sliderBlocker(_valueSlider);
 
         const auto minimum = doubleAction->getMinimum();
-
-        _valueDoubleSpinBox.setMinimum(minimum);
-        _valueSlider.setMinimum(minimum * SLIDER_MULTIPLIER);
-
         const auto maximum = doubleAction->getMaximum();
 
-        _valueDoubleSpinBox.setMaximum(maximum);
-        _valueSlider.setMaximum(maximum * SLIDER_MULTIPLIER);
+        if (_valueDoubleSpinBox) {
+            _valueDoubleSpinBox->setMinimum(minimum);
+            _valueDoubleSpinBox->setMaximum(maximum);
+        }
+        
+        if (_valueSlider) {
+            _valueSlider->setMinimum(minimum * SLIDER_MULTIPLIER);
+            _valueSlider->setMaximum(maximum * SLIDER_MULTIPLIER);
+        }
     };
 
     connect(doubleAction, &DoubleAction::minimumChanged, this, [this, doubleAction, onUpdateValueRange](const double& minimum) {
@@ -249,9 +270,12 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
     });
 
     const auto onUpdateSuffix = [this, doubleAction, setToolTips]() {
-        QSignalBlocker spinBoxBlocker(&_valueDoubleSpinBox);
+        if (!_valueDoubleSpinBox)
+            return;
 
-        _valueDoubleSpinBox.setSuffix(doubleAction->getSuffix());
+        QSignalBlocker doubleSpinBoxBlocker(_valueDoubleSpinBox);
+
+        _valueDoubleSpinBox->setSuffix(doubleAction->getSuffix());
 
         setToolTips();
     };
@@ -261,9 +285,12 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
     });
 
     const auto onUpdateDecimals = [this, doubleAction]() {
-        QSignalBlocker spinBoxBlocker(&_valueDoubleSpinBox);
+        if (!_valueDoubleSpinBox)
+            return;
 
-        _valueDoubleSpinBox.setDecimals(doubleAction->getDecimals());
+        QSignalBlocker doubleSpinBoxBlocker(_valueDoubleSpinBox);
+
+        _valueDoubleSpinBox->setDecimals(doubleAction->getDecimals());
     };
 
     connect(doubleAction, &DoubleAction::decimalsChanged, this, [this, doubleAction, onUpdateDecimals](const std::int32_t& decimals) {
@@ -271,12 +298,11 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
     });
     
     const auto onUpdateDefaultValue = [this, valueString, doubleAction]() -> void {
-        _resetPushButton.setToolTip(QString("Reset %1 to: %2").arg(doubleAction->text(), valueString(doubleAction->getDefaultValue(), doubleAction->getDecimals())));
-    };
+        if (!_resetPushButton)
+            return;
 
-    connect(&_resetPushButton, &QPushButton::clicked, this, [this, doubleAction]() {
-        doubleAction->reset();
-    });
+        _resetPushButton->setToolTip(QString("Reset %1 to: %2").arg(doubleAction->text(), valueString(doubleAction->getDefaultValue(), doubleAction->getDecimals())));
+    };
 
     connect(doubleAction, &DoubleAction::valueChanged, this, [this, doubleAction, onUpdateValue](const double& value) {
         onUpdateValue();
