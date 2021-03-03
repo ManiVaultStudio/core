@@ -58,6 +58,7 @@ public:
     double getDefaultValue() const;
     void setDefaultValue(const double& defaultValue);
 
+    bool canReset() const;
     void reset();
 
     float getMinimum() const;

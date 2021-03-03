@@ -4,9 +4,6 @@
 
 #include "../widgets/ColorPickerPushButton.h"
 
-#include <QHBoxLayout>
-#include <QComboBox>
-
 class QWidget;
 
 namespace hdps {
@@ -27,30 +24,32 @@ class ColorAction : public WidgetAction
 public:
     class Widget : public WidgetAction::Widget {
     public:
-        Widget(QWidget* widget, ColorAction* colorAction);
-
-        ColorPickerPushButton& getColorPickerPushButton() {
-            return _colorPickerPushButton;
-        }
-
-    private:
-        QHBoxLayout             _layout;
-        ColorPickerPushButton   _colorPickerPushButton;
+        Widget(QWidget* widget, ColorAction* colorAction, const bool& resettable = true);
     };
 
 public:
-    ColorAction(QObject* parent, const QString& title = "", const QColor& color = Qt::gray);
+    ColorAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
 
     QWidget* createWidget(QWidget* parent) override;
 
     QColor getColor() const;
     void setColor(const QColor& color);
 
+    QColor getDefaultColor() const;
+    void setDefaultColor(const QColor& defaultColor);
+
+    bool canReset() const;
+    void reset();
+
 signals:
     void colorChanged(const QColor& color);
+    void defaultColorChanged(const QColor& defaultColor);
 
 protected:
-    QColor      _color;
+    QColor  _color;
+    QColor  _defaultColor;
+
+    static const QColor DEFAULT_COLOR;
 };
 
 }

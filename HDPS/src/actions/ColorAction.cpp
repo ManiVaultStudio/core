@@ -1,17 +1,24 @@
 #include "ColorAction.h"
+#include "Application.h"
 
 #include <QDebug>
+#include <QHBoxLayout>
+#include <QComboBox>
 
 namespace hdps {
 
 namespace gui {
 
-ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const QColor& color /*= Qt::gray*/) :
+const QColor ColorAction::DEFAULT_COLOR = Qt::gray;
+
+ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/) :
     WidgetAction(parent),
-    _color()
+    _color(),
+    _defaultColor()
 {
     setText(title);
     setColor(color);
+    setDefaultColor(defaultColor);
 }
 
 QWidget* ColorAction::createWidget(QWidget* parent)
@@ -34,22 +41,48 @@ void ColorAction::setColor(const QColor& color)
     emit colorChanged(_color);
 }
 
-ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction) :
-    WidgetAction::Widget(parent, colorAction),
-    _layout(),
-    _colorPickerPushButton(this)
+QColor ColorAction::getDefaultColor() const
 {
-    _layout.setMargin(0);
-    _layout.addWidget(&_colorPickerPushButton);
+    return _defaultColor;
+}
 
-    setLayout(&_layout);
+void ColorAction::setDefaultColor(const QColor& defaultColor)
+{
+    if (defaultColor == _defaultColor)
+        return;
 
-    connect(&_colorPickerPushButton, &ColorPickerPushButton::colorChanged, this, [this, colorAction](const QColor& color) {
+    _defaultColor = defaultColor;
+
+    emit defaultColorChanged(_defaultColor);
+}
+
+bool ColorAction::canReset() const
+{
+    return _color != _defaultColor;
+}
+
+void ColorAction::reset()
+{
+    setColor(_defaultColor);
+}
+
+ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction, const bool& resettable /*= true*/) :
+    WidgetAction::Widget(parent, colorAction)
+{
+    auto layout = new QHBoxLayout();
+    auto colorPickerPushButton = new ColorPickerPushButton();
+
+    layout->setMargin(0);
+    layout->addWidget(colorPickerPushButton);
+
+    setLayout(layout);
+
+    connect(colorPickerPushButton, &ColorPickerPushButton::colorChanged, this, [this, colorAction](const QColor& color) {
         colorAction->setColor(color);
     });
 
-    const auto updateColorPickerPushButton = [this, colorAction]() -> void {
-        _colorPickerPushButton.setColor(colorAction->getColor());
+    const auto updateColorPickerPushButton = [this, colorAction, colorPickerPushButton]() -> void {
+        colorPickerPushButton->setColor(colorAction->getColor());
     };
 
     connect(colorAction, &ColorAction::colorChanged, this, [this, updateColorPickerPushButton](const QColor& color) {
@@ -57,6 +90,29 @@ ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction) :
     });
 
     updateColorPickerPushButton();
+
+    if (resettable) {
+        auto resetPushButton = new QPushButton();
+
+        resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
+        resetPushButton->setToolTip(QString("Reset %1").arg(colorAction->text()));
+
+        layout->addWidget(resetPushButton);
+
+        connect(resetPushButton, &QPushButton::clicked, this, [this, colorAction]() {
+            colorAction->reset();
+        });
+
+        const auto onUpdateColor = [resetPushButton, colorAction]() -> void {
+            resetPushButton->setEnabled(colorAction->canReset());
+        };
+
+        connect(colorAction, &ColorAction::colorChanged, this, [this, onUpdateColor](const QColor& color) {
+            onUpdateColor();
+        });
+
+        onUpdateColor();
+    }
 }
 
 }

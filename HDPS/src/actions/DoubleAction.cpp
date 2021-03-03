@@ -59,6 +59,11 @@ void DoubleAction::setDefaultValue(const double& defaultValue)
     emit defaultValueChanged(_defaultValue);
 }
 
+bool DoubleAction::canReset() const
+{
+    return _value != _defaultValue;
+}
+
 void DoubleAction::reset()
 {
     setValue(_defaultValue);
@@ -216,7 +221,7 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
         if (value * SLIDER_MULTIPLIER != _valueSlider.value())
             _valueSlider.setValue(value * static_cast<double>(SLIDER_MULTIPLIER));
 
-        _resetPushButton.setEnabled(doubleAction->getValue() != doubleAction->getDefaultValue());
+        _resetPushButton.setEnabled(doubleAction->canReset());
 
         setToolTips();
     };

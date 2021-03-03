@@ -27,7 +27,7 @@ public:
      * Constructor
      * @param parent Pointer to parent widget
      */
-    ColorPickerPushButton(QWidget* parent);
+    ColorPickerPushButton(QWidget* parent = nullptr);
 
 public: // Getters/setters
 

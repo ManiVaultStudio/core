@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QPainter>
 
-ColorPickerPushButton::ColorPickerPushButton(QWidget* parent) :
+ColorPickerPushButton::ColorPickerPushButton(QWidget* parent /*= nullptr*/) :
     QPushButton(parent),
     _colorDialog(this),
     _color(Qt::gray),
