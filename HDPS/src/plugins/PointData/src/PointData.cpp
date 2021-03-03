@@ -10,9 +10,9 @@
 
 #include <cstring>
 #include <type_traits>
+#include <queue>
 
 #include "graphics/Vector2f.h"
-
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
@@ -173,6 +173,61 @@ void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const
     }
 }
 
+void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
+{
+    const Points* currentDataset = this;
+
+    std::queue<const Points*> subsetChain;
+    // Walk back in the chain of derived data until we find the original source
+    while (currentDataset->isDerivedData())
+    {
+        // If the current set is a subset then store it on the stack to traverse later
+        if (!isFull())
+        {
+            subsetChain.push(currentDataset);
+        }
+        currentDataset = &Points::getSourceData(*currentDataset);
+    }
+
+    // We now have a non-derived dataset bound, push it if its also a subset
+    if (!currentDataset->isFull())
+        subsetChain.push(currentDataset);
+
+    // Traverse down the stack applying indexing
+    globalIndices.resize(getNumPoints(), 0);
+    std::iota(globalIndices.begin(), globalIndices.end(), 0);
+
+    while (!subsetChain.empty())
+    {
+        const Points& subset = *subsetChain.front();
+        subsetChain.pop();
+
+        for (int i = 0; i < globalIndices.size(); i++)
+        {
+            globalIndices[i] = subset.indices[globalIndices[i]];
+        }
+    }
+}
+
+void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
+{
+    // Find the global indices of this dataset
+    std::vector<unsigned int> localGlobalIndices;
+    getGlobalIndices(localGlobalIndices);
+
+    // In an array the size of the full raw data, mark selected points as true
+    std::vector<bool> globalSelection(Points::getSourceData(*this).getNumRawPoints(), false);
+    for (const unsigned int& selectionIndex : selectionIndices)
+        globalSelection[selectionIndex] = true;
+
+    // For all local points find out which are selected
+    selected.resize(localGlobalIndices.size(), false);
+    for (int i = 0; i < localGlobalIndices.size(); i++)
+    {
+        if (globalSelection[localGlobalIndices[i]])
+            selected[i] = true;
+    }
+}
 
 hdps::DataSet* Points::copy() const
 {
@@ -184,7 +239,7 @@ hdps::DataSet* Points::copy() const
 
 QString Points::createSubset() const
 {
-    const hdps::DataSet& selection = _core->requestSelection(getDataName());
+    const hdps::DataSet& selection = getSelection();
 
     return _core->createSubsetFromSelection(selection, *this, "Subset");
 }

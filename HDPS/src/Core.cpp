@@ -2,7 +2,6 @@
 
 #include "MainWindow.h"
 #include "PluginManager.h"
-#include "DataManager.h"
 
 #include "exceptions/SetNotFoundException.h"
 
@@ -12,9 +11,9 @@
 #include "ViewPlugin.h"
 #include "RawData.h"
 #include "Set.h"
-#include "DataConsumer.h"
 
 #include <QMessageBox>
+#include <algorithm>
 
 namespace hdps
 {
@@ -36,7 +35,7 @@ Core::~Core()
 void Core::init()
 {
     _pluginManager = std::make_unique<plugin::PluginManager>(*this);
-    _dataManager = std::make_unique<DataManager>();
+    _dataManager = std::make_unique<DataManager>(this);
 
     _pluginManager->loadPlugins();
 }
@@ -58,6 +57,11 @@ void Core::addPlugin(plugin::Plugin* plugin)
         case plugin::Type::VIEW:
         {
             _mainWindow.addPlugin(plugin);
+
+            // Notify of datasets in system
+            for (auto& set : _dataManager->allSets())
+                notifyDataAdded(set.first);
+
             // fallthrough
         }
 
@@ -79,6 +83,9 @@ void Core::addPlugin(plugin::Plugin* plugin)
         {
             _mainWindow.addPlugin(analysis);
         }
+        // Notify of datasets in system
+        for (auto& set : _dataManager->allSets())
+            notifyDataAdded(set.first);
     }
     // If it is a loader plugin it should call loadData
     if (plugin->getType() == plugin::Type::LOADER)
@@ -98,17 +105,6 @@ void Core::addPlugin(plugin::Plugin* plugin)
     if (plugin->getType() == plugin::Type::WRITER)
     {
         dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
-    }
-    // If the plugin is a data consumer, notify it about all the data present in the core
-    plugin::DataConsumer* dataConsumer = dynamic_cast<plugin::DataConsumer*>(plugin);
-    if (dataConsumer)
-    {
-        for (const auto& pair : _dataManager->allSets())
-        {
-            const DataSet& set = *pair.second;
-            if (supportsDataSet(dataConsumer, set.getName()))
-                dataConsumer->dataAdded(set.getName());
-        }
     }
 }
 
@@ -133,30 +129,26 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     return setName;
 }
 
-void Core::removeData(const QString dataName)
+void Core::removeDataset(const QString datasetName)
 {
-    QStringList removedSets = _dataManager->removeRawData(dataName);
+    _dataManager->removeDataset(datasetName);
 
-    for (const QString& name : removedSets)
-    {
-        notifyDataRemoved(name);
-    }
+    notifyDataRemoved(datasetName);
 }
 
-const QString Core::createDerivedData(const QString kind, const QString nameRequest, const QString sourceSetName)
+const QString Core::createDerivedData(const QString nameRequest, const QString sourceDatasetName)
 {
-    const DataSet& sourceSet = requestData(sourceSetName);
+    const DataSet& sourceSet = requestData(sourceDatasetName);
+    DataType dataType = sourceSet.getDataType();
 
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager->createPlugin(kind);
+    QString pluginName = _pluginManager->createPlugin(dataType._type);
     // Request it from the core
-    RawData& derivedData = requestRawData(pluginName);
-
-    derivedData.setDerived(true, sourceSet.getDataName());
+    RawData& rawData = requestRawData(pluginName);
 
     // Create an initial full set, but no selection because it is shared with the source data
-    DataSet* fullSet = derivedData.createDataSet();
-    fullSet->_sourceSetName = sourceSetName;
+    DataSet* fullSet = rawData.createDataSet();
+    fullSet->_sourceSetName = sourceDatasetName;
     fullSet->_derived = true;
 
     // Set properties of the new set
@@ -208,6 +200,40 @@ DataSet& Core::requestData(const QString name)
     }
 }
 
+std::vector<QString> Core::requestAllDataNames()
+{
+    const auto& datasetMap = _dataManager->allSets();
+
+    std::vector<QString> datasetNames(datasetMap.size());
+
+    int i = 0;
+    for (auto it = datasetMap.begin(); it != datasetMap.end(); ++it, i++)
+    {
+        datasetNames[i] = it->second.get()->getName();
+    }
+    return datasetNames;
+}
+
+std::vector<QString> Core::requestAllDataNames(const std::vector<DataType> dataTypes)
+{
+    const auto& datasetMap = _dataManager->allSets();
+
+    std::vector<QString> datasetNames(datasetMap.size());
+
+    int i = 0;
+    for (auto it = datasetMap.begin(); it != datasetMap.end(); ++it, i++)
+    {
+        for (DataType dt : dataTypes)
+        {
+            if (it->second.get()->getDataType() == dt)
+            {
+                datasetNames[i] = it->second.get()->getName();
+            }
+        }
+    }
+    return datasetNames;
+}
+
 DataSet& Core::requestSelection(const QString name)
 {
     try
@@ -220,81 +246,93 @@ DataSet& Core::requestSelection(const QString name)
     }
 }
 
+void Core::registerEventListener(EventListener* eventListener)
+{
+    _eventListeners.push_back(eventListener);
+}
+
+void Core::unregisterEventListener(EventListener* eventListener)
+{
+    _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
+}
+
 /**
  * Goes through all plug-ins stored in the core and calls the 'dataAdded' function
  * on all plug-ins that inherit from the DataConsumer interface.
  */
-void Core::notifyDataAdded(const QString name)
+void Core::notifyDataAdded(const QString datasetName)
 {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
-    {
-        if (supportsDataSet(dataConsumer, name))
-            dataConsumer->dataAdded(name);
-    }
+    DataType dt = requestData(datasetName).getDataType();
+
+    DataAddedEvent dataEvent;
+    dataEvent.dataSetName = datasetName;
+    dataEvent.dataType = dt;
+    
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(&dataEvent);
 }
 
 /**
 * Goes through all plug-ins stored in the core and calls the 'dataChanged' function
 * on all plug-ins that inherit from the DataConsumer interface.
 */
-void Core::notifyDataChanged(const QString name)
+void Core::notifyDataChanged(const QString datasetName)
 {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
-    {
-        if (supportsDataSet(dataConsumer, name))
-            dataConsumer->dataChanged(name);
-    }
+    DataType dt = requestData(datasetName).getDataType();
+
+    DataChangedEvent dataEvent;
+    dataEvent.dataSetName = datasetName;
+    dataEvent.dataType = dt;
+
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(&dataEvent);
 }
 
 /**
 * Goes through all plug-ins stored in the core and calls the 'dataRemoved' function
 * on all plug-ins that inherit from the DataConsumer interface.
 */
-void Core::notifyDataRemoved(const QString name)
+void Core::notifyDataRemoved(const QString datasetName)
 {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
-    {
-        dataConsumer->dataRemoved(name);
-    }
+    DataType dt = requestData(datasetName).getDataType();
+
+    DataRemovedEvent dataEvent;
+    dataEvent.dataSetName = datasetName;
+    dataEvent.dataType = dt;
+
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(&dataEvent);
 }
 
 /** Notify all data consumers that a selection has changed. */
-void Core::notifySelectionChanged(const QString dataName)
+void Core::notifySelectionChanged(const QString datasetName)
 {
-    for (plugin::DataConsumer* dataConsumer : getDataConsumers())
-    {
-        dataConsumer->selectionChanged(dataName);
-    }
+    DataType dt = requestData(datasetName).getDataType();
+
+    SelectionChangedEvent dataEvent;
+    dataEvent.dataSetName = datasetName;
+    dataEvent.dataType = dt;
+
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(&dataEvent);
+}
+
+/** Notify all event listeners that a dataset has been renamed. */
+void Core::notifyDataRenamed(const QString oldName, const QString newName)
+{
+    DataType dt = requestData(newName).getDataType();
+
+    DataRenamedEvent dataEvent;
+    dataEvent.oldName = oldName;
+    dataEvent.dataSetName = newName;
+    dataEvent.dataType = dt;
+
+    for (EventListener* listener : _eventListeners)
+        listener->onDataEvent(&dataEvent);
 }
 
 gui::MainWindow& Core::gui() const {
     return _mainWindow;
-}
-
-/** Checks if the given data consumer supports the kind data in the given set. */
-bool Core::supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName)
-{
-    const hdps::DataSet& set = requestData(setName);
-    const RawData& rawData = requestRawData(set.getDataName());
-
-    return dataConsumer->supportedDataTypes().contains(rawData.getDataType());
-}
-
-/** Retrieves all data consumers from the plug-in list. */
-std::vector<plugin::DataConsumer*> Core::getDataConsumers()
-{
-    std::vector<plugin::DataConsumer*> dataConsumers;
-    for (auto& kv : _plugins)
-    {
-        for (int i = 0; i < kv.second.size(); ++i)
-        {
-            plugin::DataConsumer* dc = dynamic_cast<plugin::DataConsumer*>(kv.second[i].get());
-
-            if (dc)
-                dataConsumers.push_back(dc);
-        }
-    }
-    return dataConsumers;
 }
 
 /** Destroys all plug-ins kept by the core */

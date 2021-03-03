@@ -47,11 +47,7 @@ public:
 
     void init() override;
 
-    void dataAdded(const QString name) Q_DECL_OVERRIDE;
-    void dataChanged(const QString name) Q_DECL_OVERRIDE;
-    void dataRemoved(const QString name) Q_DECL_OVERRIDE;
-    void selectionChanged(const QString dataName) Q_DECL_OVERRIDE;
-    DataTypes supportedDataTypes() const Q_DECL_OVERRIDE;
+    void onDataEvent(DataEvent* dataEvent);
 
     ScatterplotWidget* _scatterPlotWidget;
     hdps::DataTypes supportedColorTypes;

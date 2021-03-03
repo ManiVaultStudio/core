@@ -2,11 +2,15 @@
 #define HDPS_COREINTERFACE_H
 
 #include <QString>
+#include <vector>
+#include <functional>
 
 namespace hdps
 {
     class DataSet;
     class RawData;
+    class DataType;
+    class EventListener;
 
 class CoreInterface
 {
@@ -19,13 +23,18 @@ public:
     virtual const QString addData(const QString kind, const QString name) = 0;
 
     /**
-     * Removes a RawData object and all of the data sets associated with this data.
-     * Other data objects derived from this data object are converted to non-derived data.
-     * Notifies all plug-ins of the removed data sets automatically.
+     * Removes a Dataset. Other datasets derived from this dataset are 
+     * converted to non-derived data.
+     * Notifies all plug-ins of the removed dataset automatically.
      */
-    //virtual void removeData(const QString dataName) = 0;
+    virtual void removeDataset(const QString datasetName) = 0;
 
-    virtual const QString createDerivedData(const QString dataType, const QString name, const QString sourceName) = 0;
+    /**
+     * Creates a dataset derived from a source dataset.
+     * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
+     * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
+     */
+    virtual const QString createDerivedData(const QString nameRequest, const QString sourceDatasetName) = 0;
 
     /**
      * Creates a copy of the given selection set and gives it a unique name based
@@ -35,16 +44,21 @@ public:
     virtual QString createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) = 0;
 
     /**
-    * Request a selection from the data manager by its name.
-    */
-    virtual DataSet& requestSelection(const QString name) = 0;
-
-    /**
      * Requests a dataset from the core which has the same unique name
      * as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
     virtual DataSet& requestData(const QString name) = 0;
+
+    /**
+    * Request all data set names.
+    */
+    virtual std::vector<QString> requestAllDataNames() = 0;
+
+    /**
+    * Request names for data sets of a specific type.
+    */
+    virtual std::vector<QString> requestAllDataNames(const std::vector<DataType> dataTypes) = 0;
 
     template <class SetType>
     SetType& requestData(const QString name)
@@ -52,14 +66,16 @@ public:
         return dynamic_cast<SetType&>(requestData(name));
     }
 
-    /** Notify all data consumers that a new dataset has been added to the core. */
-    virtual void notifyDataAdded(const QString name) = 0;
-    /** Notify all data consumers that a dataset has been changed. */
-    virtual void notifyDataChanged(const QString name) = 0;
-    /** Notify all data consumers that a dataset has been removed. */
-    virtual void notifyDataRemoved(const QString name) = 0;
-    /** Notify all data consumers that a selection has changed. */
-    virtual void notifySelectionChanged(const QString dataName) = 0;
+    /** Notify registered listeners that a new dataset has been added to the core. */
+    virtual void notifyDataAdded(const QString datasetName) = 0;
+    /** Notify registered listeners that a dataset has been changed. */
+    virtual void notifyDataChanged(const QString datasetName) = 0;
+
+    /** Notify registered listeners that a selection has changed. */
+    virtual void notifySelectionChanged(const QString datasetName) = 0;
+
+    /** Notify all event listeners that a dataset has been renamed. */
+    virtual void notifyDataRenamed(const QString oldName, const QString newName) = 0;
 
 protected:
 
@@ -68,10 +84,20 @@ protected:
      * unique name as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    virtual RawData& requestRawData(const QString name) = 0;
+    virtual RawData& requestRawData(const QString datasetName) = 0;
+
+    /**
+    * Request a selection from the data manager by its corresponding raw data name.
+    */
+    virtual DataSet& requestSelection(const QString rawdataName) = 0;
+
+    virtual void registerEventListener(EventListener* eventListener) = 0;
+
+    virtual void unregisterEventListener(EventListener* eventListener) = 0;
 
     friend class RawData;
     friend class DataSet;
+    friend class EventListener;
 };
 
 } // namespace hdps
