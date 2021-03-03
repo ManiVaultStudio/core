@@ -2,10 +2,9 @@
 
 #include "WidgetAction.h"
 
-#include <QHBoxLayout>
-#include <QComboBox>
-
 class QWidget;
+class QComboBox;
+class QPushButton;
 
 namespace hdps {
 
@@ -25,11 +24,11 @@ class OptionAction : public WidgetAction
 public:
     class Widget : public WidgetAction::Widget {
     public:
-        Widget(QWidget* widget, OptionAction* optionAction);
+        Widget(QWidget* widget, OptionAction* optionAction, const bool& resettable = false);
 
     private:
-        QHBoxLayout     _layout;
-        QComboBox       _comboBox;
+        QComboBox*      _comboBox;
+        QPushButton*    _resetPushButton;
     };
 
 public:
@@ -44,6 +43,12 @@ public:
     std::int32_t getCurrentIndex() const;
     void setCurrentIndex(const std::int32_t& currentIndex);
 
+    std::int32_t getDefaultIndex() const;
+    void setDefaultIndex(const std::int32_t& defaultIndex);
+
+    bool canReset() const;
+    void reset();
+
     QString getCurrentText() const;
     void setCurrentText(const QString& currentText);
 
@@ -52,11 +57,13 @@ public:
 signals:
     void optionsChanged(const QStringList& options);
     void currentIndexChanged(const std::int32_t& currentIndex);
+    void defaultIndexChanged(const std::int32_t& defaultIndex);
     void currentTextChanged(const QString& currentText);
 
 protected:
     QStringList     _options;
     std::int32_t    _currentIndex;
+    std::int32_t    _defaultIndex;
     QString         _currentText;
 };
 

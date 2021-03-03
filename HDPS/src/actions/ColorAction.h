@@ -24,7 +24,7 @@ class ColorAction : public WidgetAction
 public:
     class Widget : public WidgetAction::Widget {
     public:
-        Widget(QWidget* widget, ColorAction* colorAction, const bool& resettable = true);
+        Widget(QWidget* widget, ColorAction* colorAction, const bool& resettable = false);
     };
 
 public:
