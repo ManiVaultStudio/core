@@ -54,6 +54,15 @@ ColorDimensionAction::Widget::Widget(QWidget* parent, ColorDimensionAction* colo
     WidgetAction::Widget(parent, colorDimensionAction),
     _layout()
 {
+    _layout.addWidget(new OptionAction::Widget(this, &colorDimensionAction->_colorDimensionAction, false));
+
+    setLayout(&_layout);
+}
+
+ColorDimensionAction::PopupWidget::PopupWidget(QWidget* parent, ColorDimensionAction* colorDimensionAction) :
+    WidgetAction::PopupWidget(parent, colorDimensionAction),
+    _layout()
+{
     _layout.addWidget(new OptionAction::Widget(this, &colorDimensionAction->_colorDimensionAction));
 
     setLayout(&_layout);

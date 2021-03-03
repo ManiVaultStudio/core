@@ -24,7 +24,7 @@ class OptionAction : public WidgetAction
 public:
     class Widget : public WidgetAction::Widget {
     public:
-        Widget(QWidget* widget, OptionAction* optionAction, const bool& resettable = false);
+        Widget(QWidget* widget, OptionAction* optionAction, const bool& resettable = true);
 
     private:
         QComboBox*      _comboBox;

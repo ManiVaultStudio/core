@@ -12,7 +12,15 @@ public:
     public:
         Widget(QWidget* parent, ColorDimensionAction* colorDimensionAction);
 
-    private:
+    protected:
+        QHBoxLayout     _layout;
+    };
+
+    class PopupWidget : public PluginAction::PopupWidget {
+    public:
+        PopupWidget(QWidget* parent, ColorDimensionAction* colorDimensionAction);
+
+    protected:
         QHBoxLayout     _layout;
     };
 

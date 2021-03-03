@@ -65,7 +65,7 @@ void ColorAction::reset()
     setColor(_defaultColor);
 }
 
-ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction, const bool& resettable /*= false*/) :
+ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction, const bool& resettable /*= true*/) :
     WidgetAction::Widget(parent, colorAction)
 {
     auto layout = new QHBoxLayout();

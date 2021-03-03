@@ -13,18 +13,17 @@
 class ColoringAction : public PluginAction
 {
 public:
-    class Widget : public PluginAction::Widget {
+    class StackedWidget : public QStackedWidget {
     public:
-        class StackedWidget : public QStackedWidget {
-        public:
-            QSize sizeHint() const override { return currentWidget()->sizeHint(); }
-            QSize minimumSizeHint() const override { return currentWidget()->minimumSizeHint(); }
-        };
+        QSize sizeHint() const override { return currentWidget()->sizeHint(); }
+        QSize minimumSizeHint() const override { return currentWidget()->minimumSizeHint(); }
+    };
 
+    class Widget : public PluginAction::Widget {
     public:
         Widget(QWidget* parent, ColoringAction* coloringAction);
 
-    private:
+    protected:
         QHBoxLayout                         _layout;
         QLabel                              _colorByLabel;
         hdps::gui::OptionAction::Widget     _colorByWidget;

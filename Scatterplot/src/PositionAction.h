@@ -56,7 +56,6 @@ public:
 protected:
     hdps::gui::OptionAction     _xDimensionAction;
     hdps::gui::OptionAction     _yDimensionAction;
-    hdps::gui::StandardAction   _resetAction;
 
     friend class Widget;
 };

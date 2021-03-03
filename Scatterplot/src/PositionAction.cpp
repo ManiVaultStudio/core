@@ -8,33 +8,28 @@ using namespace hdps::gui;
 PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Position"),
     _xDimensionAction(this, "X"),
-    _yDimensionAction(this, "Y"),
-    _resetAction(this, "Reset")
+    _yDimensionAction(this, "Y")
 {
     _xDimensionAction.setToolTip("X dimension");
     _yDimensionAction.setToolTip("Y dimension");
-    _resetAction.setToolTip("Reset position settings");
 
-    const auto updateResetAction = [this, scatterplotPlugin]() {
-        _resetAction.setEnabled(!scatterplotPlugin->getCurrentDataset().isEmpty() && !(_xDimensionAction.getCurrentIndex() == 0 && _yDimensionAction.getCurrentIndex() == 1));
-    };
-
-    connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::uint32_t& currentIndex) {
+    connect(&_xDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin](const std::uint32_t& currentIndex) {
         scatterplotPlugin->setXDimension(currentIndex);
-        updateResetAction();
     });
 
-    connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin, updateResetAction](const std::uint32_t& currentIndex) {
+    connect(&_yDimensionAction, &OptionAction::currentIndexChanged, [this, scatterplotPlugin](const std::uint32_t& currentIndex) {
         scatterplotPlugin->setYDimension(currentIndex);
-        updateResetAction();
     });
 
-    connect(&_resetAction, &QAction::triggered, this, [this]() {
+    connect(&_yDimensionAction, &OptionAction::optionsChanged, [this, scatterplotPlugin](const QStringList& options) {
         _xDimensionAction.setCurrentIndex(0);
-        _yDimensionAction.setCurrentIndex(1);
-    });
+        _xDimensionAction.setDefaultIndex(0);
 
-    updateResetAction();
+        const auto yIndex = options.count() >= 2 ? 1 : 0;
+
+        _yDimensionAction.setCurrentIndex(yIndex);
+        _yDimensionAction.setDefaultIndex(yIndex);
+    });
 }
 
 QMenu* PositionAction::getContextMenu()
@@ -49,8 +44,6 @@ QMenu* PositionAction::getContextMenu()
 
     menu->addMenu(xDimensionMenu);
     menu->addMenu(yDimensionMenu);
-    menu->addSeparator();
-    menu->addAction(&_resetAction);
 
     return menu;
 }
@@ -91,10 +84,10 @@ PositionAction::Widget::Widget(QWidget* parent, PositionAction* positionAction) 
     _yDimensionLabel.setToolTip(positionAction->_yDimensionAction.toolTip());
 
     _layout.addWidget(&_xDimensionLabel);
-    _layout.addWidget(new OptionAction::Widget(this, &positionAction->_xDimensionAction));
+    _layout.addWidget(new OptionAction::Widget(this, &positionAction->_xDimensionAction, false));
 
     _layout.addWidget(&_yDimensionLabel);
-    _layout.addWidget(new OptionAction::Widget(this, &positionAction->_yDimensionAction));
+    _layout.addWidget(new OptionAction::Widget(this, &positionAction->_yDimensionAction, false));
 
     setLayout(&_layout);
 }
@@ -109,8 +102,6 @@ PositionAction::PopupWidget::PopupWidget(QWidget* parent, PositionAction* positi
 
     layout->addWidget(new QLabel("Y-dimension:"), 1, 0);
     layout->addWidget(new OptionAction::Widget(this, &positionAction->_yDimensionAction), 1, 1);
-    
-    layout->addWidget(new StandardAction::PushButton(this, &positionAction->_resetAction), 2, 1);
 
     setLayout(layout);
 }

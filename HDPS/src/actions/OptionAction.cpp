@@ -113,7 +113,7 @@ bool OptionAction::hasSelection() const
     return _currentIndex >= 0;
 }
 
-OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const bool& resettable /*= false*/) :
+OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const bool& resettable /*= true*/) :
     WidgetAction::Widget(parent, optionAction),
     _comboBox(new QComboBox()),
     _resetPushButton(nullptr)
