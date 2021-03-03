@@ -27,8 +27,7 @@ public:
         Widget(QWidget* widget, OptionAction* optionAction, const bool& resettable = true);
 
     private:
-        QComboBox*      _comboBox;
-        QPushButton*    _resetPushButton;
+        QComboBox*  _comboBox;
     };
 
 public:

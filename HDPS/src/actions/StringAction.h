@@ -2,9 +2,6 @@
 
 #include "WidgetAction.h"
 
-#include <QHBoxLayout>
-#include <QLineEdit>
-
 class QWidget;
 
 namespace hdps {
@@ -25,11 +22,7 @@ class StringAction : public WidgetAction
 public:
     class Widget : public WidgetAction::Widget {
     public:
-        Widget(QWidget* widget, StringAction* stringAction);
-
-    private:
-        QHBoxLayout     _layout;
-        QLineEdit       _lineEdit;
+        Widget(QWidget* widget, StringAction* stringAction, const bool& resettable = true);
     };
 
 public:
@@ -37,14 +30,22 @@ public:
 
     QWidget* createWidget(QWidget* parent) override;
 
-    QString getValue() const;
-    void setValue(const QString& value);
+    QString getString() const;
+    void setString(const QString& string);
+
+    QString getDefaultString() const;
+    void setDefaultString(const QString& defaultString);
+
+    bool canReset() const;
+    void reset();
 
 signals:
-    void valueChanged(const QString& value);
+    void stringChanged(const QString& string);
+    void defaultStringChanged(const QString& defaultString);
 
 protected:
-    QString     _value;
+    QString     _string;
+    QString     _defaultString;
 };
 
 }

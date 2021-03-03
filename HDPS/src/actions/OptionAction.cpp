@@ -115,8 +115,7 @@ bool OptionAction::hasSelection() const
 
 OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const bool& resettable /*= true*/) :
     WidgetAction::Widget(parent, optionAction),
-    _comboBox(new QComboBox()),
-    _resetPushButton(nullptr)
+    _comboBox(new QComboBox())
 {
     auto layout = new QHBoxLayout();
 
@@ -166,19 +165,19 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const 
     });
 
     if (resettable) {
-        _resetPushButton = new QPushButton();
+        auto resetPushButton = new QPushButton();
 
-        _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-        _resetPushButton->setToolTip(QString("Reset %1").arg(optionAction->text()));
+        resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
+        resetPushButton->setToolTip(QString("Reset %1").arg(optionAction->text()));
 
-        layout->addWidget(_resetPushButton);
+        layout->addWidget(resetPushButton);
 
-        connect(_resetPushButton, &QPushButton::clicked, this, [this, optionAction]() {
+        connect(resetPushButton, &QPushButton::clicked, this, [this, optionAction]() {
             optionAction->reset();
         });
 
-        const auto onUpdateCurrentIndex = [this, optionAction]() -> void {
-            _resetPushButton->setEnabled(optionAction->canReset());
+        const auto onUpdateCurrentIndex = [this, optionAction, resetPushButton]() -> void {
+            resetPushButton->setEnabled(optionAction->canReset());
         };
 
         connect(optionAction, &OptionAction::currentIndexChanged, this, [this, onUpdateCurrentIndex](const QColor& color) {

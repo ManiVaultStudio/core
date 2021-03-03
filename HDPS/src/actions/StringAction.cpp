@@ -1,33 +1,12 @@
 #include "StringAction.h"
+#include "Application.h"
+
+#include <QHBoxLayout>
+#include <QLineEdit>
 
 namespace hdps {
 
 namespace gui {
-
-StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction) :
-    WidgetAction::Widget(parent, stringAction),
-    _layout(),
-    _lineEdit()
-{
-    _layout.setMargin(0);
-    _layout.addWidget(&_lineEdit);
-
-    setLayout(&_layout);
-
-    const auto updateLineEdit = [this, stringAction]() {
-        _lineEdit.setText(stringAction->getValue());
-    };
-
-    connect(stringAction, &StringAction::valueChanged, this, [this, updateLineEdit](const QString& value) {
-        updateLineEdit();
-    });
-
-    connect(&_lineEdit, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
-        stringAction->setValue(text);
-    });
-
-    updateLineEdit();
-}
 
 StringAction::StringAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent)
@@ -40,19 +19,94 @@ QWidget* StringAction::createWidget(QWidget* parent)
     return new Widget(parent, this);
 }
 
-QString StringAction::getValue() const
+QString StringAction::getString() const
 {
-    return _value;
+    return _string;
 }
 
-void StringAction::setValue(const QString& value)
+void StringAction::setString(const QString& string)
 {
-    if (value == _value)
+    if (string == _string)
         return;
 
-    _value = value;
+    _string = string;
 
-    emit valueChanged(_value);
+    emit stringChanged(_string);
+}
+
+QString StringAction::getDefaultString() const
+{
+    return _defaultString;
+}
+
+void StringAction::setDefaultString(const QString& defaultString)
+{
+    if (defaultString == _defaultString)
+        return;
+
+    _defaultString = defaultString;
+
+    emit defaultStringChanged(_defaultString);
+}
+
+bool StringAction::canReset() const
+{
+    return _string != _defaultString;
+}
+
+void StringAction::reset()
+{
+    setString(_defaultString);
+}
+
+StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction, const bool& resettable /*= true*/) :
+    WidgetAction::Widget(parent, stringAction)
+{
+    auto layout = new QHBoxLayout();
+
+    auto lineEdit = new QLineEdit();
+
+    layout->setMargin(0);
+    layout->addWidget(lineEdit);
+
+    setLayout(layout);
+
+    const auto updateLineEdit = [this, stringAction, lineEdit]() {
+        lineEdit->setText(stringAction->getString());
+    };
+
+    connect(stringAction, &StringAction::stringChanged, this, [this, updateLineEdit](const QString& value) {
+        updateLineEdit();
+    });
+
+    connect(lineEdit, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
+        stringAction->setString(text);
+    });
+
+    if (resettable) {
+        auto resetPushButton = new QPushButton();
+
+        resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
+        resetPushButton->setToolTip(QString("Reset %1").arg(stringAction->text()));
+
+        layout->addWidget(resetPushButton);
+
+        connect(resetPushButton, &QPushButton::clicked, this, [this, stringAction]() {
+            stringAction->reset();
+        });
+
+        const auto onUpdateString = [this, stringAction, resetPushButton]() -> void {
+            resetPushButton->setEnabled(stringAction->canReset());
+        };
+
+        connect(stringAction, &StringAction::stringChanged, this, [this, onUpdateString](const QColor& color) {
+            onUpdateString();
+        });
+
+        onUpdateString();
+    }
+
+    updateLineEdit();
 }
 
 }
