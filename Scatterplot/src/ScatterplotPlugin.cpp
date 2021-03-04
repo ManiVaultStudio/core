@@ -127,7 +127,7 @@ void ScatterplotPlugin::onDataEvent(DataEvent* dataEvent)
     }
 }
 
-void ScatterplotPlugin::createSubset(const bool& fromSourceData /*= false*/)
+void ScatterplotPlugin::createSubset(const bool& fromSourceData /*= false*/, const QString& name /*= ""*/)
 {
     auto& loadedPoints  = _core->requestData<Points>(_currentDataSet);
     auto& subsetPoints  = loadedPoints.isDerivedData() && fromSourceData ? DataSet::getSourceData(loadedPoints) : loadedPoints;

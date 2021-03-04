@@ -24,7 +24,16 @@ class StandardAction : public QWidgetAction
 public:
     class PushButton : public QPushButton {
     public:
-        PushButton(QWidget* parent, QAction* action);
+    public:
+        enum Configuration {
+            Text    = 0x0001,
+            Icon    = 0x0002,
+
+            TextIcon = Text | Icon
+        };
+
+    public:
+        PushButton(QWidget* parent, QAction* action, const Configuration& configuration = Configuration::Text);
     };
 
     class CheckBox : public QCheckBox {

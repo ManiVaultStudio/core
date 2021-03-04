@@ -46,7 +46,7 @@ public:
     std::uint32_t getNumberOfSelectedPoints() const;
 
 public:
-    void createSubset(const bool& fromSourceData = false);
+    void createSubset(const bool& fromSourceData = false, const QString& name = "");
 
 public: // Dimension picking
     void setXDimension(const std::int32_t& dimensionIndex);

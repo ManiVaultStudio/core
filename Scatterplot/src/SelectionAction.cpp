@@ -15,7 +15,7 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _lassoAction(this, "Lasso"),
     _polygonAction(this, "Polygon"),
     _typeActionGroup(this),
-    _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
+    _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
     _modifierAddAction(this, "Add to selection"),
     _modifierRemoveAction(this, "Remove from selection"),
     _modifierActionGroup(this),
@@ -64,12 +64,10 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _invertSelectionAction.setToolTip("Invert the selection");
     _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process");
 
-    /*
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
     _modifierRemoveAction.setIcon(fontAwesome.getIcon("minus"));
-    */
 
     _typeAction.setOptions(_scatterplotPlugin->getSelectionTool().types.keys());
 
@@ -292,8 +290,8 @@ SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionActio
 
     layout->addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction, false));
     layout->addWidget(new DoubleAction::Widget(this, &selectionAction->_brushRadiusAction, DoubleAction::Widget::Slider));
-    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction));
-    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction));
+    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction, StandardAction::PushButton::Icon));
+    layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction, StandardAction::PushButton::Icon));
     layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_clearSelectionAction));
     layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_selectAllAction));
     layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_invertSelectionAction));
@@ -322,9 +320,11 @@ SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* sele
 
         layout->setMargin(0);
 
-        layout->addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction));
-        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction));
-        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction));
+        layout->addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction, false));
+        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction, StandardAction::PushButton::Icon));
+        layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction, StandardAction::PushButton::Icon));
+
+        layout->itemAt(0)->widget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
         auto widget = new QWidget();
 

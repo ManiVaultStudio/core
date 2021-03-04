@@ -10,7 +10,7 @@ StandardAction::StandardAction(QObject* parent, const QString& title /*= ""*/) :
     setText(title);
 }
 
-StandardAction::PushButton::PushButton(QWidget* parent, QAction* action) :
+StandardAction::PushButton::PushButton(QWidget* parent, QAction* action, const Configuration& configuration /*= Configuration::Text*/) :
     QPushButton(parent)
 {
     connect(this, &QPushButton::clicked, this, [this, action]() {
@@ -23,10 +23,10 @@ StandardAction::PushButton::PushButton(QWidget* parent, QAction* action) :
             action->setChecked(toggled);
     });
 
-    const auto updateUI = [this, action]() -> void {
+    const auto updateUI = [this, action, configuration]() -> void {
         setEnabled(action->isEnabled());
-        setText(action->text());
-        setIcon(action->icon().isNull() ? QIcon() : action->icon());
+        setText(configuration & Configuration::Text ? action->text() : "");
+        setIcon(configuration & Configuration::Icon && !action->icon().isNull() ? action->icon() : QIcon());
         setCheckable(action->isCheckable());
         setChecked(action->isChecked());
         setToolTip(action->toolTip());
