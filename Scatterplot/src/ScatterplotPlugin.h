@@ -4,7 +4,6 @@
 
 #include "Common.h"
 
-#include "widgets/DataSlot.h"
 #include "PixelSelectionTool.h"
 
 #include "ScatterplotWidget.h"
@@ -69,7 +68,7 @@ private:
     /** Updates the window title (includes the name of the loaded dataset) */
     void updateWindowTitle();
 
-protected: // Data loading
+public: // Data loading
 
     /**
      * Load point data
@@ -104,7 +103,6 @@ private:
     
 private:
     QString                         _currentDataSet;
-    DataSlot*                       _dataSlot;
     std::vector<hdps::Vector2f>     _points;
     unsigned int                    _numPoints;
     PixelSelectionTool*             _pixelSelectionTool;        /** Pixel selection tool */

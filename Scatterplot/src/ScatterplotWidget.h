@@ -12,6 +12,7 @@
 #include "widgets/ColormapWidget.h"
 
 #include "PixelSelectionToolRenderer.h"
+#include "DropDataTypesWidget.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
@@ -79,13 +80,6 @@ public:
     void setPointScaling(hdps::gui::PointScaling scalingMode);
     void setSigma(const float sigma);
 
-    /**
-     * Event filter
-     *@param target Target object
-     *@param event Event that occurred
-     */
-    bool eventFilter(QObject* target, QEvent* event) override;
-
     Bounds getBounds() const {
         return _dataBounds;
     }
@@ -125,28 +119,18 @@ public slots:
     void colormapdiscreteChanged(bool isDiscrete);
 
 private:
-    const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
-    Matrix3f toNormalisedCoordinates;
-    Matrix3f toIsotropicCoordinates;
-
-    bool _isInitialized = false;
-
+    const Matrix3f              toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
+    Matrix3f                    toNormalisedCoordinates;
+    Matrix3f                    toIsotropicCoordinates;
+    bool                        _isInitialized = false;
     RenderMode                  _renderMode = SCATTERPLOT;
     ColoringMode                _coloringMode = ColoringMode::ConstantColor;
-
-    /* Renderers */
-    PointRenderer               _pointRenderer;
-    DensityRenderer             _densityRenderer;
-    PixelSelectionToolRenderer   _pixelSelectionToolRenderer;
-
-
-    /* Auxiliary widgets */
-    ColormapWidget _colormapWidget;
-
-    /* Size of the scatterplot widget */
-    QSize _windowSize;
-
-    Bounds                  _dataBounds;
-
-    PixelSelectionTool&     _pixelSelectionTool;
+    PointRenderer               _pointRenderer;                     
+    DensityRenderer             _densityRenderer;                   
+    PixelSelectionToolRenderer  _pixelSelectionToolRenderer;        
+    ColormapWidget              _colormapWidget;                    
+    DropDataTypesWidget              _dropDataWidget;                    
+    QSize                       _windowSize;                        /** Size of the scatterplot widget */
+    Bounds                      _dataBounds;                        /** Bounds of the loaded data */
+    PixelSelectionTool&         _pixelSelectionTool;                
 };

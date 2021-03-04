@@ -25,7 +25,6 @@ using namespace hdps;
 ScatterplotPlugin::ScatterplotPlugin() :
     ViewPlugin("Scatterplot View"),
     _currentDataSet(),
-    _dataSlot(nullptr),
     _points(),
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
@@ -60,6 +59,7 @@ void ScatterplotPlugin::init()
     supportedDataTypes.append(ClusterType);
     supportedDataTypes.append(ColorType);
     
+    /*
     _dataSlot = new DataSlot(supportedDataTypes);
     
     _scatterPlotWidget = new ScatterplotWidget(*_pixelSelectionTool);
@@ -67,23 +67,46 @@ void ScatterplotPlugin::init()
     _dataSlot->addWidget(_scatterPlotWidget);
 
     _dataSlot->layout()->setMargin(0);
+    */
 
     auto layout = new QVBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(0);
     layout->addWidget(_settingsAction.createWidget(this));
-    layout->addWidget(_dataSlot, 1);
+    layout->addWidget(_scatterPlotWidget, 1);
 
     setLayout(layout);
 
+    /*
     connect(_dataSlot, &DataSlot::onDataInput, this, [this](const QString& datasetName, const DataType& dataType) {
-        if (dataType == PointType)
-            loadPointData(datasetName);
+        if (dataType == PointType) {
+            if (_currentDataSet.isEmpty()) {
+                loadPointData(datasetName);
+            } else {
+                auto loadAsMenu         = new QMenu();
+                auto loadAsPointData    = new QAction("As point data");
+                auto loadAsColorData    = new QAction("As color data");
+
+                connect(loadAsPointData, &QAction::triggered, this, [this, datasetName]() {
+                    loadPointData(datasetName);
+                });
+
+                connect(loadAsColorData, &QAction::triggered, this, [this, datasetName]() {
+                    loadColorData(datasetName);
+                });
+
+                loadAsMenu->addAction(loadAsPointData);
+                loadAsMenu->addAction(loadAsColorData);
+
+                loadAsMenu->exec(QCursor::pos());
+            }
+        }
 
         if (dataType == ClusterType || dataType == ColorType)
             loadColorData(datasetName);
     });
+    */
 
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
 

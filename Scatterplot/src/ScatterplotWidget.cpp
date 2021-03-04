@@ -2,6 +2,10 @@
 #include "PixelSelectionTool.h"
 #include "Application.h"
 
+#include "PointData.h"
+#include "ClusterData.h"
+#include "ColorData.h"
+
 #include "util/Math.h"
 
 #include <vector>
@@ -35,7 +39,8 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _colormapWidget(this),
     _pointRenderer(),
     _pixelSelectionToolRenderer(pixelSelectionTool),
-    _pixelSelectionTool(pixelSelectionTool)
+    _pixelSelectionTool(pixelSelectionTool),
+    _dropDataWidget(this, DataTypes({PointType, ColorType, ClusterType}))
 {
     setMouseTracking(true);
 
@@ -223,11 +228,6 @@ void ScatterplotWidget::setSigma(const float sigma)
     _densityRenderer.setSigma(sigma);
 
     update();
-}
-
-bool ScatterplotWidget::eventFilter(QObject* target, QEvent* event)
-{
-    return QWidget::eventFilter(target, event);
 }
 
 void ScatterplotWidget::initializeGL()
