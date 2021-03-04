@@ -360,5 +360,7 @@ SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* sele
 
     layout->addWidget(new StandardAction::CheckBox(this, &selectionAction->_notifyDuringSelectionAction), 3, 1);
 
+    layout->itemAtPosition(1, 1)->widget()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
     setLayout(layout);
 }
