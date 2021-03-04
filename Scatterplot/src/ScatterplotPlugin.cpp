@@ -25,7 +25,6 @@ using namespace hdps;
 ScatterplotPlugin::ScatterplotPlugin() :
     ViewPlugin("Scatterplot View"),
     _currentDataSet(),
-    _supportedColorTypes(),
     _dataSlot(nullptr),
     _points(),
     _numPoints(0),
@@ -56,12 +55,13 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 void ScatterplotPlugin::init()
 {
     DataTypes supportedDataTypes;
-    supportedDataTypes.append(PointType);
-    _dataSlot = new DataSlot(supportedDataTypes);
-    _supportedColorTypes.append(PointType);
-    _supportedColorTypes.append(ClusterType);
-    _supportedColorTypes.append(ColorType);
 
+    supportedDataTypes.append(PointType);
+    supportedDataTypes.append(ClusterType);
+    supportedDataTypes.append(ColorType);
+    
+    _dataSlot = new DataSlot(supportedDataTypes);
+    
     _scatterPlotWidget = new ScatterplotWidget(*_pixelSelectionTool);
 
     _dataSlot->addWidget(_scatterPlotWidget);
@@ -77,7 +77,14 @@ void ScatterplotPlugin::init()
 
     setLayout(layout);
 
-    connect(_dataSlot, &DataSlot::onDataInput, this, &ScatterplotPlugin::onDataInput);
+    connect(_dataSlot, &DataSlot::onDataInput, this, [this](const QString& datasetName, const DataType& dataType) {
+        if (dataType == PointType)
+            loadPointData(datasetName);
+
+        if (dataType == ClusterType || dataType == ColorType)
+            loadColorData(datasetName);
+    });
+
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
 
     registerDataEventByType(PointType, std::bind(&ScatterplotPlugin::onDataEvent, this, std::placeholders::_1));
@@ -123,7 +130,7 @@ void ScatterplotPlugin::onDataEvent(DataEvent* dataEvent)
         DataRenamedEvent* renamedEvent = (DataRenamedEvent*) dataEvent;
 
         if (renamedEvent->oldName == _currentDataSet)
-            onDataInput(renamedEvent->dataSetName);
+            loadPointData(renamedEvent->dataSetName);
     }
 }
 
@@ -217,7 +224,7 @@ void ScatterplotPlugin::selectPoints()
     _core->notifySelectionChanged(points.getName());
 }
 
-void ScatterplotPlugin::onDataInput(QString dataSetName)
+void ScatterplotPlugin::loadPointData(const QString& dataSetName)
 {
     _currentDataSet = dataSetName;
 
@@ -246,7 +253,7 @@ void ScatterplotPlugin::onDataInput(QString dataSetName)
     updateWindowTitle();
 }
 
-void ScatterplotPlugin::onColorDataInput(QString dataSetName)
+void ScatterplotPlugin::loadColorData(const QString& dataSetName)
 {
     DataSet& dataSet = _core->requestData(dataSetName);
 

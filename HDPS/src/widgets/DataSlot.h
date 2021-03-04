@@ -19,14 +19,14 @@ namespace hdps
             Q_OBJECT
         public:
             DataSlot(hdps::DataTypes supportedTypes);
-            
+
             void addWidget(QWidget* widget);
 
             void dragEnterEvent(QDragEnterEvent* event) override;
             void dropEvent(QDropEvent* event) override;
 
         signals:
-            void onDataInput(QString dataName);
+            void onDataInput(const QString& datasetName, const DataType& dataType);
 
         private:
             QHBoxLayout* _layout;

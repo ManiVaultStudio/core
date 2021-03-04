@@ -69,9 +69,19 @@ private:
     /** Updates the window title (includes the name of the loaded dataset) */
     void updateWindowTitle();
 
-public slots:
-    void onDataInput(QString dataSetName);
-    void onColorDataInput(QString dataSetName);
+protected: // Data loading
+
+    /**
+     * Load point data
+     * @param dataSetName Name of the point dataset
+     */
+    void loadPointData(const QString& dataSetName);
+
+    /**
+     * Load color data
+     * @param dataSetName Name of the color/cluster dataset
+     */
+    void loadColorData(const QString& dataSetName);
 
     void selectPoints();
 
@@ -80,11 +90,6 @@ signals:
     void selectionChanged();
 
 public:
-
-    /** Returns the supported drop color types */
-    hdps::DataTypes getSupportedColorTypes() const {
-        return _supportedColorTypes;
-    }
 
     /** Returns the scatter plot widget */
     ScatterplotWidget* getScatterplotWidget() {
@@ -99,7 +104,6 @@ private:
     
 private:
     QString                         _currentDataSet;
-    hdps::DataTypes                 _supportedColorTypes;
     DataSlot*                       _dataSlot;
     std::vector<hdps::Vector2f>     _points;
     unsigned int                    _numPoints;
