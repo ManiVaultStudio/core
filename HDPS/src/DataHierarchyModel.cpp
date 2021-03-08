@@ -97,6 +97,9 @@ namespace hdps
         if (role == Qt::DecorationRole) {
             return item->getIcon();
         }
+        if (role == Qt::ToolTipRole)
+            return item->getDataAtColumn(0);
+
         if (role != Qt::DisplayRole)
             return QVariant();
 

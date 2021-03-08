@@ -1,5 +1,5 @@
-#ifndef HDPS_SET_H
-#define HDPS_SET_H
+#ifndef HDPS_DATASET_H
+#define HDPS_DATASET_H
 
 #include "RawData.h"
 
@@ -88,12 +88,6 @@ public:
 
     }
 
-    // Should be protected, but can't because of DataManager needing access to the data
-    QString getDataName() const
-    {
-        return _dataName;
-    }
-
 public: // Properties
 
     /**
@@ -142,6 +136,16 @@ protected:
         return *static_cast<DataType*>(_rawData);
     }
 
+    QString getDataName() const
+    {
+        return _dataName;
+    }
+
+    QString getSourceName() const
+    {
+        return _sourceSetName;
+    }
+
     /**
      * Set whether this set represents all the data or only a subset
      */
@@ -162,8 +166,10 @@ private:
     QString _sourceSetName;
 
     friend class Core;
+    friend class DataManager;
+    friend class EventListener;
 };
 
 } // namespace hdps
 
-#endif // HDPS_SET_H
+#endif // HDPS_DATASET_H

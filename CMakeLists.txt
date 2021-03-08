@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "HdpsAllInOne")
+set(PROJECT "HDPS")
 
 PROJECT(${PROJECT})
 
@@ -15,8 +15,6 @@ if (HDPS_USE_GTEST)
     add_subdirectory(external/googletest)
 endif()
 
-add_subdirectory(CsvLoader)
-add_subdirectory(FcsLoader)
 add_subdirectory(BinLoader)
 add_subdirectory(HDPS)
 add_subdirectory(Scatterplot)
@@ -25,10 +23,6 @@ add_dependencies(PointData HDPS)
 add_dependencies(ScatterplotPlugin HDPS)
 add_dependencies(ScatterplotPlugin PointData)
 add_dependencies(ScatterplotPlugin ClusterData)
-add_dependencies(CsvLoader HDPS)
-add_dependencies(CsvLoader PointData)
-add_dependencies(FcsLoader HDPS)
-add_dependencies(FcsLoader PointData)
 add_dependencies(BinLoader HDPS)
 add_dependencies(BinLoader PointData)
 

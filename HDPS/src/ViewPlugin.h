@@ -6,10 +6,8 @@
 * Base plugin class for plugins that visualize data.
 */
 
-
 #include "widgets/DockableWidget.h"
 #include "PluginFactory.h"
-#include "DataConsumer.h"
 
 #include <QWidget>
 #include <QGridLayout>
@@ -19,17 +17,22 @@ namespace hdps
 namespace plugin
 {
 
-class ViewPlugin : public gui::DockableWidget, public Plugin, public DataConsumer
+class ViewPlugin : public gui::DockableWidget, public Plugin
 {
     Q_OBJECT
     
 public:
     ViewPlugin(QString name) : Plugin(Type::VIEW, name)
     {
-        
+        setObjectName(getGuiName());
     }
 
     ~ViewPlugin() override {};
+
+    /** Returns the icon of this plugin */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("binoculars");
+    }
 };
 
 class ViewPluginFactory : public PluginFactory

@@ -1,0 +1,111 @@
+name: HDPS-core
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+# for matrix check https://docs.github.com/en/actions/reference/specifications-for-github-hosted-runners
+jobs:
+  cross-platform-build:
+    name: Cross platform build
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on:  ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - name: Windows-msvc2017
+          os: windows-2016
+          compiler: msvc-2017
+          build-cversion: 15
+          build-runtime: MD
+          build-config: Release
+
+        # - name: Linux_gcc9
+        #   os: ubuntu-18.04
+        #   build-cc: gcc
+        #   build-cxx: g++
+        #   build-compiler: gcc
+        #   build-cversion: 9
+        #   build-config: Release
+        #   build-os: Linux
+        #   build-libcxx: libstdc++
+
+        # - name: Macos_xcode10.3
+        #   os: macos-10.14
+        #   build-cc: clang
+        #   build-cxx: clang++
+        #   build-compiler: apple-clang
+        #   build-cversion: "10.0"
+        #   build-config: Release
+        #   build-os: Macos
+        #   build-xcode-version: 10.3
+        #   build-libcxx: libc++
+
+    steps:
+      - name: Checkout the source
+        uses: actions/checkout@v2
+        with:
+            submodules: recursive
+            fetch-depth: 0
+
+      - name: Select Xcode for Mac only
+        if: startsWith(runner.os, 'macOS')
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_${{matrix.build-xcode-version}}.app
+
+      - name: Setup python version
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.7"
+
+      # windows-2016 need the SSHAgentFeature added
+      - name: Start ssh key agent
+        if: matrix.os == 'windows-2016'
+        run: |
+            choco install --no-progress -my openssh --params '"/SSHAgentFeature"'
+            refreshenv
+
+      - name: Start ssh key agent
+        uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.RULESSUPPORT_DEPLOY_KEY }}
+
+      - name: Install SSH deploy key for rulessupport
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.RULESSUPPORT_DEPLOY_KEY }}
+          known_hosts: github.com AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+
+      - name: Windows build
+        if: startsWith(runner.os, 'Windows')
+        #uses: hdps/github-actions/conan_windows_build@main
+        uses: hdps/github-actions/conan_windows_build@main
+        with:
+          conan-visual-version: ${{matrix.build-cversion}}
+          conan-visual-runtime: ${{matrix.build-runtime}}
+          conan-build-type: ${{matrix.build-config}}
+          conan-user: ${{secrets.LKEB_ARTIFACTORY_USER}}
+          conan-password: ${{secrets.LKEB_ARTIFACTORY_PASSWORD}}
+          conan-pem: ${{secrets.LKEB_CERT_CHAIN}}
+          rs_ssh_key: ${{ secrets.RULESSUPPORT_DEPLOY_KEY }}
+
+      - name: Linux Mac build
+        if: "!startsWith(runner.os, 'Windows')"
+        uses: hdps/github-actions/conan_linuxmac_build@main
+        with:
+          conan-compiler: ${{matrix.build-compiler}}
+          conan-cc: ${{matrix.build-cc}}
+          conan-cxx: ${{matrix.build-cxx}}
+          conan-compiler-version: ${{matrix.build-cversion}}
+          conan-libcxx-version: ${{matrix.build-libcxx}}
+          conan-build-type: ${{matrix.build-config}}
+          conan-build-os: ${{matrix.build-os}}
+          conan-user: ${{secrets.LKEB_ARTIFACTORY_USER}}
+          conan-password: ${{secrets.LKEB_ARTIFACTORY_PASSWORD}}
+          conan-pem: ${{secrets.LKEB_CERT_CHAIN}}
+

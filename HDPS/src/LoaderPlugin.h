@@ -45,6 +45,11 @@ public:
 
     ~LoaderPlugin() override {};
 
+    /** Returns the icon of this plugin */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-import");
+    }
+
 protected:
     /**
      * Asks the user for the name of a file to load data from. Opens a file dialog at the

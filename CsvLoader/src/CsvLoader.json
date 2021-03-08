@@ -1,6 +1,0 @@
-{
-    "name" : "CSV Loader",
-    "menuName" : "CSV (.csv)",
-    "version" : "1",
-    "dependencies" : ["Points"]
-}

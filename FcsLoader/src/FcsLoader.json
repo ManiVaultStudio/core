@@ -1,6 +1,0 @@
-{
-    "name" : "FCS Loader",
-    "menuName" : "FCS (.fcs)",
-    "version" : "1",
-    "dependencies" : ["Points"]
-}

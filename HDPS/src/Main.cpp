@@ -1,13 +1,14 @@
 #include "MainWindow.h"
 
-#include <QApplication>
 #include <QSurfaceFormat>
-#include <QFontDatabase>
+#include <QStyleFactory>
+
+#include "Application.h"
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setOrganizationName("CGV TU Delft");
-    QCoreApplication::setOrganizationDomain("graphics.tudelft.nl");
+    QCoreApplication::setOrganizationName("BioVault");
+    QCoreApplication::setOrganizationDomain("LUMC (LKEB) & TU Delft (CGV)");
     QCoreApplication::setApplicationName("HDPS");
     // Necessary to instantiate QWebEngine from a plugin
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts, true);
@@ -21,14 +22,14 @@ int main(int argc, char *argv[])
     QSurfaceFormat::setDefaultFormat(defaultFormat);
 #endif
 
-    QApplication app(argc, argv);
-
-    QFontDatabase::addApplicationFont(":/Fonts/fonts/FontAwesome.otf");
+    hdps::Application application(argc, argv);
 
     // Retina display support for Mac OS and X11:
     // AA_UseHighDpiPixmaps attribute is off by default in Qt 5.1 but will most
     // likely be on by default in a future release of Qt.
-    app.setAttribute(Qt::AA_UseHighDpiPixmaps);
+    application.setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+    //application.setStyle(QStyleFactory::create("Windows"));
 
     QIcon appIcon;
     appIcon.addFile(":/Icons/AppIcon32");
@@ -37,11 +38,12 @@ int main(int argc, char *argv[])
     appIcon.addFile(":/Icons/AppIcon256");
     appIcon.addFile(":/Icons/AppIcon512");
     appIcon.addFile(":/Icons/AppIcon1024");
-    app.setWindowIcon(appIcon);
+
+    application.setWindowIcon(appIcon);
 
     hdps::gui::MainWindow mainWindow;
-    mainWindow.centerAndResize(0.75f);
+    
     mainWindow.show();
 
-    return app.exec();
+    return application.exec();
 }

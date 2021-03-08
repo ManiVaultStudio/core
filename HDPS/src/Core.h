@@ -3,6 +3,9 @@
 
 #include "CoreInterface.h"
 #include "PluginType.h"
+#include "DataType.h"
+#include "DataManager.h"
+#include "event/EventListener.h"
 
 #include <memory>
 #include <unordered_map>
@@ -22,8 +25,6 @@ namespace gui
 {
     class MainWindow;
 }
-
-class DataManager;
 
 struct AnalysisNotFoundException : public std::exception
 {
@@ -73,13 +74,18 @@ public:
     const QString addData(const QString kind, const QString nameRequest) override;
 
     /**
-     * Removes a RawData object and all of the data sets associated with this data.
-     * Other data objects derived from this data object are converted to non-derived data.
-     * Notifies all plug-ins of the removed data sets automatically.
+     * Removes a Dataset object. Other datasets derived from this datasets are
+     * converted to non-derived data.
+     * Notifies all plug-ins of the removed data set automatically.
      */
-    void removeData(const QString dataName);// override;
+    void removeDataset(const QString datasetName) override;
 
-    const QString createDerivedData(const QString kind, const QString name, const QString sourceName) override;
+    /**
+     * Creates a dataset derived from a source dataset.
+     * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
+     * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
+     */
+    const QString createDerivedData(const QString nameRequest, const QString sourceDatasetName) override;
 
     /**
      * Creates a copy of the given selection set and gives it a unique name based
@@ -89,16 +95,11 @@ public:
     QString createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString newSetName) override;
 
     /**
-     * Requests an instance of a data type plugin from the core which has the same
-     * unique name as the given parameter. If no such instance can be found a fatal
+     * Requests a dataset from the core which has the same unique name
+     * as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    RawData& requestRawData(const QString name) override;
-
-    /**
-    * Request a dataset from the data manager by its name.
-    */
-    DataSet& requestData(const QString name) override;
+    DataSet& requestData(const QString datasetName) override;
 
     /**
     * Request an analysis by its name.
@@ -106,28 +107,51 @@ public:
     plugin::Plugin& requestAnalysis(const QString name) override;
 
     /**
-    * Requests the selection set belonging to the raw dataset with the given name.
+    * Request all data set names.
     */
-    DataSet& requestSelection(const QString name) override;
+    virtual std::vector<QString> requestAllDataNames() override;
+
+    /**
+    * Request names for data sets of a specific type.
+    */
+    virtual std::vector<QString> requestAllDataNames(const std::vector<DataType> dataTypes) override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
-    void notifyDataAdded(const QString name) override;
+    void notifyDataAdded(const QString datasetName) override;
     /** Notify all data consumers that a dataset has been changed. */
-    void notifyDataChanged(const QString name) override;
-    /** Notify all data consumers that a dataset has been removed. */
-    void notifyDataRemoved(const QString name) override;
+    void notifyDataChanged(const QString datasetName) override;
+
     /** Notify all data consumers that a selection has changed. */
-    void notifySelectionChanged(const QString dataName) override;
+    void notifySelectionChanged(const QString datasetName) override;
+
+    /** Notify all event listeners that a dataset has been renamed. */
+    void notifyDataRenamed(const QString oldName, const QString newName) override;
 
     /**
     * Returns a reference to the main window for adding widgets to it.
     */
     gui::MainWindow& gui() const;
+    
+protected:
+    /**
+     * Requests an instance of a data type plugin from the core which has the same
+     * unique name as the given parameter. If no such instance can be found a fatal
+     * error is thrown.
+     */
+    RawData& requestRawData(const QString name) override;
+
+    /**
+    * Requests the selection set belonging to the raw dataset with the given name.
+    */
+    DataSet& requestSelection(const QString rawdataName) override;
+
+    void registerEventListener(EventListener* eventListener) override;
+
+    void unregisterEventListener(EventListener* eventListener) override;
+
 private:
-    /** Checks if the given data consumer supports the kind data in the given set. */
-    bool supportsDataSet(plugin::DataConsumer* dataConsumer, QString setName);
-    /** Retrieves all data consumers from the plugin list. */
-    std::vector<plugin::DataConsumer*> getDataConsumers();
+    /** Notify all data consumers that a dataset has been removed. */
+    void notifyDataRemoved(const QString name);
 
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();
@@ -143,6 +167,9 @@ private:
 
     /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>, plugin::TypeHash> _plugins;
+
+    /** List of classes listening for core events */
+    std::vector<EventListener*> _eventListeners;
 };
 
 } // namespace hdps

@@ -11,6 +11,8 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 endif(MSVC)
 
+file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
+
 find_package(Qt5Widgets REQUIRED)
 
 set(POINTS_SOURCES
@@ -23,9 +25,18 @@ set(POINTS_SOURCES
     src/RandomAccessRange.h
 )
 
+set(POINTS_HEADERS
+    src/PointData.h
+    src/PointDataIterator.h
+    src/PointDataRange.h
+    src/PointView.h
+    src/RandomAccessRange.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h
+)
+
 source_group( Plugin FILES ${POINTS_SOURCES})
 
-include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
+include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${POINTS_SOURCES})
 
@@ -42,52 +53,36 @@ generate_export_header(${PROJECT})
 # Retrieve the file name of the generated export header.
 file(GLOB EXPORT_HEADER_FILE_NAME
     RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
+list(APPEND POINTS_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
 
 if(MSVC)
-    set(LIB_LINK_SUFFIX ".lib") 
+    set(LIB_LINK_SUFFIX ".lib")
 else()
     set(LIB_LINK_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif(MSVC)
-set(HDPS_LINK_LIBRARY "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
+set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
 
+set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
+
 # Copy the DLL, the LIB file and the export header of this library to the appropriate subdirectory
 # of the installation directory.
-add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_FILE:${PROJECT}>"
-    "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/Plugins/$<TARGET_FILE_NAME:${PROJECT}>"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "$<TARGET_LINKER_FILE:${PROJECT}>"
-    "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/lib/$<TARGET_LINKER_FILE_NAME:${PROJECT}>"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME}"
-    "$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/${EXPORT_HEADER_FILE_NAME}"
+install(TARGETS ${PROJECT}
+    RUNTIME DESTINATION Plugins COMPONENT SHAREDLIB
+    LIBRARY DESTINATION lib COMPONENT LINKLIB
+    ARCHIVE DESTINATION lib COMPONENT LINKLIB
+    PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
 )
 
-# Copy point data header and its depending bfloat16 header
+# PointData is needed to build other plugins - install it now.
 add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/PointData.h"
-    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointData.h"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/PointDataIterator.h"
-    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointDataIterator.h"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/PointDataRange.h"
-    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointDataRange.h"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/PointView.h"
-    "${INSTALL_DIR}/$<CONFIGURATION>/include/PointView.h"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/RandomAccessRange.h"
-    "${INSTALL_DIR}/$<CONFIGURATION>/include/RandomAccessRange.h"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h"
-    "${INSTALL_DIR}/$<CONFIGURATION>/include/biovault_bfloat16.h"
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}/hdps/src/plugins/PointData
+        --config $<CONFIGURATION>
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )
 
 if (HDPS_USE_GTEST)

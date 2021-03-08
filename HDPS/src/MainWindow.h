@@ -1,13 +1,18 @@
-#ifndef HDPS_MAINWINDOW_H
-#define HDPS_MAINWINDOW_H
+#pragma once
 
 #include "ui_MainWindow.h"
 #include "Core.h"
-#include "CentralWidget.h"
+#include "LogDockWidget.h"
+#include "DataHierarchy.h"
+#include "widgets/Accordion.h"
 
 #include <QMainWindow>
 #include <QAction>
-#include <QByteArray>
+#include <QSharedPointer>
+
+// Advanced docking system
+#include "DockManager.h"
+#include "DockAreaWidget.h"
 
 namespace Ui
 {
@@ -27,7 +32,6 @@ namespace plugin
 namespace gui
 {
 
-class SettingsWidget;
 class LogDockWidget;
 class DataHierarchy;
 
@@ -35,8 +39,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
-	~MainWindow() override;
+    MainWindow(QWidget *parent = nullptr);
 
     /**
     * Adds a new item to the import menu.
@@ -53,21 +56,7 @@ public:
     */
     QAction* addMenuAction(plugin::Type type, QString name);
 
-    /**
-    * Adds the given view plugin to the main area of the window as a dockable widget.
-    */
-    void addView(plugin::ViewPlugin* plugin);
-
-    /**
-    * Adds the given settings widget to the settings area of the window.
-    */
-    void addSettings(SettingsWidget* settings);
-
-    /**
-     * Moves the window to the center of the screen and resizes it to a fraction
-     * of the total screen size defined by 'coverage'.
-     */
-    void centerAndResize(float coverage);
+    
 
     /**
     * Allows access to the core, which is created by this MainWindow. Useful for
@@ -75,36 +64,90 @@ public:
     */
     CoreInterface& getCore() { return *_core;  }
 
-public slots:
-    /**
-    * Store the current window layout so we can restore it later
-    */
-    void storeLayout();
+public: // Adding plugins
 
     /**
-    * Restore the configuration of dockable widgets
-    */
-    void restoreLayout();
+     * Dock (visible) plugin to the window
+     * @param plugin Plugin to add (view or analysis)
+     */
+    void addPlugin(plugin::Plugin* plugin);
+
+private: // Docking
+
+    /**
+     * TODO
+     */
+    void addDockWidget(QWidget* widget, const QString& windowTitle, const ads::DockWidgetArea& dockWidgetArea, ads::CDockAreaWidget* dockAreaWidget = nullptr);
+
+private: // Window geometry persistence
+
+    /**
+     * Invoked when the window position changes
+     * @param moveEvent Move event that occurred
+     */
+    void moveEvent(QMoveEvent* moveEvent) override;
+
+    /**
+     * Invoked when the window size changes
+     * @param resizeEvent Resize event that occurred
+     */
+    void resizeEvent(QResizeEvent* resizeEvent) override;
+
+    /** Restores the window geometry (position and size) from the application settings */
+    void restoreWindowGeometryFromSettings();
+
+    /** Save the window geometry (position and size) to application settings */
+    void saveWindowGeometryToSettings();
+
+    /**
+     * Applies default window geometry (center position and resized with \p coverage)
+     * @param coverage Fraction of the total screen size
+     */
+    void setDefaultWindowGeometry(const float& coverage = 0.7f);
+
+private: // Docking
+
+    /** Sets up docking */
+    void initializeDocking();
+
+    /** Sets up the docking area for view plugins (central widget) */
+    void initializeCentralDockingArea();
+
+    /** Sets up the docking area for analysis plugins */
+    void initializeAnalysisPluginsDockingArea();
+
+    /** Sets up the docking area for settings */
+    void initializeSettingsDockingArea();
+
+    /** Sets up the docking area for logging */
+    void initializeLoggingDockingArea();
+    
+    /** Updates the visibility of the central dock widget (depending on its content) */
+    void updateCentralWidgetVisibility();
+
+    /**
+     * Return a list of (open) view plugin dock widgets
+     * @param open Whether to only include open dock widgets
+     * @return View plugin dock area widgets
+     */
+    QList<ads::CDockWidget*> getViewPluginDockWidgets(const bool& openOnly = true);
 
 private:
-    void changeEvent(QEvent *event) override;
-    void closeEvent(QCloseEvent *event) override;
-    void hideEvent(QHideEvent *event) override;
-    void showEvent(QShowEvent *event) override;
+    QSharedPointer<Core>            _core;                          /** HDPS core */
+    QSharedPointer<Accordion>       _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
+    QSharedPointer<DataHierarchy>   _dataHierarchy;                 /** Data hierarchy viewer widget */
 
-private:
-    std::unique_ptr<Core> _core;
-    std::unique_ptr<LogDockWidget> _logDockWidget;
-
-    CentralWidget* _centralWidget;
-    DataHierarchy* _dataHierarchy;
-    std::unique_ptr<SettingsWidget> _settingsWidget;
-
-    QByteArray _windowConfiguration;
+private: // Docking
+    ads::CDockManager*      _dockManager;                   /** Manager for docking */
+    ads::CDockAreaWidget*   _analysisPluginsDockArea;       /** Docking area for analysis plugins */
+    ads::CDockAreaWidget*   _centralDockArea;               /** Docking area for view plugins */
+    ads::CDockAreaWidget*   _settingsDockArea;              /** Docking area for settings */
+    ads::CDockAreaWidget*   _loggingDockArea;               /** Docking area for logging */
+    ads::CDockWidget*       _analysisPluginsDockWidget;     /** Dock widget for analysis plugins */
+    ads::CDockWidget*       _centralDockWidget;             /** Dock widget for view plugins */
+    ads::CDockWidget*       _settingsDockWidget;            /** Dock widget for settings */
+    ads::CDockWidget*       _loggingDockWidget;             /** Dock widget for logging */
 };
 
-} // namespace gui
-
-} // namespace hdps
-
-#endif // HDPS_MAINWINDOW_H
+}
+}

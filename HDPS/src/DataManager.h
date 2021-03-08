@@ -3,6 +3,7 @@
 
 #include "RawData.h"
 #include "Set.h"
+#include "CoreInterface.h"
 
 #include <QObject> // To support signals
 #include <QString>
@@ -80,15 +81,19 @@ class DataManager : public QObject
 {
     Q_OBJECT
 public:
+    DataManager(CoreInterface* core) :
+        _core(core)
+    {
+
+    }
+
     void addRawData(RawData* rawData);
     QString addSet(QString requestedName, DataSet* set);
     void addSelection(QString dataName, DataSet* selection);
 
-    /**
-     * Removes raw data and all sets and selections belonging to this data.
-     * Returns a list of set names that have been removed as a result of this.
-     */
-    QStringList removeRawData(QString name);
+    void renameSet(QString oldName, QString requestedName);
+
+    void removeDataset(QString datasetName);
 
     RawData& getRawData(QString name);
     DataSet& getSet(QString name);
@@ -124,6 +129,9 @@ private:
     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
     */
     std::unordered_map<QString, std::unique_ptr<DataSet>> _selections;
+
+    /** Non-owning pointer to core for event notifications */
+    CoreInterface* _core;
 };
 
 } // namespace hdps
