@@ -1,8 +1,11 @@
 #include "SettingsAction.h"
 
+#include "Application.h"
 #include "ScatterplotPlugin.h"
 
 #include "util/Timer.h"
+
+#include <QMenu>
 
 using namespace hdps::gui;
 
@@ -15,7 +18,7 @@ SettingsAction::SettingsAction(ScatterplotPlugin* scatterplotPlugin) :
     _subsetAction(scatterplotPlugin),
     _selectionAction(scatterplotPlugin)
 {
-    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
     _renderModeAction.setIcon(fontAwesome.getIcon("image"));
     _plotAction.setIcon(fontAwesome.getIcon("paint-brush"));

@@ -7,6 +7,8 @@
 #include <QWidget>
 #include <QLabel>
 
+class ScatterplotPlugin;
+
 class DropDataTypesWidget : public QWidget
 {
 public:
@@ -32,10 +34,11 @@ public:
     };
 
 public:
-    DropDataTypesWidget(QWidget* parent, const hdps::DataTypes& dataTypes);
+    DropDataTypesWidget(ScatterplotPlugin* scatterplotPlugin);
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
 protected:
-    QList<DropDataTypeWidget*>   _dropDataTypeWidgets;
+    ScatterplotPlugin*                  _scatterplotPlugin;
+    QMap<QString, DropDataTypeWidget*>  _dropDataTypeWidgets;
 };

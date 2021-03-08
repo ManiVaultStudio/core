@@ -4,22 +4,19 @@
 
 #include "Common.h"
 
-#include "PixelSelectionTool.h"
-
-#include "ScatterplotWidget.h"
 #include "SettingsAction.h"
 
 using namespace hdps::plugin;
 
-// =============================================================================
-// View
-// =============================================================================
-
 class Points;
-class SettingsWidget;
+
+class PixelSelectionTool;
+class ScatterplotWidget;
+class DropDataTypesWidget;
 
 namespace hdps
 {
+    class CoreInterface;
     class Vector2f;
 }
 
@@ -32,13 +29,11 @@ public:
     ~ScatterplotPlugin() override;
     
     /** Returns the icon of this plugin */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("braille");
-    }
+    QIcon getIcon() const override;
 
     void init() override;
 
-    void onDataEvent(DataEvent* dataEvent);
+    void onDataEvent(hdps::DataEvent* dataEvent);
 
     QString getCurrentDataset() const;
     std::uint32_t getNumberOfPoints() const;
@@ -61,7 +56,7 @@ public: // Selection
     void clearSelection();
     void invertSelection();
 
-    PixelSelectionTool& getSelectionTool();
+    PixelSelectionTool* getSelectionTool();
 
 private:
 
@@ -89,11 +84,8 @@ signals:
     void selectionChanged();
 
 public:
-
-    /** Returns the scatter plot widget */
-    ScatterplotWidget* getScatterplotWidget() {
-        return _scatterPlotWidget;
-    }
+    ScatterplotWidget* getScatterplotWidget();
+    hdps::CoreInterface* getCore();
 
 private:
     void updateData();
@@ -105,11 +97,13 @@ private:
     QString                         _currentDataSet;
     std::vector<hdps::Vector2f>     _points;
     unsigned int                    _numPoints;
-    PixelSelectionTool*             _pixelSelectionTool;        /** Pixel selection tool */
     
-protected:// Widgets
-    ScatterplotWidget*              _scatterPlotWidget;
-    SettingsAction                  _settingsAction;
+    
+protected:
+    PixelSelectionTool*     _pixelSelectionTool;
+    ScatterplotWidget*      _scatterPlotWidget;
+    DropDataTypesWidget*    _dropDataWidget;
+    SettingsAction          _settingsAction;
 };
 
 // =============================================================================

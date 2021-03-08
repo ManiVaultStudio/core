@@ -12,7 +12,6 @@
 #include "widgets/ColormapWidget.h"
 
 #include "PixelSelectionToolRenderer.h"
-#include "DropDataTypesWidget.h"
 
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_3_3_Core>
@@ -129,7 +128,6 @@ private:
     DensityRenderer             _densityRenderer;                   
     PixelSelectionToolRenderer  _pixelSelectionToolRenderer;        
     ColormapWidget              _colormapWidget;                    
-    DropDataTypesWidget              _dropDataWidget;                    
     QSize                       _windowSize;                        /** Size of the scatterplot widget */
     Bounds                      _dataBounds;                        /** Bounds of the loaded data */
     PixelSelectionTool&         _pixelSelectionTool;                

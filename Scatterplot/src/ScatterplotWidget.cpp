@@ -2,10 +2,6 @@
 #include "PixelSelectionTool.h"
 #include "Application.h"
 
-#include "PointData.h"
-#include "ClusterData.h"
-#include "ColorData.h"
-
 #include "util/Math.h"
 
 #include <vector>
@@ -39,8 +35,7 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _colormapWidget(this),
     _pointRenderer(),
     _pixelSelectionToolRenderer(pixelSelectionTool),
-    _pixelSelectionTool(pixelSelectionTool),
-    _dropDataWidget(this, DataTypes({PointType, ColorType, ClusterType}))
+    _pixelSelectionTool(pixelSelectionTool)
 {
     setMouseTracking(true);
 

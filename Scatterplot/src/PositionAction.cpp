@@ -3,6 +3,8 @@
 
 #include "ScatterplotPlugin.h"
 
+#include <QMenu>
+
 using namespace hdps::gui;
 
 PositionAction::PositionAction(ScatterplotPlugin* scatterplotPlugin) :

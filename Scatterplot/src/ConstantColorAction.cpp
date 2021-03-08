@@ -2,8 +2,10 @@
 #include "Application.h"
 
 #include "ScatterplotPlugin.h"
+#include "ScatterplotWidget.h"
 
 #include <QHBoxLayout>
+#include <QMenu>
 
 using namespace hdps::gui;
 

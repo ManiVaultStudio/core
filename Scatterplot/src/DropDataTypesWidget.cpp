@@ -1,34 +1,50 @@
 #include "DropDataTypesWidget.h"
+#include "ScatterplotPlugin.h"
 #include "Application.h"
+
+#include "PointData.h"
+#include "ClusterData.h"
+#include "ColorData.h"
 
 #include <QHBoxLayout>
 #include <QResizeEvent>
+#include <QDragEnterEvent>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QMimeData>
 
 using namespace hdps;
 using namespace hdps::gui;
 
-DropDataTypesWidget::DropDataTypesWidget(QWidget* parent, const hdps::DataTypes& dataTypes) :
-    QWidget(parent),
+DropDataTypesWidget::DropDataTypesWidget(ScatterplotPlugin* scatterplotPlugin) :
+    QWidget(reinterpret_cast<QWidget*>(scatterplotPlugin)),
+    _scatterplotPlugin(scatterplotPlugin),
     _dropDataTypeWidgets()
 {
-    for (auto dataType : dataTypes)
-        _dropDataTypeWidgets << new DropDataTypeWidget(dataType);
+    _dropDataTypeWidgets["point"]   = new DropDataTypeWidget(PointType);
+    _dropDataTypeWidgets["color"]   = new DropDataTypeWidget(PointType);
+    _dropDataTypeWidgets["cluster"] = new DropDataTypeWidget(PointType);
 
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(0);
 
-    for (auto dropDataTypeWidget : _dropDataTypeWidgets) {
-        layout->addWidget(dropDataTypeWidget);
-        dropDataTypeWidget->installEventFilter(this);
-    }
+    layout->addWidget(_dropDataTypeWidgets["point"]);
+    layout->addWidget(_dropDataTypeWidgets["color"]);
+    layout->addWidget(_dropDataTypeWidgets["cluster"]);
 
-    parent->installEventFilter(this);
+    for (auto dropDataTypeWidget : _dropDataTypeWidgets.values())
+        dropDataTypeWidget->installEventFilter(this);
+
+    setAcceptDrops(true);
+
+    this->installEventFilter(this);
+    _scatterplotPlugin->installEventFilter(this);
 
     setLayout(layout);
+
+    setStyleSheet("{background-color: red;}");
 }
 
 bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
@@ -46,8 +62,41 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::DragEnter:
         {
+            if (dynamic_cast<QWidget*>(target) != this)
+                break;
+
+            const auto dragEnterEvent   = static_cast<QDragEnterEvent*>(event);
+            const auto mimeData         = dragEnterEvent->mimeData();
+            const auto mimeText         = mimeData->text();
+            const auto tokens           = mimeText.split("\n");
+            const auto datasetName      = tokens[0];
+            const auto dataType         = DataType(tokens[1]);
+            
+            if (dataType == PointType) {
+                const auto currentDatasetName = _scatterplotPlugin->getCurrentDataset();
+
+                if (currentDatasetName.isEmpty()) {
+                    _dropDataTypeWidgets["point"]->activate();
+                }
+                else {
+                    const auto currentDataset     = _scatterplotPlugin->getCore()->requestData<Points>(currentDatasetName);
+                    const auto candidateDataset   = _scatterplotPlugin->getCore()->requestData<Points>(datasetName);
+
+                    if (currentDataset.getNumPoints() != candidateDataset.getNumPoints()) {
+                        _dropDataTypeWidgets["point"]->activate();
+                    } else {
+                        _dropDataTypeWidgets["point"]->activate();
+                        _dropDataTypeWidgets["color"]->activate();
+                    }
+                }
+
+                //dragEnterEvent
+            }
+
+            /*
             for (auto dropDataTypeWidget : _dropDataTypeWidgets)
                 dropDataTypeWidget->setActive(true);
+            */
 
             break;
         }

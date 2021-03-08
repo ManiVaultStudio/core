@@ -1,6 +1,7 @@
 #include "SubsetAction.h"
-
 #include "ScatterplotPlugin.h"
+
+#include <QMenu>
 
 using namespace hdps::gui;
 

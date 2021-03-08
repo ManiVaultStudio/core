@@ -1,7 +1,8 @@
 #include "SelectionAction.h"
+#include "PixelSelectionTool.h"
 #include "Application.h"
-
 #include "ScatterplotPlugin.h"
+#include "ScatterplotWidget.h"
 
 #include <QHBoxLayout>
 
@@ -64,12 +65,12 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _invertSelectionAction.setToolTip("Invert the selection");
     _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process");
 
-    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+    const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
     _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
     _modifierRemoveAction.setIcon(fontAwesome.getIcon("minus"));
 
-    _typeAction.setOptions(_scatterplotPlugin->getSelectionTool().types.keys());
+    _typeAction.setOptions(_scatterplotPlugin->getSelectionTool()->types.keys());
 
     _typeActionGroup.addAction(&_rectangleAction);
     _typeActionGroup.addAction(&_brushAction);
@@ -82,27 +83,27 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _modifierActionGroup.addAction(&_modifierRemoveAction);
 
     connect(&_typeAction, &OptionAction::currentTextChanged, [this](const QString& currentText) {
-        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::getTypeEnum(currentText));
+        _scatterplotPlugin->getSelectionTool()->setType(PixelSelectionTool::getTypeEnum(currentText));
     });
 
     connect(&_rectangleAction, &QAction::triggered, this, [this]() {
-        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::Type::Rectangle);
+        _scatterplotPlugin->getSelectionTool()->setType(PixelSelectionTool::Type::Rectangle);
     });
 
     connect(&_brushAction, &QAction::triggered, this, [this]() {
-        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::Type::Brush);
+        _scatterplotPlugin->getSelectionTool()->setType(PixelSelectionTool::Type::Brush);
     });
 
     connect(&_lassoAction, &QAction::triggered, this, [this]() {
-        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::Type::Lasso);
+        _scatterplotPlugin->getSelectionTool()->setType(PixelSelectionTool::Type::Lasso);
     });
 
     connect(&_polygonAction, &QAction::triggered, this, [this]() {
-        _scatterplotPlugin->getSelectionTool().setType(PixelSelectionTool::Type::Polygon);
+        _scatterplotPlugin->getSelectionTool()->setType(PixelSelectionTool::Type::Polygon);
     });
 
     const auto updateType = [this]() {
-        const auto type = _scatterplotPlugin->getSelectionTool().getType();
+        const auto type = _scatterplotPlugin->getSelectionTool()->getType();
 
         _typeAction.setCurrentText(PixelSelectionTool::getTypeName(type));
         _rectangleAction.setChecked(type == PixelSelectionTool::Type::Rectangle);
@@ -112,26 +113,26 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
         _brushRadiusAction.setEnabled(type == PixelSelectionTool::Type::Brush);
     };
 
-    connect(&_scatterplotPlugin->getSelectionTool(), &PixelSelectionTool::typeChanged, this, [this, updateType](const PixelSelectionTool::Type& type) {
+    connect(_scatterplotPlugin->getSelectionTool(), &PixelSelectionTool::typeChanged, this, [this, updateType](const PixelSelectionTool::Type& type) {
         updateType();
     });
 
     updateType();
 
-    connect(&_scatterplotPlugin->getSelectionTool(), &PixelSelectionTool::brushRadiusChanged, this, [this](const float& brushRadius) {
+    connect(_scatterplotPlugin->getSelectionTool(), &PixelSelectionTool::brushRadiusChanged, this, [this](const float& brushRadius) {
         _brushRadiusAction.setValue(brushRadius);
     });
 
     connect(&_brushRadiusAction, &DoubleAction::valueChanged, this, [this](const double& value) {
-        _scatterplotPlugin->getSelectionTool().setBrushRadius(value);
+        _scatterplotPlugin->getSelectionTool()->setBrushRadius(value);
     });
 
     connect(&_modifierAddAction, &QAction::toggled, [this](bool checked) {
-        _scatterplotPlugin->getSelectionTool().setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
+        _scatterplotPlugin->getSelectionTool()->setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
     });
 
     connect(&_modifierRemoveAction, &QAction::toggled, [this](bool checked) {
-        _scatterplotPlugin->getSelectionTool().setModifier(checked ? PixelSelectionTool::Modifier::Remove : PixelSelectionTool::Modifier::Replace);
+        _scatterplotPlugin->getSelectionTool()->setModifier(checked ? PixelSelectionTool::Modifier::Remove : PixelSelectionTool::Modifier::Replace);
     });
 
     connect(&_selectAllAction, &QAction::triggered, [this]() {
@@ -147,17 +148,17 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     });
 
     const auto updateNotifyDuringSelection = [this]() -> void {
-        _notifyDuringSelectionAction.setChecked(_scatterplotPlugin->getSelectionTool().isNotifyDuringSelection());
+        _notifyDuringSelectionAction.setChecked(_scatterplotPlugin->getSelectionTool()->isNotifyDuringSelection());
     };
     
-    connect(&_scatterplotPlugin->getSelectionTool(), &PixelSelectionTool::notifyDuringSelectionChanged, this, [this, updateNotifyDuringSelection](const bool& notifyDuringSelection) {
+    connect(_scatterplotPlugin->getSelectionTool(), &PixelSelectionTool::notifyDuringSelectionChanged, this, [this, updateNotifyDuringSelection](const bool& notifyDuringSelection) {
         updateNotifyDuringSelection();
     });
 
     updateNotifyDuringSelection();
 
     connect(&_notifyDuringSelectionAction, &QAction::toggled, [this](bool toggled) {
-        _scatterplotPlugin->getSelectionTool().setNotifyDuringSelection(toggled);
+        _scatterplotPlugin->getSelectionTool()->setNotifyDuringSelection(toggled);
     });
 
     const auto updateSelectionButtons = [this]() {

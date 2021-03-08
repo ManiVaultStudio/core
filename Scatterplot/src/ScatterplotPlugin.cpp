@@ -1,9 +1,17 @@
 #include "ScatterplotPlugin.h"
 
+#include "PixelSelectionTool.h"
+#include "DropDataTypesWidget.h"
+#include "ScatterplotWidget.h"
+
 #include "PointData.h"
 #include "ClusterData.h"
 #include "ColorData.h"
 #include "Application.h"
+
+#include "PointData.h"
+#include "ClusterData.h"
+#include "ColorData.h"
 
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
@@ -29,6 +37,7 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
+    _dropDataWidget(new DropDataTypesWidget(this)),
     _settingsAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
@@ -51,24 +60,13 @@ ScatterplotPlugin::~ScatterplotPlugin(void)
 {
 }
 
+QIcon ScatterplotPlugin::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("braille");
+}
+
 void ScatterplotPlugin::init()
 {
-    DataTypes supportedDataTypes;
-
-    supportedDataTypes.append(PointType);
-    supportedDataTypes.append(ClusterType);
-    supportedDataTypes.append(ColorType);
-    
-    /*
-    _dataSlot = new DataSlot(supportedDataTypes);
-    
-    _scatterPlotWidget = new ScatterplotWidget(*_pixelSelectionTool);
-
-    _dataSlot->addWidget(_scatterPlotWidget);
-
-    _dataSlot->layout()->setMargin(0);
-    */
-
     auto layout = new QVBoxLayout();
 
     layout->setMargin(0);
@@ -326,6 +324,16 @@ void ScatterplotPlugin::loadColorData(const QString& dataSetName)
     }
 }
 
+ScatterplotWidget* ScatterplotPlugin::getScatterplotWidget()
+{
+    return _scatterPlotWidget;
+}
+
+hdps::CoreInterface* ScatterplotPlugin::getCore()
+{
+    return _core;
+}
+
 void ScatterplotPlugin::updateData()
 {
     // Check if the scatter plot is initialized, if not, don't do anything
@@ -391,9 +399,9 @@ void ScatterplotPlugin::updateSelection()
     emit selectionChanged();
 }
 
-PixelSelectionTool& ScatterplotPlugin::getSelectionTool()
+PixelSelectionTool* ScatterplotPlugin::getSelectionTool()
 {
-    return *_pixelSelectionTool;
+    return _pixelSelectionTool;
 }
 
 QString ScatterplotPlugin::getCurrentDataset() const

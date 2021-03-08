@@ -5,6 +5,8 @@
 
 using namespace hdps::gui;
 
+#include <QMenu>
+
 ColorDataAction::ColorDataAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Coloring"),
     _colorDataAction(this, "Color data"),

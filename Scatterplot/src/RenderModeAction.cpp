@@ -1,7 +1,7 @@
 #include "RenderModeAction.h"
 #include "Application.h"
-
 #include "ScatterplotPlugin.h"
+#include "ScatterplotWidget.h"
 
 using namespace hdps::gui;
 
