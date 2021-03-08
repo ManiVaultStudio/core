@@ -21,6 +21,12 @@
 #include "DockWidgetTab.h"
 #include "DockAreaTitleBar.h"
 
+// Graphics capability checking
+#include <QOpenGLFunctions>
+#include <QOffscreenSurface>
+#include <QMessageBox>
+#include <QTimer>
+
 using namespace ads;
 
 namespace hdps
@@ -80,6 +86,9 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     initializeDocking();
     restoreWindowGeometryFromSettings();
+
+    // Delay execution till the event loop has started, otherwise we cannot quit the application
+    QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 }
 
 QAction* MainWindow::addImportOption(QString menuName)
@@ -238,6 +247,40 @@ void MainWindow::setDefaultWindowGeometry(const float& coverage /*= 0.7f*/) {
     const auto newSize              = QSize(availableSize.width() * coverage, availableSize.height() * coverage);
     
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, availableGeometry));
+}
+
+void MainWindow::checkGraphicsCapabilities()
+{
+    QOffscreenSurface surf;
+    surf.create();
+
+    QOpenGLContext ctx;
+    ctx.create();
+    ctx.makeCurrent(&surf);
+
+    QOpenGLFunctions gl;
+    gl.initializeOpenGLFunctions();
+
+    int majorVersion, minorVersion;
+    gl.glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
+    gl.glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
+
+    QString warningMessage = "HDPS requires a graphics card with support for OpenGL 3.3 or newer. "
+                             "The currently used card supports version " + QString::number(majorVersion) + 
+                             "." + QString::number(minorVersion) + ". Make sure the application uses your "
+                             "dedicated graphics card and update your drivers. "
+                             "Please visit https://github.com/hdps/PublicWiki/wiki/Graphics-card-issues to "
+                             "learn more about this issue.";
+
+    if (majorVersion > 3 || (majorVersion == 3 && minorVersion < 3))
+    {
+        int ret = QMessageBox::warning(this, tr("HDPS"),
+            tr(warningMessage.toStdString().c_str()));
+
+        QApplication::exit(33);
+    }
+
+    ctx.doneCurrent();
 }
 
 void MainWindow::initializeDocking()
