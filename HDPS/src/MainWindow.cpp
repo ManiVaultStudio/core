@@ -272,7 +272,7 @@ void MainWindow::checkGraphicsCapabilities()
                              "Please visit https://github.com/hdps/PublicWiki/wiki/Graphics-card-issues to "
                              "learn more about this issue.";
 
-    if (majorVersion > 3 || (majorVersion == 3 && minorVersion < 3))
+    if (majorVersion < 3 || (majorVersion == 3 && minorVersion < 3))
     {
         int ret = QMessageBox::warning(this, tr("HDPS"),
             tr(warningMessage.toStdString().c_str()));
