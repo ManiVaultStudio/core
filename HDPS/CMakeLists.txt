@@ -320,6 +320,14 @@ if(MSVC)
     )
 endif(MSVC)
 
+#executable & linklib
+install(TARGETS ${PROJECT}
+    RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
+    ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+)
+
+
+
 #headers - Would it be better to refactor the headers to allow "install(DIRECTORY)"?
 install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
         string(REGEX REPLACE \"^src/\" \"\" STRIPPED_PUBLIC_HEADER \${PUBLIC_HEADER})
@@ -330,34 +338,104 @@ install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
         )
 
     endforeach(PUBLIC_HEADER)"
-    COMPONENT HDPS_HEADERS
-)
-
-#executable
-install(TARGETS ${PROJECT}
-    RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
+    COMPONENT HDPSPUBLIC_HEADERS
 )
 
 install(TARGETS ${PROJECT}_Public
-    ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+    EXPORT HdpsPublicExport
+    ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
+    PUBLIC_HEADER DESTINATION include COMPONENT HDPSPUBLIC_HEADERS
+    INCLUDES DESTINATION include
 )
 
-# Install the components neededfor the Plugin builds
+# Generate a .cmake file that can be imported from the install
+# to enable plugin building
+# Plugin building requires HDPS_Public.lib and the include headers
+# By convention this is placed in the lib directory
+install(EXPORT HdpsPublicExport
+        FILE HdpsCoreTargets.cmake
+        NAMESPACE HdpsCore::
+        DESTINATION lib/cmake/HdpsCore
+        COMPONENT HDPSPUBLIC_TARGET
+)
+
+target_include_directories(${PROJECT}_Public PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+
+# include CMakePackageConfigHelpers macro
+include(CMakePackageConfigHelpers)
+
+# set version
+set(version 0.2)
+
+# ***Create a HdpsCore package to support the find_package command**
+
+# Generate the version file for use with find_package
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfigVersion.cmake"
+  VERSION "${version}"
+  # When the hdps core is stable compatibility can 
+  # change to AnyNewerVersion or SameMajorVersion
+  COMPATIBILITY ExactVersion
+)
+
+# create config file
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/HdpsCoreConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfig.cmake"
+  INSTALL_DESTINATION lib/cmake/HdpsCore
+)
+
+# install the package files files
+install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfig.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfigVersion.cmake"
+        DESTINATION lib/cmake/HdpsCore
+        COMPONENT HDPSPUBLIC_PACKAGE
+)
+
+# could be used for the plugins subdirectories 
+# see doc https://cmake.org/cmake/help/v3.18/command/export.html
+#
+# export(EXPORT HdpsCoreTargets
+#        FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/HdpsCoreTargets.cmake"
+#        NAMESPACE HdpsCore::
+# )
+
+# Initially install everything in the same place
+# this may need to be split up 
+
+# Install the HDPSPUBLIC components needed for the Plugin builds
 add_custom_command(
     TARGET ${PROJECT}_Public
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
-        --component HDPS_HEADERS
+        --component HDPSPUBLIC_HEADERS
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
-        --component HDPS_LINKLIB
+        --component HDPSPUBLIC_LINKLIB
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPSPUBLIC_PACKAGE
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPSPUBLIC_TARGET
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
 )
+
+# Install the HDPS executable and lib
 add_custom_command(
     TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
@@ -366,7 +444,12 @@ add_custom_command(
         --component HDPS_EXECUTABLE
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
-
+    COMMAND "${CMAKE_COMMAND}"
+        --install ${CMAKE_BINARY_DIR}
+        --config $<CONFIGURATION>
+        --component HDPS_LINKLIB
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+        --verbose
 )
 
 # Point Data
@@ -390,7 +473,6 @@ set(ads_PlatformDir ${INSTALL_DIR}/$<CONFIGURATION>/)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
-
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_BINARY_DIR}/hdps/external/advanced_docking
@@ -400,4 +482,3 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         ${INSTALL_DIR}/$<CONFIGURATION>/bin
         ${INSTALL_DIR}/$<CONFIGURATION>
 )
-
