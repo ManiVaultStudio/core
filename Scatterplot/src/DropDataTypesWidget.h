@@ -12,13 +12,11 @@ class ScatterplotPlugin;
 class DropDataTypesWidget : public QWidget
 {
 public:
-    class DropDataTypeWidget : public hdps::gui::DataSlot {
+    class DropRegionWidget : public QWidget {
     public:
-        DropDataTypeWidget(const hdps::DataType& dataType, QWidget* parent = nullptr);
+        DropRegionWidget(const QString& title, QWidget* parent);
 
-        void dragEnterEvent(QDragEnterEvent* dragEnterEvent) override;
-        void dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent) override;
-        void dropEvent(QDropEvent* dropEvent) override;
+        bool eventFilter(QObject* target, QEvent* event) override;
 
         void setActive(const bool& active);
         void activate();
@@ -34,11 +32,11 @@ public:
     };
 
 public:
-    DropDataTypesWidget(ScatterplotPlugin* scatterplotPlugin);
+    DropDataTypesWidget(QWidget* parent, ScatterplotPlugin* scatterplotPlugin);
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
 protected:
     ScatterplotPlugin*                  _scatterplotPlugin;
-    QMap<QString, DropDataTypeWidget*>  _dropDataTypeWidgets;
+    QMap<QString, DropRegionWidget*>    _dropRegionWidgets;
 };

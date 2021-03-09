@@ -37,19 +37,11 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
-    _dropDataWidget(new DropDataTypesWidget(this)),
+    _dropDataWidget(new DropDataTypesWidget(_scatterPlotWidget, this)),
     _settingsAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
-    setContextMenuPolicy(Qt::CustomContextMenu);
     setFocusPolicy(Qt::StrongFocus);
-
-    connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint& point) {
-        //if (_currentDataSet.isEmpty() || _pixelSelectionTool->isActive())
-            //return;
-
-        _settingsAction.getContextMenu()->exec(mapToGlobal(point));
-    });
 }
 
 // =============================================================================

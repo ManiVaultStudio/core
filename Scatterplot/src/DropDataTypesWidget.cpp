@@ -1,6 +1,7 @@
 #include "DropDataTypesWidget.h"
-#include "ScatterplotPlugin.h"
 #include "Application.h"
+#include "ScatterplotPlugin.h"
+#include "ScatterplotWidget.h"
 
 #include "PointData.h"
 #include "ClusterData.h"
@@ -16,35 +17,37 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-DropDataTypesWidget::DropDataTypesWidget(ScatterplotPlugin* scatterplotPlugin) :
-    QWidget(reinterpret_cast<QWidget*>(scatterplotPlugin)),
+DropDataTypesWidget::DropDataTypesWidget(QWidget* parent, ScatterplotPlugin* scatterplotPlugin) :
+    QWidget(parent),
     _scatterplotPlugin(scatterplotPlugin),
-    _dropDataTypeWidgets()
+    _dropRegionWidgets()
 {
-    _dropDataTypeWidgets["point"]   = new DropDataTypeWidget(PointType);
-    _dropDataTypeWidgets["color"]   = new DropDataTypeWidget(PointType);
-    _dropDataTypeWidgets["cluster"] = new DropDataTypeWidget(PointType);
+    setAcceptDrops(true);
+    setMouseTracking(true);
+
+    _dropRegionWidgets["point"]     = new DropRegionWidget("Load as point data", this);
+    _dropRegionWidgets["color"]     = new DropRegionWidget("Load as color data", this);
+    _dropRegionWidgets["cluster"]   = new DropRegionWidget("Load as cluster data", this);
+    _dropRegionWidgets["error"]     = new DropRegionWidget("Data cannot be loaded", this);
 
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(0);
 
-    layout->addWidget(_dropDataTypeWidgets["point"]);
-    layout->addWidget(_dropDataTypeWidgets["color"]);
-    layout->addWidget(_dropDataTypeWidgets["cluster"]);
-
-    for (auto dropDataTypeWidget : _dropDataTypeWidgets.values())
-        dropDataTypeWidget->installEventFilter(this);
-
-    setAcceptDrops(true);
-
-    this->installEventFilter(this);
-    _scatterplotPlugin->installEventFilter(this);
-
     setLayout(layout);
 
-    setStyleSheet("{background-color: red;}");
+    layout->addWidget(_dropRegionWidgets["point"]);
+    layout->addWidget(_dropRegionWidgets["color"]);
+    layout->addWidget(_dropRegionWidgets["cluster"]);
+    layout->addWidget(_dropRegionWidgets["error"]);
+
+    for (auto dropRegionWidget : _dropRegionWidgets.values())
+        dropRegionWidget->installEventFilter(this);
+
+    // Install event filters for synchronizing widget size
+    parent->installEventFilter(this);
+    this->installEventFilter(this);
 }
 
 bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
@@ -62,8 +65,23 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::DragEnter:
         {
-            if (dynamic_cast<QWidget*>(target) != this)
+            if (dynamic_cast<QWidget*>(target) == this)
+                event->accept();
+
+            auto dropRegionWidget = dynamic_cast<DropRegionWidget*>(target);
+            /*
+            if (!_dropRegionWidgets.values().contains(dropRegionWidget))
                 break;
+
+            
+            auto dropRegionWidget = dynamic_cast<DropRegionWidget*>(target);
+
+            if (!_dropRegionWidgets.values().contains(dropRegionWidget))
+                break;
+            */
+
+            for (auto dropRegionWidget : _dropRegionWidgets.values())
+                dropRegionWidget->hide();
 
             const auto dragEnterEvent   = static_cast<QDragEnterEvent*>(event);
             const auto mimeData         = dragEnterEvent->mimeData();
@@ -76,36 +94,73 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
                 const auto currentDatasetName = _scatterplotPlugin->getCurrentDataset();
 
                 if (currentDatasetName.isEmpty()) {
-                    _dropDataTypeWidgets["point"]->activate();
+                    _dropRegionWidgets["point"]->show();
                 }
                 else {
                     const auto currentDataset     = _scatterplotPlugin->getCore()->requestData<Points>(currentDatasetName);
                     const auto candidateDataset   = _scatterplotPlugin->getCore()->requestData<Points>(datasetName);
 
                     if (currentDataset.getNumPoints() != candidateDataset.getNumPoints()) {
-                        _dropDataTypeWidgets["point"]->activate();
+                        _dropRegionWidgets["point"]->show();
                     } else {
-                        _dropDataTypeWidgets["point"]->activate();
-                        _dropDataTypeWidgets["color"]->activate();
+                        _dropRegionWidgets["point"]->show();
+                        _dropRegionWidgets["color"]->show();
                     }
                 }
-
-                //dragEnterEvent
             }
 
-            /*
-            for (auto dropDataTypeWidget : _dropDataTypeWidgets)
-                dropDataTypeWidget->setActive(true);
-            */
+            if (dropRegionWidget)
+                dragEnterEvent->acceptProposedAction();
 
             break;
         }
 
         case QEvent::DragLeave:
+        {
+            /*
+            auto dropRegionWidget = dynamic_cast<DropRegionWidget*>(target);
+
+            if (!_dropRegionWidgets.values().contains(dropRegionWidget))
+                break;
+
+            for (auto dropRegionWidget : _dropRegionWidgets.values())
+                dropRegionWidget->deactivate();
+
+            const auto dragLeaveEvent = static_cast<QDragLeaveEvent*>(event);
+
+            dropRegionWidget->setHighLight(false);
+            */
+
+            for (auto dropRegionWidget : _dropRegionWidgets.values())
+                dropRegionWidget->hide();
+
+            break;
+        }
+
         case QEvent::Drop:
         {
-            for (auto dropDataTypeWidget : _dropDataTypeWidgets)
-                dropDataTypeWidget->setActive(false);
+            auto dropRegionWidget = dynamic_cast<DropRegionWidget*>(target);
+
+            if (!_dropRegionWidgets.values().contains(dropRegionWidget))
+                break;
+
+            const auto dropEvent        = static_cast<QDragEnterEvent*>(event);
+            const auto mimeData         = dropEvent->mimeData();
+            const auto mimeText         = mimeData->text();
+            const auto tokens           = mimeText.split("\n");
+            const auto datasetName      = tokens[0];
+
+            if (!dropRegionWidget)
+                break;
+
+            if (_dropRegionWidgets.key(dropRegionWidget) == "point")
+                _scatterplotPlugin->loadPointData(datasetName);
+
+            if (_dropRegionWidgets.key(dropRegionWidget) == "color")
+                _scatterplotPlugin->loadColorData(datasetName);
+            
+            for (auto dropRegionWidget : _dropRegionWidgets.values())
+                dropRegionWidget->hide();
 
             break;
         }
@@ -117,16 +172,23 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
     return QWidget::eventFilter(target, event);
 }
 
-DropDataTypesWidget::DropDataTypeWidget::DropDataTypeWidget(const DataType& dataType, QWidget* parent /*= nullptr*/) :
-    hdps::gui::DataSlot(DataTypes({ dataType })),
+DropDataTypesWidget::DropRegionWidget::DropRegionWidget(const QString& title, QWidget* parent) :
+    QWidget(parent),
     _labelsWidget(),
     _iconLabel(),
     _dataTypeLabel()
 {
-    //_dataTypeLabel.setText(QString("Load as %1").arg(dataType()));
+    setAcceptDrops(true);
+    setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
-    layout()->setMargin(0);
-    layout()->setSpacing(0);
+    _dataTypeLabel.setText(title);
+
+    auto mainLayout = new QVBoxLayout();
+
+    mainLayout->setMargin(0);
+    mainLayout->setSpacing(0);
+
+    setLayout(mainLayout);
 
     setHighLight(false);
 
@@ -151,46 +213,40 @@ DropDataTypesWidget::DropDataTypeWidget::DropDataTypeWidget(const DataType& data
     layout->addWidget(&_dataTypeLabel);
     layout->addStretch(1);
 
-    addWidget(&_labelsWidget);
+    mainLayout->addWidget(&_labelsWidget);
 
-    deactivate();
+    hide();
+
+    parent->installEventFilter(this);
 }
 
-void DropDataTypesWidget::DropDataTypeWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
+bool DropDataTypesWidget::DropRegionWidget::eventFilter(QObject* target, QEvent* event)
 {
-    DataSlot::dragEnterEvent(dragEnterEvent);
+    if (event->type() == QEvent::MouseMove) {
+        const auto mouseEvent = static_cast<QMouseEvent*>(event);
 
-    setHighLight(true);
+        setHighLight(rect().contains(mouseEvent->pos()));
+    }
+
+    return QWidget::eventFilter(target, event);
 }
 
-void DropDataTypesWidget::DropDataTypeWidget::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
-{
-    setHighLight(false);
-}
-
-void DropDataTypesWidget::DropDataTypeWidget::dropEvent(QDropEvent* dropEvent)
-{
-    DataSlot::dropEvent(dropEvent);
-
-    setHighLight(false);
-}
-
-void DropDataTypesWidget::DropDataTypeWidget::setActive(const bool& active)
+void DropDataTypesWidget::DropRegionWidget::setActive(const bool& active)
 {
     _labelsWidget.setVisible(active);
 }
 
-void DropDataTypesWidget::DropDataTypeWidget::activate()
+void DropDataTypesWidget::DropRegionWidget::activate()
 {
     setActive(true);
 }
 
-void DropDataTypesWidget::DropDataTypeWidget::deactivate()
+void DropDataTypesWidget::DropRegionWidget::deactivate()
 {
     setActive(false);
 }
 
-void DropDataTypesWidget::DropDataTypeWidget::setHighLight(const bool& highlight /*= false*/)
+void DropDataTypesWidget::DropRegionWidget::setHighLight(const bool& highlight /*= false*/)
 {
     const auto backgroundColorString    = QString("rgba(150, 150, 150, %1)").arg(highlight ? "50" : "10");
     const auto borderString             = QString("%1 solid rgba(0, 0, 0, %2)").arg(highlight ? "1px" : "1px", highlight ? "50" : "10");
