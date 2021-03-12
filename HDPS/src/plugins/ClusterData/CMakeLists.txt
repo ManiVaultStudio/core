@@ -53,15 +53,21 @@ target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
 set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${CLUSTER_HEADERS}")
 
 install(TARGETS ${PROJECT}
-    RUNTIME DESTINATION Plugins COMPONENT SHAREDLIB
-    LIBRARY DESTINATION lib COMPONENT LINKLIB
+    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
+    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
     ARCHIVE DESTINATION lib COMPONENT LINKLIB
     PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
 )
 
+if (NOT WIN32)
+    install(TARGETS ${PROJECT}
+        LIBRARY DESTINATION lib COMPONENT LINKLIB # Linux/Mac .so for linking
+    )
+endif()
+
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
-        --install ${CMAKE_BINARY_DIR}/hdps/src/plugins/ClusterData
+        --install ${CMAKE_BINARY_DIR}/HDPS/src/plugins/ClusterData
         --config $<CONFIGURATION>
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )

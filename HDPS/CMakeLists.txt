@@ -323,7 +323,7 @@ endif(MSVC)
 #executable & linklib
 install(TARGETS ${PROJECT}
     RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
-    ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+    # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
 )
 
 
@@ -344,6 +344,7 @@ install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
 install(TARGETS ${PROJECT}_Public
     EXPORT HdpsPublicExport
     ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
+    LIBRARY DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
     PUBLIC_HEADER DESTINATION include COMPONENT HDPSPUBLIC_HEADERS
     INCLUDES DESTINATION include
 )
@@ -376,8 +377,10 @@ set(version 0.2)
 write_basic_package_version_file(
   "${CMAKE_CURRENT_BINARY_DIR}/HdpsCoreConfigVersion.cmake"
   VERSION "${version}"
-  # When the hdps core is stable compatibility can 
-  # change to AnyNewerVersion or SameMajorVersion
+  # When the hdps core is stable - version 1.0 or greater -
+  # compatibility can change to
+  # AnyNewerVersion or SameMajorVersion
+  # until then employ ExactVersion
   COMPATIBILITY ExactVersion
 )
 
@@ -444,12 +447,12 @@ add_custom_command(
         --component HDPS_EXECUTABLE
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
         --verbose
-    COMMAND "${CMAKE_COMMAND}"
-        --install ${CMAKE_BINARY_DIR}
-        --config $<CONFIGURATION>
-        --component HDPS_LINKLIB
-        --prefix ${INSTALL_DIR}/$<CONFIGURATION>
-        --verbose
+    # COMMAND "${CMAKE_COMMAND}"
+    #     --install ${CMAKE_BINARY_DIR}
+    #     --config $<CONFIGURATION>
+    #     --component HDPS_LINKLIB
+    #     --prefix ${INSTALL_DIR}/$<CONFIGURATION>
+    #     --verbose
 )
 
 # Point Data
@@ -475,10 +478,10 @@ add_subdirectory(external/advanced_docking)
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
-        --install ${CMAKE_BINARY_DIR}/hdps/external/advanced_docking
+        --install ${CMAKE_BINARY_DIR}/HDPS/external/advanced_docking
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
-    COMMAND "${CMAKE_COMMAND}" -E copy_directory
-        ${INSTALL_DIR}/$<CONFIGURATION>/bin
-        ${INSTALL_DIR}/$<CONFIGURATION>
+    # COMMAND "${CMAKE_COMMAND}" -E copy_directory
+    #     ${INSTALL_DIR}/$<CONFIGURATION>/bin
+    #     ${INSTALL_DIR}/$<CONFIGURATION>
 )
