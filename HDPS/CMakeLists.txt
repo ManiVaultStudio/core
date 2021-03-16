@@ -4,7 +4,6 @@ set(PROJECT "HDPS")
 project(${PROJECT})
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -14,13 +13,29 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
-set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
-set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
-set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
-set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
-set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2018. All rights reserved.")
-set(MACOSX_BUNDLE_GUI_IDENTIFIER "nl.tudelft.graphics.hdps")
-set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
+if(APPLE)
+	# These are the properties for the Info.plist in the mac bindle
+	set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
+	set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
+	set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
+	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
+	set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2021. All rights reserved.")
+	set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.hdps")
+	set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
+	
+	# use, i.e. don't skip the full RPATH for the build tree
+	set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+	# when building, don't use the install RPATH already
+	# (but later on when installing)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+	set(CMAKE_INSTALL_RPATH "@loader_path")
+
+	# add the automatically determined parts of the RPATH
+	# which point to directories outside the build tree to the install RPATH
+	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP")
@@ -31,7 +46,7 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-find_package(Qt5 5.12 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
+find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 
 # Normalize the incoming install path
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
@@ -292,7 +307,7 @@ target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
 
-add_executable(${PROJECT} MACOSX_BUNDLE
+add_executable(${PROJECT} MACOSX_BUNDLE WIN32
     src/.editorconfig
     ${MAIN_SOURCES}
     ${UI_HEADERS}
@@ -301,6 +316,10 @@ add_executable(${PROJECT} MACOSX_BUNDLE
 )
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+# find libraries relative to the executable in the macOS .app tree
+if(APPLE)
+	set_target_properties( ${PROJECT} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+endif()
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
@@ -321,12 +340,46 @@ if(MSVC)
 endif(MSVC)
 
 #executable & linklib
-install(TARGETS ${PROJECT}
-    RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
-    # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
-)
 
 
+if(APPLE)
+	set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
+	install(TARGETS ${PROJECT}
+		RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
+		BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
+		# ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+	)
+
+    find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
+	install(CODE "execute_process(
+			COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
+		#	RESULT_VARIABLE retval
+			COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
+			COMMAND ${CMAKE_COMMAND} -E copy 
+					\"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.3.6.3.dylib\" 
+					\"${BUNDLE_DIR}/Contents/Frameworks/\"
+			COMMAND ${CMAKE_COMMAND} -E copy 
+					\"$<TARGET_FILE:${PROJECT}_Public>\" 
+					\"${BUNDLE_DIR}/Contents/Frameworks/\"
+					
+			COMMAND ${CMAKE_COMMAND} -E copy 
+					\"$<TARGET_FILE:${PROJECT}_Private>\" 
+					\"${BUNDLE_DIR}/Contents/Frameworks/\"
+
+		)
+		
+		#if(NOT retval EQUAL 0)
+		#	message(FATAL_ERROR \"macdeployqt failed\")
+		#endif()
+		"
+		COMPONENT MACOS_BUNDLE
+	)
+else()
+	install(TARGETS ${PROJECT}
+		RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
+		# ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+	)
+endif()
 
 #headers - Would it be better to refactor the headers to allow "install(DIRECTORY)"?
 install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
@@ -481,7 +534,14 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         --install ${CMAKE_BINARY_DIR}/HDPS/external/advanced_docking
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
-    # COMMAND "${CMAKE_COMMAND}" -E copy_directory
-    #     ${INSTALL_DIR}/$<CONFIGURATION>/bin
-    #     ${INSTALL_DIR}/$<CONFIGURATION>
 )
+
+if(APPLE)
+	add_custom_command(TARGET ${PROJECT} POST_BUILD
+		COMMAND "${CMAKE_COMMAND}" 
+			--install ${CMAKE_BINARY_DIR}
+			--config $<CONFIGURATION> 
+			--component MACOS_BUNDLE
+			--prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+	)
+endif()
