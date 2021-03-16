@@ -38,6 +38,7 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _pixelSelectionTool(pixelSelectionTool)
 {
     setMouseTracking(true);
+    setAcceptDrops(true);
 
     this->installEventFilter(&_pixelSelectionTool);
 

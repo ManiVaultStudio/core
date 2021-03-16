@@ -41,7 +41,52 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _settingsAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
-    setFocusPolicy(Qt::StrongFocus);
+    //setFocusPolicy(Qt::StrongFocus);
+
+    _dropDataWidget->initialize([this](const QMimeData* mimeData) -> DropDataTypesWidget::DropRegions {
+        DropDataTypesWidget::DropRegions dropRegions;
+
+        const auto mimeText             = mimeData->text();
+        const auto tokens               = mimeText.split("\n");
+        const auto datasetName          = tokens[0];
+        const auto dataType             = DataType(tokens[1]);
+        const auto dataTypes            = DataTypes({ PointType , ColorType, ClusterType });
+        const auto currentDatasetName   = getCurrentDataset();
+        const auto candidateDataset     = getCore()->requestData<Points>(datasetName);
+        const auto candidateDatasetName = candidateDataset.getName();
+
+        if (!dataTypes.contains(dataType))
+            dropRegions << DropDataTypesWidget::DropRegion("Data is not supported", false);
+
+        const auto pointsDropRegion = DropDataTypesWidget::DropRegion("Load as points data", true, [this, candidateDatasetName]() {
+            loadPointData(candidateDatasetName);
+        });
+
+        const auto colorDropRegion = DropDataTypesWidget::DropRegion("Load as color data", true, [this, candidateDatasetName]() {
+            loadColorData(candidateDatasetName);
+        });
+
+        if (dataType == PointType) {
+            if (currentDatasetName.isEmpty()) {
+                dropRegions << pointsDropRegion;
+            }
+            else {
+                if (candidateDatasetName == currentDatasetName) {
+                    dropRegions << DropDataTypesWidget::DropRegion("Data already loaded", false);
+                }
+                else {
+                    const auto currentDataset = getCore()->requestData<Points>(currentDatasetName);
+
+                    if (currentDataset.getNumPoints() != candidateDataset.getNumPoints())
+                        dropRegions << pointsDropRegion;
+                    else
+                        dropRegions << pointsDropRegion << colorDropRegion;
+                }
+            }
+        }
+
+        return dropRegions;
+    });
 }
 
 // =============================================================================
@@ -68,41 +113,9 @@ void ScatterplotPlugin::init()
 
     setLayout(layout);
 
-    /*
-    connect(_dataSlot, &DataSlot::onDataInput, this, [this](const QString& datasetName, const DataType& dataType) {
-        if (dataType == PointType) {
-            if (_currentDataSet.isEmpty()) {
-                loadPointData(datasetName);
-            } else {
-                auto loadAsMenu         = new QMenu();
-                auto loadAsPointData    = new QAction("As point data");
-                auto loadAsColorData    = new QAction("As color data");
-
-                connect(loadAsPointData, &QAction::triggered, this, [this, datasetName]() {
-                    loadPointData(datasetName);
-                });
-
-                connect(loadAsColorData, &QAction::triggered, this, [this, datasetName]() {
-                    loadColorData(datasetName);
-                });
-
-                loadAsMenu->addAction(loadAsPointData);
-                loadAsMenu->addAction(loadAsColorData);
-
-                loadAsMenu->exec(QCursor::pos());
-            }
-        }
-
-        if (dataType == ClusterType || dataType == ColorType)
-            loadColorData(datasetName);
-    });
-    */
-
     connect(_scatterPlotWidget, &ScatterplotWidget::initialized, this, &ScatterplotPlugin::updateData);
 
     registerDataEventByType(PointType, std::bind(&ScatterplotPlugin::onDataEvent, this, std::placeholders::_1));
-
-    qApp->installEventFilter(this);
 
     QObject::connect(_pixelSelectionTool, &PixelSelectionTool::areaChanged, [this]() {
         if (!_pixelSelectionTool->isNotifyDuringSelection())

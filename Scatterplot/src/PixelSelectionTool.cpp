@@ -353,7 +353,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
                 case Type::Brush:
                 {
-                    if (wheelEvent->delta() < 0)
+                    if (wheelEvent->angleDelta().y() < 0)
                         setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
                     else
                         setBrushRadius(_brushRadius + BRUSH_RADIUS_DELTA);
