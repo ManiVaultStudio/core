@@ -29,7 +29,6 @@ class HdpsCoreConan(ConanFile):
     # exports = "*"
     short_paths = True
     generators = ("cmake")
-    version="latest"
 
     # Options may need to change depending on the packaged library
     settings = {"os": None, "build_type": None, "compiler": None, "arch": None}
@@ -52,10 +51,10 @@ class HdpsCoreConan(ConanFile):
         "revision": "auto"
     }
 
-    #def set_version(self):
+    def set_version(self):
         # Assign a version from the branch name
-    #    branch_info = CoreBranchInfo(self.recipe_folder)
-    #    self.version = branch_info.version
+        branch_info = CoreBranchInfo(self.recipe_folder)
+        self.version = branch_info.version
 
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
