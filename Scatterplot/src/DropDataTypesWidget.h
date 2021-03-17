@@ -21,16 +21,16 @@ public:
         using Dropped = std::function<void(void)>;
 
     public:
-        DropRegion(QObject* parent, const QString& title, const bool& dropAllowed = true, const Dropped& dropped = Dropped());
+        DropRegion(QObject* parent, const QString& title, const bool& isDropAllowed = true, const Dropped& dropped = Dropped());
 
+        QString getTitle() const;
+        bool isDropAllowed() const;
         void drop();
 
     protected:
         const QString   _title;
-        const bool      _dropAllowed;
+        const bool      _isDropAllowed;
         const Dropped   _dropped;
-
-        friend class DropRegionWidget;
     };
 
     using DropRegions = QList<DropRegion*>;

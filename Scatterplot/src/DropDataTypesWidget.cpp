@@ -75,6 +75,15 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
                 }
             }
 
+            auto dropRegionWidget = dynamic_cast<DropRegionWidget*>(target);
+
+            if (dropRegionWidget) {
+                if (dropRegionWidget->getDropRegion()->isDropAllowed()) {
+                    dragEnterEvent->acceptProposedAction();
+                    dropRegionWidget->setHighLight(true);
+                }
+            }
+
             break;
         }
 
@@ -154,7 +163,7 @@ DropDataTypesWidget::DropRegionWidget::DropRegionWidget(DropRegion* dropRegion, 
 
     dropRegion->setParent(this);
 
-    _dataTypeLabel.setText(_dropRegion->_title);
+    _dataTypeLabel.setText(_dropRegion->getTitle());
 
     auto mainLayout = new QVBoxLayout();
 
@@ -179,7 +188,7 @@ DropDataTypesWidget::DropRegionWidget::DropRegionWidget(DropRegion* dropRegion, 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _iconLabel.setFont(fontAwesome.getFont(20));
-    _iconLabel.setText(_dropRegion->_dropAllowed ? fontAwesome.getIconCharacter("plus-circle") : fontAwesome.getIconCharacter("exclamation-circle"));
+    _iconLabel.setText(_dropRegion->isDropAllowed() ? fontAwesome.getIconCharacter("plus-circle") : fontAwesome.getIconCharacter("exclamation-circle"));
 
     layout->addStretch(1);
     layout->addWidget(&_iconLabel);
@@ -206,11 +215,7 @@ void DropDataTypesWidget::DropRegionWidget::deactivate()
 
 void DropDataTypesWidget::DropRegionWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
 {
-    if (!_dropRegion->_dropAllowed)
-        return;
-
-    dragEnterEvent->acceptProposedAction();
-    setHighLight(true);
+    
 }
 
 DropDataTypesWidget::DropRegion* DropDataTypesWidget::DropRegionWidget::getDropRegion()
@@ -222,23 +227,33 @@ void DropDataTypesWidget::DropRegionWidget::setHighLight(const bool& highlight /
 {
     //qDebug() << _dataTypeLabel.text() << "setHighLight" << highlight;
 
-    const auto backgroundColorString    = QString("rgba(%1, %2)").arg(_dropRegion->_dropAllowed ? "150, 150, 150" : "150, 0, 0", highlight ? "50" : "10");
-    const auto borderString             = QString("%1 solid rgba(%2, %3)").arg(_dropRegion->_dropAllowed ? "0, 0, 0" : "150, 0, 0", highlight ? "1px" : "1px", highlight ? "50" : "10");
+    const auto backgroundColorString    = QString("rgba(%1, %2)").arg(_dropRegion->isDropAllowed() ? "150, 150, 150" : "150, 0, 0", highlight ? "50" : "10");
+    const auto borderString             = QString("%1 solid rgba(%2, %3)").arg(_dropRegion->isDropAllowed() ? "0, 0, 0" : "150, 0, 0", highlight ? "1px" : "1px", highlight ? "50" : "10");
 
     _labelsWidget.setStyleSheet(QString("QWidget#Labels { background-color: %2; border: %3; }").arg(backgroundColorString, borderString));
 
-    const auto textColorString = QString("rgba(%1, %2)").arg(_dropRegion->_dropAllowed ? "0, 0, 0" : "150, 0, 0", highlight ? "200" : "100");
+    const auto textColorString = QString("rgba(%1, %2)").arg(_dropRegion->isDropAllowed() ? "0, 0, 0" : "150, 0, 0", highlight ? "200" : "100");
 
     _iconLabel.setStyleSheet(QString("color: %1;").arg(textColorString));
     _dataTypeLabel.setStyleSheet(QString("color: %1;").arg(textColorString));
 }
 
-DropDataTypesWidget::DropRegion::DropRegion(QObject* parent, const QString& title, const bool& dropAllowed /*= true*/, const Dropped& dropped /*= Dropped()*/) :
+DropDataTypesWidget::DropRegion::DropRegion(QObject* parent, const QString& title, const bool& isDropAllowed /*= true*/, const Dropped& dropped /*= Dropped()*/) :
     QObject(parent),
     _title(title),
-    _dropAllowed(dropAllowed),
+    _isDropAllowed(isDropAllowed),
     _dropped(dropped)
 {
+}
+
+QString DropDataTypesWidget::DropRegion::getTitle() const
+{
+    return _title;
+}
+
+bool DropDataTypesWidget::DropRegion::isDropAllowed() const
+{
+    return _isDropAllowed;
 }
 
 void DropDataTypesWidget::DropRegion::drop()
