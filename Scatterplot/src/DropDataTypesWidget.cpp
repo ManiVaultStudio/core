@@ -24,7 +24,6 @@ DropDataTypesWidget::DropDataTypesWidget(QWidget* parent, ScatterplotPlugin* sca
 {
     //setAcceptDrops(true);
     setMouseTracking(true);
-    //setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
     auto layout = new QHBoxLayout();
 
@@ -35,9 +34,6 @@ DropDataTypesWidget::DropDataTypesWidget(QWidget* parent, ScatterplotPlugin* sca
 
     // Install event filter for synchronizing widget size
     parent->installEventFilter(this);
-
-    // Install event filter for drag and drop
-    //this->installEventFilter(this);
 }
 
 bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
@@ -65,9 +61,7 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
                 setAcceptDrops(false);
                 removeAllDropRegionWidgets();
 
-                auto dropRegions = _getDropRegionsFunction(dragEnterEvent->mimeData());
-
-                for (auto dropRegion : dropRegions) {
+                for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData())) {
                     const auto dropRegionWidget = new DropRegionWidget(dropRegion);
 
                     layout()->addWidget(dropRegionWidget);
@@ -78,10 +72,10 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
             auto dropRegionWidget = dynamic_cast<DropRegionWidget*>(target);
 
             if (dropRegionWidget) {
-                if (dropRegionWidget->getDropRegion()->isDropAllowed()) {
-                    dragEnterEvent->acceptProposedAction();
+                dragEnterEvent->acceptProposedAction();
+
+                if (dropRegionWidget->getDropRegion()->isDropAllowed())
                     dropRegionWidget->setHighLight(true);
-                }
             }
 
             break;
@@ -196,26 +190,6 @@ DropDataTypesWidget::DropRegionWidget::DropRegionWidget(DropRegion* dropRegion, 
     layout->addStretch(1);
 
     mainLayout->addWidget(&_labelsWidget);
-}
-
-void DropDataTypesWidget::DropRegionWidget::setActive(const bool& active)
-{
-    _labelsWidget.setVisible(active);
-}
-
-void DropDataTypesWidget::DropRegionWidget::activate()
-{
-    setActive(true);
-}
-
-void DropDataTypesWidget::DropRegionWidget::deactivate()
-{
-    setActive(false);
-}
-
-void DropDataTypesWidget::DropRegionWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
-{
-    
 }
 
 DropDataTypesWidget::DropRegion* DropDataTypesWidget::DropRegionWidget::getDropRegion()

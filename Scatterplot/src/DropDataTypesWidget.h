@@ -45,12 +45,6 @@ public:
     public:
         DropRegionWidget(DropRegion* dropRegion, QWidget* parent = nullptr);
 
-        void setActive(const bool& active);
-        void activate();
-        void deactivate();
-
-        void dragEnterEvent(QDragEnterEvent* dragEnterEvent) override;
-
         DropRegion* getDropRegion();
 
     protected:
