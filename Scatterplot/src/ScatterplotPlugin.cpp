@@ -1,7 +1,6 @@
 #include "ScatterplotPlugin.h"
 
 #include "PixelSelectionTool.h"
-#include "DropDataTypesWidget.h"
 #include "ScatterplotWidget.h"
 
 #include "PointData.h"
@@ -15,6 +14,7 @@
 
 #include "graphics/Vector2f.h"
 #include "graphics/Vector3f.h"
+#include "widgets/DropWidget.h"
 
 #include <QtCore>
 #include <QApplication>
@@ -37,7 +37,7 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
     _scatterPlotWidget(new ScatterplotWidget(*_pixelSelectionTool)),
-    _dropDataWidget(new DropDataTypesWidget(_scatterPlotWidget, this)),
+    _dropWidget(new DropWidget(_scatterPlotWidget)),
     _settingsAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
@@ -50,8 +50,8 @@ ScatterplotPlugin::ScatterplotPlugin() :
         _settingsAction.getContextMenu()->exec(mapToGlobal(point));
     });
 
-    _dropDataWidget->initialize([this](const QMimeData* mimeData) -> DropDataTypesWidget::DropRegions {
-        DropDataTypesWidget::DropRegions dropRegions;
+    _dropWidget->initialize([this](const QMimeData* mimeData) -> DropWidget::DropRegions {
+        DropWidget::DropRegions dropRegions;
 
         const auto mimeText             = mimeData->text();
         const auto tokens               = mimeText.split("\n");
@@ -63,21 +63,22 @@ ScatterplotPlugin::ScatterplotPlugin() :
         const auto candidateDatasetName = candidateDataset.getName();
 
         if (!dataTypes.contains(dataType))
-            dropRegions << new DropDataTypesWidget::DropRegion(this, "Data is not supported", false);
+            dropRegions << new DropWidget::DropRegion(this, QIcon(), "Incompatible data", "This type of data is not supported", false);
 
-        const auto getPointsDropRegion = [this, candidateDatasetName]() -> DropDataTypesWidget::DropRegion* {
-            return new DropDataTypesWidget::DropRegion(this, "Load as points data", true, [this, candidateDatasetName]() {
+        
+        const auto getPointsDropRegion = [this, candidateDatasetName]() -> DropWidget::DropRegion* {
+            return new DropWidget::DropRegion(this, QIcon(), "Points", "Load as points data", true, [this, candidateDatasetName]() {
                 loadPointData(candidateDatasetName);
             });
         };
 
-        const auto getColorDropRegion = [this, candidateDatasetName]() -> DropDataTypesWidget::DropRegion* {
-            return new DropDataTypesWidget::DropRegion(this, "Load as color data", true, [this, candidateDatasetName]() {
+        const auto getColorDropRegion = [this, candidateDatasetName]() -> DropWidget::DropRegion* {
+            return new DropWidget::DropRegion(this, QIcon(), "Color", "Load as color data", true, [this, candidateDatasetName]() {
                 loadColorData(candidateDatasetName);
             });
         };
 
-        const auto dataAlreadyLoaded = new DropDataTypesWidget::DropRegion(this, "Data already loaded", false);
+        const auto dataAlreadyLoaded = new DropWidget::DropRegion(this, QIcon(), "Warning", "Data already loaded", false);
 
         if (dataType == PointType) {
             if (currentDatasetName.isEmpty()) {

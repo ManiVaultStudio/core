@@ -4,6 +4,8 @@
 #include <QLabel>
 
 class QMimeData;
+class QGraphicsOpacityEffect;
+class QPropertyAnimation;
 
 namespace hdps
 {
@@ -31,19 +33,53 @@ public:
      *
      * @author Thomas Kroes
      */
-    class DropRegion : public QObject {
+    class DropRegion : public QObject
+    {
+    public:
+        /**
+         * Standard widget class
+         * 
+         * Drop region widget class for standardized visual representation
+         *
+         * @author Thomas Kroes
+         */
+        class StandardWidget : public QWidget
+        {
+        public:
+            /**
+             * Constructor
+             * @param parent Parent widget
+             * @param icon Icon of the drop region
+             * @param title Title of the drop region
+             * @param description Description of the drop region
+             * @param dropAllowed Whether dropping is allowed in the region
+             */
+            StandardWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description, const bool& dropAllowed = true);
+        };
+
     public:
         /** Callback function when mime data is dropped */
         using Dropped = std::function<void(void)>;
 
     public:
         /**
-         * Constructor
+         * Constructs a drop region object with a custom widget
          * @param parent Parent widget to enable drag and drop behaviour for
          * @param widget Widget for the visual representation of the region
          * @param dropped Callback function when mime data is dropped
          */
         DropRegion(QObject* parent, QWidget* widget, const Dropped& dropped = Dropped());
+
+        /**
+         * Constructs a drop region object with a standard widget
+         * @param parent Parent widget to enable drag and drop behaviour for
+         * @param icon Icon of the drop region
+         * @param title Title of the drop region
+         * @param description Description of the drop region
+         * @param dropAllowed Whether dropping is allowed in the region
+         * @param dropped Callback function when mime data is dropped
+         */
+        DropRegion(QObject* parent, const QIcon& icon, const QString& title, const QString& description, const bool& dropAllowed = true, const Dropped& dropped = Dropped());
 
         /** Get visual representation of the region */
         QWidget* getWidget() const;
@@ -91,7 +127,9 @@ public:
         void setHighLight(const bool& highlight = false);
 
     protected:
-        DropRegion* _dropRegion;    /** Drop region */
+        DropRegion*                 _dropRegion;        /** Drop region */
+        QGraphicsOpacityEffect*     _opacityEffect;     /** Effect for modulating opacity */
+        QPropertyAnimation*         _opacityAnimation;  /** Animation of the opacity effect */
 
         friend class DropWidget;
     };

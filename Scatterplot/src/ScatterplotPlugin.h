@@ -18,6 +18,10 @@ namespace hdps
 {
     class CoreInterface;
     class Vector2f;
+
+    namespace gui {
+        class DropWidget;
+    }
 }
 
 class ScatterplotPlugin : public ViewPlugin
@@ -100,10 +104,10 @@ private:
     
     
 protected:
-    PixelSelectionTool*     _pixelSelectionTool;
-    ScatterplotWidget*      _scatterPlotWidget;
-    DropDataTypesWidget*    _dropDataWidget;
-    SettingsAction          _settingsAction;
+    PixelSelectionTool*         _pixelSelectionTool;
+    ScatterplotWidget*          _scatterPlotWidget;
+    hdps::gui::DropWidget*      _dropWidget;
+    SettingsAction              _settingsAction;
 };
 
 // =============================================================================
