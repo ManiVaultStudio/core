@@ -22,8 +22,7 @@ DropDataTypesWidget::DropDataTypesWidget(QWidget* parent, ScatterplotPlugin* sca
     _scatterplotPlugin(scatterplotPlugin),
     _getDropRegionsFunction()
 {
-    //setAcceptDrops(true);
-    setMouseTracking(true);
+    setAcceptDrops(true);
 
     auto layout = new QHBoxLayout();
 
@@ -119,13 +118,6 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
         default:
             break;
     }
-
-    /*
-    auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
-
-    if (_dragging && mouseEvent)
-        mouseEvent->ignore();
-    */
 
     return QWidget::eventFilter(target, event);
 }
