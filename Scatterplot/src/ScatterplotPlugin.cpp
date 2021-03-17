@@ -43,6 +43,13 @@ ScatterplotPlugin::ScatterplotPlugin() :
     setDockingLocation(DockableWidget::DockingLocation::Right);
     //setFocusPolicy(Qt::StrongFocus);
 
+    connect(_scatterPlotWidget, &ScatterplotWidget::customContextMenuRequested, this, [this](const QPoint& point) {
+        //if (_currentDataSet.isEmpty() || _pixelSelectionTool->isActive())
+            //return;
+
+        _settingsAction.getContextMenu()->exec(mapToGlobal(point));
+    });
+
     _dropDataWidget->initialize([this](const QMimeData* mimeData) -> DropDataTypesWidget::DropRegions {
         DropDataTypesWidget::DropRegions dropRegions;
 
@@ -56,31 +63,37 @@ ScatterplotPlugin::ScatterplotPlugin() :
         const auto candidateDatasetName = candidateDataset.getName();
 
         if (!dataTypes.contains(dataType))
-            dropRegions << DropDataTypesWidget::DropRegion("Data is not supported", false);
+            dropRegions << new DropDataTypesWidget::DropRegion(this, "Data is not supported", false);
 
-        const auto pointsDropRegion = DropDataTypesWidget::DropRegion("Load as points data", true, [this, candidateDatasetName]() {
-            loadPointData(candidateDatasetName);
-        });
+        const auto getPointsDropRegion = [this, candidateDatasetName]() -> DropDataTypesWidget::DropRegion* {
+            return new DropDataTypesWidget::DropRegion(this, "Load as points data", true, [this, candidateDatasetName]() {
+                loadPointData(candidateDatasetName);
+            });
+        };
 
-        const auto colorDropRegion = DropDataTypesWidget::DropRegion("Load as color data", true, [this, candidateDatasetName]() {
-            loadColorData(candidateDatasetName);
-        });
+        const auto getColorDropRegion = [this, candidateDatasetName]() -> DropDataTypesWidget::DropRegion* {
+            return new DropDataTypesWidget::DropRegion(this, "Load as color data", true, [this, candidateDatasetName]() {
+                loadColorData(candidateDatasetName);
+            });
+        };
+
+        const auto dataAlreadyLoaded = new DropDataTypesWidget::DropRegion(this, "Data already loaded", false);
 
         if (dataType == PointType) {
             if (currentDatasetName.isEmpty()) {
-                dropRegions << pointsDropRegion;
+                dropRegions << getPointsDropRegion();
             }
             else {
                 if (candidateDatasetName == currentDatasetName) {
-                    dropRegions << DropDataTypesWidget::DropRegion("Data already loaded", false);
+                    dropRegions << dataAlreadyLoaded;
                 }
                 else {
                     const auto currentDataset = getCore()->requestData<Points>(currentDatasetName);
 
                     if (currentDataset.getNumPoints() != candidateDataset.getNumPoints())
-                        dropRegions << pointsDropRegion;
+                        dropRegions << getPointsDropRegion();
                     else
-                        dropRegions << pointsDropRegion << colorDropRegion;
+                        dropRegions << getPointsDropRegion() << getColorDropRegion();
                 }
             }
         }
@@ -89,11 +102,7 @@ ScatterplotPlugin::ScatterplotPlugin() :
     });
 }
 
-// =============================================================================
-// View
-// =============================================================================
-
-ScatterplotPlugin::~ScatterplotPlugin(void)
+ScatterplotPlugin::~ScatterplotPlugin()
 {
 }
 

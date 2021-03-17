@@ -145,8 +145,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
         case QEvent::Paint:
             return false;
 
-        case QEvent::ContextMenu:
-            break;
+        //case QEvent::ContextMenu:
+            //break;
 
         case QEvent::Resize:
         {

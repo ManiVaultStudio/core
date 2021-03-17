@@ -16,17 +16,14 @@ class DropDataTypesWidget : public QWidget
 public:
     class DropRegionWidget;
 
-    class DropRegion {
+    class DropRegion : public QObject {
     public:
         using Dropped = std::function<void(void)>;
 
     public:
-        DropRegion(const QString& title, const bool& dropAllowed = true, const Dropped& dropped = Dropped()) :
-            _title(title),
-            _dropAllowed(dropAllowed),
-            _dropped(dropped)
-        {
-        }
+        DropRegion(QObject* parent, const QString& title, const bool& dropAllowed = true, const Dropped& dropped = Dropped());
+
+        void drop();
 
     protected:
         const QString   _title;
@@ -36,7 +33,7 @@ public:
         friend class DropRegionWidget;
     };
 
-    using DropRegions = QList<DropRegion>;
+    using DropRegions = QList<DropRegion*>;
 
 public:
     using GetDropRegions = std::function<DropRegions(const QMimeData*)>;
@@ -46,9 +43,7 @@ public:
     public:
 
     public:
-        DropRegionWidget(const DropRegion& dropRegion, QWidget* parent = nullptr);
-
-        bool eventFilter(QObject* target, QEvent* event) override;
+        DropRegionWidget(DropRegion* dropRegion, QWidget* parent = nullptr);
 
         void setActive(const bool& active);
         void activate();
@@ -56,16 +51,19 @@ public:
 
         void dragEnterEvent(QDragEnterEvent* dragEnterEvent) override;
         void dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent) override;
-        void dropEvent(QDropEvent* dropEvent) override;
+
+        DropRegion* getDropRegion();
 
     protected:
         void setHighLight(const bool& highlight = false);
 
     protected:
-        DropRegion  _dropRegion;
+        DropRegion* _dropRegion;
         QWidget     _labelsWidget;
         QLabel      _iconLabel;
         QLabel      _dataTypeLabel;
+
+        friend class DropDataTypesWidget;
     };
 
 public:
