@@ -20,8 +20,7 @@ using namespace hdps::gui;
 DropDataTypesWidget::DropDataTypesWidget(QWidget* parent, ScatterplotPlugin* scatterplotPlugin) :
     QWidget(parent),
     _scatterplotPlugin(scatterplotPlugin),
-    _getDropRegions(),
-    _dragging(false)
+    _getDropRegionsFunction()
 {
     //setAcceptDrops(true);
     setMouseTracking(true);
@@ -63,18 +62,15 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
             const auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
 
             if (isParentWidgetEvent) {
-                qDebug() << "Parent drag enter";
-
                 setAcceptDrops(false);
-
                 removeAllDropRegionWidgets();
 
-                auto dropRegions = _getDropRegions(dragEnterEvent->mimeData());
+                auto dropRegions = _getDropRegionsFunction(dragEnterEvent->mimeData());
 
                 for (auto dropRegion : dropRegions) {
                     const auto dropRegionWidget = new DropRegionWidget(dropRegion);
-                    layout()->addWidget(dropRegionWidget);
 
+                    layout()->addWidget(dropRegionWidget);
                     dropRegionWidget->installEventFilter(this);
                 }
             }
@@ -82,53 +78,25 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
             break;
         }
 
-        
-        case QEvent::DragMove:
-        {
-            // Route drag and drop events to child region drop widgets
-            if (isParentWidgetEvent) {
-                qDebug() << "Parent drag move";
-                
-                //event->ignore();
-                break;
-            }
-
-            break;
-        }
-
         case QEvent::DragLeave:
         {
-            if (isParentWidgetEvent) {
-                qDebug() << "Parent drag leave";
-                //hide();
+            if (isParentWidgetEvent)
                 removeAllDropRegionWidgets();
-            }
 
             auto dropRegionWidget = dynamic_cast<DropRegionWidget*>(target);
 
             if (dropRegionWidget) {
-
                 setAcceptDrops(true);
-
                 dropRegionWidget->setHighLight(false);
-
                 removeAllDropRegionWidgets();
             }
-
-            
 
             break;
         }
 
         case QEvent::Drop:
         {
-            
             const auto dropEvent = static_cast<QDropEvent*>(event);
-
-            if (isParentWidgetEvent) {
-                qDebug() << "Parent drop";
-                //dropEvent->ignore();
-            }
 
             auto dropRegionWidget = dynamic_cast<DropRegionWidget*>(target);
 
@@ -159,9 +127,9 @@ bool DropDataTypesWidget::eventFilter(QObject* target, QEvent* event)
     return QWidget::eventFilter(target, event);
 }
 
-void DropDataTypesWidget::initialize(GetDropRegions getDropRegions)
+void DropDataTypesWidget::initialize(GetDropRegionsFunction getDropRegions)
 {
-    _getDropRegions = getDropRegions;
+    _getDropRegionsFunction = getDropRegions;
 }
 
 void DropDataTypesWidget::removeAllDropRegionWidgets()
@@ -238,22 +206,11 @@ void DropDataTypesWidget::DropRegionWidget::deactivate()
 
 void DropDataTypesWidget::DropRegionWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
 {
-    qDebug() << "DropRegionWidget::dragEnterEvent";
+    if (!_dropRegion->_dropAllowed)
+        return;
 
     dragEnterEvent->acceptProposedAction();
-
     setHighLight(true);
-}
-
-void DropDataTypesWidget::DropRegionWidget::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
-{
-    qDebug() << "DropRegionWidget::dragLeaveEvent";
-
-    /*
-    parentWidget()->setAcceptDrops(true);
-
-    setHighLight(false);
-    */
 }
 
 DropDataTypesWidget::DropRegion* DropDataTypesWidget::DropRegionWidget::getDropRegion()

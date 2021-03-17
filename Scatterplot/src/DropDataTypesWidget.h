@@ -36,7 +36,7 @@ public:
     using DropRegions = QList<DropRegion*>;
 
 public:
-    using GetDropRegions = std::function<DropRegions(const QMimeData*)>;
+    using GetDropRegionsFunction = std::function<DropRegions(const QMimeData*)>;
 
 public:
     class DropRegionWidget : public QWidget {
@@ -50,7 +50,6 @@ public:
         void deactivate();
 
         void dragEnterEvent(QDragEnterEvent* dragEnterEvent) override;
-        void dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent) override;
 
         DropRegion* getDropRegion();
 
@@ -71,13 +70,12 @@ public:
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
-    void initialize(GetDropRegions getDropRegions);
+    void initialize(GetDropRegionsFunction getDropRegions);
 
 private:
     void removeAllDropRegionWidgets();
 
 protected:
-    ScatterplotPlugin*  _scatterplotPlugin;
-    GetDropRegions      _getDropRegions;
-    bool                _dragging;
+    ScatterplotPlugin*          _scatterplotPlugin;
+    GetDropRegionsFunction      _getDropRegionsFunction;
 };
