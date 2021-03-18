@@ -344,12 +344,13 @@ endif(MSVC)
 
 if(APPLE)
 	set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
+    set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
 	install(TARGETS ${PROJECT}
 		RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
 		BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
 		# ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
 	)
-
+    # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
 	install(CODE "execute_process(
 			COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
@@ -365,7 +366,6 @@ if(APPLE)
 			COMMAND ${CMAKE_COMMAND} -E copy 
 					\"$<TARGET_FILE:${PROJECT}_Private>\" 
 					\"${BUNDLE_DIR}/Contents/Frameworks/\"
-
 		)
 		
 		#if(NOT retval EQUAL 0)
@@ -374,6 +374,11 @@ if(APPLE)
 		"
 		COMPONENT MACOS_BUNDLE
 	)
+    install(CODE "execute_process(
+            COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt5_DIR} ${BUNDLE_DIR}
+        )"
+        COMPONENT MACOS_BUNDLE
+    )
 else()
 	install(TARGETS ${PROJECT}
 		RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
