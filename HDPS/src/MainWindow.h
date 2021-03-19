@@ -105,6 +105,8 @@ private: // Window geometry persistence
      */
     void setDefaultWindowGeometry(const float& coverage = 0.7f);
 
+    void checkGraphicsCapabilities();
+
 private: // Docking
 
     /** Sets up docking */

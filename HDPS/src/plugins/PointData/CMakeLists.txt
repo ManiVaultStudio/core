@@ -71,16 +71,23 @@ set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
 # Copy the DLL, the LIB file and the export header of this library to the appropriate subdirectory
 # of the installation directory.
 install(TARGETS ${PROJECT}
-    RUNTIME DESTINATION Plugins COMPONENT SHAREDLIB
-    LIBRARY DESTINATION lib COMPONENT LINKLIB
+    RUNTIME DESTINATION Plugins COMPONENT PLUGINS # Windows .dll
+    LIBRARY DESTINATION Plugins COMPONENT PLUGINS # Linux/Mac .so
     ARCHIVE DESTINATION lib COMPONENT LINKLIB
     PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
 )
 
+if (NOT WIN32)
+    install(TARGETS ${PROJECT}
+        LIBRARY DESTINATION lib COMPONENT LINKLIB # Linux/Mac .so for linking
+        PUBLIC_HEADER DESTINATION include COMPONENT HEADERS
+    )
+endif()
+
 # PointData is needed to build other plugins - install it now.
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
-        --install ${CMAKE_BINARY_DIR}/hdps/src/plugins/PointData
+        --install ${CMAKE_BINARY_DIR}/HDPS/src/plugins/PointData
         --config $<CONFIGURATION>
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>
 )
