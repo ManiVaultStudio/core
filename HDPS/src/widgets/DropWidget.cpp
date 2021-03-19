@@ -77,8 +77,10 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::DragLeave:
         {
-            if (isParentWidgetEvent)
+            if (isParentWidgetEvent) {
+                qDebug() << "removeAllDropRegionWidgets";
                 removeAllDropRegionWidgets();
+            }
 
             auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(target);
 
@@ -86,6 +88,7 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
                 //setAcceptDrops(true);
                 dropRegionContainerWidget->setHighLight(false);
                 //removeAllDropRegionWidgets();
+                event->accept();
             }
 
             break;
