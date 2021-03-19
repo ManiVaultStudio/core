@@ -114,10 +114,17 @@ public:
          * @param dropRegion Drop region
          * @param parent Parent widget
          */
-        DropRegionContainerWidget(DropRegion* dropRegion, QWidget* parent = nullptr);
+        DropRegionContainerWidget(DropRegion* dropRegion, QWidget* parent);
 
         /** Get the drop region */
         DropRegion* getDropRegion();
+
+        /**
+         * Respond to \p target events
+         * @param target Object of which an event occurred
+         * @param event The event that took place
+         */
+        bool eventFilter(QObject* parent, QEvent* event) override;
 
     protected:
         /**

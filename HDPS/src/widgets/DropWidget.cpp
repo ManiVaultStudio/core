@@ -22,6 +22,7 @@ DropWidget::DropWidget(QWidget* parent) :
     _getDropRegionsFunction()
 {
     setAcceptDrops(true);
+    setMouseTracking(true);
 
     auto layout = new QHBoxLayout();
 
@@ -30,13 +31,17 @@ DropWidget::DropWidget(QWidget* parent) :
 
     setLayout(layout);
 
+    // Install event filter for drag and drop
+    this->installEventFilter(this);
+
     // Install event filter for synchronizing widget size
     parent->installEventFilter(this);
 }
 
 bool DropWidget::eventFilter(QObject* target, QEvent* event)
 {
-    const auto isParentWidgetEvent = dynamic_cast<QWidget*>(target) == parent();
+    const auto isParentWidgetEvent  = dynamic_cast<QWidget*>(target) == parent();
+    const auto isThisWidgetEvent    = dynamic_cast<QWidget*>(target) == this;
 
     switch (event->type())
     {
@@ -51,25 +56,17 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::DragEnter:
         {
-            const auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
+            if (isThisWidgetEvent) {
+                qDebug() << "Target widget drag enter event";
 
-            if (isParentWidgetEvent) {
-                //setAcceptDrops(false);
+                const auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
+
                 removeAllDropRegionWidgets();
 
-                for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData())) {
-                    const auto dropRegionContainerWidget = new DropRegionContainerWidget(dropRegion);
+                for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData()))
+                    layout()->addWidget(new DropRegionContainerWidget(dropRegion, this));
 
-                    layout()->addWidget(dropRegionContainerWidget);
-                    dropRegionContainerWidget->installEventFilter(this);
-                }
-            }
-
-            auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(target);
-
-            if (dropRegionContainerWidget) {
                 dragEnterEvent->acceptProposedAction();
-                dropRegionContainerWidget->setHighLight(true);
             }
 
             break;
@@ -77,18 +74,10 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::DragLeave:
         {
-            if (isParentWidgetEvent) {
-                qDebug() << "removeAllDropRegionWidgets";
+            if (isThisWidgetEvent) {
+                qDebug() << "Target widget drag leave event";
+                const auto dragLeaveEvent = static_cast<QDragLeaveEvent*>(event);
                 removeAllDropRegionWidgets();
-            }
-
-            auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(target);
-
-            if (dropRegionContainerWidget) {
-                //setAcceptDrops(true);
-                dropRegionContainerWidget->setHighLight(false);
-                //removeAllDropRegionWidgets();
-                event->accept();
             }
 
             break;
@@ -96,18 +85,10 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Drop:
         {
-            const auto dropEvent = static_cast<QDropEvent*>(event);
-
-            auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(target);
-
-            if (dropRegionContainerWidget) {
-                dropRegionContainerWidget->getDropRegion()->drop();
-
-                //setAcceptDrops(true);
+            if (isThisWidgetEvent) {
+                const auto dropEvent = static_cast<QDropEvent*>(event);
 
                 removeAllDropRegionWidgets();
-
-                dropEvent->acceptProposedAction();
             }
 
             break;
@@ -135,13 +116,12 @@ void DropWidget::removeAllDropRegionWidgets()
     }
 }
 
-DropWidget::DropRegionContainerWidget::DropRegionContainerWidget(DropRegion* dropRegion, QWidget* parent /*= nullptr*/) :
+DropWidget::DropRegionContainerWidget::DropRegionContainerWidget(DropRegion* dropRegion, QWidget* parent) :
     QWidget(parent),
     _dropRegion(dropRegion),
     _opacityEffect(new QGraphicsOpacityEffect(this)),
     _opacityAnimation(new QPropertyAnimation(_opacityEffect, "opacity"))
 {
-    setAcceptDrops(true);
     setAutoFillBackground(true);
     setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
     setGraphicsEffect(_opacityEffect);
@@ -159,6 +139,9 @@ DropWidget::DropRegionContainerWidget::DropRegionContainerWidget(DropRegion* dro
     setLayout(mainLayout);
 
     setHighLight(false);
+
+    // Respond to drag move events of the parent widget so that we can highlight when needed
+    parent->installEventFilter(this);
 }
 
 DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
@@ -166,11 +149,47 @@ DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
     return _dropRegion;
 }
 
+bool DropWidget::DropRegionContainerWidget::eventFilter(QObject* target, QEvent* event)
+{
+    const auto isParentWidgetEvent = dynamic_cast<QWidget*>(target) == parent();
+
+    qDebug() << event;
+    switch (event->type())
+    {
+        case QEvent::DragMove:
+        {
+            if (isParentWidgetEvent) {
+                qDebug() << "isParentWidgetEvent";
+                const auto dragMoveEvent = static_cast<QDragMoveEvent*>(event);
+                setHighLight(rect().contains(dragMoveEvent->pos()));
+            }
+
+            break;
+        }
+
+        case QEvent::Drop:
+        {
+            const auto dropEvent = static_cast<QDropEvent*>(event);
+
+            if (rect().contains(dropEvent->pos()))
+                getDropRegion()->drop();
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QWidget::eventFilter(target, event);
+}
+
 void DropWidget::DropRegionContainerWidget::setHighLight(const bool& highlight /*= false*/)
 {
     const auto targetOpacity = highlight ? 0.9 : 0.6;
 
-    _opacityEffect->setOpacity(targetOpacity);
+    if (_opacityEffect->opacity() != targetOpacity)
+        _opacityEffect->setOpacity(targetOpacity);
 
     /*
     _opacityAnimation->setStartValue(_opacityEffect->opacity());
