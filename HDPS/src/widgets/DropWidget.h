@@ -49,12 +49,11 @@ public:
             /**
              * Constructor
              * @param parent Parent widget
-             * @param icon Icon of the drop region
              * @param title Title of the drop region
              * @param description Description of the drop region
              * @param dropAllowed Whether dropping is allowed in the region
              */
-            StandardWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description, const bool& dropAllowed = true);
+            StandardWidget(QWidget* parent, const QString& title, const QString& description, const bool& dropAllowed = true);
         };
 
     public:
@@ -73,13 +72,12 @@ public:
         /**
          * Constructs a drop region object with a standard widget
          * @param parent Parent widget to enable drag and drop behaviour for
-         * @param icon Icon of the drop region
          * @param title Title of the drop region
          * @param description Description of the drop region
          * @param dropAllowed Whether dropping is allowed in the region
          * @param dropped Callback function when mime data is dropped
          */
-        DropRegion(QObject* parent, const QIcon& icon, const QString& title, const QString& description, const bool& dropAllowed = true, const Dropped& dropped = Dropped());
+        DropRegion(QObject* parent, const QString& title, const QString& description, const bool& dropAllowed = true, const Dropped& dropped = Dropped());
 
         /** Get visual representation of the region */
         QWidget* getWidget() const;
@@ -154,6 +152,10 @@ public:
      * @param event The event that took place
      */
     bool eventFilter(QObject* target, QEvent* event) override;
+
+    void dragEnterEvent(QDragEnterEvent* dragEnterEvent) override;
+    void dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent) override;
+    void dropEvent(QDropEvent* dropEvent) override;
 
     /**
      * Initialize the drop widget

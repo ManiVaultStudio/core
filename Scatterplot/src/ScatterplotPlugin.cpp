@@ -63,38 +63,35 @@ ScatterplotPlugin::ScatterplotPlugin() :
         const auto candidateDatasetName = candidateDataset.getName();
 
         if (!dataTypes.contains(dataType))
-            dropRegions << new DropWidget::DropRegion(this, QIcon(), "Incompatible data", "This type of data is not supported", false);
-
-        
-        const auto getPointsDropRegion = [this, candidateDatasetName]() -> DropWidget::DropRegion* {
-            return new DropWidget::DropRegion(this, QIcon(), "Points", "Load as points data", true, [this, candidateDatasetName]() {
-                loadPointData(candidateDatasetName);
-            });
-        };
-
-        const auto getColorDropRegion = [this, candidateDatasetName]() -> DropWidget::DropRegion* {
-            return new DropWidget::DropRegion(this, QIcon(), "Color", "Load as color data", true, [this, candidateDatasetName]() {
-                loadColorData(candidateDatasetName);
-            });
-        };
-
-        const auto dataAlreadyLoaded = new DropWidget::DropRegion(this, QIcon(), "Warning", "Data already loaded", false);
+            dropRegions << new DropWidget::DropRegion(this, "Incompatible data", "This type of data is not supported", false);
 
         if (dataType == PointType) {
             if (currentDatasetName.isEmpty()) {
-                dropRegions << getPointsDropRegion();
+                dropRegions << new DropWidget::DropRegion(this, "Position", "Load point positions", true, [this, candidateDatasetName]() {
+                    loadPointData(candidateDatasetName);
+                });
             }
             else {
                 if (candidateDatasetName == currentDatasetName) {
-                    dropRegions << dataAlreadyLoaded;
+                    dropRegions << new DropWidget::DropRegion(this, "Warning", "Data already loaded", false);
                 }
                 else {
                     const auto currentDataset = getCore()->requestData<Points>(currentDatasetName);
 
-                    if (currentDataset.getNumPoints() != candidateDataset.getNumPoints())
-                        dropRegions << getPointsDropRegion();
-                    else
-                        dropRegions << getPointsDropRegion() << getColorDropRegion();
+                    if (currentDataset.getNumPoints() != candidateDataset.getNumPoints()) {
+                        dropRegions << new DropWidget::DropRegion(this, "Position", "Load point positions", true, [this, candidateDatasetName]() {
+                            loadPointData(candidateDatasetName);
+                        });
+                    }
+                    else {
+                        dropRegions << new DropWidget::DropRegion(this, "Position", "Load point positions", true, [this, candidateDatasetName]() {
+                            loadPointData(candidateDatasetName);
+                        });
+
+                        dropRegions << new DropWidget::DropRegion(this, "Color", "Load point colors", true, [this, candidateDatasetName]() {
+                            loadColorData(candidateDatasetName);
+                        });
+                    }
                 }
             }
         }

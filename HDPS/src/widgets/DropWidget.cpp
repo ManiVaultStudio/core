@@ -31,9 +31,6 @@ DropWidget::DropWidget(QWidget* parent) :
 
     setLayout(layout);
 
-    // Install event filter for drag and drop
-    this->installEventFilter(this);
-
     // Install event filter for synchronizing widget size
     parent->installEventFilter(this);
 }
@@ -54,51 +51,31 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
             break;
         }
 
-        case QEvent::DragEnter:
-        {
-            if (isThisWidgetEvent) {
-                qDebug() << "Target widget drag enter event";
-
-                const auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
-
-                removeAllDropRegionWidgets();
-
-                for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData()))
-                    layout()->addWidget(new DropRegionContainerWidget(dropRegion, this));
-
-                dragEnterEvent->acceptProposedAction();
-            }
-
-            break;
-        }
-
-        case QEvent::DragLeave:
-        {
-            if (isThisWidgetEvent) {
-                qDebug() << "Target widget drag leave event";
-                const auto dragLeaveEvent = static_cast<QDragLeaveEvent*>(event);
-                removeAllDropRegionWidgets();
-            }
-
-            break;
-        }
-
-        case QEvent::Drop:
-        {
-            if (isThisWidgetEvent) {
-                const auto dropEvent = static_cast<QDropEvent*>(event);
-
-                removeAllDropRegionWidgets();
-            }
-
-            break;
-        }
-
         default:
             break;
     }
 
     return QWidget::eventFilter(target, event);
+}
+
+void DropWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
+{
+    removeAllDropRegionWidgets();
+
+    for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData()))
+        layout()->addWidget(new DropRegionContainerWidget(dropRegion, this));
+
+    dragEnterEvent->acceptProposedAction();
+}
+
+void DropWidget::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
+{
+    removeAllDropRegionWidgets();
+}
+
+void DropWidget::dropEvent(QDropEvent* dropEvent)
+{
+    removeAllDropRegionWidgets();
 }
 
 void DropWidget::initialize(const GetDropRegionsFunction& getDropRegions)
@@ -140,7 +117,7 @@ DropWidget::DropRegionContainerWidget::DropRegionContainerWidget(DropRegion* dro
 
     setHighLight(false);
 
-    // Respond to drag move events of the parent widget so that we can highlight when needed
+    // Respond to drag move/drop events of the parent widget
     parent->installEventFilter(this);
 }
 
@@ -151,17 +128,13 @@ DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
 
 bool DropWidget::DropRegionContainerWidget::eventFilter(QObject* target, QEvent* event)
 {
-    const auto isParentWidgetEvent = dynamic_cast<QWidget*>(target) == parent();
-
-    qDebug() << event;
     switch (event->type())
     {
         case QEvent::DragMove:
         {
-            if (isParentWidgetEvent) {
-                qDebug() << "isParentWidgetEvent";
+            if (dynamic_cast<QWidget*>(target) == parent()) {
                 const auto dragMoveEvent = static_cast<QDragMoveEvent*>(event);
-                setHighLight(rect().contains(dragMoveEvent->pos()));
+                setHighLight(geometry().contains(dragMoveEvent->pos()));
             }
 
             break;
@@ -169,10 +142,12 @@ bool DropWidget::DropRegionContainerWidget::eventFilter(QObject* target, QEvent*
 
         case QEvent::Drop:
         {
-            const auto dropEvent = static_cast<QDropEvent*>(event);
+            if (dynamic_cast<QWidget*>(target) == parent()) {
+                const auto dropEvent = static_cast<QDropEvent*>(event);
 
-            if (rect().contains(dropEvent->pos()))
-                getDropRegion()->drop();
+                if (geometry().contains(dropEvent->pos()))
+                    getDropRegion()->drop();
+            }
 
             break;
         }
@@ -205,9 +180,9 @@ DropWidget::DropRegion::DropRegion(QObject* parent, QWidget* widget, const Dropp
 {
 }
 
-DropWidget::DropRegion::DropRegion(QObject* parent, const QIcon& icon, const QString& title, const QString& description, const bool& dropAllowed /*= true*/, const Dropped& dropped /*= Dropped()*/) :
+DropWidget::DropRegion::DropRegion(QObject* parent, const QString& title, const QString& description, const bool& dropAllowed /*= true*/, const Dropped& dropped /*= Dropped()*/) :
     QObject(parent),
-    _widget(new StandardWidget(nullptr, icon, title, description, dropAllowed)),
+    _widget(new StandardWidget(nullptr, title, description, dropAllowed)),
     _dropped(dropped)
 {
 }
@@ -225,18 +200,15 @@ void DropWidget::DropRegion::drop()
         _dropped();
 }
 
-DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description, const bool& dropAllowed /*= true*/) :
+DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QString& title, const QString& description, const bool& dropAllowed /*= true*/) :
     QWidget(parent)
 {
     setObjectName("StandardWidget");
 
     auto layout = new QVBoxLayout();
 
-    auto iconLabel          = new QLabel();
     auto titleLabel         = new QLabel(title);
     auto descriptionLabel   = new QLabel(description);
-
-    iconLabel->setPixmap(icon.pixmap(QSize(32, 32)));
 
     titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setStyleSheet("font-weight: bold");
@@ -248,7 +220,6 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QI
     layout->setAlignment(Qt::AlignCenter);
 
     layout->addStretch(1);
-    layout->addWidget(iconLabel);
     layout->addWidget(titleLabel);
     layout->addWidget(descriptionLabel);
     layout->addStretch(1);
@@ -256,10 +227,10 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QI
     setLayout(layout);
 
     const auto saturation       = dropAllowed ? 0 : 100;
-    const auto backgroundColor  = QString("hsl(0, %1%, 90%)").arg(QString::number(saturation));
+    const auto backgroundColor  = QString("hsl(0, %1%, 97%)").arg(QString::number(saturation));
     const auto foregroundColor  = QString("hsl(0, %1%, 30%)").arg(QString::number(saturation));
     const auto borderColor      = QString("hsl(0, %1%, 60%)").arg(QString::number(saturation));
-    const auto border           = QString("2px solid %1").arg(borderColor);
+    const auto border           = QString("1px solid %1").arg(borderColor);
 
     setStyleSheet(QString("QWidget#StandardWidget{ background-color: %1; border: %2; } QLabel { color: %3; }").arg(backgroundColor, border, foregroundColor));
 }
