@@ -12,6 +12,8 @@
 
 #include "util/FileUtil.h"
 
+#include <cmath>
+
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QLineEdit>
@@ -308,7 +310,7 @@ void MainWindow::initializeCentralDockingArea()
     QLabel* welcomeLabel = new QLabel();
 
     // choose the icon for different-dpi screens
-    const int pixelRatio = static_cast<int>(std::ceil(devicePixelRatio()));
+    const int pixelRatio = static_cast<int>(ceil(devicePixelRatio()));
     QString iconName = ":/Icons/AppIcon256";
     if (pixelRatio > 1) iconName = ":/Icons/AppIcon512";
     if (pixelRatio > 2) iconName = ":/Icons/AppIcon1024";
