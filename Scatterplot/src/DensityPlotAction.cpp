@@ -1,6 +1,7 @@
 #include "DensityPlotAction.h"
 #include "Application.h"
 
+#include "ScatterplotPlugin.h"
 #include "ScatterplotWidget.h"
 
 using namespace hdps::gui;
@@ -11,7 +12,7 @@ DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
 {
     setToolTip("Density plot settings");
 
-    _sigmaAction.setUpdateDuringDrag(false);
+    //
 
     const auto updateRenderMode = [this]() -> void {
         setVisible(getScatterplotWidget()->getRenderMode() != ScatterplotWidget::SCATTERPLOT);
@@ -28,6 +29,16 @@ DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
     connect(&_sigmaAction, &DoubleAction::valueChanged, this, [this, updateSigma](const double& value) {
         updateSigma();
     });
+
+    const auto updateSigmaAction = [this]() {
+        _sigmaAction.setUpdateDuringDrag(_scatterplotPlugin->getNumberOfPoints() < 100000);
+    };
+
+    connect(scatterplotPlugin, &ScatterplotPlugin::currentDatasetChanged, this, [this, updateSigmaAction](const QString& datasetName) {
+        updateSigmaAction();
+    });
+
+    updateSigmaAction();
 
     updateRenderMode();
     updateSigma();

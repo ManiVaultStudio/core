@@ -152,7 +152,7 @@ bool AccordionSection::isExpanded() const
 
 void AccordionSection::updateLeftIcon()
 {
-    const auto iconName = _toggleButton.isChecked() ? "angle-right" : "angle-down";
+    const auto iconName = _toggleButton.isChecked() ? "angle-down" : "angle-right";
     const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
 
     _leftIconLabel.setPixmap(icon.pixmap(ICON_SIZE));
