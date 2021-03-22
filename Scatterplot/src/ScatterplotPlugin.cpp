@@ -44,8 +44,8 @@ ScatterplotPlugin::ScatterplotPlugin() :
     //setFocusPolicy(Qt::StrongFocus);
 
     connect(_scatterPlotWidget, &ScatterplotWidget::customContextMenuRequested, this, [this](const QPoint& point) {
-        //if (_currentDataSet.isEmpty() || _pixelSelectionTool->isActive())
-            //return;
+        if (_currentDataSet.isEmpty())
+            return;
 
         _settingsAction.getContextMenu()->exec(mapToGlobal(point));
     });

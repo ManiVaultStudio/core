@@ -12,8 +12,6 @@ DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
 {
     setToolTip("Density plot settings");
 
-    //
-
     const auto updateRenderMode = [this]() -> void {
         setVisible(getScatterplotWidget()->getRenderMode() != ScatterplotWidget::SCATTERPLOT);
     };
