@@ -56,13 +56,17 @@ public:
     */
     QAction* addMenuAction(plugin::Type type, QString name);
 
-    
-
     /**
     * Allows access to the core, which is created by this MainWindow. Useful for
     * unit tests that may need to call addData and requestData.
     */
     CoreInterface& getCore() { return *_core;  }
+
+    /**
+     * Callback invoked when the window closes
+     * @param closeEvent Close event
+     */
+    void closeEvent(QCloseEvent* closeEvent);
 
 public: // Adding plugins
 

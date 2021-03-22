@@ -117,6 +117,11 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
     }
 }
 
+void MainWindow::closeEvent(QCloseEvent* closeEvent)
+{
+    delete _dockManager;
+}
+
 void MainWindow::addPlugin(plugin::Plugin* plugin)
 {
     const auto pluginType = plugin->getType();
@@ -325,8 +330,8 @@ void MainWindow::initializeCentralDockingArea()
 void MainWindow::initializeAnalysisPluginsDockingArea()
 {
     _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
-    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
+    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
     _analysisPluginsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
     _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion.get());
 
@@ -334,15 +339,15 @@ void MainWindow::initializeAnalysisPluginsDockingArea()
 
     //_analysisPluginsDockArea->setDockAreaFlag(CDockAreaWidget::HideSingleWidgetTitleBar, true);
     _analysisPluginsDockArea->setMinimumWidth(300);
-    _analysisPluginsDockArea->setMaximumWidth(600);
+    //_analysisPluginsDockArea->setMaximumWidth(600);
     _analysisPluginsDockArea->resize(QSize(400, 0));
 }
 
 void MainWindow::initializeSettingsDockingArea()
 {
     _settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
-    _settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
+    _settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
     _settingsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
 
     _settingsDockWidget->setWidget(_dataHierarchy.get());
@@ -351,7 +356,7 @@ void MainWindow::initializeSettingsDockingArea()
 
     //_settingsDockArea->setDockAreaFlag(CDockAreaWidget::HideSingleWidgetTitleBar, true);
     _settingsDockArea->setMinimumWidth(200);
-    _settingsDockArea->setMaximumWidth(400);
+    //_settingsDockArea->setMaximumWidth(400);
     _settingsDockArea->resize(QSize(300, 0));
 }
 
