@@ -229,6 +229,8 @@ void ScatterplotPlugin::selectPoints()
 void ScatterplotPlugin::onDataInput(QString dataSetName)
 {
     _currentDataSet = dataSetName;
+    
+    _scatterPlotWidget->resetColorMap();
 
     setWindowTitle(_currentDataSet);
 
