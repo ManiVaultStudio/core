@@ -1,8 +1,7 @@
 #ifndef HDPS_LOGDOCKWIDGET_H
 #define HDPS_LOGDOCKWIDGET_H
 
-// Qt header file:
-#include <QDockWidget>
+#include "widgets/DockableWidget.h"
 
 // Standard C++ header file:
 #include <memory> // For std::unique_ptr
@@ -12,10 +11,10 @@ namespace hdps
 namespace gui
 {
 
-class LogDockWidget final: public QDockWidget
+class LogDockWidget final: public DockableWidget
 {
 public:
-    explicit LogDockWidget(QMainWindow&);
+    explicit LogDockWidget(const DockingLocation& location = DockingLocation::Left, QWidget* parent = nullptr);
     ~LogDockWidget() override;
 
 private:

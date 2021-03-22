@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked) {
         if (checked) {
-            _loggingDockWidget->setWidget(new LogDockWidget(*this));
+            _loggingDockWidget->setWidget(new LogDockWidget(DockableWidget::DockingLocation::Bottom, this));
             _loggingDockArea->show();
         } else {
             delete _loggingDockWidget->takeWidget();

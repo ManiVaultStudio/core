@@ -12,6 +12,7 @@
 #include <QMainWindow>
 #include <QTreeView>
 #include <QUuid>
+#include <QVBoxLayout>
 
 namespace
 {
@@ -44,10 +45,15 @@ private:
     QMetaObject::Connection m_awakeConnection;
 
 public:
-    explicit Data(QDockWidget& dockWidget)
+    explicit Data(DockableWidget& dockableWidget)
     {
-        auto& treeView = *new QTreeView(&dockWidget);
-        dockWidget.setWidget(&treeView);
+        auto& treeView = *new QTreeView(&dockableWidget);
+
+        auto layout = new QVBoxLayout();
+        layout->setMargin(0);
+        layout->setSpacing(0);
+        layout->addWidget(&treeView);
+        dockableWidget.setLayout(layout);
 
         treeView.setEditTriggers(QAbstractItemView::NoEditTriggers);
         treeView.setRootIsDecorated(false);
@@ -114,14 +120,11 @@ public:
 };
 
 
-LogDockWidget::LogDockWidget(QMainWindow& mainWindow)
+LogDockWidget::LogDockWidget(const DockingLocation& location, QWidget* parent)
     :
-    QDockWidget(&mainWindow),
+    DockableWidget(location, parent),
     _data(std::make_unique<Data>(*this))
 {
-    // The following is copied from DockableWidget::DockableWidget, in
-    // "core\HDPS\src\widgets\DockableWidget.cpp":
-
     // Generate a unique name for the widget to let Qt identify it and store/retrieve its state
     setObjectName(QString("Dockable Widget ") + QUuid::createUuid().toString());
 }
