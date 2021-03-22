@@ -49,6 +49,8 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
         _pixelSelectionToolRenderer.update();
         update();
     });
+
+    resetColorMap();
 }
 
 bool ScatterplotWidget::isInitialized()
@@ -191,6 +193,21 @@ bool ScatterplotWidget::eventFilter(QObject* target, QEvent* event)
     return QWidget::eventFilter(target, event);
 }
 
+void ScatterplotWidget::resetColorMap()
+{
+    _colormapWidget.setColormap(0, true);
+
+    if (!_isInitialized)
+        return;
+
+    makeCurrent();
+
+    _pointRenderer.setColormap(_colormapWidget.getActiveColormap());
+    _densityRenderer.setColormap(_colormapWidget.getActiveColormap());
+
+    update();
+}
+
 void ScatterplotWidget::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -249,7 +266,6 @@ void ScatterplotWidget::resizeGL(int w, int h)
     else {
         _colormapWidget.move(width() - 71, 10);
     }
-    _colormapWidget.setColormap(0, true);
 }
 
 void ScatterplotWidget::paintGL()
