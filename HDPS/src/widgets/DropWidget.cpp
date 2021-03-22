@@ -229,7 +229,7 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
     const auto saturation       = dropAllowed ? 0 : 100;
     const auto backgroundColor  = QString("hsl(0, %1%, 97%)").arg(QString::number(saturation));
     const auto foregroundColor  = QString("hsl(0, %1%, 30%)").arg(QString::number(saturation));
-    const auto borderColor      = QString("hsl(0, %1%, 60%)").arg(QString::number(saturation));
+    const auto borderColor      = QString("hsl(0, %1%, 70%)").arg(QString::number(saturation));
     const auto border           = QString("1px solid %1").arg(borderColor);
 
     setStyleSheet(QString("QWidget#StandardWidget{ background-color: %1; border: %2; } QLabel { color: %3; }").arg(backgroundColor, border, foregroundColor));
