@@ -13,8 +13,7 @@ public:
         Widget(QWidget* parent, ColorDataAction* coloringAction);
 
     private:
-        QHBoxLayout                         _layout;
-        hdps::gui::StringAction::Widget     _colorDataWidget;
+        QHBoxLayout     _layout;
     };
 
 public:
@@ -41,9 +40,10 @@ public:
 
     QMenu* getContextMenu();
 
+    hdps::gui::StringAction& getDatasetNameAction() { return _datasetNameAction; }
+
 protected:
-    hdps::gui::StringAction     _colorDataAction;
-    hdps::gui::StandardAction   _resetAction;
+    hdps::gui::StringAction     _datasetNameAction;
 
     friend class Widget;
 };

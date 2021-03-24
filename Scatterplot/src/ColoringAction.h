@@ -70,6 +70,10 @@ public:
     }
 
     QMenu* getContextMenu();
+    
+    ConstantColorAction& getConstantColorAction() { return _constantColorAction; }
+    ColorDimensionAction& getColorDimensionAction() { return _colorDimensionAction; }
+    ColorDataAction& getColorDataAction() { return _colorDataAction; }
 
     void setDimensions(const std::uint32_t& numberOfDimensions, const std::vector<QString>& dimensionNames = std::vector<QString>());
     void setDimensions(const std::vector<QString>& dimensionNames);

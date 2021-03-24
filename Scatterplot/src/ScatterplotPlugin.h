@@ -99,6 +99,7 @@ private:
     
 private:
     QString                         _currentDataSet;
+    QString                         _currentColorDataSet;
     std::vector<hdps::Vector2f>     _points;
     unsigned int                    _numPoints;
     

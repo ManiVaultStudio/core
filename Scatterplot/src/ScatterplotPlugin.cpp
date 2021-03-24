@@ -33,6 +33,7 @@ using namespace hdps;
 ScatterplotPlugin::ScatterplotPlugin() :
     ViewPlugin("Scatterplot View"),
     _currentDataSet(),
+    _currentColorDataSet(),
     _points(),
     _numPoints(0),
     _pixelSelectionTool(new PixelSelectionTool(this, false)),
@@ -87,9 +88,11 @@ ScatterplotPlugin::ScatterplotPlugin() :
                             loadPointData(candidateDatasetName);
                         });
 
-                        dropRegions << new DropWidget::DropRegion(this, "Color", "Load point colors", true, [this, candidateDatasetName]() {
-                            loadColorData(candidateDatasetName);
-                        });
+                        if (candidateDatasetName != _currentColorDataSet) {
+                            dropRegions << new DropWidget::DropRegion(this, "Color", "Load point colors", true, [this, candidateDatasetName]() {
+                                loadColorData(candidateDatasetName);
+                            });
+                        }
                     }
                 }
             }
@@ -259,7 +262,8 @@ void ScatterplotPlugin::selectPoints()
 void ScatterplotPlugin::loadPointData(const QString& dataSetName)
 {
     _currentDataSet = dataSetName;
-    
+    _currentColorDataSet = "";
+
     _scatterPlotWidget->resetColorMap();
 
     setWindowTitle(_currentDataSet);
@@ -285,10 +289,15 @@ void ScatterplotPlugin::loadPointData(const QString& dataSetName)
     _pixelSelectionTool->setEnabled(!_currentDataSet.isEmpty());
 
     updateWindowTitle();
+
+    _scatterPlotWidget->setColoringMode(ScatterplotWidget::ColoringMode::ConstantColor);
+    _settingsAction.getColoringAction().getColorDataAction().getDatasetNameAction().reset();
 }
 
 void ScatterplotPlugin::loadColorData(const QString& dataSetName)
 {
+    _currentColorDataSet = dataSetName;
+
     DataSet& dataSet = _core->requestData(dataSetName);
 
     DataType dataType = dataSet.getDataType();
@@ -335,6 +344,9 @@ void ScatterplotPlugin::loadColorData(const QString& dataSetName)
 
         updateData();
     }
+
+    _scatterPlotWidget->setColoringMode(ScatterplotWidget::ColoringMode::ColorData);
+    _settingsAction.getColoringAction().getColorDataAction().getDatasetNameAction().setString(dataSetName);
 }
 
 ScatterplotWidget* ScatterplotPlugin::getScatterplotWidget()

@@ -3,39 +3,33 @@
 
 #include "ScatterplotPlugin.h"
 
-using namespace hdps::gui;
-
 #include <QMenu>
+
+using namespace hdps::gui;
 
 ColorDataAction::ColorDataAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Coloring"),
-    _colorDataAction(this, "Color data"),
-    _resetAction(this, "Reset")
+    _datasetNameAction(this, "Color dataset name")
 {
-    scatterplotPlugin->addAction(&_colorDataAction);
-    scatterplotPlugin->addAction(&_resetAction);
+    scatterplotPlugin->addAction(&_datasetNameAction);
 
-    _resetAction.setToolTip("Reset color settings");
-
-    _colorDataAction.setEnabled(false);
+    _datasetNameAction.setEnabled(false);
 }
 
 QMenu* ColorDataAction::getContextMenu()
 {
     auto menu = new QMenu("Color data");
 
-    menu->addAction(&_colorDataAction);
-    menu->addAction(&_resetAction);
+    menu->addAction(&_datasetNameAction);
 
     return menu;
 }
 
 ColorDataAction::Widget::Widget(QWidget* parent, ColorDataAction* coloringAction) :
     WidgetAction::Widget(parent, coloringAction),
-    _layout(),
-    _colorDataWidget(this, &coloringAction->_colorDataAction)
+    _layout()
 {
-    _layout.addWidget(&_colorDataWidget);
+    _layout.addWidget(new StringAction::Widget(this, &coloringAction->_datasetNameAction, false));
 
     setLayout(&_layout);
 }
