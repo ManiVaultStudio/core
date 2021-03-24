@@ -308,11 +308,11 @@ void MainWindow::initializeCentralDockingArea()
     QLabel* welcomeLabel = new QLabel();
 
     // choose the icon for different-dpi screens
-    const int pixelRatio = static_cast<int>(std::ceil(devicePixelRatio()));
-    QString iconName = ":/Icons/AppIcon256";
-    if (pixelRatio > 1) iconName = ":/Icons/AppIcon512";
-    if (pixelRatio > 2) iconName = ":/Icons/AppIcon1024";
-
+    const int pixelRatio = devicePixelRatio();
+    QString iconName = ":/Images/AppBackground256";
+    if (pixelRatio > 1) iconName = ":/Images/AppBackground512";
+    if (pixelRatio > 2) iconName = ":/Images/AppBackground1024";
+    
     welcomeLabel->setPixmap(QPixmap(iconName).scaled(256, 256));
     welcomeLabel->setAlignment(Qt::AlignCenter);
 
