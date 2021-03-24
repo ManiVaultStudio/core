@@ -143,6 +143,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const 
         comboBox->addItems(options);
         comboBox->setEnabled(!options.isEmpty());
         comboBox->setSizeAdjustPolicy(QComboBox::SizeAdjustPolicy::AdjustToContents);
+        comboBox->adjustSize();
 
         updateToolTip();
     };

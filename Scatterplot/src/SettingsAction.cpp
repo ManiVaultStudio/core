@@ -2,8 +2,7 @@
 
 #include "Application.h"
 #include "ScatterplotPlugin.h"
-
-#include "util/Timer.h"
+#include "PointData.h"
 
 #include <QMenu>
 
@@ -87,6 +86,25 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
     _layout.setMargin(4);
 
     this->installEventFilter(this);
+
+    const auto onCurrentDatasetChanged = [this, settingsAction](const QString& datasetName = "") -> void {
+        auto positionPriority = 10;
+
+        if (!datasetName.isEmpty() && settingsAction->_scatterplotPlugin->getCore()->requestData<Points>(datasetName).getNumDimensions() == 2)
+            positionPriority = 1;
+
+        qDebug() << positionPriority;
+
+        _stateWidgets[2]->setPriority(positionPriority);
+
+        updateLayout();
+    };
+
+    connect(settingsAction->_scatterplotPlugin, &ScatterplotPlugin::currentDatasetChanged, this, [this, onCurrentDatasetChanged](const QString& datasetName) {
+        onCurrentDatasetChanged(datasetName);
+    });
+
+    onCurrentDatasetChanged();
 }
 
 bool SettingsAction::Widget::eventFilter(QObject* object, QEvent* event)
@@ -94,64 +112,8 @@ bool SettingsAction::Widget::eventFilter(QObject* object, QEvent* event)
     switch (event->type())
     {
         case QEvent::Resize:
-        {
-            Timer timer("Handle resize event");
-
-            QMap<StateWidget*, WidgetType> states;
-
-            for (auto stateWidget : _stateWidgets)
-                states[stateWidget] = WidgetType::Compact;
-
-            const auto getWidth = [this, &states]() -> std::uint32_t {
-                std::uint32_t width = 2 * _layout.margin();
-
-                for (auto stateWidget : _stateWidgets)
-                    width += stateWidget->getSizeHint(states[stateWidget]).width();
-
-                for (auto spacerWidget : _spacerWidgets) {
-                    const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
-                    const auto stateWidgetLeft      = _stateWidgets[spacerWidgetIndex];
-                    const auto stateWidgetRight     = _stateWidgets[spacerWidgetIndex + 1];
-                    const auto spacerWidgetType     = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
-                    const auto spacerWidgetWidth    = SpacerWidget::getWidth(spacerWidgetType);
-
-                    width += spacerWidgetWidth;
-                }
-
-                return width;
-            };
-
-            auto prioritySortedStateWidgets = _stateWidgets;
-
-            std::sort(prioritySortedStateWidgets.begin(), prioritySortedStateWidgets.end(), [](StateWidget* stateWidgetA, StateWidget* stateWidgetB) {
-                return stateWidgetA->getPriority() > stateWidgetB->getPriority();
-            });
-
-            for (auto stateWidget : prioritySortedStateWidgets) {
-                auto cachedStates = states;
-
-                states[stateWidget] = WidgetType::Standard;
-
-                if (getWidth() > static_cast<std::uint32_t>(width())) {
-                    states = cachedStates;
-                    break;
-                }
-            }
-
-            for (auto stateWidget : _stateWidgets)
-                stateWidget->setState(states[stateWidget]);
-
-            for (auto spacerWidget : _spacerWidgets) {
-                const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
-                const auto stateWidgetLeft      = _stateWidgets[spacerWidgetIndex];
-                const auto stateWidgetRight     = _stateWidgets[spacerWidgetIndex + 1];
-                const auto spacerWidgetType     = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
-
-                spacerWidget->setType(spacerWidgetType);
-            }
-
+            updateLayout();
             break;
-        }
 
         default:
             break;
@@ -170,6 +132,62 @@ void SettingsAction::Widget::addStateWidget(WidgetAction* widgetAction, const st
     }
     
     _toolBarLayout.addWidget(_stateWidgets.back());
+}
+
+void SettingsAction::Widget::updateLayout()
+{
+    QMap<StateWidget*, WidgetType> states;
+
+    for (auto stateWidget : _stateWidgets)
+        states[stateWidget] = WidgetType::Compact;
+
+    const auto getWidth = [this, &states]() -> std::uint32_t {
+        std::uint32_t width = 2 * _layout.margin();
+
+        for (auto stateWidget : _stateWidgets)
+            width += stateWidget->getSizeHint(states[stateWidget]).width();
+
+        for (auto spacerWidget : _spacerWidgets) {
+            const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
+            const auto stateWidgetLeft      = _stateWidgets[spacerWidgetIndex];
+            const auto stateWidgetRight     = _stateWidgets[spacerWidgetIndex + 1];
+            const auto spacerWidgetType     = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
+            const auto spacerWidgetWidth    = SpacerWidget::getWidth(spacerWidgetType);
+
+            width += spacerWidgetWidth;
+        }
+
+        return width;
+    };
+
+    auto prioritySortedStateWidgets = _stateWidgets;
+
+    std::sort(prioritySortedStateWidgets.begin(), prioritySortedStateWidgets.end(), [](StateWidget* stateWidgetA, StateWidget* stateWidgetB) {
+        return stateWidgetA->getPriority() > stateWidgetB->getPriority();
+    });
+
+    for (auto stateWidget : prioritySortedStateWidgets) {
+        auto cachedStates = states;
+
+        states[stateWidget] = WidgetType::Standard;
+
+        if (getWidth() > static_cast<std::uint32_t>(width())) {
+            states = cachedStates;
+            break;
+        }
+    }
+
+    for (auto stateWidget : _stateWidgets)
+        stateWidget->setState(states[stateWidget]);
+
+    for (auto spacerWidget : _spacerWidgets) {
+        const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
+        const auto stateWidgetLeft      = _stateWidgets[spacerWidgetIndex];
+        const auto stateWidgetRight     = _stateWidgets[spacerWidgetIndex + 1];
+        const auto spacerWidgetType     = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
+
+        spacerWidget->setType(spacerWidgetType);
+    }
 }
 
 SettingsAction::SpacerWidget::SpacerWidget(const Type& type /*= State::Divider*/) :

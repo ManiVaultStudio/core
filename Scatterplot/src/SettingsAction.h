@@ -46,6 +46,9 @@ public:
         void addStateWidget(WidgetAction* widgetAction, const std::int32_t& priority = 0);
 
     private:
+        void updateLayout();
+
+    private:
         QHBoxLayout             _layout;
         QWidget                 _toolBarWidget;
         QHBoxLayout             _toolBarLayout;
