@@ -93,8 +93,6 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
         if (!datasetName.isEmpty() && settingsAction->_scatterplotPlugin->getCore()->requestData<Points>(datasetName).getNumDimensions() == 2)
             positionPriority = 1;
 
-        qDebug() << positionPriority;
-
         _stateWidgets[2]->setPriority(positionPriority);
 
         updateLayout();
