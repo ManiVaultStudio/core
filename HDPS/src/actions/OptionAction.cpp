@@ -88,6 +88,11 @@ void OptionAction::reset()
     setCurrentIndex(_defaultIndex);
 }
 
+void OptionAction::clearOptions()
+{
+    _options.clear();
+}
+
 QString OptionAction::getCurrentText() const
 {
     return _currentText;
@@ -137,6 +142,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const 
         comboBox->clear();
         comboBox->addItems(options);
         comboBox->setEnabled(!options.isEmpty());
+        comboBox->setSizeAdjustPolicy(QComboBox::SizeAdjustPolicy::AdjustToContents);
 
         updateToolTip();
     };

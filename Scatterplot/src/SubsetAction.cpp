@@ -1,22 +1,20 @@
 #include "SubsetAction.h"
 #include "ScatterplotPlugin.h"
+#include "PointData.h"
 
 #include <QMenu>
 
+using namespace hdps;
 using namespace hdps::gui;
 
 SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
     PluginAction(scatterplotPlugin, "Subset"),
     _subsetNameAction(this, "Subset name"),
     _createSubsetAction(this, "Create subset"),
-    _fromSourceDataAction(this, "From source data")
+    _sourceDataAction(this, "Source data")
 {
     _subsetNameAction.setToolTip("Name of the subset");
     _createSubsetAction.setToolTip("Create subset from selected data points");
-    _fromSourceDataAction.setToolTip("Create subset from source data");
-
-    _fromSourceDataAction.setCheckable(true);
-    _fromSourceDataAction.setChecked(true);
 
     const auto updateActions = [this]() -> void {
         setEnabled(_scatterplotPlugin->getNumberOfSelectedPoints() >= 1);
@@ -25,16 +23,25 @@ SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
     connect(_scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), this, updateActions);
 
     connect(&_createSubsetAction, &QAction::triggered, this, [this]() {
-        _scatterplotPlugin->createSubset(_fromSourceDataAction.isChecked(), _subsetNameAction.getString());
+        _scatterplotPlugin->createSubset(_sourceDataAction.getCurrentIndex() == 1, _subsetNameAction.getString());
     });
 
     const auto onCurrentDatasetChanged = [this]() -> void {
-        const auto currentDatasetName = _scatterplotPlugin->getCurrentDataset();
+        const auto datasetName = _scatterplotPlugin->getCurrentDataset();
 
-        if (currentDatasetName.isEmpty())
-            _subsetNameAction.setString("");
-        else
-            _subsetNameAction.setString(QString("%1_subset").arg(currentDatasetName));
+        QStringList sourceDataOptions;
+
+        if (!datasetName.isEmpty()) {
+            const auto sourceDatasetName = DataSet::getSourceData(_scatterplotPlugin->getCore()->requestData<Points>(datasetName)).getName();
+
+            sourceDataOptions << datasetName;
+
+            if (sourceDatasetName != datasetName)
+                sourceDataOptions << QString("%1 (source data)").arg(sourceDatasetName);
+        }
+
+        _sourceDataAction.setOptions(sourceDataOptions);
+        _sourceDataAction.setEnabled(sourceDataOptions.count() >= 2);
     };
 
     connect(scatterplotPlugin, &ScatterplotPlugin::currentDatasetChanged, this, [this, onCurrentDatasetChanged](const QString& datasetName) {
@@ -50,7 +57,7 @@ QMenu* SubsetAction::getContextMenu()
     auto menu = new QMenu("Subset");
 
     menu->addAction(&_createSubsetAction);
-    menu->addAction(&_fromSourceDataAction);
+    menu->addAction(&_sourceDataAction);
 
     return menu;
 }
@@ -59,9 +66,8 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     WidgetAction::Widget(parent, subsetAction),
     _layout()
 {
-    //_layout.addWidget(new StringAction::Widget(this, &subsetAction->_subsetNameAction, false));
     _layout.addWidget(new StandardAction::PushButton(this, &subsetAction->_createSubsetAction));
-    _layout.addWidget(new StandardAction::CheckBox(this, &subsetAction->_fromSourceDataAction));
+    _layout.addWidget(new OptionAction::Widget(this, &subsetAction->_sourceDataAction));
 
     //_layout.itemAt(0)->widget()->setFixedWidth(80);
 

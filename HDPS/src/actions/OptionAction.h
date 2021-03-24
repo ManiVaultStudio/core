@@ -42,6 +42,7 @@ public:
 
     bool canReset() const;
     void reset();
+    void clearOptions();
 
     QString getCurrentText() const;
     void setCurrentText(const QString& currentText);

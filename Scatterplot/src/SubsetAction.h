@@ -47,7 +47,7 @@ public:
 protected:
     hdps::gui::StringAction     _subsetNameAction;
     hdps::gui::StandardAction   _createSubsetAction;
-    hdps::gui::StandardAction   _fromSourceDataAction;
+    hdps::gui::OptionAction     _sourceDataAction;
 
     friend class Widget;
 };
