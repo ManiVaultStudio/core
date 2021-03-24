@@ -38,13 +38,13 @@ public:
         PopupWidget(QWidget* parent, ColoringAction* coloringAction);
 
     protected:
-        QHBoxLayout                             _layout;
-        QLabel                                  _colorByLabel;
-        hdps::gui::OptionAction::PopupWidget    _colorByWidget;
-        StackedWidget                           _stackedWidget;
-        ConstantColorAction::PopupWidget        _constantColorWidget;
-        ColorDimensionAction::PopupWidget       _colorDimensionWidget;
-        ColorDataAction::PopupWidget            _colorDataWidget;
+        QHBoxLayout                         _layout;
+        QLabel                              _colorByLabel;
+        hdps::gui::OptionAction::Widget     _colorByWidget;
+        StackedWidget                       _stackedWidget;
+        ConstantColorAction::Widget         _constantColorWidget;
+        ColorDimensionAction::Widget        _colorDimensionWidget;
+        ColorDataAction::Widget             _colorDataWidget;
     };
 
 public:

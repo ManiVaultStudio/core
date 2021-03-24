@@ -182,7 +182,7 @@ ColoringAction::PopupWidget::PopupWidget(QWidget* parent, ColoringAction* colori
     WidgetAction::PopupWidget(parent, coloringAction),
     _layout(),
     _colorByLabel("Color by:"),
-    _colorByWidget(this, &coloringAction->_colorByAction),
+    _colorByWidget(this, &coloringAction->_colorByAction, false),
     _stackedWidget(),
     _constantColorWidget(this, &coloringAction->_constantColorAction),
     _colorDimensionWidget(this, &coloringAction->_colorDimensionAction),
