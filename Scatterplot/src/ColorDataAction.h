@@ -16,6 +16,14 @@ public:
         QHBoxLayout     _layout;
     };
 
+    class PopupWidget : public PluginAction::PopupWidget {
+    public:
+        PopupWidget(QWidget* parent, ColorDataAction* coloringAction);
+
+    private:
+        QHBoxLayout     _layout;
+    };
+
 public:
     ColorDataAction(ScatterplotPlugin* scatterplotPlugin);
 

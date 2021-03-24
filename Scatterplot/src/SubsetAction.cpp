@@ -67,7 +67,7 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     _layout()
 {
     _layout.addWidget(new StandardAction::PushButton(this, &subsetAction->_createSubsetAction));
-    _layout.addWidget(new OptionAction::Widget(this, &subsetAction->_sourceDataAction));
+    _layout.addWidget(new OptionAction::Widget(this, &subsetAction->_sourceDataAction, false));
 
     //_layout.itemAt(0)->widget()->setFixedWidth(80);
 

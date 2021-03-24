@@ -33,3 +33,12 @@ ColorDataAction::Widget::Widget(QWidget* parent, ColorDataAction* coloringAction
 
     setLayout(&_layout);
 }
+
+ColorDataAction::PopupWidget::PopupWidget(QWidget* parent, ColorDataAction* coloringAction) :
+    WidgetAction::PopupWidget(parent, coloringAction),
+    _layout()
+{
+    _layout.addWidget(new StringAction::Widget(this, &coloringAction->_datasetNameAction));
+
+    setLayout(&_layout);
+}
