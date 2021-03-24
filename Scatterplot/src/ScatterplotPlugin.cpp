@@ -503,20 +503,11 @@ void ScatterplotPlugin::selectAll()
     if (_currentDataSet.isEmpty())
         return;
 
-    const auto& points = _core->requestData<Points>(_currentDataSet);
+    auto& points            = _core->requestData<Points>(_currentDataSet);
+    auto& selectionSet      = dynamic_cast<Points&>(points.getSelection());
+    auto& selectionIndices  = selectionSet.indices;
 
-    auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
-    auto& selectionSetIndices   = selectionSet.indices;
-
-    const auto& setIndices = points.isDerivedData() ? DataSet::getSourceData(points).indices : points.indices;
-
-    selectionSetIndices.clear();
-    selectionSetIndices.resize(points.getNumPoints());
-
-    if (points.isFull())
-        std::iota(selectionSetIndices.begin(), selectionSetIndices.end(), 0);
-    else
-        selectionSetIndices = setIndices;
+    selectionIndices = points.indices;
 
     _core->notifySelectionChanged(_currentDataSet);
 }
@@ -526,8 +517,7 @@ void ScatterplotPlugin::clearSelection()
     if (_currentDataSet.isEmpty())
         return;
 
-    const auto& points = _core->requestData<Points>(_currentDataSet);
-
+    auto& points                = _core->requestData<Points>(_currentDataSet);
     auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
     auto& selectionSetIndices   = selectionSet.indices;
 
@@ -541,26 +531,16 @@ void ScatterplotPlugin::invertSelection()
     if (_currentDataSet.isEmpty())
         return;
 
-    const auto& points = _core->requestData<Points>(_currentDataSet);
+    auto& points        = _core->requestData<Points>(_currentDataSet);
+    auto& pointsIndices = points.indices;
+    auto& selectionSet  = dynamic_cast<Points&>(points.getSelection());
 
-    auto& selectionSet          = dynamic_cast<Points&>(points.getSelection());
-    auto& selectionSetIndices   = selectionSet.indices;
+    auto selectionIndicesSet = QSet<std::uint32_t>(pointsIndices.begin(), pointsIndices.end());
 
-    const auto& pointsIndices = points.isDerivedData() ? DataSet::getSourceData(points).indices : points.indices;
+    for (auto selectionSetIndex : selectionSet.indices)
+        selectionIndicesSet.remove(selectionSetIndex);
 
-    const auto selectionIndicesSet = QSet<std::uint32_t>(selectionSetIndices.begin(), selectionSetIndices.end());
-
-    selectionSetIndices.clear();
-    selectionSetIndices.reserve(points.getNumPoints());
-
-    for (std::uint32_t p = 0; p < points.getNumPoints(); ++p) {
-        const auto setIndex = points.isFull() ? p : pointsIndices[p];
-
-        if (selectionIndicesSet.contains(setIndex))
-            continue;
-
-        selectionSetIndices.push_back(setIndex);
-    }
+    selectionSet.indices = std::vector<std::uint32_t>(selectionIndicesSet.begin(), selectionIndicesSet.end());
 
     _core->notifySelectionChanged(_currentDataSet);
 }
