@@ -50,6 +50,8 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     });
 
     _pointRenderer.setPointScaling(Absolute);
+
+    resetColorMap();
 }
 
 bool ScatterplotWidget::isInitialized()
@@ -225,6 +227,21 @@ void ScatterplotWidget::setSigma(const float sigma)
     update();
 }
 
+void ScatterplotWidget::resetColorMap()
+{
+    _colormapWidget.setColormap(0, true);
+
+    if (!_isInitialized)
+        return;
+
+    makeCurrent();
+
+    _pointRenderer.setColormap(_colormapWidget.getActiveColormap());
+    _densityRenderer.setColormap(_colormapWidget.getActiveColormap());
+
+    update();
+}
+
 void ScatterplotWidget::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -284,7 +301,6 @@ void ScatterplotWidget::resizeGL(int w, int h)
     else {
         _colormapWidget.move(width() - 71, 10);
     }
-    _colormapWidget.setColormap(0, true);
 }
 
 void ScatterplotWidget::paintGL()

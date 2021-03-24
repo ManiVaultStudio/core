@@ -313,7 +313,13 @@ void MainWindow::initializeCentralDockingArea()
 {
     QLabel* welcomeLabel = new QLabel();
 
-    welcomeLabel->setText("Welcome to HDPS");
+    // choose the icon for different-dpi screens
+    const int pixelRatio = static_cast<int>(std::ceil(devicePixelRatio()));
+    QString iconName = ":/Icons/AppIcon256";
+    if (pixelRatio > 1) iconName = ":/Icons/AppIcon512";
+    if (pixelRatio > 2) iconName = ":/Icons/AppIcon1024";
+
+    welcomeLabel->setPixmap(QPixmap(iconName).scaled(256, 256));
     welcomeLabel->setAlignment(Qt::AlignCenter);
 
     _centralDockWidget->setWidget(welcomeLabel);

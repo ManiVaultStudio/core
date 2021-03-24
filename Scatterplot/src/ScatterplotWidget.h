@@ -27,6 +27,7 @@ using namespace hdps::gui;
 class ScatterplotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
+
 public:
     enum RenderMode {
         SCATTERPLOT,
@@ -82,6 +83,9 @@ public:
     Bounds getBounds() const {
         return _dataBounds;
     }
+
+    /** Resets the current color map to the default color map */
+    void resetColorMap();
 
 protected:
     void initializeGL()         Q_DECL_OVERRIDE;
