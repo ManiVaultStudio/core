@@ -507,7 +507,12 @@ void ScatterplotPlugin::selectAll()
     auto& selectionSet      = dynamic_cast<Points&>(points.getSelection());
     auto& selectionIndices  = selectionSet.indices;
 
-    selectionIndices = points.indices;
+    if (points.isFull()) {
+        selectionIndices.resize(points.getNumPoints());
+        std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
+    } else {
+        selectionIndices = points.indices;
+    }
 
     _core->notifySelectionChanged(_currentDataSet);
 }
@@ -534,6 +539,11 @@ void ScatterplotPlugin::invertSelection()
     auto& points        = _core->requestData<Points>(_currentDataSet);
     auto& pointsIndices = points.indices;
     auto& selectionSet  = dynamic_cast<Points&>(points.getSelection());
+
+    if (points.isFull()) {
+        pointsIndices.resize(points.getNumPoints());
+        std::iota(pointsIndices.begin(), pointsIndices.end(), 0);
+    }
 
     auto selectionIndicesSet = QSet<std::uint32_t>(pointsIndices.begin(), pointsIndices.end());
 
