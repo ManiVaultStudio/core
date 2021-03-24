@@ -38,6 +38,7 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _pixelSelectionTool(pixelSelectionTool)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
+    setAcceptDrops(true);
 
     this->installEventFilter(&_pixelSelectionTool);
 

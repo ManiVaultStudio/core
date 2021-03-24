@@ -20,6 +20,8 @@ namespace gui
  * Depending on the data being dragged, an overlay is presented with one or more drop regions
  * Each region has its own visual representation and drop behaviour (with custom lambda function)
  *
+ * Note: Add the following line to the parent widget to enabled drag and drop: setAcceptDrops(true);
+ *
  * @author Thomas Kroes
  */
 class DropWidget : public QWidget
@@ -117,13 +119,6 @@ public:
         /** Get the drop region */
         DropRegion* getDropRegion();
 
-        /**
-         * Respond to \p target events
-         * @param target Object of which an event occurred
-         * @param event The event that took place
-         */
-        bool eventFilter(QObject* parent, QEvent* event) override;
-
     protected:
         /**
          * Sets the highlight state of the widget
@@ -152,10 +147,6 @@ public:
      * @param event The event that took place
      */
     bool eventFilter(QObject* target, QEvent* event) override;
-
-    void dragEnterEvent(QDragEnterEvent* dragEnterEvent) override;
-    void dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent) override;
-    void dropEvent(QDropEvent* dropEvent) override;
 
     /**
      * Initialize the drop widget

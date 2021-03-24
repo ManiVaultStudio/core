@@ -1,5 +1,6 @@
 #include "DropWidget.h"
 
+#include <QApplication>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QResizeEvent>
@@ -21,8 +22,7 @@ DropWidget::DropWidget(QWidget* parent) :
     QWidget(parent),
     _getDropRegionsFunction()
 {
-    setAcceptDrops(true);
-    setMouseTracking(true);
+    setAttribute(Qt::WA_TransparentForMouseEvents);
 
     auto layout = new QHBoxLayout();
 
@@ -51,31 +51,77 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
             break;
         }
 
+        case QEvent::DragEnter:
+        {
+            if (dynamic_cast<QWidget*>(target) != parent())
+                break;
+
+            const auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
+
+            removeAllDropRegionWidgets();
+
+            for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData()))
+                layout()->addWidget(new DropRegionContainerWidget(dropRegion, this));
+
+            dragEnterEvent->acceptProposedAction();
+            
+            break;
+        }
+
+        case QEvent::DragMove:
+        {
+            if (dynamic_cast<QWidget*>(target) != parent())
+                break;
+
+            const auto dragMoveEvent = static_cast<QDragMoveEvent*>(event);
+
+            for (int i = 0; i < layout()->count(); ++i)
+            {
+                auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(layout()->itemAt(i)->widget());
+
+                if (dropRegionContainerWidget)
+                    dropRegionContainerWidget->setHighLight(dropRegionContainerWidget->geometry().contains(dragMoveEvent->pos()));
+            }
+
+            break;
+        }
+        
+
+        case QEvent::DragLeave:
+        {
+            if (dynamic_cast<QWidget*>(target) != parent())
+                break;
+
+            removeAllDropRegionWidgets();
+            break;
+        }
+
+        case QEvent::Drop:
+        {
+            if (dynamic_cast<QWidget*>(target) != parent())
+                break;
+
+            const auto dropEvent = static_cast<QDropEvent*>(event);
+
+            for (int i = 0; i < layout()->count(); ++i)
+            {
+                auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(layout()->itemAt(i)->widget());
+
+                if (dropRegionContainerWidget) {
+                    if (dropRegionContainerWidget->geometry().contains(dropEvent->pos()))
+                        dropRegionContainerWidget->getDropRegion()->drop();
+                }
+            }
+
+            removeAllDropRegionWidgets();
+            break;
+        }
+
         default:
             break;
     }
 
     return QWidget::eventFilter(target, event);
-}
-
-void DropWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
-{
-    removeAllDropRegionWidgets();
-
-    for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData()))
-        layout()->addWidget(new DropRegionContainerWidget(dropRegion, this));
-
-    dragEnterEvent->acceptProposedAction();
-}
-
-void DropWidget::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
-{
-    removeAllDropRegionWidgets();
-}
-
-void DropWidget::dropEvent(QDropEvent* dropEvent)
-{
-    removeAllDropRegionWidgets();
 }
 
 void DropWidget::initialize(const GetDropRegionsFunction& getDropRegions)
@@ -116,47 +162,11 @@ DropWidget::DropRegionContainerWidget::DropRegionContainerWidget(DropRegion* dro
     setLayout(mainLayout);
 
     setHighLight(false);
-
-    // Respond to drag move/drop events of the parent widget
-    parent->installEventFilter(this);
 }
 
 DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
 {
     return _dropRegion;
-}
-
-bool DropWidget::DropRegionContainerWidget::eventFilter(QObject* target, QEvent* event)
-{
-    switch (event->type())
-    {
-        case QEvent::DragMove:
-        {
-            if (dynamic_cast<QWidget*>(target) == parent()) {
-                const auto dragMoveEvent = static_cast<QDragMoveEvent*>(event);
-                setHighLight(geometry().contains(dragMoveEvent->pos()));
-            }
-
-            break;
-        }
-
-        case QEvent::Drop:
-        {
-            if (dynamic_cast<QWidget*>(target) == parent()) {
-                const auto dropEvent = static_cast<QDropEvent*>(event);
-
-                if (geometry().contains(dropEvent->pos()))
-                    getDropRegion()->drop();
-            }
-
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return QWidget::eventFilter(target, event);
 }
 
 void DropWidget::DropRegionContainerWidget::setHighLight(const bool& highlight /*= false*/)
