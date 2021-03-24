@@ -173,16 +173,6 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
 
     updateSelectionButtons();
 
-    const auto updateRenderMode = [this]() -> void {
-        setEnabled(getScatterplotWidget()->getRenderMode() == ScatterplotWidget::SCATTERPLOT);
-    };
-
-    connect(getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, updateRenderMode](const ScatterplotWidget::RenderMode& renderMode) {
-        updateRenderMode();
-    });
-
-    updateRenderMode();
-
     _scatterplotPlugin->installEventFilter(this);
 }
 
@@ -299,16 +289,6 @@ SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionActio
     layout->addWidget(new StandardAction::CheckBox(this, &selectionAction->_notifyDuringSelectionAction));
 
     setLayout(layout);
-
-    const auto renderModeChanged = [this, selectionAction]() {
-        setEnabled(selectionAction->getScatterplotWidget()->getRenderMode() == ScatterplotWidget::SCATTERPLOT);
-    };
-
-    connect(selectionAction->getScatterplotWidget(), &ScatterplotWidget::renderModeChanged, this, [this, renderModeChanged](const ScatterplotWidget::RenderMode& renderMode) {
-        renderModeChanged();
-    });
-
-    renderModeChanged();
 }
 
 SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* selectionAction) :
