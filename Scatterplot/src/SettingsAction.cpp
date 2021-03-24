@@ -86,6 +86,7 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
     _layout.setMargin(4);
 
     this->installEventFilter(this);
+    _toolBarWidget.installEventFilter(this);
 
     const auto onCurrentDatasetChanged = [this, settingsAction](const QString& datasetName = "") -> void {
         auto positionPriority = 10;
@@ -94,8 +95,6 @@ SettingsAction::Widget::Widget(QWidget* parent, SettingsAction* settingsAction) 
             positionPriority = 1;
 
         _stateWidgets[2]->setPriority(positionPriority);
-
-        updateLayout();
     };
 
     connect(settingsAction->_scatterplotPlugin, &ScatterplotPlugin::currentDatasetChanged, this, [this, onCurrentDatasetChanged](const QString& datasetName) {

@@ -291,7 +291,7 @@ void ScatterplotPlugin::loadPointData(const QString& dataSetName)
     updateWindowTitle();
 
     _scatterPlotWidget->setColoringMode(ScatterplotWidget::ColoringMode::ConstantColor);
-    _settingsAction.getColoringAction().getColorDataAction().getDatasetNameAction().reset();
+    _settingsAction.getColoringAction().getColorDataAction().getDatasetNameAction().setString("None loaded");
 }
 
 void ScatterplotPlugin::loadColorData(const QString& dataSetName)

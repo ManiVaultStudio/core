@@ -34,10 +34,10 @@ SubsetAction::SubsetAction(ScatterplotPlugin* scatterplotPlugin) :
         if (!datasetName.isEmpty()) {
             const auto sourceDatasetName = DataSet::getSourceData(_scatterplotPlugin->getCore()->requestData<Points>(datasetName)).getName();
 
-            sourceDataOptions << datasetName;
+            sourceDataOptions << QString("From: %1").arg(datasetName);
 
             if (sourceDatasetName != datasetName)
-                sourceDataOptions << QString("%1 (source data)").arg(sourceDatasetName);
+                sourceDataOptions << QString("From: %1 (source data)").arg(sourceDatasetName);
         }
 
         _sourceDataAction.setOptions(sourceDataOptions);
