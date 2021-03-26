@@ -27,6 +27,26 @@ namespace gui
 class DropWidget : public QWidget
 {
 public:
+
+    /**
+     * Drop indicator widget class
+     *
+     * Convenience (standard) class for a drop indicator (some visual cues that something can be dropped)
+     *
+     * @author Thomas Kroes
+     */
+    class DropIndicatorWidget : public QWidget
+    {
+    public:
+        /**
+         * Constructor
+         * @param parent Parent widget
+         * @param title Title
+         * @param description Description
+         */
+        DropIndicatorWidget(QWidget* parent, const QString& title, const QString& description);
+    };
+
     /**
      * Drop region class
      *
@@ -154,12 +174,25 @@ public:
      */
     void initialize(const GetDropRegionsFunction& getDropRegions);
 
+    /** Get/set whether to show the drop indicator widget */
+    bool getShowDropIndicator() const;
+    void setShowDropIndicator(const bool& showDropIndicator);
+
+    /**
+     * Sets the drop indicator widget
+     * @param dropIndicatorWidget Drop indicator widget
+     */
+    void setDropIndicatorWidget(QWidget* dropIndicatorWidget);
+
 private:
-    /** Remove all (temporary) drop regions from the layout */
-    void removeAllDropRegionWidgets();
+
+    /** Removes all (temporary) drop regions from the layout */
+    void resetLayout();
 
 protected:
     GetDropRegionsFunction  _getDropRegionsFunction;        /** Function that (based on mime data) returns a list of drop regions */
+    bool                    _showDropIndicator;             /** Whether to show a drop indicator widget overlay */
+    QWidget*                _dropIndicatorWidget;           /** Widget that makes users aware that items can be dropped */
 };
 
 }

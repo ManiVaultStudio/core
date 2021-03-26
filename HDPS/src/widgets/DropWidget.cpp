@@ -1,4 +1,5 @@
 #include "DropWidget.h"
+#include "Application.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -20,7 +21,9 @@ namespace gui
 
 DropWidget::DropWidget(QWidget* parent) :
     QWidget(parent),
-    _getDropRegionsFunction()
+    _getDropRegionsFunction(),
+    _showDropIndicator(true),
+    _dropIndicatorWidget(nullptr)
 {
     setAttribute(Qt::WA_TransparentForMouseEvents);
 
@@ -47,7 +50,13 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != parent())
                 break;
 
-            setFixedSize(static_cast<QResizeEvent*>(event)->size());
+            const auto parentWidgetSize = static_cast<QResizeEvent*>(event)->size();
+
+            setFixedSize(parentWidgetSize);
+
+            if (_dropIndicatorWidget)
+                _dropIndicatorWidget->setFixedSize(parentWidgetSize);
+
             break;
         }
 
@@ -58,13 +67,16 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
 
             const auto dragEnterEvent = static_cast<QDragEnterEvent*>(event);
 
-            removeAllDropRegionWidgets();
+            resetLayout();
 
             for (auto dropRegion : _getDropRegionsFunction(dragEnterEvent->mimeData()))
                 layout()->addWidget(new DropRegionContainerWidget(dropRegion, this));
 
             dragEnterEvent->acceptProposedAction();
             
+            if (_dropIndicatorWidget)
+                _dropIndicatorWidget->hide();
+
             break;
         }
 
@@ -92,7 +104,11 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
             if (dynamic_cast<QWidget*>(target) != parent())
                 break;
 
-            removeAllDropRegionWidgets();
+            resetLayout();
+
+            if (_dropIndicatorWidget)
+                _dropIndicatorWidget->setVisible(_showDropIndicator);
+
             break;
         }
 
@@ -113,7 +129,11 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
                 }
             }
 
-            removeAllDropRegionWidgets();
+            resetLayout();
+
+            if (_dropIndicatorWidget)
+                _dropIndicatorWidget->setVisible(_showDropIndicator);
+
             break;
         }
 
@@ -129,7 +149,32 @@ void DropWidget::initialize(const GetDropRegionsFunction& getDropRegions)
     _getDropRegionsFunction = getDropRegions;
 }
 
-void DropWidget::removeAllDropRegionWidgets()
+bool DropWidget::getShowDropIndicator() const
+{
+    return _showDropIndicator;
+}
+
+void DropWidget::setShowDropIndicator(const bool& showDropIndicator)
+{
+    if (showDropIndicator == _showDropIndicator)
+        return;
+
+    _showDropIndicator = showDropIndicator;
+
+    if (_dropIndicatorWidget)
+        _dropIndicatorWidget->setVisible(showDropIndicator);
+}
+
+void DropWidget::setDropIndicatorWidget(QWidget* dropIndicatorWidget)
+{
+    Q_ASSERT(dropIndicatorWidget != nullptr);
+
+    _dropIndicatorWidget = dropIndicatorWidget;
+
+    _dropIndicatorWidget->setParent(parentWidget());
+}
+
+void DropWidget::resetLayout()
 {
     QLayoutItem* child;
 
@@ -213,8 +258,6 @@ void DropWidget::DropRegion::drop()
 DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QString& title, const QString& description, const bool& dropAllowed /*= true*/) :
     QWidget(parent)
 {
-    setObjectName("StandardWidget");
-
     auto layout = new QVBoxLayout();
 
     auto titleLabel         = new QLabel(title);
@@ -242,7 +285,47 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
     const auto borderColor      = QString("hsl(0, %1%, 70%)").arg(QString::number(saturation));
     const auto border           = QString("1px solid %1").arg(borderColor);
 
+    setObjectName("StandardWidget");
     setStyleSheet(QString("QWidget#StandardWidget{ background-color: %1; border: %2; } QLabel { color: %3; }").arg(backgroundColor, border, foregroundColor));
+}
+
+DropWidget::DropIndicatorWidget::DropIndicatorWidget(QWidget* parent, const QString& title, const QString& description) :
+    QWidget(parent)
+{
+    setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    auto layout = new QVBoxLayout();
+
+    auto iconLabel          = new QLabel();
+    auto titleLabel         = new QLabel(title);
+    auto descriptionLabel   = new QLabel(description);
+
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    iconLabel->setAlignment(Qt::AlignCenter);
+    iconLabel->setFont(fontAwesome.getFont(14));
+    iconLabel->setText(fontAwesome.getIconCharacter("file-import"));
+    iconLabel->setStyleSheet("QLabel { padding: 10px; }");
+
+    titleLabel->setAlignment(Qt::AlignCenter);
+    titleLabel->setStyleSheet("font-weight: bold");
+
+    descriptionLabel->setAlignment(Qt::AlignCenter);
+
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    layout->setAlignment(Qt::AlignCenter);
+
+    layout->addStretch(1);
+    layout->addWidget(iconLabel);
+    layout->addWidget(titleLabel);
+    layout->addWidget(descriptionLabel);
+    layout->addStretch(1);
+
+    setLayout(layout);
+
+    setObjectName("DropIndicatorWidget");
+    setStyleSheet("QWidget#DropIndicatorWidget > QLabel { color: gray; }");
 }
 
 }

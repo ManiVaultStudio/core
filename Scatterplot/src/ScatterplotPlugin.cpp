@@ -51,6 +51,7 @@ ScatterplotPlugin::ScatterplotPlugin() :
         _settingsAction.getContextMenu()->exec(mapToGlobal(point));
     });
 
+    _dropWidget->setDropIndicatorWidget(new DropWidget::DropIndicatorWidget(this, "No data loaded", "Drag items from the data hierarchy to this view to visualize data..."));
     _dropWidget->initialize([this](const QMimeData* mimeData) -> DropWidget::DropRegions {
         DropWidget::DropRegions dropRegions;
 
@@ -293,6 +294,10 @@ void ScatterplotPlugin::loadPointData(const QString& dataSetName)
 
     _scatterPlotWidget->setColoringMode(ScatterplotWidget::ColoringMode::ConstantColor);
     _settingsAction.getColoringAction().getColorDataAction().getDatasetNameAction().setString("None loaded");
+
+    _dropWidget->setShowDropIndicator(false);
+
+    setFocus();
 }
 
 void ScatterplotPlugin::loadColorData(const QString& dataSetName)
@@ -348,6 +353,10 @@ void ScatterplotPlugin::loadColorData(const QString& dataSetName)
 
     _scatterPlotWidget->setColoringMode(ScatterplotWidget::ColoringMode::ColorData);
     _settingsAction.getColoringAction().getColorDataAction().getDatasetNameAction().setString(dataSetName);
+
+    _dropWidget->setShowDropIndicator(false);
+
+    setFocus();
 }
 
 ScatterplotWidget* ScatterplotPlugin::getScatterplotWidget()
