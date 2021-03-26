@@ -9,6 +9,8 @@ PluginAction::PluginAction(ScatterplotPlugin* scatterplotPlugin, const QString& 
     WidgetAction(reinterpret_cast<QObject*>(scatterplotPlugin)),
     _scatterplotPlugin(scatterplotPlugin)
 {
+    _scatterplotPlugin->addAction(this);
+
     setText(title);
     setToolTip(title);
 }

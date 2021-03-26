@@ -12,6 +12,10 @@ RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
     _contourPlotAction(this, "Contour"),
     _actionGroup(this)
 {
+    _scatterPlotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _densityPlotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _contourPlotAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
     _scatterplotPlugin->addAction(&_scatterPlotAction);
     _scatterplotPlugin->addAction(&_densityPlotAction);
     _scatterplotPlugin->addAction(&_contourPlotAction);

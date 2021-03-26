@@ -25,6 +25,15 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _invertSelectionAction(this, "Invert selection"),
     _notifyDuringSelectionAction(this, "Notify during selection")
 {
+    _rectangleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _brushAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _lassoAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _polygonAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _clearSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _selectAllAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _invertSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
     scatterplotPlugin->addAction(&_rectangleAction);
     scatterplotPlugin->addAction(&_brushAction);
     scatterplotPlugin->addAction(&_lassoAction);

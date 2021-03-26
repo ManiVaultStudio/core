@@ -42,6 +42,7 @@ ScatterplotPlugin::ScatterplotPlugin() :
     _settingsAction(this)
 {
     setDockingLocation(DockableWidget::DockingLocation::Right);
+    setFocusPolicy(Qt::ClickFocus);
 
     connect(_scatterPlotWidget, &ScatterplotWidget::customContextMenuRequested, this, [this](const QPoint& point) {
         if (_currentDataSet.isEmpty())
