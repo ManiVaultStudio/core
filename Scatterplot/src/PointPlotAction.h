@@ -2,9 +2,6 @@
 
 #include "PluginAction.h"
 
-#include "actions/OptionAction.h"
-#include "actions/DoubleAction.h"
-
 #include <QLabel>
 
 class PointPlotAction : public PluginAction
@@ -50,8 +47,8 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    hdps::gui::DoubleAction     _pointSizeAction;
-    hdps::gui::DoubleAction     _pointOpacityAction;
+    hdps::gui::DecimalAction    _pointSizeAction;
+    hdps::gui::DecimalAction    _pointOpacityAction;
 
     static constexpr double DEFAULT_POINT_SIZE = 10.0;
     static constexpr double DEFAULT_POINT_OPACITY = 50.0;

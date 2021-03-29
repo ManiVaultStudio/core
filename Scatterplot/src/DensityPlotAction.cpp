@@ -24,7 +24,7 @@ DensityPlotAction::DensityPlotAction(ScatterplotPlugin* scatterplotPlugin) :
         updateRenderMode();
     });
 
-    connect(&_sigmaAction, &DoubleAction::valueChanged, this, [this, updateSigma](const double& value) {
+    connect(&_sigmaAction, &DecimalAction::valueChanged, this, [this, updateSigma](const double& value) {
         updateSigma();
     });
 
@@ -67,7 +67,7 @@ DensityPlotAction::Widget::Widget(QWidget* parent, DensityPlotAction* densityPlo
     _sigmaLabel("Sigma:")
 {
     _layout.addWidget(&_sigmaLabel);
-    _layout.addWidget(new DoubleAction::Widget(this, &densityPlotAction->_sigmaAction, DoubleAction::Widget::Configuration::Slider));
+    _layout.addWidget(new DecimalAction::Widget(this, &densityPlotAction->_sigmaAction, DecimalAction::Widget::Configuration::Slider));
 
     setLayout(&_layout);
 }
@@ -78,7 +78,7 @@ DensityPlotAction::PopupWidget::PopupWidget(QWidget* parent, DensityPlotAction* 
     auto layout = new QGridLayout();
 
     layout->addWidget(new QLabel("Sigma:"), 0, 0);
-    layout->addWidget(new DoubleAction::Widget(this, &densityPlotAction->_sigmaAction), 0, 1);
+    layout->addWidget(new DecimalAction::Widget(this, &densityPlotAction->_sigmaAction), 0, 1);
 
     setLayout(layout);
 }

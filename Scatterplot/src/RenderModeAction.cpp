@@ -32,9 +32,9 @@ RenderModeAction::RenderModeAction(ScatterplotPlugin* scatterplotPlugin) :
     _densityPlotAction.setShortcut(QKeySequence("D"));
     _contourPlotAction.setShortcut(QKeySequence("C"));
 
-    _scatterPlotAction.setToolTip("Set render mode to scatter plot");
-    _densityPlotAction.setToolTip("Set render mode to density plot");
-    _contourPlotAction.setToolTip("Set render mode to contour plot");
+    _scatterPlotAction.setToolTip("Set render mode to scatter plot (S)");
+    _densityPlotAction.setToolTip("Set render mode to density plot (D)");
+    _contourPlotAction.setToolTip("Set render mode to contour plot (C)");
 
     /*
     const auto& fontAwesome = Application::getIconFont("FontAwesome");

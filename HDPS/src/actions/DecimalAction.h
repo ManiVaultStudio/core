@@ -12,13 +12,13 @@ namespace hdps {
 namespace gui {
 
 /**
- * Double widget action class
+ * Decimal widget action class
  *
- * Stores a double and creates widgets to interact with it
+ * Stores a double value and creates widgets to interact with it
  *
  * @author Thomas Kroes
  */
-class DoubleAction : public WidgetAction
+class DecimalAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -36,7 +36,7 @@ public:
         };
 
     public:
-        Widget(QWidget* parent, DoubleAction* floatAction, const Configuration& configuration = Configuration::All);
+        Widget(QWidget* parent, DecimalAction* floatAction, const Configuration& configuration = Configuration::All);
 
     protected:
         QDoubleSpinBox*     _valueDoubleSpinBox;
@@ -45,7 +45,7 @@ public:
     };
 
 public:
-    DoubleAction(QObject * parent, const QString& title, const double& minimum = MIN_VALUE, const double& maximum = MAX_VALUE, const double& value = VALUE, const double& defaultValue = DEFAULT_VALUE, const std::int32_t& decimals = DECIMALS);
+    DecimalAction(QObject * parent, const QString& title, const double& minimum = MIN_VALUE, const double& maximum = MAX_VALUE, const double& value = VALUE, const double& defaultValue = DEFAULT_VALUE, const std::int32_t& decimals = DECIMALS);
 
     QWidget* createWidget(QWidget* parent) override;
 

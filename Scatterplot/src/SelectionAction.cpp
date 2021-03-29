@@ -62,17 +62,17 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
     _invertSelectionAction.setShortcut(QKeySequence("I"));
     _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
 
-    _rectangleAction.setToolTip("Select data points inside a rectangle");
-    _brushAction.setToolTip("Select data points using a brush tool");
-    _lassoAction.setToolTip("Select data points using a lasso");
-    _polygonAction.setToolTip("Select data points by drawing a polygon");
+    _rectangleAction.setToolTip("Select data points inside a rectangle (R)");
+    _brushAction.setToolTip("Select data points using a brush tool (B)");
+    _lassoAction.setToolTip("Select data points using a lasso (L)");
+    _polygonAction.setToolTip("Select data points by drawing a polygon (P)");
     _brushRadiusAction.setToolTip("Brush selection tool radius");
     _modifierAddAction.setToolTip("Add items to the existing selection");
     _modifierRemoveAction.setToolTip("Remove items from the existing selection");
-    _clearSelectionAction.setToolTip("Clears the selection");
-    _selectAllAction.setToolTip("Select all data points");
-    _invertSelectionAction.setToolTip("Invert the selection");
-    _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process");
+    _clearSelectionAction.setToolTip("Clears the selection (E)");
+    _selectAllAction.setToolTip("Select all data points (A)");
+    _invertSelectionAction.setToolTip("Invert the selection (I)");
+    _notifyDuringSelectionAction.setToolTip("Notify during selection or only at the end of the selection process (U)");
 
     const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
@@ -132,7 +132,7 @@ SelectionAction::SelectionAction(ScatterplotPlugin* scatterplotPlugin) :
         _brushRadiusAction.setValue(brushRadius);
     });
 
-    connect(&_brushRadiusAction, &DoubleAction::valueChanged, this, [this](const double& value) {
+    connect(&_brushRadiusAction, &DecimalAction::valueChanged, this, [this](const double& value) {
         _scatterplotPlugin->getSelectionTool()->setBrushRadius(value);
     });
 
@@ -289,7 +289,7 @@ SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionActio
     auto layout = new QHBoxLayout();
 
     layout->addWidget(new OptionAction::Widget(this, &selectionAction->_typeAction, false));
-    layout->addWidget(new DoubleAction::Widget(this, &selectionAction->_brushRadiusAction, DoubleAction::Widget::Slider));
+    layout->addWidget(new DecimalAction::Widget(this, &selectionAction->_brushRadiusAction, DecimalAction::Widget::Slider));
     layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierAddAction, StandardAction::PushButton::Icon));
     layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_modifierRemoveAction, StandardAction::PushButton::Icon));
     layout->addWidget(new StandardAction::PushButton(this, &selectionAction->_clearSelectionAction));
@@ -344,7 +344,7 @@ SelectionAction::PopupWidget::PopupWidget(QWidget* parent, SelectionAction* sele
     layout->addWidget(getTypeWidget(), 0, 1);
     
     layout->addWidget(new QLabel("Brush radius:"), 1, 0);
-    layout->addWidget(new DoubleAction::Widget(this, &selectionAction->_brushRadiusAction), 1, 1);
+    layout->addWidget(new DecimalAction::Widget(this, &selectionAction->_brushRadiusAction), 1, 1);
 
     layout->addWidget(getSelectWidget(), 2, 1);
 

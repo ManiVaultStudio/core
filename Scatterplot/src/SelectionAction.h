@@ -57,7 +57,7 @@ protected:
     hdps::gui::StandardAction   _lassoAction;
     hdps::gui::StandardAction   _polygonAction;
     QActionGroup                _typeActionGroup;
-    hdps::gui::DoubleAction     _brushRadiusAction;
+    hdps::gui::DecimalAction    _brushRadiusAction;
     hdps::gui::StandardAction   _modifierAddAction;
     hdps::gui::StandardAction   _modifierRemoveAction;
     QActionGroup                _modifierActionGroup;

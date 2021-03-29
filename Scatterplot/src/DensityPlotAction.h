@@ -46,7 +46,7 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    hdps::gui::DoubleAction     _sigmaAction;
+    hdps::gui::DecimalAction    _sigmaAction;
 
     static constexpr double DEFAULT_SIGMA = 25.0;
 

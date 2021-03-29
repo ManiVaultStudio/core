@@ -29,11 +29,11 @@ PointPlotAction::PointPlotAction(ScatterplotPlugin* scatterplotPlugin) :
         updateRenderMode();
     });
 
-    connect(&_pointSizeAction, &DoubleAction::valueChanged, this, [this, updatePointSize](const double& value) {
+    connect(&_pointSizeAction, &DecimalAction::valueChanged, this, [this, updatePointSize](const double& value) {
         updatePointSize();
     });
 
-    connect(&_pointOpacityAction, &DoubleAction::valueChanged, this, [this, updatePointOpacity](const double& value) {
+    connect(&_pointOpacityAction, &DecimalAction::valueChanged, this, [this, updatePointOpacity](const double& value) {
         updatePointOpacity();
     });
 
@@ -71,10 +71,10 @@ PointPlotAction::Widget::Widget(QWidget* parent, PointPlotAction* pointPlotActio
     setToolTip("Point plot settings");
 
     _layout.addWidget(&_pointSizelabel);
-    _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointSizeAction, DoubleAction::Widget::Configuration::Slider));
+    _layout.addWidget(new DecimalAction::Widget(this, &pointPlotAction->_pointSizeAction, DecimalAction::Widget::Configuration::Slider));
 
     _layout.addWidget(&_pointOpacitylabel);
-    _layout.addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction, DoubleAction::Widget::Configuration::Slider));
+    _layout.addWidget(new DecimalAction::Widget(this, &pointPlotAction->_pointOpacityAction, DecimalAction::Widget::Configuration::Slider));
 
     setLayout(&_layout);
 }
@@ -85,10 +85,10 @@ PointPlotAction::PopupWidget::PopupWidget(QWidget* parent, PointPlotAction* poin
     auto layout = new QGridLayout();
 
     layout->addWidget(new QLabel("Size:"), 0, 0);
-    layout->addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointSizeAction), 0, 2);
+    layout->addWidget(new DecimalAction::Widget(this, &pointPlotAction->_pointSizeAction), 0, 2);
 
     layout->addWidget(new QLabel("Opacity:"), 1, 0);
-    layout->addWidget(new DoubleAction::Widget(this, &pointPlotAction->_pointOpacityAction), 1, 2);
+    layout->addWidget(new DecimalAction::Widget(this, &pointPlotAction->_pointOpacityAction), 1, 2);
 
     setLayout(layout);
 }

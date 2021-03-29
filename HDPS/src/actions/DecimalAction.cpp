@@ -1,4 +1,4 @@
-#include "DoubleAction.h"
+#include "DecimalAction.h"
 
 #include "../Application.h"
 
@@ -11,7 +11,7 @@ namespace hdps {
 
 namespace gui {
 
-DoubleAction::DoubleAction(QObject * parent, const QString& title, const double& minimum /*= MIN_VALUE*/, const double& maximum /*= MAX_VALUE*/, const double& value /*= VALUE*/, const double& defaultValue /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DECIMALS*/) :
+DecimalAction::DecimalAction(QObject * parent, const QString& title, const double& minimum /*= MIN_VALUE*/, const double& maximum /*= MAX_VALUE*/, const double& value /*= VALUE*/, const double& defaultValue /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DECIMALS*/) :
     WidgetAction(parent),
     _value(),
     _defaultValue(),
@@ -29,17 +29,17 @@ DoubleAction::DoubleAction(QObject * parent, const QString& title, const double&
     setDecimals(decimals);
 }
 
-QWidget* DoubleAction::createWidget(QWidget* parent)
+QWidget* DecimalAction::createWidget(QWidget* parent)
 {
     return new Widget(parent, this);
 }
 
-double DoubleAction::getValue() const
+double DecimalAction::getValue() const
 {
     return _value;
 }
 
-void DoubleAction::setValue(const double& value)
+void DecimalAction::setValue(const double& value)
 {
     if (value == _value)
         return;
@@ -49,12 +49,12 @@ void DoubleAction::setValue(const double& value)
     emit valueChanged(_value);
 }
 
-double DoubleAction::getDefaultValue() const
+double DecimalAction::getDefaultValue() const
 {
     return _defaultValue;
 }
 
-void DoubleAction::setDefaultValue(const double& defaultValue)
+void DecimalAction::setDefaultValue(const double& defaultValue)
 {
     if (defaultValue == _defaultValue)
         return;
@@ -64,22 +64,22 @@ void DoubleAction::setDefaultValue(const double& defaultValue)
     emit defaultValueChanged(_defaultValue);
 }
 
-bool DoubleAction::canReset() const
+bool DecimalAction::canReset() const
 {
     return _value != _defaultValue;
 }
 
-void DoubleAction::reset()
+void DecimalAction::reset()
 {
     setValue(_defaultValue);
 }
 
-float DoubleAction::getMinimum() const
+float DecimalAction::getMinimum() const
 {
     return _minimum;
 }
 
-void DoubleAction::setMinimum(const double& minimum)
+void DecimalAction::setMinimum(const double& minimum)
 {
     if (minimum == _minimum)
         return;
@@ -89,12 +89,12 @@ void DoubleAction::setMinimum(const double& minimum)
     emit minimumChanged(_minimum);
 }
 
-float DoubleAction::getMaximum() const
+float DecimalAction::getMaximum() const
 {
     return _maximum;
 }
 
-void DoubleAction::setMaximum(const double& maximum)
+void DecimalAction::setMaximum(const double& maximum)
 {
     if (maximum == _maximum)
         return;
@@ -104,18 +104,18 @@ void DoubleAction::setMaximum(const double& maximum)
     emit maximumChanged(_maximum);
 }
 
-void DoubleAction::setRange(const double& min, const double& max)
+void DecimalAction::setRange(const double& min, const double& max)
 {
     setMinimum(min);
     setMaximum(max);
 }
 
-QString DoubleAction::getSuffix() const
+QString DecimalAction::getSuffix() const
 {
     return _suffix;
 }
 
-void DoubleAction::setSuffix(const QString& suffix)
+void DecimalAction::setSuffix(const QString& suffix)
 {
     if (suffix == _suffix)
         return;
@@ -125,12 +125,12 @@ void DoubleAction::setSuffix(const QString& suffix)
     emit suffixChanged(_suffix);
 }
 
-std::uint32_t DoubleAction::getDecimals() const
+std::uint32_t DecimalAction::getDecimals() const
 {
     return _decimals;
 }
 
-void DoubleAction::setDecimals(const std::uint32_t& decimals)
+void DecimalAction::setDecimals(const std::uint32_t& decimals)
 {
     if (decimals == _decimals)
         return;
@@ -140,12 +140,12 @@ void DoubleAction::setDecimals(const std::uint32_t& decimals)
     emit decimalsChanged(_decimals);
 }
 
-bool DoubleAction::getUpdateDuringDrag() const
+bool DecimalAction::getUpdateDuringDrag() const
 {
     return _updateDuringDrag;
 }
 
-void DoubleAction::setUpdateDuringDrag(const bool& updateDuringDrag)
+void DecimalAction::setUpdateDuringDrag(const bool& updateDuringDrag)
 {
     if (updateDuringDrag == _updateDuringDrag)
         return;
@@ -153,7 +153,7 @@ void DoubleAction::setUpdateDuringDrag(const bool& updateDuringDrag)
     _updateDuringDrag = updateDuringDrag;
 }
 
-DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const Configuration& configuration /*= Configuration::All*/) :
+DecimalAction::Widget::Widget(QWidget* parent, DecimalAction* doubleAction, const Configuration& configuration /*= Configuration::All*/) :
     WidgetAction::Widget(parent, doubleAction),
     _valueDoubleSpinBox(nullptr),
     _valueSlider(nullptr),
@@ -261,11 +261,11 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
         }
     };
 
-    connect(doubleAction, &DoubleAction::minimumChanged, this, [this, doubleAction, onUpdateValueRange](const double& minimum) {
+    connect(doubleAction, &DecimalAction::minimumChanged, this, [this, doubleAction, onUpdateValueRange](const double& minimum) {
         onUpdateValueRange();
     });
 
-    connect(doubleAction, &DoubleAction::maximumChanged, this, [this, doubleAction, onUpdateValueRange](const double& maximum) {
+    connect(doubleAction, &DecimalAction::maximumChanged, this, [this, doubleAction, onUpdateValueRange](const double& maximum) {
         onUpdateValueRange();
     });
 
@@ -280,7 +280,7 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
         setToolTips();
     };
 
-    connect(doubleAction, &DoubleAction::suffixChanged, this, [this, doubleAction, onUpdateSuffix](const QString& suffix) {
+    connect(doubleAction, &DecimalAction::suffixChanged, this, [this, doubleAction, onUpdateSuffix](const QString& suffix) {
         onUpdateSuffix();
     });
 
@@ -293,7 +293,7 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
         _valueDoubleSpinBox->setDecimals(doubleAction->getDecimals());
     };
 
-    connect(doubleAction, &DoubleAction::decimalsChanged, this, [this, doubleAction, onUpdateDecimals](const std::int32_t& decimals) {
+    connect(doubleAction, &DecimalAction::decimalsChanged, this, [this, doubleAction, onUpdateDecimals](const std::int32_t& decimals) {
         onUpdateDecimals();
     });
     
@@ -304,11 +304,11 @@ DoubleAction::Widget::Widget(QWidget* parent, DoubleAction* doubleAction, const 
         _resetPushButton->setToolTip(QString("Reset %1 to: %2").arg(doubleAction->text(), valueString(doubleAction->getDefaultValue(), doubleAction->getDecimals())));
     };
 
-    connect(doubleAction, &DoubleAction::valueChanged, this, [this, doubleAction, onUpdateValue](const double& value) {
+    connect(doubleAction, &DecimalAction::valueChanged, this, [this, doubleAction, onUpdateValue](const double& value) {
         onUpdateValue();
     });
 
-    connect(doubleAction, &DoubleAction::defaultValueChanged, this, [this, onUpdateDefaultValue](const double& value) {
+    connect(doubleAction, &DecimalAction::defaultValueChanged, this, [this, onUpdateDefaultValue](const double& value) {
         onUpdateDefaultValue();
     });
 
