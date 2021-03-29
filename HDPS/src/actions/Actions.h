@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ColorAction.h"
-#include "DoubleAction.h"
+#include "DecimalAction.h"
 #include "OptionAction.h"
 #include "StandardAction.h"
 #include "StringAction.h"
