@@ -1,77 +1,107 @@
 #include "ColorPickerPushButton.h"
 
 #include <QDebug>
-#include <QColorDialog>
 #include <QPainter>
 
-const QSize ColorPickerPushButton::_iconSize = QSize(12, 12);
-
-ColorPickerPushButton::ColorPickerPushButton(QWidget* parent) :
-	QPushButton(parent),
-	_colorDialog(new QColorDialog(parent)),
-    _showText(true)
+ColorPickerPushButton::ColorPickerPushButton(QWidget* parent /*= nullptr*/) :
+    QPushButton(parent),
+    _colorDialog(this),
+    _color(Qt::gray),
+    _textMode(TextMode::NoText)
 {
-	setIconSize(_iconSize);
-	this->setStyleSheet("text-align:left; margin: -1px; padding-left: 5px; padding-top: 4px; padding-bottom: 3px;");
+    QObject::connect(this, &QPushButton::clicked, [this]() {
+        QObject::connect(&_colorDialog, &QColorDialog::currentColorChanged, [this](const QColor& color) {
+            setColor(color);
+        });
 
-	QObject::connect(this, &QPushButton::clicked, [this]() {
-		QObject::connect(_colorDialog, &QColorDialog::currentColorChanged, [this](const QColor& color) {
-			setColor(color);
-		});
-
-		_colorDialog->show();
-	});
+        _colorDialog.show();
+    });
 }
 
 QColor ColorPickerPushButton::getColor() const
 {
-	return _colorDialog->currentColor();
+    return _color;
 }
 
 void ColorPickerPushButton::setColor(const QColor& color)
 {
-	if (color != getColor())
-		_colorDialog->setCurrentColor(color);
+    if (color == _color)
+        return;
 
-	auto icon = QPixmap(_iconSize);
+    _color = color;
 
-	icon.fill(color);
+    _colorDialog.setCurrentColor(_color);
 
-	auto painter = new QPainter(&icon);
+    update();
 
-	painter->setPen(QPen(QBrush(QColor(30, 30, 30)), 1.5f));
+    emit colorChanged(_color);
+}
 
-	QPointF points[5] = {
-		QPointF(0.0f, 0.0f),
-		QPointF(_iconSize.width(), 0.0f),
-		QPointF(_iconSize.width(), _iconSize.height()),
-		QPointF(0.0f, _iconSize.height()),
-		QPointF(0.0f, 0.0f)
-	};
+ColorPickerPushButton::TextMode ColorPickerPushButton::getTextMode() const
+{
+    return _textMode;
+}
 
-	painter->drawPolyline(points, 5);
+void ColorPickerPushButton::setTextMode(const ColorPickerPushButton::TextMode& textMode)
+{
+    _textMode = textMode;
 
-	setIcon(icon);
-		
-	delete painter;
-	
-    if (_showText) {
-        const auto colorString = QString("rgb(%1, %2, %3)").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()));
+    update();
+}
 
-        setText(colorString);
+void ColorPickerPushButton::paintEvent(QPaintEvent* paintEvent)
+{
+    QPushButton::paintEvent(paintEvent);
+
+    QPainter painter(this);
+
+    //painter.setRenderHint(QPainter::Antialiasing);
+
+    const auto margin = 5;
+
+    QPoint offset(margin, margin);
+
+    auto fillRect = rect();
+
+    fillRect.setTopLeft(fillRect.topLeft() + offset);
+    fillRect.setBottomRight(fillRect.bottomRight() - offset - QPoint(1, 1));
+
+    auto color = getColor();
+
+    if (!isEnabled()) {
+        const auto grayScale = qGray(color.rgb());
+        color.setRgb(grayScale, grayScale, grayScale);
     }
 
-	emit colorChanged(color);
-}
+    painter.setBrush(QBrush(color));
+    painter.setPen(QPen(QBrush(isEnabled() ? QColor(50, 50, 50) : Qt::gray), 1.0, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painter.drawRect(fillRect);
 
-bool ColorPickerPushButton::getShowText() const
-{
-    return _showText;
-}
+    QString colorText;
 
-void ColorPickerPushButton::setShowText(const bool& showText)
-{
-    _showText = showText;
+    switch (_textMode)
+    {
+        case ColorPickerPushButton::TextMode::NoText:
+            break;
 
-    setColor(_colorDialog->currentColor());
+        case ColorPickerPushButton::TextMode::RGB:
+            colorText = QString("rgb(%1, %2, %3)").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()));
+            break;
+
+        case ColorPickerPushButton::TextMode::Hexadecimal:
+            colorText = color.name(QColor::HexRgb);
+            break;
+
+        default:
+            break;
+    }
+
+    if (!colorText.isEmpty()) {
+        QTextOption textOption;
+
+        textOption.setAlignment(Qt::AlignCenter);
+
+        painter.setFont(QFont("Arial", 7));
+        painter.drawText(fillRect, colorText, textOption);
+    }
 }

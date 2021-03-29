@@ -28,10 +28,17 @@ int main(int argc, char *argv[])
     // AA_UseHighDpiPixmaps attribute is off by default in Qt 5.1 but will most
     // likely be on by default in a future release of Qt.
     application.setAttribute(Qt::AA_UseHighDpiPixmaps);
+    
+    QFile styleSheetFile(":/styles/default.qss");
 
-    //application.setStyle(QStyleFactory::create("Windows"));
+    styleSheetFile.open(QFile::ReadOnly);
+
+    QString styleSheet = QLatin1String(styleSheetFile.readAll());
+
+    qApp->setStyleSheet(styleSheet);
 
     QIcon appIcon;
+
     appIcon.addFile(":/Icons/AppIcon32");
     appIcon.addFile(":/Icons/AppIcon64");
     appIcon.addFile(":/Icons/AppIcon128");

@@ -1,4 +1,7 @@
 <RCC>
+	<qresource prefix="/styles">
+		<file alias="default.qss">styles/default.qss</file>
+	</qresource>
 	<qresource prefix="/IconFonts">
 		<file alias="FontAwesome-5.14.otf">iconfonts/FontAwesome-5.14.otf</file>
 		<file alias="FontAwesome-5.14.json">iconfonts/FontAwesome-5.14.json</file>

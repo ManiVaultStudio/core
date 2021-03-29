@@ -92,9 +92,9 @@ public: // Getters/setters
     bool isNotifyDuringSelection() const;
     void setNotifyDuringSelection(const bool& notifyDuringSelection);
 
-    /** Get/set (brush) radius */
-    float getRadius() const;
-    void setRadius(const float& radius);
+    /** Get/set brush radius */
+    float getBrushRadius() const;
+    void setBrushRadius(const float& brushRadius);
 
     /** Trigger signals */
     void setChanged();
@@ -148,8 +148,8 @@ signals:
     /** Signals that the notify during selection property has changed */
     void notifyDuringSelectionChanged(const bool& notifyDuringSelection);
 
-    /** Signals that the radius has changed */
-    void radiusChanged(const float& radius);
+    /** Signals that the brush radius has changed */
+    void brushRadiusChanged(const float& brushRadius);
 
     /** Signals that the selection shape changed */
     void shapeChanged();
@@ -169,20 +169,21 @@ protected:
     Modifier            _modifier;                  /** Current selection modifier */
     bool                _active;                    /** Whether the selection process is active */
     bool                _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
-    float               _radius;                    /** Brush/circle radius */
+    float               _brushRadius;               /** Brush radius */
     QPoint              _mousePosition;             /** Current mouse position */
     QVector<QPoint>     _mousePositions;            /** Recorded mouse positions */
     int                 _mouseButtons;              /** State of the left, middle and right mouse buttons */
     QPixmap             _shapePixmap;               /** Pixmap for the selection tool shape */
     QPixmap             _areaPixmap;                /** Pixmap for the selection area */
+    bool                _preventContextMenu;        /** Whether to prevent a context menu */
 
 public:
 
-    // Brush/circle radius 
-    static constexpr float RADIUS_MIN       = 10.0f;        /** Minimum radius */
-    static constexpr float RADIUS_MAX       = 1000.0f;      /** Maximum radius */
-    static constexpr float RADIUS_DEFAULT   = 25.0f;        /** Default radius */
-    static constexpr float RADIUS_DELTA     = 10.0f;        /** Radius increment */
+    // Brush radius 
+    static constexpr float BRUSH_RADIUS_MIN       = 10.0f;      /** Minimum radius */
+    static constexpr float BRUSH_RADIUS_MAX       = 500.0f;     /** Maximum radius */
+    static constexpr float BRUSH_RADIUS_DEFAULT   = 50.0f;      /** Default radius */
+    static constexpr float BRUSH_RADIUS_DELTA     = 10.0f;      /** Radius increment */
 
     // Drawing constants
     static const QColor COLOR_MAIN;         /** Main color */

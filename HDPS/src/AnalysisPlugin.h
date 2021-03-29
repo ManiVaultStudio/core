@@ -15,7 +15,11 @@ namespace plugin
 class AnalysisPlugin : public Plugin
 {
 public:
-    AnalysisPlugin(QString name) : Plugin(Type::ANALYSIS, name) { }
+    AnalysisPlugin(QString name) :
+        Plugin(Type::ANALYSIS, name)
+    {
+    }
+
     ~AnalysisPlugin() override {};
 
     /** Returns the icon of this plugin */

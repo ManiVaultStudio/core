@@ -1,5 +1,6 @@
 #include "ScatterplotWidget.h"
 #include "PixelSelectionTool.h"
+#include "Application.h"
 
 #include "util/Math.h"
 
@@ -36,7 +37,8 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
     _pixelSelectionToolRenderer(pixelSelectionTool),
     _pixelSelectionTool(pixelSelectionTool)
 {
-    setMouseTracking(true);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    setAcceptDrops(true);
 
     this->installEventFilter(&_pixelSelectionTool);
 
@@ -44,11 +46,11 @@ ScatterplotWidget::ScatterplotWidget(PixelSelectionTool& pixelSelectionTool) :
         if (!isInitialized())
             return;
 
-        makeCurrent();
-
         _pixelSelectionToolRenderer.update();
         update();
     });
+
+    _pointRenderer.setPointScaling(Absolute);
 
     resetColorMap();
 }
@@ -58,45 +60,63 @@ bool ScatterplotWidget::isInitialized()
     return _isInitialized;
 }
 
-void ScatterplotWidget::setRenderMode(RenderMode renderMode)
+ScatterplotWidget::RenderMode ScatterplotWidget::getRenderMode() const
 {
+    return _renderMode;
+}
+
+void ScatterplotWidget::setRenderMode(const RenderMode& renderMode)
+{
+    if (renderMode == _renderMode)
+        return;
+
     _renderMode = renderMode;
 
-    update();
-}
+    emit renderModeChanged(_renderMode);
 
-void ScatterplotWidget::renderModePicked(const int index)
-{
-    switch (index)
+    switch (_renderMode)
     {
-    case 0: setRenderMode(ScatterplotWidget::RenderMode::SCATTERPLOT); break;
-    case 1: setRenderMode(ScatterplotWidget::RenderMode::DENSITY); break;
-    case 2: setRenderMode(ScatterplotWidget::RenderMode::LANDSCAPE); break;
+        case ScatterplotWidget::SCATTERPLOT:
+            break;
+        
+        case ScatterplotWidget::DENSITY:
+            computeDensity();
+            break;
+
+        case ScatterplotWidget::LANDSCAPE:
+            computeDensity();
+            break;
+
+        default:
+            break;
     }
-    qDebug() << "Render Mode Picked";
-}
 
-void ScatterplotWidget::pointSizeChanged(const int size)
-{
-    _pointRenderer.setPointSize(size / 1000.0f);
     update();
 }
 
-void ScatterplotWidget::pointOpacityChanged(const int opacity)
+ScatterplotWidget::ColoringMode ScatterplotWidget::getColoringMode() const
 {
-    _pointRenderer.setAlpha(opacity / 100.0f);
-    update();
+    return _coloringMode;
 }
 
-void ScatterplotWidget::sigmaChanged(const int sigma)
+void ScatterplotWidget::setColoringMode(const ColoringMode& coloringMode)
 {
-    _densityRenderer.setSigma(sigma / 100.0f);
-    update();
+    if (coloringMode == _coloringMode)
+        return;
+
+    _coloringMode = coloringMode;
+
+    emit coloringModeChanged(_coloringMode);
 }
 
 void ScatterplotWidget::computeDensity()
 {
+    emit densityComputationStarted();
+
     _densityRenderer.computeDensity();
+
+    emit densityComputationEnded();
+
     update();
 }
 
@@ -134,6 +154,24 @@ void ScatterplotWidget::setData(const std::vector<Vector2f>* points)
     _pointRenderer.setData(*points);
     _densityRenderer.setData(points);
 
+    switch (_renderMode)
+    {
+        case ScatterplotWidget::SCATTERPLOT:
+            break;
+        
+        case ScatterplotWidget::DENSITY:
+        case ScatterplotWidget::LANDSCAPE:
+        {
+            _densityRenderer.computeDensity();
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    _pointRenderer.setOutlineColor(Vector3f(1, 0, 0));
+
     update();
 }
 
@@ -159,9 +197,9 @@ void ScatterplotWidget::setColors(const std::vector<Vector3f>& colors)
     update();
 }
 
-void ScatterplotWidget::setPointSize(const float size)
+void ScatterplotWidget::setPointSize(const float& pointSize)
 {
-    _pointRenderer.setPointSize(size);
+    _pointRenderer.setPointSize(pointSize);
 
     update();
 }
@@ -169,6 +207,8 @@ void ScatterplotWidget::setPointSize(const float size)
 void ScatterplotWidget::setAlpha(const float alpha)
 {
     _pointRenderer.setAlpha(alpha);
+
+    update();
 }
 
 void ScatterplotWidget::setPointScaling(hdps::gui::PointScaling scalingMode)
@@ -186,11 +226,6 @@ void ScatterplotWidget::setSigma(const float sigma)
     _densityRenderer.setSigma(sigma);
 
     update();
-}
-
-bool ScatterplotWidget::eventFilter(QObject* target, QEvent* event)
-{
-    return QWidget::eventFilter(target, event);
 }
 
 void ScatterplotWidget::resetColorMap()
@@ -234,6 +269,7 @@ void ScatterplotWidget::initializeGL()
 
     _isInitialized = true;
     emit initialized();
+
 }
 
 void ScatterplotWidget::resizeGL(int w, int h)
@@ -283,21 +319,17 @@ void ScatterplotWidget::paintGL()
 
     switch (_renderMode)
     {
-    case SCATTERPLOT: _pointRenderer.render(); break;
-    case DENSITY:
-    {
-        _densityRenderer.setRenderMode(DensityRenderer::DENSITY);
-        _densityRenderer.render();
-        break;
+        case SCATTERPLOT:
+            _pointRenderer.render();
+            break;
+
+        case DENSITY:
+        case LANDSCAPE:
+            _densityRenderer.setRenderMode(_renderMode == DENSITY ? DensityRenderer::DENSITY : DensityRenderer::LANDSCAPE);
+            _densityRenderer.render();
+            break;
     }
-    case LANDSCAPE:
-    {
-        _densityRenderer.setRenderMode(DensityRenderer::LANDSCAPE);
-        _densityRenderer.render();
-        break;
-    }
-    }
-    
+
     _pixelSelectionToolRenderer.render();
 }
 

@@ -17,6 +17,7 @@
 #include <QOpenGLFunctions_3_3_Core>
 
 #include <QMouseEvent>
+#include <QMenu>
 
 class PixelSelectionTool;
 
@@ -29,21 +30,32 @@ class ScatterplotWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core
 
 public:
     enum RenderMode {
-        SCATTERPLOT, DENSITY, LANDSCAPE
+        SCATTERPLOT,
+        DENSITY,
+        LANDSCAPE
     };
 
-    ScatterplotWidget(PixelSelectionTool& pixelSelectionTool);
+    /** The way that point colors are determined */
+    enum class ColoringMode {
+        ConstantColor,      /** Point color is a constant color */
+        ColorDimension,          /** Data dimension drives the color */
+        ColorData           /** Determined by external color dataset */
+    };
 
+public:
+    ScatterplotWidget(PixelSelectionTool& pixelSelectionTool);
     ~ScatterplotWidget();
 
     /** Returns true when the widget was initialized and is ready to be used. */
     bool isInitialized();
 
-    /**
-     * Change the rendering mode displayed in the widget.
-     * The options are defined by ScatterplotWidget::RenderMode.
-     */
-    void setRenderMode(RenderMode renderMode);
+    /** Get/set render mode */
+    RenderMode getRenderMode() const;
+    void setRenderMode(const RenderMode& renderMode);
+
+    /** Get/set coloring mode */
+    ColoringMode getColoringMode() const;
+    void setColoringMode(const ColoringMode& coloringMode);
 
     /**
      * Feed 2-dimensional data to the scatterplot.
@@ -51,20 +63,22 @@ public:
     void setData(const std::vector<Vector2f>* data);
     void setHighlights(const std::vector<char>& highlights);
     void setScalars(const std::vector<float>& scalars);
+
+    /**
+     * Set colors for each individual data point
+     * @param colors Vector of colors (size must match that of the loaded points dataset)
+     */
     void setColors(const std::vector<Vector3f>& colors);
 
-    void setPointSize(const float size);
+    /**
+     * Set point size in pixels
+     * @param pointSize Point size in pixels
+     */
+    void setPointSize(const float& pointSize);
     void setScalarEffect(PointEffect effect);
     void setAlpha(const float alpha);
     void setPointScaling(hdps::gui::PointScaling scalingMode);
     void setSigma(const float sigma);
-
-    /**
-     * Event filter
-     *@param target Target object
-     *@param event Event that occurred
-     */
-    bool eventFilter(QObject* target, QEvent* event) override;
 
     Bounds getBounds() const {
         return _dataBounds;
@@ -83,38 +97,42 @@ protected:
 signals:
     void initialized();
 
+    /**
+     * Signals that the render mode changed
+     * @param renderMode Signals that the render mode has changed
+     */
+    void renderModeChanged(const RenderMode& renderMode);
+
+    /**
+     * Signals that the coloring mode changed
+     * @param coloringMode Signals that the coloring mode has changed
+     */
+    void coloringModeChanged(const ColoringMode& coloringMode);
+
+    /** Signals that the density computation has started */
+    void densityComputationStarted();
+
+    /** Signals that the density computation has ended */
+    void densityComputationEnded();
+
 public slots:
-    void renderModePicked(const int index);
-    void pointSizeChanged(const int size);
-    void pointOpacityChanged(const int opacity);
-    void sigmaChanged(const int sigma);
     void computeDensity();
 
     void colormapChanged(QString colormapName);
     void colormapdiscreteChanged(bool isDiscrete);
 
 private:
-    const Matrix3f toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
-    Matrix3f toNormalisedCoordinates;
-    Matrix3f toIsotropicCoordinates;
-
-    bool _isInitialized = false;
-
-    RenderMode _renderMode = SCATTERPLOT;
-
-    /* Renderers */
-    PointRenderer           _pointRenderer;
-    DensityRenderer         _densityRenderer;
-    PixelSelectionToolRenderer   _pixelSelectionToolRenderer;
-
-
-    /* Auxiliary widgets */
-    ColormapWidget _colormapWidget;
-
-    /* Size of the scatterplot widget */
-    QSize _windowSize;
-
-    Bounds _dataBounds;
-
-    PixelSelectionTool&     _pixelSelectionTool;
+    const Matrix3f              toClipCoordinates = Matrix3f(2, 0, 0, 2, -1, -1);
+    Matrix3f                    toNormalisedCoordinates;
+    Matrix3f                    toIsotropicCoordinates;
+    bool                        _isInitialized = false;
+    RenderMode                  _renderMode = SCATTERPLOT;
+    ColoringMode                _coloringMode = ColoringMode::ConstantColor;
+    PointRenderer               _pointRenderer;                     
+    DensityRenderer             _densityRenderer;                   
+    PixelSelectionToolRenderer  _pixelSelectionToolRenderer;        
+    ColormapWidget              _colormapWidget;                    
+    QSize                       _windowSize;                        /** Size of the scatterplot widget */
+    Bounds                      _dataBounds;                        /** Bounds of the loaded data */
+    PixelSelectionTool&         _pixelSelectionTool;                
 };

@@ -1,0 +1,31 @@
+QWidget#PopupWidget {
+    border: 1px solid grey;
+}
+
+QPushButton {
+    margin: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 22px;
+    qproperty-iconSize: 12px;
+}
+
+QPushButton[cssClass="square"] {
+    padding-left: 1px;
+    padding-right: 1px;
+    width: 22px;
+}
+
+QComboBox {
+    margin: 0px;
+    padding-left: 5px;
+    height: 20px;
+}
+
+QLineEdit {
+    height: 18px;
+}
+
+QLineEdit:read-only {
+    background: rgb(230, 230, 230);
+}

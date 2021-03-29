@@ -54,6 +54,7 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
 set( MAIN_SOURCES
     src/Main.cpp
+    res/styles/default.qss
 )
 
 set( CORE_HEADERS
@@ -93,29 +94,46 @@ set( WIDGET_HEADERS
     src/widgets/ColormapWidget.h
     src/widgets/ColorPickerPushButton.h
     src/widgets/MaterialCheckBoxWidget.h
-    src/widgets/ComboBox.h
-    src/widgets/PushButton.h
-    src/widgets/HorizontalDivider.h
     src/widgets/DataSlot.h
     src/widgets/Accordion.h
     src/widgets/AccordionSection.h
     src/widgets/DockableWidget.h
     src/widgets/SettingsWidget.h
+    src/widgets/PopupPushButton.h
+    src/widgets/DropWidget.h
 )
 
 set( WIDGET_SOURCES
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
-	src/widgets/ColorPickerPushButton.cpp
+    src/widgets/ColorPickerPushButton.cpp
     src/widgets/MaterialCheckBoxWidget.cpp
-    src/widgets/ComboBox.cpp
-    src/widgets/PushButton.cpp
-    src/widgets/HorizontalDivider.cpp
     src/widgets/DataSlot.cpp
-	src/widgets/Accordion.cpp
+    src/widgets/Accordion.cpp
     src/widgets/AccordionSection.cpp
-	src/widgets/DockableWidget.cpp
-	src/widgets/SettingsWidget.cpp
+    src/widgets/DockableWidget.cpp
+    src/widgets/SettingsWidget.cpp
+    src/widgets/PopupPushButton.cpp
+    src/widgets/DropWidget.cpp
+)
+
+set(ACTIONS_HEADERS
+    src/actions/ColorAction.h
+    src/actions/DecimalAction.h
+    src/actions/OptionAction.h
+    src/actions/StandardAction.h
+    src/actions/StringAction.h
+    src/actions/WidgetAction.h
+    src/actions/Actions.h
+)
+
+set(ACTIONS_SOURCES
+    src/actions/ColorAction.cpp
+    src/actions/DecimalAction.cpp
+    src/actions/OptionAction.cpp
+    src/actions/StandardAction.cpp
+    src/actions/StringAction.cpp
+    src/actions/WidgetAction.cpp
 )
 
 set( RENDERER_HEADERS
@@ -162,7 +180,7 @@ set( UTIL_HEADERS
     src/util/DensityComputation.h
     src/util/Math.h
     src/util/Timer.h
-	src/util/IconFont.h
+    src/util/IconFont.h
     src/util/IconFonts.h
     src/util/FontAwesome.h
 )
@@ -173,7 +191,7 @@ set( UTIL_SOURCES
     src/util/DensityComputation.cpp
     src/util/Math.cpp
     src/util/Timer.cpp
-	src/util/IconFont.cpp
+    src/util/IconFont.cpp
     src/util/IconFonts.cpp
     src/util/FontAwesome.cpp
 )
@@ -212,6 +230,7 @@ list(APPEND PRIVATE_SOURCES
 list(APPEND PUBLIC_HEADERS
     ${GRAPHICS_HEADERS}
     ${WIDGET_HEADERS}
+    ${ACTIONS_HEADERS}
     ${RENDERER_HEADERS}
     ${UTIL_HEADERS}
     ${PLUGIN_HEADERS}
@@ -221,23 +240,33 @@ list(APPEND PUBLIC_HEADERS
 list(APPEND PUBLIC_SOURCES
     ${GRAPHICS_SOURCES}
     ${WIDGET_SOURCES}
+    ${ACTIONS_SOURCES}
     ${RENDERER_SOURCES}
     ${UTIL_SOURCES}
     ${PLUGIN_SOURCES}
     ${PUBLIC_HEADERS}
 )
+
 list(APPEND GRAPHICS_FILES
     ${GRAPHICS_HEADERS}
     ${GRAPHICS_SOURCES}
 )
+
 list(APPEND WIDGET_FILES
     ${WIDGET_SOURCES}
     ${WIDGET_HEADERS}
 )
+
+list(APPEND ACTIONS_FILES
+    ${ACTIONS_SOURCES}
+    ${ACTIONS_HEADERS}
+)
+
 list(APPEND RENDERER_FILES
     ${RENDERER_HEADERS}
     ${RENDERER_SOURCES}
 )
+
 list(APPEND UTIL_FILES
     ${UTIL_SOURCES}
     ${UTIL_HEADERS}
@@ -263,6 +292,7 @@ source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
 source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
+source_group(Public\\Actions FILES ${ACTIONS_FILES})
 source_group( Public\\Renderers FILES ${RENDERER_FILES})
 source_group( Public\\Util FILES ${UTIL_FILES})
 source_group( Public\\Graphics FILES ${GRAPHICS_FILES})

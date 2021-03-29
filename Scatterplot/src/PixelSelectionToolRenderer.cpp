@@ -63,21 +63,24 @@ void PixelSelectionToolRenderer::render()
             throw std::runtime_error("Unable to bind shader program");
 
         glViewport(0, 0, _renderSize.width(), _renderSize.height());
+        glActiveTexture(GL_TEXTURE0);
 
         _shaderProgram->setUniformValue("overlayTexture", 0);
-
+        
         _dummyVAO.bind();
         {
             _areaTexture->bind();
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
+            
             _shapeTexture->bind();
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         }
         _dummyVAO.release();
 
         _shaderProgram->release();
+        _areaTexture->release();
         _shapeTexture->release();
+        
     }
     catch (std::exception& e)
     {
@@ -105,7 +108,7 @@ void PixelSelectionToolRenderer::update()
         const auto sizeChanged = image.size() != QSize(texture->width(), texture->height());
 
         if (!texture->isCreated() || sizeChanged) {
-            texture.reset(new QOpenGLTexture(image));
+            texture.reset(new QOpenGLTexture(image), &QOpenGLTexture::destroy);
             texture->create();
             texture->setWrapMode(QOpenGLTexture::ClampToBorder);
         }

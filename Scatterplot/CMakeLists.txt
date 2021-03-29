@@ -21,29 +21,26 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 set(PLUGIN
+    src/Common.h
     src/ScatterplotPlugin.h
     src/ScatterplotPlugin.cpp
-	src/PixelSelectionTool.h
-    src/PixelSelectionTool.cpp
-	src/PixelSelectionToolRenderer.h
-    src/PixelSelectionToolRenderer.cpp
 )
 
-file(GLOB WIDGETS src/*Widget.*)
+file(GLOB PixelSelectionTool src/*PixelSelectionTool*.*)
+file(GLOB UI src/*Widget*.*)
+file(GLOB Actions src/*Action.*)
 file(GLOB SHADERS src/*.glsl)
 file(GLOB JSON src/*.json)
-file(GLOB UIS src/*.ui)
 file(GLOB SHADERS res/shaders/*.vert res/shaders/*.frag)
 file(GLOB QRC res/*.qrc)
 
-QT5_WRAP_UI(UI_HEADERS ${UIS})
-
-set(SOURCES ${PLUGIN} ${WIDGETS})
+set(SOURCES ${PLUGIN} ${PixelSelectionTool} ${UI} ${Actions})
 set(AUX ${JSON} ${QRC})
 
 source_group(Plugin FILES ${PLUGIN})
-source_group(Widgets FILES ${WIDGETS})
-source_group(UI FILES ${UIS})
+source_group(PixelSelectionTool FILES ${PixelSelectionTool})
+source_group(UI FILES ${UI})
+source_group(Actions FILES ${Actions})
 source_group(Shaders FILES ${SHADERS})
 source_group(Aux FILES ${AUX})
 
