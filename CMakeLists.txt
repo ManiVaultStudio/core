@@ -15,12 +15,9 @@ if (HDPS_USE_GTEST)
     add_subdirectory(external/googletest)
 endif()
 
-add_subdirectory(BinLoader)
 add_subdirectory(HDPS)
 
 add_dependencies(PointData HDPS)
-add_dependencies(BinLoader HDPS)
-add_dependencies(BinLoader PointData)
 
 add_dependencies(ImageData HDPS)
 add_dependencies(ImageData PointData)
