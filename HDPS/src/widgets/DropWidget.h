@@ -45,6 +45,9 @@ public:
          * @param description Description
          */
         DropIndicatorWidget(QWidget* parent, const QString& title, const QString& description);
+
+    protected:
+        QGraphicsOpacityEffect*     _opacityEffect;     /** Effect for modulating opacity */
     };
 
     /**

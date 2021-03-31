@@ -40,9 +40,6 @@ DropWidget::DropWidget(QWidget* parent) :
 
 bool DropWidget::eventFilter(QObject* target, QEvent* event)
 {
-    const auto isParentWidgetEvent  = dynamic_cast<QWidget*>(target) == parent();
-    const auto isThisWidgetEvent    = dynamic_cast<QWidget*>(target) == this;
-
     switch (event->type())
     {
         case QEvent::Resize:
@@ -87,12 +84,14 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
 
             const auto dragMoveEvent = static_cast<QDragMoveEvent*>(event);
 
-            for (int i = 0; i < layout()->count(); ++i)
-            {
-                auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(layout()->itemAt(i)->widget());
+            if (layout()->count() > 1) {
+                for (int i = 0; i < layout()->count(); ++i)
+                {
+                    auto dropRegionContainerWidget = dynamic_cast<DropRegionContainerWidget*>(layout()->itemAt(i)->widget());
 
-                if (dropRegionContainerWidget)
-                    dropRegionContainerWidget->setHighLight(dropRegionContainerWidget->geometry().contains(dragMoveEvent->pos()));
+                    if (dropRegionContainerWidget)
+                        dropRegionContainerWidget->setHighLight(dropRegionContainerWidget->geometry().contains(dragMoveEvent->pos()));
+                }
             }
 
             break;
@@ -216,7 +215,7 @@ DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
 
 void DropWidget::DropRegionContainerWidget::setHighLight(const bool& highlight /*= false*/)
 {
-    const auto targetOpacity = highlight ? 0.9 : 0.6;
+    const auto targetOpacity = highlight ? 0.9 : 0.5;
 
     if (_opacityEffect->opacity() != targetOpacity)
         _opacityEffect->setOpacity(targetOpacity);
@@ -260,8 +259,16 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
 {
     auto layout = new QVBoxLayout();
 
+    auto iconLabel          = new QLabel();
     auto titleLabel         = new QLabel(title);
     auto descriptionLabel   = new QLabel(description);
+
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    iconLabel->setAlignment(Qt::AlignCenter);
+    iconLabel->setFont(fontAwesome.getFont(14));
+    iconLabel->setText(fontAwesome.getIconCharacter(dropAllowed ? "file-import" : "exclamation-circle"));
+    iconLabel->setStyleSheet("QLabel { padding: 10px; }");
 
     titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setStyleSheet("font-weight: bold");
@@ -273,6 +280,7 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
     layout->setAlignment(Qt::AlignCenter);
 
     layout->addStretch(1);
+    layout->addWidget(iconLabel);
     layout->addWidget(titleLabel);
     layout->addWidget(descriptionLabel);
     layout->addStretch(1);
@@ -282,7 +290,7 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
     const auto saturation       = dropAllowed ? 0 : 100;
     const auto backgroundColor  = QString("hsl(0, %1%, 97%)").arg(QString::number(saturation));
     const auto foregroundColor  = QString("hsl(0, %1%, 30%)").arg(QString::number(saturation));
-    const auto borderColor      = QString("hsl(0, %1%, 70%)").arg(QString::number(saturation));
+    const auto borderColor      = QString("hsl(0, %1%, 50%)").arg(QString::number(saturation));
     const auto border           = QString("1px solid %1").arg(borderColor);
 
     setObjectName("StandardWidget");
@@ -290,9 +298,13 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
 }
 
 DropWidget::DropIndicatorWidget::DropIndicatorWidget(QWidget* parent, const QString& title, const QString& description) :
-    QWidget(parent)
+    QWidget(parent),
+    _opacityEffect(new QGraphicsOpacityEffect(this))
 {
     setAttribute(Qt::WA_TransparentForMouseEvents);
+    setGraphicsEffect(_opacityEffect);
+
+    _opacityEffect->setOpacity(0.35);
 
     auto layout = new QVBoxLayout();
 
@@ -325,7 +337,7 @@ DropWidget::DropIndicatorWidget::DropIndicatorWidget(QWidget* parent, const QStr
     setLayout(layout);
 
     setObjectName("DropIndicatorWidget");
-    setStyleSheet("QWidget#DropIndicatorWidget > QLabel { color: gray; }");
+    setStyleSheet("QWidget#DropIndicatorWidget > QLabel { color: gray; } QWidget#DropIndicatorWidget { background-color: hsl(0, 0%, 97%); }");
 }
 
 }
