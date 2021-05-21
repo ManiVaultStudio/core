@@ -12,7 +12,7 @@ WidgetAction::Widget::Widget(QWidget* parent, QAction* action) :
 {
     const auto updateAction = [this, action]() -> void {
         setEnabled(action->isEnabled());
-        //setVisible(action->isVisible());
+        setVisible(action->isVisible());
     };
 
     connect(action, &QAction::changed, this, [this, updateAction]() {

@@ -29,6 +29,7 @@ StandardAction::PushButton::PushButton(QWidget* parent, QAction* action, const C
         setIcon(configuration & Configuration::Icon && !action->icon().isNull() ? action->icon() : QIcon());
         setCheckable(action->isCheckable());
         setChecked(action->isChecked());
+        setVisible(action->isVisible());
         setToolTip(action->toolTip());
     };
 
@@ -52,6 +53,7 @@ StandardAction::CheckBox::CheckBox(QWidget* parent, QAction* action) :
         setText(action->text());
         setToolTip(action->toolTip());
         setChecked(action->isChecked());
+        setVisible(action->isVisible());
     };
 
     connect(action, &QAction::changed, this, [this, updateUI]() {
