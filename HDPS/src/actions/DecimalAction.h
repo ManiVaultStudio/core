@@ -36,7 +36,7 @@ public:
         };
 
     public:
-        Widget(QWidget* parent, DecimalAction* floatAction, const Configuration& configuration = Configuration::All);
+        Widget(QWidget* parent, DecimalAction* decimalAction, const Configuration& configuration = Configuration::All);
 
     protected:
         QDoubleSpinBox*     _valueDoubleSpinBox;
