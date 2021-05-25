@@ -56,11 +56,11 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     if (currentIndex == _currentIndex || currentIndex >= static_cast<std::int32_t>(_options.count()))
         return;
 
-    _currentIndex = currentIndex;
-    
-    emit currentIndexChanged(_currentIndex);
+    _currentIndex   = currentIndex;
+    _currentText    = _options[_currentIndex];
 
-    setCurrentText(_options[_currentIndex]);
+    emit currentIndexChanged(_currentIndex);
+    emit currentTextChanged(_currentText);
 }
 
 std::int32_t OptionAction::getDefaultIndex() const
@@ -106,11 +106,11 @@ void OptionAction::setCurrentText(const QString& currentText)
     if (!_options.contains(currentText))
         return;
 
-    _currentText = currentText;
+    _currentText    = currentText;
+    _currentIndex   = _options.indexOf(_currentText);
 
     emit currentTextChanged(_currentText);
-
-    setCurrentIndex(_options.indexOf(_currentText));
+    emit currentIndexChanged(_currentIndex);
 }
 
 bool OptionAction::hasSelection() const
