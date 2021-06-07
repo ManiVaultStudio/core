@@ -45,7 +45,7 @@ void main()
     vTexCoord = vertex;
     // Pass input attributes to fragment shader if they are defined
     vHighlight = hasHighlights ? highlight : 0;
-    vScalar = hasScalars ? (scalar - scalarRange.x) / scalarRange.z : 1;
+    vScalar = hasScalars ? (scalar - scalarRange.x) / scalarRange.z : 0;
     vColor = hasColors ? color : vec3(0.5);
     
     // Point properties

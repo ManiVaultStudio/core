@@ -1,4 +1,7 @@
 <RCC>
+	<qresource prefix="/styles">
+		<file alias="default.qss">styles/default.qss</file>
+	</qresource>
 	<qresource prefix="/IconFonts">
 		<file alias="FontAwesome-5.14.otf">iconfonts/FontAwesome-5.14.otf</file>
 		<file alias="FontAwesome-5.14.json">iconfonts/FontAwesome-5.14.json</file>
@@ -10,6 +13,11 @@
         <file alias="AppIcon256">icons/AppIcon256.png</file>
         <file alias="AppIcon512">icons/AppIcon512.png</file>
         <file alias="AppIcon1024">icons/AppIcon1024.png</file>
+    </qresource>
+    <qresource prefix="/Images">
+        <file alias="AppBackground256">images/AppBackground256.png</file>
+        <file alias="AppBackground512">images/AppBackground512.png</file>
+        <file alias="AppBackground1024">images/AppBackground1024.png</file>
     </qresource>
     <qresource prefix="/">
         <file>icons/DataIcon.png</file>

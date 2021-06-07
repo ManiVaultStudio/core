@@ -16,10 +16,17 @@
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QScreen>
+#include <QToolBar>
 #include <QDebug>
 
 #include "DockWidgetTab.h"
 #include "DockAreaTitleBar.h"
+
+// Graphics capability checking
+#include <QOpenGLFunctions>
+#include <QOffscreenSurface>
+#include <QMessageBox>
+#include <QTimer>
 
 using namespace ads;
 
@@ -80,6 +87,9 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     initializeDocking();
     restoreWindowGeometryFromSettings();
+
+    // Delay execution till the event loop has started, otherwise we cannot quit the application
+    QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 }
 
 QAction* MainWindow::addImportOption(QString menuName)
@@ -105,6 +115,11 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
         default:
             return nullptr;
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent* closeEvent)
+{
+    delete _dockManager;
 }
 
 void MainWindow::addPlugin(plugin::Plugin* plugin)
@@ -137,7 +152,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
             dockWidget->setWidget(viewPlugin, CDockWidget::ForceNoScrollArea);
             dockWidget->setProperty("PluginType", "View");
-            dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+            //dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
 
             connect(viewPlugin, &QWidget::windowTitleChanged, [this, dockWidget](const QString& title) {
                 dockWidget->setWindowTitle(title);
@@ -185,6 +200,10 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 updateCentralWidgetVisibility();
             });
 
+            QObject::connect(dockWidget, &CDockWidget::topLevelChanged, [this, dockWidget](bool topLevel) {
+                updateCentralWidgetVisibility();
+            });
+            
             break;
         }
 
@@ -240,6 +259,40 @@ void MainWindow::setDefaultWindowGeometry(const float& coverage /*= 0.7f*/) {
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, availableGeometry));
 }
 
+void MainWindow::checkGraphicsCapabilities()
+{
+    QOffscreenSurface surf;
+    surf.create();
+
+    QOpenGLContext ctx;
+    ctx.create();
+    ctx.makeCurrent(&surf);
+
+    QOpenGLFunctions gl;
+    gl.initializeOpenGLFunctions();
+
+    int majorVersion, minorVersion;
+    gl.glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
+    gl.glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
+
+    QString warningMessage = "HDPS requires a graphics card with support for OpenGL 3.3 or newer. "
+                             "The currently used card supports version " + QString::number(majorVersion) + 
+                             "." + QString::number(minorVersion) + ". Make sure the application uses your "
+                             "dedicated graphics card and update your drivers. "
+                             "Please visit https://github.com/hdps/PublicWiki/wiki/Graphics-card-issues to "
+                             "learn more about this issue.";
+
+    if (majorVersion < 3 || (majorVersion == 3 && minorVersion < 3))
+    {
+        int ret = QMessageBox::warning(this, tr("HDPS"),
+            tr(warningMessage.toStdString().c_str()));
+
+        QApplication::exit(33);
+    }
+
+    ctx.doneCurrent();
+}
+
 void MainWindow::initializeDocking()
 {
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
@@ -256,15 +309,21 @@ void MainWindow::initializeDocking()
     initializeSettingsDockingArea();
     initializeLoggingDockingArea();
 
-    QObject::connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidgetVisibility);
-    QObject::connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidgetVisibility);
+    connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidgetVisibility);
+    connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidgetVisibility);
 }
 
 void MainWindow::initializeCentralDockingArea()
 {
     QLabel* welcomeLabel = new QLabel();
 
-    welcomeLabel->setText("Welcome to HDPS");
+    // choose the icon for different-dpi screens
+    const int pixelRatio = devicePixelRatio();
+    QString iconName = ":/Images/AppBackground256";
+    if (pixelRatio > 1) iconName = ":/Images/AppBackground512";
+    if (pixelRatio > 2) iconName = ":/Images/AppBackground1024";
+    
+    welcomeLabel->setPixmap(QPixmap(iconName).scaled(256, 256));
     welcomeLabel->setAlignment(Qt::AlignCenter);
 
     _centralDockWidget->setWidget(welcomeLabel);
@@ -281,8 +340,8 @@ void MainWindow::initializeCentralDockingArea()
 void MainWindow::initializeAnalysisPluginsDockingArea()
 {
     _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
-    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
+    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
     _analysisPluginsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
     _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion.get());
 
@@ -290,15 +349,15 @@ void MainWindow::initializeAnalysisPluginsDockingArea()
 
     //_analysisPluginsDockArea->setDockAreaFlag(CDockAreaWidget::HideSingleWidgetTitleBar, true);
     _analysisPluginsDockArea->setMinimumWidth(300);
-    _analysisPluginsDockArea->setMaximumWidth(600);
+    //_analysisPluginsDockArea->setMaximumWidth(600);
     _analysisPluginsDockArea->resize(QSize(400, 0));
 }
 
 void MainWindow::initializeSettingsDockingArea()
 {
     _settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
-    _settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
+    _settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
     _settingsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
 
     _settingsDockWidget->setWidget(_dataHierarchy.get());
@@ -307,7 +366,7 @@ void MainWindow::initializeSettingsDockingArea()
 
     //_settingsDockArea->setDockAreaFlag(CDockAreaWidget::HideSingleWidgetTitleBar, true);
     _settingsDockArea->setMinimumWidth(200);
-    _settingsDockArea->setMaximumWidth(400);
+    //_settingsDockArea->setMaximumWidth(400);
     _settingsDockArea->resize(QSize(300, 0));
 }
 
@@ -326,9 +385,12 @@ void MainWindow::initializeLoggingDockingArea()
 void MainWindow::updateCentralWidgetVisibility()
 {
     if (getViewPluginDockWidgets().count() == 0) {
+        _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
         _centralDockArea->dockWidget(0)->toggleView(true);
     }
     else {
+        _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
+
         if (_centralDockArea->dockWidgets().size() == 1)
             _centralDockArea->dockWidget(0)->toggleView(false);
     }

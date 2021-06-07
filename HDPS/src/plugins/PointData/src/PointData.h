@@ -752,7 +752,7 @@ public:
     unsigned int getNumPoints() const
     {
         if (isFull()) return getRawData<PointData>().getNumPoints();
-        else return indices.size();
+        else return static_cast<std::uint32_t>(indices.size());
     }
 
     unsigned int getNumDimensions() const

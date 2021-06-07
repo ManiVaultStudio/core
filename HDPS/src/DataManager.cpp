@@ -112,20 +112,23 @@ const QString DataManager::getUniqueSetName(QString request)
         if (set.getName() == request)
         {
             // Index in the string where the underscore followed by digits starts
-            int index = request.lastIndexOf(QRegularExpression("_\\d+"));
+            int index = request.lastIndexOf(QRegularExpression("Copy \\d+"));
+            int digitIndex = index + 5;
+            int parIndex = request.lastIndexOf(")");
 
             // If the regular expression was not found create the first copy
             if (index == -1)
             {
-                return getUniqueSetName(request + "_1");
+                return getUniqueSetName(request + " (Copy 1)");
             }
             else
             {
                 // Number of characters used by the digits we need to replace
-                int numChars = request.length() - (index + 1);
+                int numChars = parIndex - digitIndex;
                 // The digit we want to increment and place back
-                int digit = request.right(numChars).toInt() + 1;
-                return getUniqueSetName(request.left(request.length() - numChars) + QString::number(digit));
+                int digit = request.mid(digitIndex, numChars).toInt() + 1;
+
+                return getUniqueSetName(request.left(parIndex - numChars) + QString::number(digit) + ")");
             }
         }
     }

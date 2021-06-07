@@ -15,16 +15,9 @@ if (HDPS_USE_GTEST)
     add_subdirectory(external/googletest)
 endif()
 
-add_subdirectory(BinLoader)
 add_subdirectory(HDPS)
-add_subdirectory(Scatterplot)
 
 add_dependencies(PointData HDPS)
-add_dependencies(ScatterplotPlugin HDPS)
-add_dependencies(ScatterplotPlugin PointData)
-add_dependencies(ScatterplotPlugin ClusterData)
-add_dependencies(BinLoader HDPS)
-add_dependencies(BinLoader PointData)
 
 add_dependencies(ImageData HDPS)
 add_dependencies(ImageData PointData)
