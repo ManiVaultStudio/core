@@ -3,6 +3,9 @@
 #include "WidgetAction.h"
 
 class QWidget;
+class QComboBox;
+class QPushButton;
+class QAbstractListModel;
 
 namespace hdps {
 
@@ -20,19 +23,38 @@ class OptionAction : public WidgetAction
     Q_OBJECT
 
 public:
+
     class Widget : public WidgetAction::Widget {
+    protected:
+        Widget(QWidget* parent, OptionAction* optionAction);
+
     public:
-        Widget(QWidget* widget, OptionAction* optionAction, const bool& resettable = true);
+        QHBoxLayout* getLayout() { return _layout; }
+        QComboBox* getComboBox() { return _comboBox; }
+        QPushButton* getResetPushButton() { return _resetPushButton; }
+
+    protected:
+        QHBoxLayout*    _layout;
+        QComboBox*      _comboBox;
+        QPushButton*    _resetPushButton;
+
+        friend class OptionAction;
+    };
+
+protected:
+    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) {
+        return new OptionAction::Widget(parent, this);
     };
 
 public:
     OptionAction(QObject* parent, const QString& title = "");
 
-    QWidget* createWidget(QWidget* parent) override;
-
     QStringList getOptions() const;
     bool hasOptions() const;
     void setOptions(const QStringList& options);
+    QAbstractListModel* getModel();
+    void setModel(QAbstractListModel* listModel);
+    bool hasModel() const;
 
     std::int32_t getCurrentIndex() const;
     void setCurrentIndex(const std::int32_t& currentIndex);
@@ -51,15 +73,17 @@ public:
 
 signals:
     void optionsChanged(const QStringList& options);
+    void modelChanged(QAbstractListModel* listModel);
     void currentIndexChanged(const std::int32_t& currentIndex);
     void defaultIndexChanged(const std::int32_t& defaultIndex);
     void currentTextChanged(const QString& currentText);
 
 protected:
-    QStringList     _options;
-    std::int32_t    _currentIndex;
-    std::int32_t    _defaultIndex;
-    QString         _currentText;
+    QStringList             _options;
+    QAbstractListModel*     _model;
+    std::int32_t            _currentIndex;
+    std::int32_t            _defaultIndex;
+    QString                 _currentText;
 };
 
 }

@@ -29,11 +29,6 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const doubl
     setDecimals(decimals);
 }
 
-QWidget* DecimalAction::createWidget(QWidget* parent)
-{
-    return new Widget(parent, this);
-}
-
 double DecimalAction::getValue() const
 {
     return _value;
@@ -153,67 +148,54 @@ void DecimalAction::setUpdateDuringDrag(const bool& updateDuringDrag)
     _updateDuringDrag = updateDuringDrag;
 }
 
-DecimalAction::Widget::Widget(QWidget* parent, DecimalAction* decimalAction, const Configuration& configuration /*= Configuration::All*/) :
-    WidgetAction::Widget(parent, decimalAction),
-    _valueDoubleSpinBox(nullptr),
-    _valueSlider(nullptr),
-    _resetPushButton(nullptr)
+DecimalAction::Widget::Widget(QWidget* parent, DecimalAction* decimalAction) :
+    WidgetAction::Widget(parent, decimalAction, Widget::State::Standard),
+    _valueDoubleSpinBox(new QDoubleSpinBox()),
+    _valueSlider(new QSlider(Qt::Horizontal)),
+    _resetPushButton(new QPushButton())
 {
     setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
 
     auto layout = new QHBoxLayout();
 
+    layout->addWidget(_valueDoubleSpinBox);
+    layout->addWidget(_valueSlider);
+    layout->addWidget(_resetPushButton);
+
     setLayout(layout);
 
     layout->setMargin(0);
 
-    if (configuration & Configuration::SpinBox) {
-        _valueDoubleSpinBox = new QDoubleSpinBox();
-        
-        _valueDoubleSpinBox->setFixedWidth(60);
+    _valueDoubleSpinBox->setFixedWidth(60);
 
-        layout->addWidget(_valueDoubleSpinBox);
+    connect(_valueDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
+        decimalAction->setValue(value);
+    });
 
-        connect(_valueDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
-            decimalAction->setValue(value);
-        });
-    }
+    const auto onUpdateAction = [this, decimalAction]() -> void {
+        decimalAction->setValue(static_cast<double>(_valueSlider->value()) / static_cast<double>(SLIDER_MULTIPLIER));
+    };
 
-    if (configuration & Configuration::Slider) {
-        _valueSlider = new QSlider(Qt::Horizontal);
-        
-        layout->addWidget(_valueSlider);
+    connect(_valueSlider, &QSlider::valueChanged, this, [this, decimalAction, onUpdateAction](int value) {
+        if (!decimalAction->getUpdateDuringDrag())
+            return;
 
-        const auto onUpdateAction = [this, decimalAction]() -> void {
-            decimalAction->setValue(static_cast<double>(_valueSlider->value()) / static_cast<double>(SLIDER_MULTIPLIER));
-        };
+        onUpdateAction();
+    });
 
-        connect(_valueSlider, &QSlider::valueChanged, this, [this, decimalAction, onUpdateAction](int value) {
-            if (!decimalAction->getUpdateDuringDrag())
-                return;
+    connect(_valueSlider, &QSlider::sliderReleased, this, [this, decimalAction, onUpdateAction]() {
+        if (decimalAction->getUpdateDuringDrag())
+            return;
 
-            onUpdateAction();
-        });
+        onUpdateAction();
+    });
 
-        connect(_valueSlider, &QSlider::sliderReleased, this, [this, decimalAction, onUpdateAction]() {
-            if (decimalAction->getUpdateDuringDrag())
-                return;
+    _resetPushButton->setVisible(false);
+    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
 
-            onUpdateAction();
-        });
-    }
-
-    if (configuration & Configuration::Reset) {
-        _resetPushButton = new QPushButton();
-
-        layout->addWidget(_resetPushButton);
-
-        _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-
-        connect(_resetPushButton, &QPushButton::clicked, this, [this, decimalAction]() {
-            decimalAction->reset();
-        });
-    }
+    connect(_resetPushButton, &QPushButton::clicked, this, [this, decimalAction]() {
+        decimalAction->reset();
+    });
 
     const auto valueString = [](const double& value, const std::uint32_t& decimals) -> QString {
         return QString::number(value, 'f', decimals);

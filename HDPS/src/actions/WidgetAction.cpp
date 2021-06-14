@@ -1,38 +1,44 @@
 #include "WidgetAction.h"
 
+#include <QDebug>
 #include <QMenu>
+#include <QEvent>
+#include <QPainter>
 
 namespace hdps {
 
 namespace gui {
 
-WidgetAction::Widget::Widget(QWidget* parent, QAction* action) :
+WidgetAction::Widget::Widget(QWidget* parent, WidgetAction* widgetAction, const State& state) :
     QWidget(parent),
-    _action(action)
+    _widgetAction(widgetAction),
+    _state(state)
 {
-    const auto updateAction = [this, action]() -> void {
-        setEnabled(action->isEnabled());
-        setVisible(action->isVisible());
+    const auto updateAction = [this, widgetAction]() -> void {
+        setEnabled(widgetAction->isEnabled());
+        setVisible(widgetAction->isVisible());
     };
 
-    connect(action, &QAction::changed, this, [this, updateAction]() {
+    connect(widgetAction, &QAction::changed, this, [this, updateAction]() {
         updateAction();
     });
 
     updateAction();
 }
 
-void WidgetAction::Widget::setLayout(QLayout* layout)
+void WidgetAction::Widget::setPopupLayout(QLayout* popupLayout)
 {
-    layout->setMargin(0);
-    layout->setSpacing(4);
+    auto mainLayout = new QVBoxLayout();
 
-    QWidget::setLayout(layout);
-}
+    mainLayout->setMargin(4);
 
-bool WidgetAction::Widget::isChildOfMenu() const
-{
-    return dynamic_cast<QMenu*>(parent());
+    setLayout(mainLayout);
+
+    auto groupBox = new QGroupBox(_widgetAction->text());
+
+    groupBox->setLayout(popupLayout);
+
+    mainLayout->addWidget(groupBox);
 }
 
 WidgetAction::WidgetAction(QObject* parent) :
@@ -40,51 +46,53 @@ WidgetAction::WidgetAction(QObject* parent) :
 {
 }
 
-WidgetAction::PopupWidget::PopupWidget(QWidget* parent, QAction* action) :
-    Widget(parent, action)
-{
-    setWindowTitle(action->text());
-}
-
-WidgetAction::CompactWidget::CompactWidget(QWidget* parent, WidgetAction* widgetAction) :
-    Widget(parent, widgetAction),
+WidgetAction::CollapsedWidget::CollapsedWidget(QWidget* parent, WidgetAction* widgetAction) :
+    Widget(parent, widgetAction, Widget::State::Collapsed),
     _layout(),
-    _popupPushButton()
+    _toolButton()
 {
-    _popupPushButton.setIcon(widgetAction->icon());
-    _popupPushButton.setToolTip(widgetAction->toolTip());
-    _popupPushButton.setWidget(widgetAction->createWidget(this, WidgetType::Popup));
+    _layout.setMargin(0);
 
-    _layout.addWidget(&_popupPushButton);
+    _toolButton.setIcon(widgetAction->icon());
+    _toolButton.setToolTip(widgetAction->toolTip());
+    _toolButton.addAction(widgetAction);
+    _toolButton.setPopupMode(QToolButton::InstantPopup);
+    _toolButton.setIconSize(QSize(12, 12));
+    _toolButton.setFixedSize(QSize(24, 24));
+    _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
+
+    _layout.addWidget(&_toolButton);
 
     setLayout(&_layout);
 }
 
-WidgetAction::StateWidget::StateWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& priority /*= 0*/, const WidgetType& state /*= WidgetType::Compact*/) :
-    Widget(parent, widgetAction),
+WidgetAction::StateWidget::StateWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& priority /*= 0*/, const Widget::State& state /*= Widget::State::Compact*/) :
+    QWidget(parent),
+    _widgetAction(widgetAction),
     _state(state),
     _priority(priority),
-    _layout(),
-    _standardWidget(widgetAction->createWidget(this, WidgetType::Standard)),
-    _compactWidget(widgetAction->createWidget(this, WidgetType::Compact))
+    _standardWidget(widgetAction->createWidget(this)),
+    _compactWidget(widgetAction->createCollapsedWidget(this))
 {
-    _layout.addWidget(_standardWidget);
-    _layout.addWidget(_compactWidget);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->addWidget(_standardWidget);
+    layout->addWidget(_compactWidget);
 
     setState(state);
-
-    setLayout(&_layout);
+    setLayout(layout);
 }
 
-WidgetAction::WidgetType WidgetAction::StateWidget::getState() const
+WidgetAction::Widget::State WidgetAction::StateWidget::getState() const
 {
     return _state;
 }
 
-void WidgetAction::StateWidget::setState(const WidgetType& state)
+void WidgetAction::StateWidget::setState(const Widget::State& state)
 {
-    _standardWidget->setVisible(state == WidgetType::Standard);
-    _compactWidget->setVisible(state == WidgetType::Compact);
+    _standardWidget->setVisible(state == Widget::State::Standard);
+    _compactWidget->setVisible(state == Widget::State::Collapsed);
 }
 
 std::int32_t WidgetAction::StateWidget::getPriority() const
@@ -97,14 +105,14 @@ void WidgetAction::StateWidget::setPriority(const std::int32_t& priority)
     _priority = priority;
 }
 
-QSize WidgetAction::StateWidget::getSizeHint(const WidgetType& state) const
+QSize WidgetAction::StateWidget::getSizeHint(const Widget::State& state) const
 {
     switch (state)
     {
-        case WidgetType::Standard:
+        case Widget::State::Standard:
             return _standardWidget->sizeHint();
 
-        case WidgetType::Compact:
+        case Widget::State::Collapsed:
             return _compactWidget->sizeHint();
 
         default:
@@ -113,6 +121,28 @@ QSize WidgetAction::StateWidget::getSizeHint(const WidgetType& state) const
 
     return QSize();
 }
+
+void WidgetAction::ToolButton::paintEvent(QPaintEvent* paintEvent)
+{
+    QToolButton::paintEvent(paintEvent);
+
+    QPainter painter(this);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    const auto margin = 5.0f;
+
+    QPointF center;
+
+    center.setY(height() - margin);
+    center.setX(width() - margin);
+
+    painter.setPen(QPen(QBrush(isEnabled() ? Qt::black : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
+    painter.setBrush(Qt::NoBrush);
+    painter.drawPoint(center);
+}
+
+
 
 }
 }

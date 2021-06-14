@@ -3,6 +3,7 @@
 
 #include <QHBoxLayout>
 #include <QLineEdit>
+#include <QPushButton>
 
 namespace hdps {
 
@@ -12,11 +13,6 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent)
 {
     setText(title);
-}
-
-QWidget* StringAction::createWidget(QWidget* parent)
-{
-    return new Widget(parent, this);
 }
 
 QString StringAction::getString() const
@@ -59,53 +55,48 @@ void StringAction::reset()
     setString(_defaultString);
 }
 
-StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction, const bool& resettable /*= true*/) :
-    WidgetAction::Widget(parent, stringAction)
+StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction) :
+    WidgetAction::Widget(parent, stringAction, Widget::State::Standard),
+    _layout(new QHBoxLayout()),
+    _lineEdit(new QLineEdit()),
+    _resetPushButton(new QPushButton())
 {
-    auto layout = new QHBoxLayout();
+    _layout->setMargin(0);
+    _layout->addWidget(_lineEdit);
 
-    auto lineEdit = new QLineEdit();
+    setLayout(_layout);
 
-    layout->setMargin(0);
-    layout->addWidget(lineEdit);
-
-    setLayout(layout);
-
-    const auto updateLineEdit = [this, stringAction, lineEdit]() {
-        lineEdit->setText(stringAction->getString());
+    const auto updateLineEdit = [this, stringAction]() {
+        _lineEdit->setText(stringAction->getString());
     };
 
     connect(stringAction, &StringAction::stringChanged, this, [this, updateLineEdit](const QString& value) {
         updateLineEdit();
     });
 
-    connect(lineEdit, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
+    connect(_lineEdit, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
     });
 
-    if (resettable) {
-        auto resetPushButton = new QPushButton();
+    _resetPushButton->setVisible(false);
+    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
+    _resetPushButton->setToolTip(QString("Reset %1").arg(stringAction->text()));
 
-        resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-        resetPushButton->setToolTip(QString("Reset %1").arg(stringAction->text()));
+    _layout->addWidget(_resetPushButton);
 
-        layout->addWidget(resetPushButton);
+    connect(_resetPushButton, &QPushButton::clicked, this, [this, stringAction]() {
+        stringAction->reset();
+    });
 
-        connect(resetPushButton, &QPushButton::clicked, this, [this, stringAction]() {
-            stringAction->reset();
-        });
+    const auto onUpdateString = [this, stringAction]() -> void {
+        _resetPushButton->setEnabled(stringAction->canReset());
+    };
 
-        const auto onUpdateString = [this, stringAction, resetPushButton]() -> void {
-            resetPushButton->setEnabled(stringAction->canReset());
-        };
-
-        connect(stringAction, &StringAction::stringChanged, this, [this, onUpdateString](const QColor& color) {
-            onUpdateString();
-        });
-
+    connect(stringAction, &StringAction::stringChanged, this, [this, onUpdateString](const QColor& color) {
         onUpdateString();
-    }
+    });
 
+    onUpdateString();
     updateLineEdit();
 }
 
