@@ -3,6 +3,7 @@
 #include "WidgetAction.h"
 
 class QCheckBox;
+class QPushButton;
 
 namespace hdps {
 
@@ -23,7 +24,7 @@ public:
 
     class Widget : public WidgetAction::Widget {
     protected:
-        Widget(QWidget* parent, CheckAction* checkAction);
+        Widget(QWidget* parent, CheckAction* checkAction, const bool& toggleButton = false);
 
     public:
         QHBoxLayout* getLayout() { return _layout; }
@@ -32,6 +33,7 @@ public:
     protected:
         QHBoxLayout*    _layout;
         QCheckBox*      _checkBox;
+        QPushButton*    _pushButton;
 
         friend class CheckAction;
     };
@@ -41,6 +43,9 @@ protected:
 
 public:
     CheckAction(QObject* parent, const QString& title = "");
+
+    Widget* createCheckBoxWidget(QWidget* parent) { return new Widget(parent, this);  };
+    Widget* createToggleButtonWidget(QWidget* parent) { return new Widget(parent, this, true);  };
 };
 
 }

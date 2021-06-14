@@ -121,7 +121,6 @@ set(ACTIONS_HEADERS
     src/actions/OptionAction.h
     src/actions/TriggerAction.h
     src/actions/CheckAction.h
-    src/actions/ToggleAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
     src/actions/Actions.h
@@ -133,7 +132,6 @@ set(ACTIONS_SOURCES
     src/actions/OptionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/CheckAction.cpp
-    src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
 )
