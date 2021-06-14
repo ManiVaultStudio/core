@@ -10,42 +10,48 @@ namespace hdps {
 namespace gui {
 
 /**
- * Check action class
+ * Toggle action class
  *
- * Check action with check button UI
+ * Toggle action with check/toggle button UI
  *
  * @author Thomas Kroes
  */
-class CheckAction : public WidgetAction
+class ToggleAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
+    enum class Mode {
+        CheckBox,
+        Button
+
+    };
     class Widget : public WidgetAction::Widget {
     protected:
-        Widget(QWidget* parent, CheckAction* checkAction, const bool& toggleButton = false);
+        Widget(QWidget* parent, ToggleAction* checkAction, const Mode& mode = Mode::CheckBox);
 
     public:
         QHBoxLayout* getLayout() { return _layout; }
         QCheckBox* getCheckBox() { return _checkBox; }
+        QPushButton* getPushButton() { return _pushButton; }
 
     protected:
         QHBoxLayout*    _layout;
         QCheckBox*      _checkBox;
         QPushButton*    _pushButton;
 
-        friend class CheckAction;
+        friend class ToggleAction;
     };
 
 protected:
     QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;;
 
 public:
-    CheckAction(QObject* parent, const QString& title = "");
+    ToggleAction(QObject* parent, const QString& title = "");
 
     Widget* createCheckBoxWidget(QWidget* parent) { return new Widget(parent, this);  };
-    Widget* createToggleButtonWidget(QWidget* parent) { return new Widget(parent, this, true);  };
+    Widget* createPushButtonWidget(QWidget* parent) { return new Widget(parent, this, Mode::Button);  };
 };
 
 }
