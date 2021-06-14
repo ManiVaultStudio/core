@@ -23,31 +23,32 @@ class DecimalAction : public WidgetAction
     Q_OBJECT
 
 public:
+
     class Widget : public WidgetAction::Widget
     {
+    protected:
+        Widget(QWidget* parent, DecimalAction* decimalAction);
+        
     public:
-        enum Configuration {
-            SpinBox = 0x0001,
-            Slider  = 0x0002,
-            Reset   = 0x0004,
-
-            SpinBoxSlider   = SpinBox | Slider,
-            All             = SpinBox | Slider | Reset
-        };
-
-    public:
-        Widget(QWidget* parent, DecimalAction* decimalAction, const Configuration& configuration = Configuration::All);
+        QDoubleSpinBox* getDoubleSpinBox() { return _valueDoubleSpinBox; }
+        QSlider* getSlider() { return _valueSlider; }
+        QPushButton* getResetPushButton() { return _resetPushButton; }
 
     protected:
         QDoubleSpinBox*     _valueDoubleSpinBox;
         QSlider*            _valueSlider;
         QPushButton*        _resetPushButton;
+
+        friend class DecimalAction;
+    };
+
+protected:
+    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override {
+        return new DecimalAction::Widget(parent, this);
     };
 
 public:
     DecimalAction(QObject * parent, const QString& title, const double& minimum = MIN_VALUE, const double& maximum = MAX_VALUE, const double& value = VALUE, const double& defaultValue = DEFAULT_VALUE, const std::int32_t& decimals = DECIMALS);
-
-    QWidget* createWidget(QWidget* parent) override;
 
     double getValue() const;
     void setValue(const double& value);

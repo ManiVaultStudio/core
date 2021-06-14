@@ -99,7 +99,6 @@ set( WIDGET_HEADERS
     src/widgets/AccordionSection.h
     src/widgets/DockableWidget.h
     src/widgets/SettingsWidget.h
-    src/widgets/PopupPushButton.h
     src/widgets/DropWidget.h
 )
 
@@ -113,7 +112,6 @@ set( WIDGET_SOURCES
     src/widgets/AccordionSection.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/SettingsWidget.cpp
-    src/widgets/PopupPushButton.cpp
     src/widgets/DropWidget.cpp
 )
 
@@ -121,7 +119,8 @@ set(ACTIONS_HEADERS
     src/actions/ColorAction.h
     src/actions/DecimalAction.h
     src/actions/OptionAction.h
-    src/actions/StandardAction.h
+    src/actions/TriggerAction.h
+    src/actions/ToggleAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
     src/actions/Actions.h
@@ -131,7 +130,8 @@ set(ACTIONS_SOURCES
     src/actions/ColorAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/OptionAction.cpp
-    src/actions/StandardAction.cpp
+    src/actions/TriggerAction.cpp
+    src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
 )
