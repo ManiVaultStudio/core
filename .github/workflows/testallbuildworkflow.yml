@@ -1,6 +1,6 @@
 # This workflow does not contain any actual build steps 
 # it dispatches other workflows to perform the actual work.
-name: TestWorkflowDispatch
+name: TestBuildCoreAndPlugins
 on: workflow_dispatch  # Trigger this manually or possibly with a chrono
 jobs:
   build_core_first:
