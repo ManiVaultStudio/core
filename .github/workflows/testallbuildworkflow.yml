@@ -11,6 +11,8 @@ jobs:
         with:
           owner: hdps
           repo: core
+          ref: master
+          wait_interval: 20
           github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
           workflow_file_name: testbuildcore.yml
           trigger_workflow: true
