@@ -25,8 +25,8 @@ public:
     enum class Mode {
         CheckBox,
         Button
-
     };
+
     class Widget : public WidgetAction::Widget {
     protected:
         Widget(QWidget* parent, ToggleAction* checkAction, const Mode& mode = Mode::CheckBox);
@@ -45,13 +45,13 @@ public:
     };
 
 protected:
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;;
+    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;
 
 public:
     ToggleAction(QObject* parent, const QString& title = "");
 
     Widget* createCheckBoxWidget(QWidget* parent) { return new Widget(parent, this);  };
-    Widget* createPushButtonWidget(QWidget* parent) { return new Widget(parent, this, Mode::Button);  };
+    Widget* createPushButtonWidget(QWidget* parent) { return new Widget(parent, this, Mode::Button); };
 };
 
 }

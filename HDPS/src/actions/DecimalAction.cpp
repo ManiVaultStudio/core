@@ -69,7 +69,7 @@ void DecimalAction::reset()
     setValue(_defaultValue);
 }
 
-float DecimalAction::getMinimum() const
+double DecimalAction::getMinimum() const
 {
     return _minimum;
 }
@@ -84,7 +84,7 @@ void DecimalAction::setMinimum(const double& minimum)
     emit minimumChanged(_minimum);
 }
 
-float DecimalAction::getMaximum() const
+double DecimalAction::getMaximum() const
 {
     return _maximum;
 }
