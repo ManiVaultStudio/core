@@ -65,10 +65,6 @@ ToggleAction::Widget::Widget(QWidget* parent, ToggleAction* checkAction, const M
             _pushButton->setText(checkAction->text());
             _pushButton->setIcon(checkAction->icon());
 
-            connect(_pushButton, &QPushButton::clicked, this, [this, checkAction]() {
-                checkAction->trigger();
-            });
-
             connect(_pushButton, &QPushButton::toggled, this, [this, checkAction](bool toggled) {
                 checkAction->setChecked(toggled);
             });

@@ -57,6 +57,14 @@ public:
     bool canReset() const;
     void reset();
 
+    StringAction& operator= (const StringAction& other)
+    {
+        _string         = other._string;
+        _defaultString  = other._defaultString;
+
+        return *this;
+    }
+
 signals:
     void stringChanged(const QString& string);
     void defaultStringChanged(const QString& defaultString);
