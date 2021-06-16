@@ -7,6 +7,8 @@
 #include "event/EventListener.h"
 
 #include <QString>
+#include <QMap>
+#include <QVariant>
 #include <QUuid>
 #include <QVariant>
 #include <QIcon>
@@ -20,7 +22,7 @@ class Plugin : public hdps::EventListener
 {
 public:
     Plugin(Type type, QString kind);
-    
+
     virtual ~Plugin() {};
 
     /**
@@ -79,6 +81,48 @@ public:
         this->_core = core;
 
         setEventCore(core);
+    }
+
+public: // Properties
+
+    /**
+     * Get property in variant form
+     * @param name Name of the property
+     * @param defaultValue Default value
+     * @return Property in variant form
+     */
+    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const
+    {
+        if (!hasProperty(name))
+            return defaultValue;
+
+        return _properties[name];
+    }
+
+    /**
+    * Set property
+    * @param name Name of the property
+    * @param value Property value
+    */
+    void setProperty(const QString& name, const QVariant& value)
+    {
+        _properties[name] = value;
+    }
+
+    /**
+    * Determines whether a property with a give name exists
+    * @param name Name of the property
+    * @param value If property with the given name exists
+    */
+    bool hasProperty(const QString& name) const
+    {
+        return _properties.contains(name);
+    }
+
+    /** Returns a list of available property names */
+    QStringList propertyNames() const
+    {
+        return _properties.keys();
     }
 
 public: // Settings
