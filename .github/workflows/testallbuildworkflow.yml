@@ -33,6 +33,7 @@ jobs:
     - name: Setup Environment
       run: |
         python3 -m pip install PyGithub
+        python3 -m pip install packaging
 
     - name: Get core and plugin versions
       run: |
