@@ -99,10 +99,10 @@ public:
     SliderWidget* createSliderWidget(QWidget* parent);
 
 signals:
-    void valueChanged(const double& value);
-    void defaultValueChanged(const double& defaultValue);
-    void minimumChanged(const double& minimum);
-    void maximumChanged(const double& maximum);
+    void valueChanged(const std::int32_t& value);
+    void defaultValueChanged(const std::int32_t& defaultValue);
+    void minimumChanged(const std::int32_t& minimum);
+    void maximumChanged(const std::int32_t& maximum);
     void suffixChanged(const QString& suffix);
 
 protected:
@@ -113,10 +113,10 @@ protected:
     QString         _suffix;
     bool            _updateDuringDrag;
 
-    static constexpr double MIN_VALUE       = 0;
-    static constexpr double MAX_VALUE       = 100;
-    static constexpr double VALUE           = 0;
-    static constexpr double DEFAULT_VALUE   = 0;
+    static constexpr std::int32_t MIN_VALUE       = 0;
+    static constexpr std::int32_t MAX_VALUE       = 100;
+    static constexpr std::int32_t VALUE           = 0;
+    static constexpr std::int32_t DEFAULT_VALUE   = 0;
 };
 
 }

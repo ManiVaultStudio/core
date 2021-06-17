@@ -15,8 +15,8 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     WidgetAction(parent),
     _value(),
     _defaultValue(),
-    _minimum(std::numeric_limits<std::int32_t>::max()),
-    _maximum(std::numeric_limits<std::int32_t>::min()),
+    _minimum(std::numeric_limits<std::int32_t>::min()),
+    _maximum(std::numeric_limits<std::int32_t>::max()),
     _suffix(),
     _updateDuringDrag(true)
 {
@@ -135,7 +135,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     WidgetAction::Widget(parent, integralAction, Widget::State::Standard),
     _spinBox(new QSpinBox())
 {
-    setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
+    _spinBox->setObjectName("SpinBox");
 
     auto layout = new QHBoxLayout();
 
@@ -143,8 +143,6 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
 
     layout->setMargin(0);
     layout->addWidget(_spinBox);
-
-    _spinBox->setFixedWidth(60);
 
     connect(_spinBox, qOverload<int>(&QSpinBox::valueChanged), this, [this, integralAction](int value) {
         integralAction->setValue(value);
@@ -170,18 +168,15 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     const auto onUpdateValueRange = [this, integralAction]() {
         QSignalBlocker spinBoxBlocker(_spinBox);
 
-        const auto minimum = integralAction->getMinimum();
-        const auto maximum = integralAction->getMaximum();
-
-        _spinBox->setMinimum(minimum);
-        _spinBox->setMaximum(maximum);
+        _spinBox->setMinimum(integralAction->getMinimum());
+        _spinBox->setMaximum(integralAction->getMaximum());
     };
 
-    connect(integralAction, &IntegralAction::minimumChanged, this, [this, integralAction, onUpdateValueRange](const double& minimum) {
+    connect(integralAction, &IntegralAction::minimumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& minimum) {
         onUpdateValueRange();
     });
 
-    connect(integralAction, &IntegralAction::maximumChanged, this, [this, integralAction, onUpdateValueRange](const double& maximum) {
+    connect(integralAction, &IntegralAction::maximumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& maximum) {
         onUpdateValueRange();
     });
 
@@ -197,7 +192,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         onUpdateSuffix();
     });
 
-    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const double& value) {
+    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
         onUpdateValue();
     });
 
@@ -211,7 +206,7 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     WidgetAction::Widget(parent, integralAction, Widget::State::Standard),
     _slider(new QSlider(Qt::Horizontal))
 {
-    setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
+    _slider->setObjectName("Slider");
 
     auto layout = new QHBoxLayout();
 
@@ -254,22 +249,19 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     const auto onUpdateValueRange = [this, integralAction]() {
         QSignalBlocker sliderBlocker(_slider);
 
-        const auto minimum = integralAction->getMinimum();
-        const auto maximum = integralAction->getMaximum();
-
-        _slider->setMinimum(minimum);
-        _slider->setMaximum(maximum);
+        _slider->setMinimum(integralAction->getMinimum());
+        _slider->setMaximum(integralAction->getMaximum());
     };
 
-    connect(integralAction, &IntegralAction::minimumChanged, this, [this, integralAction, onUpdateValueRange](const double& minimum) {
+    connect(integralAction, &IntegralAction::minimumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& minimum) {
         onUpdateValueRange();
     });
 
-    connect(integralAction, &IntegralAction::maximumChanged, this, [this, integralAction, onUpdateValueRange](const double& maximum) {
+    connect(integralAction, &IntegralAction::maximumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& maximum) {
         onUpdateValueRange();
     });
 
-    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const double& value) {
+    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
         onUpdateValue();
     });
 
