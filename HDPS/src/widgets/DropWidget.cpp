@@ -26,7 +26,7 @@ DropWidget::DropWidget(QWidget* parent) :
     _dropIndicatorWidget(nullptr)
 {
     setAttribute(Qt::WA_TransparentForMouseEvents);
-
+    
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
@@ -97,7 +97,6 @@ bool DropWidget::eventFilter(QObject* target, QEvent* event)
             break;
         }
         
-
         case QEvent::DragLeave:
         {
             if (dynamic_cast<QWidget*>(target) != parent())

@@ -2,9 +2,9 @@
 
 #include "WidgetAction.h"
 
-#include "../widgets/ColorPickerPushButton.h"
-
 class QWidget;
+class ColorPickerPushButton;
+class QPushButton;
 
 namespace hdps {
 
@@ -22,15 +22,31 @@ class ColorAction : public WidgetAction
     Q_OBJECT
 
 public:
+
     class Widget : public WidgetAction::Widget {
+    protected:
+        Widget(QWidget* parent, ColorAction* colorAction);
+
     public:
-        Widget(QWidget* widget, ColorAction* colorAction, const bool& resettable = true);
+        QHBoxLayout* getLayout() { return _layout; }
+        ColorPickerPushButton* getColorPickerPushButton() { return _colorPickerPushButton; }
+        QPushButton* getResetPushButton() { return _resetPushButton; }
+
+    protected:
+        QHBoxLayout*            _layout;
+        ColorPickerPushButton*  _colorPickerPushButton;
+        QPushButton*            _resetPushButton;
+
+        friend class ColorAction;
+    };
+
+protected:
+    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override {
+        return new ColorAction::Widget(parent, this);
     };
 
 public:
     ColorAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
-
-    QWidget* createWidget(QWidget* parent) override;
 
     QColor getColor() const;
     void setColor(const QColor& color);
@@ -40,6 +56,14 @@ public:
 
     bool canReset() const;
     void reset();
+
+    ColorAction& operator= (const ColorAction& other)
+    {
+        _color          = other._color;
+        _defaultColor   = other._defaultColor;
+
+        return *this;
+    }
 
 signals:
     void colorChanged(const QColor& color);

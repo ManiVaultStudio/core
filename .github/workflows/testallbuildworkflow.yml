@@ -1,0 +1,59 @@
+# This workflow does not contain any actual build steps 
+# it dispatches other workflows to perform the actual work.
+name: TestBuildCoreAndPlugins
+on: workflow_dispatch  # Trigger this manually or possibly with a chrono
+jobs:
+  build_core_first:
+    name: Build core first
+    runs-on: ubuntu-latest
+    steps:
+      - uses: convictional/trigger-workflow-and-wait@v1.3.0
+        with:
+          owner: hdps
+          repo: core
+          ref: master
+          wait_interval: 20
+          github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          workflow_file_name: testbuildcore.yml
+          trigger_workflow: true
+          wait_workflow: true
+
+  build_all_plugins:
+    name: Build all plugins
+    runs-on: ubuntu-latest
+    needs: build_core_first
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7.9'
+
+    - name: Setup Environment
+      run: |
+        python3 -m pip install PyGithub
+        python3 -m pip install packaging
+
+    - name: Get core and plugin versions
+      run: |
+        echo "CORE_VERSION=$(python3 get_core_version.py ${{ github.ref }})" >> $GITHUB_ENV
+        echo "BUILDREF_SCATTERPLOT=$(python3 get_plugin_ref.py hdps Scatterplot ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_IMAGELOADERPLUGIN=$(python3 get_plugin_ref.py hdps ImageLoaderPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_TSNEANALYSIS=$(python3 get_plugin_ref.py hdps t-SNE-Analysis ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_IMAGEVIEWERPLUGIN=$(python3 get_plugin_ref.py hdps ImageViewerPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_HDF5LOADER=$(python3 get_plugin_ref.py hdps HDF5Loader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_DIMENSIONSVIEWERPLUGIN=$(python3 get_plugin_ref.py hdps DimensionsViewerPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_PARALLELCOORDINATESPLUGIN=$(python3 get_plugin_ref.py hdps ParallelCoordinatesPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_CSVLOADER=$(python3 get_plugin_ref.py hdps CsvLoader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_FCSLOADER=$(python3 get_plugin_ref.py hdps FcsLoader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_BINIO=$(python3 get_plugin_ref.py hdps BinIO ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+      working-directory: ./ci_scripts
+
+    - name: Run Scatterplot
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: hdps/Scatterplot
+        event-type: test_event
+        client-payload: '{"ref": "${{ env.BUILDREF_SCATTERPLOT }}"}'

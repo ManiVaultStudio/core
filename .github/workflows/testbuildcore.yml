@@ -1,0 +1,17 @@
+name: TestBuildCore
+on: workflow_dispatch
+jobs:
+  test_job:
+    name: Test job
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Test building core all platforms
+        run: |
+          echo Hello from ${{ runner.os }}; ls -al .
+          echo Simulating build delay
+          sleep 20
+          echo Build done on ${{ runner.os }}
+        shell: bash

@@ -14,7 +14,7 @@ ColorPickerPushButton::ColorPickerPushButton(QWidget* parent /*= nullptr*/) :
             setColor(color);
         });
 
-        _colorDialog.show();
+        _colorDialog.exec();
     });
 }
 

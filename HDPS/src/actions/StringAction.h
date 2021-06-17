@@ -3,6 +3,8 @@
 #include "WidgetAction.h"
 
 class QWidget;
+class QLineEdit;
+class QPushButton;
 
 namespace hdps {
 
@@ -20,15 +22,31 @@ class StringAction : public WidgetAction
     Q_OBJECT
 
 public:
+
     class Widget : public WidgetAction::Widget {
+    protected:
+        Widget(QWidget* parent, StringAction* stringAction);
+
     public:
-        Widget(QWidget* widget, StringAction* stringAction, const bool& resettable = true);
+        QHBoxLayout* getLayout() { return _layout; }
+        QLineEdit* getLineEdit() { return _lineEdit; }
+        QPushButton* getResetPushButton() { return _resetPushButton; }
+
+    protected:
+        QHBoxLayout*    _layout;
+        QLineEdit*      _lineEdit;
+        QPushButton*    _resetPushButton;
+
+        friend class StringAction;
+    };
+
+protected:
+    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override {
+        return new StringAction::Widget(parent, this);
     };
 
 public:
     StringAction(QObject* parent, const QString& title = "");
-
-    QWidget* createWidget(QWidget* parent) override;
 
     QString getString() const;
     void setString(const QString& string);
@@ -38,6 +56,14 @@ public:
 
     bool canReset() const;
     void reset();
+
+    StringAction& operator= (const StringAction& other)
+    {
+        _string         = other._string;
+        _defaultString  = other._defaultString;
+
+        return *this;
+    }
 
 signals:
     void stringChanged(const QString& string);

@@ -1,11 +1,10 @@
 #pragma once
 
-#include "../widgets/PopupPushButton.h"
-
 #include <QWidgetAction>
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QToolButton>
+#include <QDebug>
 
 namespace hdps {
 
@@ -23,56 +22,58 @@ class WidgetAction : public QWidgetAction
     Q_OBJECT
 
 public:
-    enum class WidgetType {
-        Standard,
-        Compact,
-        Popup
-    };
-
-public:
     class Widget : public QWidget
     {
     public:
-        Widget(QWidget* parent, QAction* action);
+        enum class State {
+            Standard,
+            Collapsed,
+            Popup
+        };
 
-        void setLayout(QLayout* layout);
-
-        bool isChildOfMenu() const;
+    public:
+        Widget(QWidget* parent, WidgetAction* widgetAction, const State& type);
 
     protected:
-        QAction*  _action;
+        void setPopupLayout(QLayout* popupLayout);
+
+    protected:
+        WidgetAction*   _widgetAction;
+        State           _state;
     };
 
-    class PopupWidget : public Widget {
+    class ToolButton : public QToolButton {
     public:
-        PopupWidget(QWidget* parent, QAction* action);
+        void paintEvent(QPaintEvent* paintEvent);
     };
 
-    class CompactWidget : public Widget {
+    class CollapsedWidget : public Widget {
     public:
-        CompactWidget(QWidget* parent, WidgetAction* widgetAction);
+        CollapsedWidget(QWidget* parent, WidgetAction* widgetAction);
+
+        ToolButton& getToolButton() { return _toolButton; }
 
     private:
-        QHBoxLayout             _layout;
-        gui::PopupPushButton    _popupPushButton;
+        QHBoxLayout     _layout;
+        ToolButton      _toolButton;
     };
 
-    class StateWidget : public Widget {
+    class StateWidget : public QWidget {
     public:
-        StateWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& priority = 0, const WidgetType& state = WidgetType::Compact);
+        StateWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& priority = 0, const Widget::State& state = Widget::State::Collapsed);
 
-        WidgetType getState() const;
-        void setState(const WidgetType& state);
+        Widget::State getState() const;
+        void setState(const Widget::State& state);
 
         std::int32_t getPriority() const;
         void setPriority(const std::int32_t& priority);
 
-        QSize getSizeHint(const WidgetType& state) const;
+        QSize getSizeHint(const Widget::State& state) const;
 
     private:
-        WidgetType      _state;
+        WidgetAction*   _widgetAction;
+        Widget::State   _state;
         std::int32_t    _priority;
-        QHBoxLayout     _layout;
         QWidget*        _standardWidget;
         QWidget*        _compactWidget;
     };
@@ -80,27 +81,18 @@ public:
     explicit WidgetAction(QObject* parent);
 
     QWidget* createWidget(QWidget* parent) override {
-        return new Widget(parent, this);
+        if (dynamic_cast<ToolButton*>(parent->parent()))
+            return getWidget(parent, Widget::State::Popup);
+
+        return getWidget(parent, Widget::State::Standard);
     }
 
-    virtual QWidget* createWidget(QWidget* parent, const WidgetType& widgetType = WidgetType::Standard) {
-        switch (widgetType)
-        {
-            case WidgetType::Standard:
-                return new Widget(parent, this);
+    QWidget* createCollapsedWidget(QWidget* parent) {
+        return new CollapsedWidget(parent, this);
 
-            case WidgetType::Compact:
-                return new CompactWidget(parent, this);
-
-            case WidgetType::Popup:
-                return new PopupWidget(parent, this);
-
-            default:
-                break;
-        }
-
-        return nullptr;
     }
+protected:
+    virtual QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) = 0;
 };
 
 }
