@@ -23,10 +23,24 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_core_first
     steps:
-    - name: Run_Scatterplot
+    - name: Get core and plugin versions
+      run: |
+        echo "CORE_VERSION=$(python ./ci_scripts/get_core_version.py ${{ github.ref }})" >> $GITHUB_ENV
+        echo "BUILDREF_SCATTERPLOT=$(python get_plugin_ref.py hdps Scatterplot ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_IMAGELOADERPLUGIN=$(python get_plugin_ref.py hdps ImageLoaderPlugin ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_TSNEANALYSIS=$(python get_plugin_ref.py hdps t-SNE-Analysis ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_IMAGEVIEWERPLUGIN=$(python get_plugin_ref.py hdps ImageViewerPlugin ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_HDF5LOADER=$(python get_plugin_ref.py hdps HDF5Loader ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_DIMENSIONSVIEWERPLUGIN=$(python get_plugin_ref.py hdps DimensionsViewerPlugin ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_PARALLELCOORDINATESPLUGIN=$(python get_plugin_ref.py hdps ParallelCoordinatesPlugin ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_CSVLOADER=$(python get_plugin_ref.py hdps CsvLoader ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_FCSLOADER=$(python get_plugin_ref.py hdps FcsLoader ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_BINIO=$(python get_plugin_ref.py hdps BinIO ${{ env.CORE_VERSION }})"
+
+    - name: Run Scatterplot
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: hdps/Scatterplot
         event-type: test_event
-        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+        client-payload: '{"ref": "${{ BUILDREF_SCATTERPLOT }}"}'
