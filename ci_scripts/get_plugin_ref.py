@@ -6,12 +6,13 @@ if __name__ == "__main__":
     org_name (string): name of the github organization
     repo_name (string): name of the git hub repo
     access_token (string): a Personal Access Token with at least repo permissions
-    core_version (string): core version to match
+    core_version (string): core version to match - optional
 
     Returns a GitHub reference to the correct branch of the plugin
     either the "refs/heads/core_<core_version>/<plugin_version>" or
     "refs/heads/master"
     """
+    release_branch = None
     if len(sys.argv) == 5:
         release_branch = get_plugin_release_branch(
             sys.argv[1], sys.argv[2], sys.argv[4], sys.argv[3]
