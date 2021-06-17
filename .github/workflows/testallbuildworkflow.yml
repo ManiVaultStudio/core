@@ -43,4 +43,4 @@ jobs:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: hdps/Scatterplot
         event-type: test_event
-        client-payload: '{"ref": "${{ BUILDREF_SCATTERPLOT }}"}'
+        client-payload: '{"ref": "${{ env.BUILDREF_SCATTERPLOT }}"}'
