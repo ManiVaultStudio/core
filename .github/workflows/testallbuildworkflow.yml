@@ -58,6 +58,8 @@ jobs:
           [{repo: \"ImageLoaderPlugin\"}, {ref: \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}],
         ]}"
 
+    outputs:
+        matrix: ${{ steps.set-matrix.outputs.matrix }}
 
   build_all_plugins:
     name: Build all plugins
