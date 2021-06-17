@@ -9,8 +9,8 @@ if __name__ == "__main__":
     core_version (string): core version to match - optional
 
     Returns a GitHub reference to the correct branch of the plugin
-    either the "refs/heads/core_<core_version>/<plugin_version>" or
-    "refs/heads/master"
+    either the "core_<core_version>/<plugin_version>" or
+    "master"/"main"
     """
     release_branch = None
     if len(sys.argv) == 5:
@@ -19,6 +19,6 @@ if __name__ == "__main__":
         )
     if (len(sys.argv) == 4) or (release_branch is None):
         main_name = get_repo_main_name(sys.argv[1], sys.argv[2], sys.argv[3])
-        print(f"refs/heads/{main_name}")
+        print(f"{main_name}")
     else:
-        print(f"refs/heads/{release_branch}")
+        print(f"{release_branch}")
