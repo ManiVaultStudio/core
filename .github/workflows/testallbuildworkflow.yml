@@ -23,20 +23,31 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_core_first
     steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7.9'
+
+    - name: Setup Environment
+      run: |
+        python3 -m pip install PyGithub
+
     - name: Get core and plugin versions
       run: |
-        echo "CORE_VERSION=$(python ./ci_scripts/get_core_version.py ${{ github.ref }})" >> $GITHUB_ENV
-        echo "BUILDREF_SCATTERPLOT=$(python ./ci_scripts/get_plugin_ref.py hdps Scatterplot ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_IMAGELOADERPLUGIN=$(python ./ci_scripts/get_plugin_ref.py hdps ImageLoaderPlugin ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_TSNEANALYSIS=$(python ./ci_scripts/get_plugin_ref.py hdps t-SNE-Analysis ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_IMAGEVIEWERPLUGIN=$(python ./ci_scripts/get_plugin_ref.py hdps ImageViewerPlugin ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_HDF5LOADER=$(python ./ci_scripts/get_plugin_ref.py hdps HDF5Loader ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_DIMENSIONSVIEWERPLUGIN=$(python ./ci_scripts/get_plugin_ref.py hdps DimensionsViewerPlugin ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_PARALLELCOORDINATESPLUGIN=$(python ./ci_scripts/get_plugin_ref.py hdps ParallelCoordinatesPlugin ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_CSVLOADER=$(python ./ci_scripts/get_plugin_ref.py hdps CsvLoader ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_FCSLOADER=$(python ./ci_scripts/get_plugin_ref.py hdps FcsLoader ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_BINIO=$(python ./ci_scripts/get_plugin_ref.py hdps BinIO ${{ env.CORE_VERSION }})"
-      working-directory: ./hdps
+        echo "CORE_VERSION=$(python get_core_version.py ${{ github.ref }})" >> $GITHUB_ENV
+        echo "BUILDREF_SCATTERPLOT=$(python get_plugin_ref.py hdps Scatterplot ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_IMAGELOADERPLUGIN=$(python get_plugin_ref.py hdps ImageLoaderPlugin ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_TSNEANALYSIS=$(python get_plugin_ref.py hdps t-SNE-Analysis ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_IMAGEVIEWERPLUGIN=$(python get_plugin_ref.py hdps ImageViewerPlugin ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_HDF5LOADER=$(python get_plugin_ref.py hdps HDF5Loader ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_DIMENSIONSVIEWERPLUGIN=$(python get_plugin_ref.py hdps DimensionsViewerPlugin ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_PARALLELCOORDINATESPLUGIN=$(python get_plugin_ref.py hdps ParallelCoordinatesPlugin ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_CSVLOADER=$(python get_plugin_ref.py hdps CsvLoader ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_FCSLOADER=$(python get_plugin_ref.py hdps FcsLoader ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_BINIO=$(python get_plugin_ref.py hdps BinIO ${{ env.CORE_VERSION }})"
+      working-directory: ./ci_scripts
 
     - name: Run Scatterplot
       uses: peter-evans/repository-dispatch@v1
