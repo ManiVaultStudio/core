@@ -59,7 +59,7 @@ jobs:
         ]}"
 
     outputs:
-        matrix: ${{ steps.set-matrix.outputs.matrix }}
+        matrix: ${{ fromJson(steps.set-matrix.outputs.matrix) }}
 
   build_all_plugins:
     name: Build all plugins
