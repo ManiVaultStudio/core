@@ -53,10 +53,10 @@ jobs:
     - name: Build plugin matrix
       id: set-matrix
       run: >
-        echo "::set-output name=matrix::{[
+        echo "::set-output name=matrix::\"{[
           [{repo: \"Scatterplot\"}, {ref: \"${{ env.BUILDREF_SCATTERPLOT }}\"}],
           [{repo: \"ImageLoaderPlugin\"}, {ref: \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}],
-        ]}"
+        ]}\""
 
     outputs:
         matrix: ${{ fromJson(steps.set-matrix.outputs.matrix) }}
