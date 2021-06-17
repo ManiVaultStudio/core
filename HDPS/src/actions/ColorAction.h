@@ -57,6 +57,14 @@ public:
     bool canReset() const;
     void reset();
 
+    ColorAction& operator= (const ColorAction& other)
+    {
+        _color          = other._color;
+        _defaultColor   = other._defaultColor;
+
+        return *this;
+    }
+
 signals:
     void colorChanged(const QColor& color);
     void defaultColorChanged(const QColor& defaultColor);

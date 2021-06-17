@@ -71,6 +71,17 @@ public:
 
     bool hasSelection() const;
 
+    OptionAction& operator= (const OptionAction& other)
+    {
+        _options        = other._options;
+        _model          = other._model;
+        _currentIndex   = other._currentIndex;
+        _defaultIndex   = other._defaultIndex;
+        _currentText    = other._currentText;
+
+        return *this;
+    }
+
 signals:
     void optionsChanged(const QStringList& options);
     void modelChanged(QAbstractListModel* listModel);

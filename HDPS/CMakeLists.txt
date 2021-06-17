@@ -209,13 +209,13 @@ set( PLUGIN_HEADERS
     src/PluginType.h
     src/SelectionListener.h
     src/Set.h
-	src/Application.h
+    src/Application.h
 )
 
 set( PLUGIN_SOURCES
     src/LoaderPlugin.cpp
-	src/Application.cpp
-	src/Plugin.cpp
+    src/Application.cpp
+    src/Plugin.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

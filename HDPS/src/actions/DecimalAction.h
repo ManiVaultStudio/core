@@ -76,6 +76,19 @@ public:
     bool getUpdateDuringDrag() const;
     void setUpdateDuringDrag(const bool& updateDuringDrag);
 
+    DecimalAction& operator= (const DecimalAction& other)
+    {
+        _value              = other._value;
+        _defaultValue       = other._defaultValue;
+        _minimum            = other._minimum;
+        _maximum            = other._maximum;
+        _suffix             = other._suffix;
+        _decimals           = other._decimals;
+        _updateDuringDrag   = other._updateDuringDrag;
+
+        return *this;
+    }
+
 signals:
     void valueChanged(const double& value);
     void defaultValueChanged(const double& defaultValue);
