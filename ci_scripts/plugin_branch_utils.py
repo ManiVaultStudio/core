@@ -55,6 +55,7 @@ def get_plugin_release_branch(org_name, repo_name, core_version, access_token):
         return None
     return highest_name
 
+
 def get_repo_main_name(org_name, repo_name, access_token):
     """Return the name "master" or "main" depending
     on what exists in the repo.
@@ -81,6 +82,7 @@ def get_repo_main_name(org_name, repo_name, access_token):
     if has_master:
         return "master"
     return None
+
 
 def get_core_release_version_from_ref(github_ref):
     branch_pattern = re.compile('refs/heads/(?P<branch>.*)')
