@@ -22,6 +22,8 @@ jobs:
     name: Configure plugin versions matrix
     runs-on: ubuntu-latest
     needs: build_core_first
+    outputs:
+        matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
     - uses: actions/checkout@v2
 
@@ -53,18 +55,15 @@ jobs:
     - name: Build plugin matrix
       id: set-matrix
       run: |
-        new_matrix="{[
+        new_matrix="[
           [{\"repo\": \"Scatterplot\"}, {\"ref\": \"${{ env.BUILDREF_SCATTERPLOT }}\"}],
-          [{\"repo\": \"ImageLoaderPlugin\"}, {\"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}],
-        ]}"
+          [{\"repo\": \"ImageLoaderPlugin\"}, {\"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}]
+        ]"
         new_matrix="${new_matrix//'%'/'%25'}"
         new_matrix="${new_matrix//$'\n'/'%0A'}"
         new_matrix="${new_matrix//$'\r'/'%0D'}"
         echo $new_matrix
         echo "::set-output name=matrix::$new_matrix"
-
-    outputs:
-        matrix: ${{ steps.set-matrix.outputs.matrix }}
 
   build_all_plugins:
     name: Build all plugins
