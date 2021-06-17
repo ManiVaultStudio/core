@@ -61,7 +61,7 @@ jobs:
         new_matrix="${new_matrix//$'\n'/'%0A'}"
         new_matrix="${new_matrix//$'\r'/'%0D'}"
         echo $new_matrix
-        echo "::set-output name=matrix::$new_matrix
+        echo "::set-output name=matrix::$new_matrix"
 
     outputs:
         matrix: ${{ fromJson(steps.set-matrix.outputs.matrix) }}
