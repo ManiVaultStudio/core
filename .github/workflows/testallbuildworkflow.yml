@@ -51,9 +51,13 @@ jobs:
       working-directory: ./ci_scripts
 
     - name: Run Scatterplot
-      uses: peter-evans/repository-dispatch@v1
+      uses: convictional/trigger-workflow-and-wait@v1.3.0
       with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: hdps/Scatterplot
-        event-type: test_event
-        client-payload: '{"ref": "${{ env.BUILDREF_SCATTERPLOT }}"}'
+        owner: hdps
+        repo: Scatterplot
+        ref: ${{ env.BUILDREF_SCATTERPLOT }}
+        github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        workflow_file_name: testworkflow.yml
+        propagate_failure: true
+        trigger_workflow: true
+        wait_workflow: false
