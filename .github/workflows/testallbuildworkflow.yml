@@ -38,16 +38,16 @@ jobs:
     - name: Get core and plugin versions
       run: |
         echo "CORE_VERSION=$(python3 get_core_version.py ${{ github.ref }})" >> $GITHUB_ENV
-        echo "BUILDREF_SCATTERPLOT=$(python3 get_plugin_ref.py hdps Scatterplot ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_IMAGELOADERPLUGIN=$(python3 get_plugin_ref.py hdps ImageLoaderPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_TSNEANALYSIS=$(python3 get_plugin_ref.py hdps t-SNE-Analysis ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_IMAGEVIEWERPLUGIN=$(python3 get_plugin_ref.py hdps ImageViewerPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_HDF5LOADER=$(python3 get_plugin_ref.py hdps HDF5Loader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_DIMENSIONSVIEWERPLUGIN=$(python3 get_plugin_ref.py hdps DimensionsViewerPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_PARALLELCOORDINATESPLUGIN=$(python3 get_plugin_ref.py hdps ParallelCoordinatesPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_CSVLOADER=$(python3 get_plugin_ref.py hdps CsvLoader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_FCSLOADER=$(python3 get_plugin_ref.py hdps FcsLoader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
-        echo "BUILDREF_BINIO=$(python3 get_plugin_ref.py hdps BinIO ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})"
+        echo "BUILDREF_SCATTERPLOT=$(python3 get_plugin_ref.py hdps Scatterplot ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_IMAGELOADERPLUGIN=$(python3 get_plugin_ref.py hdps ImageLoaderPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_TSNEANALYSIS=$(python3 get_plugin_ref.py hdps t-SNE-Analysis ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_IMAGEVIEWERPLUGIN=$(python3 get_plugin_ref.py hdps ImageViewerPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_HDF5LOADER=$(python3 get_plugin_ref.py hdps HDF5Loader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_DIMENSIONSVIEWERPLUGIN=$(python3 get_plugin_ref.py hdps DimensionsViewerPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_PARALLELCOORDINATESPLUGIN=$(python3 get_plugin_ref.py hdps ParallelCoordinatesPlugin ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_CSVLOADER=$(python3 get_plugin_ref.py hdps CsvLoader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_FCSLOADER=$(python3 get_plugin_ref.py hdps FcsLoader ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
+        echo "BUILDREF_BINIO=$(python3 get_plugin_ref.py hdps BinIO ${{ secrets.REPO_ACCESS_TOKEN }} ${{ env.CORE_VERSION }})" >> $GITHUB_ENV
       working-directory: ./ci_scripts
 
     - name: Run Scatterplot
