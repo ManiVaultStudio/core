@@ -98,7 +98,10 @@ public: // Properties
      */
     QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const
     {
-        return _rawData->getProperty(name, defaultValue);
+        if (!hasProperty(name))
+            return defaultValue;
+
+        return _properties[name];
     }
 
     /**
@@ -108,7 +111,7 @@ public: // Properties
     */
     void setProperty(const QString& name, const QVariant& value)
     {
-        _rawData->setProperty(name, value);
+        _properties[name] = value;
     }
 
     /**
@@ -118,13 +121,13 @@ public: // Properties
     */
     bool hasProperty(const QString& name) const
     {
-        return _rawData->hasProperty(name);
+        return _properties.contains(name);
     }
 
     /** Returns a list of available property names */
     QStringList propertyNames() const
     {
-        return _rawData->propertyNames();
+        return _properties.keys();
     }
 
 protected:
@@ -164,6 +167,8 @@ private:
 
     bool _derived = false;
     QString _sourceSetName;
+
+    QMap<QString, QVariant> _properties; /** Properties map */
 
     friend class Core;
     friend class DataManager;
