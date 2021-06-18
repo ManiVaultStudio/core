@@ -55,9 +55,9 @@ jobs:
     - name: Build plugin matrix
       id: set-matrix
       run: |
-        new_matrix="{\"include\": [
-          [{\"repo\": \"Scatterplot\"}, {\"ref\": \"${{ env.BUILDREF_SCATTERPLOT }}\"}],
-          [{\"repo\": \"ImageLoaderPlugin\"}, {\"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}]
+        new_matrix="{\\\"include\\\": [
+          [{\\\"repo\\\": \\\"Scatterplot\\\"}, {\\\"ref\\\": \\\"${{ env.BUILDREF_SCATTERPLOT }}\\\"}],
+          [{\\\"repo\\\": \\\"ImageLoaderPlugin\\\"}, {\\\"ref\\\": \\\"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\\\"}]
         ]}"
         new_matrix="${new_matrix//$'\n'/''}"
         new_matrix="${new_matrix//$'\r'/''}"
