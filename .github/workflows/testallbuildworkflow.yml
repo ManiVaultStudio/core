@@ -60,7 +60,7 @@ jobs:
           [{\"repo\": \"ImageLoaderPlugin\"}, {\"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}]
         ]}"
         echo $new_matrix
-        echo "::set-output name=matrix::$new_matrix"
+        echo "::set-output name=matrix::$(echo $new_matrix)"
 
   build_all_plugins:
     name: Build all plugins
@@ -72,6 +72,7 @@ jobs:
     steps:
     - name: Check matrix
       run: |
+        echo "Matrix: ${{ matrix }}"
         echo "Repo value: ${{ matrix.plugin.repo }}"
         echo "Ref value: ${{ matrix.plugin.ref }}"
 
