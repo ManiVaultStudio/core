@@ -59,11 +59,8 @@ jobs:
           [{\"repo\": \"Scatterplot\"}, {\"ref\": \"${{ env.BUILDREF_SCATTERPLOT }}\"}],
           [{\"repo\": \"ImageLoaderPlugin\"}, {\"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}]
         ]"
-        new_matrix="${new_matrix//'%'/'%25'}"
-        new_matrix="${new_matrix//$'\n'/'%0A'}"
-        new_matrix="${new_matrix//$'\r'/'%0D'}"
         echo $new_matrix
-        echo "::set-output name=matrix::$new_matrix"
+        echo ::set-output name=matrix::{\"include\":$(echo $new_matrix)}\"
 
   build_all_plugins:
     name: Build all plugins
