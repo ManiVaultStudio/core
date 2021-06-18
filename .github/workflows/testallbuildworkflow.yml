@@ -55,14 +55,14 @@ jobs:
     - name: Build plugin matrix
       id: set-matrix
       run: |
-        new_matrix="{\\\"include\\\": [
-          [{\\\"repo\\\": \\\"Scatterplot\\\"}, {\\\"ref\\\": \\\"${{ env.BUILDREF_SCATTERPLOT }}\\\"}],
-          [{\\\"repo\\\": \\\"ImageLoaderPlugin\\\"}, {\\\"ref\\\": \\\"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\\\"}]
+        new_matrix="{\"plugin\": [
+          [{\"repo\": \"Scatterplot\"}, {\"ref\": \"${{ env.BUILDREF_SCATTERPLOT }}\"}],
+          [{\"repo\": \"ImageLoaderPlugin\"}, {\"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}]
         ]}"
         new_matrix="${new_matrix//$'\n'/''}"
         new_matrix="${new_matrix//$'\r'/''}"
         echo "$new_matrix"
-        echo "::set-output name=matrix::$(echo $new_matrix)"
+        echo "::set-output name=matrix::$new_matrix"
         echo "Output set to ${{ steps.configure_plugin_matrix.outputs.matrix }}"
 
   build_all_plugins:
@@ -75,7 +75,7 @@ jobs:
     steps:
     - name: Check matrix
       run: |
-        echo "Matrix: ${{ matrix }}"
+        echo "Matrix: ${{ matrix.plugin }}"
         echo "Repo value: ${{ matrix.repo }}"
         echo "Ref value: ${{ matrix.ref }}"
 
