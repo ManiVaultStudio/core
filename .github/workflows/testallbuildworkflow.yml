@@ -70,6 +70,11 @@ jobs:
       matrix: ${{ fromJson(needs.configure_plugin_matrix.outputs.matrix) }}
 
     steps:
+    - name: Check matrix
+      run: |
+        echo "Repo value: ${{ matrix.plugin.repo }}"
+        echo "Ref value: ${{ matrix.plugin.ref }}"
+
     - name: Run plugin builds
       uses: convictional/trigger-workflow-and-wait@v1.3.0
       with:
