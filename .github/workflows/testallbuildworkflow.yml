@@ -56,8 +56,8 @@ jobs:
       id: set-matrix
       run: |
         new_matrix="{\"include\": [
-          {\"plugin\": [{\"repo\": \"Scatterplot\"}, {\"ref\": \"${{ env.BUILDREF_SCATTERPLOT }}\"}]},
-          {\"plugin\": [{\"repo\": \"ImageLoaderPlugin\"}, {\"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}]}
+          {\"plugin\": \"Scatterplot\", \"ref\": \"${{ env.BUILDREF_SCATTERPLOT }}\"},
+          {\"plugin\": \"ImageLoaderPlugin\", \"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}
         ]}"
         new_matrix="${new_matrix//$'\n'/''}"
         new_matrix="${new_matrix//$'\r'/''}"
@@ -75,15 +75,14 @@ jobs:
     steps:
     - name: Check matrix
       run: |
-        echo "Matrix: ${{ matrix.plugin }}"
-        echo "Repo value: ${{ matrix.plugin.repo }}"
-        echo "Ref value: ${{ matrix.plugin.ref }}"
+        echo "Repo value: ${{ matrix.plugin }}"
+        echo "Ref value: ${{ matrix.ref }}"
 
     - name: Run plugin builds
       uses: convictional/trigger-workflow-and-wait@v1.3.0
       with:
         owner: hdps
-        repo: ${{ matrix.repo }}
+        repo: ${{ matrix.plugin }}
         ref: ${{ matrix.ref }}
         github_token: ${{ secrets.REPO_ACCESS_TOKEN }}
         workflow_file_name: testworkflow.yml
