@@ -1,6 +1,6 @@
 # This workflow does not contain any actual build steps 
 # it dispatches other workflows to perform the actual work.
-name: TestBuildCoreAndPlugins
+name: BuildCoreAndPlugins
 on: workflow_dispatch  # Trigger this manually or possibly with a chrono
 jobs:
   build_core_first:
@@ -57,7 +57,15 @@ jobs:
       run: |
         new_matrix="{\"include\": [
           {\"plugin\": \"Scatterplot\", \"ref\": \"${{ env.BUILDREF_SCATTERPLOT }}\"},
-          {\"plugin\": \"ImageLoaderPlugin\", \"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"}
+          {\"plugin\": \"ImageLoaderPlugin\", \"ref\": \"${{ env.BUILDREF_IMAGELOADERPLUGIN }}\"},
+          {\"plugin\": \"t-SNE-Analysis\", \"ref\": \"${{ env.BUILDREF_TSNEANALYSIS }}\"},
+          {\"plugin\": \"ImageViewerPlugin\", \"ref\": \"${{ env.BUILDREF_IMAGEVIEWERPLUGIN }}\"},
+          {\"plugin\": \"HDF5Loader\", \"ref\": \"${{ env.BUILDREF_HDF5LOADER }}\"},
+          {\"plugin\": \"DimensionsViewerPlugin\", \"ref\": \"${{ env.BUILDREF_DIMENSIONSVIEWERPLUGIN }}\"},
+          {\"plugin\": \"ParallelCoordinatesPlugin\", \"ref\": \"${{ env.BUILDREF_PARALLELCOORDINATESPLUGIN }}\"},
+          {\"plugin\": \"CsvLoader\", \"ref\": \"${{ env.BUILDREF_CSVLOADER }}\"},
+          {\"plugin\": \"FcsLoader\", \"ref\": \"${{ env.BUILDREF_FCSLOADER }}\"},
+          {\"plugin\": \"BinIO\", \"ref\": \"${{ env.BUILDREF_BINIO }}\"}
         ]}"
         new_matrix="${new_matrix//$'\n'/''}"
         new_matrix="${new_matrix//$'\r'/''}"
