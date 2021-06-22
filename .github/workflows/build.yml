@@ -25,15 +25,15 @@ jobs:
           build-runtime: MD
           build-config: Release
 
-        - name: Linux_gcc9
-          os: ubuntu-18.04
-          build-cc: gcc
-          build-cxx: g++
-          build-compiler: gcc
-          build-cversion: 9
-          build-config: Release
-          build-os: Linux
-          build-libcxx: libstdc++
+#        - name: Linux_gcc9
+#          os: ubuntu-18.04
+#          build-cc: gcc
+#          build-cxx: g++
+#          build-compiler: gcc
+#          build-cversion: 9
+#          build-config: Release
+#          build-os: Linux
+#          build-libcxx: libstdc++
 
         - name: Macos_xcode10.3
           os: macos-10.14
