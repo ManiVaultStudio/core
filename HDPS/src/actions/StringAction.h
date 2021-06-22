@@ -59,6 +59,8 @@ public:
 
     StringAction& operator= (const StringAction& other)
     {
+        WidgetAction::operator=(other);
+
         _string         = other._string;
         _defaultString  = other._defaultString;
 

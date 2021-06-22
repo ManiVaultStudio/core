@@ -2,6 +2,7 @@
 
 #include "ColorAction.h"
 #include "DecimalAction.h"
+#include "IntegralAction.h"
 #include "OptionAction.h"
 #include "TriggerAction.h"
 #include "ToggleAction.h"

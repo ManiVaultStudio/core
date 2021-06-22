@@ -73,6 +73,8 @@ public:
 
     OptionAction& operator= (const OptionAction& other)
     {
+        WidgetAction::operator=(other);
+
         _options        = other._options;
         _model          = other._model;
         _currentIndex   = other._currentIndex;
