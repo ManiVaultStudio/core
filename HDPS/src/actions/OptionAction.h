@@ -79,7 +79,6 @@ public:
         _model          = other._model;
         _currentIndex   = other._currentIndex;
         _defaultIndex   = other._defaultIndex;
-        _currentText    = other._currentText;
 
         return *this;
     }
@@ -96,7 +95,6 @@ protected:
     QAbstractListModel*     _model;
     std::int32_t            _currentIndex;
     std::int32_t            _defaultIndex;
-    QString                 _currentText;
 };
 
 }
