@@ -59,10 +59,10 @@ public:
     bool canReset() const;
     void reset();
 
-    float getMinimum() const;
+    double getMinimum() const;
     void setMinimum(const double& minimum);
 
-    float getMaximum() const;
+    double getMaximum() const;
     void setMaximum(const double& maximum);
 
     void setRange(const double& min, const double& max);
@@ -78,6 +78,8 @@ public:
 
     DecimalAction& operator= (const DecimalAction& other)
     {
+        WidgetAction::operator=(other);
+
         _value              = other._value;
         _defaultValue       = other._defaultValue;
         _minimum            = other._minimum;

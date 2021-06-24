@@ -118,6 +118,7 @@ set( WIDGET_SOURCES
 set(ACTIONS_HEADERS
     src/actions/ColorAction.h
     src/actions/DecimalAction.h
+    src/actions/IntegralAction.h
     src/actions/OptionAction.h
     src/actions/TriggerAction.h
     src/actions/ToggleAction.h
@@ -129,6 +130,7 @@ set(ACTIONS_HEADERS
 set(ACTIONS_SOURCES
     src/actions/ColorAction.cpp
     src/actions/DecimalAction.cpp
+    src/actions/IntegralAction.cpp
     src/actions/OptionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/ToggleAction.cpp

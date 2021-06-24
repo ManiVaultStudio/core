@@ -15,8 +15,7 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/) :
     _options(),
     _model(nullptr),
     _currentIndex(-1),
-    _defaultIndex(0),
-    _currentText()
+    _defaultIndex(0)
 {
     setText(title);
 }
@@ -40,11 +39,8 @@ void OptionAction::setOptions(const QStringList& options)
 
     emit optionsChanged(_options);
 
-    _currentIndex   = 0;
-    _currentText    = _options[_currentIndex];
-
-    emit currentIndexChanged(_currentIndex);
-    emit currentTextChanged(_currentText);
+    if (_currentIndex >= options.count())
+        setCurrentIndex(0);
 }
 
 QAbstractListModel* OptionAction::getModel()
@@ -80,15 +76,10 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     if (!hasModel() && currentIndex >= static_cast<std::int32_t>(_options.count()))
         return;
 
-    _currentIndex   = currentIndex;
+    _currentIndex = currentIndex;
     
-    if (hasModel())
-        _currentText = _model->data(_model->index(_currentIndex, 0), Qt::DisplayRole).toString();
-    else
-        _currentText = _options[_currentIndex];
-
     emit currentIndexChanged(_currentIndex);
-    emit currentTextChanged(_currentText);
+    emit currentTextChanged(getCurrentText());
 }
 
 std::int32_t OptionAction::getDefaultIndex() const
@@ -123,29 +114,33 @@ void OptionAction::clearOptions()
 
 QString OptionAction::getCurrentText() const
 {
-    return _currentText;
+    if (_currentIndex < 0)
+        return "";
+
+    if (hasModel())
+        return _model->data(_model->index(_currentIndex, 0), Qt::DisplayRole).toString();
+    else
+        return _options[_currentIndex];
 }
 
 void OptionAction::setCurrentText(const QString& currentText)
 {
-    if (currentText == _currentText)
-        return;
-
     if (!_options.contains(currentText))
         return;
 
-    _currentText = currentText;
-    
     if (hasModel()) {
         const auto matches = _model->match(_model->index(0), Qt::DisplayRole, currentText, Qt::MatchFlag::MatchExactly);
 
         if (!matches.isEmpty())
             _currentIndex = matches.first().row();
     } else {
-        _currentIndex = _options.indexOf(_currentText);
+        if (_options.contains(currentText))
+            _currentIndex = _options.indexOf(currentText);
+        else
+            _currentIndex = 0;
     }
 
-    emit currentTextChanged(_currentText);
+    emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
 }
 

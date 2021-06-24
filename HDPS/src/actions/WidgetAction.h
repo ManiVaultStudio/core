@@ -91,6 +91,17 @@ public:
         return new CollapsedWidget(parent, this);
 
     }
+
+    WidgetAction& operator= (const WidgetAction& other)
+    {
+        setText(other.text());
+        setToolTip(other.toolTip());
+        setCheckable(other.isCheckable());
+        setChecked(other.isChecked());
+
+        return *this;
+    }
+
 protected:
     virtual QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) = 0;
 };

@@ -59,6 +59,8 @@ public:
 
     ColorAction& operator= (const ColorAction& other)
     {
+        WidgetAction::operator=(other);
+
         _color          = other._color;
         _defaultColor   = other._defaultColor;
 

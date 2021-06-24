@@ -31,8 +31,7 @@ ToggleAction::Widget::Widget(QWidget* parent, ToggleAction* checkAction, const M
             _layout->addWidget(_checkBox);
 
             connect(_checkBox, &QCheckBox::toggled, this, [this, checkAction](bool toggled) {
-                if (checkAction->isCheckable())
-                    checkAction->setChecked(toggled);
+                checkAction->setChecked(toggled);
             });
 
             const auto update = [this, checkAction]() -> void {
