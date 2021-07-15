@@ -67,6 +67,8 @@ public:
         return *this;
     }
 
+    QWidget* createWidget(QWidget* parent, const bool& resettable = false);
+
 signals:
     void colorChanged(const QColor& color);
     void defaultColorChanged(const QColor& defaultColor);
