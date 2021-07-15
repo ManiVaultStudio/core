@@ -62,6 +62,15 @@ void ColorAction::reset()
     setColor(_defaultColor);
 }
 
+QWidget* ColorAction::createWidget(QWidget* parent, const bool& resettable /*= false*/)
+{
+    auto widget = dynamic_cast<Widget*>(WidgetAction::createWidget(parent));
+
+    widget->getResetPushButton()->setVisible(resettable);
+
+    return widget;
+}
+
 ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction) :
     WidgetAction::Widget(parent, colorAction, Widget::State::Standard),
     _layout(new QHBoxLayout()),
