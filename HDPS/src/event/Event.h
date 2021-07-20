@@ -13,7 +13,9 @@ namespace hdps
         DataChanged,
         DataRemoved,
         SelectionChanged,
-        DataRenamed
+        DataRenamed,
+        PluginAdded,
+        PluginRemoved
     };
 
     class HdpsEvent
@@ -78,6 +80,42 @@ namespace hdps
         DataRenamedEvent() : DataEvent(EventType::DataRenamed) {}
 
         QString oldName;
+    };
+
+    namespace plugin {
+        class Plugin;
+    }
+
+    class PluginEvent : public HdpsEvent
+    {
+    public:
+        PluginEvent(EventType type) :
+            HdpsEvent(type),
+            _plugin(nullptr)
+        {
+        }
+
+        plugin::Plugin* _plugin;
+    };
+
+    class PluginAddedEvent : public PluginEvent
+    {
+    public:
+        PluginAddedEvent() :
+            PluginEvent(EventType::PluginAdded)
+        {
+        }
+
+        QString     _inputDataset;  
+    };
+
+    class PluginRemovedEvent : public PluginEvent
+    {
+    public:
+        PluginRemovedEvent() :
+            PluginEvent(EventType::PluginRemoved)
+        {
+        }
     };
 }
 

@@ -106,6 +106,13 @@ void Core::addPlugin(plugin::Plugin* plugin)
     {
         dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
     }
+
+    PluginAddedEvent pluginAddedEvent;
+
+    pluginAddedEvent._plugin = plugin;
+
+    for (EventListener* listener : _eventListeners)
+        listener->onPluginEvent(&pluginAddedEvent);
 }
 
 const QString Core::addData(const QString kind, const QString nameRequest)

@@ -5,7 +5,7 @@
 #include "PluginType.h"
 #include "Application.h"
 #include "event/EventListener.h"
-#include "actions/WidgetAction.h"
+#include "actions/SharedActions.h"
 
 #include <QString>
 #include <QMap>
@@ -19,11 +19,8 @@ namespace hdps
 namespace plugin
 {
 
-class Plugin : public hdps::EventListener
+class Plugin : public EventListener, public gui::SharedActions
 {
-public:
-    using QActionList = QList<gui::WidgetAction*>;
-
 public:
     Plugin(Type type, QString kind);
 
@@ -146,25 +143,6 @@ public: // Settings
      */
     void setSetting(const QString& path, const QVariant& value);
 
-public: // Actions API
-
-    /**
-     * Add widget action to the plugin (expose it)
-     * The plugin does not take ownership of the allocated widget action
-     * @param widgetAction Widget action to add
-     */
-    void addActionWidget(gui::WidgetAction* widgetAction);
-
-    /**
-     * Removes an action widget from the plugin
-     * This does not de-allocate the widget action memory
-     * @param widgetAction Widget action to remove
-     */
-    void removeActionWidget(gui::WidgetAction* widgetAction);
-
-    /** Returns the list of exposed action widgets */
-    const QActionList& getActionWidgets() const;
-
 protected:
     CoreInterface* _core;
 
@@ -174,7 +152,6 @@ private:
     const QString               _kind;              /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
     const Type                  _type;              /** Type of plugin (e.g. analysis, data, loader, writer & view) */
     QMap<QString, QVariant>     _properties;        /** Properties map */
-    QActionList                 _widgetActions;     /** Exposed widget actions */
 
     /** Keeps track of how many instance have been created per plugin kind */
     static QMap<QString, std::int32_t> _noInstances;

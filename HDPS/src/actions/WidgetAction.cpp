@@ -46,6 +46,11 @@ WidgetAction::WidgetAction(QObject* parent) :
 {
 }
 
+QWidget* WidgetAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
+{
+    return new QWidget();
+}
+
 WidgetAction::CollapsedWidget::CollapsedWidget(QWidget* parent, WidgetAction* widgetAction) :
     Widget(parent, widgetAction, Widget::State::Collapsed),
     _layout(),

@@ -62,12 +62,16 @@ set( CORE_HEADERS
     src/Logger.h
     src/LogItemModel.h
     src/LogDockWidget.h
-    src/DataHierarchyModel.h
-    src/DataHierarchy.h
+    src/PluginHierarchyItem.h
+    src/PluginHierarchyModel.h
+    src/PluginHierarchyWidget.h
     src/MainWindow.h
     src/PluginManager.h
     src/Core.h
     src/DataManager.h
+	src/DataImportAction.h
+	src/DataExportAction.h
+	src/DataAnalysisAction.h
     src/exceptions/SetNotFoundException.h
 )
 
@@ -75,12 +79,16 @@ set( CORE_SOURCES
     src/Logger.cpp
     src/LogItemModel.cpp
     src/LogDockWidget.cpp
-    src/DataHierarchyModel.cpp
-    src/DataHierarchy.cpp
+    src/PluginHierarchyItem.cpp
+    src/PluginHierarchyModel.cpp
+    src/PluginHierarchyWidget.cpp
     src/MainWindow.cpp
     src/PluginManager.cpp
     src/Core.cpp
     src/DataManager.cpp
+	src/DataImportAction.cpp
+	src/DataExportAction.cpp
+	src/DataAnalysisAction.cpp
 )
 
 set( EVENT_HEADERS
@@ -124,6 +132,7 @@ set(ACTIONS_HEADERS
     src/actions/ToggleAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
+    src/actions/SharedActions.h
     src/actions/Actions.h
 )
 
@@ -136,6 +145,7 @@ set(ACTIONS_SOURCES
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
+    src/actions/SharedActions.cpp
 )
 
 set( RENDERER_HEADERS

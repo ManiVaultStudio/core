@@ -13,6 +13,7 @@
 #include <queue>
 
 #include "graphics/Vector2f.h"
+#include "Application.h"
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
@@ -23,6 +24,11 @@ Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 PointData::~PointData(void)
 {
     
+}
+
+QIcon PointData::getIcon() const
+{
+    return hdps::Application::getIconFont("FontAwesome").getIcon("circle");
 }
 
 void PointData::init()

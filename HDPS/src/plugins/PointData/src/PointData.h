@@ -308,6 +308,9 @@ public:
     PointData() : RawData("Points", PointType) { }
     ~PointData(void) override;
 
+    /** Returns the icon of this plugin */
+    QIcon getIcon() const override;
+
     void init() override;
 
     hdps::DataSet* createDataSet() const override;

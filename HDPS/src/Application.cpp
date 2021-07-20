@@ -10,6 +10,7 @@ namespace hdps {
 
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
+    _iconFonts(),
     _settings()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));

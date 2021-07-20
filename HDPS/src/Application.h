@@ -1,9 +1,9 @@
 #pragma once
 
+#include "util/IconFonts.h"
+
 #include <QApplication>
 #include <QSettings>
-
-#include "util/IconFonts.h"
 
 namespace hdps {
 
@@ -59,8 +59,8 @@ public: // Settings API
     void setSetting(const QString& path, const QVariant& value);
 
 protected:
-    IconFonts       _iconFonts;     /** Icon fonts resource */
-    QSettings       _settings;
+    IconFonts       _iconFonts;         /** Icon fonts resource */
+    QSettings       _settings;          /** Settings */
 };
 
 }

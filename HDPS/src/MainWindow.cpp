@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
     _core(nullptr),
     _analysisPluginsAccordion(QSharedPointer<Accordion>::create()),
-    _dataHierarchy(nullptr),
+    _pluginHierarchyWidget(nullptr),
     _dockManager(new CDockManager(this)),
     _analysisPluginsDockArea(nullptr),
     _centralDockArea(nullptr),
@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _core = QSharedPointer<Core>::create(*this);
     _core->init();
 
-    _dataHierarchy = QSharedPointer<DataHierarchy>::create(_core->getDataManager());
+    _pluginHierarchyWidget = QSharedPointer<PluginHierarchyWidget>::create(_core.get());
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -82,8 +82,6 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
             _loggingDockArea->hide();
         }
     });
-
-    connect(&_core->getDataManager(), &DataManager::dataChanged, _dataHierarchy.get(), &DataHierarchy::updateDataModel);
 
     initializeDocking();
     restoreWindowGeometryFromSettings();
@@ -360,7 +358,7 @@ void MainWindow::initializeSettingsDockingArea()
     _settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
     _settingsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
 
-    _settingsDockWidget->setWidget(_dataHierarchy.get());
+    _settingsDockWidget->setWidget(_pluginHierarchyWidget.get());
 
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _settingsDockWidget);
 

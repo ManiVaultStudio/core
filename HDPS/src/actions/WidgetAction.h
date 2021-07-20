@@ -4,7 +4,7 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QToolButton>
-#include <QDebug>
+#include <QMenu>
 
 namespace hdps {
 
@@ -102,8 +102,12 @@ public:
         return *this;
     }
 
+    virtual QMenu* getContextMenu() {
+        return new QMenu();
+    };
+
 protected:
-    virtual QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) = 0;
+    virtual QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard);
 };
 
 }

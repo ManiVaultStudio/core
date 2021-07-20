@@ -3,7 +3,7 @@
 #include "ui_MainWindow.h"
 #include "Core.h"
 #include "LogDockWidget.h"
-#include "DataHierarchy.h"
+#include "PluginHierarchyWidget.h"
 #include "widgets/Accordion.h"
 
 #include <QMainWindow>
@@ -33,7 +33,7 @@ namespace gui
 {
 
 class LogDockWidget;
-class DataHierarchy;
+class PluginHierarchyWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -139,9 +139,9 @@ private: // Docking
     QList<ads::CDockWidget*> getViewPluginDockWidgets(const bool& openOnly = true);
 
 private:
-    QSharedPointer<Core>            _core;                          /** HDPS core */
-    QSharedPointer<Accordion>       _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
-    QSharedPointer<DataHierarchy>   _dataHierarchy;                 /** Data hierarchy viewer widget */
+    QSharedPointer<Core>                    _core;                          /** HDPS core */
+    QSharedPointer<Accordion>               _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
+    QSharedPointer<PluginHierarchyWidget>   _pluginHierarchyWidget;         /** Data hierarchy tree widget */
 
 private: // Docking
     ads::CDockManager*      _dockManager;                   /** Manager for docking */

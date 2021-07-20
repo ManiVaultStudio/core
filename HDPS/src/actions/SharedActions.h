@@ -1,0 +1,51 @@
+#ifndef HDPS_SHARED_ACTIONS_H
+#define HDPS_SHARED_ACTIONS_H
+
+#include "actions/WidgetAction.h"
+
+namespace hdps {
+
+namespace gui {
+
+/**
+ * Shared action mixin class
+ *
+ * @author Thomas Kroes
+ */
+class SharedActions
+{
+public:
+
+    /** List of widget actions */
+    using WidgetActionList = QList<gui::WidgetAction*>;
+
+public:
+
+    /**
+     * Exposes a widget action
+     * This class does not alter the ownership of the allocated widget action
+     * @param widgetAction Widget action to expose
+     */
+    void exposeAction(gui::WidgetAction* widgetAction);
+
+    /**
+     * Conceals an action widget
+     * This does not de-allocate the widget action memory
+     * @param widgetAction Widget action to remove
+     */
+    void concealAction(gui::WidgetAction* widgetAction);
+
+    /** Returns list of shared action widgets*/
+    const WidgetActionList& getExposedActions() const;
+
+    /** Returns context menu for the exposed actions */
+    QMenu* getContextMenu();
+
+protected:
+    WidgetActionList    _actions;     /** Exposed widget actions */
+};
+
+}
+}
+
+#endif // HDPS_SHARED_ACTIONS_H
