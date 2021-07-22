@@ -1,8 +1,7 @@
-#include "PluginHierarchyModel.h"
-#include "PluginHierarchyItem.h"
+#include "DataHierarchyModel.h"
+#include "DataHierarchyItem.h"
 #include "Plugin.h"
-#include "DataExportAction.h"
-#include "DataAnalysisAction.h"
+#include "Core.h"
 
 #include <QDebug>
 
@@ -13,51 +12,40 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
     QAbstractItemModel(parent),
     EventListener(),
     _core(core),
-    _rootItem(new PluginHierarchyItem())
+    _rootItem(new DataHierarchyItem())
 {
     setEventCore(reinterpret_cast<CoreInterface*>(_core));
 
-    registerPluginEvent([this](hdps::PluginEvent* pluginEvent) {
-        if (pluginEvent->getType() == EventType::PluginAdded) {
-
-            switch (pluginEvent->_plugin->getType())
+    registerDataEvent([this](hdps::DataEvent* dataEvent) {
+        switch (dataEvent->getType())
+        {
+            case EventType::DataAdded:
             {
-                case plugin::Type::ANALYSIS:
+                DataSet& dataset = _core->requestData(dataEvent->dataSetName);
+
+                QModelIndex parentModelIndex;
+
+                if (dataset.getParentDatasetName().isEmpty())
+                    parentModelIndex = QModelIndex();
+                else
+                    parentModelIndex = match(index(0, 0), Qt::DisplayRole, dataset.getParentDatasetName(), 1, Qt::MatchFlag::MatchRecursive).first();
+                
+                auto dataItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
+
+                beginInsertRows(parentModelIndex, dataItem->getNumChildren(), dataItem->getNumChildren() + 1);
                 {
-                    //pluginEvent->_plugin->exposeAction(new DataAction(this));
-                    break;
+                    qDebug() << dataEvent->dataSetName;
+                    dataItem->addChild(new DataHierarchyItem(dataEvent->dataSetName));
                 }
+                endInsertRows();
 
-                case plugin::Type::DATA:
-                {
-                    beginInsertRows(QModelIndex(), _rootItem->childCount(), _rootItem->childCount() + 1);
-                    {
-                        pluginEvent->_plugin->exposeAction(new DataExportAction(this));
-                        pluginEvent->_plugin->exposeAction(new DataAnalysisAction(this));
-
-                        _rootItem->addChild(new PluginHierarchyItem(pluginEvent->_plugin));
-                    }
-                    endInsertRows();
-
-                    break;
-                }
-
-                case plugin::Type::WRITER:
-                {
-                    break;
-                }
+                break;
             }
 
-            
-            //insertRow(1);
+            default:
+                break;
         }
     });
-
-    /*
-    registerDataEvent(
-        pluginEvent->_plugin->exposeAction(new gui::TriggerAction(this, "Mean-shift"));
-    );
-    */
 }
 
 PluginHierarchyModel::~PluginHierarchyModel()
@@ -70,7 +58,7 @@ QVariant PluginHierarchyModel::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    auto item = static_cast<PluginHierarchyItem*>(index.internalPointer());
+    auto item = static_cast<DataHierarchyItem*>(index.internalPointer());
 
     if (role == Qt::DecorationRole)
         return item->getIcon();
@@ -89,14 +77,14 @@ QModelIndex PluginHierarchyModel::index(int row, int column, const QModelIndex& 
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    PluginHierarchyItem* parentItem;
+    DataHierarchyItem* parentItem;
 
     if (!parent.isValid())
         parentItem = _rootItem;
     else
-        parentItem = static_cast<PluginHierarchyItem*>(parent.internalPointer());
+        parentItem = static_cast<DataHierarchyItem*>(parent.internalPointer());
 
-    PluginHierarchyItem* childItem = parentItem->getChild(row);
+    DataHierarchyItem* childItem = parentItem->getChild(row);
 
     if (childItem)
         return createIndex(row, column, childItem);
@@ -108,8 +96,8 @@ QModelIndex PluginHierarchyModel::parent(const QModelIndex& index) const
     if (!index.isValid())
         return QModelIndex();
 
-    PluginHierarchyItem* childItem = static_cast<PluginHierarchyItem*>(index.internalPointer());
-    PluginHierarchyItem* parentItem = childItem->getParent();
+    auto childItem  = static_cast<DataHierarchyItem*>(index.internalPointer());
+    auto parentItem = childItem->getParent();
 
     if (parentItem == nullptr || parentItem == _rootItem)
         return QModelIndex();
@@ -119,7 +107,7 @@ QModelIndex PluginHierarchyModel::parent(const QModelIndex& index) const
 
 int PluginHierarchyModel::rowCount(const QModelIndex& parent) const
 {
-    PluginHierarchyItem* parentItem;
+    DataHierarchyItem* parentItem;
 
     if (parent.column() > 0)
         return 0;
@@ -127,16 +115,17 @@ int PluginHierarchyModel::rowCount(const QModelIndex& parent) const
     if (!parent.isValid())
         parentItem = _rootItem;
     else
-        parentItem = static_cast<PluginHierarchyItem*>(parent.internalPointer());
+        parentItem = static_cast<DataHierarchyItem*>(parent.internalPointer());
 
-    return parentItem->childCount();
+    return parentItem->getNumChildren();
 }
 
 int PluginHierarchyModel::columnCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
-        return static_cast<PluginHierarchyItem*>(parent.internalPointer())->columnCount();
-    return _rootItem->columnCount();
+        return static_cast<DataHierarchyItem*>(parent.internalPointer())->getNumColumns();
+
+    return _rootItem->getNumColumns();
 }
 
 Qt::DropActions PluginHierarchyModel::supportedDragActions() const
@@ -144,7 +133,7 @@ Qt::DropActions PluginHierarchyModel::supportedDragActions() const
     return Qt::CopyAction | Qt::MoveAction;
 }
 
-PluginHierarchyItem* PluginHierarchyModel::getItem(const QModelIndex& index, int role) const
+DataHierarchyItem* PluginHierarchyModel::getItem(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return nullptr;
@@ -152,7 +141,7 @@ PluginHierarchyItem* PluginHierarchyModel::getItem(const QModelIndex& index, int
     if (role != Qt::DisplayRole)
         return nullptr;
 
-    PluginHierarchyItem* item = static_cast<PluginHierarchyItem*>(index.internalPointer());
+    DataHierarchyItem* item = static_cast<DataHierarchyItem*>(index.internalPointer());
 
     return item;
 }
@@ -175,7 +164,7 @@ QVariant PluginHierarchyModel::headerData(int section, Qt::Orientation orientati
 
 QMimeData* PluginHierarchyModel::mimeData(const QModelIndexList &indexes) const
 {
-    QVector<PluginHierarchyItem*> items;
+    QVector<DataHierarchyItem*> items;
 
     foreach(const QModelIndex &index, indexes)
         items.push_back(getItem(index, Qt::DisplayRole));

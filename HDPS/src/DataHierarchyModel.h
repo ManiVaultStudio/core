@@ -1,19 +1,16 @@
-#ifndef HDPS_PluginHierarchyModel_H
-#define HDPS_PluginHierarchyModel_H
+#ifndef HDPS_HIERARCHY_MODEL_H
+#define HDPS_HIERARCHY_MODEL_H
 
 #include "event/EventListener.h"
 
 #include <QAbstractItemModel>
 #include <QMimeData>
 
-#include <QVector>
-#include <QIcon>
-
 namespace hdps
 {
 
 class Core;
-class PluginHierarchyItem;
+class DataHierarchyItem;
 
 /**
  * Underlying data model for a data hierarchy tree
@@ -58,7 +55,7 @@ public:
 
     Qt::DropActions supportedDragActions() const override;
 
-    PluginHierarchyItem* getItem(const QModelIndex& index, int role) const;
+    DataHierarchyItem* getItem(const QModelIndex& index, int role) const;
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
@@ -71,13 +68,13 @@ public:
     QMimeData* mimeData(const QModelIndexList &indexes) const override;
 
 private:
-    //void setupModelData(DataManager& dataManager, PluginHierarchyItem* parent);
+    //void setupModelData(DataManager& dataManager, HierarchyItem* parent);
 
 private:
-    Core*                   _core;          /** Pointer to core */
-    PluginHierarchyItem*    _rootItem;      /** Root node of the data hierarchy */
+    Core*               _core;          /** Pointer to core */
+    DataHierarchyItem*  _rootItem;      /** Root node of the data hierarchy */
 };
 
 }
 
-#endif // HDPS_PluginHierarchyModel_H
+#endif // HDPS_HIERARCHY_MODEL_H

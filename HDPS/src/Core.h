@@ -95,6 +95,20 @@ public:
     */
     virtual std::vector<QString> requestAllDataNames(const std::vector<DataType> dataTypes) override;
 
+    /**
+     * Exports a dataset
+     * @param exportKind Type of export plugin
+     * @param datasetName Name of the dataset to export
+     */
+    const void exportDataset(const QString exportKind, const QString& datasetName) override;
+
+    /**
+     * Analyzes a dataset
+     * @param analysisKind Type of analysis plugin
+     * @param datasetName Name of the dataset to analyze
+     */
+    const void analyzeDataset(const QString analysisKind, const QString& datasetName) override;
+
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString datasetName) override;
     /** Notify all data consumers that a dataset has been changed. */

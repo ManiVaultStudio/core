@@ -36,6 +36,13 @@ public:
     */
     QString createPlugin(const QString kind);
     
+    /**
+     * Create an analysis plugin
+     * @param analysisKind Kind of analysis
+     * @param inputDatasetName Name of the input dataset
+     */
+    void createAnalysisPlugin(const QString& kind, const QString& inputDatasetName);
+
 private:
     /**
     * Resolves plugin dependencies, returns list of resolved plugin filenames.

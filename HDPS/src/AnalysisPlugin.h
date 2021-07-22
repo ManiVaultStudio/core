@@ -9,6 +9,7 @@ class QWidget;
 
 namespace hdps
 {
+
 namespace plugin
 {
 
@@ -16,7 +17,8 @@ class AnalysisPlugin : public Plugin
 {
 public:
     AnalysisPlugin(QString name) :
-        Plugin(Type::ANALYSIS, name)
+        Plugin(Type::ANALYSIS, name),
+        _inputDatasetName()
     {
     }
 
@@ -33,6 +35,33 @@ public:
     }
 
     virtual gui::SettingsWidget* const getSettings() = 0;
+
+    void setInputDatasetName(const QString& inputDatasetName) {
+        Q_ASSERT(!inputDatasetName.isEmpty());
+
+        _inputDatasetName = inputDatasetName;
+    }
+
+    QString getOutputDatasetName() const {
+        return _outputDatasetName;
+    }
+
+protected:
+    void notifyStarted() {
+    }
+
+    void notifyProgressed(const float& progress) {
+    }
+
+    void notifyFinished() {
+    }
+
+    void notifyAborted() {
+    }
+
+protected:
+    QString   _inputDatasetName;        /** Name of the input dataset */
+    QString   _outputDatasetName;       /** Name of the output dataset */
 };
 
 

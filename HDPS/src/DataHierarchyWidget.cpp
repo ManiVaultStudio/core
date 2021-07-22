@@ -1,6 +1,6 @@
-#include "PluginHierarchyWidget.h"
-#include "PluginHierarchyModel.h"
-#include "PluginHierarchyItem.h"
+#include "DataHierarchyWidget.h"
+#include "DataHierarchyModel.h"
+#include "DataHierarchyItem.h"
 #include "Core.h"
 
 #include <QInputDialog>

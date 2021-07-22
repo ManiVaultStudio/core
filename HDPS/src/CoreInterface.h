@@ -11,6 +11,7 @@ namespace hdps
     class RawData;
     class DataType;
     class EventListener;
+    class HierarchyDataItem;
 
 class CoreInterface
 {
@@ -65,6 +66,20 @@ public:
     {
         return dynamic_cast<SetType&>(requestData(name));
     }
+
+    /**
+     * Exports a dataset
+     * @param exportKind Type of export plugin
+     * @param datasetName Name of the dataset to export
+     */
+    virtual const void exportDataset(const QString exportKind, const QString& datasetName) = 0;
+
+    /**
+     * Analyzes a dataset
+     * @param analysisKind Type of analysis plugin
+     * @param datasetName Name of the dataset to analyze
+     */
+    virtual const void analyzeDataset(const QString analysisKind, const QString& datasetName) = 0;
 
     /** Notify registered listeners that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString datasetName) = 0;

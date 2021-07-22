@@ -62,16 +62,10 @@ set( CORE_HEADERS
     src/Logger.h
     src/LogItemModel.h
     src/LogDockWidget.h
-    src/PluginHierarchyItem.h
-    src/PluginHierarchyModel.h
-    src/PluginHierarchyWidget.h
     src/MainWindow.h
     src/PluginManager.h
     src/Core.h
     src/DataManager.h
-	src/DataImportAction.h
-	src/DataExportAction.h
-	src/DataAnalysisAction.h
     src/exceptions/SetNotFoundException.h
 )
 
@@ -79,16 +73,10 @@ set( CORE_SOURCES
     src/Logger.cpp
     src/LogItemModel.cpp
     src/LogDockWidget.cpp
-    src/PluginHierarchyItem.cpp
-    src/PluginHierarchyModel.cpp
-    src/PluginHierarchyWidget.cpp
     src/MainWindow.cpp
     src/PluginManager.cpp
     src/Core.cpp
     src/DataManager.cpp
-	src/DataImportAction.cpp
-	src/DataExportAction.cpp
-	src/DataAnalysisAction.cpp
 )
 
 set( EVENT_HEADERS
@@ -230,13 +218,33 @@ set( PLUGIN_SOURCES
     src/Plugin.cpp
 )
 
+set(DATA_HIERARCHY_HEADERS
+    src/DataHierarchyItem.h
+    src/DataHierarchyModel.h
+    src/DataHierarchyWidget.h
+	src/DataImportAction.h
+	src/DataExportAction.h
+	src/DataAnalysisAction.h
+)
+
+set(DATA_HIERARCHY_SOURCES
+    src/DataHierarchyItem.cpp
+    src/DataHierarchyModel.cpp
+    src/DataHierarchyWidget.cpp
+	src/DataImportAction.cpp
+	src/DataExportAction.cpp
+	src/DataAnalysisAction.cpp
+)
+
 list(APPEND PRIVATE_HEADERS
     ${CORE_HEADERS}
+	${DATA_HIERARCHY_HEADERS}
 )
 
 list(APPEND PRIVATE_SOURCES
     ${CORE_SOURCES}
     ${PRIVATE_HEADERS}
+    ${DATA_HIERARCHY_SOURCES}
 )
 
 list(APPEND PUBLIC_HEADERS
@@ -276,12 +284,18 @@ list(APPEND ACTIONS_FILES
 
 list(APPEND RENDERER_FILES
     ${RENDERER_HEADERS}
+
     ${RENDERER_SOURCES}
 )
 
 list(APPEND UTIL_FILES
     ${UTIL_SOURCES}
     ${UTIL_HEADERS}
+)
+
+list(APPEND HIERARCHY_FILES
+    ${DATA_HIERARCHY_SOURCES}
+    ${DATA_HIERARCHY_HEADERS}
 )
 
 if(WIN32)

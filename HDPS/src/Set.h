@@ -2,8 +2,8 @@
 #define HDPS_DATASET_H
 
 #include "RawData.h"
-
 #include "CoreInterface.h"
+#include "actions/SharedActions.h"
 
 #include <QString>
 #include <QVector>
@@ -12,16 +12,17 @@
 namespace hdps
 {
 
-class DataSet
+class DataSet : public gui::SharedActions
 {
 public:
     DataSet(CoreInterface* core, QString dataName) :
+        gui::SharedActions(),
         _core(core),
         _dataName(dataName),
         _all(false),
-        _rawData(nullptr)
+        _rawData(nullptr),
+        _parentDatasetName()
     {
-        
     }
 
     virtual ~DataSet() {}
@@ -87,6 +88,10 @@ public:
     {
 
     }
+
+    /** Get/set parent dataset name */
+    QString getParentDatasetName() const { return _parentDatasetName; };
+    void setParentDatasetName(const QString& parentDatasetName) { _parentDatasetName = parentDatasetName; };
 
 public: // Properties
 
@@ -169,6 +174,8 @@ private:
     QString _sourceSetName;
 
     QMap<QString, QVariant> _properties; /** Properties map */
+
+    QString _parentDatasetName;
 
     friend class Core;
     friend class DataManager;

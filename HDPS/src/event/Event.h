@@ -14,8 +14,12 @@ namespace hdps
         DataRemoved,
         SelectionChanged,
         DataRenamed,
-        PluginAdded,
-        PluginRemoved
+        AnalysisAdded,
+        AnalysisRemoved,
+        AnalysisStarted,
+        AnalysisProgressed,
+        AnalysisFinished,
+        AnalysisAborted
     };
 
     class HdpsEvent
@@ -54,6 +58,8 @@ namespace hdps
     {
     public:
         DataAddedEvent() : DataEvent(EventType::DataAdded) {}
+
+        QString _parentDatasetName;
     };
 
     class DataChangedEvent : public DataEvent
@@ -83,40 +89,81 @@ namespace hdps
     };
 
     namespace plugin {
-        class Plugin;
+        class AnalysisPlugin;
     }
 
-    class PluginEvent : public HdpsEvent
+    class AnalysisEvent : public HdpsEvent
     {
     public:
-        PluginEvent(EventType type) :
+        AnalysisEvent(EventType type, plugin::AnalysisPlugin* analysisPlugin) :
             HdpsEvent(type),
-            _plugin(nullptr)
+            _analysisPlugin(analysisPlugin)
         {
         }
 
-        plugin::Plugin* _plugin;
+        plugin::AnalysisPlugin* _analysisPlugin;
     };
 
-    class PluginAddedEvent : public PluginEvent
+    class AnalysisAddedEvent : public AnalysisEvent
     {
     public:
-        PluginAddedEvent() :
-            PluginEvent(EventType::PluginAdded)
+        AnalysisAddedEvent(plugin::AnalysisPlugin* analysisPlugin) :
+            AnalysisEvent(EventType::AnalysisAdded, analysisPlugin)
         {
         }
-
-        QString     _inputDataset;  
     };
 
-    class PluginRemovedEvent : public PluginEvent
+    class AnalysisRemovedEvent : public AnalysisEvent
     {
     public:
-        PluginRemovedEvent() :
-            PluginEvent(EventType::PluginRemoved)
+        AnalysisRemovedEvent(plugin::AnalysisPlugin* analysisPlugin) :
+            AnalysisEvent(EventType::AnalysisRemoved, analysisPlugin)
         {
         }
     };
+
+    class AnalysisStartedEvent : public AnalysisEvent
+    {
+    public:
+        AnalysisStartedEvent(plugin::AnalysisPlugin* analysisPlugin) :
+            AnalysisEvent(EventType::AnalysisStarted, analysisPlugin)
+        {
+        }
+    };
+
+    class AnalysisProgressedEvent : public AnalysisEvent
+    {
+    public:
+        AnalysisProgressedEvent(plugin::AnalysisPlugin* analysisPlugin, const float& progress) :
+            AnalysisEvent(EventType::AnalysisProgressed, analysisPlugin),
+            _progress(progress)
+        {
+        }
+
+        float   _progress;      /** Normalized progress [0, 1] */
+    };
+
+    class AnalysisFinishedEvent : public AnalysisEvent
+    {
+    public:
+        AnalysisFinishedEvent(plugin::AnalysisPlugin* analysisPlugin) :
+            AnalysisEvent(EventType::AnalysisFinished, analysisPlugin)
+        {
+        }
+    };
+
+    class AnalysisAbortedEvent : public AnalysisEvent
+    {
+    public:
+        AnalysisAbortedEvent(plugin::AnalysisPlugin* analysisPlugin, const QString& reason) :
+            AnalysisEvent(EventType::AnalysisAborted, analysisPlugin),
+            _reason(reason)
+        {
+        }
+
+        QString _reason;    /** Reason for aborting the analysis */
+    };
+
 }
 
 #endif // HDPS_EVENT_H

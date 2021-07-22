@@ -37,9 +37,9 @@ void EventListener::registerDataEvent(DataEventHandler callback)
     _dataEventHandlers.push_back(callback);
 }
 
-void EventListener::registerPluginEvent(PluginEventHandler callback)
+void EventListener::registerAnalysisEvent(AnalysisEventHandler callback)
 {
-    _pluginEventHandlers.push_back(callback);
+    _analysisEventHandlers.push_back(callback);
 }
 
 void EventListener::onDataEvent(DataEvent* dataEvent)
@@ -84,10 +84,10 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
         dataEventHandler(dataEvent);
 }
 
-void EventListener::onPluginEvent(PluginEvent* pluginEvent)
+void EventListener::onAnalysisEvent(AnalysisEvent* analysisEvent)
 {
-    for (auto pluginEventHandler : _pluginEventHandlers)
-        pluginEventHandler(pluginEvent);
+    for (auto analysisEventHandler : _analysisEventHandlers)
+        analysisEventHandler(analysisEvent);
 }
 
 }

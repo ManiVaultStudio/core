@@ -12,7 +12,6 @@ QMap<QString, std::int32_t> hdps::plugin::Plugin::_noInstances = QMap<QString, s
 
 Plugin::Plugin(Type type, QString kind) :
     EventListener(),
-    gui::SharedActions(),
     _name(kind + QUuid::createUuid().toString()),
     _guiName(QString("%1 %2").arg(kind, QString::number(_noInstances[kind] + 1))),
     _kind(kind),

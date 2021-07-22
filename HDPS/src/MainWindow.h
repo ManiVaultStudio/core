@@ -3,7 +3,7 @@
 #include "ui_MainWindow.h"
 #include "Core.h"
 #include "LogDockWidget.h"
-#include "PluginHierarchyWidget.h"
+#include "DataHierarchyWidget.h"
 #include "widgets/Accordion.h"
 
 #include <QMainWindow>

@@ -11,6 +11,7 @@
 #include "ViewPlugin.h"
 #include "RawData.h"
 #include "Set.h"
+#include "DataHierarchyItem.h"
 
 #include <QMessageBox>
 #include <algorithm>
@@ -21,7 +22,7 @@ namespace hdps
 Core::Core(gui::MainWindow& mainWindow)
 : _mainWindow(mainWindow)
 {
-    
+    DataHierarchyItem::core = this;
 }
 
 Core::~Core()
@@ -78,14 +79,9 @@ void Core::addPlugin(plugin::Plugin* plugin)
     // If it is an analysis plugin with a settings widget, add the settings to the main window
     if (plugin->getType() == plugin::Type::ANALYSIS)
     {
-        plugin::AnalysisPlugin* analysis = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
-        if (analysis->hasSettings())
-        {
-            _mainWindow.addPlugin(analysis);
-        }
-        // Notify of datasets in system
-        for (auto& set : _dataManager->allSets())
-            notifyDataAdded(set.first);
+        auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
+
+        notifyDataAdded(analysisPlugin->getOutputDatasetName());
     }
     // If it is a loader plugin it should call loadData
     if (plugin->getType() == plugin::Type::LOADER)
@@ -106,13 +102,6 @@ void Core::addPlugin(plugin::Plugin* plugin)
     {
         dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
     }
-
-    PluginAddedEvent pluginAddedEvent;
-
-    pluginAddedEvent._plugin = plugin;
-
-    for (EventListener* listener : _eventListeners)
-        listener->onPluginEvent(&pluginAddedEvent);
 }
 
 const QString Core::addData(const QString kind, const QString nameRequest)
@@ -239,6 +228,16 @@ std::vector<QString> Core::requestAllDataNames(const std::vector<DataType> dataT
         }
     }
     return datasetNames;
+}
+
+const void Core::exportDataset(const QString exportKind, const QString& datasetName)
+{
+    qDebug() << datasetName << exportKind;
+}
+
+const void Core::analyzeDataset(const QString analysisKind, const QString& datasetName)
+{
+    _pluginManager->createAnalysisPlugin(analysisKind, datasetName);
 }
 
 DataSet& Core::requestSelection(const QString name)
