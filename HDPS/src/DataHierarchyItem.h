@@ -17,6 +17,16 @@ class DataHierarchyItem : public QObject
 public:
     using PluginHierarchyItems = QVector<DataHierarchyItem*>;
 
+    /** Columns */
+    enum class Column {
+        Name,
+        Progress,
+        Analyzing,
+
+        _start = Name,
+        _end = Analyzing
+    };
+
 public:
     /**
      * Constructor
@@ -64,8 +74,12 @@ public:
      */
     QString getDataAtColumn(const std::uint32_t& column) const;
 
-    /** Returns the item icon */
-    QIcon getIcon();
+    /**
+     * Get icon at column
+     * @param column Column index
+     * @return Icon
+     */
+    QIcon getIconAtColumn(const std::uint32_t& column) const;
 
     /** Returns the item context menu */
     QMenu* getContextMenu();
@@ -73,12 +87,29 @@ public:
     /** Returns the name of the dataset (empty of root item) */
     QString getDatasetName() const;
 
+public: // Analysis
+
+    /**
+     * Set analyzing
+     * @param analyzing Whether an analysis is taking place
+     */
+    void setAnalyzing(const bool& analyzing);
+
+    /**
+     * Set analysis progress
+     * @param progress Progress of the analysis
+     */
+    void setProgress(const float& progress);
+
 protected:
     DataHierarchyItem*      _parent;            /** Pointer to parent item */   
     PluginHierarchyItems    _children;          /** Pointers to child items */
     QString                 _datasetName;       /** Name of the dataset */
     DataSet*                _dataset;           /** Pointer to the dataset */
+    bool                    _analyzing;         /** Whether an analysis is taking place */
+    float                   _progress;          /** Status of the analysis */
 
+    static const QSize size;
 public:
     static Core* core;  /** Static pointer to the core */
 };

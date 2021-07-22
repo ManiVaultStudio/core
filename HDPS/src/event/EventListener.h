@@ -13,7 +13,7 @@ namespace hdps
     public:
         /** Event registration function signatures */
         using DataEventHandler      = std::function<void(DataEvent*)>;
-        using AnalysisEventHandler  = std::function<void(AnalysisEvent*)>;  /** Analysis event handler */
+        using AnalysisEventHandler  = std::function<void(const AnalysisEvent&)>;  /** Analysis event handler */
 
         // Disabled until a better solution can be found as currently it requires
         // plugins to manually unregister if they are no longer interested in a dataset.
@@ -32,7 +32,7 @@ namespace hdps
 
     private:
         void onDataEvent(DataEvent* dataEvent);
-        void onAnalysisEvent(AnalysisEvent* analysisEvent);
+        void onAnalysisEvent(const AnalysisEvent& analysisEvent);
 
         std::unordered_map<QString, DataEventHandler>   _dataEventHandlersByName;
         std::unordered_map<DataType, DataEventHandler>  _dataEventHandlersByType;

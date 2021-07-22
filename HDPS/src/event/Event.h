@@ -31,7 +31,7 @@ namespace hdps
 
         }
 
-        EventType getType()
+        EventType getType() const
         {
             return _type;
         }
@@ -101,6 +101,11 @@ namespace hdps
         {
         }
 
+        const plugin::AnalysisPlugin* getAnalysisPlugin() const {
+            return _analysisPlugin;
+        }
+
+    protected:
         plugin::AnalysisPlugin* _analysisPlugin;
     };
 
@@ -140,6 +145,11 @@ namespace hdps
         {
         }
 
+        float getProgress() const {
+            return _progress;
+        }
+
+    protected:
         float   _progress;      /** Normalized progress [0, 1] */
     };
 
@@ -161,6 +171,11 @@ namespace hdps
         {
         }
 
+        QString getReason() const {
+            return _reason;
+        }
+
+    protected:
         QString _reason;    /** Reason for aborting the analysis */
     };
 

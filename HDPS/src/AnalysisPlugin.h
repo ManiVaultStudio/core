@@ -36,6 +36,10 @@ public:
 
     virtual gui::SettingsWidget* const getSettings() = 0;
 
+    QString getInputDatasetName() const {
+        return _inputDatasetName;
+    }
+
     void setInputDatasetName(const QString& inputDatasetName) {
         Q_ASSERT(!inputDatasetName.isEmpty());
 
@@ -48,15 +52,19 @@ public:
 
 protected:
     void notifyStarted() {
+        _core->notifyAnalysisEvent(AnalysisStartedEvent(this));
     }
 
     void notifyProgressed(const float& progress) {
+        _core->notifyAnalysisEvent(AnalysisProgressedEvent(this, progress));
     }
 
     void notifyFinished() {
+        _core->notifyAnalysisEvent(AnalysisFinishedEvent(this));
     }
 
-    void notifyAborted() {
+    void notifyAborted(const QString& reason) {
+        _core->notifyAnalysisEvent(AnalysisAbortedEvent(this, reason));
     }
 
 protected:

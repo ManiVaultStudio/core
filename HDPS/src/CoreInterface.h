@@ -1,6 +1,8 @@
 #ifndef HDPS_COREINTERFACE_H
 #define HDPS_COREINTERFACE_H
 
+#include "event/Event.h"
+
 #include <QString>
 #include <vector>
 #include <functional>
@@ -91,6 +93,9 @@ public:
 
     /** Notify all event listeners that a dataset has been renamed. */
     virtual void notifyDataRenamed(const QString oldName, const QString newName) = 0;
+
+    /** Notify all event listeners of an analysis event */
+    virtual void notifyAnalysisEvent(const AnalysisEvent& analysisEvent) = 0;
 
 protected:
 

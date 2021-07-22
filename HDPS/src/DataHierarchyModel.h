@@ -30,6 +30,15 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
 
     /**
+     * Sets the data value for the given model index and data role
+     * @param index Model index
+     * @param value Data value in variant form
+     * @param role Data role
+     * @return Whether the data was properly set or not
+     */
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+
+    /**
         * Mandatory override for QAbstractItemModel. Provides an index associated
         * to a particular data item at location (row, column).
         */

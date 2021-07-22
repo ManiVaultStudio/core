@@ -3,8 +3,9 @@
 #include "DataHierarchyItem.h"
 #include "Core.h"
 
-#include <QInputDialog>
 #include <QDebug>
+#include <QInputDialog>
+#include <QHeaderView>
 
 namespace hdps
 {
@@ -16,17 +17,27 @@ PluginHierarchyWidget::PluginHierarchyWidget(Core* core) :
     _core(core),
     _model(new PluginHierarchyModel(_core))
 {
-    setMinimumWidth(200);
+    setMinimumWidth(500);
     setModel(_model);
     
     setContextMenuPolicy(Qt::CustomContextMenu);
+
     connect(this, &QTreeView::customContextMenuRequested, this, &PluginHierarchyWidget::itemContextMenu);
 
     setDragEnabled(true);
     setDragDropMode(QAbstractItemView::DragOnly);
     setSelectionMode(QAbstractItemView::SingleSelection);
-    setRootIsDecorated(true);
+    setRootIsDecorated(false);
     setItemsExpandable(true);
+
+    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress), 50);
+    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), 20);
+
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Name), QHeaderView::Stretch);
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress), QHeaderView::Fixed);
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), QHeaderView::Fixed);
+
+    header()->setStretchLastSection(false);
 }
 
 void PluginHierarchyWidget::itemContextMenu(const QPoint& pos)

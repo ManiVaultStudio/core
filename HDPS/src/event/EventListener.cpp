@@ -84,7 +84,7 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
         dataEventHandler(dataEvent);
 }
 
-void EventListener::onAnalysisEvent(AnalysisEvent* analysisEvent)
+void EventListener::onAnalysisEvent(const AnalysisEvent& analysisEvent)
 {
     for (auto analysisEventHandler : _analysisEventHandlers)
         analysisEventHandler(analysisEvent);

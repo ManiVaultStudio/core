@@ -2,6 +2,7 @@
 #include "DataHierarchyItem.h"
 #include "Plugin.h"
 #include "Core.h"
+#include "AnalysisPlugin.h"
 
 #include <QDebug>
 
@@ -34,11 +35,41 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
 
                 beginInsertRows(parentModelIndex, dataItem->getNumChildren(), dataItem->getNumChildren() + 1);
                 {
-                    qDebug() << dataEvent->dataSetName;
                     dataItem->addChild(new DataHierarchyItem(dataEvent->dataSetName));
                 }
                 endInsertRows();
 
+                break;
+            }
+
+            default:
+                break;
+        }
+    });
+
+    registerAnalysisEvent([this](const hdps::AnalysisEvent& analysisEvent) {
+        const auto outputDatasetName    = analysisEvent.getAnalysisPlugin()->getOutputDatasetName();
+        const auto outputDatasetIndex   = match(index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+        
+        switch (analysisEvent.getType())
+        {
+            case EventType::AnalysisStarted:
+            {
+                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing)), true);
+                break;
+            }
+
+            case EventType::AnalysisProgressed:
+            {
+                auto analysisProgressedEvent = static_cast<const AnalysisProgressedEvent*>(&analysisEvent);
+                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress)), analysisProgressedEvent->getProgress());
+                break;
+            }
+
+            case EventType::AnalysisFinished:
+            case EventType::AnalysisAborted:
+            {
+                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing)), false);
                 break;
             }
 
@@ -61,15 +92,42 @@ QVariant PluginHierarchyModel::data(const QModelIndex& index, int role) const
     auto item = static_cast<DataHierarchyItem*>(index.internalPointer());
 
     if (role == Qt::DecorationRole)
-        return item->getIcon();
+        return item->getIconAtColumn(index.column());
 
     if (role == Qt::ToolTipRole)
-        return item->getDataAtColumn(0);
+        return item->getDataAtColumn(index.column());
 
     if (role != Qt::DisplayRole)
         return QVariant();
 
     return item->getDataAtColumn(index.column());
+}
+
+bool PluginHierarchyModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
+{
+    const auto column = static_cast<DataHierarchyItem::Column>(index.column());
+
+    auto dataHierarchyItem = static_cast<DataHierarchyItem*>((void*)index.internalPointer());
+    
+    switch (column) {
+        case DataHierarchyItem::Column::Name:
+            break;
+
+        case DataHierarchyItem::Column::Analyzing:
+            dataHierarchyItem->setAnalyzing(value.toBool());
+            break;
+
+        case DataHierarchyItem::Column::Progress:
+            dataHierarchyItem->setProgress(value.toFloat());
+            break;
+
+        default:
+            break;
+    }
+
+    emit dataChanged(index.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::_start)), index.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::_end)));
+
+    return true;
 }
 
 QModelIndex PluginHierarchyModel::index(int row, int column, const QModelIndex& parent) const
@@ -88,6 +146,7 @@ QModelIndex PluginHierarchyModel::index(int row, int column, const QModelIndex& 
 
     if (childItem)
         return createIndex(row, column, childItem);
+
     return QModelIndex();
 }
 
@@ -156,8 +215,22 @@ Qt::ItemFlags PluginHierarchyModel::flags(const QModelIndex& index) const
 
 QVariant PluginHierarchyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return _rootItem->getDataAtColumn(section);
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+        switch (static_cast<DataHierarchyItem::Column>(section))
+        {
+            case DataHierarchyItem::Column::Name:
+                return "Name";
+
+            case DataHierarchyItem::Column::Analyzing:
+            case DataHierarchyItem::Column::Progress:
+                return "";
+
+            default:
+                break;
+        }
+
+        return "";
+    }
 
     return QVariant();
 }

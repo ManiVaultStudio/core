@@ -120,6 +120,9 @@ public:
     /** Notify all event listeners that a dataset has been renamed. */
     void notifyDataRenamed(const QString oldName, const QString newName) override;
 
+    /** Notify all event listeners of an analysis event */
+    void notifyAnalysisEvent(const AnalysisEvent& analysisEvent) override;
+
     /**
     * Returns a reference to the main window for adding widgets to it.
     */

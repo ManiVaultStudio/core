@@ -81,8 +81,11 @@ void Core::addPlugin(plugin::Plugin* plugin)
     {
         auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
+        _mainWindow.addPlugin(plugin);
+
         notifyDataAdded(analysisPlugin->getOutputDatasetName());
     }
+
     // If it is a loader plugin it should call loadData
     if (plugin->getType() == plugin::Type::LOADER)
     {
@@ -335,6 +338,12 @@ void Core::notifyDataRenamed(const QString oldName, const QString newName)
 
     for (EventListener* listener : _eventListeners)
         listener->onDataEvent(&dataEvent);
+}
+
+void Core::notifyAnalysisEvent(const AnalysisEvent& analysisEvent)
+{
+    for (EventListener* eventListener : _eventListeners)
+        eventListener->onAnalysisEvent(analysisEvent);
 }
 
 gui::MainWindow& Core::gui() const {
