@@ -6,10 +6,10 @@ namespace hdps {
 
 class Core;
 
-class DataAnalysisAction : public hdps::gui::WidgetAction
+class AnalyzeDataAction : public hdps::gui::WidgetAction
 {
 public:
-    DataAnalysisAction(QObject* parent, Core* core, const QString& datasetName);
+    AnalyzeDataAction(QObject* parent, Core* core, const QString& datasetName);
 
     QMenu* getContextMenu();
 

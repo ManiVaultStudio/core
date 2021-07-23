@@ -29,13 +29,6 @@ public:
         return Application::getIconFont("FontAwesome").getIcon("chart-line");
     }
 
-    bool hasSettings()
-    {
-        return getSettings() != nullptr;
-    }
-
-    virtual gui::SettingsWidget* const getSettings() = 0;
-
     QString getInputDatasetName() const {
         return _inputDatasetName;
     }
@@ -55,8 +48,14 @@ protected:
         _core->notifyAnalysisEvent(AnalysisStartedEvent(this));
     }
 
-    void notifyProgressed(const float& progress) {
-        _core->notifyAnalysisEvent(AnalysisProgressedEvent(this, progress));
+    void notifyProgressSection(const QString& section) {
+        QCoreApplication::processEvents();
+        _core->notifyAnalysisEvent(AnalysisProgressSectionEvent(this, section));
+    }
+
+    void notifyProgressPercentage(const float& percentage) {
+        QCoreApplication::processEvents();
+        _core->notifyAnalysisEvent(AnalysisProgressPercentageEvent(this, percentage));
     }
 
     void notifyFinished() {

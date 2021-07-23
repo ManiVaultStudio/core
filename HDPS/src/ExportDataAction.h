@@ -6,10 +6,10 @@ namespace hdps {
 
 class Core;
 
-class DataExportAction : public hdps::gui::WidgetAction
+class ExportDataAction : public hdps::gui::WidgetAction
 {
 public:
-    DataExportAction(QObject* parent, Core* core, const QString& datasetName);
+    ExportDataAction(QObject* parent, Core* core, const QString& datasetName);
 
     QMenu* getContextMenu();
 

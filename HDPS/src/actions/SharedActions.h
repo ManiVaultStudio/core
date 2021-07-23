@@ -38,6 +38,13 @@ public:
     /** Returns list of shared action widgets*/
     const WidgetActionList& getExposedActions() const;
 
+    /**
+     * Get action by name
+     * @param name Name of the action
+     * @return Pointer to action (if any)
+     */
+    gui::WidgetAction* getActionByName(const QString& name);
+
     /** Returns context menu for the exposed actions */
     QMenu* getContextMenu();
 

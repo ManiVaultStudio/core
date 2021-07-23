@@ -59,10 +59,17 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
                 break;
             }
 
-            case EventType::AnalysisProgressed:
+            case EventType::AnalysisProgressSection:
             {
-                auto analysisProgressedEvent = static_cast<const AnalysisProgressedEvent*>(&analysisEvent);
-                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress)), analysisProgressedEvent->getProgress());
+                auto event = static_cast<const AnalysisProgressSectionEvent*>(&analysisEvent);
+                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Description)), event->getSection());
+                break;
+            }
+
+            case EventType::AnalysisProgressPercentage:
+            {
+                auto event = static_cast<const AnalysisProgressPercentageEvent*>(&analysisEvent);
+                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress)), event->getPercentage());
                 break;
             }
 
@@ -113,12 +120,16 @@ bool PluginHierarchyModel::setData(const QModelIndex& index, const QVariant& val
         case DataHierarchyItem::Column::Name:
             break;
 
-        case DataHierarchyItem::Column::Analyzing:
-            dataHierarchyItem->setAnalyzing(value.toBool());
+        case DataHierarchyItem::Column::Description:
+            dataHierarchyItem->setProgressSection(value.toString());
             break;
 
         case DataHierarchyItem::Column::Progress:
-            dataHierarchyItem->setProgress(value.toFloat());
+            dataHierarchyItem->setProgressPercentage(value.toFloat());
+            break;
+
+        case DataHierarchyItem::Column::Analyzing:
+            dataHierarchyItem->setAnalyzing(value.toBool());
             break;
 
         default:
@@ -220,6 +231,9 @@ QVariant PluginHierarchyModel::headerData(int section, Qt::Orientation orientati
         {
             case DataHierarchyItem::Column::Name:
                 return "Name";
+
+            case DataHierarchyItem::Column::Description:
+                return "Description";
 
             case DataHierarchyItem::Column::Analyzing:
             case DataHierarchyItem::Column::Progress:

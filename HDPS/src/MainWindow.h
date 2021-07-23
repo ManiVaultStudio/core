@@ -3,7 +3,6 @@
 #include "ui_MainWindow.h"
 #include "Core.h"
 #include "LogDockWidget.h"
-#include "DataHierarchyWidget.h"
 #include "widgets/Accordion.h"
 
 #include <QMainWindow>
@@ -33,7 +32,8 @@ namespace gui
 {
 
 class LogDockWidget;
-class PluginHierarchyWidget;
+class DataHierarchyWidget;
+class DataEditorWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -119,9 +119,6 @@ private: // Docking
     /** Sets up the docking area for view plugins (central widget) */
     void initializeCentralDockingArea();
 
-    /** Sets up the docking area for analysis plugins */
-    void initializeAnalysisPluginsDockingArea();
-
     /** Sets up the docking area for settings */
     void initializeSettingsDockingArea();
 
@@ -139,19 +136,19 @@ private: // Docking
     QList<ads::CDockWidget*> getViewPluginDockWidgets(const bool& openOnly = true);
 
 private:
-    QSharedPointer<Core>                    _core;                          /** HDPS core */
-    QSharedPointer<Accordion>               _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
-    QSharedPointer<PluginHierarchyWidget>   _pluginHierarchyWidget;         /** Data hierarchy tree widget */
+    QSharedPointer<Core>        _core;                          /** HDPS core */
+    QSharedPointer<Accordion>   _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
+    DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget     */
+    DataEditorWidget*           _dataEditorWidget;              /** Data editor tree widget */
 
 private: // Docking
     ads::CDockManager*      _dockManager;                   /** Manager for docking */
-    ads::CDockAreaWidget*   _analysisPluginsDockArea;       /** Docking area for analysis plugins */
     ads::CDockAreaWidget*   _centralDockArea;               /** Docking area for view plugins */
     ads::CDockAreaWidget*   _settingsDockArea;              /** Docking area for settings */
     ads::CDockAreaWidget*   _loggingDockArea;               /** Docking area for logging */
-    ads::CDockWidget*       _analysisPluginsDockWidget;     /** Dock widget for analysis plugins */
     ads::CDockWidget*       _centralDockWidget;             /** Dock widget for view plugins */
-    ads::CDockWidget*       _settingsDockWidget;            /** Dock widget for settings */
+    ads::CDockWidget*       _dataHierarchyDockWidget;       /** Dock widget for data hierarchy */
+    ads::CDockWidget*       _dataEditorDockWidget;          /** Dock widget for data editor */
     ads::CDockWidget*       _loggingDockWidget;             /** Dock widget for logging */
 };
 

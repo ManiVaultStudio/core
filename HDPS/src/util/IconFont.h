@@ -65,7 +65,7 @@ public: // Getters
      * @param foregroundColor Foreground color of the icon
      * @param backgroundColor Background color of the icon
      */
-    QIcon getIcon(const QString& name, const QSize& size = QSize(24, 24), const QColor& foregroundColor = QColor(0, 0, 0, 255), const QColor& backgroundColor = Qt::transparent) const;
+    QIcon getIcon(const QString& name, const QSize& size = QSize(14, 14), const QColor& foregroundColor = QColor(0, 0, 0, 255), const QColor& backgroundColor = Qt::transparent) const;
 
 public: // Initialization
 

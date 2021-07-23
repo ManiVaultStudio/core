@@ -17,7 +17,8 @@ namespace hdps
         AnalysisAdded,
         AnalysisRemoved,
         AnalysisStarted,
-        AnalysisProgressed,
+        AnalysisProgressSection,
+        AnalysisProgressPercentage,
         AnalysisFinished,
         AnalysisAborted
     };
@@ -136,21 +137,38 @@ namespace hdps
         }
     };
 
-    class AnalysisProgressedEvent : public AnalysisEvent
+    class AnalysisProgressSectionEvent : public AnalysisEvent
     {
     public:
-        AnalysisProgressedEvent(plugin::AnalysisPlugin* analysisPlugin, const float& progress) :
-            AnalysisEvent(EventType::AnalysisProgressed, analysisPlugin),
-            _progress(progress)
+        AnalysisProgressSectionEvent(plugin::AnalysisPlugin* analysisPlugin, const QString& section) :
+            AnalysisEvent(EventType::AnalysisProgressSection, analysisPlugin),
+            _section(section)
         {
         }
 
-        float getProgress() const {
-            return _progress;
+        QString getSection() const {
+            return _section;
         }
 
     protected:
-        float   _progress;      /** Normalized progress [0, 1] */
+        QString   _section;      /** Progress section */
+    };
+
+    class AnalysisProgressPercentageEvent : public AnalysisEvent
+    {
+    public:
+        AnalysisProgressPercentageEvent(plugin::AnalysisPlugin* analysisPlugin, const float& percentage) :
+            AnalysisEvent(EventType::AnalysisProgressPercentage, analysisPlugin),
+            _percentage(percentage)
+        {
+        }
+
+        float getPercentage() const {
+            return _percentage;
+        }
+
+    protected:
+        float   _percentage;      /** Normalized progress percentage [0, 1] */
     };
 
     class AnalysisFinishedEvent : public AnalysisEvent

@@ -1,12 +1,11 @@
 #include "MainWindow.h"
-
+#include "DataHierarchyWidget.h"
+#include "DataEditorWidget.h"
 #include "DataManager.h" // To connect changed data signal to dataHierarchy
 #include "Logger.h"
-
 #include "PluginManager.h"
 #include "PluginType.h"
 #include "Application.h"
-
 #include "ViewPlugin.h"
 #include "AnalysisPlugin.h"
 
@@ -40,15 +39,15 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
     _core(nullptr),
     _analysisPluginsAccordion(QSharedPointer<Accordion>::create()),
-    _pluginHierarchyWidget(nullptr),
+    _dataHierarchyWidget(nullptr),
+    _dataEditorWidget(nullptr),
     _dockManager(new CDockManager(this)),
-    _analysisPluginsDockArea(nullptr),
     _centralDockArea(nullptr),
     _settingsDockArea(nullptr),
     _loggingDockArea(nullptr),
-    _analysisPluginsDockWidget(new CDockWidget("Analyses")),
     _centralDockWidget(new CDockWidget("Views")),
-    _settingsDockWidget(new CDockWidget("Settings")),
+    _dataHierarchyDockWidget(new CDockWidget("Data hierarchy")),
+    _dataEditorDockWidget(new CDockWidget("Data editor")),
     _loggingDockWidget(new CDockWidget("Logging"))
 {
     setupUi(this);
@@ -56,7 +55,13 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _core = QSharedPointer<Core>::create(*this);
     _core->init();
 
-    _pluginHierarchyWidget = QSharedPointer<PluginHierarchyWidget>::create(_core.get());
+    _dataHierarchyWidget    = new DataHierarchyWidget(this, _core.get());
+    _dataEditorWidget       = new DataEditorWidget(this, _core.get());
+
+    connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetNameChanged, this, [this](const QString& selectedDatasetName) {
+        _dataEditorWidget->setDataset(selectedDatasetName);
+        _dataEditorDockWidget->setWindowTitle(QString("Data editor (%1)").arg(selectedDatasetName));
+    });
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -138,8 +143,6 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
             dockWidget->setProperty("PluginType", "Analysis");
-
-            _analysisPluginsAccordion->addSection(analysisPlugin->getSettings());
 
             break;
         }
@@ -303,7 +306,6 @@ void MainWindow::initializeDocking()
     CDockManager::setConfigFlag(CDockManager::DockAreaHasUndockButton, true);
 
     initializeCentralDockingArea();
-    initializeAnalysisPluginsDockingArea();
     initializeSettingsDockingArea();
     initializeLoggingDockingArea();
 
@@ -335,37 +337,24 @@ void MainWindow::initializeCentralDockingArea()
     _centralDockWidget->tabWidget()->setVisible(false);
 }
 
-void MainWindow::initializeAnalysisPluginsDockingArea()
-{
-    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _analysisPluginsDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _analysisPluginsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
-    _analysisPluginsDockWidget->setWidget(_analysisPluginsAccordion.get());
-
-    _analysisPluginsDockArea = _dockManager->addDockWidget(LeftDockWidgetArea, _analysisPluginsDockWidget);
-
-    //_analysisPluginsDockArea->setDockAreaFlag(CDockAreaWidget::HideSingleWidgetTitleBar, true);
-    _analysisPluginsDockArea->setMinimumWidth(300);
-    //_analysisPluginsDockArea->setMaximumWidth(600);
-    _analysisPluginsDockArea->resize(QSize(400, 0));
-}
-
 void MainWindow::initializeSettingsDockingArea()
 {
-    _settingsDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _settingsDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _settingsDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _settingsDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cogs"));
+    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
+    _dataHierarchyDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sitemap"));
+    _dataHierarchyDockWidget->setWidget(_dataHierarchyWidget);
 
-    _settingsDockWidget->setWidget(_pluginHierarchyWidget.get());
+    _dataEditorDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _dataEditorDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _dataEditorDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
+    _dataEditorDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("edit"));
+    _dataEditorDockWidget->setWidget(_dataEditorWidget);
 
-    _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _settingsDockWidget);
+    _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
+    _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataEditorDockWidget, _settingsDockArea);
 
-    //_settingsDockArea->setDockAreaFlag(CDockAreaWidget::HideSingleWidgetTitleBar, true);
-    _settingsDockArea->setMinimumWidth(200);
-    //_settingsDockArea->setMaximumWidth(400);
-    _settingsDockArea->resize(QSize(300, 0));
+    _settingsDockArea->setMinimumWidth(500);
 }
 
 void MainWindow::initializeLoggingDockingArea()

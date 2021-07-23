@@ -13,22 +13,26 @@ namespace hdps
 namespace gui
 {
 
-PluginHierarchyWidget::PluginHierarchyWidget(Core* core) :
+DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
+    QTreeView(parent),
     _core(core),
-    _model(new PluginHierarchyModel(_core))
+    _model(new PluginHierarchyModel(_core)),
+    _selectionModel(new QItemSelectionModel(_model))
 {
     setMinimumWidth(500);
     setModel(_model);
     
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(this, &QTreeView::customContextMenuRequested, this, &PluginHierarchyWidget::itemContextMenu);
+    connect(this, &QTreeView::customContextMenuRequested, this, &DataHierarchyWidget::itemContextMenu);
 
+    setSelectionModel(_selectionModel);
     setDragEnabled(true);
     setDragDropMode(QAbstractItemView::DragOnly);
     setSelectionMode(QAbstractItemView::SingleSelection);
     setRootIsDecorated(false);
     setItemsExpandable(true);
+    setHeaderHidden(true);
 
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress), 50);
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), 20);
@@ -38,9 +42,24 @@ PluginHierarchyWidget::PluginHierarchyWidget(Core* core) :
     header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), QHeaderView::Fixed);
 
     header()->setStretchLastSection(false);
+
+    connect(_selectionModel, &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+        const auto selectedDatasetName = current.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Name)).data(Qt::DisplayRole).toString();
+        emit selectedDatasetNameChanged(selectedDatasetName);
+    });
+
+    connect(_model, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& parent, int first, int last)
+    {
+        if (!isExpanded(parent))
+            expand(parent);
+
+        _selectionModel->select(parent.child(first, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+
+        emit selectedDatasetNameChanged(parent.child(first, 0).data(Qt::DisplayRole).toString());
+    });
 }
 
-void PluginHierarchyWidget::itemContextMenu(const QPoint& pos)
+void DataHierarchyWidget::itemContextMenu(const QPoint& pos)
 {
      QModelIndex index = indexAt(pos);
 
@@ -54,7 +73,7 @@ void PluginHierarchyWidget::itemContextMenu(const QPoint& pos)
     }
 }
 
-void PluginHierarchyWidget::dataRenamed()
+void DataHierarchyWidget::dataRenamed()
 {
     /*
     // Extract name of item that triggered the context menu action

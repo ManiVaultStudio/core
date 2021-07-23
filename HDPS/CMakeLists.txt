@@ -222,18 +222,20 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyItem.h
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
+	src/DataEditorWidget.h
 	src/DataImportAction.h
-	src/DataExportAction.h
-	src/DataAnalysisAction.h
+	src/ExportDataAction.h
+	src/AnalyzeDataAction.h
 )
 
 set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyItem.cpp
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
+    src/DataEditorWidget.cpp
 	src/DataImportAction.cpp
-	src/DataExportAction.cpp
-	src/DataAnalysisAction.cpp
+	src/ExportDataAction.cpp
+	src/AnalyzeDataAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

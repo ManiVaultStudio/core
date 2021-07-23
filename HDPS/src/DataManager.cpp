@@ -1,6 +1,6 @@
 #include "DataManager.h"
-#include "DataExportAction.h"
-#include "DataAnalysisAction.h"
+#include "ExportDataAction.h"
+#include "AnalyzeDataAction.h"
 
 #include <QRegularExpression>
 #include <cassert>
@@ -20,8 +20,8 @@ QString DataManager::addSet(QString requestedName, DataSet* set)
     
     set->setName(uniqueName);
 
-    set->exposeAction(new DataExportAction(this, reinterpret_cast<Core*>(_core), uniqueName));
-    set->exposeAction(new DataAnalysisAction(this, reinterpret_cast<Core*>(_core), uniqueName));
+    set->exposeAction(new ExportDataAction(this, reinterpret_cast<Core*>(_core), uniqueName));
+    set->exposeAction(new AnalyzeDataAction(this, reinterpret_cast<Core*>(_core), uniqueName));
 
     _dataSetMap.emplace(set->getName(), std::unique_ptr<DataSet>(set));
 

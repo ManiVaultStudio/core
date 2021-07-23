@@ -1,5 +1,5 @@
-#ifndef HDPS_PLUGIN_HIERARCHY_WIDGET_H
-#define HDPS_PLUGIN_HIERARCHY_WIDGET_H
+#ifndef HDPS_DATA_HIERARCHY_WIDGET_H
+#define HDPS_DATA_HIERARCHY_WIDGET_H
 
 #include <QWidget>
 #include <QTreeView>
@@ -15,25 +15,33 @@ namespace gui
 {
 
 /**
-    * Widget displaying all data currently present in the system.
-    */
-class PluginHierarchyWidget : public QTreeView
+* Widget displaying all data currently present in the system.
+*/
+class DataHierarchyWidget : public QTreeView
 {
     Q_OBJECT
 public:
-    PluginHierarchyWidget(Core* core);
+    DataHierarchyWidget(QWidget* parent, Core* core);
             
 public slots:
     void itemContextMenu(const QPoint& pos);
 
     void dataRenamed();
 
+signals:
+    /**
+     * Invoked when the selected data changed
+     * @param datasetName Name of the newly selected dataset
+     */
+    void selectedDatasetNameChanged(const QString& datasetName);
+
 private:
-    Core*                   _core;          /** Pointer to core */
-    PluginHierarchyModel*   _model;         /** Model containing data to be displayed in the hierarchy */
+    Core*                   _core;              /** Pointer to core */
+    PluginHierarchyModel*   _model;             /** Model containing data to be displayed in the hierarchy */
+    QItemSelectionModel*    _selectionModel;    /** Selection model */
 };
 
 }
 }
 
-#endif // HDPS_PLUGIN_HIERARCHY_WIDGET_H
+#endif // HDPS_DATA_HIERARCHY_WIDGET_H

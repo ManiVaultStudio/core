@@ -20,6 +20,7 @@ public:
     /** Columns */
     enum class Column {
         Name,
+        Description,
         Progress,
         Analyzing,
 
@@ -96,20 +97,26 @@ public: // Analysis
     void setAnalyzing(const bool& analyzing);
 
     /**
-     * Set analysis progress
-     * @param progress Progress of the analysis
+     * Set analysis progress percentage
+     * @param progressPercentage Progress percentage of the analysis
      */
-    void setProgress(const float& progress);
+    void setProgressPercentage(const float& progressPercentage);
+
+    /**
+     * Set analysis progress section
+     * @param progressSection Progress section of the analysis
+     */
+    void setProgressSection(const QString& progressSection);
 
 protected:
-    DataHierarchyItem*      _parent;            /** Pointer to parent item */   
-    PluginHierarchyItems    _children;          /** Pointers to child items */
-    QString                 _datasetName;       /** Name of the dataset */
-    DataSet*                _dataset;           /** Pointer to the dataset */
-    bool                    _analyzing;         /** Whether an analysis is taking place */
-    float                   _progress;          /** Status of the analysis */
+    DataHierarchyItem*      _parent;                /** Pointer to parent item */
+    PluginHierarchyItems    _children;              /** Pointers to child items */
+    QString                 _datasetName;           /** Name of the dataset */
+    DataSet*                _dataset;               /** Pointer to the dataset */
+    bool                    _analyzing;             /** Whether an analysis is taking place */
+    QString                 _progressSection;       /** Progress section of the analysis */
+    float                   _progressPercentage;    /** Progress percentage of the analysis */
 
-    static const QSize size;
 public:
     static Core* core;  /** Static pointer to the core */
 };

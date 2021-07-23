@@ -1,4 +1,4 @@
-#include "DataAnalysisAction.h"
+#include "AnalyzeDataAction.h"
 #include "Core.h"
 #include "Application.h"
 
@@ -8,15 +8,15 @@ namespace hdps {
 
 using namespace gui;
 
-DataAnalysisAction::DataAnalysisAction(QObject* parent, Core* core, const QString& datasetName) :
+AnalyzeDataAction::AnalyzeDataAction(QObject* parent, Core* core, const QString& datasetName) :
     WidgetAction(parent),
     _meanShiftAction(this, "Mean-shift"),
     _tsneAction(this, "TSNE")
 {
-    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("microchip"));
+    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
     connect(&_meanShiftAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
-        core->analyzeDataset("Mean Shift Analysis", datasetName);
+        core->analyzeDataset("Mean Shift Clustering", datasetName);
     });
 
     connect(&_tsneAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
@@ -24,9 +24,9 @@ DataAnalysisAction::DataAnalysisAction(QObject* parent, Core* core, const QStrin
     });
 }
 
-QMenu* DataAnalysisAction::getContextMenu()
+QMenu* AnalyzeDataAction::getContextMenu()
 {
-    auto menu = new QMenu("Analysis");
+    auto menu = new QMenu("Analyze");
 
     menu->setIcon(icon());
 

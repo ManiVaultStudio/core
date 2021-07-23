@@ -1,4 +1,4 @@
-#include "DataExportAction.h"
+#include "ExportDataAction.h"
 #include "Core.h"
 #include "Application.h"
 
@@ -8,7 +8,7 @@ namespace hdps {
 
 using namespace gui;
 
-DataExportAction::DataExportAction(QObject* parent, Core* core, const QString& datasetName) :
+ExportDataAction::ExportDataAction(QObject* parent, Core* core, const QString& datasetName) :
     WidgetAction(parent),
     _binaryAction(this, "Binary"),
     _csvAction(this, "CSV")
@@ -24,7 +24,7 @@ DataExportAction::DataExportAction(QObject* parent, Core* core, const QString& d
     });
 }
 
-QMenu* DataExportAction::getContextMenu()
+QMenu* ExportDataAction::getContextMenu()
 {
     auto menu = new QMenu("Export");
 

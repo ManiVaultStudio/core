@@ -1,7 +1,7 @@
 #include "DataHierarchyItem.h"
 #include "Set.h"
-#include "DataExportAction.h"
-#include "DataAnalysisAction.h"
+#include "ExportDataAction.h"
+#include "AnalyzeDataAction.h"
 
 #include <QDebug>
 
@@ -9,7 +9,6 @@ namespace hdps
 {
 
 Core* DataHierarchyItem::core = nullptr;
-const QSize DataHierarchyItem::size = QSize(14, 14);
 
 DataHierarchyItem::DataHierarchyItem(const QString& datasetName /*= ""*/, DataHierarchyItem* parent /*= nullptr*/) :
     QObject(parent),
@@ -18,7 +17,8 @@ DataHierarchyItem::DataHierarchyItem(const QString& datasetName /*= ""*/, DataHi
     _datasetName(datasetName),
     _dataset(nullptr),
     _analyzing(false),
-    _progress(0.0f)
+    _progressSection(),
+    _progressPercentage(0.0f)
 {
     if (!datasetName.isEmpty()) {
         try
@@ -96,11 +96,14 @@ QString DataHierarchyItem::getDataAtColumn(const std::uint32_t& column) const
         case Column::Name:
             return _dataset->getName();
 
+        case Column::Description:
+            return _progressSection;
+
         case Column::Analyzing:
             return "";
 
         case Column::Progress:
-            return _analyzing ? QString("%1%").arg(100.0f * _progress) : "";
+            return _analyzing ? QString("%1%").arg(100.0f * _progressPercentage) : "";
 
         default:
             break;
@@ -116,18 +119,19 @@ QIcon DataHierarchyItem::getIconAtColumn(const std::uint32_t& column) const
     switch (static_cast<Column>(column))
     {
         case Column::Name:
-            return fontAwesome.getIcon(_datasetName.isEmpty() ? "home" : "database", size);
+            return fontAwesome.getIcon(_datasetName.isEmpty() ? "home" : "database");
+
+        case Column::Progress:
+        case Column::Description:
+            break;
 
         case Column::Analyzing:
         {
             if (_analyzing)
-                return fontAwesome.getIcon("play", size);
+                return fontAwesome.getIcon("microchip");
 
             break;
         }
-
-        case Column::Progress:
-            break;
 
         default:
             break;
@@ -154,11 +158,19 @@ QString DataHierarchyItem::getDatasetName() const
 void DataHierarchyItem::setAnalyzing(const bool& analyzing)
 {
     _analyzing = analyzing;
+
+    if (!_analyzing)
+        _progressSection = "";
 }
 
-void DataHierarchyItem::setProgress(const float& progress)
+void DataHierarchyItem::setProgressPercentage(const float& progressPercentage)
 {
-    _progress = progress;
+    _progressPercentage = progressPercentage;
+}
+
+void DataHierarchyItem::setProgressSection(const QString& progressSection)
+{
+    _progressSection = progressSection;
 }
 
 }

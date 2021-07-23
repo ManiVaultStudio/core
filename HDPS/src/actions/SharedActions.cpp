@@ -26,6 +26,15 @@ const hdps::gui::SharedActions::WidgetActionList& SharedActions::getExposedActio
     return _actions;
 }
 
+hdps::gui::WidgetAction* SharedActions::getActionByName(const QString& name)
+{
+    for (auto action : _actions)
+        if (action->text() == name)
+            return action;
+
+    return nullptr;
+}
+
 QMenu* SharedActions::getContextMenu()
 {
     auto menu = new QMenu();
