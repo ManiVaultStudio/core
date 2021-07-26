@@ -12,7 +12,7 @@ namespace gui {
 
 OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent),
-    _options(),
+    _defaultModel(),
     _model(nullptr),
     _currentIndex(-1),
     _defaultIndex(0)
@@ -22,30 +22,35 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/) :
 
 QStringList OptionAction::getOptions() const
 {
-    return _options;
+    QStringList options;
+
+    for (int rowIndex = 0; rowIndex < getModel()->rowCount(); ++rowIndex)
+        options << getModel()->index(rowIndex, 0).data(Qt::DisplayRole).toString();
+
+    return options;
 }
 
 bool OptionAction::hasOptions() const
 {
-    return !_options.isEmpty();
+    return !getOptions().isEmpty();
 }
 
 void OptionAction::setOptions(const QStringList& options)
 {
-    if (options == _options)
-        return;
+    _defaultModel.setStringList(options);
 
-    _options = options;
-
-    emit optionsChanged(_options);
+    emit optionsChanged(getOptions());
 
     if (_currentIndex >= options.count())
         setCurrentIndex(0);
 }
 
-QAbstractListModel* OptionAction::getModel()
+const QAbstractListModel* OptionAction::getModel() const
 {
-    return _model;
+    if (_model != nullptr)
+        return _model;
+
+    return &_defaultModel;
 }
 
 void OptionAction::setModel(QAbstractListModel* listModel)
@@ -73,7 +78,7 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     if (currentIndex == _currentIndex)
         return;
 
-    if (!hasModel() && currentIndex >= static_cast<std::int32_t>(_options.count()))
+    if (currentIndex >= static_cast<std::int32_t>(getOptions().count()))
         return;
 
     _currentIndex = currentIndex;
@@ -97,6 +102,16 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
     emit defaultIndexChanged(_defaultIndex);
 }
 
+QString OptionAction::getDefaultText() const
+{
+    return getOptions()[_defaultIndex];
+}
+
+void OptionAction::setDefaultText(const QString& defaultText)
+{
+    _defaultIndex = getOptions().indexOf(defaultText);
+}
+
 bool OptionAction::canReset() const
 {
     return _currentIndex != _defaultIndex;
@@ -107,38 +122,22 @@ void OptionAction::reset()
     setCurrentIndex(_defaultIndex);
 }
 
-void OptionAction::clearOptions()
-{
-    _options.clear();
-}
-
 QString OptionAction::getCurrentText() const
 {
     if (_currentIndex < 0)
         return "";
 
-    if (hasModel())
-        return _model->data(_model->index(_currentIndex, 0), Qt::DisplayRole).toString();
-    else
-        return _options[_currentIndex];
+    return getModel()->data(getModel()->index(_currentIndex, 0), Qt::DisplayRole).toString();
 }
 
 void OptionAction::setCurrentText(const QString& currentText)
 {
-    if (!_options.contains(currentText))
+    const auto options = getOptions();
+
+    if (!options.contains(currentText))
         return;
 
-    if (hasModel()) {
-        const auto matches = _model->match(_model->index(0), Qt::DisplayRole, currentText, Qt::MatchFlag::MatchExactly);
-
-        if (!matches.isEmpty())
-            _currentIndex = matches.first().row();
-    } else {
-        if (_options.contains(currentText))
-            _currentIndex = _options.indexOf(currentText);
-        else
-            _currentIndex = 0;
-    }
+    _currentIndex = options.indexOf(currentText);
 
     emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
@@ -172,7 +171,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         _comboBox->clear();
 
         if (optionAction->hasModel()) {
-            _comboBox->setModel(optionAction->getModel());
+            _comboBox->setModel(const_cast<QAbstractListModel*>(optionAction->getModel()));
         }
         else {
             const auto options = optionAction->getOptions();

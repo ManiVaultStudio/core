@@ -20,7 +20,7 @@ AnalyzeDataAction::AnalyzeDataAction(QObject* parent, Core* core, const QString&
     });
 
     connect(&_tsneAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
-        core->analyzeDataset("TSNE", datasetName);
+        core->analyzeDataset("tSNE Analysis", datasetName);
     });
 }
 

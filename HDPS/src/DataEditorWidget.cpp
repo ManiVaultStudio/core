@@ -1,7 +1,9 @@
 #include "DataEditorWidget.h"
 #include "Core.h"
+#include "actions/WidgetActionGroup.h"
 
 #include <QDebug>
+#include <QTreeWidgetItem>
 
 namespace hdps
 {
@@ -12,21 +14,29 @@ namespace gui
 DataEditorWidget::DataEditorWidget(QWidget* parent, Core* core) :
     QWidget(parent),
     _core(core),
+    _treeWidget(new QTreeWidget()),
     _dataWidget(nullptr)
 {
+    setAutoFillBackground(true);
+
     auto layout = new QVBoxLayout();
 
     setLayout(layout);
 
+    layout->setMargin(0);
     layout->setAlignment(Qt::AlignTop);
+
+    _treeWidget->setHeaderHidden(true);
+    _treeWidget->setIndentation(0);
+    _treeWidget->setAutoFillBackground(true);
+
+    layout->addWidget(_treeWidget);
 }
 
 void DataEditorWidget::setDataset(const QString& datasetName)
 {
     try
     {
-        Q_ASSERT(!datasetName.isEmpty());
-
         if (datasetName.isEmpty())
             return;
 
@@ -35,16 +45,73 @@ void DataEditorWidget::setDataset(const QString& datasetName)
 
         auto& dataset = _core->requestData(datasetName);
 
-        auto settingsAction = dataset.getActionByName("Settings");
+        _treeWidget->clear();
 
-        _dataWidget = settingsAction ? settingsAction->createWidget(this) : new QWidget();
+        auto exposedActions = dataset.getExposedActions();
 
-        layout()->addWidget(_dataWidget);
+        for (auto exposedAction : exposedActions) {
+            auto exposedWidgetActionGroup = dynamic_cast<WidgetActionGroup*>(exposedAction);
+
+            if (exposedWidgetActionGroup == nullptr)
+                continue;
+
+            auto button = addButton(exposedAction->text());
+            auto section = addWidget(button, exposedAction->createWidget(this));
+
+            button->addChild(section);
+
+            button->setExpanded(true);
+            
+            QCoreApplication::processEvents();
+
+            button->setExpanded(exposedWidgetActionGroup->isExpanded());
+        }
     }
     catch (std::exception& e)
     {
-    	
     }
+}
+
+QTreeWidgetItem* DataEditorWidget::addButton(const QString& title)
+{
+    auto treeWidgetItem = new QTreeWidgetItem();
+
+    _treeWidget->addTopLevelItem(treeWidgetItem);
+    _treeWidget->setItemWidget(treeWidgetItem, 0, new SectionExpandButton(treeWidgetItem, title));
+
+    return treeWidgetItem;
+}
+
+QTreeWidgetItem* DataEditorWidget::addWidget(QTreeWidgetItem* buttonTreeWidgetItem, QWidget* widget)
+{
+    widget->setAutoFillBackground(true);
+    widget->setMinimumHeight(10);
+
+    auto section = new QTreeWidgetItem(buttonTreeWidgetItem);
+    
+    auto containerWidget = new QWidget();
+    auto containerLayout = new QVBoxLayout();
+
+    containerLayout->setSizeConstraint(QLayout::SetMaximumSize);
+    containerLayout->addWidget(widget);
+    
+    containerWidget->setLayout(containerLayout);
+    containerWidget->setAutoFillBackground(true);
+
+    section->setDisabled(true);
+    
+    _treeWidget->setItemWidget(section, 0, containerWidget);
+
+    return section;
+}
+
+SectionExpandButton::SectionExpandButton(QTreeWidgetItem* treeWidgetItem, const QString& text, QWidget* parent /*= nullptr*/) :
+    QPushButton(text, parent),
+    _treeWidgetItem(treeWidgetItem)
+{
+    connect(this, &QPushButton::clicked, this, [this]() {
+        _treeWidgetItem->setExpanded(!_treeWidgetItem->isExpanded());
+    });
 }
 
 }

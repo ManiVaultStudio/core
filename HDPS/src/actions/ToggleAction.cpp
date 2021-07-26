@@ -72,8 +72,8 @@ ToggleAction::Widget::Widget(QWidget* parent, ToggleAction* checkAction, const M
                 QSignalBlocker blocker(_pushButton);
 
                 _pushButton->setEnabled(checkAction->isEnabled());
-                //_pushButton->setText(checkAction->text());
-                //_pushButton->setIcon(checkAction->icon());
+                _pushButton->setText(checkAction->text());
+                _pushButton->setIcon(checkAction->icon());
                 _pushButton->setChecked(checkAction->isChecked());
                 _pushButton->setToolTip(checkAction->toolTip());
 

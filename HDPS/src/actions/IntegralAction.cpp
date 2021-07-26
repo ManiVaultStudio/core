@@ -272,12 +272,12 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
 
 QWidget* IntegralAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
 {
-    auto widget = new QWidget();
+    auto widget = new QWidget(parent);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
-    layout->addWidget(new SpinBoxWidget(parent, this));
-    layout->addWidget(new SliderWidget(parent, this));
+    layout->addWidget(new SpinBoxWidget(parent, this), 1);
+    layout->addWidget(new SliderWidget(parent, this), 2);
 
     widget->setLayout(layout);
 

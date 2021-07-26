@@ -43,8 +43,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
 
     header()->setStretchLastSection(false);
 
-    connect(_selectionModel, &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
-        const auto selectedDatasetName = current.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Name)).data(Qt::DisplayRole).toString();
+    connect(_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
+        const auto selectedDatasetName = selected.first().topLeft().data(Qt::DisplayRole).toString();
         emit selectedDatasetNameChanged(selectedDatasetName);
     });
 
@@ -54,8 +54,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
             expand(parent);
 
         _selectionModel->select(parent.child(first, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
-
-        emit selectedDatasetNameChanged(parent.child(first, 0).data(Qt::DisplayRole).toString());
     });
 }
 
