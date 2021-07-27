@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QEvent>
 #include <QPainter>
+#include <QLabel>
 
 namespace hdps {
 
@@ -44,6 +45,19 @@ void WidgetAction::Widget::setPopupLayout(QLayout* popupLayout)
 WidgetAction::WidgetAction(QObject* parent) :
     QWidgetAction(parent)
 {
+}
+
+QLabel* WidgetAction::createLabelWidget(QWidget* parent)
+{
+    auto label = new QLabel(text(), parent);
+
+    connect(this, &QAction::changed, this, [this, label]() {
+        label->setEnabled(isEnabled());
+        label->setText(text());
+        label->setToolTip(toolTip());
+    });
+
+    return label;
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)

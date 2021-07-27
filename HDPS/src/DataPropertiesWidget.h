@@ -28,13 +28,13 @@ protected:
  * Data editor widget class
  * Widget class for viewing/editing data
  */
-class DataEditorWidget : public QWidget
+class DataPropertiesWidget : public QWidget
 {
 public:
     
 
 public:
-    DataEditorWidget(QWidget* parent, Core* core);
+    DataPropertiesWidget(QWidget* parent, Core* core);
             
     void setDataset(const QString& datasetName);
 

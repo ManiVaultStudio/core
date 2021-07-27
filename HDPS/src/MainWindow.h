@@ -33,7 +33,7 @@ namespace gui
 
 class LogDockWidget;
 class DataHierarchyWidget;
-class DataEditorWidget;
+class DataPropertiesWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -139,17 +139,17 @@ private:
     QSharedPointer<Core>        _core;                          /** HDPS core */
     QSharedPointer<Accordion>   _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
     DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget     */
-    DataEditorWidget*           _dataEditorWidget;              /** Data editor tree widget */
+    DataPropertiesWidget*       _dataPropertiesWidget;          /** Data properties widget */
 
 private: // Docking
-    ads::CDockManager*      _dockManager;                   /** Manager for docking */
-    ads::CDockAreaWidget*   _centralDockArea;               /** Docking area for view plugins */
-    ads::CDockAreaWidget*   _settingsDockArea;              /** Docking area for settings */
-    ads::CDockAreaWidget*   _loggingDockArea;               /** Docking area for logging */
-    ads::CDockWidget*       _centralDockWidget;             /** Dock widget for view plugins */
-    ads::CDockWidget*       _dataHierarchyDockWidget;       /** Dock widget for data hierarchy */
-    ads::CDockWidget*       _dataEditorDockWidget;          /** Dock widget for data editor */
-    ads::CDockWidget*       _loggingDockWidget;             /** Dock widget for logging */
+    ads::CDockManager*          _dockManager;                   /** Manager for docking */
+    ads::CDockAreaWidget*       _centralDockArea;               /** Docking area for view plugins */
+    ads::CDockAreaWidget*       _settingsDockArea;              /** Docking area for settings */
+    ads::CDockAreaWidget*       _loggingDockArea;               /** Docking area for logging */
+    ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */
+    ads::CDockWidget*           _dataHierarchyDockWidget;       /** Dock widget for data hierarchy */
+    ads::CDockWidget*           _dataEditorDockWidget;          /** Dock widget for data editor */
+    ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
 };
 
 }

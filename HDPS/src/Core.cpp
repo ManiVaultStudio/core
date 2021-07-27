@@ -58,12 +58,6 @@ void Core::addPlugin(plugin::Plugin* plugin)
         case plugin::Type::VIEW:
         {
             _mainWindow.addPlugin(plugin);
-
-            // Notify of datasets in system
-            for (auto& set : _dataManager->allSets())
-                notifyDataAdded(set.first);
-
-            // fallthrough
         }
 
         // Otherwise add the plugin to a list of plug-ins of the same type

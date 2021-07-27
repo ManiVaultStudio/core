@@ -80,8 +80,7 @@ std::int32_t DataHierarchyItem::getNumColumns() const
 
 QString DataHierarchyItem::serialize() const
 {
-    return "";
-    //return _setName + "\n" + _dataType;
+    return _dataset->getName() + "\n" + _dataset->getDataType();
 }
 
 QString DataHierarchyItem::getDataAtColumn(const std::uint32_t& column) const
@@ -103,7 +102,7 @@ QString DataHierarchyItem::getDataAtColumn(const std::uint32_t& column) const
             return "";
 
         case Column::Progress:
-            return _analyzing ? QString("%1%").arg(100.0f * _progressPercentage) : "";
+            return _analyzing ? QString("%1%").arg(QString::number(100.0f * _progressPercentage, 'f', 1)) : "";
 
         default:
             break;

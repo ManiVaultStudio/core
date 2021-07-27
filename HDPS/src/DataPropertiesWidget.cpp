@@ -1,4 +1,4 @@
-#include "DataEditorWidget.h"
+#include "DataPropertiesWidget.h"
 #include "Core.h"
 #include "actions/WidgetActionGroup.h"
 
@@ -11,7 +11,7 @@ namespace hdps
 namespace gui
 {
 
-DataEditorWidget::DataEditorWidget(QWidget* parent, Core* core) :
+DataPropertiesWidget::DataPropertiesWidget(QWidget* parent, Core* core) :
     QWidget(parent),
     _core(core),
     _treeWidget(new QTreeWidget()),
@@ -33,7 +33,7 @@ DataEditorWidget::DataEditorWidget(QWidget* parent, Core* core) :
     layout->addWidget(_treeWidget);
 }
 
-void DataEditorWidget::setDataset(const QString& datasetName)
+void DataPropertiesWidget::setDataset(const QString& datasetName)
 {
     try
     {
@@ -60,10 +60,6 @@ void DataEditorWidget::setDataset(const QString& datasetName)
 
             button->addChild(section);
 
-            button->setExpanded(true);
-            
-            QCoreApplication::processEvents();
-
             button->setExpanded(exposedWidgetActionGroup->isExpanded());
         }
     }
@@ -72,7 +68,7 @@ void DataEditorWidget::setDataset(const QString& datasetName)
     }
 }
 
-QTreeWidgetItem* DataEditorWidget::addButton(const QString& title)
+QTreeWidgetItem* DataPropertiesWidget::addButton(const QString& title)
 {
     auto treeWidgetItem = new QTreeWidgetItem();
 
@@ -82,7 +78,7 @@ QTreeWidgetItem* DataEditorWidget::addButton(const QString& title)
     return treeWidgetItem;
 }
 
-QTreeWidgetItem* DataEditorWidget::addWidget(QTreeWidgetItem* buttonTreeWidgetItem, QWidget* widget)
+QTreeWidgetItem* DataPropertiesWidget::addWidget(QTreeWidgetItem* buttonTreeWidgetItem, QWidget* widget)
 {
     widget->setAutoFillBackground(true);
     widget->setMinimumHeight(10);
@@ -98,7 +94,7 @@ QTreeWidgetItem* DataEditorWidget::addWidget(QTreeWidgetItem* buttonTreeWidgetIt
     containerWidget->setLayout(containerLayout);
     containerWidget->setAutoFillBackground(true);
 
-    section->setDisabled(true);
+    //section->setDisabled(true);
     
     _treeWidget->setItemWidget(section, 0, containerWidget);
 

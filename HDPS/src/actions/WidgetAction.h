@@ -6,6 +6,8 @@
 #include <QToolButton>
 #include <QMenu>
 
+class QLabel;
+
 namespace hdps {
 
 namespace gui {
@@ -91,6 +93,8 @@ public:
         return new CollapsedWidget(parent, this);
 
     }
+
+    QLabel* createLabelWidget(QWidget* parent);
 
     WidgetAction& operator= (const WidgetAction& other)
     {

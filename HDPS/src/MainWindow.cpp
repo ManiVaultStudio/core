@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "DataHierarchyWidget.h"
-#include "DataEditorWidget.h"
+#include "DataPropertiesWidget.h"
 #include "DataManager.h" // To connect changed data signal to dataHierarchy
 #include "Logger.h"
 #include "PluginManager.h"
@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _core(nullptr),
     _analysisPluginsAccordion(QSharedPointer<Accordion>::create()),
     _dataHierarchyWidget(nullptr),
-    _dataEditorWidget(nullptr),
+    _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),
     _centralDockArea(nullptr),
     _settingsDockArea(nullptr),
@@ -56,11 +56,11 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _core->init();
 
     _dataHierarchyWidget    = new DataHierarchyWidget(this, _core.get());
-    _dataEditorWidget       = new DataEditorWidget(this, _core.get());
+    _dataPropertiesWidget   = new DataPropertiesWidget(this, _core.get());
 
     connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetNameChanged, this, [this](const QString& selectedDatasetName) {
-        _dataEditorWidget->setDataset(selectedDatasetName);
-        _dataEditorDockWidget->setWindowTitle(QString("Data editor (%1)").arg(selectedDatasetName));
+        _dataEditorDockWidget->setWindowTitle(QString("Data properties: %1").arg(selectedDatasetName));
+        _dataPropertiesWidget->setDataset(selectedDatasetName);
     });
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
@@ -349,12 +349,12 @@ void MainWindow::initializeSettingsDockingArea()
     _dataEditorDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
     _dataEditorDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
     _dataEditorDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("edit"));
-    _dataEditorDockWidget->setWidget(_dataEditorWidget);
+    _dataEditorDockWidget->setWidget(_dataPropertiesWidget);
 
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
     _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataEditorDockWidget, _settingsDockArea);
 
-    _settingsDockArea->setMinimumWidth(400);
+    _settingsDockArea->setMinimumWidth(500);
 }
 
 void MainWindow::initializeLoggingDockingArea()

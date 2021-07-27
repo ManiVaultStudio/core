@@ -76,6 +76,8 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
             case EventType::AnalysisFinished:
             case EventType::AnalysisAborted:
             {
+                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Description)), "");
+                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress)), 0);
                 setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing)), false);
                 break;
             }

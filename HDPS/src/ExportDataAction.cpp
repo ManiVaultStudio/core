@@ -13,7 +13,7 @@ ExportDataAction::ExportDataAction(QObject* parent, Core* core, const QString& d
     _binaryAction(this, "Binary"),
     _csvAction(this, "CSV")
 {
-    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("file-export"));
+    //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("file-export"));
 
     connect(&_binaryAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
         core->exportDataset("BinExporter", datasetName);

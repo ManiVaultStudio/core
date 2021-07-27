@@ -10,10 +10,10 @@ using namespace gui;
 
 AnalyzeDataAction::AnalyzeDataAction(QObject* parent, Core* core, const QString& datasetName) :
     WidgetAction(parent),
-    _meanShiftAction(this, "Mean-shift"),
-    _tsneAction(this, "TSNE")
+    _meanShiftAction(this, "Mean Shift Clustering"),
+    _tsneAction(this, "tSNE Analysis")
 {
-    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
+    //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
     connect(&_meanShiftAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
         core->analyzeDataset("Mean Shift Clustering", datasetName);

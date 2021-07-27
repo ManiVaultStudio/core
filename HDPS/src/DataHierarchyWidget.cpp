@@ -34,6 +34,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
     setItemsExpandable(true);
     setHeaderHidden(true);
 
+    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Description), 200);
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress), 50);
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), 20);
 
