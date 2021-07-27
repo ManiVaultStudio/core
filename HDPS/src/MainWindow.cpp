@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _loggingDockArea(nullptr),
     _centralDockWidget(new CDockWidget("Views")),
     _dataHierarchyDockWidget(new CDockWidget("Data hierarchy")),
-    _dataEditorDockWidget(new CDockWidget("Data editor")),
+    _dataEditorDockWidget(new CDockWidget("Data properties")),
     _loggingDockWidget(new CDockWidget("Logging"))
 {
     setupUi(this);

@@ -5,6 +5,7 @@
 #include <QEvent>
 #include <QPainter>
 #include <QLabel>
+#include <QGroupBox>
 
 namespace hdps {
 
@@ -47,9 +48,9 @@ WidgetAction::WidgetAction(QObject* parent) :
 {
 }
 
-QLabel* WidgetAction::createLabelWidget(QWidget* parent)
+WidgetAction::Label* WidgetAction::createLabelWidget(QWidget* parent)
 {
-    auto label = new QLabel(text(), parent);
+    auto label = new WidgetAction::Label(text(), parent);
 
     connect(this, &QAction::changed, this, [this, label]() {
         label->setEnabled(isEnabled());
@@ -162,6 +163,11 @@ void WidgetAction::ToolButton::paintEvent(QPaintEvent* paintEvent)
 }
 
 
+
+WidgetAction::Label::Label(const QString& text, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
+    QLabel(text, parent, windowFlags)
+{
+}
 
 }
 }

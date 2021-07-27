@@ -40,9 +40,6 @@ void OptionAction::setOptions(const QStringList& options)
     _defaultModel.setStringList(options);
 
     emit optionsChanged(getOptions());
-
-    if (_currentIndex >= options.count())
-        setCurrentIndex(0);
 }
 
 const QAbstractListModel* OptionAction::getModel() const
@@ -127,7 +124,7 @@ QString OptionAction::getCurrentText() const
     if (_currentIndex < 0)
         return "";
 
-    return getModel()->data(getModel()->index(_currentIndex, 0), Qt::DisplayRole).toString();
+    return getOptions()[_currentIndex];
 }
 
 void OptionAction::setCurrentText(const QString& currentText)
@@ -169,18 +166,8 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         QSignalBlocker comboBoxSignalBlocker(_comboBox);
 
         _comboBox->clear();
-
-        if (optionAction->hasModel()) {
-            _comboBox->setModel(const_cast<QAbstractListModel*>(optionAction->getModel()));
-        }
-        else {
-            const auto options = optionAction->getOptions();
-            
-            _comboBox->addItems(options);
-            _comboBox->setEnabled(!options.isEmpty());
-        }
-        
-        //comboBox->adjustSize();
+        _comboBox->setModel(const_cast<QAbstractListModel*>(optionAction->getModel()));
+        _comboBox->setEnabled(!optionAction->getOptions().isEmpty());
 
         updateToolTip();
     };
@@ -201,10 +188,6 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         
         _comboBox->setCurrentText(optionAction->getCurrentText());
     };
-
-    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, updateComboBoxSelection](const std::int32_t& currentIndex) {
-        updateComboBoxSelection();
-    });
 
     connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection, updateToolTip](const QString& currentText) {
         updateComboBoxSelection();

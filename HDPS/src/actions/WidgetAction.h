@@ -2,7 +2,7 @@
 
 #include <QWidgetAction>
 #include <QVBoxLayout>
-#include <QGroupBox>
+#include <QLabel>
 #include <QToolButton>
 #include <QMenu>
 
@@ -42,6 +42,21 @@ public:
     protected:
         WidgetAction*   _widgetAction;
         State           _state;
+    };
+
+    class Label : public QLabel {
+    public:
+        explicit Label(const QString& text, QWidget* parent = nullptr, Qt::WindowFlags windowFlags = Qt::WindowFlags());
+
+        void enterEvent(QEvent *ev) override
+        {
+            setStyleSheet("QLabel { text-decoration: underline; }");
+        }
+
+        void leaveEvent(QEvent *ev) override
+        {
+            setStyleSheet("QLabel { text-decoration: none; }");
+        }
     };
 
     class ToolButton : public QToolButton {
@@ -94,7 +109,7 @@ public:
 
     }
 
-    QLabel* createLabelWidget(QWidget* parent);
+    Label* createLabelWidget(QWidget* parent);
 
     WidgetAction& operator= (const WidgetAction& other)
     {
