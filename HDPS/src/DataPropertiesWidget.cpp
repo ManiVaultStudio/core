@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QTreeWidgetItem>
+#include <QColor>
 
 namespace hdps
 {
@@ -58,6 +59,8 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             auto button = addButton(exposedAction->text());
             auto section = addWidget(button, exposedAction->createWidget(this));
 
+            section->setBackground(0, QColor(240, 0, 240));
+
             button->addChild(section);
 
             button->setExpanded(exposedWidgetActionGroup->isExpanded());
@@ -83,10 +86,9 @@ QTreeWidgetItem* DataPropertiesWidget::addWidget(QTreeWidgetItem* buttonTreeWidg
     widget->setAutoFillBackground(true);
     widget->setMinimumHeight(10);
 
-    auto section = new QTreeWidgetItem(buttonTreeWidgetItem);
-    
-    auto containerWidget = new QWidget();
-    auto containerLayout = new QVBoxLayout();
+    auto section            = new QTreeWidgetItem(buttonTreeWidgetItem);
+    auto containerWidget    = new QWidget();
+    auto containerLayout    = new QVBoxLayout();
 
     containerLayout->setSizeConstraint(QLayout::SetMaximumSize);
     containerLayout->addWidget(widget);

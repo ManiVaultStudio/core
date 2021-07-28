@@ -146,7 +146,22 @@ QMenu* DataHierarchyItem::getContextMenu()
 
     Q_ASSERT(_dataset != nullptr);
 
-    return _dataset->getContextMenu();
+    auto contextMenu = _dataset->getContextMenu();
+
+    // Extract name of item that triggered the context menu action
+    QAction* act = qobject_cast<QAction*>(sender());
+
+    QString datasetName = act->data().toString();
+
+    // Pop up a dialog where the user can enter a new name
+    bool ok;
+
+    QString newDatasetName = QInputDialog::getText(this, tr("Rename Dataset"), tr("Dataset name:"), QLineEdit::Normal, datasetName, &ok);
+
+    if (ok && !newDatasetName.isEmpty())
+        _core->getDataManager().renameSet(datasetName, newDatasetName);
+
+    return contextMenu;
 }
 
 QString DataHierarchyItem::getDatasetName() const

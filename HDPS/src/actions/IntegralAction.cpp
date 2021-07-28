@@ -131,6 +131,16 @@ void IntegralAction::setUpdateDuringDrag(const bool& updateDuringDrag)
     _updateDuringDrag = updateDuringDrag;
 }
 
+bool IntegralAction::isAtMinimum() const
+{
+    return _value == _minimum;
+}
+
+bool IntegralAction::isAtMaximum() const
+{
+    return _value == _maximum;
+}
+
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
     WidgetAction::Widget(parent, integralAction, Widget::State::Standard),
     _spinBox(new QSpinBox())

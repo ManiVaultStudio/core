@@ -29,6 +29,7 @@ public:
     };
 
 public:
+
     /**
      * Constructor
      * @param datasetName Name of the dataset (empty for root)

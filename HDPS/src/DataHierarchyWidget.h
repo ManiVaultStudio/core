@@ -26,11 +26,10 @@ public:
 public slots:
     void itemContextMenu(const QPoint& pos);
 
-    void dataRenamed();
-
 signals:
+
     /**
-     * Invoked when the selected data changed
+     * Invoked when the selected data name changed
      * @param datasetName Name of the newly selected dataset
      */
     void selectedDatasetNameChanged(const QString& datasetName);

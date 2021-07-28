@@ -81,6 +81,9 @@ public:
     bool getUpdateDuringDrag() const;
     void setUpdateDuringDrag(const bool& updateDuringDrag);
 
+    bool isAtMinimum() const;
+    bool isAtMaximum() const;
+
     IntegralAction& operator= (const IntegralAction& other)
     {
         WidgetAction::operator=(other);
