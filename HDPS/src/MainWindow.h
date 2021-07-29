@@ -3,7 +3,6 @@
 #include "ui_MainWindow.h"
 #include "Core.h"
 #include "LogDockWidget.h"
-#include "widgets/Accordion.h"
 
 #include <QMainWindow>
 #include <QAction>
@@ -137,7 +136,6 @@ private: // Docking
 
 private:
     QSharedPointer<Core>        _core;                          /** HDPS core */
-    QSharedPointer<Accordion>   _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
     DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget     */
     DataPropertiesWidget*       _dataPropertiesWidget;          /** Data properties widget */
 

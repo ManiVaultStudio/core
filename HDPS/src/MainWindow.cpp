@@ -38,7 +38,6 @@ namespace gui
 MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
     _core(nullptr),
-    _analysisPluginsAccordion(QSharedPointer<Accordion>::create()),
     _dataHierarchyWidget(nullptr),
     _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),

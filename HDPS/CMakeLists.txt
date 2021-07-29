@@ -91,10 +91,7 @@ set( WIDGET_HEADERS
     src/widgets/ColorPickerPushButton.h
     src/widgets/MaterialCheckBoxWidget.h
     src/widgets/DataSlot.h
-    src/widgets/Accordion.h
-    src/widgets/AccordionSection.h
     src/widgets/DockableWidget.h
-    src/widgets/SettingsWidget.h
     src/widgets/DropWidget.h
 )
 
@@ -104,10 +101,7 @@ set( WIDGET_SOURCES
     src/widgets/ColorPickerPushButton.cpp
     src/widgets/MaterialCheckBoxWidget.cpp
     src/widgets/DataSlot.cpp
-    src/widgets/Accordion.cpp
-    src/widgets/AccordionSection.cpp
     src/widgets/DockableWidget.cpp
-    src/widgets/SettingsWidget.cpp
     src/widgets/DropWidget.cpp
 )
 

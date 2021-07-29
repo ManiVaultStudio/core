@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PluginFactory.h"
-#include "widgets/SettingsWidget.h"
 
 #include <memory>
 
