@@ -45,11 +45,6 @@
     <addaction name="openProjectAction"/>
     <addaction name="exitAction"/>
    </widget>
-   <widget class="QMenu" name="menuAnalysis">
-    <property name="title">
-     <string>Analysis</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuVisualization">
     <property name="title">
      <string>Visualization</string>
@@ -63,7 +58,6 @@
     <addaction name="logViewAction"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuAnalysis"/>
    <addaction name="menuVisualization"/>
    <addaction name="menuHelp"/>
   </widget>

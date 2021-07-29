@@ -108,9 +108,6 @@ QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
 {
     switch (type)
     {
-        case plugin::Type::ANALYSIS:
-            return menuAnalysis->addAction(name);
-
         case plugin::Type::VIEW:
             return menuVisualization->addAction(name);
 
