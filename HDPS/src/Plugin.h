@@ -36,7 +36,7 @@ public:
      * This function gets called when the plugin is first instantiated.
      */
     virtual void init() = 0;
-	
+
     /** Returns the unique name of this plugin */
     QString getName() const {
         return _name;
@@ -88,6 +88,11 @@ public:
 
         setEventCore(core);
     }
+
+    /**
+     * Returns a list of datatypes that is supported for operations by this plugin.
+     */
+    virtual DataTypes supportedDataTypes() const = 0;
 
 public: // Properties
 

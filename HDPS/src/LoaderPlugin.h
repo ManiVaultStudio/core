@@ -36,14 +36,14 @@ class LoaderPlugin : public Plugin
 public:
     LoaderPlugin(QString name) : Plugin(Type::LOADER, name) { }
 
+    ~LoaderPlugin() override {};
+
     /**
      * Should be implemented by loader plugins to parse their specific data.
      * This function will be called when the user clicks on the menu item for this loader.
      * The implementation is free to create file dialogs if desired.
      */
     virtual void loadData() = 0;
-
-    ~LoaderPlugin() override {};
 
     /** Returns the icon of this plugin */
     QIcon getIcon() const override {

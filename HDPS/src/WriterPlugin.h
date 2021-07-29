@@ -21,9 +21,9 @@ class WriterPlugin : public Plugin
 public:
     WriterPlugin(QString name) : Plugin(Type::WRITER, name) { }
 
-    virtual void writeData() = 0;
-
     ~WriterPlugin() override {};
+
+    virtual void writeData() = 0;
 
     /** Returns the icon of this plugin */
     QIcon getIcon() const override {

@@ -26,6 +26,9 @@ namespace hdps {
 
         virtual DataSet* createDataSet() const = 0;
 
+        // Override supportedDataTypes function, so custom data types don't need to supply it.
+        virtual DataTypes supportedDataTypes() const override { return DataTypes(); }
+
     private:
         DataType _dataType;
     };
