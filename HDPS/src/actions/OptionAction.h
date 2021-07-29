@@ -54,8 +54,9 @@ public:
     QStringList getOptions() const;
     bool hasOptions() const;
     void setOptions(const QStringList& options);
-    void setModel(QAbstractListModel* listModel);
-    bool hasModel() const;
+
+    void setCustomListModel(QAbstractListModel* listModel);
+    bool hasCustomListModel() const;
 
     std::int32_t getCurrentIndex() const;
     void setCurrentIndex(const std::int32_t& currentIndex);
@@ -78,16 +79,16 @@ public:
 
 signals:
     void optionsChanged(const QStringList& options);
-    void modelChanged(QAbstractListModel* listModel);
+    void customListModelChanged(QAbstractListModel* customListModel);
     void currentIndexChanged(const std::int32_t& currentIndex);
     void defaultIndexChanged(const std::int32_t& defaultIndex);
     void currentTextChanged(const QString& currentText);
 
 protected:
-    QStringListModel        _defaultModel;
-    QAbstractListModel*     _model;
-    std::int32_t            _currentIndex;
-    std::int32_t            _defaultIndex;
+    QStringListModel        _defaultModel;          /** Default simple string list model */
+    QAbstractListModel*     _customListModel;       /** Custom list model for enriched (combobox) ui */
+    std::int32_t            _currentIndex;          /** Currently selected index */
+    std::int32_t            _defaultIndex;          /** Default index */
 };
 
 }

@@ -13,7 +13,7 @@ namespace gui {
 OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent),
     _defaultModel(),
-    _model(nullptr),
+    _customListModel(nullptr),
     _currentIndex(-1),
     _defaultIndex(0)
 {
@@ -44,25 +44,25 @@ void OptionAction::setOptions(const QStringList& options)
 
 const QAbstractListModel* OptionAction::getModel() const
 {
-    if (_model != nullptr)
-        return _model;
+    if (_customListModel != nullptr)
+        return _customListModel;
 
     return &_defaultModel;
 }
 
-void OptionAction::setModel(QAbstractListModel* listModel)
+void OptionAction::setCustomListModel(QAbstractListModel* customListModel)
 {
-    if (listModel == _model)
+    if (customListModel == _customListModel)
         return;
 
-    _model = listModel;
+    _customListModel = customListModel;
 
-    emit modelChanged(_model);
+    emit customListModelChanged(_customListModel);
 }
 
-bool OptionAction::hasModel() const
+bool OptionAction::hasCustomListModel() const
 {
-    return _model != nullptr;
+    return _customListModel != nullptr;
 }
 
 std::int32_t OptionAction::getCurrentIndex() const
@@ -151,8 +151,6 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     _comboBox(new QComboBox()),
     _resetPushButton(new QPushButton())
 {
-    //comboBox->setSizeAdjustPolicy(QComboBox::SizeAdjustPolicy::AdjustToContents);
-
     _layout->setMargin(0);
     _layout->addWidget(_comboBox, 1);
 
@@ -165,7 +163,7 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     const auto populateComboBox = [this, optionAction, updateToolTip]() -> void {
         QSignalBlocker comboBoxSignalBlocker(_comboBox);
 
-        _comboBox->clear();
+        _comboBox->setModel(new QStringListModel());
         _comboBox->setModel(const_cast<QAbstractListModel*>(optionAction->getModel()));
         _comboBox->setEnabled(!optionAction->getOptions().isEmpty());
 
@@ -173,10 +171,6 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     };
 
     connect(optionAction, &OptionAction::optionsChanged, this, [this, populateComboBox](const QStringList& options) {
-        populateComboBox();
-    });
-
-    connect(optionAction, &OptionAction::modelChanged, this, [this, populateComboBox](QAbstractListModel* listModel) {
         populateComboBox();
     });
 
