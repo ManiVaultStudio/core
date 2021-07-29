@@ -148,6 +148,7 @@ QMenu* DataHierarchyItem::getContextMenu()
 
     auto contextMenu = _dataset->getContextMenu();
 
+    /*
     // Extract name of item that triggered the context menu action
     QAction* act = qobject_cast<QAction*>(sender());
 
@@ -160,6 +161,7 @@ QMenu* DataHierarchyItem::getContextMenu()
 
     if (ok && !newDatasetName.isEmpty())
         _core->getDataManager().renameSet(datasetName, newDatasetName);
+    */
 
     return contextMenu;
 }
