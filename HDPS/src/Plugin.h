@@ -14,6 +14,8 @@
 #include <QVariant>
 #include <QIcon>
 
+class QMenu;
+
 namespace hdps
 {
 namespace plugin
@@ -125,6 +127,15 @@ public: // Properties
     {
         return _properties.keys();
     }
+
+public: // GUI
+
+    /**
+     * Generates a context menu for display in other (view) plugins
+     * @param context Context of the plugin that requested the context menu
+     * @return Context menu
+     */
+    virtual QMenu* contextMenu(const QVariant& context) { return nullptr; };
 
 public: // Settings
 

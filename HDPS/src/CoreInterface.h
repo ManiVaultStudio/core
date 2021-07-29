@@ -15,6 +15,11 @@ namespace hdps
     class EventListener;
     class HierarchyDataItem;
 
+    namespace plugin
+    {
+        class Plugin;
+    }
+
 class CoreInterface
 {
 public:
@@ -82,6 +87,8 @@ public:
      * @param datasetName Name of the dataset to analyze
      */
     virtual const void analyzeDataset(const QString analysisKind, const QString& datasetName) = 0;
+
+    virtual plugin::Plugin& requestAnalysis(const QString name) = 0;
 
     /** Notify registered listeners that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString datasetName) = 0;

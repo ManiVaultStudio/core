@@ -193,6 +193,23 @@ DataSet& Core::requestData(const QString name)
     }
 }
 
+hdps::plugin::Plugin& Core::requestAnalysis(const QString name)
+{
+    try {
+        auto analysisPluginsMap = std::map<QString, hdps::plugin::Plugin*>();
+
+        for (const auto& analysisPlugin : _plugins[plugin::Type::ANALYSIS]) {
+            analysisPluginsMap[analysisPlugin->getName()] = analysisPlugin.get();
+        }
+
+        return *analysisPluginsMap[name];
+    }
+    catch (AnalysisNotFoundException e)
+    {
+        QMessageBox::critical(nullptr, QString("HDPS"), e.what(), QMessageBox::Ok);
+    }
+}
+
 std::vector<QString> Core::requestAllDataNames()
 {
     const auto& datasetMap = _dataManager->allSets();

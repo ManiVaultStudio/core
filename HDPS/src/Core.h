@@ -26,6 +26,22 @@ namespace gui
     class MainWindow;
 }
 
+struct AnalysisNotFoundException : public std::exception
+{
+public:
+    AnalysisNotFoundException(QString analysisName) :
+        message((QString("Failed to find an analysis with name: ") + analysisName).toStdString())
+    { }
+
+    const char* what() const throw () override
+    {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
+};
+
 class Core : public CoreInterface
 {
 public:
@@ -84,6 +100,11 @@ public:
      * error is thrown.
      */
     DataSet& requestData(const QString datasetName) override;
+
+    /**
+    * Request an analysis by its name.
+    */
+    plugin::Plugin& requestAnalysis(const QString name) override;
 
     /**
     * Request all data set names.
