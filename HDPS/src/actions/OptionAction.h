@@ -49,7 +49,7 @@ protected:
     };
 
 public:
-    OptionAction(QObject* parent, const QString& title = "");
+    OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList());
 
     QStringList getOptions() const;
     bool hasOptions() const;
