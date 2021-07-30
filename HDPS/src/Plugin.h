@@ -89,11 +89,6 @@ public:
         setEventCore(core);
     }
 
-    /**
-     * Returns a list of datatypes that is supported for operations by this plugin.
-     */
-    virtual DataTypes supportedDataTypes() const = 0;
-
 public: // Properties
 
     /**
