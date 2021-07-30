@@ -48,10 +48,16 @@ protected:
     QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;
 
 public:
-    ToggleAction(QObject* parent, const QString& title = "");
+    ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = true, const bool& defaultToggled = true);
+
+    bool canReset() const;
+    void reset();
 
     Widget* createCheckBoxWidget(QWidget* parent) { return new Widget(parent, this);  };
     Widget* createPushButtonWidget(QWidget* parent) { return new Widget(parent, this, Mode::Button); };
+
+protected:
+    bool    _defaultToggled;            /** Whether toggled by default */
 };
 
 }
