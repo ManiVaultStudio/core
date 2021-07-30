@@ -8,11 +8,23 @@ namespace hdps {
 
 namespace gui {
 
-ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/) :
-    WidgetAction(parent)
+ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= true*/, const bool& defaultToggled /*= true*/) :
+    WidgetAction(parent),
+    _defaultToggled(defaultToggled)
 {
     setCheckable(true);
     setText(title);
+    setChecked(toggled);
+}
+
+bool ToggleAction::canReset() const
+{
+    return isChecked() == _defaultToggled;
+}
+
+void ToggleAction::reset()
+{
+    setChecked(_defaultToggled);
 }
 
 ToggleAction::Widget::Widget(QWidget* parent, ToggleAction* checkAction, const Mode& mode /*= Mode::CheckBox*/) :
