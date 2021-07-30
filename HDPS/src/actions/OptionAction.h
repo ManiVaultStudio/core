@@ -2,6 +2,8 @@
 
 #include "WidgetAction.h"
 
+#include <QStringListModel>
+
 class QWidget;
 class QComboBox;
 class QPushButton;
@@ -47,14 +49,14 @@ protected:
     };
 
 public:
-    OptionAction(QObject* parent, const QString& title = "");
+    OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList());
 
     QStringList getOptions() const;
     bool hasOptions() const;
     void setOptions(const QStringList& options);
-    QAbstractListModel* getModel();
-    void setModel(QAbstractListModel* listModel);
-    bool hasModel() const;
+
+    void setCustomListModel(QAbstractListModel* listModel);
+    bool hasCustomListModel() const;
 
     std::int32_t getCurrentIndex() const;
     void setCurrentIndex(const std::int32_t& currentIndex);
@@ -62,39 +64,31 @@ public:
     std::int32_t getDefaultIndex() const;
     void setDefaultIndex(const std::int32_t& defaultIndex);
 
+    QString getDefaultText() const;
+    void setDefaultText(const QString& defaultText);
+
     bool canReset() const;
     void reset();
-    void clearOptions();
 
     QString getCurrentText() const;
     void setCurrentText(const QString& currentText);
 
     bool hasSelection() const;
 
-    OptionAction& operator= (const OptionAction& other)
-    {
-        WidgetAction::operator=(other);
-
-        _options        = other._options;
-        _model          = other._model;
-        _currentIndex   = other._currentIndex;
-        _defaultIndex   = other._defaultIndex;
-
-        return *this;
-    }
+    const QAbstractListModel* getModel() const;;
 
 signals:
     void optionsChanged(const QStringList& options);
-    void modelChanged(QAbstractListModel* listModel);
+    void customListModelChanged(QAbstractListModel* customListModel);
     void currentIndexChanged(const std::int32_t& currentIndex);
     void defaultIndexChanged(const std::int32_t& defaultIndex);
     void currentTextChanged(const QString& currentText);
 
 protected:
-    QStringList             _options;
-    QAbstractListModel*     _model;
-    std::int32_t            _currentIndex;
-    std::int32_t            _defaultIndex;
+    QStringListModel        _defaultModel;          /** Default simple string list model */
+    QAbstractListModel*     _customListModel;       /** Custom list model for enriched (combobox) ui */
+    std::int32_t            _currentIndex;          /** Currently selected index */
+    std::int32_t            _defaultIndex;          /** Default index */
 };
 
 }

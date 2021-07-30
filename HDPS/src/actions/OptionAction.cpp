@@ -10,57 +10,60 @@ namespace hdps {
 
 namespace gui {
 
-OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/) :
+OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/) :
     WidgetAction(parent),
-    _options(),
-    _model(nullptr),
+    _defaultModel(),
+    _customListModel(nullptr),
     _currentIndex(-1),
     _defaultIndex(0)
 {
     setText(title);
+    setOptions(options);
 }
 
 QStringList OptionAction::getOptions() const
 {
-    return _options;
+    QStringList options;
+
+    for (int rowIndex = 0; rowIndex < getModel()->rowCount(); ++rowIndex)
+        options << getModel()->index(rowIndex, 0).data(Qt::DisplayRole).toString();
+
+    return options;
 }
 
 bool OptionAction::hasOptions() const
 {
-    return !_options.isEmpty();
+    return !getOptions().isEmpty();
 }
 
 void OptionAction::setOptions(const QStringList& options)
 {
-    if (options == _options)
+    _defaultModel.setStringList(options);
+
+    emit optionsChanged(getOptions());
+}
+
+const QAbstractListModel* OptionAction::getModel() const
+{
+    if (_customListModel != nullptr)
+        return _customListModel;
+
+    return &_defaultModel;
+}
+
+void OptionAction::setCustomListModel(QAbstractListModel* customListModel)
+{
+    if (customListModel == _customListModel)
         return;
 
-    _options = options;
+    _customListModel = customListModel;
 
-    emit optionsChanged(_options);
-
-    if (_currentIndex >= options.count())
-        setCurrentIndex(0);
+    emit customListModelChanged(_customListModel);
 }
 
-QAbstractListModel* OptionAction::getModel()
+bool OptionAction::hasCustomListModel() const
 {
-    return _model;
-}
-
-void OptionAction::setModel(QAbstractListModel* listModel)
-{
-    if (listModel == _model)
-        return;
-
-    _model = listModel;
-
-    emit modelChanged(_model);
-}
-
-bool OptionAction::hasModel() const
-{
-    return _model != nullptr;
+    return _customListModel != nullptr;
 }
 
 std::int32_t OptionAction::getCurrentIndex() const
@@ -73,7 +76,7 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     if (currentIndex == _currentIndex)
         return;
 
-    if (!hasModel() && currentIndex >= static_cast<std::int32_t>(_options.count()))
+    if (currentIndex >= static_cast<std::int32_t>(getOptions().count()))
         return;
 
     _currentIndex = currentIndex;
@@ -97,6 +100,16 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
     emit defaultIndexChanged(_defaultIndex);
 }
 
+QString OptionAction::getDefaultText() const
+{
+    return getOptions()[_defaultIndex];
+}
+
+void OptionAction::setDefaultText(const QString& defaultText)
+{
+    _defaultIndex = getOptions().indexOf(defaultText);
+}
+
 bool OptionAction::canReset() const
 {
     return _currentIndex != _defaultIndex;
@@ -107,38 +120,22 @@ void OptionAction::reset()
     setCurrentIndex(_defaultIndex);
 }
 
-void OptionAction::clearOptions()
-{
-    _options.clear();
-}
-
 QString OptionAction::getCurrentText() const
 {
     if (_currentIndex < 0)
         return "";
 
-    if (hasModel())
-        return _model->data(_model->index(_currentIndex, 0), Qt::DisplayRole).toString();
-    else
-        return _options[_currentIndex];
+    return getOptions()[_currentIndex];
 }
 
 void OptionAction::setCurrentText(const QString& currentText)
 {
-    if (!_options.contains(currentText))
+    const auto options = getOptions();
+
+    if (!options.contains(currentText))
         return;
 
-    if (hasModel()) {
-        const auto matches = _model->match(_model->index(0), Qt::DisplayRole, currentText, Qt::MatchFlag::MatchExactly);
-
-        if (!matches.isEmpty())
-            _currentIndex = matches.first().row();
-    } else {
-        if (_options.contains(currentText))
-            _currentIndex = _options.indexOf(currentText);
-        else
-            _currentIndex = 0;
-    }
+    _currentIndex = options.indexOf(currentText);
 
     emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
@@ -155,8 +152,6 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     _comboBox(new QComboBox()),
     _resetPushButton(new QPushButton())
 {
-    //comboBox->setSizeAdjustPolicy(QComboBox::SizeAdjustPolicy::AdjustToContents);
-
     _layout->setMargin(0);
     _layout->addWidget(_comboBox, 1);
 
@@ -169,28 +164,14 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     const auto populateComboBox = [this, optionAction, updateToolTip]() -> void {
         QSignalBlocker comboBoxSignalBlocker(_comboBox);
 
-        _comboBox->clear();
-
-        if (optionAction->hasModel()) {
-            _comboBox->setModel(optionAction->getModel());
-        }
-        else {
-            const auto options = optionAction->getOptions();
-            
-            _comboBox->addItems(options);
-            _comboBox->setEnabled(!options.isEmpty());
-        }
-        
-        //comboBox->adjustSize();
+        _comboBox->setModel(new QStringListModel());
+        _comboBox->setModel(const_cast<QAbstractListModel*>(optionAction->getModel()));
+        _comboBox->setEnabled(!optionAction->getOptions().isEmpty());
 
         updateToolTip();
     };
 
     connect(optionAction, &OptionAction::optionsChanged, this, [this, populateComboBox](const QStringList& options) {
-        populateComboBox();
-    });
-
-    connect(optionAction, &OptionAction::modelChanged, this, [this, populateComboBox](QAbstractListModel* listModel) {
         populateComboBox();
     });
 
@@ -202,10 +183,6 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         
         _comboBox->setCurrentText(optionAction->getCurrentText());
     };
-
-    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, updateComboBoxSelection](const std::int32_t& currentIndex) {
-        updateComboBoxSelection();
-    });
 
     connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection, updateToolTip](const QString& currentText) {
         updateComboBoxSelection();
