@@ -39,8 +39,15 @@ QMenu* SharedActions::getContextMenu()
 {
     auto menu = new QMenu();
 
-    for (auto action : _actions)
-        menu->addMenu(action->getContextMenu());
+    for (auto action : _actions) {
+        auto contextMenu = action->getContextMenu();
+
+        if (contextMenu == nullptr)
+            continue;
+
+        menu->addMenu(contextMenu);
+    }
+        
 
     return menu;
 
