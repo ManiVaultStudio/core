@@ -8,7 +8,7 @@ namespace hdps {
 
 namespace gui {
 
-ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= true*/, const bool& defaultToggled /*= true*/) :
+ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/) :
     WidgetAction(parent),
     _defaultToggled(defaultToggled)
 {

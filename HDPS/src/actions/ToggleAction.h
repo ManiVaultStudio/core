@@ -48,7 +48,7 @@ protected:
     QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;
 
 public:
-    ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = true, const bool& defaultToggled = true);
+    ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = false, const bool& defaultToggled = false);
 
     bool canReset() const;
     void reset();
