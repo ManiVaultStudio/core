@@ -10,7 +10,7 @@ namespace hdps {
 
 namespace gui {
 
-OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/) :
+OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/) :
     WidgetAction(parent),
     _defaultModel(),
     _customListModel(nullptr),
@@ -19,6 +19,8 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
 {
     setText(title);
     setOptions(options);
+    setCurrentText(defaultOption);
+    setDefaultText(defaultOption);
 }
 
 QStringList OptionAction::getOptions() const
