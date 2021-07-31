@@ -26,9 +26,6 @@ namespace hdps {
 
         virtual DataSet* createDataSet() const = 0;
 
-        // Override supportedDataTypes function, so custom data types don't need to supply it.
-        virtual DataTypes supportedDataTypes() const override { return DataTypes(); }
-
     private:
         DataType _dataType;
     };
@@ -44,6 +41,9 @@ namespace plugin {
         ~RawDataFactory() override {};
     
         RawData* produce() override = 0;
+
+        // Override supportedDataTypes function, so custom data types don't need to supply it.
+        virtual DataTypes supportedDataTypes() const override { return DataTypes(); }
     };
 
 } // namespace plugin
