@@ -16,6 +16,7 @@ public:
 protected:
     hdps::gui::TriggerAction    _meanShiftAction;
     hdps::gui::TriggerAction    _tsneAction;
+    hdps::gui::TriggerAction    _hsneAction;
 };
 
 }

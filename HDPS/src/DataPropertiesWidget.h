@@ -15,11 +15,14 @@ class Core;
 namespace gui
 {
 
+class WidgetActionGroup;
+
 class SectionExpandButton : public QPushButton {
 public:
-    SectionExpandButton(QTreeWidgetItem* treeWidgetItem, const QString& text, QWidget* parent = nullptr);
+    SectionExpandButton(QTreeWidgetItem* treeWidgetItem, WidgetActionGroup* widgetActionGroup, const QString& text, QWidget* parent = nullptr);
 
 protected:
+    WidgetActionGroup*  _widgetActionGroup;
     QTreeWidgetItem*    _treeWidgetItem;
 };
     
@@ -39,8 +42,7 @@ public:
     void setDataset(const QString& datasetName);
 
 protected:
-    QTreeWidgetItem* addButton(const QString& title);
-    QTreeWidgetItem* addWidget(QTreeWidgetItem* buttonTreeWidgetItem, QWidget* widget);
+    QTreeWidgetItem* addButton(const QString& title, WidgetActionGroup* widgetActionGroup);
 
 protected:
     Core*           _core;          /** Pointer to core */

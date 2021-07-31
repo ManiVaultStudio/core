@@ -11,7 +11,8 @@ using namespace gui;
 AnalyzeDataAction::AnalyzeDataAction(QObject* parent, Core* core, const QString& datasetName) :
     WidgetAction(parent),
     _meanShiftAction(this, "Mean Shift Clustering"),
-    _tsneAction(this, "tSNE Analysis")
+    _tsneAction(this, "TSNE"),
+    _hsneAction(this, "HSNE")
 {
     //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
@@ -21,6 +22,10 @@ AnalyzeDataAction::AnalyzeDataAction(QObject* parent, Core* core, const QString&
 
     connect(&_tsneAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
         core->analyzeDataset("tSNE Analysis", datasetName);
+    });
+
+    connect(&_hsneAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
+        core->analyzeDataset("hSNE Analysis", datasetName);
     });
 }
 
@@ -32,6 +37,7 @@ QMenu* AnalyzeDataAction::getContextMenu()
 
     menu->addAction(&_meanShiftAction);
     menu->addAction(&_tsneAction);
+    menu->addAction(&_hsneAction);
 
     menu->addSeparator();
 
