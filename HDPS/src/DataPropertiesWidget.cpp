@@ -85,12 +85,18 @@ SectionExpandButton::SectionExpandButton(QTreeWidgetItem* treeWidgetItem, Widget
     _widgetActionGroup(widgetActionGroup),
     _treeWidgetItem(treeWidgetItem)
 {
+    auto frameLayout    = new QHBoxLayout();
+    auto iconLabel      = new QLabel();
+
+    frameLayout->addWidget(iconLabel);
+
+    setLayout(frameLayout);
 
     connect(this, &QPushButton::clicked, this, [this]() {
         _widgetActionGroup->toggle();
     });
 
-    const auto update = [this]() -> void {
+    const auto update = [this, iconLabel]() -> void {
         if (_widgetActionGroup->isExpanded()) {
             _treeWidgetItem->setExpanded(true);
 
@@ -107,7 +113,11 @@ SectionExpandButton::SectionExpandButton(QTreeWidgetItem* treeWidgetItem, Widget
             _treeWidgetItem->setExpanded(false);
             _treeWidgetItem->removeChild(_treeWidgetItem->child(0));
         }
-        
+
+        const auto iconName = _widgetActionGroup->isExpanded() ? "angle-down" : "angle-right";
+        const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
+
+        iconLabel->setPixmap(icon.pixmap(QSize(12, 12)));
     };
 
     connect(_widgetActionGroup, &WidgetActionGroup::expanded, this, [this, update]() {
