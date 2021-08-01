@@ -10,7 +10,7 @@ namespace gui {
  * Widget action group class
  *
  * Groups multiple actions
- * Instances of this class are represented by expandable/collapsible sections in the data editor widget
+ * When exposed in a dataset, the widget is added to the data properties widget as a section
  * 
  * @author Thomas Kroes
  */
@@ -19,6 +19,11 @@ class WidgetActionGroup : public WidgetAction
     Q_OBJECT
 
 public:
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     * @param expanded Whether the group is initially expanded/collapsed
+     */
     explicit WidgetActionGroup(QObject* parent, const bool& expanded = false);
 
     /** Set expanded/collapsed */
