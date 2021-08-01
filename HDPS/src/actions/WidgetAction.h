@@ -98,7 +98,7 @@ public:
     explicit WidgetAction(QObject* parent);
 
     QWidget* createWidget(QWidget* parent) override {
-        if (dynamic_cast<ToolButton*>(parent->parent()))
+        if (parent != nullptr && dynamic_cast<ToolButton*>(parent->parent()))
             return getWidget(parent, Widget::State::Popup);
 
         return getWidget(parent, Widget::State::Standard);

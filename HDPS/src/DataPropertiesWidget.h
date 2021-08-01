@@ -42,7 +42,7 @@ public:
     void setDataset(const QString& datasetName);
 
 protected:
-    QTreeWidgetItem* addButton(const QString& title, WidgetActionGroup* widgetActionGroup);
+    QTreeWidgetItem* addButton(WidgetActionGroup* widgetActionGroup);
 
 protected:
     Core*           _core;          /** Pointer to core */

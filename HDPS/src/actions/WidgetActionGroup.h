@@ -16,11 +16,30 @@ namespace gui {
  */
 class WidgetActionGroup : public WidgetAction
 {
+    Q_OBJECT
+
 public:
     explicit WidgetActionGroup(QObject* parent, const bool& expanded = false);
 
-    /** Returns whether or not the group is expanded */
+    /** Set expanded/collapsed */
+    void setExpanded(const bool& expanded);
+
+    /** Expand/collapse/toggle the group */
+    void expand();
+    void collapse();
+    void toggle();
+
+    /** Returns whether the group is expanded/collapsed */
     bool isExpanded() const;
+    bool isCollapsed() const;
+
+signals:
+
+    /** Signals that the group got expanded */
+    void expanded();
+
+    /** Signals that the group got collapsed */
+    void collapsed();
 
 protected:
     bool    _expanded;      /** Whether or not the group is expanded */

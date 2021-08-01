@@ -30,6 +30,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent, Core* core) :
     _treeWidget->setHeaderHidden(true);
     _treeWidget->setIndentation(0);
     _treeWidget->setAutoFillBackground(true);
+    _treeWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     //itemExpanded(QTreeWidgetItem *item)
 
@@ -58,7 +59,7 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             if (exposedWidgetActionGroup == nullptr)
                 continue;
 
-            addButton(exposedAction->text(), exposedWidgetActionGroup);
+            addButton(exposedWidgetActionGroup);
         }
     }
     catch (std::exception& e)
@@ -66,15 +67,16 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
     }
 }
 
-QTreeWidgetItem* DataPropertiesWidget::addButton(const QString& title, WidgetActionGroup* widgetActionGroup)
+QTreeWidgetItem* DataPropertiesWidget::addButton(WidgetActionGroup* widgetActionGroup)
 {
     auto treeWidgetItem = new QTreeWidgetItem();
 
     _treeWidget->addTopLevelItem(treeWidgetItem);
-    _treeWidget->setItemWidget(treeWidgetItem, 0, new SectionExpandButton(treeWidgetItem, widgetActionGroup, title));
-    
-    treeWidgetItem->setExpanded(widgetActionGroup->isExpanded());
 
+    auto button = new SectionExpandButton(treeWidgetItem, widgetActionGroup, widgetActionGroup->text());
+
+    _treeWidget->setItemWidget(treeWidgetItem, 0, button);
+    
     return treeWidgetItem;
 }
 
@@ -83,29 +85,40 @@ SectionExpandButton::SectionExpandButton(QTreeWidgetItem* treeWidgetItem, Widget
     _widgetActionGroup(widgetActionGroup),
     _treeWidgetItem(treeWidgetItem)
 {
-    connect(_treeWidgetItem->treeWidget(), &QTreeWidget::itemExpanded, this, [this](QTreeWidgetItem* treeWidgetItem) {
-        if (treeWidgetItem != _treeWidgetItem)
-            return;
-
-        auto section = new QTreeWidgetItem(_treeWidgetItem);
-
-        _treeWidgetItem->addChild(section);
-        _treeWidgetItem->treeWidget()->setItemWidget(section, 0, _widgetActionGroup->createWidget(this));
-    });
-
-    connect(_treeWidgetItem->treeWidget(), &QTreeWidget::itemCollapsed, this, [this](QTreeWidgetItem* treeWidgetItem) {
-        if (treeWidgetItem != _treeWidgetItem)
-            return;
-
-        _treeWidgetItem->removeChild(_treeWidgetItem->child(0));
-    });
 
     connect(this, &QPushButton::clicked, this, [this]() {
-        if (_treeWidgetItem->isExpanded())
-            _treeWidgetItem->treeWidget()->collapseItem(_treeWidgetItem);
-        else
-            _treeWidgetItem->treeWidget()->expandItem(_treeWidgetItem);
+        _widgetActionGroup->toggle();
     });
+
+    const auto update = [this]() -> void {
+        if (_widgetActionGroup->isExpanded()) {
+            _treeWidgetItem->setExpanded(true);
+
+            auto groupWidget = _widgetActionGroup->createWidget(this);
+
+            groupWidget->setAutoFillBackground(true);
+
+            auto section = new QTreeWidgetItem(_treeWidgetItem);
+
+            _treeWidgetItem->addChild(section);
+            _treeWidgetItem->treeWidget()->setItemWidget(section, 0, groupWidget);
+        }
+        else {
+            _treeWidgetItem->setExpanded(false);
+            _treeWidgetItem->removeChild(_treeWidgetItem->child(0));
+        }
+        
+    };
+
+    connect(_widgetActionGroup, &WidgetActionGroup::expanded, this, [this, update]() {
+        update();
+    });
+
+    connect(_widgetActionGroup, &WidgetActionGroup::collapsed, this, [this, update]() {
+        update();
+    });
+
+    update();
 }
 
 }
