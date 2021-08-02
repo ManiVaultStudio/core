@@ -27,7 +27,7 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
                 QModelIndex parentModelIndex;
 
                 if (dataset.getParentDatasetName().isEmpty())
-                    parentModelIndex = QModelIndex();
+                    parentModelIndex = index(0, 0);
                 else
                     parentModelIndex = match(index(0, 0), Qt::DisplayRole, dataset.getParentDatasetName(), 1, Qt::MatchFlag::MatchRecursive).first();
                 
