@@ -73,6 +73,15 @@ public:
     }
 
     /**
+     * Marks this dataset as derived and sets the dataset it's derived from to sourceDataName.
+     */
+    void setSourceData(QString sourceDataName)
+    {
+        _sourceSetName = sourceDataName;
+        _derived = true;
+    }
+
+    /**
      * Gets the selection associated with this data set. If the data set is
      * derived then the selection of the source data will be returned. Otherwise,
      * the selection of the set's data will be returned.
