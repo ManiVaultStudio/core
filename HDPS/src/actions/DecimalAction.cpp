@@ -148,53 +148,45 @@ void DecimalAction::setUpdateDuringDrag(const bool& updateDuringDrag)
     _updateDuringDrag = updateDuringDrag;
 }
 
-DecimalAction::Widget::Widget(QWidget* parent, DecimalAction* decimalAction) :
-    WidgetAction::Widget(parent, decimalAction, Widget::State::Standard),
-    _valueDoubleSpinBox(new QDoubleSpinBox()),
-    _valueSlider(new QSlider(Qt::Horizontal)),
-    _resetPushButton(new QPushButton())
+hdps::gui::DecimalAction::SpinBoxWidget* DecimalAction::createSpinBoxWidget(QWidget* parent)
 {
-    setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
+    return new SpinBoxWidget(parent, this);
+}
 
+hdps::gui::DecimalAction::SliderWidget* DecimalAction::createSliderWidget(QWidget* parent)
+{
+    return new SliderWidget(parent, this);
+}
+
+QWidget* DecimalAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
+{
+    auto widget = new QWidget(parent);
     auto layout = new QHBoxLayout();
 
-    layout->addWidget(_valueDoubleSpinBox);
-    layout->addWidget(_valueSlider);
-    layout->addWidget(_resetPushButton);
+    layout->setMargin(0);
+    layout->addWidget(new SpinBoxWidget(parent, this), 1);
+    layout->addWidget(new SliderWidget(parent, this), 2);
+
+    widget->setLayout(layout);
+
+    return widget;
+}
+
+DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
+    WidgetAction::Widget(parent, decimalAction, Widget::State::Standard),
+    _doubleSpinBox(new QDoubleSpinBox())
+{
+    _doubleSpinBox->setObjectName("DoubleSpinBox");
+
+    auto layout = new QHBoxLayout();
 
     setLayout(layout);
 
     layout->setMargin(0);
+    layout->addWidget(_doubleSpinBox);
 
-    _valueDoubleSpinBox->setFixedWidth(60);
-
-    connect(_valueDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
+    connect(_doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
         decimalAction->setValue(value);
-    });
-
-    const auto onUpdateAction = [this, decimalAction]() -> void {
-        decimalAction->setValue(static_cast<double>(_valueSlider->value()) / static_cast<double>(SLIDER_MULTIPLIER));
-    };
-
-    connect(_valueSlider, &QSlider::valueChanged, this, [this, decimalAction, onUpdateAction](int value) {
-        if (!decimalAction->getUpdateDuringDrag())
-            return;
-
-        onUpdateAction();
-    });
-
-    connect(_valueSlider, &QSlider::sliderReleased, this, [this, decimalAction, onUpdateAction]() {
-        if (decimalAction->getUpdateDuringDrag())
-            return;
-
-        onUpdateAction();
-    });
-
-    _resetPushButton->setVisible(false);
-    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-
-    connect(_resetPushButton, &QPushButton::clicked, this, [this, decimalAction]() {
-        decimalAction->reset();
     });
 
     const auto valueString = [](const double& value, const std::uint32_t& decimals) -> QString {
@@ -202,45 +194,24 @@ DecimalAction::Widget::Widget(QWidget* parent, DecimalAction* decimalAction) :
     };
 
     const auto setToolTips = [this, decimalAction, valueString]() {
-        const auto toolTip = QString("%1: %2%3").arg(decimalAction->text(), valueString(decimalAction->getValue(), decimalAction->getDecimals()), decimalAction->getSuffix());
-
-        if (_valueDoubleSpinBox)
-            _valueDoubleSpinBox->setToolTip(toolTip);
-
-        if (_valueSlider)
-            _valueSlider->setToolTip(toolTip);
+        _doubleSpinBox->setToolTip(QString("%1: %2%3").arg(decimalAction->text(), valueString(decimalAction->getValue(), decimalAction->getDecimals()), decimalAction->getSuffix()));
     };
 
     const auto onUpdateValue = [this, decimalAction, setToolTips]() {
         const auto value = decimalAction->getValue();
 
-        if (_valueDoubleSpinBox && value != _valueDoubleSpinBox->value())
-            _valueDoubleSpinBox->setValue(value);
-
-        if (_valueSlider && value * SLIDER_MULTIPLIER != _valueSlider->value())
-            _valueSlider->setValue(value * static_cast<double>(SLIDER_MULTIPLIER));
-
-        if (_resetPushButton)
-            _resetPushButton->setEnabled(decimalAction->canReset());
-
+        if (value == _doubleSpinBox->value())
+            return;
+        
+        _doubleSpinBox->setValue(value);
         setToolTips();
     };
 
     const auto onUpdateValueRange = [this, decimalAction]() {
-        QSignalBlocker spinBoxBlocker(_valueDoubleSpinBox), sliderBlocker(_valueSlider);
+        QSignalBlocker spinBoxBlocker(_doubleSpinBox);
 
-        const auto minimum = decimalAction->getMinimum();
-        const auto maximum = decimalAction->getMaximum();
-
-        if (_valueDoubleSpinBox) {
-            _valueDoubleSpinBox->setMinimum(minimum);
-            _valueDoubleSpinBox->setMaximum(maximum);
-        }
-        
-        if (_valueSlider) {
-            _valueSlider->setMinimum(minimum * SLIDER_MULTIPLIER);
-            _valueSlider->setMaximum(maximum * SLIDER_MULTIPLIER);
-        }
+        _doubleSpinBox->setMinimum(decimalAction->getMinimum());
+        _doubleSpinBox->setMaximum(decimalAction->getMaximum());
     };
 
     connect(decimalAction, &DecimalAction::minimumChanged, this, [this, decimalAction, onUpdateValueRange](const double& minimum) {
@@ -252,12 +223,12 @@ DecimalAction::Widget::Widget(QWidget* parent, DecimalAction* decimalAction) :
     });
 
     const auto onUpdateSuffix = [this, decimalAction, setToolTips]() {
-        if (!_valueDoubleSpinBox)
+        if (!_doubleSpinBox)
             return;
 
-        QSignalBlocker doubleSpinBoxBlocker(_valueDoubleSpinBox);
+        QSignalBlocker doubleSpinBoxBlocker(_doubleSpinBox);
 
-        _valueDoubleSpinBox->setSuffix(decimalAction->getSuffix());
+        _doubleSpinBox->setSuffix(decimalAction->getSuffix());
 
         setToolTips();
     };
@@ -267,38 +238,104 @@ DecimalAction::Widget::Widget(QWidget* parent, DecimalAction* decimalAction) :
     });
 
     const auto onUpdateDecimals = [this, decimalAction]() {
-        if (!_valueDoubleSpinBox)
+        if (!_doubleSpinBox)
             return;
 
-        QSignalBlocker doubleSpinBoxBlocker(_valueDoubleSpinBox);
+        QSignalBlocker doubleSpinBoxBlocker(_doubleSpinBox);
 
-        _valueDoubleSpinBox->setDecimals(decimalAction->getDecimals());
+        _doubleSpinBox->setDecimals(decimalAction->getDecimals());
     };
 
     connect(decimalAction, &DecimalAction::decimalsChanged, this, [this, decimalAction, onUpdateDecimals](const std::int32_t& decimals) {
         onUpdateDecimals();
     });
-    
-    const auto onUpdateDefaultValue = [this, valueString, decimalAction]() -> void {
-        if (!_resetPushButton)
-            return;
-
-        _resetPushButton->setToolTip(QString("Reset %1 to: %2").arg(decimalAction->text(), valueString(decimalAction->getDefaultValue(), decimalAction->getDecimals())));
-    };
 
     connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](const double& value) {
         onUpdateValue();
     });
 
-    connect(decimalAction, &DecimalAction::defaultValueChanged, this, [this, onUpdateDefaultValue](const double& value) {
-        onUpdateDefaultValue();
+    onUpdateValueRange();
+    onUpdateValue();
+    onUpdateSuffix();
+    onUpdateDecimals();
+    setToolTips();
+}
+
+DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decimalAction) :
+    WidgetAction::Widget(parent, decimalAction, Widget::State::Standard),
+    _slider(new QSlider(Qt::Horizontal))
+{
+    _slider->setObjectName("Slider");
+
+    auto layout = new QHBoxLayout();
+
+    setLayout(layout);
+
+    layout->setMargin(0);
+    layout->addWidget(_slider);
+
+    const auto onUpdateAction = [this, decimalAction]() -> void {
+        decimalAction->setValue(static_cast<double>(_slider->value()) / static_cast<double>(SLIDER_MULTIPLIER));
+    };
+
+    connect(_slider, &QSlider::valueChanged, this, [this, decimalAction, onUpdateAction](int value) {
+        if (!decimalAction->getUpdateDuringDrag())
+            return;
+
+        onUpdateAction();
+    });
+
+    connect(_slider, &QSlider::sliderReleased, this, [this, decimalAction, onUpdateAction]() {
+        if (decimalAction->getUpdateDuringDrag())
+            return;
+
+        onUpdateAction();
+    });
+
+    const auto valueString = [](const double& value, const std::uint32_t& decimals) -> QString {
+        return QString::number(value, 'f', decimals);
+    };
+
+    const auto setToolTips = [this, decimalAction, valueString]() {
+        const auto toolTip = QString("%1: %2%3").arg(decimalAction->text(), valueString(decimalAction->getValue(), decimalAction->getDecimals()), decimalAction->getSuffix());
+
+        if (_slider)
+            _slider->setToolTip(toolTip);
+    };
+
+    const auto onUpdateValue = [this, decimalAction, setToolTips]() {
+        const auto value        = decimalAction->getValue();
+        const auto sliderValue  = value * static_cast<double>(SLIDER_MULTIPLIER);
+
+        if (sliderValue == _slider->value())
+            return;
+
+        _slider->setValue(sliderValue);
+
+        setToolTips();
+    };
+
+    const auto onUpdateValueRange = [this, decimalAction]() {
+        QSignalBlocker sliderBlocker(_slider);
+
+        _slider->setMinimum(decimalAction->getMinimum() * SLIDER_MULTIPLIER);
+        _slider->setMaximum(decimalAction->getMaximum() * SLIDER_MULTIPLIER);
+    };
+
+    connect(decimalAction, &DecimalAction::minimumChanged, this, [this, decimalAction, onUpdateValueRange](const double& minimum) {
+        onUpdateValueRange();
+    });
+
+    connect(decimalAction, &DecimalAction::maximumChanged, this, [this, decimalAction, onUpdateValueRange](const double& maximum) {
+        onUpdateValueRange();
+    });
+
+    connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](const double& value) {
+        onUpdateValue();
     });
 
     onUpdateValueRange();
     onUpdateValue();
-    onUpdateDefaultValue();
-    onUpdateSuffix();
-    onUpdateDecimals();
     setToolTips();
 }
 

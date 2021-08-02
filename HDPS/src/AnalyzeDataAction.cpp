@@ -25,7 +25,7 @@ AnalyzeDataAction::AnalyzeDataAction(QObject* parent, Core* core, const QString&
     });
 
     connect(&_hsneAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
-        core->analyzeDataset("hSNE Analysis", datasetName);
+        core->analyzeDataset("HSNE Analysis", datasetName);
     });
 }
 

@@ -24,28 +24,36 @@ class DecimalAction : public WidgetAction
 
 public:
 
-    class Widget : public WidgetAction::Widget
+    class SpinBoxWidget : public WidgetAction::Widget
     {
     protected:
-        Widget(QWidget* parent, DecimalAction* decimalAction);
+        SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction);
         
     public:
-        QDoubleSpinBox* getDoubleSpinBox() { return _valueDoubleSpinBox; }
-        QSlider* getSlider() { return _valueSlider; }
-        QPushButton* getResetPushButton() { return _resetPushButton; }
+        QDoubleSpinBox* getDoubleSpinBox() { return _doubleSpinBox; }
 
     protected:
-        QDoubleSpinBox*     _valueDoubleSpinBox;
-        QSlider*            _valueSlider;
-        QPushButton*        _resetPushButton;
+        QDoubleSpinBox*     _doubleSpinBox;
+
+        friend class DecimalAction;
+    };
+
+    class SliderWidget : public WidgetAction::Widget
+    {
+    protected:
+        SliderWidget(QWidget* parent, DecimalAction* decimalAction);
+
+    public:
+        QSlider* getSlider() { return _slider; }
+
+    protected:
+        QSlider*    _slider;
 
         friend class DecimalAction;
     };
 
 protected:
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override {
-        return new DecimalAction::Widget(parent, this);
-    };
+    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;;
 
 public:
     DecimalAction(QObject * parent, const QString& title, const double& minimum = MIN_VALUE, const double& maximum = MAX_VALUE, const double& value = VALUE, const double& defaultValue = DEFAULT_VALUE, const std::int32_t& decimals = DECIMALS);
@@ -90,6 +98,9 @@ public:
 
         return *this;
     }
+
+    SpinBoxWidget* createSpinBoxWidget(QWidget* parent);
+    SliderWidget* createSliderWidget(QWidget* parent);
 
 signals:
     void valueChanged(const double& value);

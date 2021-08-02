@@ -48,12 +48,10 @@ protected:
     }
 
     void notifyProgressSection(const QString& section) {
-        QCoreApplication::processEvents();
         _core->notifyAnalysisEvent(AnalysisProgressSectionEvent(this, section));
     }
 
     void notifyProgressPercentage(const float& percentage) {
-        QCoreApplication::processEvents();
         _core->notifyAnalysisEvent(AnalysisProgressPercentageEvent(this, percentage));
     }
 
