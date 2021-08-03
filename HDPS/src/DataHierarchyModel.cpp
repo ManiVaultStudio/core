@@ -239,6 +239,8 @@ QVariant PluginHierarchyModel::headerData(int section, Qt::Orientation orientati
                 return "Name";
 
             case DataHierarchyItem::Column::Description:
+                return "Description";
+
             case DataHierarchyItem::Column::Analyzing:
             case DataHierarchyItem::Column::Progress:
                 return "";
