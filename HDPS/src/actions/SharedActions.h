@@ -45,7 +45,17 @@ public:
      */
     gui::WidgetAction* getActionByName(const QString& name);
 
-    /** Returns context menu for the exposed actions */
+    /**
+     * Populates existing menu with exposed actions menus
+     * @param contextMenu Context menu to populate
+     */
+    void populateContextMenu(QMenu* contextMenu = nullptr);
+
+    /**
+     * Gets context menu for the exposed actions
+     * @param targetMenu Target menu to insert the exposed action menus
+     * @return Context menu
+     */
     QMenu* getContextMenu();
 
 protected:

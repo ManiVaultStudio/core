@@ -35,6 +35,18 @@ hdps::gui::WidgetAction* SharedActions::getActionByName(const QString& name)
     return nullptr;
 }
 
+void SharedActions::populateContextMenu(QMenu* contextMenu /*= nullptr*/)
+{
+    for (auto action : _actions) {
+        auto contextMenu = action->getContextMenu();
+
+        if (contextMenu == nullptr)
+            continue;
+
+        contextMenu->addMenu(contextMenu);
+    }
+}
+
 QMenu* SharedActions::getContextMenu()
 {
     auto menu = new QMenu();
@@ -47,7 +59,6 @@ QMenu* SharedActions::getContextMenu()
 
         menu->addMenu(contextMenu);
     }
-        
 
     return menu;
 
