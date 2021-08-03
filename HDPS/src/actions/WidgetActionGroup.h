@@ -38,6 +38,12 @@ public:
     bool isExpanded() const;
     bool isCollapsed() const;
 
+    /**
+     * Sets the group read-only
+     * @param readOnly Whether the group is read-only
+     */
+    virtual void setReadOnly() {};
+
 signals:
 
     /** Signals that the group got expanded */
