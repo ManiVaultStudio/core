@@ -38,7 +38,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress), 50);
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), 20);
 
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Name), QHeaderView::Stretch);
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Name), QHeaderView::Interactive);
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Description), QHeaderView::Stretch);
     header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress), QHeaderView::Fixed);
     header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), QHeaderView::Fixed);
 
