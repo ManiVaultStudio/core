@@ -18,6 +18,11 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
     _defaultIndex(0)
 {
     setText(title);
+    initialize(options, currentOption, defaultOption);
+}
+
+void OptionAction::initialize(const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
+{
     setOptions(options);
     setCurrentText(defaultOption);
     setDefaultText(defaultOption);
@@ -112,16 +117,6 @@ void OptionAction::setDefaultText(const QString& defaultText)
     _defaultIndex = getOptions().indexOf(defaultText);
 }
 
-bool OptionAction::canReset() const
-{
-    return _currentIndex != _defaultIndex;
-}
-
-void OptionAction::reset()
-{
-    setCurrentIndex(_defaultIndex);
-}
-
 QString OptionAction::getCurrentText() const
 {
     if (_currentIndex < 0)
@@ -143,21 +138,31 @@ void OptionAction::setCurrentText(const QString& currentText)
     emit currentIndexChanged(_currentIndex);
 }
 
+bool OptionAction::canReset() const
+{
+    return _currentIndex != _defaultIndex;
+}
+
+void OptionAction::reset()
+{
+    setCurrentIndex(_defaultIndex);
+}
+
 bool OptionAction::hasSelection() const
 {
     return _currentIndex >= 0;
 }
 
-OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
+OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction) :
     WidgetAction::Widget(parent, optionAction, Widget::State::Standard),
-    _layout(new QHBoxLayout()),
-    _comboBox(new QComboBox()),
-    _resetPushButton(new QPushButton())
+    _comboBox(new QComboBox())
 {
-    _layout->setMargin(0);
-    _layout->addWidget(_comboBox, 1);
+    auto layout = new QHBoxLayout();
 
-    setLayout(_layout);
+    layout->setMargin(0);
+    layout->addWidget(_comboBox, 1);
+
+    setLayout(layout);
 
     const auto updateToolTip = [this, optionAction]() -> void {
         _comboBox->setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
@@ -195,25 +200,6 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         optionAction->setCurrentIndex(currentIndex);
     });
 
-    _resetPushButton->setVisible(false);
-    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-    _resetPushButton->setToolTip(QString("Reset %1").arg(optionAction->text()));
-
-    _layout->addWidget(_resetPushButton);
-
-    connect(_resetPushButton, &QPushButton::clicked, this, [this, optionAction]() {
-        optionAction->reset();
-    });
-
-    const auto onUpdateCurrentIndex = [this, optionAction]() -> void {
-        _resetPushButton->setEnabled(optionAction->canReset());
-    };
-
-    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, onUpdateCurrentIndex](const QColor& color) {
-        onUpdateCurrentIndex();
-    });
-
-    onUpdateCurrentIndex();
     populateComboBox();
     updateComboBoxSelection();
     updateToolTip();
