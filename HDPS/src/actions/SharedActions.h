@@ -49,7 +49,7 @@ public:
      * Populates existing menu with exposed actions menus
      * @param contextMenu Context menu to populate
      */
-    void populateContextMenu(QMenu* contextMenu = nullptr);
+    void populateContextMenu(QMenu* contextMenu);
 
     /**
      * Gets context menu for the exposed actions
