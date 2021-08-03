@@ -138,7 +138,7 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const Widget::State& state /*=
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    return new ToggleAction::Widget(parent, this);
+    return new ToggleAction::PushButtonWidget(parent, this);
 }
 
 }
