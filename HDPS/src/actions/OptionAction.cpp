@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QComboBox>
-#include <QPushButton>
 
 namespace hdps {
 

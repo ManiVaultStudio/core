@@ -3,16 +3,22 @@
 
 #include <QHBoxLayout>
 #include <QLineEdit>
-#include <QPushButton>
 
 namespace hdps {
 
 namespace gui {
 
-StringAction::StringAction(QObject* parent, const QString& title /*= ""*/) :
+StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
     WidgetAction(parent)
 {
     setText(title);
+    initialize(string, defaultString);
+}
+
+void StringAction::initialize(const QString& string /*= ""*/, const QString& defaultString /*= ""*/)
+{
+    setString(string);
+    setDefaultString(defaultString);
 }
 
 QString StringAction::getString() const
@@ -55,18 +61,20 @@ void StringAction::reset()
     setString(_defaultString);
 }
 
-StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction) :
+StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
     WidgetAction::Widget(parent, stringAction, Widget::State::Standard),
-    _layout(new QHBoxLayout()),
-    _lineEdit(new QLineEdit()),
-    _resetPushButton(new QPushButton())
+    _lineEdit(new QLineEdit())
 {
-    _layout->setMargin(0);
-    _layout->addWidget(_lineEdit);
+    auto layout = new QHBoxLayout();
 
-    setLayout(_layout);
+    layout->setMargin(0);
+    layout->addWidget(_lineEdit);
+
+    setLayout(layout);
 
     const auto updateLineEdit = [this, stringAction]() {
+        QSignalBlocker blocker(_lineEdit);
+
         _lineEdit->setText(stringAction->getString());
     };
 
@@ -78,25 +86,6 @@ StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction) :
         stringAction->setString(text);
     });
 
-    _resetPushButton->setVisible(false);
-    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-    _resetPushButton->setToolTip(QString("Reset %1").arg(stringAction->text()));
-
-    _layout->addWidget(_resetPushButton);
-
-    connect(_resetPushButton, &QPushButton::clicked, this, [this, stringAction]() {
-        stringAction->reset();
-    });
-
-    const auto onUpdateString = [this, stringAction]() -> void {
-        _resetPushButton->setEnabled(stringAction->canReset());
-    };
-
-    connect(stringAction, &StringAction::stringChanged, this, [this, onUpdateString](const QColor& color) {
-        onUpdateString();
-    });
-
-    onUpdateString();
     updateLineEdit();
 }
 

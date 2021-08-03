@@ -23,40 +23,85 @@ class StringAction : public WidgetAction
 
 public:
 
-    class Widget : public WidgetAction::Widget {
+    /**
+     * Line edit widget class for string action
+     */
+    class LineEditWidget : public WidgetAction::Widget
+    {
     protected:
-        Widget(QWidget* parent, StringAction* stringAction);
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param stringAction Pointer to string action
+         */
+        LineEditWidget(QWidget* parent, StringAction* stringAction);
 
     public:
-        QHBoxLayout* getLayout() { return _layout; }
+
+        /** Gets the line edit widget */
         QLineEdit* getLineEdit() { return _lineEdit; }
-        QPushButton* getResetPushButton() { return _resetPushButton; }
 
     protected:
-        QHBoxLayout*    _layout;
-        QLineEdit*      _lineEdit;
-        QPushButton*    _resetPushButton;
+        QLineEdit*      _lineEdit;      /** Line edit widget */
 
         friend class StringAction;
     };
 
 protected:
+
+    /**
+     * Get widget representation of the string action
+     * @param parent Pointer to parent widget
+     * @param state Widget state
+     */
     QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override {
-        return new StringAction::Widget(parent, this);
+        return new StringAction::LineEditWidget(parent, this);
     };
 
 public:
-    StringAction(QObject* parent, const QString& title = "");
 
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     * @param title Title of the action
+     * @param string String
+     * @param defaultString Default string
+     */
+    StringAction(QObject* parent, const QString& title = "", const QString& string = "", const QString& defaultString = "");
+
+    /**
+     * Initialize the string action
+     * @param string String
+     * @param defaultString Default string
+     */
+    void initialize(const QString& string = "", const QString& defaultString = "");
+
+    /** Gets the current string */
     QString getString() const;
+
+    /**
+     * Sets the current string
+     * @param string Current string
+     */
     void setString(const QString& string);
 
+    /** Gets the default string */
     QString getDefaultString() const;
+
+    /**
+     * Sets the default string
+     * @param defaultString Default string
+     */
     void setDefaultString(const QString& defaultString);
 
+    /** Determines whether the current string can be reset to its default string */
     bool canReset() const;
+
+    /** Reset the current string to the default string */
     void reset();
 
+    /*
     StringAction& operator= (const StringAction& other)
     {
         WidgetAction::operator=(other);
@@ -66,14 +111,25 @@ public:
 
         return *this;
     }
+    */
 
 signals:
+
+    /**
+     * Signals that the current string changed
+     * @param string Current string that changed
+     */
     void stringChanged(const QString& string);
+
+    /**
+     * Signals that the default string changed
+     * @param defaultString Default string that changed
+     */
     void defaultStringChanged(const QString& defaultString);
 
 protected:
-    QString     _string;
-    QString     _defaultString;
+    QString     _string;            /** Current string */
+    QString     _defaultString;     /** Default string */
 };
 
 }

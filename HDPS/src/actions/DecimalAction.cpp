@@ -4,7 +4,6 @@
 
 #include <QHBoxLayout>
 #include <QDoubleSpinBox>
-#include <QPushButton>
 #include <QSlider>
 
 namespace hdps {
