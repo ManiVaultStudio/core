@@ -44,22 +44,27 @@ public:
 
 protected:
     void notifyStarted() {
+        qApp->processEvents();
         _core->notifyAnalysisEvent(AnalysisStartedEvent(this));
     }
 
     void notifyProgressSection(const QString& section) {
+        qApp->processEvents();
         _core->notifyAnalysisEvent(AnalysisProgressSectionEvent(this, section));
     }
 
     void notifyProgressPercentage(const float& percentage) {
+        qApp->processEvents();
         _core->notifyAnalysisEvent(AnalysisProgressPercentageEvent(this, percentage));
     }
 
     void notifyFinished() {
+        qApp->processEvents();
         _core->notifyAnalysisEvent(AnalysisFinishedEvent(this));
     }
 
     void notifyAborted(const QString& reason) {
+        qApp->processEvents();
         _core->notifyAnalysisEvent(AnalysisAbortedEvent(this, reason));
     }
 

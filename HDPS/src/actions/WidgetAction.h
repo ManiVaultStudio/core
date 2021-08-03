@@ -46,7 +46,7 @@ public:
 
     class Label : public QLabel {
     public:
-        explicit Label(const QString& text, QWidget* parent = nullptr, Qt::WindowFlags windowFlags = Qt::WindowFlags());
+        explicit Label(WidgetAction* widgetAction, QWidget* parent = nullptr, Qt::WindowFlags windowFlags = Qt::WindowFlags());
 
         void enterEvent(QEvent *ev) override
         {

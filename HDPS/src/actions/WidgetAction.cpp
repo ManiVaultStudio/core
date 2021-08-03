@@ -50,15 +50,7 @@ WidgetAction::WidgetAction(QObject* parent) :
 
 WidgetAction::Label* WidgetAction::createLabelWidget(QWidget* parent)
 {
-    auto label = new WidgetAction::Label(text(), parent);
-
-    connect(this, &QAction::changed, this, [this, label]() {
-        label->setEnabled(isEnabled());
-        label->setText(text());
-        label->setToolTip(toolTip());
-    });
-
-    return label;
+    return new WidgetAction::Label(this, parent);
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
@@ -164,9 +156,14 @@ void WidgetAction::ToolButton::paintEvent(QPaintEvent* paintEvent)
 
 
 
-WidgetAction::Label::Label(const QString& text, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
-    QLabel(text, parent, windowFlags)
+WidgetAction::Label::Label(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
+    QLabel(widgetAction->text(), parent, windowFlags)
 {
+    connect(widgetAction, &WidgetAction::changed, this, [this]() {
+        setEnabled(isEnabled());
+        setText(text());
+        setToolTip(toolTip());
+    });
 }
 
 }
