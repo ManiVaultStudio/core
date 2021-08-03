@@ -24,7 +24,7 @@ class ColorAction : public WidgetAction
 public:
 
     /**
-     * Color color picker push button class
+     * Color color picker push button class for color action
      */
     class ColorPickerPushButtonWidget : public WidgetAction::Widget {
     protected:
@@ -32,7 +32,7 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param parent Pointer to color action
+         * @param colorAction Pointer to color action
          */
         ColorPickerPushButtonWidget(QWidget* parent, ColorAction* colorAction);
 
@@ -63,6 +63,7 @@ protected:
     };
 
 public:
+
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -82,7 +83,10 @@ public:
     /** Gets the current color */
     QColor getColor() const;
 
-    /** Sets the current color */
+    /**
+     * Sets the current color
+     * @param color Current color
+     */
     void setColor(const QColor& color);
 
     /** Gets the default color */
@@ -112,13 +116,13 @@ public:
 signals:
 
     /**
-     * Signals that the current color has changed
+     * Signals that the current color changed
      * @param color Current color that changed
      */
     void colorChanged(const QColor& color);
 
     /**
-     * Signals that the default color has changed
+     * Signals that the default color changed
      * @param defaultColor Default color that changed
      */
     void defaultColorChanged(const QColor& defaultColor);

@@ -22,6 +22,11 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const doubl
     _updateDuringDrag(true)
 {
     setText(title);
+    initialize(minimum, maximum, value, defaultValue, decimals);
+}
+
+void DecimalAction::initialize(const double& minimum /*= MIN_VALUE*/, const double& maximum /*= MAX_VALUE*/, const double& value /*= VALUE*/, const double& defaultValue /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DECIMALS*/)
+{
     setMinimum(minimum);
     setMaximum(maximum);
     setValue(value);
@@ -99,10 +104,10 @@ void DecimalAction::setMaximum(const double& maximum)
     emit maximumChanged(_maximum);
 }
 
-void DecimalAction::setRange(const double& min, const double& max)
+void DecimalAction::setRange(const double& minimum, const double& maximum)
 {
-    setMinimum(min);
-    setMaximum(max);
+    setMinimum(minimum);
+    setMaximum(maximum);
 }
 
 QString DecimalAction::getSuffix() const
