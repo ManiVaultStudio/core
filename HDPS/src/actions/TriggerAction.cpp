@@ -13,15 +13,16 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
     setText(title);
 }
 
-TriggerAction::Widget::Widget(QWidget* parent, TriggerAction* triggerAction) :
+TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction) :
     WidgetAction::Widget(parent, triggerAction, Widget::State::Standard),
-    _layout(new QHBoxLayout()),
     _pushButton(new QPushButton())
 {
-    _layout->setMargin(0);
-    _layout->addWidget(_pushButton);
+    auto layout = new QHBoxLayout();
 
-    setLayout(_layout);
+    layout->setMargin(0);
+    layout->addWidget(_pushButton);
+
+    setLayout(layout);
 
     connect(_pushButton, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
@@ -50,7 +51,7 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const Widget::State& state /*
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    return new TriggerAction::Widget(parent, this);
+    return new TriggerAction::PushButtonWidget(parent, this);
 }
 
 }

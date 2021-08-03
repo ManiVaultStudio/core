@@ -21,25 +21,46 @@ class TriggerAction : public WidgetAction
 
 public:
 
-    class Widget : public WidgetAction::Widget {
+    /**
+     * Push button widget class for trigger action
+     */
+    class PushButtonWidget : public WidgetAction::Widget {
     protected:
-        Widget(QWidget* parent, TriggerAction* triggerAction);
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param triggerAction Pointer to trigger action
+         */
+        PushButtonWidget(QWidget* parent, TriggerAction* triggerAction);
 
     public:
-        QHBoxLayout* getLayout() { return _layout; }
+
+        /** Gets the push button widget */
         QPushButton* getPushButton() { return _pushButton; }
 
     protected:
-        QHBoxLayout*    _layout;
-        QPushButton*    _pushButton;
+        QPushButton*    _pushButton;        /** Push button widget */
 
         friend class TriggerAction;
     };
 
 protected:
+
+    /**
+     * Get widget representation of the trigger action
+     * @param parent Pointer to parent widget
+     * @param state Widget state
+     */
     QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;;
 
 public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     * @param title Title of the action
+     */
     TriggerAction(QObject* parent, const QString& title = "");
 };
 
