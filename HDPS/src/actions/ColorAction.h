@@ -54,7 +54,7 @@ public:
 protected:
 
     /**
-     * Get widget representation of the action
+     * Get widget representation of the color action
      * @param parent Pointer to parent widget
      * @param state Widget state
      */

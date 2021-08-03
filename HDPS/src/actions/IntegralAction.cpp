@@ -21,6 +21,11 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     _updateDuringDrag(true)
 {
     setText(title);
+    initialize(minimum, maximum, value, defaultValue);
+}
+
+void IntegralAction::initialize(const std::int32_t& minimum /*= MIN_VALUE*/, const std::int32_t& maximum /*= MAX_VALUE*/, const std::int32_t& value /*= VALUE*/, const std::int32_t& defaultValue /*= DEFAULT_VALUE*/)
+{
     setMinimum(minimum);
     setMaximum(maximum);
     setValue(value);
@@ -97,10 +102,10 @@ void IntegralAction::setMaximum(const std::int32_t& maximum)
     emit maximumChanged(_maximum);
 }
 
-void IntegralAction::setRange(const std::int32_t& min, const std::int32_t& max)
+void IntegralAction::setRange(const std::int32_t& minimum, const std::int32_t& maximum)
 {
-    setMinimum(min);
-    setMaximum(max);
+    setMinimum(minimum);
+    setMaximum(maximum);
 }
 
 QString IntegralAction::getSuffix() const

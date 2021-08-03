@@ -153,6 +153,16 @@ void DecimalAction::setUpdateDuringDrag(const bool& updateDuringDrag)
     _updateDuringDrag = updateDuringDrag;
 }
 
+bool DecimalAction::isAtMinimum() const
+{
+    return _value == _minimum;
+}
+
+bool DecimalAction::isAtMaximum() const
+{
+    return _value == _maximum;
+}
+
 hdps::gui::DecimalAction::SpinBoxWidget* DecimalAction::createSpinBoxWidget(QWidget* parent)
 {
     return new SpinBoxWidget(parent, this);

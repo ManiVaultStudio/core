@@ -77,7 +77,7 @@ public:
 protected:
 
     /**
-     * Get widget representation of the action
+     * Get widget representation of the decimal action
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
@@ -183,6 +183,12 @@ public:
      */
     void setUpdateDuringDrag(const bool& updateDuringDrag);
 
+    /** Returns whether the current value is at its minimum */
+    bool isAtMinimum() const;
+
+    /** Returns whether the current value is at its maximum */
+    bool isAtMaximum() const;
+
     /*
     DecimalAction& operator= (const DecimalAction& other)
     {
@@ -201,14 +207,14 @@ public:
     */
 
     /**
-     * Create a spin box widget for the decimal action
+     * Creates a spin box widget to interact with the decimal action
      * @param parent Pointer to parent widget
      * @return Spin box widget
      */
     SpinBoxWidget* createSpinBoxWidget(QWidget* parent);
 
     /**
-     * Create a slider widget for the decimal action
+     * Creates a slider widget to interact with the decimal action
      * @param parent Pointer to parent widget
      * @return Slider widget
      */
