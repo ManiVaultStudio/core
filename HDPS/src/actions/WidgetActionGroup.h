@@ -42,7 +42,7 @@ public:
      * Sets the group read-only
      * @param readOnly Whether the group is read-only
      */
-    virtual void setReadOnly() {};
+    virtual void setReadOnly(const bool& readOnly) {};
 
 signals:
 
