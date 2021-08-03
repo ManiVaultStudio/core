@@ -18,6 +18,11 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
     _defaultColor()
 {
     setText(title);
+    initialize(color, defaultColor);
+}
+
+void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
+{
     setColor(color);
     setDefaultColor(defaultColor);
 }
@@ -62,20 +67,10 @@ void ColorAction::reset()
     setColor(_defaultColor);
 }
 
-QWidget* ColorAction::createWidget(QWidget* parent, const bool& resettable /*= false*/)
-{
-    auto widget = dynamic_cast<Widget*>(WidgetAction::createWidget(parent));
-
-    widget->getResetPushButton()->setVisible(resettable);
-
-    return widget;
-}
-
-ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction) :
+ColorAction::ColorPickerPushButtonWidget::ColorPickerPushButtonWidget(QWidget* parent, ColorAction* colorAction) :
     WidgetAction::Widget(parent, colorAction, Widget::State::Standard),
     _layout(new QHBoxLayout()),
-    _colorPickerPushButton(new ColorPickerPushButton()),
-    _resetPushButton(new QPushButton())
+    _colorPickerPushButton(new ColorPickerPushButton())
 {
     _layout->setMargin(0);
     _layout->addWidget(_colorPickerPushButton);
@@ -95,26 +90,6 @@ ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction) :
     });
 
     updateColorPickerPushButton();
-
-    _resetPushButton->setVisible(false);
-    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-    _resetPushButton->setToolTip(QString("Reset %1").arg(colorAction->text()));
-
-    _layout->addWidget(_resetPushButton);
-
-    connect(_resetPushButton, &QPushButton::clicked, this, [this, colorAction]() {
-        colorAction->reset();
-    });
-
-    const auto onUpdateColor = [this, colorAction]() -> void {
-        _resetPushButton->setEnabled(colorAction->canReset());
-    };
-
-    connect(colorAction, &ColorAction::colorChanged, this, [this, onUpdateColor](const QColor& color) {
-        onUpdateColor();
-    });
-
-    onUpdateColor();
 }
 
 }
