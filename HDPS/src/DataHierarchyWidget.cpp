@@ -30,7 +30,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
     setDragEnabled(true);
     setDragDropMode(QAbstractItemView::DragOnly);
     setSelectionMode(QAbstractItemView::SingleSelection);
-    setRootIsDecorated(false);
+    setRootIsDecorated(true);
     setItemsExpandable(true);
     setHeaderHidden(true);
 

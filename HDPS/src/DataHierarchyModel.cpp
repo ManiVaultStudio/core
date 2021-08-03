@@ -33,11 +33,15 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
                 
                 auto dataItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
 
-                beginInsertRows(parentModelIndex, dataItem->getNumChildren(), dataItem->getNumChildren() + 1);
+                emit layoutAboutToBeChanged();
                 {
-                    dataItem->addChild(new DataHierarchyItem(dataEvent->dataSetName));
+                    beginInsertRows(parentModelIndex, dataItem->getNumChildren(), dataItem->getNumChildren() + 1);
+                    {
+                        dataItem->addChild(new DataHierarchyItem(dataEvent->dataSetName));
+                    }
+                    endInsertRows();
                 }
-                endInsertRows();
+                emit layoutChanged();
 
                 break;
             }
