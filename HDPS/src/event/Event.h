@@ -61,7 +61,7 @@ namespace hdps
         DataAddedEvent() : DataEvent(EventType::DataAdded) {}
 
         QString     _parentDatasetName;
-        bool        _visibleInGui;
+        bool        _visible;
     };
 
     class DataChangedEvent : public DataEvent

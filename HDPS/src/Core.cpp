@@ -134,7 +134,7 @@ void Core::removeDataset(const QString datasetName)
     notifyDataRemoved(datasetName);
 }
 
-const QString Core::createDerivedData(const QString nameRequest, const QString sourceDatasetName)
+const QString Core::createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent /*= ""*/)
 {
     const DataSet& sourceSet = requestData(sourceDatasetName);
     DataType dataType = sourceSet.getDataType();
@@ -156,27 +156,27 @@ const QString Core::createDerivedData(const QString nameRequest, const QString s
     QString setName = _dataManager->addSet(nameRequest, fullSet);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager.addDataset(setName, sourceDatasetName);
+    _dataHierarchyManager.addDataset(setName, dataHierarchyParent.isEmpty() ? sourceDatasetName : dataHierarchyParent);
 
     return setName;
 }
 
-QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString nameRequest, const bool& visibleInGui /*= true*/)
+QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString parentSetName /*= ""*/, const bool& visible /*= true*/)
 {
     // Create a new set with only the indices that were part of the selection set
     DataSet* newSet = selection.copy();
 
-    newSet->_dataName = parentSet._dataName;
-    newSet->_sourceSetName = parentSet._sourceSetName;
-    newSet->_derived = parentSet._derived;
+    newSet->_dataName       = sourceSet._dataName;
+    newSet->_sourceSetName  = sourceSet._sourceSetName;
+    newSet->_derived        = sourceSet._derived;
 
     // Add the set the core and publish the name of the set to all plug-ins
-    QString setName = _dataManager->addSet(nameRequest, newSet);
+    QString setName = _dataManager->addSet(newSetName, newSet);
     
     notifyDataAdded(setName);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager.addDataset(setName, parentSet.getName(), visibleInGui);
+    _dataHierarchyManager.addDataset(setName, parentSetName.isEmpty() ? sourceSet.getName() : parentSetName, visible);
 
     return setName;
 }

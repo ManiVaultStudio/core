@@ -7,12 +7,12 @@ namespace hdps
 
 Core* DataHierarchyItem::core = nullptr;
 
-DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QString& datasetName /*= ""*/, const QString& parentDatasetName /*= ""*/, const bool& visibleInGui /*= true*/) :
+DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QString& datasetName /*= ""*/, const QString& parentDatasetName /*= ""*/, const bool& visible /*= true*/) :
     QObject(parent),
     _datasetName(datasetName),
     _parent(parentDatasetName),
     _children(),
-    _visibleInGui(visibleInGui),
+    _visible(visible),
     _progress(0.0)
 {
 }
@@ -37,9 +37,14 @@ std::uint32_t DataHierarchyItem::getNumberOfChildren() const
     return _children.count();
 }
 
-QString DataHierarchyItem::getVisibleInGui() const
+bool DataHierarchyItem::getVisible() const
 {
-    return _visibleInGui;
+    return _visible;
+}
+
+bool DataHierarchyItem::isHidden() const
+{
+    return !_visible;
 }
 
 QString DataHierarchyItem::getDescription() const
@@ -84,7 +89,7 @@ void DataHierarchyItem::removeChild(const QString& name)
 
 QString DataHierarchyItem::toString() const
 {
-    return QString("Name=%1, Parent=%2, Children=[%3], Visible in GUI=%4").arg(_datasetName, _parent, _children.join(", "), _visibleInGui ? "true" : "false");
+    return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_datasetName, _parent, _children.join(", "), _visible ? "true" : "false", _description, QString::number(_progress, 'f', 1));
 }
 
 hdps::DataSet& DataHierarchyItem::getDataset() const

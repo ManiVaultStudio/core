@@ -10,11 +10,11 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
 {
 }
 
-void DataHierarchyManager::addDataset(const QString& datasetName, const QString& parentDatasetName /*= ""*/, const bool& visibleInGui /*= true*/)
+void DataHierarchyManager::addDataset(const QString& datasetName, const QString& parentDatasetName /*= ""*/, const bool& visible /*= true*/)
 {
     Q_ASSERT(!datasetName.isEmpty());
 
-    _dataHierarchyItemsMap[datasetName] = new DataHierarchyItem(this, datasetName, parentDatasetName, visibleInGui);
+    _dataHierarchyItemsMap[datasetName] = new DataHierarchyItem(this, datasetName, parentDatasetName, visible);
 
     if (!parentDatasetName.isEmpty() && _dataHierarchyItemsMap.contains(parentDatasetName))
         _dataHierarchyItemsMap[parentDatasetName]->addChild(datasetName);

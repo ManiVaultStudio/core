@@ -24,9 +24,9 @@ public:
      * Add a dataset to the hierarchy
      * @param datasetName Name of the dataset
      * @param parentDatasetName Name of the parent dataset (if any)
-     * @param visibleInGui Whether the dataset is visible in the gui
+     * @param visible Whether the dataset is visible in the gui
      */
-    void addDataset(const QString& datasetName, const QString& parentDatasetName = "", const bool& visibleInGui = true);
+    void addDataset(const QString& datasetName, const QString& parentDatasetName = "", const bool& visible = true);
 
     /**
      * Removes a dataset from the hierarchy

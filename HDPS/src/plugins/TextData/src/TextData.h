@@ -51,11 +51,11 @@ public:
         return text;
     }
 
-    QString createSubset(const bool& visibleInGui = true) const override
+    QString createSubset(const QString parentSetName = "", const bool& visible = true) const override
     {
         const hdps::DataSet& selection = getSelection();
 
-        return _core->createSubsetFromSelection(selection, *this, "Subset", visibleInGui);
+        return _core->createSubsetFromSelection(selection, *this, "Subset", parentSetName, visible);
     }
 
     std::vector<unsigned int> indices;

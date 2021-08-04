@@ -372,7 +372,7 @@ public:
 
         _vectorHolder.constVisit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
             {
-                const std::ptrdiff_t numPoints{ getNumPoints() };
+                const std::ptrdiff_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
                 std::ptrdiff_t resultIndex{};
 
                 for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
@@ -782,7 +782,7 @@ public:
     // Set functions
     DataSet* copy() const override;
 
-    QString createSubset(const bool& visibleInGui = true) const override;
+    QString createSubset(const QString parentSetName = "", const bool& visible = true) const override;
 
     std::vector<unsigned int> indices;
 };

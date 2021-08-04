@@ -15,6 +15,9 @@ DataHierarchyModel::DataHierarchyModel(Core* core, QObject* parent) :
     _rootItem(new DataHierarchyModelItem(nullptr))
 {
     connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) {
+        if (dataHierarchyItem.isHidden())
+            return;
+
         DataSet& dataset = _core->requestData(dataHierarchyItem.getDatasetName());
 
         QModelIndex parentModelIndex;
@@ -31,6 +34,9 @@ DataHierarchyModel::DataHierarchyModel(Core* core, QObject* parent) :
         emit layoutAboutToBeChanged();
         {
             const auto numberOfChildren = dataHierarchyItem.getNumberOfChildren();
+
+            //qDebug() << dataHierarchyItem;
+            //qDebug() << numberOfChildren;
 
             beginInsertRows(parentModelIndex, numberOfChildren, numberOfChildren + 1);
             {

@@ -32,9 +32,9 @@ public:
      * @param parent Pointer to parent object
      * @param datasetName Name of the dataset
      * @param parentDatasetName Name of the parent dataset
-     * @param visibleInGui Whether the dataset is visible in the GUI
+     * @param visible Whether the dataset is visible in the GUI
      */
-    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visibleInGui = true);
+    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true);
 
     /** Gets the dataset name */
     QString getDatasetName() const;
@@ -49,7 +49,10 @@ public:
     std::uint32_t getNumberOfChildren() const;
 
     /** Gets whether the dataset is visible in the GUI */
-    QString getVisibleInGui() const;
+    bool getVisible() const;
+
+    /** Gets whether the dataset is hidden */
+    bool isHidden() const;
 
     /**
      * Gets/sets the description
@@ -95,7 +98,7 @@ public:
         _datasetName    = other._datasetName;
         _parent         = other._parent;
         _children       = other._children;
-        _visibleInGui   = other._visibleInGui;
+        _visible        = other._visible;
         _description    = other._description;
         _progress       = other._progress;
 
@@ -121,7 +124,7 @@ protected:
     QString         _datasetName;       /** Name of the dataset */
     QString         _parent;            /** Parent item */
     QStringList     _children;          /** Child items (if any) */
-    bool            _visibleInGui;      /** Whether the dataset is visible in the GUI */
+    bool            _visible;           /** Whether the dataset is visible in the GUI */
     QString         _description;       /** Description */
     float           _progress;          /** Progress */
 
