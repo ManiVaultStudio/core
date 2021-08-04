@@ -255,6 +255,11 @@ const void Core::analyzeDataset(const QString analysisKind, const QString& datas
     _pluginManager->createAnalysisPlugin(analysisKind, datasetName);
 }
 
+std::vector<QString> Core::requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType)
+{
+    return _pluginManager->requestPluginKindsByPluginTypeAndDataType(pluginType, dataType);
+}
+
 DataSet& Core::requestSelection(const QString name)
 {
     try

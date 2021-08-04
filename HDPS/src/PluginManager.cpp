@@ -248,6 +248,18 @@ void PluginManager::createAnalysisPlugin(const QString& kind, const QString& inp
     }
 }
 
+std::vector<QString> PluginManager::requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType)
+{
+    std::vector<QString> pluginKinds;
+
+    /* TODO
+    for (auto pluginFactory : _pluginFactories)
+        pluginFactory->supportedDataTypes();
+    */
+
+    return pluginKinds;
+}
+
 QString PluginManager::pluginTriggered(const QString& kind)
 {
     PluginFactory *pluginFactory = _pluginFactories[kind];

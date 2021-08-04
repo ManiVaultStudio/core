@@ -90,6 +90,14 @@ public:
 
     virtual plugin::Plugin& requestAnalysis(const QString name) = 0;
 
+    /**
+     * Get a list of plugin kinds (names) given a plugin type and data type
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param dataType Type of data that the plugin should be compatible with
+     * @return List of compatible plugin kinds that can handle the data type
+     */
+    virtual std::vector<QString> requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType) = 0;
+
     /** Notify registered listeners that a new dataset has been added to the core. */
     virtual void notifyDataAdded(const QString datasetName) = 0;
     /** Notify registered listeners that a dataset has been changed. */

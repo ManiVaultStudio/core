@@ -130,6 +130,14 @@ public:
      */
     const void analyzeDataset(const QString analysisKind, const QString& datasetName) override;
 
+    /**
+     * Get a list of plugin kinds (names) given a plugin type and data type
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param dataType Type of data that the plugin should be compatible with
+     * @return List of compatible plugin kinds that can handle the data type
+     */
+    std::vector<QString> requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType) override;
+
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString datasetName) override;
     /** Notify all data consumers that a dataset has been changed. */

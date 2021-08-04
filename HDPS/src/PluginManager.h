@@ -43,6 +43,14 @@ public:
      */
     void createAnalysisPlugin(const QString& kind, const QString& inputDatasetName);
 
+    /**
+     * Get a list of plugin kinds (names) given a plugin type and data type
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param dataType Type of data that the plugin should be compatible with
+     * @return List of compatible plugin kinds that can handle the data type
+     */
+    std::vector<QString> requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType);
+
 private:
     /**
     * Resolves plugin dependencies, returns list of resolved plugin filenames.
