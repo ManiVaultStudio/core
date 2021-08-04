@@ -156,12 +156,12 @@ const QString Core::createDerivedData(const QString nameRequest, const QString s
     QString setName = _dataManager->addSet(nameRequest, fullSet);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager.addDataset(setName);
+    _dataHierarchyManager.addDataset(setName, sourceDatasetName);
 
     return setName;
 }
 
-QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString nameRequest)
+QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString nameRequest, const bool& visibleInGui /*= true*/)
 {
     // Create a new set with only the indices that were part of the selection set
     DataSet* newSet = selection.copy();
@@ -176,7 +176,7 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     notifyDataAdded(setName);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager.addDataset(setName, parentSet.getName());
+    _dataHierarchyManager.addDataset(setName, parentSet.getName(), visibleInGui);
 
     return setName;
 }

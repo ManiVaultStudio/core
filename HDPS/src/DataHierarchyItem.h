@@ -114,7 +114,7 @@ signals:
      * Signals that the progress changed
      * @param progress Progress
      */
-    void progressChanged(const double& progress);
+    void progressChanged(const float& progress);
 
 protected:
         

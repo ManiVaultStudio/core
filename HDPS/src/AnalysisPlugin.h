@@ -43,6 +43,7 @@ public:
     }
 
 protected:
+
     void notifyStarted() {
         _core->getHierarchyItem(_outputDatasetName).setDescription("");
         _core->getHierarchyItem(_outputDatasetName).setProgress(0.0);

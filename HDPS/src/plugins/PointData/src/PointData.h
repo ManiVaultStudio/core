@@ -782,7 +782,7 @@ public:
     // Set functions
     DataSet* copy() const override;
 
-    QString createSubset() const override;
+    QString createSubset(const bool& visibleInGui = true) const override;
 
     std::vector<unsigned int> indices;
 };

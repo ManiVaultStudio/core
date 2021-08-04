@@ -39,49 +39,22 @@ DataHierarchyModel::DataHierarchyModel(Core* core, QObject* parent) :
             endInsertRows();
         }
         emit layoutChanged();
+
+        connect(&dataHierarchyItem, &DataHierarchyItem::descriptionChanged, this, [this, &dataHierarchyItem](const QString& description) {
+            const auto outputDatasetName    = dataHierarchyItem.getDatasetName();
+            const auto outputDatasetIndex   = match(index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+
+            setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), description);
+        });
+
+        connect(&dataHierarchyItem, &DataHierarchyItem::progressChanged, this, [this, &dataHierarchyItem](const float& progress) {
+            const auto outputDatasetName    = dataHierarchyItem.getDatasetName();
+            const auto outputDatasetIndex   = match(index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+
+            setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), progress);
+            setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), progress > 0.0f);
+        });
     });
-
-    /*
-    registerAnalysisEvent([this](const hdps::AnalysisEvent& analysisEvent) {
-        const auto outputDatasetName    = analysisEvent.getAnalysisPlugin()->getOutputDatasetName();
-        const auto outputDatasetIndex   = match(index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
-        
-        switch (analysisEvent.getType())
-        {
-            case EventType::AnalysisStarted:
-            {
-                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), true);
-                break;
-            }
-
-            case EventType::AnalysisProgressSection:
-            {
-                auto event = static_cast<const AnalysisProgressSectionEvent*>(&analysisEvent);
-                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), event->getSection());
-                break;
-            }
-
-            case EventType::AnalysisProgressPercentage:
-            {
-                auto event = static_cast<const AnalysisProgressPercentageEvent*>(&analysisEvent);
-                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), event->getPercentage());
-                break;
-            }
-
-            case EventType::AnalysisFinished:
-            case EventType::AnalysisAborted:
-            {
-                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), "");
-                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), 0);
-                setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), false);
-                break;
-            }
-
-            default:
-                break;
-        }
-    });
-    */
 }
 
 DataHierarchyModel::~DataHierarchyModel()
@@ -134,7 +107,7 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
             break;
     }
 
-    emit dataChanged(index.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::_start)), index.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::_end)));
+    emit dataChanged(index, index);
 
     return true;
 }
@@ -258,22 +231,5 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
 
     return mimeData;
 }
-
-/*
-void PluginHierarchyModel::setupModelData(DataManager& dataManager, PluginHierarchyItem* parent)
-{
-    for (auto& setPair : dataManager.allSets())
-    {
-        QString setName = setPair.first;
-        auto& set = setPair.second;
-
-        //RawData& rawData = dataManager.getRawData(set->getDataName());
-
-        PluginHierarchyItem* setItem = new PluginHierarchyItem(setName, set->getDataType(), _rootItem);
-            
-        _rootItem->addChild(setItem);
-    }
-}
-*/
 
 }
