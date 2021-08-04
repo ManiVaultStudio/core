@@ -23,7 +23,7 @@ Core::Core(gui::MainWindow& mainWindow) :
     _mainWindow(mainWindow),
     _dataHierarchyManager()
 {
-    DataHierarchyManager::DataHierarchyItem::core = this;
+    DataHierarchyItem::core = this;
 }
 
 Core::~Core()
@@ -169,7 +169,6 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     newSet->_dataName = parentSet._dataName;
     newSet->_sourceSetName = parentSet._sourceSetName;
     newSet->_derived = parentSet._derived;
-    newSet->setParentDatasetName(parentSet.getName());
 
     // Add the set the core and publish the name of the set to all plug-ins
     QString setName = _dataManager->addSet(nameRequest, newSet);
@@ -267,7 +266,7 @@ const void Core::analyzeDataset(const QString analysisKind, const QString& datas
     _pluginManager->createAnalysisPlugin(analysisKind, datasetName);
 }
 
-std::vector<QString> Core::requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType)
+std::vector<QString> Core::requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType) const
 {
     return _pluginManager->requestPluginKindsByPluginTypeAndDataType(pluginType, dataType);
 }

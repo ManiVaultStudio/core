@@ -4,67 +4,6 @@
 namespace hdps
 {
 
-QString DataHierarchyManager::DataHierarchyItem::getDatasetName() const
-{
-    return _datasetName;
-}
-
-QString DataHierarchyManager::DataHierarchyItem::getParent() const
-{
-    return _parent;
-}
-
-QStringList DataHierarchyManager::DataHierarchyItem::getChildren() const
-{
-    return _children;
-}
-
-std::uint32_t DataHierarchyManager::DataHierarchyItem::getNumberOfChildren() const
-{
-    return _children.count();
-}
-
-QString DataHierarchyManager::DataHierarchyItem::getVisibleInGui() const
-{
-    return _visibleInGui;
-}
-
-QString DataHierarchyManager::DataHierarchyItem::getDescription() const
-{
-    return _description;
-}
-
-void DataHierarchyManager::DataHierarchyItem::addChild(const QString& name)
-{
-    _children << name;
-}
-
-void DataHierarchyManager::DataHierarchyItem::removeChild(const QString& name)
-{
-    _children.removeAll(name);
-}
-
-QString DataHierarchyManager::DataHierarchyItem::toString() const
-{
-    return QString("Name=%1, Parent=%2, Children=[%3], Visible in GUI=%4").arg(_datasetName, _parent, _children.join(", "), _visibleInGui ? "true" : "false");
-}
-
-hdps::DataSet& DataHierarchyManager::DataHierarchyItem::getDataset() const
-{
-    Q_ASSERT(!_datasetName.isEmpty());
-
-    return core->requestData(_datasetName);
-}
-
-hdps::DataType DataHierarchyManager::DataHierarchyItem::getDataType() const
-{
-    Q_ASSERT(!_datasetName.isEmpty());
-
-    return core->requestData(_datasetName).getDataType();
-}
-
-Core* DataHierarchyManager::DataHierarchyItem::core = nullptr;
-
 DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     QObject(parent),
     _dataHierarchyItemsMap()
@@ -100,7 +39,28 @@ bool DataHierarchyManager::removeDataset(const QString& datasetName)
     return true;
 }
 
-const hdps::DataHierarchyManager::DataHierarchyItem& DataHierarchyManager::getHierarchyItem(const QString& datasetName) const
+void DataHierarchyManager::setItemDescription(const QString& datasetName, const QString& description)
+{
+    Q_ASSERT(!datasetName.isEmpty());
+
+    if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
+        return;
+}
+
+void DataHierarchyManager::setItemProgress(const QString& datasetName, const double& progress)
+{
+    Q_ASSERT(!datasetName.isEmpty());
+
+    if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
+        return;
+}
+
+const hdps::DataHierarchyItem& DataHierarchyManager::getHierarchyItem(const QString& datasetName) const
+{
+    return const_cast<DataHierarchyManager*>(this)->getHierarchyItem(datasetName);
+}
+
+hdps::DataHierarchyItem& DataHierarchyManager::getHierarchyItem(const QString& datasetName)
 {
     Q_ASSERT(!datasetName.isEmpty());
 

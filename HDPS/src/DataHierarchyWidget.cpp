@@ -16,23 +16,19 @@ namespace gui
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
     QTreeView(parent),
     _core(core),
-    _model(new PluginHierarchyModel(_core)),
-    _selectionModel(new QItemSelectionModel(_model))
+    _model(_core),
+    _selectionModel(&_model)
 {
     setMinimumWidth(500);
-    setModel(_model);
+    setModel(&_model);
     
     setContextMenuPolicy(Qt::CustomContextMenu);
-
-    connect(this, &QTreeView::customContextMenuRequested, this, &DataHierarchyWidget::itemContextMenu);
-
-    setSelectionModel(_selectionModel);
+    setSelectionModel(&_selectionModel);
     setDragEnabled(true);
     setDragDropMode(QAbstractItemView::DragOnly);
     setSelectionMode(QAbstractItemView::SingleSelection);
     setRootIsDecorated(true);
     setItemsExpandable(true);
-    //setHeaderHidden(true);
 
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description), 200);
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress), 50);
@@ -45,49 +41,48 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
 
     header()->setStretchLastSection(false);
 
-    connect(_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
+    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
         const auto selectedDatasetName = selected.first().topLeft().data(Qt::DisplayRole).toString();
         emit selectedDatasetNameChanged(selectedDatasetName);
     });
 
-    connect(_model, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& parent, int first, int last)
+    connect(&_model, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& parent, int first, int last)
     {
         if (!isExpanded(parent))
             expand(parent);
 
-        _selectionModel->select(parent.child(first, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+        //_selectionModel.select(parent.child(first, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
     });
-}
 
-void DataHierarchyWidget::itemContextMenu(const QPoint& pos)
-{
-     QModelIndex index = indexAt(pos);
+    connect(this, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
+        QModelIndex index = indexAt(position);
 
-    if (index.isValid())
-    {
-        auto dataHierarchyItem = _model->getItem(index, Qt::DisplayRole);
-        
-        QSharedPointer<QMenu> contextMenu(dataHierarchyItem->getContextMenu());
+        if (index.isValid())
+        {
+            auto dataHierarchyItem = _model.getItem(index, Qt::DisplayRole);
 
-        /*
-        auto contextMenu = _dataset->getContextMenu();
+            QSharedPointer<QMenu> contextMenu(dataHierarchyItem->getContextMenu());
 
-        // Extract name of item that triggered the context menu action
-        QAction* act = qobject_cast<QAction*>(sender());
+            /*
+            auto contextMenu = _dataset->getContextMenu();
 
-        QString datasetName = act->data().toString();
+            // Extract name of item that triggered the context menu action
+            QAction* act = qobject_cast<QAction*>(sender());
 
-        // Pop up a dialog where the user can enter a new name
-        bool ok;
+            QString datasetName = act->data().toString();
 
-        QString newDatasetName = QInputDialog::getText(this, tr("Rename Dataset"), tr("Dataset name:"), QLineEdit::Normal, datasetName, &ok);
+            // Pop up a dialog where the user can enter a new name
+            bool ok;
 
-        if (ok && !newDatasetName.isEmpty())
-            _core->getDataManager().renameSet(datasetName, newDatasetName);
-        */
+            QString newDatasetName = QInputDialog::getText(this, tr("Rename Dataset"), tr("Dataset name:"), QLineEdit::Normal, datasetName, &ok);
 
-        contextMenu->exec(viewport()->mapToGlobal(pos));
-    }
+            if (ok && !newDatasetName.isEmpty())
+                _core->getDataManager().renameSet(datasetName, newDatasetName);
+            */
+
+            contextMenu->exec(viewport()->mapToGlobal(position));
+        }
+    });
 }
 
 }

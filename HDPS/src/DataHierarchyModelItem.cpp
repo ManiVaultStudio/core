@@ -8,7 +8,7 @@
 namespace hdps
 {
 
-DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyManager::DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent /*= nullptr*/) :
+DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent /*= nullptr*/) :
     QObject(parent),
     _parent(parent),
     _children(),

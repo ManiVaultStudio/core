@@ -136,7 +136,7 @@ private: // Docking
 
 private:
     QSharedPointer<Core>        _core;                          /** HDPS core */
-    DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget     */
+    DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget */
     DataPropertiesWidget*       _dataPropertiesWidget;          /** Data properties widget */
 
 private: // Docking

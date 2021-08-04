@@ -20,8 +20,7 @@ public:
         _core(core),
         _dataName(dataName),
         _all(false),
-        _rawData(nullptr),
-        _parentDatasetName()
+        _rawData(nullptr)
     {
     }
 
@@ -97,10 +96,6 @@ public:
     {
 
     }
-
-    /** Get/set parent dataset name */
-    QString getParentDatasetName() const { return _parentDatasetName; };
-    void setParentDatasetName(const QString& parentDatasetName) { _parentDatasetName = parentDatasetName; };
 
 public: // Properties
 
@@ -181,7 +176,6 @@ private:
     bool                        _derived = false;       /** Whether this dataset is derived from another dataset */
     QString                     _sourceSetName;         /** Name of the source dataset (if any) */
     QMap<QString, QVariant>     _properties;            /** Properties map */
-    QString                     _parentDatasetName;     /** Name of the parent dataset (if any) */
 
     friend class Core;
     friend class DataManager;

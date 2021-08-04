@@ -3,14 +3,13 @@
 #include "DataHierarchyManager.h"
 #include "Plugin.h"
 #include "Core.h"
-#include "AnalysisPlugin.h"
 
 #include <QDebug>
 
 namespace hdps
 {
 
-PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
+DataHierarchyModel::DataHierarchyModel(Core* core, QObject* parent) :
     QAbstractItemModel(parent),
     EventListener(),
     _core(core),
@@ -18,7 +17,7 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
 {
     setEventCore(reinterpret_cast<CoreInterface*>(_core));
 
-    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this](DataHierarchyManager::DataHierarchyItem& dataHierarchyItem) {
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) {
         DataSet& dataset = _core->requestData(dataHierarchyItem.getDatasetName());
 
         QModelIndex parentModelIndex;
@@ -45,6 +44,7 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
         emit layoutChanged();
     });
 
+    /*
     registerAnalysisEvent([this](const hdps::AnalysisEvent& analysisEvent) {
         const auto outputDatasetName    = analysisEvent.getAnalysisPlugin()->getOutputDatasetName();
         const auto outputDatasetIndex   = match(index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
@@ -84,14 +84,15 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
                 break;
         }
     });
+    */
 }
 
-PluginHierarchyModel::~PluginHierarchyModel()
+DataHierarchyModel::~DataHierarchyModel()
 {
     delete _rootItem;
 }
 
-QVariant PluginHierarchyModel::data(const QModelIndex& index, int role) const
+QVariant DataHierarchyModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -110,7 +111,7 @@ QVariant PluginHierarchyModel::data(const QModelIndex& index, int role) const
     return item->getDataAtColumn(index.column());
 }
 
-bool PluginHierarchyModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
+bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
 {
     const auto column = static_cast<DataHierarchyModelItem::Column>(index.column());
 
@@ -141,7 +142,7 @@ bool PluginHierarchyModel::setData(const QModelIndex& index, const QVariant& val
     return true;
 }
 
-QModelIndex PluginHierarchyModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex DataHierarchyModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
@@ -161,7 +162,7 @@ QModelIndex PluginHierarchyModel::index(int row, int column, const QModelIndex& 
     return QModelIndex();
 }
 
-QModelIndex PluginHierarchyModel::parent(const QModelIndex& index) const
+QModelIndex DataHierarchyModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
         return QModelIndex();
@@ -175,7 +176,7 @@ QModelIndex PluginHierarchyModel::parent(const QModelIndex& index) const
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-int PluginHierarchyModel::rowCount(const QModelIndex& parent) const
+int DataHierarchyModel::rowCount(const QModelIndex& parent) const
 {
     DataHierarchyModelItem* parentItem;
 
@@ -190,7 +191,7 @@ int PluginHierarchyModel::rowCount(const QModelIndex& parent) const
     return parentItem->getNumChildren();
 }
 
-int PluginHierarchyModel::columnCount(const QModelIndex& parent) const
+int DataHierarchyModel::columnCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
         return static_cast<DataHierarchyModelItem*>(parent.internalPointer())->getNumColumns();
@@ -198,12 +199,12 @@ int PluginHierarchyModel::columnCount(const QModelIndex& parent) const
     return _rootItem->getNumColumns();
 }
 
-Qt::DropActions PluginHierarchyModel::supportedDragActions() const
+Qt::DropActions DataHierarchyModel::supportedDragActions() const
 {
     return Qt::CopyAction | Qt::MoveAction;
 }
 
-DataHierarchyModelItem* PluginHierarchyModel::getItem(const QModelIndex& index, int role) const
+DataHierarchyModelItem* DataHierarchyModel::getItem(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return nullptr;
@@ -214,7 +215,7 @@ DataHierarchyModelItem* PluginHierarchyModel::getItem(const QModelIndex& index, 
     return static_cast<DataHierarchyModelItem*>(index.internalPointer());
 }
 
-Qt::ItemFlags PluginHierarchyModel::flags(const QModelIndex& index) const
+Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -222,7 +223,7 @@ Qt::ItemFlags PluginHierarchyModel::flags(const QModelIndex& index) const
     return Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 }
 
-QVariant PluginHierarchyModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
         switch (static_cast<DataHierarchyModelItem::Column>(section))
@@ -247,7 +248,7 @@ QVariant PluginHierarchyModel::headerData(int section, Qt::Orientation orientati
     return QVariant();
 }
 
-QMimeData* PluginHierarchyModel::mimeData(const QModelIndexList &indexes) const
+QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
 {
     QVector<DataHierarchyModelItem*> items;
 

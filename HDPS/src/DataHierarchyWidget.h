@@ -1,6 +1,8 @@
 #ifndef HDPS_DATA_HIERARCHY_WIDGET_H
 #define HDPS_DATA_HIERARCHY_WIDGET_H
 
+#include "DataHierarchyModel.h"
+
 #include <QWidget>
 #include <QTreeView>
 #include <QMenu>
@@ -9,22 +11,25 @@ namespace hdps
 {
 
 class Core;
-class PluginHierarchyModel;
 
 namespace gui
 {
 
 /**
-* Widget displaying all data currently present in the system.
+* Widget for displaying the data hierarchy
 */
 class DataHierarchyWidget : public QTreeView
 {
     Q_OBJECT
+
 public:
+
+    /**
+     * Constructor
+     * @param parent Parent widget
+     * @param core Pointer to the core
+     */
     DataHierarchyWidget(QWidget* parent, Core* core);
-            
-public slots:
-    void itemContextMenu(const QPoint& pos);
 
 signals:
 
@@ -35,9 +40,9 @@ signals:
     void selectedDatasetNameChanged(const QString& datasetName);
 
 private:
-    Core*                   _core;              /** Pointer to core */
-    PluginHierarchyModel*   _model;             /** Model containing data to be displayed in the hierarchy */
-    QItemSelectionModel*    _selectionModel;    /** Selection model */
+    Core*                   _core;              /** Pointer to the core */
+    DataHierarchyModel      _model;             /** Model containing data to be displayed in the hierarchy */
+    QItemSelectionModel     _selectionModel;    /** Selection model */
 };
 
 }

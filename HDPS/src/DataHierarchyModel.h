@@ -15,14 +15,14 @@ class DataHierarchyModelItem;
 /**
  * Underlying data model for a data hierarchy tree
  */
-class PluginHierarchyModel : public QAbstractItemModel, public EventListener
+class DataHierarchyModel : public QAbstractItemModel, public EventListener
 {
     Q_OBJECT
 
 public:
-    explicit PluginHierarchyModel(Core* core, QObject* parent = nullptr);
+    explicit DataHierarchyModel(Core* core, QObject* parent = nullptr);
 
-    ~PluginHierarchyModel();
+    ~DataHierarchyModel();
 
     /**
         * Mandatory override for QAbstractItemModel.

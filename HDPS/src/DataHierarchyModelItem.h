@@ -34,7 +34,7 @@ public:
      * @param dataHierarchyItem Pointer to data hierarchy item
      * @param parent Parent (if any)
      */
-    explicit DataHierarchyModelItem(DataHierarchyManager::DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent = nullptr);
+    explicit DataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent = nullptr);
 
     /** Destructor */
     virtual ~DataHierarchyModelItem();
@@ -106,12 +106,12 @@ public: // Analysis
     void setProgressSection(const QString& progressSection);
 
 protected:
-    DataHierarchyModelItem*                     _parent;                /** Pointer to parent item */
-    PluginHierarchyItems                        _children;              /** Pointers to child items */
-    DataHierarchyManager::DataHierarchyItem*    _dataHierarchyItem;     /** Pointer to data hierarchy item*/
-    bool                                        _analyzing;             /** Whether an analysis is taking place */
-    QString                                     _progressSection;       /** Progress section of the analysis */
-    float                                       _progressPercentage;    /** Progress percentage of the analysis */
+    DataHierarchyModelItem*     _parent;                    /** Pointer to parent item */
+    PluginHierarchyItems        _children;                  /** Pointers to child items */
+    DataHierarchyItem*          _dataHierarchyItem;         /** Pointer to data hierarchy item*/
+    bool                        _analyzing;                 /** Whether an analysis is taking place */
+    QString                     _progressSection;           /** Progress section of the analysis */
+    float                       _progressPercentage;        /** Progress percentage of the analysis */
 
 public:
     static Core* core;  /** Static pointer to the core */
