@@ -11,12 +11,9 @@ namespace hdps
 
 DataHierarchyModel::DataHierarchyModel(Core* core, QObject* parent) :
     QAbstractItemModel(parent),
-    EventListener(),
     _core(core),
     _rootItem(new DataHierarchyModelItem(nullptr))
 {
-    setEventCore(reinterpret_cast<CoreInterface*>(_core));
-
     connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) {
         DataSet& dataset = _core->requestData(dataHierarchyItem.getDatasetName());
 

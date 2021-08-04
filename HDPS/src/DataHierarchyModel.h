@@ -1,8 +1,6 @@
 #ifndef HDPS_HIERARCHY_MODEL_H
 #define HDPS_HIERARCHY_MODEL_H
 
-#include "event/EventListener.h"
-
 #include <QAbstractItemModel>
 #include <QMimeData>
 
@@ -15,7 +13,7 @@ class DataHierarchyModelItem;
 /**
  * Underlying data model for a data hierarchy tree
  */
-class DataHierarchyModel : public QAbstractItemModel, public EventListener
+class DataHierarchyModel : public QAbstractItemModel
 {
     Q_OBJECT
 
