@@ -175,16 +175,13 @@ protected:
 private:
     mutable RawData* _rawData;
 
-    QString _name;
-    QString _dataName;
-    bool _all;
-
-    bool _derived = false;
-    QString _sourceSetName;
-
-    QMap<QString, QVariant> _properties; /** Properties map */
-
-    QString _parentDatasetName;
+    QString                     _name;                  /** Name of the dataset */
+    QString                     _dataName;              /** Name of the raw data */
+    bool                        _all;                   /** Whether this is the full dataset */
+    bool                        _derived = false;       /** Whether this dataset is derived from another dataset */
+    QString                     _sourceSetName;         /** Name of the source dataset (if any) */
+    QMap<QString, QVariant>     _properties;            /** Properties map */
+    QString                     _parentDatasetName;     /** Name of the parent dataset (if any) */
 
     friend class Core;
     friend class DataManager;

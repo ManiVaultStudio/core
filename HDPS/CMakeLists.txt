@@ -64,6 +64,7 @@ set( CORE_HEADERS
     src/LogDockWidget.h
     src/MainWindow.h
     src/PluginManager.h
+    src/DataHierarchyManager.h
     src/Core.h
     src/DataManager.h
     src/exceptions/SetNotFoundException.h
@@ -75,6 +76,7 @@ set( CORE_SOURCES
     src/LogDockWidget.cpp
     src/MainWindow.cpp
     src/PluginManager.cpp
+    src/DataHierarchyManager.cpp
     src/Core.cpp
     src/DataManager.cpp
 )
@@ -216,7 +218,7 @@ set( PLUGIN_SOURCES
 )
 
 set(DATA_HIERARCHY_HEADERS
-    src/DataHierarchyItem.h
+    src/DataHierarchyModelItem.h
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
 	src/DataPropertiesWidget.h
@@ -226,7 +228,7 @@ set(DATA_HIERARCHY_HEADERS
 )
 
 set(DATA_HIERARCHY_SOURCES
-    src/DataHierarchyItem.cpp
+    src/DataHierarchyModelItem.cpp
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp

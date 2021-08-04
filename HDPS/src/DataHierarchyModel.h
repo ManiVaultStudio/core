@@ -10,7 +10,7 @@ namespace hdps
 {
 
 class Core;
-class DataHierarchyItem;
+class DataHierarchyModelItem;
 
 /**
  * Underlying data model for a data hierarchy tree
@@ -64,7 +64,7 @@ public:
 
     Qt::DropActions supportedDragActions() const override;
 
-    DataHierarchyItem* getItem(const QModelIndex& index, int role) const;
+    DataHierarchyModelItem* getItem(const QModelIndex& index, int role) const;
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
@@ -80,8 +80,8 @@ private:
     //void setupModelData(DataManager& dataManager, HierarchyItem* parent);
 
 private:
-    Core*               _core;          /** Pointer to core */
-    DataHierarchyItem*  _rootItem;      /** Root node of the data hierarchy */
+    Core*                       _core;          /** Pointer to core */
+    DataHierarchyModelItem*     _rootItem;      /** Root node of the data hierarchy */
 };
 
 }

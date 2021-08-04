@@ -1,5 +1,5 @@
-#ifndef HDPS_DATA_HIERARCHY_ITEM_H
-#define HDPS_DATA_HIERARCHY_ITEM_H
+#ifndef HDPS_DATA_HIERARCHY_MODEL_ITEM_H
+#define HDPS_DATA_HIERARCHY_MODEL_ITEM_H
 
 #include "Core.h"
 #include "Set.h"
@@ -12,10 +12,10 @@ class QMenu;
 namespace hdps
 {
 
-class DataHierarchyItem : public QObject
+class DataHierarchyModelItem : public QObject
 {
 public:
-    using PluginHierarchyItems = QVector<DataHierarchyItem*>;
+    using PluginHierarchyItems = QVector<DataHierarchyModelItem*>;
 
     /** Columns */
     enum class Column {
@@ -35,27 +35,27 @@ public:
      * @param datasetName Name of the dataset (empty for root)
      * @param parent Parent (if any)
      */
-    explicit DataHierarchyItem(const QString& datasetName = "", DataHierarchyItem* parent = nullptr);
+    explicit DataHierarchyModelItem(const QString& datasetName = "", DataHierarchyModelItem* parent = nullptr);
 
     /** Destructor */
-    virtual ~DataHierarchyItem();
+    virtual ~DataHierarchyModelItem();
 
     /**
      * Add a child item
      * @param item Child item to add
      */
-    void addChild(DataHierarchyItem* item);
+    void addChild(DataHierarchyModelItem* item);
     
     /** Get/set parent item */
-    DataHierarchyItem* getParent();
-    void setParent(DataHierarchyItem* parent);
+    DataHierarchyModelItem* getParent();
+    void setParent(DataHierarchyModelItem* parent);
 
     /**
      * Get child at row
      * @param row Row index of the child
      * @return Child item
      */
-    DataHierarchyItem* getChild(const std::int32_t& row);
+    DataHierarchyModelItem* getChild(const std::int32_t& row);
 
     /** Returns the child index w.r.t. the parent */
     std::int32_t row() const;
@@ -110,7 +110,7 @@ public: // Analysis
     void setProgressSection(const QString& progressSection);
 
 protected:
-    DataHierarchyItem*      _parent;                /** Pointer to parent item */
+    DataHierarchyModelItem*      _parent;                /** Pointer to parent item */
     PluginHierarchyItems    _children;              /** Pointers to child items */
     QString                 _datasetName;           /** Name of the dataset */
     DataSet*                _dataset;               /** Pointer to the dataset */
@@ -124,4 +124,4 @@ public:
 
 }
 
-#endif // HDPS_DATA_HIERARCHY_ITEM_H
+#endif // HDPS_DATA_HIERARCHY_MODEL_ITEM_H

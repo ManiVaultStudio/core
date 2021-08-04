@@ -1,6 +1,6 @@
 #include "DataHierarchyWidget.h"
 #include "DataHierarchyModel.h"
-#include "DataHierarchyItem.h"
+#include "DataHierarchyModelItem.h"
 #include "Core.h"
 
 #include <QDebug>
@@ -34,14 +34,14 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
     setItemsExpandable(true);
     //setHeaderHidden(true);
 
-    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Description), 200);
-    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress), 50);
-    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), 20);
+    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description), 200);
+    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress), 50);
+    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing), 20);
 
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Name), QHeaderView::Interactive);
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Description), QHeaderView::Stretch);
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Progress), QHeaderView::Fixed);
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyItem::Column::Analyzing), QHeaderView::Fixed);
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Name), QHeaderView::Interactive);
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description), QHeaderView::Stretch);
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress), QHeaderView::Fixed);
+    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing), QHeaderView::Fixed);
 
     header()->setStretchLastSection(false);
 

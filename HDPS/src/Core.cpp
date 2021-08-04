@@ -11,7 +11,7 @@
 #include "ViewPlugin.h"
 #include "RawData.h"
 #include "Set.h"
-#include "DataHierarchyItem.h"
+#include "DataHierarchyModelItem.h"
 
 #include <QMessageBox>
 #include <algorithm>
@@ -19,10 +19,11 @@
 namespace hdps
 {
 
-Core::Core(gui::MainWindow& mainWindow)
-: _mainWindow(mainWindow)
+Core::Core(gui::MainWindow& mainWindow) :
+    _mainWindow(mainWindow),
+    _dataHierarchyManager()
 {
-    DataHierarchyItem::core = this;
+    DataHierarchyModelItem::core = this;
 }
 
 Core::~Core()
@@ -117,8 +118,12 @@ const QString Core::addData(const QString kind, const QString nameRequest)
 
     // Add them to the data manager
     QString setName = _dataManager->addSet(nameRequest, fullSet);
+    
     _dataManager->addSelection(rawDataName, selection);
     
+    // Add the dataset to the hierarchy manager
+    _dataHierarchyManager.addDataset(setName);
+
     return setName;
 }
 
@@ -150,6 +155,9 @@ const QString Core::createDerivedData(const QString nameRequest, const QString s
     // Add them to the data manager
     QString setName = _dataManager->addSet(nameRequest, fullSet);
 
+    // Add the dataset to the hierarchy manager
+    _dataHierarchyManager.addDataset(setName);
+
     return setName;
 }
 
@@ -165,7 +173,11 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
 
     // Add the set the core and publish the name of the set to all plug-ins
     QString setName = _dataManager->addSet(nameRequest, newSet);
+    
     notifyDataAdded(setName);
+
+    // Add the dataset to the hierarchy manager
+    _dataHierarchyManager.addDataset(setName, parentSet.getName());
 
     return setName;
 }

@@ -5,6 +5,7 @@
 #include "PluginType.h"
 #include "DataType.h"
 #include "DataManager.h"
+#include "DataHierarchyManager.h"
 #include "event/EventListener.h"
 
 #include <memory>
@@ -45,6 +46,10 @@ private:
 class Core : public CoreInterface
 {
 public:
+    using UniquePtrPlugin   = std::unique_ptr<plugin::Plugin>;
+    using UniquePtrsPlugin  = std::vector<UniquePtrPlugin>;
+
+public:
     Core(gui::MainWindow& mainWindow);
     ~Core();
 
@@ -59,6 +64,10 @@ public:
     DataManager& getDataManager()
     {
         return *_dataManager;
+    }
+
+    DataHierarchyManager& getDataHierarchyManager() {
+        return _dataHierarchyManager;
     }
 
     /**
@@ -184,17 +193,11 @@ private:
 private:
     gui::MainWindow& _mainWindow;
 
-    /** Plugin manager responsible for loading plug-ins and adding them to the core. */
-    std::unique_ptr<plugin::PluginManager> _pluginManager;
-
-    /** Data manager responsible for storing data sets and data selections */
-    std::unique_ptr<DataManager> _dataManager;
-
-    /** List of plugin instances currently present in the application. Instances are stored by type. */
-    std::unordered_map<plugin::Type, std::vector<std::unique_ptr<plugin::Plugin>>, plugin::TypeHash> _plugins;
-
-    /** List of classes listening for core events */
-    std::vector<EventListener*> _eventListeners;
+    DataHierarchyManager                                                    _dataHierarchyManager;      /** Internal hierarchical data tree */
+    std::unique_ptr<plugin::PluginManager>                                  _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core. */
+    std::unique_ptr<DataManager>                                            _dataManager;               /** Data manager responsible for storing data sets and data selections */
+    std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
+    std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */
 };
 
 } // namespace hdps

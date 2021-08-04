@@ -1,4 +1,4 @@
-#include "DataHierarchyItem.h"
+#include "DataHierarchyModelItem.h"
 #include "Set.h"
 #include "ExportDataAction.h"
 #include "AnalyzeDataAction.h"
@@ -8,9 +8,9 @@
 namespace hdps
 {
 
-Core* DataHierarchyItem::core = nullptr;
+Core* DataHierarchyModelItem::core = nullptr;
 
-DataHierarchyItem::DataHierarchyItem(const QString& datasetName /*= ""*/, DataHierarchyItem* parent /*= nullptr*/) :
+DataHierarchyModelItem::DataHierarchyModelItem(const QString& datasetName /*= ""*/, DataHierarchyModelItem* parent /*= nullptr*/) :
     QObject(parent),
     _parent(parent),
     _children(),
@@ -31,28 +31,28 @@ DataHierarchyItem::DataHierarchyItem(const QString& datasetName /*= ""*/, DataHi
     }
 }
 
-DataHierarchyItem::~DataHierarchyItem()
+DataHierarchyModelItem::~DataHierarchyModelItem()
 {
     qDeleteAll(_children);
 }
 
-void DataHierarchyItem::addChild(DataHierarchyItem* item)
+void DataHierarchyModelItem::addChild(DataHierarchyModelItem* item)
 {
     item->setParent(this);
     _children.append(item);
 }
 
-DataHierarchyItem* DataHierarchyItem::getParent()
+DataHierarchyModelItem* DataHierarchyModelItem::getParent()
 {
     return _parent;
 }
 
-void DataHierarchyItem::setParent(DataHierarchyItem* parent)
+void DataHierarchyModelItem::setParent(DataHierarchyModelItem* parent)
 {
     _parent = parent;
 }
 
-DataHierarchyItem* DataHierarchyItem::getChild(const std::int32_t& row)
+DataHierarchyModelItem* DataHierarchyModelItem::getChild(const std::int32_t& row)
 {
     if (row < 0 || row >= _children.size())
         return nullptr;
@@ -60,30 +60,30 @@ DataHierarchyItem* DataHierarchyItem::getChild(const std::int32_t& row)
     return _children[row];
 }
 
-std::int32_t DataHierarchyItem::row() const
+std::int32_t DataHierarchyModelItem::row() const
 {
     if (_parent)
-        return _parent->_children.indexOf(const_cast<DataHierarchyItem*>(this));
+        return _parent->_children.indexOf(const_cast<DataHierarchyModelItem*>(this));
 
     return 0;
 }
 
-std::int32_t DataHierarchyItem::getNumChildren() const
+std::int32_t DataHierarchyModelItem::getNumChildren() const
 {
     return _children.count();
 }
 
-std::int32_t DataHierarchyItem::getNumColumns() const
+std::int32_t DataHierarchyModelItem::getNumColumns() const
 {
     return static_cast<std::int32_t>(Column::_end) + 1;
 }
 
-QString DataHierarchyItem::serialize() const
+QString DataHierarchyModelItem::serialize() const
 {
     return _dataset->getName() + "\n" + _dataset->getDataType();
 }
 
-QString DataHierarchyItem::getDataAtColumn(const std::uint32_t& column) const
+QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) const
 {
     if (_datasetName.isEmpty())
         return "Data";
@@ -111,7 +111,7 @@ QString DataHierarchyItem::getDataAtColumn(const std::uint32_t& column) const
     return "";
 }
 
-QIcon DataHierarchyItem::getIconAtColumn(const std::uint32_t& column) const
+QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
 {
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
@@ -139,7 +139,7 @@ QIcon DataHierarchyItem::getIconAtColumn(const std::uint32_t& column) const
     return QIcon();
 }
 
-QMenu* DataHierarchyItem::getContextMenu()
+QMenu* DataHierarchyModelItem::getContextMenu()
 {
     if (_datasetName.isEmpty())
         return new QMenu();
@@ -166,12 +166,12 @@ QMenu* DataHierarchyItem::getContextMenu()
     return contextMenu;
 }
 
-QString DataHierarchyItem::getDatasetName() const
+QString DataHierarchyModelItem::getDatasetName() const
 {
     return _datasetName;
 }
 
-void DataHierarchyItem::setAnalyzing(const bool& analyzing)
+void DataHierarchyModelItem::setAnalyzing(const bool& analyzing)
 {
     _analyzing = analyzing;
 
@@ -179,12 +179,12 @@ void DataHierarchyItem::setAnalyzing(const bool& analyzing)
         _progressSection = "";
 }
 
-void DataHierarchyItem::setProgressPercentage(const float& progressPercentage)
+void DataHierarchyModelItem::setProgressPercentage(const float& progressPercentage)
 {
     _progressPercentage = progressPercentage;
 }
 
-void DataHierarchyItem::setProgressSection(const QString& progressSection)
+void DataHierarchyModelItem::setProgressSection(const QString& progressSection)
 {
     _progressSection = progressSection;
 }
