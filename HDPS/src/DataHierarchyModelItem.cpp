@@ -8,27 +8,15 @@
 namespace hdps
 {
 
-Core* DataHierarchyModelItem::core = nullptr;
-
-DataHierarchyModelItem::DataHierarchyModelItem(const QString& datasetName /*= ""*/, DataHierarchyModelItem* parent /*= nullptr*/) :
+DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyManager::DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent /*= nullptr*/) :
     QObject(parent),
     _parent(parent),
     _children(),
-    _datasetName(datasetName),
-    _dataset(nullptr),
+    _dataHierarchyItem(dataHierarchyItem),
     _analyzing(false),
     _progressSection(),
     _progressPercentage(0.0f)
 {
-    if (!datasetName.isEmpty()) {
-        try
-        {
-            _dataset = dynamic_cast<DataSet*>(&core->requestData(_datasetName));
-        }
-        catch (const std::exception&)
-        {
-        }
-    }
 }
 
 DataHierarchyModelItem::~DataHierarchyModelItem()
@@ -80,20 +68,24 @@ std::int32_t DataHierarchyModelItem::getNumColumns() const
 
 QString DataHierarchyModelItem::serialize() const
 {
-    return _dataset->getName() + "\n" + _dataset->getDataType();
+    if (_dataHierarchyItem == nullptr)
+        return "";
+
+    return _dataHierarchyItem->getDatasetName() + "\n" + _dataHierarchyItem->getDataType();
 }
 
 QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) const
 {
-    if (_datasetName.isEmpty())
-        return "Data";
+    if (_dataHierarchyItem == nullptr)
+        return "";
 
-    Q_ASSERT(_dataset != nullptr);
+    if (_dataHierarchyItem->getDatasetName().isEmpty())
+        return "Data";
 
     switch (static_cast<Column>(column))
     {
         case Column::Name:
-            return _dataset->getName();
+            return _dataHierarchyItem->getDatasetName();
 
         case Column::Description:
             return _progressSection;
@@ -115,10 +107,13 @@ QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
 {
     auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
+    if (_dataHierarchyItem == nullptr)
+        return fontAwesome.getIcon("home");
+
     switch (static_cast<Column>(column))
     {
         case Column::Name:
-            return fontAwesome.getIcon(_datasetName.isEmpty() ? "home" : "database");
+            return fontAwesome.getIcon("database");
 
         case Column::Progress:
         case Column::Description:
@@ -141,34 +136,10 @@ QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
 
 QMenu* DataHierarchyModelItem::getContextMenu()
 {
-    if (_datasetName.isEmpty())
+    if (_dataHierarchyItem == nullptr || _dataHierarchyItem->getDatasetName().isEmpty())
         return new QMenu();
 
-    Q_ASSERT(_dataset != nullptr);
-
-    auto contextMenu = _dataset->getContextMenu();
-
-    /*
-    // Extract name of item that triggered the context menu action
-    QAction* act = qobject_cast<QAction*>(sender());
-
-    QString datasetName = act->data().toString();
-
-    // Pop up a dialog where the user can enter a new name
-    bool ok;
-
-    QString newDatasetName = QInputDialog::getText(this, tr("Rename Dataset"), tr("Dataset name:"), QLineEdit::Normal, datasetName, &ok);
-
-    if (ok && !newDatasetName.isEmpty())
-        _core->getDataManager().renameSet(datasetName, newDatasetName);
-    */
-
-    return contextMenu;
-}
-
-QString DataHierarchyModelItem::getDatasetName() const
-{
-    return _datasetName;
+    return _dataHierarchyItem->getDataset().getContextMenu();
 }
 
 void DataHierarchyModelItem::setAnalyzing(const bool& analyzing)

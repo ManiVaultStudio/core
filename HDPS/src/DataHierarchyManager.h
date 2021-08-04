@@ -1,6 +1,8 @@
 #ifndef HDPS_DATA_HIERARCHY_MANAGER_H
 #define HDPS_DATA_HIERARCHY_MANAGER_H
 
+#include "Set.h"
+
 #include <QObject>
 #include <QMap>
 #include <QString>
@@ -8,6 +10,8 @@
 
 namespace hdps
 {
+
+class Core;
 
 class DataHierarchyManager : public QObject
 {
@@ -29,39 +33,44 @@ public:
         {
         }
 
-        QString getDatasetName() const { return _datasetName; }
-        QString getParent() const { return _parent; }
-        QStringList getChildren() const { return _children; }
-        std::uint32_t getNumberOfChildren() const { return _children.count(); }
-        QString getVisibleInGui() const { return _visibleInGui; }
+        QString getDatasetName() const;
+        QString getParent() const;
+        QStringList getChildren() const;
+        std::uint32_t getNumberOfChildren() const;
+        QString getVisibleInGui() const;
+        QString getDescription() const;
 
-        void addChild(const QString& name) {
-            _children << name;
-        }
+        void addChild(const QString& name);
 
-        void removeChild(const QString& name) {
-            _children.removeAll(name);
-        }
+        void removeChild(const QString& name);
 
-        QString toString() const {
-            return QString("Name=%1, Parent=%2, Children=[%3], Visible in GUI=%4").arg(_datasetName, _parent, _children.join(", "), _visibleInGui ? "true" : "false");
-        }
+        QString toString() const;
+
+        DataSet& getDataset() const;
+
+        DataType getDataType() const;
 
         DataHierarchyItem& operator= (const DataHierarchyItem& other)
         {
-            _datasetName    = other._datasetName;
-            _parent         = other._parent;
-            _children       = other._children;
-            _visibleInGui   = other._visibleInGui;
+            _datasetName        = other._datasetName;
+            _parent             = other._parent;
+            _children           = other._children;
+            _visibleInGui       = other._visibleInGui;
+            _description        = other._description;
 
             return *this;
         }
 
     protected:
+        
         QString         _datasetName;       /** Name of the dataset */
         QString         _parent;            /** Parent item */
         QStringList     _children;          /** Child items (if any) */
         bool            _visibleInGui;      /** Whether the dataset is visible in the GUI */
+        QString         _description;       /** Description */
+
+    public:
+        static Core* core;  /** Pointer to core */
     };
 
     using DataHierarchyItemsMap = QMap<QString, DataHierarchyItem>;
@@ -104,16 +113,16 @@ protected:
 signals:
 
     /**
-     * Invoked when an item is added to the hierarchy manager
+     * Invoked when a hierarchy item is added to the hierarchy manager
      * @param dataHierarchyItem Added item
      */
-    void itemAdded(const DataHierarchyItem& dataHierarchyItem);
+    void hierarchyItemAdded(DataHierarchyItem& dataHierarchyItem);
 
     /**
-     * Invoked when an item is removed from the hierarchy manager
+     * Invoked when a hierarchy item is removed from the hierarchy manager
      * @param datasetName Name of the removed dataset
      */
-    void itemRemoved(const DataHierarchyItem& dataHierarchyItem);
+    void hierarchyItemRemoved(DataHierarchyItem& dataHierarchyItem);
 
 private:
     DataHierarchyItemsMap   _dataHierarchyItemsMap;     /** Data hierarchy items map */

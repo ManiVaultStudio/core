@@ -14,11 +14,11 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
     QAbstractItemModel(parent),
     EventListener(),
     _core(core),
-    _rootItem(new DataHierarchyModelItem())
+    _rootItem(new DataHierarchyModelItem(nullptr))
 {
     setEventCore(reinterpret_cast<CoreInterface*>(_core));
 
-    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, [this](const DataHierarchyManager::DataHierarchyItem& dataHierarchyItem) {
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this](DataHierarchyManager::DataHierarchyItem& dataHierarchyItem) {
         DataSet& dataset = _core->requestData(dataHierarchyItem.getDatasetName());
 
         QModelIndex parentModelIndex;
@@ -38,7 +38,7 @@ PluginHierarchyModel::PluginHierarchyModel(Core* core, QObject* parent) :
 
             beginInsertRows(parentModelIndex, numberOfChildren, numberOfChildren + 1);
             {
-                dataItem->addChild(new DataHierarchyModelItem(dataHierarchyItem.getDatasetName()));
+                dataItem->addChild(new DataHierarchyModelItem(&dataHierarchyItem));
             }
             endInsertRows();
         }

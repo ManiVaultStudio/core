@@ -23,7 +23,7 @@ Core::Core(gui::MainWindow& mainWindow) :
     _mainWindow(mainWindow),
     _dataHierarchyManager()
 {
-    DataHierarchyModelItem::core = this;
+    DataHierarchyManager::DataHierarchyItem::core = this;
 }
 
 Core::~Core()
