@@ -6,6 +6,7 @@
 #include "DataType.h"
 #include "DataManager.h"
 #include "DataHierarchyManager.h"
+
 #include "event/EventListener.h"
 
 #include <memory>
@@ -158,14 +159,18 @@ public:
     /** Notify all event listeners that a dataset has been renamed. */
     void notifyDataRenamed(const QString oldName, const QString newName) override;
 
-    /** Notify all event listeners of an analysis event */
-    void notifyAnalysisEvent(const AnalysisEvent& analysisEvent) override;
-
     /**
     * Returns a reference to the main window for adding widgets to it.
     */
     gui::MainWindow& gui() const;
     
+    /**
+     * Get hierarchy item by dataset name
+     * @param datasetName Name of the dataset
+     * @return Data hierarchy item
+     */
+    DataHierarchyItem& getHierarchyItem(const QString& datasetName) override;
+
 protected:
     /**
      * Requests an instance of a data type plugin from the core which has the same

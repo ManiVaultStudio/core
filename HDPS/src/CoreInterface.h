@@ -3,6 +3,8 @@
 
 #include "event/Event.h"
 
+#include "DataHierarchyItem.h"
+
 #include <QString>
 #include <vector>
 #include <functional>
@@ -101,8 +103,12 @@ public:
     /** Notify all event listeners that a dataset has been renamed. */
     virtual void notifyDataRenamed(const QString oldName, const QString newName) = 0;
 
-    /** Notify all event listeners of an analysis event */
-    virtual void notifyAnalysisEvent(const AnalysisEvent& analysisEvent) = 0;
+    /**
+     * Get hierarchy item by dataset name
+     * @param datasetName Name of the dataset
+     * @return Data hierarchy item
+     */
+    virtual DataHierarchyItem& getHierarchyItem(const QString& datasetName) = 0;
 
 protected:
 

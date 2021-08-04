@@ -196,6 +196,7 @@ set( UTIL_SOURCES
 
 set( PLUGIN_HEADERS
     src/CoreInterface.h
+	src/DataHierarchyItem.h
     src/AnalysisPlugin.h
     src/DataType.h
     src/RawData.h
@@ -211,6 +212,7 @@ set( PLUGIN_HEADERS
 )
 
 set( PLUGIN_SOURCES
+	src/DataHierarchyItem.cpp
 	src/Plugin.cpp
     src/LoaderPlugin.cpp
     src/Application.cpp
@@ -218,7 +220,6 @@ set( PLUGIN_SOURCES
 )
 
 set(DATA_HIERARCHY_HEADERS
-    src/DataHierarchyItem.h
     src/DataHierarchyModelItem.h
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
@@ -229,7 +230,6 @@ set(DATA_HIERARCHY_HEADERS
 )
 
 set(DATA_HIERARCHY_SOURCES
-    src/DataHierarchyItem.cpp
     src/DataHierarchyModelItem.cpp
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp

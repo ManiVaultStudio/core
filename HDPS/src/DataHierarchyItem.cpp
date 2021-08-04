@@ -1,10 +1,21 @@
 #include "DataHierarchyItem.h"
 #include "Core.h"
+#include "Set.h"
 
 namespace hdps
 {
 
 Core* DataHierarchyItem::core = nullptr;
+
+DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QString& datasetName /*= ""*/, const QString& parentDatasetName /*= ""*/, const bool& visibleInGui /*= true*/) :
+    QObject(parent),
+    _datasetName(datasetName),
+    _parent(parentDatasetName),
+    _children(),
+    _visibleInGui(visibleInGui),
+    _progress(0.0)
+{
+}
 
 QString DataHierarchyItem::getDatasetName() const
 {
@@ -34,6 +45,31 @@ QString DataHierarchyItem::getVisibleInGui() const
 QString DataHierarchyItem::getDescription() const
 {
     return _description;
+}
+
+void DataHierarchyItem::setDescription(const QString& description)
+{
+    if (description == _description)
+        return;
+
+    _description = description;
+
+    emit descriptionChanged(_description);
+}
+
+float DataHierarchyItem::getProgress() const
+{
+    return _progress;
+}
+
+void DataHierarchyItem::setProgress(const float& progress)
+{
+    if (progress == _progress)
+        return;
+
+    _progress = progress;
+
+    emit progressChanged(_progress);
 }
 
 void DataHierarchyItem::addChild(const QString& name)

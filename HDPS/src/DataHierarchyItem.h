@@ -1,7 +1,7 @@
 #ifndef HDPS_DATA_HIERARCHY_ITEM_H
 #define HDPS_DATA_HIERARCHY_ITEM_H
 
-#include "Set.h"
+#include "DataType.h"
 
 #include <QObject>
 #include <QMap>
@@ -11,6 +11,7 @@
 namespace hdps
 {
 
+class DataSet;
 class Core;
 
  /**
@@ -20,24 +21,20 @@ class Core;
   *
   * @author Thomas Kroes
   */
-class DataHierarchyItem
+class DataHierarchyItem : public QObject
 {
+    Q_OBJECT
+
 public:
 
     /**
      * Constructor
-     * @param name Name of the dataset
-     * @param parent Name of the parent dataset
+     * @param parent Pointer to parent object
+     * @param datasetName Name of the dataset
+     * @param parentDatasetName Name of the parent dataset
      * @param visibleInGui Whether the dataset is visible in the GUI
      */
-    DataHierarchyItem(const QString& name = "", const QString& parent = "", const bool& visibleInGui = true) :
-        _datasetName(name),
-        _parent(parent),
-        _children(),
-        _visibleInGui(visibleInGui),
-        _progress(0.0)
-    {
-    }
+    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visibleInGui = true);
 
     /** Gets the dataset name */
     QString getDatasetName() const;
@@ -54,8 +51,19 @@ public:
     /** Gets whether the dataset is visible in the GUI */
     QString getVisibleInGui() const;
 
-    /** Gets the description */
+    /**
+     * Gets/sets the description
+     * @param description Description
+     */
     QString getDescription() const;
+    void setDescription(const QString& description);
+
+    /**
+     * Gets/sets the progress
+     * @param progress Progress
+     */
+    float getProgress() const;
+    void setProgress(const float& progress);
 
     /**
      * Adds a child (name reference to data hierarchy item)
@@ -94,6 +102,20 @@ public:
         return *this;
     }
 
+signals:
+
+    /**
+     * Signals that the description changed
+     * @param description Description
+     */
+    void descriptionChanged(const QString& description);
+
+    /**
+     * Signals that the progress changed
+     * @param progress Progress
+     */
+    void progressChanged(const double& progress);
+
 protected:
         
     QString         _datasetName;       /** Name of the dataset */
@@ -101,14 +123,14 @@ protected:
     QStringList     _children;          /** Child items (if any) */
     bool            _visibleInGui;      /** Whether the dataset is visible in the GUI */
     QString         _description;       /** Description */
-    double          _progress;          /** Progress */
+    float           _progress;          /** Progress */
 
 public:
     static Core* core;  /** Pointer to core */
 };
 
 /** Maps string to data hierarchy item */
-using DataHierarchyItemsMap = QMap<QString, DataHierarchyItem>;
+using DataHierarchyItemsMap = QMap<QString, DataHierarchyItem*>;
 
 /**
  * Print to console

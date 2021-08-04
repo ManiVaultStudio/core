@@ -37,11 +37,6 @@ void EventListener::registerDataEvent(DataEventHandler callback)
     _dataEventHandlers.push_back(callback);
 }
 
-void EventListener::registerAnalysisEvent(AnalysisEventHandler callback)
-{
-    _analysisEventHandlers.push_back(callback);
-}
-
 void EventListener::onDataEvent(DataEvent* dataEvent)
 {
     if (dataEvent->getType() == EventType::SelectionChanged)
@@ -82,12 +77,6 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
 
     for (auto dataEventHandler : _dataEventHandlers)
         dataEventHandler(dataEvent);
-}
-
-void EventListener::onAnalysisEvent(const AnalysisEvent& analysisEvent)
-{
-    for (auto analysisEventHandler : _analysisEventHandlers)
-        analysisEventHandler(analysisEvent);
 }
 
 }

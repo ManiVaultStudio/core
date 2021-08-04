@@ -44,28 +44,26 @@ public:
 
 protected:
     void notifyStarted() {
-        qApp->processEvents();
-        _core->notifyAnalysisEvent(AnalysisStartedEvent(this));
+        _core->getHierarchyItem(_outputDatasetName).setDescription("");
+        _core->getHierarchyItem(_outputDatasetName).setProgress(0.0);
     }
 
     void notifyProgressSection(const QString& section) {
-        qApp->processEvents();
-        _core->notifyAnalysisEvent(AnalysisProgressSectionEvent(this, section));
+        _core->getHierarchyItem(_outputDatasetName).setDescription(section);
     }
 
     void notifyProgressPercentage(const float& percentage) {
-        qApp->processEvents();
-        _core->notifyAnalysisEvent(AnalysisProgressPercentageEvent(this, percentage));
+        _core->getHierarchyItem(_outputDatasetName).setProgress(percentage);
     }
 
     void notifyFinished() {
-        qApp->processEvents();
-        _core->notifyAnalysisEvent(AnalysisFinishedEvent(this));
+        _core->getHierarchyItem(_outputDatasetName).setDescription("");
+        _core->getHierarchyItem(_outputDatasetName).setProgress(0.0);
     }
 
     void notifyAborted(const QString& reason) {
-        qApp->processEvents();
-        _core->notifyAnalysisEvent(AnalysisAbortedEvent(this, reason));
+        _core->getHierarchyItem(_outputDatasetName).setDescription("");
+        _core->getHierarchyItem(_outputDatasetName).setProgress(0.0);
     }
 
 protected:

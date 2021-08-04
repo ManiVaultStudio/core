@@ -368,14 +368,13 @@ void Core::notifyDataRenamed(const QString oldName, const QString newName)
         listener->onDataEvent(&dataEvent);
 }
 
-void Core::notifyAnalysisEvent(const AnalysisEvent& analysisEvent)
-{
-    for (EventListener* eventListener : _eventListeners)
-        eventListener->onAnalysisEvent(analysisEvent);
-}
-
 gui::MainWindow& Core::gui() const {
     return _mainWindow;
+}
+
+hdps::DataHierarchyItem& Core::getHierarchyItem(const QString& datasetName)
+{
+    return _dataHierarchyManager.getHierarchyItem(datasetName);
 }
 
 /** Destroys all plug-ins kept by the core */
