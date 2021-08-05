@@ -14,10 +14,6 @@ namespace gui {
  */
 class SharedActions
 {
-public:
-
-    /** List of widget actions */
-    using WidgetActionList = QList<gui::WidgetAction*>;
 
 public:
 
@@ -36,7 +32,7 @@ public:
     void concealAction(gui::WidgetAction* widgetAction);
 
     /** Returns list of shared action widgets*/
-    const WidgetActionList& getExposedActions() const;
+    const WidgetActions& getExposedActions() const;
 
     /**
      * Get action by name
@@ -59,7 +55,7 @@ public:
     QMenu* getContextMenu();
 
 protected:
-    WidgetActionList    _actions;     /** Exposed widget actions */
+    WidgetActions    _actions;     /** Exposed widget actions */
 };
 
 }

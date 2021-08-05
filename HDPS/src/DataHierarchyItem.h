@@ -155,6 +155,7 @@ protected:
     QString         _description;       /** Description */
     float           _progress;          /** Progress */
     bool            _selected;          /** Whether the hierarchy item is selected */
+    QList<QIcon>    _icons;             /** Icons */
 
 public:
     static Core* core;  /** Pointer to core */

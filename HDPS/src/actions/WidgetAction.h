@@ -129,5 +129,8 @@ protected:
     virtual QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard);
 };
 
+/** List of widget actions */
+using WidgetActions = QVector<WidgetAction*>;
+
 }
 }

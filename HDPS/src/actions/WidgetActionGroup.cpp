@@ -1,4 +1,5 @@
 #include "WidgetActionGroup.h"
+#include "ToggleAction.h"
 
 #include <QDebug>
 #include <QMenu>
@@ -59,6 +60,36 @@ bool WidgetActionGroup::isExpanded() const
 bool WidgetActionGroup::isCollapsed() const
 {
     return !_expanded;
+}
+
+WidgetActionGroup::GroupWidget::GroupWidget(QWidget* parent, WidgetActionGroup* widgetActionGroup) :
+    WidgetAction::Widget(parent, widgetActionGroup, Widget::State::Standard),
+    _layout(new QGridLayout())
+{
+    _layout->setColumnStretch(0, 1);
+    _layout->setColumnStretch(1, 2);
+
+    setLayout(_layout);
+}
+
+void WidgetActionGroup::GroupWidget::addWidgetAction(WidgetAction& widgetAction)
+{
+    const auto numRows = _layout->rowCount();
+
+    auto toggleAction = dynamic_cast<ToggleAction*>(&widgetAction);
+
+    if (toggleAction) {
+        _layout->addWidget(toggleAction->createCheckBoxWidget(this), numRows, 1);
+    }
+    else {
+        _layout->addWidget(widgetAction.createLabelWidget(this), numRows, 0);
+        _layout->addWidget(widgetAction.createWidget(this), numRows, 1);
+    }
+}
+
+QGridLayout* WidgetActionGroup::GroupWidget::layout()
+{
+    return _layout;
 }
 
 }

@@ -21,7 +21,7 @@ void SharedActions::concealAction(gui::WidgetAction* widgetAction)
     _actions.removeOne(widgetAction);
 }
 
-const hdps::gui::SharedActions::WidgetActionList& SharedActions::getExposedActions() const
+const hdps::gui::WidgetActions& SharedActions::getExposedActions() const
 {
     return _actions;
 }

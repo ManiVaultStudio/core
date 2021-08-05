@@ -2,6 +2,9 @@
 
 #include "WidgetAction.h"
 
+class QWidget;
+class QGridLayout;
+
 namespace hdps {
 
 namespace gui {
@@ -17,6 +20,37 @@ namespace gui {
 class WidgetActionGroup : public WidgetAction
 {
     Q_OBJECT
+
+public:
+
+    /**
+     * Line edit widget class for string action
+     */
+    class GroupWidget : public WidgetAction::Widget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param widgetActionGroup Pointer to widget action group
+         */
+        GroupWidget(QWidget* parent, WidgetActionGroup* widgetActionGroup);
+
+        /**
+         * Adds an action to the form
+         * @param widgetAction Widget action
+         */
+        void addWidgetAction(WidgetAction& widgetAction);
+
+        /** Get grid layout */
+        QGridLayout* layout();
+
+    protected:
+        QGridLayout*    _layout;        /** Main grid layout */
+
+        friend class WidgetActionGroup;
+    };
 
 public:
     /**
