@@ -71,34 +71,42 @@ void Core::addPlugin(plugin::Plugin* plugin)
     // Initialize the plugin after it has been added to the core
     plugin->init();
 
-    // If it is an analysis plugin with a settings widget, add the settings to the main window
-    if (plugin->getType() == plugin::Type::ANALYSIS)
+    switch (plugin->getType())
     {
-        auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
-
-        _mainWindow.addPlugin(plugin);
-
-        notifyDataAdded(analysisPlugin->getOutputDatasetName());
-    }
-
-    // If it is a loader plugin it should call loadData
-    if (plugin->getType() == plugin::Type::LOADER)
-    {
-        try
+        case plugin::Type::ANALYSIS:
         {
-            dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+            auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
+
+            _mainWindow.addPlugin(plugin);
+
+            notifyDataAdded(analysisPlugin->getOutputDatasetName());
+
+            break;
         }
-        catch (plugin::DataLoadException e)
+
+        case plugin::Type::LOADER:
         {
-            QMessageBox messageBox;
-            messageBox.critical(0, "Error", e.what());
-            messageBox.setFixedSize(500, 200);
+            try
+            {
+                dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+            }
+            catch (plugin::DataLoadException e)
+            {
+                QMessageBox messageBox;
+                messageBox.critical(0, "Error", e.what());
+                messageBox.setFixedSize(500, 200);
+            }
+
+            break;
         }
-    }
-    // If it is a writer plugin it should call writeData
-    if (plugin->getType() == plugin::Type::WRITER)
-    {
-        dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
+
+        case plugin::Type::WRITER:
+        {
+            dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
+
+            break;
+        }
+
     }
 }
 
@@ -106,6 +114,7 @@ const QString Core::addData(const QString kind, const QString nameRequest)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
+
     // Request it from the core
     const RawData& rawData = requestRawData(rawDataName);
 
@@ -121,8 +130,9 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     
     _dataManager->addSelection(rawDataName, selection);
     
-    // Add the dataset to the hierarchy manager
+    // Add the dataset to the hierarchy manager and select the dataset
     _dataHierarchyManager.addDataset(setName);
+    _dataHierarchyManager.selectHierarchyItem(setName);
 
     return setName;
 }
@@ -161,7 +171,7 @@ const QString Core::createDerivedData(const QString& nameRequest, const QString&
     return setName;
 }
 
-QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString parentSetName /*= ""*/, const bool& visible /*= true*/)
+QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString dataHierarchyParent /*= ""*/, const bool& visible /*= true*/)
 {
     // Create a new set with only the indices that were part of the selection set
     DataSet* newSet = selection.copy();
@@ -176,7 +186,7 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     notifyDataAdded(setName);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager.addDataset(setName, parentSetName.isEmpty() ? sourceSet.getName() : parentSetName, visible);
+    _dataHierarchyManager.addDataset(setName, dataHierarchyParent.isEmpty() ? sourceSet.getName() : dataHierarchyParent, visible);
 
     return setName;
 }
@@ -372,7 +382,7 @@ gui::MainWindow& Core::gui() const {
     return _mainWindow;
 }
 
-hdps::DataHierarchyItem& Core::getHierarchyItem(const QString& datasetName)
+hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& datasetName)
 {
     return _dataHierarchyManager.getHierarchyItem(datasetName);
 }

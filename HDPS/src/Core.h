@@ -95,6 +95,7 @@ public:
      * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
      * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
      * @param dataHierarchyParent Name of the parent in the data hierarchy (sourceDatasetName if is used if empty)
+     * @param visible Whether the new dataset is visible in the user interface
      */
     const QString createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent = "") override;
 
@@ -102,8 +103,13 @@ public:
      * Creates a copy of the given selection set and gives it a unique name based
      * on the name given to this function. Then adds the new set to the data manager
      * and notifies all data consumers of the new set.
+     * @param selection Selection set
+     * @param sourceSet Source dataset
+     * @param newSetName Intended name of the subset
+     * @param dataHierarchyParent Name of the parent in the data hierarchy (sourceDatasetName if is used if empty)
+     * @param visible Whether the new dataset is visible in the user interface
      */
-    QString createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString parentSetName = "", const bool& visible = true) override;
+    QString createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString dataHierarchyParent = "", const bool& visible = true) override;
 
     /**
      * Requests a dataset from the core which has the same unique name
@@ -170,7 +176,7 @@ public:
      * @param datasetName Name of the dataset
      * @return Data hierarchy item
      */
-    DataHierarchyItem& getHierarchyItem(const QString& datasetName) override;
+    DataHierarchyItem& getDataHierarchyItem(const QString& datasetName) override;
 
 protected:
     /**

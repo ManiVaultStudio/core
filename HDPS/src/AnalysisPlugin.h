@@ -47,34 +47,34 @@ protected:
     void notifyStarted() {
         qApp->processEvents();
 
-        _core->getHierarchyItem(_outputDatasetName).setDescription("");
-        _core->getHierarchyItem(_outputDatasetName).setProgress(0.0);
+        _core->getDataHierarchyItem(_outputDatasetName).setDescription("");
+        _core->getDataHierarchyItem(_outputDatasetName).setProgress(0.0);
     }
 
     void notifyProgressSection(const QString& section) {
         qApp->processEvents();
 
-        _core->getHierarchyItem(_outputDatasetName).setDescription(section);
+        _core->getDataHierarchyItem(_outputDatasetName).setDescription(section);
     }
 
     void notifyProgressPercentage(const float& percentage) {
         qApp->processEvents();
 
-        _core->getHierarchyItem(_outputDatasetName).setProgress(percentage);
+        _core->getDataHierarchyItem(_outputDatasetName).setProgress(percentage);
     }
 
     void notifyFinished() {
         qApp->processEvents();
 
-        _core->getHierarchyItem(_outputDatasetName).setDescription("");
-        _core->getHierarchyItem(_outputDatasetName).setProgress(0.0);
+        _core->getDataHierarchyItem(_outputDatasetName).setDescription("");
+        _core->getDataHierarchyItem(_outputDatasetName).setProgress(0.0);
     }
 
     void notifyAborted(const QString& reason) {
         qApp->processEvents();
 
-        _core->getHierarchyItem(_outputDatasetName).setDescription("");
-        _core->getHierarchyItem(_outputDatasetName).setProgress(0.0);
+        _core->getDataHierarchyItem(_outputDatasetName).setDescription("");
+        _core->getDataHierarchyItem(_outputDatasetName).setProgress(0.0);
     }
 
 protected:

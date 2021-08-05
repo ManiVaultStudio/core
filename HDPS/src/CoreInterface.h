@@ -44,6 +44,7 @@ public:
      * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
      * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
      * @param dataHierarchyParent Name of the parent in the data hierarchy (sourceDatasetName if is used if empty)
+     * @param visible Whether the new dataset is visible in the user interface
      */
     virtual const QString createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent = "") = 0;
 
@@ -51,8 +52,13 @@ public:
      * Creates a copy of the given selection set and gives it a unique name based
      * on the name given to this function. Then adds the new set to the data manager
      * and notifies all data consumers of the new set.
+     * @param selection Selection set
+     * @param sourceSet Source dataset
+     * @param newSetName Intended name of the subset
+     * @param dataHierarchyParent Name of the parent in the data hierarchy (sourceDatasetName if is used if empty)
+     * @param visible Whether the new dataset is visible in the user interface
      */
-    virtual QString createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString parentSetName = "", const bool& visible = true) = 0;
+    virtual QString createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString dataHierarchyParent = "", const bool& visible = true) = 0;
 
     /**
      * Requests a dataset from the core which has the same unique name
@@ -105,11 +111,11 @@ public:
     virtual void notifyDataRenamed(const QString oldName, const QString newName) = 0;
 
     /**
-     * Get hierarchy item by dataset name
+     * Get data hierarchy item by dataset name
      * @param datasetName Name of the dataset
      * @return Data hierarchy item
      */
-    virtual DataHierarchyItem& getHierarchyItem(const QString& datasetName) = 0;
+    virtual DataHierarchyItem& getDataHierarchyItem(const QString& datasetName) = 0;
 
 protected:
 

@@ -6,6 +6,9 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QHeaderView>
+#include <QMessageBox>
+
+#include <stdexcept>
 
 namespace hdps
 {
@@ -47,7 +50,16 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
         emit selectedDatasetNameChanged(selectedDatasetName);
     });
 
-    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) {
+    const auto getModelIndexForDatasetName = [this](const QString& datasetName) -> QModelIndex {
+        const auto modelIndex = _model.match(_model.index(0, 0), Qt::DisplayRole, datasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+
+        if (!modelIndex.isValid())
+            throw new std::runtime_error(QString("Dataset '%1' not found in model").arg(datasetName).toLatin1());
+
+        return modelIndex;
+    };
+
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this, getModelIndexForDatasetName](DataHierarchyItem& dataHierarchyItem) {
         if (dataHierarchyItem.isHidden())
             return;
 
@@ -60,32 +72,54 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
         if (parentDatasetName.isEmpty())
             parentModelIndex = _model.index(0, 0);
         else
-            parentModelIndex = _model.match(_model.index(0, 0), Qt::DisplayRole, parentDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+            parentModelIndex = getModelIndexForDatasetName(parentDatasetName);
 
         _model.addItem(parentModelIndex, &dataHierarchyItem);
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::descriptionChanged, this, [this, &dataHierarchyItem](const QString& description) {
-            const auto outputDatasetName    = dataHierarchyItem.getDatasetName();
-            const auto outputDatasetIndex   = _model.match(_model.index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+        connect(&dataHierarchyItem, &DataHierarchyItem::descriptionChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const QString& description) {
+            try
+            {
+                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem.getDatasetName());
 
-            _model.setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), description);
+                _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), description);
+            }
+            catch (std::exception& e)
+            {
+                QMessageBox::warning(nullptr, "HDPS", QString("Unable to change data hierarchy item description: %1").arg(e.what()));
+            }
         });
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::progressChanged, this, [this, &dataHierarchyItem](const float& progress) {
-            const auto outputDatasetName    = dataHierarchyItem.getDatasetName();
-            const auto outputDatasetIndex   = _model.match(_model.index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
-
-            _model.setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), progress);
-            _model.setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), progress > 0.0f);
+        connect(&dataHierarchyItem, &DataHierarchyItem::progressChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const float& progress) {
+            try
+            {
+                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem.getDatasetName());
+                
+                _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), progress);
+                _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), progress > 0.0f);
+            }
+            catch (std::exception& e)
+            {
+                QMessageBox::warning(nullptr, "HDPS", QString("Unable to change data hierarchy item progress: %1").arg(e.what()));
+            }
         });
-    });
 
-    connect(&_model, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& parent, int first, int last)
-    {
-        if (!isExpanded(parent))
-            expand(parent);
+        connect(&dataHierarchyItem, &DataHierarchyItem::selectionChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const bool& selection) {
+            try
+            {
+                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem.getDatasetName());
 
-        //_selectionModel.select(parent.child(first, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+                _selectionModel.select(modelIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+            }
+            catch (std::exception& e)
+            {
+                QMessageBox::warning(nullptr, "HDPS", QString("Unable to select data hierarchy item: %1").arg(e.what()));
+            }
+        });
+
+        if (!isExpanded(parentModelIndex))
+            expand(parentModelIndex);
+
+        //_selectionModel.select(paparentModelIndexrent.child(first, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
     });
 
     connect(this, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
