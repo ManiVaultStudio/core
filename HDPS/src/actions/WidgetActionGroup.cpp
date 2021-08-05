@@ -66,8 +66,8 @@ WidgetActionGroup::GroupWidget::GroupWidget(QWidget* parent, WidgetActionGroup* 
     WidgetAction::Widget(parent, widgetActionGroup, Widget::State::Standard),
     _layout(new QGridLayout())
 {
-    _layout->setColumnStretch(0, 1);
-    _layout->setColumnStretch(1, 2);
+    _layout->setColumnStretch(0, 2);
+    _layout->setColumnStretch(1, 5);
 
     setLayout(_layout);
 }
@@ -82,7 +82,11 @@ void WidgetActionGroup::GroupWidget::addWidgetAction(WidgetAction& widgetAction)
         _layout->addWidget(toggleAction->createCheckBoxWidget(this), numRows, 1);
     }
     else {
-        _layout->addWidget(widgetAction.createLabelWidget(this), numRows, 0);
+        auto labelWidget = widgetAction.createLabelWidget(this);
+
+        labelWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        _layout->addWidget(labelWidget, numRows, 0);
         _layout->addWidget(widgetAction.createWidget(this), numRows, 1);
     }
 }
