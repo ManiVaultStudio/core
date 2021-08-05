@@ -1,66 +1,17 @@
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
-#include "DataHierarchyManager.h"
-#include "Plugin.h"
-#include "Core.h"
+#include "DataHierarchyItem.h"
 
 #include <QDebug>
+#include <QIcon>
 
 namespace hdps
 {
 
-DataHierarchyModel::DataHierarchyModel(Core* core, QObject* parent) :
+DataHierarchyModel::DataHierarchyModel(QObject* parent) :
     QAbstractItemModel(parent),
-    _core(core),
     _rootItem(new DataHierarchyModelItem(nullptr))
 {
-    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) {
-        if (dataHierarchyItem.isHidden())
-            return;
-
-        DataSet& dataset = _core->requestData(dataHierarchyItem.getDatasetName());
-
-        QModelIndex parentModelIndex;
-
-        const auto parentDatasetName = dataHierarchyItem.getParent();
-
-        if (parentDatasetName.isEmpty())
-            parentModelIndex = index(0, 0);
-        else
-            parentModelIndex = match(index(0, 0), Qt::DisplayRole, parentDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
-
-        auto dataItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
-
-        emit layoutAboutToBeChanged();
-        {
-            const auto numberOfChildren = dataHierarchyItem.getNumberOfChildren();
-
-            //qDebug() << dataHierarchyItem;
-            //qDebug() << numberOfChildren;
-
-            beginInsertRows(parentModelIndex, numberOfChildren, numberOfChildren + 1);
-            {
-                dataItem->addChild(new DataHierarchyModelItem(&dataHierarchyItem));
-            }
-            endInsertRows();
-        }
-        emit layoutChanged();
-
-        connect(&dataHierarchyItem, &DataHierarchyItem::descriptionChanged, this, [this, &dataHierarchyItem](const QString& description) {
-            const auto outputDatasetName    = dataHierarchyItem.getDatasetName();
-            const auto outputDatasetIndex   = match(index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
-
-            setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), description);
-        });
-
-        connect(&dataHierarchyItem, &DataHierarchyItem::progressChanged, this, [this, &dataHierarchyItem](const float& progress) {
-            const auto outputDatasetName    = dataHierarchyItem.getDatasetName();
-            const auto outputDatasetIndex   = match(index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
-
-            setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), progress);
-            setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), progress > 0.0f);
-        });
-    });
 }
 
 DataHierarchyModel::~DataHierarchyModel()
@@ -236,6 +187,25 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
     mimeData->setText(items[0]->serialize());
 
     return mimeData;
+}
+
+bool DataHierarchyModel::addItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem)
+{
+    auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
+
+    emit layoutAboutToBeChanged();
+    {
+        const auto numberOfChildren = dataHierarchyItem->getNumberOfChildren();
+
+        beginInsertRows(parentModelIndex, numberOfChildren, numberOfChildren + 1);
+        {
+            parentItem->addChild(new DataHierarchyModelItem(dataHierarchyItem));
+        }
+        endInsertRows();
+    }
+    emit layoutChanged();
+
+    return true;
 }
 
 }

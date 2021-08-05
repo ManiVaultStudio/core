@@ -14,7 +14,7 @@ void DataHierarchyManager::addDataset(const QString& datasetName, const QString&
 {
     Q_ASSERT(!datasetName.isEmpty());
 
-    _dataHierarchyItemsMap[datasetName] = new DataHierarchyItem(this, datasetName, parentDatasetName, visible);
+    _dataHierarchyItemsMap[datasetName] = SharedDataHierarchyItem(new DataHierarchyItem(this, datasetName, parentDatasetName, visible));
 
     if (!parentDatasetName.isEmpty() && _dataHierarchyItemsMap.contains(parentDatasetName))
         _dataHierarchyItemsMap[parentDatasetName]->addChild(datasetName);
@@ -32,7 +32,7 @@ bool DataHierarchyManager::removeDataset(const QString& datasetName)
     for (auto child : getChildren(datasetName))
         _dataHierarchyItemsMap.remove(child);
 
-    emit hierarchyItemRemoved(*_dataHierarchyItemsMap[datasetName]);
+    emit hierarchyItemRemoved(datasetName);
 
     _dataHierarchyItemsMap.remove(datasetName);
 
@@ -65,6 +65,20 @@ hdps::DataHierarchyItem& DataHierarchyManager::getHierarchyItem(const QString& d
     Q_ASSERT(!datasetName.isEmpty());
 
     return *_dataHierarchyItemsMap[datasetName];
+}
+
+void DataHierarchyManager::selectHierarchyItem(const QString& datasetName)
+{
+    Q_ASSERT(!datasetName.isEmpty());
+
+    for (auto dataHierarchyItem : _dataHierarchyItemsMap.values())
+        if (dataHierarchyItem->isSelected())
+            dataHierarchyItem->deselect();
+
+    if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
+        return;
+
+    _dataHierarchyItemsMap[datasetName]->select();
 }
 
 QStringList DataHierarchyManager::getChildren(const QString& datasetName, const bool& recursive /*= true*/)

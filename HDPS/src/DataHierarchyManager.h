@@ -63,6 +63,12 @@ public:
      */
     DataHierarchyItem& getHierarchyItem(const QString& datasetName);
 
+    /**
+     * Selects data hierarchy item with dataset name
+     * @param datasetName Name of the dataset to select
+     */
+    void selectHierarchyItem(const QString& datasetName);
+
 protected:
 
     /**
@@ -85,7 +91,7 @@ signals:
      * Invoked when a hierarchy item is removed from the hierarchy manager
      * @param datasetName Name of the removed dataset
      */
-    void hierarchyItemRemoved(DataHierarchyItem& dataHierarchyItem);
+    void hierarchyItemRemoved(const QString& datasetName);
 
 private:
     DataHierarchyItemsMap   _dataHierarchyItemsMap;     /** Data hierarchy items map */

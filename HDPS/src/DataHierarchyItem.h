@@ -32,9 +32,10 @@ public:
      * @param parent Pointer to parent object
      * @param datasetName Name of the dataset
      * @param parentDatasetName Name of the parent dataset
-     * @param visible Whether the dataset is visible in the GUI
+     * @param visible Whether the dataset is visible
+     * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true);
+    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true, const bool& selected = false);
 
     /** Gets the dataset name */
     QString getDatasetName() const;
@@ -48,25 +49,44 @@ public:
     /** Gets the number of children */
     std::uint32_t getNumberOfChildren() const;
 
-    /** Gets whether the dataset is visible in the GUI */
+    /** Gets whether the dataset is visible */
     bool getVisible() const;
 
     /** Gets whether the dataset is hidden */
     bool isHidden() const;
 
-    /**
-     * Gets/sets the description
-     * @param description Description
-     */
+    /** Gets the description */
     QString getDescription() const;
-    void setDescription(const QString& description);
 
     /**
-     * Gets/sets the progress
-     * @param progress Progress
+     * Sets the description
+     * @param description Description
      */
+    void setDescription(const QString& description);
+
+    /** Gets the item progress */
     float getProgress() const;
+
+    /**
+     * Sets the item progress
+     * @param progress Item progress
+     */
     void setProgress(const float& progress);
+
+    /** Gets whether the hierarchy item is selected */
+    bool isSelected() const;
+
+    /**
+     * Sets the item selection status
+     * @param selected Whether the hierarchy item is selected
+     */
+    void setSelected(const bool& selected);
+
+    /** Selects the hierarchy item */
+    void select();
+
+    /** De-selects the hierarchy item */
+    void deselect();
 
     /**
      * Adds a child (name reference to data hierarchy item)
@@ -101,6 +121,7 @@ public:
         _visible        = other._visible;
         _description    = other._description;
         _progress       = other._progress;
+        _selected       = other._selected;
 
         return *this;
     }
@@ -119,21 +140,31 @@ signals:
      */
     void progressChanged(const float& progress);
 
+    /**
+     * Signals that the item got selected
+     * @param selected Whether the item is selected
+     */
+    void selectionChanged(const bool& selected);
+
 protected:
         
     QString         _datasetName;       /** Name of the dataset */
     QString         _parent;            /** Parent item */
     QStringList     _children;          /** Child items (if any) */
-    bool            _visible;           /** Whether the dataset is visible in the GUI */
+    bool            _visible;           /** Whether the dataset is visible */
     QString         _description;       /** Description */
     float           _progress;          /** Progress */
+    bool            _selected;          /** Whether the hierarchy item is selected */
 
 public:
     static Core* core;  /** Pointer to core */
 };
 
-/** Maps string to data hierarchy item */
-using DataHierarchyItemsMap = QMap<QString, DataHierarchyItem*>;
+/** Shared pointer of data hierarchy item */
+using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
+
+/** Maps string to shared data hierarchy item */
+using DataHierarchyItemsMap = QMap<QString, SharedDataHierarchyItem>;
 
 /**
  * Print to console

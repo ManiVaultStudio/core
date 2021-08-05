@@ -16,7 +16,7 @@ namespace gui
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
     QTreeView(parent),
     _core(core),
-    _model(_core),
+    _model(this),
     _selectionModel(&_model)
 {
     setMinimumWidth(500);
@@ -45,6 +45,39 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
         const auto selectedDatasetName = selected.first().topLeft().data(Qt::DisplayRole).toString();
         emit selectedDatasetNameChanged(selectedDatasetName);
+    });
+
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this](DataHierarchyItem& dataHierarchyItem) {
+        if (dataHierarchyItem.isHidden())
+            return;
+
+        DataSet& dataset = _core->requestData(dataHierarchyItem.getDatasetName());
+
+        QModelIndex parentModelIndex;
+
+        const auto parentDatasetName = dataHierarchyItem.getParent();
+
+        if (parentDatasetName.isEmpty())
+            parentModelIndex = _model.index(0, 0);
+        else
+            parentModelIndex = _model.match(_model.index(0, 0), Qt::DisplayRole, parentDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+
+        _model.addItem(parentModelIndex, &dataHierarchyItem);
+
+        connect(&dataHierarchyItem, &DataHierarchyItem::descriptionChanged, this, [this, &dataHierarchyItem](const QString& description) {
+            const auto outputDatasetName    = dataHierarchyItem.getDatasetName();
+            const auto outputDatasetIndex   = _model.match(_model.index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+
+            _model.setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), description);
+        });
+
+        connect(&dataHierarchyItem, &DataHierarchyItem::progressChanged, this, [this, &dataHierarchyItem](const float& progress) {
+            const auto outputDatasetName    = dataHierarchyItem.getDatasetName();
+            const auto outputDatasetIndex   = _model.match(_model.index(0, 0), Qt::DisplayRole, outputDatasetName, 1, Qt::MatchFlag::MatchRecursive).first();
+
+            _model.setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), progress);
+            _model.setData(outputDatasetIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), progress > 0.0f);
+        });
     });
 
     connect(&_model, &QAbstractItemModel::rowsInserted, [this](const QModelIndex& parent, int first, int last)

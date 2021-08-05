@@ -1,5 +1,5 @@
-#ifndef HDPS_HIERARCHY_MODEL_H
-#define HDPS_HIERARCHY_MODEL_H
+#ifndef HDPS_DATA_HIERARCHY_MODEL_H
+#define HDPS_DATA_HIERARCHY_MODEL_H
 
 #include <QAbstractItemModel>
 #include <QMimeData>
@@ -7,8 +7,8 @@
 namespace hdps
 {
 
-class Core;
 class DataHierarchyModelItem;
+class DataHierarchyItem;
 
 /**
  * Underlying data model for a data hierarchy tree
@@ -18,13 +18,13 @@ class DataHierarchyModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit DataHierarchyModel(Core* core, QObject* parent = nullptr);
+    explicit DataHierarchyModel(QObject* parent = nullptr);
 
     ~DataHierarchyModel();
 
     /**
-        * Mandatory override for QAbstractItemModel.
-        */
+     * Mandatory override for QAbstractItemModel.
+     */
     QVariant data(const QModelIndex& index, int role) const override;
 
     /**
@@ -74,11 +74,17 @@ public:
      */
     QMimeData* mimeData(const QModelIndexList &indexes) const override;
 
+    /**
+     * Add a data hierarchy item to the model
+     * @param parentModelIndex Model index of the parent data hierarchy item 
+     * @param dataHierarchyItem Pointer to the data hierarchy item
+     */
+    bool addItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem);
+
 private:
-    Core*                       _core;          /** Pointer to core */
     DataHierarchyModelItem*     _rootItem;      /** Root node of the data hierarchy */
 };
 
 }
 
-#endif // HDPS_HIERARCHY_MODEL_H
+#endif // HDPS_DATA_HIERARCHY_MODEL_H

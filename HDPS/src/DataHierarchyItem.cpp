@@ -7,7 +7,7 @@ namespace hdps
 
 Core* DataHierarchyItem::core = nullptr;
 
-DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QString& datasetName /*= ""*/, const QString& parentDatasetName /*= ""*/, const bool& visible /*= true*/) :
+DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QString& datasetName /*= ""*/, const QString& parentDatasetName /*= ""*/, const bool& visible /*= true*/, const bool& selected /*= false*/) :
     QObject(parent),
     _datasetName(datasetName),
     _parent(parentDatasetName),
@@ -75,6 +75,31 @@ void DataHierarchyItem::setProgress(const float& progress)
     _progress = progress;
 
     emit progressChanged(_progress);
+}
+
+bool DataHierarchyItem::isSelected() const
+{
+    return _selected;
+}
+
+void DataHierarchyItem::setSelected(const bool& selected)
+{
+    if (selected == _selected)
+        return;
+
+    _selected = selected;
+
+    emit selectionChanged(_selected);
+}
+
+void DataHierarchyItem::select()
+{
+    setSelected(true);
+}
+
+void DataHierarchyItem::deselect()
+{
+    setSelected(false);
 }
 
 void DataHierarchyItem::addChild(const QString& name)
