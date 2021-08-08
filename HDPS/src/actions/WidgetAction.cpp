@@ -154,15 +154,13 @@ void WidgetAction::ToolButton::paintEvent(QPaintEvent* paintEvent)
     painter.drawPoint(center);
 }
 
-
-
 WidgetAction::Label::Label(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
     QLabel(widgetAction->text(), parent, windowFlags)
 {
-    connect(widgetAction, &WidgetAction::changed, this, [this]() {
-        setEnabled(isEnabled());
-        setText(text());
-        setToolTip(toolTip());
+    connect(widgetAction, &WidgetAction::changed, this, [this, widgetAction]() {
+        setEnabled(widgetAction->isEnabled());
+        setText(widgetAction->text());
+        setToolTip(widgetAction->toolTip());
     });
 }
 
