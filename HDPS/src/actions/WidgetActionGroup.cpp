@@ -64,7 +64,7 @@ bool WidgetActionGroup::isCollapsed() const
     return !_expanded;
 }
 
-bool WidgetActionGroup::getReadOnly() const
+bool WidgetActionGroup::isReadOnly() const
 {
     return _readOnly;
 }

@@ -73,7 +73,7 @@ public:
     bool isCollapsed() const;
 
     /** Gets the group read-only */
-    bool getReadOnly() const;
+    bool isReadOnly() const;
 
     /**
      * Sets the group read-only
