@@ -13,7 +13,8 @@ namespace gui {
 
 WidgetActionGroup::WidgetActionGroup(QObject* parent, const bool& expanded /*= false*/) :
     WidgetAction(parent),
-    _expanded(expanded)
+    _expanded(expanded),
+    _readOnly(false)
 {
 }
 
@@ -61,6 +62,21 @@ bool WidgetActionGroup::isExpanded() const
 bool WidgetActionGroup::isCollapsed() const
 {
     return !_expanded;
+}
+
+bool WidgetActionGroup::getReadOnly() const
+{
+    return _readOnly;
+}
+
+void WidgetActionGroup::setReadOnly(const bool& readOnly)
+{
+    if (readOnly == _readOnly)
+        return;
+
+    _readOnly = readOnly;
+
+    emit readOnlyChanged(_readOnly);
 }
 
 WidgetActionGroup::GroupWidget::GroupWidget(QWidget* parent, WidgetActionGroup* widgetActionGroup) :

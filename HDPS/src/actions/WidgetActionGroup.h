@@ -72,11 +72,14 @@ public:
     bool isExpanded() const;
     bool isCollapsed() const;
 
+    /** Gets the group read-only */
+    bool getReadOnly() const;
+
     /**
      * Sets the group read-only
      * @param readOnly Whether the group is read-only
      */
-    virtual void setReadOnly(const bool& readOnly) {};
+    void setReadOnly(const bool& readOnly);
 
 signals:
 
@@ -86,8 +89,12 @@ signals:
     /** Signals that the group got collapsed */
     void collapsed();
 
+    /** Signals that the group read-only status changed */
+    void readOnlyChanged(const bool& readOnly);
+
 protected:
     bool    _expanded;      /** Whether or not the group is expanded */
+    bool    _readOnly;      /** Whether or not the group is read-only */
 };
 
 }
