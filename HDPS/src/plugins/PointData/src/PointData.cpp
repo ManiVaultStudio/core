@@ -253,6 +253,9 @@ QString Points::createSubset(const QString parentSetName /*= ""*/, const bool& v
 
 QIcon Points::getIcon() const
 {
+    return hdps::Application::getIconFont("FontAwesome").getIcon("database");
+
+    /*
     const auto size = QSize(100, 100);
 
     QPixmap pixmap(size);
@@ -286,6 +289,7 @@ QIcon Points::getIcon() const
     painter.drawPoints(polygon);
 
     return QIcon(pixmap);
+    */
 }
 
 const std::vector<QString>& Points::getDimensionNames() const

@@ -32,6 +32,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
     setSelectionMode(QAbstractItemView::SingleSelection);
     setRootIsDecorated(true);
     setItemsExpandable(true);
+    setColumnHidden(2, true);
 
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Name), 250);
     //header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description), 100);

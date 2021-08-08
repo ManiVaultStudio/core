@@ -32,8 +32,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent, Core* core) :
     _treeWidget->setAutoFillBackground(true);
     _treeWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    //itemExpanded(QTreeWidgetItem *item)
-
     layout->addWidget(_treeWidget);
 }
 
