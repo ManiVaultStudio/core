@@ -59,7 +59,8 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             if (exposedWidgetActionGroup == nullptr)
                 continue;
 
-            addButton(exposedWidgetActionGroup);
+            if (exposedWidgetActionGroup->isVisible())
+                addButton(exposedWidgetActionGroup);
         }
     }
     catch (std::exception& e)
