@@ -20,6 +20,7 @@ public:
     enum class Column {
         Name,
         Description,
+        Analysis,
         Progress,
         Analyzing,
 

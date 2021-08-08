@@ -79,6 +79,9 @@ public: // Image retrieval functions
     /** Sets the referenced points set */
     void setPoints(Points* points);
 
+    /** Get icon for the dataset */
+    QIcon getIcon() const override;
+
 private:
     ImageData*  _imageData;     /** Pointer to raw image data */
     Points*     _points;        /** Pointer to the referenced points dataset */

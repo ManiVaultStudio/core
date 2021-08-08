@@ -7,6 +7,7 @@
 
 #include <QtCore>
 #include <QtDebug>
+#include <QPainter>
 
 #include <cstring>
 #include <type_traits>
@@ -248,6 +249,43 @@ QString Points::createSubset(const QString parentSetName /*= ""*/, const bool& v
     const hdps::DataSet& selection = getSelection();
 
     return _core->createSubsetFromSelection(selection, *this, "Subset", parentSetName, visible);
+}
+
+QIcon Points::getIcon() const
+{
+    const auto size = QSize(100, 100);
+
+    QPixmap pixmap(size);
+
+    pixmap.fill(Qt::transparent);
+
+    const auto iconRectangle = QRect(0, 0, size.width(), size.height());
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPen linepen(Qt::black);
+    linepen.setCapStyle(Qt::RoundCap);
+    linepen.setWidth(15);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setPen(linepen);
+
+    QVector<QPoint> points;
+
+    QPolygon polygon;
+
+    const auto numSteps     = 3;
+    const auto stepSizeX    = static_cast<float>(size.width()) / static_cast<float>(numSteps + 1);
+    const auto stepSizeY    = static_cast<float>(size.height()) / static_cast<float>(numSteps + 1);
+
+    for (int x = stepSizeX; x < size.width(); x += stepSizeX)
+        for (int y = stepSizeY; y < size.height(); y += stepSizeY)
+            polygon << QPoint(x, y);
+
+    painter.drawPoints(polygon);
+
+    return QIcon(pixmap);
 }
 
 const std::vector<QString>& Points::getDimensionNames() const

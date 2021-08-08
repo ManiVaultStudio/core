@@ -1,5 +1,6 @@
 #include "WidgetActionGroup.h"
 #include "ToggleAction.h"
+#include "TriggerAction.h"
 
 #include <QDebug>
 #include <QMenu>
@@ -72,14 +73,23 @@ WidgetActionGroup::GroupWidget::GroupWidget(QWidget* parent, WidgetActionGroup* 
     setLayout(_layout);
 }
 
-void WidgetActionGroup::GroupWidget::addWidgetAction(WidgetAction& widgetAction)
+void WidgetActionGroup::GroupWidget::addWidgetAction(WidgetAction& widgetAction, const bool& forceTogglePushButton /*= false*/)
 {
     const auto numRows = _layout->rowCount();
 
-    auto toggleAction = dynamic_cast<ToggleAction*>(&widgetAction);
+    auto toggleAction   = dynamic_cast<ToggleAction*>(&widgetAction);
+    auto triggerAction  = dynamic_cast<TriggerAction*>(&widgetAction);
 
-    if (toggleAction) {
-        _layout->addWidget(toggleAction->createCheckBoxWidget(this), numRows, 1);
+    if (toggleAction || triggerAction) {
+        if (toggleAction) {
+            if (forceTogglePushButton)
+                _layout->addWidget(toggleAction->createPushButtonWidget(this), numRows, 1);
+            else
+                _layout->addWidget(toggleAction->createCheckBoxWidget(this), numRows, 1);
+        }
+
+        if (triggerAction != nullptr)
+            _layout->addWidget(triggerAction->createWidget(this), numRows, 1);
     }
     else {
         auto labelWidget = widgetAction.createLabelWidget(this);

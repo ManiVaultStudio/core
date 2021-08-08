@@ -90,11 +90,14 @@ QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) con
         case Column::Description:
             return _progressSection;
 
-        case Column::Analyzing:
+        case Column::Analysis:
             return "";
 
         case Column::Progress:
             return _analyzing ? QString("%1%").arg(QString::number(100.0f * _progressPercentage, 'f', 1)) : "";
+
+        case Column::Analyzing:
+            return "";
 
         default:
             break;
@@ -113,7 +116,10 @@ QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
     switch (static_cast<Column>(column))
     {
         case Column::Name:
-            return fontAwesome.getIcon("database");
+            return _dataHierarchyItem->getIconByName("data");
+
+        case Column::Analysis:
+            return _dataHierarchyItem->getIconByName("analysis");
 
         case Column::Progress:
         case Column::Description:

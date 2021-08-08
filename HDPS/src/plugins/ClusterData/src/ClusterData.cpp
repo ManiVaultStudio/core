@@ -32,3 +32,8 @@ hdps::RawData* ClusterDataFactory::produce()
 {
     return new ClusterData();
 }
+
+QIcon Clusters::getIcon() const
+{
+    return QIcon();
+}

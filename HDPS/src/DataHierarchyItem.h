@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QString>
 #include <QDebug>
+#include <QIcon>
 
 namespace hdps
 {
@@ -24,6 +25,14 @@ class Core;
 class DataHierarchyItem : public QObject
 {
     Q_OBJECT
+
+public:
+
+    /** Named icon */
+    using NamedIcon = QPair<QString, QIcon>;
+
+    /** List of named icons */
+    using IconList = QList<NamedIcon>;
 
 public:
 
@@ -88,6 +97,31 @@ public:
     /** De-selects the hierarchy item */
     void deselect();
 
+    /** Gets list of named icons */
+    IconList getIcons() const;
+
+    /**
+     * Add named icon
+     * @param name Name of the icon
+     * @param icon Icon
+     */
+    void addIcon(const QString& name, const QIcon& icon);
+
+    /**
+     * Remove icon by name
+     * @param name Name of the icon
+     */
+    void removeIcon(const QString& name);
+
+    /**
+     * Get icon by name
+     * @param name Name of the icon
+     * @return Icon
+     */
+    QIcon getIconByName(const QString& name) const;
+
+public: // Hierarchy
+
     /**
      * Adds a child (name reference to data hierarchy item)
      * @param name Name of the child
@@ -100,6 +134,8 @@ public:
      */
     void removeChild(const QString& name);
 
+public: // Miscellaneous
+
     /** Gets the string representation of the hierarchy item */
     QString toString() const;
 
@@ -108,6 +144,8 @@ public:
 
     /** Get the dataset type */
     DataType getDataType() const;
+
+public: // Operators
 
     /**
      * Assignment operator
@@ -122,6 +160,7 @@ public:
         _description    = other._description;
         _progress       = other._progress;
         _selected       = other._selected;
+        _namedIcons     = other._namedIcons;
 
         return *this;
     }
@@ -155,7 +194,7 @@ protected:
     QString         _description;       /** Description */
     float           _progress;          /** Progress */
     bool            _selected;          /** Whether the hierarchy item is selected */
-    QList<QIcon>    _icons;             /** Icons */
+    IconList        _namedIcons;        /** Named icons */
 
 public:
     static Core* core;  /** Pointer to core */
@@ -172,13 +211,24 @@ using DataHierarchyItemsMap = QMap<QString, SharedDataHierarchyItem>;
  * @param debug Debug
  * @param dataHierarchyItem Data hierarchy item
  */
-inline QDebug operator<<(QDebug debug, const DataHierarchyItem& dataHierarchyItem)
+inline QDebug operator << (QDebug debug, const DataHierarchyItem& dataHierarchyItem)
 {
     debug.nospace() << dataHierarchyItem.toString();
 
     return debug.space();
 }
 
+}
+
+/**
+ * Compares to named icons
+ * @param lhs Left hand side icon
+ * @param rhs Right hand side icon
+ * @param dataHierarchyItem Data hierarchy item
+ */
+inline bool operator == (const hdps::DataHierarchyItem::NamedIcon& lhs, const hdps::DataHierarchyItem::NamedIcon& rhs)
+{
+    return lhs.first == rhs.first;
 }
 
 #endif // HDPS_DATA_HIERARCHY_ITEM_H

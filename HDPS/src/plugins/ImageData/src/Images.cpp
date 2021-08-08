@@ -87,3 +87,8 @@ void Images::setPoints(Points* points)
 {
     _points = points;
 }
+
+QIcon Images::getIcon() const
+{
+    return QIcon();
+}

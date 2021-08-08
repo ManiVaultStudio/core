@@ -41,7 +41,7 @@ public:
          * Adds an action to the form
          * @param widgetAction Widget action
          */
-        void addWidgetAction(WidgetAction& widgetAction);
+        void addWidgetAction(WidgetAction& widgetAction, const bool& forceTogglePushButton = false);
 
         /** Get grid layout */
         QGridLayout* layout();

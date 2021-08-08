@@ -784,6 +784,9 @@ public:
 
     QString createSubset(const QString parentSetName = "", const bool& visible = true) const override;
 
+    /** Get icon for the dataset */
+    QIcon getIcon() const override;
+
     std::vector<unsigned int> indices;
 };
 

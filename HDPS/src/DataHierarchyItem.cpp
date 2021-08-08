@@ -15,6 +15,7 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QStrin
     _visible(visible),
     _progress(0.0)
 {
+    addIcon("data", getDataset().getIcon());
 }
 
 QString DataHierarchyItem::getDatasetName() const
@@ -100,6 +101,32 @@ void DataHierarchyItem::select()
 void DataHierarchyItem::deselect()
 {
     setSelected(false);
+}
+
+hdps::DataHierarchyItem::IconList DataHierarchyItem::getIcons() const
+{
+    return _namedIcons;
+}
+
+void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
+{
+    _namedIcons << NamedIcon(name, icon);
+}
+
+void DataHierarchyItem::removeIcon(const QString& name)
+{
+    for (const auto& namedIcon : _namedIcons)
+        if (name == namedIcon.first)
+            _namedIcons.removeOne(namedIcon);
+}
+
+QIcon DataHierarchyItem::getIconByName(const QString& name) const
+{
+    for (const auto& namedIcon : _namedIcons)
+        if (name == namedIcon.first)
+            return namedIcon.second;
+
+    return QIcon();
 }
 
 void DataHierarchyItem::addChild(const QString& name)

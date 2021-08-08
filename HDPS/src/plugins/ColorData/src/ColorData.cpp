@@ -37,3 +37,8 @@ hdps::RawData* ColorDataFactory::produce()
 {
     return new ColorData();
 }
+
+QIcon Colors::getIcon() const
+{
+    return QIcon();
+}

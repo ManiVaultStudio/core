@@ -97,6 +97,9 @@ public:
 
     }
 
+    /** Get icon for the dataset */
+    virtual QIcon getIcon() const = 0;
+
 public: // Properties
 
     /**

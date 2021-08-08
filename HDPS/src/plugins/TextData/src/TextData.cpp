@@ -32,3 +32,8 @@ RawData* TextDataFactory::produce()
 {
     return new TextData();
 }
+
+QIcon Text::getIcon() const
+{
+    return QIcon();
+}

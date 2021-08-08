@@ -78,6 +78,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
             _mainWindow.addPlugin(plugin);
+            _dataHierarchyManager.getHierarchyItem(analysisPlugin->getOutputDatasetName()).addIcon("analysis", analysisPlugin->getIcon());
 
             notifyDataAdded(analysisPlugin->getOutputDatasetName());
 

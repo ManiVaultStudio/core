@@ -87,6 +87,9 @@ public:
         return _core->createSubsetFromSelection(selection, *this, "Clusters", parentSetName, visible);
     }
 
+    /** Get icon for the dataset */
+    QIcon getIcon() const override;
+
     std::vector<unsigned int> indices;
 };
 
