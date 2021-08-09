@@ -1,6 +1,5 @@
 #include "AnalyzeDataAction.h"
-#include "Core.h"
-#include "Application.h"
+#include "DataHierarchyItem.h"
 
 #include <QMenu>
 
@@ -8,24 +7,25 @@ namespace hdps {
 
 using namespace gui;
 
-AnalyzeDataAction::AnalyzeDataAction(QObject* parent, Core* core, const QString& datasetName) :
+AnalyzeDataAction::AnalyzeDataAction(QObject* parent, DataHierarchyItem* dataHierarchyItem) :
     WidgetAction(parent),
+    _dataHierarchyItem(dataHierarchyItem),
     _meanShiftAction(this, "Mean Shift Clustering"),
     _tsneAction(this, "TSNE"),
     _hsneAction(this, "HSNE")
 {
     //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
-    connect(&_meanShiftAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
-        core->analyzeDataset("Mean Shift Clustering", datasetName);
+    connect(&_meanShiftAction, &TriggerAction::triggered, this, [this]() {
+        _dataHierarchyItem->analyzeDataset("Mean Shift Clustering");
     });
 
-    connect(&_tsneAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
-        core->analyzeDataset("tSNE Analysis", datasetName);
+    connect(&_tsneAction, &TriggerAction::triggered, this, [this]() {
+        _dataHierarchyItem->analyzeDataset("tSNE Analysis");
     });
 
-    connect(&_hsneAction, &TriggerAction::triggered, this, [this, core, datasetName]() {
-        core->analyzeDataset("HSNE Analysis", datasetName);
+    connect(&_hsneAction, &TriggerAction::triggered, this, [this]() {
+        _dataHierarchyItem->analyzeDataset("HSNE Analysis");
     });
 }
 

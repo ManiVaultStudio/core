@@ -4,19 +4,20 @@
 
 namespace hdps {
 
-class Core;
+class DataHierarchyItem;
 
 class AnalyzeDataAction : public hdps::gui::WidgetAction
 {
 public:
-    AnalyzeDataAction(QObject* parent, Core* core, const QString& datasetName);
+    AnalyzeDataAction(QObject* parent, DataHierarchyItem* dataHierarchyItem);
 
     QMenu* getContextMenu();
 
 protected:
-    hdps::gui::TriggerAction    _meanShiftAction;
-    hdps::gui::TriggerAction    _tsneAction;
-    hdps::gui::TriggerAction    _hsneAction;
+    DataHierarchyItem*          _dataHierarchyItem;     /** Pointer to data hierarchy item */
+    hdps::gui::TriggerAction    _meanShiftAction;       /** Mean-shift clustering action */
+    hdps::gui::TriggerAction    _tsneAction;            /** TSNE action */
+    hdps::gui::TriggerAction    _hsneAction;            /** HSNE action */
 };
 
 }

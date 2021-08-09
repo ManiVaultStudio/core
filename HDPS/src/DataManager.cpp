@@ -1,6 +1,5 @@
 #include "DataManager.h"
 #include "ExportDataAction.h"
-#include "AnalyzeDataAction.h"
 
 #include <QRegularExpression>
 #include <cassert>
@@ -20,9 +19,6 @@ QString DataManager::addSet(QString requestedName, DataSet* set)
     
     set->setName(uniqueName);
 
-    set->exposeAction(new ExportDataAction(this, reinterpret_cast<Core*>(_core), uniqueName));
-    set->exposeAction(new AnalyzeDataAction(this, reinterpret_cast<Core*>(_core), uniqueName));
-
     _dataSetMap.emplace(set->getName(), std::unique_ptr<DataSet>(set));
 
     emit dataChanged();
@@ -34,32 +30,36 @@ void DataManager::addSelection(QString dataName, DataSet* selection)
     _selections.emplace(dataName, std::unique_ptr<DataSet>(selection));
 }
 
-void DataManager::renameSet(QString oldName, QString requestedName)
+QString DataManager::renameSet(QString oldName, QString requestedName)
 {
     auto& dataSet = _dataSetMap[oldName];
 
     // Find a unique name from the requested name and set it in the dataset
-    QString newName = getUniqueSetName(requestedName);
-    dataSet->setName(newName);
+    const auto newDatasetName = getUniqueSetName(requestedName);
+
+    dataSet->setName(newDatasetName);
 
     // Update source set references
     for (auto& kv : allSets())
     {
         if (kv.second->getSourceName() == oldName)
         {
-            kv.second->_sourceSetName = newName;
+            kv.second->_sourceSetName = newDatasetName;
         }
     }
 
     // Put the renamed set back into the map
-    _dataSetMap.emplace(newName, std::unique_ptr<DataSet>(dataSet.release()));
+    _dataSetMap.emplace(newDatasetName, std::unique_ptr<DataSet>(dataSet.release()));
 
     // Erase the old entry in the map
     _dataSetMap.erase(oldName);
 
     emit dataChanged();
 
-    _core->notifyDataRenamed(oldName, newName);
+    _core->notifyDataRenamed(oldName, newDatasetName);
+    _core->getDataHierarchyItem(oldName).setDatasetName(newDatasetName);
+
+    return newDatasetName;
 }
 
 void DataManager::removeDataset(QString datasetName)

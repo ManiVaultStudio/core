@@ -11,7 +11,7 @@
 #include "ViewPlugin.h"
 #include "RawData.h"
 #include "Set.h"
-#include "DataHierarchyModelItem.h"
+#include "AnalyzeDataAction.h"
 
 #include <QMessageBox>
 #include <algorithm>
@@ -135,6 +135,9 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     _dataHierarchyManager.addDataset(setName);
     _dataHierarchyManager.selectHierarchyItem(setName);
 
+    //set->exposeAction(new ExportDataAction(this, reinterpret_cast<Core*>(_core), uniqueName));
+    fullSet->exposeAction(new AnalyzeDataAction(&_mainWindow, &getDataHierarchyItem(setName)));
+
     return setName;
 }
 
@@ -143,6 +146,11 @@ void Core::removeDataset(const QString datasetName)
     _dataManager->removeDataset(datasetName);
 
     notifyDataRemoved(datasetName);
+}
+
+QString Core::renameDataset(const QString& currentDatasetName, const QString& intendedDatasetName)
+{
+    return _dataManager->renameSet(currentDatasetName, intendedDatasetName);
 }
 
 const QString Core::createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent /*= ""*/)

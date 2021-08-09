@@ -1,5 +1,6 @@
 #include "DataHierarchyItem.h"
 #include "Core.h"
+#include "DataManager.h"
 #include "Set.h"
 
 namespace hdps
@@ -21,6 +22,16 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QStrin
 QString DataHierarchyItem::getDatasetName() const
 {
     return _datasetName;
+}
+
+void DataHierarchyItem::renameDataset(const QString& intendedDatasetName)
+{
+    Q_ASSERT(!intendedDatasetName.isEmpty());
+
+    if (intendedDatasetName.isEmpty())
+        return;
+
+    _datasetName = core->renameDataset(_datasetName, intendedDatasetName);
 }
 
 QString DataHierarchyItem::getParent() const
@@ -156,6 +167,29 @@ hdps::DataType DataHierarchyItem::getDataType() const
     Q_ASSERT(!_datasetName.isEmpty());
 
     return core->requestData(_datasetName).getDataType();
+}
+
+void DataHierarchyItem::analyzeDataset(const QString& analysisKind)
+{
+    Q_ASSERT(!analysisKind.isEmpty());
+
+    if (analysisKind.isEmpty())
+        return;
+
+    core->analyzeDataset(analysisKind, _datasetName);
+}
+
+void DataHierarchyItem::setDatasetName(const QString& datasetName)
+{
+    Q_ASSERT(!_datasetName.isEmpty());
+
+    if (datasetName.isEmpty())
+        return;
+
+    if (datasetName == _datasetName)
+        return;
+
+    _datasetName = datasetName;
 }
 
 }

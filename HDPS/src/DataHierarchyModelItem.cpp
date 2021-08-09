@@ -148,6 +148,11 @@ QMenu* DataHierarchyModelItem::getContextMenu()
     return _dataHierarchyItem->getDataset().getContextMenu();
 }
 
+void DataHierarchyModelItem::renameDataset(const QString& intendedDatasetName)
+{
+    _dataHierarchyItem->renameDataset(intendedDatasetName);
+}
+
 void DataHierarchyModelItem::setAnalyzing(const bool& analyzing)
 {
     _analyzing = analyzing;

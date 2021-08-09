@@ -46,6 +46,7 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
     
     switch (column) {
         case DataHierarchyModelItem::Column::Name:
+            dataHierarchyItem->renameDataset(value.toString());
             break;
 
         case DataHierarchyModelItem::Column::Description:
@@ -150,7 +151,12 @@ Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
     if (!index.isValid())
         return Qt::NoItemFlags;
     
-    return Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
+    auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
+
+    if (static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::Name)
+        itemFlags |= Qt::ItemIsEditable;
+
+    return itemFlags;
 }
 
 QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation, int role) const

@@ -49,6 +49,12 @@ public:
     /** Gets the dataset name */
     QString getDatasetName() const;
 
+    /**
+     * Renames the dataset
+     * @param intendedDatasetName Intended new name of the dataset
+     */
+    void renameDataset(const QString& intendedDatasetName);
+
     /** Gets the parent dataset name */
     QString getParent() const;
 
@@ -145,6 +151,12 @@ public: // Miscellaneous
     /** Get the dataset type */
     DataType getDataType() const;
 
+    /**
+     * Analyze the dataset
+     * @param analysisKind Type (kind) of analysis
+     */
+    void analyzeDataset(const QString& analysisKind);
+
 public: // Operators
 
     /**
@@ -164,6 +176,12 @@ public: // Operators
 
         return *this;
     }
+
+protected:
+    /** Sets the dataset name
+     * @param datasetName Name of the dataset
+     */
+    void setDatasetName(const QString& datasetName);
 
 signals:
 
@@ -198,6 +216,8 @@ protected:
 
 public:
     static Core* core;  /** Pointer to core */
+
+    friend class DataManager;
 };
 
 /** Shared pointer of data hierarchy item */

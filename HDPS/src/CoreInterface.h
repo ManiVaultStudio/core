@@ -40,6 +40,14 @@ public:
     virtual void removeDataset(const QString datasetName) = 0;
 
     /**
+     * Renames a dataset
+     * @param currentDatasetName Current name of the dataset
+     * @param intendedDatasetName Intended name of the dataset
+     * @return New name of the dataset
+     */
+    virtual QString renameDataset(const QString& currentDatasetName, const QString& intendedDatasetName) = 0;
+
+    /**
      * Creates a dataset derived from a source dataset.
      * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
      * @param sourceDatasetName Name of the source dataset from which this dataset will be derived

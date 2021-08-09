@@ -91,7 +91,7 @@ public:
     QString addSet(QString requestedName, DataSet* set);
     void addSelection(QString dataName, DataSet* selection);
 
-    void renameSet(QString oldName, QString requestedName);
+    QString renameSet(QString oldName, QString requestedName);
 
     void removeDataset(QString datasetName);
 

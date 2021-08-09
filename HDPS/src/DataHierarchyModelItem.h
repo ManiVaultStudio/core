@@ -86,6 +86,12 @@ public:
     /** Returns the item context menu */
     QMenu* getContextMenu();
 
+    /**
+     * Renames the dataset
+     * @param intendedDatasetName Intended new name of the dataset
+     */
+    void renameDataset(const QString& intendedDatasetName);
+
 public: // Analysis
 
     /**
