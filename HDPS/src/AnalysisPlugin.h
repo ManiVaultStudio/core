@@ -30,6 +30,10 @@ public:
         return Application::getIconFont("FontAwesome").getIcon("chart-line");
     }
 
+    DataHierarchyItem* getInputDataHierarchyItem() const {
+        return _inputDataHierarchyItem;
+    }
+
     QString getInputDatasetName() const {
         Q_ASSERT(_inputDataHierarchyItem != nullptr);
 
@@ -52,6 +56,10 @@ public:
             return;
 
         _inputDataHierarchyItem = inputDataHierarchyItem;
+    }
+
+    DataHierarchyItem* getOutputDataHierarchyItem() const {
+        return _outputDataHierarchyItem;
     }
 
     QString getOutputDatasetName() const {

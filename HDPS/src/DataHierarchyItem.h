@@ -149,6 +149,12 @@ public: // Miscellaneous
     /** Get the dataset */
     DataSet& getDataset() const;
 
+    /** Get the dataset */
+    template<typename DatasetType>
+    DatasetType& getDataset() const {
+        return dynamic_cast<DatasetType&>(getDataset());
+    };
+
     /** Get the dataset type */
     DataType getDataType() const;
 
