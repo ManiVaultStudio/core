@@ -38,13 +38,14 @@ public:
 
     /**
      * Constructor
+     * @param core Pointer to the core
      * @param parent Pointer to parent object
      * @param datasetName Name of the dataset
      * @param parentDatasetName Name of the parent dataset
      * @param visible Whether the dataset is visible
      * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true, const bool& selected = false);
+    DataHierarchyItem(Core* core, QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true, const bool& selected = false);
 
     /** Gets the dataset name */
     QString getDatasetName() const;
@@ -165,6 +166,7 @@ public: // Operators
      */
     DataHierarchyItem& operator= (const DataHierarchyItem& other)
     {
+        _core           = other._core;
         _datasetName    = other._datasetName;
         _parent         = other._parent;
         _children       = other._children;
@@ -204,7 +206,7 @@ signals:
     void selectionChanged(const bool& selected);
 
 protected:
-        
+    Core*           _core;              /** Pointer to core */
     QString         _datasetName;       /** Name of the dataset */
     QString         _parent;            /** Parent item */
     QStringList     _children;          /** Child items (if any) */
@@ -214,9 +216,7 @@ protected:
     bool            _selected;          /** Whether the hierarchy item is selected */
     IconList        _namedIcons;        /** Named icons */
 
-public:
-    static Core* core;  /** Pointer to core */
-
+protected:
     friend class DataManager;
 };
 

@@ -18,7 +18,7 @@ class DataHierarchyManager : public QObject
     Q_OBJECT
 
 public:
-    DataHierarchyManager(QObject* parent = nullptr);
+    DataHierarchyManager(Core* core, QObject* parent = nullptr);
 
     /**
      * Add a dataset to the hierarchy
@@ -54,14 +54,14 @@ public:
      * @param datasetName Name of the dataset
      * @return Data hierarchy item
      */
-    const DataHierarchyItem& getHierarchyItem(const QString& datasetName) const;
+    const DataHierarchyItem* getHierarchyItem(const QString& datasetName) const;
 
     /**
      * Get hierarchy item by dataset name
      * @param datasetName Name of the dataset
      * @return Data hierarchy item
      */
-    DataHierarchyItem& getHierarchyItem(const QString& datasetName);
+    DataHierarchyItem* getHierarchyItem(const QString& datasetName);
 
     /**
      * Selects data hierarchy item with dataset name
@@ -94,6 +94,7 @@ signals:
     void hierarchyItemRemoved(const QString& datasetName);
 
 private:
+    Core*                   _core;                      /** Pointer to core */
     DataHierarchyItemsMap   _dataHierarchyItemsMap;     /** Data hierarchy items map */
 };
 

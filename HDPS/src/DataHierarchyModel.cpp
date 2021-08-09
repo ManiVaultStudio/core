@@ -26,16 +26,17 @@ QVariant DataHierarchyModel::data(const QModelIndex& index, int role) const
 
     auto item = static_cast<DataHierarchyModelItem*>(index.internalPointer());
 
-    if (role == Qt::DecorationRole)
-        return item->getIconAtColumn(index.column());
+    switch (role) {
+        case Qt::DecorationRole:
+            return item->getIconAtColumn(index.column());
 
-    if (role == Qt::ToolTipRole)
-        return item->getDataAtColumn(index.column());
+        case Qt::DisplayRole:
+        case Qt::ToolTipRole:
+        case Qt::EditRole:
+            return item->getDataAtColumn(index.column());
+    }
 
-    if (role != Qt::DisplayRole)
-        return QVariant();
-
-    return item->getDataAtColumn(index.column());
+    return QVariant();
 }
 
 bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)

@@ -21,9 +21,8 @@ namespace hdps
 
 Core::Core(gui::MainWindow& mainWindow) :
     _mainWindow(mainWindow),
-    _dataHierarchyManager()
+    _dataHierarchyManager(this)
 {
-    DataHierarchyItem::core = this;
 }
 
 Core::~Core()
@@ -78,7 +77,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
             _mainWindow.addPlugin(plugin);
-            _dataHierarchyManager.getHierarchyItem(analysisPlugin->getOutputDatasetName()).addIcon("analysis", analysisPlugin->getIcon());
+            _dataHierarchyManager.getHierarchyItem(analysisPlugin->getOutputDatasetName())->addIcon("analysis", analysisPlugin->getIcon());
 
             notifyDataAdded(analysisPlugin->getOutputDatasetName());
 
@@ -136,7 +135,7 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     _dataHierarchyManager.selectHierarchyItem(setName);
 
     //set->exposeAction(new ExportDataAction(this, reinterpret_cast<Core*>(_core), uniqueName));
-    fullSet->exposeAction(new AnalyzeDataAction(&_mainWindow, &getDataHierarchyItem(setName)));
+    fullSet->exposeAction(new AnalyzeDataAction(&_mainWindow, getDataHierarchyItem(setName)));
 
     return setName;
 }
@@ -391,7 +390,7 @@ gui::MainWindow& Core::gui() const {
     return _mainWindow;
 }
 
-hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& datasetName)
+hdps::DataHierarchyItem* Core::getDataHierarchyItem(const QString& datasetName)
 {
     return _dataHierarchyManager.getHierarchyItem(datasetName);
 }

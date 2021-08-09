@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PluginFactory.h"
+#include "DataHierarchyItem.h"
 
 #include <memory>
 
@@ -17,7 +18,8 @@ class AnalysisPlugin : public Plugin
 public:
     AnalysisPlugin(QString name) :
         Plugin(Type::ANALYSIS, name),
-        _inputDatasetName()
+        _inputDataHierarchyItem(nullptr),
+        _outputDataHierarchyItem(nullptr)
     {
     }
 
@@ -29,57 +31,116 @@ public:
     }
 
     QString getInputDatasetName() const {
-        return _inputDatasetName;
+        Q_ASSERT(_inputDataHierarchyItem != nullptr);
+
+        if (_inputDataHierarchyItem == nullptr)
+            return "";
+
+        return _inputDataHierarchyItem->getDatasetName();
     }
 
-    void setInputDatasetName(const QString& inputDatasetName) {
-        Q_ASSERT(!inputDatasetName.isEmpty());
+    /** Get input dataset */
+    template<typename DatasetType>
+    DatasetType& getInputDataset() const {
+        return dynamic_cast<DatasetType&>(_inputDataHierarchyItem->getDataset());
+    }
 
-        _inputDatasetName = inputDatasetName;
+    void setInputDataHierarchyItem(DataHierarchyItem* inputDataHierarchyItem) {
+        Q_ASSERT(inputDataHierarchyItem != nullptr);
+
+        if (inputDataHierarchyItem == nullptr)
+            return;
+
+        _inputDataHierarchyItem = inputDataHierarchyItem;
     }
 
     QString getOutputDatasetName() const {
-        return _outputDatasetName;
+        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+
+        if (_outputDataHierarchyItem == nullptr)
+            return "";
+
+        return _outputDataHierarchyItem->getDatasetName();
+    }
+
+    /** Get output dataset */
+    template<typename DatasetType>
+    DatasetType& getOutputDataset() const {
+        return dynamic_cast<DatasetType&>(_outputDataHierarchyItem->getDataset());
+    }
+
+    void setOutputDatasetName(const QString& outputDatasetName) {
+        Q_ASSERT(!outputDatasetName.isEmpty());
+
+        if (outputDatasetName.isEmpty())
+            return;
+
+        _outputDataHierarchyItem = _core->getDataHierarchyItem(outputDatasetName);
     }
 
 protected:
 
     void notifyStarted() {
+        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+
+        if (_outputDataHierarchyItem == nullptr)
+            return;
+
         qApp->processEvents();
 
-        _core->getDataHierarchyItem(_outputDatasetName).setDescription("");
-        _core->getDataHierarchyItem(_outputDatasetName).setProgress(0.0);
+        _outputDataHierarchyItem->setDescription("");
+        _outputDataHierarchyItem->setProgress(0.0);
     }
 
     void notifyProgressSection(const QString& section) {
+        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+
+        if (_outputDataHierarchyItem == nullptr)
+            return;
+
         qApp->processEvents();
 
-        _core->getDataHierarchyItem(_outputDatasetName).setDescription(section);
+        _outputDataHierarchyItem->setDescription(section);
     }
 
     void notifyProgressPercentage(const float& percentage) {
+        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+
+        if (_outputDataHierarchyItem == nullptr)
+            return;
+
         qApp->processEvents();
 
-        _core->getDataHierarchyItem(_outputDatasetName).setProgress(percentage);
+        _outputDataHierarchyItem->setProgress(percentage);
     }
 
     void notifyFinished() {
+        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+
+        if (_outputDataHierarchyItem == nullptr)
+            return;
+
         qApp->processEvents();
 
-        _core->getDataHierarchyItem(_outputDatasetName).setDescription("");
-        _core->getDataHierarchyItem(_outputDatasetName).setProgress(0.0);
+        _outputDataHierarchyItem->setDescription("");
+        _outputDataHierarchyItem->setProgress(0.0);
     }
 
     void notifyAborted(const QString& reason) {
+        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+
+        if (_outputDataHierarchyItem == nullptr)
+            return;
+
         qApp->processEvents();
 
-        _core->getDataHierarchyItem(_outputDatasetName).setDescription("");
-        _core->getDataHierarchyItem(_outputDatasetName).setProgress(0.0);
+        _outputDataHierarchyItem->setDescription("");
+        _outputDataHierarchyItem->setProgress(0.0);
     }
 
 protected:
-    QString   _inputDatasetName;        /** Name of the input dataset */
-    QString   _outputDatasetName;       /** Name of the output dataset */
+    DataHierarchyItem*  _inputDataHierarchyItem;        /** Input data hierarchy item */
+    DataHierarchyItem*  _outputDataHierarchyItem;       /** Output data hierarchy item */
 };
 
 

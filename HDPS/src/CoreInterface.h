@@ -121,9 +121,9 @@ public:
     /**
      * Get data hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @return Data hierarchy item
+     * @return Pointer to data hierarchy item
      */
-    virtual DataHierarchyItem& getDataHierarchyItem(const QString& datasetName) = 0;
+    virtual DataHierarchyItem* getDataHierarchyItem(const QString& datasetName) = 0;
 
 protected:
 

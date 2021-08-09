@@ -6,10 +6,9 @@
 namespace hdps
 {
 
-Core* DataHierarchyItem::core = nullptr;
-
-DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QString& datasetName /*= ""*/, const QString& parentDatasetName /*= ""*/, const bool& visible /*= true*/, const bool& selected /*= false*/) :
+DataHierarchyItem::DataHierarchyItem(Core* core, QObject* parent /*= nullptr*/, const QString& datasetName /*= ""*/, const QString& parentDatasetName /*= ""*/, const bool& visible /*= true*/, const bool& selected /*= false*/) :
     QObject(parent),
+    _core(core),
     _datasetName(datasetName),
     _parent(parentDatasetName),
     _children(),
@@ -31,7 +30,7 @@ void DataHierarchyItem::renameDataset(const QString& intendedDatasetName)
     if (intendedDatasetName.isEmpty())
         return;
 
-    _datasetName = core->renameDataset(_datasetName, intendedDatasetName);
+    _datasetName = _core->renameDataset(_datasetName, intendedDatasetName);
 }
 
 QString DataHierarchyItem::getParent() const
@@ -159,14 +158,14 @@ hdps::DataSet& DataHierarchyItem::getDataset() const
 {
     Q_ASSERT(!_datasetName.isEmpty());
 
-    return core->requestData(_datasetName);
+    return _core->requestData(_datasetName);
 }
 
 hdps::DataType DataHierarchyItem::getDataType() const
 {
     Q_ASSERT(!_datasetName.isEmpty());
 
-    return core->requestData(_datasetName).getDataType();
+    return _core->requestData(_datasetName).getDataType();
 }
 
 void DataHierarchyItem::analyzeDataset(const QString& analysisKind)
@@ -176,7 +175,7 @@ void DataHierarchyItem::analyzeDataset(const QString& analysisKind)
     if (analysisKind.isEmpty())
         return;
 
-    core->analyzeDataset(analysisKind, _datasetName);
+    _core->analyzeDataset(analysisKind, _datasetName);
 }
 
 void DataHierarchyItem::setDatasetName(const QString& datasetName)

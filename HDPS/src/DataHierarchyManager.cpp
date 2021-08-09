@@ -4,8 +4,9 @@
 namespace hdps
 {
 
-DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
+DataHierarchyManager::DataHierarchyManager(Core* core, QObject* parent /*= nullptr*/) :
     QObject(parent),
+    _core(core),
     _dataHierarchyItemsMap()
 {
 }
@@ -14,7 +15,7 @@ void DataHierarchyManager::addDataset(const QString& datasetName, const QString&
 {
     Q_ASSERT(!datasetName.isEmpty());
 
-    _dataHierarchyItemsMap[datasetName] = SharedDataHierarchyItem(new DataHierarchyItem(this, datasetName, parentDatasetName, visible));
+    _dataHierarchyItemsMap[datasetName] = SharedDataHierarchyItem(new DataHierarchyItem(_core, this, datasetName, parentDatasetName, visible));
 
     if (!parentDatasetName.isEmpty() && _dataHierarchyItemsMap.contains(parentDatasetName))
         _dataHierarchyItemsMap[parentDatasetName]->addChild(datasetName);
@@ -55,16 +56,20 @@ void DataHierarchyManager::setItemProgress(const QString& datasetName, const dou
         return;
 }
 
-const hdps::DataHierarchyItem& DataHierarchyManager::getHierarchyItem(const QString& datasetName) const
+const hdps::DataHierarchyItem* DataHierarchyManager::getHierarchyItem(const QString& datasetName) const
 {
     return const_cast<DataHierarchyManager*>(this)->getHierarchyItem(datasetName);
 }
 
-hdps::DataHierarchyItem& DataHierarchyManager::getHierarchyItem(const QString& datasetName)
+hdps::DataHierarchyItem* DataHierarchyManager::getHierarchyItem(const QString& datasetName)
 {
     Q_ASSERT(!datasetName.isEmpty());
 
-    return *_dataHierarchyItemsMap[datasetName];
+    for (auto dataHierarchyItem : _dataHierarchyItemsMap.values())
+        if (dataHierarchyItem->getDatasetName() == datasetName)
+            return dataHierarchyItem.get();
+
+    return nullptr;
 }
 
 void DataHierarchyManager::selectHierarchyItem(const QString& datasetName)

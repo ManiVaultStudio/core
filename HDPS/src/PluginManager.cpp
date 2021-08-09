@@ -238,7 +238,7 @@ void PluginManager::createAnalysisPlugin(const QString& kind, const QString& inp
         if (!pluginInstance)
             return;
 
-        pluginInstance->setInputDatasetName(inputDatasetName);
+        pluginInstance->setInputDataHierarchyItem(_core.getDataHierarchyItem(inputDatasetName));
 
         _core.addPlugin(pluginInstance);
     }
