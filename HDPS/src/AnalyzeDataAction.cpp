@@ -29,9 +29,9 @@ AnalyzeDataAction::AnalyzeDataAction(QObject* parent, DataHierarchyItem* dataHie
     });
 }
 
-QMenu* AnalyzeDataAction::getContextMenu()
+QMenu* AnalyzeDataAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    auto menu = new QMenu("Analyze");
+    auto menu = new QMenu("Analyze", parent);
 
     menu->setIcon(icon());
 

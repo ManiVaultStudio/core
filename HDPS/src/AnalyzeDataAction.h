@@ -11,7 +11,12 @@ class AnalyzeDataAction : public hdps::gui::WidgetAction
 public:
     AnalyzeDataAction(QObject* parent, DataHierarchyItem* dataHierarchyItem);
 
-    QMenu* getContextMenu();
+    /**
+     * Get the context menu for the action
+     * @param parent Parent widget
+     * @return Context menu
+     */
+    QMenu* getContextMenu(QWidget* parent = nullptr);
 
 protected:
     DataHierarchyItem*          _dataHierarchyItem;     /** Pointer to data hierarchy item */

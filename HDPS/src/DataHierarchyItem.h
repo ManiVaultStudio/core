@@ -15,13 +15,13 @@ namespace hdps
 class DataSet;
 class Core;
 
- /**
-  * Data hierarchy item class
-  *
-  * Represents a dataset as an item in a dataset hierarchy
-  *
-  * @author Thomas Kroes
-  */
+/**
+ * Data hierarchy item class
+ *
+ * Represents a dataset as an item in a dataset hierarchy
+ *
+ * @author Thomas Kroes
+ */
 class DataHierarchyItem : public QObject
 {
     Q_OBJECT

@@ -121,8 +121,13 @@ public:
         return *this;
     }
 
-    virtual QMenu* getContextMenu() {
-        return new QMenu();
+    /**
+     * Get the context menu for the action
+     * @param parent Parent widget
+     * @return Context menu
+     */
+    virtual QMenu* getContextMenu(QWidget* parent = nullptr) {
+        return new QMenu(parent);
     };
 
 protected:
