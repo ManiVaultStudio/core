@@ -127,7 +127,7 @@ public:
      * @return Context menu
      */
     virtual QMenu* getContextMenu(QWidget* parent = nullptr) {
-        return new QMenu(parent);
+        return nullptr;
     };
 
 protected:
