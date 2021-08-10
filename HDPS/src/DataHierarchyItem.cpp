@@ -3,6 +3,8 @@
 #include "DataManager.h"
 #include "Set.h"
 
+#include <QTimer>
+
 namespace hdps
 {
 
@@ -13,7 +15,10 @@ DataHierarchyItem::DataHierarchyItem(Core* core, QObject* parent /*= nullptr*/, 
     _parent(parentDatasetName),
     _children(),
     _visible(visible),
-    _progress(0.0)
+    _taskDescription(""),
+    _taskProgress(0.0),
+    _taskName(""),
+    _taskStatus(TaskStatus::Idle)
 {
     addIcon("data", getDataset().getIcon());
 }
@@ -58,34 +63,9 @@ bool DataHierarchyItem::isHidden() const
     return !_visible;
 }
 
-QString DataHierarchyItem::getDescription() const
+QString DataHierarchyItem::getTaskDescription() const
 {
-    return _description;
-}
-
-void DataHierarchyItem::setDescription(const QString& description)
-{
-    if (description == _description)
-        return;
-
-    _description = description;
-
-    emit descriptionChanged(_description);
-}
-
-float DataHierarchyItem::getProgress() const
-{
-    return _progress;
-}
-
-void DataHierarchyItem::setProgress(const float& progress)
-{
-    if (progress == _progress)
-        return;
-
-    _progress = progress;
-
-    emit progressChanged(_progress);
+    return _taskDescription;
 }
 
 bool DataHierarchyItem::isSelected() const
@@ -151,7 +131,7 @@ void DataHierarchyItem::removeChild(const QString& name)
 
 QString DataHierarchyItem::toString() const
 {
-    return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_datasetName, _parent, _children.join(", "), _visible ? "true" : "false", _description, QString::number(_progress, 'f', 1));
+    return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_datasetName, _parent, _children.join(", "), _visible ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
 }
 
 hdps::DataSet& DataHierarchyItem::getDataset() const
@@ -178,6 +158,29 @@ void DataHierarchyItem::analyzeDataset(const QString& analysisKind)
     _core->analyzeDataset(analysisKind, _datasetName);
 }
 
+QString DataHierarchyItem::getTaskName() const
+{
+    return _taskName;
+}
+
+void DataHierarchyItem::setTaskName(const QString& taskName)
+{
+    if (taskName == _taskName)
+        return;
+
+    _taskName = taskName;
+}
+
+hdps::DataHierarchyItem::TaskStatus DataHierarchyItem::getTaskStatus() const
+{
+    return _taskStatus;
+}
+
+bool DataHierarchyItem::isIdle() const
+{
+    return _taskStatus == TaskStatus::Idle;
+}
+
 void DataHierarchyItem::setDatasetName(const QString& datasetName)
 {
     Q_ASSERT(!_datasetName.isEmpty());
@@ -189,6 +192,93 @@ void DataHierarchyItem::setDatasetName(const QString& datasetName)
         return;
 
     _datasetName = datasetName;
+}
+
+void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
+{
+    if (taskDescription == _taskDescription)
+        return;
+
+    _taskDescription = taskDescription;
+
+    emit taskDescriptionChanged(_taskDescription);
+}
+
+float DataHierarchyItem::getTaskProgress() const
+{
+    return _taskProgress;
+}
+
+void DataHierarchyItem::setTaskProgress(const float& taskProgress)
+{
+    if (taskProgress == _taskProgress)
+        return;
+
+    _taskProgress = taskProgress;
+
+    emit taskProgressChanged(_taskProgress);
+}
+
+bool DataHierarchyItem::isRunning() const
+{
+    return _taskStatus == TaskStatus::Running;
+}
+
+bool DataHierarchyItem::isFinished() const
+{
+    return _taskStatus == TaskStatus::Finished;
+}
+
+bool DataHierarchyItem::isAborted() const
+{
+    return _taskStatus == TaskStatus::Aborted;
+}
+
+void DataHierarchyItem::setTaskIdle()
+{
+    _taskStatus = TaskStatus::Idle;
+}
+
+void DataHierarchyItem::setTaskRunning()
+{
+    _taskStatus = TaskStatus::Running;
+}
+
+void DataHierarchyItem::setTaskFinished()
+{
+    if (_taskStatus == TaskStatus::Aborted)
+        return;
+
+    _taskStatus = TaskStatus::Finished;
+
+    setTaskDescription(QString("%1 finished").arg(_taskName));
+
+    auto timer = QSharedPointer<QTimer>::create();
+
+    connect(timer.get(), &QTimer::timeout, this, [this, timer]() {
+        setTaskProgress(0.0f);
+        setTaskDescription("");
+    });
+
+    timer->setSingleShot(true);
+    timer->start(1500);
+}
+
+void DataHierarchyItem::setTaskAborted()
+{
+    _taskStatus = TaskStatus::Aborted;
+
+    setTaskDescription(QString("%1 aborted").arg(_taskName));
+
+    auto timer = QSharedPointer<QTimer>::create();
+
+    connect(timer.get(), &QTimer::timeout, this, [this, timer]() {
+        setTaskProgress(0.0f);
+        setTaskDescription("");
+    });
+
+    timer->setSingleShot(true);
+    timer->start(1500);
 }
 
 }

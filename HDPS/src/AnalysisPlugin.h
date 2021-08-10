@@ -5,8 +5,6 @@
 
 #include <memory>
 
-class QWidget;
-
 namespace hdps
 {
 
@@ -15,6 +13,7 @@ namespace plugin
 
 class AnalysisPlugin : public Plugin
 {
+
 public:
     AnalysisPlugin(QString name) :
         Plugin(Type::ANALYSIS, name),
@@ -86,64 +85,64 @@ public:
         _outputDataHierarchyItem = _core->getDataHierarchyItem(outputDatasetName);
     }
 
-protected:
+protected: // Status
 
-    void notifyStarted() {
+    /** Get task status */
+    DataHierarchyItem::TaskStatus getTaskStatus() const {
         Q_ASSERT(_outputDataHierarchyItem != nullptr);
 
-        if (_outputDataHierarchyItem == nullptr)
-            return;
-
-        qApp->processEvents();
-
-        _outputDataHierarchyItem->setDescription("");
-        _outputDataHierarchyItem->setProgress(0.0);
+        return _outputDataHierarchyItem->getTaskStatus();
     }
 
-    void notifyProgressSection(const QString& section) {
+    /**
+     * Set name of the task
+     * @param taskName Name of the task
+     */
+    void setTaskName(const QString& taskName) {
         Q_ASSERT(_outputDataHierarchyItem != nullptr);
 
-        if (_outputDataHierarchyItem == nullptr)
-            return;
-
-        qApp->processEvents();
-
-        _outputDataHierarchyItem->setDescription(section);
+        _outputDataHierarchyItem->setTaskName(taskName);
     }
 
-    void notifyProgressPercentage(const float& percentage) {
+    /**
+     * Set the task progress
+     * @param taskProgress Progress of the task (%)
+     */
+    void setTaskProgress(const float& taskProgress) {
         Q_ASSERT(_outputDataHierarchyItem != nullptr);
 
-        if (_outputDataHierarchyItem == nullptr)
-            return;
-
-        qApp->processEvents();
-
-        _outputDataHierarchyItem->setProgress(percentage);
+        _outputDataHierarchyItem->setTaskProgress(taskProgress);
     }
 
-    void notifyFinished() {
+    /**
+     * Set the task description
+     * @param taskDescription Description of the task
+     */
+    void setTaskDescription(const QString& taskDescription) {
         Q_ASSERT(_outputDataHierarchyItem != nullptr);
 
-        if (_outputDataHierarchyItem == nullptr)
-            return;
-
-        qApp->processEvents();
-
-        _outputDataHierarchyItem->setDescription("");
-        _outputDataHierarchyItem->setProgress(0.0);
+        _outputDataHierarchyItem->setTaskDescription(taskDescription);
     }
 
-    void notifyAborted(const QString& reason) {
+    /** Set the task status to running */
+    void setTaskRunning() {
         Q_ASSERT(_outputDataHierarchyItem != nullptr);
 
-        if (_outputDataHierarchyItem == nullptr)
-            return;
+        _outputDataHierarchyItem->setTaskRunning();
+    }
 
-        qApp->processEvents();
+    /** Set the task status to finished */
+    void setTaskFinished() {
+        Q_ASSERT(_outputDataHierarchyItem != nullptr);
 
-        _outputDataHierarchyItem->setDescription("");
-        _outputDataHierarchyItem->setProgress(0.0);
+        _outputDataHierarchyItem->setTaskFinished();
+    }
+
+    /** Set the task status to aborted */
+    void setTaskAborted() {
+        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+
+        _outputDataHierarchyItem->setTaskAborted();
     }
 
 protected:

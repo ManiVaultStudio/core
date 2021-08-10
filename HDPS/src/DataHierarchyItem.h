@@ -28,6 +28,16 @@ class DataHierarchyItem : public QObject
 
 public:
 
+    /** Task status enumeration */
+    enum class TaskStatus {
+        Idle,           /** Analysis is idle */
+        Running,        /** An analysis is currently running */
+        Finished,       /** Analysis has finished successfully */
+        Aborted         /** Analysis has been aborted */
+    };
+
+public:
+
     /** Named icon */
     using NamedIcon = QPair<QString, QIcon>;
 
@@ -70,24 +80,6 @@ public:
 
     /** Gets whether the dataset is hidden */
     bool isHidden() const;
-
-    /** Gets the description */
-    QString getDescription() const;
-
-    /**
-     * Sets the description
-     * @param description Description
-     */
-    void setDescription(const QString& description);
-
-    /** Gets the item progress */
-    float getProgress() const;
-
-    /**
-     * Sets the item progress
-     * @param progress Item progress
-     */
-    void setProgress(const float& progress);
 
     /** Gets whether the hierarchy item is selected */
     bool isSelected() const;
@@ -164,6 +156,50 @@ public: // Miscellaneous
      */
     void analyzeDataset(const QString& analysisKind);
 
+public: // Task
+
+    /** Get task name */
+    QString getTaskName() const;
+
+    /**
+     * Set task name
+     * @param taskName Name of the task
+     */
+    void setTaskName(const QString& taskName);
+
+    /** Get task status */
+    TaskStatus getTaskStatus() const;
+
+    /** Gets the task description */
+    QString getTaskDescription() const;
+
+    /**
+     * Sets the task description
+     * @param taskDescription Task description
+     */
+    void setTaskDescription(const QString& taskDescription);
+
+    /** Gets the task progress */
+    float getTaskProgress() const;
+
+    /**
+     * Sets the task progress
+     * @param taskProgress Task progress
+     */
+    void setTaskProgress(const float& taskProgress);
+
+    /** Convenience functions for status checking */
+    bool isIdle() const;
+    bool isRunning() const;
+    bool isFinished() const;
+    bool isAborted() const;
+
+    /** Set task status */
+    void setTaskIdle();
+    void setTaskRunning();
+    void setTaskFinished();
+    void setTaskAborted();
+
 public: // Operators
 
     /**
@@ -172,15 +208,17 @@ public: // Operators
      */
     DataHierarchyItem& operator= (const DataHierarchyItem& other)
     {
-        _core           = other._core;
-        _datasetName    = other._datasetName;
-        _parent         = other._parent;
-        _children       = other._children;
-        _visible        = other._visible;
-        _description    = other._description;
-        _progress       = other._progress;
-        _selected       = other._selected;
-        _namedIcons     = other._namedIcons;
+        _core               = other._core;
+        _datasetName        = other._datasetName;
+        _parent             = other._parent;
+        _children           = other._children;
+        _visible            = other._visible;
+        _taskDescription    = other._taskDescription;
+        _taskProgress       = other._taskProgress;
+        _selected           = other._selected;
+        _namedIcons         = other._namedIcons;
+        _taskName           = other._taskName;
+        _taskStatus         = other._taskStatus;
 
         return *this;
     }
@@ -194,16 +232,16 @@ protected:
 signals:
 
     /**
-     * Signals that the description changed
-     * @param description Description
+     * Signals that the task description changed
+     * @param taskDescription Task description
      */
-    void descriptionChanged(const QString& description);
+    void taskDescriptionChanged(const QString& taskDescription);
 
     /**
-     * Signals that the progress changed
-     * @param progress Progress
+     * Signals that the task progress changed
+     * @param taskProgress Task progress
      */
-    void progressChanged(const float& progress);
+    void taskProgressChanged(const float& taskProgress);
 
     /**
      * Signals that the item got selected
@@ -217,10 +255,12 @@ protected:
     QString         _parent;            /** Parent item */
     QStringList     _children;          /** Child items (if any) */
     bool            _visible;           /** Whether the dataset is visible */
-    QString         _description;       /** Description */
-    float           _progress;          /** Progress */
     bool            _selected;          /** Whether the hierarchy item is selected */
     IconList        _namedIcons;        /** Named icons */
+    QString         _taskDescription;   /** Task description */
+    float           _taskProgress;      /** Task progress */
+    QString         _taskName;          /** Name of the current task */
+    TaskStatus      _taskStatus;        /** Status of the current task */
 
 protected:
     friend class DataManager;

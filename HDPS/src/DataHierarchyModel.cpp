@@ -61,10 +61,6 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
             dataHierarchyItem->setProgressPercentage(value.toFloat());
             break;
 
-        case DataHierarchyModelItem::Column::Analyzing:
-            dataHierarchyItem->setAnalyzing(value.toBool());
-            break;
-
         default:
             break;
     }

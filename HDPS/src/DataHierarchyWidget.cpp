@@ -77,7 +77,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
 
         _model.addItem(parentModelIndex, &dataHierarchyItem);
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::descriptionChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const QString& description) {
+        connect(&dataHierarchyItem, &DataHierarchyItem::taskDescriptionChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const QString& description) {
             try
             {
                 const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem.getDatasetName());
@@ -90,7 +90,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
             }
         });
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::progressChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const float& progress) {
+        connect(&dataHierarchyItem, &DataHierarchyItem::taskProgressChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const float& progress) {
             try
             {
                 const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem.getDatasetName());
@@ -131,23 +131,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
             auto dataHierarchyItem = _model.getItem(index, Qt::DisplayRole);
 
             QSharedPointer<QMenu> contextMenu(dataHierarchyItem->getContextMenu());
-
-            /*
-            auto contextMenu = _dataset->getContextMenu();
-
-            // Extract name of item that triggered the context menu action
-            QAction* act = qobject_cast<QAction*>(sender());
-
-            QString datasetName = act->data().toString();
-
-            // Pop up a dialog where the user can enter a new name
-            bool ok;
-
-            QString newDatasetName = QInputDialog::getText(this, tr("Rename Dataset"), tr("Dataset name:"), QLineEdit::Normal, datasetName, &ok);
-
-            if (ok && !newDatasetName.isEmpty())
-                _core->getDataManager().renameSet(datasetName, newDatasetName);
-            */
 
             contextMenu->exec(viewport()->mapToGlobal(position));
         }

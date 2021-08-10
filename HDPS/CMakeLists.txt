@@ -14,27 +14,27 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 if(APPLE)
-	# These are the properties for the Info.plist in the mac bindle
-	set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
-	set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
-	set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
-	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
-	set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2021. All rights reserved.")
-	set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.hdps")
-	set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
-	
-	# use, i.e. don't skip the full RPATH for the build tree
-	set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+    # These are the properties for the Info.plist in the mac bindle
+    set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
+    set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2021. All rights reserved.")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.hdps")
+    set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
+    
+    # use, i.e. don't skip the full RPATH for the build tree
+    set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
-	# when building, don't use the install RPATH already
-	# (but later on when installing)
-	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    # when building, don't use the install RPATH already
+    # (but later on when installing)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-	set(CMAKE_INSTALL_RPATH "@loader_path")
+    set(CMAKE_INSTALL_RPATH "@loader_path")
 
-	# add the automatically determined parts of the RPATH
-	# which point to directories outside the build tree to the install RPATH
-	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    # add the automatically determined parts of the RPATH
+    # which point to directories outside the build tree to the install RPATH
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
 
 if(MSVC)
@@ -68,6 +68,7 @@ set( CORE_HEADERS
     src/Core.h
     src/DataManager.h
     src/exceptions/SetNotFoundException.h
+
 )
 
 set( CORE_SOURCES
@@ -130,7 +131,7 @@ set(ACTIONS_SOURCES
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
-	src/actions/WidgetActionGroup.cpp
+    src/actions/WidgetActionGroup.cpp
     src/actions/SharedActions.cpp
 )
 
@@ -196,7 +197,7 @@ set( UTIL_SOURCES
 
 set( PLUGIN_HEADERS
     src/CoreInterface.h
-	src/DataHierarchyItem.h
+    src/DataHierarchyItem.h
     src/AnalysisPlugin.h
     src/DataType.h
     src/RawData.h
@@ -212,8 +213,8 @@ set( PLUGIN_HEADERS
 )
 
 set( PLUGIN_SOURCES
-	src/DataHierarchyItem.cpp
-	src/Plugin.cpp
+    src/DataHierarchyItem.cpp
+    src/Plugin.cpp
     src/LoaderPlugin.cpp
     src/Application.cpp
     src/Plugin.cpp
@@ -223,10 +224,10 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyModelItem.h
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
-	src/DataPropertiesWidget.h
-	src/DataImportAction.h
-	src/ExportDataAction.h
-	src/AnalyzeDataAction.h
+    src/DataPropertiesWidget.h
+    src/DataImportAction.h
+    src/ExportDataAction.h
+    src/AnalyzeDataAction.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -234,14 +235,14 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp
-	src/DataImportAction.cpp
-	src/ExportDataAction.cpp
-	src/AnalyzeDataAction.cpp
+    src/DataImportAction.cpp
+    src/ExportDataAction.cpp
+    src/AnalyzeDataAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS
     ${CORE_HEADERS}
-	${DATA_HIERARCHY_HEADERS}
+    ${DATA_HIERARCHY_HEADERS}
 )
 
 list(APPEND PRIVATE_SOURCES
@@ -377,7 +378,7 @@ add_executable(${PROJECT} MACOSX_BUNDLE WIN32
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
-	set_target_properties( ${PROJECT} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+    set_target_properties( ${PROJECT} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 endif()
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
@@ -402,47 +403,47 @@ endif(MSVC)
 
 
 if(APPLE)
-	set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
+    set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
-	install(TARGETS ${PROJECT}
-		RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
-		BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
-		# ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
-	)
+    install(TARGETS ${PROJECT}
+        RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
+        BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
+        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+    )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-	install(CODE "execute_process(
-			COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
-		#	RESULT_VARIABLE retval
-			COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
-			COMMAND ${CMAKE_COMMAND} -E copy 
-					\"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.3.6.3.dylib\" 
-					\"${BUNDLE_DIR}/Contents/Frameworks/\"
-			COMMAND ${CMAKE_COMMAND} -E copy 
-					\"$<TARGET_FILE:${PROJECT}_Public>\" 
-					\"${BUNDLE_DIR}/Contents/Frameworks/\"
-					
-			COMMAND ${CMAKE_COMMAND} -E copy 
-					\"$<TARGET_FILE:${PROJECT}_Private>\" 
-					\"${BUNDLE_DIR}/Contents/Frameworks/\"
-		)
-		
-		#if(NOT retval EQUAL 0)
-		#	message(FATAL_ERROR \"macdeployqt failed\")
-		#endif()
-		"
-		COMPONENT MACOS_BUNDLE
-	)
+    install(CODE "execute_process(
+            COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
+        #	RESULT_VARIABLE retval
+            COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
+            COMMAND ${CMAKE_COMMAND} -E copy 
+                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.3.6.3.dylib\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+            COMMAND ${CMAKE_COMMAND} -E copy 
+                    \"$<TARGET_FILE:${PROJECT}_Public>\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+                    
+            COMMAND ${CMAKE_COMMAND} -E copy 
+                    \"$<TARGET_FILE:${PROJECT}_Private>\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+        )
+        
+        #if(NOT retval EQUAL 0)
+        #	message(FATAL_ERROR \"macdeployqt failed\")
+        #endif()
+        "
+        COMPONENT MACOS_BUNDLE
+    )
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt5_DIR} ${BUNDLE_DIR}
         )"
         COMPONENT MACOS_BUNDLE
     )
 else()
-	install(TARGETS ${PROJECT}
-		RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
-		# ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
-	)
+    install(TARGETS ${PROJECT}
+        RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
+        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+    )
 endif()
 
 #headers - Would it be better to refactor the headers to allow "install(DIRECTORY)"?
@@ -601,11 +602,11 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 )
 
 if(APPLE)
-	add_custom_command(TARGET ${PROJECT} POST_BUILD
-		COMMAND "${CMAKE_COMMAND}" 
-			--install ${CMAKE_BINARY_DIR}
-			--config $<CONFIGURATION> 
-			--component MACOS_BUNDLE
-			--prefix ${INSTALL_DIR}/$<CONFIGURATION>/
-	)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" 
+            --install ${CMAKE_BINARY_DIR}
+            --config $<CONFIGURATION> 
+            --component MACOS_BUNDLE
+            --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+    )
 endif()

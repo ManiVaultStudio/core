@@ -13,7 +13,6 @@ DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyI
     _parent(parent),
     _children(),
     _dataHierarchyItem(dataHierarchyItem),
-    _analyzing(false),
     _progressSection(),
     _progressPercentage(0.0f)
 {
@@ -94,7 +93,7 @@ QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) con
             return "";
 
         case Column::Progress:
-            return _analyzing ? QString("%1%").arg(QString::number(100.0f * _progressPercentage, 'f', 1)) : "";
+            return _dataHierarchyItem->isRunning() ? QString("%1%").arg(QString::number(100.0f * _progressPercentage, 'f', 1)) : "";
 
         case Column::Analyzing:
             return "";
@@ -127,7 +126,7 @@ QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
 
         case Column::Analyzing:
         {
-            if (_analyzing)
+            if (_dataHierarchyItem->isRunning())
                 return fontAwesome.getIcon("microchip");
 
             break;
@@ -151,14 +150,6 @@ QMenu* DataHierarchyModelItem::getContextMenu()
 void DataHierarchyModelItem::renameDataset(const QString& intendedDatasetName)
 {
     _dataHierarchyItem->renameDataset(intendedDatasetName);
-}
-
-void DataHierarchyModelItem::setAnalyzing(const bool& analyzing)
-{
-    _analyzing = analyzing;
-
-    if (!_analyzing)
-        _progressSection = "";
 }
 
 void DataHierarchyModelItem::setProgressPercentage(const float& progressPercentage)

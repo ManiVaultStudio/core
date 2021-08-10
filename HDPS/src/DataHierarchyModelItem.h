@@ -95,12 +95,6 @@ public:
 public: // Analysis
 
     /**
-     * Set analyzing
-     * @param analyzing Whether an analysis is taking place
-     */
-    void setAnalyzing(const bool& analyzing);
-
-    /**
      * Set analysis progress percentage
      * @param progressPercentage Progress percentage of the analysis
      */
@@ -116,7 +110,6 @@ protected:
     DataHierarchyModelItem*     _parent;                    /** Pointer to parent item */
     PluginHierarchyItems        _children;                  /** Pointers to child items */
     DataHierarchyItem*          _dataHierarchyItem;         /** Pointer to data hierarchy item*/
-    bool                        _analyzing;                 /** Whether an analysis is taking place */
     QString                     _progressSection;           /** Progress section of the analysis */
     float                       _progressPercentage;        /** Progress percentage of the analysis */
 
