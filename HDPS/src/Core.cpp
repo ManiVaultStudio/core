@@ -134,8 +134,9 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     _dataHierarchyManager.addDataset(setName);
     _dataHierarchyManager.selectHierarchyItem(setName);
 
-    //set->exposeAction(new ExportDataAction(this, reinterpret_cast<Core*>(_core), uniqueName));
-    fullSet->addAction(new AnalyzeDataAction(&_mainWindow, getDataHierarchyItem(setName)));
+    auto analyzeDataAction = new AnalyzeDataAction(&_mainWindow, getDataHierarchyItem(setName));
+
+    analyzeDataAction->setContext(fullSet->getName());
 
     return setName;
 }

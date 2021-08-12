@@ -41,6 +41,15 @@ public:
         return nullptr;
     };
 
+    /**
+     * Set drop target
+     * @param isDropTarget whether the widget action is a drop target
+     */
+    void setDropTarget(const bool& isDropTarget);
+
+    /** Gets whether the widget action is a drop target */
+    bool isDropTarget() const;
+
 public:
 
     /**
@@ -55,9 +64,18 @@ public:
 protected:
     virtual QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard);
 
+signals:
+
+    /**
+     * Signals that the widget action drop target status changed
+     * @param isDropTarget Whether the widget action is a drop target
+     */
+    void isDropTargetChanged(const bool& isDropTarget);
+
 protected:
     QString     _createdBy;         /** Establishes who created the widget action (view, analysis, data etc.) */
     QString     _context;           /** Context in which the widget action resides (for instance in a dataset) */
+    bool        _isDropTarget;      /** Whether the widget action is eligible for dropping by another widget action */
 };
 
 /** List of widget actions */

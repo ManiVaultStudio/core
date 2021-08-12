@@ -1,5 +1,5 @@
-#ifndef HDPS_SHARED_ACTIONS_H
-#define HDPS_SHARED_ACTIONS_H
+#ifndef HDPS_WIDGET_ACTIONS_MANAGER_H
+#define HDPS_WIDGET_ACTIONS_MANAGER_H
 
 #include "actions/WidgetAction.h"
 
@@ -8,11 +8,11 @@ namespace hdps {
 namespace gui {
 
 /**
- * Shared action mixin class
+ * Widget actions manager class
  *
  * @author Thomas Kroes
  */
-class SharedActions
+class WidgetActionsManager
 {
 
 public:
@@ -58,11 +58,25 @@ public:
      */
     QMenu* getContextMenu();
 
+public:
+    
+    /**
+     * Informs the manager that a widget started dragging (called by the widget action)
+     */
+    void widgetStartedDragging(WidgetAction* widgetAction);
+
+    /**
+     * Informs the manager that a widget started dragging (called by the widget action)
+     */
+    void widgetStoppedDragging(WidgetAction* widgetAction);
+
 protected:
     WidgetActions    _actions;     /** Exposed widget actions */
+
+    friend class WidgetAction;
 };
 
 }
 }
 
-#endif // HDPS_SHARED_ACTIONS_H
+#endif // HDPS_WIDGET_ACTIONS_MANAGER_H

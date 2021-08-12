@@ -17,8 +17,12 @@ namespace hdps {
 namespace gui {
 
 WidgetAction::WidgetAction(QObject* parent) :
-    QWidgetAction(parent)
+    QWidgetAction(parent),
+    _createdBy(),
+    _context(),
+    _isDropTarget(false)
 {
+    Application::current()->getWidgetActionsManager().addAction(this);
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
@@ -37,6 +41,21 @@ QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
 WidgetActionLabel* WidgetAction::createLabelWidget(QWidget* parent)
 {
     return new WidgetActionLabel(this, parent);
+}
+
+void WidgetAction::setDropTarget(const bool& isDropTarget)
+{
+    if (isDropTarget == _isDropTarget)
+        return;
+
+    _isDropTarget = isDropTarget;
+
+    isDropTargetChanged(_isDropTarget);
+}
+
+bool WidgetAction::isDropTarget() const
+{
+    return _isDropTarget;
 }
 
 void WidgetAction::setContext(const QString& context)

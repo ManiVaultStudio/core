@@ -143,22 +143,9 @@ public: // Properties
 
 public: // Actions
 
-    /**
-     * Add a widget action
-     * This class does not alter the ownership of the allocated widget action
-     * @param widgetAction Widget action to expose
-     */
-    void addAction(gui::WidgetAction* widgetAction) {
-        Q_ASSERT(widgetAction != nullptr);
-
-        widgetAction->setContext(_name);
-
-        Application::current()->addAction(widgetAction);
-    }
-
     /** Returns list of shared action widgets*/
     hdps::gui::WidgetActions getActions() const {
-        return Application::current()->getActionsByContext(_name);
+        return Application::current()->getWidgetActionsManager().getActionsByContext(_name);
     }
 
     /**
@@ -167,7 +154,7 @@ public: // Actions
      * @return Context menu
      */
     QMenu* getContextMenu(QWidget* parent = nullptr) {
-        return Application::current()->getContextMenu();
+        return Application::current()->getWidgetActionsManager().getContextMenu();
     };
 
     /**
@@ -175,7 +162,7 @@ public: // Actions
      * @param contextMenu Context menu to populate
      */
     void populateContextMenu(QMenu* contextMenu) {
-        return Application::current()->populateContextMenu(_name, contextMenu);
+        return Application::current()->getWidgetActionsManager().populateContextMenu(_name, contextMenu);
     };
 
 protected:

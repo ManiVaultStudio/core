@@ -61,12 +61,12 @@ public: // Actions
 
         widgetAction->setContext(_guiName);
 
-        Application::current()->addAction(widgetAction);
+        Application::current()->getWidgetActionsManager().addAction(widgetAction);
     }
 
     /** Returns list of shared widget actions*/
     hdps::gui::WidgetActions getWidgetActions() const {
-        return Application::current()->getActionsByContext(_guiName);
+        return Application::current()->getWidgetActionsManager().getActionsByContext(_guiName);
     }
 };
 

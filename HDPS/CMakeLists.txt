@@ -122,7 +122,7 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionGroup.h
-    src/actions/SharedActions.h
+    src/actions/WidgetActionsManager.h
     src/actions/Actions.h
 )
 
@@ -140,7 +140,7 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionGroup.cpp
-    src/actions/SharedActions.cpp
+	src/actions/WidgetActionsManager.cpp
 )
 
 set( RENDERER_HEADERS

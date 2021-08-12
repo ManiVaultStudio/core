@@ -22,6 +22,10 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
         setText(widgetAction->text());
         setToolTip(widgetAction->toolTip());
     });
+
+    connect(widgetAction, &WidgetAction::isDropTargetChanged, this, [this, widgetAction](const bool& isDropTarget) {
+        setStyleSheet(QString("QLabel { text-decoration: %1; }").arg(isDropTarget ? "underline" : "none"));
+    });
 }
 
 void WidgetActionLabel::mousePressEvent(QMouseEvent* mouseEvent)
@@ -46,7 +50,11 @@ void WidgetActionLabel::mouseMoveEvent(QMouseEvent* mouseEvent)
     drag->setMimeData(mimeData);
     drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(16, 16));
 
+    Application::current()->getWidgetActionsManager().widgetStartedDragging(_widgetAction);
+
     Qt::DropAction dropAction = drag->exec();
+
+    Application::current()->getWidgetActionsManager().widgetStoppedDragging(_widgetAction);
 }
 
 void WidgetActionLabel::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
@@ -56,28 +64,25 @@ void WidgetActionLabel::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
     if (!mimeData->hasFormat("text/plain"))
         return;
 
-    qDebug() << mimeData->text() << typeid(*_widgetAction).name();
+    //qDebug() << mimeData->text() << typeid(*_widgetAction).name();
 
     if (mimeData->text() != typeid(*_widgetAction).name())
         return;
 
     dragEnterEvent->acceptProposedAction();
-
-    setStyleSheet("QLabel { text-decoration: underline; }");
 }
 
 void WidgetActionLabel::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
 {
-    setStyleSheet("QLabel { text-decoration: none; }");
 }
 
 void WidgetActionLabel::dropEvent(QDropEvent* dropEvent)
 {
-    qDebug() << dropEvent->mimeData()->text();
+    //qDebug() << dropEvent->mimeData()->text();
 
     dropEvent->acceptProposedAction();
 
-    setStyleSheet("QLabel { text-decoration: none; }");
+    Application::current()->getWidgetActionsManager().widgetStoppedDragging(_widgetAction);
 }
 
 }

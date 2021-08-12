@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/IconFonts.h"
-#include "actions/SharedActions.h"
+#include "actions/WidgetActionsManager.h"
 
 #include <QApplication>
 #include <QSettings>
@@ -15,7 +15,7 @@ namespace hdps {
  *
  * @author Thomas Kroes
  */
-class Application : public QApplication, public gui::SharedActions
+class Application : public QApplication
 {
 public: // Construction/destruction
 
@@ -61,10 +61,14 @@ public: // Settings API
 
 public: // Actions API
 
+    gui::WidgetActionsManager& getWidgetActionsManager() {
+        return _widgetActionsManager;
+    }
 
 protected:
-    IconFonts       _iconFonts;         /** Icon fonts resource */
-    QSettings       _settings;          /** Settings */
+    IconFonts                   _iconFonts;                 /** Icon fonts resource */
+    QSettings                   _settings;                  /** Settings */
+    gui::WidgetActionsManager   _widgetActionsManager;      /** Widget actions manager */
 };
 
 }
