@@ -117,6 +117,10 @@ set(ACTIONS_HEADERS
     src/actions/ToggleAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
+    src/actions/WidgetActionStateWidget.h
+    src/actions/WidgetActionWidget.h
+    src/actions/WidgetActionCollapsedWidget.h
+    src/actions/WidgetActionLabel.h
     src/actions/WidgetActionGroup.h
     src/actions/SharedActions.h
     src/actions/Actions.h
@@ -131,6 +135,10 @@ set(ACTIONS_SOURCES
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
+    src/actions/WidgetActionStateWidget.cpp
+    src/actions/WidgetActionWidget.cpp
+    src/actions/WidgetActionCollapsedWidget.cpp
+    src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionGroup.cpp
     src/actions/SharedActions.cpp
 )

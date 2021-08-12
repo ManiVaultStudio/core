@@ -27,7 +27,7 @@ public:
     /**
      * Spinbox widget class for decimal action
      */
-    class SpinBoxWidget : public WidgetAction::Widget
+    class SpinBoxWidget : public WidgetActionWidget
     {
     protected:
 
@@ -52,7 +52,7 @@ public:
     /**
      * Slider widget class for decimal action
      */
-    class SliderWidget : public WidgetAction::Widget
+    class SliderWidget : public WidgetActionWidget
     {
     protected:
 
@@ -81,7 +81,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;;
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;;
 
 public:
 

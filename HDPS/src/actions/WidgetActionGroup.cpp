@@ -1,11 +1,10 @@
 #include "WidgetActionGroup.h"
+#include "WidgetActionLabel.h"
 #include "ToggleAction.h"
 #include "TriggerAction.h"
 
 #include <QDebug>
-#include <QMenu>
-#include <QEvent>
-#include <QPainter>
+#include <QGridLayout>
 
 namespace hdps {
 
@@ -79,8 +78,8 @@ void WidgetActionGroup::setReadOnly(const bool& readOnly)
     emit readOnlyChanged(_readOnly);
 }
 
-WidgetActionGroup::GroupWidget::GroupWidget(QWidget* parent, WidgetActionGroup* widgetActionGroup) :
-    WidgetAction::Widget(parent, widgetActionGroup, Widget::State::Standard),
+WidgetActionGroup::Widget::Widget(QWidget* parent, WidgetActionGroup* widgetActionGroup) :
+    WidgetActionWidget(parent, widgetActionGroup, WidgetActionWidget::State::Standard),
     _layout(new QGridLayout())
 {
     _layout->setColumnStretch(0, 2);
@@ -89,7 +88,7 @@ WidgetActionGroup::GroupWidget::GroupWidget(QWidget* parent, WidgetActionGroup* 
     setLayout(_layout);
 }
 
-void WidgetActionGroup::GroupWidget::addWidgetAction(WidgetAction& widgetAction, const bool& forceTogglePushButton /*= false*/)
+void WidgetActionGroup::Widget::addWidgetAction(WidgetAction& widgetAction, const bool& forceTogglePushButton /*= false*/)
 {
     const auto numRows = _layout->rowCount();
 
@@ -117,7 +116,7 @@ void WidgetActionGroup::GroupWidget::addWidgetAction(WidgetAction& widgetAction,
     }
 }
 
-QGridLayout* WidgetActionGroup::GroupWidget::layout()
+QGridLayout* WidgetActionGroup::Widget::layout()
 {
     return _layout;
 }

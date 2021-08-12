@@ -1,6 +1,7 @@
 #pragma once
 
 #include "util/IconFonts.h"
+#include "actions/SharedActions.h"
 
 #include <QApplication>
 #include <QSettings>
@@ -14,7 +15,7 @@ namespace hdps {
  *
  * @author Thomas Kroes
  */
-class Application : public QApplication
+class Application : public QApplication, public gui::SharedActions
 {
 public: // Construction/destruction
 
@@ -57,6 +58,9 @@ public: // Settings API
      * @param value Value in variant form
      */
     void setSetting(const QString& path, const QVariant& value);
+
+public: // Actions API
+
 
 protected:
     IconFonts       _iconFonts;         /** Icon fonts resource */

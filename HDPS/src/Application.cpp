@@ -10,6 +10,7 @@ namespace hdps {
 
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
+    gui::SharedActions(),
     _iconFonts(),
     _settings()
 {

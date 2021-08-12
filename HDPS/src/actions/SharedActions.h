@@ -18,24 +18,28 @@ class SharedActions
 public:
 
     /**
-     * Exposes a widget action
+     * Add a widget action
      * This class does not alter the ownership of the allocated widget action
      * @param widgetAction Widget action to expose
      */
-    void exposeAction(gui::WidgetAction* widgetAction);
+    void addAction(gui::WidgetAction* widgetAction);
 
     /**
-     * Conceals an action widget
+     * Removes an action widget
      * This does not de-allocate the widget action memory
      * @param widgetAction Widget action to remove
      */
-    void concealAction(gui::WidgetAction* widgetAction);
-
-    /** Returns list of shared action widgets*/
-    const WidgetActions& getExposedActions() const;
+    void removeAction(gui::WidgetAction* widgetAction);
 
     /**
-     * Get action by name
+     * Gets widget actions by context
+     * @param context Context
+     * @return Widget actions
+     */
+    WidgetActions getActionsByContext(const QString& context) const;
+
+    /**
+     * Get widget action by name
      * @param name Name of the action
      * @return Pointer to action (if any)
      */
@@ -45,7 +49,7 @@ public:
      * Populates existing menu with exposed actions menus
      * @param contextMenu Context menu to populate
      */
-    void populateContextMenu(QMenu* contextMenu);
+    void populateContextMenu(const QString& context, QMenu* contextMenu);
 
     /**
      * Gets context menu for the exposed actions

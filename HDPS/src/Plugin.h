@@ -5,7 +5,6 @@
 #include "PluginType.h"
 #include "Application.h"
 #include "event/EventListener.h"
-#include "actions/SharedActions.h"
 
 #include <QString>
 #include <QMap>
@@ -21,7 +20,7 @@ namespace hdps
 namespace plugin
 {
 
-class Plugin : public EventListener, public gui::SharedActions
+class Plugin : public EventListener
 {
 public:
     Plugin(Type type, QString kind);
@@ -148,7 +147,7 @@ public: // Settings
 protected:
     CoreInterface* _core;
 
-private:
+protected:
     const QString               _name;              /** Unique plugin name */
     const QString               _guiName;           /** Name in the GUI */
     const QString               _kind;              /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */

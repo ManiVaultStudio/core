@@ -3,6 +3,7 @@
 #include "WidgetAction.h"
 
 class QWidget;
+class QHBoxLayout;
 class ColorPickerPushButton;
 class QPushButton;
 
@@ -26,7 +27,7 @@ public:
     /**
      * Color color picker push button class for color action
      */
-    class ColorPickerPushButtonWidget : public WidgetAction::Widget {
+    class ColorPickerPushButtonWidget : public WidgetActionWidget {
     protected:
 
         /**
@@ -58,7 +59,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override {
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
         return new ColorAction::ColorPickerPushButtonWidget(parent, this);
     };
 

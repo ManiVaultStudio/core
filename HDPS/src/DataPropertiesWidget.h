@@ -25,7 +25,6 @@ protected:
     WidgetActionGroup*  _widgetActionGroup;
     QTreeWidgetItem*    _treeWidgetItem;
 };
-    
 
 /**
  * Data editor widget class

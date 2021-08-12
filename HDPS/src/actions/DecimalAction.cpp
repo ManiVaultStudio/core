@@ -162,34 +162,12 @@ bool DecimalAction::isAtMaximum() const
     return _value == _maximum;
 }
 
-hdps::gui::DecimalAction::SpinBoxWidget* DecimalAction::createSpinBoxWidget(QWidget* parent)
-{
-    return new SpinBoxWidget(parent, this);
-}
-
-hdps::gui::DecimalAction::SliderWidget* DecimalAction::createSliderWidget(QWidget* parent)
-{
-    return new SliderWidget(parent, this);
-}
-
-QWidget* DecimalAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
-{
-    auto widget = new QWidget(parent);
-    auto layout = new QHBoxLayout();
-
-    layout->setMargin(0);
-    layout->addWidget(new SpinBoxWidget(parent, this), 1);
-    layout->addWidget(new SliderWidget(parent, this), 2);
-
-    widget->setLayout(layout);
-
-    return widget;
-}
-
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
-    WidgetAction::Widget(parent, decimalAction, Widget::State::Standard),
+    WidgetActionWidget(parent, decimalAction, WidgetActionWidget::State::Standard),
     _doubleSpinBox(new QDoubleSpinBox())
 {
+    setAcceptDrops(true);
+
     _doubleSpinBox->setObjectName("DoubleSpinBox");
 
     auto layout = new QHBoxLayout();
@@ -276,9 +254,11 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
 }
 
 DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decimalAction) :
-    WidgetAction::Widget(parent, decimalAction, Widget::State::Standard),
+    WidgetActionWidget(parent, decimalAction, WidgetActionWidget::State::Standard),
     _slider(new QSlider(Qt::Horizontal))
 {
+    setAcceptDrops(true);
+
     _slider->setObjectName("Slider");
 
     auto layout = new QHBoxLayout();
@@ -351,6 +331,30 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     onUpdateValueRange();
     onUpdateValue();
     setToolTips();
+}
+
+hdps::gui::DecimalAction::SpinBoxWidget* DecimalAction::createSpinBoxWidget(QWidget* parent)
+{
+    return new SpinBoxWidget(parent, this);
+}
+
+hdps::gui::DecimalAction::SliderWidget* DecimalAction::createSliderWidget(QWidget* parent)
+{
+    return new SliderWidget(parent, this);
+}
+
+QWidget* DecimalAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+{
+    auto widget = new QWidget(parent);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->addWidget(new SpinBoxWidget(parent, this), 1);
+    layout->addWidget(new SliderWidget(parent, this), 2);
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 }

@@ -41,6 +41,33 @@ public:
     virtual QToolBar* getToolBar() {
         return nullptr;
     };
+
+public: // Actions
+
+    /**
+     * Add a (widget) action
+     * This class does not alter the ownership of the allocated widget action
+     * @param widgetAction Widget action to expose
+     */
+    void addAction(QAction* action) {
+        Q_ASSERT(action != nullptr);
+
+        QWidget::addAction(action);
+
+        auto widgetAction = dynamic_cast<gui::WidgetAction*>(action);
+
+        if (widgetAction == nullptr)
+            return;
+
+        widgetAction->setContext(_guiName);
+
+        Application::current()->addAction(widgetAction);
+    }
+
+    /** Returns list of shared widget actions*/
+    hdps::gui::WidgetActions getWidgetActions() const {
+        return Application::current()->getActionsByContext(_guiName);
+    }
 };
 
 class ViewPluginFactory : public PluginFactory

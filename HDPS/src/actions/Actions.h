@@ -9,3 +9,5 @@
 #include "StringAction.h"
 #include "WidgetAction.h"
 #include "WidgetActionGroup.h"
+#include "WidgetActionLabel.h"
+#include "WidgetActionStateWidget.h"

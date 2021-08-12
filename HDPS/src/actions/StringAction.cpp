@@ -62,9 +62,11 @@ void StringAction::reset()
 }
 
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
-    WidgetAction::Widget(parent, stringAction, Widget::State::Standard),
+    WidgetActionWidget(parent, stringAction, WidgetActionWidget::State::Standard),
     _lineEdit(new QLineEdit())
 {
+    setAcceptDrops(true);
+
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);

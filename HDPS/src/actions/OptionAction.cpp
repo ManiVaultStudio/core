@@ -153,9 +153,11 @@ bool OptionAction::hasSelection() const
 }
 
 OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction) :
-    WidgetAction::Widget(parent, optionAction, Widget::State::Standard),
+    WidgetActionWidget(parent, optionAction, WidgetActionWidget::State::Standard),
     _comboBox(new QComboBox())
 {
+    setAcceptDrops(true);
+
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);

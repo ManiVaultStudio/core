@@ -26,6 +26,7 @@
 #include <QOffscreenSurface>
 #include <QMessageBox>
 #include <QTimer>
+#include <QLabel>
 
 using namespace ads;
 
