@@ -7,26 +7,32 @@ namespace hdps {
 
 namespace gui {
 
-void SharedActions::exposeAction(gui::WidgetAction* widgetAction)
+void SharedActions::addAction(gui::WidgetAction* widgetAction)
 {
     Q_ASSERT(widgetAction != nullptr);
 
     _actions << widgetAction;
 }
 
-void SharedActions::concealAction(gui::WidgetAction* widgetAction)
+void SharedActions::removeAction(gui::WidgetAction* widgetAction)
 {
     Q_ASSERT(widgetAction != nullptr);
 
     _actions.removeOne(widgetAction);
 }
 
-const hdps::gui::WidgetActions& SharedActions::getExposedActions() const
+WidgetActions SharedActions::getActionsByContext(const QString& context) const
 {
-    return _actions;
+    WidgetActions actions;
+
+    for (auto action : _actions)
+        if (context == action->getContext())
+            actions << action;
+
+    return actions;
 }
 
-hdps::gui::WidgetAction* SharedActions::getActionByName(const QString& name)
+WidgetAction* SharedActions::getActionByName(const QString& name)
 {
     for (auto action : _actions)
         if (action->text() == name)
@@ -35,9 +41,12 @@ hdps::gui::WidgetAction* SharedActions::getActionByName(const QString& name)
     return nullptr;
 }
 
-void SharedActions::populateContextMenu(QMenu* contextMenu)
+void SharedActions::populateContextMenu(const QString& context, QMenu* contextMenu)
 {
     for (auto action : _actions) {
+        if (context != action->getContext())
+            continue;
+
         auto actionContextMenu = action->getContextMenu();
 
         if (actionContextMenu == nullptr)

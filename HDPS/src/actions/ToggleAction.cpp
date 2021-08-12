@@ -3,6 +3,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QMenu>
+#include <QHBoxLayout>
 
 namespace hdps {
 
@@ -57,9 +58,11 @@ void ToggleAction::reset()
 }
 
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* checkAction) :
-    WidgetAction::Widget(parent, checkAction, Widget::State::Standard),
+    WidgetActionWidget(parent, checkAction, WidgetActionWidget::State::Standard),
     _checkBox(nullptr)
 {
+    setAcceptDrops(true);
+
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
@@ -93,7 +96,7 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* chec
 }
 
 ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* checkAction) :
-    WidgetAction::Widget(parent, checkAction, Widget::State::Standard),
+    WidgetActionWidget(parent, checkAction, WidgetActionWidget::State::Standard),
     _pushButton(nullptr)
 {
     auto layout = new QHBoxLayout();
@@ -133,7 +136,7 @@ ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* 
     setLayout(layout);
 }
 
-QWidget* ToggleAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
+QWidget* ToggleAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);

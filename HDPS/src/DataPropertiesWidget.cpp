@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QTreeWidgetItem>
 #include <QColor>
+#include <QVBoxLayout>
+#include <QLabel>
 
 namespace hdps
 {
@@ -49,7 +51,7 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
 
         _treeWidget->clear();
 
-        auto exposedActions = dataset.getExposedActions();
+        auto exposedActions = dataset.getActions();
 
         for (auto exposedAction : exposedActions) {
             auto exposedWidgetActionGroup = dynamic_cast<WidgetActionGroup*>(exposedAction);

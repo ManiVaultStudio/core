@@ -68,10 +68,12 @@ void ColorAction::reset()
 }
 
 ColorAction::ColorPickerPushButtonWidget::ColorPickerPushButtonWidget(QWidget* parent, ColorAction* colorAction) :
-    WidgetAction::Widget(parent, colorAction, Widget::State::Standard),
+    WidgetActionWidget(parent, colorAction, WidgetActionWidget::State::Standard),
     _layout(new QHBoxLayout()),
     _colorPickerPushButton(new ColorPickerPushButton())
 {
+    setAcceptDrops(true);
+
     _layout->setMargin(0);
     _layout->addWidget(_colorPickerPushButton);
 

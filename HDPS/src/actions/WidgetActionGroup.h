@@ -24,9 +24,9 @@ class WidgetActionGroup : public WidgetAction
 public:
 
     /**
-     * Line edit widget class for string action
+     * Group widget class for
      */
-    class GroupWidget : public WidgetAction::Widget
+    class Widget : public WidgetActionWidget
     {
     protected:
 
@@ -35,7 +35,7 @@ public:
          * @param parent Pointer to parent widget
          * @param widgetActionGroup Pointer to widget action group
          */
-        GroupWidget(QWidget* parent, WidgetActionGroup* widgetActionGroup);
+        Widget(QWidget* parent, WidgetActionGroup* widgetActionGroup);
 
         /**
          * Adds an action to the form

@@ -3,7 +3,7 @@
 
 #include "RawData.h"
 #include "CoreInterface.h"
-#include "actions/SharedActions.h"
+#include "Application.h"
 
 #include <QString>
 #include <QVector>
@@ -12,11 +12,10 @@
 namespace hdps
 {
 
-class DataSet : public gui::SharedActions
+class DataSet
 {
 public:
     DataSet(CoreInterface* core, QString dataName) :
-        gui::SharedActions(),
         _core(core),
         _dataName(dataName),
         _all(false),
@@ -141,6 +140,43 @@ public: // Properties
     {
         return _properties.keys();
     }
+
+public: // Actions
+
+    /**
+     * Add a widget action
+     * This class does not alter the ownership of the allocated widget action
+     * @param widgetAction Widget action to expose
+     */
+    void addAction(gui::WidgetAction* widgetAction) {
+        Q_ASSERT(widgetAction != nullptr);
+
+        widgetAction->setContext(_name);
+
+        Application::current()->addAction(widgetAction);
+    }
+
+    /** Returns list of shared action widgets*/
+    hdps::gui::WidgetActions getActions() const {
+        return Application::current()->getActionsByContext(_name);
+    }
+
+    /**
+     * Get the context menu
+     * @param parent Parent widget
+     * @return Context menu
+     */
+    QMenu* getContextMenu(QWidget* parent = nullptr) {
+        return Application::current()->getContextMenu();
+    };
+
+    /**
+     * Populates existing menu with actions menus
+     * @param contextMenu Context menu to populate
+     */
+    void populateContextMenu(QMenu* contextMenu) {
+        return Application::current()->populateContextMenu(_name, contextMenu);
+    };
 
 protected:
     template <class DataType>

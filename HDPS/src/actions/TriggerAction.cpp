@@ -2,6 +2,7 @@
 
 #include <QPushButton>
 #include <QMenu>
+#include <QHBoxLayout>
 
 namespace hdps {
 
@@ -14,9 +15,11 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
 }
 
 TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction) :
-    WidgetAction::Widget(parent, triggerAction, Widget::State::Standard),
+    WidgetActionWidget(parent, triggerAction, WidgetActionWidget::State::Standard),
     _pushButton(new QPushButton())
 {
+    setAcceptDrops(true);
+
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
@@ -46,7 +49,7 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     update();
 }
 
-QWidget* TriggerAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
+QWidget* TriggerAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);

@@ -29,7 +29,7 @@ public:
     /**
      * Combobox widget class for option action
      */
-    class ComboBoxWidget : public WidgetAction::Widget {
+    class ComboBoxWidget : public WidgetActionWidget {
     protected:
 
         /**
@@ -57,7 +57,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) {
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) {
         return new OptionAction::ComboBoxWidget(parent, this);
     };
 

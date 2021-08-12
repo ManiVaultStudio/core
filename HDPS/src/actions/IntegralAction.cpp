@@ -147,9 +147,11 @@ bool IntegralAction::isAtMaximum() const
 }
 
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
-    WidgetAction::Widget(parent, integralAction, Widget::State::Standard),
+    WidgetActionWidget(parent, integralAction, WidgetActionWidget::State::Standard),
     _spinBox(new QSpinBox())
 {
+    setAcceptDrops(true);
+
     _spinBox->setObjectName("SpinBox");
 
     auto layout = new QHBoxLayout();
@@ -218,9 +220,11 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
 }
 
 IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* integralAction) :
-    WidgetAction::Widget(parent, integralAction, Widget::State::Standard),
+    WidgetActionWidget(parent, integralAction, WidgetActionWidget::State::Standard),
     _slider(new QSlider(Qt::Horizontal))
 {
+    setAcceptDrops(true);
+
     _slider->setObjectName("Slider");
 
     auto layout = new QHBoxLayout();
@@ -285,8 +289,9 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     setToolTips();
 }
 
-QWidget* IntegralAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
+QWidget* IntegralAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
+
     auto widget = new QWidget(parent);
     auto layout = new QHBoxLayout();
 

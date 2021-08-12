@@ -24,7 +24,7 @@ public:
     /**
      * Push button widget class for trigger action
      */
-    class PushButtonWidget : public WidgetAction::Widget {
+    class PushButtonWidget : public WidgetActionWidget {
     protected:
 
         /**
@@ -52,7 +52,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;;
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;;
 
 public:
 
