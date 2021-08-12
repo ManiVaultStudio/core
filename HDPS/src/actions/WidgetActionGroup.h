@@ -26,7 +26,7 @@ public:
     /**
      * Group widget class for
      */
-    class Widget : public WidgetActionWidget
+    class FormWidget : public WidgetActionWidget
     {
     protected:
 
@@ -35,7 +35,7 @@ public:
          * @param parent Pointer to parent widget
          * @param widgetActionGroup Pointer to widget action group
          */
-        Widget(QWidget* parent, WidgetActionGroup* widgetActionGroup);
+        FormWidget(QWidget* parent, WidgetActionGroup* widgetActionGroup);
 
         /**
          * Adds an action to the form

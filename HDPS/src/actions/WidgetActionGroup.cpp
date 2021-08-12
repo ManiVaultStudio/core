@@ -78,7 +78,7 @@ void WidgetActionGroup::setReadOnly(const bool& readOnly)
     emit readOnlyChanged(_readOnly);
 }
 
-WidgetActionGroup::Widget::Widget(QWidget* parent, WidgetActionGroup* widgetActionGroup) :
+WidgetActionGroup::FormWidget::FormWidget(QWidget* parent, WidgetActionGroup* widgetActionGroup) :
     WidgetActionWidget(parent, widgetActionGroup, WidgetActionWidget::State::Standard),
     _layout(new QGridLayout())
 {
@@ -88,7 +88,7 @@ WidgetActionGroup::Widget::Widget(QWidget* parent, WidgetActionGroup* widgetActi
     setLayout(_layout);
 }
 
-void WidgetActionGroup::Widget::addWidgetAction(WidgetAction& widgetAction, const bool& forceTogglePushButton /*= false*/)
+void WidgetActionGroup::FormWidget::addWidgetAction(WidgetAction& widgetAction, const bool& forceTogglePushButton /*= false*/)
 {
     const auto numRows = _layout->rowCount();
 
@@ -116,7 +116,7 @@ void WidgetActionGroup::Widget::addWidgetAction(WidgetAction& widgetAction, cons
     }
 }
 
-QGridLayout* WidgetActionGroup::Widget::layout()
+QGridLayout* WidgetActionGroup::FormWidget::layout()
 {
     return _layout;
 }
