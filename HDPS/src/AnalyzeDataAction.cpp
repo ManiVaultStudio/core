@@ -14,6 +14,8 @@ AnalyzeDataAction::AnalyzeDataAction(QObject* parent, DataHierarchyItem* dataHie
     _tsneAction(this, "TSNE"),
     _hsneAction(this, "HSNE")
 {
+    dataHierarchyItem->addAction(*this);
+
     //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
     connect(&_meanShiftAction, &TriggerAction::triggered, this, [this]() {

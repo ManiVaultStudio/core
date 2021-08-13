@@ -144,7 +144,7 @@ QMenu* DataHierarchyModelItem::getContextMenu()
     if (_dataHierarchyItem == nullptr || _dataHierarchyItem->getDatasetName().isEmpty())
         return new QMenu();
 
-    return _dataHierarchyItem->getDataset().getContextMenu();
+    return _dataHierarchyItem->getContextMenu();
 }
 
 void DataHierarchyModelItem::renameDataset(const QString& intendedDatasetName)

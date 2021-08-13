@@ -32,6 +32,8 @@ namespace hdps
 
 const hdps::DataType PointType = hdps::DataType(QString("Points"));
 
+class PointsInfoAction;
+
 // =============================================================================
 // Raw Data
 // =============================================================================
@@ -599,8 +601,10 @@ private:
     }
 
 public:
-    Points(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
-    ~Points() override { }
+    Points(hdps::CoreInterface* core, QString dataName);
+    ~Points() override;
+
+    void init() override;
 
     /// Allows read-only access to the internal point data vector, from its begin to its end.
     /// Similar to C++17 std::visit.

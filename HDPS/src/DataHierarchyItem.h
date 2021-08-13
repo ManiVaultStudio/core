@@ -3,6 +3,8 @@
 
 #include "DataType.h"
 
+#include "actions/WidgetAction.h"
+
 #include <QObject>
 #include <QMap>
 #include <QString>
@@ -156,6 +158,27 @@ public: // Miscellaneous
      */
     void analyzeDataset(const QString& analysisKind);
 
+public: // Actions
+
+    /** Add action */
+    void addAction(hdps::gui::WidgetAction& widgetAction);
+
+    /** Returns list of shared action widgets*/
+    hdps::gui::WidgetActions getActions() const;
+
+    /**
+     * Get the context menu
+     * @param parent Parent widget
+     * @return Context menu
+     */
+    QMenu* getContextMenu(QWidget* parent = nullptr);;
+
+    /**
+     * Populates existing menu with actions menus
+     * @param contextMenu Context menu to populate
+     */
+    void populateContextMenu(QMenu* contextMenu);;
+
 public: // Task
 
     /** Get task name */
@@ -219,6 +242,7 @@ public: // Operators
         _namedIcons         = other._namedIcons;
         _taskName           = other._taskName;
         _taskStatus         = other._taskStatus;
+        _actions            = other._actions;
 
         return *this;
     }
@@ -249,18 +273,25 @@ signals:
      */
     void selectionChanged(const bool& selected);
 
+    /**
+     * Signals that a widget action was added
+     * @param widgetAction Widget action that was added
+     */
+    void actionAdded(hdps::gui::WidgetAction& widgetAction);
+
 protected:
-    Core*           _core;              /** Pointer to core */
-    QString         _datasetName;       /** Name of the dataset */
-    QString         _parent;            /** Parent item */
-    QStringList     _children;          /** Child items (if any) */
-    bool            _visible;           /** Whether the dataset is visible */
-    bool            _selected;          /** Whether the hierarchy item is selected */
-    IconList        _namedIcons;        /** Named icons */
-    QString         _taskDescription;   /** Task description */
-    float           _taskProgress;      /** Task progress */
-    QString         _taskName;          /** Name of the current task */
-    TaskStatus      _taskStatus;        /** Status of the current task */
+    Core*                       _core;              /** Pointer to core */
+    QString                     _datasetName;       /** Name of the dataset */
+    QString                     _parent;            /** Parent item */
+    QStringList                 _children;          /** Child items (if any) */
+    bool                        _visible;           /** Whether the dataset is visible */
+    bool                        _selected;          /** Whether the hierarchy item is selected */
+    IconList                    _namedIcons;        /** Named icons */
+    QString                     _taskDescription;   /** Task description */
+    float                       _taskProgress;      /** Task progress */
+    QString                     _taskName;          /** Name of the current task */
+    TaskStatus                  _taskStatus;        /** Status of the current task */
+    hdps::gui::WidgetActions    _actions;           /** Widget actions */
 
 protected:
     friend class DataManager;

@@ -25,6 +25,8 @@ public:
 
     virtual ~DataSet() {}
 
+    virtual void init() {};
+
     virtual DataSet* copy() const = 0;
 
     virtual QString createSubset(const QString parentSetName = "", const bool& visible = true) const = 0;
@@ -144,13 +146,15 @@ public: // Properties
 public: // Actions
 
     /** Returns list of shared action widgets*/
-    void addAction(hdps::gui::WidgetAction& widgetAction) const {
-        widgetAction.setContext(_name);
+    void addAction(hdps::gui::WidgetAction& widgetAction) {
+        Q_ASSERT(!_name.isEmpty());
+        _core->getDataHierarchyItem(_name)->addAction(widgetAction);
     }
 
     /** Returns list of shared action widgets*/
     hdps::gui::WidgetActions getActions() const {
-        return Application::current()->getWidgetActionsManager().getActionsByContext(_name);
+        Q_ASSERT(!_name.isEmpty());
+        return _core->getDataHierarchyItem(_name)->getActions();
     }
 
     /**
@@ -159,7 +163,8 @@ public: // Actions
      * @return Context menu
      */
     QMenu* getContextMenu(QWidget* parent = nullptr) {
-        return Application::current()->getWidgetActionsManager().getContextMenu(parent, _name);
+        Q_ASSERT(!_name.isEmpty());
+        return _core->getDataHierarchyItem(_name)->getContextMenu(parent);
     };
 
     /**
@@ -167,7 +172,8 @@ public: // Actions
      * @param contextMenu Context menu to populate
      */
     void populateContextMenu(QMenu* contextMenu) {
-        return Application::current()->getWidgetActionsManager().populateContextMenu(_name, contextMenu);
+        Q_ASSERT(!_name.isEmpty());
+        return _core->getDataHierarchyItem(_name)->populateContextMenu(contextMenu);
     };
 
 protected:

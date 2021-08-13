@@ -128,9 +128,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
 
         if (index.isValid())
         {
-            auto dataHierarchyItem = _model.getItem(index, Qt::DisplayRole);
+            auto dataHierarchyModelItem = _model.getItem(index, Qt::DisplayRole);
 
-            QSharedPointer<QMenu> contextMenu(dataHierarchyItem->getContextMenu());
+            QSharedPointer<QMenu> contextMenu(dataHierarchyModelItem->getContextMenu());
 
             contextMenu->exec(viewport()->mapToGlobal(position));
         }

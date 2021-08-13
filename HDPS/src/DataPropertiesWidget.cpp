@@ -47,21 +47,34 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
         if (_dataWidget != nullptr)
             delete _dataWidget;
 
-        auto& dataset = _core->requestData(datasetName);
+        auto dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
 
-        _treeWidget->clear();
+        auto createWidgets = [this, datasetName]() -> void {
+            auto& dataset = _core->requestData(datasetName);
 
-        auto exposedActions = dataset.getActions();
+            _treeWidget->clear();
 
-        for (auto exposedAction : exposedActions) {
-            auto exposedWidgetActionGroup = dynamic_cast<WidgetActionGroup*>(exposedAction);
+            auto exposedActions = dataset.getActions();
 
-            if (exposedWidgetActionGroup == nullptr)
-                continue;
+            for (auto exposedAction : exposedActions) {
+                auto exposedWidgetActionGroup = dynamic_cast<WidgetActionGroup*>(exposedAction);
 
-            if (exposedWidgetActionGroup->isVisible())
-                addButton(exposedWidgetActionGroup);
-        }
+                if (exposedWidgetActionGroup == nullptr)
+                    continue;
+
+                if (exposedWidgetActionGroup->isVisible())
+                    addButton(exposedWidgetActionGroup);
+            }
+        };
+
+        disconnect(dataHierarchyItem, &DataHierarchyItem::actionAdded, this, nullptr);
+
+        connect(dataHierarchyItem, &DataHierarchyItem::actionAdded, this, [this, createWidgets]() {
+            qDebug() << "createWidgets";
+            createWidgets();
+        });
+
+        createWidgets();
     }
     catch (std::exception& e)
     {

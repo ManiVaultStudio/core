@@ -18,7 +18,8 @@ DataHierarchyItem::DataHierarchyItem(Core* core, QObject* parent /*= nullptr*/, 
     _taskDescription(""),
     _taskProgress(0.0),
     _taskName(""),
-    _taskStatus(TaskStatus::Idle)
+    _taskStatus(TaskStatus::Idle),
+    _actions()
 {
     addIcon("data", getDataset().getIcon());
 }
@@ -156,6 +157,46 @@ void DataHierarchyItem::analyzeDataset(const QString& analysisKind)
         return;
 
     _core->analyzeDataset(analysisKind, _datasetName);
+}
+
+void DataHierarchyItem::addAction(hdps::gui::WidgetAction& widgetAction)
+{
+    _actions << &widgetAction;
+
+    emit actionAdded(widgetAction);
+}
+
+hdps::gui::WidgetActions DataHierarchyItem::getActions() const
+{
+    return _actions;
+}
+
+QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
+{
+    auto menu = new QMenu(parent);
+
+    for (auto action : _actions) {
+        auto contextMenu = action->getContextMenu();
+
+        if (contextMenu == nullptr)
+            continue;
+
+        menu->addMenu(contextMenu);
+    }
+
+    return menu;
+}
+
+void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
+{
+    for (auto action : _actions) {
+        auto actionContextMenu = action->getContextMenu();
+
+        if (actionContextMenu == nullptr)
+            continue;
+
+        contextMenu->addMenu(actionContextMenu);
+    }
 }
 
 QString DataHierarchyItem::getTaskName() const

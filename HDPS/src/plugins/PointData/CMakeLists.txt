@@ -22,6 +22,8 @@ set(POINTS_SOURCES
     src/PointDataIterator.h
     src/PointDataRange.h
     src/PointView.h
+    src/PointsInfoAction.h
+    src/PointsInfoAction.cpp
     src/RandomAccessRange.h
 )
 
@@ -30,6 +32,7 @@ set(POINTS_HEADERS
     src/PointDataIterator.h
     src/PointDataRange.h
     src/PointView.h
+    src/PointsInfoAction.h
     src/RandomAccessRange.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h
 )

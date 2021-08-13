@@ -19,7 +19,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
     connect(widgetAction, &WidgetAction::changed, this, [this, widgetAction]() {
         setEnabled(widgetAction->isEnabled());
-        setText(widgetAction->text());
+        setText(QString("%1: ").arg(widgetAction->text()));
         setToolTip(widgetAction->toolTip());
     });
 

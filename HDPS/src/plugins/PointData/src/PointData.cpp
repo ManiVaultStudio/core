@@ -4,6 +4,7 @@
 #endif
 
 #include "PointData.h"
+#include "PointsInfoAction.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -143,6 +144,20 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
                 result[i].set(vec[n + dimensionIndex1], vec[n + dimensionIndex2]);
             }
         });
+}
+
+Points::Points(hdps::CoreInterface* core, QString dataName) :
+    hdps::DataSet(core, dataName)
+{
+}
+
+Points::~Points()
+{
+}
+
+void Points::init()
+{
+    addAction(*(new PointsInfoAction(_core, getName())));
 }
 
 // =============================================================================
