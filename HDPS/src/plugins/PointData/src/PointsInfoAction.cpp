@@ -2,6 +2,9 @@
 #include "DataHierarchyItem.h"
 #include "PointData.h"
 
+#include <QGridLayout>
+#include <QListView>
+
 using namespace hdps;
 using namespace hdps::gui;
 
@@ -46,17 +49,23 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
         return QString::number(noBytes, 'f', 2) + " " + unit;
     };
 
-    const auto updateActions = [this, getNoBytesHumanReadable]() -> void {
+    const auto getSelectedIndices = [this]() -> std::vector<std::uint32_t> {
         auto& points    = _dataHierarchyItem->getDataset<Points>();
         auto& selection = dynamic_cast<Points&>(points.getSelection());
+
+        return selection.indices;
+    };
+
+    const auto updateActions = [this, getNoBytesHumanReadable]() -> void {
+        auto& points = _dataHierarchyItem->getDataset<Points>();
 
         _numberOfPointsAction.setString(QString::number(points.getNumPoints()));
         _numberOfDimensionsAction.setString(QString::number(points.getNumDimensions()));
         _memorySizeAction.setString(getNoBytesHumanReadable(points.getNumPoints() * points.getNumDimensions() * 4));
-        _numberOfSelectedPointsAction.setString(QString::number(selection.indices.size()));
+        _numberOfSelectedPointsAction.setString(QString::number(_selectedIndices.size()));
     };
 
-    registerDataEventByType(PointType, [this, updateActions](hdps::DataEvent* dataEvent) {
+    registerDataEventByType(PointType, [this, updateActions, getSelectedIndices](hdps::DataEvent* dataEvent) {
         if (dataEvent->dataSetName != _dataHierarchyItem->getDatasetName())
             return;
 
@@ -64,11 +73,28 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
             case EventType::DataAdded:
             case EventType::DataChanged:
             case EventType::SelectionChanged:
+            {
+                if (dataEvent->getType() == EventType::SelectionChanged) {
+                    _selectedIndices = getSelectedIndices();
+                    emit selectedIndicesChanged(_selectedIndices);
+                }
+
                 updateActions();
+
+                break;
+            }
+            
+            default:
+                break;
         }
     });
 
     updateActions();
+}
+
+const std::vector<std::uint32_t>& PointsInfoAction::getSelectedIndices() const
+{
+    return _selectedIndices;
 }
 
 PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAction, const hdps::gui::WidgetActionWidget::State& state) :
@@ -78,4 +104,26 @@ PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAc
     addWidgetAction(pointsInfoAction->getNumberOfDimensionsAction());
     addWidgetAction(pointsInfoAction->getMemorySizeAction());
     addWidgetAction(pointsInfoAction->getNumberOfSelectedPointsAction());
+
+    auto selectedIndicesListWidget = new QListView();
+
+    selectedIndicesListWidget->setFixedHeight(200);
+
+    layout()->addWidget(new QLabel("Selected indices:"), 5, 0);
+    layout()->addWidget(selectedIndicesListWidget, 5, 1);
+
+    const auto updateSelectedIndicesWidget = [this, pointsInfoAction, selectedIndicesListWidget]() -> void {
+        QStringList items;
+
+        for (auto selectedIndex : pointsInfoAction->getSelectedIndices())
+            items << QString::number(selectedIndex);
+
+        selectedIndicesListWidget->setModel(new QStringListModel(items));
+    };
+
+    connect(pointsInfoAction, &PointsInfoAction::selectedIndicesChanged, this, [this, updateSelectedIndicesWidget]() {
+        updateSelectedIndicesWidget();
+    });
+
+    updateSelectedIndicesWidget();
 }

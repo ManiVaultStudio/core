@@ -17,6 +17,8 @@ namespace hdps {
  */
 class PointsInfoAction : public hdps::gui::WidgetActionGroup, public hdps::EventListener
 {
+    Q_OBJECT
+
 protected:
 
     /** Widget class for points info action */
@@ -51,16 +53,30 @@ public:
      */
     PointsInfoAction(hdps::CoreInterface* core, const QString& datasetName, QObject* parent = nullptr);
 
+    /** Get selected indices in the points dataset */
+    const std::vector<std::uint32_t>& getSelectedIndices() const;
+
+public: // Action getters
+
     hdps::gui::StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
     hdps::gui::StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
     hdps::gui::StringAction& getMemorySizeAction() { return _memorySizeAction; }
     hdps::gui::StringAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
 
+signals:
+
+    /**
+     * Signals that the selected indices changed
+     * @param selectedIndices Selected indices
+     */
+    void selectedIndicesChanged(const std::vector<std::uint32_t>& selectedIndices);
+
 protected:
-    hdps::CoreInterface*        _core;                              /** Pointer to the core */
-    hdps::DataHierarchyItem*    _dataHierarchyItem;                 /** Pointer to the data hierarchy item of the points dataset */
-    hdps::gui::StringAction     _numberOfPointsAction;              /** Number of points action */
-    hdps::gui::StringAction     _numberOfDimensionsAction;          /** Number of dimensions action */
-    hdps::gui::StringAction     _memorySizeAction;                  /** Memory size action */
-    hdps::gui::StringAction     _numberOfSelectedPointsAction;      /** Memory size action */
+    hdps::CoreInterface*            _core;                              /** Pointer to the core */
+    hdps::DataHierarchyItem*        _dataHierarchyItem;                 /** Pointer to the data hierarchy item of the points dataset */
+    hdps::gui::StringAction         _numberOfPointsAction;              /** Number of points action */
+    hdps::gui::StringAction         _numberOfDimensionsAction;          /** Number of dimensions action */
+    hdps::gui::StringAction         _memorySizeAction;                  /** Memory size action */
+    hdps::gui::StringAction         _numberOfSelectedPointsAction;      /** Memory size action */
+    std::vector<std::uint32_t>      _selectedIndices;                   /** Selected point indices */
 };

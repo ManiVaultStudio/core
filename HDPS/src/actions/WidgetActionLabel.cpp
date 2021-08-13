@@ -12,16 +12,22 @@ namespace hdps {
 namespace gui {
 
 WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
-    QLabel(widgetAction->text(), parent, windowFlags),
+    QLabel("", parent, windowFlags),
     _widgetAction(widgetAction)
 {
     setAcceptDrops(true);
 
-    connect(widgetAction, &WidgetAction::changed, this, [this, widgetAction]() {
-        setEnabled(widgetAction->isEnabled());
+    const auto updateTextAndTooltip = [this, widgetAction]() -> void {
         setText(QString("%1: ").arg(widgetAction->text()));
-        setToolTip(widgetAction->toolTip());
+        setToolTip(widgetAction->text());
+    };
+
+    connect(widgetAction, &WidgetAction::changed, this, [this, widgetAction, updateTextAndTooltip]() {
+        setEnabled(widgetAction->isEnabled());
+        updateTextAndTooltip();
     });
+
+    updateTextAndTooltip();
 
     connect(widgetAction, &WidgetAction::isDropTargetChanged, this, [this, widgetAction](const bool& isDropTarget) {
         setStyleSheet(QString("QLabel { text-decoration: %1; }").arg(isDropTarget ? "underline" : "none"));

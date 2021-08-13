@@ -208,6 +208,8 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     // Initialize the dataset (e.g. setup default actions for info)
     newSet->init();
 
+    new AnalyzeDataAction(&_mainWindow, getDataHierarchyItem(setName));
+
     return setName;
 }
 
