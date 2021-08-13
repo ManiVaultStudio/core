@@ -53,10 +53,11 @@ public:
 
     /**
      * Gets context menu for the exposed actions
-     * @param targetMenu Target menu to insert the exposed action menus
+     * @param parent Parent widget
+     * @param context Context
      * @return Context menu
      */
-    QMenu* getContextMenu();
+    QMenu* getContextMenu(QWidget* parent, const QString& context);
 
 public:
     

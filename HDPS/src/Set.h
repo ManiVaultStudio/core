@@ -144,6 +144,11 @@ public: // Properties
 public: // Actions
 
     /** Returns list of shared action widgets*/
+    void addAction(hdps::gui::WidgetAction& widgetAction) const {
+        widgetAction.setContext(_name);
+    }
+
+    /** Returns list of shared action widgets*/
     hdps::gui::WidgetActions getActions() const {
         return Application::current()->getWidgetActionsManager().getActionsByContext(_name);
     }
@@ -154,7 +159,7 @@ public: // Actions
      * @return Context menu
      */
     QMenu* getContextMenu(QWidget* parent = nullptr) {
-        return Application::current()->getWidgetActionsManager().getContextMenu();
+        return Application::current()->getWidgetActionsManager().getContextMenu(parent, _name);
     };
 
     /**

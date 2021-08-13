@@ -56,11 +56,14 @@ void WidgetActionsManager::populateContextMenu(const QString& context, QMenu* co
     }
 }
 
-QMenu* WidgetActionsManager::getContextMenu()
+QMenu* WidgetActionsManager::getContextMenu(QWidget* parent, const QString& context)
 {
-    auto menu = new QMenu();
+    auto menu = new QMenu(parent);
 
     for (auto action : _actions) {
+        if (context != action->getContext())
+            continue;
+
         auto contextMenu = action->getContextMenu();
 
         if (contextMenu == nullptr)
