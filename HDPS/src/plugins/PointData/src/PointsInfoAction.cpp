@@ -4,6 +4,7 @@
 
 #include <QGridLayout>
 #include <QListView>
+#include <QAbstractEventDispatcher>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -16,7 +17,8 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
     _numberOfPointsAction(this, "Number of points"),
     _numberOfDimensionsAction(this, "Number of dimensions"),
     _memorySizeAction(this, "Occupied memory"),
-    _numberOfSelectedPointsAction(this, "Number of selected points")
+    _numberOfSelectedPointsAction(this, "Number of selected points"),
+    _selectionChangedTimer()
 {
     setText("Info");
     setEventCore(_core);
@@ -32,6 +34,8 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
     _numberOfDimensionsAction.setToolTip("The number of dimensions in the point data");
     _memorySizeAction.setToolTip("The amount of memory occupied by the dataset");
     _numberOfSelectedPointsAction.setToolTip("The number of selected points in the dataset");
+
+    _selectionChangedTimer.setSingleShot(true);
 
     const auto getNoBytesHumanReadable = [](std::uint32_t noBytes) -> QString
     {
@@ -68,7 +72,7 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
             case EventType::SelectionChanged:
             {
                 if (dataEvent->getType() == EventType::SelectionChanged)
-                    emit selectedIndicesChanged(getSelectedIndices());
+                    _selectionChangedTimer.start(100);
 
                 updateActions();
 
@@ -81,6 +85,10 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
     });
 
     updateActions();
+
+    connect(&_selectionChangedTimer, &QTimer::timeout, this, [this]() {
+        emit selectedIndicesChanged(getSelectedIndices());
+    });
 }
 
 const std::vector<std::uint32_t>& PointsInfoAction::getSelectedIndices() const

@@ -3,6 +3,8 @@
 #include "actions/Actions.h"
 #include "event/EventListener.h"
 
+#include <QTimer>
+
 namespace hdps {
     class CoreInterface;
     class DataHierarchyItem;
@@ -72,10 +74,11 @@ signals:
     void selectedIndicesChanged(const std::vector<std::uint32_t>& selectedIndices);
 
 protected:
-    hdps::CoreInterface*            _core;                              /** Pointer to the core */
-    hdps::DataHierarchyItem*        _dataHierarchyItem;                 /** Pointer to the data hierarchy item of the points dataset */
-    hdps::gui::StringAction         _numberOfPointsAction;              /** Number of points action */
-    hdps::gui::StringAction         _numberOfDimensionsAction;          /** Number of dimensions action */
-    hdps::gui::StringAction         _memorySizeAction;                  /** Memory size action */
-    hdps::gui::StringAction         _numberOfSelectedPointsAction;      /** Memory size action */
+    hdps::CoreInterface*        _core;                              /** Pointer to the core */
+    hdps::DataHierarchyItem*    _dataHierarchyItem;                 /** Pointer to the data hierarchy item of the points dataset */
+    hdps::gui::StringAction     _numberOfPointsAction;              /** Number of points action */
+    hdps::gui::StringAction     _numberOfDimensionsAction;          /** Number of dimensions action */
+    hdps::gui::StringAction     _memorySizeAction;                  /** Memory size action */
+    hdps::gui::StringAction     _numberOfSelectedPointsAction;      /** Memory size action */
+    QTimer                      _selectionChangedTimer;             /** Timer to control when selection changes are processed */
 };
