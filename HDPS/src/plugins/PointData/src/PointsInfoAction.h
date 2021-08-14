@@ -64,6 +64,8 @@ public: // Action getters
     hdps::gui::StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
     hdps::gui::StringAction& getMemorySizeAction() { return _memorySizeAction; }
     hdps::gui::StringAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
+    hdps::gui::TriggerAction& getUpdateAction() { return _updateAction; }
+    hdps::gui::ToggleAction& getManualUpdateAction() { return _manualUpdateAction; }
 
 signals:
 
@@ -80,5 +82,7 @@ protected:
     hdps::gui::StringAction     _numberOfDimensionsAction;          /** Number of dimensions action */
     hdps::gui::StringAction     _memorySizeAction;                  /** Memory size action */
     hdps::gui::StringAction     _numberOfSelectedPointsAction;      /** Memory size action */
+    hdps::gui::TriggerAction    _updateAction;                      /** Update action */
+    hdps::gui::ToggleAction     _manualUpdateAction;                /** Manual update action */
     QTimer                      _selectionChangedTimer;             /** Timer to control when selection changes are processed */
 };

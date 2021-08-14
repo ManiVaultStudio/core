@@ -18,6 +18,8 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
     _numberOfDimensionsAction(this, "Number of dimensions"),
     _memorySizeAction(this, "Occupied memory"),
     _numberOfSelectedPointsAction(this, "Number of selected points"),
+    _updateAction(this, "Update"),
+    _manualUpdateAction(this, "Manual update"),
     _selectionChangedTimer()
 {
     setText("Info");
@@ -87,8 +89,25 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
     updateActions();
 
     connect(&_selectionChangedTimer, &QTimer::timeout, this, [this]() {
+        if (_manualUpdateAction.isChecked())
+            return;
+
         emit selectedIndicesChanged(getSelectedIndices());
     });
+
+    const auto updateUpdateAction = [this]() -> void {
+        _updateAction.setEnabled(_manualUpdateAction.isChecked());
+    };
+
+    connect(&_manualUpdateAction, &ToggleAction::toggled, this, [this, updateUpdateAction]() {
+        updateUpdateAction();
+    });
+
+    connect(&_updateAction, &TriggerAction::triggered, this, [this]() {
+        emit selectedIndicesChanged(getSelectedIndices());
+    });
+
+    updateUpdateAction();
 }
 
 const std::vector<std::uint32_t>& PointsInfoAction::getSelectedIndices() const
@@ -109,10 +128,21 @@ PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAc
 
     auto selectedIndicesListWidget = new QListView();
 
-    selectedIndicesListWidget->setFixedHeight(200);
+    selectedIndicesListWidget->setFixedHeight(120);
+    //selectedIndicesListWidget->setSpacing(1);
 
-    layout()->addWidget(new QLabel("Selected indices:"), 5, 0);
-    layout()->addWidget(selectedIndicesListWidget, 5, 1);
+    const auto numberOfRows = layout()->rowCount();
+
+    layout()->addWidget(new QLabel("Selected indices:"), numberOfRows, 0);
+    layout()->addWidget(selectedIndicesListWidget, numberOfRows, 1);
+
+    auto updateLayout = new QHBoxLayout();
+
+    updateLayout->setMargin(0);
+    updateLayout->addWidget(pointsInfoAction->getUpdateAction().createWidget(this), 1);
+    updateLayout->addWidget(pointsInfoAction->getManualUpdateAction().createCheckBoxWidget(this));
+
+    layout()->addLayout(updateLayout, numberOfRows + 1, 1);
 
     const auto updateSelectedIndicesWidget = [this, pointsInfoAction, selectedIndicesListWidget]() -> void {
         QStringList items;
