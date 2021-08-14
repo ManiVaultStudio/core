@@ -49,23 +49,16 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
         return QString::number(noBytes, 'f', 2) + " " + unit;
     };
 
-    const auto getSelectedIndices = [this]() -> std::vector<std::uint32_t> {
-        auto& points    = _dataHierarchyItem->getDataset<Points>();
-        auto& selection = dynamic_cast<Points&>(points.getSelection());
-
-        return selection.indices;
-    };
-
     const auto updateActions = [this, getNoBytesHumanReadable]() -> void {
         auto& points = _dataHierarchyItem->getDataset<Points>();
 
         _numberOfPointsAction.setString(QString::number(points.getNumPoints()));
         _numberOfDimensionsAction.setString(QString::number(points.getNumDimensions()));
         _memorySizeAction.setString(getNoBytesHumanReadable(points.getNumPoints() * points.getNumDimensions() * 4));
-        _numberOfSelectedPointsAction.setString(QString::number(_selectedIndices.size()));
+        _numberOfSelectedPointsAction.setString(QString::number(getSelectedIndices().size()));
     };
 
-    registerDataEventByType(PointType, [this, updateActions, getSelectedIndices](hdps::DataEvent* dataEvent) {
+    registerDataEventByType(PointType, [this, updateActions](hdps::DataEvent* dataEvent) {
         if (dataEvent->dataSetName != _dataHierarchyItem->getDatasetName())
             return;
 
@@ -74,10 +67,8 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
             case EventType::DataChanged:
             case EventType::SelectionChanged:
             {
-                if (dataEvent->getType() == EventType::SelectionChanged) {
-                    _selectedIndices = getSelectedIndices();
-                    emit selectedIndicesChanged(_selectedIndices);
-                }
+                if (dataEvent->getType() == EventType::SelectionChanged)
+                    emit selectedIndicesChanged(getSelectedIndices());
 
                 updateActions();
 
@@ -94,7 +85,10 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
 
 const std::vector<std::uint32_t>& PointsInfoAction::getSelectedIndices() const
 {
-    return _selectedIndices;
+    auto& points    = _dataHierarchyItem->getDataset<Points>();
+    auto& selection = dynamic_cast<Points&>(points.getSelection());
+
+    return selection.indices;
 }
 
 PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAction, const hdps::gui::WidgetActionWidget::State& state) :

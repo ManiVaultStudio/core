@@ -78,5 +78,4 @@ protected:
     hdps::gui::StringAction         _numberOfDimensionsAction;          /** Number of dimensions action */
     hdps::gui::StringAction         _memorySizeAction;                  /** Memory size action */
     hdps::gui::StringAction         _numberOfSelectedPointsAction;      /** Memory size action */
-    std::vector<std::uint32_t>      _selectedIndices;                   /** Selected point indices */
 };

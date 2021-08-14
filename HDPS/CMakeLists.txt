@@ -128,6 +128,7 @@ set(ACTIONS_HEADERS
 )
 
 set(ACTIONS_SOURCES
+    src/actions/ColorAction.cpp
     src/actions/ColorMapAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/IntegralAction.cpp
