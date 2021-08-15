@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _loggingDockArea(nullptr),
     _centralDockWidget(new CDockWidget("Views")),
     _dataHierarchyDockWidget(new CDockWidget("Data hierarchy")),
-    _dataEditorDockWidget(new CDockWidget("Data properties")),
+    _dataPropertiesDockWidget(new CDockWidget("Data properties")),
     _loggingDockWidget(new CDockWidget("Logging"))
 {
     setupUi(this);
@@ -59,8 +59,11 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataPropertiesWidget   = new DataPropertiesWidget(this, _core.get());
 
     connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetNameChanged, this, [this](const QString& selectedDatasetName) {
-        _dataEditorDockWidget->setWindowTitle(QString("Data properties: %1").arg(selectedDatasetName));
         _dataPropertiesWidget->setDataset(selectedDatasetName);
+    });
+
+    connect(_dataPropertiesWidget, &DataPropertiesWidget::datasetNameChanged, this, [this](const QString& datasetName) {
+        _dataPropertiesDockWidget->setWindowTitle(QString("Data properties: %1").arg(datasetName));
     });
 
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
@@ -342,14 +345,14 @@ void MainWindow::initializeSettingsDockingArea()
     _dataHierarchyDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sitemap"));
     _dataHierarchyDockWidget->setWidget(_dataHierarchyWidget);
 
-    _dataEditorDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _dataEditorDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _dataEditorDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _dataEditorDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("edit"));
-    _dataEditorDockWidget->setWidget(_dataPropertiesWidget);
+    _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
+    _dataPropertiesDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("edit"));
+    _dataPropertiesDockWidget->setWidget(_dataPropertiesWidget);
 
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
-    _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataEditorDockWidget, _settingsDockArea);
+    _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataPropertiesDockWidget, _settingsDockArea);
 
     _settingsDockArea->setMinimumWidth(600);
 }

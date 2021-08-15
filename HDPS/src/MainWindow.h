@@ -146,7 +146,7 @@ private: // Docking
     ads::CDockAreaWidget*       _loggingDockArea;               /** Docking area for logging */
     ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */
     ads::CDockWidget*           _dataHierarchyDockWidget;       /** Dock widget for data hierarchy */
-    ads::CDockWidget*           _dataEditorDockWidget;          /** Dock widget for data editor */
+    ads::CDockWidget*           _dataPropertiesDockWidget;      /** Dock widget for data properties */
     ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
 };
 

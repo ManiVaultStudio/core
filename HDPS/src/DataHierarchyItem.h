@@ -248,6 +248,7 @@ public: // Operators
     }
 
 protected:
+
     /** Sets the dataset name
      * @param datasetName Name of the dataset
      */
@@ -278,6 +279,12 @@ signals:
      * @param widgetAction Widget action that was added
      */
     void actionAdded(hdps::gui::WidgetAction& widgetAction);
+
+    /**
+     * Signals that the dataset names changed
+     * @param datasetName New name of the dataset
+     */
+    void datasetNameChanged(const QString& datasetName);
 
 protected:
     Core*                       _core;              /** Pointer to core */

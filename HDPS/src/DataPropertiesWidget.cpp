@@ -18,7 +18,8 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent, Core* core) :
     QWidget(parent),
     _core(core),
     _treeWidget(new QTreeWidget()),
-    _dataWidget(nullptr)
+    _dataWidget(nullptr),
+    _dataHierarchyItem(nullptr)
 {
     setAutoFillBackground(true);
 
@@ -47,7 +48,12 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
         if (_dataWidget != nullptr)
             delete _dataWidget;
 
-        auto dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
+        if (_dataHierarchyItem != nullptr) {
+            disconnect(_dataHierarchyItem, &DataHierarchyItem::actionAdded, this, nullptr);
+            disconnect(_dataHierarchyItem, &DataHierarchyItem::datasetNameChanged, this, nullptr);
+        }
+
+        _dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
 
         auto createWidgets = [this, datasetName]() -> void {
             auto& dataset = _core->requestData(datasetName);
@@ -67,13 +73,19 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             }
         };
 
-        disconnect(dataHierarchyItem, &DataHierarchyItem::actionAdded, this, nullptr);
-
-        connect(dataHierarchyItem, &DataHierarchyItem::actionAdded, this, [this, createWidgets]() {
-            qDebug() << "createWidgets";
+        connect(_dataHierarchyItem, &DataHierarchyItem::actionAdded, this, [this, createWidgets]() {
             createWidgets();
         });
 
+        const auto updateWindowTitle = [this]() {
+            emit datasetNameChanged(_dataHierarchyItem->getDatasetName());
+        };
+
+        connect(_dataHierarchyItem, &DataHierarchyItem::datasetNameChanged, this, [this, updateWindowTitle](const QString& datasetName) {
+            updateWindowTitle();
+        });
+
+        updateWindowTitle();
         createWidgets();
     }
     catch (std::exception& e)

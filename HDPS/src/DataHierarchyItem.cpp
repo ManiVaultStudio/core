@@ -36,6 +36,9 @@ void DataHierarchyItem::renameDataset(const QString& intendedDatasetName)
     if (intendedDatasetName.isEmpty())
         return;
 
+    if (intendedDatasetName == _datasetName)
+        return;
+
     _datasetName = _core->renameDataset(_datasetName, intendedDatasetName);
 }
 
@@ -233,6 +236,8 @@ void DataHierarchyItem::setDatasetName(const QString& datasetName)
         return;
 
     _datasetName = datasetName;
+
+    emit datasetNameChanged(_datasetName);
 }
 
 void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
