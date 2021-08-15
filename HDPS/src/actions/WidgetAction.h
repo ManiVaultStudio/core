@@ -5,6 +5,7 @@
 
 #include <QWidgetAction>
 #include <QMenu>
+#include <QDebug>
 
 class QLabel;
 
@@ -26,10 +27,25 @@ class WidgetAction : public QWidgetAction
 public:
     explicit WidgetAction(QObject* parent);
 
+    /**
+     * Create standard widget
+     * @param parent Parent widget
+     * @return Pointer to created widget
+     */
     QWidget* createWidget(QWidget* parent) override;
 
+    /**
+     * Create collapsed widget
+     * @param parent Parent widget
+     * @return Pointer to collapsed widget
+     */
     QWidget* createCollapsedWidget(QWidget* parent);
 
+    /**
+     * Create label widget
+     * @param parent Parent widget
+     * @return Pointer to label widget
+     */
     WidgetActionLabel* createLabelWidget(QWidget* parent);
 
     /**
@@ -80,6 +96,30 @@ protected:
 
 /** List of widget actions */
 using WidgetActions = QVector<WidgetAction*>;
+
+/**
+ * Print widget action to console
+ * @param debug Debug
+ * @param widgetAction Reference to widget action
+ */
+inline QDebug operator << (QDebug debug, const WidgetAction& widgetAction)
+{
+    debug.noquote().nospace() << widgetAction.getContext() << "::" << widgetAction.text();
+
+    return debug.space();
+}
+
+/**
+ * Print widget action to console
+ * @param debug Debug
+ * @param widgetAction Pointer to widget action
+ */
+inline QDebug operator << (QDebug debug, WidgetAction* widgetAction)
+{
+    debug.noquote().nospace() << widgetAction->getContext() << "::" << widgetAction->text();
+
+    return debug.space();
+}
 
 }
 }

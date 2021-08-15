@@ -31,6 +31,11 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
     connect(widgetAction, &WidgetAction::isDropTargetChanged, this, [this, widgetAction](const bool& isDropTarget) {
         setStyleSheet(QString("QLabel { text-decoration: %1; }").arg(isDropTarget ? "underline" : "none"));
+
+        /*
+        if (isDropTarget)
+            qDebug() << widgetAction->text();
+        */
     });
 }
 
