@@ -59,7 +59,7 @@ public:
     const std::vector<std::uint32_t>& getSelectedIndices() const;
 
     /** Get dimension names in the points dataset */
-    const std::vector<QString>& getDimensionNames() const;
+    const std::vector<QString> getDimensionNames() const;
 
 public: // Action getters
 

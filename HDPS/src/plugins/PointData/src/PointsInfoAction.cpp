@@ -118,9 +118,20 @@ const std::vector<std::uint32_t>& PointsInfoAction::getSelectedIndices() const
     return selection.indices;
 }
 
-const std::vector<QString>& PointsInfoAction::getDimensionNames() const
+const std::vector<QString> PointsInfoAction::getDimensionNames() const
 {
-    return _dataHierarchyItem->getDataset<Points>().getDimensionNames();
+    auto& points            = _dataHierarchyItem->getDataset<Points>();
+    auto& dimensionNames    = points.getDimensionNames();
+
+    if (!dimensionNames.empty())
+        return dimensionNames;
+
+    std::vector<QString> generatedDimensionNames;
+
+    for (int dimensionId = 0; dimensionId < points.getNumDimensions(); dimensionId++)
+        generatedDimensionNames.push_back(QString("Dim %1").arg(dimensionId));
+
+    return generatedDimensionNames;
 }
 
 PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAction, const hdps::gui::WidgetActionWidget::State& state) :
