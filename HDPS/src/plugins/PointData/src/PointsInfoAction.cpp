@@ -118,6 +118,11 @@ const std::vector<std::uint32_t>& PointsInfoAction::getSelectedIndices() const
     return selection.indices;
 }
 
+const std::vector<QString>& PointsInfoAction::getDimensionNames() const
+{
+    return _dataHierarchyItem->getDataset<Points>().getDimensionNames();
+}
+
 PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAction, const hdps::gui::WidgetActionWidget::State& state) :
     WidgetActionGroup::FormWidget(parent, pointsInfoAction)
 {
@@ -128,21 +133,36 @@ PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAc
 
     auto selectedIndicesListWidget = new QListView();
 
-    selectedIndicesListWidget->setFixedHeight(120);
+    selectedIndicesListWidget->setFixedHeight(100);
     //selectedIndicesListWidget->setSpacing(1);
 
-    const auto numberOfRows = layout()->rowCount();
+    auto numberOfRows = layout()->rowCount();
 
     layout()->addWidget(new QLabel("Selected indices:"), numberOfRows, 0);
-    layout()->addWidget(selectedIndicesListWidget, numberOfRows, 1);
+    
+    auto selectedIndicesLayout = new QHBoxLayout();
 
-    auto updateLayout = new QHBoxLayout();
+    selectedIndicesLayout->setMargin(0);
+    selectedIndicesLayout->addWidget(selectedIndicesListWidget);
 
-    updateLayout->setMargin(0);
-    updateLayout->addWidget(pointsInfoAction->getUpdateAction().createWidget(this), 1);
+    auto updateLayout = new QVBoxLayout();
+
+    updateLayout->addWidget(pointsInfoAction->getUpdateAction().createWidget(this));
     updateLayout->addWidget(pointsInfoAction->getManualUpdateAction().createCheckBoxWidget(this));
+    updateLayout->addStretch(1);
 
-    layout()->addLayout(updateLayout, numberOfRows + 1, 1);
+    selectedIndicesLayout->addLayout(updateLayout);
+
+    layout()->addLayout(selectedIndicesLayout, numberOfRows, 1);
+
+    numberOfRows = layout()->rowCount();
+
+    auto dimensionNamesListWidget = new QListView();
+
+    dimensionNamesListWidget->setFixedHeight(100);
+
+    layout()->addWidget(new QLabel("Dimension names:"), numberOfRows, 0);
+    layout()->addWidget(dimensionNamesListWidget, numberOfRows, 1);
 
     const auto updateSelectedIndicesWidget = [this, pointsInfoAction, selectedIndicesListWidget]() -> void {
         QStringList items;
@@ -153,9 +173,19 @@ PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAc
         selectedIndicesListWidget->setModel(new QStringListModel(items));
     };
 
+    const auto updateDimensionNamesWidget = [this, pointsInfoAction, dimensionNamesListWidget]() -> void {
+        QStringList items;
+
+        for (auto dimensionName : pointsInfoAction->getDimensionNames())
+            items << dimensionName;
+
+        dimensionNamesListWidget->setModel(new QStringListModel(items));
+    };
+
     connect(pointsInfoAction, &PointsInfoAction::selectedIndicesChanged, this, [this, updateSelectedIndicesWidget]() {
         updateSelectedIndicesWidget();
     });
 
     updateSelectedIndicesWidget();
+    updateDimensionNamesWidget();
 }
