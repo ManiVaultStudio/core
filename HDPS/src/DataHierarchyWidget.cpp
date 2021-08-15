@@ -71,7 +71,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
         const auto parentDatasetName = dataHierarchyItem.getParent();
 
         if (parentDatasetName.isEmpty())
-            parentModelIndex = _model.index(0, 0);
+            parentModelIndex = QModelIndex();
         else
             parentModelIndex = getModelIndexForDatasetName(parentDatasetName);
 
