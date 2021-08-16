@@ -11,6 +11,8 @@ class QLabel;
 
 namespace hdps {
 
+class DataHierarchyItem;
+
 namespace gui {
 
 /**
@@ -66,13 +68,19 @@ public:
     /** Gets whether the widget action is a drop target */
     bool isDropTarget() const;
 
-public:
+public: // Context
 
     /**
-     * Set the context (used for linking actions)
+     * Set the context (used for action grouping)
      * @param context Context
      */
     void setContext(const QString& context);
+
+    /**
+     * Set the data hierarchy item context (used for action grouping)
+     * @param dataHierarchyItem Data hierarchy item
+     */
+    void setContext(const DataHierarchyItem* dataHierarchyItem);
 
     /** Get the context */
     QString getContext() const;
@@ -89,9 +97,10 @@ signals:
     void isDropTargetChanged(const bool& isDropTarget);
 
 protected:
-    QString     _createdBy;         /** Establishes who created the widget action (view, analysis, data etc.) */
-    QString     _context;           /** Context in which the widget action resides (for instance in a dataset) */
-    bool        _isDropTarget;      /** Whether the widget action is eligible for dropping by another widget action */
+    QString                     _createdBy;                     /** Establishes who created the widget action (view, analysis, data etc.) */
+    QString                     _context;                       /** The widget action resides outside of the data hierarchy widget (e.g. plugin view) */
+    const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
+    bool                        _isDropTarget;                  /** Whether the widget action is eligible for dropping by another widget action */
 };
 
 /** List of widget actions */

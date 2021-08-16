@@ -78,6 +78,8 @@ QMenu* WidgetActionsManager::getContextMenu(QWidget* parent, const QString& cont
 void WidgetActionsManager::widgetStartedDragging(WidgetAction* widgetAction)
 {
     for (auto action : _actions) {
+        qDebug() << action;
+
         if (widgetAction == action)
             continue;
 

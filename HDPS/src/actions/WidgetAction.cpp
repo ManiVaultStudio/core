@@ -1,16 +1,9 @@
 #include "WidgetAction.h"
 #include "WidgetActionCollapsedWidget.h"
+#include "DataHierarchyItem.h"
 #include "Application.h"
 
 #include <QDebug>
-#include <QMenu>
-#include <QEvent>
-#include <QPainter>
-#include <QLabel>
-#include <QGroupBox>
-#include <QDrag>
-#include <QMimeData>
-#include <QMouseEvent>
 
 namespace hdps {
 
@@ -20,6 +13,7 @@ WidgetAction::WidgetAction(QObject* parent) :
     QWidgetAction(parent),
     _createdBy(),
     _context(),
+    _dataHierarchyItemContext(nullptr),
     _isDropTarget(false)
 {
     Application::current()->getWidgetActionsManager().addAction(this);
@@ -63,8 +57,19 @@ void WidgetAction::setContext(const QString& context)
     _context = context;
 }
 
+void WidgetAction::setContext(const DataHierarchyItem* dataHierarchyItem)
+{
+    if (dataHierarchyItem == _dataHierarchyItemContext)
+        return;
+
+    _dataHierarchyItemContext = dataHierarchyItem;
+}
+
 QString WidgetAction::getContext() const
 {
+    if (_dataHierarchyItemContext != nullptr)
+        return _dataHierarchyItemContext->getDatasetName();
+
     return _context;
 }
 
