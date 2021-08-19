@@ -3,7 +3,7 @@
 #include <QtCore>
 #include <QtDebug>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.TextData")
+Q_PLUGIN_METADATA(IID "hdps.TextData")
 
 // =============================================================================
 // Data
@@ -28,9 +28,9 @@ hdps::DataSet* TextData::createDataSet() const
 // Factory
 // =============================================================================
 
-RawData* TextDataFactory::produce()
+hdps::plugin::RawData* TextDataFactory::produce()
 {
-    return new TextData();
+    return new TextData(this);
 }
 
 QIcon Text::getIcon() const

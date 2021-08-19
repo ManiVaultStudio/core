@@ -331,7 +331,7 @@ void Points::setValueAt(const std::size_t index, const float newValue)
 // Factory
 // =============================================================================
 
-hdps::RawData* PointDataFactory::produce()
+hdps::plugin::RawData* PointDataFactory::produce()
 {
-    return new PointData();
+    return new PointData(this);
 }

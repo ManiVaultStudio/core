@@ -50,7 +50,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
         // If the plugin is RawData, then add it to the data manager
         case plugin::Type::DATA:
         {
-            _dataManager->addRawData(dynamic_cast<RawData*>(plugin));
+            _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin));
             break;
         }
 
@@ -116,7 +116,7 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     QString rawDataName = _pluginManager->createPlugin(kind);
 
     // Request it from the core
-    const RawData& rawData = requestRawData(rawDataName);
+    const plugin::RawData& rawData = requestRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
     auto fullSet    = rawData.createDataSet();
@@ -165,7 +165,7 @@ const QString Core::createDerivedData(const QString& nameRequest, const QString&
     QString pluginName = _pluginManager->createPlugin(dataType._type);
 
     // Request it from the core
-    RawData& rawData = requestRawData(pluginName);
+    plugin::RawData& rawData = requestRawData(pluginName);
 
     // Create an initial full set, but no selection because it is shared with the source data
     auto fullSet = rawData.createDataSet();
@@ -213,7 +213,7 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     return setName;
 }
 
-RawData& Core::requestRawData(const QString name)
+plugin::RawData& Core::requestRawData(const QString name)
 {
     try
     {

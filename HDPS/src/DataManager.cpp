@@ -1,4 +1,5 @@
 #include "DataManager.h"
+#include "RawData.h"
 #include "ExportDataAction.h"
 
 #include <QRegularExpression>
@@ -8,9 +9,9 @@
 namespace hdps
 {
 
-void DataManager::addRawData(RawData* rawData)
+void DataManager::addRawData(plugin::RawData* rawData)
 {
-    _rawDataMap.emplace(rawData->getName(), std::unique_ptr<RawData>(rawData));
+    _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
 }
 
 QString DataManager::addSet(QString requestedName, DataSet* set)
@@ -80,7 +81,7 @@ void DataManager::removeDataset(QString datasetName)
     _dataSetMap.erase(datasetName);
 }
 
-RawData& DataManager::getRawData(QString name)
+plugin::RawData& DataManager::getRawData(QString name)
 {
     if (_rawDataMap.find(name) == _rawDataMap.end())
         throw DataNotFoundException(name);

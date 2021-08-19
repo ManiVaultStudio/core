@@ -16,10 +16,10 @@ const hdps::DataType ColorType = hdps::DataType(QString("Colors"));
 // Raw Data
 // =============================================================================
 
-class ColorData : public hdps::RawData
+class ColorData : public hdps::plugin::RawData
 {
 public:
-    ColorData() : hdps::RawData("Colors", ColorType) { }
+    ColorData(const hdps::plugin::PluginFactory* factory) : hdps::plugin::RawData(factory, ColorType) { }
     ~ColorData(void) override;
     
     void init() override;
@@ -78,5 +78,5 @@ public:
     ColorDataFactory(void) {}
     ~ColorDataFactory(void) override {}
     
-    hdps::RawData* produce() override;
+    hdps::plugin::RawData* produce() override;
 };

@@ -19,10 +19,10 @@ const hdps::DataType TextType = hdps::DataType(QString("Text"));
 // Raw Data
 // =============================================================================
 
-class TextData : public RawData
+class TextData : public hdps::plugin::RawData
 {
 public:
-    TextData() : RawData("Text", TextType) { }
+    TextData(PluginFactory* factory) : hdps::plugin::RawData(factory, TextType) { }
     ~TextData(void) override;
     
     void init() override;
@@ -72,12 +72,12 @@ class TextDataFactory : public RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.lumc.TextData"
+    Q_PLUGIN_METADATA(IID   "hdps.TextData"
                       FILE  "TextData.json")
     
 public:
     TextDataFactory(void) {}
     ~TextDataFactory(void) override {}
     
-    RawData* produce() override;
+    hdps::plugin::RawData* produce() override;
 };

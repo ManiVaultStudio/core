@@ -7,7 +7,7 @@
 */
 
 #include "widgets/DockableWidget.h"
-#include "PluginFactory.h"
+#include "Plugin.h"
 
 #include <QWidget>
 #include <QGridLayout>
@@ -24,8 +24,8 @@ class ViewPlugin : public gui::DockableWidget, public Plugin
     Q_OBJECT
     
 public:
-    ViewPlugin(QString name) :
-        Plugin(Type::VIEW, name)
+    ViewPlugin(const PluginFactory* factory) :
+        Plugin(factory)
     {
         setObjectName(getGuiName());
     }
@@ -75,7 +75,11 @@ class ViewPluginFactory : public PluginFactory
     Q_OBJECT
 
 public:
+    ViewPluginFactory() :
+        PluginFactory(Type::VIEW)
+    {
 
+    }
     ~ViewPluginFactory() override {};
 
     /**
@@ -88,6 +92,6 @@ public:
 
 } // namespace hdps
 
-Q_DECLARE_INTERFACE(hdps::plugin::ViewPluginFactory, "cytosplore.ViewPluginFactory")
+Q_DECLARE_INTERFACE(hdps::plugin::ViewPluginFactory, "hdps.ViewPluginFactory")
 
 #endif // HDPS_VIEWPLUGIN_H

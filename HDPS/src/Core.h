@@ -192,7 +192,7 @@ protected:
      * unique name as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    RawData& requestRawData(const QString name) override;
+    plugin::RawData& requestRawData(const QString name) override;
 
     /**
     * Requests the selection set belonging to the raw dataset with the given name.

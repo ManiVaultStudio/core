@@ -1,6 +1,8 @@
 #ifndef HDPS_PLUGINTYPE_H
 #define HDPS_PLUGINTYPE_H
 
+#include <cstddef>
+
 /**
  * Provides all possible types of plugins.
  *

@@ -1,9 +1,9 @@
 #ifndef HDPS_DATASET_H
 #define HDPS_DATASET_H
 
-#include "RawData.h"
 #include "CoreInterface.h"
 #include "Application.h"
+#include "RawData.h"
 
 #include <QString>
 #include <QVector>
@@ -205,7 +205,7 @@ protected:
 
     CoreInterface* _core;
 private:
-    mutable RawData* _rawData;
+    mutable plugin::RawData*    _rawData;
 
     QString                     _name;                  /** Name of the dataset */
     QString                     _dataName;              /** Name of the raw data */

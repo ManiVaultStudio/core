@@ -38,7 +38,7 @@ class PointsInfoAction;
 // Raw Data
 // =============================================================================
 
-class POINTDATA_EXPORT PointData : public hdps::RawData
+class POINTDATA_EXPORT PointData : public hdps::plugin::RawData
 {
 private:
 
@@ -307,7 +307,7 @@ public:
     template <std::size_t N>
     using ElementTypeAt = VectorHolder::ElementTypeAt<N>;
 
-    PointData() : RawData("Points", PointType) { }
+    PointData(PluginFactory* factory) : RawData(factory, PointType) { }
     ~PointData(void) override;
 
     /** Returns the icon of this plugin */
@@ -802,12 +802,12 @@ class PointDataFactory : public RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
         Q_OBJECT
-        Q_PLUGIN_METADATA(IID   "nl.tudelft.PointData"
+        Q_PLUGIN_METADATA(IID   "hdps.PointData"
             FILE  "PointData.json")
 
 public:
     PointDataFactory(void) {}
     ~PointDataFactory(void) override {}
 
-    hdps::RawData* produce() override;
+    hdps::plugin::RawData* produce() override;
 };
