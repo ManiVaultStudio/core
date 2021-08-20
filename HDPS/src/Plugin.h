@@ -149,10 +149,10 @@ protected:
     CoreInterface* _core;
 
 protected:
+    const PluginFactory* _factory;
+
     const QString               _name;              /** Unique plugin name */
     const QString               _guiName;           /** Name in the GUI */
-
-    const PluginFactory*        _factory;
 
     QMap<QString, QVariant>     _properties;        /** Properties map */
 
