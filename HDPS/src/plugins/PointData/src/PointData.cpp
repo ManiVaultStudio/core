@@ -4,7 +4,7 @@
 #endif
 
 #include "PointData.h"
-#include "PointsInfoAction.h"
+#include "InfoAction.h"
 
 #include <QtCore>
 #include <QtDebug>

@@ -13,7 +13,7 @@ namespace hdps {
 /**
  * Selected indices action class
  *
- * Action class for displaying selected point indices
+ * Action class for selected point indices
  *
  * @author Thomas Kroes
  */
@@ -37,7 +37,7 @@ protected:
     };
 
     /**
-     * Get widget representation of the info action
+     * Get widget representation of the selected indices action
      * @param parent Pointer to parent widget
      * @param state Widget state
      */

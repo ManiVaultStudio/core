@@ -9,7 +9,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName) :
-    WidgetAction(parent, "Selected indices"),
+    WidgetAction(parent),
     EventListener(),
     _core(core),
     _dataHierarchyItem(nullptr),

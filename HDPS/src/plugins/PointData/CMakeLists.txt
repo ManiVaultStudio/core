@@ -23,13 +23,6 @@ set(POINTS_SOURCES
     src/PointDataRange.h
     src/PointView.h
     src/RandomAccessRange.h
-
-    src/InfoAction.h
-    src/InfoAction.cpp
-    src/SelectedIndicesAction.h
-    src/SelectedIndicesAction.cpp
-    src/DimensionNamesAction.h
-    src/DimensionNamesAction.cpp
 )
 
 set(POINTS_HEADERS
@@ -46,6 +39,12 @@ set(POINTS_HEADERS
 )
 
 set(ACTIONS_SOURCES
+    src/InfoAction.h
+    src/InfoAction.cpp
+    src/SelectedIndicesAction.h
+    src/SelectedIndicesAction.cpp
+    src/DimensionNamesAction.h
+    src/DimensionNamesAction.cpp
 )
 
 source_group(Plugin FILES ${POINTS_SOURCES})
