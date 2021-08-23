@@ -1,7 +1,7 @@
 #ifndef HDPS_LOADERPLUGIN_H
 #define HDPS_LOADERPLUGIN_H
 
-#include "PluginFactory.h"
+#include "Plugin.h"
 
 #include <QString>
 
@@ -34,7 +34,7 @@ private:
 class LoaderPlugin : public Plugin
 {
 public:
-    LoaderPlugin(QString name) : Plugin(Type::LOADER, name) { }
+    LoaderPlugin(const PluginFactory* factory) : Plugin(factory) { }
 
     ~LoaderPlugin() override {};
 
@@ -66,7 +66,11 @@ class LoaderPluginFactory : public PluginFactory
     Q_OBJECT
     
 public:
-    
+    LoaderPluginFactory() :
+        PluginFactory(Type::LOADER)
+    {
+
+    }
     ~LoaderPluginFactory() override {};
     
     /**
@@ -79,6 +83,6 @@ public:
 
 } // namespace hdps
 
-Q_DECLARE_INTERFACE(hdps::plugin::LoaderPluginFactory, "cytosplore.LoaderPluginFactory")
+Q_DECLARE_INTERFACE(hdps::plugin::LoaderPluginFactory, "hdps.LoaderPluginFactory")
 
 #endif // HDPS_LOADERPLUGIN_H

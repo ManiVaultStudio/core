@@ -3,7 +3,7 @@
 #include <QtCore>
 #include <QtDebug>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.ClusterData")
+Q_PLUGIN_METADATA(IID "hdps.ClusterData")
 
 // =============================================================================
 // View
@@ -28,9 +28,9 @@ hdps::DataSet* ClusterData::createDataSet() const
 // Factory
 // =============================================================================
 
-hdps::RawData* ClusterDataFactory::produce()
+hdps::plugin::RawData* ClusterDataFactory::produce()
 {
-    return new ClusterData();
+    return new ClusterData(this);
 }
 
 QIcon Clusters::getIcon() const

@@ -12,7 +12,6 @@
 namespace hdps
 {
     class DataSet;
-    class RawData;
     class DataType;
     class EventListener;
     class HierarchyDataItem;
@@ -20,6 +19,7 @@ namespace hdps
     namespace plugin
     {
         class Plugin;
+        class RawData;
     }
 
 class CoreInterface
@@ -132,7 +132,7 @@ protected:
      * unique name as the given parameter. If no such instance can be found a fatal
      * error is thrown.
      */
-    virtual RawData& requestRawData(const QString datasetName) = 0;
+    virtual plugin::RawData& requestRawData(const QString datasetName) = 0;
 
     /**
     * Request a selection from the data manager by its corresponding raw data name.

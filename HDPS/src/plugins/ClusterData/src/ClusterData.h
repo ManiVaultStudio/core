@@ -29,10 +29,10 @@ struct Cluster
     std::vector<float> _stddev;
 };
 
-class ClusterData : public hdps::RawData
+class ClusterData : public hdps::plugin::RawData
 {
 public:
-    ClusterData() : hdps::RawData("Clusters", ClusterType) { }
+    ClusterData(const hdps::plugin::PluginFactory* factory) : hdps::plugin::RawData(factory, ClusterType) { }
     ~ClusterData(void) override;
     
     void init() override;
@@ -101,12 +101,12 @@ class ClusterDataFactory : public hdps::plugin::RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.tudelft.ClusterData"
+    Q_PLUGIN_METADATA(IID   "hdps.ClusterData"
                       FILE  "ClusterData.json")
     
 public:
     ClusterDataFactory(void) {}
     ~ClusterDataFactory(void) override {}
     
-    hdps::RawData* produce() override;
+    hdps::plugin::RawData* produce() override;
 };

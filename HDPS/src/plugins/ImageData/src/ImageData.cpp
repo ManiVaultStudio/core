@@ -11,8 +11,8 @@
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ImageData")
 
-ImageData::ImageData() :
-    hdps::RawData("Image Data", ImageType),
+ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :
+    hdps::plugin::RawData(factory, ImageType),
     _type(Type::Undefined),
     _noImages(0),
     _imageSize(),
@@ -134,7 +134,7 @@ hdps::DataSet* ImageData::createDataSet() const
     return new Images(_core, getName());
 }
 
-hdps::RawData* ImageDataFactory::produce()
+hdps::plugin::RawData* ImageDataFactory::produce()
 {
-    return new ImageData();
+    return new ImageData(this);
 }

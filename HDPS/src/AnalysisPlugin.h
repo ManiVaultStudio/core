@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PluginFactory.h"
+#include "Plugin.h"
 #include "DataHierarchyItem.h"
 
 #include <memory>
@@ -15,8 +15,8 @@ class AnalysisPlugin : public Plugin
 {
 
 public:
-    AnalysisPlugin(QString name) :
-        Plugin(Type::ANALYSIS, name),
+    AnalysisPlugin(const PluginFactory* factory) :
+        Plugin(factory),
         _inputDataHierarchyItem(nullptr),
         _outputDataHierarchyItem(nullptr)
     {
@@ -156,7 +156,11 @@ class AnalysisPluginFactory : public PluginFactory
     Q_OBJECT
     
 public:
-    
+    AnalysisPluginFactory() :
+        PluginFactory(Type::ANALYSIS)
+    {
+
+    }
     ~AnalysisPluginFactory() override {};
     
     /**
@@ -169,4 +173,4 @@ public:
 
 } // namespace hdps
 
-Q_DECLARE_INTERFACE(hdps::plugin::AnalysisPluginFactory, "cytosplore.AnalysisPluginFactory")
+Q_DECLARE_INTERFACE(hdps::plugin::AnalysisPluginFactory, "hdps.AnalysisPluginFactory")

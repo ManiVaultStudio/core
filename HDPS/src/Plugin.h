@@ -1,6 +1,7 @@
 #ifndef HDPS_PLUGIN_H
 #define HDPS_PLUGIN_H
 
+#include "PluginFactory.h"
 #include "CoreInterface.h"
 #include "PluginType.h"
 #include "Application.h"
@@ -23,7 +24,7 @@ namespace plugin
 class Plugin : public EventListener
 {
 public:
-    Plugin(Type type, QString kind);
+    Plugin(const PluginFactory* factory);
 
     virtual ~Plugin() {};
 
@@ -54,7 +55,7 @@ public:
     */
     QString getKind() const
     {
-        return _kind;
+        return _factory->getKind();
     }
 
     /**
@@ -62,7 +63,7 @@ public:
      */
     Type getType() const
     {
-        return _type;
+        return _factory->getType();
     }
 
     /**
@@ -148,10 +149,11 @@ protected:
     CoreInterface* _core;
 
 protected:
+    const PluginFactory* _factory;
+
     const QString               _name;              /** Unique plugin name */
     const QString               _guiName;           /** Name in the GUI */
-    const QString               _kind;              /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
-    const Type                  _type;              /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+
     QMap<QString, QVariant>     _properties;        /** Properties map */
 
     /** Keeps track of how many instance have been created per plugin kind */

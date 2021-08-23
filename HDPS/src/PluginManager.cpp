@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include "MainWindow.h"
+#include "PluginFactory.h"
 #include "AnalysisPlugin.h"
 #include "RawData.h"
 #include "LoaderPlugin.h"
@@ -75,7 +76,7 @@ void PluginManager::loadPlugins()
 
         // Create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
-       
+
         // If pluginFactory is a nullptr then loading of the plugin failed for some reason. Print the reason to output.
         if (!pluginFactory)
         {
@@ -85,6 +86,7 @@ void PluginManager::loadPlugins()
 
         // Loading of the plugin succeeded so cast it to its original class
         _pluginFactories[pluginKind] = qobject_cast<PluginFactory*>(pluginFactory);
+        _pluginFactories[pluginKind]->setKind(pluginKind);
 
         // Add the plugin to a menu item and link the triggering of the menu item to triggering of the plugin
         QAction* action = NULL;

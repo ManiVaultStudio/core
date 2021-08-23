@@ -16,7 +16,7 @@ class Points;
 
 const hdps::DataType ImageType = hdps::DataType(QString("Images"));
 
-class IMAGEDATA_EXPORT ImageData : public hdps::RawData
+class IMAGEDATA_EXPORT ImageData : public hdps::plugin::RawData
 {
 public:
     enum Type
@@ -48,7 +48,7 @@ public:
     }
 
 public:
-    ImageData();
+    ImageData(const hdps::plugin::PluginFactory* factory);
 
     void init() override;
 
@@ -93,12 +93,12 @@ class ImageDataFactory : public hdps::plugin::RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.tudelft.ImageData"
+    Q_PLUGIN_METADATA(IID   "hdps.ImageData"
                       FILE  "ImageData.json")
     
 public:
     ImageDataFactory() {}
     ~ImageDataFactory() override {}
     
-    hdps::RawData* produce() override;
+    hdps::plugin::RawData* produce() override;
 };

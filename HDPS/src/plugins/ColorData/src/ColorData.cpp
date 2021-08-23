@@ -30,15 +30,19 @@ hdps::DataSet* ColorData::createDataSet() const
 }
 
 // =============================================================================
-// Factory
+// Color Data Set
 // =============================================================================
-
-hdps::RawData* ColorDataFactory::produce()
-{
-    return new ColorData();
-}
 
 QIcon Colors::getIcon() const
 {
     return QIcon();
+}
+
+// =============================================================================
+// Factory
+// =============================================================================
+
+hdps::plugin::RawData* ColorDataFactory::produce()
+{
+    return new ColorData(this);
 }

@@ -1,7 +1,7 @@
 #ifndef HDPS_RAWDATA_H
 #define HDPS_RAWDATA_H
 
-#include "PluginFactory.h"
+#include "Plugin.h"
 #include "DataType.h"
 
 #include <QString>
@@ -9,11 +9,12 @@
 namespace hdps {
     class DataSet;
 
-    class RawData : public plugin::Plugin
+namespace plugin {
+    class RawData : public Plugin
     {
     public:
-        RawData(QString name, DataType dataType) :
-            Plugin(plugin::Type::DATA, name),
+        RawData(const PluginFactory* factory, DataType dataType) :
+            Plugin(factory),
             _dataType(dataType)
         { }
 
@@ -30,14 +31,16 @@ namespace hdps {
         DataType _dataType;
     };
 
-namespace plugin {
-
     class RawDataFactory : public PluginFactory
     {
         Q_OBJECT
     
     public:
-    
+        RawDataFactory() :
+            PluginFactory(Type::DATA)
+        {
+
+        }
         ~RawDataFactory() override {};
     
         RawData* produce() override = 0;

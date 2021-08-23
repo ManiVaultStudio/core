@@ -7,7 +7,7 @@
 */
 
 
-#include "PluginFactory.h"
+#include "Plugin.h"
 
 #include <QString>
 
@@ -19,7 +19,7 @@ namespace plugin
 class WriterPlugin : public Plugin
 {
 public:
-    WriterPlugin(QString name) : Plugin(Type::WRITER, name) { }
+    WriterPlugin(const PluginFactory* factory) : Plugin(factory) { }
 
     ~WriterPlugin() override {};
 
@@ -37,7 +37,11 @@ class WriterPluginFactory : public PluginFactory
     Q_OBJECT
     
 public:
-    
+    WriterPluginFactory() :
+        PluginFactory(Type::WRITER)
+    {
+
+    }
     ~WriterPluginFactory() override {};
     
     WriterPlugin* produce() override = 0;
@@ -47,6 +51,6 @@ public:
 
 } // namespace hdps
 
-Q_DECLARE_INTERFACE(hdps::plugin::WriterPluginFactory, "cytosplore.WriterPluginFactory")
+Q_DECLARE_INTERFACE(hdps::plugin::WriterPluginFactory, "hdps.WriterPluginFactory")
 
 #endif // HDPS_WRITERPLUGIN_H
