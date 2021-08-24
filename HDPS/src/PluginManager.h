@@ -49,7 +49,7 @@ public:
      * @param dataType Type of data that the plugin should be compatible with
      * @return List of compatible plugin kinds that can handle the data type
      */
-    std::vector<QString> requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType);
+    QStringList requestPluginKindsByPluginTypeAndDataType(const Type& pluginType, const DataType& dataType);
 
 private:
     /**

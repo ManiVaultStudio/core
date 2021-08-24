@@ -11,7 +11,9 @@
 #include "ViewPlugin.h"
 #include "RawData.h"
 #include "Set.h"
-#include "AnalyzeDataAction.h"
+
+#include "DataAnalysisAction.h"
+#include "DataExportAction.h"
 
 #include <QMessageBox>
 #include <algorithm>
@@ -137,7 +139,8 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
-    new AnalyzeDataAction(&_mainWindow, getDataHierarchyItem(setName));
+    new DataAnalysisAction(&_mainWindow, this, getDataHierarchyItem(setName));
+    new DataExportAction(&_mainWindow, this, getDataHierarchyItem(setName));
 
     return setName;
 }
@@ -208,7 +211,8 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     // Initialize the dataset (e.g. setup default actions for info)
     newSet->init();
 
-    new AnalyzeDataAction(&_mainWindow, getDataHierarchyItem(setName));
+    new DataAnalysisAction(&_mainWindow, this, getDataHierarchyItem(setName));
+    new DataExportAction(&_mainWindow, this, getDataHierarchyItem(setName));
 
     return setName;
 }
@@ -298,7 +302,7 @@ const void Core::analyzeDataset(const QString analysisKind, const QString& datas
     _pluginManager->createAnalysisPlugin(analysisKind, datasetName);
 }
 
-std::vector<QString> Core::requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType) const
+QStringList Core::requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const
 {
     return _pluginManager->requestPluginKindsByPluginTypeAndDataType(pluginType, dataType);
 }

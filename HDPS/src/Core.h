@@ -161,7 +161,7 @@ public:
      * @param dataType Type of data that the plugin should be compatible with
      * @return List of compatible plugin kinds that can handle the data type
      */
-    std::vector<QString> requestPluginKindsByPluginTypeAndDataType(const QString& pluginType, const DataType& dataType) const;
+    QStringList requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString datasetName) override;
