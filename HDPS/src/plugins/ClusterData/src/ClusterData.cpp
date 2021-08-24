@@ -1,4 +1,6 @@
 #include "ClusterData.h"
+#include "InfoAction.h"
+
 #include "Application.h"
 
 #include <QtCore>
@@ -17,7 +19,6 @@ ClusterData::~ClusterData(void)
 
 void ClusterData::init()
 {
-
 }
 
 hdps::DataSet* ClusterData::createDataSet() const
@@ -32,6 +33,13 @@ hdps::DataSet* ClusterData::createDataSet() const
 hdps::plugin::RawData* ClusterDataFactory::produce()
 {
     return new ClusterData(this);
+}
+
+void Clusters::init()
+{
+    _infoAction = QSharedPointer<InfoAction>::create(nullptr, _core, getName());
+
+    addAction(*_infoAction.get());
 }
 
 QIcon Clusters::getIcon() const

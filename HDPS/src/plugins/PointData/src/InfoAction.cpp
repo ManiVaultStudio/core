@@ -20,8 +20,6 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     setText("Info");
     setEventCore(_core);
 
-    //addAction(_numberOfPointsAction);
-
     _dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
 
     _numberOfPointsAction.setEnabled(false);

@@ -18,6 +18,8 @@ const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
 // Raw Data
 // =============================================================================
 
+class InfoAction;
+
 struct Cluster
 {
     std::vector<unsigned int> indices;
@@ -62,6 +64,8 @@ public:
     Clusters(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
     ~Clusters() override { }
 
+    void init() override;
+
     std::vector<Cluster>& getClusters()
     {
         return getRawData<ClusterData>().getClusters();
@@ -90,7 +94,8 @@ public:
     /** Get icon for the dataset */
     QIcon getIcon() const override;
 
-    std::vector<unsigned int> indices;
+    std::vector<unsigned int>       indices;
+    QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
 };
 
 // =============================================================================

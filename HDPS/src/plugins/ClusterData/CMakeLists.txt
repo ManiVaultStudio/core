@@ -29,11 +29,19 @@ set(CLUSTER_HEADERS
     src/ClusterData.h
 )
 
-source_group( Plugin FILES ${SOURCES})
+set(ACTIONS_SOURCES
+    src/InfoAction.h
+    src/InfoAction.cpp
+    src/ClustersAction.h
+    src/ClustersAction.cpp
+)
+
+source_group(Plugin FILES ${SOURCES})
+source_group(Actions FILES ${ACTIONS_SOURCES})
 
 include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 

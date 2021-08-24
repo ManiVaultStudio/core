@@ -40,6 +40,8 @@ CreateClusterDialog::CreateClusterDialog(CoreInterface* core, const QString& inp
     }
 
     _targetAction.setOptions(clusterDatasetNames);
+    _targetAction.setCurrentText(clusterDatasetNames.first());
+    _targetAction.setEnabled(clusterDatasetNames.count() >= 1);
 
     const auto addWidgetAction = [this, layout](WidgetAction& widgetAction) -> void {
         const auto numRows = layout->rowCount();
@@ -79,6 +81,8 @@ CreateClusterDialog::CreateClusterDialog(CoreInterface* core, const QString& inp
             cluster.indices = selection.indices;
 
             clusterDataset.addCluster(cluster);
+
+            core->notifyDataChanged(targetClusterDataseName);
 
             accept();
         }
