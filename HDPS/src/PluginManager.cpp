@@ -104,7 +104,6 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
-            action = gui.addExportOption(menuName);
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
@@ -257,7 +256,7 @@ void PluginManager::createExporterPlugin(const QString& kind, const QString& inp
         if (!_pluginFactories.keys().contains(kind))
             throw std::runtime_error("Unrecognized plugin kind");
 
-        auto pluginInstance = dynamic_cast<AnalysisPlugin*>(_pluginFactories[kind]->produce());
+        auto pluginInstance = dynamic_cast<WriterPlugin*>(_pluginFactories[kind]->produce());
 
         if (!pluginInstance)
             return;

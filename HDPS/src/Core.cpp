@@ -292,14 +292,14 @@ std::vector<QString> Core::requestAllDataNames(const std::vector<DataType> dataT
     return datasetNames;
 }
 
-const void Core::exportDataset(const QString kind, const QString& datasetName)
-{
-    _pluginManager->createExporterPlugin(kind, datasetName);
-}
-
 const void Core::analyzeDataset(const QString kind, const QString& datasetName)
 {
     _pluginManager->createAnalysisPlugin(kind, datasetName);
+}
+
+const void Core::exportDataset(const QString kind, const QString& datasetName)
+{
+    _pluginManager->createExporterPlugin(kind, datasetName);
 }
 
 QStringList Core::requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const

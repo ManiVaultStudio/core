@@ -92,18 +92,18 @@ public:
     }
 
     /**
-     * Exports a dataset
-     * @param exportKind Type of export plugin
-     * @param datasetName Name of the dataset to export
-     */
-    virtual const void exportDataset(const QString exportKind, const QString& datasetName) = 0;
-
-    /**
      * Analyzes a dataset
      * @param analysisKind Type of analysis plugin
      * @param datasetName Name of the dataset to analyze
      */
     virtual const void analyzeDataset(const QString analysisKind, const QString& datasetName) = 0;
+
+    /**
+     * Exports a dataset
+     * @param exportKind Type of export plugin
+     * @param datasetName Name of the dataset to export
+     */
+    virtual const void exportDataset(const QString exportKind, const QString& datasetName) = 0;
 
     virtual plugin::Plugin& requestAnalysis(const QString name) = 0;
 

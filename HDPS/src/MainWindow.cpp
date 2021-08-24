@@ -103,11 +103,6 @@ QAction* MainWindow::addImportOption(QString menuName)
     return importDataFileMenu->addAction(menuName);
 }
 
-QAction* MainWindow::addExportOption(QString menuName)
-{
-    return exportDataFileMenu->addAction(menuName);
-}
-
 QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
 {
     switch (type)

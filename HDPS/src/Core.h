@@ -142,18 +142,18 @@ public:
     virtual std::vector<QString> requestAllDataNames(const std::vector<DataType> dataTypes) override;
 
     /**
-     * Exports a dataset
-     * @param kind Name of exporter plugin
-     * @param datasetName Name of the dataset to export
-     */
-    const void exportDataset(const QString kind, const QString& datasetName) override;
-
-    /**
      * Analyzes a dataset
      * @param kind Name of the analysis plugin
      * @param datasetName Name of the dataset to analyze
      */
     const void analyzeDataset(const QString kind, const QString& datasetName) override;
+
+    /**
+     * Exports a dataset
+     * @param kind Name of exporter plugin
+     * @param datasetName Name of the dataset to export
+     */
+    const void exportDataset(const QString kind, const QString& datasetName) override;
 
     /**
      * Get a list of plugin kinds (names) given a plugin type and data type

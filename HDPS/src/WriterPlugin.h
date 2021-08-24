@@ -19,7 +19,11 @@ namespace plugin
 class WriterPlugin : public Plugin
 {
 public:
-    WriterPlugin(const PluginFactory* factory) : Plugin(factory) { }
+    WriterPlugin(const PluginFactory* factory) :
+        Plugin(factory),
+        _inputDataHierarchyItem(nullptr)
+    {
+    }
 
     ~WriterPlugin() override {};
 
@@ -29,6 +33,39 @@ public:
     QIcon getIcon() const override {
         return Application::getIconFont("FontAwesome").getIcon("file-export");
     }
+
+public:
+
+    DataHierarchyItem* getInputDataHierarchyItem() const {
+        return _inputDataHierarchyItem;
+    }
+
+    QString getInputDatasetName() const {
+        Q_ASSERT(_inputDataHierarchyItem != nullptr);
+
+        if (_inputDataHierarchyItem == nullptr)
+            return "";
+
+        return _inputDataHierarchyItem->getDatasetName();
+    }
+
+    /** Get input dataset */
+    template<typename DatasetType>
+    DatasetType& getInputDataset() const {
+        return dynamic_cast<DatasetType&>(_inputDataHierarchyItem->getDataset());
+    }
+
+    void setInputDataHierarchyItem(DataHierarchyItem* inputDataHierarchyItem) {
+        Q_ASSERT(inputDataHierarchyItem != nullptr);
+
+        if (inputDataHierarchyItem == nullptr)
+            return;
+
+        _inputDataHierarchyItem = inputDataHierarchyItem;
+    }
+
+protected:
+    DataHierarchyItem*  _inputDataHierarchyItem;        /** Input data hierarchy item */
 };
 
 
