@@ -32,7 +32,8 @@ namespace hdps
 
 const hdps::DataType PointType = hdps::DataType(QString("Points"));
 
-class PointsInfoAction;
+class InfoAction;
+class ClusterAction;
 
 // =============================================================================
 // Raw Data
@@ -792,6 +793,9 @@ public:
     QIcon getIcon() const override;
 
     std::vector<unsigned int> indices;
+
+    QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
+    QSharedPointer<ClusterAction>   _clusterAction;     /** Shared pointer to cluster action */
 };
 
 // =============================================================================

@@ -29,8 +29,9 @@ public:
      * Requests the plugin manager to create new RawData of the given kind.
      * The manager will add the raw data to the core and return the
      * unique name of the data set linked with the raw data.
+     * @param parentDatasetName Name of the parent dataset in the data hierarchy
      */
-    virtual const QString addData(const QString kind, const QString name) = 0;
+    virtual const QString addData(const QString kind, const QString name, const QString& parentDatasetName = "") = 0;
 
     /**
      * Removes a Dataset. Other datasets derived from this dataset are 

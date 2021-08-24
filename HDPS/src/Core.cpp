@@ -112,7 +112,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-const QString Core::addData(const QString kind, const QString nameRequest)
+const QString Core::addData(const QString kind, const QString nameRequest, const QString& parentDatasetName /*= ""*/)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
@@ -133,7 +133,7 @@ const QString Core::addData(const QString kind, const QString nameRequest)
     _dataManager->addSelection(rawDataName, selection);
     
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager.addDataset(setName);
+    _dataHierarchyManager.addDataset(setName, parentDatasetName);
     _dataHierarchyManager.selectHierarchyItem(setName);
     
     // Initialize the dataset (e.g. setup default actions for info)

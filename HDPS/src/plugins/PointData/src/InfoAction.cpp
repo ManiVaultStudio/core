@@ -5,7 +5,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetName, QObject* parent /*= nullptr*/) :
+InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName) :
     GroupAction(parent, false),
     EventListener(),
     _core(core),

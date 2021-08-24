@@ -23,6 +23,8 @@ set(POINTS_SOURCES
     src/PointDataRange.h
     src/PointView.h
     src/RandomAccessRange.h
+    src/CreateClusterDialog.h
+    src/CreateClusterDialog.cpp
 )
 
 set(POINTS_HEADERS
@@ -45,6 +47,8 @@ set(ACTIONS_SOURCES
     src/SelectedIndicesAction.cpp
     src/DimensionNamesAction.h
     src/DimensionNamesAction.cpp
+    src/ClusterAction.h
+    src/ClusterAction.cpp
 )
 
 source_group(Plugin FILES ${POINTS_SOURCES})

@@ -5,6 +5,7 @@
 
 #include "PointData.h"
 #include "InfoAction.h"
+#include "ClusterAction.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -147,7 +148,9 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
 }
 
 Points::Points(hdps::CoreInterface* core, QString dataName) :
-    hdps::DataSet(core, dataName)
+    hdps::DataSet(core, dataName),
+    _infoAction(),
+    _clusterAction()
 {
 }
 
@@ -157,7 +160,11 @@ Points::~Points()
 
 void Points::init()
 {
-    addAction(*(new PointsInfoAction(_core, getName())));
+    _infoAction     = QSharedPointer<InfoAction>::create(nullptr, _core, getName());
+    _clusterAction  = QSharedPointer<ClusterAction>::create(nullptr, _core, getName());
+
+    addAction(*_infoAction.get());
+    addAction(*_clusterAction.get());
 }
 
 // =============================================================================

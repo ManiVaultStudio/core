@@ -5,6 +5,8 @@
 
 #include <QTimer>
 
+using namespace hdps::gui;
+
 namespace hdps
 {
 
@@ -172,14 +174,14 @@ void DataHierarchyItem::exportDataset(const QString& pluginName)
     _core->exportDataset(pluginName, _datasetName);
 }
 
-void DataHierarchyItem::addAction(hdps::gui::WidgetAction& widgetAction)
+void DataHierarchyItem::addAction(WidgetAction& widgetAction)
 {
     _actions << &widgetAction;
 
     emit actionAdded(widgetAction);
 }
 
-hdps::gui::WidgetActions DataHierarchyItem::getActions() const
+WidgetActions DataHierarchyItem::getActions() const
 {
     return _actions;
 }

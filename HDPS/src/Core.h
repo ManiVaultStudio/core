@@ -80,8 +80,9 @@ public:
      * Requests the plugin manager to create new RawData of the given kind.
      * The manager will add the raw data to the core and return the
      * unique name of the data set linked with the raw data.
+     * @param parentDatasetName Name of the parent dataset in the data hierarchy
      */
-    const QString addData(const QString kind, const QString nameRequest) override;
+    const QString addData(const QString kind, const QString nameRequest, const QString& parentDatasetName = "") override;
 
     /**
      * Removes a Dataset object. Other datasets derived from this datasets are

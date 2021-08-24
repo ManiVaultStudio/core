@@ -1,4 +1,5 @@
 #include "ClusterData.h"
+#include "Application.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -35,5 +36,5 @@ hdps::plugin::RawData* ClusterDataFactory::produce()
 
 QIcon Clusters::getIcon() const
 {
-    return QIcon();
+    return hdps::Application::getIconFont("FontAwesome").getIcon("th-large");
 }
