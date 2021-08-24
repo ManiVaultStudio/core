@@ -14,7 +14,8 @@ WidgetAction::WidgetAction(QObject* parent) :
     _createdBy(),
     _context(),
     _dataHierarchyItemContext(nullptr),
-    _isDropTarget(false)
+    _isDropTarget(false)//,
+    //_children()
 {
     Application::current()->getWidgetActionsManager().addAction(this);
 }

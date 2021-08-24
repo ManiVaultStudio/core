@@ -11,7 +11,8 @@ namespace gui {
 
 ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/) :
     WidgetAction(parent),
-    _defaultToggled(defaultToggled)
+    _defaultToggled(defaultToggled),
+    _interactionMode(InteractionMode::CheckBox)
 {
     setCheckable(true);
     setText(title);
@@ -55,6 +56,11 @@ bool ToggleAction::canReset() const
 void ToggleAction::reset()
 {
     setChecked(_defaultToggled);
+}
+
+void ToggleAction::setInteractionMode(const InteractionMode& interactionMode)
+{
+    _interactionMode = interactionMode;
 }
 
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* checkAction) :
@@ -141,7 +147,16 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const WidgetActionWidget::Stat
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    return new ToggleAction::PushButtonWidget(parent, this);
+    switch (_interactionMode)
+    {
+        case InteractionMode::CheckBox:
+            return new ToggleAction::CheckBoxWidget(parent, this);
+
+        case InteractionMode::PushButton:
+            return new ToggleAction::PushButtonWidget(parent, this);
+    }
+
+    return new ToggleAction::CheckBoxWidget(parent, this);
 }
 
 }

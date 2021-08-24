@@ -10,21 +10,21 @@ namespace hdps {
 namespace gui {
 
 /**
- * Widget action group class
+ * Group action class
  *
  * Groups multiple actions
- * When exposed in a dataset, the widget is added to the data properties widget as a section
+ * When added to a dataset, the widget is added to the data properties widget as a section
  * 
  * @author Thomas Kroes
  */
-class WidgetActionGroup : public WidgetAction
+class GroupAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
     /**
-     * Group widget class for
+     * Group widget class for widget action group
      */
     class FormWidget : public WidgetActionWidget
     {
@@ -33,15 +33,9 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param widgetActionGroup Pointer to widget action group
+         * @param groupAction Pointer to group action
          */
-        FormWidget(QWidget* parent, WidgetActionGroup* widgetActionGroup);
-
-        /**
-         * Adds an action to the form
-         * @param widgetAction Widget action
-         */
-        void addWidgetAction(WidgetAction& widgetAction, const bool& forceTogglePushButton = false);
+        FormWidget(QWidget* parent, GroupAction* groupAction);
 
         /** Get grid layout */
         QGridLayout* layout();
@@ -49,16 +43,26 @@ public:
     protected:
         QGridLayout*    _layout;        /** Main grid layout */
 
-        friend class WidgetActionGroup;
+        friend class GroupAction;
+    };
+
+    /**
+     * Get widget representation of the group action
+     * @param parent Pointer to parent widget
+     * @param state Widget state
+     */
+    QWidget* getWidget(QWidget* parent, const hdps::gui::WidgetActionWidget::State& state = hdps::gui::WidgetActionWidget::State::Standard) override {
+        return new FormWidget(parent, this);
     };
 
 public:
+
     /**
      * Constructor
      * @param parent Pointer to parent object
      * @param expanded Whether the group is initially expanded/collapsed
      */
-    explicit WidgetActionGroup(QObject* parent, const bool& expanded = false);
+    explicit GroupAction(QObject* parent, const bool& expanded = false);
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
@@ -93,8 +97,8 @@ signals:
     void readOnlyChanged(const bool& readOnly);
 
 protected:
-    bool    _expanded;      /** Whether or not the group is expanded */
-    bool    _readOnly;      /** Whether or not the group is read-only */
+    bool            _expanded;          /** Whether or not the group is expanded */
+    bool            _readOnly;          /** Whether or not the group is read-only */
 };
 
 }

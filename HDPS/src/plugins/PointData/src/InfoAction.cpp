@@ -6,7 +6,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetName, QObject* parent /*= nullptr*/) :
-    WidgetActionGroup(parent, false),
+    GroupAction(parent, false),
     EventListener(),
     _core(core),
     _dataHierarchyItem(nullptr),
@@ -19,6 +19,8 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
 {
     setText("Info");
     setEventCore(_core);
+
+    //addAction(_numberOfPointsAction);
 
     _dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
 
@@ -77,15 +79,4 @@ PointsInfoAction::PointsInfoAction(CoreInterface* core, const QString& datasetNa
     });
 
     updateActions();
-}
-
-PointsInfoAction::Widget::Widget(QWidget* parent, PointsInfoAction* pointsInfoAction, const hdps::gui::WidgetActionWidget::State& state) :
-    WidgetActionGroup::FormWidget(parent, pointsInfoAction)
-{
-    addWidgetAction(pointsInfoAction->getNumberOfPointsAction());
-    addWidgetAction(pointsInfoAction->getNumberOfDimensionsAction());
-    addWidgetAction(pointsInfoAction->getMemorySizeAction());
-    addWidgetAction(pointsInfoAction->getNumberOfSelectedPointsAction());
-    addWidgetAction(pointsInfoAction->getSelectedIndicesAction());
-    addWidgetAction(pointsInfoAction->getDimensionNamesAction());
 }

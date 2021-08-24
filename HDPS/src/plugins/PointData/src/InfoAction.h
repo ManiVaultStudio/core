@@ -13,6 +13,8 @@ namespace hdps {
     class DataHierarchyItem;
 }
 
+using namespace hdps::gui;
+
 /**
  * Points info action class
  *
@@ -20,33 +22,9 @@ namespace hdps {
  *
  * @author Thomas Kroes
  */
-class PointsInfoAction : public hdps::gui::WidgetActionGroup, public hdps::EventListener
+class PointsInfoAction : public GroupAction, public hdps::EventListener
 {
     Q_OBJECT
-
-protected:
-
-    /** Widget class for points info action */
-    class Widget : public hdps::gui::WidgetActionGroup::FormWidget {
-    public:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param infoAction Pointer to points info action
-         * @param state State of the widget
-         */
-        Widget(QWidget* parent, PointsInfoAction* pointsInfoAction, const hdps::gui::WidgetActionWidget::State& state);
-    };
-
-    /**
-     * Get widget representation of the info action
-     * @param parent Pointer to parent widget
-     * @param state Widget state
-     */
-    QWidget* getWidget(QWidget* parent, const hdps::gui::WidgetActionWidget::State& state = hdps::gui::WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
-    };
 
 public:
 
@@ -70,10 +48,10 @@ public: // Action getters
 protected:
     hdps::CoreInterface*        _core;                              /** Pointer to the core */
     hdps::DataHierarchyItem*    _dataHierarchyItem;                 /** Pointer to the data hierarchy item of the points dataset */
-    hdps::gui::StringAction     _numberOfPointsAction;              /** Number of points action */
-    hdps::gui::StringAction     _numberOfDimensionsAction;          /** Number of dimensions action */
-    hdps::gui::StringAction     _memorySizeAction;                  /** Memory size action */
-    hdps::gui::StringAction     _numberOfSelectedPointsAction;      /** Memory size action */
+    StringAction                _numberOfPointsAction;              /** Number of points action */
+    StringAction                _numberOfDimensionsAction;          /** Number of dimensions action */
+    StringAction                _memorySizeAction;                  /** Memory size action */
+    StringAction                _numberOfSelectedPointsAction;      /** Memory size action */
     SelectedIndicesAction       _selectedIndicesAction;             /** Selected indices action */
     DimensionNamesAction        _dimensionNamesAction;              /** Dimension names action */
 };

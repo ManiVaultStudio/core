@@ -68,6 +68,12 @@ public:
     /** Gets whether the widget action is a drop target */
     bool isDropTarget() const;
 
+    /**
+     * Add a child widget action
+     
+    virtual void addChild(WidgetAction* widgetAction);
+    */
+    
 public: // Context
 
     /**
@@ -101,6 +107,7 @@ protected:
     QString                     _context;                       /** The widget action resides outside of the data hierarchy widget (e.g. plugin view) */
     const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
     bool                        _isDropTarget;                  /** Whether the widget action is eligible for dropping by another widget action */
+    //WidgetActions               _children;                      /** Pointers to child widget actions */
 };
 
 /** List of widget actions */

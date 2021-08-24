@@ -112,6 +112,7 @@ set(ACTIONS_HEADERS
     src/actions/ColorAction.h
     src/actions/ColorMapAction.h
     src/actions/DecimalAction.h
+    src/actions/GroupAction.h
     src/actions/IntegralAction.h
     src/actions/OptionAction.h
     src/actions/TriggerAction.h
@@ -122,7 +123,6 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
-    src/actions/WidgetActionGroup.h
     src/actions/WidgetActionsManager.h
     src/actions/Actions.h
 )
@@ -131,6 +131,7 @@ set(ACTIONS_SOURCES
     src/actions/ColorAction.cpp
     src/actions/ColorMapAction.cpp
     src/actions/DecimalAction.cpp
+    src/actions/GroupAction.cpp
     src/actions/IntegralAction.cpp
     src/actions/OptionAction.cpp
     src/actions/TriggerAction.cpp
@@ -141,8 +142,7 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
-    src/actions/WidgetActionGroup.cpp
-	src/actions/WidgetActionsManager.cpp
+    src/actions/WidgetActionsManager.cpp
 )
 
 set( RENDERER_HEADERS

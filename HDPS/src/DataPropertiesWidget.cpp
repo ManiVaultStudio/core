@@ -1,6 +1,7 @@
 #include "DataPropertiesWidget.h"
 #include "Core.h"
-#include "actions/WidgetActionGroup.h"
+
+#include "actions/GroupAction.h"
 
 #include <QDebug>
 #include <QTreeWidgetItem>
@@ -63,13 +64,13 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             auto exposedActions = dataset.getActions();
 
             for (auto exposedAction : exposedActions) {
-                auto exposedWidgetActionGroup = dynamic_cast<WidgetActionGroup*>(exposedAction);
+                auto exposedGroupAction = dynamic_cast<GroupAction*>(exposedAction);
 
-                if (exposedWidgetActionGroup == nullptr)
+                if (exposedGroupAction == nullptr)
                     continue;
 
-                if (exposedWidgetActionGroup->isVisible())
-                    addButton(exposedWidgetActionGroup);
+                if (exposedGroupAction->isVisible())
+                    addButton(exposedGroupAction);
             }
         };
 
@@ -90,25 +91,26 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
     }
     catch (std::exception& e)
     {
+        qDebug() << QString("Unable to edit data properties for %1: %2").arg(datasetName, e.what());
     }
 }
 
-QTreeWidgetItem* DataPropertiesWidget::addButton(WidgetActionGroup* widgetActionGroup)
+QTreeWidgetItem* DataPropertiesWidget::addButton(GroupAction* groupAction)
 {
     auto treeWidgetItem = new QTreeWidgetItem();
 
     _treeWidget->addTopLevelItem(treeWidgetItem);
 
-    auto button = new SectionExpandButton(treeWidgetItem, widgetActionGroup, widgetActionGroup->text());
+    auto button = new SectionExpandButton(treeWidgetItem, groupAction, groupAction->text());
 
     _treeWidget->setItemWidget(treeWidgetItem, 0, button);
     
     return treeWidgetItem;
 }
 
-SectionExpandButton::SectionExpandButton(QTreeWidgetItem* treeWidgetItem, WidgetActionGroup* widgetActionGroup, const QString& text, QWidget* parent /*= nullptr*/) :
+SectionExpandButton::SectionExpandButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, const QString& text, QWidget* parent /*= nullptr*/) :
     QPushButton(text, parent),
-    _widgetActionGroup(widgetActionGroup),
+    _widgetActionGroup(groupAction),
     _treeWidgetItem(treeWidgetItem)
 {
     auto frameLayout    = new QHBoxLayout();
@@ -146,11 +148,11 @@ SectionExpandButton::SectionExpandButton(QTreeWidgetItem* treeWidgetItem, Widget
         iconLabel->setPixmap(icon.pixmap(QSize(12, 12)));
     };
 
-    connect(_widgetActionGroup, &WidgetActionGroup::expanded, this, [this, update]() {
+    connect(_widgetActionGroup, &GroupAction::expanded, this, [this, update]() {
         update();
     });
 
-    connect(_widgetActionGroup, &WidgetActionGroup::collapsed, this, [this, update]() {
+    connect(_widgetActionGroup, &GroupAction::collapsed, this, [this, update]() {
         update();
     });
 
