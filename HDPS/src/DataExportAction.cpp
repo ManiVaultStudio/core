@@ -20,20 +20,20 @@ DataExportAction::DataExportAction(QObject* parent, Core* core, DataHierarchyIte
     _pluginKinds = core->requestPluginKindsByPluginTypeAndDataType(plugin::Type::WRITER, _dataHierarchyItem->getDataset().getDataType());
 
     for (auto pluginKind : _pluginKinds) {
-        auto analysisPluginAction = new TriggerAction(this, pluginKind);
+        auto exporterPluginAction = new TriggerAction(this, pluginKind);
 
-        connect(analysisPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            _dataHierarchyItem->analyzeDataset(pluginKind);
+        connect(exporterPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
+            _dataHierarchyItem->exportDataset(pluginKind);
         });
     }
 }
 
-QMenu* DataExportAction::getContextMenu()
+QMenu* DataExportAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
     if (_pluginKinds.isEmpty())
         return nullptr;
 
-    auto menu = new QMenu("Export");
+    auto menu = new QMenu("Export", parent);
 
     menu->setIcon(icon());
 

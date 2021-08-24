@@ -152,14 +152,24 @@ hdps::DataType DataHierarchyItem::getDataType() const
     return _core->requestData(_datasetName).getDataType();
 }
 
-void DataHierarchyItem::analyzeDataset(const QString& analysisKind)
+void DataHierarchyItem::analyzeDataset(const QString& pluginName)
 {
-    Q_ASSERT(!analysisKind.isEmpty());
+    Q_ASSERT(!pluginName.isEmpty());
 
-    if (analysisKind.isEmpty())
+    if (pluginName.isEmpty())
         return;
 
-    _core->analyzeDataset(analysisKind, _datasetName);
+    _core->analyzeDataset(pluginName, _datasetName);
+}
+
+void DataHierarchyItem::exportDataset(const QString& pluginName)
+{
+    Q_ASSERT(!pluginName.isEmpty());
+
+    if (pluginName.isEmpty())
+        return;
+
+    _core->exportDataset(pluginName, _datasetName);
 }
 
 void DataHierarchyItem::addAction(hdps::gui::WidgetAction& widgetAction)

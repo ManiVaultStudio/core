@@ -143,17 +143,17 @@ public:
 
     /**
      * Exports a dataset
-     * @param exportKind Type of export plugin
+     * @param kind Name of exporter plugin
      * @param datasetName Name of the dataset to export
      */
-    const void exportDataset(const QString exportKind, const QString& datasetName) override;
+    const void exportDataset(const QString kind, const QString& datasetName) override;
 
     /**
      * Analyzes a dataset
-     * @param analysisKind Type of analysis plugin
+     * @param kind Name of the analysis plugin
      * @param datasetName Name of the dataset to analyze
      */
-    const void analyzeDataset(const QString analysisKind, const QString& datasetName) override;
+    const void analyzeDataset(const QString kind, const QString& datasetName) override;
 
     /**
      * Get a list of plugin kinds (names) given a plugin type and data type

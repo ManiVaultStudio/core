@@ -33,7 +33,7 @@ public:
      * @param parent Parent widget
      * @return Context menu
      */
-    QMenu* getContextMenu();
+    QMenu* getContextMenu(QWidget* parent = nullptr);
 
 protected:
     DataHierarchyItem*  _dataHierarchyItem;     /** Pointer to data hierarchy item */

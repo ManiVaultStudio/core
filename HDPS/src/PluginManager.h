@@ -38,10 +38,17 @@ public:
     
     /**
      * Create an analysis plugin
-     * @param analysisKind Kind of analysis
+     * @param kind Kind of analysis
      * @param inputDatasetName Name of the input dataset
      */
     void createAnalysisPlugin(const QString& kind, const QString& inputDatasetName);
+
+    /**
+     * Create an exporter plugin
+     * @param kind Kind of exporter
+     * @param inputDatasetName Name of the input dataset
+     */
+    void createExporterPlugin(const QString& kind, const QString& inputDatasetName);
 
     /**
      * Get a list of plugin kinds (names) given a plugin type and data type

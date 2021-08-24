@@ -1,6 +1,5 @@
 #include "DataManager.h"
 #include "RawData.h"
-#include "ExportDataAction.h"
 
 #include <QRegularExpression>
 #include <cassert>

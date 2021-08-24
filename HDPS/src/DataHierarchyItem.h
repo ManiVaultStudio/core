@@ -154,9 +154,15 @@ public: // Miscellaneous
 
     /**
      * Analyze the dataset
-     * @param analysisKind Type (kind) of analysis
+     * @param pluginName Name of the analysis plugin
      */
-    void analyzeDataset(const QString& analysisKind);
+    void analyzeDataset(const QString& pluginName);
+
+    /**
+     * Export the dataset
+     * @param pluginName Name of the exporter plugin
+     */
+    void exportDataset(const QString& pluginName);
 
 public: // Actions
 
