@@ -96,6 +96,11 @@ void MeanShift::setData(const std::vector<Vector2f>* points)
     _needsDensityMapUpdate = true;
 }
 
+void MeanShift::setSigma(float sigma)
+{
+    _sigma = sigma;
+}
+
 void MeanShift::drawFullscreenQuad()
 {
     glBindVertexArray(_quad);
