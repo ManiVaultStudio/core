@@ -9,9 +9,9 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QDoubleSpinBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
+#include <QRandomGenerator>
 
 using namespace hdps;
 
@@ -41,7 +41,13 @@ CreateClusterDialog::CreateClusterDialog(CoreInterface* core, const QString& inp
 
     _targetAction.setOptions(clusterDatasetNames);
     _targetAction.setCurrentText(clusterDatasetNames.first());
-    _targetAction.setEnabled(clusterDatasetNames.count() >= 1);
+    _targetAction.setEnabled(clusterDatasetNames.count() > 1);
+
+    const auto randomHue        = QRandomGenerator::global()->bounded(360);
+    const auto randomSaturation = QRandomGenerator::global()->bounded(150, 255);
+    const auto randomLightness  = QRandomGenerator::global()->bounded(100, 200);
+
+    _colorAction.setColor(QColor::fromHsl(randomHue, randomSaturation, randomLightness));
 
     const auto addWidgetAction = [this, layout](WidgetAction& widgetAction) -> void {
         const auto numRows = layout->rowCount();
@@ -57,7 +63,7 @@ CreateClusterDialog::CreateClusterDialog(CoreInterface* core, const QString& inp
     auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     dialogButtonBox->button(QDialogButtonBox::Ok)->setText("&Create");
-    dialogButtonBox->button(QDialogButtonBox::Cancel)->setText("&Cancel");
+    dialogButtonBox->button(QDialogButtonBox::Cancel)->setText("C&ancel");
 
     auto dialogButtonBoxLayout = new QHBoxLayout();
 
@@ -65,6 +71,30 @@ CreateClusterDialog::CreateClusterDialog(CoreInterface* core, const QString& inp
     dialogButtonBoxLayout->addWidget(dialogButtonBox);
 
     layout->addLayout(dialogButtonBoxLayout, layout->rowCount(), 0, 1, 2);
+
+    const auto updateCreateButton = [this, dialogButtonBox]() -> void {
+        dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!_nameAction.getString().isEmpty());
+    };
+
+    const auto updateNameAction = [this, core]() -> void {
+        if (!_nameAction.getString().isEmpty())
+            return;
+
+        auto& clusterDataset = core->getDataHierarchyItem(_targetAction.getCurrentText())->getDataset<Clusters>();
+
+        _nameAction.setString(QString("cluster_%1").arg(clusterDataset.getClusters().size() + 1));
+    };
+
+    connect(&_targetAction, &OptionAction::currentTextChanged, this, [this, updateNameAction](const QString& currentText) {
+        updateNameAction();
+    });
+
+    connect(&_nameAction, &StringAction::stringChanged, this, [this, updateCreateButton](const QString& string) {
+        updateCreateButton();
+    });
+
+    updateNameAction();
+    updateCreateButton();
 
     connect(dialogButtonBox, &QDialogButtonBox::accepted, [this, core, inputDataHierarchyItem]() {
         const auto targetClusterDataseName = _targetAction.getCurrentText();

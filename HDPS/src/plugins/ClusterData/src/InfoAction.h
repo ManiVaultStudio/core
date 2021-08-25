@@ -3,6 +3,8 @@
 #include "actions/Actions.h"
 #include "event/EventListener.h"
 
+#include "ClustersAction.h"
+
 namespace hdps {
     class CoreInterface;
     class DataHierarchyItem;
@@ -14,7 +16,7 @@ using namespace hdps::gui;
 /**
  * Info action class
  *
- * Action class for displaying basic points info
+ * Action class for displaying basic clusters info
  *
  * @author Thomas Kroes
  */
@@ -40,4 +42,5 @@ protected:
     CoreInterface*          _core;                      /** Pointer to the core */
     DataHierarchyItem*      _dataHierarchyItem;         /** Pointer to the data hierarchy item of the points dataset */
     StringAction            _numberOfClustersAction;    /** Number of points action */
+    ClustersAction          _clustersAction;            /** Clusters action */
 };

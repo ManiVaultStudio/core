@@ -188,6 +188,9 @@ const QString Core::createDerivedData(const QString& nameRequest, const QString&
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
+    new DataAnalysisAction(&_mainWindow, this, getDataHierarchyItem(setName));
+    new DataExportAction(&_mainWindow, this, getDataHierarchyItem(setName));
+
     return setName;
 }
 

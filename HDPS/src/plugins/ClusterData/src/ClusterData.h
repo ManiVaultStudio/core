@@ -22,6 +22,10 @@ class InfoAction;
 
 struct Cluster
 {
+    bool operator== (const Cluster& rhs) {
+        return rhs._name == _name;
+    }
+
     std::vector<unsigned int> indices;
 
     QString _name;
@@ -50,6 +54,10 @@ public:
         _clusters.push_back(cluster);
     }
 
+    void removeCluster(const Cluster& cluster) {
+        _clusters.erase(std::remove(_clusters.begin(), _clusters.end(), cluster), _clusters.end());
+    }
+
 private:
     std::vector<Cluster> _clusters;
 };
@@ -74,6 +82,11 @@ public:
     void addCluster(Cluster& cluster)
     {
         getRawData<ClusterData>().addCluster(cluster);
+    }
+
+    void removeCluster(const Cluster& cluster)
+    {
+        getRawData<ClusterData>().removeCluster(cluster);
     }
 
     DataSet* copy() const override

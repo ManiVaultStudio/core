@@ -46,7 +46,7 @@ public:
 
 public: // Action getters
 
-    TriggerAction& getCreateCluster() { return _createClusterAction; }
+    TriggerAction& getCreateCluster() { return _editAndCreateClusterAction; }
 
 signals:
 
@@ -57,8 +57,8 @@ signals:
     void selectedIndicesChanged(const std::vector<std::uint32_t>& selectedIndices);
 
 protected:
-    CoreInterface*          _core;                          /** Pointer to the core */
-    DataHierarchyItem*      _inputDataHierarchyItem;        /** Pointer to the input data hierarchy item */
-    DataHierarchyItem*      _clusterDataHierarchyItem;      /** Pointer to the output cluster data hierarchy item */
-    TriggerAction           _createClusterAction;           /** Create cluster action */
+    CoreInterface*          _core;                              /** Pointer to the core */
+    DataHierarchyItem*      _inputDataHierarchyItem;            /** Pointer to the input data hierarchy item */
+    DataHierarchyItem*      _clusterDataHierarchyItem;          /** Pointer to the output cluster data hierarchy item */
+    TriggerAction           _editAndCreateClusterAction;        /** Edit and create cluster action */
 };

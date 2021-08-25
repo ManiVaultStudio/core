@@ -14,10 +14,12 @@ ClusterAction::ClusterAction(QObject* parent, hdps::CoreInterface* core, const Q
     _core(core),
     _inputDataHierarchyItem(nullptr),
     _clusterDataHierarchyItem(nullptr),
-    _createClusterAction(this, "Create cluster")
+    _editAndCreateClusterAction(this, "create")
 {
     setText("Cluster");
     setEventCore(_core);
+
+    _editAndCreateClusterAction.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("edit"));
 
     _inputDataHierarchyItem = _core->getDataHierarchyItem(datasetName);
 
@@ -25,7 +27,7 @@ ClusterAction::ClusterAction(QObject* parent, hdps::CoreInterface* core, const Q
         auto& points    = _inputDataHierarchyItem->getDataset<Points>();
         auto& selection = dynamic_cast<Points&>(points.getSelection());
 
-        _createClusterAction.setEnabled(!selection.indices.empty());
+        _editAndCreateClusterAction.setEnabled(!selection.indices.empty());
     };
 
     registerDataEventByType(PointType, [this, updateCreateClusterAction](hdps::DataEvent* dataEvent) {
@@ -44,30 +46,16 @@ ClusterAction::ClusterAction(QObject* parent, hdps::CoreInterface* core, const Q
         }
     });
 
-    connect(&_createClusterAction, &TriggerAction::triggered, this, [this]() {
+    connect(&_editAndCreateClusterAction, &TriggerAction::triggered, this, [this]() {
         if (_clusterDataHierarchyItem == nullptr) {
             const auto clusterDatasetName = _core->addData("Cluster", "Cluster", _inputDataHierarchyItem->getDatasetName());
             _clusterDataHierarchyItem = _core->getDataHierarchyItem(clusterDatasetName);
         }
 
         auto& createClusterDialog = CreateClusterDialog(_core, _inputDataHierarchyItem->getDatasetName());
-        qDebug() << createClusterDialog.exec();
 
-        /*
-        auto& points            = _inputDataHierarchyItem->getDataset<Points>();
-        auto& selection         = dynamic_cast<Points&>(points.getSelection());
-        auto& clusterDataset    = _clusterDataHierarchyItem->getDataset<Clusters>();
-
-        
-
-        Cluster cluster;
-
-        cluster._name   = createClusterDialog.getNameAction().getString();
-        cluster._color  = createClusterDialog.getColorAction().getColor();
-        cluster.indices = selection.indices;
-
-        clusterDataset.addCluster(cluster);
-        */
+        createClusterDialog.setModal(true);
+        createClusterDialog.exec();
     });
 
     updateCreateClusterAction();
@@ -77,7 +65,7 @@ QMenu* ClusterAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
     auto menu = new QMenu(text(), parent);
 
-    menu->addAction(&_createClusterAction);
+    menu->addAction(&_editAndCreateClusterAction);
 
     return menu;
 }

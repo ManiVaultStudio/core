@@ -7,11 +7,12 @@ using namespace hdps;
 using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName) :
-    GroupAction(parent, false),
+    GroupAction(parent, true),
     EventListener(),
     _core(core),
     _dataHierarchyItem(nullptr),
-    _numberOfClustersAction(this, "Number of clusters")
+    _numberOfClustersAction(this, "Number of clusters"),
+    _clustersAction(this, core, datasetName)
 {
     setText("Info");
     setEventCore(_core);
@@ -22,7 +23,6 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     _numberOfClustersAction.setToolTip("The number of clusters");
 
     const auto updateActions = [this]() -> void {
-        qDebug() << "updateActions";
         auto& clusters = _dataHierarchyItem->getDataset<Clusters>();
 
         _numberOfClustersAction.setString(QString::number(clusters.getClusters().size()));
