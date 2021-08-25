@@ -795,7 +795,6 @@ public:
     std::vector<unsigned int> indices;
 
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
-    QSharedPointer<ClusterAction>   _clusterAction;     /** Shared pointer to cluster action */
 };
 
 // =============================================================================

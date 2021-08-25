@@ -2,8 +2,8 @@
 #include "CreateClusterDialog.h"
 
 #include "DataHierarchyItem.h"
-#include "PointData.h"
-#include "ClusterData.h"
+//#include "PointData.h"
+//#include "ClusterData.h"
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -19,7 +19,8 @@ ClusterAction::ClusterAction(QObject* parent, hdps::CoreInterface* core, const Q
     setText("Cluster");
     setEventCore(_core);
 
-    _editAndCreateClusterAction.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("edit"));
+    /*
+    //_editAndCreateClusterAction.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("edit"));
 
     _inputDataHierarchyItem = _core->getDataHierarchyItem(datasetName);
 
@@ -58,7 +59,7 @@ ClusterAction::ClusterAction(QObject* parent, hdps::CoreInterface* core, const Q
         createClusterDialog.exec();
     });
 
-    updateCreateClusterAction();
+    updateCreateClusterAction();*/
 }
 
 QMenu* ClusterAction::getContextMenu(QWidget* parent /*= nullptr*/)
@@ -72,8 +73,12 @@ QMenu* ClusterAction::getContextMenu(QWidget* parent /*= nullptr*/)
 
 const std::vector<std::uint32_t>& ClusterAction::getSelectedIndices() const
 {
+    /*
     auto& points    = _inputDataHierarchyItem->getDataset<Points>();
     auto& selection = dynamic_cast<Points&>(points.getSelection());
 
     return selection.indices;
+    */
+
+    return std::vector<std::uint32_t>();
 }

@@ -2,7 +2,6 @@
 #define HDPS_DATASET_H
 
 #include "CoreInterface.h"
-#include "Application.h"
 #include "RawData.h"
 
 #include <QString>
@@ -146,35 +145,23 @@ public: // Properties
 public: // Actions
 
     /** Returns list of shared action widgets*/
-    void addAction(hdps::gui::WidgetAction& widgetAction) {
-        Q_ASSERT(!_name.isEmpty());
-        _core->getDataHierarchyItem(_name)->addAction(widgetAction);
-    }
+    void addAction(hdps::gui::WidgetAction& widgetAction);
 
     /** Returns list of shared action widgets*/
-    hdps::gui::WidgetActions getActions() const {
-        Q_ASSERT(!_name.isEmpty());
-        return _core->getDataHierarchyItem(_name)->getActions();
-    }
+    hdps::gui::WidgetActions getActions() const;
 
     /**
      * Get the context menu
      * @param parent Parent widget
      * @return Context menu
      */
-    QMenu* getContextMenu(QWidget* parent = nullptr) {
-        Q_ASSERT(!_name.isEmpty());
-        return _core->getDataHierarchyItem(_name)->getContextMenu(parent);
-    };
+    QMenu* getContextMenu(QWidget* parent = nullptr);;
 
     /**
      * Populates existing menu with actions menus
      * @param contextMenu Context menu to populate
      */
-    void populateContextMenu(QMenu* contextMenu) {
-        Q_ASSERT(!_name.isEmpty());
-        return _core->getDataHierarchyItem(_name)->populateContextMenu(contextMenu);
-    };
+    void populateContextMenu(QMenu* contextMenu);;
 
 protected:
     template <class DataType>

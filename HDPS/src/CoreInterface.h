@@ -3,8 +3,6 @@
 
 #include "event/Event.h"
 
-#include "DataHierarchyItem.h"
-
 #include <QString>
 #include <vector>
 #include <functional>
@@ -14,7 +12,7 @@ namespace hdps
     class DataSet;
     class DataType;
     class EventListener;
-    class HierarchyDataItem;
+    class DataHierarchyItem;
 
     namespace plugin
     {

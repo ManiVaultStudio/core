@@ -46,3 +46,7 @@ QIcon Clusters::getIcon() const
 {
     return hdps::Application::getIconFont("FontAwesome").getIcon("th-large");
 }
+
+
+//QSharedPointer<ClusterAction>   _clusterAction;     /** Shared pointer to cluster action */
+//_clusterAction = QSharedPointer<ClusterAction>::create(nullptr, _core, getName());

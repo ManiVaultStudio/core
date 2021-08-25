@@ -1,5 +1,6 @@
 #include "DataManager.h"
 #include "RawData.h"
+#include "DataHierarchyItem.h"
 
 #include <QRegularExpression>
 #include <cassert>

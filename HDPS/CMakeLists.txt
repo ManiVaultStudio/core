@@ -228,6 +228,7 @@ set( PLUGIN_SOURCES
     src/LoaderPlugin.cpp
     src/Application.cpp
     src/Plugin.cpp
+    src/Set.cpp
 )
 
 set(DATA_HIERARCHY_HEADERS

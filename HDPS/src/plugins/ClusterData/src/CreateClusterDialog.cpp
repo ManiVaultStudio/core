@@ -2,7 +2,7 @@
 
 #include "CoreInterface.h"
 #include "Application.h"
-#include "PointData.h"
+//#include "PointData.h"
 #include "ClusterData.h"
 
 #include <QDebug>
@@ -21,6 +21,7 @@ CreateClusterDialog::CreateClusterDialog(CoreInterface* core, const QString& inp
     _nameAction(this, "Name"),
     _colorAction(this, "Color")
 {
+    /*
     setWindowTitle("Add cluster");
     setWindowIcon(hdps::Application::getIconFont("FontAwesome").getIcon("th-large"));
     
@@ -123,4 +124,5 @@ CreateClusterDialog::CreateClusterDialog(CoreInterface* core, const QString& inp
     connect(dialogButtonBox, &QDialogButtonBox::rejected, [this]() {
         reject();
     });
+    */
 }

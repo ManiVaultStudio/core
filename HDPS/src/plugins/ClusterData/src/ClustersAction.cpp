@@ -148,6 +148,8 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
         if (clusters.isEmpty())
             return;
 
+        qDebug() << clusters.size();
+
         clustersAction->removeClusters(clusters);
     });
 

@@ -1,5 +1,5 @@
 #include "DimensionNamesAction.h"
-
+#include "DataHierarchyItem.h"
 #include "PointData.h"
 
 #include <QHBoxLayout>

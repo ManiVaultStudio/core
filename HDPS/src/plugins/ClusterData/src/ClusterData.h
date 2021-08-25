@@ -1,5 +1,7 @@
 #pragma once
 
+#include "clusterdata_export.h"
+
 #include <RawData.h>
 #include <Set.h>
 
@@ -20,7 +22,7 @@ const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
 
 class InfoAction;
 
-struct Cluster
+struct CLUSTERDATA_EXPORT Cluster
 {
     bool operator== (const Cluster& rhs) {
         return rhs._name == _name;
@@ -35,7 +37,7 @@ struct Cluster
     std::vector<float> _stddev;
 };
 
-class ClusterData : public hdps::plugin::RawData
+class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData
 {
 public:
     ClusterData(const hdps::plugin::PluginFactory* factory) : hdps::plugin::RawData(factory, ClusterType) { }
@@ -66,7 +68,7 @@ private:
 // Cluster Set
 // =============================================================================
 
-class Clusters : public hdps::DataSet
+class CLUSTERDATA_EXPORT Clusters : public hdps::DataSet
 {
 public:
     Clusters(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
