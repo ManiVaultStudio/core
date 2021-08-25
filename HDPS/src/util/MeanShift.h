@@ -20,6 +20,7 @@ public:
     void cleanup();
 
     void setData(const std::vector<Vector2f>* points);
+    void setSigma(float sigma);
 
     void drawFullscreenQuad();
 

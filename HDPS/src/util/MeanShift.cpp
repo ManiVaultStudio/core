@@ -96,6 +96,11 @@ void MeanShift::setData(const std::vector<Vector2f>* points)
     _needsDensityMapUpdate = true;
 }
 
+void MeanShift::setSigma(float sigma)
+{
+    _sigma = sigma;
+}
+
 void MeanShift::drawFullscreenQuad()
 {
     glBindVertexArray(_quad);
@@ -201,6 +206,7 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
 {
     if (points.size() == 0) return;
 
+    densityComputation.setSigma(_sigma);
     densityComputation.compute();
     computeGradient();
     computeMeanShift();
