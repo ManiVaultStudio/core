@@ -206,6 +206,7 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
 {
     if (points.size() == 0) return;
 
+    densityComputation.setSigma(_sigma);
     densityComputation.compute();
     computeGradient();
     computeMeanShift();
