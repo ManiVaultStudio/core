@@ -21,9 +21,6 @@ int ClustersModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
 
 int ClustersModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    if (_clusters == nullptr)
-        return 0;
-
     return static_cast<std::int32_t>(Column::_End);
 }
 

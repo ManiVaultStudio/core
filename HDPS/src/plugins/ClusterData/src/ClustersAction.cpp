@@ -81,13 +81,18 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     auto clustersTreeView = new QTreeView();
 
+    // Configure tree view
     clustersTreeView->setFixedHeight(150);
     clustersTreeView->setRootIsDecorated(false);
     clustersTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     clustersTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     clustersTreeView->setModel(&clustersAction->getClustersModel());
-    clustersTreeView->setColumnHidden(static_cast<std::int32_t>(ClustersModel::Column::ID), true);
-    clustersTreeView->header()->setStretchLastSection(true);
+
+    // Configure header view
+    auto header = clustersTreeView->header();
+
+    header->setStretchLastSection(true);
+    header->hideSection(static_cast<std::int32_t>(ClustersModel::Column::ID));
 
     auto mainLayout = new QVBoxLayout();
 
