@@ -12,7 +12,7 @@ namespace gui {
 OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/) :
     WidgetAction(parent),
     _defaultModel(),
-    _customListModel(nullptr),
+    _customModel(nullptr),
     _currentIndex(-1),
     _defaultIndex(0)
 {
@@ -49,27 +49,27 @@ void OptionAction::setOptions(const QStringList& options)
     emit optionsChanged(getOptions());
 }
 
-const QAbstractListModel* OptionAction::getModel() const
+const QAbstractItemModel* OptionAction::getModel() const
 {
-    if (_customListModel != nullptr)
-        return _customListModel;
+    if (_customModel != nullptr)
+        return _customModel;
 
     return &_defaultModel;
 }
 
-void OptionAction::setCustomListModel(QAbstractListModel* customListModel)
+void OptionAction::setCustomModel(QAbstractItemModel* itemModel)
 {
-    if (customListModel == _customListModel)
+    if (itemModel == _customModel)
         return;
 
-    _customListModel = customListModel;
+    _customModel = itemModel;
 
-    emit customListModelChanged(_customListModel);
+    emit customModelChanged(_customModel);
 }
 
-bool OptionAction::hasCustomListModel() const
+bool OptionAction::hasCustomModel() const
 {
-    return _customListModel != nullptr;
+    return _customModel != nullptr;
 }
 
 std::int32_t OptionAction::getCurrentIndex() const
@@ -173,7 +173,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         QSignalBlocker comboBoxSignalBlocker(_comboBox);
 
         _comboBox->setModel(new QStringListModel());
-        _comboBox->setModel(const_cast<QAbstractListModel*>(optionAction->getModel()));
+        _comboBox->setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
         _comboBox->setEnabled(!optionAction->getOptions().isEmpty());
 
         updateToolTip();

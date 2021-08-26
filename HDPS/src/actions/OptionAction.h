@@ -94,13 +94,13 @@ public:
     void setOptions(const QStringList& options);
 
     /**
-     * Sets a custom list model for more advanced display of options
-     * @param listModel Pointer to custom list model
+     * Sets a custom item model for more advanced display of options
+     * @param itemModel Pointer to custom item model
      */
-    void setCustomListModel(QAbstractListModel* listModel);
+    void setCustomModel(QAbstractItemModel* itemModel);
 
-    /** Determines whether the option action has a custom list model */
-    bool hasCustomListModel() const;
+    /** Determines whether the option action has a custom item model */
+    bool hasCustomModel() const;
 
     /** Gets the current option index */
     std::int32_t getCurrentIndex() const;
@@ -147,8 +147,8 @@ public:
     /** Determines whether an option has been selected */
     bool hasSelection() const;
 
-    /** Gets the used list model */
-    const QAbstractListModel* getModel() const;;
+    /** Gets the used item model */
+    const QAbstractItemModel* getModel() const;
 
 signals:
 
@@ -159,10 +159,10 @@ signals:
     void optionsChanged(const QStringList& options);
 
     /**
-     * Signals that the custom list model changed
-     * @param customListModel Custom list model
+     * Signals that the custom model changed
+     * @param customModel Custom model
      */
-    void customListModelChanged(QAbstractListModel* customListModel);
+    void customModelChanged(QAbstractItemModel* customModel);
 
     /**
      * Signals that the current index changed
@@ -184,7 +184,7 @@ signals:
 
 protected:
     QStringListModel        _defaultModel;          /** Default simple string list model */
-    QAbstractListModel*     _customListModel;       /** Custom list model for enriched (combobox) ui */
+    QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
     std::int32_t            _currentIndex;          /** Currently selected index */
     std::int32_t            _defaultIndex;          /** Default index */
 };
