@@ -176,8 +176,12 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     const auto onUpdateValue = [this, integralAction, setToolTips]() {
         const auto value = integralAction->getValue();
 
-        if (value != _spinBox->value())
-            _spinBox->setValue(value);
+        if (value == _spinBox->value())
+            return;
+
+        QSignalBlocker doubleSpinBoxBlocker(_spinBox);
+        
+        _spinBox->setValue(value);
 
         setToolTips();
     };
@@ -259,8 +263,12 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     const auto onUpdateValue = [this, integralAction, setToolTips]() {
         const auto value = integralAction->getValue();
 
-        if (value != _slider->value())
-            _slider->setValue(value);
+        if (value == _slider->value())
+            return;
+
+        QSignalBlocker sliderBlocker(_slider);
+        
+        _slider->setValue(value);
 
         setToolTips();
     };

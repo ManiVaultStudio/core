@@ -195,6 +195,8 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
         if (value == _doubleSpinBox->value())
             return;
         
+        QSignalBlocker doubleSpinBoxBlocker(_doubleSpinBox);
+
         _doubleSpinBox->setValue(value);
         setToolTips();
     };
@@ -303,6 +305,8 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
 
         if (sliderValue == _slider->value())
             return;
+
+        QSignalBlocker sliderBlocker(_slider);
 
         _slider->setValue(sliderValue);
 
