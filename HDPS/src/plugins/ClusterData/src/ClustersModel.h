@@ -25,9 +25,10 @@ public:
 
     /** Columns */
     enum class Column {
+        Color,              /** Color of the cluster */
         Name,               /** Name of the cluster */
         ID,                 /** Identifier of the cluster */
-        NumberOfPoints,     /** Number of points in the cluster */
+        NumberOfIndices,     /** Number of points in the cluster */
 
         /** Number of columns */
         _Count

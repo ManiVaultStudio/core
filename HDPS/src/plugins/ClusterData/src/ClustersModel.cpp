@@ -34,20 +34,26 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
+        //case Qt::TextAlignmentRole:
+            //return column == Column::NumberOfIndices ? Qt::AlignRight : QVariant();
+
         case Qt::DecorationRole:
-            return column == Column::Name ? getDecorationRole(cluster._color) : QVariant();
+            return column == Column::Color ? getDecorationRole(cluster._color) : QVariant();
 
         case Qt::DisplayRole:
         {
             switch (column)
             {
+                case Column::Color:
+                    break;
+
                 case Column::Name:
                     return cluster._name;
 
                 case Column::ID:
                     return cluster._id;
 
-                case Column::NumberOfPoints:
+                case Column::NumberOfIndices:
                     return cluster._indices.size();
             }
 
@@ -58,11 +64,14 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
         {
             switch (column)
             {
+                case Column::Color:
+                    break;
+
                 case Column::Name:
                     return cluster._name;
 
                 case Column::ID:
-                case Column::NumberOfPoints:
+                case Column::NumberOfIndices:
                     break;
 
                 default:
@@ -87,26 +96,19 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
 
     switch (role)
     {
-        case Qt::DecorationRole:
-        {
-            switch (column) {
-                case Column::Name:
-                    cluster->_color = value.value<QColor>();
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        case Qt::DisplayRole:
-            break;
-
         case Qt::EditRole:
         {
             switch (column) {
+                case Column::Color:
+                    cluster->_color = value.value<QColor>();
+                    break;
+
                 case Column::Name:
                     cluster->_name = value.toString();
+                    break;
+
+                case Column::ID:
+                case Column::NumberOfIndices:
                     break;
 
                 default:
@@ -132,19 +134,46 @@ QVariant ClustersModel::headerData(int section, Qt::Orientation orientation, int
             {
                 switch (static_cast<Column>(section))
                 {
+                    case Column::Color:
+                        return "";
+
                     case Column::Name:
                         return "Name";
 
                     case Column::ID:
                         return "Identifier";
 
-                    case Column::NumberOfPoints:
+                    case Column::NumberOfIndices:
                         return "# Points";
 
                     default:
-                        return "";
+                        break;
                 }
+
+                break;
             }
+
+            case Qt::DecorationRole:
+            {
+                switch (static_cast<Column>(section))
+                {
+                    case Column::Color:
+                        return Application::getIconFont("FontAwesome").getIcon("palette", QSize(12, 12));
+
+                    case Column::Name:
+                    case Column::ID:
+                    case Column::NumberOfIndices:
+                        break;
+
+                    default:
+                        break;
+                }
+
+                break;
+            }
+
+            default:
+                break;
         }
     }
 

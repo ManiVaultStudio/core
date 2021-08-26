@@ -41,7 +41,6 @@ protected:
         Widget(QWidget* parent, ClustersAction* clustersAction, const hdps::gui::WidgetActionWidget::State& state);
 
     protected:
-        ColorAction         _colorAction;           /** Color action */
         TriggerAction       _removeAction;          /** Remove clusters action */
         QItemSelection      _cacheClusterSelection;  /** Cached selected indexes */
     };
