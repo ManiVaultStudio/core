@@ -33,7 +33,7 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
             //return column == Column::NumberOfIndices ? Qt::AlignRight : QVariant();
 
         case Qt::DecorationRole:
-            return column == Column::Color ? getDecorationRole(cluster._color) : QVariant();
+            return column == Column::Color ? getColorIcon(cluster._color) : QVariant();
 
         case Qt::ToolTipRole:
         {
@@ -270,13 +270,20 @@ void ClustersModel::removeClustersById(const QStringList& ids)
     emit layoutChanged();
 }
 
-QIcon ClustersModel::getDecorationRole(const QColor& color) const
+QIcon ClustersModel::getColorIcon(const QColor& color) const
 {
     QPixmap pixmap(QSize(14, 14));
 
-    pixmap.fill(color);
+    pixmap.fill(Qt::transparent);
 
     QPainter painter(&pixmap);
+
+    const auto radius = 3;
+
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(QBrush(color));
+    painter.drawRoundedRect(0, 0, 14, 14, radius, radius);
 
     return QIcon(pixmap);
 }

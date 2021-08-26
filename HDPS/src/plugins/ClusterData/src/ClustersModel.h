@@ -28,7 +28,7 @@ public:
         Color,              /** Color of the cluster */
         Name,               /** Name of the cluster */
         ID,                 /** Identifier of the cluster */
-        NumberOfIndices,     /** Number of points in the cluster */
+        NumberOfIndices,    /** Number of indices in the cluster */
 
         /** Number of columns */
         _Count
@@ -113,11 +113,11 @@ public:
 private:
 
     /**
-     * Get decoration role (icon)
+     * Get color icon
      * @param color Color of the icon
      * @return Icon
      */
-    QIcon getDecorationRole(const QColor& color) const;
+    QIcon getColorIcon(const QColor& color) const;
 
 public:
     std::vector<Cluster>    _clusters;     /** List of clusters from cluster data */

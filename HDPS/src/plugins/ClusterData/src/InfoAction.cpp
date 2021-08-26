@@ -14,7 +14,7 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     _numberOfClustersAction(this, "Number of clusters"),
     _clustersAction(this, core, datasetName)
 {
-    setText("Info");
+    setText("Clusters");
     setEventCore(_core);
 
     _dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
