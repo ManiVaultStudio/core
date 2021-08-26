@@ -29,7 +29,8 @@ public:
         ID,                 /** Identifier of the cluster */
         NumberOfPoints,     /** Number of points in the cluster */
 
-        _End
+        /** Number of columns */
+        _Count
     };
 
 public:

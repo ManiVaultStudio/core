@@ -21,7 +21,7 @@ int ClustersModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
 
 int ClustersModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    return static_cast<std::int32_t>(Column::_End);
+    return static_cast<std::int32_t>(Column::_Count);
 }
 
 QVariant ClustersModel::data(const QModelIndex& index, int role) const
@@ -189,14 +189,14 @@ void ClustersModel::setClusters(std::vector<Cluster>* clusters)
 
     const auto numberOfClustersChanged = _clusters == nullptr ? true : _clusters->size() == clusters->size();
 
-    emit beginResetModel();
-
     _clusters = clusters;
 
-    emit endResetModel();
-
-    if (numberOfClustersChanged)
+    if (numberOfClustersChanged) {
         emit layoutChanged();
+    }
+    else {
+        emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::_Count) - 1));
+    }
 }
 
 QIcon ClustersModel::getDecorationRole(const QColor& color) const
