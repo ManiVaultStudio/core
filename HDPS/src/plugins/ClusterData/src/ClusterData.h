@@ -41,7 +41,28 @@ struct CLUSTERDATA_EXPORT Cluster
      * @param rhs Right hand sign of the comparison
      */
     bool operator==(const Cluster& rhs) const {
-        return rhs._id == _id;
+        if (rhs._name != _name)
+            return false;
+
+        if (rhs._id != _id)
+            return false;
+
+        if (rhs._color != _color)
+            return false;
+
+        if (rhs._indices != _indices)
+            return false;
+
+        if (rhs._median != _median)
+            return false;
+
+        if (rhs._mean != _mean)
+            return false;
+
+        if (rhs._stddev != _stddev)
+            return false;
+
+        return true;
     }
 
     QString                     _name;          /** GUI name */

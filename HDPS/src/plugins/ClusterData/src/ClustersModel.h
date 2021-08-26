@@ -95,18 +95,20 @@ public:
      */
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    /**
-     * Get cluster
-     * @param row Row index
-     * @return Cluster
-     */
-    Cluster& getCluster(const std::int32_t& row);
+    /** Get clusters */
+    std::vector<Cluster>& getClusters();
 
     /**
      * Set clusters
      * @param clusters Pointer to clusters
      */
-    void setClusters(std::vector<Cluster>* clusters);
+    void setClusters(const std::vector<Cluster>& clusters);
+
+    /**
+     * Remove clusters by their unique identifiers
+     * @param ids Unique identifiers of the clusters to remove
+     */
+    void removeClustersById(const QStringList& ids);
 
 private:
 
@@ -118,5 +120,5 @@ private:
     QIcon getDecorationRole(const QColor& color) const;
 
 public:
-    std::vector<Cluster>*    _clusters;     /** List of clusters from cluster data */
+    std::vector<Cluster>    _clusters;     /** List of clusters from cluster data */
 };

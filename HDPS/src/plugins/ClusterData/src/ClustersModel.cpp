@@ -7,16 +7,13 @@ using namespace hdps;
 
 ClustersModel::ClustersModel(QObject* parent) :
     QAbstractListModel(parent),
-    _clusters(nullptr)
+    _clusters()
 {
 }
 
 int ClustersModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    if (_clusters == nullptr)
-        return 0;
-    
-    return static_cast<std::int32_t>(_clusters->size());
+    return static_cast<std::int32_t>(_clusters.size());
 }
 
 int ClustersModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
@@ -26,9 +23,7 @@ int ClustersModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) co
 
 QVariant ClustersModel::data(const QModelIndex& index, int role) const
 {
-    Q_ASSERT(_clusters != nullptr);
-
-    auto& cluster = _clusters->at(index.row());
+    auto& cluster = _clusters.at(index.row());
 
     const auto column = static_cast<Column>(index.column());
 
@@ -40,12 +35,39 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole:
             return column == Column::Color ? getDecorationRole(cluster._color) : QVariant();
 
+        case Qt::ToolTipRole:
+        {
+            switch (column)
+            {
+                case Column::Color:
+                    return QString("Color: %1").arg(data(index, Qt::DisplayRole).toString());
+
+                case Column::Name:
+                    return QString("Name: %1").arg(data(index, Qt::DisplayRole).toString());
+
+                case Column::ID:
+                    return QString("Identifier: %1").arg(data(index, Qt::DisplayRole).toString());
+
+                case Column::NumberOfIndices:
+                {
+                    QStringList indices;
+
+                    for (auto index : cluster._indices)
+                        indices << QString::number(index);
+
+                    return QString("Indices: [%1]").arg(indices.join(", "));
+                }
+            }
+
+            break;
+        }
+
         case Qt::DisplayRole:
         {
             switch (column)
             {
                 case Column::Color:
-                    break;
+                    return QString("rgb(%1, %2, %3").arg(QString::number(cluster._color.red()), QString::number(cluster._color.green()), QString::number(cluster._color.blue()));
 
                 case Column::Name:
                     return cluster._name;
@@ -65,6 +87,7 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
             switch (column)
             {
                 case Column::Color:
+                    return QVariant::fromValue(cluster._color);
                     break;
 
                 case Column::Name:
@@ -182,7 +205,7 @@ QVariant ClustersModel::headerData(int section, Qt::Orientation orientation, int
 
 QModelIndex ClustersModel::index(int row, int column, const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    return createIndex(row, column, &_clusters->at(row));
+    return createIndex(row, column, (void*)(&_clusters.at(row)));
 }
 
 Qt::ItemFlags ClustersModel::flags(const QModelIndex& index) const
@@ -207,25 +230,44 @@ Qt::ItemFlags ClustersModel::flags(const QModelIndex& index) const
     return itemFlags;
 }
 
-Cluster& ClustersModel::getCluster(const std::int32_t& row)
+std::vector<Cluster>& ClustersModel::getClusters()
 {
-    return _clusters->at(row);
+    return _clusters;
 }
 
-void ClustersModel::setClusters(std::vector<Cluster>* clusters)
+void ClustersModel::setClusters(const std::vector<Cluster>& clusters)
 {
-    Q_ASSERT(clusters != nullptr);
-
-    const auto numberOfClustersChanged = _clusters == nullptr ? true : _clusters->size() == clusters->size();
-
-    _clusters = clusters;
+    const auto numberOfClustersChanged = clusters.size() != _clusters.size();
 
     if (numberOfClustersChanged) {
+
+        emit layoutAboutToBeChanged();
+        {
+            _clusters = clusters;
+        }
         emit layoutChanged();
     }
     else {
-        emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::_Count) - 1));
+        if (!std::equal(_clusters.begin(), _clusters.end(), clusters.begin())) {
+            _clusters = clusters;
+
+            emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::_Count) - 1));
+        }
     }
+}
+
+void ClustersModel::removeClustersById(const QStringList& ids)
+{
+    emit layoutAboutToBeChanged();
+    {
+        for (auto id : ids) {
+            _clusters.erase(std::remove_if(_clusters.begin(), _clusters.end(), [id](const Cluster& cluster) -> bool
+            {
+                return cluster._id == id;
+            }), _clusters.end());
+        }
+    }
+    emit layoutChanged();
 }
 
 QIcon ClustersModel::getDecorationRole(const QColor& color) const
