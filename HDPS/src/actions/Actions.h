@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ColorAction.h"
+#include "ColorMapAction.h"
 #include "DecimalAction.h"
 #include "GroupAction.h"
 #include "IntegralAction.h"

@@ -23,7 +23,7 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
 void OptionAction::initialize(const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
 {
     setOptions(options);
-    setCurrentText(defaultOption);
+    setCurrentText(currentOption);
     setDefaultText(defaultOption);
 }
 

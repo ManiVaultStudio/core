@@ -13,7 +13,7 @@ namespace gui {
  *
  * @author Thomas Kroes
  */
-class ColorMapAction : protected OptionAction
+class ColorMapAction : public OptionAction
 {
     Q_OBJECT
 
