@@ -3,6 +3,10 @@
 #include "actions/Actions.h"
 #include "event/EventListener.h"
 
+#include "ClustersModel.h"
+
+#include <QItemSelection>
+
 namespace hdps {
     class CoreInterface;
     class DataHierarchyItem;
@@ -22,8 +26,6 @@ using namespace hdps::gui;
  */
 class ClustersAction : public hdps::gui::WidgetAction, public EventListener
 {
-    Q_OBJECT
-
 protected:
 
     /** Widget class for clusters action */
@@ -39,8 +41,9 @@ protected:
         Widget(QWidget* parent, ClustersAction* clustersAction, const hdps::gui::WidgetActionWidget::State& state);
 
     protected:
-        ColorAction     _colorAction;       /** Color action */
-        TriggerAction   _removeAction;      /** Remove clusters action */
+        ColorAction         _colorAction;           /** Color action */
+        TriggerAction       _removeAction;          /** Remove clusters action */
+        QItemSelection      _cacheClusterSelection;  /** Cached selected indexes */
     };
 
     /**
@@ -72,20 +75,16 @@ public:
     void selectPoints(const std::vector<std::uint32_t>& indices);
 
     /**
-     * Remove cluster
-     * @param clusters Clusters to remove
+     * Remove clusters by their unique identifiers
+     * @param ids Unique identifiers of the clusters to remove
      */
-    void removeClusters(const QVector<Cluster*>& clusters);
+    void removeClustersById(const QStringList& ids);
 
-signals:
-
-    /**
-     * Signals that the clusters changed
-     * @param clusters New clusters
-     */
-    void clustersChanged(std::vector<Cluster>* clusters);
+    /** Get the clusters model */
+    ClustersModel& getClustersModel();
 
 protected:
     hdps::CoreInterface*        _core;                  /** Pointer to the core */
     hdps::DataHierarchyItem*    _dataHierarchyItem;     /** Pointer to the data hierarchy item of the points dataset */
+    ClustersModel               _clustersModel;         /** Clusters model */
 };

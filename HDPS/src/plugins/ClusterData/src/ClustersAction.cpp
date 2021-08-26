@@ -1,5 +1,4 @@
 #include "ClustersAction.h"
-#include "ClustersModel.h"
 #include "DataHierarchyItem.h"
 #include "ClusterData.h"
 #include "PointData.h"
@@ -15,7 +14,8 @@ ClustersAction::ClustersAction(QObject* parent, hdps::CoreInterface* core, const
     WidgetAction(parent),
     EventListener(),
     _core(core),
-    _dataHierarchyItem(nullptr)
+    _dataHierarchyItem(nullptr),
+    _clustersModel(this)
 {
     setText("Clusters");
     setEventCore(_core);
@@ -27,7 +27,13 @@ ClustersAction::ClustersAction(QObject* parent, hdps::CoreInterface* core, const
             return;
 
         if (dataEvent->getType() == EventType::DataChanged)
-            emit clustersChanged(getClusters());
+            _clustersModel.setClusters(getClusters());
+    });
+
+    connect(&_clustersModel, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
+        Q_ASSERT(_dataHierarchyItem != nullptr);
+
+        _core->notifyDataChanged(_dataHierarchyItem->getDatasetName());
     });
 }
 
@@ -48,12 +54,22 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     _core->notifySelectionChanged(parentDataHierarchyItem->getDatasetName());
 }
 
-void ClustersAction::removeClusters(const QVector<Cluster*>& clusters)
+void ClustersAction::removeClustersById(const QStringList& ids)
 {
-    for (auto& cluster : clusters)
-        _dataHierarchyItem->getDataset<Clusters>().removeCluster(*cluster);
+    Q_ASSERT(_dataHierarchyItem != nullptr);
+    Q_ASSERT(!ids.isEmpty());
+
+    if (ids.isEmpty())
+        return;
+
+    _dataHierarchyItem->getDataset<Clusters>().removeClustersById(ids);
 
     _core->notifyDataChanged(_dataHierarchyItem->getDatasetName());
+}
+
+ClustersModel& ClustersAction::getClustersModel()
+{
+    return _clustersModel;
 }
 
 ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, const hdps::gui::WidgetActionWidget::State& state) :
@@ -65,12 +81,13 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     auto clustersTreeView = new QTreeView();
 
-    clustersTreeView->setFixedHeight(250);
+    clustersTreeView->setFixedHeight(150);
     clustersTreeView->setRootIsDecorated(false);
     clustersTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     clustersTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    clustersTreeView->setModel(&clustersAction->getClustersModel());
+    clustersTreeView->setColumnHidden(static_cast<std::int32_t>(ClustersModel::Column::ID), true);
     clustersTreeView->header()->setStretchLastSection(true);
-    clustersTreeView->setFocusPolicy(Qt::ClickFocus);
 
     auto mainLayout = new QVBoxLayout();
 
@@ -89,7 +106,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
         // Gather point indices for selection
         for (auto selectedIndex : selectedRows) {
             auto cluster = static_cast<Cluster*>(selectedIndex.internalPointer());
-            selectionIndices.insert(selectionIndices.end(), cluster->indices.begin(), cluster->indices.end());
+            selectionIndices.insert(selectionIndices.end(), cluster->_indices.begin(), cluster->_indices.end());
         }
 
         // Remove duplicates
@@ -110,24 +127,25 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
             color = static_cast<Cluster*>(selectedRows.first().internalPointer())->_color;
 
         _colorAction.setEnabled(canSelectColor);
+
+        //QSignalBlocker colorActionBlocker(&_colorAction);
+
         _colorAction.setColor(color);
     };
 
     //selectionChangedHandler();
 
-    const auto updateClustersListView = [this, clustersAction, clustersTreeView, selectionChangedHandler]() -> void {
-        clustersTreeView->setModel(new ClustersModel(this, clustersAction->getClusters()));
-
-        connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {
-            selectionChangedHandler();
-        });
-    };
-
-    connect(clustersAction, &ClustersAction::clustersChanged, this, [this, updateClustersListView](std::vector<Cluster>* clusters) {
-        updateClustersListView();
+    connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {
+        selectionChangedHandler();
     });
 
-    updateClustersListView();
+    connect(clustersTreeView->model(), &QAbstractItemModel::modelAboutToBeReset, this, [this, clustersTreeView]() {
+        _cacheClusterSelection = clustersTreeView->selectionModel()->selection();
+    });
+
+    connect(clustersTreeView->model(), &QAbstractItemModel::modelReset, this, [this, clustersTreeView]() {
+        //clustersTreeView->selectionModel()->select(_cacheClusterSelection, QItemSelectionModel::SelectionFlag::Rows | QItemSelectionModel::SelectionFlag::ClearAndSelect);
+    });
 
     auto toolbarLayout = new QHBoxLayout();
 
@@ -136,37 +154,28 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     toolbarLayout->addWidget(_colorAction.createWidget(this), 1);
     toolbarLayout->addWidget(_removeAction.createWidget(this));
 
-    connect(&_removeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView, updateClustersListView]() {
+    connect(&_removeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView]() {
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
 
-        QVector<Cluster*> clusters;
+        QStringList clusterIds;
 
-        // Gather point indices for selection
         for (auto selectedIndex : selectedRows)
-            clusters << static_cast<Cluster*>(selectedIndex.internalPointer());
+            clusterIds << selectedIndex.siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
 
-        if (clusters.isEmpty())
-            return;
-
-        qDebug() << clusters.size();
-
-        clustersAction->removeClusters(clusters);
+        clustersAction->removeClustersById(clusterIds);
     });
 
-    /*
-    connect(&_colorAction, &ColorAction::colorChanged, this, [this, clustersAction, clustersTreeView, updateClustersListView]() {
+    connect(&_colorAction, &ColorAction::colorChanged, this, [this, clustersAction, clustersTreeView]() {
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
 
-        QVector<Cluster*> clusters;
-
-        // Gather point indices for selection
-        for (auto selectedIndex : selectedRows)
-            clusters << static_cast<Cluster*>(selectedIndex.internalPointer());
-
-        if (clusters.isEmpty())
+        if (selectedRows.count() != 1)
             return;
 
-        clustersAction->removeClusters(clusters);
+        const auto newColor = _colorAction.getColor();
+
+        auto cluster = static_cast<Cluster*>(selectedRows.first().internalPointer());
+        
+        if (newColor != cluster->_color)
+            clustersTreeView->model()->setData(selectedRows.first(), newColor, Qt::DecorationRole);
     });
-    */
 }

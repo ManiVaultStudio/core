@@ -7,6 +7,7 @@
 
 #include <QString>
 #include <QColor>
+#include <QUuid>
 
 #include <vector>
 
@@ -24,44 +25,67 @@ class InfoAction;
 
 struct CLUSTERDATA_EXPORT Cluster
 {
-    bool operator== (const Cluster& rhs) {
-        return rhs._name == _name;
+    /** Constructor */
+    Cluster() :
+        _name(""),
+        _id(QUuid::createUuid().toString()),
+        _color(Qt::gray),
+        _median(),
+        _mean(),
+        _stddev()
+    {
     }
 
-    std::vector<unsigned int> indices;
+    /**
+     * Comparison operator for two clusters (compares the internal identifiers)
+     * @param rhs Right hand sign of the comparison
+     */
+    bool operator==(const Cluster& rhs) const {
+        return rhs._id == _id;
+    }
 
-    QString _name;
-    QColor _color;
-    std::vector<float> _median;
-    std::vector<float> _mean;
-    std::vector<float> _stddev;
+    QString                     _name;          /** GUI name */
+    QString                     _id;            /** Unique cluster name */
+    QColor                      _color;         /** Cluster color */
+    std::vector<unsigned int>   _indices;       /** Indices contained by the cluster */
+    std::vector<float>          _median;        /** Median values */
+    std::vector<float>          _mean;          /** Mean values */
+    std::vector<float>          _stddev;        /** Standard deviation values */
 };
 
 class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData
 {
 public:
-    ClusterData(const hdps::plugin::PluginFactory* factory) : hdps::plugin::RawData(factory, ClusterType) { }
+    ClusterData(const hdps::plugin::PluginFactory* factory);
     ~ClusterData(void) override;
     
     void init() override;
 
     hdps::DataSet* createDataSet() const override;
 
-    std::vector<Cluster>& getClusters()
-    {
-        return _clusters;
-    }
+    /** Returns reference to the clusters */
+    std::vector<Cluster>& getClusters();
 
-    void addCluster(Cluster& cluster) {
-        _clusters.push_back(cluster);
-    }
+    /**
+     * Adds a cluster
+     * @param cluster Cluster to add
+     */
+    void addCluster(Cluster& cluster);
 
-    void removeCluster(const Cluster& cluster) {
-        _clusters.erase(std::remove(_clusters.begin(), _clusters.end(), cluster), _clusters.end());
-    }
+    /**
+     * Removes a cluster by its unique identifier
+     * @param id Unique identifier of the cluster to remove
+     */
+    void removeClusterById(const QString& id);
+
+    /**
+     * Remove clusters by their unique identifiers
+     * @param ids Unique identifiers of the clusters to remove
+     */
+    void removeClustersById(const QStringList& ids);
 
 private:
-    std::vector<Cluster> _clusters;
+    std::vector<Cluster>    _clusters;      /** Clusters data */
 };
 
 // =============================================================================
@@ -81,15 +105,23 @@ public:
         return getRawData<ClusterData>().getClusters();
     }
 
-    void addCluster(Cluster& cluster)
-    {
-        getRawData<ClusterData>().addCluster(cluster);
-    }
+    /**
+     * Adds a cluster
+     * @param cluster Cluster to add
+     */
+    void addCluster(Cluster& cluster);
 
-    void removeCluster(const Cluster& cluster)
-    {
-        getRawData<ClusterData>().removeCluster(cluster);
-    }
+    /**
+     * Removes a cluster by its unique identifier
+     * @param id Unique identifier of the cluster to remove
+     */
+    void removeClusterById(const QString& id);
+
+    /**
+     * Remove clusters by their unique identifiers
+     * @param ids Unique identifiers of the clusters to remove
+     */
+    void removeClustersById(const QStringList& ids);
 
     DataSet* copy() const override
     {

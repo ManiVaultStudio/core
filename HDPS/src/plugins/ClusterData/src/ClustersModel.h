@@ -26,9 +26,7 @@ public:
     /** Columns */
     enum class Column {
         Name,               /** Name of the cluster */
-        //Median,
-        //Mean,
-        //StdDev,
+        ID,                 /** Identifier of the cluster */
         NumberOfPoints,     /** Number of points in the cluster */
 
         _End
@@ -39,9 +37,8 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param clusters Pointer to clusters
      */
-    ClustersModel(QObject* parent, std::vector<Cluster>* clusters);
+    ClustersModel(QObject* parent);
 
     /**
      * Get the number of row
@@ -102,6 +99,12 @@ public:
      * @return Cluster
      */
     Cluster& getCluster(const std::int32_t& row);
+
+    /**
+     * Set clusters
+     * @param clusters Pointer to clusters
+     */
+    void setClusters(std::vector<Cluster>* clusters);
 
 private:
 

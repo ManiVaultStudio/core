@@ -5,23 +5,24 @@
 
 using namespace hdps;
 
-ClustersModel::ClustersModel(QObject* parent, std::vector<Cluster>* clusters) :
+ClustersModel::ClustersModel(QObject* parent) :
     QAbstractListModel(parent),
-    _clusters(clusters)
+    _clusters(nullptr)
 {
-    Q_ASSERT(_clusters != nullptr);
 }
 
 int ClustersModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    Q_ASSERT(_clusters != nullptr);
+    if (_clusters == nullptr)
+        return 0;
     
     return static_cast<std::int32_t>(_clusters->size());
 }
 
 int ClustersModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    Q_ASSERT(_clusters != nullptr);
+    if (_clusters == nullptr)
+        return 0;
 
     return static_cast<std::int32_t>(Column::_End);
 }
@@ -46,8 +47,11 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
                 case Column::Name:
                     return cluster._name;
 
+                case Column::ID:
+                    return cluster._id;
+
                 case Column::NumberOfPoints:
-                    return cluster.indices.size();
+                    return cluster._indices.size();
             }
 
             break;
@@ -59,6 +63,10 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
             {
                 case Column::Name:
                     return cluster._name;
+
+                case Column::ID:
+                case Column::NumberOfPoints:
+                    break;
 
                 default:
                     break;
@@ -80,10 +88,34 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
 
     auto cluster = static_cast<Cluster*>((void*)index.internalPointer());
 
-    switch (column) {
-        case Column::Name:
-            cluster->_name = value.toString();
+    switch (role)
+    {
+        case Qt::DecorationRole:
+        {
+            switch (column) {
+                case Column::Name:
+                    cluster->_color = value.value<QColor>();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        case Qt::DisplayRole:
             break;
+
+        case Qt::EditRole:
+        {
+            switch (column) {
+                case Column::Name:
+                    cluster->_name = value.toString();
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         default:
             break;
@@ -105,6 +137,9 @@ QVariant ClustersModel::headerData(int section, Qt::Orientation orientation, int
                 {
                     case Column::Name:
                         return "Name";
+
+                    case Column::ID:
+                        return "Identifier";
 
                     case Column::NumberOfPoints:
                         return "# Points";
@@ -149,6 +184,22 @@ Qt::ItemFlags ClustersModel::flags(const QModelIndex& index) const
 Cluster& ClustersModel::getCluster(const std::int32_t& row)
 {
     return _clusters->at(row);
+}
+
+void ClustersModel::setClusters(std::vector<Cluster>* clusters)
+{
+    Q_ASSERT(clusters != nullptr);
+
+    const auto numberOfClustersChanged = _clusters == nullptr ? true : _clusters->size() == clusters->size();
+
+    emit beginResetModel();
+
+    _clusters = clusters;
+
+    emit endResetModel();
+
+    if (numberOfClustersChanged)
+        emit layoutChanged();
 }
 
 QIcon ClustersModel::getDecorationRole(const QColor& color) const
