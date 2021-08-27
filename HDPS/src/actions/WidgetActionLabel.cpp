@@ -16,6 +16,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _widgetAction(widgetAction)
 {
     setAcceptDrops(true);
+    setEnabled(widgetAction->isEnabled());
 
     const auto updateTextAndTooltip = [this, widgetAction]() -> void {
         setText(QString("%1: ").arg(widgetAction->text()));
