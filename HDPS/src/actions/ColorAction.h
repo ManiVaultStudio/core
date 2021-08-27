@@ -1,11 +1,10 @@
 #pragma once
 
 #include "WidgetAction.h"
+#include "ColorPickerAction.h"
 
-class QWidget;
-class QHBoxLayout;
-class ColorPickerPushButton;
-class QPushButton;
+#include <QHBoxLayout>
+#include <QToolButton>
 
 namespace hdps {
 
@@ -24,10 +23,33 @@ class ColorAction : public WidgetAction
 
 public:
 
-    /**
-     * Color color picker push button class for color action
-     */
-    class ColorPickerPushButtonWidget : public WidgetActionWidget {
+    /** Color picker push button class for color action */
+    class ColorPickerPushButtonWidget : public WidgetActionWidget
+    {
+    protected:
+
+        /** Extended tool button widget class with display of current color */
+        class ToolButton : public QToolButton
+        {
+        public:
+
+            /**
+             * Constructor
+             * @param parent Parent widget
+             * @param colorPickerAction Reference to color picker action
+             */
+            ToolButton(QWidget* parent, ColorPickerAction& colorPickerAction);
+
+            /**
+             * Paint event
+             * @param paintEvent Pointer to paint event
+             */
+            void paintEvent(QPaintEvent* paintEvent) override;
+
+        protected:
+            ColorPickerAction&  _colorPickerAction;     /** Reference to color picker action */
+        };
+
     protected:
 
         /**
@@ -37,17 +59,14 @@ public:
          */
         ColorPickerPushButtonWidget(QWidget* parent, ColorAction* colorAction);
 
-    public:
+    public: // Action getters
 
-        /** Return widget layout */
-        QHBoxLayout* getLayout() { return _layout; }
-
-        /** Return color picker push button */
-        ColorPickerPushButton* getColorPickerPushButton() { return _colorPickerPushButton; }
+        ColorPickerAction& getColorPickerAction() { return _colorPickerAction; }
 
     protected:
-        QHBoxLayout*            _layout;                    /** Widget layout */
-        ColorPickerPushButton*  _colorPickerPushButton;     /** Color picker push button */
+        QHBoxLayout         _layout;                /** Widget layout */
+        ColorPickerAction   _colorPickerAction;     /** Color picker action */
+        ToolButton          _toolButton;            /** Tool button for the popup */
 
         friend class ColorAction;
     };
@@ -97,22 +116,10 @@ public:
     void setDefaultColor(const QColor& defaultColor);
 
     /** Determines whether the current color can be reset to its default */
-    bool canReset() const;
+    bool canReset() const override;
 
     /** Reset the current color to the default color */
-    void reset();
-
-    /*
-    ColorAction& operator= (const ColorAction& other)
-    {
-        WidgetAction::operator=(other);
-
-        _color          = other._color;
-        _defaultColor   = other._defaultColor;
-
-        return *this;
-    }
-    */
+    void reset() override;
 
 signals:
 

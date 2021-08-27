@@ -68,12 +68,12 @@ public:
     /** Gets whether the widget action is a drop target */
     bool isDropTarget() const;
 
-    /**
-     * Add a child widget action
-     
-    virtual void addChild(WidgetAction* widgetAction);
-    */
-    
+    /** Determines whether the current color can be reset to its default */
+    virtual bool canReset() const;
+
+    /** Reset the current color to the default color */
+    virtual void reset();
+
 public: // Context
 
     /**

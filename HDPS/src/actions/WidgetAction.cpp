@@ -53,6 +53,15 @@ bool WidgetAction::isDropTarget() const
     return _isDropTarget;
 }
 
+bool WidgetAction::canReset() const
+{
+    return false;
+}
+
+void WidgetAction::reset()
+{
+}
+
 void WidgetAction::setContext(const QString& context)
 {
     _context = context;

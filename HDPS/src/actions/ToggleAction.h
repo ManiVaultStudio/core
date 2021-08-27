@@ -126,10 +126,10 @@ public:
     void setDefaultToggled(const bool& defaultToggled);
 
     /** Determines whether the action can be reset */
-    bool canReset() const;
+    bool canReset() const override;
 
     /** Reset to default */
-    void reset();
+    void reset() override;
 
     /**
      * Set the interaction mode

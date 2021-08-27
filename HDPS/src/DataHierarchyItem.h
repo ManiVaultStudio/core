@@ -6,6 +6,7 @@
 #include "actions/WidgetAction.h"
 
 #include <QObject>
+#include <QVector>
 #include <QMap>
 #include <QString>
 #include <QDebug>
@@ -309,6 +310,9 @@ protected:
 protected:
     friend class DataManager;
 };
+
+/** Vector of pointers to data hierarchy item */
+using DataHierarchyItems = QVector<DataHierarchyItem*>;
 
 /** Shared pointer of data hierarchy item */
 using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;

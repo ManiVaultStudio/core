@@ -96,22 +96,10 @@ public:
     void setDefaultString(const QString& defaultString);
 
     /** Determines whether the current string can be reset to its default string */
-    bool canReset() const;
+    bool canReset() const override;
 
     /** Reset the current string to the default string */
-    void reset();
-
-    /*
-    StringAction& operator= (const StringAction& other)
-    {
-        WidgetAction::operator=(other);
-
-        _string         = other._string;
-        _defaultString  = other._defaultString;
-
-        return *this;
-    }
-    */
+    void reset() override;
 
 signals:
 

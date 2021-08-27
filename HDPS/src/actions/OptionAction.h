@@ -139,10 +139,10 @@ public:
     void setDefaultText(const QString& defaultText);
 
     /** Determines whether the current value can be reset to its default */
-    bool canReset() const;
+    bool canReset() const override;
 
     /** Reset the current value to the default value */
-    void reset();
+    void reset() override;
 
     /** Determines whether an option has been selected */
     bool hasSelection() const;

@@ -126,10 +126,10 @@ public:
     void setDefaultValue(const double& defaultValue);
 
     /** Determines whether the current value can be reset to its default */
-    bool canReset() const;
+    bool canReset() const override;
 
     /** Reset the current value to the default value */
-    void reset();
+    void reset() override;
 
     /** Gets the minimum value */
     double getMinimum() const;

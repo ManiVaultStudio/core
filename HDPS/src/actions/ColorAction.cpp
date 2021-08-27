@@ -1,10 +1,8 @@
 #include "ColorAction.h"
 #include "Application.h"
 
-#include "../widgets/ColorPickerPushButton.h"
-
 #include <QDebug>
-#include <QHBoxLayout>
+#include <QPainter>
 
 namespace hdps {
 
@@ -69,29 +67,62 @@ void ColorAction::reset()
 
 ColorAction::ColorPickerPushButtonWidget::ColorPickerPushButtonWidget(QWidget* parent, ColorAction* colorAction) :
     WidgetActionWidget(parent, colorAction, WidgetActionWidget::State::Standard),
-    _layout(new QHBoxLayout()),
-    _colorPickerPushButton(new ColorPickerPushButton())
+    _layout(),
+    _colorPickerAction(this, "Color picker", colorAction->getColor(), colorAction->getColor()),
+    _toolButton(this, _colorPickerAction)
 {
     setAcceptDrops(true);
 
-    _layout->setMargin(0);
-    _layout->addWidget(_colorPickerPushButton);
-
-    setLayout(_layout);
-
-    connect(_colorPickerPushButton, &ColorPickerPushButton::colorChanged, this, [this, colorAction](const QColor& color) {
+    connect(&_colorPickerAction, &ColorPickerAction::colorChanged, this, [this, colorAction](const QColor& color) {
         colorAction->setColor(color);
+        _toolButton.update();
     });
 
-    const auto updateColorPickerPushButton = [this, colorAction]() -> void {
-        _colorPickerPushButton->setColor(colorAction->getColor());
-    };
+    _toolButton.setToolTip(colorAction->toolTip());
+    _toolButton.addAction(&_colorPickerAction);
+    _toolButton.setPopupMode(QToolButton::InstantPopup);
+    _toolButton.setFixedHeight(24);
+    _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
-    connect(colorAction, &ColorAction::colorChanged, this, [this, updateColorPickerPushButton](const QColor& color) {
-        updateColorPickerPushButton();
-    });
+    _layout.setMargin(0);
+    _layout.addWidget(&_toolButton);
 
-    updateColorPickerPushButton();
+    setLayout(&_layout);
+}
+
+ColorAction::ColorPickerPushButtonWidget::ToolButton::ToolButton(QWidget* parent, ColorPickerAction& colorPickerAction) :
+    QToolButton(parent),
+    _colorPickerAction(colorPickerAction)
+{
+}
+
+void ColorAction::ColorPickerPushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)
+{
+    QToolButton::paintEvent(paintEvent);
+
+    QPainter painter(this);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    const auto margin = 5;
+
+    QPoint offset(margin, margin);
+
+    auto fillRect = rect();
+
+    fillRect.setTopLeft(fillRect.topLeft() + offset);
+    fillRect.setBottomRight(fillRect.bottomRight() - offset - QPoint(0, 0));
+
+    auto color = _colorPickerAction.getColor();
+
+    if (!isEnabled()) {
+        const auto grayScale = qGray(color.rgb());
+        color.setRgb(grayScale, grayScale, grayScale);
+    }
+
+    painter.setBrush(QBrush(color));
+    painter.setPen(QPen(QBrush(isEnabled() ? QColor(50, 50, 50) : Qt::gray), 1.0, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painter.drawRect(fillRect);
 }
 
 }
