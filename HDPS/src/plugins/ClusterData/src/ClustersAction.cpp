@@ -78,8 +78,11 @@ ClustersModel& ClustersAction::getClustersModel()
 
 ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, const hdps::gui::WidgetActionWidget::State& state) :
     WidgetActionWidget(parent, clustersAction, state),
-    _removeAction(this, "Remove")
+    _nameFilterAction(this, "Name filter"),
+    _removeAction(this, "Remove"),
+    _cacheClusterSelection()
 {
+    _nameFilterAction.setPlaceHolderString("Filter by cluster name...");
     _removeAction.setEnabled(false);
 
     auto clustersTreeView = new QTreeView();
@@ -112,6 +115,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     mainLayout->setMargin(0);
     mainLayout->addWidget(clustersTreeView);
+    mainLayout->addWidget(_nameFilterAction.createWidget(this));
 
     setLayout(mainLayout);
 

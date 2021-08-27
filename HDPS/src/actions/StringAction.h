@@ -101,6 +101,15 @@ public:
     /** Reset the current string to the default string */
     void reset() override;
 
+    /** Get placeholder text */
+    QString getPlaceholderString() const;
+
+    /**
+     * Set placeholder text
+     * @param placeholderText Placeholder text
+     */
+    void setPlaceHolderString(const QString& placeholderString);
+
 signals:
 
     /**
@@ -115,9 +124,16 @@ signals:
      */
     void defaultStringChanged(const QString& defaultString);
 
+    /**
+     * Signals that the placeholder string changed
+     * @param placeholderString Placeholder string that changed
+     */
+    void placeholderStringChanged(const QString& placeholderString);
+
 protected:
-    QString     _string;            /** Current string */
-    QString     _defaultString;     /** Default string */
+    QString     _string;                /** Current string */
+    QString     _defaultString;         /** Default string */
+    QString     _placeholderString;     /** Place holder string */
 };
 
 }

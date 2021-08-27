@@ -61,6 +61,21 @@ void StringAction::reset()
     setString(_defaultString);
 }
 
+QString StringAction::getPlaceholderString() const
+{
+    return _placeholderString;
+}
+
+void StringAction::setPlaceHolderString(const QString& placeholderString)
+{
+    if (placeholderString == _placeholderString)
+        return;
+
+    _placeholderString = placeholderString;
+
+    emit placeholderStringChanged(_placeholderString);
+}
+
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
     WidgetActionWidget(parent, stringAction, WidgetActionWidget::State::Standard),
     _lineEdit(new QLineEdit())
@@ -80,8 +95,16 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
         _lineEdit->setText(stringAction->getString());
     };
 
+    const auto updatePlaceHolderText = [this, stringAction]() -> void {
+        _lineEdit->setPlaceholderText(stringAction->getPlaceholderString());
+    };
+
     connect(stringAction, &StringAction::stringChanged, this, [this, updateLineEdit](const QString& value) {
         updateLineEdit();
+    });
+
+    connect(stringAction, &StringAction::placeholderStringChanged, this, [this, updatePlaceHolderText](const QString& value) {
+        updatePlaceHolderText();
     });
 
     connect(_lineEdit, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
@@ -89,6 +112,7 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     });
 
     updateLineEdit();
+    updatePlaceHolderText();
 }
 
 }

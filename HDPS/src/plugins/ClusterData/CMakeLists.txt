@@ -22,8 +22,6 @@ find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 set(SOURCES
     src/ClusterData.h
     src/ClusterData.cpp
-	src/CreateClusterDialog.h
-    src/CreateClusterDialog.cpp
     src/ClusterData.json
 )
 
@@ -38,8 +36,6 @@ set(ACTIONS_SOURCES
     src/ClustersAction.cpp
     src/ClustersModel.h
     src/ClustersModel.cpp
-	src/ClusterAction.h
-    src/ClusterAction.cpp
 )
 
 source_group(Plugin FILES ${SOURCES})
