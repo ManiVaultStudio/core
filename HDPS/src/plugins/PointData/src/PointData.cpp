@@ -254,6 +254,40 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
     }
 }
 
+void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
+{
+    Points& selection = static_cast<Points&>(getSelection());
+
+    // Find the global indices of this dataset
+    std::vector<unsigned int> localGlobalIndices;
+    getGlobalIndices(localGlobalIndices);
+
+    // In an array the size of the full raw data, mark selected points as true
+    std::vector<bool> globalSelection(Points::getSourceData(*this).getNumRawPoints(), false);
+    for (const unsigned int& selectionIndex : selection.indices)
+        globalSelection[selectionIndex] = true;
+
+    // For all local points find out which are selected
+    std::vector<bool> selected(localGlobalIndices.size(), false);
+    int indexCount = 0;
+    for (int i = 0; i < localGlobalIndices.size(); i++)
+    {
+        if (globalSelection[localGlobalIndices[i]])
+        {
+            selected[i] = true;
+            indexCount++;
+        }
+    }
+
+    localSelectionIndices.resize(indexCount);
+    int c = 0;
+    for (int i = 0; i < selected.size(); i++)
+    {
+        if (selected[i])
+            localSelectionIndices[c++] = i;
+    }
+}
+
 hdps::DataSet* Points::copy() const
 {
     Points* set = new Points(_core, getDataName());
