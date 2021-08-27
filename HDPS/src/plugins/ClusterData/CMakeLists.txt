@@ -36,6 +36,8 @@ set(ACTIONS_SOURCES
     src/ClustersAction.cpp
     src/ClustersModel.h
     src/ClustersModel.cpp
+    src/ClustersFilterModel.h
+    src/ClustersFilterModel.cpp
 )
 
 source_group(Plugin FILES ${SOURCES})

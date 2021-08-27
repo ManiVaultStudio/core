@@ -6,7 +6,6 @@
 #include <QTreeView>
 #include <QHeaderView>
 #include <QVBoxLayout>
-#include <QColorDialog>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -80,10 +79,15 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     WidgetActionWidget(parent, clustersAction, state),
     _nameFilterAction(this, "Name filter"),
     _removeAction(this, "Remove"),
-    _cacheClusterSelection()
+    _cacheClusterSelection(),
+    _clustersFilterModel(this)
 {
     _nameFilterAction.setPlaceHolderString("Filter by cluster name...");
     _removeAction.setEnabled(false);
+
+    _clustersFilterModel.setSourceModel(&clustersAction->getClustersModel());
+    _clustersFilterModel.setDynamicSortFilter(true);
+    _clustersFilterModel.setFilterKeyColumn(static_cast<std::int32_t>(ClustersModel::Column::Name));
 
     auto clustersTreeView = new QTreeView();
 
@@ -92,8 +96,9 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     clustersTreeView->setRootIsDecorated(false);
     clustersTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     clustersTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    //clustersTreeView->setSortingEnabled(true);
-    clustersTreeView->setModel(&clustersAction->getClustersModel());
+    clustersTreeView->setSortingEnabled(true);
+    clustersTreeView->sortByColumn(static_cast<std::int32_t>(ClustersModel::Column::NumberOfIndices));
+    clustersTreeView->setModel(&_clustersFilterModel);
 
     // Configure header view
     auto header = clustersTreeView->header();
@@ -128,7 +133,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
         // Gather point indices for selection
         for (auto selectedIndex : selectedRows) {
-            auto cluster = static_cast<Cluster*>(selectedIndex.internalPointer());
+            auto cluster = static_cast<Cluster*>(_clustersFilterModel.mapToSource(selectedIndex).internalPointer());
             selectionIndices.insert(selectionIndices.end(), cluster->_indices.begin(), cluster->_indices.end());
         }
 
@@ -143,8 +148,6 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
         _removeAction.setEnabled(!selectedRows.isEmpty());
     };
 
-    //selectionChangedHandler();
-    
     connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {
         selectionChangedHandler();
     });
@@ -161,7 +164,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
             return;
 
         // Get sibling color model index and the current cluster color
-        const auto colorIndex   = index.siblingAtColumn(colorColumn);
+        const auto colorIndex   = _clustersFilterModel.mapToSource(index).siblingAtColumn(colorColumn);
         const auto currentColor = colorIndex.data(Qt::EditRole).value<QColor>();
         
         // Update the clusters model with the new color
@@ -180,8 +183,18 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
         QStringList clusterIds;
 
         for (auto selectedIndex : selectedRows)
-            clusterIds << selectedIndex.siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
+            clusterIds << _clustersFilterModel.mapToSource(selectedIndex).siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
 
         clustersAction->removeClustersById(clusterIds);
     });
+
+    const auto updateNameFilter = [this]() -> void {
+        _clustersFilterModel.setNameFilter(_nameFilterAction.getString());
+    };
+
+    connect(&_nameFilterAction, &StringAction::stringChanged, this, [this, updateNameFilter](const QString& string) {
+        updateNameFilter();
+    });
+
+    updateNameFilter();
 }

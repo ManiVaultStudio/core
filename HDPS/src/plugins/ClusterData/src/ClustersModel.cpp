@@ -88,14 +88,15 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
             {
                 case Column::Color:
                     return QVariant::fromValue(cluster._color);
-                    break;
 
                 case Column::Name:
                     return cluster._name;
 
                 case Column::ID:
+                    return cluster._id;
+
                 case Column::NumberOfIndices:
-                    break;
+                    return cluster._indices.size();
 
                 default:
                     break;

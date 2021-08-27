@@ -4,6 +4,7 @@
 #include "event/EventListener.h"
 
 #include "ClustersModel.h"
+#include "ClustersFilterModel.h"
 
 #include <QItemSelection>
 
@@ -41,9 +42,10 @@ protected:
         Widget(QWidget* parent, ClustersAction* clustersAction, const hdps::gui::WidgetActionWidget::State& state);
 
     protected:
-        StringAction    _nameFilterAction;          /** Name filter action */
-        TriggerAction   _removeAction;              /** Remove clusters action */
-        QItemSelection  _cacheClusterSelection;     /** Cached selected indexes */
+        StringAction            _nameFilterAction;          /** Name filter action */
+        TriggerAction           _removeAction;              /** Remove clusters action */
+        QItemSelection          _cacheClusterSelection;     /** Cached selected indexes */
+        ClustersFilterModel     _clustersFilterModel;       /** Clusters filter model */
     };
 
     /**
