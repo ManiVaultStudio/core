@@ -154,6 +154,11 @@ hdps::DataType DataHierarchyItem::getDataType() const
     return _core->requestData(_datasetName).getDataType();
 }
 
+void DataHierarchyItem::notifyDataChanged()
+{
+    _core->notifyDataChanged(_datasetName);
+}
+
 void DataHierarchyItem::analyzeDataset(const QString& pluginName)
 {
     Q_ASSERT(!pluginName.isEmpty());
