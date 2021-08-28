@@ -2,10 +2,6 @@
 
 #include "actions/Actions.h"
 
-namespace hdps {
-    class CoreInterface;
-}
-
 struct Cluster;
 
 using namespace hdps;
@@ -13,7 +9,7 @@ using namespace hdps;
 /**
  * Clusters model class
  *
- * Model class for display of clusters
+ * List model class for storing clusters
  *
  * @author Thomas Kroes
  */
