@@ -38,6 +38,8 @@ set(ACTIONS_SOURCES
     src/ClustersModel.cpp
     src/ClustersFilterModel.h
     src/ClustersFilterModel.cpp
+	src/MergeClustersDialog.h
+	src/MergeClustersDialog.cpp
 )
 
 source_group(Plugin FILES ${SOURCES})

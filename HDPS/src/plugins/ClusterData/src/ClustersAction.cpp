@@ -1,4 +1,5 @@
 #include "ClustersAction.h"
+#include "MergeClustersDialog.h"
 #include "DataHierarchyItem.h"
 #include "ClusterData.h"
 #include "PointData.h"
@@ -79,6 +80,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     WidgetActionWidget(parent, clustersAction, state),
     _nameFilterAction(this, "Name filter"),
     _removeAction(this, "Remove"),
+    _mergeAction(this, "Merge"),
     _cacheClusterSelection(),
     _clustersFilterModel(this)
 {
@@ -146,6 +148,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
         // Update state of the remove action
         _removeAction.setEnabled(!selectedRows.isEmpty());
+        _mergeAction.setEnabled(selectedRows.count() >= 2);
     };
 
     connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {
@@ -176,6 +179,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     mainLayout->addLayout(toolbarLayout);
 
     toolbarLayout->addWidget(_removeAction.createWidget(this));
+    toolbarLayout->addWidget(_mergeAction.createWidget(this));
 
     connect(&_removeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView]() {
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
@@ -186,6 +190,32 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
             clusterIds << _clustersFilterModel.mapToSource(selectedIndex).siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
 
         clustersAction->removeClustersById(clusterIds);
+    });
+
+    connect(&_mergeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView]() {
+        const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
+
+        QStringList clusterIdsToRemove;
+
+        auto mergeCluster = static_cast<Cluster*>(_clustersFilterModel.mapToSource(selectedRows.first()).internalPointer());
+
+        mergeCluster->_name = QString("%1*").arg(mergeCluster->_name);
+
+        //MergeClustersDialog mergeClustersDialog(this);
+        //mergeClustersDialog.exec();
+
+        for (auto selectedIndex : selectedRows) {
+            auto cluster = static_cast<Cluster*>(_clustersFilterModel.mapToSource(selectedIndex).internalPointer());
+
+            if (selectedIndex == selectedRows.first())
+                continue;
+
+            clusterIdsToRemove << cluster->_id;
+
+            mergeCluster->_indices.insert(mergeCluster->_indices.end(), cluster->_indices.begin(), cluster->_indices.end());
+        }
+
+        clustersAction->removeClustersById(clusterIdsToRemove);
     });
 
     const auto updateNameFilter = [this]() -> void {
