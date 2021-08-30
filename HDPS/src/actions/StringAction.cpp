@@ -1,8 +1,6 @@
 #include "StringAction.h"
-#include "Application.h"
 
 #include <QHBoxLayout>
-#include <QLineEdit>
 
 namespace hdps {
 
@@ -77,26 +75,18 @@ void StringAction::setPlaceHolderString(const QString& placeholderString)
 }
 
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
-    WidgetActionWidget(parent, stringAction, WidgetActionWidget::State::Standard),
-    _lineEdit(new QLineEdit())
+    QLineEdit(parent)
 {
     setAcceptDrops(true);
-
-    auto layout = new QHBoxLayout();
-
-    layout->setMargin(0);
-    layout->addWidget(_lineEdit);
-
-    setLayout(layout);
-
+    
     const auto updateLineEdit = [this, stringAction]() {
-        QSignalBlocker blocker(_lineEdit);
+        QSignalBlocker blocker(this);
 
-        _lineEdit->setText(stringAction->getString());
+        setText(stringAction->getString());
     };
 
     const auto updatePlaceHolderText = [this, stringAction]() -> void {
-        _lineEdit->setPlaceholderText(stringAction->getPlaceholderString());
+        setPlaceholderText(stringAction->getPlaceholderString());
     };
 
     connect(stringAction, &StringAction::stringChanged, this, [this, updateLineEdit](const QString& value) {
@@ -107,7 +97,7 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
         updatePlaceHolderText();
     });
 
-    connect(_lineEdit, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
+    connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
     });
 

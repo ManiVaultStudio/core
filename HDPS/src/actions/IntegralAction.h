@@ -2,9 +2,10 @@
 
 #include "WidgetAction.h"
 
+#include <QSpinBox>
+#include <QSlider>
+
 class QWidget;
-class QSpinBox;
-class QSlider;
 class QPushButton;
 
 namespace hdps {
@@ -24,10 +25,8 @@ class IntegralAction : public WidgetAction
 
 public:
 
-    /**
-     * Spinbox widget class for integral action
-     */
-    class SpinBoxWidget : public WidgetActionWidget
+    /** Spinbox widget class for integral action */
+    class SpinBoxWidget : public QSpinBox
     {
     protected:
 
@@ -38,21 +37,11 @@ public:
          */
         SpinBoxWidget(QWidget* parent, IntegralAction* integralAction);
         
-    public:
-
-        /** Gets the spinbox widget */
-        QSpinBox* getSpinBox() { return _spinBox; }
-
-    protected:
-        QSpinBox*   _spinBox;       /** Spinbox widget */
-
         friend class IntegralAction;
     };
 
-    /**
-     * Slider widget class for integral action
-     */
-    class SliderWidget : public WidgetActionWidget
+    /** Slider widget class for integral action */
+    class SliderWidget : public QSlider
     {
     protected:
 
@@ -62,14 +51,6 @@ public:
          * @param integralAction Pointer to integral action
          */
         SliderWidget(QWidget* parent, IntegralAction* integralAction);
-
-    public:
-
-        /** Gets the slider widget */
-        QSlider* getSlider() { return _slider; }
-
-    protected:
-        QSlider*   _slider;     /** Slider widget */
 
         friend class IntegralAction;
     };

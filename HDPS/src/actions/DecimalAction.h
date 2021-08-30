@@ -2,9 +2,10 @@
 
 #include "WidgetAction.h"
 
+#include <QDoubleSpinBox>
+#include <QSlider>
+
 class QWidget;
-class QDoubleSpinBox;
-class QSlider;
 class QPushButton;
 
 namespace hdps {
@@ -24,10 +25,8 @@ class DecimalAction : public WidgetAction
 
 public:
 
-    /**
-     * Spinbox widget class for decimal action
-     */
-    class SpinBoxWidget : public WidgetActionWidget
+    /** Spinbox widget class for decimal action */
+    class SpinBoxWidget : public QDoubleSpinBox
     {
     protected:
 
@@ -37,22 +36,12 @@ public:
          * @param decimalAction Pointer to decimal action
          */
         SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction);
-        
-    public:
-
-        /** Gets the double spinbox widget */
-        QDoubleSpinBox* getDoubleSpinBox() { return _doubleSpinBox; }
-
-    protected:
-        QDoubleSpinBox*     _doubleSpinBox;     /** Double spinbox widget */
 
         friend class DecimalAction;
     };
 
-    /**
-     * Slider widget class for decimal action
-     */
-    class SliderWidget : public WidgetActionWidget
+    /** Slider widget class for decimal action */
+    class SliderWidget : public QSlider
     {
     protected:
 
@@ -62,14 +51,6 @@ public:
          * @param decimalAction Pointer to decimal action
          */
         SliderWidget(QWidget* parent, DecimalAction* decimalAction);
-
-    public:
-
-        /** Gets the slider widget */
-        QSlider* getSlider() { return _slider; }
-
-    protected:
-        QSlider*    _slider;        /** Slider widget */
 
         friend class DecimalAction;
     };

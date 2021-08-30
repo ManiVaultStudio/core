@@ -2,8 +2,9 @@
 
 #include "WidgetAction.h"
 
+#include <QLineEdit>
+
 class QWidget;
-class QLineEdit;
 class QPushButton;
 
 namespace hdps {
@@ -23,10 +24,8 @@ class StringAction : public WidgetAction
 
 public:
 
-    /**
-     * Line edit widget class for string action
-     */
-    class LineEditWidget : public WidgetActionWidget
+    /** Line edit widget class for string action */
+    class LineEditWidget : public QLineEdit
     {
     protected:
 
@@ -36,14 +35,6 @@ public:
          * @param stringAction Pointer to string action
          */
         LineEditWidget(QWidget* parent, StringAction* stringAction);
-
-    public:
-
-        /** Gets the line edit widget */
-        QLineEdit* getLineEdit() { return _lineEdit; }
-
-    protected:
-        QLineEdit*      _lineEdit;      /** Line edit widget */
 
         friend class StringAction;
     };
