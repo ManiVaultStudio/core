@@ -170,6 +170,15 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
     setAcceptDrops(true);
     setObjectName("DoubleSpinBox");
 
+    const auto update = [this, decimalAction]() -> void {
+        setEnabled(decimalAction->isEnabled());
+        setToolTip(decimalAction->text());
+    };
+
+    connect(decimalAction, &DecimalAction::changed, this, [update]() {
+        update();
+    });
+
     connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
         decimalAction->setValue(value);
     });
@@ -247,6 +256,15 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
 {
     setAcceptDrops(true);
     setObjectName("Slider");
+
+    const auto update = [this, decimalAction]() -> void {
+        setEnabled(decimalAction->isEnabled());
+        setToolTip(decimalAction->text());
+    };
+
+    connect(decimalAction, &DecimalAction::changed, this, [update]() {
+        update();
+    });
 
     setRange(std::numeric_limits<std::int16_t>::lowest(), std::numeric_limits<std::int16_t>::max());
 
