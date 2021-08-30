@@ -22,6 +22,8 @@ find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 set(SOURCES
     src/ClusterData.h
     src/ClusterData.cpp
+    src/Cluster.h
+    src/Cluster.cpp
     src/ClusterData.json
 )
 
@@ -34,20 +36,36 @@ set(ACTIONS_SOURCES
     src/InfoAction.cpp
     src/ClustersAction.h
     src/ClustersAction.cpp
+)
+
+set(WIDGET_SOURCES
+    src/MergeClustersDialog.h
+    src/MergeClustersDialog.cpp
+)
+
+set(MODEL_SOURCES
     src/ClustersModel.h
     src/ClustersModel.cpp
     src/ClustersFilterModel.h
     src/ClustersFilterModel.cpp
-	src/MergeClustersDialog.h
-	src/MergeClustersDialog.cpp
+)
+
+set(IO_SOURCES
+    src/ClusterVisitor.h
+    src/ClusterVisitor.cpp
+    src/ClusterVisitorJson.h
+    src/ClusterVisitorJson.cpp
 )
 
 source_group(Plugin FILES ${SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
+source_group(Widget FILES ${WIDGET_SOURCES})
+source_group(Model FILES ${MODEL_SOURCES})
+source_group(IO FILES ${IO_SOURCES})
 
 include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${WIDGET_SOURCES} ${MODEL_SOURCES} ${IO_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 

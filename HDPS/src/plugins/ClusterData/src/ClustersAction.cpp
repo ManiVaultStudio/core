@@ -240,4 +240,11 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     });
 
     updateNameFilter();
+
+    const auto updateImportExportActions = [this]() {
+        _importAction.setEnabled(false);
+        _exportAction.setEnabled(false);
+    };
+
+    updateImportExportActions();
 }

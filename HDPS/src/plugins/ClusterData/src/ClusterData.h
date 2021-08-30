@@ -2,6 +2,8 @@
 
 #include "clusterdata_export.h"
 
+#include "Cluster.h"
+
 #include <RawData.h>
 #include <Set.h>
 
@@ -22,57 +24,6 @@ const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
 // =============================================================================
 
 class InfoAction;
-
-struct CLUSTERDATA_EXPORT Cluster
-{
-    /** Constructor */
-    Cluster() :
-        _name(""),
-        _id(QUuid::createUuid().toString()),
-        _color(Qt::gray),
-        _median(),
-        _mean(),
-        _stddev()
-    {
-    }
-
-    /**
-     * Comparison operator for two clusters (compares the internal identifiers)
-     * @param rhs Right hand sign of the comparison
-     */
-    bool operator==(const Cluster& rhs) const {
-        if (rhs._name != _name)
-            return false;
-
-        if (rhs._id != _id)
-            return false;
-
-        if (rhs._color != _color)
-            return false;
-
-        if (rhs._indices != _indices)
-            return false;
-
-        if (rhs._median != _median)
-            return false;
-
-        if (rhs._mean != _mean)
-            return false;
-
-        if (rhs._stddev != _stddev)
-            return false;
-
-        return true;
-    }
-
-    QString                     _name;          /** GUI name */
-    QString                     _id;            /** Unique cluster name */
-    QColor                      _color;         /** Cluster color */
-    std::vector<unsigned int>   _indices;       /** Indices contained by the cluster */
-    std::vector<float>          _median;        /** Median values */
-    std::vector<float>          _mean;          /** Mean values */
-    std::vector<float>          _stddev;        /** Standard deviation values */
-};
 
 class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData
 {
