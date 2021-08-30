@@ -89,7 +89,7 @@ public:
      * @param colorMap Current color map
      * @param defaultColorMap Default color map
      */
-    ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "", const QString& defaultColorMap = "");
+    ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu", const QString& defaultColorMap = "RdYlBu");
 
     /**
      * Initialize the color map action
@@ -130,9 +130,9 @@ signals:
 
     /**
      * Signals that the current color map image changed
-     * @param colorMapImage Current color map image
+     * @param image Current color map image
      */
-    void colorMapImageChanged(const QImage& colorMapImage);
+    void imageChanged(const QImage& image);
 
 protected:
     OptionAction                _currentColorMapAction;     /** Current color map selection action */

@@ -97,7 +97,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     clustersTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     clustersTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     clustersTreeView->setSortingEnabled(true);
-    clustersTreeView->sortByColumn(static_cast<std::int32_t>(ClustersModel::Column::Name));
+    clustersTreeView->sortByColumn(static_cast<std::int32_t>(ClustersModel::Column::Name), Qt::SortOrder::AscendingOrder);
     clustersTreeView->setModel(&_clustersFilterModel);
 
     // Configure header view

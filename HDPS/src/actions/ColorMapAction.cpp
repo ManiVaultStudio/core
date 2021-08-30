@@ -13,7 +13,7 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/) :
+ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
     WidgetAction(parent),
     _currentColorMapAction(this, "Current color map"),
     _settingsAction(this),
@@ -27,7 +27,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     initialize(colorMap, defaultColorMap);
 
     const auto notifyColorMapImageChanged = [this]() -> void {
-        emit colorMapImageChanged(getColorMapImage());
+        emit imageChanged(getColorMapImage());
     };
 
     connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, [this, notifyColorMapImageChanged](const std::int32_t& currentIndex) -> void {
@@ -98,7 +98,7 @@ ColorMapAction::ComboboxWidget::ComboboxWidget(QWidget* parent, OptionAction* op
     OptionAction::ComboBoxWidget(parent, optionAction),
     _colorMapAction(colorMapAction)
 {
-    connect(colorMapAction, &ColorMapAction::colorMapImageChanged, this, [this](const QImage& colorMapImage) {
+    connect(colorMapAction, &ColorMapAction::imageChanged, this, [this](const QImage& colorMapImage) {
         update();
     });
 }

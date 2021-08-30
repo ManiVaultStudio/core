@@ -147,6 +147,15 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     setAcceptDrops(true);
     setObjectName("SpinBox");
 
+    const auto update = [this, integralAction]() -> void {
+        setEnabled(integralAction->isEnabled());
+        setToolTip(integralAction->text());
+    };
+
+    connect(integralAction, &IntegralAction::changed, this, [update]() {
+        update();
+    });
+
     connect(this, qOverload<int>(&QSpinBox::valueChanged), this, [this, integralAction](int value) {
         integralAction->setValue(value);
     });
@@ -213,6 +222,15 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
 {
     setAcceptDrops(true);
     setObjectName("Slider");
+
+    const auto update = [this, integralAction]() -> void {
+        setEnabled(integralAction->isEnabled());
+        setToolTip(integralAction->text());
+    };
+
+    connect(integralAction, &IntegralAction::changed, this, [update]() {
+        update();
+    });
 
     connect(this, &QSlider::valueChanged, this, [this, integralAction](int value) {
         if (!integralAction->getUpdateDuringDrag())
