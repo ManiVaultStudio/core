@@ -16,6 +16,7 @@ ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const
 {
     setCheckable(true);
     setText(title);
+    initialize(toggled, defaultToggled);
 }
 
 void ToggleAction::initialize(const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/)
