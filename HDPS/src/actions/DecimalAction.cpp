@@ -179,6 +179,8 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
         update();
     });
 
+    update();
+
     connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
         decimalAction->setValue(value);
     });
@@ -265,6 +267,8 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     connect(decimalAction, &DecimalAction::changed, this, [update]() {
         update();
     });
+
+    update();
 
     setRange(std::numeric_limits<std::int16_t>::lowest(), std::numeric_limits<std::int16_t>::max());
 

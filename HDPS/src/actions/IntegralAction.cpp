@@ -156,6 +156,8 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
         update();
     });
 
+    update();
+
     connect(this, qOverload<int>(&QSpinBox::valueChanged), this, [this, integralAction](int value) {
         integralAction->setValue(value);
     });
@@ -231,6 +233,8 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     connect(integralAction, &IntegralAction::changed, this, [update]() {
         update();
     });
+
+    update();
 
     connect(this, &QSlider::valueChanged, this, [this, integralAction](int value) {
         if (!integralAction->getUpdateDuringDrag())

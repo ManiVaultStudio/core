@@ -88,6 +88,8 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
         update();
     });
 
+    update();
+
     const auto updateLineEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
 

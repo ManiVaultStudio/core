@@ -81,11 +81,22 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     _nameFilterAction(this, "Name filter"),
     _removeAction(this, "Remove"),
     _mergeAction(this, "Merge"),
+    _importAction(this, ""),
+    _exportAction(this, ""),
     _cacheClusterSelection(),
     _clustersFilterModel(this)
 {
     _nameFilterAction.setPlaceHolderString("Filter by cluster name...");
     _removeAction.setEnabled(false);
+
+    _importAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _exportAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+
+    _nameFilterAction.setToolTip("Filter by cluster name");
+    _removeAction.setToolTip("Remove the selected filter(s)");
+    _mergeAction.setToolTip("Merge the selected filter(s)");
+    _importAction.setToolTip("Import clusters from JSON file");
+    _nameFilterAction.setToolTip("Export clusters to JSON file");
 
     _clustersFilterModel.setSourceModel(&clustersAction->getClustersModel());
     _clustersFilterModel.setDynamicSortFilter(true);
@@ -178,8 +189,10 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     mainLayout->addLayout(toolbarLayout);
 
-    toolbarLayout->addWidget(_removeAction.createWidget(this));
-    toolbarLayout->addWidget(_mergeAction.createWidget(this));
+    toolbarLayout->addWidget(_removeAction.createWidget(this), 1);
+    toolbarLayout->addWidget(_mergeAction.createWidget(this), 1);
+    toolbarLayout->addWidget(_importAction.createWidget(this));
+    toolbarLayout->addWidget(_exportAction.createWidget(this));
 
     connect(&_removeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView]() {
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();

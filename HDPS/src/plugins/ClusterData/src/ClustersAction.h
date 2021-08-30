@@ -45,6 +45,8 @@ protected:
         StringAction            _nameFilterAction;          /** Name filter action */
         TriggerAction           _removeAction;              /** Remove clusters action */
         TriggerAction           _mergeAction;               /** Merge clusters action */
+        TriggerAction           _importAction;              /** Import clusters action */
+        TriggerAction           _exportAction;              /** Export clusters action */
         QItemSelection          _cacheClusterSelection;     /** Cached selected indexes */
         ClustersFilterModel     _clustersFilterModel;       /** Clusters filter model */
     };
