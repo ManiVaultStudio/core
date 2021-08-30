@@ -41,7 +41,7 @@ public:
             ToolButton(QWidget* parent, ColorPickerAction& colorPickerAction);
 
             /**
-             * Paint event
+             * Paint event to override default paint
              * @param paintEvent Pointer to paint event
              */
             void paintEvent(QPaintEvent* paintEvent) override;

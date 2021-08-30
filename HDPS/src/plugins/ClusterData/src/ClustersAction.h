@@ -39,7 +39,7 @@ protected:
          * @param clustersAction Pointer to clusters action
          * @param state State of the widget
          */
-        Widget(QWidget* parent, ClustersAction* clustersAction, const hdps::gui::WidgetActionWidget::State& state);
+        Widget(QWidget* parent, ClustersAction* clustersAction, const WidgetActionWidget::State& state);
 
     protected:
         StringAction            _nameFilterAction;          /** Name filter action */
@@ -53,7 +53,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const hdps::gui::WidgetActionWidget::State& state = hdps::gui::WidgetActionWidget::State::Standard) override {
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
         return new Widget(parent, this, state);
     };
 

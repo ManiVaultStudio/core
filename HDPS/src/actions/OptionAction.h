@@ -2,10 +2,10 @@
 
 #include "WidgetAction.h"
 
+#include <QComboBox>
 #include <QStringListModel>
 
 class QWidget;
-class QComboBox;
 class QPushButton;
 class QAbstractListModel;
 
@@ -29,7 +29,7 @@ public:
     /**
      * Combobox widget class for option action
      */
-    class ComboBoxWidget : public WidgetActionWidget {
+    class ComboBoxWidget : public QComboBox {
     protected:
 
         /**
@@ -38,14 +38,6 @@ public:
          * @param optionAction Pointer to option action
          */
         ComboBoxWidget(QWidget* parent, OptionAction* optionAction);
-
-    public:
-
-        /** Gets the combobox widget */
-        QComboBox* getComboBox() { return _comboBox; }
-
-    protected:
-        QComboBox*      _comboBox;      /** Combobox widget */
 
         friend class OptionAction;
     };

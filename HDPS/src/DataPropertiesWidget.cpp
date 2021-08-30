@@ -2,6 +2,7 @@
 #include "Core.h"
 
 #include "actions/GroupAction.h"
+#include "actions/ColorMapAction.h"
 
 #include <QDebug>
 #include <QTreeWidgetItem>
@@ -27,6 +28,10 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent, Core* core) :
     auto layout = new QVBoxLayout();
 
     setLayout(layout);
+
+    auto colorMapAction = new ColorMapAction(this, "Color map", util::ColorMap::Type::OneDimensional, "RdYlBu", "RdYlBu");
+
+    layout->addWidget(colorMapAction->createWidget(this));
 
     layout->setMargin(0);
     layout->setAlignment(Qt::AlignTop);

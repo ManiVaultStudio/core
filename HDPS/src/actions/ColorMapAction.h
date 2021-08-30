@@ -1,8 +1,11 @@
 #pragma once
 
+#include "WidgetAction.h"
 #include "OptionAction.h"
-
-#include <QSortFilterProxyModel>
+#include "ColorMapSettingsAction.h"
+#include "util/ColorMap.h"
+#include "util/ColorMapModel.h"
+#include "util/ColorMapFilterModel.h"
 
 namespace hdps {
 
@@ -11,190 +14,70 @@ namespace gui {
 /**
  * Color map action class
  *
- * Extended option action for color map selection and management
+ * Color map selection and settings action
  *
  * @author Thomas Kroes
  */
-class ColorMapAction : public OptionAction
+class ColorMapAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
-    /**
-     * Color map class
-     *
-     * Primarily a container for color map related parameters (e.g. name, resource path)
-     * This model can contain 1D and 2D color maps (perhaps in the future also 3D)
-     *
-     * @author Thomas Kroes
-     */
-    class ColorMap {
-
-    public: // Enumerations
+    /** Combobox widget class for display of a color map */
+    class ComboboxWidget : public OptionAction::ComboBoxWidget {
+    protected:
 
         /**
-         * Color map type
-         * Defines the color map types
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param optionAction Pointer to option action
+         * @param colorMapAction Pointer to color map action
+         * @param state State of the widget
          */
-        enum class Type {
-            ZeroDimensional,    /** Zero-dimensional color map (not in use at the moment) */
-            OneDimensional,     /** One-dimensional color map */
-            TwoDimensional      /** Two-dimensional color map */
-        };
+        ComboboxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state);
 
-    public: // Construction/destruction
-
-        /** (Default) constructor
-         * @param name Name of the color map
-         * @param resourcePath Resource path of the color map image
-         * @param name Color map type
-         * @param image Color map image
+        /**
+         * Paint event to override default paint
+         * @param paintEvent Pointer to paint event
          */
-        ColorMap(const QString& name = "", const QString& resourcePath = "", const Type& type = Type::OneDimensional, const QImage& image = QImage());
+        void paintEvent(QPaintEvent* paintEvent) override;
 
-    public: // Getters
+    protected:
+        ColorMapAction*   _colorMapAction;      /** Pointer to color map action */
 
-        /** Returns the color map name */
-        QString getName() const;
-
-        /** Returns the resource path */
-        QString getResourcePath() const;
-
-        /** Returns the color map type */
-        Type getType() const;
-
-        /** Returns the color map image */
-        QImage getImage() const;
-
-        /** Returns the number of dimensions */
-        int getNoDimensions() const;
-
-    private:
-        const QString       _name;              /** Name in the user interface */
-        const QString       _resourcePath;      /** Resource path of the color image */
-        const Type          _type;              /** Color map type */
-        const QImage        _image;             /** Color map image */
+        friend class ColorMapAction;
     };
 
-    /**
-     * Color map model class
-     *
-     * Provides a central place where color maps are stored
-     * This model can contain 1D and 2D color maps (perhaps in the future also 3D)
-     *
-     * @author Thomas Kroes
-     */
-    class ColorMapModel : public QAbstractListModel
-    {
-    public:
+    /** Widget class for color map action */
+    class Widget : public WidgetActionWidget {
+    protected:
 
         /**
-         * Color map model columns
-         * Defines the color map model columns
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param colorMapAction Pointer to color map action
+         * @param state State of the widget
          */
-        enum class Column {
-            Preview,                    /** Preview */
-            Name,                       /** Name column */
-            Image,                      /** Image column */
-            NoDimensions,               /** Dimensionality */
-            ResourcePath,               /** Resource path */
+        Widget(QWidget* parent, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state);
 
-            Start = Preview,          /** Column start */
-            End = ResourcePath      /** Column End */
-        };
+    protected:
+        QComboBox*  _comboBoxWidget;        /** Pointer to combobox widget */
+        QWidget*    _settingsWidget;        /** Pointer to settings widget */
 
-    public:
-
-        /** Constructor */
-        ColorMapModel(QObject* parent, const ColorMap::Type& type);
-
-    public: // Inherited MVC
-
-        /**
-         * Returns the the number of model columns
-         * @param parent Parent index
-         */
-        int columnCount(const QModelIndex& parent) const override;
-
-        /**
-         * Returns the number of color maps in the model
-         * @param parent Parent index
-         */
-        int rowCount(const QModelIndex& parent /* = QModelIndex() */) const override;
-
-        /**
-         * Returns model data for the given index
-         * @param index Index
-         * @param role The data role
-         */
-        QVariant data(const QModelIndex& index, int role /* = Qt::DisplayRole */) const override;
-
-    public: // Miscellaneous
-
-        /** Setups the model data (e.g. loads color maps from resources) */
-        void setupModelData();
-
-        /**
-         * Returns a color map given a row index
-         * @param row Row index
-         */
-        const ColorMap* getColorMap(const int& row) const;
-
-    private:
-        QVector<ColorMap>   _colorMaps;     /** Color maps data */
+        friend class ColorMapAction;
     };
 
-public:
+protected:
 
     /**
-     * Color map filter model class
-     *
-     * A class for filtering out 1D or 2D color maps from the color map model
-     *
-     * @author Thomas Kroes
+     * Get widget representation of the color map action
+     * @param parent Pointer to parent widget
+     * @param state Widget state
      */
-    class ColorMapFilterModel : public QSortFilterProxyModel {
-    public:
-
-        /** Constructor */
-        ColorMapFilterModel(QObject *parent, const ColorMap::Type& type = ColorMap::Type::OneDimensional) :
-            QSortFilterProxyModel(parent),
-            _type(type)
-        {
-        }
-
-        /**
-         * Returns whether a give row with give parent is filtered out (false) or in (true)
-         * @param row Row index
-         * @param parent Parent index
-         */
-        bool filterAcceptsRow(int row, const QModelIndex& parent) const override
-        {
-            const auto index = sourceModel()->index(row, static_cast<int>(ColorMapModel::Column::NoDimensions));
-            return static_cast<int>(_type) == sourceModel()->data(index, Qt::EditRole).toInt();
-        }
-
-        /** Returns the type of color map */
-        ColorMap::Type type() const {
-            return _type;
-        }
-
-        /**
-         * Sets the type of color map
-         * @param type Type of color map (e.g. 1D, 2D)
-         */
-        void setType(const ColorMap::Type& type) {
-            if (type == _type)
-                return;
-
-            _type = type;
-            invalidateFilter();
-        }
-
-    private:
-        ColorMap::Type      _type;      /** Type of color map (e.g. 1D, 2D) */
-    };
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
+        return new Widget(parent, this, state);
+    }
 
 public:
 
@@ -202,10 +85,11 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param colorMapType Type of color map (1D/2D)
      * @param colorMap Current color map
      * @param defaultColorMap Default color map
      */
-    ColorMapAction(QObject* parent, const QString& title = "", const ColorMap::Type& colorMapType = ColorMap::Type::OneDimensional, const QString& colorMap = "", const QString& defaultColorMap = "");
+    ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "", const QString& defaultColorMap = "");
 
     /**
      * Initialize the color map action
@@ -218,6 +102,9 @@ public: // Option action wrappers
 
     /** Gets the current color map name */
     QString getColorMap() const;
+
+    /** Gets the current color map */
+    QImage getColorMapImage() const;
 
     /**
      * Sets the current color map name
@@ -234,25 +121,23 @@ public: // Option action wrappers
      */
     void setDefaultColorMap(const QString& defaultColorMap);
 
+public: // Action getters
+
+    OptionAction& getCurrentColorMapAction() { return _currentColorMapAction; }
+    ColorMapSettingsAction& getColorMapSettingsAction() { return _settingsAction; }
+
 signals:
 
     /**
-     * Signals that the current color map name changed
-     * @param colorMap Current color map name
+     * Signals that the current color map image changed
+     * @param colorMapImage Current color map image
      */
-    void colorMapChanged(const QString& colorMap);
-
-    /**
-     * Signals that the default color map name changed
-     * @param defaultColorMap Default color map name
-     */
-    void defaultColorMapChanged(const QString& defaultColorMap);
+    void colorMapImageChanged(const QImage& colorMapImage);
 
 protected:
-    ColorMapFilterModel     _filteredColorMapModel;     /** The filtered color map model (contains either 1D or 2D color maps) */
-
-protected:
-    static ColorMapModel colorMapModel;
+    OptionAction                _currentColorMapAction;     /** Current color map selection action */
+    ColorMapSettingsAction      _settingsAction;            /** Color map settings action */
+    util::ColorMapFilterModel   _filteredColorMapModel;     /** The filtered color map model (contains either 1D or 2D color maps) */
 };
 
 }

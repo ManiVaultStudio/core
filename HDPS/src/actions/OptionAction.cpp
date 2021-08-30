@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QComboBox>
+#include <QListView>
 
 namespace hdps {
 
@@ -153,28 +154,21 @@ bool OptionAction::hasSelection() const
 }
 
 OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction) :
-    WidgetActionWidget(parent, optionAction, WidgetActionWidget::State::Standard),
-    _comboBox(new QComboBox())
+    QComboBox(parent)
 {
     setAcceptDrops(true);
-
-    auto layout = new QHBoxLayout();
-
-    layout->setMargin(0);
-    layout->addWidget(_comboBox, 1);
-
-    setLayout(layout);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     const auto updateToolTip = [this, optionAction]() -> void {
-        _comboBox->setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
+        setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
     };
 
     const auto populateComboBox = [this, optionAction, updateToolTip]() -> void {
-        QSignalBlocker comboBoxSignalBlocker(_comboBox);
+        QSignalBlocker comboBoxSignalBlocker(this);
 
-        _comboBox->setModel(new QStringListModel());
-        _comboBox->setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
-        _comboBox->setEnabled(!optionAction->getOptions().isEmpty());
+        setModel(new QStringListModel());
+        setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        setEnabled(!optionAction->getOptions().isEmpty());
 
         updateToolTip();
     };
@@ -184,12 +178,12 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     });
 
     const auto updateComboBoxSelection = [this, optionAction]() -> void {
-        if (optionAction->getCurrentText() == _comboBox->currentText())
+        if (optionAction->getCurrentText() == currentText())
             return;
         
-        QSignalBlocker comboBoxSignalBlocker(_comboBox);
+        QSignalBlocker comboBoxSignalBlocker(this);
         
-        _comboBox->setCurrentText(optionAction->getCurrentText());
+        setCurrentText(optionAction->getCurrentText());
     };
 
     connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection, updateToolTip](const QString& currentText) {
@@ -197,7 +191,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         updateToolTip();
     });
 
-    connect(_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
+    connect(this, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
         optionAction->setCurrentIndex(currentIndex);
     });
 

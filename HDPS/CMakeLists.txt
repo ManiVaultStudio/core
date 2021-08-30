@@ -112,6 +112,7 @@ set(ACTIONS_HEADERS
     src/actions/ColorAction.h
     src/actions/ColorPickerAction.h
     src/actions/ColorMapAction.h
+    src/actions/ColorMapSettingsAction.h
     src/actions/DecimalAction.h
     src/actions/GroupAction.h
     src/actions/IntegralAction.h
@@ -130,8 +131,9 @@ set(ACTIONS_HEADERS
 
 set(ACTIONS_SOURCES
     src/actions/ColorAction.cpp
+    src/actions/ColorPickerAction.cpp
     src/actions/ColorMapAction.cpp
-	src/actions/ColorPickerAction.cpp
+    src/actions/ColorMapSettingsAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/GroupAction.cpp
     src/actions/IntegralAction.cpp
@@ -194,6 +196,9 @@ set( UTIL_HEADERS
     src/util/IconFont.h
     src/util/IconFonts.h
     src/util/FontAwesome.h
+    src/util/ColorMap.h
+    src/util/ColorMapFilterModel.h
+    src/util/ColorMapModel.h
 )
 
 set( UTIL_SOURCES
@@ -205,6 +210,9 @@ set( UTIL_SOURCES
     src/util/IconFont.cpp
     src/util/IconFonts.cpp
     src/util/FontAwesome.cpp
+    src/util/ColorMap.cpp
+    src/util/ColorMapFilterModel.cpp
+    src/util/ColorMapModel.cpp
 )
 
 set( PLUGIN_HEADERS
