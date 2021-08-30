@@ -30,11 +30,18 @@ protected:
      */
     ColorMapSettingsAction(ColorMapAction* colorMapAction);
 
+public: // Action getters
+
+    DecimalAction& getRangeMinAction() { return _rangeMinAction; }
+    DecimalAction& getRangeMaxAction() { return _rangeMaxAction; }
+    TriggerAction& getResetToDataRangeAction() { return _resetToDataRangeAction; }
+    ToggleAction& getInvertAction() { return _invertAction; }
+
 protected:
-    DecimalAction   _rangeMinAction;        /** Range minimum action */
-    DecimalAction   _rangeMaxAction;        /** Range maximum action */
-    TriggerAction   _resetToDataRange;      /** Reset minimum/maximum range to data range */
-    ToggleAction    _invertedAction;        /** Color map is horizontally mirrored action */
+    DecimalAction   _rangeMinAction;            /** Range minimum action */
+    DecimalAction   _rangeMaxAction;            /** Range maximum action */
+    TriggerAction   _resetToDataRangeAction;    /** Reset minimum/maximum range to data range */
+    ToggleAction    _invertAction;              /** Color map is horizontally mirrored action */
 
     /** Only color map action may instantiate this class */
     friend class ColorMapAction;

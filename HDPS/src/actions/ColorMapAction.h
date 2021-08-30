@@ -124,7 +124,7 @@ public: // Option action wrappers
 public: // Action getters
 
     OptionAction& getCurrentColorMapAction() { return _currentColorMapAction; }
-    ColorMapSettingsAction& getColorMapSettingsAction() { return _settingsAction; }
+    ColorMapSettingsAction& getSettingsAction() { return _settingsAction; }
 
 signals:
 

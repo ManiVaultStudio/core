@@ -26,8 +26,16 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 
     initialize(colorMap, defaultColorMap);
 
-    connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) -> void {
+    const auto notifyColorMapImageChanged = [this]() -> void {
         emit colorMapImageChanged(getColorMapImage());
+    };
+
+    connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, [this, notifyColorMapImageChanged](const std::int32_t& currentIndex) -> void {
+        notifyColorMapImageChanged();
+    });
+
+    connect(&_settingsAction.getInvertAction(), &ToggleAction::toggled, this, [this, notifyColorMapImageChanged](bool toggled) -> void {
+        notifyColorMapImageChanged();
     });
 }
 
@@ -53,8 +61,17 @@ QImage ColorMapAction::getColorMapImage() const
     if (_currentColorMapAction.getModel() == nullptr)
         return QImage();
 
+    // Get the model index of the selected color map image
     const auto filteredModelIndex = _currentColorMapAction.getModel()->index(_currentColorMapAction.getCurrentIndex(), 0);
-    return filteredModelIndex.siblingAtColumn(static_cast<std::int32_t>(ColorMapModel::Column::Image)).data(Qt::EditRole).value<QImage>();
+
+    // Get the selected color map image
+    auto colorMapImage = filteredModelIndex.siblingAtColumn(static_cast<std::int32_t>(ColorMapModel::Column::Image)).data(Qt::EditRole).value<QImage>();
+
+    // Mirror if required
+    if (const_cast<ColorMapAction*>(this)->getSettingsAction().getInvertAction().isChecked())
+        colorMapImage = colorMapImage.mirrored(true, false);
+
+    return colorMapImage;
 }
 
 void ColorMapAction::setColorMap(const QString& colorMap)
@@ -81,6 +98,9 @@ ColorMapAction::ComboboxWidget::ComboboxWidget(QWidget* parent, OptionAction* op
     OptionAction::ComboBoxWidget(parent, optionAction),
     _colorMapAction(colorMapAction)
 {
+    connect(colorMapAction, &ColorMapAction::colorMapImageChanged, this, [this](const QImage& colorMapImage) {
+        update();
+    });
 }
 
 void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
@@ -115,7 +135,7 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
 ColorMapAction::Widget::Widget(QWidget* parent, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state) :
     WidgetActionWidget(parent, colorMapAction, state),
     _comboBoxWidget(dynamic_cast<QComboBox*>(new ComboboxWidget(parent, &colorMapAction->getCurrentColorMapAction(), colorMapAction, state))),
-    _settingsWidget(colorMapAction->getColorMapSettingsAction().createCollapsedWidget(this))
+    _settingsWidget(colorMapAction->getSettingsAction().createCollapsedWidget(this))
 {
     auto layout = new QHBoxLayout();
 
