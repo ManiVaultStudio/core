@@ -6,12 +6,12 @@ namespace hdps {
 
 namespace gui {
 
-DecimalAction::DecimalAction(QObject * parent, const QString& title, const double& minimum /*= MIN_VALUE*/, const double& maximum /*= MAX_VALUE*/, const double& value /*= VALUE*/, const double& defaultValue /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DECIMALS*/) :
+DecimalAction::DecimalAction(QObject * parent, const QString& title, const float& minimum /*= INIT_MIN*/, const float& maximum /*= INIT_MAX*/, const float& value /*= INIT_VALUE*/, const float& defaultValue /*= INIT_DEFAULT_VALUE*/, const std::int32_t& decimals /*= INIT_DECIMALS*/) :
     WidgetAction(parent),
     _value(),
     _defaultValue(),
-    _minimum(std::numeric_limits<double>::max()),
-    _maximum(std::numeric_limits<double>::min()),
+    _minimum(std::numeric_limits<float>::lowest()),
+    _maximum(std::numeric_limits<float>::max()),
     _suffix(),
     _decimals(),
     _updateDuringDrag(true)
@@ -20,7 +20,7 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const doubl
     initialize(minimum, maximum, value, defaultValue, decimals);
 }
 
-void DecimalAction::initialize(const double& minimum /*= MIN_VALUE*/, const double& maximum /*= MAX_VALUE*/, const double& value /*= VALUE*/, const double& defaultValue /*= DEFAULT_VALUE*/, const std::int32_t& decimals /*= DECIMALS*/)
+void DecimalAction::initialize(const float& minimum /*= INIT_MIN_VALUE*/, const float& maximum /*= INIT_MAX_VALUE*/, const float& value /*= INIT_VALUE*/, const float& defaultValue /*= INIT_DEFAULT_VALUE*/, const std::int32_t& decimals /*= INIT_DECIMALS*/)
 {
     setMinimum(minimum);
     setMaximum(maximum);
@@ -29,12 +29,12 @@ void DecimalAction::initialize(const double& minimum /*= MIN_VALUE*/, const doub
     setDecimals(decimals);
 }
 
-double DecimalAction::getValue() const
+float DecimalAction::getValue() const
 {
     return _value;
 }
 
-void DecimalAction::setValue(const double& value)
+void DecimalAction::setValue(const float& value)
 {
     if (value == _value)
         return;
@@ -44,12 +44,12 @@ void DecimalAction::setValue(const double& value)
     emit valueChanged(_value);
 }
 
-double DecimalAction::getDefaultValue() const
+float DecimalAction::getDefaultValue() const
 {
     return _defaultValue;
 }
 
-void DecimalAction::setDefaultValue(const double& defaultValue)
+void DecimalAction::setDefaultValue(const float& defaultValue)
 {
     if (defaultValue == _defaultValue)
         return;
@@ -69,12 +69,12 @@ void DecimalAction::reset()
     setValue(_defaultValue);
 }
 
-double DecimalAction::getMinimum() const
+float DecimalAction::getMinimum() const
 {
     return _minimum;
 }
 
-void DecimalAction::setMinimum(const double& minimum)
+void DecimalAction::setMinimum(const float& minimum)
 {
     if (minimum == _minimum)
         return;
@@ -84,12 +84,12 @@ void DecimalAction::setMinimum(const double& minimum)
     emit minimumChanged(_minimum);
 }
 
-double DecimalAction::getMaximum() const
+float DecimalAction::getMaximum() const
 {
     return _maximum;
 }
 
-void DecimalAction::setMaximum(const double& maximum)
+void DecimalAction::setMaximum(const float& maximum)
 {
     if (maximum == _maximum)
         return;
@@ -99,7 +99,7 @@ void DecimalAction::setMaximum(const double& maximum)
     emit maximumChanged(_maximum);
 }
 
-void DecimalAction::setRange(const double& minimum, const double& maximum)
+void DecimalAction::setRange(const float& minimum, const float& maximum)
 {
     setMinimum(minimum);
     setMaximum(maximum);
@@ -153,9 +153,15 @@ bool DecimalAction::isAtMinimum() const
     return _value == _minimum;
 }
 
-bool DecimalAction::isAtMaximum() const
+double DecimalAction::getIntervalLength() const
 {
-    return _value == _maximum;
+    return static_cast<double>(_maximum) - static_cast<double>(_minimum);
+}
+
+float DecimalAction::getNormalized() const
+{
+    const auto offset = static_cast<double>(_value) - static_cast<double>(_minimum);
+    return static_cast<float>(offset / getIntervalLength());
 }
 
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
@@ -182,7 +188,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
         if (actionValue == value())
             return;
         
-        QSignalBlocker doubleSpinBoxBlocker(this);
+        QSignalBlocker blocker(this);
 
         setValue(actionValue);
 
@@ -190,17 +196,16 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
     };
 
     const auto onUpdateValueRange = [this, decimalAction]() {
-        QSignalBlocker spinBoxBlocker(this);
+        QSignalBlocker blocker(this);
 
-        setMinimum(decimalAction->getMinimum());
-        setMaximum(decimalAction->getMaximum());
+        setRange(decimalAction->getMinimum(), decimalAction->getMaximum());
     };
 
-    connect(decimalAction, &DecimalAction::minimumChanged, this, [this, decimalAction, onUpdateValueRange](const double& minimum) {
+    connect(decimalAction, &DecimalAction::minimumChanged, this, [this, decimalAction, onUpdateValueRange](const float& minimum) {
         onUpdateValueRange();
     });
 
-    connect(decimalAction, &DecimalAction::maximumChanged, this, [this, decimalAction, onUpdateValueRange](const double& maximum) {
+    connect(decimalAction, &DecimalAction::maximumChanged, this, [this, decimalAction, onUpdateValueRange](const float& maximum) {
         onUpdateValueRange();
     });
 
@@ -226,7 +231,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
         onUpdateDecimals();
     });
 
-    connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](const double& value) {
+    connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](const float& value) {
         onUpdateValue();
     });
 
@@ -243,8 +248,13 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     setAcceptDrops(true);
     setObjectName("Slider");
 
-    const auto onUpdateAction = [this, decimalAction]() -> void {
-        decimalAction->setValue(static_cast<double>(value()) / static_cast<double>(SLIDER_MULTIPLIER));
+    setRange(std::numeric_limits<std::int16_t>::lowest(), std::numeric_limits<std::int16_t>::max());
+
+    const auto sliderIntervalLength = static_cast<float>(maximum() - minimum());
+
+    const auto onUpdateAction = [this, decimalAction, sliderIntervalLength]() -> void {
+        const auto sliderValueNormalized    = static_cast<float>(value() - minimum()) / sliderIntervalLength;
+        decimalAction->setValue(decimalAction->getMinimum() + (sliderValueNormalized * decimalAction->getIntervalLength()));
     };
 
     connect(this, &QSlider::valueChanged, this, [this, decimalAction, onUpdateAction](int value) {
@@ -271,12 +281,8 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
         setToolTip(toolTip);
     };
 
-    const auto onUpdateValue = [this, decimalAction, setToolTips]() {
-        const auto actionValue  = decimalAction->getValue();
-        const auto sliderValue  = actionValue * static_cast<double>(SLIDER_MULTIPLIER);
-
-        if (sliderValue == value())
-            return;
+    const auto onUpdateValue = [this, decimalAction, sliderIntervalLength, setToolTips]() {
+        const auto sliderValue = minimum() + (decimalAction->getNormalized() * sliderIntervalLength);
 
         QSignalBlocker blocker(this);
 
@@ -285,26 +291,10 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
         setToolTips();
     };
 
-    const auto onUpdateValueRange = [this, decimalAction]() {
-        QSignalBlocker blocker(this);
-
-        setMinimum(decimalAction->getMinimum() * SLIDER_MULTIPLIER);
-        setMaximum(decimalAction->getMaximum() * SLIDER_MULTIPLIER);
-    };
-
-    connect(decimalAction, &DecimalAction::minimumChanged, this, [this, decimalAction, onUpdateValueRange](const double& minimum) {
-        onUpdateValueRange();
-    });
-
-    connect(decimalAction, &DecimalAction::maximumChanged, this, [this, decimalAction, onUpdateValueRange](const double& maximum) {
-        onUpdateValueRange();
-    });
-
     connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](const double& value) {
         onUpdateValue();
     });
 
-    onUpdateValueRange();
     onUpdateValue();
     setToolTips();
 }

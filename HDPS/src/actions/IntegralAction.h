@@ -75,7 +75,7 @@ public:
      * @param value Value
      * @param defaultValue Default value
      */
-    IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = MIN_VALUE, const std::int32_t& maximum = MAX_VALUE, const std::int32_t& value = VALUE, const std::int32_t& defaultValue = DEFAULT_VALUE);
+    IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
 
     /**
      * Initialize the integral action
@@ -84,7 +84,7 @@ public:
      * @param value Value
      * @param defaultValue Default value
      */
-    void initialize(const std::int32_t& minimum = MIN_VALUE, const std::int32_t& maximum = MAX_VALUE, const std::int32_t& value = VALUE, const std::int32_t& defaultValue = DEFAULT_VALUE);
+    void initialize(const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
 
     /** Gets the current value */
     std::int32_t getValue() const;
@@ -229,10 +229,10 @@ protected:
     QString         _suffix;                /** Suffix */
     bool            _updateDuringDrag;      /** Whether the value should update during interaction */
 
-    static constexpr std::int32_t MIN_VALUE       = 0;          /** Default initialization minimum value */
-    static constexpr std::int32_t MAX_VALUE       = 100;        /** Default initialization maximum value */
-    static constexpr std::int32_t VALUE           = 0;          /** Default initialization value */
-    static constexpr std::int32_t DEFAULT_VALUE   = 0;          /** Default initialization default value */
+    static constexpr std::int32_t INIT_MIN              = std::numeric_limits<std::int32_t>::lowest();    /** Initialization minimum value */
+    static constexpr std::int32_t INIT_MAX              = std::numeric_limits<std::int32_t>::max();       /** Initialization maximum value */
+    static constexpr std::int32_t INIT_VALUE            = 0;                                              /** Initialization value */
+    static constexpr std::int32_t INIT_DEFAULT_VALUE    = 0;                                              /** Initialization default value */
 };
 
 }

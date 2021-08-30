@@ -34,13 +34,13 @@ public: // Action getters
 
     DecimalAction& getRangeMinAction() { return _rangeMinAction; }
     DecimalAction& getRangeMaxAction() { return _rangeMaxAction; }
-    TriggerAction& getResetToDataRangeAction() { return _resetToDataRangeAction; }
+    TriggerAction& getResetToDataRangeAction() { return _resetToDefaultRangeAction; }
     ToggleAction& getInvertAction() { return _invertAction; }
 
 protected:
     DecimalAction   _rangeMinAction;            /** Range minimum action */
     DecimalAction   _rangeMaxAction;            /** Range maximum action */
-    TriggerAction   _resetToDataRangeAction;    /** Reset minimum/maximum range to data range */
+    TriggerAction   _resetToDefaultRangeAction;    /** Reset minimum/maximum range to data range */
     ToggleAction    _invertAction;              /** Color map is horizontally mirrored action */
 
     /** Only color map action may instantiate this class */

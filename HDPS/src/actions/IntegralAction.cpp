@@ -6,11 +6,11 @@ namespace hdps {
 
 namespace gui {
 
-IntegralAction::IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum /*= MIN_VALUE*/, const std::int32_t& maximum /*= MAX_VALUE*/, const std::int32_t& value /*= VALUE*/, const std::int32_t& defaultValue /*= DEFAULT_VALUE*/) :
+IntegralAction::IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum /*= INIT_MIN*/, const std::int32_t& maximum /*= INIT_MAX*/, const std::int32_t& value /*= INIT_VALUE*/, const std::int32_t& defaultValue /*= INIT_DEFAULT_VALUE*/) :
     WidgetAction(parent),
     _value(),
     _defaultValue(),
-    _minimum(std::numeric_limits<std::int32_t>::min()),
+    _minimum(std::numeric_limits<std::int32_t>::lowest()),
     _maximum(std::numeric_limits<std::int32_t>::max()),
     _suffix(),
     _updateDuringDrag(true)
@@ -19,7 +19,7 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     initialize(minimum, maximum, value, defaultValue);
 }
 
-void IntegralAction::initialize(const std::int32_t& minimum /*= MIN_VALUE*/, const std::int32_t& maximum /*= MAX_VALUE*/, const std::int32_t& value /*= VALUE*/, const std::int32_t& defaultValue /*= DEFAULT_VALUE*/)
+void IntegralAction::initialize(const std::int32_t& minimum /*= INIT_MIN*/, const std::int32_t& maximum /*= INIT_MAX*/, const std::int32_t& value /*= INIT_VALUE*/, const std::int32_t& defaultValue /*= INIT_DEFAULT_VALUE*/)
 {
     setMinimum(minimum);
     setMaximum(maximum);
@@ -175,8 +175,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     const auto onUpdateValueRange = [this, integralAction]() {
         QSignalBlocker blocker(this);
 
-        setMinimum(integralAction->getMinimum());
-        setMaximum(integralAction->getMaximum());
+        setRange(integralAction->getMinimum(), integralAction->getMaximum());
     };
 
     connect(integralAction, &IntegralAction::minimumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& minimum) {
@@ -253,8 +252,7 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     const auto onUpdateValueRange = [this, integralAction]() {
         QSignalBlocker blocker(this);
 
-        setMinimum(integralAction->getMinimum());
-        setMaximum(integralAction->getMaximum());
+        setRange(integralAction->getMinimum(), integralAction->getMaximum());
     };
 
     connect(integralAction, &IntegralAction::minimumChanged, this, [this, integralAction, onUpdateValueRange](const std::int32_t& minimum) {
