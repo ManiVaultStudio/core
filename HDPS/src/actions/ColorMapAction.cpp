@@ -33,7 +33,13 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
 {
-    _currentColorMapAction.setCurrentText(colorMap);
+    if (_filteredColorMapModel.rowCount() >= 1) {
+        if (!colorMap.isEmpty())
+            _currentColorMapAction.setCurrentText(colorMap);
+        else
+            _currentColorMapAction.setCurrentIndex(0);
+    }
+
     _currentColorMapAction.setDefaultText(defaultColorMap);
 }
 
@@ -86,11 +92,22 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
+    QStyleOption styleOption;
+
+    styleOption.init(this);
+    
     const auto margin               = 5;
     const auto colorMapRectangle    = rect().marginsRemoved(QMargins(margin, margin, 20, margin));
 
-    painter.drawImage(colorMapRectangle, _colorMapAction->getColorMapImage());
-    painter.setPen(QPen(QBrush(Qt::black), 1));
+    // Get color map image from the model
+    auto colorMapeImage = _colorMapAction->getColorMapImage();
+
+    // Convert to gray scale if disabled
+    if (!isEnabled())
+        colorMapeImage = colorMapeImage.convertToFormat(QImage::Format_Grayscale8);
+
+    painter.drawImage(colorMapRectangle, colorMapeImage);
+    painter.setPen(QPen(QBrush(isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText)), 1));
     painter.setBrush(Qt::NoBrush);
     painter.drawRect(colorMapRectangle);
 }

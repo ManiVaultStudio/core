@@ -238,7 +238,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
 }
 
 DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decimalAction) :
-    QSlider(parent)
+    QSlider(Qt::Horizontal, parent)
 {
     setAcceptDrops(true);
     setObjectName("Slider");

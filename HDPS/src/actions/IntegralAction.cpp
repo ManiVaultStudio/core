@@ -210,7 +210,7 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
 }
 
 IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* integralAction) :
-    QSlider(parent)
+    QSlider(Qt::Horizontal, parent)
 {
     setAcceptDrops(true);
     setObjectName("Slider");
