@@ -8,12 +8,11 @@
 
 Q_PLUGIN_METADATA(IID "hdps.ClusterData")
 
-// =============================================================================
-// View
-// =============================================================================
+using namespace hdps::util;
 
 ClusterData::ClusterData(const hdps::plugin::PluginFactory* factory) :
-    hdps::plugin::RawData(factory, ClusterType)
+    hdps::plugin::RawData(factory, ClusterType),
+    Visitable()
 {
 }
 
@@ -35,6 +34,11 @@ std::vector<Cluster>& ClusterData::getClusters()
     return _clusters;
 }
 
+void ClusterData::accept(ClusterDataVisitor& visitor) const
+{
+
+}
+
 void ClusterData::addCluster(Cluster& cluster)
 {
     _clusters.push_back(cluster);
@@ -44,7 +48,7 @@ void ClusterData::removeClusterById(const QString& id)
 {
     _clusters.erase(std::remove_if(_clusters.begin(), _clusters.end(), [id](const Cluster& cluster) -> bool
     {
-        return cluster._id == id;
+        return cluster.getId() == id;
     }), _clusters.end());
 }
 

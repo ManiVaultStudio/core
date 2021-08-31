@@ -147,7 +147,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
         // Gather point indices for selection
         for (auto selectedIndex : selectedRows) {
             auto cluster = static_cast<Cluster*>(_clustersFilterModel.mapToSource(selectedIndex).internalPointer());
-            selectionIndices.insert(selectionIndices.end(), cluster->_indices.begin(), cluster->_indices.end());
+            selectionIndices.insert(selectionIndices.end(), cluster->getIndices().begin(), cluster->getIndices().end());
         }
 
         // Remove duplicates
@@ -212,7 +212,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
         auto mergeCluster = static_cast<Cluster*>(_clustersFilterModel.mapToSource(selectedRows.first()).internalPointer());
 
-        mergeCluster->_name = QString("%1*").arg(mergeCluster->_name);
+        mergeCluster->setName(QString("%1*").arg(mergeCluster->getName()));
 
         //MergeClustersDialog mergeClustersDialog(this);
         //mergeClustersDialog.exec();
@@ -223,9 +223,9 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
             if (selectedIndex == selectedRows.first())
                 continue;
 
-            clusterIdsToRemove << cluster->_id;
+            clusterIdsToRemove << cluster->getId();
 
-            mergeCluster->_indices.insert(mergeCluster->_indices.end(), cluster->_indices.begin(), cluster->_indices.end());
+            mergeCluster->getIndices().insert(mergeCluster->getIndices().end(), cluster->getIndices().begin(), cluster->getIndices().end());
         }
 
         clustersAction->removeClustersById(clusterIdsToRemove);

@@ -2,7 +2,7 @@
 
 #include "actions/Actions.h"
 
-struct Cluster;
+class Cluster;
 
 using namespace hdps;
 

@@ -28,7 +28,10 @@ set(SOURCES
 )
 
 set(CLUSTER_HEADERS
+    src/Cluster.h
     src/ClusterData.h
+    src/ClusterDataVisitor.h
+    src/ClusterDataVisitorJson.h
 )
 
 set(ACTIONS_SOURCES
@@ -50,22 +53,22 @@ set(MODEL_SOURCES
     src/ClustersFilterModel.cpp
 )
 
-set(IO_SOURCES
-    src/ClusterVisitor.h
-    src/ClusterVisitor.cpp
-    src/ClusterVisitorJson.h
-    src/ClusterVisitorJson.cpp
+set(VISITOR_SOURCES
+    src/ClusterDataVisitor.h
+    src/ClusterDataVisitor.cpp
+    src/ClusterDataVisitorJson.h
+    src/ClusterDataVisitorJson.cpp
 )
 
 source_group(Plugin FILES ${SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Widget FILES ${WIDGET_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
-source_group(IO FILES ${IO_SOURCES})
+source_group(Visitor FILES ${VISITOR_SOURCES})
 
 include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${WIDGET_SOURCES} ${MODEL_SOURCES} ${IO_SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${WIDGET_SOURCES} ${MODEL_SOURCES} ${VISITOR_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 

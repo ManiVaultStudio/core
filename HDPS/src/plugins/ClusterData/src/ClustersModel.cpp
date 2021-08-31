@@ -23,7 +23,7 @@ int ClustersModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) co
 
 QVariant ClustersModel::data(const QModelIndex& index, int role) const
 {
-    auto& cluster = _clusters.at(index.row());
+    const auto& cluster = _clusters.at(index.row());
 
     const auto column = static_cast<Column>(index.column());
 
@@ -33,7 +33,7 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
             //return column == Column::NumberOfIndices ? Qt::AlignRight : QVariant();
 
         case Qt::DecorationRole:
-            return column == Column::Color ? getColorIcon(cluster._color) : QVariant();
+            return column == Column::Color ? getColorIcon(cluster.getColor()) : QVariant();
 
         case Qt::ToolTipRole:
         {
@@ -52,7 +52,7 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
                 {
                     QStringList indices;
 
-                    for (auto index : cluster._indices)
+                    for (auto index : cluster.getIndices())
                         indices << QString::number(index);
 
                     return QString("Indices: [%1]").arg(indices.join(", "));
@@ -67,16 +67,16 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
             switch (column)
             {
                 case Column::Color:
-                    return QString("rgb(%1, %2, %3").arg(QString::number(cluster._color.red()), QString::number(cluster._color.green()), QString::number(cluster._color.blue()));
+                    return QString("rgb(%1, %2, %3").arg(QString::number(cluster.getColor().red()), QString::number(cluster.getColor().green()), QString::number(cluster.getColor().blue()));
 
                 case Column::Name:
-                    return cluster._name;
+                    return cluster.getName();
 
                 case Column::ID:
-                    return cluster._id;
+                    return cluster.getId();
 
                 case Column::NumberOfIndices:
-                    return cluster._indices.size();
+                    return QString::number(cluster.getNumberOfIndices());
             }
 
             break;
@@ -87,16 +87,16 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
             switch (column)
             {
                 case Column::Color:
-                    return QVariant::fromValue(cluster._color);
+                    return QVariant::fromValue(cluster.getColor());
 
                 case Column::Name:
-                    return cluster._name;
+                    return cluster.getName();
 
                 case Column::ID:
-                    return cluster._id;
+                    return cluster.getId();
 
                 case Column::NumberOfIndices:
-                    return cluster._indices.size();
+                    return cluster.getNumberOfIndices();
 
                 default:
                     break;
@@ -124,11 +124,11 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
         {
             switch (column) {
                 case Column::Color:
-                    cluster->_color = value.value<QColor>();
+                    cluster->setColor(value.value<QColor>());
                     break;
 
                 case Column::Name:
-                    cluster->_name = value.toString();
+                    cluster->setName(value.toString());
                     break;
 
                 case Column::ID:
@@ -264,7 +264,7 @@ void ClustersModel::removeClustersById(const QStringList& ids)
         for (auto id : ids) {
             _clusters.erase(std::remove_if(_clusters.begin(), _clusters.end(), [id](const Cluster& cluster) -> bool
             {
-                return cluster._id == id;
+                return cluster.getId() == id;
             }), _clusters.end());
         }
     }

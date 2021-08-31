@@ -13,7 +13,7 @@ namespace hdps {
     class DataHierarchyItem;
 }
 
-struct Cluster;
+class Cluster;
 
 using namespace hdps;
 using namespace hdps::gui;

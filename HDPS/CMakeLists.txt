@@ -68,7 +68,6 @@ set( CORE_HEADERS
     src/Core.h
     src/DataManager.h
     src/exceptions/SetNotFoundException.h
-
 )
 
 set( CORE_SOURCES
@@ -199,6 +198,8 @@ set( UTIL_HEADERS
     src/util/ColorMap.h
     src/util/ColorMapFilterModel.h
     src/util/ColorMapModel.h
+    src/util/Visitable.h
+    src/util/Visitor.h
 )
 
 set( UTIL_SOURCES
@@ -213,6 +214,8 @@ set( UTIL_SOURCES
     src/util/ColorMap.cpp
     src/util/ColorMapFilterModel.cpp
     src/util/ColorMapModel.cpp
+    src/util/Visitable.cpp
+    src/util/Visitor.cpp
 )
 
 set( PLUGIN_HEADERS
