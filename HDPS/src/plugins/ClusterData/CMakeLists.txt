@@ -31,7 +31,6 @@ set(CLUSTER_HEADERS
     src/Cluster.h
     src/ClusterData.h
     src/ClusterDataVisitor.h
-    src/ClusterDataVisitorJson.h
 )
 
 set(ACTIONS_SOURCES
@@ -56,8 +55,6 @@ set(MODEL_SOURCES
 set(VISITOR_SOURCES
     src/ClusterDataVisitor.h
     src/ClusterDataVisitor.cpp
-    src/ClusterDataVisitorJson.h
-    src/ClusterDataVisitorJson.cpp
 )
 
 source_group(Plugin FILES ${SOURCES})

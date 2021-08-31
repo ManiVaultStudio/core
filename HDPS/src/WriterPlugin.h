@@ -8,6 +8,7 @@
 
 
 #include "Plugin.h"
+#include "DataHierarchyItem.h"
 
 #include <QString>
 
