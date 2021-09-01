@@ -34,7 +34,7 @@ std::vector<Cluster>& ClusterData::getClusters()
     return _clusters;
 }
 
-void ClusterData::accept(ClusterDataVisitor& visitor) const
+void ClusterData::accept(ClusterDataVisitor* visitor) const
 {
 
 }

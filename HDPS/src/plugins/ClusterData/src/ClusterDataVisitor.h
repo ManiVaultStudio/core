@@ -19,4 +19,10 @@ public:
      * @param cluster Cluster to visit
      */
     virtual void visitCluster(const Cluster& cluster) const = 0;
+
+    /**
+     * Visit cluster
+     * @param cluster Cluster to visit
+     */
+    virtual void visitClusterData(const ClusterData& clusterData) const = 0;
 };

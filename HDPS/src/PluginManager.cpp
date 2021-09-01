@@ -284,7 +284,9 @@ QStringList PluginManager::requestPluginKindsByPluginTypeAndDataType(const Type&
 
         pluginKinds << pluginFactory->getKind();
     }
-        
+
+    pluginKinds.sort();
+
     return pluginKinds;
 }
 
