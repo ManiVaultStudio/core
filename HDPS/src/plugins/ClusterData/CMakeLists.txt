@@ -42,11 +42,6 @@ set(ACTIONS_SOURCES
     src/FilterAndSelectAction.cpp
 )
 
-set(WIDGET_SOURCES
-    src/MergeClustersDialog.h
-    src/MergeClustersDialog.cpp
-)
-
 set(MODEL_SOURCES
     src/ClustersModel.h
     src/ClustersModel.cpp
@@ -61,13 +56,12 @@ set(VISITOR_SOURCES
 
 source_group(Plugin FILES ${SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
-source_group(Widget FILES ${WIDGET_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
 source_group(Visitor FILES ${VISITOR_SOURCES})
 
 include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${WIDGET_SOURCES} ${MODEL_SOURCES} ${VISITOR_SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${VISITOR_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 

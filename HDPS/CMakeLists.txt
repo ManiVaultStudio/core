@@ -200,6 +200,7 @@ set( UTIL_HEADERS
     src/util/ColorMapModel.h
     src/util/Visitable.h
     src/util/Visitor.h
+    src/util/DatasetRef.h
 )
 
 set( UTIL_SOURCES
@@ -216,6 +217,7 @@ set( UTIL_SOURCES
     src/util/ColorMapModel.cpp
     src/util/Visitable.cpp
     src/util/Visitor.cpp
+    src/util/DatasetRef.cpp
 )
 
 set( PLUGIN_HEADERS

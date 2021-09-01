@@ -1,5 +1,4 @@
 #include "ClustersAction.h"
-#include "MergeClustersDialog.h"
 #include "DataHierarchyItem.h"
 #include "ClusterData.h"
 #include "PointData.h"
