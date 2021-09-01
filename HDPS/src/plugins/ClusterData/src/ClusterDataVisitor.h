@@ -3,6 +3,7 @@
 #include "util/Visitor.h"
 
 class Cluster;
+class ClusterData;
 
 /**
  * Cluster data visitor class
@@ -18,11 +19,11 @@ public:
      * Visit cluster
      * @param cluster Cluster to visit
      */
-    virtual void visitCluster(const Cluster& cluster) const = 0;
+    virtual void visitCluster(const Cluster* cluster) const = 0;
 
     /**
      * Visit cluster
      * @param cluster Cluster to visit
      */
-    virtual void visitClusterData(const ClusterData& clusterData) const = 0;
+    virtual void visitClusterData(const ClusterData* clusterData) const = 0;
 };

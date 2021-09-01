@@ -14,9 +14,9 @@ Cluster::Cluster() :
 {
 }
 
-void Cluster::accept(ClusterDataVisitor& visitor) const
+void Cluster::accept(ClusterDataVisitor* visitor) const
 {
-    visitor.visitCluster(*this);
+    visitor->visitCluster(this);
 }
 
 QString Cluster::getName() const

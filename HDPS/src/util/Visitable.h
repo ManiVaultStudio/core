@@ -23,7 +23,7 @@ public:
     /** Accept visitor for visiting
      * @param visitor Reference to visitor that will visit this component
      */
-    virtual void accept(VisitorType& visitor) const = 0;
+    virtual void accept(VisitorType* visitor) const = 0;
 };
 
 }

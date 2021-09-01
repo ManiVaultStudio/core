@@ -78,40 +78,32 @@ ClustersModel& ClustersAction::getClustersModel()
 
 ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, const hdps::gui::WidgetActionWidget::State& state) :
     WidgetActionWidget(parent, clustersAction, state),
-    _nameFilterAction(this, "Name filter"),
+    _filterModel(this),
+    _selectionModel(&_filterModel),
     _removeAction(this, "Remove"),
     _mergeAction(this, "Merge"),
-    _importAction(this, ""),
-    _exportAction(this, ""),
-    _cacheClusterSelection(),
-    _clustersFilterModel(this)
+    _filterAndSelectAction(this, _filterModel, _selectionModel)
 {
-    _nameFilterAction.setPlaceHolderString("Filter by cluster name...");
     _removeAction.setEnabled(false);
 
-    _importAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-    _exportAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-
-    _nameFilterAction.setToolTip("Filter by cluster name");
     _removeAction.setToolTip("Remove the selected filter(s)");
     _mergeAction.setToolTip("Merge the selected filter(s)");
-    _importAction.setToolTip("Import clusters from JSON file");
-    _nameFilterAction.setToolTip("Export clusters to JSON file");
 
-    _clustersFilterModel.setSourceModel(&clustersAction->getClustersModel());
-    _clustersFilterModel.setDynamicSortFilter(true);
-    _clustersFilterModel.setFilterKeyColumn(static_cast<std::int32_t>(ClustersModel::Column::Name));
+    _filterModel.setSourceModel(&clustersAction->getClustersModel());
+    _filterModel.setDynamicSortFilter(true);
+    _filterModel.setFilterKeyColumn(static_cast<std::int32_t>(ClustersModel::Column::Name));
 
     auto clustersTreeView = new QTreeView();
 
     // Configure tree view
+    clustersTreeView->setModel(&_filterModel);
+    clustersTreeView->setSelectionModel(&_selectionModel);
     clustersTreeView->setFixedHeight(150);
     clustersTreeView->setRootIsDecorated(false);
     clustersTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     clustersTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     clustersTreeView->setSortingEnabled(true);
     clustersTreeView->sortByColumn(static_cast<std::int32_t>(ClustersModel::Column::Name), Qt::SortOrder::AscendingOrder);
-    clustersTreeView->setModel(&_clustersFilterModel);
 
     // Configure header view
     auto header = clustersTreeView->header();
@@ -133,7 +125,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     mainLayout->setMargin(0);
     mainLayout->addWidget(clustersTreeView);
-    mainLayout->addWidget(_nameFilterAction.createWidget(this));
+    mainLayout->addWidget(_filterAndSelectAction.createWidget(this));
 
     setLayout(mainLayout);
 
@@ -146,7 +138,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
         // Gather point indices for selection
         for (auto selectedIndex : selectedRows) {
-            auto cluster = static_cast<Cluster*>(_clustersFilterModel.mapToSource(selectedIndex).internalPointer());
+            auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
             selectionIndices.insert(selectionIndices.end(), cluster->getIndices().begin(), cluster->getIndices().end());
         }
 
@@ -178,7 +170,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
             return;
 
         // Get sibling color model index and the current cluster color
-        const auto colorIndex   = _clustersFilterModel.mapToSource(index).siblingAtColumn(colorColumn);
+        const auto colorIndex   = _filterModel.mapToSource(index).siblingAtColumn(colorColumn);
         const auto currentColor = colorIndex.data(Qt::EditRole).value<QColor>();
         
         // Update the clusters model with the new color
@@ -191,8 +183,6 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     toolbarLayout->addWidget(_removeAction.createWidget(this), 1);
     toolbarLayout->addWidget(_mergeAction.createWidget(this), 1);
-    toolbarLayout->addWidget(_importAction.createWidget(this));
-    toolbarLayout->addWidget(_exportAction.createWidget(this));
 
     connect(&_removeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView]() {
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
@@ -200,7 +190,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
         QStringList clusterIds;
 
         for (auto selectedIndex : selectedRows)
-            clusterIds << _clustersFilterModel.mapToSource(selectedIndex).siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
+            clusterIds << _filterModel.mapToSource(selectedIndex).siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
 
         clustersAction->removeClustersById(clusterIds);
     });
@@ -210,7 +200,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
         QStringList clusterIdsToRemove;
 
-        auto mergeCluster = static_cast<Cluster*>(_clustersFilterModel.mapToSource(selectedRows.first()).internalPointer());
+        auto mergeCluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedRows.first()).internalPointer());
 
         mergeCluster->setName(QString("%1*").arg(mergeCluster->getName()));
 
@@ -218,7 +208,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
         //mergeClustersDialog.exec();
 
         for (auto selectedIndex : selectedRows) {
-            auto cluster = static_cast<Cluster*>(_clustersFilterModel.mapToSource(selectedIndex).internalPointer());
+            auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
 
             if (selectedIndex == selectedRows.first())
                 continue;
@@ -230,21 +220,4 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
         clustersAction->removeClustersById(clusterIdsToRemove);
     });
-
-    const auto updateNameFilter = [this]() -> void {
-        _clustersFilterModel.setNameFilter(_nameFilterAction.getString());
-    };
-
-    connect(&_nameFilterAction, &StringAction::stringChanged, this, [this, updateNameFilter](const QString& string) {
-        updateNameFilter();
-    });
-
-    updateNameFilter();
-
-    const auto updateImportExportActions = [this]() {
-        _importAction.setEnabled(false);
-        _exportAction.setEnabled(false);
-    };
-
-    updateImportExportActions();
 }

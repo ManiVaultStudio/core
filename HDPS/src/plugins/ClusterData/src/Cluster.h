@@ -49,7 +49,7 @@ public:
     /** Accept cluster data visitor for visiting
      * @param visitor Reference to visitor that will visit this component
      */
-    void accept(ClusterDataVisitor& visitor) const override;
+    void accept(ClusterDataVisitor* visitor) const override;
 
 public: // Getters/setters
 

@@ -38,6 +38,8 @@ set(ACTIONS_SOURCES
     src/InfoAction.cpp
     src/ClustersAction.h
     src/ClustersAction.cpp
+    src/FilterAndSelectAction.h
+    src/FilterAndSelectAction.cpp
 )
 
 set(WIDGET_SOURCES
