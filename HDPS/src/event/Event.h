@@ -13,14 +13,7 @@ namespace hdps
         DataChanged,
         DataRemoved,
         SelectionChanged,
-        DataRenamed,
-        AnalysisAdded,
-        AnalysisRemoved,
-        AnalysisStarted,
-        AnalysisProgressSection,
-        AnalysisProgressPercentage,
-        AnalysisFinished,
-        AnalysisAborted
+        DataRenamed
     };
 
     class HdpsEvent
