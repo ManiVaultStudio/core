@@ -10,6 +10,12 @@
 
 #include <vector>
 
+/**
+ * Clusters class
+ *
+ * Storage class for cluster data
+ *
+ */
 class CLUSTERDATA_EXPORT Cluster : public hdps::util::Visitable<ClusterDataVisitor>
 {
 public:
