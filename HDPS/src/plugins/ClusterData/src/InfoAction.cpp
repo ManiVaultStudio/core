@@ -1,8 +1,5 @@
 #include "InfoAction.h"
 
-#include "DataHierarchyItem.h"
-#include "ClusterData.h"
-
 using namespace hdps;
 using namespace hdps::gui;
 
@@ -10,26 +7,28 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     GroupAction(parent, true),
     EventListener(),
     _core(core),
-    _dataHierarchyItem(nullptr),
+    _clusters(datasetName),
     _numberOfClustersAction(this, "Number of clusters"),
     _clustersAction(this, core, datasetName)
 {
     setText("Clusters");
     setEventCore(_core);
 
-    _dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
-
     _numberOfClustersAction.setEnabled(false);
     _numberOfClustersAction.setToolTip("The number of clusters");
 
     const auto updateActions = [this]() -> void {
-        auto& clusters = _dataHierarchyItem->getDataset<Clusters>();
+        if (!_clusters.isValid())
+            return;
 
-        _numberOfClustersAction.setString(QString::number(clusters.getClusters().size()));
+        _numberOfClustersAction.setString(QString::number(_clusters->getClusters().size()));
     };
 
     registerDataEventByType(ClusterType, [this, updateActions](hdps::DataEvent* dataEvent) {
-        if (dataEvent->dataSetName != _dataHierarchyItem->getDatasetName())
+        if (!_clusters.isValid())
+            return;
+
+        if (dataEvent->dataSetName != _clusters->getName())
             return;
 
         switch (dataEvent->getType()) {
