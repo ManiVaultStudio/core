@@ -32,10 +32,11 @@ public:
 
     /** Task status enumeration */
     enum class TaskStatus {
-        Idle,           /** Analysis is idle */
-        Running,        /** An analysis is currently running */
-        Finished,       /** Analysis has finished successfully */
-        Aborted         /** Analysis has been aborted */
+        Undefined = -1,     /** Analysis status is undefined */
+        Idle,               /** Analysis is idle */
+        Running,            /** An analysis is currently running */
+        Finished,           /** Analysis has finished successfully */
+        Aborted             /** Analysis has been aborted */
     };
 
 public:

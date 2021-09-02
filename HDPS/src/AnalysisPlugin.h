@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Plugin.h"
-#include "DataHierarchyItem.h"
+
+#include "util/DatasetRef.h"
 
 #include <memory>
 
@@ -17,8 +18,8 @@ class AnalysisPlugin : public Plugin
 public:
     AnalysisPlugin(const PluginFactory* factory) :
         Plugin(factory),
-        _inputDataHierarchyItem(nullptr),
-        _outputDataHierarchyItem(nullptr)
+        _input(),
+        _output()
     {
     }
 
@@ -29,69 +30,63 @@ public:
         return Application::getIconFont("FontAwesome").getIcon("chart-line");
     }
 
-    DataHierarchyItem* getInputDataHierarchyItem() const {
-        return _inputDataHierarchyItem;
+    /** Get input dataset name */
+    QString getInputDatasetName() const {
+        return _input.getDatasetName();
     }
 
-    QString getInputDatasetName() const {
-        Q_ASSERT(_inputDataHierarchyItem != nullptr);
-
-        if (_inputDataHierarchyItem == nullptr)
-            return "";
-
-        return _inputDataHierarchyItem->getDatasetName();
+    /**
+     * Set input dataset name (updates the input data reference)
+     * @param inputDatasetName Name of the input dataset
+     */
+    void setInputDatasetName(const QString& inputDatasetName) {
+        _input.setDatasetName(inputDatasetName);
     }
 
     /** Get input dataset */
     template<typename DatasetType>
-    DatasetType& getInputDataset() const {
-        return dynamic_cast<DatasetType&>(_inputDataHierarchyItem->getDataset());
+    DatasetType& getInputDataset() {
+        return dynamic_cast<DatasetType&>(*_input);
     }
 
-    void setInputDataHierarchyItem(DataHierarchyItem* inputDataHierarchyItem) {
-        Q_ASSERT(inputDataHierarchyItem != nullptr);
-
-        if (inputDataHierarchyItem == nullptr)
-            return;
-
-        _inputDataHierarchyItem = inputDataHierarchyItem;
+    /** Get input dataset */
+    template<typename DatasetType>
+    const DatasetType& getInputDataset() const {
+        return dynamic_cast<DatasetType&>(*_input);
     }
 
-    DataHierarchyItem* getOutputDataHierarchyItem() const {
-        return _outputDataHierarchyItem;
+    /** Get output dataset name */
+    QString getOutputDatasetName() {
+        return _output.getDatasetName();
     }
 
-    QString getOutputDatasetName() const {
-        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+    /** Get output dataset name */
+    const QString getOutputDatasetName() const {
+        return _output.getDatasetName();
+    }
 
-        if (_outputDataHierarchyItem == nullptr)
-            return "";
-
-        return _outputDataHierarchyItem->getDatasetName();
+    /**
+     * Set output dataset name (updates the output data reference)
+     * @param outputDatasetName Name of the output dataset
+     */
+    void setOutputDatasetName(const QString& outputDatasetName) {
+        _output.setDatasetName(outputDatasetName);
     }
 
     /** Get output dataset */
     template<typename DatasetType>
-    DatasetType& getOutputDataset() const {
-        return dynamic_cast<DatasetType&>(_outputDataHierarchyItem->getDataset());
-    }
-
-    void setOutputDatasetName(const QString& outputDatasetName) {
-        Q_ASSERT(!outputDatasetName.isEmpty());
-
-        if (outputDatasetName.isEmpty())
-            return;
-
-        _outputDataHierarchyItem = _core->getDataHierarchyItem(outputDatasetName);
+    DatasetType& getOutputDataset() {
+        return dynamic_cast<DatasetType&>(*_output);
     }
 
 protected: // Status
 
     /** Get task status */
     DataHierarchyItem::TaskStatus getTaskStatus() const {
-        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+        if (!_output.isValid())
+            return DataHierarchyItem::TaskStatus::Undefined;
 
-        return _outputDataHierarchyItem->getTaskStatus();
+        return _output.getDataHierarchyItem()->getTaskStatus();
     }
 
     /**
@@ -99,9 +94,10 @@ protected: // Status
      * @param taskName Name of the task
      */
     void setTaskName(const QString& taskName) {
-        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+        if (!_output.isValid())
+            return;
 
-        _outputDataHierarchyItem->setTaskName(taskName);
+        _output.getDataHierarchyItem()->setTaskName(taskName);
     }
 
     /**
@@ -109,9 +105,10 @@ protected: // Status
      * @param taskProgress Progress of the task (%)
      */
     void setTaskProgress(const float& taskProgress) {
-        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+        if (!_output.isValid())
+            return;
 
-        _outputDataHierarchyItem->setTaskProgress(taskProgress);
+        _output.getDataHierarchyItem()->setTaskProgress(taskProgress);
     }
 
     /**
@@ -119,35 +116,39 @@ protected: // Status
      * @param taskDescription Description of the task
      */
     void setTaskDescription(const QString& taskDescription) {
-        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+        if (!_output.isValid())
+            return;
 
-        _outputDataHierarchyItem->setTaskDescription(taskDescription);
+        _output.getDataHierarchyItem()->setTaskDescription(taskDescription);
     }
 
     /** Set the task status to running */
     void setTaskRunning() {
-        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+        if (!_output.isValid())
+            return;
 
-        _outputDataHierarchyItem->setTaskRunning();
+        _output.getDataHierarchyItem()->setTaskRunning();
     }
 
     /** Set the task status to finished */
     void setTaskFinished() {
-        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+        if (!_output.isValid())
+            return;
 
-        _outputDataHierarchyItem->setTaskFinished();
+        _output.getDataHierarchyItem()->setTaskFinished();
     }
 
     /** Set the task status to aborted */
     void setTaskAborted() {
-        Q_ASSERT(_outputDataHierarchyItem != nullptr);
+        if (!_output.isValid())
+            return;
 
-        _outputDataHierarchyItem->setTaskAborted();
+        _output.getDataHierarchyItem()->setTaskAborted();
     }
 
 protected:
-    DataHierarchyItem*  _inputDataHierarchyItem;        /** Input data hierarchy item */
-    DataHierarchyItem*  _outputDataHierarchyItem;       /** Output data hierarchy item */
+    util::DatasetRef<DataSet>     _input;       /** Input dataset */
+    util::DatasetRef<DataSet>     _output;      /** Output dataset */
 };
 
 

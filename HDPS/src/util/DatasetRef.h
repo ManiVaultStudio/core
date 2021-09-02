@@ -123,32 +123,27 @@ public:
     }
 
     /** Dereference operator */
-    DatasetType& operator* ()
-    {
+    DatasetType& operator* () {
         return *_dataset;
     }
 
     /** Arrow operator */
-    DatasetType* operator-> ()
-    {
+    DatasetType* operator-> () {
         return _dataset;
     }
 
     /** Arrow operator */
-    const DatasetType* operator-> () const
-    {
+    const DatasetType* operator-> () const {
         return _dataset;
     }
 
     /** Returns whether the dataset pointer is valid (if the dataset actually exists) */
-    bool isValid() const
-    {
+    bool isValid() const {
         return _dataset != nullptr;
     }
 
     /** Get the current dataset name */
-    QString getDatasetName() const
-    {
+    QString getDatasetName() const {
         return _datasetName;
     }
 
@@ -156,8 +151,7 @@ public:
      * Set the name of the current dataset
      * @param datasetName Name of the dataset for which the pointer needs to be resolved 
      */
-    void setDatasetName(const QString& datasetName)
-    {
+    void setDatasetName(const QString& datasetName) {
         Q_ASSERT(Application::core() != nullptr);
 
         if (Application::core() == nullptr)
@@ -203,10 +197,24 @@ public:
     }
 
     /** Resets the internals (dataset pointer to nullptr etc.) */
-    void reset()
-    {
+    void reset() {
         _datasetName = "";
         _dataset = nullptr;
+    }
+
+    /** Get the corresponding data hierarchy item */
+    DataHierarchyItem* getDataHierarchyItem() {
+        Q_ASSERT(Application::core() != nullptr);
+
+        if (!isValid())
+            return nullptr;
+
+        return Application::core()->getDataHierarchyItem(_datasetName);
+    }
+
+    /** Get the corresponding data hierarchy item */
+    const DataHierarchyItem* getDataHierarchyItem() const {
+        return const_cast<DatasetRef<DatasetType>*>(this)->getDataHierarchyItem();
     }
 
     /**
@@ -214,8 +222,7 @@ public:
      * Consumers of this class don't need to keep a pointer
      * to the core anymore to inform others that data changed
      */
-    void notifyDataChanged()
-    {
+    void notifyDataChanged() {
         Q_ASSERT(Application::core() != nullptr);
 
         if (Application::core() == nullptr)
@@ -229,8 +236,7 @@ public:
      * Consumers of this class don't need to keep a pointer
      * to the core anymore to inform others that data changed
      */
-    void notifySelectionChanged()
-    {
+    void notifySelectionChanged() {
         Q_ASSERT(Application::core() != nullptr);
 
         if (Application::core() == nullptr)
