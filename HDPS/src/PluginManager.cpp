@@ -261,7 +261,7 @@ void PluginManager::createExporterPlugin(const QString& kind, const QString& inp
         if (!pluginInstance)
             return;
 
-        pluginInstance->setInputDataHierarchyItem(_core.getDataHierarchyItem(inputDatasetName));
+        pluginInstance->setInputDatasetName(inputDatasetName);
 
         _core.addPlugin(pluginInstance);
     }

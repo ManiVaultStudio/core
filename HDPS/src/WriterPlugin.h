@@ -8,9 +8,12 @@
 
 
 #include "Plugin.h"
-#include "DataHierarchyItem.h"
+
+#include "util/DatasetRef.h"
 
 #include <QString>
+
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -22,7 +25,7 @@ class WriterPlugin : public Plugin
 public:
     WriterPlugin(const PluginFactory* factory) :
         Plugin(factory),
-        _inputDataHierarchyItem(nullptr)
+        _input()
     {
     }
 
@@ -37,36 +40,27 @@ public:
 
 public:
 
-    DataHierarchyItem* getInputDataHierarchyItem() const {
-        return _inputDataHierarchyItem;
+    /** Get input dataset name */
+    QString getInputDatasetName() const {
+        return _input.getDatasetName();
     }
 
-    QString getInputDatasetName() const {
-        Q_ASSERT(_inputDataHierarchyItem != nullptr);
-
-        if (_inputDataHierarchyItem == nullptr)
-            return "";
-
-        return _inputDataHierarchyItem->getDatasetName();
+    /**
+     * Set input dataset name
+     * @param datasetName Name of the input dataset
+     */
+    void setInputDatasetName(const QString& datasetName) {
+        _input.setDatasetName(datasetName);
     }
 
     /** Get input dataset */
     template<typename DatasetType>
     DatasetType& getInputDataset() const {
-        return dynamic_cast<DatasetType&>(_inputDataHierarchyItem->getDataset());
-    }
-
-    void setInputDataHierarchyItem(DataHierarchyItem* inputDataHierarchyItem) {
-        Q_ASSERT(inputDataHierarchyItem != nullptr);
-
-        if (inputDataHierarchyItem == nullptr)
-            return;
-
-        _inputDataHierarchyItem = inputDataHierarchyItem;
+        return dynamic_cast<DatasetType&>(*_input);
     }
 
 protected:
-    DataHierarchyItem*  _inputDataHierarchyItem;        /** Input data hierarchy item */
+    DatasetRef<DataSet>     _input;     /** Input dataset reference */
 };
 
 
