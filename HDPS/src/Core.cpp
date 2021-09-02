@@ -12,11 +12,15 @@
 #include "RawData.h"
 #include "Set.h"
 
+#include "util/DatasetRef.h"
+
 #include "DataAnalysisAction.h"
 #include "DataExportAction.h"
 
 #include <QMessageBox>
 #include <algorithm>
+
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -25,6 +29,7 @@ Core::Core(gui::MainWindow& mainWindow) :
     _mainWindow(mainWindow),
     _dataHierarchyManager(this)
 {
+    DatasetRefPrivate::setCore(this);
 }
 
 Core::~Core()
