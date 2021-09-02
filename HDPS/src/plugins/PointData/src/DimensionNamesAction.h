@@ -2,11 +2,15 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
+#include "util/DatasetRef.h"
+
+#include "PointData.h"
 
 namespace hdps {
     class CoreInterface;
-    class DataHierarchyItem;
 }
+
+using namespace hdps::util;
 
 /**
  * Dimension names action class
@@ -64,6 +68,6 @@ signals:
     void dimensionNamesChanged(const QStringList& dimensionNames);
 
 protected:
-    hdps::DataHierarchyItem*    _dataHierarchyItem;     /** Pointer to the data hierarchy item of the points dataset */
-    QStringList                 _dimensionNames;        /** Dimension names */
+    DatasetRef<Points>      _points;            /** Points dataset reference */
+    QStringList             _dimensionNames;    /** Dimension names */
 };

@@ -1,6 +1,4 @@
 #include "DimensionNamesAction.h"
-#include "DataHierarchyItem.h"
-#include "PointData.h"
 
 #include <QHBoxLayout>
 #include <QListView>
@@ -10,21 +8,22 @@ using namespace hdps;
 DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName) :
     WidgetAction(parent),
     EventListener(),
-    _dataHierarchyItem(core->getDataHierarchyItem(datasetName)),
+    _points(datasetName),
     _dimensionNames()
 {
     setText("Dimension names");
     setEventCore(core);
 
     const auto updateDimensionNames = [this]() -> void {
+        if (!_points.isValid())
+            return;
+
         _dimensionNames.clear();
 
-        auto& points = _dataHierarchyItem->getDataset<Points>();
-
-        auto& dimensionNames = points.getDimensionNames();
+        auto& dimensionNames = _points->getDimensionNames();
 
         if (dimensionNames.empty()) {
-            for (std::uint32_t dimensionId = 0; dimensionId < points.getNumDimensions(); dimensionId++)
+            for (std::uint32_t dimensionId = 0; dimensionId < _points->getNumDimensions(); dimensionId++)
                 _dimensionNames << QString("Dim %1").arg(dimensionId);
         }
         else {
@@ -34,7 +33,10 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
     };
 
     registerDataEventByType(PointType, [this, updateDimensionNames](hdps::DataEvent* dataEvent) {
-        if (dataEvent->dataSetName != _dataHierarchyItem->getDatasetName())
+        if (!_points.isValid())
+            return;
+
+        if (dataEvent->dataSetName != _points->getName())
             return;
 
         switch (dataEvent->getType()) {
@@ -63,9 +65,8 @@ QStringList DimensionNamesAction::getDimensionNames() const
 DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction, const hdps::gui::WidgetActionWidget::State& state) :
     WidgetActionWidget(parent, dimensionNamesAction, state)
 {
-    auto layout = new QHBoxLayout();
-
-    auto listView = new QListView();
+    auto layout     = new QHBoxLayout();
+    auto listView   = new QListView();
 
     listView->setFixedHeight(100);
 

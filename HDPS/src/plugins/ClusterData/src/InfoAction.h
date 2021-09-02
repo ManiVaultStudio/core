@@ -9,7 +9,6 @@
 
 namespace hdps {
     class CoreInterface;
-    class DataHierarchyItem;
 }
 
 using namespace hdps;
