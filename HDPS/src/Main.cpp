@@ -22,12 +22,12 @@ int main(int argc, char *argv[])
     QSurfaceFormat::setDefaultFormat(defaultFormat);
 #endif
 
-    hdps::Application application(argc, argv);
+    hdps::Application hdpsApplication(argc, argv);
 
     // Retina display support for Mac OS and X11:
     // AA_UseHighDpiPixmaps attribute is off by default in Qt 5.1 but will most
     // likely be on by default in a future release of Qt.
-    application.setAttribute(Qt::AA_UseHighDpiPixmaps);
+    hdpsApplication.setAttribute(Qt::AA_UseHighDpiPixmaps);
     
     QFile styleSheetFile(":/styles/default.qss");
 
@@ -46,11 +46,13 @@ int main(int argc, char *argv[])
     appIcon.addFile(":/Icons/AppIcon512");
     appIcon.addFile(":/Icons/AppIcon1024");
 
-    application.setWindowIcon(appIcon);
+    hdpsApplication.setWindowIcon(appIcon);
 
     hdps::gui::MainWindow mainWindow;
     
+    hdpsApplication.setCore(&mainWindow.getCore());
+
     mainWindow.show();
 
-    return application.exec();
+    return hdpsApplication.exec();
 }

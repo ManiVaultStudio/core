@@ -8,6 +8,8 @@
 
 namespace hdps {
 
+class CoreInterface;
+
 /**
  * HDPS application class
  * 
@@ -31,6 +33,17 @@ public: // Miscellaneous
     /** Returns a pointer to the current HDPS application (if the current application derives from hdps::Application) */
     static Application* current();
 
+    /** Get pointer to the core */
+    CoreInterface* getCore();
+
+    /**
+     * Set pointer to the core
+     * @param core Pointer to the core
+     */
+    void setCore(CoreInterface* core);
+
+    /** Get pointer to the core */
+    static CoreInterface* core();
 
 public: // Static resource access functions
 
@@ -66,6 +79,7 @@ public: // Actions API
     }
 
 protected:
+    CoreInterface*              _core;                      /** Shared pointer to HDPS core */
     IconFonts                   _iconFonts;                 /** Icon fonts resource */
     QSettings                   _settings;                  /** Settings */
     gui::WidgetActionsManager   _widgetActionsManager;      /** Widget actions manager */

@@ -79,6 +79,25 @@ const IconFont& hdps::Application::getIconFont(const QString& name, const std::i
     return current()->_iconFonts.getIconFont(name, majorVersion, minorVersion);
 }
 
+hdps::CoreInterface* Application::getCore()
+{
+    Q_ASSERT(_core != nullptr);
+
+    return _core;
+}
+
+void Application::setCore(CoreInterface* core)
+{
+    Q_ASSERT(_core != nullptr);
+
+    _core = core;
+}
+
+hdps::CoreInterface* Application::core()
+{
+    return current()->getCore();
+}
+
 QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
 {
     return _settings.value(path, defaultValue);

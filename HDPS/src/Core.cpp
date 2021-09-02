@@ -12,8 +12,6 @@
 #include "RawData.h"
 #include "Set.h"
 
-#include "util/DatasetRef.h"
-
 #include "DataAnalysisAction.h"
 #include "DataExportAction.h"
 
@@ -29,7 +27,6 @@ Core::Core(gui::MainWindow& mainWindow) :
     _mainWindow(mainWindow),
     _dataHierarchyManager(this)
 {
-    DatasetRefPrivate::setCore(this);
 }
 
 Core::~Core()

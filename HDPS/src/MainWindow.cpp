@@ -38,7 +38,6 @@ namespace gui
 
 MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
-    _core(nullptr),
     _dataHierarchyWidget(nullptr),
     _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),
@@ -53,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     setupUi(this);
 
     _core = QSharedPointer<Core>::create(*this);
+
     _core->init();
 
     _dataHierarchyWidget    = new DataHierarchyWidget(this, _core.get());
