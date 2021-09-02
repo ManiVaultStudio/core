@@ -49,12 +49,6 @@ public:
         return dynamic_cast<DatasetType&>(*_input);
     }
 
-    /** Get input dataset */
-    template<typename DatasetType>
-    const DatasetType& getInputDataset() const {
-        return dynamic_cast<DatasetType&>(*_input);
-    }
-
     /** Get output dataset name */
     QString getOutputDatasetName() {
         return _output.getDatasetName();
