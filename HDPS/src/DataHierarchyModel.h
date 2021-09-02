@@ -81,6 +81,12 @@ public:
      */
     bool addItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem);
 
+    /**
+     * Remove a data hierarchy item from the model
+     * @param parentModelIndex Model index of the parent data hierarchy item
+     */
+    bool removeItem(const QModelIndex& modelIndex);
+
 private:
     DataHierarchyModelItem*     _rootItem;      /** Root node of the data hierarchy */
 };

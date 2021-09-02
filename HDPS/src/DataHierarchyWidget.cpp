@@ -60,6 +60,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
         return modelIndex;
     };
 
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemRemoved, this, [this, getModelIndexForDatasetName](const QString& datasetName) {
+        _model.removeItem(getModelIndexForDatasetName(datasetName));
+    });
+
     connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this, getModelIndexForDatasetName](DataHierarchyItem& dataHierarchyItem) {
         if (dataHierarchyItem.isHidden())
             return;
@@ -131,6 +135,14 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
             auto dataHierarchyModelItem = _model.getItem(index, Qt::DisplayRole);
 
             QSharedPointer<QMenu> contextMenu(dataHierarchyModelItem->getContextMenu());
+
+            auto removeAction = new QAction("Remove");
+
+            connect(removeAction, &QAction::triggered, this, [this, dataHierarchyModelItem]() {
+                _core->removeDataset(dataHierarchyModelItem->getDataAtColumn(0));
+            });
+
+            contextMenu->addAction(removeAction);
 
             contextMenu->exec(viewport()->mapToGlobal(position));
         }

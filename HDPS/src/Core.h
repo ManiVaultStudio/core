@@ -205,8 +205,13 @@ protected:
     void unregisterEventListener(EventListener* eventListener) override;
 
 private:
-    /** Notify all data consumers that a dataset has been removed. */
-    void notifyDataRemoved(const QString name);
+
+    /**
+     * Notify all event listeners that a dataset has been removed
+     * @param dataType Type of the data
+     * @param name Name of the dataset
+     */
+    void notifyDataRemoved(const DataType& dataType, const QString name);
 
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();

@@ -13,6 +13,8 @@ namespace hdps
 
 class DataHierarchyModelItem : public QObject
 {
+Q_OBJECT
+
 public:
     using PluginHierarchyItems = QVector<DataHierarchyModelItem*>;
 

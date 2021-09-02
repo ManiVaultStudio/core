@@ -14,51 +14,60 @@ ClustersAction::ClustersAction(QObject* parent, hdps::CoreInterface* core, const
     WidgetAction(parent),
     EventListener(),
     _core(core),
-    _dataHierarchyItem(nullptr),
+    _clusters(datasetName),
     _clustersModel(this)
 {
     setText("Clusters");
     setEventCore(_core);
 
-    _dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
-
     registerDataEventByType(ClusterType, [this](hdps::DataEvent* dataEvent) {
-        if (dataEvent->dataSetName != _dataHierarchyItem->getDatasetName())
+        if (!_clusters.isValid())
+            return;
+
+        if (dataEvent->dataSetName != _clusters->getName())
             return;
 
         if (dataEvent->getType() == EventType::DataChanged)
             _clustersModel.setClusters(*getClusters());
     });
 
-    connect(&_clustersModel, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
-        Q_ASSERT(_dataHierarchyItem != nullptr);
+    const auto updateClusters = [this]() -> void {
+        _clusters->getClusters() = _clustersModel.getClusters();
+        _clusters.notifyDataChanged();
+    };
 
-        _dataHierarchyItem->getDataset<Clusters>().getClusters() = _clustersModel.getClusters();
+    connect(&_clustersModel, &QAbstractItemModel::dataChanged, this, [this, updateClusters](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
+        if (!_clusters.isValid())
+            return;
 
-        _core->notifyDataChanged(_dataHierarchyItem->getDatasetName());
+        updateClusters();
     });
 
-    // Clear the selection when the layout of the model changes
-    connect(&_clustersModel, &QAbstractItemModel::layoutChanged, this, [this](const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint) {
-        Q_ASSERT(_dataHierarchyItem != nullptr);
+    connect(&_clustersModel, &QAbstractItemModel::layoutChanged, this, [this, updateClusters](const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint) {
+        if (!_clusters.isValid())
+            return;
 
-        _dataHierarchyItem->getDataset<Clusters>().getClusters() = _clustersModel.getClusters();
-
-        _core->notifyDataChanged(_dataHierarchyItem->getDatasetName());
+        updateClusters();
     });
 }
 
 std::vector<Cluster>* ClustersAction::getClusters()
 {
-    return &_dataHierarchyItem->getDataset<Clusters>().getClusters();
+    if (!_clusters.isValid())
+        return nullptr;
+
+    return &_clusters->getClusters();
 }
 
 void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
 {
-    auto parentDataHierarchyItem = _core->getDataHierarchyItem(_dataHierarchyItem->getParent());
-    
-    auto& points    = parentDataHierarchyItem->getDataset<Points>();
-    auto& selection = dynamic_cast<Points&>(points.getSelection());
+    if (!_clusters.isValid())
+        return;
+
+    auto dataHierarchyItem          = _core->getDataHierarchyItem(_clusters->getName());
+    auto parentDataHierarchyItem    = _core->getDataHierarchyItem(dataHierarchyItem->getParent());
+    auto& points                    = parentDataHierarchyItem->getDataset<Points>();
+    auto& selection                 = dynamic_cast<Points&>(points.getSelection());
     
     selection.indices = indices;
 

@@ -2,6 +2,7 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
+#include "util/DatasetRef.h"
 
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
@@ -15,9 +16,11 @@ namespace hdps {
 }
 
 class Cluster;
+class Clusters;
 
 using namespace hdps;
 using namespace hdps::gui;
+using namespace hdps::util;
 
 /**
  * Clusters action class
@@ -88,7 +91,7 @@ public:
     ClustersModel& getClustersModel();
 
 protected:
-    hdps::CoreInterface*        _core;                  /** Pointer to the core */
-    hdps::DataHierarchyItem*    _dataHierarchyItem;     /** Pointer to the data hierarchy item of the points dataset */
-    ClustersModel               _clustersModel;         /** Clusters model */
+    CoreInterface*          _core;              /** Pointer to the core */
+    DatasetRef<Clusters>    _clusters;          /** Cluster dataset reference */
+    ClustersModel           _clustersModel;     /** Clusters model */
 };

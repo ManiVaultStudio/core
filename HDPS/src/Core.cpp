@@ -149,9 +149,12 @@ const QString Core::addData(const QString kind, const QString nameRequest, const
 
 void Core::removeDataset(const QString datasetName)
 {
-    _dataManager->removeDataset(datasetName);
+    const auto dataType = requestData(datasetName).getDataType();
 
-    notifyDataRemoved(datasetName);
+    _dataManager->removeDataset(datasetName);
+    _dataHierarchyManager.removeDataset(datasetName);
+
+    notifyDataRemoved(dataType, datasetName);
 }
 
 QString Core::renameDataset(const QString& currentDatasetName, const QString& intendedDatasetName)
@@ -370,13 +373,12 @@ void Core::notifyDataChanged(const QString datasetName)
 * Goes through all plug-ins stored in the core and calls the 'dataRemoved' function
 * on all plug-ins that inherit from the DataConsumer interface.
 */
-void Core::notifyDataRemoved(const QString datasetName)
+void Core::notifyDataRemoved(const DataType& dataType, const QString datasetName)
 {
-    DataType dt = requestData(datasetName).getDataType();
-
     DataRemovedEvent dataEvent;
-    dataEvent.dataSetName = datasetName;
-    dataEvent.dataType = dt;
+
+    dataEvent.dataSetName   = datasetName;
+    dataEvent.dataType      = dataType;
 
     for (EventListener* listener : _eventListeners)
         listener->onDataEvent(&dataEvent);

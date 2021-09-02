@@ -30,10 +30,10 @@ bool DataHierarchyManager::removeDataset(const QString& datasetName)
     if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
         return false;
 
+    emit hierarchyItemRemoved(datasetName);
+
     for (auto child : getChildren(datasetName))
         _dataHierarchyItemsMap.remove(child);
-
-    emit hierarchyItemRemoved(datasetName);
 
     _dataHierarchyItemsMap.remove(datasetName);
 
@@ -98,7 +98,8 @@ QStringList DataHierarchyManager::getChildren(const QString& datasetName, const 
     auto children = dataHierarchyItem->getChildren();
 
     if (recursive)
-        children << getChildren(datasetName, recursive);
+        for (auto child : children)
+            children << getChildren(child, recursive);
 
     return children;
 }

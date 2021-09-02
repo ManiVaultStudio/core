@@ -215,4 +215,11 @@ bool DataHierarchyModel::addItem(const QModelIndex& parentModelIndex, DataHierar
     return true;
 }
 
+bool DataHierarchyModel::removeItem(const QModelIndex& modelIndex)
+{
+    //auto DataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(modelIndex.internalPointer());
+
+    return true;
+}
+
 }
