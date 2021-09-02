@@ -1,6 +1,4 @@
 #include "InfoAction.h"
-#include "DataHierarchyItem.h"
-#include "PointData.h"
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -9,7 +7,7 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     GroupAction(parent, false),
     EventListener(),
     _core(core),
-    _dataHierarchyItem(nullptr),
+    _points(datasetName),
     _numberOfPointsAction(this, "Number of points"),
     _numberOfDimensionsAction(this, "Number of dimensions"),
     _memorySizeAction(this, "Occupied memory"),
@@ -19,8 +17,6 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
 {
     setText("Info");
     setEventCore(_core);
-
-    _dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
 
     _numberOfPointsAction.setEnabled(false);
     _numberOfDimensionsAction.setEnabled(false);
@@ -49,17 +45,22 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     };
 
     const auto updateActions = [this, getNoBytesHumanReadable]() -> void {
-        auto& points    = _dataHierarchyItem->getDataset<Points>();
-        auto& selection = dynamic_cast<Points&>(points.getSelection());
+        if (!_points.isValid())
+            return;
 
-        _numberOfPointsAction.setString(QString::number(points.getNumPoints()));
-        _numberOfDimensionsAction.setString(QString::number(points.getNumDimensions()));
-        _memorySizeAction.setString(getNoBytesHumanReadable(points.getNumPoints() * points.getNumDimensions() * 4));
+        auto& selection = dynamic_cast<Points&>(_points->getSelection());
+
+        _numberOfPointsAction.setString(QString::number(_points->getNumPoints()));
+        _numberOfDimensionsAction.setString(QString::number(_points->getNumDimensions()));
+        _memorySizeAction.setString(getNoBytesHumanReadable(_points->getNumPoints() * _points->getNumDimensions() * 4));
         _numberOfSelectedPointsAction.setString(QString::number(selection.indices.size()));
     };
 
     registerDataEventByType(PointType, [this, updateActions](hdps::DataEvent* dataEvent) {
-        if (dataEvent->dataSetName != _dataHierarchyItem->getDatasetName())
+        if (!_points.isValid())
+            return;
+
+        if (dataEvent->dataSetName != _points->getName())
             return;
 
         switch (dataEvent->getType()) {

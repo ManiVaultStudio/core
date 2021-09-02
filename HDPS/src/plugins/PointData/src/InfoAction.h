@@ -2,19 +2,22 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
+#include "util/DatasetRef.h"
 
 #include "SelectedIndicesAction.h"
 #include "DimensionNamesAction.h"
+
+#include "PointData.h"
 
 #include <QTimer>
 
 namespace hdps {
     class CoreInterface;
-    class DataHierarchyItem;
 }
 
 using namespace hdps;
 using namespace hdps::gui;
+using namespace hdps::util;
 
 /**
  * Info action class
@@ -48,7 +51,7 @@ public: // Action getters
 
 protected:
     CoreInterface*          _core;                              /** Pointer to the core */
-    DataHierarchyItem*      _dataHierarchyItem;                 /** Pointer to the data hierarchy item of the points dataset */
+    DatasetRef<Points>      _points;                            /** Points dataset reference */
     StringAction            _numberOfPointsAction;              /** Number of points action */
     StringAction            _numberOfDimensionsAction;          /** Number of dimensions action */
     StringAction            _memorySizeAction;                  /** Memory size action */
