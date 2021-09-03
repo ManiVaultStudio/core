@@ -16,7 +16,7 @@ DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetNa
 {
     //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
-    _dataset->getHierarchyItem()->addAction(*this);
+    _dataset->getHierarchyItem().addAction(*this);
 
     _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataType(plugin::Type::ANALYSIS, _dataset->getDataType());
 
@@ -24,7 +24,7 @@ DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetNa
         auto analysisPluginAction = new TriggerAction(this, pluginKind);
         
         connect(analysisPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            _dataset->getHierarchyItem()->analyzeDataset(pluginKind);
+            _dataset->getHierarchyItem().analyzeDataset(pluginKind);
         });
     }
 }

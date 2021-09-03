@@ -18,8 +18,14 @@ class DataHierarchyModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
     explicit DataHierarchyModel(QObject* parent = nullptr);
 
+    /** Destructor */
     ~DataHierarchyModel();
 
     /**
@@ -60,12 +66,30 @@ public:
      */
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
+    /** Get supported drag actions */
     Qt::DropActions supportedDragActions() const override;
 
+   /**
+    * Get data hierarchy model item
+    * @param index Model index of the item
+    * @param role Data role
+    */
     DataHierarchyModelItem* getItem(const QModelIndex& index, int role) const;
 
+    /**
+     * Get item flags
+     * @param index Model index
+     * @return Item flags
+     */
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+    /**
+     * Get header data
+     * @param section Section
+     * @param orientation Orientation
+     * @param role Data role
+     * @return Header
+     */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
@@ -79,13 +103,13 @@ public:
      * @param parentModelIndex Model index of the parent data hierarchy item 
      * @param dataHierarchyItem Pointer to the data hierarchy item
      */
-    bool addItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem);
+    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem);
 
     /**
      * Remove a data hierarchy item from the model
      * @param parentModelIndex Model index of the parent data hierarchy item
      */
-    bool removeItem(const QModelIndex& modelIndex);
+    bool removeDataHierarchyModelItem(const QModelIndex& modelIndex);
 
 private:
     DataHierarchyModelItem*     _rootItem;      /** Root node of the data hierarchy */

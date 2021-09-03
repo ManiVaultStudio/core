@@ -41,16 +41,16 @@ public:
     /**
      * Get hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @return Shared pointer to data hierarchy item
+     * @return Pointer to data hierarchy item
      */
-    const SharedDataHierarchyItem getHierarchyItem(const QString& datasetName) const;
+    const DataHierarchyItem* getHierarchyItem(const QString& datasetName) const;
 
     /**
      * Get hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @return Shared pointer to data hierarchy item
+     * @return Pointer to data hierarchy item
      */
-    SharedDataHierarchyItem getHierarchyItem(const QString& datasetName);
+    DataHierarchyItem* getHierarchyItem(const QString& datasetName);
 
     /**
      * Selects data hierarchy item with dataset name
@@ -62,19 +62,31 @@ protected:
 
     /**
      * Get dataset children
-     * @param dataHierarchyItem Shared pointer to data hierarchy item
+     * @param dataHierarchyItem Pointer to data hierarchy item
      * @param recursive Whether to get all children in a recursive manner
      * @return Children
      */
-    SharedDataHierarchyItems getChildren(SharedDataHierarchyItem& dataHierarchyItem, const bool& recursive = true);
+    DataHierarchyItems getChildren(DataHierarchyItem* dataHierarchyItem, const bool& recursive = true);
+
+    /**
+     * Remove a child by dataset name
+     * @param datasetName Name of the dataset
+     */
+    void removeDataHierarchyItemByDatasetName(const QString& datasetName);
 
 signals:
 
     /**
      * Invoked when a hierarchy item is added to the hierarchy manager
-     * @param dataHierarchyItem Shared pointer to added item
+     * @param dataHierarchyItem Pointer to added data hierarchy item
      */
-    void hierarchyItemAdded(SharedDataHierarchyItem dataHierarchyItem);
+    void hierarchyItemAdded(DataHierarchyItem* dataHierarchyItem);
+
+    /**
+     * Invoked when a hierarchy item is about to be removed from the hierarchy manager
+     * @param datasetName Name of the about to be removed dataset
+     */
+    void hierarchyItemAboutToBeRemoved(const QString& datasetName);
 
     /**
      * Invoked when a hierarchy item is removed from the hierarchy manager

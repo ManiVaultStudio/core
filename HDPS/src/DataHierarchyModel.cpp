@@ -196,7 +196,7 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
     return mimeData;
 }
 
-bool DataHierarchyModel::addItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem)
+bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem)
 {
     auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
 
@@ -215,9 +215,14 @@ bool DataHierarchyModel::addItem(const QModelIndex& parentModelIndex, DataHierar
     return true;
 }
 
-bool DataHierarchyModel::removeItem(const QModelIndex& modelIndex)
+bool DataHierarchyModel::removeDataHierarchyModelItem(const QModelIndex& modelIndex)
 {
-    //auto DataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(modelIndex.internalPointer());
+    auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(modelIndex.internalPointer());
+
+    beginRemoveRows(modelIndex.parent(), modelIndex.row(), modelIndex.row());
+    endRemoveRows();
+
+    delete dataHierarchyModelItem;
 
     return true;
 }

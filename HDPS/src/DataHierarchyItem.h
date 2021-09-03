@@ -20,8 +20,11 @@ class DataSet;
 /** Shared pointer of data hierarchy item */
 using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
 
-/** Vector of shared data hierarchy item pointers */
+/** Vector of data hierarchy item shared pointers */
 using SharedDataHierarchyItems = QVector<SharedDataHierarchyItem>;
+
+/** Vector of data hierarchy item pointers */
+using DataHierarchyItems = QVector<DataHierarchyItem*>;
 
 /**
  * Data hierarchy item class
@@ -38,11 +41,11 @@ public:
 
     /** Task status enumeration */
     enum class TaskStatus {
-        Undefined = -1,     /** Analysis status is undefined */
-        Idle,               /** Analysis is idle */
-        Running,            /** An analysis is currently running */
-        Finished,           /** Analysis has finished successfully */
-        Aborted             /** Analysis has been aborted */
+        Undefined = -1,     /** Task status is undefined */
+        Idle,               /** Task is idle */
+        Running,            /** An Task is currently running */
+        Finished,           /** Task has finished successfully */
+        Aborted             /** Task has been aborted */
     };
 
 public:
@@ -67,6 +70,9 @@ public:
      */
     DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true, const bool& selected = false);
 
+    /** Destructor */
+    ~DataHierarchyItem();
+
     /** Gets the dataset name */
     QString getDatasetName() const;
 
@@ -77,13 +83,13 @@ public:
     void renameDataset(const QString& intendedDatasetName);
 
     /** Gets the parent dataset name */
-    SharedDataHierarchyItem getParent() const;
+    DataHierarchyItem* getParent() const;
 
     /** Returns whether the data hierarchy item has a parent */
     bool hasParent() const;
 
     /** Gets the names of the children name */
-    SharedDataHierarchyItems getChildren() const;
+    DataHierarchyItems getChildren() const;
 
     /** Gets the number of children */
     std::uint32_t getNumberOfChildren() const;
@@ -142,9 +148,9 @@ public: // Hierarchy
 
     /**
      * Removes a child (name reference to data hierarchy item)
-     * @param name Name of the child
+     * @param dataHierarchyItem Pointer to data hierarchy item
      */
-    void removeChild(const QString& name);
+    void removeChild(DataHierarchyItem* dataHierarchyItem);
 
 public: // Miscellaneous
 
@@ -277,8 +283,8 @@ signals:
 
 protected:
     util::DatasetRef<DataSet>   _dataset;           /** Dataset reference */
-    SharedDataHierarchyItem     _parent;            /** Pointer to parent data hierarchy item */
-    SharedDataHierarchyItems    _children;          /** Child items (if any) */
+    DataHierarchyItem*          _parent;            /** Pointer to parent data hierarchy item */
+    DataHierarchyItems          _children;          /** Pointers to child items (if any) */
     bool                        _visible;           /** Whether the dataset is visible */
     bool                        _selected;          /** Whether the hierarchy item is selected */
     IconList                    _namedIcons;        /** Named icons */

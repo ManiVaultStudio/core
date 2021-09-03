@@ -4,12 +4,12 @@
 namespace hdps
 {
 
-SharedDataHierarchyItem DataSet::getHierarchyItem()
+DataHierarchyItem& DataSet::getHierarchyItem()
 {
-    return _core->getDataHierarchyItem(_name);
+    return *_core->getDataHierarchyItem(_name);
 }
 
-const SharedDataHierarchyItem DataSet::getHierarchyItem() const
+const DataHierarchyItem& DataSet::getHierarchyItem() const
 {
     return const_cast<DataSet*>(this)->getHierarchyItem();
 }

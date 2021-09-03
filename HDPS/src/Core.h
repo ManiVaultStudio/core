@@ -182,9 +182,9 @@ public:
     /**
      * Get hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @return Shared pointer to data hierarchy item
+     * @return Pointer to data hierarchy item
      */
-    SharedDataHierarchyItem getDataHierarchyItem(const QString& datasetName) override;
+    DataHierarchyItem* getDataHierarchyItem(const QString& datasetName) override;
 
 protected:
     /**

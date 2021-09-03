@@ -15,7 +15,7 @@ DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) 
 {
     //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("file-export"));
 
-    _dataset->getHierarchyItem()->addAction(*this);
+    _dataset->getHierarchyItem().addAction(*this);
 
     _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataType(plugin::Type::WRITER, _dataset->getDataType());
 
@@ -23,7 +23,7 @@ DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) 
         auto exporterPluginAction = new TriggerAction(this, pluginKind);
 
         connect(exporterPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            _dataset->getHierarchyItem()->exportDataset(pluginKind);
+            _dataset->getHierarchyItem().exportDataset(pluginKind);
         });
     }
 }

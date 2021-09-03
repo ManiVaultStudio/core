@@ -19,14 +19,14 @@ void DataHierarchyManager::addDataset(const QString& datasetName, const QString&
         if (datasetName.isEmpty())
             throw std::runtime_error("Dataset name is empty");
 
-        const auto newDataHierarchyItem = SharedDataHierarchyItem(new DataHierarchyItem(this, datasetName, parentDatasetName, visible));
+        const auto newDataHierarchyItem = SharedDataHierarchyItem::create(this, datasetName, parentDatasetName, visible);
 
         _dataHierarchyItems << newDataHierarchyItem;
 
         if (!parentDatasetName.isEmpty())
             getHierarchyItem(parentDatasetName)->addChild(datasetName);
 
-        emit hierarchyItemAdded(newDataHierarchyItem);
+        emit hierarchyItemAdded(newDataHierarchyItem.get());
     }
     catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to add dataset to data hierarchy", e.what());
@@ -41,14 +41,10 @@ bool DataHierarchyManager::removeDataset(const QString& datasetName)
 
         const auto hierarchyItem = getHierarchyItem(datasetName);
 
-        if (hierarchyItem.isNull())
+        if (hierarchyItem == nullptr)
             throw std::runtime_error(QString("%1 does not exist in the data hierarchy").arg(datasetName).toLatin1());
 
-        for (auto child : getChildren(getHierarchyItem(datasetName)))
-            _dataHierarchyItems.remove(_dataHierarchyItems.indexOf(child));
-
-        emit hierarchyItemRemoved(datasetName);
-
+        removeDataHierarchyItemByDatasetName(hierarchyItem->getDatasetName());
     }
     catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to remove dataset from data hierarchy", e.what());
@@ -57,18 +53,18 @@ bool DataHierarchyManager::removeDataset(const QString& datasetName)
     return true;
 }
 
-const SharedDataHierarchyItem DataHierarchyManager::getHierarchyItem(const QString& datasetName) const
+const DataHierarchyItem* DataHierarchyManager::getHierarchyItem(const QString& datasetName) const
 {
     return const_cast<DataHierarchyManager*>(this)->getHierarchyItem(datasetName);
 }
 
-SharedDataHierarchyItem DataHierarchyManager::getHierarchyItem(const QString& datasetName)
+DataHierarchyItem* DataHierarchyManager::getHierarchyItem(const QString& datasetName)
 {
     Q_ASSERT(!datasetName.isEmpty());
 
     for (auto dataHierarchyItem : _dataHierarchyItems)
         if (dataHierarchyItem->getDatasetName() == datasetName)
-            return dataHierarchyItem;
+            return dataHierarchyItem.get();
 
     return nullptr;
 }
@@ -81,7 +77,7 @@ void DataHierarchyManager::selectHierarchyItem(const QString& datasetName)
 
         const auto hierarchyItem = getHierarchyItem(datasetName);
 
-        if (hierarchyItem.isNull())
+        if (hierarchyItem == nullptr)
             throw std::runtime_error(QString("%1 does not exist in the data hierarchy").arg(datasetName).toLatin1());
 
         for (auto dataHierarchyItem : _dataHierarchyItems)
@@ -95,9 +91,9 @@ void DataHierarchyManager::selectHierarchyItem(const QString& datasetName)
     }
 }
 
-SharedDataHierarchyItems DataHierarchyManager::getChildren(SharedDataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
+DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem* dataHierarchyItem, const bool& recursive /*= true*/)
 {
-    Q_ASSERT(!dataHierarchyItem.isNull());
+    Q_ASSERT(dataHierarchyItem != nullptr);
 
     auto children = dataHierarchyItem->getChildren();
 
@@ -106,6 +102,19 @@ SharedDataHierarchyItems DataHierarchyManager::getChildren(SharedDataHierarchyIt
             children << getChildren(child, recursive);
 
     return children;
+}
+
+void DataHierarchyManager::removeDataHierarchyItemByDatasetName(const QString& datasetName)
+{
+    for (auto dataHierarchyItem : _dataHierarchyItems) {
+        if (dataHierarchyItem->getDatasetName() == datasetName) {
+            emit hierarchyItemAboutToBeRemoved(datasetName);
+            {
+                _dataHierarchyItems.removeOne(dataHierarchyItem);
+            }
+            emit hierarchyItemRemoved(datasetName);
+        }
+    }
 }
 
 }

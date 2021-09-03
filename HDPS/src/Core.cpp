@@ -156,8 +156,11 @@ void Core::removeDataset(const QString datasetName)
 {
     const auto dataType = requestData(datasetName).getDataType();
 
-    _dataManager->removeDataset(datasetName);
+    // Remove the associated data hierarchy items first
     _dataHierarchyManager.removeDataset(datasetName);
+
+    // The from the data manager
+    _dataManager->removeDataset(datasetName);
 
     notifyDataRemoved(dataType, datasetName);
 }
@@ -420,7 +423,7 @@ gui::MainWindow& Core::gui() const {
     return _mainWindow;
 }
 
-hdps::SharedDataHierarchyItem Core::getDataHierarchyItem(const QString& datasetName)
+hdps::DataHierarchyItem* Core::getDataHierarchyItem(const QString& datasetName)
 {
     return _dataHierarchyManager.getHierarchyItem(datasetName);
 }

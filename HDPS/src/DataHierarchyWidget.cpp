@@ -50,8 +50,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     header()->setStretchLastSection(false);
 
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        const auto selectedDatasetName = selected.first().topLeft().data(Qt::DisplayRole).toString();
-        emit selectedDatasetNameChanged(selectedDatasetName);
+        //const auto selectedDatasetName = selected.first().topLeft().data(Qt::DisplayRole).toString();
+        //emit selectedDatasetNameChanged(selectedDatasetName);
     });
 
     const auto getModelIndexForDatasetName = [this](const QString& datasetName) -> QModelIndex {
@@ -63,12 +63,12 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         return modelIndex;
     };
 
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemRemoved, this, [this, getModelIndexForDatasetName](const QString& datasetName) {
-        _model.removeItem(getModelIndexForDatasetName(datasetName));
+    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAboutToBeRemoved, this, [this, getModelIndexForDatasetName](const QString& datasetName) {
+        _model.removeDataHierarchyModelItem(getModelIndexForDatasetName(datasetName));
     });
 
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this, getModelIndexForDatasetName](SharedDataHierarchyItem dataHierarchyItem) {
-        if (dataHierarchyItem->isHidden())
+    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this, getModelIndexForDatasetName](DataHierarchyItem* dataHierarchyItem) {
+        if (dataHierarchyItem == nullptr || dataHierarchyItem->isHidden())
             return;
 
         DatasetRef<DataSet> dataset(dataHierarchyItem->getDatasetName());
@@ -80,9 +80,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         else
             parentModelIndex = getModelIndexForDatasetName(dataHierarchyItem->getParent()->getDatasetName());
 
-        _model.addItem(parentModelIndex, dataHierarchyItem.get());
+        _model.addDataHierarchyModelItem(parentModelIndex, dataHierarchyItem);
 
-        connect(dataHierarchyItem.get(), &DataHierarchyItem::taskDescriptionChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const QString& description) {
+        connect(dataHierarchyItem, &DataHierarchyItem::taskDescriptionChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const QString& description) {
             try
             {
                 const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem->getDatasetName());
@@ -95,7 +95,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             }
         });
 
-        connect(dataHierarchyItem.get(), &DataHierarchyItem::taskProgressChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const float& progress) {
+        connect(dataHierarchyItem, &DataHierarchyItem::taskProgressChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const float& progress) {
             try
             {
                 const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem->getDatasetName());
@@ -109,7 +109,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             }
         });
 
-        connect(dataHierarchyItem.get(), &DataHierarchyItem::selectionChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const bool& selection) {
+        connect(dataHierarchyItem, &DataHierarchyItem::selectionChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const bool& selection) {
             try
             {
                 const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem->getDatasetName());

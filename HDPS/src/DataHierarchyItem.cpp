@@ -32,6 +32,17 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent /*= nullptr*/, const QStrin
     addIcon("data", getDataset().getIcon());
 }
 
+DataHierarchyItem::~DataHierarchyItem()
+{
+    if (_parent == nullptr)
+        return;
+
+    _parent->removeChild(this);
+
+    for (auto child : _children)
+        delete child;
+}
+
 QString DataHierarchyItem::getDatasetName() const
 {
     return _dataset.getDatasetName();
@@ -53,17 +64,17 @@ void DataHierarchyItem::renameDataset(const QString& intendedDatasetName)
     }
 }
 
-SharedDataHierarchyItem DataHierarchyItem::getParent() const
+DataHierarchyItem* DataHierarchyItem::getParent() const
 {
     return _parent;
 }
 
 bool DataHierarchyItem::hasParent() const
 {
-    return !_parent.isNull();
+    return _parent != nullptr;
 }
 
-SharedDataHierarchyItems DataHierarchyItem::getChildren() const
+DataHierarchyItems DataHierarchyItem::getChildren() const
 {
     return _children;
 }
@@ -144,11 +155,9 @@ void DataHierarchyItem::addChild(const QString& name)
     _children << Application::core()->getDataHierarchyItem(name);
 }
 
-void DataHierarchyItem::removeChild(const QString& name)
+void DataHierarchyItem::removeChild(DataHierarchyItem* dataHierarchyItem)
 {
-    _children.erase(std::remove_if(_children.begin(), _children.end(), [name](SharedDataHierarchyItem dataHierarchyItem) {
-        return dataHierarchyItem->getDatasetName() == name;
-    }), _children.end());
+    _children.removeOne(dataHierarchyItem);
 }
 
 QString DataHierarchyItem::toString() const

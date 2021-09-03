@@ -80,7 +80,7 @@ protected: // Status
         if (!_output.isValid())
             return DataHierarchyItem::TaskStatus::Undefined;
 
-        return _output->getHierarchyItem()->getTaskStatus();
+        return _output->getHierarchyItem().getTaskStatus();
     }
 
     /**
@@ -91,7 +91,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem()->setTaskName(taskName);
+        _output->getHierarchyItem().setTaskName(taskName);
     }
 
     /**
@@ -102,7 +102,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem()->setTaskProgress(taskProgress);
+        _output->getHierarchyItem().setTaskProgress(taskProgress);
     }
 
     /**
@@ -113,7 +113,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem()->setTaskDescription(taskDescription);
+        _output->getHierarchyItem().setTaskDescription(taskDescription);
     }
 
     /** Set the task status to running */
@@ -121,7 +121,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem()->setTaskRunning();
+        _output->getHierarchyItem().setTaskRunning();
     }
 
     /** Set the task status to finished */
@@ -129,7 +129,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem()->setTaskFinished();
+        _output->getHierarchyItem().setTaskFinished();
     }
 
     /** Set the task status to aborted */
@@ -137,7 +137,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem()->setTaskAborted();
+        _output->getHierarchyItem().setTaskAborted();
     }
 
 protected:

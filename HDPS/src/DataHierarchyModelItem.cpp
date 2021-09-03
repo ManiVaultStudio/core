@@ -16,13 +16,18 @@ DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyI
     _progressSection(),
     _progressPercentage(0.0f)
 {
+    /*
     connect(_dataHierarchyItem, &DataHierarchyItem::destroyed, this, [this]() {
         delete this;
     });
+    */
 }
 
 DataHierarchyModelItem::~DataHierarchyModelItem()
 {
+    if (_parent)
+        _parent->removeChild(this);
+
     qDeleteAll(_children);
 }
 
@@ -153,6 +158,11 @@ QMenu* DataHierarchyModelItem::getContextMenu()
 void DataHierarchyModelItem::renameDataset(const QString& intendedDatasetName)
 {
     _dataHierarchyItem->renameDataset(intendedDatasetName);
+}
+
+void DataHierarchyModelItem::removeChild(DataHierarchyModelItem* dataHierarchyModelItem)
+{
+    _children.removeOne(dataHierarchyModelItem);
 }
 
 void DataHierarchyModelItem::setProgressPercentage(const float& progressPercentage)

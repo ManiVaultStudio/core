@@ -50,10 +50,10 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             delete _dataWidget;
 
         if (_dataset.isValid()) {
-            const auto hierarchyItem = _dataset->getHierarchyItem();
+            const auto hierarchyItem = &_dataset->getHierarchyItem();
 
-            disconnect(hierarchyItem.get(), &DataHierarchyItem::actionAdded, this, nullptr);
-            disconnect(hierarchyItem.get(), &DataHierarchyItem::datasetNameChanged, this, nullptr);
+            disconnect(hierarchyItem, &DataHierarchyItem::actionAdded, this, nullptr);
+            disconnect(hierarchyItem, &DataHierarchyItem::datasetNameChanged, this, nullptr);
         }
 
         _dataset.setDatasetName(datasetName);
@@ -74,7 +74,7 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             }
         };
 
-        connect(_dataset->getHierarchyItem().get(), &DataHierarchyItem::actionAdded, this, [this, createWidgets]() {
+        connect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this, createWidgets]() {
             createWidgets();
         });
 

@@ -94,6 +94,14 @@ public:
      */
     void renameDataset(const QString& intendedDatasetName);
 
+protected:
+
+    /**
+     * Removes a child (name reference to data hierarchy item)
+     * @param dataHierarchyModelItem Pointer to data hierarchy model item
+     */
+    void removeChild(DataHierarchyModelItem* dataHierarchyModelItem);
+
 public: // Analysis
 
     /**

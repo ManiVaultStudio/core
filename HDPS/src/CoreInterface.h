@@ -127,9 +127,9 @@ public:
     /**
      * Get data hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @return Shared pointer to data hierarchy item
+     * @return Pointer to data hierarchy item
      */
-    virtual SharedDataHierarchyItem getDataHierarchyItem(const QString& datasetName) = 0;
+    virtual DataHierarchyItem* getDataHierarchyItem(const QString& datasetName) = 0;
 
     /**
      * Get a list of plugin kinds (names) given a plugin type and data type
