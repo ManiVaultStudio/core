@@ -243,28 +243,6 @@ public: // Task
     void setTaskFinished();
     void setTaskAborted();
 
-public: // Operators
-
-    /**
-     * Assignment operator
-     * @param other Data hierarchy item to copy from
-     */
-    DataHierarchyItem& operator= (const DataHierarchyItem& other)
-    {
-        _parent             = other._parent;
-        _children           = other._children;
-        _visible            = other._visible;
-        _taskDescription    = other._taskDescription;
-        _taskProgress       = other._taskProgress;
-        _selected           = other._selected;
-        _namedIcons         = other._namedIcons;
-        _taskName           = other._taskName;
-        _taskStatus         = other._taskStatus;
-        _actions            = other._actions;
-
-        return *this;
-    }
-
 signals:
 
     /**

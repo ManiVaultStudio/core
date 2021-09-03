@@ -7,6 +7,7 @@
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
 #include "FilterAndSelectAction.h"
+#include "SubsetAction.h"
 
 #include <QItemSelectionModel>
 
@@ -51,6 +52,7 @@ protected:
         TriggerAction           _removeAction;              /** Remove clusters action */
         TriggerAction           _mergeAction;               /** Merge clusters action */
         FilterAndSelectAction   _filterAndSelectAction;     /** Filter and select clusters action */
+        SubsetAction            _subsetAction;              /** Subset action */
     };
 
     /**
@@ -80,6 +82,9 @@ public:
      * @param indices Point indices to select
      */
     void selectPoints(const std::vector<std::uint32_t>& indices);
+
+    /** Create subset from selected clusters */
+    void createSubset();
 
     /**
      * Remove clusters by their unique identifiers

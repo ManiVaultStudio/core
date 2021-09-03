@@ -74,6 +74,17 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     _core->notifySelectionChanged(parentDataHierarchyItem->getDatasetName());
 }
 
+void ClustersAction::createSubset()
+{
+    auto dataHierarchyItem = _core->getDataHierarchyItem(_clusters->getName());
+    
+    DatasetRef<Points> points(dataHierarchyItem->getParent()->getDatasetName());
+
+    auto& selection = dynamic_cast<Points&>(points->getSelection());
+
+    const auto subsetName = points->createSubset(points->getName());
+}
+
 void ClustersAction::removeClustersById(const QStringList& ids)
 {
     _clustersModel.removeClustersById(ids);
@@ -90,7 +101,8 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     _selectionModel(&_filterModel),
     _removeAction(this, "Remove"),
     _mergeAction(this, "Merge"),
-    _filterAndSelectAction(this, _filterModel, _selectionModel)
+    _filterAndSelectAction(this, _filterModel, _selectionModel),
+    _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
 {
     _removeAction.setEnabled(false);
 
@@ -128,14 +140,6 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::Color), QHeaderView::Fixed);
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::Name), QHeaderView::Stretch);
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::NumberOfIndices), QHeaderView::Fixed);
-
-    auto mainLayout = new QVBoxLayout();
-
-    mainLayout->setMargin(0);
-    mainLayout->addWidget(clustersTreeView);
-    mainLayout->addWidget(_filterAndSelectAction.createWidget(this));
-
-    setLayout(mainLayout);
 
     const auto selectionChangedHandler = [this, clustersAction, clustersTreeView]() -> void {
 
@@ -187,10 +191,18 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     auto toolbarLayout = new QHBoxLayout();
 
-    mainLayout->addLayout(toolbarLayout);
-
     toolbarLayout->addWidget(_removeAction.createWidget(this), 1);
     toolbarLayout->addWidget(_mergeAction.createWidget(this), 1);
+
+    auto mainLayout = new QVBoxLayout();
+
+    mainLayout->setMargin(0);
+    mainLayout->addWidget(clustersTreeView);
+    mainLayout->addWidget(_filterAndSelectAction.createWidget(this));
+    mainLayout->addLayout(toolbarLayout);
+    mainLayout->addWidget(_subsetAction.createWidget(this));
+
+    setLayout(mainLayout);
 
     connect(&_removeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView]() {
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();

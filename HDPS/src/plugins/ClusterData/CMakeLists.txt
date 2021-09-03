@@ -40,6 +40,8 @@ set(ACTIONS_SOURCES
     src/ClustersAction.cpp
     src/FilterAndSelectAction.h
     src/FilterAndSelectAction.cpp
+    src/SubsetAction.h
+    src/SubsetAction.cpp
 )
 
 set(MODEL_SOURCES
