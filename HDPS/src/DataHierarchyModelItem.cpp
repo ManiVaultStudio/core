@@ -16,11 +16,6 @@ DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyI
     _progressSection(),
     _progressPercentage(0.0f)
 {
-    /*
-    connect(_dataHierarchyItem, &DataHierarchyItem::destroyed, this, [this]() {
-        delete this;
-    });
-    */
 }
 
 DataHierarchyModelItem::~DataHierarchyModelItem()
