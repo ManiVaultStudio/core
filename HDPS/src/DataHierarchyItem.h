@@ -3,6 +3,7 @@
 
 #include "DataType.h"
 
+#include "util/DatasetRef.h"
 #include "actions/WidgetAction.h"
 
 #include <QObject>
@@ -15,7 +16,12 @@ namespace hdps
 {
 
 class DataSet;
-class Core;
+
+/** Shared pointer of data hierarchy item */
+using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
+
+/** Vector of shared data hierarchy item pointers */
+using SharedDataHierarchyItems = QVector<SharedDataHierarchyItem>;
 
 /**
  * Data hierarchy item class
@@ -47,18 +53,19 @@ public:
     /** List of named icons */
     using IconList = QList<NamedIcon>;
 
+    
+
 public:
 
     /**
      * Constructor
-     * @param core Pointer to the core
      * @param parent Pointer to parent object
      * @param datasetName Name of the dataset
      * @param parentDatasetName Name of the parent dataset
      * @param visible Whether the dataset is visible
      * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(Core* core, QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true, const bool& selected = false);
+    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true, const bool& selected = false);
 
     /** Gets the dataset name */
     QString getDatasetName() const;
@@ -70,10 +77,13 @@ public:
     void renameDataset(const QString& intendedDatasetName);
 
     /** Gets the parent dataset name */
-    QString getParent() const;
+    SharedDataHierarchyItem getParent() const;
+
+    /** Returns whether the data hierarchy item has a parent */
+    bool hasParent() const;
 
     /** Gets the names of the children name */
-    QStringList getChildren() const;
+    SharedDataHierarchyItems getChildren() const;
 
     /** Gets the number of children */
     std::uint32_t getNumberOfChildren() const;
@@ -142,11 +152,11 @@ public: // Miscellaneous
     QString toString() const;
 
     /** Get the dataset */
-    DataSet& getDataset() const;
+    DataSet& getDataset();
 
     /** Get the dataset */
     template<typename DatasetType>
-    DatasetType& getDataset() const {
+    DatasetType& getDataset() {
         return dynamic_cast<DatasetType&>(getDataset());
     };
 
@@ -241,8 +251,6 @@ public: // Operators
      */
     DataHierarchyItem& operator= (const DataHierarchyItem& other)
     {
-        _core               = other._core;
-        _datasetName        = other._datasetName;
         _parent             = other._parent;
         _children           = other._children;
         _visible            = other._visible;
@@ -256,13 +264,6 @@ public: // Operators
 
         return *this;
     }
-
-protected:
-
-    /** Sets the dataset name
-     * @param datasetName Name of the dataset
-     */
-    void setDatasetName(const QString& datasetName);
 
 signals:
 
@@ -297,10 +298,9 @@ signals:
     void datasetNameChanged(const QString& datasetName);
 
 protected:
-    Core*                       _core;              /** Pointer to core */
-    QString                     _datasetName;       /** Name of the dataset */
-    QString                     _parent;            /** Parent item */
-    QStringList                 _children;          /** Child items (if any) */
+    util::DatasetRef<DataSet>   _dataset;           /** Dataset reference */
+    SharedDataHierarchyItem     _parent;            /** Pointer to parent data hierarchy item */
+    SharedDataHierarchyItems    _children;          /** Child items (if any) */
     bool                        _visible;           /** Whether the dataset is visible */
     bool                        _selected;          /** Whether the hierarchy item is selected */
     IconList                    _namedIcons;        /** Named icons */
@@ -313,12 +313,6 @@ protected:
 protected:
     friend class DataManager;
 };
-
-/** Shared pointer of data hierarchy item */
-using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
-
-/** Maps string to shared data hierarchy item */
-using DataHierarchyItemsMap = QMap<QString, SharedDataHierarchyItem>;
 
 /**
  * Print to console

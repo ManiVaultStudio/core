@@ -11,14 +11,17 @@
 namespace hdps
 {
 
-class Core;
-
 class DataHierarchyManager : public QObject
 {
     Q_OBJECT
 
 public:
-    DataHierarchyManager(Core* core, QObject* parent = nullptr);
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
+    DataHierarchyManager(QObject* parent = nullptr);
 
     /**
      * Add a dataset to the hierarchy
@@ -36,32 +39,18 @@ public:
     bool removeDataset(const QString& datasetName);
 
     /**
-     * Set the hierarchy item description
+     * Get hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @param description Description
+     * @return Shared pointer to data hierarchy item
      */
-    void setItemDescription(const QString& datasetName, const QString& description);
-
-    /**
-     * Set the hierarchy item progress
-     * @param datasetName Name of the dataset
-     * @param progress Progress [0, 1]
-     */
-    void setItemProgress(const QString& datasetName, const double& progress);
+    const SharedDataHierarchyItem getHierarchyItem(const QString& datasetName) const;
 
     /**
      * Get hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @return Data hierarchy item
+     * @return Shared pointer to data hierarchy item
      */
-    const DataHierarchyItem* getHierarchyItem(const QString& datasetName) const;
-
-    /**
-     * Get hierarchy item by dataset name
-     * @param datasetName Name of the dataset
-     * @return Data hierarchy item
-     */
-    DataHierarchyItem* getHierarchyItem(const QString& datasetName);
+    SharedDataHierarchyItem getHierarchyItem(const QString& datasetName);
 
     /**
      * Selects data hierarchy item with dataset name
@@ -73,19 +62,19 @@ protected:
 
     /**
      * Get dataset children
-     * @param datasetName Name of the dataset
+     * @param dataHierarchyItem Shared pointer to data hierarchy item
      * @param recursive Whether to get all children in a recursive manner
      * @return Children
      */
-    QStringList getChildren(const QString& datasetName, const bool& recursive = true);
+    SharedDataHierarchyItems getChildren(SharedDataHierarchyItem& dataHierarchyItem, const bool& recursive = true);
 
 signals:
 
     /**
      * Invoked when a hierarchy item is added to the hierarchy manager
-     * @param dataHierarchyItem Added item
+     * @param dataHierarchyItem Shared pointer to added item
      */
-    void hierarchyItemAdded(DataHierarchyItem& dataHierarchyItem);
+    void hierarchyItemAdded(SharedDataHierarchyItem dataHierarchyItem);
 
     /**
      * Invoked when a hierarchy item is removed from the hierarchy manager
@@ -94,8 +83,7 @@ signals:
     void hierarchyItemRemoved(const QString& datasetName);
 
 private:
-    Core*                   _core;                      /** Pointer to core */
-    DataHierarchyItemsMap   _dataHierarchyItemsMap;     /** Data hierarchy items map */
+    SharedDataHierarchyItems    _dataHierarchyItems;     /** Shared pointers to data hierarchy items */
 };
 
 }

@@ -11,6 +11,10 @@
 namespace hdps
 {
 
+class DataHierarchyItem;
+
+using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
+
 class DataSet
 {
 public:
@@ -99,6 +103,12 @@ public:
 
     /** Get icon for the dataset */
     virtual QIcon getIcon() const = 0;
+
+    /** Get data hierarchy item */
+    SharedDataHierarchyItem getHierarchyItem();
+
+    /** Get data hierarchy item */
+    const SharedDataHierarchyItem getHierarchyItem() const;
 
 public: // Properties
 

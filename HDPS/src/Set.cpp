@@ -4,6 +4,16 @@
 namespace hdps
 {
 
+SharedDataHierarchyItem DataSet::getHierarchyItem()
+{
+    return _core->getDataHierarchyItem(_name);
+}
+
+const SharedDataHierarchyItem DataSet::getHierarchyItem() const
+{
+    return const_cast<DataSet*>(this)->getHierarchyItem();
+}
+
 void DataSet::addAction(hdps::gui::WidgetAction& widgetAction)
 {
     Q_ASSERT(!_name.isEmpty());

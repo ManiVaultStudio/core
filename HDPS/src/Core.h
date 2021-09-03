@@ -67,9 +67,8 @@ public:
         return *_dataManager;
     }
 
-    DataHierarchyManager& getDataHierarchyManager() {
-        return _dataHierarchyManager;
-    }
+    /** Get the data hierarchy manager */
+    DataHierarchyManager& getDataHierarchyManager() override;
 
     /**
     * Adds the given plugin to the list of plugins kept by the core.
@@ -162,7 +161,7 @@ public:
      * @param dataType Type of data that the plugin should be compatible with
      * @return List of compatible plugin kinds that can handle the data type
      */
-    QStringList requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const;
+    QStringList requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString datasetName) override;
@@ -183,9 +182,9 @@ public:
     /**
      * Get hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @return Pointer to data hierarchy item
+     * @return Shared pointer to data hierarchy item
      */
-    DataHierarchyItem* getDataHierarchyItem(const QString& datasetName) override;
+    SharedDataHierarchyItem getDataHierarchyItem(const QString& datasetName) override;
 
 protected:
     /**

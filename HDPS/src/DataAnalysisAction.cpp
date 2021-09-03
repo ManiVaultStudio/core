@@ -9,22 +9,22 @@ namespace hdps {
 
 using namespace gui;
 
-DataAnalysisAction::DataAnalysisAction(QObject* parent, Core* core, DataHierarchyItem* dataHierarchyItem) :
+DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetName) :
     WidgetAction(parent),
-    _dataHierarchyItem(dataHierarchyItem),
+    _dataset(datasetName),
     _pluginKinds()
 {
     //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
-    dataHierarchyItem->addAction(*this);
+    _dataset->getHierarchyItem()->addAction(*this);
 
-    _pluginKinds = core->requestPluginKindsByPluginTypeAndDataType(plugin::Type::ANALYSIS, _dataHierarchyItem->getDataset().getDataType());
+    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataType(plugin::Type::ANALYSIS, _dataset->getDataType());
 
     for (auto pluginKind : _pluginKinds) {
         auto analysisPluginAction = new TriggerAction(this, pluginKind);
         
         connect(analysisPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            _dataHierarchyItem->analyzeDataset(pluginKind);
+            _dataset->getHierarchyItem()->analyzeDataset(pluginKind);
         });
     }
 }

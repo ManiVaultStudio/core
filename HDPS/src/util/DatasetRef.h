@@ -2,7 +2,6 @@
 
 #include "event/EventListener.h"
 
-#include "DataHierarchyItem.h"
 #include "Set.h"
 #include "Application.h"
 
@@ -111,6 +110,9 @@ public:
                 {
                     auto datasetRenamedEvent = static_cast<hdps::DataRenamedEvent*>(dataEvent);
 
+                    if (datasetRenamedEvent->oldName != _datasetName)
+                        return;
+
                     _datasetName = datasetRenamedEvent->dataSetName;
 
                     emit datasetNameChanged(datasetRenamedEvent->oldName, datasetRenamedEvent->dataSetName);
@@ -134,6 +136,11 @@ public:
 
     /** Arrow operator */
     const DatasetType* operator-> () const {
+        return _dataset;
+    }
+
+    /** Get the dataset pointer */
+    DatasetType* get() {
         return _dataset;
     }
 
@@ -200,21 +207,6 @@ public:
     void reset() {
         _datasetName = "";
         _dataset = nullptr;
-    }
-
-    /** Get the corresponding data hierarchy item */
-    DataHierarchyItem* getDataHierarchyItem() {
-        Q_ASSERT(Application::core() != nullptr);
-
-        if (!isValid())
-            return nullptr;
-
-        return Application::core()->getDataHierarchyItem(_datasetName);
-    }
-
-    /** Get the corresponding data hierarchy item */
-    const DataHierarchyItem* getDataHierarchyItem() const {
-        return const_cast<DatasetRef<DatasetType>*>(this)->getDataHierarchyItem();
     }
 
     /**

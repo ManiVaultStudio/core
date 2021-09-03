@@ -1,11 +1,11 @@
 #pragma once
 
 #include "actions/Actions.h"
+#include "util/DatasetRef.h"
+
+using namespace hdps::util;
 
 namespace hdps {
-
-class Core;
-class DataHierarchyItem;
 
 /**
  * Data analysis action class
@@ -21,10 +21,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
-     * @param dataHierarchyItem Pointer to the data hierarchy item
+     * @param datasetName Name of the dataset
      */
-    DataAnalysisAction(QObject* parent, Core* core, DataHierarchyItem* dataHierarchyItem);
+    DataAnalysisAction(QObject* parent, const QString& datasetName);
 
     /**
      * Get the context menu for the action
@@ -34,8 +33,8 @@ public:
     QMenu* getContextMenu(QWidget* parent = nullptr);
 
 protected:
-    DataHierarchyItem*  _dataHierarchyItem;     /** Pointer to data hierarchy item */
-    QStringList         _pluginKinds;           /** Compatible exporter plugins */
+    DatasetRef<DataSet>     _dataset;       /** Dataset reference */
+    QStringList             _pluginKinds;   /** Compatible exporter plugins */
 };
 
 }

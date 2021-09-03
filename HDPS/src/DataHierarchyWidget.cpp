@@ -3,6 +3,8 @@
 #include "DataHierarchyModelItem.h"
 #include "Core.h"
 
+#include "util/DatasetRef.h"
+
 #include <QDebug>
 #include <QInputDialog>
 #include <QHeaderView>
@@ -10,15 +12,16 @@
 
 #include <stdexcept>
 
+using namespace hdps::util;
+
 namespace hdps
 {
 
 namespace gui
 {
 
-DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
+DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     QTreeView(parent),
-    _core(core),
     _model(this),
     _selectionModel(&_model)
 {
@@ -60,31 +63,29 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
         return modelIndex;
     };
 
-    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemRemoved, this, [this, getModelIndexForDatasetName](const QString& datasetName) {
+    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemRemoved, this, [this, getModelIndexForDatasetName](const QString& datasetName) {
         _model.removeItem(getModelIndexForDatasetName(datasetName));
     });
 
-    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this, getModelIndexForDatasetName](DataHierarchyItem& dataHierarchyItem) {
-        if (dataHierarchyItem.isHidden())
+    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::hierarchyItemAdded, this, [this, getModelIndexForDatasetName](SharedDataHierarchyItem dataHierarchyItem) {
+        if (dataHierarchyItem->isHidden())
             return;
 
-        DataSet& dataset = _core->requestData(dataHierarchyItem.getDatasetName());
+        DatasetRef<DataSet> dataset(dataHierarchyItem->getDatasetName());
 
         QModelIndex parentModelIndex;
 
-        const auto parentDatasetName = dataHierarchyItem.getParent();
-
-        if (parentDatasetName.isEmpty())
+        if (!dataHierarchyItem->hasParent())
             parentModelIndex = QModelIndex();
         else
-            parentModelIndex = getModelIndexForDatasetName(parentDatasetName);
+            parentModelIndex = getModelIndexForDatasetName(dataHierarchyItem->getParent()->getDatasetName());
 
-        _model.addItem(parentModelIndex, &dataHierarchyItem);
+        _model.addItem(parentModelIndex, dataHierarchyItem.get());
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::taskDescriptionChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const QString& description) {
+        connect(dataHierarchyItem.get(), &DataHierarchyItem::taskDescriptionChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const QString& description) {
             try
             {
-                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem.getDatasetName());
+                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem->getDatasetName());
 
                 _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), description);
             }
@@ -94,10 +95,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
             }
         });
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::taskProgressChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const float& progress) {
+        connect(dataHierarchyItem.get(), &DataHierarchyItem::taskProgressChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const float& progress) {
             try
             {
-                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem.getDatasetName());
+                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem->getDatasetName());
                 
                 _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), progress);
                 _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), progress > 0.0f);
@@ -108,10 +109,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
             }
         });
 
-        connect(&dataHierarchyItem, &DataHierarchyItem::selectionChanged, this, [this, getModelIndexForDatasetName, &dataHierarchyItem](const bool& selection) {
+        connect(dataHierarchyItem.get(), &DataHierarchyItem::selectionChanged, this, [this, getModelIndexForDatasetName, dataHierarchyItem](const bool& selection) {
             try
             {
-                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem.getDatasetName());
+                const auto modelIndex = getModelIndexForDatasetName(dataHierarchyItem->getDatasetName());
 
                 _selectionModel.select(modelIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
             }
@@ -139,7 +140,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent, Core* core) :
             auto removeAction = new QAction("Remove");
 
             connect(removeAction, &QAction::triggered, this, [this, dataHierarchyModelItem]() {
-                _core->removeDataset(dataHierarchyModelItem->getDataAtColumn(0));
+                Application::core()->removeDataset(dataHierarchyModelItem->getDataAtColumn(0));
             });
 
             contextMenu->addAction(removeAction);

@@ -1,99 +1,103 @@
 #include "DataHierarchyManager.h"
-#include "Core.h"
+
+#include <QMessageBox>
+
+#include <stdexcept>
 
 namespace hdps
 {
 
-DataHierarchyManager::DataHierarchyManager(Core* core, QObject* parent /*= nullptr*/) :
+DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     QObject(parent),
-    _core(core),
-    _dataHierarchyItemsMap()
+    _dataHierarchyItems()
 {
 }
 
 void DataHierarchyManager::addDataset(const QString& datasetName, const QString& parentDatasetName /*= ""*/, const bool& visible /*= true*/)
 {
-    Q_ASSERT(!datasetName.isEmpty());
+    try {
+        if (datasetName.isEmpty())
+            throw std::runtime_error("Dataset name is empty");
 
-    _dataHierarchyItemsMap[datasetName] = SharedDataHierarchyItem(new DataHierarchyItem(_core, this, datasetName, parentDatasetName, visible));
+        const auto newDataHierarchyItem = SharedDataHierarchyItem(new DataHierarchyItem(this, datasetName, parentDatasetName, visible));
 
-    if (!parentDatasetName.isEmpty() && _dataHierarchyItemsMap.contains(parentDatasetName))
-        _dataHierarchyItemsMap[parentDatasetName]->addChild(datasetName);
+        _dataHierarchyItems << newDataHierarchyItem;
 
-    emit hierarchyItemAdded(*_dataHierarchyItemsMap[datasetName]);
+        if (!parentDatasetName.isEmpty())
+            getHierarchyItem(parentDatasetName)->addChild(datasetName);
+
+        emit hierarchyItemAdded(newDataHierarchyItem);
+    }
+    catch (std::exception& e) {
+        QMessageBox::critical(nullptr, "Unable to add dataset to data hierarchy", e.what());
+    }
 }
 
 bool DataHierarchyManager::removeDataset(const QString& datasetName)
 {
-    Q_ASSERT(!datasetName.isEmpty());
+    try {
+        if (datasetName.isEmpty())
+            throw std::runtime_error("Dataset name is empty");
 
-    if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
-        return false;
+        const auto hierarchyItem = getHierarchyItem(datasetName);
 
-    emit hierarchyItemRemoved(datasetName);
+        if (hierarchyItem.isNull())
+            throw std::runtime_error(QString("%1 does not exist in the data hierarchy").arg(datasetName).toLatin1());
 
-    for (auto child : getChildren(datasetName))
-        _dataHierarchyItemsMap.remove(child);
+        for (auto child : getChildren(getHierarchyItem(datasetName)))
+            _dataHierarchyItems.remove(_dataHierarchyItems.indexOf(child));
 
-    _dataHierarchyItemsMap.remove(datasetName);
+        emit hierarchyItemRemoved(datasetName);
+
+    }
+    catch (std::exception& e) {
+        QMessageBox::critical(nullptr, "Unable to remove dataset from data hierarchy", e.what());
+    }
 
     return true;
 }
 
-void DataHierarchyManager::setItemDescription(const QString& datasetName, const QString& description)
-{
-    Q_ASSERT(!datasetName.isEmpty());
-
-    if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
-        return;
-}
-
-void DataHierarchyManager::setItemProgress(const QString& datasetName, const double& progress)
-{
-    Q_ASSERT(!datasetName.isEmpty());
-
-    if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
-        return;
-}
-
-const hdps::DataHierarchyItem* DataHierarchyManager::getHierarchyItem(const QString& datasetName) const
+const SharedDataHierarchyItem DataHierarchyManager::getHierarchyItem(const QString& datasetName) const
 {
     return const_cast<DataHierarchyManager*>(this)->getHierarchyItem(datasetName);
 }
 
-hdps::DataHierarchyItem* DataHierarchyManager::getHierarchyItem(const QString& datasetName)
+SharedDataHierarchyItem DataHierarchyManager::getHierarchyItem(const QString& datasetName)
 {
     Q_ASSERT(!datasetName.isEmpty());
 
-    for (auto dataHierarchyItem : _dataHierarchyItemsMap.values())
+    for (auto dataHierarchyItem : _dataHierarchyItems)
         if (dataHierarchyItem->getDatasetName() == datasetName)
-            return dataHierarchyItem.get();
+            return dataHierarchyItem;
 
     return nullptr;
 }
 
 void DataHierarchyManager::selectHierarchyItem(const QString& datasetName)
 {
-    Q_ASSERT(!datasetName.isEmpty());
+    try {
+        if (datasetName.isEmpty())
+            throw std::runtime_error("Dataset name is empty");
 
-    for (auto dataHierarchyItem : _dataHierarchyItemsMap.values())
-        if (dataHierarchyItem->isSelected())
-            dataHierarchyItem->deselect();
+        const auto hierarchyItem = getHierarchyItem(datasetName);
 
-    if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
-        return;
+        if (hierarchyItem.isNull())
+            throw std::runtime_error(QString("%1 does not exist in the data hierarchy").arg(datasetName).toLatin1());
 
-    _dataHierarchyItemsMap[datasetName]->select();
+        for (auto dataHierarchyItem : _dataHierarchyItems)
+            if (dataHierarchyItem->isSelected())
+                dataHierarchyItem->deselect();
+
+        hierarchyItem->select();
+    }
+    catch (std::exception& e) {
+        QMessageBox::critical(nullptr, "Unable to select dataset in data hierarchy", e.what());
+    }
 }
 
-QStringList DataHierarchyManager::getChildren(const QString& datasetName, const bool& recursive /*= true*/)
+SharedDataHierarchyItems DataHierarchyManager::getChildren(SharedDataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
 {
-    Q_ASSERT(!datasetName.isEmpty());
-
-    if (datasetName.isEmpty() || !_dataHierarchyItemsMap.contains(datasetName))
-        return QStringList();
-
-    auto& dataHierarchyItem = _dataHierarchyItemsMap[datasetName];
+    Q_ASSERT(!dataHierarchyItem.isNull());
 
     auto children = dataHierarchyItem->getChildren();
 

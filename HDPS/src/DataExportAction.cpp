@@ -8,22 +8,22 @@ namespace hdps {
 
 using namespace gui;
 
-DataExportAction::DataExportAction(QObject* parent, Core* core, DataHierarchyItem* dataHierarchyItem) :
+DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) :
     WidgetAction(parent),
-    _dataHierarchyItem(dataHierarchyItem),
+    _dataset(datasetName),
     _pluginKinds()
 {
     //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("file-export"));
 
-    dataHierarchyItem->addAction(*this);
+    _dataset->getHierarchyItem()->addAction(*this);
 
-    _pluginKinds = core->requestPluginKindsByPluginTypeAndDataType(plugin::Type::WRITER, _dataHierarchyItem->getDataset().getDataType());
+    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataType(plugin::Type::WRITER, _dataset->getDataType());
 
     for (auto pluginKind : _pluginKinds) {
         auto exporterPluginAction = new TriggerAction(this, pluginKind);
 
         connect(exporterPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            _dataHierarchyItem->exportDataset(pluginKind);
+            _dataset->getHierarchyItem()->exportDataset(pluginKind);
         });
     }
 }

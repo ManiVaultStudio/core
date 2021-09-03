@@ -25,7 +25,7 @@ namespace hdps
 
 Core::Core(gui::MainWindow& mainWindow) :
     _mainWindow(mainWindow),
-    _dataHierarchyManager(this)
+    _dataHierarchyManager()
 {
 }
 
@@ -43,6 +43,11 @@ void Core::init()
     _dataManager = std::make_unique<DataManager>(this);
 
     _pluginManager->loadPlugins();
+}
+
+hdps::DataHierarchyManager& Core::getDataHierarchyManager()
+{
+    return _dataHierarchyManager;
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -141,8 +146,8 @@ const QString Core::addData(const QString kind, const QString nameRequest, const
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
-    new DataAnalysisAction(&_mainWindow, this, getDataHierarchyItem(setName));
-    new DataExportAction(&_mainWindow, this, getDataHierarchyItem(setName));
+    new DataAnalysisAction(&_mainWindow, setName);
+    new DataExportAction(&_mainWindow, setName);
 
     return setName;
 }
@@ -193,8 +198,8 @@ const QString Core::createDerivedData(const QString& nameRequest, const QString&
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
-    new DataAnalysisAction(&_mainWindow, this, getDataHierarchyItem(setName));
-    new DataExportAction(&_mainWindow, this, getDataHierarchyItem(setName));
+    new DataAnalysisAction(&_mainWindow, setName);
+    new DataExportAction(&_mainWindow, setName);
 
     return setName;
 }
@@ -219,8 +224,8 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     // Initialize the dataset (e.g. setup default actions for info)
     newSet->init();
 
-    new DataAnalysisAction(&_mainWindow, this, getDataHierarchyItem(setName));
-    new DataExportAction(&_mainWindow, this, getDataHierarchyItem(setName));
+    new DataAnalysisAction(&_mainWindow, setName);
+    new DataExportAction(&_mainWindow, setName);
 
     return setName;
 }
@@ -415,7 +420,7 @@ gui::MainWindow& Core::gui() const {
     return _mainWindow;
 }
 
-hdps::DataHierarchyItem* Core::getDataHierarchyItem(const QString& datasetName)
+hdps::SharedDataHierarchyItem Core::getDataHierarchyItem(const QString& datasetName)
 {
     return _dataHierarchyManager.getHierarchyItem(datasetName);
 }

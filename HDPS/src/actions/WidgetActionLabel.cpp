@@ -63,11 +63,11 @@ void WidgetActionLabel::mouseMoveEvent(QMouseEvent* mouseEvent)
     drag->setMimeData(mimeData);
     drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(16, 16));
 
-    Application::current()->getWidgetActionsManager().widgetStartedDragging(_widgetAction);
+    //Application::current()->getWidgetActionsManager().widgetStartedDragging(_widgetAction);
 
     Qt::DropAction dropAction = drag->exec();
 
-    Application::current()->getWidgetActionsManager().widgetStoppedDragging(_widgetAction);
+    //Application::current()->getWidgetActionsManager().widgetStoppedDragging(_widgetAction);
 }
 
 void WidgetActionLabel::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
@@ -95,7 +95,7 @@ void WidgetActionLabel::dropEvent(QDropEvent* dropEvent)
 
     dropEvent->acceptProposedAction();
 
-    Application::current()->getWidgetActionsManager().widgetStoppedDragging(_widgetAction);
+    //Application::current()->getWidgetActionsManager().widgetStoppedDragging(_widgetAction);
 }
 
 }

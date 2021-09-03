@@ -1,9 +1,13 @@
 #ifndef HDPS_COREINTERFACE_H
 #define HDPS_COREINTERFACE_H
 
+#include "PluginType.h"
+
 #include "event/Event.h"
 
 #include <QString>
+#include <QSharedPointer>
+
 #include <vector>
 #include <functional>
 
@@ -12,7 +16,10 @@ namespace hdps
     class DataSet;
     class DataType;
     class EventListener;
+    class DataHierarchyManager;
     class DataHierarchyItem;
+
+    using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
 
     namespace plugin
     {
@@ -120,9 +127,20 @@ public:
     /**
      * Get data hierarchy item by dataset name
      * @param datasetName Name of the dataset
-     * @return Pointer to data hierarchy item
+     * @return Shared pointer to data hierarchy item
      */
-    virtual DataHierarchyItem* getDataHierarchyItem(const QString& datasetName) = 0;
+    virtual SharedDataHierarchyItem getDataHierarchyItem(const QString& datasetName) = 0;
+
+    /**
+     * Get a list of plugin kinds (names) given a plugin type and data type
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param dataType Type of data that the plugin should be compatible with
+     * @return List of compatible plugin kinds that can handle the data type
+     */
+    virtual QStringList requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const = 0;
+
+    /** Get the data hierarchy manager */
+    virtual DataHierarchyManager& getDataHierarchyManager() = 0;
 
 protected:
 

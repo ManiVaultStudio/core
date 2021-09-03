@@ -1,17 +1,18 @@
 #ifndef HDPS_DATA_PROPERTIES_WIDGET_H
 #define HDPS_DATA_PROPERTIES_WIDGET_H
 
+#include "util/DatasetRef.h"
+
 #include <QWidget>
 #include <QPushButton>
 #include <QTreeWidget>
 
 class QTreeWidgetItem;
 
+using namespace hdps::util;
+
 namespace hdps
 {
-
-class Core;
-class DataHierarchyItem;
 
 namespace gui
 {
@@ -58,9 +59,8 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent widget
-     * @param core Pointer to the core
      */
-    DataPropertiesWidget(QWidget* parent, Core* core);
+    DataPropertiesWidget(QWidget* parent);
 
     /**
      * Set the name of the current dataset
@@ -85,10 +85,9 @@ signals:
     void datasetNameChanged(const QString& datasetName);
 
 protected:
-    Core*                   _core;                  /** Pointer to the core */
-    QTreeWidget*            _treeWidget;            /** Pointer to sections tree widget */
-    QWidget*                _dataWidget;            /** Pointer to current data widget */
-    DataHierarchyItem*      _dataHierarchyItem;     /** Pointer to current data hierarchy item */
+    QTreeWidget*            _treeWidget;    /** Pointer to sections tree widget */
+    QWidget*                _dataWidget;    /** Pointer to current data widget */
+    DatasetRef<DataSet>     _dataset;       /** Dataset reference */
 };
 
 }

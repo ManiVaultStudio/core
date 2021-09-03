@@ -1,4 +1,5 @@
 #include "DataPropertiesWidget.h"
+#include "Application.h"
 #include "Core.h"
 
 #include "actions/GroupAction.h"
@@ -15,12 +16,11 @@ namespace hdps
 namespace gui
 {
 
-DataPropertiesWidget::DataPropertiesWidget(QWidget* parent, Core* core) :
+DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
-    _core(core),
     _treeWidget(new QTreeWidget()),
     _dataWidget(nullptr),
-    _dataHierarchyItem(nullptr)
+    _dataset(nullptr)
 {
     setAutoFillBackground(true);
 
@@ -44,24 +44,24 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
     try
     {
         if (datasetName.isEmpty())
-            return;
+            throw std::runtime_error("data set name is empty");
 
         if (_dataWidget != nullptr)
             delete _dataWidget;
 
-        if (_dataHierarchyItem != nullptr) {
-            disconnect(_dataHierarchyItem, &DataHierarchyItem::actionAdded, this, nullptr);
-            disconnect(_dataHierarchyItem, &DataHierarchyItem::datasetNameChanged, this, nullptr);
+        if (_dataset.isValid()) {
+            const auto hierarchyItem = _dataset->getHierarchyItem();
+
+            disconnect(hierarchyItem.get(), &DataHierarchyItem::actionAdded, this, nullptr);
+            disconnect(hierarchyItem.get(), &DataHierarchyItem::datasetNameChanged, this, nullptr);
         }
 
-        _dataHierarchyItem = _core->getDataHierarchyItem(datasetName);
+        _dataset.setDatasetName(datasetName);
 
         auto createWidgets = [this, datasetName]() -> void {
-            auto& dataset = _core->requestData(datasetName);
-
             _treeWidget->clear();
 
-            auto exposedActions = dataset.getActions();
+            auto exposedActions = _dataset->getActions();
 
             for (auto exposedAction : exposedActions) {
                 auto exposedGroupAction = dynamic_cast<GroupAction*>(exposedAction);
@@ -74,15 +74,15 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             }
         };
 
-        connect(_dataHierarchyItem, &DataHierarchyItem::actionAdded, this, [this, createWidgets]() {
+        connect(_dataset->getHierarchyItem().get(), &DataHierarchyItem::actionAdded, this, [this, createWidgets]() {
             createWidgets();
         });
 
         const auto updateWindowTitle = [this]() {
-            emit datasetNameChanged(_dataHierarchyItem->getDatasetName());
+            emit datasetNameChanged(_dataset.getDatasetName());
         };
 
-        connect(_dataHierarchyItem, &DataHierarchyItem::datasetNameChanged, this, [this, updateWindowTitle](const QString& datasetName) {
+        connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this, updateWindowTitle](const QString& datasetName) {
             updateWindowTitle();
         });
 
@@ -91,7 +91,7 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
     }
     catch (std::exception& e)
     {
-        qDebug() << QString("Unable to edit data properties for %1: %2").arg(datasetName, e.what());
+        qDebug() << QString("Cannot update data properties: ").arg(datasetName, e.what());
     }
 }
 

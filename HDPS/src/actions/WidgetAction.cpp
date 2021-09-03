@@ -17,7 +17,7 @@ WidgetAction::WidgetAction(QObject* parent) :
     _isDropTarget(false)//,
     //_children()
 {
-    Application::current()->getWidgetActionsManager().addAction(this);
+    //Application::current()->getWidgetActionsManager().addAction(this);
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)

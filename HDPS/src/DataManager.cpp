@@ -58,7 +58,6 @@ QString DataManager::renameSet(QString oldName, QString requestedName)
     emit dataChanged();
 
     _core->notifyDataRenamed(oldName, newDatasetName);
-    _core->getDataHierarchyItem(oldName)->setDatasetName(newDatasetName);
 
     return newDatasetName;
 }

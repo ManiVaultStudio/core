@@ -53,10 +53,12 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     _core = QSharedPointer<Core>::create(*this);
 
+    dynamic_cast<Application*>(qApp)->setCore(_core.get());
+
     _core->init();
 
-    _dataHierarchyWidget    = new DataHierarchyWidget(this, _core.get());
-    _dataPropertiesWidget   = new DataPropertiesWidget(this, _core.get());
+    _dataHierarchyWidget    = new DataHierarchyWidget(this);
+    _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
     connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetNameChanged, this, [this](const QString& selectedDatasetName) {
         _dataPropertiesWidget->setDataset(selectedDatasetName);

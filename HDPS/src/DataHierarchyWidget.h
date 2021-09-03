@@ -10,8 +10,6 @@
 namespace hdps
 {
 
-class Core;
-
 namespace gui
 {
 
@@ -27,9 +25,8 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
-     * @param core Pointer to the core
      */
-    DataHierarchyWidget(QWidget* parent, Core* core);
+    DataHierarchyWidget(QWidget* parent);
 
 signals:
 
@@ -40,7 +37,6 @@ signals:
     void selectedDatasetNameChanged(const QString& datasetName);
 
 private:
-    Core*                   _core;              /** Pointer to the core */
     DataHierarchyModel      _model;             /** Model containing data to be displayed in the hierarchy */
     QItemSelectionModel     _selectionModel;    /** Selection model */
 };

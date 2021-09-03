@@ -12,7 +12,7 @@ DatasetRefPrivate::DatasetRefPrivate(QObject* parent /*= nullptr*/) :
     QObject(parent),
     EventListener()
 {
-    setEventCore(Application::core());
+    setEventCore(reinterpret_cast<CoreInterface*>(Application::core()));
 }
 
 }
