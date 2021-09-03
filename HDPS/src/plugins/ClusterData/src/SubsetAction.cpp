@@ -43,6 +43,10 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
         setEnabled(numberOfSelectedRows >= 1);
     };
 
+    const auto updateCreateSubsetAction = [this]() -> void {
+        _createSubsetAction.setEnabled(!_subsetNameAction.getString().isEmpty());
+    };
+
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this, updateSelectionActions](const QItemSelection& selected, const QItemSelection& deselected) {
         updateSelectionActions();
     });
@@ -51,7 +55,12 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
         updateSelectionActions();
     });
 
+    connect(&_subsetNameAction, &StringAction::stringChanged, this, [this, updateCreateSubsetAction](const QString& string) {
+        updateCreateSubsetAction();
+    });
+
     updateSelectionActions();
+    updateCreateSubsetAction();
 }
 
 SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction, const WidgetActionWidget::State& state) :
