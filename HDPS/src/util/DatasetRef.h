@@ -96,7 +96,7 @@ public:
             switch (dataEvent->getType()) {
                 case EventType::DataRemoved:
                 {
-                    if (dataEvent->dataSetName != _datasetName)
+                    if (dataEvent->dataSetName != _dataset->getName())
                         return;
 
                     _dataset = nullptr;
@@ -110,10 +110,8 @@ public:
                 {
                     auto datasetRenamedEvent = static_cast<hdps::DataRenamedEvent*>(dataEvent);
 
-                    if (datasetRenamedEvent->oldName != _datasetName)
+                    if (datasetRenamedEvent->oldName != _dataset->getName())
                         return;
-
-                    _datasetName = datasetRenamedEvent->dataSetName;
 
                     emit datasetNameChanged(datasetRenamedEvent->oldName, datasetRenamedEvent->dataSetName);
                     break;
@@ -151,7 +149,10 @@ public:
 
     /** Get the current dataset name */
     QString getDatasetName() const {
-        return _datasetName;
+        if (_dataset == nullptr)
+            return "";
+
+        return _dataset->getName();
     }
 
     /**
@@ -159,22 +160,17 @@ public:
      * @param datasetName Name of the dataset for which the pointer needs to be resolved 
      */
     void setDatasetName(const QString& datasetName) {
-        Q_ASSERT(Application::core() != nullptr);
-
-        if (Application::core() == nullptr)
-            return;
-
         if (datasetName.isEmpty()) {
             reset();
             return;
         }
         
-        if (datasetName == _datasetName)
+        // No need to process the same name
+        if (datasetName == _dataset->getName())
             return;
 
-        const auto previousName = _datasetName;
-
-        _datasetName = datasetName;
+        // Cache the previous dataset name
+        const auto previousName = _dataset->getName();
 
         try
         {
@@ -192,10 +188,10 @@ public:
             }
 
             // Let subscribers know that the pointer changed
-            emit changed(_datasetName);
+            emit changed(_dataset->getName());
 
             // Let subscribers know that the dataset name changed
-            emit datasetNameChanged(previousName, _datasetName);
+            emit datasetNameChanged(previousName, _dataset->getName());
         }
         catch (std::exception& e)
         {
@@ -205,7 +201,6 @@ public:
 
     /** Resets the internals (dataset pointer to nullptr etc.) */
     void reset() {
-        _datasetName = "";
         _dataset = nullptr;
     }
 
@@ -215,12 +210,7 @@ public:
      * to the core anymore to inform others that data changed
      */
     void notifyDataChanged() {
-        Q_ASSERT(Application::core() != nullptr);
-
-        if (Application::core() == nullptr)
-            return;
-
-        Application::core()->notifyDataChanged(_datasetName);
+        Application::core()->notifyDataChanged(_dataset->getName());
     }
 
     /**
@@ -229,16 +219,13 @@ public:
      * to the core anymore to inform others that data changed
      */
     void notifySelectionChanged() {
-        Q_ASSERT(Application::core() != nullptr);
-
-        if (Application::core() == nullptr)
+        if (_dataset == nullptr)
             return;
 
-        Application::core()->notifySelectionChanged(_datasetName);
+        Application::core()->notifySelectionChanged(_dataset->getName());
     }
 
 private:
-    QString         _datasetName;   /** The name of the dataset to which the reference points */
     DatasetType*    _dataset;       /** Pointer to dataset (if any) */
 };
 
