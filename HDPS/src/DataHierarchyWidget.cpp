@@ -50,8 +50,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     header()->setStretchLastSection(false);
 
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        //const auto selectedDatasetName = selected.first().topLeft().data(Qt::DisplayRole).toString();
-        //emit selectedDatasetNameChanged(selectedDatasetName);
+        const auto selectedDatasetName = selected.first().topLeft().data(Qt::DisplayRole).toString();
+        emit selectedDatasetNameChanged(selectedDatasetName);
     });
 
     const auto getModelIndexForDatasetName = [this](const QString& datasetName) -> QModelIndex {
