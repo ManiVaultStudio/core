@@ -131,7 +131,7 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
     const auto margin = 8;
 
     // Deflated fill rectangle for color map inset
-    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, 5 * margin, margin));
+    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, 5 * margin, margin + 1));
 
     // Get color map image from the model
     auto colorMapeImage = _colorMapAction->getColorMapImage();
@@ -141,7 +141,7 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
         colorMapeImage = colorMapeImage.convertToFormat(QImage::Format_Grayscale8);
 
     // Establish pen color based on whether the color map is enabled or not
-    const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
+    const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::Shadow) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
     colorMapeImage = colorMapeImage.scaled(pixmapRect.size());
 

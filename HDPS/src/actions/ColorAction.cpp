@@ -128,7 +128,7 @@ void ColorAction::ColorPickerPushButtonWidget::ToolButton::paintEvent(QPaintEven
     QPoint offset(margin, margin);
 
     // Deflated fill rectangle for color inset
-    auto colorRect = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 1, margin));
+    auto colorRect = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 1, margin + 1));
 
     // Get current color
     auto color = _colorPickerAction.getColor();
@@ -140,7 +140,7 @@ void ColorAction::ColorPickerPushButtonWidget::ToolButton::paintEvent(QPaintEven
     }
 
     // Establish pen color based on whether the color map is enabled or not
-    const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
+    const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::Shadow) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
     // Do the painting
     painterColorPixmap.setBrush(QBrush(color));
