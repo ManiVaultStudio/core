@@ -1,12 +1,12 @@
 #pragma once
 
 #include <QWidget>
+#include <QCheckBox>
 
 class QPushButton;
 class QString;
 
 class QPropertyAnimation;
-class MaterialCheckBoxWidget;
 
 class ColormapWidget : public QWidget
 {
@@ -55,5 +55,5 @@ private:
 
     QString _subWidgetStyles[2];
 
-    MaterialCheckBoxWidget* _discreteColormapCheckbox;
+    QCheckBox* _discreteColormapCheckbox;
 };

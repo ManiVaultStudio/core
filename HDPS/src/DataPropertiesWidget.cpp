@@ -20,7 +20,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _treeWidget(new QTreeWidget()),
     _dataWidget(nullptr),
-    _dataset(nullptr)
+    _dataset()
 {
     setAutoFillBackground(true);
 

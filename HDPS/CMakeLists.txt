@@ -91,8 +91,6 @@ set( WIDGET_HEADERS
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
     src/widgets/ColorPickerPushButton.h
-    src/widgets/MaterialCheckBoxWidget.h
-    src/widgets/DataSlot.h
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
 )
@@ -101,8 +99,6 @@ set( WIDGET_SOURCES
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
     src/widgets/ColorPickerPushButton.cpp
-    src/widgets/MaterialCheckBoxWidget.cpp
-    src/widgets/DataSlot.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
 )

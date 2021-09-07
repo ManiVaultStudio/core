@@ -1,7 +1,5 @@
 #include "ColormapWidget.h"
 
-#include "MaterialCheckBoxWidget.h"
-
 #include <QString>
 #include <QPushButton>
 #include <QLabel>
@@ -119,10 +117,10 @@ void ColormapWidget::initUI()
     QObject::connect(_activeColormap, &QPushButton::released, this, &ColormapWidget::activeColormapClicked);
     QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &ColormapWidget::colormapClicked);
 
-    _discreteColormapCheckbox = new MaterialCheckBoxWidget("Discrete Colormap", _rightBGWidget);
+    _discreteColormapCheckbox = new QCheckBox("Discrete Colormap", _rightBGWidget);
     _discreteColormapCheckbox->setChecked(false);
     _discreteColormapCheckbox->move(5, 180);
-    QObject::connect(_discreteColormapCheckbox, &MaterialCheckBoxWidget::stateChanged, this, &ColormapWidget::discreteColormapClicked);
+    QObject::connect(_discreteColormapCheckbox, &QCheckBox::stateChanged, this, &ColormapWidget::discreteColormapClicked);
 
     _slideOutAnimation = new QPropertyAnimation(this, "geometry");
     _slideOutAnimation->setDuration(500);
