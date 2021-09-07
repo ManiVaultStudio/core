@@ -20,7 +20,7 @@ WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, Widget
     _toolButton.addAction(widgetAction);
     _toolButton.setPopupMode(QToolButton::InstantPopup);
     _toolButton.setIconSize(QSize(12, 12));
-    _toolButton.setFixedSize(QSize(24, 24));
+    //_toolButton.setFixedSize(QSize(24, 24));
     _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
     _layout.addWidget(&_toolButton);

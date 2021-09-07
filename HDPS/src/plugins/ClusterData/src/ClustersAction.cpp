@@ -68,7 +68,7 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     auto parentDataHierarchyItem    = dataHierarchyItem->getParent();
     auto& points                    = parentDataHierarchyItem->getDataset<Points>();
     auto& selection                 = dynamic_cast<Points&>(points.getSelection());
-    
+
     selection.indices = indices;
 
     _core->notifySelectionChanged(parentDataHierarchyItem->getDatasetName());

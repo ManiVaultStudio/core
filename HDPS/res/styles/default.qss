@@ -3,7 +3,6 @@ QWidget#PopupWidget {
 }
 
 QPushButton {
-    margin: 0px;
     padding-left: 5px;
     padding-right: 5px;
     height: 22px;
@@ -28,4 +27,9 @@ QLineEdit {
 
 QLineEdit:read-only {
     background: rgb(230, 230, 230);
+}
+
+QToolButton {
+    width: 18px;
+    height: 18px;
 }

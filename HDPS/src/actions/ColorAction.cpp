@@ -82,7 +82,6 @@ ColorAction::ColorPickerPushButtonWidget::ColorPickerPushButtonWidget(QWidget* p
     _toolButton.setToolTip(colorAction->toolTip());
     _toolButton.addAction(&_colorPickerAction);
     _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.setFixedHeight(22);
     _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
     _layout.setMargin(0);

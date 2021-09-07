@@ -157,7 +157,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     QComboBox(parent)
 {
     setAcceptDrops(true);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     const auto update = [this, optionAction]() -> void {
         setEnabled(optionAction->isEnabled());
