@@ -44,15 +44,6 @@ protected:
 signals:
 
     /**
-     * Signals that the dataset pointer changed
-     * @param datasetName Name of the dataset
-     */
-    void changed(const QString& datasetName);
-
-    /** Signals that the dataset pointer became invalid (nullptr) */
-    void invalidated();
-
-    /**
      * Signals that the name of the currently pointed to dataset changed
      * @param oldDatasetName Old name of the dataset
      * @param newDatasetName New name of the dataset
@@ -97,12 +88,15 @@ public:
             switch (dataEvent->getType()) {
                 case EventType::DataRemoved:
                 {
+                    const auto previousDatasetName = _datasetName;
+
                     if (dataEvent->dataSetName != _datasetName)
                         return;
 
-                    _dataset = nullptr;
+                    _dataset        = nullptr;
+                    _datasetName    = "";
 
-                    emit invalidated();
+                    emit datasetNameChanged(previousDatasetName, "");
 
                     break;
                 }
@@ -187,9 +181,6 @@ public:
                 const auto errorMessage = QString("Data set ref type mismatch, %1 is of different dataset type").arg(datasetName);
                 throw std::runtime_error(errorMessage.toLatin1());
             }
-
-            // Let subscribers know that the pointer changed
-            emit changed(_datasetName);
 
             // Let subscribers know that the dataset name changed
             emit datasetNameChanged(previousName, _datasetName);

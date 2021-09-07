@@ -86,7 +86,6 @@ signals:
 
 protected:
     QTreeWidget*            _treeWidget;    /** Pointer to sections tree widget */
-    QWidget*                _dataWidget;    /** Pointer to current data widget */
     DatasetRef<DataSet>     _dataset;       /** Dataset reference */
 };
 

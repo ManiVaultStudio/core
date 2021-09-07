@@ -56,8 +56,6 @@ public:
     /** List of named icons */
     using IconList = QList<NamedIcon>;
 
-    
-
 public:
 
     /**

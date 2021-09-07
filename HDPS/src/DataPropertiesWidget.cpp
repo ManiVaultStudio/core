@@ -19,7 +19,6 @@ namespace gui
 DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _treeWidget(new QTreeWidget()),
-    _dataWidget(nullptr),
     _dataset()
 {
     setAutoFillBackground(true);
@@ -46,9 +45,6 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
         if (datasetName.isEmpty())
             throw std::runtime_error("data set name is empty");
 
-        if (_dataWidget != nullptr)
-            delete _dataWidget;
-
         if (_dataset.isValid()) {
             const auto hierarchyItem = &_dataset->getHierarchyItem();
 
@@ -58,8 +54,11 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
 
         _dataset.setDatasetName(datasetName);
 
-        auto createWidgets = [this, datasetName]() -> void {
+        auto createWidgets = [this]() -> void {
             _treeWidget->clear();
+
+            if (!_dataset.isValid())
+                return;
 
             auto exposedActions = _dataset->getActions();
 
@@ -82,7 +81,8 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
             emit datasetNameChanged(_dataset.getDatasetName());
         };
 
-        connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this, updateWindowTitle](const QString& datasetName) {
+        connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this, updateWindowTitle, createWidgets](const QString& oldDatasetName, const QString& newDatasetName) {
+            createWidgets();
             updateWindowTitle();
         });
 
