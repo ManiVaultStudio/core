@@ -39,7 +39,7 @@ public: // Construction
 public: // Subsets
 
     /** Create an image subset (not implemented at this point) */
-    virtual QString createSubset(const QString parentSetName = "", const bool& visible = true) const override { return ""; };
+    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override { return ""; };
 
 public: // Image retrieval functions
 

@@ -32,7 +32,13 @@ public:
 
     virtual DataSet* copy() const = 0;
 
-    virtual QString createSubset(const QString parentSetName = "", const bool& visible = true) const = 0;
+    /**
+     * Create subset
+     * @param subsetName Name of the subset
+     * @param parentSetName Name of the parent dataset
+     * @param visible Whether the subset will be visible in the UI
+     */
+    virtual QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const = 0;
 
     QString getName() const
     {

@@ -51,11 +51,17 @@ public:
         return text;
     }
 
-    QString createSubset(const QString parentSetName = "", const bool& visible = true) const override
+    /**
+     * Create subset
+     * @param subsetName Name of the subset
+     * @param parentSetName Name of the parent dataset
+     * @param visible Whether the subset will be visible in the UI
+     */
+    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override
     {
         const hdps::DataSet& selection = getSelection();
 
-        return _core->createSubsetFromSelection(selection, *this, "Subset", parentSetName, visible);
+        return _core->createSubsetFromSelection(selection, *this, subsetName, parentSetName, visible);
     }
 
     /** Get icon for the dataset */

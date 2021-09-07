@@ -33,7 +33,7 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
     };
 
     connect(&_createSubsetAction, &TriggerAction::triggered, this, [this, getItemSelection]() {
-        _clustersAction.createSubset();
+        _clustersAction.createSubset(_subsetNameAction.getString());
     });
 
     const auto updateSelectionActions = [this]() -> void {

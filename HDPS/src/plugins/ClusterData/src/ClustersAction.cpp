@@ -74,7 +74,7 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     _core->notifySelectionChanged(parentDataHierarchyItem->getDatasetName());
 }
 
-void ClustersAction::createSubset()
+void ClustersAction::createSubset(const QString& datasetName)
 {
     auto dataHierarchyItem = _core->getDataHierarchyItem(_clusters->getName());
     
@@ -82,7 +82,7 @@ void ClustersAction::createSubset()
 
     auto& selection = dynamic_cast<Points&>(points->getSelection());
 
-    const auto subsetName = points->createSubset(points->getName());
+    const auto subsetName = points->createSubset(datasetName, points->getName());
 }
 
 void ClustersAction::removeClustersById(const QStringList& ids)

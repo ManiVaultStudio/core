@@ -84,7 +84,7 @@ public:
     void selectPoints(const std::vector<std::uint32_t>& indices);
 
     /** Create subset from selected clusters */
-    void createSubset();
+    void createSubset(const QString& datasetName);
 
     /**
      * Remove clusters by their unique identifiers
