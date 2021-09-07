@@ -87,10 +87,21 @@ FilterAndSelectAction::Widget::Widget(QWidget* parent, FilterAndSelectAction* fi
 
     mainLayout->setMargin(0);
 
-    mainLayout->addWidget(filterAndSelectAction->getNameFilterAction().createWidget(this));
-    mainLayout->addWidget(filterAndSelectAction->getSelectAllAction().createWidget(this));
-    mainLayout->addWidget(filterAndSelectAction->getSelectNoneAction().createWidget(this));
-    mainLayout->addWidget(filterAndSelectAction->getSelectInvertAction().createWidget(this));
+    auto nameFilterWidget   = filterAndSelectAction->getNameFilterAction().createWidget(this);
+    auto selectAllWidget    = filterAndSelectAction->getSelectAllAction().createWidget(this);
+    auto selectNoneWidget   = filterAndSelectAction->getSelectNoneAction().createWidget(this);
+    auto selectInvertWidget = filterAndSelectAction->getSelectInvertAction().createWidget(this);
+
+    const auto fixedPushButtonWidth = 50;
+
+    selectAllWidget->setFixedWidth(fixedPushButtonWidth);
+    selectNoneWidget->setFixedWidth(fixedPushButtonWidth);
+    selectInvertWidget->setFixedWidth(fixedPushButtonWidth);
+
+    mainLayout->addWidget(nameFilterWidget);
+    mainLayout->addWidget(selectAllWidget);
+    mainLayout->addWidget(selectNoneWidget);
+    mainLayout->addWidget(selectInvertWidget);
 
     setLayout(mainLayout);
 }
