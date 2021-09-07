@@ -104,8 +104,6 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     _filterAndSelectAction(this, _filterModel, _selectionModel),
     _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
 {
-    qDebug() << "ClustersAction::Widget::Widget";
-
     _removeAction.setEnabled(false);
 
     _removeAction.setToolTip("Remove the selected filter(s)");

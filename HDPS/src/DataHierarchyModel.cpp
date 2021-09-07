@@ -200,17 +200,11 @@ bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentMode
 {
     auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
 
-    emit layoutAboutToBeChanged();
+    beginInsertRows(parentModelIndex, rowCount(parentModelIndex), rowCount(parentModelIndex) + 1);
     {
-        const auto numberOfChildren = dataHierarchyItem->getNumberOfChildren();
-
-        beginInsertRows(parentModelIndex, numberOfChildren, numberOfChildren + 1);
-        {
-            parentItem->addChild(new DataHierarchyModelItem(dataHierarchyItem));
-        }
-        endInsertRows();
+        parentItem->addChild(new DataHierarchyModelItem(dataHierarchyItem));
     }
-    emit layoutChanged();
+    endInsertRows();
 
     return true;
 }
@@ -220,9 +214,10 @@ bool DataHierarchyModel::removeDataHierarchyModelItem(const QModelIndex& modelIn
     auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(modelIndex.internalPointer());
 
     beginRemoveRows(modelIndex.parent(), modelIndex.row(), modelIndex.row());
+    {
+        delete dataHierarchyModelItem;
+    }
     endRemoveRows();
-
-    delete dataHierarchyModelItem;
 
     return true;
 }
