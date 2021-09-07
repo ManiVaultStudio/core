@@ -107,17 +107,31 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
 {
     OptionAction::ComboBoxWidget::paintEvent(paintEvent);
 
-    QPainter painter(this);
+    // Draw at a higher resolution to get better anti-aliasing
+    const auto pixmapSize = 2 * size();
+    const auto pixmapRect = QRect(QPoint(), pixmapSize);
 
+    // Create color pixmap
+    QPixmap colorPixmap(pixmapSize);
+
+    // Fill with a transparent background
+    colorPixmap.fill(Qt::transparent);
+
+    // Create a painter to draw in the color pixmap
+    QPainter painter(&colorPixmap);
+
+    // Enable anti-aliasing
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
     QStyleOption styleOption;
 
     styleOption.init(this);
     
-    const auto margin               = 5;
-    const auto colorMapRectangle    = rect().marginsRemoved(QMargins(margin, margin, 20, margin));
+    // Set inset margins
+    const auto margin = 8;
+
+    // Deflated fill rectangle for color map inset
+    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, 5 * margin, margin));
 
     // Get color map image from the model
     auto colorMapeImage = _colorMapAction->getColorMapImage();
@@ -126,10 +140,21 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
     if (!isEnabled())
         colorMapeImage = colorMapeImage.convertToFormat(QImage::Format_Grayscale8);
 
-    painter.drawImage(colorMapRectangle, colorMapeImage);
-    painter.setPen(QPen(QBrush(isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText)), 1));
-    painter.setBrush(Qt::NoBrush);
-    painter.drawRect(colorMapRectangle);
+    // Establish pen color based on whether the color map is enabled or not
+    const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
+
+    colorMapeImage = colorMapeImage.scaled(pixmapRect.size());
+
+    QBrush colorMapPixMapBrush(colorMapeImage);
+
+    // Do the painting
+    painter.setPen(QPen(penColor, 2, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painter.setBrush(colorMapPixMapBrush);
+    painter.drawRoundedRect(colorMapRectangle, 6, 6);
+
+    QPainter painterColorWidget(this);
+
+    painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
 ColorMapAction::Widget::Widget(QWidget* parent, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state) :

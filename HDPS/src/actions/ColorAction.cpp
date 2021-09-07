@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QStyleOption>
 
 namespace hdps {
 
@@ -100,29 +101,55 @@ void ColorAction::ColorPickerPushButtonWidget::ToolButton::paintEvent(QPaintEven
 {
     QToolButton::paintEvent(paintEvent);
 
-    QPainter painter(this);
+    // Draw at a higher resolution to get better anti-aliasing
+    const auto pixmapSize = 2 * size();
+    const auto pixmapRect = QRect(QPoint(), pixmapSize);
 
-    painter.setRenderHint(QPainter::Antialiasing);
+    // Create color pixmap
+    QPixmap colorPixmap(pixmapSize);
 
-    const auto margin = 5;
+    // Fill with a transparent background
+    colorPixmap.fill(Qt::transparent);
 
+    // Create a painter to draw in the color pixmap
+    QPainter painterColorPixmap(&colorPixmap);
+    
+    // Enable anti-aliasing
+    painterColorPixmap.setRenderHint(QPainter::Antialiasing);
+
+    QStyleOption styleOption;
+
+    styleOption.init(this);
+
+    // Set inset margins
+    const auto margin = 10;
+
+    // Rect offset
     QPoint offset(margin, margin);
 
-    auto fillRect = rect();
+    // Deflated fill rectangle for color inset
+    auto colorRect = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 1, margin));
 
-    fillRect.setTopLeft(fillRect.topLeft() + offset);
-    fillRect.setBottomRight(fillRect.bottomRight() - offset - QPoint(0, 0));
-
+    // Get current color
     auto color = _colorPickerAction.getColor();
 
+    // Support enabled/disabled control
     if (!isEnabled()) {
         const auto grayScale = qGray(color.rgb());
         color.setRgb(grayScale, grayScale, grayScale);
     }
 
-    painter.setBrush(QBrush(color));
-    painter.setPen(QPen(QBrush(isEnabled() ? QColor(50, 50, 50) : Qt::gray), 1.0, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
-    painter.drawRect(fillRect);
+    // Establish pen color based on whether the color map is enabled or not
+    const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
+
+    // Do the painting
+    painterColorPixmap.setBrush(QBrush(color));
+    painterColorPixmap.setPen(QPen(penColor, 2.0, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painterColorPixmap.drawRoundedRect(colorRect, 6, 6);
+
+    QPainter painterColorWidget(this);
+
+    painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
 }
