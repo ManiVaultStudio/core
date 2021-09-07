@@ -3,8 +3,6 @@
 #include "Core.h"
 
 #include "actions/GroupAction.h"
-#include "actions/ColorAction.h"
-#include "actions/ColorMapAction.h"
 
 #include <QDebug>
 #include <QTreeWidgetItem>
@@ -38,14 +36,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     _treeWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     layout->addWidget(_treeWidget);
-
-    auto colorAction = new ColorAction(this, "Color");
-    auto colorMapAction = new ColorMapAction(this, "Color map");
-
-    auto actionLayout = new QHBoxLayout();
-
-    actionLayout->addWidget(colorAction->createWidget(this));
-    actionLayout->addWidget(colorMapAction->createWidget(this));
 
     layout->addLayout(actionLayout);
 
