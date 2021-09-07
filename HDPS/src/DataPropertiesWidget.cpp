@@ -36,6 +36,12 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     _treeWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     layout->addWidget(_treeWidget);
+
+    connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this](const QString& oldDatasetName, const QString& newDatasetName) {
+        loadDataset();
+    });
+
+    emit datasetNameChanged("");
 }
 
 void DataPropertiesWidget::setDataset(const QString& datasetName)
@@ -45,53 +51,43 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
         if (datasetName.isEmpty())
             throw std::runtime_error("data set name is empty");
 
-        if (_dataset.isValid()) {
-            const auto hierarchyItem = &_dataset->getHierarchyItem();
-
-            disconnect(hierarchyItem, &DataHierarchyItem::actionAdded, this, nullptr);
-            disconnect(hierarchyItem, &DataHierarchyItem::datasetNameChanged, this, nullptr);
-        }
+        if (_dataset.isValid())
+            disconnect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
         _dataset.setDatasetName(datasetName);
 
-        auto createWidgets = [this]() -> void {
-            _treeWidget->clear();
+        if (!_dataset.isValid())
+            return;
 
-            if (!_dataset.isValid())
-                return;
-
-            auto exposedActions = _dataset->getActions();
-
-            for (auto exposedAction : exposedActions) {
-                auto exposedGroupAction = dynamic_cast<GroupAction*>(exposedAction);
-
-                if (exposedGroupAction == nullptr)
-                    continue;
-
-                if (exposedGroupAction->isVisible())
-                    addButton(exposedGroupAction);
-            }
-        };
-
-        connect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this, createWidgets]() {
-            createWidgets();
+        connect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this]() {
+            loadDataset();
         });
-
-        const auto updateWindowTitle = [this]() {
-            emit datasetNameChanged(_dataset.getDatasetName());
-        };
-
-        connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this, updateWindowTitle, createWidgets](const QString& oldDatasetName, const QString& newDatasetName) {
-            createWidgets();
-            updateWindowTitle();
-        });
-
-        updateWindowTitle();
-        createWidgets();
     }
     catch (std::exception& e)
     {
-        qDebug() << QString("Cannot update data properties: ").arg(datasetName, e.what());
+        qDebug() << QString("Cannot update data properties for %1: %2").arg(datasetName, e.what());
+    }
+}
+
+void DataPropertiesWidget::loadDataset()
+{
+    emit datasetNameChanged(_dataset.getDatasetName());
+
+    _treeWidget->clear();
+
+    if (!_dataset.isValid())
+        return;
+
+    auto exposedActions = _dataset->getActions();
+
+    for (auto exposedAction : exposedActions) {
+        auto exposedGroupAction = dynamic_cast<GroupAction*>(exposedAction);
+
+        if (exposedGroupAction == nullptr)
+            continue;
+
+        if (exposedGroupAction->isVisible())
+            addButton(exposedGroupAction);
     }
 }
 

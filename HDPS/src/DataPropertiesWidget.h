@@ -70,6 +70,9 @@ public:
 
 protected:
 
+    /** Load dataset properties */
+    void loadDataset();
+
     /**
      * Add a section collapse/expand button
      * @param groupAction Pointer to group action

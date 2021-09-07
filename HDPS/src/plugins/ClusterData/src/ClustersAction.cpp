@@ -104,6 +104,8 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     _filterAndSelectAction(this, _filterModel, _selectionModel),
     _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
 {
+    qDebug() << "ClustersAction::Widget::Widget";
+
     _removeAction.setEnabled(false);
 
     _removeAction.setToolTip("Remove the selected filter(s)");
@@ -140,7 +142,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::Color), QHeaderView::Fixed);
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::Name), QHeaderView::Stretch);
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::NumberOfIndices), QHeaderView::Fixed);
-
+    
     const auto selectionChangedHandler = [this, clustersAction, clustersTreeView]() -> void {
 
         // Point indices that need to be selected
@@ -198,6 +200,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     mainLayout->setMargin(0);
     mainLayout->addWidget(clustersTreeView);
+
     mainLayout->addWidget(_filterAndSelectAction.createWidget(this));
     mainLayout->addLayout(toolbarLayout);
     mainLayout->addWidget(_subsetAction.createWidget(this));
@@ -223,9 +226,6 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
         auto mergeCluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedRows.first()).internalPointer());
 
         mergeCluster->setName(QString("%1*").arg(mergeCluster->getName()));
-
-        //MergeClustersDialog mergeClustersDialog(this);
-        //mergeClustersDialog.exec();
 
         for (auto selectedIndex : selectedRows) {
             auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());

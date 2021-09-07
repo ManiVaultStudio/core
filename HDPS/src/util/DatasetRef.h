@@ -165,7 +165,7 @@ public:
         _datasetName = datasetName;
 
         // Cache the previous dataset name
-        const auto previousName = _datasetName;
+        const auto previousDatasetName = _datasetName;
 
         try
         {
@@ -183,7 +183,7 @@ public:
             }
 
             // Let subscribers know that the dataset name changed
-            emit datasetNameChanged(previousName, _datasetName);
+            emit datasetNameChanged(previousDatasetName, _datasetName);
         }
         catch (std::exception& e)
         {
@@ -193,7 +193,14 @@ public:
 
     /** Resets the internals (dataset pointer to nullptr etc.) */
     void reset() {
-        _dataset = nullptr;
+        // Cache the previous dataset name
+        const auto previousDatasetName = _datasetName;
+
+        _dataset        = nullptr;
+        _datasetName    = "";
+
+        // Let subscribers know that the dataset name changed
+        emit datasetNameChanged(previousDatasetName, "");
     }
 
     /**
