@@ -37,8 +37,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     layout->addWidget(_treeWidget);
 
-    layout->addLayout(actionLayout);
-
     connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this](const QString& oldDatasetName, const QString& newDatasetName) {
         loadDataset();
     });
