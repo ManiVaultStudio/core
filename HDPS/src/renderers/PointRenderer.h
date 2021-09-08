@@ -46,7 +46,15 @@ namespace hdps
             bool hasHighlights() const { return !_highlights.empty(); }
             bool hasScalars() const { return !_scalars.empty(); }
             bool hasColors() const { return !_colors.empty(); }
-            Vector3f getScalarRange() { return Vector3f(_scalarLow, _scalarHigh, _scalarRange); }
+
+            Vector3f getColorMapRange() const {
+                return _colorMapRange;
+            }
+
+            void setColorMapRange(const hdps::Vector3f& colorMapRange) {
+                _colorMapRange = colorMapRange;
+            }
+
             void draw();
             void destroy();
 
@@ -64,9 +72,7 @@ namespace hdps
             std::vector<float>    _scalars;
             std::vector<Vector3f> _colors;
 
-            float _scalarLow;
-            float _scalarHigh;
-            float _scalarRange;
+            Vector3f _colorMapRange;
 
             bool _dirtyPositions = false;
             bool _dirtyHighlights = false;
@@ -106,6 +112,9 @@ namespace hdps
             void resize(QSize renderSize) override;
             void render() override;
             void destroy() override;
+
+            Vector3f getColorMapRange() const;
+            void setColorMapRange(const float& min, const float& max);
 
         private:
             /* Point properties */

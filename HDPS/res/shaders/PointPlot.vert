@@ -16,8 +16,10 @@ uniform mat3 orthoM;
 uniform bool hasHighlights;
 /** Whether a scalar buffer is used */
 uniform bool hasScalars;
-/** Range of scalar buffer if defined */
-uniform vec3 scalarRange;
+
+/** Color map scalar range */
+uniform vec3 colorMapRange;
+
 /** Whether a color buffer is used */
 uniform bool hasColors;
 
@@ -45,7 +47,7 @@ void main()
     vTexCoord = vertex;
     // Pass input attributes to fragment shader if they are defined
     vHighlight = hasHighlights ? highlight : 0;
-    vScalar = hasScalars ? (scalar - scalarRange.x) / scalarRange.z : 0;
+    vScalar = hasScalars ? (scalar - colorMapRange.x) / colorMapRange.z : 0;
     vColor = hasColors ? color : vec3(0.5);
     
     // Point properties

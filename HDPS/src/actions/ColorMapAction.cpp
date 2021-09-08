@@ -1,4 +1,5 @@
 #include "ColorMapAction.h"
+#include "Application.h"
 
 #include <QHBoxLayout>
 #include <QPaintEvent>
@@ -20,6 +21,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     _filteredColorMapModel(this, colorMapType)
 {
     setText(title);
+    setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
 
     _filteredColorMapModel.setSourceModel(ColorMapModel::getGlobalInstance());
     _currentColorMapAction.setCustomModel(&_filteredColorMapModel);

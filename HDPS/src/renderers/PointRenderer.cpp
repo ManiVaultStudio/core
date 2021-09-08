@@ -95,19 +95,27 @@ namespace hdps
 
         void PointArrayObject::setScalars(const std::vector<float>& scalars)
         {
-            _scalarLow = std::numeric_limits<float>::max();
-            _scalarHigh = -std::numeric_limits<float>::max();
+            _colorMapRange.x    = std::numeric_limits<float>::max();
+            _colorMapRange.y    = -std::numeric_limits<float>::max();
 
             // Determine scalar range
             for (const float& scalar : scalars)
             {
-                if (scalar < _scalarLow) _scalarLow = scalar;
-                if (scalar > _scalarHigh) _scalarHigh = scalar;
+                if (scalar < _colorMapRange.x)
+                    _colorMapRange.x = scalar;
+
+                if (scalar > _colorMapRange.y)
+                    _colorMapRange.y = scalar;
             }
-            _scalarRange = _scalarHigh - _scalarLow;
-            if (_scalarRange < 1e-07) _scalarRange = 1e-07;
+
+            _colorMapRange.z = _colorMapRange.y - _colorMapRange.x;
+
+            if (_colorMapRange.z < 1e-07)
+                _colorMapRange.z = 1e-07;
 
             _scalars = scalars;
+
+            //qDebug() << _scalarLow << _scalarHigh << _scalarRange;
 
             _dirtyScalars = true;
         }
@@ -283,9 +291,7 @@ namespace hdps
             _shader.uniform1i("hasColors", _gpuPoints.hasColors());
 
             if (_gpuPoints.hasScalars())
-            {
-                _shader.uniform3f("scalarRange", _gpuPoints.getScalarRange());
-            }
+                _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());
 
             if (_pointEffect == PointEffect::Color) {
                 _colormap.bind(0);
@@ -298,6 +304,16 @@ namespace hdps
         void PointRenderer::destroy()
         {
             _gpuPoints.destroy();
+        }
+
+        hdps::Vector3f PointRenderer::getColorMapRange() const
+        {
+            return _gpuPoints.getColorMapRange();
+        }
+
+        void PointRenderer::setColorMapRange(const float& min, const float& max)
+        {
+            return _gpuPoints.setColorMapRange(Vector3f(min, max, max - min));
         }
 
     } // namespace gui

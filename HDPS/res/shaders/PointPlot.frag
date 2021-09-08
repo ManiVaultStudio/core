@@ -35,7 +35,7 @@ void main()
     // Set point color
     vec3 color = vColor;
     if (scalarEffect == EFFECT_COLOR) {
-        color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
+		color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
     }
     
     // Change color if point is highlighted
