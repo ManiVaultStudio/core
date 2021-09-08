@@ -54,6 +54,12 @@ protected:
      */
     ColorMapSettingsAction(ColorMapAction* colorMapAction);
 
+    /**
+     * Enable/disable range editing
+     * @param rangeEditingEnabled Whether range editing is enabled or not
+     */
+    void setRangeEditingEnabled(const bool& rangeEditingEnabled);
+
 public: // Action getters
 
     ToggleAction& getInvertAction() { return _invertAction; }

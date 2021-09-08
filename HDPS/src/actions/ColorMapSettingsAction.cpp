@@ -51,6 +51,13 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction* colorMapAction) :
     update();
 }
 
+void ColorMapSettingsAction::setRangeEditingEnabled(const bool& rangeEditingEnabled)
+{
+    _rangeMinAction.setEnabled(rangeEditingEnabled);
+    _rangeMaxAction.setEnabled(rangeEditingEnabled);
+    _resetToDefaultRangeAction.setEnabled(rangeEditingEnabled);
+}
+
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction, const WidgetActionWidget::State& state) :
     WidgetActionWidget(parent, colorMapSettingsAction, state)
 {
