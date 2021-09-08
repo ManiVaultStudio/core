@@ -131,7 +131,7 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
     const auto margin = 8;
 
     // Deflated fill rectangle for color map inset
-    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, 5 * margin, margin + 1));
+    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 28, margin + 1));
 
     // Get color map image from the model
     auto colorMapeImage = _colorMapAction->getColorMapImage();
@@ -165,6 +165,7 @@ ColorMapAction::Widget::Widget(QWidget* parent, ColorMapAction* colorMapAction, 
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
+    layout->setSpacing(3);
 
     layout->addWidget(_comboBoxWidget);
     layout->addWidget(_settingsWidget);
@@ -174,6 +175,8 @@ ColorMapAction::Widget::Widget(QWidget* parent, ColorMapAction* colorMapAction, 
     connect(_comboBoxWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) -> void {
         update();
     });
+
+    _comboBoxWidget->setStyleSheet("QComboBox QAbstractItemView { min-width: 250px; }");
 }
 
 }

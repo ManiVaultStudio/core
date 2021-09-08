@@ -45,9 +45,9 @@ namespace hdps
             _densityComputation.compute();
         }
 
-        void DensityRenderer::setColormap(const QString colormap)
+        void DensityRenderer::setColormap(const QImage& image)
         {
-            _colormap.loadFromFile(colormap);
+            _colormap.loadFromImage(image);
             _hasColorMap = true;
         }
 

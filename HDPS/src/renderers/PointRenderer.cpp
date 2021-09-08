@@ -201,9 +201,9 @@ namespace hdps
             _pointEffect = effect;
         }
 
-        void PointRenderer::setColormap(const QString colormap)
+        void PointRenderer::setColormap(const QImage& image)
         {
-            _colormap.loadFromFile(colormap);
+            _colormap.loadFromImage(image);
         }
 
         void PointRenderer::setBounds(const Bounds& bounds)

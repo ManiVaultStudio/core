@@ -149,6 +149,22 @@ class Texture2D : public Texture
 public:
     Texture2D() : Texture(GL_TEXTURE_2D) { }
 
+    void loadFromImage(QImage image)
+    {
+        QRgb* data = (QRgb*)image.bits();
+
+        create();
+        bind();
+        glTexImage2D(_target, 0, GL_RGBA8, image.width(), image.height(), 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, data);
+
+        glTexParameteri(_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        release();
+    }
+
     void loadFromFile(QString path)
     {
         QPixmap pixmap(path);

@@ -35,12 +35,11 @@ namespace hdps
             void computeDensity();
 
             /**
-            * Loads a colormap from the given resource path and sets it
-            * as the current colormap for the landscape view.
-            *
-            * @param colormap Resource path of a colormap
-            */
-            void setColormap(const QString colormap);
+             * Loads a colormap from an image and loads as 
+             *the current colormap for the landscape view.
+             * @param image Color map image
+             */
+            void setColormap(const QImage& image);
 
             void init() override;
             void resize(QSize renderSize) override;

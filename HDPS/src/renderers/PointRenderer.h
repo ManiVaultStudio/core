@@ -95,7 +95,7 @@ namespace hdps
             void setColors(const std::vector<Vector3f>& colors);
 
             void setScalarEffect(const PointEffect effect);
-            void setColormap(const QString colormap);
+            void setColormap(const QImage& image);
             void setBounds(const Bounds& bounds);
             void setPointSize(const float size);
             void setAlpha(const float alpha);
