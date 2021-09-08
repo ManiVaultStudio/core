@@ -54,6 +54,8 @@ protected:
      */
     ColorMapSettingsAction(ColorMapAction* colorMapAction);
 
+public:
+
     /**
      * Enable/disable range editing
      * @param rangeEditingEnabled Whether range editing is enabled or not
