@@ -251,11 +251,11 @@ protected:
     std::uint32_t   _decimals;              /** Number of decimals */
     bool            _updateDuringDrag;      /** Whether the value should update during interaction */
 
-    static constexpr float  INIT_MIN            = std::numeric_limits<float>::lowest();     /** Initialization minimum value */
-    static constexpr float  INIT_MAX            = std::numeric_limits<float>::max();        /** Initialization maximum value */
-    static constexpr float  INIT_VALUE          = 0.0;                                      /** Initialization value */
-    static constexpr float  INIT_DEFAULT_VALUE  = 0.0;                                      /** Initialization default value */
-    static constexpr int    INIT_DECIMALS       = 1;                                        /** Initialization number of decimals */
+    static constexpr float  INIT_MIN            = 0.0f;         /** Initialization minimum value */
+    static constexpr float  INIT_MAX            = 100.0f;       /** Initialization maximum value */
+    static constexpr float  INIT_VALUE          = 0.0;          /** Initialization value */
+    static constexpr float  INIT_DEFAULT_VALUE  = 0.0;          /** Initialization default value */
+    static constexpr int    INIT_DECIMALS       = 1;            /** Initialization number of decimals */
 };
 
 }

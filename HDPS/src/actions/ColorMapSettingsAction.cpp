@@ -3,6 +3,7 @@
 #include "Application.h"
 
 #include <QGridLayout>
+#include <QGroupBox>
 
 using namespace hdps::util;
 
@@ -15,7 +16,9 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction* colorMapAction) :
     _rangeMinAction(this, "Range minimum", 0, 1, 0, 0, 2),
     _rangeMaxAction(this, "Range maximum", 0, 1, 1, 1, 2),
     _resetToDefaultRangeAction(this, "Reset to default range"),
-    _invertAction(this, "Mirror horizontally")
+    _invertAction(this, "Mirror horizontally"),
+    _discreteAction(this, "Discrete"),
+    _numberOfDiscreteStepsAction(this, "Number of discrete steps", 1, 100, 10, 10)
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cog"));
@@ -73,7 +76,36 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
 
     layout->addWidget(colorMapSettingsAction->getInvertAction().createWidget(this), 3, 1);
 
+    auto discreteGroupBox   = new QGroupBox("Discrete");
+    auto discreteLayout     = new QVBoxLayout();
+
+    discreteGroupBox->setCheckable(true);
+    discreteGroupBox->setLayout(discreteLayout);
+
+    auto& discrete                      = colorMapSettingsAction->getDiscreteAction();
+    auto& numberOfDiscreteStepsAction   = colorMapSettingsAction->getNumberOfDiscreteStepsAction();
+
+    discreteLayout->addWidget(numberOfDiscreteStepsAction.createLabelWidget(this));
+    discreteLayout->addWidget(numberOfDiscreteStepsAction.createWidget(this));
+
+    layout->addWidget(discreteGroupBox, layout->rowCount(), 0, 1, 2);
+
+    const auto updateGroupBox = [this, discreteGroupBox, &discrete]() {
+        QSignalBlocker blocker(discreteGroupBox);
+
+        discreteGroupBox->setTitle(discrete.text());
+        discreteGroupBox->setChecked(discrete.isChecked());
+    };
+
+    connect(&discrete, &ToggleAction::toggled, this, updateGroupBox);
+
+    connect(discreteGroupBox, &QGroupBox::toggled, this, [this, &discrete](bool toggled) {
+        discrete.setChecked(toggled);
+    });
+
     setPopupLayout(layout);
+
+    updateGroupBox();
 }
 
 }

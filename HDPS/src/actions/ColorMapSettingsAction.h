@@ -4,6 +4,7 @@
 #include "DecimalAction.h"
 #include "ToggleAction.h"
 #include "TriggerAction.h"
+#include "IntegralAction.h"
 
 namespace hdps {
 
@@ -68,12 +69,16 @@ public: // Action getters
     DecimalAction& getRangeMinAction() { return _rangeMinAction; }
     DecimalAction& getRangeMaxAction() { return _rangeMaxAction; }
     TriggerAction& getResetToDataRangeAction() { return _resetToDefaultRangeAction; }
+    ToggleAction& getDiscreteAction() { return _discreteAction; }
+    IntegralAction& getNumberOfDiscreteStepsAction() { return _numberOfDiscreteStepsAction; }
 
 protected:
-    DecimalAction   _rangeMinAction;                /** Range minimum action */
-    DecimalAction   _rangeMaxAction;                /** Range maximum action */
-    TriggerAction   _resetToDefaultRangeAction;     /** Reset minimum/maximum range to data range */
-    ToggleAction    _invertAction;                  /** Color map is horizontally mirrored action */
+    DecimalAction       _rangeMinAction;                    /** Range minimum action */
+    DecimalAction       _rangeMaxAction;                    /** Range maximum action */
+    TriggerAction       _resetToDefaultRangeAction;         /** Reset minimum/maximum range to data range */
+    ToggleAction        _invertAction;                      /** Color map is horizontally mirrored action */
+    ToggleAction        _discreteAction;                    /** Color map is discrete/continuous action */
+    IntegralAction      _numberOfDiscreteStepsAction;       /** Number of discrete steps in the color map action */
 
     /** Only color map action may instantiate this class */
     friend class ColorMapAction;

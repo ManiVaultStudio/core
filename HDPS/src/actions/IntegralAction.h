@@ -229,10 +229,10 @@ protected:
     QString         _suffix;                /** Suffix */
     bool            _updateDuringDrag;      /** Whether the value should update during interaction */
 
-    static constexpr std::int32_t INIT_MIN              = std::numeric_limits<std::int32_t>::lowest();    /** Initialization minimum value */
-    static constexpr std::int32_t INIT_MAX              = std::numeric_limits<std::int32_t>::max();       /** Initialization maximum value */
-    static constexpr std::int32_t INIT_VALUE            = 0;                                              /** Initialization value */
-    static constexpr std::int32_t INIT_DEFAULT_VALUE    = 0;                                              /** Initialization default value */
+    static constexpr std::int32_t INIT_MIN              = 0;        /** Initialization minimum value */
+    static constexpr std::int32_t INIT_MAX              = 100;      /** Initialization maximum value */
+    static constexpr std::int32_t INIT_VALUE            = 0;        /** Initialization value */
+    static constexpr std::int32_t INIT_DEFAULT_VALUE    = 0;        /** Initialization default value */
 };
 
 }
