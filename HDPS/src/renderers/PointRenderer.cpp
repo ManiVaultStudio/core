@@ -50,12 +50,14 @@ namespace hdps
             quad.create();
             quad.bind();
             quad.setData(vertices);
+
             glVertexAttribPointer(ATTRIBUTE_VERTICES, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
             glEnableVertexAttribArray(ATTRIBUTE_VERTICES);
 
             // Position buffer
             _positionBuffer.create();
             _positionBuffer.bind();
+
             glVertexAttribPointer(ATTRIBUTE_POSITIONS, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_POSITIONS, 1);
             glEnableVertexAttribArray(ATTRIBUTE_POSITIONS);
@@ -63,18 +65,28 @@ namespace hdps
             // Highlight buffer, disabled by default
             _highlightBuffer.create();
             _highlightBuffer.bind();
+
             glVertexAttribIPointer(ATTRIBUTE_HIGHLIGHTS, 1, GL_BYTE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_HIGHLIGHTS, 1);
 
             // Scalar buffer, disabled by default
             _scalarBuffer.create();
             _scalarBuffer.bind();
+
             glVertexAttribPointer(ATTRIBUTE_SCALARS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_SCALARS, 1);
+
+            // Scalar buffer for point size
+            _sizeScalarBuffer.create();
+            _sizeScalarBuffer.bind();
+
+            glVertexAttribPointer(ATTRIBUTE_SCALARS_SIZE, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_SCALARS_SIZE, 1);
 
             // Color buffer, disabled by default
             _colorBuffer.create();
             _colorBuffer.bind();
+
             glVertexAttribPointer(ATTRIBUTE_COLORS, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_COLORS, 1);
         }
@@ -95,29 +107,54 @@ namespace hdps
 
         void PointArrayObject::setScalars(const std::vector<float>& scalars)
         {
-            _colorMapRange.x    = std::numeric_limits<float>::max();
-            _colorMapRange.y    = -std::numeric_limits<float>::max();
+            _colorScalarsRange.x = std::numeric_limits<float>::max();
+            _colorScalarsRange.y = -std::numeric_limits<float>::max();
 
             // Determine scalar range
             for (const float& scalar : scalars)
             {
-                if (scalar < _colorMapRange.x)
-                    _colorMapRange.x = scalar;
+                if (scalar < _colorScalarsRange.x)
+                    _colorScalarsRange.x = scalar;
 
-                if (scalar > _colorMapRange.y)
-                    _colorMapRange.y = scalar;
+                if (scalar > _colorScalarsRange.y)
+                    _colorScalarsRange.y = scalar;
             }
 
-            _colorMapRange.z = _colorMapRange.y - _colorMapRange.x;
+            _colorScalarsRange.z = _colorScalarsRange.y - _colorScalarsRange.x;
 
-            if (_colorMapRange.z < 1e-07)
-                _colorMapRange.z = 1e-07;
+            if (_colorScalarsRange.z < 1e-07)
+                _colorScalarsRange.z = 1e-07;
 
             _scalars = scalars;
 
             //qDebug() << _scalarLow << _scalarHigh << _scalarRange;
 
             _dirtyScalars = true;
+        }
+
+        void PointArrayObject::setSizeScalars(const std::vector<float>& scalars)
+        {
+            _sizeScalarsRange.x = std::numeric_limits<float>::max();
+            _sizeScalarsRange.y = -std::numeric_limits<float>::max();
+
+            // Determine scalar range
+            for (const float& scalar : scalars)
+            {
+                if (scalar < _sizeScalarsRange.x)
+                    _sizeScalarsRange.x = scalar;
+
+                if (scalar > _sizeScalarsRange.y)
+                    _sizeScalarsRange.y = scalar;
+            }
+
+            _sizeScalarsRange.z = _sizeScalarsRange.y - _sizeScalarsRange.x;
+
+            if (_sizeScalarsRange.z < 1e-07)
+                _sizeScalarsRange.z = 1e-07;
+
+            _sizeScalars = scalars;
+
+            _dirtySizeScalars = true;
         }
 
         void PointArrayObject::setColors(const std::vector<Vector3f>& colors)
@@ -144,27 +181,46 @@ namespace hdps
             {
                 _positionBuffer.bind();
                 _positionBuffer.setData(_positions);
+
                 _dirtyPositions = false;
             }
+
             if (_dirtyHighlights)
             {
                 _highlightBuffer.bind();
                 _highlightBuffer.setData(_highlights);
+
                 enableAttribute(ATTRIBUTE_HIGHLIGHTS, true);
+
                 _dirtyHighlights = false;
             }
+
             if (_dirtyScalars)
             {
                 _scalarBuffer.bind();
                 _scalarBuffer.setData(_scalars);
+
                 enableAttribute(ATTRIBUTE_SCALARS, true);
+
                 _dirtyScalars = false;
             }
+
+            if (_dirtySizeScalars)
+            {
+                _sizeScalarBuffer.bind();
+                _sizeScalarBuffer.setData(_sizeScalars);
+
+                enableAttribute(ATTRIBUTE_SCALARS_SIZE, true);
+
+                _dirtySizeScalars = false;
+            }
+
             if (_dirtyColors)
             {
                 _colorBuffer.bind();
                 _colorBuffer.setData(_colors);
                 enableAttribute(ATTRIBUTE_COLORS, true);
+
                 _dirtyColors = false;
             }
 

@@ -33,12 +33,14 @@ namespace hdps
             BufferObject _positionBuffer;
             BufferObject _highlightBuffer;
             BufferObject _scalarBuffer;
+            BufferObject _sizeScalarBuffer;
             BufferObject _colorBuffer;
 
             void init();
             void setPositions(const std::vector<Vector2f>& positions);
             void setHighlights(const std::vector<char>& highlights);
             void setScalars(const std::vector<float>& scalars);
+            void setSizeScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
 
             void enableAttribute(uint index, bool enable);
@@ -48,11 +50,11 @@ namespace hdps
             bool hasColors() const { return !_colors.empty(); }
 
             Vector3f getColorMapRange() const {
-                return _colorMapRange;
+                return _colorScalarsRange;
             }
 
             void setColorMapRange(const hdps::Vector3f& colorMapRange) {
-                _colorMapRange = colorMapRange;
+                _colorScalarsRange = colorMapRange;
             }
 
             void draw();
@@ -60,24 +62,27 @@ namespace hdps
 
         private:
             // Vertex array indices
-            const uint ATTRIBUTE_VERTICES   = 0;
-            const uint ATTRIBUTE_POSITIONS  = 1;
-            const uint ATTRIBUTE_HIGHLIGHTS = 2;
-            const uint ATTRIBUTE_SCALARS    = 3;
-            const uint ATTRIBUTE_COLORS     = 4;
+            const uint ATTRIBUTE_VERTICES       = 0;
+            const uint ATTRIBUTE_POSITIONS      = 1;
+            const uint ATTRIBUTE_HIGHLIGHTS     = 2;
+            const uint ATTRIBUTE_SCALARS        = 3;
+            const uint ATTRIBUTE_SCALARS_SIZE   = 5;
+            const uint ATTRIBUTE_COLORS         = 4;
 
             /* Point attributes */
-            std::vector<Vector2f> _positions;
-            std::vector<char>     _highlights;
-            std::vector<float>    _scalars;
-            std::vector<Vector3f> _colors;
+            std::vector<Vector2f>   _positions;
+            std::vector<char>       _highlights;
+            std::vector<float>      _scalars;
+            std::vector<float>      _sizeScalars;
+            std::vector<Vector3f>   _colors;
+            Vector3f                _colorScalarsRange;
+            Vector3f                _sizeScalarsRange;
 
-            Vector3f _colorMapRange;
-
-            bool _dirtyPositions = false;
-            bool _dirtyHighlights = false;
-            bool _dirtyScalars = false;
-            bool _dirtyColors = false;
+            bool _dirtyPositions    = false;
+            bool _dirtyHighlights   = false;
+            bool _dirtyScalars      = false;
+            bool _dirtySizeScalars  = false;
+            bool _dirtyColors       = false;
         };
 
         struct PointSettings
