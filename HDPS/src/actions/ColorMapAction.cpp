@@ -181,9 +181,14 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
     // Establish pen color based on whether the color map is enabled or not
     const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::Shadow) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
-    colorMapeImage = colorMapeImage.scaled(pixmapRect.size());
+    // Get scaled copy of the color map image so that it fits correctly
+    colorMapeImage = colorMapeImage.scaled(colorMapRectangle.size());
 
+    // Create a textured brush
     QBrush colorMapPixMapBrush(colorMapeImage);
+
+    // And set the texture offset such that it aligns properly
+    colorMapPixMapBrush.setTransform(QTransform::fromTranslate(margin, 0));
 
     // Do the painting
     painter.setPen(QPen(penColor, 2, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
@@ -192,6 +197,7 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
 
     QPainter painterColorWidget(this);
 
+    // Draw the color map over the control
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 

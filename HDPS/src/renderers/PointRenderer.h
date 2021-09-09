@@ -32,8 +32,9 @@ namespace hdps
 
             BufferObject _positionBuffer;
             BufferObject _highlightBuffer;
-            BufferObject _scalarBuffer;
+            BufferObject _colorScalarBuffer;
             BufferObject _sizeScalarBuffer;
+            BufferObject _opacityScalarBuffer;
             BufferObject _colorBuffer;
 
             void init();
@@ -41,12 +42,14 @@ namespace hdps
             void setHighlights(const std::vector<char>& highlights);
             void setScalars(const std::vector<float>& scalars);
             void setSizeScalars(const std::vector<float>& scalars);
+            void setOpacityScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
 
             void enableAttribute(uint index, bool enable);
 
             bool hasHighlights() const { return !_highlights.empty(); }
-            bool hasScalars() const { return !_scalars.empty(); }
+            bool hasColorScalars() const { return !_colorScalars.empty(); }
+            bool hasSizeScalars() const { return !_sizeScalars.empty(); }
             bool hasColors() const { return !_colors.empty(); }
 
             Vector3f getColorMapRange() const {
@@ -61,28 +64,37 @@ namespace hdps
             void destroy();
 
         private:
-            // Vertex array indices
-            const uint ATTRIBUTE_VERTICES       = 0;
-            const uint ATTRIBUTE_POSITIONS      = 1;
-            const uint ATTRIBUTE_HIGHLIGHTS     = 2;
-            const uint ATTRIBUTE_SCALARS        = 3;
-            const uint ATTRIBUTE_SCALARS_SIZE   = 5;
-            const uint ATTRIBUTE_COLORS         = 4;
+
+            /** Vertex array indices */
+            const uint ATTRIBUTE_VERTICES           = 0;
+            const uint ATTRIBUTE_POSITIONS          = 1;
+            const uint ATTRIBUTE_HIGHLIGHTS         = 2;
+            const uint ATTRIBUTE_COLORS             = 4;
+            const uint ATTRIBUTE_SCALARS_COLOR      = 3;
+            const uint ATTRIBUTE_SCALARS_SIZE       = 5;
+            const uint ATTRIBUTE_SCALARS_OPACITY    = 6;
 
             /* Point attributes */
             std::vector<Vector2f>   _positions;
-            std::vector<char>       _highlights;
-            std::vector<float>      _scalars;
-            std::vector<float>      _sizeScalars;
             std::vector<Vector3f>   _colors;
-            Vector3f                _colorScalarsRange;
-            Vector3f                _sizeScalarsRange;
+            std::vector<char>       _highlights;
+            
+            /** Scalar channels */
+            std::vector<float>  _colorScalars;      /** Point color scalar channel */
+            std::vector<float>  _sizeScalars;       /** Point size scalar channel */
+            std::vector<float>  _opacityScalars;    /** Point opacity scalar channel */
 
-            bool _dirtyPositions    = false;
-            bool _dirtyHighlights   = false;
-            bool _dirtyScalars      = false;
-            bool _dirtySizeScalars  = false;
-            bool _dirtyColors       = false;
+            /** Scalar ranges */
+            Vector3f    _colorScalarsRange;     /** Scalar range of the point color scalars */
+            Vector3f    _sizeScalarsRange;      /** Scalar range of the point size scalars */
+            Vector3f    _opacityScalarsRange;   /** Scalar range of the point opacity scalars */
+
+            bool _dirtyPositions        = false;
+            bool _dirtyHighlights       = false;
+            bool _dirtyColorScalars     = false;
+            bool _dirtySizeScalars      = false;
+            bool _dirtyOpacityScalars   = false;
+            bool _dirtyColors           = false;
         };
 
         struct PointSettings
@@ -102,7 +114,9 @@ namespace hdps
         public:
             void setData(const std::vector<Vector2f>& points);
             void setHighlights(const std::vector<char>& highlights);
-            void setScalars(const std::vector<float>& scalars);
+            void setColorChannelScalars(const std::vector<float>& scalars);
+            void setSizeChannelScalars(const std::vector<float>& scalars);
+            void setOpacityChannelScalars(const std::vector<float>& scalars);
             void setColors(const std::vector<Vector3f>& colors);
 
             void setScalarEffect(const PointEffect effect);

@@ -69,26 +69,35 @@ namespace hdps
             glVertexAttribIPointer(ATTRIBUTE_HIGHLIGHTS, 1, GL_BYTE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_HIGHLIGHTS, 1);
 
-            // Scalar buffer, disabled by default
-            _scalarBuffer.create();
-            _scalarBuffer.bind();
-
-            glVertexAttribPointer(ATTRIBUTE_SCALARS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glVertexAttribDivisor(ATTRIBUTE_SCALARS, 1);
-
-            // Scalar buffer for point size
-            _sizeScalarBuffer.create();
-            _sizeScalarBuffer.bind();
-
-            glVertexAttribPointer(ATTRIBUTE_SCALARS_SIZE, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-            glVertexAttribDivisor(ATTRIBUTE_SCALARS_SIZE, 1);
-
             // Color buffer, disabled by default
             _colorBuffer.create();
             _colorBuffer.bind();
 
             glVertexAttribPointer(ATTRIBUTE_COLORS, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_COLORS, 1);
+
+            // Scalar buffer for point color, disabled by default
+            _colorScalarBuffer.create();
+            _colorScalarBuffer.bind();
+
+            glVertexAttribPointer(ATTRIBUTE_SCALARS_COLOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_SCALARS_COLOR, 1);
+
+            /*
+            // Scalar buffer for point size, disabled by default
+            _sizeScalarBuffer.create();
+            _sizeScalarBuffer.bind();
+
+            glVertexAttribPointer(ATTRIBUTE_SCALARS_SIZE, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_SCALARS_SIZE, 1);
+
+            // Scalar buffer for point opacity, disabled by default
+            _opacityScalarBuffer.create();
+            _opacityScalarBuffer.bind();
+
+            glVertexAttribPointer(ATTRIBUTE_SCALARS_OPACITY, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+            glVertexAttribDivisor(ATTRIBUTE_SCALARS_OPACITY, 1);
+            */
         }
 
         void PointArrayObject::setPositions(const std::vector<Vector2f>& positions)
@@ -125,15 +134,14 @@ namespace hdps
             if (_colorScalarsRange.z < 1e-07)
                 _colorScalarsRange.z = 1e-07;
 
-            _scalars = scalars;
+            _colorScalars = scalars;
 
-            //qDebug() << _scalarLow << _scalarHigh << _scalarRange;
-
-            _dirtyScalars = true;
+            _dirtyColorScalars = true;
         }
 
         void PointArrayObject::setSizeScalars(const std::vector<float>& scalars)
         {
+            /*
             _sizeScalarsRange.x = std::numeric_limits<float>::max();
             _sizeScalarsRange.y = -std::numeric_limits<float>::max();
 
@@ -155,6 +163,34 @@ namespace hdps
             _sizeScalars = scalars;
 
             _dirtySizeScalars = true;
+            */
+        }
+
+        void PointArrayObject::setOpacityScalars(const std::vector<float>& scalars)
+        {
+            /*
+            _opacityScalarsRange.x  = std::numeric_limits<float>::max();
+            _opacityScalarsRange.y  = -std::numeric_limits<float>::max();
+
+            // Determine scalar range
+            for (const float& scalar : scalars)
+            {
+                if (scalar < _opacityScalarsRange.x)
+                    _opacityScalarsRange.x = scalar;
+
+                if (scalar > _opacityScalarsRange.y)
+                    _opacityScalarsRange.y = scalar;
+            }
+
+            _opacityScalarsRange.z = _opacityScalarsRange.y - _opacityScalarsRange.x;
+
+            if (_opacityScalarsRange.z < 1e-07)
+                _opacityScalarsRange.z = 1e-07;
+
+            _opacityScalars = scalars;
+
+            _dirtyOpacityScalars = true;
+            */
         }
 
         void PointArrayObject::setColors(const std::vector<Vector3f>& colors)
@@ -195,16 +231,26 @@ namespace hdps
                 _dirtyHighlights = false;
             }
 
-            if (_dirtyScalars)
+            if (_dirtyColors)
             {
-                _scalarBuffer.bind();
-                _scalarBuffer.setData(_scalars);
+                _colorBuffer.bind();
+                _colorBuffer.setData(_colors);
+                enableAttribute(ATTRIBUTE_COLORS, true);
 
-                enableAttribute(ATTRIBUTE_SCALARS, true);
-
-                _dirtyScalars = false;
+                _dirtyColors = false;
             }
 
+            if (_dirtyColorScalars)
+            {
+                _colorScalarBuffer.bind();
+                _colorScalarBuffer.setData(_colorScalars);
+
+                enableAttribute(ATTRIBUTE_SCALARS_COLOR, true);
+
+                _dirtyColorScalars = false;
+            }
+
+            /*
             if (_dirtySizeScalars)
             {
                 _sizeScalarBuffer.bind();
@@ -215,14 +261,16 @@ namespace hdps
                 _dirtySizeScalars = false;
             }
 
-            if (_dirtyColors)
+            if (_dirtyOpacityScalars)
             {
-                _colorBuffer.bind();
-                _colorBuffer.setData(_colors);
-                enableAttribute(ATTRIBUTE_COLORS, true);
+                _opacityScalarBuffer.bind();
+                _opacityScalarBuffer.setData(_sizeScalars);
 
-                _dirtyColors = false;
+                enableAttribute(ATTRIBUTE_SCALARS_OPACITY, true);
+
+                _dirtyOpacityScalars = false;
             }
+            */
 
             // Before calling glDrawArraysInstanced, check if _positions is non-empty, to
             // prevent a crash on some (older) computers, see HDPS core pull request #42,
@@ -250,9 +298,19 @@ namespace hdps
             _gpuPoints.setHighlights(highlights);
         }
 
-        void PointRenderer::setScalars(const std::vector<float>& scalars)
+        void PointRenderer::setColorChannelScalars(const std::vector<float>& scalars)
         {
             _gpuPoints.setScalars(scalars);
+        }
+
+        void PointRenderer::setSizeChannelScalars(const std::vector<float>& scalars)
+        {
+            _gpuPoints.setSizeScalars(scalars);
+        }
+
+        void PointRenderer::setOpacityChannelScalars(const std::vector<float>& scalars)
+        {
+            _gpuPoints.setOpacityScalars(scalars);
         }
 
         void PointRenderer::setColors(const std::vector<Vector3f>& colors)
@@ -343,10 +401,10 @@ namespace hdps
             _shader.uniform3f("outlineColor", _outlineColor);
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
-            _shader.uniform1i("hasScalars", _gpuPoints.hasScalars());
+            _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
             _shader.uniform1i("hasColors", _gpuPoints.hasColors());
 
-            if (_gpuPoints.hasScalars())
+            if (_gpuPoints.hasColorScalars())
                 _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());
 
             if (_pointEffect == PointEffect::Color) {
