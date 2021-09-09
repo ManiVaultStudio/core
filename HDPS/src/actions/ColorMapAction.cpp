@@ -32,13 +32,10 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
         emit imageChanged(getColorMapImage());
     };
 
-    connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, [this, notifyColorMapImageChanged](const std::int32_t& currentIndex) -> void {
-        notifyColorMapImageChanged();
-    });
-
-    connect(&_settingsAction.getInvertAction(), &ToggleAction::toggled, this, [this, notifyColorMapImageChanged](bool toggled) -> void {
-        notifyColorMapImageChanged();
-    });
+    connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, notifyColorMapImageChanged);
+    connect(&_settingsAction.getInvertAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&_settingsAction.getDiscreteAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&_settingsAction.getNumberOfDiscreteStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
 }
 
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
@@ -69,9 +66,44 @@ QImage ColorMapAction::getColorMapImage() const
     // Get the selected color map image
     auto colorMapImage = filteredModelIndex.siblingAtColumn(static_cast<std::int32_t>(ColorMapModel::Column::Image)).data(Qt::EditRole).value<QImage>();
 
+    // Cast away the const-ness of the this pointer and get the settings action
+    auto& settingsAction = const_cast<ColorMapAction*>(this)->getSettingsAction();
+
     // Mirror if required
-    if (const_cast<ColorMapAction*>(this)->getSettingsAction().getInvertAction().isChecked())
+    if (settingsAction.getInvertAction().isChecked())
         colorMapImage = colorMapImage.mirrored(true, false);
+
+    if (settingsAction.getDiscreteAction().isChecked()) {
+        const auto numberOfDiscreteSteps = settingsAction.getNumberOfDiscreteStepsAction().getValue();
+
+        QImage discreteColorMapImage(numberOfDiscreteSteps, 1, QImage::Format::Format_ARGB32);
+
+        const auto stepSize = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
+
+        for (int step = 0; step < numberOfDiscreteSteps; step++) {
+            const auto rangeStart   = step * stepSize;
+            const auto rangeEnd     = rangeStart + stepSize;
+
+            float colorSum[] = { 0.0f, 0.0f, 0.0f };
+
+            for (int p = rangeStart; p < rangeEnd; p++) {
+                const auto pixel = colorMapImage.pixelColor(p, 0);
+
+                colorSum[0] += pixel.redF();
+                colorSum[1] += pixel.greenF();
+                colorSum[2] += pixel.blueF();
+            }
+
+            for (int c = 0; c < 3; c++)
+                colorSum[c] /= static_cast<float>(stepSize);
+
+            const auto discreteColor = QColor::fromRgbF(colorSum[0], colorSum[1], colorSum[2]);
+            
+            discreteColorMapImage.setPixelColor(step, 0, discreteColor);
+        }
+
+        return discreteColorMapImage;
+    }
 
     return colorMapImage;
 }
