@@ -22,11 +22,17 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
 
 void DecimalAction::initialize(const float& minimum /*= INIT_MIN_VALUE*/, const float& maximum /*= INIT_MAX_VALUE*/, const float& value /*= INIT_VALUE*/, const float& defaultValue /*= INIT_DEFAULT_VALUE*/, const std::int32_t& decimals /*= INIT_DECIMALS*/)
 {
-    setMinimum(minimum);
-    setMaximum(maximum);
-    setValue(value);
-    setDefaultValue(defaultValue);
-    setDecimals(decimals);
+    _minimum        = std::min(minimum, _maximum);
+    _maximum        = std::max(maximum, _minimum);
+    _value          = std::max(_minimum, std::min(value, _maximum));
+    _defaultValue   = std::max(_minimum, std::min(defaultValue, _maximum));
+    _decimals       = decimals;
+
+    emit minimumChanged(_minimum);
+    emit maximumChanged(_maximum);
+    emit valueChanged(_value);
+    emit defaultValueChanged(_defaultValue);
+    emit decimalsChanged(_decimals);
 }
 
 float DecimalAction::getValue() const

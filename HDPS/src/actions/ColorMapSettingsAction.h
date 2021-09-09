@@ -2,6 +2,7 @@
 
 #include "WidgetAction.h"
 #include "DecimalAction.h"
+#include "DecimalRangeAction.h"
 #include "ToggleAction.h"
 #include "TriggerAction.h"
 #include "IntegralAction.h"
@@ -66,15 +67,13 @@ public:
 public: // Action getters
 
     ToggleAction& getInvertAction() { return _invertAction; }
-    DecimalAction& getRangeMinAction() { return _rangeMinAction; }
-    DecimalAction& getRangeMaxAction() { return _rangeMaxAction; }
+    DecimalRangeAction& getRangeAction() { return _rangeAction; }
     TriggerAction& getResetToDataRangeAction() { return _resetToDefaultRangeAction; }
     ToggleAction& getDiscreteAction() { return _discreteAction; }
     IntegralAction& getNumberOfDiscreteStepsAction() { return _numberOfDiscreteStepsAction; }
 
 protected:
-    DecimalAction       _rangeMinAction;                    /** Range minimum action */
-    DecimalAction       _rangeMaxAction;                    /** Range maximum action */
+    DecimalRangeAction  _rangeAction;                       /** Range action */
     TriggerAction       _resetToDefaultRangeAction;         /** Reset minimum/maximum range to data range */
     ToggleAction        _invertAction;                      /** Color map is horizontally mirrored action */
     ToggleAction        _discreteAction;                    /** Color map is discrete/continuous action */

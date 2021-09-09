@@ -76,16 +76,20 @@ QImage ColorMapAction::getColorMapImage() const
     if (settingsAction.getDiscreteAction().isChecked()) {
         const auto numberOfDiscreteSteps = settingsAction.getNumberOfDiscreteStepsAction().getValue();
 
+        // The discrete color map image
         QImage discreteColorMapImage(numberOfDiscreteSteps, 1, QImage::Format::Format_ARGB32);
 
-        const auto stepSize = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
+        // Compute step size in source image coordinates 
+        const auto sourceStepSize = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
 
+        // Create average color for each discrete color section
         for (int step = 0; step < numberOfDiscreteSteps; step++) {
-            const auto rangeStart   = step * stepSize;
-            const auto rangeEnd     = rangeStart + stepSize;
+            const auto rangeStart   = step * sourceStepSize;
+            const auto rangeEnd     = rangeStart + sourceStepSize;
 
             float colorSum[] = { 0.0f, 0.0f, 0.0f };
 
+            // Sum the pixel colors so that we can average them later
             for (int p = rangeStart; p < rangeEnd; p++) {
                 const auto pixel = colorMapImage.pixelColor(p, 0);
 
@@ -94,12 +98,12 @@ QImage ColorMapAction::getColorMapImage() const
                 colorSum[2] += pixel.blueF();
             }
 
+            // Compute average color per bin
             for (int c = 0; c < 3; c++)
-                colorSum[c] /= static_cast<float>(stepSize);
+                colorSum[c] /= static_cast<float>(sourceStepSize);
 
-            const auto discreteColor = QColor::fromRgbF(colorSum[0], colorSum[1], colorSum[2]);
-            
-            discreteColorMapImage.setPixelColor(step, 0, discreteColor);
+            // Assign the pixel color
+            discreteColorMapImage.setPixelColor(step, 0, QColor::fromRgbF(colorSum[0], colorSum[1], colorSum[2]));
         }
 
         return discreteColorMapImage;

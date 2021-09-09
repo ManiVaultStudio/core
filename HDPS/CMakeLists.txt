@@ -109,6 +109,7 @@ set(ACTIONS_HEADERS
     src/actions/ColorMapAction.h
     src/actions/ColorMapSettingsAction.h
     src/actions/DecimalAction.h
+    src/actions/DecimalRangeAction.h
     src/actions/GroupAction.h
     src/actions/IntegralAction.h
     src/actions/OptionAction.h
@@ -130,6 +131,7 @@ set(ACTIONS_SOURCES
     src/actions/ColorMapAction.cpp
     src/actions/ColorMapSettingsAction.cpp
     src/actions/DecimalAction.cpp
+    src/actions/DecimalRangeAction.cpp
     src/actions/GroupAction.cpp
     src/actions/IntegralAction.cpp
     src/actions/OptionAction.cpp

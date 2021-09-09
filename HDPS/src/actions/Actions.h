@@ -3,6 +3,7 @@
 #include "ColorAction.h"
 #include "ColorMapAction.h"
 #include "DecimalAction.h"
+#include "DecimalRangeAction.h"
 #include "GroupAction.h"
 #include "IntegralAction.h"
 #include "OptionAction.h"

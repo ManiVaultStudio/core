@@ -13,51 +13,35 @@ namespace gui {
 
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction* colorMapAction) :
     WidgetAction(colorMapAction),
-    _rangeMinAction(this, "Range minimum", 0, 1, 0, 0, 2),
-    _rangeMaxAction(this, "Range maximum", 0, 1, 1, 1, 2),
+    _rangeAction(this, "Range", 0, 1, 0, 1, 0, 1),
     _resetToDefaultRangeAction(this, "Reset to default range"),
     _invertAction(this, "Mirror horizontally"),
     _discreteAction(this, "Discrete"),
-    _numberOfDiscreteStepsAction(this, "Number of discrete steps", 1, 100, 10, 10)
+    _numberOfDiscreteStepsAction(this, "Number of discrete steps", 2, 25, 10, 10)
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cog"));
 
-    _rangeMinAction.setToolTip("Minimum value of the color map");
-    _rangeMaxAction.setToolTip("Maximum value of the color map");
+    _rangeAction.setToolTip("Range of the color map");
     _invertAction.setToolTip("Mirror the color map horizontally");
     _resetToDefaultRangeAction.setToolTip("Reset the min/max value to the data range");
 
     const auto update = [this]() {
-        _resetToDefaultRangeAction.setEnabled(_rangeMinAction.canReset() || _rangeMaxAction.canReset());
+        _resetToDefaultRangeAction.setEnabled(_rangeAction.canReset());
     };
 
-    connect(&_rangeMinAction, &DecimalAction::valueChanged, this, [this, update](const double& value) {
-        if (value >= _rangeMaxAction.getValue())
-            _rangeMaxAction.setValue(value);
-
-        update();
-    });
-
-    connect(&_rangeMaxAction, &DecimalAction::valueChanged, this, [this, update](const double& value) {
-        if (value <= _rangeMinAction.getValue())
-            _rangeMinAction.setValue(value);
-
-        update();
-    });
-
     connect(&_resetToDefaultRangeAction, &TriggerAction::triggered, this, [this, update]() {
-        _rangeMinAction.reset();
-        _rangeMaxAction.reset();
+        _rangeAction.reset();
     });
+
+    connect(&_rangeAction, &DecimalRangeAction::rangeChanged, this, update);
 
     update();
 }
 
 void ColorMapSettingsAction::setRangeEditingEnabled(const bool& rangeEditingEnabled)
 {
-    _rangeMinAction.setEnabled(rangeEditingEnabled);
-    _rangeMaxAction.setEnabled(rangeEditingEnabled);
+    _rangeAction.setEnabled(rangeEditingEnabled);
     _resetToDefaultRangeAction.setEnabled(rangeEditingEnabled);
 }
 
@@ -66,11 +50,11 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
 {
     auto layout = new QGridLayout();
 
-    layout->addWidget(colorMapSettingsAction->getRangeMinAction().createLabelWidget(this), 0, 0);
-    layout->addWidget(colorMapSettingsAction->getRangeMinAction().createWidget(this), 0, 1);
+    layout->addWidget(colorMapSettingsAction->getRangeAction().getRangeMinAction().createLabelWidget(this), 0, 0);
+    layout->addWidget(colorMapSettingsAction->getRangeAction().getRangeMinAction().createWidget(this), 0, 1);
 
-    layout->addWidget(colorMapSettingsAction->getRangeMaxAction().createLabelWidget(this), 1, 0);
-    layout->addWidget(colorMapSettingsAction->getRangeMaxAction().createWidget(this), 1, 1);
+    layout->addWidget(colorMapSettingsAction->getRangeAction().getRangeMaxAction().createLabelWidget(this), 1, 0);
+    layout->addWidget(colorMapSettingsAction->getRangeAction().getRangeMaxAction().createWidget(this), 1, 1);
 
     layout->addWidget(colorMapSettingsAction->getResetToDataRangeAction().createWidget(this), 2, 1);
 

@@ -21,10 +21,15 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
 
 void IntegralAction::initialize(const std::int32_t& minimum /*= INIT_MIN*/, const std::int32_t& maximum /*= INIT_MAX*/, const std::int32_t& value /*= INIT_VALUE*/, const std::int32_t& defaultValue /*= INIT_DEFAULT_VALUE*/)
 {
-    setMinimum(minimum);
-    setMaximum(maximum);
-    setValue(value);
-    setDefaultValue(defaultValue);
+    _minimum        = std::min(minimum, _maximum);
+    _maximum        = std::max(maximum, _minimum);
+    _value          = std::max(_minimum, std::min(value, _maximum));
+    _defaultValue   = std::max(_minimum, std::min(defaultValue, _maximum));
+
+    emit minimumChanged(_minimum);
+    emit maximumChanged(_maximum);
+    emit valueChanged(_value);
+    emit defaultValueChanged(_defaultValue);
 }
 
 std::int32_t IntegralAction::getValue() const
