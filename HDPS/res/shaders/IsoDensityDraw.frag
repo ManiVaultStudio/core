@@ -6,25 +6,26 @@ uniform sampler2D densityMap;
 uniform vec2 renderParams;
 uniform vec3 colorMapRange;
 
-in vec2 pass_texCoord;
+in vec2 pass_colorMapUV;
 
 out vec4 fragColor;
 
 // Get the normalized density from the color map range
-float toneMapChannel(float minPixelValue, float maxPixelValue, float pixelValue)
+float getNormalizedDensity(vec2 uv)
 {
-	return 1.0f;
+	float density = texture(densityMap, uv).r;
+	return (density - colorMapRange.x) / colorMapRange.z;
 }
 
 void main() {
-	float density = (texture(densityMap, pass_texCoord).r - colorMapRange.x) / colorMapRange.z;
+	float density = getNormalizedDensity(pass_colorMapUV);
     
 	if (density < renderParams.y)
 		discard;
     
     vec3 texelSize = vec3(1.0 / 512, 1.0 / 512, 0.0) * 0.5;
     
-    float texCoord;
+    float colorMapUV;
     
     vec4 advancedModeFragment = vec4(1.0);
     
@@ -35,25 +36,24 @@ void main() {
 	// Central differences to find out if we draw the iso contour instead of the color
 	vec4 neighborDensities;
 
-	neighborDensities.x = (texture(densityMap, pass_texCoord + texelSize.xz).r - colorMapRange.x) / colorMapRange.z;
-	neighborDensities.y = (texture(densityMap, pass_texCoord - texelSize.xz).r - colorMapRange.x) / colorMapRange.z;
-	neighborDensities.z = (texture(densityMap, pass_texCoord + texelSize.zy).r - colorMapRange.x) / colorMapRange.z;
-	neighborDensities.w = (texture(densityMap, pass_texCoord - texelSize.zy).r - colorMapRange.x) / colorMapRange.z;
-	//neighborDensities *= renderParams.x;
+	neighborDensities.x = getNormalizedDensity(pass_colorMapUV + texelSize.xz);
+	neighborDensities.y = getNormalizedDensity(pass_colorMapUV - texelSize.xz);
+	neighborDensities.z = getNormalizedDensity(pass_colorMapUV + texelSize.zy);
+	neighborDensities.w = getNormalizedDensity(pass_colorMapUV - texelSize.zy);
 
-	ivec4 stepId = min(ivec4(floor(neighborDensities * vec4(numSteps+1))), ivec4(numSteps));
+	ivec4 stepId 	= min(ivec4(floor(neighborDensities * vec4(numSteps+1))), ivec4(numSteps));
+	isBoundary 		= (any(notEqual(stepId.xxx, stepId.yzw)));
 
-	isBoundary = (any(notEqual(stepId.xxx, stepId.yzw)));
-
-	texCoord = min(floor(density * (numSteps+1)), numSteps);
-	texCoord = clamp(texCoord / numSteps, 0.0, 1.0);
+	// Establish color map texture coordinates
+	colorMapUV = min(floor(density * (numSteps+1)), numSteps);
+	colorMapUV = clamp(colorMapUV / numSteps, 0.0, 1.0);
 	
-    vec3 col = texture(colormap, vec2(texCoord, 1 - texCoord)).rgb;
+	// Evaluate the color map
+    vec3 color = texture(colormap, vec2(colorMapUV, 1 - colorMapUV)).rgb;
 	
-    if(isBoundary) 
-    {
-        col *= 0.75;
-    }
+    if(isBoundary)
+        color *= 0.75;
     
-    fragColor = vec4(col, 1);
+	// Set output color
+    fragColor = vec4(color, 1);
 }
