@@ -18,7 +18,7 @@ DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) 
 
     _dataset->getHierarchyItem().addAction(*this);
 
-    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataTypes(plugin::Type::WRITER, QVector<DataType>({ _dataset->getDataType() }));
+    _pluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::WRITER, QVector<DataType>({ _dataset->getDataType() }));
 
     for (auto pluginKind : _pluginKinds) {
         auto exporterPluginAction = new TriggerAction(this, pluginKind);

@@ -21,13 +21,31 @@ class PluginFactory : public QObject
 
 public:
     PluginFactory(Type type) :
-        _type(type)
-    {}
+        _kind(),
+        _type(type),
+        _guiName("asdasd")
+    {
+    }
+
     ~PluginFactory() override {};
 
     void setKind(QString kind) { _kind = kind; }
     QString getKind() const { return _kind; }
+
     Type getType() const { return _type; }
+
+    /** Get the menu name of the plugin */
+    QString getGuiName() const {
+        return _guiName;
+    }
+
+    /**
+     * Set the GUI name of the plugin
+     * @param guiName GUI name of the plugin
+     */
+    void setGuiName(const QString& guiName) {
+        _guiName = guiName;
+    }
 
     virtual Plugin* produce() = 0;
 
@@ -40,8 +58,9 @@ public:
     //virtual bool isCompatible(DataSet& dataSet) = 0;
 
 private:
-    QString _kind; /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
-    Type    _type; /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+    QString     _kind;      /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
+    Type        _type;      /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+    QString     _guiName;   /** Name of the plugin in the GUI */
 };
 
 } // namespace plugin

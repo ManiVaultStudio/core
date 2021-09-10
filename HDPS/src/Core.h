@@ -169,7 +169,14 @@ public:
      * @param dataTypes Types of data that the plugin should be compatible with (data type ignored when empty)
      * @return List of compatible plugin kinds that can handle the data type
      */
-    QStringList requestPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>()) const override;
+    QStringList getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>()) const override;
+
+    /**
+     * Get plugin GUI name from plugin kind
+     * @param pluginKind Kind of plugin
+     * @param GUI name of the plugin, empty if the plugin kind was not found
+     */
+    QString getPluginGuiName(const QString& pluginKind) const override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString datasetName) override;

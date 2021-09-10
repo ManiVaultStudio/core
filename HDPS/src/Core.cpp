@@ -317,9 +317,9 @@ const void Core::exportDataset(const QString kind, const QString& datasetName)
     _pluginManager->createExporterPlugin(kind, datasetName);
 }
 
-QStringList Core::requestPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
+QStringList Core::getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
 {
-    return _pluginManager->requestPluginKindsByPluginTypeAndDataTypes(pluginType, dataTypes);
+    return _pluginManager->getPluginKindsByPluginTypeAndDataTypes(pluginType, dataTypes);
 }
 
 DataSet& Core::requestSelection(const QString name)
@@ -342,6 +342,11 @@ void Core::registerEventListener(EventListener* eventListener)
 void Core::unregisterEventListener(EventListener* eventListener)
 {
     _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
+}
+
+QString Core::getPluginGuiName(const QString& pluginKind) const
+{
+    return _pluginManager->getPluginGuiName(pluginKind);
 }
 
 /**

@@ -134,7 +134,7 @@ QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::Display
 
 void ColorMapModel::setupModelData()
 {
-    auto prefix = ":/resources/colormaps";
+    auto prefix = ":/colormaps";
 
     const auto noSteps = 256;
 
@@ -152,31 +152,6 @@ void ColorMapModel::setupModelData()
         const auto resourcePath = iterator1D.next();
         _colorMaps.append(ColorMap(QFileInfo(resourcePath).baseName(), resourcePath, ColorMap::Type::OneDimensional, QImage(resourcePath)));
     }
-    /*
-    QDirIterator iterator2D(QString("%1/2D/").arg(prefix), QDirIterator::Subdirectories);
-
-    while (iterator2D.hasNext()) {
-        const auto resourcePath = iterator2D.next();
-        _colorMaps.append(ColorMap(QFileInfo(resourcePath).baseName(), resourcePath, ColorMap::Type::TwoDimensional, QImage(resourcePath)));
-    }
-
-    
-    const auto noHueSteps = 36;
-    const auto hueDelta = 360.0f / noHueSteps;
-
-    for (int h = 0; h < noHueSteps; ++h)
-    {
-        const auto color = QColor::fromHsl(h * hueDelta, 255, 125);
-
-        auto colorMapImage = QImage(32, 32, QImage::Format::Format_RGB888);
-
-        colorMapImage.fill(color);
-
-        const auto name = QString("[%1, %2, %3]").arg(QString::number(color.red()), QString::number(color.green()), QString::number(color.blue()));
-
-        _colorMaps.append(ColorMap(name, "", ColorMap::Type::ZeroDimensional, colorMapImage));
-    }
-    */
 
     beginInsertRows(QModelIndex(), 0, _colorMaps.count());
     endInsertRows();

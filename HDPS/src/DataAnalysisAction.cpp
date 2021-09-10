@@ -19,7 +19,7 @@ DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetNa
 
     _dataset->getHierarchyItem().addAction(*this);
 
-    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataTypes(plugin::Type::ANALYSIS, QVector<DataType>({ _dataset->getDataType() }));
+    _pluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::ANALYSIS, QVector<DataType>({ _dataset->getDataType() }));
 
     for (auto pluginKind : _pluginKinds) {
         auto analysisPluginAction = new TriggerAction(this, pluginKind);

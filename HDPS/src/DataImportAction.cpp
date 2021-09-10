@@ -15,10 +15,10 @@ DataImportAction::DataImportAction(QObject* parent) :
     setText("Import");
     setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
 
-    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER);
+    _pluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER);
 
     for (auto pluginKind : _pluginKinds) {
-        auto importerPluginAction = new TriggerAction(this, pluginKind);
+        auto importerPluginAction = new TriggerAction(this, Application::core()->getPluginGuiName(pluginKind));
 
         connect(importerPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
             Application::core()->importDataset(pluginKind);

@@ -56,7 +56,14 @@ public:
      * @param dataTypes Types of data that the plugin should be compatible with (data type ignored when empty)
      * @return List of compatible plugin kinds that can handle the data type
      */
-    QStringList requestPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>());
+    QStringList getPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>());
+
+    /**
+     * Get plugin GUI name from plugin kind
+     * @param pluginKind Kind of plugin
+     * @param GUI name of the plugin, empty if the plugin kind was not found
+     */
+    QString getPluginGuiName(const QString& pluginKind) const;
 
     /**
      * Get a list of plugin kinds (names) given a plugin type

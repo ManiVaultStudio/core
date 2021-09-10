@@ -9,6 +9,8 @@
 #include <QInputDialog>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QResizeEvent>
+#include <QVBoxLayout>
 
 #include <stdexcept>
 
@@ -23,7 +25,9 @@ namespace gui
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     QTreeView(parent),
     _model(this),
-    _selectionModel(&_model)
+    _selectionModel(&_model),
+    _noDataOverlayWidget(new NoDataOverlayWidget(this)),
+    _dataImportAction(this)
 {
     setMinimumWidth(500);
     setModel(&_model);
@@ -55,6 +59,18 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
         emit selectedDatasetNameChanged(selected.first().topLeft().data(Qt::DisplayRole).toString());
     });
+
+    const auto numberOfRowsChanged = [this]() {
+        const auto dataIsLoaded = _model.rowCount() == 0;
+
+        _noDataOverlayWidget->setVisible(dataIsLoaded);
+        setHeaderHidden(dataIsLoaded);
+    };
+
+    connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
+    connect(&_model, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+
+    numberOfRowsChanged();
 
     const auto getModelIndexForDatasetName = [this](const QString& datasetName) -> QModelIndex {
         const auto modelIndex = _model.match(_model.index(0, 0), Qt::DisplayRole, datasetName, 1, Qt::MatchFlag::MatchRecursive).first();
@@ -149,7 +165,82 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             contextMenu->exec(viewport()->mapToGlobal(position));
         }
+        else {
+            auto contextMenu = _dataImportAction.getContextMenu();
+
+            if (contextMenu)
+                contextMenu->exec(viewport()->mapToGlobal(position));
+        }
     });
+}
+
+DataHierarchyWidget::NoDataOverlayWidget::NoDataOverlayWidget(QWidget* parent) :
+    QWidget(parent),
+    _opacityEffect(new QGraphicsOpacityEffect(this))
+{
+    setAttribute(Qt::WA_TransparentForMouseEvents);
+    setGraphicsEffect(_opacityEffect);
+
+    _opacityEffect->setOpacity(0.35);
+
+    auto layout = new QVBoxLayout();
+
+    auto iconLabel = new QLabel();
+    auto titleLabel = new QLabel("No data loaded");
+    auto descriptionLabel = new QLabel("Right-click + import to load data");
+
+    const auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    iconLabel->setAlignment(Qt::AlignCenter);
+    iconLabel->setFont(fontAwesome.getFont(14));
+    iconLabel->setText(fontAwesome.getIconCharacter("database"));
+    iconLabel->setStyleSheet("QLabel { padding: 10px; }");
+
+    titleLabel->setAlignment(Qt::AlignCenter);
+    titleLabel->setStyleSheet("font-weight: bold");
+
+    descriptionLabel->setAlignment(Qt::AlignCenter);
+
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    layout->setAlignment(Qt::AlignCenter);
+
+    layout->addStretch(1);
+    layout->addWidget(iconLabel);
+    layout->addWidget(titleLabel);
+    layout->addWidget(descriptionLabel);
+    layout->addStretch(1);
+
+    setLayout(layout);
+
+    // Install event filter for synchronizing widget size
+    parent->installEventFilter(this);
+
+    setObjectName("NoDataOverlayWidget");
+    setStyleSheet("QWidget#NoDataOverlayWidget > QLabel { color: gray; }");
+}
+
+bool DataHierarchyWidget::NoDataOverlayWidget::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Resize:
+        {
+            if (dynamic_cast<QWidget*>(target) != parent())
+                break;
+
+            const auto parentWidgetSize = static_cast<QResizeEvent*>(event)->size();
+
+            setFixedSize(parentWidgetSize);
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QWidget::eventFilter(target, event);
 }
 
 }

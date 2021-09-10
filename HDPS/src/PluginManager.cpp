@@ -87,6 +87,7 @@ void PluginManager::loadPlugins()
         // Loading of the plugin succeeded so cast it to its original class
         _pluginFactories[pluginKind] = qobject_cast<PluginFactory*>(pluginFactory);
         _pluginFactories[pluginKind]->setKind(pluginKind);
+        _pluginFactories[pluginKind]->setGuiName(menuName);
 
         // Add the plugin to a menu item and link the triggering of the menu item to triggering of the plugin
         QAction* action = NULL;
@@ -271,7 +272,7 @@ void PluginManager::createExporterPlugin(const QString& kind, const QString& inp
     }
 }
 
-QStringList PluginManager::requestPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
+QStringList PluginManager::getPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
 {
     QStringList pluginKinds;
 
@@ -295,6 +296,14 @@ QStringList PluginManager::requestPluginKindsByPluginTypeAndDataTypes(const Type
     pluginKinds.sort();
 
     return pluginKinds;
+}
+
+QString PluginManager::getPluginGuiName(const QString& pluginKind) const
+{
+    if (!_pluginFactories.contains(pluginKind))
+        return "";
+
+    return _pluginFactories[pluginKind]->getGuiName();
 }
 
 QStringList PluginManager::requestPluginKindsByPluginType(const plugin::Type& pluginType)
