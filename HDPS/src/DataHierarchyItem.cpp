@@ -39,8 +39,10 @@ DataHierarchyItem::~DataHierarchyItem()
 
     _parent->removeChild(this);
 
+    /*
     for (auto child : _children)
         delete child;
+    */
 }
 
 QString DataHierarchyItem::getDatasetName() const

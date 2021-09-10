@@ -206,6 +206,10 @@ bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentMode
     }
     endInsertRows();
 
+    for (auto child : dataHierarchyItem->getChildren()) {
+        addDataHierarchyModelItem(index(rowCount(parentModelIndex) - 1, 0, parentModelIndex), child);
+    }
+
     return true;
 }
 

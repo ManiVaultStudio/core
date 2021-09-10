@@ -44,7 +44,7 @@ void Core::init()
 {
     _pluginManager          = std::make_unique<plugin::PluginManager>(*this);
     _dataManager            = std::make_unique<DataManager>(this);
-    _dataHierarchyManager   = std::make_unique<DataHierarchyManager>(*_dataManager);
+    _dataHierarchyManager   = std::make_unique<DataHierarchyManager>(&_mainWindow);
 
     _pluginManager->loadPlugins();
 }
@@ -90,7 +90,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
             _mainWindow.addPlugin(plugin);
-            _dataHierarchyManager->getHierarchyItem(analysisPlugin->getOutputDatasetName())->addIcon("analysis", analysisPlugin->getIcon());
+            _dataHierarchyManager->getItem(analysisPlugin->getOutputDatasetName())->addIcon("analysis", analysisPlugin->getIcon());
 
             notifyDataAdded(analysisPlugin->getOutputDatasetName());
 
@@ -144,8 +144,8 @@ const QString Core::addData(const QString kind, const QString nameRequest, const
     _dataManager->addSelection(rawDataName, selection);
     
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager->addDataset(setName, parentDatasetName);
-    _dataHierarchyManager->selectHierarchyItem(setName);
+    _dataHierarchyManager->addItem(setName, parentDatasetName);
+    _dataHierarchyManager->selectItem(setName);
     
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
@@ -155,15 +155,20 @@ const QString Core::addData(const QString kind, const QString nameRequest, const
     return setName;
 }
 
-void Core::removeDataset(const QString& datasetName, const bool& recursively /*= false*/)
+void Core::removeDatasets(const QStringList& datasetNames, const bool& recursively /*= false*/)
 {
-    // Cache the data type because later on the dataset has already been removed
-    const auto dataType = requestData(datasetName).getDataType();
+    for (auto datasetName : datasetNames) {
+        if (datasetName.isEmpty())
+            continue;
 
-    // Remove the data hierarchy item from the hierarchy
-    _dataHierarchyManager->removeDataset(datasetName, recursively);
+        // Cache the data type because later on the dataset has already been removed
+        const auto dataType = requestData(datasetName).getDataType();
 
-    notifyDataRemoved(dataType, datasetName);
+        // Remove the dataset from the data manager
+        _dataManager->removeDataset(datasetName);
+
+        notifyDataRemoved(dataType, datasetName);
+    }
 }
 
 QString Core::renameDataset(const QString& currentDatasetName, const QString& intendedDatasetName)
@@ -197,7 +202,7 @@ const QString Core::createDerivedData(const QString& nameRequest, const QString&
     QString setName = _dataManager->addSet(nameRequest, fullSet);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addDataset(setName, dataHierarchyParent.isEmpty() ? sourceDatasetName : dataHierarchyParent);
+    _dataHierarchyManager->addItem(setName, dataHierarchyParent.isEmpty() ? sourceDatasetName : dataHierarchyParent);
 
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
@@ -222,7 +227,7 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     notifyDataAdded(setName);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addDataset(setName, dataHierarchyParent.isEmpty() ? sourceSet.getName() : dataHierarchyParent, visible);
+    _dataHierarchyManager->addItem(setName, dataHierarchyParent.isEmpty() ? sourceSet.getName() : dataHierarchyParent, visible);
 
     // Initialize the dataset (e.g. setup default actions for info)
     newSet->init();
@@ -434,7 +439,7 @@ gui::MainWindow& Core::gui() const {
 
 hdps::DataHierarchyItem* Core::getDataHierarchyItem(const QString& datasetName)
 {
-    return _dataHierarchyManager->getHierarchyItem(datasetName);
+    return _dataHierarchyManager->getItem(datasetName);
 }
 
 /** Destroys all plug-ins kept by the core */

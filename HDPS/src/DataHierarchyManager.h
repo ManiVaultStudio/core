@@ -22,9 +22,8 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param dataManager Reference to data manager
      */
-    DataHierarchyManager(DataManager& dataManager, QObject* parent = nullptr);
+    DataHierarchyManager(QObject* parent = nullptr);
 
     /**
      * Add a dataset to the hierarchy
@@ -32,34 +31,34 @@ public:
      * @param parentDatasetName Name of the parent dataset (if any)
      * @param visible Whether the dataset is visible in the gui
      */
-    void addDataset(const QString& datasetName, const QString& parentDatasetName = "", const bool& visible = true);
+    void addItem(const QString& datasetName, const QString& parentDatasetName = "", const bool& visible = true);
 
     /**
-     * Removes a dataset from the hierarchy
-     * @param datasetName Name of the dataset
-     * @return Whether the dataset was removed
+     * Removes an item from the hierarchy
+     * @param datasetName Name of the dataset that the hierarchy item references
+     * @return List of datasets that need to removed
      */
-    bool removeDataset(const QString& datasetName, const bool& recursively = false);
-
-    /**
-     * Get hierarchy item by dataset name
-     * @param datasetName Name of the dataset
-     * @return Pointer to data hierarchy item
-     */
-    const DataHierarchyItem* getHierarchyItem(const QString& datasetName) const;
+    QStringList removeItem(const QString& datasetName, const bool& recursively = false);
 
     /**
      * Get hierarchy item by dataset name
      * @param datasetName Name of the dataset
      * @return Pointer to data hierarchy item
      */
-    DataHierarchyItem* getHierarchyItem(const QString& datasetName);
+    const DataHierarchyItem* getItem(const QString& datasetName) const;
+
+    /**
+     * Get hierarchy item by dataset name
+     * @param datasetName Name of the dataset
+     * @return Pointer to data hierarchy item
+     */
+    DataHierarchyItem* getItem(const QString& datasetName);
 
     /**
      * Selects data hierarchy item with dataset name
      * @param datasetName Name of the dataset to select
      */
-    void selectHierarchyItem(const QString& datasetName);
+    void selectItem(const QString& datasetName);
 
     /**
      * Get dataset children
@@ -68,15 +67,6 @@ public:
      * @return Children
      */
     DataHierarchyItems getChildren(DataHierarchyItem* dataHierarchyItem, const bool& recursive = true);
-
-protected:
-
-    /**
-     * Remove a child by dataset name
-     * @param datasetName Name of the dataset
-     * @param recursively Recursively remove all children
-     */
-    void removeDataHierarchyItemByDatasetName(const QString& datasetName, const bool& recursively = false);
 
 signals:
 
@@ -111,8 +101,7 @@ signals:
     void itemRelocated(DataHierarchyItem* relocatedItem);
 
 private:
-    DataManager&                _dataManager;           /** Reference to data manager */
-    SharedDataHierarchyItems    _dataHierarchyItems;    /** Shared pointers to data hierarchy items */
+    DataHierarchyItems    _dataHierarchyItems;    /** Shared pointers to data hierarchy items */
 };
 
 }

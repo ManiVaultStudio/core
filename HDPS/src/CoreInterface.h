@@ -39,13 +39,13 @@ public:
     virtual const QString addData(const QString kind, const QString name, const QString& parentDatasetName = "") = 0;
 
     /**
-     * Removes a Dataset. Other datasets derived from this dataset are 
+     * Removes one or more datasets. Other datasets derived from this dataset are 
      * converted to non-derived data.
      * Notifies all plug-ins of the removed dataset automatically.
-     * @param datasetName Name of the (top-level) dataset to remove
+     * @param datasetNames Names of the datasets to remove
      * @param recursively Remove datasets recursively
      */
-    virtual void removeDataset(const QString& datasetName, const bool& recursively = false) = 0;
+    virtual void removeDatasets(const QStringList& datasetNames, const bool& recursively = false) = 0;
 
     /**
      * Renames a dataset

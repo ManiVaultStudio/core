@@ -64,7 +64,7 @@ QString DataManager::renameSet(QString oldName, QString requestedName)
 
 void DataManager::removeDataset(const QString& datasetName, const bool& recursively /*= true*/)
 {
-    qDebug() << "Removing " << datasetName;
+    qDebug() << "Removing" << datasetName << "from the data manager";
 
     // Turn all derived datasets referring to the dataset to be removed to non-derived
     for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
