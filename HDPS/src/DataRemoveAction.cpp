@@ -35,12 +35,17 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
                 datasetsToRemove << child->getDatasetName();
         }
 
-        ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, datasetsToRemove);
-        confirmDataRemoveDialog.exec();
+        if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
+            ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, datasetsToRemove);
+            confirmDataRemoveDialog.exec();
 
-        connect(&confirmDataRemoveDialog, &ConfirmDataRemoveDialog::accepted, this, [this, recursively]() {
+            connect(&confirmDataRemoveDialog, &ConfirmDataRemoveDialog::accepted, this, [this, recursively]() {
+                Application::core()->removeDataset(_dataset.getDatasetName(), recursively);
+            });
+        }
+        else {
             Application::core()->removeDataset(_dataset.getDatasetName(), recursively);
-        });
+        }
     };
 
     connect(&_removeSelectedAction, &TriggerAction::triggered, this, [this, removeDataset]() {
