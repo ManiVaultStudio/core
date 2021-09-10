@@ -231,11 +231,10 @@ private:
     void destroyPlugins();
 
 private:
-    gui::MainWindow& _mainWindow;
-
-    DataHierarchyManager                                                    _dataHierarchyManager;      /** Internal hierarchical data tree */
+    gui::MainWindow&                                                        _mainWindow;                /** Reference to the main window */
     std::unique_ptr<plugin::PluginManager>                                  _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core. */
     std::unique_ptr<DataManager>                                            _dataManager;               /** Data manager responsible for storing data sets and data selections */
+    std::unique_ptr<DataHierarchyManager>                                   _dataHierarchyManager;      /** Internal hierarchical data tree */
     std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */
 };

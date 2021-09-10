@@ -11,6 +11,8 @@
 namespace hdps
 {
 
+class DataManager;
+
 class DataHierarchyManager : public QObject
 {
     Q_OBJECT

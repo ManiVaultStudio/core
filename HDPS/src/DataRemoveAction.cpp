@@ -21,6 +21,9 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
     setText("Remove");
     setIcon(Application::getIconFont("FontAwesome").getIcon("trash-alt"));
 
+    _removeSelectedAction.setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+    _removeSelectedAndChildrenAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap"));
+    
     _dataset->getHierarchyItem().addAction(*this);
 
     const auto removeDataset = [this, datasetName](const bool& recursively = false) -> void {
@@ -37,11 +40,8 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
 
         if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
             ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, datasetsToRemove);
-            confirmDataRemoveDialog.exec();
-
-            connect(&confirmDataRemoveDialog, &ConfirmDataRemoveDialog::accepted, this, [this, recursively]() {
+            if (confirmDataRemoveDialog.exec() == 1)
                 Application::core()->removeDataset(_dataset.getDatasetName(), recursively);
-            });
         }
         else {
             Application::core()->removeDataset(_dataset.getDatasetName(), recursively);
@@ -59,6 +59,8 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
 
 QMenu* DataRemoveAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
+    _removeSelectedAndChildrenAction.setEnabled(_dataset->getHierarchyItem().hasChildren());
+
     auto menu = new QMenu(text(), parent);
 
     menu->setIcon(icon());
@@ -118,7 +120,7 @@ DataRemoveAction::ConfirmDataRemoveDialog::ConfirmDataRemoveDialog(QWidget* pare
     });
 
     connect(&_cancelAction, &TriggerAction::triggered, [this]() {
-        accept();
+        reject();
     });
 }
 

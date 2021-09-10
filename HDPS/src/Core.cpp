@@ -24,7 +24,11 @@ namespace hdps
 
 Core::Core(gui::MainWindow& mainWindow) :
     _mainWindow(mainWindow),
-    _dataHierarchyManager(*_dataManager)
+    _pluginManager(),
+    _dataManager(),
+    _dataHierarchyManager(),
+    _plugins(),
+    _eventListeners()
 {
 }
 
@@ -38,15 +42,16 @@ Core::~Core()
 
 void Core::init()
 {
-    _pluginManager = std::make_unique<plugin::PluginManager>(*this);
-    _dataManager = std::make_unique<DataManager>(this);
+    _pluginManager          = std::make_unique<plugin::PluginManager>(*this);
+    _dataManager            = std::make_unique<DataManager>(this);
+    _dataHierarchyManager   = std::make_unique<DataHierarchyManager>(*_dataManager);
 
     _pluginManager->loadPlugins();
 }
 
 hdps::DataHierarchyManager& Core::getDataHierarchyManager()
 {
-    return _dataHierarchyManager;
+    return *_dataHierarchyManager;
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -85,7 +90,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
 
             _mainWindow.addPlugin(plugin);
-            _dataHierarchyManager.getHierarchyItem(analysisPlugin->getOutputDatasetName())->addIcon("analysis", analysisPlugin->getIcon());
+            _dataHierarchyManager->getHierarchyItem(analysisPlugin->getOutputDatasetName())->addIcon("analysis", analysisPlugin->getIcon());
 
             notifyDataAdded(analysisPlugin->getOutputDatasetName());
 
@@ -139,8 +144,8 @@ const QString Core::addData(const QString kind, const QString nameRequest, const
     _dataManager->addSelection(rawDataName, selection);
     
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager.addDataset(setName, parentDatasetName);
-    _dataHierarchyManager.selectHierarchyItem(setName);
+    _dataHierarchyManager->addDataset(setName, parentDatasetName);
+    _dataHierarchyManager->selectHierarchyItem(setName);
     
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
@@ -156,7 +161,7 @@ void Core::removeDataset(const QString& datasetName, const bool& recursively /*=
     const auto dataType = requestData(datasetName).getDataType();
 
     // Remove the data hierarchy item from the hierarchy
-    _dataHierarchyManager.removeDataset(datasetName, recursively);
+    _dataHierarchyManager->removeDataset(datasetName, recursively);
 
     notifyDataRemoved(dataType, datasetName);
 }
@@ -192,7 +197,7 @@ const QString Core::createDerivedData(const QString& nameRequest, const QString&
     QString setName = _dataManager->addSet(nameRequest, fullSet);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager.addDataset(setName, dataHierarchyParent.isEmpty() ? sourceDatasetName : dataHierarchyParent);
+    _dataHierarchyManager->addDataset(setName, dataHierarchyParent.isEmpty() ? sourceDatasetName : dataHierarchyParent);
 
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
@@ -217,7 +222,7 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     notifyDataAdded(setName);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager.addDataset(setName, dataHierarchyParent.isEmpty() ? sourceSet.getName() : dataHierarchyParent, visible);
+    _dataHierarchyManager->addDataset(setName, dataHierarchyParent.isEmpty() ? sourceSet.getName() : dataHierarchyParent, visible);
 
     // Initialize the dataset (e.g. setup default actions for info)
     newSet->init();
@@ -429,7 +434,7 @@ gui::MainWindow& Core::gui() const {
 
 hdps::DataHierarchyItem* Core::getDataHierarchyItem(const QString& datasetName)
 {
-    return _dataHierarchyManager.getHierarchyItem(datasetName);
+    return _dataHierarchyManager->getHierarchyItem(datasetName);
 }
 
 /** Destroys all plug-ins kept by the core */

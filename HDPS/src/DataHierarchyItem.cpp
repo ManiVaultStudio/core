@@ -89,6 +89,11 @@ std::uint32_t DataHierarchyItem::getNumberOfChildren() const
     return _children.count();
 }
 
+bool DataHierarchyItem::hasChildren() const
+{
+    return getNumberOfChildren() > 0;
+}
+
 bool DataHierarchyItem::getVisible() const
 {
     return _visible;

@@ -92,6 +92,9 @@ public:
     /** Gets the number of children */
     std::uint32_t getNumberOfChildren() const;
 
+    /** Establishes whether the item has any children */
+    bool hasChildren() const;
+
     /** Gets whether the dataset is visible */
     bool getVisible() const;
 
