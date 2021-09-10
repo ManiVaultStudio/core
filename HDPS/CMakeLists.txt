@@ -249,8 +249,11 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
     src/DataPropertiesWidget.h
+    src/DataAction.h
     src/DataExportAction.h
     src/DataAnalysisAction.h
+    src/DataImportAction.h
+    src/DataRemoveAction.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -258,8 +261,11 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp
+    src/DataAction.cpp
     src/DataExportAction.cpp
     src/DataAnalysisAction.cpp
+    src/DataImportAction.cpp
+    src/DataRemoveAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

@@ -84,11 +84,13 @@ public:
     const QString addData(const QString kind, const QString nameRequest, const QString& parentDatasetName = "") override;
 
     /**
-     * Removes a Dataset object. Other datasets derived from this datasets are
+     * Removes a Dataset. Other datasets derived from this dataset are
      * converted to non-derived data.
-     * Notifies all plug-ins of the removed data set automatically.
+     * Notifies all plug-ins of the removed dataset automatically.
+     * @param datasetName Name of the (top-level) dataset to remove
+     * @param recursively Remove datasets recursively
      */
-    void removeDataset(const QString datasetName) override;
+    void removeDataset(const QString& datasetName, const bool& recursively = false);
 
     /**
      * Renames a dataset
@@ -149,6 +151,12 @@ public:
     const void analyzeDataset(const QString kind, const QString& datasetName) override;
 
     /**
+     * Imports a dataset
+     * @param importKind Type of import plugin
+     */
+    const void importDataset(const QString importKind) override;
+
+    /**
      * Exports a dataset
      * @param kind Name of exporter plugin
      * @param datasetName Name of the dataset to export
@@ -156,12 +164,12 @@ public:
     const void exportDataset(const QString kind, const QString& datasetName) override;
 
     /**
-     * Get a list of plugin kinds (names) given a plugin type and data type
+     * Get a list of plugin kinds (names) given a plugin type and data type(s)
      * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param dataType Type of data that the plugin should be compatible with
+     * @param dataTypes Types of data that the plugin should be compatible with (data type ignored when empty)
      * @return List of compatible plugin kinds that can handle the data type
      */
-    QStringList requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const override;
+    QStringList requestPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>()) const override;
 
     /** Notify all data consumers that a new dataset has been added to the core. */
     void notifyDataAdded(const QString datasetName) override;

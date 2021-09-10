@@ -13,11 +13,12 @@ DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) 
     _dataset(datasetName),
     _pluginKinds()
 {
-    //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("file-export"));
+    setText("Export");
+    setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
 
     _dataset->getHierarchyItem().addAction(*this);
 
-    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataType(plugin::Type::WRITER, _dataset->getDataType());
+    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataTypes(plugin::Type::WRITER, QVector<DataType>({ _dataset->getDataType() }));
 
     for (auto pluginKind : _pluginKinds) {
         auto exporterPluginAction = new TriggerAction(this, pluginKind);
@@ -33,7 +34,7 @@ QMenu* DataExportAction::getContextMenu(QWidget* parent /*= nullptr*/)
     if (_pluginKinds.isEmpty())
         return nullptr;
 
-    auto menu = new QMenu("Export", parent);
+    auto menu = new QMenu(text(), parent);
 
     menu->setIcon(icon());
 

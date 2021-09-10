@@ -12,8 +12,7 @@
 #include "RawData.h"
 #include "Set.h"
 
-#include "DataAnalysisAction.h"
-#include "DataExportAction.h"
+#include "DataAction.h"
 
 #include <QMessageBox>
 #include <algorithm>
@@ -25,7 +24,7 @@ namespace hdps
 
 Core::Core(gui::MainWindow& mainWindow) :
     _mainWindow(mainWindow),
-    _dataHierarchyManager()
+    _dataHierarchyManager(*_dataManager)
 {
 }
 
@@ -146,21 +145,18 @@ const QString Core::addData(const QString kind, const QString nameRequest, const
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
-    new DataAnalysisAction(&_mainWindow, setName);
-    new DataExportAction(&_mainWindow, setName);
+    new DataAction(&_mainWindow, setName);
 
     return setName;
 }
 
-void Core::removeDataset(const QString datasetName)
+void Core::removeDataset(const QString& datasetName, const bool& recursively /*= false*/)
 {
+    // Cache the data type because later on the dataset has already been removed
     const auto dataType = requestData(datasetName).getDataType();
 
-    // Remove the associated data hierarchy items first
-    _dataHierarchyManager.removeDataset(datasetName);
-
-    // The from the data manager
-    _dataManager->removeDataset(datasetName);
+    // Remove the data hierarchy item from the hierarchy
+    _dataHierarchyManager.removeDataset(datasetName, recursively);
 
     notifyDataRemoved(dataType, datasetName);
 }
@@ -201,8 +197,7 @@ const QString Core::createDerivedData(const QString& nameRequest, const QString&
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
-    new DataAnalysisAction(&_mainWindow, setName);
-    new DataExportAction(&_mainWindow, setName);
+    new DataAction(&_mainWindow, setName);
 
     return setName;
 }
@@ -227,8 +222,7 @@ QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet&
     // Initialize the dataset (e.g. setup default actions for info)
     newSet->init();
 
-    new DataAnalysisAction(&_mainWindow, setName);
-    new DataExportAction(&_mainWindow, setName);
+    new DataAction(&_mainWindow, setName);
 
     return setName;
 }
@@ -313,14 +307,19 @@ const void Core::analyzeDataset(const QString kind, const QString& datasetName)
     _pluginManager->createAnalysisPlugin(kind, datasetName);
 }
 
+const void Core::importDataset(const QString importKind)
+{
+    _pluginManager->createPlugin(importKind);
+}
+
 const void Core::exportDataset(const QString kind, const QString& datasetName)
 {
     _pluginManager->createExporterPlugin(kind, datasetName);
 }
 
-QStringList Core::requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const
+QStringList Core::requestPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
 {
-    return _pluginManager->requestPluginKindsByPluginTypeAndDataType(pluginType, dataType);
+    return _pluginManager->requestPluginKindsByPluginTypeAndDataTypes(pluginType, dataTypes);
 }
 
 DataSet& Core::requestSelection(const QString name)

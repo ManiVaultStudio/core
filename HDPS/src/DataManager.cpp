@@ -62,14 +62,19 @@ QString DataManager::renameSet(QString oldName, QString requestedName)
     return newDatasetName;
 }
 
-void DataManager::removeDataset(QString datasetName)
+void DataManager::removeDataset(const QString& datasetName, const bool& recursively /*= true*/)
 {
+    qDebug() << "Removing " << datasetName;
+
     // Turn all derived datasets referring to the dataset to be removed to non-derived
     for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
     {
         DataSet& set = *it->second;
+        
         if (set.isDerivedData() && set.getSourceName() == datasetName)
         {
+            qDebug() << "Un-derive" << set.getName();
+
             set._derived = false;
             set._sourceSetName = "";
         }

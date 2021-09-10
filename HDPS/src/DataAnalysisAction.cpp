@@ -14,11 +14,12 @@ DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetNa
     _dataset(datasetName),
     _pluginKinds()
 {
-    //setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
+    setText("Analyze");
+    setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
     _dataset->getHierarchyItem().addAction(*this);
 
-    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataType(plugin::Type::ANALYSIS, _dataset->getDataType());
+    _pluginKinds = Application::core()->requestPluginKindsByPluginTypeAndDataTypes(plugin::Type::ANALYSIS, QVector<DataType>({ _dataset->getDataType() }));
 
     for (auto pluginKind : _pluginKinds) {
         auto analysisPluginAction = new TriggerAction(this, pluginKind);
@@ -34,7 +35,7 @@ QMenu* DataAnalysisAction::getContextMenu(QWidget* parent /*= nullptr*/)
     if (_pluginKinds.isEmpty())
         return nullptr;
 
-    auto menu = new QMenu("Analyze", parent);
+    auto menu = new QMenu(text(), parent);
 
     menu->setIcon(icon());
 

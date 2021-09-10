@@ -96,7 +96,14 @@ public:
 
     QString renameSet(QString oldName, QString requestedName);
 
-    void removeDataset(QString datasetName);
+    /**
+     * Removes a Dataset. Other datasets derived from this dataset are
+     * converted to non-derived data.
+     * Notifies all plug-ins of the removed dataset automatically.
+     * @param datasetName Name of the (top-level) dataset to remove
+     * @param recursively Remove datasets recursively
+     */
+    void removeDataset(const QString& datasetName, const bool& recursively = true);
 
     plugin::RawData& getRawData(QString name);
     DataSet& getSet(QString name);

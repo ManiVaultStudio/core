@@ -271,7 +271,7 @@ void PluginManager::createExporterPlugin(const QString& kind, const QString& inp
     }
 }
 
-QStringList PluginManager::requestPluginKindsByPluginTypeAndDataType(const Type& pluginType, const DataType& dataType)
+QStringList PluginManager::requestPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
 {
     QStringList pluginKinds;
 
@@ -279,7 +279,30 @@ QStringList PluginManager::requestPluginKindsByPluginTypeAndDataType(const Type&
         if (pluginFactory->getType() != pluginType)
             continue;
 
-        if (!pluginFactory->supportedDataTypes().contains(dataType))
+        auto pluginCompatible = dataTypes.isEmpty();
+
+        for (auto dataType : dataTypes) {
+            if (pluginFactory->supportedDataTypes().contains(dataType)) {
+                pluginCompatible = true;
+                break;
+            }
+        }
+
+        if (pluginCompatible)
+            pluginKinds << pluginFactory->getKind();
+    }
+
+    pluginKinds.sort();
+
+    return pluginKinds;
+}
+
+QStringList PluginManager::requestPluginKindsByPluginType(const plugin::Type& pluginType)
+{
+    QStringList pluginKinds;
+
+    for (auto pluginFactory : _pluginFactories) {
+        if (pluginFactory->getType() != pluginType)
             continue;
 
         pluginKinds << pluginFactory->getKind();

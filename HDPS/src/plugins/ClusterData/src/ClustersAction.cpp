@@ -105,6 +105,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
 {
     _removeAction.setEnabled(false);
+    //_removeAction.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("trash-alt"));
 
     _removeAction.setToolTip("Remove the selected filter(s)");
     _mergeAction.setToolTip("Merge the selected filter(s)");

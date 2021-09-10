@@ -42,8 +42,10 @@ public:
      * Removes a Dataset. Other datasets derived from this dataset are 
      * converted to non-derived data.
      * Notifies all plug-ins of the removed dataset automatically.
+     * @param datasetName Name of the (top-level) dataset to remove
+     * @param recursively Remove datasets recursively
      */
-    virtual void removeDataset(const QString datasetName) = 0;
+    virtual void removeDataset(const QString& datasetName, const bool& recursively = false) = 0;
 
     /**
      * Renames a dataset
@@ -105,6 +107,12 @@ public:
     virtual const void analyzeDataset(const QString analysisKind, const QString& datasetName) = 0;
 
     /**
+     * Imports a dataset
+     * @param importKind Type of import plugin
+     */
+    virtual const void importDataset(const QString importKind) = 0;
+
+    /**
      * Exports a dataset
      * @param exportKind Type of export plugin
      * @param datasetName Name of the dataset to export
@@ -132,12 +140,12 @@ public:
     virtual DataHierarchyItem* getDataHierarchyItem(const QString& datasetName) = 0;
 
     /**
-     * Get a list of plugin kinds (names) given a plugin type and data type
+     * Get a list of plugin kinds (names) given a plugin type and data type(s)
      * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param dataType Type of data that the plugin should be compatible with
+     * @param dataTypes Types of data that the plugin should be compatible with (data type ignored when empty)
      * @return List of compatible plugin kinds that can handle the data type
      */
-    virtual QStringList requestPluginKindsByPluginTypeAndDataType(const plugin::Type& pluginType, const DataType& dataType) const = 0;
+    virtual QStringList requestPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>()) const = 0;
 
     /** Get the data hierarchy manager */
     virtual DataHierarchyManager& getDataHierarchyManager() = 0;

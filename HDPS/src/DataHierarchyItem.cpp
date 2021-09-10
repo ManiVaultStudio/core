@@ -69,6 +69,11 @@ DataHierarchyItem* DataHierarchyItem::getParent() const
     return _parent;
 }
 
+void DataHierarchyItem::setParent(DataHierarchyItem* parent)
+{
+    _parent = parent;
+}
+
 bool DataHierarchyItem::hasParent() const
 {
     return _parent != nullptr;

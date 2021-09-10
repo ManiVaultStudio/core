@@ -80,7 +80,7 @@ public:
      */
     void renameDataset(const QString& intendedDatasetName);
 
-    /** Gets the parent dataset name */
+    /** Gets the parent hierarchy item */
     DataHierarchyItem* getParent() const;
 
     /** Returns whether the data hierarchy item has a parent */
@@ -135,6 +135,11 @@ public:
      * @return Icon
      */
     QIcon getIconByName(const QString& name) const;
+
+protected:
+
+    /** Sets the parent hierarchy item */
+    void setParent(DataHierarchyItem* parent);
 
 public: // Hierarchy
 
@@ -293,6 +298,7 @@ protected:
     hdps::gui::WidgetActions    _actions;           /** Widget actions */
 
 protected:
+    friend class DataHierarchyManager;
     friend class DataManager;
 };
 

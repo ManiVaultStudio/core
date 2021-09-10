@@ -1,4 +1,5 @@
 #include "DataHierarchyManager.h"
+#include "DataManager.h"
 
 #include <QMessageBox>
 
@@ -7,8 +8,9 @@
 namespace hdps
 {
 
-DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
+DataHierarchyManager::DataHierarchyManager(DataManager& dataManager, QObject* parent /*= nullptr*/) :
     QObject(parent),
+    _dataManager(dataManager),
     _dataHierarchyItems()
 {
 }
@@ -26,14 +28,14 @@ void DataHierarchyManager::addDataset(const QString& datasetName, const QString&
         if (!parentDatasetName.isEmpty())
             getHierarchyItem(parentDatasetName)->addChild(datasetName);
 
-        emit hierarchyItemAdded(newDataHierarchyItem.get());
+        emit itemAdded(newDataHierarchyItem.get());
     }
     catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to add dataset to data hierarchy", e.what());
     }
 }
 
-bool DataHierarchyManager::removeDataset(const QString& datasetName)
+bool DataHierarchyManager::removeDataset(const QString& datasetName, const bool& recursively /*= false*/)
 {
     try {
         if (datasetName.isEmpty())
@@ -44,7 +46,10 @@ bool DataHierarchyManager::removeDataset(const QString& datasetName)
         if (hierarchyItem == nullptr)
             throw std::runtime_error(QString("%1 does not exist in the data hierarchy").arg(datasetName).toLatin1());
 
-        removeDataHierarchyItemByDatasetName(hierarchyItem->getDatasetName());
+        removeDataHierarchyItemByDatasetName(hierarchyItem->getDatasetName(), recursively);
+
+        // Remove the dataset from the data manager
+        _dataManager.removeDataset(datasetName);
     }
     catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to remove dataset from data hierarchy", e.what());
@@ -104,15 +109,29 @@ DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem* dataHier
     return children;
 }
 
-void DataHierarchyManager::removeDataHierarchyItemByDatasetName(const QString& datasetName)
+void DataHierarchyManager::removeDataHierarchyItemByDatasetName(const QString& datasetName, const bool& recursively /*= false*/)
 {
     for (auto dataHierarchyItem : _dataHierarchyItems) {
         if (dataHierarchyItem->getDatasetName() == datasetName) {
-            emit hierarchyItemAboutToBeRemoved(datasetName);
+            if (recursively) {
+                for (auto removeDataHierarchyItem : getChildren(dataHierarchyItem.get(), true))
+                    removeDataHierarchyItemByDatasetName(removeDataHierarchyItem->getDatasetName(), recursively);
+            }
+            else {
+                for (auto child : dataHierarchyItem->getChildren()) {
+                    emit itemAboutToBeRelocated(child);
+                    {
+                        child->setParent(nullptr);
+                    }
+                    emit itemRelocated(child);
+                }
+            }
+
+            emit itemAboutToBeRemoved(datasetName);
             {
                 _dataHierarchyItems.removeOne(dataHierarchyItem);
             }
-            emit hierarchyItemRemoved(datasetName);
+            emit itemRemoved(datasetName);
         }
     }
 }
