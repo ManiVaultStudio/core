@@ -183,11 +183,10 @@ DataHierarchyWidget::NoDataOverlayWidget::NoDataOverlayWidget(QWidget* parent) :
 
     _opacityEffect->setOpacity(0.35);
 
-    auto layout = new QVBoxLayout();
-
-    auto iconLabel = new QLabel();
-    auto titleLabel = new QLabel("No data loaded");
-    auto descriptionLabel = new QLabel("Right-click + import to load data");
+    auto layout             = new QVBoxLayout();
+    auto iconLabel          = new QLabel();
+    auto titleLabel         = new QLabel("No data loaded");
+    auto descriptionLabel   = new QLabel("Right-click to import data");
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 

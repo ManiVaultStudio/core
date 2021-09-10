@@ -23,7 +23,7 @@ public:
     PluginFactory(Type type) :
         _kind(),
         _type(type),
-        _guiName("asdasd")
+        _guiName()
     {
     }
 
