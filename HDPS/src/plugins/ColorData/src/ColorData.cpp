@@ -1,4 +1,5 @@
 #include "ColorData.h"
+#include "Application.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -36,6 +37,11 @@ hdps::DataSet* ColorData::createDataSet() const
 QIcon Colors::getIcon() const
 {
     return QIcon();
+}
+
+QIcon ColorDataFactory::getIcon() const
+{
+    return hdps::Application::getIconFont("FontAwesome").getIcon("palette");
 }
 
 // =============================================================================

@@ -5,6 +5,7 @@
 #include "DataType.h"
 
 #include <QObject>
+#include <QIcon>
 
 namespace hdps
 {
@@ -46,6 +47,9 @@ public:
     void setGuiName(const QString& guiName) {
         _guiName = guiName;
     }
+
+    /** Returns the plugin icon */
+    virtual QIcon getIcon() const = 0;
 
     virtual Plugin* produce() = 0;
 

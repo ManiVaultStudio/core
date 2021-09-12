@@ -23,6 +23,8 @@ DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) 
     for (auto pluginKind : _pluginKinds) {
         auto exporterPluginAction = new TriggerAction(this, pluginKind);
 
+        exporterPluginAction->setIcon(Application::core()->getPluginIcon(pluginKind));
+
         connect(exporterPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
             _dataset->getHierarchyItem().exportDataset(pluginKind);
         });

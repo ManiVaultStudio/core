@@ -322,6 +322,14 @@ QStringList PluginManager::requestPluginKindsByPluginType(const plugin::Type& pl
     return pluginKinds;
 }
 
+QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
+{
+    if (!_pluginFactories.contains(pluginKind))
+        return QIcon();
+
+    return _pluginFactories[pluginKind]->getIcon();
+}
+
 QString PluginManager::pluginTriggered(const QString& kind)
 {
     PluginFactory *pluginFactory = _pluginFactories[kind];

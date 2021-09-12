@@ -72,6 +72,13 @@ public:
      */
     QStringList requestPluginKindsByPluginType(const plugin::Type& pluginType);
 
+    /**
+     * Get plugin icon from plugin kind
+     * @param pluginKind Kind of plugin
+     * @return Plugin icon name of the plugin, null icon the plugin kind was not found
+     */
+    QIcon getPluginIcon(const QString& pluginKind) const;
+
 private:
     /**
     * Resolves plugin dependencies, returns list of resolved plugin filenames.

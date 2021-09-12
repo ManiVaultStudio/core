@@ -23,7 +23,9 @@ DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetNa
 
     for (auto pluginKind : _pluginKinds) {
         auto analysisPluginAction = new TriggerAction(this, pluginKind);
-        
+
+        analysisPluginAction->setIcon(Application::core()->getPluginIcon(pluginKind));
+
         connect(analysisPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
             _dataset->getHierarchyItem().analyzeDataset(pluginKind);
         });

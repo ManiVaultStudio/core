@@ -144,5 +144,8 @@ public:
     ClusterDataFactory(void) {}
     ~ClusterDataFactory(void) override {}
     
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
+
     hdps::plugin::RawData* produce() override;
 };

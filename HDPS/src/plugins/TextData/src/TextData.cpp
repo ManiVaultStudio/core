@@ -5,18 +5,12 @@
 
 Q_PLUGIN_METADATA(IID "hdps.TextData")
 
-// =============================================================================
-// Data
-// =============================================================================
-
 TextData::~TextData(void)
 {
-    
 }
 
 void TextData::init()
 {
-
 }
 
 hdps::DataSet* TextData::createDataSet() const
@@ -24,9 +18,10 @@ hdps::DataSet* TextData::createDataSet() const
     return new Text(_core, getName());
 }
 
-// =============================================================================
-// Factory
-// =============================================================================
+QIcon TextDataFactory::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("font");
+}
 
 hdps::plugin::RawData* TextDataFactory::produce()
 {
@@ -35,5 +30,5 @@ hdps::plugin::RawData* TextDataFactory::produce()
 
 QIcon Text::getIcon() const
 {
-    return QIcon();
+    return Application::getIconFont("FontAwesome").getIcon("font");
 }

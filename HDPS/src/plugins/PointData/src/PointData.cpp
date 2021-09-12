@@ -28,11 +28,6 @@ PointData::~PointData(void)
     
 }
 
-QIcon PointData::getIcon() const
-{
-    return hdps::Application::getIconFont("FontAwesome").getIcon("circle");
-}
-
 void PointData::init()
 {
 
@@ -362,6 +357,11 @@ float Points::getValueAt(const std::size_t index) const
 void Points::setValueAt(const std::size_t index, const float newValue)
 {
     getRawData<PointData>().setValueAt(index, newValue);
+}
+
+QIcon PointDataFactory::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("circle");
 }
 
 // =============================================================================

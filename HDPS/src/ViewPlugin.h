@@ -32,11 +32,6 @@ public:
 
     ~ViewPlugin() override {};
 
-    /** Returns the icon of this plugin */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("binoculars");
-    }
-
     /** Returns the toolbar which is shown at the top of the view plugin (dock) widget */
     virtual QToolBar* getToolBar() {
         return nullptr;
@@ -76,6 +71,11 @@ public:
 
     }
     ~ViewPluginFactory() override {};
+
+    /** Returns the plugin icon */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("eye");
+    }
 
     /**
      * Produces an instance of a view plugin. This function gets called by the plugin manager.

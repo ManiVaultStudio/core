@@ -121,23 +121,14 @@ public:
 
     virtual plugin::Plugin& requestAnalysis(const QString name) = 0;
 
-    /** Notify registered listeners that a new dataset has been added to the core. */
-    virtual void notifyDataAdded(const QString datasetName) = 0;
-    /** Notify registered listeners that a dataset has been changed. */
-    virtual void notifyDataChanged(const QString datasetName) = 0;
-
-    /** Notify registered listeners that a selection has changed. */
-    virtual void notifySelectionChanged(const QString datasetName) = 0;
-
-    /** Notify all event listeners that a dataset has been renamed. */
-    virtual void notifyDataRenamed(const QString oldName, const QString newName) = 0;
-
     /**
      * Get data hierarchy item by dataset name
      * @param datasetName Name of the dataset
      * @return Pointer to data hierarchy item
      */
     virtual DataHierarchyItem* getDataHierarchyItem(const QString& datasetName) = 0;
+
+public: // Plugin queries
 
     /**
      * Get a list of plugin kinds (names) given a plugin type and data type(s)
@@ -150,12 +141,58 @@ public:
     /**
      * Get plugin GUI name from plugin kind
      * @param pluginKind Kind of plugin
-     * @param GUI name of the plugin, empty if the plugin kind was not found
+     * @return GUI name of the plugin, empty if the plugin kind was not found
      */
     virtual QString getPluginGuiName(const QString& pluginKind) const = 0;
 
+    /**
+     * Get plugin icon from plugin kind
+     * @param pluginKind Kind of plugin
+     * @return Plugin icon name of the plugin, null icon the plugin kind was not found
+     */
+    virtual QIcon getPluginIcon(const QString& pluginKind) const = 0;
+
     /** Get the data hierarchy manager */
     virtual DataHierarchyManager& getDataHierarchyManager() = 0;
+
+public: // Events & notifications
+
+    /**
+     * Notify all data consumers that a new dataset has been added to the core
+     * @param datasetName Name of the dataset that was added
+     */
+    virtual void notifyDataAdded(const QString datasetName) = 0;
+
+    /**
+     * Notify all data consumers that a dataset has been changed
+     * @param datasetName Name of the dataset of which the data changed
+     */
+    virtual void notifyDataChanged(const QString datasetName) = 0;
+
+    /**
+     * Notify all data consumers that a selection has changed
+     @param datasetName Name of the dataset of which the selection changed
+     */
+    virtual void notifySelectionChanged(const QString datasetName) = 0;
+
+    /**
+     * Notify all event listeners that a dataset has been renamed
+     * @param oldName Old dataset name
+     * @param newName New dataset name
+     */
+    virtual void notifyDataRenamed(const QString oldName, const QString newName) = 0;
+
+    /**
+     * Register an event listener
+     * @param eventListener Pointer to event listener to register
+     */
+    virtual void registerEventListener(EventListener* eventListener) = 0;
+
+    /**
+     * Unregister an event listener
+     * @param eventListener Pointer to event listener to unregister
+     */
+    virtual void unregisterEventListener(EventListener* eventListener) = 0;
 
 protected:
 
@@ -171,9 +208,7 @@ protected:
     */
     virtual DataSet& requestSelection(const QString rawdataName) = 0;
 
-    virtual void registerEventListener(EventListener* eventListener) = 0;
-
-    virtual void unregisterEventListener(EventListener* eventListener) = 0;
+    
 
     friend class RawData;
     friend class DataSet;

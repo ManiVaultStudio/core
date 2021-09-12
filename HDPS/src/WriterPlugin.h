@@ -33,11 +33,6 @@ public:
 
     virtual void writeData() = 0;
 
-    /** Returns the icon of this plugin */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-export");
-    }
-
 public:
 
     /** Get input dataset name */
@@ -76,6 +71,11 @@ public:
     }
     ~WriterPluginFactory() override {};
     
+    /** Returns the plugin icon */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-export");
+    }
+
     WriterPlugin* produce() override = 0;
 };
 

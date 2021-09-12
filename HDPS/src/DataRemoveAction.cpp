@@ -41,7 +41,12 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
 
         if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
             ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, datasetsToRemove);
-            if (confirmDataRemoveDialog.exec() == 1)
+
+            // Show the confirm data removal dialog
+            confirmDataRemoveDialog.exec();
+
+            // Remove data if accepted
+            if (confirmDataRemoveDialog.result() == 1)
                 dataHierarchyManager.removeItem(datasetName, recursively);
         }
         else {

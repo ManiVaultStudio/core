@@ -90,5 +90,5 @@ void Images::setPoints(Points* points)
 
 QIcon Images::getIcon() const
 {
-    return QIcon();
+    return hdps::Application::getIconFont("FontAwesome").getIcon("images");
 }

@@ -359,6 +359,11 @@ QString Core::getPluginGuiName(const QString& pluginKind) const
     return _pluginManager->getPluginGuiName(pluginKind);
 }
 
+QIcon Core::getPluginIcon(const QString& pluginKind) const
+{
+    return _pluginManager->getPluginIcon(pluginKind);
+}
+
 /**
  * Goes through all plug-ins stored in the core and calls the 'dataAdded' function
  * on all plug-ins that inherit from the DataConsumer interface.

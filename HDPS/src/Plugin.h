@@ -45,8 +45,8 @@ public:
     }
 
     /** Returns the icon of this plugin */
-    virtual QIcon getIcon() const {
-        return Application::getIconFont("FontAwesome").getIcon("plug");
+    virtual QIcon getIcon() const final {
+        return _factory->getIcon();
     }
 
     /**

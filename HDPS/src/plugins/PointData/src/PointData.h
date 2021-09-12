@@ -311,9 +311,6 @@ public:
     PointData(PluginFactory* factory) : RawData(factory, PointType) { }
     ~PointData(void) override;
 
-    /** Returns the icon of this plugin */
-    QIcon getIcon() const override;
-
     void init() override;
 
     hdps::DataSet* createDataSet() const override;
@@ -819,6 +816,9 @@ class PointDataFactory : public RawDataFactory
 public:
     PointDataFactory(void) {}
     ~PointDataFactory(void) override {}
+
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
 
     hdps::plugin::RawData* produce() override;
 };

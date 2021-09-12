@@ -25,11 +25,6 @@ public:
 
     ~AnalysisPlugin() override {};
 
-    /** Returns the icon of this plugin */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("chart-line");
-    }
-
     /** Get input dataset name */
     QString getInputDatasetName() const {
         return _input.getDatasetName();
@@ -158,6 +153,11 @@ public:
     }
     ~AnalysisPluginFactory() override {};
     
+    /** Returns the plugin icon */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("square-root-alt");
+    }
+
     /**
     * Produces an instance of an analysis plugin. This function gets called by the plugin manager.
     */

@@ -58,15 +58,6 @@ void ClusterData::removeClustersById(const QStringList& ids)
         removeClusterById(clusterId);
 }
 
-// =============================================================================
-// Factory
-// =============================================================================
-
-hdps::plugin::RawData* ClusterDataFactory::produce()
-{
-    return new ClusterData(this);
-}
-
 void Clusters::init()
 {
     _infoAction = QSharedPointer<InfoAction>::create(nullptr, _core, getName());
@@ -91,9 +82,15 @@ void Clusters::removeClustersById(const QStringList& ids)
 
 QIcon Clusters::getIcon() const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("th-large");
+    return Application::getIconFont("FontAwesome").getIcon("th-large");
 }
 
+QIcon ClusterDataFactory::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("th-large");
+}
 
-//QSharedPointer<ClusterAction>   _clusterAction;     /** Shared pointer to cluster action */
-//_clusterAction = QSharedPointer<ClusterAction>::create(nullptr, _core, getName());
+hdps::plugin::RawData* ClusterDataFactory::produce()
+{
+    return new ClusterData(this);
+}

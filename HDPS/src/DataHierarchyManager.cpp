@@ -93,7 +93,7 @@ QStringList DataHierarchyManager::removeItem(const QString& datasetName, const b
             emit itemRemoved(datasetToRemove);
         }
     } catch (std::exception& e) {
-        QMessageBox::critical(nullptr, "Unable to remove dataset from data hierarchy", e.what());
+        QMessageBox::critical(nullptr, "Unable to remove dataset(s) from data hierarchy", e.what());
     }
 
     return datasetsToRemove;

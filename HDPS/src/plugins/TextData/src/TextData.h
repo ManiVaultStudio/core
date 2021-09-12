@@ -33,10 +33,6 @@ private:
     std::vector<QString> _data;
 };
 
-// =============================================================================
-// Text Data Set
-// =============================================================================
-
 class Text : public DataSet
 {
 public:
@@ -84,6 +80,9 @@ class TextDataFactory : public RawDataFactory
 public:
     TextDataFactory(void) {}
     ~TextDataFactory(void) override {}
-    
+
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
+
     hdps::plugin::RawData* produce() override;
 };

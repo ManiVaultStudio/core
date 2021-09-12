@@ -45,11 +45,6 @@ public:
      */
     virtual void loadData() = 0;
 
-    /** Returns the icon of this plugin */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-import");
-    }
-
 protected:
     /**
      * Asks the user for the name of a file to load data from. Opens a file dialog at the
@@ -73,6 +68,11 @@ public:
     }
     ~LoaderPluginFactory() override {};
     
+    /** Returns the plugin icon */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-import");
+    }
+
     /**
     * Produces an instance of a loader plugin. This function gets called by the plugin manager.
     */

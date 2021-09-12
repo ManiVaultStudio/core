@@ -163,6 +163,8 @@ public:
      */
     const void exportDataset(const QString kind, const QString& datasetName) override;
 
+public: // Plugin queries
+
     /**
      * Get a list of plugin kinds (names) given a plugin type and data type(s)
      * @param pluginType Type of plugin e.g. analysis, exporter
@@ -178,16 +180,53 @@ public:
      */
     QString getPluginGuiName(const QString& pluginKind) const override;
 
-    /** Notify all data consumers that a new dataset has been added to the core. */
+    /**
+     * Get plugin icon from plugin kind
+     * @param pluginKind Kind of plugin
+     * @return Plugin icon name of the plugin, null icon the plugin kind was not found
+     */
+    QIcon getPluginIcon(const QString& pluginKind) const override;
+
+public: // Events & notifications
+
+    /**
+     * Notify all data consumers that a new dataset has been added to the core
+     * @param datasetName Name of the dataset that was added
+     */
     void notifyDataAdded(const QString datasetName) override;
-    /** Notify all data consumers that a dataset has been changed. */
+
+    /**
+     * Notify all data consumers that a dataset has been changed
+     * @param datasetName Name of the dataset of which the data changed
+     */
     void notifyDataChanged(const QString datasetName) override;
 
-    /** Notify all data consumers that a selection has changed. */
+    /**
+     * Notify all data consumers that a selection has changed
+     @param datasetName Name of the dataset of which the selection changed
+     */
     void notifySelectionChanged(const QString datasetName) override;
 
-    /** Notify all event listeners that a dataset has been renamed. */
+    /**
+     * Notify all event listeners that a dataset has been renamed
+     * @param oldName Old dataset name
+     * @param newName New dataset name
+     */
     void notifyDataRenamed(const QString oldName, const QString newName) override;
+
+    /**
+     * Register an event listener
+     * @param eventListener Pointer to event listener to register
+     */
+    void registerEventListener(EventListener* eventListener) override;
+
+    /**
+     * Unregister an event listener
+     * @param eventListener Pointer to event listener to unregister
+     */
+    void unregisterEventListener(EventListener* eventListener) override;
+
+public:
 
     /**
     * Returns a reference to the main window for adding widgets to it.
@@ -213,10 +252,6 @@ protected:
     * Requests the selection set belonging to the raw dataset with the given name.
     */
     DataSet& requestSelection(const QString rawdataName) override;
-
-    void registerEventListener(EventListener* eventListener) override;
-
-    void unregisterEventListener(EventListener* eventListener) override;
 
 private:
 

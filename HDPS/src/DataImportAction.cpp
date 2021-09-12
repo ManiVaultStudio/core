@@ -18,7 +18,11 @@ DataImportAction::DataImportAction(QObject* parent) :
     _pluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER);
 
     for (auto pluginKind : _pluginKinds) {
-        auto importerPluginAction = new TriggerAction(this, Application::core()->getPluginGuiName(pluginKind));
+        const auto pluginGuiName = Application::core()->getPluginGuiName(pluginKind);
+
+        auto importerPluginAction = new TriggerAction(this, QString("Load %1").arg(pluginGuiName));
+
+        importerPluginAction->setIcon(Application::core()->getPluginIcon(pluginKind));
 
         connect(importerPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
             Application::core()->importDataset(pluginKind);

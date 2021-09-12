@@ -1,5 +1,6 @@
 #include "ImageData.h"
 #include "Images.h"
+#include "Application.h"
 
 #include <PointData.h>
 
@@ -132,6 +133,11 @@ float ImageData::pointValue(const std::uint32_t& x, const std::uint32_t& y) cons
 hdps::DataSet* ImageData::createDataSet() const
 {
     return new Images(_core, getName());
+}
+
+QIcon ImageDataFactory::getIcon() const
+{
+    return hdps::Application::getIconFont("FontAwesome").getIcon("images");
 }
 
 hdps::plugin::RawData* ImageDataFactory::produce()

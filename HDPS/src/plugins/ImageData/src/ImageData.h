@@ -99,6 +99,9 @@ class ImageDataFactory : public hdps::plugin::RawDataFactory
 public:
     ImageDataFactory() {}
     ~ImageDataFactory() override {}
-    
+
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
+
     hdps::plugin::RawData* produce() override;
 };
