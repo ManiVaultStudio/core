@@ -45,6 +45,9 @@ bool OptionAction::hasOptions() const
 
 void OptionAction::setOptions(const QStringList& options)
 {
+    if (_defaultModel.stringList() == options)
+        return;
+    
     _defaultModel.setStringList(options);
 
     emit optionsChanged(getOptions());
@@ -161,14 +164,13 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 
     const auto update = [this, optionAction]() -> void {
         setEnabled(optionAction->isEnabled());
+        setVisible(optionAction->isVisible());
         setToolTip(optionAction->text());
     };
 
     connect(optionAction, &OptionAction::changed, this, [update]() {
         update();
     });
-
-    update();
 
     const auto updateToolTip = [this, optionAction]() -> void {
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
@@ -179,7 +181,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 
         setModel(new QStringListModel());
         setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
-        setEnabled(!optionAction->getOptions().isEmpty());
+        //setEnabled(!optionAction->getOptions().isEmpty());
 
         updateToolTip();
     };
@@ -209,6 +211,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     populateComboBox();
     updateComboBoxSelection();
     updateToolTip();
+    update();
 }
 
 }
