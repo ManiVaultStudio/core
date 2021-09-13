@@ -51,6 +51,7 @@ protected:
         QItemSelectionModel     _selectionModel;            /** Clusters selection model */
         TriggerAction           _removeAction;              /** Remove clusters action */
         TriggerAction           _mergeAction;               /** Merge clusters action */
+        
         FilterAndSelectAction   _filterAndSelectAction;     /** Filter and select clusters action */
         SubsetAction            _subsetAction;              /** Subset action */
     };
@@ -95,8 +96,15 @@ public:
     /** Get the clusters model */
     ClustersModel& getClustersModel();
 
+public: // Action getters
+
+    TriggerAction& getImportAction() { return _importAction; }
+    TriggerAction& getExportAction() { return _exportAction; }
+
 protected:
     CoreInterface*          _core;              /** Pointer to the core */
     DatasetRef<Clusters>    _clusters;          /** Cluster dataset reference */
     ClustersModel           _clustersModel;     /** Clusters model */
+    TriggerAction           _importAction;      /** Import clusters action */
+    TriggerAction           _exportAction;      /** Export clusters action */
 };

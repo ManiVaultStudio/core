@@ -85,6 +85,36 @@ QIcon Clusters::getIcon() const
     return Application::getIconFont("FontAwesome").getIcon("th-large");
 }
 
+void Clusters::fromVariant(const QVariant& variant)
+{
+    if (variant.type() != QVariant::Type::List)
+        throw std::runtime_error("Clusters variant is not a list");
+
+    std::vector<Cluster>& clusters = getClusters();
+
+    const auto variantList = variant.toList();
+
+    clusters.clear();
+    clusters.resize(variantList.count());
+
+    auto clusterIndex = 0;
+
+    for (auto& cluster : clusters) {
+        cluster.fromVariant(variantList.at(clusterIndex));
+        clusterIndex++;
+    }
+}
+
+QVariant Clusters::toVariant() const
+{
+    QVariantList clustersList;
+
+    for (auto cluster : getClusters())
+        clustersList << cluster.toVariant();
+
+    return clustersList;
+}
+
 QIcon ClusterDataFactory::getIcon() const
 {
     return Application::getIconFont("FontAwesome").getIcon("th-large");

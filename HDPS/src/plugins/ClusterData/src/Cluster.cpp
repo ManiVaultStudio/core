@@ -2,12 +2,15 @@
 
 #include <QUuid>
 
+#include <stdexcept>
+
 using namespace hdps::util;
 
 Cluster::Cluster() :
     _name(""),
     _id(QUuid::createUuid().toString()),
     _color(Qt::gray),
+    _indices(),
     _median(),
     _mean(),
     _stddev()
@@ -81,4 +84,48 @@ std::vector<float>& Cluster::getMean()
 std::vector<float>& Cluster::getStandardDeviation()
 {
     return _stddev;
+}
+
+void Cluster::fromVariant(const QVariant& variant)
+{
+    if (variant.type() != QVariant::Type::Map)
+        throw std::runtime_error("Cluster variant is not a map");
+
+    const auto variantMap = variant.toMap();
+
+    // Serializable attributes
+    QStringList attributeNames({ "name" , "id", "color", "indices"});
+
+    // Check if all attributes are present
+    for (auto attributeName : attributeNames)
+        if (!variantMap.contains(attributeName))
+            throw std::runtime_error(QString("Attribute %1 not found").arg(attributeName).toLatin1());
+
+    // Populate cluster with attributes
+    _name       = variantMap["name"].toString();
+    _id         = variantMap["id"].toString();
+    _color      = variantMap["color"].value<QColor>();
+
+    // Convert to standard vector and assign
+    const auto indicesList = variantMap["indices"].toList();
+
+    // Reshape the indices
+    _indices.clear();
+    _indices.reserve(indicesList.count());
+
+    // Populate indices
+    for (auto index : indicesList)
+        _indices.push_back(index.toInt());
+}
+
+QVariant Cluster::toVariant() const
+{
+    QVariantMap clusterVariantMap;
+
+    clusterVariantMap["name"]       = _name;
+    clusterVariantMap["id"]         = _id;
+    clusterVariantMap["color"]      = _color;
+    clusterVariantMap["indices"]    = QVariantList(_indices.begin(), _indices.end());
+
+    return clusterVariantMap;
 }

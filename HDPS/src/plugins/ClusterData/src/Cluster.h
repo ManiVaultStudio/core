@@ -103,6 +103,12 @@ public: // Getters/setters
     /** Get median */
     std::vector<float>& getStandardDeviation();
 
+    /** Loads cluster from a variant */
+    void fromVariant(const QVariant& variant);
+
+    /** Returns a variant representation of the cluster */
+    QVariant toVariant() const;
+
 protected:
     QString                     _name;          /** GUI name */
     QString                     _id;            /** Unique cluster name */

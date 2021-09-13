@@ -6,6 +6,11 @@
 #include <QTreeView>
 #include <QHeaderView>
 #include <QVBoxLayout>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QVariant>
+#include <QFile>
+#include <QFileDialog>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -15,10 +20,18 @@ ClustersAction::ClustersAction(QObject* parent, hdps::CoreInterface* core, const
     EventListener(),
     _core(core),
     _clusters(datasetName),
-    _clustersModel(this)
+    _clustersModel(this),
+    _importAction(this, "Import"),
+    _exportAction(this, "Export")
 {
     setText("Clusters");
     setEventCore(_core);
+
+    _importAction.setToolTip("Import clusters from file");
+    _exportAction.setToolTip("Export clusters to file");
+
+    //_importAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    //_exportAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
 
     registerDataEventByType(ClusterType, [this](hdps::DataEvent* dataEvent) {
         if (!_clusters.isValid())
@@ -48,6 +61,84 @@ ClustersAction::ClustersAction(QObject* parent, hdps::CoreInterface* core, const
             return;
 
         updateClusters();
+    });
+
+    connect(&_importAction, &TriggerAction::triggered, this, [this]() {
+
+        try
+        {
+            QFileDialog fileDialog;
+
+            // Configure file dialog
+            fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+            fileDialog.setNameFilters({ "Cluster JSON files (*json)" });
+            fileDialog.setDefaultSuffix(".json");
+
+            // Show the dialog
+            if (fileDialog.exec() == 0)
+                return;
+
+            if (fileDialog.selectedFiles().count() != 1)
+                return;
+
+            QFile clustersFile;
+
+            // Load the file
+            clustersFile.setFileName(fileDialog.selectedFiles().first());
+            clustersFile.open(QIODevice::ReadOnly);
+
+            // Get the cluster data
+            QByteArray clustersData = clustersFile.readAll();
+
+            QJsonDocument clusterJsonDocument;
+
+            // Convert to JSON document
+            clusterJsonDocument = QJsonDocument::fromJson(clustersData);
+            
+            // Load in the cluster from variant data
+            _clusters->fromVariant(clusterJsonDocument.toVariant());
+
+            // Let others know that the clusters changed
+            _clusters.notifyDataChanged();
+        }
+        catch (std::exception& e)
+        {
+            QMessageBox::critical(nullptr, QString("Unable to load clusters"), e.what(), QMessageBox::Ok);
+        }
+    });
+
+    connect(&_exportAction, &TriggerAction::triggered, this, [this]() {
+
+        try
+        {
+            // Create JSON document from clusters variant map
+            QJsonDocument document(QJsonArray::fromVariantList(_clusters->toVariant().toList()));
+
+            // Show the dialog
+            QFileDialog fileDialog;
+
+            // Configure file dialog
+            fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+            fileDialog.setNameFilters({ "Cluster JSON files (*json)" });
+            fileDialog.setDefaultSuffix(".json");
+            
+            if (fileDialog.exec() == 0)
+                return;
+
+            // Only save if we have one file
+            if (fileDialog.selectedFiles().count() != 1)
+                return;
+
+            QFile jsonFile(fileDialog.selectedFiles().first());
+
+            // Save the file
+            jsonFile.open(QFile::WriteOnly);
+            jsonFile.write(document.toJson());
+        }
+        catch (std::exception& e)
+        {
+            QMessageBox::critical(nullptr, QString("Unable to save clusters"), e.what(), QMessageBox::Ok);
+        }
     });
 }
 
@@ -109,11 +200,17 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
     _selectionModel(&_filterModel),
     _removeAction(this, "Remove"),
     _mergeAction(this, "Merge"),
+    
     _filterAndSelectAction(this, _filterModel, _selectionModel),
     _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
 {
-    _removeAction.setEnabled(false);
+    _removeAction.setToolTip("Remove the selected clusters");
+    _mergeAction.setToolTip("Merge the selected clusters");
+
+    _removeAction.setEnabled(false); 
+
     //_removeAction.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("trash-alt"));
+    //_mergeAction.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("object-group"));
 
     _removeAction.setToolTip("Remove the selected filter(s)");
     _mergeAction.setToolTip("Merge the selected filter(s)");
@@ -202,6 +299,8 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, 
 
     toolbarLayout->addWidget(_removeAction.createWidget(this), 1);
     toolbarLayout->addWidget(_mergeAction.createWidget(this), 1);
+    toolbarLayout->addWidget(clustersAction->getImportAction().createWidget(this), 1);
+    toolbarLayout->addWidget(clustersAction->getExportAction().createWidget(this), 1);
 
     auto mainLayout = new QVBoxLayout();
 

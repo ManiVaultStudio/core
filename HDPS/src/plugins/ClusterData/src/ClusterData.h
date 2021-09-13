@@ -83,6 +83,11 @@ public:
         return getRawData<ClusterData>().getClusters();
     }
 
+    const std::vector<Cluster>& getClusters() const
+    {
+        return getRawData<ClusterData>().getClusters();
+    }
+
     /**
      * Adds a cluster
      * @param cluster Cluster to add
@@ -124,6 +129,12 @@ public:
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;
+
+    /** Loads cluster from variant list */
+    void fromVariant(const QVariant& variant);
+
+    /** Returns a variant representation of the clusters */
+    QVariant toVariant() const;
 
     std::vector<unsigned int>       indices;
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
