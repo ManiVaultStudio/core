@@ -6,6 +6,7 @@
 
 #include "Set.h"
 #include "PointDataRange.h"
+#include "LinkedSelection.h"
 
 #include <biovault_bfloat16.h>
 
@@ -783,6 +784,21 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
+    /**
+     * Adds a mapping of global selection indices from this dataset to a target dataset.
+     * @param targetDataSet The name of the target dataset
+     * @param mapping Map of global selection indices in this dataset to a vector of
+     *                global indices in the target dataset.
+     */
+    void addLinkedSelection(QString targetDataSet, hdps::SelectionMap& mapping);
+
+    /**
+     * Set global selection indices on this dataset. Applies linked selections
+     * if present in the dataset.
+     * @param selectionIndices Vector of global point indices to select
+     */
+    void setSelection(std::vector<unsigned int>& selectionIndices);
+
     // Set functions
     DataSet* copy() const override;
 
@@ -800,6 +816,9 @@ public:
     std::vector<unsigned int> indices;
 
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
+
+private:
+    std::vector<hdps::LinkedSelection> _linkedSelections;
 };
 
 // =============================================================================

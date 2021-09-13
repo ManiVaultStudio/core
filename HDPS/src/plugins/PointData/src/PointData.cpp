@@ -359,14 +359,48 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-QIcon PointDataFactory::getIcon() const
+void Points::addLinkedSelection(QString targetDataSet, hdps::SelectionMap& mapping)
 {
-    return Application::getIconFont("FontAwesome").getIcon("circle");
+    _linkedSelections.emplace_back(getName(), targetDataSet);
+    _linkedSelections.back().setMapping(mapping);
+}
+
+void Points::setSelection(std::vector<unsigned int>& indices)
+{
+    Points& selection = static_cast<Points&>(getSelection());
+
+    selection.indices = indices;
+
+    for (hdps::LinkedSelection& linkedSelection : _linkedSelections)
+    {
+        const hdps::SelectionMap& mapping = linkedSelection.getMapping();
+
+        // Create separate vector of additional linked selected points
+        std::vector<unsigned int> extraSelectionIndices;
+        // Reserve at least as much space as required for a 1-1 mapping
+        extraSelectionIndices.reserve(indices.size());
+
+        for (const int selectionIndex : indices)
+        {
+            if (mapping.find(selectionIndex) != mapping.end())
+            {
+                const std::vector<unsigned int>& mappedSelection = mapping.at(selectionIndex);
+                extraSelectionIndices.insert(extraSelectionIndices.end(), mappedSelection.begin(), mappedSelection.end());
+            }
+        }
+
+        selection.indices.insert(selection.indices.end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
+    }
 }
 
 // =============================================================================
 // Factory
 // =============================================================================
+
+QIcon PointDataFactory::getIcon() const
+{
+    return Application::getIconFont("FontAwesome").getIcon("circle");
+}
 
 hdps::plugin::RawData* PointDataFactory::produce()
 {

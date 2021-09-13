@@ -233,6 +233,7 @@ set( PLUGIN_HEADERS
     src/SelectionListener.h
     src/Set.h
     src/Application.h
+    src/LinkedSelection.h
 )
 
 set( PLUGIN_SOURCES
@@ -242,6 +243,7 @@ set( PLUGIN_SOURCES
     src/Application.cpp
     src/Plugin.cpp
     src/Set.cpp
+    src/LinkedSelection.cpp
 )
 
 set(DATA_HIERARCHY_HEADERS
