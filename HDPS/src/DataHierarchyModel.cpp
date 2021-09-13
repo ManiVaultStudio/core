@@ -158,25 +158,57 @@ Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
 
 QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        switch (static_cast<DataHierarchyModelItem::Column>(section))
-        {
-            case DataHierarchyModelItem::Column::Name:
-                return "Name";
+    if (orientation == Qt::Horizontal) {
+        switch (role) {
+            case Qt::DisplayRole:
+            {
+                switch (static_cast<DataHierarchyModelItem::Column>(section))
+                {
+                    case DataHierarchyModelItem::Column::Name:
+                        return "Name";
 
-            case DataHierarchyModelItem::Column::Description:
-                return "Description";
+                    case DataHierarchyModelItem::Column::Description:
+                        return "Description";
 
-            case DataHierarchyModelItem::Column::Analysis:
-            case DataHierarchyModelItem::Column::Analyzing:
-            case DataHierarchyModelItem::Column::Progress:
-                return "";
+                    case DataHierarchyModelItem::Column::Analysis:
+                    case DataHierarchyModelItem::Column::Analyzing:
+                    case DataHierarchyModelItem::Column::Progress:
+                        return "";
+
+                    default:
+                        break;
+                }
+
+                break;
+            }
+
+            case Qt::DecorationRole:
+            {
+                const auto iconSize = QSize(14, 14);
+
+                switch (static_cast<DataHierarchyModelItem::Column>(section))
+                {
+                    case DataHierarchyModelItem::Column::Name:
+                    case DataHierarchyModelItem::Column::Description:
+                    case DataHierarchyModelItem::Column::Analysis:
+                        break;
+
+                    case DataHierarchyModelItem::Column::Analyzing:
+                        return Application::getIconFont("FontAwesome").getIcon("check", iconSize);
+
+                    case DataHierarchyModelItem::Column::Progress:
+                        return Application::getIconFont("FontAwesome").getIcon("percentage", iconSize);
+
+                    default:
+                        break;
+                }
+
+                break;
+            }
 
             default:
                 break;
         }
-
-        return "";
     }
 
     return QVariant();
