@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "NumericalAction.h"
 
 #include <QSpinBox>
 #include <QSlider>
@@ -19,7 +19,7 @@ namespace gui {
  *
  * @author Thomas Kroes
  */
-class IntegralAction : public WidgetAction
+class IntegralAction : public NumericalAction<std::int32_t>
 {
     Q_OBJECT
 
@@ -78,104 +78,6 @@ public:
     IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
 
     /**
-     * Initialize the integral action
-     * @param minimum Minimum value
-     * @param maximum Maximum value
-     * @param value Value
-     * @param defaultValue Default value
-     */
-    void initialize(const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
-
-    /** Gets the current value */
-    std::int32_t getValue() const;
-
-    /**
-     * Sets the current value
-     * @param value Current value
-     */
-    void setValue(const std::int32_t& value);
-
-    /** Gets the default value */
-    std::int32_t getDefaultValue() const;
-
-    /**
-     * Sets the default value
-     * @param defaultValue Default value
-     */
-    void setDefaultValue(const std::int32_t& defaultValue);
-
-    /** Determines whether the current value can be reset to its default */
-    bool canReset() const override;
-
-    /** Reset the current value to the default value */
-    void reset() override;
-
-    /** Gets the minimum value */
-    std::int32_t getMinimum() const;
-
-    /**
-     * Sets the minimum value
-     * @param minimum Minimum value
-     */
-    void setMinimum(const std::int32_t& minimum);
-
-    /** Gets the maximum value */
-    std::int32_t getMaximum() const;
-
-    /**
-     * Sets the maximum value
-     * @param maximum Maximum value
-     */
-    void setMaximum(const std::int32_t& maximum);
-
-    /**
-     * Sets the value range
-     * @param minimum Minimum value
-     * @param maximum Maximum value
-     */
-    void setRange(const std::int32_t& minimum, const std::int32_t& maximum);
-
-    /** Gets the suffix */
-    QString getSuffix() const;
-
-    /**
-     * Sets the suffix
-     * @param suffix Suffix
-     */
-    void setSuffix(const QString& suffix);
-
-    /** Gets whether the value should update during interaction */
-    bool getUpdateDuringDrag() const;
-
-    /**
-     * Sets whether the value should update during interaction
-     * @param updateDuringDrag Whether the value should update during interaction
-     */
-    void setUpdateDuringDrag(const bool& updateDuringDrag);
-
-    /** Returns whether the current value is at its minimum */
-    bool isAtMinimum() const;
-
-    /** Returns whether the current value is at its maximum */
-    bool isAtMaximum() const;
-
-    /*
-    IntegralAction& operator= (const IntegralAction& other)
-    {
-        WidgetAction::operator=(other);
-
-        _value              = other._value;
-        _defaultValue       = other._defaultValue;
-        _minimum            = other._minimum;
-        _maximum            = other._maximum;
-        _suffix             = other._suffix;
-        _updateDuringDrag   = other._updateDuringDrag;
-
-        return *this;
-    }
-    */
-
-    /**
      * Creates a spin box widget to interact with the integral action
      * @param parent Pointer to parent widget
      * @return Spin box widget
@@ -216,19 +118,18 @@ signals:
     void maximumChanged(const std::int32_t& maximum);
 
     /**
+     * Signals that the prefix changed
+     * @param prefix New prefix
+     */
+    void prefixChanged(const QString& prefix);
+
+    /**
      * Signals that the suffix changed
      * @param suffix New suffix
      */
     void suffixChanged(const QString& suffix);
 
 protected:
-    std::int32_t    _value;                 /** Current value */
-    std::int32_t    _defaultValue;          /** Default value */
-    std::int32_t    _minimum;               /** Minimum value */
-    std::int32_t    _maximum;               /** Maximum value */
-    QString         _suffix;                /** Suffix */
-    bool            _updateDuringDrag;      /** Whether the value should update during interaction */
-
     static constexpr std::int32_t INIT_MIN              = 0;        /** Initialization minimum value */
     static constexpr std::int32_t INIT_MAX              = 100;      /** Initialization maximum value */
     static constexpr std::int32_t INIT_VALUE            = 0;        /** Initialization value */

@@ -13,6 +13,7 @@ hdps::Application::Application(int& argc, char** argv) :
     _iconFonts(),
     _settings()
 {
+    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
 }
 
 hdps::Application* hdps::Application::current()

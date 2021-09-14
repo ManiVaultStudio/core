@@ -7,143 +7,16 @@ namespace hdps {
 namespace gui {
 
 IntegralAction::IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum /*= INIT_MIN*/, const std::int32_t& maximum /*= INIT_MAX*/, const std::int32_t& value /*= INIT_VALUE*/, const std::int32_t& defaultValue /*= INIT_DEFAULT_VALUE*/) :
-    WidgetAction(parent),
-    _value(),
-    _defaultValue(),
-    _minimum(std::numeric_limits<std::int32_t>::lowest()),
-    _maximum(std::numeric_limits<std::int32_t>::max()),
-    _suffix(),
-    _updateDuringDrag(true)
+    NumericalAction<std::int32_t>(parent, title, minimum, maximum, value, defaultValue)
 {
-    setText(title);
+    _valueChanged           = [this]() -> void { emit valueChanged(_value); };
+    _defaultValueChanged    = [this]() -> void { emit defaultValueChanged(_defaultValue); };
+    _minimumChanged         = [this]() -> void { emit minimumChanged(_minimum); };
+    _maximumChanged         = [this]() -> void { emit maximumChanged(_maximum); };
+    _prefixChanged          = [this]() -> void { emit prefixChanged(_prefix); };
+    _suffixChanged          = [this]() -> void { emit suffixChanged(_suffix); };
+
     initialize(minimum, maximum, value, defaultValue);
-}
-
-void IntegralAction::initialize(const std::int32_t& minimum /*= INIT_MIN*/, const std::int32_t& maximum /*= INIT_MAX*/, const std::int32_t& value /*= INIT_VALUE*/, const std::int32_t& defaultValue /*= INIT_DEFAULT_VALUE*/)
-{
-    _minimum        = std::min(minimum, _maximum);
-    _maximum        = std::max(maximum, _minimum);
-    _value          = std::max(_minimum, std::min(value, _maximum));
-    _defaultValue   = std::max(_minimum, std::min(defaultValue, _maximum));
-
-    emit minimumChanged(_minimum);
-    emit maximumChanged(_maximum);
-    emit valueChanged(_value);
-    emit defaultValueChanged(_defaultValue);
-}
-
-std::int32_t IntegralAction::getValue() const
-{
-    return _value;
-}
-
-void IntegralAction::setValue(const std::int32_t& value)
-{
-    if (value == _value)
-        return;
-
-    _value = std::max(_minimum, std::min(value, _maximum));
-
-    emit valueChanged(_value);
-}
-
-std::int32_t IntegralAction::getDefaultValue() const
-{
-    return _defaultValue;
-}
-
-void IntegralAction::setDefaultValue(const std::int32_t& defaultValue)
-{
-    if (defaultValue == _defaultValue)
-        return;
-
-    _defaultValue = std::max(_minimum, std::min(defaultValue, _maximum));
-
-    emit defaultValueChanged(_defaultValue);
-}
-
-bool IntegralAction::canReset() const
-{
-    return _value != _defaultValue;
-}
-
-void IntegralAction::reset()
-{
-    setValue(_defaultValue);
-}
-
-std::int32_t IntegralAction::getMinimum() const
-{
-    return _minimum;
-}
-
-void IntegralAction::setMinimum(const std::int32_t& minimum)
-{
-    if (minimum == _minimum)
-        return;
-
-    _minimum = std::min(minimum, _maximum);
-
-    emit minimumChanged(_minimum);
-}
-
-std::int32_t IntegralAction::getMaximum() const
-{
-    return _maximum;
-}
-
-void IntegralAction::setMaximum(const std::int32_t& maximum)
-{
-    if (maximum == _maximum)
-        return;
-
-    _maximum = std::max(maximum, _minimum);
-
-    emit maximumChanged(_maximum);
-}
-
-void IntegralAction::setRange(const std::int32_t& minimum, const std::int32_t& maximum)
-{
-    setMinimum(minimum);
-    setMaximum(maximum);
-}
-
-QString IntegralAction::getSuffix() const
-{
-    return _suffix;
-}
-
-void IntegralAction::setSuffix(const QString& suffix)
-{
-    if (suffix == _suffix)
-        return;
-
-    _suffix = suffix;
-
-    emit suffixChanged(_suffix);
-}
-
-bool IntegralAction::getUpdateDuringDrag() const
-{
-    return _updateDuringDrag;
-}
-
-void IntegralAction::setUpdateDuringDrag(const bool& updateDuringDrag)
-{
-    if (updateDuringDrag == _updateDuringDrag)
-        return;
-
-    _updateDuringDrag = updateDuringDrag;
-}
-
-bool IntegralAction::isAtMinimum() const
-{
-    return _value == _minimum;
-}
-
-bool IntegralAction::isAtMaximum() const
-{
-    return _value == _maximum;
 }
 
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
