@@ -72,19 +72,10 @@ public: // Settings API
      */
     void setSetting(const QString& path, const QVariant& value);
 
-public: // Actions API
-
-    /*
-    gui::WidgetActionsManager& getWidgetActionsManager() {
-        return _widgetActionsManager;
-    }
-    */
-
 protected:
-    CoreInterface*              _core;                      /** Shared pointer to HDPS core */
-    IconFonts                   _iconFonts;                 /** Icon fonts resource */
-    QSettings                   _settings;                  /** Settings */
-    //gui::WidgetActionsManager   _widgetActionsManager;      /** Widget actions manager */
+    CoreInterface*      _core;          /** Shared pointer to HDPS core */
+    IconFonts           _iconFonts;     /** Icon fonts resource */
+    QSettings           _settings;      /** Settings */
 };
 
 }
