@@ -28,6 +28,16 @@ class NumericalAction : public WidgetAction
     using SuffixChangedCB               = std::function<void()>;
     using NumberOfDecimalsChangedCB     = std::function<void()>;
 
+    /** Describes the widget configurations */
+    enum class WidgetConfiguration {
+        ValueSpinBox        = 0x00001,
+        ValueSlider         = 0x00002,
+        ResetPushButton     = 0x00004,
+
+        Basic               = ValueSpinBox | ValueSlider,
+        All                 = ValueSpinBox | ValueSlider | ResetPushButton
+    };
+
 public:
 
     /**
@@ -49,6 +59,7 @@ public:
         _suffix(),
         _numberOfDecimals(),
         _updateDuringDrag(true),
+        _widgetConfiguration(WidgetConfiguration::All),
         _valueChanged(),
         _defaultValueChanged(),
         _minimumChanged(),
@@ -268,15 +279,26 @@ public:
         return static_cast<double>(offset / getIntervalLength());
     }
 
+    /** Gets the widget configuration */
+    virtual const WidgetConfiguration& getWidgetConfiguration() const final {
+        return _widgetConfiguration;
+    };
+
+    /** Gets the widget configuration */
+    virtual void  setWidgetConfiguration(const WidgetConfiguration& widgetConfiguration) final {
+        _widgetConfiguration = widgetConfiguration;
+    };
+
 protected: // Numerical and auxiliary data
-    NumericalType   _value;                 /** Current value */
-    NumericalType   _defaultValue;          /** Default value */
-    NumericalType   _minimum;               /** Minimum value */
-    NumericalType   _maximum;               /** Maximum value */
-    QString         _prefix;                /** Prefix string */
-    QString         _suffix;                /** Suffix string */
-    std::uint32_t   _numberOfDecimals;      /** Number of decimals */
-    bool            _updateDuringDrag;      /** Whether the value should update during interaction */
+    NumericalType           _value;                 /** Current value */
+    NumericalType           _defaultValue;          /** Default value */
+    NumericalType           _minimum;               /** Minimum value */
+    NumericalType           _maximum;               /** Maximum value */
+    QString                 _prefix;                /** Prefix string */
+    QString                 _suffix;                /** Suffix string */
+    std::uint32_t           _numberOfDecimals;      /** Number of decimals */
+    bool                    _updateDuringDrag;      /** Whether the value should update during interaction */
+    WidgetConfiguration     _widgetConfiguration;   /** Widget configuration */
 
 protected: // Callbacks for implementations of the numerical action
     ValueChangedCB              _valueChanged;                  /** Callback which is called when the value changed */
