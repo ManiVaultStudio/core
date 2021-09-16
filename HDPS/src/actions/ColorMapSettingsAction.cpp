@@ -11,8 +11,9 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction* colorMapAction) :
-    WidgetAction(colorMapAction),
+ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
+    WidgetAction(&colorMapAction),
+    _colorMapAction(colorMapAction),
     _rangeAction(this, "Range", 0, 1, 0, 1, 0, 1),
     _resetToDefaultRangeAction(this, "Reset to default range"),
     _invertAction(this, "Mirror horizontally"),
@@ -37,11 +38,14 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction* colorMapAction) :
     connect(&_rangeAction, &DecimalRangeAction::rangeChanged, this, update);
 
     update();
+
+    setRangeEditingEnabled(colorMapAction.hasWidgetFlag(ColorMapAction::EditRange));
 }
 
 void ColorMapSettingsAction::setRangeEditingEnabled(const bool& rangeEditingEnabled)
 {
-    _rangeAction.setEnabled(rangeEditingEnabled);
+    _rangeAction.getRangeMinAction().setEnabled(rangeEditingEnabled);
+    _rangeAction.getRangeMaxAction().setEnabled(rangeEditingEnabled);
     _resetToDefaultRangeAction.setEnabled(rangeEditingEnabled);
 }
 
@@ -50,11 +54,15 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
 {
     auto layout = new QGridLayout();
 
-    layout->addWidget(colorMapSettingsAction->getRangeAction().getRangeMinAction().createLabelWidget(this), 0, 0);
-    layout->addWidget(colorMapSettingsAction->getRangeAction().getRangeMinAction().createWidget(this), 0, 1);
+    auto& rangeAction = colorMapSettingsAction->getRangeAction();
+    auto& rangeMinAction = rangeAction.getRangeMinAction();
+    auto& rangeMaxAction = rangeAction.getRangeMaxAction();
 
-    layout->addWidget(colorMapSettingsAction->getRangeAction().getRangeMaxAction().createLabelWidget(this), 1, 0);
-    layout->addWidget(colorMapSettingsAction->getRangeAction().getRangeMaxAction().createWidget(this), 1, 1);
+    layout->addWidget(rangeMinAction.createLabelWidget(this), 0, 0);
+    layout->addWidget(rangeMinAction.createWidget(this), 0, 1);
+
+    layout->addWidget(rangeMaxAction.createLabelWidget(this), 1, 0);
+    layout->addWidget(rangeMaxAction.createWidget(this), 1, 1);
 
     layout->addWidget(colorMapSettingsAction->getResetToDataRangeAction().createWidget(this), 2, 1);
 

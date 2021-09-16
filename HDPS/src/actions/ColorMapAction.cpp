@@ -17,7 +17,7 @@ namespace gui {
 ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
     WidgetAction(parent),
     _currentColorMapAction(this, "Current color map"),
-    _settingsAction(this),
+    _settingsAction(*this),
     _filteredColorMapModel(this, colorMapType)
 {
     setText(title);

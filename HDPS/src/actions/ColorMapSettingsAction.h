@@ -52,9 +52,9 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapAction Pointer to color map action
+     * @param colorMapAction Reference to color map action
      */
-    ColorMapSettingsAction(ColorMapAction* colorMapAction);
+    ColorMapSettingsAction(ColorMapAction& colorMapAction);
 
 public:
 
@@ -66,6 +66,7 @@ public:
 
 public: // Action getters
 
+    ColorMapAction& getColorMapAction() { return _colorMapAction; }
     ToggleAction& getInvertAction() { return _invertAction; }
     DecimalRangeAction& getRangeAction() { return _rangeAction; }
     TriggerAction& getResetToDataRangeAction() { return _resetToDefaultRangeAction; }
@@ -73,6 +74,7 @@ public: // Action getters
     IntegralAction& getNumberOfDiscreteStepsAction() { return _numberOfDiscreteStepsAction; }
 
 protected:
+    ColorMapAction&     _colorMapAction;                    /** Reference to color map action */
     DecimalRangeAction  _rangeAction;                       /** Range action */
     TriggerAction       _resetToDefaultRangeAction;         /** Reset minimum/maximum range to data range */
     ToggleAction        _invertAction;                      /** Color map is horizontally mirrored action */
