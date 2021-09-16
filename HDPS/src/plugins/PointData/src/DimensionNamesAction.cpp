@@ -9,13 +9,18 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
     WidgetAction(parent),
     EventListener(),
     _points(datasetName),
-    _dimensionNames()
+    _dimensionNames(),
+    _updateAction(this, "Update"),
+    _manualUpdateAction(this, "Manual update")
 {
     setText("Dimension names");
     setEventCore(core);
 
     const auto updateDimensionNames = [this]() -> void {
         if (!_points.isValid())
+            return;
+
+        if (_manualUpdateAction.isChecked())
             return;
 
         _dimensionNames.clear();
@@ -32,7 +37,16 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
         }
     };
 
-    registerDataEventByType(PointType, [this, updateDimensionNames](hdps::DataEvent* dataEvent) {
+    const auto dataChanged = [this]() -> void {
+        _manualUpdateAction.setChecked(_points->getNumDimensions() > 5);
+
+        if (_manualUpdateAction.isChecked())
+            return;
+
+        _updateAction.trigger();
+    };
+
+    registerDataEventByType(PointType, [this, dataChanged](hdps::DataEvent* dataEvent) {
         if (!_points.isValid())
             return;
 
@@ -42,10 +56,8 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
         switch (dataEvent->getType()) {
             case EventType::DataAdded:
             case EventType::DataChanged:
-            case EventType::SelectionChanged:
             {
-                updateDimensionNames();
-                emit dimensionNamesChanged(_dimensionNames);
+                dataChanged();
                 break;
             }
 
@@ -54,7 +66,22 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
         }
     });
 
-    updateDimensionNames();
+    dataChanged();
+
+    const auto updateUpdateAction = [this]() -> void {
+        _updateAction.setEnabled(_manualUpdateAction.isChecked());
+    };
+
+    connect(&_manualUpdateAction, &ToggleAction::toggled, this, [this, updateUpdateAction]() {
+        updateUpdateAction();
+    });
+
+    connect(&_updateAction, &TriggerAction::triggered, this, [this, updateDimensionNames]() {
+        updateDimensionNames();
+        emit dimensionNamesChanged(_dimensionNames);
+    });
+
+    updateUpdateAction();
 }
 
 QStringList DimensionNamesAction::getDimensionNames() const
@@ -73,6 +100,16 @@ DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dime
     layout->setMargin(0);
     layout->addWidget(listView);
 
+    auto updateLayout = new QVBoxLayout();
+
+    updateLayout->addWidget(dimensionNamesAction->getUpdateAction().createWidget(this));
+    updateLayout->addWidget(dimensionNamesAction->getManualUpdateAction().createCheckBoxWidget(this));
+    updateLayout->addStretch(1);
+
+    layout->addLayout(updateLayout);
+
+    setLayout(layout);
+
     const auto updateListView = [this, dimensionNamesAction, listView]() -> void {
         QStringList items;
 
@@ -87,6 +124,4 @@ DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dime
     });
 
     updateListView();
-
-    setLayout(layout);
 }

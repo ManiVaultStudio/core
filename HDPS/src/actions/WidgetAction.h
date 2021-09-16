@@ -2,10 +2,12 @@
 
 #include "WidgetActionWidget.h"
 #include "WidgetActionLabel.h"
+#include "WidgetActionResetButton.h"
 
 #include <QWidgetAction>
 #include <QMenu>
 #include <QDebug>
+#include <QFlags>
 
 class QLabel;
 
@@ -51,6 +53,13 @@ public:
     WidgetActionLabel* createLabelWidget(QWidget* parent);
 
     /**
+     * Create reset button
+     * @param parent Parent widget
+     * @return Pointer to reset button
+     */
+    WidgetActionResetButton* createResetButton(QWidget* parent);
+
+    /**
      * Get the context menu for the action
      * @param parent Parent widget
      * @return Context menu
@@ -73,6 +82,12 @@ public:
 
     /** Reset the current color to the default color */
     virtual void reset();
+
+    /** Gets the widget flags */
+    bool hasWidgetFlag(const std::int32_t& widgetFlag) const;
+
+    /** Set the widget flags */
+    void setWidgetFlags(const std::int32_t& widgetFlag);
 
 public: // Context
 
@@ -97,6 +112,12 @@ protected:
 signals:
 
     /**
+     * Signals that the resettable-ness changed
+     * @param canReset Whether the widget action can be reset
+     */
+    void canResetChanged(const bool& canReset);
+
+    /**
      * Signals that the widget action drop target status changed
      * @param isDropTarget Whether the widget action is a drop target
      */
@@ -107,7 +128,7 @@ protected:
     QString                     _context;                       /** The widget action resides outside of the data hierarchy widget (e.g. plugin view) */
     const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
     bool                        _isDropTarget;                  /** Whether the widget action is eligible for dropping by another widget action */
-    //WidgetActions               _children;                      /** Pointers to child widget actions */
+    std::int32_t                _widgetFlags;                   /** Widget flags */
 };
 
 /** List of widget actions */

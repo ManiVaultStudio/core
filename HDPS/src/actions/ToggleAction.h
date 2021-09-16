@@ -22,10 +22,15 @@ class ToggleAction : public WidgetAction
 
 public:
 
-    /** Interaction modes */
-    enum class InteractionMode {
-        CheckBox,       /** Checkbox interaction (default) */
-        PushButton,     /** Push button */
+    /** Describes the widget flags */
+    enum WidgetFlag {
+        CheckBox    = 0x00001,      /** The widget includes a check box */
+        Button      = 0x00002,      /** The widget includes a (toggle) push button */
+        Reset       = 0x00004,      /** The widget includes a reset push button */
+
+        Basic               = CheckBox,
+        CheckBoxAndReset    = CheckBox | Reset,
+        ButtonAndReset      = Button | Reset
     };
 
 public:
@@ -107,15 +112,6 @@ public:
      */
     void initialize(const bool& toggled = false, const bool& defaultToggled = false);
 
-    /** Gets toggled */
-    bool getToggled() const;
-
-    /**
-     * Sets toggled value
-     * @param toggled Toggled
-     */
-    void setToggled(const bool& toggled);
-
     /** Gets default toggled */
     bool getDefaultToggled() const;
 
@@ -130,12 +126,6 @@ public:
 
     /** Reset to default */
     void reset() override;
-
-    /**
-     * Set the interaction mode
-     * @param interactionMode Interaction mode
-     */
-    void setInteractionMode(const InteractionMode& interactionMode);
 
     /**
      * Creates a check box widget to interact with the toggle action
@@ -160,8 +150,7 @@ signals:
     void defaultToggledChanged(const bool& defaultToggled);
 
 protected:
-    bool                _defaultToggled;        /** Whether toggled by default */
-    InteractionMode     _interactionMode;       /** Interaction mode (checkbox or push  button) */
+    bool    _defaultToggled;        /** Whether toggled by default */
 };
 
 }

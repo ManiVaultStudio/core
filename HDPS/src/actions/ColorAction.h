@@ -23,8 +23,19 @@ class ColorAction : public WidgetAction
 
 public:
 
+    /** Describes the widget flags */
+    enum WidgetFlag {
+        Picker      = 0x00001,      /** The widget includes a color picker */
+        ResetButton = 0x00004,      /** The widget includes a reset push button */
+
+        Basic   = Picker,
+        All     = Picker | ResetButton
+    };
+
+public:
+
     /** Color picker push button class for color action */
-    class ColorPickerPushButtonWidget : public WidgetActionWidget
+    class PushButtonWidget : public WidgetActionWidget
     {
     protected:
 
@@ -57,7 +68,7 @@ public:
          * @param parent Pointer to parent widget
          * @param colorAction Pointer to color action
          */
-        ColorPickerPushButtonWidget(QWidget* parent, ColorAction* colorAction);
+        PushButtonWidget(QWidget* parent, ColorAction* colorAction);
 
     public: // Action getters
 
@@ -78,9 +89,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new ColorAction::ColorPickerPushButtonWidget(parent, this);
-    };
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;;
 
 public:
 

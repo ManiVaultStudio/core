@@ -18,6 +18,7 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
 {
     setText(title);
     initialize(color, defaultColor);
+    setWidgetFlags(WidgetFlag::Basic);
 }
 
 void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
@@ -66,13 +67,14 @@ void ColorAction::reset()
     setColor(_defaultColor);
 }
 
-ColorAction::ColorPickerPushButtonWidget::ColorPickerPushButtonWidget(QWidget* parent, ColorAction* colorAction) :
+ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
     WidgetActionWidget(parent, colorAction, WidgetActionWidget::State::Standard),
     _layout(),
     _colorPickerAction(this, "Color picker", colorAction->getColor(), colorAction->getColor()),
     _toolButton(this, _colorPickerAction)
 {
     setAcceptDrops(true);
+    setObjectName("PushButton");
 
     connect(&_colorPickerAction, &ColorPickerAction::colorChanged, this, [this, colorAction](const QColor& color) {
         colorAction->setColor(color);
@@ -91,13 +93,14 @@ ColorAction::ColorPickerPushButtonWidget::ColorPickerPushButtonWidget(QWidget* p
     setLayout(&_layout);
 }
 
-ColorAction::ColorPickerPushButtonWidget::ToolButton::ToolButton(QWidget* parent, ColorPickerAction& colorPickerAction) :
+ColorAction::PushButtonWidget::ToolButton::ToolButton(QWidget* parent, ColorPickerAction& colorPickerAction) :
     QToolButton(parent),
     _colorPickerAction(colorPickerAction)
 {
+    setObjectName("ToolButton");
 }
 
-void ColorAction::ColorPickerPushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)
+void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)
 {
     QToolButton::paintEvent(paintEvent);
 
@@ -145,11 +148,41 @@ void ColorAction::ColorPickerPushButtonWidget::ToolButton::paintEvent(QPaintEven
     // Do the painting
     painterColorPixmap.setBrush(QBrush(color));
     painterColorPixmap.setPen(QPen(penColor, 2.0, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
-    painterColorPixmap.drawRoundedRect(colorRect, 6, 6);
+    painterColorPixmap.drawRoundedRect(colorRect, 5, 5);
 
     QPainter painterColorWidget(this);
 
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
+}
+
+QWidget* ColorAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+{
+    auto widget = new QWidget(parent);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(3);
+
+    if (hasWidgetFlag(WidgetFlag::Picker))
+        layout->addWidget(new PushButtonWidget(parent, this));
+
+    if (hasWidgetFlag(WidgetFlag::ResetButton))
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    const auto update = [this, widget]() -> void {
+        widget->setEnabled(isEnabled());
+        widget->setToolTip(text());
+    };
+
+    connect(this, &IntegralAction::changed, this, [update]() {
+        update();
+    });
+
+    update();
+
+    return widget;
 }
 
 }

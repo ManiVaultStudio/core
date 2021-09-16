@@ -26,6 +26,17 @@ class OptionAction : public WidgetAction
 
 public:
 
+    /** Describes the widget flags */
+    enum WidgetFlag {
+        ComboBox    = 0x00001,      /** The widget includes a combobox */
+        ResetButton = 0x00004,      /** The widget includes a reset push button */
+
+        Basic   = ComboBox,
+        All     = ComboBox | ResetButton
+    };
+
+public:
+
     /**
      * Combobox widget class for option action
      */
@@ -49,9 +60,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) {
-        return new OptionAction::ComboBoxWidget(parent, this);
-    };
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard);;
 
 public:
 

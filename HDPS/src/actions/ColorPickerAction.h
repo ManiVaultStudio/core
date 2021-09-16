@@ -13,6 +13,8 @@ namespace gui {
 /**
  * Color picker action class
  *
+ * Note: for internal use by the color action only
+ *
  * @author Thomas Kroes
  */
 class ColorPickerAction : public WidgetAction
@@ -55,7 +57,7 @@ protected:
         return new Widget(parent, this, state);
     };
 
-public:
+protected:
 
     /**
      * Constructor
@@ -64,6 +66,8 @@ public:
      * @param color Initial color
      */
     ColorPickerAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
+
+public:
 
     /**
      * Initialize the color action
@@ -112,6 +116,8 @@ protected:
 
     /** Default default color */
     static const QColor DEFAULT_COLOR;
+
+    friend class ColorAction;
 };
 
 }

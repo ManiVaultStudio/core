@@ -27,15 +27,20 @@ class NumericalAction : public WidgetAction
     using PrefixChangedCB               = std::function<void()>;
     using SuffixChangedCB               = std::function<void()>;
     using NumberOfDecimalsChangedCB     = std::function<void()>;
+    using CanResetChangedCB             = std::function<void()>;
 
-    /** Describes the widget configurations */
-    enum class WidgetConfiguration {
-        ValueSpinBox        = 0x00001,
-        ValueSlider         = 0x00002,
-        ResetPushButton     = 0x00004,
+public:
 
-        Basic               = ValueSpinBox | ValueSlider,
-        All                 = ValueSpinBox | ValueSlider | ResetPushButton
+    /** Describes the widget settings */
+    enum WidgetFlag {
+        SpinBox = 0x00001,      /** Widget includes a spin box */
+        Slider  = 0x00002,      /** Widget includes a slider */
+        Reset   = 0x00004,      /** Widget includes a reset push button */
+
+        Basic               = SpinBox | Slider,
+        SpinBoxAndReset     = SpinBox | Reset,
+        SliderAndReset      = Slider | Reset,
+        All                 = SpinBox | Slider | Reset
     };
 
 public:
@@ -59,7 +64,6 @@ public:
         _suffix(),
         _numberOfDecimals(),
         _updateDuringDrag(true),
-        _widgetConfiguration(WidgetConfiguration::All),
         _valueChanged(),
         _defaultValueChanged(),
         _minimumChanged(),
@@ -69,6 +73,7 @@ public:
         _numberOfDecimalsChanged()
     {
         setText(title);
+        setWidgetFlags(WidgetFlag::Basic);
     }
 
     /**
@@ -109,9 +114,14 @@ public:
         if (value == _value)
             return;
 
+        const auto couldReset = canReset();
+
         _value = std::max(_minimum, std::min(value, _maximum));
 
         _valueChanged();
+
+        if (canReset() != couldReset)
+            _canResetChanged();
     }
 
     /** Gets the default value */
@@ -279,26 +289,15 @@ public:
         return static_cast<double>(offset / getIntervalLength());
     }
 
-    /** Gets the widget configuration */
-    virtual const WidgetConfiguration& getWidgetConfiguration() const final {
-        return _widgetConfiguration;
-    };
-
-    /** Gets the widget configuration */
-    virtual void  setWidgetConfiguration(const WidgetConfiguration& widgetConfiguration) final {
-        _widgetConfiguration = widgetConfiguration;
-    };
-
 protected: // Numerical and auxiliary data
-    NumericalType           _value;                 /** Current value */
-    NumericalType           _defaultValue;          /** Default value */
-    NumericalType           _minimum;               /** Minimum value */
-    NumericalType           _maximum;               /** Maximum value */
-    QString                 _prefix;                /** Prefix string */
-    QString                 _suffix;                /** Suffix string */
-    std::uint32_t           _numberOfDecimals;      /** Number of decimals */
-    bool                    _updateDuringDrag;      /** Whether the value should update during interaction */
-    WidgetConfiguration     _widgetConfiguration;   /** Widget configuration */
+    NumericalType   _value;                 /** Current value */
+    NumericalType   _defaultValue;          /** Default value */
+    NumericalType   _minimum;               /** Minimum value */
+    NumericalType   _maximum;               /** Maximum value */
+    QString         _prefix;                /** Prefix string */
+    QString         _suffix;                /** Suffix string */
+    std::uint32_t   _numberOfDecimals;      /** Number of decimals */
+    bool            _updateDuringDrag;      /** Whether the value should update during interaction */
 
 protected: // Callbacks for implementations of the numerical action
     ValueChangedCB              _valueChanged;                  /** Callback which is called when the value changed */
@@ -308,6 +307,7 @@ protected: // Callbacks for implementations of the numerical action
     PrefixChangedCB             _prefixChanged;                 /** Callback which is called when the prefix changed */
     SuffixChangedCB             _suffixChanged;                 /** Callback which is called when the suffix changed */
     NumberOfDecimalsChangedCB   _numberOfDecimalsChanged;       /** Callback which is called when the number of decimals changed */
+    CanResetChangedCB           _canResetChanged;               /** Callback which is called when the resettable-ness changed */
 
     static constexpr std::uint32_t  INIT_NUMBER_OF_DECIMALS     = 1;        /** Initialization number of decimals */
 };

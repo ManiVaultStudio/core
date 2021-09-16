@@ -22,6 +22,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
+    setWidgetFlags(WidgetFlag::Basic);
 
     _filteredColorMapModel.setSourceModel(ColorMapModel::getGlobalInstance());
     _currentColorMapAction.setCustomModel(&_filteredColorMapModel);
@@ -132,16 +133,18 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     _currentColorMapAction.setDefaultText(defaultColorMap);
 }
 
-ColorMapAction::ComboboxWidget::ComboboxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state) :
+ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state) :
     OptionAction::ComboBoxWidget(parent, optionAction),
     _colorMapAction(colorMapAction)
 {
+    setObjectName("ComboBox");
+
     connect(colorMapAction, &ColorMapAction::imageChanged, this, [this](const QImage& colorMapImage) {
         update();
     });
 }
 
-void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
+void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 {
     OptionAction::ComboBoxWidget::paintEvent(paintEvent);
 
@@ -193,7 +196,7 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
     // Do the painting
     painter.setPen(QPen(penColor, 2, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
     painter.setBrush(colorMapPixMapBrush);
-    painter.drawRoundedRect(colorMapRectangle, 6, 6);
+    painter.drawRoundedRect(colorMapRectangle, 5, 5);
 
     QPainter painterColorWidget(this);
 
@@ -201,26 +204,44 @@ void ColorMapAction::ComboboxWidget::paintEvent(QPaintEvent* paintEvent)
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
-ColorMapAction::Widget::Widget(QWidget* parent, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, colorMapAction, state),
-    _comboBoxWidget(dynamic_cast<QComboBox*>(new ComboboxWidget(parent, &colorMapAction->getCurrentColorMapAction(), colorMapAction, state))),
-    _settingsWidget(colorMapAction->getSettingsAction().createCollapsedWidget(this))
+QWidget* ColorMapAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
+    auto widget = new QWidget(parent);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(3);
 
-    layout->addWidget(_comboBoxWidget);
-    layout->addWidget(_settingsWidget);
+    auto comboBoxWidget = new ComboBoxWidget(parent, &_currentColorMapAction, this, state);
 
-    setLayout(layout);
+    layout->addWidget(comboBoxWidget);
 
-    connect(_comboBoxWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) -> void {
+    if (hasWidgetFlag(WidgetFlag::Settings))
+        layout->addWidget(_settingsAction.createCollapsedWidget(widget));
+
+    if (hasWidgetFlag(WidgetFlag::ResetButton))
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    connect(comboBoxWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, [widget](int index) -> void {
+        widget->update();
+    });
+
+    comboBoxWidget->setStyleSheet("QComboBox QAbstractItemView { min-width: 250px; }");
+
+    const auto update = [this, widget]() -> void {
+        widget->setEnabled(isEnabled());
+        widget->setToolTip(text());
+    };
+
+    connect(this, &IntegralAction::changed, this, [update]() {
         update();
     });
 
-    _comboBoxWidget->setStyleSheet("QComboBox QAbstractItemView { min-width: 250px; }");
+    update();
+
+    return widget;
 }
 
 }

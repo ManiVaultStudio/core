@@ -2,8 +2,6 @@
 
 #include <QLabel>
 
-class QLabel;
-
 namespace hdps {
 
 namespace gui {

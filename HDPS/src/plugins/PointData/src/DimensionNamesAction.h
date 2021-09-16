@@ -11,6 +11,7 @@ namespace hdps {
 }
 
 using namespace hdps::util;
+using namespace hdps::gui;
 
 /**
  * Dimension names action class
@@ -60,6 +61,11 @@ public:
     /** Get the dimension names */
     QStringList getDimensionNames() const;
 
+public: // Action getters
+
+    TriggerAction& getUpdateAction() { return _updateAction; }
+    ToggleAction& getManualUpdateAction() { return _manualUpdateAction; }
+
 signals:
 
     /** Signals that the dimension names changed
@@ -68,6 +74,8 @@ signals:
     void dimensionNamesChanged(const QStringList& dimensionNames);
 
 protected:
-    DatasetRef<Points>      _points;            /** Points dataset reference */
-    QStringList             _dimensionNames;    /** Dimension names */
+    DatasetRef<Points>      _points;                /** Points dataset reference */
+    QStringList             _dimensionNames;        /** Dimension names */
+    TriggerAction           _updateAction;          /** Update action */
+    ToggleAction            _manualUpdateAction;    /** Manual update action */
 };

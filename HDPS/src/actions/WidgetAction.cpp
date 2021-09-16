@@ -14,10 +14,9 @@ WidgetAction::WidgetAction(QObject* parent) :
     _createdBy(),
     _context(),
     _dataHierarchyItemContext(nullptr),
-    _isDropTarget(false)//,
-    //_children()
+    _isDropTarget(false),
+    _widgetFlags()
 {
-    //Application::current()->getWidgetActionsManager().addAction(this);
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
@@ -36,6 +35,11 @@ QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
 WidgetActionLabel* WidgetAction::createLabelWidget(QWidget* parent)
 {
     return new WidgetActionLabel(this, parent);
+}
+
+WidgetActionResetButton* WidgetAction::createResetButton(QWidget* parent)
+{
+    return new WidgetActionResetButton(this, parent);
 }
 
 void WidgetAction::setDropTarget(const bool& isDropTarget)
@@ -60,6 +64,16 @@ bool WidgetAction::canReset() const
 
 void WidgetAction::reset()
 {
+}
+
+bool WidgetAction::hasWidgetFlag(const std::int32_t& widgetFlag) const
+{
+    return _widgetFlags & widgetFlag;
+}
+
+void WidgetAction::setWidgetFlags(const std::int32_t& widgetFlags)
+{
+    _widgetFlags = widgetFlags;
 }
 
 void WidgetAction::setContext(const QString& context)

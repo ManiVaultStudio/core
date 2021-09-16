@@ -17,7 +17,7 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction* colorMapAction) :
     _resetToDefaultRangeAction(this, "Reset to default range"),
     _invertAction(this, "Mirror horizontally"),
     _discreteAction(this, "Discrete"),
-    _numberOfDiscreteStepsAction(this, "Number of discrete steps", 2, 25, 10, 10)
+    _numberOfDiscreteStepsAction(this, "Number of steps", 2, 25, 10, 10)
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cog"));
@@ -61,7 +61,7 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
     layout->addWidget(colorMapSettingsAction->getInvertAction().createWidget(this), 3, 1);
 
     auto discreteGroupBox   = new QGroupBox("Discrete");
-    auto discreteLayout     = new QVBoxLayout();
+    auto discreteLayout     = new QHBoxLayout();
 
     discreteGroupBox->setCheckable(true);
     discreteGroupBox->setLayout(discreteLayout);

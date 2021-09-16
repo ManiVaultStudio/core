@@ -18,6 +18,7 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
     _defaultIndex(0)
 {
     setText(title);
+    setWidgetFlags(WidgetFlag::Basic);
     initialize(options, currentOption, defaultOption);
 }
 
@@ -26,6 +27,8 @@ void OptionAction::initialize(const QStringList& options /*= QStringList()*/, co
     setOptions(options);
     setCurrentText(currentOption);
     setDefaultText(defaultOption);
+
+    emit canResetChanged(canReset());
 }
 
 QStringList OptionAction::getOptions() const
@@ -51,6 +54,7 @@ void OptionAction::setOptions(const QStringList& options)
     _defaultModel.setStringList(options);
 
     emit optionsChanged(getOptions());
+    emit canResetChanged(canReset());
 }
 
 const QAbstractItemModel* OptionAction::getModel() const
@@ -93,6 +97,7 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
+    emit canResetChanged(canReset());
 }
 
 std::int32_t OptionAction::getDefaultIndex() const
@@ -108,6 +113,7 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
     _defaultIndex = defaultIndex;
 
     emit defaultIndexChanged(_defaultIndex);
+    emit canResetChanged(canReset());
 }
 
 QString OptionAction::getDefaultText() const
@@ -139,6 +145,7 @@ void OptionAction::setCurrentText(const QString& currentText)
 
     emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
+    emit canResetChanged(canReset());
 }
 
 bool OptionAction::canReset() const
@@ -159,6 +166,7 @@ bool OptionAction::hasSelection() const
 OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction) :
     QComboBox(parent)
 {
+    setObjectName("ComboBox");
     setAcceptDrops(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
@@ -212,6 +220,35 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     updateComboBoxSelection();
     updateToolTip();
     update();
+}
+
+QWidget* OptionAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+{
+    auto widget = new QWidget(parent);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+
+    if (hasWidgetFlag(WidgetFlag::ComboBox))
+        layout->addWidget(new OptionAction::ComboBoxWidget(parent, this));
+
+    if (hasWidgetFlag(WidgetFlag::ResetButton))
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    const auto update = [this, widget]() -> void {
+        widget->setEnabled(isEnabled());
+        widget->setToolTip(text());
+    };
+
+    connect(this, &OptionAction::changed, this, [update]() {
+        update();
+    });
+
+    update();
+
+    return widget;
 }
 
 }

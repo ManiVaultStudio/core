@@ -24,8 +24,20 @@ class ColorMapAction : public WidgetAction
 
 public:
 
+    /** Describes the widget configurations (a color map combobox always exists) */
+    enum WidgetFlag {
+        Settings        = 0x00001,      /** Widgets have a settings popup to adjust range and other settings */
+        EditRange       = 0x00002,      /** Users are allowed to change the color map range */
+        ResetButton     = 0x00004,      /** There is a button to reset the color map */
+
+        Basic   = Settings | EditRange,
+        All     = Settings | EditRange | ResetButton
+    };
+
+public:
+
     /** Combobox widget class for display of a color map */
-    class ComboboxWidget : public OptionAction::ComboBoxWidget {
+    class ComboBoxWidget : public OptionAction::ComboBoxWidget {
     protected:
 
         /**
@@ -35,7 +47,7 @@ public:
          * @param colorMapAction Pointer to color map action
          * @param state State of the widget
          */
-        ComboboxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state);
+        ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state);
 
         /**
          * Paint event to override default paint
@@ -49,25 +61,6 @@ public:
         friend class ColorMapAction;
     };
 
-    /** Widget class for color map action */
-    class Widget : public WidgetActionWidget {
-    protected:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param colorMapAction Pointer to color map action
-         * @param state State of the widget
-         */
-        Widget(QWidget* parent, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state);
-
-    protected:
-        QComboBox*  _comboBoxWidget;        /** Pointer to combobox widget */
-        QWidget*    _settingsWidget;        /** Pointer to settings widget */
-
-        friend class ColorMapAction;
-    };
-
 protected:
 
     /**
@@ -75,9 +68,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
-    }
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;
 
 public:
 

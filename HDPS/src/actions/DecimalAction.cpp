@@ -16,6 +16,7 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
     _prefixChanged              = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged              = [this]() -> void { emit suffixChanged(_suffix); };
     _numberOfDecimalsChanged    = [this]() -> void { emit numberOfDecimalsChanged(_numberOfDecimals); };
+    _canResetChanged            = [this]() -> void { emit canResetChanged(canReset()); };
 
     initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
 }
@@ -24,7 +25,7 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
     QDoubleSpinBox(parent)
 {
     setAcceptDrops(true);
-    setObjectName("DoubleSpinBox");
+    setObjectName("SpinBox");
 
     const auto update = [this, decimalAction]() -> void {
         setEnabled(decimalAction->isEnabled());
@@ -193,10 +194,28 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const WidgetActionWidget::Sta
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
-    layout->addWidget(new SpinBoxWidget(parent, this), 1);
-    layout->addWidget(new SliderWidget(parent, this), 2);
+
+    if (hasWidgetFlag(WidgetFlag::SpinBox))
+        layout->addWidget(new SpinBoxWidget(parent, this), 1);
+
+    if (hasWidgetFlag(WidgetFlag::Slider))
+        layout->addWidget(new SliderWidget(parent, this), 2);
+
+    if (hasWidgetFlag(WidgetFlag::Reset))
+        layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
+
+    const auto update = [this, widget]() -> void {
+        widget->setEnabled(isEnabled());
+        widget->setToolTip(text());
+    };
+
+    connect(this, &DecimalAction::changed, this, [update]() {
+        update();
+    });
+
+    update();
 
     return widget;
 }

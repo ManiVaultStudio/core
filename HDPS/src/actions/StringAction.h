@@ -24,6 +24,17 @@ class StringAction : public WidgetAction
 
 public:
 
+    /** Describes the widget configurations (a color map combobox always exists) */
+    enum WidgetFlag {
+        LineEdit    = 0x00001,      /** Widget includes a line edit */
+        ResetButton = 0x00002,      /** There is a button to reset the string action */
+
+        Basic   = LineEdit,
+        All     = LineEdit | ResetButton
+    };
+
+public:
+
     /** Line edit widget class for string action */
     class LineEditWidget : public QLineEdit
     {
@@ -46,9 +57,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param state Widget state
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new StringAction::LineEditWidget(parent, this);
-    };
+    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;;
 
 public:
 

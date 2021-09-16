@@ -15,6 +15,7 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     _maximumChanged         = [this]() -> void { emit maximumChanged(_maximum); };
     _prefixChanged          = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged          = [this]() -> void { emit suffixChanged(_suffix); };
+    _canResetChanged        = [this]() -> void { emit canResetChanged(canReset()); };
 
     initialize(minimum, maximum, value, defaultValue);
 }
@@ -178,20 +179,38 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const WidgetActionWidget::St
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
-    layout->addWidget(new SpinBoxWidget(parent, this), 1);
-    layout->addWidget(new SliderWidget(parent, this), 2);
+
+    if (hasWidgetFlag(WidgetFlag::SpinBox))
+        layout->addWidget(new SpinBoxWidget(parent, this), 1);
+
+    if (hasWidgetFlag(WidgetFlag::Slider))
+        layout->addWidget(new SliderWidget(parent, this), 2);
+
+    if (hasWidgetFlag(WidgetFlag::Reset))
+        layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
+
+    const auto update = [this, widget]() -> void {
+        widget->setEnabled(isEnabled());
+        widget->setToolTip(text());
+    };
+
+    connect(this, &IntegralAction::changed, this, [update]() {
+        update();
+    });
+
+    update();
 
     return widget;
 }
 
-hdps::gui::IntegralAction::SpinBoxWidget* IntegralAction::createSpinBoxWidget(QWidget* parent)
+IntegralAction::SpinBoxWidget* IntegralAction::createSpinBoxWidget(QWidget* parent)
 {
     return new SpinBoxWidget(parent, this);
 }
 
-hdps::gui::IntegralAction::SliderWidget* IntegralAction::createSliderWidget(QWidget* parent)
+IntegralAction::SliderWidget* IntegralAction::createSliderWidget(QWidget* parent)
 {
     return new SliderWidget(parent, this);
 }

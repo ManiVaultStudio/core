@@ -11,27 +11,24 @@ namespace gui {
 
 ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/) :
     WidgetAction(parent),
-    _defaultToggled(defaultToggled),
-    _interactionMode(InteractionMode::CheckBox)
+    _defaultToggled(defaultToggled)
 {
     setCheckable(true);
     setText(title);
+    setWidgetFlags(WidgetFlag::CheckBox);
     initialize(toggled, defaultToggled);
+
+    connect(this, &ToggleAction::toggled, this, [this]() {
+        emit canResetChanged(canReset());
+    });
+
+    emit canResetChanged(canReset());
 }
 
 void ToggleAction::initialize(const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/)
 {
     setChecked(toggled);
-}
-
-bool ToggleAction::getToggled() const
-{
-    return isChecked();
-}
-
-void ToggleAction::setToggled(const bool& toggled)
-{
-    setChecked(toggled);
+    setDefaultToggled(defaultToggled);
 }
 
 bool ToggleAction::getDefaultToggled() const
@@ -51,17 +48,12 @@ void ToggleAction::setDefaultToggled(const bool& defaultToggled)
 
 bool ToggleAction::canReset() const
 {
-    return isChecked() == _defaultToggled;
+    return isChecked() != _defaultToggled;
 }
 
 void ToggleAction::reset()
 {
     setChecked(_defaultToggled);
-}
-
-void ToggleAction::setInteractionMode(const InteractionMode& interactionMode)
-{
-    _interactionMode = interactionMode;
 }
 
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* checkAction) :
@@ -88,7 +80,6 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* chec
         _checkBox->setEnabled(checkAction->isEnabled());
         _checkBox->setText(checkAction->text());
         _checkBox->setToolTip(checkAction->toolTip());
-        _checkBox->setChecked(checkAction->isChecked());
 
         setVisible(checkAction->isVisible());
     };
@@ -97,7 +88,17 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* chec
         update();
     });
 
+    const auto updateToggle = [this, checkAction]() -> void {
+        QSignalBlocker blocker(_checkBox);
+        _checkBox->setChecked(checkAction->isChecked());
+    };
+
+    connect(checkAction, &ToggleAction::toggled, this, [this, updateToggle]() {
+        updateToggle();
+    });
+
     update();
+    updateToggle();
 
     setLayout(layout);
 }
@@ -148,16 +149,35 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const WidgetActionWidget::Stat
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    switch (_interactionMode)
-    {
-        case InteractionMode::CheckBox:
-            return new ToggleAction::CheckBoxWidget(parent, this);
+    auto widget = new QWidget(parent);
+    auto layout = new QHBoxLayout();
 
-        case InteractionMode::PushButton:
-            return new ToggleAction::PushButtonWidget(parent, this);
-    }
+    layout->setMargin(0);
+    layout->setSpacing(3);
 
-    return new ToggleAction::CheckBoxWidget(parent, this);
+    if (hasWidgetFlag(WidgetFlag::CheckBox))
+        layout->addWidget(new ToggleAction::CheckBoxWidget(parent, this));
+
+    if (hasWidgetFlag(WidgetFlag::Button))
+        layout->addWidget(new ToggleAction::PushButtonWidget(parent, this));
+
+    if (hasWidgetFlag(WidgetFlag::Reset))
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    const auto update = [this, widget]() -> void {
+        widget->setEnabled(isEnabled());
+        widget->setToolTip(text());
+    };
+
+    connect(this, &ToggleAction::changed, this, [update]() {
+        update();
+    });
+
+    update();
+
+    return widget;
 }
 
 }

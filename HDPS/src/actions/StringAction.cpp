@@ -6,10 +6,13 @@ namespace hdps {
 
 namespace gui {
 
+    
+
 StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
     WidgetAction(parent)
 {
     setText(title);
+    setWidgetFlags(WidgetFlag::Basic);
     initialize(string, defaultString);
 }
 
@@ -77,6 +80,7 @@ void StringAction::setPlaceHolderString(const QString& placeholderString)
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
     QLineEdit(parent)
 {
+    setObjectName("LineEdit");
     setAcceptDrops(true);
     
     const auto update = [this, stringAction]() -> void {
@@ -114,6 +118,36 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 
     updateLineEdit();
     updatePlaceHolderText();
+}
+
+QWidget* StringAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+{
+    auto widget = new QWidget(parent);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(3);
+
+    if (hasWidgetFlag(WidgetFlag::LineEdit))
+        layout->addWidget(new StringAction::LineEditWidget(parent, this));
+
+    if (hasWidgetFlag(WidgetFlag::ResetButton))
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    const auto update = [this, widget]() -> void {
+        widget->setEnabled(isEnabled());
+        widget->setToolTip(text());
+    };
+
+    connect(this, &StringAction::changed, this, [update]() {
+        update();
+    });
+
+    update();
+
+    return widget;
 }
 
 }
