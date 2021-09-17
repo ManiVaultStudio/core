@@ -1,25 +1,26 @@
 #include "Images.h"
 #include "ImageData.h"
+#include "InfoAction.h"
 
 #include <QDebug>
-#include <QImage>
-#include <QInputDialog>
-
-#include <set>
-#include <cmath>
-
-#include "util/Timer.h"
-
-#include "PointData.h"
-
-#define PROFILE
 
 Images::Images(hdps::CoreInterface* core, QString dataName) :
     DataSet(core, dataName),
-    _imageData(nullptr),
-    _points(nullptr)
+    _imageData(nullptr)
 {
     _imageData = &getRawData<ImageData>();
+}
+
+void Images::init()
+{
+    _infoAction = QSharedPointer<InfoAction>::create(nullptr, _core, getName());
+
+    addAction(*_infoAction.get());
+}
+
+QString Images::createSubset(const QString subsetName /*= "subset"*/, const QString parentSetName /*= ""*/, const bool& visible /*= true*/) const
+{
+    return "";
 }
 
 hdps::DataSet* Images::copy() const
@@ -28,64 +29,77 @@ hdps::DataSet* Images::copy() const
 
     images->setName(getName());
 
-    images->_points = _points;
-
     return images;
 }
 
-ImageData::Type Images::type() const
+ImageData::Type Images::getType() const
 {
-    return _imageData->type();
+    return _imageData->getType();
 }
 
-std::uint32_t Images::noImages() const
+void Images::setType(const ImageData::Type& type)
 {
-    return _imageData->noImages();
+    _imageData->setType(type);
 }
 
-QSize Images::imageSize() const
+std::uint32_t Images::getNumberOfImages() const
 {
-    return _imageData->imageSize();
+    return _imageData->getNumberOfImages();
 }
 
-std::uint32_t Images::noComponents() const
+void Images::setNumberOfImages(const std::uint32_t& numberOfImages)
 {
-    return _imageData->noComponents();
+    _imageData->setNumberImages(numberOfImages);
 }
 
-std::vector<QString> Images::imageFilePaths() const
+QSize Images::getImageSize() const
 {
-    return _imageData->imageFilePaths();
+    return _imageData->getImageSize();
 }
 
-std::vector<QString> Images::dimensionNames() const
+void Images::setImageSize(const QSize& imageSize)
 {
-    return _imageData->dimensionNames();
+    _imageData->setImageSize(imageSize);
 }
 
-std::uint32_t Images::noPixels() const
+std::uint32_t Images::getNumberOfComponentsPerPixel() const
 {
-    return imageSize().width() * imageSize().height();
+    return _imageData->getNumberOfComponentsPerPixel();
+}
+
+void Images::setNumberOfComponentsPerPixel(const std::uint32_t& numberOfComponentsPerPixel)
+{
+    _imageData->setNumberOfComponentsPerPixel(numberOfComponentsPerPixel);
+}
+
+QStringList Images::imageFilePaths() const
+{
+    return _imageData->getImageFilePaths();
+}
+
+void Images::setImageFilePaths(const QStringList& imageFilePaths)
+{
+    _imageData->setImageFilePaths(imageFilePaths);
+}
+
+QStringList Images::dimensionNames() const
+{
+    return _imageData->getDimensionNames();
+}
+
+void Images::setDimensionNames(const QStringList& dimensionNames)
+{
+    _imageData->setDimensionNames(dimensionNames);
+}
+
+std::uint32_t Images::getNumberOfPixels() const
+{
+    return getImageSize().width() * getImageSize().height();
 }
 
 std::uint32_t Images::noChannelsPerPixel()
 {
     return 4;
-}
-
-QString Images::pointsName()
-{
-    return _imageData->pointsName();
-}
-
-Points* Images::points()
-{
-    return _points;
-}
-
-void Images::setPoints(Points* points)
-{
-    _points = points;
 }
 
 QIcon Images::getIcon() const

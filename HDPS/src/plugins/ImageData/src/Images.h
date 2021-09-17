@@ -16,7 +16,7 @@
 
 using namespace hdps::plugin;
 
-class Points;
+class InfoAction;
 
 /**
  * Images dataset class
@@ -36,53 +36,83 @@ public: // Construction
      */
     Images(hdps::CoreInterface* core, QString dataName);
 
+    /** Initializes the dataset */
+    void init() override;
+
 public: // Subsets
 
     /** Create an image subset (not implemented at this point) */
-    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override { return ""; };
+    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override;;
 
 public: // Image retrieval functions
 
     /** Obtain a copy of this dataset */
     hdps::DataSet* copy() const override;
 
-    /** Returns the image collection type e.g. stack or sequence */
-    ImageData::Type type() const;
+    /** Gets the image collection type e.g. stack or sequence */
+    ImageData::Type getType() const;
 
-    /** Returns the number of images in this dataset */
-    std::uint32_t noImages() const;
+    /**
+     * Sets the image collection type e.g. stack or sequence
+     * @param type Image collection type
+     */
+    void setType(const ImageData::Type& type);
 
-    /** Returns the size of the images */
-    QSize imageSize() const;
+    /** Gets the number of images in this dataset */
+    std::uint32_t getNumberOfImages() const;
 
-    /** Returns the number of components */
-    std::uint32_t noComponents() const;
+    /**
+     * Sets the number of images
+     * @param numberOfImages Number of images
+     */
+    void setNumberOfImages(const std::uint32_t& numberOfImages);
 
-    /** Returns the (absolute) image file paths */
-    std::vector<QString> imageFilePaths() const;
+    /** Gets the size of the images */
+    QSize getImageSize() const;
 
-    /** Returns the dimension names (the image names) */
-    std::vector<QString> dimensionNames() const;
+    /**
+     * Sets the image size
+     * @param imageSize Size of the image(s)
+     */
+    void setImageSize(const QSize& imageSize);
+
+    /** Gets the number of components per pixel */
+    std::uint32_t getNumberOfComponentsPerPixel() const;
+
+    /**
+     * Sets the number of components per pixel
+     * @param numberOfComponentsPerPixel Number of components per pixel
+     */
+    void setNumberOfComponentsPerPixel(const std::uint32_t& numberOfComponentsPerPixel);
+
+    /** Gets the image file paths */
+    QStringList imageFilePaths() const;
+
+    /**
+     * Sets the image file paths
+     * @param imageFilePaths Image file paths
+     */
+    void setImageFilePaths(const QStringList& imageFilePaths);
+
+    /** Gets the dimension names (the image names) */
+    QStringList dimensionNames() const;
+
+    /**
+     * Sets the dimension names
+     * @param dimensionNames Dimension names
+     */
+    void setDimensionNames(const QStringList& dimensionNames);
 
     /** Returns the number of pixels in total */
-    std::uint32_t noPixels() const;
+    std::uint32_t getNumberOfPixels() const;
 
     /** Returns the number of color channels per pixel */
     static std::uint32_t noChannelsPerPixel();
-
-    /** Name of the referenced points set */
-    QString pointsName();
-
-    /** Returns a pointer to the referenced points set */
-    Points* points();
-
-    /** Sets the referenced points set */
-    void setPoints(Points* points);
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;
 
 private:
-    ImageData*  _imageData;     /** Pointer to raw image data */
-    Points*     _points;        /** Pointer to the referenced points dataset */
+    ImageData*                      _imageData;     /** Pointer to raw image data */
+    QSharedPointer<InfoAction>      _infoAction;    /** Shared pointer to info action */
 };

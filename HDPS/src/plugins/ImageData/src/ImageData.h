@@ -27,7 +27,7 @@ public:
         MultiPartSequence
     };
 
-    static QString typeName(const Type& type)
+    static QString getTypeName(const Type& type)
     {
         switch (type)
         {
@@ -53,40 +53,74 @@ public:
     void init() override;
 
 public:
-    Type type() const;
+
+    /** Gets the image collection type e.g. stack or sequence */
+    Type getType() const;
+
+    /**
+     * Sets the image collection type e.g. stack or sequence
+     * @param type Image collection type
+     */
     void setType(const Type& type);
-    std::uint32_t noImages() const;
-    void setNoImages(const std::uint32_t& noImages);
-    QSize imageSize() const;
+
+    /** Gets the number of images */
+    std::uint32_t getNumberOfImages() const;
+
+    /**
+     * Sets the number of images
+     * @param numberOfImages Number of images
+     */
+    void setNumberImages(const std::uint32_t& numberOfImages);
+
+    /** Gets the image size */
+    QSize getImageSize() const;
+
+    /**
+     * Sets the image size
+     * @param imageSize Size of the image(s)
+     */
     void setImageSize(const QSize& imageSize);
-    std::uint32_t noComponents() const;
-    void setNoComponents(const std::uint32_t& noComponents);
-    std::vector<QString> imageFilePaths() const;
-    void setImageFilePaths(const std::vector<QString>& imageFilePaths);
-    std::vector<QString> dimensionNames() const;
-    void setDimensionNames(const std::vector<QString>& dimensionNames);
 
-    QString pointsName() const;
-    Points* points() const;
+    /** Gets the number of components per pixel */
+    std::uint32_t getNumberOfComponentsPerPixel() const;
 
-public:
-    std::uint32_t noPoints() const;
-    std::uint32_t noDimensions() const;
-    
-    float pointValue(const std::uint32_t& index) const;
-    float pointValue(const std::uint32_t& x, const std::uint32_t& y) const;
+    /**
+     * Sets the number of components per pixel
+     * @param numberOfPixelComponents Number of pixel components
+     */
+    void setNumberOfComponentsPerPixel(const std::uint32_t& numberOfComponentsPerPixel);
 
+    /** Gets the image file paths */
+    QStringList getImageFilePaths() const;
+
+    /**
+     * Sets the image file paths
+     * @param imageFilePaths Image file paths
+     */
+    void setImageFilePaths(const QStringList& imageFilePaths);
+
+    /** Gets the dimension names (the image names) */
+    const QStringList& getDimensionNames() const;
+
+    /**
+     * Sets the dimension names
+     * @param dimensionNames Dimension names
+     */
+    void setDimensionNames(const QStringList& dimensionNames);
+
+    /**
+     * Create images dataset
+     * @return Pointer to dataset
+     */
     hdps::DataSet* createDataSet() const override;
 
 private:
-    Type                    _type;
-    std::uint32_t           _noImages;
-    QSize                   _imageSize;
-    std::uint32_t           _noComponents;
-    std::vector<QString>    _imageFilePaths;
-    std::vector<QString>    _dimensionNames;
-    QString                 _pointsName;
-    Points*                 _points;
+    Type                _type;                          /** Image collection type e.g. stack or sequence */
+    std::uint32_t       _numberOfImages;                /** Number of images in the set */
+    QSize               _imageSize;                     /** Image resolution */
+    std::uint32_t       _numberOfComponentsPerPixel;    /** Number of components per pixel */
+    QStringList         _imageFilePaths;                /** Image file paths */
+    QStringList         _dimensionNames;                /** Dimension names */
 };
 
 class ImageDataFactory : public hdps::plugin::RawDataFactory

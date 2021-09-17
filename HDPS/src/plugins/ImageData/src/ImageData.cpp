@@ -2,37 +2,26 @@
 #include "Images.h"
 #include "Application.h"
 
-#include <PointData.h>
-
-#include <QtCore>
 #include <QDebug>
-#include <QImage>
-
-#include <set>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.ImageData")
 
 ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :
     hdps::plugin::RawData(factory, ImageType),
     _type(Type::Undefined),
-    _noImages(0),
+    _numberOfImages(0),
     _imageSize(),
-    _noComponents(0),
-    _pointsName(""),
-    _points(nullptr)
+    _numberOfComponentsPerPixel(0),
+    _imageFilePaths(),
+    _dimensionNames()
 {
 }
 
 void ImageData::init()
 {
-    _pointsName = _core->addData("Points", QString("imagepointdata"));
-    
-    _points = &(dynamic_cast<Points&>(_core->requestData(_pointsName)));
-
-    _core->notifyDataAdded(_pointsName);
 }
 
-ImageData::Type ImageData::type() const
+ImageData::Type ImageData::getType() const
 {
     return _type;
 }
@@ -42,7 +31,7 @@ void ImageData::setType(const ImageData::Type& type)
     _type = type;
 }
 
-QSize ImageData::imageSize() const
+QSize ImageData::getImageSize() const
 {
     return _imageSize;
 }
@@ -52,82 +41,44 @@ void ImageData::setImageSize(const QSize& imageSize)
     _imageSize = imageSize;
 }
 
-std::uint32_t ImageData::noComponents() const
+std::uint32_t ImageData::getNumberOfComponentsPerPixel() const
 {
-    return _noComponents;
+    return _numberOfComponentsPerPixel;
 }
 
-void ImageData::setNoComponents(const std::uint32_t& noComponents)
+void ImageData::setNumberOfComponentsPerPixel(const std::uint32_t& numberOfComponentsPerPixel)
 {
-    _noComponents = noComponents;
+    _numberOfComponentsPerPixel = numberOfComponentsPerPixel;
 }
 
-QString ImageData::pointsName() const
-{
-    return _pointsName;
-}
-
-Points* ImageData::points() const
-{
-    return _points;
-}
-
-std::uint32_t ImageData::noPoints() const
-{
-    if (_points == nullptr)
-        return 0;
-
-    return _points->getNumPoints();
-}
-
-std::uint32_t ImageData::noDimensions() const
-{
-    if (_points == nullptr)
-        return 0;
-
-    return _points->getNumDimensions();
-}
-
-std::vector<QString> ImageData::imageFilePaths() const
+QStringList ImageData::getImageFilePaths() const
 {
     return _imageFilePaths;
 }
 
-void ImageData::setImageFilePaths(const std::vector<QString>& imageFilePaths)
+void ImageData::setImageFilePaths(const QStringList& imageFilePaths)
 {
     _imageFilePaths = imageFilePaths;
 }
 
-std::vector<QString> ImageData::dimensionNames() const
+const QStringList& ImageData::getDimensionNames() const
 {
     return _dimensionNames;
 }
 
-void ImageData::setDimensionNames(const std::vector<QString>& dimensionNames)
+void ImageData::setDimensionNames(const QStringList& dimensionNames)
 {
     _dimensionNames = dimensionNames;
-
-    _points->setDimensionNames(dimensionNames);
 }
 
-std::uint32_t ImageData::noImages() const
+std::uint32_t ImageData::getNumberOfImages() const
 {
-    return _noImages;
+    return _numberOfImages;
 }
 
-void ImageData::setNoImages(const std::uint32_t& noImages)
+void ImageData::setNumberImages(const std::uint32_t& numberOfImages)
 {
-    _noImages = noImages;
-}
-
-float ImageData::pointValue(const std::uint32_t& index) const
-{
-    return _points->getValueAt(index);
-}
-
-float ImageData::pointValue(const std::uint32_t& x, const std::uint32_t& y) const
-{
-    return pointValue(y * _imageSize.width() + x);
+    _numberOfImages = numberOfImages;
 }
 
 hdps::DataSet* ImageData::createDataSet() const
