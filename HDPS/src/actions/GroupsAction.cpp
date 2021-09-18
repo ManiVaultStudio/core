@@ -78,10 +78,27 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
     _widgetActionGroup(groupAction),
     _treeWidgetItem(treeWidgetItem)
 {
-    auto frameLayout    = new QHBoxLayout();
-    auto iconLabel      = new QLabel();
+    auto frameLayout        = new QHBoxLayout();
+    auto iconToolButton     = new QPushButton();
+    auto resetToolButton    = new QPushButton();
 
-    frameLayout->addWidget(iconLabel);
+    const auto iconSize = QSize(12, 12);
+
+    iconToolButton->setEnabled(false);
+
+    iconToolButton->setStyleSheet("QPushButton { border: none; }");
+    resetToolButton->setStyleSheet("QPushButton { border: none; }");
+
+    //iconToolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    //resetToolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    
+    iconToolButton->setFixedSize(iconSize);
+    resetToolButton->setFixedSize(iconSize);
+
+    frameLayout->setMargin(3);
+    frameLayout->addWidget(iconToolButton);
+    frameLayout->addStretch(1);
+    frameLayout->addWidget(resetToolButton);
 
     setLayout(frameLayout);
 
@@ -91,7 +108,7 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
     });
 
     // Update the state of the push button when the group action changes
-    const auto update = [this, iconLabel]() -> void {
+    const auto update = [this, iconToolButton]() -> void {
         if (_widgetActionGroup->isExpanded()) {
             _treeWidgetItem->setExpanded(true);
 
@@ -116,18 +133,46 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
 
         // Pick icon that corresponds to the group action state
         const auto iconName = _widgetActionGroup->isExpanded() ? "angle-down" : "angle-right";
-        const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
 
         // Assign the icon
-        iconLabel->setPixmap(icon.pixmap(QSize(12, 12)));
+        iconToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon(iconName));
     };
+
+    resetToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
 
     // Update when the group action is expanded or collapsed
     connect(_widgetActionGroup, &GroupAction::expanded, this, update);
     connect(_widgetActionGroup, &GroupAction::collapsed, this, update);
 
+    // Update the state of the reset push button
+    const auto updateResetPushButton = [this, groupAction, resetToolButton]() -> void {
+        auto canReset = false;
+
+        for (auto child : groupAction->children()) {
+            auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+            if (childWidgetAction == nullptr)
+                continue;
+
+            if (childWidgetAction->canReset())
+                canReset = true;
+        }
+
+        resetToolButton->setEnabled(canReset);
+    };
+
+    // Walk over all child actions
+    for (auto child : groupAction->children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (childWidgetAction == nullptr)
+            continue;
+
+        connect(childWidgetAction, &WidgetAction::canResetChanged, this, updateResetPushButton);
+    }
 
     update();
+    updateResetPushButton();
 }
 
 }

@@ -16,11 +16,11 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
     setText("Dimension names");
     setEventCore(core);
 
+    _updateAction.setToolTip("Update the dimension names");
+    _manualUpdateAction.setToolTip("Update the dimension names manually");
+
     const auto updateDimensionNames = [this]() -> void {
         if (!_points.isValid())
-            return;
-
-        if (_manualUpdateAction.isChecked())
             return;
 
         _dimensionNames.clear();
@@ -38,7 +38,7 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
     };
 
     const auto dataChanged = [this]() -> void {
-        _manualUpdateAction.setChecked(_points->getNumDimensions() > 5);
+        _manualUpdateAction.setChecked(_points->getNumDimensions() > 1000);
 
         if (_manualUpdateAction.isChecked())
             return;
