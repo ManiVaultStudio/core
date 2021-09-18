@@ -111,6 +111,7 @@ set(ACTIONS_HEADERS
     src/actions/DecimalAction.h
     src/actions/DecimalRangeAction.h
     src/actions/GroupAction.h
+    src/actions/GroupsAction.h
     src/actions/IntegralAction.h
     src/actions/NumericalAction.h
     src/actions/OptionAction.h
@@ -135,6 +136,7 @@ set(ACTIONS_SOURCES
     src/actions/DecimalAction.cpp
     src/actions/DecimalRangeAction.cpp
     src/actions/GroupAction.cpp
+    src/actions/GroupsAction.cpp
     src/actions/IntegralAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
