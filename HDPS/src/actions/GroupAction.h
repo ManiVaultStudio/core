@@ -62,7 +62,7 @@ public:
      * @param parent Pointer to parent object
      * @param expanded Whether the group is initially expanded/collapsed
      */
-    explicit GroupAction(QObject* parent, const bool& expanded = false);
+    GroupAction(QObject* parent, const bool& expanded = false);
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);

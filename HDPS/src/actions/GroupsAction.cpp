@@ -30,13 +30,27 @@ const hdps::gui::GroupsAction::GroupActions& GroupsAction::getGroupActions() con
 GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
     WidgetActionWidget(parent, groupsAction, WidgetActionWidget::State::Standard)
 {
+    setObjectName("GroupsAction");
+
     auto treeWidget = new QTreeWidget();
 
     // Configure tree widget
     treeWidget->setHeaderHidden(true);
     treeWidget->setIndentation(0);
-    treeWidget->setAutoFillBackground(true);
     treeWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    treeWidget->setSelectionMode(QAbstractItemView::NoSelection);
+
+    treeWidget->setStyleSheet("QTreeWidget { border: none; }");
+
+    QStyleOption styleOption;
+
+    styleOption.init(treeWidget);
+
+    auto palette = treeWidget->palette();
+
+    palette.setColor(QPalette::Base, styleOption.palette.color(QPalette::Normal, QPalette::Button));
+
+    treeWidget->setPalette(palette);
 
     auto layout = new QVBoxLayout();
 
@@ -78,27 +92,12 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
     _widgetActionGroup(groupAction),
     _treeWidgetItem(treeWidgetItem)
 {
-    auto frameLayout        = new QHBoxLayout();
-    auto iconToolButton     = new QPushButton();
-    auto resetToolButton    = new QPushButton();
-
-    const auto iconSize = QSize(12, 12);
-
-    iconToolButton->setEnabled(false);
-
-    iconToolButton->setStyleSheet("QPushButton { border: none; }");
-    resetToolButton->setStyleSheet("QPushButton { border: none; }");
-
-    //iconToolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    //resetToolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    
-    iconToolButton->setFixedSize(iconSize);
-    resetToolButton->setFixedSize(iconSize);
+    auto frameLayout    = new QHBoxLayout();
+    auto iconLabel      = new QLabel();
 
     frameLayout->setMargin(3);
-    frameLayout->addWidget(iconToolButton);
+    frameLayout->addWidget(iconLabel);
     frameLayout->addStretch(1);
-    frameLayout->addWidget(resetToolButton);
 
     setLayout(frameLayout);
 
@@ -108,17 +107,22 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
     });
 
     // Update the state of the push button when the group action changes
-    const auto update = [this, iconToolButton]() -> void {
+    const auto update = [this, iconLabel]() -> void {
         if (_widgetActionGroup->isExpanded()) {
             _treeWidgetItem->setExpanded(true);
 
             // Create group action widget on-the-fly
             auto groupWidget = _widgetActionGroup->createWidget(this);
 
-            groupWidget->setAutoFillBackground(true);
+            QStyleOption styleOption;
+
+            styleOption.init(groupWidget);
 
             // Create new tree widget item for the group action widget
             auto section = new QTreeWidgetItem(_treeWidgetItem);
+
+            // Set group background color
+            section->setBackgroundColor(0, styleOption.palette.color(QPalette::Normal, QPalette::Button));
 
             // Add the item as a child and assign the group action widget
             _treeWidgetItem->addChild(section);
@@ -133,17 +137,17 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
 
         // Pick icon that corresponds to the group action state
         const auto iconName = _widgetActionGroup->isExpanded() ? "angle-down" : "angle-right";
+        const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
 
         // Assign the icon
-        iconToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon(iconName));
+        iconLabel->setPixmap(icon.pixmap(QSize(12, 12)));
     };
-
-    resetToolButton->setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
 
     // Update when the group action is expanded or collapsed
     connect(_widgetActionGroup, &GroupAction::expanded, this, update);
     connect(_widgetActionGroup, &GroupAction::collapsed, this, update);
 
+    /*
     // Update the state of the reset push button
     const auto updateResetPushButton = [this, groupAction, resetToolButton]() -> void {
         auto canReset = false;
@@ -170,9 +174,10 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
 
         connect(childWidgetAction, &WidgetAction::canResetChanged, this, updateResetPushButton);
     }
+    */
 
     update();
-    updateResetPushButton();
+    //updateResetPushButton();
 }
 
 }

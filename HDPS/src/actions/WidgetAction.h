@@ -29,7 +29,7 @@ class WidgetAction : public QWidgetAction
     Q_OBJECT
 
 public:
-    explicit WidgetAction(QObject* parent);
+    WidgetAction(QObject* parent);
 
     /**
      * Create standard widget

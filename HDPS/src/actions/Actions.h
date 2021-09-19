@@ -5,6 +5,7 @@
 #include "DecimalAction.h"
 #include "DecimalRangeAction.h"
 #include "GroupAction.h"
+#include "GroupsAction.h"
 #include "IntegralAction.h"
 #include "OptionAction.h"
 #include "TriggerAction.h"
