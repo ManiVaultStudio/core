@@ -89,6 +89,12 @@ public:
      */
     void initialize(const QString& colorMap = "", const QString& defaultColorMap = "");
 
+    /** Gets the current color map type */
+    util::ColorMap::Type getColorMapType() const;
+
+    /** Sets the current color map type */
+    void setColorMapType(const util::ColorMap::Type& colorMapType);
+
 public: // Option action wrappers
 
     /** Gets the current color map name */
@@ -120,6 +126,12 @@ public: // Action getters
 signals:
 
     /**
+     * Signals that the current color map type changed
+     * @param colorMapType Current color map type
+     */
+    void colorMapTypeChanged(const util::ColorMap::Type& colorMapType);
+
+    /**
      * Signals that the current color map image changed
      * @param image Current color map image
      */
@@ -127,8 +139,8 @@ signals:
 
 protected:
     OptionAction                _currentColorMapAction;     /** Current color map selection action */
+    util::ColorMapFilterModel   _colorMapFilterModel;       /** The filtered color map model (contains either 1D or 2D color maps) */
     ColorMapSettingsAction      _settingsAction;            /** Color map settings action */
-    util::ColorMapFilterModel   _filteredColorMapModel;     /** The filtered color map model (contains either 1D or 2D color maps) */
 };
 
 }

@@ -57,7 +57,7 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-bool ColorAction::canReset() const
+bool ColorAction::isResettable() const
 {
     return _color != _defaultColor;
 }

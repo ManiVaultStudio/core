@@ -18,7 +18,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     setAcceptDrops(true);
     setEnabled(widgetAction->isEnabled());
     setToolTip(widgetAction->text());
-    setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
     const auto updateTextAndTooltip = [this, widgetAction]() -> void {
         setText(QString("%1: ").arg(widgetAction->text()));

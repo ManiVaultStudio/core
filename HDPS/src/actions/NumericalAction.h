@@ -27,7 +27,7 @@ class NumericalAction : public WidgetAction
     using PrefixChangedCB               = std::function<void()>;
     using SuffixChangedCB               = std::function<void()>;
     using NumberOfDecimalsChangedCB     = std::function<void()>;
-    using CanResetChangedCB             = std::function<void()>;
+    using ResettableChangedCB             = std::function<void()>;
 
 public:
 
@@ -114,14 +114,14 @@ public:
         if (value == _value)
             return;
 
-        const auto couldReset = canReset();
+        const auto couldReset = isResettable();
 
         _value = std::max(_minimum, std::min(value, _maximum));
 
         _valueChanged();
 
-        if (canReset() != couldReset)
-            _canResetChanged();
+        if (isResettable() != couldReset)
+            _resettableChanged();
     }
 
     /** Gets the default value */
@@ -143,7 +143,7 @@ public:
     }
 
     /** Determines whether the current value can be reset to its default */
-    virtual bool canReset() const final {
+    virtual bool isResettable() const final {
         return _value != _defaultValue;
     }
 
@@ -307,7 +307,7 @@ protected: // Callbacks for implementations of the numerical action
     PrefixChangedCB             _prefixChanged;                 /** Callback which is called when the prefix changed */
     SuffixChangedCB             _suffixChanged;                 /** Callback which is called when the suffix changed */
     NumberOfDecimalsChangedCB   _numberOfDecimalsChanged;       /** Callback which is called when the number of decimals changed */
-    CanResetChangedCB           _canResetChanged;               /** Callback which is called when the resettable-ness changed */
+    ResettableChangedCB         _resettableChanged;             /** Callback which is called when the resettable-ness changed */
 
     static constexpr std::uint32_t  INIT_NUMBER_OF_DECIMALS     = 1;        /** Initialization number of decimals */
 };

@@ -125,7 +125,7 @@ public:
     void setDefaultColor(const QColor& defaultColor);
 
     /** Determines whether the current color can be reset to its default */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset the current color to the default color */
     void reset() override;

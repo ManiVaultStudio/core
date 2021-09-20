@@ -2,7 +2,8 @@
 #include "ColorMapAction.h"
 #include "Application.h"
 
-#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QGroupBox>
 
 using namespace hdps::util;
@@ -14,90 +15,70 @@ namespace gui {
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction),
-    _rangeAction(this, "Range", 0, 1, 0, 1, 0, 1),
-    _resetToDefaultRangeAction(this, "Reset to default range"),
-    _invertAction(this, "Mirror horizontally"),
-    _discreteAction(this, "Discrete"),
-    _numberOfDiscreteStepsAction(this, "Number of steps", 2, 25, 10, 10)
+    _horizontalAxisAction(colorMapAction, "Horizontal"),
+    _verticalAxisAction(colorMapAction, "Vertical"),
+    _discreteAction(colorMapAction)
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cog"));
 
-    _rangeAction.setToolTip("Range of the color map");
-    _invertAction.setToolTip("Mirror the color map horizontally");
-    _resetToDefaultRangeAction.setToolTip("Reset the min/max value to the data range");
+    _horizontalAxisAction.setToolTip("Range of the color map");
+    _horizontalAxisAction.setToolTip("Mirror the color map horizontally");
+    _verticalAxisAction.setToolTip("Mirror the color map vertically");
 
-    const auto update = [this]() {
-        _resetToDefaultRangeAction.setEnabled(_rangeAction.canReset());
+    const auto updateRangeActions = [this]() -> void {
+        _horizontalAxisAction.setText(_colorMapAction.getColorMapType() == ColorMap::Type::OneDimensional ? "Range" : "Horizontal");
     };
 
-    connect(&_resetToDefaultRangeAction, &TriggerAction::triggered, this, [this, update]() {
-        _rangeAction.reset();
-    });
+    connect(&colorMapAction, &ColorMapAction::colorMapTypeChanged, this, updateRangeActions);
 
-    connect(&_rangeAction, &DecimalRangeAction::rangeChanged, this, update);
-
-    update();
-
-    setRangeEditingEnabled(colorMapAction.hasWidgetFlag(ColorMapAction::EditRange));
+    updateRangeActions();
 }
 
-void ColorMapSettingsAction::setRangeEditingEnabled(const bool& rangeEditingEnabled)
+void ColorMapSettingsAction::reset()
 {
-    _rangeAction.getRangeMinAction().setEnabled(rangeEditingEnabled);
-    _rangeAction.getRangeMaxAction().setEnabled(rangeEditingEnabled);
-    _resetToDefaultRangeAction.setEnabled(rangeEditingEnabled);
+    _colorMapAction.reset();
+    _horizontalAxisAction.reset();
+    _verticalAxisAction.reset();
+    _discreteAction.reset();
 }
 
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, colorMapSettingsAction, state)
+    WidgetActionWidget(parent, colorMapSettingsAction, state),
+    _colorMapViewAction(colorMapSettingsAction->getColorMapAction())
 {
-    auto layout = new QGridLayout();
+    auto mainLayout     = new QHBoxLayout();
+    auto settingsLayout = new QVBoxLayout();
+    auto rangeLayout    = new QHBoxLayout();
 
-    auto& rangeAction = colorMapSettingsAction->getRangeAction();
-    auto& rangeMinAction = rangeAction.getRangeMinAction();
-    auto& rangeMaxAction = rangeAction.getRangeMaxAction();
+    mainLayout->setMargin(0);
 
-    layout->addWidget(rangeMinAction.createLabelWidget(this), 0, 0);
-    layout->addWidget(rangeMinAction.createWidget(this), 0, 1);
+    switch (colorMapSettingsAction->getColorMapAction().getColorMapType())
+    {
+        case ColorMap::Type::OneDimensional:
+        {
+            rangeLayout->addWidget(colorMapSettingsAction->getHorizontalAxisAction().createWidget(this));
+            break;
+        }
 
-    layout->addWidget(rangeMaxAction.createLabelWidget(this), 1, 0);
-    layout->addWidget(rangeMaxAction.createWidget(this), 1, 1);
+        case ColorMap::Type::TwoDimensional:
+        {
+            mainLayout->addWidget(_colorMapViewAction.createWidget(this));
+            rangeLayout->addWidget(colorMapSettingsAction->getHorizontalAxisAction().createWidget(this));
+            rangeLayout->addWidget(colorMapSettingsAction->getVerticalAxisAction().createWidget(this));
+            break;
+        }
 
-    layout->addWidget(colorMapSettingsAction->getResetToDataRangeAction().createWidget(this), 2, 1);
+        default:
+            break;
+    }
 
-    layout->addWidget(colorMapSettingsAction->getInvertAction().createWidget(this), 3, 1);
+    mainLayout->addLayout(settingsLayout);
 
-    auto discreteGroupBox   = new QGroupBox("Discrete");
-    auto discreteLayout     = new QHBoxLayout();
+    settingsLayout->addLayout(rangeLayout);
+    settingsLayout->addWidget(colorMapSettingsAction->getDiscreteAction().createWidget(this));
 
-    discreteGroupBox->setCheckable(true);
-    discreteGroupBox->setLayout(discreteLayout);
-
-    auto& discrete                      = colorMapSettingsAction->getDiscreteAction();
-    auto& numberOfDiscreteStepsAction   = colorMapSettingsAction->getNumberOfDiscreteStepsAction();
-
-    discreteLayout->addWidget(numberOfDiscreteStepsAction.createLabelWidget(this));
-    discreteLayout->addWidget(numberOfDiscreteStepsAction.createWidget(this));
-
-    layout->addWidget(discreteGroupBox, layout->rowCount(), 0, 1, 2);
-
-    const auto updateGroupBox = [this, discreteGroupBox, &discrete]() {
-        QSignalBlocker blocker(discreteGroupBox);
-
-        discreteGroupBox->setTitle(discrete.text());
-        discreteGroupBox->setChecked(discrete.isChecked());
-    };
-
-    connect(&discrete, &ToggleAction::toggled, this, updateGroupBox);
-
-    connect(discreteGroupBox, &QGroupBox::toggled, this, [this, &discrete](bool toggled) {
-        discrete.setChecked(toggled);
-    });
-
-    setPopupLayout(layout);
-
-    updateGroupBox();
+    setLayout(mainLayout);
 }
 
 }

@@ -96,7 +96,7 @@ public:
     void setDefaultString(const QString& defaultString);
 
     /** Determines whether the current string can be reset to its default string */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset the current string to the default string */
     void reset() override;

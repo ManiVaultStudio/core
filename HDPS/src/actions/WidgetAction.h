@@ -78,9 +78,12 @@ public:
     bool isDropTarget() const;
 
     /** Determines whether the current color can be reset to its default */
-    virtual bool canReset() const;
+    virtual bool isResettable() const;
 
-    /** Reset the current color to the default color */
+    /** Sets the action resettable */
+    virtual void setResettable(const bool& resettable);
+
+    /** Reset to default */
     virtual void reset();
 
     /** Gets the widget flags */
@@ -113,9 +116,9 @@ signals:
 
     /**
      * Signals that the resettable-ness changed
-     * @param canReset Whether the widget action can be reset
+     * @param isResettable Whether the widget action can be reset
      */
-    void canResetChanged(const bool& canReset);
+    void resettableChanged(const bool& isResettable);
 
     /**
      * Signals that the widget action drop target status changed
@@ -129,6 +132,7 @@ protected:
     const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
     bool                        _isDropTarget;                  /** Whether the widget action is eligible for dropping by another widget action */
     std::int32_t                _widgetFlags;                   /** Widget flags */
+    bool                        _resettable;                    /** Whether the action can be reset */
 };
 
 /** List of widget actions */

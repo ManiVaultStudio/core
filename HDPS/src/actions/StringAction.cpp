@@ -52,7 +52,7 @@ void StringAction::setDefaultString(const QString& defaultString)
     emit defaultStringChanged(_defaultString);
 }
 
-bool StringAction::canReset() const
+bool StringAction::isResettable() const
 {
     return _string != _defaultString;
 }

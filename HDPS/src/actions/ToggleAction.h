@@ -122,7 +122,7 @@ public:
     void setDefaultToggled(const bool& defaultToggled);
 
     /** Determines whether the action can be reset */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset to default */
     void reset() override;

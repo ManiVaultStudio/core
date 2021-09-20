@@ -140,7 +140,7 @@ public:
     void setDefaultText(const QString& defaultText);
 
     /** Determines whether the current value can be reset to its default */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset the current value to the default value */
     void reset() override;

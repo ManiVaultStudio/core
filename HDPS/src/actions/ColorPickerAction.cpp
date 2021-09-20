@@ -54,7 +54,7 @@ void ColorPickerAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-bool ColorPickerAction::canReset() const
+bool ColorPickerAction::isResettable() const
 {
     return _color != _defaultColor;
 }

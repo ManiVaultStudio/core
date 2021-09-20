@@ -62,6 +62,17 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
     groupBox->setLayout(popupLayout);
 
     mainLayout->addWidget(groupBox);
+
+    const auto update = [this, groupBox]() -> void {
+        groupBox->setTitle(_widgetAction->text());
+        groupBox->setToolTip(_widgetAction->text());
+    };
+
+    connect(_widgetAction, &WidgetAction::changed, this, [update]() {
+        update();
+    });
+
+    update();
 }
 
 }

@@ -150,7 +150,7 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
     /*
     // Update the state of the reset push button
     const auto updateResetPushButton = [this, groupAction, resetToolButton]() -> void {
-        auto canReset = false;
+        auto isResettable = false;
 
         for (auto child : groupAction->children()) {
             auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
@@ -158,11 +158,11 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
             if (childWidgetAction == nullptr)
                 continue;
 
-            if (childWidgetAction->canReset())
-                canReset = true;
+            if (childWidgetAction->isResettable())
+                isResettable = true;
         }
 
-        resetToolButton->setEnabled(canReset);
+        resetToolButton->setEnabled(isResettable);
     };
 
     // Walk over all child actions
@@ -172,7 +172,7 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
         if (childWidgetAction == nullptr)
             continue;
 
-        connect(childWidgetAction, &WidgetAction::canResetChanged, this, updateResetPushButton);
+        connect(childWidgetAction, &WidgetAction::isResettableChanged, this, updateResetPushButton);
     }
     */
 

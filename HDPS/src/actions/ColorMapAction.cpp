@@ -8,6 +8,8 @@
 #include <QAbstractItemView>
 #include <QItemSelectionModel>
 
+#include <numeric>
+
 using namespace hdps::util;
 
 namespace hdps {
@@ -17,15 +19,15 @@ namespace gui {
 ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, const ColorMap::Type& colorMapType /*= ColorMap::Type::OneDimensional*/, const QString& colorMap /*= "RdYlBu"*/, const QString& defaultColorMap /*= "RdYlBu"*/) :
     WidgetAction(parent),
     _currentColorMapAction(this, "Current color map"),
-    _settingsAction(*this),
-    _filteredColorMapModel(this, colorMapType)
+    _colorMapFilterModel(this, colorMapType),
+    _settingsAction(*this)
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setWidgetFlags(WidgetFlag::Basic);
 
-    _filteredColorMapModel.setSourceModel(ColorMapModel::getGlobalInstance());
-    _currentColorMapAction.setCustomModel(&_filteredColorMapModel);
+    _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
+    _currentColorMapAction.setCustomModel(&_colorMapFilterModel);
 
     initialize(colorMap, defaultColorMap);
 
@@ -34,14 +36,15 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     };
 
     connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getInvertAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&_settingsAction.getHorizontalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
+    connect(&_settingsAction.getVerticalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
     connect(&_settingsAction.getDiscreteAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
-    connect(&_settingsAction.getNumberOfDiscreteStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
+    connect(&_settingsAction.getDiscreteAction().getNumberOfStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
 }
 
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
 {
-    if (_filteredColorMapModel.rowCount() >= 1) {
+    if (_colorMapFilterModel.rowCount() >= 1) {
         if (!colorMap.isEmpty())
             _currentColorMapAction.setCurrentText(colorMap);
         else
@@ -49,6 +52,19 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
     }
 
     _currentColorMapAction.setDefaultText(defaultColorMap);
+}
+
+hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
+{
+    return _colorMapFilterModel.getType();
+}
+
+void ColorMapAction::setColorMapType(const util::ColorMap::Type& colorMapType)
+{
+    _colorMapFilterModel.setType(colorMapType);
+    _currentColorMapAction.reset();
+
+    emit colorMapTypeChanged(colorMapType);
 }
 
 QString ColorMapAction::getColorMap() const
@@ -70,44 +86,125 @@ QImage ColorMapAction::getColorMapImage() const
     // Cast away the const-ness of the this pointer and get the settings action
     auto& settingsAction = const_cast<ColorMapAction*>(this)->getSettingsAction();
 
-    // Mirror if required
-    if (settingsAction.getInvertAction().isChecked())
-        colorMapImage = colorMapImage.mirrored(true, false);
+    // Establish whether the color map needs to be mirrored in the horizontally and vertical direction
+    const auto mirrorHorizontally   = settingsAction.getHorizontalAxisAction().getMirrorAction().isChecked();
+    const auto mirrorVertically     = settingsAction.getVerticalAxisAction().getMirrorAction().isChecked();
 
+    // Perform the mirroring
+    colorMapImage = colorMapImage.mirrored(mirrorHorizontally, mirrorVertically);
+
+    // Convert to discrete representation
     if (settingsAction.getDiscreteAction().isChecked()) {
-        const auto numberOfDiscreteSteps = settingsAction.getNumberOfDiscreteStepsAction().getValue();
 
-        // The discrete color map image
-        QImage discreteColorMapImage(numberOfDiscreteSteps, 1, QImage::Format::Format_ARGB32);
+        // Get the number of discrete color map steps
+        const auto numberOfDiscreteSteps = settingsAction.getDiscreteAction().getNumberOfStepsAction().getValue();
 
-        // Compute step size in source image coordinates 
-        const auto sourceStepSize = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
+        switch (_colorMapFilterModel.getType())
+        {
+            case ColorMap::Type::OneDimensional:
+            {
+                // The discrete one-dimensional color map image
+                QImage discreteColorMapImage(numberOfDiscreteSteps, 1, QImage::Format::Format_ARGB32);
 
-        // Create average color for each discrete color section
-        for (int step = 0; step < numberOfDiscreteSteps; step++) {
-            const auto rangeStart   = step * sourceStepSize;
-            const auto rangeEnd     = rangeStart + sourceStepSize;
+                // Compute step size in source image coordinates 
+                const auto sourceStepSizeX = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
 
-            float colorSum[] = { 0.0f, 0.0f, 0.0f };
+                // Create average color for each discrete color section
+                for (int stepX = 0; stepX < numberOfDiscreteSteps; stepX++) {
 
-            // Sum the pixel colors so that we can average them later
-            for (int p = rangeStart; p < rangeEnd; p++) {
-                const auto pixel = colorMapImage.pixelColor(p, 0);
+                    // Compute source image pixel range
+                    const auto rangeStartX  = stepX * sourceStepSizeX;
+                    const auto rangeEndR    = rangeStartX + sourceStepSizeX;
 
-                colorSum[0] += pixel.redF();
-                colorSum[1] += pixel.greenF();
-                colorSum[2] += pixel.blueF();
+                    // Create channel for RGB color components
+                    QVector<QVector<float>> channels;
+
+                    channels.resize(3);
+
+                    // Sum the pixel colors so that we can average them later
+                    for (int p = rangeStartX; p < rangeEndR; p++) {
+                        const auto pixel = colorMapImage.pixelColor(p, 0);
+
+                        channels[0].push_back(pixel.redF());
+                        channels[1].push_back(pixel.greenF());
+                        channels[2].push_back(pixel.blueF());
+                    }
+
+                    // Compute number of pixels
+                    const auto noPixels = static_cast<float>(sourceStepSizeX);
+
+                    QColor discreteColor;
+
+                    // Compute average color per channel
+                    discreteColor.setRedF(std::accumulate(channels[0].begin(), channels[0].end(), 0.0f) / noPixels);
+                    discreteColor.setGreenF(std::accumulate(channels[1].begin(), channels[1].end(), 0.0f) / noPixels);
+                    discreteColor.setBlueF(std::accumulate(channels[2].begin(), channels[2].end(), 0.0f) / noPixels);
+
+                    // Assign the pixel color
+                    discreteColorMapImage.setPixelColor(stepX, 0, discreteColor);
+                }
+
+                return discreteColorMapImage;
             }
 
-            // Compute average color per bin
-            for (int c = 0; c < 3; c++)
-                colorSum[c] /= static_cast<float>(sourceStepSize);
+            case ColorMap::Type::TwoDimensional:
+            {
+                // The discrete one-dimensional color map image
+                QImage discreteColorMapImage(numberOfDiscreteSteps, numberOfDiscreteSteps, QImage::Format::Format_ARGB32);
 
-            // Assign the pixel color
-            discreteColorMapImage.setPixelColor(step, 0, QColor::fromRgbF(colorSum[0], colorSum[1], colorSum[2]));
+                // Compute step size in source image coordinates 
+                const auto sourceStepSizeX = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
+                const auto sourceStepSizeY = static_cast<std::int32_t>(floorf(colorMapImage.height()) / static_cast<float>(numberOfDiscreteSteps));
+
+                // Create average color for each discrete color section
+                for (int stepY = 0; stepY < numberOfDiscreteSteps; stepY++) {
+                    for (int stepX = 0; stepX < numberOfDiscreteSteps; stepX++) {
+                        
+                        // Compute source image pixel ranges in x and y direction
+                        const auto rangeStartX  = stepX * sourceStepSizeX;
+                        const auto rangeEndX    = rangeStartX + sourceStepSizeX;
+                        const auto rangeStartY  = stepY * sourceStepSizeY;
+                        const auto rangeEndY    = rangeStartY + sourceStepSizeY;
+
+                        // Create channel for RGB color components
+                        QVector<QVector<float>> channels;
+
+                        channels.resize(3);
+
+                        // Sum the pixel colors so that we can average them later
+                        for (int pixelY = rangeStartY; pixelY < rangeEndY; pixelY++) {
+                            for (int pixelX = rangeStartX; pixelX < rangeEndX; pixelX++) {
+
+                                // Get source image pixel color
+                                const auto pixel = colorMapImage.pixelColor(pixelX, pixelY);
+
+                                channels[0].push_back(pixel.redF());
+                                channels[1].push_back(pixel.greenF());
+                                channels[2].push_back(pixel.blueF());
+                            }
+                        }
+                        
+                        // Compute number of pixels
+                        const auto noPixels = static_cast<float>(sourceStepSizeX * sourceStepSizeY);
+
+                        QColor discreteColor;
+
+                        // Compute average color per channel
+                        discreteColor.setRedF(std::accumulate(channels[0].begin(), channels[0].end(), 0.0f) / noPixels);
+                        discreteColor.setGreenF(std::accumulate(channels[1].begin(), channels[1].end(), 0.0f) / noPixels);
+                        discreteColor.setBlueF(std::accumulate(channels[2].begin(), channels[2].end(), 0.0f) / noPixels);
+
+                        // Assign the pixel color
+                        discreteColorMapImage.setPixelColor(stepX, stepY, discreteColor);
+                    }
+                }
+
+                return discreteColorMapImage;
+            }
+
+            default:
+                break;
         }
-
-        return discreteColorMapImage;
     }
 
     return colorMapImage;
@@ -118,7 +215,6 @@ void ColorMapAction::setColorMap(const QString& colorMap)
     Q_ASSERT(!colorMap.isEmpty());
 
     _currentColorMapAction.setCurrentText(colorMap);
-
 }
 
 QString ColorMapAction::getDefaultColorMap() const
@@ -175,23 +271,23 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 28, margin + 1));
 
     // Get color map image from the model
-    auto colorMapeImage = _colorMapAction->getColorMapImage();
+    auto colorMapImage = _colorMapAction->getColorMapImage();
 
     // Convert to gray scale if disabled
     if (!isEnabled())
-        colorMapeImage = colorMapeImage.convertToFormat(QImage::Format_Grayscale8);
+        colorMapImage = colorMapImage.convertToFormat(QImage::Format_Grayscale8);
 
     // Establish pen color based on whether the color map is enabled or not
     const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::Shadow) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
     // Get scaled copy of the color map image so that it fits correctly
-    colorMapeImage = colorMapeImage.scaled(colorMapRectangle.size());
+    colorMapImage = colorMapImage.scaled(colorMapRectangle.size(), Qt::AspectRatioMode::IgnoreAspectRatio);
 
     // Create a textured brush
-    QBrush colorMapPixMapBrush(colorMapeImage);
+    QBrush colorMapPixMapBrush(colorMapImage);
 
     // And set the texture offset such that it aligns properly
-    colorMapPixMapBrush.setTransform(QTransform::fromTranslate(margin, 0));
+    colorMapPixMapBrush.setTransform(QTransform::fromTranslate(margin, margin));
 
     // Do the painting
     painter.setPen(QPen(penColor, 2, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));

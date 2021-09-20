@@ -19,10 +19,10 @@ ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const
     initialize(toggled, defaultToggled);
 
     connect(this, &ToggleAction::toggled, this, [this]() {
-        emit canResetChanged(canReset());
+        emit resettableChanged(isResettable());
     });
 
-    emit canResetChanged(canReset());
+    setResettable(isResettable());
 }
 
 void ToggleAction::initialize(const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/)
@@ -46,7 +46,7 @@ void ToggleAction::setDefaultToggled(const bool& defaultToggled)
     emit defaultToggledChanged(_defaultToggled);
 }
 
-bool ToggleAction::canReset() const
+bool ToggleAction::isResettable() const
 {
     return isChecked() != _defaultToggled;
 }

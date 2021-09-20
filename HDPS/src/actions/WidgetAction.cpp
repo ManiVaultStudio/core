@@ -15,7 +15,8 @@ WidgetAction::WidgetAction(QObject* parent) :
     _context(),
     _dataHierarchyItemContext(nullptr),
     _isDropTarget(false),
-    _widgetFlags()
+    _widgetFlags(),
+    _resettable(false)
 {
 }
 
@@ -57,13 +58,24 @@ bool WidgetAction::isDropTarget() const
     return _isDropTarget;
 }
 
-bool WidgetAction::canReset() const
+bool WidgetAction::isResettable() const
 {
-    return false;
+    return _resettable;
+}
+
+void WidgetAction::setResettable(const bool& resettable)
+{
+    if (resettable == _resettable)
+        return;
+
+    _resettable = resettable;
+
+    emit resettableChanged(_resettable);
 }
 
 void WidgetAction::reset()
 {
+    qDebug() << text() << "Does not implement a reset function";
 }
 
 bool WidgetAction::hasWidgetFlag(const std::int32_t& widgetFlag) const

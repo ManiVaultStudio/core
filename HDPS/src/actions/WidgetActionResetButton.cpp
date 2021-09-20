@@ -20,11 +20,11 @@ WidgetActionResetButton::WidgetActionResetButton(WidgetAction* widgetAction, QWi
     setStyleSheet("QToolButton { border : none; }");
 
     const auto update = [this, widgetAction]() -> void {
-        setEnabled(widgetAction->isEnabled() && widgetAction->canReset());
+        setEnabled(widgetAction->isEnabled() && widgetAction->isResettable());
     };
 
     connect(widgetAction, &WidgetAction::changed, this, update);
-    connect(widgetAction, &WidgetAction::canResetChanged, this, update);
+    connect(widgetAction, &WidgetAction::resettableChanged, this, update);
 
     connect(this, &QToolButton::clicked, this, [this, widgetAction]() -> void {
         widgetAction->reset();

@@ -15,7 +15,7 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     _maximumChanged         = [this]() -> void { emit maximumChanged(_maximum); };
     _prefixChanged          = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged          = [this]() -> void { emit suffixChanged(_suffix); };
-    _canResetChanged        = [this]() -> void { emit canResetChanged(canReset()); };
+    _resettableChanged      = [this]() -> void { emit resettableChanged(isResettable()); };
 
     initialize(minimum, maximum, value, defaultValue);
 }

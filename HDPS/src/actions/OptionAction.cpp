@@ -28,7 +28,7 @@ void OptionAction::initialize(const QStringList& options /*= QStringList()*/, co
     setCurrentText(currentOption);
     setDefaultText(defaultOption);
 
-    emit canResetChanged(canReset());
+    setResettable(isResettable());
 }
 
 QStringList OptionAction::getOptions() const
@@ -54,7 +54,8 @@ void OptionAction::setOptions(const QStringList& options)
     _defaultModel.setStringList(options);
 
     emit optionsChanged(getOptions());
-    emit canResetChanged(canReset());
+
+    setResettable(isResettable());
 }
 
 const QAbstractItemModel* OptionAction::getModel() const
@@ -97,7 +98,8 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
-    emit canResetChanged(canReset());
+    
+    setResettable(isResettable());
 }
 
 std::int32_t OptionAction::getDefaultIndex() const
@@ -113,7 +115,8 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
     _defaultIndex = defaultIndex;
 
     emit defaultIndexChanged(_defaultIndex);
-    emit canResetChanged(canReset());
+
+    setResettable(isResettable());
 }
 
 QString OptionAction::getDefaultText() const
@@ -131,6 +134,11 @@ QString OptionAction::getCurrentText() const
     if (_currentIndex < 0)
         return "";
 
+    auto options = getOptions();
+
+    if (_currentIndex >= options.count())
+        return "";
+
     return getOptions()[_currentIndex];
 }
 
@@ -145,10 +153,11 @@ void OptionAction::setCurrentText(const QString& currentText)
 
     emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
-    emit canResetChanged(canReset());
+
+    setResettable(isResettable());
 }
 
-bool OptionAction::canReset() const
+bool OptionAction::isResettable() const
 {
     return _currentIndex != _defaultIndex;
 }

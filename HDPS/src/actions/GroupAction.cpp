@@ -98,8 +98,11 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
         const auto isToggleAction   = dynamic_cast<ToggleAction*>(childWidgetAction);
         const auto isTriggerAction  = dynamic_cast<TriggerAction*>(childWidgetAction);
 
-        if (!isToggleAction && !isTriggerAction)
-            _layout->addWidget(childWidgetAction->createLabelWidget(this), numRows, 0);
+        if (!isToggleAction && !isTriggerAction) {
+            auto labelWidget = childWidgetAction->createLabelWidget(this);
+            labelWidget->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            _layout->addWidget(labelWidget, numRows, 0);
+        }
 
         _layout->addWidget(childWidgetAction->createWidget(this), numRows, 1);
     }
