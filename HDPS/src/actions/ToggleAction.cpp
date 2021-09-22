@@ -161,21 +161,10 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const WidgetActionWidget::Stat
     if (hasWidgetFlag(WidgetFlag::Button))
         layout->addWidget(new ToggleAction::PushButtonWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::Reset))
+    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
-
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &ToggleAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
 
     return widget;
 }

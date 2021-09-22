@@ -164,6 +164,7 @@ set( RENDERER_HEADERS
     src/renderers/DensityRenderer.h
     src/renderers/SelectionRenderer.h
     src/renderers/ImageRenderer.h
+    src/renderers/PixelSelectionToolRenderer.h
 )
 
 set( RENDERER_SOURCES
@@ -171,6 +172,7 @@ set( RENDERER_SOURCES
     src/renderers/DensityRenderer.cpp
     src/renderers/SelectionRenderer.cpp
     src/renderers/ImageRenderer.cpp
+	src/renderers/PixelSelectionToolRenderer.cpp
 )
 
 set( GRAPHICS_HEADERS
@@ -211,6 +213,7 @@ set( UTIL_HEADERS
     src/util/Visitable.h
     src/util/Visitor.h
     src/util/DatasetRef.h
+    src/util/PixelSelectionTool.h
 )
 
 set( UTIL_SOURCES
@@ -228,6 +231,7 @@ set( UTIL_SOURCES
     src/util/Visitable.cpp
     src/util/Visitor.cpp
     src/util/DatasetRef.cpp
+	src/util/PixelSelectionTool.cpp
 )
 
 set( PLUGIN_HEADERS

@@ -196,6 +196,18 @@ public: // Events & notifications
     void notifyDataAdded(const QString datasetName) override;
 
     /**
+     * Notify all data consumers that a dataset is about to be removed
+     * @param datasetName Name of the dataset that is about to be removed
+     */
+    void notifyDataAboutToBeRemoved(const DataType& dataType, const QString datasetName) override;
+
+    /**
+     * Notify all data consumers that a dataset is removed
+     * @param datasetName Name of the dataset that is removed
+     */
+    void notifyDataRemoved(const DataType& dataType, const QString datasetName) override;
+
+    /**
      * Notify all data consumers that a dataset has been changed
      * @param datasetName Name of the dataset of which the data changed
      */
@@ -254,13 +266,6 @@ protected:
     DataSet& requestSelection(const QString rawdataName) override;
 
 private:
-
-    /**
-     * Notify all event listeners that a dataset has been removed
-     * @param dataType Type of the data
-     * @param name Name of the dataset
-     */
-    void notifyDataRemoved(const DataType& dataType, const QString name);
 
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();

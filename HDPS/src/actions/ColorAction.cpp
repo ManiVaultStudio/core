@@ -166,7 +166,7 @@ QWidget* ColorAction::getWidget(QWidget* parent, const WidgetActionWidget::State
     if (hasWidgetFlag(WidgetFlag::Picker))
         layout->addWidget(new PushButtonWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::ResetButton))
+    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);

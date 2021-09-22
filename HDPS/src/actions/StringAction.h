@@ -26,11 +26,11 @@ public:
 
     /** Describes the widget configurations (a color map combobox always exists) */
     enum WidgetFlag {
-        LineEdit    = 0x00001,      /** Widget includes a line edit */
-        ResetButton = 0x00002,      /** There is a button to reset the string action */
+        LineEdit        = 0x00001,      /** Widget includes a line edit */
+        ResetPushButton = 0x00002,      /** There is a button to reset the string action */
 
         Basic   = LineEdit,
-        All     = LineEdit | ResetButton
+        All     = LineEdit | ResetPushButton
     };
 
 public:

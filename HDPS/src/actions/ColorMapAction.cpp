@@ -315,7 +315,7 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const WidgetActionWidget::St
     if (hasWidgetFlag(WidgetFlag::Settings))
         layout->addWidget(_settingsAction.createCollapsedWidget(widget));
 
-    if (hasWidgetFlag(WidgetFlag::ResetButton))
+    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);

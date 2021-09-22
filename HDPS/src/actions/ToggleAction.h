@@ -24,13 +24,13 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        CheckBox    = 0x00001,      /** The widget includes a check box */
-        Button      = 0x00002,      /** The widget includes a (toggle) push button */
-        Reset       = 0x00004,      /** The widget includes a reset push button */
+        CheckBox            = 0x00001,      /** The widget includes a check box */
+        Button              = 0x00002,      /** The widget includes a (toggle) push button */
+        ResetPushButton     = 0x00004,      /** The widget includes a reset push button */
 
-        Basic               = CheckBox,
-        CheckBoxAndReset    = CheckBox | Reset,
-        ButtonAndReset      = Button | Reset
+        Basic                       = CheckBox,
+        CheckBoxAndResetPushButton  = CheckBox | ResetPushButton,
+        ButtonAndPushButton         = Button | ResetPushButton
     };
 
 public:

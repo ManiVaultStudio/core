@@ -15,7 +15,7 @@ ColorMapViewAction::ColorMapViewAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction)
 {
-    setText("Color map view");
+    setText("Preview");
 }
 
 ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMapViewAction, const WidgetActionWidget::State& state) :

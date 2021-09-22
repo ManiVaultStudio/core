@@ -28,11 +28,11 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        ComboBox    = 0x00001,      /** The widget includes a combobox */
-        ResetButton = 0x00004,      /** The widget includes a reset push button */
+        ComboBox        = 0x00001,      /** The widget includes a combobox */
+        ResetPushButton = 0x00002,      /** The widget includes a reset push button */
 
         Basic   = ComboBox,
-        All     = ComboBox | ResetButton
+        All     = ComboBox | ResetPushButton
     };
 
 public:

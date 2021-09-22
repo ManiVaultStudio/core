@@ -201,7 +201,7 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const WidgetActionWidget::Sta
     if (hasWidgetFlag(WidgetFlag::Slider))
         layout->addWidget(new SliderWidget(parent, this), 2);
 
-    if (hasWidgetFlag(WidgetFlag::Reset))
+    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);

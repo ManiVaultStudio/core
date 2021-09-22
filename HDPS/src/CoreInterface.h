@@ -164,6 +164,20 @@ public: // Events & notifications
     virtual void notifyDataAdded(const QString datasetName) = 0;
 
     /**
+     * Notify all data consumers that a dataset is about to be removed
+     * @param dataType Type of the data
+     * @param datasetName Name of the dataset that is about to be removed
+     */
+    virtual void notifyDataAboutToBeRemoved(const DataType& dataType, const QString datasetName) = 0;
+
+    /**
+     * Notify all data consumers that a dataset is removed
+     * @param dataType Type of the data
+     * @param datasetName Name of the dataset that is removed
+     */
+    virtual void notifyDataRemoved(const DataType& dataType, const QString datasetName) = 0;
+
+    /**
      * Notify all data consumers that a dataset has been changed
      * @param datasetName Name of the dataset of which the data changed
      */

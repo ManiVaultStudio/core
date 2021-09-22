@@ -49,6 +49,18 @@ signals:
      * @param newDatasetName New name of the dataset
      */
     void datasetNameChanged(const QString& oldDatasetName, const QString& newDatasetName);
+
+    /**
+     * Signals that the dataset is about to be removed
+     * @param datasetName Name of the dataset that is about to be removed
+     */
+    void datasetAboutToBeRemoved(const QString& datasetName);
+
+    /**
+     * Signals that the dataset has been removed
+     * @param datasetName Name of the dataset that was removed
+     */
+    void datasetRemoved(const QString& datasetName);
 };
 
 /**
@@ -86,6 +98,16 @@ public:
                 return;
 
             switch (dataEvent->getType()) {
+                case EventType::DataAboutToBeRemoved:
+                {
+                    if (dataEvent->dataSetName != _datasetName)
+                        return;
+
+                    emit datasetAboutToBeRemoved(dataEvent->dataSetName);
+
+                    break;
+                }
+
                 case EventType::DataRemoved:
                 {
                     const auto previousDatasetName = _datasetName;
@@ -96,6 +118,7 @@ public:
                     _dataset        = nullptr;
                     _datasetName    = "";
 
+                    emit datasetRemoved(previousDatasetName);
                     emit datasetNameChanged(previousDatasetName, "");
 
                     break;

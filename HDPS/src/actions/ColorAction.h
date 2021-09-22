@@ -25,11 +25,11 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        Picker      = 0x00001,      /** The widget includes a color picker */
-        ResetButton = 0x00004,      /** The widget includes a reset push button */
+        Picker          = 0x00001,      /** The widget includes a color picker */
+        ResetPushButton = 0x00002,      /** The widget includes a reset push button */
 
         Basic   = Picker,
-        All     = Picker | ResetButton
+        All     = Picker | ResetPushButton
     };
 
 public:

@@ -20,7 +20,7 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     _discreteAction(colorMapAction)
 {
     setText("Settings");
-    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("cog"));
+    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
 
     _horizontalAxisAction.setToolTip("Range of the color map");
     _horizontalAxisAction.setToolTip("Mirror the color map horizontally");
@@ -53,6 +53,11 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
 
     mainLayout->setMargin(0);
 
+    mainLayout->addLayout(settingsLayout);
+
+    settingsLayout->addLayout(rangeLayout);
+    settingsLayout->addWidget(colorMapSettingsAction->getDiscreteAction().createWidget(this));
+
     switch (colorMapSettingsAction->getColorMapAction().getColorMapType())
     {
         case ColorMap::Type::OneDimensional:
@@ -63,20 +68,15 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
 
         case ColorMap::Type::TwoDimensional:
         {
-            mainLayout->addWidget(_colorMapViewAction.createWidget(this));
             rangeLayout->addWidget(colorMapSettingsAction->getHorizontalAxisAction().createWidget(this));
             rangeLayout->addWidget(colorMapSettingsAction->getVerticalAxisAction().createWidget(this));
+            mainLayout->addWidget(_colorMapViewAction.createWidget(this));
             break;
         }
 
         default:
             break;
     }
-
-    mainLayout->addLayout(settingsLayout);
-
-    settingsLayout->addLayout(rangeLayout);
-    settingsLayout->addWidget(colorMapSettingsAction->getDiscreteAction().createWidget(this));
 
     setLayout(mainLayout);
 }

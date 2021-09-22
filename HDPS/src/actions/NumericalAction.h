@@ -33,14 +33,14 @@ public:
 
     /** Describes the widget settings */
     enum WidgetFlag {
-        SpinBox = 0x00001,      /** Widget includes a spin box */
-        Slider  = 0x00002,      /** Widget includes a slider */
-        Reset   = 0x00004,      /** Widget includes a reset push button */
+        SpinBox             = 0x00001,      /** Widget includes a spin box */
+        Slider              = 0x00002,      /** Widget includes a slider */
+        ResetPushButton     = 0x00004,      /** Widget includes a reset push button */
 
         Basic               = SpinBox | Slider,
-        SpinBoxAndReset     = SpinBox | Reset,
-        SliderAndReset      = Slider | Reset,
-        All                 = SpinBox | Slider | Reset
+        SpinBoxAndReset     = SpinBox | ResetPushButton,
+        SliderAndReset      = Slider | ResetPushButton,
+        All                 = SpinBox | Slider | ResetPushButton
     };
 
 public:

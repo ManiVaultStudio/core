@@ -241,7 +241,7 @@ QWidget* OptionAction::getWidget(QWidget* parent, const WidgetActionWidget::Stat
     if (hasWidgetFlag(WidgetFlag::ComboBox))
         layout->addWidget(new OptionAction::ComboBoxWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::ResetButton))
+    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);

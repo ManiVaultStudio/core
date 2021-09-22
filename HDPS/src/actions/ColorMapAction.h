@@ -28,10 +28,10 @@ public:
     enum WidgetFlag {
         Settings        = 0x00001,      /** Widgets have a settings popup to adjust range and other settings */
         EditRange       = 0x00002,      /** Users are allowed to change the color map range */
-        ResetButton     = 0x00004,      /** There is a button to reset the color map */
+        ResetPushButton = 0x00004,      /** There is a button to reset the color map */
 
         Basic   = Settings | EditRange,
-        All     = Settings | EditRange | ResetButton
+        All     = Settings | EditRange | ResetPushButton
     };
 
 public:

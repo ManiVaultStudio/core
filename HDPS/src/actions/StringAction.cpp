@@ -131,7 +131,7 @@ QWidget* StringAction::getWidget(QWidget* parent, const WidgetActionWidget::Stat
     if (hasWidgetFlag(WidgetFlag::LineEdit))
         layout->addWidget(new StringAction::LineEditWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::ResetButton))
+    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
