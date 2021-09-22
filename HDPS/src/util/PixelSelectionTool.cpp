@@ -5,6 +5,7 @@
 #include <QEvent>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <QtMath>
 
 const QMap<QString, PixelSelectionTool::Type> PixelSelectionTool::types = {
@@ -132,6 +133,101 @@ void PixelSelectionTool::setChanged()
 void PixelSelectionTool::abort()
 {
     endSelection();
+}
+
+QIcon PixelSelectionTool::getIcon(const Type& selectionType)
+{
+    const auto margin           = 5;
+    const auto pixmapSize       = QSize(100, 100);
+    const auto pixmapDeflated   = QRect(QPoint(), pixmapSize).marginsRemoved(QMargins(margin, margin, margin, margin));
+
+    // Create pixmap
+    QPixmap pixmap(pixmapSize);
+
+    // Fill with a transparent background
+    pixmap.fill(Qt::transparent);
+
+    // Create a painter to draw in the pixmap
+    QPainter painter(&pixmap);
+
+    // Enable anti-aliasing
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    // Get the text color from the application
+    const auto textColor = QApplication::palette().text().color();
+
+    // Configure painter
+    painter.setPen(QPen(textColor, 10, Qt::DotLine, Qt::SquareCap, Qt::SvgMiterJoin));
+
+    switch (selectionType)
+    {
+    case PixelSelectionTool::Type::Rectangle:
+    {
+        painter.drawRect(pixmapDeflated);
+        break;
+    }
+
+    case PixelSelectionTool::Type::Brush:
+    {
+        painter.drawEllipse(pixmapDeflated.center(), 45, 45);
+        break;
+    }
+
+    case PixelSelectionTool::Type::Lasso:
+    {
+        QVector<QPoint> polygonPoints;
+
+        polygonPoints << QPoint(5, 8);
+        polygonPoints << QPoint(80, 28);
+        polygonPoints << QPoint(92, 90);
+        polygonPoints << QPoint(45, 60);
+        polygonPoints << QPoint(10, 80);
+
+        polygonPoints << polygonPoints[0];
+        polygonPoints << polygonPoints[1];
+
+        QPainterPath testCurve;
+
+        QVector<QVector<QPoint>> curves;
+
+        for (int pointIndex = 1; pointIndex < polygonPoints.count() - 1; pointIndex++) {
+            const auto pPrevious    = polygonPoints[pointIndex - 1];
+            const auto p            = polygonPoints[pointIndex];
+            const auto pNext        = polygonPoints[pointIndex + 1];
+            const auto pC0          = pPrevious + ((p - pPrevious) / 2);
+            const auto pC1          = p + ((pNext - p) / 2);
+
+            curves << QVector<QPoint>({ pC0, p, pC1 });
+        }
+
+        testCurve.moveTo(curves.first().first());
+
+        for (auto curve : curves)
+            testCurve.cubicTo(curve[0], curve[1], curve[2]);
+
+        painter.drawPath(testCurve);
+
+        break;
+    }
+
+    case PixelSelectionTool::Type::Polygon:
+    {
+        QVector<QPoint> points;
+
+        points << QPoint(10, 10);
+        points << QPoint(90, 45);
+        points << QPoint(25, 90);
+
+        painter.drawPolygon(points);
+
+        break;
+    }
+
+    default:
+        break;
+    }
+
+    return QIcon(pixmap);
 }
 
 bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
