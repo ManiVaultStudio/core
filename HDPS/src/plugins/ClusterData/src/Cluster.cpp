@@ -71,21 +71,6 @@ void Cluster::setIndices(const std::vector<unsigned int>& indices)
     _indices = indices;
 }
 
-std::vector<float>& Cluster::getMedian()
-{
-    return _median;
-}
-
-std::vector<float>& Cluster::getMean()
-{
-    return _mean;
-}
-
-std::vector<float>& Cluster::getStandardDeviation()
-{
-    return _stddev;
-}
-
 void Cluster::fromVariant(const QVariant& variant)
 {
     if (variant.type() != QVariant::Type::Map)
