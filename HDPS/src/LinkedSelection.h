@@ -14,6 +14,7 @@ namespace hdps
     public:
         LinkedSelection(QString source, QString target);
 
+        QString getTargetDataset() { return _targetData; }
         const SelectionMap& getMapping();
         void setMapping(SelectionMap& map);
 
