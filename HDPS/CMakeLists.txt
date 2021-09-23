@@ -118,6 +118,11 @@ set(ACTIONS_HEADERS
     src/actions/IntegralAction.h
     src/actions/NumericalAction.h
     src/actions/OptionAction.h
+    src/actions/PixelSelectionAction.h
+    src/actions/PixelSelectionModifierAction.h
+    src/actions/PixelSelectionOperationsAction.h
+    src/actions/PixelSelectionOverlayAction.h
+    src/actions/PixelSelectionTypeAction.h
     src/actions/TriggerAction.h
     src/actions/ToggleAction.h
     src/actions/StringAction.h
@@ -146,6 +151,11 @@ set(ACTIONS_SOURCES
     src/actions/IntegralAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
+	src/actions/PixelSelectionAction.cpp
+    src/actions/PixelSelectionModifierAction.cpp
+    src/actions/PixelSelectionOperationsAction.cpp
+    src/actions/PixelSelectionOverlayAction.cpp
+    src/actions/PixelSelectionTypeAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
