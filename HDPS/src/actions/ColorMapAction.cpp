@@ -26,9 +26,6 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setWidgetFlags(WidgetFlag::Basic);
 
-    _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
-    _currentColorMapAction.setCustomModel(&_colorMapFilterModel);
-
     initialize(colorMap, defaultColorMap);
 
     const auto notifyColorMapImageChanged = [this]() -> void {
@@ -40,18 +37,28 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     connect(&_settingsAction.getVerticalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
     connect(&_settingsAction.getDiscreteAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
     connect(&_settingsAction.getDiscreteAction().getNumberOfStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
+
+    connect(&_currentColorMapAction, &OptionAction::resettableChanged, this, [this](const bool& resettable) {
+        setResettable(isResettable());
+    });
 }
 
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
 {
-    if (_colorMapFilterModel.rowCount() >= 1) {
-        if (!colorMap.isEmpty())
-            _currentColorMapAction.setCurrentText(colorMap);
-        else
-            _currentColorMapAction.setCurrentIndex(0);
-    }
+    _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
+    _currentColorMapAction.initialize(_colorMapFilterModel, colorMap, defaultColorMap);
 
-    _currentColorMapAction.setDefaultText(defaultColorMap);
+    setResettable(isResettable());
+}
+
+bool ColorMapAction::isResettable() const
+{
+    return _currentColorMapAction.isResettable();
+}
+
+void ColorMapAction::reset()
+{
+    _currentColorMapAction.reset();
 }
 
 hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
@@ -65,6 +72,8 @@ void ColorMapAction::setColorMapType(const util::ColorMap::Type& colorMapType)
     _currentColorMapAction.reset();
 
     emit colorMapTypeChanged(colorMapType);
+
+    setResettable(isResettable());
 }
 
 QString ColorMapAction::getColorMap() const
@@ -215,6 +224,8 @@ void ColorMapAction::setColorMap(const QString& colorMap)
     Q_ASSERT(!colorMap.isEmpty());
 
     _currentColorMapAction.setCurrentText(colorMap);
+
+    setResettable(isResettable());
 }
 
 QString ColorMapAction::getDefaultColorMap() const
@@ -227,6 +238,8 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     Q_ASSERT(!defaultColorMap.isEmpty());
 
     _currentColorMapAction.setDefaultText(defaultColorMap);
+
+    setResettable(isResettable());
 }
 
 ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state) :

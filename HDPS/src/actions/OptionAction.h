@@ -82,6 +82,14 @@ public:
      */
     void initialize(const QStringList& options = QStringList(), const QString& currentOption = "", const QString& defaultOption = "");
 
+    /**
+     * Initialize the option action with a custom model
+     * @param customModel Pointer to custom model
+     * @param currentOption Current option
+     * @param defaultOption Default option
+     */
+    void initialize(QAbstractItemModel& customModel, const QString& currentOption = "", const QString& defaultOption = "");
+
     /** Gets the options */
     QStringList getOptions() const;
 

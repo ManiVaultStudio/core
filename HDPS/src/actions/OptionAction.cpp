@@ -31,6 +31,15 @@ void OptionAction::initialize(const QStringList& options /*= QStringList()*/, co
     setResettable(isResettable());
 }
 
+void OptionAction::initialize(QAbstractItemModel& customModel, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
+{
+    setCustomModel(&customModel);
+    setCurrentText(currentOption);
+    setDefaultText(defaultOption);
+
+    setResettable(isResettable());
+}
+
 QStringList OptionAction::getOptions() const
 {
     QStringList options;
