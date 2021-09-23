@@ -12,13 +12,13 @@ PixelSelectionTypeAction::PixelSelectionTypeAction(PixelSelectionAction& pixelSe
     WidgetAction(&pixelSelectionAction),
     _pixelSelectionAction(pixelSelectionAction),
     _typeAction(this, "Type"),
-    _rectangleAction(this, "Rectangle"),
-    _brushAction(this, "Brush"),
-    _lassoAction(this, "Lasso"),
-    _polygonAction(this, "Polygon"),
+    _rectangleAction(this, ""),
+    _brushAction(this, ""),
+    _lassoAction(this, ""),
+    _polygonAction(this, ""),
     _typeActionGroup(this)
 {
-    setText("Selection overlay");
+    setText("Type");
 
     auto targetWidget = _pixelSelectionAction.getTargetWidget();
     
@@ -55,6 +55,8 @@ PixelSelectionTypeAction::PixelSelectionTypeAction(PixelSelectionAction& pixelSe
     _polygonAction.setToolTip("Select data points by drawing a polygon (P)");
 
     _typeAction.setOptions(pixelSelectionTool.types.keys());
+    _typeAction.setCurrentText("Rectangle");
+    _typeAction.setDefaultText("Rectangle");
 
     _typeActionGroup.addAction(&_rectangleAction);
     _typeActionGroup.addAction(&_brushAction);
@@ -89,12 +91,47 @@ PixelSelectionTypeAction::PixelSelectionTypeAction(PixelSelectionAction& pixelSe
         _brushAction.setChecked(type == PixelSelectionTool::Type::Brush);
         _lassoAction.setChecked(type == PixelSelectionTool::Type::Lasso);
         _polygonAction.setChecked(type == PixelSelectionTool::Type::Polygon);
-        //_brushRadiusAction.setEnabled(type == PixelSelectionTool::Type::Brush);
+
+        setResettable(_typeAction.isResettable());
     };
 
     connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, this, updateType);
 
     updateType();
+}
+
+bool PixelSelectionTypeAction::isResettable() const
+{
+    return _typeAction.isResettable();
+}
+
+void PixelSelectionTypeAction::reset()
+{
+    _typeAction.reset();
+}
+
+PixelSelectionTypeAction::Widget::Widget(QWidget* parent, PixelSelectionTypeAction* pixelSelectionTypeAction, const WidgetActionWidget::State& state) :
+    WidgetActionWidget(parent, pixelSelectionTypeAction, state)
+{
+    auto layout = new QHBoxLayout();
+
+    layout->setSpacing(3);
+    layout->setMargin(0);
+
+    if (pixelSelectionTypeAction->hasWidgetFlag(PixelSelectionTypeAction::ComboBox))
+        layout->addWidget(pixelSelectionTypeAction->getTypeAction().createWidget(this));
+
+    if (pixelSelectionTypeAction->hasWidgetFlag(PixelSelectionTypeAction::PushButtonGroup)) {
+        layout->addWidget(pixelSelectionTypeAction->getRectangleAction().createWidget(this));
+        layout->addWidget(pixelSelectionTypeAction->getBrushAction().createWidget(this));
+        layout->addWidget(pixelSelectionTypeAction->getLassoAction().createWidget(this));
+        layout->addWidget(pixelSelectionTypeAction->getPolygonAction().createWidget(this));
+    }
+
+    if (pixelSelectionTypeAction->hasWidgetFlag(PixelSelectionTypeAction::ResetPushButton))
+        layout->addWidget(pixelSelectionTypeAction->createResetButton(this));
+
+    setLayout(layout);
 }
 
 }

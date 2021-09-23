@@ -20,6 +20,8 @@ void StringAction::initialize(const QString& string /*= ""*/, const QString& def
 {
     setString(string);
     setDefaultString(defaultString);
+
+    setResettable(isResettable());
 }
 
 QString StringAction::getString() const
@@ -35,6 +37,8 @@ void StringAction::setString(const QString& string)
     _string = string;
 
     emit stringChanged(_string);
+
+    setResettable(isResettable());
 }
 
 QString StringAction::getDefaultString() const

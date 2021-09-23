@@ -2,12 +2,12 @@
 
 #include "util/PixelSelectionTool.h"
 
-#include "WidgetAction.h"
+#include "GroupAction.h"
+#include "ColorAction.h"
 #include "DecimalAction.h"
 #include "ToggleAction.h"
 
 #include "PixelSelectionTypeAction.h"
-#include "PixelSelectionOverlayAction.h"
 #include "PixelSelectionModifierAction.h"
 #include "PixelSelectionOperationsAction.h"
 
@@ -24,7 +24,7 @@ namespace gui {
  *
  * @author Thomas Kroes
  */
-class PixelSelectionAction : public WidgetAction
+class PixelSelectionAction : public GroupAction
 {
 public:
 
@@ -61,9 +61,10 @@ public: /** Action getters */
 
 protected:
     QWidget*                            _targetWidget;                      /** Pointer to target widget */
+    ColorAction                         _overlayColor;                      /** Selection overlay color action */
+    DecimalAction                       _overlayOpacity;                    /** Selection overlay opacity action */
     PixelSelectionTool&                 _pixelSelectionTool;                /** Reference to pixel selection tool */
     PixelSelectionTypeAction            _pixelSelectionTypeAction;          /** Pixel selection type action */
-    PixelSelectionOverlayAction         _pixelSelectionOverlayAction;       /** Pixel selection overlay action */
     PixelSelectionModifierAction        _pixelSelectionModifierAction;      /** Pixel selection modifier action */
     PixelSelectionOperationsAction      _pixelSelectionOperationsAction;    /** Pixel selection operations action */
     DecimalAction                       _brushRadiusAction;                 /** Brush radius action */

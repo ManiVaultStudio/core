@@ -9,14 +9,15 @@ namespace hdps {
 namespace gui {
 
 WidgetActionResetButton::WidgetActionResetButton(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/) :
-    QPushButton(parent),
+    QToolButton(parent),
     _widgetAction(widgetAction)
 {
     setObjectName("ResetPushButton");
     setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
-    //setIconSize(QSize(12, 12));
+    setIconSize(QSize(10, 10));
+    setToolButtonStyle(Qt::ToolButtonIconOnly);
     setToolTip(QString("Reset %1 to default").arg(widgetAction->text()));
-    setProperty("class", "square");
+    setStyleSheet("QToolButton { border : none; }");
 
     const auto update = [this, widgetAction]() -> void {
         setEnabled(widgetAction->isEnabled() && widgetAction->isResettable());
@@ -25,7 +26,7 @@ WidgetActionResetButton::WidgetActionResetButton(WidgetAction* widgetAction, QWi
     connect(widgetAction, &WidgetAction::changed, this, update);
     connect(widgetAction, &WidgetAction::resettableChanged, this, update);
 
-    connect(this, &QPushButton::clicked, this, [this, widgetAction]() -> void {
+    connect(this, &QToolButton::clicked, this, [this, widgetAction]() -> void {
         widgetAction->reset();
     });
 

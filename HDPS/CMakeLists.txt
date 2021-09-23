@@ -121,7 +121,6 @@ set(ACTIONS_HEADERS
     src/actions/PixelSelectionAction.h
     src/actions/PixelSelectionModifierAction.h
     src/actions/PixelSelectionOperationsAction.h
-    src/actions/PixelSelectionOverlayAction.h
     src/actions/PixelSelectionTypeAction.h
     src/actions/TriggerAction.h
     src/actions/ToggleAction.h
@@ -154,7 +153,6 @@ set(ACTIONS_SOURCES
 	src/actions/PixelSelectionAction.cpp
     src/actions/PixelSelectionModifierAction.cpp
     src/actions/PixelSelectionOperationsAction.cpp
-    src/actions/PixelSelectionOverlayAction.cpp
     src/actions/PixelSelectionTypeAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/ToggleAction.cpp

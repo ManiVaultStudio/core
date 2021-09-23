@@ -246,17 +246,6 @@ QWidget* OptionAction::getWidget(QWidget* parent, const WidgetActionWidget::Stat
 
     widget->setLayout(layout);
 
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &OptionAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
-
     return widget;
 }
 

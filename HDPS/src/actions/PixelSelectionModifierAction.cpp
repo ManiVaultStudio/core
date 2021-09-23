@@ -11,11 +11,14 @@ namespace gui {
 PixelSelectionModifierAction::PixelSelectionModifierAction(PixelSelectionAction& pixelSelectionAction) :
     WidgetAction(&pixelSelectionAction),
     _pixelSelectionAction(pixelSelectionAction),
-    _modifierAddAction(this, "Add to selection"),
-    _modifierRemoveAction(this, "Remove from selection"),
+    _modifierAddAction(this, "Add"),
+    _modifierRemoveAction(this, "Subtract"),
     _modifierActionGroup(this)
 {
-    setText("Selection modifier");
+    setText("Selection");
+
+    _modifierAddAction.setWidgetFlags(ToggleAction::PushButton);
+    _modifierRemoveAction.setWidgetFlags(ToggleAction::PushButton);
 
     auto targetWidget = _pixelSelectionAction.getTargetWidget();
 
@@ -29,8 +32,8 @@ PixelSelectionModifierAction::PixelSelectionModifierAction(PixelSelectionAction&
 
     const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
-    _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
-    _modifierRemoveAction.setIcon(fontAwesome.getIcon("minus"));
+    //_modifierAddAction.setIcon(fontAwesome.getIcon("plus-square"));
+    //_modifierRemoveAction.setIcon(fontAwesome.getIcon("minus-square"));
 
     _modifierAddAction.setToolTip("Add items to the existing selection");
     _modifierRemoveAction.setToolTip("Remove items from the existing selection");

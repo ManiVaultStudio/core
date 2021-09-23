@@ -158,7 +158,7 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const WidgetActionWidget::Stat
     if (hasWidgetFlag(WidgetFlag::CheckBox))
         layout->addWidget(new ToggleAction::CheckBoxWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::Button))
+    if (hasWidgetFlag(WidgetFlag::PushButton))
         layout->addWidget(new ToggleAction::PushButtonWidget(parent, this));
 
     if (hasWidgetFlag(WidgetFlag::ResetPushButton))

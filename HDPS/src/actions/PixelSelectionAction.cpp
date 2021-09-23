@@ -11,25 +11,33 @@ namespace hdps {
 namespace gui {
 
 PixelSelectionAction::PixelSelectionAction(QWidget* targetWidget, PixelSelectionTool& pixelSelectionTool) :
-    WidgetAction(targetWidget),
+    GroupAction(targetWidget),
     _targetWidget(targetWidget),
+    _overlayColor(this, "Color", QColor(255, 0, 0), QColor(255, 0, 0)),
+    _overlayOpacity(this, "Opacity", 0.0f, 100.0f, 50.0f, 50.0f, 1),
     _pixelSelectionTool(pixelSelectionTool),
     _pixelSelectionTypeAction(*this),
-    _pixelSelectionOverlayAction(*this),
     _pixelSelectionModifierAction(*this),
     _pixelSelectionOperationsAction(*this),
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
-    _notifyDuringSelectionAction(this, "Notify during selection")
+    _notifyDuringSelectionAction(this, "Notify during selection", true, true)
 {
     setText("Selection");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+
+    _overlayColor.setWidgetFlags(ColorAction::All);
+    _overlayOpacity.setWidgetFlags(DecimalAction::All);
+    _pixelSelectionTypeAction.setWidgetFlags(PixelSelectionTypeAction::PushButtonGroup | PixelSelectionTypeAction::ResetPushButton);
+    _brushRadiusAction.setWidgetFlags(DecimalAction::All);
+    _notifyDuringSelectionAction.setWidgetFlags(ToggleAction::CheckBoxAndResetPushButton);
+
+    _overlayOpacity.setSuffix("%");
 
     _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
     _targetWidget->addAction(&_brushRadiusAction);
     _targetWidget->addAction(&_notifyDuringSelectionAction);
 
-    _notifyDuringSelectionAction.setCheckable(true);
     _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
 
     _brushRadiusAction.setToolTip("Brush selection tool radius");

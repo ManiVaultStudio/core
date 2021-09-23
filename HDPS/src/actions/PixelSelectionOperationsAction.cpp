@@ -11,11 +11,11 @@ namespace gui {
 PixelSelectionOperationsAction::PixelSelectionOperationsAction(PixelSelectionAction& pixelSelectionAction) :
     WidgetAction(&pixelSelectionAction),
     _pixelSelectionAction(pixelSelectionAction),
-    _clearSelectionAction(this, "Select none"),
-    _selectAllAction(this, "Select all"),
-    _invertSelectionAction(this, "Invert selection")
+    _clearSelectionAction(this, "None"),
+    _selectAllAction(this, "All"),
+    _invertSelectionAction(this, "Invert")
 {
-    setText("Selection operations");
+    setText("Select");
 
     auto targetWidget = _pixelSelectionAction.getTargetWidget();
 

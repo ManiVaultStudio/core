@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QPushButton>
+#include <QToolButton>
 
 namespace hdps {
 
@@ -15,7 +15,7 @@ class WidgetAction;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionResetButton : public QPushButton {
+class WidgetActionResetButton : public QToolButton {
 public:
     explicit WidgetActionResetButton(WidgetAction* widgetAction, QWidget* parent = nullptr);
 

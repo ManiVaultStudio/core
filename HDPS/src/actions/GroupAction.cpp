@@ -85,6 +85,10 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     _layout->setColumnStretch(0, 2);
     _layout->setColumnStretch(1, 5);
 
+    auto contentsMargin = _layout->contentsMargins();
+    
+    _layout->setMargin(5);
+
     setLayout(_layout);
 
     for (auto child : groupAction->children()) {

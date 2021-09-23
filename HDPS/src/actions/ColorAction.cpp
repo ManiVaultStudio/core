@@ -25,6 +25,8 @@ void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QCol
 {
     setColor(color);
     setDefaultColor(defaultColor);
+
+    setResettable(isResettable());
 }
 
 QColor ColorAction::getColor() const
@@ -40,6 +42,8 @@ void ColorAction::setColor(const QColor& color)
     _color = color;
 
     emit colorChanged(_color);
+
+    setResettable(isResettable());
 }
 
 QColor ColorAction::getDefaultColor() const
@@ -79,6 +83,10 @@ ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* co
     connect(&_colorPickerAction, &ColorPickerAction::colorChanged, this, [this, colorAction](const QColor& color) {
         colorAction->setColor(color);
         _toolButton.update();
+    });
+
+    connect(colorAction, &ColorAction::colorChanged, this, [this](const QColor& color) {
+        _colorPickerAction.setColor(color);
     });
 
     _toolButton.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);

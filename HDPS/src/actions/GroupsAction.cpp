@@ -81,6 +81,17 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
             // Create the section expand/collapse button
             auto button = new SectionPushButton(treeWidgetItem, groupAction, groupAction->text());
 
+            // Update button enabled/disabled
+            const auto updateButton = [button, groupAction]() -> void {
+                button->setEnabled(groupAction->isEnabled());
+            };
+
+            // Enable/disable button when widget action is toggled
+            connect(groupAction, &WidgetAction::changed, this, updateButton);
+
+            // Perform initial update
+            updateButton();
+
             // Assign the button to the top-level tree widget item
             treeWidget->setItemWidget(treeWidgetItem, 0, button);
         }
@@ -95,7 +106,9 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
     auto frameLayout    = new QHBoxLayout();
     auto iconLabel      = new QLabel();
 
-    frameLayout->setMargin(3);
+    iconLabel->setAlignment(Qt::AlignCenter);
+
+    frameLayout->setMargin(5);
     frameLayout->addWidget(iconLabel);
     frameLayout->addStretch(1);
 
