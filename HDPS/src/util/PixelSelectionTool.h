@@ -72,7 +72,7 @@ public: // Construction/destruction
      * @param targetWidget Target widget on which the pixel selection tool operates
      * @param enabled Whether the tool is enabled or not
      */
-    PixelSelectionTool(QObject* parent, const bool& enabled = true);
+    PixelSelectionTool(QWidget* targetWidget, const bool& enabled = true);
 
 public: // Getters/setters
 

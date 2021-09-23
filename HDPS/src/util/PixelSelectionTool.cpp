@@ -21,8 +21,8 @@ const QMap<QString, PixelSelectionTool::Modifier> PixelSelectionTool::modifiers 
     { "Remove", PixelSelectionTool::Modifier::Remove }
 };
 
-PixelSelectionTool::PixelSelectionTool(QObject* parent, const bool& enabled /*= true*/) :
-    QObject(parent),
+PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :
+    QObject(targetWidget),
     _enabled(enabled),
     _type(Type::Rectangle),
     _modifier(Modifier::Replace),
@@ -43,6 +43,9 @@ PixelSelectionTool::PixelSelectionTool(QObject* parent, const bool& enabled /*= 
     _penControlPoint()
 {
     setMainColor(QColor(Qt::black));
+
+    // Tap into events from the target widget (necessary for drawing)
+    targetWidget->installEventFilter(this);
 }
 
 bool PixelSelectionTool::isEnabled() const

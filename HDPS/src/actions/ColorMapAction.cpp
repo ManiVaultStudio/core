@@ -326,17 +326,6 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const WidgetActionWidget::St
 
     comboBoxWidget->setStyleSheet("QComboBox QAbstractItemView { min-width: 250px; }");
 
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
-
     return widget;
 }
 
