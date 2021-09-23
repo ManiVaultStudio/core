@@ -6,8 +6,12 @@
 
 #include <QKeyEvent>
 
+namespace hdps {
+
+namespace gui {
+
 PixelSelectionAction::PixelSelectionAction(QWidget* targetWidget, PixelSelectionTool& pixelSelectionTool) :
-    GroupAction(targetWidget),
+    WidgetAction(targetWidget),
     _targetWidget(targetWidget),
     _pixelSelectionTool(pixelSelectionTool),
     _pixelSelectionTypeAction(*this),
@@ -29,7 +33,6 @@ PixelSelectionAction::PixelSelectionAction(QWidget* targetWidget, PixelSelection
     _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
 
     _brushRadiusAction.setToolTip("Brush selection tool radius");
-    
 
     const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
@@ -174,4 +177,7 @@ bool PixelSelectionAction::eventFilter(QObject* object, QEvent* event)
     }
 
     return QObject::eventFilter(object, event);
+}
+
+}
 }

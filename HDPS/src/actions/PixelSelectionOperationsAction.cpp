@@ -4,6 +4,10 @@
 
 #include "util/PixelSelectionTool.h"
 
+namespace hdps {
+
+namespace gui {
+
 PixelSelectionOperationsAction::PixelSelectionOperationsAction(PixelSelectionAction& pixelSelectionAction) :
     WidgetAction(&pixelSelectionAction),
     _pixelSelectionAction(pixelSelectionAction),
@@ -59,4 +63,7 @@ PixelSelectionOperationsAction::Widget::Widget(QWidget* parent, PixelSelectionOp
     layout->addWidget(pixelSelectionOperationsAction->getInvertSelectionAction().createWidget(this));
 
     setLayout(layout);
+}
+
+}
 }

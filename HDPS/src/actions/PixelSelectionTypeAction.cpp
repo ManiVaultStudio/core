@@ -4,6 +4,10 @@
 
 #include "util/PixelSelectionTool.h"
 
+namespace hdps {
+
+namespace gui {
+
 PixelSelectionTypeAction::PixelSelectionTypeAction(PixelSelectionAction& pixelSelectionAction) :
     WidgetAction(&pixelSelectionAction),
     _pixelSelectionAction(pixelSelectionAction),
@@ -91,4 +95,7 @@ PixelSelectionTypeAction::PixelSelectionTypeAction(PixelSelectionAction& pixelSe
     connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, this, updateType);
 
     updateType();
+}
+
+}
 }

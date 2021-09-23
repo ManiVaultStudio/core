@@ -1,8 +1,10 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include "TriggerAction.h"
 
-using namespace hdps::gui;
+namespace hdps {
+
+namespace gui {
 
 class PixelSelectionAction;
 
@@ -65,3 +67,6 @@ protected:
     TriggerAction           _selectAllAction;           /** Select all action */
     TriggerAction           _invertSelectionAction;     /** Invert selection action */
 };
+
+}
+}

@@ -1,8 +1,10 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include "ToggleAction.h"
 
-using namespace hdps::gui;
+namespace hdps {
+
+namespace gui {
 
 class PixelSelectionAction;
 
@@ -64,3 +66,6 @@ protected:
     ToggleAction            _modifierRemoveAction;      /** Remove from current selection action */
     QActionGroup            _modifierActionGroup;       /** Modifier action group */
 };
+
+}
+}

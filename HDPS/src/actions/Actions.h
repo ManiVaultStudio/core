@@ -8,6 +8,7 @@
 #include "GroupsAction.h"
 #include "IntegralAction.h"
 #include "OptionAction.h"
+#include "PixelSelectionAction.h"
 #include "TriggerAction.h"
 #include "ToggleAction.h"
 #include "StringAction.h"

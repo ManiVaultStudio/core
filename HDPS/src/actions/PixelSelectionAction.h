@@ -1,7 +1,10 @@
 #pragma once
 
-#include "actions/Actions.h"
 #include "util/PixelSelectionTool.h"
+
+#include "WidgetAction.h"
+#include "DecimalAction.h"
+#include "ToggleAction.h"
 
 #include "PixelSelectionTypeAction.h"
 #include "PixelSelectionOverlayAction.h"
@@ -10,7 +13,9 @@
 
 class QWidget;
 
-using namespace hdps::gui;
+namespace hdps {
+
+namespace gui {
 
 /**
  * Pixel selection action class
@@ -19,7 +24,7 @@ using namespace hdps::gui;
  *
  * @author Thomas Kroes
  */
-class PixelSelectionAction : public GroupAction
+class PixelSelectionAction : public WidgetAction
 {
 public:
 
@@ -64,3 +69,6 @@ protected:
     DecimalAction                       _brushRadiusAction;                 /** Brush radius action */
     ToggleAction                        _notifyDuringSelectionAction;       /** Notify during selection action */
 };
+
+}
+}

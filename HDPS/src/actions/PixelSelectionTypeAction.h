@@ -1,8 +1,11 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include "OptionAction.h"
+#include "TriggerAction.h"
 
-using namespace hdps::gui;
+namespace hdps {
+
+namespace gui {
 
 class PixelSelectionAction;
 
@@ -40,3 +43,6 @@ protected:
     TriggerAction           _polygonAction;             /** Switch to polygon selection action */
     QActionGroup            _typeActionGroup;           /** Type action group */
 };
+
+}
+}

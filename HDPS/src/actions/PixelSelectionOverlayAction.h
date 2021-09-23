@@ -1,8 +1,11 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include "ColorAction.h"
+#include "DecimalAction.h"
 
-using namespace hdps::gui;
+namespace hdps {
+
+namespace gui {
 
 class PixelSelectionAction;
 
@@ -63,3 +66,6 @@ protected:
     ColorAction             _selectionOverlayColor;     /** Selection overlay color action */
     DecimalAction           _selectionOverlayOpacity;   /** Selection overlay opacity action */
 };
+
+}
+}
