@@ -69,32 +69,66 @@ public: // Construction/destruction
 
     /**
      * Constructor
-     * @param parent Parent object
+     * @param targetWidget Target widget on which the pixel selection tool operates
      * @param enabled Whether the tool is enabled or not
      */
     PixelSelectionTool(QObject* parent, const bool& enabled = true);
 
 public: // Getters/setters
 
-    /** Get/set whether the tool is enabled or not */
+    /** Get whether the tool is enabled or not */
     bool isEnabled() const;
+
+    /**
+     * Set whether the tool is enabled or not
+     * @param enabled Whether the tool is enabled or not
+     */
     void setEnabled(const bool& enabled);
 
-    /** Get/set the current pixel selection shape type */
+    /** Get the current pixel selection type */
     Type getType() const;
+
+    /**
+     * Set the current pixel selection type
+     * @param type Pixel selection type
+     */
     void setType(const Type& type);
 
-    /** Get/set the current pixel selection modifier */
+    /** Get the current pixel selection modifier */
     Modifier getModifier() const;
+
+    /**
+     * Set the current pixel selection modifier
+     * @param modifier Pixel selection modifier
+     */
     void setModifier(const Modifier& modifier);
 
-    /** Get/set whether notifications should be fired continuously or only at the end of selection */
+    /** Get whether notifications should be fired continuously or only at the end of selection */
     bool isNotifyDuringSelection() const;
+
+    /**
+     * Set whether notifications should be fired continuously or only at the end of selection
+     * @param notifyDuringSelection Whether notifications should be fired continuously or only at the end of selection
+     */
     void setNotifyDuringSelection(const bool& notifyDuringSelection);
 
-    /** Get/set brush radius */
+    /** Get brush radius */
     float getBrushRadius() const;
+
+    /**
+     * Set brush radius
+     * @param brushRadius Brush radius
+     */
     void setBrushRadius(const float& brushRadius);
+
+    /** Get main drawing color */
+    QColor getMainColor() const;
+
+    /**
+     * Set main drawing color
+     * @param color Drawing color
+     */
+    void setMainColor(const QColor& mainColor);
 
     /** Trigger signals */
     void setChanged();
@@ -183,19 +217,17 @@ protected:
     QPixmap             _areaPixmap;                /** Pixmap for the selection area */
     bool                _preventContextMenu;        /** Whether to prevent a context menu */
 
-public:
+protected:
+    QColor              _mainColor;                 /** Main drawing color */
+    QColor              _fillColor;                 /** Selection area fill color (based on main color) */
+    QBrush              _areaBrush;                 /** Selection area brush */
+    QPen                _penLineForeGround;         /** Foreground pen */
+    QPen                _penLineBackGround;         /** Background pen */
+    QPen                _penControlPoint;           /** Control point pen */
 
-    // Brush radius 
+public:
     static constexpr float BRUSH_RADIUS_MIN       = 10.0f;      /** Minimum radius */
     static constexpr float BRUSH_RADIUS_MAX       = 500.0f;     /** Maximum radius */
     static constexpr float BRUSH_RADIUS_DEFAULT   = 50.0f;      /** Default radius */
     static constexpr float BRUSH_RADIUS_DELTA     = 10.0f;      /** Radius increment */
-
-    // Drawing constants
-    static const QColor COLOR_MAIN;         /** Main color */
-    static const QColor COLOR_FILL;         /** Selection area fill color (based on main color) */
-    static const QBrush AREA_BRUSH;         /** Selection area brush */
-    static const QPen PEN_LINE_FG;          /** Foreground pen */
-    static const QPen PEN_LINE_BG;          /** Background pen */
-    static const QPen PEN_CP;               /** Control point pen */
 };

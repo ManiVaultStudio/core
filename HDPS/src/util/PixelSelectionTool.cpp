@@ -21,13 +21,6 @@ const QMap<QString, PixelSelectionTool::Modifier> PixelSelectionTool::modifiers 
     { "Remove", PixelSelectionTool::Modifier::Remove }
 };
 
-const QColor PixelSelectionTool::COLOR_MAIN      = Qt::black;
-const QColor PixelSelectionTool::COLOR_FILL      = QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 50);
-const QBrush PixelSelectionTool::AREA_BRUSH      = QBrush(COLOR_FILL);
-const QPen PixelSelectionTool::PEN_LINE_FG       = QPen(COLOR_MAIN, 1.7f, Qt::SolidLine);
-const QPen PixelSelectionTool::PEN_LINE_BG       = QPen(QColor(COLOR_MAIN.red(), COLOR_MAIN.green(), COLOR_MAIN.blue(), 140), 1.7f, Qt::DotLine);
-const QPen PixelSelectionTool::PEN_CP            = QPen(COLOR_MAIN, 7.0f, Qt::SolidLine, Qt::RoundCap);
-
 PixelSelectionTool::PixelSelectionTool(QObject* parent, const bool& enabled /*= true*/) :
     QObject(parent),
     _enabled(enabled),
@@ -41,8 +34,15 @@ PixelSelectionTool::PixelSelectionTool(QObject* parent, const bool& enabled /*= 
     _mouseButtons(),
     _shapePixmap(),
     _areaPixmap(),
-    _preventContextMenu(false)
+    _preventContextMenu(false),
+    _mainColor(),
+    _fillColor(),
+    _areaBrush(),
+    _penLineForeGround(),
+    _penLineBackGround(),
+    _penControlPoint()
 {
+    setMainColor(QColor(Qt::black));
 }
 
 bool PixelSelectionTool::isEnabled() const
@@ -120,6 +120,21 @@ void PixelSelectionTool::setBrushRadius(const float& brushRadius)
     emit brushRadiusChanged(_brushRadius);
     
     paint();
+}
+
+QColor PixelSelectionTool::getMainColor() const
+{
+    return _mainColor;
+}
+
+void PixelSelectionTool::setMainColor(const QColor& mainColor)
+{
+    _mainColor          = mainColor;
+    _fillColor          = QColor(_mainColor.red(), _mainColor.green(), _mainColor.blue(), 50);
+    _areaBrush          = QBrush(_fillColor);
+    _penLineForeGround  = QPen(_mainColor, 1.7f, Qt::SolidLine);
+    _penLineBackGround  = QPen(QColor(_mainColor.red(), _mainColor.green(), _mainColor.blue(), 140), 1.7f, Qt::DotLine);
+    _penControlPoint    = QPen(_mainColor, 7.0f, Qt::SolidLine, Qt::RoundCap);
 }
 
 void PixelSelectionTool::setChanged()
@@ -493,7 +508,7 @@ void PixelSelectionTool::paint()
     _shapePixmap = QPixmap(_shapePixmap.size());
     _shapePixmap.fill(Qt::transparent);
 
-    _areaPixmap = QPixmap(_shapePixmap.size());
+    _areaPixmap = QPixmap(_areaPixmap.size());
     _areaPixmap.fill(Qt::transparent);
 
     QPainter shapePainter(&_shapePixmap), areaPainter(&_areaPixmap);
@@ -523,11 +538,11 @@ void PixelSelectionTool::paint()
             controlPoints << _mousePositions.first();
             controlPoints << _mousePositions.last();
                 
-            areaPainter.setBrush(AREA_BRUSH);
+            areaPainter.setBrush(_areaBrush);
             areaPainter.setPen(Qt::NoPen);
             areaPainter.drawRect(rectangle);
 
-            shapePainter.setPen(PEN_LINE_FG);
+            shapePainter.setPen(_penLineForeGround);
             shapePainter.drawRect(rectangle);
 
             const auto size         = 8.0f;
@@ -544,22 +559,22 @@ void PixelSelectionTool::paint()
 
             if (noMousePositions >= 1) {
                 if (noMousePositions == 1) {
-                    areaPainter.setBrush(AREA_BRUSH);
+                    areaPainter.setBrush(_areaBrush);
                     areaPainter.drawEllipse(QPointF(brushCenter), _brushRadius, _brushRadius);
                 }
                 else {
                     areaPainter.setBrush(Qt::NoBrush);
-                    areaPainter.setPen(QPen(AREA_BRUSH, 2.0 * _brushRadius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+                    areaPainter.setPen(QPen(_areaBrush, 2.0 * _brushRadius, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
                     areaPainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
                 }
             }
 
             shapePainter.setPen(Qt::NoPen);
-            shapePainter.setBrush(AREA_BRUSH);
+            shapePainter.setBrush(_areaBrush);
 
             shapePainter.drawPoint(brushCenter);
 
-            shapePainter.setPen(_mouseButtons & Qt::LeftButton ? PEN_LINE_FG : PEN_LINE_BG);
+            shapePainter.setPen(_mouseButtons & Qt::LeftButton ? _penLineForeGround : _penLineBackGround);
             shapePainter.setBrush(Qt::NoBrush);
             shapePainter.drawEllipse(QPointF(brushCenter), _brushRadius, _brushRadius);
 
@@ -579,20 +594,20 @@ void PixelSelectionTool::paint()
             if (noMousePositions < 2)
                 break;
 
-            areaPainter.setBrush(AREA_BRUSH);
+            areaPainter.setBrush(_areaBrush);
             areaPainter.setPen(Qt::NoPen);
             areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
             shapePainter.setBrush(Qt::NoBrush);
 
-            shapePainter.setPen(PEN_LINE_FG);
+            shapePainter.setPen(_penLineForeGround);
             shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
 
             controlPoints << _mousePositions.first();
             controlPoints << _mousePositions.last();
 
-            shapePainter.setBrush(AREA_BRUSH);
-            shapePainter.setPen(PEN_LINE_BG);
+            shapePainter.setBrush(_areaBrush);
+            shapePainter.setPen(_penLineBackGround);
             shapePainter.drawPolyline(controlPoints.constData(), controlPoints.count());
 
             const auto size = 8.0f;
@@ -608,13 +623,13 @@ void PixelSelectionTool::paint()
             if (noMousePositions < 2)
                 break;
 
-            areaPainter.setBrush(AREA_BRUSH);
+            areaPainter.setBrush(_areaBrush);
             areaPainter.setPen(Qt::NoPen);
             areaPainter.drawPolygon(_mousePositions.constData(), _mousePositions.count());
 
             shapePainter.setBrush(Qt::NoBrush);
 
-            shapePainter.setPen(PEN_LINE_FG);
+            shapePainter.setPen(_penLineForeGround);
             shapePainter.drawPolyline(_mousePositions.constData(), _mousePositions.count());
 
             QVector<QPoint> connectingPoints;
@@ -622,7 +637,7 @@ void PixelSelectionTool::paint()
             connectingPoints << _mousePositions.first();
             connectingPoints << _mousePositions.last();
 
-            shapePainter.setPen(PEN_LINE_BG);
+            shapePainter.setPen(_penLineBackGround);
             shapePainter.drawPolyline(connectingPoints.constData(), connectingPoints.count());
 
             controlPoints << _mousePositions;
@@ -639,7 +654,7 @@ void PixelSelectionTool::paint()
             break;
     }
     
-    shapePainter.setPen(PEN_CP);
+    shapePainter.setPen(_penControlPoint);
     shapePainter.drawPoints(controlPoints);
     
     switch (_type)
@@ -655,12 +670,12 @@ void PixelSelectionTool::paint()
                     break;
 
                 case Modifier::Add:
-                    shapePainter.setPen(PEN_LINE_FG);
+                    shapePainter.setPen(_penLineForeGround);
                     shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
                     break;
 
                 case Modifier::Remove:
-                    shapePainter.setPen(PEN_LINE_FG);
+                    shapePainter.setPen(_penLineForeGround);
                     shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
                     break;
 
