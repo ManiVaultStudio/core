@@ -214,6 +214,7 @@ set( UTIL_HEADERS
     src/util/Timer.h
     src/util/IconFont.h
     src/util/IconFonts.h
+    src/util/Interpolation.h
     src/util/FontAwesome.h
     src/util/ColorMap.h
     src/util/ColorMapFilterModel.h
@@ -233,6 +234,7 @@ set( UTIL_SOURCES
     src/util/Timer.cpp
     src/util/IconFont.cpp
     src/util/IconFonts.cpp
+    src/util/Interpolation.cpp
     src/util/FontAwesome.cpp
     src/util/ColorMap.cpp
     src/util/ColorMapFilterModel.cpp

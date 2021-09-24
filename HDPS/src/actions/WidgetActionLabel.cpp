@@ -16,28 +16,20 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _widgetAction(widgetAction)
 {
     setAcceptDrops(true);
-    setEnabled(widgetAction->isEnabled());
-    setToolTip(widgetAction->text());
 
-    const auto updateTextAndTooltip = [this, widgetAction]() -> void {
+    const auto update = [this, widgetAction]() -> void {
+        setEnabled(widgetAction->isEnabled());
         setText(QString("%1: ").arg(widgetAction->text()));
         setToolTip(widgetAction->text());
+        setVisible(widgetAction->isVisible());
     };
 
-    connect(widgetAction, &WidgetAction::changed, this, [this, widgetAction, updateTextAndTooltip]() {
-        setEnabled(widgetAction->isEnabled());
-        updateTextAndTooltip();
-    });
+    connect(widgetAction, &WidgetAction::changed, this, update);
 
-    updateTextAndTooltip();
+    update();
 
     connect(widgetAction, &WidgetAction::isDropTargetChanged, this, [this, widgetAction](const bool& isDropTarget) {
         setStyleSheet(QString("QLabel { text-decoration: %1; }").arg(isDropTarget ? "underline" : "none"));
-
-        /*
-        if (isDropTarget)
-            qDebug() << widgetAction->text();
-        */
     });
 }
 

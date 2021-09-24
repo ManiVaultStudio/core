@@ -56,6 +56,11 @@ bool PixelSelectionTool::isEnabled() const
 void PixelSelectionTool::setEnabled(const bool& enabled)
 {
     _enabled = enabled;
+
+    if (!_enabled) {
+        _shapePixmap.fill(Qt::transparent);
+        _areaPixmap.fill(Qt::transparent);
+    }
 }
 
 PixelSelectionTool::Type PixelSelectionTool::getType() const

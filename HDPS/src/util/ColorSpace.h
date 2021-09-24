@@ -2,6 +2,8 @@
 
 #include <QMap>
 
+namespace hdps {
+
 namespace util {
 
 /**
@@ -26,4 +28,5 @@ static const QMap<ColorSpace, QString> colorSpaces = {
     { ColorSpace::LAB, "LAB" }
 };
 
+}
 }
