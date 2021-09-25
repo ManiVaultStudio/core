@@ -6,11 +6,8 @@ namespace hdps {
 
 namespace util {
 
-/**
- * Color space
- * Defines color spaces
- */
-enum class ColorSpace
+/** Color space types enum */
+enum class ColorSpaceType
 {
     Mono,   /** Single channel */
     Duo,    /** Double channel */
@@ -19,13 +16,13 @@ enum class ColorSpace
     LAB     /**  */
 };
 
-/** Maps color space enum to name */
-static const QMap<ColorSpace, QString> colorSpaces = {
-    { ColorSpace::Mono, "Mono" },
-    { ColorSpace::Duo, "Duo" },
-    { ColorSpace::RGB, "RGB" },
-    { ColorSpace::HSL, "HSL" },
-    { ColorSpace::LAB, "LAB" }
+/** Maps color space type enum to name */
+static const QMap<ColorSpaceType, QString> colorSpaces = {
+    { ColorSpaceType::Mono, "Mono" },
+    { ColorSpaceType::Duo, "Duo" },
+    { ColorSpaceType::RGB, "RGB" },
+    { ColorSpaceType::HSL, "HSL" },
+    { ColorSpaceType::LAB, "LAB" }
 };
 
 }

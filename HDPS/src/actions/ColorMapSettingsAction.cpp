@@ -30,7 +30,7 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
         _horizontalAxisAction.setText(_colorMapAction.getColorMapType() == ColorMap::Type::OneDimensional ? "Range" : "Horizontal");
     };
 
-    connect(&colorMapAction, &ColorMapAction::colorMapTypeChanged, this, updateRangeActions);
+    connect(&colorMapAction, &ColorMapAction::typeChanged, this, updateRangeActions);
 
     updateRangeActions();
 }

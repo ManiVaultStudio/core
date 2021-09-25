@@ -210,6 +210,7 @@ set( UTIL_HEADERS
     src/util/FileUtil.h
     src/util/MeanShift.h
     src/util/DensityComputation.h
+    src/util/Exception.h
     src/util/Math.h
     src/util/Timer.h
     src/util/IconFont.h
@@ -230,6 +231,7 @@ set( UTIL_SOURCES
     src/util/FileUtil.cpp
     src/util/MeanShift.cpp
     src/util/DensityComputation.cpp
+    src/util/Exception.cpp
     src/util/Math.cpp
     src/util/Timer.cpp
     src/util/IconFont.cpp

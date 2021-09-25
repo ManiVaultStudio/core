@@ -71,7 +71,7 @@ void ColorMapAction::setColorMapType(const util::ColorMap::Type& colorMapType)
     _colorMapFilterModel.setType(colorMapType);
     _currentColorMapAction.reset();
 
-    emit colorMapTypeChanged(colorMapType);
+    emit typeChanged(colorMapType);
 
     setResettable(isResettable());
 }

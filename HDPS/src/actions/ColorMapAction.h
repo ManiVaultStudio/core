@@ -135,7 +135,7 @@ signals:
      * Signals that the current color map type changed
      * @param colorMapType Current color map type
      */
-    void colorMapTypeChanged(const util::ColorMap::Type& colorMapType);
+    void typeChanged(const util::ColorMap::Type& colorMapType);
 
     /**
      * Signals that the current color map image changed
