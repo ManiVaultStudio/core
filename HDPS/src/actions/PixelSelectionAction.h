@@ -57,7 +57,15 @@ public: // Event handling
      */
     bool eventFilter(QObject* object, QEvent* event) override;
 
-public: /** Action getters */
+public: // Action getters
+
+    ColorAction& getOverlayColor() { return _overlayColor; }
+    DecimalAction& getOverlayOpacity() { return _overlayOpacity; }
+    PixelSelectionTypeAction& getPixelSelectionTypeAction() { return _pixelSelectionTypeAction; }
+    PixelSelectionModifierAction& getPixelSelectionModifierAction() { return _pixelSelectionModifierAction; }
+    PixelSelectionOperationsAction& getPixelSelectionOperationsAction() { return _pixelSelectionOperationsAction; }
+    DecimalAction& getBrushRadiusAction() { return _brushRadiusAction; }
+    ToggleAction& getNotifyDuringSelectionAction() { return _notifyDuringSelectionAction; }
 
 protected:
     QWidget*                            _targetWidget;                      /** Pointer to target widget */
