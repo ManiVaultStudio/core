@@ -31,6 +31,7 @@ void WebWidget::init(WebCommunicationObject* communicationObject)
     QObject::connect(_js, &WebCommunicationObject::notifyJsBridgeIsAvailable, this, &WebWidget::initWebPage);
 
     _webView = new QWebEngineView();
+    _webView->setAcceptDrops(false);
     //assert(_webView->settings()->testAttribute(QWebEngineSettings::JavascriptEnabled));
 
     QVBoxLayout* layout = new QVBoxLayout();
