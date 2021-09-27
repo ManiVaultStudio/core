@@ -4,6 +4,8 @@
 
 #include "util/PixelSelectionTool.h"
 
+using namespace hdps::util;
+
 namespace hdps {
 
 namespace gui {
@@ -29,10 +31,10 @@ PixelSelectionTypeAction::PixelSelectionTypeAction(PixelSelectionAction& pixelSe
     _lassoAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _polygonAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
-    _rectangleAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionTool::Type::Rectangle));
-    _brushAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionTool::Type::Brush));
-    _lassoAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionTool::Type::Lasso));
-    _polygonAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionTool::Type::Polygon));
+    _rectangleAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Rectangle));
+    _brushAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Brush));
+    _lassoAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Lasso));
+    _polygonAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Polygon));
 
     targetWidget->addAction(&_rectangleAction);
     targetWidget->addAction(&_brushAction);
@@ -54,7 +56,7 @@ PixelSelectionTypeAction::PixelSelectionTypeAction(PixelSelectionAction& pixelSe
     _lassoAction.setToolTip("Select data points using a lasso (L)");
     _polygonAction.setToolTip("Select data points by drawing a polygon (P)");
 
-    _typeAction.setOptions(pixelSelectionTool.types.keys());
+    _typeAction.setOptions(pixelSelectionTypes.values());
     _typeAction.setCurrentText("Rectangle");
     _typeAction.setDefaultText("Rectangle");
 
@@ -64,33 +66,33 @@ PixelSelectionTypeAction::PixelSelectionTypeAction(PixelSelectionAction& pixelSe
     _typeActionGroup.addAction(&_polygonAction);
 
     connect(&_typeAction, &OptionAction::currentTextChanged, [this, &pixelSelectionTool](const QString& currentText) {
-        pixelSelectionTool.setType(PixelSelectionTool::getTypeEnum(currentText));
+        pixelSelectionTool.setType(pixelSelectionTypes.key(currentText));
     });
 
     connect(&_rectangleAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionTool::Type::Rectangle);
+        pixelSelectionTool.setType(PixelSelectionType::Rectangle);
     });
 
     connect(&_brushAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionTool::Type::Brush);
+        pixelSelectionTool.setType(PixelSelectionType::Brush);
     });
 
     connect(&_lassoAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionTool::Type::Lasso);
+        pixelSelectionTool.setType(PixelSelectionType::Lasso);
     });
 
     connect(&_polygonAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionTool::Type::Polygon);
+        pixelSelectionTool.setType(PixelSelectionType::Polygon);
     });
 
     const auto updateType = [this, &pixelSelectionTool]() {
         const auto type = pixelSelectionTool.getType();
 
-        _typeAction.setCurrentText(PixelSelectionTool::getTypeName(type));
-        _rectangleAction.setChecked(type == PixelSelectionTool::Type::Rectangle);
-        _brushAction.setChecked(type == PixelSelectionTool::Type::Brush);
-        _lassoAction.setChecked(type == PixelSelectionTool::Type::Lasso);
-        _polygonAction.setChecked(type == PixelSelectionTool::Type::Polygon);
+        _typeAction.setCurrentText(pixelSelectionTypes.value(type));
+        _rectangleAction.setChecked(type == PixelSelectionType::Rectangle);
+        _brushAction.setChecked(type == PixelSelectionType::Brush);
+        _lassoAction.setChecked(type == PixelSelectionType::Lasso);
+        _polygonAction.setChecked(type == PixelSelectionType::Polygon);
 
         setResettable(_typeAction.isResettable());
     };

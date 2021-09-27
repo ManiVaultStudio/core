@@ -8,24 +8,15 @@
 #include <QPainterPath>
 #include <QtMath>
 
-const QMap<QString, PixelSelectionTool::Type> PixelSelectionTool::types = {
-    { "Rectangle", PixelSelectionTool::Type::Rectangle },
-    { "Brush", PixelSelectionTool::Type::Brush },
-    { "Lasso", PixelSelectionTool::Type::Lasso },
-    { "Polygon", PixelSelectionTool::Type::Polygon }
-};
+namespace hdps {
 
-const QMap<QString, PixelSelectionTool::Modifier> PixelSelectionTool::modifiers = {
-    { "Replace", PixelSelectionTool::Modifier::Replace },
-    { "Add", PixelSelectionTool::Modifier::Add },
-    { "Remove", PixelSelectionTool::Modifier::Remove }
-};
+namespace util {
 
 PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :
     QObject(targetWidget),
     _enabled(enabled),
-    _type(Type::Rectangle),
-    _modifier(Modifier::Replace),
+    _type(PixelSelectionType::Rectangle),
+    _modifier(PixelSelectionModifierType::Replace),
     _active(false),
     _notifyDuringSelection(true),
     _brushRadius(BRUSH_RADIUS_DEFAULT),
@@ -63,12 +54,12 @@ void PixelSelectionTool::setEnabled(const bool& enabled)
     }
 }
 
-PixelSelectionTool::Type PixelSelectionTool::getType() const
+PixelSelectionType PixelSelectionTool::getType() const
 {
     return _type;
 }
 
-void PixelSelectionTool::setType(const Type& type)
+void PixelSelectionTool::setType(const PixelSelectionType& type)
 {
     if (type == _type)
         return;
@@ -81,12 +72,12 @@ void PixelSelectionTool::setType(const Type& type)
     paint();
 }
 
-PixelSelectionTool::Modifier PixelSelectionTool::getModifier() const
+PixelSelectionModifierType PixelSelectionTool::getModifier() const
 {
     return _modifier;
 }
 
-void PixelSelectionTool::setModifier(const Modifier& modifier)
+void PixelSelectionTool::setModifier(const PixelSelectionModifierType& modifier)
 {
     if (modifier == _modifier)
         return;
@@ -158,7 +149,7 @@ void PixelSelectionTool::abort()
     endSelection();
 }
 
-QIcon PixelSelectionTool::getIcon(const Type& selectionType)
+QIcon PixelSelectionTool::getIcon(const PixelSelectionType& selectionType)
 {
     const auto margin           = 5;
     const auto pixmapSize       = QSize(100, 100);
@@ -184,70 +175,70 @@ QIcon PixelSelectionTool::getIcon(const Type& selectionType)
 
     switch (selectionType)
     {
-    case PixelSelectionTool::Type::Rectangle:
-    {
-        painter.drawRect(pixmapDeflated);
-        break;
-    }
-
-    case PixelSelectionTool::Type::Brush:
-    {
-        painter.drawEllipse(pixmapDeflated.center(), 45, 45);
-        break;
-    }
-
-    case PixelSelectionTool::Type::Lasso:
-    {
-        QVector<QPoint> polygonPoints;
-
-        polygonPoints << QPoint(5, 8);
-        polygonPoints << QPoint(80, 28);
-        polygonPoints << QPoint(92, 90);
-        polygonPoints << QPoint(45, 60);
-        polygonPoints << QPoint(10, 80);
-
-        polygonPoints << polygonPoints[0];
-        polygonPoints << polygonPoints[1];
-
-        QPainterPath testCurve;
-
-        QVector<QVector<QPoint>> curves;
-
-        for (int pointIndex = 1; pointIndex < polygonPoints.count() - 1; pointIndex++) {
-            const auto pPrevious    = polygonPoints[pointIndex - 1];
-            const auto p            = polygonPoints[pointIndex];
-            const auto pNext        = polygonPoints[pointIndex + 1];
-            const auto pC0          = pPrevious + ((p - pPrevious) / 2);
-            const auto pC1          = p + ((pNext - p) / 2);
-
-            curves << QVector<QPoint>({ pC0, p, pC1 });
+        case PixelSelectionType::Rectangle:
+        {
+            painter.drawRect(pixmapDeflated);
+            break;
         }
 
-        testCurve.moveTo(curves.first().first());
+        case PixelSelectionType::Brush:
+        {
+            painter.drawEllipse(pixmapDeflated.center(), 45, 45);
+            break;
+        }
 
-        for (auto curve : curves)
-            testCurve.cubicTo(curve[0], curve[1], curve[2]);
+        case PixelSelectionType::Lasso:
+        {
+            QVector<QPoint> polygonPoints;
 
-        painter.drawPath(testCurve);
+            polygonPoints << QPoint(5, 8);
+            polygonPoints << QPoint(80, 28);
+            polygonPoints << QPoint(92, 90);
+            polygonPoints << QPoint(45, 60);
+            polygonPoints << QPoint(10, 80);
 
-        break;
-    }
+            polygonPoints << polygonPoints[0];
+            polygonPoints << polygonPoints[1];
 
-    case PixelSelectionTool::Type::Polygon:
-    {
-        QVector<QPoint> points;
+            QPainterPath testCurve;
 
-        points << QPoint(10, 10);
-        points << QPoint(90, 45);
-        points << QPoint(25, 90);
+            QVector<QVector<QPoint>> curves;
 
-        painter.drawPolygon(points);
+            for (int pointIndex = 1; pointIndex < polygonPoints.count() - 1; pointIndex++) {
+                const auto pPrevious    = polygonPoints[pointIndex - 1];
+                const auto p            = polygonPoints[pointIndex];
+                const auto pNext        = polygonPoints[pointIndex + 1];
+                const auto pC0          = pPrevious + ((p - pPrevious) / 2);
+                const auto pC1          = p + ((pNext - p) / 2);
 
-        break;
-    }
+                curves << QVector<QPoint>({ pC0, p, pC1 });
+            }
 
-    default:
-        break;
+            testCurve.moveTo(curves.first().first());
+
+            for (auto curve : curves)
+                testCurve.cubicTo(curve[0], curve[1], curve[2]);
+
+            painter.drawPath(testCurve);
+
+            break;
+        }
+
+        case PixelSelectionType::Polygon:
+        {
+            QVector<QPoint> points;
+
+            points << QPoint(10, 10);
+            points << QPoint(90, 45);
+            points << QPoint(25, 90);
+
+            painter.drawPolygon(points);
+
+            break;
+        }
+
+        default:
+            break;
     }
 
     return QIcon(pixmap);
@@ -289,9 +280,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-                case Type::Rectangle:
-                case Type::Brush:
-                case Type::Lasso:
+                case PixelSelectionType::Rectangle:
+                case PixelSelectionType::Brush:
+                case PixelSelectionType::Lasso:
                 {
                     switch (mouseEvent->button())
                     {
@@ -311,7 +302,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
-                case Type::Polygon:
+                case PixelSelectionType::Polygon:
                 {
                     if (_mousePositions.isEmpty() && mouseEvent->button() == Qt::LeftButton)
                         startSelection();
@@ -351,9 +342,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-                case Type::Rectangle:
-                case Type::Brush:
-                case Type::Lasso:
+                case PixelSelectionType::Rectangle:
+                case PixelSelectionType::Brush:
+                case PixelSelectionType::Lasso:
                 {
                     switch (mouseEvent->button())
                     {
@@ -371,7 +362,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
-                case Type::Polygon:
+                case PixelSelectionType::Polygon:
                 {
                     switch (mouseEvent->button())
                     {
@@ -406,7 +397,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-                case Type::Rectangle:
+                case PixelSelectionType::Rectangle:
                 {
                     if (mouseEvent->buttons() & Qt::LeftButton) {
                         if (_mousePositions.size() == 1) {
@@ -427,7 +418,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
-                case Type::Brush:
+                case PixelSelectionType::Brush:
                 {
                     if (mouseEvent->buttons() & Qt::LeftButton)
                         _mousePositions << _mousePosition;
@@ -437,7 +428,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
-                case Type::Lasso:
+                case PixelSelectionType::Lasso:
                 {
                     if (mouseEvent->buttons() & Qt::LeftButton && !_mousePositions.isEmpty())
                         _mousePositions << mouseEvent->pos();
@@ -448,7 +439,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
-                case Type::Polygon:
+                case PixelSelectionType::Polygon:
                 {
                     if (!_mousePositions.isEmpty())
                         _mousePositions.last() = mouseEvent->pos();
@@ -472,10 +463,10 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
             switch (_type)
             {
-                case Type::Rectangle:
+                case PixelSelectionType::Rectangle:
                     break;
 
-                case Type::Brush:
+                case PixelSelectionType::Brush:
                 {
                     if (wheelEvent->angleDelta().y() < 0)
                         setBrushRadius(_brushRadius - BRUSH_RADIUS_DELTA);
@@ -487,8 +478,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                     break;
                 }
 
-                case Type::Lasso:
-                case Type::Polygon:
+                case PixelSelectionType::Lasso:
+                case PixelSelectionType::Polygon:
                     break;
 
                 default:
@@ -534,7 +525,7 @@ void PixelSelectionTool::paint()
 
     switch (_type)
     {
-        case Type::Rectangle:
+        case PixelSelectionType::Rectangle:
         {
             if (noMousePositions != 2)
                 break;
@@ -561,7 +552,7 @@ void PixelSelectionTool::paint()
             break;
         }
         
-        case Type::Brush:
+        case PixelSelectionType::Brush:
         {
             const auto brushCenter = _mousePosition;
 
@@ -597,7 +588,7 @@ void PixelSelectionTool::paint()
             break;
         }
         
-        case Type::Lasso:
+        case PixelSelectionType::Lasso:
         {
             if (noMousePositions < 2)
                 break;
@@ -626,7 +617,7 @@ void PixelSelectionTool::paint()
             break;
         }
         
-        case Type::Polygon:
+        case PixelSelectionType::Polygon:
         {
             if (noMousePositions < 2)
                 break;
@@ -667,22 +658,22 @@ void PixelSelectionTool::paint()
     
     switch (_type)
     {
-        case Type::Rectangle:
-        case Type::Brush:
-        case Type::Lasso:
-        case Type::Polygon:
+        case PixelSelectionType::Rectangle:
+        case PixelSelectionType::Brush:
+        case PixelSelectionType::Lasso:
+        case PixelSelectionType::Polygon:
         {
             switch (_modifier)
             {
-                case Modifier::Replace:
+                case PixelSelectionModifierType::Replace:
                     break;
 
-                case Modifier::Add:
+                case PixelSelectionModifierType::Add:
                     shapePainter.setPen(_penLineForeGround);
                     shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("plus-circle"), QTextOption(Qt::AlignCenter));
                     break;
 
-                case Modifier::Remove:
+                case PixelSelectionModifierType::Remove:
                     shapePainter.setPen(_penLineForeGround);
                     shapePainter.drawText(textRectangle, hdps::Application::getIconFont("FontAwesome").getIconCharacter("minus-circle"), QTextOption(Qt::AlignCenter));
                     break;
@@ -715,4 +706,7 @@ void PixelSelectionTool::endSelection()
 
     _mousePositions.clear();
     _active = false;
+}
+
+}
 }

@@ -33,7 +33,7 @@ public:
      * @param targetWidget Pointer to target widget
      * @param pixelSelectionTool Reference to pixel selection tool
      */
-    PixelSelectionAction(QWidget* targetWidget, PixelSelectionTool& pixelSelectionTool);
+    PixelSelectionAction(QWidget* targetWidget, util::PixelSelectionTool& pixelSelectionTool);
 
     /**
      * Get the context menu for the action
@@ -46,7 +46,7 @@ public:
     QWidget* getTargetWidget();
 
     /** Get reference to pixel selection tool */
-    PixelSelectionTool& getPixelSelectionTool();
+    util::PixelSelectionTool& getPixelSelectionTool();
 
 public: // Event handling
 
@@ -71,7 +71,7 @@ protected:
     QWidget*                            _targetWidget;                      /** Pointer to target widget */
     ColorAction                         _overlayColor;                      /** Selection overlay color action */
     DecimalAction                       _overlayOpacity;                    /** Selection overlay opacity action */
-    PixelSelectionTool&                 _pixelSelectionTool;                /** Reference to pixel selection tool */
+    util::PixelSelectionTool&           _pixelSelectionTool;                /** Reference to pixel selection tool */
     PixelSelectionTypeAction            _pixelSelectionTypeAction;          /** Pixel selection type action */
     PixelSelectionModifierAction        _pixelSelectionModifierAction;      /** Pixel selection modifier action */
     PixelSelectionOperationsAction      _pixelSelectionOperationsAction;    /** Pixel selection operations action */

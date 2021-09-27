@@ -4,6 +4,8 @@
 
 #include "util/PixelSelectionTool.h"
 
+using namespace hdps::util;
+
 namespace hdps {
 
 namespace gui {
@@ -42,11 +44,11 @@ PixelSelectionModifierAction::PixelSelectionModifierAction(PixelSelectionAction&
     _modifierActionGroup.addAction(&_modifierRemoveAction);
 
     connect(&_modifierAddAction, &QAction::toggled, [this, &pixelSelectionTool](bool checked) {
-        pixelSelectionTool.setModifier(checked ? PixelSelectionTool::Modifier::Add : PixelSelectionTool::Modifier::Replace);
+        pixelSelectionTool.setModifier(checked ? PixelSelectionModifierType::Add : PixelSelectionModifierType::Replace);
     });
 
     connect(&_modifierRemoveAction, &QAction::toggled, [this, &pixelSelectionTool](bool checked) {
-        pixelSelectionTool.setModifier(checked ? PixelSelectionTool::Modifier::Remove : PixelSelectionTool::Modifier::Replace);
+        pixelSelectionTool.setModifier(checked ? PixelSelectionModifierType::Remove : PixelSelectionModifierType::Replace);
     });
 
     const auto updateResettable = [this]() -> void {

@@ -1,11 +1,17 @@
 #pragma once
 
+#include "PixelSelection.h"
+
 #include <QWidget>
 #include <QMap>
 #include <QPen>
 #include <QBrush>
 
 class QPainter;
+
+namespace hdps {
+
+namespace util {
 
 /**
  * Pixel selection tool class
@@ -19,51 +25,6 @@ class QPainter;
 class PixelSelectionTool : public QObject
 {
     Q_OBJECT
-
-public:
-
-    /** Types */
-    enum class Type
-    {
-        Rectangle,      /** Select pixels within a rectangle */
-        Brush,          /** A brush is used the paint the pixel selection */
-        Lasso,          /** A lasso tool is used to select pixels */
-        Polygon         /** Select pixels in the interior of a polygon */
-    };
-
-    /** Maps type name to type enum and vice versa */
-    static QMap<QString, Type> const types;
-
-    /** Get string representation of type enum */
-    static QString getTypeName(const Type& type) {
-        return types.key(type);
-    }
-
-    /** Get enum representation from type name */
-    static Type getTypeEnum(const QString& typeName) {
-        return types[typeName];
-    }
-
-    /** Modifiers */
-    enum class Modifier
-    {
-        Replace,        /** Replace selection */
-        Add,            /** Add to selection */
-        Remove          /** Remove from selection */
-    };
-
-    /** Maps modifier name to modifier enum and vice versa */
-    static QMap<QString, Modifier> const modifiers;
-
-    /** Get string representation of modifier enum */
-    static QString getModifierName(const Modifier& modifier) {
-        return modifiers.key(modifier);
-    }
-
-    /** Get enum representation from modifier name */
-    static Modifier getModifierEnum(const QString& modifierName) {
-        return modifiers[modifierName];
-    }
 
 public: // Construction/destruction
 
@@ -86,22 +47,22 @@ public: // Getters/setters
     void setEnabled(const bool& enabled);
 
     /** Get the current pixel selection type */
-    Type getType() const;
+    PixelSelectionType getType() const;
 
     /**
      * Set the current pixel selection type
      * @param type Pixel selection type
      */
-    void setType(const Type& type);
+    void setType(const PixelSelectionType& type);
 
     /** Get the current pixel selection modifier */
-    Modifier getModifier() const;
+    PixelSelectionModifierType getModifier() const;
 
     /**
      * Set the current pixel selection modifier
      * @param modifier Pixel selection modifier
      */
-    void setModifier(const Modifier& modifier);
+    void setModifier(const PixelSelectionModifierType& modifier);
 
     /** Get whether notifications should be fired continuously or only at the end of selection */
     bool isNotifyDuringSelection() const;
@@ -155,7 +116,7 @@ public: // Getters/setters
      * Get the icon for the specified selection type
      * @param selectionType The type of selection e.g. brush rectangle etc.
      */
-    static QIcon getIcon(const PixelSelectionTool::Type& selectionType);
+    static QIcon getIcon(const PixelSelectionType& selectionType);
 
 public: // Event handling
 
@@ -180,10 +141,10 @@ private:
 signals:
 
     /** Signals that the type has changed */
-    void typeChanged(const Type& type);
+    void typeChanged(const PixelSelectionType& type);
 
     /** Signals that the selection modifier has changed */
-    void modifierChanged(const Modifier& modifier);
+    void modifierChanged(const PixelSelectionModifierType& modifier);
 
     /** Signals that the notify during selection property has changed */
     void notifyDuringSelectionChanged(const bool& notifyDuringSelection);
@@ -204,18 +165,18 @@ signals:
     void ended();
 
 protected:
-    bool                _enabled;                   /** Whether the tool is enabled or not */
-    Type                _type;                      /** Current selection type */
-    Modifier            _modifier;                  /** Current selection modifier */
-    bool                _active;                    /** Whether the selection process is active */
-    bool                _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
-    float               _brushRadius;               /** Brush radius */
-    QPoint              _mousePosition;             /** Current mouse position */
-    QVector<QPoint>     _mousePositions;            /** Recorded mouse positions */
-    int                 _mouseButtons;              /** State of the left, middle and right mouse buttons */
-    QPixmap             _shapePixmap;               /** Pixmap for the selection tool shape */
-    QPixmap             _areaPixmap;                /** Pixmap for the selection area */
-    bool                _preventContextMenu;        /** Whether to prevent a context menu */
+    bool                    _enabled;                   /** Whether the tool is enabled or not */
+    PixelSelectionType           _type;                      /** Current selection type */
+    PixelSelectionModifierType   _modifier;                  /** Current selection modifier */
+    bool                    _active;                    /** Whether the selection process is active */
+    bool                    _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
+    float                   _brushRadius;               /** Brush radius */
+    QPoint                  _mousePosition;             /** Current mouse position */
+    QVector<QPoint>         _mousePositions;            /** Recorded mouse positions */
+    int                     _mouseButtons;              /** State of the left, middle and right mouse buttons */
+    QPixmap                 _shapePixmap;               /** Pixmap for the selection tool shape */
+    QPixmap                 _areaPixmap;                /** Pixmap for the selection area */
+    bool                    _preventContextMenu;        /** Whether to prevent a context menu */
 
 protected:
     QColor              _mainColor;                 /** Main drawing color */
@@ -231,3 +192,6 @@ public:
     static constexpr float BRUSH_RADIUS_DEFAULT   = 50.0f;      /** Default radius */
     static constexpr float BRUSH_RADIUS_DELTA     = 10.0f;      /** Radius increment */
 };
+
+}
+}

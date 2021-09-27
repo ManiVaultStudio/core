@@ -6,6 +6,8 @@
 
 #include <QKeyEvent>
 
+using namespace hdps::util;
+
 namespace hdps {
 
 namespace gui {
@@ -71,7 +73,7 @@ PixelSelectionAction::PixelSelectionAction(QWidget* targetWidget, PixelSelection
     });
 
     const auto updateType = [this, &pixelSelectionTool]() {
-        _brushRadiusAction.setEnabled(pixelSelectionTool.getType() == PixelSelectionTool::Type::Brush);
+        _brushRadiusAction.setEnabled(pixelSelectionTool.getType() == PixelSelectionType::Brush);
     };
 
     connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, this, updateType);
