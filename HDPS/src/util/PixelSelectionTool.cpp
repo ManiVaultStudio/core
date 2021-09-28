@@ -239,6 +239,36 @@ QIcon PixelSelectionTool::getIcon(const PixelSelectionType& selectionType)
             break;
         }
 
+        case PixelSelectionType::Sample:
+        {
+            painter.setPen(QPen(textColor, 10, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+
+            // Radii and center of the cross hair
+            const auto r1       = 5.0f, r2 = 25.0f, r3 = 45.0f;
+            const auto center   = QPoint(50, 50);
+
+            // Draw four orthogonal lines
+            for (int step = 0; step < 4; step++) {
+
+                // Compute angle in radians
+                const auto angle = qDegreesToRadians(step * 90.0f);
+
+                // Draw inner line
+                painter.drawPolyline(QVector<QPoint>({
+                    center + QPoint(0, 0),
+                    center + QPoint(r1 * sin(angle), r1 * cos(angle))
+                    }));
+
+                // Draw outer line
+                painter.drawPolyline(QVector<QPoint>({
+                    center + QPoint(r2 * sin(angle), r2 * cos(angle)),
+                    center + QPoint(r3 * sin(angle), r3 * cos(angle))
+                }));
+            }
+
+            break;
+        }
+
         default:
             break;
     }
@@ -285,6 +315,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                 case PixelSelectionType::Rectangle:
                 case PixelSelectionType::Brush:
                 case PixelSelectionType::Lasso:
+                case PixelSelectionType::Sample:
                 {
                     switch (mouseEvent->button())
                     {
@@ -347,6 +378,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                 case PixelSelectionType::Rectangle:
                 case PixelSelectionType::Brush:
                 case PixelSelectionType::Lasso:
+                case PixelSelectionType::Sample:
                 {
                     switch (mouseEvent->button())
                     {
@@ -448,6 +480,15 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
                     if (isActive())
                         shouldPaint = true;
+
+                    break;
+                }
+
+                case PixelSelectionType::Sample:
+                {
+                    _mousePositions = { _mousePosition };
+
+                    shouldPaint = true;
 
                     break;
                 }
@@ -647,6 +688,33 @@ void PixelSelectionTool::paint()
             const auto textCenter = _mousePositions.first() - QPoint(size, size);
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
+
+            break;
+        }
+
+        case PixelSelectionType::Sample:
+        {
+            if (noMousePositions < 1)
+                break;
+
+            const auto mousePosition = _mousePositions.last();
+
+            areaPainter.setBrush(_areaBrush);
+            areaPainter.setPen(QPen(_areaBrush, 100, Qt::SolidLine, Qt::RoundCap));
+            areaPainter.drawPoint(mousePosition);
+
+            shapePainter.setBrush(Qt::NoBrush);
+            shapePainter.setPen(_mouseButtons & Qt::LeftButton ? _penLineForeGround : _penLineBackGround);
+
+            shapePainter.drawPolyline(QVector<QPoint>({
+                QPoint(mousePosition.x(), 0),
+                QPoint(mousePosition.x(), _shapePixmap.size().height())
+            }));
+
+            shapePainter.drawPolyline(QVector<QPoint>({
+                QPoint(0, mousePosition.y()),
+                QPoint(_shapePixmap.size().width(), mousePosition.y())
+                }));
 
             break;
         }

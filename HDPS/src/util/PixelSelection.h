@@ -36,6 +36,22 @@ static const QMap<PixelSelectionType, QString> pixelSelectionTypes = {
     { PixelSelectionType::Sample, "Sample" }
 };
 
+/**
+ * Get pixel selection type name from enum
+ * @param pixelSelectionType Pixel selection type
+ */
+static QString getPixelSelectionTypeName(const PixelSelectionType& pixelSelectionType) {
+    return pixelSelectionTypes.value(pixelSelectionType);
+}
+
+/**
+ * Get pixel selection type enum from name
+ * @param pixelSelectionTypeName Name of the pixel selection type
+ */
+static PixelSelectionType getPixelSelectionTypeEnum(const QString& pixelSelectionTypeName) {
+    return pixelSelectionTypes.key(pixelSelectionTypeName);
+}
+
 /** Selection modifiers enum */
 enum class PixelSelectionModifierType
 {
@@ -50,6 +66,22 @@ static const QMap<PixelSelectionModifierType, QString> pixelSelectionModifiers =
     { PixelSelectionModifierType::Add, "Add" },
     { PixelSelectionModifierType::Remove, "Remove" }
 };
+
+/**
+ * Get pixel selection modifier type name
+ * @param pixelSelectionModifierType Pixel selection modifier type
+ */
+static QString getPixelSelectionModifierTypeName(const PixelSelectionModifierType& pixelSelectionModifierType) {
+    return pixelSelectionModifiers.value(pixelSelectionModifierType);
+}
+
+/**
+ * Get pixel selection modifier type enum from name
+ * @param pixelSelectionModifierTypeName Name of the pixel selection type
+ */
+static PixelSelectionModifierType getPixelSelectionModifierTypeEnum(const QString& pixelSelectionModifierTypeName) {
+    return pixelSelectionModifiers.key(pixelSelectionModifierTypeName);
+}
 
 }
 }
