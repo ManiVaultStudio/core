@@ -90,17 +90,17 @@ set( EVENT_HEADERS
 set( WIDGET_HEADERS
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
-    src/widgets/ColorPickerPushButton.h
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
+    src/widgets/ResponsiveToolbarWidget.h
 )
 
 set( WIDGET_SOURCES
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
-    src/widgets/ColorPickerPushButton.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
+    src/widgets/ResponsiveToolbarWidget.cpp
 )
 
 set(ACTIONS_HEADERS

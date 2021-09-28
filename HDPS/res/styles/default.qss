@@ -5,14 +5,14 @@ QWidget#PopupWidget {
 QPushButton {
     padding-left: 5px;
     padding-right: 5px;
-    height: 22px;
+    height: 20px;
     qproperty-iconSize: 12px;
 }
 
 QPushButton[cssClass="square"] {
     padding-left: 1px;
     padding-right: 1px;
-    width: 22px;
+    width: 20px;
 }
 
 QComboBox {

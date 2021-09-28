@@ -27,7 +27,7 @@ class NumericalAction : public WidgetAction
     using PrefixChangedCB               = std::function<void()>;
     using SuffixChangedCB               = std::function<void()>;
     using NumberOfDecimalsChangedCB     = std::function<void()>;
-    using ResettableChangedCB             = std::function<void()>;
+    using ResettableChangedCB           = std::function<void()>;
 
 public:
 
