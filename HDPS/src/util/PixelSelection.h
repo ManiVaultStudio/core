@@ -16,6 +16,17 @@ enum class PixelSelectionType
     Sample          /** Probe one pixel at a time */
 };
 
+/** Pixel selection types alias */
+using PixelSelectionTypes = QVector<PixelSelectionType>;
+
+/** Default pixel selection types */
+static const PixelSelectionTypes defaultPixelSelectionTypes = {
+    PixelSelectionType::Rectangle,
+    PixelSelectionType::Brush,
+    PixelSelectionType::Polygon,
+    PixelSelectionType::Lasso
+};
+
 /** Maps pixel selection type enum to name */
 static const QMap<PixelSelectionType, QString> pixelSelectionTypes = {
     { PixelSelectionType::Rectangle, "Rectangle" },

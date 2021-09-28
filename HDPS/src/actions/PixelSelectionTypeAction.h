@@ -3,6 +3,8 @@
 #include "OptionAction.h"
 #include "TriggerAction.h"
 
+#include "util/PixelSelection.h"
+
 namespace hdps {
 
 namespace gui {
@@ -65,14 +67,21 @@ public:
     /** 
      * Constructor
      * @param pixelSelectionAction Reference to pixel selection action
+     * @param pixelSelectionTypes Allowed pixel selection types
      */
-    PixelSelectionTypeAction(PixelSelectionAction& pixelSelectionAction);
+    PixelSelectionTypeAction(PixelSelectionAction& pixelSelectionAction, const util::PixelSelectionTypes& pixelSelectionTypes = util::defaultPixelSelectionTypes);
 
     /** Determines whether the current value can be reset to its default */
     bool isResettable() const override;
 
     /** Reset the current value to the default value */
     void reset() override;
+
+    /** Get allowed pixel selection types */
+    util::PixelSelectionTypes getAllowedTypes() const;
+
+    /** Set allowed pixel selection types */
+    void setAllowedTypes(const util::PixelSelectionTypes& pixelSelectionTypes);
 
 public: /** Action getters */
 
@@ -81,15 +90,18 @@ public: /** Action getters */
     TriggerAction& getBrushAction() { return _brushAction; }
     TriggerAction& getLassoAction() { return _lassoAction; }
     TriggerAction& getPolygonAction() { return _polygonAction; }
+    TriggerAction& getSampleAction() { return _sampleAction; }
 
 protected:
-    PixelSelectionAction&   _pixelSelectionAction;      /** Reference to pixel selection action */
-    OptionAction            _typeAction;                /** Selection type action */
-    TriggerAction           _rectangleAction;           /** Switch to rectangle selection action */
-    TriggerAction           _brushAction;               /** Switch to brush selection action */
-    TriggerAction           _lassoAction;               /** Switch to lasso selection action */
-    TriggerAction           _polygonAction;             /** Switch to polygon selection action */
-    QActionGroup            _typeActionGroup;           /** Type action group */
+    PixelSelectionAction&       _pixelSelectionAction;      /** Reference to pixel selection action */
+    util::PixelSelectionTypes   _pixelSelectionTypes;       /** Pixel selection types */
+    OptionAction                _typeAction;                /** Selection type action */
+    TriggerAction               _rectangleAction;           /** Switch to rectangle selection action */
+    TriggerAction               _brushAction;               /** Switch to brush selection action */
+    TriggerAction               _lassoAction;               /** Switch to lasso selection action */
+    TriggerAction               _polygonAction;             /** Switch to polygon selection action */
+    TriggerAction               _sampleAction;              /** Switch to sample selection action */
+    QActionGroup                _typeActionGroup;           /** Type action group */
 };
 
 }
