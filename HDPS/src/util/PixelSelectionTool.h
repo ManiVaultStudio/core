@@ -165,26 +165,26 @@ signals:
     void ended();
 
 protected:
-    bool                    _enabled;                   /** Whether the tool is enabled or not */
-    PixelSelectionType           _type;                      /** Current selection type */
-    PixelSelectionModifierType   _modifier;                  /** Current selection modifier */
-    bool                    _active;                    /** Whether the selection process is active */
-    bool                    _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
-    float                   _brushRadius;               /** Brush radius */
-    QPoint                  _mousePosition;             /** Current mouse position */
-    QVector<QPoint>         _mousePositions;            /** Recorded mouse positions */
-    int                     _mouseButtons;              /** State of the left, middle and right mouse buttons */
-    QPixmap                 _shapePixmap;               /** Pixmap for the selection tool shape */
-    QPixmap                 _areaPixmap;                /** Pixmap for the selection area */
-    bool                    _preventContextMenu;        /** Whether to prevent a context menu */
+    bool                        _enabled;                   /** Whether the tool is enabled or not */
+    PixelSelectionType          _type;                      /** Current selection type */
+    PixelSelectionModifierType  _modifier;                  /** Current selection modifier */
+    bool                        _active;                    /** Whether the selection process is active */
+    bool                        _notifyDuringSelection;     /** Whether the selection is published continuously or at the end */
+    float                       _brushRadius;               /** Brush radius */
+    QPoint                      _mousePosition;             /** Current mouse position */
+    QVector<QPoint>             _mousePositions;            /** Recorded mouse positions */
+    int                         _mouseButtons;              /** State of the left, middle and right mouse buttons */
+    QPixmap                     _shapePixmap;               /** Pixmap for the selection tool shape */
+    QPixmap                     _areaPixmap;                /** Pixmap for the selection area */
+    bool                        _preventContextMenu;        /** Whether to prevent a context menu */
 
 protected:
-    QColor              _mainColor;                 /** Main drawing color */
-    QColor              _fillColor;                 /** Selection area fill color (based on main color) */
-    QBrush              _areaBrush;                 /** Selection area brush */
-    QPen                _penLineForeGround;         /** Foreground pen */
-    QPen                _penLineBackGround;         /** Background pen */
-    QPen                _penControlPoint;           /** Control point pen */
+    QColor      _mainColor;                 /** Main drawing color */
+    QColor      _fillColor;                 /** Selection area fill color (based on main color) */
+    QBrush      _areaBrush;                 /** Selection area brush */
+    QPen        _penLineForeGround;         /** Foreground pen */
+    QPen        _penLineBackGround;         /** Background pen */
+    QPen        _penControlPoint;           /** Control point pen */
 
 public:
     static constexpr float BRUSH_RADIUS_MIN       = 10.0f;      /** Minimum radius */

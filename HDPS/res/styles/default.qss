@@ -3,8 +3,8 @@ QWidget#PopupWidget {
 }
 
 QPushButton {
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
     height: 20px;
     qproperty-iconSize: 12px;
 }
@@ -18,7 +18,7 @@ QPushButton[cssClass="square"] {
 QComboBox {
     margin: 0px;
     padding-left: 5px;
-    height: 20px;
+    height: 18px;
 }
 
 QLineEdit {
@@ -30,6 +30,7 @@ QLineEdit:read-only {
 }
 
 QToolButton {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
+    qproperty-iconSize: 12px;
 }

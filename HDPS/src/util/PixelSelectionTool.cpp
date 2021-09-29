@@ -286,8 +286,33 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
         case QEvent::Paint:
             return false;
 
-        //case QEvent::ContextMenu:
-            //break;
+        case QEvent::ContextMenu:
+        {
+            // Prevent context menu when selection is ended in polygon mode (by right-clicking)
+            if (_preventContextMenu) {
+                _preventContextMenu = false;
+                return true;
+            }
+
+            break;
+        }
+
+        case QEvent::KeyPress:
+        {
+            // Get key that was pressed
+            auto keyEvent = static_cast<QKeyEvent*>(event);
+            
+            // Do not handle repeating keys
+            if (!keyEvent->isAutoRepeat()) {
+                // Start navigating when the space key is pressed
+                if (keyEvent->key() == Qt::Key_Escape && _type == PixelSelectionType::Polygon) {
+                    endSelection();
+                    shouldPaint = true;
+                }
+            }
+
+            break;
+        }
 
         case QEvent::Resize:
         {
@@ -404,8 +429,11 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                             break;
 
                         case Qt::RightButton:
+                        {
+                            _preventContextMenu = true;
                             endSelection();
                             break;
+                        }
  
                         default:
                             break;
@@ -752,6 +780,12 @@ void PixelSelectionTool::paint()
                     break;
             }
 
+            break;
+        }
+
+        case PixelSelectionType::Sample:
+        {
+            shapePainter.drawText(_mousePosition, QString("%1, %2").arg(QString::number(_mousePosition.x()), QString::number(_mousePosition.y())));
             break;
         }
 

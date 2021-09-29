@@ -216,7 +216,8 @@ QImage ColorMapAction::getColorMapImage() const
         }
     }
 
-    return colorMapImage;
+    // Ensure 24-bit depth image
+    return colorMapImage.convertToFormat(QImage::Format_RGB32);
 }
 
 void ColorMapAction::setColorMap(const QString& colorMap)
@@ -278,7 +279,7 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     styleOption.init(this);
     
     // Set inset margins
-    const auto margin = 8;
+    const auto margin = 7;
 
     // Deflated fill rectangle for color map inset
     const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 28, margin + 1));
