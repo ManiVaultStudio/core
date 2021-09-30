@@ -728,7 +728,7 @@ void PixelSelectionTool::paint()
             const auto mousePosition = _mousePositions.last();
 
             areaPainter.setBrush(_areaBrush);
-            areaPainter.setPen(QPen(_areaBrush, 100, Qt::SolidLine, Qt::RoundCap));
+            areaPainter.setPen(QPen(_areaBrush, 5, Qt::SolidLine, Qt::RoundCap));
             areaPainter.drawPoint(mousePosition);
 
             shapePainter.setBrush(Qt::NoBrush);
@@ -785,7 +785,7 @@ void PixelSelectionTool::paint()
 
         case PixelSelectionType::Sample:
         {
-            shapePainter.drawText(_mousePosition, QString("%1, %2").arg(QString::number(_mousePosition.x()), QString::number(_mousePosition.y())));
+            //shapePainter.drawText(_mousePosition, QString("%1, %2").arg(QString::number(_mousePosition.x()), QString::number(_mousePosition.y())));
             break;
         }
 

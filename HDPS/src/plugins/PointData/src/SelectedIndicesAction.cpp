@@ -90,7 +90,7 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
     auto updateLayout = new QVBoxLayout();
 
     updateLayout->addWidget(selectedIndicesAction->getUpdateAction().createWidget(this));
-    updateLayout->addWidget(selectedIndicesAction->getManualUpdateAction().createCheckBoxWidget(this));
+    updateLayout->addWidget(selectedIndicesAction->getManualUpdateAction().createWidget(this));
     updateLayout->addStretch(1);
 
     selectedIndicesLayout->addLayout(updateLayout);

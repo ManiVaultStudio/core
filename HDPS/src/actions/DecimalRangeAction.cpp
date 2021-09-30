@@ -13,6 +13,8 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*=
     _rangeMinAction(this, "Minimum"),
     _rangeMaxAction(this, "Maximum")
 {
+    setMayReset(true);
+
     connect(&_rangeMinAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value >= _rangeMaxAction.getValue())
             _rangeMaxAction.setValue(value);

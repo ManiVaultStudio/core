@@ -97,8 +97,10 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
         if (childWidgetAction == nullptr)
             continue;
 
-        const auto numRows = _layout->rowCount();
+        if (!childWidgetAction->isVisible())
+            continue;
 
+        const auto numRows          = _layout->rowCount();
         const auto isToggleAction   = dynamic_cast<ToggleAction*>(childWidgetAction);
         const auto isTriggerAction  = dynamic_cast<TriggerAction*>(childWidgetAction);
 
@@ -109,6 +111,9 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
         }
 
         _layout->addWidget(childWidgetAction->createWidget(this), numRows, 1);
+
+        if (childWidgetAction->getMayReset())
+            _layout->addWidget(childWidgetAction->createResetButton(this), numRows, 2);
     }
 }
 

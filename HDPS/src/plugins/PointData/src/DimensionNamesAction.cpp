@@ -103,7 +103,7 @@ DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dime
     auto updateLayout = new QVBoxLayout();
 
     updateLayout->addWidget(dimensionNamesAction->getUpdateAction().createWidget(this));
-    updateLayout->addWidget(dimensionNamesAction->getManualUpdateAction().createCheckBoxWidget(this));
+    updateLayout->addWidget(dimensionNamesAction->getManualUpdateAction().createWidget(this));
     updateLayout->addStretch(1);
 
     layout->addLayout(updateLayout);

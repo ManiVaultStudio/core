@@ -23,6 +23,13 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     _memorySizeAction.setEnabled(false);
     _numberOfSelectedPointsAction.setEnabled(false);
 
+    _numberOfPointsAction.setMayReset(false);
+    _numberOfDimensionsAction.setMayReset(false);
+    _memorySizeAction.setMayReset(false);
+    _numberOfSelectedPointsAction.setMayReset(false);
+    _selectedIndicesAction.setMayReset(false);
+    _dimensionNamesAction.setMayReset(false);
+
     _numberOfPointsAction.setToolTip("The number of points");
     _numberOfDimensionsAction.setToolTip("The number of dimensions in the point data");
     _memorySizeAction.setToolTip("The amount of memory occupied by the dataset");

@@ -13,7 +13,7 @@ namespace hdps {
 namespace gui {
 
 PixelSelectionAction::PixelSelectionAction(QWidget* targetWidget, PixelSelectionTool& pixelSelectionTool, const PixelSelectionTypes& pixelSelectionTypes /*= util::defaultPixelSelectionTypes*/) :
-    GroupAction(targetWidget),
+    WidgetAction(targetWidget),
     _targetWidget(targetWidget),
     _pixelSelectionTool(pixelSelectionTool),
     _pixelSelectionTypes(pixelSelectionTypes),
@@ -70,9 +70,6 @@ void PixelSelectionAction::setAllowedTypes(const util::PixelSelectionTypes& pixe
 
 void PixelSelectionAction::initOverlay()
 {
-    _overlayColor.setWidgetFlags(ColorAction::All);
-    _overlayOpacity.setWidgetFlags(DecimalAction::All);
-
     _overlayOpacity.setSuffix("%");
 }
 
@@ -100,12 +97,6 @@ void PixelSelectionAction::initType()
     targetWidget->addAction(&_polygonAction);
     targetWidget->addAction(&_sampleAction);
 
-    _rectangleAction.setCheckable(true);
-    _brushAction.setCheckable(true);
-    _lassoAction.setCheckable(true);
-    _polygonAction.setCheckable(true);
-    _sampleAction.setCheckable(true);
-
     _rectangleAction.setShortcut(QKeySequence("R"));
     _brushAction.setShortcut(QKeySequence("B"));
     _lassoAction.setShortcut(QKeySequence("L"));
@@ -132,24 +123,29 @@ void PixelSelectionAction::initType()
         pixelSelectionTool.setType(util::pixelSelectionTypes.key(currentText));
     });
 
-    connect(&_rectangleAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionType::Rectangle);
+    connect(&_rectangleAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+        if (toggled)
+            pixelSelectionTool.setType(PixelSelectionType::Rectangle);
     });
 
-    connect(&_brushAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionType::Brush);
+    connect(&_brushAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+        if (toggled)
+            pixelSelectionTool.setType(PixelSelectionType::Brush);
     });
 
-    connect(&_lassoAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionType::Lasso);
+    connect(&_lassoAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+        if (toggled)
+            pixelSelectionTool.setType(PixelSelectionType::Lasso);
     });
 
-    connect(&_polygonAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionType::Polygon);
+    connect(&_polygonAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+        if (toggled)
+            pixelSelectionTool.setType(PixelSelectionType::Polygon);
     });
 
-    connect(&_sampleAction, &QAction::triggered, this, [this, &pixelSelectionTool]() {
-        pixelSelectionTool.setType(PixelSelectionType::Sample);
+    connect(&_sampleAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+        if (toggled)
+            pixelSelectionTool.setType(PixelSelectionType::Sample);
     });
 
     const auto updateType = [this, &pixelSelectionTool]() {
@@ -173,8 +169,8 @@ void PixelSelectionAction::initType()
 
 void PixelSelectionAction::initModifier()
 {
-    _modifierAddAction.setWidgetFlags(ToggleAction::PushButton);
-    _modifierSubtractAction.setWidgetFlags(ToggleAction::PushButton);
+    _modifierAddAction.setDefaultWidgetFlags(ToggleAction::PushButton);
+    _modifierSubtractAction.setDefaultWidgetFlags(ToggleAction::PushButton);
 
     _targetWidget->addAction(&_modifierAddAction);
     _targetWidget->addAction(&_modifierSubtractAction);
@@ -184,8 +180,8 @@ void PixelSelectionAction::initModifier()
 
     const auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
-    //_modifierAddAction.setIcon(fontAwesome.getIcon("plus-square"));
-    //_modifierRemoveAction.setIcon(fontAwesome.getIcon("minus-square"));
+    _modifierAddAction.setIcon(fontAwesome.getIcon("plus"));
+    _modifierSubtractAction.setIcon(fontAwesome.getIcon("minus"));
 
     _modifierAddAction.setToolTip("Add items to the existing selection");
     _modifierSubtractAction.setToolTip("Remove items from the existing selection");
@@ -244,9 +240,7 @@ void PixelSelectionAction::initOperations()
 
 void PixelSelectionAction::initMiscellaneous()
 {
-    _typeAction.setWidgetFlags(OptionAction::All);
-    _brushRadiusAction.setWidgetFlags(DecimalAction::All);
-    _notifyDuringSelectionAction.setWidgetFlags(ToggleAction::CheckBoxAndResetPushButton);
+    _notifyDuringSelectionAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
 
     _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 

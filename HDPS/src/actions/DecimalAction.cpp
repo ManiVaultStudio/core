@@ -27,17 +27,6 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
     setAcceptDrops(true);
     setObjectName("SpinBox");
 
-    const auto update = [this, decimalAction]() -> void {
-        setEnabled(decimalAction->isEnabled());
-        setToolTip(decimalAction->text());
-    };
-
-    connect(decimalAction, &DecimalAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
-
     connect(this, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, decimalAction](double value) {
         decimalAction->setValue(value);
     });
@@ -115,18 +104,6 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
 {
     setAcceptDrops(true);
     setObjectName("Slider");
-
-    const auto update = [this, decimalAction]() -> void {
-        setEnabled(decimalAction->isEnabled());
-        setToolTip(decimalAction->text());
-    };
-
-    connect(decimalAction, &DecimalAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
-
     setRange(std::numeric_limits<std::int16_t>::lowest(), std::numeric_limits<std::int16_t>::max());
 
     const auto sliderIntervalLength = static_cast<float>(maximum() - minimum());
@@ -188,34 +165,23 @@ hdps::gui::DecimalAction::SliderWidget* DecimalAction::createSliderWidget(QWidge
     return new SliderWidget(parent, this);
 }
 
-QWidget* DecimalAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
-    auto widget = new QWidget(parent);
+    auto widget = new WidgetActionWidget(parent, this, state);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
 
-    if (hasWidgetFlag(WidgetFlag::SpinBox))
+    if (widgetFlags & WidgetFlag::SpinBox)
         layout->addWidget(new SpinBoxWidget(parent, this), 1);
 
-    if (hasWidgetFlag(WidgetFlag::Slider))
+    if (widgetFlags & WidgetFlag::Slider)
         layout->addWidget(new SliderWidget(parent, this), 2);
 
-    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
+    if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
-
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &DecimalAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
 
     return widget;
 }

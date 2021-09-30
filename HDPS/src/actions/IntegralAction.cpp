@@ -26,17 +26,6 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
     setAcceptDrops(true);
     setObjectName("SpinBox");
 
-    const auto update = [this, integralAction]() -> void {
-        setEnabled(integralAction->isEnabled());
-        setToolTip(integralAction->text());
-    };
-
-    connect(integralAction, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
-
     connect(this, qOverload<int>(&QSpinBox::valueChanged), this, [this, integralAction](int value) {
         integralAction->setValue(value);
     });
@@ -104,17 +93,6 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     setAcceptDrops(true);
     setObjectName("Slider");
 
-    const auto update = [this, integralAction]() -> void {
-        setEnabled(integralAction->isEnabled());
-        setToolTip(integralAction->text());
-    };
-
-    connect(integralAction, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
-
     connect(this, &QSlider::valueChanged, this, [this, integralAction](int value) {
         if (!integralAction->getUpdateDuringDrag())
             return;
@@ -173,34 +151,23 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     setToolTips();
 }
 
-QWidget* IntegralAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
-    auto widget = new QWidget(parent);
+    auto widget = new WidgetActionWidget(parent, this, state);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
 
-    if (hasWidgetFlag(WidgetFlag::SpinBox))
+    if (widgetFlags & WidgetFlag::SpinBox)
         layout->addWidget(new SpinBoxWidget(parent, this), 1);
 
-    if (hasWidgetFlag(WidgetFlag::Slider))
+    if (widgetFlags & WidgetFlag::Slider)
         layout->addWidget(new SliderWidget(parent, this), 2);
 
-    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
+    if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
-
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
 
     return widget;
 }

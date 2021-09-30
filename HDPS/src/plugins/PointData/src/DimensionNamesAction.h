@@ -42,9 +42,10 @@ protected:
     /**
      * Get widget representation of the dimension names action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     * @param state State of the widget (for stateful widgets)
      */
-    QWidget* getWidget(QWidget* parent, const hdps::gui::WidgetActionWidget::State& state = hdps::gui::WidgetActionWidget::State::Standard) override {
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const hdps::gui::WidgetActionWidget::State& state = hdps::gui::WidgetActionWidget::State::Standard) override {
         return new Widget(parent, this, state);
     };
 

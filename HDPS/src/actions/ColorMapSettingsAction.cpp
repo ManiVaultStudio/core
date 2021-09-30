@@ -21,6 +21,7 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
+    setMayReset(true);
 
     _horizontalAxisAction.setToolTip("Range of the color map");
     _horizontalAxisAction.setToolTip("Mirror the color map horizontally");

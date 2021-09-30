@@ -135,7 +135,7 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
             auto section = new QTreeWidgetItem(_treeWidgetItem);
 
             // Set group background color
-            section->setBackgroundColor(0, styleOption.palette.color(QPalette::Normal, QPalette::Button));
+            section->setBackground(0, styleOption.palette.color(QPalette::Normal, QPalette::Button));
 
             // Add the item as a child and assign the group action widget
             _treeWidgetItem->addChild(section);

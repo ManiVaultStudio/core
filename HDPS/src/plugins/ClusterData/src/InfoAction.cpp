@@ -17,6 +17,9 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     _numberOfClustersAction.setEnabled(false);
     _numberOfClustersAction.setToolTip("The number of clusters");
 
+    _numberOfClustersAction.setMayReset(false);
+    _clustersAction.setMayReset(false);
+
     const auto updateActions = [this]() -> void {
         if (!_clusters.isValid())
             return;

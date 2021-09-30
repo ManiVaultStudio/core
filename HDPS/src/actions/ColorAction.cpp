@@ -18,7 +18,8 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
 {
     setText(title);
     initialize(color, defaultColor);
-    setWidgetFlags(WidgetFlag::Basic);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::Basic);
 }
 
 void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
@@ -133,7 +134,7 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
     styleOption.init(this);
 
     // Set inset margins
-    const auto margin = 9;
+    const auto margin = 10;
 
     // Rect offset
     QPoint offset(margin, margin);
@@ -163,32 +164,21 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
-QWidget* ColorAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
-    auto widget = new QWidget(parent);
+    auto widget = new WidgetActionWidget(parent, this, state);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(3);
 
-    if (hasWidgetFlag(WidgetFlag::Picker))
+    if (widgetFlags & WidgetFlag::Picker)
         layout->addWidget(new PushButtonWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
+    if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
-
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
 
     return widget;
 }

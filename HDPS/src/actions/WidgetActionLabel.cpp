@@ -27,10 +27,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     connect(widgetAction, &WidgetAction::changed, this, update);
 
     update();
-
-    connect(widgetAction, &WidgetAction::isDropTargetChanged, this, [this, widgetAction](const bool& isDropTarget) {
-        setStyleSheet(QString("QLabel { text-decoration: %1; }").arg(isDropTarget ? "underline" : "none"));
-    });
 }
 
 void WidgetActionLabel::mousePressEvent(QMouseEvent* mouseEvent)

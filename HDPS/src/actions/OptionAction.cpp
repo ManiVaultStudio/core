@@ -18,7 +18,8 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
     _defaultIndex(0)
 {
     setText(title);
-    setWidgetFlags(WidgetFlag::Basic);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::Basic);
     initialize(options, currentOption, defaultOption);
 }
 
@@ -188,16 +189,6 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     setAcceptDrops(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    const auto update = [this, optionAction]() -> void {
-        setEnabled(optionAction->isEnabled());
-        setVisible(optionAction->isVisible());
-        setToolTip(optionAction->text());
-    };
-
-    connect(optionAction, &OptionAction::changed, this, [update]() {
-        update();
-    });
-
     const auto updateToolTip = [this, optionAction]() -> void {
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
     };
@@ -237,20 +228,19 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     populateComboBox();
     updateComboBoxSelection();
     updateToolTip();
-    update();
 }
 
-QWidget* OptionAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
-    auto widget = new QWidget(parent);
+    auto widget = new WidgetActionWidget(parent, this, state);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
 
-    if (hasWidgetFlag(WidgetFlag::ComboBox))
+    if (widgetFlags & WidgetFlag::ComboBox)
         layout->addWidget(new OptionAction::ComboBoxWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
+    if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);

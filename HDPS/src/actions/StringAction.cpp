@@ -12,7 +12,8 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
     WidgetAction(parent)
 {
     setText(title);
-    setWidgetFlags(WidgetFlag::Basic);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::Basic);
     initialize(string, defaultString);
 }
 
@@ -86,17 +87,6 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
-    
-    const auto update = [this, stringAction]() -> void {
-        setEnabled(stringAction->isEnabled());
-        setToolTip(stringAction->text());
-    };
-
-    connect(stringAction, &StringAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
 
     const auto updateLineEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
@@ -124,32 +114,21 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     updatePlaceHolderText();
 }
 
-QWidget* StringAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
-    auto widget = new QWidget(parent);
+    auto widget = new WidgetActionWidget(parent, this, state);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(3);
 
-    if (hasWidgetFlag(WidgetFlag::LineEdit))
+    if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new StringAction::LineEditWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
+    if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
-
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &StringAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
 
     return widget;
 }

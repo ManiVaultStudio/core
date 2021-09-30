@@ -14,7 +14,7 @@ WidgetActionResetButton::WidgetActionResetButton(WidgetAction* widgetAction, QWi
 {
     setObjectName("ResetPushButton");
     setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
-    setIconSize(QSize(10, 10));
+    setIconSize(QSize(7, 7));
     setToolButtonStyle(Qt::ToolButtonIconOnly);
     setToolTip(QString("Reset %1 to default").arg(widgetAction->text()));
     setStyleSheet("QToolButton { border : none; }");

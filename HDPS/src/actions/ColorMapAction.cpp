@@ -24,7 +24,8 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
-    setWidgetFlags(WidgetFlag::Basic);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::Basic);
 
     initialize(colorMap, defaultColorMap);
 
@@ -279,7 +280,7 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     styleOption.init(this);
     
     // Set inset margins
-    const auto margin = 7;
+    const auto margin = 8;
 
     // Deflated fill rectangle for color map inset
     const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 28, margin + 1));
@@ -314,9 +315,9 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
-QWidget* ColorMapAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
-    auto widget = new QWidget(parent);
+    auto widget = new WidgetActionWidget(parent, this, state);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
@@ -326,10 +327,10 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const WidgetActionWidget::St
 
     layout->addWidget(comboBoxWidget);
 
-    if (hasWidgetFlag(WidgetFlag::Settings))
+    if (widgetFlags & WidgetFlag::Settings)
         layout->addWidget(_settingsAction.createCollapsedWidget(widget));
 
-    if (hasWidgetFlag(WidgetFlag::ResetPushButton))
+    if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);

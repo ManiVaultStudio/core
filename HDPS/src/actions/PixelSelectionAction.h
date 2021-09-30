@@ -2,7 +2,7 @@
 
 #include "util/PixelSelectionTool.h"
 
-#include "GroupAction.h"
+#include "WidgetAction.h"
 #include "ColorAction.h"
 #include "DecimalAction.h"
 #include "OptionAction.h"
@@ -22,7 +22,7 @@ namespace gui {
  *
  * @author Thomas Kroes
  */
-class PixelSelectionAction : public GroupAction
+class PixelSelectionAction : public WidgetAction
 {
 public:
 
@@ -84,11 +84,11 @@ public: // Action getters
     ColorAction& getOverlayColor() { return _overlayColor; }
     DecimalAction& getOverlayOpacity() { return _overlayOpacity; }
     OptionAction& getTypeAction() { return _typeAction; }
-    TriggerAction& getRectangleAction() { return _rectangleAction; }
-    TriggerAction& getBrushAction() { return _brushAction; }
-    TriggerAction& getLassoAction() { return _lassoAction; }
-    TriggerAction& getPolygonAction() { return _polygonAction; }
-    TriggerAction& getSampleAction() { return _sampleAction; }
+    ToggleAction& getRectangleAction() { return _rectangleAction; }
+    ToggleAction& getBrushAction() { return _brushAction; }
+    ToggleAction& getLassoAction() { return _lassoAction; }
+    ToggleAction& getPolygonAction() { return _polygonAction; }
+    ToggleAction& getSampleAction() { return _sampleAction; }
     ToggleAction& getModifierReplaceAction() { return _modifierReplaceAction; }
     ToggleAction& getModifierAddAction() { return _modifierAddAction; }
     ToggleAction& getModifierSubtractAction() { return _modifierSubtractAction; }
@@ -105,11 +105,11 @@ protected:
     ColorAction                 _overlayColor;                      /** Selection overlay color action */
     DecimalAction               _overlayOpacity;                    /** Selection overlay opacity action */
     OptionAction                _typeAction;                        /** Selection type action */
-    TriggerAction               _rectangleAction;                   /** Switch to rectangle selection action */
-    TriggerAction               _brushAction;                       /** Switch to brush selection action */
-    TriggerAction               _lassoAction;                       /** Switch to lasso selection action */
-    TriggerAction               _polygonAction;                     /** Switch to polygon selection action */
-    TriggerAction               _sampleAction;                      /** Switch to sample selection action */
+    ToggleAction                _rectangleAction;                   /** Switch to rectangle selection action */
+    ToggleAction                _brushAction;                       /** Switch to brush selection action */
+    ToggleAction                _lassoAction;                       /** Switch to lasso selection action */
+    ToggleAction                _polygonAction;                     /** Switch to polygon selection action */
+    ToggleAction                _sampleAction;                      /** Switch to sample selection action */
     QActionGroup                _typeActionGroup;                   /** Type action group */
     ToggleAction                _modifierReplaceAction;             /** Replace current selection action */
     ToggleAction                _modifierAddAction;                 /** Add to current selection action */

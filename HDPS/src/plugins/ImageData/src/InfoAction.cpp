@@ -14,8 +14,6 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     _imageHeightAction(this, "Image height"),
     _numberOfPixelsAction(this, "Number of pixels"),
     _numberComponentsPerPixelAction(this, "Number of components per pixel")
-    //_imageFilePathsAction(this, core, datasetName),
-    //_dimensionNamesAction(this, core, datasetName)
 {
     setText("Info");
     setEventCore(_core);
@@ -26,8 +24,13 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     _imageHeightAction.setEnabled(false);
     _numberOfPixelsAction.setEnabled(false);
     _numberComponentsPerPixelAction.setEnabled(false);
-    //_imageFilePathsAction.setEnabled(false);
-    //_dimensionNamesAction.setEnabled(false);
+
+    _typeAction.setMayReset(false);
+    _numberOfImagesAction.setMayReset(false);
+    _imageWidthAction.setMayReset(false);
+    _imageHeightAction.setMayReset(false);
+    _numberOfPixelsAction.setMayReset(false);
+    _numberComponentsPerPixelAction.setMayReset(false);
 
     const auto updateActions = [this]() -> void {
         if (!_images.isValid())

@@ -73,7 +73,8 @@ public:
         _numberOfDecimalsChanged()
     {
         setText(title);
-        setWidgetFlags(WidgetFlag::Basic);
+        setMayReset(true);
+        setDefaultWidgetFlags(WidgetFlag::Basic);
     }
 
     /**

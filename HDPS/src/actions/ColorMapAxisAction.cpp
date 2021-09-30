@@ -20,11 +20,6 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapAction& colorMapAction, const QSt
 {
     setText(title);
     
-    const auto mayEditRange = colorMapAction.hasWidgetFlag(ColorMapAction::EditRange);
-
-    _rangeAction.getRangeMinAction().setEnabled(mayEditRange);
-    _rangeAction.getRangeMaxAction().setEnabled(mayEditRange);
-
     _rangeAction.setToolTip("Range of the color map");
     _resetAction.setToolTip("Reset the color map");
     _mirrorAction.setToolTip("Mirror the color map");
@@ -34,7 +29,7 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapAction& colorMapAction, const QSt
     };
 
     connect(&_resetAction, &TriggerAction::triggered, this, [this, update]() {
-        _resetAction.reset();
+        _rangeAction.reset();
     });
 
     connect(&_rangeAction, &DecimalRangeAction::rangeChanged, this, update);

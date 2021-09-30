@@ -49,7 +49,7 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     update();
 }
 
-QWidget* TriggerAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
