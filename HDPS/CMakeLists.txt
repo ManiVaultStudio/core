@@ -88,19 +88,23 @@ set( EVENT_HEADERS
 )
 
 set( WIDGET_HEADERS
+    src/widgets/CollapsedWidget.h
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
     src/widgets/ResponsiveToolbarWidget.h
+    src/widgets/ToolbarItemWidget.h
 )
 
 set( WIDGET_SOURCES
+    src/widgets/CollapsedWidget.cpp
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
     src/widgets/ResponsiveToolbarWidget.cpp
+    src/widgets/ToolbarItemWidget.cpp
 )
 
 set(ACTIONS_HEADERS
@@ -123,7 +127,6 @@ set(ACTIONS_HEADERS
     src/actions/ToggleAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
-    src/actions/WidgetActionStateWidget.h
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
@@ -152,7 +155,6 @@ set(ACTIONS_SOURCES
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
-    src/actions/WidgetActionStateWidget.cpp
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp

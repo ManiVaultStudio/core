@@ -35,12 +35,22 @@ QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetF
 
 bool WidgetAction::getMayReset() const
 {
-    return false;
+    return _mayReset;
 }
 
 void WidgetAction::setMayReset(const bool& mayReset)
 {
     _mayReset = mayReset;
+}
+
+std::int32_t WidgetAction::getSortIndex() const
+{
+    return _sortIndex;
+}
+
+void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
+{
+    _sortIndex = sortIndex;
 }
 
 QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)

@@ -80,6 +80,15 @@ public:
 
     /** Set whether a user may reset the action to the default value */
     virtual void setMayReset(const bool& mayReset);
+    
+    /** Get the sort index */
+    std::int32_t getSortIndex() const;
+
+    /**
+     * Set the sort index
+     * @param sortIndex Sorting index
+     */
+    void setSortIndex(const std::int32_t& sortIndex);
 
     /** Determines whether the action can be reset to its default */
     virtual bool isResettable() const;
@@ -135,6 +144,7 @@ protected:
     std::int32_t                _defaultWidgetFlags;            /** Default widget flags */
     bool                        _resettable;                    /** Whether the action can be reset */
     bool                        _mayReset;                      /** Whether the action may be reset (from the user interface) */
+    std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
 };
 
 /** List of widget actions */

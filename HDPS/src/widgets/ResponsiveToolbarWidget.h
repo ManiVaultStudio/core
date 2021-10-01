@@ -1,7 +1,8 @@
 #pragma once
 
-#include "actions/WidgetAction.h"
-#include "actions/WidgetActionStateWidget.h"
+#include "actions/WidgetActionWidget.h"
+
+#include "ToolbarItemWidget.h"
 
 #include <QWidget>
 #include <QHBoxLayout>
@@ -29,7 +30,7 @@ public:
         SpacerWidget(const Type& type = Type::Divider);
 
         static Type getType(const WidgetActionWidget::State& widgetTypeLeft, const WidgetActionWidget::State& widgetTypeRight);
-        static Type getType(const WidgetActionStateWidget* stateWidgetLeft, const WidgetActionStateWidget* stateWidgetRight);
+        static Type getType(const ToolbarItemWidget* toolbarItemWidgetLeft, const ToolbarItemWidget* toolbarItemWidgetRight);
 
         void setType(const Type& type);
         static std::int32_t getWidth(const Type& type);
@@ -45,14 +46,12 @@ public:
 
     bool eventFilter(QObject* object, QEvent* event);
 
-protected:
-
     /**
      * Add a widget to the toolbar
      * @param widget Widget to add
      * @param priority Expansion priority
      */
-    //void addWidget(QWidget* widget, const std::int32_t& priority = 0);
+    void addWidget(QWidget* widget, const std::int32_t& priority = 0);
 
     /**
      * Add a widget action to the toolbar
@@ -63,18 +62,15 @@ protected:
 
 private:
 
-    /**
-     * Updates the layout
-     * Distri
-     */
+    /** Updates the layout */
     void updateLayout();
 
 protected:
-    QHBoxLayout                 _layout;                /** Main layout */
-    QWidget                     _toolBarWidget;         /** Toolbar widget */
-    QHBoxLayout                 _toolBarLayout;         /** Toolbar layout */
-    QVector<QWidget*>           _widgets;               /** Widgets to display, either regular or stateful widgets */
-    QVector<SpacerWidget*>      _spacerWidgets;         /** Spacer widgets */
+    QHBoxLayout                     _layout;                /** Main layout */
+    QWidget                         _toolBarWidget;         /** Toolbar widget */
+    QHBoxLayout                     _toolBarLayout;         /** Toolbar layout */
+    QVector<ToolbarItemWidget*>     _widgets;               /** Widgets to display, either regular or stateful widgets */
+    QVector<SpacerWidget*>          _spacerWidgets;         /** Spacer widgets */
 
     friend class SettingsAction;
 };

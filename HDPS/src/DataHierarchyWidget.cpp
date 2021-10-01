@@ -29,7 +29,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _noDataOverlayWidget(new NoDataOverlayWidget(this)),
     _dataImportAction(this)
 {
-    setMinimumWidth(500);
+    //setMinimumWidth(500);
     setModel(&_model);
     
     setContextMenuPolicy(Qt::CustomContextMenu);

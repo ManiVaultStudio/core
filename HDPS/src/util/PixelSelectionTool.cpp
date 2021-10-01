@@ -373,7 +373,6 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
                         case Qt::RightButton:
                             _mousePositions << mouseEvent->pos();
-                            return true;
                             break;
 
                         default:

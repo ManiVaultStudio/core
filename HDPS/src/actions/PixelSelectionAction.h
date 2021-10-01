@@ -28,11 +28,12 @@ public:
 
     /**
      * Constructor
+     * @param parent Pointer to parent object
      * @param targetWidget Pointer to target widget
      * @param pixelSelectionTool Reference to pixel selection tool
      * @param pixelSelectionTypes Allowed pixel selection types
      */
-    PixelSelectionAction(QWidget* targetWidget, util::PixelSelectionTool& pixelSelectionTool, const util::PixelSelectionTypes& pixelSelectionTypes = util::defaultPixelSelectionTypes);
+    PixelSelectionAction(QObject* parent, QWidget* targetWidget, util::PixelSelectionTool& pixelSelectionTool, const util::PixelSelectionTypes& pixelSelectionTypes = util::defaultPixelSelectionTypes);
 
     /**
      * Get the context menu for the action

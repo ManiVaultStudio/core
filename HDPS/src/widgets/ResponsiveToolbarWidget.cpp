@@ -1,6 +1,17 @@
 #include "ResponsiveToolbarWidget.h"
+#include "CollapsedWidget.h"
 
+#include "util/Exception.h"
+
+#include <QCoreApplication>
+#include <QDebug>
 #include <QEvent>
+#include <QMap>
+#include <QPushButton>
+#include <QResizeEvent>
+#include <QSharedPointer>
+
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -16,9 +27,9 @@ ResponsiveToolbarWidget::ResponsiveToolbarWidget(QWidget* parent) :
     _widgets(),
     _spacerWidgets()
 {
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
-    _toolBarLayout.setMargin(0);
+    _toolBarLayout.setMargin(4);
     _toolBarLayout.setSpacing(0);
     _toolBarLayout.setSizeConstraint(QLayout::SetFixedSize);
 
@@ -33,9 +44,9 @@ ResponsiveToolbarWidget::ResponsiveToolbarWidget(QWidget* parent) :
 
     _layout.setMargin(4);
 
+    parent->installEventFilter(this);
     this->installEventFilter(this);
-
-    _toolBarWidget.installEventFilter(this);
+    //_toolBarWidget.installEventFilter(this);
 }
 
 bool ResponsiveToolbarWidget::eventFilter(QObject* object, QEvent* event)
@@ -43,8 +54,21 @@ bool ResponsiveToolbarWidget::eventFilter(QObject* object, QEvent* event)
     switch (event->type())
     {
         case QEvent::Resize:
-            updateLayout();
+        {
+            auto resizeEvent = static_cast<QResizeEvent*>(event);
+            qDebug() << resizeEvent;
+
+            auto widget = dynamic_cast<QWidget*>(object);
+
+            if (widget == parentWidget()) {
+                setFixedWidth(parentWidget()->width());
+                updateLayout();
+            }
+                
+                
+
             break;
+        }
 
         default:
             break;
@@ -53,72 +77,103 @@ bool ResponsiveToolbarWidget::eventFilter(QObject* object, QEvent* event)
     return QObject::eventFilter(object, event);
 }
 
-//void ResponsiveToolbarWidget::addWidget(WidgetAction* widgetAction, const std::int32_t& priority /*= 0*/)
-//{
-//    _widgets << new WidgetActionStateWidget(this, widgetAction, priority);
-//
-//    if (_widgets.count() >= 2) {
-//        _spacerWidgets << new SpacerWidget();
-//        _toolBarLayout.addWidget(_spacerWidgets.back());
-//    }
-//    
-//    _toolBarLayout.addWidget(_widgets.back());
-//}
+void ResponsiveToolbarWidget::addWidget(QWidget* widget, const std::int32_t& priority /*= 0*/)
+{
+    auto sharedWidget = QSharedPointer<QWidget>(widget);
+
+    _widgets << new ToolbarItemWidget(this, [this, sharedWidget, widget](const WidgetActionWidget::State& state) -> QSharedPointer<QWidget> {
+        switch (state)
+        {
+            case WidgetActionWidget::State::Standard:
+                return sharedWidget;
+
+            case WidgetActionWidget::State::Collapsed:
+                return QSharedPointer<QWidget>(new CollapsedWidget(this, widget));
+
+            default:
+                break;
+        }
+
+        return nullptr;
+    });
+
+    if (_widgets.count() >= 2) {
+        _spacerWidgets << new SpacerWidget();
+        _toolBarLayout.addWidget(_spacerWidgets.back());
+    }
+
+    _toolBarLayout.addWidget(_widgets.back());
+}
 
 void ResponsiveToolbarWidget::updateLayout()
 {
-    //QMap<WidgetActionStateWidget*, WidgetActionWidget::State> states;
+    qDebug() << __FUNCTION__;
+    
+    try {
+        QMap<ToolbarItemWidget*, WidgetActionWidget::State> states;
 
-    //for (auto stateWidget : _widgets)
-    //    states[stateWidget] = WidgetActionWidget::State::Collapsed;
+        for (auto widget : _widgets)
+            states[widget] = WidgetActionWidget::State::Collapsed;
 
-    //const auto getWidth = [this, &states]() -> std::uint32_t {
-    //    std::uint32_t width = 2 * _layout.margin();
+        const auto getWidth = [this, &states]() -> std::uint32_t {
+            std::uint32_t width = 2 * _layout.margin();
 
-    //    for (auto stateWidget : _widgets)
-    //        width += stateWidget->getSizeHint(states[stateWidget]).width();
+            for (auto widget : _widgets)
+                width += widget->getSizeHint(states[widget]).width();
 
-    //    for (auto spacerWidget : _spacerWidgets) {
-    //        const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
-    //        const auto stateWidgetLeft      = _widgets[spacerWidgetIndex];
-    //        const auto stateWidgetRight     = _widgets[spacerWidgetIndex + 1];
-    //        const auto spacerWidgetType     = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
-    //        const auto spacerWidgetWidth    = SpacerWidget::getWidth(spacerWidgetType);
+            for (auto spacerWidget : _spacerWidgets) {
+                const auto spacerWidgetIndex = _spacerWidgets.indexOf(spacerWidget);
+                const auto stateWidgetLeft = _widgets[spacerWidgetIndex];
+                const auto stateWidgetRight = _widgets[spacerWidgetIndex + 1];
+                const auto spacerWidgetType = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
+                const auto spacerWidgetWidth = SpacerWidget::getWidth(spacerWidgetType);
 
-    //        width += spacerWidgetWidth;
-    //    }
+                width += spacerWidgetWidth;
+            }
 
-    //    return width;
-    //};
+            return width;
+        };
 
-    //auto prioritySortedStateWidgets = _widgets;
+        // Sorted toolbar item widgets based on priority
+        QVector<ToolbarItemWidget*> prioritySortedToolbarItemWidgets = _widgets;
 
-    //std::sort(prioritySortedStateWidgets.begin(), prioritySortedStateWidgets.end(), [](WidgetActionStateWidget* stateWidgetA, WidgetActionStateWidget* stateWidgetB) {
-    //    return stateWidgetA->getPriority() > stateWidgetB->getPriority();
-    //});
+        // Do the sorting
+        std::sort(prioritySortedToolbarItemWidgets.begin(), prioritySortedToolbarItemWidgets.end(), [](ToolbarItemWidget* toolbarItemWidgetA, ToolbarItemWidget* toolbarItemWidgetB) {
 
-    //for (auto stateWidget : prioritySortedStateWidgets) {
-    //    auto cachedStates = states;
+            // Stateful widgets with higher priority are collapsed later than ones with a low priority
+            return toolbarItemWidgetA->getPriority() > toolbarItemWidgetB->getPriority();
+        });
 
-    //    states[stateWidget] = WidgetActionWidget::State::Standard;
+        for (auto stateWidget : prioritySortedToolbarItemWidgets) {
+            auto cachedStates = states;
 
-    //    if (getWidth() > static_cast<std::uint32_t>(width())) {
-    //        states = cachedStates;
-    //        break;
-    //    }
-    //}
+            states[stateWidget] = WidgetActionWidget::State::Standard;
 
-    //for (auto stateWidget : _widgets)
-    //    stateWidget->setState(states[stateWidget]);
+            if (getWidth() > static_cast<std::uint32_t>(width())) {
+                states = cachedStates;
+                break;
+            }
+        }
 
-    //for (auto spacerWidget : _spacerWidgets) {
-    //    const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
-    //    const auto stateWidgetLeft      = _widgets[spacerWidgetIndex];
-    //    const auto stateWidgetRight     = _widgets[spacerWidgetIndex + 1];
-    //    const auto spacerWidgetType     = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
+        for (auto widget : _widgets)
+            widget->setState(states[widget]);
 
-    //    spacerWidget->setType(spacerWidgetType);
-    //}
+        for (auto spacerWidget : _spacerWidgets) {
+            const auto spacerWidgetIndex = _spacerWidgets.indexOf(spacerWidget);
+            const auto stateWidgetLeft = _widgets[spacerWidgetIndex];
+            const auto stateWidgetRight = _widgets[spacerWidgetIndex + 1];
+            const auto spacerWidgetType = SpacerWidget::getType(states[stateWidgetLeft], states[stateWidgetRight]);
+
+            spacerWidget->setType(spacerWidgetType);
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to publish selection change", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to publish selection change");
+    }
 }
 
 ResponsiveToolbarWidget::SpacerWidget::SpacerWidget(const Type& type /*= State::Divider*/) :
@@ -144,9 +199,9 @@ ResponsiveToolbarWidget::SpacerWidget::Type ResponsiveToolbarWidget::SpacerWidge
     return widgetTypeLeft == WidgetActionWidget::State::Collapsed && widgetTypeRight == WidgetActionWidget::State::Collapsed ? Type::Spacer : Type::Divider;
 }
 
-ResponsiveToolbarWidget::SpacerWidget::Type ResponsiveToolbarWidget::SpacerWidget::getType(const WidgetActionStateWidget* stateWidgetLeft, const WidgetActionStateWidget* stateWidgetRight)
+ResponsiveToolbarWidget::SpacerWidget::Type ResponsiveToolbarWidget::SpacerWidget::getType(const ToolbarItemWidget* toolbarItemWidgetLeft, const ToolbarItemWidget* toolbarItemWidgetRight)
 {
-    return getType(stateWidgetLeft->getState(), stateWidgetRight->getState());
+    return getType(toolbarItemWidgetLeft->getState(), toolbarItemWidgetRight->getState());
 }
 
 void ResponsiveToolbarWidget::SpacerWidget::setType(const Type& type)

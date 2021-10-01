@@ -85,8 +85,8 @@ QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(16, 16)
 
         pixmap.fill(backgroundColor);
 
-        const auto iconRectangle = QRect(0, 0, size.width(), size.height());
-        const auto iconText     = getIconCharacter(name);
+        const auto iconRectangle    = QRect(0, 0, size.width(), size.height());
+        const auto iconText         = getIconCharacter(name);
 
         QPainter painter(&pixmap);
 
@@ -100,9 +100,9 @@ QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(16, 16)
         const auto scaleY       = iconRectangle.height() * 1.0 / fontMetrics.height();
         const auto scaleOverall = std::min(scaleX, scaleY);
 
-        painter.translate(iconRectangle.center());
-        painter.scale(scaleOverall, scaleOverall);
-        painter.translate(-iconRectangle.center());
+        //painter.translate(iconRectangle.center());
+        //painter.scale(scaleOverall, scaleOverall);
+        //painter.translate(-iconRectangle.center());
         painter.drawText(iconRectangle, Qt::AlignCenter, iconText);
 
         return QIcon(pixmap);

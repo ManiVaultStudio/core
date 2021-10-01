@@ -12,13 +12,13 @@ namespace hdps {
 
 namespace gui {
 
-PixelSelectionAction::PixelSelectionAction(QWidget* targetWidget, PixelSelectionTool& pixelSelectionTool, const PixelSelectionTypes& pixelSelectionTypes /*= util::defaultPixelSelectionTypes*/) :
-    WidgetAction(targetWidget),
+PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidget, PixelSelectionTool& pixelSelectionTool, const PixelSelectionTypes& pixelSelectionTypes /*= util::defaultPixelSelectionTypes*/) :
+    WidgetAction(parent),
     _targetWidget(targetWidget),
     _pixelSelectionTool(pixelSelectionTool),
     _pixelSelectionTypes(pixelSelectionTypes),
-    _overlayColor(this, "Color", QColor(255, 0, 0), QColor(255, 0, 0)),
-    _overlayOpacity(this, "Opacity", 0.0f, 100.0f, 50.0f, 50.0f, 1),
+    _overlayColor(this, "Overlay color", QColor(255, 0, 0), QColor(255, 0, 0)),
+    _overlayOpacity(this, "Overlay opacity", 0.0f, 100.0f, 50.0f, 50.0f, 1),
     _typeAction(this, "Type"),
     _rectangleAction(this, "Rectangle"),
     _brushAction(this, "Brush"),
