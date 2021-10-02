@@ -21,6 +21,23 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
     initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
 }
 
+void DecimalAction::initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/)
+{
+    _minimum            = std::min(minimum, _maximum);
+    _maximum            = std::max(maximum, _minimum);
+    _value              = std::max(_minimum, std::min(value, _maximum));
+    _defaultValue       = std::max(_minimum, std::min(defaultValue, _maximum));
+    _numberOfDecimals   = numberOfDecimals;
+
+    _minimumChanged();
+    _maximumChanged();
+    _valueChanged();
+    _defaultValueChanged();
+
+    if (_numberOfDecimalsChanged)
+        _numberOfDecimalsChanged();
+}
+
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
     QDoubleSpinBox(parent)
 {
@@ -153,16 +170,6 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
 
     onUpdateValue();
     setToolTips();
-}
-
-hdps::gui::DecimalAction::SpinBoxWidget* DecimalAction::createSpinBoxWidget(QWidget* parent)
-{
-    return new SpinBoxWidget(parent, this);
-}
-
-hdps::gui::DecimalAction::SliderWidget* DecimalAction::createSliderWidget(QWidget* parent)
-{
-    return new SliderWidget(parent, this);
 }
 
 QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)

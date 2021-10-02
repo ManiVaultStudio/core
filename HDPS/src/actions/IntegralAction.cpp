@@ -20,6 +20,19 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     initialize(minimum, maximum, value, defaultValue);
 }
 
+void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue)
+{
+    _minimum        = std::min(minimum, _maximum);
+    _maximum        = std::max(maximum, _minimum);
+    _value          = std::max(_minimum, std::min(value, _maximum));
+    _defaultValue   = std::max(_minimum, std::min(defaultValue, _maximum));
+
+    _minimumChanged();
+    _maximumChanged();
+    _valueChanged();
+    _defaultValueChanged();
+}
+
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
     QSpinBox(parent)
 {
@@ -170,16 +183,6 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     widget->setLayout(layout);
 
     return widget;
-}
-
-IntegralAction::SpinBoxWidget* IntegralAction::createSpinBoxWidget(QWidget* parent)
-{
-    return new SpinBoxWidget(parent, this);
-}
-
-IntegralAction::SliderWidget* IntegralAction::createSliderWidget(QWidget* parent)
-{
-    return new SliderWidget(parent, this);
 }
 
 }

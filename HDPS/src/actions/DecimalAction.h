@@ -80,18 +80,13 @@ public:
     DecimalAction(QObject * parent, const QString& title, const float& minimum = INIT_MIN, const float& maximum = INIT_MAX, const float& value = INIT_VALUE, const float& defaultValue = INIT_DEFAULT_VALUE, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
     /**
-     * Creates a spin box widget to interact with the decimal action
-     * @param parent Pointer to parent widget
-     * @return Spin box widget
+     * Initialize the decimal action
+     * @param minimum Minimum value
+     * @param maximum Maximum value
+     * @param value Value
+     * @param defaultValue Default value
      */
-    SpinBoxWidget* createSpinBoxWidget(QWidget* parent);
-
-    /**
-     * Creates a slider widget to interact with the decimal action
-     * @param parent Pointer to parent widget
-     * @return Slider widget
-     */
-    SliderWidget* createSliderWidget(QWidget* parent);
+    void initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
 signals:
 

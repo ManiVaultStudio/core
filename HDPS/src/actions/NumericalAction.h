@@ -77,30 +77,6 @@ public:
         setDefaultWidgetFlags(WidgetFlag::Basic);
     }
 
-    /**
-     * Initialize the decimal action
-     * @param minimum Minimum value
-     * @param maximum Maximum value
-     * @param value Value
-     * @param defaultValue Default value
-     */
-    void initialize(const NumericalType& minimum, const NumericalType& maximum, const NumericalType& value, const NumericalType& defaultValue, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS)
-    {
-        _minimum            = std::min(minimum, _maximum);
-        _maximum            = std::max(maximum, _minimum);
-        _value              = std::max(_minimum, std::min(value, _maximum));
-        _defaultValue       = std::max(_minimum, std::min(defaultValue, _maximum));
-        _numberOfDecimals   = numberOfDecimals;
-
-        _minimumChanged();
-        _maximumChanged();
-        _valueChanged();
-        _defaultValueChanged();
-
-        if (_numberOfDecimalsChanged)
-            _numberOfDecimalsChanged();
-    }
-
     /** Gets the current value */
     virtual NumericalType getValue() const final {
         return _value;

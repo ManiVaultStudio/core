@@ -95,7 +95,7 @@ public: // Image retrieval functions
     void setImageFilePaths(const QStringList& imageFilePaths);
 
     /** Gets the dimension names (the image names) */
-    QStringList dimensionNames() const;
+    QStringList getDimensionNames() const;
 
     /**
      * Sets the dimension names
@@ -108,6 +108,12 @@ public: // Image retrieval functions
 
     /** Returns the number of color channels per pixel */
     static std::uint32_t noChannelsPerPixel();
+
+    /**
+     * Get image at index
+     * 
+     */
+    QImage getImage(const std::uint32_t& index);
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;

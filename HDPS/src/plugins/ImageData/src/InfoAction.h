@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ImagePreviewAction.h"
+
 #include "actions/Actions.h"
 #include "event/EventListener.h"
 #include "util/DatasetRef.h"
@@ -26,13 +28,11 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
      * @param datasetName Name of the images dataset
      */
-    InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName);
+    InfoAction(QObject* parent, const QString& datasetName);
 
 protected:
-    CoreInterface*          _core;                              /** Pointer to the core */
     DatasetRef<Images>      _images;                            /** Points dataset reference */
     StringAction            _typeAction;                        /** Image collection type action */
     StringAction            _numberOfImagesAction;              /** Number of images action */
@@ -40,6 +40,5 @@ protected:
     StringAction            _imageHeightAction;                 /** Image height action */
     StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
     StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
-    //ImageFilePathsAction    _imageFilePathsAction;              /** Image file paths action */
-    //DimensionNamesAction    _dimensionNamesAction;              /** Dimension names action */
+    ImagePreviewAction      _imagePreviewAction;                /** Image preview action */
 };

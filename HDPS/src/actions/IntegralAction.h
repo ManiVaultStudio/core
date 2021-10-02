@@ -79,18 +79,13 @@ public:
     IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
 
     /**
-     * Creates a spin box widget to interact with the integral action
-     * @param parent Pointer to parent widget
-     * @return Spin box widget
+     * Initialize the integral action
+     * @param minimum Minimum value
+     * @param maximum Maximum value
+     * @param value Value
+     * @param defaultValue Default value
      */
-    SpinBoxWidget* createSpinBoxWidget(QWidget* parent);
-
-    /**
-     * Creates a slider widget to interact with the integral action
-     * @param parent Pointer to parent widget
-     * @return Slider widget
-     */
-    SliderWidget* createSliderWidget(QWidget* parent);
+    void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
 
 signals:
 

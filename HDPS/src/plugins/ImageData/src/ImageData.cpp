@@ -11,6 +11,7 @@ ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :
     _type(Type::Undefined),
     _numberOfImages(0),
     _imageSize(),
+    _imageRectangle(),
     _numberOfComponentsPerPixel(0),
     _imageFilePaths(),
     _dimensionNames()
@@ -39,6 +40,16 @@ QSize ImageData::getImageSize() const
 void ImageData::setImageSize(const QSize& imageSize)
 {
     _imageSize = imageSize;
+}
+
+QRect ImageData::getImageRectangle() const
+{
+    return _imageRectangle;
+}
+
+void ImageData::setImageRectangle(const QRect& imageRectangle)
+{
+    _imageRectangle = imageRectangle;
 }
 
 std::uint32_t ImageData::getNumberOfComponentsPerPixel() const

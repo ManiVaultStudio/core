@@ -76,10 +76,10 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
 {
     auto layout = new QHBoxLayout();
 
-    auto rangeMinSpinBoxWidget  = decimalRangeAction->getRangeMinAction().createSpinBoxWidget(this);
-    auto rangeMinSliderWidget   = decimalRangeAction->getRangeMinAction().createSliderWidget(this);
-    auto rangeMaxSpinBoxWidget  = decimalRangeAction->getRangeMaxAction().createSpinBoxWidget(this);
-    auto rangeMaxSliderWidget   = decimalRangeAction->getRangeMaxAction().createSliderWidget(this);
+    auto rangeMinSpinBoxWidget  = decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox);
+    auto rangeMinSliderWidget   = decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::Slider);
+    auto rangeMaxSpinBoxWidget  = decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox);
+    auto rangeMaxSliderWidget   = decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::Slider);
 
     switch (state)
     {

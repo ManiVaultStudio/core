@@ -38,6 +38,8 @@ set(IMAGE_DATA_SOURCES
 set(ACTIONS_SOURCES 
     src/InfoAction.h
     src/InfoAction.cpp
+    src/ImagePreviewAction.h
+    src/ImagePreviewAction.cpp
 )
 
 source_group(Actions FILES ${ACTIONS_SOURCES})

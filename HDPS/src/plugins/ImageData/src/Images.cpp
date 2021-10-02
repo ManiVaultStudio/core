@@ -13,7 +13,7 @@ Images::Images(hdps::CoreInterface* core, QString dataName) :
 
 void Images::init()
 {
-    _infoAction = QSharedPointer<InfoAction>::create(nullptr, _core, getName());
+    _infoAction = QSharedPointer<InfoAction>::create(nullptr, getName());
 
     addAction(*_infoAction.get());
 }
@@ -82,7 +82,7 @@ void Images::setImageFilePaths(const QStringList& imageFilePaths)
     _imageData->setImageFilePaths(imageFilePaths);
 }
 
-QStringList Images::dimensionNames() const
+QStringList Images::getDimensionNames() const
 {
     return _imageData->getDimensionNames();
 }
@@ -100,6 +100,13 @@ std::uint32_t Images::getNumberOfPixels() const
 std::uint32_t Images::noChannelsPerPixel()
 {
     return 4;
+}
+
+QImage Images::getImage(const std::uint32_t& index)
+{
+    QImage image;
+
+    return image;
 }
 
 QIcon Images::getIcon() const

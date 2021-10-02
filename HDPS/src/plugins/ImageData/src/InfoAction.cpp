@@ -1,22 +1,23 @@
 #include "InfoAction.h"
+#include "Application.h"
 
 using namespace hdps;
 using namespace hdps::gui;
 
-InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName) :
+InfoAction::InfoAction(QObject* parent, const QString& datasetName) :
     GroupAction(parent, false),
     EventListener(),
-    _core(core),
     _images(datasetName),
     _typeAction(this, "Image collection type"),
     _numberOfImagesAction(this, "Number of images"),
     _imageWidthAction(this, "Image width"),
     _imageHeightAction(this, "Image height"),
     _numberOfPixelsAction(this, "Number of pixels"),
-    _numberComponentsPerPixelAction(this, "Number of components per pixel")
+    _numberComponentsPerPixelAction(this, "Number of components per pixel"),
+    _imagePreviewAction(this, datasetName)
 {
     setText("Info");
-    setEventCore(_core);
+    setEventCore(Application::core());
 
     _typeAction.setEnabled(false);
     _numberOfImagesAction.setEnabled(false);
