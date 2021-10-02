@@ -109,14 +109,36 @@ public: // Image retrieval functions
     /** Returns the number of color channels per pixel */
     static std::uint32_t noChannelsPerPixel();
 
-    /**
-     * Get image at index
-     * 
-     */
-    QImage getImage(const std::uint32_t& index);
-
     /** Get icon for the dataset */
     QIcon getIcon() const override;
+
+public:
+
+    /**
+     * Get scalar data
+     * @param dimensionIndex Dimension index
+     * @param scalarData Scalar data for the specified dimension
+     * @param scalarDataRange Scalar data range
+     */
+    void getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
+
+protected:
+
+    /**
+     * Get scalar data for image sequence
+     * @param dimensionIndex Dimension index
+     * @param scalarData Scalar data for the specified dimension
+     * @param scalarDataRange Scalar data range
+     */
+    void getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
+
+    /**
+     * Get scalar data for image stack
+     * @param dimensionIndex Dimension index
+     * @param scalarData Scalar data for the specified dimension
+     * @param scalarDataRange Scalar data range
+     */
+    void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
 
 private:
     ImageData*                      _imageData;     /** Pointer to raw image data */

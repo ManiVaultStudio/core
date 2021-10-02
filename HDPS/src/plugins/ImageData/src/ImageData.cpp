@@ -4,6 +4,8 @@
 
 #include <QDebug>
 
+#include <stdexcept>
+
 Q_PLUGIN_METADATA(IID "nl.tudelft.ImageData")
 
 ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :

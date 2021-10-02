@@ -64,6 +64,12 @@ public:
      */
     ImagePreviewAction(QObject* parent, const QString& datasetName);
 
+    /**
+     * Get preview image at dimension index
+     * @param dimensionIndex Dimension index
+     */
+    QImage getPreviewImage(const std::uint32_t& dimensionIndex);
+
 public: // Action getters
 
     OptionAction& getCurrentImageNameAction() { return _currentImageNameAction; }
@@ -73,4 +79,7 @@ protected:
     DatasetRef<Images>      _images;                        /** Images dataset reference */
     OptionAction            _currentImageNameAction;        /** Image collection type action */
     IntegralAction          _currentImageIndexAction;       /** Image collection type action */
+    QVector<uchar>          _previewScalarData;             /** Preview scalar data */
+
+    static const std::int32_t previewImageNoChannels = 4;
 };

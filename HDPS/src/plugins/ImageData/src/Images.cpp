@@ -2,7 +2,15 @@
 #include "ImageData.h"
 #include "InfoAction.h"
 
+#include "util/Exception.h"
+
+#include "DataHierarchyItem.h"
+
+#include "PointData.h"
+
 #include <QDebug>
+
+using namespace hdps::util;
 
 Images::Images(hdps::CoreInterface* core, QString dataName) :
     DataSet(core, dataName),
@@ -102,14 +110,107 @@ std::uint32_t Images::noChannelsPerPixel()
     return 4;
 }
 
-QImage Images::getImage(const std::uint32_t& index)
-{
-    QImage image;
-
-    return image;
-}
-
 QIcon Images::getIcon() const
 {
     return hdps::Application::getIconFont("FontAwesome").getIcon("images");
+}
+
+void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
+{
+    try
+    {
+        if (static_cast<std::uint32_t>(scalarData.count()) < getNumberOfPixels())
+            throw std::runtime_error("Scalar data vector number of elements is smaller than the number of pixels");
+
+        switch (_imageData->getType())
+        {
+            case ImageData::Undefined:
+                break;
+
+            case ImageData::Sequence:
+                getScalarDataForImageSequence(dimensionIndex, scalarData, scalarDataRange);
+                break;
+
+            case ImageData::Stack:
+                getScalarDataForImageStack(dimensionIndex, scalarData, scalarDataRange);
+                break;
+
+            case ImageData::MultiPartSequence:
+                break;
+
+            default:
+                break;
+        }
+
+        // Initialize scalar data range
+        scalarDataRange = { std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest() };
+
+        // Compute the actual scalar data range
+        for (auto& scalar : scalarData) {
+            scalarDataRange.first = std::min(scalar, scalarDataRange.first);
+            scalarDataRange.second = std::max(scalar, scalarDataRange.second);
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get scalar data", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get scalar data");
+    }
+}
+
+void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
+{
+    auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
+
+    points.visitData([this, points, dimensionIndex, &scalarData](auto pointData) {
+        const auto dimensionId      = dimensionIndex;
+        const auto imageSize        = _imageData->getImageSize();
+        const auto noPixels         = getNumberOfPixels();
+        const auto selection        = dynamic_cast<Points&>(points.getSelection());
+        const auto selectionIndices = selection.indices;
+        const auto selectionSize    = selectionIndices.size();
+
+        if (!selectionIndices.empty()) {
+            for (std::uint32_t p = 0; p < noPixels; p++) {
+                auto sum = 0.0f;
+
+                for (auto selectionIndex : selectionIndices)
+                    sum += pointData[selectionIndex][p];
+
+                scalarData[p] = static_cast<float>(sum / selectionSize);
+            }
+        }
+        else {
+            for (std::uint32_t p = 0; p < noPixels; p++)
+                scalarData[p] = pointData[dimensionIndex][p];
+        }
+    });
+}
+
+void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
+{
+    auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
+
+    if (points.isDerivedData()) {
+        points.visitData([this, &points, dimensionIndex, &scalarData](auto pointData) {
+            auto& sourceData = points.getSourceData<Points>(points);
+
+            if (sourceData.isFull()) {
+                for (std::uint32_t i = 0; i < points.getNumPoints(); i++)
+                    scalarData[i] = pointData[i][dimensionIndex];
+            }
+            else {
+                for (int i = 0; i < sourceData.indices.size(); i++)
+                    scalarData[sourceData.indices[i]] = pointData[i][dimensionIndex];
+            }
+        });
+    }
+    else {
+        points.visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
+            for (auto pointView : pointData)
+                scalarData[pointView.index()] = pointView[dimensionIndex];
+        });
+    }
 }
