@@ -16,7 +16,8 @@ WidgetAction::WidgetAction(QObject* parent) :
     _dataHierarchyItemContext(nullptr),
     _defaultWidgetFlags(),
     _resettable(false),
-    _mayReset(false)
+    _mayReset(false),
+    _sortIndex(-1)
 {
 }
 
