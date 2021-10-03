@@ -119,8 +119,9 @@ public:
      * @param dimensionIndex Dimension index
      * @param scalarData Scalar data for the specified dimension
      * @param scalarDataRange Scalar data range
+     * @param subsample Subsample amount (every n pixels)
      */
-    void getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
+    void getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample = 1);
 
 protected:
 
@@ -129,16 +130,18 @@ protected:
      * @param dimensionIndex Dimension index
      * @param scalarData Scalar data for the specified dimension
      * @param scalarDataRange Scalar data range
+     * @param subsample Subsample amount (every n pixels)
      */
-    void getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
+    void getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample = 1);
 
     /**
      * Get scalar data for image stack
      * @param dimensionIndex Dimension index
      * @param scalarData Scalar data for the specified dimension
      * @param scalarDataRange Scalar data range
+     * @param subsample Subsample amount (every n pixels)
      */
-    void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
+    void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample = 1);
 
 private:
     ImageData*                      _imageData;     /** Pointer to raw image data */

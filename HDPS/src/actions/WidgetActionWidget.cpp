@@ -17,36 +17,20 @@ WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* widgetActi
     _widgetAction(widgetAction),
     _state(state)
 {
-    const auto updateAction = [this, widgetAction]() -> void {
+    // Update basic widget settings when the action changes
+    const auto update = [this, widgetAction]() -> void {
         setEnabled(widgetAction->isEnabled());
         setVisible(widgetAction->isVisible());
+        setToolTip(widgetAction->toolTip());
     };
 
-    connect(widgetAction, &QAction::changed, this, [this, updateAction]() {
-        updateAction();
+    // When the action changes, update basic widget settings 
+    connect(widgetAction, &QAction::changed, this, [this, update]() {
+        update();
     });
 
-    updateAction();
-}
-
-void WidgetActionWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
-{
-    auto mimeData = dragEnterEvent->mimeData();
-
-    if (!mimeData->hasFormat("text/plain"))
-        return;
-
-    qDebug() << mimeData->text() << typeid(*_widgetAction).name();
-
-    if (mimeData->text() == typeid(*_widgetAction).name())
-        dragEnterEvent->acceptProposedAction();
-}
-
-void WidgetActionWidget::dropEvent(QDropEvent* dropEvent)
-{
-    qDebug() << dropEvent->mimeData()->text();
-
-    dropEvent->acceptProposedAction();
+    // Do an initial update
+    update();
 }
 
 void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)

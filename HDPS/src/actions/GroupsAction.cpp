@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QTreeWidget>
+#include <QResizeEvent>
 
 namespace hdps {
 
@@ -39,6 +40,8 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
     treeWidget->setIndentation(0);
     treeWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     treeWidget->setSelectionMode(QAbstractItemView::NoSelection);
+    treeWidget->setUniformRowHeights(false);
+    treeWidget->setEditTriggers(QTreeWidget::NoEditTriggers);
 
     treeWidget->setStyleSheet("QTreeWidget { border: none; }");
 
@@ -125,11 +128,11 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
             _treeWidgetItem->setExpanded(true);
 
             // Create group action widget on-the-fly
-            auto groupWidget = _widgetActionGroup->createWidget(this);
+            auto groupActionWidget = _widgetActionGroup->createWidget(this);
 
             QStyleOption styleOption;
 
-            styleOption.init(groupWidget);
+            styleOption.init(groupActionWidget);
 
             // Create new tree widget item for the group action widget
             auto section = new QTreeWidgetItem(_treeWidgetItem);
@@ -139,7 +142,7 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
 
             // Add the item as a child and assign the group action widget
             _treeWidgetItem->addChild(section);
-            _treeWidgetItem->treeWidget()->setItemWidget(section, 0, groupWidget);
+            _treeWidgetItem->treeWidget()->setItemWidget(section, 0, groupActionWidget);
         }
         else {
 

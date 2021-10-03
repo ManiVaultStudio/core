@@ -28,11 +28,11 @@ public:
 
 public:
 
-    /**
-     * Group widget class for widget action group
-     */
+    /** Group widget class for widget action groups */
     class Widget : public WidgetActionWidget
     {
+    protected:
+
         /**
          * Section push button class
          *

@@ -115,12 +115,15 @@ QIcon Images::getIcon() const
     return hdps::Application::getIconFont("FontAwesome").getIcon("images");
 }
 
-void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
+void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
 {
     try
     {
         if (static_cast<std::uint32_t>(scalarData.count()) < getNumberOfPixels())
             throw std::runtime_error("Scalar data vector number of elements is smaller than the number of pixels");
+
+        if (subsample < 1)
+            throw std::runtime_error("Subsample amount may not be zero");
 
         switch (_imageData->getType())
         {
@@ -128,11 +131,11 @@ void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& 
                 break;
 
             case ImageData::Sequence:
-                getScalarDataForImageSequence(dimensionIndex, scalarData, scalarDataRange);
+                getScalarDataForImageSequence(dimensionIndex, scalarData, scalarDataRange, subsample);
                 break;
 
             case ImageData::Stack:
-                getScalarDataForImageStack(dimensionIndex, scalarData, scalarDataRange);
+                getScalarDataForImageStack(dimensionIndex, scalarData, scalarDataRange, subsample);
                 break;
 
             case ImageData::MultiPartSequence:
@@ -160,11 +163,18 @@ void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& 
     }
 }
 
-void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
+void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
 {
+    QSize sourceImageSize = getImageSize(), targetImageSize;
+
+    // Establish target image size based on sub-sampling
+    targetImageSize.setWidth(static_cast<int>(floorf(sourceImageSize.width() / subsample)));
+    targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height() / subsample)));
+
+    // Get reference to input points dataset
     auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
 
-    points.visitData([this, points, dimensionIndex, &scalarData](auto pointData) {
+    points.visitData([this, points, dimensionIndex, &scalarData, subsample, sourceImageSize, targetImageSize](auto pointData) {
         const auto dimensionId      = dimensionIndex;
         const auto imageSize        = _imageData->getImageSize();
         const auto noPixels         = getNumberOfPixels();
@@ -183,14 +193,32 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
             }
         }
         else {
-            for (std::uint32_t p = 0; p < noPixels; p++)
-                scalarData[p] = pointData[dimensionIndex][p];
+
+            // Populate scalar data vector with pixel data
+            for (std::int32_t pixelX = 0; pixelX < targetImageSize.width(); pixelX++) {
+                for (std::int32_t pixelY = 0; pixelY < targetImageSize.height(); pixelY++) {
+
+                    // Compute the source and target pixel index
+                    const auto sourcePixelIndex = (pixelY * subsample) * sourceImageSize.width() + (pixelX * subsample);
+                    const auto targetPixelIndex = pixelY * targetImageSize.width() + pixelX;
+
+                    // And assign the scalar data
+                    scalarData[targetPixelIndex] = pointData[dimensionIndex][sourcePixelIndex];
+                }
+            }
         }
     });
 }
 
-void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
+void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
 {
+    QSize sourceImageSize = getImageSize(), targetImageSize;
+
+    // Establish target image size based on sub-sampling
+    targetImageSize.setWidth(static_cast<int>(floorf(sourceImageSize.width() / subsample)));
+    targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height() / subsample)));
+
+    // Get reference to input points dataset
     auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
 
     if (points.isDerivedData()) {
@@ -208,9 +236,20 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         });
     }
     else {
-        points.visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
-            for (auto pointView : pointData)
-                scalarData[pointView.index()] = pointView[dimensionIndex];
+        points.visitSourceData([this, dimensionIndex, &scalarData, subsample, sourceImageSize, targetImageSize](auto pointData) {
+
+            // Populate scalar data vector with pixel data
+            for (std::int32_t pixelX = 0; pixelX < targetImageSize.width(); pixelX++) {
+                for (std::int32_t pixelY = 0; pixelY < targetImageSize.height(); pixelY++) {
+
+                    // Compute the source and target pixel index
+                    const auto sourcePixelIndex = (pixelY * subsample) * sourceImageSize.width() + (pixelX * subsample);
+                    const auto targetPixelIndex = pixelY * targetImageSize.width() + pixelX;
+
+                    // And assign the scalar data
+                    scalarData[targetPixelIndex] = pointData[sourcePixelIndex][dimensionIndex];
+                }
+            }
         });
     }
 }

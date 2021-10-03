@@ -7,27 +7,21 @@ using namespace hdps::gui;
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QPushButton>
 
 ImagePreviewAction::ImagePreviewAction(QObject* parent, const QString& datasetName) :
     WidgetAction(parent),
     hdps::EventListener(),
     _images(datasetName),
+    _previewImageAction(this, "Preview image"),
     _currentImageNameAction(this, "Current image name"),
-    _currentImageIndexAction(this, "Current image index"),
-    _previewScalarData()
+    _windowLevelAction(this),
+    _previewScalarData(),
+    _previewImageSize(),
+    _subsamplingFactor(1)
 {
     setText("Image preview");
     setEventCore(Application::core());
-
-    // Update current image index when the current image name changes
-    connect(&_currentImageNameAction, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
-        _currentImageIndexAction.setValue(currentIndex);
-    });
-
-    // Update current image name when the current image index changes
-    connect(&_currentImageIndexAction, &IntegralAction::valueChanged, this, [this](const std::int32_t& value) {
-        _currentImageNameAction.setCurrentIndex(value);
-    });
 
     // Update actions when images data changes
     const auto updateActions = [this]() -> void {
@@ -44,7 +38,6 @@ ImagePreviewAction::ImagePreviewAction(QObject* parent, const QString& datasetNa
 
         // Initialize current name and index actions
         _currentImageNameAction.initialize(dimensionNames, dimensionNames.first(), dimensionNames.first());
-        _currentImageIndexAction.initialize(0, numberOfDimensions - 1, 0, 0);
     };
 
     registerDataEventByType(ImageType, [this, updateActions](hdps::DataEvent* dataEvent) {
@@ -61,12 +54,27 @@ ImagePreviewAction::ImagePreviewAction(QObject* parent, const QString& datasetNa
                 // Update action states
                 updateActions();
 
+                // Get source image size
+                const auto imageSize = _images->getImageSize();
+
+                // Compute subsampling factor
+                _subsamplingFactor = std::max(1.0, std::min(imageSize.width(), imageSize.height()) / 64.0);
+
+                qDebug() << _subsamplingFactor;
+
+                // Establish effective (sub-sampled) image resolution
+                _previewImageSize.setWidth(static_cast<int>(floorf(imageSize.width() / _subsamplingFactor)));
+                _previewImageSize.setHeight(static_cast<int>(floorf(imageSize.height() / _subsamplingFactor)));
+
+                // Establish number of preview image pixels
+                const auto numberOfPreviewImagePixels = _previewImageSize.width() * _previewImageSize.height();
+
                 // Establish number of required scalars
-                const auto numberOfScalars = _images->getNumberOfPixels() * previewImageNoChannels;
+                const auto numberOfScalars = numberOfPreviewImagePixels * previewImageNoChannels;
 
                 // Allocate preview image scalars
                 if (numberOfScalars != _previewScalarData.count())
-                    _previewScalarData.resize(_images->getNumberOfPixels() * previewImageNoChannels);
+                    _previewScalarData.resize(numberOfPreviewImagePixels * previewImageNoChannels);
 
                 break;
             }
@@ -75,6 +83,27 @@ ImagePreviewAction::ImagePreviewAction(QObject* parent, const QString& datasetNa
                 break;
         }
     });
+
+    // Update preview image action with image
+    const auto updatePreviewImageAction = [this]() {
+        if (_previewScalarData.isEmpty())
+            return;
+
+        // Assign image to image action
+        _previewImageAction.setImage(getPreviewImage(_currentImageNameAction.getCurrentIndex()));
+    };
+
+    // Update preview image action image when selected dimension changes or the window/level settings
+    connect(&_currentImageNameAction, &OptionAction::currentIndexChanged, this, updatePreviewImageAction);
+    connect(&_windowLevelAction.getWindowAction(), &DecimalAction::valueChanged, this, updatePreviewImageAction);
+    connect(&_windowLevelAction.getLevelAction(), &DecimalAction::valueChanged, this, updatePreviewImageAction);
+}
+
+float ImagePreviewAction::getAspectRatio() const
+{
+    const auto imageSize = _images->getImageSize();
+
+    return static_cast<float>(imageSize.height()) / static_cast<float>(imageSize.width());
 }
 
 QImage ImagePreviewAction::getPreviewImage(const std::uint32_t& dimensionIndex)
@@ -90,28 +119,39 @@ QImage ImagePreviewAction::getPreviewImage(const std::uint32_t& dimensionIndex)
         QPair<float, float> scalarDataRange;
 
         // Get float scalar data
-        _images->getScalarData(dimensionIndex, scalarData32, scalarDataRange);
+        _images->getScalarData(dimensionIndex, scalarData32, scalarDataRange, _subsamplingFactor);
         
+        std::pair<float, float> displayRange;
 
-        // Compute scalar data range length
-        const auto scalarDataRangeLength = scalarDataRange.second - scalarDataRange.first;
+        const auto maxWindow            = scalarDataRange.second - scalarDataRange.first;
+        const auto windowNormalized     = _windowLevelAction.getWindowAction().getValue();
+        const auto levelNormalized      = _windowLevelAction.getLevelAction().getValue();
+        const auto level                = std::clamp(scalarDataRange.first + (levelNormalized * maxWindow), scalarDataRange.first, scalarDataRange.second);
+        const auto window               = std::clamp(windowNormalized * maxWindow, scalarDataRange.first, scalarDataRange.second);
 
-        for (std::uint32_t pixelIndex = 0; pixelIndex < _images->getNumberOfPixels(); pixelIndex++) {
+        displayRange.first      = std::clamp(level - (window / 2.0f), scalarDataRange.first, scalarDataRange.second);
+        displayRange.second     = std::clamp(level + (window / 2.0f), scalarDataRange.first, scalarDataRange.second);
+
+        // Compute display range length
+        const auto displayRangeLength = displayRange.second - displayRange.first;
+
+        // Establish number of preview image pixels
+        const auto numberOfPreviewImagePixels = _previewImageSize.width() * _previewImageSize.height();
+
+        // Compute preview scalar data
+        for (std::int32_t pixelIndex = 0; pixelIndex < numberOfPreviewImagePixels; pixelIndex++) {
 
             // Compute normalized data value and gray scale value
-            const auto normalized   = (scalarData32[pixelIndex] - scalarDataRange.first) / scalarDataRangeLength;
-            const auto grayscale    = static_cast<unsigned char>(normalized * 255.0f);
-
+            const auto normalized   = displayRangeLength == 0.0f ? 0.5f : std::clamp((scalarData32[pixelIndex] - displayRange.first) / displayRangeLength, 0.0f, 1.0f);
+            const auto grayscale    = static_cast<uchar>(normalized * 255.0f);
+        
             // Assign preview data
             for (int channelIndex = 0; channelIndex < previewImageNoChannels; channelIndex++)
                 _previewScalarData[pixelIndex * previewImageNoChannels + channelIndex] = grayscale;
         }
 
-        // Get the image size
-        const auto imageSize = _images->getImageSize();
-
         // Create the preview image
-        return QImage((uchar*)_previewScalarData.data(), imageSize.width(), imageSize.height(), QImage::Format_RGB32).mirrored(false, true);
+        return QImage((uchar*)_previewScalarData.data(), _previewImageSize.width(), _previewImageSize.height(), QImage::Format_RGB32).mirrored(false, true);
     }
     catch (std::exception& e)
     {
@@ -125,39 +165,19 @@ QImage ImagePreviewAction::getPreviewImage(const std::uint32_t& dimensionIndex)
 ImagePreviewAction::Widget::Widget(QWidget* parent, ImagePreviewAction* imagePreviewAction, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state) :
     WidgetActionWidget(parent, imagePreviewAction, state)
 {
-    //setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
+    //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    auto mainLayout         = new QVBoxLayout();
-    auto currentImageLayout = new QHBoxLayout();
-    auto previewLabel       = new QLabel();
+    auto mainLayout     = new QVBoxLayout();
+    auto toolbarLayout  = new QHBoxLayout();
 
     mainLayout->setMargin(0);
+    mainLayout->setSpacing(3);
 
-    previewLabel->setFrameShape(QFrame::Panel);
-    previewLabel->setFrameShadow(QFrame::Sunken);
-    //previewLabel->setScaledContents(true);
-    //previewLabel->setFixedSize(200, 200);
-    //previewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    
-
-    mainLayout->addWidget(previewLabel);
-    mainLayout->addLayout(currentImageLayout);
-
-    currentImageLayout->addWidget(imagePreviewAction->getCurrentImageNameAction().createWidget(this));
-    currentImageLayout->addWidget(imagePreviewAction->getCurrentImageIndexAction().createWidget(this, IntegralAction::Slider));
+    mainLayout->addWidget(imagePreviewAction->getPreviewImageAction().createWidget(this, ImageAction::Label));
+    mainLayout->addLayout(toolbarLayout);
 
     setLayout(mainLayout);
 
-    // Update preview image label
-    connect(&imagePreviewAction->getCurrentImageNameAction(), &OptionAction::currentIndexChanged, this, [previewLabel, imagePreviewAction](const std::int32_t& currentIndex) {
-
-        // Get scaled copy to fit in the label
-        const auto previewImage = imagePreviewAction->getPreviewImage(currentIndex).scaledToWidth(previewLabel->width(), Qt::SmoothTransformation);
-
-        // Configure preview label
-        previewLabel->setPixmap(QPixmap::fromImage(previewImage));
-        previewLabel->setScaledContents(true);
-        previewLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-        //previewLabel->setFixedHeight(previewImage.height());
-    });
+    toolbarLayout->addWidget(imagePreviewAction->getCurrentImageNameAction().createWidget(this));
+    toolbarLayout->addWidget(imagePreviewAction->getWindowLevelAction().createCollapsedWidget(this));
 }

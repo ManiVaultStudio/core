@@ -36,11 +36,6 @@ public:
      */
     WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const State& state);
 
-public: // Drag and drop behavior
-
-    void dragEnterEvent(QDragEnterEvent* dragEnterEvent);
-    void dropEvent(QDropEvent* dropEvent);
-
 protected: // Miscellaneous
 
     /**

@@ -119,6 +119,7 @@ set(ACTIONS_HEADERS
     src/actions/DecimalRangeAction.h
     src/actions/GroupAction.h
     src/actions/GroupsAction.h
+    src/actions/ImageAction.h
     src/actions/IntegralAction.h
     src/actions/NumericalAction.h
     src/actions/OptionAction.h
@@ -132,6 +133,7 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionResetButton.h
     src/actions/WidgetActionsManager.h
+    src/actions/WindowLevelAction.h
     src/actions/Actions.h
 )
 
@@ -147,6 +149,7 @@ set(ACTIONS_SOURCES
     src/actions/DecimalRangeAction.cpp
     src/actions/GroupAction.cpp
     src/actions/GroupsAction.cpp
+    src/actions/ImageAction.cpp
     src/actions/IntegralAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
@@ -160,6 +163,7 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionResetButton.cpp
     src/actions/WidgetActionsManager.cpp
+    src/actions/WindowLevelAction.cpp
 )
 
 set( RENDERER_HEADERS

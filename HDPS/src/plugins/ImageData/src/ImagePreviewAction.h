@@ -1,8 +1,9 @@
 #pragma once
 
 #include "actions/WidgetAction.h"
-#include "actions/IntegralAction.h"
+#include "actions/ImageAction.h"
 #include "actions/OptionAction.h"
+#include "actions/WindowLevelAction.h"
 
 #include "event/EventListener.h"
 #include "util/DatasetRef.h"
@@ -64,6 +65,9 @@ public:
      */
     ImagePreviewAction(QObject* parent, const QString& datasetName);
 
+    /** Get aspect ratio */
+    float getAspectRatio() const;
+
     /**
      * Get preview image at dimension index
      * @param dimensionIndex Dimension index
@@ -72,14 +76,18 @@ public:
 
 public: // Action getters
 
+    ImageAction& getPreviewImageAction() { return _previewImageAction; }
     OptionAction& getCurrentImageNameAction() { return _currentImageNameAction; }
-    IntegralAction& getCurrentImageIndexAction() { return _currentImageIndexAction; }
+    WindowLevelAction& getWindowLevelAction() { return _windowLevelAction; }
 
 protected:
     DatasetRef<Images>      _images;                        /** Images dataset reference */
-    OptionAction            _currentImageNameAction;        /** Image collection type action */
-    IntegralAction          _currentImageIndexAction;       /** Image collection type action */
+    ImageAction             _previewImageAction;            /** Preview image action */
+    OptionAction            _currentImageNameAction;        /** Current image name action */
+    WindowLevelAction       _windowLevelAction;             /** Window level action */
     QVector<uchar>          _previewScalarData;             /** Preview scalar data */
+    QSize                   _previewImageSize;              /** Effective preview image size */
+    std::uint32_t           _subsamplingFactor;             /** Subsampling factor */
 
-    static const std::int32_t previewImageNoChannels = 4;
+    static const std::int32_t previewImageNoChannels    = 4;
 };
