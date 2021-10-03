@@ -72,7 +72,7 @@ public:
      */
     void setNumberImages(const std::uint32_t& numberOfImages);
 
-    /** Gets the image size */
+    /** Get the image size */
     QSize getImageSize() const;
 
     /**
@@ -81,14 +81,23 @@ public:
      */
     void setImageSize(const QSize& imageSize);
 
-    /** Gets the image rectangle */
-    QRect getImageRectangle() const;
+    /** Get the source rectangle */
+    QRect getSourceRectangle() const;
 
     /**
-     * Sets the image rectangle
-     * @param imageRectangle Rectangle of the image(s)
+     * Set the source rectangle
+     * @param sourceRectangle Source rectangle
      */
-    void setImageRectangle(const QRect& imageRectangle);
+    void setSourceRectangle(const QRect& sourceRectangle);
+
+    /** Get the target rectangle */
+    QRect getTargetRectangle() const;
+
+    /**
+     * Set the target rectangle
+     * @param targetRectangle Target rectangle
+     */
+    void setTargetRectangle(const QRect& targetRectangle);
 
     /** Gets the number of components per pixel */
     std::uint32_t getNumberOfComponentsPerPixel() const;
@@ -127,7 +136,8 @@ private:
     Type                _type;                          /** Image collection type e.g. stack or sequence */
     std::uint32_t       _numberOfImages;                /** Number of images in the set */
     QSize               _imageSize;                     /** Image size */
-    QRect               _imageRectangle;                /** Image rectangle */
+    QRect               _sourceRectangle;               /** Source image rectangle */
+    QRect               _targetRectangle;               /** Target image rectangle */
     std::uint32_t       _numberOfComponentsPerPixel;    /** Number of components per pixel */
     QStringList         _imageFilePaths;                /** Image file paths */
     QStringList         _dimensionNames;                /** Dimension names */

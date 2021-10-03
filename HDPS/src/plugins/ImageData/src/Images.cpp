@@ -70,6 +70,16 @@ void Images::setImageSize(const QSize& imageSize)
     _imageData->setImageSize(imageSize);
 }
 
+QRect Images::getSourceRectangle() const
+{
+    return _imageData->getSourceRectangle();
+}
+
+QRect Images::getTargetRectangle() const
+{
+    return _imageData->getTargetRectangle();
+}
+
 std::uint32_t Images::getNumberOfComponentsPerPixel() const
 {
     return _imageData->getNumberOfComponentsPerPixel();

@@ -76,6 +76,12 @@ public: // Image retrieval functions
      */
     void setImageSize(const QSize& imageSize);
 
+    /** Get the source rectangle */
+    QRect getSourceRectangle() const;
+
+    /** Get the target rectangle */
+    QRect getTargetRectangle() const;
+
     /** Gets the number of components per pixel */
     std::uint32_t getNumberOfComponentsPerPixel() const;
 
