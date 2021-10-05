@@ -155,6 +155,11 @@ public:
         return _dataset;
     }
 
+    /** get source data */
+    DatasetType& getSourceData() {
+        return dynamic_cast<DatasetType&>(DataSet::getSourceData(*_dataset));
+    }
+
     /** Get the dataset pointer */
     DatasetType* get() {
         return _dataset;

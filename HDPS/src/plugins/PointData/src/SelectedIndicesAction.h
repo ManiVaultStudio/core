@@ -79,9 +79,10 @@ signals:
     void selectedIndicesChanged(const std::vector<std::uint32_t>& selectedIndices);
 
 protected:
-    CoreInterface*      _core;                      /** Pointer to the core */
-    DatasetRef<Points>  _points;                    /** Points dataset reference */
-    TriggerAction       _updateAction;              /** Update action */
-    ToggleAction        _manualUpdateAction;        /** Manual update action */
-    QTimer              _selectionChangedTimer;     /** Timer to control when selection changes are processed */
+    CoreInterface*              _core;                      /** Pointer to the core */
+    DatasetRef<Points>          _points;                    /** Points dataset reference */
+    TriggerAction               _updateAction;              /** Update action */
+    ToggleAction                _manualUpdateAction;        /** Manual update action */
+    QTimer                      _selectionChangedTimer;     /** Timer to control when selection changes are processed */
+    std::vector<std::uint32_t>  _selectedIndices;           /** Selected indices */
 };
