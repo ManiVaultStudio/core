@@ -75,9 +75,19 @@ QRect Images::getSourceRectangle() const
     return _imageData->getSourceRectangle();
 }
 
+void Images::setSourceRectangle(const QRect& sourceRectangle)
+{
+    _imageData->setSourceRectangle(sourceRectangle);
+}
+
 QRect Images::getTargetRectangle() const
 {
     return _imageData->getTargetRectangle();
+}
+
+void Images::setTargetRectangle(const QRect& targetRectangle)
+{
+    _imageData->setTargetRectangle(targetRectangle);
 }
 
 std::uint32_t Images::getNumberOfComponentsPerPixel() const
@@ -90,7 +100,7 @@ void Images::setNumberOfComponentsPerPixel(const std::uint32_t& numberOfComponen
     _imageData->setNumberOfComponentsPerPixel(numberOfComponentsPerPixel);
 }
 
-QStringList Images::imageFilePaths() const
+QStringList Images::getImageFilePaths() const
 {
     return _imageData->getImageFilePaths();
 }

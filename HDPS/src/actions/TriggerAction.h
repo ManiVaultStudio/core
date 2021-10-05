@@ -2,7 +2,7 @@
 
 #include "WidgetAction.h"
 
-class QPushButton;
+#include <QPushButton>
 
 namespace hdps {
 
@@ -21,26 +21,33 @@ class TriggerAction : public WidgetAction
 
 public:
 
-    /**
-     * Push button widget class for trigger action
-     */
-    class PushButtonWidget : public WidgetActionWidget {
+    /** Describes the widget flags */
+    enum WidgetFlag {
+
+        /** Push button options */
+        Icon            = 0x00001,          /** Enable push button icon */
+        Text            = 0x00002,          /** Enable push button text */
+
+        /** Push button configurations */
+        IconText = Icon | Text              /** Push button with icon and text */
+    };
+
+public:
+
+    /** Push button widget class for trigger action */
+    class PushButtonWidget : public QPushButton {
     protected:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
          * @param triggerAction Pointer to trigger action
+         * @param widgetFlags Widget flags
          */
-        PushButtonWidget(QWidget* parent, TriggerAction* triggerAction);
-
-    public:
-
-        /** Gets the push button widget */
-        QPushButton* getPushButton() { return _pushButton; }
+        PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags);
 
     protected:
-        QPushButton*    _pushButton;        /** Push button widget */
+        TriggerAction*   _triggerAction;      /** Pointer to toggle action */
 
         friend class TriggerAction;
     };

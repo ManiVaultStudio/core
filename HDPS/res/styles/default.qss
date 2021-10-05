@@ -9,7 +9,7 @@ QPushButton {
     qproperty-iconSize: 12px;
 }
 
-QPushButton[cssClass="square"] {
+.square-button {
     padding-left: 1px;
     padding-right: 1px;
     width: 20px;

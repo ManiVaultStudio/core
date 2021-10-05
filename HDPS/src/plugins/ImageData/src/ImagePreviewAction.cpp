@@ -60,8 +60,6 @@ ImagePreviewAction::ImagePreviewAction(QObject* parent, const QString& datasetNa
                 // Compute subsampling factor
                 _subsamplingFactor = std::max(1.0, std::min(imageSize.width(), imageSize.height()) / 64.0);
 
-                qDebug() << _subsamplingFactor;
-
                 // Establish effective (sub-sampled) image resolution
                 _previewImageSize.setWidth(static_cast<int>(floorf(imageSize.width() / _subsamplingFactor)));
                 _previewImageSize.setHeight(static_cast<int>(floorf(imageSize.height() / _subsamplingFactor)));

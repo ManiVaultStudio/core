@@ -381,7 +381,7 @@ void Points::selectInvert()
     selectionIndices.clear();
     selectionIndices.reserve(noPixels - selectionSet.size());
 
-    for (int i = 0; i < noPixels; i++) {
+    for (std::uint32_t i = 0; i < noPixels; i++) {
         if (selectionSet.find(i) == selectionSet.end())
             selectionIndices.push_back(i);
     }

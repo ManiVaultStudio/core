@@ -21,7 +21,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class ImagePreviewAction : public WidgetAction, public hdps::EventListener
+class ImagePreviewAction : public WidgetAction, public EventListener
 {
     Q_OBJECT
 

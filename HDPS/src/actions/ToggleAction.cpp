@@ -116,8 +116,10 @@ ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* 
         if (widgetFlags & WidgetFlag::Text)
             setText(_toggleAction->text());
 
-        if (widgetFlags & WidgetFlag::Icon)
+        if (widgetFlags & WidgetFlag::Icon) {
             setIcon(_toggleAction->icon());
+            setProperty("class", "square-button");
+        }
 
         setChecked(_toggleAction->isChecked());
         setToolTip(_toggleAction->toolTip());

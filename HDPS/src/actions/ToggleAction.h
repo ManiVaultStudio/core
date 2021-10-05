@@ -24,6 +24,7 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
+
         /** Push button options */
         Icon                = 0x00001,                      /** Enable push button icon */
         Text                = 0x00002,                      /** Enable push button text */
@@ -33,9 +34,9 @@ public:
         ResetPushButton     = 0x00010,                      /** The widget includes a reset push button */
 
         /** Push button configurations */
-        PushButtonIcon      = (PushButton & ~Text) | Icon,  /** Push button with icon only */
-        PushButtonText      = PushButton,                   /** Push button with text only */
-        PushButtonIconText  = PushButton | Icon             /** Push button with icon and text */
+        PushButtonIcon          = (PushButton & ~Text) | Icon,  /** Push button with icon only */
+        PushButtonText          = PushButton,                   /** Push button with text only */
+        PushButtonIconText      = PushButton | Icon             /** Push button with icon and text */
     };
 
 public:

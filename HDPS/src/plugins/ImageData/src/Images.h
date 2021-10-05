@@ -79,8 +79,20 @@ public: // Image retrieval functions
     /** Get the source rectangle */
     QRect getSourceRectangle() const;
 
+    /**
+     * Set the source rectangle
+     * @param sourceRectangle Source rectangle
+     */
+    void setSourceRectangle(const QRect& sourceRectangle);
+
     /** Get the target rectangle */
     QRect getTargetRectangle() const;
+
+    /**
+     * Set the target rectangle
+     * @param targetRectangle Target rectangle
+     */
+    void setTargetRectangle(const QRect& targetRectangle);
 
     /** Gets the number of components per pixel */
     std::uint32_t getNumberOfComponentsPerPixel() const;
@@ -91,8 +103,8 @@ public: // Image retrieval functions
      */
     void setNumberOfComponentsPerPixel(const std::uint32_t& numberOfComponentsPerPixel);
 
-    /** Gets the image file paths */
-    QStringList imageFilePaths() const;
+    /** Get the image file paths */
+    QStringList getImageFilePaths() const;
 
     /**
      * Sets the image file paths
