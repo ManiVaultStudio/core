@@ -75,29 +75,19 @@ public:
     /** Get the image size */
     QSize getImageSize() const;
 
-    /**
-     * Sets the image size
-     * @param imageSize Size of the image(s)
-     */
-    void setImageSize(const QSize& imageSize);
-
     /** Get the source rectangle */
     QRect getSourceRectangle() const;
-
-    /**
-     * Set the source rectangle
-     * @param sourceRectangle Source rectangle
-     */
-    void setSourceRectangle(const QRect& sourceRectangle);
 
     /** Get the target rectangle */
     QRect getTargetRectangle() const;
 
     /**
-     * Set the target rectangle
-     * @param targetRectangle Target rectangle
+     * Set the image geometry
+     * @param sourceImageSize Size of the source image(s)
+     * @param targetImageSize Size of the target image(s)
+     * @param imageOffset Offset of the image(s)
      */
-    void setTargetRectangle(const QRect& targetRectangle);
+    void setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize = QSize(), const QPoint& imageOffset = QPoint());
 
     /** Gets the number of components per pixel */
     std::uint32_t getNumberOfComponentsPerPixel() const;
@@ -135,7 +125,7 @@ public:
 private:
     Type                _type;                          /** Image collection type e.g. stack or sequence */
     std::uint32_t       _numberOfImages;                /** Number of images in the set */
-    QSize               _imageSize;                     /** Image size */
+    QPoint              _imageOffset;                   /** Image offset */
     QRect               _sourceRectangle;               /** Source image rectangle */
     QRect               _targetRectangle;               /** Target image rectangle */
     std::uint32_t       _numberOfComponentsPerPixel;    /** Number of components per pixel */
@@ -147,9 +137,8 @@ class ImageDataFactory : public hdps::plugin::RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "hdps.ImageData"
-                      FILE  "ImageData.json")
-    
+    Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData" FILE "ImageData.json")
+
 public:
     ImageDataFactory() {}
     ~ImageDataFactory() override {}

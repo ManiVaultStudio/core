@@ -65,19 +65,9 @@ QSize Images::getImageSize() const
     return _imageData->getImageSize();
 }
 
-void Images::setImageSize(const QSize& imageSize)
-{
-    _imageData->setImageSize(imageSize);
-}
-
 QRect Images::getSourceRectangle() const
 {
     return _imageData->getSourceRectangle();
-}
-
-void Images::setSourceRectangle(const QRect& sourceRectangle)
-{
-    _imageData->setSourceRectangle(sourceRectangle);
 }
 
 QRect Images::getTargetRectangle() const
@@ -85,9 +75,9 @@ QRect Images::getTargetRectangle() const
     return _imageData->getTargetRectangle();
 }
 
-void Images::setTargetRectangle(const QRect& targetRectangle)
+void Images::setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize /*= QSize()*/, const QPoint& imageOffset /*= QPoint()*/)
 {
-    _imageData->setTargetRectangle(targetRectangle);
+    _imageData->setImageGeometry(sourceImageSize, targetImageSize, imageOffset);
 }
 
 std::uint32_t Images::getNumberOfComponentsPerPixel() const
@@ -232,12 +222,6 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
 {
-    QSize sourceImageSize = getImageSize(), targetImageSize;
-
-    // Establish target image size based on sub-sampling
-    targetImageSize.setWidth(static_cast<int>(floorf(sourceImageSize.width() / subsample)));
-    targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height() / subsample)));
-
     // Get reference to input points dataset
     auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
 
@@ -256,18 +240,20 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         });
     }
     else {
-        points.visitSourceData([this, dimensionIndex, &scalarData, subsample, sourceImageSize, targetImageSize](auto pointData) {
+        points.visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
+
+            // Cache the target rectangle
+            const auto targetRectangle = getTargetRectangle();
 
             // Populate scalar data vector with pixel data
-            for (std::int32_t pixelX = 0; pixelX < targetImageSize.width(); pixelX++) {
-                for (std::int32_t pixelY = 0; pixelY < targetImageSize.height(); pixelY++) {
+            for (std::int32_t pixelX = targetRectangle.left(); pixelX < targetRectangle.right(); pixelX++) {
+                for (std::int32_t pixelY = targetRectangle.top(); pixelY < targetRectangle.bottom(); pixelY++) {
 
-                    // Compute the source and target pixel index
-                    const auto sourcePixelIndex = (pixelY * subsample) * sourceImageSize.width() + (pixelX * subsample);
-                    const auto targetPixelIndex = pixelY * targetImageSize.width() + pixelX;
+                    // Compute the target pixel index
+                    const auto targetPixelIndex = (pixelY - targetRectangle .top()) * targetRectangle.width() + (pixelX - targetRectangle.left());
 
                     // And assign the scalar data
-                    scalarData[targetPixelIndex] = pointData[sourcePixelIndex][dimensionIndex];
+                    scalarData[targetPixelIndex] = pointData[targetPixelIndex][dimensionIndex];
                 }
             }
         });

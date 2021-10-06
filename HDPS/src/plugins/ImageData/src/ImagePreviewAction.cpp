@@ -158,6 +158,8 @@ QImage ImagePreviewAction::getPreviewImage(const std::uint32_t& dimensionIndex)
     catch (...) {
         exceptionMessageBox("Unable to get preview image");
     }
+
+    return QImage();
 }
 
 ImagePreviewAction::Widget::Widget(QWidget* parent, ImagePreviewAction* imagePreviewAction, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state) :

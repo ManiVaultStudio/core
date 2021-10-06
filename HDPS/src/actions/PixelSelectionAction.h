@@ -54,6 +54,12 @@ public:
     /** Set allowed pixel selection types */
     void setAllowedTypes(const util::PixelSelectionTypes& pixelSelectionTypes);
 
+    /**
+     * Enables/disables shortcuts
+     * @param shortcutsEnabled Whether shortcuts are enabled or not
+     */
+    void setShortcutsEnabled(const bool& shortcutsEnabled);
+
 protected:
 
     /** Perform selection overlay initialization */

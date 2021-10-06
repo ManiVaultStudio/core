@@ -70,29 +70,19 @@ public: // Image retrieval functions
     /** Gets the size of the images */
     QSize getImageSize() const;
 
-    /**
-     * Sets the image size
-     * @param imageSize Size of the image(s)
-     */
-    void setImageSize(const QSize& imageSize);
-
     /** Get the source rectangle */
     QRect getSourceRectangle() const;
-
-    /**
-     * Set the source rectangle
-     * @param sourceRectangle Source rectangle
-     */
-    void setSourceRectangle(const QRect& sourceRectangle);
 
     /** Get the target rectangle */
     QRect getTargetRectangle() const;
 
     /**
-     * Set the target rectangle
-     * @param targetRectangle Target rectangle
+     * Set the image geometry
+     * @param sourceImageSize Size of the source image(s)
+     * @param targetImageSize Size of the target image(s)
+     * @param imageOffset Offset of the image(s)
      */
-    void setTargetRectangle(const QRect& targetRectangle);
+    void setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize = QSize(), const QPoint& imageOffset = QPoint());
 
     /** Gets the number of components per pixel */
     std::uint32_t getNumberOfComponentsPerPixel() const;

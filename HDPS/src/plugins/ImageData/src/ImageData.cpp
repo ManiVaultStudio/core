@@ -2,17 +2,21 @@
 #include "Images.h"
 #include "Application.h"
 
+#include "util/Exception.h"
+
 #include <QDebug>
 
 #include <stdexcept>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.ImageData")
+Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData")
+
+using namespace hdps::util;
 
 ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :
     hdps::plugin::RawData(factory, ImageType),
     _type(Type::Undefined),
     _numberOfImages(0),
-    _imageSize(),
+    _imageOffset(),
     _sourceRectangle(),
     _targetRectangle(),
     _numberOfComponentsPerPixel(0),
@@ -37,15 +41,7 @@ void ImageData::setType(const ImageData::Type& type)
 
 QSize ImageData::getImageSize() const
 {
-    return _imageSize;
-}
-
-void ImageData::setImageSize(const QSize& imageSize)
-{
-    _imageSize = imageSize;
-
-    _sourceRectangle = QRect(QPoint(), imageSize);
-    _targetRectangle = QRect(QPoint(), imageSize);
+    return _targetRectangle.size();
 }
 
 QRect ImageData::getSourceRectangle() const
@@ -53,19 +49,34 @@ QRect ImageData::getSourceRectangle() const
     return _sourceRectangle;
 }
 
-void ImageData::setSourceRectangle(const QRect& sourceRectangle)
-{
-    _sourceRectangle = sourceRectangle;
-}
-
 QRect ImageData::getTargetRectangle() const
 {
     return _targetRectangle;
 }
 
-void ImageData::setTargetRectangle(const QRect& targetRectangle)
+void ImageData::setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize /*= QSize()*/, const QPoint& imageOffset /*= QPoint()*/)
 {
-    _targetRectangle = targetRectangle;
+    try
+    {
+        // Except when the target image size exceeds the source image size
+        if (targetImageSize.width() > sourceImageSize.width() || targetImageSize.height() > sourceImageSize.height())
+            throw std::runtime_error("Target image size may not be larger than source image size");
+
+        // Compute source and target rectangles
+        _sourceRectangle = QRect(QPoint(), sourceImageSize);
+        _targetRectangle = targetImageSize.isValid() ? QRect(imageOffset, targetImageSize) : _sourceRectangle;
+
+        // Except when the target rectangle exceeds the source rectangle boundaries
+        if (!_sourceRectangle.contains(_targetRectangle.topLeft()) || !_sourceRectangle.contains(_targetRectangle.bottomRight()))
+            throw std::runtime_error("Target image rectangle exceeds source rectangle boundaries");
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to set image geometry", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to set image geometry");
+    }
 }
 
 std::uint32_t ImageData::getNumberOfComponentsPerPixel() const

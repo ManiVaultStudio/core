@@ -45,6 +45,8 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidge
     initOperations();
     initMiscellaneous();
 
+    setShortcutsEnabled(true);
+
     _targetWidget->installEventFilter(this);
 }
 
@@ -68,6 +70,38 @@ void PixelSelectionAction::setAllowedTypes(const util::PixelSelectionTypes& pixe
     _pixelSelectionTypes = pixelSelectionTypes;
 }
 
+void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
+{
+    if (shortcutsEnabled) {
+        _targetWidget->addAction(&_rectangleAction);
+        _targetWidget->addAction(&_brushAction);
+        _targetWidget->addAction(&_lassoAction);
+        _targetWidget->addAction(&_polygonAction);
+        _targetWidget->addAction(&_sampleAction);
+        _targetWidget->addAction(&_modifierAddAction);
+        _targetWidget->addAction(&_modifierSubtractAction);
+        _targetWidget->addAction(&_clearSelectionAction);
+        _targetWidget->addAction(&_selectAllAction);
+        _targetWidget->addAction(&_invertSelectionAction);
+        _targetWidget->addAction(&_brushRadiusAction);
+        _targetWidget->addAction(&_notifyDuringSelectionAction);
+    }
+    else {
+        _targetWidget->removeAction(&_rectangleAction);
+        _targetWidget->removeAction(&_brushAction);
+        _targetWidget->removeAction(&_lassoAction);
+        _targetWidget->removeAction(&_polygonAction);
+        _targetWidget->removeAction(&_sampleAction);
+        _targetWidget->removeAction(&_modifierAddAction);
+        _targetWidget->removeAction(&_modifierSubtractAction);
+        _targetWidget->removeAction(&_clearSelectionAction);
+        _targetWidget->removeAction(&_selectAllAction);
+        _targetWidget->removeAction(&_invertSelectionAction);
+        _targetWidget->removeAction(&_brushRadiusAction);
+        _targetWidget->removeAction(&_notifyDuringSelectionAction);
+    }
+}
+
 void PixelSelectionAction::initOverlay()
 {
     _overlayOpacity.setSuffix("%");
@@ -85,23 +119,17 @@ void PixelSelectionAction::initType()
     _polygonAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _sampleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
-    _rectangleAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Rectangle));
-    _brushAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Brush));
-    _lassoAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Lasso));
-    _polygonAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Polygon));
-    _sampleAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Sample));
-
-    targetWidget->addAction(&_rectangleAction);
-    targetWidget->addAction(&_brushAction);
-    targetWidget->addAction(&_lassoAction);
-    targetWidget->addAction(&_polygonAction);
-    targetWidget->addAction(&_sampleAction);
-
     _rectangleAction.setShortcut(QKeySequence("R"));
     _brushAction.setShortcut(QKeySequence("B"));
     _lassoAction.setShortcut(QKeySequence("L"));
     _polygonAction.setShortcut(QKeySequence("P"));
     _sampleAction.setShortcut(QKeySequence("S"));
+
+    _rectangleAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Rectangle));
+    _brushAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Brush));
+    _lassoAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Lasso));
+    _polygonAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Polygon));
+    _sampleAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Sample));
 
     _rectangleAction.setToolTip("Select pixels inside a rectangle (R)");
     _brushAction.setToolTip("Select pixels using a brush tool (B)");
@@ -172,9 +200,6 @@ void PixelSelectionAction::initModifier()
     _modifierAddAction.setDefaultWidgetFlags(ToggleAction::PushButton);
     _modifierSubtractAction.setDefaultWidgetFlags(ToggleAction::PushButton);
 
-    _targetWidget->addAction(&_modifierAddAction);
-    _targetWidget->addAction(&_modifierSubtractAction);
-
     _modifierAddAction.setCheckable(true);
     _modifierSubtractAction.setCheckable(true);
 
@@ -213,10 +238,6 @@ void PixelSelectionAction::initOperations()
     _selectAllAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _invertSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
-    _targetWidget->addAction(&_clearSelectionAction);
-    _targetWidget->addAction(&_selectAllAction);
-    _targetWidget->addAction(&_invertSelectionAction);
-
     _clearSelectionAction.setShortcut(QKeySequence("E"));
     _selectAllAction.setShortcut(QKeySequence("A"));
     _invertSelectionAction.setShortcut(QKeySequence("I"));
@@ -224,18 +245,6 @@ void PixelSelectionAction::initOperations()
     _clearSelectionAction.setToolTip("Clears the selection (E)");
     _selectAllAction.setToolTip("Select all data points (A)");
     _invertSelectionAction.setToolTip("Invert the selection (I)");
-
-    const auto updateSelectionButtons = [this]() {
-        //_clearSelectionAction.setEnabled(_scatterplotPlugin->canClearSelection());
-        //_selectAllAction.setEnabled(_scatterplotPlugin->canSelectAll());
-        //_invertSelectionAction.setEnabled(_scatterplotPlugin->canInvertSelection());
-    };
-
-    //connect(_scatterplotPlugin, qOverload<>(&ScatterplotPlugin::selectionChanged), this, [this, updateSelectionButtons]() {
-    //    updateSelectionButtons();
-    //});
-
-    updateSelectionButtons();
 }
 
 void PixelSelectionAction::initMiscellaneous()
@@ -243,9 +252,6 @@ void PixelSelectionAction::initMiscellaneous()
     _notifyDuringSelectionAction.setDefaultWidgetFlags(ToggleAction::CheckBox);
 
     _notifyDuringSelectionAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-
-    _targetWidget->addAction(&_brushRadiusAction);
-    _targetWidget->addAction(&_notifyDuringSelectionAction);
 
     _notifyDuringSelectionAction.setShortcut(QKeySequence("U"));
 
