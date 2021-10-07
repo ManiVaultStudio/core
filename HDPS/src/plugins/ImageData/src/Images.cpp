@@ -100,16 +100,6 @@ void Images::setImageFilePaths(const QStringList& imageFilePaths)
     _imageData->setImageFilePaths(imageFilePaths);
 }
 
-QStringList Images::getDimensionNames() const
-{
-    return _imageData->getDimensionNames();
-}
-
-void Images::setDimensionNames(const QStringList& dimensionNames)
-{
-    _imageData->setDimensionNames(dimensionNames);
-}
-
 std::uint32_t Images::getNumberOfPixels() const
 {
     return getImageSize().width() * getImageSize().height();
@@ -225,21 +215,34 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
     // Get reference to input points dataset
     auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
 
+    // Treat derived and non-derived separately
     if (points.isDerivedData()) {
+
+        // Visit derived points dataset
         points.visitData([this, &points, dimensionIndex, &scalarData](auto pointData) {
+
+            // Get reference to source data
             auto& sourceData = points.getSourceData<Points>(points);
 
             if (sourceData.isFull()) {
-                for (std::uint32_t i = 0; i < points.getNumPoints(); i++)
-                    scalarData[i] = pointData[i][dimensionIndex];
+
+                // Populate from full dataset
+                for (std::uint32_t pixelIndex = 0; pixelIndex < points.getNumPoints(); pixelIndex++)
+                    if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
+                        scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
             }
             else {
-                for (int i = 0; i < sourceData.indices.size(); i++)
-                    scalarData[sourceData.indices[i]] = pointData[i][dimensionIndex];
+
+                // Populate from partial dataset
+                for (std::int32_t pixelIndex = 0; pixelIndex < sourceData.indices.size(); pixelIndex++)
+                    if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
+                        scalarData[sourceData.indices[pixelIndex]] = pointData[pixelIndex][dimensionIndex];
             }
         });
     }
     else {
+
+        // Visit derived points dataset
         points.visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
 
             // Cache the target rectangle
@@ -253,7 +256,8 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                     const auto targetPixelIndex = (pixelY - targetRectangle .top()) * targetRectangle.width() + (pixelX - targetRectangle.left());
 
                     // And assign the scalar data
-                    scalarData[targetPixelIndex] = pointData[targetPixelIndex][dimensionIndex];
+                    if (targetPixelIndex < scalarData.count() && targetPixelIndex < pointData.size())
+                        scalarData[targetPixelIndex] = pointData[targetPixelIndex][dimensionIndex];
                 }
             }
         });

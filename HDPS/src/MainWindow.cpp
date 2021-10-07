@@ -351,7 +351,7 @@ void MainWindow::initializeSettingsDockingArea()
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
     _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataPropertiesDockWidget, _settingsDockArea);
 
-    _settingsDockArea->setMinimumWidth(400);
+    _settingsDockArea->setMinimumWidth(500);
 }
 
 void MainWindow::initializeLoggingDockingArea()

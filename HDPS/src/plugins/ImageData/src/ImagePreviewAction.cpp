@@ -20,6 +20,7 @@ ImagePreviewAction::ImagePreviewAction(QObject* parent, const QString& datasetNa
     _previewImageSize(),
     _subsamplingFactor(1)
 {
+    /*
     setText("Image preview");
     setEventCore(Application::core());
 
@@ -95,6 +96,7 @@ ImagePreviewAction::ImagePreviewAction(QObject* parent, const QString& datasetNa
     connect(&_currentImageNameAction, &OptionAction::currentIndexChanged, this, updatePreviewImageAction);
     connect(&_windowLevelAction.getWindowAction(), &DecimalAction::valueChanged, this, updatePreviewImageAction);
     connect(&_windowLevelAction.getLevelAction(), &DecimalAction::valueChanged, this, updatePreviewImageAction);
+    */
 }
 
 float ImagePreviewAction::getAspectRatio() const

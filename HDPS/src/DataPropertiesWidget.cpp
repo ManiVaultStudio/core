@@ -32,6 +32,10 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
         loadDataset();
     });
 
+    connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this](const QString& oldDatasetName, const QString& newDatasetName) {
+        loadDataset();
+    });
+
     emit datasetNameChanged("");
 }
 
@@ -67,8 +71,10 @@ void DataPropertiesWidget::loadDataset()
 {
     emit datasetNameChanged(_dataset.getDatasetName());
 
-    if (!_dataset.isValid())
+    if (!_dataset.isValid()) {
+        _groupsAction.set(QVector<GroupAction*>());
         return;
+    }
 
     GroupsAction::GroupActions groupActions;
 

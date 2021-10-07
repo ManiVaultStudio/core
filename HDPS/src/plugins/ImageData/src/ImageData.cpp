@@ -2,6 +2,9 @@
 #include "Images.h"
 #include "Application.h"
 
+#include "PointData.h"
+#include "DataHierarchyItem.h"
+
 #include "util/Exception.h"
 
 #include <QDebug>
@@ -97,16 +100,6 @@ QStringList ImageData::getImageFilePaths() const
 void ImageData::setImageFilePaths(const QStringList& imageFilePaths)
 {
     _imageFilePaths = imageFilePaths;
-}
-
-const QStringList& ImageData::getDimensionNames() const
-{
-    return _dimensionNames;
-}
-
-void ImageData::setDimensionNames(const QStringList& dimensionNames)
-{
-    _dimensionNames = dimensionNames;
 }
 
 std::uint32_t ImageData::getNumberOfImages() const

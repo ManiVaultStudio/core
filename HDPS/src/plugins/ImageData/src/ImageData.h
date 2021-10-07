@@ -107,15 +107,6 @@ public:
      */
     void setImageFilePaths(const QStringList& imageFilePaths);
 
-    /** Gets the dimension names (the image names) */
-    const QStringList& getDimensionNames() const;
-
-    /**
-     * Sets the dimension names
-     * @param dimensionNames Dimension names
-     */
-    void setDimensionNames(const QStringList& dimensionNames);
-
     /**
      * Create images dataset
      * @return Pointer to dataset

@@ -102,15 +102,6 @@ public: // Image retrieval functions
      */
     void setImageFilePaths(const QStringList& imageFilePaths);
 
-    /** Gets the dimension names (the image names) */
-    QStringList getDimensionNames() const;
-
-    /**
-     * Sets the dimension names
-     * @param dimensionNames Dimension names
-     */
-    void setDimensionNames(const QStringList& dimensionNames);
-
     /** Returns the number of pixels in total */
     std::uint32_t getNumberOfPixels() const;
 
