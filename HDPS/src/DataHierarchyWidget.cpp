@@ -41,7 +41,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     setItemsExpandable(true);
     setColumnHidden(2, true);
 
-    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Name), 250);
+    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Name), 180);
     //header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description), 100);
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress), 50);
     header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing), 20);
