@@ -164,6 +164,44 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     setToolTips();
 }
 
+IntegralAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralAction* integralAction) :
+    QLineEdit(parent)
+{
+    setAcceptDrops(true);
+    setObjectName("LineEdit");
+
+    connect(this, &QLineEdit::textChanged, this, [this, integralAction](const QString& value) {
+        integralAction->setValue(text().toInt());
+    });
+
+    const auto valueString = [](const std::int32_t& value) -> QString {
+        return QString::number(value);
+
+    };
+    const auto setToolTips = [this, integralAction, valueString]() {
+        setToolTip(QString("%1: %2%3").arg(integralAction->text(), valueString(integralAction->getValue()), integralAction->getSuffix()));
+    };
+
+    const auto onUpdateValue = [this, integralAction, setToolTips]() {
+        const auto actionValue = integralAction->getValue();
+
+        if (actionValue == text().toInt())
+            return;
+
+        QSignalBlocker blocker(this);
+
+        setText(QString::number(integralAction->getValue()));
+
+        setToolTips();
+    };
+
+    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
+        onUpdateValue();
+    });
+
+    onUpdateValue();
+}
+
 QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
 {
     auto widget = new WidgetActionWidget(parent, this, state);
@@ -176,6 +214,9 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
 
     if (widgetFlags & WidgetFlag::Slider)
         layout->addWidget(new SliderWidget(parent, this), 2);
+
+    if (widgetFlags & WidgetFlag::LineEdit)
+        layout->addWidget(new LineEditWidget(parent, this));
 
     if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));

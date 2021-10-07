@@ -35,7 +35,8 @@ public:
     enum WidgetFlag {
         SpinBox             = 0x00001,      /** Widget includes a spin box */
         Slider              = 0x00002,      /** Widget includes a slider */
-        ResetPushButton     = 0x00004,      /** Widget includes a reset push button */
+        LineEdit            = 0x00004,      /** Widget includes a line edit */
+        ResetPushButton     = 0x00008,      /** Widget includes a reset push button */
 
         Basic               = SpinBox | Slider,
         SpinBoxAndReset     = SpinBox | ResetPushButton,
