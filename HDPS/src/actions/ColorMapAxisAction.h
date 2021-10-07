@@ -56,6 +56,9 @@ protected:
      */
     ColorMapAxisAction(ColorMapAction& colorMapAction, const QString& title);
 
+    /** Determines whether the current color can be reset to its default */
+    bool isResettable() const override;
+
     /** Reset to default */
     void reset() override;
 

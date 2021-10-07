@@ -31,6 +31,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 
     const auto notifyColorMapImageChanged = [this]() -> void {
         emit imageChanged(getColorMapImage());
+        setResettable(isResettable());
     };
 
     connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, notifyColorMapImageChanged);
@@ -39,9 +40,12 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     connect(&_settingsAction.getDiscreteAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
     connect(&_settingsAction.getDiscreteAction().getNumberOfStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
 
-    connect(&_currentColorMapAction, &OptionAction::resettableChanged, this, [this](const bool& resettable) {
+    const auto updateResettable = [this]() {
         setResettable(isResettable());
-    });
+    };
+
+    connect(&_currentColorMapAction, &OptionAction::resettableChanged, this, updateResettable);
+    connect(&_settingsAction, &ColorMapSettingsAction::resettableChanged, this, updateResettable);
 }
 
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
@@ -54,12 +58,13 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
 
 bool ColorMapAction::isResettable() const
 {
-    return _currentColorMapAction.isResettable();
+    return _currentColorMapAction.isResettable() | _settingsAction.isResettable();
 }
 
 void ColorMapAction::reset()
 {
     _currentColorMapAction.reset();
+    _settingsAction.reset();
 }
 
 hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
@@ -250,6 +255,14 @@ ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* op
 {
     setObjectName("ComboBox");
 
+    // Make text color transparent
+    QPalette palette = this->palette();
+    palette.setColor(QPalette::Text, QColor(0, 0, 0, 0));
+    
+    // Asign palette
+    setPalette(palette);
+
+    // Paint the control when the color map image changes
     connect(colorMapAction, &ColorMapAction::imageChanged, this, [this](const QImage& colorMapImage) {
         update();
     });
@@ -305,9 +318,9 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     colorMapPixMapBrush.setTransform(QTransform::fromTranslate(margin, margin));
 
     // Do the painting
-    painter.setPen(QPen(penColor, 2, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painter.setPen(QPen(penColor, 1.5, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
     painter.setBrush(colorMapPixMapBrush);
-    painter.drawRoundedRect(colorMapRectangle, 5, 5);
+    painter.drawRoundedRect(colorMapRectangle, 4, 4);
 
     QPainter painterColorWidget(this);
 

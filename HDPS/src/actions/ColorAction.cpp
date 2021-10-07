@@ -156,8 +156,8 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
 
     // Do the painting
     painterColorPixmap.setBrush(QBrush(color));
-    painterColorPixmap.setPen(QPen(penColor, 2.0, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
-    painterColorPixmap.drawRoundedRect(colorRect, 5, 5);
+    painterColorPixmap.setPen(QPen(penColor, 1.5, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painterColorPixmap.drawRoundedRect(colorRect, 4, 4);
 
     QPainter painterColorWidget(this);
 

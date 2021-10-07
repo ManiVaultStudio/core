@@ -33,12 +33,24 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
 
     connect(&colorMapAction, &ColorMapAction::typeChanged, this, updateRangeActions);
 
+    const auto updateResettable = [this]() {
+        setResettable(isResettable());
+    };
+
+    connect(&_horizontalAxisAction, &ColorMapAxisAction::resettableChanged, this, updateResettable);
+    connect(&_verticalAxisAction, &ColorMapAxisAction::resettableChanged, this, updateResettable);
+    connect(&_discreteAction, &ColorMapDiscreteAction::resettableChanged, this, updateResettable);
+
     updateRangeActions();
+}
+
+bool ColorMapSettingsAction::isResettable() const
+{
+    return _horizontalAxisAction.isResettable() | _verticalAxisAction.isResettable() | _discreteAction.isResettable();
 }
 
 void ColorMapSettingsAction::reset()
 {
-    _colorMapAction.reset();
     _horizontalAxisAction.reset();
     _verticalAxisAction.reset();
     _discreteAction.reset();

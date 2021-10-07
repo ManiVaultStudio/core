@@ -36,6 +36,18 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapAction& colorMapAction, const QSt
     connect(&_rangeAction, &DecimalRangeAction::resettableChanged, this, update);
 
     update();
+
+    const auto updateResettable = [this]() {
+        setResettable(isResettable());
+    };
+
+    connect(&_rangeAction, &DecimalRangeAction::resettableChanged, this, updateResettable);
+    connect(&_mirrorAction, &ToggleAction::resettableChanged, this, updateResettable);
+}
+
+bool ColorMapAxisAction::isResettable() const
+{
+    return _rangeAction.isResettable() | _mirrorAction.isResettable();
 }
 
 void ColorMapAxisAction::reset()
