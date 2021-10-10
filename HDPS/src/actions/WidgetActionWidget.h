@@ -19,6 +19,13 @@ class WidgetActionWidget : public QWidget
 {
 public:
 
+    /** Reserved widget settings */
+    enum WidgetFlag {
+        PopupLayout = 0x00100,      /** Widget with popup layout */
+    };
+
+public:
+
     /** Widget states */
     enum State {
         Standard,   /** Standard representation of the action (default) */

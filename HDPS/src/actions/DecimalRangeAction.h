@@ -19,13 +19,6 @@ class DecimalRangeAction : public WidgetAction
 
 public:
 
-    /** Describes the widget settings */
-    enum WidgetFlag {
-        Popup = 0x00001,      /** Widget with popup layout */
-    };
-
-public:
-
     /** Widget class for decimal range action */
     class DecimalRangeWidget : public WidgetActionWidget
     {

@@ -230,9 +230,9 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     updateToolTip();
 }
 
-QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = new WidgetActionWidget(parent, this, state);
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);

@@ -81,7 +81,7 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
     auto rangeMaxSpinBoxWidget  = decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox);
     auto rangeMaxSliderWidget   = decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::Slider);
 
-    if (widgetFlags & Popup) {
+    if (widgetFlags & PopupLayout) {
         auto layout = new QHBoxLayout();
 
         layout->setMargin(0);
