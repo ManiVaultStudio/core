@@ -45,9 +45,8 @@ public:
          * @param parent Pointer to parent widget
          * @param optionAction Pointer to option action
          * @param colorMapAction Pointer to color map action
-         * @param state State of the widget
          */
-        ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state);
+        ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction);
 
         /**
          * Paint event to override default paint
@@ -67,9 +66,8 @@ protected:
      * Get widget representation of the color map action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
-     * @param state State of the widget (for stateful widgets)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 

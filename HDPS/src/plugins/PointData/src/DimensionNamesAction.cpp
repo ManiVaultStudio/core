@@ -89,8 +89,8 @@ QStringList DimensionNamesAction::getDimensionNames() const
     return _dimensionNames;
 }
 
-DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction, const hdps::gui::WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, dimensionNamesAction, state)
+DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction) :
+    WidgetActionWidget(parent, dimensionNamesAction)
 {
     auto layout     = new QHBoxLayout();
     auto listView   = new QListView();

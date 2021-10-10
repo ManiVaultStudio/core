@@ -80,8 +80,8 @@ FilterAndSelectAction::FilterAndSelectAction(QObject* parent, ClustersFilterMode
     updateNameFilter();
 }
 
-FilterAndSelectAction::Widget::Widget(QWidget* parent, FilterAndSelectAction* filterAndSelectAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, filterAndSelectAction, state)
+FilterAndSelectAction::Widget::Widget(QWidget* parent, FilterAndSelectAction* filterAndSelectAction) :
+    WidgetActionWidget(parent, filterAndSelectAction)
 {
     auto mainLayout = new QHBoxLayout();
 

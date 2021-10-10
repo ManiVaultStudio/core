@@ -172,9 +172,9 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     setToolTips();
 }
 
-QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = new WidgetActionWidget(parent, this, state);
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);

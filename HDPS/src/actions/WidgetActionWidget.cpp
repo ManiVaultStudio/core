@@ -4,18 +4,15 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QGroupBox>
-#include <QDrag>
-#include <QMimeData>
-#include <QMouseEvent>
 
 namespace hdps {
 
 namespace gui {
 
-WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const State& state) :
+WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& widgetFlags /*= 0*/) :
     QWidget(parent),
     _widgetAction(widgetAction),
-    _state(state)
+    _widgetFlags(widgetFlags)
 {
     // Update basic widget settings when the action changes
     const auto update = [this, widgetAction]() -> void {

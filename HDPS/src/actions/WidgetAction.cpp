@@ -23,15 +23,12 @@ WidgetAction::WidgetAction(QObject* parent) :
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    if (parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent()))
-        return getWidget(parent, _defaultWidgetFlags, WidgetActionWidget::State::Popup);
-
-    return getWidget(parent, _defaultWidgetFlags, WidgetActionWidget::State::Standard);
+    return getWidget(parent, _defaultWidgetFlags);
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    return getWidget(parent, widgetFlags, WidgetActionWidget::State::Standard);
+    return getWidget(parent, widgetFlags);
 }
 
 bool WidgetAction::getMayReset() const
@@ -115,7 +112,7 @@ QString WidgetAction::getContext() const
     return _context;
 }
 
-QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     return new QWidget();
 }

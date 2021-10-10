@@ -34,19 +34,17 @@ protected:
          * Constructor
          * @param parent Pointer to parent widget
          * @param dimensionNamesAction Pointer to dimension names action
-         * @param state State of the widget
          */
-        Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction, const hdps::gui::WidgetActionWidget::State& state);
+        Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction);
     };
 
     /**
      * Get widget representation of the dimension names action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
-     * @param state State of the widget (for stateful widgets)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const hdps::gui::WidgetActionWidget::State& state = hdps::gui::WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this);
     };
 
 public:

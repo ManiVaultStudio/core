@@ -164,11 +164,9 @@ QImage ImagePreviewAction::getPreviewImage(const std::uint32_t& dimensionIndex)
     return QImage();
 }
 
-ImagePreviewAction::Widget::Widget(QWidget* parent, ImagePreviewAction* imagePreviewAction, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, imagePreviewAction, state)
+ImagePreviewAction::Widget::Widget(QWidget* parent, ImagePreviewAction* imagePreviewAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, imagePreviewAction)
 {
-    //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
     auto mainLayout     = new QVBoxLayout();
     auto toolbarLayout  = new QHBoxLayout();
 

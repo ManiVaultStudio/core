@@ -29,19 +29,17 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param colorMapViewAction Pointer to color map view action
-         * @param state State of the widget
          */
-        Widget(QWidget* parent, ColorMapViewAction* colorMapViewAction, const WidgetActionWidget::State& state);
+        Widget(QWidget* parent, ColorMapViewAction* colorMapViewAction);
     };
 
     /**
      * Get widget representation of the color map view action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
-     * @param state State of the widget (for stateful widgets)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this);
     };
 
 protected:

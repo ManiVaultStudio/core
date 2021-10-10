@@ -249,7 +249,7 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     setResettable(isResettable());
 }
 
-ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state) :
+ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction) :
     OptionAction::ComboBoxWidget(parent, optionAction),
     _colorMapAction(colorMapAction)
 {
@@ -328,15 +328,15 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
-QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = new WidgetActionWidget(parent, this, state);
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(3);
 
-    auto comboBoxWidget = new ComboBoxWidget(parent, &_currentColorMapAction, this, state);
+    auto comboBoxWidget = new ComboBoxWidget(parent, &_currentColorMapAction, this);
 
     layout->addWidget(comboBoxWidget);
 

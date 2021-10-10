@@ -56,8 +56,8 @@ void ColorMapAxisAction::reset()
     _mirrorAction.reset();
 }
 
-ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMapAxisAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, colorMapAxisAction, state)
+ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMapAxisAction) :
+    WidgetActionWidget(parent, colorMapAxisAction)
 {
     auto layout = new QGridLayout();
 

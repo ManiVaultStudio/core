@@ -194,8 +194,8 @@ ClustersModel& ClustersAction::getClustersModel()
     return _clustersModel;
 }
 
-ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, const hdps::gui::WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, clustersAction, state),
+ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) :
+    WidgetActionWidget(parent, clustersAction),
     _filterModel(this),
     _selectionModel(&_filterModel),
     _removeAction(this, "Remove"),

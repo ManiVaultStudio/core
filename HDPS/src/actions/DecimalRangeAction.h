@@ -19,6 +19,13 @@ class DecimalRangeAction : public WidgetAction
 
 public:
 
+    /** Describes the widget settings */
+    enum WidgetFlag {
+        Popup = 0x00001,      /** Widget with popup layout */
+    };
+
+public:
+
     /** Widget class for decimal range action */
     class DecimalRangeWidget : public WidgetActionWidget
     {
@@ -28,9 +35,9 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param decimalRangeAction Pointer to decimal range action
-         * @param state State of the widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const WidgetActionWidget::State& state);
+        DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags = 0);
 
     protected:
         friend class DecimalRangeAction;
@@ -42,10 +49,9 @@ protected:
      * Get widget representation of the decimal range action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
-     * @param state State of the widget (for stateful widgets)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new DecimalRangeWidget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new DecimalRangeWidget(parent, this);
     };
 
 public:

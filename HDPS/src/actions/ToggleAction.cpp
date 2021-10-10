@@ -133,12 +133,12 @@ ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* 
     update();
 }
 
-QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    auto widget = new WidgetActionWidget(parent, this, state);
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);

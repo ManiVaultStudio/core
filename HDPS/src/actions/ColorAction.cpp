@@ -73,7 +73,7 @@ void ColorAction::reset()
 }
 
 ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
-    WidgetActionWidget(parent, colorAction, WidgetActionWidget::State::Standard),
+    WidgetActionWidget(parent, colorAction),
     _layout(),
     _colorPickerAction(this, "Color picker", colorAction->getColor(), colorAction->getColor()),
     _toolButton(this, _colorPickerAction)
@@ -164,9 +164,9 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
-QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = new WidgetActionWidget(parent, this, state);
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);

@@ -103,7 +103,7 @@ QVector<WidgetAction*> GroupAction::getSortedWidgetActions()
 }
 
 GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
-    WidgetActionWidget(parent, groupAction, WidgetActionWidget::State::Standard),
+    WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())
 {
     _layout->setColumnStretch(0, 3);

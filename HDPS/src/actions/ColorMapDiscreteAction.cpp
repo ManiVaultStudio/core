@@ -39,8 +39,8 @@ void ColorMapDiscreteAction::reset()
     _numberOfStepsAction.reset();
 }
 
-ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, colorMapDiscreteAction, state)
+ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction) :
+    WidgetActionWidget(parent, colorMapDiscreteAction)
 {
     auto layout         = new QVBoxLayout();
     auto groupBox       = new QGroupBox();

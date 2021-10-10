@@ -114,9 +114,9 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     updatePlaceHolderText();
 }
 
-QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = new WidgetActionWidget(parent, this, state);
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);

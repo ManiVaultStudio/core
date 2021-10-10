@@ -18,8 +18,8 @@ ColorMapViewAction::ColorMapViewAction(ColorMapAction& colorMapAction) :
     setText("Preview");
 }
 
-ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMapViewAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, colorMapViewAction, state)
+ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMapViewAction) :
+    WidgetActionWidget(parent, colorMapViewAction)
 {
     auto layout = new QVBoxLayout();
 

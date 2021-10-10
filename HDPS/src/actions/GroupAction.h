@@ -50,9 +50,8 @@ public:
      * Get widget representation of the group action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
-     * @param state State of the widget (for stateful widgets)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const hdps::gui::WidgetActionWidget::State& state = hdps::gui::WidgetActionWidget::State::Standard) override {
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
         return new FormWidget(parent, this);
     };
 

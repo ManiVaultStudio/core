@@ -71,8 +71,8 @@ void DecimalRangeAction::reset()
     _rangeMaxAction.reset();
 }
 
-DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, decimalRangeAction, state)
+DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :
+    WidgetActionWidget(parent, decimalRangeAction, widgetFlags)
 {
     auto layout = new QHBoxLayout();
 
@@ -81,37 +81,26 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
     auto rangeMaxSpinBoxWidget  = decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox);
     auto rangeMaxSliderWidget   = decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::Slider);
 
-    switch (state)
-    {
-        case WidgetActionWidget::State::Standard:
-        {
-            auto layout = new QHBoxLayout();
+    if (widgetFlags & Popup) {
+        auto layout = new QHBoxLayout();
 
-            layout->setMargin(0);
-            layout->addWidget(rangeMinSpinBoxWidget);
-            layout->addWidget(rangeMinSliderWidget);
-            layout->addWidget(rangeMaxSpinBoxWidget);
-            layout->addWidget(rangeMaxSpinBoxWidget);
+        layout->setMargin(0);
+        layout->addWidget(rangeMinSpinBoxWidget);
+        layout->addWidget(rangeMinSliderWidget);
+        layout->addWidget(rangeMaxSpinBoxWidget);
+        layout->addWidget(rangeMaxSpinBoxWidget);
 
-            setLayout(layout);
-            break;
-        }
+        setLayout(layout);
+    }
+    else {
+        auto layout = new QGridLayout();
 
-        case WidgetActionWidget::State::Popup:
-        {
-            auto layout = new QGridLayout();
+        layout->addWidget(rangeMinSpinBoxWidget, 0, 0);
+        layout->addWidget(rangeMinSliderWidget, 0, 1);
+        layout->addWidget(rangeMaxSpinBoxWidget, 1, 0);
+        layout->addWidget(rangeMaxSpinBoxWidget, 1, 1);
 
-            layout->addWidget(rangeMinSpinBoxWidget, 0, 0);
-            layout->addWidget(rangeMinSliderWidget, 0, 1);
-            layout->addWidget(rangeMaxSpinBoxWidget, 1, 0);
-            layout->addWidget(rangeMaxSpinBoxWidget, 1, 1);
-
-            setPopupLayout(layout);
-            break;
-        }
-
-        default:
-            break;
+        setPopupLayout(layout);
     }
 }
 

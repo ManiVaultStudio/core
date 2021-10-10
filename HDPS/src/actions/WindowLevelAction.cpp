@@ -24,8 +24,8 @@ WindowLevelAction::WindowLevelAction(QObject* parent) :
     connect(&_levelAction, &DecimalAction::valueChanged, this, windowLevelChanged);
 }
 
-WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLevelAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, windowLevelAction, state)
+WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLevelAction) :
+    WidgetActionWidget(parent, windowLevelAction)
 {
     auto layout = new QGridLayout();
 

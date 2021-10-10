@@ -30,19 +30,17 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param colorMapDiscreteAction Pointer to color map discrete action
-         * @param state State of the widget
          */
-        Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction, const WidgetActionWidget::State& state);
+        Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction);
     };
 
     /**
      * Get widget representation of the color map discrete action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
-     * @param state State of the widget (for stateful widgets)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this);
     };
 
 protected:

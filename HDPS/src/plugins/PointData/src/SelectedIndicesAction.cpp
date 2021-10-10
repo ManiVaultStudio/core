@@ -89,8 +89,8 @@ const std::vector<std::uint32_t>& SelectedIndicesAction::getSelectedIndices() co
     return _selectedIndices;
 }
 
-SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction, const hdps::gui::WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, selectedIndicesAction, state)
+SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction) :
+    WidgetActionWidget(parent, selectedIndicesAction)
 {
     auto selectedIndicesListWidget = new QListView();
 

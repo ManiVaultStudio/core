@@ -143,11 +143,11 @@ ImageAction::LabelWidget::LabelWidget(QWidget* parent, ImageAction* imageAction)
 //    return size().width() * aspectRatio;
 //}
 
-QWidget* ImageAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* ImageAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     return new ImageAction::LabelWidget(parent, this);
 
-    auto widget = new WidgetActionWidget(parent, this, state);
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);

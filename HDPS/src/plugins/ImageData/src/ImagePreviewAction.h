@@ -37,7 +37,7 @@ public:
          * @param parent Pointer to parent widget
          * @param imagePreviewAction Pointer to image preview action
          */
-        Widget(QWidget* parent, ImagePreviewAction* imagePreviewAction, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state);
+        Widget(QWidget* parent, ImagePreviewAction* imagePreviewAction, const std::int32_t& widgetFlags);
 
     protected:
 
@@ -50,10 +50,9 @@ protected:
      * Get widget representation of the preview action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
-     * @param state State of the widget (for stateful widgets)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, widgetFlags, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
     };
 
 public:

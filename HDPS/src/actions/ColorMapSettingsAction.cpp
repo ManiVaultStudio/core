@@ -56,8 +56,8 @@ void ColorMapSettingsAction::reset()
     _discreteAction.reset();
 }
 
-ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, colorMapSettingsAction, state),
+ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :
+    WidgetActionWidget(parent, colorMapSettingsAction),
     _colorMapViewAction(colorMapSettingsAction->getColorMapAction())
 {
     auto mainLayout     = new QHBoxLayout();

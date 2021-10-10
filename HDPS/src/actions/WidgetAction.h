@@ -125,9 +125,8 @@ protected:
      * Get widget representation of the action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
-     * @param state State of the widget (for stateful widgets)
      */
-    virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard);
+    virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
 signals:
 

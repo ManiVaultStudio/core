@@ -9,7 +9,7 @@ namespace hdps {
 namespace gui {
 
 WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* widgetAction) :
-    WidgetActionWidget(parent, widgetAction, WidgetActionWidget::State::Collapsed),
+    WidgetActionWidget(parent, widgetAction),
     _layout(),
     _toolButton()
 {
