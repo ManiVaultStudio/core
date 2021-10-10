@@ -380,8 +380,11 @@ void Core::notifyDataAdded(const QString datasetName)
     dataEvent.dataSetName = datasetName;
     dataEvent.dataType = dt;
     
-    for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&dataEvent);
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataEvent);
 }
 
 void Core::notifyDataAboutToBeRemoved(const DataType& dataType, const QString datasetName)
@@ -391,8 +394,11 @@ void Core::notifyDataAboutToBeRemoved(const DataType& dataType, const QString da
     dataAboutToBeRemovedEvent.dataSetName   = datasetName;
     dataAboutToBeRemovedEvent.dataType      = dataType;
 
-    for (auto eventListener : _eventListeners)
-        eventListener->onDataEvent(&dataAboutToBeRemovedEvent);
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataAboutToBeRemovedEvent);
 }
 
 void Core::notifyDataRemoved(const DataType& dataType, const QString datasetName)
@@ -402,8 +408,11 @@ void Core::notifyDataRemoved(const DataType& dataType, const QString datasetName
     dataRemovedEvent.dataSetName    = datasetName;
     dataRemovedEvent.dataType       = dataType;
 
-    for (auto eventListener : _eventListeners)
-        eventListener->onDataEvent(&dataRemovedEvent);
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataRemovedEvent);
 }
 
 /**
