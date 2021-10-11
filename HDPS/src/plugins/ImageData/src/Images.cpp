@@ -249,8 +249,8 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
             const auto targetRectangle = getTargetRectangle();
 
             // Populate scalar data vector with pixel data
-            for (std::int32_t pixelX = targetRectangle.left(); pixelX < targetRectangle.right(); pixelX++) {
-                for (std::int32_t pixelY = targetRectangle.top(); pixelY < targetRectangle.bottom(); pixelY++) {
+            for (std::int32_t pixelX = targetRectangle.left(); pixelX <= targetRectangle.right(); pixelX++) {
+                for (std::int32_t pixelY = targetRectangle.top(); pixelY <= targetRectangle.bottom(); pixelY++) {
 
                     // Compute the target pixel index
                     const auto targetPixelIndex = (pixelY - targetRectangle .top()) * targetRectangle.width() + (pixelX - targetRectangle.left());
