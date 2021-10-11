@@ -236,13 +236,12 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                 // Populate from partial dataset
                 for (std::int32_t pixelIndex = 0; pixelIndex < sourceData.indices.size(); pixelIndex++)
                     if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
-                        scalarData[sourceData.indices[pixelIndex]] = pointData[pixelIndex][dimensionIndex];
+                        scalarData[sourceData.indices[pixelIndex]] = pointData[sourceData.indices[pixelIndex]][dimensionIndex];
             }
         });
     }
     else {
 
-        // Visit derived points dataset
         points.visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
 
             // Cache the target rectangle
@@ -252,14 +251,39 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
             for (std::int32_t pixelX = targetRectangle.left(); pixelX <= targetRectangle.right(); pixelX++) {
                 for (std::int32_t pixelY = targetRectangle.top(); pixelY <= targetRectangle.bottom(); pixelY++) {
 
-                    // Compute the target pixel index
-                    const auto targetPixelIndex = (pixelY - targetRectangle .top()) * targetRectangle.width() + (pixelX - targetRectangle.left());
+                    // Establish pixel coordinate
+                    const QPoint pixelCoordinate(pixelX, pixelY);
 
-                    // And assign the scalar data
-                    if (targetPixelIndex < scalarData.count() && targetPixelIndex < pointData.size())
-                        scalarData[targetPixelIndex] = pointData[targetPixelIndex][dimensionIndex];
+                    // Compute the target pixel index
+                    const auto targetPixelIndex = getTargetPixelIndex(pixelCoordinate);
+                    
+                    // Assign the scalar data
+                    scalarData[targetPixelIndex] = pointData[targetPixelIndex][dimensionIndex];
                 }
             }
         });
     }
+}
+
+std::uint32_t Images::getTargetPixelIndex(const QPoint& coordinate) const
+{
+    const auto targetRectangle      = _imageData->getTargetRectangle();
+    const auto relativeCoordinate   = coordinate - targetRectangle.topLeft();
+
+    return relativeCoordinate.y() * targetRectangle.width() + relativeCoordinate.x();
+}
+
+std::uint32_t Images::getSourceDataIndex(const QPoint& coordinate) const
+{
+    // Get reference to input points dataset
+    auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
+
+    // Get reference to source data
+    auto& sourceData = points.getSourceData<Points>(points);
+
+    const auto targetRectangle      = _imageData->getTargetRectangle();
+    const auto relativeCoordinate   = coordinate - targetRectangle.topLeft();
+
+    return relativeCoordinate.y() * targetRectangle.width() + relativeCoordinate.x();
+    //return (targetRectangle.height() - relativeCoordinate.y()) * targetRectangle.width() + relativeCoordinate.x();
 }

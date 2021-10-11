@@ -41,5 +41,5 @@ protected:
     StringAction            _targetRectangleAction;             /** Target rectangle action */
     StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
     StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
-    ImagePreviewAction      _imagePreviewAction;                /** Image preview action */
+    //ImagePreviewAction      _imagePreviewAction;                /** Image preview action */
 };

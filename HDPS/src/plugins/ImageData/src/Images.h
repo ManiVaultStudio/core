@@ -142,6 +142,20 @@ protected:
      */
     void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample = 1);
 
+    /**
+     * Get target pixel index from two-dimensional image coordinate
+     * @param coordinate Two-dimensional image coordinate
+     * @return Target pixel index
+     */
+    std::uint32_t getTargetPixelIndex(const QPoint& coordinate) const;
+
+    /**
+     * Get scalar data index from two-dimensional image coordinate
+     * @param coordinate Two-dimensional image coordinate
+     * @return Scalar data index
+     */
+    std::uint32_t getSourceDataIndex(const QPoint& coordinate) const;
+
 private:
     ImageData*                      _imageData;     /** Pointer to raw image data */
     QSharedPointer<InfoAction>      _infoAction;    /** Shared pointer to info action */
