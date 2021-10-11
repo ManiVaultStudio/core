@@ -26,14 +26,13 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
     
     _dataset->getHierarchyItem().addAction(*this);
 
-    const auto removeDataset = [this, datasetName](const bool& recursively = false) -> void {
-        QStringList datasetsToRemove({ datasetName });
+    const auto removeDataset = [this](const bool& recursively = false) -> void {
+        QStringList datasetsToRemove({ _dataset.getDatasetName() });
 
         auto& dataHierarchyManager = Application::core()->getDataHierarchyManager();
 
         if (recursively) {
-            auto dataHierarchyItem      = dataHierarchyManager.getItem(datasetName);
-            auto children               = dataHierarchyManager.getChildren(dataHierarchyItem);
+            auto children = dataHierarchyManager.getChildren(&_dataset->getHierarchyItem());
 
             for (auto child : children)
                 datasetsToRemove << child->getDatasetName();
@@ -47,10 +46,10 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
 
             // Remove data if accepted
             if (confirmDataRemoveDialog.result() == 1)
-                dataHierarchyManager.removeItem(datasetName, recursively);
+                dataHierarchyManager.removeItem(_dataset.getDatasetName(), recursively);
         }
         else {
-            dataHierarchyManager.removeItem(datasetName, recursively);
+            dataHierarchyManager.removeItem(_dataset.getDatasetName(), recursively);
         }
 
         Application::core()->removeDatasets(datasetsToRemove);

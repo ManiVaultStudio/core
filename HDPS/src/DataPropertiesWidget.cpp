@@ -32,10 +32,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
         loadDataset();
     });
 
-    connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this](const QString& oldDatasetName, const QString& newDatasetName) {
-        loadDataset();
-    });
-
     emit datasetNameChanged("");
 }
 
@@ -78,7 +74,7 @@ void DataPropertiesWidget::loadDataset()
 
     GroupsAction::GroupActions groupActions;
 
-    for (auto action : _dataset->getActions()) {
+    for (auto action : _dataset->getHierarchyItem().getActions()) {
         auto groupAction = dynamic_cast<GroupAction*>(action);
 
         if (groupAction == nullptr)

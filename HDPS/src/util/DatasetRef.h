@@ -5,10 +5,10 @@
 #include "Set.h"
 #include "Application.h"
 
+#include "util/Exception.h"
+
 #include <QString>
 #include <QMessageBox>
-
-#include <stdexcept>
 
 namespace hdps
 {
@@ -126,11 +126,17 @@ public:
 
                 case EventType::DataRenamed:
                 {
+                    // Get data renamed event
                     auto datasetRenamedEvent = static_cast<hdps::DataRenamedEvent*>(dataEvent);
 
+                    // No need to process zero delta
                     if (datasetRenamedEvent->oldName != _datasetName)
                         return;
 
+                    // Update with new name
+                    _datasetName = datasetRenamedEvent->dataSetName;
+
+                    // Notify others of the name change
                     emit datasetNameChanged(datasetRenamedEvent->oldName, datasetRenamedEvent->dataSetName);
                     break;
                 }
@@ -215,7 +221,11 @@ public:
         }
         catch (std::exception& e)
         {
-            QMessageBox::critical(nullptr, QString("HDPS"), e.what(), QMessageBox::Ok);
+            exceptionMessageBox("Unable to set dataset reference", e.what());
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to set dataset reference");
         }
     }
 
