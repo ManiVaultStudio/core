@@ -21,6 +21,10 @@ QComboBox {
     height: 18px;
 }
 
+QSpinBox, QDoubleSpinBox {
+    height: 18px;
+}
+
 QLineEdit {
     height: 18px;
 }
