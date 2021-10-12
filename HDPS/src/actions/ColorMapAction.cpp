@@ -259,13 +259,26 @@ ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* op
     QPalette palette = this->palette();
     palette.setColor(QPalette::Text, QColor(0, 0, 0, 0));
     
-    // Asign palette
+    // Assign palette
     setPalette(palette);
 
     // Paint the control when the color map image changes
     connect(colorMapAction, &ColorMapAction::imageChanged, this, [this](const QImage& colorMapImage) {
         update();
     });
+
+    /*
+    const auto updateIconSize = [this, colorMapAction]() -> void {
+        setIconSize(colorMapAction->getColorMapType() == ColorMap::Type::OneDimensional ? QSize() : QSize(12, 12));
+    };
+
+    // Adjust the size of the icon when the color map type changes (hide the icon in one-dimensional mode)
+    connect(colorMapAction, &ColorMapAction::typeChanged, this, [updateIconSize](const util::ColorMap::Type& colorMapType) {
+        updateIconSize();
+    });
+    */
+
+    setIconSize(QSize());
 }
 
 void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)

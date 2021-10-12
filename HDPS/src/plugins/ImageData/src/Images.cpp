@@ -215,7 +215,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
     // Get reference to input points dataset
     auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
 
-    // Treat derived and non-derived separately
+    // Treat derived and non-derived differently
     if (points.isDerivedData()) {
 
         // Visit derived points dataset
@@ -236,7 +236,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                 // Populate from partial dataset
                 for (std::int32_t pixelIndex = 0; pixelIndex < sourceData.indices.size(); pixelIndex++)
                     if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
-                        scalarData[sourceData.indices[pixelIndex]] = pointData[sourceData.indices[pixelIndex]][dimensionIndex];
+                        scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
             }
         });
     }

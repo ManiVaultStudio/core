@@ -60,7 +60,7 @@ QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::Display
                             return icon(colorMap.getImage(), QSize(150, 14));
 
                         case 2:
-                            return icon(colorMap.getImage(), QSize(14, 14));
+                            return icon(colorMap.getImage(), QSize(12, 12));
 
                         default:
                             break;
