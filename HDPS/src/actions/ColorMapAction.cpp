@@ -8,6 +8,8 @@
 #include <QAbstractItemView>
 #include <QItemSelectionModel>
 
+#include <math.h>
+
 using namespace hdps::util;
 
 namespace hdps {
