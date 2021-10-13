@@ -103,6 +103,8 @@ public:
                     if (dataEvent->dataSetName != _datasetName)
                         return;
 
+                    _dataset = nullptr;
+
                     emit datasetAboutToBeRemoved(dataEvent->dataSetName);
 
                     break;
