@@ -153,6 +153,11 @@ public:
         return *_dataset;
     }
 
+    /** Const dereference operator */
+    const DatasetType& operator* () const {
+        return *_dataset;
+    }
+
     /** Arrow operator */
     DatasetType* operator-> () {
         return _dataset;
