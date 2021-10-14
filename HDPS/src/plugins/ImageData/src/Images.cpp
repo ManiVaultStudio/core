@@ -226,41 +226,6 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 
         if (dataset.getDataType() == ClusterType) {
         }
-
-        //if (static_cast<std::uint32_t>(scalarData.count()) < getNumberOfPixels())
-        //    throw std::runtime_error("Scalar data vector number of elements is smaller than the number of pixels");
-
-        //if (subsample < 1)
-        //    throw std::runtime_error("Subsample amount may not be zero");
-
-        //switch (_imageData->getType())
-        //{
-        //case ImageData::Undefined:
-        //    break;
-
-        //case ImageData::Sequence:
-        //    getScalarDataForImageSequence(dimensionIndex, scalarData, scalarDataRange, subsample);
-        //    break;
-
-        //case ImageData::Stack:
-        //    getScalarDataForImageStack(dimensionIndex, scalarData, scalarDataRange, subsample);
-        //    break;
-
-        //case ImageData::MultiPartSequence:
-        //    break;
-
-        //default:
-        //    break;
-        //}
-
-        //// Initialize scalar data range
-        //scalarDataRange = { std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest() };
-
-        //// Compute the actual scalar data range
-        //for (auto& scalar : scalarData) {
-        //    scalarDataRange.first = std::min(scalar, scalarDataRange.first);
-        //    scalarDataRange.second = std::max(scalar, scalarDataRange.second);
-        //}
     }
     catch (std::exception& e)
     {
@@ -269,109 +234,125 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
     catch (...) {
         exceptionMessageBox("Unable to get scalar data");
     }
-
-    
 }
 
 void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
 {
-    QSize sourceImageSize = getImageSize(), targetImageSize;
+    // Get reference to input dataset
+    auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
 
-    // Establish target image size based on sub-sampling
-    targetImageSize.setWidth(static_cast<int>(floorf(sourceImageSize.width() / subsample)));
-    targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height() / subsample)));
+    if (dataset.getDataType() == PointType) {
 
-    // Get reference to input points dataset
-    auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
+        // Obtain reference to the points source input dataset
+        auto& points = DataSet::getSourceData(dynamic_cast<Points&>(dataset));
 
-    points.visitData([this, points, dimensionIndex, &scalarData, subsample, sourceImageSize, targetImageSize](auto pointData) {
-        const auto dimensionId      = dimensionIndex;
-        const auto imageSize        = _imageData->getImageSize();
-        const auto noPixels         = getNumberOfPixels();
-        const auto selection        = dynamic_cast<Points&>(points.getSelection());
-        const auto selectionIndices = selection.indices;
-        const auto selectionSize    = selectionIndices.size();
+        QSize sourceImageSize = getImageSize(), targetImageSize;
 
-        if (!selectionIndices.empty()) {
-            for (std::uint32_t p = 0; p < noPixels; p++) {
-                auto sum = 0.0f;
+        // Establish target image size based on sub-sampling
+        targetImageSize.setWidth(static_cast<int>(floorf(sourceImageSize.width() / subsample)));
+        targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height() / subsample)));
 
-                for (auto selectionIndex : selectionIndices)
-                    sum += pointData[selectionIndex][p];
+        points.visitData([this, points, dimensionIndex, &scalarData, subsample, sourceImageSize, targetImageSize](auto pointData) {
+            const auto dimensionId = dimensionIndex;
+            const auto imageSize = _imageData->getImageSize();
+            const auto noPixels = getNumberOfPixels();
+            const auto selection = dynamic_cast<Points&>(points.getSelection());
+            const auto selectionIndices = selection.indices;
+            const auto selectionSize = selectionIndices.size();
 
-                scalarData[p] = static_cast<float>(sum / selectionSize);
-            }
-        }
-        else {
+            if (!selectionIndices.empty()) {
+                for (std::uint32_t p = 0; p < noPixels; p++) {
+                    auto sum = 0.0f;
 
-            // Populate scalar data vector with pixel data
-            for (std::int32_t pixelX = 0; pixelX < targetImageSize.width(); pixelX++) {
-                for (std::int32_t pixelY = 0; pixelY < targetImageSize.height(); pixelY++) {
+                    for (auto selectionIndex : selectionIndices)
+                        sum += pointData[selectionIndex][p];
 
-                    // Compute the source and target pixel index
-                    const auto sourcePixelIndex = (pixelY * subsample) * sourceImageSize.width() + (pixelX * subsample);
-                    const auto targetPixelIndex = pixelY * targetImageSize.width() + pixelX;
-
-                    // And assign the scalar data
-                    scalarData[targetPixelIndex] = pointData[dimensionIndex][sourcePixelIndex];
+                    scalarData[p] = static_cast<float>(sum / selectionSize);
                 }
             }
-        }
-    });
+            else {
+
+                // Populate scalar data vector with pixel data
+                for (std::int32_t pixelX = 0; pixelX < targetImageSize.width(); pixelX++) {
+                    for (std::int32_t pixelY = 0; pixelY < targetImageSize.height(); pixelY++) {
+
+                        // Compute the source and target pixel index
+                        const auto sourcePixelIndex = (pixelY * subsample) * sourceImageSize.width() + (pixelX * subsample);
+                        const auto targetPixelIndex = pixelY * targetImageSize.width() + pixelX;
+
+                        // And assign the scalar data
+                        scalarData[targetPixelIndex] = pointData[dimensionIndex][sourcePixelIndex];
+                    }
+                }
+            }
+        });
+    }
+
+    if (dataset.getDataType() == ClusterType) {
+    }
 }
 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
 {
-    // Get reference to input points dataset
-    auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
+    // Get reference to input dataset
+    auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
 
-    // Treat derived and non-derived differently
-    if (points.isDerivedData()) {
+    if (dataset.getDataType() == PointType) {
 
-        // Visit derived points dataset
-        points.visitData([this, &points, dimensionIndex, &scalarData](auto pointData) {
+        // Obtain reference to the points dataset
+        auto& points = dynamic_cast<Points&>(dataset);
 
-            // Get reference to source data
-            auto& sourceData = points.getSourceData<Points>(points);
+        // Treat derived and non-derived differently
+        if (points.isDerivedData()) {
 
-            if (sourceData.isFull()) {
+            // Visit derived points dataset
+            points.visitData([this, &points, dimensionIndex, &scalarData](auto pointData) {
 
-                // Populate from full dataset
-                for (std::uint32_t pixelIndex = 0; pixelIndex < points.getNumPoints(); pixelIndex++)
-                    if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
-                        scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
-            }
-            else {
+                // Get reference to source data
+                auto& sourceData = points.getSourceData<Points>(points);
 
-                // Populate from partial dataset
-                for (std::int32_t pixelIndex = 0; pixelIndex < sourceData.indices.size(); pixelIndex++)
-                    if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
-                        scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
-            }
-        });
-    }
-    else {
+                if (sourceData.isFull()) {
 
-        points.visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
-
-            // Cache the target rectangle
-            const auto targetRectangle = getTargetRectangle();
-
-            // Populate scalar data vector with pixel data
-            for (std::int32_t pixelX = targetRectangle.left(); pixelX <= targetRectangle.right(); pixelX++) {
-                for (std::int32_t pixelY = targetRectangle.top(); pixelY <= targetRectangle.bottom(); pixelY++) {
-
-                    // Establish pixel coordinate
-                    const QPoint pixelCoordinate(pixelX, pixelY);
-
-                    // Compute the target pixel index
-                    const auto targetPixelIndex = getTargetPixelIndex(pixelCoordinate);
-                    
-                    // Assign the scalar data
-                    scalarData[targetPixelIndex] = pointData[targetPixelIndex][dimensionIndex];
+                    // Populate from full dataset
+                    for (std::uint32_t pixelIndex = 0; pixelIndex < points.getNumPoints(); pixelIndex++)
+                        if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
+                            scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
                 }
-            }
-        });
+                else {
+
+                    // Populate from partial dataset
+                    for (std::int32_t pixelIndex = 0; pixelIndex < sourceData.indices.size(); pixelIndex++)
+                        if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
+                            scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
+                }
+            });
+        }
+        else {
+
+            points.visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
+
+                // Cache the target rectangle
+                const auto targetRectangle = getTargetRectangle();
+
+                // Populate scalar data vector with pixel data
+                for (std::int32_t pixelX = targetRectangle.left(); pixelX <= targetRectangle.right(); pixelX++) {
+                    for (std::int32_t pixelY = targetRectangle.top(); pixelY <= targetRectangle.bottom(); pixelY++) {
+
+                        // Establish pixel coordinate
+                        const QPoint pixelCoordinate(pixelX, pixelY);
+
+                        // Compute the target pixel index
+                        const auto targetPixelIndex = getTargetPixelIndex(pixelCoordinate);
+
+                        // Assign the scalar data
+                        scalarData[targetPixelIndex] = pointData[targetPixelIndex][dimensionIndex];
+                    }
+                }
+            });
+        }
+    }
+
+    if (dataset.getDataType() == ClusterType) {
     }
 }
 
