@@ -178,6 +178,12 @@ public:
         return _dataset;
     }
 
+    /** Get the dataset pointer of the specified type */
+    template<typename TargetDatasetType>
+    TargetDatasetType* get() {
+        return dynamic_cast<TargetDatasetType*>(_dataset);
+    }
+
     /** Returns whether the dataset pointer is valid (if the dataset actually exists) */
     bool isValid() const {
         return _dataset != nullptr;

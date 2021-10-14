@@ -116,15 +116,12 @@ QIcon Images::getIcon() const
     return hdps::Application::getIconFont("FontAwesome").getIcon("images");
 }
 
-void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
+void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     try
     {
         if (static_cast<std::uint32_t>(scalarData.count()) < getNumberOfPixels())
             throw std::runtime_error("Scalar data vector number of elements is smaller than the number of pixels");
-
-        if (subsample < 1)
-            throw std::runtime_error("Subsample amount may not be zero");
 
         switch (_imageData->getType())
         {
@@ -132,11 +129,11 @@ void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& 
                 break;
 
             case ImageData::Sequence:
-                getScalarDataForImageSequence(dimensionIndex, scalarData, scalarDataRange, subsample);
+                getScalarDataForImageSequence(dimensionIndex, scalarData, scalarDataRange);
                 break;
 
             case ImageData::Stack:
-                getScalarDataForImageStack(dimensionIndex, scalarData, scalarDataRange, subsample);
+                getScalarDataForImageStack(dimensionIndex, scalarData, scalarDataRange);
                 break;
 
             case ImageData::MultiPartSequence:
@@ -236,7 +233,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
     }
 }
 
-void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
+void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get reference to input dataset
     auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
@@ -249,10 +246,10 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
         QSize sourceImageSize = getImageSize(), targetImageSize;
 
         // Establish target image size based on sub-sampling
-        targetImageSize.setWidth(static_cast<int>(floorf(sourceImageSize.width() / subsample)));
-        targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height() / subsample)));
+        targetImageSize.setWidth(static_cast<int>(floorf(sourceImageSize.width())));
+        targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height())));
 
-        points.visitData([this, points, dimensionIndex, &scalarData, subsample, sourceImageSize, targetImageSize](auto pointData) {
+        points.visitData([this, points, dimensionIndex, &scalarData, sourceImageSize, targetImageSize](auto pointData) {
             const auto dimensionId = dimensionIndex;
             const auto imageSize = _imageData->getImageSize();
             const auto noPixels = getNumberOfPixels();
@@ -277,11 +274,10 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
                     for (std::int32_t pixelY = 0; pixelY < targetImageSize.height(); pixelY++) {
 
                         // Compute the source and target pixel index
-                        const auto sourcePixelIndex = (pixelY * subsample) * sourceImageSize.width() + (pixelX * subsample);
                         const auto targetPixelIndex = pixelY * targetImageSize.width() + pixelX;
 
                         // And assign the scalar data
-                        scalarData[targetPixelIndex] = pointData[dimensionIndex][sourcePixelIndex];
+                        scalarData[targetPixelIndex] = pointData[dimensionIndex][targetPixelIndex];
                     }
                 }
             }
@@ -292,7 +288,7 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
     }
 }
 
-void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
+void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get reference to input dataset
     auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
@@ -353,6 +349,46 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
     }
 
     if (dataset.getDataType() == ClusterType) {
+        
+        // Obtain reference to the clusters dataset
+        auto& clusters = dynamic_cast<Clusters&>(dataset);
+
+        auto index = 0;
+
+        for (auto& cluster : clusters.getClusters()) {
+            for (const auto clusterIndex : cluster.getIndices()) {
+                const auto clusterPixelCoordinate = QPoint(clusterIndex % getSourceRectangle().width(), static_cast<std::int32_t>(floorf(clusterIndex / getSourceRectangle().width())));
+
+                if (getSourceRectangle().contains(clusterPixelCoordinate)) {
+                    const auto targetPixelCoordinate    = clusterPixelCoordinate - getTargetRectangle().topLeft();
+                    const auto targetPixelIndex         = targetPixelCoordinate.y() * getTargetRectangle().width() + targetPixelCoordinate.x();
+
+                    // Get cluster color
+                    const auto clusterColor = cluster.getColor();
+
+                    // Assign scalar data
+                    switch (dimensionIndex)
+                    {
+                        case 0:
+                            scalarData[targetPixelIndex] = clusterColor.redF();
+                            break;
+
+                        case 1:
+                            scalarData[targetPixelIndex] = clusterColor.greenF();
+                            break;
+
+                        case 2:
+                            scalarData[targetPixelIndex] = clusterColor.blueF();
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    index++;
+                }
+            }
+        }
     }
 }
 

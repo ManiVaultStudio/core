@@ -119,7 +119,7 @@ QImage ImagePreviewAction::getPreviewImage(const std::uint32_t& dimensionIndex)
         QPair<float, float> scalarDataRange;
 
         // Get float scalar data
-        _images->getScalarData(dimensionIndex, scalarData32, scalarDataRange, _subsamplingFactor);
+        _images->getScalarData(dimensionIndex, scalarData32, scalarDataRange);
         
         std::pair<float, float> displayRange;
 
