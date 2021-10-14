@@ -72,7 +72,7 @@ QMenu* DataRemoveAction::getContextMenu(QWidget* parent /*= nullptr*/)
 
     menu->setIcon(icon());
 
-    menu->addAction(&_removeSelectedAction);
+    //menu->addAction(&_removeSelectedAction);
     menu->addAction(&_removeSelectedAndChildrenAction);
 
     return menu;

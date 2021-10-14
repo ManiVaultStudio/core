@@ -122,6 +122,14 @@ public:
      */
     void getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample = 1);
 
+    /**
+     * Get selection data
+     * @param selectionImageData Image data for the selection
+     * @param selectedIndices Selected pixel indices
+     * @param selectionBoundaries Boundaries of the selection (in image coordinates)
+     */
+    void getSelectionData(std::vector<std::uint8_t>& selectionImageData, std::vector<std::uint32_t>& selectedIndices, QRect& selectionBoundaries);
+
 protected:
 
     /**

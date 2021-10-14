@@ -7,6 +7,7 @@
 #include "DataHierarchyItem.h"
 
 #include "PointData.h"
+#include "ClusterData.h"
 
 #include <QDebug>
 
@@ -161,6 +162,115 @@ void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& 
     catch (...) {
         exceptionMessageBox("Unable to get scalar data");
     }
+}
+
+void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std::vector<std::uint32_t>& selectedIndices, QRect& selectionBoundaries)
+{
+    try
+    {
+        // Get reference to input dataset
+        auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
+
+        if (dataset.getDataType() == PointType) {
+
+            // Obtain reference to the point source input dataset
+            auto& sourcePoints = DataSet::getSourceData(dynamic_cast<Points&>(dataset));
+
+            // Get selection indices from points dataset
+            auto& globalSelectionIndices = dynamic_cast<Points&>(sourcePoints.getSelection()).indices;
+
+            // Clear the selected indices
+            selectedIndices.clear();
+            selectedIndices.reserve(getNumberOfPixels());
+
+            const auto sourceImageWidth = getSourceRectangle().width();
+            const auto targetImageWidth = getTargetRectangle().width();
+
+            // Fill selection data with non-selected
+            std::fill(selectionImageData.begin(), selectionImageData.end(), 0);
+
+            // Initialize selection boundaries with numeric extremes
+            selectionBoundaries.setTop(std::numeric_limits<int>::max());
+            selectionBoundaries.setBottom(std::numeric_limits<int>::lowest());
+            selectionBoundaries.setLeft(std::numeric_limits<int>::max());
+            selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
+
+            // Iterate over all global selection indices
+            for (const auto& globalSelectionIndex : globalSelectionIndices) {
+
+                // Compute global pixel coordinate
+                const auto globalPixelCoordinate = QPoint(globalSelectionIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(globalSelectionIndex / static_cast<float>(sourceImageWidth))));
+
+                // Only proceed if the pixel is located within the source image rectangle
+                if (!getTargetRectangle().contains(globalPixelCoordinate))
+                    continue;
+
+                // Compute local pixel coordinate and index
+                const auto localPixelCoordinate = globalPixelCoordinate - getTargetRectangle().topLeft();
+                const auto localPixelIndex = localPixelCoordinate.y() * targetImageWidth + localPixelCoordinate.x();
+
+                // And add the target pixel index to the list of selected pixels
+                if (static_cast<std::uint32_t>(localPixelIndex) < getNumberOfPixels())
+                    selectedIndices.push_back(localPixelIndex);
+
+                // Assign selected pixel
+                selectionImageData[localPixelIndex] = 255;
+
+                // Add pixel pixel coordinate and possibly inflate the selection boundaries
+                selectionBoundaries.setLeft(std::min(selectionBoundaries.left(), localPixelCoordinate.x()));
+                selectionBoundaries.setRight(std::max(selectionBoundaries.right(), localPixelCoordinate.x()));
+                selectionBoundaries.setTop(std::min(selectionBoundaries.top(), localPixelCoordinate.y()));
+                selectionBoundaries.setBottom(std::max(selectionBoundaries.bottom(), localPixelCoordinate.y()));
+            }
+        }
+
+        if (dataset.getDataType() == ClusterType) {
+        }
+
+        //if (static_cast<std::uint32_t>(scalarData.count()) < getNumberOfPixels())
+        //    throw std::runtime_error("Scalar data vector number of elements is smaller than the number of pixels");
+
+        //if (subsample < 1)
+        //    throw std::runtime_error("Subsample amount may not be zero");
+
+        //switch (_imageData->getType())
+        //{
+        //case ImageData::Undefined:
+        //    break;
+
+        //case ImageData::Sequence:
+        //    getScalarDataForImageSequence(dimensionIndex, scalarData, scalarDataRange, subsample);
+        //    break;
+
+        //case ImageData::Stack:
+        //    getScalarDataForImageStack(dimensionIndex, scalarData, scalarDataRange, subsample);
+        //    break;
+
+        //case ImageData::MultiPartSequence:
+        //    break;
+
+        //default:
+        //    break;
+        //}
+
+        //// Initialize scalar data range
+        //scalarDataRange = { std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest() };
+
+        //// Compute the actual scalar data range
+        //for (auto& scalar : scalarData) {
+        //    scalarDataRange.first = std::min(scalar, scalarDataRange.first);
+        //    scalarDataRange.second = std::max(scalar, scalarDataRange.second);
+        //}
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get scalar data", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get scalar data");
+    }
+
+    
 }
 
 void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange, const std::uint32_t& subsample /*= 1*/)
