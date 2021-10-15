@@ -204,7 +204,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 
                 // Compute local pixel coordinate and index
                 const auto localPixelCoordinate = globalPixelCoordinate - getTargetRectangle().topLeft();
-                const auto localPixelIndex = localPixelCoordinate.y() * targetImageWidth + localPixelCoordinate.x();
+                const auto localPixelIndex      = localPixelCoordinate.y() * targetImageWidth + localPixelCoordinate.x();
 
                 // And add the target pixel index to the list of selected pixels
                 if (static_cast<std::uint32_t>(localPixelIndex) < getNumberOfPixels())
@@ -222,6 +222,56 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
         }
 
         if (dataset.getDataType() == ClusterType) {
+
+            // Obtain reference to the cluster source input dataset
+            auto& sourceClusters = dynamic_cast<Clusters&>(dataset.getSelection());
+
+            // Clear the selected indices
+            selectedIndices.clear();
+            selectedIndices.reserve(getNumberOfPixels());
+
+            const auto sourceImageWidth = getSourceRectangle().width();
+            const auto targetImageWidth = getTargetRectangle().width();
+
+            // Fill selection data with non-selected
+            std::fill(selectionImageData.begin(), selectionImageData.end(), 0);
+
+            // Initialize selection boundaries with numeric extremes
+            selectionBoundaries.setTop(std::numeric_limits<int>::max());
+            selectionBoundaries.setBottom(std::numeric_limits<int>::lowest());
+            selectionBoundaries.setLeft(std::numeric_limits<int>::max());
+            selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
+
+            for (const auto& clusterIndex : sourceClusters.indices) {
+                const auto& cluster = sourceClusters.getClusters()[clusterIndex];
+
+                for (const auto& clusterSelectionIndex : cluster.getIndices()) {
+
+                    // Compute global pixel coordinate
+                    const auto globalPixelCoordinate = QPoint(clusterSelectionIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(clusterSelectionIndex / static_cast<float>(sourceImageWidth))));
+
+                    // Only proceed if the pixel is located within the source image rectangle
+                    if (!getTargetRectangle().contains(globalPixelCoordinate))
+                        continue;
+
+                    // Compute local pixel coordinate and index
+                    const auto localPixelCoordinate = globalPixelCoordinate - getTargetRectangle().topLeft();
+                    const auto localPixelIndex      = localPixelCoordinate.y() * targetImageWidth + localPixelCoordinate.x();
+
+                    // And add the target pixel index to the list of selected pixels
+                    if (static_cast<std::uint32_t>(localPixelIndex) < getNumberOfPixels())
+                        selectedIndices.push_back(localPixelIndex);
+
+                    // Assign selected pixel
+                    selectionImageData[localPixelIndex] = 255;
+
+                    // Add pixel pixel coordinate and possibly inflate the selection boundaries
+                    selectionBoundaries.setLeft(std::min(selectionBoundaries.left(), localPixelCoordinate.x()));
+                    selectionBoundaries.setRight(std::max(selectionBoundaries.right(), localPixelCoordinate.x()));
+                    selectionBoundaries.setTop(std::min(selectionBoundaries.top(), localPixelCoordinate.y()));
+                    selectionBoundaries.setBottom(std::max(selectionBoundaries.bottom(), localPixelCoordinate.y()));
+                }
+            }
         }
     }
     catch (std::exception& e)
@@ -353,41 +403,28 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         // Obtain reference to the clusters dataset
         auto& clusters = dynamic_cast<Clusters&>(dataset);
 
-        auto index = 0;
+        auto clusterIndex = 0;
 
+        // Iterate over all clusters
         for (auto& cluster : clusters.getClusters()) {
-            for (const auto clusterIndex : cluster.getIndices()) {
-                const auto clusterPixelCoordinate = QPoint(clusterIndex % getSourceRectangle().width(), static_cast<std::int32_t>(floorf(clusterIndex / getSourceRectangle().width())));
 
+            // Iterate over all indices in the cluster
+            for (const auto index : cluster.getIndices()) {
+
+                // Compute pixel coordinate
+                const auto clusterPixelCoordinate = QPoint(index % getSourceRectangle().width(), static_cast<std::int32_t>(floorf(index / getSourceRectangle().width())));
+
+                // Only process if inside the target rectangle
                 if (getTargetRectangle().contains(clusterPixelCoordinate)) {
                     const auto targetPixelCoordinate    = clusterPixelCoordinate - getTargetRectangle().topLeft();
                     const auto targetPixelIndex         = targetPixelCoordinate.y() * getTargetRectangle().width() + targetPixelCoordinate.x();
 
-                    // Get cluster color
-                    const auto clusterColor = cluster.getColor();
-
-                    // Assign scalar data
-                    switch (dimensionIndex)
-                    {
-                        case 0:
-                            scalarData[targetPixelIndex] = clusterColor.redF();
-                            break;
-
-                        case 1:
-                            scalarData[targetPixelIndex] = clusterColor.greenF();
-                            break;
-
-                        case 2:
-                            scalarData[targetPixelIndex] = clusterColor.blueF();
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                    index++;
+                    // Assign cluster index to scalar data
+                    scalarData[targetPixelIndex] = clusterIndex;
                 }
             }
+
+            clusterIndex++;
         }
     }
 }
