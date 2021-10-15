@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
     connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetNameChanged, this, [this](const QString& selectedDatasetName) {
-        _dataPropertiesWidget->setDataset(selectedDatasetName);
+        _dataPropertiesWidget->setDatasetName(selectedDatasetName);
     });
 
     connect(_dataPropertiesWidget, &DataPropertiesWidget::datasetNameChanged, this, [this](const QString& datasetName) {

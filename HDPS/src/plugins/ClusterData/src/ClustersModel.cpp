@@ -5,7 +5,7 @@
 
 using namespace hdps;
 
-ClustersModel::ClustersModel(QObject* parent) :
+ClustersModel::ClustersModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
     _clusters()
 {

@@ -50,7 +50,6 @@ protected:
         QItemSelectionModel     _selectionModel;            /** Clusters selection model */
         TriggerAction           _removeAction;              /** Remove clusters action */
         TriggerAction           _mergeAction;               /** Merge clusters action */
-        
         FilterAndSelectAction   _filterAndSelectAction;     /** Filter and select clusters action */
         SubsetAction            _subsetAction;              /** Subset action */
     };
@@ -69,10 +68,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
      * @param datasetName Name of the points dataset
      */
-    ClustersAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName);
+    ClustersAction(QObject* parent, const QString& datasetName);
 
     /** Get clusters */
     std::vector<Cluster>* getClusters();
@@ -101,7 +99,6 @@ public: // Action getters
     TriggerAction& getExportAction() { return _exportAction; }
 
 protected:
-    CoreInterface*          _core;              /** Pointer to the core */
     DatasetRef<Clusters>    _clusters;          /** Cluster dataset reference */
     ClustersModel           _clustersModel;     /** Clusters model */
     TriggerAction           _importAction;      /** Import clusters action */

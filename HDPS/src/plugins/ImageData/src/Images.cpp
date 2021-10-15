@@ -359,7 +359,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
             for (const auto clusterIndex : cluster.getIndices()) {
                 const auto clusterPixelCoordinate = QPoint(clusterIndex % getSourceRectangle().width(), static_cast<std::int32_t>(floorf(clusterIndex / getSourceRectangle().width())));
 
-                if (getSourceRectangle().contains(clusterPixelCoordinate)) {
+                if (getTargetRectangle().contains(clusterPixelCoordinate)) {
                     const auto targetPixelCoordinate    = clusterPixelCoordinate - getTargetRectangle().topLeft();
                     const auto targetPixelIndex         = targetPixelCoordinate.y() * getTargetRectangle().width() + targetPixelCoordinate.x();
 

@@ -3,16 +3,15 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName) :
+InfoAction::InfoAction(QObject* parent,const QString& datasetName) :
     GroupAction(parent, true),
     EventListener(),
-    _core(core),
     _clusters(datasetName),
     _numberOfClustersAction(this, "Number of clusters"),
-    _clustersAction(this, core, datasetName)
+    _clustersAction(this, datasetName)
 {
     setText("Clusters");
-    setEventCore(_core);
+    setEventCore(Application::core());
 
     _numberOfClustersAction.setEnabled(false);
     _numberOfClustersAction.setToolTip("The number of clusters");

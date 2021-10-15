@@ -42,7 +42,7 @@ public:
      * Set the name of the current dataset
      * @param datasetName Name of the dataset
      */
-    void setDataset(const QString& datasetName);
+    void setDatasetName(const QString& datasetName);
 
 protected:
 

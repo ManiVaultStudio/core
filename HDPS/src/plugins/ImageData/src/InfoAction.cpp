@@ -5,7 +5,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, const QString& datasetName) :
-    GroupAction(parent, false),
+    GroupAction(parent, true),
     EventListener(),
     _images(datasetName),
     _typeAction(this, "Image collection type"),

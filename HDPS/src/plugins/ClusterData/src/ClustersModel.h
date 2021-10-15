@@ -36,7 +36,7 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      */
-    ClustersModel(QObject* parent);
+    ClustersModel(QObject* parent = nullptr);
 
     /**
      * Get the number of row

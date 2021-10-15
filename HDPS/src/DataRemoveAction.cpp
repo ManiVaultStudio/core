@@ -66,8 +66,6 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
 
 QMenu* DataRemoveAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    _removeSelectedAndChildrenAction.setEnabled(_dataset->getHierarchyItem().hasChildren());
-
     auto menu = new QMenu(text(), parent);
 
     menu->setIcon(icon());

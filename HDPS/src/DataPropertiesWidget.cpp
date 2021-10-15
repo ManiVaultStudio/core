@@ -32,16 +32,17 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
         loadDataset();
     });
 
+    connect(&_dataset, &DatasetRef<DataSet>::datasetAboutToBeRemoved, this, [this]() {
+        setDatasetName("");
+    });
+
     emit datasetNameChanged("");
 }
 
-void DataPropertiesWidget::setDataset(const QString& datasetName)
+void DataPropertiesWidget::setDatasetName(const QString& datasetName)
 {
     try
     {
-        if (datasetName.isEmpty())
-            throw std::runtime_error("data set name is empty");
-
         if (_dataset.isValid())
             disconnect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 

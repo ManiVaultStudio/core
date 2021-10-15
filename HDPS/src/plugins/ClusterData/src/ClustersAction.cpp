@@ -15,17 +15,16 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-ClustersAction::ClustersAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName) :
+ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
     WidgetAction(parent),
     EventListener(),
-    _core(core),
     _clusters(datasetName),
-    _clustersModel(this),
+    _clustersModel(),
     _importAction(this, "Import"),
     _exportAction(this, "Export")
 {
     setText("Clusters");
-    setEventCore(_core);
+    setEventCore(Application::core());
 
     _importAction.setToolTip("Import clusters from file");
     _exportAction.setToolTip("Export clusters to file");
@@ -155,7 +154,7 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     if (!_clusters.isValid())
         return;
 
-    auto dataHierarchyItem          = _core->getDataHierarchyItem(_clusters->getName());
+    auto dataHierarchyItem          = Application::core()->getDataHierarchyItem(_clusters->getName());
     auto parentDataHierarchyItem    = dataHierarchyItem->getParent();
     auto& points                    = parentDataHierarchyItem->getDataset<Points>();
     auto& selection                 = dynamic_cast<Points&>(points.getSelection());
@@ -170,12 +169,12 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     for (auto index : indices)
         selection.indices.push_back(globalIndices[index]);
 
-    _core->notifySelectionChanged(parentDataHierarchyItem->getDatasetName());
+    Application::core()->notifySelectionChanged(parentDataHierarchyItem->getDatasetName());
 }
 
 void ClustersAction::createSubset(const QString& datasetName)
 {
-    auto dataHierarchyItem = _core->getDataHierarchyItem(_clusters->getName());
+    auto dataHierarchyItem = Application::core()->getDataHierarchyItem(_clusters->getName());
     
     DatasetRef<Points> points(dataHierarchyItem->getParent()->getDatasetName());
 
@@ -196,11 +195,10 @@ ClustersModel& ClustersAction::getClustersModel()
 
 ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) :
     WidgetActionWidget(parent, clustersAction),
-    _filterModel(this),
+    _filterModel(),
     _selectionModel(&_filterModel),
     _removeAction(this, "Remove"),
     _mergeAction(this, "Merge"),
-    
     _filterAndSelectAction(this, _filterModel, _selectionModel),
     _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
 {

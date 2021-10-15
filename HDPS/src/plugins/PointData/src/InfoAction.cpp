@@ -4,7 +4,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName) :
-    GroupAction(parent, false),
+    GroupAction(parent, true),
     EventListener(),
     _core(core),
     _points(datasetName),
