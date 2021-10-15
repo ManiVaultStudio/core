@@ -30,12 +30,12 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class ClustersAction : public hdps::gui::WidgetAction, public EventListener
+class ClustersAction : public WidgetAction, public EventListener
 {
 protected:
 
     /** Widget class for clusters action */
-    class Widget : public hdps::gui::WidgetActionWidget {
+    class Widget : public WidgetActionWidget, public EventListener {
     public:
 
         /**
@@ -74,6 +74,9 @@ public:
 
     /** Get clusters */
     std::vector<Cluster>* getClusters();
+
+    /** Get clusters */
+    DatasetRef<Clusters>& getClustersDataset();
 
     /**
      * Select points

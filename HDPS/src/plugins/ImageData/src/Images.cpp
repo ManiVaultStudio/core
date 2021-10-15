@@ -242,9 +242,13 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setLeft(std::numeric_limits<int>::max());
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
+            // Iterate over all clusters and populate the selection data
             for (const auto& clusterIndex : sourceClusters.indices) {
+                
+                // Get reference to cluster
                 const auto& cluster = sourceClusters.getClusters()[clusterIndex];
-
+                
+                // Iterate over all indices in the cluster
                 for (const auto& clusterSelectionIndex : cluster.getIndices()) {
 
                     // Compute global pixel coordinate
@@ -426,6 +430,8 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
             clusterIndex++;
         }
+
+        qDebug() << scalarData;
     }
 }
 

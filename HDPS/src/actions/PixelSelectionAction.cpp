@@ -18,7 +18,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidge
     _pixelSelectionTool(pixelSelectionTool),
     _pixelSelectionTypes(pixelSelectionTypes),
     _overlayColor(this, "Overlay color", QColor(255, 0, 0), QColor(255, 0, 0)),
-    _overlayOpacity(this, "Overlay opacity", 0.0f, 100.0f, 50.0f, 50.0f, 1),
+    _overlayOpacity(this, "Overlay opacity", 0.0f, 100.0f, 75.0f, 75.0f, 1),
     _typeAction(this, "Type"),
     _rectangleAction(this, "Rectangle"),
     _brushAction(this, "Brush"),

@@ -39,8 +39,22 @@ ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
         if (dataEvent->dataSetName != _clusters->getName())
             return;
 
-        if (dataEvent->getType() == EventType::DataChanged)
-            _clustersModel.setClusters(*getClusters());
+        switch (dataEvent->getType())
+        {
+            case EventType::DataChanged:
+            {
+                _clustersModel.setClusters(*getClusters());
+                break;
+            }
+
+            case EventType::SelectionChanged:
+            {
+                break;
+            }
+
+            default:
+                break;
+        }
     });
 
     const auto updateClusters = [this]() -> void {
@@ -149,6 +163,11 @@ std::vector<Cluster>* ClustersAction::getClusters()
     return &_clusters->getClusters();
 }
 
+DatasetRef<Clusters>& ClustersAction::getClustersDataset()
+{
+    return _clusters;
+}
+
 void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
 {
     if (!_clusters.isValid())
@@ -202,6 +221,8 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
     _filterAndSelectAction(this, _filterModel, _selectionModel),
     _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
 {
+    setEventCore(Application::core());
+
     _removeAction.setToolTip("Remove the selected clusters");
     _mergeAction.setToolTip("Merge the selected clusters");
 
@@ -250,12 +271,25 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         // Point indices that need to be selected
         std::vector<std::uint32_t> selectionIndices;
 
+        // Get selected row
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
+
+        // Get reference to cluster selection set
+        auto& currentClusterSelectionIndices = dynamic_cast<Clusters&>(clustersAction->getClustersDataset()->getSelection()).indices;
+
+        // Clear and reserve the selection indices
+        currentClusterSelectionIndices.clear();
+        currentClusterSelectionIndices.reserve(clustersAction->getClusters()->size());
 
         // Gather point indices for selection
         for (auto selectedIndex : selectedRows) {
             auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
+
+            // Add point index to selection
             selectionIndices.insert(selectionIndices.end(), cluster->getIndices().begin(), cluster->getIndices().end());
+            
+            // Add selected index
+            currentClusterSelectionIndices.push_back(selectedIndex.row());
         }
 
         // Remove duplicates
@@ -268,6 +302,9 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         // Update state of the remove action
         _removeAction.setEnabled(!selectedRows.isEmpty());
         _mergeAction.setEnabled(selectedRows.count() >= 2);
+
+        // Notify others that the cluster selection has changed
+        Application::core()->notifySelectionChanged(clustersAction->getClustersDataset()->getName());
     };
 
     connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {
