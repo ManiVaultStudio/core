@@ -20,6 +20,7 @@
 
 #include "DockWidgetTab.h"
 #include "DockAreaTitleBar.h"
+#include "DockSplitter.h"
 
 // Graphics capability checking
 #include <QOpenGLFunctions>
@@ -350,6 +351,13 @@ void MainWindow::initializeSettingsDockingArea()
 
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
     _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataPropertiesDockWidget, _settingsDockArea);
+
+    auto splitter = ads::internal::findParent<ads::CDockSplitter*>(_settingsDockArea);
+
+    if (splitter != nullptr) {
+        const auto height = splitter->height();
+        splitter->setSizes({ height * 1 / 3, height * 2 / 3 });
+    }
 
     _settingsDockArea->setMinimumWidth(500);
 }

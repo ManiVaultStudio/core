@@ -243,7 +243,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
             // Get clusters input points dataset
-            auto& points = dataset.getHierarchyItem().getParent()->getDataset<Points>();
+            auto& points = DataSet::getSourceData<Points>(dataset.getHierarchyItem().getParent()->getDataset<Points>());
 
             // Iterate over all clusters and populate the selection data
             for (const auto& clusterIndex : sourceClusters.indices) {
@@ -419,7 +419,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         const auto sourceWidth = getSourceRectangle().width();
 
         // Get clusters input points dataset
-        auto& points = dataset.getHierarchyItem().getParent()->getDataset<Points>();
+        auto& points = DataSet::getSourceData<Points>(dataset.getHierarchyItem().getParent()->getDataset<Points>());
 
         // Iterate over all clusters
         for (auto& cluster : clusters.getClusters()) {
