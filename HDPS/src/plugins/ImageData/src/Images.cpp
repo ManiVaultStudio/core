@@ -242,6 +242,9 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setLeft(std::numeric_limits<int>::max());
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
+            // Get clusters input points dataset
+            auto& points = dataset.getHierarchyItem().getParent()->getDataset<Points>();
+
             // Iterate over all clusters and populate the selection data
             for (const auto& clusterIndex : sourceClusters.indices) {
                 
@@ -251,8 +254,11 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
                 // Iterate over all indices in the cluster
                 for (const auto& clusterSelectionIndex : cluster.getIndices()) {
 
+                    // Get translated point index
+                    const auto pointIndex = points.isFull() ? clusterSelectionIndex : points.indices[clusterSelectionIndex];
+
                     // Compute global pixel coordinate
-                    const auto globalPixelCoordinate = QPoint(clusterSelectionIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(clusterSelectionIndex / static_cast<float>(sourceImageWidth))));
+                    const auto globalPixelCoordinate = QPoint(pointIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(sourceImageWidth))));
 
                     // Only proceed if the pixel is located within the source image rectangle
                     if (!getTargetRectangle().contains(globalPixelCoordinate))
