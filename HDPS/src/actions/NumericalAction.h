@@ -86,7 +86,6 @@ public:
     /**
      * Sets the current value
      * @param value Current value
-     * @return Whether the value changed
      */
     virtual void setValue(const NumericalType& value) {
         if (value == _value)

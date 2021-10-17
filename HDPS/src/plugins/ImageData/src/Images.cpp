@@ -409,17 +409,28 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
         auto clusterIndex = 0;
 
+        // Width of the source image
+        const auto sourceWidth = getSourceRectangle().width();
+
+        // Get clusters input points dataset
+        auto& points = dataset.getHierarchyItem().getParent()->getDataset<Points>();
+
         // Iterate over all clusters
         for (auto& cluster : clusters.getClusters()) {
 
             // Iterate over all indices in the cluster
             for (const auto index : cluster.getIndices()) {
 
-                // Compute pixel coordinate
-                const auto clusterPixelCoordinate = QPoint(index % getSourceRectangle().width(), static_cast<std::int32_t>(floorf(index / getSourceRectangle().width())));
+                // Get translated point index
+                const auto pointIndex = points.isFull() ? index : points.indices[index];
 
+                // Compute pixel coordinate
+                const auto clusterPixelCoordinate = QPoint(pointIndex % sourceWidth, static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(sourceWidth))));
+                
                 // Only process if inside the target rectangle
                 if (getTargetRectangle().contains(clusterPixelCoordinate)) {
+
+                    // Compute target pixel coordinate and pixel index into scalar data
                     const auto targetPixelCoordinate    = clusterPixelCoordinate - getTargetRectangle().topLeft();
                     const auto targetPixelIndex         = targetPixelCoordinate.y() * getTargetRectangle().width() + targetPixelCoordinate.x();
 
@@ -430,8 +441,6 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
             clusterIndex++;
         }
-
-        qDebug() << scalarData;
     }
 }
 

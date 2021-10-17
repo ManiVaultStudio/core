@@ -7,7 +7,8 @@ namespace hdps {
 namespace gui {
 
 DecimalAction::DecimalAction(QObject * parent, const QString& title, const float& minimum /*= INIT_MIN*/, const float& maximum /*= INIT_MAX*/, const float& value /*= INIT_VALUE*/, const float& defaultValue /*= INIT_DEFAULT_VALUE*/, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
-    NumericalAction<float>(parent, title, minimum, maximum, value, defaultValue, numberOfDecimals)
+    NumericalAction<float>(parent, title, minimum, maximum, value, defaultValue, numberOfDecimals),
+    _singleStep(0.1f)
 {
     _valueChanged               = [this]() -> void { emit valueChanged(_value); };
     _defaultValueChanged        = [this]() -> void { emit defaultValueChanged(_defaultValue); };
@@ -36,6 +37,21 @@ void DecimalAction::initialize(const float& minimum, const float& maximum, const
 
     if (_numberOfDecimalsChanged)
         _numberOfDecimalsChanged();
+}
+
+float DecimalAction::getSingleStep() const
+{
+    return _singleStep;
+}
+
+void DecimalAction::setSingleStep(const float& singleStep)
+{
+    if (singleStep == _singleStep)
+        return;
+
+    _singleStep = std::max(0.0f, singleStep);
+
+    emit singleStepChanged(_singleStep);
 }
 
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
@@ -75,14 +91,6 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
         setRange(decimalAction->getMinimum(), decimalAction->getMaximum());
     };
 
-    connect(decimalAction, &DecimalAction::minimumChanged, this, [this, decimalAction, onUpdateValueRange](const float& minimum) {
-        onUpdateValueRange();
-    });
-
-    connect(decimalAction, &DecimalAction::maximumChanged, this, [this, decimalAction, onUpdateValueRange](const float& maximum) {
-        onUpdateValueRange();
-    });
-
     const auto onUpdateSuffix = [this, decimalAction, setToolTips]() {
         QSignalBlocker blocker(this);
 
@@ -91,28 +99,30 @@ DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* deci
         setToolTips();
     };
 
-    connect(decimalAction, &DecimalAction::suffixChanged, this, [this, decimalAction, onUpdateSuffix](const QString& suffix) {
-        onUpdateSuffix();
-    });
-
     const auto onUpdateDecimals = [this, decimalAction]() {
         QSignalBlocker blocker(this);
 
         setDecimals(decimalAction->getNumberOfDecimals());
     };
 
-    connect(decimalAction, &DecimalAction::numberOfDecimalsChanged, this, [this, decimalAction, onUpdateDecimals](const std::int32_t& decimals) {
-        onUpdateDecimals();
-    });
+    const auto onUpdateSingleStep = [this, decimalAction]() {
+        QSignalBlocker blocker(this);
 
-    connect(decimalAction, &DecimalAction::valueChanged, this, [this, decimalAction, onUpdateValue](const float& value) {
-        onUpdateValue();
-    });
+        setSingleStep(decimalAction->getSingleStep());
+    };
+
+    connect(decimalAction, &DecimalAction::minimumChanged, this, onUpdateValueRange);
+    connect(decimalAction, &DecimalAction::maximumChanged, this, onUpdateValueRange);
+    connect(decimalAction, &DecimalAction::suffixChanged, this, onUpdateSuffix);
+    connect(decimalAction, &DecimalAction::numberOfDecimalsChanged, this, onUpdateDecimals);
+    connect(decimalAction, &DecimalAction::singleStepChanged, this, onUpdateSingleStep);
+    connect(decimalAction, &DecimalAction::valueChanged, this, onUpdateValue);
 
     onUpdateValueRange();
     onUpdateValue();
     onUpdateSuffix();
     onUpdateDecimals();
+    onUpdateSingleStep();
     setToolTips();
 }
 

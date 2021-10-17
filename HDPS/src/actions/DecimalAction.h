@@ -87,6 +87,15 @@ public:
      */
     void initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
+    /** Gets the single step */
+    float getSingleStep() const;
+
+    /**
+     * Sets the single step
+     * @param singleStep Single step
+     */
+    void setSingleStep(const float& singleStep);
+
 signals:
 
     /**
@@ -130,6 +139,15 @@ signals:
      * @param numberOfDecimals Number of decimals
      */
     void numberOfDecimalsChanged(const std::uint32_t& numberOfDecimals);
+
+    /**
+     * Signals that the single step changed
+     * @param singleStep Single step
+     */
+    void singleStepChanged(const float& singleStep);
+
+protected:
+    float   _singleStep;    /** Single step size for spin box */
 
 protected:
     static constexpr float  INIT_MIN            = 0.0f;         /** Initialization minimum value */

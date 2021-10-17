@@ -13,9 +13,18 @@ WindowLevelAction::WindowLevelAction(QObject* parent) :
     setText("Window/level Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
 
+    // Set tooltips
     _windowAction.setToolTip("Window");
     _levelAction.setToolTip("Level");
     
+    // Set decimals
+    _windowAction.setNumberOfDecimals(2);
+    _levelAction.setNumberOfDecimals(2);
+
+    // Set single step
+    _windowAction.setSingleStep(0.05f);
+    _levelAction.setSingleStep(0.05f);
+
     const auto windowLevelChanged = [this]() {
         emit changed(*this);
     };
@@ -31,9 +40,11 @@ WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLeve
 
     layout->addWidget(windowLevelAction->getWindowAction().createLabelWidget(this), 0, 0);
     layout->addWidget(windowLevelAction->getWindowAction().createWidget(this), 0, 1);
+    layout->addWidget(windowLevelAction->getWindowAction().createResetButton(this), 0, 2);
 
     layout->addWidget(windowLevelAction->getLevelAction().createLabelWidget(this), 1, 0);
     layout->addWidget(windowLevelAction->getLevelAction().createWidget(this), 1, 1);
+    layout->addWidget(windowLevelAction->getLevelAction().createResetButton(this), 1, 2);
 
     setPopupLayout(layout);
 }
