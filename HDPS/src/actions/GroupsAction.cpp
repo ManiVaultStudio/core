@@ -63,8 +63,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
     layout->setAlignment(Qt::AlignTop);
     layout->addWidget(treeWidget);
 
-    // Change the accordion section when the groups action changes
-    connect(groupsAction, &GroupsAction::changed, this, [this, groupsAction, treeWidget]() {
+    const auto update = [this, treeWidget, groupsAction]() {
 
         // Clear previous sections
         treeWidget->clear();
@@ -87,7 +86,13 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
             // Assign the button to the top-level tree widget item
             treeWidget->setItemWidget(treeWidgetItem, 0, button);
         }
-    });
+    };
+
+    // Change the accordion section when the groups action changes
+    connect(groupsAction, &GroupsAction::changed, this, update);
+
+    // Do an initial update
+    update();
 }
 
 GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, const QString& text, QWidget* parent /*= nullptr*/) :
