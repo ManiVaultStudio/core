@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ImagePreviewAction.h"
-
 #include "actions/Actions.h"
 #include "event/EventListener.h"
 #include "util/DatasetRef.h"
@@ -41,5 +39,4 @@ protected:
     StringAction            _targetRectangleAction;             /** Target rectangle action */
     StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
     StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
-    //ImagePreviewAction      _imagePreviewAction;                /** Image preview action */
 };

@@ -15,7 +15,6 @@ InfoAction::InfoAction(QObject* parent, const QString& datasetName) :
     _targetRectangleAction(this, "Target rectangle"),
     _numberOfPixelsAction(this, "Number of pixels"),
     _numberComponentsPerPixelAction(this, "Number of components per pixel")//,
-    //_imagePreviewAction(this, datasetName)
 {
     setText("Info");
     setEventCore(Application::core());
