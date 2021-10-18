@@ -157,11 +157,6 @@ public:
     const DatasetType& operator* () const {
       return *_dataset;
     }
-    
-    /** Dereference operator */
-    DatasetType& operator* () const {
-        return *_dataset;
-    }
 
     /** Arrow operator */
     DatasetType* operator-> () {
