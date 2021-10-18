@@ -9,6 +9,7 @@
 #include <QItemSelectionModel>
 
 #include <numeric>
+#include <math.h>
 
 using namespace hdps::util;
 

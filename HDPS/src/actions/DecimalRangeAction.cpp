@@ -103,6 +103,14 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
         setPopupLayout(layout);
     }
 }
+#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
+constexpr float  DecimalRangeAction::INIT_LIMIT_MIN;
+constexpr float  DecimalRangeAction::INIT_LIMIT_MAX;
+constexpr float  DecimalRangeAction::INIT_RANGE_MIN;
+constexpr float  DecimalRangeAction::INIT_RANGE_MAX;
+constexpr float  DecimalRangeAction::INIT_DEFAULT_RANGE_MIN;
+constexpr float  DecimalRangeAction::INIT_DEFAULT_RANGE_MAX;
+#endif
 
 }
 }
