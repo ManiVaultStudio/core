@@ -94,14 +94,17 @@ public: // Getters/setters
      */
     void setIndices(const std::vector<unsigned int>& indices);
 
-    /** Get median */
-    std::vector<float>& getMedian();
+    /** Get median values for every dimension of the cluster */
+    std::vector<float>& getMedian() { return _median; }
+    const std::vector<float>& getMedian() const { return _median; }
 
-    /** Get median */
-    std::vector<float>& getMean();
+    /** Get mean values for every dimension of the cluster */
+    std::vector<float>& getMean() { return _mean; }
+    const std::vector<float>& getMean() const { return _mean; }
 
-    /** Get median */
-    std::vector<float>& getStandardDeviation();
+    /** Get standard deviation values for every dimension of the cluster */
+    std::vector<float>& getStandardDeviation() { return _stddev; }
+    const std::vector<float>& getStandardDeviation() const { return _stddev; }
 
     /** Loads cluster from a variant */
     void fromVariant(const QVariant& variant);
@@ -114,9 +117,9 @@ protected:
     QString                     _id;            /** Unique cluster name */
     QColor                      _color;         /** Cluster color */
     std::vector<unsigned int>   _indices;       /** Indices contained by the cluster */
-    std::vector<float>          _median;        /** Median values */
-    std::vector<float>          _mean;          /** Mean values */
-    std::vector<float>          _stddev;        /** Standard deviation values */
+    std::vector<float>          _median;        /** Median dimension values */
+    std::vector<float>          _mean;          /** Mean dimension values */
+    std::vector<float>          _stddev;        /** Standard deviation dimension values */
 };
 
 /**

@@ -30,6 +30,6 @@ public:
 
 } // namespace hdps
 
-Q_DECLARE_INTERFACE(hdps::plugin::SelectionListener, "cytosplore.SelectionListener")
+Q_DECLARE_INTERFACE(hdps::plugin::SelectionListener, "hdps.SelectionListener")
 
 #endif // HDPS_SELECTIONLISTENER_H
