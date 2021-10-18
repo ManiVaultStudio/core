@@ -155,6 +155,11 @@ public:
 
     /** Const dereference operator */
     const DatasetType& operator* () const {
+      return *_dataset;
+    }
+    
+    /** Dereference operator */
+    DatasetType& operator* () const {
         return *_dataset;
     }
 

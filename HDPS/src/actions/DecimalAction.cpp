@@ -203,5 +203,13 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     return widget;
 }
 
+#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
+constexpr float DecimalAction::INIT_MIN;
+constexpr float DecimalAction::INIT_MAX;
+constexpr float DecimalAction::INIT_VALUE;
+constexpr float DecimalAction::INIT_DEFAULT_VALUE;
+constexpr int   DecimalAction::INIT_DECIMALS; 
+#endif
+
 }
 }

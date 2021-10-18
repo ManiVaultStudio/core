@@ -60,7 +60,7 @@ public:
      * Callback invoked when the window closes
      * @param closeEvent Close event
      */
-    void closeEvent(QCloseEvent* closeEvent);
+    void closeEvent(QCloseEvent* closeEvent) override;
 
 public: // Adding plugins
 
