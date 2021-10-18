@@ -25,11 +25,11 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        Picker      = 0x00001,      /** The widget includes a color picker */
-        ResetButton = 0x00004,      /** The widget includes a reset push button */
+        Picker          = 0x00001,      /** The widget includes a color picker */
+        ResetPushButton = 0x00002,      /** The widget includes a reset push button */
 
         Basic   = Picker,
-        All     = Picker | ResetButton
+        All     = Picker | ResetPushButton
     };
 
 public:
@@ -87,9 +87,9 @@ protected:
     /**
      * Get widget representation of the color action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;;
 
 public:
 
@@ -125,7 +125,7 @@ public:
     void setDefaultColor(const QColor& defaultColor);
 
     /** Determines whether the current color can be reset to its default */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset the current color to the default color */
     void reset() override;

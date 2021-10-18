@@ -64,8 +64,8 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
     updateCreateSubsetAction();
 }
 
-SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, subsetAction, state)
+SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
+    WidgetActionWidget(parent, subsetAction)
 {
     auto mainLayout = new QHBoxLayout();
 

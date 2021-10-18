@@ -50,6 +50,11 @@ QString DataHierarchyItem::getDatasetName() const
     return _dataset.getDatasetName();
 }
 
+void DataHierarchyItem::setDatasetName(const QString& datasetName)
+{
+    _dataset.setDatasetName(datasetName);
+}
+
 void DataHierarchyItem::renameDataset(const QString& intendedDatasetName)
 {
     try {

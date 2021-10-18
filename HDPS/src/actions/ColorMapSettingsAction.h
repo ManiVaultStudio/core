@@ -1,5 +1,9 @@
 #pragma once
 
+#include "ColorMapAxisAction.h"
+#include "ColorMapViewAction.h"
+#include "ColorMapDiscreteAction.h"
+
 #include "WidgetAction.h"
 #include "DecimalAction.h"
 #include "DecimalRangeAction.h"
@@ -27,25 +31,27 @@ class ColorMapSettingsAction : public WidgetAction
 public:
 
     /** Widget class for color map settings action */
-    class Widget : public hdps::gui::WidgetActionWidget {
+    class Widget : public WidgetActionWidget {
     public:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
          * @param colorMapSettingsAction Pointer to clusters action
-         * @param state State of the widget
          */
-        Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction, const WidgetActionWidget::State& state);
+        Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction);
+
+    protected:
+        ColorMapViewAction      _colorMapViewAction;    /** Color map view action */
     };
 
     /**
-     * Get widget representation of the clusters action
+     * Get widget representation of the color map settings action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this);
     };
 
 protected:
@@ -58,30 +64,26 @@ protected:
 
 public:
 
-    /**
-     * Enable/disable range editing
-     * @param rangeEditingEnabled Whether range editing is enabled or not
-     */
-    void setRangeEditingEnabled(const bool& rangeEditingEnabled);
+    /** Determines whether the current color can be reset to its default */
+    bool isResettable() const override;
+
+    /** Reset to default */
+    void reset() override;
 
 public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }
-    ToggleAction& getInvertAction() { return _invertAction; }
-    DecimalRangeAction& getRangeAction() { return _rangeAction; }
-    TriggerAction& getResetToDataRangeAction() { return _resetToDefaultRangeAction; }
-    ToggleAction& getDiscreteAction() { return _discreteAction; }
-    IntegralAction& getNumberOfDiscreteStepsAction() { return _numberOfDiscreteStepsAction; }
+    ColorMapAxisAction& getHorizontalAxisAction() { return _horizontalAxisAction; }
+    ColorMapAxisAction& getVerticalAxisAction() { return _verticalAxisAction; }
+    ColorMapDiscreteAction& getDiscreteAction() { return _discreteAction; }
 
 protected:
-    ColorMapAction&     _colorMapAction;                    /** Reference to color map action */
-    DecimalRangeAction  _rangeAction;                       /** Range action */
-    TriggerAction       _resetToDefaultRangeAction;         /** Reset minimum/maximum range to data range */
-    ToggleAction        _invertAction;                      /** Color map is horizontally mirrored action */
-    ToggleAction        _discreteAction;                    /** Color map is discrete/continuous action */
-    IntegralAction      _numberOfDiscreteStepsAction;       /** Number of discrete steps in the color map action */
+    ColorMapAction&             _colorMapAction;            /** Reference to color map action */
+    ColorMapAxisAction          _horizontalAxisAction;      /** Horizontal axis action */
+    ColorMapAxisAction          _verticalAxisAction;        /** Vertical axis action */
+    ColorMapDiscreteAction      _discreteAction;            /** Discrete action */
 
-    /** Only color map action may instantiate this class */
+    /** Only color map actions may instantiate this class */
     friend class ColorMapAction;
 };
 

@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-ClustersFilterModel::ClustersFilterModel(QObject* parent) :
+ClustersFilterModel::ClustersFilterModel(QObject* parent /*= nullptr*/) :
     QSortFilterProxyModel(parent),
     _nameFilter("")
 {

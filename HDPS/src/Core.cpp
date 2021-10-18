@@ -164,9 +164,13 @@ void Core::removeDatasets(const QStringList& datasetNames, const bool& recursive
         // Cache the data type because later on the dataset has already been removed
         const auto dataType = requestData(datasetName).getDataType();
 
+        // Notify listeners that the dataset is about to be removed
+        notifyDataAboutToBeRemoved(dataType, datasetName);
+        
         // Remove the dataset from the data manager
         _dataManager->removeDataset(datasetName);
 
+        // Notify listeners that the dataset is removed
         notifyDataRemoved(dataType, datasetName);
     }
 }
@@ -376,8 +380,39 @@ void Core::notifyDataAdded(const QString datasetName)
     dataEvent.dataSetName = datasetName;
     dataEvent.dataType = dt;
     
-    for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&dataEvent);
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataEvent);
+}
+
+void Core::notifyDataAboutToBeRemoved(const DataType& dataType, const QString datasetName)
+{
+    DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent;
+
+    dataAboutToBeRemovedEvent.dataSetName   = datasetName;
+    dataAboutToBeRemovedEvent.dataType      = dataType;
+
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataAboutToBeRemovedEvent);
+}
+
+void Core::notifyDataRemoved(const DataType& dataType, const QString datasetName)
+{
+    DataRemovedEvent dataRemovedEvent;
+
+    dataRemovedEvent.dataSetName    = datasetName;
+    dataRemovedEvent.dataType       = dataType;
+
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataRemovedEvent);
 }
 
 /**
@@ -391,21 +426,6 @@ void Core::notifyDataChanged(const QString datasetName)
     DataChangedEvent dataEvent;
     dataEvent.dataSetName = datasetName;
     dataEvent.dataType = dt;
-
-    for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&dataEvent);
-}
-
-/**
-* Goes through all plug-ins stored in the core and calls the 'dataRemoved' function
-* on all plug-ins that inherit from the DataConsumer interface.
-*/
-void Core::notifyDataRemoved(const DataType& dataType, const QString datasetName)
-{
-    DataRemovedEvent dataEvent;
-
-    dataEvent.dataSetName   = datasetName;
-    dataEvent.dataType      = dataType;
 
     for (EventListener* listener : _eventListeners)
         listener->onDataEvent(&dataEvent);

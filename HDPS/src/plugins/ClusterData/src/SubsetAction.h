@@ -30,18 +30,17 @@ protected:
          * Constructor
          * @param parent Pointer to parent widget
          * @param subsetAction Pointer to subset action
-         * @param state State of the widget
          */
-        Widget(QWidget* parent, SubsetAction* subsetAction, const WidgetActionWidget::State& state);
+        Widget(QWidget* parent, SubsetAction* subsetAction);
     };
 
     /**
-     * Get widget representation of the clusters action
+     * Get widget representation of the subset action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this);
     };
 
 public:

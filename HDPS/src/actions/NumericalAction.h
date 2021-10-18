@@ -27,20 +27,21 @@ class NumericalAction : public WidgetAction
     using PrefixChangedCB               = std::function<void()>;
     using SuffixChangedCB               = std::function<void()>;
     using NumberOfDecimalsChangedCB     = std::function<void()>;
-    using CanResetChangedCB             = std::function<void()>;
+    using ResettableChangedCB           = std::function<void()>;
 
 public:
 
     /** Describes the widget settings */
     enum WidgetFlag {
-        SpinBox = 0x00001,      /** Widget includes a spin box */
-        Slider  = 0x00002,      /** Widget includes a slider */
-        Reset   = 0x00004,      /** Widget includes a reset push button */
+        SpinBox             = 0x00001,      /** Widget includes a spin box */
+        Slider              = 0x00002,      /** Widget includes a slider */
+        LineEdit            = 0x00004,      /** Widget includes a line edit */
+        ResetPushButton     = 0x00008,      /** Widget includes a reset push button */
 
         Basic               = SpinBox | Slider,
-        SpinBoxAndReset     = SpinBox | Reset,
-        SliderAndReset      = Slider | Reset,
-        All                 = SpinBox | Slider | Reset
+        SpinBoxAndReset     = SpinBox | ResetPushButton,
+        SliderAndReset      = Slider | ResetPushButton,
+        All                 = SpinBox | Slider | ResetPushButton
     };
 
 public:
@@ -73,31 +74,8 @@ public:
         _numberOfDecimalsChanged()
     {
         setText(title);
-        setWidgetFlags(WidgetFlag::Basic);
-    }
-
-    /**
-     * Initialize the decimal action
-     * @param minimum Minimum value
-     * @param maximum Maximum value
-     * @param value Value
-     * @param defaultValue Default value
-     */
-    void initialize(const NumericalType& minimum, const NumericalType& maximum, const NumericalType& value, const NumericalType& defaultValue, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS)
-    {
-        _minimum            = std::min(minimum, _maximum);
-        _maximum            = std::max(maximum, _minimum);
-        _value              = std::max(_minimum, std::min(value, _maximum));
-        _defaultValue       = std::max(_minimum, std::min(defaultValue, _maximum));
-        _numberOfDecimals   = numberOfDecimals;
-
-        _minimumChanged();
-        _maximumChanged();
-        _valueChanged();
-        _defaultValueChanged();
-
-        if (_numberOfDecimalsChanged)
-            _numberOfDecimalsChanged();
+        setMayReset(true);
+        setDefaultWidgetFlags(WidgetFlag::Basic);
     }
 
     /** Gets the current value */
@@ -108,20 +86,19 @@ public:
     /**
      * Sets the current value
      * @param value Current value
-     * @return Whether the value changed
      */
     virtual void setValue(const NumericalType& value) {
         if (value == _value)
             return;
 
-        const auto couldReset = canReset();
+        const auto couldReset = isResettable();
 
         _value = std::max(_minimum, std::min(value, _maximum));
 
         _valueChanged();
 
-        if (canReset() != couldReset)
-            _canResetChanged();
+        if (isResettable() != couldReset)
+            _resettableChanged();
     }
 
     /** Gets the default value */
@@ -143,7 +120,7 @@ public:
     }
 
     /** Determines whether the current value can be reset to its default */
-    virtual bool canReset() const final {
+    virtual bool isResettable() const final {
         return _value != _defaultValue;
     }
 
@@ -307,7 +284,7 @@ protected: // Callbacks for implementations of the numerical action
     PrefixChangedCB             _prefixChanged;                 /** Callback which is called when the prefix changed */
     SuffixChangedCB             _suffixChanged;                 /** Callback which is called when the suffix changed */
     NumberOfDecimalsChangedCB   _numberOfDecimalsChanged;       /** Callback which is called when the number of decimals changed */
-    CanResetChangedCB           _canResetChanged;               /** Callback which is called when the resettable-ness changed */
+    ResettableChangedCB         _resettableChanged;             /** Callback which is called when the resettable-ness changed */
 
     static constexpr std::uint32_t  INIT_NUMBER_OF_DECIMALS = 1;        /** Initialization number of decimals */
 };

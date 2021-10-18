@@ -75,6 +75,12 @@ public:
     QString getDatasetName() const;
 
     /**
+     * Set the dataset name
+     * @param datasetName Name of the dataset
+     */
+    void setDatasetName(const QString& datasetName);
+
+    /**
      * Renames the dataset
      * @param intendedDatasetName Intended new name of the dataset
      */

@@ -813,6 +813,15 @@ public:
     /** Get icon for the dataset */
     QIcon getIcon() const override;
 
+    /** Select all data points */
+    void selectAll();
+
+    /** Clear data point selection */
+    void selectNone();
+
+    /** Invert the data point selection */
+    void selectInvert();
+
     std::vector<unsigned int> indices;
 
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */

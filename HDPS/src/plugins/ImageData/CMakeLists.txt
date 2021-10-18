@@ -19,25 +19,34 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-file(GLOB H src/*.h)
-file(GLOB CPP src/*.cpp)
 file(GLOB JSON src/*.json)
-
-set(SOURCES ${H} ${CPP})
 set(AUX ${JSON})
-set(IMAGEDATA_HEADERS 
+
+set(IMAGE_DATA_HEADERS 
     src/Image.h
     src/ImageData.h
     src/Images.h
     src/Common.h
 )
 
-source_group(Plugin FILES ${SOURCES})
+set(IMAGE_DATA_SOURCES 
+    src/Image.cpp
+    src/ImageData.cpp
+    src/Images.cpp
+)
+
+set(ACTIONS_SOURCES 
+    src/InfoAction.h
+    src/InfoAction.cpp
+)
+
+source_group(Actions FILES ${ACTIONS_SOURCES})
+source_group(Plugin FILES ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES})
 source_group(Aux FILES ${AUX})
 
 include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES} ${AUX})
+add_library(${PROJECT} SHARED ${IMAGE_DATA_HEADERS} ${IMAGE_DATA_SOURCES} ${ACTIONS_SOURCES} ${AUX})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 
@@ -58,13 +67,15 @@ endif(MSVC)
 
 set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}HDPS_Public${LIB_LINK_SUFFIX}")
 set(POINTDATA_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_LINK_SUFFIX}") 
+set(CLUSTER_DATA_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ClusterData${LIB_LINK_SUFFIX}") 
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
 target_link_libraries(${PROJECT} "${POINTDATA_LINK_LIBRARY}")
+target_link_libraries(${PROJECT} "${CLUSTER_DATA_LINK_LIBRARY}")
 
-set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${IMAGEDATA_HEADERS}")
+set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${IMAGE_DATA_HEADERS}")
 
 install(TARGETS ${PROJECT}
     RUNTIME DESTINATION Plugins COMPONENT PLUGINS

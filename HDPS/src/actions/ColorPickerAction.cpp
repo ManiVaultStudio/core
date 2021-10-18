@@ -54,7 +54,7 @@ void ColorPickerAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-bool ColorPickerAction::canReset() const
+bool ColorPickerAction::isResettable() const
 {
     return _color != _defaultColor;
 }
@@ -64,8 +64,8 @@ void ColorPickerAction::reset()
     setColor(_defaultColor);
 }
 
-ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPickerAction, const WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, colorPickerAction, state),
+ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPickerAction) :
+    WidgetActionWidget(parent, colorPickerAction),
     _layout(),
     _colorDialog(),
     _hueAction(this, "Hue", 0, 359, colorPickerAction->getColor().hue(), colorPickerAction->getColor().hue()),
@@ -148,23 +148,7 @@ ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPicke
         colorPickerAction->setColor(color);
     });
 
-    switch (state)
-    {
-        case Widget::State::Standard:
-        {
-            setLayout(&_layout);
-            break;
-        }
-
-        case Widget::State::Popup:
-        {
-            setPopupLayout(&_layout);
-            break;
-        }
-
-        default:
-            break;
-    }
+    setLayout(&_layout);
 }
 
 }

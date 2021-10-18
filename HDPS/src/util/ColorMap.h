@@ -16,14 +16,10 @@ class ColorMap
 
 public: // Enumerations
 
-    /**
-     * Color map type
-     * Defines the color map types
-     */
+    /** Color map types */
     enum class Type {
-        ZeroDimensional,    /** Zero-dimensional color map (not in use at the moment) */
-        OneDimensional,     /** One-dimensional color map */
-        TwoDimensional      /** Two-dimensional color map */
+        OneDimensional = 1,     /** One-dimensional color map */
+        TwoDimensional          /** Two-dimensional color map */
     };
 
 public: // Construction/destruction
@@ -51,7 +47,7 @@ public: // Getters
     QImage getImage() const;
 
     /** Returns the number of dimensions */
-    int getNoDimensions() const;
+    std::uint32_t getNoDimensions() const;
 
 private:
     const QString       _name;              /** Name in the user interface */

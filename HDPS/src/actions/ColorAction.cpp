@@ -18,13 +18,16 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
 {
     setText(title);
     initialize(color, defaultColor);
-    setWidgetFlags(WidgetFlag::Basic);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::Basic);
 }
 
 void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
 {
     setColor(color);
     setDefaultColor(defaultColor);
+
+    setResettable(isResettable());
 }
 
 QColor ColorAction::getColor() const
@@ -40,6 +43,8 @@ void ColorAction::setColor(const QColor& color)
     _color = color;
 
     emit colorChanged(_color);
+
+    setResettable(isResettable());
 }
 
 QColor ColorAction::getDefaultColor() const
@@ -57,7 +62,7 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-bool ColorAction::canReset() const
+bool ColorAction::isResettable() const
 {
     return _color != _defaultColor;
 }
@@ -68,7 +73,7 @@ void ColorAction::reset()
 }
 
 ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
-    WidgetActionWidget(parent, colorAction, WidgetActionWidget::State::Standard),
+    WidgetActionWidget(parent, colorAction),
     _layout(),
     _colorPickerAction(this, "Color picker", colorAction->getColor(), colorAction->getColor()),
     _toolButton(this, _colorPickerAction)
@@ -79,6 +84,10 @@ ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* co
     connect(&_colorPickerAction, &ColorPickerAction::colorChanged, this, [this, colorAction](const QColor& color) {
         colorAction->setColor(color);
         _toolButton.update();
+    });
+
+    connect(colorAction, &ColorAction::colorChanged, this, [this](const QColor& color) {
+        _colorPickerAction.setColor(color);
     });
 
     _toolButton.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -147,40 +156,29 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
 
     // Do the painting
     painterColorPixmap.setBrush(QBrush(color));
-    painterColorPixmap.setPen(QPen(penColor, 2.0, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
-    painterColorPixmap.drawRoundedRect(colorRect, 5, 5);
+    painterColorPixmap.setPen(QPen(penColor, 1.5, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painterColorPixmap.drawRoundedRect(colorRect, 4, 4);
 
     QPainter painterColorWidget(this);
 
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
-QWidget* ColorAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto widget = new QWidget(parent);
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
     layout->setSpacing(3);
 
-    if (hasWidgetFlag(WidgetFlag::Picker))
+    if (widgetFlags & WidgetFlag::Picker)
         layout->addWidget(new PushButtonWidget(parent, this));
 
-    if (hasWidgetFlag(WidgetFlag::ResetButton))
+    if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
-
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
 
     return widget;
 }

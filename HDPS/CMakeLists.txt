@@ -88,42 +88,53 @@ set( EVENT_HEADERS
 )
 
 set( WIDGET_HEADERS
+    src/widgets/CollapsedWidget.h
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
-    src/widgets/ColorPickerPushButton.h
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
+    src/widgets/ResponsiveToolbarWidget.h
+    src/widgets/ToolbarItemWidget.h
 )
 
 set( WIDGET_SOURCES
+    src/widgets/CollapsedWidget.cpp
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
-    src/widgets/ColorPickerPushButton.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
+    src/widgets/ResponsiveToolbarWidget.cpp
+    src/widgets/ToolbarItemWidget.cpp
 )
 
 set(ACTIONS_HEADERS
     src/actions/ColorAction.h
     src/actions/ColorPickerAction.h
     src/actions/ColorMapAction.h
+    src/actions/ColorMapAxisAction.h
+    src/actions/ColorMapDiscreteAction.h
+    src/actions/ColorMapViewAction.h
     src/actions/ColorMapSettingsAction.h
     src/actions/DecimalAction.h
     src/actions/DecimalRangeAction.h
     src/actions/GroupAction.h
+    src/actions/GroupsAction.h
+    src/actions/ImageAction.h
     src/actions/IntegralAction.h
     src/actions/NumericalAction.h
     src/actions/OptionAction.h
+    src/actions/PixelSelectionAction.h
     src/actions/TriggerAction.h
     src/actions/ToggleAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
-    src/actions/WidgetActionStateWidget.h
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionResetButton.h
     src/actions/WidgetActionsManager.h
+    src/actions/WidgetActionStateWidget.h
+    src/actions/WindowLevelAction.h
     src/actions/Actions.h
 )
 
@@ -131,23 +142,30 @@ set(ACTIONS_SOURCES
     src/actions/ColorAction.cpp
     src/actions/ColorPickerAction.cpp
     src/actions/ColorMapAction.cpp
+    src/actions/ColorMapAxisAction.cpp
+    src/actions/ColorMapDiscreteAction.cpp
+    src/actions/ColorMapViewAction.cpp
     src/actions/ColorMapSettingsAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/DecimalRangeAction.cpp
     src/actions/GroupAction.cpp
+    src/actions/GroupsAction.cpp
+    src/actions/ImageAction.cpp
     src/actions/IntegralAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
+	src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
-    src/actions/WidgetActionStateWidget.cpp
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionResetButton.cpp
     src/actions/WidgetActionsManager.cpp
+    src/actions/WidgetActionStateWidget.cpp
+    src/actions/WindowLevelAction.cpp
 )
 
 set( RENDERER_HEADERS
@@ -192,34 +210,44 @@ set( UTIL_HEADERS
     src/util/FileUtil.h
     src/util/MeanShift.h
     src/util/DensityComputation.h
+    src/util/Exception.h
     src/util/Math.h
     src/util/Timer.h
     src/util/IconFont.h
     src/util/IconFonts.h
+    src/util/Interpolation.h
     src/util/FontAwesome.h
     src/util/ColorMap.h
     src/util/ColorMapFilterModel.h
     src/util/ColorMapModel.h
+    src/util/ColorSpace.h
     src/util/Visitable.h
     src/util/Visitor.h
     src/util/DatasetRef.h
+    src/util/PixelSelectionTool.h
+    src/util/PixelSelection.h
 )
 
 set( UTIL_SOURCES
     src/util/FileUtil.cpp
     src/util/MeanShift.cpp
     src/util/DensityComputation.cpp
+    src/util/Exception.cpp
     src/util/Math.cpp
     src/util/Timer.cpp
     src/util/IconFont.cpp
     src/util/IconFonts.cpp
+    src/util/Interpolation.cpp
     src/util/FontAwesome.cpp
     src/util/ColorMap.cpp
     src/util/ColorMapFilterModel.cpp
     src/util/ColorMapModel.cpp
+    src/util/ColorSpace.cpp
     src/util/Visitable.cpp
     src/util/Visitor.cpp
     src/util/DatasetRef.cpp
+	src/util/PixelSelectionTool.cpp
+	src/util/PixelSelection.cpp
 )
 
 set( PLUGIN_HEADERS

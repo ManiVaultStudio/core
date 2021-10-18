@@ -20,6 +20,7 @@
 
 #include "DockWidgetTab.h"
 #include "DockAreaTitleBar.h"
+#include "DockSplitter.h"
 
 // Graphics capability checking
 #include <QOpenGLFunctions>
@@ -61,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
     connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetNameChanged, this, [this](const QString& selectedDatasetName) {
-        _dataPropertiesWidget->setDataset(selectedDatasetName);
+        _dataPropertiesWidget->setDatasetName(selectedDatasetName);
     });
 
     connect(_dataPropertiesWidget, &DataPropertiesWidget::datasetNameChanged, this, [this](const QString& datasetName) {
@@ -351,7 +352,14 @@ void MainWindow::initializeSettingsDockingArea()
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
     _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataPropertiesDockWidget, _settingsDockArea);
 
-    _settingsDockArea->setMinimumWidth(600);
+    auto splitter = ads::internal::findParent<ads::CDockSplitter*>(_settingsDockArea);
+
+    if (splitter != nullptr) {
+        const auto height = splitter->height();
+        splitter->setSizes({ height * 1 / 3, height * 2 / 3 });
+    }
+
+    _settingsDockArea->setMinimumWidth(500);
 }
 
 void MainWindow::initializeLoggingDockingArea()

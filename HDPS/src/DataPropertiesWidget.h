@@ -2,6 +2,7 @@
 #define HDPS_DATA_PROPERTIES_WIDGET_H
 
 #include "util/DatasetRef.h"
+#include "actions/GroupsAction.h"
 
 #include <QWidget>
 #include <QPushButton>
@@ -10,38 +11,13 @@
 class QTreeWidgetItem;
 
 using namespace hdps::util;
+using namespace hdps::gui;
 
 namespace hdps
 {
 
 namespace gui
 {
-
-class GroupAction;
-
-/**
- * Section expand button class
- *
- * Represents a collapse/expand button
- *
- * @author Thomas Kroes
- */
-class SectionExpandButton : public QPushButton {
-public:
-
-    /**
-     * Constructor
-     * @param treeWidgetItem Pointer to tree widget item
-     * @param widgetActionGroup Pointer to widget action group
-     * @param text Section name
-     * @param parent Pointer to parent widget
-     */
-    SectionExpandButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, const QString& text, QWidget* parent = nullptr);
-
-protected:
-    GroupAction*        _widgetActionGroup;     /** Pointer to widget action group */
-    QTreeWidgetItem*    _treeWidgetItem;        /** Pointer to widget action group */
-};
 
 /**
  * Data properties widget class
@@ -66,18 +42,12 @@ public:
      * Set the name of the current dataset
      * @param datasetName Name of the dataset
      */
-    void setDataset(const QString& datasetName);
+    void setDatasetName(const QString& datasetName);
 
 protected:
 
     /** Load dataset properties */
     void loadDataset();
-
-    /**
-     * Add a section collapse/expand button
-     * @param groupAction Pointer to group action
-     */
-    QTreeWidgetItem* addButton(GroupAction* groupAction);
 
 signals:
 
@@ -88,8 +58,8 @@ signals:
     void datasetNameChanged(const QString& datasetName);
 
 protected:
-    QTreeWidget*            _treeWidget;    /** Pointer to sections tree widget */
     DatasetRef<DataSet>     _dataset;       /** Dataset reference */
+    GroupsAction            _groupsAction;  /** Groups action */
 };
 
 }

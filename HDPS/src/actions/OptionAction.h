@@ -28,11 +28,11 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        ComboBox    = 0x00001,      /** The widget includes a combobox */
-        ResetButton = 0x00004,      /** The widget includes a reset push button */
+        ComboBox        = 0x00001,      /** The widget includes a combobox */
+        ResetPushButton = 0x00002,      /** The widget includes a reset push button */
 
         Basic   = ComboBox,
-        All     = ComboBox | ResetButton
+        All     = ComboBox | ResetPushButton
     };
 
 public:
@@ -58,9 +58,9 @@ protected:
     /**
      * Get widget representation of the option action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard);;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
 public:
 
@@ -81,6 +81,14 @@ public:
      * @param defaultOption Default option
      */
     void initialize(const QStringList& options = QStringList(), const QString& currentOption = "", const QString& defaultOption = "");
+
+    /**
+     * Initialize the option action with a custom model
+     * @param customModel Pointer to custom model
+     * @param currentOption Current option
+     * @param defaultOption Default option
+     */
+    void initialize(QAbstractItemModel& customModel, const QString& currentOption = "", const QString& defaultOption = "");
 
     /** Gets the options */
     QStringList getOptions() const;
@@ -140,7 +148,7 @@ public:
     void setDefaultText(const QString& defaultText);
 
     /** Determines whether the current value can be reset to its default */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset the current value to the default value */
     void reset() override;

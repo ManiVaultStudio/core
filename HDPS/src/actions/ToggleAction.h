@@ -2,8 +2,8 @@
 
 #include "WidgetAction.h"
 
-class QCheckBox;
-class QPushButton;
+#include <QCheckBox>
+#include <QPushButton>
 
 namespace hdps {
 
@@ -24,21 +24,25 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        CheckBox    = 0x00001,      /** The widget includes a check box */
-        Button      = 0x00002,      /** The widget includes a (toggle) push button */
-        Reset       = 0x00004,      /** The widget includes a reset push button */
 
-        Basic               = CheckBox,
-        CheckBoxAndReset    = CheckBox | Reset,
-        ButtonAndReset      = Button | Reset
+        /** Push button options */
+        Icon                = 0x00001,                      /** Enable push button icon */
+        Text                = 0x00002,                      /** Enable push button text */
+
+        CheckBox            = 0x00004,                      /** The widget includes a check box */
+        PushButton          = 0x00008 | Text,               /** The widget includes a toggle push button with text */
+        ResetPushButton     = 0x00010,                      /** The widget includes a reset push button */
+
+        /** Push button configurations */
+        PushButtonIcon          = (PushButton & ~Text) | Icon,  /** Push button with icon only */
+        PushButtonText          = PushButton,                   /** Push button with text only */
+        PushButtonIconText      = PushButton | Icon             /** Push button with icon and text */
     };
 
 public:
 
-    /**
-     * Check box widget class for toggle action
-     */
-    class CheckBoxWidget : public WidgetActionWidget
+    /** Check box widget class for toggle action */
+    class CheckBoxWidget : public QCheckBox
     {
     protected:
 
@@ -49,21 +53,14 @@ public:
          */
         CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction);
 
-    public:
-
-        /** Gets the check box widget */
-        QCheckBox* getCheckBox() { return _checkBox; }
-
     protected:
-        QCheckBox*      _checkBox;      /** Check box widget */
+        ToggleAction*   _toggleAction;      /** Pointer to toggle action */
 
         friend class ToggleAction;
     };
 
-    /**
-     * Push button widget class for toggle action
-     */
-    class PushButtonWidget : public WidgetActionWidget
+    /** Push button widget class for toggle action */
+    class PushButtonWidget : public QPushButton
     {
     protected:
 
@@ -71,16 +68,12 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param toggleAction Pointer to toggle action
+         * @param widgetFlags Widget flags
          */
-        PushButtonWidget(QWidget* parent, ToggleAction* checkAction);
-
-    public:
-
-        /** Gets the push button widget */
-        QPushButton* getPushButton() { return _pushButton; }
+        PushButtonWidget(QWidget* parent, ToggleAction* toggleAction, const std::int32_t& widgetFlags);
 
     protected:
-        QPushButton*    _pushButton;        /** Push button widget */
+        ToggleAction*   _toggleAction;      /** Pointer to toggle action */
 
         friend class ToggleAction;
     };
@@ -90,9 +83,9 @@ protected:
     /**
      * Get widget representation of the toggle action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -122,24 +115,10 @@ public:
     void setDefaultToggled(const bool& defaultToggled);
 
     /** Determines whether the action can be reset */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset to default */
     void reset() override;
-
-    /**
-     * Creates a check box widget to interact with the toggle action
-     * @param parent Pointer to parent widget
-     * @return Check box widget
-     */
-    CheckBoxWidget* createCheckBoxWidget(QWidget* parent) { return new CheckBoxWidget(parent, this);  };
-
-    /**
-     * Creates a push button widget to interact with the toggle action
-     * @param parent Pointer to parent widget
-     * @return Push button widget
-     */
-    PushButtonWidget* createPushButtonWidget(QWidget* parent) { return new PushButtonWidget(parent, this); };
 
 signals:
 

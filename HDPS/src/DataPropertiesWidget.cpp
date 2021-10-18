@@ -5,10 +5,7 @@
 #include "actions/GroupAction.h"
 
 #include <QDebug>
-#include <QTreeWidgetItem>
-#include <QColor>
 #include <QVBoxLayout>
-#include <QLabel>
 
 namespace hdps
 {
@@ -18,8 +15,8 @@ namespace gui
 
 DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
-    _treeWidget(new QTreeWidget()),
-    _dataset()
+    _dataset(),
+    _groupsAction(this)
 {
     setAutoFillBackground(true);
 
@@ -29,28 +26,23 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     layout->setMargin(0);
     layout->setAlignment(Qt::AlignTop);
-
-    _treeWidget->setHeaderHidden(true);
-    _treeWidget->setIndentation(0);
-    _treeWidget->setAutoFillBackground(true);
-    _treeWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-
-    layout->addWidget(_treeWidget);
+    layout->addWidget(_groupsAction.createWidget(this));
 
     connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this](const QString& oldDatasetName, const QString& newDatasetName) {
         loadDataset();
     });
 
+    connect(&_dataset, &DatasetRef<DataSet>::datasetAboutToBeRemoved, this, [this]() {
+        setDatasetName("");
+    });
+
     emit datasetNameChanged("");
 }
 
-void DataPropertiesWidget::setDataset(const QString& datasetName)
+void DataPropertiesWidget::setDatasetName(const QString& datasetName)
 {
     try
     {
-        if (datasetName.isEmpty())
-            throw std::runtime_error("data set name is empty");
-
         if (_dataset.isValid())
             disconnect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
@@ -59,7 +51,10 @@ void DataPropertiesWidget::setDataset(const QString& datasetName)
         if (!_dataset.isValid())
             return;
 
-        connect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this]() {
+        connect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
+            if (dynamic_cast<GroupAction*>(&widgetAction) == nullptr)
+                return;
+
             loadDataset();
         });
     }
@@ -73,86 +68,23 @@ void DataPropertiesWidget::loadDataset()
 {
     emit datasetNameChanged(_dataset.getDatasetName());
 
-    _treeWidget->clear();
-
-    if (!_dataset.isValid())
+    if (!_dataset.isValid()) {
+        _groupsAction.set(QVector<GroupAction*>());
         return;
+    }
 
-    auto exposedActions = _dataset->getActions();
+    GroupsAction::GroupActions groupActions;
 
-    for (auto exposedAction : exposedActions) {
-        auto exposedGroupAction = dynamic_cast<GroupAction*>(exposedAction);
+    for (auto action : _dataset->getHierarchyItem().getActions()) {
+        auto groupAction = dynamic_cast<GroupAction*>(action);
 
-        if (exposedGroupAction == nullptr)
+        if (groupAction == nullptr)
             continue;
 
-        if (exposedGroupAction->isVisible())
-            addButton(exposedGroupAction);
+        groupActions << groupAction;
     }
-}
 
-QTreeWidgetItem* DataPropertiesWidget::addButton(GroupAction* groupAction)
-{
-    auto treeWidgetItem = new QTreeWidgetItem();
-
-    _treeWidget->addTopLevelItem(treeWidgetItem);
-
-    auto button = new SectionExpandButton(treeWidgetItem, groupAction, groupAction->text());
-
-    _treeWidget->setItemWidget(treeWidgetItem, 0, button);
-    
-    return treeWidgetItem;
-}
-
-SectionExpandButton::SectionExpandButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, const QString& text, QWidget* parent /*= nullptr*/) :
-    QPushButton(text, parent),
-    _widgetActionGroup(groupAction),
-    _treeWidgetItem(treeWidgetItem)
-{
-    auto frameLayout    = new QHBoxLayout();
-    auto iconLabel      = new QLabel();
-
-    frameLayout->addWidget(iconLabel);
-
-    setLayout(frameLayout);
-
-    connect(this, &QPushButton::clicked, this, [this]() {
-        _widgetActionGroup->toggle();
-    });
-
-    const auto update = [this, iconLabel]() -> void {
-        if (_widgetActionGroup->isExpanded()) {
-            _treeWidgetItem->setExpanded(true);
-
-            auto groupWidget = _widgetActionGroup->createWidget(this);
-
-            groupWidget->setAutoFillBackground(true);
-
-            auto section = new QTreeWidgetItem(_treeWidgetItem);
-
-            _treeWidgetItem->addChild(section);
-            _treeWidgetItem->treeWidget()->setItemWidget(section, 0, groupWidget);
-        }
-        else {
-            _treeWidgetItem->setExpanded(false);
-            _treeWidgetItem->removeChild(_treeWidgetItem->child(0));
-        }
-
-        const auto iconName = _widgetActionGroup->isExpanded() ? "angle-down" : "angle-right";
-        const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
-
-        iconLabel->setPixmap(icon.pixmap(QSize(12, 12)));
-    };
-
-    connect(_widgetActionGroup, &GroupAction::expanded, this, [this, update]() {
-        update();
-    });
-
-    connect(_widgetActionGroup, &GroupAction::collapsed, this, [this, update]() {
-        update();
-    });
-
-    update();
+    _groupsAction.set(groupActions);
 }
 
 }

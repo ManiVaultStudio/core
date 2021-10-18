@@ -2,37 +2,37 @@
 #include "Images.h"
 #include "Application.h"
 
-#include <PointData.h>
+#include "PointData.h"
+#include "DataHierarchyItem.h"
 
-#include <QtCore>
+#include "util/Exception.h"
+
 #include <QDebug>
-#include <QImage>
 
-#include <set>
+#include <stdexcept>
 
-Q_PLUGIN_METADATA(IID "nl.tudelft.ImageData")
+Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData")
+
+using namespace hdps::util;
 
 ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :
     hdps::plugin::RawData(factory, ImageType),
     _type(Type::Undefined),
-    _noImages(0),
-    _imageSize(),
-    _noComponents(0),
-    _pointsName(""),
-    _points(nullptr)
+    _numberOfImages(0),
+    _imageOffset(),
+    _sourceRectangle(),
+    _targetRectangle(),
+    _numberOfComponentsPerPixel(0),
+    _imageFilePaths(),
+    _dimensionNames()
 {
 }
 
 void ImageData::init()
 {
-    _pointsName = _core->addData("Points", QString("imagepointdata"));
-    
-    _points = &(dynamic_cast<Points&>(_core->requestData(_pointsName)));
-
-    _core->notifyDataAdded(_pointsName);
 }
 
-ImageData::Type ImageData::type() const
+ImageData::Type ImageData::getType() const
 {
     return _type;
 }
@@ -42,92 +42,74 @@ void ImageData::setType(const ImageData::Type& type)
     _type = type;
 }
 
-QSize ImageData::imageSize() const
+QSize ImageData::getImageSize() const
 {
-    return _imageSize;
+    return _targetRectangle.size();
 }
 
-void ImageData::setImageSize(const QSize& imageSize)
+QRect ImageData::getSourceRectangle() const
 {
-    _imageSize = imageSize;
+    return _sourceRectangle;
 }
 
-std::uint32_t ImageData::noComponents() const
+QRect ImageData::getTargetRectangle() const
 {
-    return _noComponents;
+    return _targetRectangle;
 }
 
-void ImageData::setNoComponents(const std::uint32_t& noComponents)
+void ImageData::setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize /*= QSize()*/, const QPoint& imageOffset /*= QPoint()*/)
 {
-    _noComponents = noComponents;
+    try
+    {
+        // Except when the target image size exceeds the source image size
+        if (targetImageSize.width() > sourceImageSize.width() || targetImageSize.height() > sourceImageSize.height())
+            throw std::runtime_error("Target image size may not be larger than source image size");
+
+        // Compute source and target rectangles
+        _sourceRectangle = QRect(QPoint(), sourceImageSize);
+        _targetRectangle = targetImageSize.isValid() ? QRect(imageOffset, targetImageSize) : _sourceRectangle;
+
+        // Except when the target rectangle exceeds the source rectangle boundaries
+        if (!_sourceRectangle.contains(_targetRectangle.topLeft()) || !_sourceRectangle.contains(_targetRectangle.bottomRight()))
+            throw std::runtime_error("Target image rectangle exceeds source rectangle boundaries");
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to set image geometry", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to set image geometry");
+    }
 }
 
-QString ImageData::pointsName() const
+std::uint32_t ImageData::getNumberOfComponentsPerPixel() const
 {
-    return _pointsName;
+    return _numberOfComponentsPerPixel;
 }
 
-Points* ImageData::points() const
+void ImageData::setNumberOfComponentsPerPixel(const std::uint32_t& numberOfComponentsPerPixel)
 {
-    return _points;
+    _numberOfComponentsPerPixel = numberOfComponentsPerPixel;
 }
 
-std::uint32_t ImageData::noPoints() const
-{
-    if (_points == nullptr)
-        return 0;
-
-    return _points->getNumPoints();
-}
-
-std::uint32_t ImageData::noDimensions() const
-{
-    if (_points == nullptr)
-        return 0;
-
-    return _points->getNumDimensions();
-}
-
-std::vector<QString> ImageData::imageFilePaths() const
+QStringList ImageData::getImageFilePaths() const
 {
     return _imageFilePaths;
 }
 
-void ImageData::setImageFilePaths(const std::vector<QString>& imageFilePaths)
+void ImageData::setImageFilePaths(const QStringList& imageFilePaths)
 {
     _imageFilePaths = imageFilePaths;
 }
 
-std::vector<QString> ImageData::dimensionNames() const
+std::uint32_t ImageData::getNumberOfImages() const
 {
-    return _dimensionNames;
+    return _numberOfImages;
 }
 
-void ImageData::setDimensionNames(const std::vector<QString>& dimensionNames)
+void ImageData::setNumberImages(const std::uint32_t& numberOfImages)
 {
-    _dimensionNames = dimensionNames;
-
-    _points->setDimensionNames(dimensionNames);
-}
-
-std::uint32_t ImageData::noImages() const
-{
-    return _noImages;
-}
-
-void ImageData::setNoImages(const std::uint32_t& noImages)
-{
-    _noImages = noImages;
-}
-
-float ImageData::pointValue(const std::uint32_t& index) const
-{
-    return _points->getValueAt(index);
-}
-
-float ImageData::pointValue(const std::uint32_t& x, const std::uint32_t& y) const
-{
-    return pointValue(y * _imageSize.width() + x);
+    _numberOfImages = numberOfImages;
 }
 
 hdps::DataSet* ImageData::createDataSet() const

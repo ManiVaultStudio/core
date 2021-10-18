@@ -28,9 +28,9 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param decimalRangeAction Pointer to decimal range action
-         * @param state State of the widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const WidgetActionWidget::State& state);
+        DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags = 0);
 
     protected:
         friend class DecimalRangeAction;
@@ -41,10 +41,10 @@ protected:
     /**
      * Get widget representation of the decimal range action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new DecimalRangeWidget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new DecimalRangeWidget(parent, this);
     };
 
 public:
@@ -87,7 +87,7 @@ public:
     void setRange(const float& minimum, const float& maximum);
 
     /** Determines whether the current range can be reset to its default */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset the current range to the default value */
     void reset() override;

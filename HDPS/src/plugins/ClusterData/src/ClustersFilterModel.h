@@ -15,7 +15,7 @@ public:
     /** Constructor
      * @param parent Pointer to parent object
     */
-    ClustersFilterModel(QObject* parent);
+    ClustersFilterModel(QObject* parent = nullptr);
 
     /**
      * Returns whether a give row with give parent is filtered out (false) or in (true)

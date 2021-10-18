@@ -77,6 +77,7 @@ QMenu* WidgetActionsManager::getContextMenu(QWidget* parent, const QString& cont
 
 void WidgetActionsManager::widgetStartedDragging(WidgetAction* widgetAction)
 {
+    /*
     for (auto action : _actions) {
         qDebug() << action;
 
@@ -88,10 +89,12 @@ void WidgetActionsManager::widgetStartedDragging(WidgetAction* widgetAction)
 
         action->setDropTarget(true);
     }
+    */
 }
 
 void WidgetActionsManager::widgetStoppedDragging(WidgetAction* widgetAction)
 {
+    /*
     for (auto action : _actions) {
         if (widgetAction == action)
             continue;
@@ -101,6 +104,7 @@ void WidgetActionsManager::widgetStoppedDragging(WidgetAction* widgetAction)
 
         action->setDropTarget(false);
     }
+    */
 }
 
 }

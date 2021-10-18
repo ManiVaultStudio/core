@@ -4,6 +4,7 @@
 
 #include <QSpinBox>
 #include <QSlider>
+#include <QLineEdit>
 
 class QWidget;
 class QPushButton;
@@ -55,14 +56,29 @@ public:
         friend class IntegralAction;
     };
 
+    /** Line edit widget class for integral action */
+    class LineEditWidget : public QLineEdit
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param integralAction Pointer to integral action
+         */
+        LineEditWidget(QWidget* parent, IntegralAction* integralAction);
+
+        friend class IntegralAction;
+    };
+
 protected:
 
     /**
      * Get widget representation of the integral action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -78,18 +94,13 @@ public:
     IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
 
     /**
-     * Creates a spin box widget to interact with the integral action
-     * @param parent Pointer to parent widget
-     * @return Spin box widget
+     * Initialize the integral action
+     * @param minimum Minimum value
+     * @param maximum Maximum value
+     * @param value Value
+     * @param defaultValue Default value
      */
-    SpinBoxWidget* createSpinBoxWidget(QWidget* parent);
-
-    /**
-     * Creates a slider widget to interact with the integral action
-     * @param parent Pointer to parent widget
-     * @return Slider widget
-     */
-    SliderWidget* createSliderWidget(QWidget* parent);
+    void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
 
 signals:
 

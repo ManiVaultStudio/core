@@ -32,7 +32,7 @@ QImage ColorMap::getImage() const
     return _image;
 }
 
-int ColorMap::getNoDimensions() const
+std::uint32_t ColorMap::getNoDimensions() const
 {
     return static_cast<int>(_type);
 }

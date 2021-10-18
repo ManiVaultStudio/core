@@ -28,10 +28,10 @@ public:
     enum WidgetFlag {
         Settings        = 0x00001,      /** Widgets have a settings popup to adjust range and other settings */
         EditRange       = 0x00002,      /** Users are allowed to change the color map range */
-        ResetButton     = 0x00004,      /** There is a button to reset the color map */
+        ResetPushButton = 0x00004,      /** There is a button to reset the color map */
 
         Basic   = Settings | EditRange,
-        All     = Settings | EditRange | ResetButton
+        All     = Settings | EditRange | ResetPushButton
     };
 
 public:
@@ -45,9 +45,8 @@ public:
          * @param parent Pointer to parent widget
          * @param optionAction Pointer to option action
          * @param colorMapAction Pointer to color map action
-         * @param state State of the widget
          */
-        ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction, const WidgetActionWidget::State& state);
+        ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction);
 
         /**
          * Paint event to override default paint
@@ -66,9 +65,9 @@ protected:
     /**
      * Get widget representation of the color map action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -88,6 +87,18 @@ public:
      * @param defaultColorMap Default color map
      */
     void initialize(const QString& colorMap = "", const QString& defaultColorMap = "");
+
+    /** Determines whether the current color can be reset to its default */
+    bool isResettable() const override;
+
+    /** Reset the current color to the default color */
+    void reset() override;
+
+    /** Gets the current color map type */
+    util::ColorMap::Type getColorMapType() const;
+
+    /** Sets the current color map type */
+    void setColorMapType(const util::ColorMap::Type& colorMapType);
 
 public: // Option action wrappers
 
@@ -120,6 +131,12 @@ public: // Action getters
 signals:
 
     /**
+     * Signals that the current color map type changed
+     * @param colorMapType Current color map type
+     */
+    void typeChanged(const util::ColorMap::Type& colorMapType);
+
+    /**
      * Signals that the current color map image changed
      * @param image Current color map image
      */
@@ -127,8 +144,8 @@ signals:
 
 protected:
     OptionAction                _currentColorMapAction;     /** Current color map selection action */
+    util::ColorMapFilterModel   _colorMapFilterModel;       /** The filtered color map model (contains either 1D or 2D color maps) */
     ColorMapSettingsAction      _settingsAction;            /** Color map settings action */
-    util::ColorMapFilterModel   _filteredColorMapModel;     /** The filtered color map model (contains either 1D or 2D color maps) */
 };
 
 }

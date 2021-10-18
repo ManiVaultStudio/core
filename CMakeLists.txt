@@ -21,6 +21,8 @@ add_dependencies(PointData HDPS)
 
 add_dependencies(ImageData HDPS)
 add_dependencies(ImageData PointData)
+add_dependencies(ImageData ClusterData)
+
 # Note: The plugins BasicClustering and ImageView are not in used (as Julian Thijssen commented,
 # June 24, 2019), so this CMakeLists does not add those subdirectories.
 

@@ -3,6 +3,8 @@
 #include <QGridLayout>
 #include <QListView>
 
+#include <QSet>
+
 using namespace hdps;
 using namespace hdps::gui;
 
@@ -13,7 +15,8 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
     _points(datasetName),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update"),
-    _selectionChangedTimer()
+    _selectionChangedTimer(),
+    _selectedIndices()
 {
     setText("Selected indices");
     setEventCore(_core);
@@ -24,19 +27,15 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
         if (!_points.isValid())
             return;
 
-        if (dataEvent->dataSetName != _points->getName())
+        if (dataEvent->dataSetName != _points.getSourceData().getName())
             return;
 
         switch (dataEvent->getType()) {
             case EventType::DataAdded:
             case EventType::DataChanged:
             case EventType::SelectionChanged:
-            {
-                if (dataEvent->getType() == EventType::SelectionChanged)
-                    _selectionChangedTimer.start(100);
-
+                _selectionChangedTimer.start(100);
                 break;
-            }
             
             default:
                 break;
@@ -46,6 +45,26 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
     connect(&_selectionChangedTimer, &QTimer::timeout, this, [this]() {
         if (_manualUpdateAction.isChecked())
             return;
+
+        if (!_points.isValid())
+            return;
+
+        auto& selection = dynamic_cast<Points&>(_points->getSelection());
+
+        if (_points->isFull()) {
+            _selectedIndices = selection.indices;
+        }
+        else {
+            _selectedIndices.clear();
+            _selectedIndices.reserve(_points->indices.size());
+
+            QSet<std::uint32_t> indicesSet(_points->indices.begin(), _points->indices.end());
+
+            // Add selection indices if they belong to the subset
+            for (const auto& selectionIndex : selection.indices)
+                if (indicesSet.contains(selectionIndex))
+                    _selectedIndices.push_back(selectionIndex);
+        }
 
         emit selectedIndicesChanged(getSelectedIndices());
     });
@@ -67,16 +86,11 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
 
 const std::vector<std::uint32_t>& SelectedIndicesAction::getSelectedIndices() const
 {
-    if (!_points.isValid())
-        return std::vector<std::uint32_t>();
-
-    auto& selection = dynamic_cast<Points&>(_points->getSelection());
-
-    return selection.indices;
+    return _selectedIndices;
 }
 
-SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction, const hdps::gui::WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, selectedIndicesAction, state)
+SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction) :
+    WidgetActionWidget(parent, selectedIndicesAction)
 {
     auto selectedIndicesListWidget = new QListView();
 
@@ -90,7 +104,7 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
     auto updateLayout = new QVBoxLayout();
 
     updateLayout->addWidget(selectedIndicesAction->getUpdateAction().createWidget(this));
-    updateLayout->addWidget(selectedIndicesAction->getManualUpdateAction().createCheckBoxWidget(this));
+    updateLayout->addWidget(selectedIndicesAction->getManualUpdateAction().createWidget(this));
     updateLayout->addStretch(1);
 
     selectedIndicesLayout->addLayout(updateLayout);

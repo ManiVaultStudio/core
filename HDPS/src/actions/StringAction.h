@@ -24,13 +24,13 @@ class StringAction : public WidgetAction
 
 public:
 
-    /** Describes the widget configurations (a color map combobox always exists) */
+    /** Describes the widget configurations */
     enum WidgetFlag {
-        LineEdit    = 0x00001,      /** Widget includes a line edit */
-        ResetButton = 0x00002,      /** There is a button to reset the string action */
+        LineEdit        = 0x00001,      /** Widget includes a line edit */
+        ResetPushButton = 0x00002,      /** There is a button to reset the string action */
 
         Basic   = LineEdit,
-        All     = LineEdit | ResetButton
+        All     = LineEdit | ResetPushButton
     };
 
 public:
@@ -55,9 +55,9 @@ protected:
     /**
      * Get widget representation of the string action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -96,7 +96,7 @@ public:
     void setDefaultString(const QString& defaultString);
 
     /** Determines whether the current string can be reset to its default string */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset the current string to the default string */
     void reset() override;

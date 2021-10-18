@@ -31,9 +31,8 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param colorPickerAction Pointer to color picker action
-         * @param state State of the widget
          */
-        Widget(QWidget* parent, ColorPickerAction* colorPickerAction, const WidgetActionWidget::State& state);
+        Widget(QWidget* parent, ColorPickerAction* colorPickerAction);
 
     protected:
         QVBoxLayout         _layout;                    /** Main layout */
@@ -51,10 +50,10 @@ protected:
     /**
      * Get widget representation of the color picker action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this);
     };
 
 protected:
@@ -91,7 +90,7 @@ public:
     void setDefaultColor(const QColor& defaultColor);
 
     /** Determines whether the current color can be reset to its default */
-    bool canReset() const override;
+    bool isResettable() const override;
 
     /** Reset the current color to the default color */
     void reset() override;

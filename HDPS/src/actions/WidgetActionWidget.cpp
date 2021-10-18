@@ -4,49 +4,30 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QGroupBox>
-#include <QDrag>
-#include <QMimeData>
-#include <QMouseEvent>
 
 namespace hdps {
 
 namespace gui {
 
-WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const State& state) :
+WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& widgetFlags /*= 0*/) :
     QWidget(parent),
     _widgetAction(widgetAction),
-    _state(state)
+    _widgetFlags(widgetFlags)
 {
-    const auto updateAction = [this, widgetAction]() -> void {
+    // Update basic widget settings when the action changes
+    const auto update = [this, widgetAction]() -> void {
         setEnabled(widgetAction->isEnabled());
         setVisible(widgetAction->isVisible());
+        setToolTip(widgetAction->toolTip());
     };
 
-    connect(widgetAction, &QAction::changed, this, [this, updateAction]() {
-        updateAction();
+    // When the action changes, update basic widget settings 
+    connect(widgetAction, &QAction::changed, this, [this, update]() {
+        update();
     });
 
-    updateAction();
-}
-
-void WidgetActionWidget::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
-{
-    auto mimeData = dragEnterEvent->mimeData();
-
-    if (!mimeData->hasFormat("text/plain"))
-        return;
-
-    qDebug() << mimeData->text() << typeid(*_widgetAction).name();
-
-    if (mimeData->text() == typeid(*_widgetAction).name())
-        dragEnterEvent->acceptProposedAction();
-}
-
-void WidgetActionWidget::dropEvent(QDropEvent* dropEvent)
-{
-    qDebug() << dropEvent->mimeData()->text();
-
-    dropEvent->acceptProposedAction();
+    // Do an initial update
+    update();
 }
 
 void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
@@ -62,6 +43,17 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
     groupBox->setLayout(popupLayout);
 
     mainLayout->addWidget(groupBox);
+
+    const auto update = [this, groupBox]() -> void {
+        groupBox->setTitle(_widgetAction->text());
+        groupBox->setToolTip(_widgetAction->text());
+    };
+
+    connect(_widgetAction, &WidgetAction::changed, this, [update]() {
+        update();
+    });
+
+    update();
 }
 
 }

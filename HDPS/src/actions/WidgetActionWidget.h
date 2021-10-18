@@ -19,8 +19,15 @@ class WidgetActionWidget : public QWidget
 {
 public:
 
+    /** Reserved widget settings */
+    enum WidgetFlag {
+        PopupLayout = 0x00100,      /** Widget with popup layout */
+    };
+
+public:
+
     /** Widget states */
-    enum class State {
+    enum State {
         Standard,   /** Standard representation of the action (default) */
         Collapsed,  /** The widget is in a collapsed state and represented by a popup button */
         Popup       /** The widget representation of the action in a popup */
@@ -32,14 +39,9 @@ public:
      * Constructor
      * @param parent Parent widget
      * @param widgetAction Pointer to the widget action that will be displayed
-     * @param state State of the widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const State& state);
-
-public: // Drag and drop behavior
-
-    void dragEnterEvent(QDragEnterEvent* dragEnterEvent);
-    void dropEvent(QDropEvent* dropEvent);
+    WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& widgetFlags = 0);
 
 protected: // Miscellaneous
 
@@ -51,7 +53,7 @@ protected: // Miscellaneous
 
 protected:
     WidgetAction*   _widgetAction;      /** Pointer to widget action that will be displayed */
-    State           _state;             /** State of the widget */
+    std::int32_t    _widgetFlags;       /** Widget creation flags */
 };
 
 }

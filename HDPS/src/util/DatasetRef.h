@@ -5,10 +5,10 @@
 #include "Set.h"
 #include "Application.h"
 
+#include "util/Exception.h"
+
 #include <QString>
 #include <QMessageBox>
-
-#include <stdexcept>
 
 namespace hdps
 {
@@ -49,6 +49,18 @@ signals:
      * @param newDatasetName New name of the dataset
      */
     void datasetNameChanged(const QString& oldDatasetName, const QString& newDatasetName);
+
+    /**
+     * Signals that the dataset is about to be removed
+     * @param datasetName Name of the dataset that is about to be removed
+     */
+    void datasetAboutToBeRemoved(const QString& datasetName);
+
+    /**
+     * Signals that the dataset has been removed
+     * @param datasetName Name of the dataset that was removed
+     */
+    void datasetRemoved(const QString& datasetName);
 };
 
 /**
@@ -86,6 +98,18 @@ public:
                 return;
 
             switch (dataEvent->getType()) {
+                case EventType::DataAboutToBeRemoved:
+                {
+                    if (dataEvent->dataSetName != _datasetName)
+                        return;
+
+                    _dataset = nullptr;
+
+                    emit datasetAboutToBeRemoved(dataEvent->dataSetName);
+
+                    break;
+                }
+
                 case EventType::DataRemoved:
                 {
                     const auto previousDatasetName = _datasetName;
@@ -96,6 +120,7 @@ public:
                     _dataset        = nullptr;
                     _datasetName    = "";
 
+                    emit datasetRemoved(previousDatasetName);
                     emit datasetNameChanged(previousDatasetName, "");
 
                     break;
@@ -103,11 +128,17 @@ public:
 
                 case EventType::DataRenamed:
                 {
+                    // Get data renamed event
                     auto datasetRenamedEvent = static_cast<hdps::DataRenamedEvent*>(dataEvent);
 
+                    // No need to process zero delta
                     if (datasetRenamedEvent->oldName != _datasetName)
                         return;
 
+                    // Update with new name
+                    _datasetName = datasetRenamedEvent->dataSetName;
+
+                    // Notify others of the name change
                     emit datasetNameChanged(datasetRenamedEvent->oldName, datasetRenamedEvent->dataSetName);
                     break;
                 }
@@ -122,9 +153,9 @@ public:
         return *_dataset;
     }
 
-    /** Dereference operator */
-    DatasetType& operator* () const {
-        return *_dataset;
+    /** Const dereference operator */
+    const DatasetType& operator* () const {
+      return *_dataset;
     }
 
     /** Arrow operator */
@@ -137,9 +168,20 @@ public:
         return _dataset;
     }
 
+    /** get source data */
+    DatasetType& getSourceData() {
+        return dynamic_cast<DatasetType&>(DataSet::getSourceData(*_dataset));
+    }
+
     /** Get the dataset pointer */
     DatasetType* get() {
         return _dataset;
+    }
+
+    /** Get the dataset pointer of the specified type */
+    template<typename TargetDatasetType>
+    TargetDatasetType* get() {
+        return dynamic_cast<TargetDatasetType*>(_dataset);
     }
 
     /** Returns whether the dataset pointer is valid (if the dataset actually exists) */
@@ -192,7 +234,11 @@ public:
         }
         catch (std::exception& e)
         {
-            QMessageBox::critical(nullptr, QString("HDPS"), e.what(), QMessageBox::Ok);
+            exceptionMessageBox("Unable to set dataset reference", e.what());
+        }
+        catch (...)
+        {
+            exceptionMessageBox("Unable to set dataset reference");
         }
     }
 

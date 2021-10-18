@@ -16,11 +16,11 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
     setText("Dimension names");
     setEventCore(core);
 
+    _updateAction.setToolTip("Update the dimension names");
+    _manualUpdateAction.setToolTip("Update the dimension names manually");
+
     const auto updateDimensionNames = [this]() -> void {
         if (!_points.isValid())
-            return;
-
-        if (_manualUpdateAction.isChecked())
             return;
 
         _dimensionNames.clear();
@@ -38,7 +38,7 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
     };
 
     const auto dataChanged = [this]() -> void {
-        _manualUpdateAction.setChecked(_points->getNumDimensions() > 5);
+        _manualUpdateAction.setChecked(_points->getNumDimensions() > 1000);
 
         if (_manualUpdateAction.isChecked())
             return;
@@ -89,8 +89,8 @@ QStringList DimensionNamesAction::getDimensionNames() const
     return _dimensionNames;
 }
 
-DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction, const hdps::gui::WidgetActionWidget::State& state) :
-    WidgetActionWidget(parent, dimensionNamesAction, state)
+DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction) :
+    WidgetActionWidget(parent, dimensionNamesAction)
 {
     auto layout     = new QHBoxLayout();
     auto listView   = new QListView();
@@ -103,7 +103,7 @@ DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dime
     auto updateLayout = new QVBoxLayout();
 
     updateLayout->addWidget(dimensionNamesAction->getUpdateAction().createWidget(this));
-    updateLayout->addWidget(dimensionNamesAction->getManualUpdateAction().createCheckBoxWidget(this));
+    updateLayout->addWidget(dimensionNamesAction->getManualUpdateAction().createWidget(this));
     updateLayout->addStretch(1);
 
     layout->addLayout(updateLayout);

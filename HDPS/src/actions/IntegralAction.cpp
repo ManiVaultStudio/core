@@ -15,9 +15,22 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     _maximumChanged         = [this]() -> void { emit maximumChanged(_maximum); };
     _prefixChanged          = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged          = [this]() -> void { emit suffixChanged(_suffix); };
-    _canResetChanged        = [this]() -> void { emit canResetChanged(canReset()); };
+    _resettableChanged      = [this]() -> void { emit resettableChanged(isResettable()); };
 
     initialize(minimum, maximum, value, defaultValue);
+}
+
+void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue)
+{
+    _minimum        = std::min(minimum, _maximum);
+    _maximum        = std::max(maximum, _minimum);
+    _value          = std::max(_minimum, std::min(value, _maximum));
+    _defaultValue   = std::max(_minimum, std::min(defaultValue, _maximum));
+
+    _minimumChanged();
+    _maximumChanged();
+    _valueChanged();
+    _defaultValueChanged();
 }
 
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
@@ -25,17 +38,6 @@ IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* in
 {
     setAcceptDrops(true);
     setObjectName("SpinBox");
-
-    const auto update = [this, integralAction]() -> void {
-        setEnabled(integralAction->isEnabled());
-        setToolTip(integralAction->text());
-    };
-
-    connect(integralAction, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
 
     connect(this, qOverload<int>(&QSpinBox::valueChanged), this, [this, integralAction](int value) {
         integralAction->setValue(value);
@@ -104,17 +106,6 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     setAcceptDrops(true);
     setObjectName("Slider");
 
-    const auto update = [this, integralAction]() -> void {
-        setEnabled(integralAction->isEnabled());
-        setToolTip(integralAction->text());
-    };
-
-    connect(integralAction, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
-
     connect(this, &QSlider::valueChanged, this, [this, integralAction](int value) {
         if (!integralAction->getUpdateDuringDrag())
             return;
@@ -173,46 +164,66 @@ IntegralAction::SliderWidget::SliderWidget(QWidget* parent, IntegralAction* inte
     setToolTips();
 }
 
-QWidget* IntegralAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+IntegralAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralAction* integralAction) :
+    QLineEdit(parent)
 {
-    auto widget = new QWidget(parent);
+    setAcceptDrops(true);
+    setObjectName("LineEdit");
+
+    connect(this, &QLineEdit::textChanged, this, [this, integralAction](const QString& value) {
+        integralAction->setValue(text().toInt());
+    });
+
+    const auto valueString = [](const std::int32_t& value) -> QString {
+        return QString::number(value);
+
+    };
+    const auto setToolTips = [this, integralAction, valueString]() {
+        setToolTip(QString("%1: %2%3").arg(integralAction->text(), valueString(integralAction->getValue()), integralAction->getSuffix()));
+    };
+
+    const auto onUpdateValue = [this, integralAction, setToolTips]() {
+        const auto actionValue = integralAction->getValue();
+
+        if (actionValue == text().toInt())
+            return;
+
+        QSignalBlocker blocker(this);
+
+        setText(QString::number(integralAction->getValue()));
+
+        setToolTips();
+    };
+
+    connect(integralAction, &IntegralAction::valueChanged, this, [this, integralAction, onUpdateValue](const std::int32_t& value) {
+        onUpdateValue();
+    });
+
+    onUpdateValue();
+}
+
+QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
 
-    if (hasWidgetFlag(WidgetFlag::SpinBox))
+    if (widgetFlags & WidgetFlag::SpinBox)
         layout->addWidget(new SpinBoxWidget(parent, this), 1);
 
-    if (hasWidgetFlag(WidgetFlag::Slider))
+    if (widgetFlags & WidgetFlag::Slider)
         layout->addWidget(new SliderWidget(parent, this), 2);
 
-    if (hasWidgetFlag(WidgetFlag::Reset))
+    if (widgetFlags & WidgetFlag::LineEdit)
+        layout->addWidget(new LineEditWidget(parent, this));
+
+    if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
 
-    const auto update = [this, widget]() -> void {
-        widget->setEnabled(isEnabled());
-        widget->setToolTip(text());
-    };
-
-    connect(this, &IntegralAction::changed, this, [update]() {
-        update();
-    });
-
-    update();
-
     return widget;
-}
-
-IntegralAction::SpinBoxWidget* IntegralAction::createSpinBoxWidget(QWidget* parent)
-{
-    return new SpinBoxWidget(parent, this);
-}
-
-IntegralAction::SliderWidget* IntegralAction::createSliderWidget(QWidget* parent)
-{
-    return new SliderWidget(parent, this);
 }
 
 }

@@ -49,9 +49,9 @@ public:
     /**
      * Get widget representation of the group action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const hdps::gui::WidgetActionWidget::State& state = hdps::gui::WidgetActionWidget::State::Standard) override {
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
         return new FormWidget(parent, this);
     };
 
@@ -62,18 +62,24 @@ public:
      * @param parent Pointer to parent object
      * @param expanded Whether the group is initially expanded/collapsed
      */
-    explicit GroupAction(QObject* parent, const bool& expanded = false);
+    GroupAction(QObject* parent, const bool& expanded = false);
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
 
-    /** Expand/collapse/toggle the group */
+    /** Expand the group */
     void expand();
+
+    /** Collapse the group */
     void collapse();
+
+    /** Toggle the group */
     void toggle();
 
-    /** Returns whether the group is expanded/collapsed */
+    /** Get whether the group is expanded */
     bool isExpanded() const;
+
+    /** Get whether the group is collapsed */
     bool isCollapsed() const;
 
     /** Gets the group read-only */
@@ -84,6 +90,18 @@ public:
      * @param readOnly Whether the group is read-only
      */
     void setReadOnly(const bool& readOnly);
+
+    /**
+     * Add widget action using stream in operator
+     * @param widgetAction Reference to widget action
+     */
+    void operator << (WidgetAction& widgetAction)
+    {
+        _widgetActions << &widgetAction;
+    }
+
+    /** Get sorted widget actions */
+    QVector<WidgetAction*> getSortedWidgetActions();
 
 signals:
 
@@ -97,8 +115,9 @@ signals:
     void readOnlyChanged(const bool& readOnly);
 
 protected:
-    bool            _expanded;          /** Whether or not the group is expanded */
-    bool            _readOnly;          /** Whether or not the group is read-only */
+    bool                        _expanded;          /** Whether or not the group is expanded */
+    bool                        _readOnly;          /** Whether or not the group is read-only */
+    QVector<WidgetAction*>      _widgetActions;     /** Widget actions */
 };
 
 }

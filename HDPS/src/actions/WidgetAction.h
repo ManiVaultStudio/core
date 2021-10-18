@@ -29,7 +29,7 @@ class WidgetAction : public QWidgetAction
     Q_OBJECT
 
 public:
-    explicit WidgetAction(QObject* parent);
+    WidgetAction(QObject* parent);
 
     /**
      * Create standard widget
@@ -69,25 +69,38 @@ public:
     };
 
     /**
-     * Set drop target
-     * @param isDropTarget whether the widget action is a drop target
+     * Create widget for the action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags
      */
-    void setDropTarget(const bool& isDropTarget);
+    QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
-    /** Gets whether the widget action is a drop target */
-    bool isDropTarget() const;
+    /** Determines whether a user may reset the action to the default value */
+    virtual bool getMayReset() const;
 
-    /** Determines whether the current color can be reset to its default */
-    virtual bool canReset() const;
+    /** Set whether a user may reset the action to the default value */
+    virtual void setMayReset(const bool& mayReset);
+    
+    /** Get the sort index */
+    std::int32_t getSortIndex() const;
 
-    /** Reset the current color to the default color */
+    /**
+     * Set the sort index
+     * @param sortIndex Sorting index
+     */
+    void setSortIndex(const std::int32_t& sortIndex);
+
+    /** Determines whether the action can be reset to its default */
+    virtual bool isResettable() const;
+
+    /** Sets the action resettable */
+    virtual void setResettable(const bool& resettable);
+
+    /** Reset to default */
     virtual void reset();
 
-    /** Gets the widget flags */
-    bool hasWidgetFlag(const std::int32_t& widgetFlag) const;
-
     /** Set the widget flags */
-    void setWidgetFlags(const std::int32_t& widgetFlag);
+    void setDefaultWidgetFlags(const std::int32_t& widgetFlag);
 
 public: // Context
 
@@ -107,28 +120,30 @@ public: // Context
     QString getContext() const;
 
 protected:
-    virtual QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard);
+
+    /**
+     * Get widget representation of the action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
 signals:
 
     /**
      * Signals that the resettable-ness changed
-     * @param canReset Whether the widget action can be reset
+     * @param isResettable Whether the widget action can be reset
      */
-    void canResetChanged(const bool& canReset);
-
-    /**
-     * Signals that the widget action drop target status changed
-     * @param isDropTarget Whether the widget action is a drop target
-     */
-    void isDropTargetChanged(const bool& isDropTarget);
+    void resettableChanged(const bool& isResettable);
 
 protected:
     QString                     _createdBy;                     /** Establishes who created the widget action (view, analysis, data etc.) */
     QString                     _context;                       /** The widget action resides outside of the data hierarchy widget (e.g. plugin view) */
     const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
-    bool                        _isDropTarget;                  /** Whether the widget action is eligible for dropping by another widget action */
-    std::int32_t                _widgetFlags;                   /** Widget flags */
+    std::int32_t                _defaultWidgetFlags;            /** Default widget flags */
+    bool                        _resettable;                    /** Whether the action can be reset */
+    bool                        _mayReset;                      /** Whether the action may be reset (from the user interface) */
+    std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
 };
 
 /** List of widget actions */

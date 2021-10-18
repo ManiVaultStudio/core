@@ -35,7 +35,7 @@ public:
 
 private:
     std::vector<std::uint16_t>	_data;
-    QSize						_size;
+    QSize                       _size;
     std::uint32_t				_noComponents;
     QString						_imageFilePath;
     QString						_dimensionName;

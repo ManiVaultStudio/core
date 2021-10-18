@@ -33,7 +33,7 @@ QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::Display
 
     const auto colorMap = _colorMaps.at(index.row());
 
-    auto icon = [](const QImage& image, const QSize& size) {
+    auto icon = [](const QImage& image, const QSize& size) -> QPixmap {
         auto pixmap = QPixmap::fromImage(image).scaled(size);
         
         QPainter painter(&pixmap);
@@ -56,14 +56,11 @@ QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::Display
                 {
                     switch (colorMap.getNoDimensions())
                     {
-                        case 0:
-                            return icon(colorMap.getImage(), QSize(15, 15));
-
                         case 1:
-                            return icon(colorMap.getImage(), QSize(150, 12));
+                            return icon(colorMap.getImage(), QSize(150, 14));
 
                         case 2:
-                            return icon(colorMap.getImage(), QSize(32, 32));
+                            return icon(colorMap.getImage(), QSize(12, 12));
 
                         default:
                             break;
@@ -138,19 +135,31 @@ void ColorMapModel::setupModelData()
 
     const auto noSteps = 256;
 
+    // Create black-to-white color map
     QImage blackToWhite(noSteps, 1, QImage::Format::Format_RGB32);
 
-    for (int value = 0; value < noSteps; ++value) {
+    // Set black-to-white pixels
+    for (int value = 0; value < noSteps; ++value)
         blackToWhite.setPixelColor(value, 0, QColor(value, value, value, 255));
-    }
 
     _colorMaps.append(ColorMap("Black to white", "", ColorMap::Type::OneDimensional, blackToWhite));
 
+    // Create iterator for one-dimensional color maps
     QDirIterator iterator1D(QString("%1/1D/").arg(prefix), QDirIterator::Subdirectories);
 
+    // Add the one-dimensional color maps
     while (iterator1D.hasNext()) {
         const auto resourcePath = iterator1D.next();
         _colorMaps.append(ColorMap(QFileInfo(resourcePath).baseName(), resourcePath, ColorMap::Type::OneDimensional, QImage(resourcePath)));
+    }
+
+    // Create iterator for two-dimensional color maps
+    QDirIterator iterator2D(QString("%1/2D/").arg(prefix), QDirIterator::Subdirectories);
+
+    // Add the two-dimensional color maps
+    while (iterator2D.hasNext()) {
+        const auto resourcePath = iterator2D.next();
+        _colorMaps.append(ColorMap(QFileInfo(resourcePath).baseName(), resourcePath, ColorMap::Type::TwoDimensional, QImage(resourcePath)));
     }
 
     beginInsertRows(QModelIndex(), 0, _colorMaps.count());

@@ -30,39 +30,37 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class ClustersAction : public hdps::gui::WidgetAction, public EventListener
+class ClustersAction : public WidgetAction, public EventListener
 {
 protected:
 
     /** Widget class for clusters action */
-    class Widget : public hdps::gui::WidgetActionWidget {
+    class Widget : public WidgetActionWidget, public EventListener {
     public:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
          * @param clustersAction Pointer to clusters action
-         * @param state State of the widget
          */
-        Widget(QWidget* parent, ClustersAction* clustersAction, const WidgetActionWidget::State& state);
+        Widget(QWidget* parent, ClustersAction* clustersAction);
 
     protected:
         ClustersFilterModel     _filterModel;               /** Clusters filter model */
         QItemSelectionModel     _selectionModel;            /** Clusters selection model */
         TriggerAction           _removeAction;              /** Remove clusters action */
         TriggerAction           _mergeAction;               /** Merge clusters action */
-        
         FilterAndSelectAction   _filterAndSelectAction;     /** Filter and select clusters action */
         SubsetAction            _subsetAction;              /** Subset action */
     };
 
     /**
-     * Get widget representation of the clusters action
+     * Get widget representation of the color action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override {
-        return new Widget(parent, this, state);
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this);
     };
 
 public:
@@ -70,13 +68,15 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
      * @param datasetName Name of the points dataset
      */
-    ClustersAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName);
+    ClustersAction(QObject* parent, const QString& datasetName);
 
     /** Get clusters */
     std::vector<Cluster>* getClusters();
+
+    /** Get clusters */
+    DatasetRef<Clusters>& getClustersDataset();
 
     /**
      * Select points
@@ -102,7 +102,6 @@ public: // Action getters
     TriggerAction& getExportAction() { return _exportAction; }
 
 protected:
-    CoreInterface*          _core;              /** Pointer to the core */
     DatasetRef<Clusters>    _clusters;          /** Cluster dataset reference */
     ClustersModel           _clustersModel;     /** Clusters model */
     TriggerAction           _importAction;      /** Import clusters action */

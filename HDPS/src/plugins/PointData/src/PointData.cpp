@@ -13,6 +13,7 @@
 #include <cstring>
 #include <type_traits>
 #include <queue>
+#include <set>
 
 #include "graphics/Vector2f.h"
 #include "Application.h"
@@ -337,6 +338,55 @@ QIcon Points::getIcon() const
 
     return QIcon(pixmap);
     */
+}
+
+void Points::selectAll()
+{
+    auto& selection         = dynamic_cast<Points&>(getSelection());
+    auto& selectionIndices  = selection.indices;
+
+    selectionIndices.clear();
+    selectionIndices.resize(getNumPoints());
+
+    if (isFull()) {
+        std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
+    }
+    else {
+        for (const auto& index : indices)
+            selectionIndices.push_back(index);
+    }
+
+    _core->notifySelectionChanged(getName());
+}
+
+void Points::selectNone()
+{
+    auto& selection         = dynamic_cast<Points&>(getSelection());
+    auto& selectionIndices  = selection.indices;
+
+    selectionIndices.clear();
+
+    _core->notifySelectionChanged(getName());
+}
+
+void Points::selectInvert()
+{
+    auto& selection         = dynamic_cast<Points&>(getSelection());
+    auto& selectionIndices  = selection.indices;
+
+    std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
+
+    const auto noPixels = getNumPoints();
+
+    selectionIndices.clear();
+    selectionIndices.reserve(noPixels - selectionSet.size());
+
+    for (std::uint32_t i = 0; i < noPixels; i++) {
+        if (selectionSet.find(i) == selectionSet.end())
+            selectionIndices.push_back(i);
+    }
+
+    _core->notifySelectionChanged(getName());
 }
 
 const std::vector<QString>& Points::getDimensionNames() const

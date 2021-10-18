@@ -14,17 +14,44 @@ WidgetAction::WidgetAction(QObject* parent) :
     _createdBy(),
     _context(),
     _dataHierarchyItemContext(nullptr),
-    _isDropTarget(false),
-    _widgetFlags()
+    _defaultWidgetFlags(),
+    _resettable(false),
+    _mayReset(false),
+    _sortIndex(-1)
 {
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
     if (parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent()))
-        return getWidget(parent, WidgetActionWidget::State::Popup);
+        return getWidget(parent, WidgetActionWidget::PopupLayout);
 
-    return getWidget(parent, WidgetActionWidget::State::Standard);
+    return getWidget(parent, _defaultWidgetFlags);
+}
+
+QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    return getWidget(parent, widgetFlags);
+}
+
+bool WidgetAction::getMayReset() const
+{
+    return _mayReset;
+}
+
+void WidgetAction::setMayReset(const bool& mayReset)
+{
+    _mayReset = mayReset;
+}
+
+std::int32_t WidgetAction::getSortIndex() const
+{
+    return _sortIndex;
+}
+
+void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
+{
+    _sortIndex = sortIndex;
 }
 
 QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
@@ -42,38 +69,29 @@ WidgetActionResetButton* WidgetAction::createResetButton(QWidget* parent)
     return new WidgetActionResetButton(this, parent);
 }
 
-void WidgetAction::setDropTarget(const bool& isDropTarget)
+bool WidgetAction::isResettable() const
 {
-    if (isDropTarget == _isDropTarget)
+    return _resettable;
+}
+
+void WidgetAction::setResettable(const bool& resettable)
+{
+    if (resettable == _resettable)
         return;
 
-    _isDropTarget = isDropTarget;
+    _resettable = resettable;
 
-    isDropTargetChanged(_isDropTarget);
-}
-
-bool WidgetAction::isDropTarget() const
-{
-    return _isDropTarget;
-}
-
-bool WidgetAction::canReset() const
-{
-    return false;
+    emit resettableChanged(_resettable);
 }
 
 void WidgetAction::reset()
 {
+    qDebug() << text() << "Does not implement a reset function";
 }
 
-bool WidgetAction::hasWidgetFlag(const std::int32_t& widgetFlag) const
+void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
-    return _widgetFlags & widgetFlag;
-}
-
-void WidgetAction::setWidgetFlags(const std::int32_t& widgetFlags)
-{
-    _widgetFlags = widgetFlags;
+    _defaultWidgetFlags = widgetFlags;
 }
 
 void WidgetAction::setContext(const QString& context)
@@ -97,7 +115,7 @@ QString WidgetAction::getContext() const
     return _context;
 }
 
-QWidget* WidgetAction::getWidget(QWidget* parent, const WidgetActionWidget::State& state /*= WidgetActionWidget::State::Standard*/)
+QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     return new QWidget();
 }

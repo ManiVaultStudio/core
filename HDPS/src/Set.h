@@ -102,6 +102,19 @@ public:
         return _core->requestSelection(getSourceData(*this).getDataName());
     }
 
+    /**
+     * Gets the selection associated with this data set. If the data set is
+     * derived then the selection of the source data will be returned. Otherwise,
+     * the selection of the set's data will be returned.
+     *
+     * @return The selection of dataset type associated with this data set
+     */
+    template<typename DatasetType>
+    DatasetType& getSelection() const
+    {
+        return dynamic_cast<DatasetType&>(_core->requestSelection(getSourceData(*this).getDataName()));
+    }
+
     void setSelection(std::vector<unsigned int> indices)
     {
 

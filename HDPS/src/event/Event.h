@@ -11,6 +11,7 @@ namespace hdps
     {
         DataAdded,
         DataChanged,
+        DataAboutToBeRemoved,
         DataRemoved,
         SelectionChanged,
         DataRenamed
@@ -61,6 +62,12 @@ namespace hdps
     {
     public:
         DataChangedEvent() : DataEvent(EventType::DataChanged) {}
+    };
+
+    class DataAboutToBeRemovedEvent : public DataEvent
+    {
+    public:
+        DataAboutToBeRemovedEvent() : DataEvent(EventType::DataAboutToBeRemoved) {}
     };
 
     class DataRemovedEvent : public DataEvent

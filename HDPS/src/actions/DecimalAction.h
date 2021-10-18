@@ -60,9 +60,9 @@ protected:
     /**
      * Get widget representation of the decimal action
      * @param parent Pointer to parent widget
-     * @param state Widget state
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const WidgetActionWidget::State& state = WidgetActionWidget::State::Standard) override;;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -79,18 +79,22 @@ public:
     DecimalAction(QObject * parent, const QString& title, const float& minimum = INIT_MIN, const float& maximum = INIT_MAX, const float& value = INIT_VALUE, const float& defaultValue = INIT_DEFAULT_VALUE, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
     /**
-     * Creates a spin box widget to interact with the decimal action
-     * @param parent Pointer to parent widget
-     * @return Spin box widget
+     * Initialize the decimal action
+     * @param minimum Minimum value
+     * @param maximum Maximum value
+     * @param value Value
+     * @param defaultValue Default value
      */
-    SpinBoxWidget* createSpinBoxWidget(QWidget* parent);
+    void initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
+
+    /** Gets the single step */
+    float getSingleStep() const;
 
     /**
-     * Creates a slider widget to interact with the decimal action
-     * @param parent Pointer to parent widget
-     * @return Slider widget
+     * Sets the single step
+     * @param singleStep Single step
      */
-    SliderWidget* createSliderWidget(QWidget* parent);
+    void setSingleStep(const float& singleStep);
 
 signals:
 
@@ -135,6 +139,15 @@ signals:
      * @param numberOfDecimals Number of decimals
      */
     void numberOfDecimalsChanged(const std::uint32_t& numberOfDecimals);
+
+    /**
+     * Signals that the single step changed
+     * @param singleStep Single step
+     */
+    void singleStepChanged(const float& singleStep);
+
+protected:
+    float   _singleStep;    /** Single step size for spin box */
 
 protected:
     static constexpr float  INIT_MIN            = 0.0f;         /** Initialization minimum value */
