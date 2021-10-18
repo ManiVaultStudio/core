@@ -23,10 +23,6 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
     setMayReset(true);
 
-    _horizontalAxisAction.setToolTip("Range of the color map");
-    _horizontalAxisAction.setToolTip("Mirror the color map horizontally");
-    _verticalAxisAction.setToolTip("Mirror the color map vertically");
-
     const auto updateRangeActions = [this]() -> void {
         _horizontalAxisAction.setText(_colorMapAction.getColorMapType() == ColorMap::Type::OneDimensional ? "Range" : "Horizontal");
     };

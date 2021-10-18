@@ -115,6 +115,28 @@ QVariant Clusters::toVariant() const
     return clustersList;
 }
 
+std::vector<std::uint32_t> Clusters::getSelectedIndices() const
+{
+    // Indices that are selected
+    std::vector<std::uint32_t> selectedIndices;
+
+    // Gather indices
+    for (const auto& clusterIndex : getSelection<Clusters>().indices) {
+
+        // Get reference to selected cluster
+        const auto selectedCluster = getClusters()[clusterIndex];
+
+        // Add cluster indices to selected indices
+        selectedIndices.insert(selectedIndices.end(), selectedCluster.getIndices().begin(), selectedCluster.getIndices().end());
+    }
+
+    // Remove duplicates
+    std::sort(selectedIndices.begin(), selectedIndices.end());
+    selectedIndices.erase(unique(selectedIndices.begin(), selectedIndices.end()), selectedIndices.end());
+
+    return selectedIndices;
+}
+
 QIcon ClusterDataFactory::getIcon() const
 {
     return Application::getIconFont("FontAwesome").getIcon("th-large");

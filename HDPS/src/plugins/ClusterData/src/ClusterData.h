@@ -136,6 +136,9 @@ public:
     /** Returns a variant representation of the clusters */
     QVariant toVariant() const;
 
+    /** Gets concatenated indices for all selected clusters */
+    std::vector<std::uint32_t> getSelectedIndices() const;
+
     std::vector<unsigned int>       indices;
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
 };

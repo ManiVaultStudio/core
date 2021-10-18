@@ -89,6 +89,11 @@ void WidgetAction::reset()
     qDebug() << text() << "Does not implement a reset function";
 }
 
+std::int32_t WidgetAction::getDefaultWidgetFlags() const
+{
+    return _defaultWidgetFlags;
+}
+
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;

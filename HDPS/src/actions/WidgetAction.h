@@ -99,8 +99,14 @@ public:
     /** Reset to default */
     virtual void reset();
 
-    /** Set the widget flags */
-    void setDefaultWidgetFlags(const std::int32_t& widgetFlag);
+    /** Gets the default widget flags */
+    std::int32_t getDefaultWidgetFlags() const;
+
+    /**
+     * Set the widget flags
+     * @param widgetFlags Widget flags
+     */
+    void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
 public: // Context
 

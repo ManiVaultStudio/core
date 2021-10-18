@@ -268,9 +268,6 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
     
     const auto selectionChangedHandler = [this, clustersAction, clustersTreeView]() -> void {
 
-        // Point indices that need to be selected
-        std::vector<std::uint32_t> selectionIndices;
-
         // Get selected row
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
 
@@ -285,19 +282,12 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         for (auto selectedIndex : selectedRows) {
             auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
 
-            // Add point index to selection
-            selectionIndices.insert(selectionIndices.end(), cluster->getIndices().begin(), cluster->getIndices().end());
-            
             // Add selected index
             currentClusterSelectionIndices.push_back(selectedIndex.row());
         }
 
-        // Remove duplicates
-        std::sort(selectionIndices.begin(), selectionIndices.end());
-        selectionIndices.erase(unique(selectionIndices.begin(), selectionIndices.end()), selectionIndices.end());
-
         // Select points
-        clustersAction->selectPoints(selectionIndices);
+        clustersAction->selectPoints(clustersAction->getClustersDataset()->getSelectedIndices());
 
         // Update state of the remove action
         _removeAction.setEnabled(!selectedRows.isEmpty());
