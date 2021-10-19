@@ -171,10 +171,10 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
         if (dataset.getDataType() == PointType) {
 
             // Obtain reference to the point source input dataset
-            auto& sourcePoints = DataSet::getSourceData(dynamic_cast<Points&>(dataset));
+            auto& points = DataSet::getSourceData(dynamic_cast<Points&>(dataset));
 
             // Get selection indices from points dataset
-            auto& globalSelectionIndices = dynamic_cast<Points&>(sourcePoints.getSelection()).indices;
+            auto& selectionIndices = dynamic_cast<Points&>(points.getSelection()).indices;
 
             // Clear the selected indices
             selectedIndices.clear();
@@ -192,11 +192,16 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setLeft(std::numeric_limits<int>::max());
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
-            // Iterate over all global selection indices
-            for (const auto& globalSelectionIndex : globalSelectionIndices) {
+            std::vector<std::uint32_t> globalIndices;
+
+            // Get global indices for mapping the selected local indices
+            points.getGlobalIndices(globalIndices);
+
+            // Iterate over selection indices
+            for (const auto& selectionIndex : selectionIndices) {
 
                 // Compute global pixel coordinate
-                const auto globalPixelCoordinate = QPoint(globalSelectionIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(globalSelectionIndex / static_cast<float>(sourceImageWidth))));
+                const auto globalPixelCoordinate = QPoint(selectionIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(selectionIndex / static_cast<float>(sourceImageWidth))));
 
                 // Only proceed if the pixel is located within the source image rectangle
                 if (!getTargetRectangle().contains(globalPixelCoordinate))
@@ -286,10 +291,10 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to get scalar data", e);
+        exceptionMessageBox("Unable to get image selection data", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to get scalar data");
+        exceptionMessageBox("Unable to get image selection data");
     }
 }
 
