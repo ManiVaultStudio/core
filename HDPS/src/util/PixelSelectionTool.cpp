@@ -811,5 +811,12 @@ void PixelSelectionTool::endSelection()
     _active = false;
 }
 
+#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
+constexpr float PixelSelectionTool::BRUSH_RADIUS_MIN;
+constexpr float PixelSelectionTool::BRUSH_RADIUS_MAX;
+constexpr float PixelSelectionTool::BRUSH_RADIUS_DEFAULT;
+constexpr float PixelSelectionTool::BRUSH_RADIUS_DELTA;
+#endif
+
 }
 }
