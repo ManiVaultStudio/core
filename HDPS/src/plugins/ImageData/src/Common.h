@@ -2,7 +2,7 @@
 
 #include <QString>
 
-#include "imagedata_export.h"
+//#include "imagedata_export.h"
 
 enum class SelectionModifier
 {
