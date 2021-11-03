@@ -27,6 +27,7 @@ set(IMAGE_DATA_HEADERS
     src/ImageData.h
     src/Images.h
     src/Common.h
+    ${CMAKE_CURRENT_BINARY_DIR}/imagedata_export.h
 )
 
 set(IMAGE_DATA_SOURCES 
