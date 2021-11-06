@@ -31,9 +31,9 @@ set(TEXTDATA_HEADERS
 
 source_group( Plugin FILES ${SOURCES})
 
-include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
-
 add_library(${PROJECT} SHARED ${SOURCES})
+
+target_include_directories(${PROJECT} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 

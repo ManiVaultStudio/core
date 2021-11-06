@@ -1,11 +1,14 @@
 #pragma once
 
+#include "util/IconFonts.h"
+#include "actions/WidgetActionsManager.h"
+
 #include <QApplication>
 #include <QSettings>
 
-#include "util/IconFonts.h"
-
 namespace hdps {
+
+class CoreInterface;
 
 /**
  * HDPS application class
@@ -30,6 +33,17 @@ public: // Miscellaneous
     /** Returns a pointer to the current HDPS application (if the current application derives from hdps::Application) */
     static Application* current();
 
+    /** Get pointer to the core */
+    CoreInterface* getCore();
+
+    /**
+     * Set pointer to the core
+     * @param core Pointer to the core
+     */
+    void setCore(CoreInterface* core);
+
+    /** Get pointer to the core */
+    static CoreInterface* core();
 
 public: // Static resource access functions
 
@@ -59,8 +73,9 @@ public: // Settings API
     void setSetting(const QString& path, const QVariant& value);
 
 protected:
-    IconFonts       _iconFonts;     /** Icon fonts resource */
-    QSettings       _settings;
+    CoreInterface*      _core;          /** Shared pointer to HDPS core */
+    IconFonts           _iconFonts;     /** Icon fonts resource */
+    QSettings           _settings;      /** Settings */
 };
 
 }

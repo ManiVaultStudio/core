@@ -1,122 +1,120 @@
-#ifndef HDPS_DATAHIERARCHYMODEL_H
-#define HDPS_DATAHIERARCHYMODEL_H
-
-#include "DataManager.h"
+#ifndef HDPS_DATA_HIERARCHY_MODEL_H
+#define HDPS_DATA_HIERARCHY_MODEL_H
 
 #include <QAbstractItemModel>
 #include <QMimeData>
 
-#include <QVector>
-#include <QIcon>
-
 namespace hdps
 {
-    class DataHierarchyItem
-    {
-    public:
-        explicit DataHierarchyItem(QString setName, DataType dataType, DataHierarchyItem* parent = nullptr);
 
-        ~DataHierarchyItem();
+class DataHierarchyModelItem;
+class DataHierarchyItem;
 
-        void addChild(DataHierarchyItem* item);
+/**
+ * Underlying data model for a data hierarchy tree
+ */
+class DataHierarchyModel : public QAbstractItemModel
+{
+    Q_OBJECT
 
-        inline void setIcon(const QIcon &aicon)
-        {
-            _icon = aicon;
-        }
-
-        DataHierarchyItem* getParent();
-        DataHierarchyItem* getChild(int row);
-        const QIcon& getIcon() { return _icon; }
-
-        QString getDataAtColumn(int column) const;
-        int row() const;
-
-        int childCount() const;
-        int columnCount() const;
-
-        QString serialize() const;
-
-    private:
-        /** Keep a pointer to parent node */
-        DataHierarchyItem* _parentItem;
-
-        /** Keep a list of pointers to child nodes */
-        QVector<DataHierarchyItem*> _childItems;
-
-        /** Name of data set */
-        QString _setName;
-
-        /** Type of raw data linked to by set */
-        DataType _dataType;
-
-        /** Stored icon for this item */
-        QIcon _icon;
-    };
+public:
 
     /**
-     * Underlying data model for a data hierarchy tree
+     * Constructor
+     * @param parent Pointer to parent object
      */
-    class DataHierarchyModel : public QAbstractItemModel
-    {
-        Q_OBJECT
-    public:
-        explicit DataHierarchyModel(DataManager& dataManager, QObject* parent = nullptr);
+    explicit DataHierarchyModel(QObject* parent = nullptr);
 
-        ~DataHierarchyModel();
+    /** Destructor */
+    ~DataHierarchyModel();
 
-        /**
-         * Mandatory override for QAbstractItemModel.
-         */
-        QVariant data(const QModelIndex& index, int role) const override;
+    /**
+     * Mandatory override for QAbstractItemModel.
+     */
+    QVariant data(const QModelIndex& index, int role) const override;
 
-        /**
-         * Mandatory override for QAbstractItemModel. Provides an index associated
-         * to a particular data item at location (row, column).
-         */
-        QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+    /**
+     * Sets the data value for the given model index and data role
+     * @param index Model index
+     * @param value Data value in variant form
+     * @param role Data role
+     * @return Whether the data was properly set or not
+     */
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
-        /**
-         * Mandatory override for QAbstractItemModel. Returns the index of the parent
-         * of this item. If this item is not a child, an invalid index is returned.
-         */
-        QModelIndex parent(const QModelIndex& index) const override;
+    /**
+     * Mandatory override for QAbstractItemModel. Provides an index associated
+     * to a particular data item at location (row, column).
+     */
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 
-        /**
-         * Mandatory override for QAbstractItemModel.
-         * Returns the number of children of this parent item.
-         */
-        int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    /**
+     * Mandatory override for QAbstractItemModel. Returns the index of the parent
+     * of this item. If this item is not a child, an invalid index is returned.
+     */
+    QModelIndex parent(const QModelIndex& index) const override;
 
-        /**
-         * Mandatory override for QAbstractItemModel.
-         * Returns number of columns associated with this parent item.
-         */
-        int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    /**
+     * Mandatory override for QAbstractItemModel.
+     * Returns the number of children of this parent item.
+     */
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-        Qt::DropActions supportedDragActions() const override;
+    /**
+     * Mandatory override for QAbstractItemModel.
+     * Returns number of columns associated with this parent item.
+     */
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-        DataHierarchyItem* getItem(const QModelIndex& index, int role) const;
+    /** Get supported drag actions */
+    Qt::DropActions supportedDragActions() const override;
 
-        Qt::ItemFlags flags(const QModelIndex &index) const override;
+   /**
+    * Get data hierarchy model item
+    * @param index Model index of the item
+    * @param role Data role
+    */
+    DataHierarchyModelItem* getItem(const QModelIndex& index, int role) const;
 
-        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    /**
+     * Get item flags
+     * @param index Model index
+     * @return Item flags
+     */
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-        /**
-         * For the given item indices return the MIME data intended to pass information
-         * in the case of e.g. dragging or dropping data.
-         */
-        QMimeData* mimeData(const QModelIndexList &indexes) const override;
+    /**
+     * Get header data
+     * @param section Section
+     * @param orientation Orientation
+     * @param role Data role
+     * @return Header
+     */
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    private:
-        void setupModelData(DataManager& dataManager, DataHierarchyItem* parent);
+    /**
+     * For the given item indices return the MIME data intended to pass information
+     * in the case of e.g. dragging or dropping data.
+     */
+    QMimeData* mimeData(const QModelIndexList &indexes) const override;
 
-        /** Root node of the data hierarchy */
-        DataHierarchyItem* _rootItem;
+    /**
+     * Add a data hierarchy item to the model
+     * @param parentModelIndex Model index of the parent data hierarchy item 
+     * @param dataHierarchyItem Pointer to the data hierarchy item
+     */
+    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem);
 
-        /** Reference to data manager of core system to be able to query for data */
-        DataManager& _dataManager;
-    };
+    /**
+     * Remove a data hierarchy item from the model
+     * @param parentModelIndex Model index of the parent data hierarchy item
+     */
+    bool removeDataHierarchyModelItem(const QModelIndex& modelIndex);
+
+private:
+    DataHierarchyModelItem*     _rootItem;      /** Root node of the data hierarchy */
+};
+
 }
 
-#endif // HDPS_DATAHIERARCHYMODEL_H
+#endif // HDPS_DATA_HIERARCHY_MODEL_H

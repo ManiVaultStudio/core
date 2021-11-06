@@ -3,8 +3,6 @@
 #include "ui_MainWindow.h"
 #include "Core.h"
 #include "LogDockWidget.h"
-#include "DataHierarchy.h"
-#include "widgets/Accordion.h"
 
 #include <QMainWindow>
 #include <QAction>
@@ -33,7 +31,8 @@ namespace gui
 {
 
 class LogDockWidget;
-class DataHierarchy;
+class DataHierarchyWidget;
+class DataPropertiesWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -45,11 +44,6 @@ public:
     * Adds a new item to the import menu.
     */
     QAction* addImportOption(QString menuName);
-
-    /**
-    * Adds a new item to the export menu.
-    */
-    QAction* addExportOption(QString menuName);
 
     /**
     * Adds a new item to the menu drop-down for this particular type.
@@ -66,7 +60,7 @@ public:
      * Callback invoked when the window closes
      * @param closeEvent Close event
      */
-    void closeEvent(QCloseEvent* closeEvent);
+    void closeEvent(QCloseEvent* closeEvent) override;
 
 public: // Adding plugins
 
@@ -119,9 +113,6 @@ private: // Docking
     /** Sets up the docking area for view plugins (central widget) */
     void initializeCentralDockingArea();
 
-    /** Sets up the docking area for analysis plugins */
-    void initializeAnalysisPluginsDockingArea();
-
     /** Sets up the docking area for settings */
     void initializeSettingsDockingArea();
 
@@ -139,20 +130,19 @@ private: // Docking
     QList<ads::CDockWidget*> getViewPluginDockWidgets(const bool& openOnly = true);
 
 private:
-    QSharedPointer<Core>            _core;                          /** HDPS core */
-    QSharedPointer<Accordion>       _analysisPluginsAccordion;      /** Analysis plugins accordion widget */
-    QSharedPointer<DataHierarchy>   _dataHierarchy;                 /** Data hierarchy viewer widget */
+    QSharedPointer<Core>        _core;                          /** HDPS core */
+    DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget */
+    DataPropertiesWidget*       _dataPropertiesWidget;          /** Data properties widget */
 
 private: // Docking
-    ads::CDockManager*      _dockManager;                   /** Manager for docking */
-    ads::CDockAreaWidget*   _analysisPluginsDockArea;       /** Docking area for analysis plugins */
-    ads::CDockAreaWidget*   _centralDockArea;               /** Docking area for view plugins */
-    ads::CDockAreaWidget*   _settingsDockArea;              /** Docking area for settings */
-    ads::CDockAreaWidget*   _loggingDockArea;               /** Docking area for logging */
-    ads::CDockWidget*       _analysisPluginsDockWidget;     /** Dock widget for analysis plugins */
-    ads::CDockWidget*       _centralDockWidget;             /** Dock widget for view plugins */
-    ads::CDockWidget*       _settingsDockWidget;            /** Dock widget for settings */
-    ads::CDockWidget*       _loggingDockWidget;             /** Dock widget for logging */
+    ads::CDockManager*          _dockManager;                   /** Manager for docking */
+    ads::CDockAreaWidget*       _centralDockArea;               /** Docking area for view plugins */
+    ads::CDockAreaWidget*       _settingsDockArea;              /** Docking area for settings */
+    ads::CDockAreaWidget*       _loggingDockArea;               /** Docking area for logging */
+    ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */
+    ads::CDockWidget*           _dataHierarchyDockWidget;       /** Dock widget for data hierarchy */
+    ads::CDockWidget*           _dataPropertiesDockWidget;      /** Dock widget for data properties */
+    ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
 };
 
 }

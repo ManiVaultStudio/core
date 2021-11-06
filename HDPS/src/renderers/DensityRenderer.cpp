@@ -45,9 +45,19 @@ namespace hdps
             _densityComputation.compute();
         }
 
-        void DensityRenderer::setColormap(const QString colormap)
+        float DensityRenderer::getMaxDensity() const
         {
-            _colormap.loadFromFile(colormap);
+            return _densityComputation.getMaxDensity();
+        }
+
+        hdps::Vector3f DensityRenderer::getColorMapRange() const
+        {
+            return Vector3f(0.0f, _densityComputation.getMaxDensity(), _densityComputation.getMaxDensity());
+        }
+
+        void DensityRenderer::setColormap(const QImage& image)
+        {
+            _colormap.loadFromImage(image);
             _hasColorMap = true;
         }
 
@@ -140,6 +150,7 @@ namespace hdps
             _shaderIsoDensityDraw.uniform1i("tex", 0);
 
             _shaderIsoDensityDraw.uniform2f("renderParams", 1.0f / maxDensity, 1.0f / _densityComputation.getNumPoints());
+            _shaderIsoDensityDraw.uniform3f("colorMapRange", _colorMapRange);
 
             _colormap.bind(1);
             _shaderIsoDensityDraw.uniform1i("colormap", 1);
@@ -157,6 +168,11 @@ namespace hdps
         void DensityRenderer::onSelection(Selection selection)
         {
             _isSelecting = false;
+        }
+
+        void DensityRenderer::setColorMapRange(const float& min, const float& max)
+        {
+            _colorMapRange = Vector3f(min, max, max - min);
         }
 
     } // namespace gui

@@ -1,10 +1,9 @@
 #include "ColorAction.h"
 #include "Application.h"
 
-#include "../widgets/ColorPickerPushButton.h"
-
 #include <QDebug>
-#include <QHBoxLayout>
+#include <QPainter>
+#include <QStyleOption>
 
 namespace hdps {
 
@@ -18,8 +17,17 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
     _defaultColor()
 {
     setText(title);
+    initialize(color, defaultColor);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::Basic);
+}
+
+void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
+{
     setColor(color);
     setDefaultColor(defaultColor);
+
+    setResettable(isResettable());
 }
 
 QColor ColorAction::getColor() const
@@ -35,6 +43,8 @@ void ColorAction::setColor(const QColor& color)
     _color = color;
 
     emit colorChanged(_color);
+
+    setResettable(isResettable());
 }
 
 QColor ColorAction::getDefaultColor() const
@@ -52,7 +62,7 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-bool ColorAction::canReset() const
+bool ColorAction::isResettable() const
 {
     return _color != _defaultColor;
 }
@@ -62,59 +72,115 @@ void ColorAction::reset()
     setColor(_defaultColor);
 }
 
-QWidget* ColorAction::createWidget(QWidget* parent, const bool& resettable /*= false*/)
+ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
+    WidgetActionWidget(parent, colorAction),
+    _layout(),
+    _colorPickerAction(this, "Color picker", colorAction->getColor(), colorAction->getColor()),
+    _toolButton(this, _colorPickerAction)
 {
-    auto widget = dynamic_cast<Widget*>(WidgetAction::createWidget(parent));
+    setAcceptDrops(true);
+    setObjectName("PushButton");
 
-    widget->getResetPushButton()->setVisible(resettable);
+    connect(&_colorPickerAction, &ColorPickerAction::colorChanged, this, [this, colorAction](const QColor& color) {
+        colorAction->setColor(color);
+        _toolButton.update();
+    });
 
-    return widget;
+    connect(colorAction, &ColorAction::colorChanged, this, [this](const QColor& color) {
+        _colorPickerAction.setColor(color);
+    });
+
+    _toolButton.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    _toolButton.setToolTip(colorAction->toolTip());
+    _toolButton.addAction(&_colorPickerAction);
+    _toolButton.setPopupMode(QToolButton::InstantPopup);
+    _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
+
+    _layout.setMargin(0);
+    _layout.addWidget(&_toolButton);
+
+    setLayout(&_layout);
 }
 
-ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction) :
-    WidgetAction::Widget(parent, colorAction, Widget::State::Standard),
-    _layout(new QHBoxLayout()),
-    _colorPickerPushButton(new ColorPickerPushButton()),
-    _resetPushButton(new QPushButton())
+ColorAction::PushButtonWidget::ToolButton::ToolButton(QWidget* parent, ColorPickerAction& colorPickerAction) :
+    QToolButton(parent),
+    _colorPickerAction(colorPickerAction)
 {
-    _layout->setMargin(0);
-    _layout->addWidget(_colorPickerPushButton);
+    setObjectName("ToolButton");
+}
 
-    setLayout(_layout);
+void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)
+{
+    QToolButton::paintEvent(paintEvent);
 
-    connect(_colorPickerPushButton, &ColorPickerPushButton::colorChanged, this, [this, colorAction](const QColor& color) {
-        colorAction->setColor(color);
-    });
+    // Draw at a higher resolution to get better anti-aliasing
+    const auto pixmapSize = 2 * size();
+    const auto pixmapRect = QRect(QPoint(), pixmapSize);
 
-    const auto updateColorPickerPushButton = [this, colorAction]() -> void {
-        _colorPickerPushButton->setColor(colorAction->getColor());
-    };
+    // Create color pixmap
+    QPixmap colorPixmap(pixmapSize);
 
-    connect(colorAction, &ColorAction::colorChanged, this, [this, updateColorPickerPushButton](const QColor& color) {
-        updateColorPickerPushButton();
-    });
+    // Fill with a transparent background
+    colorPixmap.fill(Qt::transparent);
 
-    updateColorPickerPushButton();
+    // Create a painter to draw in the color pixmap
+    QPainter painterColorPixmap(&colorPixmap);
+    
+    // Enable anti-aliasing
+    painterColorPixmap.setRenderHint(QPainter::Antialiasing);
 
-    _resetPushButton->setVisible(false);
-    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-    _resetPushButton->setToolTip(QString("Reset %1").arg(colorAction->text()));
+    QStyleOption styleOption;
 
-    _layout->addWidget(_resetPushButton);
+    styleOption.init(this);
 
-    connect(_resetPushButton, &QPushButton::clicked, this, [this, colorAction]() {
-        colorAction->reset();
-    });
+    // Set inset margins
+    const auto margin = 10;
 
-    const auto onUpdateColor = [this, colorAction]() -> void {
-        _resetPushButton->setEnabled(colorAction->canReset());
-    };
+    // Rect offset
+    QPoint offset(margin, margin);
 
-    connect(colorAction, &ColorAction::colorChanged, this, [this, onUpdateColor](const QColor& color) {
-        onUpdateColor();
-    });
+    // Deflated fill rectangle for color inset
+    auto colorRect = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 1, margin + 1));
 
-    onUpdateColor();
+    // Get current color
+    auto color = _colorPickerAction.getColor();
+
+    // Support enabled/disabled control
+    if (!isEnabled()) {
+        const auto grayScale = qGray(color.rgb());
+        color.setRgb(grayScale, grayScale, grayScale);
+    }
+
+    // Establish pen color based on whether the color map is enabled or not
+    const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::Shadow) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
+
+    // Do the painting
+    painterColorPixmap.setBrush(QBrush(color));
+    painterColorPixmap.setPen(QPen(penColor, 1.5, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painterColorPixmap.drawRoundedRect(colorRect, 4, 4);
+
+    QPainter painterColorWidget(this);
+
+    painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
+}
+
+QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(3);
+
+    if (widgetFlags & WidgetFlag::Picker)
+        layout->addWidget(new PushButtonWidget(parent, this));
+
+    if (widgetFlags & WidgetFlag::ResetPushButton)
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 }

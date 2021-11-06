@@ -6,6 +6,7 @@
 
 #include "Set.h"
 #include "PointDataRange.h"
+#include "LinkedSelection.h"
 
 #include <biovault_bfloat16.h>
 
@@ -32,11 +33,14 @@ namespace hdps
 
 const hdps::DataType PointType = hdps::DataType(QString("Points"));
 
+class InfoAction;
+class ClusterAction;
+
 // =============================================================================
 // Raw Data
 // =============================================================================
 
-class POINTDATA_EXPORT PointData : public hdps::RawData
+class POINTDATA_EXPORT PointData : public hdps::plugin::RawData
 {
 private:
 
@@ -305,7 +309,7 @@ public:
     template <std::size_t N>
     using ElementTypeAt = VectorHolder::ElementTypeAt<N>;
 
-    PointData() : RawData("Points", PointType) { }
+    PointData(PluginFactory* factory) : RawData(factory, PointType) { }
     ~PointData(void) override;
 
     void init() override;
@@ -369,7 +373,7 @@ public:
 
         _vectorHolder.constVisit([&resultContainer, this, &dimensionIndices, &indices](const auto& vec)
             {
-                const std::ptrdiff_t numPoints{ getNumPoints() };
+                const std::ptrdiff_t numPoints{ static_cast<std::uint32_t>(indices.size()) };
                 std::ptrdiff_t resultIndex{};
 
                 for (std::ptrdiff_t pointIndex{}; pointIndex < numPoints; ++pointIndex)
@@ -596,8 +600,10 @@ private:
     }
 
 public:
-    Points(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
-    ~Points() override { }
+    Points(hdps::CoreInterface* core, QString dataName);
+    ~Points() override;
+
+    void init() override;
 
     /// Allows read-only access to the internal point data vector, from its begin to its end.
     /// Similar to C++17 std::visit.
@@ -744,6 +750,8 @@ public:
      */
     void selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const;
 
+    void getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const;
+
     unsigned int getNumRawPoints() const
     {
         return getRawData<PointData>().getNumPoints();
@@ -776,12 +784,50 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
+    /**
+     * Adds a mapping of global selection indices from this dataset to a target dataset.
+     * @param targetDataSet The name of the target dataset
+     * @param mapping Map of global selection indices in this dataset to a vector of
+     *                global indices in the target dataset.
+     */
+    void addLinkedSelection(QString targetDataSet, hdps::SelectionMap& mapping);
+
+    /**
+     * Set global selection indices on this dataset. Applies linked selections
+     * if present in the dataset.
+     * @param selectionIndices Vector of global point indices to select
+     */
+    void setSelection(std::vector<unsigned int>& selectionIndices);
+
     // Set functions
     DataSet* copy() const override;
 
-    QString createSubset() const override;
+    /**
+     * Create subset
+     * @param subsetName Name of the subset
+     * @param parentSetName Name of the parent dataset
+     * @param visible Whether the subset will be visible in the UI
+     */
+    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override;
+
+    /** Get icon for the dataset */
+    QIcon getIcon() const override;
+
+    /** Select all data points */
+    void selectAll();
+
+    /** Clear data point selection */
+    void selectNone();
+
+    /** Invert the data point selection */
+    void selectInvert();
 
     std::vector<unsigned int> indices;
+
+    QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
+
+private:
+    std::vector<hdps::LinkedSelection> _linkedSelections;
 };
 
 // =============================================================================
@@ -792,12 +838,15 @@ class PointDataFactory : public RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
         Q_OBJECT
-        Q_PLUGIN_METADATA(IID   "nl.tudelft.PointData"
+        Q_PLUGIN_METADATA(IID   "hdps.PointData"
             FILE  "PointData.json")
 
 public:
     PointDataFactory(void) {}
     ~PointDataFactory(void) override {}
 
-    hdps::RawData* produce() override;
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
+
+    hdps::plugin::RawData* produce() override;
 };

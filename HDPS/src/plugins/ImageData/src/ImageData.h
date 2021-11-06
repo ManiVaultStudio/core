@@ -16,7 +16,7 @@ class Points;
 
 const hdps::DataType ImageType = hdps::DataType(QString("Images"));
 
-class IMAGEDATA_EXPORT ImageData : public hdps::RawData
+class IMAGEDATA_EXPORT ImageData : public hdps::plugin::RawData
 {
 public:
     enum Type
@@ -27,7 +27,7 @@ public:
         MultiPartSequence
     };
 
-    static QString typeName(const Type& type)
+    static QString getTypeName(const Type& type)
     {
         switch (type)
         {
@@ -48,57 +48,94 @@ public:
     }
 
 public:
-    ImageData();
+    ImageData(const hdps::plugin::PluginFactory* factory);
 
     void init() override;
 
 public:
-    Type type() const;
+
+    /** Gets the image collection type e.g. stack or sequence */
+    Type getType() const;
+
+    /**
+     * Sets the image collection type e.g. stack or sequence
+     * @param type Image collection type
+     */
     void setType(const Type& type);
-    std::uint32_t noImages() const;
-    void setNoImages(const std::uint32_t& noImages);
-    QSize imageSize() const;
-    void setImageSize(const QSize& imageSize);
-    std::uint32_t noComponents() const;
-    void setNoComponents(const std::uint32_t& noComponents);
-    std::vector<QString> imageFilePaths() const;
-    void setImageFilePaths(const std::vector<QString>& imageFilePaths);
-    std::vector<QString> dimensionNames() const;
-    void setDimensionNames(const std::vector<QString>& dimensionNames);
 
-    QString pointsName() const;
-    Points* points() const;
+    /** Gets the number of images */
+    std::uint32_t getNumberOfImages() const;
 
-public:
-    std::uint32_t noPoints() const;
-    std::uint32_t noDimensions() const;
-    
-    float pointValue(const std::uint32_t& index) const;
-    float pointValue(const std::uint32_t& x, const std::uint32_t& y) const;
+    /**
+     * Sets the number of images
+     * @param numberOfImages Number of images
+     */
+    void setNumberImages(const std::uint32_t& numberOfImages);
 
+    /** Get the image size */
+    QSize getImageSize() const;
+
+    /** Get the source rectangle */
+    QRect getSourceRectangle() const;
+
+    /** Get the target rectangle */
+    QRect getTargetRectangle() const;
+
+    /**
+     * Set the image geometry
+     * @param sourceImageSize Size of the source image(s)
+     * @param targetImageSize Size of the target image(s)
+     * @param imageOffset Offset of the image(s)
+     */
+    void setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize = QSize(), const QPoint& imageOffset = QPoint());
+
+    /** Gets the number of components per pixel */
+    std::uint32_t getNumberOfComponentsPerPixel() const;
+
+    /**
+     * Sets the number of components per pixel
+     * @param numberOfPixelComponents Number of pixel components
+     */
+    void setNumberOfComponentsPerPixel(const std::uint32_t& numberOfComponentsPerPixel);
+
+    /** Gets the image file paths */
+    QStringList getImageFilePaths() const;
+
+    /**
+     * Sets the image file paths
+     * @param imageFilePaths Image file paths
+     */
+    void setImageFilePaths(const QStringList& imageFilePaths);
+
+    /**
+     * Create images dataset
+     * @return Pointer to dataset
+     */
     hdps::DataSet* createDataSet() const override;
 
 private:
-    Type                    _type;
-    std::uint32_t           _noImages;
-    QSize                   _imageSize;
-    std::uint32_t           _noComponents;
-    std::vector<QString>    _imageFilePaths;
-    std::vector<QString>    _dimensionNames;
-    QString                 _pointsName;
-    Points*                 _points;
+    Type                _type;                          /** Image collection type e.g. stack or sequence */
+    std::uint32_t       _numberOfImages;                /** Number of images in the set */
+    QPoint              _imageOffset;                   /** Image offset */
+    QRect               _sourceRectangle;               /** Source image rectangle */
+    QRect               _targetRectangle;               /** Target image rectangle */
+    std::uint32_t       _numberOfComponentsPerPixel;    /** Number of components per pixel */
+    QStringList         _imageFilePaths;                /** Image file paths */
+    QStringList         _dimensionNames;                /** Dimension names */
 };
 
 class ImageDataFactory : public hdps::plugin::RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.tudelft.ImageData"
-                      FILE  "ImageData.json")
-    
+    Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData" FILE "ImageData.json")
+
 public:
     ImageDataFactory() {}
     ~ImageDataFactory() override {}
-    
-    hdps::RawData* produce() override;
+
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
+
+    hdps::plugin::RawData* produce() override;
 };

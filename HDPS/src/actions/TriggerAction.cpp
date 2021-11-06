@@ -1,7 +1,7 @@
 #include "TriggerAction.h"
 
-#include <QPushButton>
 #include <QMenu>
+#include <QHBoxLayout>
 
 namespace hdps {
 
@@ -11,30 +11,31 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent)
 {
     setText(title);
+    setDefaultWidgetFlags(WidgetFlag::Text);
 }
 
-TriggerAction::Widget::Widget(QWidget* parent, TriggerAction* triggerAction) :
-    WidgetAction::Widget(parent, triggerAction, Widget::State::Standard),
-    _layout(new QHBoxLayout()),
-    _pushButton(new QPushButton())
+TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags) :
+    QPushButton(parent),
+    _triggerAction(triggerAction)
 {
-    _layout->setMargin(0);
-    _layout->addWidget(_pushButton);
-
-    setLayout(_layout);
-
-    connect(_pushButton, &QPushButton::clicked, this, [this, triggerAction]() {
+    connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();
     });
 
-    const auto update = [this, triggerAction]() -> void {
-        QSignalBlocker blocker(_pushButton);
+    const auto update = [this, triggerAction, widgetFlags]() -> void {
+        QSignalBlocker blocker(this);
 
-        _pushButton->setEnabled(triggerAction->isEnabled());
-        _pushButton->setText(triggerAction->text());
-        _pushButton->setIcon(triggerAction->icon());
-        _pushButton->setToolTip(triggerAction->toolTip());
+        setEnabled(triggerAction->isEnabled());
 
+        if (widgetFlags & WidgetFlag::Text)
+            setText(triggerAction->text());
+
+        if (widgetFlags & WidgetFlag::Icon) {
+            setIcon(triggerAction->icon());
+            setProperty("class", "square-button");
+        }
+
+        setToolTip(triggerAction->toolTip());
         setVisible(triggerAction->isVisible());
     };
 
@@ -45,12 +46,12 @@ TriggerAction::Widget::Widget(QWidget* parent, TriggerAction* triggerAction) :
     update();
 }
 
-QWidget* TriggerAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
+QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    return new TriggerAction::Widget(parent, this);
+    return new TriggerAction::PushButtonWidget(parent, this, widgetFlags);
 }
 
 }

@@ -1,7 +1,6 @@
 #ifndef HDPS_DATAMANAGER_H
 #define HDPS_DATAMANAGER_H
 
-#include "RawData.h"
 #include "Set.h"
 #include "CoreInterface.h"
 
@@ -29,6 +28,10 @@ namespace std {
 
 namespace hdps
 {
+    namespace plugin
+    {
+        class RawData;
+    }
 
 struct DataNotFoundException : public std::exception
 {
@@ -87,15 +90,22 @@ public:
 
     }
 
-    void addRawData(RawData* rawData);
+    void addRawData(plugin::RawData* rawData);
     QString addSet(QString requestedName, DataSet* set);
     void addSelection(QString dataName, DataSet* selection);
 
-    void renameSet(QString oldName, QString requestedName);
+    QString renameSet(QString oldName, QString requestedName);
 
-    void removeDataset(QString datasetName);
+    /**
+     * Removes a Dataset. Other datasets derived from this dataset are
+     * converted to non-derived data.
+     * Notifies all plug-ins of the removed dataset automatically.
+     * @param datasetName Name of the (top-level) dataset to remove
+     * @param recursively Remove datasets recursively
+     */
+    void removeDataset(const QString& datasetName, const bool& recursively = true);
 
-    RawData& getRawData(QString name);
+    plugin::RawData& getRawData(QString name);
     DataSet& getSet(QString name);
     DataSet& getSelection(QString name);
     const std::unordered_map<QString, std::unique_ptr<DataSet>>& allSets() const;
@@ -116,7 +126,7 @@ private:
      * Stores all raw data in the system. Raw data is stored by the name
      * retrieved from their Plugin::getName() function.
      */
-    std::unordered_map<QString, std::unique_ptr<RawData>> _rawDataMap;
+    std::unordered_map<QString, std::unique_ptr<plugin::RawData>> _rawDataMap;
 
     /**
      * Stores all data sets in the system. Data sets are stored by the name

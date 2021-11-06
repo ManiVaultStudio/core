@@ -1,9 +1,8 @@
 #ifndef HDPS_DATASET_H
 #define HDPS_DATASET_H
 
-#include "RawData.h"
-
 #include "CoreInterface.h"
+#include "RawData.h"
 
 #include <QString>
 #include <QVector>
@@ -11,6 +10,10 @@
 
 namespace hdps
 {
+
+class DataHierarchyItem;
+
+using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
 
 class DataSet
 {
@@ -21,14 +24,21 @@ public:
         _all(false),
         _rawData(nullptr)
     {
-        
     }
 
     virtual ~DataSet() {}
 
+    virtual void init() {};
+
     virtual DataSet* copy() const = 0;
 
-    virtual QString createSubset() const = 0;
+    /**
+     * Create subset
+     * @param subsetName Name of the subset
+     * @param parentSetName Name of the parent dataset
+     * @param visible Whether the subset will be visible in the UI
+     */
+    virtual QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const = 0;
 
     QString getName() const
     {
@@ -72,6 +82,15 @@ public:
     }
 
     /**
+     * Marks this dataset as derived and sets the dataset it's derived from to sourceDataName.
+     */
+    void setSourceData(QString sourceDataName)
+    {
+        _sourceSetName = sourceDataName;
+        _derived = true;
+    }
+
+    /**
      * Gets the selection associated with this data set. If the data set is
      * derived then the selection of the source data will be returned. Otherwise,
      * the selection of the set's data will be returned.
@@ -83,10 +102,32 @@ public:
         return _core->requestSelection(getSourceData(*this).getDataName());
     }
 
+    /**
+     * Gets the selection associated with this data set. If the data set is
+     * derived then the selection of the source data will be returned. Otherwise,
+     * the selection of the set's data will be returned.
+     *
+     * @return The selection of dataset type associated with this data set
+     */
+    template<typename DatasetType>
+    DatasetType& getSelection() const
+    {
+        return dynamic_cast<DatasetType&>(_core->requestSelection(getSourceData(*this).getDataName()));
+    }
+
     void setSelection(std::vector<unsigned int> indices)
     {
 
     }
+
+    /** Get icon for the dataset */
+    virtual QIcon getIcon() const = 0;
+
+    /** Get reference to data hierarchy item */
+    DataHierarchyItem& getHierarchyItem();
+
+    /** Get reference to data hierarchy item */
+    const DataHierarchyItem& getHierarchyItem() const;
 
 public: // Properties
 
@@ -130,6 +171,27 @@ public: // Properties
         return _properties.keys();
     }
 
+public: // Actions
+
+    /** Returns list of shared action widgets*/
+    void addAction(hdps::gui::WidgetAction& widgetAction);
+
+    /** Returns list of shared action widgets*/
+    hdps::gui::WidgetActions getActions() const;
+
+    /**
+     * Get the context menu
+     * @param parent Parent widget
+     * @return Context menu
+     */
+    QMenu* getContextMenu(QWidget* parent = nullptr);;
+
+    /**
+     * Populates existing menu with actions menus
+     * @param contextMenu Context menu to populate
+     */
+    void populateContextMenu(QMenu* contextMenu);;
+
 protected:
     template <class DataType>
     DataType& getRawData() const
@@ -159,16 +221,14 @@ protected:
 
     CoreInterface* _core;
 private:
-    mutable RawData* _rawData;
+    mutable plugin::RawData*    _rawData;
 
-    QString _name;
-    QString _dataName;
-    bool _all;
-
-    bool _derived = false;
-    QString _sourceSetName;
-
-    QMap<QString, QVariant> _properties; /** Properties map */
+    QString                     _name;                  /** Name of the dataset */
+    QString                     _dataName;              /** Name of the raw data */
+    bool                        _all;                   /** Whether this is the full dataset */
+    bool                        _derived = false;       /** Whether this dataset is derived from another dataset */
+    QString                     _sourceSetName;         /** Name of the source dataset (if any) */
+    QMap<QString, QVariant>     _properties;            /** Properties map */
 
     friend class Core;
     friend class DataManager;

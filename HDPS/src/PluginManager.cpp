@@ -5,10 +5,12 @@
 #include <QDebug>
 #include <QPluginLoader>
 #include <QSignalMapper>
+#include <QMessageBox>
 
 #include <assert.h>
 
 #include "MainWindow.h"
+#include "PluginFactory.h"
 #include "AnalysisPlugin.h"
 #include "RawData.h"
 #include "LoaderPlugin.h"
@@ -19,6 +21,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
+
+#include <stdexcept>
 
 namespace hdps {
 
@@ -72,7 +76,7 @@ void PluginManager::loadPlugins()
 
         // Create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
-       
+
         // If pluginFactory is a nullptr then loading of the plugin failed for some reason. Print the reason to output.
         if (!pluginFactory)
         {
@@ -82,6 +86,8 @@ void PluginManager::loadPlugins()
 
         // Loading of the plugin succeeded so cast it to its original class
         _pluginFactories[pluginKind] = qobject_cast<PluginFactory*>(pluginFactory);
+        _pluginFactories[pluginKind]->setKind(pluginKind);
+        _pluginFactories[pluginKind]->setGuiName(menuName);
 
         // Add the plugin to a menu item and link the triggering of the menu item to triggering of the plugin
         QAction* action = NULL;
@@ -99,7 +105,6 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
-            action = gui.addExportOption(menuName);
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
@@ -221,6 +226,108 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
 QString PluginManager::createPlugin(const QString kind)
 {
     return pluginTriggered(kind);
+}
+
+void PluginManager::createAnalysisPlugin(const QString& kind, const QString& inputDatasetName)
+{
+    try
+    {
+        if (!_pluginFactories.keys().contains(kind))
+            throw std::runtime_error("Unrecognized plugin kind");
+
+        auto pluginInstance = dynamic_cast<AnalysisPlugin*>(_pluginFactories[kind]->produce());
+
+        if (!pluginInstance)
+            return;
+
+        pluginInstance->setInputDatasetName(inputDatasetName);
+
+        _core.addPlugin(pluginInstance);
+    }
+    catch (std::exception& e)
+    {
+        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create analysis plugin: %1").arg(e.what()));
+    }
+}
+
+void PluginManager::createExporterPlugin(const QString& kind, const QString& inputDatasetName)
+{
+    try
+    {
+        if (!_pluginFactories.keys().contains(kind))
+            throw std::runtime_error("Unrecognized plugin kind");
+
+        auto pluginInstance = dynamic_cast<WriterPlugin*>(_pluginFactories[kind]->produce());
+
+        if (!pluginInstance)
+            return;
+
+        pluginInstance->setInputDatasetName(inputDatasetName);
+
+        _core.addPlugin(pluginInstance);
+    }
+    catch (std::exception& e)
+    {
+        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create analysis plugin: %1").arg(e.what()));
+    }
+}
+
+QStringList PluginManager::getPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
+{
+    QStringList pluginKinds;
+
+    for (auto pluginFactory : _pluginFactories) {
+        if (pluginFactory->getType() != pluginType)
+            continue;
+
+        auto pluginCompatible = dataTypes.isEmpty();
+
+        for (auto dataType : dataTypes) {
+            if (pluginFactory->supportedDataTypes().contains(dataType)) {
+                pluginCompatible = true;
+                break;
+            }
+        }
+
+        if (pluginCompatible)
+            pluginKinds << pluginFactory->getKind();
+    }
+
+    pluginKinds.sort();
+
+    return pluginKinds;
+}
+
+QString PluginManager::getPluginGuiName(const QString& pluginKind) const
+{
+    if (!_pluginFactories.contains(pluginKind))
+        return "";
+
+    return _pluginFactories[pluginKind]->getGuiName();
+}
+
+QStringList PluginManager::requestPluginKindsByPluginType(const plugin::Type& pluginType)
+{
+    QStringList pluginKinds;
+
+    for (auto pluginFactory : _pluginFactories) {
+        if (pluginFactory->getType() != pluginType)
+            continue;
+
+        pluginKinds << pluginFactory->getKind();
+    }
+
+    pluginKinds.sort();
+
+    return pluginKinds;
+}
+
+QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
+{
+    if (!_pluginFactories.contains(pluginKind))
+        return QIcon();
+
+    return _pluginFactories[pluginKind]->getIcon();
 }
 
 QString PluginManager::pluginTriggered(const QString& kind)

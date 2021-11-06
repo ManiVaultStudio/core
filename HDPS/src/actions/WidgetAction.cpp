@@ -1,148 +1,129 @@
 #include "WidgetAction.h"
+#include "WidgetActionCollapsedWidget.h"
+#include "DataHierarchyItem.h"
+#include "Application.h"
 
 #include <QDebug>
-#include <QMenu>
-#include <QEvent>
-#include <QPainter>
 
 namespace hdps {
 
 namespace gui {
 
-WidgetAction::Widget::Widget(QWidget* parent, WidgetAction* widgetAction, const State& state) :
-    QWidget(parent),
-    _widgetAction(widgetAction),
-    _state(state)
-{
-    const auto updateAction = [this, widgetAction]() -> void {
-        setEnabled(widgetAction->isEnabled());
-        setVisible(widgetAction->isVisible());
-    };
-
-    connect(widgetAction, &QAction::changed, this, [this, updateAction]() {
-        updateAction();
-    });
-
-    updateAction();
-}
-
-void WidgetAction::Widget::setPopupLayout(QLayout* popupLayout)
-{
-    auto mainLayout = new QVBoxLayout();
-
-    mainLayout->setMargin(4);
-
-    setLayout(mainLayout);
-
-    auto groupBox = new QGroupBox(_widgetAction->text());
-
-    groupBox->setLayout(popupLayout);
-
-    mainLayout->addWidget(groupBox);
-}
-
 WidgetAction::WidgetAction(QObject* parent) :
-    QWidgetAction(parent)
+    QWidgetAction(parent),
+    _createdBy(),
+    _context(),
+    _dataHierarchyItemContext(nullptr),
+    _defaultWidgetFlags(),
+    _resettable(false),
+    _mayReset(false),
+    _sortIndex(-1)
 {
 }
 
-WidgetAction::CollapsedWidget::CollapsedWidget(QWidget* parent, WidgetAction* widgetAction) :
-    Widget(parent, widgetAction, Widget::State::Collapsed),
-    _layout(),
-    _toolButton()
+QWidget* WidgetAction::createWidget(QWidget* parent)
 {
-    _layout.setMargin(0);
+    if (parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent()))
+        return getWidget(parent, WidgetActionWidget::PopupLayout);
 
-    _toolButton.setIcon(widgetAction->icon());
-    _toolButton.setToolTip(widgetAction->toolTip());
-    _toolButton.addAction(widgetAction);
-    _toolButton.setPopupMode(QToolButton::InstantPopup);
-    _toolButton.setIconSize(QSize(12, 12));
-    _toolButton.setFixedSize(QSize(24, 24));
-    _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
-
-    _layout.addWidget(&_toolButton);
-
-    setLayout(&_layout);
+    return getWidget(parent, _defaultWidgetFlags);
 }
 
-WidgetAction::StateWidget::StateWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& priority /*= 0*/, const Widget::State& state /*= Widget::State::Compact*/) :
-    QWidget(parent),
-    _widgetAction(widgetAction),
-    _state(state),
-    _priority(priority),
-    _standardWidget(widgetAction->createWidget(this)),
-    _compactWidget(widgetAction->createCollapsedWidget(this))
+QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
-    auto layout = new QHBoxLayout();
-
-    layout->setMargin(0);
-    layout->addWidget(_standardWidget);
-    layout->addWidget(_compactWidget);
-
-    setState(state);
-    setLayout(layout);
+    return getWidget(parent, widgetFlags);
 }
 
-WidgetAction::Widget::State WidgetAction::StateWidget::getState() const
+bool WidgetAction::getMayReset() const
 {
-    return _state;
+    return _mayReset;
 }
 
-void WidgetAction::StateWidget::setState(const Widget::State& state)
+void WidgetAction::setMayReset(const bool& mayReset)
 {
-    _standardWidget->setVisible(state == Widget::State::Standard);
-    _compactWidget->setVisible(state == Widget::State::Collapsed);
+    _mayReset = mayReset;
 }
 
-std::int32_t WidgetAction::StateWidget::getPriority() const
+std::int32_t WidgetAction::getSortIndex() const
 {
-    return _priority;
+    return _sortIndex;
 }
 
-void WidgetAction::StateWidget::setPriority(const std::int32_t& priority)
+void WidgetAction::setSortIndex(const std::int32_t& sortIndex)
 {
-    _priority = priority;
+    _sortIndex = sortIndex;
 }
 
-QSize WidgetAction::StateWidget::getSizeHint(const Widget::State& state) const
+QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
 {
-    switch (state)
-    {
-        case Widget::State::Standard:
-            return _standardWidget->sizeHint();
-
-        case Widget::State::Collapsed:
-            return _compactWidget->sizeHint();
-
-        default:
-            break;
-    }
-
-    return QSize();
+    return new WidgetActionCollapsedWidget(parent, this);
 }
 
-void WidgetAction::ToolButton::paintEvent(QPaintEvent* paintEvent)
+WidgetActionLabel* WidgetAction::createLabelWidget(QWidget* parent)
 {
-    QToolButton::paintEvent(paintEvent);
-
-    QPainter painter(this);
-
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    const auto margin = 5.0f;
-
-    QPointF center;
-
-    center.setY(height() - margin);
-    center.setX(width() - margin);
-
-    painter.setPen(QPen(QBrush(isEnabled() ? Qt::black : Qt::gray), 2.5, Qt::SolidLine, Qt::RoundCap));
-    painter.setBrush(Qt::NoBrush);
-    painter.drawPoint(center);
+    return new WidgetActionLabel(this, parent);
 }
 
+WidgetActionResetButton* WidgetAction::createResetButton(QWidget* parent)
+{
+    return new WidgetActionResetButton(this, parent);
+}
 
+bool WidgetAction::isResettable() const
+{
+    return _resettable;
+}
+
+void WidgetAction::setResettable(const bool& resettable)
+{
+    if (resettable == _resettable)
+        return;
+
+    _resettable = resettable;
+
+    emit resettableChanged(_resettable);
+}
+
+void WidgetAction::reset()
+{
+    qDebug() << text() << "Does not implement a reset function";
+}
+
+std::int32_t WidgetAction::getDefaultWidgetFlags() const
+{
+    return _defaultWidgetFlags;
+}
+
+void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
+{
+    _defaultWidgetFlags = widgetFlags;
+}
+
+void WidgetAction::setContext(const QString& context)
+{
+    _context = context;
+}
+
+void WidgetAction::setContext(const DataHierarchyItem* dataHierarchyItem)
+{
+    if (dataHierarchyItem == _dataHierarchyItemContext)
+        return;
+
+    _dataHierarchyItemContext = dataHierarchyItem;
+}
+
+QString WidgetAction::getContext() const
+{
+    if (_dataHierarchyItemContext != nullptr)
+        return _dataHierarchyItemContext->getDatasetName();
+
+    return _context;
+}
+
+QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    return new QWidget();
+}
 
 }
 }

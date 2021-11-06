@@ -1,18 +1,28 @@
 #include "StringAction.h"
-#include "Application.h"
 
 #include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
 
 namespace hdps {
 
 namespace gui {
 
-StringAction::StringAction(QObject* parent, const QString& title /*= ""*/) :
+    
+
+StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
     WidgetAction(parent)
 {
     setText(title);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::Basic);
+    initialize(string, defaultString);
+}
+
+void StringAction::initialize(const QString& string /*= ""*/, const QString& defaultString /*= ""*/)
+{
+    setString(string);
+    setDefaultString(defaultString);
+
+    setResettable(isResettable());
 }
 
 QString StringAction::getString() const
@@ -28,6 +38,8 @@ void StringAction::setString(const QString& string)
     _string = string;
 
     emit stringChanged(_string);
+
+    setResettable(isResettable());
 }
 
 QString StringAction::getDefaultString() const
@@ -45,7 +57,7 @@ void StringAction::setDefaultString(const QString& defaultString)
     emit defaultStringChanged(_defaultString);
 }
 
-bool StringAction::canReset() const
+bool StringAction::isResettable() const
 {
     return _string != _defaultString;
 }
@@ -55,49 +67,70 @@ void StringAction::reset()
     setString(_defaultString);
 }
 
-StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction) :
-    WidgetAction::Widget(parent, stringAction, Widget::State::Standard),
-    _layout(new QHBoxLayout()),
-    _lineEdit(new QLineEdit()),
-    _resetPushButton(new QPushButton())
+QString StringAction::getPlaceholderString() const
 {
-    _layout->setMargin(0);
-    _layout->addWidget(_lineEdit);
+    return _placeholderString;
+}
 
-    setLayout(_layout);
+void StringAction::setPlaceHolderString(const QString& placeholderString)
+{
+    if (placeholderString == _placeholderString)
+        return;
+
+    _placeholderString = placeholderString;
+
+    emit placeholderStringChanged(_placeholderString);
+}
+
+StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :
+    QLineEdit(parent)
+{
+    setObjectName("LineEdit");
+    setAcceptDrops(true);
 
     const auto updateLineEdit = [this, stringAction]() {
-        _lineEdit->setText(stringAction->getString());
+        QSignalBlocker blocker(this);
+
+        setText(stringAction->getString());
+    };
+
+    const auto updatePlaceHolderText = [this, stringAction]() -> void {
+        setPlaceholderText(stringAction->getPlaceholderString());
     };
 
     connect(stringAction, &StringAction::stringChanged, this, [this, updateLineEdit](const QString& value) {
         updateLineEdit();
     });
 
-    connect(_lineEdit, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
+    connect(stringAction, &StringAction::placeholderStringChanged, this, [this, updatePlaceHolderText](const QString& value) {
+        updatePlaceHolderText();
+    });
+
+    connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
     });
 
-    _resetPushButton->setVisible(false);
-    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-    _resetPushButton->setToolTip(QString("Reset %1").arg(stringAction->text()));
-
-    _layout->addWidget(_resetPushButton);
-
-    connect(_resetPushButton, &QPushButton::clicked, this, [this, stringAction]() {
-        stringAction->reset();
-    });
-
-    const auto onUpdateString = [this, stringAction]() -> void {
-        _resetPushButton->setEnabled(stringAction->canReset());
-    };
-
-    connect(stringAction, &StringAction::stringChanged, this, [this, onUpdateString](const QColor& color) {
-        onUpdateString();
-    });
-
-    onUpdateString();
     updateLineEdit();
+    updatePlaceHolderText();
+}
+
+QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(3);
+
+    if (widgetFlags & WidgetFlag::LineEdit)
+        layout->addWidget(new StringAction::LineEditWidget(parent, this));
+
+    if (widgetFlags & WidgetFlag::ResetPushButton)
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 }

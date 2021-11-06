@@ -16,10 +16,10 @@ const hdps::DataType ColorType = hdps::DataType(QString("Colors"));
 // Raw Data
 // =============================================================================
 
-class ColorData : public hdps::RawData
+class ColorData : public hdps::plugin::RawData
 {
 public:
-    ColorData() : hdps::RawData("Colors", ColorType) { }
+    ColorData(const hdps::plugin::PluginFactory* factory) : hdps::plugin::RawData(factory, ColorType) { }
     ~ColorData(void) override;
     
     void init() override;
@@ -50,12 +50,21 @@ public:
         return colors;
     }
 
-    QString createSubset() const override
+    /**
+     * Create subset
+     * @param subsetName Name of the subset
+     * @param parentSetName Name of the parent dataset
+     * @param visible Whether the subset will be visible in the UI
+     */
+    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "",const bool& visible = true) const override
     {
         const hdps::DataSet& selection = getSelection();
 
-        return _core->createSubsetFromSelection(selection, *this, "Subset");
+        return _core->createSubsetFromSelection(selection, *this, subsetName, parentSetName, visible);
     }
+
+    /** Get icon for the dataset */
+    QIcon getIcon() const override;
 
     std::vector<unsigned int> indices;
 };
@@ -75,5 +84,8 @@ public:
     ColorDataFactory(void) {}
     ~ColorDataFactory(void) override {}
     
-    hdps::RawData* produce() override;
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
+
+    hdps::plugin::RawData* produce() override;
 };

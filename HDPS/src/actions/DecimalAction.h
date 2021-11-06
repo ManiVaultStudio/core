@@ -1,10 +1,11 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "NumericalAction.h"
+
+#include <QDoubleSpinBox>
+#include <QSlider>
 
 class QWidget;
-class QDoubleSpinBox;
-class QSlider;
 class QPushButton;
 
 namespace hdps {
@@ -12,108 +13,148 @@ namespace hdps {
 namespace gui {
 
 /**
- * Decimal widget action class
+ * Decimal action class
  *
- * Stores a double value and creates widgets to interact with it
+ * Stores a float value and creates widgets to interact with it
  *
  * @author Thomas Kroes
  */
-class DecimalAction : public WidgetAction
+class DecimalAction : public NumericalAction<float>
 {
     Q_OBJECT
 
 public:
 
-    class Widget : public WidgetAction::Widget
+    /** Spinbox widget class for decimal action */
+    class SpinBoxWidget : public QDoubleSpinBox
     {
     protected:
-        Widget(QWidget* parent, DecimalAction* decimalAction);
-        
-    public:
-        QDoubleSpinBox* getDoubleSpinBox() { return _valueDoubleSpinBox; }
-        QSlider* getSlider() { return _valueSlider; }
-        QPushButton* getResetPushButton() { return _resetPushButton; }
 
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param decimalAction Pointer to decimal action
+         */
+        SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction);
+
+        friend class DecimalAction;
+    };
+
+    /** Slider widget class for decimal action */
+    class SliderWidget : public QSlider
+    {
     protected:
-        QDoubleSpinBox*     _valueDoubleSpinBox;
-        QSlider*            _valueSlider;
-        QPushButton*        _resetPushButton;
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param decimalAction Pointer to decimal action
+         */
+        SliderWidget(QWidget* parent, DecimalAction* decimalAction);
 
         friend class DecimalAction;
     };
 
 protected:
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override {
-        return new DecimalAction::Widget(parent, this);
-    };
+
+    /**
+     * Get widget representation of the decimal action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
-    DecimalAction(QObject * parent, const QString& title, const double& minimum = MIN_VALUE, const double& maximum = MAX_VALUE, const double& value = VALUE, const double& defaultValue = DEFAULT_VALUE, const std::int32_t& decimals = DECIMALS);
 
-    double getValue() const;
-    void setValue(const double& value);
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     * @param title Title of the action
+     * @param minimum Minimum value
+     * @param maximum Maximum value
+     * @param value Value
+     * @param defaultValue Default value
+     * @param numberOfDecimals Number of decimals
+     */
+    DecimalAction(QObject * parent, const QString& title, const float& minimum = INIT_MIN, const float& maximum = INIT_MAX, const float& value = INIT_VALUE, const float& defaultValue = INIT_DEFAULT_VALUE, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
-    double getDefaultValue() const;
-    void setDefaultValue(const double& defaultValue);
+    /**
+     * Initialize the decimal action
+     * @param minimum Minimum value
+     * @param maximum Maximum value
+     * @param value Value
+     * @param defaultValue Default value
+     */
+    void initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
-    bool canReset() const;
-    void reset();
+    /** Gets the single step */
+    float getSingleStep() const;
 
-    double getMinimum() const;
-    void setMinimum(const double& minimum);
-
-    double getMaximum() const;
-    void setMaximum(const double& maximum);
-
-    void setRange(const double& min, const double& max);
-
-    QString getSuffix() const;
-    void setSuffix(const QString& suffix);
-
-    std::uint32_t getDecimals() const;
-    void setDecimals(const std::uint32_t& decimals);
-
-    bool getUpdateDuringDrag() const;
-    void setUpdateDuringDrag(const bool& updateDuringDrag);
-
-    DecimalAction& operator= (const DecimalAction& other)
-    {
-        WidgetAction::operator=(other);
-
-        _value              = other._value;
-        _defaultValue       = other._defaultValue;
-        _minimum            = other._minimum;
-        _maximum            = other._maximum;
-        _suffix             = other._suffix;
-        _decimals           = other._decimals;
-        _updateDuringDrag   = other._updateDuringDrag;
-
-        return *this;
-    }
+    /**
+     * Sets the single step
+     * @param singleStep Single step
+     */
+    void setSingleStep(const float& singleStep);
 
 signals:
-    void valueChanged(const double& value);
-    void defaultValueChanged(const double& defaultValue);
-    void minimumChanged(const double& minimum);
-    void maximumChanged(const double& maximum);
+
+    /**
+     * Signals that the current value changed
+     * @param value Current value that changed
+     */
+    void valueChanged(const float& value);
+
+    /**
+     * Signals that the default value changed
+     * @param defaultValue Default value that changed
+     */
+    void defaultValueChanged(const float& defaultValue);
+
+    /**
+     * Signals that the minimum value changed
+     * @param minimum New minimum
+     */
+    void minimumChanged(const float& minimum);
+
+    /**
+     * Signals that the maximum value changed
+     * @param maximum New maximum
+     */
+    void maximumChanged(const float& maximum);
+
+    /**
+     * Signals that the prefix changed
+     * @param prefix New prefix
+     */
+    void prefixChanged(const QString& prefix);
+
+    /**
+     * Signals that the suffix changed
+     * @param suffix New suffix
+     */
     void suffixChanged(const QString& suffix);
-    void decimalsChanged(const std::uint32_t& decimals);
+
+    /**
+     * Signals that the number of decimals changed
+     * @param numberOfDecimals Number of decimals
+     */
+    void numberOfDecimalsChanged(const std::uint32_t& numberOfDecimals);
+
+    /**
+     * Signals that the single step changed
+     * @param singleStep Single step
+     */
+    void singleStepChanged(const float& singleStep);
 
 protected:
-    double          _value;
-    double          _defaultValue;
-    double          _minimum;
-    double          _maximum;
-    QString         _suffix;
-    std::uint32_t   _decimals;
-    bool            _updateDuringDrag;
+    float   _singleStep;    /** Single step size for spin box */
 
-    static constexpr int SLIDER_MULTIPLIER = 1000;
-    static constexpr double MIN_VALUE = 0.0;
-    static constexpr double MAX_VALUE = 100.0;
-    static constexpr double VALUE = 0.0;
-    static constexpr double DEFAULT_VALUE = 0.0;
-    static constexpr int DECIMALS = 1;
+protected:
+    static constexpr float  INIT_MIN            = 0.0f;         /** Initialization minimum value */
+    static constexpr float  INIT_MAX            = 100.0f;       /** Initialization maximum value */
+    static constexpr float  INIT_VALUE          = 0.0;          /** Initialization value */
+    static constexpr float  INIT_DEFAULT_VALUE  = 0.0;          /** Initialization default value */
+    static constexpr int    INIT_DECIMALS       = 1;            /** Initialization number of decimals */
 };
 
 }

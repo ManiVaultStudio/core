@@ -1,10 +1,16 @@
 #pragma once
 
 #include "ColorAction.h"
+#include "ColorMapAction.h"
 #include "DecimalAction.h"
+#include "DecimalRangeAction.h"
+#include "GroupAction.h"
+#include "GroupsAction.h"
 #include "IntegralAction.h"
 #include "OptionAction.h"
+#include "PixelSelectionAction.h"
 #include "TriggerAction.h"
 #include "ToggleAction.h"
 #include "StringAction.h"
 #include "WidgetAction.h"
+#include "WidgetActionLabel.h"

@@ -33,7 +33,7 @@ public:
     void setSigma(float sigma);
 
     Texture2D& getDensityTexture() { return _densityTexture; }
-    float getMaxDensity() { return _maxKDE; }
+    float getMaxDensity() const { return _maxKDE; }
     unsigned int getNumPoints() { return _numPoints; }
 
     void compute();

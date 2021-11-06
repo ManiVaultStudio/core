@@ -1,10 +1,12 @@
 #pragma once
 
-#include "WidgetAction.h"
+#include "NumericalAction.h"
+
+#include <QSpinBox>
+#include <QSlider>
+#include <QLineEdit>
 
 class QWidget;
-class QSpinBox;
-class QSlider;
 class QPushButton;
 
 namespace hdps {
@@ -18,105 +20,131 @@ namespace gui {
  *
  * @author Thomas Kroes
  */
-class IntegralAction : public WidgetAction
+class IntegralAction : public NumericalAction<std::int32_t>
 {
     Q_OBJECT
 
 public:
 
-    class SpinBoxWidget : public WidgetAction::Widget
+    /** Spinbox widget class for integral action */
+    class SpinBoxWidget : public QSpinBox
     {
     protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param integralAction Pointer to integral action
+         */
         SpinBoxWidget(QWidget* parent, IntegralAction* integralAction);
         
-    public:
-        QSpinBox* getSpinBox() { return _spinBox; }
+        friend class IntegralAction;
+    };
 
+    /** Slider widget class for integral action */
+    class SliderWidget : public QSlider
+    {
     protected:
-        QSpinBox*   _spinBox;
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param integralAction Pointer to integral action
+         */
+        SliderWidget(QWidget* parent, IntegralAction* integralAction);
 
         friend class IntegralAction;
     };
 
-    class SliderWidget : public WidgetAction::Widget
+    /** Line edit widget class for integral action */
+    class LineEditWidget : public QLineEdit
     {
     protected:
-        SliderWidget(QWidget* parent, IntegralAction* integralAction);
 
-    public:
-        QSlider* getSlider() { return _slider; }
-
-    protected:
-        QSlider*   _slider;
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param integralAction Pointer to integral action
+         */
+        LineEditWidget(QWidget* parent, IntegralAction* integralAction);
 
         friend class IntegralAction;
     };
 
 protected:
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;
+
+    /**
+     * Get widget representation of the integral action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
-    IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = MIN_VALUE, const std::int32_t& maximum = MAX_VALUE, const std::int32_t& value = VALUE, const std::int32_t& defaultValue = DEFAULT_VALUE);
 
-    std::int32_t getValue() const;
-    void setValue(const std::int32_t& value);
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     * @param title Title of the action
+     * @param minimum Minimum value
+     * @param maximum Maximum value
+     * @param value Value
+     * @param defaultValue Default value
+     */
+    IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
 
-    std::int32_t getDefaultValue() const;
-    void setDefaultValue(const std::int32_t& defaultValue);
-
-    bool canReset() const;
-    void reset();
-
-    std::int32_t getMinimum() const;
-    void setMinimum(const std::int32_t& minimum);
-
-    std::int32_t getMaximum() const;
-    void setMaximum(const std::int32_t& maximum);
-
-    void setRange(const std::int32_t& min, const std::int32_t& max);
-
-    QString getSuffix() const;
-    void setSuffix(const QString& suffix);
-
-    bool getUpdateDuringDrag() const;
-    void setUpdateDuringDrag(const bool& updateDuringDrag);
-
-    IntegralAction& operator= (const IntegralAction& other)
-    {
-        WidgetAction::operator=(other);
-
-        _value              = other._value;
-        _defaultValue       = other._defaultValue;
-        _minimum            = other._minimum;
-        _maximum            = other._maximum;
-        _suffix             = other._suffix;
-        _updateDuringDrag   = other._updateDuringDrag;
-
-        return *this;
-    }
-
-    SpinBoxWidget* createSpinBoxWidget(QWidget* parent);
-    SliderWidget* createSliderWidget(QWidget* parent);
+    /**
+     * Initialize the integral action
+     * @param minimum Minimum value
+     * @param maximum Maximum value
+     * @param value Value
+     * @param defaultValue Default value
+     */
+    void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
 
 signals:
+
+    /**
+     * Signals that the current value changed
+     * @param value Current value that changed
+     */
     void valueChanged(const std::int32_t& value);
+
+    /**
+     * Signals that the default value changed
+     * @param defaultValue Default value that changed
+     */
     void defaultValueChanged(const std::int32_t& defaultValue);
+
+    /**
+     * Signals that the minimum value changed
+     * @param minimum New minimum
+     */
     void minimumChanged(const std::int32_t& minimum);
+
+    /**
+     * Signals that the maximum value changed
+     * @param maximum New maximum
+     */
     void maximumChanged(const std::int32_t& maximum);
+
+    /**
+     * Signals that the prefix changed
+     * @param prefix New prefix
+     */
+    void prefixChanged(const QString& prefix);
+
+    /**
+     * Signals that the suffix changed
+     * @param suffix New suffix
+     */
     void suffixChanged(const QString& suffix);
 
 protected:
-    std::int32_t    _value;
-    std::int32_t    _defaultValue;
-    std::int32_t    _minimum;
-    std::int32_t    _maximum;
-    QString         _suffix;
-    bool            _updateDuringDrag;
-
-    static constexpr std::int32_t MIN_VALUE       = 0;
-    static constexpr std::int32_t MAX_VALUE       = 100;
-    static constexpr std::int32_t VALUE           = 0;
-    static constexpr std::int32_t DEFAULT_VALUE   = 0;
+    static constexpr std::int32_t INIT_MIN              = 0;        /** Initialization minimum value */
+    static constexpr std::int32_t INIT_MAX              = 100;      /** Initialization maximum value */
+    static constexpr std::int32_t INIT_VALUE            = 0;        /** Initialization value */
+    static constexpr std::int32_t INIT_DEFAULT_VALUE    = 0;        /** Initialization default value */
 };
 
 }

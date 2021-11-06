@@ -4,6 +4,7 @@
 #include "../SelectionListener.h"
 
 #include "../graphics/Vector2f.h"
+#include "../graphics/Vector3f.h"
 #include "../graphics/Bounds.h"
 #include "../graphics/Texture.h"
 #include "../graphics/Shader.h"
@@ -33,14 +34,15 @@ namespace hdps
             void setBounds(const Bounds& bounds);
             void setSigma(const float sigma);
             void computeDensity();
+            float getMaxDensity() const;
+            Vector3f getColorMapRange() const;
 
             /**
-            * Loads a colormap from the given resource path and sets it
-            * as the current colormap for the landscape view.
-            *
-            * @param colormap Resource path of a colormap
-            */
-            void setColormap(const QString colormap);
+             * Loads a colormap from an image and loads as 
+             *the current colormap for the landscape view.
+             * @param image Color map image
+             */
+            void setColormap(const QImage& image);
 
             void init() override;
             void resize(QSize renderSize) override;
@@ -49,6 +51,8 @@ namespace hdps
 
             void onSelecting(Selection selection) override;
             void onSelection(Selection selection) override;
+
+            void setColorMapRange(const float& min, const float& max);
 
         private:
             void drawDensity();
@@ -68,6 +72,7 @@ namespace hdps
             DensityComputation _densityComputation;
             Texture2D _colormap;
             
+            Vector3f _colorMapRange;
 
             RenderMode _renderMode;
 

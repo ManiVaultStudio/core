@@ -4,21 +4,41 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QComboBox>
-#include <QPushButton>
+#include <QListView>
 
 namespace hdps {
 
 namespace gui {
 
-OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/) :
+OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/) :
     WidgetAction(parent),
     _defaultModel(),
-    _customListModel(nullptr),
+    _customModel(nullptr),
     _currentIndex(-1),
     _defaultIndex(0)
 {
     setText(title);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::Basic);
+    initialize(options, currentOption, defaultOption);
+}
+
+void OptionAction::initialize(const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
+{
     setOptions(options);
+    setCurrentText(currentOption);
+    setDefaultText(defaultOption);
+
+    setResettable(isResettable());
+}
+
+void OptionAction::initialize(QAbstractItemModel& customModel, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
+{
+    setCustomModel(&customModel);
+    setCurrentText(currentOption);
+    setDefaultText(defaultOption);
+
+    setResettable(isResettable());
 }
 
 QStringList OptionAction::getOptions() const
@@ -38,32 +58,37 @@ bool OptionAction::hasOptions() const
 
 void OptionAction::setOptions(const QStringList& options)
 {
+    if (_defaultModel.stringList() == options)
+        return;
+    
     _defaultModel.setStringList(options);
 
     emit optionsChanged(getOptions());
+
+    setResettable(isResettable());
 }
 
-const QAbstractListModel* OptionAction::getModel() const
+const QAbstractItemModel* OptionAction::getModel() const
 {
-    if (_customListModel != nullptr)
-        return _customListModel;
+    if (_customModel != nullptr)
+        return _customModel;
 
     return &_defaultModel;
 }
 
-void OptionAction::setCustomListModel(QAbstractListModel* customListModel)
+void OptionAction::setCustomModel(QAbstractItemModel* itemModel)
 {
-    if (customListModel == _customListModel)
+    if (itemModel == _customModel)
         return;
 
-    _customListModel = customListModel;
+    _customModel = itemModel;
 
-    emit customListModelChanged(_customListModel);
+    emit customModelChanged(_customModel);
 }
 
-bool OptionAction::hasCustomListModel() const
+bool OptionAction::hasCustomModel() const
 {
-    return _customListModel != nullptr;
+    return _customModel != nullptr;
 }
 
 std::int32_t OptionAction::getCurrentIndex() const
@@ -83,6 +108,8 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
+    
+    setResettable(isResettable());
 }
 
 std::int32_t OptionAction::getDefaultIndex() const
@@ -98,6 +125,8 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
     _defaultIndex = defaultIndex;
 
     emit defaultIndexChanged(_defaultIndex);
+
+    setResettable(isResettable());
 }
 
 QString OptionAction::getDefaultText() const
@@ -110,19 +139,14 @@ void OptionAction::setDefaultText(const QString& defaultText)
     _defaultIndex = getOptions().indexOf(defaultText);
 }
 
-bool OptionAction::canReset() const
-{
-    return _currentIndex != _defaultIndex;
-}
-
-void OptionAction::reset()
-{
-    setCurrentIndex(_defaultIndex);
-}
-
 QString OptionAction::getCurrentText() const
 {
     if (_currentIndex < 0)
+        return "";
+
+    auto options = getOptions();
+
+    if (_currentIndex >= options.count())
         return "";
 
     return getOptions()[_currentIndex];
@@ -139,6 +163,18 @@ void OptionAction::setCurrentText(const QString& currentText)
 
     emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
+
+    setResettable(isResettable());
+}
+
+bool OptionAction::isResettable() const
+{
+    return _currentIndex != _defaultIndex;
+}
+
+void OptionAction::reset()
+{
+    setCurrentIndex(_defaultIndex);
 }
 
 bool OptionAction::hasSelection() const
@@ -146,27 +182,23 @@ bool OptionAction::hasSelection() const
     return _currentIndex >= 0;
 }
 
-OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
-    WidgetAction::Widget(parent, optionAction, Widget::State::Standard),
-    _layout(new QHBoxLayout()),
-    _comboBox(new QComboBox()),
-    _resetPushButton(new QPushButton())
+OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction) :
+    QComboBox(parent)
 {
-    _layout->setMargin(0);
-    _layout->addWidget(_comboBox, 1);
-
-    setLayout(_layout);
+    setObjectName("ComboBox");
+    setAcceptDrops(true);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     const auto updateToolTip = [this, optionAction]() -> void {
-        _comboBox->setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
+        setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
     };
 
     const auto populateComboBox = [this, optionAction, updateToolTip]() -> void {
-        QSignalBlocker comboBoxSignalBlocker(_comboBox);
+        QSignalBlocker comboBoxSignalBlocker(this);
 
-        _comboBox->setModel(new QStringListModel());
-        _comboBox->setModel(const_cast<QAbstractListModel*>(optionAction->getModel()));
-        _comboBox->setEnabled(!optionAction->getOptions().isEmpty());
+        setModel(new QStringListModel());
+        setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        setEnabled(optionAction->getOptions().count() >= 2);
 
         updateToolTip();
     };
@@ -176,12 +208,12 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
     });
 
     const auto updateComboBoxSelection = [this, optionAction]() -> void {
-        if (optionAction->getCurrentText() == _comboBox->currentText())
+        if (optionAction->getCurrentText() == currentText())
             return;
         
-        QSignalBlocker comboBoxSignalBlocker(_comboBox);
+        QSignalBlocker comboBoxSignalBlocker(this);
         
-        _comboBox->setCurrentText(optionAction->getCurrentText());
+        setCurrentText(optionAction->getCurrentText());
     };
 
     connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection, updateToolTip](const QString& currentText) {
@@ -189,32 +221,31 @@ OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction) :
         updateToolTip();
     });
 
-    connect(_comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
+    connect(this, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
         optionAction->setCurrentIndex(currentIndex);
     });
 
-    _resetPushButton->setVisible(false);
-    _resetPushButton->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("undo"));
-    _resetPushButton->setToolTip(QString("Reset %1").arg(optionAction->text()));
-
-    _layout->addWidget(_resetPushButton);
-
-    connect(_resetPushButton, &QPushButton::clicked, this, [this, optionAction]() {
-        optionAction->reset();
-    });
-
-    const auto onUpdateCurrentIndex = [this, optionAction]() -> void {
-        _resetPushButton->setEnabled(optionAction->canReset());
-    };
-
-    connect(optionAction, &OptionAction::currentIndexChanged, this, [this, onUpdateCurrentIndex](const QColor& color) {
-        onUpdateCurrentIndex();
-    });
-
-    onUpdateCurrentIndex();
     populateComboBox();
     updateComboBoxSelection();
     updateToolTip();
+}
+
+QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+{
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+
+    if (widgetFlags & WidgetFlag::ComboBox)
+        layout->addWidget(new OptionAction::ComboBoxWidget(parent, this));
+
+    if (widgetFlags & WidgetFlag::ResetPushButton)
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 }

@@ -4,15 +4,19 @@
 #endif
 
 #include "PointData.h"
+#include "InfoAction.h"
 
 #include <QtCore>
 #include <QtDebug>
+#include <QPainter>
 
 #include <cstring>
 #include <type_traits>
 #include <queue>
+#include <set>
 
 #include "graphics/Vector2f.h"
+#include "Application.h"
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
@@ -138,6 +142,23 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
         });
 }
 
+Points::Points(hdps::CoreInterface* core, QString dataName) :
+    hdps::DataSet(core, dataName),
+    _infoAction()
+{
+}
+
+Points::~Points()
+{
+}
+
+void Points::init()
+{
+    _infoAction = QSharedPointer<InfoAction>::create(nullptr, _core, getName());
+
+    addAction(*_infoAction.get());
+}
+
 // =============================================================================
 // Point Set
 // =============================================================================
@@ -229,6 +250,40 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
     }
 }
 
+void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
+{
+    Points& selection = static_cast<Points&>(getSelection());
+
+    // Find the global indices of this dataset
+    std::vector<unsigned int> localGlobalIndices;
+    getGlobalIndices(localGlobalIndices);
+
+    // In an array the size of the full raw data, mark selected points as true
+    std::vector<bool> globalSelection(Points::getSourceData(*this).getNumRawPoints(), false);
+    for (const unsigned int& selectionIndex : selection.indices)
+        globalSelection[selectionIndex] = true;
+
+    // For all local points find out which are selected
+    std::vector<bool> selected(localGlobalIndices.size(), false);
+    int indexCount = 0;
+    for (int i = 0; i < localGlobalIndices.size(); i++)
+    {
+        if (globalSelection[localGlobalIndices[i]])
+        {
+            selected[i] = true;
+            indexCount++;
+        }
+    }
+
+    localSelectionIndices.resize(indexCount);
+    int c = 0;
+    for (int i = 0; i < selected.size(); i++)
+    {
+        if (selected[i])
+            localSelectionIndices[c++] = i;
+    }
+}
+
 hdps::DataSet* Points::copy() const
 {
     Points* set = new Points(_core, getDataName());
@@ -237,11 +292,101 @@ hdps::DataSet* Points::copy() const
     return set;
 }
 
-QString Points::createSubset() const
+QString Points::createSubset(const QString subsetName /*= "subset"*/, const QString parentSetName /*= ""*/, const bool& visible /*= true*/) const
 {
     const hdps::DataSet& selection = getSelection();
 
-    return _core->createSubsetFromSelection(selection, *this, "Subset");
+    return _core->createSubsetFromSelection(selection, *this, subsetName, parentSetName, visible);
+}
+
+QIcon Points::getIcon() const
+{
+    return hdps::Application::getIconFont("FontAwesome").getIcon("database");
+
+    /*
+    const auto size = QSize(100, 100);
+
+    QPixmap pixmap(size);
+
+    pixmap.fill(Qt::transparent);
+
+    const auto iconRectangle = QRect(0, 0, size.width(), size.height());
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    QPen linepen(Qt::black);
+    linepen.setCapStyle(Qt::RoundCap);
+    linepen.setWidth(15);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setPen(linepen);
+
+    QVector<QPoint> points;
+
+    QPolygon polygon;
+
+    const auto numSteps     = 3;
+    const auto stepSizeX    = static_cast<float>(size.width()) / static_cast<float>(numSteps + 1);
+    const auto stepSizeY    = static_cast<float>(size.height()) / static_cast<float>(numSteps + 1);
+
+    for (int x = stepSizeX; x < size.width(); x += stepSizeX)
+        for (int y = stepSizeY; y < size.height(); y += stepSizeY)
+            polygon << QPoint(x, y);
+
+    painter.drawPoints(polygon);
+
+    return QIcon(pixmap);
+    */
+}
+
+void Points::selectAll()
+{
+    auto& selection         = dynamic_cast<Points&>(getSelection());
+    auto& selectionIndices  = selection.indices;
+
+    selectionIndices.clear();
+    selectionIndices.resize(getNumPoints());
+
+    if (isFull()) {
+        std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
+    }
+    else {
+        for (const auto& index : indices)
+            selectionIndices.push_back(index);
+    }
+
+    _core->notifySelectionChanged(getName());
+}
+
+void Points::selectNone()
+{
+    auto& selection         = dynamic_cast<Points&>(getSelection());
+    auto& selectionIndices  = selection.indices;
+
+    selectionIndices.clear();
+
+    _core->notifySelectionChanged(getName());
+}
+
+void Points::selectInvert()
+{
+    auto& selection         = dynamic_cast<Points&>(getSelection());
+    auto& selectionIndices  = selection.indices;
+
+    std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
+
+    const auto noPixels = getNumPoints();
+
+    selectionIndices.clear();
+    selectionIndices.reserve(noPixels - selectionSet.size());
+
+    for (std::uint32_t i = 0; i < noPixels; i++) {
+        if (selectionSet.find(i) == selectionSet.end())
+            selectionIndices.push_back(i);
+    }
+
+    _core->notifySelectionChanged(getName());
 }
 
 const std::vector<QString>& Points::getDimensionNames() const
@@ -264,11 +409,50 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
+void Points::addLinkedSelection(QString targetDataSet, hdps::SelectionMap& mapping)
+{
+    _linkedSelections.emplace_back(getName(), targetDataSet);
+    _linkedSelections.back().setMapping(mapping);
+}
+
+void Points::setSelection(std::vector<unsigned int>& indices)
+{
+    Points& selection = static_cast<Points&>(getSelection());
+
+    selection.indices = indices;
+
+    for (hdps::LinkedSelection& linkedSelection : _linkedSelections)
+    {
+        const hdps::SelectionMap& mapping = linkedSelection.getMapping();
+
+        // Create separate vector of additional linked selected points
+        std::vector<unsigned int> extraSelectionIndices;
+        // Reserve at least as much space as required for a 1-1 mapping
+        extraSelectionIndices.reserve(indices.size());
+
+        for (const int selectionIndex : indices)
+        {
+            if (mapping.find(selectionIndex) != mapping.end())
+            {
+                const std::vector<unsigned int>& mappedSelection = mapping.at(selectionIndex);
+                extraSelectionIndices.insert(extraSelectionIndices.end(), mappedSelection.begin(), mappedSelection.end());
+            }
+        }
+
+        selection.indices.insert(selection.indices.end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
+    }
+}
+
 // =============================================================================
 // Factory
 // =============================================================================
 
-hdps::RawData* PointDataFactory::produce()
+QIcon PointDataFactory::getIcon() const
 {
-    return new PointData();
+    return Application::getIconFont("FontAwesome").getIcon("circle");
+}
+
+hdps::plugin::RawData* PointDataFactory::produce()
+{
+    return new PointData(this);
 }

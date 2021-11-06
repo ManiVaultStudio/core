@@ -10,48 +10,10 @@ namespace hdps {
 
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
+    _iconFonts(),
     _settings()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
-
-    /* Uncomment to test the icon font versioning system
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(1, 12)));
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 2)));
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 7)));
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(7, 0)));
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 6)));
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 1)));
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 11)));
-    _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(6, 0)));
-    
-    qDebug() << _iconFonts;
-
-    auto testIconFont = [this](const QString& iconFontname, const std::int32_t& majorVersion = -1, const std::int32_t& minorVersion = -1) {
-        QDebug debug = qDebug();
-
-        debug.noquote();
-
-        try {
-            const auto& iconFont = _iconFonts.getIconFont(iconFontname, majorVersion, minorVersion);
-
-            debug << iconFontname + "-" + IconFont::getSearchVersionString(majorVersion, minorVersion) + ":" << "\t" << IconFont::getSearchVersionString(iconFont.getMajorVersion(), iconFont.getMinorVersion());
-        } catch (IconFonts::IconFontNotFoundException& e) {
-            debug << iconFontname + "-" + IconFont::getSearchVersionString(majorVersion, minorVersion) + ":" << "\t" << "not found";
-        }
-        catch (...) {
-            qDebug() << "Unhandled exception";
-        }
-    };
-
-    testIconFont("FontAwesome");
-    testIconFont("FontAwesome", 5);
-    testIconFont("FontAwesome", 5, 5);
-    testIconFont("FontAwesome", 5, 11);
-    testIconFont("FontAwesome", -1, 11);
-    testIconFont("FontAwesome", 3, 0);
-    testIconFont("FontAwesome", 5, 14);
-    */
 }
 
 hdps::Application* hdps::Application::current()
@@ -75,6 +37,25 @@ hdps::Application* hdps::Application::current()
 const IconFont& hdps::Application::getIconFont(const QString& name, const std::int32_t& majorVersion /*= -1*/, const std::int32_t& minorVersion /*= -1*/)
 {
     return current()->_iconFonts.getIconFont(name, majorVersion, minorVersion);
+}
+
+hdps::CoreInterface* Application::getCore()
+{
+    Q_ASSERT(_core != nullptr);
+
+    return _core;
+}
+
+void Application::setCore(CoreInterface* core)
+{
+    Q_ASSERT(_core != nullptr);
+
+    _core = core;
+}
+
+hdps::CoreInterface* Application::core()
+{
+    return current()->getCore();
 }
 
 QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const

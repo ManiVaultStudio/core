@@ -14,27 +14,27 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 
 if(APPLE)
-	# These are the properties for the Info.plist in the mac bindle
-	set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
-	set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
-	set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
-	set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
-	set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2021. All rights reserved.")
-	set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.hdps")
-	set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
-	
-	# use, i.e. don't skip the full RPATH for the build tree
-	set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+    # These are the properties for the Info.plist in the mac bindle
+    set(MACOSX_BUNDLE_BUNDLE_NAME "HDPS")
+    set(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "1.0")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0")
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2021. All rights reserved.")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.biovault.hdps")
+    set(MACOSX_BUNDLE_ICON_FILE AppIcon.icns)
+    
+    # use, i.e. don't skip the full RPATH for the build tree
+    set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
-	# when building, don't use the install RPATH already
-	# (but later on when installing)
-	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    # when building, don't use the install RPATH already
+    # (but later on when installing)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-	set(CMAKE_INSTALL_RPATH "@loader_path")
+    set(CMAKE_INSTALL_RPATH "@loader_path")
 
-	# add the automatically determined parts of the RPATH
-	# which point to directories outside the build tree to the install RPATH
-	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    # add the automatically determined parts of the RPATH
+    # which point to directories outside the build tree to the install RPATH
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
 
 if(MSVC)
@@ -62,10 +62,9 @@ set( CORE_HEADERS
     src/Logger.h
     src/LogItemModel.h
     src/LogDockWidget.h
-    src/DataHierarchyModel.h
-    src/DataHierarchy.h
     src/MainWindow.h
     src/PluginManager.h
+    src/DataHierarchyManager.h
     src/Core.h
     src/DataManager.h
     src/exceptions/SetNotFoundException.h
@@ -75,10 +74,9 @@ set( CORE_SOURCES
     src/Logger.cpp
     src/LogItemModel.cpp
     src/LogDockWidget.cpp
-    src/DataHierarchyModel.cpp
-    src/DataHierarchy.cpp
     src/MainWindow.cpp
     src/PluginManager.cpp
+    src/DataHierarchyManager.cpp
     src/Core.cpp
     src/DataManager.cpp
 )
@@ -90,52 +88,84 @@ set( EVENT_HEADERS
 )
 
 set( WIDGET_HEADERS
+    src/widgets/CollapsedWidget.h
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
-    src/widgets/ColorPickerPushButton.h
-    src/widgets/MaterialCheckBoxWidget.h
-    src/widgets/DataSlot.h
-    src/widgets/Accordion.h
-    src/widgets/AccordionSection.h
     src/widgets/DockableWidget.h
-    src/widgets/SettingsWidget.h
     src/widgets/DropWidget.h
+    src/widgets/ResponsiveToolbarWidget.h
+    src/widgets/ToolbarItemWidget.h
 )
 
 set( WIDGET_SOURCES
+    src/widgets/CollapsedWidget.cpp
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
-    src/widgets/ColorPickerPushButton.cpp
-    src/widgets/MaterialCheckBoxWidget.cpp
-    src/widgets/DataSlot.cpp
-    src/widgets/Accordion.cpp
-    src/widgets/AccordionSection.cpp
     src/widgets/DockableWidget.cpp
-    src/widgets/SettingsWidget.cpp
     src/widgets/DropWidget.cpp
+    src/widgets/ResponsiveToolbarWidget.cpp
+    src/widgets/ToolbarItemWidget.cpp
 )
 
 set(ACTIONS_HEADERS
     src/actions/ColorAction.h
+    src/actions/ColorPickerAction.h
+    src/actions/ColorMapAction.h
+    src/actions/ColorMapAxisAction.h
+    src/actions/ColorMapDiscreteAction.h
+    src/actions/ColorMapViewAction.h
+    src/actions/ColorMapSettingsAction.h
     src/actions/DecimalAction.h
+    src/actions/DecimalRangeAction.h
+    src/actions/GroupAction.h
+    src/actions/GroupsAction.h
+    src/actions/ImageAction.h
     src/actions/IntegralAction.h
+    src/actions/NumericalAction.h
     src/actions/OptionAction.h
+    src/actions/PixelSelectionAction.h
     src/actions/TriggerAction.h
     src/actions/ToggleAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
+    src/actions/WidgetActionWidget.h
+    src/actions/WidgetActionCollapsedWidget.h
+    src/actions/WidgetActionLabel.h
+    src/actions/WidgetActionResetButton.h
+    src/actions/WidgetActionsManager.h
+    src/actions/WidgetActionStateWidget.h
+    src/actions/WindowLevelAction.h
     src/actions/Actions.h
 )
 
 set(ACTIONS_SOURCES
     src/actions/ColorAction.cpp
+    src/actions/ColorPickerAction.cpp
+    src/actions/ColorMapAction.cpp
+    src/actions/ColorMapAxisAction.cpp
+    src/actions/ColorMapDiscreteAction.cpp
+    src/actions/ColorMapViewAction.cpp
+    src/actions/ColorMapSettingsAction.cpp
     src/actions/DecimalAction.cpp
+    src/actions/DecimalRangeAction.cpp
+    src/actions/GroupAction.cpp
+    src/actions/GroupsAction.cpp
+    src/actions/ImageAction.cpp
     src/actions/IntegralAction.cpp
+    src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
+	src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
+    src/actions/WidgetActionWidget.cpp
+    src/actions/WidgetActionCollapsedWidget.cpp
+    src/actions/WidgetActionLabel.cpp
+    src/actions/WidgetActionResetButton.cpp
+    src/actions/WidgetActionsManager.cpp
+    src/actions/WidgetActionStateWidget.cpp
+    src/actions/WindowLevelAction.cpp
 )
 
 set( RENDERER_HEADERS
@@ -180,26 +210,49 @@ set( UTIL_HEADERS
     src/util/FileUtil.h
     src/util/MeanShift.h
     src/util/DensityComputation.h
+    src/util/Exception.h
     src/util/Math.h
     src/util/Timer.h
     src/util/IconFont.h
     src/util/IconFonts.h
+    src/util/Interpolation.h
     src/util/FontAwesome.h
+    src/util/ColorMap.h
+    src/util/ColorMapFilterModel.h
+    src/util/ColorMapModel.h
+    src/util/ColorSpace.h
+    src/util/Visitable.h
+    src/util/Visitor.h
+    src/util/DatasetRef.h
+    src/util/PixelSelectionTool.h
+    src/util/PixelSelection.h
 )
 
 set( UTIL_SOURCES
     src/util/FileUtil.cpp
     src/util/MeanShift.cpp
     src/util/DensityComputation.cpp
+    src/util/Exception.cpp
     src/util/Math.cpp
     src/util/Timer.cpp
     src/util/IconFont.cpp
     src/util/IconFonts.cpp
+    src/util/Interpolation.cpp
     src/util/FontAwesome.cpp
+    src/util/ColorMap.cpp
+    src/util/ColorMapFilterModel.cpp
+    src/util/ColorMapModel.cpp
+    src/util/ColorSpace.cpp
+    src/util/Visitable.cpp
+    src/util/Visitor.cpp
+    src/util/DatasetRef.cpp
+	src/util/PixelSelectionTool.cpp
+	src/util/PixelSelection.cpp
 )
 
 set( PLUGIN_HEADERS
     src/CoreInterface.h
+    src/DataHierarchyItem.h
     src/AnalysisPlugin.h
     src/DataType.h
     src/RawData.h
@@ -212,22 +265,52 @@ set( PLUGIN_HEADERS
     src/SelectionListener.h
     src/Set.h
     src/Application.h
+    src/LinkedSelection.h
 )
 
 set( PLUGIN_SOURCES
-	src/Plugin.cpp
+    src/DataHierarchyItem.cpp
+    src/Plugin.cpp
     src/LoaderPlugin.cpp
     src/Application.cpp
     src/Plugin.cpp
+    src/Set.cpp
+    src/LinkedSelection.cpp
+)
+
+set(DATA_HIERARCHY_HEADERS
+    src/DataHierarchyModelItem.h
+    src/DataHierarchyModel.h
+    src/DataHierarchyWidget.h
+    src/DataPropertiesWidget.h
+    src/DataAction.h
+    src/DataExportAction.h
+    src/DataAnalysisAction.h
+    src/DataImportAction.h
+    src/DataRemoveAction.h
+)
+
+set(DATA_HIERARCHY_SOURCES
+    src/DataHierarchyModelItem.cpp
+    src/DataHierarchyModel.cpp
+    src/DataHierarchyWidget.cpp
+    src/DataPropertiesWidget.cpp
+    src/DataAction.cpp
+    src/DataExportAction.cpp
+    src/DataAnalysisAction.cpp
+    src/DataImportAction.cpp
+    src/DataRemoveAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS
     ${CORE_HEADERS}
+    ${DATA_HIERARCHY_HEADERS}
 )
 
 list(APPEND PRIVATE_SOURCES
     ${CORE_SOURCES}
     ${PRIVATE_HEADERS}
+    ${DATA_HIERARCHY_SOURCES}
 )
 
 list(APPEND PUBLIC_HEADERS
@@ -267,12 +350,18 @@ list(APPEND ACTIONS_FILES
 
 list(APPEND RENDERER_FILES
     ${RENDERER_HEADERS}
+
     ${RENDERER_SOURCES}
 )
 
 list(APPEND UTIL_FILES
     ${UTIL_SOURCES}
     ${UTIL_HEADERS}
+)
+
+list(APPEND HIERARCHY_FILES
+    ${DATA_HIERARCHY_SOURCES}
+    ${DATA_HIERARCHY_HEADERS}
 )
 
 if(WIN32)
@@ -351,7 +440,7 @@ add_executable(${PROJECT} MACOSX_BUNDLE WIN32
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
-	set_target_properties( ${PROJECT} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+    set_target_properties( ${PROJECT} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 endif()
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
@@ -376,47 +465,47 @@ endif(MSVC)
 
 
 if(APPLE)
-	set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
+    set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
-	install(TARGETS ${PROJECT}
-		RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
-		BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
-		# ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
-	)
+    install(TARGETS ${PROJECT}
+        RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
+        BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
+        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+    )
     # -always-overwrite
     find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${_qt_bin_dir}")
-	install(CODE "execute_process(
-			COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
-		#	RESULT_VARIABLE retval
-			COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
-			COMMAND ${CMAKE_COMMAND} -E copy 
-					\"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.3.6.3.dylib\" 
-					\"${BUNDLE_DIR}/Contents/Frameworks/\"
-			COMMAND ${CMAKE_COMMAND} -E copy 
-					\"$<TARGET_FILE:${PROJECT}_Public>\" 
-					\"${BUNDLE_DIR}/Contents/Frameworks/\"
-					
-			COMMAND ${CMAKE_COMMAND} -E copy 
-					\"$<TARGET_FILE:${PROJECT}_Private>\" 
-					\"${BUNDLE_DIR}/Contents/Frameworks/\"
-		)
-		
-		#if(NOT retval EQUAL 0)
-		#	message(FATAL_ERROR \"macdeployqt failed\")
-		#endif()
-		"
-		COMPONENT MACOS_BUNDLE
-	)
+    install(CODE "execute_process(
+            COMMAND ${MACDEPLOYQT_EXECUTABLE} \"${BUNDLE_DIR}\" -always-overwrite
+        #	RESULT_VARIABLE retval
+            COMMAND ${CMAKE_COMMAND} -E make_directory \"${BUNDLE_DIR}/Contents/Frameworks\"
+            COMMAND ${CMAKE_COMMAND} -E copy 
+                    \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.3.6.3.dylib\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+            COMMAND ${CMAKE_COMMAND} -E copy 
+                    \"$<TARGET_FILE:${PROJECT}_Public>\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+                    
+            COMMAND ${CMAKE_COMMAND} -E copy 
+                    \"$<TARGET_FILE:${PROJECT}_Private>\" 
+                    \"${BUNDLE_DIR}/Contents/Frameworks/\"
+        )
+        
+        #if(NOT retval EQUAL 0)
+        #	message(FATAL_ERROR \"macdeployqt failed\")
+        #endif()
+        "
+        COMPONENT MACOS_BUNDLE
+    )
     install(CODE "execute_process(
             COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt5_DIR} ${BUNDLE_DIR}
         )"
         COMPONENT MACOS_BUNDLE
     )
 else()
-	install(TARGETS ${PROJECT}
-		RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
-		# ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
-	)
+    install(TARGETS ${PROJECT}
+        RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
+        # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
+    )
 endif()
 
 #headers - Would it be better to refactor the headers to allow "install(DIRECTORY)"?
@@ -575,11 +664,11 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 )
 
 if(APPLE)
-	add_custom_command(TARGET ${PROJECT} POST_BUILD
-		COMMAND "${CMAKE_COMMAND}" 
-			--install ${CMAKE_BINARY_DIR}
-			--config $<CONFIGURATION> 
-			--component MACOS_BUNDLE
-			--prefix ${INSTALL_DIR}/$<CONFIGURATION>/
-	)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" 
+            --install ${CMAKE_BINARY_DIR}
+            --config $<CONFIGURATION> 
+            --component MACOS_BUNDLE
+            --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+    )
 endif()

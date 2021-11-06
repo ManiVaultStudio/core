@@ -19,10 +19,10 @@ const hdps::DataType TextType = hdps::DataType(QString("Text"));
 // Raw Data
 // =============================================================================
 
-class TextData : public RawData
+class TextData : public hdps::plugin::RawData
 {
 public:
-    TextData() : RawData("Text", TextType) { }
+    TextData(PluginFactory* factory) : hdps::plugin::RawData(factory, TextType) { }
     ~TextData(void) override;
     
     void init() override;
@@ -32,10 +32,6 @@ public:
 private:
     std::vector<QString> _data;
 };
-
-// =============================================================================
-// Text Data Set
-// =============================================================================
 
 class Text : public DataSet
 {
@@ -51,12 +47,21 @@ public:
         return text;
     }
 
-    QString createSubset() const override
+    /**
+     * Create subset
+     * @param subsetName Name of the subset
+     * @param parentSetName Name of the parent dataset
+     * @param visible Whether the subset will be visible in the UI
+     */
+    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override
     {
         const hdps::DataSet& selection = getSelection();
 
-        return _core->createSubsetFromSelection(selection, *this, "Subset");
+        return _core->createSubsetFromSelection(selection, *this, subsetName, parentSetName, visible);
     }
+
+    /** Get icon for the dataset */
+    QIcon getIcon() const override;
 
     std::vector<unsigned int> indices;
 };
@@ -69,12 +74,15 @@ class TextDataFactory : public RawDataFactory
 {
     Q_INTERFACES(hdps::plugin::RawDataFactory hdps::plugin::PluginFactory)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID   "nl.lumc.TextData"
+    Q_PLUGIN_METADATA(IID   "hdps.TextData"
                       FILE  "TextData.json")
     
 public:
     TextDataFactory(void) {}
     ~TextDataFactory(void) override {}
-    
-    RawData* produce() override;
+
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
+
+    hdps::plugin::RawData* produce() override;
 };

@@ -77,7 +77,7 @@ QFont IconFont::getFont(const int& pointSize /*= -1*/) const
     return QFont(_fontFamily, pointSize);
 }
 
-QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(24, 24)*/, const QColor& foregroundColor/*= QColor(0, 0, 0, 255)*/, const QColor& backgroundColor/*= Qt::transparent*/) const
+QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(16, 16)*/, const QColor& foregroundColor/*= QColor(0, 0, 0, 255)*/, const QColor& backgroundColor/*= Qt::transparent*/) const
 {
     try
     {
@@ -85,14 +85,14 @@ QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(24, 24)
 
         pixmap.fill(backgroundColor);
 
-        const auto iconRectangle = QRect(0, 0, size.width(), size.height());
-        const auto iconText     = getIconCharacter(name);
+        const auto iconRectangle    = QRect(0, 0, size.width(), size.height());
+        const auto iconText         = getIconCharacter(name);
 
         QPainter painter(&pixmap);
 
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setPen(foregroundColor);
-        painter.setFont(getFont(10));
+        painter.setFont(getFont(10.1));
 
         QFontMetrics fontMetrics(painter.font());
 
@@ -100,9 +100,9 @@ QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(24, 24)
         const auto scaleY       = iconRectangle.height() * 1.0 / fontMetrics.height();
         const auto scaleOverall = std::min(scaleX, scaleY);
 
-        painter.translate(iconRectangle.center());
-        painter.scale(scaleOverall, scaleOverall);
-        painter.translate(-iconRectangle.center());
+        //painter.translate(iconRectangle.center());
+        //painter.scale(scaleOverall, scaleOverall);
+        //painter.translate(-iconRectangle.center());
         painter.drawText(iconRectangle, Qt::AlignCenter, iconText);
 
         return QIcon(pixmap);

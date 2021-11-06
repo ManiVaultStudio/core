@@ -2,7 +2,7 @@
 
 #include "WidgetAction.h"
 
-class QPushButton;
+#include <QPushButton>
 
 namespace hdps {
 
@@ -21,25 +21,58 @@ class TriggerAction : public WidgetAction
 
 public:
 
-    class Widget : public WidgetAction::Widget {
-    protected:
-        Widget(QWidget* parent, TriggerAction* triggerAction);
+    /** Describes the widget flags */
+    enum WidgetFlag {
 
-    public:
-        QHBoxLayout* getLayout() { return _layout; }
-        QPushButton* getPushButton() { return _pushButton; }
+        /** Push button options */
+        Icon            = 0x00001,          /** Enable push button icon */
+        Text            = 0x00002,          /** Enable push button text */
+
+        /** Push button configurations */
+        IconText = Icon | Text              /** Push button with icon and text */
+    };
+
+public:
+
+    /** Push button widget class for trigger action */
+    class PushButtonWidget : public QPushButton {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param triggerAction Pointer to trigger action
+         * @param widgetFlags Widget flags
+         */
+        PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags);
 
     protected:
-        QHBoxLayout*    _layout;
-        QPushButton*    _pushButton;
+        TriggerAction*   _triggerAction;      /** Pointer to toggle action */
 
         friend class TriggerAction;
     };
 
 protected:
-    QWidget* getWidget(QWidget* parent, const Widget::State& state = Widget::State::Standard) override;;
+
+    /**
+     * Get widget representation of the trigger action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
+
+    /** Reset to default */
+    void reset() override {};
+
+public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     * @param title Title of the action
+     */
     TriggerAction(QObject* parent, const QString& title = "");
 };
 

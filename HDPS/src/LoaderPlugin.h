@@ -1,7 +1,7 @@
 #ifndef HDPS_LOADERPLUGIN_H
 #define HDPS_LOADERPLUGIN_H
 
-#include "PluginFactory.h"
+#include "Plugin.h"
 
 #include <QString>
 
@@ -34,7 +34,7 @@ private:
 class LoaderPlugin : public Plugin
 {
 public:
-    LoaderPlugin(QString name) : Plugin(Type::LOADER, name) { }
+    LoaderPlugin(const PluginFactory* factory) : Plugin(factory) { }
 
     ~LoaderPlugin() override {};
 
@@ -44,11 +44,6 @@ public:
      * The implementation is free to create file dialogs if desired.
      */
     virtual void loadData() = 0;
-
-    /** Returns the icon of this plugin */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-import");
-    }
 
 protected:
     /**
@@ -66,9 +61,18 @@ class LoaderPluginFactory : public PluginFactory
     Q_OBJECT
     
 public:
-    
+    LoaderPluginFactory() :
+        PluginFactory(Type::LOADER)
+    {
+
+    }
     ~LoaderPluginFactory() override {};
     
+    /** Returns the plugin icon */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-import");
+    }
+
     /**
     * Produces an instance of a loader plugin. This function gets called by the plugin manager.
     */
@@ -79,6 +83,6 @@ public:
 
 } // namespace hdps
 
-Q_DECLARE_INTERFACE(hdps::plugin::LoaderPluginFactory, "cytosplore.LoaderPluginFactory")
+Q_DECLARE_INTERFACE(hdps::plugin::LoaderPluginFactory, "hdps.LoaderPluginFactory")
 
 #endif // HDPS_LOADERPLUGIN_H

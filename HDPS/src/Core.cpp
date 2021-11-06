@@ -12,16 +12,24 @@
 #include "RawData.h"
 #include "Set.h"
 
+#include "DataAction.h"
+
 #include <QMessageBox>
 #include <algorithm>
+
+using namespace hdps::util;
 
 namespace hdps
 {
 
-Core::Core(gui::MainWindow& mainWindow)
-: _mainWindow(mainWindow)
+Core::Core(gui::MainWindow& mainWindow) :
+    _mainWindow(mainWindow),
+    _pluginManager(),
+    _dataManager(),
+    _dataHierarchyManager(),
+    _plugins(),
+    _eventListeners()
 {
-    
 }
 
 Core::~Core()
@@ -34,10 +42,16 @@ Core::~Core()
 
 void Core::init()
 {
-    _pluginManager = std::make_unique<plugin::PluginManager>(*this);
-    _dataManager = std::make_unique<DataManager>(this);
+    _pluginManager          = std::make_unique<plugin::PluginManager>(*this);
+    _dataManager            = std::make_unique<DataManager>(this);
+    _dataHierarchyManager   = std::make_unique<DataHierarchyManager>(&_mainWindow);
 
     _pluginManager->loadPlugins();
+}
+
+hdps::DataHierarchyManager& Core::getDataHierarchyManager()
+{
+    return *_dataHierarchyManager;
 }
 
 void Core::addPlugin(plugin::Plugin* plugin)
@@ -49,7 +63,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
         // If the plugin is RawData, then add it to the data manager
         case plugin::Type::DATA:
         {
-            _dataManager->addRawData(dynamic_cast<RawData*>(plugin));
+            _dataManager->addRawData(dynamic_cast<plugin::RawData*>(plugin));
             break;
         }
 
@@ -57,12 +71,6 @@ void Core::addPlugin(plugin::Plugin* plugin)
         case plugin::Type::VIEW:
         {
             _mainWindow.addPlugin(plugin);
-
-            // Notify of datasets in system
-            for (auto& set : _dataManager->allSets())
-                notifyDataAdded(set.first);
-
-            // fallthrough
         }
 
         // Otherwise add the plugin to a list of plug-ins of the same type
@@ -75,79 +83,119 @@ void Core::addPlugin(plugin::Plugin* plugin)
     // Initialize the plugin after it has been added to the core
     plugin->init();
 
-    // If it is an analysis plugin with a settings widget, add the settings to the main window
-    if (plugin->getType() == plugin::Type::ANALYSIS)
+    switch (plugin->getType())
     {
-        plugin::AnalysisPlugin* analysis = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
-        if (analysis->hasSettings())
+        case plugin::Type::ANALYSIS:
         {
-            _mainWindow.addPlugin(analysis);
+            auto analysisPlugin = dynamic_cast<plugin::AnalysisPlugin*>(plugin);
+
+            _mainWindow.addPlugin(plugin);
+            _dataHierarchyManager->getItem(analysisPlugin->getOutputDatasetName())->addIcon("analysis", analysisPlugin->getIcon());
+
+            notifyDataAdded(analysisPlugin->getOutputDatasetName());
+
+            break;
         }
-        // Notify of datasets in system
-        for (auto& set : _dataManager->allSets())
-            notifyDataAdded(set.first);
-    }
-    // If it is a loader plugin it should call loadData
-    if (plugin->getType() == plugin::Type::LOADER)
-    {
-        try
+
+        case plugin::Type::LOADER:
         {
-            dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+            try
+            {
+                dynamic_cast<plugin::LoaderPlugin*>(plugin)->loadData();
+            }
+            catch (plugin::DataLoadException e)
+            {
+                QMessageBox messageBox;
+                messageBox.critical(0, "Error", e.what());
+                messageBox.setFixedSize(500, 200);
+            }
+
+            break;
         }
-        catch (plugin::DataLoadException e)
+
+        case plugin::Type::WRITER:
         {
-            QMessageBox messageBox;
-            messageBox.critical(0, "Error", e.what());
-            messageBox.setFixedSize(500, 200);
+            dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
+
+            break;
         }
-    }
-    // If it is a writer plugin it should call writeData
-    if (plugin->getType() == plugin::Type::WRITER)
-    {
-        dynamic_cast<plugin::WriterPlugin*>(plugin)->writeData();
+
     }
 }
 
-const QString Core::addData(const QString kind, const QString nameRequest)
+const QString Core::addData(const QString kind, const QString nameRequest, const QString& parentDatasetName /*= ""*/)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
+
     // Request it from the core
-    const RawData& rawData = requestRawData(rawDataName);
+    const plugin::RawData& rawData = requestRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    DataSet* fullSet = rawData.createDataSet();
-    DataSet* selection = rawData.createDataSet();
+    auto fullSet    = rawData.createDataSet();
+    auto selection  = rawData.createDataSet();
 
     // Set the properties of the new sets
     fullSet->setAll(true);
 
     // Add them to the data manager
     QString setName = _dataManager->addSet(nameRequest, fullSet);
+    
     _dataManager->addSelection(rawDataName, selection);
     
+    // Add the dataset to the hierarchy manager and select the dataset
+    _dataHierarchyManager->addItem(setName, parentDatasetName);
+    _dataHierarchyManager->selectItem(setName);
+    
+    // Initialize the dataset (e.g. setup default actions for info)
+    fullSet->init();
+
+    new DataAction(&_mainWindow, setName);
+
     return setName;
 }
 
-void Core::removeDataset(const QString datasetName)
+void Core::removeDatasets(const QStringList& datasetNames, const bool& recursively /*= false*/)
 {
-    _dataManager->removeDataset(datasetName);
+    for (auto datasetName : datasetNames) {
+        if (datasetName.isEmpty())
+            continue;
 
-    notifyDataRemoved(datasetName);
+        // Cache the data type because later on the dataset has already been removed
+        const auto dataType = requestData(datasetName).getDataType();
+
+        // Notify listeners that the dataset is about to be removed
+        notifyDataAboutToBeRemoved(dataType, datasetName);
+        
+        // Remove the dataset from the data manager
+        _dataManager->removeDataset(datasetName);
+
+        // Notify listeners that the dataset is removed
+        notifyDataRemoved(dataType, datasetName);
+    }
 }
 
-const QString Core::createDerivedData(const QString nameRequest, const QString sourceDatasetName)
+QString Core::renameDataset(const QString& currentDatasetName, const QString& intendedDatasetName)
+{
+    return _dataManager->renameSet(currentDatasetName, intendedDatasetName);
+}
+
+const QString Core::createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent /*= ""*/)
 {
     const DataSet& sourceSet = requestData(sourceDatasetName);
-    DataType dataType = sourceSet.getDataType();
+
+    // Get the data type
+    const auto dataType = sourceSet.getDataType();
 
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(dataType._type);
+
     // Request it from the core
-    RawData& rawData = requestRawData(pluginName);
+    plugin::RawData& rawData = requestRawData(pluginName);
 
     // Create an initial full set, but no selection because it is shared with the source data
-    DataSet* fullSet = rawData.createDataSet();
+    auto fullSet = rawData.createDataSet();
+
     fullSet->_sourceSetName = sourceDatasetName;
     fullSet->_derived = true;
 
@@ -157,26 +205,43 @@ const QString Core::createDerivedData(const QString nameRequest, const QString s
     // Add them to the data manager
     QString setName = _dataManager->addSet(nameRequest, fullSet);
 
+    // Add the dataset to the hierarchy manager
+    _dataHierarchyManager->addItem(setName, dataHierarchyParent.isEmpty() ? sourceDatasetName : dataHierarchyParent);
+
+    // Initialize the dataset (e.g. setup default actions for info)
+    fullSet->init();
+
+    new DataAction(&_mainWindow, setName);
+
     return setName;
 }
 
-QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet& parentSet, const QString nameRequest)
+QString Core::createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString dataHierarchyParent /*= ""*/, const bool& visible /*= true*/)
 {
     // Create a new set with only the indices that were part of the selection set
-    DataSet* newSet = selection.copy();
+    auto newSet = selection.copy();
 
-    newSet->_dataName = parentSet._dataName;
-    newSet->_sourceSetName = parentSet._sourceSetName;
-    newSet->_derived = parentSet._derived;
+    newSet->_dataName       = sourceSet._dataName;
+    newSet->_sourceSetName  = sourceSet._sourceSetName;
+    newSet->_derived        = sourceSet._derived;
 
     // Add the set the core and publish the name of the set to all plug-ins
-    QString setName = _dataManager->addSet(nameRequest, newSet);
+    const auto setName = _dataManager->addSet(newSetName, newSet);
+    
     notifyDataAdded(setName);
+
+    // Add the dataset to the hierarchy manager
+    _dataHierarchyManager->addItem(setName, dataHierarchyParent.isEmpty() ? sourceSet.getName() : dataHierarchyParent, visible);
+
+    // Initialize the dataset (e.g. setup default actions for info)
+    newSet->init();
+
+    new DataAction(&_mainWindow, setName);
 
     return setName;
 }
 
-RawData& Core::requestRawData(const QString name)
+plugin::RawData& Core::requestRawData(const QString name)
 {
     try
     {
@@ -251,6 +316,26 @@ std::vector<QString> Core::requestAllDataNames(const std::vector<DataType> dataT
     return datasetNames;
 }
 
+const void Core::analyzeDataset(const QString kind, const QString& datasetName)
+{
+    _pluginManager->createAnalysisPlugin(kind, datasetName);
+}
+
+const void Core::importDataset(const QString importKind)
+{
+    _pluginManager->createPlugin(importKind);
+}
+
+const void Core::exportDataset(const QString kind, const QString& datasetName)
+{
+    _pluginManager->createExporterPlugin(kind, datasetName);
+}
+
+QStringList Core::getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
+{
+    return _pluginManager->getPluginKindsByPluginTypeAndDataTypes(pluginType, dataTypes);
+}
+
 DataSet& Core::requestSelection(const QString name)
 {
     try
@@ -273,6 +358,16 @@ void Core::unregisterEventListener(EventListener* eventListener)
     _eventListeners.erase(std::remove(_eventListeners.begin(), _eventListeners.end(), eventListener), _eventListeners.end());
 }
 
+QString Core::getPluginGuiName(const QString& pluginKind) const
+{
+    return _pluginManager->getPluginGuiName(pluginKind);
+}
+
+QIcon Core::getPluginIcon(const QString& pluginKind) const
+{
+    return _pluginManager->getPluginIcon(pluginKind);
+}
+
 /**
  * Goes through all plug-ins stored in the core and calls the 'dataAdded' function
  * on all plug-ins that inherit from the DataConsumer interface.
@@ -285,8 +380,39 @@ void Core::notifyDataAdded(const QString datasetName)
     dataEvent.dataSetName = datasetName;
     dataEvent.dataType = dt;
     
-    for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&dataEvent);
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataEvent);
+}
+
+void Core::notifyDataAboutToBeRemoved(const DataType& dataType, const QString datasetName)
+{
+    DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent;
+
+    dataAboutToBeRemovedEvent.dataSetName   = datasetName;
+    dataAboutToBeRemovedEvent.dataType      = dataType;
+
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataAboutToBeRemovedEvent);
+}
+
+void Core::notifyDataRemoved(const DataType& dataType, const QString datasetName)
+{
+    DataRemovedEvent dataRemovedEvent;
+
+    dataRemovedEvent.dataSetName    = datasetName;
+    dataRemovedEvent.dataType       = dataType;
+
+    const auto eventListeners = _eventListeners;
+
+    for (auto listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataRemovedEvent);
 }
 
 /**
@@ -298,22 +424,6 @@ void Core::notifyDataChanged(const QString datasetName)
     DataType dt = requestData(datasetName).getDataType();
 
     DataChangedEvent dataEvent;
-    dataEvent.dataSetName = datasetName;
-    dataEvent.dataType = dt;
-
-    for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&dataEvent);
-}
-
-/**
-* Goes through all plug-ins stored in the core and calls the 'dataRemoved' function
-* on all plug-ins that inherit from the DataConsumer interface.
-*/
-void Core::notifyDataRemoved(const QString datasetName)
-{
-    DataType dt = requestData(datasetName).getDataType();
-
-    DataRemovedEvent dataEvent;
     dataEvent.dataSetName = datasetName;
     dataEvent.dataType = dt;
 
@@ -350,6 +460,11 @@ void Core::notifyDataRenamed(const QString oldName, const QString newName)
 
 gui::MainWindow& Core::gui() const {
     return _mainWindow;
+}
+
+hdps::DataHierarchyItem* Core::getDataHierarchyItem(const QString& datasetName)
+{
+    return _dataHierarchyManager->getItem(datasetName);
 }
 
 /** Destroys all plug-ins kept by the core */

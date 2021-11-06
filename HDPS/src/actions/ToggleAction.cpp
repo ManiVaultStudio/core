@@ -3,23 +3,53 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QMenu>
+#include <QHBoxLayout>
 
 namespace hdps {
 
 namespace gui {
 
-ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= true*/, const bool& defaultToggled /*= true*/) :
+ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/) :
     WidgetAction(parent),
     _defaultToggled(defaultToggled)
 {
     setCheckable(true);
     setText(title);
-    setChecked(toggled);
+    setMayReset(true);
+    setDefaultWidgetFlags(WidgetFlag::CheckBox);
+    initialize(toggled, defaultToggled);
+
+    connect(this, &ToggleAction::toggled, this, [this]() {
+        emit resettableChanged(isResettable());
+    });
+
+    setResettable(isResettable());
 }
 
-bool ToggleAction::canReset() const
+void ToggleAction::initialize(const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/)
 {
-    return isChecked() == _defaultToggled;
+    setChecked(toggled);
+    setDefaultToggled(defaultToggled);
+}
+
+bool ToggleAction::getDefaultToggled() const
+{
+    return _defaultToggled;
+}
+
+void ToggleAction::setDefaultToggled(const bool& defaultToggled)
+{
+    if (defaultToggled == _defaultToggled)
+        return;
+
+    _defaultToggled = defaultToggled;
+
+    emit defaultToggledChanged(_defaultToggled);
+}
+
+bool ToggleAction::isResettable() const
+{
+    return isChecked() != _defaultToggled;
 }
 
 void ToggleAction::reset()
@@ -27,94 +57,105 @@ void ToggleAction::reset()
     setChecked(_defaultToggled);
 }
 
-ToggleAction::Widget::Widget(QWidget* parent, ToggleAction* checkAction, const Mode& mode /*= Mode::CheckBox*/) :
-    WidgetAction::Widget(parent, checkAction, Widget::State::Standard),
-    _layout(new QHBoxLayout()),
-    _checkBox(nullptr),
-    _pushButton(nullptr)
+ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction) :
+    QCheckBox(parent),
+    _toggleAction(toggleAction)
 {
-    _layout->setMargin(0);
+    setAcceptDrops(true);
 
-    switch (mode) {
-        case Mode::CheckBox:
-        {
-            _checkBox = new QCheckBox();
+    auto layout = new QHBoxLayout();
 
-            _layout->addWidget(_checkBox);
+    layout->setMargin(0);
 
-            connect(_checkBox, &QCheckBox::toggled, this, [this, checkAction](bool toggled) {
-                checkAction->setChecked(toggled);
-            });
+    connect(this, &QCheckBox::toggled, this, [this](bool toggled) {
+        _toggleAction->setChecked(toggled);
+    });
 
-            const auto update = [this, checkAction]() -> void {
-                QSignalBlocker blocker(_checkBox);
+    const auto update = [this]() -> void {
+        QSignalBlocker blocker(this);
 
-                _checkBox->setEnabled(checkAction->isEnabled());
-                _checkBox->setText(checkAction->text());
-                _checkBox->setToolTip(checkAction->toolTip());
-                _checkBox->setChecked(checkAction->isChecked());
+        setEnabled(_toggleAction->isEnabled());
+        setText(_toggleAction->text());
+        setToolTip(_toggleAction->toolTip());
+        setVisible(_toggleAction->isVisible());
+    };
 
-                setVisible(checkAction->isVisible());
-            };
+    connect(toggleAction, &ToggleAction::changed, this, [this, update]() {
+        update();
+    });
 
-            connect(checkAction, &ToggleAction::changed, this, [this, update]() {
-                update();
-            });
+    const auto updateToggle = [this]() -> void {
+        QSignalBlocker blocker(this);
 
-            update();
+        setChecked(_toggleAction->isChecked());
+    };
 
-            break;
-        }
+    connect(_toggleAction, &ToggleAction::toggled, this, [this, updateToggle]() {
+        updateToggle();
+    });
 
-        case Mode::Button:
-        {
-            _pushButton = new QPushButton();
-
-            _layout->addWidget(_pushButton);
-
-            _pushButton->setCheckable(true);
-            _pushButton->setText(checkAction->text());
-            _pushButton->setIcon(checkAction->icon());
-
-            connect(_pushButton, &QPushButton::toggled, this, [this, checkAction](bool toggled) {
-                checkAction->setChecked(toggled);
-            });
-
-            const auto update = [this, checkAction]() -> void {
-                QSignalBlocker blocker(_pushButton);
-
-                _pushButton->setEnabled(checkAction->isEnabled());
-                //_pushButton->setText(checkAction->text());
-                //_pushButton->setIcon(checkAction->icon());
-                _pushButton->setChecked(checkAction->isChecked());
-                _pushButton->setToolTip(checkAction->toolTip());
-
-                setVisible(checkAction->isVisible());
-            };
-
-            connect(checkAction, &QAction::changed, this, [this, update]() {
-                update();
-            });
-
-            update();
-
-            break;
-        }
-
-    default:
-        break;
-
-    }
-
-    setLayout(_layout);
+    update();
+    updateToggle();
 }
 
-QWidget* ToggleAction::getWidget(QWidget* parent, const Widget::State& state /*= Widget::State::Standard*/)
+ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* toggleAction, const std::int32_t& widgetFlags) :
+    QPushButton(parent),
+    _toggleAction(toggleAction)
+{
+    setCheckable(true);
+
+    connect(this, &QPushButton::toggled, this, [this](bool toggled) {
+        _toggleAction->setChecked(toggled);
+    });
+
+    const auto update = [this, widgetFlags]() -> void {
+        QSignalBlocker blocker(this);
+
+        setEnabled(_toggleAction->isEnabled());
+
+        if (widgetFlags & WidgetFlag::Text)
+            setText(_toggleAction->text());
+
+        if (widgetFlags & WidgetFlag::Icon) {
+            setIcon(_toggleAction->icon());
+            setProperty("class", "square-button");
+        }
+
+        setChecked(_toggleAction->isChecked());
+        setToolTip(_toggleAction->toolTip());
+        setVisible(_toggleAction->isVisible());
+    };
+
+    connect(toggleAction, &QAction::changed, this, [this, update]() {
+        update();
+    });
+
+    update();
+}
+
+QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    return new ToggleAction::Widget(parent, this);
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(3);
+
+    if (widgetFlags & WidgetFlag::CheckBox)
+        layout->addWidget(new ToggleAction::CheckBoxWidget(parent, this));
+
+    if (widgetFlags & WidgetFlag::PushButton)
+        layout->addWidget(new ToggleAction::PushButtonWidget(parent, this, widgetFlags));
+
+    if (widgetFlags & WidgetFlag::ResetPushButton)
+        layout->addWidget(createResetButton(parent));
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 }

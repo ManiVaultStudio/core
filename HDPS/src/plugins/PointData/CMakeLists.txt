@@ -32,13 +32,27 @@ set(POINTS_HEADERS
     src/PointView.h
     src/RandomAccessRange.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h
+
+    src/InfoAction.h
+    src/SelectedIndicesAction.h
+    src/DimensionNamesAction.h
 )
 
-source_group( Plugin FILES ${POINTS_SOURCES})
+set(ACTIONS_SOURCES
+    src/InfoAction.h
+    src/InfoAction.cpp
+    src/SelectedIndicesAction.h
+    src/SelectedIndicesAction.cpp
+    src/DimensionNamesAction.h
+    src/DimensionNamesAction.cpp
+)
+
+source_group(Plugin FILES ${POINTS_SOURCES})
+source_group(Actions FILES ${ACTIONS_SOURCES})
 
 include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${POINTS_SOURCES})
+add_library(${PROJECT} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 

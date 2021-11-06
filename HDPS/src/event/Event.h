@@ -11,6 +11,7 @@ namespace hdps
     {
         DataAdded,
         DataChanged,
+        DataAboutToBeRemoved,
         DataRemoved,
         SelectionChanged,
         DataRenamed
@@ -25,7 +26,7 @@ namespace hdps
 
         }
 
-        EventType getType()
+        EventType getType() const
         {
             return _type;
         }
@@ -52,12 +53,21 @@ namespace hdps
     {
     public:
         DataAddedEvent() : DataEvent(EventType::DataAdded) {}
+
+        QString     _parentDatasetName;
+        bool        _visible;
     };
 
     class DataChangedEvent : public DataEvent
     {
     public:
         DataChangedEvent() : DataEvent(EventType::DataChanged) {}
+    };
+
+    class DataAboutToBeRemovedEvent : public DataEvent
+    {
+    public:
+        DataAboutToBeRemovedEvent() : DataEvent(EventType::DataAboutToBeRemoved) {}
     };
 
     class DataRemovedEvent : public DataEvent

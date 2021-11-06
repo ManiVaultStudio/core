@@ -1,4 +1,6 @@
 #include "DataManager.h"
+#include "RawData.h"
+#include "DataHierarchyItem.h"
 
 #include <QRegularExpression>
 #include <cassert>
@@ -7,15 +9,17 @@
 namespace hdps
 {
 
-void DataManager::addRawData(RawData* rawData)
+void DataManager::addRawData(plugin::RawData* rawData)
 {
-    _rawDataMap.emplace(rawData->getName(), std::unique_ptr<RawData>(rawData));
+    _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
 }
 
 QString DataManager::addSet(QString requestedName, DataSet* set)
 {
     QString uniqueName = getUniqueSetName(requestedName);
+    
     set->setName(uniqueName);
+
     _dataSetMap.emplace(set->getName(), std::unique_ptr<DataSet>(set));
 
     emit dataChanged();
@@ -27,42 +31,53 @@ void DataManager::addSelection(QString dataName, DataSet* selection)
     _selections.emplace(dataName, std::unique_ptr<DataSet>(selection));
 }
 
-void DataManager::renameSet(QString oldName, QString requestedName)
+QString DataManager::renameSet(QString oldName, QString requestedName)
 {
     auto& dataSet = _dataSetMap[oldName];
 
     // Find a unique name from the requested name and set it in the dataset
-    QString newName = getUniqueSetName(requestedName);
-    dataSet->setName(newName);
+    const auto newDatasetName = getUniqueSetName(requestedName);
+
+    dataSet->setName(newDatasetName);
 
     // Update source set references
     for (auto& kv : allSets())
     {
         if (kv.second->getSourceName() == oldName)
         {
-            kv.second->_sourceSetName = newName;
+            kv.second->_sourceSetName = newDatasetName;
         }
     }
 
     // Put the renamed set back into the map
-    _dataSetMap.emplace(newName, std::unique_ptr<DataSet>(dataSet.release()));
+    _dataSetMap.emplace(newDatasetName, std::unique_ptr<DataSet>(dataSet.release()));
 
     // Erase the old entry in the map
     _dataSetMap.erase(oldName);
 
     emit dataChanged();
 
-    _core->notifyDataRenamed(oldName, newName);
+    // Make sure the name of the dataset in the data hierarchy item is updated prior to broadcasting the name change
+    _core->getDataHierarchyItem(oldName)->setDatasetName(newDatasetName);
+
+    _core->notifyDataRenamed(oldName, newDatasetName);
+
+    return newDatasetName;
 }
 
-void DataManager::removeDataset(QString datasetName)
+void DataManager::removeDataset(const QString& datasetName, const bool& recursively /*= true*/)
 {
+    qDebug() << "Removing" << datasetName << "from the data manager";
+
     // Turn all derived datasets referring to the dataset to be removed to non-derived
     for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
     {
         DataSet& set = *it->second;
+        
         if (set.isDerivedData() && set.getSourceName() == datasetName)
         {
+            qDebug() << "Un-derive" << set.getName();
+
             set._derived = false;
             set._sourceSetName = "";
         }
@@ -73,7 +88,7 @@ void DataManager::removeDataset(QString datasetName)
     _dataSetMap.erase(datasetName);
 }
 
-RawData& DataManager::getRawData(QString name)
+plugin::RawData& DataManager::getRawData(QString name)
 {
     if (_rawDataMap.find(name) == _rawDataMap.end())
         throw DataNotFoundException(name);
