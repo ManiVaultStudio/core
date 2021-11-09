@@ -68,6 +68,11 @@ public: // Action getters
     TriggerAction& getUpdateAction() { return _updateAction; }
     ToggleAction& getManualUpdateAction() { return _manualUpdateAction; }
 
+protected:
+
+    /** Update the selected indices */
+    void updateSelectedIndices();
+
 signals:
 
     /**
@@ -83,4 +88,6 @@ protected:
     ToggleAction                _manualUpdateAction;        /** Manual update action */
     QTimer                      _selectionChangedTimer;     /** Timer to control when selection changes are processed */
     std::vector<std::uint32_t>  _selectedIndices;           /** Selected indices */
+
+    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 1000000;
 };

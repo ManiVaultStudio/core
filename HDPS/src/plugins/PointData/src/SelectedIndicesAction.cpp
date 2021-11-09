@@ -20,22 +20,37 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
 {
     setText("Selected indices");
     setEventCore(_core);
-    
+
     _selectionChangedTimer.setSingleShot(true);
 
+    // Register to points data events
     registerDataEventByType(PointType, [this](hdps::DataEvent* dataEvent) {
         if (!_points.isValid())
             return;
 
+        // Only process points that we reference
         if (dataEvent->dataSetName != _points.getSourceData().getName())
             return;
 
         switch (dataEvent->getType()) {
+
             case EventType::DataAdded:
+            {
+                // Turn manual update on if there are more than one million points (for performance reasons)
+                _manualUpdateAction.setChecked(_points->getNumPoints() > MANUAL_UPDATE_THRESHOLD);
+
+                break;
+            }
+
             case EventType::DataChanged:
             case EventType::SelectionChanged:
-                _selectionChangedTimer.start(100);
+            {
+                // Update selected indices
+                if (_points->getNumPoints() < MANUAL_UPDATE_THRESHOLD)
+                    _selectionChangedTimer.start(100);
+                
                 break;
+            }
             
             default:
                 break;
@@ -43,50 +58,65 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
     });
 
     connect(&_selectionChangedTimer, &QTimer::timeout, this, [this]() {
+
+        // Do not update if manual update is chosen
         if (_manualUpdateAction.isChecked())
             return;
 
-        if (!_points.isValid())
-            return;
-
-        auto& selection = dynamic_cast<Points&>(_points->getSelection());
-
-        if (_points->isFull()) {
-            _selectedIndices = selection.indices;
-        }
-        else {
-            _selectedIndices.clear();
-            _selectedIndices.reserve(_points->indices.size());
-
-            QSet<std::uint32_t> indicesSet(_points->indices.begin(), _points->indices.end());
-
-            // Add selection indices if they belong to the subset
-            for (const auto& selectionIndex : selection.indices)
-                if (indicesSet.contains(selectionIndex))
-                    _selectedIndices.push_back(selectionIndex);
-        }
-
-        emit selectedIndicesChanged(getSelectedIndices());
+        // Compute the selected indices
+        updateSelectedIndices();
     });
 
-    const auto updateUpdateAction = [this]() -> void {
+    // Update actions
+    const auto updateActions = [this]() -> void {
         _updateAction.setEnabled(_manualUpdateAction.isChecked());
     };
 
-    connect(&_manualUpdateAction, &ToggleAction::toggled, this, [this, updateUpdateAction]() {
-        updateUpdateAction();
+    connect(&_manualUpdateAction, &ToggleAction::toggled, this, [this, updateActions]() {
+        updateActions();
     });
 
     connect(&_updateAction, &TriggerAction::triggered, this, [this]() {
+        updateSelectedIndices();
         emit selectedIndicesChanged(getSelectedIndices());
     });
 
-    updateUpdateAction();
+    updateActions();
 }
 
 const std::vector<std::uint32_t>& SelectedIndicesAction::getSelectedIndices() const
 {
     return _selectedIndices;
+}
+
+void SelectedIndicesAction::updateSelectedIndices()
+{
+    // Only proceed if we have a valid points reference
+    if (!_points.isValid())
+        return;
+
+    // Get points selection
+    auto& selection = dynamic_cast<Points&>(_points->getSelection());
+
+    // Generate 
+    if (_points->isFull()) {
+        _selectedIndices = selection.indices;
+    }
+    else {
+        _selectedIndices.clear();
+        _selectedIndices.reserve(_points->indices.size());
+
+        // Create points indices set
+        QSet<std::uint32_t> indicesSet(_points->indices.begin(), _points->indices.end());
+
+        // Add selection indices if they belong to the subset
+        for (const auto& selectionIndex : selection.indices)
+            if (indicesSet.contains(selectionIndex))
+                _selectedIndices.push_back(selectionIndex);
+    }
+
+    // Notify others that the selection indices changed
+    emit selectedIndicesChanged(getSelectedIndices());
 }
 
 SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction) :
