@@ -1,7 +1,10 @@
 #include "InfoAction.h"
 
+#include "util/Miscellaneous.h"
+
 using namespace hdps;
 using namespace hdps::gui;
+using namespace hdps::util;
 
 InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName) :
     GroupAction(parent, true),
@@ -35,23 +38,7 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
     _memorySizeAction.setToolTip("The amount of memory occupied by the dataset");
     _numberOfSelectedPointsAction.setToolTip("The number of selected points in the dataset");
 
-    const auto getNoBytesHumanReadable = [](std::uint32_t noBytes) -> QString
-    {
-        QStringList list{ "KB", "MB", "GB", "TB" };
-
-        QStringListIterator it(list);
-        QString unit("bytes");
-
-        while (noBytes >= 1024.0 && it.hasNext())
-        {
-            unit = it.next();
-            noBytes /= 1024.0;
-        }
-
-        return QString::number(noBytes, 'f', 2) + " " + unit;
-    };
-
-    const auto updateActions = [this, getNoBytesHumanReadable]() -> void {
+    const auto updateActions = [this]() -> void {
         if (!_points.isValid())
             return;
 
