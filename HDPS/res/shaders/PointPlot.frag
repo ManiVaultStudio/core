@@ -54,7 +54,7 @@ void main()
 		if (numSelectedPoints == 0) {
 			fragColor = vec4(color, a * alpha);
 		} else {
-			fragColor = vec4(color, focusSelection && isHighlighted ? 1.0f : 0.1f);
+			fragColor = vec4(color, focusSelection && isHighlighted ? 1.0f : 0.01f);
 		}
 	} else {
 		fragColor = vec4(color, a * alpha);
