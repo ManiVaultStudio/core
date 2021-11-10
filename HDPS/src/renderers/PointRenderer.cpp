@@ -293,9 +293,11 @@ namespace hdps
             _gpuPoints.setPositions(positions);
         }
 
-        void PointRenderer::setHighlights(const std::vector<char>& highlights)
+        void PointRenderer::setHighlights(const std::vector<char>& highlights, const std::int32_t& numSelectedPoints)
         {
             _gpuPoints.setHighlights(highlights);
+
+            _numSelectedPoints = numSelectedPoints;
         }
 
         void PointRenderer::setColorChannelScalars(const std::vector<float>& scalars)
@@ -355,6 +357,11 @@ namespace hdps
             _outlineColor = color;
         }
 
+        void PointRenderer::setFocusSelection(const bool& focusSelection)
+        {
+            _focusSelection = focusSelection;
+        }
+
         void PointRenderer::init()
         {
             initializeOpenGLFunctions();
@@ -403,6 +410,8 @@ namespace hdps
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
             _shader.uniform1i("hasColors", _gpuPoints.hasColors());
+            _shader.uniform1i("numSelectedPoints", _numSelectedPoints);
+            _shader.uniform1i("focusSelection", _focusSelection);
 
             if (_gpuPoints.hasColorScalars())
                 _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());

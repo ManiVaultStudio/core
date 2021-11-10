@@ -11,6 +11,10 @@ uniform float alpha;
 uniform int   scalarEffect;
 uniform vec3  outlineColor;
 
+/** Focus selection parameters */
+uniform int numSelectedPoints;
+uniform bool focusSelection;
+
 // Colormap to use if current effect is EFFECT_COLOR
 uniform sampler2D colormap;
 
@@ -34,6 +38,7 @@ void main()
     
     // Set point color
     vec3 color = vColor;
+	
     if (scalarEffect == EFFECT_COLOR) {
 		color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
     }
@@ -43,5 +48,15 @@ void main()
         color = len > 0.5 ? outlineColor : color;
     }
     
-    fragColor = vec4(color, a * alpha);
+	bool isHighlighted = vHighlight == 1;
+	
+	if (focusSelection) {
+		if (numSelectedPoints == 0) {
+			fragColor = vec4(color, a * alpha);
+		} else {
+			fragColor = vec4(color, focusSelection && isHighlighted ? 1.0f : 0.1f);
+		}
+	} else {
+		fragColor = vec4(color, a * alpha);
+	}
 }
