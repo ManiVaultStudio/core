@@ -8,11 +8,11 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName) :
+SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, Points& points) :
     WidgetAction(parent),
     EventListener(),
     _core(core),
-    _points(datasetName),
+    _points(&points),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update"),
     _selectionChangedTimer(),
@@ -29,7 +29,7 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
             return;
 
         // Only process points that we reference
-        if (dataEvent->dataSetName != _points.getSourceData().getName())
+        if (dataEvent->getDataset() != _points.getSourceData())
             return;
 
         switch (dataEvent->getType()) {

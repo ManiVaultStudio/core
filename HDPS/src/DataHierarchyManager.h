@@ -27,18 +27,18 @@ public:
 
     /**
      * Add a dataset to the hierarchy
-     * @param datasetName Name of the dataset
-     * @param parentDatasetName Name of the parent dataset (if any)
+     * @param dataset Dataset
+     * @param parentDataset Pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible in the gui
      */
-    void addItem(const QString& datasetName, const QString& parentDatasetName = "", const bool& visible = true);
+    void addItem(DataSet& dataset, DataSet* parentDataset = nullptr, const bool& visible = true);
 
     /**
      * Removes an item from the hierarchy
-     * @param datasetName Name of the dataset that the hierarchy item references
-     * @return List of datasets that need to removed
+     * @param dataset Reference to the dataset
+     * @return vector of pointers to datasets that need to removed
      */
-    QStringList removeItem(const QString& datasetName, const bool& recursively = false);
+    QVector<const DataSet*> removeItem(const DataSet& dataset, const bool& recursively = false);
 
     /**
      * Get hierarchy item by dataset name
@@ -48,11 +48,11 @@ public:
     const DataHierarchyItem* getItem(const QString& datasetName) const;
 
     /**
-     * Get hierarchy item by dataset name
-     * @param datasetName Name of the dataset
+     * Get hierarchy item by dataset globally unique identifier
+     * @param datasetId Globally unique identifier of the dataset
      * @return Pointer to data hierarchy item
      */
-    DataHierarchyItem* getItem(const QString& datasetName);
+    DataHierarchyItem* getItem(const QString& datasetId);
 
     /**
      * Selects data hierarchy item with dataset name
@@ -78,9 +78,9 @@ signals:
 
     /**
      * Signals that a hierarchy item is about to be removed from the hierarchy manager
-     * @param datasetName Name of the about to be removed dataset
+     * @param dataSet Reference to about to be removed dataset
      */
-    void itemAboutToBeRemoved(const QString& datasetName);
+    void itemAboutToBeRemoved(const DataSet& dataSet);
 
     /**
      * Signals that a hierarchy item is removed from the hierarchy manager

@@ -73,7 +73,7 @@ QString DataHierarchyModelItem::serialize() const
     if (_dataHierarchyItem == nullptr)
         return "";
 
-    return _dataHierarchyItem->getDatasetName() + "\n" + _dataHierarchyItem->getDataType();
+    return _dataHierarchyItem->getGuiName() + "\n" + _dataHierarchyItem->getDataType();
 }
 
 QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) const
@@ -81,13 +81,13 @@ QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) con
     if (_dataHierarchyItem == nullptr)
         return "";
 
-    if (_dataHierarchyItem->getDatasetName().isEmpty())
+    if (_dataHierarchyItem->getGuiName().isEmpty())
         return "Data";
 
     switch (static_cast<Column>(column))
     {
         case Column::Name:
-            return _dataHierarchyItem->getDatasetName();
+            return _dataHierarchyItem->getGuiName();
 
         case Column::Description:
             return _progressSection;
@@ -144,7 +144,7 @@ QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
 
 QMenu* DataHierarchyModelItem::getContextMenu()
 {
-    if (_dataHierarchyItem == nullptr || _dataHierarchyItem->getDatasetName().isEmpty())
+    if (_dataHierarchyItem == nullptr || _dataHierarchyItem->getGuiName().isEmpty())
         return new QMenu();
 
     return _dataHierarchyItem->getContextMenu();

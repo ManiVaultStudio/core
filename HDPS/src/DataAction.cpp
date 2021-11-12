@@ -18,7 +18,7 @@ DataAction::DataAction(QObject* parent, const QString& datasetName) :
     setText("Data");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("trash-alt"));
 
-    _dataset->getHierarchyItem().addAction(*this);
+    _dataset->getDataHierarchyItem().addAction(*this);
 }
 
 }

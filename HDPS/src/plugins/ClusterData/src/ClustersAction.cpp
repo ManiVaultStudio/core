@@ -172,7 +172,7 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
 {
     if (!_clusters.isValid())
         return;
-
+    
     auto dataHierarchyItem          = Application::core()->getDataHierarchyItem(_clusters->getName());
     auto parentDataHierarchyItem    = dataHierarchyItem->getParent();
     auto& points                    = parentDataHierarchyItem->getDataset<Points>();

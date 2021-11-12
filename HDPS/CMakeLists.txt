@@ -132,7 +132,6 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionResetButton.h
-    src/actions/WidgetActionsManager.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
     src/actions/Actions.h
@@ -163,7 +162,6 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionResetButton.cpp
-    src/actions/WidgetActionsManager.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
 )

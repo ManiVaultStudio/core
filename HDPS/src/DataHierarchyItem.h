@@ -61,30 +61,30 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the dataset
-     * @param parentDatasetName Name of the parent dataset
+     * @param dataset Dataset
+     * @param parentDataset Pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible
      * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true, const bool& selected = false);
+    DataHierarchyItem(QObject* parent, DataSet& dataset, DataSet* parentDataset = nullptr, const bool& visible = true, const bool& selected = false);
 
     /** Destructor */
     ~DataHierarchyItem();
 
-    /** Gets the dataset name */
-    QString getDatasetName() const;
+    /** Get the dataset GUI name */
+    QString getGuiName() const;
 
     /**
-     * Set the dataset name
-     * @param datasetName Name of the dataset
+     * Set the dataset GUI name
+     * @param guiName GUI name of the dataset
      */
-    void setDatasetName(const QString& datasetName);
+    void setGuiName(const QString& guiName);
 
     /**
-     * Renames the dataset
-     * @param intendedDatasetName Intended new name of the dataset
+     * Renames the GUI name of the dataset
+     * @param newGuiName New GUI name of the dataset
      */
-    void renameDataset(const QString& intendedDatasetName);
+    void renameDataset(const QString& newGuiName);
 
     /** Gets the parent hierarchy item */
     DataHierarchyItem* getParent() const;
@@ -153,10 +153,10 @@ protected:
 public: // Hierarchy
 
     /**
-     * Adds a child (name reference to data hierarchy item)
-     * @param name Name of the child
+     * Add a child
+     * @param child Reference to child data hierarchy item
      */
-    void addChild(const QString& name);
+    void addChild(DataHierarchyItem& child);
 
     /**
      * Removes a child (name reference to data hierarchy item)

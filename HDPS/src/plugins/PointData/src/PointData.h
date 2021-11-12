@@ -786,11 +786,11 @@ public:
 
     /**
      * Adds a mapping of global selection indices from this dataset to a target dataset.
-     * @param targetDataSet The name of the target dataset
+     * @param targetDataSet The target dataset
      * @param mapping Map of global selection indices in this dataset to a vector of
      *                global indices in the target dataset.
      */
-    void addLinkedSelection(QString targetDataSet, hdps::SelectionMap& mapping);
+    void addLinkedSelection(DataSet& targetDataSet, hdps::SelectionMap& mapping);
 
     /**
      * Set global selection indices on this dataset. Applies linked selections
@@ -803,12 +803,13 @@ public:
     DataSet* copy() const override;
 
     /**
-     * Create subset
-     * @param subsetName Name of the subset
-     * @param parentSetName Name of the parent dataset
+     * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
+     * @param subsetGuiName Name of the subset in the GUI
+     * @param parentDataSet Pointer to parent dataset (if any)
      * @param visible Whether the subset will be visible in the UI
+     * @return Reference to the created subset
      */
-    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override;
+    DataSet& createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible = true) const override;
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;

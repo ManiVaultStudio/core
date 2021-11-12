@@ -18,13 +18,14 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
     _removeSelectedAction(this, "Selected"),
     _removeSelectedAndChildrenAction(this, "Selected + descendants")
 {
+    /*
     setText("Remove");
     setIcon(Application::getIconFont("FontAwesome").getIcon("trash-alt"));
 
     _removeSelectedAction.setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
     _removeSelectedAndChildrenAction.setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap"));
     
-    _dataset->getHierarchyItem().addAction(*this);
+    _dataset->getDataHierarchyItem().addAction(*this);
 
     const auto removeDataset = [this](const bool& recursively = false) -> void {
         QStringList datasetsToRemove({ _dataset.getDatasetName() });
@@ -32,7 +33,7 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
         auto& dataHierarchyManager = Application::core()->getDataHierarchyManager();
 
         if (recursively) {
-            auto children = dataHierarchyManager.getChildren(&_dataset->getHierarchyItem());
+            auto children = dataHierarchyManager.getChildren(&_dataset->getDataHierarchyItem());
 
             for (auto child : children)
                 datasetsToRemove << child->getDatasetName();
@@ -62,6 +63,7 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) 
     connect(&_removeSelectedAndChildrenAction, &TriggerAction::triggered, this, [this, removeDataset]() {
         removeDataset(true);
     });
+    */
 }
 
 QMenu* DataRemoveAction::getContextMenu(QWidget* parent /*= nullptr*/)

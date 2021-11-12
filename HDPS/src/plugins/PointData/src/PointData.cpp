@@ -154,7 +154,7 @@ Points::~Points()
 
 void Points::init()
 {
-    _infoAction = QSharedPointer<InfoAction>::create(nullptr, _core, getName());
+    _infoAction = QSharedPointer<InfoAction>::create(nullptr, _core, *this);
 
     addAction(*_infoAction.get());
 }
@@ -287,16 +287,16 @@ void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionI
 hdps::DataSet* Points::copy() const
 {
     Points* set = new Points(_core, getDataName());
-    set->setName(getName());
+
+    set->setGuiName(getGuiName());
     set->indices = indices;
+
     return set;
 }
 
-QString Points::createSubset(const QString subsetName /*= "subset"*/, const QString parentSetName /*= ""*/, const bool& visible /*= true*/) const
+DataSet& Points::createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible /*= true*/) const
 {
-    const hdps::DataSet& selection = getSelection();
-
-    return _core->createSubsetFromSelection(selection, *this, subsetName, parentSetName, visible);
+    return _core->createSubsetFromSelection(getSelection(), *this, subsetGuiName, parentDataSet, visible);
 }
 
 QIcon Points::getIcon() const
@@ -356,7 +356,7 @@ void Points::selectAll()
             selectionIndices.push_back(index);
     }
 
-    _core->notifySelectionChanged(getName());
+    _core->notifySelectionChanged(*this);
 }
 
 void Points::selectNone()
@@ -366,7 +366,7 @@ void Points::selectNone()
 
     selectionIndices.clear();
 
-    _core->notifySelectionChanged(getName());
+    _core->notifySelectionChanged(*this);
 }
 
 void Points::selectInvert()
@@ -386,7 +386,7 @@ void Points::selectInvert()
             selectionIndices.push_back(i);
     }
 
-    _core->notifySelectionChanged(getName());
+    _core->notifySelectionChanged(*this);
 }
 
 const std::vector<QString>& Points::getDimensionNames() const
@@ -409,9 +409,9 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void Points::addLinkedSelection(QString targetDataSet, hdps::SelectionMap& mapping)
+void Points::addLinkedSelection(DataSet& targetDataSet, hdps::SelectionMap& mapping)
 {
-    _linkedSelections.emplace_back(getName(), targetDataSet);
+    _linkedSelections.emplace_back(this, &targetDataSet);
     _linkedSelections.back().setMapping(mapping);
 }
 

@@ -7,20 +7,22 @@
 
 namespace hdps
 {
+    class DataSet;
+
     using SelectionMap = std::map<unsigned int, std::vector<unsigned int>>;
 
     class LinkedSelection
     {
     public:
-        LinkedSelection(QString source, QString target);
+        LinkedSelection(DataSet* sourceDataSet, DataSet* targetDataSet);
 
-        QString getTargetDataset() { return _targetData; }
+        DataSet* getTargetDataset() { return _targetDataSet; }
         const SelectionMap& getMapping();
         void setMapping(SelectionMap& map);
 
     private:
-        QString _sourceData;
-        QString _targetData;
+        DataSet*    _sourceDataSet;
+        DataSet*    _targetDataSet;
 
         SelectionMap _mapping;
     };

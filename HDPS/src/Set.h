@@ -6,11 +6,14 @@
 
 #include <QString>
 #include <QVector>
+#include <QUuid>
+
 #include <memory>
+
+#include "actions/WidgetAction.h"
 
 namespace hdps
 {
-
 class DataHierarchyItem;
 
 using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
@@ -20,9 +23,14 @@ class DataSet
 public:
     DataSet(CoreInterface* core, QString dataName) :
         _core(core),
+        _rawData(nullptr),
+        _id(QUuid::createUuid().toString()),
+        _guiName(),
         _dataName(dataName),
         _all(false),
-        _rawData(nullptr)
+        _derived(false),
+        _sourceSetName(),
+        _properties()
     {
     }
 
@@ -33,39 +41,48 @@ public:
     virtual DataSet* copy() const = 0;
 
     /**
-     * Create subset
-     * @param subsetName Name of the subset
-     * @param parentSetName Name of the parent dataset
+     * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
+     * @param subsetGuiName Name of the subset in the GUI
+     * @param parentDataSet Pointer to parent dataset (if any)
      * @param visible Whether the subset will be visible in the UI
+     * @return Reference to the created subset
      */
-    virtual QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const = 0;
+    virtual DataSet& createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible = true) const = 0;
 
-    QString getName() const
+    /** Get the globally unique identifier of the dataset in string format */
+    QString getId() const
     {
-        return _name;
+        return _id;
     }
 
-    void setName(QString name)
+    /** Get the GUI name of the dataset */
+    QString getGuiName() const
     {
-        _name = name;
+        return _guiName;
     }
 
     /**
-     * Returns true if this set represents the full data and false if it's a subset.
+     * Set the GUI name of the dataset
+     * @param guiName Name of the dataset in the graphical user interface
      */
+    void setGuiName(const QString& guiName)
+    {
+        _guiName = guiName;
+    }
+
+    /** Returns true if this set represents the full data and false if it's a subset */
     bool isFull() const
     {
         return _all;
     }
 
+    /** Returns whether the dataset is derived */
     bool isDerivedData() const
     {
         return _derived;
     }
 
-    /**
-     * Returns the data type of the raw data associated with this dataset.
-     */
+    /** Returns the data type of the raw data associated with this dataset */
     DataType getDataType() const
     {
         return _core->requestRawData(getDataName()).getDataType();
@@ -124,10 +141,28 @@ public:
     virtual QIcon getIcon() const = 0;
 
     /** Get reference to data hierarchy item */
-    DataHierarchyItem& getHierarchyItem();
+    DataHierarchyItem& getDataHierarchyItem();
 
     /** Get reference to data hierarchy item */
-    const DataHierarchyItem& getHierarchyItem() const;
+    const DataHierarchyItem& getDataHierarchyItem() const;
+
+public: // Operators
+
+    /**
+     * Equality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator == (const DataSet& rhs) const {
+        return rhs.getId() == _id;
+    }
+
+    /**
+     * Inequality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator != (const DataSet& rhs) const {
+        return rhs.getId() != _id;
+    }
 
 public: // Properties
 
@@ -198,14 +233,17 @@ protected:
     {
         if (_rawData == nullptr)
             _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getDataName()));
+
         return *static_cast<DataType*>(_rawData);
     }
 
+    /** Get the name of the raw data */
     QString getDataName() const
     {
         return _dataName;
     }
 
+    /** Get the name of the source dataset */
     QString getSourceName() const
     {
         return _sourceSetName;
@@ -213,20 +251,22 @@ protected:
 
     /**
      * Set whether this set represents all the data or only a subset
+     * @param all Whether this is a full dataset
      */
-    void setAll(bool all)
+    void setAll(const bool& all)
     {
         _all = all;
     }
 
     CoreInterface* _core;
+
 private:
     mutable plugin::RawData*    _rawData;
-
-    QString                     _name;                  /** Name of the dataset */
+    QString                     _id;                    /** Globally unique dataset name */
+    QString                     _guiName;               /** Name of the dataset in the graphical user interface */
     QString                     _dataName;              /** Name of the raw data */
     bool                        _all;                   /** Whether this is the full dataset */
-    bool                        _derived = false;       /** Whether this dataset is derived from another dataset */
+    bool                        _derived;               /** Whether this dataset is derived from another dataset */
     QString                     _sourceSetName;         /** Name of the source dataset (if any) */
     QMap<QString, QVariant>     _properties;            /** Properties map */
 

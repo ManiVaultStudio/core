@@ -35,17 +35,12 @@ public:
 
 public:
 
-    /** Get input dataset name */
-    QString getInputDatasetName() const {
-        return _input.getDatasetName();
-    }
-
     /**
-     * Set input dataset name
-     * @param datasetName Name of the input dataset
+     * Set input dataset
+     * @param inputDataset Reference to input dataset
      */
-    void setInputDatasetName(const QString& datasetName) {
-        _input.setDatasetName(datasetName);
+    void setInputDataset(DataSet& inputDataset) {
+        _input.set(&inputDataset);
     }
 
     /** Get input dataset */

@@ -48,15 +48,6 @@ public: // Actions
         Q_ASSERT(action != nullptr);
 
         QWidget::addAction(action);
-
-        auto widgetAction = dynamic_cast<gui::WidgetAction*>(action);
-
-        if (widgetAction == nullptr)
-            return;
-
-        widgetAction->setContext(_guiName);
-
-        //Application::current()->getWidgetActionsManager().addAction(widgetAction);
     }
 };
 

@@ -91,10 +91,14 @@ public:
     }
 
     void addRawData(plugin::RawData* rawData);
-    QString addSet(QString requestedName, DataSet* set);
-    void addSelection(QString dataName, DataSet* selection);
 
-    QString renameSet(QString oldName, QString requestedName);
+    /**
+     * Add data set to the data manager
+     * @param dataSet Reference to the data set
+     */
+    void addSet(DataSet& dataSet);
+
+    void addSelection(QString dataName, DataSet* selection);
 
     /**
      * Removes a Dataset. Other datasets derived from this dataset are
@@ -109,14 +113,6 @@ public:
     DataSet& getSet(QString name);
     DataSet& getSelection(QString name);
     const std::unordered_map<QString, std::unique_ptr<DataSet>>& allSets() const;
-
-    /**
-     * Generates a unique set name based on a requested name.
-     * If the requested name already is the name of a stored data set, it will suffix
-     * the name with incrementing numbers until the name is unique and then return it.
-     * If the requested name is not in use, then the request will be returned as is.
-     */
-    const QString getUniqueSetName(QString request);
 
 signals:
     void dataChanged();

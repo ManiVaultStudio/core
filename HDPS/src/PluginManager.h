@@ -39,16 +39,16 @@ public:
     /**
      * Create an analysis plugin
      * @param kind Kind of analysis
-     * @param inputDatasetName Name of the input dataset
+     * @param dataSet Reference to input dataset
      */
-    void createAnalysisPlugin(const QString& kind, const QString& inputDatasetName);
+    void createAnalysisPlugin(const QString& kind, DataSet& dataSet);
 
     /**
      * Create an exporter plugin
      * @param kind Kind of exporter
-     * @param inputDatasetName Name of the input dataset
+     * @param dataSet Reference to input dataset
      */
-    void createExporterPlugin(const QString& kind, const QString& inputDatasetName);
+    void createExporterPlugin(const QString& kind, DataSet& dataSet);
 
     /**
      * Get a list of plugin kinds (names) given a plugin type and data type(s)

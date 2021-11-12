@@ -108,23 +108,6 @@ public:
      */
     void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
-public: // Context
-
-    /**
-     * Set the context (used for action grouping)
-     * @param context Context
-     */
-    void setContext(const QString& context);
-
-    /**
-     * Set the data hierarchy item context (used for action grouping)
-     * @param dataHierarchyItem Data hierarchy item
-     */
-    void setContext(const DataHierarchyItem* dataHierarchyItem);
-
-    /** Get the context */
-    QString getContext() const;
-
 protected:
 
     /**
@@ -144,7 +127,6 @@ signals:
 
 protected:
     QString                     _createdBy;                     /** Establishes who created the widget action (view, analysis, data etc.) */
-    QString                     _context;                       /** The widget action resides outside of the data hierarchy widget (e.g. plugin view) */
     const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
     std::int32_t                _defaultWidgetFlags;            /** Default widget flags */
     bool                        _resettable;                    /** Whether the action can be reset */
@@ -162,7 +144,7 @@ using WidgetActions = QVector<WidgetAction*>;
  */
 inline QDebug operator << (QDebug debug, const WidgetAction& widgetAction)
 {
-    debug.noquote().nospace() << widgetAction.getContext() << "::" << widgetAction.text();
+    debug.noquote().nospace() << widgetAction.text();
 
     return debug.space();
 }
@@ -174,7 +156,7 @@ inline QDebug operator << (QDebug debug, const WidgetAction& widgetAction)
  */
 inline QDebug operator << (QDebug debug, WidgetAction* widgetAction)
 {
-    debug.noquote().nospace() << widgetAction->getContext() << "::" << widgetAction->text();
+    debug.noquote().nospace() << widgetAction->text();
 
     return debug.space();
 }

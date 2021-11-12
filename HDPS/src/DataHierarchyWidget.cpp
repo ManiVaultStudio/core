@@ -82,10 +82,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     };
 
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, [this, getModelIndexForDatasetName](DataHierarchyItem* dataHierarchyItem) {
+        /*
         if (dataHierarchyItem == nullptr || dataHierarchyItem->isHidden())
             return;
 
-        DatasetRef<DataSet> dataset(dataHierarchyItem->getDatasetName());
+        DatasetRef<DataSet> dataset(dataHierarchyItem->getDataset());
 
         QModelIndex parentModelIndex;
 
@@ -139,19 +140,23 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         if (!isExpanded(parentModelIndex))
             expand(parentModelIndex);
 
+        */
+
         //_selectionModel.select(paparentModelIndexrent.child(first, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
     });
 
+    /*
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAboutToBeRemoved, this, [this, getModelIndexForDatasetName](const QString& datasetName) {
         _selectionModel.clear();
         _model.removeDataHierarchyModelItem(getModelIndexForDatasetName(datasetName));
     });
+    */
 
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemRelocated, this, [this, getModelIndexForDatasetName](DataHierarchyItem* relocatedItem) {
         Q_ASSERT(relocatedItem != nullptr);
 
-        _model.removeDataHierarchyModelItem(getModelIndexForDatasetName(relocatedItem->getDatasetName()));
-        _model.addDataHierarchyModelItem(QModelIndex(), relocatedItem);
+        //_model.removeDataHierarchyModelItem(getModelIndexForDatasetName(relocatedItem->getDatasetName()));
+        //_model.addDataHierarchyModelItem(QModelIndex(), relocatedItem);
     });
 
     connect(this, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {

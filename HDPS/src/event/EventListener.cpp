@@ -39,25 +39,26 @@ void EventListener::registerDataEvent(DataEventHandler callback)
 
 void EventListener::onDataEvent(DataEvent* dataEvent)
 {
+    /*
     if (dataEvent->getType() == EventType::SelectionChanged)
     {
         // Fire events for linked datasets
-        DataSet& baseDataSet1 = DataSet::getSourceData(_eventCore->requestData(dataEvent->dataSetName));
+        DataSet& baseDataSet1 = DataSet::getSourceData(dataEvent->getDataset());
         QString dataName1 = baseDataSet1.getDataName();
 
-        const std::vector<QString>& dataSetNames = _eventCore->requestAllDataNames();
+        const auto& allDataSets = _eventCore->requestAllDataSets();
 
         // Go through all datasets in the system and find datasets with the same source data
-        for (const QString& dataSetName : dataSetNames)
+        for (const auto& dataSet : allDataSets)
         {
-            DataSet& baseDataSet2 = DataSet::getSourceData(_eventCore->requestData(dataSetName));
-            QString dataName2 = baseDataSet2.getDataName();
+            auto& baseDataSet2 = DataSet::getSourceData(*dataSet);
+            QString dataName2   = baseDataSet2.getDataName();
 
             // Fire selection events for datasets with the same source data as the original event
             if (dataName1 == dataName2)
             {
                 DataEvent sourceDataEvent = *dataEvent;
-                sourceDataEvent.dataSetName = dataSetName;
+                sourceDataEvent.dataSetName = dataSet;
                     
                 if (_dataEventHandlersByName.find(sourceDataEvent.dataSetName) != _dataEventHandlersByName.end())
                     _dataEventHandlersByName[sourceDataEvent.dataSetName](&sourceDataEvent);
@@ -77,6 +78,7 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
 
     for (auto dataEventHandler : _dataEventHandlers)
         dataEventHandler(dataEvent);
+    */
 }
 
 }

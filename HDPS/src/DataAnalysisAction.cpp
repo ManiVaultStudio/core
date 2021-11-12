@@ -17,7 +17,7 @@ DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetNa
     setText("Analyze");
     setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
 
-    _dataset->getHierarchyItem().addAction(*this);
+    _dataset->getDataHierarchyItem().addAction(*this);
 
     _pluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::ANALYSIS, QVector<DataType>({ _dataset->getDataType() }));
 
@@ -27,7 +27,7 @@ DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetNa
         analysisPluginAction->setIcon(Application::core()->getPluginIcon(pluginKind));
 
         connect(analysisPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            _dataset->getHierarchyItem().analyzeDataset(pluginKind);
+            _dataset->getDataHierarchyItem().analyzeDataset(pluginKind);
         });
     }
 }

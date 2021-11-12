@@ -1,12 +1,15 @@
 #include "LinkedSelection.h"
 
+#include "Set.h"
+
 namespace hdps
 {
-    LinkedSelection::LinkedSelection(QString source, QString target) :
-        _sourceData(source),
-        _targetData(target)
+    LinkedSelection::LinkedSelection(DataSet* sourceDataSet, DataSet* targetDataSet) :
+        _sourceDataSet(sourceDataSet),
+        _targetDataSet(targetDataSet)
     {
-
+        Q_ASSERT(_sourceDataSet != nullptr);
+        Q_ASSERT(_targetDataSet != nullptr);
     }
 
     const SelectionMap& LinkedSelection::getMapping()

@@ -28,6 +28,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     layout->setAlignment(Qt::AlignTop);
     layout->addWidget(_groupsAction.createWidget(this));
 
+    /*
     connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this](const QString& oldDatasetName, const QString& newDatasetName) {
         loadDataset();
     });
@@ -37,21 +38,23 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     });
 
     emit datasetNameChanged("");
+    */
 }
 
 void DataPropertiesWidget::setDatasetName(const QString& datasetName)
 {
+    /*
     try
     {
         if (_dataset.isValid())
-            disconnect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
+            disconnect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
         _dataset.setDatasetName(datasetName);
 
         if (!_dataset.isValid())
             return;
 
-        connect(&_dataset->getHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
+        connect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
             if (dynamic_cast<GroupAction*>(&widgetAction) == nullptr)
                 return;
 
@@ -62,10 +65,12 @@ void DataPropertiesWidget::setDatasetName(const QString& datasetName)
     {
         qDebug() << QString("Cannot update data properties for %1: %2").arg(datasetName, e.what());
     }
+    */
 }
 
 void DataPropertiesWidget::loadDataset()
 {
+    /*
     emit datasetNameChanged(_dataset.getDatasetName());
 
     if (!_dataset.isValid()) {
@@ -75,7 +80,7 @@ void DataPropertiesWidget::loadDataset()
 
     GroupsAction::GroupActions groupActions;
 
-    for (auto action : _dataset->getHierarchyItem().getActions()) {
+    for (auto action : _dataset->getDataHierarchyItem().getActions()) {
         auto groupAction = dynamic_cast<GroupAction*>(action);
 
         if (groupAction == nullptr)
@@ -85,6 +90,7 @@ void DataPropertiesWidget::loadDataset()
     }
 
     _groupsAction.set(groupActions);
+    */
 }
 
 }

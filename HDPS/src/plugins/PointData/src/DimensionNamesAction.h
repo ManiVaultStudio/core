@@ -53,9 +53,9 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param core Pointer to the core
-     * @param datasetName Name of the points dataset
+     * @param points Reference to points dataset
      */
-    DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName);
+    DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, Points& points);
 
     /** Get the dimension names */
     QStringList getDimensionNames() const;

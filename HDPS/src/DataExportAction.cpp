@@ -16,7 +16,7 @@ DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) 
     setText("Export");
     setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
 
-    _dataset->getHierarchyItem().addAction(*this);
+    _dataset->getDataHierarchyItem().addAction(*this);
 
     _pluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::WRITER, QVector<DataType>({ _dataset->getDataType() }));
 
@@ -26,7 +26,7 @@ DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) 
         exporterPluginAction->setIcon(Application::core()->getPluginIcon(pluginKind));
 
         connect(exporterPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            _dataset->getHierarchyItem().exportDataset(pluginKind);
+            _dataset->getDataHierarchyItem().exportDataset(pluginKind);
         });
     }
 }

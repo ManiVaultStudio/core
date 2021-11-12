@@ -36,9 +36,9 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param core Pointer to the core
-     * @param datasetName Name of the points dataset
+     * @param points Reference to points dataset
      */
-    InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName);
+    InfoAction(QObject* parent, CoreInterface* core, Points& points);
 
 public: // Action getters
 
