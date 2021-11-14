@@ -131,11 +131,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataSet /*= nullptr*/)
+DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, DataSet* parentDataSet /*= nullptr*/)
 {
-    
-
-    
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
 
@@ -145,26 +142,23 @@ DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, const
     // Create an initial full set and an empty selection belonging to the raw data
     auto fullSet    = rawData.createDataSet();
     auto selection  = rawData.createDataSet();
-    /*
+
     // Set the properties of the new sets
     fullSet->setAll(true);
 
     // Add them to the data manager
-    QString setName = _dataManager->addSet(nameRequest, fullSet);
+    _dataManager->addSet(*fullSet);
     
     _dataManager->addSelection(rawDataName, selection);
     
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager->addItem(setName, parentDatasetName);
-    _dataHierarchyManager->selectItem(setName);
+    _dataHierarchyManager->addItem(*fullSet, parentDataSet);
+    _dataHierarchyManager->selectItem(*fullSet);
     
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
-    new DataAction(&_mainWindow, setName);
-
-    return setName;
-    */
+    //new DataAction(&_mainWindow, dataSetGuiName);
 
     return *fullSet;
 }

@@ -31,9 +31,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the points dataset
+     * @param clusters Reference to clusters dataset
      */
-    InfoAction(QObject* parent, const QString& datasetName);
+    InfoAction(QObject* parent, Clusters& clusters);
 
 public: // Action getters
 

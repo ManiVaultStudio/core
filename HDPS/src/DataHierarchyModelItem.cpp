@@ -81,13 +81,13 @@ QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) con
     if (_dataHierarchyItem == nullptr)
         return "";
 
-    if (_dataHierarchyItem->getGuiName().isEmpty())
-        return "Data";
-
     switch (static_cast<Column>(column))
     {
         case Column::Name:
             return _dataHierarchyItem->getGuiName();
+
+        case Column::ID:
+            return _dataHierarchyItem->getDataset().getId();
 
         case Column::Description:
             return _progressSection;
@@ -119,6 +119,9 @@ QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
     {
         case Column::Name:
             return _dataHierarchyItem->getIconByName("data");
+
+        case Column::ID:
+            break;
 
         case Column::Analysis:
             return _dataHierarchyItem->getIconByName("analysis");

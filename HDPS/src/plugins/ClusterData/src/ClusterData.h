@@ -109,22 +109,21 @@ public:
     DataSet* copy() const override
     {
         Clusters* clusters = new Clusters(_core, getDataName());
-        clusters->setName(getName());
+        clusters->setGuiName(getGuiName());
         clusters->indices = indices;
         return clusters;
     }
 
     /**
-     * Create subset
-     * @param subsetName Name of the subset
-     * @param parentSetName Name of the parent dataset
+     * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
+     * @param subsetGuiName Name of the subset in the GUI
+     * @param parentDataSet Pointer to parent dataset (if any)
      * @param visible Whether the subset will be visible in the UI
+     * @return Reference to the created subset
      */
-    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override
+    DataSet& createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible = true) const override
     {
-        const hdps::DataSet& selection = getSelection();
-
-        return _core->createSubsetFromSelection(selection, *this, "Clusters", parentSetName, visible);
+        return _core->createSubsetFromSelection(getSelection(), *this, subsetGuiName, parentDataSet, visible);
     }
 
     /** Get icon for the dataset */

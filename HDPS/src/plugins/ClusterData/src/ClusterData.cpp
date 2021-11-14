@@ -60,7 +60,7 @@ void ClusterData::removeClustersById(const QStringList& ids)
 
 void Clusters::init()
 {
-    _infoAction = QSharedPointer<InfoAction>::create(nullptr, getName());
+    _infoAction = QSharedPointer<InfoAction>::create(nullptr, *this);
 
     addAction(*_infoAction.get());
 }

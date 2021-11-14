@@ -15,10 +15,10 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
+ClustersAction::ClustersAction(QObject* parent, Clusters& clusters) :
     WidgetAction(parent),
     EventListener(),
-    _clusters(datasetName),
+    _clusters(&clusters),
     _clustersModel(),
     _importAction(this, "Import"),
     _exportAction(this, "Export")
@@ -36,7 +36,7 @@ ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
         if (!_clusters.isValid())
             return;
 
-        if (dataEvent->dataSetName != _clusters->getName())
+        if (dataEvent->getDataset() != *_clusters)
             return;
 
         switch (dataEvent->getType())
@@ -59,7 +59,7 @@ ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
 
     const auto updateClusters = [this]() -> void {
         _clusters->getClusters() = _clustersModel.getClusters();
-        _clusters.notifyDataChanged();
+        Application::core()->notifyDataChanged(*_clusters);
     };
 
     connect(&_clustersModel, &QAbstractItemModel::dataChanged, this, [this, updateClusters](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
@@ -112,7 +112,7 @@ ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
             _clusters->fromVariant(clusterJsonDocument.toVariant());
 
             // Let others know that the clusters changed
-            _clusters.notifyDataChanged();
+            Application::core()->notifyDataChanged(*_clusters);
         }
         catch (std::exception& e)
         {
@@ -173,8 +173,7 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     if (!_clusters.isValid())
         return;
     
-    auto dataHierarchyItem          = Application::core()->getDataHierarchyItem(_clusters->getName());
-    auto parentDataHierarchyItem    = dataHierarchyItem->getParent();
+    auto parentDataHierarchyItem    = _clusters->getDataHierarchyItem().getParent();
     auto& points                    = parentDataHierarchyItem->getDataset<Points>();
     auto& selection                 = dynamic_cast<Points&>(points.getSelection());
 
@@ -188,18 +187,15 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     for (auto index : indices)
         selection.indices.push_back(globalIndices[index]);
 
-    Application::core()->notifySelectionChanged(parentDataHierarchyItem->getDatasetName());
+    Application::core()->notifySelectionChanged(parentDataHierarchyItem->getDataset());
 }
 
 void ClustersAction::createSubset(const QString& datasetName)
 {
-    auto dataHierarchyItem = Application::core()->getDataHierarchyItem(_clusters->getName());
-    
-    DatasetRef<Points> points(dataHierarchyItem->getParent()->getDatasetName());
+    auto& points    = _clusters->getDataHierarchyItem().getParent()->getDataset();
+    auto& selection = points.getSelection<Points&>();
 
-    auto& selection = dynamic_cast<Points&>(points->getSelection());
-
-    const auto subsetName = points->createSubset(datasetName, points->getName());
+    points.createSubset("Clusters", &points);
 }
 
 void ClustersAction::removeClustersById(const QStringList& ids)
@@ -294,7 +290,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         _mergeAction.setEnabled(selectedRows.count() >= 2);
 
         // Notify others that the cluster selection has changed
-        Application::core()->notifySelectionChanged(clustersAction->getClustersDataset()->getName());
+        Application::core()->notifySelectionChanged(*clustersAction->getClustersDataset());
     };
 
     connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {

@@ -22,21 +22,21 @@ Images::Images(hdps::CoreInterface* core, QString dataName) :
 
 void Images::init()
 {
-    _infoAction = QSharedPointer<InfoAction>::create(nullptr, getName());
+    _infoAction = QSharedPointer<InfoAction>::create(nullptr, *this);
 
     addAction(*_infoAction.get());
 }
 
-QString Images::createSubset(const QString subsetName /*= "subset"*/, const QString parentSetName /*= ""*/, const bool& visible /*= true*/) const
+hdps::DataSet& Images::createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible /*= true*/) const
 {
-    return "";
+    return _core->createSubsetFromSelection(getSelection(), *this, subsetGuiName, parentDataSet, visible);
 }
 
 hdps::DataSet* Images::copy() const
 {
     Images* images = new Images(_core, getDataName());
 
-    images->setName(getName());
+    images->setGuiName(getGuiName());
 
     return images;
 }
@@ -166,7 +166,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
     try
     {
         // Get reference to input dataset
-        auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
+        auto& dataset = getDataHierarchyItem().getParent()->getDataset<DataSet>();
 
         if (dataset.getDataType() == PointType) {
 
@@ -301,7 +301,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get reference to input dataset
-    auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
+    auto& dataset = getDataHierarchyItem().getParent()->getDataset<DataSet>();
 
     if (dataset.getDataType() == PointType) {
 
@@ -356,7 +356,7 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get reference to input dataset
-    auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
+    auto& dataset = getDataHierarchyItem().getParent()->getDataset<DataSet>();
 
     if (dataset.getDataType() == PointType) {
 
@@ -465,8 +465,8 @@ std::uint32_t Images::getTargetPixelIndex(const QPoint& coordinate) const
 
 std::uint32_t Images::getSourceDataIndex(const QPoint& coordinate) const
 {
-    // Get reference to input points dataset
-    auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
+    // Get reference to input dataset
+    auto& points = getDataHierarchyItem().getParent()->getDataset<Points>();
 
     // Get reference to source data
     auto& sourceData = points.getSourceData<Points>(points);

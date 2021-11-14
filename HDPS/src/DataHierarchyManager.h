@@ -56,9 +56,9 @@ public:
 
     /**
      * Selects data hierarchy item with dataset name
-     * @param datasetName Name of the dataset to select
+     * @param dataSet Reference to dataset to select
      */
-    void selectItem(const QString& datasetName);
+    void selectItem(DataSet& dataSet);
 
     /**
      * Get dataset children

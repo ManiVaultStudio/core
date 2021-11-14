@@ -4,10 +4,10 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-InfoAction::InfoAction(QObject* parent, const QString& datasetName) :
+InfoAction::InfoAction(QObject* parent, Images& images) :
     GroupAction(parent, true),
     EventListener(),
-    _images(datasetName),
+    _images(&images),
     _typeAction(this, "Image collection type"),
     _numberOfImagesAction(this, "Number of images"),
     _imageResolutionAction(this, "Image resolution"),
@@ -63,7 +63,7 @@ InfoAction::InfoAction(QObject* parent, const QString& datasetName) :
         if (!_images.isValid())
             return;
 
-        if (dataEvent->dataSetName != _images->getName())
+        if (dataEvent->getDataset() != *_images)
             return;
 
         switch (dataEvent->getType()) {

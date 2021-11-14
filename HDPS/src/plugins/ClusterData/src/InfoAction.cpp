@@ -3,12 +3,12 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-InfoAction::InfoAction(QObject* parent,const QString& datasetName) :
+InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
     GroupAction(parent, true),
     EventListener(),
-    _clusters(datasetName),
+    _clusters(&clusters),
     _numberOfClustersAction(this, "Number of clusters"),
-    _clustersAction(this, datasetName)
+    _clustersAction(this, clusters)
 {
     setText("Clusters");
     setEventCore(Application::core());
@@ -30,7 +30,7 @@ InfoAction::InfoAction(QObject* parent,const QString& datasetName) :
         if (!_clusters.isValid())
             return;
 
-        if (dataEvent->dataSetName != _clusters->getName())
+        if (dataEvent->getDataset() != *_clusters)
             return;
 
         switch (dataEvent->getType()) {

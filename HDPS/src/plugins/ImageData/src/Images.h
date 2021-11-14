@@ -41,8 +41,14 @@ public: // Construction
 
 public: // Subsets
 
-    /** Create an image subset (not implemented at this point) */
-    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override;;
+    /**
+     * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
+     * @param subsetGuiName Name of the subset in the GUI
+     * @param parentDataSet Pointer to parent dataset (if any)
+     * @param visible Whether the subset will be visible in the UI
+     * @return Reference to the created subset
+     */
+    DataSet& createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible = true) const override;
 
 public: // Image retrieval functions
 

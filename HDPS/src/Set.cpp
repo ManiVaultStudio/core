@@ -34,4 +34,4 @@ void DataSet::populateContextMenu(QMenu* contextMenu)
     return _core->getDataHierarchyItem(_id)->populateContextMenu(contextMenu);
 }
 
-} // namespace hdps
+}

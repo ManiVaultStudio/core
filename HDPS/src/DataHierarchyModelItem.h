@@ -22,6 +22,7 @@ public:
     /** Columns */
     enum class Column {
         Name,
+        ID,
         Description,
         Analysis,
         Progress,

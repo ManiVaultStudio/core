@@ -47,6 +47,9 @@ public:
     {
         // Perform startup initialization
         init();
+
+        // Assign dataset
+        set(dataset);
     }
 
     /**
@@ -96,12 +99,10 @@ public:
      */
     void set(DataSet* dataset) {
 
-        Q_ASSERT(dataset != nullptr);
-
         // Assign dataset pointer and cache the globally unique dataset identifier
         try
         {
-            if (dataset != nullptr) {
+            if (dataset == nullptr) {
                 reset();
                 return;
             }

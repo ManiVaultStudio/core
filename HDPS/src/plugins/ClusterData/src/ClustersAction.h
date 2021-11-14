@@ -68,9 +68,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the points dataset
+     * @param clusters Reference to clusters dataset
      */
-    ClustersAction(QObject* parent, const QString& datasetName);
+    ClustersAction(QObject* parent, Clusters& clusters);
 
     /** Get clusters */
     std::vector<Cluster>* getClusters();

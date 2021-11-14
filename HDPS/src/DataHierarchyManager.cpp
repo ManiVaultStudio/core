@@ -110,24 +110,22 @@ DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetId)
     return nullptr;
 }
 
-void DataHierarchyManager::selectItem(const QString& datasetName)
+void DataHierarchyManager::selectItem(DataSet& dataSet)
 {
-    qDebug() << "Selecting" << datasetName << "in the data hierarchy";
+    qDebug() << "Selecting" << dataSet.getGuiName() << "in the data hierarchy";
 
     try {
-        if (datasetName.isEmpty())
-            throw std::runtime_error("Dataset name is empty");
 
-        const auto hierarchyItem = getItem(datasetName);
+        // Get data hierarchy item that needs to be selected
+        auto& hierarchyItem = dataSet.getDataHierarchyItem();
 
-        if (hierarchyItem == nullptr)
-            throw std::runtime_error(QString("%1 does not exist in the data hierarchy").arg(datasetName).toLatin1());
-
+        // Deselect other data hierarchy items
         for (auto dataHierarchyItem : _dataHierarchyItems)
             if (dataHierarchyItem->isSelected())
                 dataHierarchyItem->deselect();
 
-        hierarchyItem->select();
+        // Select the data hierarchy item
+        hierarchyItem.select();
     }
     catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to select dataset in data hierarchy", e.what());

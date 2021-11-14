@@ -26,9 +26,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the images dataset
+     * @param images Reference to images dataset
      */
-    InfoAction(QObject* parent, const QString& datasetName);
+    InfoAction(QObject* parent, Images& images);
 
 protected:
     DatasetRef<Images>      _images;                            /** Points dataset reference */

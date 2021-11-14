@@ -73,13 +73,12 @@ public:
         return *_dataManager;
     }
 
-    /** Get the data hierarchy manager */
-    DataHierarchyManager& getDataHierarchyManager() override;
-
     /**
     * Adds the given plugin to the list of plugins kept by the core.
     */
     void addPlugin(plugin::Plugin* plugin);
+
+public: // Data access
 
     /**
      * Requests the plugin manager to create new RawData of the given kind.
@@ -90,11 +89,11 @@ public:
      * @param parentDataSet Pointer to parent dataset in the data hierarchy (root if nullptr)
      * @return Reference to the added dataset
      */
-    DataSet& addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataSet = nullptr) override;
+    DataSet& addData(const QString& kind, const QString& dataSetGuiName, DataSet* parentDataSet = nullptr) override;
 
     /**
      * Removes one or more datasets
-     * Other datasets derived from this dataset are  converted to non-derived data.
+     * Other datasets derived from this dataset are converted to non-derived data.
      * Notifies all plug-ins of the removed dataset automatically
      * @param datasets Datasets to remove
      * @param recursively Remove datasets recursively
@@ -123,8 +122,6 @@ public:
      */
     DataSet& createSubsetFromSelection(const DataSet& selection, const DataSet& sourceDataset, const QString& guiName, const DataSet* parentDataset = nullptr, const bool& visible = true) override;
 
-public: // Data requests
-
     /**
      * Requests a dataset from the core by dataset globally unique identifier (if no such instance can be found a fatal error is thrown)
      * @param dataSetId Globally unique identifier of the dataset
@@ -139,6 +136,20 @@ public: // Data requests
      * @return Vector of pointers to datasets
      */
     QVector<DataSet*> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) override;
+
+protected: // Data access
+
+    /**
+     * Requests an instance of a data type plugin from the core which has the same
+     * unique name as the given parameter. If no such instance can be found a fatal
+     * error is thrown.
+     */
+    plugin::RawData& requestRawData(const QString name) override;
+
+    /**
+    * Requests the selection set belonging to the raw dataset with the given name.
+    */
+    DataSet& requestSelection(const QString rawdataName) override;
 
 public: // Analysis
 
@@ -171,15 +182,6 @@ public: // Import/export
      */
     const void exportDataset(const QString& kind, DataSet& dataSet) override;
 
-public: // Data hierarchy
-
-    /**
-     * Get data hierarchy item by dataset globally unique identifier
-     * @param dataSetId Globally unique identifier of the dataset
-     * @return Pointer to data hierarchy item
-     */
-    DataHierarchyItem* getDataHierarchyItem(const QString& dataSetId) override;
-
 public: // Plugin queries
 
     /**
@@ -203,6 +205,18 @@ public: // Plugin queries
      * @return Plugin icon name of the plugin, null icon the plugin kind was not found
      */
     QIcon getPluginIcon(const QString& pluginKind) const override;
+
+public: // Data hierarchy
+
+    /** Get a reference to the data hierarchy manager */
+    DataHierarchyManager& getDataHierarchyManager() override;
+
+    /**
+     * Get data hierarchy item by dataset globally unique identifier
+     * @param dataSetId Globally unique identifier of the dataset
+     * @return Pointer to data hierarchy item
+     */
+    DataHierarchyItem* getDataHierarchyItem(const QString& dataSetId) override;
 
 public: // Events & notifications
 
@@ -262,19 +276,6 @@ public:
     * Returns a reference to the main window for adding widgets to it.
     */
     gui::MainWindow& gui() const;
-
-protected:
-    /**
-     * Requests an instance of a data type plugin from the core which has the same
-     * unique name as the given parameter. If no such instance can be found a fatal
-     * error is thrown.
-     */
-    plugin::RawData& requestRawData(const QString name) override;
-
-    /**
-    * Requests the selection set belonging to the raw dataset with the given name.
-    */
-    DataSet& requestSelection(const QString rawdataName) override;
 
 private:
 
