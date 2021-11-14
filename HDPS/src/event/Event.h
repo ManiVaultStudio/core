@@ -62,6 +62,14 @@ namespace hdps
             return *_dataset;
         }
 
+        /**
+         * Set reference to the dataset
+         * @param dataset Reference to the dataset
+         */
+        void setDataset(DataSet& dataset) {
+            _dataset = &dataset;
+        }
+
     protected:
         DataSet*  _dataset;   /** Pointer to dataset for which the event occurred */
     };

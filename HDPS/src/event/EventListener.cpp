@@ -39,7 +39,6 @@ void EventListener::registerDataEvent(DataEventHandler callback)
 
 void EventListener::onDataEvent(DataEvent* dataEvent)
 {
-    /*
     if (dataEvent->getType() == EventType::SelectionChanged)
     {
         // Fire events for linked datasets
@@ -58,27 +57,27 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
             if (dataName1 == dataName2)
             {
                 DataEvent sourceDataEvent = *dataEvent;
-                sourceDataEvent.dataSetName = dataSet;
-                    
-                if (_dataEventHandlersByName.find(sourceDataEvent.dataSetName) != _dataEventHandlersByName.end())
-                    _dataEventHandlersByName[sourceDataEvent.dataSetName](&sourceDataEvent);
 
-                if (_dataEventHandlersByType.find(sourceDataEvent.dataType) != _dataEventHandlersByType.end())
-                    _dataEventHandlersByType[sourceDataEvent.dataType](&sourceDataEvent);
+                sourceDataEvent.setDataset(*dataSet);
+                    
+                if (_dataEventHandlersById.find(sourceDataEvent.getDataset().getId()) != _dataEventHandlersById.end())
+                    _dataEventHandlersById[sourceDataEvent.getDataset().getId()](&sourceDataEvent);
+
+                if (_dataEventHandlersByType.find(sourceDataEvent.getDataset().getDataType()) != _dataEventHandlersByType.end())
+                    _dataEventHandlersByType[sourceDataEvent.getDataset().getDataType()](&sourceDataEvent);
             }
         }
         return;
     }
         
-    if (_dataEventHandlersByName.find(dataEvent->dataSetName) != _dataEventHandlersByName.end())
-        _dataEventHandlersByName[dataEvent->dataSetName](dataEvent);
+    if (_dataEventHandlersById.find(dataEvent->getDataset().getId()) != _dataEventHandlersById.end())
+        _dataEventHandlersById[dataEvent->getDataset().getId()](dataEvent);
 
-    if (_dataEventHandlersByType.find(dataEvent->dataType) != _dataEventHandlersByType.end())
-        _dataEventHandlersByType[dataEvent->dataType](dataEvent);
+    if (_dataEventHandlersByType.find(dataEvent->getDataset().getDataType()) != _dataEventHandlersByType.end())
+        _dataEventHandlersByType[dataEvent->getDataset().getDataType()](dataEvent);
 
     for (auto dataEventHandler : _dataEventHandlers)
         dataEventHandler(dataEvent);
-    */
 }
 
 }

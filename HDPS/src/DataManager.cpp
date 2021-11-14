@@ -58,12 +58,12 @@ plugin::RawData& DataManager::getRawData(QString name)
     return *_rawDataMap[name];
 }
 
-DataSet& DataManager::getSet(QString name)
+hdps::DataSet& DataManager::getSet(const QString& datasetId)
 {
-    if (_dataSetMap.find(name) == _dataSetMap.end())
-        throw SetNotFoundException(name);
+    if (_dataSetMap.find(datasetId) == _dataSetMap.end())
+        throw SetNotFoundException(datasetId);
 
-    return *_dataSetMap[name];
+    return *_dataSetMap[datasetId];
 }
 
 DataSet& DataManager::getSelection(QString name)

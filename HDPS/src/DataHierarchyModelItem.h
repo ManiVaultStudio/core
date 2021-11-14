@@ -20,7 +20,7 @@ public:
     using PluginHierarchyItems = QVector<DataHierarchyModelItem*>;
 
     /** Columns */
-    enum class Column {
+    enum Column {
         Name,
         ID,
         Description,

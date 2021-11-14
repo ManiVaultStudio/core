@@ -22,18 +22,27 @@ namespace hdps
         void registerDataEvent(DataEventHandler callback);
 
     protected:
-        // Sets internal static event core, called once upon plugin creation
+
+        /**
+         * Sets internal static event core, called once upon plugin creation
+         * @param core Pointer to the core
+         */
         void setEventCore(CoreInterface* core);
 
-        // Unregisters the event listener from the core
+        /** Destructor, unregisters the event listener from the core */
         ~EventListener();
 
     private:
+
+        /**
+         * Invoked when a data event occurs
+         * @param dataEvent Pointer to data event that occurred
+         */
         void onDataEvent(DataEvent* dataEvent);
 
-        std::unordered_map<QString, DataEventHandler>   _dataEventHandlersByName;
-        std::unordered_map<DataType, DataEventHandler>  _dataEventHandlersByType;
-        std::vector<DataEventHandler>                   _dataEventHandlers;
+        std::unordered_map<QString, DataEventHandler>   _dataEventHandlersById;         /** Data event handlers by dataset globally unique identifier */
+        std::unordered_map<DataType, DataEventHandler>  _dataEventHandlersByType;       /** Data event handlers by data type */
+        std::vector<DataEventHandler>                   _dataEventHandlers;             /** Non-specific Data event handlers */
 
         static CoreInterface* _eventCore;
 

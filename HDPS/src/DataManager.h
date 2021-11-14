@@ -110,7 +110,14 @@ public:
     void removeDataset(const QString& datasetName, const bool& recursively = true);
 
     plugin::RawData& getRawData(QString name);
-    DataSet& getSet(QString name);
+
+    /**
+     * Get set by dataset globally unique identifier
+     * @param datasetId Globally unique identifier of the dataset
+     * @return Reference to the dataset
+     */
+    DataSet& getSet(const QString& datasetId);
+
     DataSet& getSelection(QString name);
     const std::unordered_map<QString, std::unique_ptr<DataSet>>& allSets() const;
 

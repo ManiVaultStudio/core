@@ -39,10 +39,10 @@ public:
     DataPropertiesWidget(QWidget* parent);
 
     /**
-     * Set the name of the current dataset
-     * @param datasetName Name of the dataset
+     * Set the ID of the current dataset
+     * @param datasetId Globally unique identifier of the dataset
      */
-    void setDatasetName(const QString& datasetName);
+    void setDatasetId(const QString& datasetId);
 
 protected:
 
@@ -52,10 +52,10 @@ protected:
 signals:
 
     /**
-     * Signals that the dataset name changed (used to change the docking widget title)
-     * @param datasetName Name of the dataset
+     * Signals that the current dataset gui name changed (used to change the docking widget title)
+     * @param datasetGuiName GUI name of the current dataset
      */
-    void datasetNameChanged(const QString& datasetName);
+    void currentDatasetGuiNameChanged(const QString& datasetGuiName);
 
 protected:
     DatasetRef<DataSet>     _dataset;       /** Dataset reference */

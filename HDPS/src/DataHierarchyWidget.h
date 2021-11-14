@@ -56,10 +56,10 @@ public:
 signals:
 
     /**
-     * Invoked when the selected data name changed
-     * @param datasetName Name of the newly selected dataset
+     * Invoked when the selected dataset changed
+     * @param datasetId Globally unique identifier of the selected dataset
      */
-    void selectedDatasetNameChanged(const QString& datasetName);
+    void selectedDatasetChanged(const QString& datasetId);
 
 private:
     DataHierarchyModel      _model;                 /** Model containing data to be displayed in the hierarchy */

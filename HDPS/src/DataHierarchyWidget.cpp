@@ -39,25 +39,33 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     setSelectionMode(QAbstractItemView::SingleSelection);
     setRootIsDecorated(true);
     setItemsExpandable(true);
-    setColumnHidden(2, true);
 
-    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Name), 180);
-    //header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description), 100);
-    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress), 50);
-    header()->resizeSection(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing), 20);
+    // Hide columns
+    setColumnHidden(DataHierarchyModelItem::Column::ID, true);
+    setColumnHidden(DataHierarchyModelItem::Column::Analysis, true);
 
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Name), QHeaderView::Interactive);
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description), QHeaderView::Stretch);
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress), QHeaderView::Fixed);
-    header()->setSectionResizeMode(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing), QHeaderView::Fixed);
+    header()->resizeSection(DataHierarchyModelItem::Column::Name, 180);
+    //header()->resizeSection(DataHierarchyModelItem::Column::Description, 100);
+    header()->resizeSection(DataHierarchyModelItem::Column::Progress, 50);
+    header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, 20);
+
+    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
+    header()->setSectionResizeMode(DataHierarchyModelItem::Column::ID, QHeaderView::Fixed);
+    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Description, QHeaderView::Stretch);
+    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
+    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Analyzing, QHeaderView::Fixed);
 
     header()->setStretchLastSection(false);
 
-    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        if (selected.isEmpty())
+    connect(&_selectionModel, &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+        if (!current.isValid())
             return;
+        
+        // Get the globally unique identifier of the selected dataset
+        const auto selectedDatasetId = current.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::ID)).data(Qt::DisplayRole).toString();
 
-        emit selectedDatasetNameChanged(selected.first().topLeft().data(Qt::DisplayRole).toString());
+        // Notify others that a dataset was selected
+        emit selectedDatasetChanged(selectedDatasetId);
     });
 
     const auto numberOfRowsChanged = [this]() {
@@ -101,7 +109,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             {
                 const auto modelIndex = getModelIndexForDataset(dataHierarchyItem->getDataset());
 
-                _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Description)), description);
+                _model.setData(modelIndex.siblingAtColumn(DataHierarchyModelItem::Column::Description), description);
             }
             catch (std::exception& e)
             {
@@ -114,8 +122,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             {
                 const auto modelIndex = getModelIndexForDataset(dataHierarchyItem->getDataset());
                 
-                _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Progress)), progress);
-                _model.setData(modelIndex.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::Analyzing)), progress > 0.0f);
+                _model.setData(modelIndex.siblingAtColumn(DataHierarchyModelItem::Column::Progress), progress);
+                _model.setData(modelIndex.siblingAtColumn(DataHierarchyModelItem::Column::Analyzing), progress > 0.0f);
             }
             catch (std::exception& e)
             {
