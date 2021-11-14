@@ -67,7 +67,14 @@ public:
      */
     void setGuiName(const QString& guiName)
     {
+        // Cache the old GUI name
+        const auto previousGuiName = _guiName;
+
+        // Assign new GUI name
         _guiName = guiName;
+
+        // Notify others that the data GUI name changed
+        Application::core()->notifyDataGuiNameChanged(*this, previousGuiName);
     }
 
     /** Returns true if this set represents the full data and false if it's a subset */

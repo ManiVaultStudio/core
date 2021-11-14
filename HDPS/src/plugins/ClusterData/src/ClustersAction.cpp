@@ -47,7 +47,7 @@ ClustersAction::ClustersAction(QObject* parent, Clusters& clusters) :
                 break;
             }
 
-            case EventType::SelectionChanged:
+            case EventType::DataSelectionChanged:
             {
                 break;
             }
@@ -173,8 +173,8 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     if (!_clusters.isValid())
         return;
     
-    auto parentDataHierarchyItem    = _clusters->getDataHierarchyItem().getParent();
-    auto& points                    = parentDataHierarchyItem->getDataset<Points>();
+    auto& parentDataHierarchyItem   = _clusters->getDataHierarchyItem().getParent();
+    auto& points                    = parentDataHierarchyItem.getDataset<Points>();
     auto& selection                 = dynamic_cast<Points&>(points.getSelection());
 
     selection.indices.clear();
@@ -187,12 +187,12 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     for (auto index : indices)
         selection.indices.push_back(globalIndices[index]);
 
-    Application::core()->notifySelectionChanged(parentDataHierarchyItem->getDataset());
+    Application::core()->notifyDataSelectionChanged(parentDataHierarchyItem.getDataset());
 }
 
 void ClustersAction::createSubset(const QString& datasetName)
 {
-    auto& points    = _clusters->getDataHierarchyItem().getParent()->getDataset();
+    auto& points    = _clusters->getDataHierarchyItem().getParent().getDataset();
     auto& selection = points.getSelection<Points&>();
 
     points.createSubset("Clusters", &points);
@@ -290,7 +290,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         _mergeAction.setEnabled(selectedRows.count() >= 2);
 
         // Notify others that the cluster selection has changed
-        Application::core()->notifySelectionChanged(*clustersAction->getClustersDataset());
+        Application::core()->notifyDataSelectionChanged(*clustersAction->getClustersDataset());
     };
 
     connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {

@@ -356,7 +356,7 @@ void Points::selectAll()
             selectionIndices.push_back(index);
     }
 
-    _core->notifySelectionChanged(*this);
+    _core->notifyDataSelectionChanged(*this);
 }
 
 void Points::selectNone()
@@ -366,7 +366,7 @@ void Points::selectNone()
 
     selectionIndices.clear();
 
-    _core->notifySelectionChanged(*this);
+    _core->notifyDataSelectionChanged(*this);
 }
 
 void Points::selectInvert()
@@ -386,7 +386,7 @@ void Points::selectInvert()
             selectionIndices.push_back(i);
     }
 
-    _core->notifySelectionChanged(*this);
+    _core->notifyDataSelectionChanged(*this);
 }
 
 const std::vector<QString>& Points::getDimensionNames() const

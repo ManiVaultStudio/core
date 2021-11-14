@@ -6,7 +6,7 @@ namespace hdps
 
 DataHierarchyItem& DataSet::getDataHierarchyItem()
 {
-    return *_core->getDataHierarchyItem(_id);
+    return _core->getDataHierarchyItem(_id);
 }
 
 const DataHierarchyItem& DataSet::getDataHierarchyItem() const
@@ -16,22 +16,22 @@ const DataHierarchyItem& DataSet::getDataHierarchyItem() const
 
 void DataSet::addAction(hdps::gui::WidgetAction& widgetAction)
 {
-    _core->getDataHierarchyItem(_id)->addAction(widgetAction);
+    _core->getDataHierarchyItem(_id).addAction(widgetAction);
 }
 
 hdps::gui::WidgetActions DataSet::getActions() const
 {
-    return _core->getDataHierarchyItem(_id)->getActions();
+    return _core->getDataHierarchyItem(_id).getActions();
 }
 
 QMenu* DataSet::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    return _core->getDataHierarchyItem(_id)->getContextMenu(parent);
+    return _core->getDataHierarchyItem(_id).getContextMenu(parent);
 }
 
 void DataSet::populateContextMenu(QMenu* contextMenu)
 {
-    return _core->getDataHierarchyItem(_id)->populateContextMenu(contextMenu);
+    return _core->getDataHierarchyItem(_id).populateContextMenu(contextMenu);
 }
 
 }

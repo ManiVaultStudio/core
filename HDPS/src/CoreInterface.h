@@ -50,6 +50,20 @@ public: // Data access
     virtual DataSet& addData(const QString& kind, const QString& dataSetGuiName, DataSet* parentDataSet = nullptr) = 0;
 
     /**
+     * Requests the plugin manager to create new RawData of the given kind
+     * The manager will add the raw data to the core and return the
+     * unique name of the data set linked with the raw data
+     * @param kind Kind of plugin
+     * @param datasetGuiName Name of the added dataset in the GUI
+     * @param parentDataSet Pointer to parent dataset in the data hierarchy (root if nullptr)
+     * @return Reference to the added dataset
+     */
+    template <class SetType>
+    SetType& addData(const QString& kind, const QString& dataSetGuiName, DataSet* parentDataSet = nullptr) {
+        return dynamic_cast<SetType&>(addData(kind, dataSetGuiName, parentDataSet));
+    }
+
+    /**
      * Removes one or more datasets
      * Other datasets derived from this dataset are  converted to non-derived data.
      * Notifies all plug-ins of the removed dataset automatically
@@ -184,9 +198,9 @@ public: // Data hierarchy
     /**
      * Get data hierarchy item by dataset globally unique identifier
      * @param dataSetId Globally unique identifier of the dataset
-     * @return Pointer to data hierarchy item
+     * @return Reference to data hierarchy item
      */
-    virtual DataHierarchyItem* getDataHierarchyItem(const QString& dataSetId) = 0;
+    virtual DataHierarchyItem& getDataHierarchyItem(const QString& dataSetId) = 0;
 
 public: // Events & notifications
 
@@ -194,13 +208,13 @@ public: // Events & notifications
      * Notify listeners that a new dataset has been added to the core
      * @param dataset Reference to the dataset that was added
      */
-    virtual void notifyDataAdded(DataSet& dataset) = 0;
+    virtual void notifyDataAdded(const DataSet& dataset) = 0;
 
     /**
      * Notify listeners that a dataset is about to be removed
      * @param dataset Reference to the dataset which is about to be removed
      */
-    virtual void notifyDataAboutToBeRemoved(DataSet& dataset) = 0;
+    virtual void notifyDataAboutToBeRemoved(const DataSet& dataset) = 0;
 
     /**
      * Notify listeners that a dataset is removed
@@ -213,20 +227,20 @@ public: // Events & notifications
      * Notify listeners that a dataset has changed
      * @param dataset Reference to the dataset of which the data changed
      */
-    virtual void notifyDataChanged(DataSet& dataset) = 0;
+    virtual void notifyDataChanged(const DataSet& dataset) = 0;
 
     /**
-     * Notify listeners that a selection has changed
+     * Notify listeners that data selection has changed
      * @param dataset Reference to the dataset of which the selection changed
      */
-    virtual void notifySelectionChanged(DataSet& dataset) = 0;
+    virtual void notifyDataSelectionChanged(const DataSet& dataset) = 0;
 
     /**
      * Notify all listeners that a dataset GUI name has changed
      * @param dataset Reference to the dataset of which the GUI name changed
      * @param previousGuiName Previous dataset name
      */
-    virtual void notifyGuiNameChanged(DataSet& dataset, const QString& previousGuiName) = 0;
+    virtual void notifyDataGuiNameChanged(const DataSet& dataset, const QString& previousGuiName) = 0;
 
     /**
      * Register an event listener

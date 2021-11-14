@@ -100,7 +100,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         if (!dataHierarchyItem->hasParent())
             parentModelIndex = QModelIndex();
         else
-            parentModelIndex = getModelIndexForDataset(dataHierarchyItem->getParent()->getDataset());
+            parentModelIndex = getModelIndexForDataset(dataHierarchyItem->getParent().getDataset());
 
         _model.addDataHierarchyModelItem(parentModelIndex, dataHierarchyItem);
 

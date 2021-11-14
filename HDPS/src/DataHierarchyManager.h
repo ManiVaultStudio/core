@@ -41,18 +41,18 @@ public:
     QVector<const DataSet*> removeItem(const DataSet& dataset, const bool& recursively = false);
 
     /**
-     * Get hierarchy item by dataset name
-     * @param datasetName Name of the dataset
-     * @return Pointer to data hierarchy item
+     * Get hierarchy item by dataset globally unique identifier
+     * @param datasetId Globally unique identifier of the dataset
+     * @return Reference to data hierarchy item
      */
-    const DataHierarchyItem* getItem(const QString& datasetName) const;
+    const DataHierarchyItem& getItem(const QString& datasetId) const;
 
     /**
      * Get hierarchy item by dataset globally unique identifier
      * @param datasetId Globally unique identifier of the dataset
-     * @return Pointer to data hierarchy item
+     * @return Reference to data hierarchy item
      */
-    DataHierarchyItem* getItem(const QString& datasetId);
+    DataHierarchyItem& getItem(const QString& datasetId);
 
     /**
      * Selects data hierarchy item with dataset name

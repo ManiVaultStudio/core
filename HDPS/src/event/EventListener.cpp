@@ -39,7 +39,7 @@ void EventListener::registerDataEvent(DataEventHandler callback)
 
 void EventListener::onDataEvent(DataEvent* dataEvent)
 {
-    if (dataEvent->getType() == EventType::SelectionChanged)
+    if (dataEvent->getType() == EventType::DataSelectionChanged)
     {
         // Fire events for linked datasets
         DataSet& baseDataSet1 = DataSet::getSourceData(dataEvent->getDataset());

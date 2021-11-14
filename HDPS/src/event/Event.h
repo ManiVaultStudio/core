@@ -15,8 +15,8 @@ namespace hdps
         DataChanged,
         DataAboutToBeRemoved,
         DataRemoved,
-        SelectionChanged,
-        GuiNameChanged
+        DataSelectionChanged,
+        DataGuiNameChanged
     };
 
     class HdpsEvent
@@ -187,10 +187,10 @@ namespace hdps
     };
 
     /**
-     * Selection changed event class
+     * Data selection changed event class
      * Data event which is emitted by the core when data selection has changed
      */
-    class SelectionChangedEvent : public DataEvent
+    class DataSelectionChangedEvent : public DataEvent
     {
     public:
 
@@ -198,17 +198,17 @@ namespace hdps
          * Constructor
          * @param dataset Pointer to dataset
          */
-        SelectionChangedEvent(DataSet* dataset) :
-            DataEvent(EventType::SelectionChanged, dataset)
+        DataSelectionChangedEvent(DataSet* dataset) :
+            DataEvent(EventType::DataSelectionChanged, dataset)
         {
         }
     };
 
     /**
-     * Gui name changed event class
+     * Data GUI name changed event class
      * Data event which is emitted by the core when a dataset GUI name changed
      */
-    class GuiNameChangedEvent : public DataEvent
+    class DataGuiNameChangedEvent : public DataEvent
     {
     public:
 
@@ -217,8 +217,8 @@ namespace hdps
          * @param dataset Pointer to dataset
          * @param previousGuiName Previous GUI name
          */
-        GuiNameChangedEvent(DataSet* dataset, const QString previousGuiName) :
-            DataEvent(EventType::GuiNameChanged, dataset),
+        DataGuiNameChangedEvent(DataSet* dataset, const QString previousGuiName) :
+            DataEvent(EventType::DataGuiNameChanged, dataset),
             _previousGuiName(previousGuiName)
         {
         }

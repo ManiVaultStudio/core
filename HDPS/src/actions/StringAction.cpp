@@ -55,6 +55,8 @@ void StringAction::setDefaultString(const QString& defaultString)
     _defaultString = defaultString;
 
     emit defaultStringChanged(_defaultString);
+
+    setResettable(isResettable());
 }
 
 bool StringAction::isResettable() const

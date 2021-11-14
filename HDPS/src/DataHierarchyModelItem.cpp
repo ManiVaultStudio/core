@@ -73,7 +73,7 @@ QString DataHierarchyModelItem::serialize() const
     if (_dataHierarchyItem == nullptr)
         return "";
 
-    return _dataHierarchyItem->getGuiName() + "\n" + _dataHierarchyItem->getDataType();
+    return _dataHierarchyItem->getGuiName() + "\n" + _dataHierarchyItem->getDataset().getId() + "\n" + _dataHierarchyItem->getDataType();
 }
 
 QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) const

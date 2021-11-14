@@ -43,7 +43,7 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
             }
 
             case EventType::DataChanged:
-            case EventType::SelectionChanged:
+            case EventType::DataSelectionChanged:
             {
                 // Update selected indices
                 if (_points->getNumPoints() < MANUAL_UPDATE_THRESHOLD)

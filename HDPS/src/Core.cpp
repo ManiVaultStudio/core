@@ -97,7 +97,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             auto& outputDataset = analysisPlugin->getOutputDataset();
 
             // Adjust the data hierarchy icon
-            _dataHierarchyManager->getItem(outputDataset.getId())->addIcon("analysis", analysisPlugin->getIcon());
+            _dataHierarchyManager->getItem(outputDataset.getId()).addIcon("analysis", analysisPlugin->getIcon());
 
             // Notify listeners that a dataset was added
             notifyDataAdded(outputDataset);
@@ -374,7 +374,7 @@ const void Core::exportDataset(const QString& kind, DataSet& dataSet)
     }
 }
 
-hdps::DataHierarchyItem* Core::getDataHierarchyItem(const QString& dataSetId)
+hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 {
     return _dataHierarchyManager->getItem(dataSetId);
 }
@@ -416,10 +416,10 @@ QIcon Core::getPluginIcon(const QString& pluginKind) const
     return _pluginManager->getPluginIcon(pluginKind);
 }
 
-void Core::notifyDataAdded(DataSet& dataset)
+void Core::notifyDataAdded(const DataSet& dataset)
 {
     // Create data added event
-    DataAddedEvent dataEvent(&dataset);
+    DataAddedEvent dataEvent(const_cast<DataSet*>(&dataset));
 
     // Cache the event listeners to prevent crash
     const auto eventListeners = _eventListeners;
@@ -430,12 +430,12 @@ void Core::notifyDataAdded(DataSet& dataset)
             listener->onDataEvent(&dataEvent);
 }
 
-void Core::notifyDataAboutToBeRemoved(DataSet& dataset)
+void Core::notifyDataAboutToBeRemoved(const DataSet& dataset)
 {
     // Create data about to be removed event
-    DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent(&dataset);
+    DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent(const_cast<DataSet*>(&dataset));
 
-    // Cache the event listeners to prevent crash
+    // Cache the event listeners to prevent timing issues
     const auto eventListeners = _eventListeners;
 
     // And notify all listeners
@@ -449,7 +449,7 @@ void Core::notifyDataRemoved(const QString& datasetId, const DataType& dataType)
     // Create data removed event
     DataRemovedEvent dataRemovedEvent(nullptr, datasetId);
 
-    // Cache the event listeners to prevent crash
+    // Cache the event listeners to prevent timing issues
     const auto eventListeners = _eventListeners;
 
     // And notify all listeners
@@ -458,34 +458,34 @@ void Core::notifyDataRemoved(const QString& datasetId, const DataType& dataType)
             listener->onDataEvent(&dataRemovedEvent);
 }
 
-void Core::notifyDataChanged(DataSet& dataset)
+void Core::notifyDataChanged(const DataSet& dataset)
 {
     // Create data changed event
-    DataChangedEvent dataEvent(&dataset);
+    DataChangedEvent dataEvent(const_cast<DataSet*>(&dataset));
 
     // And notify all listeners
     for (EventListener* listener : _eventListeners)
         listener->onDataEvent(&dataEvent);
 }
 
-void Core::notifySelectionChanged(DataSet& dataset)
+void Core::notifyDataSelectionChanged(const DataSet& dataset)
 {
-    // Create selection changed event
-    SelectionChangedEvent selectionChangedEvent(&dataset);
+    // Create data selection changed event
+    DataSelectionChangedEvent dataSelectionChangedEvent(const_cast<DataSet*>(&dataset));
 
     // And notify all listeners
     for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&selectionChangedEvent);
+        listener->onDataEvent(&dataSelectionChangedEvent);
 }
 
-void Core::notifyGuiNameChanged(DataSet& dataset, const QString& previousGuiName)
+void Core::notifyDataGuiNameChanged(const DataSet& dataset, const QString& previousGuiName)
 {
     // Create GUI name changed event
-    GuiNameChangedEvent guiNameChangedEvent(&dataset, previousGuiName);
+    DataGuiNameChangedEvent dataGuiNameChangedEvent(const_cast<DataSet*>(&dataset), previousGuiName);
 
     // And notify all listeners
     for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&guiNameChangedEvent);
+        listener->onDataEvent(&dataGuiNameChangedEvent);
 }
 
 gui::MainWindow& Core::gui() const {

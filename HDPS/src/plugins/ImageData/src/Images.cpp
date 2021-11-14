@@ -166,7 +166,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
     try
     {
         // Get reference to input dataset
-        auto& dataset = getDataHierarchyItem().getParent()->getDataset<DataSet>();
+        auto& dataset = getDataHierarchyItem().getParent().getDataset<DataSet>();
 
         if (dataset.getDataType() == PointType) {
 
@@ -248,7 +248,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
             // Get clusters input points dataset
-            auto& points = DataSet::getSourceData<Points>(dataset.getDataHierarchyItem().getParent()->getDataset<Points>());
+            auto& points = DataSet::getSourceData<Points>(dataset.getDataHierarchyItem().getParent().getDataset<Points>());
 
             // Iterate over all clusters and populate the selection data
             for (const auto& clusterIndex : sourceClusters.indices) {
@@ -301,7 +301,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get reference to input dataset
-    auto& dataset = getDataHierarchyItem().getParent()->getDataset<DataSet>();
+    auto& dataset = getDataHierarchyItem().getParent().getDataset<DataSet>();
 
     if (dataset.getDataType() == PointType) {
 
@@ -356,7 +356,7 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get reference to input dataset
-    auto& dataset = getDataHierarchyItem().getParent()->getDataset<DataSet>();
+    auto& dataset = getDataHierarchyItem().getParent().getDataset<DataSet>();
 
     if (dataset.getDataType() == PointType) {
 
@@ -424,7 +424,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         const auto sourceWidth = getSourceRectangle().width();
 
         // Get clusters input points dataset
-        auto& points = DataSet::getSourceData<Points>(dataset.getDataHierarchyItem().getParent()->getDataset<Points>());
+        auto& points = DataSet::getSourceData<Points>(dataset.getDataHierarchyItem().getParent().getDataset<Points>());
 
         // Iterate over all clusters
         for (auto& cluster : clusters.getClusters()) {
@@ -466,7 +466,7 @@ std::uint32_t Images::getTargetPixelIndex(const QPoint& coordinate) const
 std::uint32_t Images::getSourceDataIndex(const QPoint& coordinate) const
 {
     // Get reference to input dataset
-    auto& points = getDataHierarchyItem().getParent()->getDataset<Points>();
+    auto& points = getDataHierarchyItem().getParent().getDataset<Points>();
 
     // Get reference to source data
     auto& sourceData = points.getSourceData<Points>(points);
@@ -475,5 +475,4 @@ std::uint32_t Images::getSourceDataIndex(const QPoint& coordinate) const
     const auto relativeCoordinate   = coordinate - targetRectangle.topLeft();
 
     return relativeCoordinate.y() * targetRectangle.width() + relativeCoordinate.x();
-    //return (targetRectangle.height() - relativeCoordinate.y()) * targetRectangle.width() + relativeCoordinate.x();
 }

@@ -1,9 +1,13 @@
 #include "DataHierarchyManager.h"
 #include "DataManager.h"
 
+#include "util/Exception.h"
+
 #include <QMessageBox>
 
 #include <stdexcept>
+
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -94,20 +98,28 @@ QVector<const DataSet*> DataHierarchyManager::removeItem(const DataSet& dataset,
     return datasetsToRemove;
 }
 
-const DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetName) const
+const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId) const
 {
-    return const_cast<DataHierarchyManager*>(this)->getItem(datasetName);
+    return const_cast<DataHierarchyManager*>(this)->getItem(datasetId);
 }
 
-DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetId)
+DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId)
 {
-    Q_ASSERT(!datasetId.isEmpty());
+    try
+    {
+        Q_ASSERT(!datasetId.isEmpty());
 
-    for (auto dataHierarchyItem : _dataHierarchyItems)
-        if (dataHierarchyItem->getDataset().getId() == datasetId)
-            return dataHierarchyItem;
-
-    return nullptr;
+        for (auto dataHierarchyItem : _dataHierarchyItems)
+            if (dataHierarchyItem->getDataset().getId() == datasetId)
+                return *dataHierarchyItem;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to retrieve data hierarchy item", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to retrieve data hierarchy item");
+    }
 }
 
 void DataHierarchyManager::selectItem(DataSet& dataSet)

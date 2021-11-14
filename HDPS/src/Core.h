@@ -214,9 +214,9 @@ public: // Data hierarchy
     /**
      * Get data hierarchy item by dataset globally unique identifier
      * @param dataSetId Globally unique identifier of the dataset
-     * @return Pointer to data hierarchy item
+     * @return Reference to data hierarchy item
      */
-    DataHierarchyItem* getDataHierarchyItem(const QString& dataSetId) override;
+    DataHierarchyItem& getDataHierarchyItem(const QString& dataSetId) override;
 
 public: // Events & notifications
 
@@ -224,13 +224,13 @@ public: // Events & notifications
      * Notify listeners that a new dataset has been added to the core
      * @param dataset Reference to the dataset that was added
      */
-    void notifyDataAdded(DataSet& dataset) override;
+    void notifyDataAdded(const DataSet& dataset) override;
 
     /**
      * Notify listeners that a dataset is about to be removed
      * @param dataset Reference to the dataset which is about to be removed
      */
-    void notifyDataAboutToBeRemoved(DataSet& dataset) override;
+    void notifyDataAboutToBeRemoved(const DataSet& dataset) override;
 
     /**
      * Notify listeners that a dataset is removed
@@ -243,20 +243,20 @@ public: // Events & notifications
      * Notify listeners that a dataset has changed
      * @param dataset Reference to the dataset of which the data changed
      */
-    void notifyDataChanged(DataSet& dataset) override;
+    void notifyDataChanged(const DataSet& dataset) override;
 
     /**
      * Notify listeners that a selection has changed
      * @param dataset Reference to the dataset of which the selection changed
      */
-    void notifySelectionChanged(DataSet& dataset) override;
+    void notifyDataSelectionChanged(const DataSet& dataset) override;
 
     /**
      * Notify listeners that a dataset GUI name has changed
      * @param dataset Reference to dataset of which the GUI name changed
      * @param previousGuiName Previous dataset name
      */
-    void notifyGuiNameChanged(DataSet& dataset, const QString& previousGuiName) override;
+    void notifyDataGuiNameChanged(const DataSet& dataset, const QString& previousGuiName) override;
 
     /**
      * Register an event listener

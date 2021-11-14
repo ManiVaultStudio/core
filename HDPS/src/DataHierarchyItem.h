@@ -86,8 +86,8 @@ public:
      */
     void renameDataset(const QString& newGuiName);
 
-    /** Gets the parent hierarchy item */
-    DataHierarchyItem* getParent() const;
+    /** Get reference to parent hierarchy item */
+    DataHierarchyItem& getParent() const;
 
     /** Returns whether the data hierarchy item has a parent */
     bool hasParent() const;
@@ -147,8 +147,8 @@ public:
 
 protected:
 
-    /** Sets the parent hierarchy item */
-    void setParent(DataHierarchyItem* parent);
+    /** Set reference to parent hierarchy item */
+    void setParent(DataHierarchyItem& parent);
 
 public: // Hierarchy
 

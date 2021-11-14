@@ -69,7 +69,7 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
         switch (dataEvent->getType()) {
             case EventType::DataAdded:
             case EventType::DataChanged:
-            case EventType::SelectionChanged:
+            case EventType::DataSelectionChanged:
             {
                 updateActions();
                 break;

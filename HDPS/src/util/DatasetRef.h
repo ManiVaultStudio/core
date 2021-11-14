@@ -31,7 +31,7 @@ namespace util
  *
  * @author T. Kroes
  */
-template<typename DatasetType>
+template<typename SetType>
 class DatasetRef : EventListener
 {
 public:
@@ -40,7 +40,23 @@ public:
      * Constructor
      * @param dataset Pointer to dataset (if any)
      */
-    DatasetRef(DatasetType* dataset = nullptr) :
+    DatasetRef(SetType* dataset = nullptr) :
+        EventListener(),
+        _datasetId(),
+        _dataset(nullptr)
+    {
+        // Perform startup initialization
+        init();
+
+        // Assign dataset
+        set(dataset);
+    }
+
+    /**
+     * Constructor
+     * @param dataset Reference to dataset
+     */
+    DatasetRef(SetType& dataset) :
         EventListener(),
         _datasetId(),
         _dataset(nullptr)
@@ -112,7 +128,7 @@ public:
                 return;
 
             // Try to cast the dataset pointer to the target dataset type
-            _dataset = dynamic_cast<DatasetType*>(dataset);
+            _dataset = dynamic_cast<SetType*>(dataset);
 
             // Throw an exception when the pointer is null (does not match target dataset type)
             if (_dataset == nullptr)
@@ -128,40 +144,48 @@ public:
         }
     }
 
+    /**
+     * Set the reference from a pointer to a dataset
+     * @param dataset Reference to the dataset
+     */
+    void set(DataSet& dataset) {
+        set(&dataset);
+    }
+
     /** Dereference operator */
-    DatasetType& operator* () {
+    SetType& operator* () {
         return *_dataset;
     }
 
     /** Const dereference operator */
-    const DatasetType& operator* () const {
+    const SetType& operator* () const {
       return *_dataset;
     }
 
     /** Arrow operator */
-    DatasetType* operator-> () {
+    SetType* operator-> () {
         return _dataset;
     }
 
     /** Arrow operator */
-    const DatasetType* operator-> () const {
+    const SetType* operator-> () const {
         return _dataset;
     }
 
     /** get source data */
-    DatasetType& getSourceData() {
-        return dynamic_cast<DatasetType&>(DataSet::getSourceData(*_dataset));
+    SetType& getSourceData() {
+        return dynamic_cast<SetType&>(DataSet::getSourceData(*_dataset));
     }
 
     /** Get the dataset pointer */
-    DatasetType* get() {
+    SetType* get() {
         return _dataset;
     }
 
     /** Get the dataset pointer of the specified type */
-    template<typename TargetDatasetType>
-    TargetDatasetType* get() {
-        return dynamic_cast<TargetDatasetType*>(_dataset);
+    template<typename TargetSetType>
+    TargetSetType* get() {
+        return dynamic_cast<TargetSetType*>(_dataset);
     }
 
     /** Returns whether the dataset pointer is valid (if the dataset actually exists) */
@@ -182,7 +206,7 @@ public:
 
 private:
     QString         _datasetId;     /** Globally unique dataset identifier */
-    DatasetType*    _dataset;       /** Pointer to dataset (if any) */
+    SetType*    _dataset;       /** Pointer to dataset (if any) */
 };
 
 }

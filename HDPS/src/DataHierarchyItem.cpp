@@ -57,7 +57,6 @@ void DataHierarchyItem::setGuiName(const QString& guiName)
 
 void DataHierarchyItem::renameDataset(const QString& newGuiName)
 {
-    /*
     try {
         if (newGuiName.isEmpty())
             throw std::runtime_error("New GUI name is empty");
@@ -65,22 +64,21 @@ void DataHierarchyItem::renameDataset(const QString& newGuiName)
         if (newGuiName == _dataset->getGuiName())
             return;
 
-        Application::core()->renameDataset(_dataset.getDatasetName(), intendedDatasetName);
+        _dataset->setGuiName(newGuiName);
     }
     catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to rename dataset", e.what());
     }
-    */
 }
 
-DataHierarchyItem* DataHierarchyItem::getParent() const
+DataHierarchyItem& DataHierarchyItem::getParent() const
 {
-    return _parent;
+    return *_parent;
 }
 
-void DataHierarchyItem::setParent(DataHierarchyItem* parent)
+void DataHierarchyItem::setParent(DataHierarchyItem& parent)
 {
-    _parent = parent;
+    _parent = &parent;
 }
 
 bool DataHierarchyItem::hasParent() const

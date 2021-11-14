@@ -36,7 +36,7 @@ InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
         switch (dataEvent->getType()) {
             case EventType::DataAdded:
             case EventType::DataChanged:
-            case EventType::SelectionChanged:
+            case EventType::DataSelectionChanged:
             {
                 updateActions();
                 break;
