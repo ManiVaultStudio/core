@@ -199,6 +199,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         setModel(new QStringListModel());
         setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
         setEnabled(optionAction->getOptions().count() >= 2);
+        setCurrentIndex(optionAction->getCurrentIndex());
 
         updateToolTip();
     };

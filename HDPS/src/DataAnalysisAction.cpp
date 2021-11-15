@@ -9,9 +9,9 @@ namespace hdps {
 
 using namespace gui;
 
-DataAnalysisAction::DataAnalysisAction(QObject* parent, const QString& datasetName) :
+DataAnalysisAction::DataAnalysisAction(QObject* parent, DataSet& dataset) :
     WidgetAction(parent),
-    _dataset(datasetName),
+    _dataset(dataset),
     _pluginKinds()
 {
     setText("Analyze");

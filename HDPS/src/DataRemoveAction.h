@@ -43,9 +43,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the dataset
+     * @param dataset Reference to the dataset
      */
-    DataRemoveAction(QObject* parent, const QString& datasetName);
+    DataRemoveAction(QObject* parent, DataSet& dataset);
 
     /**
      * Get the context menu for the action

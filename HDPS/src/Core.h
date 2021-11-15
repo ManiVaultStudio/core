@@ -86,10 +86,10 @@ public: // Data access
      * unique name of the data set linked with the raw data
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataSet Pointer to parent dataset in the data hierarchy (root if nullptr)
+     * @param parentDataset Pointer to parent dataset in the data hierarchy (root if nullptr)
      * @return Reference to the added dataset
      */
-    DataSet& addData(const QString& kind, const QString& dataSetGuiName, DataSet* parentDataSet = nullptr) override;
+    DataSet& addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataset = nullptr) override;
 
     /**
      * Removes one or more datasets
@@ -102,12 +102,12 @@ public: // Data access
 
     /**
      * Creates a dataset derived from a source dataset.
-     * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
-     * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
-     * @param dataHierarchyParent Name of the parent in the data hierarchy (sourceDatasetName if is used if empty)
-     * @param visible Whether the new dataset is visible in the user interface
+     * @param guiName GUI name for the new dataset from the core
+     * @param sourceDataset Reference to source dataset from which this dataset will be derived
+     * @param parentDataset Pointer to parent dataset in the data hierarchy (will attach to root in hierarchy if empty)
+     * @return Reference to created derived dataset
      */
-    const QString createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent = "") override;
+    DataSet& createDerivedData(const QString& guiName, const DataSet& sourceDataset, const DataSet* parentDataset = nullptr) override;
 
     /**
      * Creates a copy of the given selection set and gives it a unique name based
@@ -118,7 +118,7 @@ public: // Data access
      * @param guiName GUI name of the subset
      * @param parentDataset Pointer to the parent dataset in the data hierarchy (sourceSetName if is used if empty)
      * @param visible Whether the new dataset is visible in the user interface
-     * @return Subset
+     * @return Reference to created subset
      */
     DataSet& createSubsetFromSelection(const DataSet& selection, const DataSet& sourceDataset, const QString& guiName, const DataSet* parentDataset = nullptr, const bool& visible = true) override;
 

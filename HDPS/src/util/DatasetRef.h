@@ -20,6 +20,76 @@ namespace util
 {
 
 /**
+ * Dataset reference private class
+ *
+ * Designed to emit signals related to changes in the dataset reference
+ *
+ * @author T. Kroes
+ */
+class DatasetRefPrivate : public QObject, public EventListener
+{
+    Q_OBJECT
+
+    /** Only dataset reference template classes have access to protected members */
+    template<typename> friend class DatasetRef;
+
+protected:
+
+    /**
+     * Default constructor
+     * @param parent Pointer to parent object
+     */
+    DatasetRefPrivate() :
+        QObject()
+    {
+    }
+
+    /**
+     * Copy constructor
+     * @param other Object to copy from
+     */
+    DatasetRefPrivate(const DatasetRefPrivate& other) :
+        QObject()
+    {
+        Q_ASSERT(thread() == other.thread());
+        setObjectName(other.objectName());
+        blockSignals(other.signalsBlocked());
+    }
+
+    /**
+     * Assignment operator
+     * @param other Object to assign from
+     */
+    DatasetRefPrivate& operator=(DatasetRefPrivate other) {
+        return *this;
+    }
+
+signals:
+
+    /**
+     * Signals that the pointer to the dataset changed
+     * @param dataset Pointer to current dataset
+     */
+    void changed(DataSet* dataset);
+
+    /** Signals that the dataset is about to be removed */
+    void aboutToBeRemoved();
+
+    /**
+     * Signals that the dataset has been removed
+     * @param datasetId Globally unique identifier of the dataset that is removed
+     */
+    void removed(const QString& datasetId);
+
+    /**
+     * Signals that the dataset GUI name changed
+     * @param oldGuiName Old GUI name
+     * @param newGuiName New GUI name
+     */
+    void guiNameChanged(const QString& oldGuiName, const QString& newGuiName);
+};
+
+/**
  * Dataset reference class
  *
  * Smart dataset pointer for datasets
@@ -32,16 +102,16 @@ namespace util
  * @author T. Kroes
  */
 template<typename SetType>
-class DatasetRef : EventListener
+class DatasetRef : public DatasetRefPrivate
 {
 public:
 
     /**
-     * Constructor
+     * (Default) constructor
      * @param dataset Pointer to dataset (if any)
      */
     DatasetRef(SetType* dataset = nullptr) :
-        EventListener(),
+        DatasetRefPrivate(),
         _datasetId(),
         _dataset(nullptr)
     {
@@ -57,8 +127,7 @@ public:
      * @param dataset Reference to dataset
      */
     DatasetRef(SetType& dataset) :
-        EventListener(),
-        _datasetId(),
+        DatasetRefPrivate(),
         _dataset(nullptr)
     {
         // Perform startup initialization
@@ -73,6 +142,7 @@ public:
      * @param datasetId Globally unique identifier of the dataset
      */
     DatasetRef(const QString& datasetId) :
+        DatasetRefPrivate(),
         _datasetId(datasetId),
         _dataset(nullptr)
     {
@@ -93,6 +163,15 @@ public:
 
             switch (dataEvent->getType()) {
 
+                // Data is about to be removed
+                case EventType::DataAboutToBeRemoved:
+                {
+                    // Notify others that the dataset is about to be removed
+                    emit aboutToBeRemoved();
+
+                    break;
+                }
+
                 // Reset the reference when the data is removed
                 case EventType::DataRemoved:
                 {
@@ -102,6 +181,21 @@ public:
 
                     // Reset the reference
                     reset();
+
+                    // Notify others that the dataset is removed
+                    emit removed(_datasetId);
+
+                    break;
+                }
+
+                // Dataset GUI name changed
+                case EventType::DataGuiNameChanged:
+                {
+                    // Get dataset GUI name changed event
+                    auto datasetGuiNameChangedEvent = static_cast<hdps::DataGuiNameChangedEvent*>(dataEvent);
+
+                    // Notify others of the name change
+                    emit guiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset().getGuiName());
 
                     break;
                 }
@@ -133,6 +227,9 @@ public:
             // Throw an exception when the pointer is null (does not match target dataset type)
             if (_dataset == nullptr)
                 throw std::runtime_error("Data set ref type mismatch");
+
+            // Inform others that the pointer to the dataset changed
+            emit changed(_dataset);
         }
         catch (std::exception& e)
         {

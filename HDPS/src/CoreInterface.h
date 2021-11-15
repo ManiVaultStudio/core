@@ -44,10 +44,10 @@ public: // Data access
      * unique name of the data set linked with the raw data
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataSet Pointer to parent dataset in the data hierarchy (root if nullptr)
+     * @param parentDataset Pointer to parent dataset in the data hierarchy (root if nullptr)
      * @return Reference to the added dataset
      */
-    virtual DataSet& addData(const QString& kind, const QString& dataSetGuiName, DataSet* parentDataSet = nullptr) = 0;
+    virtual DataSet& addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataset = nullptr) = 0;
 
     /**
      * Requests the plugin manager to create new RawData of the given kind
@@ -55,12 +55,12 @@ public: // Data access
      * unique name of the data set linked with the raw data
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataSet Pointer to parent dataset in the data hierarchy (root if nullptr)
+     * @param parentDataset Pointer to parent dataset in the data hierarchy (root if nullptr)
      * @return Reference to the added dataset
      */
     template <class SetType>
-    SetType& addData(const QString& kind, const QString& dataSetGuiName, DataSet* parentDataSet = nullptr) {
-        return dynamic_cast<SetType&>(addData(kind, dataSetGuiName, parentDataSet));
+    SetType& addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataset = nullptr) {
+        return dynamic_cast<SetType&>(addData(kind, dataSetGuiName, parentDataset));
     }
 
     /**
@@ -74,12 +74,12 @@ public: // Data access
 
     /**
      * Creates a dataset derived from a source dataset.
-     * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
-     * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
-     * @param dataHierarchyParent Name of the parent in the data hierarchy (sourceDatasetName if is used if empty)
-     * @param visible Whether the new dataset is visible in the user interface
+     * @param guiName GUI name for the new dataset from the core
+     * @param sourceDataset Reference to source dataset from which this dataset will be derived
+     * @param parentDataset Pointer to parent dataset in the data hierarchy (will attach to root in hierarchy if empty)
+     * @return Reference to created derived dataset
      */
-    virtual const QString createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent = "") = 0;
+    virtual DataSet& createDerivedData(const QString& guiName, const DataSet& sourceDataset, const DataSet* parentDataset = nullptr) = 0;
 
     /**
      * Creates a copy of the given selection set and gives it a unique name based
@@ -90,7 +90,7 @@ public: // Data access
      * @param guiName GUI name of the subset
      * @param parentDataset Pointer to the parent dataset in the data hierarchy (sourceSetName if is used if empty)
      * @param visible Whether the new dataset is visible in the user interface
-     * @return Subset
+     * @return Reference to created subset
      */
     virtual DataSet& createSubsetFromSelection(const DataSet& selection, const DataSet& sourceDataset, const QString& guiName, const DataSet* parentDataset = nullptr, const bool& visible = true) = 0;
 
@@ -110,7 +110,7 @@ public: // Data access
     template <class SetType>
     SetType& requestData(const QString& dataSetId)
     {
-        return dynamic_cast<SetType&>(requestData(name));
+        return dynamic_cast<SetType&>(requestData(dataSetId));
     }
 
     /**

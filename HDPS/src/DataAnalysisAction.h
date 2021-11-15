@@ -21,9 +21,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the dataset
+     * @param dataset Reference to dataset
      */
-    DataAnalysisAction(QObject* parent, const QString& datasetName);
+    DataAnalysisAction(QObject* parent, DataSet& dataset);
 
     /**
      * Get the context menu for the action

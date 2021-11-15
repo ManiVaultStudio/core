@@ -23,9 +23,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the dataset
+     * @param dataset Reference to dataset
      */
-    DataAction(QObject* parent, const QString& datasetName);
+    DataAction(QObject* parent, DataSet& dataset);
 
 protected:
     DatasetRef<DataSet>     _dataset;                /** Dataset reference */

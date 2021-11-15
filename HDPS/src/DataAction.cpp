@@ -8,12 +8,12 @@ namespace hdps {
 
 using namespace gui;
 
-DataAction::DataAction(QObject* parent, const QString& datasetName) :
+DataAction::DataAction(QObject* parent, DataSet& dataset) :
     WidgetAction(parent),
-    _dataset(datasetName),
-    _dataAnalysisAction(this, datasetName),
-    _dataExportAction(this, datasetName),
-    _dataRemoveAction(this, datasetName)
+    _dataset(dataset),
+    _dataAnalysisAction(this, dataset),
+    _dataExportAction(this, dataset),
+    _dataRemoveAction(this, dataset)
 {
     setText("Data");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("trash-alt"));

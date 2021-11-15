@@ -131,7 +131,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, DataSet* parentDataSet /*= nullptr*/)
+DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataset /*= nullptr*/)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
@@ -144,6 +144,7 @@ DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, DataS
     auto selection  = rawData.createDataSet();
 
     // Set the properties of the new sets
+    fullSet->setGuiName(dataSetGuiName);
     fullSet->setAll(true);
 
     // Add them to the data manager
@@ -152,13 +153,14 @@ DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, DataS
     _dataManager->addSelection(rawDataName, selection);
     
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager->addItem(*fullSet, parentDataSet);
+    _dataHierarchyManager->addItem(*fullSet, const_cast<DataSet*>(parentDataset));
     _dataHierarchyManager->selectItem(*fullSet);
     
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
-    //new DataAction(&_mainWindow, dataSetGuiName);
+    // Add data action (available as right-click menu in the data hierarchy widget)
+    new DataAction(&_mainWindow, *fullSet);
 
     return *fullSet;
 }
@@ -182,13 +184,10 @@ void Core::removeDatasets(const QVector<DataSet*> datasets, const bool& recursiv
     }
 }
 
-const QString Core::createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent /*= ""*/)
+DataSet& Core::createDerivedData(const QString& guiName, const DataSet& sourceDataset, const DataSet* parentDataset /*= nullptr*/)
 {
-    /*
-    const DataSet& sourceSet = requestData(sourceDatasetName);
-
-    // Get the data type
-    const auto dataType = sourceSet.getDataType();
+    // Get the data type of the source dataset
+    const auto dataType = sourceDataset.getDataType();
 
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(dataType._type);
@@ -197,57 +196,54 @@ const QString Core::createDerivedData(const QString& nameRequest, const QString&
     plugin::RawData& rawData = requestRawData(pluginName);
 
     // Create an initial full set, but no selection because it is shared with the source data
-    auto fullSet = rawData.createDataSet();
+    auto derivedDataset = rawData.createDataSet();
 
-    fullSet->_sourceSetName = sourceDatasetName;
-    fullSet->_derived = true;
+    // Mark the full set as derived
+    derivedDataset->setSourceDataSetId(sourceDataset.getId());
 
     // Set properties of the new set
-    fullSet->setAll(true);
+    derivedDataset->setAll(true);
     
     // Add them to the data manager
-    _dataManager->addSet(*fullSet);
+    _dataManager->addSet(*derivedDataset);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addItem(fullSet->getId(),, dataHierarchyParent.isEmpty() ? sourceDatasetName : dataHierarchyParent);
+    _dataHierarchyManager->addItem(*derivedDataset, parentDataset == nullptr ? const_cast<DataSet*>(&sourceDataset) : const_cast<DataSet*>(parentDataset));
 
     // Initialize the dataset (e.g. setup default actions for info)
-    fullSet->init();
+    derivedDataset->init();
 
-    new DataAction(&_mainWindow, setName);
+    // Add data action (available as right-click menu in the data hierarchy widget)
+    new DataAction(&_mainWindow, *derivedDataset);
 
-    return setName;
-    */
-
-    return "";
+    return *derivedDataset;
 }
 
 DataSet& Core::createSubsetFromSelection(const DataSet& selection, const DataSet& sourceDataset, const QString& guiName, const DataSet* parentDataset /*= nullptr*/, const bool& visible /*= true*/)
 {
-    // Create a new set with only the indices that were part of the selection set
-    auto newSet = selection.copy();
+    // Create a subset with only the indices that were part of the selection set
+    auto subset = selection.copy();
 
-    newSet->_dataName       = sourceDataset._dataName;
-    newSet->_sourceSetName  = sourceDataset._sourceSetName;
-    newSet->_derived        = sourceDataset._derived;
+    subset->_dataName           = sourceDataset._dataName;
+    subset->_sourceDataSetId    = sourceDataset._sourceDataSetId;
+    subset->_derived            = sourceDataset._derived;
 
-    /*
     // Add the set the core and publish the name of the set to all plug-ins
-    const auto setName = _dataManager->addSet(newSetName, newSet);
+    _dataManager->addSet(*subset);
     
     // Notify listeners that data was added
-    notifyDataAdded(*newSet);
+    notifyDataAdded(*subset);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addItem(newSet->getId(), dataHierarchyParent.isEmpty() ? sourceSet.getName() : dataHierarchyParent, visible);
+    _dataHierarchyManager->addItem(*subset, parentDataset == nullptr ? const_cast<DataSet*>(&sourceDataset) : const_cast<DataSet*>(parentDataset), visible);
 
     // Initialize the dataset (e.g. setup default actions for info)
-    newSet->init();
+    subset->init();
 
-    new DataAction(&_mainWindow, setName);
-    */
+    // Add data action (available as right-click menu in the data hierarchy widget)
+    new DataAction(&_mainWindow, *subset);
 
-    return *newSet;
+    return *subset;
 }
 
 plugin::RawData& Core::requestRawData(const QString name)

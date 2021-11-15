@@ -31,6 +31,7 @@ void DataManager::removeDataset(const QString& datasetName, const bool& recursiv
 {
     qDebug() << "Removing" << datasetName << "from the data manager";
 
+    /* TODO
     // Turn all derived datasets referring to the dataset to be removed to non-derived
     for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
     {
@@ -45,6 +46,7 @@ void DataManager::removeDataset(const QString& datasetName, const bool& recursiv
         }
         it++;
     }
+    */
 
     // Remove dataset
     _dataSetMap.erase(datasetName);

@@ -12,9 +12,9 @@ namespace hdps {
 
 using namespace gui;
 
-DataRemoveAction::DataRemoveAction(QObject* parent, const QString& datasetName) :
+DataRemoveAction::DataRemoveAction(QObject* parent, DataSet& dataset) :
     WidgetAction(parent),
-    _dataset(datasetName),
+    _dataset(dataset),
     _removeSelectedAction(this, "Selected"),
     _removeSelectedAndChildrenAction(this, "Selected + descendants")
 {

@@ -29,7 +29,7 @@ public:
         _dataName(dataName),
         _all(false),
         _derived(false),
-        _sourceSetName(),
+        _sourceDataSetId(),
         _properties()
     {
     }
@@ -102,16 +102,40 @@ public:
     template <class T>
     static T& getSourceData(T& set)
     {
-        return set.isDerivedData() ? getSourceData(static_cast<T&>(set._core->requestData(set._sourceSetName))) : set;
+        return set.isDerivedData() ? getSourceData(static_cast<T&>(set._core->requestData(set._sourceDataSetId))) : set;
     }
 
     /**
-     * Marks this dataset as derived and sets the dataset it's derived from to sourceDataName.
+     * Marks this dataset as derived and sets the source dataset globally unique identifier
+     * @param sourceDataId Globally unique identifier of the source data
      */
-    void setSourceData(QString sourceDataName)
+    void setSourceDataSetId(const QString& sourceDataId)
     {
-        _sourceSetName = sourceDataName;
-        _derived = true;
+        _sourceDataSetId    = sourceDataId;
+        _derived            = true;
+    }
+
+    /**
+     * Marks this dataset as derived and sets the source dataset globally unique identifier
+     * @param dataset Reference to dataset
+     */
+    void setSourceDataSet(const DataSet& dataset)
+    {
+        _sourceDataSetId    = dataset.getId();
+        _derived            = true;
+    }
+
+    /**
+     * Marks this dataset as derived and sets the source dataset globally unique identifier
+     * @param dataset Pointer to dataset
+     */
+    void setSourceDataSet(const DataSet* dataset)
+    {
+        if (dataset == nullptr)
+            return;
+
+        _sourceDataSetId    = dataset->getId();
+        _derived            = true;
     }
 
     /**
@@ -226,7 +250,7 @@ public: // Actions
      * @param parent Parent widget
      * @return Context menu
      */
-    QMenu* getContextMenu(QWidget* parent = nullptr);;
+    QMenu* getContextMenu(QWidget* parent = nullptr);
 
     /**
      * Populates existing menu with actions menus
@@ -251,9 +275,9 @@ protected:
     }
 
     /** Get the name of the source dataset */
-    QString getSourceName() const
+    QString getSourceDataSetId() const
     {
-        return _sourceSetName;
+        return _sourceDataSetId;
     }
 
     /**
@@ -268,14 +292,14 @@ protected:
     CoreInterface* _core;
 
 private:
-    mutable plugin::RawData*    _rawData;
-    QString                     _id;                    /** Globally unique dataset name */
-    QString                     _guiName;               /** Name of the dataset in the graphical user interface */
-    QString                     _dataName;              /** Name of the raw data */
-    bool                        _all;                   /** Whether this is the full dataset */
-    bool                        _derived;               /** Whether this dataset is derived from another dataset */
-    QString                     _sourceSetName;         /** Name of the source dataset (if any) */
-    QMap<QString, QVariant>     _properties;            /** Properties map */
+    mutable plugin::RawData*    _rawData;           /** Pointer to the raw data referenced in this set */
+    QString                     _id;                /** Globally unique dataset name */
+    QString                     _guiName;           /** Name of the dataset in the graphical user interface */
+    QString                     _dataName;          /** Name of the raw data */
+    bool                        _all;               /** Whether this is the full dataset */
+    bool                        _derived;           /** Whether this dataset is derived from another dataset */
+    QString                     _sourceDataSetId;   /** Globally unique identifier of the source dataset */
+    QMap<QString, QVariant>     _properties;        /** Properties map */
 
     friend class Core;
     friend class DataManager;

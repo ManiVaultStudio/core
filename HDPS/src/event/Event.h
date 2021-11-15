@@ -62,6 +62,12 @@ namespace hdps
             return *_dataset;
         }
 
+        /** Get reference to the dataset */
+        template<typename SetType>
+        SetType& getDataset() {
+            return dynamic_cast<SetType&>(*_dataset);
+        }
+
         /**
          * Set reference to the dataset
          * @param dataset Reference to the dataset
