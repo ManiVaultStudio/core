@@ -115,6 +115,7 @@ set(ACTIONS_HEADERS
     src/actions/ColorMapDiscreteAction.h
     src/actions/ColorMapViewAction.h
     src/actions/ColorMapSettingsAction.h
+    src/actions/DatasetPickerAction.h
     src/actions/DecimalAction.h
     src/actions/DecimalRangeAction.h
     src/actions/GroupAction.h
@@ -145,6 +146,7 @@ set(ACTIONS_SOURCES
     src/actions/ColorMapDiscreteAction.cpp
     src/actions/ColorMapViewAction.cpp
     src/actions/ColorMapSettingsAction.cpp
+	src/actions/DatasetPickerAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/DecimalRangeAction.cpp
     src/actions/GroupAction.cpp

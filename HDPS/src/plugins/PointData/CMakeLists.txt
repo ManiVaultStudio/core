@@ -36,6 +36,7 @@ set(POINTS_HEADERS
     src/InfoAction.h
     src/SelectedIndicesAction.h
     src/DimensionNamesAction.h
+    src/PointsDimensionPickerAction.h
 )
 
 set(ACTIONS_SOURCES
@@ -45,6 +46,8 @@ set(ACTIONS_SOURCES
     src/SelectedIndicesAction.cpp
     src/DimensionNamesAction.h
     src/DimensionNamesAction.cpp
+    src/PointsDimensionPickerAction.h
+    src/PointsDimensionPickerAction.cpp
 )
 
 source_group(Plugin FILES ${POINTS_SOURCES})

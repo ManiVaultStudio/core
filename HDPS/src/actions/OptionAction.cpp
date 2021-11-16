@@ -60,9 +60,17 @@ void OptionAction::setOptions(const QStringList& options)
 {
     if (_defaultModel.stringList() == options)
         return;
-    
+
+    // Cache the current index
+    const auto currentIndex = _currentIndex;
+
+    // Assign the options
     _defaultModel.setStringList(options);
 
+    // Re-assign cached current index
+    _currentIndex = options.count() > 0 ? std::max(0, std::min(currentIndex, options.count() - 1)) : -1;
+
+    // Notify the others that the options changed
     emit optionsChanged(getOptions());
 
     setResettable(isResettable());

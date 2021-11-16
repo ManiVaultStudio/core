@@ -2,6 +2,7 @@
 
 #include "ColorAction.h"
 #include "ColorMapAction.h"
+#include "DatasetPickerAction.h"
 #include "DecimalAction.h"
 #include "DecimalRangeAction.h"
 #include "GroupAction.h"

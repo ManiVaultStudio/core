@@ -148,68 +148,26 @@ public:
     {
     }
 
-    /** Initializes the dataset reference */
-    void init() {
+    /**
+     * Copy constructor
+     * @param other Dataset reference to copy from
+     */
+    DatasetRef(const DatasetRef& other)
+    {
+        // Initialize
+        init();
 
-        // Set event core in the event listener
-        setEventCore(Application::core());
-
-        // Register for data removal events
-        registerDataEvent([this](hdps::DataEvent* dataEvent) {
-
-            // Only proceed if we have a valid data set
-            if (_dataset == nullptr)
-                return;
-
-            switch (dataEvent->getType()) {
-
-                // Data is about to be removed
-                case EventType::DataAboutToBeRemoved:
-                {
-                    // Notify others that the dataset is about to be removed
-                    emit aboutToBeRemoved();
-
-                    break;
-                }
-
-                // Reset the reference when the data is removed
-                case EventType::DataRemoved:
-                {
-                    // Do not process foreign datasets
-                    if (dataEvent->getDataset() != (*_dataset))
-                        return;
-
-                    // Reset the reference
-                    reset();
-
-                    // Notify others that the dataset is removed
-                    emit removed(_datasetId);
-
-                    break;
-                }
-
-                // Dataset GUI name changed
-                case EventType::DataGuiNameChanged:
-                {
-                    // Get dataset GUI name changed event
-                    auto datasetGuiNameChangedEvent = static_cast<hdps::DataGuiNameChangedEvent*>(dataEvent);
-
-                    // Notify others of the name change
-                    emit guiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset().getGuiName());
-
-                    break;
-                }
-            }
-        });
+        // And assign
+        *this = other;
     }
+
+public:
 
     /**
      * Set the reference from a pointer to a dataset
      * @param dataset Pointer to the dataset
      */
     void set(DataSet* dataset) {
-
-        // Assign dataset pointer and cache the globally unique dataset identifier
         try
         {
             if (dataset == nullptr) {
@@ -222,11 +180,13 @@ public:
                 return;
 
             // Try to cast the dataset pointer to the target dataset type
-            _dataset = dynamic_cast<SetType*>(dataset);
+            _dataset    = dynamic_cast<SetType*>(dataset);
 
             // Throw an exception when the pointer is null (does not match target dataset type)
             if (_dataset == nullptr)
                 throw std::runtime_error("Data set ref type mismatch");
+
+            _datasetId = _dataset->getId();
 
             // Inform others that the pointer to the dataset changed
             emit changed(_dataset);
@@ -275,13 +235,13 @@ public:
     }
 
     /** Get the dataset pointer */
-    SetType* get() {
+    SetType* get() const {
         return _dataset;
     }
 
     /** Get the dataset pointer of the specified type */
     template<typename TargetSetType>
-    TargetSetType* get() {
+    TargetSetType* get() const {
         return dynamic_cast<TargetSetType*>(_dataset);
     }
 
@@ -301,8 +261,97 @@ public:
         _datasetId  = "";
     }
 
+protected:
+
+    /** Initializes the dataset reference */
+    void init() {
+
+        // Set event core in the event listener
+        setEventCore(Application::core());
+
+        // Register for data removal events
+        registerDataEvent([this](hdps::DataEvent* dataEvent) {
+
+            // Only proceed if we have a valid data set
+            if (_dataset == nullptr)
+                return;
+
+            // Only process datasets that we reference
+            if (dataEvent->getDataset() != (*_dataset))
+                return;
+
+            switch (dataEvent->getType()) {
+
+                // Data is about to be removed
+                case EventType::DataAboutToBeRemoved:
+                {
+                    // Notify others that the dataset is about to be removed
+                    emit aboutToBeRemoved();
+
+                    break;
+                }
+
+                // Reset the reference when the data is removed
+                case EventType::DataRemoved:
+                {
+                    // Reset the reference
+                    reset();
+
+                    // Notify others that the dataset is removed
+                    emit removed(_datasetId);
+
+                    break;
+                }
+
+                // Dataset GUI name changed
+                case EventType::DataGuiNameChanged:
+                {
+                    // Get dataset GUI name changed event
+                    auto datasetGuiNameChangedEvent = static_cast<hdps::DataGuiNameChangedEvent*>(dataEvent);
+
+                    // Notify others of the name change
+                    emit guiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset().getGuiName());
+
+                    break;
+                }
+            }
+        });
+    }
+
+public: // Operators
+
+    /**
+     * Equality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator == (const DatasetRef<SetType>& rhs) const {
+        return rhs.getDatasetId() == _datasetId;
+    }
+
+    /**
+     * Inequality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator != (const DatasetRef<SetType>& rhs) const {
+        return rhs.getDatasetId() != _datasetId;
+    }
+
+    /**
+     * Assignment operator
+     * @param other Reference to assign from
+     */
+    DatasetRef<SetType>& DatasetRef<SetType>::operator=(const DatasetRef<SetType>& other)
+    {
+        DatasetRefPrivate::operator=(other);
+
+        _datasetId  = other._datasetId;
+        _dataset    = other._dataset;
+
+        return *this;
+    }
+
 private:
-    QString         _datasetId;     /** Globally unique dataset identifier */
+    QString     _datasetId;     /** Globally unique dataset identifier */
     SetType*    _dataset;       /** Pointer to dataset (if any) */
 };
 
