@@ -77,11 +77,9 @@ public:
 
 public: /** Action getters */
 
-    OptionAction& getDimensionSelectAction() { return _dimensionSelectAction; }
-    OptionAction& getDimensionSearchAction() { return _dimensionSearchAction; }
+    OptionAction& getCurrentDimensionAction() { return _currentDimensionAction; }
 
 protected:
     DatasetRef<Points>  _points;                    /** Dataset reference to points dataset from which the dimension will be picked */
-    OptionAction        _dimensionSelectAction;     /** Pick a dimension by selecting */
-    OptionAction        _dimensionSearchAction;     /** Pick a dimension by searching */
+    OptionAction        _currentDimensionAction;    /** Current dimension action */
 };

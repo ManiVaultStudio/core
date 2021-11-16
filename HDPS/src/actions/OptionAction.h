@@ -3,6 +3,8 @@
 #include "WidgetAction.h"
 
 #include <QComboBox>
+#include <QLineEdit>
+#include <QCompleter>
 #include <QStringListModel>
 
 class QWidget;
@@ -29,17 +31,16 @@ public:
     /** Describes the widget flags */
     enum WidgetFlag {
         ComboBox        = 0x00001,      /** The widget includes a combobox */
-        ResetPushButton = 0x00002,      /** The widget includes a reset push button */
+        LineEdit        = 0x00002,      /** The widget includes a line edit */
+        ResetPushButton = 0x00004,      /** The widget includes a reset push button */
 
         Basic   = ComboBox,
         All     = ComboBox | ResetPushButton
     };
 
-public:
+public: // Widgets
 
-    /**
-     * Combobox widget class for option action
-     */
+    /** Combobox widget class for option action */
     class ComboBoxWidget : public QComboBox {
     protected:
 
@@ -49,6 +50,23 @@ public:
          * @param optionAction Pointer to option action
          */
         ComboBoxWidget(QWidget* parent, OptionAction* optionAction);
+
+        friend class OptionAction;
+    };
+
+    /** Combobox widget class for option action */
+    class LineEditWidget : public QLineEdit {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param optionAction Pointer to option action
+         */
+        LineEditWidget(QWidget* parent, OptionAction* optionAction);
+
+    protected:
+        QCompleter  _completer;     /** Completer for searching and filtering */
 
         friend class OptionAction;
     };
@@ -90,20 +108,26 @@ public:
      */
     void initialize(QAbstractItemModel& customModel, const QString& currentOption = "", const QString& defaultOption = "");
 
-    /** Gets the options */
+    /** Get the options */
     QStringList getOptions() const;
+
+    /** Get the number of options */
+    std::uint32_t getNumberOfOptions() const;
+
+    /** Determines whether an option exists */
+    bool hasOption(const QString& option) const;
 
     /** Determines whether there are any options */
     bool hasOptions() const;
 
     /**
-     * Sets the options
+     * Set the options
      * @param options Options
      */
     void setOptions(const QStringList& options);
 
     /**
-     * Sets a custom item model for more advanced display of options
+     * Set a custom item model for more advanced display of options
      * @param itemModel Pointer to custom item model
      */
     void setCustomModel(QAbstractItemModel* itemModel);
@@ -111,38 +135,38 @@ public:
     /** Determines whether the option action has a custom item model */
     bool hasCustomModel() const;
 
-    /** Gets the current option index */
+    /** Get the current option index */
     std::int32_t getCurrentIndex() const;
 
     /**
-     * Sets the current option index
+     * Set the current option index
      * @param currentIndex Current option index
      */
     void setCurrentIndex(const std::int32_t& currentIndex);
 
-    /** Gets the default option index */
+    /** Get the default option index */
     std::int32_t getDefaultIndex() const;
 
     /**
-     * Sets the default option index
+     * Set the default option index
      * @param defaultIndex Default option index
      */
     void setDefaultIndex(const std::int32_t& defaultIndex);
 
-    /** Gets the current option index */
+    /** Get the current option index */
     QString getCurrentText() const;
 
     /**
-     * Sets the current option text
+     * Set the current option text
      * @param currentText Current option text
      */
     void setCurrentText(const QString& currentText);
 
-    /** Gets the default option text */
+    /** Get the default option text */
     QString getDefaultText() const;
 
     /**
-     * Sets the default option text
+     * Set the default option text
      * @param defaultText Default option text
      */
     void setDefaultText(const QString& defaultText);
@@ -156,16 +180,13 @@ public:
     /** Determines whether an option has been selected */
     bool hasSelection() const;
 
-    /** Gets the used item model */
+    /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
 signals:
 
-    /**
-     * Signals that the options changed
-     * @param options Options
-     */
-    void optionsChanged(const QStringList& options);
+    /** Signals that the options changed */
+    void optionsChanged();
 
     /**
      * Signals that the custom model changed
@@ -191,11 +212,18 @@ signals:
      */
     void currentTextChanged(const QString& currentText);
 
+    /**
+     * Signals that the search threshold changed
+     * @param currentText Current text
+     */
+    void searchThresholdChanged(const std::uint32_t& searchThreshold);
+
 protected:
     QStringListModel        _defaultModel;          /** Default simple string list model */
     QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
     std::int32_t            _currentIndex;          /** Currently selected index */
     std::int32_t            _defaultIndex;          /** Default index */
+    std::uint32_t           _searchThreshold;       /** Threshold for switching between combobox and line edit */
 };
 
 }

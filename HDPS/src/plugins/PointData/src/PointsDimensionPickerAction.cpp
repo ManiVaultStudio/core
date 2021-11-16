@@ -8,16 +8,13 @@ using namespace hdps;
 PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent) :
     WidgetAction(parent),
     _points(nullptr),
-    _dimensionSelectAction(this, "Select dimension"),
-    _dimensionSearchAction(this, "Search dimension")
+    _currentDimensionAction(this, "Select dimension")
 {
     setText("Points dimension picker");
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
 
-    _dimensionSelectAction.setToolTip("Pick a dimension by selecting");
-    _dimensionSearchAction.setToolTip("Pick a dimension by searching");
-
-    _dimensionSearchAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+    _currentDimensionAction.setToolTip("Pick a dimension by selecting");
+    _currentDimensionAction.setDefaultWidgetFlags(OptionAction::ComboBox | OptionAction::LineEdit);
 }
 
 void PointsDimensionPickerAction::setPointsDataset(const DatasetRef<Points>& points)
@@ -36,22 +33,22 @@ void PointsDimensionPickerAction::setPointsDataset(const DatasetRef<Points>& poi
     else {
 
         // Create dimension names
-        for (int dimensionIndex = 0; dimensionIndex < _points->getNumDimensions(); dimensionIndex++)
+        for (std::uint32_t dimensionIndex = 0; dimensionIndex < _points->getNumDimensions(); dimensionIndex++)
             options << QString("Dim %1").arg(QString::number(dimensionIndex));
     }
 
     // Assign options
-    _dimensionSelectAction.setOptions(options);
+    _currentDimensionAction.setOptions(options);
 }
 
 QStringList PointsDimensionPickerAction::getDimensionNames() const
 {
-    return _dimensionSelectAction.getOptions();
+    return _currentDimensionAction.getOptions();
 }
 
 void PointsDimensionPickerAction::setCurrentDimensionName(const QString& dimensionName)
 {
-    _dimensionSelectAction.setCurrentText(dimensionName);
+    _currentDimensionAction.setCurrentText(dimensionName);
 }
 
 PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPickerAction* pointsDimensionPickerAction) :
@@ -60,10 +57,27 @@ PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPick
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
-    layout->setSpacing(3);
 
-    layout->addWidget(pointsDimensionPickerAction->getDimensionSelectAction().createWidget(this));
-    layout->addWidget(pointsDimensionPickerAction->getDimensionSearchAction().createCollapsedWidget(this));
+    auto widget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this);
+
+    layout->addWidget(widget);
 
     setLayout(layout);
+
+    // Update visibility of the combobox and line edit depending on the number of options
+    const auto updateWidgets = [this, pointsDimensionPickerAction, widget]() {
+
+        // Determine whether to show the combobox or the line edit
+        const auto showComboBox = pointsDimensionPickerAction->getCurrentDimensionAction().getNumberOfOptions() < 5;
+
+        // Show/hide combobox and line edit
+        widget->findChild<QComboBox*>("ComboBox")->setVisible(showComboBox);
+        widget->findChild<QLineEdit*>("LineEdit")->setVisible(!showComboBox);
+    };
+
+    // Update widgets when the number of options change
+    connect(&pointsDimensionPickerAction->getCurrentDimensionAction(), &OptionAction::optionsChanged, updateWidgets);
+
+    // Do an initial update at startup
+    updateWidgets();
 }
