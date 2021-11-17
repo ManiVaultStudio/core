@@ -57,8 +57,9 @@ public:
     /** 
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    PointsDimensionPickerAction(QObject* parent);
+    PointsDimensionPickerAction(QObject* parent, const QString& title);
 
     /**
      * Set the points dataset from which the dimension will be picked
@@ -69,11 +70,52 @@ public:
     /** Get the names of the dimensions */
     QStringList getDimensionNames() const;
 
+    /** Get the number of currently loaded dimensions */
+    std::uint32_t getNumberOfDimensions() const;
+
+    /** Get the current dimension index */
+    std::int32_t getCurrentDimensionIndex() const;
+
+    /** Get the current dimension name */
+    QString getCurrentDimensionName() const;
+
+    /**
+     * Set the current dimension by index
+     * @param dimensionIndex Index of the current dimension
+     */
+    void setCurrentDimensionIndex(const std::int32_t& dimensionIndex);
+
     /**
      * Set the current dimension by name
-     * @param dimensionName Current dimension name
+     * @param dimensionName Name of the current dimension
      */
     void setCurrentDimensionName(const QString& dimensionName);
+
+    /**
+     * Set the default dimension index
+     * @param defaultDimensionIndex Default dimension index
+     */
+    void setDefaultDimensionIndex(const std::int32_t& defaultDimensionIndex);
+
+    /**
+     * Set the default dimension name
+     * @param defaultDimensionName Default dimension name
+     */
+    void setDefaultDimensionName(const QString& defaultDimensionName);
+
+signals:
+
+    /**
+     * Signals that the current dimension index changed
+     * @param currentDimensionIndex Index of the current dimension
+     */
+    void currentDimensionIndexChanged(const std::int32_t& currentDimensionIndex);
+
+    /**
+     * Signals that the current dimension name changed
+     * @param currentDimensionName Name of the current dimension
+     */
+    void currentDimensionNameChanged(const QString& currentDimensionName);
 
 public: /** Action getters */
 

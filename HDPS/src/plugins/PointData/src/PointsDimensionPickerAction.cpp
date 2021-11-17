@@ -5,16 +5,28 @@
 
 using namespace hdps;
 
-PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent) :
+PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const QString& title) :
     WidgetAction(parent),
     _points(nullptr),
     _currentDimensionAction(this, "Select dimension")
 {
-    setText("Points dimension picker");
+    setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
 
     _currentDimensionAction.setToolTip("Pick a dimension by selecting");
+
+    // Show both the combobox and line edit by default and change their visibility when the dimensions change
     _currentDimensionAction.setDefaultWidgetFlags(OptionAction::ComboBox | OptionAction::LineEdit);
+
+    // Selection changed notifier
+    const auto selectionChanged = [this]() {
+        emit currentDimensionIndexChanged(_currentDimensionAction.getCurrentIndex());
+        emit currentDimensionNameChanged(_currentDimensionAction.getCurrentText());
+    };
+
+    // Relay current index/text changed signal from the current dimension action
+    connect(&_currentDimensionAction, &OptionAction::currentIndexChanged, this, selectionChanged);
+    connect(&_currentDimensionAction, &OptionAction::currentTextChanged, this, selectionChanged);
 }
 
 void PointsDimensionPickerAction::setPointsDataset(const DatasetRef<Points>& points)
@@ -46,9 +58,39 @@ QStringList PointsDimensionPickerAction::getDimensionNames() const
     return _currentDimensionAction.getOptions();
 }
 
+std::uint32_t PointsDimensionPickerAction::getNumberOfDimensions() const
+{
+    return _currentDimensionAction.getNumberOfOptions();
+}
+
+std::int32_t PointsDimensionPickerAction::getCurrentDimensionIndex() const
+{
+    return _currentDimensionAction.getCurrentIndex();
+}
+
+QString PointsDimensionPickerAction::getCurrentDimensionName() const
+{
+    return _currentDimensionAction.getCurrentText();
+}
+
+void PointsDimensionPickerAction::setCurrentDimensionIndex(const std::int32_t& dimensionIndex)
+{
+    _currentDimensionAction.setCurrentIndex(dimensionIndex);
+}
+
 void PointsDimensionPickerAction::setCurrentDimensionName(const QString& dimensionName)
 {
     _currentDimensionAction.setCurrentText(dimensionName);
+}
+
+void PointsDimensionPickerAction::setDefaultDimensionIndex(const std::int32_t& defaultDimensionIndex)
+{
+    _currentDimensionAction.setDefaultIndex(defaultDimensionIndex);
+}
+
+void PointsDimensionPickerAction::setDefaultDimensionName(const QString& defaultDimensionName)
+{
+    _currentDimensionAction.setDefaultText(defaultDimensionName);
 }
 
 PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPickerAction* pointsDimensionPickerAction) :
