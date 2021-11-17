@@ -31,6 +31,19 @@ PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const 
 
 void PointsDimensionPickerAction::setPointsDataset(const DatasetRef<Points>& points)
 {
+    // Only proceed if we have a valid points dataset
+    if (!points.isValid()) {
+
+        // Reset options
+        _currentDimensionAction.setOptions(QStringList());
+
+        // Reset current dimension index
+        setCurrentDimensionIndex(-1);
+
+        return;
+    }
+
+    // Assign points dataset reference
     _points = points;
 
     // Dimension names options for the select action
@@ -51,6 +64,10 @@ void PointsDimensionPickerAction::setPointsDataset(const DatasetRef<Points>& poi
 
     // Assign options
     _currentDimensionAction.setOptions(options);
+
+    // And set current dimensions
+    if (getNumberOfDimensions() >= 1)
+        setCurrentDimensionIndex(0);
 }
 
 QStringList PointsDimensionPickerAction::getDimensionNames() const
@@ -110,7 +127,7 @@ PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPick
     const auto updateWidgets = [this, pointsDimensionPickerAction, widget]() {
 
         // Determine whether to show the combobox or the line edit
-        const auto showComboBox = pointsDimensionPickerAction->getCurrentDimensionAction().getNumberOfOptions() < 5;
+        const auto showComboBox = pointsDimensionPickerAction->getCurrentDimensionAction().getNumberOfOptions() < 1000;
 
         // Show/hide combobox and line edit
         widget->findChild<QComboBox*>("ComboBox")->setVisible(showComboBox);

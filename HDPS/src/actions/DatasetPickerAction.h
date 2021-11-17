@@ -64,6 +64,9 @@ public:
      */
     void setDatasets(const QVector<DatasetRef<hdps::DataSet>>& datasets);
 
+    /** Get the current dataset */
+    DatasetRef<hdps::DataSet> getCurrentDataset();
+
     /**
      * Set the current dataset
      * @param currentDataset Current dataset reference

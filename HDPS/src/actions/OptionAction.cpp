@@ -200,6 +200,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     QComboBox(parent)
 {
     setObjectName("ComboBox");
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     const auto updateToolTip = [this, optionAction]() -> void {
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
@@ -267,7 +268,7 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
         setText(optionAction->getCurrentText());
     };
 
-    connect(optionAction, &OptionAction::currentTextChanged, this, updateCurrentOption);
+    connect(optionAction, &OptionAction::currentIndexChanged, this, updateCurrentOption);
 
     connect(this, &QLineEdit::editingFinished, this, [this, optionAction]() {
         optionAction->setCurrentText(text());

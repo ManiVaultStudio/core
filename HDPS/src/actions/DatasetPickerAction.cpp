@@ -28,17 +28,28 @@ void DatasetPickerAction::setDatasets(const QVector<DatasetRef<hdps::DataSet>>& 
     for (auto& dataset : _datasets) {
 
         // Update the datasets when the dataset is removed
-        connect(&dataset, &DatasetRef<DataSet>::aboutToBeRemoved, this, [this, dataset]() {
+        connect(&dataset, &DatasetRef<DataSet>::dataAboutToBeRemoved, this, [this, dataset]() {
             _datasets.removeOne(dataset);
             updateCurrentDatasetAction();
         });
 
         // Update the current dataset action when the dataset is renamed
-        connect(&dataset, &DatasetRef<DataSet>::guiNameChanged, this, &DatasetPickerAction::updateCurrentDatasetAction);
+        connect(&dataset, &DatasetRef<DataSet>::dataGuiNameChanged, this, &DatasetPickerAction::updateCurrentDatasetAction);
     }
 
     // Update the options action
     updateCurrentDatasetAction();
+}
+
+DatasetRef<DataSet> DatasetPickerAction::getCurrentDataset()
+{
+    // Get the current dataset index
+    const auto currentIndex = _currentDatasetAction.getCurrentIndex();
+
+    if (currentIndex >= 0)
+        return _datasets[currentIndex];
+
+    return DatasetRef<DataSet>();
 }
 
 void DatasetPickerAction::setCurrentDataset(const DatasetRef<hdps::DataSet>& currentDataset)

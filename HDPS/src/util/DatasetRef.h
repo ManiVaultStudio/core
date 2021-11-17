@@ -72,21 +72,24 @@ signals:
      */
     void changed(DataSet* dataset);
 
+    /** Signals that the dataset contents changed */
+    void dataChanged();
+
     /** Signals that the dataset is about to be removed */
-    void aboutToBeRemoved();
+    void dataAboutToBeRemoved();
 
     /**
      * Signals that the dataset has been removed
      * @param datasetId Globally unique identifier of the dataset that is removed
      */
-    void removed(const QString& datasetId);
+    void dataRemoved(const QString& datasetId);
 
     /**
      * Signals that the dataset GUI name changed
      * @param oldGuiName Old GUI name
      * @param newGuiName New GUI name
      */
-    void guiNameChanged(const QString& oldGuiName, const QString& newGuiName);
+    void dataGuiNameChanged(const QString& oldGuiName, const QString& newGuiName);
 };
 
 /**
@@ -286,7 +289,7 @@ protected:
                 case EventType::DataAboutToBeRemoved:
                 {
                     // Notify others that the dataset is about to be removed
-                    emit aboutToBeRemoved();
+                    emit dataAboutToBeRemoved();
 
                     break;
                 }
@@ -298,7 +301,16 @@ protected:
                     reset();
 
                     // Notify others that the dataset is removed
-                    emit removed(_datasetId);
+                    emit dataRemoved(_datasetId);
+
+                    break;
+                }
+
+                // Data contents changed
+                case EventType::DataChanged:
+                {
+                    // Notify others that the dataset contents changed
+                    emit dataChanged();
 
                     break;
                 }
@@ -310,7 +322,7 @@ protected:
                     auto datasetGuiNameChangedEvent = static_cast<hdps::DataGuiNameChangedEvent*>(dataEvent);
 
                     // Notify others of the name change
-                    emit guiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset().getGuiName());
+                    emit dataGuiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset().getGuiName());
 
                     break;
                 }

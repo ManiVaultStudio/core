@@ -239,11 +239,15 @@ bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentMode
 {
     auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
 
+    emit layoutAboutToBeChanged();
+
     beginInsertRows(parentModelIndex, rowCount(parentModelIndex), rowCount(parentModelIndex) + 1);
     {
         parentItem->addChild(new DataHierarchyModelItem(dataHierarchyItem));
     }
     endInsertRows();
+
+    emit layoutChanged();
 
     for (auto child : dataHierarchyItem->getChildren()) {
         addDataHierarchyModelItem(index(rowCount(parentModelIndex) - 1, 0, parentModelIndex), child);

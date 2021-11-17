@@ -223,7 +223,6 @@ protected:
     QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
     std::int32_t            _currentIndex;          /** Currently selected index */
     std::int32_t            _defaultIndex;          /** Default index */
-    std::uint32_t           _searchThreshold;       /** Threshold for switching between combobox and line edit */
 };
 
 }
