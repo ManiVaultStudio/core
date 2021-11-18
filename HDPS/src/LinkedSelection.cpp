@@ -4,12 +4,12 @@
 
 namespace hdps
 {
-    LinkedSelection::LinkedSelection(DataSet* sourceDataSet, DataSet* targetDataSet) :
+    LinkedSelection::LinkedSelection(const Dataset<DatasetImpl>& sourceDataSet, const Dataset<DatasetImpl>& targetDataSet) :
         _sourceDataSet(sourceDataSet),
         _targetDataSet(targetDataSet)
     {
-        Q_ASSERT(_sourceDataSet != nullptr);
-        Q_ASSERT(_targetDataSet != nullptr);
+        Q_ASSERT(!_sourceDataSet.isValid());
+        Q_ASSERT(!_targetDataSet.isValid());
     }
 
     const SelectionMap& LinkedSelection::getMapping()

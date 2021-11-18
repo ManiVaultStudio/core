@@ -24,9 +24,9 @@ void ClusterData::init()
 {
 }
 
-hdps::DataSet* ClusterData::createDataSet() const
+Dataset<DatasetImpl> ClusterData::createDataSet() const
 {
-    return new Clusters(_core, getName());
+    return Dataset<DatasetImpl>(new Clusters(_core, getName()));
 }
 
 std::vector<Cluster>& ClusterData::getClusters()
@@ -121,7 +121,7 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     std::vector<std::uint32_t> selectedIndices;
 
     // Gather indices
-    for (const auto& clusterIndex : getSelection<Clusters>().indices) {
+    for (const auto& clusterIndex : getSelection<Clusters>()->indices) {
 
         // Get reference to selected cluster
         const auto selectedCluster = getClusters()[clusterIndex];

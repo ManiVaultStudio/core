@@ -25,7 +25,7 @@ class InfoAction;
  *
  * @author Thomas Kroes
  */
-class IMAGEDATA_EXPORT Images : public hdps::DataSet
+class IMAGEDATA_EXPORT Images : public hdps::DatasetImpl
 {
 public: // Construction
 
@@ -44,16 +44,16 @@ public: // Subsets
     /**
      * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
      * @param subsetGuiName Name of the subset in the GUI
-     * @param parentDataSet Pointer to parent dataset (if any)
+     * @param parentDataSet Smart pointer to parent dataset (if any)
      * @param visible Whether the subset will be visible in the UI
-     * @return Reference to the created subset
+     * @return Smart pointer to the created subset
      */
-    DataSet& createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible = true) const override;
+    hdps::Dataset<hdps::DatasetImpl> createSubset(const QString subsetGuiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet, const bool& visible = true) const override;
 
 public: // Image retrieval functions
 
     /** Obtain a copy of this dataset */
-    hdps::DataSet* copy() const override;
+    hdps::Dataset<hdps::DatasetImpl> copy() const override;
 
     /** Gets the image collection type e.g. stack or sequence */
     ImageData::Type getType() const;

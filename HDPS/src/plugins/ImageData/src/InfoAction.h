@@ -2,7 +2,6 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
-#include "util/DatasetRef.h"
 
 #include "Images.h"
 
@@ -31,12 +30,12 @@ public:
     InfoAction(QObject* parent, Images& images);
 
 protected:
-    DatasetRef<Images>      _images;                            /** Points dataset reference */
-    StringAction            _typeAction;                        /** Image collection type action */
-    StringAction            _numberOfImagesAction;              /** Number of images action */
-    StringAction            _imageResolutionAction;             /** Image resolution action */
-    StringAction            _sourceRectangleAction;             /** Source rectangle action */
-    StringAction            _targetRectangleAction;             /** Target rectangle action */
-    StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
-    StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
+    Dataset<Images>     _images;                            /** Points dataset reference */
+    StringAction        _typeAction;                        /** Image collection type action */
+    StringAction        _numberOfImagesAction;              /** Number of images action */
+    StringAction        _imageResolutionAction;             /** Image resolution action */
+    StringAction        _sourceRectangleAction;             /** Source rectangle action */
+    StringAction        _targetRectangleAction;             /** Target rectangle action */
+    StringAction        _numberOfPixelsAction;              /** Number of pixels per image action */
+    StringAction        _numberComponentsPerPixelAction;    /** Number of components action */
 };

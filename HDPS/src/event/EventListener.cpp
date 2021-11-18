@@ -1,7 +1,10 @@
 #include "EventListener.h"
 
 #include "CoreInterface.h"
+#include "Event.h"
 #include "Set.h"
+
+#include "util/SmartDataset.h"
 
 #include <unordered_map>
 
@@ -42,39 +45,42 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
     if (dataEvent->getType() == EventType::DataSelectionChanged)
     {
         // Fire events for linked datasets
-        DataSet& baseDataSet1 = DataSet::getSourceData(dataEvent->getDataset());
-        QString dataName1 = baseDataSet1.getDataName();
+        auto& baseDataSet1 = dataEvent->getDataset()->getSourceDataset<DatasetImpl>();
 
-        const auto& allDataSets = _eventCore->requestAllDataSets();
+        QString dataName1 = baseDataSet1->getRawDataName();
+
+        // Get all available dataset from the core
+        auto allDataSets = _eventCore->requestAllDataSets();
 
         // Go through all datasets in the system and find datasets with the same source data
-        for (const auto& dataSet : allDataSets)
+        for (auto& dataSet : allDataSets)
         {
-            auto& baseDataSet2 = DataSet::getSourceData(*dataSet);
-            QString dataName2   = baseDataSet2.getDataName();
+            auto& baseDataSet2 = dataSet->getSourceDataset<DatasetImpl>();
+
+            QString dataName2   = baseDataSet2->getRawDataName();
 
             // Fire selection events for datasets with the same source data as the original event
             if (dataName1 == dataName2)
             {
                 DataEvent sourceDataEvent = *dataEvent;
 
-                sourceDataEvent.setDataset(*dataSet);
-                    
-                if (_dataEventHandlersById.find(sourceDataEvent.getDataset().getId()) != _dataEventHandlersById.end())
-                    _dataEventHandlersById[sourceDataEvent.getDataset().getId()](&sourceDataEvent);
+                sourceDataEvent.setDataset(*dataSet.get());
 
-                if (_dataEventHandlersByType.find(sourceDataEvent.getDataset().getDataType()) != _dataEventHandlersByType.end())
-                    _dataEventHandlersByType[sourceDataEvent.getDataset().getDataType()](&sourceDataEvent);
+                if (_dataEventHandlersById.find(sourceDataEvent.getDataset()->getGuid()) != _dataEventHandlersById.end())
+                    _dataEventHandlersById[sourceDataEvent.getDataset()->getGuid()](&sourceDataEvent);
+
+                if (_dataEventHandlersByType.find(sourceDataEvent.getDataset()->getDataType()) != _dataEventHandlersByType.end())
+                    _dataEventHandlersByType[sourceDataEvent.getDataset()->getDataType()](&sourceDataEvent);
             }
         }
         return;
     }
         
-    if (_dataEventHandlersById.find(dataEvent->getDataset().getId()) != _dataEventHandlersById.end())
-        _dataEventHandlersById[dataEvent->getDataset().getId()](dataEvent);
+    if (_dataEventHandlersById.find(dataEvent->getDataset()->getGuid()) != _dataEventHandlersById.end())
+        _dataEventHandlersById[dataEvent->getDataset()->getGuid()](dataEvent);
 
-    if (_dataEventHandlersByType.find(dataEvent->getDataset().getDataType()) != _dataEventHandlersByType.end())
-        _dataEventHandlersByType[dataEvent->getDataset().getDataType()](dataEvent);
+    if (_dataEventHandlersByType.find(dataEvent->getDataset()->getDataType()) != _dataEventHandlersByType.end())
+        _dataEventHandlersByType[dataEvent->getDataset()->getDataType()](dataEvent);
 
     for (auto dataEventHandler : _dataEventHandlers)
         dataEventHandler(dataEvent);

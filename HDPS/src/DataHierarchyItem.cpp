@@ -3,6 +3,8 @@
 #include "DataManager.h"
 #include "Set.h"
 
+#include "util/SmartDataset.h"
+
 #include <QTimer>
 
 #include <stdexcept>
@@ -12,9 +14,9 @@ using namespace hdps::gui;
 namespace hdps
 {
 
-DataHierarchyItem::DataHierarchyItem(QObject* parent, DataSet& dataset, DataSet* parentDataset /*= nullptr*/, const bool& visible /*= true*/, const bool& selected /*= false*/) :
+DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
     QObject(parent),
-    _dataset(&dataset),
+    _dataset(dataset),
     _parent(),
     _children(),
     _visible(visible),
@@ -26,10 +28,10 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, DataSet& dataset, DataSet*
     _taskStatus(TaskStatus::Idle),
     _actions()
 {
-    if (parentDataset)
+    if (parentDataset.isValid())
         _parent = &parentDataset->getDataHierarchyItem();
 
-    addIcon("data", getDataset().getIcon());
+    addIcon("data", getDataset()->getIcon());
 }
 
 DataHierarchyItem::~DataHierarchyItem()
@@ -182,9 +184,9 @@ QString DataHierarchyItem::toString() const
     return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), _visible ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
 }
 
-DataSet& DataHierarchyItem::getDataset()
+Dataset<DatasetImpl> DataHierarchyItem::getDataset()
 {
-    return *_dataset;
+    return _dataset;
 }
 
 DataType DataHierarchyItem::getDataType() const
@@ -197,7 +199,7 @@ void DataHierarchyItem::notifyDataChanged()
     if (!_dataset.isValid())
         return;
 
-    Application::core()->notifyDataChanged(*_dataset);
+    Application::core()->notifyDataChanged(_dataset);
 }
 
 void DataHierarchyItem::analyzeDataset(const QString& pluginName)
@@ -207,7 +209,7 @@ void DataHierarchyItem::analyzeDataset(const QString& pluginName)
     if (pluginName.isEmpty())
         return;
 
-    Application::core()->analyzeDataset(pluginName, *_dataset);
+    Application::core()->analyzeDataset(pluginName, _dataset);
 }
 
 void DataHierarchyItem::exportDataset(const QString& pluginName)
@@ -217,7 +219,7 @@ void DataHierarchyItem::exportDataset(const QString& pluginName)
     if (pluginName.isEmpty())
         return;
 
-    Application::core()->exportDataset(pluginName, *_dataset);
+    Application::core()->exportDataset(pluginName, _dataset);
 }
 
 void DataHierarchyItem::addAction(WidgetAction& widgetAction)

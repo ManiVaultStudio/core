@@ -2,7 +2,6 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
-#include "util/DatasetRef.h"
 
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
@@ -19,7 +18,6 @@ namespace hdps {
 class Cluster;
 class Clusters;
 
-using namespace hdps;
 using namespace hdps::gui;
 using namespace hdps::util;
 
@@ -30,12 +28,12 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class ClustersAction : public WidgetAction, public EventListener
+class ClustersAction : public WidgetAction, public hdps::EventListener
 {
 protected:
 
     /** Widget class for clusters action */
-    class Widget : public WidgetActionWidget, public EventListener {
+    class Widget : public WidgetActionWidget, public hdps::EventListener {
     public:
 
         /**
@@ -76,7 +74,7 @@ public:
     std::vector<Cluster>* getClusters();
 
     /** Get clusters */
-    DatasetRef<Clusters>& getClustersDataset();
+    Dataset<Clusters>& getClustersDataset();
 
     /**
      * Select points
@@ -102,8 +100,8 @@ public: // Action getters
     TriggerAction& getExportAction() { return _exportAction; }
 
 protected:
-    DatasetRef<Clusters>    _clusters;          /** Cluster dataset reference */
-    ClustersModel           _clustersModel;     /** Clusters model */
-    TriggerAction           _importAction;      /** Import clusters action */
-    TriggerAction           _exportAction;      /** Export clusters action */
+    Dataset<Clusters>   _clusters;          /** Cluster dataset reference */
+    ClustersModel       _clustersModel;     /** Clusters model */
+    TriggerAction       _importAction;      /** Import clusters action */
+    TriggerAction       _exportAction;      /** Export clusters action */
 };

@@ -2,7 +2,7 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
-#include "util/DatasetRef.h"
+#include "util/SmartDataset.h"
 
 #include "ClusterData.h"
 #include "ClustersAction.h"
@@ -40,7 +40,7 @@ public: // Action getters
     StringAction& getNumberOfClustersAction() { return _numberOfClustersAction; }
 
 protected:
-    DatasetRef<Clusters>    _clusters;                  /** Clusters dataset reference */
-    StringAction            _numberOfClustersAction;    /** Number of points action */
-    ClustersAction          _clustersAction;            /** Clusters action */
+    Dataset<Clusters>   _clusters;                  /** Clusters dataset smart pointer */
+    StringAction        _numberOfClustersAction;    /** Number of points action */
+    ClustersAction      _clustersAction;            /** Clusters action */
 };

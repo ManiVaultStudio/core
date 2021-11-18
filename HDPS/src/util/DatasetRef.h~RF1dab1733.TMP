@@ -232,6 +232,11 @@ public:
         return _dataset;
     }
 
+    /** Parenthesis operator */
+    SetType* operator() const {
+        return _dataset;
+    }
+
     /** get source data */
     SetType& getSourceData() {
         return dynamic_cast<SetType&>(DataSet::getSourceData(*_dataset));

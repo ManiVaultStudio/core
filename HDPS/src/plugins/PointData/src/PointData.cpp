@@ -34,9 +34,9 @@ void PointData::init()
 
 }
 
-hdps::DataSet* PointData::createDataSet() const
+hdps::Dataset<DatasetImpl> PointData::createDataSet() const
 {
-    return new Points(_core, getName());
+    return hdps::Dataset<DatasetImpl>(new Points(_core, getName()));
 }
 
 unsigned int PointData::getNumPoints() const
@@ -143,7 +143,7 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
 }
 
 Points::Points(hdps::CoreInterface* core, QString dataName) :
-    hdps::DataSet(core, dataName),
+    hdps::DatasetImpl(core, dataName),
     _infoAction()
 {
 }
@@ -196,9 +196,10 @@ void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const
 
 void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 {
-    const Points* currentDataset = this;
+    auto currentDataset = toSmartPointer<Points>();
 
-    std::queue<const Points*> subsetChain;
+    std::queue<Dataset<Points>> subsetChain;
+
     // Walk back in the chain of derived data until we find the original source
     while (currentDataset->isDerivedData())
     {
@@ -207,7 +208,7 @@ void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
         {
             subsetChain.push(currentDataset);
         }
-        currentDataset = &Points::getSourceData(*currentDataset);
+        currentDataset = getSourceDataset<Points>();
     }
 
     // We now have a non-derived dataset bound, push it if its also a subset
@@ -237,7 +238,8 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
     getGlobalIndices(localGlobalIndices);
 
     // In an array the size of the full raw data, mark selected points as true
-    std::vector<bool> globalSelection(Points::getSourceData(*this).getNumRawPoints(), false);
+    std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+
     for (const unsigned int& selectionIndex : selectionIndices)
         globalSelection[selectionIndex] = true;
 
@@ -252,15 +254,15 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
 
 void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
 {
-    Points& selection = static_cast<Points&>(getSelection());
+    auto selection = getSelection<Points>();
 
     // Find the global indices of this dataset
     std::vector<unsigned int> localGlobalIndices;
     getGlobalIndices(localGlobalIndices);
 
     // In an array the size of the full raw data, mark selected points as true
-    std::vector<bool> globalSelection(Points::getSourceData(*this).getNumRawPoints(), false);
-    for (const unsigned int& selectionIndex : selection.indices)
+    std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+    for (const unsigned int& selectionIndex : selection->indices)
         globalSelection[selectionIndex] = true;
 
     // For all local points find out which are selected
@@ -284,9 +286,9 @@ void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionI
     }
 }
 
-hdps::DataSet* Points::copy() const
+Dataset<DatasetImpl> Points::copy() const
 {
-    Points* set = new Points(_core, getDataName());
+    auto set = new Points(_core, getRawDataName());
 
     set->setGuiName(getGuiName());
     set->indices = indices;
@@ -294,9 +296,9 @@ hdps::DataSet* Points::copy() const
     return set;
 }
 
-DataSet& Points::createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible /*= true*/) const
+Dataset<DatasetImpl> Points::createSubset(const QString subsetGuiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible /*= true*/) const
 {
-    return _core->createSubsetFromSelection(getSelection(), *this, subsetGuiName, parentDataSet, visible);
+    return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), subsetGuiName, parentDataSet, visible);
 }
 
 QIcon Points::getIcon() const
@@ -342,8 +344,8 @@ QIcon Points::getIcon() const
 
 void Points::selectAll()
 {
-    auto& selection         = dynamic_cast<Points&>(getSelection());
-    auto& selectionIndices  = selection.indices;
+    auto& selection         = getSelection<Points>();
+    auto& selectionIndices  = selection->indices;
 
     selectionIndices.clear();
     selectionIndices.resize(getNumPoints());
@@ -361,8 +363,8 @@ void Points::selectAll()
 
 void Points::selectNone()
 {
-    auto& selection         = dynamic_cast<Points&>(getSelection());
-    auto& selectionIndices  = selection.indices;
+    auto& selection         = getSelection<Points>();
+    auto& selectionIndices  = selection->indices;
 
     selectionIndices.clear();
 
@@ -371,8 +373,8 @@ void Points::selectNone()
 
 void Points::selectInvert()
 {
-    auto& selection         = dynamic_cast<Points&>(getSelection());
-    auto& selectionIndices  = selection.indices;
+    auto& selection         = getSelection<Points>();
+    auto& selectionIndices  = selection->indices;
 
     std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
 
@@ -409,17 +411,17 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void Points::addLinkedSelection(DataSet& targetDataSet, hdps::SelectionMap& mapping)
+void Points::addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
 {
-    _linkedSelections.emplace_back(this, &targetDataSet);
+    _linkedSelections.emplace_back(toSmartPointer(), targetDataSet);
     _linkedSelections.back().setMapping(mapping);
 }
 
 void Points::setSelection(std::vector<unsigned int>& indices)
 {
-    Points& selection = static_cast<Points&>(getSelection());
+    auto selection = getSelection<Points>();
 
-    selection.indices = indices;
+    selection->indices = indices;
 
     for (hdps::LinkedSelection& linkedSelection : _linkedSelections)
     {
@@ -439,7 +441,7 @@ void Points::setSelection(std::vector<unsigned int>& indices)
             }
         }
 
-        selection.indices.insert(selection.indices.end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
+        selection->indices.insert(selection->indices.end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
     }
 }
 

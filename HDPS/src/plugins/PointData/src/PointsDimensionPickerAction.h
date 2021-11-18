@@ -2,12 +2,12 @@
 
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
-#include "util/DatasetRef.h"
 
 #include "PointData.h"
 
 #include "pointdata_export.h"
 
+using namespace hdps;
 using namespace hdps::gui;
 using namespace hdps::util;
 
@@ -65,7 +65,7 @@ public:
      * Set the points dataset from which the dimension will be picked
      * @param points Dataset reference to points dataset
      */
-    void setPointsDataset(const DatasetRef<Points>& points);
+    void setPointsDataset(const Dataset<Points>& points);
 
     /** Get the names of the dimensions */
     QStringList getDimensionNames() const;
@@ -122,6 +122,6 @@ public: /** Action getters */
     OptionAction& getCurrentDimensionAction() { return _currentDimensionAction; }
 
 protected:
-    DatasetRef<Points>  _points;                    /** Dataset reference to points dataset from which the dimension will be picked */
+    Dataset<Points>     _points;                    /** Dataset reference to points dataset from which the dimension will be picked */
     OptionAction        _currentDimensionAction;    /** Current dimension action */
 };

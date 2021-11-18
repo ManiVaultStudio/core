@@ -3,7 +3,7 @@
 #include "DataHierarchyModelItem.h"
 #include "Core.h"
 
-#include "util/DatasetRef.h"
+#include "util/SmartDataset.h"
 
 #include <QDebug>
 #include <QInputDialog>
@@ -41,7 +41,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     setItemsExpandable(true);
 
     // Hide columns
-    setColumnHidden(DataHierarchyModelItem::Column::ID, true);
+    setColumnHidden(DataHierarchyModelItem::Column::GUID, true);
     setColumnHidden(DataHierarchyModelItem::Column::Analysis, true);
 
     header()->resizeSection(DataHierarchyModelItem::Column::Name, 180);
@@ -50,7 +50,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, 20);
 
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
-    header()->setSectionResizeMode(DataHierarchyModelItem::Column::ID, QHeaderView::Fixed);
+    header()->setSectionResizeMode(DataHierarchyModelItem::Column::GUID, QHeaderView::Fixed);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Description, QHeaderView::Stretch);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Analyzing, QHeaderView::Fixed);
@@ -62,7 +62,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             return;
         
         // Get the globally unique identifier of the selected dataset
-        const auto selectedDatasetId = current.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::ID)).data(Qt::DisplayRole).toString();
+        const auto selectedDatasetId = current.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::GUID)).data(Qt::DisplayRole).toString();
 
         // Notify others that a dataset was selected
         emit selectedDatasetChanged(selectedDatasetId);
@@ -80,11 +80,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     numberOfRowsChanged();
 
-    const auto getModelIndexForDataset = [this](const DataSet& dataSet) -> QModelIndex {
-        const auto modelIndex = _model.match(_model.index(0, 1), Qt::DisplayRole, dataSet.getId(), 1, Qt::MatchFlag::MatchRecursive).first();
+    const auto getModelIndexForDataset = [this](const Dataset<DatasetImpl>& dataset) -> QModelIndex {
+        const auto modelIndex = _model.match(_model.index(0, 1), Qt::DisplayRole, dataset->getGuid(), 1, Qt::MatchFlag::MatchRecursive).first();
 
         if (!modelIndex.isValid())
-            throw new std::runtime_error(QString("Dataset '%1' not found in model").arg(dataSet.getGuiName()).toLatin1());
+            throw new std::runtime_error(QString("Dataset '%1' not found in model").arg(dataset->getGuiName()).toLatin1());
 
         return modelIndex;
     };
@@ -93,7 +93,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         if (dataHierarchyItem == nullptr || dataHierarchyItem->isHidden())
             return;
 
-        DatasetRef<DataSet> dataset(&dataHierarchyItem->getDataset());
+        auto dataset = dataHierarchyItem->getDataset();
 
         QModelIndex parentModelIndex;
 

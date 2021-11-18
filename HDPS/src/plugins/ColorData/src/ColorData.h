@@ -6,9 +6,7 @@
 #include <QColor>
 #include <vector>
 
-// =============================================================================
-// Data Type
-// =============================================================================
+using namespace hdps;
 
 const hdps::DataType ColorType = hdps::DataType(QString("Colors"));
 
@@ -26,39 +24,41 @@ public:
 
     uint count();
 
-    hdps::DataSet* createDataSet() const override;
+    /** Create dataset for for raw data */
+    Dataset<DatasetImpl> createDataSet() const override;
 
 private:
     std::vector<QColor> _colors;
 };
 
-// =============================================================================
-// Color Data Set
-// =============================================================================
-
-class Colors : public hdps::DataSet
+class Colors : public hdps::DatasetImpl
 {
 public:
-    Colors(hdps::CoreInterface* core, QString dataName) : DataSet(core, dataName) { }
+    Colors(CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
     ~Colors() override { }
 
-    DataSet* copy() const override
+    /**
+     * Get a copy of the dataset
+     * @return Smart pointer to copy of dataset
+     */
+    Dataset<DatasetImpl> copy() const override
     {
-        Colors* colors = new Colors(_core, getDataName());
+        auto colors = new Colors(_core, getRawDataName());
         colors->setGuiName(getGuiName());
         colors->indices = indices;
-        return colors;
+
+        return Dataset<DatasetImpl>(colors);
     }
 
     /**
      * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
      * @param subsetGuiName Name of the subset in the GUI
-     * @param parentDataSet Pointer to parent dataset (if any)
+     * @param parentDataSet Smart pointer to parent dataset (if any)
      * @param visible Whether the subset will be visible in the UI
-     * @return Reference to the created subset
+     * @return Smart pointer to the created subset
      */
-    DataSet& createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible = true) const override {
-        return _core->createSubsetFromSelection(getSelection(), *this, subsetGuiName, parentDataSet, visible);
+    Dataset<DatasetImpl> createSubset(const QString subsetGuiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible = true) const override {
+        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), subsetGuiName, parentDataSet, visible);
     }
 
     /** Get icon for the dataset */

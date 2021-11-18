@@ -3,8 +3,7 @@
 #include "MainWindow.h"
 #include "PluginManager.h"
 
-#include "exceptions/SetNotFoundException.h"
-#include "util/DatasetRef.h"
+#include "event/Event.h"
 #include "util/Exception.h"
 
 #include "AnalysisPlugin.h"
@@ -16,7 +15,6 @@
 
 #include "DataAction.h"
 
-#include <QMessageBox>
 #include <algorithm>
 
 using namespace hdps::util;
@@ -97,7 +95,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             auto& outputDataset = analysisPlugin->getOutputDataset();
 
             // Adjust the data hierarchy icon
-            _dataHierarchyManager->getItem(outputDataset.getId()).addIcon("analysis", analysisPlugin->getIcon());
+            _dataHierarchyManager->getItem(outputDataset->getGuid()).addIcon("analysis", analysisPlugin->getIcon());
 
             // Notify listeners that a dataset was added
             notifyDataAdded(outputDataset);
@@ -131,7 +129,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataset /*= nullptr*/)
+Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind);
@@ -153,8 +151,8 @@ DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, const
     _dataManager->addSelection(rawDataName, selection);
     
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager->addItem(*fullSet, const_cast<DataSet*>(parentDataset));
-    _dataHierarchyManager->selectItem(*fullSet);
+    _dataHierarchyManager->addItem(Dataset<DatasetImpl>(fullSet), const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    _dataHierarchyManager->selectItem(Dataset<DatasetImpl>(fullSet));
     
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
@@ -162,10 +160,10 @@ DataSet& Core::addData(const QString& kind, const QString& dataSetGuiName, const
     // Add data action (available as right-click menu in the data hierarchy widget)
     new DataAction(&_mainWindow, *fullSet);
 
-    return *fullSet;
+    return Dataset<DatasetImpl>(fullSet);
 }
 
-void Core::removeDatasets(const QVector<DataSet*> datasets, const bool& recursively /*= false*/)
+void Core::removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively /*= false*/)
 {
     // Remove datasets one by one
     for (const auto& dataset : datasets) {
@@ -174,20 +172,20 @@ void Core::removeDatasets(const QVector<DataSet*> datasets, const bool& recursiv
         const auto dataType = dataset->getDataType();
 
         // Notify listeners that the dataset is about to be removed
-        notifyDataAboutToBeRemoved(*dataset);
+        notifyDataAboutToBeRemoved(dataset);
         
         // Remove the dataset from the data manager
         //_dataManager->removeDataset(*dataset);
 
         // Notify listeners that the dataset is removed
-        notifyDataRemoved(dataset->getId(), dataType);
+        notifyDataRemoved(dataset->getGuid(), dataType);
     }
 }
 
-DataSet& Core::createDerivedData(const QString& guiName, const DataSet& sourceDataset, const DataSet* parentDataset /*= nullptr*/)
+Dataset<DatasetImpl> Core::createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset)
 {
     // Get the data type of the source dataset
-    const auto dataType = sourceDataset.getDataType();
+    const auto dataType = sourceDataset->getDataType();
 
     // Create a new plugin of the given kind
     QString pluginName = _pluginManager->createPlugin(dataType._type);
@@ -199,7 +197,7 @@ DataSet& Core::createDerivedData(const QString& guiName, const DataSet& sourceDa
     auto derivedDataset = rawData.createDataSet();
 
     // Mark the full set as derived
-    derivedDataset->setSourceDataSetId(sourceDataset.getId());
+    derivedDataset->setSourceDataSet(sourceDataset);
 
     // Set properties of the new set
     derivedDataset->setAll(true);
@@ -208,7 +206,7 @@ DataSet& Core::createDerivedData(const QString& guiName, const DataSet& sourceDa
     _dataManager->addSet(*derivedDataset);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addItem(*derivedDataset, parentDataset == nullptr ? const_cast<DataSet*>(&sourceDataset) : const_cast<DataSet*>(parentDataset));
+    _dataHierarchyManager->addItem(derivedDataset, const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
     // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();
@@ -216,53 +214,67 @@ DataSet& Core::createDerivedData(const QString& guiName, const DataSet& sourceDa
     // Add data action (available as right-click menu in the data hierarchy widget)
     new DataAction(&_mainWindow, *derivedDataset);
 
-    return *derivedDataset;
+    return Dataset<DatasetImpl>(*derivedDataset);
 }
 
-DataSet& Core::createSubsetFromSelection(const DataSet& selection, const DataSet& sourceDataset, const QString& guiName, const DataSet* parentDataset /*= nullptr*/, const bool& visible /*= true*/)
+Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible /*= true*/)
 {
-    // Create a subset with only the indices that were part of the selection set
-    auto subset = selection.copy();
+    try
+    {
+        // Create a subset with only the indices that were part of the selection set
+        auto subset = selection->copy();
 
-    subset->_dataName           = sourceDataset._dataName;
-    subset->_sourceDataSetId    = sourceDataset._sourceDataSetId;
-    subset->_derived            = sourceDataset._derived;
+        // Assign source dataset to subset
+        *subset = *const_cast<Dataset<DatasetImpl>&>(sourceDataset);
 
-    // Add the set the core and publish the name of the set to all plug-ins
-    _dataManager->addSet(*subset);
+        // Add the set the core and publish the name of the set to all plug-ins
+        _dataManager->addSet(*subset);
     
-    // Notify listeners that data was added
-    notifyDataAdded(*subset);
+        // Notify listeners that data was added
+        notifyDataAdded(*subset);
 
-    // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addItem(*subset, parentDataset == nullptr ? const_cast<DataSet*>(&sourceDataset) : const_cast<DataSet*>(parentDataset), visible);
+        // Add the dataset to the hierarchy manager
+        _dataHierarchyManager->addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
 
-    // Initialize the dataset (e.g. setup default actions for info)
-    subset->init();
+        // Initialize the dataset (e.g. setup default actions for info)
+        subset->init();
 
-    // Add data action (available as right-click menu in the data hierarchy widget)
-    new DataAction(&_mainWindow, *subset);
+        // Add data action (available as right-click menu in the data hierarchy widget)
+        new DataAction(&_mainWindow, *subset);
 
-    return *subset;
+        return subset;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to create subset from selection", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to create subset from selection");
+    }
+
+    return Dataset<DatasetImpl>();
 }
 
-plugin::RawData& Core::requestRawData(const QString name)
+plugin::RawData& Core::requestRawData(const QString& name)
 {
     try
     {
         return _dataManager->getRawData(name);
     }
-    catch (DataNotFoundException e)
+    catch (std::exception& e)
     {
-        QMessageBox::critical(nullptr, QString("HDPS"), e.what(), QMessageBox::Ok);
+        exceptionMessageBox("Unable to request raw data", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to request raw data");
     }
 }
 
-DataSet& Core::requestData(const QString& dataSetId)
+Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)
 {
     try
     {
-        return _dataManager->getSet(dataSetId);
+        return Dataset<DatasetImpl>(_dataManager->getSet(dataSetId));
     }
     catch (std::exception& e)
     {
@@ -271,12 +283,14 @@ DataSet& Core::requestData(const QString& dataSetId)
     catch (...) {
         exceptionMessageBox("Unable to request dataset by identifier");
     }
+
+    return Dataset<DatasetImpl>();
 }
 
-QVector<DataSet*> Core::requestAllDataSets(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
+QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
 {
-    // Result
-    QVector<DataSet*> allDataSets;
+    // Resulting smart pointers to datasets
+    QVector<Dataset<DatasetImpl>> allDataSets;
 
     try
     {
@@ -284,7 +298,7 @@ QVector<DataSet*> Core::requestAllDataSets(const QVector<DataType>& dataTypes /*
         const auto& dataSetsMap = _dataManager->allSets();
 
         // And reserve the proper amount of dataset references
-        allDataSets.reserve(dataSetsMap.size());
+        allDataSets.reserve(static_cast<std::int32_t>(dataSetsMap.size()));
 
         // Add dataset references one by one
         for (auto it = dataSetsMap.begin(); it != dataSetsMap.end(); it++) {
@@ -328,7 +342,7 @@ hdps::plugin::Plugin& Core::requestAnalysis(const QString& kind)
     }
 }
 
-const void Core::analyzeDataset(const QString& kind, DataSet& dataSet)
+const void Core::analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataSet)
 {
     try {
         _pluginManager->createAnalysisPlugin(kind, dataSet);
@@ -356,7 +370,7 @@ const void Core::importDataset(const QString& kind)
     }
 }
 
-const void Core::exportDataset(const QString& kind, DataSet& dataSet)
+const void Core::exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSet)
 {
     try {
         _pluginManager->createExporterPlugin(kind, dataSet);
@@ -380,16 +394,9 @@ QStringList Core::getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& plu
     return _pluginManager->getPluginKindsByPluginTypeAndDataTypes(pluginType, dataTypes);
 }
 
-DataSet& Core::requestSelection(const QString name)
+Dataset<DatasetImpl> Core::requestSelection(const QString& name)
 {
-    try
-    {
-        return _dataManager->getSelection(name);
-    }
-    catch (const SelectionNotFoundException e)
-    {
-        QMessageBox::critical(nullptr, QString("HDPS"), e.what(), QMessageBox::Ok);
-    }
+    return Dataset<DatasetImpl>(_dataManager->getSelection(name));
 }
 
 void Core::registerEventListener(EventListener* eventListener)
@@ -412,10 +419,10 @@ QIcon Core::getPluginIcon(const QString& pluginKind) const
     return _pluginManager->getPluginIcon(pluginKind);
 }
 
-void Core::notifyDataAdded(const DataSet& dataset)
+void Core::notifyDataAdded(const Dataset<DatasetImpl>& dataset)
 {
     // Create data added event
-    DataAddedEvent dataEvent(const_cast<DataSet*>(&dataset));
+    DataAddedEvent dataEvent(dataset);
 
     // Cache the event listeners to prevent crash
     const auto eventListeners = _eventListeners;
@@ -426,10 +433,10 @@ void Core::notifyDataAdded(const DataSet& dataset)
             listener->onDataEvent(&dataEvent);
 }
 
-void Core::notifyDataAboutToBeRemoved(const DataSet& dataset)
+void Core::notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset)
 {
     // Create data about to be removed event
-    DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent(const_cast<DataSet*>(&dataset));
+    DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent(dataset);
 
     // Cache the event listeners to prevent timing issues
     const auto eventListeners = _eventListeners;
@@ -454,30 +461,30 @@ void Core::notifyDataRemoved(const QString& datasetId, const DataType& dataType)
             listener->onDataEvent(&dataRemovedEvent);
 }
 
-void Core::notifyDataChanged(const DataSet& dataset)
+void Core::notifyDataChanged(const Dataset<DatasetImpl>& dataset)
 {
     // Create data changed event
-    DataChangedEvent dataEvent(const_cast<DataSet*>(&dataset));
+    DataChangedEvent dataEvent(dataset);
 
     // And notify all listeners
     for (EventListener* listener : _eventListeners)
         listener->onDataEvent(&dataEvent);
 }
 
-void Core::notifyDataSelectionChanged(const DataSet& dataset)
+void Core::notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset)
 {
     // Create data selection changed event
-    DataSelectionChangedEvent dataSelectionChangedEvent(const_cast<DataSet*>(&dataset));
+    DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
 
     // And notify all listeners
     for (EventListener* listener : _eventListeners)
         listener->onDataEvent(&dataSelectionChangedEvent);
 }
 
-void Core::notifyDataGuiNameChanged(const DataSet& dataset, const QString& previousGuiName)
+void Core::notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName)
 {
     // Create GUI name changed event
-    DataGuiNameChangedEvent dataGuiNameChangedEvent(const_cast<DataSet*>(&dataset), previousGuiName);
+    DataGuiNameChangedEvent dataGuiNameChangedEvent(dataset, previousGuiName);
 
     // And notify all listeners
     for (EventListener* listener : _eventListeners)

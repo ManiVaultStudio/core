@@ -18,9 +18,9 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
 {
 }
 
-void DataHierarchyManager::addItem(DataSet& dataset, DataSet* parentDataset /*= nullptr*/, const bool& visible /*= true*/)
+void DataHierarchyManager::addItem(Dataset<DatasetImpl>& dataset, Dataset<DatasetImpl>& parentDataset, const bool& visible /*= true*/)
 {
-    qDebug() << "Adding" << dataset.getGuiName() << "to the data hierarchy";
+    qDebug() << "Adding" << dataset->getGuiName() << "to the data hierarchy";
 
     try {
 
@@ -29,8 +29,8 @@ void DataHierarchyManager::addItem(DataSet& dataset, DataSet* parentDataset /*= 
 
         _dataHierarchyItems << newDataHierarchyItem;
 
-        if (parentDataset)
-            parentDataset->getDataHierarchyItem().addChild(dataset.getDataHierarchyItem());
+        if (parentDataset.isValid())
+            parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
 
         emit itemAdded(newDataHierarchyItem);
     }
@@ -39,11 +39,12 @@ void DataHierarchyManager::addItem(DataSet& dataset, DataSet* parentDataset /*= 
     }
 }
 
-QVector<const DataSet*> DataHierarchyManager::removeItem(const DataSet& dataset, const bool& recursively /*= false*/)
+QVector<Dataset<DatasetImpl>> DataHierarchyManager::removeItem(const Dataset<DatasetImpl>& dataset, const bool& recursively /*= false*/)
 {
-    qDebug() << "Removing" << dataset.getGuiName() << "from the data hierarchy";
+    qDebug() << "Removing" << dataset->getGuiName() << "from the data hierarchy";
 
-    QVector<const DataSet*> datasetsToRemove({ &dataset });
+    QVector<Dataset<DatasetImpl>> datasetsToRemove({ dataset });
+
     /*
     try {
         const auto hierarchyItem = getItem(datasetName);
@@ -98,19 +99,19 @@ QVector<const DataSet*> DataHierarchyManager::removeItem(const DataSet& dataset,
     return datasetsToRemove;
 }
 
-const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId) const
+const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid) const
 {
-    return const_cast<DataHierarchyManager*>(this)->getItem(datasetId);
+    return const_cast<DataHierarchyManager*>(this)->getItem(datasetGuid);
 }
 
-DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId)
+DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
 {
     try
     {
-        Q_ASSERT(!datasetId.isEmpty());
+        Q_ASSERT(!datasetGuid.isEmpty());
 
         for (auto dataHierarchyItem : _dataHierarchyItems)
-            if (dataHierarchyItem->getDataset().getId() == datasetId)
+            if (dataHierarchyItem->getDataset().getDatasetGuid() == datasetGuid)
                 return *dataHierarchyItem;
     }
     catch (std::exception& e)
@@ -122,14 +123,14 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetId)
     }
 }
 
-void DataHierarchyManager::selectItem(DataSet& dataSet)
+void DataHierarchyManager::selectItem(Dataset<DatasetImpl>& dataSet)
 {
-    qDebug() << "Selecting" << dataSet.getGuiName() << "in the data hierarchy";
+    qDebug() << "Selecting" << dataSet->getGuiName() << "in the data hierarchy";
 
     try {
 
         // Get data hierarchy item that needs to be selected
-        auto& hierarchyItem = dataSet.getDataHierarchyItem();
+        auto& hierarchyItem = dataSet->getDataHierarchyItem();
 
         // Deselect other data hierarchy items
         for (auto dataHierarchyItem : _dataHierarchyItems)

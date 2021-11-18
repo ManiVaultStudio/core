@@ -2,7 +2,7 @@
 
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
-#include "util/DatasetRef.h"
+#include "util/SmartDataset.h"
 
 #include "Set.h"
 
@@ -62,16 +62,16 @@ public:
      * Set the datasets from which can be picked
      * @param datasets Datasets from which can be picked
      */
-    void setDatasets(const QVector<DatasetRef<hdps::DataSet>>& datasets);
+    void setDatasets(const QVector<hdps::Dataset<hdps::DatasetImpl>>& datasets);
 
     /** Get the current dataset */
-    DatasetRef<hdps::DataSet> getCurrentDataset();
+    hdps::Dataset<hdps::DatasetImpl> getCurrentDataset();
 
     /**
      * Set the current dataset
      * @param currentDataset Current dataset reference
      */
-    void setCurrentDataset(const DatasetRef<hdps::DataSet>& currentDataset);
+    void setCurrentDataset(const hdps::Dataset<hdps::DatasetImpl>& currentDataset);
 
 protected:
 
@@ -88,9 +88,9 @@ signals:
      * Signals that a dataset has been picked
      * @param Dataset reference to picked dataset
      */
-    void datasetPicked(const DatasetRef<hdps::DataSet>& pickedDataset);
+    void datasetPicked(const hdps::Dataset<hdps::DatasetImpl>& pickedDataset);
 
 protected:
-    QVector<DatasetRef<hdps::DataSet>>  _datasets;                  /** Datasets from which can be picked */
-    OptionAction                        _currentDatasetAction;      /** Pick dataset action */
+    QVector<hdps::Dataset<hdps::DatasetImpl>>   _datasets;                  /** Datasets from which can be picked */
+    OptionAction                                _currentDatasetAction;      /** Pick dataset action */
 };

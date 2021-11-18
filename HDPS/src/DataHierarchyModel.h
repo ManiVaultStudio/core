@@ -1,5 +1,4 @@
-#ifndef HDPS_DATA_HIERARCHY_MODEL_H
-#define HDPS_DATA_HIERARCHY_MODEL_H
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QMimeData>
@@ -116,5 +115,3 @@ private:
 };
 
 }
-
-#endif // HDPS_DATA_HIERARCHY_MODEL_H

@@ -31,7 +31,7 @@ namespace gui
 namespace util
 {
     template<typename DatasetType>
-    class DatasetRef;
+    class Dataset;
 }
 
 struct AnalysisNotFoundException : public std::exception
@@ -53,108 +53,96 @@ private:
 class Core : public CoreInterface
 {
 public:
+
+    /** Aliases */
     using UniquePtrPlugin   = std::unique_ptr<plugin::Plugin>;
     using UniquePtrsPlugin  = std::vector<UniquePtrPlugin>;
 
 public:
-    Core(gui::MainWindow& mainWindow);
-    ~Core();
 
     /**
-    * Initializes the core. Loads all plugins from the designated plugin directory.
-    */
-    void init();
-
-    /**
-     * Returns a reference to the internal data manager
+     * Constructor
+     * @param mainWindow Reference to the main window
      */
-    DataManager& getDataManager()
-    {
-        return *_dataManager;
-    }
+    Core(gui::MainWindow& mainWindow);
 
-    /**
-    * Adds the given plugin to the list of plugins kept by the core.
-    */
-    void addPlugin(plugin::Plugin* plugin);
+    /** Destructor */
+    ~Core();
 
 public: // Data access
 
     /**
-     * Requests the plugin manager to create new RawData of the given kind.
-     * The manager will add the raw data to the core and return the
-     * unique name of the data set linked with the raw data
+     * Requests the plugin manager to create new RawData of the given kind
+     * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataset Pointer to parent dataset in the data hierarchy (root if nullptr)
-     * @return Reference to the added dataset
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
+     * @return Smart pointer to the added dataset
      */
-    DataSet& addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataset = nullptr) override;
+    Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
 
     /**
      * Removes one or more datasets
-     * Other datasets derived from this dataset are converted to non-derived data.
+     * Other datasets derived from this dataset are converted to non-derived data
      * Notifies all plug-ins of the removed dataset automatically
-     * @param datasets Datasets to remove
+     * @param datasets Smart pointers to the datasets that need to be removed
      * @param recursively Remove datasets recursively
      */
-    void removeDatasets(const QVector<DataSet*> datasets, const bool& recursively = false) override;
+    void removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively = false) override;
 
     /**
      * Creates a dataset derived from a source dataset.
      * @param guiName GUI name for the new dataset from the core
-     * @param sourceDataset Reference to source dataset from which this dataset will be derived
-     * @param parentDataset Pointer to parent dataset in the data hierarchy (will attach to root in hierarchy if empty)
-     * @return Reference to created derived dataset
+     * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
+     * @return Smart pointer to the created derived dataset
      */
-    DataSet& createDerivedData(const QString& guiName, const DataSet& sourceDataset, const DataSet* parentDataset = nullptr) override;
+    Dataset<DatasetImpl> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset) override;
 
     /**
-     * Creates a copy of the given selection set and gives it a unique name based
-     * on the name given to this function. Then adds the new set to the data manager
-     * and notifies all data consumers of the new set.
-     * @param selection Selection set
-     * @param sourceDataset Source dataset
+     * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set
+     * @param selection Smart pointer to the selection set
+     * @param sourceDataset Smart pointer to the source dataset
      * @param guiName GUI name of the subset
-     * @param parentDataset Pointer to the parent dataset in the data hierarchy (sourceSetName if is used if empty)
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (sourceSetName if not valid)
      * @param visible Whether the new dataset is visible in the user interface
-     * @return Reference to created subset
+     * @return Smart pointer to the created subset
      */
-    DataSet& createSubsetFromSelection(const DataSet& selection, const DataSet& sourceDataset, const QString& guiName, const DataSet* parentDataset = nullptr, const bool& visible = true) override;
+    Dataset<DatasetImpl> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true) override;
 
     /**
-     * Requests a dataset from the core by dataset globally unique identifier (if no such instance can be found a fatal error is thrown)
-     * @param dataSetId Globally unique identifier of the dataset
-     * @return Reference to data set
+     * Requests a dataset from the core by dataset GUID (if no such instance can be found a fatal error is thrown)
+     * @param datasetGuid GUID of the dataset
+     * @return Smart pointer to the dataset
      */
-    DataSet& requestData(const QString& dataSetId) override;
+    Dataset<DatasetImpl> requestDataset(const QString& datasetGuid) override;
 
     /**
      * Returns all data sets that are present in the core, filtered by data type(s)
      * Returns all data sets in case of an empty filter
      * @param dataTypes Data types to filter
-     * @return Vector of pointers to datasets
+     * @return Vector of references to datasets
      */
-    QVector<DataSet*> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) override;
+    QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) override;
 
 protected: // Data access
 
     /**
-     * Requests an instance of a data type plugin from the core which has the same
-     * unique name as the given parameter. If no such instance can be found a fatal
-     * error is thrown.
+     * Requests an instance of a data type plugin from the core which has the same unique name as the given parameter, if no such instance can be found a fatal error is thrown
+     * @param datasetName Name of the dataset
      */
-    plugin::RawData& requestRawData(const QString name) override;
+    plugin::RawData& requestRawData(const QString& name) override;
 
     /**
-    * Requests the selection set belonging to the raw dataset with the given name.
-    */
-    DataSet& requestSelection(const QString rawdataName) override;
+     * Request a selection from the data manager by its corresponding raw data name.
+     * @param rawdataName Name of the raw data
+     */
+    Dataset<DatasetImpl> requestSelection(const QString& rawDataName) override;
 
 public: // Analysis
 
     /**
-     * Request an analysis by its kind
+     * Request an analysis plugin by its kind
      * @param kind Type of analysis
      * @return Reference to created plugin
      */
@@ -163,9 +151,9 @@ public: // Analysis
     /**
      * Analyze a dataset
      * @param kind Type of analysis
-     * @param dataSet Reference  to dataset to analyze
+     * @param dataSet Smart pointer to the dataset to analyze
      */
-    const void analyzeDataset(const QString& kind, DataSet& dataSet) override;
+    const void analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataset) override;
 
 public: // Import/export
 
@@ -178,9 +166,9 @@ public: // Import/export
     /**
      * Exports a dataset
      * @param kind Type of export plugin
-     * @param dataSet Reference to dataset to export
+     * @param dataSet Smart pointer to the dataset to export
      */
-    const void exportDataset(const QString& kind, DataSet& dataSet) override;
+    const void exportDataset(const QString& kind, Dataset<DatasetImpl>& dataset) override;
 
 public: // Plugin queries
 
@@ -195,7 +183,7 @@ public: // Plugin queries
     /**
      * Get plugin GUI name from plugin kind
      * @param pluginKind Kind of plugin
-     * @param GUI name of the plugin, empty if the plugin kind was not found
+     * @return GUI name of the plugin, empty if the plugin kind was not found
      */
     QString getPluginGuiName(const QString& pluginKind) const override;
 
@@ -212,51 +200,51 @@ public: // Data hierarchy
     DataHierarchyManager& getDataHierarchyManager() override;
 
     /**
-     * Get data hierarchy item by dataset globally unique identifier
-     * @param dataSetId Globally unique identifier of the dataset
+     * Get data hierarchy item by dataset GUI
+     * @param datasetGuid Globally unique identifier of the dataset
      * @return Reference to data hierarchy item
      */
-    DataHierarchyItem& getDataHierarchyItem(const QString& dataSetId) override;
+    DataHierarchyItem& getDataHierarchyItem(const QString& datasetGuid) override;
 
 public: // Events & notifications
 
     /**
      * Notify listeners that a new dataset has been added to the core
-     * @param dataset Reference to the dataset that was added
+     * @param dataset Smart pointer to the dataset that was added
      */
-    void notifyDataAdded(const DataSet& dataset) override;
+    void notifyDataAdded(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify listeners that a dataset is about to be removed
-     * @param dataset Reference to the dataset which is about to be removed
+     * @param dataset Smart pointer to the dataset which is about to be removed
      */
-    void notifyDataAboutToBeRemoved(const DataSet& dataset) override;
+    void notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify listeners that a dataset is removed
-     * @param datasetId Globally unique identifier of the dataset that was removed
+     * @param datasetGuid GUID of the dataset that was removed
      * @param dataType Type of the data
      */
-    void notifyDataRemoved(const QString& datasetId, const DataType& dataType) override;
+    void notifyDataRemoved(const QString& datasetGuid, const DataType& dataType) override;
 
     /**
      * Notify listeners that a dataset has changed
-     * @param dataset Reference to the dataset of which the data changed
+     * @param dataset Smart pointer to the dataset of which the data changed
      */
-    void notifyDataChanged(const DataSet& dataset) override;
+    void notifyDataChanged(const Dataset<DatasetImpl>& dataset) override;
 
     /**
-     * Notify listeners that a selection has changed
-     * @param dataset Reference to the dataset of which the selection changed
+     * Notify listeners that data selection has changed
+     * @param dataset Smart pointer to the dataset of which the selection changed
      */
-    void notifyDataSelectionChanged(const DataSet& dataset) override;
+    void notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset) override;
 
     /**
-     * Notify listeners that a dataset GUI name has changed
-     * @param dataset Reference to dataset of which the GUI name changed
+     * Notify all listeners that a dataset GUI name has changed
+     * @param dataset Smart pointer to the dataset of which the GUI name changed
      * @param previousGuiName Previous dataset name
      */
-    void notifyDataGuiNameChanged(const DataSet& dataset, const QString& previousGuiName) override;
+    void notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) override;
 
     /**
      * Register an event listener
@@ -272,10 +260,19 @@ public: // Events & notifications
 
 public:
 
-    /**
-    * Returns a reference to the main window for adding widgets to it.
-    */
+    /** Returns a reference to the main window for adding widgets to it */
     gui::MainWindow& gui() const;
+
+    /** Initializes the core; loads all plugins from the designated plugin directory */
+    void init();
+
+    /** Returns a reference to the internal data manager */
+    DataManager& getDataManager() {
+        return *_dataManager;
+    }
+
+    /** Adds the given plugin to the list of plugins kept by the core */
+    void addPlugin(plugin::Plugin* plugin);
 
 private:
 

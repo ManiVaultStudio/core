@@ -1,5 +1,4 @@
-#ifndef HDPS_DATA_HIERARCHY_WIDGET_H
-#define HDPS_DATA_HIERARCHY_WIDGET_H
+#pragma once
 
 #include "DataHierarchyModel.h"
 #include "DataImportAction.h"
@@ -70,5 +69,3 @@ private:
 
 }
 }
-
-#endif // HDPS_DATA_HIERARCHY_WIDGET_H

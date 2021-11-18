@@ -29,7 +29,7 @@ PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const 
     connect(&_currentDimensionAction, &OptionAction::currentTextChanged, this, selectionChanged);
 }
 
-void PointsDimensionPickerAction::setPointsDataset(const DatasetRef<Points>& points)
+void PointsDimensionPickerAction::setPointsDataset(const Dataset<Points>& points)
 {
     // Only proceed if we have a valid points dataset
     if (!points.isValid()) {

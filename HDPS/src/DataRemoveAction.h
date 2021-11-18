@@ -1,7 +1,6 @@
 #pragma once
 
 #include "actions/Actions.h"
-#include "util/DatasetRef.h"
 
 #include <QDialog>
 
@@ -43,9 +42,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param dataset Reference to the dataset
+     * @param dataset Smart pointer to the dataset
      */
-    DataRemoveAction(QObject* parent, DataSet& dataset);
+    DataRemoveAction(QObject* parent, const Dataset<DatasetImpl>& dataset);
 
     /**
      * Get the context menu for the action
@@ -55,7 +54,7 @@ public:
     QMenu* getContextMenu(QWidget* parent = nullptr);
 
 protected:
-    DatasetRef<DataSet>     _dataset;                           /** Dataset reference */
+    Dataset<DatasetImpl>    _dataset;                           /** Smart pointer to the dataset */
     TriggerAction           _removeSelectedAction;              /** Remove selected dataset only action */
     TriggerAction           _removeSelectedAndChildrenAction;   /** Remove dataset and all its descendants action */
 };

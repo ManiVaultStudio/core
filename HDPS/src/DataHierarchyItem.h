@@ -3,8 +3,9 @@
 
 #include "DataType.h"
 
-#include "util/DatasetRef.h"
+#include "CoreInterface.h"
 #include "actions/WidgetAction.h"
+#include "Set.h"
 
 #include <QObject>
 #include <QMap>
@@ -15,13 +16,7 @@
 namespace hdps
 {
 
-class DataSet;
-
-/** Shared pointer of data hierarchy item */
-using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
-
-/** Vector of data hierarchy item shared pointers */
-using SharedDataHierarchyItems = QVector<SharedDataHierarchyItem>;
+class DatasetImpl;
 
 /** Vector of data hierarchy item pointers */
 using DataHierarchyItems = QVector<DataHierarchyItem*>;
@@ -61,12 +56,12 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param dataset Dataset
-     * @param parentDataset Pointer to parent dataset (if any)
+     * @param dataset Smart pointer to dataset
+     * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible
      * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(QObject* parent, DataSet& dataset, DataSet* parentDataset = nullptr, const bool& visible = true, const bool& selected = false);
+    DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
 
     /** Destructor */
     ~DataHierarchyItem();
@@ -170,12 +165,12 @@ public: // Miscellaneous
     QString toString() const;
 
     /** Get the dataset */
-    DataSet& getDataset();
+    Dataset<DatasetImpl> getDataset();
 
     /** Get the dataset */
     template<typename DatasetType>
-    DatasetType& getDataset() {
-        return dynamic_cast<DatasetType&>(getDataset());
+    Dataset<DatasetType> getDataset() {
+        return Dataset<DatasetType>(getDataset().get<DatasetType>());
     };
 
     /** Get the dataset type */
@@ -294,7 +289,7 @@ signals:
     void datasetNameChanged(const QString& datasetName);
 
 protected:
-    util::DatasetRef<DataSet>   _dataset;           /** Dataset reference */
+    Dataset<DatasetImpl>        _dataset;           /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;            /** Pointer to parent data hierarchy item */
     DataHierarchyItems          _children;          /** Pointers to child items (if any) */
     bool                        _visible;           /** Whether the dataset is visible */

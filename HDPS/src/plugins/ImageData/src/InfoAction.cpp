@@ -1,5 +1,6 @@
 #include "InfoAction.h"
 #include "Application.h"
+#include "event/Event.h"
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -63,7 +64,7 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
         if (!_images.isValid())
             return;
 
-        if (dataEvent->getDataset() != *_images)
+        if (dataEvent->getDataset() != _images)
             return;
 
         switch (dataEvent->getType()) {

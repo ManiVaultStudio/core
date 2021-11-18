@@ -20,7 +20,7 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent) :
     });
 }
 
-void DatasetPickerAction::setDatasets(const QVector<DatasetRef<hdps::DataSet>>& datasets)
+void DatasetPickerAction::setDatasets(const QVector<Dataset<DatasetImpl>>& datasets)
 {
     _datasets = datasets;
 
@@ -28,20 +28,20 @@ void DatasetPickerAction::setDatasets(const QVector<DatasetRef<hdps::DataSet>>& 
     for (auto& dataset : _datasets) {
 
         // Update the datasets when the dataset is removed
-        connect(&dataset, &DatasetRef<DataSet>::dataAboutToBeRemoved, this, [this, dataset]() {
+        connect(&dataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, dataset]() {
             _datasets.removeOne(dataset);
             updateCurrentDatasetAction();
         });
 
         // Update the current dataset action when the dataset is renamed
-        connect(&dataset, &DatasetRef<DataSet>::dataGuiNameChanged, this, &DatasetPickerAction::updateCurrentDatasetAction);
+        connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, this, &DatasetPickerAction::updateCurrentDatasetAction);
     }
 
     // Update the options action
     updateCurrentDatasetAction();
 }
 
-DatasetRef<DataSet> DatasetPickerAction::getCurrentDataset()
+Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset()
 {
     // Get the current dataset index
     const auto currentIndex = _currentDatasetAction.getCurrentIndex();
@@ -49,10 +49,10 @@ DatasetRef<DataSet> DatasetPickerAction::getCurrentDataset()
     if (currentIndex >= 0)
         return _datasets[currentIndex];
 
-    return DatasetRef<DataSet>();
+    return Dataset<DatasetImpl>();
 }
 
-void DatasetPickerAction::setCurrentDataset(const DatasetRef<hdps::DataSet>& currentDataset)
+void DatasetPickerAction::setCurrentDataset(const Dataset<DatasetImpl>& currentDataset)
 {
     // Get index of current dataset
     const auto currentIndex = _datasets.indexOf(currentDataset);

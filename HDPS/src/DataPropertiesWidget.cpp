@@ -51,7 +51,7 @@ void DataPropertiesWidget::setDatasetId(const QString& datasetId)
             disconnect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
         // Assign the dataset reference
-        _dataset.set(&Application::core()->requestData(datasetId));
+        _dataset = Application::core()->requestDataset(datasetId);
 
         // Only proceed if we have a valid reference
         if (!_dataset.isValid())

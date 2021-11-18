@@ -3,6 +3,7 @@
 #include "Plugin.h"
 
 #include "DataHierarchyItem.h"
+#include "Set.h"
 
 #include <memory>
 
@@ -26,31 +27,31 @@ public:
     ~AnalysisPlugin() override {};
 
     /**
-     * Set input dataset
-     * @param inputDataset Reference to input dataset
+     * Set input dataset smart pointer
+     * @param inputDataset Smart pointer to the input dataset
      */
-    void setInputDataset(DataSet& inputDataset) {
-        _input.set(&inputDataset);
+    void setInputDataset(Dataset<DatasetImpl>& inputDataset) {
+        _input = inputDataset;
     }
 
-    /** Get input dataset */
-    template<typename DatasetType = DataSet>
-    DatasetType& getInputDataset() {
-        return dynamic_cast<DatasetType&>(*_input);
+    /** Get input dataset smart pointer */
+    template<typename DatasetType = DatasetImpl>
+    Dataset<DatasetType> getInputDataset() {
+        return Dataset<DatasetType>(_input.get<DatasetType>());
     }
 
     /**
-     * Set output dataset
-     * @param outputDataset Reference to output dataset
+     * Set output dataset smart pointer
+     * @param outputDataset Smart pointer to output dataset
      */
-    void setOutputDataset(DataSet& outputDataset) {
-        _output.set(&outputDataset);
+    void setOutputDataset(Dataset<DatasetImpl>& outputDataset) {
+        _output = outputDataset;
     }
 
-    /** Get output dataset */
-    template<typename DatasetType = DataSet>
-    DatasetType& getOutputDataset() {
-        return dynamic_cast<DatasetType&>(*_output);
+    /** Get output dataset smart pointer */
+    template<typename DatasetType = DatasetImpl>
+    Dataset<DatasetType> getOutputDataset() {
+        return Dataset<DatasetType>(_output.get<DatasetType>());
     }
 
 protected: // Status
@@ -121,8 +122,8 @@ protected: // Status
     }
 
 protected:
-    util::DatasetRef<DataSet>     _input;       /** Input dataset */
-    util::DatasetRef<DataSet>     _output;      /** Output dataset */
+    Dataset<DatasetImpl>    _input;       /** Input dataset smart pointer */
+    Dataset<DatasetImpl>    _output;      /** Output dataset smart pointer */
 };
 
 

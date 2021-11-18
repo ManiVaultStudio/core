@@ -1,5 +1,4 @@
-#ifndef HDPS_DATA_HIERARCHY_MANAGER_H
-#define HDPS_DATA_HIERARCHY_MANAGER_H
+#pragma once
 
 #include "DataHierarchyItem.h"
 
@@ -27,38 +26,38 @@ public:
 
     /**
      * Add a dataset to the hierarchy
-     * @param dataset Dataset
-     * @param parentDataset Pointer to parent dataset (if any)
+     * @param dataset Smart pointer to dataset
+     * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible in the gui
      */
-    void addItem(DataSet& dataset, DataSet* parentDataset = nullptr, const bool& visible = true);
+    void addItem(Dataset<DatasetImpl>& dataset, Dataset<DatasetImpl>& parentDataset, const bool& visible = true);
 
     /**
      * Removes an item from the hierarchy
-     * @param dataset Reference to the dataset
+     * @param dataset Smart pointer to the dataset
      * @return vector of pointers to datasets that need to removed
      */
-    QVector<const DataSet*> removeItem(const DataSet& dataset, const bool& recursively = false);
+    QVector<Dataset<DatasetImpl>> removeItem(const Dataset<DatasetImpl>& dataset, const bool& recursively = false);
 
     /**
      * Get hierarchy item by dataset globally unique identifier
-     * @param datasetId Globally unique identifier of the dataset
+     * @param datasetGuid Dataset GUID
      * @return Reference to data hierarchy item
      */
-    const DataHierarchyItem& getItem(const QString& datasetId) const;
+    const DataHierarchyItem& getItem(const QString& datasetGuid) const;
 
     /**
      * Get hierarchy item by dataset globally unique identifier
-     * @param datasetId Globally unique identifier of the dataset
+     * @param datasetGuid Dataset GUID
      * @return Reference to data hierarchy item
      */
-    DataHierarchyItem& getItem(const QString& datasetId);
+    DataHierarchyItem& getItem(const QString& datasetGuid);
 
     /**
      * Selects data hierarchy item with dataset name
-     * @param dataSet Reference to dataset to select
+     * @param dataSet Smart pointer to dataset to select
      */
-    void selectItem(DataSet& dataSet);
+    void selectItem(Dataset<DatasetImpl>& dataSet);
 
     /**
      * Get dataset children
@@ -78,9 +77,9 @@ signals:
 
     /**
      * Signals that a hierarchy item is about to be removed from the hierarchy manager
-     * @param dataSet Reference to about to be removed dataset
+     * @param dataSet Smart pointer to the about to be removed dataset
      */
-    void itemAboutToBeRemoved(const DataSet& dataSet);
+    void itemAboutToBeRemoved(const Dataset<DatasetImpl>& dataSet);
 
     /**
      * Signals that a hierarchy item is removed from the hierarchy manager
@@ -105,5 +104,3 @@ private:
 };
 
 }
-
-#endif // HDPS_DATA_HIERARCHY_MANAGER_H

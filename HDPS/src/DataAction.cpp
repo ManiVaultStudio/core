@@ -8,7 +8,7 @@ namespace hdps {
 
 using namespace gui;
 
-DataAction::DataAction(QObject* parent, DataSet& dataset) :
+DataAction::DataAction(QObject* parent, const Dataset<DatasetImpl>& dataset) :
     WidgetAction(parent),
     _dataset(dataset),
     _dataAnalysisAction(this, dataset),

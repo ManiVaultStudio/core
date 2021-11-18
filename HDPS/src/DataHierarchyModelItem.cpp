@@ -73,7 +73,7 @@ QString DataHierarchyModelItem::serialize() const
     if (_dataHierarchyItem == nullptr)
         return "";
 
-    return _dataHierarchyItem->getGuiName() + "\n" + _dataHierarchyItem->getDataset().getId() + "\n" + _dataHierarchyItem->getDataType();
+    return _dataHierarchyItem->getGuiName() + "\n" + _dataHierarchyItem->getDataset()->getGuid() + "\n" + _dataHierarchyItem->getDataType();
 }
 
 QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) const
@@ -86,8 +86,8 @@ QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) con
         case Column::Name:
             return _dataHierarchyItem->getGuiName();
 
-        case Column::ID:
-            return _dataHierarchyItem->getDataset().getId();
+        case Column::GUID:
+            return _dataHierarchyItem->getDataset()->getGuid();
 
         case Column::Description:
             return _progressSection;
@@ -120,7 +120,7 @@ QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
         case Column::Name:
             return _dataHierarchyItem->getIconByName("data");
 
-        case Column::ID:
+        case Column::GUID:
             break;
 
         case Column::Analysis:

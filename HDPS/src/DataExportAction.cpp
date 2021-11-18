@@ -8,7 +8,7 @@ namespace hdps {
 
 using namespace gui;
 
-DataExportAction::DataExportAction(QObject* parent, DataSet& dataset) :
+DataExportAction::DataExportAction(QObject* parent, const Dataset<DatasetImpl>& dataset) :
     WidgetAction(parent),
     _dataset(dataset),
     _pluginKinds()

@@ -14,15 +14,9 @@
 
 #include <vector>
 
-// =============================================================================
-// Data Type
-// =============================================================================
+using namespace hdps;
 
 const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
-
-// =============================================================================
-// Raw Data
-// =============================================================================
 
 class InfoAction;
 
@@ -31,10 +25,11 @@ class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData, public hdps
 public:
     ClusterData(const hdps::plugin::PluginFactory* factory);
     ~ClusterData(void) override;
-    
+
     void init() override;
 
-    hdps::DataSet* createDataSet() const override;
+    /** Create dataset for raw data */
+    Dataset<DatasetImpl> createDataSet() const override;
 
     /** Returns reference to the clusters */
     std::vector<Cluster>& getClusters();
@@ -70,10 +65,10 @@ private:
 // Cluster Set
 // =============================================================================
 
-class CLUSTERDATA_EXPORT Clusters : public hdps::DataSet
+class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
 {
 public:
-    Clusters(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
+    Clusters(CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
     ~Clusters() override { }
 
     void init() override;
@@ -106,24 +101,30 @@ public:
      */
     void removeClustersById(const QStringList& ids);
 
-    DataSet* copy() const override
+    /**
+     * Get a copy of the dataset
+     * @return Smart pointer to copy of dataset
+     */
+    Dataset<DatasetImpl> copy() const override
     {
-        Clusters* clusters = new Clusters(_core, getDataName());
+        auto clusters = new Clusters(_core, getRawDataName());
+
         clusters->setGuiName(getGuiName());
         clusters->indices = indices;
-        return clusters;
+        
+        return Dataset<DatasetImpl>(clusters);
     }
 
     /**
      * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
      * @param subsetGuiName Name of the subset in the GUI
-     * @param parentDataSet Pointer to parent dataset (if any)
+     * @param parentDataSet Smart pointer to parent dataset (if any)
      * @param visible Whether the subset will be visible in the UI
-     * @return Reference to the created subset
+     * @return Smart pointer to the created subset
      */
-    DataSet& createSubset(const QString subsetGuiName, DataSet* parentDataSet, const bool& visible = true) const override
+    Dataset<DatasetImpl> createSubset(const QString subsetGuiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible = true) const
     {
-        return _core->createSubsetFromSelection(getSelection(), *this, subsetGuiName, parentDataSet, visible);
+        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), subsetGuiName, parentDataSet, visible);
     }
 
     /** Get icon for the dataset */

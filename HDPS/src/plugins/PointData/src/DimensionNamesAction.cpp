@@ -1,5 +1,7 @@
 #include "DimensionNamesAction.h"
 
+#include "event/Event.h"
+
 #include <QHBoxLayout>
 #include <QListView>
 
@@ -50,7 +52,7 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
         if (!_points.isValid())
             return;
 
-        if (dataEvent->getDataset() != *_points)
+        if (dataEvent->getDataset() != _points)
             return;
 
         switch (dataEvent->getType()) {

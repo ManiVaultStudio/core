@@ -50,7 +50,7 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
             dataHierarchyItem->renameDataset(value.toString());
             break;
 
-        case DataHierarchyModelItem::Column::ID:
+        case DataHierarchyModelItem::Column::GUID:
             break;
 
         case DataHierarchyModelItem::Column::Description:
@@ -170,7 +170,7 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                     case DataHierarchyModelItem::Column::Name:
                         return "Name";
 
-                    case DataHierarchyModelItem::Column::ID:
+                    case DataHierarchyModelItem::Column::GUID:
                         return "ID";
 
                     case DataHierarchyModelItem::Column::Description:
@@ -195,7 +195,7 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                 switch (static_cast<DataHierarchyModelItem::Column>(section))
                 {
                     case DataHierarchyModelItem::Column::Name:
-                    case DataHierarchyModelItem::Column::ID:
+                    case DataHierarchyModelItem::Column::GUID:
                     case DataHierarchyModelItem::Column::Description:
                     case DataHierarchyModelItem::Column::Analysis:
                         break;

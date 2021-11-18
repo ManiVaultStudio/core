@@ -4,34 +4,34 @@
 namespace hdps
 {
 
-DataHierarchyItem& DataSet::getDataHierarchyItem()
+DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
 {
-    return _core->getDataHierarchyItem(_id);
+    return _core->getDataHierarchyItem(_guid);
 }
 
-const DataHierarchyItem& DataSet::getDataHierarchyItem() const
+const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 {
-    return const_cast<DataSet*>(this)->getDataHierarchyItem();
+    return const_cast<DatasetImpl*>(this)->getDataHierarchyItem();
 }
 
-void DataSet::addAction(hdps::gui::WidgetAction& widgetAction)
+void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)
 {
-    _core->getDataHierarchyItem(_id).addAction(widgetAction);
+    _core->getDataHierarchyItem(_guid).addAction(widgetAction);
 }
 
-hdps::gui::WidgetActions DataSet::getActions() const
+hdps::gui::WidgetActions DatasetImpl::getActions() const
 {
-    return _core->getDataHierarchyItem(_id).getActions();
+    return _core->getDataHierarchyItem(_guid).getActions();
 }
 
-QMenu* DataSet::getContextMenu(QWidget* parent /*= nullptr*/)
+QMenu* DatasetImpl::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    return _core->getDataHierarchyItem(_id).getContextMenu(parent);
+    return _core->getDataHierarchyItem(_guid).getContextMenu(parent);
 }
 
-void DataSet::populateContextMenu(QMenu* contextMenu)
+void DatasetImpl::populateContextMenu(QMenu* contextMenu)
 {
-    return _core->getDataHierarchyItem(_id).populateContextMenu(contextMenu);
+    return _core->getDataHierarchyItem(_guid).populateContextMenu(contextMenu);
 }
 
 }

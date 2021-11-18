@@ -228,7 +228,7 @@ QString PluginManager::createPlugin(const QString kind)
     return pluginTriggered(kind);
 }
 
-void PluginManager::createAnalysisPlugin(const QString& kind, DataSet& dataSet)
+void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImpl>& dataSet)
 {
     try
     {
@@ -250,7 +250,7 @@ void PluginManager::createAnalysisPlugin(const QString& kind, DataSet& dataSet)
     }
 }
 
-void PluginManager::createExporterPlugin(const QString& kind, DataSet& dataSet)
+void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImpl>& dataSet)
 {
     try
     {

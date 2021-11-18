@@ -13,9 +13,9 @@ void TextData::init()
 {
 }
 
-hdps::DataSet* TextData::createDataSet() const
+Dataset<DatasetImpl> TextData::createDataSet() const
 {
-    return new Text(_core, getName());
+    return Dataset<DatasetImpl>(new Text(_core, getName()));
 }
 
 QIcon TextDataFactory::getIcon() const

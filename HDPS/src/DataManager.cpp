@@ -2,9 +2,14 @@
 #include "RawData.h"
 #include "DataHierarchyItem.h"
 
+#include "util/Exception.h"
+
 #include <QRegularExpression>
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
+
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -14,71 +19,148 @@ void DataManager::addRawData(plugin::RawData* rawData)
     _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
 }
 
-void DataManager::addSet(DataSet& dataSet)
+void DataManager::addSet(const Dataset<DatasetImpl>& dataset)
 {
-    // Add the data set to the map
-    _dataSetMap.emplace(dataSet.getId(), std::unique_ptr<DataSet>(&dataSet));
-
-    emit dataChanged();
-}
-
-void DataManager::addSelection(QString dataName, DataSet* selection)
-{
-    _selections.emplace(dataName, std::unique_ptr<DataSet>(selection));
-}
-
-void DataManager::removeDataset(const QString& datasetName, const bool& recursively /*= true*/)
-{
-    qDebug() << "Removing" << datasetName << "from the data manager";
-
-    /* TODO
-    // Turn all derived datasets referring to the dataset to be removed to non-derived
-    for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
+    try
     {
-        DataSet& set = *it->second;
-        
-        if (set.isDerivedData() && set.getSourceName() == datasetName)
-        {
-            qDebug() << "Un-derive" << set.getGuiName();
+        // Except in the case of an invalid dataset smart pointer
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset smart pointer is invalid");
 
-            set._derived = false;
-            set._sourceSetName = "";
-        }
-        it++;
+        // Add the data set to the map
+        _dataSetMap.emplace(dataset->getGuid(), dataset);
+
+        emit dataChanged();
     }
-    */
-
-    // Remove dataset
-    _dataSetMap.erase(datasetName);
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add dataset", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add dataset");
+    }
 }
 
-plugin::RawData& DataManager::getRawData(QString name)
+void DataManager::addSelection(const QString& dataName, Dataset<DatasetImpl> selection)
 {
-    if (_rawDataMap.find(name) == _rawDataMap.end())
-        throw DataNotFoundException(name);
-
-    return *_rawDataMap[name];
+    _selections.emplace(dataName, selection);
 }
 
-hdps::DataSet& DataManager::getSet(const QString& datasetId)
+void DataManager::removeDataset(const Dataset<DatasetImpl>& dataset, const bool& recursively /*= true*/)
 {
-    if (_dataSetMap.find(datasetId) == _dataSetMap.end())
-        throw SetNotFoundException(datasetId);
+    try
+    {
+        // Except when the dataset smart pointer is invalid
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset smart pointer is invalid");
 
-    return *_dataSetMap[datasetId];
+        qDebug() << "Removing" << dataset->getGuiName() << "from the data manager";
+
+        /* TODO
+        // Turn all derived datasets referring to the dataset to be removed to non-derived
+        for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
+        {
+            DataSet& set = *it->second;
+
+            if (set.isDerivedData() && set.getSourceName() == datasetName)
+            {
+                qDebug() << "Un-derive" << set.getGuiName();
+
+                set._derived = false;
+                set._sourceSetName = "";
+            }
+            it++;
+        }
+        */
+
+        // Remove dataset
+        _dataSetMap.erase(dataset->getGuid());
+
+        emit dataChanged();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove dataset", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove dataset");
+    }
 }
 
-DataSet& DataManager::getSelection(QString name)
+plugin::RawData& DataManager::getRawData(const QString& name)
 {
-    DataSet* selection = _selections[name].get();
+    try
+    {
+        // Except when the dataset smart pointer is invalid
+        if (name.isEmpty())
+            throw std::runtime_error("Raw data name is invalid");
 
-    if (!selection)
-        throw SelectionNotFoundException(name);
+        // Except when the raw data is not found
+        if (_rawDataMap.find(name) == _rawDataMap.end())
+            throw std::runtime_error("Raw data not found");
 
-    return *selection;
+        return *_rawDataMap[name];
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get raw data from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get raw data from data manager");
+    }
 }
 
-const std::unordered_map<QString, std::unique_ptr<DataSet>>& DataManager::allSets() const
+Dataset<DatasetImpl>& DataManager::getSet(const QString& datasetGuid)
+{
+    try
+    {
+        // Except when the dataset GUI is invalid
+        if (datasetGuid.isEmpty())
+            throw std::runtime_error("Dataset GUID is invalid");
+
+        // Except when the dataset is not found
+        if (_dataSetMap.find(datasetGuid) == _dataSetMap.end())
+            throw std::runtime_error("Set not found");
+
+        return _dataSetMap[datasetGuid];
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get raw data from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get raw data from data manager");
+    }
+
+    return Dataset<DatasetImpl>();
+}
+
+Dataset<DatasetImpl> DataManager::getSelection(const QString& dataName)
+{
+    try
+    {
+        // Except when the data name is invalid
+        if (dataName.isEmpty())
+            throw std::runtime_error("Data name is invalid");
+
+        // Except when the selection set is not found
+        if (_selections.find(dataName) == _dataSetMap.end())
+            throw std::runtime_error("Selection set not found");
+
+        return _selections[dataName];
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get raw data from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get raw data from data manager");
+    }
+
+    return Dataset<DatasetImpl>();
+}
+
+const std::unordered_map<QString, Dataset<DatasetImpl>>& DataManager::allSets() const
 {
     return _dataSetMap;
 }

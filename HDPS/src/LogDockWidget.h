@@ -1,5 +1,4 @@
-#ifndef HDPS_LOGDOCKWIDGET_H
-#define HDPS_LOGDOCKWIDGET_H
+#pragma once
 
 // Qt header file:
 #include <QDockWidget>
@@ -23,7 +22,5 @@ private:
     const std::unique_ptr<const Data> _data;
 };
 
-} // namespace gui
-} // namespace hdps
-
-#endif // HDPS_LOGDOCKWIDGET_H
+}
+}

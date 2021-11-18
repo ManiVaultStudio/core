@@ -2,7 +2,6 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
-#include "util/DatasetRef.h"
 
 #include "SelectedIndicesAction.h"
 #include "DimensionNamesAction.h"
@@ -51,7 +50,7 @@ public: // Action getters
 
 protected:
     CoreInterface*          _core;                              /** Pointer to the core */
-    DatasetRef<Points>      _points;                            /** Points dataset reference */
+    Dataset<Points>         _points;                            /** Points dataset reference */
     StringAction            _numberOfPointsAction;              /** Number of points action */
     StringAction            _numberOfDimensionsAction;          /** Number of dimensions action */
     StringAction            _memorySizeAction;                  /** Memory size action */

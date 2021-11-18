@@ -1,7 +1,6 @@
-#ifndef HDPS_DATA_PROPERTIES_WIDGET_H
-#define HDPS_DATA_PROPERTIES_WIDGET_H
+#pragma once
 
-#include "util/DatasetRef.h"
+#include "util/SmartDataset.h"
 #include "actions/GroupsAction.h"
 
 #include <QWidget>
@@ -58,11 +57,9 @@ signals:
     void currentDatasetGuiNameChanged(const QString& datasetGuiName);
 
 protected:
-    DatasetRef<DataSet>     _dataset;       /** Dataset reference */
+    Dataset<DatasetImpl>    _dataset;       /** Smart point to curent dataset */
     GroupsAction            _groupsAction;  /** Groups action */
 };
 
 }
 }
-
-#endif // HDPS_DATA_PROPERTIES_WIDGET_H

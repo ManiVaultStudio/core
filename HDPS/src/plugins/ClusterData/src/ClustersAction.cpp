@@ -1,7 +1,9 @@
 #include "ClustersAction.h"
-#include "DataHierarchyItem.h"
+#include <DataHierarchyItem.h>
 #include "ClusterData.h"
-#include "PointData.h"
+
+#include <PointData.h>
+#include <event/Event.h>
 
 #include <QTreeView>
 #include <QHeaderView>
@@ -24,7 +26,7 @@ ClustersAction::ClustersAction(QObject* parent, Clusters& clusters) :
     _exportAction(this, "Export")
 {
     setText("Clusters");
-    setEventCore(Application::core());
+    setEventCore(hdps::Application::core());
 
     _importAction.setToolTip("Import clusters from file");
     _exportAction.setToolTip("Export clusters to file");
@@ -36,7 +38,7 @@ ClustersAction::ClustersAction(QObject* parent, Clusters& clusters) :
         if (!_clusters.isValid())
             return;
 
-        if (dataEvent->getDataset() != *_clusters)
+        if (dataEvent->getDataset() != _clusters)
             return;
 
         switch (dataEvent->getType())
@@ -163,7 +165,7 @@ std::vector<Cluster>* ClustersAction::getClusters()
     return &_clusters->getClusters();
 }
 
-DatasetRef<Clusters>& ClustersAction::getClustersDataset()
+Dataset<Clusters>& ClustersAction::getClustersDataset()
 {
     return _clusters;
 }
@@ -175,17 +177,17 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
     
     auto& parentDataHierarchyItem   = _clusters->getDataHierarchyItem().getParent();
     auto& points                    = parentDataHierarchyItem.getDataset<Points>();
-    auto& selection                 = dynamic_cast<Points&>(points.getSelection());
+    auto& selection                 = points->getSelection<Points>();
 
-    selection.indices.clear();
-    selection.indices.reserve(indices.size());
+    selection->indices.clear();
+    selection->indices.reserve(indices.size());
 
     std::vector<std::uint32_t> globalIndices;
 
-    points.getGlobalIndices(globalIndices);
+    points->getGlobalIndices(globalIndices);
 
     for (auto index : indices)
-        selection.indices.push_back(globalIndices[index]);
+        selection->indices.push_back(globalIndices[index]);
 
     Application::core()->notifyDataSelectionChanged(parentDataHierarchyItem.getDataset());
 }
@@ -193,9 +195,9 @@ void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
 void ClustersAction::createSubset(const QString& datasetName)
 {
     auto& points    = _clusters->getDataHierarchyItem().getParent().getDataset();
-    auto& selection = points.getSelection<Points&>();
+    //auto& selection = points->getSelection<Points>();
 
-    points.createSubset("Clusters", &points);
+    points->createSubset("Clusters", points);
 }
 
 void ClustersAction::removeClustersById(const QStringList& ids)
@@ -268,7 +270,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
 
         // Get reference to cluster selection set
-        auto& currentClusterSelectionIndices = dynamic_cast<Clusters&>(clustersAction->getClustersDataset()->getSelection()).indices;
+        auto& currentClusterSelectionIndices = clustersAction->getClustersDataset()->getSelection<Clusters>()->indices;
 
         // Clear and reserve the selection indices
         currentClusterSelectionIndices.clear();

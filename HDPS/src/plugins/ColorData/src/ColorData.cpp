@@ -6,9 +6,7 @@
 
 Q_PLUGIN_METADATA(IID "nl.lumc.ColorData")
 
-// =============================================================================
-// Data
-// =============================================================================
+using namespace hdps;
 
 ColorData::~ColorData(void)
 {
@@ -22,12 +20,12 @@ void ColorData::init()
 
 uint ColorData::count()
 {
-    return _colors.size();
+    return static_cast<std::uint32_t>(_colors.size());
 }
 
-hdps::DataSet* ColorData::createDataSet() const
+Dataset<DatasetImpl> ColorData::createDataSet() const
 {
-    return new Colors(_core, getName());
+    return Dataset<DatasetImpl>(new Colors(_core, getName()));
 }
 
 // =============================================================================

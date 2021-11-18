@@ -109,9 +109,9 @@ public:
 
     /**
      * Create images dataset
-     * @return Pointer to dataset
+     * @return Smart pointer to dataset
      */
-    hdps::DataSet* createDataSet() const override;
+    hdps::Dataset<hdps::DatasetImpl> createDataSet() const override;
 
 private:
     Type                _type;                          /** Image collection type e.g. stack or sequence */

@@ -1,5 +1,7 @@
 #include "InfoAction.h"
 
+#include "event/Event.h"
+
 using namespace hdps;
 using namespace hdps::gui;
 
@@ -30,7 +32,7 @@ InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
         if (!_clusters.isValid())
             return;
 
-        if (dataEvent->getDataset() != *_clusters)
+        if (dataEvent->getDataset() != _clusters)
             return;
 
         switch (dataEvent->getType()) {

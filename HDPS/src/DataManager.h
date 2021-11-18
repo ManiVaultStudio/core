@@ -1,5 +1,4 @@
-#ifndef HDPS_DATAMANAGER_H
-#define HDPS_DATAMANAGER_H
+#pragma once
 
 #include "Set.h"
 #include "CoreInterface.h"
@@ -28,103 +27,80 @@ namespace std {
 
 namespace hdps
 {
-    namespace plugin
-    {
-        class RawData;
-    }
 
-struct DataNotFoundException : public std::exception
-{
-public:
-    DataNotFoundException(QString dataName) :
-        message((QString("Failed to find raw data with name: ") + dataName).toStdString()) { }
-
-    const char* what() const throw () override
-    {
-        return message.c_str();
-    }
-
-private:
-    std::string message;
-};
-
-struct SetNotFoundException : public std::exception
-{
-public:
-    SetNotFoundException(QString setName) :
-        message((QString("Failed to find a set with name: ") + setName).toStdString())
-    { }
-
-    const char* what() const throw () override
-    {
-        return message.c_str();
-    }
-
-private:
-    std::string message;
-};
-
-struct SelectionNotFoundException : public std::exception
-{
-public:
-    SelectionNotFoundException(QString name) :
-        message((QString("Failed to find a selection for raw data: ") + name).toStdString())
-    { }
-
-    const char* what() const throw () override
-    {
-        return message.c_str();
-    }
-
-private:
-    std::string message;
-};
+namespace plugin {
+    class RawData;
+}
 
 class DataManager : public QObject
 {
     Q_OBJECT
+
 public:
+
+    /**
+     * Constructor
+     * @param core Pointer to the core
+     */
     DataManager(CoreInterface* core) :
         _core(core)
     {
-
     }
 
+    /**
+     * Add raw data to the data manager
+     * @param rawData Pointer to the raw data
+     */
     void addRawData(plugin::RawData* rawData);
 
     /**
      * Add data set to the data manager
-     * @param dataSet Reference to the data set
+     * @param dataset Smart pointer to the dataset
      */
-    void addSet(DataSet& dataSet);
-
-    void addSelection(QString dataName, DataSet* selection);
+    void addSet(const Dataset<DatasetImpl>& dataset);
 
     /**
-     * Removes a Dataset. Other datasets derived from this dataset are
-     * converted to non-derived data.
-     * Notifies all plug-ins of the removed dataset automatically.
-     * @param datasetName Name of the (top-level) dataset to remove
+     * Add selection to the data manager
+     * @param dataName Name of the raw data
+     * @param selection Smart pointer to selection dataset
+     */
+    void addSelection(const QString& dataName, Dataset<DatasetImpl> selection);
+
+    /**
+     * Removes a Dataset, other datasets derived from this dataset are converted to non-derived data (notifies listeners)
+     * @param dataset Smart pointer to dataset to remove
      * @param recursively Remove datasets recursively
      */
-    void removeDataset(const QString& datasetName, const bool& recursively = true);
-
-    plugin::RawData& getRawData(QString name);
+    void removeDataset(const Dataset<DatasetImpl>& dataset, const bool& recursively = true);
 
     /**
-     * Get set by dataset globally unique identifier
-     * @param datasetId Globally unique identifier of the dataset
-     * @return Reference to the dataset
+     * Get raw data by name
+     * @param name Name of the raw data
      */
-    DataSet& getSet(const QString& datasetId);
+    plugin::RawData& getRawData(const QString& name);
 
-    DataSet& getSelection(QString name);
-    const std::unordered_map<QString, std::unique_ptr<DataSet>>& allSets() const;
+    /**
+     * Get dataset by dataset GUID
+     * @param datasetGuid GUID of the dataset
+     * @return Smart pointer to the dataset
+     */
+    Dataset<DatasetImpl>& getSet(const QString& datasetGuid);
+
+    /**
+     * Get selection by data name
+     * @param dataName Name of the data
+     * @return Smart pointer to the selection dataset
+     */
+    Dataset<DatasetImpl> getSelection(const QString& dataName);
+
+    /** Get all sets from the data manager */
+    const std::unordered_map<QString, Dataset<DatasetImpl>>& allSets() const;
 
 signals:
     void dataChanged();
 
 private:
+
     /**
      * Stores all raw data in the system. Raw data is stored by the name
      * retrieved from their Plugin::getName() function.
@@ -135,18 +111,16 @@ private:
      * Stores all data sets in the system. Data sets are stored by the name
      * retrieved from their DataSet::getName() function.
      */
-    std::unordered_map<QString, std::unique_ptr<DataSet>> _dataSetMap;
+    std::unordered_map<QString, Dataset<DatasetImpl>> _dataSetMap;
 
     /**
     * Stores selection sets on all data plug-ins
     * NOTE: Can't be a QMap because it doesn't support move semantics of unique_ptr
     */
-    std::unordered_map<QString, std::unique_ptr<DataSet>> _selections;
+    std::unordered_map<QString, Dataset<DatasetImpl>> _selections;
 
     /** Non-owning pointer to core for event notifications */
     CoreInterface* _core;
 };
 
 } // namespace hdps
-
-#endif // HDPS_DATAMANAGER_H

@@ -1,9 +1,8 @@
-#ifndef HDPS_COREINTERFACE_H
-#define HDPS_COREINTERFACE_H
+#pragma once
 
 #include "PluginType.h"
 
-#include "event/Event.h"
+#include "util/SmartDataset.h"
 
 #include <QString>
 #include <QSharedPointer>
@@ -13,13 +12,11 @@
 
 namespace hdps
 {
-    class DataSet;
+    class DatasetImpl;
     class DataType;
     class EventListener;
     class DataHierarchyManager;
     class DataHierarchyItem;
-
-    using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
 
     namespace plugin
     {
@@ -27,10 +24,11 @@ namespace hdps
         class RawData;
     }
 
+    // Forward declare smart pointer for datasets
     namespace util
     {
         template<typename DatasetType>
-        class DatasetRef;
+        class SmartDataset;
     }
 
 class CoreInterface
@@ -40,105 +38,122 @@ public: // Data access
 
     /**
      * Requests the plugin manager to create new RawData of the given kind
-     * The manager will add the raw data to the core and return the
-     * unique name of the data set linked with the raw data
+     * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataset Pointer to parent dataset in the data hierarchy (root if nullptr)
-     * @return Reference to the added dataset
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
+     * @return Smart pointer to the added dataset
      */
-    virtual DataSet& addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataset = nullptr) = 0;
+    virtual Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
 
     /**
      * Requests the plugin manager to create new RawData of the given kind
-     * The manager will add the raw data to the core and return the
-     * unique name of the data set linked with the raw data
+     * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
-     * @param parentDataset Pointer to parent dataset in the data hierarchy (root if nullptr)
-     * @return Reference to the added dataset
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if smart pointer is not valid)
+     * @return Smart pointer to the added dataset
      */
-    template <class SetType>
-    SetType& addData(const QString& kind, const QString& dataSetGuiName, const DataSet* parentDataset = nullptr) {
-        return dynamic_cast<SetType&>(addData(kind, dataSetGuiName, parentDataset));
+    template <class DatasetType>
+    Dataset<DatasetType> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) {
+        return Dataset<DatasetType>(addDataset(kind, dataSetGuiName, parentDataset).get<DatasetType>());
     }
 
     /**
      * Removes one or more datasets
-     * Other datasets derived from this dataset are  converted to non-derived data.
+     * Other datasets derived from this dataset are converted to non-derived data
      * Notifies all plug-ins of the removed dataset automatically
-     * @param datasets Datasets to remove
+     * @param datasets Smart pointers to the datasets that need to be removed
      * @param recursively Remove datasets recursively
      */
-    virtual void removeDatasets(const QVector<DataSet*> datasets, const bool& recursively = false) = 0;
+    virtual void removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively = false) = 0;
 
     /**
      * Creates a dataset derived from a source dataset.
      * @param guiName GUI name for the new dataset from the core
-     * @param sourceDataset Reference to source dataset from which this dataset will be derived
-     * @param parentDataset Pointer to parent dataset in the data hierarchy (will attach to root in hierarchy if empty)
-     * @return Reference to created derived dataset
+     * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
+     * @return Smart pointer to the created derived dataset
      */
-    virtual DataSet& createDerivedData(const QString& guiName, const DataSet& sourceDataset, const DataSet* parentDataset = nullptr) = 0;
+    virtual Dataset<DatasetImpl> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset) = 0;
 
     /**
-     * Creates a copy of the given selection set and gives it a unique name based
-     * on the name given to this function. Then adds the new set to the data manager
-     * and notifies all data consumers of the new set.
-     * @param selection Selection set
-     * @param sourceDataset Source dataset
+     * Creates a dataset derived from a source dataset.
+     * @param guiName GUI name for the new dataset from the core
+     * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
+     * @return Smart pointer to the created derived dataset
+     */
+    template <class DatasetType>
+    Dataset<DatasetType> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset) {
+        return util::Dataset<DatasetType>(createDerivedData(guiName, sourceDataset, parentDataset).get<DatasetType>());
+    };
+
+    /**
+     * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set
+     * @param selection Smart pointer to the selection set
+     * @param sourceDataset Smart pointer to the source dataset
      * @param guiName GUI name of the subset
-     * @param parentDataset Pointer to the parent dataset in the data hierarchy (sourceSetName if is used if empty)
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (sourceSetName if not valid)
      * @param visible Whether the new dataset is visible in the user interface
-     * @return Reference to created subset
+     * @return Smart pointer to the created subset
      */
-    virtual DataSet& createSubsetFromSelection(const DataSet& selection, const DataSet& sourceDataset, const QString& guiName, const DataSet* parentDataset = nullptr, const bool& visible = true) = 0;
+    virtual Dataset<DatasetImpl> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true) = 0;
 
     /**
-     * Requests a dataset from the core by dataset globally unique identifier (if no such instance can be found a fatal error is thrown)
-     * @param dataSetId Globally unique identifier of the dataset
-     * @return Reference to data set
+     * Requests a dataset from the core by dataset GUID (if no such instance can be found a fatal error is thrown)
+     * @param datasetGuid GUID of the dataset
+     * @return Smart pointer to the dataset
      */
-    virtual DataSet& requestData(const QString& dataSetId) = 0;
+    virtual Dataset<DatasetImpl> requestDataset(const QString& datasetGuid) = 0;
 
     /**
-     * Requests a dataset of a specific type from the core by dataset globally unique identifier
-     * If no such instance can be found a fatal error is thrown
-     * @param dataSetId Globally unique identifier of the dataset
-     * @return Reference to data set
+     * Requests a dataset of a specific type from the core by dataset GUID, if no such instance can be found a fatal error is thrown
+     * @param datasetGuid GUID of the dataset
+     * @return Smart pointer to the dataset
      */
-    template <class SetType>
-    SetType& requestData(const QString& dataSetId)
+    template<class DatasetType>
+    Dataset<DatasetType> requestDataset(const QString& datasetGuid)
     {
-        return dynamic_cast<SetType&>(requestData(dataSetId));
+        return dynamic_cast<DatasetType&>(requestDataset(datasetGuid));
     }
 
     /**
      * Returns all data sets that are present in the core, filtered by data type(s)
      * Returns all data sets in case of an empty filter
      * @param dataTypes Data types to filter
-     * @return Vector of pointers to datasets
+     * @return Vector of references to datasets
      */
-    virtual QVector<DataSet*> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) = 0;
+    virtual QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) = 0;
 
 protected: // Data access
 
     /**
-     * Requests an instance of a data type plugin from the core which has the same
-     * unique name as the given parameter. If no such instance can be found a fatal
-     * error is thrown.
+     * Requests an instance of a data type plugin from the core which has the same unique name as the given parameter, if no such instance can be found a fatal error is thrown
+     * @param datasetName Name of the dataset
      */
-    virtual plugin::RawData& requestRawData(const QString datasetName) = 0;
+    virtual plugin::RawData& requestRawData(const QString& datasetName) = 0;
 
     /**
-    * Request a selection from the data manager by its corresponding raw data name.
-    */
-    virtual DataSet& requestSelection(const QString rawdataName) = 0;
+     * Request a selection from the data manager by its corresponding raw data name.
+     * @param rawdataName Name of the raw data
+     */
+    virtual Dataset<DatasetImpl> requestSelection(const QString& rawDataName) = 0;
+
+    /**
+     * Request a selection from the data manager by its corresponding raw data name.
+     * @param rawdataName Name of the raw data
+     */
+    template<class DatasetType>
+    Dataset<DatasetType> requestSelection(const QString& rawDataName)
+    {
+        return Dataset<DatasetType>(dynamic_cast<DatasetType*>(requestSelection(rawDataName).get()));
+    }
 
 public: // Analysis
 
     /**
-     * Request an analysis by its kind
+     * Request an analysis plugin by its kind
      * @param kind Type of analysis
      * @return Reference to created plugin
      */
@@ -147,9 +162,9 @@ public: // Analysis
     /**
      * Analyze a dataset
      * @param kind Type of analysis
-     * @param dataSet Dataset to analyze
+     * @param dataSet Smart pointer to the dataset to analyze
      */
-    virtual const void analyzeDataset(const QString& kind, DataSet& dataSet) = 0;
+    virtual const void analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataSet) = 0;
 
 public: // Import/export
 
@@ -162,9 +177,9 @@ public: // Import/export
     /**
      * Exports a dataset
      * @param kind Type of export plugin
-     * @param dataSet Reference to dataset to export
+     * @param dataSet Smart pointer to the dataset to export
      */
-    virtual const void exportDataset(const QString& kind, DataSet& dataSet) = 0;
+    virtual const void exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSet) = 0;
 
 public: // Plugin queries
 
@@ -196,51 +211,97 @@ public: // Data hierarchy
     virtual DataHierarchyManager& getDataHierarchyManager() = 0;
 
     /**
-     * Get data hierarchy item by dataset globally unique identifier
-     * @param dataSetId Globally unique identifier of the dataset
+     * Get data hierarchy item by dataset GUID
+     * @param datasetGuid Globally unique identifier of the dataset
      * @return Reference to data hierarchy item
      */
-    virtual DataHierarchyItem& getDataHierarchyItem(const QString& dataSetId) = 0;
+    virtual DataHierarchyItem& getDataHierarchyItem(const QString& datasetGuid) = 0;
 
 public: // Events & notifications
 
     /**
      * Notify listeners that a new dataset has been added to the core
-     * @param dataset Reference to the dataset that was added
+     * @param dataset Smart pointer to the dataset that was added
      */
-    virtual void notifyDataAdded(const DataSet& dataset) = 0;
+    virtual void notifyDataAdded(const Dataset<DatasetImpl>& dataset) = 0;
+
+    /**
+     * Notify listeners that a new dataset has been added to the core
+     * @param dataset Smart pointer to the dataset that was added
+     */
+    template<class DatasetType>
+    void notifyDataAdded(const Dataset<DatasetType>& dataset) {
+        notifyDataAdded(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
+    }
 
     /**
      * Notify listeners that a dataset is about to be removed
-     * @param dataset Reference to the dataset which is about to be removed
+     * @param dataset Smart pointer to the dataset which is about to be removed
      */
-    virtual void notifyDataAboutToBeRemoved(const DataSet& dataset) = 0;
+    virtual void notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) = 0;
+
+    /**
+     * Notify listeners that a dataset is about to be removed
+     * @param dataset Smart pointer to the dataset which is about to be removed
+     */
+    template<class DatasetType>
+    void notifyDataAboutToBeRemoved(const Dataset<DatasetType>& dataset) {
+        notifyDataAboutToBeRemoved(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
+    }
 
     /**
      * Notify listeners that a dataset is removed
-     * @param datasetId Globally unique identifier of the dataset that was removed
+     * @param datasetGuid GUID of the dataset that was removed
      * @param dataType Type of the data
      */
-    virtual void notifyDataRemoved(const QString& datasetId, const DataType& dataType) = 0;
+    virtual void notifyDataRemoved(const QString& datasetGuid, const DataType& dataType) = 0;
 
     /**
      * Notify listeners that a dataset has changed
-     * @param dataset Reference to the dataset of which the data changed
+     * @param dataset Smart pointer to the dataset of which the data changed
      */
-    virtual void notifyDataChanged(const DataSet& dataset) = 0;
+    virtual void notifyDataChanged(const Dataset<DatasetImpl>& dataset) = 0;
+
+    /**
+     * Notify listeners that a dataset has changed
+     * @param dataset Smart pointer to the dataset of which the data changed
+     */
+    template<class DatasetType>
+    void notifyDataChanged(const Dataset<DatasetType>& dataset) {
+        notifyDataChanged(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
+    }
 
     /**
      * Notify listeners that data selection has changed
-     * @param dataset Reference to the dataset of which the selection changed
+     * @param dataset Smart pointer to the dataset of which the selection changed
      */
-    virtual void notifyDataSelectionChanged(const DataSet& dataset) = 0;
+    virtual void notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset) = 0;
+
+    /**
+     * Notify listeners that data selection has changed
+     * @param dataset Smart pointer to the dataset of which the selection changed
+     */
+    template<class DatasetType>
+    void notifyDataSelectionChanged(const Dataset<DatasetType>& dataset) {
+        notifyDataSelectionChanged(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
+    }
 
     /**
      * Notify all listeners that a dataset GUI name has changed
-     * @param dataset Reference to the dataset of which the GUI name changed
+     * @param dataset Smart pointer to the dataset of which the GUI name changed
      * @param previousGuiName Previous dataset name
      */
-    virtual void notifyDataGuiNameChanged(const DataSet& dataset, const QString& previousGuiName) = 0;
+    virtual void notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) = 0;
+
+    /**
+     * Notify all listeners that a dataset GUI name has changed
+     * @param dataset Smart pointer to the dataset of which the GUI name changed
+     * @param previousGuiName Previous dataset name
+     */
+    template<class DatasetType>
+    void notifyDataGuiNameChanged(const Dataset<DatasetType>& dataset) {
+        notifyDataGuiNameChanged(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
+    }
 
     /**
      * Register an event listener
@@ -255,10 +316,8 @@ public: // Events & notifications
     virtual void unregisterEventListener(EventListener* eventListener) = 0;
 
     friend class RawData;
-    friend class DataSet;
+    friend class DatasetImpl;
     friend class EventListener;
 };
 
-} // namespace hdps
-
-#endif // HDPS_COREINTERFACE_H
+}

@@ -67,7 +67,6 @@ set( CORE_HEADERS
     src/DataHierarchyManager.h
     src/Core.h
     src/DataManager.h
-    src/exceptions/SetNotFoundException.h
 )
 
 set( CORE_SOURCES
@@ -81,9 +80,13 @@ set( CORE_SOURCES
     src/DataManager.cpp
 )
 
-set( EVENT_HEADERS
+set(EVENT_HEADERS
     src/event/Event.h
     src/event/EventListener.h
+)
+
+set(EVENT_SOURCES
+    src/event/Event.cpp
     src/event/EventListener.cpp
 )
 
@@ -224,7 +227,7 @@ set( UTIL_HEADERS
     src/util/ColorSpace.h
     src/util/Visitable.h
     src/util/Visitor.h
-    src/util/DatasetRef.h
+    src/util/SmartDataset.h
     src/util/PixelSelectionTool.h
     src/util/PixelSelection.h
 )
@@ -247,7 +250,7 @@ set( UTIL_SOURCES
     src/util/ColorSpace.cpp
     src/util/Visitable.cpp
     src/util/Visitor.cpp
-    src/util/DatasetRef.cpp
+    src/util/SmartDataset.cpp
 	src/util/PixelSelectionTool.cpp
 	src/util/PixelSelection.cpp
 )
@@ -332,6 +335,7 @@ list(APPEND PUBLIC_SOURCES
     ${RENDERER_SOURCES}
     ${UTIL_SOURCES}
     ${PLUGIN_SOURCES}
+    ${EVENT_SOURCES}
     ${PUBLIC_HEADERS}
 )
 
@@ -359,6 +363,11 @@ list(APPEND RENDERER_FILES
 list(APPEND UTIL_FILES
     ${UTIL_SOURCES}
     ${UTIL_HEADERS}
+)
+
+list(APPEND EVENT_FILES
+    ${EVENT_HEADERS}
+    ${EVENT_SOURCES}
 )
 
 list(APPEND HIERARCHY_FILES
@@ -390,7 +399,7 @@ source_group(Public\\Actions FILES ${ACTIONS_FILES})
 source_group( Public\\Renderers FILES ${RENDERER_FILES})
 source_group( Public\\Util FILES ${UTIL_FILES})
 source_group( Public\\Graphics FILES ${GRAPHICS_FILES})
-source_group( Public\\Event FILES ${EVENT_HEADERS})
+source_group( Public\\Event FILES ${EVENT_FILES})
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})
 source_group( Resources FILES win/hdps.rc)
@@ -403,14 +412,14 @@ if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
-
 add_library(${PROJECT}_Public ${LINK_TYPE}
     src/.editorconfig
     ${PUBLIC_SOURCES}
 )
 
 set_property(TARGET ${PROJECT}_Public PROPERTY CXX_STANDARD 14)
+
+target_include_directories(${PROJECT}_Public PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
@@ -428,6 +437,7 @@ target_link_libraries(${PROJECT}_Private qtadvanceddocking)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
 target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
+target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
 
@@ -444,6 +454,8 @@ set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 if(APPLE)
     set_target_properties( ${PROJECT} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 endif()
+
+target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)

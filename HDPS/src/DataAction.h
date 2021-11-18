@@ -23,12 +23,12 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param dataset Reference to dataset
+     * @param dataset Smart pointer to the dataset
      */
-    DataAction(QObject* parent, DataSet& dataset);
+    DataAction(QObject* parent, const Dataset<DatasetImpl>& dataset);
 
 protected:
-    DatasetRef<DataSet>     _dataset;                /** Dataset reference */
+    Dataset<DatasetImpl>    _dataset;               /** Smart pointer to the dataset */
     DataAnalysisAction      _dataAnalysisAction;    /** Data analysis action */
     DataExportAction        _dataExportAction;      /** Data export action */
     DataRemoveAction        _dataRemoveAction;      /** Data remove action */

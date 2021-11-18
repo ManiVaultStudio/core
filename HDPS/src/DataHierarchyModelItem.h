@@ -1,5 +1,4 @@
-#ifndef HDPS_DATA_HIERARCHY_MODEL_ITEM_H
-#define HDPS_DATA_HIERARCHY_MODEL_ITEM_H
+#pragma once
 
 #include "Core.h"
 #include "DataHierarchyManager.h"
@@ -22,7 +21,7 @@ public:
     /** Columns */
     enum Column {
         Name,
-        ID,
+        GUID,
         Description,
         Analysis,
         Progress,
@@ -130,5 +129,3 @@ public:
 };
 
 }
-
-#endif // HDPS_DATA_HIERARCHY_MODEL_ITEM_H
