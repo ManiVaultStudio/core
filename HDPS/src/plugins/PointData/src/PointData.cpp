@@ -296,9 +296,9 @@ Dataset<DatasetImpl> Points::copy() const
     return set;
 }
 
-Dataset<DatasetImpl> Points::createSubset(const QString subsetGuiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible /*= true*/) const
+Dataset<DatasetImpl> Points::createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible /*= true*/) const
 {
-    return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), subsetGuiName, parentDataSet, visible);
+    return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
 QIcon Points::getIcon() const

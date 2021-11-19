@@ -8,8 +8,8 @@ namespace hdps
         _sourceDataSet(sourceDataSet),
         _targetDataSet(targetDataSet)
     {
-        Q_ASSERT(!_sourceDataSet.isValid());
-        Q_ASSERT(!_targetDataSet.isValid());
+        Q_ASSERT(_sourceDataSet.isValid());
+        Q_ASSERT(_targetDataSet.isValid());
     }
 
     const SelectionMap& LinkedSelection::getMapping()

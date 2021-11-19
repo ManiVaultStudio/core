@@ -62,12 +62,25 @@ public:
 
     /**
      * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
-     * @param subsetGuiName Name of the subset in the GUI
+     * @param guiName Name of the subset in the GUI
      * @param parentDataSet Smart pointer to parent dataset (if any)
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    virtual Dataset<DatasetImpl> createSubset(const QString subsetGuiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible = true) const = 0;
+    virtual Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible = true) const = 0;
+
+    /**
+     * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
+     * @param guiName Name of the subset in the GUI
+     * @param parentDataSet Smart pointer to parent dataset (if any)
+     * @param visible Whether the subset will be visible in the UI
+     * @return Smart pointer to the created subset
+     */
+    template<typename DatasetType, typename ParentDatasetType>
+    Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<ParentDatasetType>& parentDataSet, const bool& visible = true) const
+    {
+        return createSubset(guiName, Dataset<DatasetImpl>(parentDataSet.get<DatasetImpl>()), visible).converted<DatasetType>();
+    }
 
     /** Get the globally unique identifier of the dataset in string format */
     QString getGuid() const
@@ -115,19 +128,6 @@ public:
         return _core->requestRawData(getRawDataName()).getDataType();
     }
 
-    /**
-     * Get source dataset if the given set is derived
-     * @param dataset Smart pointer to dataset
-     */
-    template<typename DatasetType>
-    static Dataset<DatasetType> getSourceDataset(Dataset<DatasetType>& dataset)
-    {
-        if (!dataset->isDerivedData())
-            return dataset;
-
-        return Dataset<DatasetType>(getSourceDataset(dataset->toSmartPointer<DatasetType>()));
-    }
-
     /** Get source dataset if the given set is derived */
     template<typename DatasetType>
     Dataset<DatasetType> getSourceDataset() const
@@ -135,7 +135,7 @@ public:
         if (!isDerivedData())
             return toSmartPointer<DatasetType>();
 
-        return Dataset<DatasetType>(getSourceDataset(_sourceDataset->toSmartPointer<DatasetType>()));
+        return Dataset<DatasetType>(_sourceDataset->getSourceDataset<DatasetType>());
     }
 
     /**
@@ -152,7 +152,7 @@ public:
     template<typename DatasetType>
     Dataset<DatasetType> getParentDataset() const
     {
-        return getDataHierarchyItem().getParent().getDataset().converted<DatasetType>();
+        return getDataHierarchyItem().getParent().getDataset().get<DatasetType>();
     }
 
     /**
@@ -164,7 +164,7 @@ public:
      */
     Dataset<DatasetImpl> getSelection() const
     {
-        return _core->requestSelection(getSourceDataset<DatasetImpl>(toSmartPointer())->getRawDataName());
+        return _core->requestSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
     /**
@@ -177,7 +177,7 @@ public:
     template<typename DatasetType>
     Dataset<DatasetType> getSelection() const
     {
-        return _core->requestSelection<DatasetType>(getSourceDataset(toSmartPointer())->getRawDataName());
+        return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
     /**

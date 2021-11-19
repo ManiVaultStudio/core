@@ -1,10 +1,10 @@
-#ifndef HDPS_DATA_HIERARCHY_ITEM_H
-#define HDPS_DATA_HIERARCHY_ITEM_H
+#pragma once
 
 #include "DataType.h"
 
 #include "CoreInterface.h"
 #include "actions/WidgetAction.h"
+#include "event/Event.h"
 #include "Set.h"
 
 #include <QObject>
@@ -307,7 +307,7 @@ protected:
 };
 
 /**
- * Print to console
+ * Print data hierarchy item to the console
  * @param debug Debug
  * @param dataHierarchyItem Data hierarchy item
  */
@@ -321,14 +321,12 @@ inline QDebug operator << (QDebug debug, const DataHierarchyItem& dataHierarchyI
 }
 
 /**
- * Compares to named icons
+ * Compares two named icons
  * @param lhs Left hand side icon
  * @param rhs Right hand side icon
- * @param dataHierarchyItem Data hierarchy item
+ * @return Whether the icons are equal
  */
 inline bool operator == (const hdps::DataHierarchyItem::NamedIcon& lhs, const hdps::DataHierarchyItem::NamedIcon& rhs)
 {
     return lhs.first == rhs.first;
 }
-
-#endif // HDPS_DATA_HIERARCHY_ITEM_H

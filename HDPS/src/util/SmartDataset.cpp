@@ -9,8 +9,7 @@
 namespace hdps
 {
 
-namespace util
-{
+using namespace util;
 
 void SmartDatasetPrivate::set(DatasetImpl* dataset)
 {
@@ -106,5 +105,4 @@ void SmartDatasetPrivate::init()
     });
 }
 
-}
 }

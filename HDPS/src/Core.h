@@ -97,7 +97,7 @@ public: // Data access
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
      * @return Smart pointer to the created derived dataset
      */
-    Dataset<DatasetImpl> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset) override;
+    Dataset<DatasetImpl> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
 
     /**
      * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set

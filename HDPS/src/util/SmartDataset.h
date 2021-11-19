@@ -11,9 +11,6 @@ namespace hdps
 class DatasetImpl;
 class CoreInterface;
 
-namespace util
-{
-
 /**
  * Dataset reference private class
  *
@@ -26,7 +23,7 @@ class SmartDatasetPrivate : public QObject, public EventListener
     Q_OBJECT
 
     /** Only dataset reference template classes have access to protected members */
-    template<typename> friend class SmartDataset;
+    template<typename> friend class Dataset;
 
 protected:
 
@@ -124,7 +121,7 @@ protected:
  * @author T. Kroes
  */
 template<typename DatasetType>
-class SmartDataset : public SmartDatasetPrivate
+class Dataset : public SmartDatasetPrivate
 {
 public:
 
@@ -132,7 +129,7 @@ public:
      * (Default) constructor
      * @param dataset Pointer to dataset (if any)
      */
-    SmartDataset(DatasetType* dataset = nullptr) :
+    Dataset(DatasetType* dataset = nullptr) :
         SmartDatasetPrivate()
     {
         // Perform startup initialization
@@ -146,7 +143,7 @@ public:
      * Constructor
      * @param dataset Reference to dataset
      */
-    SmartDataset(DatasetType& dataset) :
+    Dataset(DatasetType& dataset) :
         SmartDatasetPrivate()
     {
         // Perform startup initialization
@@ -158,9 +155,9 @@ public:
 
     /**
      * Copy constructor
-     * @param other Smart dataset reference to copy from
+     * @param other Smart pointer to copy from
      */
-    SmartDataset(const SmartDataset& other)
+    Dataset(const Dataset<DatasetType>& other)
     {
         // Initialize
         init();
@@ -169,7 +166,22 @@ public:
         *this = other;
     }
 
-public:
+    /**
+     * Copy constructor
+     * @param other Smart pointer to copy from
+     */
+    template<typename OtherDatasetType>
+    Dataset(const Dataset<OtherDatasetType>& other)
+    {
+        // Initialize
+        init();
+
+        // And assign
+        _datasetId  = other._datasetId;
+        _dataset    = other._dataset;
+    }
+
+public: // Operators
 
     /**
      * Set the pointer to dataset
@@ -189,36 +201,62 @@ public:
         return dynamic_cast<DatasetType&>(*_dataset);
     }
 
+public: // Pointer access
+
     /** Arrow operator */
     DatasetType* operator-> () {
-        return get();
+        return get<DatasetType>();
     }
 
     /** Arrow operator */
     const DatasetType* operator-> () const {
-        return get();
+        return get<DatasetType>();
     }
 
     /** Parenthesis operator */
     DatasetType* operator() () const {
-        return dynamic_cast<DatasetType*>(_dataset);
+        return get<DatasetType>();
+    }
+
+    /** Get the dataset pointer */
+    template<typename TargetSetType>
+    TargetSetType* get() const {
+        try
+        {
+            Q_ASSERT(_dataset != nullptr);
+
+            // Cast to target type
+            auto dataset = dynamic_cast<TargetSetType*>(_dataset);
+
+            // Except if conversion fails
+            if (_dataset == nullptr)
+                throw std::runtime_error("Smart pointer is null, or the conversion to the target type failed");
+
+            return dataset;
+        }
+        catch (std::exception& e)
+        {
+            util::exceptionMessageBox("Unable to retrieve pointer from dataset smart pointer", e.what());
+        }
+        catch (...)
+        {
+            util::exceptionMessageBox("Unable to retrieve pointer from dataset smart pointer");
+        }
+        
+        return nullptr;
     }
 
     /** Get the dataset pointer */
     DatasetType* get() const {
-        return dynamic_cast<DatasetType*>(_dataset);
+        return get<DatasetType>();
     }
 
-    /** Get the dataset pointer of the specified type */
-    template<typename TargetSetType>
-    TargetSetType* get() const {
-        return dynamic_cast<TargetSetType*>(_dataset);
-    }
+public: // Miscellaneous
 
     /** Get the smart pointer of the specified type */
     template<typename TargetSetType>
-    SmartDataset<TargetSetType> converted() const {
-        return SmartDataset<TargetSetType>(dynamic_cast<TargetSetType*>(_dataset));
+    Dataset<TargetSetType> getConverted() const {
+        return Dataset<TargetSetType>(_dataset->get<TargetSetType>());
     }
 
     /** Returns whether the dataset pointer is valid (if the dataset actually exists) */
@@ -243,23 +281,23 @@ public: // Operators
      * Equality operator
      * @param rhs Right-hand-side operator
      */
-    const bool operator == (const SmartDataset<DatasetType>& rhs) const {
-        return rhs.getDatasetGuid() == _datasetId;
-    }
+    //const bool operator == (const Dataset<DatasetType>& rhs) const {
+    //    return rhs.getDatasetGuid() == _datasetId;
+    //}
 
     /**
      * Inequality operator
      * @param rhs Right-hand-side operator
      */
-    const bool operator != (const SmartDataset<DatasetType>& rhs) const {
-        return rhs.getDatasetGuid() != _datasetId;
-    }
+    //const bool operator != (const Dataset<DatasetType>& rhs) const {
+    //    return rhs.getDatasetGuid() != _datasetId;
+    //}
 
     /**
      * Assignment operator
      * @param other Reference to assign from
      */
-    SmartDataset<DatasetType>& SmartDataset<DatasetType>::operator=(const SmartDataset<DatasetType>& other)
+    Dataset<DatasetType>& Dataset<DatasetType>::operator=(const Dataset<DatasetType>& other)
     {
         SmartDatasetPrivate::operator=(other);
 
@@ -289,13 +327,5 @@ inline bool operator == (const SmartDatasetPrivate& lhs, const SmartDatasetPriva
 inline bool operator != (const SmartDatasetPrivate& lhs, const SmartDatasetPrivate& rhs) {
     return lhs.getDatasetGuid() != rhs.getDatasetGuid();
 }
-
-}
-
-// Use an alias from now on for brevity and clarity
-template<typename DatasetType>
-using Dataset = util::SmartDataset<DatasetType>;
-
-
 
 }

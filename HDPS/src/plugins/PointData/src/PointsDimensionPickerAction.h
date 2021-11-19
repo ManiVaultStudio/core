@@ -103,6 +103,15 @@ public:
      */
     void setDefaultDimensionName(const QString& defaultDimensionName);
 
+    /** Get search threshold */
+    std::uint32_t getSearchThreshold() const;
+
+    /**
+     * Set search threshold
+     * @param searchThreshold Search threshold
+     */
+    void setSearchThreshold(const std::uint32_t& searchThreshold);
+
 signals:
 
     /**
@@ -124,4 +133,5 @@ public: /** Action getters */
 protected:
     Dataset<Points>     _points;                    /** Dataset reference to points dataset from which the dimension will be picked */
     OptionAction        _currentDimensionAction;    /** Current dimension action */
+    std::uint32_t       _searchThreshold;           /** Select from a drop-down below the threshold and above use a search bar */
 };

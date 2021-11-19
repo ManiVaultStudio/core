@@ -19,10 +19,6 @@ namespace util
     class SmartDataset;
 }
 
-// Use an alias from now on for brevity and clarity
-template<typename DatasetType>
-using Dataset = util::SmartDataset<DatasetType>;
-
 enum class EventType
 {
     DataAdded,
@@ -79,7 +75,7 @@ public:
     /** Get reference to the dataset */
     template<typename DatasetType>
     Dataset<DatasetType> getDataset() {
-        return Dataset<DatasetType>(*_dataset);
+        return Dataset<DatasetType>(_dataset.get<DatasetType>());
     }
 
     /**

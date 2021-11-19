@@ -144,17 +144,17 @@ Dataset<DatasetImpl> DataManager::getSelection(const QString& dataName)
             throw std::runtime_error("Data name is invalid");
 
         // Except when the selection set is not found
-        if (_selections.find(dataName) == _dataSetMap.end())
+        if (_selections.find(dataName) == _selections.end())
             throw std::runtime_error("Selection set not found");
 
         return _selections[dataName];
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to get raw data from data manager", e);
+        exceptionMessageBox("Unable to get selection dataset from data manager", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to get raw data from data manager");
+        exceptionMessageBox("Unable to get selection dataset from data manager");
     }
 
     return Dataset<DatasetImpl>();

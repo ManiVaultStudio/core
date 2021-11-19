@@ -42,6 +42,10 @@ void EventListener::registerDataEvent(DataEventHandler callback)
 
 void EventListener::onDataEvent(DataEvent* dataEvent)
 {
+    // Only process data events which are valid
+    if (!dataEvent->getDataset().isValid())
+        return;
+
     if (dataEvent->getType() == EventType::DataSelectionChanged)
     {
         // Fire events for linked datasets

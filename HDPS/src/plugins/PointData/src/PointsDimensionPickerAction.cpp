@@ -8,7 +8,8 @@ using namespace hdps;
 PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const QString& title) :
     WidgetAction(parent),
     _points(nullptr),
-    _currentDimensionAction(this, "Select dimension")
+    _currentDimensionAction(this, "Select dimension"),
+    _searchThreshold(1000)
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
@@ -110,6 +111,16 @@ void PointsDimensionPickerAction::setDefaultDimensionName(const QString& default
     _currentDimensionAction.setDefaultText(defaultDimensionName);
 }
 
+std::uint32_t PointsDimensionPickerAction::getSearchThreshold() const
+{
+    return _searchThreshold;
+}
+
+void PointsDimensionPickerAction::setSearchThreshold(const std::uint32_t& searchThreshold)
+{
+    _searchThreshold = searchThreshold;
+}
+
 PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPickerAction* pointsDimensionPickerAction) :
     WidgetActionWidget(parent, pointsDimensionPickerAction)
 {
@@ -127,7 +138,7 @@ PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPick
     const auto updateWidgets = [this, pointsDimensionPickerAction, widget]() {
 
         // Determine whether to show the combobox or the line edit
-        const auto showComboBox = pointsDimensionPickerAction->getCurrentDimensionAction().getNumberOfOptions() < 1000;
+        const auto showComboBox = pointsDimensionPickerAction->getCurrentDimensionAction().getNumberOfOptions() < pointsDimensionPickerAction->getSearchThreshold();
 
         // Show/hide combobox and line edit
         widget->findChild<QComboBox*>("ComboBox")->setVisible(showComboBox);

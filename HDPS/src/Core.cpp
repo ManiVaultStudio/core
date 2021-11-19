@@ -151,8 +151,8 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     _dataManager->addSelection(rawDataName, selection);
     
     // Add the dataset to the hierarchy manager and select the dataset
-    _dataHierarchyManager->addItem(Dataset<DatasetImpl>(fullSet), const_cast<Dataset<DatasetImpl>&>(parentDataset));
-    _dataHierarchyManager->selectItem(Dataset<DatasetImpl>(fullSet));
+    _dataHierarchyManager->addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    _dataHierarchyManager->selectItem(fullSet);
     
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
@@ -182,7 +182,7 @@ void Core::removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bo
     }
 }
 
-Dataset<DatasetImpl> Core::createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset)
+Dataset<DatasetImpl> Core::createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
 {
     // Get the data type of the source dataset
     const auto dataType = sourceDataset->getDataType();
