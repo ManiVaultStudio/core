@@ -3,7 +3,7 @@
 #include "DataManager.h"
 #include "Set.h"
 
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
 
 #include <QTimer>
 

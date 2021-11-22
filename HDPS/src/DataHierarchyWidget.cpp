@@ -3,7 +3,7 @@
 #include "DataHierarchyModelItem.h"
 #include "Core.h"
 
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
 
 #include <QDebug>
 #include <QInputDialog>

@@ -4,7 +4,7 @@
 #include "Event.h"
 #include "Set.h"
 
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
 
 #include <unordered_map>
 
@@ -22,7 +22,8 @@ void EventListener::setEventCore(CoreInterface* core)
 
 EventListener::~EventListener()
 {
-    _eventCore->unregisterEventListener(this);
+    if (_eventCore)
+        _eventCore->unregisterEventListener(this);
 }
 
 //void EventListener::registerDataEventByName(QString dataSetName, DataEventHandler callback)

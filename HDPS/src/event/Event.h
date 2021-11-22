@@ -2,7 +2,7 @@
 
 #include "DataType.h"
 
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
 
 #include <QString>
 

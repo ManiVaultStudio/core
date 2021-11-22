@@ -466,9 +466,13 @@ void Core::notifyDataChanged(const Dataset<DatasetImpl>& dataset)
     // Create data changed event
     DataChangedEvent dataEvent(dataset);
 
+    // Cache the event listeners to prevent timing issues
+    const auto eventListeners = _eventListeners;
+
     // And notify all listeners
-    for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&dataEvent);
+    for (EventListener* listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataEvent);
 }
 
 void Core::notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset)
@@ -476,9 +480,13 @@ void Core::notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset)
     // Create data selection changed event
     DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
 
+    // Cache the event listeners to prevent timing issues
+    const auto eventListeners = _eventListeners;
+
     // And notify all listeners
-    for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&dataSelectionChangedEvent);
+    for (EventListener* listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataSelectionChangedEvent);
 }
 
 void Core::notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName)
@@ -486,9 +494,13 @@ void Core::notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const Q
     // Create GUI name changed event
     DataGuiNameChangedEvent dataGuiNameChangedEvent(dataset, previousGuiName);
 
+    // Cache the event listeners to prevent timing issues
+    const auto eventListeners = _eventListeners;
+
     // And notify all listeners
-    for (EventListener* listener : _eventListeners)
-        listener->onDataEvent(&dataGuiNameChangedEvent);
+    for (EventListener* listener : eventListeners)
+        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+            listener->onDataEvent(&dataGuiNameChangedEvent);
 }
 
 gui::MainWindow& Core::gui() const {

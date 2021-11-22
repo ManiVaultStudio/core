@@ -374,9 +374,12 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
                 if (sourceData->isFull()) {
 
+                    // Cache number of scalars
+                    const auto numberOfScalars = static_cast<std::uint32_t>(scalarData.count());
+
                     // Populate from full dataset
                     for (std::uint32_t pixelIndex = 0; pixelIndex < points->getNumPoints(); pixelIndex++)
-                        if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
+                        if (pixelIndex < numberOfScalars && pixelIndex < pointData.size())
                             scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
                 }
                 else {

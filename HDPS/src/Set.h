@@ -5,7 +5,7 @@
 #include "RawData.h"
 
 #include "actions/WidgetAction.h"
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
 
 #include <QString>
 #include <QVector>

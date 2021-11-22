@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
 
 #include <QString>
 

@@ -2,7 +2,8 @@
 
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
+#include "event/EventListener.h"
 
 #include "Set.h"
 
@@ -17,7 +18,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class DatasetPickerAction : public WidgetAction
+class DatasetPickerAction : public WidgetAction, public hdps::EventListener
 {
 Q_OBJECT
 

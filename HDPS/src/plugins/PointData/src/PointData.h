@@ -551,13 +551,13 @@ private:
     static ReturnType privateVisitSourceData(Points& points, const FunctionObject functionObject)
     {
         // Note that PointsType may or may not be "const".
-        auto sourceData = points.getSourceDataset<Points>(Dataset<Points>(&points));
+        auto sourceData = points.getSourceDataset<Points>();
 
-        if ((sourceData == points) || points.isFull())
+        if (sourceData->getGuid() == points.getGuid() || points.isFull())
         {
             // In this case, this (points) is itself a source data, or it is a full set.
             // Basically just do sourceData.visitData:
-            return privateVisitData<ReturnType>(sourceData, functionObject);
+            return privateVisitData<ReturnType>(*sourceData, functionObject);
         }
         else
         {
@@ -586,7 +586,7 @@ private:
                 // Define an index function that translates a derived subset index to a source data index.
                 const auto indexFunction = [&sourceData](const auto indexIterator)
                 {
-                    return sourceData.indices[*indexIterator];
+                    return sourceData->indices[*indexIterator];
                 };
 
                 return sourceData->template visitFromBeginToEnd<ReturnType>(

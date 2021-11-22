@@ -2,7 +2,7 @@
 
 #include "PluginType.h"
 
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
 
 #include <QString>
 #include <QSharedPointer>
@@ -125,7 +125,7 @@ public: // Data access
     template<typename DatasetType>
     Dataset<DatasetType> requestDataset(const QString& datasetGuid)
     {
-        return dynamic_cast<DatasetType&>(requestDataset(datasetGuid));
+        return Dataset<DatasetType>(requestDataset(datasetGuid));
     }
 
     /**

@@ -2,7 +2,7 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
-#include "util/SmartDataset.h"
+#include "util/Dataset.h"
 
 #include "ClusterData.h"
 #include "ClustersAction.h"

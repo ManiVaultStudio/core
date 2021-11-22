@@ -227,7 +227,9 @@ set( UTIL_HEADERS
     src/util/ColorSpace.h
     src/util/Visitable.h
     src/util/Visitor.h
-    src/util/SmartDataset.h
+    src/util/Dataset.h
+    src/util/DatasetPrivate.h
+    src/util/DatasetSignals.h
     src/util/PixelSelectionTool.h
     src/util/PixelSelection.h
 )
@@ -250,9 +252,11 @@ set( UTIL_SOURCES
     src/util/ColorSpace.cpp
     src/util/Visitable.cpp
     src/util/Visitor.cpp
-    src/util/SmartDataset.cpp
-	src/util/PixelSelectionTool.cpp
-	src/util/PixelSelection.cpp
+    src/util/Dataset.cpp
+    src/util/DatasetPrivate.cpp
+    src/util/DatasetSignals.cpp
+    src/util/PixelSelectionTool.cpp
+    src/util/PixelSelection.cpp
 )
 
 set( PLUGIN_HEADERS

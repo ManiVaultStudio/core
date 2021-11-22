@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DatasetPrivate.h"
+
 #include "event/EventListener.h"
 #include "util/Exception.h"
 
@@ -10,103 +12,6 @@ namespace hdps
 
 class DatasetImpl;
 class CoreInterface;
-
-/**
- * Dataset reference private class
- *
- * Designed to emit signals related to changes in the dataset reference
- *
- * @author T. Kroes
- */
-class SmartDatasetPrivate : public QObject, public EventListener
-{
-    Q_OBJECT
-
-    /** Only dataset reference template classes have access to protected members */
-    template<typename> friend class Dataset;
-
-protected:
-
-    /**
-     * Default constructor
-     * @param parent Pointer to parent object
-     */
-    SmartDatasetPrivate() :
-        QObject(),
-        _datasetId(),
-        _dataset(nullptr)
-    {
-    }
-
-    /**
-     * Copy constructor
-     * @param other Object to copy from
-     */
-    SmartDatasetPrivate(const SmartDatasetPrivate& other) :
-        QObject(),
-        _datasetId(),
-        _dataset(nullptr)
-    {
-    }
-
-    /**
-     * Assignment operator
-     * @param other Object to assign from
-     */
-    SmartDatasetPrivate& operator=(SmartDatasetPrivate other) {
-        return *this;
-    }
-
-    /** Reset the smart pointer */
-    virtual void reset() = 0;
-
-    /**
-     * Set the smart pointer
-     * @param dataset Pointer to dataset
-     */
-    void set(DatasetImpl* dataset);
-
-protected:
-
-    /** Perform initialization */
-    void init();
-
-public:
-
-    /** Get dataset GUID */
-    virtual QString getDatasetGuid() const = 0;
-
-signals:
-
-    /**
-     * Signals that the pointer to the dataset changed
-     * @param dataset Pointer to current dataset
-     */
-    void changed(DatasetImpl* dataset);
-
-    /** Signals that the dataset contents changed */
-    void dataChanged();
-
-    /** Signals that the dataset is about to be removed */
-    void dataAboutToBeRemoved();
-
-    /**
-     * Signals that the dataset has been removed
-     * @param datasetId Globally unique identifier of the dataset that is removed
-     */
-    void dataRemoved(const QString& datasetId);
-
-    /**
-     * Signals that the dataset GUI name changed
-     * @param oldGuiName Old GUI name
-     * @param newGuiName New GUI name
-     */
-    void dataGuiNameChanged(const QString& oldGuiName, const QString& newGuiName);
-
-protected:
-    QString         _datasetId;     /** Globally unique dataset identifier */
-    DatasetImpl*    _dataset;       /** Pointer to the dataset (if any) */
-};
 
 /**
  * Smart dataset class
@@ -121,7 +26,7 @@ protected:
  * @author T. Kroes
  */
 template<typename DatasetType>
-class Dataset : public SmartDatasetPrivate
+class Dataset : public DatasetPrivate
 {
 public:
 
@@ -130,13 +35,9 @@ public:
      * @param dataset Pointer to dataset (if any)
      */
     Dataset(DatasetType* dataset = nullptr) :
-        SmartDatasetPrivate()
+        DatasetPrivate()
     {
-        // Perform startup initialization
-        init();
-
-        // Assign dataset
-        set(*dataset);
+        set(dataset);
     }
 
     /**
@@ -144,13 +45,9 @@ public:
      * @param dataset Reference to dataset
      */
     Dataset(DatasetType& dataset) :
-        SmartDatasetPrivate()
+        DatasetPrivate()
     {
-        // Perform startup initialization
-        init();
-
-        // Assign dataset
-        set(dataset);
+        set(&dataset);
     }
 
     /**
@@ -159,10 +56,8 @@ public:
      */
     Dataset(const Dataset<DatasetType>& other)
     {
-        // Initialize
-        init();
+        set(other.get());
 
-        // And assign
         *this = other;
     }
 
@@ -173,54 +68,47 @@ public:
     template<typename OtherDatasetType>
     Dataset(const Dataset<OtherDatasetType>& other)
     {
-        // Initialize
-        init();
-
-        // And assign
-        _datasetId  = other._datasetId;
-        _dataset    = other._dataset;
+        set(other.get<DatasetType>());
     }
 
 public: // Operators
 
-    /**
-     * Set the pointer to dataset
-     * @param dataset Reference to the dataset
-     */
-    void set(DatasetType& dataset) {
-        SmartDatasetPrivate::set(&dataset);
-    }
-
     /** Dereference operator */
-    DatasetType& operator* () {
+    DatasetType& operator* ()
+    {
         return dynamic_cast<DatasetType&>(*_dataset);
     }
 
     /** Const dereference operator */
-    const DatasetType& operator* () const {
+    const DatasetType& operator* () const
+    {
         return dynamic_cast<DatasetType&>(*_dataset);
     }
 
 public: // Pointer access
 
     /** Arrow operator */
-    DatasetType* operator-> () {
+    DatasetType* operator-> ()
+    {
         return get<DatasetType>();
     }
 
     /** Arrow operator */
-    const DatasetType* operator-> () const {
+    const DatasetType* operator-> () const
+    {
         return get<DatasetType>();
     }
 
     /** Parenthesis operator */
-    DatasetType* operator() () const {
+    DatasetType* operator() () const
+    {
         return get<DatasetType>();
     }
 
     /** Get the dataset pointer */
     template<typename TargetSetType>
-    TargetSetType* get() const {
+    TargetSetType* get() const
+    {
         try
         {
             Q_ASSERT(_dataset != nullptr);
@@ -247,30 +135,45 @@ public: // Pointer access
     }
 
     /** Get the dataset pointer */
-    DatasetType* get() const {
-        return get<DatasetType>();
+    DatasetImpl* get() const
+    {
+        return _dataset;
+    }
+
+    /**
+     * Set the smart pointer
+     * @param dataset Pointer to dataset
+     */
+    template<typename DatasetType>
+    void set(DatasetType* dataset)
+    {
+        DatasetPrivate::set(static_cast<DatasetImpl*>(dataset));
     }
 
 public: // Miscellaneous
 
     /** Get the smart pointer of the specified type */
     template<typename TargetSetType>
-    Dataset<TargetSetType> getConverted() const {
+    Dataset<TargetSetType> getConverted() const
+    {
         return Dataset<TargetSetType>(_dataset->get<TargetSetType>());
     }
 
     /** Returns whether the dataset pointer is valid (if the dataset actually exists) */
-    bool isValid() const {
+    bool isValid() const
+    {
         return _dataset != nullptr;
     }
 
     /** Get the current dataset globally unique identifier */
-    QString getDatasetGuid() const override {
+    QString getDatasetGuid() const override
+    {
         return _datasetId;
     }
 
     /** Resets the internals (dataset pointer to nullptr etc.) */
-    void reset() override {
+    void reset() override
+    {
         _dataset    = nullptr;
         _datasetId  = "";
     }
@@ -299,32 +202,31 @@ public: // Operators
      */
     Dataset<DatasetType>& Dataset<DatasetType>::operator=(const Dataset<DatasetType>& other)
     {
-        SmartDatasetPrivate::operator=(other);
-
-        _datasetId  = other._datasetId;
-        _dataset    = other._dataset;
+        set(other.get());
 
         return *this;
     }
 };
 
 /**
- * Compares two smart pointers for equality
- * @param lhs Left hand side smart pointer
- * @param rhs Right hand side smart pointer
+ * Compares two dataset smart pointers for equality
+ * @param lhs Left hand side dataset smart pointer
+ * @param rhs Right hand side dataset smart pointer
  * @return Whether lhs and rhs are equal
  */
-inline bool operator == (const SmartDatasetPrivate& lhs, const SmartDatasetPrivate& rhs) {
+inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
+{
     return lhs.getDatasetGuid() == rhs.getDatasetGuid();
 }
 
 /**
- * Compares two smart pointers for inequality
- * @param lhs Left hand side smart pointer
- * @param rhs Right hand side smart pointer
+ * Compares two dataset smart pointers for inequality
+ * @param lhs Left hand side dataset smart pointer
+ * @param rhs Right hand side dataset smart pointer
  * @return Whether lhs and rhs are not equal
  */
-inline bool operator != (const SmartDatasetPrivate& lhs, const SmartDatasetPrivate& rhs) {
+inline bool operator != (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
+{
     return lhs.getDatasetGuid() != rhs.getDatasetGuid();
 }
 
