@@ -16,12 +16,11 @@ class CoreInterface;
 /**
  * Smart dataset class
  *
- * Smart dataset pointer for datasets
+ * Smart pointer for datasets
  * 
- * This smart pointer ensures that access to datasets through pointers 
- * is more secure and requires less code. It internally manages a pointer
- * throughout the lifetime of a dataset (resets the datasets to nullptr
- * when a dataset is removed etc.).
+ * This smart pointer aims to make dataset access through pointers more secure. It internally manages a pointer throughout the lifetime of a dataset (resets the datasets to nullptr when a dataset is removed etc.).
+ * Access is through standard arrow and dereference operators. It is advised to always check for pointer validity before use of the pointer.
+ * In addition, it emits data signals when data is renamed, removed etc.
  *
  * @author T. Kroes
  */
@@ -62,7 +61,7 @@ public:
     }
 
     /**
-     * Copy constructor
+     * Templated copy constructor
      * @param other Smart pointer to copy from
      */
     template<typename OtherDatasetType>
@@ -105,7 +104,7 @@ public: // Pointer access
         return get<DatasetType>();
     }
 
-    /** Get the dataset pointer */
+    /** Get the dataset pointer in the target dataset type */
     template<typename TargetSetType>
     TargetSetType* get() const
     {
@@ -134,30 +133,13 @@ public: // Pointer access
         return nullptr;
     }
 
-    /** Get the dataset pointer */
+    /** Get the dataset implementation pointer */
     DatasetImpl* get() const
     {
         return _dataset;
     }
 
-    /**
-     * Set the smart pointer
-     * @param dataset Pointer to dataset
-     */
-    template<typename DatasetType>
-    void set(DatasetType* dataset)
-    {
-        DatasetPrivate::set(static_cast<DatasetImpl*>(dataset));
-    }
-
 public: // Miscellaneous
-
-    /** Get the smart pointer of the specified type */
-    template<typename TargetSetType>
-    Dataset<TargetSetType> getConverted() const
-    {
-        return Dataset<TargetSetType>(_dataset->get<TargetSetType>());
-    }
 
     /** Returns whether the dataset pointer is valid (if the dataset actually exists) */
     bool isValid() const
@@ -179,22 +161,6 @@ public: // Miscellaneous
     }
 
 public: // Operators
-
-    /**
-     * Equality operator
-     * @param rhs Right-hand-side operator
-     */
-    //const bool operator == (const Dataset<DatasetType>& rhs) const {
-    //    return rhs.getDatasetGuid() == _datasetId;
-    //}
-
-    /**
-     * Inequality operator
-     * @param rhs Right-hand-side operator
-     */
-    //const bool operator != (const Dataset<DatasetType>& rhs) const {
-    //    return rhs.getDatasetGuid() != _datasetId;
-    //}
 
     /**
      * Assignment operator

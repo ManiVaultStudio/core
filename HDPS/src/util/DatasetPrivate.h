@@ -20,33 +20,23 @@ class CoreInterface;
  *
  * @author T. Kroes
  */
-class DatasetPrivate : public EventListener
+class DatasetPrivate : public QObject, public EventListener
 {
+    Q_OBJECT
+
     /** Only dataset reference template classes have access to protected members */
     template<typename> friend class Dataset;
 
 protected:
 
     /** Default constructor */
-    DatasetPrivate() :
-        EventListener(),
-        _datasetId(),
-        _dataset(nullptr),
-        _signals()
-    {
-    }
+    DatasetPrivate();
 
     /**
      * Copy constructor
      * @param other Object to copy from
      */
-    DatasetPrivate(const DatasetPrivate& other) :
-        EventListener(),
-        _datasetId(),
-        _dataset(nullptr),
-        _signals()
-    {
-    }
+    DatasetPrivate(const DatasetPrivate& other);
 
     /**
      * Assignment operator
@@ -55,6 +45,8 @@ protected:
     DatasetPrivate& operator=(DatasetPrivate other) {
         return *this;
     }
+
+public:
 
     /** Reset the smart pointer */
     virtual void reset() = 0;
@@ -80,6 +72,33 @@ public:
     {
         return _signals;
     }
+
+signals:
+
+    /**
+     * Signals that the pointer to the dataset changed
+     * @param dataset Pointer to current dataset
+     */
+    void changed(DatasetImpl* dataset);
+
+    /** Signals that the dataset contents changed */
+    void dataChanged();
+
+    /** Signals that the dataset is about to be removed */
+    void dataAboutToBeRemoved();
+
+    /**
+     * Signals that the dataset has been removed
+     * @param datasetId Globally unique identifier of the dataset that is removed
+     */
+    void dataRemoved(const QString& datasetId);
+
+    /**
+     * Signals that the dataset GUI name changed
+     * @param oldGuiName Old GUI name
+     * @param newGuiName New GUI name
+     */
+    void dataGuiNameChanged(const QString& oldGuiName, const QString& newGuiName);
 
 protected:
     QString             _datasetId;     /** Globally unique dataset identifier */

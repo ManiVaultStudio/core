@@ -146,8 +146,8 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     fullSet->setAll(true);
 
     // Add them to the data manager
-    _dataManager->addSet(*fullSet);
-    
+    _dataManager->addSet(fullSet);
+
     _dataManager->addSelection(rawDataName, selection);
     
     // Add the dataset to the hierarchy manager and select the dataset
@@ -160,7 +160,7 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     // Add data action (available as right-click menu in the data hierarchy widget)
     new DataAction(&_mainWindow, *fullSet);
 
-    return Dataset<DatasetImpl>(fullSet);
+    return fullSet;
 }
 
 void Core::removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively /*= false*/)

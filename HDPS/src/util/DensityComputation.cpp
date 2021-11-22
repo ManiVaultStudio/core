@@ -198,7 +198,7 @@ void DensityComputation::compute()
     _offscreenSurface.create();
     _ctx->makeCurrent(&_offscreenSurface);
 
-    _numPoints = _points->size();
+    _numPoints = static_cast<std::uint32_t>(_points->size());
 
     // Upload the points to the GPU
     _pointBuffer.bind();

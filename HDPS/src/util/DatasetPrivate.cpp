@@ -3,6 +3,7 @@
 #include "DatasetPrivate.h"
 
 #include "event/Event.h"
+#include "Application.h"
 
 #include "Set.h"
 
@@ -10,6 +11,26 @@ namespace hdps
 {
 
 using namespace util;
+
+DatasetPrivate::DatasetPrivate() :
+    EventListener(),
+    _datasetId(),
+    _dataset(nullptr),
+    _signals()
+{
+    // Register for data events
+    registerDatasetEvents();
+}
+
+DatasetPrivate::DatasetPrivate(const DatasetPrivate& other) :
+    EventListener(),
+    _datasetId(),
+    _dataset(nullptr),
+    _signals()
+{
+    // Register for data events
+    registerDatasetEvents();
+}
 
 void DatasetPrivate::set(DatasetImpl* dataset)
 {
@@ -20,23 +41,16 @@ void DatasetPrivate::set(DatasetImpl* dataset)
             return;
         }
 
-        // Set event core in the event listener
-        setEventCore(dataset->getCore());
-
         // No need to process the same dataset
         if (dataset == _dataset)
             return;
 
-        // Try to cast the dataset pointer to the target dataset type
-        _dataset = dataset;
-
-        _datasetId = _dataset->getGuid();
+        // Set internal dataset pointer and dataset GUID
+        _dataset    = dataset;
+        _datasetId  = _dataset->getGuid();
 
         // Inform others that the pointer to the dataset changed
-        _signals.notifyChanged(dynamic_cast<DatasetImpl*>(_dataset));
-
-        // Register for dataset events
-        registerDatasetEvents();
+        emit changed(dynamic_cast<DatasetImpl*>(_dataset));
     }
     catch (std::exception& e)
     {
@@ -52,6 +66,9 @@ void DatasetPrivate::registerDatasetEvents()
 {
     try
     {
+        // Set the event core (necessary for listening to data events)
+        setEventCore(Application::core());
+
         // Register for data removal events
         registerDataEvent([this](DataEvent* dataEvent) {
 
@@ -71,6 +88,8 @@ void DatasetPrivate::registerDatasetEvents()
                     // Notify others that the dataset is about to be removed
                     _signals.notifyDataAboutToBeRemoved();
 
+                    emit dataAboutToBeRemoved();
+
                     break;
                 }
 
@@ -82,6 +101,8 @@ void DatasetPrivate::registerDatasetEvents()
 
                     // Notify others that the dataset is removed
                     _signals.notifyDataRemoved(getDatasetGuid());
+                    
+                    emit dataRemoved(getDatasetGuid());
 
                     break;
                 }
@@ -91,6 +112,8 @@ void DatasetPrivate::registerDatasetEvents()
                 {
                     // Notify others that the dataset contents changed
                     _signals.notifyDataChanged();
+                    
+                    emit dataChanged();
 
                     break;
                 }
@@ -103,6 +126,8 @@ void DatasetPrivate::registerDatasetEvents()
 
                     // Notify others of the data GUI name change
                     _signals.notifyDataGuiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset()->getGuiName());
+                    
+                    emit dataGuiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset()->getGuiName());
 
                     break;
                 }
