@@ -54,6 +54,73 @@ public:
         return Dataset<DatasetType>(_output.get<DatasetType>());
     }
 
+protected: // Status
+
+    /** Get task status */
+    DataHierarchyItem::TaskStatus getTaskStatus() const {
+        if (!_output.isValid())
+            return DataHierarchyItem::TaskStatus::Undefined;
+
+        return _output->getDataHierarchyItem().getTaskStatus();
+    }
+
+    /**
+     * Set name of the task
+     * @param taskName Name of the task
+     */
+    void setTaskName(const QString& taskName) {
+        if (!_output.isValid())
+            return;
+
+        _output->getDataHierarchyItem().setTaskName(taskName);
+    }
+
+    /**
+     * Set the task progress
+     * @param taskProgress Progress of the task (%)
+     */
+    void setTaskProgress(const float& taskProgress) {
+        if (!_output.isValid())
+            return;
+
+        _output->getDataHierarchyItem().setTaskProgress(taskProgress);
+    }
+
+    /**
+     * Set the task description
+     * @param taskDescription Description of the task
+     */
+    void setTaskDescription(const QString& taskDescription) {
+        if (!_output.isValid())
+            return;
+
+        _output->getDataHierarchyItem().setTaskDescription(taskDescription);
+    }
+
+    /** Set the task status to running */
+    void setTaskRunning() {
+        if (!_output.isValid())
+            return;
+
+        _output->getDataHierarchyItem().setTaskRunning();
+    }
+
+    /** Set the task status to finished */
+    void setTaskFinished() {
+        if (!_output.isValid())
+            return;
+
+        _output->getDataHierarchyItem().setTaskFinished();
+    }
+
+    /** Set the task status to aborted */
+    void setTaskAborted() {
+        if (!_output.isValid())
+            return;
+
+        _output->getDataHierarchyItem().setTaskAborted();
+    }
+
 protected:
     Dataset<DatasetImpl>    _input;       /** Input dataset smart pointer */
     Dataset<DatasetImpl>    _output;      /** Output dataset smart pointer */

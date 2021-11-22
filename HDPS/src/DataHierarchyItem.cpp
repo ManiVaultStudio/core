@@ -77,6 +77,16 @@ DataHierarchyItem& DataHierarchyItem::getParent() const
     return *_parent;
 }
 
+void DataHierarchyItem::getParents(DataHierarchyItems& parents) const
+{
+    // Add ourselves
+    parents << const_cast<DataHierarchyItem*>(this);
+
+    // And possibly our parents
+    if (hasParent())
+        getParents(parents);
+}
+
 void DataHierarchyItem::setParent(DataHierarchyItem& parent)
 {
     _parent = &parent;
@@ -166,6 +176,25 @@ QIcon DataHierarchyItem::getIconByName(const QString& name) const
             return namedIcon.second;
 
     return QIcon();
+}
+
+QString DataHierarchyItem::getFullPathName() const
+{
+    DataHierarchyItems parents;
+
+    // Walk up the tree and fetch all parents
+    getParents(parents);
+
+    QStringList dataHierarchyItemNames;
+
+    // Add GUI names of the parents to the string list
+    for (const auto& parent : parents)
+        dataHierarchyItemNames << parent->getDataset()->getGuiName();
+
+    // Add name of this data hierarchy item
+    dataHierarchyItemNames << _dataset->getGuiName();
+
+    return dataHierarchyItemNames.join("/");
 }
 
 void DataHierarchyItem::addChild(DataHierarchyItem& child)

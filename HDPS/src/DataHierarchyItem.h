@@ -84,6 +84,9 @@ public:
     /** Get reference to parent hierarchy item */
     DataHierarchyItem& getParent() const;
 
+    /** Walks up the hierarchy and returns all parents */
+    void getParents(DataHierarchyItems& parents) const;
+
     /** Returns whether the data hierarchy item has a parent */
     bool hasParent() const;
 
@@ -139,6 +142,9 @@ public:
      * @return Icon
      */
     QIcon getIconByName(const QString& name) const;
+
+    /** Get the full path name of the data hierarchy item (separated by forward slashes) */
+    QString getFullPathName() const;
 
 protected:
 

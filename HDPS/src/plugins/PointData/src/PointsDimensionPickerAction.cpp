@@ -14,7 +14,7 @@ PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const 
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
 
-    _currentDimensionAction.setToolTip("Pick a dimension by selecting");
+    _currentDimensionAction.setToolTip("Current dimension");
 
     // Show both the combobox and line edit by default and change their visibility when the dimensions change
     _currentDimensionAction.setDefaultWidgetFlags(OptionAction::ComboBox | OptionAction::LineEdit);

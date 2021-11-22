@@ -1,5 +1,6 @@
 #include "DatasetPickerAction.h"
 #include "Application.h"
+#include "DataHierarchyItem.h"
 
 #include "event/Event.h"
 
@@ -8,16 +9,15 @@
 using namespace hdps;
 
 DatasetPickerAction::DatasetPickerAction(QObject* parent) :
-    WidgetAction(parent),
+    OptionAction(parent, "Pick dataset"),
     _datasets(),
-    _currentDatasetAction(this, "Pick dimension")
+    _showFullPathName()
 {
     setText("Dataset picker");
     setIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+    setToolTip("Pick a dataset");
 
-    _currentDatasetAction.setToolTip("Pick a dataset");
-
-    connect(&_currentDatasetAction, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
+    connect(this, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
         emit datasetPicked(_datasets[currentIndex].get());
     });
 }
@@ -48,10 +48,10 @@ void DatasetPickerAction::setDatasets(const QVector<Dataset<DatasetImpl>>& datas
     updateCurrentDatasetAction();
 }
 
-Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset()
+Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
 {
     // Get the current dataset index
-    const auto currentIndex = _currentDatasetAction.getCurrentIndex();
+    const auto currentIndex = getCurrentIndex();
 
     if (currentIndex >= 0)
         return _datasets[currentIndex];
@@ -69,7 +69,19 @@ void DatasetPickerAction::setCurrentDataset(const Dataset<DatasetImpl>& currentD
         return;
 
     // Change current index
-    _currentDatasetAction.setCurrentIndex(currentIndex);
+    setCurrentIndex(currentIndex);
+}
+
+bool DatasetPickerAction::getShowFullPathName() const
+{
+    return _showFullPathName;
+}
+
+void DatasetPickerAction::setShowFullPathName(const bool& showFullPathName)
+{
+    _showFullPathName = showFullPathName;
+
+    updateCurrentDatasetAction();
 }
 
 void DatasetPickerAction::updateCurrentDatasetAction()
@@ -79,25 +91,8 @@ void DatasetPickerAction::updateCurrentDatasetAction()
 
     // Add option for each dataset
     for (auto dataset : _datasets)
-        datasets << dataset->getGuiName();
+        datasets << (_showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName());
 
     // Set options in picker action
-    _currentDatasetAction.setOptions(datasets);
-}
-
-DatasetPickerAction::Widget::Widget(QWidget* parent, DatasetPickerAction* datasetPickerAction) :
-    WidgetActionWidget(parent, datasetPickerAction)
-{
-    auto layout = new QHBoxLayout();
-
-    layout->setMargin(0);
-    layout->setSpacing(3);
-
-    auto currentDatasetWidget = datasetPickerAction->getCurrentDatasetAction().createWidget(this);
-
-    currentDatasetWidget->findChild<QComboBox*>("ComboBox")->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-
-    layout->addWidget(currentDatasetWidget);
-
-    setLayout(layout);
+    setOptions(datasets);
 }

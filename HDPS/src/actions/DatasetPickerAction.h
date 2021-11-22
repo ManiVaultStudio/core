@@ -18,38 +18,9 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class DatasetPickerAction : public WidgetAction
+class DatasetPickerAction : public OptionAction, public hdps::EventListener
 {
 Q_OBJECT
-
-public:
-
-    /** Widget class for dataset picker action */
-    class Widget : public WidgetActionWidget
-    {
-    protected:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param datasetPickerAction Pointer to dataset picker action
-         */
-        Widget(QWidget* parent, DatasetPickerAction* datasetPickerAction);
-
-    protected:
-        friend class DatasetPickerAction;
-    };
-
-protected:
-
-    /**
-     * Get widget representation of the points dimension action
-     * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
-     */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this);
-    };
 
 public:
 
@@ -66,7 +37,7 @@ public:
     void setDatasets(const QVector<hdps::Dataset<hdps::DatasetImpl>>& datasets);
 
     /** Get the current dataset */
-    hdps::Dataset<hdps::DatasetImpl> getCurrentDataset();
+    hdps::Dataset<hdps::DatasetImpl> getCurrentDataset() const;
 
     /**
      * Set the current dataset
@@ -74,14 +45,19 @@ public:
      */
     void setCurrentDataset(const hdps::Dataset<hdps::DatasetImpl>& currentDataset);
 
+    /** Get whether to show the full path name in the GUI */
+    bool getShowFullPathName() const;
+
+    /**
+     * Set whether to show the full path name in the GUI
+     * @param showFullPathName Whether to show the full path name in the GUI
+     */
+    void setShowFullPathName(const bool& showFullPathName);
+
 protected:
 
     /** Update the current dataset action from the dataset */
     void updateCurrentDatasetAction();
-
-public: /** Action getters */
-
-    OptionAction& getCurrentDatasetAction() { return _currentDatasetAction; }
 
 signals:
 
@@ -93,5 +69,5 @@ signals:
 
 protected:
     QVector<hdps::Dataset<hdps::DatasetImpl>>   _datasets;                  /** Datasets from which can be picked */
-    OptionAction                                _currentDatasetAction;      /** Pick dataset action */
+    bool                                        _showFullPathName;          /** Whether to show the full path name in the GUI */
 };
