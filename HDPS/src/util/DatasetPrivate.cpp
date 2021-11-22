@@ -48,7 +48,7 @@ void DatasetPrivate::set(DatasetImpl* dataset)
         _datasetId  = _dataset->getGuid();
 
         // Inform others that the pointer to the dataset changed
-        emit changed(dynamic_cast<DatasetImpl*>(_dataset));
+        emit changed(_dataset);
     }
     catch (std::exception& e)
     {
