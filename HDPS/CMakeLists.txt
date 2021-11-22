@@ -229,7 +229,6 @@ set( UTIL_HEADERS
     src/util/Visitor.h
     src/util/Dataset.h
     src/util/DatasetPrivate.h
-    src/util/DatasetSignals.h
     src/util/PixelSelectionTool.h
     src/util/PixelSelection.h
 )
@@ -254,7 +253,6 @@ set( UTIL_SOURCES
     src/util/Visitor.cpp
     src/util/Dataset.cpp
     src/util/DatasetPrivate.cpp
-    src/util/DatasetSignals.cpp
     src/util/PixelSelectionTool.cpp
     src/util/PixelSelection.cpp
 )

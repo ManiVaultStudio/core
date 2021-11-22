@@ -15,8 +15,7 @@ using namespace util;
 DatasetPrivate::DatasetPrivate() :
     EventListener(),
     _datasetId(),
-    _dataset(nullptr),
-    _signals()
+    _dataset(nullptr)
 {
     // Register for data events
     registerDatasetEvents();
@@ -25,8 +24,7 @@ DatasetPrivate::DatasetPrivate() :
 DatasetPrivate::DatasetPrivate(const DatasetPrivate& other) :
     EventListener(),
     _datasetId(),
-    _dataset(nullptr),
-    _signals()
+    _dataset(nullptr)
 {
     // Register for data events
     registerDatasetEvents();
@@ -86,8 +84,6 @@ void DatasetPrivate::registerDatasetEvents()
                 case EventType::DataAboutToBeRemoved:
                 {
                     // Notify others that the dataset is about to be removed
-                    _signals.notifyDataAboutToBeRemoved();
-
                     emit dataAboutToBeRemoved();
 
                     break;
@@ -100,8 +96,6 @@ void DatasetPrivate::registerDatasetEvents()
                     reset();
 
                     // Notify others that the dataset is removed
-                    _signals.notifyDataRemoved(getDatasetGuid());
-                    
                     emit dataRemoved(getDatasetGuid());
 
                     break;
@@ -111,8 +105,6 @@ void DatasetPrivate::registerDatasetEvents()
                 case EventType::DataChanged:
                 {
                     // Notify others that the dataset contents changed
-                    _signals.notifyDataChanged();
-                    
                     emit dataChanged();
 
                     break;
@@ -125,8 +117,6 @@ void DatasetPrivate::registerDatasetEvents()
                     auto datasetGuiNameChangedEvent = static_cast<hdps::DataGuiNameChangedEvent*>(dataEvent);
 
                     // Notify others of the data GUI name change
-                    _signals.notifyDataGuiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset()->getGuiName());
-                    
                     emit dataGuiNameChanged(datasetGuiNameChangedEvent->getPreviousGuiName(), datasetGuiNameChangedEvent->getDataset()->getGuiName());
 
                     break;

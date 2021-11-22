@@ -1,7 +1,5 @@
 #pragma once
 
-#include "DatasetSignals.h"
-
 #include "event/EventListener.h"
 #include "util/Exception.h"
 
@@ -16,7 +14,7 @@ class CoreInterface;
 /**
  * Smart dataset pointer private class
  *
- * Designed to emit signals related to changes in the dataset reference
+ * Private internals for the dataset smart pointer
  *
  * @author T. Kroes
  */
@@ -67,12 +65,6 @@ public:
     /** Get dataset GUID */
     virtual QString getDatasetGuid() const = 0;
 
-    /** Get data signals */
-    DatasetSignals& getSignals()
-    {
-        return _signals;
-    }
-
 signals:
 
     /**
@@ -101,9 +93,8 @@ signals:
     void dataGuiNameChanged(const QString& oldGuiName, const QString& newGuiName);
 
 protected:
-    QString             _datasetId;     /** Globally unique dataset identifier */
-    DatasetImpl*        _dataset;       /** Pointer to the dataset (if any) */
-    DatasetSignals      _signals;       /** For emitting signals */
+    QString         _datasetId;     /** Globally unique dataset identifier */
+    DatasetImpl*    _dataset;       /** Pointer to the dataset (if any) */
 };
 
 }
