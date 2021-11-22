@@ -196,8 +196,9 @@ Dataset<DatasetImpl> Core::createDerivedData(const QString& guiName, const Datas
     // Create an initial full set, but no selection because it is shared with the source data
     auto derivedDataset = rawData.createDataSet();
 
-    // Mark the full set as derived
+    // Mark the full set as derived and set the GUI name
     derivedDataset->setSourceDataSet(sourceDataset);
+    derivedDataset->setGuiName(guiName);
 
     // Set properties of the new set
     derivedDataset->setAll(true);
@@ -206,7 +207,7 @@ Dataset<DatasetImpl> Core::createDerivedData(const QString& guiName, const Datas
     _dataManager->addSet(*derivedDataset);
 
     // Add the dataset to the hierarchy manager
-    _dataHierarchyManager->addItem(derivedDataset, const_cast<Dataset<DatasetImpl>&>(parentDataset));
+    _dataHierarchyManager->addItem(derivedDataset, !parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(sourceDataset) : const_cast<Dataset<DatasetImpl>&>(parentDataset));
 
     // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();

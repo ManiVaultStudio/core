@@ -108,35 +108,13 @@ public: // Pointer access
     template<typename TargetSetType>
     TargetSetType* get() const
     {
-        try
-        {
-            Q_ASSERT(_dataset != nullptr);
-
-            // Cast to target type
-            auto dataset = dynamic_cast<TargetSetType*>(_dataset);
-
-            // Except if conversion fails
-            if (_dataset == nullptr)
-                throw std::runtime_error("Smart pointer is null, or the conversion to the target type failed");
-
-            return dataset;
-        }
-        catch (std::exception& e)
-        {
-            util::exceptionMessageBox("Unable to retrieve pointer from dataset smart pointer", e.what());
-        }
-        catch (...)
-        {
-            util::exceptionMessageBox("Unable to retrieve pointer from dataset smart pointer");
-        }
-        
-        return nullptr;
+        return reinterpret_cast<TargetSetType*>(_dataset);
     }
 
     /** Get the dataset implementation pointer */
-    DatasetImpl* get() const
+    DatasetType* get() const
     {
-        return _dataset;
+        return get<DatasetType>();
     }
 
 public: // Miscellaneous

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "PluginType.h"
-
-#include "util/Dataset.h"
+#include "Dataset.h"
 
 #include <QString>
 #include <QSharedPointer>
@@ -78,8 +77,8 @@ public: // Data access
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
      * @return Smart pointer to the created derived dataset
      */
-    template <typename DatasetType, typename ParentDatasetType>
-    Dataset<DatasetType> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<ParentDatasetType>& parentDataset = Dataset<ParentDatasetType>())
+    template <typename DatasetType>
+    Dataset<DatasetType> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>())
     {
         return createDerivedData(guiName, sourceDataset, parentDataset);
     }

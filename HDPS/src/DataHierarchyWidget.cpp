@@ -2,8 +2,7 @@
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
 #include "Core.h"
-
-#include "util/Dataset.h"
+#include "Dataset.h"
 
 #include <QDebug>
 #include <QInputDialog>
@@ -77,6 +76,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
     connect(&_model, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+
+    // Insert new rows expanded
+    connect(&_model, &QAbstractItemModel::rowsInserted, this, [&](const QModelIndex& parent, int first, int last) {
+        expand(_model.index(first, 0, parent));
+    });
 
     numberOfRowsChanged();
 

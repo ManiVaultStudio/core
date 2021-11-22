@@ -1,11 +1,11 @@
 #pragma once
 
-#include "actions/Actions.h"
-#include "event/EventListener.h"
-#include "util/Dataset.h"
-
+#include "Dataset.h"
 #include "ClusterData.h"
 #include "ClustersAction.h"
+
+#include "actions/Actions.h"
+#include "event/EventListener.h"
 
 namespace hdps {
     class CoreInterface;

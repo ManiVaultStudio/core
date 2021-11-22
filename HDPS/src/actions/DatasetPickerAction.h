@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Dataset.h"
+
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
-#include "util/Dataset.h"
-#include "event/EventListener.h"
 
 #include "Set.h"
 
@@ -18,7 +18,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class DatasetPickerAction : public WidgetAction, public hdps::EventListener
+class DatasetPickerAction : public WidgetAction
 {
 Q_OBJECT
 

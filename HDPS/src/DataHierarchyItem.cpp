@@ -2,8 +2,7 @@
 #include "Core.h"
 #include "DataManager.h"
 #include "Set.h"
-
-#include "util/Dataset.h"
+#include "Dataset.h"
 
 #include <QTimer>
 

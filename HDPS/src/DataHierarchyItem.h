@@ -231,11 +231,11 @@ public: // Task
 
     /**
      * Sets the task description
-     * @param taskDescription Task description
+     * @param taskDescription Task description [0, 1]
      */
     void setTaskDescription(const QString& taskDescription);
 
-    /** Gets the task progress */
+    /** Gets the task progress [0, 1] */
     float getTaskProgress() const;
 
     /**

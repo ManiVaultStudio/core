@@ -9,49 +9,16 @@ using namespace hdps;
 
 DatasetPickerAction::DatasetPickerAction(QObject* parent) :
     WidgetAction(parent),
-    EventListener(),
     _datasets(),
     _currentDatasetAction(this, "Pick dimension")
 {
     setText("Dataset picker");
     setIcon(Application::getIconFont("FontAwesome").getIcon("database"));
-    setEventCore(Application::core());
 
     _currentDatasetAction.setToolTip("Pick a dataset");
 
     connect(&_currentDatasetAction, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
         emit datasetPicked(_datasets[currentIndex].get());
-    });
-
-    registerDataEvent([this](DataEvent* dataEvent) {
-
-        // Get dataset for which the event occurred
-        const auto dataset = dataEvent->getDataset();
-
-        // Only proceed if the dataset resides in the dataset picker
-        if (!_datasets.contains(dataset))
-            return;
-
-        switch (dataEvent->getType())
-        {
-            case EventType::DataAboutToBeRemoved:
-            {
-                _datasets.removeOne(dataset);
-                updateCurrentDatasetAction();
-
-                break;
-            }
-
-            case EventType::DataGuiNameChanged:
-            {
-                updateCurrentDatasetAction();
-
-                break;
-            }
-
-            default:
-                break;
-        }
     });
 }
 
@@ -59,6 +26,23 @@ void DatasetPickerAction::setDatasets(const QVector<Dataset<DatasetImpl>>& datas
 {
     // Assign datasets
     _datasets = datasets;
+
+    // Create connections
+    for (auto& dataset : _datasets) {
+
+        // Update the datasets when the dataset is removed
+        connect(&dataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, dataset]() {
+
+            // Remove the dataset from the slit
+            _datasets.removeOne(dataset);
+
+            // And update the dataset selection picker action
+            updateCurrentDatasetAction();
+        });
+
+        // Update the current dataset action when the dataset is renamed
+        connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, this, &DatasetPickerAction::updateCurrentDatasetAction);
+    }
 
     // And update the options action
     updateCurrentDatasetAction();

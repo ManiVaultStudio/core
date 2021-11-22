@@ -3,9 +3,9 @@
 
 #include "CoreInterface.h"
 #include "RawData.h"
+#include "Dataset.h"
 
 #include "actions/WidgetAction.h"
-#include "util/Dataset.h"
 
 #include <QString>
 #include <QVector>

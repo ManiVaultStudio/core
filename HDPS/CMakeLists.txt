@@ -227,8 +227,6 @@ set( UTIL_HEADERS
     src/util/ColorSpace.h
     src/util/Visitable.h
     src/util/Visitor.h
-    src/util/Dataset.h
-    src/util/DatasetPrivate.h
     src/util/PixelSelectionTool.h
     src/util/PixelSelection.h
 )
@@ -251,8 +249,6 @@ set( UTIL_SOURCES
     src/util/ColorSpace.cpp
     src/util/Visitable.cpp
     src/util/Visitor.cpp
-    src/util/Dataset.cpp
-    src/util/DatasetPrivate.cpp
     src/util/PixelSelectionTool.cpp
     src/util/PixelSelection.cpp
 )
@@ -273,6 +269,8 @@ set( PLUGIN_HEADERS
     src/Set.h
     src/Application.h
     src/LinkedSelection.h
+    src/Dataset.h
+    src/DatasetPrivate.h
 )
 
 set( PLUGIN_SOURCES
@@ -283,6 +281,8 @@ set( PLUGIN_SOURCES
     src/Plugin.cpp
     src/Set.cpp
     src/LinkedSelection.cpp
+    src/Dataset.cpp
+    src/DatasetPrivate.cpp
 )
 
 set(DATA_HIERARCHY_HEADERS

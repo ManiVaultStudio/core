@@ -2,6 +2,7 @@
 #define HDPS_LOADERPLUGIN_H
 
 #include "Plugin.h"
+#include "DataHierarchyItem.h"
 
 #include <QString>
 
