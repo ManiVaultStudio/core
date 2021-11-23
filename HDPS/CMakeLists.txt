@@ -654,7 +654,6 @@ add_subdirectory(src/plugins/ImageData)
 
 # Qt Advanced docking system
 set(VERSION_SHORT 3.7.0)
-set(ads_PlatformDir ${INSTALL_DIR}/$<CONFIGURATION>/)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
