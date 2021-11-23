@@ -2,6 +2,7 @@
 
 #include "DataAnalysisAction.h"
 #include "DataExportAction.h"
+#include "DataCopyAction.h"
 #include "DataRemoveAction.h"
 
 using namespace hdps::gui;
@@ -31,6 +32,7 @@ protected:
     Dataset<DatasetImpl>    _dataset;               /** Smart pointer to the dataset */
     DataAnalysisAction      _dataAnalysisAction;    /** Data analysis action */
     DataExportAction        _dataExportAction;      /** Data export action */
+    DataCopyAction          _dataCopyAction;        /** Data copy action */
     DataRemoveAction        _dataRemoveAction;      /** Data remove action */
 };
 

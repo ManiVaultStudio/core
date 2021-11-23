@@ -295,6 +295,7 @@ set(DATA_HIERARCHY_HEADERS
     src/DataAnalysisAction.h
     src/DataImportAction.h
     src/DataRemoveAction.h
+    src/DataCopyAction.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -307,6 +308,7 @@ set(DATA_HIERARCHY_SOURCES
     src/DataAnalysisAction.cpp
     src/DataImportAction.cpp
     src/DataRemoveAction.cpp
+    src/DataCopyAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

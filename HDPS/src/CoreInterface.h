@@ -39,6 +39,15 @@ public: // Data access
     virtual Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
 
     /**
+     * Copies a dataset and adds it to the data hierarchy
+     * @param dataset Smart pointer to dataset to copy
+     * @param datasetGuiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
+     * @return Smart pointer to the copied dataset
+     */
+    virtual Dataset<DatasetImpl> copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
+
+    /**
      * Requests the plugin manager to create new RawData of the given kind
      * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
      * @param kind Kind of plugin

@@ -163,6 +163,40 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     return fullSet;
 }
 
+Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
+{
+    try
+    {
+        // Except if the source dataset is invalid
+        if (!dataset.isValid())
+            throw std::runtime_error("Source dataset is invalid");
+
+        // Copy the dataset
+        auto datasetCopy = dataset->copy();
+
+        // Adjust GUI name
+        datasetCopy->setGuiName(dataSetGuiName);
+
+        // Establish parent
+        auto parent = parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(parentDataset) : (dataset->getDataHierarchyItem().hasParent() ? dataset->getDataHierarchyItem().getParent().getDataset() : Dataset<DatasetImpl>());
+
+        // Add to the data hierarchy manager
+        _dataHierarchyManager->addItem(const_cast<Dataset<DatasetImpl>&>(datasetCopy), parent);
+
+        // Notify others that data was added
+        notifyDataAdded(dataset);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to copy dataset", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to copy dataset");
+    }
+
+    return Dataset<DatasetImpl>();
+}
+
 void Core::removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively /*= false*/)
 {
     // Remove datasets one by one
