@@ -20,11 +20,6 @@
         <file alias="AppBackground1024">images/AppBackground1024.png</file>
     </qresource>
     <qresource prefix="/">
-        <file>icons/DataIcon.png</file>
-        <file>icons/TextIcon.png</file>
-        <file>icons/ColorIcon.png</file>
-        <file>icons/ClusterIcon.png</file>
-        <file>icons/DragDropWhite.png</file>
         <file>shaders/Quad.vert</file>
         <file>shaders/DensityCompute.vert</file>
         <file>shaders/DensityCompute.frag</file>
