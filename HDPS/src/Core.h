@@ -256,6 +256,32 @@ public: // Events & notifications
     void notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) override;
 
     /**
+     * Notify all listeners that a dataset child was added
+     * @param parentDataset Smart pointer to the parent dataset
+     * @param childDataset Smart pointer to the child dataset that was added
+     */
+    void notifyDataChildAdded(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset) override;
+
+    /**
+     * Notify all listeners that a dataset child was removed
+     * @param parentDataset Smart pointer to the parent dataset
+     * @param childDataset Smart pointer to the child dataset that was removed
+     */
+    void notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset) override;
+
+    /**
+     * Notify all listeners that a dataset is locked
+     * @param dataset Smart pointer to the dataset
+     */
+    void notifyDataLocked(const Dataset<DatasetImpl>& dataset) override;
+
+    /**
+     * Notify all listeners that a dataset is unlocked
+     * @param dataset Smart pointer to the dataset
+     */
+    void notifyDataUnlocked(const Dataset<DatasetImpl>& dataset) override;
+
+    /**
      * Register an event listener
      * @param eventListener Pointer to event listener to register
      */

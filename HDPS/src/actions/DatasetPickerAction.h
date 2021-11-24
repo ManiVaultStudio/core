@@ -27,8 +27,9 @@ public:
     /** 
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    DatasetPickerAction(QObject* parent);
+    DatasetPickerAction(QObject* parent, const QString& title);
 
     /**
      * Set the datasets from which can be picked
@@ -38,6 +39,13 @@ public:
 
     /** Get the current dataset */
     hdps::Dataset<hdps::DatasetImpl> getCurrentDataset() const;
+
+    /** Get the current dataset */
+    template<typename DatasetType>
+    hdps::Dataset<DatasetType> getCurrentDataset() const
+    {
+        return getCurrentDataset();
+    }
 
     /**
      * Set the current dataset

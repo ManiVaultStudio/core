@@ -29,10 +29,16 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl>& dataset, Dataset<Datase
 
         _dataHierarchyItems << newDataHierarchyItem;
 
+        // Add child item if the parent is valid
         if (parentDataset.isValid())
             parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
 
-        emit itemAdded(newDataHierarchyItem);
+        // Notify others that an item is added
+        emit itemAdded(*newDataHierarchyItem);
+
+        // Notify others that a child is added
+        if (parentDataset.isValid())
+            Application::core()->notifyDataChildAdded(parentDataset, dataset);
     }
     catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to add dataset to data hierarchy", e.what());
@@ -92,6 +98,11 @@ QVector<Dataset<DatasetImpl>> DataHierarchyManager::removeItem(const Dataset<Dat
             }
             emit itemRemoved(datasetToRemove);
         }
+
+        // Notify others that a child was removed
+        if (parentDataset.isValid())
+            Application::core()->notifyDataChildAdded(parentDataset, dataset);
+
     } catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to remove dataset(s) from data hierarchy", e.what());
     }
@@ -151,6 +162,7 @@ DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem* dataHier
 
     auto children = dataHierarchyItem->getChildren();
 
+    // Get children recursively
     if (recursive)
         for (auto child : children)
             children << getChildren(child, recursive);

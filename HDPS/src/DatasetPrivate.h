@@ -73,9 +73,6 @@ signals:
      */
     void changed(DatasetImpl* dataset);
 
-    /** Signals that the dataset contents changed */
-    void dataChanged();
-
     /** Signals that the dataset is about to be removed */
     void dataAboutToBeRemoved();
 
@@ -85,12 +82,24 @@ signals:
      */
     void dataRemoved(const QString& datasetId);
 
+    /** Signals that the dataset contents changed */
+    void dataChanged();
+
+    /** Signals that the dataset selection changed */
+    void dataSelectionChanged();
+
     /**
      * Signals that the dataset GUI name changed
      * @param oldGuiName Old GUI name
      * @param newGuiName New GUI name
      */
     void dataGuiNameChanged(const QString& oldGuiName, const QString& newGuiName);
+
+    /** Signals that a dataset child was added */
+    void dataChildAdded(const Dataset<DatasetImpl>& childDataset);
+
+    /** Signals that a dataset child was removed */
+    void dataChildRemoved(const Dataset<DatasetImpl>& childDataset);
 
 protected:
     QString         _datasetId;     /** Globally unique dataset identifier */

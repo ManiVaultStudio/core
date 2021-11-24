@@ -121,16 +121,40 @@ void DatasetPrivate::registerDatasetEvents()
 
                     break;
                 }
+
+                // Dataset child was added
+                case EventType::DataChildAdded:
+                {
+                    // Get data child added event
+                    auto dataChildAddedEvent = static_cast<hdps::DataChildAddedEvent*>(dataEvent);
+
+                    // Notify others that a data child was added
+                    emit dataChildAdded(dataChildAddedEvent->getChildDataset());
+
+                    break;
+                }
+
+                // Dataset child was removed
+                case EventType::DataChildRemoved:
+                {
+                    // Get data child removed event
+                    auto dataChildRemovedEvent = static_cast<hdps::DataChildRemovedEvent*>(dataEvent);
+
+                    // Notify others that a data child was removed
+                    emit dataChildAdded(dataChildRemovedEvent->getChildDataset());
+
+                    break;
+                }
             }
         });
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to initialize dataset smart pointer", e.what());
+        exceptionMessageBox("Unable to register to dataset events in smart pointer", e.what());
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to initialize dataset smart pointer");
+        exceptionMessageBox("Unable to register to dataset events in smart pointer");
     }
 }
 

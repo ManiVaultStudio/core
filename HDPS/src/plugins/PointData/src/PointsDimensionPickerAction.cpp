@@ -16,9 +16,6 @@ PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const 
 
     _currentDimensionAction.setToolTip("Current dimension");
 
-    // Show both the combobox and line edit by default and change their visibility when the dimensions change
-    _currentDimensionAction.setDefaultWidgetFlags(OptionAction::ComboBox | OptionAction::LineEdit);
-
     // Selection changed notifier
     const auto selectionChanged = [this]() {
         emit currentDimensionIndexChanged(_currentDimensionAction.getCurrentIndex());
@@ -127,27 +124,7 @@ PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPick
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
-
-    auto widget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this);
-
-    layout->addWidget(widget);
+    layout->addWidget(pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this));
 
     setLayout(layout);
-
-    // Update visibility of the combobox and line edit depending on the number of options
-    const auto updateWidgets = [this, pointsDimensionPickerAction, widget]() {
-
-        // Determine whether to show the combobox or the line edit
-        const auto showComboBox = pointsDimensionPickerAction->getCurrentDimensionAction().getNumberOfOptions() < pointsDimensionPickerAction->getSearchThreshold();
-
-        // Show/hide combobox and line edit
-        widget->findChild<QComboBox*>("ComboBox")->setVisible(showComboBox);
-        widget->findChild<QLineEdit*>("LineEdit")->setVisible(!showComboBox);
-    };
-
-    // Update widgets when the number of options change
-    connect(&pointsDimensionPickerAction->getCurrentDimensionAction(), &OptionAction::optionsChanged, updateWidgets);
-
-    // Do an initial update at startup
-    updateWidgets();
 }

@@ -244,30 +244,10 @@ public: // Events & notifications
     virtual void notifyDataAdded(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
-     * Notify listeners that a new dataset has been added to the core
-     * @param dataset Smart pointer to the dataset that was added
-     */
-    template<typename DatasetType>
-    void notifyDataAdded(const Dataset<DatasetType>& dataset)
-    {
-        notifyDataAdded(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
-    }
-
-    /**
      * Notify listeners that a dataset is about to be removed
      * @param dataset Smart pointer to the dataset which is about to be removed
      */
     virtual void notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify listeners that a dataset is about to be removed
-     * @param dataset Smart pointer to the dataset which is about to be removed
-     */
-    template<typename DatasetType>
-    void notifyDataAboutToBeRemoved(const Dataset<DatasetType>& dataset)
-    {
-        notifyDataAboutToBeRemoved(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
-    }
 
     /**
      * Notify listeners that a dataset is removed
@@ -283,30 +263,10 @@ public: // Events & notifications
     virtual void notifyDataChanged(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
-     * Notify listeners that a dataset has changed
-     * @param dataset Smart pointer to the dataset of which the data changed
-     */
-    template<typename DatasetType>
-    void notifyDataChanged(const Dataset<DatasetType>& dataset)
-    {
-        notifyDataChanged(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
-    }
-
-    /**
      * Notify listeners that data selection has changed
      * @param dataset Smart pointer to the dataset of which the selection changed
      */
     virtual void notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset) = 0;
-
-    /**
-     * Notify listeners that data selection has changed
-     * @param dataset Smart pointer to the dataset of which the selection changed
-     */
-    template<typename DatasetType>
-    void notifyDataSelectionChanged(const Dataset<DatasetType>& dataset)
-    {
-        notifyDataSelectionChanged(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
-    }
 
     /**
      * Notify all listeners that a dataset GUI name has changed
@@ -316,15 +276,30 @@ public: // Events & notifications
     virtual void notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) = 0;
 
     /**
-     * Notify all listeners that a dataset GUI name has changed
-     * @param dataset Smart pointer to the dataset of which the GUI name changed
-     * @param previousGuiName Previous dataset name
+     * Notify all listeners that a dataset child was added
+     * @param parentDataset Smart pointer to the parent dataset
+     * @param childDataset Smart pointer to the child dataset that was added
      */
-    template<typename DatasetType>
-    void notifyDataGuiNameChanged(const Dataset<DatasetType>& dataset)
-    {
-        notifyDataGuiNameChanged(Dataset<DatasetImpl>(dataset.get<DatasetImpl>()));
-    }
+    virtual void notifyDataChildAdded(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset) = 0;
+
+    /**
+     * Notify all listeners that a dataset child was removed
+     * @param parentDataset Smart pointer to the parent dataset
+     * @param childDataset Smart pointer to the child dataset that was removed
+     */
+    virtual void notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset) = 0;
+
+    /**
+     * Notify all listeners that a dataset is locked
+     * @param dataset Smart pointer to the dataset
+     */
+    virtual void notifyDataLocked(const Dataset<DatasetImpl>& dataset) = 0;
+
+    /**
+     * Notify all listeners that a dataset is unlocked
+     * @param dataset Smart pointer to the dataset
+     */
+    virtual void notifyDataUnlocked(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
      * Register an event listener

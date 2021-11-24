@@ -20,6 +20,7 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _children(),
     _visible(visible),
     _selected(false),
+    _locked(false),
     _namedIcons(),
     _taskDescription(""),
     _taskProgress(0.0),
@@ -27,23 +28,22 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _taskStatus(TaskStatus::Idle),
     _actions()
 {
+    // Set parent item
     if (parentDataset.isValid())
         _parent = &parentDataset->getDataHierarchyItem();
 
+    // Add data icon
     addIcon("data", getDataset()->getIcon());
 }
 
 DataHierarchyItem::~DataHierarchyItem()
 {
+    // Only proceed if we have a valid parent
     if (_parent == nullptr)
         return;
 
+    // Remove child from parent
     _parent->removeChild(this);
-
-    /*
-    for (auto child : _children)
-        delete child;
-    */
 }
 
 QString DataHierarchyItem::getGuiName() const
@@ -59,12 +59,20 @@ void DataHierarchyItem::setGuiName(const QString& guiName)
 void DataHierarchyItem::renameDataset(const QString& newGuiName)
 {
     try {
+
+        // Except if the don't have a valid dataset
+        if (!_dataset.isValid())
+            throw std::runtime_error("Dataset is invalid");
+
+        // Except if the new GUI name is empty
         if (newGuiName.isEmpty())
             throw std::runtime_error("New GUI name is empty");
 
+        // Do not proceed if the new GUI name matches the old GUI name
         if (newGuiName == _dataset->getGuiName())
             return;
 
+        // Set the GUI name of the dataset dataset
         _dataset->setGuiName(newGuiName);
     }
     catch (std::exception& e) {
@@ -134,11 +142,14 @@ bool DataHierarchyItem::isSelected() const
 
 void DataHierarchyItem::setSelected(const bool& selected)
 {
+    // Prevent unnecessary updates
     if (selected == _selected)
         return;
 
+    // Assign selected status
     _selected = selected;
 
+    // Notify others that the selection status changed
     emit selectionChanged(_selected);
 }
 
@@ -164,6 +175,7 @@ void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
 
 void DataHierarchyItem::removeIcon(const QString& name)
 {
+    // Loop over all icons and remove them from the list if it matches the name
     for (const auto& namedIcon : _namedIcons)
         if (name == namedIcon.first)
             _namedIcons.removeOne(namedIcon);
@@ -171,6 +183,7 @@ void DataHierarchyItem::removeIcon(const QString& name)
 
 QIcon DataHierarchyItem::getIconByName(const QString& name) const
 {
+    // Loop over all icons and return it if it matches the name
     for (const auto& namedIcon : _namedIcons)
         if (name == namedIcon.first)
             return namedIcon.second;
@@ -212,7 +225,7 @@ QString DataHierarchyItem::toString() const
     return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), _visible ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
 }
 
-Dataset<DatasetImpl> DataHierarchyItem::getDataset()
+Dataset<DatasetImpl> DataHierarchyItem::getDataset() const
 {
     return _dataset;
 }
@@ -224,9 +237,11 @@ DataType DataHierarchyItem::getDataType() const
 
 void DataHierarchyItem::notifyDataChanged()
 {
+    // Do not notify if we don't have a valid dataset
     if (!_dataset.isValid())
         return;
 
+    // Notify others that the dataset data changed
     Application::core()->notifyDataChanged(_dataset);
 }
 
@@ -234,9 +249,11 @@ void DataHierarchyItem::analyzeDataset(const QString& pluginName)
 {
     Q_ASSERT(!pluginName.isEmpty());
 
+    // Do not analyze if the plugin name is invalid
     if (pluginName.isEmpty())
         return;
 
+    // Instruct the core to analyze the dataset
     Application::core()->analyzeDataset(pluginName, _dataset);
 }
 
@@ -244,16 +261,20 @@ void DataHierarchyItem::exportDataset(const QString& pluginName)
 {
     Q_ASSERT(!pluginName.isEmpty());
 
+    // Do not export if the plugin name is invalid
     if (pluginName.isEmpty())
         return;
 
+    // Instruct the core to export the dataset
     Application::core()->exportDataset(pluginName, _dataset);
 }
 
 void DataHierarchyItem::addAction(WidgetAction& widgetAction)
 {
+    // Add action to the vector
     _actions << &widgetAction;
 
+    // Notify others that an action was added
     emit actionAdded(widgetAction);
 }
 
@@ -264,15 +285,18 @@ WidgetActions DataHierarchyItem::getActions() const
 
 QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 {
+    // Create new context menu
     auto menu = new QMenu(parent);
 
+    // Loop over all actions and ad their context menu (if there is one)
     for (auto action : _actions) {
+
+        // Get pointer to action context menu
         auto contextMenu = action->getContextMenu();
 
-        if (contextMenu == nullptr)
-            continue;
-
-        menu->addMenu(contextMenu);
+        // Add context menu when it is valid
+        if (contextMenu)
+            menu->addMenu(contextMenu);
     }
 
     return menu;
@@ -280,14 +304,37 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 
 void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
 {
+    // Populate context menu with items from actions
     for (auto action : _actions) {
+
+        // Get pointer to action context menu
         auto actionContextMenu = action->getContextMenu();
 
-        if (actionContextMenu == nullptr)
-            continue;
-
-        contextMenu->addMenu(actionContextMenu);
+        // Add context menu when it is valid
+        if (actionContextMenu)
+            contextMenu->addMenu(actionContextMenu);
     }
+}
+
+bool DataHierarchyItem::getLocked() const
+{
+    return _locked;
+}
+
+void DataHierarchyItem::setLocked(const bool& locked)
+{
+    // Prevent unnecessary updates
+    if (locked == _locked)
+        return;
+
+    // Assign new locked status
+    _locked = locked;
+
+    // Notify others that the data got locked/unlocked
+    if (_locked)
+        Application::core()->notifyDataLocked(_dataset);
+    else
+        Application::core()->notifyDataUnlocked(_dataset);
 }
 
 QString DataHierarchyItem::getTaskName() const
@@ -297,9 +344,11 @@ QString DataHierarchyItem::getTaskName() const
 
 void DataHierarchyItem::setTaskName(const QString& taskName)
 {
+    // Prevent unnecessary updates
     if (taskName == _taskName)
         return;
 
+    // Assign the task name
     _taskName = taskName;
 }
 
@@ -315,11 +364,14 @@ bool DataHierarchyItem::isIdle() const
 
 void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
 {
+    // Prevent unnecessary updates
     if (taskDescription == _taskDescription)
         return;
 
+    // Assign new task description
     _taskDescription = taskDescription;
 
+    // Notify others that the task description changed
     emit taskDescriptionChanged(_taskDescription);
 }
 
@@ -335,6 +387,7 @@ void DataHierarchyItem::setTaskProgress(const float& taskProgress)
 
     _taskProgress = taskProgress;
 
+    // Notify others that the task progress changed
     emit taskProgressChanged(_taskProgress);
 }
 
@@ -365,20 +418,26 @@ void DataHierarchyItem::setTaskRunning()
 
 void DataHierarchyItem::setTaskFinished()
 {
+    // Do not proceed if already aborted
     if (_taskStatus == TaskStatus::Aborted)
         return;
 
+    // Set task status to finished
     _taskStatus = TaskStatus::Finished;
 
+    // Adjust the task description
     setTaskDescription(QString("%1 finished").arg(_taskName));
 
+    // Create timer to let the message disappear after a while
     auto timer = QSharedPointer<QTimer>::create();
 
+    // Reset the progress and task description when the timer times out
     connect(timer.get(), &QTimer::timeout, this, [this, timer]() {
         setTaskProgress(0.0f);
         setTaskDescription("");
     });
 
+    // Start the timer
     timer->setSingleShot(true);
     timer->start(1500);
 }
@@ -387,15 +446,19 @@ void DataHierarchyItem::setTaskAborted()
 {
     _taskStatus = TaskStatus::Aborted;
 
+    // Set task description to aborted
     setTaskDescription(QString("%1 aborted").arg(_taskName));
 
+    // Create timer to let the message disappear after a while
     auto timer = QSharedPointer<QTimer>::create();
 
+    // Reset the progress and task description when the timer times out
     connect(timer.get(), &QTimer::timeout, this, [this, timer]() {
         setTaskProgress(0.0f);
         setTaskDescription("");
     });
 
+    // Start the timer
     timer->setSingleShot(true);
     timer->start(1500);
 }

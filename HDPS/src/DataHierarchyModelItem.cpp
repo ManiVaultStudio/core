@@ -76,73 +76,136 @@ QString DataHierarchyModelItem::serialize() const
     return _dataHierarchyItem->getGuiName() + "\n" + _dataHierarchyItem->getDataset()->getGuid() + "\n" + _dataHierarchyItem->getDataType();
 }
 
-QString DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column) const
+QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, int role /*= Qt::DisplayRole*/) const
 {
+    // Only proceed if we have a valid data hierarchy item
     if (_dataHierarchyItem == nullptr)
-        return "";
+        return QVariant();
 
-    switch (static_cast<Column>(column))
+    switch (role)
     {
-        case Column::Name:
-            return _dataHierarchyItem->getGuiName();
-
-        case Column::GUID:
-            return _dataHierarchyItem->getDataset()->getGuid();
-
-        case Column::Description:
-            return _progressSection;
-
-        case Column::Analysis:
-            return "";
-
-        case Column::Progress:
-            return _dataHierarchyItem->isRunning() ? QString("%1%").arg(QString::number(100.0f * _progressPercentage, 'f', 1)) : "";
-
-        case Column::Analyzing:
-            return "";
-
-        default:
-            break;
-    }
-
-    return "";
-}
-
-QIcon DataHierarchyModelItem::getIconAtColumn(const std::uint32_t& column) const
-{
-    auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
-
-    if (_dataHierarchyItem == nullptr)
-        return fontAwesome.getIcon("home");
-
-    switch (static_cast<Column>(column))
-    {
-        case Column::Name:
-            return _dataHierarchyItem->getIconByName("data");
-
-        case Column::GUID:
-            break;
-
-        case Column::Analysis:
-            return _dataHierarchyItem->getIconByName("analysis");
-
-        case Column::Progress:
-        case Column::Description:
-            break;
-
-        case Column::Analyzing:
+        // String representation
+        case Qt::DisplayRole:
         {
-            if (_dataHierarchyItem->isRunning())
-                return fontAwesome.getIcon("microchip");
+            // Get edit value role for column
+            const auto editValue = getDataAtColumn(column, Qt::EditRole);
+
+            switch (static_cast<Column>(column))
+            {
+                case Column::Name:
+                    return editValue;
+
+                case Column::GUID:
+                    return editValue;
+
+                case Column::Description:
+                    return editValue;
+
+                case Column::Analysis:
+                    return editValue;
+
+                case Column::Progress:
+                    return _dataHierarchyItem->isRunning() ? QString("%1%").arg(QString::number(editValue.toFloat(), 'f', 1)) : "";
+
+                case Column::Analyzing:
+                    return editValue;
+
+                case Column::Locked:
+                    return "";
+
+                default:
+                    break;
+            }
 
             break;
         }
 
+        // Actual value
+        case Qt::EditRole:
+        {
+            switch (static_cast<Column>(column))
+            {
+                case Column::Name:
+                    return _dataHierarchyItem->getGuiName();
+
+                case Column::GUID:
+                    return _dataHierarchyItem->getDataset()->getGuid();
+
+                case Column::Description:
+                    return _progressSection;
+
+                case Column::Analysis:
+                    return "";
+
+                case Column::Progress:
+                    return _dataHierarchyItem->isRunning() ? 100.0f * _progressPercentage : 0.0f;
+
+                case Column::Analyzing:
+                    return "";
+
+                case Column::Locked:
+                    return _dataHierarchyItem->getLocked();
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        // For icons
+        case Qt::DecorationRole:
+        {
+            // Get reference to Font Awesome icon font
+            auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
+
+            switch (static_cast<Column>(column))
+            {
+                case Column::Name:
+                    return _dataHierarchyItem->getIconByName("data");
+
+                case Column::GUID:
+                    break;
+
+                case Column::Analysis:
+                    return _dataHierarchyItem->getIconByName("analysis");
+
+                case Column::Progress:
+                case Column::Description:
+                    break;
+
+                case Column::Analyzing:
+                {
+                    if (_dataHierarchyItem->isRunning())
+                        return fontAwesome.getIcon("microchip");
+
+                    break;
+                }
+
+                case Column::Locked:
+                {
+                    if (_dataHierarchyItem->getDataset()->isLocked())
+                        return fontAwesome.getIcon("lock");
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        // Grayed out text when locked
+        case Qt::ForegroundRole:
+            return _dataHierarchyItem->getLocked() ? QColor(Qt::gray) : QColor(Qt::black);
+
         default:
             break;
     }
 
-    return QIcon();
+    return QVariant();
 }
 
 QMenu* DataHierarchyModelItem::getContextMenu()

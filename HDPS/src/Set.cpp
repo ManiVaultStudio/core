@@ -4,14 +4,42 @@
 namespace hdps
 {
 
+const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
+{
+    return const_cast<DatasetImpl*>(this)->getDataHierarchyItem();
+}
+
 DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
 {
     return _core->getDataHierarchyItem(_guid);
 }
 
-const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
+QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
 {
-    return const_cast<DatasetImpl*>(this)->getDataHierarchyItem();
+    // Found children
+    QVector<Dataset<DatasetImpl>> children;
+
+    // Loop over all data hierarchy children and add to the list if occur in the data types
+    for (auto dataHierarchyChild : getDataHierarchyItem().getChildren())
+        if (dataTypes.contains(dataHierarchyChild->getDataType()))
+            children << dataHierarchyChild->getDataset();
+
+    return children;
+}
+
+void DatasetImpl::lock()
+{
+    getDataHierarchyItem().setLocked(true);
+}
+
+void DatasetImpl::unlock()
+{
+    getDataHierarchyItem().setLocked(false);
+}
+
+bool DatasetImpl::isLocked() const
+{
+    return getDataHierarchyItem().getLocked();
 }
 
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)

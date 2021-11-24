@@ -178,7 +178,7 @@ Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, cons
         datasetCopy->setGuiName(dataSetGuiName);
 
         // Establish parent
-        auto parent = parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(parentDataset) : (dataset->getDataHierarchyItem().hasParent() ? dataset->getDataHierarchyItem().getParent().getDataset() : Dataset<DatasetImpl>());
+        auto parent = parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(parentDataset) : (dataset->getDataHierarchyItem().hasParent() ? dataset->getParent<DatasetImpl>() : Dataset<DatasetImpl>());
 
         // Add to the data hierarchy manager
         _dataHierarchyManager->addItem(const_cast<Dataset<DatasetImpl>&>(datasetCopy), parent);
@@ -456,86 +456,266 @@ QIcon Core::getPluginIcon(const QString& pluginKind) const
 
 void Core::notifyDataAdded(const Dataset<DatasetImpl>& dataset)
 {
-    // Create data added event
-    DataAddedEvent dataEvent(dataset);
+    try {
 
-    // Cache the event listeners to prevent crash
-    const auto eventListeners = _eventListeners;
+        // Create data added event
+        DataAddedEvent dataEvent(dataset);
 
-    // And notify all listeners
-    for (auto listener : eventListeners)
-        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-            listener->onDataEvent(&dataEvent);
+        // Cache the event listeners to prevent crash
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that data was added", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that data was added");
+    }
 }
 
 void Core::notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset)
 {
-    // Create data about to be removed event
-    DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent(dataset);
+    try {
 
-    // Cache the event listeners to prevent timing issues
-    const auto eventListeners = _eventListeners;
+        // Create data about to be removed event
+        DataAboutToBeRemovedEvent dataAboutToBeRemovedEvent(dataset);
 
-    // And notify all listeners
-    for (auto listener : eventListeners)
-        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-            listener->onDataEvent(&dataAboutToBeRemovedEvent);
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataAboutToBeRemovedEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that data is about to be removed", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that data is about to be removed");
+    }
 }
 
 void Core::notifyDataRemoved(const QString& datasetId, const DataType& dataType)
 {
-    // Create data removed event
-    DataRemovedEvent dataRemovedEvent(nullptr, datasetId);
+    try {
 
-    // Cache the event listeners to prevent timing issues
-    const auto eventListeners = _eventListeners;
+        // Create data removed event
+        DataRemovedEvent dataRemovedEvent(nullptr, datasetId);
 
-    // And notify all listeners
-    for (auto listener : eventListeners)
-        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-            listener->onDataEvent(&dataRemovedEvent);
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataRemovedEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that data is removed", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that data is removed");
+    }
 }
 
 void Core::notifyDataChanged(const Dataset<DatasetImpl>& dataset)
 {
-    // Create data changed event
-    DataChangedEvent dataEvent(dataset);
+    try {
+    
+        // Create data changed event
+        DataChangedEvent dataEvent(dataset);
 
-    // Cache the event listeners to prevent timing issues
-    const auto eventListeners = _eventListeners;
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
 
-    // And notify all listeners
-    for (EventListener* listener : eventListeners)
-        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-            listener->onDataEvent(&dataEvent);
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that data is changed", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that data is changed");
+    }
 }
 
 void Core::notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset)
 {
-    // Create data selection changed event
-    DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
+    try {
 
-    // Cache the event listeners to prevent timing issues
-    const auto eventListeners = _eventListeners;
+        // Create data selection changed event
+        DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
 
-    // And notify all listeners
-    for (EventListener* listener : eventListeners)
-        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-            listener->onDataEvent(&dataSelectionChangedEvent);
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataSelectionChangedEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that data selection has changed", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that data selection has changed");
+    }
 }
 
 void Core::notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName)
 {
-    // Create GUI name changed event
-    DataGuiNameChangedEvent dataGuiNameChangedEvent(dataset, previousGuiName);
+    try {
 
-    // Cache the event listeners to prevent timing issues
-    const auto eventListeners = _eventListeners;
+        // Create GUI name changed event
+        DataGuiNameChangedEvent dataGuiNameChangedEvent(dataset, previousGuiName);
 
-    // And notify all listeners
-    for (EventListener* listener : eventListeners)
-        if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-            listener->onDataEvent(&dataGuiNameChangedEvent);
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataGuiNameChangedEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that data GUI name has changed", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that data GUI name has changed");
+    }
+}
+
+void Core::notifyDataChildAdded(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset)
+{
+    try {
+
+        // Except if parent dataset is not valid
+        if (!parentDataset.isValid())
+            throw std::runtime_error("Parent dataset is invalid");
+
+        // Except if child dataset is not valid
+        if (!childDataset.isValid())
+            throw std::runtime_error("Child dataset is invalid");
+
+        // Create data child added event
+        DataChildAddedEvent dataChildAddedEvent(parentDataset, childDataset);
+
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataChildAddedEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that a data child was added", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that a data child was added");
+    }
+}
+
+void Core::notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset)
+{
+    try {
+
+        // Except if parent dataset is not valid
+        if (!parentDataset.isValid())
+            throw std::runtime_error("Parent dataset is invalid");
+
+        // Except if child dataset is not valid
+        if (!childDataset.isValid())
+            throw std::runtime_error("Child dataset is invalid");
+
+        // Create data child removed event
+        DataChildRemovedEvent dataChildRemovedEvent(parentDataset, childDataset);
+
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataChildRemovedEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that a data child was removed", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that a data child was removed");
+    }
+}
+
+void Core::notifyDataLocked(const Dataset<DatasetImpl>& dataset)
+{
+    try {
+
+        // Except if dataset is not valid
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset is invalid");
+
+        // Create data locked event
+        DataLockedEvent dataLockedEvent(dataset);
+
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataLockedEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that a data was locked", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that a data was locked");
+    }
+}
+
+void Core::notifyDataUnlocked(const Dataset<DatasetImpl>& dataset)
+{
+    try {
+
+        // Except if dataset is not valid
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset is invalid");
+
+        // Create data unlocked event
+        DataUnlockedEvent dataUnlockedEvent(dataset);
+
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
+
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataUnlockedEvent);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to notify that a data was unlocked", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to notify that a data was unlocked");
+    }
 }
 
 gui::MainWindow& Core::gui() const {

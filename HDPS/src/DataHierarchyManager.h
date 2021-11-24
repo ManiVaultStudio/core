@@ -71,9 +71,9 @@ signals:
 
     /**
      * Signals that a hierarchy item is added to the hierarchy manager
-     * @param dataHierarchyItem Pointer to added data hierarchy item
+     * @param dataHierarchyItem Reference to added data hierarchy item
      */
-    void itemAdded(DataHierarchyItem* dataHierarchyItem);
+    void itemAdded(DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Signals that a hierarchy item is about to be removed from the hierarchy manager
@@ -83,21 +83,21 @@ signals:
 
     /**
      * Signals that a hierarchy item is removed from the hierarchy manager
-     * @param datasetName Name of the removed dataset
+     * @param datasetGui GUID of the removed dataset
      */
-    void itemRemoved(const QString& datasetName);
+    void itemRemoved(const QString& datasetGui);
 
     /**
      * Signals that a hierarchy item has been re-located
-     * @param relocatedItem Pointer to data hierarchy item that will be relocated
+     * @param itemToBeRelocated Reference to data hierarchy item that will be relocated
      */
-    void itemAboutToBeRelocated(DataHierarchyItem* itemToBeRelocated);
+    void itemAboutToBeRelocated(DataHierarchyItem& itemToBeRelocated);
 
     /**
      * Signals that a hierarchy item has been relocated
-     * @param relocatedItem Pointer to relocated data hierarchy item
+     * @param relocatedItem Reference to relocated data hierarchy item
      */
-    void itemRelocated(DataHierarchyItem* relocatedItem);
+    void itemRelocated(DataHierarchyItem& relocatedItem);
 
 private:
     DataHierarchyItems    _dataHierarchyItems;    /** Shared pointers to data hierarchy items */

@@ -171,11 +171,11 @@ public: // Miscellaneous
     QString toString() const;
 
     /** Get the dataset */
-    Dataset<DatasetImpl> getDataset();
+    Dataset<DatasetImpl> getDataset() const;
 
     /** Get the dataset */
     template<typename DatasetType>
-    Dataset<DatasetType> getDataset() {
+    Dataset<DatasetType> getDataset() const {
         return Dataset<DatasetType>(getDataset().get<DatasetType>());
     };
 
@@ -217,6 +217,17 @@ public: // Actions
      * @param contextMenu Context menu to populate
      */
     void populateContextMenu(QMenu* contextMenu);;
+
+public: // Lock
+
+    /** Get locked status */
+    bool getLocked() const;
+
+    /**
+     * Set locked status
+     * @param locked Whether the dataset is locked
+     */
+    void setLocked(const bool& locked);
 
 public: // Task
 
@@ -289,10 +300,16 @@ signals:
     void actionAdded(hdps::gui::WidgetAction& widgetAction);
 
     /**
-     * Signals that the dataset names changed
+     * Signals that the dataset name changed
      * @param datasetName New name of the dataset
      */
     void datasetNameChanged(const QString& datasetName);
+
+    /**
+     * Signals that the locked status changed
+     * @param locked Locked
+     */
+    void lockedChanged(const bool& locked);
 
 protected:
     Dataset<DatasetImpl>        _dataset;           /** Smart pointer to dataset */
@@ -300,6 +317,7 @@ protected:
     DataHierarchyItems          _children;          /** Pointers to child items (if any) */
     bool                        _visible;           /** Whether the dataset is visible */
     bool                        _selected;          /** Whether the hierarchy item is selected */
+    bool                        _locked;            /** Whether the dataset is locked */
     IconList                    _namedIcons;        /** Named icons */
     QString                     _taskDescription;   /** Task description */
     float                       _taskProgress;      /** Task progress */

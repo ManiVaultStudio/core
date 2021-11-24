@@ -31,8 +31,7 @@ public:
     /** Describes the widget flags */
     enum WidgetFlag {
         ComboBox        = 0x00001,      /** The widget includes a combobox */
-        LineEdit        = 0x00002,      /** The widget includes a line edit */
-        ResetPushButton = 0x00004,      /** The widget includes a reset push button */
+        ResetPushButton = 0x00002,      /** The widget includes a reset push button */
 
         Basic   = ComboBox,
         All     = ComboBox | ResetPushButton
@@ -50,20 +49,6 @@ public: // Widgets
          * @param optionAction Pointer to option action
          */
         ComboBoxWidget(QWidget* parent, OptionAction* optionAction);
-
-        friend class OptionAction;
-    };
-
-    /** Combobox widget class for option action */
-    class LineEditWidget : public QLineEdit {
-    protected:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param optionAction Pointer to option action
-         */
-        LineEditWidget(QWidget* parent, OptionAction* optionAction);
 
     protected:
         QCompleter  _completer;     /** Completer for searching and filtering */

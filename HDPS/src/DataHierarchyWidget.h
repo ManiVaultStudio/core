@@ -52,6 +52,24 @@ public:
      */
     DataHierarchyWidget(QWidget* parent);
 
+protected:
+
+    /**
+     * Add a data hierarchy to the tree widget
+     * @param dataHierarchyItem Reference to the data hierarchy item
+     */
+    void addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem);
+
+    /**
+     * Get model index of the dataset
+     * @param dataset Smart pointer to dataset
+     * @return Dataset model index
+     */
+    QModelIndex getModelIndexByDataset(const Dataset<DatasetImpl>& dataset);
+
+    /** Invoked when the number of rows changed (shows/hides the tree view header) */
+    void numberOfRowsChanged();
+
 signals:
 
     /**

@@ -46,17 +46,22 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     header()->resizeSection(DataHierarchyModelItem::Column::Name, 180);
     //header()->resizeSection(DataHierarchyModelItem::Column::Description, 100);
     header()->resizeSection(DataHierarchyModelItem::Column::Progress, 50);
-    header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, 20);
+    header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, 16);
+    header()->resizeSection(DataHierarchyModelItem::Column::Locked, 16);
 
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::GUID, QHeaderView::Fixed);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Description, QHeaderView::Stretch);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Analyzing, QHeaderView::Fixed);
+    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Locked, QHeaderView::Fixed);
 
     header()->setStretchLastSection(false);
 
+    // Notify others that the dataset selection changed when the current row in the model changed
     connect(&_selectionModel, &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+
+        // Only proceed with a valid selection
         if (!current.isValid())
             return;
         
@@ -67,125 +72,144 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         emit selectedDatasetChanged(selectedDatasetId);
     });
 
-    const auto numberOfRowsChanged = [this]() {
-        const auto dataIsLoaded = _model.rowCount() == 0;
-
-        _noDataOverlayWidget->setVisible(dataIsLoaded);
-        setHeaderHidden(dataIsLoaded);
-    };
-
-    connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
-    connect(&_model, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+    // Show/hide the overlay and header widget when the number of rows changes
+    connect(&_model, &QAbstractItemModel::rowsInserted, this, &DataHierarchyWidget::numberOfRowsChanged);
+    connect(&_model, &QAbstractItemModel::rowsRemoved, this, &DataHierarchyWidget::numberOfRowsChanged);
 
     // Insert new rows expanded
     connect(&_model, &QAbstractItemModel::rowsInserted, this, [&](const QModelIndex& parent, int first, int last) {
         expand(_model.index(first, 0, parent));
     });
 
-    numberOfRowsChanged();
-
-    const auto getModelIndexForDataset = [this](const Dataset<DatasetImpl>& dataset) -> QModelIndex {
-        const auto modelIndex = _model.match(_model.index(0, 1), Qt::DisplayRole, dataset->getGuid(), 1, Qt::MatchFlag::MatchRecursive).first();
-
-        if (!modelIndex.isValid())
-            throw new std::runtime_error(QString("Dataset '%1' not found in model").arg(dataset->getGuiName()).toLatin1());
-
-        return modelIndex;
-    };
-
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, [this, getModelIndexForDataset](DataHierarchyItem* dataHierarchyItem) {
-        if (dataHierarchyItem == nullptr || dataHierarchyItem->isHidden())
-            return;
-
-        auto dataset = dataHierarchyItem->getDataset();
-
-        QModelIndex parentModelIndex;
-
-        if (!dataHierarchyItem->hasParent())
-            parentModelIndex = QModelIndex();
-        else
-            parentModelIndex = getModelIndexForDataset(dataHierarchyItem->getParent().getDataset());
-
-        _model.addDataHierarchyModelItem(parentModelIndex, dataHierarchyItem);
-
-        connect(dataHierarchyItem, &DataHierarchyItem::taskDescriptionChanged, this, [this, getModelIndexForDataset, dataHierarchyItem](const QString& description) {
-            try
-            {
-                const auto modelIndex = getModelIndexForDataset(dataHierarchyItem->getDataset());
-
-                _model.setData(modelIndex.siblingAtColumn(DataHierarchyModelItem::Column::Description), description);
-            }
-            catch (std::exception& e)
-            {
-                QMessageBox::warning(nullptr, "HDPS", QString("Unable to change data hierarchy item description: %1").arg(e.what()));
-            }
-        });
-
-        connect(dataHierarchyItem, &DataHierarchyItem::taskProgressChanged, this, [this, getModelIndexForDataset, dataHierarchyItem](const float& progress) {
-            try
-            {
-                const auto modelIndex = getModelIndexForDataset(dataHierarchyItem->getDataset());
-                
-                _model.setData(modelIndex.siblingAtColumn(DataHierarchyModelItem::Column::Progress), progress);
-                _model.setData(modelIndex.siblingAtColumn(DataHierarchyModelItem::Column::Analyzing), progress > 0.0f);
-            }
-            catch (std::exception& e)
-            {
-                QMessageBox::warning(nullptr, "HDPS", QString("Unable to change data hierarchy item progress: %1").arg(e.what()));
-            }
-        });
-
-        connect(dataHierarchyItem, &DataHierarchyItem::selectionChanged, this, [this, getModelIndexForDataset, dataHierarchyItem](const bool& selection) {
-            try
-            {
-                const auto modelIndex = getModelIndexForDataset(dataHierarchyItem->getDataset());
-
-                _selectionModel.select(modelIndex, QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
-            }
-            catch (std::exception& e)
-            {
-                QMessageBox::warning(nullptr, "HDPS", QString("Unable to select data hierarchy item: %1").arg(e.what()));
-            }
-        });
-
-        if (!isExpanded(parentModelIndex))
-            expand(parentModelIndex);
-
-        //_selectionModel.select(paparentModelIndexrent.child(first, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
-    });
+    // Add data hierarchy item to the widget when added in the data manager
+    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, &DataHierarchyWidget::addDataHierarchyItem);
 
     /*
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAboutToBeRemoved, this, [this, getModelIndexForDatasetName](const QString& datasetName) {
         _selectionModel.clear();
         _model.removeDataHierarchyModelItem(getModelIndexForDatasetName(datasetName));
     });
-    */
 
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemRelocated, this, [this, getModelIndexForDataset](DataHierarchyItem* relocatedItem) {
+    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemRelocated, this, [this](DataHierarchyItem* relocatedItem) {
         Q_ASSERT(relocatedItem != nullptr);
 
         //_model.removeDataHierarchyModelItem(getModelIndexForDatasetName(relocatedItem->getDatasetName()));
         //_model.addDataHierarchyModelItem(QModelIndex(), relocatedItem);
     });
+    */
 
+    // Invoked the custom context menu when requested by the tree view
     connect(this, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
-        QModelIndex index = indexAt(position);
 
-        if (index.isValid())
+        // Get the model index at the required position
+        const auto modelIndexBelowCursor = indexAt(position);
+
+        // Show dataset context menu when over a dataset, give options to load data otherwise
+        if (modelIndexBelowCursor.isValid())
         {
-            auto dataHierarchyModelItem = _model.getItem(index, Qt::DisplayRole);
+            // Get pointer to data hierarchy item
+            auto dataHierarchyModelItem = _model.getItem(modelIndexBelowCursor, Qt::DisplayRole);
 
+            // Get the data hierarchy item context menu
             QSharedPointer<QMenu> contextMenu(dataHierarchyModelItem->getContextMenu());
 
+            // And show it
             contextMenu->exec(viewport()->mapToGlobal(position));
         }
         else {
+
+            // Get dataset import context menu
             auto contextMenu = _dataImportAction.getContextMenu();
 
+            // Show it
             if (contextMenu)
                 contextMenu->exec(viewport()->mapToGlobal(position));
         }
     });
+
+    // Initial visibility of the overlay and header
+    numberOfRowsChanged();
+}
+
+void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
+{
+    // Do not add hidden data hierarchy items
+    if (dataHierarchyItem.isHidden())
+        return;
+
+    // Get smart pointer to the dataset
+    auto dataset = dataHierarchyItem.getDataset();
+
+    try {
+
+        // Model index of the parent
+        QModelIndex parentModelIndex;
+
+        // Establish parent model index
+        if (!dataHierarchyItem.hasParent())
+            parentModelIndex = QModelIndex();
+        else
+            parentModelIndex = getModelIndexByDataset(dataHierarchyItem.getParent().getDataset());;
+
+        // Add the data hierarchy item to the model
+        _model.addDataHierarchyModelItem(parentModelIndex, dataHierarchyItem);
+
+        // Update the model then the data hierarchy item task description changes
+        connect(&dataHierarchyItem, &DataHierarchyItem::taskDescriptionChanged, this, [this, dataset](const QString& description) {
+            _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Description), description);
+        });
+
+        // Update the model then the data hierarchy item task progress changes
+        connect(&dataHierarchyItem, &DataHierarchyItem::taskProgressChanged, this, [this, dataset](const float& progress) {
+            _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Progress), progress);
+            _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Analyzing), progress > 0.0f);
+        });
+
+        // Update the model then the data hierarchy item task selection status changes
+        connect(&dataHierarchyItem, &DataHierarchyItem::selectionChanged, this, [this, dataset](const bool& selection) {
+            _selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+        });
+
+        // Update the model then the data hierarchy item locked status changes
+        connect(&dataHierarchyItem, &DataHierarchyItem::lockedChanged, this, [this, dataset](const bool& selection) {
+            emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Locked));
+        });
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->getGuiName()), e);
+    }
+    catch (...) {
+        exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->getGuiName()));
+    }
+    // Expand by default
+    //if (!isExpanded(parentModelIndex))
+    //    expand(parentModelIndex);
+}
+
+QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
+{
+    // Search for the model index
+    const auto modelIndices = _model.match(_model.index(0, 1), Qt::DisplayRole, dataset->getGuid(), 1, Qt::MatchFlag::MatchRecursive);
+
+    // Except if not found
+    if (modelIndices.isEmpty())
+        throw new std::runtime_error(QString("'%1' not found in the data hierarchy model").arg(dataset->getGuiName()).toLatin1());
+
+    // Return first match
+    return modelIndices.first();
+}
+
+void DataHierarchyWidget::numberOfRowsChanged()
+{
+    // Establish whether any data is loaded
+    const auto dataIsLoaded = _model.rowCount() == 0;
+
+    // Show the no data overlay widget when no data is loaded
+    _noDataOverlayWidget->setVisible(dataIsLoaded);
+
+    // Show the header when data is loaded
+    setHeaderHidden(dataIsLoaded);
 }
 
 DataHierarchyWidget::NoDataOverlayWidget::NoDataOverlayWidget(QWidget* parent) :

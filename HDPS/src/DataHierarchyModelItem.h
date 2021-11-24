@@ -26,9 +26,10 @@ public:
         Analysis,
         Progress,
         Analyzing,
+        Locked,
 
         _start = Name,
-        _end = Analyzing
+        _end = Locked
     };
 
 public:
@@ -75,16 +76,10 @@ public:
     /**
      * Get data at column
      * @param column Column index
+     * @param role Data role
      * @return Data in string format
      */
-    QString getDataAtColumn(const std::uint32_t& column) const;
-
-    /**
-     * Get icon at column
-     * @param column Column index
-     * @return Icon
-     */
-    QIcon getIconAtColumn(const std::uint32_t& column) const;
+    QVariant getDataAtColumn(const std::uint32_t& column, int role = Qt::DisplayRole) const;
 
     /** Returns the item context menu */
     QMenu* getContextMenu();

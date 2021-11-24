@@ -148,13 +148,6 @@ public:
         _derived        = true;
     }
 
-    /** Get parent dataset (if any) */
-    template<typename DatasetType>
-    Dataset<DatasetType> getParentDataset() const
-    {
-        return getDataHierarchyItem().getParent().getDataset().get<DatasetType>();
-    }
-
     /**
      * Gets the selection associated with this data set. If the data set is
      * derived then the selection of the source data will be returned. Otherwise,
@@ -216,11 +209,49 @@ public:
     /** Get icon for the dataset */
     virtual QIcon getIcon() const = 0;
 
+
+public: // Hierarchy
+
     /** Get reference to data hierarchy item */
     DataHierarchyItem& getDataHierarchyItem();
 
     /** Get reference to data hierarchy item */
     const DataHierarchyItem& getDataHierarchyItem() const;
+
+    /** Get parent dataset (if any) */
+    template<typename DatasetType>
+    Dataset<DatasetType> getParent() const
+    {
+        return getDataHierarchyItem().getParent().getDataset().get<DatasetType>();
+    }
+
+    /**
+     * Get child datasets (if any) of the specified type(s)
+     * @param dataTypes Dataset type(s) to filter out
+     * @return Child datasets of the dataset type(s)
+     */
+    QVector<Dataset<DatasetImpl>> getChildren(const QVector<DataType>& dataTypes = QVector<DataType>()) const;
+
+    /**
+     * Get child datasets (if any) of the specified type
+     * @param filterDataType Type of data to filter
+     * @return Child datasets of the dataset type
+     */
+    QVector<Dataset<DatasetImpl>> getChildren(const DataType& filterDataType)
+    {
+        return getChildren(QVector<DataType>({ filterDataType }));
+    }
+
+public: // Lock
+
+    /** Lock the dataset */
+    void lock();
+
+    /** Unlock the dataset */
+    void unlock();
+
+    /** Get whether the dataset is locked */
+    bool isLocked() const;
 
 public: // Operators
 

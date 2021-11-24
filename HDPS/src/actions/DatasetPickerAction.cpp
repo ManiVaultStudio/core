@@ -8,12 +8,12 @@
 
 using namespace hdps;
 
-DatasetPickerAction::DatasetPickerAction(QObject* parent) :
+DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) :
     OptionAction(parent, "Pick dataset"),
     _datasets(),
     _showFullPathName()
 {
-    setText("Dataset picker");
+    setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("database"));
     setToolTip("Pick a dataset");
 

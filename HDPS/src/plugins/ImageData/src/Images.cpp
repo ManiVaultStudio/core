@@ -356,7 +356,7 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get reference to input dataset
-    auto dataset = getParentDataset<DatasetImpl>();
+    auto dataset = getParent<DatasetImpl>();
 
     if (dataset->getDataType() == PointType) {
 
@@ -427,7 +427,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         const auto sourceWidth = getSourceRectangle().width();
 
         // Get clusters input points dataset
-        auto points = dataset->getParentDataset<DatasetImpl>()->getSourceDataset<Points>();
+        auto points = dataset->getParent<DatasetImpl>()->getSourceDataset<Points>();
 
         // Iterate over all clusters
         for (auto& cluster : clusters->getClusters()) {
@@ -469,7 +469,7 @@ std::uint32_t Images::getTargetPixelIndex(const QPoint& coordinate) const
 std::uint32_t Images::getSourceDataIndex(const QPoint& coordinate) const
 {
     // Get reference to source data
-    auto& sourceData = getParentDataset<Points>()->getSourceDataset<Points>();
+    auto& sourceData = getParent<Points>()->getSourceDataset<Points>();
 
     const auto targetRectangle      = _imageData->getTargetRectangle();
     const auto relativeCoordinate   = coordinate - targetRectangle.topLeft();
