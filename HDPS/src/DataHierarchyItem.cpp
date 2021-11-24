@@ -408,12 +408,17 @@ bool DataHierarchyItem::isAborted() const
 
 void DataHierarchyItem::setTaskIdle()
 {
+    // Set task status to idle
     _taskStatus = TaskStatus::Idle;
 }
 
 void DataHierarchyItem::setTaskRunning()
 {
+    // Set task status to running
     _taskStatus = TaskStatus::Running;
+
+    // lock the item
+    setLocked(true);
 }
 
 void DataHierarchyItem::setTaskFinished()
@@ -440,6 +445,9 @@ void DataHierarchyItem::setTaskFinished()
     // Start the timer
     timer->setSingleShot(true);
     timer->start(1500);
+
+    // Unlock the item
+    setLocked(false);
 }
 
 void DataHierarchyItem::setTaskAborted()
@@ -461,6 +469,9 @@ void DataHierarchyItem::setTaskAborted()
     // Start the timer
     timer->setSingleShot(true);
     timer->start(1500);
+
+    // Unlock the item
+    setLocked(false);
 }
 
 }
