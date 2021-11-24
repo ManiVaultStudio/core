@@ -43,11 +43,14 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     setColumnHidden(DataHierarchyModelItem::Column::GUID, true);
     setColumnHidden(DataHierarchyModelItem::Column::Analysis, true);
 
+    header()->setStretchLastSection(false);
+    header()->setMinimumSectionSize(18);
+
     header()->resizeSection(DataHierarchyModelItem::Column::Name, 180);
     //header()->resizeSection(DataHierarchyModelItem::Column::Description, 100);
-    header()->resizeSection(DataHierarchyModelItem::Column::Progress, 50);
-    header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, 16);
-    header()->resizeSection(DataHierarchyModelItem::Column::Locked, 16);
+    header()->resizeSection(DataHierarchyModelItem::Column::Progress, 40);
+    header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, header()->minimumSectionSize());
+    header()->resizeSection(DataHierarchyModelItem::Column::Locked, header()->minimumSectionSize());
 
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::GUID, QHeaderView::Fixed);
@@ -55,8 +58,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Analyzing, QHeaderView::Fixed);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Locked, QHeaderView::Fixed);
-
-    header()->setStretchLastSection(false);
 
     // Notify others that the dataset selection changed when the current row in the model changed
     connect(&_selectionModel, &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
@@ -84,12 +85,20 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Add data hierarchy item to the widget when added in the data manager
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, &DataHierarchyWidget::addDataHierarchyItem);
 
-    /*
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAboutToBeRemoved, this, [this, getModelIndexForDatasetName](const QString& datasetName) {
+    // Remove model item when a data hierarchy item is removed
+    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAboutToBeRemoved, this, [this](const Dataset<DatasetImpl>& dataset) {
+
+        // Clear the selection
         _selectionModel.clear();
-        _model.removeDataHierarchyModelItem(getModelIndexForDatasetName(datasetName));
+
+        // Remove the item from the data hierarchy
+        _model.removeDataHierarchyModelItem(getModelIndexByDataset(dataset));
+
+        // Notify others that a dataset was selected
+        emit selectedDatasetChanged("");
     });
 
+    /*
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemRelocated, this, [this](DataHierarchyItem* relocatedItem) {
         Q_ASSERT(relocatedItem != nullptr);
 
@@ -171,9 +180,12 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
         });
 
         // Update the model then the data hierarchy item locked status changes
-        connect(&dataHierarchyItem, &DataHierarchyItem::lockedChanged, this, [this, dataset](const bool& selection) {
+        connect(&dataHierarchyItem, &DataHierarchyItem::lockedChanged, this, [this, dataset](const bool& locked) {
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Locked));
         });
+
+        // Select the added dataset
+        _selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
     }
     catch (std::exception& e)
     {
@@ -182,9 +194,6 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
     catch (...) {
         exceptionMessageBox(QString("Unable to add %1 to the data hierarchy tree widget").arg(dataset->getGuiName()));
     }
-    // Expand by default
-    //if (!isExpanded(parentModelIndex))
-    //    expand(parentModelIndex);
 }
 
 QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImpl>& dataset)
@@ -261,14 +270,14 @@ bool DataHierarchyWidget::NoDataOverlayWidget::eventFilter(QObject* target, QEve
 {
     switch (event->type())
     {
+        // Resize event
         case QEvent::Resize:
         {
             if (dynamic_cast<QWidget*>(target) != parent())
                 break;
 
-            const auto parentWidgetSize = static_cast<QResizeEvent*>(event)->size();
-
-            setFixedSize(parentWidgetSize);
+            // Set fixed overlay size
+            setFixedSize(static_cast<QResizeEvent*>(event)->size());
 
             break;
         }

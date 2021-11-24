@@ -86,8 +86,8 @@ public:
      * @param dataset Reference to the dataset
      */
     void setDataset(const Dataset<DatasetImpl>& dataset) {
-        if (!dataset.isValid())
-            throw std::runtime_error("Data event contains an invalid pointer to a dataset");
+        //if (!dataset.isValid())
+        //    throw std::runtime_error("Data event contains an invalid pointer to a dataset");
 
         _dataset = dataset;
     }

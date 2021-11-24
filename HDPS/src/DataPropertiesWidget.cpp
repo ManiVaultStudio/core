@@ -28,17 +28,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     layout->setAlignment(Qt::AlignTop);
     layout->addWidget(_groupsAction.createWidget(this));
 
-    /*
-    connect(&_dataset, &DatasetRef<DataSet>::datasetNameChanged, this, [this](const QString& oldDatasetName, const QString& newDatasetName) {
-        loadDataset();
-    });
-
-    connect(&_dataset, &DatasetRef<DataSet>::datasetAboutToBeRemoved, this, [this]() {
-        setDatasetName("");
-    });
-    */
-
-    // Initial dataset name change
     emit currentDatasetGuiNameChanged("");
 }
 
@@ -51,33 +40,39 @@ void DataPropertiesWidget::setDatasetId(const QString& datasetId)
             disconnect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
         // Assign the dataset reference
-        _dataset = Application::core()->requestDataset(datasetId);
+        if (!datasetId.isEmpty())
+            _dataset = Application::core()->requestDataset(datasetId);
+        else
+            _dataset.reset();
 
         // Only proceed if we have a valid reference
-        if (!_dataset.isValid())
-            return;
+        if (_dataset.isValid())
+        {
+            // Reload when actions are added on-the-fly
+            connect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
+                if (dynamic_cast<GroupAction*>(&widgetAction) == nullptr)
+                    return;
 
-        // Reload when actions are added on-the-fly
-        connect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
-            if (dynamic_cast<GroupAction*>(&widgetAction) == nullptr)
-                return;
-
-            loadDataset();
-        });
+                loadDataset();
+            });
+        }
 
         // Initial dataset load
         loadDataset();
     }
     catch (std::exception& e)
     {
-        qDebug() << QString("Cannot update data properties for %1: %2").arg(_dataset->getGuiName(), e.what());
+        exceptionMessageBox("Cannot update data properties", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Cannot update data properties");
     }
 }
 
 void DataPropertiesWidget::loadDataset()
 {
     // Inform others that the loaded dataset changed
-    emit currentDatasetGuiNameChanged(_dataset->getGuiName());
+    emit currentDatasetGuiNameChanged(_dataset.isValid() ? _dataset->getGuiName() : "");
 
     // Clear groups if the reference is invalid
     if (!_dataset.isValid()) {

@@ -37,7 +37,7 @@ public:
      * @param dataset Smart pointer to the dataset
      * @return vector of pointers to datasets that need to removed
      */
-    QVector<Dataset<DatasetImpl>> removeItem(const Dataset<DatasetImpl>& dataset, const bool& recursively = false);
+    void removeItem(const Dataset<DatasetImpl>& dataset, const bool& recursively = false);
 
     /**
      * Get hierarchy item by dataset globally unique identifier
@@ -77,9 +77,9 @@ signals:
 
     /**
      * Signals that a hierarchy item is about to be removed from the hierarchy manager
-     * @param dataSet Smart pointer to the about to be removed dataset
+     * @param dataset Smart pointer to the about to be removed dataset
      */
-    void itemAboutToBeRemoved(const Dataset<DatasetImpl>& dataSet);
+    void itemAboutToBeRemoved(const Dataset<DatasetImpl>& dataset);
 
     /**
      * Signals that a hierarchy item is removed from the hierarchy manager

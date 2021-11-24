@@ -1,6 +1,9 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include "actions/ToggleAction.h"
+#include "actions/TriggerAction.h"
+
+#include "Dataset.h"
 
 #include <QDialog>
 
@@ -16,7 +19,7 @@ namespace hdps {
  *
  * @author Thomas Kroes
  */
-class DataRemoveAction : public hdps::gui::WidgetAction
+class DataRemoveAction : public hdps::gui::TriggerAction
 {
 public:
 
@@ -27,9 +30,9 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param datasetsToRemove Names of the dataset(s) to remove
+         * @param datasetsToRemove Dataset(s) to remove
          */
-        ConfirmDataRemoveDialog(QWidget* parent, const QStringList& datasetsToRemove);
+        ConfirmDataRemoveDialog(QWidget* parent, const QVector<Dataset<DatasetImpl>>& datasetsToRemove);
 
     protected:
         ToggleAction    _showAgainAction;       /** Whether to show this dialog again */
@@ -46,17 +49,8 @@ public:
      */
     DataRemoveAction(QObject* parent, const Dataset<DatasetImpl>& dataset);
 
-    /**
-     * Get the context menu for the action
-     * @param parent Parent widget
-     * @return Context menu
-     */
-    QMenu* getContextMenu(QWidget* parent = nullptr);
-
 protected:
-    Dataset<DatasetImpl>    _dataset;                           /** Smart pointer to the dataset */
-    TriggerAction           _removeSelectedAction;              /** Remove selected dataset only action */
-    TriggerAction           _removeSelectedAndChildrenAction;   /** Remove dataset and all its descendants action */
+    Dataset<DatasetImpl>    _dataset;       /** Smart pointer to the dataset */
 };
 
 }

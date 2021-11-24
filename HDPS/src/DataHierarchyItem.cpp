@@ -26,7 +26,9 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _taskProgress(0.0),
     _taskName(""),
     _taskStatus(TaskStatus::Idle),
-    _actions()
+    _actions(),
+    _dataRemoveAction(parent, dataset),
+    _dataCopyAction(parent, dataset)
 {
     // Set parent item
     if (parentDataset.isValid())
@@ -101,13 +103,19 @@ void DataHierarchyItem::setParent(DataHierarchyItem& parent)
 }
 
 bool DataHierarchyItem::hasParent() const
-{
+{ 
     return _parent != nullptr;
 }
 
-DataHierarchyItems DataHierarchyItem::getChildren() const
+DataHierarchyItems DataHierarchyItem::getChildren(const bool& recursive /*= false*/) const
 {
-    return _children;
+    auto children = _children;
+
+    if (recursive)
+        for (auto child : _children)
+            children << child->getChildren(recursive);
+
+    return children;
 }
 
 std::uint32_t DataHierarchyItem::getNumberOfChildren() const
@@ -299,6 +307,13 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
             menu->addMenu(contextMenu);
     }
 
+    menu->addSeparator();
+
+    _dataRemoveAction.setEnabled(!_locked);
+
+    menu->addAction(&_dataRemoveAction);
+    menu->addAction(&_dataCopyAction);
+
     return menu;
 }
 
@@ -330,11 +345,17 @@ void DataHierarchyItem::setLocked(const bool& locked)
     // Assign new locked status
     _locked = locked;
 
-    // Notify others that the data got locked/unlocked
+    // Notify others that the data got locked/unlocked through the core
     if (_locked)
         Application::core()->notifyDataLocked(_dataset);
     else
         Application::core()->notifyDataUnlocked(_dataset);
+
+    // Notify others that the data got locked/unlocked
+    emit lockedChanged(_locked);
+
+    // Make sure the locked status changed event is handled
+    QCoreApplication::processEvents();
 }
 
 QString DataHierarchyItem::getTaskName() const
@@ -373,6 +394,9 @@ void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
 
     // Notify others that the task description changed
     emit taskDescriptionChanged(_taskDescription);
+
+    // Make sure the task description changed event is handled
+    QCoreApplication::processEvents();
 }
 
 float DataHierarchyItem::getTaskProgress() const
@@ -389,6 +413,9 @@ void DataHierarchyItem::setTaskProgress(const float& taskProgress)
 
     // Notify others that the task progress changed
     emit taskProgressChanged(_taskProgress);
+
+    // Make sure the task progress changed event is handled
+    QCoreApplication::processEvents();
 }
 
 bool DataHierarchyItem::isRunning() const

@@ -1,11 +1,12 @@
 #pragma once
 
 #include "DataType.h"
-
 #include "CoreInterface.h"
 #include "actions/WidgetAction.h"
 #include "event/Event.h"
 #include "Set.h"
+#include "DataRemoveAction.h"
+#include "DataCopyAction.h"
 
 #include <QObject>
 #include <QMap>
@@ -90,8 +91,11 @@ public:
     /** Returns whether the data hierarchy item has a parent */
     bool hasParent() const;
 
-    /** Gets the names of the children name */
-    DataHierarchyItems getChildren() const;
+    /**
+     * Gets the names of the children name
+     * @param recursive Recursive
+     */
+    DataHierarchyItems getChildren(const bool& recursive = false) const;
 
     /** Gets the number of children */
     std::uint32_t getNumberOfChildren() const;
@@ -312,18 +316,20 @@ signals:
     void lockedChanged(const bool& locked);
 
 protected:
-    Dataset<DatasetImpl>        _dataset;           /** Smart pointer to dataset */
-    DataHierarchyItem*          _parent;            /** Pointer to parent data hierarchy item */
-    DataHierarchyItems          _children;          /** Pointers to child items (if any) */
-    bool                        _visible;           /** Whether the dataset is visible */
-    bool                        _selected;          /** Whether the hierarchy item is selected */
-    bool                        _locked;            /** Whether the dataset is locked */
-    IconList                    _namedIcons;        /** Named icons */
-    QString                     _taskDescription;   /** Task description */
-    float                       _taskProgress;      /** Task progress */
-    QString                     _taskName;          /** Name of the current task */
-    TaskStatus                  _taskStatus;        /** Status of the current task */
-    hdps::gui::WidgetActions    _actions;           /** Widget actions */
+    Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
+    DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
+    DataHierarchyItems          _children;              /** Pointers to child items (if any) */
+    bool                        _visible;               /** Whether the dataset is visible */
+    bool                        _selected;              /** Whether the hierarchy item is selected */
+    bool                        _locked;                /** Whether the dataset is locked */
+    IconList                    _namedIcons;            /** Named icons */
+    QString                     _taskDescription;       /** Task description */
+    float                       _taskProgress;          /** Task progress */
+    QString                     _taskName;              /** Name of the current task */
+    TaskStatus                  _taskStatus;            /** Status of the current task */
+    hdps::gui::WidgetActions    _actions;               /** Widget actions */
+    DataRemoveAction            _dataRemoveAction;      /** Data remove action */
+    DataCopyAction              _dataCopyAction;        /** Data copy action */
 
 protected:
     friend class DataHierarchyManager;

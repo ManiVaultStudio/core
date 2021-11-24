@@ -77,7 +77,7 @@ QFont IconFont::getFont(const int& pointSize /*= -1*/) const
     return QFont(_fontFamily, pointSize);
 }
 
-QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(14, 14)*/, const QColor& foregroundColor/*= QColor(0, 0, 0, 255)*/, const QColor& backgroundColor/*= Qt::transparent*/) const
+QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(16, 16)*/, const QColor& foregroundColor/*= QColor(0, 0, 0, 255)*/, const QColor& backgroundColor/*= Qt::transparent*/) const
 {
     try
     {
@@ -92,7 +92,7 @@ QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(14, 14)
 
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setPen(foregroundColor);
-        painter.setFont(getFont(10.1));
+        painter.setFont(getFont(9.5));
 
         QFontMetrics fontMetrics(painter.font());
 
