@@ -78,6 +78,10 @@ void DataHierarchyManager::removeItem(const Dataset<DatasetImpl>& dataset, const
             }
             emit itemRemoved(datasetToRemove->getGuid());
         }
+
+        // Notify others that a child is removed
+        if (dataset->getDataHierarchyItem().hasParent())
+            Application::core()->notifyDataChildAdded(const_cast<Dataset<DatasetImpl>&>(dataset)->getParent<DatasetImpl>(), dataset);
     }
     catch (std::exception& e)
     {
