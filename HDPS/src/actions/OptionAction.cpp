@@ -68,21 +68,37 @@ bool OptionAction::hasOptions() const
 
 void OptionAction::setOptions(const QStringList& options)
 {
+    // Only proceed if the options changed
     if (_defaultModel.stringList() == options)
         return;
 
-    // Cache the current index
-    const auto currentIndex = _currentIndex;
+    // Cache the current index and text
+    const auto oldCurrentIndex  = _currentIndex;
+    const auto oldCurrentText   = getCurrentText();
 
-    // Assign the options
-    _defaultModel.setStringList(options);
+    if (_defaultModel.rowCount() == options.count()) {
 
-    // Re-assign cached current index
-    _currentIndex = options.count() > 0 ? std::max(0, std::min(currentIndex, options.count() - 1)) : -1;
+        // Number of items matches so update string list model with new items
+        for (std::int32_t rowIndex = 0; rowIndex < _defaultModel.rowCount(); rowIndex++)
+            _defaultModel.setData(_defaultModel.index(rowIndex, 0), options.at(rowIndex));
+    }
+    else {
 
-    // Notify the others that the options changed
-    emit optionsChanged();
+        // Override the string in the string list model
+        _defaultModel.setStringList(options);
 
+        // Number of items deviates so compute a valid current index
+        _currentIndex = options.count() > 0 ? std::max(0, std::min(oldCurrentIndex, options.count() - 1)) : -1;
+    }
+
+    // Notify the others that the model changed
+    emit modelChanged();
+
+    // Notify others that the current index and text changed when the current index changed
+    emit currentIndexChanged(_currentIndex);
+    emit currentTextChanged(getCurrentText());
+
+    // Set resettable status
     setResettable(isResettable());
 }
 
@@ -101,7 +117,9 @@ void OptionAction::setCustomModel(QAbstractItemModel* itemModel)
 
     _customModel = itemModel;
 
+    // Notify others that the custom model and the current model changed
     emit customModelChanged(_customModel);
+    emit modelChanged();
 }
 
 bool OptionAction::hasCustomModel() const
@@ -124,6 +142,7 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
 
     _currentIndex = currentIndex;
     
+    // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
     
@@ -142,6 +161,7 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
 
     _defaultIndex = defaultIndex;
 
+    // Notify others that the default index changed
     emit defaultIndexChanged(_defaultIndex);
 
     setResettable(isResettable());
@@ -202,17 +222,17 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 {
     setObjectName("ComboBox");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    setCompleter(&_completer);
+    //setCompleter(&_completer);
 
     // Configure completer
-    _completer.setCaseSensitivity(Qt::CaseInsensitive);
-    _completer.setFilterMode(Qt::MatchContains);
-    _completer.setCompletionColumn(0);
-    _completer.setCompletionMode(QCompleter::PopupCompletion);
+    //_completer.setCaseSensitivity(Qt::CaseInsensitive);
+    //_completer.setFilterMode(Qt::MatchContains);
+    //_completer.setCompletionColumn(0);
+    //_completer.setCompletionMode(QCompleter::PopupCompletion);
 
     // Update completer
     const auto updateCompleter = [this, optionAction]() -> void {
-        _completer.setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        //_completer.setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
     };
 
     // Update tooltips
@@ -220,28 +240,40 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
     };
 
-    // Fill combobox with options from the option action
-    const auto populateComboBox = [this, optionAction, updateToolTip, updateCompleter]() -> void {
+    // Assign option action model to combobox
+    const auto updateComboBoxModel = [this, optionAction, updateToolTip, updateCompleter]() -> void {
+        
+        // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
 
-        setModel(new QStringListModel());
+        // Disconnect from any previous list model
+        if (model())
+            disconnect(model(), &QAbstractItemModel::layoutChanged, this, nullptr);
+
+        // Update model and enable/disable based on the row count
         setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
-        setEnabled(optionAction->getNumberOfOptions() >= 2);
-        setCurrentIndex(optionAction->getCurrentIndex());
+
+        // Enabled/disable the combobox depending on the number of items
+        connect(model(), &QAbstractItemModel::layoutChanged, this, [this, optionAction](const QList<QPersistentModelIndex>& parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint) {
+            setEnabled(optionAction->getNumberOfOptions() >= 2);
+        });
 
         // Update completer and tooltips
-        updateCompleter();
+        //updateCompleter();
         updateToolTip();
     };
 
-    // Populate the combobox when the options change
-    connect(optionAction, &OptionAction::optionsChanged, this, populateComboBox);
+    // Assign model when changed in the option action
+    connect(optionAction, &OptionAction::modelChanged, this, updateComboBoxModel);
 
     // Update combobox selection when the action changes
     const auto updateComboBoxSelection = [this, optionAction]() -> void {
+
+        // Only proceed if the current text changed
         if (optionAction->getCurrentText() == currentText())
             return;
-        
+
+        // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
         
         setCurrentText(optionAction->getCurrentText());
@@ -249,6 +281,10 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 
     // Update the combobox selection and tooltip when the option action selection changes
     connect(optionAction, &OptionAction::currentTextChanged, this, [this, updateComboBoxSelection, updateToolTip](const QString& currentText) {
+
+        // Prevent signals from being emitted
+        QSignalBlocker comboBoxSignalBlocker(this);
+
         updateComboBoxSelection();
         updateToolTip();
     });
@@ -259,8 +295,8 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     });
 
     // Do initial updates
-    updateCompleter();
-    populateComboBox();
+    //updateCompleter();
+    updateComboBoxModel();
     updateComboBoxSelection();
     updateToolTip();
 }

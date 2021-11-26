@@ -170,8 +170,8 @@ public:
 
 signals:
 
-    /** Signals that the options changed */
-    void optionsChanged();
+    /** Signals that the model changed */
+    void modelChanged();
 
     /**
      * Signals that the custom model changed

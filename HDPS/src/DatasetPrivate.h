@@ -95,11 +95,17 @@ signals:
      */
     void dataGuiNameChanged(const QString& oldGuiName, const QString& newGuiName);
 
-    /** Signals that a dataset child was added */
+    /**
+     * Signals that a dataset child is added
+     * @param childDataset Smart pointer to added child dataset
+     */
     void dataChildAdded(const Dataset<DatasetImpl>& childDataset);
 
-    /** Signals that a dataset child was removed */
-    void dataChildRemoved(const Dataset<DatasetImpl>& childDataset);
+    /**
+     * Signals that a dataset child was removed
+     * @param childDatasetGuid GUID of the dataset child that is removed
+     */
+    void dataChildRemoved(const QString& childDatasetGuid);
 
 protected:
     QString         _datasetId;     /** Globally unique dataset identifier */

@@ -56,22 +56,20 @@ void DataManager::removeDataset(const Dataset<DatasetImpl>& dataset, const bool&
 
         qDebug() << "Removing" << dataset->getGuiName() << "from the data manager";
 
-        /* TODO
         // Turn all derived datasets referring to the dataset to be removed to non-derived
         for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
         {
-            DataSet& set = *it->second;
+            auto& set = *it->second;
 
-            if (set.isDerivedData() && set.getSourceName() == datasetName)
+            if (set.isDerivedData() && set.getGuid() == dataset->getGuid())
             {
                 qDebug() << "Un-derive" << set.getGuiName();
 
                 set._derived = false;
-                set._sourceSetName = "";
+                set.setSourceDataSet(Dataset<DatasetImpl>());
             }
             it++;
         }
-        */
 
         // Remove dataset
         _dataSetMap.erase(dataset->getGuid());

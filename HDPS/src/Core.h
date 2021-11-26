@@ -265,9 +265,9 @@ public: // Events & notifications
     /**
      * Notify all listeners that a dataset child was removed
      * @param parentDataset Smart pointer to the parent dataset
-     * @param childDataset Smart pointer to the child dataset that was removed
+     * @param childDatasetGuid GUID of the child dataset that was removed
      */
-    void notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset) override;
+    void notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const QString& childDatasetGuid) override;
 
     /**
      * Notify all listeners that a dataset is locked

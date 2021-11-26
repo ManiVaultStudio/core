@@ -89,12 +89,10 @@ DataHierarchyItem& DataHierarchyItem::getParent() const
 
 void DataHierarchyItem::getParents(DataHierarchyItems& parents) const
 {
-    // Add ourselves
-    parents << const_cast<DataHierarchyItem*>(this);
-
-    // And possibly our parents
-    if (hasParent())
-        getParents(parents);
+    if (_parent) {
+        parents << _parent;
+        _parent->getParents(parents);
+    }
 }
 
 void DataHierarchyItem::setParent(DataHierarchyItem& parent)

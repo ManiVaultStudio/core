@@ -293,21 +293,21 @@ public:
     /**
      * Constructor
      * @param dataset Smart pointer to the dataset
-     * @param childDataset Smart pointer to the child dataset
+     * @param childDatasetGuid GUID of the child dataset
      */
-    DataChildRemovedEvent(const Dataset<DatasetImpl>& dataset, const Dataset<DatasetImpl>& childDataset) :
+    DataChildRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& childDatasetGuid) :
         DataEvent(EventType::DataChildRemoved, dataset),
-        _childDataset(childDataset)
+        _childDatasetGuid(childDatasetGuid)
     {
     }
 
-    /** Get smart pointer to the child dataset */
-    Dataset<DatasetImpl> getChildDataset() const {
-        return _childDataset;
+    /** Get GUID of the child dataset */
+    QString getChildDatasetGuid() const {
+        return _childDatasetGuid;
     }
 
 protected:
-    Dataset<DatasetImpl>    _childDataset;      /** Smart pointer to child dataset */
+    QString     _childDatasetGuid;      /** GUID of of the child dataset */
 };
 
 /**

@@ -65,11 +65,18 @@ void DataHierarchyManager::removeItem(const Dataset<DatasetImpl>& dataset, const
 
         // Remove the items from the list
         for (auto& datasetToRemove : datasetsToRemove) {
+            
+            // Get reference to data hierarchy item
+            auto& dataHierarchyItemToRemove = datasetToRemove->getDataHierarchyItem();
+
+            // Get smart pointer to parent dataset
+            const auto parentDataset = dataHierarchyItemToRemove.getParent().getDataset();
+
+            // Get GUID of the the dataset which is about to be removed
+            const auto datasetGuid = dataHierarchyItemToRemove.getDataset()->getGuid();
+
             emit itemAboutToBeRemoved(*datasetToRemove);
             {
-                // Get reference to data hierarchy item
-                auto& dataHierarchyItemToRemove = datasetToRemove->getDataHierarchyItem();
-
                 // Remove from internal list
                 _dataHierarchyItems.removeOne(&dataHierarchyItemToRemove);
 
@@ -77,11 +84,11 @@ void DataHierarchyManager::removeItem(const Dataset<DatasetImpl>& dataset, const
                 delete &dataHierarchyItemToRemove;
             }
             emit itemRemoved(datasetToRemove->getGuid());
-        }
 
-        // Notify others that a child is removed
-        if (dataset->getDataHierarchyItem().hasParent())
-            Application::core()->notifyDataChildAdded(const_cast<Dataset<DatasetImpl>&>(dataset)->getParent<DatasetImpl>(), dataset);
+            // Notify others that a child is removed
+            if (dataset->getDataHierarchyItem().hasParent())
+                Application::core()->notifyDataChildRemoved(parentDataset, datasetGuid);
+        }
     }
     catch (std::exception& e)
     {

@@ -633,7 +633,7 @@ void Core::notifyDataChildAdded(const Dataset<DatasetImpl>& parentDataset, const
     }
 }
 
-void Core::notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset)
+void Core::notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const QString& childDatasetGuid)
 {
     try {
 
@@ -641,12 +641,8 @@ void Core::notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, con
         if (!parentDataset.isValid())
             throw std::runtime_error("Parent dataset is invalid");
 
-        // Except if child dataset is not valid
-        if (!childDataset.isValid())
-            throw std::runtime_error("Child dataset is invalid");
-
         // Create data child removed event
-        DataChildRemovedEvent dataChildRemovedEvent(parentDataset, childDataset);
+        DataChildRemovedEvent dataChildRemovedEvent(parentDataset, childDatasetGuid);
 
         // Cache the event listeners to prevent timing issues
         const auto eventListeners = _eventListeners;

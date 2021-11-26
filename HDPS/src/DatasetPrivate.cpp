@@ -141,7 +141,7 @@ void DatasetPrivate::registerDatasetEvents()
                     auto dataChildRemovedEvent = static_cast<hdps::DataChildRemovedEvent*>(dataEvent);
 
                     // Notify others that a data child was removed
-                    emit dataChildAdded(dataChildRemovedEvent->getChildDataset());
+                    emit dataChildRemoved(dataChildRemovedEvent->getChildDatasetGuid());
 
                     break;
                 }
