@@ -222,7 +222,8 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 {
     setObjectName("ComboBox");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    //setCompleter(&_completer);
+    setCompleter(&_completer);
+    //setEditable(true);
 
     // Configure completer
     //_completer.setCaseSensitivity(Qt::CaseInsensitive);
@@ -232,7 +233,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 
     // Update completer
     const auto updateCompleter = [this, optionAction]() -> void {
-        //_completer.setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+        _completer.setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
     };
 
     // Update tooltips
