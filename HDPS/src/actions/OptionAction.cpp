@@ -28,7 +28,6 @@ void OptionAction::initialize(const QStringList& options /*= QStringList()*/, co
     setOptions(options);
     setCurrentText(currentOption);
     setDefaultText(defaultOption);
-
     setResettable(isResettable());
 }
 
@@ -37,7 +36,6 @@ void OptionAction::initialize(QAbstractItemModel& customModel, const QString& cu
     setCustomModel(&customModel);
     setCurrentText(currentOption);
     setDefaultText(defaultOption);
-
     setResettable(isResettable());
 }
 
@@ -120,6 +118,17 @@ void OptionAction::setCustomModel(QAbstractItemModel* itemModel)
     // Notify others that the custom model and the current model changed
     emit customModelChanged(_customModel);
     emit modelChanged();
+
+    if (_customModel) {
+
+        // Possibly adjust the current index when the layout of the custom model changes
+        connect(_customModel, &QAbstractItemModel::layoutChanged, this, [this]() {
+
+            // Current index may not exceed the row count
+            if (_customModel->rowCount() > 0 && _currentIndex >= _customModel->rowCount())
+                setCurrentIndex(_customModel->rowCount() - 1);
+        });
+    }
 }
 
 bool OptionAction::hasCustomModel() const
@@ -217,24 +226,10 @@ bool OptionAction::hasSelection() const
 }
 
 OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction) :
-    QComboBox(parent),
-    _completer()
+    QComboBox(parent)
 {
     setObjectName("ComboBox");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    setCompleter(&_completer);
-    //setEditable(true);
-
-    // Configure completer
-    //_completer.setCaseSensitivity(Qt::CaseInsensitive);
-    //_completer.setFilterMode(Qt::MatchContains);
-    //_completer.setCompletionColumn(0);
-    //_completer.setCompletionMode(QCompleter::PopupCompletion);
-
-    // Update completer
-    const auto updateCompleter = [this, optionAction]() -> void {
-        _completer.setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
-    };
 
     // Update tooltips
     const auto updateToolTip = [this, optionAction]() -> void {
@@ -242,7 +237,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     };
 
     // Assign option action model to combobox
-    const auto updateComboBoxModel = [this, optionAction, updateToolTip, updateCompleter]() -> void {
+    const auto updateComboBoxModel = [this, optionAction, updateToolTip]() -> void {
         
         // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
@@ -259,8 +254,6 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
             setEnabled(optionAction->getNumberOfOptions() >= 2);
         });
 
-        // Update completer and tooltips
-        //updateCompleter();
         updateToolTip();
     };
 
@@ -276,7 +269,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 
         // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
-        
+
         setCurrentText(optionAction->getCurrentText());
     };
 
@@ -295,11 +288,64 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         optionAction->setCurrentIndex(currentIndex);
     });
 
-    // Do initial updates
-    //updateCompleter();
+    // Perform initial updates
     updateComboBoxModel();
     updateComboBoxSelection();
     updateToolTip();
+}
+
+OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* optionAction) :
+    QLineEdit(parent),
+    _optionAction(optionAction),
+    _completer()
+{
+    setObjectName("LineEdit");
+    setCompleter(&_completer);
+
+    _completer.setCaseSensitivity(Qt::CaseInsensitive);
+    _completer.setFilterMode(Qt::MatchContains);
+    _completer.setCompletionColumn(0);
+    _completer.setCompletionMode(QCompleter::PopupCompletion);
+
+    // Update completer model
+    const auto updateCompleterModel = [this, optionAction]() {
+        _completer.setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
+    };
+
+    // Update completer model when the option action model changes
+    connect(optionAction, &OptionAction::modelChanged, updateCompleterModel);
+
+    // Update line edit text when the current option changes
+    const auto updateText = [this, optionAction]() -> void {
+
+        // Prevent signals from being emitted
+        QSignalBlocker lineEditBlocker(this);
+
+        // Update text
+        setText(optionAction->getCurrentText());
+    };
+
+    // Update line edit text when the current option changes
+    connect(optionAction, &OptionAction::currentTextChanged, this, updateText);
+
+    // Update option action selection when the line edit editing finished
+    connect(this, &QLineEdit::editingFinished, this, [this, optionAction]() {
+        optionAction->setCurrentText(text());
+    });
+
+    // Update option action selection when auto completion activated
+    connect(&_completer, QOverload<const QString&>::of(&QCompleter::activated), [this, optionAction](const QString& text) {
+        optionAction->setCurrentText(text);
+    });
+
+    // Update option action selection when a auto completion item is highlighted
+    connect(&_completer, QOverload<const QString&>::of(&QCompleter::highlighted), [this, optionAction](const QString& text) {
+        optionAction->setCurrentText(text);
+    });
+
+    // Do an initial update of the completer model and update the line edit text
+    updateCompleterModel();
+    updateText();
 }
 
 QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -311,6 +357,9 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
 
     if (widgetFlags & WidgetFlag::ComboBox)
         layout->addWidget(new OptionAction::ComboBoxWidget(parent, this));
+
+    if (widgetFlags & WidgetFlag::LineEdit)
+        layout->addWidget(new OptionAction::LineEditWidget(parent, this));
 
     if (widgetFlags & WidgetFlag::ResetPushButton)
         layout->addWidget(createResetButton(parent));

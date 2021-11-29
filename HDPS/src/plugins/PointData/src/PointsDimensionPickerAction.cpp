@@ -9,7 +9,7 @@ PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const 
     WidgetAction(parent),
     _points(nullptr),
     _currentDimensionAction(this, "Select dimension"),
-    _searchThreshold(1000)
+    _searchThreshold(DEFAULT_SEARCH_THRESHOLD)
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
@@ -118,13 +118,43 @@ void PointsDimensionPickerAction::setSearchThreshold(const std::uint32_t& search
     _searchThreshold = searchThreshold;
 }
 
+bool PointsDimensionPickerAction::maySearch() const
+{
+    return _currentDimensionAction.getNumberOfOptions() >= _searchThreshold;
+}
+
 PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPickerAction* pointsDimensionPickerAction) :
     WidgetActionWidget(parent, pointsDimensionPickerAction)
 {
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
-    layout->addWidget(pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this));
 
+    // Create widgets
+    auto comboBoxWidget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::ComboBox);
+    auto lineEditWidget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::LineEdit);
+
+    // Add widgets to layout
+    layout->addWidget(comboBoxWidget);
+    layout->addWidget(lineEditWidget);
+
+    // Update widgets visibility
+    const auto updateWidgetsVisibility = [pointsDimensionPickerAction, comboBoxWidget, lineEditWidget]() {
+        
+        // Get whether the option action may be searched
+        const auto maySearch = pointsDimensionPickerAction->maySearch();
+
+        // Update visibility
+        comboBoxWidget->setVisible(!maySearch);
+        lineEditWidget->setVisible(maySearch);
+    };
+
+    // Update widgets visibility when the dimensions change
+    connect(&pointsDimensionPickerAction->getCurrentDimensionAction(), &OptionAction::modelChanged, this, updateWidgetsVisibility);
+
+    // Initial update of widgets visibility
+    updateWidgetsVisibility();
+
+    // Apply layout
     setLayout(layout);
 }

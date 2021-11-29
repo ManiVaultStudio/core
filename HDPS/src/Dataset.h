@@ -152,6 +152,8 @@ public: // Operators
     }
 };
 
+using Datasets = QVector<Dataset<DatasetImpl>>;
+
 /**
  * Compares two dataset smart pointers for equality
  * @param lhs Left hand side dataset smart pointer

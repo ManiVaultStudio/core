@@ -112,6 +112,9 @@ public:
      */
     void setSearchThreshold(const std::uint32_t& searchThreshold);
 
+    /** Establishes whether the dimensions can be searched (number of options exceeds the search threshold) */
+    bool maySearch() const;
+
 signals:
 
     /**
@@ -134,4 +137,7 @@ protected:
     Dataset<Points>     _points;                    /** Dataset reference to points dataset from which the dimension will be picked */
     OptionAction        _currentDimensionAction;    /** Current dimension action */
     std::uint32_t       _searchThreshold;           /** Select from a drop-down below the threshold and above use a search bar */
+
+protected:
+    static constexpr std::uint32_t DEFAULT_SEARCH_THRESHOLD = 100;     /** Default search threshold */
 };

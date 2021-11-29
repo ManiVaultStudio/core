@@ -288,8 +288,10 @@ protected: // Callbacks for implementations of the numerical action
 
     static constexpr std::uint32_t  INIT_NUMBER_OF_DECIMALS = 1;        /** Initialization number of decimals */
 };
+
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
 template<typename T> constexpr std::uint32_t  NumericalAction<T>::INIT_NUMBER_OF_DECIMALS;
 #endif
+
 }
 }

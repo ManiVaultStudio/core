@@ -30,8 +30,9 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        ComboBox        = 0x00001,      /** The widget includes a combobox */
-        ResetPushButton = 0x00002,      /** The widget includes a reset push button */
+        ComboBox        = 0x00001,      /** The widget includes a combobox widget */
+        LineEdit        = 0x00002,      /** The widget includes a searchable line edit widget */
+        ResetPushButton = 0x00004,      /** The widget includes a reset push button */
 
         Basic   = ComboBox,
         All     = ComboBox | ResetPushButton
@@ -50,8 +51,23 @@ public: // Widgets
          */
         ComboBoxWidget(QWidget* parent, OptionAction* optionAction);
 
+        friend class OptionAction;
+    };
+
+    /** Line edit widget (with auto completion) class for option action */
+    class LineEditWidget : public QLineEdit {
     protected:
-        QCompleter  _completer;     /** Completer for searching and filtering */
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param optionAction Pointer to option action
+         */
+        LineEditWidget(QWidget* parent, OptionAction* optionAction);
+
+    protected:
+        OptionAction*   _optionAction;  /** Pointer to option action */
+        QCompleter      _completer;     /** Completer for searching and filtering */
 
         friend class OptionAction;
     };
@@ -196,12 +212,6 @@ signals:
      * @param currentText Current text
      */
     void currentTextChanged(const QString& currentText);
-
-    /**
-     * Signals that the search threshold changed
-     * @param currentText Current text
-     */
-    void searchThresholdChanged(const std::uint32_t& searchThreshold);
 
 protected:
     QStringListModel        _defaultModel;          /** Default simple string list model */
