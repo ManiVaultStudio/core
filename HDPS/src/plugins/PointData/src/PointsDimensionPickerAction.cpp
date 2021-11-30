@@ -19,12 +19,10 @@ PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const 
     // Selection changed notifier
     const auto selectionChanged = [this]() {
         emit currentDimensionIndexChanged(_currentDimensionAction.getCurrentIndex());
-        emit currentDimensionNameChanged(_currentDimensionAction.getCurrentText());
     };
 
     // Relay current index/text changed signal from the current dimension action
     connect(&_currentDimensionAction, &OptionAction::currentIndexChanged, this, selectionChanged);
-    connect(&_currentDimensionAction, &OptionAction::currentTextChanged, this, selectionChanged);
 }
 
 void PointsDimensionPickerAction::setPointsDataset(const Dataset<Points>& points)

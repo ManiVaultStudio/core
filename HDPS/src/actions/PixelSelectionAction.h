@@ -48,12 +48,6 @@ public:
     /** Get reference to pixel selection tool */
     util::PixelSelectionTool& getPixelSelectionTool();
 
-    /** Get allowed pixel selection types */
-    util::PixelSelectionTypes getAllowedTypes() const;
-
-    /** Set allowed pixel selection types */
-    void setAllowedTypes(const util::PixelSelectionTypes& pixelSelectionTypes);
-
     /**
      * Enables/disables shortcuts
      * @param shortcutsEnabled Whether shortcuts are enabled or not
