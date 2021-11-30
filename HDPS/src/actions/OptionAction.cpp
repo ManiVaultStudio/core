@@ -313,7 +313,7 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     };
 
     // Update completer model when the option action model changes
-    connect(optionAction, &OptionAction::modelChanged, updateCompleterModel);
+    connect(optionAction, &OptionAction::modelChanged, this, updateCompleterModel);
 
     // Update line edit text when the current option changes
     const auto updateText = [this, optionAction]() -> void {
