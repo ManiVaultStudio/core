@@ -7,7 +7,6 @@
 #define EFFECT_OUTLINE 3
 
 // Point properties
-uniform float alpha;
 uniform int   scalarEffect;
 uniform vec3  outlineColor;
 
@@ -23,6 +22,7 @@ smooth in vec2  vTexCoord;
 flat   in int   vHighlight;
 smooth in float vScalar;
 smooth in vec3  vColor;
+smooth in float vOpacity;
 
 // Output color
 out vec4 fragColor;
@@ -52,11 +52,11 @@ void main()
 	
 	if (focusSelection) {
 		if (numSelectedPoints == 0) {
-			fragColor = vec4(color, a * alpha);
+			fragColor = vec4(color, a * vOpacity);
 		} else {
 			fragColor = vec4(color, focusSelection && isHighlighted ? 1.0f : 0.03f);
 		}
 	} else {
-		fragColor = vec4(color, a * alpha);
+		fragColor = vec4(color, a * vOpacity);
 	}
 }

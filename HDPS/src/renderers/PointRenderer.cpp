@@ -83,7 +83,6 @@ namespace hdps
             glVertexAttribPointer(ATTRIBUTE_SCALARS_COLOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_SCALARS_COLOR, 1);
 
-            /*
             // Scalar buffer for point size, disabled by default
             _sizeScalarBuffer.create();
             _sizeScalarBuffer.bind();
@@ -97,7 +96,6 @@ namespace hdps
 
             glVertexAttribPointer(ATTRIBUTE_SCALARS_OPACITY, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
             glVertexAttribDivisor(ATTRIBUTE_SCALARS_OPACITY, 1);
-            */
         }
 
         void PointArrayObject::setPositions(const std::vector<Vector2f>& positions)
@@ -141,56 +139,16 @@ namespace hdps
 
         void PointArrayObject::setSizeScalars(const std::vector<float>& scalars)
         {
-            /*
-            _sizeScalarsRange.x = std::numeric_limits<float>::max();
-            _sizeScalarsRange.y = -std::numeric_limits<float>::max();
-
-            // Determine scalar range
-            for (const float& scalar : scalars)
-            {
-                if (scalar < _sizeScalarsRange.x)
-                    _sizeScalarsRange.x = scalar;
-
-                if (scalar > _sizeScalarsRange.y)
-                    _sizeScalarsRange.y = scalar;
-            }
-
-            _sizeScalarsRange.z = _sizeScalarsRange.y - _sizeScalarsRange.x;
-
-            if (_sizeScalarsRange.z < 1e-07)
-                _sizeScalarsRange.z = 1e-07;
-
             _sizeScalars = scalars;
 
             _dirtySizeScalars = true;
-            */
         }
 
         void PointArrayObject::setOpacityScalars(const std::vector<float>& scalars)
         {
-            /*
-            _opacityScalarsRange.x  = std::numeric_limits<float>::max();
-            _opacityScalarsRange.y  = -std::numeric_limits<float>::max();
-
-            // Determine scalar range
-            for (const float& scalar : scalars)
-            {
-                if (scalar < _opacityScalarsRange.x)
-                    _opacityScalarsRange.x = scalar;
-
-                if (scalar > _opacityScalarsRange.y)
-                    _opacityScalarsRange.y = scalar;
-            }
-
-            _opacityScalarsRange.z = _opacityScalarsRange.y - _opacityScalarsRange.x;
-
-            if (_opacityScalarsRange.z < 1e-07)
-                _opacityScalarsRange.z = 1e-07;
-
             _opacityScalars = scalars;
 
             _dirtyOpacityScalars = true;
-            */
         }
 
         void PointArrayObject::setColors(const std::vector<Vector3f>& colors)
@@ -250,7 +208,7 @@ namespace hdps
                 _dirtyColorScalars = false;
             }
 
-            /*
+            
             if (_dirtySizeScalars)
             {
                 _sizeScalarBuffer.bind();
@@ -264,13 +222,12 @@ namespace hdps
             if (_dirtyOpacityScalars)
             {
                 _opacityScalarBuffer.bind();
-                _opacityScalarBuffer.setData(_sizeScalars);
+                _opacityScalarBuffer.setData(_opacityScalars);
 
                 enableAttribute(ATTRIBUTE_SCALARS_OPACITY, true);
 
                 _dirtyOpacityScalars = false;
             }
-            */
 
             // Before calling glDrawArraysInstanced, check if _positions is non-empty, to
             // prevent a crash on some (older) computers, see HDPS core pull request #42,
@@ -397,9 +354,21 @@ namespace hdps
 
             _shader.bind();
 
+            _shader.uniform1f("pointSize", _pointSettings._pointSize);
+
             switch (_pointSettings._scalingMode) {
-            case Relative: _shader.uniform1f("pointSize", _pointSettings._pointSize); break;
-            case Absolute: _shader.uniform1f("pointSize", _pointSettings._pointSize / size); break;
+                case Relative:
+                {
+                    _shader.uniform1f("pointSize", _pointSettings._pointSize);
+                    break;
+                }
+
+                case Absolute:
+                {
+                    _shader.uniform1f("pointSize", _pointSettings._pointSize);
+                    _shader.uniform1f("pointSizeScale", _pointSettings._pointSize / size);
+                    break;
+                }
             }
 
             _shader.uniformMatrix3f("orthoM", _orthoM);

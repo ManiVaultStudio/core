@@ -353,7 +353,7 @@ void DataHierarchyItem::setLocked(const bool& locked)
     emit lockedChanged(_locked);
 
     // Make sure the locked status changed event is handled
-    QCoreApplication::processEvents();
+    //QCoreApplication::processEvents();
 }
 
 QString DataHierarchyItem::getTaskName() const
@@ -394,7 +394,7 @@ void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
     emit taskDescriptionChanged(_taskDescription);
 
     // Make sure the task description changed event is handled
-    QCoreApplication::processEvents();
+    //QCoreApplication::processEvents();
 }
 
 float DataHierarchyItem::getTaskProgress() const
@@ -413,7 +413,7 @@ void DataHierarchyItem::setTaskProgress(const float& taskProgress)
     emit taskProgressChanged(_taskProgress);
 
     // Make sure the task progress changed event is handled
-    QCoreApplication::processEvents();
+    //QCoreApplication::processEvents();
 }
 
 bool DataHierarchyItem::isRunning() const
