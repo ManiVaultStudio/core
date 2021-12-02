@@ -170,28 +170,6 @@ Dataset<Clusters>& ClustersAction::getClustersDataset()
     return _clusters;
 }
 
-void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
-{
-    if (!_clusters.isValid())
-        return;
-    
-    auto& parentDataHierarchyItem   = _clusters->getDataHierarchyItem().getParent();
-    auto& points                    = parentDataHierarchyItem.getDataset<Points>();
-    auto& selection                 = points->getSelection<Points>();
-
-    selection->indices.clear();
-    selection->indices.reserve(indices.size());
-
-    std::vector<std::uint32_t> globalIndices;
-
-    points->getGlobalIndices(globalIndices);
-
-    for (auto index : indices)
-        selection->indices.push_back(globalIndices[index]);
-
-    Application::core()->notifyDataSelectionChanged(parentDataHierarchyItem.getDataset());
-}
-
 void ClustersAction::createSubset(const QString& datasetName)
 {
     auto& points    = _clusters->getDataHierarchyItem().getParent().getDataset();
@@ -241,7 +219,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
     // Configure tree view
     clustersTreeView->setModel(&_filterModel);
     clustersTreeView->setSelectionModel(&_selectionModel);
-    clustersTreeView->setFixedHeight(150);
+    clustersTreeView->setFixedHeight(300);
     clustersTreeView->setRootIsDecorated(false);
     clustersTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     clustersTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -269,11 +247,10 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         // Get selected row
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
 
-        // Get reference to cluster selection set
-        auto& currentClusterSelectionIndices = clustersAction->getClustersDataset()->getSelection<Clusters>()->indices;
+        // Indices of the selected clusters
+        std::vector<std::uint32_t> currentClusterSelectionIndices;
 
         // Clear and reserve the selection indices
-        currentClusterSelectionIndices.clear();
         currentClusterSelectionIndices.reserve(clustersAction->getClusters()->size());
 
         // Gather point indices for selection
@@ -285,14 +262,14 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         }
 
         // Select points
-        clustersAction->selectPoints(clustersAction->getClustersDataset()->getSelectedIndices());
+        clustersAction->getClustersDataset()->setSelection(currentClusterSelectionIndices);
 
         // Update state of the remove action
         _removeAction.setEnabled(!selectedRows.isEmpty());
         _mergeAction.setEnabled(selectedRows.count() >= 2);
 
         // Notify others that the cluster selection has changed
-        Application::core()->notifyDataSelectionChanged(*clustersAction->getClustersDataset());
+        Application::core()->notifyDataSelectionChanged(clustersAction->getClustersDataset());
     };
 
     connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {

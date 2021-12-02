@@ -42,6 +42,18 @@ bool DatasetImpl::isLocked() const
     return getDataHierarchyItem().getLocked();
 }
 
+std::int32_t DatasetImpl::getGroupIndex() const
+{
+    return _groupIndex;
+}
+
+void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
+{
+    _groupIndex = groupIndex;
+
+    _core->notifyDataSelectionChanged(this);
+}
+
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)
 {
     _core->getDataHierarchyItem(_guid).addAction(widgetAction);

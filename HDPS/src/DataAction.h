@@ -2,6 +2,7 @@
 
 #include "DataAnalysisAction.h"
 #include "DataViewAction.h"
+#include "DataGroupingAction.h"
 #include "DataExportAction.h"
 
 using namespace hdps::gui;
@@ -31,6 +32,7 @@ protected:
     Dataset<DatasetImpl>    _dataset;               /** Smart pointer to the dataset */
     DataAnalysisAction      _dataAnalysisAction;    /** Data analysis action */
     DataViewAction          _dataViewAction;        /** Data view action */
+    DataGroupingAction      _dataGroupingAction;    /** Data grouping action */
     DataExportAction        _dataExportAction;      /** Data export action */
 };
 

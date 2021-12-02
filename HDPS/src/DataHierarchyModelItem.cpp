@@ -4,9 +4,12 @@
 #include "DataHierarchyManager.h"
 
 #include <QDebug>
+#include <QPainter>
 
 namespace hdps
 {
+
+QRandomGenerator DataHierarchyModelItem::rng = QRandomGenerator();
 
 DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent /*= nullptr*/) :
     QObject(parent),
@@ -98,6 +101,9 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                 case Column::GUID:
                     return editValue;
 
+                case Column::GroupIndex:
+                    return editValue;
+
                 case Column::Description:
                     return editValue;
 
@@ -130,6 +136,9 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
 
                 case Column::GUID:
                     return _dataHierarchyItem->getDataset()->getGuid();
+
+                case Column::GroupIndex:
+                    return _dataHierarchyItem->getDataset()->getGroupIndex();
 
                 case Column::Description:
                     return _progressSection;
@@ -167,6 +176,45 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                 case Column::GUID:
                     break;
 
+                case Column::GroupIndex:
+                {
+                    break;
+
+                    // Get the group index of the dataset
+                    const auto groupIndex = getDataAtColumn(column, Qt::EditRole).toInt();
+
+                    if (groupIndex < 0)
+                        break;
+
+                    const auto size = QSize(100, 100);
+
+                    QPixmap pixmap(size);
+
+                    pixmap.fill(Qt::transparent);
+
+                    const auto iconRectangle = QRect(0, 0, size.width(), size.height());
+
+                    QPainter painter(&pixmap);
+
+                    painter.setRenderHint(QPainter::Antialiasing);
+
+                    // Seed the random number generator with the group index
+                    rng.seed(groupIndex);
+
+                    const auto randomHue        = rng.bounded(360);
+                    const auto randomSaturation = rng.bounded(150, 255);
+                    const auto randomLightness  = rng.bounded(50, 200);
+
+                    painter.setBrush(QColor::fromHsl(randomHue, randomSaturation, randomLightness));
+                    painter.drawEllipse(iconRectangle);
+
+                    painter.setPen(Qt::white);
+                    painter.setFont(QFont("Arial", 50, 200));
+                    painter.drawText(iconRectangle, QString::number(groupIndex), QTextOption(Qt::AlignCenter));
+
+                    return QIcon(pixmap);
+                }
+
                 case Column::Analysis:
                     return _dataHierarchyItem->getIconByName("analysis");
 
@@ -198,6 +246,32 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
         }
 
         // Grayed out text when locked
+        case Qt::TextAlignmentRole:
+        {
+            switch (static_cast<Column>(column))
+            {
+                case Column::Name:
+                case Column::GUID:
+                    break;
+
+                case Column::GroupIndex:
+                    return Qt::AlignVCenter | Qt::AlignRight;
+
+                case Column::Analysis:
+                case Column::Progress:
+                case Column::Description:
+                case Column::Analyzing:
+                case Column::Locked:
+                    break;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        // Grayed out text when locked
         case Qt::ForegroundRole:
             return _dataHierarchyItem->getLocked() ? QColor(Qt::gray) : QColor(Qt::black);
 
@@ -219,6 +293,11 @@ QMenu* DataHierarchyModelItem::getContextMenu()
 void DataHierarchyModelItem::renameDataset(const QString& intendedDatasetName)
 {
     _dataHierarchyItem->renameDataset(intendedDatasetName);
+}
+
+void DataHierarchyModelItem::setGroupIndex(const std::int32_t& groupIndex)
+{
+    _dataHierarchyItem->getDataset()->setGroupIndex(groupIndex);
 }
 
 void DataHierarchyModelItem::removeChild(DataHierarchyModelItem* dataHierarchyModelItem)

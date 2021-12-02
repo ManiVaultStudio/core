@@ -36,25 +36,29 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
 {
     const auto column = static_cast<DataHierarchyModelItem::Column>(index.column());
 
-    auto dataHierarchyItem = static_cast<DataHierarchyModelItem*>((void*)index.internalPointer());
+    auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>((void*)index.internalPointer());
     
     switch (column) {
         case DataHierarchyModelItem::Column::Name:
-            dataHierarchyItem->renameDataset(value.toString());
+            dataHierarchyModelItem->renameDataset(value.toString());
             break;
 
         case DataHierarchyModelItem::Column::GUID:
             break;
 
+        case DataHierarchyModelItem::Column::GroupIndex:
+            dataHierarchyModelItem->setGroupIndex(value.toInt());
+            break;
+
         case DataHierarchyModelItem::Column::Description:
-            dataHierarchyItem->setProgressSection(value.toString());
+            dataHierarchyModelItem->setProgressSection(value.toString());
             break;
 
         case DataHierarchyModelItem::Column::Analysis:
             break;
 
         case DataHierarchyModelItem::Column::Progress:
-            dataHierarchyItem->setProgressPercentage(value.toFloat());
+            dataHierarchyModelItem->setProgressPercentage(value.toFloat());
             break;
 
         default:
@@ -158,6 +162,10 @@ Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
     if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::Name)
         itemFlags |= Qt::ItemIsEditable;
 
+    // Make group index column editable
+    if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::GroupIndex)
+        itemFlags |= Qt::ItemIsEditable;
+
     // Disable when locked
     if (itemIsLocked)
         itemFlags &= ~Qt::ItemIsEnabled;
@@ -202,6 +210,11 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                 {
                     case DataHierarchyModelItem::Column::Name:
                     case DataHierarchyModelItem::Column::GUID:
+                        break;
+
+                    case DataHierarchyModelItem::Column::GroupIndex:
+                        return Application::getIconFont("FontAwesome").getIcon("object-group");
+
                     case DataHierarchyModelItem::Column::Description:
                     case DataHierarchyModelItem::Column::Analysis:
                         break;

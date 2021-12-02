@@ -40,7 +40,8 @@ public:
         _all(false),
         _derived(false),
         _sourceDataset(),
-        _properties()
+        _properties(),
+        _groupIndex(-1)
     {
     }
 
@@ -197,7 +198,7 @@ public:
      * Set selection
      * @param indices Selection indices
      */
-    void setSelection(const std::vector<std::uint32_t>& indices)
+    virtual void setSelection(const std::vector<std::uint32_t>& indices)
     {
     }
 
@@ -313,6 +314,17 @@ public: // Properties
         return _properties.keys();
     }
 
+public:
+
+    /** Get group index */
+    std::int32_t getGroupIndex() const;
+
+    /**
+     * Set group index
+     * @param groupIndex group index
+     */
+    void setGroupIndex(const std::int32_t& groupIndex);
+
 public: // Actions
 
     /** Returns list of shared action widgets*/
@@ -392,6 +404,7 @@ private:
     bool                        _derived;           /** Whether this dataset is derived from another dataset */
     Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
     QMap<QString, QVariant>     _properties;        /** Properties map */
+    std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
 
     friend class Core;
     friend class DataManager;

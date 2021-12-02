@@ -4,6 +4,7 @@
 
 #include "ClusterDataVisitor.h"
 #include "Cluster.h"
+#include "event/EventListener.h"
 
 #include <RawData.h>
 #include <Set.h>
@@ -57,6 +58,13 @@ public:
      */
     void removeClustersById(const QStringList& ids);
 
+    /**
+     * Get cluster index by name
+     * @param clusterName Name of the cluster to search for
+     * @return Index of the cluster (-1 if not found)
+     */
+    std::int32_t getClusterIndex(const QString& clusterName) const;
+
 private:
     std::vector<Cluster>    _clusters;      /** Clusters data */
 };
@@ -65,7 +73,7 @@ private:
 // Cluster Set
 // =============================================================================
 
-class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
+class CLUSTERDATA_EXPORT Clusters : public DatasetImpl, public hdps::EventListener
 {
 public:
     Clusters(CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
@@ -138,6 +146,18 @@ public:
 
     /** Gets concatenated indices for all selected clusters */
     std::vector<std::uint32_t> getSelectedIndices() const;
+
+    /** Get names of the selected clusters */
+    QStringList getSelectedClusterNames() const;
+
+    /** Select clusters by name */
+    void setSelection(const QStringList& clusterNames);
+
+    /**
+     * Set selection
+     * @param indices Selection indices
+     */
+    void setSelection(const std::vector<std::uint32_t>& indices) override;
 
     std::vector<unsigned int>       indices;
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */

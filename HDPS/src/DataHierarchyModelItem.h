@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QRandomGenerator>
 
 class QMenu;
 
@@ -23,6 +24,7 @@ public:
         Name,
         GUID,
         Description,
+        GroupIndex,
         Analysis,
         Progress,
         Analyzing,
@@ -90,6 +92,12 @@ public:
      */
     void renameDataset(const QString& intendedDatasetName);
 
+    /**
+     * Set group index
+     * @param groupIndex group index
+     */
+    void setGroupIndex(const std::int32_t& groupIndex);
+
 protected:
 
     /**
@@ -118,6 +126,9 @@ protected:
     DataHierarchyItem*          _dataHierarchyItem;         /** Pointer to data hierarchy item*/
     QString                     _progressSection;           /** Progress section of the analysis */
     float                       _progressPercentage;        /** Progress percentage of the analysis */
+
+    /** Random number generator for pseudo-random group index colors */
+    static QRandomGenerator rng;
 
 public:
     static Core* core;  /** Static pointer to the core */

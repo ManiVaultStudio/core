@@ -13,6 +13,7 @@ DataAction::DataAction(QObject* parent, const Dataset<DatasetImpl>& dataset) :
     _dataset(dataset),
     _dataAnalysisAction(this, dataset),
     _dataViewAction(this, dataset),
+    _dataGroupingAction(this, dataset),
     _dataExportAction(this, dataset)
 {
     setText("Data");

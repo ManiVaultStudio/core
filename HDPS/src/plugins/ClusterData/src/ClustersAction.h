@@ -76,12 +76,6 @@ public:
     /** Get clusters */
     Dataset<Clusters>& getClustersDataset();
 
-    /**
-     * Select points
-     * @param indices Point indices to select
-     */
-    void selectPoints(const std::vector<std::uint32_t>& indices);
-
     /** Create subset from selected clusters */
     void createSubset(const QString& datasetName);
 

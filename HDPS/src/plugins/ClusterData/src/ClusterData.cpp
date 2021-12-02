@@ -1,6 +1,11 @@
 #include "ClusterData.h"
 #include "InfoAction.h"
 
+#include "Dataset.h"
+#include "DataHierarchyItem.h"
+#include "event/Event.h"
+#include "PointData.h"
+
 #include "Application.h"
 
 #include <QtCore>
@@ -58,11 +63,49 @@ void ClusterData::removeClustersById(const QStringList& ids)
         removeClusterById(clusterId);
 }
 
+std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
+{
+    std::int32_t clusterIndex = 0;
+
+    // Loop over all clusters and see if the name matches
+    for (const auto& cluster : _clusters){
+
+        if (clusterName == cluster.getName())
+            return clusterIndex;
+
+        clusterIndex++;
+    }
+
+    return -1;
+}
+
 void Clusters::init()
 {
     _infoAction = QSharedPointer<InfoAction>::create(nullptr, *this);
 
     addAction(*_infoAction.get());
+
+    setEventCore(_core);
+
+    registerDataEventByType(ClusterType, [this](DataEvent* dataEvent) {
+        if (dataEvent->getDataset() == Dataset<Clusters>(this))
+            return;
+
+        if (getGroupIndex() < 0)
+            return;
+
+        if (dataEvent->getDataset()->getGroupIndex() == getGroupIndex() && dataEvent->getDataset()->getDataType() == ClusterType) {
+
+            // Get smart pointer to foreign clusters dataset
+            auto foreignClusters = dataEvent->getDataset<Clusters>();
+
+            // Get names of the selected clusters in the foreign dataset
+            const auto foreignSelectedClusterNames = foreignClusters->getSelectedClusterNames();
+
+            // Attempt to select clusters (fails if the clusters are the same)
+            setSelection(foreignSelectedClusterNames);
+        }
+    });
 }
 
 void Clusters::addCluster(Cluster& cluster)
@@ -135,6 +178,86 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     selectedIndices.erase(unique(selectedIndices.begin(), selectedIndices.end()), selectedIndices.end());
 
     return selectedIndices;
+}
+
+QStringList Clusters::getSelectedClusterNames() const
+{
+    QStringList clusterNames;
+
+    for (const auto& selectedIndex : getSelection<Clusters>()->indices)
+        clusterNames  << getClusters()[selectedIndex].getName();
+
+    return clusterNames;
+}
+
+void Clusters::setSelection(const QStringList& clusterNames)
+{
+    // Exit if nothing changed
+    if (clusterNames == getSelectedClusterNames())
+        return;
+
+    // New selection indices
+    std::vector<std::uint32_t> selectionIndices;
+
+    for (const auto& clusterName : clusterNames) {
+
+        // Get cluster index
+        const auto clusterIndex = getRawData<ClusterData>().getClusterIndex(clusterName);
+
+        if (clusterIndex >= 0)
+            selectionIndices.push_back(clusterIndex);
+    }
+
+    // Set the selection
+    setSelection(selectionIndices);
+}
+
+void Clusters::setSelection(const std::vector<std::uint32_t>& indices)
+{
+    // No need to process equal selections
+    if (indices == getSelection<Clusters>()->indices)
+        return;
+
+    // Assign new selection
+    getSelection<Clusters>()->indices = indices;
+
+    // Notify others that the cluster selection has changed
+    _core->notifyDataSelectionChanged(this);
+
+    // Get reference to input dataset
+    auto& parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+
+    // Select points
+    if (parentDataset->getDataType() == PointType) {
+
+        auto& points                = Dataset<Points>(parentDataset);
+        auto& selection             = points->getSelection<Points>();
+        auto& pointSelectionIndices = selection->indices;
+
+        pointSelectionIndices.clear();
+        pointSelectionIndices.reserve(indices.size());
+
+        std::vector<std::uint32_t> globalIndices;
+
+        points->getGlobalIndices(globalIndices);
+
+        // Append point indices per cluster
+        for (auto clusterSelectionIndex : getSelection<Clusters>()->indices) {
+            
+            // Get cluster
+            const auto cluster = getClusters().at(clusterSelectionIndex);
+
+            // Append the indices
+            pointSelectionIndices.insert(pointSelectionIndices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
+        }
+
+        // Remove duplicates
+        std::sort(pointSelectionIndices.begin(), pointSelectionIndices.end());
+        pointSelectionIndices.erase(unique(pointSelectionIndices.begin(), pointSelectionIndices.end()), pointSelectionIndices.end());
+
+        // Notify others that the parent points selection has changed
+        _core->notifyDataSelectionChanged(parentDataset);
+    }
 }
 
 QIcon ClusterDataFactory::getIcon() const

@@ -47,6 +47,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     header()->setMinimumSectionSize(18);
 
     header()->resizeSection(DataHierarchyModelItem::Column::Name, 180);
+    //header()->resizeSection(DataHierarchyModelItem::Column::GUID, 100);
+    header()->resizeSection(DataHierarchyModelItem::Column::GroupIndex, 40);
     //header()->resizeSection(DataHierarchyModelItem::Column::Description, 100);
     header()->resizeSection(DataHierarchyModelItem::Column::Progress, 40);
     header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, header()->minimumSectionSize());
@@ -54,6 +56,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::GUID, QHeaderView::Fixed);
+    header()->setSectionResizeMode(DataHierarchyModelItem::Column::GroupIndex, QHeaderView::Fixed);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Description, QHeaderView::Stretch);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
     header()->setSectionResizeMode(DataHierarchyModelItem::Column::Analyzing, QHeaderView::Fixed);

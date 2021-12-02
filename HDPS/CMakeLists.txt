@@ -259,6 +259,7 @@ set( PLUGIN_HEADERS
     src/DataRemoveAction.h
     src/DataCopyAction.h
     src/DataViewAction.h
+    src/DataGroupingAction.h
     src/AnalysisPlugin.h
     src/DataType.h
     src/RawData.h
@@ -281,6 +282,7 @@ set( PLUGIN_SOURCES
     src/DataRemoveAction.cpp
     src/DataCopyAction.cpp
     src/DataViewAction.cpp
+    src/DataGroupingAction.cpp
     src/Plugin.cpp
     src/LoaderPlugin.cpp
     src/Application.cpp
@@ -300,6 +302,7 @@ set(DATA_HIERARCHY_HEADERS
     src/DataExportAction.h
     src/DataAnalysisAction.h
     src/DataImportAction.h
+    src/DataGroupingAction.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -311,6 +314,7 @@ set(DATA_HIERARCHY_SOURCES
     src/DataExportAction.cpp
     src/DataAnalysisAction.cpp
     src/DataImportAction.cpp
+    src/DataGroupingAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS
