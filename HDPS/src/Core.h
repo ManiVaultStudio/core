@@ -179,6 +179,14 @@ public: // Import/export
      */
     const void exportDataset(const QString& kind, Dataset<DatasetImpl>& dataset) override;
 
+public: // View
+
+    /**
+     * Views a dataset
+     * @param kind Type of import plugin
+     */
+    const void viewDataset(const QString& kind, const Datasets& datasets);
+
 public: // Plugin queries
 
     /**

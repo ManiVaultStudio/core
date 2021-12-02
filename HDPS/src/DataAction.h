@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DataAnalysisAction.h"
+#include "DataViewAction.h"
 #include "DataExportAction.h"
 
 using namespace hdps::gui;
@@ -29,6 +30,7 @@ public:
 protected:
     Dataset<DatasetImpl>    _dataset;               /** Smart pointer to the dataset */
     DataAnalysisAction      _dataAnalysisAction;    /** Data analysis action */
+    DataViewAction          _dataViewAction;        /** Data view action */
     DataExportAction        _dataExportAction;      /** Data export action */
 };
 

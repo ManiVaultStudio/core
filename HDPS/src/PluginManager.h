@@ -50,6 +50,13 @@ public:
     void createExporterPlugin(const QString& kind, Dataset<DatasetImpl>& dataSet);
 
     /**
+     * Create a view plugin
+     * @param kind Kind of exporter
+     * @param dataSets Input dataset(s)
+     */
+    void createViewPlugin(const QString& kind, const Datasets& dataSets);
+
+    /**
      * Get a list of plugin kinds (names) given a plugin type and data type(s)
      * @param pluginType Type of plugin e.g. analysis, exporter
      * @param dataTypes Types of data that the plugin should be compatible with (data type ignored when empty)

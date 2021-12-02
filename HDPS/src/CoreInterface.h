@@ -199,6 +199,14 @@ public: // Import/export
      */
     virtual const void exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSet) = 0;
 
+public: // View
+
+    /**
+     * Views a dataset
+     * @param kind Type of import plugin
+     */
+    virtual const void viewDataset(const QString& kind, const Datasets& datasets) = 0;
+
 public: // Plugin queries
 
     /**

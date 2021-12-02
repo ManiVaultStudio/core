@@ -258,6 +258,7 @@ set( PLUGIN_HEADERS
     src/DataHierarchyItem.h
     src/DataRemoveAction.h
     src/DataCopyAction.h
+    src/DataViewAction.h
     src/AnalysisPlugin.h
     src/DataType.h
     src/RawData.h
@@ -279,6 +280,7 @@ set( PLUGIN_SOURCES
     src/DataHierarchyItem.cpp
     src/DataRemoveAction.cpp
     src/DataCopyAction.cpp
+    src/DataViewAction.cpp
     src/Plugin.cpp
     src/LoaderPlugin.cpp
     src/Application.cpp

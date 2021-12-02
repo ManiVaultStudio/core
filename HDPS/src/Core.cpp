@@ -422,6 +422,20 @@ const void Core::exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSe
     }
 }
 
+const void Core::viewDataset(const QString& kind, const Datasets& datasets)
+{
+    try {
+        _pluginManager->createViewPlugin(kind, datasets);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to view dataset", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to view dataset");
+    }
+}
+
 hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 {
     return _dataHierarchyManager->getItem(dataSetId);

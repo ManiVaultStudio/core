@@ -132,6 +132,12 @@ PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPick
     auto comboBoxWidget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::ComboBox);
     auto lineEditWidget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::LineEdit);
 
+    // Gets search icon to decorate the line edit
+    const auto searchIcon = Application::getIconFont("FontAwesome").getIcon("search");
+
+    // Add the icon to the line edit
+    lineEditWidget->findChild<QLineEdit*>("LineEdit")->addAction(searchIcon, QLineEdit::TrailingPosition);
+
     // Add widgets to layout
     layout->addWidget(comboBoxWidget);
     layout->addWidget(lineEditWidget);

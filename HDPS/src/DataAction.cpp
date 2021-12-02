@@ -12,6 +12,7 @@ DataAction::DataAction(QObject* parent, const Dataset<DatasetImpl>& dataset) :
     WidgetAction(parent),
     _dataset(dataset),
     _dataAnalysisAction(this, dataset),
+    _dataViewAction(this, dataset),
     _dataExportAction(this, dataset)
 {
     setText("Data");
