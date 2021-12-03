@@ -40,9 +40,8 @@ protected:
      * Assignment operator
      * @param other Object to assign from
      */
-    DatasetPrivate& operator=(DatasetPrivate other) {
-        return *this;
-    }
+    DatasetPrivate& operator=(const DatasetPrivate& other) = delete;
+        
 
 public:
 
