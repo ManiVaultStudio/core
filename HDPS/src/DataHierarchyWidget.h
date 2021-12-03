@@ -16,7 +16,7 @@ namespace gui
 /**
 * Widget for displaying the data hierarchy
 */
-class DataHierarchyWidget : public QTreeView
+class DataHierarchyWidget : public QWidget
 {
     Q_OBJECT
 
@@ -70,6 +70,32 @@ protected:
     /** Invoked when the number of rows changed (shows/hides the tree view header) */
     void numberOfRowsChanged();
 
+protected:
+
+    /** Update the visibility of the tree view columns */
+    void updateColumnsVisibility();
+
+    /**
+     * Get indices
+     * @param parent Parent model index
+     */
+    QModelIndexList getModelIndexList(QModelIndex parent = QModelIndex()) const;
+
+    /** Establishes whether one or more items may be expanded */
+    bool mayExpandAll() const;
+
+    /** Expand all items in the hierarchy */
+    void expandAll();
+
+    /** Establishes whether one or more items may be collapse */
+    bool mayCollapseAll() const;
+
+    /** Collapse all items in the hierarchy */
+    void collapseAll();
+
+    /** Updates the toolbar (enables/disables items) */
+    void updateToolBar();
+
 signals:
 
     /**
@@ -79,10 +105,14 @@ signals:
     void selectedDatasetChanged(const QString& datasetId);
 
 private:
-    DataHierarchyModel      _model;                 /** Model containing data to be displayed in the hierarchy */
-    QItemSelectionModel     _selectionModel;        /** Selection model */
-    NoDataOverlayWidget*    _noDataOverlayWidget;   /** Overlay help widget which is shown when no data is loaded */
-    DataImportAction        _dataImportAction;      /** Data import action */
+    DataHierarchyModel      _model;                     /** Model containing data to be displayed in the hierarchy */
+    QTreeView               _treeView;                  /** Tree view that contains the data hierarchy */
+    QItemSelectionModel     _selectionModel;            /** Selection model */
+    NoDataOverlayWidget*    _noDataOverlayWidget;       /** Overlay help widget which is shown when no data is loaded */
+    DataImportAction        _dataImportAction;          /** Data import action */
+    TriggerAction           _expandAllAction;           /** Expand all datasets action */
+    TriggerAction           _collapseAllAction;         /** Collapse all datasets action */
+    ToggleAction            _groupingAction;            /** Data grouping action */
 };
 
 }

@@ -190,6 +190,9 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                     case DataHierarchyModelItem::Column::Description:
                         return "Description";
 
+                    case DataHierarchyModelItem::Column::GroupIndex:
+                        return "Group ID";
+
                     case DataHierarchyModelItem::Column::Analysis:
                     case DataHierarchyModelItem::Column::Analyzing:
                     case DataHierarchyModelItem::Column::Progress:
@@ -212,10 +215,8 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                     case DataHierarchyModelItem::Column::GUID:
                         break;
 
-                    case DataHierarchyModelItem::Column::GroupIndex:
-                        return Application::getIconFont("FontAwesome").getIcon("object-group");
-
                     case DataHierarchyModelItem::Column::Description:
+                    case DataHierarchyModelItem::Column::GroupIndex:
                     case DataHierarchyModelItem::Column::Analysis:
                         break;
 

@@ -12,20 +12,46 @@ using namespace gui;
 DataGroupingAction::DataGroupingAction(QObject* parent, const Dataset<DatasetImpl>& dataset) :
     WidgetAction(parent),
     _dataset(dataset),
-    _sequential(this, "Sequential")
+    _assignAction(this, "Assign"),
+    _removeAction(this, "Remove"),
+    _removeRecursivelyAction(this, "Remove recursively")
 {
     setText("Grouping");
     setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
 
     _dataset->getDataHierarchyItem().addAction(*this);
 
-    connect(&_sequential, &TriggerAction::triggered, this, [this]() {
+    _assignAction.setIcon(Application::getIconFont("FontAwesome").getIcon("plus"));
+    _removeAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash-alt"));
+    _removeRecursivelyAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash-alt"));
+
+    // Assign group indices when the assign action is triggered
+    connect(&_assignAction, &TriggerAction::triggered, this, [this]() {
 
         // Create grouping dialog
         GroupingDialog groupingDialog(nullptr, _dataset);
 
         // Show the dialog
         groupingDialog.exec();
+    });
+
+    // Remove when the remove action is triggered
+    connect(&_removeAction, &TriggerAction::triggered, this, [this]() {
+        _dataset->setGroupIndex(-1);
+    });
+
+    // Remove recursively when the remove recursively action is triggered
+    connect(&_removeRecursivelyAction, &TriggerAction::triggered, this, [this]() {
+
+        // Remove selected
+        _dataset->setGroupIndex(-1);
+
+        // Get dataset children
+        const auto children = _dataset->getDataHierarchyItem().getChildren();
+
+        // Loop over all children and remove group index
+        for (const auto& child : children)
+            child->getDataset()->setGroupIndex(-1);
     });
 }
 
@@ -35,18 +61,30 @@ QMenu* DataGroupingAction::getContextMenu(QWidget* parent /*= nullptr*/)
 
     menu->setIcon(icon());
 
-    for (auto child : children()) {
-        auto triggerAction = dynamic_cast<TriggerAction*>(child);
-
-        if (triggerAction == nullptr)
-            continue;
-
-        menu->addAction(triggerAction);
-    }
+    menu->addAction(&_assignAction);
 
     menu->addSeparator();
 
+    menu->addAction(&_removeAction);
+    menu->addAction(&_removeRecursivelyAction);
+
+    _removeAction.setEnabled(_dataset->getGroupIndex() >= 0);
+    _removeRecursivelyAction.setEnabled(mayRemoveRecursively());
+
     return menu;
+}
+
+bool DataGroupingAction::mayRemoveRecursively() const
+{
+    // Get dataset children
+    const auto children = _dataset->getDataHierarchyItem().getChildren();
+
+    // Loop over all children and see if the group index is removal
+    for (const auto& child : children)
+        if (child->getDataset()->getGroupIndex() >= 0)
+            return true;
+
+    return false;
 }
 
 DataGroupingAction::GroupingDialog::GroupingDialog(QWidget* parent, const Dataset<DatasetImpl>& dataset) :
@@ -67,20 +105,23 @@ DataGroupingAction::GroupingDialog::GroupingDialog(QWidget* parent, const Datase
     // Updates the window title based on the grouping configuration
     const auto updateWindowTitle = [this]() -> void {
 
-        // Get dataset children
-        const auto children = _dataset->getDataHierarchyItem().getChildren(_recursiveAction.isChecked());
+        if (_recursiveAction.isChecked()) {
 
-        // Get number of children
-        const auto numberOfChildren = children.count();
+            // Get dataset children
+            const auto children = _dataset->getDataHierarchyItem().getChildren(_recursiveAction.isChecked());
 
-        if (numberOfChildren == 0)
-            setWindowTitle(QString("Group %1").arg(_dataset->getGuiName()));
+            // Get number of children
+            const auto numberOfChildren = children.count();
 
-        if (numberOfChildren == 1)
-            setWindowTitle(QString("Group %1 and 1 child").arg(_dataset->getGuiName()));
+            if (numberOfChildren == 1)
+                setWindowTitle(QString("Set group ID for  %1 and 1 child").arg(_dataset->getGuiName()));
 
-        if (numberOfChildren > 1)
-            setWindowTitle(QString("Group %1 and %2 children").arg(_dataset->getGuiName(), QString::number(numberOfChildren)));
+            if (numberOfChildren > 1)
+                setWindowTitle(QString("Set group ID for  %1 and %2 children").arg(_dataset->getGuiName(), QString::number(numberOfChildren)));
+        }
+        else {
+            setWindowTitle(QString("Set group ID for %1").arg(_dataset->getGuiName()));
+        }
     };
     
     auto layout = new QGridLayout();
@@ -119,18 +160,21 @@ DataGroupingAction::GroupingDialog::GroupingDialog(QWidget* parent, const Datase
         if (_groupIndexAction.getValue() >= 0)
             groupIndex++;
 
-        // Get dataset children
-        const auto children = _dataset->getDataHierarchyItem().getChildren(_recursiveAction.isChecked());
+        if (_recursiveAction.isChecked()) {
 
-        // Loop over all children and assign an increasing group index
-        for (const auto& child : children) {
+            // Get dataset children
+            const auto children = _dataset->getDataHierarchyItem().getChildren();
 
-            // Assign the group index
-            child->getDataset()->setGroupIndex(groupIndex);
+            // Loop over all children and assign an increasing group index
+            for (const auto& child : children) {
 
-            // Increase the group index by one
-            if (_groupIndexAction.getValue() >= 0)
-                groupIndex++;
+                // Assign the group index
+                child->getDataset()->setGroupIndex(groupIndex);
+
+                // Increase the group index by one
+                if (_groupIndexAction.getValue() >= 0)
+                    groupIndex++;
+            }
         }
 
         accept();
@@ -139,6 +183,7 @@ DataGroupingAction::GroupingDialog::GroupingDialog(QWidget* parent, const Datase
     // Handle when rejected
     connect(dialogButtonBox, &QDialogButtonBox::rejected, this, &GroupingDialog::reject);
 
+    // Update the window title when the recursive option is toggled
     connect(&_recursiveAction, &ToggleAction::toggled, this, updateWindowTitle);
 
     // Initial update of the window title

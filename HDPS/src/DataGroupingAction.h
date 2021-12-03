@@ -63,8 +63,15 @@ public:
     QMenu* getContextMenu(QWidget* parent = nullptr);
 
 protected:
-    Dataset<DatasetImpl>    _dataset;               /** Smart pointer to the dataset */
-    TriggerAction           _sequential;       /** Groups children recursively and sequentially */
+
+    /** Establishes whether group indices may be removed recursively */
+    bool mayRemoveRecursively() const;
+
+protected:
+    Dataset<DatasetImpl>    _dataset;                   /** Smart pointer to the dataset */
+    TriggerAction           _assignAction;              /** Groups children recursively and sequentially */
+    TriggerAction           _removeAction;              /** Remove action*/
+    TriggerAction           _removeRecursivelyAction;   /** Remove recursively action */
 };
 
 }

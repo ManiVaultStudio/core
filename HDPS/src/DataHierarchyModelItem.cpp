@@ -102,7 +102,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     return editValue;
 
                 case Column::GroupIndex:
-                    return editValue;
+                    return editValue.toInt() >= 0 ? editValue : "";
 
                 case Column::Description:
                     return editValue;

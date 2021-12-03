@@ -22,45 +22,91 @@ namespace gui
 {
 
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
-    QTreeView(parent),
+    QWidget(parent),
     _model(this),
+    _treeView(this),
     _selectionModel(&_model),
     _noDataOverlayWidget(new NoDataOverlayWidget(this)),
-    _dataImportAction(this)
+    _dataImportAction(this),
+    _expandAllAction(this, "Expand all"),
+    _collapseAllAction(this, "Collapse all"),
+    _groupingAction(this, "Grouping", false, false)
 {
     //setMinimumWidth(500);
-    setModel(&_model);
-    
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    setSelectionModel(&_selectionModel);
-    setDragEnabled(true);
-    setDragDropMode(QAbstractItemView::DragOnly);
-    setSelectionMode(QAbstractItemView::SingleSelection);
-    setRootIsDecorated(true);
-    setItemsExpandable(true);
+    _treeView.setModel(&_model);
 
-    // Hide columns
-    setColumnHidden(DataHierarchyModelItem::Column::GUID, true);
-    setColumnHidden(DataHierarchyModelItem::Column::Analysis, true);
+    _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
+    _treeView.setSelectionModel(&_selectionModel);
+    _treeView.setDragEnabled(true);
+    _treeView.setDragDropMode(QAbstractItemView::DragOnly);
+    _treeView.setSelectionMode(QAbstractItemView::SingleSelection);
+    _treeView.setRootIsDecorated(true);
+    _treeView.setItemsExpandable(true);
 
-    header()->setStretchLastSection(false);
-    header()->setMinimumSectionSize(18);
+    _treeView.header()->setStretchLastSection(false);
+    _treeView.header()->setMinimumSectionSize(18);
 
-    header()->resizeSection(DataHierarchyModelItem::Column::Name, 180);
+    _treeView.header()->resizeSection(DataHierarchyModelItem::Column::Name, 180);
     //header()->resizeSection(DataHierarchyModelItem::Column::GUID, 100);
-    header()->resizeSection(DataHierarchyModelItem::Column::GroupIndex, 40);
+    _treeView.header()->resizeSection(DataHierarchyModelItem::Column::GroupIndex, 60);
     //header()->resizeSection(DataHierarchyModelItem::Column::Description, 100);
-    header()->resizeSection(DataHierarchyModelItem::Column::Progress, 40);
-    header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, header()->minimumSectionSize());
-    header()->resizeSection(DataHierarchyModelItem::Column::Locked, header()->minimumSectionSize());
+    _treeView.header()->resizeSection(DataHierarchyModelItem::Column::Progress, 40);
+    _treeView.header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, _treeView.header()->minimumSectionSize());
+    _treeView.header()->resizeSection(DataHierarchyModelItem::Column::Locked, _treeView.header()->minimumSectionSize());
 
-    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
-    header()->setSectionResizeMode(DataHierarchyModelItem::Column::GUID, QHeaderView::Fixed);
-    header()->setSectionResizeMode(DataHierarchyModelItem::Column::GroupIndex, QHeaderView::Fixed);
-    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Description, QHeaderView::Stretch);
-    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
-    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Analyzing, QHeaderView::Fixed);
-    header()->setSectionResizeMode(DataHierarchyModelItem::Column::Locked, QHeaderView::Fixed);
+    _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
+    _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::GUID, QHeaderView::Fixed);
+    _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::GroupIndex, QHeaderView::Fixed);
+    _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Description, QHeaderView::Stretch);
+    _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
+    _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Analyzing, QHeaderView::Fixed);
+    _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Locked, QHeaderView::Fixed);
+
+    // Configure expand all action
+    _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
+    _expandAllAction.setToolTip("Expand all datasets in the hierarchy");
+
+    // Expand all items when the expand all action is triggered
+    connect(&_expandAllAction, &TriggerAction::triggered, this, &DataHierarchyWidget::expandAll);
+
+    // Configure collapse all action
+    _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
+    _collapseAllAction.setToolTip("Collapse all datasets in the hierarchy");
+
+    // Collapse all items when the collapse all action is triggered
+    connect(&_collapseAllAction, &TriggerAction::triggered, this, &DataHierarchyWidget::collapseAll);
+
+    // Configure grouping action
+    _groupingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
+    _groupingAction.setToolTip("Edit dataset grouping");
+
+    // Update columns visibility when grouping is editable/disabled
+    connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::updateColumnsVisibility);
+
+    // Create layout that will contain the toolbar and the tree view
+    auto layout = new QVBoxLayout();
+
+    // Remove the layout margin and spacing
+    layout->setMargin(2);
+    layout->setSpacing(0);
+
+    // Create tool bar layout
+    auto toolbarLayout = new QHBoxLayout();
+
+    // Add toolbar items
+    toolbarLayout->setContentsMargins(0, 2, 0, 2);
+    toolbarLayout->setSpacing(3);
+    toolbarLayout->addStretch(1);
+    toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
+    toolbarLayout->addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
+    toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::PushButtonIcon));
+
+    // Add tool bar layout and tree view widget
+    layout->addLayout(toolbarLayout);
+    layout->addWidget(&_treeView);
+
+    // Apply layout
+    setLayout(layout);
 
     // Notify others that the dataset selection changed when the current row in the model changed
     connect(&_selectionModel, &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
@@ -82,7 +128,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     // Insert new rows expanded
     connect(&_model, &QAbstractItemModel::rowsInserted, this, [&](const QModelIndex& parent, int first, int last) {
-        expand(_model.index(first, 0, parent));
+        _treeView.expand(_model.index(first, 0, parent));
     });
 
     // Add data hierarchy item to the widget when added in the data manager
@@ -101,20 +147,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         emit selectedDatasetChanged("");
     });
 
-    /*
-    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemRelocated, this, [this](DataHierarchyItem* relocatedItem) {
-        Q_ASSERT(relocatedItem != nullptr);
-
-        //_model.removeDataHierarchyModelItem(getModelIndexForDatasetName(relocatedItem->getDatasetName()));
-        //_model.addDataHierarchyModelItem(QModelIndex(), relocatedItem);
-    });
-    */
-
     // Invoked the custom context menu when requested by the tree view
-    connect(this, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
+    connect(&_treeView, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
 
         // Get the model index at the required position
-        const auto modelIndexBelowCursor = indexAt(position);
+        const auto modelIndexBelowCursor = _treeView.indexAt(position);
 
         // Show dataset context menu when over a dataset, give options to load data otherwise
         if (modelIndexBelowCursor.isValid())
@@ -126,7 +163,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             QSharedPointer<QMenu> contextMenu(dataHierarchyModelItem->getContextMenu());
 
             // And show it
-            contextMenu->exec(viewport()->mapToGlobal(position));
+            contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
         }
         else {
 
@@ -135,12 +172,19 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             // Show it
             if (contextMenu)
-                contextMenu->exec(viewport()->mapToGlobal(position));
+                contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
         }
     });
 
+    // Update tool bar when items got expanded/collapsed
+    connect(&_treeView, &QTreeView::expanded, this, &DataHierarchyWidget::updateToolBar);
+    connect(&_treeView, &QTreeView::collapsed, this, &DataHierarchyWidget::updateToolBar);
+
     // Initial visibility of the overlay and header
     numberOfRowsChanged();
+
+    // Initial update of tree view columns visibility
+    updateColumnsVisibility();
 }
 
 void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
@@ -215,13 +259,102 @@ QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImp
 void DataHierarchyWidget::numberOfRowsChanged()
 {
     // Establish whether any data is loaded
-    const auto dataIsLoaded = _model.rowCount() == 0;
+    const auto dataIsLoaded = _model.rowCount() >= 1;
 
     // Show the no data overlay widget when no data is loaded
-    _noDataOverlayWidget->setVisible(dataIsLoaded);
+    _noDataOverlayWidget->setVisible(!dataIsLoaded);
 
     // Show the header when data is loaded
-    setHeaderHidden(dataIsLoaded);
+    _treeView.setHeaderHidden(!dataIsLoaded);
+
+    // Update the toolbar
+    updateToolBar();
+}
+
+void DataHierarchyWidget::updateColumnsVisibility()
+{
+    _treeView.setColumnHidden(DataHierarchyModelItem::Column::GUID, true);
+    _treeView.setColumnHidden(DataHierarchyModelItem::Column::Analysis, true);
+    _treeView.setColumnHidden(DataHierarchyModelItem::Column::GroupIndex, !_groupingAction.isChecked());
+}
+
+QModelIndexList DataHierarchyWidget::getModelIndexList(QModelIndex parent /*= QModelIndex()*/) const
+{
+    QModelIndexList modelIndexList;
+
+    if (parent.isValid())
+        modelIndexList << parent;
+
+    // Loop over all children of parent
+    for (int rowIndex = 0; rowIndex < _model.rowCount(parent); ++rowIndex) {
+
+        // Get model index of child
+        QModelIndex index = _model.index(rowIndex, 0, parent);
+
+        // Recursive
+        if (_model.hasChildren(index))
+            modelIndexList << getModelIndexList(index);
+    }
+
+    return modelIndexList;
+}
+
+bool DataHierarchyWidget::mayExpandAll() const
+{
+    // Get all model indices in the model
+    const auto allModelIndices = getModelIndexList();
+
+    // Loop over all indices and return true if one item is collapsed
+    for (const auto& modelIndex : allModelIndices) {
+        if (_model.rowCount(modelIndex) > 0 && !_treeView.isExpanded(modelIndex))
+            return true;
+    }
+
+    return false;
+}
+
+void DataHierarchyWidget::expandAll()
+{
+    // Get all model indices in the model
+    const auto allModelIndices = getModelIndexList();
+
+    // Loop over all indices and expand them
+    for (const auto& modelIndex : allModelIndices)
+        _treeView.setExpanded(modelIndex, true);
+}
+
+bool DataHierarchyWidget::mayCollapseAll() const
+{
+    // Get all model indices in the model
+    const auto allModelIndices = getModelIndexList();
+
+    // Loop over all indices and return true if one item is expanded
+    for (const auto& modelIndex : allModelIndices)
+        if (_model.rowCount(modelIndex) > 0 && _treeView.isExpanded(modelIndex))
+            return true;
+
+    return false;
+}
+
+void DataHierarchyWidget::collapseAll()
+{
+    // Get all model indices in the model
+    const auto allModelIndices = getModelIndexList();
+
+    // Loop over all indices and collapse them
+    for (const auto& modelIndex : allModelIndices)
+        _treeView.setExpanded(modelIndex, false);
+}
+
+void DataHierarchyWidget::updateToolBar()
+{
+    // Establish whether any data is loaded
+    const auto dataIsLoaded = _model.rowCount() >= 1;
+
+    // Enable/disable the items
+    _expandAllAction.setEnabled(dataIsLoaded && mayExpandAll());
+    _collapseAllAction.setEnabled(dataIsLoaded && mayCollapseAll());
+    _groupingAction.setEnabled(dataIsLoaded);
 }
 
 DataHierarchyWidget::NoDataOverlayWidget::NoDataOverlayWidget(QWidget* parent) :

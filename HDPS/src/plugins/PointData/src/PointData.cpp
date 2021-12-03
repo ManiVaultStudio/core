@@ -5,6 +5,7 @@
 
 #include "PointData.h"
 #include "InfoAction.h"
+#include "event/Event.h"
 
 #include <QtCore>
 #include <QtDebug>
@@ -144,6 +145,7 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
 
 Points::Points(hdps::CoreInterface* core, QString dataName) :
     hdps::DatasetImpl(core, dataName),
+    EventListener(),
     _infoAction()
 {
 }
@@ -157,6 +159,40 @@ void Points::init()
     _infoAction = QSharedPointer<InfoAction>::create(nullptr, _core, *this);
 
     addAction(*_infoAction.get());
+
+    setEventCore(_core);
+
+    registerDataEventByType(PointType, [this](DataEvent* dataEvent) {
+        if (dataEvent->getDataset() == Dataset<Points>(this))
+            return;
+
+        if (getGroupIndex() < 0)
+            return;
+
+        if (dataEvent->getDataset()->getGroupIndex() == getGroupIndex()) {
+
+            // Get smart pointer to foreign points dataset
+            auto foreignPoints = dataEvent->getDataset<Points>();
+
+            // Only synchronize when the number of points matches
+            if (foreignPoints->getNumPoints() != getNumPoints())
+                return;
+
+            // Get source target indices
+            auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
+            auto& targetIndices = getSelection<Points>()->indices;
+
+            // Do nothing if the indices have not changed
+            if (sourceIndices == targetIndices)
+                return;
+
+            // Copy indices from source to target if the indices have changed
+            targetIndices = sourceIndices;
+
+            // Notify others that the cluster selection has changed
+            _core->notifyDataSelectionChanged(this);
+        }
+    });
 }
 
 // =============================================================================

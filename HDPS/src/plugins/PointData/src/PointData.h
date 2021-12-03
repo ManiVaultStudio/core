@@ -7,6 +7,7 @@
 #include "Set.h"
 #include "PointDataRange.h"
 #include "LinkedSelection.h"
+#include "event/EventListener.h"
 
 #include <biovault_bfloat16.h>
 
@@ -503,7 +504,7 @@ private:
 // Point Set
 // =============================================================================
 
-class POINTDATA_EXPORT Points : public hdps::DatasetImpl
+class POINTDATA_EXPORT Points : public hdps::DatasetImpl, public hdps::EventListener
 {
 private:
     /* Private helper function for visitData. Helps to reduces duplicate
