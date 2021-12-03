@@ -30,6 +30,7 @@ Core::Core(gui::MainWindow& mainWindow) :
     _plugins(),
     _eventListeners()
 {
+    _datasetGroupingEnabled = Application::current()->getSetting("Core/DatasetGroupingEnabled", false).toBool();
 }
 
 Core::~Core()
@@ -441,6 +442,11 @@ hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
     return _dataHierarchyManager->getItem(dataSetId);
 }
 
+bool Core::isDatasetGroupingEnabled() const
+{
+    return _datasetGroupingEnabled;
+}
+
 QStringList Core::getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
 {
     return _pluginManager->getPluginKindsByPluginTypeAndDataTypes(pluginType, dataTypes);
@@ -745,6 +751,17 @@ void Core::destroyPlugins()
             kv.second[i].reset();
         }
     }
+}
+
+void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)
+{
+    if (datasetGroupingEnabled == _datasetGroupingEnabled)
+        return;
+
+    _datasetGroupingEnabled = datasetGroupingEnabled;
+
+    // Save the setting
+    Application::current()->setSetting("Core/DatasetGroupingEnabled", _datasetGroupingEnabled);
 }
 
 } // namespace hdps

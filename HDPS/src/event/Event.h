@@ -346,4 +346,42 @@ public:
     }
 };
 
+/**
+ * Dataset grouping event class
+ * Event container class for datasets grouping events
+ */
+class DatasetGroupingEvent : public HdpsEvent
+{
+public:
+
+    /**
+     * Constructor
+     * @param eventType Type of event
+     * @param datasetGroupingEnabled Whether datasets can be grouped or not
+     */
+    DatasetGroupingEvent(const EventType& eventType, const bool& datasetGroupingEnabled) :
+        HdpsEvent(eventType),
+        _datasetGroupingEnabled(datasetGroupingEnabled)
+    {
+    }
+
+    /** Get whether dataset grouping is enabled or not */
+    bool isDatasetGroupingEnabled() const
+    {
+        return _datasetGroupingEnabled;
+    }
+
+    /** Get whether dataset grouping is enabled or not */
+    void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)
+    {
+        if (datasetGroupingEnabled == _datasetGroupingEnabled)
+            return;
+
+        _datasetGroupingEnabled = datasetGroupingEnabled;
+    }
+
+protected:
+    bool    _datasetGroupingEnabled;   /** Whether datasets can be grouped or not */
+};
+
 }

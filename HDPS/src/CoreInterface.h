@@ -227,7 +227,7 @@ public: // Plugin queries
     /**
      * Get plugin icon from plugin kind
      * @param pluginKind Kind of plugin
-     * @return Plugin icon name of the plugin, null icon the plugin kind was not found
+     * @return Plugin icon name of the plugin, null icon if the plugin kind was not found
      */
     virtual QIcon getPluginIcon(const QString& pluginKind) const = 0;
 
@@ -242,6 +242,14 @@ public: // Data hierarchy
      * @return Reference to data hierarchy item
      */
     virtual DataHierarchyItem& getDataHierarchyItem(const QString& datasetGuid) = 0;
+
+public: // Dataset grouping
+
+    /** Get whether dataset grouping is enabled or not */
+    virtual bool isDatasetGroupingEnabled() const = 0;
+
+    /** Get whether dataset grouping is enabled or not */
+    virtual void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) = 0;
 
 public: // Events & notifications
 
@@ -320,6 +328,9 @@ public: // Events & notifications
      * @param eventListener Pointer to event listener to unregister
      */
     virtual void unregisterEventListener(EventListener* eventListener) = 0;
+
+protected:
+    bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */
 
     friend class RawData;
     friend class DatasetImpl;

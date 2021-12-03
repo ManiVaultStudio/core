@@ -214,7 +214,7 @@ DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
 
 void DropWidget::DropRegionContainerWidget::setHighLight(const bool& highlight /*= false*/)
 {
-    const auto targetOpacity = highlight ? 0.9 : 0.5;
+    const auto targetOpacity = highlight ? 0.98 : 0.8;
 
     if (_opacityEffect->opacity() != targetOpacity)
         _opacityEffect->setOpacity(targetOpacity);

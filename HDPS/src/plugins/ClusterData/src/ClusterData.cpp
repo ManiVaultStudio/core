@@ -88,10 +88,17 @@ void Clusters::init()
     setEventCore(_core);
 
     registerDataEventByType(ClusterType, [this](DataEvent* dataEvent) {
+
+        // Only process selection changes
+        if (dataEvent->getType() != EventType::DataSelectionChanged)
+            return;
+
+        // Do not process our own selection changes
         if (dataEvent->getDataset() == Dataset<Clusters>(this))
             return;
 
-        if (getGroupIndex() < 0)
+        // Only synchronize when our own group index is non-negative
+        if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
             return;
 
         if (dataEvent->getDataset()->getGroupIndex() == getGroupIndex() && dataEvent->getDataset()->getDataType() == ClusterType) {

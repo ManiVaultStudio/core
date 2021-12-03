@@ -30,7 +30,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _dataImportAction(this),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
-    _groupingAction(this, "Grouping", false, false)
+    _groupingAction(this, "Grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
 {
     //setMinimumWidth(500);
     _treeView.setModel(&_model);
@@ -81,7 +81,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _groupingAction.setToolTip("Edit dataset grouping");
 
     // Update columns visibility when grouping is editable/disabled
-    connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::updateColumnsVisibility);
+    connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
 
     // Create layout that will contain the toolbar and the tree view
     auto layout = new QVBoxLayout();
@@ -269,6 +269,15 @@ void DataHierarchyWidget::numberOfRowsChanged()
 
     // Update the toolbar
     updateToolBar();
+}
+
+void DataHierarchyWidget::onGroupingActionToggled(const bool& toggled)
+{
+    // Set in the core whether datasets may be grouped or not
+    Application::core()->setDatasetGroupingEnabled(toggled);
+
+    // Update the visibility of the tree view columns
+    updateColumnsVisibility();
 }
 
 void DataHierarchyWidget::updateColumnsVisibility()

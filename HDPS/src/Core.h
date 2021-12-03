@@ -223,6 +223,14 @@ public: // Data hierarchy
      */
     DataHierarchyItem& getDataHierarchyItem(const QString& datasetGuid) override;
 
+public: // Dataset grouping
+
+    /** Get whether dataset grouping is enabled or not */
+    bool isDatasetGroupingEnabled() const override;
+
+    /** Get whether dataset grouping is enabled or not */
+    void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) override;
+
 public: // Events & notifications
 
     /**

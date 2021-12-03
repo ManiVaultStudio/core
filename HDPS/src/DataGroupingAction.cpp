@@ -57,6 +57,9 @@ DataGroupingAction::DataGroupingAction(QObject* parent, const Dataset<DatasetImp
 
 QMenu* DataGroupingAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
+    if (!Application::core()->isDatasetGroupingEnabled())
+        return nullptr;
+
     auto menu = new QMenu(text(), parent);
 
     menu->setIcon(icon());

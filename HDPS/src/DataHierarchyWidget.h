@@ -72,6 +72,12 @@ protected:
 
 protected:
 
+    /**
+     * Invoked when the dataset grouping action is toggled
+     * @param toggled Whether dataset grouping is enabled or not
+     */
+    void onGroupingActionToggled(const bool& toggled);
+
     /** Update the visibility of the tree view columns */
     void updateColumnsVisibility();
 

@@ -76,6 +76,10 @@ void DataHierarchyItem::renameDataset(const QString& newGuiName)
 
         // Set the GUI name of the dataset dataset
         _dataset->setGuiName(newGuiName);
+
+        // Rename has an effect on the full path name of children, so trigger a GUI rename of the children
+        for (const auto& child : getChildren())
+            child->getDataset()->setGuiName(child->getDataset()->getGuiName());
     }
     catch (std::exception& e) {
         QMessageBox::critical(nullptr, "Unable to rename dataset", e.what());
