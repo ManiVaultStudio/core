@@ -111,24 +111,28 @@ ToggleAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ToggleAction* 
     const auto update = [this, widgetFlags]() -> void {
         QSignalBlocker blocker(this);
 
-        setEnabled(_toggleAction->isEnabled());
+        if (isEnabled() != _toggleAction->isEnabled())
+            setEnabled(_toggleAction->isEnabled());
 
-        if (widgetFlags & WidgetFlag::Text)
+        if (isChecked() != _toggleAction->isChecked())
+            setChecked(_toggleAction->isChecked());
+
+        if (toolTip() != _toggleAction->toolTip())
+            setToolTip(_toggleAction->toolTip());
+
+        if (isVisible() != _toggleAction->isVisible())
+            setVisible(_toggleAction->isVisible());
+
+        if (widgetFlags & WidgetFlag::Text && text() != _toggleAction->text())
             setText(_toggleAction->text());
 
         if (widgetFlags & WidgetFlag::Icon) {
             setIcon(_toggleAction->icon());
             setProperty("class", "square-button");
         }
-
-        setChecked(_toggleAction->isChecked());
-        setToolTip(_toggleAction->toolTip());
-        setVisible(_toggleAction->isVisible());
     };
 
-    connect(toggleAction, &QAction::changed, this, [this, update]() {
-        update();
-    });
+    connect(_toggleAction, &QAction::changed, this, update);
 
     update();
 }

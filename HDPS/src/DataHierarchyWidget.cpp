@@ -85,7 +85,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     // Configure grouping action
     _groupingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
-    _groupingAction.setToolTip("Edit dataset grouping");
+    _groupingAction.setToolTip("Enable/disable dataset grouping");
 
     // Update columns visibility when grouping is editable/disabled
     connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);

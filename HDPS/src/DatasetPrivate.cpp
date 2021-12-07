@@ -17,7 +17,7 @@ DatasetPrivate::DatasetPrivate() :
     _datasetId(),
     _dataset(nullptr)
 {
-    // Register for data events
+    // Register for data events from the core
     registerDatasetEvents();
 }
 
@@ -26,7 +26,7 @@ DatasetPrivate::DatasetPrivate(const DatasetPrivate& other) :
     _datasetId(),
     _dataset(nullptr)
 {
-    // Register for data events
+    // Register for data events from the core
     registerDatasetEvents();
 }
 
@@ -67,14 +67,10 @@ void DatasetPrivate::registerDatasetEvents()
         // Set the event core (necessary for listening to data events)
         setEventCore(Application::core());
 
-        // Register for data removal events
+        // Register for data events
         registerDataEvent([this](DataEvent* dataEvent) {
 
-            // Only proceed if we have a valid data set
-            if (getDatasetGuid().isEmpty())
-                return;
-
-            // Only process datasets that we reference
+            // Only process dataset that we reference
             if (dataEvent->getDataset()->getGuid() != getDatasetGuid())
                 return;
 
@@ -106,6 +102,15 @@ void DatasetPrivate::registerDatasetEvents()
                 {
                     // Notify others that the dataset contents changed
                     emit dataChanged();
+
+                    break;
+                }
+
+                // Data selection changed
+                case EventType::DataSelectionChanged:
+                {
+                    // Notify others that the dataset selection changed
+                    emit dataSelectionChanged();
 
                     break;
                 }

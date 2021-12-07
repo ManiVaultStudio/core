@@ -172,33 +172,34 @@ void Points::init()
         if (dataEvent->getDataset() == Dataset<Points>(this))
             return;
 
-        // Only synchronize when our own group index is non-negative
+        // Only synchronize when dataset grouping is enabled and our own group index is non-negative
         if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
             return;
 
-        if (dataEvent->getDataset()->getGroupIndex() == getGroupIndex()) {
+        // Only synchronize of the group indexes match
+        if (dataEvent->getDataset()->getGroupIndex() != getGroupIndex())
+            return;
 
-            // Get smart pointer to foreign points dataset
-            auto foreignPoints = dataEvent->getDataset<Points>();
+        // Get smart pointer to foreign points dataset
+        auto foreignPoints = dataEvent->getDataset<Points>();
 
-            // Only synchronize when the number of points matches
-            if (foreignPoints->getNumPoints() != getNumPoints())
-                return;
+        // Only synchronize when the number of points matches
+        if (foreignPoints->getNumPoints() != getNumPoints())
+            return;
 
-            // Get source target indices
-            auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
-            auto& targetIndices = getSelection<Points>()->indices;
+        // Get source target indices
+        auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
+        auto& targetIndices = getSelection<Points>()->indices;
 
-            // Do nothing if the indices have not changed
-            if (sourceIndices == targetIndices)
-                return;
+        // Do nothing if the indices have not changed
+        if (sourceIndices == targetIndices)
+            return;
 
-            // Copy indices from source to target if the indices have changed
-            targetIndices = sourceIndices;
+        // Copy indices from source to target if the indices have changed
+        targetIndices = sourceIndices;
 
-            // Notify others that the cluster selection has changed
-            _core->notifyDataSelectionChanged(this);
-        }
+        // Notify others that the cluster selection has changed
+        _core->notifyDataSelectionChanged(this);
     });
 }
 

@@ -126,7 +126,6 @@ signals:
     void resettableChanged(const bool& isResettable);
 
 protected:
-    QString                     _createdBy;                     /** Establishes who created the widget action (view, analysis, data etc.) */
     const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
     std::int32_t                _defaultWidgetFlags;            /** Default widget flags */
     bool                        _resettable;                    /** Whether the action can be reset */

@@ -326,7 +326,8 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 
     menu->addSeparator();
 
-    _dataRemoveAction.setEnabled(!_locked);
+    //_dataRemoveAction.setEnabled(!_locked);
+    _dataRemoveAction.setEnabled(false);
 
     menu->addAction(&_dataRemoveAction);
     menu->addAction(&_dataCopyAction);
@@ -370,9 +371,6 @@ void DataHierarchyItem::setLocked(const bool& locked)
 
     // Notify others that the data got locked/unlocked
     emit lockedChanged(_locked);
-
-    // Make sure the locked status changed event is handled
-    //QCoreApplication::processEvents();
 }
 
 QString DataHierarchyItem::getTaskName() const
@@ -412,8 +410,6 @@ void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
     // Start the task description timer if it is not already active
     if (!_taskDescriptionTimer.isActive())
         _taskDescriptionTimer.start(TASK_UPDATE_TIMER_INTERVAL);
-
-    QCoreApplication::processEvents();
 }
 
 float DataHierarchyItem::getTaskProgress() const
@@ -435,8 +431,6 @@ void DataHierarchyItem::setTaskProgress(const float& taskProgress)
     // Start the task progress timer if it is not already active
     if (!_taskProgressTimer.isActive())
         _taskProgressTimer.start(TASK_UPDATE_TIMER_INTERVAL);
-
-    QCoreApplication::processEvents();
 }
 
 void DataHierarchyItem::setNumberOfSubTasks(const float& numberOfSubTasks)
@@ -502,22 +496,15 @@ void DataHierarchyItem::setTaskFinished()
 
     // Reset sub tasks (if any)
     _subTasks.fill(false);
-    
+
     // Adjust the task description
     setTaskDescription(QString("%1 finished").arg(_taskName));
 
-    // Create timer to let the message disappear after a while
-    auto timer = QSharedPointer<QTimer>::create();
-
-    // Reset the progress and task description when the timer times out
-    connect(timer.get(), &QTimer::timeout, this, [this, timer]() {
+    // Reset the progress and task description after a while
+    QTimer::singleShot(MESSAGE_DISAPPEAR_INTERVAL, [this]() {
         setTaskProgress(0.0f);
         setTaskDescription("");
     });
-
-    // Start the timer
-    timer->setSingleShot(true);
-    timer->start(1500);
 
     // Unlock the item
     setLocked(false);
@@ -525,6 +512,7 @@ void DataHierarchyItem::setTaskFinished()
 
 void DataHierarchyItem::setTaskAborted()
 {
+    // Set task status to aborted
     _taskStatus = TaskStatus::Aborted;
 
     // Reset sub tasks (if any)
@@ -533,18 +521,11 @@ void DataHierarchyItem::setTaskAborted()
     // Set task description to aborted
     setTaskDescription(QString("%1 aborted").arg(_taskName));
 
-    // Create timer to let the message disappear after a while
-    auto timer = QSharedPointer<QTimer>::create();
-
-    // Reset the progress and task description when the timer times out
-    connect(timer.get(), &QTimer::timeout, this, [this, timer]() {
+    // Reset the progress and task description after a while
+    QTimer::singleShot(MESSAGE_DISAPPEAR_INTERVAL, [this]() {
         setTaskProgress(0.0f);
         setTaskDescription("");
     });
-
-    // Start the timer
-    timer->setSingleShot(true);
-    timer->start(1500);
 
     // Unlock the item
     setLocked(false);

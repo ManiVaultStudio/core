@@ -354,6 +354,9 @@ protected:
 
     /** Single shot task update timer interval */
     static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
+
+    /** Single shot message disappear timer interval */
+    static constexpr std::uint32_t MESSAGE_DISAPPEAR_INTERVAL = 1500;
 };
 
 /**

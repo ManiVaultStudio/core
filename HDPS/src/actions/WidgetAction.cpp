@@ -11,7 +11,6 @@ namespace gui {
 
 WidgetAction::WidgetAction(QObject* parent) :
     QWidgetAction(parent),
-    _createdBy(),
     _dataHierarchyItemContext(nullptr),
     _defaultWidgetFlags(),
     _resettable(false),
