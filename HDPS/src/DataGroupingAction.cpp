@@ -93,7 +93,7 @@ bool DataGroupingAction::mayRemoveRecursively() const
 DataGroupingAction::GroupingDialog::GroupingDialog(QWidget* parent, const Dataset<DatasetImpl>& dataset) :
     QDialog(parent),
     _dataset(dataset),
-    _groupIndexAction(this, "Start index", -1, 100, 0, 0),
+    _groupIndexAction(this, "Start index", 0, 100, 0, 0),
     _recursiveAction(this, "Recursively", true, true),
     _applyAction(this, "Apply"),
     _cancelAction(this, "Cancel")

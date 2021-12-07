@@ -24,15 +24,20 @@ namespace gui
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     QWidget(parent),
     _model(this),
+    _filterModel(this),
     _treeView(this),
     _selectionModel(&_model),
     _noDataOverlayWidget(new NoDataOverlayWidget(this)),
     _dataImportAction(this),
+    _datasetNameFilterAction(this, "Dataset name filter"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _groupingAction(this, "Grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
 {
-    //setMinimumWidth(500);
+    // Set filter model input model
+    _filterModel.setSourceModel(&_model);
+
+    // Set tree view input model
     _treeView.setModel(&_model);
 
     _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
@@ -50,7 +55,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     //header()->resizeSection(DataHierarchyModelItem::Column::GUID, 100);
     _treeView.header()->resizeSection(DataHierarchyModelItem::Column::GroupIndex, 60);
     //header()->resizeSection(DataHierarchyModelItem::Column::Description, 100);
-    _treeView.header()->resizeSection(DataHierarchyModelItem::Column::Progress, 40);
+    _treeView.header()->resizeSection(DataHierarchyModelItem::Column::Progress, 45);
     _treeView.header()->resizeSection(DataHierarchyModelItem::Column::Analyzing, _treeView.header()->minimumSectionSize());
     _treeView.header()->resizeSection(DataHierarchyModelItem::Column::Locked, _treeView.header()->minimumSectionSize());
 
@@ -61,6 +66,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
     _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Analyzing, QHeaderView::Fixed);
     _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Locked, QHeaderView::Fixed);
+
+    _datasetNameFilterAction.setPlaceHolderString("Search by name...");
 
     // Configure expand all action
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
@@ -96,6 +103,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Add toolbar items
     toolbarLayout->setContentsMargins(0, 2, 0, 2);
     toolbarLayout->setSpacing(3);
+    //toolbarLayout->addWidget(_datasetNameFilterAction.createWidget(this), 1);
     toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
@@ -107,6 +115,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     // Apply layout
     setLayout(layout);
+
+    // Update the data hierarchy filter model filter when the dataset filter name action changes
+    connect(&_datasetNameFilterAction, &StringAction::stringChanged, this, [this](const QString& value) {
+        _filterModel.setFilterRegExp(value);
+    });
 
     // Notify others that the dataset selection changed when the current row in the model changed
     connect(&_selectionModel, &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
@@ -128,6 +141,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     // Insert new rows expanded
     connect(&_model, &QAbstractItemModel::rowsInserted, this, [&](const QModelIndex& parent, int first, int last) {
+
+        // Expand by default
         _treeView.expand(_model.index(first, 0, parent));
     });
 
@@ -210,29 +225,39 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
         // Add the data hierarchy item to the model
         _model.addDataHierarchyModelItem(parentModelIndex, dataHierarchyItem);
 
-        // Update the model then the data hierarchy item task description changes
+        // Update the model when the data hierarchy item task description changes
         connect(&dataHierarchyItem, &DataHierarchyItem::taskDescriptionChanged, this, [this, dataset](const QString& description) {
+
+            // Notify others that the description changed
             _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Description), description);
         });
 
-        // Update the model then the data hierarchy item task progress changes
+        // Update the model when the data hierarchy item task progress changes
         connect(&dataHierarchyItem, &DataHierarchyItem::taskProgressChanged, this, [this, dataset](const float& progress) {
+
+            //qDebug() << "DataHierarchyItem::taskProgressChanged" << progress;
+
+            // Notify others that the progress changed
             _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Progress), progress);
             _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Analyzing), progress > 0.0f);
         });
 
-        // Update the model then the data hierarchy item task selection status changes
+        // Update the model when the data hierarchy item selection status changes
         connect(&dataHierarchyItem, &DataHierarchyItem::selectionChanged, this, [this, dataset](const bool& selection) {
             _selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
         });
 
-        // Update the model then the data hierarchy item locked status changes
+        // Update the model when the data hierarchy item locked status changes
         connect(&dataHierarchyItem, &DataHierarchyItem::lockedChanged, this, [this, dataset](const bool& locked) {
+
+            // Notify others that the locked state changed
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Locked));
         });
 
-        // Select the added dataset
         _selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+
+        // Notify others that a dataset was selected
+        emit selectedDatasetChanged(dataset->getGuid());
     }
     catch (std::exception& e)
     {

@@ -295,6 +295,7 @@ set( PLUGIN_SOURCES
 
 set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyModelItem.h
+    src/DataHierarchyFilterModel.h
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
     src/DataPropertiesWidget.h
@@ -307,6 +308,7 @@ set(DATA_HIERARCHY_HEADERS
 
 set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyModelItem.cpp
+    src/DataHierarchyFilterModel.cpp
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp

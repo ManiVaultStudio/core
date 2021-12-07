@@ -13,6 +13,8 @@
 #include <QString>
 #include <QDebug>
 #include <QIcon>
+#include <QTimer>
+#include <QBitArray>
 
 namespace hdps
 {
@@ -233,7 +235,7 @@ public: // Lock
      */
     void setLocked(const bool& locked);
 
-public: // Task
+public: // Tasks
 
     /** Get task name */
     QString getTaskName() const;
@@ -264,6 +266,18 @@ public: // Task
      * @param taskProgress Task progress
      */
     void setTaskProgress(const float& taskProgress);
+
+    /**
+     * Set the number of sub tasks
+     * @param numberOfSubTasks Number of sub tasks
+     */
+    void setNumberOfSubTasks(const float& numberOfSubTasks);
+
+    /**
+     * Flag sub task as finished
+     * @param subTaskIndex Index of the sub task
+     */
+    void setSubTaskFinished(const float& subTaskIndex);
 
     /** Convenience functions for status checking */
     bool isIdle() const;
@@ -325,8 +339,11 @@ protected:
     IconList                    _namedIcons;            /** Named icons */
     QString                     _taskDescription;       /** Task description */
     float                       _taskProgress;          /** Task progress */
+    QBitArray                   _subTasks;              /** Sub-tasks bit array */
     QString                     _taskName;              /** Name of the current task */
     TaskStatus                  _taskStatus;            /** Status of the current task */
+    QTimer                      _taskDescriptionTimer;  /** Task description timer which prevents excessive successive GUI updates */
+    QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
     hdps::gui::WidgetActions    _actions;               /** Widget actions */
     DataRemoveAction            _dataRemoveAction;      /** Data remove action */
     DataCopyAction              _dataCopyAction;        /** Data copy action */
@@ -334,6 +351,9 @@ protected:
 protected:
     friend class DataHierarchyManager;
     friend class DataManager;
+
+    /** Single shot task update timer interval */
+    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
 };
 
 /**

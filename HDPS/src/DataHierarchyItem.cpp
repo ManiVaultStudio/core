@@ -4,8 +4,6 @@
 #include "Set.h"
 #include "Dataset.h"
 
-#include <QTimer>
-
 #include <stdexcept>
 
 using namespace hdps::gui;
@@ -24,8 +22,11 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _namedIcons(),
     _taskDescription(""),
     _taskProgress(0.0),
+    _subTasks(),
     _taskName(""),
     _taskStatus(TaskStatus::Idle),
+    _taskDescriptionTimer(),
+    _taskProgressTimer(),
     _actions(),
     _dataRemoveAction(parent, dataset),
     _dataCopyAction(parent, dataset)
@@ -36,6 +37,20 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
 
     // Add data icon
     addIcon("data", getDataset()->getIcon());
+
+    // Task description/progress timer should be a one-off timer
+    _taskDescriptionTimer.setSingleShot(true);
+    _taskProgressTimer.setSingleShot(true);
+
+    // Notify others that the task description changed when the task description timer timed out
+    connect(&_taskDescriptionTimer, &QTimer::timeout, [this]() {
+        emit taskDescriptionChanged(_taskDescription);
+    });
+
+    // Notify others that the task progress changed when the task progress timer timed out
+    connect(&_taskProgressTimer, &QTimer::timeout, [this]() {
+        emit taskProgressChanged(getTaskProgress());
+    });
 }
 
 DataHierarchyItem::~DataHierarchyItem()
@@ -394,15 +409,18 @@ void DataHierarchyItem::setTaskDescription(const QString& taskDescription)
     // Assign new task description
     _taskDescription = taskDescription;
 
-    // Notify others that the task description changed
-    emit taskDescriptionChanged(_taskDescription);
+    // Start the task description timer if it is not already active
+    if (!_taskDescriptionTimer.isActive())
+        _taskDescriptionTimer.start(TASK_UPDATE_TIMER_INTERVAL);
 
-    // Make sure the task description changed event is handled
-    //QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
 }
 
 float DataHierarchyItem::getTaskProgress() const
 {
+    if (!_subTasks.isEmpty())
+        return static_cast<float>(_subTasks.count(true)) / static_cast<float>(_subTasks.size());
+
     return _taskProgress;
 }
 
@@ -411,13 +429,36 @@ void DataHierarchyItem::setTaskProgress(const float& taskProgress)
     if (taskProgress == _taskProgress)
         return;
 
+    // Assign the new task progress
     _taskProgress = taskProgress;
 
-    // Notify others that the task progress changed
-    emit taskProgressChanged(_taskProgress);
+    // Start the task progress timer if it is not already active
+    if (!_taskProgressTimer.isActive())
+        _taskProgressTimer.start(TASK_UPDATE_TIMER_INTERVAL);
 
-    // Make sure the task progress changed event is handled
-    //QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
+}
+
+void DataHierarchyItem::setNumberOfSubTasks(const float& numberOfSubTasks)
+{
+    _subTasks.resize(numberOfSubTasks);
+}
+
+void DataHierarchyItem::setSubTaskFinished(const float& subTaskIndex)
+{
+    try {
+        // Flag sub task as finished
+        _subTasks.setBit(subTaskIndex, true);
+
+        // Start the task progress timer if it is not already active
+        if (!_taskProgressTimer.isActive())
+            _taskProgressTimer.start(TASK_UPDATE_TIMER_INTERVAL);
+
+        QCoreApplication::processEvents();
+    }
+    catch (...) {
+        qDebug() << "Unable to set flag sub task as finished";
+    }
 }
 
 bool DataHierarchyItem::isRunning() const
@@ -459,6 +500,9 @@ void DataHierarchyItem::setTaskFinished()
     // Set task status to finished
     _taskStatus = TaskStatus::Finished;
 
+    // Reset sub tasks (if any)
+    _subTasks.fill(false);
+    
     // Adjust the task description
     setTaskDescription(QString("%1 finished").arg(_taskName));
 
@@ -482,6 +526,9 @@ void DataHierarchyItem::setTaskFinished()
 void DataHierarchyItem::setTaskAborted()
 {
     _taskStatus = TaskStatus::Aborted;
+
+    // Reset sub tasks (if any)
+    _subTasks.fill(false);
 
     // Set task description to aborted
     setTaskDescription(QString("%1 aborted").arg(_taskName));

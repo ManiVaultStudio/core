@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DataHierarchyModel.h"
+#include "DataHierarchyFilterModel.h"
 #include "DataImportAction.h"
 
 #include <QWidget>
@@ -111,14 +112,16 @@ signals:
     void selectedDatasetChanged(const QString& datasetId);
 
 private:
-    DataHierarchyModel      _model;                     /** Model containing data to be displayed in the hierarchy */
-    QTreeView               _treeView;                  /** Tree view that contains the data hierarchy */
-    QItemSelectionModel     _selectionModel;            /** Selection model */
-    NoDataOverlayWidget*    _noDataOverlayWidget;       /** Overlay help widget which is shown when no data is loaded */
-    DataImportAction        _dataImportAction;          /** Data import action */
-    TriggerAction           _expandAllAction;           /** Expand all datasets action */
-    TriggerAction           _collapseAllAction;         /** Collapse all datasets action */
-    ToggleAction            _groupingAction;            /** Data grouping action */
+    DataHierarchyModel          _model;                     /** Model containing data to be displayed in the hierarchy */
+    DataHierarchyFilterModel    _filterModel;               /** Data hierarchy filter model */
+    QTreeView                   _treeView;                  /** Tree view that contains the data hierarchy */
+    QItemSelectionModel         _selectionModel;            /** Selection model */
+    NoDataOverlayWidget*        _noDataOverlayWidget;       /** Overlay help widget which is shown when no data is loaded */
+    DataImportAction            _dataImportAction;          /** Data import action */
+    StringAction                _datasetNameFilterAction;   /** String action for filtering dataset GUI name */
+    TriggerAction               _expandAllAction;           /** Expand all datasets action */
+    TriggerAction               _collapseAllAction;         /** Collapse all datasets action */
+    ToggleAction                _groupingAction;            /** Data grouping action */
 };
 
 }

@@ -1,6 +1,7 @@
 #include "DataPropertiesWidget.h"
 #include "Application.h"
 #include "Core.h"
+#include "DataHierarchyItem.h"
 
 #include "actions/GroupAction.h"
 
@@ -72,7 +73,7 @@ void DataPropertiesWidget::setDatasetId(const QString& datasetId)
 void DataPropertiesWidget::loadDataset()
 {
     // Inform others that the loaded dataset changed
-    emit currentDatasetGuiNameChanged(_dataset.isValid() ? _dataset->getGuiName() : "");
+    emit currentDatasetGuiNameChanged(_dataset.isValid() ? _dataset->getDataHierarchyItem().getFullPathName() : "");
 
     // Clear groups if the reference is invalid
     if (!_dataset.isValid()) {
