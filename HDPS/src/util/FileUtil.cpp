@@ -1,5 +1,3 @@
-#pragma once
-
 #include <QString>
 #include <QFile>
 #include <QFileInfo>

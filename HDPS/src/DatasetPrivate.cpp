@@ -1,5 +1,3 @@
-#pragma once
-
 #include "DatasetPrivate.h"
 
 #include "event/Event.h"
@@ -150,6 +148,11 @@ void DatasetPrivate::registerDatasetEvents()
 
                     break;
                 }
+
+                case EventType::DataAdded:
+                case EventType::DataLocked:
+                case EventType::DataUnlocked:
+                    break;
             }
         });
     }
