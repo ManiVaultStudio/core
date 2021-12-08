@@ -179,7 +179,7 @@ Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, cons
         datasetCopy->setGuiName(dataSetGuiName);
 
         // Establish parent
-        auto parent = parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(parentDataset) : (dataset->getDataHierarchyItem().hasParent() ? dataset->getParent<DatasetImpl>() : Dataset<DatasetImpl>());
+        auto parent = parentDataset.isValid() ? const_cast<Dataset<DatasetImpl>&>(parentDataset) : (dataset->getDataHierarchyItem().hasParent() ? dataset->getParent() : Dataset<DatasetImpl>());
 
         // Add to the data hierarchy manager
         _dataHierarchyManager->addItem(const_cast<Dataset<DatasetImpl>&>(datasetCopy), parent);

@@ -67,7 +67,7 @@ public:
     template<typename OtherDatasetType>
     Dataset(const Dataset<OtherDatasetType>& other)
     {
-        set(other.get<DatasetType>());
+        set(other.template get<DatasetType>());
     }
 
 public: // Operators
@@ -144,7 +144,7 @@ public: // Operators
      * Assignment operator
      * @param other Reference to assign from
      */
-    Dataset<DatasetType>& Dataset<DatasetType>::operator=(const Dataset<DatasetType>& other)
+    Dataset<DatasetType>& Dataset::operator=(const Dataset<DatasetType>& other)
     {
         set(other.get());
 

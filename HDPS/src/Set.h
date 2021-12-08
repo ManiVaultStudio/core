@@ -220,11 +220,7 @@ public: // Hierarchy
     const DataHierarchyItem& getDataHierarchyItem() const;
 
     /** Get parent dataset (if any) */
-    template<typename DatasetType>
-    Dataset<DatasetType> getParent() const
-    {
-        return getDataHierarchyItem().getParent().getDataset().get<DatasetType>();
-    }
+    Dataset<DatasetImpl> getParent() const;
 
     /**
      * Get child datasets (if any) of the specified type(s)

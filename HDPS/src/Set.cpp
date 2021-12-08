@@ -14,6 +14,11 @@ DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
     return _core->getDataHierarchyItem(_guid);
 }
 
+hdps::Dataset<hdps::DatasetImpl> DatasetImpl::getParent() const
+{
+    return getDataHierarchyItem().getParent().getDataset();
+}
+
 QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
 {
     // Found children
