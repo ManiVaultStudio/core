@@ -70,19 +70,6 @@ public:
      */
     virtual Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible = true) const = 0;
 
-    /**
-     * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
-     * @param guiName Name of the subset in the GUI
-     * @param parentDataSet Smart pointer to parent dataset (if any)
-     * @param visible Whether the subset will be visible in the UI
-     * @return Smart pointer to the created subset
-     */
-    template<typename DatasetType, typename ParentDatasetType>
-    Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<ParentDatasetType>& parentDataSet, const bool& visible = true) const
-    {
-        return createSubset(guiName, Dataset<DatasetImpl>(parentDataSet.get<DatasetImpl>()), visible).converted<DatasetType>();
-    }
-
     /** Get the globally unique identifier of the dataset in string format */
     QString getGuid() const
     {

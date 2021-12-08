@@ -144,7 +144,7 @@ public: // Operators
      * Assignment operator
      * @param other Reference to assign from
      */
-    Dataset<DatasetType>& Dataset::operator=(const Dataset<DatasetType>& other)
+    Dataset<DatasetType>& operator=(const Dataset<DatasetType>& other)
     {
         set(other.get());
 
