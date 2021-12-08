@@ -388,8 +388,7 @@ QIcon Points::getIcon() const
 
 void Points::selectAll()
 {
-    auto& selection         = getSelection<Points>();
-    auto& selectionIndices  = selection->indices;
+    auto& selectionIndices = getSelection<Points>()->indices;
 
     selectionIndices.clear();
     selectionIndices.resize(getNumPoints());
@@ -407,8 +406,7 @@ void Points::selectAll()
 
 void Points::selectNone()
 {
-    auto& selection         = getSelection<Points>();
-    auto& selectionIndices  = selection->indices;
+    auto& selectionIndices = getSelection<Points>()->indices;
 
     selectionIndices.clear();
 
@@ -417,8 +415,7 @@ void Points::selectNone()
 
 void Points::selectInvert()
 {
-    auto& selection         = getSelection<Points>();
-    auto& selectionIndices  = selection->indices;
+    auto& selectionIndices = getSelection<Points>()->indices;
 
     std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
 

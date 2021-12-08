@@ -98,7 +98,7 @@ void SelectedIndicesAction::updateSelectedIndices()
         return;
 
     // Get points selection
-    auto& selection = _points->getSelection<Points>();
+    auto selection = _points->getSelection<Points>();
 
     // Generate 
     if (_points->isFull()) {
