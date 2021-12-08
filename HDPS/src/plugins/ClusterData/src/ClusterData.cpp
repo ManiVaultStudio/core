@@ -237,7 +237,7 @@ void Clusters::setSelection(const std::vector<std::uint32_t>& indices)
     // Select points
     if (parentDataset->getDataType() == PointType) {
 
-        auto points                 = parentDataset;
+        auto points                 = Dataset<Points>(parentDataset);
         auto selection              = points->getSelection<Points>();
         auto& pointSelectionIndices = selection->indices;
 
