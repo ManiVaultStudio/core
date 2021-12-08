@@ -51,7 +51,7 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
     if (dataEvent->getType() == EventType::DataSelectionChanged)
     {
         // Get smart pointer to the source dataset of which the selection changed
-        auto& eventSourceDataset = dataEvent->getDataset()->getSourceDataset<DatasetImpl>();
+        auto eventSourceDataset = dataEvent->getDataset()->getSourceDataset<DatasetImpl>();
 
         // Get name of the raw data of the event dataset
         const auto eventSourceDatasetRawName = eventSourceDataset->getRawDataName();
@@ -63,7 +63,7 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
         for (auto& candidateDataset : allDatasets)
         {
             // Get source of the candidate dataset
-            auto& candidateSourceDataset = candidateDataset->getSourceDataset<DatasetImpl>();
+            auto candidateSourceDataset = candidateDataset->getSourceDataset<DatasetImpl>();
 
             // Get name of the raw data of the candidate dataset
             const auto candidateRawDataName = candidateSourceDataset->getRawDataName();
