@@ -172,10 +172,7 @@ Dataset<Clusters>& ClustersAction::getClustersDataset()
 
 void ClustersAction::createSubset(const QString& datasetName)
 {
-    auto& points    = _clusters->getDataHierarchyItem().getParent().getDataset();
-    //auto& selection = points->getSelection<Points>();
-
-    points->createSubset("Clusters", points);
+    _clusters->getParent()->createSubset("Clusters");
 }
 
 void ClustersAction::removeClustersById(const QStringList& ids)

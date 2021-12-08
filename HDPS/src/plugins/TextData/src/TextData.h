@@ -49,13 +49,13 @@ public:
     }
 
     /**
-     * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
+     * Create subset and specify where the subset will be placed in the data hierarchy
      * @param guiName Name of the subset in the GUI
-     * @param parentDataSet Smart pointer to parent dataset (if any)
+     * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet, const bool& visible = true) const override
+    Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override
     {
         return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }

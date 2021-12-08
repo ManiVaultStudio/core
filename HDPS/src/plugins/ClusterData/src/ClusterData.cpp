@@ -232,7 +232,7 @@ void Clusters::setSelection(const std::vector<std::uint32_t>& indices)
     _core->notifyDataSelectionChanged(this);
 
     // Get reference to input dataset
-    auto& parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+    auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
 
     // Select points
     if (parentDataset->getDataType() == PointType) {

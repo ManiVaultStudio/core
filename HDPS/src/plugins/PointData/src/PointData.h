@@ -807,13 +807,13 @@ public:
     hdps::Dataset<hdps::DatasetImpl> copy() const override;
 
     /**
-     * Create subset and attach it to the root of the hierarchy when the parent data set is not specified or below it otherwise
+     * Create subset and specify where the subset will be placed in the data hierarchy
      * @param guiName Name of the subset in the GUI
-     * @param parentDataSet Smart pointer to parent dataset (if any)
+     * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    hdps::Dataset<hdps::DatasetImpl> createSubset(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet, const bool& visible = true) const override;
+    hdps::Dataset<hdps::DatasetImpl> createSubset(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;
