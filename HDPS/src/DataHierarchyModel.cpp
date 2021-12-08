@@ -21,44 +21,44 @@ DataHierarchyModel::~DataHierarchyModel()
 
 QVariant DataHierarchyModel::data(const QModelIndex& index, int role) const
 {
+    // Only proceed if we have a valid model index
     if (!index.isValid())
         return QVariant();
 
+    // Get pointer to the data hierarchy model item
     auto item = static_cast<DataHierarchyModelItem*>(index.internalPointer());
 
-    switch (role) {
-        case Qt::DecorationRole:
-            return item->getIconAtColumn(index.column());
-
-        case Qt::DisplayRole:
-        case Qt::ToolTipRole:
-        case Qt::EditRole:
-            return item->getDataAtColumn(index.column());
-    }
-
-    return QVariant();
+    // Get data for role at column
+    return item->getDataAtColumn(index.column(), role);
 }
 
 bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
 {
     const auto column = static_cast<DataHierarchyModelItem::Column>(index.column());
 
-    auto dataHierarchyItem = static_cast<DataHierarchyModelItem*>((void*)index.internalPointer());
+    auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>((void*)index.internalPointer());
     
     switch (column) {
         case DataHierarchyModelItem::Column::Name:
-            dataHierarchyItem->renameDataset(value.toString());
+            dataHierarchyModelItem->renameDataset(value.toString());
+            break;
+
+        case DataHierarchyModelItem::Column::GUID:
+            break;
+
+        case DataHierarchyModelItem::Column::GroupIndex:
+            dataHierarchyModelItem->setGroupIndex(value.toInt());
             break;
 
         case DataHierarchyModelItem::Column::Description:
-            dataHierarchyItem->setProgressSection(value.toString());
+            dataHierarchyModelItem->setProgressSection(value.toString());
             break;
 
         case DataHierarchyModelItem::Column::Analysis:
             break;
 
         case DataHierarchyModelItem::Column::Progress:
-            dataHierarchyItem->setProgressPercentage(value.toFloat());
+            dataHierarchyModelItem->setProgressPercentage(value.toFloat());
             break;
 
         default:
@@ -145,13 +145,30 @@ DataHierarchyModelItem* DataHierarchyModel::getItem(const QModelIndex& index, in
 
 Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
 {
+    // Only proceed with valid model index
     if (!index.isValid())
         return Qt::NoItemFlags;
-    
+
+    // Default item flags
     auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 
-    if (static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::Name)
+    // Get pointer to data hierarchy model item
+    auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(index.internalPointer());
+
+    // Determine whether the data hierarchy item is locked
+    const auto itemIsLocked = dataHierarchyModelItem->getDataAtColumn(DataHierarchyModelItem::Column::Locked, Qt::EditRole).toBool();
+
+    // Make name column editable
+    if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::Name)
         itemFlags |= Qt::ItemIsEditable;
+
+    // Make group index column editable
+    if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::GroupIndex)
+        itemFlags |= Qt::ItemIsEditable;
+
+    // Disable when locked
+    if (itemIsLocked)
+        itemFlags &= ~Qt::ItemIsEnabled;
 
     return itemFlags;
 }
@@ -167,8 +184,14 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                     case DataHierarchyModelItem::Column::Name:
                         return "Name";
 
+                    case DataHierarchyModelItem::Column::GUID:
+                        return "ID";
+
                     case DataHierarchyModelItem::Column::Description:
                         return "Description";
+
+                    case DataHierarchyModelItem::Column::GroupIndex:
+                        return "Group ID";
 
                     case DataHierarchyModelItem::Column::Analysis:
                     case DataHierarchyModelItem::Column::Analyzing:
@@ -189,15 +212,21 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                 switch (static_cast<DataHierarchyModelItem::Column>(section))
                 {
                     case DataHierarchyModelItem::Column::Name:
+                    case DataHierarchyModelItem::Column::GUID:
+                        break;
+
                     case DataHierarchyModelItem::Column::Description:
+                    case DataHierarchyModelItem::Column::GroupIndex:
                     case DataHierarchyModelItem::Column::Analysis:
                         break;
 
                     case DataHierarchyModelItem::Column::Analyzing:
-                        return Application::getIconFont("FontAwesome").getIcon("check", iconSize);
+                        break;
+                        //return Application::getIconFont("FontAwesome").getIcon("check", iconSize);
 
                     case DataHierarchyModelItem::Column::Progress:
-                        return Application::getIconFont("FontAwesome").getIcon("percentage", iconSize);
+                        break;
+                        //return Application::getIconFont("FontAwesome").getIcon("percentage", iconSize);
 
                     default:
                         break;
@@ -228,19 +257,27 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
     return mimeData;
 }
 
-bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem)
+bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem& dataHierarchyItem)
 {
+    // Get pointer to parent data hierarchy model item
     auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
 
+    // Notify others the layout is about to be changed
+    emit layoutAboutToBeChanged();
+
+    // Insert the row
     beginInsertRows(parentModelIndex, rowCount(parentModelIndex), rowCount(parentModelIndex) + 1);
     {
-        parentItem->addChild(new DataHierarchyModelItem(dataHierarchyItem));
+        parentItem->addChild(new DataHierarchyModelItem(&dataHierarchyItem));
     }
     endInsertRows();
 
-    for (auto child : dataHierarchyItem->getChildren()) {
-        addDataHierarchyModelItem(index(rowCount(parentModelIndex) - 1, 0, parentModelIndex), child);
-    }
+    // Notify others the layout is changed
+    emit layoutChanged();
+
+    // Add children as well
+    for (auto child : dataHierarchyItem.getChildren())
+        addDataHierarchyModelItem(index(rowCount(parentModelIndex) - 1, 0, parentModelIndex), *child);
 
     return true;
 }

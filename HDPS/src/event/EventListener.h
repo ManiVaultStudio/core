@@ -1,44 +1,56 @@
-#ifndef HDPS_EVENT_LISTENER_H
-#define HDPS_EVENT_LISTENER_H
+#pragma once
 
-#include "Event.h"
-#include "CoreInterface.h"
+#include "DataType.h"
 
 #include <unordered_map>
+#include <functional>
 
 namespace hdps
 {
-    class EventListener
-    {
-    public:
-        /** Event registration function signatures */
-        using DataEventHandler      = std::function<void(DataEvent*)>;
 
-        // Disabled until a better solution can be found as currently it requires
-        // plugins to manually unregister if they are no longer interested in a dataset.
-        //void registerDataEventByName(QString dataSetName, DataEventHandler callback);
+class CoreInterface;
+class DataEvent;
 
-        void registerDataEventByType(DataType dataType, DataEventHandler callback);
-        void registerDataEvent(DataEventHandler callback);
+class EventListener
+{
+public:
 
-    protected:
-        // Sets internal static event core, called once upon plugin creation
-        void setEventCore(CoreInterface* core);
+    /** Event registration function signatures */
+    using DataEventHandler = std::function<void(DataEvent*)>;
 
-        // Unregisters the event listener from the core
-        ~EventListener();
+    // Disabled until a better solution can be found as currently it requires
+    // plugins to manually unregister if they are no longer interested in a dataset.
+    //void registerDataEventByName(QString dataSetName, DataEventHandler callback);
+    void registerDataEventByType(DataType dataType, DataEventHandler callback);
+    void registerDataEvent(DataEventHandler callback);
 
-    private:
-        void onDataEvent(DataEvent* dataEvent);
+protected:
 
-        std::unordered_map<QString, DataEventHandler>   _dataEventHandlersByName;
-        std::unordered_map<DataType, DataEventHandler>  _dataEventHandlersByType;
-        std::vector<DataEventHandler>                   _dataEventHandlers;
+    /**
+     * Sets internal static event core, called once upon plugin creation
+     * @param core Pointer to the core
+     */
+    void setEventCore(CoreInterface* core);
 
-        static CoreInterface* _eventCore;
+    /** Destructor, unregisters the event listener from the core */
+    ~EventListener();
 
-        friend class Core;
-    };
+private:
+
+    /**
+     * Invoked when a data event occurs
+     * @param dataEvent Pointer to data event that occurred
+     */
+    void onDataEvent(DataEvent* dataEvent);
+
+    std::unordered_map<QString, DataEventHandler>   _dataEventHandlersById;         /** Data event handlers by dataset globally unique identifier */
+    std::unordered_map<DataType, DataEventHandler>  _dataEventHandlersByType;       /** Data event handlers by data type */
+    std::vector<DataEventHandler>                   _dataEventHandlers;             /** Non-specific Data event handlers */
+
+    /** Pointer to the the (event) core */
+    static CoreInterface* _eventCore;
+
+    friend class Core;
+};
+
 }
-
-#endif // HDPS_EVENT_LISTENER_H

@@ -37,6 +37,14 @@ public:
         return nullptr;
     };
 
+    /**
+     * Load one (or more datasets in the view)
+     * @param datasets Dataset(s) to load
+     */
+    virtual void loadData(const Datasets& datasets) {
+        qDebug() << "Load function not implemented in view plugin implementation";
+    }
+
 public: // Actions
 
     /**
@@ -48,15 +56,6 @@ public: // Actions
         Q_ASSERT(action != nullptr);
 
         QWidget::addAction(action);
-
-        auto widgetAction = dynamic_cast<gui::WidgetAction*>(action);
-
-        if (widgetAction == nullptr)
-            return;
-
-        widgetAction->setContext(_guiName);
-
-        //Application::current()->getWidgetActionsManager().addAction(widgetAction);
     }
 };
 

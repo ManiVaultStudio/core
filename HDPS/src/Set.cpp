@@ -4,38 +4,79 @@
 namespace hdps
 {
 
-DataHierarchyItem& DataSet::getHierarchyItem()
+const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 {
-    return *_core->getDataHierarchyItem(_name);
+    return const_cast<DatasetImpl*>(this)->getDataHierarchyItem();
 }
 
-const DataHierarchyItem& DataSet::getHierarchyItem() const
+DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
 {
-    return const_cast<DataSet*>(this)->getHierarchyItem();
+    return _core->getDataHierarchyItem(_guid);
 }
 
-void DataSet::addAction(hdps::gui::WidgetAction& widgetAction)
+hdps::Dataset<hdps::DatasetImpl> DatasetImpl::getParent() const
 {
-    Q_ASSERT(!_name.isEmpty());
-    _core->getDataHierarchyItem(_name)->addAction(widgetAction);
+    return getDataHierarchyItem().getParent().getDataset();
 }
 
-hdps::gui::WidgetActions DataSet::getActions() const
+QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
 {
-    Q_ASSERT(!_name.isEmpty());
-    return _core->getDataHierarchyItem(_name)->getActions();
+    // Found children
+    QVector<Dataset<DatasetImpl>> children;
+
+    // Loop over all data hierarchy children and add to the list if occur in the data types
+    for (auto dataHierarchyChild : getDataHierarchyItem().getChildren())
+        if (dataTypes.contains(dataHierarchyChild->getDataType()))
+            children << dataHierarchyChild->getDataset();
+
+    return children;
 }
 
-QMenu* DataSet::getContextMenu(QWidget* parent /*= nullptr*/)
+void DatasetImpl::lock()
 {
-    Q_ASSERT(!_name.isEmpty());
-    return _core->getDataHierarchyItem(_name)->getContextMenu(parent);
+    getDataHierarchyItem().setLocked(true);
 }
 
-void DataSet::populateContextMenu(QMenu* contextMenu)
+void DatasetImpl::unlock()
 {
-    Q_ASSERT(!_name.isEmpty());
-    return _core->getDataHierarchyItem(_name)->populateContextMenu(contextMenu);
+    getDataHierarchyItem().setLocked(false);
 }
 
-} // namespace hdps
+bool DatasetImpl::isLocked() const
+{
+    return getDataHierarchyItem().getLocked();
+}
+
+std::int32_t DatasetImpl::getGroupIndex() const
+{
+    return _groupIndex;
+}
+
+void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
+{
+    _groupIndex = groupIndex;
+
+    _core->notifyDataSelectionChanged(this);
+}
+
+void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)
+{
+    _core->getDataHierarchyItem(_guid).addAction(widgetAction);
+}
+
+hdps::gui::WidgetActions DatasetImpl::getActions() const
+{
+    return _core->getDataHierarchyItem(_guid).getActions();
+}
+
+QMenu* DatasetImpl::getContextMenu(QWidget* parent /*= nullptr*/)
+{
+    return _core->getDataHierarchyItem(_guid).getContextMenu(parent);
+}
+
+void DatasetImpl::populateContextMenu(QMenu* contextMenu)
+{
+    return _core->getDataHierarchyItem(_guid).populateContextMenu(contextMenu);
+}
+
+}

@@ -26,6 +26,11 @@ WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, Widget
     _layout.addWidget(&_toolButton);
 
     setLayout(&_layout);
+
+    connect(widgetAction, &WidgetAction::changed, this, [this, widgetAction]() {
+        _toolButton.setIcon(widgetAction->icon());
+        _toolButton.setToolTip(widgetAction->toolTip());
+    });
 }
 
 void WidgetActionCollapsedWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)

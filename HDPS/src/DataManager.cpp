@@ -2,9 +2,14 @@
 #include "RawData.h"
 #include "DataHierarchyItem.h"
 
+#include "util/Exception.h"
+
 #include <QRegularExpression>
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
+
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -14,140 +19,148 @@ void DataManager::addRawData(plugin::RawData* rawData)
     _rawDataMap.emplace(rawData->getName(), std::unique_ptr<plugin::RawData>(rawData));
 }
 
-QString DataManager::addSet(QString requestedName, DataSet* set)
+void DataManager::addSet(const Dataset<DatasetImpl>& dataset)
 {
-    QString uniqueName = getUniqueSetName(requestedName);
-    
-    set->setName(uniqueName);
-
-    _dataSetMap.emplace(set->getName(), std::unique_ptr<DataSet>(set));
-
-    emit dataChanged();
-    return uniqueName;
-}
-
-void DataManager::addSelection(QString dataName, DataSet* selection)
-{
-    _selections.emplace(dataName, std::unique_ptr<DataSet>(selection));
-}
-
-QString DataManager::renameSet(QString oldName, QString requestedName)
-{
-    auto& dataSet = _dataSetMap[oldName];
-
-    // Find a unique name from the requested name and set it in the dataset
-    const auto newDatasetName = getUniqueSetName(requestedName);
-
-    dataSet->setName(newDatasetName);
-
-    // Update source set references
-    for (auto& kv : allSets())
+    try
     {
-        if (kv.second->getSourceName() == oldName)
+        // Except in the case of an invalid dataset smart pointer
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset smart pointer is invalid");
+
+        // Add the data set to the map
+        _dataSetMap.emplace(dataset->getGuid(), dataset);
+
+        emit dataChanged();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add dataset", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add dataset");
+    }
+}
+
+void DataManager::addSelection(const QString& dataName, Dataset<DatasetImpl> selection)
+{
+    _selections.emplace(dataName, selection);
+}
+
+void DataManager::removeDataset(const Dataset<DatasetImpl>& dataset, const bool& recursively /*= true*/)
+{
+    try
+    {
+        // Except when the dataset smart pointer is invalid
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset smart pointer is invalid");
+
+        qDebug() << "Removing" << dataset->getGuiName() << "from the data manager";
+
+        // Turn all derived datasets referring to the dataset to be removed to non-derived
+        for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
         {
-            kv.second->_sourceSetName = newDatasetName;
+            auto& set = *it->second;
+
+            if (set.isDerivedData() && set.getGuid() == dataset->getGuid())
+            {
+                qDebug() << "Un-derive" << set.getGuiName();
+
+                set._derived = false;
+                set.setSourceDataSet(Dataset<DatasetImpl>());
+            }
+            it++;
         }
+
+        // Remove dataset
+        _dataSetMap.erase(dataset->getGuid());
+
+        emit dataChanged();
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove dataset", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove dataset");
+    }
+}
+
+plugin::RawData& DataManager::getRawData(const QString& name)
+{
+    try
+    {
+        // Except when the dataset smart pointer is invalid
+        if (name.isEmpty())
+            throw std::runtime_error("Raw data name is invalid");
+
+        // Except when the raw data is not found
+        if (_rawDataMap.find(name) == _rawDataMap.end())
+            throw std::runtime_error("Raw data not found");
+
+        return *_rawDataMap[name];
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get raw data from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get raw data from data manager");
+    }
+}
+
+Dataset<DatasetImpl> DataManager::getSet(const QString& datasetGuid)
+{
+    try
+    {
+        // Except when the dataset GUI is invalid
+        if (datasetGuid.isEmpty())
+            throw std::runtime_error("Dataset GUID is invalid");
+
+        // Except when the dataset is not found
+        if (_dataSetMap.find(datasetGuid) == _dataSetMap.end())
+            throw std::runtime_error("Set not found");
+
+        return _dataSetMap[datasetGuid];
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get raw data from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get raw data from data manager");
     }
 
-    // Put the renamed set back into the map
-    _dataSetMap.emplace(newDatasetName, std::unique_ptr<DataSet>(dataSet.release()));
-
-    // Erase the old entry in the map
-    _dataSetMap.erase(oldName);
-
-    emit dataChanged();
-
-    // Make sure the name of the dataset in the data hierarchy item is updated prior to broadcasting the name change
-    _core->getDataHierarchyItem(oldName)->setDatasetName(newDatasetName);
-
-    _core->notifyDataRenamed(oldName, newDatasetName);
-
-    return newDatasetName;
+    return Dataset<DatasetImpl>();
 }
 
-void DataManager::removeDataset(const QString& datasetName, const bool& recursively /*= true*/)
+Dataset<DatasetImpl> DataManager::getSelection(const QString& dataName)
 {
-    qDebug() << "Removing" << datasetName << "from the data manager";
-
-    // Turn all derived datasets referring to the dataset to be removed to non-derived
-    for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
+    try
     {
-        DataSet& set = *it->second;
-        
-        if (set.isDerivedData() && set.getSourceName() == datasetName)
-        {
-            qDebug() << "Un-derive" << set.getName();
+        // Except when the data name is invalid
+        if (dataName.isEmpty())
+            throw std::runtime_error("Data name is invalid");
 
-            set._derived = false;
-            set._sourceSetName = "";
-        }
-        it++;
+        // Except when the selection set is not found
+        if (_selections.find(dataName) == _selections.end())
+            throw std::runtime_error("Selection set not found");
+
+        return _selections[dataName];
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get selection dataset from data manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get selection dataset from data manager");
     }
 
-    // Remove dataset
-    _dataSetMap.erase(datasetName);
+    return Dataset<DatasetImpl>();
 }
 
-plugin::RawData& DataManager::getRawData(QString name)
-{
-    if (_rawDataMap.find(name) == _rawDataMap.end())
-        throw DataNotFoundException(name);
-
-    return *_rawDataMap[name];
-}
-
-DataSet& DataManager::getSet(QString name)
-{
-    if (_dataSetMap.find(name) == _dataSetMap.end())
-        throw SetNotFoundException(name);
-
-    return *_dataSetMap[name];
-}
-
-DataSet& DataManager::getSelection(QString name)
-{
-    DataSet* selection = _selections[name].get();
-
-    if (!selection)
-        throw SelectionNotFoundException(name);
-
-    return *selection;
-}
-
-const std::unordered_map<QString, std::unique_ptr<DataSet>>& DataManager::allSets() const
+const std::unordered_map<QString, Dataset<DatasetImpl>>& DataManager::allSets() const
 {
     return _dataSetMap;
-}
-
-const QString DataManager::getUniqueSetName(QString request)
-{
-    for (const auto& pair : allSets())
-    {
-        const DataSet& set = *pair.second;
-        if (set.getName() == request)
-        {
-            // Index in the string where the underscore followed by digits starts
-            int index = request.lastIndexOf(QRegularExpression("Copy \\d+"));
-            int digitIndex = index + 5;
-            int parIndex = request.lastIndexOf(")");
-
-            // If the regular expression was not found create the first copy
-            if (index == -1)
-            {
-                return getUniqueSetName(request + " (Copy 1)");
-            }
-            else
-            {
-                // Number of characters used by the digits we need to replace
-                int numChars = parIndex - digitIndex;
-                // The digit we want to increment and place back
-                int digit = request.mid(digitIndex, numChars).toInt() + 1;
-
-                return getUniqueSetName(request.left(parIndex - numChars) + QString::number(digit) + ")");
-            }
-        }
-    }
-    return request;
 }
 
 } // namespace hdps

@@ -1,22 +1,23 @@
 #include "InfoAction.h"
 
 #include "util/Miscellaneous.h"
+#include "event/Event.h"
 
 using namespace hdps;
 using namespace hdps::gui;
 using namespace hdps::util;
 
-InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& datasetName) :
+InfoAction::InfoAction(QObject* parent, CoreInterface* core, Points& points) :
     GroupAction(parent, true),
     EventListener(),
     _core(core),
-    _points(datasetName),
+    _points(&points),
     _numberOfPointsAction(this, "Number of points"),
     _numberOfDimensionsAction(this, "Number of dimensions"),
     _memorySizeAction(this, "Occupied memory"),
     _numberOfSelectedPointsAction(this, "Number of selected points"),
-    _selectedIndicesAction(this, core, datasetName),
-    _dimensionNamesAction(this, core, datasetName)
+    _selectedIndicesAction(this, core, points),
+    _dimensionNamesAction(this, core, points)
 {
     setText("Info");
     setEventCore(_core);
@@ -56,13 +57,13 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, const QString& data
         if (!_points.isValid())
             return;
 
-        if (dataEvent->dataSetName != _points->getName())
+        if (dataEvent->getDataset() != _points)
             return;
 
         switch (dataEvent->getType()) {
             case EventType::DataAdded:
             case EventType::DataChanged:
-            case EventType::SelectionChanged:
+            case EventType::DataSelectionChanged:
             {
                 updateActions();
                 break;

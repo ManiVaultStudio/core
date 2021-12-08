@@ -60,16 +60,6 @@ PixelSelectionTool& PixelSelectionAction::getPixelSelectionTool()
     return _pixelSelectionTool;
 }
 
-PixelSelectionTypes PixelSelectionAction::getAllowedTypes() const
-{
-    return _pixelSelectionTypes;
-}
-
-void PixelSelectionAction::setAllowedTypes(const util::PixelSelectionTypes& pixelSelectionTypes)
-{
-    _pixelSelectionTypes = pixelSelectionTypes;
-}
-
 void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
 {
     if (shortcutsEnabled) {
@@ -137,7 +127,12 @@ void PixelSelectionAction::initType()
     _polygonAction.setToolTip("Select pixels by drawing a polygon (P)");
     _sampleAction.setToolTip("Sample pixel by dragging over the image (S)");
 
-    _typeAction.setOptions(util::pixelSelectionTypes.values());
+    QStringList typeOptions;
+
+    for (auto pixelSelectionType : _pixelSelectionTypes)
+        typeOptions << getPixelSelectionTypeName(pixelSelectionType);
+
+    _typeAction.setOptions(typeOptions);
     _typeAction.setCurrentText("Rectangle");
     _typeAction.setDefaultText("Rectangle");
 
@@ -306,24 +301,25 @@ QMenu* PixelSelectionAction::getContextMenu()
         menu->addMenu(actionMenu);
     };
 
-    if (pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle))
         menu->addAction(&_rectangleAction);
 
-    if (pixelSelectionTypes.contains(PixelSelectionType::Brush))
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Brush))
         menu->addAction(&_brushAction);
 
-    if (pixelSelectionTypes.contains(PixelSelectionType::Lasso))
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Lasso))
         menu->addAction(&_lassoAction);
 
-    if (pixelSelectionTypes.contains(PixelSelectionType::Polygon))
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Polygon))
         menu->addAction(&_polygonAction);
 
-    if (pixelSelectionTypes.contains(PixelSelectionType::Sample))
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Sample))
         menu->addAction(&_sampleAction);
 
     menu->addSeparator();
 
-    addActionToMenu(&_brushRadiusAction);
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Brush))
+        addActionToMenu(&_brushRadiusAction);
 
     menu->addSeparator();
 

@@ -76,9 +76,10 @@ public:
              * @param parent Parent widget
              * @param title Title of the drop region
              * @param description Description of the drop region
+             * @param iconName Name of the icon
              * @param dropAllowed Whether dropping is allowed in the region
              */
-            StandardWidget(QWidget* parent, const QString& title, const QString& description, const bool& dropAllowed = true);
+            StandardWidget(QWidget* parent, const QString& title, const QString& description, const QString& iconName = "file-import", const bool& dropAllowed = true);
         };
 
     public:
@@ -88,21 +89,23 @@ public:
     public:
         /**
          * Constructs a drop region object with a custom widget
-         * @param parent Parent widget to enable drag and drop behaviour for
+         * @param parent Parent widget to enable drag and drop behavior for
          * @param widget Widget for the visual representation of the region
+         * @param iconName Name of the icon
          * @param dropped Callback function when mime data is dropped
          */
         DropRegion(QObject* parent, QWidget* widget, const Dropped& dropped = Dropped());
 
         /**
          * Constructs a drop region object with a standard widget
-         * @param parent Parent widget to enable drag and drop behaviour for
+         * @param parent Parent widget to enable drag and drop behavior for
          * @param title Title of the drop region
          * @param description Description of the drop region
+         * @param iconName Name of the icon
          * @param dropAllowed Whether dropping is allowed in the region
          * @param dropped Callback function when mime data is dropped
          */
-        DropRegion(QObject* parent, const QString& title, const QString& description, const bool& dropAllowed = true, const Dropped& dropped = Dropped());
+        DropRegion(QObject* parent, const QString& title, const QString& description, const QString& iconName = "file-import", const bool& dropAllowed = true, const Dropped& dropped = Dropped());
 
         /** Get visual representation of the region */
         QWidget* getWidget() const;

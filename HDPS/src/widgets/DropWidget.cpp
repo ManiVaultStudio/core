@@ -214,7 +214,7 @@ DropWidget::DropRegion* DropWidget::DropRegionContainerWidget::getDropRegion()
 
 void DropWidget::DropRegionContainerWidget::setHighLight(const bool& highlight /*= false*/)
 {
-    const auto targetOpacity = highlight ? 0.9 : 0.5;
+    const auto targetOpacity = highlight ? 0.98 : 0.8;
 
     if (_opacityEffect->opacity() != targetOpacity)
         _opacityEffect->setOpacity(targetOpacity);
@@ -233,9 +233,9 @@ DropWidget::DropRegion::DropRegion(QObject* parent, QWidget* widget, const Dropp
 {
 }
 
-DropWidget::DropRegion::DropRegion(QObject* parent, const QString& title, const QString& description, const bool& dropAllowed /*= true*/, const Dropped& dropped /*= Dropped()*/) :
+DropWidget::DropRegion::DropRegion(QObject* parent, const QString& title, const QString& description, const QString& iconName /*= "file-import"*/, const bool& dropAllowed /*= true*/, const Dropped& dropped /*= Dropped()*/) :
     QObject(parent),
-    _widget(new StandardWidget(nullptr, title, description, dropAllowed)),
+    _widget(new StandardWidget(nullptr, title, description, iconName, dropAllowed)),
     _dropped(dropped)
 {
 }
@@ -253,7 +253,7 @@ void DropWidget::DropRegion::drop()
         _dropped();
 }
 
-DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QString& title, const QString& description, const bool& dropAllowed /*= true*/) :
+DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QString& title, const QString& description, const QString& iconName /*= "file-import"*/, const bool& dropAllowed /*= true*/) :
     QWidget(parent)
 {
     auto layout = new QVBoxLayout();
@@ -266,7 +266,7 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
 
     iconLabel->setAlignment(Qt::AlignCenter);
     iconLabel->setFont(fontAwesome.getFont(14));
-    iconLabel->setText(fontAwesome.getIconCharacter(dropAllowed ? "file-import" : "exclamation-circle"));
+    iconLabel->setText(fontAwesome.getIconCharacter(dropAllowed ? iconName : "exclamation-circle"));
     iconLabel->setStyleSheet("QLabel { padding: 10px; }");
 
     titleLabel->setAlignment(Qt::AlignCenter);

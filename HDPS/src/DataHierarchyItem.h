@@ -1,27 +1,25 @@
-#ifndef HDPS_DATA_HIERARCHY_ITEM_H
-#define HDPS_DATA_HIERARCHY_ITEM_H
+#pragma once
 
 #include "DataType.h"
-
-#include "util/DatasetRef.h"
+#include "CoreInterface.h"
 #include "actions/WidgetAction.h"
+#include "event/Event.h"
+#include "Set.h"
+#include "DataRemoveAction.h"
+#include "DataCopyAction.h"
 
 #include <QObject>
 #include <QMap>
 #include <QString>
 #include <QDebug>
 #include <QIcon>
+#include <QTimer>
+#include <QBitArray>
 
 namespace hdps
 {
 
-class DataSet;
-
-/** Shared pointer of data hierarchy item */
-using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
-
-/** Vector of data hierarchy item shared pointers */
-using SharedDataHierarchyItems = QVector<SharedDataHierarchyItem>;
+class DatasetImpl;
 
 /** Vector of data hierarchy item pointers */
 using DataHierarchyItems = QVector<DataHierarchyItem*>;
@@ -61,39 +59,45 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the dataset
-     * @param parentDatasetName Name of the parent dataset
+     * @param dataset Smart pointer to dataset
+     * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible
      * @param selected Whether the dataset is selected
      */
-    DataHierarchyItem(QObject* parent = nullptr, const QString& datasetName = "", const QString& parentDatasetName = "", const bool& visible = true, const bool& selected = false);
+    DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
 
     /** Destructor */
     ~DataHierarchyItem();
 
-    /** Gets the dataset name */
-    QString getDatasetName() const;
+    /** Get the dataset GUI name */
+    QString getGuiName() const;
 
     /**
-     * Set the dataset name
-     * @param datasetName Name of the dataset
+     * Set the dataset GUI name
+     * @param guiName GUI name of the dataset
      */
-    void setDatasetName(const QString& datasetName);
+    void setGuiName(const QString& guiName);
 
     /**
-     * Renames the dataset
-     * @param intendedDatasetName Intended new name of the dataset
+     * Renames the GUI name of the dataset
+     * @param newGuiName New GUI name of the dataset
      */
-    void renameDataset(const QString& intendedDatasetName);
+    void renameDataset(const QString& newGuiName);
 
-    /** Gets the parent hierarchy item */
-    DataHierarchyItem* getParent() const;
+    /** Get reference to parent hierarchy item */
+    DataHierarchyItem& getParent() const;
+
+    /** Walks up the hierarchy and returns all parents */
+    void getParents(DataHierarchyItems& parents) const;
 
     /** Returns whether the data hierarchy item has a parent */
     bool hasParent() const;
 
-    /** Gets the names of the children name */
-    DataHierarchyItems getChildren() const;
+    /**
+     * Gets the names of the children name
+     * @param recursive Recursive
+     */
+    DataHierarchyItems getChildren(const bool& recursive = false) const;
 
     /** Gets the number of children */
     std::uint32_t getNumberOfChildren() const;
@@ -145,18 +149,21 @@ public:
      */
     QIcon getIconByName(const QString& name) const;
 
+    /** Get the full path name of the data hierarchy item (separated by forward slashes) */
+    QString getFullPathName() const;
+
 protected:
 
-    /** Sets the parent hierarchy item */
-    void setParent(DataHierarchyItem* parent);
+    /** Set reference to parent hierarchy item */
+    void setParent(DataHierarchyItem& parent);
 
 public: // Hierarchy
 
     /**
-     * Adds a child (name reference to data hierarchy item)
-     * @param name Name of the child
+     * Add a child
+     * @param child Reference to child data hierarchy item
      */
-    void addChild(const QString& name);
+    void addChild(DataHierarchyItem& child);
 
     /**
      * Removes a child (name reference to data hierarchy item)
@@ -170,12 +177,12 @@ public: // Miscellaneous
     QString toString() const;
 
     /** Get the dataset */
-    DataSet& getDataset();
+    Dataset<DatasetImpl> getDataset() const;
 
     /** Get the dataset */
     template<typename DatasetType>
-    DatasetType& getDataset() {
-        return dynamic_cast<DatasetType&>(getDataset());
+    Dataset<DatasetType> getDataset() const {
+        return Dataset<DatasetType>(getDataset().get<DatasetType>());
     };
 
     /** Get the dataset type */
@@ -217,7 +224,18 @@ public: // Actions
      */
     void populateContextMenu(QMenu* contextMenu);;
 
-public: // Task
+public: // Lock
+
+    /** Get locked status */
+    bool getLocked() const;
+
+    /**
+     * Set locked status
+     * @param locked Whether the dataset is locked
+     */
+    void setLocked(const bool& locked);
+
+public: // Tasks
 
     /** Get task name */
     QString getTaskName() const;
@@ -236,11 +254,11 @@ public: // Task
 
     /**
      * Sets the task description
-     * @param taskDescription Task description
+     * @param taskDescription Task description [0, 1]
      */
     void setTaskDescription(const QString& taskDescription);
 
-    /** Gets the task progress */
+    /** Gets the task progress [0, 1] */
     float getTaskProgress() const;
 
     /**
@@ -248,6 +266,18 @@ public: // Task
      * @param taskProgress Task progress
      */
     void setTaskProgress(const float& taskProgress);
+
+    /**
+     * Set the number of sub tasks
+     * @param numberOfSubTasks Number of sub tasks
+     */
+    void setNumberOfSubTasks(const float& numberOfSubTasks);
+
+    /**
+     * Flag sub task as finished
+     * @param subTaskIndex Index of the sub task
+     */
+    void setSubTaskFinished(const float& subTaskIndex);
 
     /** Convenience functions for status checking */
     bool isIdle() const;
@@ -288,31 +318,49 @@ signals:
     void actionAdded(hdps::gui::WidgetAction& widgetAction);
 
     /**
-     * Signals that the dataset names changed
+     * Signals that the dataset name changed
      * @param datasetName New name of the dataset
      */
     void datasetNameChanged(const QString& datasetName);
 
+    /**
+     * Signals that the locked status changed
+     * @param locked Locked
+     */
+    void lockedChanged(const bool& locked);
+
 protected:
-    util::DatasetRef<DataSet>   _dataset;           /** Dataset reference */
-    DataHierarchyItem*          _parent;            /** Pointer to parent data hierarchy item */
-    DataHierarchyItems          _children;          /** Pointers to child items (if any) */
-    bool                        _visible;           /** Whether the dataset is visible */
-    bool                        _selected;          /** Whether the hierarchy item is selected */
-    IconList                    _namedIcons;        /** Named icons */
-    QString                     _taskDescription;   /** Task description */
-    float                       _taskProgress;      /** Task progress */
-    QString                     _taskName;          /** Name of the current task */
-    TaskStatus                  _taskStatus;        /** Status of the current task */
-    hdps::gui::WidgetActions    _actions;           /** Widget actions */
+    Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
+    DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
+    DataHierarchyItems          _children;              /** Pointers to child items (if any) */
+    bool                        _visible;               /** Whether the dataset is visible */
+    bool                        _selected;              /** Whether the hierarchy item is selected */
+    bool                        _locked;                /** Whether the dataset is locked */
+    IconList                    _namedIcons;            /** Named icons */
+    QString                     _taskDescription;       /** Task description */
+    float                       _taskProgress;          /** Task progress */
+    QBitArray                   _subTasks;              /** Sub-tasks bit array */
+    QString                     _taskName;              /** Name of the current task */
+    TaskStatus                  _taskStatus;            /** Status of the current task */
+    QTimer                      _taskDescriptionTimer;  /** Task description timer which prevents excessive successive GUI updates */
+    QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
+    hdps::gui::WidgetActions    _actions;               /** Widget actions */
+    DataRemoveAction            _dataRemoveAction;      /** Data remove action */
+    DataCopyAction              _dataCopyAction;        /** Data copy action */
 
 protected:
     friend class DataHierarchyManager;
     friend class DataManager;
+
+    /** Single shot task update timer interval */
+    static constexpr std::uint32_t TASK_UPDATE_TIMER_INTERVAL = 100;
+
+    /** Single shot message disappear timer interval */
+    static constexpr std::uint32_t MESSAGE_DISAPPEAR_INTERVAL = 1500;
 };
 
 /**
- * Print to console
+ * Print data hierarchy item to the console
  * @param debug Debug
  * @param dataHierarchyItem Data hierarchy item
  */
@@ -326,14 +374,12 @@ inline QDebug operator << (QDebug debug, const DataHierarchyItem& dataHierarchyI
 }
 
 /**
- * Compares to named icons
+ * Compares two named icons
  * @param lhs Left hand side icon
  * @param rhs Right hand side icon
- * @param dataHierarchyItem Data hierarchy item
+ * @return Whether the icons are equal
  */
 inline bool operator == (const hdps::DataHierarchyItem::NamedIcon& lhs, const hdps::DataHierarchyItem::NamedIcon& rhs)
 {
     return lhs.first == rhs.first;
 }
-
-#endif // HDPS_DATA_HIERARCHY_ITEM_H

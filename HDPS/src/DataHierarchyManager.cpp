@@ -1,9 +1,13 @@
 #include "DataHierarchyManager.h"
 #include "DataManager.h"
 
+#include "util/Exception.h"
+
 #include <QMessageBox>
 
 #include <stdexcept>
+
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -14,128 +18,134 @@ DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
 {
 }
 
-void DataHierarchyManager::addItem(const QString& datasetName, const QString& parentDatasetName /*= ""*/, const bool& visible /*= true*/)
+void DataHierarchyManager::addItem(Dataset<DatasetImpl>& dataset, Dataset<DatasetImpl>& parentDataset, const bool& visible /*= true*/)
 {
-    qDebug() << "Adding" << datasetName << "to the data hierarchy";
+    qDebug() << "Adding" << dataset->getGuiName() << "to the data hierarchy";
 
     try {
-        if (datasetName.isEmpty())
-            throw std::runtime_error("Dataset name is empty");
 
         // Create new data hierarchy item
-        const auto newDataHierarchyItem = new DataHierarchyItem(this, datasetName, parentDatasetName, visible);
+        const auto newDataHierarchyItem = new DataHierarchyItem(this, dataset, parentDataset, visible);
 
         _dataHierarchyItems << newDataHierarchyItem;
 
-        if (!parentDatasetName.isEmpty())
-            getItem(parentDatasetName)->addChild(datasetName);
+        // Add child item if the parent is valid
+        if (parentDataset.isValid())
+            parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
 
-        emit itemAdded(newDataHierarchyItem);
+        // Notify others that an item is added
+        emit itemAdded(*newDataHierarchyItem);
+
+        // Notify others that a child is added
+        if (parentDataset.isValid())
+            Application::core()->notifyDataChildAdded(parentDataset, dataset);
     }
-    catch (std::exception& e) {
-        QMessageBox::critical(nullptr, "Unable to add dataset to data hierarchy", e.what());
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to add dataset to the data hierarchy manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to add dataset to the data hierarchy manager");
     }
 }
 
-QStringList DataHierarchyManager::removeItem(const QString& datasetName, const bool& recursively /*= false*/)
+void DataHierarchyManager::removeItem(const Dataset<DatasetImpl>& dataset, const bool& recursively /*= false*/)
 {
-    qDebug() << "Removing" << datasetName << "from the data hierarchy";
-
-    QStringList datasetsToRemove({ datasetName });
-
     try {
-        if (datasetName.isEmpty())
-            throw std::runtime_error("Dataset name is empty");
+        qDebug() << "Removing" << dataset->getGuiName() << "from the data hierarchy";
 
-        const auto hierarchyItem = getItem(datasetName);
+        QVector<Dataset<DatasetImpl>> datasetsToRemove({ dataset });
 
-        if (hierarchyItem == nullptr)
-            throw std::runtime_error(QString("%1 does not exist in the data hierarchy").arg(datasetName).toLatin1());
-
-        if (recursively) {
-            auto dataHierarchyItem  = getItem(datasetName);
-            auto children           = getChildren(dataHierarchyItem);
-
-            // Build a list of dataset names which need to be removed
-            for (auto child : children)
-                datasetsToRemove << child->getDatasetName();
-        }
-        else {
-
-            // Get the immediate children which need to be re-located
-            const auto immediateChildren = getChildren(getItem(datasetName), false);
-
-            // Relocate the immediate children to the root
-            for (auto immediateChild : immediateChildren) {
-                emit itemAboutToBeRelocated(immediateChild);
-                {
-                    immediateChild->setParent(nullptr);
-                }
-                emit itemRelocated(immediateChild);
-            }
-        }
+        // Add children recursively
+        for (auto dataHierarchyItem : const_cast<Dataset<DatasetImpl>&>(dataset)->getDataHierarchyItem().getChildren(true))
+            datasetsToRemove << dataHierarchyItem->getDataset();
 
         // Reverse the dataset names so we remove bottom-up
         std::reverse(datasetsToRemove.begin(), datasetsToRemove.end());
 
         // Remove the items from the list
-        for (auto datasetToRemove : datasetsToRemove) {
-            emit itemAboutToBeRemoved(datasetToRemove);
-            {
-                const auto itemToRemove = getItem(datasetToRemove);
+        for (auto& datasetToRemove : datasetsToRemove) {
+            
+            // Get reference to data hierarchy item
+            auto& dataHierarchyItemToRemove = datasetToRemove->getDataHierarchyItem();
 
+            // Get smart pointer to parent dataset
+            const auto parentDataset = dataHierarchyItemToRemove.getParent().getDataset();
+
+            // Get GUID of the the dataset which is about to be removed
+            const auto datasetGuid = dataHierarchyItemToRemove.getDataset()->getGuid();
+
+            emit itemAboutToBeRemoved(*datasetToRemove);
+            {
                 // Remove from internal list
-                _dataHierarchyItems.removeOne(itemToRemove);
+                _dataHierarchyItems.removeOne(&dataHierarchyItemToRemove);
 
                 // Free memory
-                delete itemToRemove;
+                delete &dataHierarchyItemToRemove;
             }
-            emit itemRemoved(datasetToRemove);
+            emit itemRemoved(datasetToRemove->getGuid());
+
+            // Notify others that a child is removed
+            if (dataset->getDataHierarchyItem().hasParent())
+                Application::core()->notifyDataChildRemoved(parentDataset, datasetGuid);
         }
-    } catch (std::exception& e) {
-        QMessageBox::critical(nullptr, "Unable to remove dataset(s) from data hierarchy", e.what());
     }
-
-    return datasetsToRemove;
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove item(s) from the data hierarchy manager");
+    }
 }
 
-const DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetName) const
+const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid) const
 {
-    return const_cast<DataHierarchyManager*>(this)->getItem(datasetName);
+    return const_cast<DataHierarchyManager*>(this)->getItem(datasetGuid);
 }
 
-DataHierarchyItem* DataHierarchyManager::getItem(const QString& datasetName)
+DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
 {
-    Q_ASSERT(!datasetName.isEmpty());
+    try
+    {
+        Q_ASSERT(!datasetGuid.isEmpty());
 
-    for (auto dataHierarchyItem : _dataHierarchyItems)
-        if (dataHierarchyItem->getDatasetName() == datasetName)
-            return dataHierarchyItem;
-
-    return nullptr;
+        for (auto dataHierarchyItem : _dataHierarchyItems)
+            if (dataHierarchyItem->getDataset().getDatasetGuid() == datasetGuid)
+                return *dataHierarchyItem;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to get item from the data hierarchy manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to get item from the data hierarchy manager");
+    }
 }
 
-void DataHierarchyManager::selectItem(const QString& datasetName)
+void DataHierarchyManager::selectItem(Dataset<DatasetImpl>& dataSet)
 {
-    qDebug() << "Selecting" << datasetName << "in the data hierarchy";
+    qDebug() << "Selecting" << dataSet->getGuiName() << "in the data hierarchy";
 
     try {
-        if (datasetName.isEmpty())
-            throw std::runtime_error("Dataset name is empty");
 
-        const auto hierarchyItem = getItem(datasetName);
+        // Get data hierarchy item that needs to be selected
+        auto& hierarchyItem = dataSet->getDataHierarchyItem();
 
-        if (hierarchyItem == nullptr)
-            throw std::runtime_error(QString("%1 does not exist in the data hierarchy").arg(datasetName).toLatin1());
-
+        // Deselect other data hierarchy items
         for (auto dataHierarchyItem : _dataHierarchyItems)
             if (dataHierarchyItem->isSelected())
                 dataHierarchyItem->deselect();
 
-        hierarchyItem->select();
+        // Select the data hierarchy item
+        hierarchyItem.select();
     }
-    catch (std::exception& e) {
-        QMessageBox::critical(nullptr, "Unable to select dataset in data hierarchy", e.what());
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to select item in the data hierarchy manager", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to select item in the data hierarchy manager");
     }
 }
 
@@ -145,6 +155,7 @@ DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem* dataHier
 
     auto children = dataHierarchyItem->getChildren();
 
+    // Get children recursively
     if (recursive)
         for (auto child : children)
             children << getChildren(child, recursive);

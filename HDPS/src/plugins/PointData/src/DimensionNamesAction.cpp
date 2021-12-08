@@ -1,14 +1,16 @@
 #include "DimensionNamesAction.h"
 
+#include "event/Event.h"
+
 #include <QHBoxLayout>
 #include <QListView>
 
 using namespace hdps;
 
-DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName) :
+DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, Points& points) :
     WidgetAction(parent),
     EventListener(),
-    _points(datasetName),
+    _points(&points),
     _dimensionNames(),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update")
@@ -50,7 +52,7 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
         if (!_points.isValid())
             return;
 
-        if (dataEvent->dataSetName != _points->getName())
+        if (dataEvent->getDataset() != _points)
             return;
 
         switch (dataEvent->getType()) {

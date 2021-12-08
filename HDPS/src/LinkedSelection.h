@@ -1,29 +1,33 @@
-#ifndef HDPS_LINKED_SELECTION_H
-#define HDPS_LINKED_SELECTION_H
+#pragma once
+
+#include "Dataset.h"
 
 #include <QString>
+
 #include <map>
 #include <vector>
 
 namespace hdps
 {
-    using SelectionMap = std::map<unsigned int, std::vector<unsigned int>>;
+class DatasetImpl;
 
-    class LinkedSelection
-    {
-    public:
-        LinkedSelection(QString source, QString target);
+using SelectionMap = std::map<unsigned int, std::vector<unsigned int>>;
 
-        QString getTargetDataset() { return _targetData; }
-        const SelectionMap& getMapping();
-        void setMapping(SelectionMap& map);
+class LinkedSelection
+{
+public:
+    LinkedSelection(const Dataset<DatasetImpl>& sourceDataSet, const Dataset<DatasetImpl>& targetDataSet);
 
-    private:
-        QString _sourceData;
-        QString _targetData;
+    Dataset<DatasetImpl> getTargetDataset() { return _targetDataSet; }
 
-        SelectionMap _mapping;
-    };
+    const SelectionMap& getMapping();
+    void setMapping(SelectionMap& map);
+
+private: 
+    Dataset<DatasetImpl>    _sourceDataSet;
+    Dataset<DatasetImpl>    _targetDataSet;
+
+    SelectionMap _mapping;
+};
+
 }
-
-#endif // HDPS_LINKED_SELECTION_H

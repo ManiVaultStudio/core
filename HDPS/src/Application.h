@@ -1,7 +1,6 @@
 #pragma once
 
 #include "util/IconFonts.h"
-#include "actions/WidgetActionsManager.h"
 
 #include <QApplication>
 #include <QSettings>

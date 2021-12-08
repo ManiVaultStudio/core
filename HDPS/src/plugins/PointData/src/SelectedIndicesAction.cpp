@@ -1,5 +1,7 @@
 #include "SelectedIndicesAction.h"
 
+#include "event/Event.h"
+
 #include <QGridLayout>
 #include <QListView>
 
@@ -8,11 +10,11 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName) :
+SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, Points& points) :
     WidgetAction(parent),
     EventListener(),
     _core(core),
-    _points(datasetName),
+    _points(&points),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update"),
     _selectionChangedTimer(),
@@ -29,7 +31,7 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
             return;
 
         // Only process points that we reference
-        if (dataEvent->dataSetName != _points.getSourceData().getName())
+        if (dataEvent->getDataset() != _points->getSourceDataset<DatasetImpl>())
             return;
 
         switch (dataEvent->getType()) {
@@ -43,7 +45,7 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
             }
 
             case EventType::DataChanged:
-            case EventType::SelectionChanged:
+            case EventType::DataSelectionChanged:
             {
                 // Update selected indices
                 if (_points->getNumPoints() < MANUAL_UPDATE_THRESHOLD)
@@ -96,11 +98,11 @@ void SelectedIndicesAction::updateSelectedIndices()
         return;
 
     // Get points selection
-    auto& selection = dynamic_cast<Points&>(_points->getSelection());
+    auto selection = _points->getSelection<Points>();
 
     // Generate 
     if (_points->isFull()) {
-        _selectedIndices = selection.indices;
+        _selectedIndices = selection->indices;
     }
     else {
         _selectedIndices.clear();
@@ -110,7 +112,7 @@ void SelectedIndicesAction::updateSelectedIndices()
         QSet<std::uint32_t> indicesSet(_points->indices.begin(), _points->indices.end());
 
         // Add selection indices if they belong to the subset
-        for (const auto& selectionIndex : selection.indices)
+        for (const auto& selectionIndex : selection->indices)
             if (indicesSet.contains(selectionIndex))
                 _selectedIndices.push_back(selectionIndex);
     }

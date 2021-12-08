@@ -3,6 +3,7 @@
 #include "Plugin.h"
 
 #include "DataHierarchyItem.h"
+#include "Set.h"
 
 #include <memory>
 
@@ -25,47 +26,32 @@ public:
 
     ~AnalysisPlugin() override {};
 
-    /** Get input dataset name */
-    QString getInputDatasetName() const {
-        return _input.getDatasetName();
+    /**
+     * Set input dataset smart pointer
+     * @param inputDataset Smart pointer to the input dataset
+     */
+    void setInputDataset(Dataset<DatasetImpl>& inputDataset) {
+        _input = inputDataset;
+    }
+
+    /** Get input dataset smart pointer */
+    template<typename DatasetType = DatasetImpl>
+    Dataset<DatasetType> getInputDataset() {
+        return Dataset<DatasetType>(_input.get<DatasetType>());
     }
 
     /**
-     * Set input dataset name (updates the input data reference)
-     * @param inputDatasetName Name of the input dataset
+     * Set output dataset smart pointer
+     * @param outputDataset Smart pointer to output dataset
      */
-    void setInputDatasetName(const QString& inputDatasetName) {
-        _input.setDatasetName(inputDatasetName);
+    void setOutputDataset(Dataset<DatasetImpl>& outputDataset) {
+        _output = outputDataset;
     }
 
-    /** Get input dataset */
-    template<typename DatasetType>
-    DatasetType& getInputDataset() {
-        return dynamic_cast<DatasetType&>(*_input);
-    }
-
-    /** Get output dataset name */
-    QString getOutputDatasetName() {
-        return _output.getDatasetName();
-    }
-
-    /** Get output dataset name */
-    const QString getOutputDatasetName() const {
-        return _output.getDatasetName();
-    }
-
-    /**
-     * Set output dataset name (updates the output data reference)
-     * @param outputDatasetName Name of the output dataset
-     */
-    void setOutputDatasetName(const QString& outputDatasetName) {
-        _output.setDatasetName(outputDatasetName);
-    }
-
-    /** Get output dataset */
-    template<typename DatasetType>
-    DatasetType& getOutputDataset() {
-        return dynamic_cast<DatasetType&>(*_output);
+    /** Get output dataset smart pointer */
+    template<typename DatasetType = DatasetImpl>
+    Dataset<DatasetType> getOutputDataset() {
+        return Dataset<DatasetType>(_output.get<DatasetType>());
     }
 
 protected: // Status
@@ -75,7 +61,7 @@ protected: // Status
         if (!_output.isValid())
             return DataHierarchyItem::TaskStatus::Undefined;
 
-        return _output->getHierarchyItem().getTaskStatus();
+        return _output->getDataHierarchyItem().getTaskStatus();
     }
 
     /**
@@ -86,7 +72,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem().setTaskName(taskName);
+        _output->getDataHierarchyItem().setTaskName(taskName);
     }
 
     /**
@@ -97,7 +83,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem().setTaskProgress(taskProgress);
+        _output->getDataHierarchyItem().setTaskProgress(taskProgress);
     }
 
     /**
@@ -108,7 +94,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem().setTaskDescription(taskDescription);
+        _output->getDataHierarchyItem().setTaskDescription(taskDescription);
     }
 
     /** Set the task status to running */
@@ -116,7 +102,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem().setTaskRunning();
+        _output->getDataHierarchyItem().setTaskRunning();
     }
 
     /** Set the task status to finished */
@@ -124,7 +110,7 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem().setTaskFinished();
+        _output->getDataHierarchyItem().setTaskFinished();
     }
 
     /** Set the task status to aborted */
@@ -132,12 +118,12 @@ protected: // Status
         if (!_output.isValid())
             return;
 
-        _output->getHierarchyItem().setTaskAborted();
+        _output->getDataHierarchyItem().setTaskAborted();
     }
 
 protected:
-    util::DatasetRef<DataSet>     _input;       /** Input dataset */
-    util::DatasetRef<DataSet>     _output;      /** Output dataset */
+    Dataset<DatasetImpl>    _input;       /** Input dataset smart pointer */
+    Dataset<DatasetImpl>    _output;      /** Output dataset smart pointer */
 };
 
 

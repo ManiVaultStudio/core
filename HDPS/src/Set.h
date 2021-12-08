@@ -3,9 +3,14 @@
 
 #include "CoreInterface.h"
 #include "RawData.h"
+#include "Dataset.h"
+
+#include "actions/WidgetAction.h"
 
 #include <QString>
 #include <QVector>
+#include <QUuid>
+
 #include <memory>
 
 namespace hdps
@@ -13,81 +18,122 @@ namespace hdps
 
 class DataHierarchyItem;
 
-using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
-
-class DataSet
+/**
+ * Dataset implementation class
+ * Base dataset class from which concrete dataset classes derive
+  */
+class DatasetImpl
 {
 public:
-    DataSet(CoreInterface* core, QString dataName) :
+
+    /**
+     * Constructor
+     * @param core Pointer to the core
+     * @param rawDataName Name of the raw data
+     */
+    DatasetImpl(CoreInterface* core, const QString& rawDataName) :
         _core(core),
-        _dataName(dataName),
+        _rawData(nullptr),
+        _guid(QUuid::createUuid().toString()),
+        _guiName(),
+        _rawDataName(rawDataName),
         _all(false),
-        _rawData(nullptr)
+        _derived(false),
+        _sourceDataset(),
+        _properties(),
+        _groupIndex(-1)
     {
     }
 
-    virtual ~DataSet() {}
+    /** Destructor */
+    virtual ~DatasetImpl()
+    {
+    }
 
-    virtual void init() {};
-
-    virtual DataSet* copy() const = 0;
+    /** Performs startup initialization */
+    virtual void init()
+    {
+    };
 
     /**
-     * Create subset
-     * @param subsetName Name of the subset
-     * @param parentSetName Name of the parent dataset
+     * Get a copy of the dataset
+     * @return Smart pointer to copy of dataset
+     */
+    virtual Dataset<DatasetImpl> copy() const = 0;
+
+    /**
+     * Create subset and specify where the subset will be placed in the data hierarchy
+     * @param guiName Name of the subset in the GUI
+     * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
+     * @return Smart pointer to the created subset
      */
-    virtual QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const = 0;
+    virtual Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const = 0;
 
-    QString getName() const
+    /** Get the globally unique identifier of the dataset in string format */
+    QString getGuid() const
     {
-        return _name;
+        return _guid;
     }
 
-    void setName(QString name)
+    /** Get the GUI name of the dataset */
+    QString getGuiName() const
     {
-        _name = name;
+        return _guiName;
     }
 
     /**
-     * Returns true if this set represents the full data and false if it's a subset.
+     * Set the GUI name of the dataset
+     * @param guiName Name of the dataset in the graphical user interface
      */
+    void setGuiName(const QString& guiName)
+    {
+        // Cache the old GUI name
+        const auto previousGuiName = _guiName;
+
+        // Assign new GUI name
+        _guiName = guiName;
+
+        // Notify others that the data GUI name changed
+        Application::core()->notifyDataGuiNameChanged(*this, previousGuiName);
+    }
+
+    /** Returns true if this set represents the full data and false if it's a subset */
     bool isFull() const
     {
         return _all;
     }
 
+    /** Returns whether the dataset is derived */
     bool isDerivedData() const
     {
         return _derived;
     }
 
-    /**
-     * Returns the data type of the raw data associated with this dataset.
-     */
+    /** Returns the data type of the raw data associated with this dataset */
     DataType getDataType() const
     {
-        return _core->requestRawData(getDataName()).getDataType();
+        return _core->requestRawData(getRawDataName()).getDataType();
+    }
+
+    /** Get source dataset if the given set is derived */
+    template<typename DatasetType>
+    Dataset<DatasetType> getSourceDataset() const
+    {
+        if (!isDerivedData())
+            return toSmartPointer<DatasetType>();
+
+        return Dataset<DatasetType>(_sourceDataset->getSourceDataset<DatasetType>());
     }
 
     /**
-     * If the given set is derived from another set, then calls this function on the other set.
-     * If the given set is not derived from another set, then returns the given set.
+     * Marks this dataset as derived and sets the source dataset globally unique identifier
+     * @param dataset Smart pointer to the source dataset
      */
-    template <class T>
-    static T& getSourceData(T& set)
+    void setSourceDataSet(const Dataset<DatasetImpl>& dataset)
     {
-        return set.isDerivedData() ? getSourceData(static_cast<T&>(set._core->requestData(set._sourceSetName))) : set;
-    }
-
-    /**
-     * Marks this dataset as derived and sets the dataset it's derived from to sourceDataName.
-     */
-    void setSourceData(QString sourceDataName)
-    {
-        _sourceSetName = sourceDataName;
-        _derived = true;
+        _sourceDataset  = dataset;
+        _derived        = true;
     }
 
     /**
@@ -97,9 +143,9 @@ public:
      *
      * @return The selection associated with this data set
      */
-    DataSet& getSelection() const
+    Dataset<DatasetImpl> getSelection() const
     {
-        return _core->requestSelection(getSourceData(*this).getDataName());
+        return _core->requestSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
     /**
@@ -110,24 +156,104 @@ public:
      * @return The selection of dataset type associated with this data set
      */
     template<typename DatasetType>
-    DatasetType& getSelection() const
+    Dataset<DatasetType> getSelection() const
     {
-        return dynamic_cast<DatasetType&>(_core->requestSelection(getSourceData(*this).getDataName()));
+        return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
-    void setSelection(std::vector<unsigned int> indices)
+    /**
+     * Get smart pointer to set
+     * @return Smart pointer to the set
+     */
+    Dataset<DatasetImpl> toSmartPointer() const
     {
+        return Dataset<DatasetImpl>(const_cast<DatasetImpl*>(this));
+    }
 
+    /**
+     * Get smart pointer to set
+     * @return Smart pointer to the set
+     */
+    template<typename DatasetType>
+    Dataset<DatasetType> toSmartPointer() const
+    {
+        auto nonConstThis = const_cast<DatasetImpl*>(this);
+        return Dataset<DatasetType>(dynamic_cast<DatasetType*>(nonConstThis));
+    }
+
+    /**
+     * Set selection
+     * @param indices Selection indices
+     */
+    virtual void setSelection(const std::vector<std::uint32_t>& indices)
+    {
+    }
+
+    /** Get pointer to the core */
+    CoreInterface* getCore() {
+        return _core;
     }
 
     /** Get icon for the dataset */
     virtual QIcon getIcon() const = 0;
 
-    /** Get reference to data hierarchy item */
-    DataHierarchyItem& getHierarchyItem();
+
+public: // Hierarchy
 
     /** Get reference to data hierarchy item */
-    const DataHierarchyItem& getHierarchyItem() const;
+    DataHierarchyItem& getDataHierarchyItem();
+
+    /** Get reference to data hierarchy item */
+    const DataHierarchyItem& getDataHierarchyItem() const;
+
+    /** Get parent dataset (if any) */
+    Dataset<DatasetImpl> getParent() const;
+
+    /**
+     * Get child datasets (if any) of the specified type(s)
+     * @param dataTypes Dataset type(s) to filter out
+     * @return Child datasets of the dataset type(s)
+     */
+    QVector<Dataset<DatasetImpl>> getChildren(const QVector<DataType>& dataTypes = QVector<DataType>()) const;
+
+    /**
+     * Get child datasets (if any) of the specified type
+     * @param filterDataType Type of data to filter
+     * @return Child datasets of the dataset type
+     */
+    QVector<Dataset<DatasetImpl>> getChildren(const DataType& filterDataType)
+    {
+        return getChildren(QVector<DataType>({ filterDataType }));
+    }
+
+public: // Lock
+
+    /** Lock the dataset */
+    void lock();
+
+    /** Unlock the dataset */
+    void unlock();
+
+    /** Get whether the dataset is locked */
+    bool isLocked() const;
+
+public: // Operators
+
+    /**
+     * Equality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator == (const DatasetImpl& rhs) const {
+        return rhs.getGuid() == _guid;
+    }
+
+    /**
+     * Inequality operator
+     * @param rhs Right-hand-side operator
+     */
+    const bool operator != (const DatasetImpl& rhs) const {
+        return rhs.getGuid() != _guid;
+    }
 
 public: // Properties
 
@@ -171,6 +297,17 @@ public: // Properties
         return _properties.keys();
     }
 
+public:
+
+    /** Get group index */
+    std::int32_t getGroupIndex() const;
+
+    /**
+     * Set group index
+     * @param groupIndex group index
+     */
+    void setGroupIndex(const std::int32_t& groupIndex);
+
 public: // Actions
 
     /** Returns list of shared action widgets*/
@@ -184,7 +321,7 @@ public: // Actions
      * @param parent Parent widget
      * @return Context menu
      */
-    QMenu* getContextMenu(QWidget* parent = nullptr);;
+    QMenu* getContextMenu(QWidget* parent = nullptr);
 
     /**
      * Populates existing menu with actions menus
@@ -193,46 +330,71 @@ public: // Actions
     void populateContextMenu(QMenu* contextMenu);;
 
 protected:
+
+    /** Get raw data */
     template <class DataType>
     DataType& getRawData() const
     {
         if (_rawData == nullptr)
-            _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getDataName()));
+            _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getRawDataName()));
+
         return *static_cast<DataType*>(_rawData);
     }
 
-    QString getDataName() const
+    /** Get the name of the raw data */
+    QString getRawDataName() const
     {
-        return _dataName;
-    }
-
-    QString getSourceName() const
-    {
-        return _sourceSetName;
+        return _rawDataName;
     }
 
     /**
      * Set whether this set represents all the data or only a subset
+     * @param all Whether this is a full dataset
      */
-    void setAll(bool all)
+    void setAll(const bool& all)
     {
         _all = all;
     }
 
-    CoreInterface* _core;
-private:
-    mutable plugin::RawData*    _rawData;
+public: // Operators
 
-    QString                     _name;                  /** Name of the dataset */
-    QString                     _dataName;              /** Name of the raw data */
-    bool                        _all;                   /** Whether this is the full dataset */
-    bool                        _derived = false;       /** Whether this dataset is derived from another dataset */
-    QString                     _sourceSetName;         /** Name of the source dataset (if any) */
-    QMap<QString, QVariant>     _properties;            /** Properties map */
+    /**
+     * Assignment operator
+     * @param other Reference to assign from
+     */
+    DatasetImpl& operator=(const DatasetImpl& other)
+    {
+        _core           = other._core;
+        _guiName        = other._guiName;
+        _rawDataName    = other._rawDataName;
+        _all            = other._all;
+        _derived        = other._derived;
+        _sourceDataset  = other._sourceDataset;
+        _properties     = other._properties;
+
+        return *this;
+    }
+
+protected:
+    CoreInterface*              _core;              /** Pointer to the core interface */
+
+private:
+    mutable plugin::RawData*    _rawData;           /** Pointer to the raw data referenced in this set */
+    QString                     _guid;              /** Globally unique dataset name */
+    QString                     _guiName;           /** Name of the dataset in the graphical user interface */
+    QString                     _rawDataName;       /** Name of the raw data */
+    bool                        _all;               /** Whether this is the full dataset */
+    bool                        _derived;           /** Whether this dataset is derived from another dataset */
+    Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
+    QMap<QString, QVariant>     _properties;        /** Properties map */
+    std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
 
     friend class Core;
     friend class DataManager;
     friend class EventListener;
+
+    template<typename DatasetType>
+    friend class SmartDataset;
 };
 
 } // namespace hdps

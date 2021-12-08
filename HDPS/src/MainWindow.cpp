@@ -61,11 +61,11 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataHierarchyWidget    = new DataHierarchyWidget(this);
     _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
-    connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetNameChanged, this, [this](const QString& selectedDatasetName) {
-        _dataPropertiesWidget->setDatasetName(selectedDatasetName);
+    connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetChanged, this, [this](const QString& datasetId) {
+        _dataPropertiesWidget->setDatasetId(datasetId);
     });
 
-    connect(_dataPropertiesWidget, &DataPropertiesWidget::datasetNameChanged, this, [this](const QString& datasetName) {
+    connect(_dataPropertiesWidget, &DataPropertiesWidget::currentDatasetGuiNameChanged, this, [this](const QString& datasetName) {
         _dataPropertiesDockWidget->setWindowTitle(QString("Data properties: %1").arg(datasetName));
     });
 
@@ -340,13 +340,13 @@ void MainWindow::initializeSettingsDockingArea()
     _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
     _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _dataHierarchyDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sitemap"));
+    _dataHierarchyDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap", QSize(16, 16)));
     _dataHierarchyDockWidget->setWidget(_dataHierarchyWidget);
 
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _dataPropertiesDockWidget->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("edit"));
+    _dataPropertiesDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("edit", QSize(16, 16)));
     _dataPropertiesDockWidget->setWidget(_dataPropertiesWidget);
 
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);

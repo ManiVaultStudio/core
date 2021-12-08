@@ -1,7 +1,9 @@
 #include "ClustersAction.h"
-#include "DataHierarchyItem.h"
+#include <DataHierarchyItem.h>
 #include "ClusterData.h"
-#include "PointData.h"
+
+#include <PointData.h>
+#include <event/Event.h>
 
 #include <QTreeView>
 #include <QHeaderView>
@@ -15,16 +17,16 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
+ClustersAction::ClustersAction(QObject* parent, Clusters& clusters) :
     WidgetAction(parent),
     EventListener(),
-    _clusters(datasetName),
+    _clusters(&clusters),
     _clustersModel(),
     _importAction(this, "Import"),
     _exportAction(this, "Export")
 {
     setText("Clusters");
-    setEventCore(Application::core());
+    setEventCore(hdps::Application::core());
 
     _importAction.setToolTip("Import clusters from file");
     _exportAction.setToolTip("Export clusters to file");
@@ -36,7 +38,7 @@ ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
         if (!_clusters.isValid())
             return;
 
-        if (dataEvent->dataSetName != _clusters->getName())
+        if (dataEvent->getDataset() != _clusters)
             return;
 
         switch (dataEvent->getType())
@@ -47,7 +49,7 @@ ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
                 break;
             }
 
-            case EventType::SelectionChanged:
+            case EventType::DataSelectionChanged:
             {
                 break;
             }
@@ -59,7 +61,7 @@ ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
 
     const auto updateClusters = [this]() -> void {
         _clusters->getClusters() = _clustersModel.getClusters();
-        _clusters.notifyDataChanged();
+        Application::core()->notifyDataChanged(*_clusters);
     };
 
     connect(&_clustersModel, &QAbstractItemModel::dataChanged, this, [this, updateClusters](const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>()) {
@@ -112,7 +114,7 @@ ClustersAction::ClustersAction(QObject* parent, const QString& datasetName) :
             _clusters->fromVariant(clusterJsonDocument.toVariant());
 
             // Let others know that the clusters changed
-            _clusters.notifyDataChanged();
+            Application::core()->notifyDataChanged(*_clusters);
         }
         catch (std::exception& e)
         {
@@ -163,43 +165,14 @@ std::vector<Cluster>* ClustersAction::getClusters()
     return &_clusters->getClusters();
 }
 
-DatasetRef<Clusters>& ClustersAction::getClustersDataset()
+Dataset<Clusters>& ClustersAction::getClustersDataset()
 {
     return _clusters;
 }
 
-void ClustersAction::selectPoints(const std::vector<std::uint32_t>& indices)
-{
-    if (!_clusters.isValid())
-        return;
-
-    auto dataHierarchyItem          = Application::core()->getDataHierarchyItem(_clusters->getName());
-    auto parentDataHierarchyItem    = dataHierarchyItem->getParent();
-    auto& points                    = parentDataHierarchyItem->getDataset<Points>();
-    auto& selection                 = dynamic_cast<Points&>(points.getSelection());
-
-    selection.indices.clear();
-    selection.indices.reserve(indices.size());
-
-    std::vector<std::uint32_t> globalIndices;
-
-    points.getGlobalIndices(globalIndices);
-
-    for (auto index : indices)
-        selection.indices.push_back(globalIndices[index]);
-
-    Application::core()->notifySelectionChanged(parentDataHierarchyItem->getDatasetName());
-}
-
 void ClustersAction::createSubset(const QString& datasetName)
 {
-    auto dataHierarchyItem = Application::core()->getDataHierarchyItem(_clusters->getName());
-    
-    DatasetRef<Points> points(dataHierarchyItem->getParent()->getDatasetName());
-
-    auto& selection = dynamic_cast<Points&>(points->getSelection());
-
-    const auto subsetName = points->createSubset(datasetName, points->getName());
+    _clusters->getParent()->createSubset("Clusters");
 }
 
 void ClustersAction::removeClustersById(const QStringList& ids)
@@ -243,7 +216,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
     // Configure tree view
     clustersTreeView->setModel(&_filterModel);
     clustersTreeView->setSelectionModel(&_selectionModel);
-    clustersTreeView->setFixedHeight(150);
+    clustersTreeView->setFixedHeight(300);
     clustersTreeView->setRootIsDecorated(false);
     clustersTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     clustersTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -271,11 +244,10 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         // Get selected row
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
 
-        // Get reference to cluster selection set
-        auto& currentClusterSelectionIndices = dynamic_cast<Clusters&>(clustersAction->getClustersDataset()->getSelection()).indices;
+        // Indices of the selected clusters
+        std::vector<std::uint32_t> currentClusterSelectionIndices;
 
         // Clear and reserve the selection indices
-        currentClusterSelectionIndices.clear();
         currentClusterSelectionIndices.reserve(clustersAction->getClusters()->size());
 
         // Gather point indices for selection
@@ -287,14 +259,14 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         }
 
         // Select points
-        clustersAction->selectPoints(clustersAction->getClustersDataset()->getSelectedIndices());
+        clustersAction->getClustersDataset()->setSelection(currentClusterSelectionIndices);
 
         // Update state of the remove action
         _removeAction.setEnabled(!selectedRows.isEmpty());
         _mergeAction.setEnabled(selectedRows.count() >= 2);
 
         // Notify others that the cluster selection has changed
-        Application::core()->notifySelectionChanged(clustersAction->getClustersDataset()->getName());
+        Application::core()->notifyDataSelectionChanged(clustersAction->getClustersDataset());
     };
 
     connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {

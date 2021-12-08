@@ -8,15 +8,15 @@ namespace hdps {
 
 using namespace gui;
 
-DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) :
+DataExportAction::DataExportAction(QObject* parent, const Dataset<DatasetImpl>& dataset) :
     WidgetAction(parent),
-    _dataset(datasetName),
+    _dataset(dataset),
     _pluginKinds()
 {
     setText("Export");
     setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
 
-    _dataset->getHierarchyItem().addAction(*this);
+    _dataset->getDataHierarchyItem().addAction(*this);
 
     _pluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::WRITER, QVector<DataType>({ _dataset->getDataType() }));
 
@@ -26,7 +26,7 @@ DataExportAction::DataExportAction(QObject* parent, const QString& datasetName) 
         exporterPluginAction->setIcon(Application::core()->getPluginIcon(pluginKind));
 
         connect(exporterPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            _dataset->getHierarchyItem().exportDataset(pluginKind);
+            _dataset->getDataHierarchyItem().exportDataset(pluginKind);
         });
     }
 }

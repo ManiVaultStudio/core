@@ -1,5 +1,4 @@
-#ifndef HDPS_LOGITEMMODEL_H
-#define HDPS_LOGITEMMODEL_H
+#pragma once
 
 // Qt header file:
 #include <QAbstractItemModel>
@@ -66,7 +65,5 @@ private: // Member functions:
     void sort(int column, Qt::SortOrder order) override;
 };
 
-}   //namespace gui
-}   // namespace hdps
-
-#endif // HDPS_LOGITEMMODEL_H
+}
+}

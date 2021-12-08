@@ -47,4 +47,3 @@ static void exceptionMessageBox(const QString& title, const std::exception& exce
 
 }
 }
-    

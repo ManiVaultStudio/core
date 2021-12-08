@@ -1,8 +1,9 @@
 #pragma once
 
 #include "DataAnalysisAction.h"
+#include "DataViewAction.h"
+#include "DataGroupingAction.h"
 #include "DataExportAction.h"
-#include "DataRemoveAction.h"
 
 using namespace hdps::gui;
 using namespace hdps::util;
@@ -23,15 +24,16 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the dataset
+     * @param dataset Smart pointer to the dataset
      */
-    DataAction(QObject* parent, const QString& datasetName);
+    DataAction(QObject* parent, const Dataset<DatasetImpl>& dataset);
 
 protected:
-    DatasetRef<DataSet>     _dataset;                /** Dataset reference */
+    Dataset<DatasetImpl>    _dataset;               /** Smart pointer to the dataset */
     DataAnalysisAction      _dataAnalysisAction;    /** Data analysis action */
+    DataViewAction          _dataViewAction;        /** Data view action */
+    DataGroupingAction      _dataGroupingAction;    /** Data grouping action */
     DataExportAction        _dataExportAction;      /** Data export action */
-    DataRemoveAction        _dataRemoveAction;      /** Data remove action */
 };
 
 }

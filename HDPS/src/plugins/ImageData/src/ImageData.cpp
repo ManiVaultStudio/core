@@ -13,6 +13,7 @@
 
 Q_PLUGIN_METADATA(IID "nl.BioVault.ImageData")
 
+using namespace hdps;
 using namespace hdps::util;
 
 ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :
@@ -112,9 +113,9 @@ void ImageData::setNumberImages(const std::uint32_t& numberOfImages)
     _numberOfImages = numberOfImages;
 }
 
-hdps::DataSet* ImageData::createDataSet() const
+Dataset<DatasetImpl> ImageData::createDataSet() const
 {
-    return new Images(_core, getName());
+    return Dataset<DatasetImpl>(new Images(_core, getName()));
 }
 
 QIcon ImageDataFactory::getIcon() const

@@ -11,8 +11,6 @@ namespace gui {
 
 WidgetAction::WidgetAction(QObject* parent) :
     QWidgetAction(parent),
-    _createdBy(),
-    _context(),
     _dataHierarchyItemContext(nullptr),
     _defaultWidgetFlags(),
     _resettable(false),
@@ -97,27 +95,6 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;
-}
-
-void WidgetAction::setContext(const QString& context)
-{
-    _context = context;
-}
-
-void WidgetAction::setContext(const DataHierarchyItem* dataHierarchyItem)
-{
-    if (dataHierarchyItem == _dataHierarchyItemContext)
-        return;
-
-    _dataHierarchyItemContext = dataHierarchyItem;
-}
-
-QString WidgetAction::getContext() const
-{
-    if (_dataHierarchyItemContext != nullptr)
-        return _dataHierarchyItemContext->getDatasetName();
-
-    return _context;
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

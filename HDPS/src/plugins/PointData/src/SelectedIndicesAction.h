@@ -2,7 +2,6 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
-#include "util/DatasetRef.h"
 
 #include "PointData.h"
 
@@ -56,9 +55,9 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param core Pointer to the core
-     * @param datasetName Name of the points dataset
+     * @param points Reference to points dataset
      */
-    SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName);
+    SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, Points& points);
 
     /** Get selected indices in the points dataset */
     const std::vector<std::uint32_t>& getSelectedIndices() const;
@@ -83,7 +82,7 @@ signals:
 
 protected:
     CoreInterface*              _core;                      /** Pointer to the core */
-    DatasetRef<Points>          _points;                    /** Points dataset reference */
+    Dataset<Points>             _points;                    /** Points dataset reference */
     TriggerAction               _updateAction;              /** Update action */
     ToggleAction                _manualUpdateAction;        /** Manual update action */
     QTimer                      _selectionChangedTimer;     /** Timer to control when selection changes are processed */

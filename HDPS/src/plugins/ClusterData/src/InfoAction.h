@@ -1,11 +1,11 @@
 #pragma once
 
-#include "actions/Actions.h"
-#include "event/EventListener.h"
-#include "util/DatasetRef.h"
-
+#include "Dataset.h"
 #include "ClusterData.h"
 #include "ClustersAction.h"
+
+#include "actions/Actions.h"
+#include "event/EventListener.h"
 
 namespace hdps {
     class CoreInterface;
@@ -31,16 +31,16 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param datasetName Name of the points dataset
+     * @param clusters Reference to clusters dataset
      */
-    InfoAction(QObject* parent, const QString& datasetName);
+    InfoAction(QObject* parent, Clusters& clusters);
 
 public: // Action getters
 
     StringAction& getNumberOfClustersAction() { return _numberOfClustersAction; }
 
 protected:
-    DatasetRef<Clusters>    _clusters;                  /** Clusters dataset reference */
-    StringAction            _numberOfClustersAction;    /** Number of points action */
-    ClustersAction          _clustersAction;            /** Clusters action */
+    Dataset<Clusters>   _clusters;                  /** Clusters dataset smart pointer */
+    StringAction        _numberOfClustersAction;    /** Number of points action */
+    ClustersAction      _clustersAction;            /** Clusters action */
 };

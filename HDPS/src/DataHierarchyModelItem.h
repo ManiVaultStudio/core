@@ -1,11 +1,11 @@
-#ifndef HDPS_DATA_HIERARCHY_MODEL_ITEM_H
-#define HDPS_DATA_HIERARCHY_MODEL_ITEM_H
+#pragma once
 
 #include "Core.h"
 #include "DataHierarchyManager.h"
 
 #include <QObject>
 #include <QVector>
+#include <QRandomGenerator>
 
 class QMenu;
 
@@ -20,15 +20,18 @@ public:
     using PluginHierarchyItems = QVector<DataHierarchyModelItem*>;
 
     /** Columns */
-    enum class Column {
+    enum Column {
         Name,
+        GUID,
         Description,
+        GroupIndex,
         Analysis,
         Progress,
         Analyzing,
+        Locked,
 
         _start = Name,
-        _end = Analyzing
+        _end = Locked
     };
 
 public:
@@ -75,16 +78,10 @@ public:
     /**
      * Get data at column
      * @param column Column index
+     * @param role Data role
      * @return Data in string format
      */
-    QString getDataAtColumn(const std::uint32_t& column) const;
-
-    /**
-     * Get icon at column
-     * @param column Column index
-     * @return Icon
-     */
-    QIcon getIconAtColumn(const std::uint32_t& column) const;
+    QVariant getDataAtColumn(const std::uint32_t& column, int role = Qt::DisplayRole) const;
 
     /** Returns the item context menu */
     QMenu* getContextMenu();
@@ -94,6 +91,12 @@ public:
      * @param intendedDatasetName Intended new name of the dataset
      */
     void renameDataset(const QString& intendedDatasetName);
+
+    /**
+     * Set group index
+     * @param groupIndex group index
+     */
+    void setGroupIndex(const std::int32_t& groupIndex);
 
 protected:
 
@@ -124,10 +127,11 @@ protected:
     QString                     _progressSection;           /** Progress section of the analysis */
     float                       _progressPercentage;        /** Progress percentage of the analysis */
 
+    /** Random number generator for pseudo-random group index colors */
+    static QRandomGenerator rng;
+
 public:
     static Core* core;  /** Static pointer to the core */
 };
 
 }
-
-#endif // HDPS_DATA_HIERARCHY_MODEL_ITEM_H

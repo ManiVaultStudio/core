@@ -1,5 +1,4 @@
-#ifndef HDPS_PLUGINMANAGER_H
-#define HDPS_PLUGINMANAGER_H
+#pragma once
 
 #include "Core.h"
 
@@ -39,16 +38,23 @@ public:
     /**
      * Create an analysis plugin
      * @param kind Kind of analysis
-     * @param inputDatasetName Name of the input dataset
+     * @param dataSet Reference to input dataset
      */
-    void createAnalysisPlugin(const QString& kind, const QString& inputDatasetName);
+    void createAnalysisPlugin(const QString& kind, Dataset<DatasetImpl>& dataSet);
 
     /**
      * Create an exporter plugin
      * @param kind Kind of exporter
-     * @param inputDatasetName Name of the input dataset
+     * @param dataSet Reference to input dataset
      */
-    void createExporterPlugin(const QString& kind, const QString& inputDatasetName);
+    void createExporterPlugin(const QString& kind, Dataset<DatasetImpl>& dataSet);
+
+    /**
+     * Create a view plugin
+     * @param kind Kind of exporter
+     * @param dataSets Input dataset(s)
+     */
+    void createViewPlugin(const QString& kind, const Datasets& dataSets);
 
     /**
      * Get a list of plugin kinds (names) given a plugin type and data type(s)
@@ -88,12 +94,11 @@ private:
     Core& _core;
 
     QHash<QString, PluginFactory*> _pluginFactories;
+
 private slots:
     QString pluginTriggered(const QString& kind);
 };
 
-} // namespace plugin
+}
 
-} // namespace hdps
-
-#endif // HDPS_PLUGINMANAGER_H
+}

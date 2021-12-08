@@ -1,7 +1,10 @@
 #include "EventListener.h"
 
 #include "CoreInterface.h"
+#include "Event.h"
 #include "Set.h"
+
+#include "Dataset.h"
 
 #include <unordered_map>
 
@@ -19,7 +22,8 @@ void EventListener::setEventCore(CoreInterface* core)
 
 EventListener::~EventListener()
 {
-    _eventCore->unregisterEventListener(this);
+    if (_eventCore)
+        _eventCore->unregisterEventListener(this);
 }
 
 //void EventListener::registerDataEventByName(QString dataSetName, DataEventHandler callback)
@@ -39,42 +43,66 @@ void EventListener::registerDataEvent(DataEventHandler callback)
 
 void EventListener::onDataEvent(DataEvent* dataEvent)
 {
-    if (dataEvent->getType() == EventType::SelectionChanged)
-    {
-        // Fire events for linked datasets
-        DataSet& baseDataSet1 = DataSet::getSourceData(_eventCore->requestData(dataEvent->dataSetName));
-        QString dataName1 = baseDataSet1.getDataName();
+    // Only process data events which are valid
+    if (!dataEvent->getDataset().isValid())
+        return;
 
-        const std::vector<QString>& dataSetNames = _eventCore->requestAllDataNames();
+    // Data selection changes need special treatment
+    if (dataEvent->getType() == EventType::DataSelectionChanged)
+    {
+        // Get smart pointer to the source dataset of which the selection changed
+        auto eventSourceDataset = dataEvent->getDataset()->getSourceDataset<DatasetImpl>();
+
+        // Get name of the raw data of the event dataset
+        const auto eventSourceDatasetRawName = eventSourceDataset->getRawDataName();
+
+        // Get all available dataset from the core
+        const auto allDatasets = _eventCore->requestAllDataSets();
 
         // Go through all datasets in the system and find datasets with the same source data
-        for (const QString& dataSetName : dataSetNames)
+        for (auto& candidateDataset : allDatasets)
         {
-            DataSet& baseDataSet2 = DataSet::getSourceData(_eventCore->requestData(dataSetName));
-            QString dataName2 = baseDataSet2.getDataName();
+            // Get source of the candidate dataset
+            auto candidateSourceDataset = candidateDataset->getSourceDataset<DatasetImpl>();
+
+            // Get name of the raw data of the candidate dataset
+            const auto candidateRawDataName = candidateSourceDataset->getRawDataName();
 
             // Fire selection events for datasets with the same source data as the original event
-            if (dataName1 == dataName2)
+            if (eventSourceDatasetRawName == candidateRawDataName)
             {
-                DataEvent sourceDataEvent = *dataEvent;
-                sourceDataEvent.dataSetName = dataSetName;
-                    
-                if (_dataEventHandlersByName.find(sourceDataEvent.dataSetName) != _dataEventHandlersByName.end())
-                    _dataEventHandlersByName[sourceDataEvent.dataSetName](&sourceDataEvent);
+                // Create a source data event
+                auto sourceDataEvent = *dataEvent;
 
-                if (_dataEventHandlersByType.find(sourceDataEvent.dataType) != _dataEventHandlersByType.end())
-                    _dataEventHandlersByType[sourceDataEvent.dataType](&sourceDataEvent);
+                // Set the correct dataset
+                sourceDataEvent.setDataset(candidateDataset);
+
+                // Find data handlers with identical GUID and call them
+                if (_dataEventHandlersById.find(sourceDataEvent.getDataset()->getGuid()) != _dataEventHandlersById.end())
+                    _dataEventHandlersById[sourceDataEvent.getDataset()->getGuid()](&sourceDataEvent);
+
+                // Find data handlers with the same type and call them
+                if (_dataEventHandlersByType.find(sourceDataEvent.getDataset()->getDataType()) != _dataEventHandlersByType.end())
+                    _dataEventHandlersByType[sourceDataEvent.getDataset()->getDataType()](&sourceDataEvent);
+
+                // Call all data handlers
+                for (auto dataEventHandler : _dataEventHandlers)
+                    dataEventHandler(&sourceDataEvent);
             }
         }
+
         return;
     }
-        
-    if (_dataEventHandlersByName.find(dataEvent->dataSetName) != _dataEventHandlersByName.end())
-        _dataEventHandlersByName[dataEvent->dataSetName](dataEvent);
 
-    if (_dataEventHandlersByType.find(dataEvent->dataType) != _dataEventHandlersByType.end())
-        _dataEventHandlersByType[dataEvent->dataType](dataEvent);
+    // Find data handlers with identical GUID and call them
+    if (_dataEventHandlersById.find(dataEvent->getDataset()->getGuid()) != _dataEventHandlersById.end())
+        _dataEventHandlersById[dataEvent->getDataset()->getGuid()](dataEvent);
 
+    // Find data handlers with the same type and call them
+    if (_dataEventHandlersByType.find(dataEvent->getDataset()->getDataType()) != _dataEventHandlersByType.end())
+        _dataEventHandlersByType[dataEvent->getDataset()->getDataType()](dataEvent);
+
+    // Call all data handlers
     for (auto dataEventHandler : _dataEventHandlers)
         dataEventHandler(dataEvent);
 }

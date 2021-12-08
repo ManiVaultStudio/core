@@ -1,5 +1,4 @@
-#ifndef HDPS_RAWDATA_H
-#define HDPS_RAWDATA_H
+#pragma once
 
 #include "Plugin.h"
 #include "DataType.h"
@@ -7,52 +6,61 @@
 #include <QString>
 
 namespace hdps {
-    class DataSet;
+    class DatasetImpl;
 
 namespace plugin {
-    class RawData : public Plugin
+
+class RawData : public Plugin
+{
+public:
+
+    /**
+     * Constructor
+     * @param factory Pointer to the plugin factory
+     * @param dataType Type of data
+     */
+    RawData(const PluginFactory* factory, const DataType& dataType) :
+        Plugin(factory),
+        _dataType(dataType)
     {
-    public:
-        RawData(const PluginFactory* factory, DataType dataType) :
-            Plugin(factory),
-            _dataType(dataType)
-        { }
+    }
 
-        ~RawData() override {};
-
-        const DataType& getDataType() const
-        {
-            return _dataType;
-        }
-
-        virtual DataSet* createDataSet() const = 0;
-
-    private:
-        DataType _dataType;
-    };
-
-    class RawDataFactory : public PluginFactory
+    /** Destructor */
+    ~RawData() override
     {
-        Q_OBJECT
+    }
+
+    /** Get the type of raw data */
+    const DataType& getDataType() const {
+        return _dataType;
+    }
+
+    /** Create dataset for raw data */
+    virtual Dataset<DatasetImpl> createDataSet() const = 0;
+
+private:
+    DataType    _dataType;  /** Type of data */
+};
+
+class RawDataFactory : public PluginFactory
+{
+    Q_OBJECT
     
-    public:
-        RawDataFactory() :
-            PluginFactory(Type::DATA)
-        {
+public:
+    RawDataFactory() :
+        PluginFactory(Type::DATA)
+    {
 
-        }
-        ~RawDataFactory() override {};
+    }
+    ~RawDataFactory() override {};
     
-        RawData* produce() override = 0;
+    RawData* produce() override = 0;
 
-        // Override supportedDataTypes function, so custom data types don't need to supply it.
-        virtual DataTypes supportedDataTypes() const override { return DataTypes(); }
-    };
+    // Override supportedDataTypes function, so custom data types don't need to supply it.
+    virtual DataTypes supportedDataTypes() const override { return DataTypes(); }
+};
 
-} // namespace plugin
-
-} // namespace hdps
+}
+}
 
 Q_DECLARE_INTERFACE(hdps::plugin::RawDataFactory, "hdps.RawDataFactory")
-
-#endif // HDPS_RAWDATA_H

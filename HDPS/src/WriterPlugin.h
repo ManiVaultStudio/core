@@ -9,8 +9,6 @@
 
 #include "Plugin.h"
 
-#include "util/DatasetRef.h"
-
 #include <QString>
 
 using namespace hdps::util;
@@ -35,27 +33,22 @@ public:
 
 public:
 
-    /** Get input dataset name */
-    QString getInputDatasetName() const {
-        return _input.getDatasetName();
-    }
-
     /**
-     * Set input dataset name
-     * @param datasetName Name of the input dataset
+     * Set input dataset smart pointer
+     * @param inputDataset Smart pointer to input dataset
      */
-    void setInputDatasetName(const QString& datasetName) {
-        _input.setDatasetName(datasetName);
+    void setInputDataset(Dataset<DatasetImpl>& inputDataset) {
+        _input = inputDataset;
     }
 
-    /** Get input dataset */
+    /** Get input dataset smart pointer */
     template<typename DatasetType>
-    DatasetType& getInputDataset() const {
-        return dynamic_cast<DatasetType&>(*_input);
+    Dataset<DatasetType>& getInputDataset() {
+        return Dataset<DatasetType>(*_input);
     }
 
 protected:
-    DatasetRef<DataSet>     _input;     /** Input dataset reference */
+    Dataset<DatasetImpl>    _input;     /** Input dataset smart pointer */
 };
 
 

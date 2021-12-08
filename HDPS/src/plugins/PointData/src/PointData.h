@@ -7,6 +7,7 @@
 #include "Set.h"
 #include "PointDataRange.h"
 #include "LinkedSelection.h"
+#include "event/EventListener.h"
 
 #include <biovault_bfloat16.h>
 
@@ -314,7 +315,7 @@ public:
 
     void init() override;
 
-    hdps::DataSet* createDataSet() const override;
+    hdps::Dataset<hdps::DatasetImpl> createDataSet() const override;
 
     unsigned int getNumPoints() const;
 
@@ -503,14 +504,14 @@ private:
 // Point Set
 // =============================================================================
 
-class POINTDATA_EXPORT Points : public hdps::DataSet
+class POINTDATA_EXPORT Points : public hdps::DatasetImpl, public hdps::EventListener
 {
 private:
     /* Private helper function for visitData. Helps to reduces duplicate
     * code between const and non-const overloads of visitData.
     */
-    template <typename ReturnType = void, typename FunctionObject, typename PointsType>
-    static ReturnType privateVisitData(PointsType& points, const FunctionObject functionObject)
+    template <typename ReturnType = void, typename FunctionObject>
+    static ReturnType privateVisitData(Points& points, const FunctionObject functionObject)
     {
         return points.template visitFromBeginToEnd<ReturnType>(
                 [&points, functionObject](const auto begin, const auto end) -> ReturnType
@@ -547,25 +548,25 @@ private:
     /* Private helper function for visitSourceData. Helps to reduces duplicate
     * code between const and non-const overloads of visitSourceData.
     */
-    template <typename ReturnType = void, typename FunctionObject, typename PointsType>
-    static ReturnType privateVisitSourceData(PointsType& points, const FunctionObject functionObject)
+    template <typename ReturnType = void, typename FunctionObject>
+    static ReturnType privateVisitSourceData(Points& points, const FunctionObject functionObject)
     {
         // Note that PointsType may or may not be "const".
-        PointsType& sourceData = Points::getSourceData(points);
+        auto sourceData = points.getSourceDataset<Points>();
 
-        if ((&sourceData == &points) || points.isFull())
+        if (sourceData->getGuid() == points.getGuid() || points.isFull())
         {
             // In this case, this (points) is itself a source data, or it is a full set.
             // Basically just do sourceData.visitData:
-            return privateVisitData<ReturnType>(sourceData, functionObject);
+            return privateVisitData<ReturnType>(*sourceData, functionObject);
         }
         else
         {
             // In this case, this (points) is a derived data set, and it is a subset.
 
-            if (sourceData.isFull())
+            if (sourceData->isFull())
             {
-                return sourceData.template visitFromBeginToEnd<ReturnType>(
+                return sourceData->template visitFromBeginToEnd<ReturnType>(
                     [&points, functionObject](const auto begin, const auto end) -> ReturnType
                     {
                         const auto indexFunction = [](const auto indexIterator)
@@ -586,10 +587,10 @@ private:
                 // Define an index function that translates a derived subset index to a source data index.
                 const auto indexFunction = [&sourceData](const auto indexIterator)
                 {
-                    return sourceData.indices[*indexIterator];
+                    return sourceData->indices[*indexIterator];
                 };
 
-                return sourceData.template visitFromBeginToEnd<ReturnType>(
+                return sourceData->template visitFromBeginToEnd<ReturnType>(
                     [&points, functionObject, indexFunction](const auto begin, const auto end) -> ReturnType
                     {
                         return functionObject(hdps::makePointDataRangeOfSubset(
@@ -786,11 +787,11 @@ public:
 
     /**
      * Adds a mapping of global selection indices from this dataset to a target dataset.
-     * @param targetDataSet The name of the target dataset
+     * @param targetDataSet The target dataset
      * @param mapping Map of global selection indices in this dataset to a vector of
      *                global indices in the target dataset.
      */
-    void addLinkedSelection(QString targetDataSet, hdps::SelectionMap& mapping);
+    void addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
 
     /**
      * Set global selection indices on this dataset. Applies linked selections
@@ -799,16 +800,20 @@ public:
      */
     void setSelection(std::vector<unsigned int>& selectionIndices);
 
-    // Set functions
-    DataSet* copy() const override;
+    /**
+     * Get a copy of the dataset
+     * @return Smart pointer to copy of dataset
+     */
+    hdps::Dataset<hdps::DatasetImpl> copy() const override;
 
     /**
-     * Create subset
-     * @param subsetName Name of the subset
-     * @param parentSetName Name of the parent dataset
+     * Create subset and specify where the subset will be placed in the data hierarchy
+     * @param guiName Name of the subset in the GUI
+     * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
+     * @return Smart pointer to the created subset
      */
-    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override;
+    hdps::Dataset<hdps::DatasetImpl> createSubset(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;

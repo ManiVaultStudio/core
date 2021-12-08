@@ -86,8 +86,6 @@ namespace hdps
 
             /** Scalar ranges */
             Vector3f    _colorScalarsRange;     /** Scalar range of the point color scalars */
-            Vector3f    _sizeScalarsRange;      /** Scalar range of the point size scalars */
-            Vector3f    _opacityScalarsRange;   /** Scalar range of the point opacity scalars */
 
             bool _dirtyPositions        = false;
             bool _dirtyHighlights       = false;

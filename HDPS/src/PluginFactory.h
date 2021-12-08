@@ -9,7 +9,7 @@
 
 namespace hdps
 {
-    class DataSet;
+    class DatasetImpl;
 
 namespace plugin
 {

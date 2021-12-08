@@ -27,37 +27,37 @@ public:
     
     void init() override;
 
-    hdps::DataSet* createDataSet() const override;
+    Dataset<DatasetImpl> createDataSet() const override;
 
 private:
     std::vector<QString> _data;
 };
 
-class Text : public DataSet
+class Text : public DatasetImpl
 {
 public:
-    Text(hdps::CoreInterface* core, QString dataName) : DataSet(core, dataName) { }
+    Text(hdps::CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
     ~Text() override { }
 
-    DataSet* copy() const override
+    Dataset<DatasetImpl> copy() const override
     {
-        Text* text = new Text(_core, getDataName());
-        text->setName(getName());
+        auto text = new Text(_core, getRawDataName());
+        text->setGuiName(getGuiName());
         text->indices = indices;
+        
         return text;
     }
 
     /**
-     * Create subset
-     * @param subsetName Name of the subset
-     * @param parentSetName Name of the parent dataset
+     * Create subset and specify where the subset will be placed in the data hierarchy
+     * @param guiName Name of the subset in the GUI
+     * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
+     * @return Smart pointer to the created subset
      */
-    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override
+    Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const override
     {
-        const hdps::DataSet& selection = getSelection();
-
-        return _core->createSubsetFromSelection(selection, *this, subsetName, parentSetName, visible);
+        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
     /** Get icon for the dataset */

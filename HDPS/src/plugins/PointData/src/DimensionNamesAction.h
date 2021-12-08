@@ -2,7 +2,6 @@
 
 #include "actions/Actions.h"
 #include "event/EventListener.h"
-#include "util/DatasetRef.h"
 
 #include "PointData.h"
 
@@ -10,6 +9,7 @@ namespace hdps {
     class CoreInterface;
 }
 
+using namespace hdps;
 using namespace hdps::util;
 using namespace hdps::gui;
 
@@ -53,9 +53,9 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param core Pointer to the core
-     * @param datasetName Name of the points dataset
+     * @param points Reference to points dataset
      */
-    DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, const QString& datasetName);
+    DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, Points& points);
 
     /** Get the dimension names */
     QStringList getDimensionNames() const;
@@ -73,8 +73,8 @@ signals:
     void dimensionNamesChanged(const QStringList& dimensionNames);
 
 protected:
-    DatasetRef<Points>      _points;                /** Points dataset reference */
-    QStringList             _dimensionNames;        /** Dimension names */
-    TriggerAction           _updateAction;          /** Update action */
-    ToggleAction            _manualUpdateAction;    /** Manual update action */
+    Dataset<Points>     _points;                /** Points dataset reference */
+    QStringList         _dimensionNames;        /** Dimension names */
+    TriggerAction       _updateAction;          /** Update action */
+    ToggleAction        _manualUpdateAction;    /** Manual update action */
 };

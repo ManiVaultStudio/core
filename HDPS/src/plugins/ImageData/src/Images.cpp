@@ -14,7 +14,7 @@
 using namespace hdps::util;
 
 Images::Images(hdps::CoreInterface* core, QString dataName) :
-    DataSet(core, dataName),
+    DatasetImpl(core, dataName),
     _imageData(nullptr)
 {
     _imageData = &getRawData<ImageData>();
@@ -22,21 +22,21 @@ Images::Images(hdps::CoreInterface* core, QString dataName) :
 
 void Images::init()
 {
-    _infoAction = QSharedPointer<InfoAction>::create(nullptr, getName());
+    _infoAction = QSharedPointer<InfoAction>::create(nullptr, *this);
 
     addAction(*_infoAction.get());
 }
 
-QString Images::createSubset(const QString subsetName /*= "subset"*/, const QString parentSetName /*= ""*/, const bool& visible /*= true*/) const
+Dataset<DatasetImpl> Images::createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
 {
-    return "";
+    return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
-hdps::DataSet* Images::copy() const
+Dataset<DatasetImpl> Images::copy() const
 {
-    Images* images = new Images(_core, getDataName());
+    auto images = new Images(_core, getRawDataName());
 
-    images->setName(getName());
+    images->setGuiName(getGuiName());
 
     return images;
 }
@@ -165,16 +165,16 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 {
     try
     {
-        // Get reference to input dataset
-        auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
+        // Get smart pointer to parent dataset
+        auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
 
-        if (dataset.getDataType() == PointType) {
+        if (parentDataset->getDataType() == PointType) {
 
             // Obtain reference to the point source input dataset
-            auto& points = DataSet::getSourceData(dynamic_cast<Points&>(dataset));
+            auto points = parentDataset->getSourceDataset<Points>();
 
             // Get selection indices from points dataset
-            auto& selectionIndices = dynamic_cast<Points&>(points.getSelection()).indices;
+            auto& selectionIndices = points->getSelection<Points>()->indices;
 
             // Clear the selected indices
             selectedIndices.clear();
@@ -195,7 +195,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             std::vector<std::uint32_t> globalIndices;
 
             // Get global indices for mapping the selected local indices
-            points.getGlobalIndices(globalIndices);
+            points->getGlobalIndices(globalIndices);
 
             // Iterate over selection indices
             for (const auto& selectionIndex : selectionIndices) {
@@ -226,10 +226,10 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             }
         }
 
-        if (dataset.getDataType() == ClusterType) {
+        if (parentDataset->getDataType() == ClusterType) {
 
             // Obtain reference to the cluster source input dataset
-            auto& sourceClusters = dynamic_cast<Clusters&>(dataset.getSelection());
+            auto sourceClusters = parentDataset->getSelection<Clusters>();
 
             // Clear the selected indices
             selectedIndices.clear();
@@ -248,19 +248,19 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
             // Get clusters input points dataset
-            auto& points = DataSet::getSourceData<Points>(dataset.getHierarchyItem().getParent()->getDataset<Points>());
+            auto points = parentDataset->getParent()->getSourceDataset<Points>();
 
             // Iterate over all clusters and populate the selection data
-            for (const auto& clusterIndex : sourceClusters.indices) {
+            for (const auto& clusterIndex : sourceClusters->indices) {
                 
                 // Get reference to cluster
-                const auto& cluster = sourceClusters.getClusters()[clusterIndex];
+                const auto& cluster = sourceClusters->getClusters()[clusterIndex];
                 
                 // Iterate over all indices in the cluster
                 for (const auto& clusterSelectionIndex : cluster.getIndices()) {
 
                     // Get translated point index
-                    const auto pointIndex = points.isFull() ? clusterSelectionIndex : points.indices[clusterSelectionIndex];
+                    const auto pointIndex = points->isFull() ? clusterSelectionIndex : points->indices[clusterSelectionIndex];
 
                     // Compute global pixel coordinate
                     const auto globalPixelCoordinate = QPoint(pointIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(sourceImageWidth))));
@@ -300,13 +300,13 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 
 void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
-    // Get reference to input dataset
-    auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
+    // Get smart pointer to parent dataset
+    auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
 
-    if (dataset.getDataType() == PointType) {
+    if (parentDataset->getDataType() == PointType) {
 
         // Obtain reference to the points source input dataset
-        auto& points = DataSet::getSourceData(dynamic_cast<Points&>(dataset));
+        auto points = parentDataset->getSourceDataset<Points>();
 
         QSize sourceImageSize = getImageSize(), targetImageSize;
 
@@ -314,13 +314,13 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
         targetImageSize.setWidth(static_cast<int>(floorf(sourceImageSize.width())));
         targetImageSize.setHeight(static_cast<int>(floorf(sourceImageSize.height())));
 
-        points.visitData([this, points, dimensionIndex, &scalarData, sourceImageSize, targetImageSize](auto pointData) {
-            const auto dimensionId = dimensionIndex;
-            const auto imageSize = _imageData->getImageSize();
-            const auto noPixels = getNumberOfPixels();
-            const auto selection = dynamic_cast<Points&>(points.getSelection());
-            const auto selectionIndices = selection.indices;
-            const auto selectionSize = selectionIndices.size();
+        points->visitData([this, points, dimensionIndex, &scalarData, sourceImageSize, targetImageSize](auto pointData) {
+            const auto dimensionId      = dimensionIndex;
+            const auto imageSize        = _imageData->getImageSize();
+            const auto noPixels         = getNumberOfPixels();
+            const auto selection        = points->getSelection<Points>();
+            const auto selectionIndices = selection->indices;
+            const auto selectionSize    = selectionIndices.size();
 
             if (!selectionIndices.empty()) {
                 for (std::uint32_t p = 0; p < noPixels; p++) {
@@ -349,40 +349,43 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
         });
     }
 
-    if (dataset.getDataType() == ClusterType) {
+    if (parentDataset->getDataType() == ClusterType) {
     }
 }
 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     // Get reference to input dataset
-    auto& dataset = _core->getDataHierarchyItem(getName())->getParent()->getDataset<DataSet>();
+    auto dataset = getParent();
 
-    if (dataset.getDataType() == PointType) {
+    if (dataset->getDataType() == PointType) {
 
         // Obtain reference to the points dataset
-        auto& points = dynamic_cast<Points&>(dataset);
+        auto points = Dataset<Points>(dataset);
 
         // Treat derived and non-derived differently
-        if (points.isDerivedData()) {
+        if (points->isDerivedData()) {
 
             // Visit derived points dataset
-            points.visitData([this, &points, dimensionIndex, &scalarData](auto pointData) {
+            points->visitData([this, &points, dimensionIndex, &scalarData](auto pointData) {
 
                 // Get reference to source data
-                auto& sourceData = points.getSourceData<Points>(points);
+                auto sourceData = points->getSourceDataset<Points>();
 
-                if (sourceData.isFull()) {
+                if (sourceData->isFull()) {
+
+                    // Cache number of scalars
+                    const auto numberOfScalars = static_cast<std::uint32_t>(scalarData.count());
 
                     // Populate from full dataset
-                    for (std::uint32_t pixelIndex = 0; pixelIndex < points.getNumPoints(); pixelIndex++)
-                        if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
+                    for (std::uint32_t pixelIndex = 0; pixelIndex < points->getNumPoints(); pixelIndex++)
+                        if (pixelIndex < numberOfScalars && pixelIndex < pointData.size())
                             scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
                 }
                 else {
 
                     // Populate from partial dataset
-                    for (std::int32_t pixelIndex = 0; pixelIndex < sourceData.indices.size(); pixelIndex++)
+                    for (std::int32_t pixelIndex = 0; pixelIndex < sourceData->indices.size(); pixelIndex++)
                         if (pixelIndex < scalarData.count() && pixelIndex < pointData.size())
                             scalarData[pixelIndex] = pointData[pixelIndex][dimensionIndex];
                 }
@@ -390,7 +393,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         }
         else {
 
-            points.visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
+            points->visitSourceData([this, dimensionIndex, &scalarData](auto pointData) {
 
                 // Cache the target rectangle
                 const auto targetRectangle = getTargetRectangle();
@@ -413,10 +416,10 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         }
     }
 
-    if (dataset.getDataType() == ClusterType) {
-        
+    if (dataset->getDataType() == ClusterType) {
+
         // Obtain reference to the clusters dataset
-        auto& clusters = dynamic_cast<Clusters&>(dataset);
+        auto clusters = Dataset<Clusters>(dataset);
 
         auto clusterIndex = 0;
 
@@ -424,16 +427,16 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         const auto sourceWidth = getSourceRectangle().width();
 
         // Get clusters input points dataset
-        auto& points = DataSet::getSourceData<Points>(dataset.getHierarchyItem().getParent()->getDataset<Points>());
+        auto points = dataset->getParent()->getSourceDataset<Points>();
 
         // Iterate over all clusters
-        for (auto& cluster : clusters.getClusters()) {
+        for (auto& cluster : clusters->getClusters()) {
 
             // Iterate over all indices in the cluster
             for (const auto index : cluster.getIndices()) {
 
                 // Get translated point index
-                const auto pointIndex = points.isFull() ? index : points.indices[index];
+                const auto pointIndex = points->isFull() ? index : points->indices[index];
 
                 // Compute pixel coordinate
                 const auto clusterPixelCoordinate = QPoint(pointIndex % sourceWidth, static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(sourceWidth))));
@@ -465,15 +468,11 @@ std::uint32_t Images::getTargetPixelIndex(const QPoint& coordinate) const
 
 std::uint32_t Images::getSourceDataIndex(const QPoint& coordinate) const
 {
-    // Get reference to input points dataset
-    auto& points = _core->getDataHierarchyItem(getName())->getParent()->getDataset<Points>();
-
-    // Get reference to source data
-    auto& sourceData = points.getSourceData<Points>(points);
+    // Get smart pointer to source data
+    auto sourceData = getParent()->getSourceDataset<Points>();
 
     const auto targetRectangle      = _imageData->getTargetRectangle();
     const auto relativeCoordinate   = coordinate - targetRectangle.topLeft();
 
     return relativeCoordinate.y() * targetRectangle.width() + relativeCoordinate.x();
-    //return (targetRectangle.height() - relativeCoordinate.y()) * targetRectangle.width() + relativeCoordinate.x();
 }

@@ -1,5 +1,4 @@
-#ifndef HDPS_DATA_HIERARCHY_MODEL_H
-#define HDPS_DATA_HIERARCHY_MODEL_H
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QMimeData>
@@ -101,9 +100,9 @@ public:
     /**
      * Add a data hierarchy item to the model
      * @param parentModelIndex Model index of the parent data hierarchy item 
-     * @param dataHierarchyItem Pointer to the data hierarchy item
+     * @param dataHierarchyItem Reference to the data hierarchy item
      */
-    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem* dataHierarchyItem);
+    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Remove a data hierarchy item from the model
@@ -116,5 +115,3 @@ private:
 };
 
 }
-
-#endif // HDPS_DATA_HIERARCHY_MODEL_H

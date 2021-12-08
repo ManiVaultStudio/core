@@ -4,6 +4,7 @@
 
 #include "ClusterDataVisitor.h"
 #include "Cluster.h"
+#include "event/EventListener.h"
 
 #include <RawData.h>
 #include <Set.h>
@@ -14,15 +15,9 @@
 
 #include <vector>
 
-// =============================================================================
-// Data Type
-// =============================================================================
+using namespace hdps;
 
 const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
-
-// =============================================================================
-// Raw Data
-// =============================================================================
 
 class InfoAction;
 
@@ -31,10 +26,11 @@ class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData, public hdps
 public:
     ClusterData(const hdps::plugin::PluginFactory* factory);
     ~ClusterData(void) override;
-    
+
     void init() override;
 
-    hdps::DataSet* createDataSet() const override;
+    /** Create dataset for raw data */
+    Dataset<DatasetImpl> createDataSet() const override;
 
     /** Returns reference to the clusters */
     std::vector<Cluster>& getClusters();
@@ -62,6 +58,13 @@ public:
      */
     void removeClustersById(const QStringList& ids);
 
+    /**
+     * Get cluster index by name
+     * @param clusterName Name of the cluster to search for
+     * @return Index of the cluster (-1 if not found)
+     */
+    std::int32_t getClusterIndex(const QString& clusterName) const;
+
 private:
     std::vector<Cluster>    _clusters;      /** Clusters data */
 };
@@ -70,10 +73,10 @@ private:
 // Cluster Set
 // =============================================================================
 
-class CLUSTERDATA_EXPORT Clusters : public hdps::DataSet
+class CLUSTERDATA_EXPORT Clusters : public DatasetImpl, public hdps::EventListener
 {
 public:
-    Clusters(hdps::CoreInterface* core, QString dataName) : hdps::DataSet(core, dataName) { }
+    Clusters(CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
     ~Clusters() override { }
 
     void init() override;
@@ -106,25 +109,30 @@ public:
      */
     void removeClustersById(const QStringList& ids);
 
-    DataSet* copy() const override
+    /**
+     * Get a copy of the dataset
+     * @return Smart pointer to copy of dataset
+     */
+    Dataset<DatasetImpl> copy() const override
     {
-        Clusters* clusters = new Clusters(_core, getDataName());
-        clusters->setName(getName());
+        auto clusters = new Clusters(_core, getRawDataName());
+
+        clusters->setGuiName(getGuiName());
         clusters->indices = indices;
-        return clusters;
+        
+        return Dataset<DatasetImpl>(clusters);
     }
 
     /**
-     * Create subset
-     * @param subsetName Name of the subset
-     * @param parentSetName Name of the parent dataset
+     * Create subset and specify where the subset will be placed in the data hierarchy
+     * @param guiName Name of the subset in the GUI
+     * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
+     * @return Smart pointer to the created subset
      */
-    QString createSubset(const QString subsetName = "subset", const QString parentSetName = "", const bool& visible = true) const override
+    Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const  override
     {
-        const hdps::DataSet& selection = getSelection();
-
-        return _core->createSubsetFromSelection(selection, *this, "Clusters", parentSetName, visible);
+        return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
     /** Get icon for the dataset */
@@ -138,6 +146,18 @@ public:
 
     /** Gets concatenated indices for all selected clusters */
     std::vector<std::uint32_t> getSelectedIndices() const;
+
+    /** Get names of the selected clusters */
+    QStringList getSelectedClusterNames() const;
+
+    /** Select clusters by name */
+    void setSelection(const QStringList& clusterNames);
+
+    /**
+     * Set selection
+     * @param indices Selection indices
+     */
+    void setSelection(const std::vector<std::uint32_t>& indices) override;
 
     std::vector<unsigned int>       indices;
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */

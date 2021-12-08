@@ -1,9 +1,7 @@
-#ifndef HDPS_COREINTERFACE_H
-#define HDPS_COREINTERFACE_H
+#pragma once
 
 #include "PluginType.h"
-
-#include "event/Event.h"
+#include "Dataset.h"
 
 #include <QString>
 #include <QSharedPointer>
@@ -13,13 +11,11 @@
 
 namespace hdps
 {
-    class DataSet;
+    class DatasetImpl;
     class DataType;
     class EventListener;
     class DataHierarchyManager;
     class DataHierarchyItem;
-
-    using SharedDataHierarchyItem = QSharedPointer<DataHierarchyItem>;
 
     namespace plugin
     {
@@ -29,104 +25,187 @@ namespace hdps
 
 class CoreInterface
 {
-public:
+
+public: // Data access
+
     /**
-     * Requests the plugin manager to create new RawData of the given kind.
-     * The manager will add the raw data to the core and return the
-     * unique name of the data set linked with the raw data.
-     * @param parentDatasetName Name of the parent dataset in the data hierarchy
+     * Requests the plugin manager to create new RawData of the given kind
+     * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
+     * @param kind Kind of plugin
+     * @param datasetGuiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
+     * @return Smart pointer to the added dataset
      */
-    virtual const QString addData(const QString kind, const QString name, const QString& parentDatasetName = "") = 0;
+    virtual Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
 
     /**
-     * Removes one or more datasets. Other datasets derived from this dataset are 
-     * converted to non-derived data.
-     * Notifies all plug-ins of the removed dataset automatically.
-     * @param datasetNames Names of the datasets to remove
-     * @param recursively Remove datasets recursively
+     * Copies a dataset and adds it to the data hierarchy
+     * @param dataset Smart pointer to dataset to copy
+     * @param datasetGuiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
+     * @return Smart pointer to the copied dataset
      */
-    virtual void removeDatasets(const QStringList& datasetNames, const bool& recursively = false) = 0;
+    virtual Dataset<DatasetImpl> copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
 
     /**
-     * Renames a dataset
-     * @param currentDatasetName Current name of the dataset
-     * @param intendedDatasetName Intended name of the dataset
-     * @return New name of the dataset
+     * Requests the plugin manager to create new RawData of the given kind
+     * The manager will add the raw data to the core and return the unique name of the data set linked with the raw data
+     * @param kind Kind of plugin
+     * @param datasetGuiName Name of the added dataset in the GUI
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if smart pointer is not valid)
+     * @return Smart pointer to the added dataset
      */
-    virtual QString renameDataset(const QString& currentDatasetName, const QString& intendedDatasetName) = 0;
-
-    /**
-     * Creates a dataset derived from a source dataset.
-     * @param nameRequest Preferred name for the new dataset from the core (May be changed if not unique)
-     * @param sourceDatasetName Name of the source dataset from which this dataset will be derived
-     * @param dataHierarchyParent Name of the parent in the data hierarchy (sourceDatasetName if is used if empty)
-     * @param visible Whether the new dataset is visible in the user interface
-     */
-    virtual const QString createDerivedData(const QString& nameRequest, const QString& sourceDatasetName, const QString& dataHierarchyParent = "") = 0;
-
-    /**
-     * Creates a copy of the given selection set and gives it a unique name based
-     * on the name given to this function. Then adds the new set to the data manager
-     * and notifies all data consumers of the new set.
-     * @param selection Selection set
-     * @param sourceSet Source dataset
-     * @param newSetName Intended name of the subset
-     * @param dataHierarchyParent Name of the parent in the data hierarchy (sourceDatasetName if is used if empty)
-     * @param visible Whether the new dataset is visible in the user interface
-     */
-    virtual QString createSubsetFromSelection(const DataSet& selection, const DataSet& sourceSet, const QString newSetName, const QString dataHierarchyParent = "", const bool& visible = true) = 0;
-
-    /**
-     * Requests a dataset from the core which has the same unique name
-     * as the given parameter. If no such instance can be found a fatal
-     * error is thrown.
-     */
-    virtual DataSet& requestData(const QString name) = 0;
-
-    /**
-    * Request all data set names.
-    */
-    virtual std::vector<QString> requestAllDataNames() = 0;
-
-    /**
-    * Request names for data sets of a specific type.
-    */
-    virtual std::vector<QString> requestAllDataNames(const std::vector<DataType> dataTypes) = 0;
-
-    template <class SetType>
-    SetType& requestData(const QString name)
+    template <class DatasetType>
+    Dataset<DatasetType> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>())\
     {
-        return dynamic_cast<SetType&>(requestData(name));
+        return Dataset<DatasetType>(addDataset(kind, dataSetGuiName, parentDataset).get<DatasetType>());
     }
 
     /**
-     * Analyzes a dataset
-     * @param analysisKind Type of analysis plugin
-     * @param datasetName Name of the dataset to analyze
+     * Removes one or more datasets
+     * Other datasets derived from this dataset are converted to non-derived data
+     * Notifies all plug-ins of the removed dataset automatically
+     * @param datasets Smart pointers to the datasets that need to be removed
+     * @param recursively Remove datasets recursively
      */
-    virtual const void analyzeDataset(const QString analysisKind, const QString& datasetName) = 0;
+    virtual void removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively = false) = 0;
+
+    /**
+     * Creates a dataset derived from a source dataset.
+     * @param guiName GUI name for the new dataset from the core
+     * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to source dataset in hierarchy if not valid)
+     * @return Smart pointer to the created derived dataset
+     */
+    virtual Dataset<DatasetImpl> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
+
+    /**
+     * Creates a dataset derived from a source dataset.
+     * @param guiName GUI name for the new dataset from the core
+     * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
+     * @return Smart pointer to the created derived dataset
+     */
+    template <typename DatasetType>
+    Dataset<DatasetType> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>())
+    {
+        return createDerivedData(guiName, sourceDataset, parentDataset);
+    }
+
+    /**
+     * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set
+     * @param selection Smart pointer to the selection set
+     * @param sourceDataset Smart pointer to the source dataset
+     * @param guiName GUI name of the subset
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (sourceSetName if not valid)
+     * @param visible Whether the new dataset is visible in the user interface
+     * @return Smart pointer to the created subset
+     */
+    virtual Dataset<DatasetImpl> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true) = 0;
+
+    /**
+     * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set
+     * @param selection Smart pointer to the selection set
+     * @param sourceDataset Smart pointer to the source dataset
+     * @param guiName GUI name of the subset
+     * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (sourceSetName if not valid)
+     * @param visible Whether the new dataset is visible in the user interface
+     * @return Smart pointer to the created subset
+     */
+    template <typename DatasetType>
+    Dataset<DatasetType> createSubsetFromSelection(const Dataset<DatasetImpl>& selection, const Dataset<DatasetImpl>& sourceDataset, const QString& guiName, const Dataset<DatasetImpl>& parentDataset, const bool& visible = true)
+    {
+        return createSubsetFromSelection(selection, sourceDataset, guiName, parentDataset, visible);
+    }
+
+    /**
+     * Requests a dataset from the core by dataset GUID (if no such instance can be found a fatal error is thrown)
+     * @param datasetGuid GUID of the dataset
+     * @return Smart pointer to the dataset
+     */
+    virtual Dataset<DatasetImpl> requestDataset(const QString& datasetGuid) = 0;
+
+    /**
+     * Requests a dataset of a specific type from the core by dataset GUID, if no such instance can be found a fatal error is thrown
+     * @param datasetGuid GUID of the dataset
+     * @return Smart pointer to the dataset
+     */
+    template<typename DatasetType>
+    Dataset<DatasetType> requestDataset(const QString& datasetGuid)
+    {
+        return Dataset<DatasetType>(requestDataset(datasetGuid));
+    }
+
+    /**
+     * Returns all data sets that are present in the core, filtered by data type(s)
+     * Returns all data sets in case of an empty filter
+     * @param dataTypes Data types to filter
+     * @return Vector of references to datasets
+     */
+    virtual QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) = 0;
+
+protected: // Data access
+
+    /**
+     * Requests an instance of a data type plugin from the core which has the same unique name as the given parameter, if no such instance can be found a fatal error is thrown
+     * @param datasetName Name of the dataset
+     */
+    virtual plugin::RawData& requestRawData(const QString& datasetName) = 0;
+
+    /**
+     * Request a selection from the data manager by its corresponding raw data name.
+     * @param rawdataName Name of the raw data
+     */
+    virtual Dataset<DatasetImpl> requestSelection(const QString& rawDataName) = 0;
+
+    /**
+     * Request a selection from the data manager by its corresponding raw data name.
+     * @param rawdataName Name of the raw data
+     */
+    template<typename DatasetType>
+    Dataset<DatasetType> requestSelection(const QString& rawDataName)
+    {
+        return Dataset<DatasetType>(dynamic_cast<DatasetType*>(requestSelection(rawDataName).get()));
+    }
+
+public: // Analysis
+
+    /**
+     * Request an analysis plugin by its kind
+     * @param kind Type of analysis
+     * @return Reference to created plugin
+     */
+    virtual plugin::Plugin& requestAnalysis(const QString& kind) = 0;
+
+    /**
+     * Analyze a dataset
+     * @param kind Type of analysis
+     * @param dataSet Smart pointer to the dataset to analyze
+     */
+    virtual const void analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataSet) = 0;
+
+public: // Import/export
 
     /**
      * Imports a dataset
-     * @param importKind Type of import plugin
+     * @param kind Type of import plugin
      */
-    virtual const void importDataset(const QString importKind) = 0;
+    virtual const void importDataset(const QString& kind) = 0;
 
     /**
      * Exports a dataset
-     * @param exportKind Type of export plugin
-     * @param datasetName Name of the dataset to export
+     * @param kind Type of export plugin
+     * @param dataSet Smart pointer to the dataset to export
      */
-    virtual const void exportDataset(const QString exportKind, const QString& datasetName) = 0;
+    virtual const void exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSet) = 0;
 
-    virtual plugin::Plugin& requestAnalysis(const QString name) = 0;
+public: // View
 
     /**
-     * Get data hierarchy item by dataset name
-     * @param datasetName Name of the dataset
-     * @return Pointer to data hierarchy item
+     * Views a dataset
+     * @param kind Type of import plugin
      */
-    virtual DataHierarchyItem* getDataHierarchyItem(const QString& datasetName) = 0;
+    virtual const void viewDataset(const QString& kind, const Datasets& datasets) = 0;
 
 public: // Plugin queries
 
@@ -148,53 +227,95 @@ public: // Plugin queries
     /**
      * Get plugin icon from plugin kind
      * @param pluginKind Kind of plugin
-     * @return Plugin icon name of the plugin, null icon the plugin kind was not found
+     * @return Plugin icon name of the plugin, null icon if the plugin kind was not found
      */
     virtual QIcon getPluginIcon(const QString& pluginKind) const = 0;
 
-    /** Get the data hierarchy manager */
+public: // Data hierarchy
+
+    /** Get a reference to the data hierarchy manager */
     virtual DataHierarchyManager& getDataHierarchyManager() = 0;
+
+    /**
+     * Get data hierarchy item by dataset GUID
+     * @param datasetGuid Globally unique identifier of the dataset
+     * @return Reference to data hierarchy item
+     */
+    virtual DataHierarchyItem& getDataHierarchyItem(const QString& datasetGuid) = 0;
+
+public: // Dataset grouping
+
+    /** Get whether dataset grouping is enabled or not */
+    virtual bool isDatasetGroupingEnabled() const = 0;
+
+    /** Get whether dataset grouping is enabled or not */
+    virtual void setDatasetGroupingEnabled(const bool& datasetGroupingEnabled) = 0;
 
 public: // Events & notifications
 
     /**
-     * Notify all data consumers that a new dataset has been added to the core
-     * @param datasetName Name of the dataset that was added
+     * Notify listeners that a new dataset has been added to the core
+     * @param dataset Smart pointer to the dataset that was added
      */
-    virtual void notifyDataAdded(const QString datasetName) = 0;
+    virtual void notifyDataAdded(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
-     * Notify all data consumers that a dataset is about to be removed
+     * Notify listeners that a dataset is about to be removed
+     * @param dataset Smart pointer to the dataset which is about to be removed
+     */
+    virtual void notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) = 0;
+
+    /**
+     * Notify listeners that a dataset is removed
+     * @param datasetGuid GUID of the dataset that was removed
      * @param dataType Type of the data
-     * @param datasetName Name of the dataset that is about to be removed
      */
-    virtual void notifyDataAboutToBeRemoved(const DataType& dataType, const QString datasetName) = 0;
+    virtual void notifyDataRemoved(const QString& datasetGuid, const DataType& dataType) = 0;
 
     /**
-     * Notify all data consumers that a dataset is removed
-     * @param dataType Type of the data
-     * @param datasetName Name of the dataset that is removed
+     * Notify listeners that a dataset has changed
+     * @param dataset Smart pointer to the dataset of which the data changed
      */
-    virtual void notifyDataRemoved(const DataType& dataType, const QString datasetName) = 0;
+    virtual void notifyDataChanged(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
-     * Notify all data consumers that a dataset has been changed
-     * @param datasetName Name of the dataset of which the data changed
+     * Notify listeners that data selection has changed
+     * @param dataset Smart pointer to the dataset of which the selection changed
      */
-    virtual void notifyDataChanged(const QString datasetName) = 0;
+    virtual void notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
-     * Notify all data consumers that a selection has changed
-     @param datasetName Name of the dataset of which the selection changed
+     * Notify all listeners that a dataset GUI name has changed
+     * @param dataset Smart pointer to the dataset of which the GUI name changed
+     * @param previousGuiName Previous dataset name
      */
-    virtual void notifySelectionChanged(const QString datasetName) = 0;
+    virtual void notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) = 0;
 
     /**
-     * Notify all event listeners that a dataset has been renamed
-     * @param oldName Old dataset name
-     * @param newName New dataset name
+     * Notify all listeners that a dataset child was added
+     * @param parentDataset Smart pointer to the parent dataset
+     * @param childDataset Smart pointer to the child dataset that was added
      */
-    virtual void notifyDataRenamed(const QString oldName, const QString newName) = 0;
+    virtual void notifyDataChildAdded(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset) = 0;
+
+    /**
+     * Notify all listeners that a dataset child was removed
+     * @param parentDataset Smart pointer to the parent dataset
+     * @param childDatasetGuid GUID of the child dataset that was removed
+     */
+    virtual void notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const QString& childDatasetGuid) = 0;
+
+    /**
+     * Notify all listeners that a dataset is locked
+     * @param dataset Smart pointer to the dataset
+     */
+    virtual void notifyDataLocked(const Dataset<DatasetImpl>& dataset) = 0;
+
+    /**
+     * Notify all listeners that a dataset is unlocked
+     * @param dataset Smart pointer to the dataset
+     */
+    virtual void notifyDataUnlocked(const Dataset<DatasetImpl>& dataset) = 0;
 
     /**
      * Register an event listener
@@ -209,26 +330,11 @@ public: // Events & notifications
     virtual void unregisterEventListener(EventListener* eventListener) = 0;
 
 protected:
-
-    /**
-     * Requests an instance of a data type plugin from the core which has the same
-     * unique name as the given parameter. If no such instance can be found a fatal
-     * error is thrown.
-     */
-    virtual plugin::RawData& requestRawData(const QString datasetName) = 0;
-
-    /**
-    * Request a selection from the data manager by its corresponding raw data name.
-    */
-    virtual DataSet& requestSelection(const QString rawdataName) = 0;
-
-    
+    bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */
 
     friend class RawData;
-    friend class DataSet;
+    friend class DatasetImpl;
     friend class EventListener;
 };
 
-} // namespace hdps
-
-#endif // HDPS_COREINTERFACE_H
+}

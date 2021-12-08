@@ -1,5 +1,4 @@
-#ifndef HDPS_DATA_HIERARCHY_MANAGER_H
-#define HDPS_DATA_HIERARCHY_MANAGER_H
+#pragma once
 
 #include "DataHierarchyItem.h"
 
@@ -27,38 +26,38 @@ public:
 
     /**
      * Add a dataset to the hierarchy
-     * @param datasetName Name of the dataset
-     * @param parentDatasetName Name of the parent dataset (if any)
+     * @param dataset Smart pointer to dataset
+     * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible in the gui
      */
-    void addItem(const QString& datasetName, const QString& parentDatasetName = "", const bool& visible = true);
+    void addItem(Dataset<DatasetImpl>& dataset, Dataset<DatasetImpl>& parentDataset, const bool& visible = true);
 
     /**
      * Removes an item from the hierarchy
-     * @param datasetName Name of the dataset that the hierarchy item references
-     * @return List of datasets that need to removed
+     * @param dataset Smart pointer to the dataset
+     * @return vector of pointers to datasets that need to removed
      */
-    QStringList removeItem(const QString& datasetName, const bool& recursively = false);
+    void removeItem(const Dataset<DatasetImpl>& dataset, const bool& recursively = false);
 
     /**
-     * Get hierarchy item by dataset name
-     * @param datasetName Name of the dataset
-     * @return Pointer to data hierarchy item
+     * Get hierarchy item by dataset globally unique identifier
+     * @param datasetGuid Dataset GUID
+     * @return Reference to data hierarchy item
      */
-    const DataHierarchyItem* getItem(const QString& datasetName) const;
+    const DataHierarchyItem& getItem(const QString& datasetGuid) const;
 
     /**
-     * Get hierarchy item by dataset name
-     * @param datasetName Name of the dataset
-     * @return Pointer to data hierarchy item
+     * Get hierarchy item by dataset globally unique identifier
+     * @param datasetGuid Dataset GUID
+     * @return Reference to data hierarchy item
      */
-    DataHierarchyItem* getItem(const QString& datasetName);
+    DataHierarchyItem& getItem(const QString& datasetGuid);
 
     /**
      * Selects data hierarchy item with dataset name
-     * @param datasetName Name of the dataset to select
+     * @param dataSet Smart pointer to dataset to select
      */
-    void selectItem(const QString& datasetName);
+    void selectItem(Dataset<DatasetImpl>& dataSet);
 
     /**
      * Get dataset children
@@ -72,38 +71,36 @@ signals:
 
     /**
      * Signals that a hierarchy item is added to the hierarchy manager
-     * @param dataHierarchyItem Pointer to added data hierarchy item
+     * @param dataHierarchyItem Reference to added data hierarchy item
      */
-    void itemAdded(DataHierarchyItem* dataHierarchyItem);
+    void itemAdded(DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Signals that a hierarchy item is about to be removed from the hierarchy manager
-     * @param datasetName Name of the about to be removed dataset
+     * @param dataset Smart pointer to the about to be removed dataset
      */
-    void itemAboutToBeRemoved(const QString& datasetName);
+    void itemAboutToBeRemoved(const Dataset<DatasetImpl>& dataset);
 
     /**
      * Signals that a hierarchy item is removed from the hierarchy manager
-     * @param datasetName Name of the removed dataset
+     * @param datasetGui GUID of the removed dataset
      */
-    void itemRemoved(const QString& datasetName);
+    void itemRemoved(const QString& datasetGui);
 
     /**
      * Signals that a hierarchy item has been re-located
-     * @param relocatedItem Pointer to data hierarchy item that will be relocated
+     * @param itemToBeRelocated Reference to data hierarchy item that will be relocated
      */
-    void itemAboutToBeRelocated(DataHierarchyItem* itemToBeRelocated);
+    void itemAboutToBeRelocated(DataHierarchyItem& itemToBeRelocated);
 
     /**
      * Signals that a hierarchy item has been relocated
-     * @param relocatedItem Pointer to relocated data hierarchy item
+     * @param relocatedItem Reference to relocated data hierarchy item
      */
-    void itemRelocated(DataHierarchyItem* relocatedItem);
+    void itemRelocated(DataHierarchyItem& relocatedItem);
 
 private:
     DataHierarchyItems    _dataHierarchyItems;    /** Shared pointers to data hierarchy items */
 };
 
 }
-
-#endif // HDPS_DATA_HIERARCHY_MANAGER_H
