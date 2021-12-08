@@ -84,7 +84,7 @@ public:
      * @param datasetGuid GUID of the dataset
      * @return Smart pointer to the dataset
      */
-    Dataset<DatasetImpl>& getSet(const QString& datasetGuid);
+    Dataset<DatasetImpl> getSet(const QString& datasetGuid);
 
     /**
      * Get selection by data name

@@ -255,7 +255,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     break;
 
                 case Column::GroupIndex:
-                    return Qt::AlignVCenter | Qt::AlignRight;
+                    return static_cast<std::int32_t>(Qt::AlignVCenter | Qt::AlignRight);
 
                 case Column::Analysis:
                 case Column::Progress:

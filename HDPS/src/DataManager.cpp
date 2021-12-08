@@ -108,7 +108,7 @@ plugin::RawData& DataManager::getRawData(const QString& name)
     }
 }
 
-Dataset<DatasetImpl>& DataManager::getSet(const QString& datasetGuid)
+Dataset<DatasetImpl> DataManager::getSet(const QString& datasetGuid)
 {
     try
     {

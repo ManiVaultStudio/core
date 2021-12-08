@@ -93,7 +93,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             _mainWindow.addPlugin(plugin);
 
             // Get reference to the analysis output dataset
-            auto& outputDataset = analysisPlugin->getOutputDataset();
+            auto outputDataset = analysisPlugin->getOutputDataset();
 
             // Adjust the data hierarchy icon
             _dataHierarchyManager->getItem(outputDataset->getGuid()).addIcon("analysis", analysisPlugin->getIcon());
