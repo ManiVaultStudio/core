@@ -11,6 +11,9 @@ namespace hdps
 class DatasetImpl;
 class CoreInterface;
 
+/** Only dataset reference template classes have access to protected members */
+template<typename> class Dataset;
+
 /**
  * Smart dataset pointer private class
  *
@@ -22,8 +25,8 @@ class DatasetPrivate : public QObject, public EventListener
 {
     Q_OBJECT
 
-    /** Only dataset reference template classes have access to protected members */
-    template<typename> friend class Dataset;
+    template<typename>
+    friend class Dataset;
 
 protected:
 
