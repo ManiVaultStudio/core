@@ -229,7 +229,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
         if (parentDataset->getDataType() == ClusterType) {
 
             // Obtain reference to the cluster source input dataset
-            auto& sourceClusters = parentDataset->getSelection<Clusters>();
+            auto sourceClusters = parentDataset->getSelection<Clusters>();
 
             // Clear the selected indices
             selectedIndices.clear();
@@ -248,7 +248,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
             // Get clusters input points dataset
-            auto& points = parentDataset->getDataHierarchyItem().getParent().getDataset()->getSourceDataset<Points>();
+            auto points = parentDataset->getParent()->getSourceDataset<Points>();
 
             // Iterate over all clusters and populate the selection data
             for (const auto& clusterIndex : sourceClusters->indices) {
@@ -306,7 +306,7 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
     if (parentDataset->getDataType() == PointType) {
 
         // Obtain reference to the points source input dataset
-        auto& points = parentDataset->getSourceDataset<Points>();
+        auto points = parentDataset->getSourceDataset<Points>();
 
         QSize sourceImageSize = getImageSize(), targetImageSize;
 
