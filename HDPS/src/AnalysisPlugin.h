@@ -30,7 +30,7 @@ public:
      * Set input dataset smart pointer
      * @param inputDataset Smart pointer to the input dataset
      */
-    void setInputDataset(Dataset<DatasetImpl>& inputDataset) {
+    void setInputDataset(Dataset<DatasetImpl> inputDataset) {
         _input = inputDataset;
     }
 
@@ -44,7 +44,7 @@ public:
      * Set output dataset smart pointer
      * @param outputDataset Smart pointer to output dataset
      */
-    void setOutputDataset(Dataset<DatasetImpl>& outputDataset) {
+    void setOutputDataset(Dataset<DatasetImpl> outputDataset) {
         _output = outputDataset;
     }
 
