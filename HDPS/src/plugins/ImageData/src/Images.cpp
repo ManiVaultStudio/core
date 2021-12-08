@@ -165,13 +165,13 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 {
     try
     {
-        // Get reference to input dataset
-        auto& dataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+        // Get smart pointer to parent dataset
+        auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
 
-        if (dataset->getDataType() == PointType) {
+        if (parentDataset->getDataType() == PointType) {
 
             // Obtain reference to the point source input dataset
-            auto points = dataset->getSourceDataset<Points>();
+            auto points = parentDataset->getSourceDataset<Points>();
 
             // Get selection indices from points dataset
             auto& selectionIndices = points->getSelection<Points>()->indices;
@@ -226,10 +226,10 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             }
         }
 
-        if (dataset->getDataType() == ClusterType) {
+        if (parentDataset->getDataType() == ClusterType) {
 
             // Obtain reference to the cluster source input dataset
-            auto& sourceClusters = dataset->getSelection<Clusters>();
+            auto& sourceClusters = parentDataset->getSelection<Clusters>();
 
             // Clear the selected indices
             selectedIndices.clear();
@@ -248,7 +248,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
             // Get clusters input points dataset
-            auto& points = dataset->getDataHierarchyItem().getParent().getDataset()->getSourceDataset<Points>();
+            auto& points = parentDataset->getDataHierarchyItem().getParent().getDataset()->getSourceDataset<Points>();
 
             // Iterate over all clusters and populate the selection data
             for (const auto& clusterIndex : sourceClusters->indices) {
@@ -300,13 +300,13 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 
 void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
-    // Get reference to input dataset
-    auto& dataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+    // Get smart pointer to parent dataset
+    auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
 
-    if (dataset->getDataType() == PointType) {
+    if (parentDataset->getDataType() == PointType) {
 
         // Obtain reference to the points source input dataset
-        auto& points = dataset->getSourceDataset<Points>();
+        auto& points = parentDataset->getSourceDataset<Points>();
 
         QSize sourceImageSize = getImageSize(), targetImageSize;
 
@@ -349,7 +349,7 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
         });
     }
 
-    if (dataset->getDataType() == ClusterType) {
+    if (parentDataset->getDataType() == ClusterType) {
     }
 }
 
@@ -468,8 +468,8 @@ std::uint32_t Images::getTargetPixelIndex(const QPoint& coordinate) const
 
 std::uint32_t Images::getSourceDataIndex(const QPoint& coordinate) const
 {
-    // Get reference to source data
-    auto& sourceData = getParent()->getSourceDataset<Points>();
+    // Get smart pointer to source data
+    auto sourceData = getParent()->getSourceDataset<Points>();
 
     const auto targetRectangle      = _imageData->getTargetRectangle();
     const auto relativeCoordinate   = coordinate - targetRectangle.topLeft();
