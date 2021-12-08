@@ -52,7 +52,7 @@ public: // Conversion
      * @param iconName Name of the icon
      * @param return Icon character (unicode)
      */
-    QString getIconCharacter(const QString& iconName) const;
+    QString getIconCharacter(const QString& iconName) const override;
 
 private:
     QString     _metaDataResource;      /** Location of the meta data resource JSON */
