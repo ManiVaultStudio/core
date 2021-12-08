@@ -92,6 +92,9 @@ QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::Display
 
                 case Column::ResourcePath:
                     colorMap.getResourcePath();
+
+                case Column::NoDimensions:
+                    break;
             }
 
             break;

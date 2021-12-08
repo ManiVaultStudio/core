@@ -84,34 +84,42 @@ QVariant LogItemModel::GetDataValueAtColumn(const MessageRecord& messageRecord, 
     {
         switch (static_cast<ColumnEnum>(column))
         {
-        case ColumnEnum::number:
-        {
-            return qulonglong{messageRecord.number};
-        }
-        case ColumnEnum::category:
-        {
-            return messageRecord.category;
-        }
-        case ColumnEnum::type:
-        {
-            return Logger::MsgTypeToString(messageRecord.type);
-        }
-        case ColumnEnum::fileAndLine:
-        {
-            return (messageRecord.file == nullptr) && (messageRecord.line == 0) ?
-                QString{} :
-                (QString("%1(%2)")
-                    .arg(messageRecord.file)
-                    .arg(messageRecord.line));
-        }
-        case ColumnEnum::function:
-        {
-            return messageRecord.function;
-        }
-        case ColumnEnum::message:
-        {
-            return messageRecord.message;
-        }
+            case ColumnEnum::number:
+            {
+                return qulonglong{messageRecord.number};
+            }
+
+            case ColumnEnum::category:
+            {
+                return messageRecord.category;
+            }
+
+            case ColumnEnum::type:
+            {
+                return Logger::MsgTypeToString(messageRecord.type);
+            }
+
+            case ColumnEnum::fileAndLine:
+            {
+                return (messageRecord.file == nullptr) && (messageRecord.line == 0) ?
+                    QString{} :
+                    (QString("%1(%2)")
+                        .arg(messageRecord.file)
+                        .arg(messageRecord.line));
+            }
+
+            case ColumnEnum::function:
+            {
+                return messageRecord.function;
+            }
+
+            case ColumnEnum::message:
+            {
+                return messageRecord.message;
+            }
+
+            case ColumnEnum::numberOfColumns:
+                break;
         }
     }
     return {};
