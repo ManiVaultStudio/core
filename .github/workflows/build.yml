@@ -27,12 +27,12 @@ jobs:
     strategy:
       matrix:
         include:
-        # - name: Windows-msvc2017
-          # os: windows-2016
-          # compiler: msvc-2017
-          # build-cversion: 15
-          # build-runtime: MD
-          # build-config: Release
+         - name: Windows-msvc2017
+           os: windows-2016
+           compiler: msvc-2017
+           build-cversion: 15
+           build-runtime: MD
+           build-config: Release
 
 #        - name: Linux_gcc9
 #          os: ubuntu-18.04
