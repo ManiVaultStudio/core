@@ -43,8 +43,8 @@ public:
 
     /** Get input dataset smart pointer */
     template<typename DatasetType>
-    Dataset<DatasetType>& getInputDataset() const {
-        return Dataset<DatasetImpl>(*_input);
+    Dataset<DatasetType>& getInputDataset() {
+        return Dataset<DatasetType>(*_input);
     }
 
 protected:
