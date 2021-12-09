@@ -297,7 +297,7 @@ bool Clusters::canSelectInvert() const
 void Clusters::selectAll()
 {
     // Get reference to selection indices
-    auto& selectionIndices = getSelection<Clusters>()->indices;
+    auto& selectionIndices = getSelectionIndices();
 
     // Clear and resize
     selectionIndices.clear();
@@ -312,20 +312,17 @@ void Clusters::selectAll()
 
 void Clusters::selectNone()
 {
-    // Get reference to selection indices
-    auto& selectionIndices = getSelection<Points>()->indices;
-
     // Clear
-    selectionIndices.clear();
+    getSelectionIndices().clear();
 
     // Notify others that the selection changed
-    _core->notifyDataSelectionChanged(*this);
+    _core->notifyDataSelectionChanged(this);
 }
 
 void Clusters::selectInvert()
 {
     // Get reference to selection indices
-    auto& selectionIndices = getSelection<Clusters>()->indices;
+    auto& selectionIndices = getSelectionIndices();
 
     // Create set of selected indices
     std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
