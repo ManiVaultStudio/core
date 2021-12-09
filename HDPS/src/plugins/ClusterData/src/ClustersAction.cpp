@@ -259,7 +259,7 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         }
 
         // Select points
-        clustersAction->getClustersDataset()->setSelection(currentClusterSelectionIndices);
+        clustersAction->getClustersDataset()->setSelectionIndices(currentClusterSelectionIndices);
 
         // Update state of the remove action
         _removeAction.setEnabled(!selectedRows.isEmpty());

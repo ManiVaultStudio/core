@@ -116,6 +116,47 @@ QIcon Images::getIcon() const
     return hdps::Application::getIconFont("FontAwesome").getIcon("images");
 }
 
+std::vector<std::uint32_t>& Images::getSelectionIndices()
+{
+    return std::vector<std::uint32_t>();
+}
+
+void Images::setSelectionIndices(const std::vector<std::uint32_t>& indices)
+{
+}
+
+bool Images::canSelect() const
+{
+    return false;
+}
+
+bool Images::canSelectAll() const
+{
+    return false;
+}
+
+bool Images::canSelectNone() const
+{
+    return false;
+}
+
+bool Images::canSelectInvert() const
+{
+    return false;
+}
+
+void Images::selectAll()
+{
+}
+
+void Images::selectNone()
+{
+}
+
+void Images::selectInvert()
+{
+}
+
 void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
     try
