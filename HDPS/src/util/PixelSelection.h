@@ -13,7 +13,8 @@ enum class PixelSelectionType
     Brush,          /** A brush is used the paint the pixel selection */
     Lasso,          /** A lasso tool is used to select pixels */
     Polygon,        /** Select pixels in the interior of a polygon */
-    Sample          /** Probe one pixel at a time */
+    Sample,         /** Probe one pixel at a time */
+    VisibleRegion   /** Select in the visible region of the viewport */
 };
 
 /** Pixel selection types alias */
@@ -33,7 +34,8 @@ static const QMap<PixelSelectionType, QString> pixelSelectionTypes = {
     { PixelSelectionType::Brush, "Brush" },
     { PixelSelectionType::Lasso, "Lasso" },
     { PixelSelectionType::Polygon, "Polygon" },
-    { PixelSelectionType::Sample, "Sample" }
+    { PixelSelectionType::Sample, "Sample" },
+    { PixelSelectionType::VisibleRegion, "Visible region" }
 };
 
 /**
