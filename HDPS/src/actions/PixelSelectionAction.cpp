@@ -25,6 +25,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidge
     _lassoAction(this, "Lasso"),
     _polygonAction(this, "Polygon"),
     _sampleAction(this, "Sample"),
+    _roiAction(this, "ROI"),
     _typeActionGroup(this),
     _modifierReplaceAction(this, "Replace"),
     _modifierAddAction(this, "Add"),
@@ -108,24 +109,28 @@ void PixelSelectionAction::initType()
     _lassoAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _polygonAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
     _sampleAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _roiAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
     _rectangleAction.setShortcut(QKeySequence("R"));
     _brushAction.setShortcut(QKeySequence("B"));
     _lassoAction.setShortcut(QKeySequence("L"));
     _polygonAction.setShortcut(QKeySequence("P"));
     _sampleAction.setShortcut(QKeySequence("S"));
+    _roiAction.setShortcut(QKeySequence("I"));
 
     _rectangleAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Rectangle));
     _brushAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Brush));
     _lassoAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Lasso));
     _polygonAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Polygon));
     _sampleAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::Sample));
+    _roiAction.setIcon(PixelSelectionTool::getIcon(PixelSelectionType::ROI));
 
     _rectangleAction.setToolTip("Select pixels inside a rectangle (R)");
     _brushAction.setToolTip("Select pixels using a brush tool (B)");
     _lassoAction.setToolTip("Select pixels using a lasso (L)");
     _polygonAction.setToolTip("Select pixels by drawing a polygon (P)");
     _sampleAction.setToolTip("Sample pixel by dragging over the image (S)");
+    _roiAction.setToolTip("Sample within region of interest (I)");
 
     QStringList typeOptions;
 
@@ -133,42 +138,79 @@ void PixelSelectionAction::initType()
         typeOptions << getPixelSelectionTypeName(pixelSelectionType);
 
     _typeAction.setOptions(typeOptions);
-    _typeAction.setCurrentText("Rectangle");
-    _typeAction.setDefaultText("Rectangle");
 
-    _typeActionGroup.addAction(&_rectangleAction);
-    _typeActionGroup.addAction(&_brushAction);
-    _typeActionGroup.addAction(&_lassoAction);
-    _typeActionGroup.addAction(&_polygonAction);
-    _typeActionGroup.addAction(&_sampleAction);
+    _typeAction.setCurrentText(typeOptions.first());
+    _typeAction.setDefaultText(typeOptions.first());
 
+    // Add rectangle selection type action if enabled
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Rectangle)) {
+        _typeActionGroup.addAction(&_rectangleAction);
+
+        // Switch to rectangle selection when action is triggered
+        connect(&_rectangleAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+            if (toggled)
+                pixelSelectionTool.setType(PixelSelectionType::Rectangle);
+        });
+    }
+
+    // Add brush selection type action if enabled
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Brush)) {
+        _typeActionGroup.addAction(&_brushAction);
+
+        // Switch to brush selection when action is triggered
+        connect(&_brushAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+            if (toggled)
+                pixelSelectionTool.setType(PixelSelectionType::Brush);
+        });
+    }
+
+    // Add lasso selection type action if enabled
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Lasso)) {
+        _typeActionGroup.addAction(&_lassoAction);
+
+        // Switch to lasso selection when action is triggered
+        connect(&_lassoAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+            if (toggled)
+                pixelSelectionTool.setType(PixelSelectionType::Lasso);
+        });
+    }
+
+    // Add polygon selection type action if enabled
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Polygon)) {
+        _typeActionGroup.addAction(&_polygonAction);
+
+        // Switch to polygon selection when action is triggered
+        connect(&_polygonAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+            if (toggled)
+                pixelSelectionTool.setType(PixelSelectionType::Polygon);
+        });
+    }
+
+    // Add sample selection type action if enabled
+    if (_pixelSelectionTypes.contains(PixelSelectionType::Sample)) {
+        _typeActionGroup.addAction(&_sampleAction);
+
+        // Switch to sample selection when action is triggered
+        connect(&_sampleAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+            if (toggled)
+                pixelSelectionTool.setType(PixelSelectionType::Sample);
+        });
+    }
+
+    // Add ROI selection type action if enabled
+    if (_pixelSelectionTypes.contains(PixelSelectionType::ROI)) {
+        _typeActionGroup.addAction(&_roiAction);
+
+        // Switch to ROI selection when action is triggered
+        connect(&_sampleAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
+            if (toggled)
+                pixelSelectionTool.setType(PixelSelectionType::ROI);
+        });
+    }
+
+    // Set type when the type option action changes
     connect(&_typeAction, &OptionAction::currentTextChanged, [this, &pixelSelectionTool](const QString& currentText) {
         pixelSelectionTool.setType(util::pixelSelectionTypes.key(currentText));
-    });
-
-    connect(&_rectangleAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
-        if (toggled)
-            pixelSelectionTool.setType(PixelSelectionType::Rectangle);
-    });
-
-    connect(&_brushAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
-        if (toggled)
-            pixelSelectionTool.setType(PixelSelectionType::Brush);
-    });
-
-    connect(&_lassoAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
-        if (toggled)
-            pixelSelectionTool.setType(PixelSelectionType::Lasso);
-    });
-
-    connect(&_polygonAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
-        if (toggled)
-            pixelSelectionTool.setType(PixelSelectionType::Polygon);
-    });
-
-    connect(&_sampleAction, &QAction::toggled, this, [this, &pixelSelectionTool](bool toggled) {
-        if (toggled)
-            pixelSelectionTool.setType(PixelSelectionType::Sample);
     });
 
     const auto updateType = [this, &pixelSelectionTool]() {
@@ -181,12 +223,15 @@ void PixelSelectionAction::initType()
         _lassoAction.setChecked(type == PixelSelectionType::Lasso);
         _polygonAction.setChecked(type == PixelSelectionType::Polygon);
         _sampleAction.setChecked(type == PixelSelectionType::Sample);
+        _roiAction.setChecked(type == PixelSelectionType::ROI);
 
         setResettable(_typeAction.isResettable());
     };
 
+    // Toggle type actions based on selected selection type
     connect(&pixelSelectionTool, &PixelSelectionTool::typeChanged, this, updateType);
 
+    // Do an initial update
     updateType();
 }
 

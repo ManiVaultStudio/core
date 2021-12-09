@@ -90,6 +90,7 @@ public: // Action getters
     ToggleAction& getLassoAction() { return _lassoAction; }
     ToggleAction& getPolygonAction() { return _polygonAction; }
     ToggleAction& getSampleAction() { return _sampleAction; }
+    ToggleAction& getRoiAction() { return _roiAction; }
     ToggleAction& getModifierReplaceAction() { return _modifierReplaceAction; }
     ToggleAction& getModifierAddAction() { return _modifierAddAction; }
     ToggleAction& getModifierSubtractAction() { return _modifierSubtractAction; }
@@ -111,6 +112,7 @@ protected:
     ToggleAction                _lassoAction;                       /** Switch to lasso selection action */
     ToggleAction                _polygonAction;                     /** Switch to polygon selection action */
     ToggleAction                _sampleAction;                      /** Switch to sample selection action */
+    ToggleAction                _roiAction;                         /** Switch to ROI selection action */
     QActionGroup                _typeActionGroup;                   /** Type action group */
     ToggleAction                _modifierReplaceAction;             /** Replace current selection action */
     ToggleAction                _modifierAddAction;                 /** Add to current selection action */

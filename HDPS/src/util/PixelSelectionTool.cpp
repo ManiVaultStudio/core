@@ -153,9 +153,9 @@ void PixelSelectionTool::abort()
 
 QIcon PixelSelectionTool::getIcon(const PixelSelectionType& selectionType)
 {
-    const auto margin           = 5;
-    const auto pixmapSize       = QSize(100, 100);
-    const auto pixmapDeflated   = QRect(QPoint(), pixmapSize).marginsRemoved(QMargins(margin, margin, margin, margin));
+    const auto margin = 5;
+    const auto pixmapSize = QSize(100, 100);
+    const auto pixmapRectDeflated   = QRect(QPoint(), pixmapSize).marginsRemoved(QMargins(margin, margin, margin, margin));
 
     // Create pixmap
     QPixmap pixmap(pixmapSize);
@@ -179,13 +179,13 @@ QIcon PixelSelectionTool::getIcon(const PixelSelectionType& selectionType)
     {
         case PixelSelectionType::Rectangle:
         {
-            painter.drawRect(pixmapDeflated);
+            painter.drawRect(pixmapRectDeflated);
             break;
         }
 
         case PixelSelectionType::Brush:
         {
-            painter.drawEllipse(pixmapDeflated.center(), 45, 45);
+            painter.drawEllipse(pixmapRectDeflated.center(), 45, 45);
             break;
         }
 
@@ -265,6 +265,20 @@ QIcon PixelSelectionTool::getIcon(const PixelSelectionType& selectionType)
                     center + QPoint(r3 * sin(angle), r3 * cos(angle))
                 }));
             }
+
+            break;
+        }
+
+        case PixelSelectionType::ROI:
+        {
+            // Draw outside rectangle
+            painter.setPen(QPen(textColor, 10, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+            painter.drawRect(pixmapRectDeflated);
+
+            // Draw inside rectangle filled
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(textColor);
+            painter.drawRect(pixmapRectDeflated.marginsRemoved(QMargins(margin, margin, margin, margin)));
 
             break;
         }
@@ -483,7 +497,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                 {
                     if (mouseEvent->buttons() & Qt::LeftButton)
                         _mousePositions << _mousePosition;
-                    
+
                     shouldPaint = true;
 
                     break;
@@ -742,7 +756,7 @@ void PixelSelectionTool::paint()
 
             break;
         }
-       
+
         default:
             break;
     }
