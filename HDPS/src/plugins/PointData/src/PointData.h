@@ -449,7 +449,7 @@ public:
     void setData(const T* const data, const std::size_t numPoints, const std::size_t numDimensions)
     {
          _vectorHolder = VectorHolder( std::vector<T>(data, data + numPoints * numDimensions) );
-         _numDimensions = numDimensions;
+         _numDimensions = static_cast<std::uint32_t>(numDimensions);
     }
 
 
