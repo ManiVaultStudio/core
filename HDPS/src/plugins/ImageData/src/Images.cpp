@@ -118,7 +118,7 @@ QIcon Images::getIcon() const
 
 std::vector<std::uint32_t>& Images::getSelectionIndices()
 {
-    return std::vector<std::uint32_t>();
+    return _indices;
 }
 
 void Images::setSelectionIndices(const std::vector<std::uint32_t>& indices)

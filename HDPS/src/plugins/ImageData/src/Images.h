@@ -203,6 +203,7 @@ protected:
     std::uint32_t getSourceDataIndex(const QPoint& coordinate) const;
 
 private:
+    std::vector<std::uint32_t>      _indices;       /** Selection indices */
     ImageData*                      _imageData;     /** Pointer to raw image data */
     QSharedPointer<InfoAction>      _infoAction;    /** Shared pointer to info action */
 };
