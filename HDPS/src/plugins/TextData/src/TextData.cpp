@@ -32,3 +32,44 @@ QIcon Text::getIcon() const
 {
     return Application::getIconFont("FontAwesome").getIcon("font");
 }
+
+std::vector<std::uint32_t>& Text::getSelectionIndices()
+{
+    return getSelection<Text>()->indices;
+}
+
+void Text::setSelectionIndices(const std::vector<std::uint32_t>& indices)
+{
+}
+
+bool Text::canSelect() const
+{
+    return false;
+}
+
+bool Text::canSelectAll() const
+{
+    return false;
+}
+
+bool Text::canSelectNone() const
+{
+    return false;
+}
+
+bool Text::canSelectInvert() const
+{
+    return false;
+}
+
+void Text::selectAll()
+{
+}
+
+void Text::selectNone()
+{
+}
+
+void Text::selectInvert()
+{
+}

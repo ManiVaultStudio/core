@@ -181,14 +181,6 @@ public:
         return Dataset<DatasetType>(dynamic_cast<DatasetType*>(nonConstThis));
     }
 
-    /**
-     * Set selection
-     * @param indices Selection indices
-     */
-    virtual void setSelection(const std::vector<std::uint32_t>& indices)
-    {
-    }
-
     /** Get pointer to the core */
     CoreInterface* getCore() {
         return _core;
@@ -225,6 +217,44 @@ public: // Hierarchy
     {
         return getChildren(QVector<DataType>({ filterDataType }));
     }
+
+public: // Selection
+
+    /**
+     * Get selection indices
+     * @return Selection indices
+     */
+    virtual std::vector<std::uint32_t>& getSelectionIndices() = 0;
+
+    /**
+     * Select by indices
+     * @param indices Selection indices
+     */
+    virtual void setSelectionIndices(const std::vector<std::uint32_t>& indices) = 0;
+
+    /** Get size of the selection */
+    std::int32_t getSelectionSize() const;
+
+    /** Determines whether items can be selected */
+    virtual bool canSelect() const = 0;
+
+    /** Determines whether all items can be selected */
+    virtual bool canSelectAll() const = 0;
+
+    /** Determines whether there are any items which can be deselected */
+    virtual bool canSelectNone() const = 0;
+
+    /** Determines whether the item selection can be inverted (more than one) */
+    virtual bool canSelectInvert() const = 0;
+
+    /** Select all items */
+    virtual void selectAll() = 0;
+
+    /** Deselect all items */
+    virtual void selectNone() = 0;
+
+    /** Invert item selection */
+    virtual void selectInvert() = 0;
 
 public: // Lock
 

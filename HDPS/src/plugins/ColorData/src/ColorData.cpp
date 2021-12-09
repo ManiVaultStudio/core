@@ -37,6 +37,48 @@ QIcon Colors::getIcon() const
     return QIcon();
 }
 
+std::vector<std::uint32_t>& Colors::getSelectionIndices()
+{
+    return getSelection<Colors>()->indices;
+}
+
+void Colors::setSelectionIndices(const std::vector<std::uint32_t>& indices)
+{
+    getSelectionIndices() = indices;
+}
+
+bool Colors::canSelect() const
+{
+    return false;
+}
+
+bool Colors::canSelectAll() const
+{
+    return false;
+}
+
+bool Colors::canSelectNone() const
+{
+    return false;
+}
+
+bool Colors::canSelectInvert() const
+{
+    return false;
+}
+
+void Colors::selectAll()
+{
+}
+
+void Colors::selectNone()
+{
+}
+
+void Colors::selectInvert()
+{
+}
+
 QIcon ColorDataFactory::getIcon() const
 {
     return hdps::Application::getIconFont("FontAwesome").getIcon("palette");

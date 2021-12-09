@@ -64,6 +64,41 @@ public:
     /** Get icon for the dataset */
     QIcon getIcon() const override;
 
+public: // Selection
+
+    /**
+     * Get selection
+     * @return Selection indices
+     */
+    std::vector<std::uint32_t>& getSelectionIndices() override;
+
+    /**
+     * Select by indices
+     * @param indices Selection indices
+     */
+    void setSelectionIndices(const std::vector<std::uint32_t>& indices) override;
+
+    /** Determines whether items can be selected */
+    bool canSelect() const override;
+
+    /** Determines whether all items can be selected */
+    bool canSelectAll() const override;
+
+    /** Determines whether there are any items which can be deselected */
+    bool canSelectNone() const override;
+
+    /** Determines whether the item selection can be inverted (more than one) */
+    bool canSelectInvert() const override;
+
+    /** Select all items */
+    void selectAll() override;
+
+    /** Deselect all items */
+    void selectNone() override;
+
+    /** Invert item selection */
+    void selectInvert() override;
+
     std::vector<unsigned int> indices;
 };
 

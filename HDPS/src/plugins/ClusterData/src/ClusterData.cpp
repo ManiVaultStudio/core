@@ -11,6 +11,8 @@
 #include <QtCore>
 #include <QtDebug>
 
+#include <set>
+
 Q_PLUGIN_METADATA(IID "hdps.ClusterData")
 
 using namespace hdps::util;
@@ -107,10 +109,10 @@ void Clusters::init()
             auto foreignClusters = dataEvent->getDataset<Clusters>();
 
             // Get names of the selected clusters in the foreign dataset
-            const auto foreignSelectedClusterNames = foreignClusters->getSelectedClusterNames();
+            const auto foreignSelectedClusterNames = foreignClusters->getSelectionNames();
 
             // Attempt to select clusters (fails if the clusters are the same)
-            setSelection(foreignSelectedClusterNames);
+            setSelectionNames(foreignSelectedClusterNames);
         }
     });
 }
@@ -187,39 +189,12 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     return selectedIndices;
 }
 
-QStringList Clusters::getSelectedClusterNames() const
+std::vector<std::uint32_t>& Clusters::getSelectionIndices()
 {
-    QStringList clusterNames;
-
-    for (const auto& selectedIndex : getSelection<Clusters>()->indices)
-        clusterNames  << getClusters()[selectedIndex].getName();
-
-    return clusterNames;
+    return getSelection<Clusters>()->indices;
 }
 
-void Clusters::setSelection(const QStringList& clusterNames)
-{
-    // Exit if nothing changed
-    if (clusterNames == getSelectedClusterNames())
-        return;
-
-    // New selection indices
-    std::vector<std::uint32_t> selectionIndices;
-
-    for (const auto& clusterName : clusterNames) {
-
-        // Get cluster index
-        const auto clusterIndex = getRawData<ClusterData>().getClusterIndex(clusterName);
-
-        if (clusterIndex >= 0)
-            selectionIndices.push_back(clusterIndex);
-    }
-
-    // Set the selection
-    setSelection(selectionIndices);
-}
-
-void Clusters::setSelection(const std::vector<std::uint32_t>& indices)
+void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
     // No need to process equal selections
     if (indices == getSelection<Clusters>()->indices)
@@ -265,6 +240,111 @@ void Clusters::setSelection(const std::vector<std::uint32_t>& indices)
         // Notify others that the parent points selection has changed
         _core->notifyDataSelectionChanged(parentDataset);
     }
+}
+
+QStringList Clusters::getSelectionNames() const
+{
+    QStringList clusterNames;
+
+    for (const auto& selectedIndex : getSelection<Clusters>()->indices)
+        clusterNames << getClusters()[selectedIndex].getName();
+
+    return clusterNames;
+}
+
+void Clusters::setSelectionNames(const QStringList& clusterNames)
+{
+    // Exit if nothing changed
+    if (clusterNames == getSelectionNames())
+        return;
+
+    // New selection indices
+    std::vector<std::uint32_t> selectionIndices;
+
+    for (const auto& clusterName : clusterNames) {
+
+        // Get cluster index
+        const auto clusterIndex = getRawData<ClusterData>().getClusterIndex(clusterName);
+
+        if (clusterIndex >= 0)
+            selectionIndices.push_back(clusterIndex);
+    }
+
+    // Set the selection
+    setSelectionIndices(selectionIndices);
+}
+
+bool Clusters::canSelect() const
+{
+    return getClusters().size() >= 1;
+}
+
+bool Clusters::canSelectAll() const
+{
+    return getSelectionSize() < getClusters().size();
+}
+
+bool Clusters::canSelectNone() const
+{
+    return getSelectionSize() >= 1;
+}
+
+bool Clusters::canSelectInvert() const
+{
+    return true;
+}
+
+void Clusters::selectAll()
+{
+    // Get reference to selection indices
+    auto& selectionIndices = getSelection<Clusters>()->indices;
+
+    // Clear and resize
+    selectionIndices.clear();
+    selectionIndices.resize(getClusters().size());
+
+    // Generate cluster selection indices
+    std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
+
+    // Notify others that the selection changed
+    _core->notifyDataSelectionChanged(this);
+}
+
+void Clusters::selectNone()
+{
+    // Get reference to selection indices
+    auto& selectionIndices = getSelection<Points>()->indices;
+
+    // Clear
+    selectionIndices.clear();
+
+    // Notify others that the selection changed
+    _core->notifyDataSelectionChanged(*this);
+}
+
+void Clusters::selectInvert()
+{
+    // Get reference to selection indices
+    auto& selectionIndices = getSelection<Clusters>()->indices;
+
+    // Create set of selected indices
+    std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
+
+    // Get number of clusters
+    const auto numberOfClusters = getClusters().size();
+
+    // Clear and resize
+    selectionIndices.clear();
+    selectionIndices.reserve(numberOfClusters - selectionSet.size());
+
+    // Do the inversion
+    for (std::uint32_t i = 0; i < numberOfClusters; i++) {
+        if (selectionSet.find(i) == selectionSet.end())
+            selectionIndices.push_back(i);
+    }
+
+    // Notify others that the selection changed
+    _core->notifyDataSelectionChanged(this);
 }
 
 QIcon ClusterDataFactory::getIcon() const

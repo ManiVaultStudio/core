@@ -386,50 +386,9 @@ QIcon Points::getIcon() const
     */
 }
 
-void Points::selectAll()
+std::vector<std::uint32_t>& Points::getSelectionIndices()
 {
-    auto& selectionIndices = getSelection<Points>()->indices;
-
-    selectionIndices.clear();
-    selectionIndices.resize(getNumPoints());
-
-    if (isFull()) {
-        std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
-    }
-    else {
-        for (const auto& index : indices)
-            selectionIndices.push_back(index);
-    }
-
-    _core->notifyDataSelectionChanged(*this);
-}
-
-void Points::selectNone()
-{
-    auto& selectionIndices = getSelection<Points>()->indices;
-
-    selectionIndices.clear();
-
-    _core->notifyDataSelectionChanged(*this);
-}
-
-void Points::selectInvert()
-{
-    auto& selectionIndices = getSelection<Points>()->indices;
-
-    std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
-
-    const auto noPixels = getNumPoints();
-
-    selectionIndices.clear();
-    selectionIndices.reserve(noPixels - selectionSet.size());
-
-    for (std::uint32_t i = 0; i < noPixels; i++) {
-        if (selectionSet.find(i) == selectionSet.end())
-            selectionIndices.push_back(i);
-    }
-
-    _core->notifyDataSelectionChanged(*this);
+    return getSelection<Points>()->indices;
 }
 
 const std::vector<QString>& Points::getDimensionNames() const
@@ -452,13 +411,7 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void Points::addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
-{
-    _linkedSelections.emplace_back(toSmartPointer(), targetDataSet);
-    _linkedSelections.back().setMapping(mapping);
-}
-
-void Points::setSelection(std::vector<unsigned int>& indices)
+void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
     auto selection = getSelection<Points>();
 
@@ -470,6 +423,7 @@ void Points::setSelection(std::vector<unsigned int>& indices)
 
         // Create separate vector of additional linked selected points
         std::vector<unsigned int> extraSelectionIndices;
+
         // Reserve at least as much space as required for a 1-1 mapping
         extraSelectionIndices.reserve(indices.size());
 
@@ -484,6 +438,78 @@ void Points::setSelection(std::vector<unsigned int>& indices)
 
         selection->indices.insert(selection->indices.end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
     }
+}
+
+bool Points::canSelect() const
+{
+    return getNumPoints() > 0;
+}
+
+bool Points::canSelectAll() const
+{
+    return getNumPoints() != getSelectionSize();
+}
+
+bool Points::canSelectNone() const
+{
+    return getSelection<Points>()->indices.size() >= 1;
+}
+
+bool Points::canSelectInvert() const
+{
+    return true;
+}
+
+void Points::selectAll()
+{
+    auto& selectionIndices = getSelection<Points>()->indices;
+
+    selectionIndices.clear();
+    selectionIndices.resize(getNumPoints());
+
+    if (isFull()) {
+        std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
+    }
+    else {
+        for (const auto& index : indices)
+            selectionIndices.push_back(index);
+    }
+
+    _core->notifyDataSelectionChanged(this);
+}
+
+void Points::selectNone()
+{
+    auto& selectionIndices = getSelection<Points>()->indices;
+
+    selectionIndices.clear();
+
+    _core->notifyDataSelectionChanged(this);
+}
+
+void Points::selectInvert()
+{
+    auto& selectionIndices = getSelection<Points>()->indices;
+
+    std::set<std::uint32_t> selectionSet(selectionIndices.begin(), selectionIndices.end());
+
+    const auto noPixels = getNumPoints();
+
+    selectionIndices.clear();
+    selectionIndices.reserve(noPixels - selectionSet.size());
+
+    for (std::uint32_t i = 0; i < noPixels; i++) {
+        if (selectionSet.find(i) == selectionSet.end())
+            selectionIndices.push_back(i);
+    }
+
+    _core->notifyDataSelectionChanged(this);
+}
+
+void Points::addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
+{
+    _linkedSelections.emplace_back(toSmartPointer(), targetDataSet);
+    _linkedSelections.back().setMapping(mapping);
 }
 
 // =============================================================================

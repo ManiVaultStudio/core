@@ -32,6 +32,11 @@ QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& 
     return children;
 }
 
+std::int32_t DatasetImpl::getSelectionSize() const
+{
+    return static_cast<std::int32_t>(const_cast<DatasetImpl*>(this)->getSelectionIndices().size());
+}
+
 void DatasetImpl::lock()
 {
     getDataHierarchyItem().setLocked(true);

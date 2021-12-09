@@ -16,14 +16,9 @@ WidgetActionWidget::WidgetActionWidget(QWidget* parent, WidgetAction* widgetActi
 {
     // Update basic widget settings when the action changes
     const auto update = [this]() -> void {
-        if (isEnabled() != _widgetAction->isEnabled())
-            setEnabled(_widgetAction->isEnabled());
-
-        if (toolTip() != _widgetAction->toolTip())
-            setToolTip(_widgetAction->toolTip());
-
-        if (isVisible() != _widgetAction->isVisible())
-            setVisible(_widgetAction->isVisible());
+        setEnabled(_widgetAction->isEnabled());
+        setToolTip(_widgetAction->toolTip());
+        setVisible(_widgetAction->isVisible());
     };
 
     // When the action changes, update basic widget settings 
