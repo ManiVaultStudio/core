@@ -312,7 +312,7 @@ void Clusters::selectAll()
 
 void Clusters::selectNone()
 {
-    // Clear
+    // Clear selection indices
     getSelectionIndices().clear();
 
     // Notify others that the selection changed

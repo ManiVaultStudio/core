@@ -565,7 +565,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
     if (shouldPaint)
         paint();
-    
+
     return QObject::eventFilter(target, event);
 }
 
@@ -574,10 +574,7 @@ void PixelSelectionTool::paint()
     if (!_enabled)
         return;
 
-    _shapePixmap = QPixmap(_shapePixmap.size());
     _shapePixmap.fill(Qt::transparent);
-
-    _areaPixmap = QPixmap(_areaPixmap.size());
     _areaPixmap.fill(Qt::transparent);
 
     QPainter shapePainter(&_shapePixmap), areaPainter(&_areaPixmap);

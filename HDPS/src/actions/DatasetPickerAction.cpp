@@ -41,8 +41,6 @@ void DatasetPickerAction::setDatasets(const QVector<Dataset<DatasetImpl>>& datas
         // Update the datasets model when the dataset is renamed
         connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
     }
-
-    setCustomModel(&_datasetsModel);
 }
 
 Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
@@ -112,41 +110,82 @@ const QVector<Dataset<DatasetImpl>>& DatasetPickerAction::DatasetsModel::getData
 
 Dataset<DatasetImpl> DatasetPickerAction::DatasetsModel::getDataset(const std::int32_t& rowIndex) const
 {
+    if (rowIndex < 0)
+        return Dataset<DatasetImpl>();
+
     return _datasets[rowIndex];
 }
 
 void DatasetPickerAction::DatasetsModel::setDatasets(const QVector<Dataset<DatasetImpl>>& datasets)
 {
-    if (datasets.count() != _datasets.count()) {
+    // Add datasets one-by-one
+    for (const auto& dataset : datasets)
+        addDataset(dataset);
+}
 
-        // Notify others that the model layout is about to be changed
-        emit layoutAboutToBeChanged();
-        
-        // Assign the datasets
-        _datasets = datasets;
-        
-        // Notify others that the model layout is changed
-        emit layoutChanged();
+void DatasetPickerAction::DatasetsModel::addDataset(const Dataset<DatasetImpl>& dataset)
+{
+    // Insert row into model
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    {
+        // Add the dataset
+        _datasets << dataset;
     }
-    else {
-        // Assign the datasets
-        _datasets = datasets;
-    }
+    endInsertRows();
 
-    // And update model data with datasets
-    updateData();
+    // Get smart pointer to last added dataset
+    auto& addedDataset = _datasets.last();
+
+    // Remove a dataset from the model when it is about to be deleted
+    connect(&addedDataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, &addedDataset]() {
+        removeDataset(addedDataset);
+    });
+
+    // Notify others that the model has updated when the dataset GUI name changes
+    connect(&addedDataset, &Dataset<DatasetImpl>::dataGuiNameChanged, this, [this, &addedDataset]() {
+
+        // Get row index of the dataset
+        const auto colorDatasetRowIndex = rowIndex(addedDataset);
+
+        // Only proceed if we found a valid row index
+        if (colorDatasetRowIndex < 0)
+            return;
+
+        // Establish model index
+        const auto modelIndex = index(colorDatasetRowIndex, 0);
+
+        // Only proceed if we have a valid model index
+        if (!modelIndex.isValid())
+            return;
+
+        // Notify others that the data changed
+        emit dataChanged(modelIndex, modelIndex);
+    });
 }
 
 void DatasetPickerAction::DatasetsModel::removeDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset)
 {
-    // Copy existing datasets
-    auto updatedDatasets = _datasets;
+    // Get row index of the dataset
+    const auto datasetRowIndex = rowIndex(dataset);
 
-    // Remove from the vector
-    updatedDatasets.removeOne(dataset);
+    // Remove row from model
+    beginRemoveRows(QModelIndex(), datasetRowIndex, datasetRowIndex);
+    {
+        // Remove dataset from internal vector
+        _datasets.removeOne(dataset);
+    }
+    endRemoveRows();
+}
 
-    // Assign new datasets
-    setDatasets(updatedDatasets);
+void DatasetPickerAction::DatasetsModel::removeAllDatasets()
+{
+    // Remove row from model
+    beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+    {
+        // Remove all datasets
+        _datasets.clear();
+    }
+    endRemoveRows();
 
     // And update model data with altered datasets
     updateData();

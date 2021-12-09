@@ -184,6 +184,10 @@ public:
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
+protected:
+
+    void updateCurrentIndex();
+
 signals:
 
     /** Signals that the model changed */

@@ -87,10 +87,19 @@ protected:
         void setDatasets(const QVector<hdps::Dataset<hdps::DatasetImpl>>& datasets);
 
         /**
+         * Add dataset
+         * @param dataset Smart pointer to dataset
+         */
+        void addDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset);
+
+        /**
          * Remove specific dataset
          * @param dataset Smart pointer to dataset
          */
         void removeDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset);
+
+        /** Remove all datasets from the model */
+        void removeAllDatasets();
 
         /** Get whether to show the full path name in the GUI */
         bool getShowFullPathName() const;

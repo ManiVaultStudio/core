@@ -85,14 +85,14 @@ void OptionAction::setOptions(const QStringList& options)
         // Override the string in the string list model
         _defaultModel.setStringList(options);
 
-        // Number of items deviates so compute a valid current index
-        _currentIndex = options.count() > 0 ? std::max(0, std::min(oldCurrentIndex, options.count() - 1)) : -1;
+        // Update the current index so that it respects the underlying model
+        updateCurrentIndex();
     }
 
     // Notify the others that the model changed
     emit modelChanged();
 
-    // Notify others that the current index and text changed when the current index changed
+    // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
 
@@ -108,6 +108,16 @@ const QAbstractItemModel* OptionAction::getModel() const
     return &_defaultModel;
 }
 
+void OptionAction::updateCurrentIndex()
+{
+    if (getModel()->rowCount() < 1) {
+        _currentIndex = -1;
+    } else {
+        if (_currentIndex >= getModel()->rowCount())
+            _currentIndex = getModel()->rowCount() - 1;
+    }
+}
+
 void OptionAction::setCustomModel(QAbstractItemModel* itemModel)
 {
     if (itemModel == _customModel)
@@ -119,16 +129,16 @@ void OptionAction::setCustomModel(QAbstractItemModel* itemModel)
     emit customModelChanged(_customModel);
     emit modelChanged();
 
-    if (_customModel) {
+    // Possibly adjust the current index when the layout of the custom model changes
+    if (_customModel)
+        connect(_customModel, &QAbstractItemModel::layoutChanged, this, &OptionAction::updateCurrentIndex);
 
-        // Possibly adjust the current index when the layout of the custom model changes
-        connect(_customModel, &QAbstractItemModel::layoutChanged, this, [this]() {
+    // Update the current index so that it respects the underlying model
+    updateCurrentIndex();
 
-            // Current index may not exceed the row count
-            if (_customModel->rowCount() > 0 && _currentIndex >= _customModel->rowCount())
-                setCurrentIndex(_customModel->rowCount() - 1);
-        });
-    }
+    // Notify others that the current index and text changed
+    emit currentIndexChanged(_currentIndex);
+    emit currentTextChanged(getCurrentText());
 }
 
 bool OptionAction::hasCustomModel() const
@@ -146,15 +156,15 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     if (currentIndex == _currentIndex)
         return;
 
-    if (currentIndex >= static_cast<std::int32_t>(getOptions().count()))
-        return;
-
     _currentIndex = currentIndex;
-    
+
+    // Update the current index so that it respects the underlying model
+    updateCurrentIndex();
+
     // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
-    
+
     setResettable(isResettable());
 }
 
