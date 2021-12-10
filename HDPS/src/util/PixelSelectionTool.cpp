@@ -151,6 +151,11 @@ void PixelSelectionTool::abort()
     endSelection();
 }
 
+void PixelSelectionTool::update()
+{
+    paint();
+}
+
 bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 {
     auto shouldPaint = false;
@@ -446,7 +451,7 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
 void PixelSelectionTool::paint()
 {
-    if (!_enabled)
+    if (_type != PixelSelectionType::ROI && !_enabled)
         return;
 
     _shapePixmap.fill(Qt::transparent);
@@ -613,6 +618,36 @@ void PixelSelectionTool::paint()
             shapePainter.drawPolyline(QVector<QPoint>({
                 QPoint(0, mousePosition.y()),
                 QPoint(_shapePixmap.size().width(), mousePosition.y())
+                }));
+
+            break;
+        }
+
+        case PixelSelectionType::ROI:
+        {
+            const auto topLeft      = QPointF(0.0f, 0.0f);
+            const auto bottomRight  = QPointF(_shapePixmap.size().width(), _shapePixmap.size().height());
+            const auto rectangle    = QRectF(topLeft, bottomRight);
+
+            auto boundsPen = _penLineBackGround;
+
+            boundsPen.setWidth(2 * boundsPen.width());
+
+            shapePainter.setPen(boundsPen);
+            shapePainter.drawRect(rectangle);
+
+            const auto crossHairSize = 15;
+
+            shapePainter.setPen(_penLineForeGround);
+
+            shapePainter.drawPolyline(QVector<QPointF>({
+                rectangle.center() - QPointF(crossHairSize, 0.0f),
+                rectangle.center() + QPointF(crossHairSize, 0.0f)
+            }));
+
+            shapePainter.drawPolyline(QVector<QPointF>({
+                rectangle.center() - QPointF(0.0f, crossHairSize),
+                rectangle.center() + QPointF(0.0f, crossHairSize)
                 }));
 
             break;

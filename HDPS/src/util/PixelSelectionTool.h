@@ -112,6 +112,9 @@ public: // Getters/setters
         return _areaPixmap;
     }
 
+    /** Updates the pixel selection tool (wraps internal paint method) */
+    void update();
+
 public: // Event handling
 
     /**
