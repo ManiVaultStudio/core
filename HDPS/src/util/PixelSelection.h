@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMap>
+#include <QAbstractListModel>
 
 namespace hdps {
 
@@ -84,6 +85,50 @@ static QString getPixelSelectionModifierTypeName(const PixelSelectionModifierTyp
 static PixelSelectionModifierType getPixelSelectionModifierTypeEnum(const QString& pixelSelectionModifierTypeName) {
     return pixelSelectionModifiers.key(pixelSelectionModifierTypeName);
 }
+
+/**
+ * Get the icon for the specified selection type
+ * @param selectionType The type of selection e.g. brush rectangle etc.
+ */
+QIcon getPixelSelectionTypeIcon(const PixelSelectionType& selectionType);
+
+/**
+ * Pixel selection type model class
+ *
+ * @author Thomas Kroes
+ */
+class PixelSelectionTypeModel : public QAbstractListModel {
+public:
+    
+    /**
+     * Constructor
+     * @param pixelSelectionTypes Allowed pixel selection types
+     * @param parent Pointer to parent object
+     */
+    PixelSelectionTypeModel(const PixelSelectionTypes& pixelSelectionTypes, QObject* parent = nullptr);
+    
+    /**
+     * Returns the number of pixel selection types in the model
+     * @param parent Parent index
+     */
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+
+    /**
+     * Returns the the number of model columns
+     * @param parent Parent index
+     */
+    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+
+    /**
+     * Returns model data for the given index
+     * @param index Index
+     * @param role The data role
+     */
+    QVariant data(const QModelIndex& index, int role) const;
+
+protected:
+    PixelSelectionTypes     _pixelSelectionTypes;       /** Allowed pixel selection types */
+};
 
 }
 }

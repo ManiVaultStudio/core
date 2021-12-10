@@ -101,28 +101,29 @@ public: // Action getters
     ToggleAction& getNotifyDuringSelectionAction() { return _notifyDuringSelectionAction; }
 
 protected:
-    QWidget*                    _targetWidget;                      /** Pointer to target widget */
-    util::PixelSelectionTool&   _pixelSelectionTool;                /** Reference to pixel selection tool */
-    util::PixelSelectionTypes   _pixelSelectionTypes;               /** Pixel selection types */
-    ColorAction                 _overlayColor;                      /** Selection overlay color action */
-    DecimalAction               _overlayOpacity;                    /** Selection overlay opacity action */
-    OptionAction                _typeAction;                        /** Selection type action */
-    ToggleAction                _rectangleAction;                   /** Switch to rectangle selection action */
-    ToggleAction                _brushAction;                       /** Switch to brush selection action */
-    ToggleAction                _lassoAction;                       /** Switch to lasso selection action */
-    ToggleAction                _polygonAction;                     /** Switch to polygon selection action */
-    ToggleAction                _sampleAction;                      /** Switch to sample selection action */
-    ToggleAction                _roiAction;                         /** Switch to ROI selection action */
-    QActionGroup                _typeActionGroup;                   /** Type action group */
-    ToggleAction                _modifierReplaceAction;             /** Replace current selection action */
-    ToggleAction                _modifierAddAction;                 /** Add to current selection action */
-    ToggleAction                _modifierSubtractAction;            /** Subtract from current selection action */
-    QActionGroup                _modifierActionGroup;               /** Modifier action group */
-    TriggerAction               _clearSelectionAction;              /** Clear selection action */
-    TriggerAction               _selectAllAction;                   /** Select all action */
-    TriggerAction               _invertSelectionAction;             /** Invert selection action */
-    DecimalAction               _brushRadiusAction;                 /** Brush radius action */
-    ToggleAction                _notifyDuringSelectionAction;       /** Notify during selection action */
+    QWidget*                        _targetWidget;                      /** Pointer to target widget */
+    util::PixelSelectionTool&       _pixelSelectionTool;                /** Reference to pixel selection tool */
+    util::PixelSelectionTypes       _pixelSelectionTypes;               /** Pixel selection types */
+    ColorAction                     _overlayColor;                      /** Selection overlay color action */
+    DecimalAction                   _overlayOpacity;                    /** Selection overlay opacity action */
+    util::PixelSelectionTypeModel   _typeModel;                         /** Selection type model */
+    OptionAction                    _typeAction;                        /** Selection type action */
+    ToggleAction                    _rectangleAction;                   /** Switch to rectangle selection action */
+    ToggleAction                    _brushAction;                       /** Switch to brush selection action */
+    ToggleAction                    _lassoAction;                       /** Switch to lasso selection action */
+    ToggleAction                    _polygonAction;                     /** Switch to polygon selection action */
+    ToggleAction                    _sampleAction;                      /** Switch to sample selection action */
+    ToggleAction                    _roiAction;                         /** Switch to ROI selection action */
+    QActionGroup                    _typeActionGroup;                   /** Type action group */
+    ToggleAction                    _modifierReplaceAction;             /** Replace current selection action */
+    ToggleAction                    _modifierAddAction;                 /** Add to current selection action */
+    ToggleAction                    _modifierSubtractAction;            /** Subtract from current selection action */
+    QActionGroup                    _modifierActionGroup;               /** Modifier action group */
+    TriggerAction                   _clearSelectionAction;              /** Clear selection action */
+    TriggerAction                   _selectAllAction;                   /** Select all action */
+    TriggerAction                   _invertSelectionAction;             /** Invert selection action */
+    DecimalAction                   _brushRadiusAction;                 /** Brush radius action */
+    ToggleAction                    _notifyDuringSelectionAction;       /** Notify during selection action */
 };
 
 }

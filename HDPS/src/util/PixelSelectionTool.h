@@ -112,12 +112,6 @@ public: // Getters/setters
         return _areaPixmap;
     }
 
-    /**
-     * Get the icon for the specified selection type
-     * @param selectionType The type of selection e.g. brush rectangle etc.
-     */
-    static QIcon getIcon(const PixelSelectionType& selectionType);
-
 public: // Event handling
 
     /**
