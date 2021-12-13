@@ -118,6 +118,8 @@ Dataset<DatasetImpl> DatasetPickerAction::DatasetsModel::getDataset(const std::i
 
 void DatasetPickerAction::DatasetsModel::setDatasets(const QVector<Dataset<DatasetImpl>>& datasets)
 {
+    removeAllDatasets();
+
     // Add datasets one-by-one
     for (const auto& dataset : datasets)
         addDataset(dataset);
@@ -179,8 +181,12 @@ void DatasetPickerAction::DatasetsModel::removeDataset(const hdps::Dataset<hdps:
 
 void DatasetPickerAction::DatasetsModel::removeAllDatasets()
 {
+    // No point in removing zero rows
+    if (rowCount() == 0)
+        return;
+
     // Remove row from model
-    beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+    beginRemoveRows(QModelIndex(), 0, std::max(0, rowCount() - 1));
     {
         // Remove all datasets
         _datasets.clear();

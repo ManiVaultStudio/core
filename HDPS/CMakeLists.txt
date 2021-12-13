@@ -259,7 +259,6 @@ set( PLUGIN_HEADERS
     src/DataRemoveAction.h
     src/DataCopyAction.h
     src/DataViewAction.h
-    src/DataGroupingAction.h
     src/AnalysisPlugin.h
     src/DataType.h
     src/RawData.h
@@ -282,7 +281,6 @@ set( PLUGIN_SOURCES
     src/DataRemoveAction.cpp
     src/DataCopyAction.cpp
     src/DataViewAction.cpp
-    src/DataGroupingAction.cpp
     src/Plugin.cpp
     src/LoaderPlugin.cpp
     src/Application.cpp
