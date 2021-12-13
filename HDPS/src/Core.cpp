@@ -265,6 +265,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
 
         // Assign source dataset to subset
         *subset = *const_cast<Dataset<DatasetImpl>&>(sourceDataset);
+        subset->setAll(false);
 
         // Add the set the core and publish the name of the set to all plug-ins
         _dataManager->addSet(*subset);
