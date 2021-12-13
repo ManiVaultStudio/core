@@ -381,7 +381,7 @@ protected:
      * Set whether this set represents all the data or only a subset
      * @param all Whether this is a full dataset
      */
-    void setAll(const bool& all)
+    void setAll(bool all)
     {
         _all = all;
     }
