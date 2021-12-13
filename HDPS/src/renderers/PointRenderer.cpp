@@ -314,11 +314,6 @@ namespace hdps
             _outlineColor = color;
         }
 
-        void PointRenderer::setFocusSelection(const bool& focusSelection)
-        {
-            _focusSelection = focusSelection;
-        }
-
         void PointRenderer::init()
         {
             initializeOpenGLFunctions();
@@ -380,7 +375,6 @@ namespace hdps
             _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
             _shader.uniform1i("hasColors", _gpuPoints.hasColors());
             _shader.uniform1i("numSelectedPoints", _numSelectedPoints);
-            _shader.uniform1i("focusSelection", _focusSelection);
 
             if (_gpuPoints.hasColorScalars())
                 _shader.uniform3f("colorMapRange", _gpuPoints.getColorMapRange());

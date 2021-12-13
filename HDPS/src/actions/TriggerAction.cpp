@@ -32,7 +32,9 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
 
         if (widgetFlags & WidgetFlag::Icon) {
             setIcon(triggerAction->icon());
-            setProperty("class", "square-button");
+
+            if ((widgetFlags & WidgetFlag::Text) == 0)
+                setProperty("class", "square-button");
         }
 
         setToolTip(triggerAction->toolTip());

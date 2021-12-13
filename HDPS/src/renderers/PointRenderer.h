@@ -124,7 +124,6 @@ namespace hdps
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
             void setOutlineColor(Vector3f color);
-            void setFocusSelection(const bool& focusSelection);
 
             void init() override;
             void resize(QSize renderSize) override;
@@ -153,7 +152,6 @@ namespace hdps
             Bounds _bounds = Bounds(-1, 1, -1, 1);
 
             std::int32_t    _numSelectedPoints;     /** Number of selected (highlighted points) */
-            bool            _focusSelection;        /** Draw attention to the selected points */
         };
 
     } // namespace gui

@@ -50,13 +50,5 @@ void main()
     
 	bool isHighlighted = vHighlight == 1;
 	
-	if (focusSelection) {
-		if (numSelectedPoints == 0) {
-			fragColor = vec4(color, a * vOpacity);
-		} else {
-			fragColor = vec4(color, focusSelection && isHighlighted ? 1.0f : 0.03f);
-		}
-	} else {
-		fragColor = vec4(color, a * vOpacity);
-	}
+	fragColor = vec4(color, a * vOpacity);
 }
