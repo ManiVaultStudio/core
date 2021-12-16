@@ -270,7 +270,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
         if (parentDataset->getDataType() == PointType) {
             
             // Obtain reference to the point source input dataset
-            auto points = Dataset<Points>(parentDataset)->isFull() ? parentDataset : Dataset<Points>(parentDataset->getParent());
+            auto points = Dataset<Points>(parentDataset->getParent());
 
             // Get selection indices from points dataset
             auto& selectionIndices = points->getSelection<Points>()->indices;
