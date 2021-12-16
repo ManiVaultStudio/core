@@ -88,5 +88,5 @@ protected:
     QTimer                      _selectionChangedTimer;     /** Timer to control when selection changes are processed */
     std::vector<std::uint32_t>  _selectedIndices;           /** Selected indices */
 
-    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 1000000;
+    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 10000;
 };

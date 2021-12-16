@@ -21,8 +21,7 @@ ImageData::ImageData(const hdps::plugin::PluginFactory* factory) :
     _type(Type::Undefined),
     _numberOfImages(0),
     _imageOffset(),
-    _sourceRectangle(),
-    _targetRectangle(),
+    _imageSize(),
     _numberOfComponentsPerPixel(0),
     _imageFilePaths(),
     _dimensionNames()
@@ -45,42 +44,12 @@ void ImageData::setType(const ImageData::Type& type)
 
 QSize ImageData::getImageSize() const
 {
-    return _targetRectangle.size();
+    return _imageSize;
 }
 
-QRect ImageData::getSourceRectangle() const
+void ImageData::setImageSize(const QSize& imageSize)
 {
-    return _sourceRectangle;
-}
-
-QRect ImageData::getTargetRectangle() const
-{
-    return _targetRectangle;
-}
-
-void ImageData::setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize /*= QSize()*/, const QPoint& imageOffset /*= QPoint()*/)
-{
-    try
-    {
-        // Except when the target image size exceeds the source image size
-        if (targetImageSize.width() > sourceImageSize.width() || targetImageSize.height() > sourceImageSize.height())
-            throw std::runtime_error("Target image size may not be larger than source image size");
-
-        // Compute source and target rectangles
-        _sourceRectangle = QRect(QPoint(), sourceImageSize);
-        _targetRectangle = targetImageSize.isValid() ? QRect(imageOffset, targetImageSize) : _sourceRectangle;
-
-        // Except when the target rectangle exceeds the source rectangle boundaries
-        if (!_sourceRectangle.contains(_targetRectangle.topLeft()) || !_sourceRectangle.contains(_targetRectangle.bottomRight()))
-            throw std::runtime_error("Target image rectangle exceeds source rectangle boundaries");
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to set image geometry", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to set image geometry");
-    }
+    _imageSize = imageSize;
 }
 
 std::uint32_t ImageData::getNumberOfComponentsPerPixel() const

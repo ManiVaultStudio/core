@@ -54,8 +54,8 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
         const auto imageSize = _images->getImageSize();
 
         _imageResolutionAction.setString(sizeToString(imageSize));
-        _sourceRectangleAction.setString(rectangleToString(_images->getSourceRectangle()));
-        _targetRectangleAction.setString(rectangleToString(_images->getTargetRectangle()));
+        _sourceRectangleAction.setString(rectangleToString(QRect(QPoint(), _images->getImageSize())));
+        //_targetRectangleAction.setString(rectangleToString(_images->getTargetRectangle()));
         _numberOfPixelsAction.setString(QString::number(_images->getNumberOfPixels()));
         _numberComponentsPerPixelAction.setString(QString::number(_images->getNumberOfComponentsPerPixel()));
     };
