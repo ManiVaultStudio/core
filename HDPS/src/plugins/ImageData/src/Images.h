@@ -201,7 +201,7 @@ protected:
     void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
 
     /** Get global indices */
-    std::vector<std::uint32_t> getGlobalIndices();
+    std::vector<std::uint32_t>& getGlobalIndices();
 
 private:
     std::vector<std::uint32_t>      _indices;               /** Selection indices */

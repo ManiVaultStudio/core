@@ -127,7 +127,7 @@ QRect Images::getVisibleRectangle()
     _visibleRectangle.setRight(std::numeric_limits<int>::lowest());
 
     // Get global indices into data
-    auto& globalIndices = getGlobalIndices();
+    auto globalIndices = getGlobalIndices();
 
     for (const auto& globalIndex : globalIndices) {
 
@@ -270,7 +270,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
         if (parentDataset->getDataType() == PointType) {
             
             // Obtain reference to the point source input dataset
-            auto points = parentDataset->getSourceDataset<Points>();
+            auto points = Dataset<Points>(parentDataset)->isFull() ? parentDataset : Dataset<Points>(parentDataset->getParent());
 
             // Get selection indices from points dataset
             auto& selectionIndices = points->getSelection<Points>()->indices;
@@ -300,16 +300,16 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             std::set_intersection(selectionIndices.begin(), selectionIndices.end(), globalIndices.begin(), globalIndices.end(), std::back_inserter(intersectionGlobalIndices));
 
             // Iterate over selection indices and modify the selection boundaries when not masked
-            for (const auto& intersectionGlobalIndex : selectionIndices) {
+            for (const auto& selectionIndex : selectionIndices) {
 
                 // Selected item is present in the (sub)set, so add it
-                selectedIndices.push_back(intersectionGlobalIndex);
+                selectedIndices.push_back(selectionIndex);
 
                 // Assign selected pixel
-                selectionImageData[intersectionGlobalIndex] = 255;
+                selectionImageData[selectionIndex] = 255;
 
                 // Compute global pixel coordinate
-                const auto globalPixelCoordinate = QPoint(intersectionGlobalIndex % imageWidth, static_cast<std::int32_t>(floorf(intersectionGlobalIndex / static_cast<float>(imageWidth))));
+                const auto globalPixelCoordinate = QPoint(selectionIndex % imageWidth, static_cast<std::int32_t>(floorf(selectionIndex / static_cast<float>(imageWidth))));
 
                 // Add pixel pixel coordinate and possibly inflate the selection boundaries
                 selectionBoundaries.setLeft(std::min(selectionBoundaries.left(), globalPixelCoordinate.x()));
@@ -545,7 +545,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
     }
 }
 
-std::vector<std::uint32_t> Images::getGlobalIndices()
+std::vector<std::uint32_t>& Images::getGlobalIndices()
 {
     if (!_globalIndices.empty())
         return _globalIndices;
