@@ -323,7 +323,6 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 
         if (parentDataset->getDataType() == ClusterType) {
 
-            /*
             // Obtain reference to the cluster source input dataset
             auto sourceClusters = parentDataset->getSelection<Clusters>();
 
@@ -331,8 +330,8 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectedIndices.clear();
             selectedIndices.reserve(getNumberOfPixels());
 
-            const auto sourceImageWidth = getSourceRectangle().width();
-            const auto targetImageWidth = getTargetRectangle().width();
+            const auto sourceImageWidth = getImageSize().width();
+            const auto targetImageWidth = getImageSize().width();
 
             // Fill selection data with non-selected
             std::fill(selectionImageData.begin(), selectionImageData.end(), 0);
@@ -361,29 +360,23 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
                     // Compute global pixel coordinate
                     const auto globalPixelCoordinate = QPoint(pointIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(sourceImageWidth))));
 
-                    // Only proceed if the pixel is located within the source image rectangle
-                    if (!getTargetRectangle().contains(globalPixelCoordinate))
-                        continue;
-
-                    // Compute local pixel coordinate and index
-                    const auto localPixelCoordinate = globalPixelCoordinate - getTargetRectangle().topLeft();
-                    const auto localPixelIndex      = localPixelCoordinate.y() * targetImageWidth + localPixelCoordinate.x();
+                    // Compute local pixel index
+                    const auto globalPixelIndex = globalPixelCoordinate.y() * targetImageWidth + globalPixelCoordinate.x();
 
                     // And add the target pixel index to the list of selected pixels
-                    if (static_cast<std::uint32_t>(localPixelIndex) < getNumberOfPixels())
-                        selectedIndices.push_back(localPixelIndex);
+                    if (static_cast<std::uint32_t>(globalPixelIndex) < getNumberOfPixels())
+                        selectedIndices.push_back(globalPixelIndex);
 
                     // Assign selected pixel
-                    selectionImageData[localPixelIndex] = 255;
+                    selectionImageData[globalPixelIndex] = 255;
 
                     // Add pixel pixel coordinate and possibly inflate the selection boundaries
-                    selectionBoundaries.setLeft(std::min(selectionBoundaries.left(), localPixelCoordinate.x()));
-                    selectionBoundaries.setRight(std::max(selectionBoundaries.right(), localPixelCoordinate.x()));
-                    selectionBoundaries.setTop(std::min(selectionBoundaries.top(), localPixelCoordinate.y()));
-                    selectionBoundaries.setBottom(std::max(selectionBoundaries.bottom(), localPixelCoordinate.y()));
+                    selectionBoundaries.setLeft(std::min(selectionBoundaries.left(), globalPixelCoordinate.x()));
+                    selectionBoundaries.setRight(std::max(selectionBoundaries.right(), globalPixelCoordinate.x()));
+                    selectionBoundaries.setTop(std::min(selectionBoundaries.top(), globalPixelCoordinate.y()));
+                    selectionBoundaries.setBottom(std::max(selectionBoundaries.bottom(), globalPixelCoordinate.y()));
                 }
             }
-            */
         }
     }
     catch (std::exception& e)
