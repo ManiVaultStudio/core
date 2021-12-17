@@ -201,6 +201,12 @@ public: // Hierarchy
     /** Get parent dataset (if any) */
     Dataset<DatasetImpl> getParent() const;
 
+    /** Get parent dataset (if any) */
+    template<typename DatasetType>
+    Dataset<DatasetImpl> getParent() const {
+        return Dataset<DatasetType>(getParent());
+    }
+
     /**
      * Get child datasets (if any) of the specified type(s)
      * @param dataTypes Dataset type(s) to filter out

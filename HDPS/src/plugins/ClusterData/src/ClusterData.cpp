@@ -237,6 +237,9 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
         std::sort(pointSelectionIndices.begin(), pointSelectionIndices.end());
         pointSelectionIndices.erase(unique(pointSelectionIndices.begin(), pointSelectionIndices.end()), pointSelectionIndices.end());
 
+        for (auto& pointSelectionIndex : pointSelectionIndices)
+            pointSelectionIndex = globalIndices[pointSelectionIndex];
+
         // Notify others that the parent points selection has changed
         _core->notifyDataSelectionChanged(parentDataset);
     }

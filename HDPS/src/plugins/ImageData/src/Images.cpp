@@ -110,40 +110,8 @@ QRect Images::getRectangle() const
     return QRect(QPoint(), getImageSize());
 }
 
-QRect Images::getVisibleRectangle()
+QRect Images::getVisibleRectangle() const
 {
-    if (_visibleRectangle.isValid())
-        return _visibleRectangle;
-
-    // Obtain reference to the point source input dataset
-    auto points = getParent()->getSourceDataset<Points>();
-
-    const float imageWidth = getImageSize().width();
-
-    // Initialize selection boundaries with numeric extremes
-    _visibleRectangle.setTop(std::numeric_limits<int>::max());
-    _visibleRectangle.setBottom(std::numeric_limits<int>::lowest());
-    _visibleRectangle.setLeft(std::numeric_limits<int>::max());
-    _visibleRectangle.setRight(std::numeric_limits<int>::lowest());
-
-    // Global indices into data
-    std::vector<std::uint32_t> globalIndices;
-
-    // Get global indices from points
-    points->getGlobalIndices(globalIndices);
-
-    for (const auto& globalIndex : globalIndices) {
-
-        // Compute global pixel coordinate
-        const auto globalPixelCoordinate = QPoint(globalIndex % getImageSize().width(), static_cast<std::int32_t>(floorf(globalIndex / static_cast<float>(getImageSize().width()))));
-
-        // Add pixel pixel coordinate and possibly inflate the visible rectangle
-        _visibleRectangle.setLeft(std::min(_visibleRectangle.left(), globalPixelCoordinate.x()));
-        _visibleRectangle.setRight(std::max(_visibleRectangle.right(), globalPixelCoordinate.x()));
-        _visibleRectangle.setTop(std::min(_visibleRectangle.top(), globalPixelCoordinate.y()));
-        _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), globalPixelCoordinate.y()));
-    }
-
     return _visibleRectangle;
 }
 
@@ -286,12 +254,6 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             // Get global indices from points
             points->getGlobalIndices(globalIndices);
 
-            // The global indices to include for selection boundaries computation
-            std::vector<std::uint32_t> intersectionGlobalIndices;
-
-            // Find the intersection between the selection indices and the global indices
-            std::set_intersection(selectionIndices.begin(), selectionIndices.end(), globalIndices.begin(), globalIndices.end(), std::back_inserter(intersectionGlobalIndices));
-
             // Iterate over selection indices and modify the selection boundaries when not masked
             for (const auto& selectionIndex : selectionIndices) {
 
@@ -322,6 +284,9 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
         // Generate selection data for clusters
         if (parentDataset->getDataType() == ClusterType) {
 
+            // Computes and caches the mask data
+            computeMaskData();
+
             // Obtain reference to the cluster source input dataset
             auto sourceClusters = parentDataset->getSelection<Clusters>();
 
@@ -329,8 +294,7 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectedIndices.clear();
             selectedIndices.reserve(getNumberOfPixels());
 
-            const auto sourceImageWidth = getImageSize().width();
-            const auto targetImageWidth = getImageSize().width();
+            const auto imageWidth = getImageSize().width();
 
             // Fill selection data with non-selected
             std::fill(selectionImageData.begin(), selectionImageData.end(), 0);
@@ -343,6 +307,12 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 
             // Get clusters input points dataset
             auto points = parentDataset->getParent()->getSourceDataset<Points>();
+
+            // Global indices into data
+            std::vector<std::uint32_t> globalIndices;
+
+            // Get global indices from points
+            points->getGlobalIndices(globalIndices);
 
             // Iterate over all clusters and populate the selection data
             for (const auto& clusterIndex : sourceClusters->indices) {
@@ -357,10 +327,10 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
                     const auto pointIndex = points->isFull() ? clusterSelectionIndex : points->indices[clusterSelectionIndex];
 
                     // Compute global pixel coordinate
-                    const auto globalPixelCoordinate = QPoint(pointIndex % sourceImageWidth, static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(sourceImageWidth))));
+                    const auto globalPixelCoordinate = QPoint(pointIndex % imageWidth, static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(imageWidth))));
 
                     // Compute local pixel index
-                    const auto globalPixelIndex = globalPixelCoordinate.y() * targetImageWidth + globalPixelCoordinate.x();
+                    const auto globalPixelIndex = globalPixelCoordinate.y() * imageWidth + globalPixelCoordinate.x();
 
                     // And add the target pixel index to the list of selected pixels
                     if (static_cast<std::uint32_t>(globalPixelIndex) < getNumberOfPixels())
@@ -508,32 +478,26 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         // Obtain reference to the clusters dataset
         auto clusters = Dataset<Clusters>(dataset);
 
-        auto clusterIndex = 0;
-
         // Width of the source image
         const auto sourceWidth = getImageSize().width();
 
         // Get clusters input points dataset
         auto points = dataset->getParent()->getSourceDataset<Points>();
 
+        // Global indices into data
+        std::vector<std::uint32_t> globalIndices;
+
+        // Get global indices from points
+        points->getGlobalIndices(globalIndices);
+
+        auto clusterIndex = 0;
+
         // Iterate over all clusters
         for (auto& cluster : clusters->getClusters()) {
 
-            // Iterate over all indices in the cluster
-            for (const auto index : cluster.getIndices()) {
-
-                // Get translated point index
-                const auto pointIndex = points->isFull() ? index : points->indices[index];
-
-                // Compute pixel coordinate
-                const auto clusterPixelCoordinate = QPoint(pointIndex % sourceWidth, static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(sourceWidth))));
-
-                // Compute pixel index into scalar data
-                const auto targetPixelIndex = clusterPixelCoordinate.y() * getImageSize().width() + clusterPixelCoordinate.x();
-
-                // Assign cluster index to scalar data
-                scalarData[targetPixelIndex] = clusterIndex;
-            }
+            // Iterate over all indices in the cluster and assign cluster index to scalar data
+            for (const auto localIndex : cluster.getIndices())
+                scalarData[localIndex] = clusterIndex;
 
             clusterIndex++;
         }
@@ -566,9 +530,49 @@ void Images::computeMaskData()
         // Loop over all point indices and unmask them
         for (const auto& globalIndex : globalIndices)
             _maskData[globalIndex] = 255;
+
+        const float imageWidth = getImageSize().width();
+
+        // Initialize selection boundaries with numeric extremes
+        _visibleRectangle.setTop(std::numeric_limits<int>::max());
+        _visibleRectangle.setBottom(std::numeric_limits<int>::lowest());
+        _visibleRectangle.setLeft(std::numeric_limits<int>::max());
+        _visibleRectangle.setRight(std::numeric_limits<int>::lowest());
+
+        // Loop over all point indices compute the visible rectangle
+        for (const auto& globalIndex : globalIndices) {
+
+            // Compute global pixel coordinate
+            const auto globalPixelCoordinate = QPoint(globalIndex % getImageSize().width(), static_cast<std::int32_t>(floorf(globalIndex / static_cast<float>(getImageSize().width()))));
+
+            // Add pixel pixel coordinate and possibly inflate the visible rectangle
+            _visibleRectangle.setLeft(std::min(_visibleRectangle.left(), globalPixelCoordinate.x()));
+            _visibleRectangle.setRight(std::max(_visibleRectangle.right(), globalPixelCoordinate.x()));
+            _visibleRectangle.setTop(std::min(_visibleRectangle.top(), globalPixelCoordinate.y()));
+            _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), globalPixelCoordinate.y()));
+        }
+
+        _visibleRectangle = _visibleRectangle.marginsAdded(QMargins(0, 0, 1, 1));
     }
 
     // Generate mask data for clusters
-    if (inputDataset->getDataType() == ClusterType)
-        std::fill(_maskData.begin(), _maskData.end(), 255);
+    if (inputDataset->getDataType() == ClusterType) {
+
+        // Obtain reference to the clusters dataset
+        auto clusters = Dataset<Clusters>(inputDataset);
+
+        // All data is visible
+        std::fill(_maskData.begin(), _maskData.end(), 0);
+
+        // Iterate over all clusters
+        for (auto& cluster : clusters->getClusters()) {
+
+            // Iterate over all indices in the cluster and assign cluster index to scalar data
+            for (const auto localIndex : cluster.getIndices())
+                _maskData[localIndex] = 255;
+        }
+
+        // All pixels are visible in cluster mode
+        _visibleRectangle = QRect(QPoint(), getImageSize() + QSize(1, 1));
+    }
 }

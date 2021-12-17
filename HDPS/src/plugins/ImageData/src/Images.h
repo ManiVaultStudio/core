@@ -118,7 +118,7 @@ public: // Image retrieval functions
     QRect getRectangle() const;
 
     /** Get the rectangle which bounds the visible pixels */
-    QRect getVisibleRectangle();
+    QRect getVisibleRectangle() const;
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;
