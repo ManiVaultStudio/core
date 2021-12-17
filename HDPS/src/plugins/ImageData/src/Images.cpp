@@ -193,8 +193,8 @@ void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& 
 
         // Compute the actual scalar data range
         for (auto& scalar : scalarData) {
-            scalarDataRange.first = std::min(scalar, scalarDataRange.first);
-            scalarDataRange.second = std::max(scalar, scalarDataRange.second);
+            scalarDataRange.first   = std::min(scalar, scalarDataRange.first);
+            scalarDataRange.second  = std::max(scalar, scalarDataRange.second);
         }
     }
     catch (std::exception& e)
@@ -551,8 +551,6 @@ void Images::computeMaskData()
             _visibleRectangle.setTop(std::min(_visibleRectangle.top(), globalPixelCoordinate.y()));
             _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), globalPixelCoordinate.y()));
         }
-
-        _visibleRectangle = _visibleRectangle.marginsAdded(QMargins(0, 0, 1, 1));
     }
 
     // Generate mask data for clusters
