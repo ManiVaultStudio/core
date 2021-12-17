@@ -76,11 +76,11 @@ public: // Image retrieval functions
     /** Gets the size of the images */
     QSize getImageSize() const;
 
-    /** Get the source rectangle */
-    QRect getSourceRectangle() const;
-
-    /** Get the target rectangle */
-    QRect getTargetRectangle() const;
+    /**
+     * Set the image size
+     * @param imageSize Size of the image(s)
+     */
+    void setImageSize(const QSize& imageSize);
 
     /**
      * Set the image geometry
@@ -113,6 +113,12 @@ public: // Image retrieval functions
 
     /** Returns the number of color channels per pixel */
     static std::uint32_t noChannelsPerPixel();
+
+    /** Get the rectangle of the entire image */
+    QRect getRectangle() const;
+
+    /** Get the rectangle which bounds the visible pixels */
+    QRect getVisibleRectangle() const;
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;
@@ -163,6 +169,12 @@ public:
     void getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
 
     /**
+     * Get mask image data (for subsets)
+     * @param maskData Mask scalar data
+     */
+    void getMaskData(std::vector<std::uint8_t>& maskData);
+
+    /**
      * Get selection data
      * @param selectionImageData Image data for the selection
      * @param selectedIndices Selected pixel indices
@@ -188,22 +200,13 @@ protected:
      */
     void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
 
-    /**
-     * Get target pixel index from two-dimensional image coordinate
-     * @param coordinate Two-dimensional image coordinate
-     * @return Target pixel index
-     */
-    std::uint32_t getTargetPixelIndex(const QPoint& coordinate) const;
-
-    /**
-     * Get scalar data index from two-dimensional image coordinate
-     * @param coordinate Two-dimensional image coordinate
-     * @return Scalar data index
-     */
-    std::uint32_t getSourceDataIndex(const QPoint& coordinate) const;
+    /** Computes and caches the mask data */
+    void computeMaskData();
 
 private:
-    std::vector<std::uint32_t>      _indices;       /** Selection indices */
-    ImageData*                      _imageData;     /** Pointer to raw image data */
-    QSharedPointer<InfoAction>      _infoAction;    /** Shared pointer to info action */
+    std::vector<std::uint32_t>      _indices;               /** Selection indices */
+    ImageData*                      _imageData;             /** Pointer to raw image data */
+    QSharedPointer<InfoAction>      _infoAction;            /** Shared pointer to info action */
+    QRect                           _visibleRectangle;      /** Rectangle which bounds the visible pixels */
+    std::vector<std::uint8_t>       _maskData;              /** Mask data */
 };

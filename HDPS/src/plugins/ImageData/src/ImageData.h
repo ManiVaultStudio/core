@@ -75,19 +75,14 @@ public:
     /** Get the image size */
     QSize getImageSize() const;
 
-    /** Get the source rectangle */
-    QRect getSourceRectangle() const;
+    /**
+     * Set the image size
+     * @param imageSize Size of the image(s)
+     */
+    void setImageSize(const QSize& imageSize);
 
     /** Get the target rectangle */
     QRect getTargetRectangle() const;
-
-    /**
-     * Set the image geometry
-     * @param sourceImageSize Size of the source image(s)
-     * @param targetImageSize Size of the target image(s)
-     * @param imageOffset Offset of the image(s)
-     */
-    void setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize = QSize(), const QPoint& imageOffset = QPoint());
 
     /** Gets the number of components per pixel */
     std::uint32_t getNumberOfComponentsPerPixel() const;
@@ -117,8 +112,7 @@ private:
     Type                _type;                          /** Image collection type e.g. stack or sequence */
     std::uint32_t       _numberOfImages;                /** Number of images in the set */
     QPoint              _imageOffset;                   /** Image offset */
-    QRect               _sourceRectangle;               /** Source image rectangle */
-    QRect               _targetRectangle;               /** Target image rectangle */
+    QSize               _imageSize;                     /** Image size */
     std::uint32_t       _numberOfComponentsPerPixel;    /** Number of components per pixel */
     QStringList         _imageFilePaths;                /** Image file paths */
     QStringList         _dimensionNames;                /** Dimension names */

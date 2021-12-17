@@ -87,8 +87,12 @@ public:
     /** Get reference to parent hierarchy item */
     DataHierarchyItem& getParent() const;
 
-    /** Walks up the hierarchy and returns all parents */
-    void getParents(DataHierarchyItems& parents) const;
+    /**
+     * Walks up the hierarchy of the data hierarchy item and returns all parents
+     * @param dataHierarchyItem Item to fetch the parents for
+     * @param parents Item parents
+     */
+    static void getParents(DataHierarchyItem& dataHierarchyItem, DataHierarchyItems& parents);
 
     /** Returns whether the data hierarchy item has a parent */
     bool hasParent() const;
