@@ -106,11 +106,15 @@ DataHierarchyItem& DataHierarchyItem::getParent() const
     return *_parent;
 }
 
-void DataHierarchyItem::getParents(DataHierarchyItems& parents) const
+void DataHierarchyItem::getParents(DataHierarchyItem& dataHierarchyItem, DataHierarchyItems& parents)
 {
-    if (_parent) {
-        parents << _parent;
-        _parent->getParents(parents);
+    if (dataHierarchyItem.hasParent()) {
+
+        // Recurse up the tree
+        getParents(dataHierarchyItem.getParent(), parents);
+
+        // Add parent
+        parents << &dataHierarchyItem.getParent();
     }
 }
 
@@ -221,7 +225,7 @@ QString DataHierarchyItem::getFullPathName() const
     DataHierarchyItems parents;
 
     // Walk up the tree and fetch all parents
-    getParents(parents);
+    DataHierarchyItem::getParents(*const_cast<DataHierarchyItem*>(this), parents);
 
     QStringList dataHierarchyItemNames;
 

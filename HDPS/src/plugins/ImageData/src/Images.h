@@ -200,6 +200,9 @@ protected:
      */
     void getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange);
 
+    /** Computes and caches the mask data */
+    void computeMaskData();
+
     /** Get global indices */
     std::vector<std::uint32_t>& getGlobalIndices();
 
@@ -209,4 +212,5 @@ private:
     QSharedPointer<InfoAction>      _infoAction;            /** Shared pointer to info action */
     QRect                           _visibleRectangle;      /** Rectangle which bounds the visible pixels */
     std::vector<std::uint32_t>      _globalIndices;         /** Global indices into data */
+    std::vector<std::uint8_t>       _maskData;              /** Mask data */
 };

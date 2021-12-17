@@ -19,7 +19,8 @@ Images::Images(hdps::CoreInterface* core, QString dataName) :
     _imageData(nullptr),
     _infoAction(),
     _visibleRectangle(),
-    _globalIndices()
+    _globalIndices(),
+    _maskData()
 {
     _imageData = &getRawData<ImageData>();
 }
@@ -237,27 +238,10 @@ void Images::getScalarData(const std::uint32_t& dimensionIndex, QVector<float>& 
 
 void Images::getMaskData(std::vector<std::uint8_t>& maskData)
 {
-    // Get reference to input dataset
-    auto inputDataset = getParent();
-
-    if (inputDataset->getDataType() == PointType) {
-
-        // All masked by default
-        std::fill(maskData.begin(), maskData.end(), 0);
-
-        // Obtain reference to the points dataset
-        auto points = Dataset<Points>(inputDataset);
-
-        // Get global indices into data
-        auto& globalIndices = getGlobalIndices();
-
-        for (const auto& globalIndex : globalIndices)
-            maskData[globalIndex] = 255;
-    }
-
-    if (inputDataset->getDataType() == ClusterType) {
-        std::fill(maskData.begin(), maskData.end(), 255);
-    }
+    if (!_maskData.empty())
+        maskData = _maskData;
+    else
+        computeMaskData();
 }
 
 void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std::vector<std::uint32_t>& selectedIndices, QRect& selectionBoundaries)
@@ -267,10 +251,11 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
         // Get smart pointer to parent dataset
         auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
 
+        // Generate selection data for points
         if (parentDataset->getDataType() == PointType) {
             
             // Obtain reference to the point source input dataset
-            auto points = Dataset<Points>(parentDataset->getParent());
+            auto points = Dataset<Points>(parentDataset);
 
             // Get selection indices from points dataset
             auto& selectionIndices = points->getSelection<Points>()->indices;
@@ -290,6 +275,9 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
             selectionBoundaries.setLeft(std::numeric_limits<int>::max());
             selectionBoundaries.setRight(std::numeric_limits<int>::lowest());
 
+            // Computes and caches the mask data
+            computeMaskData();
+
             // Get global indices into data
             auto& globalIndices = getGlobalIndices();
 
@@ -301,6 +289,10 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
 
             // Iterate over selection indices and modify the selection boundaries when not masked
             for (const auto& selectionIndex : selectionIndices) {
+
+                // Do not continue if masked
+                if (_maskData[selectionIndex] == 0)
+                    continue;
 
                 // Selected item is present in the (sub)set, so add it
                 selectedIndices.push_back(selectionIndex);
@@ -318,9 +310,11 @@ void Images::getSelectionData(std::vector<std::uint8_t>& selectionImageData, std
                 selectionBoundaries.setBottom(std::max(selectionBoundaries.bottom(), globalPixelCoordinate.y()));
             }
 
+            // Tweak selection boundaries
             selectionBoundaries = selectionBoundaries.marginsAdded(QMargins(0, 0, 1, 1));
         }
 
+        // Generate selection data for clusters
         if (parentDataset->getDataType() == ClusterType) {
 
             // Obtain reference to the cluster source input dataset
@@ -536,6 +530,39 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
             clusterIndex++;
         }
     }
+}
+
+void Images::computeMaskData()
+{
+    // Get reference to input dataset
+    auto inputDataset = getParent();
+
+    // Allocate mask data
+    _maskData.resize(getNumberOfPixels());
+
+    // Generate mask data for points
+    if (inputDataset->getDataType() == PointType) {
+
+        // Obtain reference to the points dataset
+        auto points = Dataset<Points>(inputDataset);
+
+        // All masked by default
+        std::fill(_maskData.begin(), _maskData.end(), 0);
+
+        // Global indices into data
+        std::vector<std::uint32_t> globalIndices;
+
+        // Get global indices from points
+        points->getGlobalIndices(globalIndices);
+
+        // Loop over all point indices and unmask them
+        for (const auto& globalIndex : globalIndices)
+            _maskData[globalIndex] = 255;
+    }
+
+    // Generate mask data for clusters
+    if (inputDataset->getDataType() == ClusterType)
+        std::fill(_maskData.begin(), _maskData.end(), 255);
 }
 
 std::vector<std::uint32_t>& Images::getGlobalIndices()
