@@ -203,14 +203,10 @@ protected:
     /** Computes and caches the mask data */
     void computeMaskData();
 
-    /** Get global indices */
-    std::vector<std::uint32_t>& getGlobalIndices();
-
 private:
     std::vector<std::uint32_t>      _indices;               /** Selection indices */
     ImageData*                      _imageData;             /** Pointer to raw image data */
     QSharedPointer<InfoAction>      _infoAction;            /** Shared pointer to info action */
     QRect                           _visibleRectangle;      /** Rectangle which bounds the visible pixels */
-    std::vector<std::uint32_t>      _globalIndices;         /** Global indices into data */
     std::vector<std::uint8_t>       _maskData;              /** Mask data */
 };
