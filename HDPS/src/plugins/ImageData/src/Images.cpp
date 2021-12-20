@@ -458,18 +458,33 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         }
         else {
 
-            points->visitSourceData([this, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
+            if (points->isFull()) {
 
-                // Populate scalar data vector with pixel data
-                for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
+                // Points dataset is full, so populate scalar data with elements
+                points->visitData([this, &points, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
 
-                    // Establish the target pixel index
-                    const auto targetPixelIndex = globalIndices[localPointIndex];
+                    // Populate scalar data vector with pixel data
+                    for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
 
-                    // And assign the scalar data
-                    scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
-                }
-            });
+                        // Establish the target pixel index
+                        const auto targetPixelIndex = globalIndices[localPointIndex];
+
+                        // And assign the scalar data
+                        scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
+                    }
+                });
+            }
+            else {
+
+                // Get smart pointer to the full points dataset
+                auto fullPoints = points->getParent().get<Points>();
+
+                // And copy all points
+                fullPoints->visitData([this, &fullPoints, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
+                    for (std::int32_t pointIndex = 0; pointIndex < fullPoints->getNumPoints(); pointIndex++)
+                        scalarData[pointIndex] = pointData[pointIndex][dimensionIndex];
+                });
+            }
         }
     }
 
