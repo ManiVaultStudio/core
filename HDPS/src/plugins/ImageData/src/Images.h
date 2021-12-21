@@ -203,6 +203,19 @@ protected:
     /** Computes and caches the mask data */
     void computeMaskData();
 
+    /**
+     * Get pixel coordinate from pixel index
+     * @param pixelIndex Pixel index
+     */
+    QPoint getPixelCoordinateFromPixelIndex(const std::int32_t& pixelIndex) const;
+
+    /**
+     * Get pixel index from pixel coordinate
+     * @param pixelCoordinate Pixel coordinate
+     * @return Pixel index
+     */
+    std::int32_t getPixelIndexFromPixelCoordinate(const QPoint& pixelCoordinate) const;
+
 private:
     std::vector<std::uint32_t>      _indices;               /** Selection indices */
     ImageData*                      _imageData;             /** Pointer to raw image data */
