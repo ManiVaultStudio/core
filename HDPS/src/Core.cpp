@@ -424,7 +424,7 @@ const void Core::exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSe
     }
 }
 
-const void Core::viewDataset(const QString& kind, const Datasets& datasets)
+const void Core::viewDatasets(const QString& kind, const Datasets& datasets)
 {
     try {
         _pluginManager->createViewPlugin(kind, datasets);
@@ -435,6 +435,20 @@ const void Core::viewDataset(const QString& kind, const Datasets& datasets)
     }
     catch (...) {
         exceptionMessageBox("Unable to view dataset");
+    }
+}
+
+const void Core::transformDatasets(const QString& kind, const Datasets& datasets)
+{
+    try {
+        _pluginManager->createTransformationPlugin(kind, datasets);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to transform dataset(s)", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to transform dataset(s)");
     }
 }
 

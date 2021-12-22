@@ -25,36 +25,15 @@ public:
      * @param factory Pointer to transformation plugin factory
      */
     TransformationPlugin(const PluginFactory* factory) :
-        Plugin(factory),
-        _inputDatasets()
+        Plugin(factory)
     {
     }
 
-    /** Destructor */
-    ~TransformationPlugin() = default;
-
     /**
-     * Set input dataset smart pointers
-     * @param inputDatasets Smart pointers to the input dataset
+     * The method which handles the data transformation
+     * @param datasets Input datasets
      */
-    void setInputDatasets(Datasets inputDatasets) {
-        _inputDatasets = inputDatasets;
-    }
-
-    /** Get input dataset smart pointer */
-    template<typename DatasetType = DatasetImpl>
-    Dataset<DatasetType> getInputDataset(std::int32_t datasetIndex) {
-        if (datasetIndex >= _inputDatasets.count())
-            return Dataset<DatasetType>();
-
-        return _inputDatasets[datasetIndex].get<DatasetType>();
-    }
-
-    /** The method which handles the data transformation */
-    virtual void transform() = 0;
-
-protected:
-    Datasets    _inputDatasets;       /** Input dataset smart pointers */
+    virtual void transform(const Datasets& datasets) = 0;
 };
 
 /**

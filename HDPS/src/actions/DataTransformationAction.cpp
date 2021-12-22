@@ -31,7 +31,7 @@ DataTransformationAction::DataTransformationAction(QObject* parent, const Datase
 
         // And transform data when trigger action is triggered
         connect(transformationPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            Application::core()->viewDataset(pluginKind, Datasets({ _dataset }));
+            Application::core()->transformDatasets(pluginKind, Datasets({ _dataset }));
         });
     }
 }

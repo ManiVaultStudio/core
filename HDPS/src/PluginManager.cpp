@@ -111,7 +111,7 @@ void PluginManager::loadPlugins()
         {
             action = gui.addMenuAction(plugin::Type::VIEW, pluginKind);
         }
-        else if (qobject_cast<TransformationPlugin*>(pluginFactory))
+        else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
         {
         }
         else
@@ -232,7 +232,7 @@ QString PluginManager::createPlugin(const QString kind)
     return pluginTriggered(kind);
 }
 
-void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImpl>& dataSet)
+void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImpl>& dataset)
 {
     try
     {
@@ -244,7 +244,7 @@ void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImp
         if (!pluginInstance)
             return;
 
-        pluginInstance->setInputDataset(dataSet);
+        pluginInstance->setInputDataset(dataset);
 
         _core.addPlugin(pluginInstance);
     }
@@ -254,7 +254,7 @@ void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImp
     }
 }
 
-void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImpl>& dataSet)
+void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImpl>& dataset)
 {
     try
     {
@@ -266,7 +266,7 @@ void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImp
         if (!pluginInstance)
             return;
 
-        pluginInstance->setInputDataset(dataSet);
+        pluginInstance->setInputDataset(dataset);
 
         _core.addPlugin(pluginInstance);
     }
@@ -276,7 +276,7 @@ void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImp
     }
 }
 
-void PluginManager::createViewPlugin(const QString& kind, const Datasets& dataSets)
+void PluginManager::createViewPlugin(const QString& kind, const Datasets& datasets)
 {
     try
     {
@@ -290,7 +290,29 @@ void PluginManager::createViewPlugin(const QString& kind, const Datasets& dataSe
 
         _core.addPlugin(pluginInstance);
 
-        pluginInstance->loadData(dataSets);
+        pluginInstance->loadData(datasets);
+    }
+    catch (std::exception& e)
+    {
+        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create analysis plugin: %1").arg(e.what()));
+    }
+}
+
+void PluginManager::createTransformationPlugin(const QString& kind, const Datasets& datasets)
+{
+    try
+    {
+        if (!_pluginFactories.keys().contains(kind))
+            throw std::runtime_error("Unrecognized plugin kind");
+
+        auto pluginInstance = dynamic_cast<TransformationPlugin*>(_pluginFactories[kind]->produce());
+
+        if (!pluginInstance)
+            return;
+
+        _core.addPlugin(pluginInstance);
+
+        pluginInstance->transform(datasets);
     }
     catch (std::exception& e)
     {

@@ -31,7 +31,7 @@ DataViewAction::DataViewAction(QObject* parent, const Dataset<DatasetImpl>& data
 
         // And export when trigger action is triggered
         connect(viewPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            Application::core()->viewDataset(pluginKind, Datasets({ _dataset }));
+            Application::core()->viewDatasets(pluginKind, Datasets({ _dataset }));
         });
     }
 }

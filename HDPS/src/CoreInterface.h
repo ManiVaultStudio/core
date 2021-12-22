@@ -199,13 +199,23 @@ public: // Import/export
      */
     virtual const void exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSet) = 0;
 
-public: // View
+public: // Data viewing
 
     /**
      * Views a dataset
      * @param kind Type of import plugin
+     * @param datasets Datasets to view
      */
-    virtual const void viewDataset(const QString& kind, const Datasets& datasets) = 0;
+    virtual const void viewDatasets(const QString& kind, const Datasets& datasets) = 0;
+
+public: // Data transformation
+
+    /**
+     * Transforms one or more datasets
+     * @param kind Type of transformation plugin
+     * @param datasets Datasets to transform
+     */
+    virtual const void transformDatasets(const QString& kind, const Datasets& datasets) = 0;
 
 public: // Plugin queries
 
