@@ -16,6 +16,7 @@
 #include "LoaderPlugin.h"
 #include "WriterPlugin.h"
 #include "ViewPlugin.h"
+#include "TransformationPlugin.h"
 #include "PluginType.h"
 
 #include <QJsonObject>
@@ -109,6 +110,9 @@ void PluginManager::loadPlugins()
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
             action = gui.addMenuAction(plugin::Type::VIEW, pluginKind);
+        }
+        else if (qobject_cast<TransformationPlugin*>(pluginFactory))
+        {
         }
         else
         {
