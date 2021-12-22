@@ -111,6 +111,7 @@ set( WIDGET_SOURCES
 )
 
 set(ACTIONS_HEADERS
+    src/actions/Actions.h
     src/actions/ColorAction.h
     src/actions/ColorPickerAction.h
     src/actions/ColorMapAction.h
@@ -138,7 +139,15 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionResetButton.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
-    src/actions/Actions.h
+    src/actions/DataAction.h
+    src/actions/DataImportAction.h
+    src/actions/DataExportAction.h
+    src/actions/DataCopyAction.h
+    src/actions/DataRemoveAction.h
+    src/actions/DataViewAction.h
+    src/actions/DataAnalysisAction.h
+    src/actions/DataGroupingAction.h
+    src/actions/DataTransformationAction.h
 )
 
 set(ACTIONS_SOURCES
@@ -169,6 +178,15 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionResetButton.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
+    src/actions/DataAction.cpp
+    src/actions/DataImportAction.cpp
+    src/actions/DataExportAction.cpp
+    src/actions/DataCopyAction.cpp
+    src/actions/DataRemoveAction.cpp
+    src/actions/DataViewAction.cpp
+    src/actions/DataAnalysisAction.cpp
+    src/actions/DataGroupingAction.cpp
+    src/actions/DataTransformationAction.cpp
 )
 
 set( RENDERER_HEADERS
@@ -256,10 +274,8 @@ set( UTIL_SOURCES
 set( PLUGIN_HEADERS
     src/CoreInterface.h
     src/DataHierarchyItem.h
-    src/DataRemoveAction.h
-    src/DataCopyAction.h
-    src/DataViewAction.h
     src/AnalysisPlugin.h
+    src/TransformationPlugin.h
     src/DataType.h
     src/RawData.h
     src/LoaderPlugin.h
@@ -278,9 +294,6 @@ set( PLUGIN_HEADERS
 
 set( PLUGIN_SOURCES
     src/DataHierarchyItem.cpp
-    src/DataRemoveAction.cpp
-    src/DataCopyAction.cpp
-    src/DataViewAction.cpp
     src/Plugin.cpp
     src/LoaderPlugin.cpp
     src/Application.cpp
@@ -297,11 +310,6 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
     src/DataPropertiesWidget.h
-    src/DataAction.h
-    src/DataExportAction.h
-    src/DataAnalysisAction.h
-    src/DataImportAction.h
-    src/DataGroupingAction.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -310,11 +318,6 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp
-    src/DataAction.cpp
-    src/DataExportAction.cpp
-    src/DataAnalysisAction.cpp
-    src/DataImportAction.cpp
-    src/DataGroupingAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

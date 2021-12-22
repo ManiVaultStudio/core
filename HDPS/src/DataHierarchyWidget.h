@@ -2,7 +2,7 @@
 
 #include "DataHierarchyModel.h"
 #include "DataHierarchyFilterModel.h"
-#include "DataImportAction.h"
+#include "actions/DataImportAction.h"
 
 #include <QWidget>
 #include <QTreeView>

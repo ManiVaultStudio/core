@@ -18,7 +18,7 @@ namespace hdps
 {
 namespace plugin
 {
-    enum class Type { ANALYSIS, DATA, LOADER, WRITER, VIEW };
+    enum class Type { ANALYSIS, DATA, LOADER, WRITER, TRANSFORMATION, VIEW };
 
     struct TypeHash
     {
