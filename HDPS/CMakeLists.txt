@@ -130,6 +130,7 @@ set(ACTIONS_HEADERS
     src/actions/PixelSelectionAction.h
     src/actions/TriggerAction.h
     src/actions/ToggleAction.h
+    src/actions/ToolbarAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
     src/actions/WidgetActionWidget.h
@@ -161,6 +162,7 @@ set(ACTIONS_SOURCES
 	src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/ToggleAction.cpp
+    src/actions/ToolbarAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
     src/actions/WidgetActionWidget.cpp

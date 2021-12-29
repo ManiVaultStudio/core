@@ -5,6 +5,54 @@
 
 #include "Application.h"
 
+#include <actions/ToolbarAction.h>
+#include <actions/IntegralAction.h>
+
+class ToolbarDialog : public QDialog
+{
+public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent widget
+     * @param dataset Dataset root to apply grouping to
+     */
+    ToolbarDialog(QWidget* parent) :
+        _toolbarAction(this),
+        _widthAction(this, "Width"),
+        _heightAction(this, "Height"),
+        _depthAction(this, "Depth")
+    {
+        setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+
+        _toolbarAction.addAction(&_widthAction, 1);
+        _toolbarAction.addAction(&_heightAction, 1);
+        _toolbarAction.addAction(&_depthAction, 1);
+
+        auto layout = new QVBoxLayout();
+
+        setLayout(layout);
+
+        layout->addWidget(_toolbarAction.createWidget(this));
+    }
+
+    /** Get preferred size */
+    QSize sizeHint() const override {
+        return QSize(0, 0);
+    }
+
+    /** Get minimum size hint*/
+    QSize minimumSizeHint() const override {
+        return sizeHint();
+    }
+
+protected:
+    ToolbarAction   _toolbarAction;
+    IntegralAction  _widthAction;
+    IntegralAction  _heightAction;
+    IntegralAction  _depthAction;
+};
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setOrganizationName("BioVault");
@@ -51,6 +99,10 @@ int main(int argc, char *argv[])
     hdps::gui::MainWindow mainWindow;
 
     mainWindow.show();
+
+    ToolbarDialog toolbarDialog(nullptr);
+
+    toolbarDialog.show();
 
     return hdpsApplication.exec();
 }
