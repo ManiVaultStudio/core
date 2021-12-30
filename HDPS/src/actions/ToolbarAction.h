@@ -31,17 +31,52 @@ public:
         Vertical    = 0x00002   /** Toolbar is vertically docked */
     };
 
-    /** Describes the item state configurations */
-    enum ItemState {
-        Collapsed,
-        Standard
-    };
+    
 
 public:
 
     /** Toolbar widget for horizontal docking */
     class HorizontalWidget : public QWidget
     {
+    protected:
+
+        /**
+         * 
+         */
+        class StatefulItem {
+        public:
+
+            /** Describes the item state configurations */
+            enum ItemState {
+                Collapsed,
+                Standard
+            };
+
+        public:
+            StatefulItem(QWidget* parent, std::int32_t index, WidgetAction* action, QHBoxLayout* targetLayout, QHBoxLayout* offscreenLayout);
+
+            std::int32_t getIndex() const;
+
+            void setState(const ItemState& state);
+
+            QWidget* getWidget(const ItemState& itemState);
+
+            std::int32_t getWidth() const;
+
+            std::int32_t getWidth(const ItemState& state) const;
+
+        protected:
+            std::int32_t    _index;                 /**  */
+            WidgetAction*   _action;                /**  */
+            ItemState       _state;                 /**  */
+            QWidget*        _collapsedWidget;       /**  */
+            QWidget*        _standardWidget;        /**  */
+            QHBoxLayout*    _targetLayout;          /**  */
+            QHBoxLayout*    _offscreenLayout;       /**  */
+        };
+
+        using SharedStatefulItem = QSharedPointer<StatefulItem>;
+
     protected:
 
         /**
@@ -72,26 +107,17 @@ public:
         /** Computes the layout in response to a resizing of the widget */
         void computeLayout();
 
-        std::int32_t getWidgetIndex(std::int32_t itemIndex, const ItemState& itemState);
-
-        QWidget* getWidget(std::int32_t itemIndex, const ItemState& itemState);
-
-        std::int32_t getWidgetWidth(std::int32_t itemIndex, const ItemState& itemState) const;
-
     protected:
-        ToolbarAction*      _toolbarAction;                         /** Pointer to toolbar action */
-        QTimer              _resizeTimer;                           /** Timer which prevents unnecessary resize handler calls */
-        QHBoxLayout         _mainLayout;                            /** Horizontal main layout */
-        QHBoxLayout         _toolbarLayout;                         /** Horizontal toolbar layout for items */
-        QWidget             _toolbarWidget;                         /** Toolbar widget */
+        ToolbarAction*                  _toolbarAction;                         /** Pointer to toolbar action */
+        QTimer                          _resizeTimer;                           /** Timer which prevents unnecessary resize handler calls */
+        QHBoxLayout                     _mainLayout;                            /** Horizontal main layout */
+        QHBoxLayout                     _toolbarLayout;                         /** Horizontal toolbar layout for items */
+        QWidget                         _toolbarWidget;                         /** Toolbar widget */
 
-        QWidget             _offScreenWidget;                       /** Offscreen widget */
-        QVBoxLayout         _offScreenLayout;                       /** Offscreen layout */
-        QHBoxLayout         _offScreenWidgetsLayout;                /** Offscreen widgets layout */
-        QHBoxLayout         _offScreenCollapsedWidgetsLayout;       /** Offscreen collapsed widgets layout */
+        QWidget                         _offScreenWidget;                       /** Offscreen widget */
+        QHBoxLayout                     _offScreenLayout;                       /** Offscreen layout */
 
-        QList<QWidget*>     _widgets;
-        QVector<ItemState>  _itemStates;                    
+        QVector<SharedStatefulItem>     _statefulItems;                         
 
         /** Default resize timer interval */
         static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;
@@ -108,7 +134,6 @@ protected:
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
-
 protected:
 
     class Item
@@ -118,6 +143,10 @@ protected:
 
             bool operator<(Item other) {
                 return _priority < other._priority;
+            }
+
+            bool operator==(Item other) {
+                return _action == other._action;
             }
 
             WidgetAction* getAction();
