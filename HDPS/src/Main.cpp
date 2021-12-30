@@ -7,6 +7,8 @@
 
 #include <actions/ToolbarAction.h>
 #include <actions/IntegralAction.h>
+#include <actions/ColorAction.h>
+#include <actions/ColorMapAction.h>
 
 class ToolbarDialog : public QDialog
 {
@@ -21,7 +23,9 @@ public:
         _toolbarAction(this),
         _widthAction(this, "Width"),
         _heightAction(this, "Height"),
-        _depthAction(this, "Depth")
+        _depthAction(this, "Depth"),
+        _colorAction(this, "Color"),
+        _colorMapAction(this, "Color map")
     {
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
@@ -29,7 +33,9 @@ public:
 
         _toolbarAction.addAction(&_widthAction, 1);
         _toolbarAction.addAction(&_heightAction, 1);
-        _toolbarAction.addAction(&_depthAction, 1);
+        _toolbarAction.addAction(&_depthAction, 5);
+        //_toolbarAction.addAction(&_colorAction, 3);
+        _toolbarAction.addAction(&_colorMapAction, 10);
 
         auto layout = new QVBoxLayout();
 
@@ -55,6 +61,8 @@ protected:
     IntegralAction  _widthAction;
     IntegralAction  _heightAction;
     IntegralAction  _depthAction;
+    ColorAction     _colorAction;
+    ColorMapAction  _colorMapAction;
 };
 
 int main(int argc, char *argv[])

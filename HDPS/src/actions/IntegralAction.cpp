@@ -1,4 +1,5 @@
 #include "IntegralAction.h"
+#include "Application.h"
 
 #include <QHBoxLayout>
 
@@ -18,6 +19,8 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     _resettableChanged      = [this]() -> void { emit resettableChanged(isResettable()); };
 
     initialize(minimum, maximum, value, defaultValue);
+
+    setIcon(Application::getIconFont("FontAwesome").getIcon("ruler"));
 }
 
 void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue)

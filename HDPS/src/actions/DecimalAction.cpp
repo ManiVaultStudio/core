@@ -1,4 +1,5 @@
 #include "DecimalAction.h"
+#include "Application.h"
 
 #include <QHBoxLayout>
 
@@ -20,6 +21,8 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
     _resettableChanged          = [this]() -> void { emit resettableChanged(isResettable()); };
 
     initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
+
+    setIcon(Application::getIconFont("FontAwesome").getIcon("ruler"));
 }
 
 void DecimalAction::initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/)

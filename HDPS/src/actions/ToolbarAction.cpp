@@ -20,8 +20,6 @@ ToolbarAction::ToolbarAction(QObject* parent, const QString& title /*= ""*/) :
 void ToolbarAction::addAction(WidgetAction* action, std::int32_t priority /*= 1*/)
 {
     _items << Item(action, priority);
-
-    std::sort(_items.begin(), _items.end());
 }
 
 ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction* toolbarAction) :
@@ -49,7 +47,10 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
 
     // Create stateful item for each toolbar action
     for (auto& item : _toolbarAction->_items)
-        _statefulItems << SharedStatefulItem::create(this, _toolbarAction->_items.indexOf(item), item.getAction(), &_toolbarLayout, &_offScreenLayout);
+        _statefulItems << SharedStatefulItem::create(this, _toolbarAction->_items.indexOf(item), item, &_toolbarLayout, &_offScreenLayout);
+
+    for (auto sortedStatefulItem : _statefulItems)
+        qDebug() << "index" << sortedStatefulItem->getIndex() << sortedStatefulItem->getPriority();
 
     // Apply toolbar layout to toolbar widget
     _offScreenWidget.setLayout(&_offScreenLayout);
@@ -90,6 +91,7 @@ void ToolbarAction::HorizontalWidget::computeLayout()
     // Initialize collapsed
     std::fill(itemStates.begin(), itemStates.end(), StatefulItem::Collapsed);
 
+    // Compute candidate configuration width
     const auto getWidth = [this, &itemStates]() -> std::int32_t {
         std::int32_t width = (_toolbarAction->_items.count() - 1) * _toolbarLayout.spacing();
 
@@ -99,12 +101,22 @@ void ToolbarAction::HorizontalWidget::computeLayout()
         return width;
     };
 
+    auto sortedStatefulItems = _statefulItems;
+
+    // Sort stateful items in descending order
+    std::sort(sortedStatefulItems.begin(), sortedStatefulItems.end(), [](auto a, auto b) {
+        return a->getPriority() > b->getPriority();
+    });
+
+    for (auto sortedStatefulItem : sortedStatefulItems)
+        qDebug() << "index" << sortedStatefulItem->getIndex() << sortedStatefulItem->getPriority();
+
     // Establish stateful item states
-    for (auto statefulItem : _statefulItems) {
+    for (auto sortedStatefulItem : sortedStatefulItems) {
         auto cachedItemStates = itemStates;
 
-        itemStates[statefulItem->getIndex()] = StatefulItem::Standard;
-
+        itemStates[sortedStatefulItem->getIndex()] = StatefulItem::Standard;
+        
         if (getWidth() > width()) {
             itemStates = cachedItemStates;
             break;
@@ -114,8 +126,6 @@ void ToolbarAction::HorizontalWidget::computeLayout()
     // Assign new state(s)
     for (auto statefulItem : _statefulItems)
         statefulItem->setState(itemStates[statefulItem->getIndex()]);
-
-    qDebug() << itemStates;
 }
 
 QWidget* ToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -136,8 +146,7 @@ QWidget* ToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
 ToolbarAction::Item::Item(WidgetAction* action, std::int32_t priority) :
     _action(action),
-    _priority(priority),
-    _widths{0, 0}
+    _priority(priority)
 {
 }
 
@@ -146,24 +155,33 @@ WidgetAction* ToolbarAction::Item::getAction()
     return _action;
 }
 
-ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std::int32_t index, WidgetAction* action, QHBoxLayout* targetLayout, QHBoxLayout* offscreenLayout) :
+std::int32_t ToolbarAction::Item::getPriority() const
+{
+    return _priority;
+}
+
+ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std::int32_t index, Item& item, QHBoxLayout* targetLayout, QHBoxLayout* offscreenLayout) :
     _index(index),
-    _action(action),
-    _state(Collapsed),
+    _item(item),
+    _state(None),
     _collapsedWidget(nullptr),
     _standardWidget(nullptr),
     _targetLayout(targetLayout),
     _offscreenLayout(offscreenLayout)
 {
-    Q_ASSERT(_action != nullptr);
     Q_ASSERT(_targetLayout != nullptr);
     Q_ASSERT(_offscreenLayout != nullptr);
 
-    _collapsedWidget    = _action->createCollapsedWidget(parent);
-    _standardWidget     = _action->createWidget(parent);
+    _collapsedWidget = _item.getAction()->createCollapsedWidget(parent);
+    _standardWidget = _item.getAction()->createWidget(parent);
 
     _offscreenLayout->addWidget(_collapsedWidget);
     _offscreenLayout->addWidget(_standardWidget);
+}
+
+ToolbarAction::Item& ToolbarAction::HorizontalWidget::StatefulItem::getItem()
+{
+    return _item;
 }
 
 std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getIndex() const
@@ -182,16 +200,18 @@ void ToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& st
     {
         case Collapsed:
         {
-            _targetLayout->insertWidget(_index, _collapsedWidget);
-            _offscreenLayout->addWidget(_standardWidget);
+            removeWidget(_standardWidget, [this]() {
+                insertWidget(_collapsedWidget);
+            });
 
             break;
         }
 
         case Standard:
         {
-            _targetLayout->insertWidget(_index, _standardWidget);
-            _offscreenLayout->addWidget(_collapsedWidget);
+            removeWidget(_collapsedWidget, [this]() {
+                insertWidget(_standardWidget);
+            });
 
             break;
         }
@@ -225,89 +245,80 @@ std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getWidth(const ItemS
     return const_cast<StatefulItem*>(this)->getWidget(state)->sizeHint().width();
 }
 
+std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getPriority() const
+{
+    return _item.getPriority();
 }
-}
 
-/*
-    const auto fadeItemWidget = [this](QWidget* widget, bool fadeIn, std::function<void()>& finished) {
+void ToolbarAction::HorizontalWidget::StatefulItem::insertWidget(QWidget* widget, std::function<void()> finished /*= std::function<void()>()*/)
+{
+    // Create opacity effect for fade in/out
+    auto opacityffect = new QGraphicsOpacityEffect(widget);
 
-        // Create opacity effect for fade in/out
-        auto opacityffect = new QGraphicsOpacityEffect(widget);
+    // Set initial opacity
+    opacityffect->setOpacity(0);
 
-        // Apply graphics effect to widget
-        widget->setGraphicsEffect(opacityffect);
+    // Apply graphics effect to widget
+    widget->setGraphicsEffect(opacityffect);
 
-        auto fadeOutAnimation = new QPropertyAnimation(opacityffect, "opacity");
+    // Create an animation which controls the widget opacity
+    auto animation = new QPropertyAnimation(opacityffect, "opacity");
 
-        fadeOutAnimation->setDuration(500);
-        fadeOutAnimation->setStartValue(fadeIn ? 0 : 1);
-        fadeOutAnimation->setEndValue(fadeIn ? 1 : 0);
+    // Configure animation
+    animation->setDuration(ANIMATION_DURATION);
+    animation->setStartValue(0);
+    animation->setEndValue(1);
+    animation->setEasingCurve(QEasingCurve::InOutQuad);
 
-        fadeOutAnimation->start();
+    // Insert widget into target layout
+    _targetLayout->insertWidget(_index, widget);
 
-        connect(fadeOutAnimation, &QPropertyAnimation::finished, this, [this, widget, opacityffect, fadeOutAnimation, &finished]() {
-            delete opacityffect;
-            delete fadeOutAnimation;
+    animation->start();
 
+    // Cleanup when finished
+    connect(animation, &QPropertyAnimation::finished, [this, widget, opacityffect, animation, finished]() {
+        delete opacityffect;
+        delete animation;
+
+        if (finished)
             finished();
-        });
-    };
+    });
+}
 
-    const auto setItemState = [this](std::int32_t itemIndex, QLayout* targetLayout) {
+void ToolbarAction::HorizontalWidget::StatefulItem::removeWidget(QWidget* widget, std::function<void()> finished /*= std::function<void()>()*/)
+{
+    // Create opacity effect for fade in/out
+    auto opacityffect = new QGraphicsOpacityEffect(widget);
 
-        // Get normal and collapsed widget
-        auto itemCollapsedWidget    = getWidget(itemIndex, Collapsed);
-        auto itemWidget             = getWidget(itemIndex, Standard);
+    // Set initial opacity
+    opacityffect->setOpacity(1);
 
+    // Apply graphics effect to widget
+    widget->setGraphicsEffect(opacityffect);
 
-    };
+    // Create an animation which controls the widget opacity
+    auto animation = new QPropertyAnimation(opacityffect, "opacity");
 
-    const auto removeFromLayout = [this](QWidget* widget, QLayout* targetLayout) {
-        auto fadeOutEffect = new QGraphicsOpacityEffect(widget);
+    // Configure animation
+    animation->setDuration(ANIMATION_DURATION);
+    animation->setStartValue(1);
+    animation->setEndValue(0);
+    animation->setEasingCurve(QEasingCurve::InOutQuad);
 
-        widget->setGraphicsEffect(fadeOutEffect);
+    animation->start();
 
-        auto fadeOutAnimation = new QPropertyAnimation(fadeOutEffect, "opacity");
+    // Cleanup when finished
+    connect(animation, &QPropertyAnimation::finished, [this, widget, opacityffect, animation, finished]() {
+        delete opacityffect;
+        delete animation;
 
-        fadeOutAnimation->setDuration(500);
-        fadeOutAnimation->setStartValue(1);
-        fadeOutAnimation->setEndValue(0);
+        // Remove widget from target layout and add to off screen layout
+        _offscreenLayout->addWidget(widget);
 
-        connect(fadeOutAnimation, &QPropertyAnimation::finished, this, [this, widget, fadeOutEffect, fadeOutAnimation, targetLayout]() {
-            delete fadeOutEffect;
-            delete fadeOutAnimation;
+        if (finished)
+            finished();
+    });
+}
 
-            targetLayout->addWidget(widget);
-        });
-    };
-
-    for (std::int32_t itemIndex = 0; itemIndex < itemStates.count(); itemIndex++) {
-        const auto itemState    = itemStates[itemIndex];
-        const auto widgetIndex  = getWidgetIndex(itemIndex, itemState);
-        const auto stateChanged = _itemStates.isEmpty() ? true : itemState != _itemStates[itemIndex];
-
-        if (stateChanged) {
-            switch (itemState)
-            {
-                case Collapsed:
-                {
-                    //addToLayout(getWidget(itemIndex, Standard), &_offScreenWidgetsLayout);
-                    //removeFromLayout(getWidget(itemIndex, Standard), &_offScreenWidgetsLayout);
-
-                    break;
-                }
-
-                case Standard:
-                {
-                    //removeFromLayout(getWidget(itemIndex, Collapsed), &_offScreenWidgetsLayout);
-
-
-                    break;
-                }
-
-                default:
-                    break;
-            }
-        }
-    }
-    */
+}
+}

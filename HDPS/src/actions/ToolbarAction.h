@@ -31,7 +31,24 @@ public:
         Vertical    = 0x00002   /** Toolbar is vertically docked */
     };
 
-    
+protected:
+
+    class Item
+    {
+    public:
+        Item(WidgetAction* action, std::int32_t priority);
+
+        bool operator==(Item other) {
+            return _action == other._action;
+        }
+
+        WidgetAction* getAction();
+        std::int32_t getPriority() const;
+
+    protected:
+        WidgetAction*   _action;
+        std::int32_t    _priority;
+    };
 
 public:
 
@@ -48,12 +65,15 @@ public:
 
             /** Describes the item state configurations */
             enum ItemState {
+                None,
                 Collapsed,
                 Standard
             };
 
         public:
-            StatefulItem(QWidget* parent, std::int32_t index, WidgetAction* action, QHBoxLayout* targetLayout, QHBoxLayout* offscreenLayout);
+            StatefulItem(QWidget* parent, std::int32_t index, Item& item, QHBoxLayout* targetLayout, QHBoxLayout* offscreenLayout);
+
+            Item& getItem();
 
             std::int32_t getIndex() const;
 
@@ -65,14 +85,28 @@ public:
 
             std::int32_t getWidth(const ItemState& state) const;
 
+            std::int32_t getPriority() const;
+
+            bool operator<(StatefulItem other) {
+                return getPriority() < other.getPriority();
+            }
+
+        protected:
+
+            void insertWidget(QWidget* widget, std::function<void()> finished = std::function<void()>());
+            void removeWidget(QWidget* widget, std::function<void()> finished = std::function<void()>());
+
         protected:
             std::int32_t    _index;                 /**  */
-            WidgetAction*   _action;                /**  */
+            Item&           _item;                  /**  */
             ItemState       _state;                 /**  */
             QWidget*        _collapsedWidget;       /**  */
             QWidget*        _standardWidget;        /**  */
             QHBoxLayout*    _targetLayout;          /**  */
             QHBoxLayout*    _offscreenLayout;       /**  */
+
+            /** Animation duration */
+            static constexpr std::int32_t ANIMATION_DURATION = 250;
         };
 
         using SharedStatefulItem = QSharedPointer<StatefulItem>;
@@ -120,7 +154,7 @@ public:
         QVector<SharedStatefulItem>     _statefulItems;                         
 
         /** Default resize timer interval */
-        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;
+        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 25;
 
         friend class ToolbarAction;
     };
@@ -133,29 +167,6 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
-
-protected:
-
-    class Item
-    {
-        public:
-            Item(WidgetAction* action, std::int32_t priority);
-
-            bool operator<(Item other) {
-                return _priority < other._priority;
-            }
-
-            bool operator==(Item other) {
-                return _action == other._action;
-            }
-
-            WidgetAction* getAction();
-
-        protected:
-            WidgetAction*   _action;
-            std::int32_t    _priority;
-            std::uint32_t   _widths[2];
-    };
 
 public:
 
@@ -171,7 +182,7 @@ public:
 signals:
 
 protected:
-    QList<Item>  _items;
+    QVector<Item>  _items;
 
     friend class HorizontalWidget;
 };
