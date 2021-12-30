@@ -25,11 +25,15 @@ public:
     {
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
+        //_widthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
+
         _toolbarAction.addAction(&_widthAction, 1);
         _toolbarAction.addAction(&_heightAction, 1);
         _toolbarAction.addAction(&_depthAction, 1);
 
         auto layout = new QVBoxLayout();
+
+        layout->setMargin(0);
 
         setLayout(layout);
 

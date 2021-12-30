@@ -31,6 +31,12 @@ public:
         Vertical    = 0x00002   /** Toolbar is vertically docked */
     };
 
+    /** Describes the item state configurations */
+    enum ItemState {
+        Collapsed,
+        Standard
+    };
+
 public:
 
     /** Toolbar widget for horizontal docking */
@@ -66,15 +72,29 @@ public:
         /** Computes the layout in response to a resizing of the widget */
         void computeLayout();
 
+        std::int32_t getWidgetIndex(std::int32_t itemIndex, const ItemState& itemState);
+
+        QWidget* getWidget(std::int32_t itemIndex, const ItemState& itemState);
+
+        std::int32_t getWidgetWidth(std::int32_t itemIndex, const ItemState& itemState) const;
+
     protected:
-        ToolbarAction*  _toolbarAction;     /** Pointer to toolbar action */
-        QTimer          _resizeTimer;       /** Timer which prevents unnecessary resize handler calls */
-        QHBoxLayout     _mainLayout;        /** Horizontal main layout */
-        QHBoxLayout     _toolbarLayout;     /** Horizontal toolbar layout for items */
-        QWidget         _toolbarWidget;     /** Toolbar widget */
+        ToolbarAction*      _toolbarAction;                         /** Pointer to toolbar action */
+        QTimer              _resizeTimer;                           /** Timer which prevents unnecessary resize handler calls */
+        QHBoxLayout         _mainLayout;                            /** Horizontal main layout */
+        QHBoxLayout         _toolbarLayout;                         /** Horizontal toolbar layout for items */
+        QWidget             _toolbarWidget;                         /** Toolbar widget */
+
+        QWidget             _offScreenWidget;                       /** Offscreen widget */
+        QVBoxLayout         _offScreenLayout;                       /** Offscreen layout */
+        QHBoxLayout         _offScreenWidgetsLayout;                /** Offscreen widgets layout */
+        QHBoxLayout         _offScreenCollapsedWidgetsLayout;       /** Offscreen collapsed widgets layout */
+
+        QList<QWidget*>     _widgets;
+        QVector<ItemState>  _itemStates;                    
 
         /** Default resize timer interval */
-        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 250;
+        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;
 
         friend class ToolbarAction;
     };
