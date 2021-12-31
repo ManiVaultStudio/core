@@ -5,6 +5,10 @@
 #include <QTimer>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
+#include <QResizeEvent>
+#include <QMoveEvent>
 
 class QWidget;
 
@@ -60,7 +64,7 @@ public:
         /**
          * 
          */
-        class StatefulItem {
+        class StatefulItem : public QObject {
         public:
 
             /** Describes the item state configurations */
@@ -71,13 +75,120 @@ public:
             };
 
         public:
-            StatefulItem(QWidget* parent, std::int32_t index, Item& item, QHBoxLayout* targetLayout, QHBoxLayout* offscreenLayout);
+            class FadeableWidget : public QWidget {
+            public:
+                FadeableWidget(QWidget* parent, QWidget* target) :
+                    QWidget(parent),
+                    _target(target),
+                    _layout(),
+                    _opacityEffect(),
+                    _opacityAnimation(&_opacityEffect, "opacity")
+                {
+                    Q_ASSERT(parent != nullptr);
+                    Q_ASSERT(_target != nullptr);
+
+                    _target->setObjectName("TargetWidget");
+
+                    //setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+
+                    parent->installEventFilter(this);
+
+                    _layout.setMargin(0);
+                    _layout.setSizeConstraint(QLayout::SetFixedSize);
+                    _layout.addWidget(target);
+                    //_layout.addStretch(1);
+
+                    setLayout(&_layout);
+
+                    _target->setGraphicsEffect(&_opacityEffect);
+                    //_target->setAttribute(Qt::WA_TranslucentBackground, true);
+                    
+                    _opacityEffect.setOpacity(0);
+
+                    _opacityAnimation.setDuration(ANIMATION_DURATION);
+                    _opacityAnimation.setEasingCurve(QEasingCurve::InOutQuad);
+                }
+
+                void setOpacity(float opacity)
+                {
+                    _opacityEffect.setOpacity(opacity);
+                }
+
+                void fadeIn(std::int32_t delay = 0, std::function<void()> finished = std::function<void()>())
+                {
+                    _opacityAnimation.setStartValue(0.0f);
+                    _opacityAnimation.setEndValue(1.0f);
+
+                    if (finished)
+                        connect(&_opacityAnimation, &QPropertyAnimation::finished, finished);
+
+                    connect(&_opacityAnimation, &QPropertyAnimation::valueChanged, _target, &QWidget::updateGeometry);
+
+                    QTimer::singleShot(delay, [this]() {
+                        _opacityAnimation.start();
+                    });
+                }
+
+                void fadeOut(std::int32_t delay = 0, std::function<void()> finished = std::function<void()>())
+                {
+                    _opacityAnimation.setStartValue(1.0f);
+                    _opacityAnimation.setEndValue(0.0f);
+
+                    if (finished)
+                        connect(&_opacityAnimation, &QPropertyAnimation::finished, finished);
+
+                    connect(&_opacityAnimation, &QPropertyAnimation::valueChanged, _target, &QWidget::updateGeometry);
+
+                    QTimer::singleShot(delay, [this]() {
+                        _opacityAnimation.start();
+                    });
+                }
+
+                bool eventFilter(QObject* target, QEvent* event) override
+                {
+                    switch (event->type())
+                    {
+                        case QEvent::Resize:
+                        {
+                            update();
+                            //_target->setFixedSize(static_cast<QResizeEvent*>(event)->size());
+
+                            break;
+                        }
+
+                        case QEvent::Move:
+                        {
+                            update();
+                            //move(static_cast<QMoveEvent*>(event)->pos());
+                            //move(100, 0);
+                            updateGeometry();
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+
+                    return QObject::eventFilter(target, event);
+                }
+
+            protected:
+                QWidget*                _target;
+                QHBoxLayout             _layout;
+                QGraphicsOpacityEffect  _opacityEffect;
+                QPropertyAnimation      _opacityAnimation;             /**  */
+            };
+
+        public:
+            StatefulItem(QWidget* parent, std::int32_t index, Item& item);
 
             Item& getItem();
 
             std::int32_t getIndex() const;
 
             void setState(const ItemState& state);
+
+            QWidget* getWidget();
 
             QWidget* getWidget(const ItemState& itemState);
 
@@ -92,21 +203,20 @@ public:
             }
 
         protected:
-
-            void insertWidget(QWidget* widget, std::function<void()> finished = std::function<void()>());
-            void removeWidget(QWidget* widget, std::function<void()> finished = std::function<void()>());
+            void swapWidget(const ItemState& stateA, const ItemState& stateB);
 
         protected:
-            std::int32_t    _index;                 /**  */
-            Item&           _item;                  /**  */
-            ItemState       _state;                 /**  */
-            QWidget*        _collapsedWidget;       /**  */
-            QWidget*        _standardWidget;        /**  */
-            QHBoxLayout*    _targetLayout;          /**  */
-            QHBoxLayout*    _offscreenLayout;       /**  */
+            std::int32_t        _index;                     /**  */
+            Item&               _item;                      /**  */
+            ItemState           _state;                     /**  */
+            QWidget             _widget;                    /**  */
+            QHBoxLayout         _widgetLayout;              /**  */
+            FadeableWidget      _collapsedWidget;           /**  */
+            FadeableWidget      _standardWidget;            /**  */
+            QVariantAnimation   _sizeAnimation;             /**  */
 
             /** Animation duration */
-            static constexpr std::int32_t ANIMATION_DURATION = 250;
+            static constexpr std::int32_t ANIMATION_DURATION = 350;
         };
 
         using SharedStatefulItem = QSharedPointer<StatefulItem>;
@@ -147,14 +257,10 @@ public:
         QHBoxLayout                     _mainLayout;                            /** Horizontal main layout */
         QHBoxLayout                     _toolbarLayout;                         /** Horizontal toolbar layout for items */
         QWidget                         _toolbarWidget;                         /** Toolbar widget */
-
-        QWidget                         _offScreenWidget;                       /** Offscreen widget */
-        QHBoxLayout                     _offScreenLayout;                       /** Offscreen layout */
-
         QVector<SharedStatefulItem>     _statefulItems;                         
 
         /** Default resize timer interval */
-        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 25;
+        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;
 
         friend class ToolbarAction;
     };

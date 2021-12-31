@@ -1,8 +1,8 @@
 #include "ToolbarAction.h"
 
 #include <QCoreApplication>
-#include <QPropertyAnimation>
-#include <QGraphicsOpacityEffect>
+
+#include <cmath>
 
 namespace hdps {
 
@@ -29,8 +29,6 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
     _mainLayout(),
     _toolbarLayout(),
     _toolbarWidget(),
-    _offScreenWidget(),
-    _offScreenLayout(),
     _statefulItems()
 {
     // Set resize timer interval and only timeout once
@@ -43,17 +41,12 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
     _toolbarLayout.setMargin(0);
     _toolbarLayout.setSizeConstraint(QLayout::SetFixedSize);
 
-    _offScreenLayout.setMargin(0);
-
     // Create stateful item for each toolbar action
     for (auto& item : _toolbarAction->_items)
-        _statefulItems << SharedStatefulItem::create(this, _toolbarAction->_items.indexOf(item), item, &_toolbarLayout, &_offScreenLayout);
+        _statefulItems << SharedStatefulItem::create(this, _toolbarAction->_items.indexOf(item), item);
 
-    for (auto sortedStatefulItem : _statefulItems)
-        qDebug() << "index" << sortedStatefulItem->getIndex() << sortedStatefulItem->getPriority();
-
-    // Apply toolbar layout to toolbar widget
-    _offScreenWidget.setLayout(&_offScreenLayout);
+    for (auto statefulItem : _statefulItems)
+        _toolbarLayout.addWidget(statefulItem->getWidget());
 
     _toolbarWidget.setLayout(&_toolbarLayout);
 
@@ -66,8 +59,6 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
 
     // Configure main layout
     _mainLayout.setMargin(0);
-
-    _offScreenWidget.show();
 }
 
 void ToolbarAction::HorizontalWidget::resizeEvent(QResizeEvent* resizeEvent)
@@ -107,9 +98,6 @@ void ToolbarAction::HorizontalWidget::computeLayout()
     std::sort(sortedStatefulItems.begin(), sortedStatefulItems.end(), [](auto a, auto b) {
         return a->getPriority() > b->getPriority();
     });
-
-    for (auto sortedStatefulItem : sortedStatefulItems)
-        qDebug() << "index" << sortedStatefulItem->getIndex() << sortedStatefulItem->getPriority();
 
     // Establish stateful item states
     for (auto sortedStatefulItem : sortedStatefulItems) {
@@ -160,23 +148,21 @@ std::int32_t ToolbarAction::Item::getPriority() const
     return _priority;
 }
 
-ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std::int32_t index, Item& item, QHBoxLayout* targetLayout, QHBoxLayout* offscreenLayout) :
+ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std::int32_t index, Item& item) :
     _index(index),
     _item(item),
     _state(None),
-    _collapsedWidget(nullptr),
-    _standardWidget(nullptr),
-    _targetLayout(targetLayout),
-    _offscreenLayout(offscreenLayout)
+    _widget(),
+    _collapsedWidget(&_widget, _item.getAction()->createCollapsedWidget(&_widget)),
+    _standardWidget(&_widget, _item.getAction()->createWidget(&_widget)),
+    _sizeAnimation(&_widget)
 {
-    Q_ASSERT(_targetLayout != nullptr);
-    Q_ASSERT(_offscreenLayout != nullptr);
+    _sizeAnimation.setDuration(ANIMATION_DURATION);
+    _sizeAnimation.setStartValue(0.0f);
+    _sizeAnimation.setEndValue(1.0f);
+    _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
 
-    _collapsedWidget = _item.getAction()->createCollapsedWidget(parent);
-    _standardWidget = _item.getAction()->createWidget(parent);
-
-    _offscreenLayout->addWidget(_collapsedWidget);
-    _offscreenLayout->addWidget(_standardWidget);
+    _widget.setLayout(&_widgetLayout);
 }
 
 ToolbarAction::Item& ToolbarAction::HorizontalWidget::StatefulItem::getItem()
@@ -200,18 +186,14 @@ void ToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& st
     {
         case Collapsed:
         {
-            removeWidget(_standardWidget, [this]() {
-                insertWidget(_collapsedWidget);
-            });
+            swapWidget(Standard, Collapsed);
 
             break;
         }
 
         case Standard:
         {
-            removeWidget(_collapsedWidget, [this]() {
-                insertWidget(_standardWidget);
-            });
+            swapWidget(Collapsed, Standard);
 
             break;
         }
@@ -226,13 +208,18 @@ QWidget* ToolbarAction::HorizontalWidget::StatefulItem::getWidget(const ItemStat
     switch (itemState)
     {
         case Collapsed:
-            return _collapsedWidget;
+            return &_collapsedWidget;
 
         case Standard:
-            return _standardWidget;
+            return &_standardWidget;
     }
 
     return nullptr;
+}
+
+QWidget* ToolbarAction::HorizontalWidget::StatefulItem::getWidget()
+{
+    return &_widget;
 }
 
 std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getWidth() const
@@ -250,74 +237,39 @@ std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getPriority() const
     return _item.getPriority();
 }
 
-void ToolbarAction::HorizontalWidget::StatefulItem::insertWidget(QWidget* widget, std::function<void()> finished /*= std::function<void()>()*/)
+void ToolbarAction::HorizontalWidget::StatefulItem::swapWidget(const ItemState& stateA, const ItemState& stateB)
 {
-    // Create opacity effect for fade in/out
-    auto opacityffect = new QGraphicsOpacityEffect(widget);
+    const auto widthBegin   = static_cast<float>(getWidth(stateA));
+    const auto widthEnd     = static_cast<float>(getWidth(stateB));
 
-    // Set initial opacity
-    opacityffect->setOpacity(0);
+    const auto widthLerp = [widthBegin, widthEnd](float norm) {
+        return widthBegin + norm * (widthEnd - widthBegin);
+    };
 
-    // Apply graphics effect to widget
-    widget->setGraphicsEffect(opacityffect);
+    switch (stateB)
+    {
+        case Collapsed:
+        {
+            _standardWidget.fadeOut();
+            _collapsedWidget.fadeIn(ANIMATION_DURATION);
 
-    // Create an animation which controls the widget opacity
-    auto animation = new QPropertyAnimation(opacityffect, "opacity");
+            break;
+        }
 
-    // Configure animation
-    animation->setDuration(ANIMATION_DURATION);
-    animation->setStartValue(0);
-    animation->setEndValue(1);
-    animation->setEasingCurve(QEasingCurve::InOutQuad);
+        case Standard:
+        {
+            _collapsedWidget.fadeOut();
+            _standardWidget.fadeIn(ANIMATION_DURATION);
 
-    // Insert widget into target layout
-    _targetLayout->insertWidget(_index, widget);
+            break;
+        }
+    }
 
-    animation->start();
-
-    // Cleanup when finished
-    connect(animation, &QPropertyAnimation::finished, [this, widget, opacityffect, animation, finished]() {
-        delete opacityffect;
-        delete animation;
-
-        if (finished)
-            finished();
+    connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp, stateB](const QVariant& value) {
+        _widget.setFixedWidth(widthLerp(value.toFloat()));
     });
-}
 
-void ToolbarAction::HorizontalWidget::StatefulItem::removeWidget(QWidget* widget, std::function<void()> finished /*= std::function<void()>()*/)
-{
-    // Create opacity effect for fade in/out
-    auto opacityffect = new QGraphicsOpacityEffect(widget);
-
-    // Set initial opacity
-    opacityffect->setOpacity(1);
-
-    // Apply graphics effect to widget
-    widget->setGraphicsEffect(opacityffect);
-
-    // Create an animation which controls the widget opacity
-    auto animation = new QPropertyAnimation(opacityffect, "opacity");
-
-    // Configure animation
-    animation->setDuration(ANIMATION_DURATION);
-    animation->setStartValue(1);
-    animation->setEndValue(0);
-    animation->setEasingCurve(QEasingCurve::InOutQuad);
-
-    animation->start();
-
-    // Cleanup when finished
-    connect(animation, &QPropertyAnimation::finished, [this, widget, opacityffect, animation, finished]() {
-        delete opacityffect;
-        delete animation;
-
-        // Remove widget from target layout and add to off screen layout
-        _offscreenLayout->addWidget(widget);
-
-        if (finished)
-            finished();
-    });
+    _sizeAnimation.start();
 }
 
 }

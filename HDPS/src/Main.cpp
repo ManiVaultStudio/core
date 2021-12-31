@@ -7,6 +7,8 @@
 
 #include <actions/ToolbarAction.h>
 #include <actions/IntegralAction.h>
+#include <actions/DecimalAction.h>
+#include <actions/StringAction.h>
 #include <actions/ColorAction.h>
 #include <actions/ColorMapAction.h>
 
@@ -21,9 +23,9 @@ public:
      */
     ToolbarDialog(QWidget* parent) :
         _toolbarAction(this),
-        _widthAction(this, "Width"),
-        _heightAction(this, "Height"),
-        _depthAction(this, "Depth"),
+        _integralAction(this, "Integral"),
+        _decimalAction(this, "Decimal"),
+        _stringAction(this, "String"),
         _colorAction(this, "Color"),
         _colorMapAction(this, "Color map")
     {
@@ -31,11 +33,11 @@ public:
 
         //_widthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
 
-        _toolbarAction.addAction(&_widthAction, 1);
-        _toolbarAction.addAction(&_heightAction, 1);
-        _toolbarAction.addAction(&_depthAction, 5);
-        //_toolbarAction.addAction(&_colorAction, 3);
-        _toolbarAction.addAction(&_colorMapAction, 10);
+        _toolbarAction.addAction(&_integralAction, 1);
+        _toolbarAction.addAction(&_decimalAction, 1);
+        _toolbarAction.addAction(&_stringAction, 11);
+        _toolbarAction.addAction(&_colorAction, 3);
+        _toolbarAction.addAction(&_colorMapAction, 1);
 
         auto layout = new QVBoxLayout();
 
@@ -58,9 +60,9 @@ public:
 
 protected:
     ToolbarAction   _toolbarAction;
-    IntegralAction  _widthAction;
-    IntegralAction  _heightAction;
-    IntegralAction  _depthAction;
+    IntegralAction  _integralAction;
+    DecimalAction   _decimalAction;
+    StringAction    _stringAction;
     ColorAction     _colorAction;
     ColorMapAction  _colorMapAction;
 };
