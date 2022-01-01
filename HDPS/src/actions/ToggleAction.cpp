@@ -1,4 +1,5 @@
 #include "ToggleAction.h"
+#include "Application.h"
 
 #include <QCheckBox>
 #include <QPushButton>
@@ -15,6 +16,7 @@ ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const
 {
     setCheckable(true);
     setText(title);
+    setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
     setMayReset(true);
     setDefaultWidgetFlags(WidgetFlag::CheckBox);
     initialize(toggled, defaultToggled);

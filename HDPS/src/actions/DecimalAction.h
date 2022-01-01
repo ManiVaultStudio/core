@@ -25,7 +25,24 @@ class DecimalAction : public NumericalAction<float>
 
 public:
 
-    /** Spinbox widget class for decimal action */
+    /** Widget class for decimal action */
+    class Widget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param decimalAction Pointer to decimal action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        Widget(QWidget* parent, DecimalAction* decimalAction, const std::int32_t& widgetFlags);
+
+    protected:
+        friend class DecimalAction;
+    };
+
+    /** Spin box widget class for decimal action */
     class SpinBoxWidget : public QDoubleSpinBox
     {
     protected:
@@ -62,7 +79,9 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
+    };
 
 public:
 

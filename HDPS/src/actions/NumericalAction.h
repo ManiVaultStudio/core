@@ -36,12 +36,8 @@ public:
         SpinBox             = 0x00001,      /** Widget includes a spin box */
         Slider              = 0x00002,      /** Widget includes a slider */
         LineEdit            = 0x00004,      /** Widget includes a line edit */
-        ResetPushButton     = 0x00008,      /** Widget includes a reset push button */
 
-        Basic               = SpinBox | Slider,
-        SpinBoxAndReset     = SpinBox | ResetPushButton,
-        SliderAndReset      = Slider | ResetPushButton,
-        All                 = SpinBox | Slider | ResetPushButton
+        All                 = SpinBox | Slider
     };
 
 public:
@@ -75,7 +71,7 @@ public:
     {
         setText(title);
         setMayReset(true);
-        setDefaultWidgetFlags(WidgetFlag::Basic);
+        setDefaultWidgetFlags(WidgetFlag::All);
     }
 
     /** Gets the current value */

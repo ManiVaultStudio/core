@@ -22,7 +22,7 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
 
     initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
 
-    setIcon(Application::getIconFont("FontAwesome").getIcon("ruler"));
+    setIcon(Application::getIconFont("FontAwesome").getIcon("ruler-horizontal"));
 }
 
 void DecimalAction::initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/)
@@ -185,25 +185,24 @@ DecimalAction::SliderWidget::SliderWidget(QWidget* parent, DecimalAction* decima
     setToolTips();
 }
 
-QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+DecimalAction::Widget::Widget(QWidget* parent, DecimalAction* decimalAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, decimalAction)
 {
-    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    if (widgetFlags & DecimalAction::WidgetFlag::SpinBox)
+        layout->addWidget(new DecimalAction::SpinBoxWidget(this, decimalAction), 1);
 
-    if (widgetFlags & WidgetFlag::SpinBox)
-        layout->addWidget(new SpinBoxWidget(parent, this), 1);
+    if (widgetFlags & DecimalAction::WidgetFlag::Slider)
+        layout->addWidget(new DecimalAction::SliderWidget(this, decimalAction), 2);
 
-    if (widgetFlags & WidgetFlag::Slider)
-        layout->addWidget(new SliderWidget(parent, this), 2);
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
-    widget->setLayout(layout);
-
-    return widget;
+    if (widgetFlags & WidgetActionWidget::PopupLayout) {
+        setPopupLayout(layout);
+    }
+    else {
+        layout->setMargin(0);
+        setLayout(layout);
+    }
 }
 
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang

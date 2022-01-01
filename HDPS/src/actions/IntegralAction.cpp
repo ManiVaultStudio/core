@@ -20,7 +20,7 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
 
     initialize(minimum, maximum, value, defaultValue);
 
-    setIcon(Application::getIconFont("FontAwesome").getIcon("ruler"));
+    setIcon(Application::getIconFont("FontAwesome").getIcon("ruler-horizontal"));
 }
 
 void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue)
@@ -205,28 +205,24 @@ IntegralAction::LineEditWidget::LineEditWidget(QWidget* parent, IntegralAction* 
     onUpdateValue();
 }
 
-QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+IntegralAction::Widget::Widget(QWidget* parent, IntegralAction* integralAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, integralAction)
 {
-    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    if (widgetFlags & IntegralAction::WidgetFlag::SpinBox)
+        layout->addWidget(new IntegralAction::SpinBoxWidget(this, integralAction), 1);
 
-    if (widgetFlags & WidgetFlag::SpinBox)
-        layout->addWidget(new SpinBoxWidget(parent, this), 1);
+    if (widgetFlags & IntegralAction::WidgetFlag::Slider)
+        layout->addWidget(new IntegralAction::SliderWidget(this, integralAction), 2);
 
-    if (widgetFlags & WidgetFlag::Slider)
-        layout->addWidget(new SliderWidget(parent, this), 2);
-
-    if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(new LineEditWidget(parent, this));
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
-    widget->setLayout(layout);
-
-    return widget;
+    if (widgetFlags & WidgetActionWidget::PopupLayout) {
+        setPopupLayout(layout);
+    }
+    else {
+        layout->setMargin(0);
+        setLayout(layout);
+    }
 }
 
 }

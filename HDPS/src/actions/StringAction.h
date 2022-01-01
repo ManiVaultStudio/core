@@ -14,7 +14,7 @@ namespace gui {
 /**
  * String widget action class
  *
- * Stores a string creates widgets to interact with it
+ * Stores a string and creates widgets to interact with it
  *
  * @author Thomas Kroes
  */
@@ -26,14 +26,27 @@ public:
 
     /** Describes the widget configurations */
     enum WidgetFlag {
-        LineEdit        = 0x00001,      /** Widget includes a line edit */
-        ResetPushButton = 0x00002,      /** There is a button to reset the string action */
-
-        Basic   = LineEdit,
-        All     = LineEdit | ResetPushButton
+        LineEdit = 0x00001,      /** Widget includes a line edit */
     };
 
 public:
+
+    /** Widget class for string action */
+    class Widget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param stringAction Pointer to string action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        Widget(QWidget* parent, StringAction* stringAction, const std::int32_t& widgetFlags);
+
+    protected:
+        friend class StringAction;
+    };
 
     /** Line edit widget class for string action */
     class LineEditWidget : public QLineEdit
@@ -57,7 +70,9 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
+    };
 
 public:
 

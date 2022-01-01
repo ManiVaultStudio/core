@@ -106,7 +106,6 @@ public:
                     _opacityEffect.setOpacity(0);
 
                     _opacityAnimation.setDuration(ANIMATION_DURATION);
-                    _opacityAnimation.setEasingCurve(QEasingCurve::InOutQuad);
                 }
 
                 void setOpacity(float opacity)
@@ -116,6 +115,7 @@ public:
 
                 void fadeIn(std::int32_t delay = 0, std::function<void()> finished = std::function<void()>())
                 {
+                    _opacityAnimation.setEasingCurve(QEasingCurve::InQuad);
                     _opacityAnimation.setStartValue(0.0f);
                     _opacityAnimation.setEndValue(1.0f);
 
@@ -131,6 +131,7 @@ public:
 
                 void fadeOut(std::int32_t delay = 0, std::function<void()> finished = std::function<void()>())
                 {
+                    _opacityAnimation.setEasingCurve(QEasingCurve::OutQuad);
                     _opacityAnimation.setStartValue(1.0f);
                     _opacityAnimation.setEndValue(0.0f);
 
@@ -260,7 +261,7 @@ public:
         QVector<SharedStatefulItem>     _statefulItems;                         
 
         /** Default resize timer interval */
-        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;
+        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 250;
 
         friend class ToolbarAction;
     };

@@ -163,7 +163,6 @@ ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std
     _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
 
     _widget.setLayout(&_widgetLayout);
-    _collapsedWidget.raise();
 }
 
 ToolbarAction::Item& ToolbarAction::HorizontalWidget::StatefulItem::getItem()
@@ -251,7 +250,11 @@ void ToolbarAction::HorizontalWidget::StatefulItem::swapWidget(const ItemState& 
     {
         case Collapsed:
         {
+            _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
             _standardWidget.fadeOut();
+
+            _collapsedWidget.raise();
+            _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
             _collapsedWidget.fadeIn(ANIMATION_DURATION);
 
             break;
@@ -259,7 +262,11 @@ void ToolbarAction::HorizontalWidget::StatefulItem::swapWidget(const ItemState& 
 
         case Standard:
         {
+            _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
             _collapsedWidget.fadeOut();
+
+            _standardWidget.raise();
+            _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
             _standardWidget.fadeIn(ANIMATION_DURATION);
 
             break;

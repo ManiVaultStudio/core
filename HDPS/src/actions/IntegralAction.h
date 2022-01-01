@@ -26,7 +26,24 @@ class IntegralAction : public NumericalAction<std::int32_t>
 
 public:
 
-    /** Spinbox widget class for integral action */
+    /** Widget class for integral action */
+    class Widget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param integralAction Pointer to integral action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        Widget(QWidget* parent, IntegralAction* integralAction, const std::int32_t& widgetFlags);
+
+    protected:
+        friend class IntegralAction;
+    };
+
+    /** Spin box widget class for integral action */
     class SpinBoxWidget : public QSpinBox
     {
     protected:
@@ -78,7 +95,9 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
+    };
 
 public:
 

@@ -30,15 +30,28 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        ComboBox        = 0x00001,      /** The widget includes a combobox widget */
-        LineEdit        = 0x00002,      /** The widget includes a searchable line edit widget */
-        ResetPushButton = 0x00004,      /** The widget includes a reset push button */
-
-        Basic   = ComboBox,
-        All     = ComboBox | ResetPushButton
+        ComboBox    = 0x00001,      /** The widget includes a combobox widget */
+        LineEdit    = 0x00002,      /** The widget includes a searchable line edit widget */
     };
 
 public: // Widgets
+
+    /** Widget class for option action */
+    class Widget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param optionAction Pointer to option action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        Widget(QWidget* parent, OptionAction* optionAction, const std::int32_t& widgetFlags);
+
+    protected:
+        friend class OptionAction;
+    };
 
     /** Combobox widget class for option action */
     class ComboBoxWidget : public QComboBox {
@@ -79,7 +92,9 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
+    };
 
 public:
 

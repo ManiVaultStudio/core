@@ -18,8 +18,9 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
     _defaultIndex(0)
 {
     setText(title);
+    setIcon(Application::getIconFont("FontAwesome").getIcon("list-alt"));
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::Basic);
+    setDefaultWidgetFlags(WidgetFlag::ComboBox);
     initialize(options, currentOption, defaultOption);
 }
 
@@ -358,25 +359,23 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     updateText();
 }
 
-QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+OptionAction::Widget::Widget(QWidget* parent, OptionAction* optionAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, optionAction)
 {
-    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    if (widgetFlags & OptionAction::WidgetFlag::ComboBox)
+        layout->addWidget(new OptionAction::ComboBoxWidget(this, optionAction));
 
-    if (widgetFlags & WidgetFlag::ComboBox)
-        layout->addWidget(new OptionAction::ComboBoxWidget(parent, this));
+    if (widgetFlags & OptionAction::WidgetFlag::LineEdit)
+        layout->addWidget(new OptionAction::LineEditWidget(this, optionAction));
 
-    if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(new OptionAction::LineEditWidget(parent, this));
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
-    widget->setLayout(layout);
-
-    return widget;
+    if (widgetFlags & WidgetActionWidget::PopupLayout) {
+        setPopupLayout(layout);
+    } else {
+        layout->setMargin(0);
+        setLayout(layout);
+    }
 }
 
 }

@@ -17,9 +17,10 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
     _defaultColor()
 {
     setText(title);
+    setIcon(Application::getIconFont("FontAwesome").getIcon("palette"));
     initialize(color, defaultColor);
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::Basic);
+    setDefaultWidgetFlags(WidgetFlag::Picker);
 }
 
 void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
@@ -164,23 +165,22 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
-QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, colorAction)
 {
-    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
-    layout->setSpacing(3);
+    if (widgetFlags & ColorAction::WidgetFlag::Picker)
+        layout->addWidget(new ColorAction::PushButtonWidget(this, colorAction));
 
-    if (widgetFlags & WidgetFlag::Picker)
-        layout->addWidget(new PushButtonWidget(parent, this));
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
-    widget->setLayout(layout);
-
-    return widget;
+    if (widgetFlags & WidgetActionWidget::PopupLayout) {
+        setPopupLayout(layout);
+    }
+    else {
+        setFixedWidth(40);
+        layout->setMargin(0);
+        setLayout(layout);
+    }
 }
 
 }

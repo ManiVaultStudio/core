@@ -1,4 +1,5 @@
 #include "StringAction.h"
+#include "Application.h"
 
 #include <QHBoxLayout>
 
@@ -11,9 +12,10 @@ namespace gui {
 StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const QString& string /*= ""*/, const QString& defaultString /*= ""*/) :
     WidgetAction(parent)
 {
-    setText(title);
+    setText(title); 
+    setIcon(Application::getIconFont("FontAwesome").getIcon("quote-right"));
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::Basic);
+    setDefaultWidgetFlags(WidgetFlag::LineEdit);
     initialize(string, defaultString);
 }
 
@@ -116,23 +118,22 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     updatePlaceHolderText();
 }
 
-QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, stringAction)
 {
-    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
-    layout->setSpacing(3);
+    if (widgetFlags & StringAction::WidgetFlag::LineEdit)
+        layout->addWidget(new StringAction::LineEditWidget(this, stringAction));
 
-    if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(new StringAction::LineEditWidget(parent, this));
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
-    widget->setLayout(layout);
-
-    return widget;
+    if (widgetFlags & WidgetActionWidget::PopupLayout) {
+        setPopupLayout(layout);
+    }
+    else {
+        setFixedWidth(40);
+        layout->setMargin(0);
+        setLayout(layout);
+    }
 }
 
 }

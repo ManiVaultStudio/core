@@ -28,13 +28,28 @@ public:
     enum WidgetFlag {
         Settings        = 0x00001,      /** Widgets have a settings popup to adjust range and other settings */
         EditRange       = 0x00002,      /** Users are allowed to change the color map range */
-        ResetPushButton = 0x00004,      /** There is a button to reset the color map */
 
-        Basic   = Settings | EditRange,
-        All     = Settings | EditRange | ResetPushButton
+        All     = Settings | EditRange
     };
 
 public:
+
+    /** Widget class for color map action */
+    class Widget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param colorMapAction Pointer to color map action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        Widget(QWidget* parent, ColorMapAction* colorMapAction, const std::int32_t& widgetFlags);
+
+    protected:
+        friend class ColorMapAction;
+    };
 
     /** Combobox widget class for display of a color map */
     class ComboBoxWidget : public OptionAction::ComboBoxWidget {
@@ -67,7 +82,9 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
+    };
 
 public:
 

@@ -25,14 +25,27 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        Picker          = 0x00001,      /** The widget includes a color picker */
-        ResetPushButton = 0x00002,      /** The widget includes a reset push button */
-
-        Basic   = Picker,
-        All     = Picker | ResetPushButton
+        Picker  = 0x00001,      /** The widget includes a color picker */
     };
 
 public:
+
+    /** Widget class for color action */
+    class Widget : public WidgetActionWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param colorAction Pointer to color action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        Widget(QWidget* parent, ColorAction* colorAction, const std::int32_t& widgetFlags);
+
+    protected:
+        friend class ColorAction;
+    };
 
     /** Color picker push button class for color action */
     class PushButtonWidget : public WidgetActionWidget
@@ -89,7 +102,9 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this, widgetFlags);
+    };
 
 public:
 

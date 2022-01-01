@@ -26,7 +26,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::Basic);
+    setDefaultWidgetFlags(WidgetFlag::All);
 
     initialize(colorMap, defaultColorMap);
 
@@ -342,33 +342,34 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     painterColorWidget.drawPixmap(rect(), colorPixmap, pixmapRect);
 }
 
-QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+ColorMapAction::Widget::Widget(QWidget* parent, ColorMapAction* colorMapAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, colorMapAction)
 {
-    auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
     layout->setSpacing(3);
 
-    auto comboBoxWidget = new ComboBoxWidget(parent, &_currentColorMapAction, this);
+    auto comboBoxWidget = new ComboBoxWidget(this, &colorMapAction->_currentColorMapAction, colorMapAction);
 
     layout->addWidget(comboBoxWidget);
 
-    if (widgetFlags & WidgetFlag::Settings)
-        layout->addWidget(_settingsAction.createCollapsedWidget(widget));
+    if (widgetFlags & ColorMapAction::WidgetFlag::Settings)
+        layout->addWidget(colorMapAction->_settingsAction.createCollapsedWidget(this));
 
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
-    widget->setLayout(layout);
-
-    connect(comboBoxWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, [widget](int index) -> void {
-        widget->update();
+    connect(comboBoxWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) -> void {
+        update();
     });
 
     comboBoxWidget->setStyleSheet("QComboBox QAbstractItemView { min-width: 250px; }");
 
-    return widget;
+    if (widgetFlags & WidgetActionWidget::PopupLayout) {
+        setPopupLayout(layout);
+    }
+    else {
+        layout->setMargin(0);
+
+        setLayout(layout);
+    }
 }
 
 }

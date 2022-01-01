@@ -1,4 +1,5 @@
 #include "TriggerAction.h"
+#include "Application.h"
 
 #include <QMenu>
 #include <QHBoxLayout>
@@ -12,6 +13,7 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Text);
+    setIcon(Application::getIconFont("FontAwesome").getIcon("magic"));
 }
 
 TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags) :
