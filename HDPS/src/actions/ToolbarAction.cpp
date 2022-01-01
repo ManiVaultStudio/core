@@ -163,6 +163,7 @@ ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std
     _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
 
     _widget.setLayout(&_widgetLayout);
+    _collapsedWidget.raise();
 }
 
 ToolbarAction::Item& ToolbarAction::HorizontalWidget::StatefulItem::getItem()

@@ -27,8 +27,9 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param windowLevelAction Pointer to window level action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        Widget(QWidget* parent, WindowLevelAction* windowLevelAction);
+        Widget(QWidget* parent, WindowLevelAction* windowLevelAction, const std::int32_t& widgetFlags);
 
     protected:
         friend class WindowLevelAction;
@@ -42,7 +43,7 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this);
+        return new Widget(parent, this, widgetFlags);
     };
 
 public:

@@ -11,6 +11,10 @@
 #include <actions/StringAction.h>
 #include <actions/ColorAction.h>
 #include <actions/ColorMapAction.h>
+#include <actions/DatasetPickerAction.h>
+#include <actions/OptionAction.h>
+#include <actions/ToggleAction.h>
+#include <actions/WindowLevelAction.h>
 
 class ToolbarDialog : public QDialog
 {
@@ -23,11 +27,16 @@ public:
      */
     ToolbarDialog(QWidget* parent) :
         _toolbarAction(this),
-        _integralAction(this, "Integral"),
-        _decimalAction(this, "Decimal"),
-        _stringAction(this, "String"),
-        _colorAction(this, "Color"),
-        _colorMapAction(this, "Color map")
+        _integralAction(this, "Integral action"),
+        _decimalAction(this, "Decimal action"),
+        _stringAction(this, "String action"),
+        _colorAction(this, "Color action"),
+        _colorMapAction(this, "Color map action"),
+        _datasetPickerAction(this, "Dataset picker action"),
+        _optionAction(this, "Option action"),
+        _toggleAction(this, "Toggle action"),
+        _triggerAction(this, "Trigger action"),
+        _windowLevelAction(this)
     {
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
@@ -38,6 +47,11 @@ public:
         _toolbarAction.addAction(&_stringAction, 11);
         _toolbarAction.addAction(&_colorAction, 3);
         _toolbarAction.addAction(&_colorMapAction, 1);
+        _toolbarAction.addAction(&_datasetPickerAction, 8);
+        _toolbarAction.addAction(&_optionAction, 5);
+        _toolbarAction.addAction(&_toggleAction, 15);
+        _toolbarAction.addAction(&_triggerAction, 4);
+        _toolbarAction.addAction(&_windowLevelAction, 7);
 
         auto layout = new QVBoxLayout();
 
@@ -59,12 +73,17 @@ public:
     }
 
 protected:
-    ToolbarAction   _toolbarAction;
-    IntegralAction  _integralAction;
-    DecimalAction   _decimalAction;
-    StringAction    _stringAction;
-    ColorAction     _colorAction;
-    ColorMapAction  _colorMapAction;
+    ToolbarAction           _toolbarAction;
+    IntegralAction          _integralAction;
+    DecimalAction           _decimalAction;
+    StringAction            _stringAction;
+    ColorAction             _colorAction;
+    ColorMapAction          _colorMapAction;
+    DatasetPickerAction     _datasetPickerAction;
+    OptionAction            _optionAction;
+    ToggleAction            _toggleAction;
+    TriggerAction           _triggerAction;
+    WindowLevelAction       _windowLevelAction;
 };
 
 int main(int argc, char *argv[])

@@ -33,18 +33,33 @@ WindowLevelAction::WindowLevelAction(QObject* parent) :
     connect(&_levelAction, &DecimalAction::valueChanged, this, windowLevelChanged);
 }
 
-WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLevelAction) :
+WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLevelAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, windowLevelAction)
 {
-    auto layout = new QGridLayout();
+    if (widgetFlags & PopupLayout) {
+        auto layout = new QGridLayout();
 
-    layout->addWidget(windowLevelAction->getWindowAction().createLabelWidget(this), 0, 0);
-    layout->addWidget(windowLevelAction->getWindowAction().createWidget(this), 0, 1);
-    layout->addWidget(windowLevelAction->getWindowAction().createResetButton(this), 0, 2);
+        layout->addWidget(windowLevelAction->getWindowAction().createLabelWidget(this), 0, 0);
+        layout->addWidget(windowLevelAction->getWindowAction().createWidget(this), 0, 1);
+        layout->addWidget(windowLevelAction->getWindowAction().createResetButton(this), 0, 2);
 
-    layout->addWidget(windowLevelAction->getLevelAction().createLabelWidget(this), 1, 0);
-    layout->addWidget(windowLevelAction->getLevelAction().createWidget(this), 1, 1);
-    layout->addWidget(windowLevelAction->getLevelAction().createResetButton(this), 1, 2);
+        layout->addWidget(windowLevelAction->getLevelAction().createLabelWidget(this), 1, 0);
+        layout->addWidget(windowLevelAction->getLevelAction().createWidget(this), 1, 1);
+        layout->addWidget(windowLevelAction->getLevelAction().createResetButton(this), 1, 2);
 
-    setPopupLayout(layout);
+        setPopupLayout(layout);
+    }
+    else {
+        auto layout = new QHBoxLayout();
+
+        layout->setMargin(0);
+
+        layout->addWidget(windowLevelAction->getWindowAction().createLabelWidget(this));
+        layout->addWidget(windowLevelAction->getWindowAction().createWidget(this));
+
+        layout->addWidget(windowLevelAction->getLevelAction().createLabelWidget(this));
+        layout->addWidget(windowLevelAction->getLevelAction().createWidget(this));
+
+        setLayout(layout);
+    }
 }
