@@ -48,8 +48,8 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
         _statefulItems << SharedStatefulItem::create(this, _toolbarAction->_items.indexOf(item), item);
 
         if (_statefulItems.count() >= 2) {
-
             _spacerWidgets << SharedSpacerWidget::create();
+
             _toolbarLayout.addWidget(_spacerWidgets.last().get());
         }
 
@@ -65,7 +65,6 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
     // Apply main layout
     setLayout(&_mainLayout);
 
-    // Configure main layout
     _mainLayout.setMargin(0);
 }
 
@@ -88,7 +87,7 @@ void ToolbarAction::HorizontalWidget::computeLayout()
     itemStates.resize(_toolbarAction->_items.count());
 
     // Initialize collapsed
-    std::fill(itemStates.begin(), itemStates.end(), Collapsed);
+    std::fill(itemStates.begin(), itemStates.end(), ItemState::Collapsed);
 
     // Compute candidate configuration width
     const auto getWidth = [this, &itemStates]() -> std::int32_t {
@@ -123,18 +122,25 @@ void ToolbarAction::HorizontalWidget::computeLayout()
     for (auto sortedStatefulItem : sortedStatefulItems) {
         auto cachedItemStates = itemStates;
 
-        itemStates[sortedStatefulItem->getIndex()] = Standard;
-        
+        itemStates[sortedStatefulItem->getIndex()] = ItemState::Standard;
+
         if (getWidth() > width()) {
             itemStates = cachedItemStates;
             break;
         }
     }
 
-    // Assign new state(s) to stateful items
+    // Assign new item states
+    setItemStates(itemStates);
+}
+
+void ToolbarAction::HorizontalWidget::setItemStates(const QVector<ItemState>& itemStates)
+{
+    // Assign new state(s) to stateful item(s)
     for (auto statefulItem : _statefulItems)
         statefulItem->setState(itemStates[statefulItem->getIndex()]);
 
+    // Assign type to spacer widget(s)
     for (auto spacerWidget : _spacerWidgets) {
         const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
         const auto itemStateLeft        = itemStates[spacerWidgetIndex];
@@ -180,7 +186,7 @@ std::int32_t ToolbarAction::Item::getPriority() const
 ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std::int32_t index, Item& item) :
     _index(index),
     _item(item),
-    _state(None),
+    _state(ItemState::Undefined),
     _widget(),
     _collapsedWidget(&_widget, _item.getAction()->createCollapsedWidget(&_widget)),
     _standardWidget(&_widget, _item.getAction()->createWidget(&_widget)),
@@ -217,37 +223,62 @@ void ToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& st
     if (state == _state)
         return;
 
-    _state = state;
+    const auto widthBegin   = static_cast<float>(getWidth(_state == ItemState::Undefined ? state : _state));
+    const auto widthEnd     = static_cast<float>(getWidth(state));
+
+    const auto widthLerp = [widthBegin, widthEnd](float norm) {
+        return widthBegin + norm * (widthEnd - widthBegin);
+    };
 
     switch (state)
     {
-        case Collapsed:
+        case ItemState::Collapsed:
         {
-            swapWidget(Standard, Collapsed);
+            _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+            if (_state != ItemState::Undefined)
+                _standardWidget.fadeOut(ANIMATION_DURATION);
+
+            _collapsedWidget.raise();
+            _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
+            _collapsedWidget.fadeIn(ANIMATION_DURATION, _state == ItemState::Undefined ? 0 : ANIMATION_DURATION);
 
             break;
         }
 
-        case Standard:
+        case ItemState::Standard:
         {
-            swapWidget(Collapsed, Standard);
+            _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+            if (_state != ItemState::Undefined)
+                _collapsedWidget.fadeOut(ANIMATION_DURATION);
+
+            _standardWidget.raise();
+            _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
+            _standardWidget.fadeIn(ANIMATION_DURATION, _state == ItemState::Undefined ? 0 : ANIMATION_DURATION);
 
             break;
         }
-
-        default:
-            break;
     }
+
+    connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp](const QVariant& value) {
+        _widget.setFixedWidth(widthLerp(value.toFloat()));
+    });
+
+    _sizeAnimation.setDuration(_state == ItemState::Undefined ? 0 : ANIMATION_DURATION);
+    _sizeAnimation.start();
+
+    _state = state;
 }
 
 QWidget* ToolbarAction::HorizontalWidget::StatefulItem::getWidget(const ItemState& itemState)
 {
     switch (itemState)
     {
-        case Collapsed:
+        case ItemState::Collapsed:
             return &_collapsedWidget;
 
-        case Standard:
+        case ItemState::Standard:
             return &_standardWidget;
     }
 
@@ -272,49 +303,6 @@ std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getWidth(const ItemS
 std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getPriority() const
 {
     return _item.getPriority();
-}
-
-void ToolbarAction::HorizontalWidget::StatefulItem::swapWidget(const ItemState& stateA, const ItemState& stateB)
-{
-    const auto widthBegin   = static_cast<float>(getWidth(stateA));
-    const auto widthEnd     = static_cast<float>(getWidth(stateB));
-
-    const auto widthLerp = [widthBegin, widthEnd](float norm) {
-        return widthBegin + norm * (widthEnd - widthBegin);
-    };
-
-    switch (stateB)
-    {
-        case Collapsed:
-        {
-            _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-            _standardWidget.fadeOut(ANIMATION_DURATION);
-
-            _collapsedWidget.raise();
-            _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-            _collapsedWidget.fadeIn(ANIMATION_DURATION, ANIMATION_DURATION);
-
-            break;
-        }
-
-        case Standard:
-        {
-            _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-            _collapsedWidget.fadeOut(ANIMATION_DURATION);
-
-            _standardWidget.raise();
-            _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-            _standardWidget.fadeIn(ANIMATION_DURATION, ANIMATION_DURATION);
-
-            break;
-        }
-    }
-
-    connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp, stateB](const QVariant& value) {
-        _widget.setFixedWidth(widthLerp(value.toFloat()));
-    });
-
-    _sizeAnimation.start();
 }
 
 }

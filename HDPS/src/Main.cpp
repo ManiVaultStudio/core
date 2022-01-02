@@ -64,7 +64,7 @@ public:
 
     /** Get preferred size */
     QSize sizeHint() const override {
-        return QSize(0, 0);
+        return QSize(850, 0);
     }
 
     /** Get minimum size hint*/

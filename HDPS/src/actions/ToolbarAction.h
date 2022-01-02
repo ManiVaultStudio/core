@@ -40,8 +40,8 @@ public:
 public:
 
     /** Describes the item state configurations */
-    enum ItemState {
-        None,
+    enum class ItemState {
+        Undefined,
         Collapsed,
         Standard
     };
@@ -103,24 +103,22 @@ public:
             }
 
         protected:
-            void swapWidget(const ItemState& stateA, const ItemState& stateB);
-
-        protected:
-            std::int32_t        _index;                     /**  */
-            Item&               _item;                      /**  */
-            ItemState           _state;                     /**  */
-            QWidget             _widget;                    /**  */
-            QHBoxLayout         _widgetLayout;              /**  */
-            FadeableWidget      _collapsedWidget;           /**  */
-            FadeableWidget      _standardWidget;            /**  */
-            QVariantAnimation   _sizeAnimation;             /**  */
+            std::int32_t        _index;             /**  */
+            Item&               _item;              /**  */
+            ItemState           _state;             /**  */
+            QWidget             _widget;            /**  */
+            QHBoxLayout         _widgetLayout;      /**  */
+            FadeableWidget      _collapsedWidget;   /**  */
+            FadeableWidget      _standardWidget;    /**  */
+            QVariantAnimation   _sizeAnimation;     /**  */
         };
 
         using SharedStatefulItem = QSharedPointer<StatefulItem>;
 
         class SpacerWidget : public QWidget {
         public:
-            enum Type {
+            enum class Type {
+                Undefined,
                 Divider,
                 Spacer
             };
@@ -128,7 +126,7 @@ public:
         public:
             SpacerWidget(const Type& type = Type::Divider) :
                 QWidget(),
-                _type(Type::Divider),
+                _type(Type::Undefined),
                 _layout(),
                 _verticalLine(),
                 _fadeableWidget(this, &_verticalLine),
@@ -145,15 +143,14 @@ public:
 
                 setLayout(&_layout);
 
-                _sizeAnimation.setDuration(ANIMATION_DURATION);
-                _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
+                _fadeableWidget.setOpacity(0.0f);
 
-                setType(type);
+                _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
             }
 
             static Type getType(const ItemState& itemStateLeft, const ItemState& itemStateRight)
             {
-                return itemStateLeft == Collapsed && itemStateRight == Collapsed ? Type::Spacer : Type::Divider;
+                return itemStateLeft == ItemState::Collapsed && itemStateRight == ItemState::Collapsed ? Type::Spacer : Type::Divider;
             }
 
             static Type getType(const StatefulItem* stateWidgetLeft, const StatefulItem* stateWidgetRight)
@@ -166,26 +163,26 @@ public:
                 if (type == _type)
                     return;
 
-                _type = type;
-
-                setFixedWidth(getWidth(_type));
-
                 switch (type)
                 {
-                    case Divider:
+                    case Type::Divider:
                     {
-                        _fadeableWidget.fadeIn(ANIMATION_DURATION / 2, 0);
-                        _sizeAnimation.setStartValue(getWidth(Spacer));
-                        _sizeAnimation.setEndValue(getWidth(Divider));
+                        _fadeableWidget.fadeIn(ANIMATION_DURATION, 0);
+
+                        _sizeAnimation.setStartValue(getWidth(Type::Spacer));
+                        _sizeAnimation.setEndValue(getWidth(Type::Divider));
+
                         break;
                     }
 
-                    case Spacer:
+                    case Type::Spacer:
                     {
-                        _fadeableWidget.fadeOut(ANIMATION_DURATION / 2, 0);
+                        if (_type != Type::Undefined)
+                            _fadeableWidget.fadeOut(ANIMATION_DURATION / 2, 0);
 
-                        _sizeAnimation.setStartValue(getWidth(Divider));
-                        _sizeAnimation.setEndValue(getWidth(Spacer));
+                        _sizeAnimation.setStartValue(getWidth(Type::Divider));
+                        _sizeAnimation.setEndValue(getWidth(Type::Spacer));
+
                         break;
                     }
 
@@ -197,32 +194,30 @@ public:
                     setFixedWidth(value.toFloat());
                 });
 
+                _sizeAnimation.setDuration(_type == Type::Undefined ? 0 : ANIMATION_DURATION);
                 _sizeAnimation.start();
+
+                _type = type;
             }
 
             static std::int32_t getWidth(const Type& type)
             {
                 switch (type)
                 {
-                    case Type::Divider:
-                        return 20;
-
-                    case Type::Spacer:
-                        return 4;
-
-                    default:
-                        break;
+                    case Type::Undefined:       return 0;
+                    case Type::Divider:         return 20;
+                    case Type::Spacer:          return 4;
                 }
 
                 return 0;
             }
 
         protected:
-            Type                _type;                      /**  */
-            QHBoxLayout         _layout;                    /**  */
-            QFrame              _verticalLine;              /**  */
-            FadeableWidget      _fadeableWidget;            /**  */
-            QVariantAnimation   _sizeAnimation;             /**  */
+            Type                _type;              /**  */
+            QHBoxLayout         _layout;            /**  */
+            QFrame              _verticalLine;      /**  */
+            FadeableWidget      _fadeableWidget;    /**  */
+            QVariantAnimation   _sizeAnimation;     /**  */
         };
 
         using SharedSpacerWidget = QSharedPointer<SpacerWidget>;
@@ -257,6 +252,12 @@ public:
         /** Computes the layout in response to a resizing of the widget */
         void computeLayout();
 
+        /**
+         * Set item states
+         * @param itemStates States of the items
+         */
+        void setItemStates(const QVector<ItemState>& itemStates);
+
     protected:
         ToolbarAction*                  _toolbarAction;     /** Pointer to toolbar action */
         QTimer                          _resizeTimer;       /** Timer which prevents unnecessary resize handler calls */
@@ -266,8 +267,8 @@ public:
         QVector<SharedStatefulItem>     _statefulItems;     
         QVector<SharedSpacerWidget>     _spacerWidgets;     /**  */
 
-        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 100;      /** Default resize timer interval */
-        static constexpr std::int32_t ANIMATION_DURATION    = 300;      /** Animation duration */
+        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;       /** Default resize timer interval */
+        static constexpr std::int32_t ANIMATION_DURATION    = 500;      /** Animation duration */
 
         friend class ToolbarAction;
     };
