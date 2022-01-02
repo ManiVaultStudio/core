@@ -35,6 +35,15 @@ public:
         Vertical    = 0x00002   /** Toolbar is vertically docked */
     };
 
+public:
+
+    /** Describes the item state configurations */
+    enum ItemState {
+        None,
+        Collapsed,
+        Standard
+    };
+
 protected:
 
     class Item
@@ -56,23 +65,22 @@ protected:
 
 public:
 
+    /*
+    
+    */
+
     /** Toolbar widget for horizontal docking */
     class HorizontalWidget : public QWidget
     {
     protected:
 
+        
+
         /**
          * 
          */
         class StatefulItem : public QObject {
-        public:
-
-            /** Describes the item state configurations */
-            enum ItemState {
-                None,
-                Collapsed,
-                Standard
-            };
+        
 
         public:
             class FadeableWidget : public QWidget {
@@ -187,6 +195,8 @@ public:
 
             std::int32_t getIndex() const;
 
+            ItemState getState() const;
+
             void setState(const ItemState& state);
 
             QWidget* getWidget();
@@ -222,6 +232,77 @@ public:
 
         using SharedStatefulItem = QSharedPointer<StatefulItem>;
 
+        class SpacerWidget : public QWidget {
+        public:
+            enum class Type {
+                Divider,
+                Spacer
+            };
+
+        public:
+            SpacerWidget(const Type& type = Type::Divider) :
+                QWidget(),
+                _type(Type::Divider),
+                _layout(new QHBoxLayout()),
+                _verticalLine(new QFrame())
+            {
+                _verticalLine->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+                _verticalLine->setFrameShape(QFrame::VLine);
+                _verticalLine->setFrameShadow(QFrame::Sunken);
+
+                _layout->setMargin(0);
+                _layout->setSpacing(0);
+                _layout->setAlignment(Qt::AlignCenter);
+                _layout->addWidget(_verticalLine);
+
+                setType(type);
+            }
+
+            static Type getType(const ItemState& itemStateLeft, const ItemState& itemStateRight)
+            {
+                return itemStateLeft == Collapsed && itemStateRight == Collapsed ? Type::Spacer : Type::Divider;
+            }
+
+            static Type getType(const StatefulItem* stateWidgetLeft, const StatefulItem* stateWidgetRight)
+            {
+                return getType(stateWidgetLeft->getState(), stateWidgetRight->getState());
+            }
+
+            void setType(const Type& type)
+            {
+                _type = type;
+
+                setLayout(_layout);
+                setFixedWidth(getWidth(_type));
+
+                _verticalLine->setVisible(_type == Type::Divider ? true : false);
+            }
+
+            static std::int32_t getWidth(const Type& type)
+            {
+                switch (type)
+                {
+                    case Type::Divider:
+                        return 14;
+
+                    case Type::Spacer:
+                        return 2;
+
+                    default:
+                        break;
+                }
+
+                return 0;
+            }
+
+        protected:
+            Type            _type;
+            QHBoxLayout*    _layout;
+            QFrame*         _verticalLine;
+        };
+
+        using SharedSpacerWidget = QSharedPointer<SpacerWidget>;
+
     protected:
 
         /**
@@ -253,12 +334,13 @@ public:
         void computeLayout();
 
     protected:
-        ToolbarAction*                  _toolbarAction;                         /** Pointer to toolbar action */
-        QTimer                          _resizeTimer;                           /** Timer which prevents unnecessary resize handler calls */
-        QHBoxLayout                     _mainLayout;                            /** Horizontal main layout */
-        QHBoxLayout                     _toolbarLayout;                         /** Horizontal toolbar layout for items */
-        QWidget                         _toolbarWidget;                         /** Toolbar widget */
-        QVector<SharedStatefulItem>     _statefulItems;                         
+        ToolbarAction*                  _toolbarAction;     /** Pointer to toolbar action */
+        QTimer                          _resizeTimer;       /** Timer which prevents unnecessary resize handler calls */
+        QHBoxLayout                     _mainLayout;        /** Horizontal main layout */
+        QHBoxLayout                     _toolbarLayout;     /** Horizontal toolbar layout for items */
+        QWidget                         _toolbarWidget;     /** Toolbar widget */
+        QVector<SharedStatefulItem>     _statefulItems;     
+        QVector<SharedSpacerWidget>     _spacerWidgets;     /**  */
 
         /** Default resize timer interval */
         static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 250;

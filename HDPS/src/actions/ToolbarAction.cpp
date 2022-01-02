@@ -29,7 +29,8 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
     _mainLayout(),
     _toolbarLayout(),
     _toolbarWidget(),
-    _statefulItems()
+    _statefulItems(),
+    _spacerWidgets()
 {
     // Set resize timer interval and only timeout once
     _resizeTimer.setInterval(RESIZE_TIMER_INTERVAL);
@@ -39,14 +40,21 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
     connect(&_resizeTimer, &QTimer::timeout, this, &HorizontalWidget::computeLayout);
 
     _toolbarLayout.setMargin(0);
+    _toolbarLayout.setSpacing(0);
     _toolbarLayout.setSizeConstraint(QLayout::SetFixedSize);
 
     // Create stateful item for each toolbar action
-    for (auto& item : _toolbarAction->_items)
+    for (auto& item : _toolbarAction->_items) {
         _statefulItems << SharedStatefulItem::create(this, _toolbarAction->_items.indexOf(item), item);
 
-    for (auto statefulItem : _statefulItems)
-        _toolbarLayout.addWidget(statefulItem->getWidget());
+        if (_statefulItems.count() >= 2) {
+
+            _spacerWidgets << SharedSpacerWidget::create();
+            _toolbarLayout.addWidget(_spacerWidgets.last().get());
+        }
+
+        _toolbarLayout.addWidget(_statefulItems.last()->getWidget());
+    }
 
     _toolbarWidget.setLayout(&_toolbarLayout);
 
@@ -75,17 +83,29 @@ void ToolbarAction::HorizontalWidget::computeLayout()
 {
     qDebug() << "Compute toolbar widget layout" << width();
 
-    QVector<StatefulItem::ItemState> itemStates;
+    QVector<ItemState> itemStates;
 
     itemStates.resize(_toolbarAction->_items.count());
 
     // Initialize collapsed
-    std::fill(itemStates.begin(), itemStates.end(), StatefulItem::Collapsed);
+    std::fill(itemStates.begin(), itemStates.end(), Collapsed);
 
     // Compute candidate configuration width
     const auto getWidth = [this, &itemStates]() -> std::int32_t {
         std::int32_t width = (_toolbarAction->_items.count() - 1) * _toolbarLayout.spacing();
 
+        // Compute total width of spacer widgets
+        for (auto spacerWidget : _spacerWidgets) {
+            const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
+            const auto itemStateLeft        = itemStates[spacerWidgetIndex];
+            const auto itemStateRight       = itemStates[spacerWidgetIndex + 1];
+            const auto spacerWidgetType     = SpacerWidget::getType(itemStateLeft, itemStateRight);
+            const auto spacerWidgetWidth    = SpacerWidget::getWidth(spacerWidgetType);
+
+            width += spacerWidgetWidth;
+        }
+
+        // Compute width of spacer items
         for (auto statefulItem : _statefulItems)
             width += statefulItem->getWidth(itemStates[statefulItem->getIndex()]);
 
@@ -103,7 +123,7 @@ void ToolbarAction::HorizontalWidget::computeLayout()
     for (auto sortedStatefulItem : sortedStatefulItems) {
         auto cachedItemStates = itemStates;
 
-        itemStates[sortedStatefulItem->getIndex()] = StatefulItem::Standard;
+        itemStates[sortedStatefulItem->getIndex()] = Standard;
         
         if (getWidth() > width()) {
             itemStates = cachedItemStates;
@@ -111,9 +131,18 @@ void ToolbarAction::HorizontalWidget::computeLayout()
         }
     }
 
-    // Assign new state(s)
+    // Assign new state(s) to stateful items
     for (auto statefulItem : _statefulItems)
         statefulItem->setState(itemStates[statefulItem->getIndex()]);
+
+    for (auto spacerWidget : _spacerWidgets) {
+        const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
+        const auto itemStateLeft        = itemStates[spacerWidgetIndex];
+        const auto itemStateRight       = itemStates[spacerWidgetIndex + 1];
+        const auto spacerWidgetType     = SpacerWidget::getType(itemStateLeft, itemStateRight);
+
+        spacerWidget->setType(spacerWidgetType);
+    }
 }
 
 QWidget* ToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -173,6 +202,11 @@ ToolbarAction::Item& ToolbarAction::HorizontalWidget::StatefulItem::getItem()
 std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getIndex() const
 {
     return _index;
+}
+
+ToolbarAction::ItemState ToolbarAction::HorizontalWidget::StatefulItem::getState() const
+{
+    return _state;
 }
 
 void ToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& state)
