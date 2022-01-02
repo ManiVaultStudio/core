@@ -60,6 +60,8 @@ public:
         setLayout(layout);
 
         layout->addWidget(_toolbarAction.createWidget(this));
+        //layout->addWidget(new QPushButton("asdas"));
+        //layout->addStretch(1);
     }
 
     /** Get preferred size */

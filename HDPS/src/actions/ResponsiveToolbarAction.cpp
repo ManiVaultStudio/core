@@ -36,13 +36,15 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
     _resizeTimer.setInterval(RESIZE_TIMER_INTERVAL);
     _resizeTimer.setSingleShot(true);
 
+    //setStyleSheet("background-color: green;");
+
     // Handle resize timer timeout
     connect(&_resizeTimer, &QTimer::timeout, this, &HorizontalWidget::computeLayout);
 
     _toolbarLayout.setMargin(0);
     _toolbarLayout.setSpacing(0);
     _toolbarLayout.setSizeConstraint(QLayout::SetFixedSize);
-
+    
     // Create stateful item for each toolbar action
     for (auto& item : _toolbarAction->_items) {
         _statefulItems << SharedStatefulItem::create(this, _toolbarAction->_items.indexOf(item), item);
@@ -91,9 +93,9 @@ void ToolbarAction::HorizontalWidget::computeLayout()
 
     // Compute candidate configuration width
     const auto getWidth = [this, &itemStates]() -> std::int32_t {
-        std::int32_t width = (_toolbarAction->_items.count() - 1) * _toolbarLayout.spacing();
+        std::int32_t width = 0;
 
-        // Compute total width of spacer widgets
+        // Compute width of spacer widgets
         for (auto spacerWidget : _spacerWidgets) {
             const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
             const auto itemStateLeft        = itemStates[spacerWidgetIndex];
@@ -195,12 +197,16 @@ ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std
     _collapsedWidget.setOpacity(0.0f);
     _standardWidget.setOpacity(0.0f);
 
+    //_collapsedWidget.setStyleSheet("background-color: orange;");
+    //_standardWidget.setStyleSheet("background-color: teal;");
+
+    // Configure size animation
     _sizeAnimation.setDuration(ANIMATION_DURATION);
     _sizeAnimation.setStartValue(0.0f);
     _sizeAnimation.setEndValue(1.0f);
     _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
 
-    _widget.setLayout(&_widgetLayout);
+    _widget.setFixedHeight(_collapsedWidget.height());
 }
 
 ToolbarAction::Item& ToolbarAction::HorizontalWidget::StatefulItem::getItem()
@@ -271,9 +277,9 @@ void ToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& st
     _state = state;
 }
 
-QWidget* ToolbarAction::HorizontalWidget::StatefulItem::getWidget(const ItemState& itemState)
+QWidget* ToolbarAction::HorizontalWidget::StatefulItem::getWidget(const ItemState& state)
 {
-    switch (itemState)
+    switch (state)
     {
         case ItemState::Collapsed:
             return &_collapsedWidget;
@@ -318,7 +324,7 @@ ToolbarAction::HorizontalWidget::SpacerWidget::SpacerWidget(const Type& type /*=
     _verticalLine.setFrameShadow(QFrame::Sunken);
 
     _layout.setMargin(0);
-    _layout.setSpacing(2);
+    _layout.setSpacing(0);
     _layout.setAlignment(Qt::AlignCenter);
     _layout.addWidget(&_verticalLine);
 
@@ -327,6 +333,8 @@ ToolbarAction::HorizontalWidget::SpacerWidget::SpacerWidget(const Type& type /*=
     _fadeableWidget.setOpacity(0.0f);
 
     _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
+
+    //setStyleSheet("background-color: purple;");
 }
 
 ToolbarAction::HorizontalWidget::SpacerWidget::Type ToolbarAction::HorizontalWidget::SpacerWidget::getType(const ItemState& itemStateLeft, const ItemState& itemStateRight)
@@ -346,29 +354,29 @@ void ToolbarAction::HorizontalWidget::SpacerWidget::setType(const Type& type)
 
     switch (type)
     {
-    case Type::Divider:
-    {
-        _fadeableWidget.fadeIn(ANIMATION_DURATION, 0);
+        case Type::Divider:
+        {
+            _fadeableWidget.fadeIn(ANIMATION_DURATION, 0);
 
-        _sizeAnimation.setStartValue(getWidth(Type::Spacer));
-        _sizeAnimation.setEndValue(getWidth(Type::Divider));
+            _sizeAnimation.setStartValue(getWidth(Type::Spacer));
+            _sizeAnimation.setEndValue(getWidth(Type::Divider));
 
-        break;
-    }
+            break;
+        }
 
-    case Type::Spacer:
-    {
-        if (_type != Type::Undefined)
-            _fadeableWidget.fadeOut(ANIMATION_DURATION / 2, 0);
+        case Type::Spacer:
+        {
+            if (_type != Type::Undefined)
+                _fadeableWidget.fadeOut(ANIMATION_DURATION / 2, 0);
 
-        _sizeAnimation.setStartValue(getWidth(Type::Divider));
-        _sizeAnimation.setEndValue(getWidth(Type::Spacer));
+            _sizeAnimation.setStartValue(getWidth(Type::Divider));
+            _sizeAnimation.setEndValue(getWidth(Type::Spacer));
 
-        break;
-    }
+            break;
+        }
 
-    default:
-        break;
+        default:
+            break;
     }
 
     connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this](const QVariant& value) {
@@ -385,9 +393,9 @@ std::int32_t ToolbarAction::HorizontalWidget::SpacerWidget::getWidth(const Type&
 {
     switch (type)
     {
-    case Type::Undefined:       return 0;
-    case Type::Divider:         return 20;
-    case Type::Spacer:          return 4;
+        case Type::Undefined:   return 0;
+        case Type::Divider:     return 20;
+        case Type::Spacer:      return 4;
     }
 
     return 0;

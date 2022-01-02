@@ -9,8 +9,6 @@
 #include <QVBoxLayout>
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
-#include <QResizeEvent>
-#include <QMoveEvent>
 
 class QWidget;
 
@@ -94,44 +92,96 @@ public:
     protected:
 
         /**
-         * 
+         * Stateful item class
+         *
+         * Selectively shows either a standard or collapsed widget of an action
+         *
+         * @author Thomas Kroes
          */
         class StatefulItem : public QObject {
 
         public:
+            /**
+             * Constructor
+             * @param parent Pointer to parent widget
+             * @param index Index
+             * @param item Reference to toolbar item
+             */
             StatefulItem(QWidget* parent, std::int32_t index, Item& item);
 
+            /**
+             * Get item
+             * @return Reference to toolbar item
+             */
             Item& getItem();
 
+            /**
+             * Get index
+             * @return Index
+             */
             std::int32_t getIndex() const;
 
+            /**
+             * Get state
+             * @return Item state
+             */
             ItemState getState() const;
 
+            /**
+             * Set state
+             * @parem state Item state
+             */
             void setState(const ItemState& state);
 
+            /**
+             * Get widget
+             * @return Pointer to stateful item widget
+             */
             QWidget* getWidget();
 
-            QWidget* getWidget(const ItemState& itemState);
+            /**
+             * Get widget
+             * @param itemState State for which to fetch the widget
+             * @return Pointer to stateful item widget
+             */
+            QWidget* getWidget(const ItemState& state);
 
+            /**
+             * Get width
+             * @return Width of the stateful item widget
+             */
             std::int32_t getWidth() const;
 
+            /**
+             * Get width
+             * @param state State for which to fetch the width
+             * @return Width
+             */
             std::int32_t getWidth(const ItemState& state) const;
 
+            /**
+             * Get priority
+             * @return Priority
+             */
             std::int32_t getPriority() const;
 
+            /**
+             * Smaller then operator
+             * @param other Stateful item to compare with
+             * @return Whether the other item is smaller than ours (in terms of the visibility priority)
+             */
             bool operator<(StatefulItem other) {
                 return getPriority() < other.getPriority();
             }
 
         protected:
-            std::int32_t        _index;             /**  */
-            Item&               _item;              /**  */
-            ItemState           _state;             /**  */
-            QWidget             _widget;            /**  */
-            QHBoxLayout         _widgetLayout;      /**  */
-            FadeableWidget      _collapsedWidget;   /**  */
-            FadeableWidget      _standardWidget;    /**  */
-            QVariantAnimation   _sizeAnimation;     /**  */
+            std::int32_t        _index;             /** Position index in the toolbar */
+            Item&               _item;              /** Reference to toolbar item */
+            ItemState           _state;             /** State of the item */
+            QWidget             _widget;            /** Main widget */
+            FadeableWidget      _collapsedWidget;   /** Fadeable collapsed widget */
+            FadeableWidget      _standardWidget;    /** Fadeable standard widget */
+            QVariantAnimation   _sizeAnimation;     /** Animation to control the size of the widget */
         };
 
         using SharedStatefulItem = QSharedPointer<StatefulItem>;
@@ -212,7 +262,7 @@ public:
 
         /** Get preferred size */
         QSize sizeHint() const override {
-            return QSize(0, 0);
+            return QSize(0, 30);
         }
 
         /** Get minimum size hint */
@@ -264,6 +314,11 @@ public:
      */
     ToolbarAction(QObject* parent, const QString& title = "");
 
+    /**
+     * Add widget action to the responsive toolbar
+     * @param action Pointer to widget action to add
+     * @param priority Visibility of the added action (smaller means the item is collapsed more likely when there is limited toolbar space)
+     */
     void addAction(WidgetAction* action, std::int32_t priority = 1);
 
 protected:
