@@ -2,6 +2,8 @@
 
 #include "WidgetAction.h"
 
+#include "widgets/FadeableWidget.h"
+
 #include <QTimer>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -65,128 +67,15 @@ protected:
 
 public:
 
-    /*
-    
-    */
-
     /** Toolbar widget for horizontal docking */
     class HorizontalWidget : public QWidget
     {
     protected:
 
-        
-
         /**
          * 
          */
         class StatefulItem : public QObject {
-        
-
-        public:
-            class FadeableWidget : public QWidget {
-            public:
-                FadeableWidget(QWidget* parent, QWidget* target) :
-                    QWidget(parent),
-                    _target(target),
-                    _layout(),
-                    _opacityEffect(),
-                    _opacityAnimation(&_opacityEffect, "opacity")
-                {
-                    Q_ASSERT(parent != nullptr);
-                    Q_ASSERT(_target != nullptr);
-
-                    _target->setObjectName("TargetWidget");
-
-                    //setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-
-                    parent->installEventFilter(this);
-
-                    _layout.setMargin(0);
-                    _layout.setSizeConstraint(QLayout::SetFixedSize);
-                    _layout.addWidget(target);
-                    //_layout.addStretch(1);
-
-                    setLayout(&_layout);
-
-                    _target->setGraphicsEffect(&_opacityEffect);
-                    //_target->setAttribute(Qt::WA_TranslucentBackground, true);
-                    
-                    _opacityEffect.setOpacity(0);
-
-                    _opacityAnimation.setDuration(ANIMATION_DURATION);
-                }
-
-                void setOpacity(float opacity)
-                {
-                    _opacityEffect.setOpacity(opacity);
-                }
-
-                void fadeIn(std::int32_t delay = 0, std::function<void()> finished = std::function<void()>())
-                {
-                    _opacityAnimation.setEasingCurve(QEasingCurve::InQuad);
-                    _opacityAnimation.setStartValue(0.0f);
-                    _opacityAnimation.setEndValue(1.0f);
-
-                    if (finished)
-                        connect(&_opacityAnimation, &QPropertyAnimation::finished, finished);
-
-                    connect(&_opacityAnimation, &QPropertyAnimation::valueChanged, _target, &QWidget::updateGeometry);
-
-                    QTimer::singleShot(delay, [this]() {
-                        _opacityAnimation.start();
-                    });
-                }
-
-                void fadeOut(std::int32_t delay = 0, std::function<void()> finished = std::function<void()>())
-                {
-                    _opacityAnimation.setEasingCurve(QEasingCurve::OutQuad);
-                    _opacityAnimation.setStartValue(1.0f);
-                    _opacityAnimation.setEndValue(0.0f);
-
-                    if (finished)
-                        connect(&_opacityAnimation, &QPropertyAnimation::finished, finished);
-
-                    connect(&_opacityAnimation, &QPropertyAnimation::valueChanged, _target, &QWidget::updateGeometry);
-
-                    QTimer::singleShot(delay, [this]() {
-                        _opacityAnimation.start();
-                    });
-                }
-
-                bool eventFilter(QObject* target, QEvent* event) override
-                {
-                    switch (event->type())
-                    {
-                        case QEvent::Resize:
-                        {
-                            update();
-                            //_target->setFixedSize(static_cast<QResizeEvent*>(event)->size());
-
-                            break;
-                        }
-
-                        case QEvent::Move:
-                        {
-                            update();
-                            //move(static_cast<QMoveEvent*>(event)->pos());
-                            //move(100, 0);
-                            updateGeometry();
-                            break;
-                        }
-
-                        default:
-                            break;
-                    }
-
-                    return QObject::eventFilter(target, event);
-                }
-
-            protected:
-                QWidget*                _target;
-                QHBoxLayout             _layout;
-                QGraphicsOpacityEffect  _opacityEffect;
-                QPropertyAnimation      _opacityAnimation;             /**  */
-            };
 
         public:
             StatefulItem(QWidget* parent, std::int32_t index, Item& item);
@@ -225,16 +114,13 @@ public:
             FadeableWidget      _collapsedWidget;           /**  */
             FadeableWidget      _standardWidget;            /**  */
             QVariantAnimation   _sizeAnimation;             /**  */
-
-            /** Animation duration */
-            static constexpr std::int32_t ANIMATION_DURATION = 350;
         };
 
         using SharedStatefulItem = QSharedPointer<StatefulItem>;
 
         class SpacerWidget : public QWidget {
         public:
-            enum class Type {
+            enum Type {
                 Divider,
                 Spacer
             };
@@ -243,17 +129,24 @@ public:
             SpacerWidget(const Type& type = Type::Divider) :
                 QWidget(),
                 _type(Type::Divider),
-                _layout(new QHBoxLayout()),
-                _verticalLine(new QFrame())
+                _layout(),
+                _verticalLine(),
+                _fadeableWidget(this, &_verticalLine),
+                _sizeAnimation()
             {
-                _verticalLine->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-                _verticalLine->setFrameShape(QFrame::VLine);
-                _verticalLine->setFrameShadow(QFrame::Sunken);
+                _verticalLine.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+                _verticalLine.setFrameShape(QFrame::VLine);
+                _verticalLine.setFrameShadow(QFrame::Sunken);
 
-                _layout->setMargin(0);
-                _layout->setSpacing(0);
-                _layout->setAlignment(Qt::AlignCenter);
-                _layout->addWidget(_verticalLine);
+                _layout.setMargin(0);
+                _layout.setSpacing(2);
+                _layout.setAlignment(Qt::AlignCenter);
+                _layout.addWidget(&_verticalLine);
+
+                setLayout(&_layout);
+
+                _sizeAnimation.setDuration(ANIMATION_DURATION);
+                _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
 
                 setType(type);
             }
@@ -270,12 +163,41 @@ public:
 
             void setType(const Type& type)
             {
+                if (type == _type)
+                    return;
+
                 _type = type;
 
-                setLayout(_layout);
                 setFixedWidth(getWidth(_type));
 
-                _verticalLine->setVisible(_type == Type::Divider ? true : false);
+                switch (type)
+                {
+                    case Divider:
+                    {
+                        _fadeableWidget.fadeIn(ANIMATION_DURATION / 2, 0);
+                        _sizeAnimation.setStartValue(getWidth(Spacer));
+                        _sizeAnimation.setEndValue(getWidth(Divider));
+                        break;
+                    }
+
+                    case Spacer:
+                    {
+                        _fadeableWidget.fadeOut(ANIMATION_DURATION / 2, 0);
+
+                        _sizeAnimation.setStartValue(getWidth(Divider));
+                        _sizeAnimation.setEndValue(getWidth(Spacer));
+                        break;
+                    }
+
+                    default:
+                        break;
+                }
+
+                connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this](const QVariant& value) {
+                    setFixedWidth(value.toFloat());
+                });
+
+                _sizeAnimation.start();
             }
 
             static std::int32_t getWidth(const Type& type)
@@ -283,10 +205,10 @@ public:
                 switch (type)
                 {
                     case Type::Divider:
-                        return 14;
+                        return 20;
 
                     case Type::Spacer:
-                        return 2;
+                        return 4;
 
                     default:
                         break;
@@ -296,9 +218,11 @@ public:
             }
 
         protected:
-            Type            _type;
-            QHBoxLayout*    _layout;
-            QFrame*         _verticalLine;
+            Type                _type;                      /**  */
+            QHBoxLayout         _layout;                    /**  */
+            QFrame              _verticalLine;              /**  */
+            FadeableWidget      _fadeableWidget;            /**  */
+            QVariantAnimation   _sizeAnimation;             /**  */
         };
 
         using SharedSpacerWidget = QSharedPointer<SpacerWidget>;
@@ -342,8 +266,8 @@ public:
         QVector<SharedStatefulItem>     _statefulItems;     
         QVector<SharedSpacerWidget>     _spacerWidgets;     /**  */
 
-        /** Default resize timer interval */
-        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 250;
+        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 100;      /** Default resize timer interval */
+        static constexpr std::int32_t ANIMATION_DURATION    = 300;      /** Animation duration */
 
         friend class ToolbarAction;
     };

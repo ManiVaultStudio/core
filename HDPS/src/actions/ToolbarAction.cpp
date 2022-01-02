@@ -186,6 +186,9 @@ ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std
     _standardWidget(&_widget, _item.getAction()->createWidget(&_widget)),
     _sizeAnimation(&_widget)
 {
+    _collapsedWidget.setOpacity(0.0f);
+    _standardWidget.setOpacity(0.0f);
+
     _sizeAnimation.setDuration(ANIMATION_DURATION);
     _sizeAnimation.setStartValue(0.0f);
     _sizeAnimation.setEndValue(1.0f);
@@ -285,11 +288,11 @@ void ToolbarAction::HorizontalWidget::StatefulItem::swapWidget(const ItemState& 
         case Collapsed:
         {
             _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-            _standardWidget.fadeOut();
+            _standardWidget.fadeOut(ANIMATION_DURATION);
 
             _collapsedWidget.raise();
             _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-            _collapsedWidget.fadeIn(ANIMATION_DURATION);
+            _collapsedWidget.fadeIn(ANIMATION_DURATION, ANIMATION_DURATION);
 
             break;
         }
@@ -297,11 +300,11 @@ void ToolbarAction::HorizontalWidget::StatefulItem::swapWidget(const ItemState& 
         case Standard:
         {
             _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-            _collapsedWidget.fadeOut();
+            _collapsedWidget.fadeOut(ANIMATION_DURATION);
 
             _standardWidget.raise();
             _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-            _standardWidget.fadeIn(ANIMATION_DURATION);
+            _standardWidget.fadeIn(ANIMATION_DURATION, ANIMATION_DURATION);
 
             break;
         }

@@ -91,23 +91,19 @@ set(EVENT_SOURCES
 )
 
 set( WIDGET_HEADERS
-    src/widgets/CollapsedWidget.h
     src/widgets/WebWidget.h
     src/widgets/ColormapWidget.h
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
-    src/widgets/ResponsiveToolbarWidget.h
-    src/widgets/ToolbarItemWidget.h
+    src/widgets/FadeableWidget.h
 )
 
 set( WIDGET_SOURCES
-    src/widgets/CollapsedWidget.cpp
     src/widgets/WebWidget.cpp
     src/widgets/ColormapWidget.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
-    src/widgets/ResponsiveToolbarWidget.cpp
-    src/widgets/ToolbarItemWidget.cpp
+    src/widgets/FadeableWidget.cpp
 )
 
 set(ACTIONS_HEADERS
