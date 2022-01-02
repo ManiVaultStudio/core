@@ -5,7 +5,7 @@
 
 #include "Application.h"
 
-#include <actions/ToolbarAction.h>
+#include <actions/ResponsiveToolbarAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/DecimalAction.h>
 #include <actions/StringAction.h>
@@ -42,14 +42,14 @@ public:
 
         //_widthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
 
-        _toolbarAction.addAction(&_integralAction, 1);
-        _toolbarAction.addAction(&_decimalAction, 1);
+        _toolbarAction.addAction(&_integralAction, 21);
+        _toolbarAction.addAction(&_decimalAction, 7);
         _toolbarAction.addAction(&_stringAction, 11);
         _toolbarAction.addAction(&_colorAction, 3);
         _toolbarAction.addAction(&_colorMapAction, 1);
         _toolbarAction.addAction(&_datasetPickerAction, 8);
         _toolbarAction.addAction(&_optionAction, 5);
-        _toolbarAction.addAction(&_toggleAction, 15);
+        _toolbarAction.addAction(&_toggleAction, 2);
         _toolbarAction.addAction(&_triggerAction, 4);
         _toolbarAction.addAction(&_windowLevelAction, 7);
 

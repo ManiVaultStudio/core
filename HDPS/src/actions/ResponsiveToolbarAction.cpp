@@ -1,4 +1,4 @@
-#include "ToolbarAction.h"
+#include "ResponsiveToolbarAction.h"
 
 #include <QCoreApplication>
 
@@ -303,6 +303,94 @@ std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getWidth(const ItemS
 std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getPriority() const
 {
     return _item.getPriority();
+}
+
+ToolbarAction::HorizontalWidget::SpacerWidget::SpacerWidget(const Type& type /*= Type::Divider*/) :
+    QWidget(),
+    _type(Type::Undefined),
+    _layout(),
+    _verticalLine(),
+    _fadeableWidget(this, &_verticalLine),
+    _sizeAnimation()
+{
+    _verticalLine.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    _verticalLine.setFrameShape(QFrame::VLine);
+    _verticalLine.setFrameShadow(QFrame::Sunken);
+
+    _layout.setMargin(0);
+    _layout.setSpacing(2);
+    _layout.setAlignment(Qt::AlignCenter);
+    _layout.addWidget(&_verticalLine);
+
+    setLayout(&_layout);
+
+    _fadeableWidget.setOpacity(0.0f);
+
+    _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
+}
+
+ToolbarAction::HorizontalWidget::SpacerWidget::Type ToolbarAction::HorizontalWidget::SpacerWidget::getType(const ItemState& itemStateLeft, const ItemState& itemStateRight)
+{
+    return itemStateLeft == ItemState::Collapsed && itemStateRight == ItemState::Collapsed ? Type::Spacer : Type::Divider;
+}
+
+ToolbarAction::HorizontalWidget::SpacerWidget::Type ToolbarAction::HorizontalWidget::SpacerWidget::getType(const StatefulItem* statefulItemLeft, const StatefulItem* statefulItemRight)
+{
+    return getType(statefulItemLeft->getState(), statefulItemRight->getState());
+}
+
+void ToolbarAction::HorizontalWidget::SpacerWidget::setType(const Type& type)
+{
+    if (type == _type)
+        return;
+
+    switch (type)
+    {
+    case Type::Divider:
+    {
+        _fadeableWidget.fadeIn(ANIMATION_DURATION, 0);
+
+        _sizeAnimation.setStartValue(getWidth(Type::Spacer));
+        _sizeAnimation.setEndValue(getWidth(Type::Divider));
+
+        break;
+    }
+
+    case Type::Spacer:
+    {
+        if (_type != Type::Undefined)
+            _fadeableWidget.fadeOut(ANIMATION_DURATION / 2, 0);
+
+        _sizeAnimation.setStartValue(getWidth(Type::Divider));
+        _sizeAnimation.setEndValue(getWidth(Type::Spacer));
+
+        break;
+    }
+
+    default:
+        break;
+    }
+
+    connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this](const QVariant& value) {
+        setFixedWidth(value.toFloat());
+    });
+
+    _sizeAnimation.setDuration(_type == Type::Undefined ? 0 : ANIMATION_DURATION);
+    _sizeAnimation.start();
+
+    _type = type;
+}
+
+std::int32_t ToolbarAction::HorizontalWidget::SpacerWidget::getWidth(const Type& type)
+{
+    switch (type)
+    {
+    case Type::Undefined:       return 0;
+    case Type::Divider:         return 20;
+    case Type::Spacer:          return 4;
+    }
+
+    return 0;
 }
 
 }

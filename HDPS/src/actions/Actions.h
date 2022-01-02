@@ -15,3 +15,4 @@
 #include "StringAction.h"
 #include "WidgetAction.h"
 #include "WidgetActionLabel.h"
+#include "ResponsiveToolbarAction.h"
