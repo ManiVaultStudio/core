@@ -10,8 +10,6 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 
-class QWidget;
-
 namespace hdps {
 
 namespace gui {
@@ -41,7 +39,7 @@ public:
     enum class ItemState {
         Undefined,      /** Item state is not defined */
         Collapsed,      /** Item is in a collapsed state (accessible through a tool button) */
-        Standard        /** Items is in a standard state */
+        Standard        /** Item is in a standard state */
     };
 
 protected:
@@ -166,7 +164,7 @@ public:
             std::int32_t getPriority() const;
 
             /**
-             * Smaller then operator
+             * Smaller than operator
              * @param other Stateful item to compare with
              * @return Whether the other item is smaller than ours (in terms of the visibility priority)
              */
@@ -179,6 +177,7 @@ public:
             Item&               _item;              /** Reference to toolbar item */
             ItemState           _state;             /** State of the item */
             QWidget             _widget;            /** Main widget */
+            QHBoxLayout         _widgetLayout;      /** Main widget layout */
             FadeableWidget      _collapsedWidget;   /** Fadeable collapsed widget */
             FadeableWidget      _standardWidget;    /** Fadeable standard widget */
             QVariantAnimation   _sizeAnimation;     /** Animation to control the size of the widget */
@@ -259,16 +258,6 @@ public:
          * @param resizeEvent Pointer to resize event
          */
         void resizeEvent(QResizeEvent* resizeEvent) override;
-
-        /** Get preferred size */
-        QSize sizeHint() const override {
-            return QSize(0, 30);
-        }
-
-        /** Get minimum size hint */
-        QSize minimumSizeHint() const override {
-            return sizeHint();
-        }
 
     private:
 

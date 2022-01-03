@@ -55,7 +55,7 @@ public:
 
         auto layout = new QVBoxLayout();
 
-        layout->setMargin(0);
+        layout->setMargin(4);
 
         setLayout(layout);
 

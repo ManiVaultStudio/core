@@ -158,8 +158,9 @@ QWidget* ToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
+    widget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Maximum);
+
     layout->setMargin(0);
-    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::Horizontal)
         layout->addWidget(new ToolbarAction::HorizontalWidget(parent, this));
@@ -190,6 +191,7 @@ ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std
     _item(item),
     _state(ItemState::Undefined),
     _widget(),
+    _widgetLayout(),
     _collapsedWidget(&_widget, _item.getAction()->createCollapsedWidget(&_widget)),
     _standardWidget(&_widget, _item.getAction()->createWidget(&_widget)),
     _sizeAnimation(&_widget)
@@ -206,7 +208,10 @@ ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std
     _sizeAnimation.setEndValue(1.0f);
     _sizeAnimation.setEasingCurve(QEasingCurve::InOutQuad);
 
-    _widget.setFixedHeight(_collapsedWidget.height());
+    _widgetLayout.setMargin(0);
+
+    //_widget.setFixedHeight(_collapsedWidget.height());
+    _widget.setLayout(&_widgetLayout);
 }
 
 ToolbarAction::Item& ToolbarAction::HorizontalWidget::StatefulItem::getItem()
@@ -241,9 +246,10 @@ void ToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& st
         case ItemState::Collapsed:
         {
             _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-
-            if (_state != ItemState::Undefined)
-                _standardWidget.fadeOut(ANIMATION_DURATION);
+            _standardWidget.fadeOut(_state == ItemState::Undefined ? 0 : ANIMATION_DURATION, 0, [this]() {
+                _widgetLayout.takeAt(0);
+                _widgetLayout.addWidget(&_collapsedWidget);
+            });
 
             _collapsedWidget.raise();
             _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
@@ -256,8 +262,10 @@ void ToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& st
         {
             _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-            if (_state != ItemState::Undefined)
-                _collapsedWidget.fadeOut(ANIMATION_DURATION);
+            _collapsedWidget.fadeOut(_state == ItemState::Undefined ? 0 : ANIMATION_DURATION, 0, [this]() {
+                _widgetLayout.takeAt(0);
+                _widgetLayout.addWidget(&_standardWidget);
+            });
 
             _standardWidget.raise();
             _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
