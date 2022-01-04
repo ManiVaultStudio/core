@@ -1,6 +1,7 @@
 #include "ResponsiveToolbarAction.h"
 
 #include <QCoreApplication>
+#include <QResizeEvent>
 
 #include <cmath>
 
@@ -8,7 +9,7 @@ namespace hdps {
 
 namespace gui {
 
-ToolbarAction::ToolbarAction(QObject* parent, const QString& title /*= ""*/) :
+ResponsiveToolbarAction::ResponsiveToolbarAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent),
     _items()
 {
@@ -17,14 +18,14 @@ ToolbarAction::ToolbarAction(QObject* parent, const QString& title /*= ""*/) :
     setDefaultWidgetFlags(WidgetFlag::Horizontal);
 }
 
-void ToolbarAction::addAction(WidgetAction* action, std::int32_t priority /*= 1*/)
+void ResponsiveToolbarAction::addAction(WidgetAction* action, std::int32_t priority /*= 1*/)
 {
     _items << Item(action, priority);
 }
 
-ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction* toolbarAction) :
+ResponsiveToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ResponsiveToolbarAction* toolbarAction) :
     QWidget(parent),
-    _toolbarAction(toolbarAction),
+    _responsiveToolbarAction(toolbarAction),
     _resizeTimer(),
     _mainLayout(),
     _toolbarLayout(),
@@ -39,15 +40,20 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
     //setStyleSheet("background-color: green;");
 
     // Handle resize timer timeout
-    connect(&_resizeTimer, &QTimer::timeout, this, &HorizontalWidget::computeLayout);
+    connect(&_resizeTimer, &QTimer::timeout, this, [this]() {
+        computeLayout();
+    });
 
     _toolbarLayout.setMargin(0);
     _toolbarLayout.setSpacing(0);
     _toolbarLayout.setSizeConstraint(QLayout::SetFixedSize);
     
     // Create stateful item for each toolbar action
-    for (auto& item : _toolbarAction->_items) {
-        _statefulItems << SharedStatefulItem::create(this, _toolbarAction->_items.indexOf(item), item);
+    for (auto& item : _responsiveToolbarAction->_items) {
+        _statefulItems << SharedStatefulItem::create(*this, _responsiveToolbarAction->_items.indexOf(item), item);
+
+        // Listen for resize events in the stateful item so that we can re-compute the layout
+        _statefulItems.last()->installEventFilter(this);
 
         if (_statefulItems.count() >= 2) {
             _spacerWidgets << SharedSpacerWidget::create();
@@ -70,7 +76,7 @@ ToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ToolbarAction
     _mainLayout.setMargin(0);
 }
 
-void ToolbarAction::HorizontalWidget::resizeEvent(QResizeEvent* resizeEvent)
+void ResponsiveToolbarAction::HorizontalWidget::resizeEvent(QResizeEvent* resizeEvent)
 {
     // Prevent resize timer timeout
     if (_resizeTimer.isActive())
@@ -80,13 +86,13 @@ void ToolbarAction::HorizontalWidget::resizeEvent(QResizeEvent* resizeEvent)
     _resizeTimer.start();
 }
 
-void ToolbarAction::HorizontalWidget::computeLayout()
+void ResponsiveToolbarAction::HorizontalWidget::computeLayout(StatefulItem* statefulItem /*= nullptr*/)
 {
     qDebug() << "Compute toolbar widget layout" << width();
 
     QVector<ItemState> itemStates;
 
-    itemStates.resize(_toolbarAction->_items.count());
+    itemStates.resize(_responsiveToolbarAction->_items.count());
 
     // Initialize collapsed
     std::fill(itemStates.begin(), itemStates.end(), ItemState::Collapsed);
@@ -136,7 +142,7 @@ void ToolbarAction::HorizontalWidget::computeLayout()
     setItemStates(itemStates);
 }
 
-void ToolbarAction::HorizontalWidget::setItemStates(const QVector<ItemState>& itemStates)
+void ResponsiveToolbarAction::HorizontalWidget::setItemStates(const QVector<ItemState>& itemStates)
 {
     // Assign new state(s) to stateful item(s)
     for (auto statefulItem : _statefulItems)
@@ -153,7 +159,7 @@ void ToolbarAction::HorizontalWidget::setItemStates(const QVector<ItemState>& it
     }
 }
 
-QWidget* ToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
+QWidget* ResponsiveToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
@@ -163,30 +169,32 @@ QWidget* ToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     layout->setMargin(0);
 
     if (widgetFlags & WidgetFlag::Horizontal)
-        layout->addWidget(new ToolbarAction::HorizontalWidget(parent, this));
+        layout->addWidget(new ResponsiveToolbarAction::HorizontalWidget(parent, this));
 
     widget->setLayout(layout);
 
     return widget;
 }
 
-ToolbarAction::Item::Item(WidgetAction* action, std::int32_t priority) :
+ResponsiveToolbarAction::Item::Item(WidgetAction* action, std::int32_t priority) :
     _action(action),
     _priority(priority)
 {
 }
 
-WidgetAction* ToolbarAction::Item::getAction()
+WidgetAction* ResponsiveToolbarAction::Item::getAction()
 {
     return _action;
 }
 
-std::int32_t ToolbarAction::Item::getPriority() const
+std::int32_t ResponsiveToolbarAction::Item::getPriority() const
 {
     return _priority;
 }
 
-ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std::int32_t index, Item& item) :
+ResponsiveToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(HorizontalWidget& horizontalWidget, std::int32_t index, Item& item) :
+    QObject(&horizontalWidget),
+    _horizontalWidget(horizontalWidget),
     _index(index),
     _item(item),
     _state(ItemState::Undefined),
@@ -199,8 +207,8 @@ ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std
     _collapsedWidget.setOpacity(0.0f);
     _standardWidget.setOpacity(0.0f);
 
-    //_collapsedWidget.setStyleSheet("background-color: orange;");
-    //_standardWidget.setStyleSheet("background-color: teal;");
+    // Respond to changes in the size of the standard widget
+    _standardWidget.installEventFilter(this);
 
     // Configure size animation
     _sizeAnimation.setDuration(ANIMATION_DURATION);
@@ -210,82 +218,103 @@ ToolbarAction::HorizontalWidget::StatefulItem::StatefulItem(QWidget* parent, std
 
     _widgetLayout.setMargin(0);
 
-    //_widget.setFixedHeight(_collapsedWidget.height());
     _widget.setLayout(&_widgetLayout);
 }
 
-ToolbarAction::Item& ToolbarAction::HorizontalWidget::StatefulItem::getItem()
+ResponsiveToolbarAction::Item& ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getItem()
 {
     return _item;
 }
 
-std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getIndex() const
+std::int32_t ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getIndex() const
 {
     return _index;
 }
 
-ToolbarAction::ItemState ToolbarAction::HorizontalWidget::StatefulItem::getState() const
+ResponsiveToolbarAction::ItemState ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getState() const
 {
     return _state;
 }
 
-void ToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& state)
+void ResponsiveToolbarAction::HorizontalWidget::StatefulItem::setState(const ItemState& state)
 {
-    if (state == _state)
-        return;
+    const auto widthBegin           = static_cast<float>(getWidth(_state == ItemState::Undefined ? state : _state));
+    const auto widthEnd             = static_cast<float>(getWidth(state));
+    const auto stateChanged         = state != _state;
+    const auto widthChanged         = widthBegin != widthEnd;
+    const auto animationDuration    = (_state == ItemState::Undefined) ? 0 : (widthChanged ? ANIMATION_DURATION : 0);
 
-    const auto widthBegin   = static_cast<float>(getWidth(_state == ItemState::Undefined ? state : _state));
-    const auto widthEnd     = static_cast<float>(getWidth(state));
-
+    // Width interpolation
     const auto widthLerp = [widthBegin, widthEnd](float norm) {
         return widthBegin + norm * (widthEnd - widthBegin);
     };
 
+    // Configure and possibly animate widgets based on the state
     switch (state)
     {
         case ItemState::Collapsed:
         {
-            _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-            _standardWidget.fadeOut(_state == ItemState::Undefined ? 0 : ANIMATION_DURATION, 0, [this]() {
-                _widgetLayout.takeAt(0);
-                _widgetLayout.addWidget(&_collapsedWidget);
-            });
-
-            _collapsedWidget.raise();
+            // Collapsed widget should respond to mouse events and the standard widget should not
             _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-            _collapsedWidget.fadeIn(ANIMATION_DURATION, _state == ItemState::Undefined ? 0 : ANIMATION_DURATION);
+            _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+            // The collapsed widget should be raised above the standard widget
+            _collapsedWidget.raise();
+
+            if (stateChanged) {
+
+                // Fade out the standard widget and swap the widgets when done
+                _standardWidget.fadeOut(animationDuration, 0, [this]() {
+                    _widgetLayout.takeAt(0);
+                    _widgetLayout.addWidget(&_collapsedWidget);
+                });
+
+                // Fade in the collapsed widget when the state changed
+                _collapsedWidget.fadeIn(animationDuration, animationDuration);
+            }
 
             break;
         }
 
         case ItemState::Standard:
         {
+            // Collapsed widget should not respond to mouse events and the standard widget should
             _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-
-            _collapsedWidget.fadeOut(_state == ItemState::Undefined ? 0 : ANIMATION_DURATION, 0, [this]() {
-                _widgetLayout.takeAt(0);
-                _widgetLayout.addWidget(&_standardWidget);
-            });
-
-            _standardWidget.raise();
             _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-            _standardWidget.fadeIn(ANIMATION_DURATION, _state == ItemState::Undefined ? 0 : ANIMATION_DURATION);
+            
+            // The standard widget should be raised above the collapsed widget
+            _standardWidget.raise();
+
+            if (stateChanged) {
+
+                // Fade in the standard widget when the state changed
+                _standardWidget.fadeIn(animationDuration, animationDuration);
+
+                // Fade out the collapsed widget and swap the widgets when done
+                _collapsedWidget.fadeOut(animationDuration, 0, [this]() {
+                    _widgetLayout.takeAt(0);
+                    _widgetLayout.addWidget(&_standardWidget);
+                });
+            }
 
             break;
         }
     }
 
+    // Update the widget fixed width when the size animation values changes
     connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp](const QVariant& value) {
         _widget.setFixedWidth(widthLerp(value.toFloat()));
     });
 
-    _sizeAnimation.setDuration(_state == ItemState::Undefined ? 0 : ANIMATION_DURATION);
+    // Set size animation duration and start
+    _sizeAnimation.setDuration(animationDuration);
     _sizeAnimation.start();
 
+    // Assign new state
     _state = state;
 }
 
-QWidget* ToolbarAction::HorizontalWidget::StatefulItem::getWidget(const ItemState& state)
+QWidget* ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getWidget(const ItemState& state)
 {
     switch (state)
     {
@@ -299,27 +328,47 @@ QWidget* ToolbarAction::HorizontalWidget::StatefulItem::getWidget(const ItemStat
     return nullptr;
 }
 
-QWidget* ToolbarAction::HorizontalWidget::StatefulItem::getWidget()
+QWidget* ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getWidget()
 {
     return &_widget;
 }
 
-std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getWidth() const
+std::int32_t ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getWidth() const
 {
     return const_cast<StatefulItem*>(this)->getWidget(_state)->sizeHint().width();
 }
 
-std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getWidth(const ItemState& state) const
+std::int32_t ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getWidth(const ItemState& state) const
 {
     return const_cast<StatefulItem*>(this)->getWidget(state)->sizeHint().width();
 }
 
-std::int32_t ToolbarAction::HorizontalWidget::StatefulItem::getPriority() const
+std::int32_t ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getPriority() const
 {
     return _item.getPriority();
 }
 
-ToolbarAction::HorizontalWidget::SpacerWidget::SpacerWidget(const Type& type /*= Type::Divider*/) :
+bool ResponsiveToolbarAction::HorizontalWidget::StatefulItem::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Resize:
+        {
+            if (_state != ItemState::Standard)
+                break;
+
+            const auto resizeEvent = static_cast<QResizeEvent*>(event);
+            QCoreApplication::processEvents();
+            _widget.setFixedWidth(resizeEvent->size().width());
+            _horizontalWidget.computeLayout(this);
+            break;
+        }
+    }
+
+    return QObject::eventFilter(target, event);
+}
+
+ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::SpacerWidget(const Type& type /*= Type::Divider*/) :
     QWidget(),
     _type(Type::Undefined),
     _layout(),
@@ -345,17 +394,17 @@ ToolbarAction::HorizontalWidget::SpacerWidget::SpacerWidget(const Type& type /*=
     //setStyleSheet("background-color: purple;");
 }
 
-ToolbarAction::HorizontalWidget::SpacerWidget::Type ToolbarAction::HorizontalWidget::SpacerWidget::getType(const ItemState& itemStateLeft, const ItemState& itemStateRight)
+ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::Type ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::getType(const ItemState& itemStateLeft, const ItemState& itemStateRight)
 {
     return itemStateLeft == ItemState::Collapsed && itemStateRight == ItemState::Collapsed ? Type::Spacer : Type::Divider;
 }
 
-ToolbarAction::HorizontalWidget::SpacerWidget::Type ToolbarAction::HorizontalWidget::SpacerWidget::getType(const StatefulItem* statefulItemLeft, const StatefulItem* statefulItemRight)
+ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::Type ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::getType(const StatefulItem* statefulItemLeft, const StatefulItem* statefulItemRight)
 {
     return getType(statefulItemLeft->getState(), statefulItemRight->getState());
 }
 
-void ToolbarAction::HorizontalWidget::SpacerWidget::setType(const Type& type)
+void ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::setType(const Type& type)
 {
     if (type == _type)
         return;
@@ -397,7 +446,7 @@ void ToolbarAction::HorizontalWidget::SpacerWidget::setType(const Type& type)
     _type = type;
 }
 
-std::int32_t ToolbarAction::HorizontalWidget::SpacerWidget::getWidth(const Type& type)
+std::int32_t ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::getWidth(const Type& type)
 {
     switch (type)
     {

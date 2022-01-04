@@ -21,7 +21,7 @@ namespace gui {
  *
  * @author Thomas Kroes
  */
-class ToolbarAction : public WidgetAction
+class ResponsiveToolbarAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -101,11 +101,11 @@ public:
         public:
             /**
              * Constructor
-             * @param parent Pointer to parent widget
+             * @param horizontalWidget Reference to horizontal widget
              * @param index Index
              * @param item Reference to toolbar item
              */
-            StatefulItem(QWidget* parent, std::int32_t index, Item& item);
+            StatefulItem(HorizontalWidget& horizontalWidget, std::int32_t index, Item& item);
 
             /**
              * Get item
@@ -164,6 +164,13 @@ public:
             std::int32_t getPriority() const;
 
             /**
+             * Respond to target object events
+             * @param target Object of which an event occurred
+             * @param event The event that took place
+             */
+            bool eventFilter(QObject* target, QEvent* event) override;
+
+            /**
              * Smaller than operator
              * @param other Stateful item to compare with
              * @return Whether the other item is smaller than ours (in terms of the visibility priority)
@@ -173,14 +180,15 @@ public:
             }
 
         protected:
-            std::int32_t        _index;             /** Position index in the toolbar */
-            Item&               _item;              /** Reference to toolbar item */
-            ItemState           _state;             /** State of the item */
-            QWidget             _widget;            /** Main widget */
-            QHBoxLayout         _widgetLayout;      /** Main widget layout */
-            FadeableWidget      _collapsedWidget;   /** Fadeable collapsed widget */
-            FadeableWidget      _standardWidget;    /** Fadeable standard widget */
-            QVariantAnimation   _sizeAnimation;     /** Animation to control the size of the widget */
+            HorizontalWidget&   _horizontalWidget;      /** Reference to owning horizontal widget */
+            std::int32_t        _index;                 /** Position index in the toolbar */
+            Item&               _item;                  /** Reference to toolbar item */
+            ItemState           _state;                 /** State of the item */
+            QWidget             _widget;                /** Main widget */
+            QHBoxLayout         _widgetLayout;          /** Main widget layout */
+            FadeableWidget      _collapsedWidget;       /** Fadeable collapsed widget */
+            FadeableWidget      _standardWidget;        /** Fadeable standard widget */
+            QVariantAnimation   _sizeAnimation;         /** Animation to control the size of the widget */
         };
 
         using SharedStatefulItem = QSharedPointer<StatefulItem>;
@@ -251,7 +259,7 @@ public:
          * @param parent Pointer to parent widget
          * @param toolbarAction Pointer to toolbar action
          */
-        HorizontalWidget(QWidget* parent, ToolbarAction* toolbarAction);
+        HorizontalWidget(QWidget* parent, ResponsiveToolbarAction* toolbarAction);
 
         /**
          * Invoked when the widget is resized
@@ -259,10 +267,11 @@ public:
          */
         void resizeEvent(QResizeEvent* resizeEvent) override;
 
-    private:
-
-        /** Computes the layout in response to a resizing of the widget */
-        void computeLayout();
+        /**
+         * Computes the layout of all items (decides which items are collapsed/standard)
+         * @param statefulItem Pointer to stateful item
+         */
+        void computeLayout(StatefulItem* statefulItem = nullptr);
 
         /**
          * Set item states
@@ -271,18 +280,20 @@ public:
         void setItemStates(const QVector<ItemState>& itemStates);
 
     protected:
-        ToolbarAction*                  _toolbarAction;     /** Pointer to toolbar action */
-        QTimer                          _resizeTimer;       /** Timer which prevents unnecessary resize handler calls */
-        QHBoxLayout                     _mainLayout;        /** Horizontal main layout */
-        QHBoxLayout                     _toolbarLayout;     /** Horizontal toolbar layout for items */
-        QWidget                         _toolbarWidget;     /** Toolbar widget */
-        QVector<SharedStatefulItem>     _statefulItems;     /** All stateful items */
-        QVector<SharedSpacerWidget>     _spacerWidgets;     /** All spacer widgets */
+        ResponsiveToolbarAction*        _responsiveToolbarAction;   /** Pointer to responsive toolbar action */
+        QTimer                          _resizeTimer;               /** Timer which prevents unnecessary resize handler calls */
+        QHBoxLayout                     _mainLayout;                /** Horizontal main layout */
+        QHBoxLayout                     _toolbarLayout;             /** Horizontal toolbar layout for items */
+        QWidget                         _toolbarWidget;             /** Toolbar widget */
+        QVector<SharedStatefulItem>     _statefulItems;             /** All stateful items */
+        QVector<SharedSpacerWidget>     _spacerWidgets;             /** All spacer widgets */
 
         static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;       /** Default resize timer interval */
-        static constexpr std::int32_t ANIMATION_DURATION    = 500;      /** Animation duration */
+        static constexpr std::int32_t ANIMATION_DURATION    = 300;      /** Animation duration */
 
-        friend class ToolbarAction;
+        friend class ResponsiveToolbarAction;
+        friend class HorizontalWidget;
+        friend class StatefulItem;
     };
 
 protected:
@@ -301,7 +312,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    ToolbarAction(QObject* parent, const QString& title = "");
+    ResponsiveToolbarAction(QObject* parent, const QString& title = "");
 
     /**
      * Add widget action to the responsive toolbar
