@@ -5,6 +5,7 @@
 
 #include "Application.h"
 
+/* TODO: remove once responsive toolbar action is working flawlessly in production
 #include <actions/ResponsiveToolbarAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/DecimalAction.h>
@@ -16,7 +17,6 @@
 #include <actions/ToggleAction.h>
 #include <actions/WindowLevelAction.h>
 
-/* TODO: remove once responsive toolbar action is working flawlessly in production
 class ChangingSizeAction : public WidgetAction
 {
 public:
