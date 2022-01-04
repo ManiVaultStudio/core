@@ -23,9 +23,9 @@ void ResponsiveToolbarAction::addAction(WidgetAction* action, std::int32_t prior
     _items << Item(action, priority);
 }
 
-ResponsiveToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ResponsiveToolbarAction* toolbarAction) :
+ResponsiveToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, ResponsiveToolbarAction* responsiveToolbarAction) :
     QWidget(parent),
-    _responsiveToolbarAction(toolbarAction),
+    _responsiveToolbarAction(responsiveToolbarAction),
     _resizeTimer(),
     _mainLayout(),
     _toolbarLayout(),
@@ -45,7 +45,7 @@ ResponsiveToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, Res
     _toolbarLayout.setMargin(0);
     _toolbarLayout.setSpacing(0);
     _toolbarLayout.setSizeConstraint(QLayout::SetFixedSize);
-    
+
     // Create stateful item for each toolbar action
     for (auto& item : _responsiveToolbarAction->_items) {
         _statefulItems << SharedStatefulItem::create(*this, _responsiveToolbarAction->_items.indexOf(item), item);
@@ -165,12 +165,19 @@ QWidget* ResponsiveToolbarAction::getWidget(QWidget* parent, const std::int32_t&
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    widget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Maximum);
-
     layout->setMargin(0);
 
-    if (widgetFlags & WidgetFlag::Horizontal)
+    if (widgetFlags & WidgetFlag::Horizontal) {
+        widget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::MinimumExpanding);
         layout->addWidget(new ResponsiveToolbarAction::HorizontalWidget(parent, this));
+    }
+
+    if (widgetFlags & WidgetFlag::Vertical) {
+        widget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Ignored);
+
+        layout->setAlignment(Qt::AlignTop);
+        layout->addWidget(new ResponsiveToolbarAction::VerticalWidget(parent, this));
+    }
 
     widget->setLayout(layout);
 
@@ -457,6 +464,24 @@ std::int32_t ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::getWidth(c
     }
 
     return 0;
+}
+
+ResponsiveToolbarAction::VerticalWidget::VerticalWidget(QWidget* parent, ResponsiveToolbarAction* responsiveToolbarAction) :
+    QWidget(parent),
+    _responsiveToolbarAction(responsiveToolbarAction),
+    _layout()
+{
+    _layout.setMargin(0);
+    _layout.setSpacing(4);
+    _layout.setSizeConstraint(QLayout::SetFixedSize);
+
+    for (auto& item : _responsiveToolbarAction->_items)
+        _layout.addWidget(item.getAction()->createCollapsedWidget(this));
+
+    if (!_responsiveToolbarAction->_items.isEmpty())
+        _layout.addStretch(1);
+
+    setLayout(&_layout);
 }
 
 }

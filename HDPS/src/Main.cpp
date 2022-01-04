@@ -16,7 +16,6 @@
 #include <actions/ToggleAction.h>
 #include <actions/WindowLevelAction.h>
 
-/*
 class ChangingSizeAction : public WidgetAction
 {
 public:
@@ -87,6 +86,8 @@ public:
     {
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
+        _toolbarAction.setDefaultWidgetFlags(ResponsiveToolbarAction::WidgetFlag::Vertical);
+
         //_widthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
 
         _toolbarAction.addAction(&_integralAction, 21);
@@ -134,7 +135,6 @@ protected:
     TriggerAction               _triggerAction;
     WindowLevelAction           _windowLevelAction;
 };
-*/
 
 int main(int argc, char *argv[])
 {
@@ -183,9 +183,9 @@ int main(int argc, char *argv[])
 
     mainWindow.show();
 
-    //ToolbarDialog toolbarDialog(nullptr);
+    ToolbarDialog toolbarDialog(nullptr);
 
-    //toolbarDialog.show();
+    toolbarDialog.show();
 
     return hdpsApplication.exec();
 }

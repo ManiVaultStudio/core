@@ -30,7 +30,9 @@ public:
     /** Describes the widget configurations */
     enum WidgetFlag {
         Horizontal  = 0x00001,  /** Toolbar is horizontally docked */
-        Vertical    = 0x00002   /** Toolbar is vertically docked */
+        Vertical    = 0x00002,  /** Toolbar is vertically docked */
+
+        Default = Horizontal
     };
 
 public:
@@ -257,9 +259,9 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param toolbarAction Pointer to toolbar action
+         * @param responsiveToolbarAction Pointer to toolbar action
          */
-        HorizontalWidget(QWidget* parent, ResponsiveToolbarAction* toolbarAction);
+        HorizontalWidget(QWidget* parent, ResponsiveToolbarAction* responsiveToolbarAction);
 
         /**
          * Invoked when the widget is resized
@@ -292,8 +294,26 @@ public:
         static constexpr std::int32_t ANIMATION_DURATION    = 300;      /** Animation duration */
 
         friend class ResponsiveToolbarAction;
-        friend class HorizontalWidget;
         friend class StatefulItem;
+    };
+
+    /** Toolbar widget for vertical docking */
+    class VerticalWidget : public QWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param responsiveToolbarAction Pointer to toolbar action
+         */
+        VerticalWidget(QWidget* parent, ResponsiveToolbarAction* responsiveToolbarAction);
+
+    protected:
+        ResponsiveToolbarAction*    _responsiveToolbarAction;   /** Pointer to responsive toolbar action */
+        QVBoxLayout                 _layout;                    /** Main vertical layout */
+
+        friend class ResponsiveToolbarAction;
     };
 
 protected:
