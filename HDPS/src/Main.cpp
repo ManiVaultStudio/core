@@ -16,6 +16,7 @@
 #include <actions/ToggleAction.h>
 #include <actions/WindowLevelAction.h>
 
+/* TODO: remove once responsive toolbar action is working flawlessly in production
 class ChangingSizeAction : public WidgetAction
 {
 public:
@@ -86,9 +87,7 @@ public:
     {
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
-        _toolbarAction.setDefaultWidgetFlags(ResponsiveToolbarAction::WidgetFlag::Vertical);
-
-        //_widthAction.setDefaultWidgetFlags(IntegralAction::WidgetFlag::SpinBox);
+        _toolbarAction.setDefaultWidgetFlags(ResponsiveToolbarAction::WidgetFlag::Horizontal);
 
         _toolbarAction.addAction(&_integralAction, 21);
         _toolbarAction.addAction(&_decimalAction, 7);
@@ -135,6 +134,7 @@ protected:
     TriggerAction               _triggerAction;
     WindowLevelAction           _windowLevelAction;
 };
+*/
 
 int main(int argc, char *argv[])
 {
@@ -183,9 +183,10 @@ int main(int argc, char *argv[])
 
     mainWindow.show();
 
+    /* TODO: remove once responsive toolbar action is working flawlessly in production
     ToolbarDialog toolbarDialog(nullptr);
-
     toolbarDialog.show();
+    */
 
     return hdpsApplication.exec();
 }
