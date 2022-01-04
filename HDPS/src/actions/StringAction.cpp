@@ -130,7 +130,6 @@ StringAction::Widget::Widget(QWidget* parent, StringAction* stringAction, const 
         setPopupLayout(layout);
     }
     else {
-        setFixedWidth(40);
         layout->setMargin(0);
         setLayout(layout);
     }

@@ -177,7 +177,6 @@ ColorAction::Widget::Widget(QWidget* parent, ColorAction* colorAction, const std
         setPopupLayout(layout);
     }
     else {
-        setFixedWidth(40);
         layout->setMargin(0);
         setLayout(layout);
     }
