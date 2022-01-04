@@ -5,7 +5,10 @@
 
 #include "Application.h"
 
-/* TODO: remove once responsive toolbar action is working flawlessly in production
+// TODO: remove once responsive toolbar action is working flawlessly in production
+//#define DEBUG_RESPONSIVE_TOOLBAR
+
+#ifdef DEBUG_RESPONSIVE_TOOLBAR
 #include <actions/ResponsiveToolbarAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/DecimalAction.h>
@@ -88,6 +91,7 @@ public:
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
         _toolbarAction.setDefaultWidgetFlags(ResponsiveToolbarAction::WidgetFlag::Horizontal);
+        _toolbarAction.setEnableAnimation(false);
 
         _toolbarAction.addAction(&_integralAction, 21);
         _toolbarAction.addAction(&_decimalAction, 7);
@@ -134,7 +138,7 @@ protected:
     TriggerAction               _triggerAction;
     WindowLevelAction           _windowLevelAction;
 };
-*/
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -183,10 +187,10 @@ int main(int argc, char *argv[])
 
     mainWindow.show();
 
-    /* TODO: remove once responsive toolbar action is working flawlessly in production
+#ifdef DEBUG_RESPONSIVE_TOOLBAR
     ToolbarDialog toolbarDialog(nullptr);
     toolbarDialog.show();
-    */
+#endif
 
     return hdpsApplication.exec();
 }

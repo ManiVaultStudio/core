@@ -31,8 +31,11 @@ public:
     /**
      * Change the widget opacity
      * @param opacity Widget opacity
+     * @param duration Duration of the animation in milliseconds
+     * @param delay Delay in milliseconds
+     * @param finished Function to call when the fade process has completed
      */
-    void setOpacity(float opacity);
+    void setOpacity(float opacity, std::int32_t duration = 0, std::int32_t delay = 0, std::function<void()> finished = std::function<void()>());
 
     /**
      * Fade in the widget

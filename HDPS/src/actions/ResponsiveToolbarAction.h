@@ -101,6 +101,7 @@ public:
         class StatefulItem : public QObject {
 
         public:
+
             /**
              * Constructor
              * @param horizontalWidget Reference to horizontal widget
@@ -213,7 +214,13 @@ public:
             };
 
         public:
-            SpacerWidget(const Type& type = Type::Divider);
+
+            /**
+             * Constructor
+             * @param horizontalWidget Reference to horizontal widget
+             * @param type Spacer type
+             */
+            SpacerWidget(HorizontalWidget& horizontalWidget, const Type& type = Type::Divider);
 
             /**
              * Get spacer type based on the state of the item left and right of the spacer
@@ -245,11 +252,12 @@ public:
             static std::int32_t getWidth(const Type& type);
 
         protected:
-            Type                _type;              /** Spacer type */
-            QHBoxLayout         _layout;            /** Main layout */
-            QFrame              _verticalLine;      /** Vertical line */
-            FadeableWidget      _fadeableWidget;    /** For fading in/out the vertical line */
-            QVariantAnimation   _sizeAnimation;     /** For animating the size of the spacer */
+            HorizontalWidget&   _horizontalWidget;      /** Reference to owning horizontal widget */
+            Type                _type;                  /** Spacer type */
+            QHBoxLayout         _layout;                /** Main layout */
+            QFrame              _verticalLine;          /** Vertical line */
+            FadeableWidget      _fadeableWidget;        /** For fading in/out the vertical line */
+            QVariantAnimation   _sizeAnimation;         /** For animating the size of the spacer */
         };
 
         using SharedSpacerWidget = QSharedPointer<SpacerWidget>;
@@ -280,6 +288,12 @@ public:
          * @param itemStates States of the items
          */
         void setItemStates(const QVector<ItemState>& itemStates);
+
+        /**
+         * Get whether animations are enabled or not
+         * @return Whether animations are enabled or not
+         */
+        bool getEnableAnimation() const;
 
     protected:
         ResponsiveToolbarAction*        _responsiveToolbarAction;   /** Pointer to responsive toolbar action */
@@ -341,8 +355,21 @@ public:
      */
     void addAction(WidgetAction* action, std::int32_t priority = 1);
 
+    /**
+     * Get whether animations are enabled or not
+     * @return Whether animations are enabled or not
+     */
+    bool getEnableAnimation() const;
+
+    /**
+     * Set whether animations are enabled or not
+     * @param enableAnimation Whether animations are enabled or not
+     */
+    void setEnableAnimation(bool enableAnimation);
+
 protected:
-    QVector<Item>  _items;          /** Toolbar items */
+    QVector<Item>   _items;             /** Toolbar items */
+    bool            _enableAnimation;   /** Whether animations are enabled or not */
 
     friend class HorizontalWidget;
 };
