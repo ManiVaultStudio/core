@@ -26,10 +26,10 @@ public:
 
     /** Describes the widget configurations (a color map combobox always exists) */
     enum WidgetFlag {
-        Settings        = 0x00001,      /** Widgets have a settings popup to adjust range and other settings */
-        EditRange       = 0x00002,      /** Users are allowed to change the color map range */
+        Settings    = 0x00001,      /** Widgets have a settings popup to adjust range and other settings */
+        EditRange   = 0x00002,      /** Users are allowed to change the color map range */
 
-        All     = Settings | EditRange
+        Default     = Settings | EditRange
     };
 
 public:

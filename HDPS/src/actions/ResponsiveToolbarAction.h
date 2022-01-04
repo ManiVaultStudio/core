@@ -17,7 +17,7 @@ namespace gui {
 /**
  * Responsive toolbar action class
  *
- * Toolbar action class which adjust the visual representation of items based on the available screen space (width)
+ * Toolbar action class which selectively collapses items based on the available screen space
  *
  * @author Thomas Kroes
  */

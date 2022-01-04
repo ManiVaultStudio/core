@@ -16,6 +16,7 @@
 #include <actions/ToggleAction.h>
 #include <actions/WindowLevelAction.h>
 
+/*
 class ChangingSizeAction : public WidgetAction
 {
 public:
@@ -70,11 +71,6 @@ class ToolbarDialog : public QDialog
 {
 public:
 
-    /**
-     * Constructor
-     * @param parent Pointer to parent widget
-     * @param dataset Dataset root to apply grouping to
-     */
     ToolbarDialog(QWidget* parent) :
         _toolbarAction(this),
         _integralAction(this, "Integral action"),
@@ -97,7 +93,7 @@ public:
         _toolbarAction.addAction(&_decimalAction, 7);
         _toolbarAction.addAction(&_stringAction, 11);
         _toolbarAction.addAction(&_colorAction, 3);
-        _toolbarAction.addAction(&_changingSizeAction, 100);
+        _toolbarAction.addAction(&_changingSizeAction, 9);
         _toolbarAction.addAction(&_colorMapAction, 1);
         _toolbarAction.addAction(&_datasetPickerAction, 8);
         _toolbarAction.addAction(&_optionAction, 5);
@@ -116,12 +112,10 @@ public:
         //layout->addStretch(1);
     }
 
-    /** Get preferred size */
     QSize sizeHint() const override {
         return QSize(850, 0);
     }
 
-    /** Get minimum size hint*/
     QSize minimumSizeHint() const override {
         return sizeHint();
     }
@@ -140,6 +134,7 @@ protected:
     TriggerAction               _triggerAction;
     WindowLevelAction           _windowLevelAction;
 };
+*/
 
 int main(int argc, char *argv[])
 {
@@ -188,9 +183,9 @@ int main(int argc, char *argv[])
 
     mainWindow.show();
 
-    ToolbarDialog toolbarDialog(nullptr);
+    //ToolbarDialog toolbarDialog(nullptr);
 
-    toolbarDialog.show();
+    //toolbarDialog.show();
 
     return hdpsApplication.exec();
 }

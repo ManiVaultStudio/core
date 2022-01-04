@@ -26,7 +26,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::All);
+    setDefaultWidgetFlags(WidgetFlag::Default);
 
     initialize(colorMap, defaultColorMap);
 

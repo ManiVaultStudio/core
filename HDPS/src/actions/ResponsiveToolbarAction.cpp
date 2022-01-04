@@ -37,8 +37,6 @@ ResponsiveToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, Res
     _resizeTimer.setInterval(RESIZE_TIMER_INTERVAL);
     _resizeTimer.setSingleShot(true);
 
-    //setStyleSheet("background-color: green;");
-
     // Handle resize timer timeout
     connect(&_resizeTimer, &QTimer::timeout, this, [this]() {
         computeLayout();
@@ -96,6 +94,9 @@ void ResponsiveToolbarAction::HorizontalWidget::computeLayout(StatefulItem* stat
 
     // Initialize collapsed
     std::fill(itemStates.begin(), itemStates.end(), ItemState::Collapsed);
+
+    if (statefulItem != nullptr)
+        itemStates[statefulItem->getIndex()] = ItemState::Standard;
 
     // Compute candidate configuration width
     const auto getWidth = [this, &itemStates]() -> std::int32_t {
