@@ -507,8 +507,6 @@ protected:
 
     static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;       /** Default resize timer interval */
     static constexpr std::int32_t ANIMATION_DURATION    = 300;      /** Animation duration */
-
-    friend class HorizontalWidget;
 };
 
 }
