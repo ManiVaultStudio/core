@@ -18,7 +18,7 @@ ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("toggle-on"));
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::CheckBox);
+    setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(toggled, defaultToggled);
 
     connect(this, &ToggleAction::toggled, this, [this]() {
@@ -155,9 +155,6 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
 
     if (widgetFlags & WidgetFlag::PushButton)
         layout->addWidget(new ToggleAction::PushButtonWidget(parent, this, widgetFlags));
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
 

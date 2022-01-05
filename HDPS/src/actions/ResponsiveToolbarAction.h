@@ -41,7 +41,7 @@ public:
     enum class ItemState {
         Undefined,      /** Item state is not defined */
         Collapsed,      /** Item is in a collapsed state (accessible through a tool button) */
-        Standard        /** Item is in a standard state */
+        Standard,       /** Item is in a standard state */
     };
 
 protected:
@@ -86,10 +86,78 @@ protected:
 
 public:
 
-    /** Toolbar widget for horizontal docking */
-    class HorizontalWidget : public QWidget
+    /**
+     * Hidden items action class
+     *
+     * Shows hidden items in a popup
+     *
+     * @author Thomas Kroes
+     */
+    class HiddenItemsAction : public WidgetAction
     {
     protected:
+
+        /** Widget for hidden items action */
+        class Widget : public WidgetActionWidget
+        {
+        protected:
+
+            /**
+             * Constructor
+             * @param parent Pointer to parent widget
+             * @param hiddenItemsAction Pointer to hidden items action
+             * @param widgetFlags Widget flags for the configuration of the widget (type)
+             */
+            Widget(QWidget* parent, HiddenItemsAction* hiddenItemsAction, const std::int32_t& widgetFlags);
+
+        protected:
+            HiddenItemsAction*      _hiddenItemsAction;     /** Pointer to hidden items action */
+            QHBoxLayout             _layout;                /** Main vertical layout */
+
+            friend class ResponsiveToolbarAction;
+        };
+
+    protected:
+
+        /**
+         * Get widget representation of the hidden items action
+         * @param parent Pointer to parent widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+            return new Widget(parent, this, widgetFlags);
+        };
+
+    protected:
+
+        /**
+         * Constructor
+         * @param responsiveToolbarAction Reference to responsive toolbar action
+         */
+        HiddenItemsAction(ResponsiveToolbarAction& responsiveToolbarAction);
+
+        /**
+         * Get responsive toolbar action
+         * @return Reference to responsive toolbar action
+         */
+        ResponsiveToolbarAction& getResponsiveToolbarAction();
+
+    protected:
+        ResponsiveToolbarAction&    _responsiveToolbarAction;   /** Reference to responsive toolbar action */
+
+        friend class ResponsiveToolbarAction;
+    };
+
+    /**
+     * Toolbar widget class
+     *
+     * Toolbar widget base class for responsive toolbar action
+     *
+     * @author Thomas Kroes
+     */
+    class ToolbarWidget : public QWidget
+    {
+    public:
 
         /**
          * Stateful item class
@@ -104,17 +172,12 @@ public:
 
             /**
              * Constructor
-             * @param horizontalWidget Reference to horizontal widget
+             * @param toolbarWidget Pointer to toolbar widget
              * @param index Index
-             * @param item Reference to toolbar item
+             * @param action Reference to action
+             * @param action Reference to action
              */
-            StatefulItem(HorizontalWidget& horizontalWidget, std::int32_t index, Item& item);
-
-            /**
-             * Get item
-             * @return Reference to toolbar item
-             */
-            Item& getItem();
+            StatefulItem(ToolbarWidget* toolbarWidget, std::int32_t index, WidgetAction& action, std::int32_t priority);
 
             /**
              * Get index
@@ -182,10 +245,23 @@ public:
                 return getPriority() < other.getPriority();
             }
 
+            /** Show the item */
+            void show();
+
+            /** Hide the item */
+            void hide();
+
+            /**
+             * Set visibility
+             * @param visible Visibility
+             */
+            void setVisibility(bool visible);
+
         protected:
-            HorizontalWidget&   _horizontalWidget;      /** Reference to owning horizontal widget */
+            ToolbarWidget*      _toolbarWidget;         /** Pointer to owning toolbar widget */
             std::int32_t        _index;                 /** Position index in the toolbar */
-            Item&               _item;                  /** Reference to toolbar item */
+            WidgetAction&       _action;                /** Reference to action */
+            std::int32_t        _priority;              /** Visibility priority */
             ItemState           _state;                 /** State of the item */
             QWidget             _widget;                /** Main widget */
             QHBoxLayout         _widgetLayout;          /** Main widget layout */
@@ -217,10 +293,10 @@ public:
 
             /**
              * Constructor
-             * @param horizontalWidget Reference to horizontal widget
+             * @param toolbarWidget Pointer to toolbar widget
              * @param type Spacer type
              */
-            SpacerWidget(HorizontalWidget& horizontalWidget, const Type& type = Type::Divider);
+            SpacerWidget(ToolbarWidget* toolbarWidget, const Type& type = Type::Divider);
 
             /**
              * Get spacer type based on the state of the item left and right of the spacer
@@ -252,7 +328,7 @@ public:
             static std::int32_t getWidth(const Type& type);
 
         protected:
-            HorizontalWidget&   _horizontalWidget;      /** Reference to owning horizontal widget */
+            ToolbarWidget*      _toolbarWidget;      /** Reference to owning horizontal widget */
             Type                _type;                  /** Spacer type */
             QHBoxLayout         _layout;                /** Main layout */
             QFrame              _verticalLine;          /** Vertical line */
@@ -267,9 +343,58 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param responsiveToolbarAction Pointer to toolbar action
+         * @param responsiveToolbarAction Reference to responsive toolbar action
          */
-        HorizontalWidget(QWidget* parent, ResponsiveToolbarAction* responsiveToolbarAction);
+        ToolbarWidget(QWidget* parent, ResponsiveToolbarAction& responsiveToolbarAction) :
+            QWidget(parent),
+            _responsiveToolbarAction(responsiveToolbarAction),
+            _statefulItems(),
+            _spacerWidgets()
+        {
+        }
+
+    public:
+
+        /**
+         * Get whether animations are enabled or not
+         * @return Whether animations are enabled or not
+         */
+        bool getEnableAnimation() const
+        {
+            return _responsiveToolbarAction.getEnableAnimation();
+        }
+
+        /**
+         * Computes the layout of all items (decides which items are collapsed/standard)
+         * @param statefulItem Pointer to stateful item
+         */
+        virtual void computeLayout(StatefulItem* statefulItem = nullptr)
+        {
+        }
+
+    protected:
+        ResponsiveToolbarAction&        _responsiveToolbarAction;   /** Reference to responsive toolbar action */
+        QVector<SharedStatefulItem>     _statefulItems;             /** All stateful items */
+        QVector<SharedSpacerWidget>     _spacerWidgets;             /** All spacer widgets */
+    };
+
+    /**
+     * Horizontal widget class
+     *
+     * Horizontal toolbar widget for responsive toolbar action
+     *
+     * @author Thomas Kroes
+     */
+    class HorizontalWidget : public ToolbarWidget
+    {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param responsiveToolbarAction Reference to toolbar action
+         */
+        HorizontalWidget(QWidget* parent, ResponsiveToolbarAction& responsiveToolbarAction);
 
         /**
          * Invoked when the widget is resized
@@ -281,7 +406,7 @@ public:
          * Computes the layout of all items (decides which items are collapsed/standard)
          * @param statefulItem Pointer to stateful item
          */
-        void computeLayout(StatefulItem* statefulItem = nullptr);
+        void computeLayout(StatefulItem* statefulItem = nullptr) override;
 
         /**
          * Set item states
@@ -289,43 +414,36 @@ public:
          */
         void setItemStates(const QVector<ItemState>& itemStates);
 
-        /**
-         * Get whether animations are enabled or not
-         * @return Whether animations are enabled or not
-         */
-        bool getEnableAnimation() const;
-
     protected:
-        ResponsiveToolbarAction*        _responsiveToolbarAction;   /** Pointer to responsive toolbar action */
         QTimer                          _resizeTimer;               /** Timer which prevents unnecessary resize handler calls */
         QHBoxLayout                     _mainLayout;                /** Horizontal main layout */
         QHBoxLayout                     _toolbarLayout;             /** Horizontal toolbar layout for items */
         QWidget                         _toolbarWidget;             /** Toolbar widget */
-        QVector<SharedStatefulItem>     _statefulItems;             /** All stateful items */
-        QVector<SharedSpacerWidget>     _spacerWidgets;             /** All spacer widgets */
-
-        static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;       /** Default resize timer interval */
-        static constexpr std::int32_t ANIMATION_DURATION    = 300;      /** Animation duration */
 
         friend class ResponsiveToolbarAction;
         friend class StatefulItem;
     };
 
-    /** Toolbar widget for vertical docking */
-    class VerticalWidget : public QWidget
+    /**
+     * Vertical widget class
+     *
+     * Vertical toolbar widget for responsive toolbar action
+     *
+     * @author Thomas Kroes
+     */
+    class VerticalWidget : public ToolbarWidget
     {
     protected:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param responsiveToolbarAction Pointer to toolbar action
+         * @param responsiveToolbarAction Reference to toolbar action
          */
-        VerticalWidget(QWidget* parent, ResponsiveToolbarAction* responsiveToolbarAction);
+        VerticalWidget(QWidget* parent, ResponsiveToolbarAction& responsiveToolbarAction);
 
     protected:
-        ResponsiveToolbarAction*    _responsiveToolbarAction;   /** Pointer to responsive toolbar action */
-        QVBoxLayout                 _layout;                    /** Main vertical layout */
+        QVBoxLayout     _layout;        /** Main vertical layout */
 
         friend class ResponsiveToolbarAction;
     };
@@ -367,9 +485,19 @@ public:
      */
     void setEnableAnimation(bool enableAnimation);
 
+    /**
+     * Get hidden items action
+     * @return Reference to hidden items action
+     */
+    HiddenItemsAction& getHiddenItemsAction();
+
 protected:
-    QVector<Item>   _items;             /** Toolbar items */
-    bool            _enableAnimation;   /** Whether animations are enabled or not */
+    QVector<Item>       _items;                 /** Toolbar items */
+    bool                _enableAnimation;       /** Whether animations are enabled or not */
+    HiddenItemsAction   _hiddenItemsAction;     /** Hidden items action */
+
+    static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;       /** Default resize timer interval */
+    static constexpr std::int32_t ANIMATION_DURATION    = 300;      /** Animation duration */
 
     friend class HorizontalWidget;
 };

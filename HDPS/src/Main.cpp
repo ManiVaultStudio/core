@@ -6,7 +6,7 @@
 #include "Application.h"
 
 // TODO: remove once responsive toolbar action is working flawlessly in production
-//#define DEBUG_RESPONSIVE_TOOLBAR
+#define DEBUG_RESPONSIVE_TOOLBAR
 
 #ifdef DEBUG_RESPONSIVE_TOOLBAR
 #include <actions/ResponsiveToolbarAction.h>
@@ -91,7 +91,7 @@ public:
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
         _toolbarAction.setDefaultWidgetFlags(ResponsiveToolbarAction::WidgetFlag::Horizontal);
-        _toolbarAction.setEnableAnimation(false);
+        //_toolbarAction.setEnableAnimation(false);
 
         _toolbarAction.addAction(&_integralAction, 21);
         _toolbarAction.addAction(&_decimalAction, 7);
