@@ -573,11 +573,6 @@ ResponsiveToolbarAction::HiddenItemsAction::Widget::Widget(QWidget* parent, Hidd
     _hiddenItemsAction(hiddenItemsAction),
     _layout()
 {
-    /*
-    for (auto statefulItem : hiddenItemsAction->getResponsiveToolbarAction()) {
-    }
-    */
-
     if (widgetFlags & WidgetActionWidget::PopupLayout) {
         setPopupLayout(&_layout);
     }

@@ -270,7 +270,7 @@ public:
             QVariantAnimation   _sizeAnimation;         /** Animation to control the size of the widget */
         };
 
-        using SharedStatefulItem = QSharedPointer<StatefulItem>;
+        using SharedStatefulItem = QSharedPointer<ToolbarWidget::StatefulItem>;
 
         /**
          * Spacer widget
@@ -328,7 +328,7 @@ public:
             static std::int32_t getWidth(const Type& type);
 
         protected:
-            ToolbarWidget*      _toolbarWidget;      /** Reference to owning horizontal widget */
+            ToolbarWidget*      _toolbarWidget;         /** Reference to owning horizontal widget */
             Type                _type;                  /** Spacer type */
             QHBoxLayout         _layout;                /** Main layout */
             QFrame              _verticalLine;          /** Vertical line */
@@ -336,7 +336,7 @@ public:
             QVariantAnimation   _sizeAnimation;         /** For animating the size of the spacer */
         };
 
-        using SharedSpacerWidget = QSharedPointer<SpacerWidget>;
+        using SharedSpacerWidget = QSharedPointer<ToolbarWidget::SpacerWidget>;
 
     protected:
 
@@ -370,6 +370,15 @@ public:
          */
         virtual void computeLayout(StatefulItem* statefulItem = nullptr)
         {
+        }
+
+        /**
+         * Get stateful items
+         * @return Stateful items
+         */
+        QVector<ToolbarWidget::SharedStatefulItem> getStatefulItems()
+        {
+            return _statefulItems;
         }
 
     protected:
