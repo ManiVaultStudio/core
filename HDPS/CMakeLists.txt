@@ -126,14 +126,19 @@ set(ACTIONS_HEADERS
     src/actions/PixelSelectionAction.h
     src/actions/TriggerAction.h
     src/actions/ToggleAction.h
-    src/actions/ResponsiveToolbarAction.h
+    src/actions/ToolbarAction.h
+    src/actions/ToolbarWidget.h
+    src/actions/ToolbarItemWidget.h
+    src/actions/ToolbarActionWidget.h
+    src/actions/ToolbarSpacerWidget.h
+    src/actions/HorizontalToolbarWidget.h
+    src/actions/VerticalToolbarWidget.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionResetButton.h
-    src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
     src/actions/Actions.h
 )
@@ -158,14 +163,19 @@ set(ACTIONS_SOURCES
 	src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/ToggleAction.cpp
-    src/actions/ResponsiveToolbarAction.cpp
+    src/actions/ToolbarAction.cpp
+    src/actions/ToolbarWidget.cpp
+    src/actions/ToolbarItemWidget.cpp
+	src/actions/ToolbarActionWidget.cpp
+    src/actions/ToolbarSpacerWidget.cpp
+    src/actions/HorizontalToolbarWidget.cpp
+    src/actions/VerticalToolbarWidget.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionResetButton.cpp
-    src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
 )
 

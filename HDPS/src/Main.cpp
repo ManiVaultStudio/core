@@ -9,7 +9,7 @@
 #define DEBUG_RESPONSIVE_TOOLBAR
 
 #ifdef DEBUG_RESPONSIVE_TOOLBAR
-#include <actions/ResponsiveToolbarAction.h>
+#include <actions/ToolbarAction.h>
 #include <actions/IntegralAction.h>
 #include <actions/DecimalAction.h>
 #include <actions/StringAction.h>
@@ -90,7 +90,7 @@ public:
     {
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
-        _toolbarAction.setDefaultWidgetFlags(ResponsiveToolbarAction::WidgetFlag::Horizontal);
+        _toolbarAction.setDefaultWidgetFlags(ToolbarAction::WidgetFlag::Horizontal);
         //_toolbarAction.setEnableAnimation(false);
 
         _toolbarAction.addAction(&_integralAction, 21);
@@ -125,7 +125,7 @@ public:
     }
 
 protected:
-    ResponsiveToolbarAction     _toolbarAction;
+    ToolbarAction               _toolbarAction;
     IntegralAction              _integralAction;
     DecimalAction               _decimalAction;
     StringAction                _stringAction;
