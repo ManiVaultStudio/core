@@ -90,7 +90,7 @@ public:
     {
         setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
-        _toolbarAction.setDefaultWidgetFlags(ToolbarAction::WidgetFlag::Horizontal);
+        _toolbarAction.setDefaultWidgetFlags(ToolbarAction::WidgetFlag::Vertical);
         //_toolbarAction.setEnableAnimation(false);
 
         _toolbarAction.addAction(&_integralAction, 21);

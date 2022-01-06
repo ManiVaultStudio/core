@@ -96,14 +96,18 @@ public:
     }
 
 protected:
-    ToolbarWidget*         _toolbarWidget;          /** Pointer to owning toolbar widget */
-    WidgetAction&          _action;                 /** Reference to action */
-    std::int32_t           _priority;               /** Visibility priority */
-    QHBoxLayout            _layout;                 /** Widget layout */
-    FadeableWidget         _collapsedWidget;        /** Fadeable collapsed widget */
-    FadeableWidget         _standardWidget;         /** Fadeable standard widget */
-    QVariantAnimation      _sizeAnimation;          /** Animation to control the size of the widget */
+    ToolbarWidget*              _toolbarWidget;         /** Pointer to owning toolbar widget */
+    WidgetAction&               _action;                /** Reference to action */
+    std::int32_t                _priority;              /** Visibility priority */
+    QHBoxLayout                 _layout;                /** Widget layout */
+    QSharedPointer<QWidget>     _collapsedWidget;       /** Fadeable collapsed widget */
+    QSharedPointer<QWidget>     _standardWidget;        /** Fadeable standard widget */
+    FadeableWidget              _collapsedWidgetFade;   /** Fadeable collapsed widget */
+    FadeableWidget              _standardWidgetFade;    /** Fadeable standard widget */
+    QVariantAnimation           _sizeAnimation;         /** Animation to control the size of the widget */
 };
+
+using SharedToolbarActionWidget = QSharedPointer<ToolbarActionWidget>;
 
 }
 }

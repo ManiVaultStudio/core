@@ -9,10 +9,11 @@ namespace hdps {
 namespace gui {
 
 ToolbarItemWidget::ToolbarItemWidget(ToolbarWidget* toolbarWidget) :
-    FadeableWidget(toolbarWidget, toolbarWidget),
+    QWidget(toolbarWidget),
     _toolbarWidget(toolbarWidget),
     _state(0),
-    _sizeAnimation(this)
+    _sizeAnimation(this),
+    _fadeableWidget(toolbarWidget, this)
 {
 }
 
@@ -42,7 +43,7 @@ void ToolbarItemWidget::hide()
 
 void ToolbarItemWidget::setVisibility(bool visible)
 {
-    setOpacity(visible ? 1.0f : 0.0f);
+    _fadeableWidget.setOpacity(visible ? 1.0f : 0.0f);
 }
 
 }

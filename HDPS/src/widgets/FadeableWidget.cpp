@@ -9,20 +9,11 @@ namespace gui {
 FadeableWidget::FadeableWidget(QWidget* parent, QWidget* target) :
     QWidget(parent),
     _target(target),
-    _layout(),
     _opacityEffect(),
     _opacityAnimation(&_opacityEffect, "opacity")
 {
     Q_ASSERT(parent != nullptr);
     Q_ASSERT(_target != nullptr);
-
-    _target->setObjectName("TargetWidget");
-
-    _layout.setMargin(0);
-    _layout.setSizeConstraint(QLayout::SetFixedSize);
-    _layout.addWidget(target);
-
-    setLayout(&_layout);
 
     _target->setGraphicsEffect(&_opacityEffect);
 }

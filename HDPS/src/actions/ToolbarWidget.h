@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ToolbarItemWidget.h"
+#include "ToolbarActionWidget.h"
+#include "ToolbarHiddenItemsAction.h"
 
 #include <QWidget>
 #include <QHBoxLayout>
@@ -58,16 +60,17 @@ public:
     QVector<SharedToolbarItemWidget> getToolbarItemWidgets();
 
     /**
-     * Set states
-     * @param states States of the toolbar widget items
+     * Get toolbar action widgets
+     * @return Vector of pointers to toolbar action widgets
      */
-    void setStates(const QVector<std::int32_t>& states);
+    QVector<ToolbarActionWidget*> getToolbarActionWidgets();
 
 protected:
-    Qt::Orientation                     _orientation;               /** Orientation of the toolbar (horizontal/vertical) */
-    ToolbarAction&                      _toolbarAction;             /** Reference to toolbar action */
-    QVector<SharedToolbarItemWidget>    _toolbarItemWidgets;        /** All toolbar item widgets (action widgets + spacers) */
-    QTimer                              _resizeTimer;               /** Timer which prevents unnecessary resize handler calls */
+    Qt::Orientation                     _orientation;                   /** Orientation of the toolbar (horizontal/vertical) */
+    ToolbarAction&                      _toolbarAction;                 /** Reference to toolbar action */
+    QVector<SharedToolbarItemWidget>    _toolbarItemWidgets;            /** All toolbar item widgets (action widgets + spacers) */
+    QTimer                              _resizeTimer;                   /** Timer which prevents unnecessary resize handler calls */
+    ToolbarHiddenItemsAction            _toolbarHiddenItemsAction;      /** Toolbar hidden items action */
 
 public:
     static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;       /** Default resize timer interval */

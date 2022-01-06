@@ -15,8 +15,7 @@ namespace gui {
 ToolbarAction::ToolbarAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent),
     _items(),
-    _enableAnimation(true),
-    _hiddenItemsAction(*this)
+    _enableAnimation(true)
 {
     setText(title);
     setMayReset(true);
@@ -38,9 +37,9 @@ void ToolbarAction::setEnableAnimation(bool enableAnimation)
     _enableAnimation = enableAnimation;
 }
 
-ToolbarAction::HiddenItemsAction& ToolbarAction::getHiddenItemsAction()
+QVector<hdps::gui::ToolbarAction::Item> ToolbarAction::getItems() const
 {
-    return _hiddenItemsAction;
+    return _items;
 }
 
 QWidget* ToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -81,32 +80,6 @@ WidgetAction* ToolbarAction::Item::getAction()
 std::int32_t ToolbarAction::Item::getPriority() const
 {
     return _priority;
-}
-
-ToolbarAction::HiddenItemsAction::HiddenItemsAction(ToolbarAction& responsiveToolbarAction) :
-    WidgetAction(&responsiveToolbarAction),
-    _responsiveToolbarAction(responsiveToolbarAction)
-{
-    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("ellipsis-h"));
-}
-
-ToolbarAction& ToolbarAction::HiddenItemsAction::getResponsiveToolbarAction()
-{
-    return _responsiveToolbarAction;
-}
-
-ToolbarAction::HiddenItemsAction::Widget::Widget(QWidget* parent, HiddenItemsAction* hiddenItemsAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, hiddenItemsAction, widgetFlags),
-    _hiddenItemsAction(hiddenItemsAction),
-    _layout()
-{
-    if (widgetFlags & WidgetActionWidget::PopupLayout) {
-        setPopupLayout(&_layout);
-    }
-    else {
-        _layout.setMargin(0);
-        setLayout(&_layout);
-    }
 }
 
 }

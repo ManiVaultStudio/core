@@ -14,17 +14,19 @@ ToolbarActionWidget::ToolbarActionWidget(ToolbarWidget* toolbarWidget, WidgetAct
     _action(action),
     _priority(priority),
     _layout(),
-    _collapsedWidget(this, _action.createCollapsedWidget(this)),
-    _standardWidget(this, _action.createWidget(this)),
+    _collapsedWidget(action.createCollapsedWidget(this)),
+    _standardWidget(_action.createWidget(this)),
+    _collapsedWidgetFade(toolbarWidget, _collapsedWidget.get()),
+    _standardWidgetFade(toolbarWidget, _standardWidget.get()),
     _sizeAnimation(this)
 {
     _state = State::Undefined;
 
-    _collapsedWidget.setOpacity(1.0f);
-    _standardWidget.setOpacity(0.0f);
+    _collapsedWidgetFade.setOpacity(1.0f);
+    _standardWidgetFade.setOpacity(1.0f);
 
     // Respond to changes in the size of the standard widget
-    _standardWidget.installEventFilter(this);
+    _standardWidget->installEventFilter(this);
 
     // Configure size animation
     _sizeAnimation.setDuration(ToolbarWidget::ANIMATION_DURATION);
@@ -39,12 +41,13 @@ ToolbarActionWidget::ToolbarActionWidget(ToolbarWidget* toolbarWidget, WidgetAct
 
 void ToolbarActionWidget::stateChanged(std::int32_t previousState, std::int32_t currentState)
 {
-    /*
-    const auto widthBegin = static_cast<float>(getWidth(_state == ItemState::Undefined ? state : _state));
-    const auto widthEnd = static_cast<float>(getWidth(state));
-    const auto stateChanged = state != _state;
-    const auto widthChanged = widthBegin != widthEnd;
-    const auto animationDuration = (_state == ItemState::Undefined || !_toolbarWidget->getEnableAnimation()) ? 0 : (widthChanged ? ANIMATION_DURATION : 0);
+    qDebug() << __FUNCTION__;
+
+    const auto widthBegin           = static_cast<float>(getWidth(previousState == State::Undefined ? currentState : previousState));
+    const auto widthEnd             = static_cast<float>(getWidth(currentState));
+    const auto stateChanged         = currentState != previousState;
+    const auto widthChanged         = widthBegin != widthEnd;
+    const auto animationDuration    = (currentState == State::Undefined || !_toolbarWidget->getEnableAnimation()) ? 0 : (widthChanged ? ToolbarWidget::ANIMATION_DURATION : 0);
 
     // Width interpolation
     const auto widthLerp = [widthBegin, widthEnd](float norm) {
@@ -52,76 +55,76 @@ void ToolbarActionWidget::stateChanged(std::int32_t previousState, std::int32_t 
     };
 
     // Configure and possibly animate widgets based on the state
-    switch (state)
+    switch (currentState)
     {
-    case ItemState::Collapsed:
-    {
-        // Collapsed widget should respond to mouse events and the standard widget should not
-        _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-        _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        case State::Collapsed:
+        {
+            // Collapsed widget should respond to mouse events and the standard widget should not
+            _collapsedWidget->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+            _standardWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-        // The collapsed widget should be raised above the standard widget
-        _collapsedWidget.raise();
+            // The collapsed widget should be raised above the standard widget
+            _collapsedWidget->raise();
 
-        if (stateChanged) {
+            if (stateChanged) {
 
-            // Fade out the standard widget and swap the widgets when done
-            _standardWidget.fadeOut(animationDuration, 0, [this]() {
-                _widgetLayout.takeAt(0);
-                _widgetLayout.addWidget(&_collapsedWidget);
-            });
+                // Fade out the standard widget and swap the widgets when done
+                _standardWidgetFade.fadeOut(animationDuration, 0, [this]() {
+                    _layout.takeAt(0);
+                    _layout.addWidget(_collapsedWidget.get());
+                });
 
-            // Fade in the collapsed widget when the state changed
-            _collapsedWidget.fadeIn(animationDuration, animationDuration);
+                // Fade in the collapsed widget when the state changed
+                _collapsedWidgetFade.fadeIn(animationDuration, animationDuration);
+            }
+
+            break;
         }
 
-        break;
-    }
+        case State::Standard:
+        {
+            // Collapsed widget should not respond to mouse events and the standard widget should
+            _collapsedWidget->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+            _standardWidget->setAttribute(Qt::WA_TransparentForMouseEvents, false);
 
-    case ItemState::Standard:
-    {
-        // Collapsed widget should not respond to mouse events and the standard widget should
-        _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-        _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
+            // The standard widget should be raised above the collapsed widget
+            _standardWidget->raise();
 
-        // The standard widget should be raised above the collapsed widget
-        _standardWidget.raise();
+            if (stateChanged) {
 
-        if (stateChanged) {
+                // Fade in the standard widget when the state changed
+                _standardWidgetFade.fadeIn(animationDuration, animationDuration);
 
-            // Fade in the standard widget when the state changed
-            _standardWidget.fadeIn(animationDuration, animationDuration);
+                // Fade out the collapsed widget and swap the widgets when done
+                _collapsedWidgetFade.fadeOut(animationDuration, 0, [this]() {
+                    _layout.takeAt(0);
+                    _layout.addWidget(_standardWidget.get());
+                });
+            }
 
-            // Fade out the collapsed widget and swap the widgets when done
-            _collapsedWidget.fadeOut(animationDuration, 0, [this]() {
-                _widgetLayout.takeAt(0);
-                _widgetLayout.addWidget(&_standardWidget);
-            });
+            break;
         }
 
-        break;
-    }
+        case State::Hidden:
+        {
+            if (stateChanged) {
 
-    case ItemState::Hidden:
-    {
-        if (stateChanged) {
+                // Fade out the collapsed widget and hide when done
+                _collapsedWidgetFade.fadeOut(animationDuration, 0, [this]() {
+                    _layout.takeAt(0);
+                    _layout.addWidget(_standardWidget.get());
+                });
+            }
 
-            // Fade out the collapsed widget and hide when done
-            _collapsedWidget.fadeOut(animationDuration, 0, [this]() {
-                _widgetLayout.takeAt(0);
-                _widgetLayout.addWidget(&_standardWidget);
-            });
+            break;
         }
-
-        break;
-    }
     }
 
     if (_toolbarWidget->getEnableAnimation()) {
 
         // Update the widget fixed width when the size animation values changes
         connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp](const QVariant& value) {
-            _widget.setFixedWidth(widthLerp(value.toFloat()));
+            setFixedWidth(widthLerp(value.toFloat()));
         });
 
         // Set size animation duration and start
@@ -129,12 +132,8 @@ void ToolbarActionWidget::stateChanged(std::int32_t previousState, std::int32_t 
         _sizeAnimation.start();
     }
     else {
-        _widget.setFixedWidth(widthEnd);
+        setFixedWidth(widthEnd);
     }
-
-    // Assign new state
-    _state = state;
-    */
 }
 
 QWidget* ToolbarActionWidget::getWidget(const std::int32_t& state)
@@ -142,10 +141,10 @@ QWidget* ToolbarActionWidget::getWidget(const std::int32_t& state)
     switch (static_cast<State>(state))
     {
         case State::Collapsed:
-            return &_collapsedWidget;
+            return _collapsedWidget.get();
 
         case State::Standard:
-            return &_standardWidget;
+            return _standardWidget.get();
     }
 
     return nullptr;

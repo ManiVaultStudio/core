@@ -21,7 +21,7 @@ class ToolbarWidget;
   *
   * @author Thomas Kroes
   */
- class ToolbarItemWidget : public FadeableWidget {
+ class ToolbarItemWidget : public QWidget {
 
  public:
 
@@ -76,12 +76,13 @@ class ToolbarWidget;
      void setVisibility(bool visible);
 
  protected:
-     ToolbarWidget*     _toolbarWidget;        /** Pointer to owning toolbar widget */
-     std::int32_t       _state;                 /** Toolbar item state */
-     QVariantAnimation  _sizeAnimation;        /** Animation to control the size of the widget */
+     ToolbarWidget*     _toolbarWidget;     /** Pointer to owning toolbar widget */
+     std::int32_t       _state;             /** Toolbar item state */
+     QVariantAnimation  _sizeAnimation;     /** Animation to control the size of the widget */
+     FadeableWidget     _fadeableWidget;    /** For fading in/out */
  };
 
- using SharedToolbarItemWidget = QSharedPointer<ToolbarItemWidget>;
+using SharedToolbarItemWidget = QSharedPointer<ToolbarItemWidget>;
 
 }
 }

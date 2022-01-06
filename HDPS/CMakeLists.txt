@@ -127,6 +127,7 @@ set(ACTIONS_HEADERS
     src/actions/TriggerAction.h
     src/actions/ToggleAction.h
     src/actions/ToolbarAction.h
+    src/actions/ToolbarHiddenItemsAction.h
     src/actions/ToolbarWidget.h
     src/actions/ToolbarItemWidget.h
     src/actions/ToolbarActionWidget.h
@@ -164,6 +165,7 @@ set(ACTIONS_SOURCES
     src/actions/TriggerAction.cpp
     src/actions/ToggleAction.cpp
     src/actions/ToolbarAction.cpp
+    src/actions/ToolbarHiddenItemsAction.cpp
     src/actions/ToolbarWidget.cpp
     src/actions/ToolbarItemWidget.cpp
 	src/actions/ToolbarActionWidget.cpp

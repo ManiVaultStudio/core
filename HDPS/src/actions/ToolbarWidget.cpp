@@ -12,7 +12,8 @@ ToolbarWidget::ToolbarWidget(QWidget* parent, ToolbarAction& toolbarAction, cons
     _orientation(orientation),
     _toolbarAction(toolbarAction),
     _toolbarItemWidgets(),
-    _resizeTimer()
+    _resizeTimer(),
+    _toolbarHiddenItemsAction(toolbarAction)
 {
     // Set resize timer interval and only timeout once
     _resizeTimer.setInterval(RESIZE_TIMER_INTERVAL);
@@ -67,15 +68,23 @@ bool ToolbarWidget::getEnableAnimation() const
     return _toolbarAction.getEnableAnimation();
 }
 
-QVector<hdps::gui::SharedToolbarItemWidget> ToolbarWidget::getToolbarItemWidgets()
+QVector<SharedToolbarItemWidget> ToolbarWidget::getToolbarItemWidgets()
 {
     return _toolbarItemWidgets;
 }
 
-void ToolbarWidget::setStates(const QVector<std::int32_t>& states)
+QVector<ToolbarActionWidget*> ToolbarWidget::getToolbarActionWidgets()
 {
-    //for (const auto state : states)
-    //_toolbarItemWidgets[states.indexOf()]
+    QVector<ToolbarActionWidget*> toolbarActionWidgets;
+
+    for (const auto& toolbarItemWidget : _toolbarItemWidgets) {
+        auto toolbarActionWidget = dynamic_cast<ToolbarActionWidget*>(toolbarItemWidget.get());
+
+        if (toolbarActionWidget)
+            toolbarActionWidgets.append(toolbarActionWidget);
+    }
+
+    return toolbarActionWidgets;
 }
 
 }

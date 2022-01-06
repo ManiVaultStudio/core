@@ -76,70 +76,6 @@ protected:
         std::int32_t    _priority;      /** Visibility priority */
     };
 
-public:
-
-    /**
-     * Hidden items action class
-     *
-     * Shows hidden items in a popup
-     *
-     * @author Thomas Kroes
-     */
-    class HiddenItemsAction : public WidgetAction
-    {
-    protected:
-
-        /** Widget for hidden items action */
-        class Widget : public WidgetActionWidget
-        {
-        protected:
-
-            /**
-             * Constructor
-             * @param parent Pointer to parent widget
-             * @param hiddenItemsAction Pointer to hidden items action
-             * @param widgetFlags Widget flags for the configuration of the widget (type)
-             */
-            Widget(QWidget* parent, HiddenItemsAction* hiddenItemsAction, const std::int32_t& widgetFlags);
-
-        protected:
-            HiddenItemsAction*      _hiddenItemsAction;     /** Pointer to hidden items action */
-            QHBoxLayout             _layout;                /** Main vertical layout */
-
-            friend class ToolbarAction;
-        };
-
-    protected:
-
-        /**
-         * Get widget representation of the hidden items action
-         * @param parent Pointer to parent widget
-         * @param widgetFlags Widget flags for the configuration of the widget (type)
-         */
-        QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-            return new Widget(parent, this, widgetFlags);
-        };
-
-    protected:
-
-        /**
-         * Constructor
-         * @param responsiveToolbarAction Reference to responsive toolbar action
-         */
-        HiddenItemsAction(ToolbarAction& responsiveToolbarAction);
-
-        /**
-         * Get responsive toolbar action
-         * @return Reference to responsive toolbar action
-         */
-        ToolbarAction& getResponsiveToolbarAction();
-
-    protected:
-        ToolbarAction&    _responsiveToolbarAction;   /** Reference to responsive toolbar action */
-
-        friend class ToolbarAction;
-    };
-
 protected:
 
     /**
@@ -178,15 +114,14 @@ public:
     void setEnableAnimation(bool enableAnimation);
 
     /**
-     * Get hidden items action
-     * @return Reference to hidden items action
+     * Get items
+     * @return Items
      */
-    HiddenItemsAction& getHiddenItemsAction();
+    QVector<Item> getItems() const;
 
 protected:
-    QVector<Item>       _items;                 /** Toolbar items */
-    bool                _enableAnimation;       /** Whether animations are enabled or not */
-    HiddenItemsAction   _hiddenItemsAction;     /** Hidden items action */
+    QVector<Item>               _items;                 /** Toolbar items */
+    bool                        _enableAnimation;       /** Whether animations are enabled or not */
 };
 
 }

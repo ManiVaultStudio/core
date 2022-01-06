@@ -2,7 +2,6 @@
 
 #include "ToolbarWidget.h"
 
-#include <QTimer>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 
@@ -37,7 +36,7 @@ protected:
     void computeLayout(ToolbarItemWidget* ignoreToolbarItemWidget = nullptr) override;
 
 protected:
-    QVBoxLayout     _layout;            /** Layout */
+    QHBoxLayout     _layout;            /** Layout */
     QVBoxLayout     _toolbarLayout;     /** Horizontal toolbar layout for items */
     QWidget         _toolbarWidget;     /** Toolbar widget */
 

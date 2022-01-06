@@ -55,7 +55,6 @@ public:
 
 protected:
     QWidget*                _target;                /** Target widget to apply the fade in/out to */
-    QHBoxLayout             _layout;                /** Main layout */
     QGraphicsOpacityEffect  _opacityEffect;         /** Effect for controlling widget opacity */
     QPropertyAnimation      _opacityAnimation;      /** Effect to control the widget opacity over time */
 };
