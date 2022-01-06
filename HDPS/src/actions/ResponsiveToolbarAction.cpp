@@ -65,20 +65,8 @@ ResponsiveToolbarAction::HorizontalWidget::HorizontalWidget(QWidget* parent, Res
     for (auto& item : _responsiveToolbarAction._items) {
         _statefulItems << SharedStatefulItem::create(this, _statefulItems.count(), *item.getAction(), item.getPriority());
 
-        if (_statefulItems.count() >= 2) {
-            _spacerWidgets << SharedSpacerWidget::create(this);
-
-            _toolbarLayout.addWidget(_spacerWidgets.last().get());
-        }
-
         _toolbarLayout.addWidget(_statefulItems.last()->getWidget());
     }
-
-    // Add last spacer widget
-    _spacerWidgets << SharedSpacerWidget::create(this);
-
-    // And add it to the toolbar layout
-    _toolbarLayout.addWidget(_spacerWidgets.last().get());
 
     // Add item for hidden items
     _statefulItems << SharedStatefulItem::create(this, _statefulItems.count(), _responsiveToolbarAction.getHiddenItemsAction(), -1);
@@ -231,6 +219,7 @@ void ResponsiveToolbarAction::HorizontalWidget::setItemStates(const QVector<Item
     for (auto statefulItem : _statefulItems)
         statefulItem->setState(itemStates[statefulItem->getIndex()]);
 
+    /*
     // Assign type to spacer widget(s)
     for (auto spacerWidget : _spacerWidgets) {
         const auto spacerWidgetIndex    = _spacerWidgets.indexOf(spacerWidget);
@@ -240,6 +229,7 @@ void ResponsiveToolbarAction::HorizontalWidget::setItemStates(const QVector<Item
 
         spacerWidget->setType(spacerWidgetType);
     }
+    */
 }
 
 QWidget* ResponsiveToolbarAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

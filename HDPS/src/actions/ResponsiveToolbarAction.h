@@ -350,8 +350,7 @@ public:
         ToolbarWidget(QWidget* parent, ResponsiveToolbarAction& responsiveToolbarAction) :
             QWidget(parent),
             _responsiveToolbarAction(responsiveToolbarAction),
-            _statefulItems(),
-            _spacerWidgets()
+            _statefulItems()
         {
         }
 
@@ -386,7 +385,6 @@ public:
     protected:
         ResponsiveToolbarAction&        _responsiveToolbarAction;   /** Reference to responsive toolbar action */
         QVector<SharedStatefulItem>     _statefulItems;             /** All stateful items */
-        QVector<SharedSpacerWidget>     _spacerWidgets;             /** All spacer widgets */
     };
 
     /**
