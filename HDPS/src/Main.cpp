@@ -6,7 +6,7 @@
 #include "Application.h"
 
 // TODO: remove once responsive toolbar action is working flawlessly in production
-#define DEBUG_RESPONSIVE_TOOLBAR
+//#define DEBUG_RESPONSIVE_TOOLBAR
 
 #ifdef DEBUG_RESPONSIVE_TOOLBAR
 #include <actions/ToolbarAction.h>
