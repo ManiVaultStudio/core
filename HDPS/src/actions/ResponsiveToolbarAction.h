@@ -42,6 +42,7 @@ public:
         Undefined,      /** Item state is not defined */
         Collapsed,      /** Item is in a collapsed state (accessible through a tool button) */
         Standard,       /** Item is in a standard state */
+        Hidden          /** Item is hidden */
     };
 
 protected:
@@ -286,7 +287,8 @@ public:
             enum class Type {
                 Undefined,      /** No spacer type defined */
                 Divider,        /** Divide with a line */
-                Spacer          /** Divide with a small space */
+                Spacer,         /** Divide with a small space */
+                Hidden          /** Spacer is hidden */
             };
 
         public:

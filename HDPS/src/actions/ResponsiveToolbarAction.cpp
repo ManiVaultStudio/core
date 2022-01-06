@@ -126,6 +126,8 @@ void ResponsiveToolbarAction::HorizontalWidget::computeLayout(StatefulItem* stat
     if (statefulItem != nullptr)
         itemStates[statefulItem->getIndex()] = ItemState::Standard;
 
+    itemStates.last() = ItemState::Hidden;
+
     // Compute candidate configuration width
     const auto getWidth = [this, &itemStates](std::int32_t numberOfItems) -> std::int32_t {
         std::int32_t width = 0;
@@ -164,7 +166,7 @@ void ResponsiveToolbarAction::HorizontalWidget::computeLayout(StatefulItem* stat
         return a->getPriority() > b->getPriority();
     });
 
-    // Establish stateful item states
+    // Compute stateful item states
     for (auto sortedStatefulItem : sortedStatefulItems) {
         auto cachedItemStates = itemStates;
 
@@ -179,6 +181,16 @@ void ResponsiveToolbarAction::HorizontalWidget::computeLayout(StatefulItem* stat
 
     if (std::adjacent_find(itemStates.begin(), itemStates.end(), std::not_equal_to<>()) == itemStates.end() && itemStates.first() == ItemState::Collapsed)
     {
+        for (auto statefulItem : _statefulItems) {
+            if (statefulItem == _statefulItems.last())
+                break;
+
+            auto cachedItemStates = itemStates;
+
+            if (getWidth(_statefulItems.indexOf(statefulItem) + 2) > width())
+                itemStates[statefulItem->getIndex()] = ItemState::Hidden;
+        }
+
         qDebug() << "All items are collapsed";
         /*
         for (auto statefulItem : _statefulItems) {
@@ -373,6 +385,20 @@ void ResponsiveToolbarAction::HorizontalWidget::StatefulItem::setState(const Ite
 
             break;
         }
+
+        case ItemState::Hidden:
+        {
+            if (stateChanged) {
+
+                // Fade out the collapsed widget and hide when done
+                _collapsedWidget.fadeOut(animationDuration, 0, [this]() {
+                    _widgetLayout.takeAt(0);
+                    _widgetLayout.addWidget(&_standardWidget);
+                });
+            }
+
+            break;
+        }
     }
 
     if (_toolbarWidget->getEnableAnimation()) {
@@ -415,11 +441,17 @@ QWidget* ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getWidget()
 
 std::int32_t ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getWidth() const
 {
+    if (_state == ItemState::Hidden)
+        return 0;
+
     return const_cast<StatefulItem*>(this)->getWidget(_state)->sizeHint().width();
 }
 
 std::int32_t ResponsiveToolbarAction::HorizontalWidget::StatefulItem::getWidth(const ItemState& state) const
 {
+    if (state == ItemState::Hidden)
+        return 0;
+
     return const_cast<StatefulItem*>(this)->getWidget(state)->sizeHint().width();
 }
 
@@ -477,6 +509,15 @@ ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::SpacerWidget(ToolbarWid
 
 ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::Type ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::getType(const ItemState& itemStateLeft, const ItemState& itemStateRight)
 {
+    if (itemStateLeft == ItemState::Collapsed && itemStateRight == ItemState::Hidden)
+        return Type::Hidden;
+
+    if (itemStateLeft == ItemState::Hidden && itemStateRight == ItemState::Collapsed)
+        return Type::Hidden;
+
+    if (itemStateLeft == ItemState::Hidden && itemStateRight == ItemState::Hidden)
+        return Type::Hidden;
+
     return itemStateLeft == ItemState::Collapsed && itemStateRight == ItemState::Collapsed ? Type::Spacer : Type::Divider;
 }
 
@@ -513,6 +554,17 @@ void ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::setType(const Type
             break;
         }
 
+        case Type::Hidden:
+        {
+            if (_type != Type::Undefined)
+                _fadeableWidget.fadeOut(_toolbarWidget->getEnableAnimation() ? ANIMATION_DURATION / 2 : 0, 0);
+
+            _sizeAnimation.setStartValue(getWidth(_type));
+            _sizeAnimation.setEndValue(getWidth(type));
+
+            break;
+        }
+
         default:
             break;
     }
@@ -534,6 +586,7 @@ std::int32_t ResponsiveToolbarAction::HorizontalWidget::SpacerWidget::getWidth(c
         case Type::Undefined:   return 0;
         case Type::Divider:     return 20;
         case Type::Spacer:      return 4;
+        case Type::Hidden:      return 0;
     }
 
     return 0;
