@@ -62,14 +62,14 @@ public:
      * Get width
      * @return Width of the stateful item widget
      */
-    std::int32_t getWidth() const override;
+    QSize getSize() const override;
 
     /**
      * Get width
      * @param state State for which to fetch the width
      * @return Width
      */
-    std::int32_t getWidth(const std::int32_t& state) const override;
+    QSize getSize(const std::int32_t& state) const override;
 
 public:
 

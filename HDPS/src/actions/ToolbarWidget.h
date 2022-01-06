@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ToolbarItemWidget.h"
-#include "ToolbarActionWidget.h"
 #include "ToolbarHiddenItemsAction.h"
 
 #include <QWidget>
@@ -13,6 +12,8 @@ namespace hdps {
 namespace gui {
 
 class ToolbarAction;
+class ToolbarActionWidget;
+class ToolbarSpacerWidget;
 
 /**
  * Responsive toolbar widget class
@@ -34,12 +35,19 @@ protected:
     ToolbarWidget(QWidget* parent, ToolbarAction& toolbarAction, const Qt::Orientation& orientation);
 
     /**
-     * Invoked when the widget is resized
-     * @param resizeEvent Pointer to resize event
+     * Respond to target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
      */
-    void resizeEvent(QResizeEvent* resizeEvent) override;
+    bool eventFilter(QObject* target, QEvent* event) override;
 
 public:
+
+    /**
+     * Get orientation
+     * @return Orientation
+     */
+    Qt::Orientation getOrientation() const;
 
     /**
      * Get whether animations are enabled or not
@@ -65,6 +73,12 @@ public:
      */
     QVector<ToolbarActionWidget*> getToolbarActionWidgets();
 
+    /**
+     * Get toolbar spacer widgets
+     * @return Vector of pointers to toolbar spacer widgets
+     */
+    QVector<ToolbarSpacerWidget*> getToolbarSpacerWidgets();
+
 protected:
     Qt::Orientation                     _orientation;                   /** Orientation of the toolbar (horizontal/vertical) */
     ToolbarAction&                      _toolbarAction;                 /** Reference to toolbar action */
@@ -74,7 +88,8 @@ protected:
 
 public:
     static constexpr std::int32_t RESIZE_TIMER_INTERVAL = 50;       /** Default resize timer interval */
-    static constexpr std::int32_t ANIMATION_DURATION    = 300;      /** Animation duration */
+    static constexpr std::int32_t ANIMATION_DURATION    = 150;      /** Animation duration */
+    static constexpr std::int32_t ITEM_SPACING          = 4;        /** Space between items (if not spacer) */
 };
 
 }

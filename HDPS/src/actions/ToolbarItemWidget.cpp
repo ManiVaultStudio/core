@@ -31,6 +31,11 @@ void ToolbarItemWidget::setState(std::int32_t state)
     stateChanged(previousState, _state);
 }
 
+void ToolbarItemWidget::stateChanged(std::int32_t previousState, std::int32_t currentState)
+{
+
+}
+
 void ToolbarItemWidget::show()
 {
     setVisibility(true);

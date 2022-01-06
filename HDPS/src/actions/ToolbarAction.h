@@ -120,8 +120,8 @@ public:
     QVector<Item> getItems() const;
 
 protected:
-    QVector<Item>               _items;                 /** Toolbar items */
-    bool                        _enableAnimation;       /** Whether animations are enabled or not */
+    QVector<Item>   _items;                 /** Toolbar items */
+    bool            _enableAnimation;       /** Whether animations are enabled or not */
 };
 
 }

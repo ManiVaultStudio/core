@@ -8,11 +8,12 @@ namespace hdps {
 
 namespace gui {
 
-ToolbarSpacerWidget::ToolbarSpacerWidget(ToolbarWidget* toolbarWidget, WidgetAction& action, std::int32_t priority) :
+ToolbarSpacerWidget::ToolbarSpacerWidget(ToolbarWidget* toolbarWidget) :
     ToolbarItemWidget(toolbarWidget),
     _toolbarWidget(toolbarWidget),
     _layout(),
     _verticalLine(),
+    _verticalLineFade(toolbarWidget, &_verticalLine),
     _sizeAnimation(this)
 {
     _state = State::Undefined;
@@ -30,112 +31,163 @@ ToolbarSpacerWidget::ToolbarSpacerWidget(ToolbarWidget* toolbarWidget, WidgetAct
 
 void ToolbarSpacerWidget::stateChanged(std::int32_t previousState, std::int32_t currentState)
 {
-    /*
-    const auto widthBegin = static_cast<float>(getWidth(_state == ItemState::Undefined ? state : _state));
-    const auto widthEnd = static_cast<float>(getWidth(state));
-    const auto stateChanged = state != _state;
-    const auto widthChanged = widthBegin != widthEnd;
-    const auto animationDuration = (_state == ItemState::Undefined || !_toolbarWidget->getEnableAnimation()) ? 0 : (widthChanged ? ANIMATION_DURATION : 0);
+    //qDebug() << __FUNCTION__ << previousState << currentState;
+
+    const auto sizeBegin = getSize(previousState == State::Undefined ? currentState : previousState);
+    const auto sizeEnd = getSize(currentState);
+    const auto stateChanged = currentState != previousState;
+    const auto widthChanged = sizeBegin != sizeEnd;
+    const auto animationDuration = (currentState == State::Undefined || !_toolbarWidget->getEnableAnimation()) ? 0 : (widthChanged ? ToolbarWidget::ANIMATION_DURATION : 0);
 
     // Width interpolation
-    const auto widthLerp = [widthBegin, widthEnd](float norm) {
-        return widthBegin + norm * (widthEnd - widthBegin);
+    const auto widthLerp = [sizeBegin, sizeEnd](float norm) {
+        return sizeBegin.width() + norm * (sizeEnd.width() - sizeBegin.width());
+    };
+
+    // Height interpolation
+    const auto heightLerp = [sizeBegin, sizeEnd](float norm) {
+        return sizeBegin.height() + norm * (sizeEnd.height() - sizeBegin.height());
     };
 
     // Configure and possibly animate widgets based on the state
-    switch (state)
+    switch (currentState)
     {
-    case ItemState::Collapsed:
-    {
-        // Collapsed widget should respond to mouse events and the standard widget should not
-        _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-        _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        case State::Divider:
+        case State::Spacer:
+        {
+            if (stateChanged)
+                _verticalLineFade.fadeIn(animationDuration, animationDuration);
 
-        // The collapsed widget should be raised above the standard widget
-        _collapsedWidget.raise();
-
-        if (stateChanged) {
-
-            // Fade out the standard widget and swap the widgets when done
-            _standardWidget.fadeOut(animationDuration, 0, [this]() {
-                _widgetLayout.takeAt(0);
-                _widgetLayout.addWidget(&_collapsedWidget);
-            });
-
-            // Fade in the collapsed widget when the state changed
-            _collapsedWidget.fadeIn(animationDuration, animationDuration);
+            break;
         }
 
-        break;
-    }
+        case State::Hidden:
+        {
+            if (stateChanged)
+                _verticalLineFade.fadeOut(animationDuration, animationDuration);
 
-    case ItemState::Standard:
-    {
-        // Collapsed widget should not respond to mouse events and the standard widget should
-        _collapsedWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-        _standardWidget.setAttribute(Qt::WA_TransparentForMouseEvents, false);
-
-        // The standard widget should be raised above the collapsed widget
-        _standardWidget.raise();
-
-        if (stateChanged) {
-
-            // Fade in the standard widget when the state changed
-            _standardWidget.fadeIn(animationDuration, animationDuration);
-
-            // Fade out the collapsed widget and swap the widgets when done
-            _collapsedWidget.fadeOut(animationDuration, 0, [this]() {
-                _widgetLayout.takeAt(0);
-                _widgetLayout.addWidget(&_standardWidget);
-            });
+            break;
         }
-
-        break;
     }
 
-    case ItemState::Hidden:
-    {
-        if (stateChanged) {
+    if (_toolbarWidget->getOrientation() == Qt::Horizontal) {
+        /*
+        if (_toolbarWidget->getEnableAnimation()) {
 
-            // Fade out the collapsed widget and hide when done
-            _collapsedWidget.fadeOut(animationDuration, 0, [this]() {
-                _widgetLayout.takeAt(0);
-                _widgetLayout.addWidget(&_standardWidget);
+            // Update the widget fixed width when the size animation values changes
+            connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp](const QVariant& value) {
+                setFixedWidth(widthLerp(value.toFloat()));
             });
+
+            // Set size animation duration and start
+            _sizeAnimation.setDuration(animationDuration);
+            _sizeAnimation.start();
         }
-
-        break;
-    }
-    }
-
-    if (_toolbarWidget->getEnableAnimation()) {
-
-        // Update the widget fixed width when the size animation values changes
-        connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp](const QVariant& value) {
-            _widget.setFixedWidth(widthLerp(value.toFloat()));
-        });
-
-        // Set size animation duration and start
-        _sizeAnimation.setDuration(animationDuration);
-        _sizeAnimation.start();
+        else {
+            setFixedWidth(sizeEnd);
+        }
+        */
     }
     else {
-        _widget.setFixedWidth(widthEnd);
+        /**/
+        if (_toolbarWidget->getEnableAnimation()) {
+            // Update the widget fixed width when the size animation values changes
+            connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp, heightLerp](const QVariant& value) {
+                setFixedWidth(widthLerp(value.toFloat()));
+                setFixedHeight(heightLerp(value.toFloat()));
+            });
+
+            // Set size animation duration and start
+            _sizeAnimation.setDuration(animationDuration);
+            _sizeAnimation.start();
+        }
+        else {
+            setFixedSize(sizeEnd);
+        }
+
+    }
+}
+
+QSize ToolbarSpacerWidget::getSize() const
+{
+    return getSize(_state);
+}
+
+QSize ToolbarSpacerWidget::getSize(const std::int32_t& state) const
+{
+    return QSize(0, 0);
+}
+
+ToolbarSpacerWidget::State ToolbarSpacerWidget::getState(const Qt::Orientation& orientation, const ToolbarActionWidget::State& statePrevious, const ToolbarActionWidget::State& stateCurrent)
+{
+    switch (orientation)
+    {
+        case Qt::Horizontal:
+            break;
+
+        case Qt::Vertical:
+        {
+            if (statePrevious == ToolbarActionWidget::State::Collapsed && stateCurrent == ToolbarActionWidget::State::Collapsed)
+                return ToolbarSpacerWidget::State::Undefined;
+
+            if (statePrevious == ToolbarActionWidget::State::Hidden && stateCurrent == ToolbarActionWidget::State::Hidden)
+                return ToolbarSpacerWidget::State::Hidden;
+
+            break;
+        }
     }
 
-    // Assign new state
-    _state = state;
-    */
+    return ToolbarSpacerWidget::State::Undefined;
 }
 
-std::int32_t ToolbarSpacerWidget::getWidth() const
+QSize ToolbarSpacerWidget::getSize(const Qt::Orientation& orientation, const ToolbarActionWidget::State& statePrevious, const ToolbarActionWidget::State& stateCurrent)
 {
-    return 0;
+    return getSize(orientation, getState(orientation, statePrevious, stateCurrent));
 }
 
-std::int32_t ToolbarSpacerWidget::getWidth(const std::int32_t& state) const
+QSize ToolbarSpacerWidget::getSize(const Qt::Orientation& orientation, const State& state)
 {
-    return 0;
+    switch (state)
+    {
+        case Undefined:
+            return QSize(0, 0);
+
+        case Divider:
+        {
+            switch (orientation)
+            {
+                case Qt::Horizontal:
+                    return QSize(0, 0);
+
+                case Qt::Vertical:
+                    return QSize(0, 0);
+            }
+
+            break;
+        }
+
+        case Spacer:
+        {
+            switch (orientation)
+            {
+                case Qt::Horizontal:
+                    return QSize(ToolbarWidget::ITEM_SPACING, 0);
+
+                case Qt::Vertical:
+                    return QSize(0, ToolbarWidget::ITEM_SPACING);
+            }
+
+            break;
+        }
+
+        case Hidden:
+            return QSize(0, 0);
+
+        default:
+            break;
+    }
+
+    return QSize(0, 0);
 }
 
 }

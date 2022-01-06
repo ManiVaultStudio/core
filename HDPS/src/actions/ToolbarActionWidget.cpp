@@ -41,17 +41,22 @@ ToolbarActionWidget::ToolbarActionWidget(ToolbarWidget* toolbarWidget, WidgetAct
 
 void ToolbarActionWidget::stateChanged(std::int32_t previousState, std::int32_t currentState)
 {
-    qDebug() << __FUNCTION__;
+    //qDebug() << __FUNCTION__ << previousState << currentState;
 
-    const auto widthBegin           = static_cast<float>(getWidth(previousState == State::Undefined ? currentState : previousState));
-    const auto widthEnd             = static_cast<float>(getWidth(currentState));
+    const auto sizeBegin            = getSize(previousState == State::Undefined ? currentState : previousState);
+    const auto sizeEnd              = getSize(currentState);
     const auto stateChanged         = currentState != previousState;
-    const auto widthChanged         = widthBegin != widthEnd;
+    const auto widthChanged         = sizeBegin != sizeEnd;
     const auto animationDuration    = (currentState == State::Undefined || !_toolbarWidget->getEnableAnimation()) ? 0 : (widthChanged ? ToolbarWidget::ANIMATION_DURATION : 0);
 
     // Width interpolation
-    const auto widthLerp = [widthBegin, widthEnd](float norm) {
-        return widthBegin + norm * (widthEnd - widthBegin);
+    const auto widthLerp = [sizeBegin, sizeEnd](float norm) {
+        return sizeBegin.width() + norm * (sizeEnd.width() - sizeBegin.width());
+    };
+
+    // Height interpolation
+    const auto heightLerp = [sizeBegin, sizeEnd](float norm) {
+        return sizeBegin.height() + norm * (sizeEnd.height() - sizeBegin.height());
     };
 
     // Configure and possibly animate widgets based on the state
@@ -120,19 +125,41 @@ void ToolbarActionWidget::stateChanged(std::int32_t previousState, std::int32_t 
         }
     }
 
-    if (_toolbarWidget->getEnableAnimation()) {
+    if (_toolbarWidget->getOrientation() == Qt::Horizontal) {
+        /*
+        if (_toolbarWidget->getEnableAnimation()) {
 
-        // Update the widget fixed width when the size animation values changes
-        connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp](const QVariant& value) {
-            setFixedWidth(widthLerp(value.toFloat()));
-        });
+            // Update the widget fixed width when the size animation values changes
+            connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp](const QVariant& value) {
+                setFixedWidth(widthLerp(value.toFloat()));
+            });
 
-        // Set size animation duration and start
-        _sizeAnimation.setDuration(animationDuration);
-        _sizeAnimation.start();
+            // Set size animation duration and start
+            _sizeAnimation.setDuration(animationDuration);
+            _sizeAnimation.start();
+        }
+        else {
+            setFixedWidth(sizeEnd);
+        }
+        */
     }
     else {
-        setFixedWidth(widthEnd);
+        /**/
+        if (_toolbarWidget->getEnableAnimation()) {
+            // Update the widget fixed width when the size animation values changes
+            connect(&_sizeAnimation, &QVariantAnimation::valueChanged, [this, widthLerp, heightLerp](const QVariant& value) {
+                setFixedWidth(widthLerp(value.toFloat()));
+                setFixedHeight(heightLerp(value.toFloat()));
+            });
+
+            // Set size animation duration and start
+            _sizeAnimation.setDuration(animationDuration);
+            _sizeAnimation.start();
+        }
+        else {
+            setFixedSize(sizeEnd);
+        }
+        
     }
 }
 
@@ -150,20 +177,20 @@ QWidget* ToolbarActionWidget::getWidget(const std::int32_t& state)
     return nullptr;
 }
 
-std::int32_t ToolbarActionWidget::getWidth() const
+QSize ToolbarActionWidget::getSize() const
 {
     if (_state == State::Hidden)
-        return 0;
+        return QSize(0, 0);
 
-    return const_cast<ToolbarActionWidget*>(this)->getWidget(static_cast<std::int32_t>(_state))->sizeHint().width();
+    return const_cast<ToolbarActionWidget*>(this)->getWidget(static_cast<std::int32_t>(_state))->sizeHint();
 }
 
-std::int32_t ToolbarActionWidget::getWidth(const std::int32_t& state) const
+QSize ToolbarActionWidget::getSize(const std::int32_t& state) const
 {
     if (static_cast<State>(state) == State::Hidden)
-        return 0;
+        return QSize(0, 0);
 
-    return const_cast<ToolbarActionWidget*>(this)->getWidget(static_cast<std::int32_t>(state))->sizeHint().width();
+    return const_cast<ToolbarActionWidget*>(this)->getWidget(static_cast<std::int32_t>(state))->sizeHint();
 }
 
 std::int32_t ToolbarActionWidget::getPriority() const
