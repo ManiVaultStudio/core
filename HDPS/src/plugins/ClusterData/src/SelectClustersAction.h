@@ -1,6 +1,6 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include <actions/Actions.h>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -9,35 +9,47 @@ class ClustersFilterModel;
 class QItemSelectionModel;
 
 /**
- * Filter and select action class
+ * Select clusters action class
  *
- * Action class for filtering and selecting clusters
+ * Action class for selection clusters (all/none/invert)
  *
  * @author Thomas Kroes
  */
-class FilterAndSelectAction : public hdps::gui::WidgetAction
+class SelectClustersAction : public WidgetAction
 {
+public:
+
+    /** Describes the widget configurations */
+    enum WidgetFlag {
+        SelectAll       = 0x00001,      /** Includes select all UI */
+        SelectNone      = 0x00002,      /** Includes select none UI */
+        SelectInvert    = 0x00004,      /** Includes select invert UI */
+
+        Default = SelectAll | SelectNone | SelectInvert
+    };
+
 protected:
 
-    /** Widget class for filtering and selection of clusters action */
-    class Widget : public hdps::gui::WidgetActionWidget {
+    /** Widget class for select clusters action */
+    class Widget : public WidgetActionWidget {
     public:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param filterAndSelectAction Pointer to filter and select action
+         * @param selectClustersAction Pointer to select clusters action
+         * @param widgetFlags Widget flags for the configuration of the widget
          */
-        Widget(QWidget* parent, FilterAndSelectAction* filterAndSelectAction);
+        Widget(QWidget* parent, SelectClustersAction* selectClustersAction, const std::int32_t& widgetFlags);
     };
 
     /**
-     * Get widget representation of the filter and select action
+     * Get widget representation of the select clusters action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this);
+        return new Widget(parent, this, widgetFlags);
     };
 
 public:
@@ -48,11 +60,10 @@ public:
      * @param filterModel Reference to clusters filter model
      * @param selectionModel Reference to selection model
      */
-    FilterAndSelectAction(QObject* parent, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel);
+    SelectClustersAction(QObject* parent, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel);
 
 public: // Action getters
 
-    StringAction& getNameFilterAction() { return _nameFilterAction; }
     TriggerAction& getSelectAllAction() { return _selectAllAction; }
     TriggerAction& getSelectNoneAction() { return _selectNoneAction; }
     TriggerAction& getSelectInvertAction() { return _selectInvertAction; }
@@ -60,7 +71,6 @@ public: // Action getters
 protected:
     ClustersFilterModel&    _filterModel;           /** Reference to clusters filter model */
     QItemSelectionModel&    _selectionModel;        /** Reference to selection model */
-    StringAction            _nameFilterAction;      /** Name filter action */
     TriggerAction           _selectAllAction;       /** Select all clusters action */
     TriggerAction           _selectNoneAction;      /** Clear cluster selection action */
     TriggerAction           _selectInvertAction;    /** Invert the cluster selection action */

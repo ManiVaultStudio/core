@@ -5,9 +5,6 @@
 #include <QItemSelection>
 #include <QHBoxLayout>
 
-using namespace hdps;
-using namespace hdps::gui;
-
 SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel) :
     WidgetAction(parent),
     _clustersAction(clustersAction),
@@ -19,9 +16,9 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
     setText("Subset");
 
     _subsetNameAction.setToolTip("Name of the subset");
-    _createSubsetAction.setToolTip("Create the subset");
-
     _subsetNameAction.setPlaceHolderString("Enter subset name here...");
+
+    _createSubsetAction.setToolTip("Create the subset");
 
     // Get item selection for entire filter model
     const auto getItemSelection = [this]() -> QItemSelection {
@@ -32,35 +29,36 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
         return QItemSelection(firstItemIndex, lastItem);
     };
 
+    // Create the subset when the create subset action is triggered
     connect(&_createSubsetAction, &TriggerAction::triggered, this, [this, getItemSelection]() {
         _clustersAction.createSubset(_subsetNameAction.getString());
         _subsetNameAction.reset();
     });
 
-    const auto updateSelectionActions = [this]() -> void {
+    // Update the read only status of the action
+    const auto updateReadOnly = [this]() -> void {
         const auto selectedRows         = _selectionModel.selectedRows();
         const auto numberOfSelectedRows = selectedRows.count();
 
         setEnabled(numberOfSelectedRows >= 1);
     };
 
+    // Update the read only status of the create subset action
     const auto updateCreateSubsetAction = [this]() -> void {
         _createSubsetAction.setEnabled(!_subsetNameAction.getString().isEmpty());
     };
 
-    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this, updateSelectionActions](const QItemSelection& selected, const QItemSelection& deselected) {
-        updateSelectionActions();
-    });
+    // Update read only status when model selection changes
+    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, updateReadOnly);
 
-    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, [this, updateSelectionActions](const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint) {
-        updateSelectionActions();
-    });
+    // Update read only status when the model layout changes
+    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
-    connect(&_subsetNameAction, &StringAction::stringChanged, this, [this, updateCreateSubsetAction](const QString& string) {
-        updateCreateSubsetAction();
-    });
+    // Update read only status when the subset name string changes
+    connect(&_subsetNameAction, &StringAction::stringChanged, this, updateReadOnly);
 
-    updateSelectionActions();
+    // Do initial read only updates
+    updateReadOnly();
     updateCreateSubsetAction();
 }
 

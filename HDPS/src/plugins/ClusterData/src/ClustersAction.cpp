@@ -17,46 +17,16 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-ClustersAction::ClustersAction(QObject* parent, Clusters& clusters) :
+ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clusters) :
     WidgetAction(parent),
-    EventListener(),
-    _clusters(&clusters),
-    _clustersModel(),
-    _importAction(this, "Import"),
-    _exportAction(this, "Export")
+    _clusters(clusters),
+    _clustersModel()
 {
     setText("Clusters");
-    setEventCore(hdps::Application::core());
 
-    _importAction.setToolTip("Import clusters from file");
-    _exportAction.setToolTip("Export clusters to file");
-
-    //_importAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-    //_exportAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-
-    registerDataEventByType(ClusterType, [this](hdps::DataEvent* dataEvent) {
-        if (!_clusters.isValid())
-            return;
-
-        if (dataEvent->getDataset() != _clusters)
-            return;
-
-        switch (dataEvent->getType())
-        {
-            case EventType::DataChanged:
-            {
-                _clustersModel.setClusters(*getClusters());
-                break;
-            }
-
-            case EventType::DataSelectionChanged:
-            {
-                break;
-            }
-
-            default:
-                break;
-        }
+    // Update the clusters model to reflect the changes in the clusters set
+    connect(&_clusters, &Dataset<Clusters>::dataChanged, this, [this]() {
+        _clustersModel.setClusters(*getClusters());
     });
 
     const auto updateClusters = [this]() -> void {
@@ -76,84 +46,6 @@ ClustersAction::ClustersAction(QObject* parent, Clusters& clusters) :
             return;
 
         updateClusters();
-    });
-
-    connect(&_importAction, &TriggerAction::triggered, this, [this]() {
-
-        try
-        {
-            QFileDialog fileDialog;
-
-            // Configure file dialog
-            fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-            fileDialog.setNameFilters({ "Cluster JSON files (*json)" });
-            fileDialog.setDefaultSuffix(".json");
-
-            // Show the dialog
-            if (fileDialog.exec() == 0)
-                return;
-
-            if (fileDialog.selectedFiles().count() != 1)
-                return;
-
-            QFile clustersFile;
-
-            // Load the file
-            clustersFile.setFileName(fileDialog.selectedFiles().first());
-            clustersFile.open(QIODevice::ReadOnly);
-
-            // Get the cluster data
-            QByteArray clustersData = clustersFile.readAll();
-
-            QJsonDocument clusterJsonDocument;
-
-            // Convert to JSON document
-            clusterJsonDocument = QJsonDocument::fromJson(clustersData);
-            
-            // Load in the cluster from variant data
-            _clusters->fromVariant(clusterJsonDocument.toVariant());
-
-            // Let others know that the clusters changed
-            Application::core()->notifyDataChanged(*_clusters);
-        }
-        catch (std::exception& e)
-        {
-            QMessageBox::critical(nullptr, QString("Unable to load clusters"), e.what(), QMessageBox::Ok);
-        }
-    });
-
-    connect(&_exportAction, &TriggerAction::triggered, this, [this]() {
-
-        try
-        {
-            // Create JSON document from clusters variant map
-            QJsonDocument document(QJsonArray::fromVariantList(_clusters->toVariant().toList()));
-
-            // Show the dialog
-            QFileDialog fileDialog;
-
-            // Configure file dialog
-            fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-            fileDialog.setNameFilters({ "Cluster JSON files (*json)" });
-            fileDialog.setDefaultSuffix(".json");
-            
-            if (fileDialog.exec() == 0)
-                return;
-
-            // Only save if we have one file
-            if (fileDialog.selectedFiles().count() != 1)
-                return;
-
-            QFile jsonFile(fileDialog.selectedFiles().first());
-
-            // Save the file
-            jsonFile.open(QFile::WriteOnly);
-            jsonFile.write(document.toJson());
-        }
-        catch (std::exception& e)
-        {
-            QMessageBox::critical(nullptr, QString("Unable to save clusters"), e.what(), QMessageBox::Ok);
-        }
     });
 }
 
@@ -189,24 +81,13 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
     WidgetActionWidget(parent, clustersAction),
     _filterModel(),
     _selectionModel(&_filterModel),
-    _removeAction(this, "Remove"),
-    _mergeAction(this, "Merge"),
-    _filterAndSelectAction(this, _filterModel, _selectionModel),
+    _removeClustersAction(*clustersAction, _filterModel, _selectionModel),
+    _mergeClustersAction(*clustersAction, _filterModel, _selectionModel),
+    _filterClustersAction(this, _filterModel, _selectionModel),
+    _selectClustersAction(this, _filterModel, _selectionModel),
     _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
 {
-    setEventCore(Application::core());
-
-    _removeAction.setToolTip("Remove the selected clusters");
-    _mergeAction.setToolTip("Merge the selected clusters");
-
-    _removeAction.setEnabled(false); 
-
-    //_removeAction.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("trash-alt"));
-    //_mergeAction.setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("object-group"));
-
-    _removeAction.setToolTip("Remove the selected filter(s)");
-    _mergeAction.setToolTip("Merge the selected filter(s)");
-
+    // Configure filter model
     _filterModel.setSourceModel(&clustersAction->getClustersModel());
     _filterModel.setDynamicSortFilter(true);
     _filterModel.setFilterKeyColumn(static_cast<std::int32_t>(ClustersModel::Column::Name));
@@ -261,10 +142,6 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         // Select points
         clustersAction->getClustersDataset()->setSelectionIndices(currentClusterSelectionIndices);
 
-        // Update state of the remove action
-        _removeAction.setEnabled(!selectedRows.isEmpty());
-        _mergeAction.setEnabled(selectedRows.count() >= 2);
-
         // Notify others that the cluster selection has changed
         Application::core()->notifyDataSelectionChanged(clustersAction->getClustersDataset());
     };
@@ -294,53 +171,18 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
 
     auto toolbarLayout = new QHBoxLayout();
 
-    toolbarLayout->addWidget(_removeAction.createWidget(this), 1);
-    toolbarLayout->addWidget(_mergeAction.createWidget(this), 1);
-    toolbarLayout->addWidget(clustersAction->getImportAction().createWidget(this), 1);
-    toolbarLayout->addWidget(clustersAction->getExportAction().createWidget(this), 1);
+    toolbarLayout->addWidget(_removeClustersAction.createWidget(this), 1);
+    toolbarLayout->addWidget(_mergeClustersAction.createWidget(this), 1);
 
     auto mainLayout = new QVBoxLayout();
 
     mainLayout->setMargin(0);
     mainLayout->addWidget(clustersTreeView);
 
-    mainLayout->addWidget(_filterAndSelectAction.createWidget(this));
+    mainLayout->addWidget(_filterClustersAction.createWidget(this));
+    mainLayout->addWidget(_selectClustersAction.createWidget(this));
     mainLayout->addLayout(toolbarLayout);
     mainLayout->addWidget(_subsetAction.createWidget(this));
 
     setLayout(mainLayout);
-
-    connect(&_removeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView]() {
-        const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
-
-        QStringList clusterIds;
-
-        for (auto selectedIndex : selectedRows)
-            clusterIds << _filterModel.mapToSource(selectedIndex).siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
-
-        clustersAction->removeClustersById(clusterIds);
-    });
-
-    connect(&_mergeAction, &TriggerAction::triggered, this, [this, clustersAction, clustersTreeView]() {
-        const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
-
-        QStringList clusterIdsToRemove;
-
-        auto mergeCluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedRows.first()).internalPointer());
-
-        mergeCluster->setName(QString("%1*").arg(mergeCluster->getName()));
-
-        for (auto selectedIndex : selectedRows) {
-            auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
-
-            if (selectedIndex == selectedRows.first())
-                continue;
-
-            clusterIdsToRemove << cluster->getId();
-
-            mergeCluster->getIndices().insert(mergeCluster->getIndices().end(), cluster->getIndices().begin(), cluster->getIndices().end());
-        }
-
-        clustersAction->removeClustersById(clusterIdsToRemove);
-    });
 }

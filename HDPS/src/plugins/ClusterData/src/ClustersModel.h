@@ -1,8 +1,10 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include "clusterdata_export.h"
 
-class Cluster;
+#include "Cluster.h"
+
+#include <actions/Actions.h>
 
 using namespace hdps;
 
@@ -13,7 +15,7 @@ using namespace hdps;
  *
  * @author Thomas Kroes
  */
-class ClustersModel : public QAbstractListModel
+class CLUSTERDATA_EXPORT ClustersModel : public QAbstractListModel
 {
     Q_OBJECT
 

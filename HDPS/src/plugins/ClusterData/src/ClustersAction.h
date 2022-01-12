@@ -1,11 +1,15 @@
 #pragma once
 
-#include "actions/Actions.h"
-#include "event/EventListener.h"
+#include "clusterdata_export.h"
+
+#include <actions/Actions.h>
 
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
-#include "FilterAndSelectAction.h"
+#include "RemoveClustersAction.h"
+#include "MergeClustersAction.h"
+#include "FilterClustersAction.h"
+#include "SelectClustersAction.h"
 #include "SubsetAction.h"
 
 #include <QItemSelectionModel>
@@ -28,12 +32,12 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class ClustersAction : public WidgetAction, public hdps::EventListener
+class CLUSTERDATA_EXPORT ClustersAction : public WidgetAction
 {
 protected:
 
     /** Widget class for clusters action */
-    class Widget : public WidgetActionWidget, public hdps::EventListener {
+    class Widget : public WidgetActionWidget {
     public:
 
         /**
@@ -46,9 +50,10 @@ protected:
     protected:
         ClustersFilterModel     _filterModel;               /** Clusters filter model */
         QItemSelectionModel     _selectionModel;            /** Clusters selection model */
-        TriggerAction           _removeAction;              /** Remove clusters action */
-        TriggerAction           _mergeAction;               /** Merge clusters action */
-        FilterAndSelectAction   _filterAndSelectAction;     /** Filter and select clusters action */
+        RemoveClustersAction    _removeClustersAction;      /** Remove clusters action */
+        MergeClustersAction     _mergeClustersAction;       /** Merge clusters action */
+        FilterClustersAction    _filterClustersAction;      /** Filter clusters action */
+        SelectClustersAction    _selectClustersAction;      /** Select clusters action */
         SubsetAction            _subsetAction;              /** Subset action */
     };
 
@@ -66,9 +71,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param clusters Reference to clusters dataset
+     * @param clusters Smart pointer to clusters
      */
-    ClustersAction(QObject* parent, Clusters& clusters);
+    ClustersAction(QObject* parent, Dataset<Clusters> clusters);
 
     /** Get clusters */
     std::vector<Cluster>* getClusters();
@@ -88,14 +93,7 @@ public:
     /** Get the clusters model */
     ClustersModel& getClustersModel();
 
-public: // Action getters
-
-    TriggerAction& getImportAction() { return _importAction; }
-    TriggerAction& getExportAction() { return _exportAction; }
-
 protected:
-    Dataset<Clusters>   _clusters;          /** Cluster dataset reference */
+    Dataset<Clusters>   _clusters;          /** Smart pointer to clusters */
     ClustersModel       _clustersModel;     /** Clusters model */
-    TriggerAction       _importAction;      /** Import clusters action */
-    TriggerAction       _exportAction;      /** Export clusters action */
 };
