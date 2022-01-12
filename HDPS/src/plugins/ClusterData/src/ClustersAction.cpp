@@ -8,14 +8,6 @@
 #include <QTreeView>
 #include <QHeaderView>
 #include <QVBoxLayout>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QVariant>
-#include <QFile>
-#include <QFileDialog>
-
-using namespace hdps;
-using namespace hdps::gui;
 
 ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clusters) :
     WidgetAction(parent),
@@ -23,6 +15,7 @@ ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clusters) :
     _clustersModel()
 {
     setText("Clusters");
+    setDefaultWidgetFlags(WidgetFlag::Default);
 
     // Update the clusters model to reflect the changes in the clusters set
     connect(&_clusters, &Dataset<Clusters>::dataChanged, this, [this]() {
@@ -64,7 +57,7 @@ Dataset<Clusters>& ClustersAction::getClustersDataset()
 
 void ClustersAction::createSubset(const QString& datasetName)
 {
-    _clusters->getParent()->createSubset("Clusters");
+    _clusters->getParent()->createSubset("Clusters", _clusters->getParent());
 }
 
 void ClustersAction::removeClustersById(const QStringList& ids)
@@ -77,7 +70,7 @@ ClustersModel& ClustersAction::getClustersModel()
     return _clustersModel;
 }
 
-ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) :
+ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, clustersAction),
     _filterModel(),
     _selectionModel(&_filterModel),
@@ -85,7 +78,9 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
     _mergeClustersAction(*clustersAction, _filterModel, _selectionModel),
     _filterClustersAction(this, _filterModel, _selectionModel),
     _selectClustersAction(this, _filterModel, _selectionModel),
-    _subsetAction(this, *clustersAction, _filterModel, _selectionModel)
+    _subsetAction(this, *clustersAction, _filterModel, _selectionModel),
+    _importClustersAction(this, *clustersAction),
+    _exportClustersAction(this, *clustersAction, _filterModel, _selectionModel)
 {
     // Configure filter model
     _filterModel.setSourceModel(&clustersAction->getClustersModel());
@@ -119,8 +114,9 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::Color), QHeaderView::Fixed);
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::Name), QHeaderView::Stretch);
     header->setSectionResizeMode(static_cast<std::int32_t>(ClustersModel::Column::NumberOfIndices), QHeaderView::Fixed);
-    
-    const auto selectionChangedHandler = [this, clustersAction, clustersTreeView]() -> void {
+
+    // Select indices when a cluster item is selected
+    connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, clustersAction, clustersTreeView](const QItemSelection &selected, const QItemSelection &deselected) -> void {
 
         // Get selected row
         const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
@@ -144,17 +140,14 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
 
         // Notify others that the cluster selection has changed
         Application::core()->notifyDataSelectionChanged(clustersAction->getClustersDataset());
-    };
-
-    connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, selectionChangedHandler](const QItemSelection& selected, const QItemSelection& deselected) {
-        selectionChangedHandler();
     });
-    
+
     // Clear the selection when the layout of the model changes
     connect(clustersTreeView->model(), &QAbstractItemModel::layoutChanged, this, [this, clustersTreeView](const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint) {
         clustersTreeView->selectionModel()->reset();
     });
 
+    // Pick cluster color when the cluster item is double clicked
     connect(clustersTreeView, &QTreeView::doubleClicked, this, [this, clustersAction, clustersTreeView](const QModelIndex& index) {
         const auto colorColumn = static_cast<std::int32_t>(ClustersModel::Column::Color);
 
@@ -169,20 +162,51 @@ ClustersAction::Widget::Widget(QWidget* parent, ClustersAction* clustersAction) 
         clustersAction->getClustersModel().setData(colorIndex, QColorDialog::getColor(currentColor));
     });
 
-    auto toolbarLayout = new QHBoxLayout();
+    auto layout = new QVBoxLayout();
 
-    toolbarLayout->addWidget(_removeClustersAction.createWidget(this), 1);
-    toolbarLayout->addWidget(_mergeClustersAction.createWidget(this), 1);
+    layout->setMargin(0);
 
-    auto mainLayout = new QVBoxLayout();
+    // Add clusters tree view
+    layout->addWidget(clustersTreeView);
 
-    mainLayout->setMargin(0);
-    mainLayout->addWidget(clustersTreeView);
+    // Add remove/merge widgets if required
+    if (widgetFlags & ClustersAction::Remove || widgetFlags & ClustersAction::Merge) {
+        auto toolbarLayout = new QHBoxLayout();
 
-    mainLayout->addWidget(_filterClustersAction.createWidget(this));
-    mainLayout->addWidget(_selectClustersAction.createWidget(this));
-    mainLayout->addLayout(toolbarLayout);
-    mainLayout->addWidget(_subsetAction.createWidget(this));
+        // Add filter widget if required
+        if (widgetFlags & ClustersAction::Filter)
+            toolbarLayout->addWidget(_filterClustersAction.createCollapsedWidget(this));
 
-    setLayout(mainLayout);
+        // Add select widget if required
+        if (widgetFlags & ClustersAction::Select)
+            toolbarLayout->addWidget(_selectClustersAction.createCollapsedWidget(this));
+
+        // Add remove widget
+        if (widgetFlags & ClustersAction::Remove)
+            toolbarLayout->addWidget(_removeClustersAction.createWidget(this, TriggerAction::Icon));
+
+        // Add merge widget
+        if (widgetFlags & ClustersAction::Merge)
+            toolbarLayout->addWidget(_mergeClustersAction.createWidget(this, TriggerAction::Icon));
+
+        // Add subset widget if required
+        if (widgetFlags & ClustersAction::Subset)
+            toolbarLayout->addWidget(_subsetAction.createCollapsedWidget(this));
+
+        toolbarLayout->addStretch(1);
+
+        // Add import clusters widget if required
+        if (widgetFlags & ClustersAction::Import)
+            toolbarLayout->addWidget(_importClustersAction.createWidget(this, TriggerAction::Icon));
+
+        // Add export clusters widget if required
+        if (widgetFlags & ClustersAction::Export)
+            toolbarLayout->addWidget(_exportClustersAction.createWidget(this, TriggerAction::Icon));
+
+        // Add toolbar to main layout
+        layout->addLayout(toolbarLayout);
+    }
+
+    // Apply the layout
+    setLayout(layout);
 }

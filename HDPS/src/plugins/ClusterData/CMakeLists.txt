@@ -38,6 +38,8 @@ set(CLUSTER_HEADERS
     src/FilterClustersAction.h
     src/SelectClustersAction.h
     src/SubsetAction.h
+    src/ImportClustersAction.h
+    src/ExportClustersAction.h
 )
 
 set(ACTIONS_SOURCES

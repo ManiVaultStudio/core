@@ -11,8 +11,8 @@ RemoveClustersAction::RemoveClustersAction(ClustersAction& clustersAction, Clust
     _filterModel(filterModel),
     _selectionModel(selectionModel)
 {
-    setText("Remove");
-    setToolTip("Remove selected clusters");
+    setText("");
+    setToolTip("Remove selected cluster(s)");
     setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
 
     // Remove selected clusters when the action is triggered

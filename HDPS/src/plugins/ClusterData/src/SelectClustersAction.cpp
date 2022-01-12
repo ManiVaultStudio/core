@@ -13,7 +13,7 @@ SelectClustersAction::SelectClustersAction(QObject* parent, ClustersFilterModel&
     _selectInvertAction(this, "Invert")
 {
     setText("Select");
-    setDefaultWidgetFlags(WidgetFlag::Default);
+    setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
 
     _selectAllAction.setToolTip("Select all clusters");
     _selectNoneAction.setToolTip("De-select all clusters");
@@ -68,18 +68,9 @@ SelectClustersAction::Widget::Widget(QWidget* parent, SelectClustersAction* sele
 {
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->addWidget(selectClustersAction->getSelectAllAction().createWidget(this));
+    layout->addWidget(selectClustersAction->getSelectNoneAction().createWidget(this));
+    layout->addWidget(selectClustersAction->getSelectInvertAction().createWidget(this));
 
-    if (widgetFlags & SelectClustersAction::SelectAll)
-        layout->addWidget(selectClustersAction->getSelectAllAction().createWidget(this));
-    
-    if (widgetFlags & SelectClustersAction::SelectNone)
-        layout->addWidget(selectClustersAction->getSelectNoneAction().createWidget(this));
-
-    if (widgetFlags & SelectClustersAction::SelectNone)
-        layout->addWidget(selectClustersAction->getSelectInvertAction().createWidget(this));
-
-    const auto fixedPushButtonWidth = 50;
-
-    setLayout(layout);
+    setPopupLayout(layout);
 }

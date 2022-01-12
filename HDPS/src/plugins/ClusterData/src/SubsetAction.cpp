@@ -13,7 +13,8 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
     _subsetNameAction(this, "Subset name"),
     _createSubsetAction(this, "Create subset")
 {
-    setText("Subset");
+    setText("Create subset");
+    setIcon(Application::getIconFont("FontAwesome").getIcon("crop"));
 
     _subsetNameAction.setToolTip("Name of the subset");
     _subsetNameAction.setPlaceHolderString("Enter subset name here...");
@@ -35,16 +36,13 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
         _subsetNameAction.reset();
     });
 
-    // Update the read only status of the action
+    // Update the read only status of the actions
     const auto updateReadOnly = [this]() -> void {
         const auto selectedRows         = _selectionModel.selectedRows();
         const auto numberOfSelectedRows = selectedRows.count();
 
         setEnabled(numberOfSelectedRows >= 1);
-    };
 
-    // Update the read only status of the create subset action
-    const auto updateCreateSubsetAction = [this]() -> void {
         _createSubsetAction.setEnabled(!_subsetNameAction.getString().isEmpty());
     };
 
@@ -59,18 +57,15 @@ SubsetAction::SubsetAction(QObject* parent, ClustersAction& clustersAction, Clus
 
     // Do initial read only updates
     updateReadOnly();
-    updateCreateSubsetAction();
 }
 
 SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
     WidgetActionWidget(parent, subsetAction)
 {
-    auto mainLayout = new QHBoxLayout();
+    auto layout = new QHBoxLayout();
 
-    mainLayout->setMargin(0);
+    layout->addWidget(subsetAction->getSubsetNameAction().createWidget(this));
+    layout->addWidget(subsetAction->getCreateSubsetAction().createWidget(this));
 
-    mainLayout->addWidget(subsetAction->getSubsetNameAction().createWidget(this));
-    mainLayout->addWidget(subsetAction->getCreateSubsetAction().createWidget(this));
-
-    setLayout(mainLayout);
+    setPopupLayout(layout);
 }

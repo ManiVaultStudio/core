@@ -1,6 +1,8 @@
 #include "FilterClustersAction.h"
 #include "ClustersFilterModel.h"
 
+#include <Application.h>
+
 #include <QItemSelection>
 #include <QHBoxLayout>
 
@@ -8,20 +10,31 @@ FilterClustersAction::FilterClustersAction(QObject* parent, ClustersFilterModel&
     WidgetAction(parent),
     _filterModel(filterModel),
     _selectionModel(selectionModel),
-    _nameFilterAction(this, "Name filter")
+    _nameFilterAction(this, "Name filter"),
+    _clearNameFilterAction(this, "Clear name filter")
 {
-    setText("Select");
+    setText("Filter clusters");
+    setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
 
     _nameFilterAction.setToolTip("Filter clusters by name (case-insensitive)");
     _nameFilterAction.setPlaceHolderString("Filter by cluster name...");
 
+    _clearNameFilterAction.setToolTip("Clear the name filter");
+    _clearNameFilterAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+
     // Update the name filter in the filter model
     const auto updateNameFilter = [this]() -> void {
         _filterModel.setNameFilter(_nameFilterAction.getString());
+        _clearNameFilterAction.setEnabled(!_nameFilterAction.getString().isEmpty());
     };
 
     // Update the filter model filter when the name filter action string changes
     connect(&_nameFilterAction, &StringAction::stringChanged, this, updateNameFilter);
+
+    // Clear the name filter when the clear name filter string changes
+    connect(&_clearNameFilterAction, &TriggerAction::triggered, this, [this]() {
+        _nameFilterAction.reset();
+    });
 
     // Do an initial update of the model name filter
     updateNameFilter();
@@ -32,9 +45,8 @@ FilterClustersAction::Widget::Widget(QWidget* parent, FilterClustersAction* filt
 {
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
-
     layout->addWidget(filterClustersAction->getNameFilterAction().createWidget(this));
+    layout->addWidget(filterClustersAction->getClearNameFilterAction().createWidget(this, TriggerAction::Icon));
 
-    setLayout(layout);
+    setPopupLayout(layout);
 }

@@ -11,7 +11,7 @@ MergeClustersAction::MergeClustersAction(ClustersAction& clustersAction, Cluster
     _filterModel(filterModel),
     _selectionModel(selectionModel)
 {
-    setText("Merge");
+    setText("");
     setToolTip("Merge selected clusters into one");
     setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
 

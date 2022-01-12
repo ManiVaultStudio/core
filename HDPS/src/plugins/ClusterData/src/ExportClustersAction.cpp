@@ -6,14 +6,17 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 
-ExportClustersAction::ExportClustersAction(QObject* parent, ClustersAction& clustersAction) :
+ExportClustersAction::ExportClustersAction(QObject* parent, ClustersAction& clustersAction, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel) :
     TriggerAction(parent),
-    _clustersAction(clustersAction)
+    _clustersAction(clustersAction),
+    _filterModel(filterModel),
+    _selectionModel(selectionModel)
 {
     setText("Export");
     setToolTip("Export clusters to file");
     setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
 
+    // Export clusters when the action is triggered
     connect(this, &TriggerAction::triggered, this, [this]() {
 
         try

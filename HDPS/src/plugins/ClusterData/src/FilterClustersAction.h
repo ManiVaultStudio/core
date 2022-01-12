@@ -2,6 +2,7 @@
 
 #include <actions/WidgetAction.h>
 #include <actions/StringAction.h>
+#include <actions/TriggerAction.h>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -55,9 +56,11 @@ public:
 public: // Action getters
 
     StringAction& getNameFilterAction() { return _nameFilterAction; }
+    TriggerAction& getClearNameFilterAction() { return _clearNameFilterAction; }
 
 protected:
-    ClustersFilterModel&    _filterModel;           /** Reference to clusters filter model */
-    QItemSelectionModel&    _selectionModel;        /** Reference to selection model */
-    StringAction            _nameFilterAction;      /** Name filter action */
+    ClustersFilterModel&    _filterModel;               /** Reference to clusters filter model */
+    QItemSelectionModel&    _selectionModel;            /** Reference to selection model */
+    StringAction            _nameFilterAction;          /** Name filter action */
+    TriggerAction           _clearNameFilterAction;     /** Clear name filter action */
 };

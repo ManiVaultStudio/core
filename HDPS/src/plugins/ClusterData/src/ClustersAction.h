@@ -11,13 +11,10 @@
 #include "FilterClustersAction.h"
 #include "SelectClustersAction.h"
 #include "SubsetAction.h"
+#include "ImportClustersAction.h"
+#include "ExportClustersAction.h"
 
 #include <QItemSelectionModel>
-
-namespace hdps {
-    class CoreInterface;
-    class DataHierarchyItem;
-}
 
 class Cluster;
 class Clusters;
@@ -34,6 +31,21 @@ using namespace hdps::util;
  */
 class CLUSTERDATA_EXPORT ClustersAction : public WidgetAction
 {
+public:
+
+    /** Describes the widget configurations */
+    enum WidgetFlag {
+        Remove      = 0x00001,      /** Includes remove clusters user interface */
+        Merge       = 0x00002,      /** Includes merge clusters user interface */
+        Filter      = 0x00004,      /** Includes filter clusters user interface */
+        Select      = 0x00008,      /** Includes select clusters user interface */
+        Subset      = 0x00010,      /** Includes create subset user interface */
+        Import      = 0x00020,      /** Includes import user interface */
+        Export      = 0x00040,      /** Includes export user interface */
+
+        Default = Remove | Merge | Filter | Select | Subset | Import | Export
+    };
+
 protected:
 
     /** Widget class for clusters action */
@@ -44,8 +56,9 @@ protected:
          * Constructor
          * @param parent Pointer to parent widget
          * @param clustersAction Pointer to clusters action
+         * @param widgetFlags Widget flags for the configuration of the widget
          */
-        Widget(QWidget* parent, ClustersAction* clustersAction);
+        Widget(QWidget* parent, ClustersAction* clustersAction, const std::int32_t& widgetFlags);
 
     protected:
         ClustersFilterModel     _filterModel;               /** Clusters filter model */
@@ -55,6 +68,8 @@ protected:
         FilterClustersAction    _filterClustersAction;      /** Filter clusters action */
         SelectClustersAction    _selectClustersAction;      /** Select clusters action */
         SubsetAction            _subsetAction;              /** Subset action */
+        ImportClustersAction    _importClustersAction;      /** Import clusters action */
+        ExportClustersAction    _exportClustersAction;      /** Export clusters action */
     };
 
     /**
@@ -63,7 +78,7 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this);
+        return new Widget(parent, this, widgetFlags);
     };
 
 public:

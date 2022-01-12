@@ -17,17 +17,6 @@ class QItemSelectionModel;
  */
 class SelectClustersAction : public WidgetAction
 {
-public:
-
-    /** Describes the widget configurations */
-    enum WidgetFlag {
-        SelectAll       = 0x00001,      /** Includes select all UI */
-        SelectNone      = 0x00002,      /** Includes select none UI */
-        SelectInvert    = 0x00004,      /** Includes select invert UI */
-
-        Default = SelectAll | SelectNone | SelectInvert
-    };
-
 protected:
 
     /** Widget class for select clusters action */
