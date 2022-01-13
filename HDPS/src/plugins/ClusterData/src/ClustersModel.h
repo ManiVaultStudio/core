@@ -29,7 +29,7 @@ public:
         NumberOfIndices,    /** Number of indices in the cluster */
 
         /** Number of columns */
-        _Count
+        Count
     };
 
 public:
@@ -94,19 +94,31 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /** Get clusters */
-    std::vector<Cluster>& getClusters();
+    QVector<Cluster>& getClusters();
 
     /**
      * Set clusters
      * @param clusters Pointer to clusters
      */
-    void setClusters(const std::vector<Cluster>& clusters);
+    void setClusters(const QVector<Cluster>& clusters);
 
     /**
      * Remove clusters by their unique identifiers
      * @param ids Unique identifiers of the clusters to remove
      */
     void removeClustersById(const QStringList& ids);
+
+    /**
+     * Colorize clusters by pseudo-random colors
+     * @param randomSeed Random seed for pseudo-random colors
+     */
+    void colorizeClusters(std::int32_t randomSeed = 0);
+
+    /**
+     * Colorize clusters by color map
+     * @param colorMapImage Color map image
+     */
+    void colorizeClusters(const QImage& colorMapImage);
 
 private:
 
@@ -118,5 +130,5 @@ private:
     QIcon getColorIcon(const QColor& color) const;
 
 public:
-    std::vector<Cluster>    _clusters;     /** List of clusters from cluster data */
+    QVector<Cluster>    _clusters;     /** Vector of clusters */
 };

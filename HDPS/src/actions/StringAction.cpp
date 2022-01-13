@@ -90,28 +90,30 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
     setObjectName("LineEdit");
     setAcceptDrops(true);
 
+    // Update the line edit text from the string action
     const auto updateLineEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);
 
         setText(stringAction->getString());
     };
 
+    // Update the place holder text in the line edit
     const auto updatePlaceHolderText = [this, stringAction]() -> void {
         setPlaceholderText(stringAction->getPlaceholderString());
     };
 
-    connect(stringAction, &StringAction::stringChanged, this, [this, updateLineEdit](const QString& value) {
-        updateLineEdit();
-    });
+    // Update the line edit string when the action string changes
+    connect(stringAction, &StringAction::stringChanged, this, updateLineEdit);
 
-    connect(stringAction, &StringAction::placeholderStringChanged, this, [this, updatePlaceHolderText](const QString& value) {
-        updatePlaceHolderText();
-    });
+    // Update the line edit placeholder string when the action placeholder string changes
+    connect(stringAction, &StringAction::placeholderStringChanged, this, updatePlaceHolderText);
 
+    // Update the action string when the line edit text changes
     connect(this, &QLineEdit::textChanged, this, [this, stringAction](const QString& text) {
         stringAction->setString(text);
     });
 
+    // Perform initial updates
     updateLineEdit();
     updatePlaceHolderText();
 }

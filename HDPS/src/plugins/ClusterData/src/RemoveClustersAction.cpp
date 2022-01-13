@@ -2,14 +2,11 @@
 #include "ClustersAction.h"
 #include "ClustersFilterModel.h"
 #include "ClusterData.h"
+#include "ClustersActionWidget.h"
 
-#include <QItemSelectionModel>
-
-RemoveClustersAction::RemoveClustersAction(ClustersAction& clustersAction, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel) :
-    TriggerAction(&clustersAction),
-    _clustersAction(clustersAction),
-    _filterModel(filterModel),
-    _selectionModel(selectionModel)
+RemoveClustersAction::RemoveClustersAction(ClustersActionWidget* clustersActionWidget) :
+    TriggerAction(clustersActionWidget),
+    _clustersActionWidget(clustersActionWidget)
 {
     setText("");
     setToolTip("Remove selected cluster(s)");
@@ -19,26 +16,26 @@ RemoveClustersAction::RemoveClustersAction(ClustersAction& clustersAction, Clust
     connect(this, &TriggerAction::triggered, this, [this]() {
 
         // Get the selected rows from the selection model
-        const auto selectedRows = _selectionModel.selectedRows();
+        const auto selectedRows = _clustersActionWidget->getSelectionModel().selectedRows();
 
         QStringList clusterIds;
 
         // Build a list of cluster identifiers to remove
         for (auto selectedIndex : selectedRows)
-            clusterIds << _filterModel.mapToSource(selectedIndex).siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
+            clusterIds << _clustersActionWidget->getFilterModel().mapToSource(selectedIndex).siblingAtColumn(static_cast<std::int32_t>(ClustersModel::Column::ID)).data(Qt::DisplayRole).toString();
 
         // Remove the clusters
-        _clustersAction.removeClustersById(clusterIds);
+        _clustersActionWidget->getClustersAction().removeClustersById(clusterIds);
     });
 
     // Update action read only status
     const auto updateReadOnly = [this]() -> void {
-        setEnabled(_selectionModel.selectedRows().count() >= 1);
+        setEnabled(_clustersActionWidget->getSelectionModel().selectedRows().count() >= 1);
     };
 
     // Update action read only status when the item selection changes
-    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, updateReadOnly);
-    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
+    connect(&_clustersActionWidget->getSelectionModel(), &QItemSelectionModel::selectionChanged, updateReadOnly);
+    connect(&_clustersActionWidget->getFilterModel(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
     // Initialize read only status
     updateReadOnly();

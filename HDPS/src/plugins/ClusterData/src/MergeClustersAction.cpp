@@ -2,14 +2,11 @@
 #include "ClustersAction.h"
 #include "ClustersFilterModel.h"
 #include "ClusterData.h"
+#include "ClustersActionWidget.h"
 
-#include <QItemSelectionModel>
-
-MergeClustersAction::MergeClustersAction(ClustersAction& clustersAction, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel) :
-    TriggerAction(&clustersAction),
-    _clustersAction(clustersAction),
-    _filterModel(filterModel),
-    _selectionModel(selectionModel)
+MergeClustersAction::MergeClustersAction(ClustersActionWidget* clustersActionWidget) :
+    TriggerAction(clustersActionWidget),
+    _clustersActionWidget(clustersActionWidget)
 {
     setText("");
     setToolTip("Merge selected clusters into one");
@@ -19,13 +16,13 @@ MergeClustersAction::MergeClustersAction(ClustersAction& clustersAction, Cluster
     connect(this, &TriggerAction::triggered, this, [this]() {
 
         // Get the selected rows from the selection model
-        const auto selectedRows = _selectionModel.selectedRows();
+        const auto selectedRows = _clustersActionWidget->getSelectionModel().selectedRows();
 
         // All cluster except the first one need to be removed after the merge process
         QStringList clusterIdsToRemove;
 
         // Determine merge cluster
-        auto mergeCluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedRows.first()).internalPointer());
+        auto mergeCluster = static_cast<Cluster*>(_clustersActionWidget->getFilterModel().mapToSource(selectedRows.first()).internalPointer());
 
         // Alter name of the merge cluster
         mergeCluster->setName(QString("%1*").arg(mergeCluster->getName()));
@@ -34,7 +31,7 @@ MergeClustersAction::MergeClustersAction(ClustersAction& clustersAction, Cluster
         for (auto selectedIndex : selectedRows) {
 
             // Get pointer to cluster
-            auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
+            auto cluster = static_cast<Cluster*>(_clustersActionWidget->getFilterModel().mapToSource(selectedIndex).internalPointer());
 
             // Do not move merge cluster indices into itself
             if (selectedIndex == selectedRows.first())
@@ -48,17 +45,17 @@ MergeClustersAction::MergeClustersAction(ClustersAction& clustersAction, Cluster
         }
 
         // Remove the redundant clusters
-        _clustersAction.removeClustersById(clusterIdsToRemove);
+        _clustersActionWidget->getClustersAction().removeClustersById(clusterIdsToRemove);
     });
 
     // Update action read only status
     const auto updateReadOnly = [this]() -> void {
-        setEnabled(_selectionModel.selectedRows().count() >= 2);
+        setEnabled(_clustersActionWidget->getSelectionModel().selectedRows().count() >= 2);
     };
 
     // Update action read only status when the item selection changes
-    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, updateReadOnly);
-    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
+    connect(&_clustersActionWidget->getSelectionModel(), &QItemSelectionModel::selectionChanged, updateReadOnly);
+    connect(&_clustersActionWidget->getFilterModel(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
     // Initialize read only status
     updateReadOnly();

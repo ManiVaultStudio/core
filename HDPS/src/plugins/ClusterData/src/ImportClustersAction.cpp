@@ -1,13 +1,14 @@
 #include "ImportClustersAction.h"
 #include "ClustersAction.h"
 #include "ClusterData.h"
+#include "ClustersActionWidget.h"
 
 #include <QFileDialog>
 #include <QJsonDocument>
 
-ImportClustersAction::ImportClustersAction(QObject* parent, ClustersAction& clustersAction) :
-    TriggerAction(parent),
-    _clustersAction(clustersAction)
+ImportClustersAction::ImportClustersAction(ClustersActionWidget* clustersActionWidget) :
+    TriggerAction(clustersActionWidget),
+    _clustersActionWidget(clustersActionWidget)
 {
     setText("Import");
     setToolTip("Import clusters from file");
@@ -45,11 +46,14 @@ ImportClustersAction::ImportClustersAction(QObject* parent, ClustersAction& clus
             // Convert to JSON document
             clusterJsonDocument = QJsonDocument::fromJson(clustersData);
 
+            // Get the clusters dataset from the clusters action
+            auto clustersDataset = _clustersActionWidget->getClustersAction().getClustersDataset();
+
             // Load in the cluster from variant data
-            _clustersAction.getClustersDataset()->fromVariant(clusterJsonDocument.toVariant());
+            clustersDataset->fromVariant(clusterJsonDocument.toVariant());
 
             // Let others know that the clusters changed
-            Application::core()->notifyDataChanged(_clustersAction.getClustersDataset());
+            Application::core()->notifyDataChanged(clustersDataset);
         }
         catch (std::exception& e)
         {

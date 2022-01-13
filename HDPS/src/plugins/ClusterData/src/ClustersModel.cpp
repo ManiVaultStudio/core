@@ -18,7 +18,7 @@ int ClustersModel::rowCount(const QModelIndex& parent /*= QModelIndex()*/) const
 
 int ClustersModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    return static_cast<std::int32_t>(Column::_Count);
+    return static_cast<std::int32_t>(Column::Count);
 }
 
 QVariant ClustersModel::data(const QModelIndex& index, int role) const
@@ -231,12 +231,12 @@ Qt::ItemFlags ClustersModel::flags(const QModelIndex& index) const
     return itemFlags;
 }
 
-std::vector<Cluster>& ClustersModel::getClusters()
+QVector<Cluster>& ClustersModel::getClusters()
 {
     return _clusters;
 }
 
-void ClustersModel::setClusters(const std::vector<Cluster>& clusters)
+void ClustersModel::setClusters(const QVector<Cluster>& clusters)
 {
     const auto numberOfClustersChanged = clusters.size() != _clusters.size();
 
@@ -252,7 +252,7 @@ void ClustersModel::setClusters(const std::vector<Cluster>& clusters)
         if (!std::equal(_clusters.begin(), _clusters.end(), clusters.begin())) {
             _clusters = clusters;
 
-            emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::_Count) - 1));
+            emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::Count) - 1));
         }
     }
 }
@@ -269,6 +269,23 @@ void ClustersModel::removeClustersById(const QStringList& ids)
         }
     }
     emit layoutChanged();
+}
+
+void ClustersModel::colorizeClusters(std::int32_t randomSeed /*= 0*/)
+{
+    // Colorize clusters by pseudo-random colors
+    Cluster::colorizeClusters(_clusters, randomSeed);
+
+    // Notify others that the data for the color column has changed
+    emit dataChanged(index(0, static_cast<std::int32_t>(Column::Color)), index(rowCount() - 1, static_cast<std::int32_t>(Column::Color)));
+}
+
+void ClustersModel::colorizeClusters(const QImage& colorMapImage)
+{
+    Cluster::colorizeClusters(_clusters, colorMapImage);
+
+    // Notify others that the data for the color column has changed
+    emit dataChanged(index(0, static_cast<std::int32_t>(Column::Color)), index(rowCount() - 1, static_cast<std::int32_t>(Column::Color)));
 }
 
 QIcon ClustersModel::getColorIcon(const QColor& color) const

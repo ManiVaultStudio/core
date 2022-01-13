@@ -7,8 +7,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-class ClustersFilterModel;
-class QItemSelectionModel;
+class ClustersActionWidget;
 
 /**
  * Filter clusters action class
@@ -47,11 +46,9 @@ public:
 
     /**
      * Constructor
-     * @param parent Pointer to parent object
-     * @param filterModel Reference to clusters filter model
-     * @param selectionModel Reference to selection model
+     * @param clustersActionWidget Pointer to clusters action widget
      */
-    FilterClustersAction(QObject* parent, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel);
+    FilterClustersAction(ClustersActionWidget* clustersActionWidget);
 
 public: // Action getters
 
@@ -59,8 +56,7 @@ public: // Action getters
     TriggerAction& getClearNameFilterAction() { return _clearNameFilterAction; }
 
 protected:
-    ClustersFilterModel&    _filterModel;               /** Reference to clusters filter model */
-    QItemSelectionModel&    _selectionModel;            /** Reference to selection model */
+    ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */
     StringAction            _nameFilterAction;          /** Name filter action */
     TriggerAction           _clearNameFilterAction;     /** Clear name filter action */
 };

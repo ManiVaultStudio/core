@@ -10,13 +10,13 @@ using namespace hdps::gui;
 class ClustersActionWidget;
 
 /**
- * Remove clusters action class
+ * Refresh clusters action class
  *
- * Action class for removing selected clusters from a clusters model
+ * Action class for refreshing clusters externally (merely provides a user interface for cluster action consumers)
  *
  * @author Thomas Kroes
  */
-class RemoveClustersAction : public TriggerAction
+class RefreshClustersAction : public TriggerAction
 {
 public:
 
@@ -24,7 +24,7 @@ public:
      * Constructor
      * @param clustersActionWidget Pointer to clusters action widget
      */
-    RemoveClustersAction(ClustersActionWidget* clustersActionWidget);
+    RefreshClustersAction(ClustersActionWidget* clustersActionWidget);
 
 protected:
     ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */

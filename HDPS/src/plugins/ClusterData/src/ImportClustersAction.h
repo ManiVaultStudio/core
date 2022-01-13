@@ -5,7 +5,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-class ClustersAction;
+class ClustersActionWidget;
 
 /**
  * Import clusters action class
@@ -20,11 +20,10 @@ public:
 
     /**
      * Constructor
-     * @param parent Pointer to parent object
-     * @param clustersAction Reference to clusters action
+     * @param clustersActionWidget Pointer to clusters action widget
      */
-    ImportClustersAction(QObject* parent, ClustersAction& clustersAction);
+    ImportClustersAction(ClustersActionWidget* clustersActionWidget);
 
 protected:
-    ClustersAction&     _clustersAction;        /** Reference to clusters action */
+    ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */
 };

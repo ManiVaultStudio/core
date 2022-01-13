@@ -5,10 +5,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-class ClustersFilterModel;
-class QItemSelectionModel;
-
-class ClustersAction;
+class ClustersActionWidget;
 
 /**
  * Subset action class
@@ -46,12 +43,9 @@ public:
 
     /**
      * Constructor
-     * @param parent Pointer to parent object
-     * @param clustersAction Reference to clusters action
-     * @param filterModel Reference to clusters filter model
-     * @param selectionModel Reference to selection model
+     * @param clustersActionWidget Pointer to clusters action widget
      */
-    SubsetAction(QObject* parent, ClustersAction& clustersAction, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel);
+    SubsetAction(ClustersActionWidget* clustersActionWidget);
 
 public: // Action getters
 
@@ -59,9 +53,7 @@ public: // Action getters
     TriggerAction& getCreateSubsetAction() { return _createSubsetAction; }
 
 protected:
-    ClustersAction&         _clustersAction;        /** Reference to clusters action */
-    ClustersFilterModel&    _filterModel;           /** Reference to clusters filter model */
-    QItemSelectionModel&    _selectionModel;        /** Reference to selection model */
-    StringAction            _subsetNameAction;      /** Subset name action */
-    TriggerAction           _createSubsetAction;    /** Create subset action */
+    ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */
+    StringAction            _subsetNameAction;          /** Subset name action */
+    TriggerAction           _createSubsetAction;        /** Create subset action */
 };

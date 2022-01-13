@@ -1,15 +1,15 @@
 #include "FilterClustersAction.h"
+#include "ClustersAction.h"
 #include "ClustersFilterModel.h"
+#include "ClustersActionWidget.h"
 
 #include <Application.h>
 
-#include <QItemSelection>
 #include <QHBoxLayout>
 
-FilterClustersAction::FilterClustersAction(QObject* parent, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel) :
-    WidgetAction(parent),
-    _filterModel(filterModel),
-    _selectionModel(selectionModel),
+FilterClustersAction::FilterClustersAction(ClustersActionWidget* clustersActionWidget) :
+    WidgetAction(clustersActionWidget),
+    _clustersActionWidget(clustersActionWidget),
     _nameFilterAction(this, "Name filter"),
     _clearNameFilterAction(this, "Clear name filter")
 {
@@ -17,14 +17,14 @@ FilterClustersAction::FilterClustersAction(QObject* parent, ClustersFilterModel&
     setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
 
     _nameFilterAction.setToolTip("Filter clusters by name (case-insensitive)");
-    _nameFilterAction.setPlaceHolderString("Filter by cluster name...");
+    _nameFilterAction.setPlaceHolderString("Filter by name...");
 
     _clearNameFilterAction.setToolTip("Clear the name filter");
     _clearNameFilterAction.setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
 
     // Update the name filter in the filter model
     const auto updateNameFilter = [this]() -> void {
-        _filterModel.setNameFilter(_nameFilterAction.getString());
+        _clustersActionWidget->getFilterModel().setNameFilter(_nameFilterAction.getString());
         _clearNameFilterAction.setEnabled(!_nameFilterAction.getString().isEmpty());
     };
 
@@ -41,11 +41,11 @@ FilterClustersAction::FilterClustersAction(QObject* parent, ClustersFilterModel&
 
     // Update read only status
     const auto updateReadOnly = [this]() -> void {
-        setEnabled(_filterModel.rowCount() >= 1);
+        setEnabled(_clustersActionWidget->getFilterModel().rowCount() >= 1);
     };
 
     // Update read only status when the model selection or layout changes
-    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
+    connect(&_clustersActionWidget->getFilterModel(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
     // Do an initial update of the read only status
     updateReadOnly();

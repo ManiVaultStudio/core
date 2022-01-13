@@ -1,16 +1,15 @@
 #include "ExportClustersAction.h"
 #include "ClustersAction.h"
 #include "ClusterData.h"
+#include "ClustersActionWidget.h"
 
 #include <QFileDialog>
 #include <QJsonDocument>
 #include <QJsonArray>
 
-ExportClustersAction::ExportClustersAction(QObject* parent, ClustersAction& clustersAction, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel) :
-    TriggerAction(parent),
-    _clustersAction(clustersAction),
-    _filterModel(filterModel),
-    _selectionModel(selectionModel)
+ExportClustersAction::ExportClustersAction(ClustersActionWidget* clustersActionWidget) :
+    TriggerAction(clustersActionWidget),
+    _clustersActionWidget(clustersActionWidget)
 {
     setText("Export");
     setToolTip("Export clusters to file");
@@ -22,7 +21,7 @@ ExportClustersAction::ExportClustersAction(QObject* parent, ClustersAction& clus
         try
         {
             // Create JSON document from clusters variant map
-            QJsonDocument document(QJsonArray::fromVariantList(_clustersAction.getClustersDataset()->toVariant().toList()));
+            QJsonDocument document(QJsonArray::fromVariantList(_clustersActionWidget->getClustersAction().getClustersDataset()->toVariant().toList()));
 
             // Show the dialog
             QFileDialog fileDialog;
@@ -53,11 +52,11 @@ ExportClustersAction::ExportClustersAction(QObject* parent, ClustersAction& clus
 
     // Update read only status
     const auto updateReadOnly = [this]() -> void {
-        setEnabled(_filterModel.rowCount() >= 1);
+        setEnabled(_clustersActionWidget->getFilterModel().rowCount() >= 1);
     };
 
     // Update read only status when the model selection or layout changes
-    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
+    connect(&_clustersActionWidget->getFilterModel(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
     // Do an initial update of the read only status
     updateReadOnly();

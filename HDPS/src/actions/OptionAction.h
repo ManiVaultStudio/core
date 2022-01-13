@@ -172,6 +172,15 @@ public:
      */
     void setDefaultText(const QString& defaultText);
 
+    /** Get placeholder text */
+    QString getPlaceholderString() const;
+
+    /**
+     * Set placeholder text
+     * @param placeholderText Placeholder text
+     */
+    void setPlaceHolderString(const QString& placeholderString);
+
     /** Determines whether the current value can be reset to its default */
     bool isResettable() const override;
 
@@ -217,11 +226,18 @@ signals:
      */
     void currentTextChanged(const QString& currentText);
 
+    /**
+     * Signals that the placeholder string changed
+     * @param placeholderString Placeholder string that changed
+     */
+    void placeholderStringChanged(const QString& placeholderString);
+
 protected:
     QStringListModel        _defaultModel;          /** Default simple string list model */
     QAbstractItemModel*     _customModel;           /** Custom item model for enriched (combobox) ui */
     std::int32_t            _currentIndex;          /** Currently selected index */
     std::int32_t            _defaultIndex;          /** Default index */
+    QString                 _placeholderString;     /** Place holder string */
 };
 
 }

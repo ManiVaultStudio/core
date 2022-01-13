@@ -36,7 +36,7 @@ Dataset<DatasetImpl> ClusterData::createDataSet() const
     return Dataset<DatasetImpl>(new Clusters(_core, getName()));
 }
 
-std::vector<Cluster>& ClusterData::getClusters()
+QVector<Cluster>& ClusterData::getClusters()
 {
     return _clusters;
 }
@@ -142,7 +142,7 @@ void Clusters::fromVariant(const QVariant& variant)
     if (variant.type() != QVariant::Type::List)
         throw std::runtime_error("Clusters variant is not a list");
 
-    std::vector<Cluster>& clusters = getClusters();
+    QVector<Cluster>& clusters = getClusters();
 
     const auto variantList = variant.toList();
 
@@ -338,7 +338,7 @@ void Clusters::selectInvert()
     selectionIndices.reserve(numberOfClusters - selectionSet.size());
 
     // Do the inversion
-    for (std::uint32_t i = 0; i < numberOfClusters; i++) {
+    for (std::uint32_t i = 0; i < static_cast<std::uint32_t>(numberOfClusters); i++) {
         if (selectionSet.find(i) == selectionSet.end())
             selectionIndices.push_back(i);
     }

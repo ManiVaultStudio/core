@@ -15,7 +15,8 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
     _defaultModel(),
     _customModel(nullptr),
     _currentIndex(-1),
-    _defaultIndex(0)
+    _defaultIndex(0),
+    _placeholderString()
 {
     setText(title);
     setMayReset(true);
@@ -196,6 +197,21 @@ void OptionAction::setDefaultText(const QString& defaultText)
     _defaultIndex = getOptions().indexOf(defaultText);
 }
 
+QString OptionAction::getPlaceholderString() const
+{
+    return _placeholderString;
+}
+
+void OptionAction::setPlaceHolderString(const QString& placeholderString)
+{
+    if (placeholderString == _placeholderString)
+        return;
+
+    _placeholderString = placeholderString;
+
+    emit placeholderStringChanged(_placeholderString);
+}
+
 QString OptionAction::getCurrentText() const
 {
     if (_currentIndex < 0)
@@ -298,10 +314,19 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         optionAction->setCurrentIndex(currentIndex);
     });
 
+    // Update the place holder text in the combobox
+    const auto updatePlaceHolderText = [this, optionAction]() -> void {
+        setPlaceholderText(optionAction->getPlaceholderString());
+    };
+
+    // Update the combobox placeholder string when the action placeholder string changes
+    connect(optionAction, &OptionAction::placeholderStringChanged, this, updatePlaceHolderText);
+
     // Perform initial updates
     updateComboBoxModel();
     updateComboBoxSelection();
     updateToolTip();
+    updatePlaceHolderText();
 }
 
 OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* optionAction) :

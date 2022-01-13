@@ -6,13 +6,7 @@
 
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
-#include "RemoveClustersAction.h"
-#include "MergeClustersAction.h"
-#include "FilterClustersAction.h"
-#include "SelectClustersAction.h"
-#include "SubsetAction.h"
-#include "ImportClustersAction.h"
-#include "ExportClustersAction.h"
+#include "ClustersActionWidget.h"
 
 #include <QItemSelectionModel>
 
@@ -25,12 +19,14 @@ using namespace hdps::util;
 /**
  * Clusters action class
  *
- * Action class for display and interaction with clusters
+ * Action class for display of and interaction with clusters
  *
  * @author Thomas Kroes
  */
 class CLUSTERDATA_EXPORT ClustersAction : public WidgetAction
 {
+    Q_OBJECT
+
 public:
 
     /** Describes the widget configurations */
@@ -40,37 +36,14 @@ public:
         Filter      = 0x00004,      /** Includes filter clusters user interface */
         Select      = 0x00008,      /** Includes select clusters user interface */
         Subset      = 0x00010,      /** Includes create subset user interface */
-        Import      = 0x00020,      /** Includes import user interface */
-        Export      = 0x00040,      /** Includes export user interface */
+        Refresh     = 0x00020,      /** Includes refresh clusters user interface */
+        Import      = 0x00040,      /** Includes import user interface */
+        Export      = 0x00080,      /** Includes export user interface */
 
         Default = Remove | Merge | Filter | Select | Subset | Import | Export
     };
 
 protected:
-
-    /** Widget class for clusters action */
-    class Widget : public WidgetActionWidget {
-    public:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         * @param clustersAction Pointer to clusters action
-         * @param widgetFlags Widget flags for the configuration of the widget
-         */
-        Widget(QWidget* parent, ClustersAction* clustersAction, const std::int32_t& widgetFlags);
-
-    protected:
-        ClustersFilterModel     _filterModel;               /** Clusters filter model */
-        QItemSelectionModel     _selectionModel;            /** Clusters selection model */
-        RemoveClustersAction    _removeClustersAction;      /** Remove clusters action */
-        MergeClustersAction     _mergeClustersAction;       /** Merge clusters action */
-        FilterClustersAction    _filterClustersAction;      /** Filter clusters action */
-        SelectClustersAction    _selectClustersAction;      /** Select clusters action */
-        SubsetAction            _subsetAction;              /** Subset action */
-        ImportClustersAction    _importClustersAction;      /** Import clusters action */
-        ExportClustersAction    _exportClustersAction;      /** Export clusters action */
-    };
 
     /**
      * Get widget representation of the color action
@@ -78,7 +51,7 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new Widget(parent, this, widgetFlags);
+        return new ClustersActionWidget(parent, this, widgetFlags);
     };
 
 public:
@@ -86,17 +59,23 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param clusters Smart pointer to clusters
+     * @param clustersDataset Smart pointer to clusters (if invalid, no dataset synchronization takes place)
      */
-    ClustersAction(QObject* parent, Dataset<Clusters> clusters);
+    ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset);
 
     /** Get clusters */
-    std::vector<Cluster>* getClusters();
+    QVector<Cluster>* getClusters();
 
-    /** Get clusters */
+    /**
+     * Get clusters
+     * @return Smart pointer to clusters dataset
+     */
     Dataset<Clusters>& getClustersDataset();
 
-    /** Create subset from selected clusters */
+    /**
+     * Create subset from selected clusters
+     * @param datasetName Name of the subset
+     */
     void createSubset(const QString& datasetName);
 
     /**
@@ -105,10 +84,21 @@ public:
      */
     void removeClustersById(const QStringList& ids);
 
-    /** Get the clusters model */
+    /**
+     * Get the clusters model
+     * @param Reference to the clusters model
+     */
     ClustersModel& getClustersModel();
 
+    /** Invalidates the clusters and requests an (external) refresh */
+    void invalidateClusters();
+
+signals:
+
+    /** Signals that a refresh is required */
+    void refreshClusters();
+
 protected:
-    Dataset<Clusters>   _clusters;          /** Smart pointer to clusters */
+    Dataset<Clusters>   _clustersDataset;   /** Smart pointer to the clusters dataset */
     ClustersModel       _clustersModel;     /** Clusters model */
 };

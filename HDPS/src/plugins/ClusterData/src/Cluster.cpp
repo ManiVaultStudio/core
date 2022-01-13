@@ -1,20 +1,22 @@
 #include "Cluster.h"
 
 #include <QUuid>
+#include <QImage>
 
 #include <stdexcept>
 
 using namespace hdps::util;
 
-Cluster::Cluster() :
-    _name(""),
+Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*/, const std::vector<std::uint32_t>& indices /*= std::vector<std::uint32_t>()*/) :
+    _name(name),
     _id(QUuid::createUuid().toString()),
-    _color(Qt::gray),
-    _indices(),
+    _color(color),
+    _indices(indices),
     _median(),
     _mean(),
     _stddev()
 {
+
 }
 
 void Cluster::accept(ClusterDataVisitor* visitor) const
@@ -113,4 +115,32 @@ QVariant Cluster::toVariant() const
     clusterVariantMap["indices"]    = QVariantList(_indices.begin(), _indices.end());
 
     return clusterVariantMap;
+}
+
+void Cluster::colorizeClusters(QVector<Cluster>& clusters, std::int32_t randomSeed /*= 0*/)
+{
+    QRandomGenerator rng;
+
+    // Seed the random number generator
+    rng.seed(randomSeed);
+
+    // Generate pseudo-random cluster colors
+    for (auto& cluster : clusters) {
+        const auto randomHue        = rng.bounded(360);
+        const auto randomSaturation = rng.bounded(150, 255);
+        const auto randomLightness  = rng.bounded(50, 200);
+
+        // Create random color from hue, saturation and lightness
+        cluster.setColor(QColor::fromHsl(randomHue, randomSaturation, randomLightness));
+    }
+}
+
+void Cluster::colorizeClusters(QVector<Cluster>& clusters, const QImage& colorMapImage)
+{
+    // Get scaled version of the color map image that matches the width to the number of clusters
+    const auto& scaledColorMapImage = colorMapImage.scaled(static_cast<std::int32_t>(clusters.size()), 1);
+
+    // Color clusters according to the color map image
+    for (auto& cluster : clusters)
+        cluster.setColor(scaledColorMapImage.pixel(clusters.indexOf(cluster), 0));
 }

@@ -7,8 +7,7 @@
 #include <QString>
 #include <QDebug>
 #include <QColor>
-
-#include <vector>
+#include <QRandomGenerator>
 
 /**
  * Clusters class
@@ -20,8 +19,13 @@ class CLUSTERDATA_EXPORT Cluster : public hdps::util::Visitable<ClusterDataVisit
 {
 public:
 
-    /** Constructor */
-    Cluster();
+    /**
+     * Constructor
+     * @param name Name of the cluster
+     * @param color Color of the cluster
+     * @param indices Indices of the cluster
+     */
+    Cluster(const QString& name = "", const QColor& color = Qt::gray, const std::vector<std::uint32_t>& indices = std::vector<std::uint32_t>());
 
     /**
      * Comparison operator for two clusters (compares the internal identifiers)
@@ -80,10 +84,10 @@ public: // Getters/setters
     void setColor(const QColor& color);
 
     /** Get contained indices */
-    const std::vector<unsigned int>& getIndices() const;
+    const std::vector<std::uint32_t>& getIndices() const;
 
     /** Get contained indices */
-    std::vector<unsigned int>& getIndices();
+    std::vector<std::uint32_t>& getIndices();
 
     /** Get number of indices */
     std::uint32_t getNumberOfIndices() const;
@@ -111,6 +115,20 @@ public: // Getters/setters
 
     /** Returns a variant representation of the cluster */
     QVariant toVariant() const;
+
+    /**
+     * Colorize clusters by pseudo-random colors
+     * @param clusters Vector of clusters to colorize
+     * @param randomSeed Random seed for pseudo-random colors
+     */
+    static void colorizeClusters(QVector<Cluster>& clusters, std::int32_t randomSeed = 0);
+
+    /**
+     * Colorize clusters by color map
+     * @param clusters Vector of clusters to colorize
+     * @param colorMapImage Color map image
+     */
+    static void colorizeClusters(QVector<Cluster>& clusters, const QImage& colorMapImage);
 
 protected:
     QString                     _name;          /** GUI name */

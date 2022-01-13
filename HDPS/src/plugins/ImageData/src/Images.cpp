@@ -436,7 +436,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
             // And copy all points
             fullPoints->visitData([this, &fullPoints, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
-                for (std::int32_t pointIndex = 0; pointIndex < fullPoints->getNumPoints(); pointIndex++)
+                for (std::uint32_t pointIndex = 0; pointIndex < fullPoints->getNumPoints(); pointIndex++)
                     scalarData[pointIndex] = pointData[pointIndex][dimensionIndex];
             });
         }

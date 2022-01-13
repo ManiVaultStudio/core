@@ -5,8 +5,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-class ClustersFilterModel;
-class QItemSelectionModel;
+class ClustersActionWidget;
 
 /**
  * Select clusters action class
@@ -45,11 +44,9 @@ public:
 
     /**
      * Constructor
-     * @param parent Pointer to parent object
-     * @param filterModel Reference to clusters filter model
-     * @param selectionModel Reference to selection model
+     * @param clustersActionWidget Pointer to clusters action widget
      */
-    SelectClustersAction(QObject* parent, ClustersFilterModel& filterModel, QItemSelectionModel& selectionModel);
+    SelectClustersAction(ClustersActionWidget* clustersActionWidget);
 
 public: // Action getters
 
@@ -58,9 +55,8 @@ public: // Action getters
     TriggerAction& getSelectInvertAction() { return _selectInvertAction; }
 
 protected:
-    ClustersFilterModel&    _filterModel;           /** Reference to clusters filter model */
-    QItemSelectionModel&    _selectionModel;        /** Reference to selection model */
-    TriggerAction           _selectAllAction;       /** Select all clusters action */
-    TriggerAction           _selectNoneAction;      /** Clear cluster selection action */
-    TriggerAction           _selectInvertAction;    /** Invert the cluster selection action */
+    ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */
+    TriggerAction           _selectAllAction;           /** Select all clusters action */
+    TriggerAction           _selectNoneAction;          /** Clear cluster selection action */
+    TriggerAction           _selectInvertAction;        /** Invert the cluster selection action */
 };
