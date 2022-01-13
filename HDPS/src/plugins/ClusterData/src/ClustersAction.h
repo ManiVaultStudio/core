@@ -2,11 +2,12 @@
 
 #include "clusterdata_export.h"
 
-#include <actions/Actions.h>
-
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
 #include "ClustersActionWidget.h"
+
+#include <actions/Actions.h>
+#include <PointData.h>
 
 #include <QItemSelectionModel>
 
@@ -35,12 +36,13 @@ public:
         Merge       = 0x00002,      /** Includes merge clusters user interface */
         Filter      = 0x00004,      /** Includes filter clusters user interface */
         Select      = 0x00008,      /** Includes select clusters user interface */
-        Subset      = 0x00010,      /** Includes create subset user interface */
-        Refresh     = 0x00020,      /** Includes refresh clusters user interface */
-        Import      = 0x00040,      /** Includes import user interface */
-        Export      = 0x00080,      /** Includes export user interface */
+        Colorize    = 0x00010,      /** Includes colorize clusters user interface */
+        Subset      = 0x00020,      /** Includes subset user interface */
+        Refresh     = 0x00040,      /** Includes refresh clusters user interface */
+        Import      = 0x00080,      /** Includes import user interface */
+        Export      = 0x00100,      /** Includes export user interface */
 
-        Default = Remove | Merge | Filter | Select | Subset | Import | Export
+        Default = Remove | Merge | Filter | Select | Colorize | Subset | Import | Export
     };
 
 protected:
@@ -60,8 +62,9 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param clustersDataset Smart pointer to clusters (if invalid, no dataset synchronization takes place)
+     * @param pointsDataset Smart pointer to points (if valid, points are selected when clusters are selected)
      */
-    ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset);
+    ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset, Dataset<Points> pointsDataset = Dataset<Points>());
 
     /** Get clusters */
     QVector<Cluster>* getClusters();
@@ -71,6 +74,12 @@ public:
      * @return Smart pointer to clusters dataset
      */
     Dataset<Clusters>& getClustersDataset();
+
+    /**
+     * Get points
+     * @return Smart pointer to points dataset
+     */
+    Dataset<Points>& getPointsDataset();
 
     /**
      * Create subset from selected clusters
@@ -93,12 +102,18 @@ public:
     /** Invalidates the clusters and requests an (external) refresh */
     void invalidateClusters();
 
+public: // Action getters
+
+    ColorizeClustersAction& getColorizeClustersAction() { return _colorizeClustersAction; }
+
 signals:
 
     /** Signals that a refresh is required */
     void refreshClusters();
 
 protected:
-    Dataset<Clusters>   _clustersDataset;   /** Smart pointer to the clusters dataset */
-    ClustersModel       _clustersModel;     /** Clusters model */
+    Dataset<Clusters>           _clustersDataset;           /** Smart pointer to the clusters dataset */
+    Dataset<Points>             _pointsDataset;             /** Smart pointer to the points dataset */
+    ClustersModel               _clustersModel;             /** Clusters model */
+    ColorizeClustersAction      _colorizeClustersAction;    /** Colorize clusters action */
 };

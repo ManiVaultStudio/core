@@ -2,6 +2,8 @@
 #include "ClustersAction.h"
 #include "ClusterData.h"
 
+#include <PointData.h>
+
 #include <QTreeView>
 #include <QHeaderView>
 #include <QVBoxLayout>
@@ -86,6 +88,53 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
         });
     }
 
+    auto points = clustersAction->getPointsDataset();
+
+    if (points.isValid()) {
+
+        // Select cluster points when the cluster selection changes
+        connect(clustersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, points, clustersAction, clustersTreeView](const QItemSelection &selected, const QItemSelection &deselected) -> void {
+            /*
+            // Get selected row
+            const auto selectedRows = clustersTreeView->selectionModel()->selectedRows();
+
+            // Indices of the selected clusters
+            std::vector<std::uint32_t> currentClusterSelectionIndices;
+
+            // Clear and reserve the selection indices
+            currentClusterSelectionIndices.reserve(clustersAction->getClusters()->size());
+
+            auto selection              = points->getSelection<Points>();
+            auto& pointSelectionIndices = selection->indices;
+
+            pointSelectionIndices.clear();
+            pointSelectionIndices.reserve(selectedRows.count());
+
+            std::vector<std::uint32_t> globalIndices;
+
+            points->getGlobalIndices(globalIndices);
+
+            // Append point indices per cluster
+            for (auto selectedIndex : selectedRows) {
+                auto cluster = static_cast<Cluster*>(_filterModel.mapToSource(selectedIndex).internalPointer());
+
+                // Append the indices
+                pointSelectionIndices.insert(pointSelectionIndices.end(), cluster->getIndices().begin(), cluster->getIndices().end());
+            }
+
+            // Remove duplicates
+            std::sort(pointSelectionIndices.begin(), pointSelectionIndices.end());
+            pointSelectionIndices.erase(unique(pointSelectionIndices.begin(), pointSelectionIndices.end()), pointSelectionIndices.end());
+
+            for (auto& pointSelectionIndex : pointSelectionIndices)
+                pointSelectionIndex = globalIndices[pointSelectionIndex];
+
+            // Notify others that the parent points selection has changed
+            Application::core()->notifyDataSelectionChanged(points);
+            */
+        });
+    }
+
     // Clear the selection when the layout of the model changes
     connect(clustersTreeView->model(), &QAbstractItemModel::layoutChanged, this, [this, clustersTreeView](const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint) {
         clustersTreeView->selectionModel()->reset();
@@ -133,13 +182,17 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
         if (widgetFlags & ClustersAction::Merge)
             toolbarLayout->addWidget(_mergeClustersAction.createWidget(this, TriggerAction::Icon));
 
+        // Add colorize widget if required
+        if (widgetFlags & ClustersAction::Colorize)
+            toolbarLayout->addWidget(_clustersAction.getColorizeClustersAction().createCollapsedWidget(this));
+
         // Add subset widget if required
         if (widgetFlags & ClustersAction::Subset)
             toolbarLayout->addWidget(_subsetAction.createCollapsedWidget(this));
 
         // Add refresh widget if required
         if (widgetFlags & ClustersAction::Refresh)
-            toolbarLayout->addWidget(_refreshClustersAction.createWidget(this));
+            toolbarLayout->addWidget(_refreshClustersAction.createWidget(this, TriggerAction::Icon));
 
         toolbarLayout->addStretch(1);
 

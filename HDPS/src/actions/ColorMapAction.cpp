@@ -348,7 +348,7 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
-    layout->setSpacing(3);
+    //layout->setSpacing(3);
 
     auto comboBoxWidget = new ComboBoxWidget(parent, &_currentColorMapAction, this);
 

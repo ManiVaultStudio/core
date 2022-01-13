@@ -2,8 +2,6 @@
 
 #include <actions/TriggerAction.h>
 
-#include <QItemSelectionModel>
-
 using namespace hdps;
 using namespace hdps::gui;
 

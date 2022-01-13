@@ -1,17 +1,18 @@
 #include "ClustersAction.h"
 #include "ClusterData.h"
 
-#include <PointData.h>
 #include <event/Event.h>
 
 #include <QTreeView>
 #include <QHeaderView>
 #include <QVBoxLayout>
 
-ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset) :
+ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset, Dataset<Points> pointsDataset /*= Dataset<Points>()*/) :
     WidgetAction(parent),
     _clustersDataset(clustersDataset),
-    _clustersModel()
+    _pointsDataset(pointsDataset),
+    _clustersModel(),
+    _colorizeClustersAction(*this)
 {
     setText("Clusters");
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -53,6 +54,11 @@ Dataset<Clusters>& ClustersAction::getClustersDataset()
     return _clustersDataset;
 }
 
+Dataset<Points>& ClustersAction::getPointsDataset()
+{
+    return _pointsDataset;
+}
+
 void ClustersAction::createSubset(const QString& datasetName)
 {
     _clustersDataset->getParent()->createSubset("Clusters", _clustersDataset->getParent());
@@ -60,7 +66,11 @@ void ClustersAction::createSubset(const QString& datasetName)
 
 void ClustersAction::removeClustersById(const QStringList& ids)
 {
-    _clustersModel.removeClustersById(ids);
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    {
+        _clustersModel.removeClustersById(ids);
+    }
+    QApplication::restoreOverrideCursor();
 }
 
 ClustersModel& ClustersAction::getClustersModel()

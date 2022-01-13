@@ -273,6 +273,9 @@ void ClustersModel::removeClustersById(const QStringList& ids)
 
 void ClustersModel::colorizeClusters(std::int32_t randomSeed /*= 0*/)
 {
+    if (_clusters.isEmpty())
+        return;
+
     // Colorize clusters by pseudo-random colors
     Cluster::colorizeClusters(_clusters, randomSeed);
 
@@ -282,6 +285,10 @@ void ClustersModel::colorizeClusters(std::int32_t randomSeed /*= 0*/)
 
 void ClustersModel::colorizeClusters(const QImage& colorMapImage)
 {
+    if (_clusters.isEmpty())
+        return;
+
+    // Colorize clusters by color map
     Cluster::colorizeClusters(_clusters, colorMapImage);
 
     // Notify others that the data for the color column has changed

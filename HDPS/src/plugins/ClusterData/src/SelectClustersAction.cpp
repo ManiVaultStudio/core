@@ -30,17 +30,29 @@ SelectClustersAction::SelectClustersAction(ClustersActionWidget* clustersActionW
 
     // Select all clusters when the select all action is triggered
     connect(&_selectAllAction, &TriggerAction::triggered, this, [this, getItemSelection]() {
-        _clustersActionWidget->getSelectionModel().select(getItemSelection(), QItemSelectionModel::Rows | QItemSelectionModel::Select);
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        {
+            _clustersActionWidget->getSelectionModel().select(getItemSelection(), QItemSelectionModel::Rows | QItemSelectionModel::Select);
+        }
+        QApplication::restoreOverrideCursor();
     });
 
     // De-select all clusters when the select none action is triggered
     connect(&_selectNoneAction, &TriggerAction::triggered, this, [this, getItemSelection]() {
-        _clustersActionWidget->getSelectionModel().select(getItemSelection(), QItemSelectionModel::Rows | QItemSelectionModel::Deselect);
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        {
+            _clustersActionWidget->getSelectionModel().select(getItemSelection(), QItemSelectionModel::Rows | QItemSelectionModel::Deselect);
+        }
+        QApplication::restoreOverrideCursor();
     });
 
     // Invert the cluster selection when the select invert action is triggered
     connect(&_selectInvertAction, &TriggerAction::triggered, this, [this, getItemSelection]() {
-        _clustersActionWidget->getSelectionModel().select(getItemSelection(), QItemSelectionModel::Rows | QItemSelectionModel::Toggle);
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        {
+            _clustersActionWidget->getSelectionModel().select(getItemSelection(), QItemSelectionModel::Rows | QItemSelectionModel::Toggle);
+        }
+        QApplication::restoreOverrideCursor();
     });
 
     // Update select actions read only status

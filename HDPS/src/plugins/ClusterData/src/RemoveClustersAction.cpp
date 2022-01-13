@@ -30,11 +30,11 @@ RemoveClustersAction::RemoveClustersAction(ClustersActionWidget* clustersActionW
 
     // Update action read only status
     const auto updateReadOnly = [this]() -> void {
-        setEnabled(_clustersActionWidget->getSelectionModel().selectedRows().count() >= 1);
+        //setEnabled(_clustersActionWidget->getSelectionModel().selectedRows().count() >= 1);
     };
 
     // Update action read only status when the item selection changes
-    connect(&_clustersActionWidget->getSelectionModel(), &QItemSelectionModel::selectionChanged, updateReadOnly);
+    connect(&_clustersActionWidget->getSelectionModel(), &QItemSelectionModel::selectionChanged, this, updateReadOnly);
     connect(&_clustersActionWidget->getFilterModel(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
     // Initialize read only status

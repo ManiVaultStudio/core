@@ -42,6 +42,7 @@ set(CLUSTER_HEADERS
     src/ImportClustersAction.h
     src/ExportClustersAction.h
     src/RefreshClustersAction.h
+    src/ColorizeClustersAction.h
 )
 
 set(ACTIONS_SOURCES
@@ -67,6 +68,8 @@ set(ACTIONS_SOURCES
     src/FilterClustersAction.cpp
     src/RefreshClustersAction.h
     src/RefreshClustersAction.cpp
+    src/ColorizeClustersAction.h
+    src/ColorizeClustersAction.cpp
 )
 
 set(MODEL_SOURCES

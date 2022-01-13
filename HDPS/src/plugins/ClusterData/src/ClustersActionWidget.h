@@ -10,6 +10,7 @@
 #include "MergeClustersAction.h"
 #include "FilterClustersAction.h"
 #include "SelectClustersAction.h"
+#include "ColorizeClustersAction.h"
 #include "SubsetAction.h"
 #include "RefreshClustersAction.h"
 #include "ImportClustersAction.h"
@@ -59,15 +60,15 @@ public:
     QItemSelectionModel& getSelectionModel();
 
 protected:
-    ClustersAction&         _clustersAction;            /** Reference to clusters action */
-    ClustersFilterModel     _filterModel;               /** Clusters filter model */
-    QItemSelectionModel     _selectionModel;            /** Clusters selection model */
-    RemoveClustersAction    _removeClustersAction;      /** Remove clusters action */
-    MergeClustersAction     _mergeClustersAction;       /** Merge clusters action */
-    FilterClustersAction    _filterClustersAction;      /** Filter clusters action */
-    SelectClustersAction    _selectClustersAction;      /** Select clusters action */
-    SubsetAction            _subsetAction;              /** Subset action */
-    RefreshClustersAction   _refreshClustersAction;     /** Refresh clusters action */
-    ImportClustersAction    _importClustersAction;      /** Import clusters action */
-    ExportClustersAction    _exportClustersAction;      /** Export clusters action */
+    ClustersAction&             _clustersAction;            /** Reference to clusters action */
+    ClustersFilterModel         _filterModel;               /** Clusters filter model */
+    QItemSelectionModel         _selectionModel;            /** Clusters selection model */
+    RemoveClustersAction        _removeClustersAction;      /** Remove clusters action */
+    MergeClustersAction         _mergeClustersAction;       /** Merge clusters action */
+    FilterClustersAction        _filterClustersAction;      /** Filter clusters action */
+    SelectClustersAction        _selectClustersAction;      /** Select clusters action */
+    SubsetAction                _subsetAction;              /** Subset action */
+    RefreshClustersAction       _refreshClustersAction;     /** Refresh clusters action */
+    ImportClustersAction        _importClustersAction;      /** Import clusters action */
+    ExportClustersAction        _exportClustersAction;      /** Export clusters action */
 };
