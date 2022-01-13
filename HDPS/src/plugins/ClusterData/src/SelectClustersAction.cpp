@@ -43,8 +43,8 @@ SelectClustersAction::SelectClustersAction(QObject* parent, ClustersFilterModel&
         _selectionModel.select(getItemSelection(), QItemSelectionModel::Rows | QItemSelectionModel::Toggle);
     });
 
-    // Update selection actions read only status
-    const auto updateActionsReadOnly = [this]() -> void {
+    // Update select actions read only status
+    const auto updateSelectActionsReadOnly = [this]() -> void {
         const auto numberOfRows         = _filterModel.rowCount();
         const auto selectedRows         = _selectionModel.selectedRows();
         const auto numberOfSelectedRows = selectedRows.count();
@@ -55,12 +55,23 @@ SelectClustersAction::SelectClustersAction(QObject* parent, ClustersFilterModel&
         _selectInvertAction.setEnabled(numberOfRows >= 1 );
     };
 
-    // Update selection actions read only status when the model selection or layout changes
-    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, updateActionsReadOnly);
-    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateActionsReadOnly);
+    // Update select actions read only status when the model selection or layout changes
+    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, updateSelectActionsReadOnly);
+    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateSelectActionsReadOnly);
 
     // Do an initial update of the actions read only status
-    updateActionsReadOnly();
+    updateSelectActionsReadOnly();
+
+    // Update read only status
+    const auto updateReadOnly = [this]() -> void {
+        setEnabled(_filterModel.rowCount() >= 1);
+    };
+
+    // Update read only status when the model selection or layout changes
+    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
+
+    // Do an initial update of the read only status
+    updateReadOnly();
 }
 
 SelectClustersAction::Widget::Widget(QWidget* parent, SelectClustersAction* selectClustersAction, const std::int32_t& widgetFlags) :

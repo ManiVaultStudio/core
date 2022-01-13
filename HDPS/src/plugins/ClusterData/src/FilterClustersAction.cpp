@@ -38,6 +38,17 @@ FilterClustersAction::FilterClustersAction(QObject* parent, ClustersFilterModel&
 
     // Do an initial update of the model name filter
     updateNameFilter();
+
+    // Update read only status
+    const auto updateReadOnly = [this]() -> void {
+        setEnabled(_filterModel.rowCount() >= 1);
+    };
+
+    // Update read only status when the model selection or layout changes
+    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
+
+    // Do an initial update of the read only status
+    updateReadOnly();
 }
 
 FilterClustersAction::Widget::Widget(QWidget* parent, FilterClustersAction* filterClustersAction, const std::int32_t& widgetFlags) :

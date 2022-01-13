@@ -38,6 +38,7 @@ RemoveClustersAction::RemoveClustersAction(ClustersAction& clustersAction, Clust
 
     // Update action read only status when the item selection changes
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, updateReadOnly);
+    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
     // Initialize read only status
     updateReadOnly();

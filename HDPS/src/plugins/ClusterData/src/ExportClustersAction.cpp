@@ -50,4 +50,15 @@ ExportClustersAction::ExportClustersAction(QObject* parent, ClustersAction& clus
             QMessageBox::critical(nullptr, QString("Unable to save clusters"), e.what(), QMessageBox::Ok);
         }
     });
+
+    // Update read only status
+    const auto updateReadOnly = [this]() -> void {
+        setEnabled(_filterModel.rowCount() >= 1);
+    };
+
+    // Update read only status when the model selection or layout changes
+    connect(&_filterModel, &QAbstractItemModel::layoutChanged, this, updateReadOnly);
+
+    // Do an initial update of the read only status
+    updateReadOnly();
 }
