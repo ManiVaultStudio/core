@@ -1,0 +1,43 @@
+#pragma once
+
+#include <actions/ToggleAction.h>
+#include <actions/TriggerAction.h>
+
+#include <QDialog>
+
+using namespace hdps::gui;
+
+/**
+ * Overwrite clusters confirmation dialog class
+ *
+ * Dialog for asking confirmation to overwrite clusters
+ *
+ * @author Thomas Kroes
+ */
+class OverwriteClustersConfirmationDialog : public QDialog
+{
+public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent widget
+     * @param numberOfUserClusters Number of clusters in total
+     * @param numberOfUserModifiedClusters Number of user modified clusters
+     */
+    OverwriteClustersConfirmationDialog(QWidget* parent, std::uint32_t numberOfUserClusters, std::uint32_t numberOfUserModifiedClusters);
+
+    /** Get preferred size */
+    QSize sizeHint() const override {
+        return QSize(350, 150);
+    }
+
+    /** Get minimum size hint*/
+    QSize minimumSizeHint() const override {
+        return sizeHint();
+    }
+
+protected:
+    ToggleAction    _showAgainAction;       /** Whether to show this dialog again */
+    TriggerAction   _overwriteAction;       /** Overwrite clusters action */
+    TriggerAction   _cancelAction;          /** Cancel action */
+};

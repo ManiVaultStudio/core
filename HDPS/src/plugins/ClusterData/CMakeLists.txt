@@ -43,6 +43,8 @@ set(CLUSTER_HEADERS
     src/ExportClustersAction.h
     src/RefreshClustersAction.h
     src/ColorizeClustersAction.h
+    src/PrefixClustersAction.h
+    src/OverwriteClustersConfirmationDialog.h
 )
 
 set(ACTIONS_SOURCES
@@ -70,6 +72,8 @@ set(ACTIONS_SOURCES
     src/RefreshClustersAction.cpp
     src/ColorizeClustersAction.h
     src/ColorizeClustersAction.cpp
+    src/PrefixClustersAction.h
+    src/PrefixClustersAction.cpp
 )
 
 set(MODEL_SOURCES
@@ -79,13 +83,19 @@ set(MODEL_SOURCES
     src/ClustersFilterModel.cpp
 )
 
+set(DIALOG_SOURCES
+    src/OverwriteClustersConfirmationDialog.h
+    src/OverwriteClustersConfirmationDialog.cpp
+)
+
 source_group(Plugin FILES ${SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
+source_group(Dialog FILES ${DIALOG_SOURCES})
 
 include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 

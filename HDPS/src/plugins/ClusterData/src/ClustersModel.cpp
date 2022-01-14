@@ -1,5 +1,6 @@
 #include "ClustersModel.h"
 #include "ClusterData.h"
+#include "OverwriteClustersConfirmationDialog.h"
 
 #include <QPainter>
 
@@ -7,7 +8,9 @@ using namespace hdps;
 
 ClustersModel::ClustersModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
-    _clusters()
+    _clusters(),
+    _modifiedByUser(),
+    _clusterPrefix()
 {
 }
 
@@ -57,6 +60,9 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
 
                     return QString("Indices: [%1]").arg(indices.join(", "));
                 }
+
+                case Column::ModifiedByUser:
+                    return QString().arg("Cluster has been modified manually") + (data(index, Qt::DisplayRole).toBool() ? "" : "not") + "";
             }
 
             break;
@@ -77,6 +83,9 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
 
                 case Column::NumberOfIndices:
                     return QString::number(cluster.getNumberOfIndices());
+
+                case Column::ModifiedByUser:
+                    return data(index, Qt::EditRole).toBool() ? "true" : "false";
             }
 
             break;
@@ -97,6 +106,9 @@ QVariant ClustersModel::data(const QModelIndex& index, int role) const
 
                 case Column::NumberOfIndices:
                     return cluster.getNumberOfIndices();
+
+                case Column::ModifiedByUser:
+                    return _modifiedByUser[index.row()];
 
                 default:
                     break;
@@ -125,14 +137,20 @@ bool ClustersModel::setData(const QModelIndex& index, const QVariant& value, int
             switch (column) {
                 case Column::Color:
                     cluster->setColor(value.value<QColor>());
+                    _modifiedByUser[index.row()] = true;
                     break;
 
                 case Column::Name:
                     cluster->setName(value.toString());
+                    _modifiedByUser[index.row()] = true;
                     break;
 
                 case Column::ID:
                 case Column::NumberOfIndices:
+                    break;
+
+                case Column::ModifiedByUser:
+                    _modifiedByUser[index.row()] = value.toBool();
                     break;
 
                 default:
@@ -170,6 +188,9 @@ QVariant ClustersModel::headerData(int section, Qt::Orientation orientation, int
                     case Column::NumberOfIndices:
                         return "# Points";
 
+                    case Column::ModifiedByUser:
+                        return "Modified by user";
+
                     default:
                         break;
                 }
@@ -187,6 +208,7 @@ QVariant ClustersModel::headerData(int section, Qt::Orientation orientation, int
                     case Column::Name:
                     case Column::ID:
                     case Column::NumberOfIndices:
+                    case Column::ModifiedByUser:
                         break;
 
                     default:
@@ -242,17 +264,34 @@ void ClustersModel::setClusters(const QVector<Cluster>& clusters)
 
     if (numberOfClustersChanged) {
 
+        // Allocate the same number of items for the modified by user column
+        _modifiedByUser.resize(clusters.count());
+
+        // And flag all clusters as unmodified
+        std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
+
         emit layoutAboutToBeChanged();
         {
+            // Assign clusters
             _clusters = clusters;
         }
         emit layoutChanged();
+
+        // Since the number of clusters changed, we can apply the prefix to all clusters without asking for user approval
+        applyClusterPrefixToAllClusters();
     }
     else {
         if (!std::equal(_clusters.begin(), _clusters.end(), clusters.begin())) {
-            _clusters = clusters;
+            
+            // Do nothing if user modified clusters may not be overridden
+            if (mayOverrideUserInput()) {
 
-            emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::Count) - 1));
+                // Assign clusters
+                _clusters = clusters;
+
+                // Notify others that the data has changed
+                emit dataChanged(index(0, 0), index(rowCount() - 1, static_cast<std::int32_t>(Column::Count) - 1));
+            }
         }
     }
 }
@@ -269,6 +308,16 @@ void ClustersModel::removeClustersById(const QStringList& ids)
         }
     }
     emit layoutChanged();
+}
+
+void ClustersModel::setClusterPrefix(const QString& clusterPrefix)
+{
+    // Assign clusters prefix
+    _clusterPrefix = clusterPrefix;
+
+    // Apply the cluster prefix to all clusters if user modifications may be overwritten
+    if (mayOverrideUserInput())
+        applyClusterPrefixToAllClusters();
 }
 
 void ClustersModel::colorizeClusters(std::int32_t randomSeed /*= 0*/)
@@ -295,6 +344,39 @@ void ClustersModel::colorizeClusters(const QImage& colorMapImage)
     emit dataChanged(index(0, static_cast<std::int32_t>(Column::Color)), index(rowCount() - 1, static_cast<std::int32_t>(Column::Color)));
 }
 
+std::uint32_t ClustersModel::getNumberOfUserModifiedClusters() const
+{
+    return std::count(_modifiedByUser.begin(), _modifiedByUser.end(), true);
+}
+
+bool ClustersModel::hasUserModifications() const
+{
+    return getNumberOfUserModifiedClusters() >= 1;
+}
+
+bool ClustersModel::mayOverrideUserInput()
+{
+    // Clusters may be overwritten without user approval
+    if (Application::current()->getSetting("OverwriteClustersAskConfirmation", true).toBool() == false)
+        return true;
+
+    // Get the number of clusters that have been modified by the user
+    const auto numberOfUserModifiedClusters = getNumberOfUserModifiedClusters();
+
+    // No local modifications, so overwrite without user approval
+    if (numberOfUserModifiedClusters == 0)
+        return true;
+
+    // Ask for confirmation dialog
+    OverwriteClustersConfirmationDialog overwriteClustersConfirmationDialog(nullptr, _clusters.count(), numberOfUserModifiedClusters);
+
+    // Show the confirm data removal dialog
+    overwriteClustersConfirmationDialog.exec();
+
+    // If the user accepted, the clusters may be overwritten, otherwise not
+    return overwriteClustersConfirmationDialog.result() == 1 ? true : false;
+}
+
 QIcon ClustersModel::getColorIcon(const QColor& color) const
 {
     QPixmap pixmap(QSize(14, 14));
@@ -311,4 +393,24 @@ QIcon ClustersModel::getColorIcon(const QColor& color) const
     painter.drawRoundedRect(0, 0, 14, 14, radius, radius);
 
     return QIcon(pixmap);
+}
+
+void ClustersModel::applyClusterPrefixToAllClusters()
+{
+    if (rowCount() == 0)
+        return;
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    {
+        // Change the prefix of the clusters
+        for (auto& cluster : _clusters)
+            cluster.setName(_clusterPrefix + QString::number(_clusters.indexOf(cluster) + 1));
+
+        // And flag all clusters as unmodified
+        std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
+
+        // Notify others that the data for the name column has changed
+        emit dataChanged(index(0, static_cast<std::int32_t>(Column::Name)), index(rowCount() - 1, static_cast<std::int32_t>(Column::Name)));
+    }
+    QApplication::restoreOverrideCursor();
 }

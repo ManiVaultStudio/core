@@ -10,7 +10,6 @@
 #include "MergeClustersAction.h"
 #include "FilterClustersAction.h"
 #include "SelectClustersAction.h"
-#include "ColorizeClustersAction.h"
 #include "SubsetAction.h"
 #include "RefreshClustersAction.h"
 #include "ImportClustersAction.h"

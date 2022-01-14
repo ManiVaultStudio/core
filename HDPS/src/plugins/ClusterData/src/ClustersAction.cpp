@@ -12,7 +12,8 @@ ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clustersDatase
     _clustersDataset(clustersDataset),
     _pointsDataset(pointsDataset),
     _clustersModel(),
-    _colorizeClustersAction(*this)
+    _colorizeClustersAction(*this),
+    _prefixClustersAction(*this)
 {
     setText("Clusters");
     setDefaultWidgetFlags(WidgetFlag::Default);

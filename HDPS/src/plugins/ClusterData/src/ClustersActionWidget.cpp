@@ -45,6 +45,7 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
     // Configure basic column sizing parameters
     header->setStretchLastSection(false);
     header->hideSection(static_cast<std::int32_t>(ClustersModel::Column::ID));
+    header->hideSection(static_cast<std::int32_t>(ClustersModel::Column::ModifiedByUser));
     header->setMinimumSectionSize(20);
 
     // Set initial column widths
@@ -166,25 +167,31 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
     if (widgetFlags & ClustersAction::Remove || widgetFlags & ClustersAction::Merge) {
         auto toolbarLayout = new QHBoxLayout();
 
-        // Add filter widget if required
+        toolbarLayout->setSpacing(3);
+
+        // Add filter clusters widget if required
         if (widgetFlags & ClustersAction::Filter)
             toolbarLayout->addWidget(_filterClustersAction.createCollapsedWidget(this));
 
-        // Add select widget if required
+        // Add select cluster(s) widget if required
         if (widgetFlags & ClustersAction::Select)
             toolbarLayout->addWidget(_selectClustersAction.createCollapsedWidget(this));
 
-        // Add remove widget
+        // Add remove cluster(s) widget
         if (widgetFlags & ClustersAction::Remove)
             toolbarLayout->addWidget(_removeClustersAction.createWidget(this, TriggerAction::Icon));
 
-        // Add merge widget
+        // Add merge clusters widget
         if (widgetFlags & ClustersAction::Merge)
             toolbarLayout->addWidget(_mergeClustersAction.createWidget(this, TriggerAction::Icon));
 
         // Add colorize widget if required
         if (widgetFlags & ClustersAction::Colorize)
             toolbarLayout->addWidget(_clustersAction.getColorizeClustersAction().createCollapsedWidget(this));
+
+        // Add prefix clusters widget if required
+        if (widgetFlags & ClustersAction::Prefix)
+            toolbarLayout->addWidget(_clustersAction.getPrefixClustersAction().createCollapsedWidget(this));
 
         // Add subset widget if required
         if (widgetFlags & ClustersAction::Subset)

@@ -19,6 +19,10 @@ ColorizeClustersAction::ColorizeClustersAction(ClustersAction& clustersAction) :
     // Do not update when dragging the pseudo-random seed slider
     _randomSeedAction.setUpdateDuringDrag(false);
 
+    // Disable color map range editing
+    _colorMapAction.getSettingsAction().getHorizontalAxisAction().getRangeAction().getRangeMinAction().setEnabled(false);
+    _colorMapAction.getSettingsAction().getHorizontalAxisAction().getRangeAction().getRangeMaxAction().setEnabled(false);
+
     // Update action read only status
     const auto updateReadOnly = [this]() -> void {
         const auto colorBy          = _colorByAction.getCurrentIndex();

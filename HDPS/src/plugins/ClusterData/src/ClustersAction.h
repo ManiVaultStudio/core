@@ -5,6 +5,8 @@
 #include "ClustersModel.h"
 #include "ClustersFilterModel.h"
 #include "ClustersActionWidget.h"
+#include "ColorizeClustersAction.h"
+#include "PrefixClustersAction.h"
 
 #include <actions/Actions.h>
 #include <PointData.h>
@@ -37,12 +39,13 @@ public:
         Filter      = 0x00004,      /** Includes filter clusters user interface */
         Select      = 0x00008,      /** Includes select clusters user interface */
         Colorize    = 0x00010,      /** Includes colorize clusters user interface */
-        Subset      = 0x00020,      /** Includes subset user interface */
-        Refresh     = 0x00040,      /** Includes refresh clusters user interface */
-        Import      = 0x00080,      /** Includes import user interface */
-        Export      = 0x00100,      /** Includes export user interface */
+        Prefix      = 0x00020,      /** Includes prefix clusters user interface */
+        Subset      = 0x00040,      /** Includes subset user interface */
+        Refresh     = 0x00080,      /** Includes refresh clusters user interface */
+        Import      = 0x00100,      /** Includes import user interface */
+        Export      = 0x00200,      /** Includes export user interface */
 
-        Default = Remove | Merge | Filter | Select | Colorize | Subset | Import | Export
+        Default = Remove | Merge | Filter | Select | Colorize | Prefix | Subset | Import | Export
     };
 
 protected:
@@ -105,6 +108,7 @@ public:
 public: // Action getters
 
     ColorizeClustersAction& getColorizeClustersAction() { return _colorizeClustersAction; }
+    PrefixClustersAction& getPrefixClustersAction() { return _prefixClustersAction; }
 
 signals:
 
@@ -116,4 +120,5 @@ protected:
     Dataset<Points>             _pointsDataset;             /** Smart pointer to the points dataset */
     ClustersModel               _clustersModel;             /** Clusters model */
     ColorizeClustersAction      _colorizeClustersAction;    /** Colorize clusters action */
+    PrefixClustersAction        _prefixClustersAction;      /** Prefix clusters action */
 };
