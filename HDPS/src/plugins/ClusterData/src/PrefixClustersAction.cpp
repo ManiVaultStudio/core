@@ -31,7 +31,7 @@ PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
 
     // Update read only status of apply action
     const auto updateApplyActionReadOnly = [this]() -> void {
-        _applyAction.setEnabled(_clustersAction.getClustersModel().hasUserModifications() || _prefixAction.isResettable());
+        _applyAction.setEnabled(!_clustersAction.getClustersModel().doAllClusterNamesStartWith(_prefixAction.getString()) || _prefixAction.isResettable());
     };
 
     // Update read only status of apply action when the prefix string changes
@@ -59,6 +59,9 @@ PrefixClustersAction::PrefixClustersAction(ClustersAction& clustersAction) :
             updateApplyActionReadOnly();
     });
 
+    // Update read only status of apply action when the data layout in the clusters model changes
+    connect(&_clustersAction.getClustersModel(), &QAbstractItemModel::layoutChanged, this, updateApplyActionReadOnly);
+
     // Perform initial update of the read only status
     updateApplyActionReadOnly();
 }
@@ -68,8 +71,8 @@ PrefixClustersAction::Widget::Widget(QWidget* parent, PrefixClustersAction* pref
 {
     auto layout = new QHBoxLayout();
 
-    layout->addWidget(prefixClustersAction->getClusterNamePrefixAction().createLabelWidget(this));
-    layout->addWidget(prefixClustersAction->getClusterNamePrefixAction().createWidget(this));
+    layout->addWidget(prefixClustersAction->getPrefixAction().createLabelWidget(this));
+    layout->addWidget(prefixClustersAction->getPrefixAction().createWidget(this));
     layout->addWidget(prefixClustersAction->getApplyAction().createWidget(this));
 
     setPopupLayout(layout);

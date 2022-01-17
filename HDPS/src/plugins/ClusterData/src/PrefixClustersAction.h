@@ -48,9 +48,9 @@ public:
      */
     PrefixClustersAction(ClustersAction& clustersAction);
 
-protected: // Action getters
+public: // Action getters
 
-    StringAction& getClusterNamePrefixAction() { return _prefixAction; }
+    StringAction& getPrefixAction() { return _prefixAction; }
     TriggerAction& getApplyAction() { return _applyAction; }
 
 protected:

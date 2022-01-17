@@ -139,6 +139,12 @@ public:
      */
     bool hasUserModifications() const;
 
+    /**
+     * Get whether all cluster names start with the supplied prefix
+     * @param prefix Cluster prefix
+     */
+    bool doAllClusterNamesStartWith(const QString& prefix);
+
 protected:
 
     /** Get whether user modified clusters may be overridden by bulk operations (prefix change etc.) */

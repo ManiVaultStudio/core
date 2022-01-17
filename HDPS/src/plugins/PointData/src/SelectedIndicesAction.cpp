@@ -45,7 +45,8 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
             case EventType::DataSelectionChanged:
             {
                 // Turn manual update on if there are more than one million points (for performance reasons)
-                _manualUpdateAction.setChecked(_points->getNumPoints() > MANUAL_UPDATE_THRESHOLD);
+                if (dataEvent->getType() == EventType::DataChanged)
+                    _manualUpdateAction.setChecked(_points->getNumPoints() > MANUAL_UPDATE_THRESHOLD);
 
                 // Update selected indices
                 if (_points->getNumPoints() < MANUAL_UPDATE_THRESHOLD)

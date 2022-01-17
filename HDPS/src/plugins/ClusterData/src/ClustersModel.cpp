@@ -264,25 +264,29 @@ void ClustersModel::setClusters(const QVector<Cluster>& clusters)
 
     if (numberOfClustersChanged) {
 
-        // Allocate the same number of items for the modified by user column
-        _modifiedByUser.resize(clusters.count());
+        // Do nothing if user modified clusters may not be overridden
+        if (mayOverrideUserInput()) {
 
-        // And flag all clusters as unmodified
-        std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
+            // Allocate the same number of items for the modified by user column
+            _modifiedByUser.resize(clusters.count());
 
-        emit layoutAboutToBeChanged();
-        {
-            // Assign clusters
-            _clusters = clusters;
+            // And flag all clusters as unmodified
+            std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
+
+            // And flag all clusters as unmodified
+            std::fill(_modifiedByUser.begin(), _modifiedByUser.end(), false);
+
+            emit layoutAboutToBeChanged();
+            {
+                // Assign clusters
+                _clusters = clusters;
+            }
+            emit layoutChanged();
         }
-        emit layoutChanged();
-
-        // Since the number of clusters changed, we can apply the prefix to all clusters without asking for user approval
-        applyClusterPrefixToAllClusters();
     }
     else {
         if (!std::equal(_clusters.begin(), _clusters.end(), clusters.begin())) {
-            
+
             // Do nothing if user modified clusters may not be overridden
             if (mayOverrideUserInput()) {
 
@@ -315,9 +319,8 @@ void ClustersModel::setClusterPrefix(const QString& clusterPrefix)
     // Assign clusters prefix
     _clusterPrefix = clusterPrefix;
 
-    // Apply the cluster prefix to all clusters if user modifications may be overwritten
-    if (mayOverrideUserInput())
-        applyClusterPrefixToAllClusters();
+    // Apply the cluster prefix to all clusters
+    applyClusterPrefixToAllClusters();
 }
 
 void ClustersModel::colorizeClusters(std::int32_t randomSeed /*= 0*/)
@@ -354,12 +357,21 @@ bool ClustersModel::hasUserModifications() const
     return getNumberOfUserModifiedClusters() >= 1;
 }
 
+bool ClustersModel::doAllClusterNamesStartWith(const QString& prefix)
+{
+    // No if there are no rows
+    if (rowCount() == 0)
+        return false;
+
+    // Establish how many clusters start with the supplied prefix
+    const auto numberOfMatches = match(index(0, static_cast<std::int32_t>(Column::Name)), Qt::EditRole, prefix, -1, Qt::MatchFlag::MatchStartsWith).count();
+
+    // All clusters start with the same prefix if the number of matches equals the number of rows in the model
+    return numberOfMatches == rowCount();
+}
+
 bool ClustersModel::mayOverrideUserInput()
 {
-    // Clusters may be overwritten without user approval
-    if (Application::current()->getSetting("OverwriteClustersAskConfirmation", true).toBool() == false)
-        return true;
-
     // Get the number of clusters that have been modified by the user
     const auto numberOfUserModifiedClusters = getNumberOfUserModifiedClusters();
 
@@ -368,13 +380,19 @@ bool ClustersModel::mayOverrideUserInput()
         return true;
 
     // Ask for confirmation dialog
-    OverwriteClustersConfirmationDialog overwriteClustersConfirmationDialog(nullptr, _clusters.count(), numberOfUserModifiedClusters);
+    if (Application::current()->getSetting("OverwriteClustersAskConfirmation", true).toBool() == true) {
 
-    // Show the confirm data removal dialog
-    overwriteClustersConfirmationDialog.exec();
+        // Create overwrite clusters dialog
+        OverwriteClustersConfirmationDialog overwriteClustersConfirmationDialog(nullptr, _clusters.count(), numberOfUserModifiedClusters);
 
-    // If the user accepted, the clusters may be overwritten, otherwise not
-    return overwriteClustersConfirmationDialog.result() == 1 ? true : false;
+        // Show the confirm data removal dialog
+        overwriteClustersConfirmationDialog.exec();
+
+        // If the user accepted, the clusters may be overwritten, otherwise not
+        return overwriteClustersConfirmationDialog.result() == 1 ? true : false;
+    }
+
+    return true;
 }
 
 QIcon ClustersModel::getColorIcon(const QColor& color) const

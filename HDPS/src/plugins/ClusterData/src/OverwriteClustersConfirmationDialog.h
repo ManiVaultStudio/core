@@ -37,7 +37,7 @@ public:
     }
 
 protected:
-    ToggleAction    _showAgainAction;       /** Whether to show this dialog again */
-    TriggerAction   _overwriteAction;       /** Overwrite clusters action */
-    TriggerAction   _cancelAction;          /** Cancel action */
+    ToggleAction    _alwaysAskPermissionAction;     /** Whether to always ask permission prior to overwriting clusters */
+    TriggerAction   _discardAction;                 /** Discard cluster change(s) action */
+    TriggerAction   _cancelAction;                  /** Cancel action */
 };
