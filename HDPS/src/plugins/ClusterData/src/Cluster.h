@@ -2,8 +2,6 @@
 
 #include "clusterdata_export.h"
 
-#include "ClusterDataVisitor.h"
-
 #include <QString>
 #include <QDebug>
 #include <QColor>
