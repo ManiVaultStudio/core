@@ -2,7 +2,6 @@
 
 #include "clusterdata_export.h"
 
-#include "ClusterDataVisitor.h"
 #include "Cluster.h"
 #include "event/EventListener.h"
 
