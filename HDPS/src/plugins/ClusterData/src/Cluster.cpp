@@ -5,8 +5,6 @@
 
 #include <stdexcept>
 
-using namespace hdps::util;
-
 Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*/, const std::vector<std::uint32_t>& indices /*= std::vector<std::uint32_t>()*/) :
     _name(name),
     _id(QUuid::createUuid().toString()),
@@ -17,11 +15,6 @@ Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*
     _stddev()
 {
 
-}
-
-void Cluster::accept(ClusterDataVisitor* visitor) const
-{
-    visitor->visitCluster(this);
 }
 
 QString Cluster::getName() const

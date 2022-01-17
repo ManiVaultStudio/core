@@ -18,8 +18,7 @@ Q_PLUGIN_METADATA(IID "hdps.ClusterData")
 using namespace hdps::util;
 
 ClusterData::ClusterData(const hdps::plugin::PluginFactory* factory) :
-    hdps::plugin::RawData(factory, ClusterType),
-    Visitable()
+    hdps::plugin::RawData(factory, ClusterType)
 {
 }
 
@@ -39,11 +38,6 @@ Dataset<DatasetImpl> ClusterData::createDataSet() const
 QVector<Cluster>& ClusterData::getClusters()
 {
     return _clusters;
-}
-
-void ClusterData::accept(ClusterDataVisitor* visitor) const
-{
-
 }
 
 void ClusterData::addCluster(Cluster& cluster)

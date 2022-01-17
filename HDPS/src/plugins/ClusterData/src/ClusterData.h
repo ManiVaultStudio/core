@@ -20,7 +20,7 @@ const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
 
 class InfoAction;
 
-class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData, public hdps::util::Visitable<ClusterDataVisitor>
+class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData
 {
 public:
     ClusterData(const hdps::plugin::PluginFactory* factory);
@@ -33,11 +33,6 @@ public:
 
     /** Returns reference to the clusters */
     QVector<Cluster>& getClusters();
-
-    /** Accept cluster data visitor for visiting
-     * @param visitor Reference to visitor that will visit this component
-     */
-    void accept(ClusterDataVisitor* visitor) const override;
 
     /**
      * Adds a cluster

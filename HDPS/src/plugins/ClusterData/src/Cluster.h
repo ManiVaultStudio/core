@@ -13,7 +13,7 @@
  * Storage class for cluster data
  *
  */
-class CLUSTERDATA_EXPORT Cluster : public hdps::util::Visitable<ClusterDataVisitor>
+class CLUSTERDATA_EXPORT Cluster
 {
 public:
 
@@ -53,11 +53,6 @@ public:
 
         return true;
     }
-
-    /** Accept cluster data visitor for visiting
-     * @param visitor Reference to visitor that will visit this component
-     */
-    void accept(ClusterDataVisitor* visitor) const override;
 
 public: // Getters/setters
 
