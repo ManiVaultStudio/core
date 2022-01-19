@@ -34,7 +34,7 @@ protected:
     DataAnalysisAction          _dataAnalysisAction;            /** Data analysis action */
     DataViewAction              _dataViewAction;                /** Data view action */
     DataExportAction            _dataExportAction;              /** Data export action */
-    DataTransformationAction    _dataTransformationAction;      /** Data transformation action */
+    //DataTransformationAction    _dataTransformationAction;      /** Data transformation action */
     DataGroupingAction          _dataGroupingAction;            /** Data grouping action */
 };
 
