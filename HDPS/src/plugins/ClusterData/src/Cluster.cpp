@@ -14,7 +14,6 @@ Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*
     _mean(),
     _stddev()
 {
-
 }
 
 QString Cluster::getName() const
@@ -61,8 +60,6 @@ std::uint32_t Cluster::getNumberOfIndices() const
 
 void Cluster::setIndices(const std::vector<unsigned int>& indices)
 {
-    Q_ASSERT(!indices.empty());
-
     _indices = indices;
 }
 
@@ -136,4 +133,9 @@ void Cluster::colorizeClusters(QVector<Cluster>& clusters, const QImage& colorMa
     // Color clusters according to the color map image
     for (auto& cluster : clusters)
         cluster.setColor(scaledColorMapImage.pixel(clusters.indexOf(cluster), 0));
+}
+
+Cluster Cluster::copy() const
+{
+    return Cluster(_name, _color, _indices);
 }

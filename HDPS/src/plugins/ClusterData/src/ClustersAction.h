@@ -9,7 +9,6 @@
 #include "PrefixClustersAction.h"
 
 #include <actions/Actions.h>
-#include <PointData.h>
 
 #include <QItemSelectionModel>
 
@@ -64,25 +63,27 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param clustersDataset Smart pointer to clusters (if invalid, no dataset synchronization takes place)
-     * @param pointsDataset Smart pointer to points (if valid, points are selected when clusters are selected)
+     * @param clustersDataset Smart pointer to clusters
      */
-    ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset, Dataset<Points> pointsDataset = Dataset<Points>());
-
-    /** Get clusters */
-    QVector<Cluster>* getClusters();
+    ClustersAction(QObject* parent, Dataset<Clusters> clustersDataset = Dataset<Clusters>());
 
     /**
      * Get clusters
+     * @return Pointer to vector of clusters
+     */
+    QVector<Cluster>* getClusters();
+
+    /**
+     * Get clusters dataset
      * @return Smart pointer to clusters dataset
      */
     Dataset<Clusters>& getClustersDataset();
 
     /**
-     * Get points
-     * @return Smart pointer to points dataset
+     * Set clusters dataset
+     * @param clustersDataset Smart pointer to clusters dataset
      */
-    Dataset<Points>& getPointsDataset();
+    void setClustersDataset(Dataset<Clusters> clustersDataset);
 
     /**
      * Create subset from selected clusters
@@ -105,6 +106,14 @@ public:
     /** Invalidates the clusters and requests an (external) refresh */
     void invalidateClusters();
 
+protected:
+
+    /** Update clusters model from clusters dataset */
+    void updateClustersModel();
+
+    /** Update clusters dataset from clusters model */
+    void updateClustersDataset();
+
 public: // Action getters
 
     ColorizeClustersAction& getColorizeClustersAction() { return _colorizeClustersAction; }
@@ -117,7 +126,6 @@ signals:
 
 protected:
     Dataset<Clusters>           _clustersDataset;           /** Smart pointer to the clusters dataset */
-    Dataset<Points>             _pointsDataset;             /** Smart pointer to the points dataset */
     ClustersModel               _clustersModel;             /** Clusters model */
     ColorizeClustersAction      _colorizeClustersAction;    /** Colorize clusters action */
     PrefixClustersAction        _prefixClustersAction;      /** Prefix clusters action */

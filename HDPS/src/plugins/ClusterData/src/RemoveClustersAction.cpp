@@ -30,7 +30,7 @@ RemoveClustersAction::RemoveClustersAction(ClustersActionWidget* clustersActionW
 
     // Update action read only status
     const auto updateReadOnly = [this]() -> void {
-        setEnabled(_clustersActionWidget->getSelectionModel().hasSelection());
+        setEnabled(_clustersActionWidget->getClustersAction().getClustersModel().rowCount() >= 1 && _clustersActionWidget->getSelectionModel().hasSelection());
     };
 
     // Update action read only status when the item selection changes or the layout

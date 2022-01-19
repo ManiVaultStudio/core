@@ -25,35 +25,6 @@ public:
      */
     Cluster(const QString& name = "", const QColor& color = Qt::gray, const std::vector<std::uint32_t>& indices = std::vector<std::uint32_t>());
 
-    /**
-     * Comparison operator for two clusters (compares the internal identifiers)
-     * @param rhs Right hand sign of the comparison
-     */
-    bool operator==(const Cluster& rhs) const {
-        if (rhs._name != _name)
-            return false;
-
-        if (rhs._id != _id)
-            return false;
-
-        if (rhs._color != _color)
-            return false;
-
-        if (rhs._indices != _indices)
-            return false;
-
-        if (rhs._median != _median)
-            return false;
-
-        if (rhs._mean != _mean)
-            return false;
-
-        if (rhs._stddev != _stddev)
-            return false;
-
-        return true;
-    }
-
 public: // Getters/setters
 
     /** Get cluster name */
@@ -122,6 +93,41 @@ public: // Getters/setters
      * @param colorMapImage Color map image
      */
     static void colorizeClusters(QVector<Cluster>& clusters, const QImage& colorMapImage);
+
+    /**
+     * Copy cluster
+     * @return Copy of the cluster (copies all members, except the _id, which is re-generated)
+     */
+    Cluster copy() const;
+
+    /**
+     * Comparison operator for two clusters (compares the internal identifiers)
+     * @param rhs Right hand sign of the comparison
+     */
+    bool operator==(const Cluster& rhs) const {
+        if (rhs._name != _name)
+            return false;
+
+        if (rhs._id != _id)
+            return false;
+
+        if (rhs._color != _color)
+            return false;
+
+        if (rhs._indices != _indices)
+            return false;
+
+        if (rhs._median != _median)
+            return false;
+
+        if (rhs._mean != _mean)
+            return false;
+
+        if (rhs._stddev != _stddev)
+            return false;
+
+        return true;
+    }
 
 protected:
     QString                     _name;          /** GUI name */

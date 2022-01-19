@@ -190,8 +190,8 @@ std::vector<std::uint32_t>& Clusters::getSelectionIndices()
 
 void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
-    // No need to process equal selections
-    if (indices == getSelection<Clusters>()->indices)
+    // No point in selecting zero clusters
+    if (indices.empty())
         return;
 
     // Assign new selection
@@ -201,42 +201,35 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     _core->notifyDataSelectionChanged(this);
 
     // Get reference to input dataset
-    auto parentDataset = getDataHierarchyItem().getParent().getDataset<DatasetImpl>();
+    auto points                 = getDataHierarchyItem().getParent().getDataset<Points>();
+    auto selection              = points->getSelection<Points>();
+    auto& pointSelectionIndices = selection->indices;
 
-    // Select points
-    if (parentDataset->getDataType() == PointType) {
+    pointSelectionIndices.clear();
+    pointSelectionIndices.reserve(indices.size());
 
-        auto points                 = Dataset<Points>(parentDataset);
-        auto selection              = points->getSelection<Points>();
-        auto& pointSelectionIndices = selection->indices;
+    std::vector<std::uint32_t> globalIndices;
 
-        pointSelectionIndices.clear();
-        pointSelectionIndices.reserve(indices.size());
+    points->getGlobalIndices(globalIndices);
 
-        std::vector<std::uint32_t> globalIndices;
+    // Append point indices per cluster
+    for (auto clusterSelectionIndex : getSelection<Clusters>()->indices) {
 
-        points->getGlobalIndices(globalIndices);
+        // Get cluster point indices and append
+        const auto cluster = getClusters().at(clusterSelectionIndex);
 
-        // Append point indices per cluster
-        for (auto clusterSelectionIndex : getSelection<Clusters>()->indices) {
-            
-            // Get cluster
-            const auto cluster = getClusters().at(clusterSelectionIndex);
-
-            // Append the indices
-            pointSelectionIndices.insert(pointSelectionIndices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
-        }
-
-        // Remove duplicates
-        std::sort(pointSelectionIndices.begin(), pointSelectionIndices.end());
-        pointSelectionIndices.erase(unique(pointSelectionIndices.begin(), pointSelectionIndices.end()), pointSelectionIndices.end());
-
-        for (auto& pointSelectionIndex : pointSelectionIndices)
-            pointSelectionIndex = globalIndices[pointSelectionIndex];
-
-        // Notify others that the parent points selection has changed
-        _core->notifyDataSelectionChanged(parentDataset);
+        pointSelectionIndices.insert(pointSelectionIndices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
     }
+
+    // Remove duplicates
+    std::sort(pointSelectionIndices.begin(), pointSelectionIndices.end());
+    pointSelectionIndices.erase(unique(pointSelectionIndices.begin(), pointSelectionIndices.end()), pointSelectionIndices.end());
+
+    for (auto& pointSelectionIndex : pointSelectionIndices)
+        pointSelectionIndex = globalIndices[pointSelectionIndex];
+
+    // Notify others that the parent points selection has changed
+    _core->notifyDataSelectionChanged(points);
 }
 
 QStringList Clusters::getSelectionNames() const

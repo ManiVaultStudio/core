@@ -6,6 +6,13 @@ namespace hdps {
 
 namespace gui {
 
+#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
+    constexpr std::int32_t IntegralAction::INIT_MIN;
+    constexpr std::int32_t IntegralAction::INIT_MAX;
+    constexpr std::int32_t IntegralAction::INIT_VALUE;
+    constexpr std::int32_t IntegralAction::INIT_DEFAULT_VALUE;
+#endif
+
 IntegralAction::IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum /*= INIT_MIN*/, const std::int32_t& maximum /*= INIT_MAX*/, const std::int32_t& value /*= INIT_VALUE*/, const std::int32_t& defaultValue /*= INIT_DEFAULT_VALUE*/) :
     NumericalAction<std::int32_t>(parent, title, minimum, maximum, value, defaultValue)
 {

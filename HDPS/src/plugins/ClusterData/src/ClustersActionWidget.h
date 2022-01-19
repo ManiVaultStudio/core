@@ -16,6 +16,7 @@
 #include "ExportClustersAction.h"
 
 #include <QItemSelectionModel>
+#include <QTreeView>
 
 using namespace hdps::gui;
 using namespace hdps::util;
@@ -59,6 +60,11 @@ public:
     QItemSelectionModel& getSelectionModel();
 
 protected:
+
+    /** Sets up the selection synchronization (select points when clusters are selected) */
+    void setupSelectionSynchronization();
+
+protected:
     ClustersAction&             _clustersAction;            /** Reference to clusters action */
     ClustersFilterModel         _filterModel;               /** Clusters filter model */
     QItemSelectionModel         _selectionModel;            /** Clusters selection model */
@@ -70,4 +76,5 @@ protected:
     RefreshClustersAction       _refreshClustersAction;     /** Refresh clusters action */
     ImportClustersAction        _importClustersAction;      /** Import clusters action */
     ExportClustersAction        _exportClustersAction;      /** Export clusters action */
+    QTreeView                   _clustersTreeView;          /** Clusters tree view */
 };
