@@ -36,7 +36,12 @@ set(POINTS_HEADERS
     src/InfoAction.h
     src/SelectedIndicesAction.h
     src/DimensionNamesAction.h
-    src/PointsDimensionPickerAction.h
+    src/DimensionPickerAction.h
+    src/DimensionsPickerAction.h
+    src/DimensionsPickerHolder.h
+    src/DimensionsPickerItemModel.h
+    src/DimensionsPickerProxyModel.h
+    src/ModelResetter.h
 )
 
 set(ACTIONS_SOURCES
@@ -46,8 +51,18 @@ set(ACTIONS_SOURCES
     src/SelectedIndicesAction.cpp
     src/DimensionNamesAction.h
     src/DimensionNamesAction.cpp
-    src/PointsDimensionPickerAction.h
-    src/PointsDimensionPickerAction.cpp
+    src/DimensionPickerAction.h
+    src/DimensionPickerAction.cpp
+    src/DimensionsPickerAction.h
+    src/DimensionsPickerAction.cpp
+    src/DimensionsPickerHolder.h
+    src/DimensionsPickerHolder.cpp
+    src/DimensionsPickerItemModel.h
+    src/DimensionsPickerItemModel.cpp
+    src/DimensionsPickerProxyModel.h
+    src/DimensionsPickerProxyModel.cpp
+    src/ModelResetter.h
+    src/ModelResetter.cpp
 )
 
 source_group(Plugin FILES ${POINTS_SOURCES})
@@ -57,7 +72,7 @@ include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 17)
 
 target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16)
 
