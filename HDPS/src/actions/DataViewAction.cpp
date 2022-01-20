@@ -24,14 +24,14 @@ DataViewAction::DataViewAction(QObject* parent, const Dataset<DatasetImpl>& data
     for (auto pluginKind : _pluginKinds) {
 
         // Create trigger action for each view plugin
-        auto exporterPluginAction = new TriggerAction(this, pluginKind);
+        auto viewPluginAction = new TriggerAction(this, pluginKind);
 
         // Set the correct icon
-        exporterPluginAction->setIcon(Application::core()->getPluginIcon(pluginKind));
+        viewPluginAction->setIcon(Application::core()->getPluginIcon(pluginKind));
 
         // And export when trigger action is triggered
-        connect(exporterPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
-            Application::core()->viewDataset(pluginKind, Datasets({ _dataset }));
+        connect(viewPluginAction, &TriggerAction::triggered, this, [this, pluginKind]() {
+            Application::core()->viewDatasets(pluginKind, Datasets({ _dataset }));
         });
     }
 }

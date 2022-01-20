@@ -2,7 +2,6 @@
 
 #include "clusterdata_export.h"
 
-#include "ClusterDataVisitor.h"
 #include "Cluster.h"
 #include "event/EventListener.h"
 
@@ -21,7 +20,7 @@ const hdps::DataType ClusterType = hdps::DataType(QString("Clusters"));
 
 class InfoAction;
 
-class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData, public hdps::util::Visitable<ClusterDataVisitor>
+class CLUSTERDATA_EXPORT ClusterData : public hdps::plugin::RawData
 {
 public:
     ClusterData(const hdps::plugin::PluginFactory* factory);
@@ -33,12 +32,7 @@ public:
     Dataset<DatasetImpl> createDataSet() const override;
 
     /** Returns reference to the clusters */
-    std::vector<Cluster>& getClusters();
-
-    /** Accept cluster data visitor for visiting
-     * @param visitor Reference to visitor that will visit this component
-     */
-    void accept(ClusterDataVisitor* visitor) const override;
+    QVector<Cluster>& getClusters();
 
     /**
      * Adds a cluster
@@ -66,7 +60,7 @@ public:
     std::int32_t getClusterIndex(const QString& clusterName) const;
 
 private:
-    std::vector<Cluster>    _clusters;      /** Clusters data */
+    QVector<Cluster>    _clusters;      /** Clusters data */
 };
 
 // =============================================================================
@@ -81,12 +75,12 @@ public:
 
     void init() override;
 
-    std::vector<Cluster>& getClusters()
+    QVector<Cluster>& getClusters()
     {
         return getRawData<ClusterData>().getClusters();
     }
 
-    const std::vector<Cluster>& getClusters() const
+    const QVector<Cluster>& getClusters() const
     {
         return getRawData<ClusterData>().getClusters();
     }

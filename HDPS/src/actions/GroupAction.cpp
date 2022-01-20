@@ -106,7 +106,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())
 {
-    _layout->setColumnStretch(0, 3);
+    _layout->setColumnStretch(0, 2);
     _layout->setColumnStretch(1, 5);
 
     auto contentsMargin = _layout->contentsMargins();

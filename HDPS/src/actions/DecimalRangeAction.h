@@ -73,11 +73,29 @@ public:
      */
     void initialize(const float& limitMin = INIT_LIMIT_MIN, const float& limitMax = INIT_LIMIT_MAX, const float& rangeMin = INIT_RANGE_MIN, const float& rangeMax = INIT_RANGE_MAX, const float& defaultRangeMin = INIT_DEFAULT_RANGE_MIN, const float& defaultRangeMax = INIT_DEFAULT_RANGE_MAX);
 
-    /** Get range minimum */
+    /**
+     * Get range minimum
+     * @return Range minimum
+     */
     float getMinimum() const;
 
-    /** Get range minimum */
+    /**
+     * Set range minimum
+     * @return Range minimum
+     */
+    void setMinimum(float minimum);
+
+    /**
+     * Get range maximum
+     * @return Range maximum
+     */
     float getMaximum() const;
+
+    /**
+     * Set range maximum
+     * @return Range maximum
+     */
+    void setMaximum(float maximum);
 
     /**
      * Sets the range

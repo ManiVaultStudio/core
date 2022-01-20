@@ -5,8 +5,8 @@
 #include "actions/WidgetAction.h"
 #include "event/Event.h"
 #include "Set.h"
-#include "DataRemoveAction.h"
-#include "DataCopyAction.h"
+#include "actions/DataRemoveAction.h"
+#include "actions/DataCopyAction.h"
 
 #include <QObject>
 #include <QMap>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "clusterdata_export.h"
+
 #include <QSortFilterProxyModel>
 
 /**
@@ -9,7 +11,7 @@
  *
  * @author Thomas Kroes
  */
-class ClustersFilterModel : public QSortFilterProxyModel {
+class CLUSTERDATA_EXPORT ClustersFilterModel : public QSortFilterProxyModel {
 public:
 
     /** Constructor

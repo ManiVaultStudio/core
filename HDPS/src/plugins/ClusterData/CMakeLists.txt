@@ -30,7 +30,21 @@ set(SOURCES
 set(CLUSTER_HEADERS
     src/Cluster.h
     src/ClusterData.h
-    src/ClusterDataVisitor.h
+    src/ClustersAction.h
+    src/ClustersActionWidget.h
+    src/ClustersModel.h
+    src/ClustersFilterModel.h
+    src/RemoveClustersAction.h
+    src/MergeClustersAction.h
+    src/FilterClustersAction.h
+    src/SelectClustersAction.h
+    src/SubsetAction.h
+    src/ImportClustersAction.h
+    src/ExportClustersAction.h
+    src/RefreshClustersAction.h
+    src/ColorizeClustersAction.h
+    src/PrefixClustersAction.h
+    src/OverwriteClustersConfirmationDialog.h
 )
 
 set(ACTIONS_SOURCES
@@ -38,10 +52,28 @@ set(ACTIONS_SOURCES
     src/InfoAction.cpp
     src/ClustersAction.h
     src/ClustersAction.cpp
-    src/FilterAndSelectAction.h
-    src/FilterAndSelectAction.cpp
+    src/ClustersActionWidget.h
+    src/ClustersActionWidget.cpp
     src/SubsetAction.h
     src/SubsetAction.cpp
+    src/ImportClustersAction.h
+    src/ImportClustersAction.cpp
+    src/ExportClustersAction.h
+    src/ExportClustersAction.cpp
+    src/RemoveClustersAction.h
+    src/RemoveClustersAction.cpp
+    src/MergeClustersAction.h
+    src/MergeClustersAction.cpp
+    src/SelectClustersAction.h
+    src/SelectClustersAction.cpp
+    src/FilterClustersAction.h
+    src/FilterClustersAction.cpp
+    src/RefreshClustersAction.h
+    src/RefreshClustersAction.cpp
+    src/ColorizeClustersAction.h
+    src/ColorizeClustersAction.cpp
+    src/PrefixClustersAction.h
+    src/PrefixClustersAction.cpp
 )
 
 set(MODEL_SOURCES
@@ -51,19 +83,19 @@ set(MODEL_SOURCES
     src/ClustersFilterModel.cpp
 )
 
-set(VISITOR_SOURCES
-    src/ClusterDataVisitor.h
-    src/ClusterDataVisitor.cpp
+set(DIALOG_SOURCES
+    src/OverwriteClustersConfirmationDialog.h
+    src/OverwriteClustersConfirmationDialog.cpp
 )
 
 source_group(Plugin FILES ${SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})
 source_group(Model FILES ${MODEL_SOURCES})
-source_group(Visitor FILES ${VISITOR_SOURCES})
+source_group(Dialog FILES ${DIALOG_SOURCES})
 
 include_directories("${INSTALL_DIR}/$<CONFIGURATION>/include/")
 
-add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${VISITOR_SOURCES})
+add_library(${PROJECT} SHARED ${SOURCES} ${ACTIONS_SOURCES} ${MODEL_SOURCES} ${DIALOG_SOURCES})
 
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
 

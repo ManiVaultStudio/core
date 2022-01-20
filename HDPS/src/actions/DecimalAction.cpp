@@ -6,6 +6,14 @@ namespace hdps {
 
 namespace gui {
 
+#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
+    constexpr float DecimalAction::INIT_MIN;
+    constexpr float DecimalAction::INIT_MAX;
+    constexpr float DecimalAction::INIT_VALUE;
+    constexpr float DecimalAction::INIT_DEFAULT_VALUE;
+    constexpr int   DecimalAction::INIT_DECIMALS;
+#endif
+
 DecimalAction::DecimalAction(QObject * parent, const QString& title, const float& minimum /*= INIT_MIN*/, const float& maximum /*= INIT_MAX*/, const float& value /*= INIT_VALUE*/, const float& defaultValue /*= INIT_DEFAULT_VALUE*/, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/) :
     NumericalAction<float>(parent, title, minimum, maximum, value, defaultValue, numberOfDecimals),
     _singleStep(0.1f)
@@ -202,14 +210,6 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
     return widget;
 }
-
-#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
-constexpr float DecimalAction::INIT_MIN;
-constexpr float DecimalAction::INIT_MAX;
-constexpr float DecimalAction::INIT_VALUE;
-constexpr float DecimalAction::INIT_DEFAULT_VALUE;
-constexpr int   DecimalAction::INIT_DECIMALS; 
-#endif
 
 }
 }

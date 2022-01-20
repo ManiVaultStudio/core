@@ -47,9 +47,19 @@ float DecimalRangeAction::getMinimum() const
     return _rangeMinAction.getValue();
 }
 
+void DecimalRangeAction::setMinimum(float minimum)
+{
+    _rangeMinAction.setValue(minimum);
+}
+
 float DecimalRangeAction::getMaximum() const
 {
     return _rangeMaxAction.getValue();
+}
+
+void DecimalRangeAction::setMaximum(float maximum)
+{
+    _rangeMaxAction.setValue(maximum);
 }
 
 void DecimalRangeAction::setRange(const float& minimum, const float& maximum)

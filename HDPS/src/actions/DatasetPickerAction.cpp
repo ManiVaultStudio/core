@@ -16,6 +16,7 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
     setIcon(Application::getIconFont("FontAwesome").getIcon("database"));
     setToolTip("Pick a dataset");
     setCustomModel(&_datasetsModel);
+    setPlaceHolderString("Pick a dataset");
 
     // Inform others that a dataset is picked when the dataset selection action current index changes
     connect(this, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {

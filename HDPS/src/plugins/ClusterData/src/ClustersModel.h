@@ -1,8 +1,10 @@
 #pragma once
 
-#include "actions/Actions.h"
+#include "clusterdata_export.h"
 
-class Cluster;
+#include "Cluster.h"
+
+#include <actions/Actions.h>
 
 using namespace hdps;
 
@@ -13,7 +15,7 @@ using namespace hdps;
  *
  * @author Thomas Kroes
  */
-class ClustersModel : public QAbstractListModel
+class CLUSTERDATA_EXPORT ClustersModel : public QAbstractListModel
 {
     Q_OBJECT
 
@@ -25,9 +27,10 @@ public:
         Name,               /** Name of the cluster */
         ID,                 /** Identifier of the cluster */
         NumberOfIndices,    /** Number of indices in the cluster */
+        ModifiedByUser,     /** Whether the cluster is modified by the user */
 
         /** Number of columns */
-        _Count
+        Count
     };
 
 public:
@@ -92,19 +95,60 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /** Get clusters */
-    std::vector<Cluster>& getClusters();
+    QVector<Cluster>& getClusters();
 
     /**
      * Set clusters
      * @param clusters Pointer to clusters
      */
-    void setClusters(const std::vector<Cluster>& clusters);
+    void setClusters(const QVector<Cluster>& clusters);
 
     /**
      * Remove clusters by their unique identifiers
      * @param ids Unique identifiers of the clusters to remove
      */
     void removeClustersById(const QStringList& ids);
+
+    /**
+     * Set cluster prefix
+     * @param clusterPrefix Cluster name prefix
+     */
+    void setClusterPrefix(const QString& clusterPrefix);
+
+    /**
+     * Colorize clusters by pseudo-random colors
+     * @param randomSeed Random seed for pseudo-random colors
+     */
+    void colorizeClusters(std::int32_t randomSeed = 0);
+
+    /**
+     * Colorize clusters by color map
+     * @param colorMapImage Color map image
+     */
+    void colorizeClusters(const QImage& colorMapImage);
+
+    /**
+     * Get the number of clusters that have been modified by the user
+     * @return Number of user modified clusters
+     */
+    std::uint32_t getNumberOfUserModifiedClusters() const;
+
+    /**
+     * Get whether the model has user modifications
+     * @return Whether the model has user modifications
+     */
+    bool hasUserModifications() const;
+
+    /**
+     * Get whether all cluster names start with the supplied prefix
+     * @param prefix Cluster prefix
+     */
+    bool doAllClusterNamesStartWith(const QString& prefix);
+
+protected:
+
+    /** Get whether user modified clusters may be overridden by bulk operations (prefix change etc.) */
+    bool mayOverrideUserInput();
 
 private:
 
@@ -115,6 +159,11 @@ private:
      */
     QIcon getColorIcon(const QColor& color) const;
 
+    /** Apply cluster prefix to all clusters*/
+    void applyClusterPrefixToAllClusters();
+
 public:
-    std::vector<Cluster>    _clusters;     /** List of clusters from cluster data */
+    QVector<Cluster>    _clusters;          /** Vector of clusters */
+    QVector<bool>       _modifiedByUser;    /** Boolean for each cluster, denoting whether it has been modified by the user */
+    QString             _clusterPrefix;     /** Cluster prefix */
 };
