@@ -43,6 +43,7 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
     _summaryUpdateAwakeConnection()
 {
     setText("Dimension selection");
+    setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
 
     connect(&_nameFilterAction, &StringAction::stringChanged, this, [this](const QString& name) {
         setNameFilter(name);
@@ -177,7 +178,7 @@ std::vector<bool> DimensionsPickerAction::getEnabledDimensions() const
     return _selectionHolder.getEnabledDimensions();
 }
 
-void DimensionsPickerAction::dataChanged(const Dataset<Points>& points)
+void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 {
     _points = points;
 
@@ -475,6 +476,8 @@ void DimensionsPickerAction::updateSummary()
 DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* dimensionSelectionAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, dimensionSelectionAction)
 {
+    setMinimumWidth(500);
+
     auto layout = new QVBoxLayout();
 
     auto nameMatchesLayout = new QHBoxLayout();
@@ -516,15 +519,24 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
 
     tableView->setSortingEnabled(true);
     tableView->setModel(dimensionSelectionAction->getProxyModel());
-    
+    tableView->setStyleSheet("QTableView::indicator:checked{ padding: 0px; margin: 0px;}");
+
     auto horizontalHeader = tableView->horizontalHeader();
 
-    horizontalHeader->setSectionResizeMode(QHeaderView::Stretch);
-    horizontalHeader->setStretchLastSection(true);
+    horizontalHeader->setStretchLastSection(false);
     horizontalHeader->setDefaultAlignment(Qt::AlignLeft);
     horizontalHeader->setSortIndicator(2, Qt::DescendingOrder);
 
+    horizontalHeader->resizeSection(1, 85);
+    horizontalHeader->resizeSection(2, 85);
+
+    // Set column resize modes
+    horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
+    horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
+    horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
+
     tableView->verticalHeader()->hide();
+    tableView->verticalHeader()->setDefaultSectionSize(5);
 
     layout->addWidget(tableView);
 

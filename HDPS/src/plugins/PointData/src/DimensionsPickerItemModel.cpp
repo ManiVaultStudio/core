@@ -143,7 +143,7 @@ namespace hdps
                 {
                 case ColumnEnum::Name: return tr("Name");
                 case ColumnEnum::Mean: return tr("Mean");
-                case ColumnEnum::StandardDeviation: return tr("Standard deviation");
+                case ColumnEnum::StandardDeviation: return tr("Standard dev.");
                 }
             }
         }

@@ -71,10 +71,10 @@ public:
     std::vector<bool> getEnabledDimensions() const;
 
     /**
-     * Sets data changed
+     * Set the input points dataset
      * @param points Smart pointer to points dataset
      */
-    void dataChanged(const Dataset<Points>& points);
+    void setPointsDataset(const Dataset<Points>& points);
 
     /** Get selection proxy model */
     hdps::DimensionsPickerProxyModel* getProxyModel();
