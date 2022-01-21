@@ -1,8 +1,12 @@
 #pragma once
 
+#include "pointdata_export.h"
+
 #include "DimensionsPickerHolder.h"
 #include "DimensionsPickerItemModel.h"
 #include "DimensionsPickerProxyModel.h"
+
+#include "ModelResetter.h"
 
 #include "actions/Actions.h"
 
@@ -19,7 +23,7 @@ class Points;
  *
  * @author Thomas Kroes
  */
-class DimensionsPickerAction : public GroupAction
+class POINTDATA_EXPORT DimensionsPickerAction : public GroupAction
 {
 protected:
 

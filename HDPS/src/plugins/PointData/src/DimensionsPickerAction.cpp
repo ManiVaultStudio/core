@@ -1,5 +1,4 @@
 #include "DimensionsPickerAction.h"
-#include "ModelResetter.h"
 #include "PointData.h"
 
 #include "Application.h"
