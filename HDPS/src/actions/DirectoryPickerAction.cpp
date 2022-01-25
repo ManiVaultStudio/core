@@ -1,21 +1,68 @@
 #include "DirectoryPickerAction.h"
 
+#include <Application.h>
+
+#include <QDir>
+#include <QFileDialog>
 #include <QHBoxLayout>
 
 namespace hdps {
 
 namespace gui {
 
-DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title /*= ""*/, const QDir& directory /*= QDir()*/, const QDir& defaultDirectory /*= QDir()*/) :
-    WidgetAction(parent)
+DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& title /*= ""*/, const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/) :
+    WidgetAction(parent),
+    _dirModel(),
+    _completer(),
+    _directoryAction(this, "Type directory"),
+    _pickAction(this, "Pick directory")
 {
     setText(title);
     setMayReset(true);
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(directory, defaultDirectory);
+
+    _completer.setModel(&_dirModel);
+
+    // Show directory line edit action
+    _directoryAction.getTrailingAction().setVisible(true);
+    _directoryAction.setCompleter(&_completer);
+
+    // Configure pick action
+    _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder"));
+    _pickAction.setToolTip("Click to choose a directory");
+
+    // Disable trailing action
+    _directoryAction.getTrailingAction().setEnabled(false);
+
+    // Update the trailing action of the string action to indicate whether the (typed) directory is valid or not
+    const auto updateStatusAction = [this]() -> void {
+        _directoryAction.getTrailingAction().setIcon(isValid() ? Application::getIconFont("FontAwesome").getIcon("check") : Application::getIconFont("FontAwesome").getIcon("exclamation"));
+        _directoryAction.getTrailingAction().setToolTip(isValid() ? "Directory exists and is valid" : "Directory does not exist");
+    };
+
+    // Initial update of the status action
+    updateStatusAction();
+
+    // Update the line edit string when the directory string changes
+    connect(&_directoryAction, &StringAction::stringChanged, this, updateStatusAction);
+
+    // Open file dialog when pick action is triggered
+    connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
+        const auto directory = QFileDialog::getExistingDirectory(nullptr, tr("Open Directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+        if (!directory.isEmpty())
+            setDirectory(directory);
+    });
+
+    // Pass-through action signals
+    connect(&_directoryAction, &StringAction::stringChanged, this, &DirectoryPickerAction::directoryChanged);
+    connect(&_directoryAction, &StringAction::defaultStringChanged, this, &DirectoryPickerAction::defaultDirectoryChanged);
+    connect(&_directoryAction, &StringAction::placeholderStringChanged, this, &DirectoryPickerAction::placeholderStringChanged);
 }
 
-void DirectoryPickerAction::initialize(const QDir& directory /*= QDir()*/, const QDir& defaultDirectory /*= QDir()*/)
+void DirectoryPickerAction::initialize(const QString& directory /*= QString()*/, const QString& defaultDirectory /*= QString()*/)
 {
     setDirectory(directory);
     setDefaultDirectory(defaultDirectory);
@@ -23,76 +70,82 @@ void DirectoryPickerAction::initialize(const QDir& directory /*= QDir()*/, const
     setResettable(isResettable());
 }
 
-QDir DirectoryPickerAction::getDirectory() const
+QString DirectoryPickerAction::getDirectory() const
 {
-    return _directory;
+    return _directoryAction.getString();
 }
 
-void DirectoryPickerAction::setDirectory(const QDir& directory)
+void DirectoryPickerAction::setDirectory(const QString& directory)
 {
-    if (directory == _directory)
+    if (directory == getDirectory())
         return;
 
-    _directory = directory;
-
-    emit directoryChanged(_directory);
+    _directoryAction.setString(directory);
 
     setResettable(isResettable());
 }
 
-QDir DirectoryPickerAction::getDefaultDirectory() const
+QString DirectoryPickerAction::getDefaultDirectory() const
 {
-    return _defaultDirectory;
+    return _directoryAction.getDefaultString();
 }
 
-void DirectoryPickerAction::setDefaultDirectory(const QDir& defaultDirectory)
+void DirectoryPickerAction::setDefaultDirectory(const QString& defaultDirectory)
 {
-    if (defaultDirectory == _defaultDirectory)
+    if (defaultDirectory == getDefaultDirectory())
         return;
 
-    _defaultDirectory = defaultDirectory;
-
-    emit defaultDirectoryChanged(_defaultDirectory);
+    _directoryAction.setDefaultString(defaultDirectory);
 
     setResettable(isResettable());
 }
 
 bool DirectoryPickerAction::isResettable() const
 {
-    return _directory != _defaultDirectory;
+    return _directoryAction.isResettable();
 }
 
 void DirectoryPickerAction::reset()
 {
-    setDirectory(_defaultDirectory);
+    _directoryAction.reset();
 }
 
 QString DirectoryPickerAction::getPlaceholderString() const
 {
-    return _placeholderString;
+    return _directoryAction.getPlaceholderString();
 }
 
 void DirectoryPickerAction::setPlaceHolderString(const QString& placeholderString)
 {
-    if (placeholderString == _placeholderString)
+    if (placeholderString == getPlaceholderString())
         return;
 
-    _placeholderString = placeholderString;
-
-    emit placeholderStringChanged(_placeholderString);
+    _directoryAction.setPlaceHolderString(placeholderString);
 }
 
+QString DirectoryPickerAction::getDirectoryName() const
+{
+    return QDir(getDirectory()).dirName();
+}
+
+bool DirectoryPickerAction::isValid() const
+{
+    return QDir(getDirectory()).exists();
+}
+
+/*
 DirectoryPickerAction::LineEditWidget::LineEditWidget(QWidget* parent, DirectoryPickerAction* directoryPickerAction) :
-    QLineEdit(parent)
+    QLineEdit(parent),
+    _statusAction(this)
 {
     setObjectName("LineEdit");
-    setAcceptDrops(true);
+    addAction(&_statusAction, QLineEdit::TrailingPosition);
 
     // Update the line edit text from the string action
     const auto updateLineEdit = [this, directoryPickerAction]() {
         QSignalBlocker blocker(this);
 
-        setText(directoryPickerAction->getDirectory().dirName());
+        setText(directoryPickerAction->getDirectory());
     };
 
     // Update the place holder text in the line edit
@@ -100,8 +153,7 @@ DirectoryPickerAction::LineEditWidget::LineEditWidget(QWidget* parent, Directory
         setPlaceholderText(directoryPickerAction->getPlaceholderString());
     };
 
-    // Update the line edit string when the action string changes
-    connect(directoryPickerAction, &DirectoryPickerAction::directoryChanged, this, updateLineEdit);
+    
 
     // Update the line edit placeholder string when the action placeholder string changes
     connect(directoryPickerAction, &DirectoryPickerAction::placeholderStringChanged, this, updatePlaceHolderText);
@@ -114,7 +166,19 @@ DirectoryPickerAction::LineEditWidget::LineEditWidget(QWidget* parent, Directory
     // Perform initial updates
     updateLineEdit();
     updatePlaceHolderText();
+    updateStatusAction();
 }
+
+DirectoryPickerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, DirectoryPickerAction* directoryPickerAction) :
+    QPushButton(parent)
+{
+    setObjectName("PushButton");
+    setProperty("class", "square-button");
+    
+
+    
+}
+*/
 
 QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
@@ -125,11 +189,19 @@ QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& w
     layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::LineEdit)
-        layout->addWidget(new DirectoryPickerAction::LineEditWidget(parent, this));
+        layout->addWidget(_directoryAction.createWidget(parent));
+
+    if (widgetFlags & WidgetFlag::PushButton)
+        layout->addWidget(_pickAction.createWidget(parent));
 
     widget->setLayout(layout);
 
     return widget;
+}
+
+DirectoryPickerAction::Widget::Widget(QWidget* parent, DirectoryPickerAction* directoryPickerAction)
+{
+
 }
 
 }

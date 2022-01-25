@@ -1,12 +1,15 @@
 #pragma once
 
 #include "WidgetAction.h"
+#include "StringAction.h"
+#include "TriggerAction.h"
 
 #include <QLineEdit>
-#include <QDir>
+#include <QString>
+#include <QDirModel>
+#include <QCompleter>
 
 class QWidget;
-class QPushButton;
 
 namespace hdps {
 
@@ -27,16 +30,16 @@ public:
 
     /** Describes the widget configurations */
     enum WidgetFlag {
-        LineEdit        = 0x00001,      /** Widget includes a line edit */
-        PickPushButton  = 0x00002,      /** There is a button to pick a directory */
+        LineEdit    = 0x00001,      /** Widget includes a line edit */
+        PushButton  = 0x00002,      /** There is a button to pick a directory */
 
-        Default = LineEdit | PickPushButton
+        Default = LineEdit | PushButton
     };
 
-public:
+protected:
 
-    /** Line edit widget class for directory picker action */
-    class LineEditWidget : public QLineEdit
+    /** Widget class for directory picker action */
+    class Widget : public QLineEdit
     {
     protected:
 
@@ -45,12 +48,10 @@ public:
          * @param parent Pointer to parent widget
          * @param directoryPickerAction Pointer to directory picker action
          */
-        LineEditWidget(QWidget* parent, DirectoryPickerAction* directoryPickerAction);
+        Widget(QWidget* parent, DirectoryPickerAction* directoryPickerAction);
 
         friend class DirectoryPickerAction;
     };
-
-protected:
 
     /**
      * Get widget representation of the directory picker action
@@ -68,38 +69,38 @@ public:
      * @param directory Directory
      * @param defaultDirectory Default directory
      */
-    DirectoryPickerAction(QObject* parent, const QString& title = "", const QDir& directory = QDir(), const QDir& defaultDirectory = QDir());
+    DirectoryPickerAction(QObject* parent, const QString& title = "", const QString& directory = QString(), const QString& defaultDirectory = QString());
 
     /**
      * Initialize the directory picker action
      * @param directory Directory
      * @param defaultDirectory Default directory
      */
-    void initialize(const QDir& directory = QDir(), const QDir& defaultDirectory = QDir());
+    void initialize(const QString& directory = QString(), const QString& defaultDirectory = QString());
 
     /**
      * Get the current directory
      * @return Current directory
      */
-    QDir getDirectory() const;
+    QString getDirectory() const;
 
     /**
      * Set the current directory
      * @param directory Current directory
      */
-    void setDirectory(const QDir& directory);
+    void setDirectory(const QString& directory);
 
     /**
      * Get the default directory
      * @return Default directory
      */
-    QDir getDefaultDirectory() const;
+    QString getDefaultDirectory() const;
 
     /**
      * Set the default directory
      * @param defaultDirectory Default directory
      */
-    void setDefaultDirectory(const QDir& defaultDirectory);
+    void setDefaultDirectory(const QString& defaultDirectory);
 
     /** Determines whether the current directory can be reset to its default directory */
     bool isResettable() const override;
@@ -119,19 +120,31 @@ public:
      */
     void setPlaceHolderString(const QString& placeholderString);
 
+    /**
+     * Get directory name
+     * @return Directory name
+     */
+    QString getDirectoryName() const;
+
+    /**
+     * Get whether the directory is valid or not
+     * @return Boolean indication whether the directory is valid or not
+     */
+    bool isValid() const;
+
 signals:
 
     /**
      * Signals that the directory changed
      * @param directory Directory that changed
      */
-    void directoryChanged(const QDir& directory);
+    void directoryChanged(const QString& directory);
 
     /**
      * Signals that the default directory changed
      * @param defaultString Default directory that changed
      */
-    void defaultDirectoryChanged(const QDir& defaultDirectory);
+    void defaultDirectoryChanged(const QString& defaultDirectory);
 
     /**
      * Signals that the placeholder string changed
@@ -140,9 +153,10 @@ signals:
     void placeholderStringChanged(const QString& placeholderString);
 
 protected:
-    QDir        _directory;             /** Current directory */
-    QDir        _defaultDirectory;      /** Default directory */
-    QString     _placeholderString;     /** Place holder string */
+    QDirModel       _dirModel;              /** Directory model */
+    QCompleter      _completer;             /** Completer */
+    StringAction    _directoryAction;       /** Directory action */
+    TriggerAction   _pickAction;            /** Pick directory action */
 };
 
 }
