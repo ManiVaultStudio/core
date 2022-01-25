@@ -2,6 +2,7 @@
 #include "WidgetActionLabel.h"
 #include "ToggleAction.h"
 #include "TriggerAction.h"
+#include "TriggersAction.h"
 
 #include <QDebug>
 #include <QGridLayout>
@@ -119,8 +120,9 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
         const auto numRows          = _layout->rowCount();
         const auto isToggleAction   = dynamic_cast<ToggleAction*>(widgetAction);
         const auto isTriggerAction  = dynamic_cast<TriggerAction*>(widgetAction);
+        const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
 
-        if (!isToggleAction && !isTriggerAction) {
+        if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
             auto labelWidget = widgetAction->createLabelWidget(this);
             labelWidget->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
             _layout->addWidget(labelWidget, numRows, 0);

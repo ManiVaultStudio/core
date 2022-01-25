@@ -38,9 +38,11 @@ public:
          * Constructor
          * @param text Push button text
          * @param tooltip Push button tooltip
+         * @param enabled Push button enabled
          */
-        Trigger(const QString& text, const QString& tooltip) :
+        Trigger(const QString& text, const QString& tooltip, bool enabled = true) :
             _id(QUuid::createUuid().toString()),
+            _enabled(enabled),
             _text(text),
             _tooltip(tooltip)
         {
@@ -58,6 +60,7 @@ public:
         }
 
         QString     _id;        /** Unique trigger identifier */
+        bool        _enabled;   /** Push button read-only */
         QString     _text;      /** Push button text */
         QString     _tooltip;   /** Push button tooltip */
     };
@@ -121,6 +124,27 @@ public:
      */
     void setTriggers(const QVector<Trigger>& triggers);
 
+    /**
+     * Set trigger text
+     * @param triggerIndex Index of the trigger
+     * @param text Trigger text
+     */
+    void setTriggerText(std::int32_t triggerIndex, const QString& text);
+
+    /**
+     * Set trigger tooltip
+     * @param triggerIndex Index of the trigger
+     * @param tooltip Trigger tooltip
+     */
+    void setTriggerTooltip(std::int32_t triggerIndex, const QString& tooltip);
+
+    /**
+     * Set trigger enabled
+     * @param triggerIndex Index of the trigger
+     * @param enabled Trigger enabled
+     */
+    void setTriggerEnabled(std::int32_t triggerIndex, const bool& enabled);
+
 protected:
 
     /**
@@ -137,6 +161,13 @@ signals:
      * @param triggers Triggers
      */
     void triggersChanged(const QVector<Trigger>& triggers);
+
+    /**
+     * Signals that a trigger changed
+     * @param triggerIndex Index of the trigger
+     * @param trigger Trigger that changed
+     */
+    void triggerChanged(std::int32_t triggerIndex, const Trigger& trigger);
 
     /**
      * Signals that a trigger is executed

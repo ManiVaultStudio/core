@@ -1,8 +1,6 @@
 #include "DimensionsPickerFilterAction.h"
 #include "DimensionsPickerAction.h"
 
-#include <QGridLayout>
-
 namespace hdps {
 
 namespace gui {

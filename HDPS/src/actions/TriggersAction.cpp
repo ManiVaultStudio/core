@@ -28,6 +28,36 @@ void TriggersAction::setTriggers(const QVector<Trigger>& triggers)
     emit triggersChanged(_triggers);
 }
 
+void TriggersAction::setTriggerText(std::int32_t triggerIndex, const QString& text)
+{
+    if (triggerIndex >= _triggers.count())
+        return;
+
+    _triggers[triggerIndex]._text = text;
+
+    emit triggerChanged(triggerIndex, _triggers[triggerIndex]);
+}
+
+void TriggersAction::setTriggerTooltip(std::int32_t triggerIndex, const QString& tooltip)
+{
+    if (triggerIndex >= _triggers.count())
+        return;
+
+    _triggers[triggerIndex]._tooltip = tooltip;
+
+    emit triggerChanged(triggerIndex, _triggers[triggerIndex]);
+}
+
+void TriggersAction::setTriggerEnabled(std::int32_t triggerIndex, const bool& enabled)
+{
+    if (triggerIndex >= _triggers.count())
+        return;
+
+    _triggers[triggerIndex]._enabled = enabled;
+
+    emit triggerChanged(triggerIndex, _triggers[triggerIndex]);
+}
+
 QPushButton* TriggersAction::createTriggerPushButton(const Trigger& trigger)
 {
     // Create push button for the trigger
@@ -100,6 +130,26 @@ TriggersAction::Widget::Widget(QWidget* parent, TriggersAction* triggersAction, 
         // Perform an initial update of the layout
         updateLayout();
     }
+
+    // Update push button when a trigger changed
+    connect(triggersAction, &TriggersAction::triggerChanged, this, [this](std::int32_t triggerIndex, const Trigger& trigger) {
+
+        // Get layout item at trigger index
+        auto itemAt = layout()->itemAt(triggerIndex);
+
+        if (itemAt == nullptr)
+            return;
+
+        // Get push button widget at trigger index
+        auto pushButton = dynamic_cast<QPushButton*>(itemAt->widget());
+
+        if (pushButton == nullptr)
+            return;
+
+        pushButton->setEnabled(trigger._enabled);
+        pushButton->setText(trigger._text);
+        pushButton->setToolTip(trigger._tooltip);
+    });
 }
 
 }
