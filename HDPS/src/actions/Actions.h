@@ -11,6 +11,7 @@
 #include "OptionAction.h"
 #include "PixelSelectionAction.h"
 #include "TriggerAction.h"
+#include "TriggersAction.h"
 #include "ToggleAction.h"
 #include "StringAction.h"
 #include "WidgetAction.h"

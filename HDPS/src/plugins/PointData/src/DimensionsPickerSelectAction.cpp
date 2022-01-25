@@ -1,0 +1,150 @@
+#include "DimensionsPickerSelectAction.h"
+#include "DimensionsPickerAction.h"
+
+#include <QFileDialog>
+
+namespace hdps {
+
+namespace gui {
+
+DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerAction& dimensionsPickerAction) :
+    WidgetAction(&dimensionsPickerAction),
+    _dimensionsPickerAction(dimensionsPickerAction),
+    _selectionThresholdAction(this, "Selection threshold", 0),
+    _computeStatisticsAction(this, "Compute statistics"),
+    _selectVisibleAction(this, "Select visible"),
+    _selectNonVisibleAction(this, "Select non-visible"),
+    _loadSelectionAction(this, "Load selection"),
+    _saveSelectionAction(this, "Save selection"),
+    _loadExclusionAction(this, "Load exclusion")
+{
+    setText("Select");
+    setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+
+    _selectionThresholdAction.setEnabled(false);
+
+    _selectionThresholdAction.setToolTip("Threshold for selecting dimensions");
+    _computeStatisticsAction, setToolTip("Compute the dimension statistics");
+    _selectVisibleAction.setToolTip("Select visible dimensions");
+    _selectNonVisibleAction.setToolTip("Select non-visible dimensions");
+    _loadSelectionAction.setToolTip("Load dimension selection from file");
+    _saveSelectionAction.setToolTip("Save dimension selection to file");
+    _loadExclusionAction.setToolTip("Load dimension exclusion selection to file");
+
+    _selectVisibleAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+    _selectNonVisibleAction.setIcon(Application::getIconFont("FontAwesome").getIcon("eye-slash"));
+
+    _selectVisibleAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    _selectNonVisibleAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    const auto selectionFileFilter = tr("Text files (*.txt);;All files (*.*)");
+
+    // Update the visible dimensions when the selection threshold changes
+    connect(&_selectionThresholdAction, &IntegralAction::valueChanged, this, [this](const std::int32_t& value) {
+        const auto sliderMaximum = _selectionThresholdAction.getMaximum();
+
+        if (value >= 0 && value <= sliderMaximum)
+        {
+            const auto& distinctStandardDeviations = _dimensionsPickerAction.getHolder().distinctStandardDeviationsWithAndWithoutZero[_dimensionsPickerAction.getHolder()._ignoreZeroValues ? 1 : 0];
+            const auto numberOfDistinctStandardDeviations = distinctStandardDeviations.size();
+
+            if (numberOfDistinctStandardDeviations > 0 && sliderMaximum > 0)
+            {
+                if ((sliderMaximum + 1) == numberOfDistinctStandardDeviations)
+                {
+                    const ModelResetter modelResetter(&_dimensionsPickerAction.getProxyModel());
+
+                    _dimensionsPickerAction.getProxyModel().SetMinimumStandardDeviation(distinctStandardDeviations[value]);
+                }
+                else
+                    assert(!"Slider maximum incorrect!");
+            }
+        }
+        else
+            assert(!"Slider value out of range!");
+    });
+
+    // Select visible dimensions when the corresponding action is triggered
+    connect(&_selectVisibleAction, &TriggerAction::triggered, this, [this]() {
+        _dimensionsPickerAction.selectDimensionsBasedOnVisibility<true>();
+    });
+
+    // Select non-visible dimensions when the corresponding action is triggered
+    connect(&_selectNonVisibleAction, &TriggerAction::triggered, this, [this]() {
+        _dimensionsPickerAction.selectDimensionsBasedOnVisibility<false>();
+    });
+
+    // Load dimension selection from file when the corresponding action is triggered
+    connect(&_loadSelectionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
+        _dimensionsPickerAction.loadSelectionFromFile(QFileDialog::getOpenFileName(nullptr, tr("Dimension selection"), {}, selectionFileFilter));
+    });
+
+    // Save dimension selection to file when the corresponding action is triggered
+    connect(&_saveSelectionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
+        _dimensionsPickerAction.saveSelectionToFile(QFileDialog::getOpenFileName(nullptr, tr("Dimension selection"), {}, selectionFileFilter));
+    });
+
+    // Load dimension exclusion from file when the corresponding action is triggered
+    connect(&_loadExclusionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
+        _dimensionsPickerAction.loadExclusionFromFile(QFileDialog::getOpenFileName(nullptr, tr("Exclusion list"), {}, selectionFileFilter));
+    });
+}
+
+DimensionsPickerSelectAction::Widget::Widget(QWidget* parent, DimensionsPickerSelectAction* dimensionsPickerSelectAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, dimensionsPickerSelectAction, widgetFlags)
+{
+    auto layout = new QVBoxLayout();
+
+    auto selectionThresholdLayout = new QHBoxLayout();
+
+    auto moreLabel = new QLabel("More");
+    auto lessLabel = new QLabel("Less");
+
+    selectionThresholdLayout->addWidget(moreLabel);
+    selectionThresholdLayout->addWidget(dimensionsPickerSelectAction->getSelectionThresholdAction().createWidget(this, IntegralAction::Slider));
+    selectionThresholdLayout->addWidget(lessLabel);
+
+    // Synchronize read-only status of the threshold labels with the threshold action
+    const auto updateSelectionThresholdLabels = [this, dimensionsPickerSelectAction, moreLabel, lessLabel]() -> void {
+        const auto isEnabled = dimensionsPickerSelectAction->getSelectionThresholdAction().isEnabled();
+
+        moreLabel->setEnabled(isEnabled);
+        lessLabel->setEnabled(isEnabled);
+    };
+
+    // Synchronize read-only status of the threshold labels when the selection threshold changes
+    connect(&dimensionsPickerSelectAction->getSelectionThresholdAction(), &IntegralAction::changed, this, [this, updateSelectionThresholdLabels]() {
+        updateSelectionThresholdLabels();
+    });
+
+    // Initial synchronization of the read-only status of the threshold labels
+    updateSelectionThresholdLabels();
+
+    layout->addLayout(selectionThresholdLayout);
+
+    layout->addWidget(dimensionsPickerSelectAction->getComputeStatisticsAction().createWidget(this));
+
+    auto selectLayout = new QHBoxLayout();
+
+    selectLayout->addWidget(dimensionsPickerSelectAction->getSelectVisibleAction().createWidget(this));
+    selectLayout->addWidget(dimensionsPickerSelectAction->getSelectNonVisibleAction().createWidget(this));
+    selectLayout->addWidget(dimensionsPickerSelectAction->getLoadSelectionAction().createWidget(this));
+    selectLayout->addWidget(dimensionsPickerSelectAction->getSaveSelectionAction().createWidget(this));
+    selectLayout->addWidget(dimensionsPickerSelectAction->getLoadExclusionAction().createWidget(this));
+
+    layout->addLayout(selectLayout);
+
+    if (widgetFlags & WidgetActionWidget::PopupLayout) {
+        setPopupLayout(layout);
+    }
+    else {
+        layout->setMargin(0);
+        setLayout(layout);
+    }
+}
+
+}
+}
+
+
+

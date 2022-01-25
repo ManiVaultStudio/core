@@ -22,94 +22,20 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
+DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title /*= "Dimensions"*/) :
     GroupAction(parent),
     _points(nullptr),
     _selectionHolder(),
     _selectionItemModel(new DimensionsPickerItemModel(_selectionHolder)),
     _selectionProxyModel(new DimensionsPickerProxyModel(_selectionHolder)),
-    _nameFilterAction(this, "Name filter"),
-    _showOnlySelectedDimensionsAction(this, "Show only selected dimensions"),
-    _applyExclusionListAction(this, "Apply exclusion list"),
-    _ignoreZeroValuesAction(this, "Ignore zero values"),
-    _selectionThresholdAction(this, "Selection threshold"),
     _summaryAction(this, "Summary"),
-    _computeStatisticsAction(this, "Compute statistics"),
-    _selectVisibleAction(this, "Select visible"),
-    _selectNonVisibleAction(this, "Select non-visible"),
-    _loadSelectionAction(this, "Load selection"),
-    _saveSelectionAction(this, "Save selection"),
-    _loadExclusionAction(this, "Load exclusion"),
+    _filterAction(*this),
+    _selectAction(*this),
+    _miscellaneousAction(*this),
     _summaryUpdateAwakeConnection()
 {
-    setText("Dimension selection");
+    setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("columns"));
-
-    connect(&_nameFilterAction, &StringAction::stringChanged, this, [this](const QString& name) {
-        setNameFilter(name);
-    });
-
-    connect(&_showOnlySelectedDimensionsAction, &ToggleAction::triggered, this, [this](bool checked) {
-        setShowOnlySelectedDimensions(checked);
-    });
-
-    connect(&_applyExclusionListAction, &ToggleAction::triggered, this, [this](bool checked) {
-        setApplyExclusionList(checked);
-    });
-
-    connect(&_ignoreZeroValuesAction, &ToggleAction::triggered, this, [this](bool checked) {
-        setIgnoreZeroValues(checked);
-    });
-
-    const auto selectionFileFilter = tr("Text files (*.txt);;All files (*.*)");
-
-    connect(&_selectionThresholdAction, &IntegralAction::valueChanged, this, [this](const std::int32_t& value) {
-        const auto sliderMaximum = _selectionThresholdAction.getMaximum();
-
-        if (value >= 0 && value <= sliderMaximum)
-        {
-            const auto& distinctStandardDeviations = _selectionHolder.distinctStandardDeviationsWithAndWithoutZero[_selectionHolder._ignoreZeroValues ? 1 : 0];
-            const auto numberOfDistinctStandardDeviations = distinctStandardDeviations.size();
-
-            if (numberOfDistinctStandardDeviations > 0 && sliderMaximum > 0)
-            {
-                if ((sliderMaximum + 1) == numberOfDistinctStandardDeviations)
-                {
-                    const ModelResetter modelResetter(_selectionProxyModel.get());
-
-                    _selectionProxyModel->SetMinimumStandardDeviation(distinctStandardDeviations[value]);
-                }
-                else
-                    assert(!"Slider maximum incorrect!");
-            }
-        }
-        else
-            assert(!"Slider value out of range!");
-    });
-
-    connect(&_computeStatisticsAction, &TriggerAction::triggered, this, [this]() {
-        computeStatistics();
-    });
-
-    connect(&_selectVisibleAction, &TriggerAction::triggered, this, [this]() {
-        selectDimensionsBasedOnVisibility<true>();
-    });
-
-    connect(&_selectNonVisibleAction, &TriggerAction::triggered, this, [this]() {
-        selectDimensionsBasedOnVisibility<true>();
-    });
-
-    connect(&_loadSelectionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
-        loadSelectionFromFile(QFileDialog::getOpenFileName(nullptr, tr("Dimension selection"), {}, selectionFileFilter));
-    });
-
-    connect(&_loadExclusionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
-        loadSelectionFromFile(QFileDialog::getOpenFileName(nullptr, tr("Exclusion list"), {}, selectionFileFilter));
-    });
-
-    connect(&_saveSelectionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
-        saveSelectionToFile(QFileDialog::getOpenFileName(nullptr, tr("Dimension selection"), {}, selectionFileFilter));
-    });
 
     _summaryAction.setEnabled(false);
 
@@ -122,18 +48,11 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
     const auto updateReadOnly = [this]() -> void {
         const auto enable = !isReadOnly();
 
-        _nameFilterAction.setEnabled(enable);
-        _showOnlySelectedDimensionsAction.setEnabled(enable);
-        _applyExclusionListAction.setEnabled(enable);
-        _ignoreZeroValuesAction.setEnabled(enable);
-        _selectionThresholdAction.setEnabled(enable && !_selectionHolder._statistics.empty());
+        _filterAction.setEnabled(enable);
+        _miscellaneousAction.setEnabled(enable);
+        //_selectionThresholdAction.setEnabled(enable && !_selectionHolder._statistics.empty());
         _summaryAction.setEnabled(false);
-        _computeStatisticsAction.setEnabled(enable);
-        _selectVisibleAction.setEnabled(enable);
-        _selectNonVisibleAction.setEnabled(enable);
-        _loadSelectionAction.setEnabled(enable);
-        _saveSelectionAction.setEnabled(enable);
-        _loadExclusionAction.setEnabled(enable);
+        _selectAction.setEnabled(enable);
     };
 
     connect(this, &GroupAction::readOnlyChanged, this, [this, updateReadOnly](const bool& readOnly) {
@@ -141,8 +60,7 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
     });
 
     updateReadOnly();
-
-    _selectionThresholdAction.setEnabled(false);
+    computeStatistics();
 }
 
 DimensionsPickerAction::~DimensionsPickerAction()
@@ -183,13 +101,17 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
     _points = points;
 
     setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
-
-    _computeStatisticsAction.setEnabled(true);
+    computeStatistics();
 }
 
-hdps::DimensionsPickerProxyModel* DimensionsPickerAction::getProxyModel()
+DimensionsPickerHolder& DimensionsPickerAction::getHolder()
 {
-    return _selectionProxyModel.get();
+    return _selectionHolder;
+}
+
+hdps::DimensionsPickerProxyModel& DimensionsPickerAction::getProxyModel()
+{
+    return *_selectionProxyModel;
 }
 
 void DimensionsPickerAction::setNameFilter(const QString& nameFilter)
@@ -313,154 +235,156 @@ void DimensionsPickerAction::saveSelectionToFile(const QString& fileName)
 
 void DimensionsPickerAction::computeStatistics()
 {
-    const ModelResetter modelResetter(_selectionProxyModel.get());
-
-    auto& statistics = _selectionHolder._statistics;
-    statistics.clear();
-
-    if (_points.isValid())
+    QApplication::setOverrideCursor(Qt::WaitCursor);
     {
-        QTime time;
+        const ModelResetter modelResetter(_selectionProxyModel.get());
 
-        time.start();
-        const auto& pointData = *_points;
+        auto& statistics = _selectionHolder._statistics;
+        statistics.clear();
 
-        pointData.visitFromBeginToEnd([&statistics, &pointData](auto beginOfData, auto endOfData)
+        if (_points.isValid())
         {
-            const auto numberOfDimensions = pointData.getNumDimensions();
-            const auto numberOfPoints = pointData.getNumPoints();
+            QTime time;
 
-            constexpr static auto quiet_NaN = std::numeric_limits<double>::quiet_NaN();
+            time.start();
+            const auto& pointData = *_points;
 
-            if (numberOfPoints == 0)
+            pointData.visitFromBeginToEnd([&statistics, &pointData](auto beginOfData, auto endOfData)
             {
-                statistics.resize(numberOfDimensions, { quiet_NaN, quiet_NaN, quiet_NaN, quiet_NaN });
-            }
-            else
-            {
-                statistics.resize(numberOfDimensions);
-                const auto* const statisticsData = statistics.data();
+                const auto numberOfDimensions = pointData.getNumDimensions();
+                const auto numberOfPoints = pointData.getNumPoints();
 
-                if (numberOfPoints == 1)
+                constexpr static auto quiet_NaN = std::numeric_limits<double>::quiet_NaN();
+
+                if (numberOfPoints == 0)
                 {
-#ifndef __APPLE__
-                    (void)std::for_each_n(std::execution::par_unseq, statistics.begin(), numberOfDimensions,
-#else
-                    (void)std::for_each_n(statistics.begin(), numberOfDimensions,
-#endif
-                        [statisticsData, beginOfData](auto& statisticsPerDimension)
-                    {
-                        const auto i = &statisticsPerDimension - statisticsData;
-
-                        const double dataValue = beginOfData[i];
-                        statisticsPerDimension = { {dataValue, dataValue}, {quiet_NaN, quiet_NaN} };
-                    });
+                    statistics.resize(numberOfDimensions, { quiet_NaN, quiet_NaN, quiet_NaN, quiet_NaN });
                 }
                 else
                 {
-#ifndef __APPLE__
-                    (void)std::for_each_n(std::execution::par_unseq, statistics.begin(), numberOfDimensions,
-#else
-                    (void)std::for_each_n(statistics.begin(), numberOfDimensions,
-#endif
-                        [statisticsData, numberOfDimensions, numberOfPoints, beginOfData](auto& statisticsPerDimension)
+                    statistics.resize(numberOfDimensions);
+                    const auto* const statisticsData = statistics.data();
+
+                    if (numberOfPoints == 1)
                     {
-                        const std::unique_ptr<double[]> data(new double[numberOfPoints]);
+#ifndef __APPLE__
+                        (void)std::for_each_n(std::execution::par_unseq, statistics.begin(), numberOfDimensions,
+#else
+                        (void)std::for_each_n(statistics.begin(), numberOfDimensions,
+#endif
+                            [statisticsData, beginOfData](auto& statisticsPerDimension)
                         {
                             const auto i = &statisticsPerDimension - statisticsData;
 
+                            const double dataValue = beginOfData[i];
+                            statisticsPerDimension = { {dataValue, dataValue}, {quiet_NaN, quiet_NaN} };
+                        });
+                    }
+                    else
+                    {
+#ifndef __APPLE__
+                        (void)std::for_each_n(std::execution::par_unseq, statistics.begin(), numberOfDimensions,
+#else
+                        (void)std::for_each_n(statistics.begin(), numberOfDimensions,
+#endif
+                            [statisticsData, numberOfDimensions, numberOfPoints, beginOfData](auto& statisticsPerDimension)
+                        {
+                            const std::unique_ptr<double[]> data(new double[numberOfPoints]);
+                            {
+                                const auto i = &statisticsPerDimension - statisticsData;
+
+                                for (unsigned j{}; j < numberOfPoints; ++j)
+                                {
+                                    data[j] = beginOfData[j * numberOfDimensions + i];
+                                }
+                            }
+
+                            double sum{};
+                            unsigned numberOfNonZeroValues{};
+
                             for (unsigned j{}; j < numberOfPoints; ++j)
                             {
-                                data[j] = beginOfData[j * numberOfDimensions + i];
+                                const auto value = data[j];
+
+                                if (value != 0.0)
+                                {
+                                    sum += value;
+                                    ++numberOfNonZeroValues;
+                                }
                             }
-                        }
+                            const auto mean = sum / numberOfPoints;
 
-                        double sum{};
-                        unsigned numberOfNonZeroValues{};
+                            double sumOfSquares{};
 
-                        for (unsigned j{}; j < numberOfPoints; ++j)
-                        {
-                            const auto value = data[j];
-
-                            if (value != 0.0)
+                            for (unsigned j{}; j < numberOfPoints; ++j)
                             {
-                                sum += value;
-                                ++numberOfNonZeroValues;
+                                const auto value = data[j] - mean;
+                                sumOfSquares += value * value;
                             }
-                        }
-                        const auto mean = sum / numberOfPoints;
 
-                        double sumOfSquares{};
+                            static_assert(quiet_NaN != quiet_NaN);
 
-                        for (unsigned j{}; j < numberOfPoints; ++j)
-                        {
-                            const auto value = data[j] - mean;
-                            sumOfSquares += value * value;
-                        }
-
-                        static_assert(quiet_NaN != quiet_NaN);
-
-                        statisticsPerDimension = StatisticsPerDimension
-                        {
+                            statisticsPerDimension = StatisticsPerDimension
                             {
-                                mean,
-                                (numberOfNonZeroValues == 0) ? quiet_NaN : (sum / numberOfNonZeroValues)
-                            },
-                            {
-                                std::sqrt(sumOfSquares / (numberOfPoints - 1)),
-                                (numberOfNonZeroValues == 0) ? quiet_NaN : std::sqrt(sumOfSquares / numberOfNonZeroValues)
-                            }
-                        };
-                    });
+                                {
+                                    mean,
+                                    (numberOfNonZeroValues == 0) ? quiet_NaN : (sum / numberOfNonZeroValues)
+                                },
+                                {
+                                    std::sqrt(sumOfSquares / (numberOfPoints - 1)),
+                                    (numberOfNonZeroValues == 0) ? quiet_NaN : std::sqrt(sumOfSquares / numberOfNonZeroValues)
+                                }
+                            };
+                        });
+                    }
                 }
-            }
-        });
-        qDebug()
-            << " Duration: " << time.elapsed() << " microsecond(s)";
+            });
+            qDebug()
+                << " Duration: " << time.elapsed() << " microsecond(s)";
 
-        for (unsigned i{}; i <= 1; ++i)
-        {
-            std::set<double> distinctStandardDeviations;
-
-            for (const auto& statisticsPerDimension : _selectionHolder._statistics)
+            for (unsigned i{}; i <= 1; ++i)
             {
-                if (!std::isnan(statisticsPerDimension.standardDeviation[i]))
+                std::set<double> distinctStandardDeviations;
+
+                for (const auto& statisticsPerDimension : _selectionHolder._statistics)
                 {
-                    distinctStandardDeviations.insert(statisticsPerDimension.standardDeviation[i]);
+                    if (!std::isnan(statisticsPerDimension.standardDeviation[i]))
+                    {
+                        distinctStandardDeviations.insert(statisticsPerDimension.standardDeviation[i]);
+                    }
                 }
+
+                _selectionHolder.distinctStandardDeviationsWithAndWithoutZero[i].assign(distinctStandardDeviations.cbegin(), distinctStandardDeviations.cend());
             }
 
-            _selectionHolder.distinctStandardDeviationsWithAndWithoutZero[i].assign(distinctStandardDeviations.cbegin(), distinctStandardDeviations.cend());
+            assert(_selectAction.getSelectionThresholdAction().getMinimum() == 0);
+            updateSlider();
         }
-
-        assert(_selectionThresholdAction.getMinimum() == 0);
-        updateSlider();
-
-        _computeStatisticsAction.setEnabled(false);
     }
+    QApplication::restoreOverrideCursor();
 }
 
 void DimensionsPickerAction::updateSlider()
 {
     const auto numberOfDistinctStandardDeviations   = _selectionHolder.distinctStandardDeviationsWithAndWithoutZero[_selectionHolder._ignoreZeroValues ? 1 : 0].size();
-    const auto isSliderValueAtMaximum               = (_selectionThresholdAction.isAtMaximum());
+    const auto isSliderValueAtMaximum               = (_selectAction.getSelectionThresholdAction().isAtMaximum());
 
     if (numberOfDistinctStandardDeviations > 0 && numberOfDistinctStandardDeviations <= std::numeric_limits<int>::max())
     {
         const auto newMaximum = static_cast<int>(numberOfDistinctStandardDeviations) - 1;
 
-        if (newMaximum != _selectionThresholdAction.getMaximum())
-            _selectionThresholdAction.setMaximum(newMaximum);
+        if (newMaximum != _selectAction.getSelectionThresholdAction().getMaximum())
+            _selectAction.getSelectionThresholdAction().setMaximum(newMaximum);
         
-        _selectionThresholdAction.setValue(isSliderValueAtMaximum ? newMaximum : 0);
+        _selectAction.getSelectionThresholdAction().setValue(isSliderValueAtMaximum ? newMaximum : 0);
     }
     else
     {
-        _selectionThresholdAction.setValue(isSliderValueAtMaximum ? 1 : 0);
-        _selectionThresholdAction.setMaximum(1);
+        _selectAction.getSelectionThresholdAction().setValue(isSliderValueAtMaximum ? 1 : 0);
+        _selectAction.getSelectionThresholdAction().setMaximum(1);
     }
 
-    _selectionThresholdAction.setEnabled(!isReadOnly() && !_selectionHolder._statistics.empty());
+    _selectAction.getSelectionThresholdAction().setEnabled(!isReadOnly() && !_selectionHolder._statistics.empty());
 }
 
 void DimensionsPickerAction::updateSummary()
@@ -476,49 +400,12 @@ void DimensionsPickerAction::updateSummary()
 DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* dimensionSelectionAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, dimensionSelectionAction)
 {
-    setMinimumWidth(500);
-
     auto layout = new QVBoxLayout();
 
-    auto nameMatchesLayout = new QHBoxLayout();
-
-    nameMatchesLayout->addWidget(dimensionSelectionAction->_nameFilterAction.createLabelWidget(this));
-    nameMatchesLayout->addWidget(dimensionSelectionAction->_nameFilterAction.createWidget(this));
-
-    layout->addLayout(nameMatchesLayout);
-    
-    layout->addWidget(dimensionSelectionAction->_showOnlySelectedDimensionsAction.createWidget(this, ToggleAction::CheckBox));
-    layout->addWidget(dimensionSelectionAction->_applyExclusionListAction.createWidget(this, ToggleAction::CheckBox));
-    layout->addWidget(dimensionSelectionAction->_ignoreZeroValuesAction.createWidget(this, ToggleAction::CheckBox));
-
-    auto selectionThresholdLayout = new QHBoxLayout();
-
-    auto moreLabel = new QLabel("More");
-    auto lessLabel = new QLabel("Less");
-
-    selectionThresholdLayout->addWidget(moreLabel);
-    selectionThresholdLayout->addWidget(dimensionSelectionAction->_selectionThresholdAction.createWidget(this, IntegralAction::Slider));
-    selectionThresholdLayout->addWidget(lessLabel);
-
-    const auto updateSelectionThresholdLabels = [this, dimensionSelectionAction, moreLabel, lessLabel]() -> void {
-        const auto isEnabled = dimensionSelectionAction->_selectionThresholdAction.isEnabled();
-
-        moreLabel->setEnabled(isEnabled);
-        lessLabel->setEnabled(isEnabled);
-    };
-
-    connect(&dimensionSelectionAction->_selectionThresholdAction, &IntegralAction::changed, this, [this, updateSelectionThresholdLabels]() {
-        updateSelectionThresholdLabels();
-    });
-
-    updateSelectionThresholdLabels();
-
-    layout->addLayout(selectionThresholdLayout);
-    
     auto tableView = new QTableView();
 
     tableView->setSortingEnabled(true);
-    tableView->setModel(dimensionSelectionAction->getProxyModel());
+    tableView->setModel(&dimensionSelectionAction->getProxyModel());
     tableView->setStyleSheet("QTableView::indicator:checked{ padding: 0px; margin: 0px;}");
 
     auto horizontalHeader = tableView->horizontalHeader();
@@ -540,35 +427,20 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
 
     layout->addWidget(tableView);
 
-    connect(&dimensionSelectionAction->_nameFilterAction, &IntegralAction::changed, this, [this, dimensionSelectionAction, tableView]() {
-        const auto isEnabled = dimensionSelectionAction->_nameFilterAction.isEnabled();
+    auto toolbarLayout = new QHBoxLayout();
 
-        tableView->setEnabled(isEnabled);
-    });
+    toolbarLayout->addWidget(dimensionSelectionAction->getFilterAction().createCollapsedWidget(this));
+    toolbarLayout->addWidget(dimensionSelectionAction->getSelectAction().createCollapsedWidget(this));
+    toolbarLayout->addWidget(dimensionSelectionAction->getMiscellaneousAction().createCollapsedWidget(this));
+    toolbarLayout->addWidget(dimensionSelectionAction->getSummaryAction().createWidget(this), 1);
 
-    layout->addWidget(dimensionSelectionAction->_summaryAction.createWidget(this));
-    layout->addWidget(dimensionSelectionAction->_computeStatisticsAction.createWidget(this));
-
-    auto selectLayout = new QHBoxLayout();
-
-    selectLayout->addWidget(dimensionSelectionAction->_selectVisibleAction.createWidget(this));
-    selectLayout->addWidget(dimensionSelectionAction->_selectNonVisibleAction.createWidget(this));
-
-    layout->addLayout(selectLayout);
-
-    auto fileLayout = new QHBoxLayout();
-
-    fileLayout->addWidget(dimensionSelectionAction->_loadSelectionAction.createWidget(this));
-    fileLayout->addWidget(dimensionSelectionAction->_loadExclusionAction.createWidget(this));
-    fileLayout->addWidget(dimensionSelectionAction->_saveSelectionAction.createWidget(this));
-
-    layout->addLayout(fileLayout);
+    layout->addLayout(toolbarLayout);
 
     if (widgetFlags & PopupLayout) {
         setPopupLayout(layout);
     }
     else {
         layout->setMargin(0);
-        setPopupLayout(layout);
+        setLayout(layout);
     }
 }

@@ -38,6 +38,9 @@ set(POINTS_HEADERS
     src/DimensionNamesAction.h
     src/DimensionPickerAction.h
     src/DimensionsPickerAction.h
+    src/DimensionsPickerFilterAction.h
+    src/DimensionsPickerSelectAction.h
+    src/DimensionsPickerMiscellaneousAction.h
     src/DimensionsPickerHolder.h
     src/DimensionsPickerItemModel.h
     src/DimensionsPickerProxyModel.h
@@ -61,6 +64,12 @@ set(ACTIONS_SOURCES
     src/DimensionsPickerItemModel.cpp
     src/DimensionsPickerProxyModel.h
     src/DimensionsPickerProxyModel.cpp
+    src/DimensionsPickerFilterAction.h
+    src/DimensionsPickerFilterAction.cpp
+    src/DimensionsPickerSelectAction.h
+    src/DimensionsPickerSelectAction.cpp
+    src/DimensionsPickerMiscellaneousAction.h
+    src/DimensionsPickerMiscellaneousAction.cpp
     src/ModelResetter.h
     src/ModelResetter.cpp
 )

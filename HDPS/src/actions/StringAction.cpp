@@ -190,9 +190,6 @@ QWidget* StringAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new StringAction::LineEditWidget(parent, this));
 
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
     widget->setLayout(layout);
 
     return widget;

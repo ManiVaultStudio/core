@@ -101,7 +101,7 @@ public: // Getters/setters
     Cluster copy() const;
 
     /**
-     * Comparison operator for two clusters (compares the internal identifiers)
+     * Comparison operator for two clusters
      * @param rhs Right hand sign of the comparison
      */
     bool operator==(const Cluster& rhs) const {

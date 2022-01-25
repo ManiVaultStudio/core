@@ -6,6 +6,10 @@
 #include "DimensionsPickerItemModel.h"
 #include "DimensionsPickerProxyModel.h"
 
+#include "DimensionsPickerFilterAction.h"
+#include "DimensionsPickerSelectAction.h"
+#include "DimensionsPickerMiscellaneousAction.h"
+
 #include "ModelResetter.h"
 
 #include "actions/Actions.h"
@@ -19,7 +23,7 @@ class Points;
 /**
  * Dimensions picker action class
  *
- * Action class for picking one or more data dimensions
+ * Action class for picking one or more points dimensions
  *
  * @author Thomas Kroes
  */
@@ -54,8 +58,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Title of the action
      */
-    DimensionsPickerAction(QObject* parent);
+    DimensionsPickerAction(QObject* parent, const QString& title = "Dimensions");
 
     /** Destructor */
     ~DimensionsPickerAction();
@@ -76,8 +81,17 @@ public:
      */
     void setPointsDataset(const Dataset<Points>& points);
 
-    /** Get selection proxy model */
-    hdps::DimensionsPickerProxyModel* getProxyModel();
+    /**
+     * Get selection picker holder
+     * @return Reference to dimensions picker holder
+     */
+    DimensionsPickerHolder& getHolder();
+
+    /**
+     * Get selection proxy model
+     * @return Reference to selection proxy model
+     */
+    DimensionsPickerProxyModel& getProxyModel();
 
 public:
 
@@ -123,17 +137,6 @@ public:
      */
     void saveSelectionToFile(const QString& fileName);
 
-protected:
-    
-    /** Compute dimension statistics */
-    void computeStatistics();
-
-    /** Update the slider */
-    void updateSlider();
-
-    /** Update the dimension selection summary */
-    void updateSummary();
-
     /** Select dimensions based on visibility */
     template <bool selectVisible>
     void selectDimensionsBasedOnVisibility()
@@ -154,22 +157,32 @@ protected:
     }
 
 protected:
+    
+    /** Compute dimension statistics */
+    void computeStatistics();
+
+    /** Update the slider */
+    void updateSlider();
+
+    /** Update the dimension selection summary */
+    void updateSummary();
+
+protected: // Action getters
+
+    DimensionsPickerFilterAction& getFilterAction() { return _filterAction; }
+    DimensionsPickerSelectAction& getSelectAction() { return _selectAction; }
+    StringAction& getSummaryAction() { return _summaryAction; }
+    DimensionsPickerMiscellaneousAction& getMiscellaneousAction() { return _miscellaneousAction; }
+
+protected:
     Dataset<Points>                                 _points;                                /** Smart pointer to points set */
     DimensionsPickerHolder                          _selectionHolder;                       /** Selection holder */
     std::unique_ptr<DimensionsPickerItemModel>      _selectionItemModel;                    /** Selection item model */
     std::unique_ptr<DimensionsPickerProxyModel>     _selectionProxyModel;                   /** Selection proxy model for filtering etc. */
-    StringAction                                    _nameFilterAction;                      /** Name filter action */
-    ToggleAction                                    _showOnlySelectedDimensionsAction;      /** Show only selected dimensions action */
-    ToggleAction                                    _applyExclusionListAction;              /** Apply exclusion list action */
-    ToggleAction                                    _ignoreZeroValuesAction;                /** Ignore zero values for statistics action */
-    IntegralAction                                  _selectionThresholdAction;              /** Selection threshold action */
     StringAction                                    _summaryAction;                         /** Summary action */
-    TriggerAction                                   _computeStatisticsAction;               /** Compute statistics action */
-    TriggerAction                                   _selectVisibleAction;                   /** Select visible dimensions action */
-    TriggerAction                                   _selectNonVisibleAction;                /** Select non visible dimensions action */
-    TriggerAction                                   _loadSelectionAction;                   /** Load selection action */
-    TriggerAction                                   _saveSelectionAction;                   /** Save selection action */
-    TriggerAction                                   _loadExclusionAction;                   /** Load exclusion action */
+    DimensionsPickerFilterAction                    _filterAction;                          /** Filter action */
+    DimensionsPickerSelectAction                    _selectAction;                          /** Select action */
+    DimensionsPickerMiscellaneousAction             _miscellaneousAction;                   /** Miscellaneous settings action */
     QMetaObject::Connection                         _summaryUpdateAwakeConnection;          /** Update summary view when idle */
 
     friend class Widget;
