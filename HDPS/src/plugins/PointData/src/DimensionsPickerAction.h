@@ -88,6 +88,12 @@ public:
     DimensionsPickerHolder& getHolder();
 
     /**
+     * Get item model
+     * @return Reference to item model
+     */
+    DimensionsPickerItemModel& getItemModel();
+
+    /**
      * Get selection proxy model
      * @return Reference to selection proxy model
      */
@@ -137,11 +143,25 @@ public:
      */
     void saveSelectionToFile(const QString& fileName);
 
+    /**
+     * Clear the selection and select a single dimension by name
+     * @param dimensionName Name of the dimension to select
+     * @param clearExisiting Whether to clear the current selection
+     */
+    void selectDimension(const QString& dimensionName, bool clearExisiting = false);
+
+    /**
+     * Clear the selection and select a single dimension by index
+     * @param dimensionIndex Index of the dimension to select
+     * @param clearExisiting Whether to clear the current selection
+     */
+    void selectDimension(const std::int32_t& dimensionIndex, bool clearExisiting = false);
+
     /** Select dimensions based on visibility */
     template <bool selectVisible>
     void selectDimensionsBasedOnVisibility()
     {
-        const auto n = _selectionHolder.getNumberOfDimensions();
+        const auto n = _holder.getNumberOfDimensions();
 
         if (n > INT_MAX)
         {
@@ -150,9 +170,9 @@ public:
         else
         {
             for (unsigned i{}; i < n; ++i)
-                _selectionHolder.setDimensionEnabled(i, _selectionProxyModel->filterAcceptsRow(i, QModelIndex()) == selectVisible);
+                _holder.setDimensionEnabled(i, _proxyModel->filterAcceptsRow(i, QModelIndex()) == selectVisible);
 
-            const ModelResetter modelResetter(_selectionProxyModel.get());
+            const ModelResetter modelResetter(_proxyModel.get());
         }
     }
 
@@ -175,15 +195,15 @@ protected: // Action getters
     DimensionsPickerMiscellaneousAction& getMiscellaneousAction() { return _miscellaneousAction; }
 
 protected:
-    Dataset<Points>                                 _points;                                /** Smart pointer to points set */
-    DimensionsPickerHolder                          _selectionHolder;                       /** Selection holder */
-    std::unique_ptr<DimensionsPickerItemModel>      _selectionItemModel;                    /** Selection item model */
-    std::unique_ptr<DimensionsPickerProxyModel>     _selectionProxyModel;                   /** Selection proxy model for filtering etc. */
-    StringAction                                    _summaryAction;                         /** Summary action */
-    DimensionsPickerFilterAction                    _filterAction;                          /** Filter action */
-    DimensionsPickerSelectAction                    _selectAction;                          /** Select action */
-    DimensionsPickerMiscellaneousAction             _miscellaneousAction;                   /** Miscellaneous settings action */
-    QMetaObject::Connection                         _summaryUpdateAwakeConnection;          /** Update summary view when idle */
+    Dataset<Points>                                 _points;                            /** Smart pointer to points set */
+    DimensionsPickerHolder                          _holder;                            /** Selection holder */
+    std::unique_ptr<DimensionsPickerItemModel>      _itemModel;                         /** Selection item model */
+    std::unique_ptr<DimensionsPickerProxyModel>     _proxyModel;                        /** Selection proxy model for filtering etc. */
+    StringAction                                    _summaryAction;                     /** Summary action */
+    DimensionsPickerFilterAction                    _filterAction;                      /** Filter action */
+    DimensionsPickerSelectAction                    _selectAction;                      /** Select action */
+    DimensionsPickerMiscellaneousAction             _miscellaneousAction;               /** Miscellaneous settings action */
+    QMetaObject::Connection                         _summaryUpdateAwakeConnection;      /** Update summary view when idle */
 
     friend class Widget;
 };

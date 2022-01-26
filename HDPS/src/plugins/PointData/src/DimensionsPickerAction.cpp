@@ -25,9 +25,9 @@ using namespace hdps::gui;
 DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title /*= "Dimensions"*/) :
     GroupAction(parent),
     _points(nullptr),
-    _selectionHolder(),
-    _selectionItemModel(new DimensionsPickerItemModel(_selectionHolder)),
-    _selectionProxyModel(new DimensionsPickerProxyModel(_selectionHolder)),
+    _holder(),
+    _itemModel(new DimensionsPickerItemModel(_holder)),
+    _proxyModel(new DimensionsPickerProxyModel(_holder)),
     _summaryAction(this, "Summary"),
     _filterAction(*this),
     _selectAction(*this),
@@ -72,28 +72,28 @@ void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, co
 {
     if (names.size() == numDimensions)
     {
-        _selectionHolder = DimensionsPickerHolder(names.data(), numDimensions);
+        _holder = DimensionsPickerHolder(names.data(), numDimensions);
     }
     else
     {
         assert(names.empty());
-        _selectionHolder = DimensionsPickerHolder(numDimensions);
+        _holder = DimensionsPickerHolder(numDimensions);
     }
 
-    auto dimensionSelectionItemModel = std::make_unique<DimensionsPickerItemModel>(_selectionHolder);
-    auto proxyModel = std::make_unique<DimensionsPickerProxyModel>(_selectionHolder);
+    auto dimensionSelectionItemModel = std::make_unique<DimensionsPickerItemModel>(_holder);
+    auto proxyModel = std::make_unique<DimensionsPickerProxyModel>(_holder);
 
     proxyModel->setSourceModel(dimensionSelectionItemModel.get());
     
-    _selectionProxyModel    = std::move(proxyModel);
-    _selectionItemModel     = std::move(dimensionSelectionItemModel);
+    _proxyModel    = std::move(proxyModel);
+    _itemModel     = std::move(dimensionSelectionItemModel);
 
     updateSlider();
 }
 
 std::vector<bool> DimensionsPickerAction::getEnabledDimensions() const
 {
-    return _selectionHolder.getEnabledDimensions();
+    return _holder.getEnabledDimensions();
 }
 
 void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
@@ -106,45 +106,50 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 
 DimensionsPickerHolder& DimensionsPickerAction::getHolder()
 {
-    return _selectionHolder;
+    return _holder;
 }
 
-hdps::DimensionsPickerProxyModel& DimensionsPickerAction::getProxyModel()
+DimensionsPickerItemModel& DimensionsPickerAction::getItemModel()
 {
-    return *_selectionProxyModel;
+    return *_itemModel;
+}
+
+DimensionsPickerProxyModel& DimensionsPickerAction::getProxyModel()
+{
+    return *_proxyModel;
 }
 
 void DimensionsPickerAction::setNameFilter(const QString& nameFilter)
 {
-    if (_selectionProxyModel == nullptr)
+    if (_proxyModel == nullptr)
         return;
 
-    const ModelResetter modelResetter(_selectionProxyModel.get());
-    _selectionProxyModel->setFilterRegExp(nameFilter);
+    const ModelResetter modelResetter(_proxyModel.get());
+    _proxyModel->setFilterRegExp(nameFilter);
 }
 
 void DimensionsPickerAction::setShowOnlySelectedDimensions(const bool& showOnlySelectedDimensions)
 {
-    if (_selectionProxyModel == nullptr)
+    if (_proxyModel == nullptr)
         return;
 
-    const ModelResetter modelResetter(_selectionProxyModel.get());
-    _selectionProxyModel->SetFilterShouldAcceptOnlySelected(showOnlySelectedDimensions);
+    const ModelResetter modelResetter(_proxyModel.get());
+    _proxyModel->SetFilterShouldAcceptOnlySelected(showOnlySelectedDimensions);
 }
 
 void DimensionsPickerAction::setApplyExclusionList(const bool& applyExclusionList)
 {
-    if (_selectionProxyModel == nullptr)
+    if (_proxyModel == nullptr)
         return;
 
-    const ModelResetter modelResetter(_selectionProxyModel.get());
-    _selectionProxyModel->SetFilterShouldAppyExclusion(applyExclusionList);
+    const ModelResetter modelResetter(_proxyModel.get());
+    _proxyModel->SetFilterShouldAppyExclusion(applyExclusionList);
 }
 
 void DimensionsPickerAction::setIgnoreZeroValues(const bool& ignoreZeroValues)
 {
-    const ModelResetter modelResetter(_selectionProxyModel.get());
-    _selectionHolder._ignoreZeroValues = ignoreZeroValues;
+    const ModelResetter modelResetter(_proxyModel.get());
+    _holder._ignoreZeroValues = ignoreZeroValues;
     
     updateSlider();
 }
@@ -155,9 +160,9 @@ void DimensionsPickerAction::loadSelectionFromFile(const QString& fileName)
 
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        const ModelResetter modelResetter(_selectionItemModel.get());
+        const ModelResetter modelResetter(_itemModel.get());
 
-        _selectionHolder.disableAllDimensions();
+        _holder.disableAllDimensions();
 
         while (!file.atEnd())
         {
@@ -167,7 +172,7 @@ void DimensionsPickerAction::loadSelectionFromFile(const QString& fileName)
             {
                 const auto name = QString::fromUtf8(trimmedLine);
 
-                if (!_selectionHolder.tryToEnableDimensionByName(name))
+                if (!_holder.tryToEnableDimensionByName(name))
                     qWarning() << "Failed to select dimension (name not found): " << name;
             }
         }
@@ -187,7 +192,7 @@ void DimensionsPickerAction::loadExclusionFromFile(const QString& fileName)
 
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        const ModelResetter modelResetter(_selectionProxyModel.get());
+        const ModelResetter modelResetter(_proxyModel.get());
 
         std::deque<QString> strings;
 
@@ -199,7 +204,7 @@ void DimensionsPickerAction::loadExclusionFromFile(const QString& fileName)
                 strings.push_back(QString::fromUtf8(trimmedLine));
         }
 
-        _selectionProxyModel->SetExclusion(std::vector<QString>(strings.cbegin(), strings.cend()));
+        _proxyModel->SetExclusion(std::vector<QString>(strings.cbegin(), strings.cend()));
     }
     else
     {
@@ -216,13 +221,13 @@ void DimensionsPickerAction::saveSelectionToFile(const QString& fileName)
 
     if (file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        const auto numberOfDimensions = _selectionHolder.getNumberOfDimensions();
+        const auto numberOfDimensions = _holder.getNumberOfDimensions();
 
         for (std::size_t i{}; i < numberOfDimensions; ++i)
         {
-            if (_selectionHolder.isDimensionEnabled(i))
+            if (_holder.isDimensionEnabled(i))
             {
-                file.write(_selectionHolder.getName(i).toUtf8());
+                file.write(_holder.getName(i).toUtf8());
                 file.write("\n");
             }
         }
@@ -233,13 +238,29 @@ void DimensionsPickerAction::saveSelectionToFile(const QString& fileName)
     }
 }
 
+void DimensionsPickerAction::selectDimension(const QString& dimensionName, bool clearExisiting /*= false*/)
+{
+    if (clearExisiting)
+        _holder.disableAllDimensions();
+
+    _holder.tryToEnableDimensionByName(dimensionName);
+}
+
+void DimensionsPickerAction::selectDimension(const std::int32_t& dimensionIndex, bool clearExisiting /*= false*/)
+{
+    if (clearExisiting)
+        _holder.disableAllDimensions();
+
+    _holder.setDimensionEnabled(dimensionIndex, true);
+}
+
 void DimensionsPickerAction::computeStatistics()
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
     {
-        const ModelResetter modelResetter(_selectionProxyModel.get());
+        const ModelResetter modelResetter(_proxyModel.get());
 
-        auto& statistics = _selectionHolder._statistics;
+        auto& statistics = _holder._statistics;
         statistics.clear();
 
         if (_points.isValid())
@@ -346,7 +367,7 @@ void DimensionsPickerAction::computeStatistics()
             {
                 std::set<double> distinctStandardDeviations;
 
-                for (const auto& statisticsPerDimension : _selectionHolder._statistics)
+                for (const auto& statisticsPerDimension : _holder._statistics)
                 {
                     if (!std::isnan(statisticsPerDimension.standardDeviation[i]))
                     {
@@ -354,7 +375,7 @@ void DimensionsPickerAction::computeStatistics()
                     }
                 }
 
-                _selectionHolder.distinctStandardDeviationsWithAndWithoutZero[i].assign(distinctStandardDeviations.cbegin(), distinctStandardDeviations.cend());
+                _holder.distinctStandardDeviationsWithAndWithoutZero[i].assign(distinctStandardDeviations.cbegin(), distinctStandardDeviations.cend());
             }
 
             assert(_selectAction.getSelectionThresholdAction().getMinimum() == 0);
@@ -366,7 +387,7 @@ void DimensionsPickerAction::computeStatistics()
 
 void DimensionsPickerAction::updateSlider()
 {
-    const auto numberOfDistinctStandardDeviations   = _selectionHolder.distinctStandardDeviationsWithAndWithoutZero[_selectionHolder._ignoreZeroValues ? 1 : 0].size();
+    const auto numberOfDistinctStandardDeviations   = _holder.distinctStandardDeviationsWithAndWithoutZero[_holder._ignoreZeroValues ? 1 : 0].size();
     const auto isSliderValueAtMaximum               = (_selectAction.getSelectionThresholdAction().isAtMaximum());
 
     if (numberOfDistinctStandardDeviations > 0 && numberOfDistinctStandardDeviations <= std::numeric_limits<int>::max())
@@ -384,15 +405,15 @@ void DimensionsPickerAction::updateSlider()
         _selectAction.getSelectionThresholdAction().setMaximum(1);
     }
 
-    _selectAction.getSelectionThresholdAction().setEnabled(!isReadOnly() && !_selectionHolder._statistics.empty());
+    _selectAction.getSelectionThresholdAction().setEnabled(!isReadOnly() && !_holder._statistics.empty());
 }
 
 void DimensionsPickerAction::updateSummary()
 {
-    const auto& holder = _selectionHolder;
+    const auto& holder = _holder;
 
     const auto numberOfDimensions           = holder.getNumberOfDimensions();
-    const auto numberOfVisibleDimensions    = (_selectionProxyModel == nullptr) ? 0 : _selectionProxyModel->rowCount();
+    const auto numberOfVisibleDimensions    = (_proxyModel == nullptr) ? 0 : _proxyModel->rowCount();
 
     _summaryAction.setString(tr("%1 available, %2 visible, %3 selected").arg(numberOfDimensions).arg(numberOfVisibleDimensions).arg(holder.getNumberOfSelectedDimensions()));
 }

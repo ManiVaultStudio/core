@@ -150,6 +150,7 @@ set(ACTIONS_HEADERS
     src/actions/DataGroupingAction.h
     src/actions/DataTransformationAction.h
     src/actions/DirectoryPickerAction.h
+    src/actions/StatusAction.h
 )
 
 set(ACTIONS_SOURCES
@@ -191,6 +192,7 @@ set(ACTIONS_SOURCES
     src/actions/DataGroupingAction.cpp
     src/actions/DataTransformationAction.cpp
     src/actions/DirectoryPickerAction.cpp
+    src/actions/StatusAction.cpp
 )
 
 set( RENDERER_HEADERS
