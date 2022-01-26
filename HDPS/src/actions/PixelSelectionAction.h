@@ -9,6 +9,8 @@
 #include "TriggerAction.h"
 #include "ToggleAction.h"
 
+#include <QActionGroup>
+
 class QWidget;
 
 namespace hdps {

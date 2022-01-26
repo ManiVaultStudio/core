@@ -10,6 +10,7 @@
 
 #include <QtCore>
 #include <QtDebug>
+#include <QMetaType>
 
 #include <set>
 
@@ -133,7 +134,7 @@ QIcon Clusters::getIcon() const
 
 void Clusters::fromVariant(const QVariant& variant)
 {
-    if (variant.type() != QVariant::Type::List)
+    if (variant.type() != QMetaType::QVariantList)
         throw std::runtime_error("Clusters variant is not a list");
 
     QVector<Cluster>& clusters = getClusters();

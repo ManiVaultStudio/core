@@ -214,7 +214,7 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    // layout->setMargin(0);  TODO obsolete
 
     if (widgetFlags & WidgetFlag::SpinBox)
         layout->addWidget(new SpinBoxWidget(parent, this), 1);

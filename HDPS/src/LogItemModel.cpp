@@ -7,7 +7,6 @@
 #include <QBrush>
 #include <QDateTime>
 #include <QFileInfo>
-#include <QRegExp>
 #include <QStringList>
 
 // Standard C++ header files:

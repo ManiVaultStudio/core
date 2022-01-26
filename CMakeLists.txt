@@ -7,6 +7,7 @@ set(PROJECT "HDPS")
 PROJECT(${PROJECT})
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
+# add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 option(HDPS_USE_GTEST "Use GoogleTest" OFF)
 

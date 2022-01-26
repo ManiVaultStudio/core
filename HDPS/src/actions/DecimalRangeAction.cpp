@@ -94,7 +94,7 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
     if (widgetFlags & PopupLayout) {
         auto layout = new QHBoxLayout();
 
-        layout->setMargin(0);
+        // layout->setMargin(0);  TODO obsolete
         layout->addWidget(rangeMinSpinBoxWidget);
         layout->addWidget(rangeMinSliderWidget);
         layout->addWidget(rangeMaxSpinBoxWidget);

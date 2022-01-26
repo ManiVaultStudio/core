@@ -2,6 +2,8 @@
 
 #include <QUuid>
 #include <QImage>
+#include <QVariant>
+#include <QMetaType>
 
 #include <stdexcept>
 
@@ -65,7 +67,7 @@ void Cluster::setIndices(const std::vector<unsigned int>& indices)
 
 void Cluster::fromVariant(const QVariant& variant)
 {
-    if (variant.type() != QVariant::Type::Map)
+    if (variant.type() != QMetaType::QVariantMap)
         throw std::runtime_error("Cluster variant is not a map");
 
     const auto variantMap = variant.toMap();

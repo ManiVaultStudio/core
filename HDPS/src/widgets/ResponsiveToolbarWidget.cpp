@@ -29,7 +29,7 @@ ResponsiveToolbarWidget::ResponsiveToolbarWidget(QWidget* parent) :
 {
     //setAutoFillBackground(true);
 
-    _toolBarLayout.setMargin(4);
+    // _toolBarLayout.setMargin(4); TODO obsolete
     _toolBarLayout.setSpacing(0);
     _toolBarLayout.setSizeConstraint(QLayout::SetFixedSize);
 
@@ -42,7 +42,7 @@ ResponsiveToolbarWidget::ResponsiveToolbarWidget(QWidget* parent) :
 
     setLayout(&_layout);
 
-    _layout.setMargin(4);
+    // _layout.setMargin(4); TODO obsolete
 
     parent->installEventFilter(this);
     this->installEventFilter(this);
@@ -116,7 +116,8 @@ void ResponsiveToolbarWidget::updateLayout()
             states[widget] = WidgetActionWidget::State::Collapsed;
 
         const auto getWidth = [this, &states]() -> std::uint32_t {
-            std::uint32_t width = 2 * _layout.margin();
+            // std::uint32_t width = 2 * _layout.margin(); TODO obsolete
+            std::uint32_t width = 4;  //TODO unknown
 
             for (auto widget : _widgets)
                 width += widget->getSizeHint(states[widget]).width();
@@ -186,7 +187,7 @@ ResponsiveToolbarWidget::SpacerWidget::SpacerWidget(const Type& type /*= State::
     _verticalLine.setFrameShape(QFrame::VLine);
     _verticalLine.setFrameShadow(QFrame::Sunken);
 
-    _layout.setMargin(2);
+    // _layout.setMargin(2); TODO obsolete
     _layout.setSpacing(0);
     _layout.setAlignment(Qt::AlignCenter);
     _layout.addWidget(&_verticalLine);

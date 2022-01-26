@@ -127,7 +127,7 @@ void PluginManager::loadPlugins()
         }
     }
 
-    QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(const QString&)>(&QSignalMapper::mapped), this, &PluginManager::pluginTriggered);
+    QObject::connect(signalMapper, &QSignalMapper::mappedString, this, &PluginManager::pluginTriggered);
 }
 
 QStringList PluginManager::resolveDependencies(QDir pluginDir) const

@@ -46,7 +46,7 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
+find_package(Qt6 6.2 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 
 # Normalize the incoming install path
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
@@ -401,8 +401,8 @@ set(UI_FILES
     ui/MainWindow.ui
 )
 
-QT5_WRAP_UI(UI_HEADERS ${UI_FILES})
-QT5_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
+QT6_WRAP_UI(UI_HEADERS ${UI_FILES})
+QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
 source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
@@ -434,8 +434,8 @@ set_property(TARGET ${PROJECT}_Public PROPERTY CXX_STANDARD 14)
 
 target_include_directories(${PROJECT}_Public PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(${PROJECT}_Public Qt5::Widgets)
-target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
+target_link_libraries(${PROJECT}_Public Qt6::Widgets)
+target_link_libraries(${PROJECT}_Public Qt6::WebEngineWidgets)
 
 add_library(${PROJECT}_Private ${LINK_TYPE}
     src/.editorconfig
@@ -444,8 +444,8 @@ add_library(${PROJECT}_Private ${LINK_TYPE}
 
 set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 14)
 
-target_link_libraries(${PROJECT}_Private Qt5::Widgets)
-target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
+target_link_libraries(${PROJECT}_Private Qt6::Widgets)
+target_link_libraries(${PROJECT}_Private Qt6::WebEngineWidgets)
 target_link_libraries(${PROJECT}_Private qtadvanceddocking)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
@@ -470,8 +470,8 @@ endif()
 
 target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
+target_link_libraries(${PROJECT} Qt6::Widgets)
+target_link_libraries(${PROJECT} Qt6::WebEngineWidgets)
 target_link_libraries(${PROJECT} qtadvanceddocking)
 
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Public>")
@@ -524,7 +524,7 @@ if(APPLE)
         COMPONENT MACOS_BUNDLE
     )
     install(CODE "execute_process(
-            COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt5_DIR} ${BUNDLE_DIR}
+            COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} ${BUNDLE_DIR}
         )"
         COMPONENT MACOS_BUNDLE
     )

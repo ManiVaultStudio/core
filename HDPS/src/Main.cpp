@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 
+#include <QFile>
 #include <QSurfaceFormat>
 #include <QStyleFactory>
 
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
     // Retina display support for Mac OS and X11:
     // AA_UseHighDpiPixmaps attribute is off by default in Qt 5.1 but will most
     // likely be on by default in a future release of Qt.
-    hdpsApplication.setAttribute(Qt::AA_UseHighDpiPixmaps);
+    // hdpsApplication.setAttribute(Qt::AA_UseHighDpiPixmaps); Default in Qt6
     
     QFile styleSheetFile(":/styles/default.qss");
 

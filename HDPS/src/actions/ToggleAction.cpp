@@ -65,7 +65,7 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
 
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    // layout->setMargin(0);  TODO obsolete
 
     connect(this, &QCheckBox::toggled, this, [this](bool toggled) {
         _toggleAction->setChecked(toggled);
@@ -145,7 +145,7 @@ QWidget* ToggleAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    // layout->setMargin(0);  TODO obsolete
     layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::CheckBox)

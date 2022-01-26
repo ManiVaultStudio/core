@@ -25,7 +25,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     setLayout(layout);
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0,0,0,0);   // TODO obsolete
     layout->setAlignment(Qt::AlignTop);
     layout->addWidget(_groupsAction.createWidget(this));
 

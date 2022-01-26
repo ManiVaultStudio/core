@@ -79,7 +79,7 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
 
     auto layout = new QVBoxLayout();
 
-    layout->setMargin(0);
+    // layout->setMargin(0);  TODO obsolete
 
     // Add clusters tree view
     layout->addWidget(&_clustersTreeView);

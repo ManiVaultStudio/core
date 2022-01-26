@@ -96,7 +96,7 @@ ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* co
     _toolButton.setPopupMode(QToolButton::InstantPopup);
     _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
-    _layout.setMargin(0);
+    // _layout.setMargin(0); TODO obsolete
     _layout.addWidget(&_toolButton);
 
     setLayout(&_layout);
@@ -131,7 +131,7 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
 
     QStyleOption styleOption;
 
-    styleOption.init(this);
+    styleOption.initFrom(this);
 
     // Set inset margins
     const auto margin = 10;
@@ -169,7 +169,7 @@ QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    // layout->setMargin(0); TODO obsolete
     layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::Picker)

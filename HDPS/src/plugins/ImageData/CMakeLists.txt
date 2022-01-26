@@ -17,7 +17,7 @@ endif(MSVC)
 
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
-find_package(Qt5 COMPONENTS Widgets WebEngineWidgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
 file(GLOB JSON src/*.json)
 set(AUX ${JSON})
@@ -70,8 +70,8 @@ set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRAR
 set(POINTDATA_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}PointData${LIB_LINK_SUFFIX}") 
 set(CLUSTER_DATA_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}ClusterData${LIB_LINK_SUFFIX}") 
 
-target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
+target_link_libraries(${PROJECT} Qt6::Widgets)
+target_link_libraries(${PROJECT} Qt6::WebEngineWidgets)
 target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
 target_link_libraries(${PROJECT} "${POINTDATA_LINK_LIBRARY}")
 target_link_libraries(${PROJECT} "${CLUSTER_DATA_LINK_LIBRARY}")

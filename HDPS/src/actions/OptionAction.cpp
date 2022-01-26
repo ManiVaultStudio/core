@@ -388,7 +388,7 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    // layout->setMargin(0);  TODO obsolete
 
     if (widgetFlags & WidgetFlag::ComboBox)
         layout->addWidget(new OptionAction::ComboBoxWidget(parent, this));

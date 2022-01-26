@@ -115,7 +115,7 @@ void ColormapWidget::initUI()
         signalMapper->setMapping(_colormaps[i], i);
     }
     QObject::connect(_activeColormap, &QPushButton::released, this, &ColormapWidget::activeColormapClicked);
-    QObject::connect(signalMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped), this, &ColormapWidget::colormapClicked);
+    QObject::connect(signalMapper, &QSignalMapper::mappedInt, this, &ColormapWidget::colormapClicked);
 
     _discreteColormapCheckbox = new QCheckBox("Discrete Colormap", _rightBGWidget);
     _discreteColormapCheckbox->setChecked(false);

@@ -50,10 +50,10 @@ public: // Getters
     std::uint32_t getNoDimensions() const;
 
 private:
-    const QString       _name;              /** Name in the user interface */
-    const QString       _resourcePath;      /** Resource path of the color image */
-    const Type          _type;              /** Color map type */
-    const QImage        _image;             /** Color map image */
+    QString       _name;              /** Name in the user interface */
+    QString       _resourcePath;      /** Resource path of the color image */
+    Type          _type;              /** Color map type */
+    QImage        _image;             /** Color map image */
 };
 
 }

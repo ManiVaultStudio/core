@@ -6,6 +6,7 @@
 #include "../util/FileUtil.h"
 
 #include <QDebug>
+#include <QOpenGLVersionFunctionsFactory>
 
 namespace hdps
 {
@@ -16,7 +17,7 @@ namespace
 
     bool compileShader(QString path, GLuint shader)
     {
-        QOpenGLFunctions_3_3_Core* f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+        auto f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(QOpenGLContext::currentContext());
 
         f->glCompileShader(shader);
 
@@ -34,7 +35,7 @@ namespace
 
     bool linkProgram(const GLuint program)
     {
-        QOpenGLFunctions_3_3_Core* f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+        auto f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(QOpenGLContext::currentContext());
 
         f->glLinkProgram(program);
 
@@ -57,7 +58,7 @@ namespace
 
     bool validateProgram(const GLuint program)
     {
-        QOpenGLFunctions_3_3_Core* f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+        auto f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(QOpenGLContext::currentContext());
 
         f->glValidateProgram(program);
 
@@ -69,7 +70,7 @@ namespace
 
     bool loadShader(QString path, int type, GLuint& shader)
     {
-        QOpenGLFunctions_3_3_Core* f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+        auto f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(QOpenGLContext::currentContext());
 
         QString source = hdps::util::loadFileContents(path);
         if (source.isEmpty()) return false;

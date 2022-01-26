@@ -47,7 +47,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
 
     QStyleOption styleOption;
 
-    styleOption.init(treeWidget);
+    styleOption.initFrom(treeWidget);
 
     auto palette = treeWidget->palette();
 
@@ -59,7 +59,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
 
     setLayout(layout);
 
-    layout->setMargin(0);
+    // layout->setMargin(0);   TODO obsolete
     layout->setAlignment(Qt::AlignTop);
     layout->addWidget(treeWidget);
 
@@ -105,7 +105,7 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
 
     iconLabel->setAlignment(Qt::AlignCenter);
 
-    frameLayout->setMargin(5);
+    // frameLayout->setMargin(5);  TODO obsolete
     frameLayout->addWidget(iconLabel);
     frameLayout->addStretch(1);
 
@@ -126,7 +126,7 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
 
             QStyleOption styleOption;
 
-            styleOption.init(groupActionWidget);
+            styleOption.initFrom(groupActionWidget);
 
             // Create new tree widget item for the group action widget
             auto section = new QTreeWidgetItem(_treeWidgetItem);

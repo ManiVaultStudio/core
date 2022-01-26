@@ -43,7 +43,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/5.15.1@lkeb/stable", "bzip2/1.0.8@")
+    requires = ("qt/6.2.2@lkeb/stable", "bzip2/1.0.8@")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
@@ -97,7 +97,7 @@ class HdpsCoreConan(ConanFile):
     def _configure_cmake(self, build_type):
         # locate Qt root to allow find_package to work
         qtpath = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
-        qt_root = str(list(qtpath.glob("**/Qt5Config.cmake"))[0].parents[3])
+        qt_root = str(list(qtpath.glob("**/Qt6Config.cmake"))[0].parents[3])
         print("Qt root ", qt_root)
 
         cmake = CMake(self, build_type=build_type)
@@ -119,8 +119,8 @@ class HdpsCoreConan(ConanFile):
         print("HDPS_INSTALL_DIR: ", os.environ["HDPS_INSTALL_DIR"])
         self.install_dir = os.environ["HDPS_INSTALL_DIR"]
 
-        cmake_debug = self._configure_cmake("Debug")
-        cmake_debug.build()
+        # cmake_debug = self._configure_cmake("Debug")
+        # cmake_debug.build()
 
         cmake_release = self._configure_cmake("Release")
         cmake_release.build()
@@ -130,9 +130,9 @@ class HdpsCoreConan(ConanFile):
         self.copy(pattern="*", src=self.install_dir)
 
     def package_info(self):
-        self.cpp_info.debug.libdirs = ["Debug/lib"]
-        self.cpp_info.debug.bindirs = ["Debug/Plugins", "Debug"]
-        self.cpp_info.debug.includedirs = ["Debug/include", "Debug"]
+        # self.cpp_info.debug.libdirs = ["Debug/lib"]
+        # self.cpp_info.debug.bindirs = ["Debug/Plugins", "Debug"]
+        # self.cpp_info.debug.includedirs = ["Debug/include", "Debug"]
         self.cpp_info.release.libdirs = ["Release/lib"]
         self.cpp_info.release.bindirs = ["Release/Plugins", "Release"]
         self.cpp_info.release.includedirs = ["Release/include", "Release"]

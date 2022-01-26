@@ -94,7 +94,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     auto layout = new QVBoxLayout();
 
     // Remove the layout margin and spacing
-    layout->setMargin(2);
+    layout->setContentsMargins(2,2,2,2); // TODO obsolete margin
     layout->setSpacing(0);
 
     // Create tool bar layout
@@ -118,7 +118,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     // Update the data hierarchy filter model filter when the dataset filter name action changes
     connect(&_datasetNameFilterAction, &StringAction::stringChanged, this, [this](const QString& value) {
-        _filterModel.setFilterRegExp(value);
+        _filterModel.setFilterRegularExpression(value);
     });
 
     // Notify others that the dataset selection changed when the current row in the model changed
@@ -417,7 +417,7 @@ DataHierarchyWidget::NoDataOverlayWidget::NoDataOverlayWidget(QWidget* parent) :
 
     descriptionLabel->setAlignment(Qt::AlignCenter);
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0,0,0,0); // TODO obsolete
     layout->setSpacing(0);
     layout->setAlignment(Qt::AlignCenter);
 

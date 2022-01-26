@@ -29,7 +29,7 @@ DropWidget::DropWidget(QWidget* parent) :
     
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    // layout->setMargin(0); TODO obsolete
     layout->setSpacing(0);
 
     setLayout(layout);
@@ -198,7 +198,7 @@ DropWidget::DropRegionContainerWidget::DropRegionContainerWidget(DropRegion* dro
 
     auto mainLayout = new QVBoxLayout();
 
-    mainLayout->setMargin(0);
+    // mainLayout->setMargin(0); TODO obsolete
     mainLayout->setSpacing(0);
     mainLayout->addWidget(_dropRegion->getWidget());
 
@@ -274,7 +274,7 @@ DropWidget::DropRegion::StandardWidget::StandardWidget(QWidget* parent, const QS
 
     descriptionLabel->setAlignment(Qt::AlignCenter);
 
-    layout->setMargin(0);
+    // layout->setMargin(0); TODO obsolete
     layout->setSpacing(0);
     layout->setAlignment(Qt::AlignCenter);
 
@@ -323,7 +323,7 @@ DropWidget::DropIndicatorWidget::DropIndicatorWidget(QWidget* parent, const QStr
 
     descriptionLabel->setAlignment(Qt::AlignCenter);
 
-    layout->setMargin(0);
+    // layout->setMargin(0); TODO obsolete
     layout->setSpacing(0);
     layout->setAlignment(Qt::AlignCenter);
 

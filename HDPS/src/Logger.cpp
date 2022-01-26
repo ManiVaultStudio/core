@@ -62,8 +62,8 @@ auto GetLogDirectoryPathName()
 auto CreateLogFilePathName()
 {
     const auto currentDateTime = QDateTime::currentDateTime();
-    const QDir logDir = GetLogDirectoryPathName();
-    const QFileInfo applicationFileInfo = QCoreApplication::applicationFilePath();
+    const QDir logDir(GetLogDirectoryPathName());
+    const QFileInfo applicationFileInfo(QCoreApplication::applicationFilePath());
 
     return logDir.filePath(applicationFileInfo.completeBaseName()
         + QLatin1String("_")

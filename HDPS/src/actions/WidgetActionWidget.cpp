@@ -32,7 +32,7 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
 {
     auto mainLayout = new QVBoxLayout();
 
-    mainLayout->setMargin(4);
+    // mainLayout->setMargin(4);  TODO obsolete
 
     setLayout(mainLayout);
 
