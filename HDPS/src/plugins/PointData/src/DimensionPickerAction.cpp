@@ -1,11 +1,11 @@
-#include "PointsDimensionPickerAction.h"
+#include "DimensionPickerAction.h"
 #include "Application.h"
 
 #include <QHBoxLayout>
 
 using namespace hdps;
 
-PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const QString& title) :
+DimensionPickerAction::DimensionPickerAction(QObject* parent, const QString& title) :
     WidgetAction(parent),
     _points(nullptr),
     _currentDimensionAction(this, "Select dimension"),
@@ -25,7 +25,7 @@ PointsDimensionPickerAction::PointsDimensionPickerAction(QObject* parent, const 
     connect(&_currentDimensionAction, &OptionAction::currentIndexChanged, this, selectionChanged);
 }
 
-void PointsDimensionPickerAction::setPointsDataset(const Dataset<Points>& points)
+void DimensionPickerAction::setPointsDataset(const Dataset<Points>& points)
 {
     // Only proceed if we have a valid points dataset
     if (!points.isValid()) {
@@ -66,71 +66,71 @@ void PointsDimensionPickerAction::setPointsDataset(const Dataset<Points>& points
         setCurrentDimensionIndex(0);
 }
 
-QStringList PointsDimensionPickerAction::getDimensionNames() const
+QStringList DimensionPickerAction::getDimensionNames() const
 {
     return _currentDimensionAction.getOptions();
 }
 
-std::uint32_t PointsDimensionPickerAction::getNumberOfDimensions() const
+std::uint32_t DimensionPickerAction::getNumberOfDimensions() const
 {
     return _currentDimensionAction.getNumberOfOptions();
 }
 
-std::int32_t PointsDimensionPickerAction::getCurrentDimensionIndex() const
+std::int32_t DimensionPickerAction::getCurrentDimensionIndex() const
 {
     return _currentDimensionAction.getCurrentIndex();
 }
 
-QString PointsDimensionPickerAction::getCurrentDimensionName() const
+QString DimensionPickerAction::getCurrentDimensionName() const
 {
     return _currentDimensionAction.getCurrentText();
 }
 
-void PointsDimensionPickerAction::setCurrentDimensionIndex(const std::int32_t& dimensionIndex)
+void DimensionPickerAction::setCurrentDimensionIndex(const std::int32_t& dimensionIndex)
 {
     _currentDimensionAction.setCurrentIndex(dimensionIndex);
 }
 
-void PointsDimensionPickerAction::setCurrentDimensionName(const QString& dimensionName)
+void DimensionPickerAction::setCurrentDimensionName(const QString& dimensionName)
 {
     _currentDimensionAction.setCurrentText(dimensionName);
 }
 
-void PointsDimensionPickerAction::setDefaultDimensionIndex(const std::int32_t& defaultDimensionIndex)
+void DimensionPickerAction::setDefaultDimensionIndex(const std::int32_t& defaultDimensionIndex)
 {
     _currentDimensionAction.setDefaultIndex(defaultDimensionIndex);
 }
 
-void PointsDimensionPickerAction::setDefaultDimensionName(const QString& defaultDimensionName)
+void DimensionPickerAction::setDefaultDimensionName(const QString& defaultDimensionName)
 {
     _currentDimensionAction.setDefaultText(defaultDimensionName);
 }
 
-std::uint32_t PointsDimensionPickerAction::getSearchThreshold() const
+std::uint32_t DimensionPickerAction::getSearchThreshold() const
 {
     return _searchThreshold;
 }
 
-void PointsDimensionPickerAction::setSearchThreshold(const std::uint32_t& searchThreshold)
+void DimensionPickerAction::setSearchThreshold(const std::uint32_t& searchThreshold)
 {
     _searchThreshold = searchThreshold;
 }
 
-bool PointsDimensionPickerAction::maySearch() const
+bool DimensionPickerAction::maySearch() const
 {
     return _currentDimensionAction.getNumberOfOptions() >= _searchThreshold;
 }
 
-PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPickerAction* pointsDimensionPickerAction) :
-    WidgetActionWidget(parent, pointsDimensionPickerAction)
+DimensionPickerAction::Widget::Widget(QWidget* parent, DimensionPickerAction* dimensionPickerAction) :
+    WidgetActionWidget(parent, dimensionPickerAction)
 {
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
 
     // Create widgets
-    auto comboBoxWidget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::ComboBox);
-    auto lineEditWidget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::LineEdit);
+    auto comboBoxWidget = dimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::ComboBox);
+    auto lineEditWidget = dimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::LineEdit);
 
     // Gets search icon to decorate the line edit
     const auto searchIcon = Application::getIconFont("FontAwesome").getIcon("search");
@@ -143,10 +143,10 @@ PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPick
     layout->addWidget(lineEditWidget);
 
     // Update widgets visibility
-    const auto updateWidgetsVisibility = [pointsDimensionPickerAction, comboBoxWidget, lineEditWidget]() {
+    const auto updateWidgetsVisibility = [dimensionPickerAction, comboBoxWidget, lineEditWidget]() {
         
         // Get whether the option action may be searched
-        const auto maySearch = pointsDimensionPickerAction->maySearch();
+        const auto maySearch = dimensionPickerAction->maySearch();
 
         // Update visibility
         comboBoxWidget->setVisible(!maySearch);
@@ -154,7 +154,7 @@ PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPick
     };
 
     // Update widgets visibility when the dimensions change
-    connect(&pointsDimensionPickerAction->getCurrentDimensionAction(), &OptionAction::modelChanged, this, updateWidgetsVisibility);
+    connect(&dimensionPickerAction->getCurrentDimensionAction(), &OptionAction::modelChanged, this, updateWidgetsVisibility);
 
     // Initial update of widgets visibility
     updateWidgetsVisibility();

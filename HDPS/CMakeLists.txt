@@ -130,6 +130,7 @@ set(ACTIONS_HEADERS
     src/actions/OptionAction.h
     src/actions/PixelSelectionAction.h
     src/actions/TriggerAction.h
+    src/actions/TriggersAction.h
     src/actions/ToggleAction.h
     src/actions/StringAction.h
     src/actions/WidgetAction.h
@@ -148,6 +149,8 @@ set(ACTIONS_HEADERS
     src/actions/DataAnalysisAction.h
     src/actions/DataGroupingAction.h
     src/actions/DataTransformationAction.h
+    src/actions/DirectoryPickerAction.h
+    src/actions/StatusAction.h
 )
 
 set(ACTIONS_SOURCES
@@ -169,6 +172,7 @@ set(ACTIONS_SOURCES
     src/actions/OptionAction.cpp
 	src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
+    src/actions/TriggersAction.cpp
     src/actions/ToggleAction.cpp
     src/actions/StringAction.cpp
     src/actions/WidgetAction.cpp
@@ -187,6 +191,8 @@ set(ACTIONS_SOURCES
     src/actions/DataAnalysisAction.cpp
     src/actions/DataGroupingAction.cpp
     src/actions/DataTransformationAction.cpp
+    src/actions/DirectoryPickerAction.cpp
+    src/actions/StatusAction.cpp
 )
 
 set( RENDERER_HEADERS

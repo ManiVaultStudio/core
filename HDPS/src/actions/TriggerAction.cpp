@@ -1,6 +1,5 @@
 #include "TriggerAction.h"
 
-#include <QMenu>
 #include <QHBoxLayout>
 
 namespace hdps {
@@ -16,7 +15,7 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
 
 TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags) :
     QPushButton(parent),
-    _triggerAction(triggerAction)
+    _triggersAction(triggerAction)
 {
     connect(this, &QPushButton::clicked, this, [this, triggerAction]() {
         triggerAction->trigger();

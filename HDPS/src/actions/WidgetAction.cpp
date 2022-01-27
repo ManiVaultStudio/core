@@ -22,7 +22,7 @@ WidgetAction::WidgetAction(QObject* parent) :
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
     if (parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent()))
-        return getWidget(parent, WidgetActionWidget::PopupLayout);
+        return getWidget(parent, _defaultWidgetFlags | WidgetActionWidget::PopupLayout);
 
     return getWidget(parent, _defaultWidgetFlags);
 }
