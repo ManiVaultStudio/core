@@ -421,6 +421,8 @@ void DimensionsPickerAction::updateSummary()
 DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* dimensionSelectionAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, dimensionSelectionAction)
 {
+    setMinimumHeight(300);
+
     auto layout = new QVBoxLayout();
 
     auto tableView = new QTableView();
