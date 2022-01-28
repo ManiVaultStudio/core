@@ -1,8 +1,8 @@
 #pragma once
 
 #include "WidgetActionWidget.h"
-#include "WidgetActionLabel.h"
-#include "WidgetActionResetButton.h"
+
+#include "Plugin.h"
 
 #include <QWidgetAction>
 #include <QMenu>
@@ -16,6 +16,8 @@ namespace hdps {
 class DataHierarchyItem;
 
 namespace gui {
+
+class WidgetActionLabel;
 
 /**
  * Widget action class
@@ -48,23 +50,17 @@ public:
     /**
      * Create label widget
      * @param parent Parent widget
-     * @return Pointer to label widget
+     * @return Pointer to widget
      */
-    WidgetActionLabel* createLabelWidget(QWidget* parent);
-
-    /**
-     * Create reset button
-     * @param parent Parent widget
-     * @return Pointer to reset button
-     */
-    WidgetActionResetButton* createResetButton(QWidget* parent);
+    QWidget* createLabelWidget(QWidget* parent);
 
     /**
      * Get the context menu for the action
      * @param parent Parent widget
      * @return Context menu
      */
-    virtual QMenu* getContextMenu(QWidget* parent = nullptr) {
+    virtual QMenu* getContextMenu(QWidget* parent = nullptr)
+    {
         return nullptr;
     };
 
@@ -108,6 +104,56 @@ public:
      */
     void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
+public: // Settings
+
+    /** Get settings prefix */
+    QString getSettingsPrefix() const;
+
+    /**
+     * Set the settings prefix globally (not in the plugin namespace)
+     * @param settingsPrefix Prefix for the widget action settings
+     */
+    void setSettingsPrefix(const QString& settingsPrefix);
+
+    /**
+     * Set the settings prefix relative to a plugin
+     * @param settingsPrefix Prefix for the widget action settings
+     * @param plugin Pointer to plugin
+     */
+    void setSettingsPrefix(const QString& settingsPrefix, const plugin::Plugin* plugin);
+
+    /** Get whether the widget action can serialized to settings */
+    bool hasSettingsPrefix() const
+    {
+        return !_settingsPrefix.isEmpty();
+    }
+
+    /** Load default value from disk */
+    void loadDefault();
+
+    /** Save default value to disk */
+    void saveDefault();
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    virtual void fromVariant(const QVariant& value)
+    {
+        qDebug() << "From variant not implemented in derived widget action class";
+    }
+
+    /**
+     * Convert action value to variant
+     * @return Value as variant
+     */
+    virtual QVariant toVariant()
+    {
+        qDebug() << "To variant not implemented in derived widget action class";
+
+        return QVariant();
+    }
+
 protected:
 
     /**
@@ -131,6 +177,7 @@ protected:
     bool                        _resettable;                    /** Whether the action can be reset */
     bool                        _mayReset;                      /** Whether the action may be reset (from the user interface) */
     std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
+    QString                     _settingsPrefix;                /** Settings prefix for persistent widget action properties (e.g. presets and defaults) */
 };
 
 /** List of widget actions */

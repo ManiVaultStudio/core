@@ -123,15 +123,12 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
         const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
 
         if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
-            auto labelWidget = widgetAction->createLabelWidget(this);
+            auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this));
             labelWidget->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
             _layout->addWidget(labelWidget, numRows, 0);
         }
 
         _layout->addWidget(widgetAction->createWidget(this), numRows, 1);
-
-        if (widgetAction->getMayReset())
-            _layout->addWidget(widgetAction->createResetButton(this), numRows, 2);
     }
 }
 

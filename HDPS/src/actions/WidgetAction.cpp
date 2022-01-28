@@ -1,4 +1,5 @@
 #include "WidgetAction.h"
+#include "WidgetActionLabel.h"
 #include "WidgetActionCollapsedWidget.h"
 #include "DataHierarchyItem.h"
 #include "Application.h"
@@ -15,7 +16,8 @@ WidgetAction::WidgetAction(QObject* parent) :
     _defaultWidgetFlags(),
     _resettable(false),
     _mayReset(false),
-    _sortIndex(-1)
+    _sortIndex(-1),
+    _settingsPrefix()
 {
 }
 
@@ -57,14 +59,9 @@ QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
     return new WidgetActionCollapsedWidget(parent, this);
 }
 
-WidgetActionLabel* WidgetAction::createLabelWidget(QWidget* parent)
+QWidget* WidgetAction::createLabelWidget(QWidget* parent)
 {
     return new WidgetActionLabel(this, parent);
-}
-
-WidgetActionResetButton* WidgetAction::createResetButton(QWidget* parent)
-{
-    return new WidgetActionResetButton(this, parent);
 }
 
 bool WidgetAction::isResettable() const
@@ -95,6 +92,45 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;
+}
+
+QString WidgetAction::getSettingsPrefix() const
+{
+    return _settingsPrefix;
+}
+
+void WidgetAction::setSettingsPrefix(const QString& settingsPrefix)
+{
+    Q_ASSERT(!settingsPrefix.isEmpty());
+
+    // No need in update the same prefix
+    if (settingsPrefix == _settingsPrefix)
+        return;
+
+    // Assign settings prefix
+    _settingsPrefix = settingsPrefix;
+
+    // Load settings from registry
+    loadDefault();
+}
+
+void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const plugin::Plugin* plugin)
+{
+    Q_ASSERT(!settingsPrefix.isEmpty());
+    Q_ASSERT(plugin != nullptr);
+
+    // Settings prefix consists of the plugin kind + settings prefix
+    _settingsPrefix = QString("%1/%2").arg(plugin->getKind(), settingsPrefix);
+}
+
+void WidgetAction::loadDefault()
+{
+    fromVariant(Application::current()->getSetting(getSettingsPrefix() + "/DefaultValue"));
+}
+
+void WidgetAction::saveDefault()
+{
+    Application::current()->setSetting(getSettingsPrefix() + "/DefaultValue", toVariant());
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

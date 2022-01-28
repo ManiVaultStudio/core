@@ -26,17 +26,18 @@ public:
     enum WidgetFlag {
 
         /** Push button options */
-        Icon                = 0x00001,                      /** Enable push button icon */
-        Text                = 0x00002,                      /** Enable push button text */
+        Icon                = 0x00001,          /** Enable push button icon */
+        Text                = 0x00002,          /** Enable push button text */
 
-        CheckBox            = 0x00004,                      /** The widget includes a check box */
-        PushButton          = 0x00008 | Text,               /** The widget includes a toggle push button with text */
-        ResetPushButton     = 0x00010,                      /** The widget includes a reset push button */
+        CheckBox            = 0x00004,          /** The widget includes a check box */
+        PushButton          = 0x00008 | Text,   /** The widget includes a toggle push button with text */
 
         /** Push button configurations */
         PushButtonIcon          = (PushButton & ~Text) | Icon,  /** Push button with icon only */
         PushButtonText          = PushButton,                   /** Push button with text only */
-        PushButtonIconText      = PushButton | Icon             /** Push button with icon and text */
+        PushButtonIconText      = PushButton | Icon,            /** Push button with icon and text */
+
+        Default = CheckBox
     };
 
 public:

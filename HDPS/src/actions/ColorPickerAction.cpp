@@ -1,4 +1,5 @@
 #include "ColorPickerAction.h"
+#include "WidgetActionLabel.h"
 #include "Application.h"
 
 #include <QDebug>

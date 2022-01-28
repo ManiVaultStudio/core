@@ -175,9 +175,6 @@ QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
     if (widgetFlags & WidgetFlag::Picker)
         layout->addWidget(new PushButtonWidget(parent, this));
 
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
     widget->setLayout(layout);
 
     return widget;

@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QTreeWidget>
 #include <QResizeEvent>
+#include <QLabel>
 
 namespace hdps {
 

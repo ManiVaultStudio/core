@@ -26,7 +26,7 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::Basic);
+    setDefaultWidgetFlags(WidgetFlag::Default);
 
     initialize(colorMap, defaultColorMap);
 
@@ -356,9 +356,6 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
 
     if (widgetFlags & WidgetFlag::Settings)
         layout->addWidget(_settingsAction.createCollapsedWidget(widget));
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
 

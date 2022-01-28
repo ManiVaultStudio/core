@@ -1,6 +1,5 @@
 #include "ColorMapDiscreteAction.h"
 #include "ColorMapAction.h"
-
 #include <QVBoxLayout>
 #include <QGroupBox>
 

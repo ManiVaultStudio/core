@@ -4,6 +4,7 @@
 
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QLabel>
 
 using namespace hdps::util;
 

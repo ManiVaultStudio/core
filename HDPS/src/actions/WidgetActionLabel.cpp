@@ -13,9 +13,23 @@ namespace gui {
 
 WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
     QLabel("", parent, windowFlags),
-    _widgetAction(widgetAction)
+    _widgetAction(widgetAction),
+    _loadDefaultAction(this, "Load default"),
+    _saveDefaultAction(this, "Save default")
 {
     setAcceptDrops(true);
+
+    // Set action actions
+    _loadDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _saveDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+
+    // Set tooltips
+    _loadDefaultAction.setToolTip("Load default value from disk");
+    _saveDefaultAction.setToolTip("Save default value to disk");
+
+    // Load/save when triggered
+    connect(&_loadDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::loadDefault);
+    connect(&_saveDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::saveDefault);
 
     const auto update = [this, widgetAction]() -> void {
         setEnabled(widgetAction->isEnabled());
@@ -31,59 +45,35 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
 void WidgetActionLabel::mousePressEvent(QMouseEvent* mouseEvent)
 {
-    if (mouseEvent->button() == Qt::LeftButton) {
-        _dragStartPosition = mouseEvent->pos();
-    }
-}
-
-void WidgetActionLabel::mouseMoveEvent(QMouseEvent* mouseEvent)
-{
-    if (!(mouseEvent->buttons() & Qt::LeftButton))
+    if (_widgetAction->getSettingsPrefix().isEmpty())
         return;
 
-    if ((mouseEvent->pos() - _dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+    if (mouseEvent->button() != Qt::LeftButton)
         return;
 
-    auto drag = new QDrag(this);
-    auto mimeData = new QMimeData;
+    auto contextMenu = new QMenu();
 
-    mimeData->setText(typeid(*_widgetAction).name());
-    drag->setMimeData(mimeData);
-    drag->setPixmap(Application::getIconFont("FontAwesome").getIcon("link").pixmap(16, 16));
+    contextMenu->addAction(&_loadDefaultAction);
+    contextMenu->addAction(&_saveDefaultAction);
 
-    //Application::current()->getWidgetActionsManager().widgetStartedDragging(_widgetAction);
-
-    Qt::DropAction dropAction = drag->exec();
-
-    //Application::current()->getWidgetActionsManager().widgetStoppedDragging(_widgetAction);
+    // Show the context menu
+    contextMenu->exec(cursor().pos());
 }
 
-void WidgetActionLabel::dragEnterEvent(QDragEnterEvent* dragEnterEvent)
+void WidgetActionLabel::enterEvent(QEvent* event)
 {
-    auto mimeData = dragEnterEvent->mimeData();
-
-    if (!mimeData->hasFormat("text/plain"))
+    if (!_widgetAction->hasSettingsPrefix())
         return;
 
-    //qDebug() << mimeData->text() << typeid(*_widgetAction).name();
+    setStyleSheet("QLabel { text-decoration: underline; }");
+}
 
-    if (mimeData->text() != typeid(*_widgetAction).name())
+void WidgetActionLabel::leaveEvent(QEvent* event)
+{
+    if (!_widgetAction->hasSettingsPrefix())
         return;
 
-    dragEnterEvent->acceptProposedAction();
-}
-
-void WidgetActionLabel::dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent)
-{
-}
-
-void WidgetActionLabel::dropEvent(QDropEvent* dropEvent)
-{
-    //qDebug() << dropEvent->mimeData()->text();
-
-    dropEvent->acceptProposedAction();
-
-    //Application::current()->getWidgetActionsManager().widgetStoppedDragging(_widgetAction);
+    setStyleSheet("QLabel { text-decoration: none; }");
 }
 
 }

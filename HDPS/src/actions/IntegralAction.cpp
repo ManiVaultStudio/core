@@ -225,9 +225,6 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new LineEditWidget(parent, this));
 
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
-
     widget->setLayout(layout);
 
     return widget;
