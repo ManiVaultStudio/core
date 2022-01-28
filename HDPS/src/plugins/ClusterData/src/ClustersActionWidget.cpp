@@ -38,7 +38,6 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
     _clustersTreeView.setSortingEnabled(true);
     _clustersTreeView.sortByColumn(static_cast<std::int32_t>(ClustersModel::Column::Name), Qt::SortOrder::AscendingOrder);
 
-    // Configure header view
     auto header = _clustersTreeView.header();
     
     // Configure basic column sizing parameters
@@ -189,10 +188,6 @@ void ClustersActionWidget::setupSelectionSynchronization()
             // Add selected index
             selectedClustersIndices.push_back(selectedIndex.row());
         }
-
-        // No point in selecting zero clusters
-        if (selectedClustersIndices.empty())
-            return;
 
         // Select clusters
         _clustersAction.getClustersDataset()->setSelectionIndices(selectedClustersIndices);
