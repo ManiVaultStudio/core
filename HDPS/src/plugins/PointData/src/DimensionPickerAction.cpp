@@ -13,6 +13,7 @@ DimensionPickerAction::DimensionPickerAction(QObject* parent, const QString& tit
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("adjust"));
+    setMayReset(false);
 
     _currentDimensionAction.setToolTip("Current dimension");
 

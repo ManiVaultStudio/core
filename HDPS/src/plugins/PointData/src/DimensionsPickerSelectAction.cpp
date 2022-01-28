@@ -24,7 +24,7 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
     _selectionThresholdAction.setEnabled(false);
 
     _selectionThresholdAction.setToolTip("Threshold for selecting dimensions");
-    _computeStatisticsAction, setToolTip("Compute the dimension statistics");
+    _computeStatisticsAction.setToolTip("Compute the dimension statistics");
     _selectVisibleAction.setToolTip("Select visible dimensions");
     _selectNonVisibleAction.setToolTip("Select non-visible dimensions");
     _loadSelectionAction.setToolTip("Load dimension selection from file");
