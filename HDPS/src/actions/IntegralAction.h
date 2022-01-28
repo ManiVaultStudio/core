@@ -102,6 +102,20 @@ public:
      */
     void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
 
+public: // Settings
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    void fromVariant(const QVariant& value) override final;
+
+    /**
+     * Convert action value to variant
+     * @return Value as variant
+     */
+    QVariant toVariant() const override final;
+
 signals:
 
     /**

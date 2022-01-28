@@ -40,6 +40,20 @@ void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t&
     _defaultValueChanged();
 }
 
+void IntegralAction::fromVariant(const QVariant& value)
+{
+    if (value.type() != QVariant::Int)
+        return;
+
+    setDefaultValue(value.toInt());
+    reset();
+}
+
+QVariant IntegralAction::toVariant() const
+{
+    return QVariant(_value);
+}
+
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
     QSpinBox(parent)
 {

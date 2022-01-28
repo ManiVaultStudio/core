@@ -210,6 +210,20 @@ public:
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
+public: // Settings
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    void fromVariant(const QVariant& value) override final;
+
+    /**
+     * Convert action value to variant
+     * @return Value as variant
+     */
+    QVariant toVariant() const override final;
+
 protected:
 
     void updateCurrentIndex();

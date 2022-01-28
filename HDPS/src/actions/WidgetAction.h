@@ -147,7 +147,7 @@ public: // Settings
      * Convert action value to variant
      * @return Value as variant
      */
-    virtual QVariant toVariant()
+    virtual QVariant toVariant() const
     {
         qDebug() << "To variant not implemented in derived widget action class";
 

@@ -65,6 +65,12 @@ public:
     /** Destructor */
     ~DimensionsPickerAction();
 
+    /** Determines whether the enabled dimension can be reset to its default */
+    bool isResettable() const override;
+
+    /** Reset the current color to the default color */
+    void reset() override;
+
     /**
      * Set dimensions
      * @param numDimensions Number of dimensions
@@ -175,6 +181,20 @@ public:
             const ModelResetter modelResetter(_proxyModel.get());
         }
     }
+
+public: // Settings
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    void fromVariant(const QVariant& value) override final;
+
+    /**
+     * Convert action value to variant
+     * @return Value as variant
+     */
+    QVariant toVariant() const override final;
 
 protected:
     

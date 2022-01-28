@@ -121,6 +121,20 @@ public:
     /** Reset to default */
     void reset() override;
 
+public: // Settings
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    void fromVariant(const QVariant& value) override final;
+
+    /**
+     * Convert action value to variant
+     * @return Value as variant
+     */
+    QVariant toVariant() const override final;
+
 signals:
 
     /**

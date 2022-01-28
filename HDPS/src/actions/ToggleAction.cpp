@@ -57,6 +57,20 @@ void ToggleAction::reset()
     setChecked(_defaultToggled);
 }
 
+void ToggleAction::fromVariant(const QVariant& value)
+{
+    if (value.type() != QVariant::Bool)
+        return;
+
+    setDefaultToggled(value.toBool());
+    reset();
+}
+
+QVariant ToggleAction::toVariant() const
+{
+    return QVariant(isChecked());
+}
+
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction) :
     QCheckBox(parent),
     _toggleAction(toggleAction)

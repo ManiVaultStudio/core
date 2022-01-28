@@ -121,6 +121,8 @@ void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const plugin
 
     // Settings prefix consists of the plugin kind + settings prefix
     _settingsPrefix = QString("%1/%2").arg(plugin->getKind(), settingsPrefix);
+
+    loadDefault();
 }
 
 void WidgetAction::loadDefault()

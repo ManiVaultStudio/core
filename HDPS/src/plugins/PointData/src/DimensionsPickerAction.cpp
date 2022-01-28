@@ -68,6 +68,16 @@ DimensionsPickerAction::~DimensionsPickerAction()
     disconnect(_summaryUpdateAwakeConnection);
 }
 
+bool DimensionsPickerAction::isResettable() const
+{
+    return toVariant() != Application::current()->getSetting(getSettingsPrefix() + "/DefaultValue").toList();
+}
+
+void DimensionsPickerAction::reset()
+{
+    fromVariant(Application::current()->getSetting(getSettingsPrefix() + "/DefaultValue"));
+}
+
 void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, const std::vector<QString>& names)
 {
     if (names.size() == numDimensions)
@@ -102,6 +112,9 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 
     setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
     computeStatistics();
+
+    if (_points.isValid())
+        setSettingsPrefix("Dimensions/" + _points->getGuiName());
 }
 
 DimensionsPickerHolder& DimensionsPickerAction::getHolder()
@@ -252,6 +265,37 @@ void DimensionsPickerAction::selectDimension(const std::int32_t& dimensionIndex,
         _holder.disableAllDimensions();
 
     _holder.setDimensionEnabled(dimensionIndex, true);
+}
+
+void DimensionsPickerAction::fromVariant(const QVariant& value)
+{
+    Q_ASSERT(value.type() != QVariant::Type::List);
+
+    const auto enabledDimensions = value.toList();
+
+    if (enabledDimensions.count() != _holder.getNumberOfDimensions())
+        return;
+
+    std::int32_t dimensionIndex = 0;
+
+    for (const auto& enabledDimension : enabledDimensions) {
+        _holder.setDimensionEnabled(dimensionIndex, enabledDimension.toBool());
+        dimensionIndex++;
+    }
+
+    const ModelResetter modelResetter(_proxyModel.get());
+}
+
+QVariant DimensionsPickerAction::toVariant() const
+{
+    QVariantList enabledDimensions;
+
+    enabledDimensions.reserve(_holder.getNumberOfDimensions());
+
+    for (const auto enabledDimension : getEnabledDimensions())
+        enabledDimensions.push_back(QVariant(enabledDimension));
+
+    return enabledDimensions;
 }
 
 void DimensionsPickerAction::computeStatistics()

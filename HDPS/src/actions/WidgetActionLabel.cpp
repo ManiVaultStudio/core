@@ -14,21 +14,22 @@ namespace gui {
 WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
     QLabel("", parent, windowFlags),
     _widgetAction(widgetAction),
-    _loadDefaultAction(this, "Load default"),
+    _isHovering(false),
+    _resetAction(this, "Reset"),
     _saveDefaultAction(this, "Save default")
 {
     setAcceptDrops(true);
 
     // Set action actions
-    _loadDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-    _saveDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    _resetAction.setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
+    _saveDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
 
     // Set tooltips
-    _loadDefaultAction.setToolTip("Load default value from disk");
+    _resetAction.setToolTip("Reset to default value");
     _saveDefaultAction.setToolTip("Save default value to disk");
 
     // Load/save when triggered
-    connect(&_loadDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::loadDefault);
+    connect(&_resetAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::reset);
     connect(&_saveDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::saveDefault);
 
     const auto update = [this, widgetAction]() -> void {
@@ -45,15 +46,20 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
 void WidgetActionLabel::mousePressEvent(QMouseEvent* mouseEvent)
 {
+    if (!_isHovering)
+        return;
+
     if (_widgetAction->getSettingsPrefix().isEmpty())
         return;
 
     if (mouseEvent->button() != Qt::LeftButton)
         return;
 
+    _resetAction.setEnabled(_widgetAction->isResettable());
+
     auto contextMenu = new QMenu();
 
-    contextMenu->addAction(&_loadDefaultAction);
+    contextMenu->addAction(&_resetAction);
     contextMenu->addAction(&_saveDefaultAction);
 
     // Show the context menu
@@ -65,6 +71,8 @@ void WidgetActionLabel::enterEvent(QEvent* event)
     if (!_widgetAction->hasSettingsPrefix())
         return;
 
+    _isHovering = true;
+
     setStyleSheet("QLabel { text-decoration: underline; }");
 }
 
@@ -72,6 +80,8 @@ void WidgetActionLabel::leaveEvent(QEvent* event)
 {
     if (!_widgetAction->hasSettingsPrefix())
         return;
+
+    _isHovering = false;
 
     setStyleSheet("QLabel { text-decoration: none; }");
 }

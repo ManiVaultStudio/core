@@ -45,8 +45,8 @@ public: // Mouse events
 
 protected:
     WidgetAction*   _widgetAction;          /** Pointer to widget action */
-    QPoint          _dragStartPosition;     /** Start position of the drag operation */
-    TriggerAction   _loadDefaultAction;     /** Load default action */
+    bool            _isHovering;            /** Whether the mouse pointer is hovering over the text*/
+    TriggerAction   _resetAction;           /** Reset action */
     TriggerAction   _saveDefaultAction;     /** Save default action */
 };
 

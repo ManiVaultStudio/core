@@ -110,6 +110,20 @@ const QAbstractItemModel* OptionAction::getModel() const
     return &_defaultModel;
 }
 
+void OptionAction::fromVariant(const QVariant& value)
+{
+    if (value.type() != QVariant::Int)
+        return;
+
+    setDefaultIndex(value.toInt());
+    reset();
+}
+
+QVariant OptionAction::toVariant() const
+{
+    return QVariant(_currentIndex);
+}
+
 void OptionAction::updateCurrentIndex()
 {
     if (getModel()->rowCount() < 1) {
