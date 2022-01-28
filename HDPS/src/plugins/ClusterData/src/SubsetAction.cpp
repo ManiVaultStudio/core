@@ -62,6 +62,8 @@ SubsetAction::Widget::Widget(QWidget* parent, SubsetAction* subsetAction) :
 {
     auto layout = new QHBoxLayout();
 
+    setFixedWidth(250);
+
     layout->addWidget(subsetAction->getSubsetNameAction().createWidget(this));
     layout->addWidget(subsetAction->getCreateSubsetAction().createWidget(this));
 
