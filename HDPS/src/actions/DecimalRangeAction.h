@@ -104,12 +104,6 @@ public:
      */
     void setRange(const float& minimum, const float& maximum);
 
-    /** Determines whether the current range can be reset to its default */
-    bool isResettable() const override;
-
-    /** Reset the current range to the default value */
-    void reset() override;
-
 public: // Action getters
 
     DecimalAction& getRangeMinAction() { return _rangeMinAction; }

@@ -86,12 +86,6 @@ public:
      */
     void initialize(const QString& colorMap = "", const QString& defaultColorMap = "");
 
-    /** Determines whether the current color can be reset to its default */
-    bool isResettable() const override;
-
-    /** Reset the current color to the default color */
-    void reset() override;
-
     /** Gets the current color map type */
     util::ColorMap::Type getColorMapType() const;
 

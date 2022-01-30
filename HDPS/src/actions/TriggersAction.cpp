@@ -58,6 +58,23 @@ void TriggersAction::setTriggerEnabled(std::int32_t triggerIndex, const bool& en
     emit triggerChanged(triggerIndex, _triggers[triggerIndex]);
 }
 
+void TriggersAction::setValue(const QVariant& value)
+{
+    // Triggers action has no value
+}
+
+QVariant TriggersAction::valueToVariant() const
+{
+    // Triggers action has no value
+    return QVariant();
+}
+
+QVariant TriggersAction::defaultValueToVariant() const
+{
+    // Triggers action has no default value
+    return QVariant();
+}
+
 QPushButton* TriggersAction::createTriggerPushButton(const Trigger& trigger)
 {
     // Create push button for the trigger

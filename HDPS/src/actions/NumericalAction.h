@@ -115,16 +115,6 @@ public:
         _defaultValueChanged();
     }
 
-    /** Determines whether the current value can be reset to its default */
-    virtual bool isResettable() const final {
-        return _value != _defaultValue;
-    }
-
-    /** Reset the current value to the default value */
-    virtual void reset() final {
-        setValue(_defaultValue);
-    }
-
     /** Gets the minimum value */
     virtual NumericalType getMinimum() const final {
         return _minimum;
@@ -263,14 +253,14 @@ public:
     }
 
 protected: // Numerical and auxiliary data
-    NumericalType   _value;                 /** Current value */
-    NumericalType   _defaultValue;          /** Default value */
-    NumericalType   _minimum;               /** Minimum value */
-    NumericalType   _maximum;               /** Maximum value */
-    QString         _prefix;                /** Prefix string */
-    QString         _suffix;                /** Suffix string */
-    std::uint32_t   _numberOfDecimals;      /** Number of decimals */
-    bool            _updateDuringDrag;      /** Whether the value should update during interaction */
+    NumericalType       _value;                 /** Current value */
+    NumericalType       _defaultValue;          /** Default value */
+    NumericalType       _minimum;               /** Minimum value */
+    NumericalType       _maximum;               /** Maximum value */
+    QString             _prefix;                /** Prefix string */
+    QString             _suffix;                /** Suffix string */
+    std::uint32_t       _numberOfDecimals;      /** Number of decimals */
+    bool                _updateDuringDrag;      /** Whether the value should update during interaction */
 
 protected: // Callbacks for implementations of the numerical action
     ValueChangedCB              _valueChanged;                  /** Callback which is called when the value changed */

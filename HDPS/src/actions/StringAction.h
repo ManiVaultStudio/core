@@ -95,12 +95,6 @@ public:
      */
     void setDefaultString(const QString& defaultString);
 
-    /** Determines whether the current string can be reset to its default string */
-    bool isResettable() const override;
-
-    /** Reset the current string to the default string */
-    void reset() override;
-
     /** Get placeholder text */
     QString getPlaceholderString() const;
 
@@ -133,6 +127,26 @@ public:
      * @param completer Pointer to completer
      */
     void setCompleter(QCompleter* completer);
+
+public: // Settings
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    void setValue(const QVariant& value) override final;
+
+    /**
+     * Convert value to variant
+     * @return Value as variant
+     */
+    QVariant valueToVariant() const override final;
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    QVariant defaultValueToVariant() const override final;
 
 signals:
 

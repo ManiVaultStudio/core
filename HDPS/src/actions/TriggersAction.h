@@ -99,11 +99,6 @@ protected:
 
 public:
 
-    /** Reset to default */
-    void reset() override {};
-
-public:
-
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -144,6 +139,26 @@ public:
      * @param enabled Trigger enabled
      */
     void setTriggerEnabled(std::int32_t triggerIndex, const bool& enabled);
+
+public: // Settings
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    void setValue(const QVariant& value) override final;
+
+    /**
+     * Convert value to variant
+     * @return Value as variant
+     */
+    QVariant valueToVariant() const override final;
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    QVariant defaultValueToVariant() const override final;
 
 protected:
 

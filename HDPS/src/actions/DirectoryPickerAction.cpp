@@ -100,16 +100,6 @@ void DirectoryPickerAction::setDefaultDirectory(const QString& defaultDirectory)
     setResettable(isResettable());
 }
 
-bool DirectoryPickerAction::isResettable() const
-{
-    return _directoryAction.isResettable();
-}
-
-void DirectoryPickerAction::reset()
-{
-    _directoryAction.reset();
-}
-
 QString DirectoryPickerAction::getPlaceholderString() const
 {
     return _directoryAction.getPlaceholderString();

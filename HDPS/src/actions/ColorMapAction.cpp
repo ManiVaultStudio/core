@@ -57,17 +57,6 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
     setResettable(isResettable());
 }
 
-bool ColorMapAction::isResettable() const
-{
-    return _currentColorMapAction.isResettable() | _settingsAction.isResettable();
-}
-
-void ColorMapAction::reset()
-{
-    _currentColorMapAction.reset();
-    _settingsAction.reset();
-}
-
 hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
 {
     return _colorMapFilterModel.getType();

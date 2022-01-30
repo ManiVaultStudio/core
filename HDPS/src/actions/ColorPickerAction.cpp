@@ -55,16 +55,6 @@ void ColorPickerAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-bool ColorPickerAction::isResettable() const
-{
-    return _color != _defaultColor;
-}
-
-void ColorPickerAction::reset()
-{
-    setColor(_defaultColor);
-}
-
 ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPickerAction) :
     WidgetActionWidget(parent, colorPickerAction),
     _layout(),

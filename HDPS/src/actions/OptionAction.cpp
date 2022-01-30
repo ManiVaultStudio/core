@@ -110,18 +110,22 @@ const QAbstractItemModel* OptionAction::getModel() const
     return &_defaultModel;
 }
 
-void OptionAction::fromVariant(const QVariant& value)
+void OptionAction::setValue(const QVariant& value)
 {
-    if (value.type() != QVariant::Int)
+    if (!value.isValid() || value.type() != QVariant::Int)
         return;
 
-    setDefaultIndex(value.toInt());
-    reset();
+    setCurrentIndex(value.toInt());
 }
 
-QVariant OptionAction::toVariant() const
+QVariant OptionAction::valueToVariant() const
 {
     return QVariant(_currentIndex);
+}
+
+QVariant OptionAction::defaultValueToVariant() const
+{
+    return QVariant(_defaultIndex);
 }
 
 void OptionAction::updateCurrentIndex()
@@ -249,16 +253,6 @@ void OptionAction::setCurrentText(const QString& currentText)
     emit currentIndexChanged(_currentIndex);
 
     setResettable(isResettable());
-}
-
-bool OptionAction::isResettable() const
-{
-    return _currentIndex != _defaultIndex;
-}
-
-void OptionAction::reset()
-{
-    setCurrentIndex(_defaultIndex);
 }
 
 bool OptionAction::hasSelection() const

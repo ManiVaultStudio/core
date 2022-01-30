@@ -2,6 +2,7 @@
 
 #include "actions/TriggerAction.h"
 
+#include <QWidget>
 #include <QLabel>
 
 namespace hdps {
@@ -17,37 +18,31 @@ class WidgetAction;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionLabel : public QLabel {
+class WidgetActionLabel : public QWidget {
 public:
+
+    /**
+     * Constructor
+     * @param widgetAction Pointer to widget action
+     * @param parent Pointer to parent widget
+     * @param windowFlags Window flags
+     */
     explicit WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent = nullptr, Qt::WindowFlags windowFlags = Qt::WindowFlags());
 
-public: // Mouse events
-
     /**
-     * Invoked when a mouse button is pressed
-     * @param mouseEvent Pointer to mouse event
+     * Respond to \p target events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
      */
-    void mousePressEvent(QMouseEvent* mouseEvent) override;
-
-    /**
-     * Invoked when the mouse enters the label
-     * @param event Pointer to event
-     *
-     */
-    void enterEvent(QEvent* event) override;
-
-    /**
-     * Invoked when the mouse leaves the label
-     * @param event Pointer to event
-     *
-     */
-    void leaveEvent(QEvent* event) override;
+    bool eventFilter(QObject* target, QEvent* event) override;
 
 protected:
-    WidgetAction*   _widgetAction;          /** Pointer to widget action */
-    bool            _isHovering;            /** Whether the mouse pointer is hovering over the text*/
-    TriggerAction   _resetAction;           /** Reset action */
-    TriggerAction   _saveDefaultAction;     /** Save default action */
+    WidgetAction*   _widgetAction;                  /** Pointer to widget action */
+    QLabel          _label;                         /** Label */
+    bool            _isHovering;                    /** Whether the mouse pointer is hovering over the text*/
+    TriggerAction   _loadDefaultAction;             /** Load default action */
+    TriggerAction   _saveDefaultAction;             /** Save default action */
+    TriggerAction   _loadFactoryDefaultAction;      /** Load factory default action */
 };
 
 }

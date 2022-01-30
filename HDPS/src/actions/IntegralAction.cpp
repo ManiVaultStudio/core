@@ -40,18 +40,22 @@ void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t&
     _defaultValueChanged();
 }
 
-void IntegralAction::fromVariant(const QVariant& value)
+void IntegralAction::setValue(const QVariant& value)
 {
-    if (value.type() != QVariant::Int)
+    if (!value.isValid() || value.type() != QVariant::Int)
         return;
 
-    setDefaultValue(value.toInt());
-    reset();
+    NumericalAction::setValue(value.toInt());
 }
 
-QVariant IntegralAction::toVariant() const
+QVariant IntegralAction::valueToVariant() const
 {
     return QVariant(_value);
+}
+
+QVariant IntegralAction::defaultValueToVariant() const
+{
+    return QVariant(_defaultValue);
 }
 
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :

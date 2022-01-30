@@ -6,84 +6,132 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QVBoxLayout>
 
 namespace hdps {
 
 namespace gui {
 
 WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
-    QLabel("", parent, windowFlags),
+    QWidget(parent, windowFlags),
     _widgetAction(widgetAction),
+    _label(),
     _isHovering(false),
-    _resetAction(this, "Reset"),
-    _saveDefaultAction(this, "Save default")
+    _loadDefaultAction(this, "Load default"),
+    _saveDefaultAction(this, "Save default"),
+    _loadFactoryDefaultAction(this, "Load factory default")
 {
-    setAcceptDrops(true);
+    auto layout = new QVBoxLayout();
+
+    layout->setAlignment(Qt::AlignRight | Qt::AlignCenter);
+
+    layout->setMargin(0);
+    layout->addStretch(1);
+    layout->addWidget(&_label);
+    layout->addStretch(1);
+
+    setLayout(layout);
+
+    _label.setAlignment(Qt::AlignRight);
 
     // Set action actions
-    _resetAction.setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
+    _loadDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
     _saveDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    _loadFactoryDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("industry"));
 
     // Set tooltips
-    _resetAction.setToolTip("Reset to default value");
+    _loadDefaultAction.setToolTip("Reset to default value");
     _saveDefaultAction.setToolTip("Save default value to disk");
+    _loadFactoryDefaultAction.setToolTip("Load factory default value");
 
     // Load/save when triggered
-    connect(&_resetAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::reset);
+    connect(&_loadDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::loadDefault);
     connect(&_saveDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::saveDefault);
 
+    // Load factory default when triggered
+    connect(&_loadFactoryDefaultAction, &TriggerAction::triggered, this, [this]() {
+        _widgetAction->reset();
+        _widgetAction->saveDefault();
+    });
+
     const auto update = [this, widgetAction]() -> void {
-        setEnabled(widgetAction->isEnabled());
-        setText(QString("%1: ").arg(widgetAction->text()));
-        setToolTip(widgetAction->text());
-        setVisible(widgetAction->isVisible());
+        _label.setEnabled(widgetAction->isEnabled());
+        _label.setText(QString("%1: ").arg(widgetAction->text()));
+        _label.setToolTip(widgetAction->text());
+        _label.setVisible(widgetAction->isVisible());
     };
 
     connect(widgetAction, &WidgetAction::changed, this, update);
 
     update();
+
+    // Install event filter for intercepting label events
+    _label.installEventFilter(this);
 }
 
-void WidgetActionLabel::mousePressEvent(QMouseEvent* mouseEvent)
+bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 {
-    if (!_isHovering)
-        return;
-
     if (_widgetAction->getSettingsPrefix().isEmpty())
-        return;
+        return QWidget::eventFilter(target, event);
 
-    if (mouseEvent->button() != Qt::LeftButton)
-        return;
+    switch (event->type())
+    {
+        // Mouse button press event
+        case QEvent::MouseButtonPress:
+        {
+            auto mouseButtonPress = static_cast<QMouseEvent*>(event);
 
-    _resetAction.setEnabled(_widgetAction->isResettable());
+            if (mouseButtonPress->button() != Qt::LeftButton)
+                break;
 
-    auto contextMenu = new QMenu();
+            const auto isAtFactoryDefault   = _widgetAction->valueToVariant() == _widgetAction->defaultValueToVariant();
+            const auto canSaveDefault       = isAtFactoryDefault ? false : _widgetAction->hasSavedDefault() && (_widgetAction->valueToVariant() != _widgetAction->savedDefaultValueToVariant());
 
-    contextMenu->addAction(&_resetAction);
-    contextMenu->addAction(&_saveDefaultAction);
+            _loadDefaultAction.setEnabled(_widgetAction->isResettable());
+            _saveDefaultAction.setEnabled(canSaveDefault);
+            _loadFactoryDefaultAction.setEnabled(_widgetAction->isFactoryResettable());
 
-    // Show the context menu
-    contextMenu->exec(cursor().pos());
-}
+            auto contextMenu = new QMenu();
 
-void WidgetActionLabel::enterEvent(QEvent* event)
-{
-    if (!_widgetAction->hasSettingsPrefix())
-        return;
+            contextMenu->addAction(&_loadDefaultAction);
+            contextMenu->addAction(&_saveDefaultAction);
 
-    _isHovering = true;
+            contextMenu->addSeparator();
 
-    setStyleSheet("QLabel { text-decoration: underline; }");
-}
+            auto optionsMenu = new QMenu("Options");
 
-void WidgetActionLabel::leaveEvent(QEvent* event)
-{
-    if (!_widgetAction->hasSettingsPrefix())
-        return;
+            optionsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cogs"));
+            optionsMenu->addAction(&_loadFactoryDefaultAction);
 
-    _isHovering = false;
+            contextMenu->addMenu(optionsMenu);
 
-    setStyleSheet("QLabel { text-decoration: none; }");
+            // Show the context menu
+            contextMenu->exec(cursor().pos());
+
+            break;
+        }
+
+        // Mouse enter event
+        case QEvent::Enter:
+        {
+            setStyleSheet("QLabel { text-decoration: underline; }");
+
+            break;
+        }
+
+        // Mouse leave event
+        case QEvent::Leave:
+        {
+            setStyleSheet("QLabel { text-decoration: none; }");
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QWidget::eventFilter(target, event);
 }
 
 }

@@ -67,16 +67,6 @@ void StringAction::setDefaultString(const QString& defaultString)
     setResettable(isResettable());
 }
 
-bool StringAction::isResettable() const
-{
-    return _string != _defaultString;
-}
-
-void StringAction::reset()
-{
-    setString(_defaultString);
-}
-
 QString StringAction::getPlaceholderString() const
 {
     return _placeholderString;
@@ -112,6 +102,24 @@ void StringAction::setCompleter(QCompleter* completer)
     _completer = completer;
 
     emit completerChanged(_completer);
+}
+
+void StringAction::setValue(const QVariant& value)
+{
+    if (!value.isValid() || value.type() != QVariant::String)
+        return;
+
+    setString(value.toString());
+}
+
+QVariant StringAction::valueToVariant() const
+{
+    return QVariant(_string);
+}
+
+QVariant StringAction::defaultValueToVariant() const
+{
+    return QVariant(_defaultString);
 }
 
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :

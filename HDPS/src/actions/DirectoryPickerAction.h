@@ -6,7 +6,7 @@
 
 #include <QLineEdit>
 #include <QString>
-#include <QDirModel>
+#include <QFileSystemModel>
 #include <QCompleter>
 
 class QWidget;
@@ -102,12 +102,6 @@ public:
      */
     void setDefaultDirectory(const QString& defaultDirectory);
 
-    /** Determines whether the current directory can be reset to its default directory */
-    bool isResettable() const override;
-
-    /** Reset the current directory to the default directory */
-    void reset() override;
-
     /**
      * Get placeholder text
      * @return Placeholder string
@@ -153,10 +147,10 @@ signals:
     void placeholderStringChanged(const QString& placeholderString);
 
 protected:
-    QDirModel       _dirModel;              /** Directory model */
-    QCompleter      _completer;             /** Completer */
-    StringAction    _directoryAction;       /** Directory action */
-    TriggerAction   _pickAction;            /** Pick directory action */
+    QFileSystemModel    _dirModel;              /** Directory model */
+    QCompleter          _completer;             /** Completer */
+    StringAction        _directoryAction;       /** Directory action */
+    TriggerAction       _pickAction;            /** Pick directory action */
 };
 
 }

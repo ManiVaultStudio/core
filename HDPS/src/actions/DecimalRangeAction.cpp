@@ -72,17 +72,6 @@ void DecimalRangeAction::setRange(const float& minimum, const float& maximum)
     _rangeMaxAction.initialize(minimum, maximum, maximum, maximum);
 }
 
-bool DecimalRangeAction::isResettable() const
-{
-    return _rangeMinAction.isResettable() || _rangeMaxAction.isResettable();
-}
-
-void DecimalRangeAction::reset()
-{
-    _rangeMinAction.reset();
-    _rangeMaxAction.reset();
-}
-
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :
     WidgetActionWidget(parent, decimalRangeAction, widgetFlags)
 {

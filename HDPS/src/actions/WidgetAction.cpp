@@ -66,7 +66,15 @@ QWidget* WidgetAction::createLabelWidget(QWidget* parent)
 
 bool WidgetAction::isResettable() const
 {
-    return _resettable;
+    if (!hasSavedDefault())
+        return false;
+
+    return valueToVariant() != savedDefaultValueToVariant();
+}
+
+bool WidgetAction::isFactoryResettable() const
+{
+    return valueToVariant() != defaultValueToVariant();
 }
 
 void WidgetAction::setResettable(const bool& resettable)
@@ -81,7 +89,12 @@ void WidgetAction::setResettable(const bool& resettable)
 
 void WidgetAction::reset()
 {
-    qDebug() << text() << "Does not implement a reset function";
+    // Get default value as variant
+    const auto defaultValue = defaultValueToVariant();
+
+    // And assign it to the value if valid
+    if (defaultValue.isValid())
+        setValue(defaultValue);
 }
 
 std::int32_t WidgetAction::getDefaultWidgetFlags() const
@@ -125,14 +138,19 @@ void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const plugin
     loadDefault();
 }
 
+bool WidgetAction::hasSavedDefault() const
+{
+    return Application::current()->getSetting(getSettingsPrefix() + "/Default").isValid();
+}
+
 void WidgetAction::loadDefault()
 {
-    fromVariant(Application::current()->getSetting(getSettingsPrefix() + "/DefaultValue"));
+    setValue(Application::current()->getSetting(getSettingsPrefix() + "/Default"));
 }
 
 void WidgetAction::saveDefault()
 {
-    Application::current()->setSetting(getSettingsPrefix() + "/DefaultValue", toVariant());
+    Application::current()->setSetting(getSettingsPrefix() + "/Default", valueToVariant());
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

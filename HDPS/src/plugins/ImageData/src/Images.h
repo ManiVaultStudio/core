@@ -82,14 +82,6 @@ public: // Image retrieval functions
      */
     void setImageSize(const QSize& imageSize);
 
-    /**
-     * Set the image geometry
-     * @param sourceImageSize Size of the source image(s)
-     * @param targetImageSize Size of the target image(s)
-     * @param imageOffset Offset of the image(s)
-     */
-    void setImageGeometry(const QSize& sourceImageSize, const QSize& targetImageSize = QSize(), const QPoint& imageOffset = QPoint());
-
     /** Gets the number of components per pixel */
     std::uint32_t getNumberOfComponentsPerPixel() const;
 

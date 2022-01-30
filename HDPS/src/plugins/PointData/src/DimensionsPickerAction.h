@@ -60,16 +60,10 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    DimensionsPickerAction(QObject* parent, const QString& title = "Dimensions");
+    DimensionsPickerAction(QObject* parent, const QString& title = "DimensionSelection");
 
     /** Destructor */
     ~DimensionsPickerAction();
-
-    /** Determines whether the enabled dimension can be reset to its default */
-    bool isResettable() const override;
-
-    /** Reset the current color to the default color */
-    void reset() override;
 
     /**
      * Set dimensions
@@ -188,13 +182,19 @@ public: // Settings
      * Set action value from variant
      * @param value Value
      */
-    void fromVariant(const QVariant& value) override final;
+    void setValue(const QVariant& value) override final;
 
     /**
-     * Convert action value to variant
+     * Convert value to variant
      * @return Value as variant
      */
-    QVariant toVariant() const override final;
+    QVariant valueToVariant() const override final;
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    QVariant defaultValueToVariant() const override final;
 
 protected:
     

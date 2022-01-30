@@ -124,7 +124,6 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
 
         if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
             auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this));
-            labelWidget->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
             _layout->addWidget(labelWidget, numRows, 0);
         }
 

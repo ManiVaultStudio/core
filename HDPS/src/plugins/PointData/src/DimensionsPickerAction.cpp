@@ -22,7 +22,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title /*= "Dimensions"*/) :
+DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title /*= "DimensionSelection"*/) :
     GroupAction(parent),
     _points(nullptr),
     _holder(),
@@ -60,22 +60,12 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& t
     });
 
     updateReadOnly();
-    computeStatistics();
+    //computeStatistics();
 }
 
 DimensionsPickerAction::~DimensionsPickerAction()
 {
     disconnect(_summaryUpdateAwakeConnection);
-}
-
-bool DimensionsPickerAction::isResettable() const
-{
-    return toVariant() != Application::current()->getSetting(getSettingsPrefix() + "/DefaultValue").toList();
-}
-
-void DimensionsPickerAction::reset()
-{
-    fromVariant(Application::current()->getSetting(getSettingsPrefix() + "/DefaultValue"));
 }
 
 void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, const std::vector<QString>& names)
@@ -267,10 +257,8 @@ void DimensionsPickerAction::selectDimension(const std::int32_t& dimensionIndex,
     _holder.setDimensionEnabled(dimensionIndex, true);
 }
 
-void DimensionsPickerAction::fromVariant(const QVariant& value)
+void DimensionsPickerAction::setValue(const QVariant& value)
 {
-    Q_ASSERT(value.type() != QVariant::Type::List);
-
     const auto enabledDimensions = value.toList();
 
     if (enabledDimensions.count() != _holder.getNumberOfDimensions())
@@ -286,16 +274,24 @@ void DimensionsPickerAction::fromVariant(const QVariant& value)
     const ModelResetter modelResetter(_proxyModel.get());
 }
 
-QVariant DimensionsPickerAction::toVariant() const
+QVariant DimensionsPickerAction::valueToVariant() const
 {
     QVariantList enabledDimensions;
 
-    enabledDimensions.reserve(_holder.getNumberOfDimensions());
+    for (const auto enabledDimension : getEnabledDimensions())
+        enabledDimensions << QVariant(enabledDimension);
+
+    return QVariant(enabledDimensions);
+}
+
+QVariant DimensionsPickerAction::defaultValueToVariant() const
+{
+    QVariantList enabledDimensions;
 
     for (const auto enabledDimension : getEnabledDimensions())
-        enabledDimensions.push_back(QVariant(enabledDimension));
+        enabledDimensions << true;
 
-    return enabledDimensions;
+    return QVariant(enabledDimensions);
 }
 
 void DimensionsPickerAction::computeStatistics()

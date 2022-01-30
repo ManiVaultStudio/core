@@ -45,17 +45,6 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapAction& colorMapAction, const QSt
     connect(&_mirrorAction, &ToggleAction::resettableChanged, this, updateResettable);
 }
 
-bool ColorMapAxisAction::isResettable() const
-{
-    return _rangeAction.isResettable() | _mirrorAction.isResettable();
-}
-
-void ColorMapAxisAction::reset()
-{
-    _rangeAction.reset();
-    _mirrorAction.reset();
-}
-
 ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMapAxisAction) :
     WidgetActionWidget(parent, colorMapAxisAction)
 {

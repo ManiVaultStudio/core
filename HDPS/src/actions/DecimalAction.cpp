@@ -62,18 +62,22 @@ void DecimalAction::setSingleStep(const float& singleStep)
     emit singleStepChanged(_singleStep);
 }
 
-void DecimalAction::fromVariant(const QVariant& value)
+void DecimalAction::setValue(const QVariant& value)
 {
-    if (value.type() != QVariant::Double)
+    if (!value.isValid() || value.type() != QVariant::Double)
         return;
 
-    setDefaultValue(value.toDouble());
-    reset();
+    NumericalAction::setValue(value.toDouble());
 }
 
-QVariant DecimalAction::toVariant() const
+QVariant DecimalAction::valueToVariant() const
 {
     return QVariant(_value);
+}
+
+QVariant DecimalAction::defaultValueToVariant() const
+{
+    return QVariant(_defaultValue);
 }
 
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :

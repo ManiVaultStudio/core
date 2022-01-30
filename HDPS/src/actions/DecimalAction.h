@@ -102,13 +102,19 @@ public: // Settings
      * Set action value from variant
      * @param value Value
      */
-    void fromVariant(const QVariant& value) override final;
+    void setValue(const QVariant& value) override final;
 
     /**
-     * Convert action value to variant
+     * Convert value to variant
      * @return Value as variant
      */
-    QVariant toVariant() const override final;
+    QVariant valueToVariant() const override final;
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    QVariant defaultValueToVariant() const override final;
 
 signals:
 

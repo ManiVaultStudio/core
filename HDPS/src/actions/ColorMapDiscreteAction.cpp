@@ -27,17 +27,6 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapAction& colorMapAction) :
     connect(&_numberOfStepsAction, &IntegralAction::resettableChanged, this, updateResettable);
 }
 
-bool ColorMapDiscreteAction::isResettable() const
-{
-    return isChecked() |_numberOfStepsAction.isResettable();
-}
-
-void ColorMapDiscreteAction::reset()
-{
-    setChecked(false);
-    _numberOfStepsAction.reset();
-}
-
 ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction) :
     WidgetActionWidget(parent, colorMapDiscreteAction)
 {

@@ -86,14 +86,23 @@ public:
      */
     void setSortIndex(const std::int32_t& sortIndex);
 
-    /** Determines whether the action can be reset to its default */
-    virtual bool isResettable() const;
+    /**
+     * Determines whether the action can be reset to its default
+     * @return Whether the action can be reset to its default
+     */
+    virtual bool isResettable() const final;
+
+    /**
+     * Determines whether the action can be reset to its factory default
+     * @return Whether the action can be reset to its factory default
+     */
+    virtual bool isFactoryResettable() const final;
 
     /** Sets the action resettable */
     virtual void setResettable(const bool& resettable);
 
     /** Reset to default */
-    virtual void reset();
+    virtual void reset() final;
 
     /** Gets the default widget flags */
     std::int32_t getDefaultWidgetFlags() const;
@@ -128,6 +137,12 @@ public: // Settings
         return !_settingsPrefix.isEmpty();
     }
 
+    /**
+     * Establish whether there is a saved default
+     * @return Whether there is a saved default
+     */
+    bool hasSavedDefault() const;
+
     /** Load default value from disk */
     void loadDefault();
 
@@ -138,18 +153,38 @@ public: // Settings
      * Set action value from variant
      * @param value Value
      */
-    virtual void fromVariant(const QVariant& value)
+    virtual void setValue(const QVariant& value)
     {
-        qDebug() << "From variant not implemented in derived widget action class";
+        qDebug() << "Set value not implemented in derived widget action class";
     }
 
     /**
-     * Convert action value to variant
+     * Convert value to variant
      * @return Value as variant
      */
-    virtual QVariant toVariant() const
+    virtual QVariant valueToVariant() const
     {
-        qDebug() << "To variant not implemented in derived widget action class";
+        qDebug() << "Value to variant not implemented in derived widget action class";
+
+        return QVariant();
+    }
+
+    /**
+     * Load saved default value to variant
+     * @return Saved default value as variant
+     */
+    virtual QVariant savedDefaultValueToVariant() const
+    {
+        return Application::current()->getSetting(getSettingsPrefix() + "/Default");
+    }
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    virtual QVariant defaultValueToVariant() const
+    {
+        qDebug() << "Default value to variant not implemented in derived widget action class";
 
         return QVariant();
     }

@@ -40,18 +40,6 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     updateRangeActions();
 }
 
-bool ColorMapSettingsAction::isResettable() const
-{
-    return _horizontalAxisAction.isResettable() | _verticalAxisAction.isResettable() | _discreteAction.isResettable();
-}
-
-void ColorMapSettingsAction::reset()
-{
-    _horizontalAxisAction.reset();
-    _verticalAxisAction.reset();
-    _discreteAction.reset();
-}
-
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :
     WidgetActionWidget(parent, colorMapSettingsAction),
     _colorMapViewAction(colorMapSettingsAction->getColorMapAction())
