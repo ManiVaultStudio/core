@@ -60,7 +60,7 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
     auto settingsLayout = new QVBoxLayout();
     auto rangeLayout    = new QHBoxLayout();
 
-    // mainLayout->setMargin(0);  TODO obsolete
+    mainLayout->setContentsMargins(0,0,0,0);
 
     mainLayout->addLayout(settingsLayout);
 

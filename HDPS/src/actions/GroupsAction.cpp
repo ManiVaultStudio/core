@@ -59,7 +59,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
 
     setLayout(layout);
 
-    // layout->setMargin(0);   TODO obsolete
+    layout->setContentsMargins(0,0,0,0);
     layout->setAlignment(Qt::AlignTop);
     layout->addWidget(treeWidget);
 
@@ -105,7 +105,7 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
 
     iconLabel->setAlignment(Qt::AlignCenter);
 
-    // frameLayout->setMargin(5);  TODO obsolete
+    frameLayout->setContentsMargins(5,5,5,5);
     frameLayout->addWidget(iconLabel);
     frameLayout->addStretch(1);
 

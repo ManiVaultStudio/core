@@ -18,7 +18,7 @@ WidgetActionStateWidget::WidgetActionStateWidget(QWidget* parent, WidgetAction* 
 {
     auto layout = new QHBoxLayout();
 
-    // layout->setMargin(0);  TODO obsolete
+    layout->setContentsMargins(0,0,0,0);
     layout->addWidget(_standardWidget);
     layout->addWidget(_compactWidget);
 

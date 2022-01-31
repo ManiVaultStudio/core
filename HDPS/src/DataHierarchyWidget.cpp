@@ -94,7 +94,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     auto layout = new QVBoxLayout();
 
     // Remove the layout margin and spacing
-    layout->setContentsMargins(2,2,2,2); // TODO obsolete margin
+    layout->setContentsMargins(2,2,2,2);
     layout->setSpacing(0);
 
     // Create tool bar layout
@@ -417,7 +417,7 @@ DataHierarchyWidget::NoDataOverlayWidget::NoDataOverlayWidget(QWidget* parent) :
 
     descriptionLabel->setAlignment(Qt::AlignCenter);
 
-    layout->setContentsMargins(0,0,0,0); // TODO obsolete
+    layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(0);
     layout->setAlignment(Qt::AlignCenter);
 

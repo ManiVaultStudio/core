@@ -126,7 +126,7 @@ PointsDimensionPickerAction::Widget::Widget(QWidget* parent, PointsDimensionPick
 {
     auto layout = new QHBoxLayout();
 
-    // layout->setMargin(0);  TODO obsolete
+    layout->setContentsMargins(0,0,0,0);
 
     // Create widgets
     auto comboBoxWidget = pointsDimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::ComboBox);

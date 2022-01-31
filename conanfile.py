@@ -119,8 +119,8 @@ class HdpsCoreConan(ConanFile):
         print("HDPS_INSTALL_DIR: ", os.environ["HDPS_INSTALL_DIR"])
         self.install_dir = os.environ["HDPS_INSTALL_DIR"]
 
-        # cmake_debug = self._configure_cmake("Debug")
-        # cmake_debug.build()
+        cmake_debug = self._configure_cmake("Debug")
+        cmake_debug.build()
 
         cmake_release = self._configure_cmake("Release")
         cmake_release.build()
@@ -130,9 +130,9 @@ class HdpsCoreConan(ConanFile):
         self.copy(pattern="*", src=self.install_dir)
 
     def package_info(self):
-        # self.cpp_info.debug.libdirs = ["Debug/lib"]
-        # self.cpp_info.debug.bindirs = ["Debug/Plugins", "Debug"]
-        # self.cpp_info.debug.includedirs = ["Debug/include", "Debug"]
+        self.cpp_info.debug.libdirs = ["Debug/lib"]
+        self.cpp_info.debug.bindirs = ["Debug/Plugins", "Debug"]
+        self.cpp_info.debug.includedirs = ["Debug/include", "Debug"]
         self.cpp_info.release.libdirs = ["Release/lib"]
         self.cpp_info.release.bindirs = ["Release/Plugins", "Release"]
         self.cpp_info.release.includedirs = ["Release/include", "Release"]

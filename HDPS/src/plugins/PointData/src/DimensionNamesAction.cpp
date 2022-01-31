@@ -99,7 +99,7 @@ DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dime
 
     listView->setFixedHeight(100);
 
-    // layout->setMargin(0);  TODO obsolete
+    layout->setContentsMargins(0,0,0,0);
     layout->addWidget(listView);
 
     auto updateLayout = new QVBoxLayout();
