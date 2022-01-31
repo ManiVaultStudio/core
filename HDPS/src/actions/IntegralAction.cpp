@@ -50,6 +50,7 @@ void IntegralAction::setValue(const QVariant& value)
 
 QVariant IntegralAction::valueToVariant() const
 {
+    qDebug() << getSettingsPath();
     return QVariant(_value);
 }
 

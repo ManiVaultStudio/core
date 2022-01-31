@@ -115,6 +115,26 @@ public: // Option action wrappers
      */
     void setDefaultColorMap(const QString& defaultColorMap);
 
+public: // Settings
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    void setValue(const QVariant& value) override final;
+
+    /**
+     * Convert value to variant
+     * @return Value as variant
+     */
+    QVariant valueToVariant() const override final;
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    QVariant defaultValueToVariant() const override final;
+
 public: // Action getters
 
     OptionAction& getCurrentColorMapAction() { return _currentColorMapAction; }

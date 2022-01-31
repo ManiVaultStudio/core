@@ -15,13 +15,14 @@ namespace gui {
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction),
-    _horizontalAxisAction(colorMapAction, "Horizontal"),
-    _verticalAxisAction(colorMapAction, "Vertical"),
-    _discreteAction(colorMapAction)
+    _horizontalAxisAction(*this, "Horizontal"),
+    _verticalAxisAction(*this, "Vertical"),
+    _discreteAction(*this)
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
     setMayReset(true);
+    setSerializable(true);
 
     const auto updateRangeActions = [this]() -> void {
         _horizontalAxisAction.setText(_colorMapAction.getColorMapType() == ColorMap::Type::OneDimensional ? "Range" : "Horizontal");

@@ -124,6 +124,26 @@ public:
     /** Sets the default color */
     void setDefaultColor(const QColor& defaultColor);
 
+public: // Settings
+
+    /**
+     * Set action value from variant
+     * @param value Value
+     */
+    void setValue(const QVariant& value) override final;
+
+    /**
+     * Convert value to variant
+     * @return Value as variant
+     */
+    QVariant valueToVariant() const override final;
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    QVariant defaultValueToVariant() const override final;
+
 signals:
 
     /**

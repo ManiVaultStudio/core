@@ -102,9 +102,6 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 
     setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
     computeStatistics();
-
-    if (_points.isValid())
-        setSettingsPrefix("Dimensions/" + _points->getGuiName());
 }
 
 DimensionsPickerHolder& DimensionsPickerAction::getHolder()

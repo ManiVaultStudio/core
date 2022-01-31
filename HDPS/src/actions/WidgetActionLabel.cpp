@@ -49,10 +49,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     connect(&_saveDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::saveDefault);
 
     // Load factory default when triggered
-    connect(&_loadFactoryDefaultAction, &TriggerAction::triggered, this, [this]() {
-        _widgetAction->reset();
-        _widgetAction->saveDefault();
-    });
+    connect(&_loadFactoryDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::reset);
 
     const auto update = [this, widgetAction]() -> void {
         _label.setEnabled(widgetAction->isEnabled());
@@ -71,9 +68,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
 bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 {
-    if (_widgetAction->getSettingsPrefix().isEmpty())
-        return QWidget::eventFilter(target, event);
-
     switch (event->type())
     {
         // Mouse button press event
@@ -85,7 +79,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                 break;
 
             const auto isAtFactoryDefault   = _widgetAction->valueToVariant() == _widgetAction->defaultValueToVariant();
-            const auto canSaveDefault       = isAtFactoryDefault ? false : _widgetAction->hasSavedDefault() && (_widgetAction->valueToVariant() != _widgetAction->savedDefaultValueToVariant());
+            const auto canSaveDefault       = isAtFactoryDefault ? false : (_widgetAction->hasSavedDefault() ? _widgetAction->valueToVariant() != _widgetAction->savedDefaultValueToVariant() : true);
 
             _loadDefaultAction.setEnabled(_widgetAction->isResettable());
             _saveDefaultAction.setEnabled(canSaveDefault);

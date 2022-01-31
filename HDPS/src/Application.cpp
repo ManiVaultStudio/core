@@ -65,6 +65,7 @@ QVariant Application::getSetting(const QString& path, const QVariant& defaultVal
 
 void Application::setSetting(const QString& path, const QVariant& value)
 {
+    qDebug() << path << value;
     _settings.setValue(path, value);
 }
 

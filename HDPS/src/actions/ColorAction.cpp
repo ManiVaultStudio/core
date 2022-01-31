@@ -62,6 +62,24 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
+void ColorAction::setValue(const QVariant& value)
+{
+    if (!value.isValid())
+        return;
+
+    setColor(value.value<QColor>());
+}
+
+QVariant ColorAction::valueToVariant() const
+{
+    return QVariant::fromValue(_color);
+}
+
+QVariant ColorAction::defaultValueToVariant() const
+{
+    return QVariant::fromValue(_defaultColor);
+}
+
 ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
     WidgetActionWidget(parent, colorAction),
     _layout(),

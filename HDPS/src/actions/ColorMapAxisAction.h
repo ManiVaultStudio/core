@@ -9,7 +9,7 @@ namespace hdps {
 
 namespace gui {
 
-class ColorMapAction;
+class ColorMapSettingsAction;
 
 /**
  * Color map axis action class
@@ -49,20 +49,18 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapAction Reference to color map action
+     * @param colorMapSettingsAction Reference to color map settings action
      * @param title Axis title
      */
-    ColorMapAxisAction(ColorMapAction& colorMapAction, const QString& title);
+    ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title);
 
 public: // Action getters
 
-    ColorMapAction& getColorMapAction() { return _colorMapAction; }
     DecimalRangeAction& getRangeAction() { return _rangeAction; }
     TriggerAction& getResetAction() { return _resetAction; }
     ToggleAction& getMirrorAction() { return _mirrorAction; }
 
 protected:
-    ColorMapAction&     _colorMapAction;    /** Reference to color map action */
     DecimalRangeAction  _rangeAction;       /** Range action */
     TriggerAction       _resetAction;       /** Reset to default range action */
     ToggleAction        _mirrorAction;      /** Mirror along the axis action */

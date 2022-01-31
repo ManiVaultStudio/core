@@ -115,27 +115,17 @@ public:
 
 public: // Settings
 
-    /** Get settings prefix */
-    QString getSettingsPrefix() const;
+    /**
+     * Get whether the widget action is serializable
+     * @return Whether the widget action is serializable
+     */
+    bool isSerializable() const;
 
     /**
-     * Set the settings prefix globally (not in the plugin namespace)
-     * @param settingsPrefix Prefix for the widget action settings
+     * Set whether the widget action is serializable
+     * @param serializable whether the widget action is serializable
      */
-    void setSettingsPrefix(const QString& settingsPrefix);
-
-    /**
-     * Set the settings prefix relative to a plugin
-     * @param settingsPrefix Prefix for the widget action settings
-     * @param plugin Pointer to plugin
-     */
-    void setSettingsPrefix(const QString& settingsPrefix, const plugin::Plugin* plugin);
-
-    /** Get whether the widget action can serialized to settings */
-    bool hasSettingsPrefix() const
-    {
-        return !_settingsPrefix.isEmpty();
-    }
+    void setSerializable(const bool& serializable);
 
     /**
      * Establish whether there is a saved default
@@ -175,7 +165,7 @@ public: // Settings
      */
     virtual QVariant savedDefaultValueToVariant() const
     {
-        return Application::current()->getSetting(getSettingsPrefix() + "/Default");
+        return Application::current()->getSetting(getSettingsPath() + "/Default");
     }
 
     /**
@@ -188,6 +178,12 @@ public: // Settings
 
         return QVariant();
     }
+
+    /**
+     * Get settings path
+     * @return Path of the action w.r.t. to the top-level action
+     */
+    QString getSettingsPath() const;
 
 protected:
 
@@ -212,7 +208,7 @@ protected:
     bool                        _resettable;                    /** Whether the action can be reset */
     bool                        _mayReset;                      /** Whether the action may be reset (from the user interface) */
     std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
-    QString                     _settingsPrefix;                /** Settings prefix for persistent widget action properties (e.g. presets and defaults) */
+    bool                        _serializable;                  /** Whether the widget action can be serialized/de-serialized */
 };
 
 /** List of widget actions */

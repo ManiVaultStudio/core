@@ -1,6 +1,8 @@
 #include "ColorMapAxisAction.h"
 #include "ColorMapAction.h"
-#include "Application.h"
+#include "ColorMapSettingsAction.h"
+
+#include <Application.h>
 
 #include <QGridLayout>
 #include <QGroupBox>
@@ -11,15 +13,18 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapAxisAction::ColorMapAxisAction(ColorMapAction& colorMapAction, const QString& title) :
-    WidgetAction(&colorMapAction),
-    _colorMapAction(colorMapAction),
+ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title) :
+    WidgetAction(&colorMapSettingsAction),
     _rangeAction(this, "Range", 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1),
     _resetAction(this, "Reset"),
     _mirrorAction(this, "Mirror")
 {
     setText(title);
-    
+    setSerializable(true);
+
+    _rangeAction.setSerializable(true);
+    _mirrorAction.setSerializable(true);
+
     _rangeAction.setToolTip("Range of the color map");
     _resetAction.setToolTip("Reset the color map");
     _mirrorAction.setToolTip("Mirror the color map");

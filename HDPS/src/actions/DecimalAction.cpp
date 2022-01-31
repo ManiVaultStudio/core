@@ -64,20 +64,32 @@ void DecimalAction::setSingleStep(const float& singleStep)
 
 void DecimalAction::setValue(const QVariant& value)
 {
-    if (!value.isValid() || value.type() != QVariant::Double)
+    if (!value.isValid())
         return;
+
+    QStringList actionPath;
+
+    auto parentAction = dynamic_cast<WidgetAction*>(parent());
+
+    while (parentAction)
+    {
+        actionPath << parentAction->text();
+
+        parentAction = dynamic_cast<WidgetAction*>(parentAction->parent());
+    }
 
     NumericalAction::setValue(value.toDouble());
 }
 
 QVariant DecimalAction::valueToVariant() const
 {
-    return QVariant(_value);
+    qDebug() << getSettingsPath();
+    return QVariant(static_cast<double>(_value));
 }
 
 QVariant DecimalAction::defaultValueToVariant() const
 {
-    return QVariant(_defaultValue);
+    return QVariant(static_cast<double>(_defaultValue));
 }
 
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :

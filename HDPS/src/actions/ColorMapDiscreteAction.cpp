@@ -1,5 +1,7 @@
 #include "ColorMapDiscreteAction.h"
 #include "ColorMapAction.h"
+#include "ColorMapSettingsAction.h"
+
 #include <QVBoxLayout>
 #include <QGroupBox>
 
@@ -9,14 +11,15 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
-    _colorMapAction(colorMapAction),
+ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction) :
+    WidgetAction(&colorMapSettingsAction),
     _numberOfStepsAction(this, "Number of steps", 2, 10, 5, 5)
 {
     setText("Discrete");
     setCheckable(true);
+    setSerializable(true);
 
+    _numberOfStepsAction.setSerializable(true);
     _numberOfStepsAction.setToolTip("Number of discrete steps");
 
     const auto updateResettable = [this]() {

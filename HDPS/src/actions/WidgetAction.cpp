@@ -1,8 +1,10 @@
 #include "WidgetAction.h"
 #include "WidgetActionLabel.h"
 #include "WidgetActionCollapsedWidget.h"
-#include "DataHierarchyItem.h"
-#include "Application.h"
+
+#include <DataHierarchyItem.h>
+#include <Application.h>
+#include <Plugin.h>
 
 #include <QDebug>
 
@@ -17,7 +19,7 @@ WidgetAction::WidgetAction(QObject* parent) :
     _resettable(false),
     _mayReset(false),
     _sortIndex(-1),
-    _settingsPrefix()
+    _serializable(false)
 {
 }
 
@@ -69,6 +71,23 @@ bool WidgetAction::isResettable() const
     if (!hasSavedDefault())
         return false;
 
+    const auto anyChildResettable = [](const WidgetAction* widgetAction) -> bool {
+        for (auto child : widgetAction->children()) {
+            auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+            if (!childWidgetAction)
+                continue;
+
+            if (childWidgetAction->isResettable())
+                return true;
+        }
+
+        return false;
+    };
+
+    if (anyChildResettable(this))
+        return true;
+
     return valueToVariant() != savedDefaultValueToVariant();
 }
 
@@ -107,50 +126,66 @@ void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
     _defaultWidgetFlags = widgetFlags;
 }
 
-QString WidgetAction::getSettingsPrefix() const
+bool WidgetAction::isSerializable() const
 {
-    return _settingsPrefix;
+    return _serializable;
 }
 
-void WidgetAction::setSettingsPrefix(const QString& settingsPrefix)
+void WidgetAction::setSerializable(const bool& serializable)
 {
-    Q_ASSERT(!settingsPrefix.isEmpty());
-
     // No need in update the same prefix
-    if (settingsPrefix == _settingsPrefix)
+    if (serializable == _serializable)
         return;
-
-    // Assign settings prefix
-    _settingsPrefix = settingsPrefix;
 
     // Load settings from registry
     loadDefault();
 }
 
-void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const plugin::Plugin* plugin)
-{
-    Q_ASSERT(!settingsPrefix.isEmpty());
-    Q_ASSERT(plugin != nullptr);
-
-    // Settings prefix consists of the plugin kind + settings prefix
-    _settingsPrefix = QString("%1/%2").arg(plugin->getKind(), settingsPrefix);
-
-    loadDefault();
-}
-
 bool WidgetAction::hasSavedDefault() const
 {
-    return Application::current()->getSetting(getSettingsPrefix() + "/Default").isValid();
+    return Application::current()->getSetting(getSettingsPath() + "/Default").isValid();
 }
 
 void WidgetAction::loadDefault()
 {
-    setValue(Application::current()->getSetting(getSettingsPrefix() + "/Default"));
+    setValue(Application::current()->getSetting(getSettingsPath() + "/Default"));
 }
 
 void WidgetAction::saveDefault()
 {
-    Application::current()->setSetting(getSettingsPrefix() + "/Default", valueToVariant());
+    Application::current()->setSetting(getSettingsPath() + "/Default", valueToVariant());
+}
+
+QString WidgetAction::getSettingsPath() const
+{
+    QStringList actionPath;
+
+    // Get the first action parent
+    auto currentParent = dynamic_cast<WidgetAction*>(parent());
+
+    // Add our own title
+    actionPath << text();
+
+    // Walk up the action tree
+    while (currentParent)
+    {
+        // Insert the action text at the beginning
+        actionPath.insert(actionPath.begin(), currentParent->text());
+
+        // Get the next parent action
+        currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
+    }
+
+    /*
+    if (!currentParent) {
+        auto parentPlugin = dynamic_cast<hdps::plugin::Plugin*>(currentParent);
+
+        if (parentPlugin)
+            actionPath.insert(actionPath.begin(), parentPlugin->getKind());
+    }
+    */  
+
+    return actionPath.join("/");
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
