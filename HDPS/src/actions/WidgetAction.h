@@ -34,6 +34,18 @@ public:
     WidgetAction(QObject* parent);
 
     /**
+     * Get name
+     * @return Name
+     */
+    QString getName() const;
+
+    /**
+     * Set name
+     * @param name Name
+     */
+    void setName(const QString& name);
+
+    /**
      * Create standard widget
      * @param parent Parent widget
      * @return Pointer to created widget
@@ -124,8 +136,9 @@ public: // Settings
     /**
      * Set whether the widget action is serializable
      * @param serializable whether the widget action is serializable
+     * @param recursive Set serializable recursively
      */
-    void setSerializable(const bool& serializable);
+    void setSerializable(const bool& serializable, bool recursive = true);
 
     /**
      * Establish whether there is a saved default
@@ -133,11 +146,23 @@ public: // Settings
      */
     bool hasSavedDefault() const;
 
-    /** Load default value from disk */
-    void loadDefault();
+    /**
+     * Establish whether a default can be saved
+     * @return Whether a default can be saved
+     */
+    bool canSaveDefault() const;
 
-    /** Save default value to disk */
-    void saveDefault();
+    /**
+     * Load default from settings
+     * @param recursive Load recursively
+     */
+    void loadDefault(bool recursive = true);
+
+    /**
+     * Save default to settings
+     * @param recursive Save recursively
+     */
+    void saveDefault(bool recursive = true);
 
     /**
      * Set action value from variant
@@ -145,7 +170,7 @@ public: // Settings
      */
     virtual void setValue(const QVariant& value)
     {
-        qDebug() << "Set value not implemented in derived widget action class";
+        qDebug() << "Set value not implemented in " << text();
     }
 
     /**
@@ -154,7 +179,7 @@ public: // Settings
      */
     virtual QVariant valueToVariant() const
     {
-        qDebug() << "Value to variant not implemented in derived widget action class";
+        qDebug() << "Value to variant not implemented in " << text();
 
         return QVariant();
     }
@@ -203,12 +228,12 @@ signals:
     void resettableChanged(const bool& isResettable);
 
 protected:
-    const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
-    std::int32_t                _defaultWidgetFlags;            /** Default widget flags */
-    bool                        _resettable;                    /** Whether the action can be reset */
-    bool                        _mayReset;                      /** Whether the action may be reset (from the user interface) */
-    std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
-    bool                        _serializable;                  /** Whether the widget action can be serialized/de-serialized */
+    QString         _name;                  /** Name (for internal use like serializing settings etc.) */
+    std::int32_t    _defaultWidgetFlags;    /** Default widget flags */
+    bool            _resettable;            /** Whether the action can be reset */
+    bool            _mayReset;              /** Whether the action may be reset (from the user interface) */
+    std::int32_t    _sortIndex;             /** Sort index (used in the group action to sort actions) */
+    bool            _serializable;          /** Whether the widget action can be serialized/de-serialized */
 };
 
 /** List of widget actions */

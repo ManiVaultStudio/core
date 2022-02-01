@@ -14,13 +14,22 @@ namespace gui {
 
 WidgetAction::WidgetAction(QObject* parent) :
     QWidgetAction(parent),
-    _dataHierarchyItemContext(nullptr),
     _defaultWidgetFlags(),
     _resettable(false),
     _mayReset(false),
     _sortIndex(-1),
-    _serializable(false)
+    _serializable(true)
 {
+}
+
+QString WidgetAction::getName() const
+{
+    return _name.isEmpty() ? text() : _name;
+}
+
+void WidgetAction::setName(const QString& name)
+{
+    _name = name;
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
@@ -71,11 +80,15 @@ bool WidgetAction::isResettable() const
     if (!hasSavedDefault())
         return false;
 
+    // Determine whether any of the children is resettable
     const auto anyChildResettable = [](const WidgetAction* widgetAction) -> bool {
         for (auto child : widgetAction->children()) {
             auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
 
             if (!childWidgetAction)
+                continue;
+
+            if (!childWidgetAction->isSerializable())
                 continue;
 
             if (childWidgetAction->isResettable())
@@ -93,6 +106,27 @@ bool WidgetAction::isResettable() const
 
 bool WidgetAction::isFactoryResettable() const
 {
+    // Determine whether any of the children is factory resettable
+    const auto anyChildFactoryResettable = [](const WidgetAction* widgetAction) -> bool {
+        for (auto child : widgetAction->children()) {
+            auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+            if (!childWidgetAction)
+                continue;
+
+            if (!childWidgetAction->isSerializable())
+                continue;
+
+            if (childWidgetAction->isFactoryResettable())
+                return true;
+        }
+
+        return false;
+    };
+
+    if (anyChildFactoryResettable(this))
+        return true;
+
     return valueToVariant() != defaultValueToVariant();
 }
 
@@ -114,6 +148,20 @@ void WidgetAction::reset()
     // And assign it to the value if valid
     if (defaultValue.isValid())
         setValue(defaultValue);
+
+    // Reset all children
+    for (auto child : children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        if (!childWidgetAction->isSerializable())
+            continue;
+
+        // Reset the child
+        childWidgetAction->reset();
+    }
 }
 
 std::int32_t WidgetAction::getDefaultWidgetFlags() const
@@ -128,32 +176,139 @@ void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 
 bool WidgetAction::isSerializable() const
 {
-    return _serializable;
+    if (_serializable)
+        return true;
+
+    // Check whether any of the children is serializable
+    for (auto child : children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        if (childWidgetAction->isSerializable())
+            return true;
+    }
+
+    return false;
 }
 
-void WidgetAction::setSerializable(const bool& serializable)
+void WidgetAction::setSerializable(const bool& serializable, bool recursive /*= true*/)
 {
     // No need in update the same prefix
     if (serializable == _serializable)
         return;
 
-    // Load settings from registry
-    loadDefault();
+    _serializable = serializable;
+
+    if (!recursive)
+        return;
+
+    // Set children serializable
+    for (auto child : children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        childWidgetAction->setSerializable(serializable);
+    }
 }
 
 bool WidgetAction::hasSavedDefault() const
 {
-    return Application::current()->getSetting(getSettingsPath() + "/Default").isValid();
+    if (Application::current()->getSetting(getSettingsPath() + "/Default").isValid())
+        return true;
+
+    // Check whether any of the children has a saved default
+    for (auto child : children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        if (!childWidgetAction->isSerializable())
+            continue;
+
+        // Load child default
+        if (childWidgetAction->hasSavedDefault())
+            return true;
+    }
+
+    return false;
 }
 
-void WidgetAction::loadDefault()
+bool WidgetAction::canSaveDefault() const
 {
+    if (valueToVariant() != savedDefaultValueToVariant())
+        return true;
+
+    // Check whether any of the children can save to default
+    for (auto child : children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        if (!childWidgetAction->isSerializable())
+            continue;
+
+        // Check whether child can save to default
+        if (childWidgetAction->canSaveDefault())
+            return true;
+    }
+
+    return false;
+}
+
+void WidgetAction::loadDefault(bool recursive /*= true*/)
+{
+    //qDebug() << "Load default for " << text();
+
+    // Load own default
     setValue(Application::current()->getSetting(getSettingsPath() + "/Default"));
+
+    if (!recursive)
+        return;
+
+    // Load default for all children
+    for (auto child : children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        if (!childWidgetAction->isSerializable())
+            continue;
+
+        // Load child default
+        childWidgetAction->loadDefault();
+    }
 }
 
-void WidgetAction::saveDefault()
+void WidgetAction::saveDefault(bool recursive /*= true*/)
 {
+    //qDebug() << "Save default for " << text();
+
+    // Save own default
     Application::current()->setSetting(getSettingsPath() + "/Default", valueToVariant());
+
+    if (!recursive)
+        return;
+
+    // Save default for all children
+    for (auto child : children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        if (!childWidgetAction->isSerializable())
+            continue;
+
+        // Save child default
+        childWidgetAction->saveDefault();
+    }
 }
 
 QString WidgetAction::getSettingsPath() const
@@ -164,26 +319,17 @@ QString WidgetAction::getSettingsPath() const
     auto currentParent = dynamic_cast<WidgetAction*>(parent());
 
     // Add our own title
-    actionPath << text();
+    actionPath << getName();
 
     // Walk up the action tree
     while (currentParent)
     {
         // Insert the action text at the beginning
-        actionPath.insert(actionPath.begin(), currentParent->text());
+        actionPath.insert(actionPath.begin(), currentParent->getName());
 
         // Get the next parent action
         currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
     }
-
-    /*
-    if (!currentParent) {
-        auto parentPlugin = dynamic_cast<hdps::plugin::Plugin*>(currentParent);
-
-        if (parentPlugin)
-            actionPath.insert(actionPath.begin(), parentPlugin->getKind());
-    }
-    */  
 
     return actionPath.join("/");
 }

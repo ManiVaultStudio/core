@@ -1,8 +1,11 @@
 #pragma once
 
 #include "GroupAction.h"
+#include "WidgetActionOptions.h"
 
+#include <QHBoxLayout>
 #include <QPushButton>
+#include <QLabel>
 
 class QWidget;
 class QTreeWidget;
@@ -52,9 +55,21 @@ public:
              */
             SectionPushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, const QString& text, QWidget* parent = nullptr);
 
+            /**
+             * Respond to target events
+             * @param target Object of which an event occurred
+             * @param event The event that took place
+             */
+            bool eventFilter(QObject* target, QEvent* event) override final;
+
         protected:
-            GroupAction*        _widgetActionGroup;     /** Pointer to widget action group */
-            QTreeWidgetItem*    _treeWidgetItem;        /** Pointer to widget action group */
+            GroupAction*            _widgetActionGroup;         /** Pointer to widget action group */
+            QTreeWidgetItem*        _treeWidgetItem;            /** Pointer to widget action group */
+            QWidget                 _overlayWidget;             /** Overlay widget for buttons etc. */
+            QHBoxLayout             _overlayLayout;             /** Overlay layout */
+            QLabel                  _iconLabel;                 /** Left-aligned icon label */
+            QLabel                  _settingsLabel;             /** Right-aligned settings label */
+            WidgetActionOptions     _widgetActionOptions;       /** Widget action options */
         };
 
     protected:

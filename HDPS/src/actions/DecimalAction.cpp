@@ -83,7 +83,6 @@ void DecimalAction::setValue(const QVariant& value)
 
 QVariant DecimalAction::valueToVariant() const
 {
-    qDebug() << getSettingsPath();
     return QVariant(static_cast<double>(_value));
 }
 

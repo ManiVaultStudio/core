@@ -15,20 +15,14 @@ namespace gui {
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction),
-    _horizontalAxisAction(*this, "Horizontal"),
-    _verticalAxisAction(*this, "Vertical"),
+    _horizontalAxisAction(*this, "Horizontal Axis"),
+    _verticalAxisAction(*this, "Vertical Axis"),
     _discreteAction(*this)
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
     setMayReset(true);
     setSerializable(true);
-
-    const auto updateRangeActions = [this]() -> void {
-        _horizontalAxisAction.setText(_colorMapAction.getColorMapType() == ColorMap::Type::OneDimensional ? "Range" : "Horizontal");
-    };
-
-    connect(&colorMapAction, &ColorMapAction::typeChanged, this, updateRangeActions);
 
     const auto updateResettable = [this]() {
         setResettable(isResettable());
@@ -37,8 +31,6 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     connect(&_horizontalAxisAction, &ColorMapAxisAction::resettableChanged, this, updateResettable);
     connect(&_verticalAxisAction, &ColorMapAxisAction::resettableChanged, this, updateResettable);
     connect(&_discreteAction, &ColorMapDiscreteAction::resettableChanged, this, updateResettable);
-
-    updateRangeActions();
 }
 
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :

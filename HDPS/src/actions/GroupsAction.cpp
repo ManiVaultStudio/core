@@ -5,7 +5,6 @@
 #include <QVBoxLayout>
 #include <QTreeWidget>
 #include <QResizeEvent>
-#include <QLabel>
 
 namespace hdps {
 
@@ -99,26 +98,43 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction) :
 GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, const QString& text, QWidget* parent /*= nullptr*/) :
     QPushButton(text, parent),
     _widgetActionGroup(groupAction),
-    _treeWidgetItem(treeWidgetItem)
+    _treeWidgetItem(treeWidgetItem),
+    _overlayWidget(this),
+    _overlayLayout(),
+    _iconLabel(),
+    _settingsLabel(),
+    _widgetActionOptions(groupAction, &_settingsLabel)
 {
-    auto frameLayout    = new QHBoxLayout();
-    auto iconLabel      = new QLabel();
+    setFixedHeight(22);
 
-    iconLabel->setAlignment(Qt::AlignCenter);
+    // Get reference to the Font Awesome icon font
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    frameLayout->setMargin(5);
-    frameLayout->addWidget(iconLabel);
-    frameLayout->addStretch(1);
+    _overlayWidget.setLayout(&_overlayLayout);
+    _overlayWidget.raise();
 
-    setLayout(frameLayout);
+    _overlayLayout.setContentsMargins(10, 6, 10, 6);
+    _overlayLayout.addWidget(&_iconLabel);
+    _overlayLayout.addStretch(1);
+
+    if (_widgetActionGroup->isSerializable())
+        _overlayLayout.addWidget(&_settingsLabel);
+
+    _iconLabel.setAlignment(Qt::AlignCenter);
+    _iconLabel.setFont(fontAwesome.getFont(7));
+    _settingsLabel.setFont(fontAwesome.getFont(7));
+
+    // Install event filter to synchronize overlay widget size with push button size
+    installEventFilter(this);
 
     // Toggle the section expansion when the section push button is clicked
     connect(this, &QPushButton::clicked, this, [this]() {
-        _widgetActionGroup->toggle();
+        if (!_settingsLabel.rect().contains(QCursor::pos()))
+            _widgetActionGroup->toggle();
     });
 
     // Update the state of the push button when the group action changes
-    const auto update = [this, iconLabel]() -> void {
+    const auto update = [this, &fontAwesome]() -> void {
         if (_widgetActionGroup->isExpanded()) {
             _treeWidgetItem->setExpanded(true);
 
@@ -146,49 +162,33 @@ GroupsAction::Widget::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
             _treeWidgetItem->removeChild(_treeWidgetItem->child(0));
         }
 
-        // Pick icon that corresponds to the group action state
-        const auto iconName = _widgetActionGroup->isExpanded() ? "angle-down" : "angle-right";
-        const auto icon     = Application::getIconFont("FontAwesome").getIcon(iconName);
-
-        // Assign the icon
-        iconLabel->setPixmap(icon.pixmap(QSize(12, 12)));
+        // Assign the icon characters
+        _iconLabel.setText(fontAwesome.getIconCharacter(_widgetActionGroup->isExpanded() ? "angle-down" : "angle-right"));
+        _settingsLabel.setText(fontAwesome.getIconCharacter("ellipsis-h"));
     };
 
     // Update when the group action is expanded or collapsed
     connect(_widgetActionGroup, &GroupAction::expanded, this, update);
     connect(_widgetActionGroup, &GroupAction::collapsed, this, update);
 
-    /*
-    // Update the state of the reset push button
-    const auto updateResetPushButton = [this, groupAction, resetToolButton]() -> void {
-        auto isResettable = false;
+    update();
+}
 
-        for (auto child : groupAction->children()) {
-            auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-            if (childWidgetAction == nullptr)
-                continue;
-
-            if (childWidgetAction->isResettable())
-                isResettable = true;
+bool GroupsAction::Widget::SectionPushButton::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::Resize:
+        {
+            _overlayWidget.setFixedSize(static_cast<QResizeEvent*>(event)->size());
+            break;
         }
 
-        resetToolButton->setEnabled(isResettable);
-    };
-
-    // Walk over all child actions
-    for (auto child : groupAction->children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (childWidgetAction == nullptr)
-            continue;
-
-        connect(childWidgetAction, &WidgetAction::isResettableChanged, this, updateResetPushButton);
+        default:
+            break;
     }
-    */
 
-    update();
-    //updateResetPushButton();
+    return QPushButton::eventFilter(target, event);
 }
 
 }

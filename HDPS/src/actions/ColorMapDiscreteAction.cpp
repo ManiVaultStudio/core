@@ -17,7 +17,6 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
 {
     setText("Discrete");
     setCheckable(true);
-    setSerializable(true);
 
     _numberOfStepsAction.setSerializable(true);
     _numberOfStepsAction.setToolTip("Number of discrete steps");
@@ -28,6 +27,24 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
 
     connect(this, &ColorMapDiscreteAction::toggled, this, updateResettable);
     connect(&_numberOfStepsAction, &IntegralAction::resettableChanged, this, updateResettable);
+}
+
+void ColorMapDiscreteAction::setValue(const QVariant& value)
+{
+    if (!value.isValid())
+        return;
+
+    setChecked(value.toBool());
+}
+
+QVariant ColorMapDiscreteAction::valueToVariant() const
+{
+    return QVariant(isChecked());
+}
+
+QVariant ColorMapDiscreteAction::defaultValueToVariant() const
+{
+    return QVariant(false);
 }
 
 ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction) :

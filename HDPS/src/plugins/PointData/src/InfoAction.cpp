@@ -21,18 +21,12 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, Points& points) :
 {
     setText("Info");
     setEventCore(_core);
+    setSerializable(false);
 
     _numberOfPointsAction.setEnabled(false);
     _numberOfDimensionsAction.setEnabled(false);
     _memorySizeAction.setEnabled(false);
     _numberOfSelectedPointsAction.setEnabled(false);
-
-    _numberOfPointsAction.setMayReset(false);
-    _numberOfDimensionsAction.setMayReset(false);
-    _memorySizeAction.setMayReset(false);
-    _numberOfSelectedPointsAction.setMayReset(false);
-    _selectedIndicesAction.setMayReset(false);
-    _dimensionNamesAction.setMayReset(false);
 
     _numberOfPointsAction.setToolTip("The number of points");
     _numberOfDimensionsAction.setToolTip("The number of dimensions in the point data");

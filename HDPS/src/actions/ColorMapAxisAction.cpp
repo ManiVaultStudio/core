@@ -50,6 +50,20 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsA
     connect(&_mirrorAction, &ToggleAction::resettableChanged, this, updateResettable);
 }
 
+void ColorMapAxisAction::setValue(const QVariant& value)
+{
+}
+
+QVariant ColorMapAxisAction::valueToVariant() const
+{
+    return QVariant();
+}
+
+QVariant ColorMapAxisAction::defaultValueToVariant() const
+{
+    return QVariant();
+}
+
 ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMapAxisAction) :
     WidgetActionWidget(parent, colorMapAxisAction)
 {

@@ -49,7 +49,7 @@ void ToggleAction::setDefaultToggled(const bool& defaultToggled)
 
 void ToggleAction::setValue(const QVariant& value)
 {
-    if (!value.isValid() || value.type() != QVariant::Bool)
+    if (!value.isValid())
         return;
 
     setChecked(value.toBool());
