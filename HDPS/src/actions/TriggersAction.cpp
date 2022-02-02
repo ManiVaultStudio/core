@@ -58,7 +58,7 @@ void TriggersAction::setTriggerEnabled(std::int32_t triggerIndex, const bool& en
     emit triggerChanged(triggerIndex, _triggers[triggerIndex]);
 }
 
-void TriggersAction::setValue(const QVariant& value)
+void TriggersAction::setValueFromVariant(const QVariant& value)
 {
     // Triggers action has no value
 }

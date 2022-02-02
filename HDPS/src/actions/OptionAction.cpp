@@ -110,7 +110,7 @@ const QAbstractItemModel* OptionAction::getModel() const
     return &_defaultModel;
 }
 
-void OptionAction::setValue(const QVariant& value)
+void OptionAction::setValueFromVariant(const QVariant& value)
 {
     if (!value.isValid() || value.type() != QVariant::Int)
         return;

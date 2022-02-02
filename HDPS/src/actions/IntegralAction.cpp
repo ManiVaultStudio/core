@@ -40,12 +40,12 @@ void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t&
     _defaultValueChanged();
 }
 
-void IntegralAction::setValue(const QVariant& value)
+void IntegralAction::setValueFromVariant(const QVariant& value)
 {
     if (!value.isValid() || value.type() != QVariant::Int)
         return;
 
-    NumericalAction::setValue(value.toInt());
+    setValue(value.toInt());
 }
 
 QVariant IntegralAction::valueToVariant() const

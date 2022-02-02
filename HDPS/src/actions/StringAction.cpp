@@ -104,7 +104,7 @@ void StringAction::setCompleter(QCompleter* completer)
     emit completerChanged(_completer);
 }
 
-void StringAction::setValue(const QVariant& value)
+void StringAction::setValueFromVariant(const QVariant& value)
 {
     if (!value.isValid() || value.type() != QVariant::String)
         return;

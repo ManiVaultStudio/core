@@ -118,10 +118,10 @@ public: // Option action wrappers
 public: // Settings
 
     /**
-     * Set action value from variant
+     * Set value from variant
      * @param value Value
      */
-    void setValue(const QVariant& value) override final;
+    void setValueFromVariant(const QVariant& value) override final;
 
     /**
      * Convert value to variant

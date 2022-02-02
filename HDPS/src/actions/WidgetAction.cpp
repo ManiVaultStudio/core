@@ -147,7 +147,7 @@ void WidgetAction::reset()
 
     // And assign it to the value if valid
     if (defaultValue.isValid())
-        setValue(defaultValue);
+        setValueFromVariant(defaultValue);
 
     // Reset all children
     for (auto child : children()) {
@@ -266,7 +266,7 @@ void WidgetAction::loadDefault(bool recursive /*= true*/)
     //qDebug() << "Load default for " << text();
 
     // Load own default
-    setValue(Application::current()->getSetting(getSettingsPath() + "/Default"));
+    setValueFromVariant(Application::current()->getSetting(getSettingsPath() + "/Default"));
 
     if (!recursive)
         return;

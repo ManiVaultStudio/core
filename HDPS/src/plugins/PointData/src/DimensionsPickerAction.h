@@ -60,7 +60,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    DimensionsPickerAction(QObject* parent, const QString& title = "DimensionSelection");
+    DimensionsPickerAction(QObject* parent, const QString& title = "Dimensions");
 
     /** Destructor */
     ~DimensionsPickerAction();
@@ -179,10 +179,10 @@ public:
 public: // Settings
 
     /**
-     * Set action value from variant
+     * Set value from variant
      * @param value Value
      */
-    void setValue(const QVariant& value) override final;
+    void setValueFromVariant(const QVariant& value) override final;
 
     /**
      * Convert value to variant

@@ -47,7 +47,7 @@ void ToggleAction::setDefaultToggled(const bool& defaultToggled)
     emit defaultToggledChanged(_defaultToggled);
 }
 
-void ToggleAction::setValue(const QVariant& value)
+void ToggleAction::setValueFromVariant(const QVariant& value)
 {
     if (!value.isValid())
         return;

@@ -13,7 +13,7 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
     setDefaultWidgetFlags(WidgetFlag::Text);
 }
 
-void TriggerAction::setValue(const QVariant& value)
+void TriggerAction::setValueFromVariant(const QVariant& value)
 {
     // Trigger action has no value
 }

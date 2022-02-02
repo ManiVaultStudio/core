@@ -29,7 +29,7 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
     connect(&_numberOfStepsAction, &IntegralAction::resettableChanged, this, updateResettable);
 }
 
-void ColorMapDiscreteAction::setValue(const QVariant& value)
+void ColorMapDiscreteAction::setValueFromVariant(const QVariant& value)
 {
     if (!value.isValid())
         return;

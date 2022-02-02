@@ -165,10 +165,10 @@ public: // Settings
     void saveDefault(bool recursive = true);
 
     /**
-     * Set action value from variant
+     * Set value from variant
      * @param value Value
      */
-    virtual void setValue(const QVariant& value)
+    virtual void setValueFromVariant(const QVariant& value)
     {
         qDebug() << "Set value not implemented in " << text();
     }

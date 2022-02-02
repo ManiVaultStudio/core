@@ -81,7 +81,7 @@ void DecimalRangeAction::setRange(const float& minimum, const float& maximum)
     _rangeMaxAction.initialize(minimum, maximum, maximum, maximum);
 }
 
-void DecimalRangeAction::setValue(const QVariant& value)
+void DecimalRangeAction::setValueFromVariant(const QVariant& value)
 {
 }
 

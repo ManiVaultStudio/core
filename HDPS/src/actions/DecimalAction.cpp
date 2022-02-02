@@ -62,7 +62,7 @@ void DecimalAction::setSingleStep(const float& singleStep)
     emit singleStepChanged(_singleStep);
 }
 
-void DecimalAction::setValue(const QVariant& value)
+void DecimalAction::setValueFromVariant(const QVariant& value)
 {
     if (!value.isValid())
         return;

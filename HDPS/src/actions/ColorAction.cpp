@@ -62,7 +62,7 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-void ColorAction::setValue(const QVariant& value)
+void ColorAction::setValueFromVariant(const QVariant& value)
 {
     if (!value.isValid())
         return;

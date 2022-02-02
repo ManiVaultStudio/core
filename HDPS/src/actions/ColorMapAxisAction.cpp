@@ -50,7 +50,7 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsA
     connect(&_mirrorAction, &ToggleAction::resettableChanged, this, updateResettable);
 }
 
-void ColorMapAxisAction::setValue(const QVariant& value)
+void ColorMapAxisAction::setValueFromVariant(const QVariant& value)
 {
 }
 

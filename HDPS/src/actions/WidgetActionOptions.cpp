@@ -49,6 +49,9 @@ WidgetActionOptions::WidgetActionOptions(WidgetAction* widgetAction, QLabel* lab
 
 bool WidgetActionOptions::eventFilter(QObject* target, QEvent* event)
 {
+    if (!_widgetAction->isSerializable())
+        return QObject::eventFilter(target, event);
+
     switch (event->type())
     {
         // Mouse button press event

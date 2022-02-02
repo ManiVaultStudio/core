@@ -239,7 +239,7 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     setResettable(isResettable());
 }
 
-void ColorMapAction::setValue(const QVariant& value)
+void ColorMapAction::setValueFromVariant(const QVariant& value)
 {
 }
 

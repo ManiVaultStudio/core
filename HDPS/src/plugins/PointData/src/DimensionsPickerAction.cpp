@@ -22,7 +22,7 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title /*= "DimensionSelection"*/) :
+DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& title /*= "Dimensions"*/) :
     GroupAction(parent),
     _points(nullptr),
     _holder(),
@@ -254,7 +254,7 @@ void DimensionsPickerAction::selectDimension(const std::int32_t& dimensionIndex,
     _holder.setDimensionEnabled(dimensionIndex, true);
 }
 
-void DimensionsPickerAction::setValue(const QVariant& value)
+void DimensionsPickerAction::setValueFromVariant(const QVariant& value)
 {
     const auto enabledDimensions = value.toList();
 
