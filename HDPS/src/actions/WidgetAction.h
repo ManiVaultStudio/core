@@ -31,19 +31,12 @@ class WidgetAction : public QWidgetAction
     Q_OBJECT
 
 public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
     WidgetAction(QObject* parent);
-
-    /**
-     * Get name
-     * @return Name
-     */
-    QString getName() const;
-
-    /**
-     * Set name
-     * @param name Name
-     */
-    void setName(const QString& name);
 
     /**
      * Create standard widget
@@ -228,7 +221,6 @@ signals:
     void resettableChanged(const bool& isResettable);
 
 protected:
-    QString         _name;                  /** Name (for internal use like serializing settings etc.) */
     std::int32_t    _defaultWidgetFlags;    /** Default widget flags */
     bool            _resettable;            /** Whether the action can be reset */
     bool            _mayReset;              /** Whether the action may be reset (from the user interface) */

@@ -39,6 +39,11 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& t
 
     _summaryAction.setEnabled(false);
 
+    _summaryAction.setSerializable(false);
+    _filterAction.setSerializable(false);
+    _selectAction.setSerializable(false);
+    _miscellaneousAction.setSerializable(false);
+
     updateSummary();
 
     _summaryUpdateAwakeConnection = connect(QAbstractEventDispatcher::instance(), &QAbstractEventDispatcher::awake,[this] {
@@ -102,6 +107,7 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
 
     setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
     computeStatistics();
+    setObjectName(QString("%1/Selection").arg(_points->getGuiName()));
 }
 
 DimensionsPickerHolder& DimensionsPickerAction::getHolder()

@@ -22,16 +22,6 @@ WidgetAction::WidgetAction(QObject* parent) :
 {
 }
 
-QString WidgetAction::getName() const
-{
-    return _name.isEmpty() ? text() : _name;
-}
-
-void WidgetAction::setName(const QString& name)
-{
-    _name = name;
-}
-
 QWidget* WidgetAction::createWidget(QWidget* parent)
 {
     if (parent != nullptr && dynamic_cast<WidgetActionCollapsedWidget::ToolButton*>(parent->parent()))
@@ -240,8 +230,17 @@ bool WidgetAction::hasSavedDefault() const
 
 bool WidgetAction::canSaveDefault() const
 {
-    if (valueToVariant() != savedDefaultValueToVariant())
-        return true;
+    const auto valueVariant             = valueToVariant();
+    const auto defaultValueVariant      = defaultValueToVariant();
+    const auto savedDefaultValueVariant = savedDefaultValueToVariant();
+
+    if (valueVariant.isValid()) {
+        if (savedDefaultValueVariant.isValid() && (valueVariant != savedDefaultValueVariant))
+            return true;
+
+        if (defaultValueVariant.isValid() && (valueVariant != savedDefaultValueVariant && valueVariant != defaultValueVariant))
+            return true;
+    }
 
     // Check whether any of the children can save to default
     for (auto child : children()) {
@@ -318,14 +317,22 @@ QString WidgetAction::getSettingsPath() const
     // Get the first action parent
     auto currentParent = dynamic_cast<WidgetAction*>(parent());
 
+    // Get path name from widget action
+    const auto getPathName = [](const WidgetAction* widgetAction) -> QString {
+        if (!widgetAction->objectName().isEmpty())
+            return widgetAction->objectName();
+
+        return widgetAction->text();
+    };
+
     // Add our own title
-    actionPath << getName();
+    actionPath << getPathName(this);
 
     // Walk up the action tree
     while (currentParent)
     {
         // Insert the action text at the beginning
-        actionPath.insert(actionPath.begin(), currentParent->getName());
+        actionPath.insert(actionPath.begin(), getPathName(currentParent));
 
         // Get the next parent action
         currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());

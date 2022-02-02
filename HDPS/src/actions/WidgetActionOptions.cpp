@@ -79,7 +79,7 @@ bool WidgetActionOptions::eventFilter(QObject* target, QEvent* event)
             auto optionsMenu = new QMenu("Options");
 
             // Configure the context menu and add reset to factory default action
-            optionsMenu->setEnabled(_widgetAction->isFactoryResettable());
+            //optionsMenu->setEnabled(_widgetAction->isFactoryResettable());
             optionsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
             optionsMenu->addAction(&_loadFactoryDefaultAction);
 
