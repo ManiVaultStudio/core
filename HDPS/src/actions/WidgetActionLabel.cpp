@@ -38,9 +38,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     connect(widgetAction, &WidgetAction::changed, this, update);
 
     update();
-
-    // Install event filter for intercepting label events
-    _label.installEventFilter(this);
 }
 
 }

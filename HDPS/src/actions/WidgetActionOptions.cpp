@@ -11,7 +11,7 @@ namespace hdps {
 namespace gui {
 
 WidgetActionOptions::WidgetActionOptions(WidgetAction* widgetAction, QLabel* label) :
-    QObject(widgetAction),
+    QObject(nullptr),
     _widgetAction(widgetAction),
     _label(label),
     _loadDefaultAction(this, "Load default"),
@@ -19,7 +19,7 @@ WidgetActionOptions::WidgetActionOptions(WidgetAction* widgetAction, QLabel* lab
     _loadFactoryDefaultAction(this, "Load factory default")
 {
     Q_ASSERT(_label != nullptr);
-
+    
     // Set action icons
     _loadDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
     _saveDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
