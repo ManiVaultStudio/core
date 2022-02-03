@@ -484,9 +484,9 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     horizontalHeader->resizeSection(2, 85);
 
     // Set column resize modes
-    horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
-    horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
+    //horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
+    //horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
+    //horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
 
     tableView->verticalHeader()->hide();
     tableView->verticalHeader()->setDefaultSectionSize(5);

@@ -98,6 +98,7 @@ set( WIDGET_HEADERS
     src/widgets/DropWidget.h
     src/widgets/ResponsiveToolbarWidget.h
     src/widgets/ToolbarItemWidget.h
+    src/widgets/Divider.h
 )
 
 set( WIDGET_SOURCES
@@ -108,6 +109,7 @@ set( WIDGET_SOURCES
     src/widgets/DropWidget.cpp
     src/widgets/ResponsiveToolbarWidget.cpp
     src/widgets/ToolbarItemWidget.cpp
+    src/widgets/Divider.cpp
 )
 
 set(ACTIONS_HEADERS

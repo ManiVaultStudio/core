@@ -1,9 +1,10 @@
 #include "DataPropertiesWidget.h"
-#include "Application.h"
-#include "Core.h"
-#include "DataHierarchyItem.h"
 
-#include "actions/GroupAction.h"
+#include <Application.h>
+#include <Core.h>
+#include <DataHierarchyItem.h>
+#include <actions/GroupAction.h>
+#include <widgets/Divider.h>
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -17,19 +18,86 @@ namespace gui
 DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _dataset(),
-    _groupsAction(this)
+    _layout(),
+    _groupsAction(this),
+    _filteredActionsAction(this, true),
+    _toolbarWidget(),
+    _toolbarLayout(),
+    _filterAction(this, "Search"),
+    _expandAllAction(this, "Expand all"),
+    _collapseAllAction(this, "Collapse all"),
+    _loadDefaultAction(this, "Load default"),
+    _saveDefaultAction(this, "Save default"),
+    _factoryDefaultAction(this, "Factory default")
 {
     setAutoFillBackground(true);
 
-    auto layout = new QVBoxLayout();
+    _filteredActionsAction.setSerializable(false);
 
-    setLayout(layout);
+    _filterAction.getLeadingAction().setVisible(true);
+    _filterAction.getLeadingAction().setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+    _filterAction.setPlaceHolderString("Filter properties by name...");
 
-    layout->setMargin(0);
-    layout->setAlignment(Qt::AlignTop);
-    layout->addWidget(_groupsAction.createWidget(this));
+    // Set action icon
+    _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
+    _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
+    _loadDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    _saveDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+    _factoryDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("industry"));
+
+    // Set action tooltips
+    _filterAction.setToolTip("Filter properties by name");
+    _expandAllAction.setToolTip("Expand all property sections");
+    _collapseAllAction.setToolTip("Collapse all property sections");
+    _loadDefaultAction.setToolTip("Load default properties");
+    _saveDefaultAction.setToolTip("Save default properties");
+    _factoryDefaultAction.setToolTip("Restore factory default properties");
+
+    setLayout(&_layout);
+
+    _layout.setMargin(5);
+    _layout.setSpacing(3);
+    _layout.setAlignment(Qt::AlignTop);
+
+    // Configure toolbar layout
+    _toolbarLayout.setContentsMargins(0, 2, 0, 2);
+    _toolbarLayout.setSpacing(4);
+
+    // Add toolbar items
+    _toolbarLayout.addWidget(_filterAction.createWidget(this), 1);
+    _toolbarLayout.addWidget(createVerticalDivider());
+    _toolbarLayout.addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
+    _toolbarLayout.addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
+    _toolbarLayout.addWidget(createVerticalDivider());
+    _toolbarLayout.addWidget(_loadDefaultAction.createWidget(this, ToggleAction::PushButtonIcon));
+    _toolbarLayout.addWidget(_saveDefaultAction.createWidget(this, ToggleAction::PushButtonIcon));
+    _toolbarLayout.addWidget(createVerticalDivider());
+    _toolbarLayout.addWidget(_factoryDefaultAction.createWidget(this, ToggleAction::PushButtonIcon));
+
+    _toolbarWidget.setLayout(&_toolbarLayout);
+
+    // Update toolbar when the current dataset changes
+    connect(&_dataset, &Dataset<DatasetImpl>::changed, this, &DataPropertiesWidget::updateToolbar);
+
+    // Update toolbar when one of the group actions is expanded/collapsed
+    connect(&_groupsAction, &GroupsAction::expanded, this, &DataPropertiesWidget::updateToolbar);
+    connect(&_groupsAction, &GroupsAction::collapsed, this, &DataPropertiesWidget::updateToolbar);
+
+    // Add toolbar layout and groups widget
+    _layout.addWidget(&_toolbarWidget);
+    _layout.addWidget(_groupsAction.createWidget(this));
 
     emit currentDatasetGuiNameChanged("");
+
+    // Update properties when the filter changes
+    connect(&_filterAction, &StringAction::stringChanged, this, &DataPropertiesWidget::updateProperties);
+
+    // Expand/collapse all when triggered
+    connect(&_expandAllAction, &TriggerAction::triggered, this, &DataPropertiesWidget::expandAll);
+    connect(&_collapseAllAction, &TriggerAction::triggered, this, &DataPropertiesWidget::collapseAll);
+
+    // Perform an initial update of the toolbar
+    updateToolbar();
 }
 
 void DataPropertiesWidget::setDatasetId(const QString& datasetId)
@@ -81,23 +149,129 @@ void DataPropertiesWidget::loadDataset()
         return;
     }
 
-    // Section in the data properties
-    GroupsAction::GroupActions groupActions;
+    // Update toolbar and properties
+    updateToolbar();
+    updateProperties();
+}
 
-    // Loop over all actions in the dataset and to section if the action is a group action
+void DataPropertiesWidget::updateToolbar()
+{
+    // Set toolbar read-only status based on whether a dataset is loaded
+    _toolbarWidget.setEnabled(_dataset.isValid());
+
+    // Cannot update actions when the dataset is invalid
+    if (!_dataset.isValid())
+        return;
+
+    // Set read-only states of actions
+    _expandAllAction.setEnabled(canExpandAll());
+    _collapseAllAction.setEnabled(canCollapseAll());
+}
+
+void DataPropertiesWidget::updateProperties()
+{
+    // Get filter string
+    const auto filterString = _filterAction.getString();
+
+    // Get group actions
+    auto groupActions = getGroupActions();
+
+    // Remove group actions
+    groupActions.erase(std::remove_if(groupActions.begin(), groupActions.end(), [&groupActions, &filterString](const GroupAction* groupAction) -> bool {
+        if (groupAction == groupActions.last())
+            return filterString.isEmpty();
+        else
+            return !filterString.isEmpty();
+    }), groupActions.end());
+
+    // Assign the group actions to the accordion
+    _groupsAction.set(groupActions);
+
+    // Find child widget actions
+    QVector<WidgetAction*> foundActions;
+
+    // Get group actions
+    auto filterGroupActions = getGroupActions();
+
+    // Remove special filtered actions group action
+    filterGroupActions.removeLast();
+
+    for (auto groupAction : filterGroupActions)
+        foundActions << groupAction->findChildren(filterString, false);
+
+    // Update filtered actions group action
+    _filteredActionsAction.setActions(foundActions);
+    _filteredActionsAction.setText(foundActions.count() == 0 ? "No properties found" : QString("Found %1 properties").arg(foundActions.count()));
+}
+
+bool DataPropertiesWidget::canExpandAll() const
+{
+    // Can expand when the number of expanded group actions is smaller than the number of group actions
+    return getNumberOfExpandedGroupActions() < getGroupActions().count();
+}
+
+void DataPropertiesWidget::expandAll()
+{
+    for (auto groupAction : getGroupActions())
+        groupAction->setExpanded(true);
+}
+
+bool DataPropertiesWidget::canCollapseAll() const
+{
+    // Can collapse when the number of collapse group actions is larger than zero
+    return getNumberOfExpandedGroupActions() >= 1;
+}
+
+void DataPropertiesWidget::collapseAll()
+{
+    for (auto groupAction : getGroupActions())
+        groupAction->setExpanded(false);
+}
+
+QVector<bool> DataPropertiesWidget::getExpansions() const
+{
+    QVector<bool> expansions;
+
+    // Loop over all actions and add expansion state when the action is a group action
+    for (auto action : _dataset->getDataHierarchyItem().getActions()) {
+        if (action == _dataset->getDataHierarchyItem().getActions().last())
+            continue;
+
+        auto groupAction = dynamic_cast<GroupAction*>(action);
+
+        // Add expansion state when the action is a group action
+        if (groupAction)
+            expansions << groupAction->isExpanded();
+    }
+
+    return expansions;
+}
+
+std::int32_t DataPropertiesWidget::getNumberOfExpandedGroupActions() const
+{
+    // Get group expansion states
+    const auto expansions = getExpansions();
+
+    // Count the number of expanded group actions
+    return std::count_if(expansions.begin(), expansions.end(), [](auto expansion) -> bool { return expansion; });
+}
+
+QVector<GroupAction*> DataPropertiesWidget::getGroupActions() const
+{
+    QVector<GroupAction*> groupActions;
+
+    // Loop over all actions and add action if is a group action
     for (auto action : _dataset->getDataHierarchyItem().getActions()) {
         auto groupAction = dynamic_cast<GroupAction*>(action);
 
-        // Only add groups action to accordion
-        if (groupAction == nullptr)
-            continue;
-
-        // Add the group action
-        groupActions << groupAction;
+        // Add expansion state when the action is a group action
+        if (groupAction)
+            groupActions << groupAction;
     }
 
-    // Assign the groups to the accordion
-    _groupsAction.set(groupActions);
+    groupActions << &const_cast<DataPropertiesWidget*>(this)->_filteredActionsAction;
+
+    return groupActions;
 }
 
 }

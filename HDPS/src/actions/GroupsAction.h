@@ -63,8 +63,22 @@ public:
             bool eventFilter(QObject* target, QEvent* event) override final;
 
         protected:
+
+            /**
+             * Updates the group widget
+             */
+            void updateGroupWidget();
+
+            /**
+             * Removes the group widget
+             */
+            void removeGroupWidget();
+
+        protected:
             GroupAction*            _widgetActionGroup;         /** Pointer to widget action group */
-            QTreeWidgetItem*        _treeWidgetItem;            /** Pointer to widget action group */
+            QTreeWidgetItem*        _parentTreeWidgetItem;      /** Pointer to parent tree widget item */
+            QTreeWidgetItem*        _groupTreeWidgetItem;       /** Pointer to group tree widget item */
+            QWidget*                _groupWidget;               /** Pointer to group widget */
             QWidget                 _overlayWidget;             /** Overlay widget for buttons etc. */
             QHBoxLayout             _overlayLayout;             /** Overlay layout */
             QLabel                  _iconLabel;                 /** Left-aligned icon label */
@@ -102,6 +116,13 @@ public:
     GroupsAction(QObject* parent);
 
     /**
+     * Respond to target events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override final;
+
+    /**
      * Adds a vector of group actions
      * @param groupActions Vector of pointers to group actions
      */
@@ -115,8 +136,20 @@ signals:
     /** Signals that the groups have changed */
     void changed(const GroupActions& groupActions);
 
+    /**
+     * Signals that a group got expanded
+     * @param groupAction Group action that got expanded
+     */
+    void expanded(const GroupAction* groupAction);
+
+    /**
+     * Signals that a group got collapsed
+     * @param groupAction Group action that got collapsed
+     */
+    void collapsed(const GroupAction* groupAction);
+
 protected:
-    GroupActions   _groupActions;      /** Pointers to group actions */
+    GroupActions    _groupActions;          /** Pointers to group actions */
 };
 
 }

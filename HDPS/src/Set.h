@@ -22,7 +22,7 @@ class DataHierarchyItem;
  * Dataset implementation class
  * Base dataset class from which concrete dataset classes derive
   */
-class DatasetImpl
+class DatasetImpl : public gui::WidgetAction
 {
 public:
 
@@ -32,6 +32,7 @@ public:
      * @param rawDataName Name of the raw data
      */
     DatasetImpl(CoreInterface* core, const QString& rawDataName) :
+        WidgetAction(nullptr),
         _core(core),
         _rawData(nullptr),
         _guid(QUuid::createUuid().toString()),

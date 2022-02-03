@@ -94,15 +94,15 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     auto layout = new QVBoxLayout();
 
     // Remove the layout margin and spacing
-    layout->setMargin(2);
-    layout->setSpacing(0);
+    layout->setMargin(3);
+    layout->setSpacing(3);
 
     // Create tool bar layout
     auto toolbarLayout = new QHBoxLayout();
 
     // Add toolbar items
-    toolbarLayout->setContentsMargins(0, 2, 0, 2);
-    toolbarLayout->setSpacing(3);
+    toolbarLayout->setContentsMargins(0, 3, 0, 3);
+    toolbarLayout->setSpacing(4);
     //toolbarLayout->addWidget(_datasetNameFilterAction.createWidget(this), 1);
     toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));

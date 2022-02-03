@@ -341,6 +341,31 @@ QString WidgetAction::getSettingsPath() const
     return actionPath.join("/");
 }
 
+QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, bool recursive /*= true*/) const
+{
+    QVector<WidgetAction*> foundChildren;
+
+    // Loop over all children
+    for (auto child : children()) {
+
+        // Cast to widget action
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        // Add child widget action if the name (text) contains the search string
+        if (childWidgetAction->text().contains(searchString, Qt::CaseInsensitive))
+            foundChildren << childWidgetAction;
+
+        // Find recursively
+        if (recursive)
+            foundChildren << childWidgetAction->findChildren(searchString, recursive);
+    }
+
+    return foundChildren;
+}
+
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     return new QWidget();

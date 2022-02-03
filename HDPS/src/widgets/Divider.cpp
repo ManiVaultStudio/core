@@ -1,0 +1,30 @@
+#include "Divider.h"
+
+namespace hdps {
+
+namespace gui {
+
+QWidget* createHorizontalDivider()
+{
+    auto horizontalLine = new QFrame();
+
+    horizontalLine->setObjectName(QString::fromUtf8("HorizontalLine"));
+    horizontalLine->setFrameShape(QFrame::HLine);
+    horizontalLine->setFrameShadow(QFrame::Sunken);
+
+    return horizontalLine;
+}
+
+QWidget* createVerticalDivider()
+{
+    auto verticalLine = new QFrame();
+
+    verticalLine->setObjectName(QString::fromUtf8("VerticalLine"));
+    verticalLine->setFrameShape(QFrame::VLine);
+    verticalLine->setFrameShadow(QFrame::Sunken);
+
+    return verticalLine;
+}
+
+}
+}
