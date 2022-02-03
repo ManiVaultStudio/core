@@ -104,6 +104,34 @@ void StringAction::setCompleter(QCompleter* completer)
     emit completerChanged(_completer);
 }
 
+void StringAction::setSearchMode(bool searchMode)
+{
+    if (!searchMode)
+        return;
+
+    // Configure leading action
+    _leadingAction.setVisible(true);
+    _leadingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+
+    // Configure trailing action
+    _trailingAction.setVisible(true);
+    _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
+
+    // Reset the string when the trailing action is triggered
+    connect(&_trailingAction, &QAction::triggered, this, &StringAction::reset);
+
+    // Update trailing action visibility depending on the string
+    const auto updateTrailingActionVisibility = [this]() -> void {
+        _trailingAction.setVisible(!_string.isEmpty());
+    };
+
+    // Update trailing action visibility when the string changes
+    connect(this, &StringAction::stringChanged, this, updateTrailingActionVisibility);
+
+    // Perform initial update of trailing action visibility
+    updateTrailingActionVisibility();
+}
+
 void StringAction::setValueFromVariant(const QVariant& value)
 {
     if (!value.isValid() || value.type() != QVariant::String)

@@ -37,58 +37,6 @@ public:
     protected:
 
         /**
-         * Section push button class
-         *
-         * Push button for expanding/collapsing items in an accordion widget for group actions
-         *
-         * @author Thomas Kroes
-         */
-        class SectionPushButton : public QPushButton {
-        public:
-
-            /**
-             * Constructor
-             * @param treeWidgetItem Pointer to tree widget item
-             * @param widgetActionGroup Pointer to widget action group
-             * @param text Section name
-             * @param parent Pointer to parent widget
-             */
-            SectionPushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, const QString& text, QWidget* parent = nullptr);
-
-            /**
-             * Respond to target events
-             * @param target Object of which an event occurred
-             * @param event The event that took place
-             */
-            bool eventFilter(QObject* target, QEvent* event) override final;
-
-        protected:
-
-            /**
-             * Updates the group widget
-             */
-            void updateGroupWidget();
-
-            /**
-             * Removes the group widget
-             */
-            void removeGroupWidget();
-
-        protected:
-            GroupAction*            _widgetActionGroup;         /** Pointer to widget action group */
-            QTreeWidgetItem*        _parentTreeWidgetItem;      /** Pointer to parent tree widget item */
-            QTreeWidgetItem*        _groupTreeWidgetItem;       /** Pointer to group tree widget item */
-            QWidget*                _groupWidget;               /** Pointer to group widget */
-            QWidget                 _overlayWidget;             /** Overlay widget for buttons etc. */
-            QHBoxLayout             _overlayLayout;             /** Overlay layout */
-            QLabel                  _iconLabel;                 /** Left-aligned icon label */
-            QLabel                  _settingsLabel;             /** Right-aligned settings label */
-            WidgetActionOptions     _widgetActionOptions;       /** Widget action options */
-        };
-
-    protected:
-
-        /**
          * Constructor
          * @param parent Pointer to parent widget
          * @param groupsAction Pointer to groups action

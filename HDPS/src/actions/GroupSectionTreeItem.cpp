@@ -1,162 +1,109 @@
+#include "GroupSectionTreeItem.h"
+#include "GroupWidgetTreeItem.h"
 #include "GroupAction.h"
-#include "WidgetActionLabel.h"
-#include "ToggleAction.h"
-#include "TriggerAction.h"
-#include "TriggersAction.h"
 
 #include <QDebug>
-#include <QGridLayout>
 
 namespace hdps {
 
 namespace gui {
 
-GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
-    WidgetAction(parent),
-    _expanded(expanded),
-    _readOnly(false),
-    _widgetActions()
+GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction* groupAction) :
+    QTreeWidgetItem(),
+    _groupAction(groupAction),
+    _pushButton(this, groupAction),
+    _groupWidgetTreeItem(nullptr)
 {
+    _pushButton.setFixedHeight(22);
+
+    treeWidget->addTopLevelItem(this);
+    treeWidget->setItemWidget(this, 0, &_pushButton);
+
+    _groupWidgetTreeItem = new GroupWidgetTreeItem(this, groupAction);
 }
 
-void GroupAction::setExpanded(const bool& expanded)
+GroupSectionTreeItem::SectionPushButton::SectionPushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, QWidget* parent /*= nullptr*/) :
+    QPushButton(groupAction->text(), parent),
+    _widgetActionGroup(groupAction),
+    _groupTreeWidgetItem(nullptr),
+    _parentTreeWidgetItem(treeWidgetItem),
+    _groupWidget(nullptr),
+    _overlayWidget(this),
+    _overlayLayout(),
+    _iconLabel(),
+    _settingsLabel(),
+    _widgetActionOptions(groupAction, &_settingsLabel)
 {
-    if (expanded == _expanded)
-        return;
+    setFixedHeight(18);
 
-    if (expanded)
-        expand();
-    else
-        collapse();
-}
+    // Get reference to the Font Awesome icon font
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-void GroupAction::expand()
-{
-    if (_expanded == true)
-        return;
+    _overlayWidget.setLayout(&_overlayLayout);
+    _overlayWidget.raise();
 
-    _expanded = true;
+    _overlayLayout.setContentsMargins(10, 4, 10, 4);
+    _overlayLayout.addWidget(&_iconLabel);
+    _overlayLayout.addStretch(1);
 
-    emit expanded();
-}
+    if (_widgetActionGroup->isSerializable())
+        _overlayLayout.addWidget(&_settingsLabel);
 
-void GroupAction::collapse()
-{
-    if (_expanded == false)
-        return;
+    _iconLabel.setAlignment(Qt::AlignCenter);
+    _iconLabel.setFont(fontAwesome.getFont(7));
+    _settingsLabel.setFont(fontAwesome.getFont(7));
 
-    _expanded = false;
+    // Install event filter to synchronize overlay widget size with push button size
+    installEventFilter(this);
 
-    emit collapsed();
-}
-
-void GroupAction::toggle()
-{
-    setExpanded(!isExpanded());
-}
-
-bool GroupAction::isExpanded() const
-{
-    return _expanded;
-}
-
-bool GroupAction::isCollapsed() const
-{
-    return !_expanded;
-}
-
-bool GroupAction::isReadOnly() const
-{
-    return _readOnly;
-}
-
-void GroupAction::setReadOnly(const bool& readOnly)
-{
-    if (readOnly == _readOnly)
-        return;
-
-    _readOnly = readOnly;
-
-    emit readOnlyChanged(_readOnly);
-}
-
-void GroupAction::setActions(const QVector<WidgetAction*>& widgetActions /*= QVector<WidgetAction*>()*/)
-{
-    _widgetActions = widgetActions;
-
-    emit actionsChanged(_widgetActions);
-}
-
-QVector<WidgetAction*> GroupAction::getSortedWidgetActions()
-{
-    auto sortedActions = _widgetActions;
-
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (childWidgetAction == nullptr)
-            continue;
-
-        if (!childWidgetAction->isVisible())
-            continue;
-
-        sortedActions << childWidgetAction;
-    }
-
-    std::sort(sortedActions.begin(), sortedActions.end(), [](WidgetAction* lhs, WidgetAction* rhs) {
-        return rhs->getSortIndex() > lhs->getSortIndex();
+    // Toggle the section expansion when the section push button is clicked
+    connect(this, &QPushButton::clicked, this, [this]() {
+        if (!_settingsLabel.rect().contains(QCursor::pos()))
+            _widgetActionGroup->toggle();
     });
 
-    return sortedActions;
-}
+    // Update the state of the push button when the group action changes
+    const auto update = [this, &fontAwesome]() -> void {
+        if (_widgetActionGroup->isExpanded())
+            _parentTreeWidgetItem->setExpanded(true);
+        else
+            _parentTreeWidgetItem->setExpanded(false);
 
-GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
-    WidgetActionWidget(parent, groupAction),
-    _layout(new QGridLayout())
-{
-    _layout->setColumnStretch(0, 3);
-    _layout->setColumnStretch(1, 5);
-
-    auto contentsMargin = _layout->contentsMargins();
-    
-    _layout->setMargin(15);
-
-    setLayout(_layout);
-
-    const auto actionsChanged = [this, groupAction]() -> void {
-        QLayoutItem* layoutItem;
-
-        while ((layoutItem = layout()->takeAt(0)) != NULL)
-        {
-            delete layoutItem->widget();
-            delete layoutItem;
-        }
-
-        for (auto widgetAction : groupAction->getSortedWidgetActions()) {
-            const auto numRows          = _layout->rowCount();
-            const auto isToggleAction   = dynamic_cast<ToggleAction*>(widgetAction);
-            const auto isTriggerAction  = dynamic_cast<TriggerAction*>(widgetAction);
-            const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
-
-            if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
-                auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this));
-                _layout->addWidget(labelWidget, numRows, 0);
-            }
-
-            _layout->addWidget(widgetAction->createWidget(this), numRows, 1);
-        }
+        // Assign the icon characters
+        _iconLabel.setText(fontAwesome.getIconCharacter(_widgetActionGroup->isExpanded() ? "angle-down" : "angle-right"));
+        _settingsLabel.setText(fontAwesome.getIconCharacter("ellipsis-h"));
     };
 
-    // Update UI when the group actions change
-    connect(groupAction, &GroupAction::actionsChanged, this, actionsChanged);
+    const auto updateText = [this, groupAction]() -> void {
+        setText(groupAction->text());
+    };
 
-    // Initial update of the actions
-    actionsChanged();
+    connect(groupAction, &WidgetAction::changed, this, updateText);
+
+    // Update when the group action is expanded or collapsed
+    connect(_widgetActionGroup, &GroupAction::expanded, this, update);
+    connect(_widgetActionGroup, &GroupAction::collapsed, this, update);
+
+    update();
 }
 
-QGridLayout* GroupAction::FormWidget::layout()
+bool GroupSectionTreeItem::SectionPushButton::eventFilter(QObject* target, QEvent* event)
 {
-    return _layout;
+    switch (event->type())
+    {
+        case QEvent::Resize:
+        {
+            if (target == this)
+                _overlayWidget.setFixedSize(static_cast<QResizeEvent*>(event)->size());
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    return QPushButton::eventFilter(target, event);
 }
 
 }

@@ -2,7 +2,6 @@
 
 #include <actions/WidgetAction.h>
 #include <actions/StringAction.h>
-#include <actions/TriggerAction.h>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -53,10 +52,8 @@ public:
 public: // Action getters
 
     StringAction& getNameFilterAction() { return _nameFilterAction; }
-    TriggerAction& getClearNameFilterAction() { return _clearNameFilterAction; }
 
 protected:
     ClustersActionWidget*   _clustersActionWidget;      /** Pointer to clusters action widget */
     StringAction            _nameFilterAction;          /** Name filter action */
-    TriggerAction           _clearNameFilterAction;     /** Clear name filter action */
 };

@@ -34,8 +34,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     _filteredActionsAction.setSerializable(false);
 
-    _filterAction.getLeadingAction().setVisible(true);
-    _filterAction.getLeadingAction().setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+    _filterAction.setSearchMode(true);
     _filterAction.setPlaceHolderString("Filter properties by name...");
 
     // Set action icon
@@ -174,15 +173,12 @@ void DataPropertiesWidget::updateProperties()
     const auto filterString = _filterAction.getString();
 
     // Get group actions
-    auto groupActions = getGroupActions();
-
-    // Remove group actions
-    groupActions.erase(std::remove_if(groupActions.begin(), groupActions.end(), [&groupActions, &filterString](const GroupAction* groupAction) -> bool {
-        if (groupAction == groupActions.last())
-            return filterString.isEmpty();
-        else
-            return !filterString.isEmpty();
-    }), groupActions.end());
+    QVector<GroupAction*> groupActions;
+    
+    if (filterString.isEmpty())
+        groupActions << getGroupActions();
+    else
+        groupActions << &_filteredActionsAction;
 
     // Assign the group actions to the accordion
     _groupsAction.set(groupActions);
@@ -192,9 +188,6 @@ void DataPropertiesWidget::updateProperties()
 
     // Get group actions
     auto filterGroupActions = getGroupActions();
-
-    // Remove special filtered actions group action
-    filterGroupActions.removeLast();
 
     for (auto groupAction : filterGroupActions)
         foundActions << groupAction->findChildren(filterString, false);
@@ -206,7 +199,6 @@ void DataPropertiesWidget::updateProperties()
 
 bool DataPropertiesWidget::canExpandAll() const
 {
-    // Can expand when the number of expanded group actions is smaller than the number of group actions
     return getNumberOfExpandedGroupActions() < getGroupActions().count();
 }
 
@@ -260,16 +252,17 @@ QVector<GroupAction*> DataPropertiesWidget::getGroupActions() const
 {
     QVector<GroupAction*> groupActions;
 
+    // Get actions from data hierarchy item
+    auto actions = _dataset->getDataHierarchyItem().getActions();
+
     // Loop over all actions and add action if is a group action
-    for (auto action : _dataset->getDataHierarchyItem().getActions()) {
+    for (auto action : actions) {
         auto groupAction = dynamic_cast<GroupAction*>(action);
 
-        // Add expansion state when the action is a group action
+        // Add expansion state when the action is a group action and if it meets the visibility constraint
         if (groupAction)
             groupActions << groupAction;
     }
-
-    groupActions << &const_cast<DataPropertiesWidget*>(this)->_filteredActionsAction;
 
     return groupActions;
 }

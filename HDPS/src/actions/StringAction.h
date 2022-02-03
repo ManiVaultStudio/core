@@ -128,6 +128,12 @@ public:
      */
     void setCompleter(QCompleter* completer);
 
+    /**
+     * Set search mode (if on, there will be a leading action with a search icon and a trailing action to clear the string)
+     * @param searchMode Whether search mode is on/off
+     */
+    void setSearchMode(bool searchMode);
+
 public: // Settings
 
     /**
