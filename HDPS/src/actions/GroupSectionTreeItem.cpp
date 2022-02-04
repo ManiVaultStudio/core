@@ -14,7 +14,7 @@ GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction*
     _pushButton(this, groupAction),
     _groupWidgetTreeItem(nullptr)
 {
-    _pushButton.setFixedHeight(20);
+    setSizeHint(0, QSize(0, 24));
 
     treeWidget->addTopLevelItem(this);
     treeWidget->setItemWidget(this, 0, &_pushButton);
@@ -51,7 +51,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _settingsLabel()//,
     //_widgetActionOptions(groupAction, &_settingsLabel)
 {
-    setFixedHeight(18);
+    setFixedHeight(20);
 
     // Get reference to the Font Awesome icon font
     auto& fontAwesome = Application::getIconFont("FontAwesome");
@@ -59,7 +59,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _overlayWidget.setLayout(&_overlayLayout);
     _overlayWidget.raise();
 
-    _overlayLayout.setContentsMargins(10, 4, 10, 4);
+    _overlayLayout.setContentsMargins(8, 4, 8, 4);
     _overlayLayout.addWidget(&_iconLabel);
     _overlayLayout.addStretch(1);
 
