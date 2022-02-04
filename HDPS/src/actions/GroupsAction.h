@@ -10,6 +10,8 @@ namespace hdps {
 
 namespace gui {
 
+class GroupSectionTreeItem;
+
 /**
  * Groups action class
  *
@@ -93,19 +95,32 @@ public:
          */
         void removeGroupAction(GroupAction* groupAction);
 
+        /**
+         * Show group action
+         * @param groupAction Pointer to the group action
+         */
+        void showGroupAction(GroupAction* groupAction);
+
+        /**
+         * Hide group action
+         * @param groupAction Pointer to the group action
+         */
+        void hideGroupAction(GroupAction* groupAction);
+
     protected:
-        GroupsAction*       _groupsAction;              /** Pointer to groups action */
-        QVBoxLayout         _layout;                    /** Main layout */
-        GroupAction         _filteredActionsAction;     /** Group action for filtered actions */
-        QWidget             _toolbarWidget;             /** Toolbar widget */
-        QHBoxLayout         _toolbarLayout;             /** Toolbar layout */
-        StringAction        _filterAction;              /** Filter action */
-        TriggerAction       _expandAllAction;           /** Expand all datasets action */
-        TriggerAction       _collapseAllAction;         /** Collapse all datasets action */
-        TriggerAction       _loadDefaultAction;         /** Load default action */
-        TriggerAction       _saveDefaultAction;         /** Save default action */
-        TriggerAction       _factoryDefaultAction;      /** Restore factory default action */
-        TreeWidget          _treeWidget;                /** Tree widget for display of the groups */
+        GroupsAction*                                   _groupsAction;                  /** Pointer to groups action */
+        QVBoxLayout                                     _layout;                        /** Main layout */
+        GroupAction                                     _filteredActionsAction;         /** Group action for filtered actions */
+        QWidget                                         _toolbarWidget;                 /** Toolbar widget */
+        QHBoxLayout                                     _toolbarLayout;                 /** Toolbar layout */
+        StringAction                                    _filterAction;                  /** Filter action */
+        TriggerAction                                   _expandAllAction;               /** Expand all datasets action */
+        TriggerAction                                   _collapseAllAction;             /** Collapse all datasets action */
+        TriggerAction                                   _loadDefaultAction;             /** Load default action */
+        TriggerAction                                   _saveDefaultAction;             /** Save default action */
+        TriggerAction                                   _factoryDefaultAction;          /** Restore factory default action */
+        TreeWidget                                      _treeWidget;                    /** Tree widget for display of the groups */
+        QMap<GroupAction*, GroupSectionTreeItem*>       _groupSectionTreeItems;         /** Maps group action pointer to group section tree item pointer */
 
         friend class GroupsAction;
     };
@@ -132,8 +147,9 @@ public: // Adding/removing group action(s)
     /**
      * Appends a group action
      * @param groupAction Group action to add
+     * @param visible Whether the group action is visible or not
      */
-    void addGroupAction(GroupAction* groupAction);
+    void addGroupAction(GroupAction* groupAction, bool visible = true);
 
     /**
      * Removes a group action
@@ -191,6 +207,49 @@ public: // Expand/collapse group(s)
      */
     std::int32_t getNumberOfExpandedGroupActions() const;
 
+public: // Visibility
+
+    /**
+     * Hide group action
+     * @param groupAction Pointer to group action
+     * @param visible Whether the group action is visible
+     */
+    void setGroupActionVisibility(GroupAction* groupAction, bool visible);
+
+    /**
+     * Show group action
+     * @param groupAction Pointer to group action
+     */
+    void showGroupAction(GroupAction* groupAction);
+
+    /**
+     * Hide all group actions
+     */
+    void showAllGroupActions();
+
+    /**
+     * Hide group action
+     * @param groupAction Pointer to group action
+     */
+    void hideGroupAction(GroupAction* groupAction);
+
+    /**
+     * Hide all group actions
+     */
+    void hideAllGroupActions();
+
+    /**
+     * Get whether the group action is visible
+     * @return Whether the group action is visible
+     */
+    bool isGroupActionVisible(GroupAction* groupAction) const;
+
+    /**
+     * Get whether the group action is hidden
+     * @return Whether the group action is hidden
+     */
+    bool isGroupActionHidden(GroupAction* groupAction) const;
+
 signals:
 
     /**
@@ -217,8 +276,21 @@ signals:
      */
     void groupActionCollapsed(GroupAction* groupAction);
 
+    /**
+     * Signals that a group action got shown
+     * @param groupAction Group action that got shown
+     */
+    void groupActionShown(GroupAction* groupAction);
+
+    /**
+     * Signals that a group action got hidden
+     * @param groupAction Group action that got hidden
+     */
+    void groupActionHidden(GroupAction* groupAction);
+
 protected:
-    GroupActions    _groupActions;      /** Pointers to group actions */
+    GroupActions                _groupActions;      /** Pointers to group actions */
+    QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
 };
 
 }

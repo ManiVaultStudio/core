@@ -59,7 +59,7 @@ public:
         QHBoxLayout             _overlayLayout;             /** Overlay layout */
         QLabel                  _iconLabel;                 /** Left-aligned icon label */
         QLabel                  _settingsLabel;             /** Right-aligned settings label */
-        WidgetActionOptions     _widgetActionOptions;       /** Widget action options */
+        //WidgetActionOptions     _widgetActionOptions;       /** Widget action options */
     };
 
 public:

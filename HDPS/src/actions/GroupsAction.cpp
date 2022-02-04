@@ -11,17 +11,21 @@ namespace gui {
 
 GroupsAction::GroupsAction(QObject* parent) :
     WidgetAction(parent),
-    _groupActions()
+    _groupActions(),
+    _visibility()
 {
     setDefaultWidgetFlags(Default);
 }
 
-void GroupsAction::addGroupAction(GroupAction* groupAction)
+void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= true*/)
 {
     qDebug() << "Add group action to groups action";
 
     // Add group action
     _groupActions << groupAction;
+
+    // Set group action visibility
+    _visibility[groupAction] = visible;
 
     // Pass through group action expanded signal
     connect(groupAction, &GroupAction::expanded, this, [this, groupAction]() -> void {
@@ -46,6 +50,9 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
 
     // Remove the group action
     _groupActions.removeOne(groupAction);
+
+    if (_visibility.contains(groupAction))
+        _visibility.remove(groupAction);
 
     // Remove connections to the group action
     disconnect(groupAction, &GroupAction::expanded, this, nullptr);
@@ -121,6 +128,56 @@ std::int32_t GroupsAction::getNumberOfExpandedGroupActions() const
     return std::count_if(expansions.begin(), expansions.end(), [](auto expansion) -> bool { return expansion; });
 }
 
+void GroupsAction::setGroupActionVisibility(GroupAction* groupAction, bool visible)
+{
+    if (!_visibility.contains(groupAction))
+        return;
+
+    // Set group action visible
+    _visibility[groupAction] = visible;
+
+    // Notify others that the group action visibility changed
+    if (visible)
+        emit groupActionShown(groupAction);
+    else
+        emit groupActionHidden(groupAction);
+}
+
+void GroupsAction::showGroupAction(GroupAction* groupAction)
+{
+    setGroupActionVisibility(groupAction, true);
+}
+
+void GroupsAction::showAllGroupActions()
+{
+    for (auto groupAction : _groupActions)
+        showGroupAction(groupAction);
+}
+
+void GroupsAction::hideGroupAction(GroupAction* groupAction)
+{
+    setGroupActionVisibility(groupAction, false);
+}
+
+void GroupsAction::hideAllGroupActions()
+{
+    for (auto groupAction : _groupActions)
+        hideGroupAction(groupAction);
+}
+
+bool GroupsAction::isGroupActionVisible(GroupAction* groupAction) const
+{
+    if (!_visibility.contains(groupAction))
+        return false;
+
+    return _visibility[groupAction];
+}
+
+bool GroupsAction::isGroupActionHidden(GroupAction* groupAction) const
+{
+    return !isGroupActionVisible(groupAction);
+}
+
 GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
@@ -139,9 +196,6 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     // Configure layout
     _layout.setMargin(0);
     _layout.setAlignment(Qt::AlignTop);
-    //_layout.setMargin(5);
-    //_layout.setSpacing(3);
-    //_layout.setAlignment(Qt::AlignTop);
 
     // Apply layout to widget
     setLayout(&_layout);
@@ -150,8 +204,8 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     createToolbar(widgetFlags);
     createTreeWidget(widgetFlags);
 
-    // Add filtering action to the groups action
-    _groupsAction->addGroupAction(&_filteredActionsAction);
+    // Add filtering action to the groups action and hide by default
+    _groupsAction->addGroupAction(&_filteredActionsAction, false);
 
     // Perform an initial update of the toolbar and action filtering
     updateToolbar();
@@ -214,12 +268,13 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
     // And add to the main layout
     _layout.addWidget(&_toolbarWidget);
 
-    // Update toolbar when the current dataset changes
-    //connect(&_dataset, &Dataset<DatasetImpl>::changed, this, &DataPropertiesWidget::updateToolbar);
-
-    // Update toolbar when one of the group actions is expanded/collapsed
+    // Update toolbar when a group action is expanded/collapsed/added/removed/shown/hidden
     connect(_groupsAction, &GroupsAction::groupActionExpanded, this, &Widget::updateToolbar);
     connect(_groupsAction, &GroupsAction::groupActionCollapsed, this, &Widget::updateToolbar);
+    connect(_groupsAction, &GroupsAction::groupActionAdded, this, &Widget::updateToolbar);
+    connect(_groupsAction, &GroupsAction::groupActionRemoved, this, &Widget::updateToolbar);
+    connect(_groupsAction, &GroupsAction::groupActionShown, this, &Widget::updateToolbar);
+    connect(_groupsAction, &GroupsAction::groupActionHidden, this, &Widget::updateToolbar);
 
     // Update properties when the filter changes
     connect(&_filterAction, &StringAction::stringChanged, this, &Widget::updateFiltering);
@@ -255,14 +310,19 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
     // Add tree widget to the layout
     _layout.addWidget(&_treeWidget);
 
+    // Add/remove group section tree items when requested
     connect(_groupsAction, &GroupsAction::groupActionAdded, this, &Widget::addGroupAction);
     connect(_groupsAction, &GroupsAction::groupActionRemoved, this, &Widget::removeGroupAction);
+
+    // Show/hide group section tree items when requested
+    connect(_groupsAction, &GroupsAction::groupActionShown, this, &Widget::showGroupAction);
+    connect(_groupsAction, &GroupsAction::groupActionHidden, this, &Widget::hideGroupAction);
 }
 
 void GroupsAction::Widget::updateToolbar()
 {
     // Set toolbar read-only status based on whether a dataset is loaded
-    _toolbarWidget.setEnabled(!_groupsAction->getGroupActions().isEmpty());
+    _toolbarWidget.setEnabled(_groupsAction->getGroupActions().count() > 1);
 
     // Set read-only states of actions
     _expandAllAction.setEnabled(_groupsAction->canExpandAll());
@@ -276,8 +336,19 @@ void GroupsAction::Widget::updateFiltering()
     // Get filter string
     const auto filterString = _filterAction.getString();
 
+    // Establish whether we are filtering out actions or not
+    const auto areFiltering = !filterString.isEmpty();
+
     // Get group actions
     auto groupActions = _groupsAction->getGroupActions();
+
+    // Set actions visibility
+    for (auto groupAction : groupActions) {
+        if (groupAction == groupActions.first())
+            _groupsAction->setGroupActionVisibility(groupAction, areFiltering);
+        else
+            _groupsAction->setGroupActionVisibility(groupAction, !areFiltering);
+    }
 
     // Do not include actions from the special filtering group action
     if (!groupActions.isEmpty())
@@ -299,44 +370,45 @@ void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
     qDebug() << "Add group action" << groupAction->text();
 
     // Create new tree widget item for the section expand/collapse button
-    auto sectionTreeWidgetItem = new GroupSectionTreeItem(&_treeWidget, groupAction);
+    _groupSectionTreeItems[groupAction] = new GroupSectionTreeItem(&_treeWidget, groupAction);
 
     // Set expansion state from group action
-    sectionTreeWidgetItem->setExpanded(groupAction->isExpanded());
+    _groupSectionTreeItems[groupAction]->setExpanded(groupAction->isExpanded());
+    _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
 }
 
 void GroupsAction::Widget::removeGroupAction(GroupAction* groupAction)
 {
     qDebug() << "Remove group action" << groupAction->text();
 
-    // Go over all top-level tree items and remove the one with the matching group action
-    for (std::int32_t topLevelTreeItemIndex = 0; topLevelTreeItemIndex < _treeWidget.topLevelItemCount(); topLevelTreeItemIndex++) {
+    Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
 
-        // Get pointer to top-level tree item
-        const auto topLevelTreeItem = _treeWidget.topLevelItem(topLevelTreeItemIndex);
+    // Get pointer to top-level group section tree item
+    const auto groupSectionTreeItem = _groupSectionTreeItems[groupAction];
 
-        // Only remove if we have a valid top-level item
-        if (!topLevelTreeItem)
-            continue;
+    // Get the index of the top-level group section tree item
+    const auto groupSectionTreeItemIndex = _treeWidget.indexOfTopLevelItem(_groupSectionTreeItems[groupAction]);
 
-        // Convert to group section tree item
-        auto groupSectionTreeItem = dynamic_cast<GroupSectionTreeItem*>(topLevelTreeItem);
+    //groupSectionTreeItem->takeChildren();
 
-        // Only proceed if we have a valid pointer to a group section tree item
-        if (!groupSectionTreeItem)
-            continue;
+    //_treeWidget.takeTopLevelItem(groupSectionTreeItemIndex);
 
-        // Do not remove if not the same group action
-        if (groupAction != groupSectionTreeItem->getGroupAction())
-            continue;
+    // Remove the group section tree item from the map
+    //_groupSectionTreeItems.remove(groupAction);
+}
 
-        // Remove the top-level item from the tree widget
-        //const auto takenTopLevelTreeItem = _treeWidget.takeTopLevelItem(topLevelTreeItemIndex);
+void GroupsAction::Widget::showGroupAction(GroupAction* groupAction)
+{
+    Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
 
-        //// And delete the top-level tree item
-        //if (takenTopLevelTreeItem)
-        //    delete takenTopLevelTreeItem;
-    }
+    _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
+}
+
+void GroupsAction::Widget::hideGroupAction(GroupAction* groupAction)
+{
+    Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
+
+    _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
 }
 
 }

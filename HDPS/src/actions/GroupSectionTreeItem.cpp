@@ -48,8 +48,8 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _overlayWidget(this),
     _overlayLayout(),
     _iconLabel(),
-    _settingsLabel(),
-    _widgetActionOptions(groupAction, &_settingsLabel)
+    _settingsLabel()//,
+    //_widgetActionOptions(groupAction, &_settingsLabel)
 {
     setFixedHeight(18);
 
