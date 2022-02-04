@@ -22,9 +22,21 @@ GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction*
     _groupWidgetTreeItem = new GroupWidgetTreeItem(this, groupAction);
 }
 
+GroupSectionTreeItem::~GroupSectionTreeItem()
+{
+    takeChildren();
+
+    delete _groupWidgetTreeItem;
+}
+
 GroupSectionTreeItem::PushButton& GroupSectionTreeItem::getPushButton()
 {
     return _pushButton;
+}
+
+GroupAction* GroupSectionTreeItem::getGroupAction()
+{
+    return _groupAction;
 }
 
 GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, QWidget* parent /*= nullptr*/) :

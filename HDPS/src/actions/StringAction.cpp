@@ -18,7 +18,7 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
 {
     setText(title);
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::Basic);
+    setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(string, defaultString);
 
     _leadingAction.setVisible(false);

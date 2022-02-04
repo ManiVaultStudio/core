@@ -1,5 +1,6 @@
 #include "GroupWidgetTreeItem.h"
 #include "GroupSectionTreeItem.h"
+#include "GroupsAction.h"
 #include "GroupAction.h"
 
 #include <QDebug>
@@ -54,7 +55,7 @@ GroupWidgetTreeItem::SizeSynchronizer::SizeSynchronizer(GroupWidgetTreeItem* gro
     QObject(),
     _groupTreeItem(groupTreeItem)
 {
-    // Get notified when the tree container/group widget changes size
+    // Synchronize when the section tree push button and/or the group widget changes size
     _groupTreeItem->getGroupSectionTreeItem()->getPushButton().installEventFilter(this);
     _groupTreeItem->getGroupWidget()->installEventFilter(this);
 }
@@ -72,6 +73,10 @@ bool GroupWidgetTreeItem::SizeSynchronizer::eventFilter(QObject* target, QEvent*
             // Synchronize tree item size hint
             if (target == _groupTreeItem->getGroupWidget())
                 _groupTreeItem->setSizeHint(0, QSize(_groupTreeItem->getGroupSectionWidth(), _groupTreeItem->getGroupWidget()->sizeHint().height()));
+
+            auto treeWidget = dynamic_cast<GroupsAction::TreeWidget*>(_groupTreeItem->treeWidget());
+
+            treeWidget->updateGeometries();
 
             break;
         }

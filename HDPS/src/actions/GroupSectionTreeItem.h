@@ -71,11 +71,20 @@ public:
      */
     GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction* groupAction);
 
+    /** Destructor */
+    ~GroupSectionTreeItem();
+
     /**
      * Get section push button
      * @return Reference to section push button
      */
     PushButton& getPushButton();
+
+    /**
+     * Get group action
+     * @return Pointer to group action
+     */
+    GroupAction* getGroupAction();
 
 protected:
     GroupAction*            _groupAction;               /** Pointer to group action (used for toggling) */

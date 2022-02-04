@@ -3,7 +3,6 @@
 #include <Dataset.h>
 
 #include <actions/GroupsAction.h>
-#include <actions/StringAction.h>
 #include <actions/TriggerAction.h>
 
 #include <QWidget>
@@ -47,58 +46,16 @@ public:
 
 protected:
 
-    /** Load dataset properties */
-    void loadDataset();
+    /**
+     * Load dataset group actions
+     */
+    void loadDatasetGroupActions();
 
     /**
-     * Updates the state of the toolbar
+     * Get group actions for the currently loaded dataset
+     * @return Vector of pointers to group actions
      */
-    void updateToolbar();
-
-    /**
-     * Updates the properties
-     */
-    void updateProperties();
-
-    /**
-     * Get whether one (or more) groups can be expanded
-     * @return Whether one (or more) groups can be expanded
-     */
-    bool canExpandAll() const;
-
-    /**
-     * Expand all group actions
-     */
-    void expandAll();
-
-    /**
-     * Get whether one (or more) groups can be expanded
-     * @return Whether one (or more) groups can be expanded
-     */
-    bool canCollapseAll() const;
-
-    /**
-     * Collapse all group actions
-     */
-    void collapseAll();
-
-    /**
-     * Get groups expansion states
-     * @return Vector of booleans, indicating whether a group is expanded or collapsed
-     */
-    QVector<bool> getExpansions() const;
-
-    /**
-     * Get number of expanded group actions
-     * @return Number of expanded group actions
-     */
-    std::int32_t getNumberOfExpandedGroupActions() const;
-
-    /**
-     * Get group actions for the loaded dataset
-     * @return Vector of group actions
-     */
-    QVector<GroupAction*> getGroupActions() const;
+    QVector<GroupAction*> getGroupActionsFromDataset() const;
 
 signals:
 
@@ -109,18 +66,9 @@ signals:
     void currentDatasetGuiNameChanged(const QString& datasetGuiName);
 
 protected:
-    Dataset<DatasetImpl>    _dataset;                   /** Smart point to current dataset */
-    QVBoxLayout             _layout;                    /** Main layout */
-    GroupsAction            _groupsAction;              /** Groups action */
-    GroupAction             _filteredActionsAction;     /** Group action for filtered actions */
-    QWidget                 _toolbarWidget;             /** Toolbar widget */
-    QHBoxLayout             _toolbarLayout;             /** Toolbar layout */
-    StringAction            _filterAction;              /** Filter action */
-    TriggerAction           _expandAllAction;           /** Expand all datasets action */
-    TriggerAction           _collapseAllAction;         /** Collapse all datasets action */
-    TriggerAction           _loadDefaultAction;         /** Load default action */
-    TriggerAction           _saveDefaultAction;         /** Save default action */
-    TriggerAction           _factoryDefaultAction;      /** Restore factory default action */
+    Dataset<DatasetImpl>    _dataset;           /** Smart point to current dataset */
+    QVBoxLayout             _layout;            /** Main layout */
+    GroupsAction            _groupsAction;      /** Groups action */
 };
 
 }
