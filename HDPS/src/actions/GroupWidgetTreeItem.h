@@ -12,6 +12,7 @@ namespace hdps {
 namespace gui {
 
 class GroupAction;
+class GroupSectionTreeItem;
 
 /**
  * Group widget tree item class
@@ -23,15 +24,21 @@ class GroupAction;
 class GroupWidgetTreeItem : public QTreeWidgetItem
 {
     /**
-    * Group widget tree item class
+    * Size synchronizer class
     *
-    * Tree item class for displaying the contents of a group action
+    * A buq in QT exists where a tree view row height is not updated when the widget contents of that row changes.
+    * This class detects changes in the row widget and sets the tree item size hint accordingly.
     *
     * @author Thomas Kroes
     */
     class SizeSynchronizer : public QObject
     {
     public:
+
+        /**
+         * Constructor
+         * @param groupTreeItem Pointer to group tree item
+         */
         SizeSynchronizer(GroupWidgetTreeItem* groupTreeItem);
 
         /**
@@ -42,20 +49,43 @@ class GroupWidgetTreeItem : public QTreeWidgetItem
         bool eventFilter(QObject* target, QEvent* event) override final;
 
     protected:
-        GroupWidgetTreeItem*  _groupTreeItem;
+        GroupWidgetTreeItem*  _groupTreeItem;   /** Pointer to group tree item */
     };
 
 public:
-    GroupWidgetTreeItem(QTreeWidgetItem* parentTreeWidgetItem, GroupAction* groupAction);
 
-    QWidget* getWidget();
+    /**
+     * Constructor
+     * @param groupSectionTreeItem Pointer to group section tree widget item
+     * @param groupAction Pointer to group action
+     */
+    GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeItem, GroupAction* groupAction);
+
+    /**
+     * Get group section tree item
+     * @return Pointer to group section tree item
+     */
+    GroupSectionTreeItem* getGroupSectionTreeItem();
+
+    /**
+     * Get section width
+     * @return Section width
+     */
+    std::int32_t getGroupSectionWidth() const;
+
+    /**
+     * Get group widget
+     * @return Pointer to group widget
+     */
+    QWidget* getGroupWidget();
 
 protected:
-    GroupAction*        _groupAction;
-    QWidget             _containerWidget;
-    QVBoxLayout         _containerLayout;
-    QWidget*            _widget;
-    SizeSynchronizer    _sizeSynchronizer;
+    GroupSectionTreeItem*   _groupSectionTreeItem;      /** Pointer to group section tree item */
+    GroupAction*            _groupAction;               /** Pointer to group action */
+    QWidget                 _containerWidget;           /** Container widget */
+    QVBoxLayout             _containerLayout;           /** Container widget layout */
+    QWidget*                _groupWidget;               /** Pointer to group widget */
+    SizeSynchronizer        _sizeSynchronizer;          /** Synchronizer for widget size */
 };
 
 }

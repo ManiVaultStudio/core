@@ -14,7 +14,7 @@ GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction*
     _pushButton(this, groupAction),
     _groupWidgetTreeItem(nullptr)
 {
-    _pushButton.setFixedHeight(22);
+    _pushButton.setFixedHeight(20);
 
     treeWidget->addTopLevelItem(this);
     treeWidget->setItemWidget(this, 0, &_pushButton);
@@ -22,7 +22,12 @@ GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction*
     _groupWidgetTreeItem = new GroupWidgetTreeItem(this, groupAction);
 }
 
-GroupSectionTreeItem::SectionPushButton::SectionPushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, QWidget* parent /*= nullptr*/) :
+GroupSectionTreeItem::PushButton& GroupSectionTreeItem::getPushButton()
+{
+    return _pushButton;
+}
+
+GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, QWidget* parent /*= nullptr*/) :
     QPushButton(groupAction->text(), parent),
     _widgetActionGroup(groupAction),
     _groupTreeWidgetItem(nullptr),
@@ -87,7 +92,7 @@ GroupSectionTreeItem::SectionPushButton::SectionPushButton(QTreeWidgetItem* tree
     update();
 }
 
-bool GroupSectionTreeItem::SectionPushButton::eventFilter(QObject* target, QEvent* event)
+bool GroupSectionTreeItem::PushButton::eventFilter(QObject* target, QEvent* event)
 {
     switch (event->type())
     {

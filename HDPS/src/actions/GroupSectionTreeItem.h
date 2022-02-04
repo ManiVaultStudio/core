@@ -28,20 +28,20 @@ public:
     /**
      * Section push button class
      *
-     * Push button for expanding/collapsing items in an accordion widget for group actions
+     * Push button for expanding/collapsing items in a groups action
      *
      * @author Thomas Kroes
      */
-    class SectionPushButton : public QPushButton {
+    class PushButton : public QPushButton {
     public:
 
         /**
          * Constructor
          * @param treeWidgetItem Pointer to tree widget item
-         * @param widgetActionGroup Pointer to widget action group
+         * @param groupAction Pointer to group action
          * @param parent Pointer to parent widget
          */
-        SectionPushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, QWidget* parent = nullptr);
+        PushButton(QTreeWidgetItem* treeWidgetItem, GroupAction* groupAction, QWidget* parent = nullptr);
 
         /**
          * Respond to target events
@@ -71,9 +71,15 @@ public:
      */
     GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction* groupAction);
 
+    /**
+     * Get section push button
+     * @return Reference to section push button
+     */
+    PushButton& getPushButton();
+
 protected:
     GroupAction*            _groupAction;               /** Pointer to group action (used for toggling) */
-    SectionPushButton       _pushButton;                /** Push button for toggling expansion */
+    PushButton              _pushButton;                /** Push button for toggling expansion */
     GroupWidgetTreeItem*    _groupWidgetTreeItem;       /** Pointer to child group widget tree item */
 };
 

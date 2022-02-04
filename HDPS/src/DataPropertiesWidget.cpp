@@ -169,6 +169,8 @@ void DataPropertiesWidget::updateToolbar()
 
 void DataPropertiesWidget::updateProperties()
 {
+    qDebug() << "updateProperties";
+
     // Get filter string
     const auto filterString = _filterAction.getString();
 

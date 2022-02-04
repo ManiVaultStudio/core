@@ -1,49 +1,62 @@
 #include "GroupWidgetTreeItem.h"
+#include "GroupSectionTreeItem.h"
 #include "GroupAction.h"
 
 #include <QDebug>
 #include <QResizeEvent>
+#include <QScrollBar>
 
 namespace hdps {
 
 namespace gui {
 
-GroupWidgetTreeItem::GroupWidgetTreeItem(QTreeWidgetItem* parentTreeWidgetItem, GroupAction* groupAction) :
-    QTreeWidgetItem(parentTreeWidgetItem),
+GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeItem, GroupAction* groupAction) :
+    QTreeWidgetItem(groupSectionTreeItem),
+    _groupSectionTreeItem(groupSectionTreeItem),
     _groupAction(groupAction),
     _containerWidget(),
     _containerLayout(),
-    _widget(groupAction->createWidget(treeWidget())),
+    _groupWidget(groupAction->createWidget(treeWidget())),
     _sizeSynchronizer(this)
 {
-    parentTreeWidgetItem->addChild(this);
+    groupSectionTreeItem->addChild(this);
 
     _containerWidget.setLayout(&_containerLayout);
-    _widget->setFixedWidth(treeWidget()->width());
+    _groupWidget->setFixedWidth(treeWidget()->width());
 
     _containerLayout.setMargin(0);
     _containerLayout.setSizeConstraint(QLayout::SetFixedSize);
-    _containerLayout.addWidget(_widget);
-
-
+    _containerLayout.addWidget(_groupWidget);
 
     treeWidget()->setItemWidget(this, 0, &_containerWidget);
 
     QCoreApplication::processEvents();
 
-    setSizeHint(0, _widget->sizeHint());
+    setSizeHint(0, _groupWidget->sizeHint());
 }
 
-QWidget* GroupWidgetTreeItem::getWidget()
+GroupSectionTreeItem* GroupWidgetTreeItem::getGroupSectionTreeItem()
 {
-    return _widget;
+    return _groupSectionTreeItem;
+}
+
+std::int32_t GroupWidgetTreeItem::getGroupSectionWidth() const
+{
+    return _groupSectionTreeItem->getPushButton().sizeHint().width();
+}
+
+QWidget* GroupWidgetTreeItem::getGroupWidget()
+{
+    return _groupWidget;
 }
 
 GroupWidgetTreeItem::SizeSynchronizer::SizeSynchronizer(GroupWidgetTreeItem* groupTreeItem) :
     QObject(),
     _groupTreeItem(groupTreeItem)
 {
-    _groupTreeItem->getWidget()->installEventFilter(this);
+    // Get notified when the tree container/group widget changes size
+    _groupTreeItem->getGroupSectionTreeItem()->getPushButton().installEventFilter(this);
+    _groupTreeItem->getGroupWidget()->installEventFilter(this);
 }
 
 bool GroupWidgetTreeItem::SizeSynchronizer::eventFilter(QObject* target, QEvent* event)
@@ -52,7 +65,13 @@ bool GroupWidgetTreeItem::SizeSynchronizer::eventFilter(QObject* target, QEvent*
     {
         case QEvent::Resize:
         {
-            _groupTreeItem->setSizeHint(0, _groupTreeItem->getWidget()->sizeHint());
+            // Synchronize group widget width with section push button width
+            if (target == &_groupTreeItem->getGroupSectionTreeItem()->getPushButton())
+                _groupTreeItem->getGroupWidget()->setFixedWidth(static_cast<QResizeEvent*>(event)->size().width());
+
+            // Synchronize tree item size hint
+            if (target == _groupTreeItem->getGroupWidget())
+                _groupTreeItem->setSizeHint(0, QSize(_groupTreeItem->getGroupSectionWidth(), _groupTreeItem->getGroupWidget()->sizeHint().height()));
 
             break;
         }

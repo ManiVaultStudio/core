@@ -1,15 +1,8 @@
 #pragma once
 
 #include "GroupAction.h"
-#include "WidgetActionOptions.h"
-
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QLabel>
 
 class QWidget;
-class QTreeWidget;
-class QTreeWidgetItem;
 
 namespace hdps {
 
