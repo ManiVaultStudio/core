@@ -12,7 +12,6 @@ ImageAction::ImageAction(QObject* parent, const QString& title /*= ""*/) :
     WidgetAction(parent)
 {
     setText(title);
-    setMayReset(true);
 }
 
 QImage ImageAction::getImage() const

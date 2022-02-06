@@ -70,7 +70,6 @@ public:
         _numberOfDecimalsChanged()
     {
         setText(title);
-        setMayReset(true);
         setDefaultWidgetFlags(WidgetFlag::Default);
     }
 
@@ -87,14 +86,11 @@ public:
         if (value == _value)
             return;
 
-        const auto couldReset = isResettable();
-
         _value = std::max(_minimum, std::min(value, _maximum));
 
         _valueChanged();
 
-        if (isResettable() != couldReset)
-            _resettableChanged();
+        notifyResettable();
     }
 
     /** Gets the default value */
@@ -113,6 +109,8 @@ public:
         _defaultValue = std::max(_minimum, std::min(defaultValue, _maximum));
 
         _defaultValueChanged();
+
+        notifyResettable();
     }
 
     /** Gets the minimum value */

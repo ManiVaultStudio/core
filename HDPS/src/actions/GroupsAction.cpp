@@ -9,17 +9,51 @@ namespace hdps {
 
 namespace gui {
 
-GroupsAction::GroupsAction(QObject* parent) :
+GroupsAction::GroupsAction(QObject* parent, WidgetAction* sourceWidgetAction /*= nullptr*/) :
     WidgetAction(parent),
     _groupActions(),
+    _sourceWidgetAction(),
     _visibility()
 {
     setDefaultWidgetFlags(Default);
+    setSerializable(false);
+
+    if (sourceWidgetAction)
+        setSourceWidgetAction(sourceWidgetAction);
+}
+
+void GroupsAction::setSourceWidgetAction(WidgetAction* sourceWidgetAction)
+{
+    GroupsAction::GroupActions groupActions;
+
+    Q_ASSERT(sourceWidgetAction != nullptr);
+
+    if (sourceWidgetAction == nullptr)
+        return;
+
+    _sourceWidgetAction = sourceWidgetAction;
+
+    // Loop over all child objects and add if is a group action
+    for (auto childObject : _sourceWidgetAction->children()) {
+        auto groupAction = dynamic_cast<GroupAction*>(childObject);
+
+        // Add when the action is a group action
+        if (groupAction)
+            groupActions << groupAction;
+    }
+
+    // Set group actions
+    setGroupActions(groupActions);
+
+    // Notify others that the source widget action changed
+    emit sourceWidgetActionChanged(_sourceWidgetAction);
 }
 
 void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= true*/)
 {
-    qDebug() << QString("Add %1 to groups action").arg(groupAction->getSettingsPath());
+#ifdef _DEBUG
+    qDebug().noquote() << QString("Add %1 to groups action").arg(groupAction->getSettingsPath());
+#endif
 
     // Add group action
     _groupActions << groupAction;
@@ -37,13 +71,21 @@ void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= tru
         emit groupActionCollapsed(groupAction);
     });
 
+    // Pass through group action resettable changed signal
+    connect(groupAction, &GroupAction::resettableChanged, this, &GroupsAction::resettableChanged);
+
+    // Pass through group action factory resettable changed signal
+    connect(groupAction, &GroupAction::factoryResettableChanged, this, &GroupsAction::factoryResettableChanged);
+
     // Notify others that a group action was added
     emit groupActionAdded(groupAction);
 }
 
 void GroupsAction::removeGroupAction(GroupAction* groupAction)
 {
-    qDebug() << QString("Remove %1 from groups action").arg(groupAction->getSettingsPath());
+#ifdef _DEBUG
+    qDebug().noquote() << QString("Remove %1 from groups action").arg(groupAction->getSettingsPath());
+#endif
 
     Q_ASSERT(_groupActions.contains(groupAction));
     Q_ASSERT(_visibility.contains(groupAction));
@@ -61,6 +103,8 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
     // Remove connections to the group action
     disconnect(groupAction, &GroupAction::expanded, this, nullptr);
     disconnect(groupAction, &GroupAction::collapsed, this, nullptr);
+    disconnect(groupAction, &GroupAction::resettableChanged, this, nullptr);
+    disconnect(groupAction, &GroupAction::factoryResettableChanged, this, nullptr);
 
     // Notify others that a group action was removed
     emit groupActionRemoved(groupAction);
@@ -68,7 +112,9 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
 
 void GroupsAction::setGroupActions(const GroupActions& groupActions)
 {
+#ifdef _DEBUG
     qDebug() << "Set group actions";
+#endif
 
     // Remove existing group actions
     resetGroupActions();
@@ -80,7 +126,9 @@ void GroupsAction::setGroupActions(const GroupActions& groupActions)
 
 void GroupsAction::resetGroupActions()
 {
+#ifdef _DEBUG
     qDebug() << "Reset group actions";
+#endif
 
     // Cache group actions in order to avoid timing issues
     auto groupActions = _groupActions;
@@ -98,7 +146,7 @@ const GroupsAction::GroupActions& GroupsAction::getGroupActions() const
 
 bool GroupsAction::canExpandAll() const
 {
-    return getNumberOfExpandedGroupActions() < getGroupActions().count();
+    return getNumberOfExpandedGroupActions() < getNumberOfVisibleGroupActions();
 }
 
 void GroupsAction::expandAll()
@@ -109,7 +157,6 @@ void GroupsAction::expandAll()
 
 bool GroupsAction::canCollapseAll() const
 {
-    // Can collapse when the number of collapse group actions is larger than zero
     return getNumberOfExpandedGroupActions() >= 1;
 }
 
@@ -119,24 +166,36 @@ void GroupsAction::collapseAll()
         groupAction->setExpanded(false);
 }
 
-QVector<bool> GroupsAction::getExpansions() const
+QVector<bool> GroupsAction::getExpansions(bool visibleOnly /*= true*/) const
 {
     QVector<bool> expansions;
 
     // Loop over all actions and add expansion state
-    for (auto groupAction : _groupActions)
-        expansions << groupAction->isExpanded();
+    for (auto groupAction : _groupActions) {
+        if (visibleOnly) {
+            if (_visibility[groupAction])
+                expansions << groupAction->isExpanded();
+        }
+        else {
+            expansions << groupAction->isExpanded();
+        }
+    }
 
     return expansions;
 }
 
-std::int32_t GroupsAction::getNumberOfExpandedGroupActions() const
+std::int32_t GroupsAction::getNumberOfExpandedGroupActions(bool visibleOnly /*= true*/) const
 {
     // Get group expansion states
-    const auto expansions = getExpansions();
+    const auto expansions = getExpansions(visibleOnly);
 
     // Count the number of expanded group actions
     return std::count_if(expansions.begin(), expansions.end(), [](auto expansion) -> bool { return expansion; });
+}
+
+std::int32_t GroupsAction::getNumberOfVisibleGroupActions() const
+{
+    return std::count_if(_visibility.begin(), _visibility.end(), [](auto visible) -> bool { return visible; });
 }
 
 void GroupsAction::setGroupActionVisibility(GroupAction* groupAction, bool visible)
@@ -189,6 +248,65 @@ bool GroupsAction::isGroupActionHidden(GroupAction* groupAction) const
     return !isGroupActionVisible(groupAction);
 }
 
+void GroupsAction::loadDefault(bool recursive /*= true*/)
+{
+    for (auto groupAction : _groupActions)
+        groupAction->loadDefault(recursive);
+}
+
+void GroupsAction::saveDefault(bool recursive /*= true*/)
+{
+    for (auto groupAction : _groupActions)
+        groupAction->saveDefault(recursive);
+}
+
+bool GroupsAction::canSaveDefault(bool recursive /*= true*/) const
+{
+    for (auto groupAction : _groupActions)
+        if (groupAction->canSaveDefault(recursive))
+            return true;
+
+    return false;
+}
+
+bool GroupsAction::isResettable(bool recursive /*= true*/) const
+{
+    for (auto groupAction : _groupActions)
+        if (groupAction->isResettable(recursive))
+            return true;
+
+    return false;
+}
+
+bool GroupsAction::isFactoryResettable(bool recursive /*= true*/) const
+{
+    for (auto groupAction : _groupActions)
+        if (groupAction->isFactoryResettable(recursive))
+            return true;
+
+    return false;
+}
+
+void GroupsAction::reset(bool recursive /*= true*/)
+{
+    for (auto groupAction : _groupActions)
+        groupAction->reset(recursive);
+}
+
+void GroupsAction::setValueFromVariant(const QVariant& value)
+{
+}
+
+QVariant GroupsAction::valueToVariant() const
+{
+    return QVariant();
+}
+
+QVariant GroupsAction::defaultValueToVariant() const
+{
+    return QVariant();
+}
+
 GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
@@ -199,9 +317,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     _filterAction(this, "Search"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
-    _loadDefaultAction(this, "Load default"),
-    _saveDefaultAction(this, "Save default"),
-    _factoryDefaultAction(this, "Factory default"),
+    _actionOptionsAction(this, groupsAction),
     _treeWidget()
 {
     // Configure layout
@@ -215,8 +331,14 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     createToolbar(widgetFlags);
     createTreeWidget(widgetFlags);
 
+    // Filtered actions group action should not be serialized
+    _filteredActionsAction.setSerializable(false);
+
     // Add filtering action to the groups action and hide by default
     _groupsAction->addGroupAction(&_filteredActionsAction, false);
+
+    // Update options action actions when the source widget action changes
+    connect(_groupsAction, &GroupsAction::sourceWidgetActionChanged, &_actionOptionsAction, &ActionOptionsAction::updateActions);
 
     // Perform an initial update of the toolbar and action filtering
     updateToolbar();
@@ -235,17 +357,11 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
     // Set action icon
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
     _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
-    _loadDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-    _saveDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-    _factoryDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("industry"));
 
     // Set action tooltips
     _filterAction.setToolTip("Filter properties by name");
     _expandAllAction.setToolTip("Expand all property sections");
     _collapseAllAction.setToolTip("Collapse all property sections");
-    _loadDefaultAction.setToolTip("Load default properties");
-    _saveDefaultAction.setToolTip("Save default properties");
-    _factoryDefaultAction.setToolTip("Restore factory default properties");
 
     // Configure toolbar layout
     _toolbarLayout.setContentsMargins(0, 2, 0, 2);
@@ -263,14 +379,13 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
         _toolbarLayout.addWidget(_collapseAllAction.createWidget(this, TriggerAction::Icon));
     }
 
-    if (widgetFlags & Expansion) {
+    if (widgetFlags & ActionOptions) {
         if (widgetFlags & Filtering || widgetFlags & Expansion)
             _toolbarLayout.addWidget(createVerticalDivider());
 
-        _toolbarLayout.addWidget(_loadDefaultAction.createWidget(this, TriggerAction::Icon));
-        _toolbarLayout.addWidget(_saveDefaultAction.createWidget(this, TriggerAction::Icon));
-        _toolbarLayout.addWidget(createVerticalDivider());
-        _toolbarLayout.addWidget(_factoryDefaultAction.createWidget(this, TriggerAction::Icon));
+        _toolbarLayout.addWidget(_actionOptionsAction.getLoadDefaultAction().createWidget(this));
+        _toolbarLayout.addWidget(_actionOptionsAction.getSaveDefaultAction().createWidget(this));
+        _toolbarLayout.addWidget(_actionOptionsAction.getFactoryDefaultAction().createWidget(this));
     }
 
     // Set toolbar widget layout
@@ -342,7 +457,9 @@ void GroupsAction::Widget::updateToolbar()
 
 void GroupsAction::Widget::updateFiltering()
 {
+#ifdef _DEBUG
     qDebug() << "Updating action filtering";
+#endif
 
     // Get filter string
     const auto filterString = _filterAction.getString();
@@ -379,7 +496,9 @@ void GroupsAction::Widget::updateFiltering()
 
 void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 {
-    qDebug() << QString("Add %1 to tree widget").arg(groupAction->getSettingsPath());
+#ifdef _DEBUG
+    qDebug().noquote() << QString("Add %1 to tree widget").arg(groupAction->getSettingsPath());
+#endif
 
     // Create new tree widget item for the section expand/collapse button
     _groupSectionTreeItems[groupAction] = new GroupSectionTreeItem(&_treeWidget, groupAction);
@@ -393,7 +512,9 @@ void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 
 void GroupsAction::Widget::removeGroupAction(GroupAction* groupAction)
 {
-    qDebug() << QString("Remove %1 from tree widget").arg(groupAction->getSettingsPath());
+#ifdef _DEBUG
+    qDebug().noquote() << QString("Remove %1 from tree widget").arg(groupAction->getSettingsPath());
+#endif
 
     Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
 

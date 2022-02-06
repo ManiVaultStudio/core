@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QResizeEvent>
 #include <QVBoxLayout>
+#include <QMenu>
 
 #include <stdexcept>
 

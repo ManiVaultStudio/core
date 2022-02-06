@@ -1,8 +1,10 @@
 #include "GroupSectionTreeItem.h"
 #include "GroupWidgetTreeItem.h"
 #include "GroupAction.h"
+#include "Application.h"
 
 #include <QDebug>
+#include <QMenu>
 
 namespace hdps {
 
@@ -24,7 +26,7 @@ GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction*
 
 GroupSectionTreeItem::~GroupSectionTreeItem()
 {
-    qDebug() << QString("Destructing %1 group tree item").arg(_groupAction->getSettingsPath());
+    //qDebug() << QString("Destructing %1 group tree item").arg(_groupAction->getSettingsPath());
 
     takeChildren();
 

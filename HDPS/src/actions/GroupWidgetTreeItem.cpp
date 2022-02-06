@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QCoreApplication>
 
 namespace hdps {
 
@@ -38,7 +39,7 @@ GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeI
 
 GroupWidgetTreeItem::~GroupWidgetTreeItem()
 {
-    qDebug() << QString("Destructing %1 group widget item").arg(_groupAction->getSettingsPath());
+    //qDebug() << QString("Destructing %1 group widget item").arg(_groupAction->getSettingsPath());
 }
 
 GroupSectionTreeItem* GroupWidgetTreeItem::getGroupSectionTreeItem()

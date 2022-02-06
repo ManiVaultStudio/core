@@ -51,12 +51,6 @@ protected:
      */
     void loadDatasetGroupActions();
 
-    /**
-     * Get group actions for the currently loaded dataset
-     * @return Vector of pointers to group actions
-     */
-    GroupsAction::GroupActions getGroupActionsFromDataset() const;
-
 signals:
 
     /**

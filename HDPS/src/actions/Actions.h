@@ -18,3 +18,4 @@
 #include "WidgetActionLabel.h"
 #include "DirectoryPickerAction.h"
 #include "StatusAction.h"
+#include "ActionOptionsAction.h"

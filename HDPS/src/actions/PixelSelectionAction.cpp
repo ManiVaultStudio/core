@@ -5,6 +5,7 @@
 #include "util/PixelSelectionTool.h"
 
 #include <QKeyEvent>
+#include <QMenu>
 
 using namespace hdps::util;
 
@@ -227,7 +228,7 @@ void PixelSelectionAction::initType()
         _sampleAction.setChecked(type == PixelSelectionType::Sample);
         _roiAction.setChecked(type == PixelSelectionType::ROI);
 
-        setResettable(_typeAction.isResettable());
+        notifyResettable();
     };
 
     // Toggle type actions based on selected selection type
@@ -264,14 +265,10 @@ void PixelSelectionAction::initModifier()
         _pixelSelectionTool.setModifier(checked ? PixelSelectionModifierType::Remove : PixelSelectionModifierType::Replace);
     });
 
-    const auto updateResettable = [this]() -> void {
-        setResettable(_modifierAddAction.isResettable() || _modifierSubtractAction.isResettable());
-    };
+    connect(&_modifierAddAction, &ColorAction::resettableChanged, this, &PixelSelectionAction::notifyResettable);
+    connect(&_modifierSubtractAction, &DecimalAction::resettableChanged, this, &PixelSelectionAction::notifyResettable);
 
-    connect(&_modifierAddAction, &ColorAction::resettableChanged, this, updateResettable);
-    connect(&_modifierSubtractAction, &DecimalAction::resettableChanged, this, updateResettable);
-
-    updateResettable();
+    notifyResettable();
 }
 
 void PixelSelectionAction::initOperations()

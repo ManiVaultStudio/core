@@ -24,12 +24,6 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
     _numberOfPixelsAction.setEnabled(false);
     _numberComponentsPerPixelAction.setEnabled(false);
 
-    _typeAction.setMayReset(false);
-    _numberOfImagesAction.setMayReset(false);
-    _imageResolutionAction.setMayReset(false);
-    _numberOfPixelsAction.setMayReset(false);
-    _numberComponentsPerPixelAction.setMayReset(false);
-
     const auto sizeToString = [](const QSize& size) -> QString {
         return QString("[%1, %2]").arg(QString::number(size.width()), QString::number(size.height()));
 

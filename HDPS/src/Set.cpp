@@ -66,22 +66,26 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
 
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)
 {
-    _core->getDataHierarchyItem(_guid).addAction(widgetAction);
+    // Re-parent the widget action
+    //widgetAction.setParent(this);
+
+   // And add to the data hierarchy item
+    getDataHierarchyItem().addAction(widgetAction);
 }
 
 hdps::gui::WidgetActions DatasetImpl::getActions() const
 {
-    return _core->getDataHierarchyItem(_guid).getActions();
+    return getDataHierarchyItem().getActions();
 }
 
 QMenu* DatasetImpl::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    return _core->getDataHierarchyItem(_guid).getContextMenu(parent);
+    return getDataHierarchyItem().getContextMenu(parent);
 }
 
 void DatasetImpl::populateContextMenu(QMenu* contextMenu)
 {
-    return _core->getDataHierarchyItem(_guid).populateContextMenu(contextMenu);
+    return getDataHierarchyItem().populateContextMenu(contextMenu);
 }
 
 }

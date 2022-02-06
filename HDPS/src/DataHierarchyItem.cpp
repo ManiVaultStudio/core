@@ -4,6 +4,8 @@
 #include "Set.h"
 #include "Dataset.h"
 
+#include <QMenu>
+
 #include <stdexcept>
 
 using namespace hdps::gui;

@@ -18,7 +18,6 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
 {
     setText(title);
     initialize(color, defaultColor);
-    setMayReset(true);
     setDefaultWidgetFlags(WidgetFlag::Basic);
 }
 
@@ -26,8 +25,7 @@ void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QCol
 {
     setColor(color);
     setDefaultColor(defaultColor);
-
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QColor ColorAction::getColor() const
@@ -44,7 +42,7 @@ void ColorAction::setColor(const QColor& color)
 
     emit colorChanged(_color);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QColor ColorAction::getDefaultColor() const

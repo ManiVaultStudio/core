@@ -5,6 +5,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QMenu>
 
 namespace hdps
 {

@@ -23,16 +23,12 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*=
     _rangeMaxAction(this, "Maximum")
 {
     setText(title);
-    setSerializable(true);
-    setMayReset(true);
 
     connect(&_rangeMinAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
         if (value >= _rangeMaxAction.getValue())
             _rangeMaxAction.setValue(value);
 
         emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
-
-        setResettable(_rangeMinAction.isResettable() || _rangeMaxAction.isResettable());
     });
 
     connect(&_rangeMaxAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
@@ -40,8 +36,6 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*=
             _rangeMinAction.setValue(value);
 
         emit rangeChanged(_rangeMinAction.getValue(), _rangeMaxAction.getValue());
-
-        setResettable(_rangeMinAction.isResettable() || _rangeMaxAction.isResettable());
     });
 
     initialize(limitMin, limitMax, rangeMin, rangeMax);

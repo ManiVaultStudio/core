@@ -21,12 +21,8 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
     _numberOfStepsAction.setSerializable(true);
     _numberOfStepsAction.setToolTip("Number of discrete steps");
 
-    const auto updateResettable = [this]() {
-        setResettable(isResettable());
-    };
-
-    connect(this, &ColorMapDiscreteAction::toggled, this, updateResettable);
-    connect(&_numberOfStepsAction, &IntegralAction::resettableChanged, this, updateResettable);
+    connect(this, &ColorMapDiscreteAction::toggled, this, &ColorMapSettingsAction::notifyResettable);
+    connect(&_numberOfStepsAction, &IntegralAction::resettableChanged, this, &ColorMapSettingsAction::notifyResettable);
 }
 
 void ColorMapDiscreteAction::setValueFromVariant(const QVariant& value)

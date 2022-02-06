@@ -72,32 +72,12 @@ void DataPropertiesWidget::loadDatasetGroupActions()
     if (!_dataset.isValid())
         return;
 
-    qDebug() << QString("Load dataset from %1").arg(_dataset->getGuiName());
+#ifdef _DEBUG
+    qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->getGuiName());
+#endif
 
     // Populate groups action with group actions from the dataset
-    _groupsAction.setGroupActions(getGroupActionsFromDataset());
-}
-
-GroupsAction::GroupActions DataPropertiesWidget::getGroupActionsFromDataset() const
-{
-    GroupsAction::GroupActions groupActions;
-
-    if (!_dataset.isValid())
-        return groupActions;
-
-    // Get actions from data hierarchy item
-    auto actions = _dataset->getDataHierarchyItem().getActions();
-
-    // Loop over all actions and add action if is a group action
-    for (auto action : actions) {
-        auto groupAction = dynamic_cast<GroupAction*>(action);
-
-        // Add expansion state when the action is a group action and if it meets the visibility constraint
-        if (groupAction)
-            groupActions << groupAction;
-    }
-
-    return groupActions;
+    _groupsAction.setSourceWidgetAction(_dataset.get());
 }
 
 }

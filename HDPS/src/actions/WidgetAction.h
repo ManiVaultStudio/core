@@ -2,14 +2,11 @@
 
 #include "WidgetActionWidget.h"
 
-#include "Plugin.h"
-
 #include <QWidgetAction>
-#include <QMenu>
 #include <QDebug>
-#include <QFlags>
 
 class QLabel;
+class QMenu;
 
 namespace hdps {
 
@@ -39,6 +36,12 @@ public:
     WidgetAction(QObject* parent);
 
     /**
+     * Get parent widget action
+     * @return Pointer to parent widget action (if any)
+     */
+    WidgetAction* getParentWidgetAction();
+
+    /**
      * Create standard widget
      * @param parent Parent widget
      * @return Pointer to created widget
@@ -64,10 +67,7 @@ public:
      * @param parent Parent widget
      * @return Context menu
      */
-    virtual QMenu* getContextMenu(QWidget* parent = nullptr)
-    {
-        return nullptr;
-    };
+    virtual QMenu* getContextMenu(QWidget* parent = nullptr);
 
     /**
      * Create widget for the action
@@ -76,12 +76,6 @@ public:
      */
     QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
-    /** Determines whether a user may reset the action to the default value */
-    virtual bool getMayReset() const;
-
-    /** Set whether a user may reset the action to the default value */
-    virtual void setMayReset(const bool& mayReset);
-    
     /** Get the sort index */
     std::int32_t getSortIndex() const;
 
@@ -90,24 +84,6 @@ public:
      * @param sortIndex Sorting index
      */
     void setSortIndex(const std::int32_t& sortIndex);
-
-    /**
-     * Determines whether the action can be reset to its default
-     * @return Whether the action can be reset to its default
-     */
-    virtual bool isResettable() const final;
-
-    /**
-     * Determines whether the action can be reset to its factory default
-     * @return Whether the action can be reset to its factory default
-     */
-    virtual bool isFactoryResettable() const final;
-
-    /** Sets the action resettable */
-    virtual void setResettable(const bool& resettable);
-
-    /** Reset to default */
-    virtual void reset() final;
 
     /** Gets the default widget flags */
     std::int32_t getDefaultWidgetFlags() const;
@@ -124,78 +100,86 @@ public: // Settings
      * Get whether the widget action is serializable
      * @return Whether the widget action is serializable
      */
-    bool isSerializable() const;
+    virtual bool isSerializable() const;
 
     /**
      * Set whether the widget action is serializable
      * @param serializable whether the widget action is serializable
      * @param recursive Set serializable recursively
      */
-    void setSerializable(const bool& serializable, bool recursive = true);
+    virtual void setSerializable(const bool& serializable, bool recursive = true);
 
     /**
      * Establish whether there is a saved default
      * @return Whether there is a saved default
      */
-    bool hasSavedDefault() const;
+    virtual bool hasSavedDefault() const;
 
     /**
      * Establish whether a default can be saved
+     * @param recursive Check recursively
      * @return Whether a default can be saved
      */
-    bool canSaveDefault() const;
+    virtual bool canSaveDefault(bool recursive = true) const;
 
     /**
      * Load default from settings
      * @param recursive Load recursively
      */
-    void loadDefault(bool recursive = true);
+    virtual void loadDefault(bool recursive = true);
 
     /**
      * Save default to settings
      * @param recursive Save recursively
      */
-    void saveDefault(bool recursive = true);
+    virtual void saveDefault(bool recursive = true);
 
     /**
      * Set value from variant
      * @param value Value
      */
-    virtual void setValueFromVariant(const QVariant& value)
-    {
-        qDebug() << "Set value not implemented in " << text();
-    }
+    virtual void setValueFromVariant(const QVariant& value);
 
     /**
      * Convert value to variant
      * @return Value as variant
      */
-    virtual QVariant valueToVariant() const
-    {
-        qDebug() << "Value to variant not implemented in " << text();
-
-        return QVariant();
-    }
+    virtual QVariant valueToVariant() const;
 
     /**
      * Load saved default value to variant
      * @return Saved default value as variant
      */
-    virtual QVariant savedDefaultValueToVariant() const
-    {
-        return Application::current()->getSetting(getSettingsPath() + "/Default");
-    }
+    virtual QVariant savedDefaultValueToVariant() const;
 
     /**
      * Convert default value to variant
      * @return Default value as variant
      */
-    virtual QVariant defaultValueToVariant() const
-    {
-        qDebug() << "Default value to variant not implemented in derived widget action class";
+    virtual QVariant defaultValueToVariant() const;
 
-        return QVariant();
-    }
+    /**
+     * Determines whether the action can be reset to its default
+     * @param recursive Check recursively
+     * @return Whether the action can be reset to its default
+     */
+    virtual bool isResettable(bool recursive = true) const;
+
+    /**
+     * Determines whether the action can be reset to its factory default
+     * @param recursive Check recursively
+     * @return Whether the action can be reset to its factory default
+     */
+    virtual bool isFactoryResettable(bool recursive = true) const;
+
+    /** Notify others if the action is (factory) resettable */
+    virtual void notifyResettable() final;
+
+    /**
+     * Reset to factory default
+     * @param recursive Reset to factory default recursively
+     */
+    virtual void reset(bool recursive = true);
 
     /**
      * Get settings path
@@ -204,12 +188,26 @@ public: // Settings
     QString getSettingsPath() const;
 
     /**
+     * Get whether serialization is taking place
+     * @return Whether serialization is taking place
+     */
+    bool isSerializing() const;
+
+    /**
      * Find child widget action of which the GUI name contains the search string
      * @param searchString The search string
      * @param recursive Whether to search recursively
      * @return Found vector of pointers to widget action(s)
      */
     QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
+
+protected:
+
+    /**
+     * Set whether serialization is taking place
+     * @param isSerializing Whether serialization is taking place
+     */
+    void setIsSerializing(bool isSerializing);
 
 protected:
 
@@ -224,16 +222,27 @@ signals:
 
     /**
      * Signals that the resettable-ness changed
-     * @param isResettable Whether the widget action can be reset
+     * @param isResettable Whether the widget action can be reset to default
      */
-    void resettableChanged(const bool& isResettable);
+    void resettableChanged(bool isResettable);
+
+    /**
+     * Signals that the factory resettable-ness changed
+     * @param isFactoryResettable Whether the widget action can be reset to factory default
+     */
+    void factoryResettableChanged(bool isFactoryResettable);
+
+    /**
+     * Signals that serializing is currently being performed or not
+     * @param isSerializing Whether serializing is currently being performed or not
+     */
+    void isSerializingChanged(bool isSerializing);
 
 protected:
-    std::int32_t    _defaultWidgetFlags;    /** Default widget flags */
-    bool            _resettable;            /** Whether the action can be reset */
-    bool            _mayReset;              /** Whether the action may be reset (from the user interface) */
-    std::int32_t    _sortIndex;             /** Sort index (used in the group action to sort actions) */
-    bool            _serializable;          /** Whether the widget action can be serialized/de-serialized */
+    std::int32_t    _defaultWidgetFlags;        /** Default widget flags */
+    std::int32_t    _sortIndex;                 /** Sort index (used in the group action to sort actions) */
+    bool            _serializable;              /** Whether the widget action can be serialized/de-serialized */
+    bool            _isSerializing;             /** Whether the widget action is currently serializing */
 };
 
 /** List of widget actions */

@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QLabel>
 #include <QMouseEvent>
+#include <QMenu>
 
 namespace hdps {
 
@@ -19,7 +20,7 @@ WidgetActionOptions::WidgetActionOptions(WidgetAction* widgetAction, QLabel* lab
     _loadFactoryDefaultAction(this, "Load factory default")
 {
     Q_ASSERT(_label != nullptr);
-    
+
     // Set action icons
     _loadDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
     _saveDefaultAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));

@@ -3,6 +3,7 @@
 #include "GroupAction.h"
 #include "StringAction.h"
 #include "TriggerAction.h"
+#include "ActionOptionsAction.h"
 
 class QWidget;
 
@@ -34,9 +35,9 @@ public:
     enum WidgetFlag {
         Filtering       = 0x00001,      /** Widget contains UI for filtering group actions */
         Expansion       = 0x00002,      /** Widget contains UI to expand/collapse all actions */
-        Serialization   = 0x00004,      /** Widget includes UI for serialization */
+        ActionOptions   = 0x00004,      /** Widget includes UI for interacting with action options */
 
-        Default = Filtering | Expansion | Serialization
+        Default = Filtering | Expansion | ActionOptions
     };
 
 public:
@@ -118,9 +119,7 @@ public:
         StringAction                                    _filterAction;                  /** Filter action */
         TriggerAction                                   _expandAllAction;               /** Expand all datasets action */
         TriggerAction                                   _collapseAllAction;             /** Collapse all datasets action */
-        TriggerAction                                   _loadDefaultAction;             /** Load default action */
-        TriggerAction                                   _saveDefaultAction;             /** Save default action */
-        TriggerAction                                   _factoryDefaultAction;          /** Restore factory default action */
+        ActionOptionsAction                             _actionOptionsAction;           /** Action options action */
         TreeWidget                                      _treeWidget;                    /** Tree widget for display of the groups */
         QMap<GroupAction*, GroupSectionTreeItem*>       _groupSectionTreeItems;         /** Maps group action pointer to group section tree item pointer */
 
@@ -141,8 +140,15 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param widgetAction Pointer to widget action
      */
-    GroupsAction(QObject* parent);
+    GroupsAction(QObject* parent, WidgetAction* sourceWidgetAction = nullptr);
+
+    /**
+     * Set source widget action
+     * @param sourceWidgetAction Pointer to source widget action (display child group actions of this widget action)
+     */
+    void setSourceWidgetAction(WidgetAction* sourceWidgetAction);
 
 public: // Adding/removing group action(s)
 
@@ -199,15 +205,23 @@ public: // Expand/collapse group(s)
 
     /**
      * Get groups expansion states
+     * @param visibleOnly Visible group actions only
      * @return Vector of booleans, indicating whether a group is expanded or collapsed
      */
-    QVector<bool> getExpansions() const;
+    QVector<bool> getExpansions(bool visibleOnly = true) const;
 
     /**
      * Get number of expanded group actions
+     * @param visibleOnly Visible group actions only
      * @return Number of expanded group actions
      */
-    std::int32_t getNumberOfExpandedGroupActions() const;
+    std::int32_t getNumberOfExpandedGroupActions(bool visibleOnly = true) const;
+
+    /**
+     * Get number of visible group actions
+     * @return Number of visible group actions
+     */
+    std::int32_t getNumberOfVisibleGroupActions() const;
 
 public: // Visibility
 
@@ -252,7 +266,72 @@ public: // Visibility
      */
     bool isGroupActionHidden(GroupAction* groupAction) const;
 
+public: // Settings
+
+    /**
+     * Load default from settings
+     * @param recursive Load recursively
+     */
+    void loadDefault(bool recursive = true) override final;
+
+    /**
+     * Save default to settings
+     * @param recursive Save recursively
+     */
+    void saveDefault(bool recursive = true) override final;
+
+    /**
+     * Establish whether a default can be saved
+     * @param recursive Check recursively
+     * @return Whether a default can be saved
+     */
+    bool canSaveDefault(bool recursive = true) const override final;
+
+    /**
+     * Determines whether the action can be reset to its default
+     * @param recursive Check recursively
+     * @return Whether the action can be reset to its default
+     */
+    bool isResettable(bool recursive = true) const override final;
+
+    /**
+     * Determines whether the action can be reset to its factory default
+     * @param recursive Check recursively
+     * @return Whether the action can be reset to its factory default
+     */
+    bool isFactoryResettable(bool recursive = true) const override final;
+
+    /**
+     * Reset to factory default
+     * @param recursive Reset to factory default recursively
+     */
+    void reset(bool recursive = true) override final;
+
+    /**
+     * Set value from variant
+     * @param value Value
+     */
+    void setValueFromVariant(const QVariant& value) override final;
+
+    /**
+     * Convert value to variant
+     * @return Value as variant
+     */
+    QVariant valueToVariant() const override final;
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    QVariant defaultValueToVariant() const override final;
+
 signals:
+
+    /**
+     * Signals that the source widget action changed
+     * @param sourceWidgetAction Pointer to source widget action
+     */
+    void sourceWidgetActionChanged(WidgetAction* sourceWidgetAction);
 
     /**
      * Signals that a group action was added
@@ -291,8 +370,9 @@ signals:
     void groupActionHidden(GroupAction* groupAction);
 
 protected:
-    GroupActions                _groupActions;      /** Pointers to group actions */
-    QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
+    GroupActions                _groupActions;          /** Pointers to group actions */
+    WidgetAction*               _sourceWidgetAction;    /** Display child group actions of this action  */
+    QMap<GroupAction*, bool>    _visibility;            /** Group action visibility */
 };
 
 /**

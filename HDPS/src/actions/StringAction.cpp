@@ -1,4 +1,5 @@
 #include "StringAction.h"
+#include "Application.h"
 
 #include <QHBoxLayout>
 #include <QCompleter>
@@ -17,7 +18,6 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
     _completer(nullptr)
 {
     setText(title);
-    setMayReset(true);
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(string, defaultString);
 
@@ -29,8 +29,7 @@ void StringAction::initialize(const QString& string /*= ""*/, const QString& def
 {
     setString(string);
     setDefaultString(defaultString);
-
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QString StringAction::getString() const
@@ -47,7 +46,7 @@ void StringAction::setString(const QString& string)
 
     emit stringChanged(_string);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QString StringAction::getDefaultString() const
@@ -64,7 +63,7 @@ void StringAction::setDefaultString(const QString& defaultString)
 
     emit defaultStringChanged(_defaultString);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QString StringAction::getPlaceholderString() const

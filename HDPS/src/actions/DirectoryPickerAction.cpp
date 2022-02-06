@@ -18,7 +18,6 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
     _pickAction(this, "Pick directory")
 {
     setText(title);
-    setMayReset(true);
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(directory, defaultDirectory);
 
@@ -66,8 +65,7 @@ void DirectoryPickerAction::initialize(const QString& directory /*= QString()*/,
 {
     setDirectory(directory);
     setDefaultDirectory(defaultDirectory);
-
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QString DirectoryPickerAction::getDirectory() const
@@ -82,7 +80,7 @@ void DirectoryPickerAction::setDirectory(const QString& directory)
 
     _directoryAction.setString(directory);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QString DirectoryPickerAction::getDefaultDirectory() const
@@ -97,7 +95,7 @@ void DirectoryPickerAction::setDefaultDirectory(const QString& defaultDirectory)
 
     _directoryAction.setDefaultString(defaultDirectory);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QString DirectoryPickerAction::getPlaceholderString() const

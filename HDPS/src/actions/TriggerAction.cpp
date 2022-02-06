@@ -1,6 +1,7 @@
 #include "TriggerAction.h"
 
 #include <QHBoxLayout>
+#include <QMenu>
 
 namespace hdps {
 

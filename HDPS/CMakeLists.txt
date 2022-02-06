@@ -155,6 +155,7 @@ set(ACTIONS_HEADERS
     src/actions/StatusAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
+    src/actions/ActionOptionsAction.h
 )
 
 set(ACTIONS_SOURCES
@@ -199,6 +200,7 @@ set(ACTIONS_SOURCES
     src/actions/StatusAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
+    src/actions/ActionOptionsAction.cpp
 )
 
 set( RENDERER_HEADERS

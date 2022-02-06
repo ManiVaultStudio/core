@@ -25,14 +25,13 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("paint-roller"));
-    setMayReset(true);
     setDefaultWidgetFlags(WidgetFlag::Default);
 
     initialize(colorMap, defaultColorMap);
 
     const auto notifyColorMapImageChanged = [this]() -> void {
         emit imageChanged(getColorMapImage());
-        setResettable(isResettable());
+        notifyResettable();
     };
 
     connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, notifyColorMapImageChanged);
@@ -40,13 +39,8 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     connect(&_settingsAction.getVerticalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
     connect(&_settingsAction.getDiscreteAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
     connect(&_settingsAction.getDiscreteAction().getNumberOfStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
-
-    const auto updateResettable = [this]() {
-        setResettable(isResettable());
-    };
-
-    connect(&_currentColorMapAction, &OptionAction::resettableChanged, this, updateResettable);
-    connect(&_settingsAction, &ColorMapSettingsAction::resettableChanged, this, updateResettable);
+    connect(&_currentColorMapAction, &OptionAction::resettableChanged, this, &ColorMapAction::notifyResettable);
+    connect(&_settingsAction, &ColorMapSettingsAction::resettableChanged, this, &ColorMapAction::notifyResettable);
 }
 
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
@@ -54,7 +48,7 @@ void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString&
     _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
     _currentColorMapAction.initialize(_colorMapFilterModel, colorMap, defaultColorMap);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
@@ -69,7 +63,7 @@ void ColorMapAction::setColorMapType(const util::ColorMap::Type& colorMapType)
 
     emit typeChanged(colorMapType);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QString ColorMapAction::getColorMap() const
@@ -222,7 +216,7 @@ void ColorMapAction::setColorMap(const QString& colorMap)
 
     _currentColorMapAction.setCurrentText(colorMap);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 QString ColorMapAction::getDefaultColorMap() const
@@ -236,7 +230,7 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
 
     _currentColorMapAction.setDefaultText(defaultColorMap);
 
-    setResettable(isResettable());
+    notifyResettable();
 }
 
 void ColorMapAction::setValueFromVariant(const QVariant& value)

@@ -42,12 +42,8 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsA
 
     update();
 
-    const auto updateResettable = [this]() {
-        setResettable(isResettable());
-    };
-
-    connect(&_rangeAction, &DecimalRangeAction::resettableChanged, this, updateResettable);
-    connect(&_mirrorAction, &ToggleAction::resettableChanged, this, updateResettable);
+    connect(&_rangeAction, &DecimalRangeAction::resettableChanged, this, &ColorMapAxisAction::notifyResettable);
+    connect(&_mirrorAction, &ToggleAction::resettableChanged, this, &ColorMapAxisAction::notifyResettable);
 }
 
 void ColorMapAxisAction::setValueFromVariant(const QVariant& value)
