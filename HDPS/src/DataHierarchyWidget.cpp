@@ -122,14 +122,14 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     // Notify others that the dataset selection changed when the current row in the model changed
-    connect(&_selectionModel, &QItemSelectionModel::currentRowChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
 
         // Only proceed with a valid selection
-        if (!current.isValid())
+        if (selected.indexes().isEmpty())
             return;
         
         // Get the globally unique identifier of the selected dataset
-        const auto selectedDatasetId = current.siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::GUID)).data(Qt::DisplayRole).toString();
+        const auto selectedDatasetId = selected.indexes().first().siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::GUID)).data(Qt::DisplayRole).toString();
 
         // Notify others that a dataset was selected
         emit selectedDatasetChanged(selectedDatasetId);

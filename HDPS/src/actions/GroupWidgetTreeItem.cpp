@@ -36,6 +36,11 @@ GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeI
     setSizeHint(0, _groupWidget->sizeHint());
 }
 
+GroupWidgetTreeItem::~GroupWidgetTreeItem()
+{
+    qDebug() << QString("Destructing %1 group widget item").arg(_groupAction->getSettingsPath());
+}
+
 GroupSectionTreeItem* GroupWidgetTreeItem::getGroupSectionTreeItem()
 {
     return _groupSectionTreeItem;

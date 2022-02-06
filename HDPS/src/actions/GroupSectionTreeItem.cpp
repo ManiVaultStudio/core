@@ -24,6 +24,8 @@ GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction*
 
 GroupSectionTreeItem::~GroupSectionTreeItem()
 {
+    qDebug() << QString("Destructing %1 group tree item").arg(_groupAction->getSettingsPath());
+
     takeChildren();
 
     delete _groupWidgetTreeItem;

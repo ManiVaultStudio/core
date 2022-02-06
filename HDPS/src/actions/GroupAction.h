@@ -135,5 +135,31 @@ protected:
     QVector<WidgetAction*>      _widgetActions;     /** Widget actions */
 };
 
+/**
+ * Print group action to console
+ * @param debug Debug
+ * @param groupAction Reference to group action
+ */
+inline QDebug operator << (QDebug debug, const GroupAction& groupAction)
+{
+    debug << groupAction.getSettingsPath();
+
+    return debug.space();
+}
+
+/**
+ * Print group action to console
+ * @param debug Debug
+ * @param groupAction Pointer to group action
+ */
+inline QDebug operator << (QDebug debug, const GroupAction* groupAction)
+{
+    Q_ASSERT(groupAction != nullptr);
+
+    debug << groupAction->getSettingsPath();
+
+    return debug.space();
+}
+
 }
 }

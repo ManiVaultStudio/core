@@ -61,6 +61,9 @@ public:
      */
     GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeItem, GroupAction* groupAction);
 
+    /** Destructor */
+    ~GroupWidgetTreeItem();
+
     /**
      * Get group section tree item
      * @return Pointer to group section tree item

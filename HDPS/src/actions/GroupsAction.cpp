@@ -19,7 +19,7 @@ GroupsAction::GroupsAction(QObject* parent) :
 
 void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= true*/)
 {
-    qDebug() << "Add group action to groups action";
+    qDebug() << QString("Add %1 to groups action").arg(groupAction->getSettingsPath());
 
     // Add group action
     _groupActions << groupAction;
@@ -43,7 +43,10 @@ void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= tru
 
 void GroupsAction::removeGroupAction(GroupAction* groupAction)
 {
-    qDebug() << "Remove group action from groups action";
+    qDebug() << QString("Remove %1 from groups action").arg(groupAction->getSettingsPath());
+
+    Q_ASSERT(_groupActions.contains(groupAction));
+    Q_ASSERT(_visibility.contains(groupAction));
 
     if (!_groupActions.contains(groupAction))
         return;
@@ -51,6 +54,7 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
     // Remove the group action
     _groupActions.removeOne(groupAction);
 
+    // Remove from visibility as well
     if (_visibility.contains(groupAction))
         _visibility.remove(groupAction);
 
@@ -64,6 +68,8 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
 
 void GroupsAction::setGroupActions(const GroupActions& groupActions)
 {
+    qDebug() << "Set group actions";
+
     // Remove existing group actions
     resetGroupActions();
 
@@ -74,9 +80,14 @@ void GroupsAction::setGroupActions(const GroupActions& groupActions)
 
 void GroupsAction::resetGroupActions()
 {
-    // Remove all group actions
-    for (auto groupAction : _groupActions)
-        if (groupAction != _groupActions.first())
+    qDebug() << "Reset group actions";
+
+    // Cache group actions in order to avoid timing issues
+    auto groupActions = _groupActions;
+
+    // Remove all group actions except the filtered actions group action
+    for (auto groupAction : groupActions)
+        if (groupAction != groupActions.first())
             removeGroupAction(groupAction);
 }
 
@@ -361,13 +372,14 @@ void GroupsAction::Widget::updateFiltering()
         foundActions << groupAction->findChildren(filterString, false);
 
     // Update filtered actions group action
+    _filteredActionsAction.setExpanded(true);
     _filteredActionsAction.setActions(foundActions);
-    _filteredActionsAction.setText(foundActions.count() == 0 ? "No properties found" : QString("Found %1 properties").arg(foundActions.count()));
+    _filteredActionsAction.setText(foundActions.count() == 0 ? "No properties found" : QString("Found %1 proper%2").arg(QString::number(foundActions.count()), foundActions.count() == 1 ? "ty": "ties"));
 }
 
 void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 {
-    qDebug() << "Add group action" << groupAction->text();
+    qDebug() << QString("Add %1 to tree widget").arg(groupAction->getSettingsPath());
 
     // Create new tree widget item for the section expand/collapse button
     _groupSectionTreeItems[groupAction] = new GroupSectionTreeItem(&_treeWidget, groupAction);
@@ -375,26 +387,30 @@ void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
     // Set expansion state from group action
     _groupSectionTreeItems[groupAction]->setExpanded(groupAction->isExpanded());
     _groupSectionTreeItems[groupAction]->setHidden(_groupsAction->isGroupActionHidden(groupAction));
+
+    update();
 }
 
 void GroupsAction::Widget::removeGroupAction(GroupAction* groupAction)
 {
-    qDebug() << "Remove group action" << groupAction->text();
+    qDebug() << QString("Remove %1 from tree widget").arg(groupAction->getSettingsPath());
 
     Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
+
+    if (!_groupSectionTreeItems.contains(groupAction))
+        return;
 
     // Get pointer to top-level group section tree item
     const auto groupSectionTreeItem = _groupSectionTreeItems[groupAction];
 
-    // Get the index of the top-level group section tree item
-    const auto groupSectionTreeItemIndex = _treeWidget.indexOfTopLevelItem(_groupSectionTreeItems[groupAction]);
+    // Remove the item from the tree widget
+    _treeWidget.removeItemWidget(groupSectionTreeItem, 0);
 
-    //groupSectionTreeItem->takeChildren();
+    // Delete it physically
+    delete _groupSectionTreeItems[groupAction];
 
-    //_treeWidget.takeTopLevelItem(groupSectionTreeItemIndex);
-
-    // Remove the group section tree item from the map
-    //_groupSectionTreeItems.remove(groupAction);
+    // And remove the group section tree item from the map
+    _groupSectionTreeItems.remove(groupAction);
 }
 
 void GroupsAction::Widget::showGroupAction(GroupAction* groupAction)

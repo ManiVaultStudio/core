@@ -24,7 +24,9 @@ class GroupsAction : public WidgetAction
     Q_OBJECT
 
 public:
-    using GroupActions = QVector<GroupAction*>;
+    class GroupActions : public QVector<GroupAction*>
+    {
+    };
 
 public:
 
@@ -292,6 +294,23 @@ protected:
     GroupActions                _groupActions;      /** Pointers to group actions */
     QMap<GroupAction*, bool>    _visibility;        /** Group action visibility */
 };
+
+/**
+ * Print group actions to console
+ * @param debug Debug
+ * @param groupActions Reference to group actions
+ */
+inline QDebug operator << (QDebug debug, const GroupsAction::GroupActions& groupActions)
+{
+    QStringList names;
+
+    for (const auto groupAction : groupActions)
+        names << groupAction->getSettingsPath();
+
+    debug << names.join(", ");
+
+    return debug.space();
+}
 
 }
 }

@@ -72,15 +72,15 @@ void DataPropertiesWidget::loadDatasetGroupActions()
     if (!_dataset.isValid())
         return;
 
-    qDebug() << "Load dataset" << _dataset->getGuiName();
+    qDebug() << QString("Load dataset from %1").arg(_dataset->getGuiName());
 
     // Populate groups action with group actions from the dataset
     _groupsAction.setGroupActions(getGroupActionsFromDataset());
 }
 
-QVector<GroupAction*> DataPropertiesWidget::getGroupActionsFromDataset() const
+GroupsAction::GroupActions DataPropertiesWidget::getGroupActionsFromDataset() const
 {
-    QVector<GroupAction*> groupActions;
+    GroupsAction::GroupActions groupActions;
 
     if (!_dataset.isValid())
         return groupActions;

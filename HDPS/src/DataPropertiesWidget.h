@@ -55,7 +55,7 @@ protected:
      * Get group actions for the currently loaded dataset
      * @return Vector of pointers to group actions
      */
-    QVector<GroupAction*> getGroupActionsFromDataset() const;
+    GroupsAction::GroupActions getGroupActionsFromDataset() const;
 
 signals:
 
