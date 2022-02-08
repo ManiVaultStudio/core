@@ -845,6 +845,17 @@ public: // Selection
      */
     void addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
 
+    /**
+     * Removes all mappings of global selection indices from this dataset
+     */
+    void removeAllLinkedSelections();
+
+    /**
+     * Removes mappings of global selection indices from this dataset to a target dataset
+     * @param targetDataSet The target dataset
+     */
+    void removeLinkedSelectionToDataSet(const hdps::Dataset<DatasetImpl>& targetDataSet);
+
 public:
 
     std::vector<unsigned int> indices;

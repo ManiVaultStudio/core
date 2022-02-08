@@ -15,6 +15,7 @@
 #include <type_traits>
 #include <queue>
 #include <set>
+#include <algorithm>
 
 #include "graphics/Vector2f.h"
 #include "Application.h"
@@ -510,6 +511,21 @@ void Points::addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet,
 {
     _linkedSelections.emplace_back(toSmartPointer(), targetDataSet);
     _linkedSelections.back().setMapping(mapping);
+}
+
+void Points::removeAllLinkedSelections()
+{
+    _linkedSelections.clear();
+}
+
+void Points::removeLinkedSelectionToDataSet(const hdps::Dataset<DatasetImpl>& targetDataSet)
+{
+    // erase-remove idiom (https://en.wikibooks.org/wiki/More_C++_Idioms/Erase-Remove) 
+    // removes all mappings to targetDataSet from _linkedSelections
+    _linkedSelections.erase(std::remove_if(_linkedSelections.begin(), 
+                                           _linkedSelections.end(), 
+                                           [targetDataSet](hdps::LinkedSelection linkedSel) {return linkedSel.getTargetDataset() == targetDataSet; }),
+                            _linkedSelections.end());
 }
 
 // =============================================================================
