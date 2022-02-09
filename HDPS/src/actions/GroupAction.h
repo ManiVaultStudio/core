@@ -112,8 +112,70 @@ public:
      */
     void setActions(const QVector<WidgetAction*>& widgetActions = QVector<WidgetAction*>());
 
-    /** Get sorted widget actions */
-    QVector<WidgetAction*> getSortedWidgetActions();
+    /**
+     * Get sorted widget actions
+     * @return Vector of sorted widget actions
+     */
+    QVector<WidgetAction*> getSortedWidgetActions() const;
+
+public: // Settings
+
+    /**
+     * Load default from settings
+     * @param recursive Load recursively
+     */
+    void loadDefault(bool recursive = true) override final;
+
+    /**
+     * Save default to settings
+     * @param recursive Save recursively
+     */
+    void saveDefault(bool recursive = true) override final;
+
+    /**
+     * Establish whether a default can be saved
+     * @param recursive Check recursively
+     * @return Whether a default can be saved
+     */
+    bool canSaveDefault(bool recursive = true) const override final;
+
+    /**
+     * Determines whether the action can be reset to its default
+     * @param recursive Check recursively
+     * @return Whether the action can be reset to its default
+     */
+    bool isResettable(bool recursive = true) const override final;
+
+    /**
+     * Determines whether the action can be reset to its factory default
+     * @param recursive Check recursively
+     * @return Whether the action can be reset to its factory default
+     */
+    bool isFactoryResettable(bool recursive = true) const override final;
+
+    /**
+     * Reset to factory default
+     * @param recursive Reset to factory default recursively
+     */
+    void reset(bool recursive = true) override final;
+
+    /**
+     * Set value from variant
+     * @param value Value
+     */
+    void setValueFromVariant(const QVariant& value) override;
+
+    /**
+     * Convert value to variant
+     * @return Value as variant
+     */
+    QVariant valueToVariant() const override;
+
+    /**
+     * Convert default value to variant
+     * @return Default value as variant
+     */
+    QVariant defaultValueToVariant() const override;
 
 signals:
 

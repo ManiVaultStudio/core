@@ -87,7 +87,7 @@ void GroupAction::setActions(const QVector<WidgetAction*>& widgetActions /*= QVe
     emit actionsChanged(_widgetActions);
 }
 
-QVector<WidgetAction*> GroupAction::getSortedWidgetActions()
+QVector<WidgetAction*> GroupAction::getSortedWidgetActions() const
 {
     auto sortedActions = _widgetActions;
 
@@ -108,6 +108,65 @@ QVector<WidgetAction*> GroupAction::getSortedWidgetActions()
     });
 
     return sortedActions;
+}
+
+void GroupAction::loadDefault(bool recursive /*= true*/)
+{
+    for (auto widgetAction : getSortedWidgetActions())
+        widgetAction->loadDefault();
+}
+
+void GroupAction::saveDefault(bool recursive /*= true*/)
+{
+    for (auto widgetAction : getSortedWidgetActions())
+        widgetAction->saveDefault();
+}
+
+bool GroupAction::canSaveDefault(bool recursive /*= true*/) const
+{
+    for (auto widgetAction : getSortedWidgetActions())
+        if (widgetAction->canSaveDefault())
+            return true;
+
+    return false;
+}
+
+bool GroupAction::isResettable(bool recursive /*= true*/) const
+{
+    for (auto widgetAction : getSortedWidgetActions())
+        if (widgetAction->isResettable())
+            return true;
+
+    return false;
+}
+
+bool GroupAction::isFactoryResettable(bool recursive /*= true*/) const
+{
+    for (auto widgetAction : getSortedWidgetActions())
+        if (widgetAction->isFactoryResettable())
+            return true;
+
+    return false;
+}
+
+void GroupAction::reset(bool recursive /*= true*/)
+{
+    for (auto widgetAction : getSortedWidgetActions())
+        widgetAction->reset();
+}
+
+void GroupAction::setValueFromVariant(const QVariant& value)
+{
+}
+
+QVariant GroupAction::valueToVariant() const
+{
+    return QVariant();
+}
+
+QVariant GroupAction::defaultValueToVariant() const
+{
+    return QVariant();
 }
 
 GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :

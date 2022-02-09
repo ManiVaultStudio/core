@@ -27,6 +27,15 @@ public:
     ~AnalysisPlugin() override {};
 
     /**
+     * Set name of the object
+     * @param name Name of the object
+     */
+    void setObjectName(const QString& name)
+    {
+        QObject::setObjectName("Plugins/Analysis/" + name);
+    }
+
+    /**
      * Set input dataset smart pointer
      * @param inputDataset Smart pointer to the input dataset
      */
@@ -125,7 +134,6 @@ protected:
     Dataset<DatasetImpl>    _input;       /** Input dataset smart pointer */
     Dataset<DatasetImpl>    _output;      /** Output dataset smart pointer */
 };
-
 
 class AnalysisPluginFactory : public PluginFactory
 {

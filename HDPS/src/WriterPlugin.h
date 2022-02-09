@@ -63,7 +63,16 @@ public:
 
     }
     ~WriterPluginFactory() override {};
-    
+
+    /**
+     * Set name of the object
+     * @param name Name of the object
+     */
+    void setObjectName(const QString& name)
+    {
+        QObject::setObjectName("Plugins/Writer/" + name);
+    }
+
     /** Returns the plugin icon */
     QIcon getIcon() const override {
         return Application::getIconFont("FontAwesome").getIcon("file-export");

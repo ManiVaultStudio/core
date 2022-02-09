@@ -3,7 +3,7 @@
 #include "GroupAction.h"
 #include "StringAction.h"
 #include "TriggerAction.h"
-#include "ActionOptionsAction.h"
+#include "PresetsAction.h"
 
 class QWidget;
 
@@ -33,11 +33,11 @@ public:
 
     /** Describes the widget configurations */
     enum WidgetFlag {
-        Filtering       = 0x00001,      /** Widget contains UI for filtering group actions */
-        Expansion       = 0x00002,      /** Widget contains UI to expand/collapse all actions */
-        ActionOptions   = 0x00004,      /** Widget includes UI for interacting with action options */
+        Filtering   = 0x00001,      /** Widget contains UI for filtering group actions */
+        Expansion   = 0x00002,      /** Widget contains UI to expand/collapse all actions */
+        Presets     = 0x00004,      /** Widget includes UI for interacting with action options */
 
-        Default = Filtering | Expansion | ActionOptions
+        Default = Filtering | Expansion | Presets
     };
 
 public:
@@ -119,7 +119,6 @@ public:
         StringAction                                    _filterAction;                  /** Filter action */
         TriggerAction                                   _expandAllAction;               /** Expand all datasets action */
         TriggerAction                                   _collapseAllAction;             /** Collapse all datasets action */
-        ActionOptionsAction                             _actionOptionsAction;           /** Action options action */
         TreeWidget                                      _treeWidget;                    /** Tree widget for display of the groups */
         QMap<GroupAction*, GroupSectionTreeItem*>       _groupSectionTreeItems;         /** Maps group action pointer to group section tree item pointer */
 
@@ -325,6 +324,10 @@ public: // Settings
      */
     QVariant defaultValueToVariant() const override final;
 
+public: // Action getters
+
+    PresetsAction& getPresetsAction() { return _presetsAction; }
+
 signals:
 
     /**
@@ -373,6 +376,7 @@ protected:
     GroupActions                _groupActions;          /** Pointers to group actions */
     WidgetAction*               _sourceWidgetAction;    /** Display child group actions of this action  */
     QMap<GroupAction*, bool>    _visibility;            /** Group action visibility */
+    PresetsAction               _presetsAction;         /** Presets action */
 };
 
 /**

@@ -14,8 +14,8 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
     WidgetAction(parent),
     _dirModel(),
     _completer(),
-    _directoryAction(this, "Type directory"),
-    _pickAction(this, "Pick directory")
+    _directoryAction(this, "Directory"),
+    _pickAction(this, "Pick")
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -28,6 +28,7 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
     _directoryAction.setCompleter(&_completer);
 
     // Configure pick action
+    _pickAction.setSerializable(false);
     _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder"));
     _pickAction.setToolTip("Click to choose a directory");
@@ -118,55 +119,8 @@ QString DirectoryPickerAction::getDirectoryName() const
 
 bool DirectoryPickerAction::isValid() const
 {
-    return QDir(getDirectory()).exists();
+    return !getDirectory().isEmpty() && QDir(getDirectory()).exists();
 }
-
-/*
-DirectoryPickerAction::LineEditWidget::LineEditWidget(QWidget* parent, DirectoryPickerAction* directoryPickerAction) :
-    QLineEdit(parent),
-    _statusAction(this)
-{
-    setObjectName("LineEdit");
-    addAction(&_statusAction, QLineEdit::TrailingPosition);
-
-    // Update the line edit text from the string action
-    const auto updateLineEdit = [this, directoryPickerAction]() {
-        QSignalBlocker blocker(this);
-
-        setText(directoryPickerAction->getDirectory());
-    };
-
-    // Update the place holder text in the line edit
-    const auto updatePlaceHolderText = [this, directoryPickerAction]() -> void {
-        setPlaceholderText(directoryPickerAction->getPlaceholderString());
-    };
-
-    
-
-    // Update the line edit placeholder string when the action placeholder string changes
-    connect(directoryPickerAction, &DirectoryPickerAction::placeholderStringChanged, this, updatePlaceHolderText);
-
-    // Update the action string when the line edit text changes
-    connect(this, &QLineEdit::textChanged, this, [this, directoryPickerAction](const QString& text) {
-        directoryPickerAction->setDirectory(text);
-    });
-
-    // Perform initial updates
-    updateLineEdit();
-    updatePlaceHolderText();
-    updateStatusAction();
-}
-
-DirectoryPickerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, DirectoryPickerAction* directoryPickerAction) :
-    QPushButton(parent)
-{
-    setObjectName("PushButton");
-    setProperty("class", "square-button");
-    
-
-    
-}
-*/
 
 QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {

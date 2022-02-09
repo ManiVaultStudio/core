@@ -6,6 +6,7 @@
 #include "PluginType.h"
 #include "Application.h"
 #include "event/EventListener.h"
+#include "actions/WidgetAction.h"
 
 #include <QString>
 #include <QMap>
@@ -21,7 +22,7 @@ namespace hdps
 namespace plugin
 {
 
-class Plugin : public EventListener
+class Plugin : public EventListener, public hdps::gui::WidgetAction
 {
 public:
     Plugin(const PluginFactory* factory);

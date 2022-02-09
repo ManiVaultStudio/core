@@ -65,7 +65,9 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& t
     });
 
     updateReadOnly();
-    //computeStatistics();
+
+    // Compute statistics when triggered
+    connect(&_selectAction.getComputeStatisticsAction(), &TriggerAction::triggered, this, &DimensionsPickerAction::computeStatistics);
 }
 
 DimensionsPickerAction::~DimensionsPickerAction()
@@ -106,7 +108,6 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
     _points = points;
 
     setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
-    computeStatistics();
     setObjectName(QString("%1/Selection").arg(_points->getGuiName()));
 }
 
@@ -465,7 +466,7 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     WidgetActionWidget(parent, dimensionSelectionAction)
 {
     setMinimumHeight(300);
-
+    /*
     auto layout = new QVBoxLayout();
 
     auto tableView = new QTableView();
@@ -484,9 +485,9 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     horizontalHeader->resizeSection(2, 85);
 
     // Set column resize modes
-    //horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
-    //horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
-    //horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
+    horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
+    horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
+    horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
 
     tableView->verticalHeader()->hide();
     tableView->verticalHeader()->setDefaultSectionSize(5);
@@ -509,4 +510,5 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
         layout->setMargin(0);
         setLayout(layout);
     }
+    */
 }

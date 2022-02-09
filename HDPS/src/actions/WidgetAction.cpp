@@ -4,9 +4,12 @@
 #include "Application.h"
 #include "DataHierarchyItem.h"
 #include "Plugin.h"
+#include "util/Exception.h"
 
 #include <QDebug>
 #include <QMenu>
+#include <QFileDialog>
+#include <QJsonArray>
 
 namespace hdps {
 
@@ -172,7 +175,7 @@ bool WidgetAction::canSaveDefault(bool recursive /*= true*/) const
 void WidgetAction::loadDefault(bool recursive /*= true*/)
 {
 #ifdef _DEBUG
-    qDebug() << QString("Load default for: %1").arg(getSettingsPath());
+    qDebug().noquote() << QString("Load default for: %1").arg(getSettingsPath());
 #endif
 
     setIsSerializing(true);
@@ -200,7 +203,7 @@ void WidgetAction::loadDefault(bool recursive /*= true*/)
 void WidgetAction::saveDefault(bool recursive /*= true*/)
 {
 #ifdef _DEBUG
-    qDebug() << QString("Save default for: %1").arg(getSettingsPath());
+    qDebug().noquote() << QString("Save default for: %1").arg(getSettingsPath());
 #endif
 
     setIsSerializing(true);
@@ -286,8 +289,13 @@ bool WidgetAction::isFactoryResettable(bool recursive /*= true*/) const
 void WidgetAction::notifyResettable()
 {
 #ifdef _DEBUG
-    qDebug() << QString("Notify resettable: %1").arg(getSettingsPath());
+    qDebug().noquote() << QString("Notify resettable: %1").arg(getSettingsPath());
 #endif
+
+    return;
+
+    if (isSerializing())
+        return;
 
     emit resettableChanged(isResettable());
     emit factoryResettableChanged(isFactoryResettable());
@@ -304,7 +312,7 @@ void WidgetAction::reset(bool recursive /*= true*/)
     const auto defaultValue = defaultValueToVariant();
 
     // And assign it to the value if valid
-    if (defaultValue.isValid())
+    if (isSerializable() && defaultValue.isValid())
         setValueFromVariant(defaultValue);
 
     if (!recursive)
@@ -386,6 +394,187 @@ QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, b
     return foundChildren;
 }
 
+void WidgetAction::fromVariant(const QVariant& value) const
+{
+
+}
+
+QVariant WidgetAction::toVariant() const
+{
+    return QVariant();
+}
+
+void WidgetAction::fromVariantMap(const QVariantMap& value) const
+{
+
+}
+
+QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
+{
+#ifdef _DEBUG
+    qDebug().noquote() << QString("Convert %1 to variant map").arg(widgetAction->text());
+#endif
+
+    QVariantMap resultVariantMap, widgetActionVariantMap;
+
+    
+
+    // Loop over all child objects
+    for (auto child : widgetAction->children()) {
+
+        // Cast to widget action
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        const auto childVariantMap = toVariantMap(childWidgetAction);
+        widgetActionVariantMap[widgetAction->text()] = childVariantMap;
+
+        //if (widgetAction->isSerializable())
+            
+    }
+
+    resultVariantMap[widgetAction->text()] = widgetActionVariantMap;
+
+    return resultVariantMap;
+}
+
+void WidgetAction::fromJsonDocument(const QJsonDocument& jsonDocument) const
+{
+
+}
+
+QJsonDocument WidgetAction::toJsonDocument() const
+{
+    return QJsonDocument::fromVariant(toVariantMap(this));
+}
+
+void WidgetAction::fromJsonFile(const QString& filePath /*= ""*/)
+{
+    try
+    {
+        // Create file info to check if the supplied file path actually exists
+        QFileInfo jsonFileInfo(filePath);
+
+        // JSON file path for loading
+        QString jsonFilePath = filePath;
+
+        // Request user to select a JSON file if the supplied file path is not valid
+        if (!jsonFileInfo.exists()) {
+
+            // Supplied file path is not valid so create a file dialog for opening a JSON file
+            QFileDialog fileDialog;
+
+            // Configure file dialog
+            fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+            fileDialog.setFileMode(QFileDialog::ExistingFile);
+            fileDialog.setNameFilters({ "HDPS preset files (*json)" });
+            fileDialog.setDefaultSuffix(".json");
+
+            // Loading failed when the file dialog is canceled
+            if (fileDialog.exec() == 0)
+                throw std::runtime_error("File selection was canceled");
+
+            // Only load if we have one file
+            if (fileDialog.selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
+
+            // Establish the JSON file path that will be loaded
+            jsonFilePath = fileDialog.selectedFiles().first();
+        }
+
+        // Create the preset file
+        QFile jsonPresetFile(jsonFilePath);
+
+        // And load the file
+        if (!jsonPresetFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open file for reading");
+
+        // Get the cluster data
+        QByteArray presetData = jsonPresetFile.readAll();
+
+        // Create JSON document
+        QJsonDocument jsonDocument;
+
+        // Convert preset raw data to JSON document
+        jsonDocument = QJsonDocument::fromJson(presetData);
+
+        // Shallow sanity check
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        // Load the preset
+        fromJsonDocument(jsonDocument);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to load widget action from JSON file", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to load widget action from JSON file");
+    }
+}
+
+void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
+{
+    try
+    {
+        // Create file info to check if the supplied file path actually exists
+        QFileInfo jsonFileInfo(filePath);
+
+        // JSON file path for saving
+        QString jsonFilePath = filePath;
+
+        // Request user to select a JSON file if the supplied file path is not valid
+        if (!jsonFileInfo.exists()) {
+
+            // Supplied file path is not valid so create a file dialog for saving a JSON file
+            QFileDialog fileDialog;
+
+            // Configure file dialog
+            fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+            fileDialog.setNameFilters({ "HDPS preset files (*json)" });
+            fileDialog.setDefaultSuffix(".json");
+
+            // Saving failed when the file dialog is canceled
+            if (fileDialog.exec() == 0)
+                throw std::runtime_error("File selection was canceled");
+
+            // Only save if we have one file
+            if (fileDialog.selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
+
+            // Establish the JSON file path that will be saved
+            jsonFilePath = fileDialog.selectedFiles().first();
+        }
+
+        // Create the preset file
+        QFile jsonFile(jsonFilePath);
+
+        // And save the file
+        if (!jsonFile.open(QFile::WriteOnly))
+            throw std::runtime_error("Unable to open file for writing");
+
+        // Create JSON document
+        auto jsonDocument = toJsonDocument();
+
+        // Shallow sanity check
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        // Write the JSON document to disk
+        jsonFile.write(QJsonDocument::fromVariant(toVariantMap(this)).toJson());
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to save widget action to JSON file", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to save widget action to JSON file");
+    }
+}
+
 void WidgetAction::setIsSerializing(bool isSerializing)
 {
     _isSerializing = isSerializing;
@@ -399,14 +588,33 @@ QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     return new QWidget();
 }
 
+WidgetAction* WidgetAction::getSerializationProxyParent()
+{
+    return _serializationProxyParent;
+}
+
+bool WidgetAction::hasSerializationProxyParent() const
+{
+    return _serializationProxyParent != nullptr;
+}
+
+void WidgetAction::setSerializationProxyParent(WidgetAction* serializationProxyParent)
+{
+    _serializationProxyParent = serializationProxyParent;
+}
+
 void WidgetAction::setValueFromVariant(const QVariant& value)
 {
+#ifdef _DEBUG
     qDebug().noquote() << "Set value not implemented in " << text();
+#endif
 }
 
 QVariant WidgetAction::valueToVariant() const
 {
-    qDebug().noquote() << "Value to variant not implemented in " << text();
+#ifdef _DEBUG
+    //qDebug().noquote() << "Value to variant not implemented in " << text();
+#endif
 
     return QVariant();
 }
@@ -418,7 +626,9 @@ QVariant WidgetAction::savedDefaultValueToVariant() const
 
 QVariant WidgetAction::defaultValueToVariant() const
 {
-    qDebug().noquote() << "Default value to variant not implemented in derived widget action class";
+#ifdef _DEBUG
+    //qDebug().noquote() << "Default value to variant not implemented in derived widget action class";
+#endif
 
     return QVariant();
 }

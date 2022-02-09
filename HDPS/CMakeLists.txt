@@ -155,7 +155,9 @@ set(ACTIONS_HEADERS
     src/actions/StatusAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
-    src/actions/ActionOptionsAction.h
+    src/actions/LoadPresetAction.h
+    src/actions/SavePresetAction.h
+    src/actions/PresetsAction.h
 )
 
 set(ACTIONS_SOURCES
@@ -200,7 +202,9 @@ set(ACTIONS_SOURCES
     src/actions/StatusAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
-    src/actions/ActionOptionsAction.cpp
+    src/actions/LoadPresetAction.cpp
+    src/actions/SavePresetAction.cpp
+    src/actions/PresetsAction.cpp
 )
 
 set( RENDERER_HEADERS
@@ -261,6 +265,9 @@ set( UTIL_HEADERS
     src/util/Visitor.h
     src/util/PixelSelectionTool.h
     src/util/PixelSelection.h
+    src/util/Preset.h
+    src/util/PresetsModel.h
+    src/util/PresetsFilterModel.h
 )
 
 set( UTIL_SOURCES
@@ -283,6 +290,9 @@ set( UTIL_SOURCES
     src/util/Visitor.cpp
     src/util/PixelSelectionTool.cpp
     src/util/PixelSelection.cpp
+    src/util/Preset.cpp
+    src/util/PresetsModel.cpp
+    src/util/PresetsFilterModel.cpp
 )
 
 set( PLUGIN_HEADERS

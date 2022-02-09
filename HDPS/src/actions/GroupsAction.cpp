@@ -13,7 +13,8 @@ GroupsAction::GroupsAction(QObject* parent, WidgetAction* sourceWidgetAction /*=
     WidgetAction(parent),
     _groupActions(),
     _sourceWidgetAction(),
-    _visibility()
+    _visibility(),
+    _presetsAction(this)
 {
     setDefaultWidgetFlags(Default);
     setSerializable(false);
@@ -24,8 +25,6 @@ GroupsAction::GroupsAction(QObject* parent, WidgetAction* sourceWidgetAction /*=
 
 void GroupsAction::setSourceWidgetAction(WidgetAction* sourceWidgetAction)
 {
-    GroupsAction::GroupActions groupActions;
-
     Q_ASSERT(sourceWidgetAction != nullptr);
 
     if (sourceWidgetAction == nullptr)
@@ -33,7 +32,9 @@ void GroupsAction::setSourceWidgetAction(WidgetAction* sourceWidgetAction)
 
     _sourceWidgetAction = sourceWidgetAction;
 
-    // Loop over all child objects and add if is a group action
+    GroupsAction::GroupActions groupActions;
+
+    // Loop over all child objects and add if it is a group action
     for (auto childObject : _sourceWidgetAction->children()) {
         auto groupAction = dynamic_cast<GroupAction*>(childObject);
 
@@ -41,6 +42,8 @@ void GroupsAction::setSourceWidgetAction(WidgetAction* sourceWidgetAction)
         if (groupAction)
             groupActions << groupAction;
     }
+
+    _presetsAction.setWidgetAction(_sourceWidgetAction);
 
     // Set group actions
     setGroupActions(groupActions);
@@ -55,8 +58,13 @@ void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= tru
     qDebug().noquote() << QString("Add %1 to groups action").arg(groupAction->getSettingsPath());
 #endif
 
+    Q_ASSERT(groupAction != nullptr);
+
     // Add group action
     _groupActions << groupAction;
+
+    // Route settings through this groups action
+    groupAction->setSerializationProxyParent(this);
 
     // Set group action visibility
     _visibility[groupAction] = visible;
@@ -70,12 +78,6 @@ void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= tru
     connect(groupAction, &GroupAction::collapsed, this, [this, groupAction]() -> void {
         emit groupActionCollapsed(groupAction);
     });
-
-    // Pass through group action resettable changed signal
-    connect(groupAction, &GroupAction::resettableChanged, this, &GroupsAction::resettableChanged);
-
-    // Pass through group action factory resettable changed signal
-    connect(groupAction, &GroupAction::factoryResettableChanged, this, &GroupsAction::factoryResettableChanged);
 
     // Notify others that a group action was added
     emit groupActionAdded(groupAction);
@@ -93,6 +95,9 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
     if (!_groupActions.contains(groupAction))
         return;
 
+    // Do not route settings through this groups action anymore
+    groupAction->setSerializationProxyParent(this);
+
     // Remove the group action
     _groupActions.removeOne(groupAction);
 
@@ -103,8 +108,6 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
     // Remove connections to the group action
     disconnect(groupAction, &GroupAction::expanded, this, nullptr);
     disconnect(groupAction, &GroupAction::collapsed, this, nullptr);
-    disconnect(groupAction, &GroupAction::resettableChanged, this, nullptr);
-    disconnect(groupAction, &GroupAction::factoryResettableChanged, this, nullptr);
 
     // Notify others that a group action was removed
     emit groupActionRemoved(groupAction);
@@ -312,12 +315,11 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     _groupsAction(groupsAction),
     _layout(),
     _filteredActionsAction(this, true),
-    _toolbarWidget(),
+    _toolbarWidget(parent),
     _toolbarLayout(),
     _filterAction(this, "Search"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
-    _actionOptionsAction(this, groupsAction),
     _treeWidget()
 {
     // Configure layout
@@ -336,9 +338,6 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
 
     // Add filtering action to the groups action and hide by default
     _groupsAction->addGroupAction(&_filteredActionsAction, false);
-
-    // Update options action actions when the source widget action changes
-    connect(_groupsAction, &GroupsAction::sourceWidgetActionChanged, &_actionOptionsAction, &ActionOptionsAction::updateActions);
 
     // Perform an initial update of the toolbar and action filtering
     updateToolbar();
@@ -369,7 +368,7 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
 
     // Add toolbar items
     if (widgetFlags & Filtering)
-        _toolbarLayout.addWidget(_filterAction.createWidget(this), 1);
+        _toolbarLayout.addWidget(_filterAction.createWidget(this), 2);
 
     if (widgetFlags & Expansion) {
         if (widgetFlags & Filtering)
@@ -379,13 +378,11 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
         _toolbarLayout.addWidget(_collapseAllAction.createWidget(this, TriggerAction::Icon));
     }
 
-    if (widgetFlags & ActionOptions) {
+    if (widgetFlags & Presets) {
         if (widgetFlags & Filtering || widgetFlags & Expansion)
             _toolbarLayout.addWidget(createVerticalDivider());
 
-        _toolbarLayout.addWidget(_actionOptionsAction.getLoadDefaultAction().createWidget(this));
-        _toolbarLayout.addWidget(_actionOptionsAction.getSaveDefaultAction().createWidget(this));
-        _toolbarLayout.addWidget(_actionOptionsAction.getFactoryDefaultAction().createWidget(this));
+        _toolbarLayout.addWidget(_groupsAction->getPresetsAction().createWidget(this));
     }
 
     // Set toolbar widget layout

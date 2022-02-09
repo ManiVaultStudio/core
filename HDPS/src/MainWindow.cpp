@@ -149,41 +149,15 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         {
             auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(plugin);
 
-            dockWidget->setWidget(viewPlugin, CDockWidget::ForceNoScrollArea);
+            dockWidget->setWidget(&viewPlugin->getWidget(), CDockWidget::ForceNoScrollArea);
             dockWidget->setProperty("PluginType", "View");
             //dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
 
-            connect(viewPlugin, &QWidget::windowTitleChanged, [this, dockWidget](const QString& title) {
+            connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, [this, dockWidget](const QString& title) {
                 dockWidget->setWindowTitle(title);
             });
 
             auto dockWidgetArea = LeftDockWidgetArea;
-
-            switch (viewPlugin->getDockingLocation())
-            {
-                case plugin::ViewPlugin::DockingLocation::Left:
-                    dockWidgetArea = LeftDockWidgetArea;
-                    break;
-
-                case plugin::ViewPlugin::DockingLocation::Right:
-                    dockWidgetArea = RightDockWidgetArea;
-                    break;
-
-                case plugin::ViewPlugin::DockingLocation::Top:
-                    dockWidgetArea = TopDockWidgetArea;
-                    break;
-
-                case plugin::ViewPlugin::DockingLocation::Bottom:
-                    dockWidgetArea = BottomDockWidgetArea;
-                    break;
-
-                case plugin::ViewPlugin::DockingLocation::Center:
-                    dockWidgetArea = CenterDockWidgetArea;
-                    break;
-
-                default:
-                    break;
-            }
 
             if (getViewPluginDockWidgets().isEmpty())
                 dockWidgetArea = CenterDockWidgetArea;

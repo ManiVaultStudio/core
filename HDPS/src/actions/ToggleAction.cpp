@@ -18,9 +18,8 @@ ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(toggled, defaultToggled);
 
-    connect(this, &ToggleAction::toggled, this, [this]() {
-        emit resettableChanged(isResettable());
-    });
+    // Notify others that the resettable-ness has changed when the action is toggled
+    connect(this, &ToggleAction::toggled, this, &WidgetAction::notifyResettable);
 
     notifyResettable();
 }

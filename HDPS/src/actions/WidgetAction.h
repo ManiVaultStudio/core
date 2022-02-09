@@ -3,7 +3,7 @@
 #include "WidgetActionWidget.h"
 
 #include <QWidgetAction>
-#include <QDebug>
+#include <QJsonDocument>
 
 class QLabel;
 class QMenu;
@@ -97,19 +97,6 @@ public:
 public: // Settings
 
     /**
-     * Get whether the widget action is serializable
-     * @return Whether the widget action is serializable
-     */
-    virtual bool isSerializable() const;
-
-    /**
-     * Set whether the widget action is serializable
-     * @param serializable whether the widget action is serializable
-     * @param recursive Set serializable recursively
-     */
-    virtual void setSerializable(const bool& serializable, bool recursive = true);
-
-    /**
      * Establish whether there is a saved default
      * @return Whether there is a saved default
      */
@@ -188,18 +175,82 @@ public: // Settings
     QString getSettingsPath() const;
 
     /**
-     * Get whether serialization is taking place
-     * @return Whether serialization is taking place
-     */
-    bool isSerializing() const;
-
-    /**
      * Find child widget action of which the GUI name contains the search string
      * @param searchString The search string
      * @param recursive Whether to search recursively
      * @return Found vector of pointers to widget action(s)
      */
     QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
+
+public: // Serialization
+
+    /**
+     * Get whether the widget action may be serialized
+     * @return Boolean indicating whether the widget action is serializable
+     */
+    virtual bool isSerializable() const;
+
+    /**
+     * Set whether the widget action is serializable
+     * @param serializable whether the widget action is serializable
+     * @param recursive Set serializable recursively
+     */
+    virtual void setSerializable(const bool& serializable, bool recursive = true);
+
+    /**
+     * Get whether serialization is taking place
+     * @return Boolean indicating whether serialization is taking place
+     */
+    bool isSerializing() const;
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    virtual void fromVariant(const QVariant& value) const;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    virtual QVariant toVariant() const;
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action and its children
+     */
+    virtual void fromVariantMap(const QVariantMap& value) const final;
+
+    /**
+     * Save widget action to variant map
+     * @param widgetAction Pointer to target widget action
+     * @return Variant map representation of the widget action and its children
+     */
+    static QVariantMap toVariantMap(const WidgetAction* widgetAction);
+
+    /**
+     * Load widget action from JSON document
+     * @param JSON document
+     */
+    virtual void fromJsonDocument(const QJsonDocument& jsonDocument) const final;
+
+    /**
+     * Save widget action to JSON document
+     * @return JSON document
+     */
+    virtual QJsonDocument toJsonDocument() const final;
+
+    /**
+     * Load widget action from JSON file
+     * @param filePath Path to the JSON file (if none/invalid a file open dialog is automatically opened)
+     */
+    virtual void fromJsonFile(const QString& filePath = "") final;
+
+    /**
+     * Save widget action from JSON file
+     * @param filePath Path to the JSON file (if none/invalid a file save dialog is automatically opened)
+     */
+    virtual void toJsonFile(const QString& filePath = "") final;
 
 protected:
 
@@ -217,6 +268,26 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
+
+public: // Serialization proxy
+
+    /**
+     * Get serialization proxy parent
+     * @return Pointer to serialization proxy parent
+     */
+    WidgetAction* getSerializationProxyParent();
+
+    /**
+     * Get whether a serialization proxy parent is specified
+     * @return Whether a serialization proxy parent is specified
+     */
+    bool hasSerializationProxyParent() const;
+
+    /**
+     * Set serialization proxy parent
+     * @param Pointer to serialization proxy parent
+     */
+    void setSerializationProxyParent(WidgetAction* serializationProxyParent);
 
 signals:
 
@@ -239,10 +310,11 @@ signals:
     void isSerializingChanged(bool isSerializing);
 
 protected:
-    std::int32_t    _defaultWidgetFlags;        /** Default widget flags */
-    std::int32_t    _sortIndex;                 /** Sort index (used in the group action to sort actions) */
-    bool            _serializable;              /** Whether the widget action can be serialized/de-serialized */
-    bool            _isSerializing;             /** Whether the widget action is currently serializing */
+    std::int32_t    _defaultWidgetFlags;            /** Default widget flags */
+    std::int32_t    _sortIndex;                     /** Sort index (used in the group action to sort actions) */
+    bool            _serializable;                  /** Whether the widget action can be serialized/de-serialized */
+    bool            _isSerializing;                 /** Whether the widget action is currently serializing */
+    WidgetAction*   _serializationProxyParent;      /** If specified, uses this proxy parent widget in stead of the QObject parent for de-serialization */
 };
 
 /** List of widget actions */

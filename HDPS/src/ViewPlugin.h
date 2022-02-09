@@ -19,18 +19,27 @@ namespace hdps
 namespace plugin
 {
 
-class ViewPlugin : public gui::DockableWidget, public Plugin
+class ViewPlugin : public Plugin
 {
     Q_OBJECT
     
 public:
     ViewPlugin(const PluginFactory* factory) :
-        Plugin(factory)
+        Plugin(factory),
+        _widget()
     {
-        setObjectName(getGuiName());
     }
 
     ~ViewPlugin() override {};
+
+    /**
+     * Set name of the object
+     * @param name Name of the object
+     */
+    void setObjectName(const QString& name)
+    {
+        QObject::setObjectName("Plugins/View/" + name);
+    }
 
     /** Returns the toolbar which is shown at the top of the view plugin (dock) widget */
     virtual QToolBar* getToolBar() {
@@ -45,18 +54,17 @@ public:
         qDebug() << "Load function not implemented in view plugin implementation";
     }
 
-public: // Actions
-
     /**
-     * Add a (widget) action
-     * This class does not alter the ownership of the allocated widget action
-     * @param widgetAction Widget action to expose
+     * Get widget representation of the plugin
+     * @return Widget representation of the plugin
      */
-    void addAction(QAction* action) {
-        Q_ASSERT(action != nullptr);
-
-        QWidget::addAction(action);
+    QWidget& getWidget()
+    {
+        return _widget;
     }
+
+protected:
+    QWidget     _widget;        /** Widget representation of the plugin */
 };
 
 class ViewPluginFactory : public PluginFactory

@@ -67,7 +67,7 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)
 {
     // Re-parent the widget action
-    //widgetAction.setParent(this);
+    widgetAction.setParent(this);
 
    // And add to the data hierarchy item
     getDataHierarchyItem().addAction(widgetAction);

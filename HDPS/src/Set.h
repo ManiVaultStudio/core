@@ -95,6 +95,8 @@ public:
         // Assign new GUI name
         _guiName = guiName;
 
+        setText(_guiName);
+
         // Notify others that the data GUI name changed
         Application::core()->notifyDataGuiNameChanged(*this, previousGuiName);
     }
