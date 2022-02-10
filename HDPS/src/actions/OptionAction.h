@@ -30,12 +30,12 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        ComboBox        = 0x00001,      /** The widget includes a combobox widget */
-        LineEdit        = 0x00002,      /** The widget includes a searchable line edit widget */
-        ResetPushButton = 0x00004,      /** The widget includes a reset push button */
+        ComboBox            = 0x00001,      /** The widget includes a combobox widget */
+        LineEdit            = 0x00002,      /** The widget includes a searchable line edit widget */
+        HorizontalButtons   = 0x00004,      /** The widget includes a push button for each option in a horizontal layout */
+        VerticalButtons     = 0x00008,      /** The widget includes a push button for each option in a vertical layout */
 
-        Basic   = ComboBox,
-        All     = ComboBox | ResetPushButton
+        Default = ComboBox
     };
 
 public: // Widgets
@@ -68,6 +68,23 @@ public: // Widgets
     protected:
         OptionAction*   _optionAction;  /** Pointer to option action */
         QCompleter      _completer;     /** Completer for searching and filtering */
+
+        friend class OptionAction;
+    };
+
+    /** Horizontal/vertical buttons widget for option action */
+    class ButtonsWidget : public QWidget {
+    protected:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param optionAction Pointer to option action
+         * @param orientation Orientation of the buttons widget (horizontal/vertical)
+         */
+        ButtonsWidget(QWidget* parent, OptionAction* optionAction, const Qt::Orientation& orientation);
+
+    protected:
 
         friend class OptionAction;
     };

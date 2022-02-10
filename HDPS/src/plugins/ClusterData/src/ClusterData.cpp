@@ -191,10 +191,6 @@ std::vector<std::uint32_t>& Clusters::getSelectionIndices()
 
 void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
-    // No point in selecting zero clusters
-    if (indices.empty())
-        return;
-
     // Assign new selection
     getSelection<Clusters>()->indices = indices;
 

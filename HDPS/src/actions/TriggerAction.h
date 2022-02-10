@@ -11,7 +11,7 @@ namespace gui {
 /**
  * Trigger action class
  *
- * Check action with button UI
+ * Action class for trigger
  *
  * @author Thomas Kroes
  */
@@ -47,7 +47,7 @@ public:
         PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags);
 
     protected:
-        TriggerAction*   _triggerAction;      /** Pointer to toggle action */
+        TriggerAction*   _triggersAction;      /** Pointer to toggle action */
 
         friend class TriggerAction;
     };

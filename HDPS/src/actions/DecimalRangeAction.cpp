@@ -13,6 +13,8 @@ DecimalRangeAction::DecimalRangeAction(QObject* parent, const QString& title /*=
     _rangeMinAction(this, "Minimum"),
     _rangeMaxAction(this, "Maximum")
 {
+    setText(title);
+
     setMayReset(true);
 
     connect(&_rangeMinAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
@@ -84,33 +86,23 @@ void DecimalRangeAction::reset()
 DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, DecimalRangeAction* decimalRangeAction, const std::int32_t& widgetFlags /*= 0*/) :
     WidgetActionWidget(parent, decimalRangeAction, widgetFlags)
 {
-    auto layout = new QHBoxLayout();
-
-    auto rangeMinSpinBoxWidget  = decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox);
-    auto rangeMinSliderWidget   = decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::Slider);
-    auto rangeMaxSpinBoxWidget  = decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox);
-    auto rangeMaxSliderWidget   = decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::Slider);
-
     if (widgetFlags & PopupLayout) {
         auto layout = new QHBoxLayout();
 
-        layout->setContentsMargins(0,0,0,0);
-        layout->addWidget(rangeMinSpinBoxWidget);
-        layout->addWidget(rangeMinSliderWidget);
-        layout->addWidget(rangeMaxSpinBoxWidget);
-        layout->addWidget(rangeMaxSpinBoxWidget);
-
-        setLayout(layout);
-    }
-    else {
-        auto layout = new QGridLayout();
-
-        layout->addWidget(rangeMinSpinBoxWidget, 0, 0);
-        layout->addWidget(rangeMinSliderWidget, 0, 1);
-        layout->addWidget(rangeMaxSpinBoxWidget, 1, 0);
-        layout->addWidget(rangeMaxSpinBoxWidget, 1, 1);
+        layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
+        layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
 
         setPopupLayout(layout);
+    }
+    else {
+        auto layout = new QHBoxLayout();
+
+        layout->setContentsMargins(0, 0, 0, 0);
+
+        layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
+        layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
+
+        setLayout(layout);
     }
 }
 #if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang

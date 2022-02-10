@@ -5,7 +5,7 @@
 #include <QLineEdit>
 
 class QWidget;
-class QPushButton;
+class QCompleter;
 
 namespace hdps {
 
@@ -110,6 +110,30 @@ public:
      */
     void setPlaceHolderString(const QString& placeholderString);
 
+    /**
+     * Get action at leading position
+     * @return Reference to action at leading position
+     */
+    QAction& getLeadingAction();
+
+    /**
+     * Get action at trailing position
+     * @return Reference to action at trailing position
+     */
+    QAction& getTrailingAction();
+
+    /**
+     * Get completer
+     * @return Pointer to completer
+     */
+    QCompleter* getCompleter();
+
+    /**
+     * Set completer
+     * @param completer Pointer to completer
+     */
+    void setCompleter(QCompleter* completer);
+
 signals:
 
     /**
@@ -130,10 +154,19 @@ signals:
      */
     void placeholderStringChanged(const QString& placeholderString);
 
+    /**
+     * Signals that the completer changed
+     * @param completer Pointer to completer
+     */
+    void completerChanged(QCompleter* completer);
+
 protected:
-    QString     _string;                /** Current string */
-    QString     _defaultString;         /** Default string */
-    QString     _placeholderString;     /** Place holder string */
+    QString         _string;                /** Current string */
+    QString         _defaultString;         /** Default string */
+    QString         _placeholderString;     /** Place holder string */
+    QAction         _leadingAction;         /** Action at the leading position */
+    QAction         _trailingAction;        /** Action at the trailing position */
+    QCompleter*     _completer;             /** Pointer to completer */
 };
 
 }

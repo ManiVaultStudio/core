@@ -12,14 +12,14 @@ using namespace hdps::gui;
 using namespace hdps::util;
 
 /**
- * Points dimension picker action class
+ * Dimension picker action class
  *
  * Action class for picking a dimension from a points dataset
  * Also support searching for a dimension
  *
  * @author Thomas Kroes
  */
-class POINTDATA_EXPORT PointsDimensionPickerAction : public WidgetAction
+class POINTDATA_EXPORT DimensionPickerAction : public WidgetAction
 {
 Q_OBJECT
 
@@ -33,18 +33,18 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param pointsDimensionPickerAction Pointer to points dimension picker action
+         * @param dimensionPickerAction Smart pointer to dimension picker action
          */
-        Widget(QWidget* parent, PointsDimensionPickerAction* pointsDimensionPickerAction);
+        Widget(QWidget* parent, DimensionPickerAction* dimensionPickerAction);
 
     protected:
-        friend class PointsDimensionPickerAction;
+        friend class DimensionPickerAction;
     };
 
 protected:
 
     /**
-     * Get widget representation of the points dimension action
+     * Get widget representation of the dimension picker action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
@@ -59,7 +59,7 @@ public:
      * @param parent Pointer to parent object
      * @param title Title of the action
      */
-    PointsDimensionPickerAction(QObject* parent, const QString& title);
+    DimensionPickerAction(QObject* parent, const QString& title);
 
     /**
      * Set the points dataset from which the dimension will be picked
@@ -134,7 +134,7 @@ public: /** Action getters */
     OptionAction& getCurrentDimensionAction() { return _currentDimensionAction; }
 
 protected:
-    Dataset<Points>     _points;                    /** Dataset reference to points dataset from which the dimension will be picked */
+    Dataset<Points>     _points;                    /** Smart pointer to points dataset from which the dimension will be picked */
     OptionAction        _currentDimensionAction;    /** Current dimension action */
     std::uint32_t       _searchThreshold;           /** Select from a drop-down below the threshold and above use a search bar */
 

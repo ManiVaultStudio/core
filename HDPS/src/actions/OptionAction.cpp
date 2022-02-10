@@ -5,6 +5,7 @@
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QListView>
+#include <QPushButton>
 
 namespace hdps {
 
@@ -20,7 +21,7 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
 {
     setText(title);
     setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::Basic);
+    setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(options, currentOption, defaultOption);
 }
 
@@ -383,6 +384,56 @@ OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* opti
     updateText();
 }
 
+OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* optionAction, const Qt::Orientation& orientation) :
+    QWidget(parent)
+{
+    setObjectName("Buttons");
+
+    // Create horizontal layout
+    QLayout* layout = nullptr;
+
+    switch (orientation)
+    {
+        case Qt::Horizontal:
+            layout = new QHBoxLayout();
+            break;
+
+        case Qt::Vertical:
+            layout = new QVBoxLayout();
+            break;
+
+        default:
+            break;
+    }
+
+    layout->setMargin(0);
+
+    std::int32_t optionIndex = 0;
+
+    // Add push button for each option
+    for (const auto& option : optionAction->getOptions()) {
+
+        // Create push button for the option
+        auto optionPushButton = new QPushButton(option);
+
+        // Set tooltip
+        optionPushButton->setToolTip(optionAction->text() + ": " + option);
+
+        // Add the push button to the layout
+        layout->addWidget(optionPushButton);
+
+        // Update the current index when the option push button is clicked
+        connect(optionPushButton, &QPushButton::clicked, this, [optionAction, optionIndex]() {
+            optionAction->setCurrentIndex(optionIndex);
+        });
+
+        optionIndex++;
+    }
+
+    // Apply the layout
+    setLayout(layout);
+}
+
 QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     auto widget = new WidgetActionWidget(parent, this);
@@ -396,13 +447,18 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new OptionAction::LineEditWidget(parent, this));
 
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
+    if (widgetFlags & WidgetFlag::HorizontalButtons)
+        layout->addWidget(new ButtonsWidget(parent, this, Qt::Horizontal));
+
+    if (widgetFlags & WidgetFlag::VerticalButtons)
+        layout->addWidget(new ButtonsWidget(parent, this, Qt::Vertical));
 
     widget->setLayout(layout);
 
     return widget;
 }
+
+
 
 }
 }
