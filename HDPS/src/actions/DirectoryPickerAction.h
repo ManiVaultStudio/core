@@ -6,7 +6,7 @@
 
 #include <QLineEdit>
 #include <QString>
-#include <QDirModel>
+#include <QFileSystemModel>
 #include <QCompleter>
 
 class QWidget;
@@ -153,10 +153,10 @@ signals:
     void placeholderStringChanged(const QString& placeholderString);
 
 protected:
-    QDirModel       _dirModel;              /** Directory model */
-    QCompleter      _completer;             /** Completer */
-    StringAction    _directoryAction;       /** Directory action */
-    TriggerAction   _pickAction;            /** Pick directory action */
+    QFileSystemModel    _dirModel;              /** Directory model */
+    QCompleter          _completer;             /** Completer */
+    StringAction        _directoryAction;       /** Directory action */
+    TriggerAction       _pickAction;            /** Pick directory action */
 };
 
 }
