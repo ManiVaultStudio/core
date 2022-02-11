@@ -11,6 +11,8 @@
 #include <QFileDialog>
 #include <QJsonArray>
 
+//#define _VERBOSE
+
 namespace hdps {
 
 namespace gui {
@@ -120,6 +122,7 @@ void WidgetAction::setSerializable(const bool& serializable, bool recursive /*= 
 
 bool WidgetAction::hasSavedDefault() const
 {
+    /*
     if (isSerializable() && Application::current()->getSetting(getSettingsPath() + "/Default").isValid())
         return true;
 
@@ -134,12 +137,14 @@ bool WidgetAction::hasSavedDefault() const
         if (childWidgetAction->hasSavedDefault())
             return true;
     }
+    */
 
     return false;
 }
 
 bool WidgetAction::canSaveDefault(bool recursive /*= true*/) const
 {
+    /*
     if (isSerializable()) {
         const auto valueVariant             = valueToVariant();
         const auto defaultValueVariant      = defaultValueToVariant();
@@ -168,16 +173,18 @@ bool WidgetAction::canSaveDefault(bool recursive /*= true*/) const
         if (childWidgetAction->canSaveDefault())
             return true;
     }
+    */
 
     return false;
 }
 
 void WidgetAction::loadDefault(bool recursive /*= true*/)
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug().noquote() << QString("Load default for: %1").arg(getSettingsPath());
 #endif
 
+    /*
     setIsSerializing(true);
     {
         if (isSerializable())
@@ -198,14 +205,16 @@ void WidgetAction::loadDefault(bool recursive /*= true*/)
         }
     }
     setIsSerializing(false);
+    */
 }
 
 void WidgetAction::saveDefault(bool recursive /*= true*/)
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug().noquote() << QString("Save default for: %1").arg(getSettingsPath());
 #endif
 
+    /*
     setIsSerializing(true);
     {
         if (isSerializable())
@@ -226,10 +235,12 @@ void WidgetAction::saveDefault(bool recursive /*= true*/)
         }
     }
     setIsSerializing(false);
+    */
 }
 
 bool WidgetAction::isResettable(bool recursive /*= true*/) const
 {
+    /*
     if (isSerializable() && hasSavedDefault() && (valueToVariant() != savedDefaultValueToVariant()))
         return true;
 
@@ -253,12 +264,14 @@ bool WidgetAction::isResettable(bool recursive /*= true*/) const
 
     if (anyChildResettable(this))
         return true;
+    */
 
     return false;
 }
 
 bool WidgetAction::isFactoryResettable(bool recursive /*= true*/) const
 {
+    /*
     if (isSerializable() && (valueToVariant() != defaultValueToVariant()))
         return true;
 
@@ -282,13 +295,14 @@ bool WidgetAction::isFactoryResettable(bool recursive /*= true*/) const
 
     if (anyChildFactoryResettable(this))
         return true;
+    */
 
     return false;
 }
 
 void WidgetAction::notifyResettable()
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug().noquote() << QString("Notify resettable: %1").arg(getSettingsPath());
 #endif
 
@@ -308,6 +322,7 @@ void WidgetAction::notifyResettable()
 
 void WidgetAction::reset(bool recursive /*= true*/)
 {
+    /*
     // Get default value as variant
     const auto defaultValue = defaultValueToVariant();
 
@@ -328,6 +343,7 @@ void WidgetAction::reset(bool recursive /*= true*/)
         // Reset the child
         childWidgetAction->reset();
     }
+    */
 }
 
 QString WidgetAction::getSettingsPath() const
@@ -359,6 +375,11 @@ QString WidgetAction::getSettingsPath() const
     }
 
     return actionPath.join("/");
+}
+
+QString WidgetAction::getSerializationName() const
+{
+    return !objectName().isEmpty() ? objectName() : text();
 }
 
 bool WidgetAction::isSerializing() const
@@ -394,32 +415,24 @@ QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, b
     return foundChildren;
 }
 
-void WidgetAction::fromVariant(const QVariant& value) const
+void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
 {
-
 }
 
-QVariant WidgetAction::toVariant() const
+QVariantMap WidgetAction::toVariantMap() const
 {
-    return QVariant();
+    return QVariantMap();
 }
 
-void WidgetAction::fromVariantMap(const QVariantMap& value) const
+void WidgetAction::fromVariantMap(WidgetAction* widgetAction, const QVariantMap& variantMap)
 {
-
-}
-
-QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
-{
-#ifdef _DEBUG
-    qDebug().noquote() << QString("Convert %1 to variant map").arg(widgetAction->text());
+#ifdef _VERBOSE
+    qDebug().noquote() << QString("From variant map: %1").arg(widgetAction->text());
 #endif
 
-    QVariantMap resultVariantMap, widgetActionVariantMap;
+    widgetAction->fromVariantMap(variantMap);
 
-    
-
-    // Loop over all child objects
+    // Loop over all child objects and serialize each
     for (auto child : widgetAction->children()) {
 
         // Cast to widget action
@@ -428,26 +441,58 @@ QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
         if (!childWidgetAction)
             continue;
 
-        const auto childVariantMap = toVariantMap(childWidgetAction);
-        widgetActionVariantMap[widgetAction->text()] = childVariantMap;
+        // Only go deeper if the child allows for serialization
+        if (!childWidgetAction->isSerializable())
+            continue;
 
-        //if (widgetAction->isSerializable())
-            
+        childWidgetAction->fromVariantMap(variantMap[childWidgetAction->getSerializationName()].toMap());
+    }
+}
+
+QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
+{
+#ifdef _VERBOSE
+    qDebug().noquote() << QString("To variant map: %1").arg(widgetAction->text());
+#endif
+
+    QVariantMap variantMap = widgetAction->toVariantMap();
+
+    // Loop over all child objects and serialize each
+    for (auto child : widgetAction->children()) {
+
+        // Cast to widget action
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        // Only go deeper if the child allows for serialization
+        if (!childWidgetAction->isSerializable())
+            continue;
+
+        Q_ASSERT(!variantMap.contains(childWidgetAction->getSerializationName()));
+
+        // Serialize child
+        variantMap[childWidgetAction->getSerializationName()] = toVariantMap(childWidgetAction);
     }
 
-    resultVariantMap[widgetAction->text()] = widgetActionVariantMap;
-
-    return resultVariantMap;
+    return variantMap;
 }
 
 void WidgetAction::fromJsonDocument(const QJsonDocument& jsonDocument) const
 {
+    const auto variantMap = jsonDocument.toVariant().toMap();
 
+    fromVariantMap(const_cast<WidgetAction*>(this), variantMap[getSerializationName()].toMap());
 }
 
 QJsonDocument WidgetAction::toJsonDocument() const
 {
-    return QJsonDocument::fromVariant(toVariantMap(this));
+    QVariantMap variantMap;
+
+    variantMap[getSerializationName()] = toVariantMap(this);
+
+    return QJsonDocument::fromVariant(variantMap);
 }
 
 void WidgetAction::fromJsonFile(const QString& filePath /*= ""*/)
@@ -563,8 +608,12 @@ void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");
 
+#if _VERBOSE
+        qDebug().noquote() << jsonDocument.toJson(QJsonDocument::Indented);
+#endif
+
         // Write the JSON document to disk
-        jsonFile.write(QJsonDocument::fromVariant(toVariantMap(this)).toJson());
+        jsonFile.write(jsonDocument.toJson());
     }
     catch (std::exception& e)
     {
@@ -601,36 +650,6 @@ bool WidgetAction::hasSerializationProxyParent() const
 void WidgetAction::setSerializationProxyParent(WidgetAction* serializationProxyParent)
 {
     _serializationProxyParent = serializationProxyParent;
-}
-
-void WidgetAction::setValueFromVariant(const QVariant& value)
-{
-#ifdef _DEBUG
-    qDebug().noquote() << "Set value not implemented in " << text();
-#endif
-}
-
-QVariant WidgetAction::valueToVariant() const
-{
-#ifdef _DEBUG
-    //qDebug().noquote() << "Value to variant not implemented in " << text();
-#endif
-
-    return QVariant();
-}
-
-QVariant WidgetAction::savedDefaultValueToVariant() const
-{
-    return Application::current()->getSetting(getSettingsPath() + "/Default");
-}
-
-QVariant WidgetAction::defaultValueToVariant() const
-{
-#ifdef _DEBUG
-    //qDebug().noquote() << "Default value to variant not implemented in derived widget action class";
-#endif
-
-    return QVariant();
 }
 
 }

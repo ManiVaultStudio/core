@@ -140,26 +140,6 @@ public:
      */
     void setTriggerEnabled(std::int32_t triggerIndex, const bool& enabled);
 
-public: // Settings
-
-    /**
-     * Set value from variant
-     * @param value Value
-     */
-    void setValueFromVariant(const QVariant& value) override final;
-
-    /**
-     * Convert value to variant
-     * @return Value as variant
-     */
-    QVariant valueToVariant() const override final;
-
-    /**
-     * Convert default value to variant
-     * @return Default value as variant
-     */
-    QVariant defaultValueToVariant() const override final;
-
 protected:
 
     /**

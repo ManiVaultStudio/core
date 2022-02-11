@@ -102,25 +102,19 @@ public:
      */
     void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
 
-public: // Settings
+public: // Serialization
 
     /**
-     * Set value from variant
-     * @param value Value
+     * Load widget action from variant
+     * @param Variant representation of the widget action
      */
-    void setValueFromVariant(const QVariant& value) override final;
+    void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-     * Convert value to variant
-     * @return Value as variant
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
      */
-    QVariant valueToVariant() const override final;
-
-    /**
-     * Convert default value to variant
-     * @return Default value as variant
-     */
-    QVariant defaultValueToVariant() const override final;
+    QVariantMap toVariantMap() const override;
 
 signals:
 

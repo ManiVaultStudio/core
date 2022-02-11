@@ -60,22 +60,17 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-void ColorAction::setValueFromVariant(const QVariant& value)
+void ColorAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!value.isValid())
+    if (!variantMap.contains("Value"))
         return;
 
-    setColor(value.value<QColor>());
+    setColor(variantMap["Value"].value<QColor>());
 }
 
-QVariant ColorAction::valueToVariant() const
+QVariantMap ColorAction::toVariantMap() const
 {
-    return QVariant::fromValue(_color);
-}
-
-QVariant ColorAction::defaultValueToVariant() const
-{
-    return QVariant::fromValue(_defaultColor);
+    return { { "Value", _color } };
 }
 
 ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :

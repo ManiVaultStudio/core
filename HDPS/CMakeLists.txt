@@ -93,7 +93,6 @@ set(EVENT_SOURCES
 set( WIDGET_HEADERS
     src/widgets/CollapsedWidget.h
     src/widgets/WebWidget.h
-    src/widgets/ColormapWidget.h
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
     src/widgets/ResponsiveToolbarWidget.h
@@ -104,7 +103,6 @@ set( WIDGET_HEADERS
 set( WIDGET_SOURCES
     src/widgets/CollapsedWidget.cpp
     src/widgets/WebWidget.cpp
-    src/widgets/ColormapWidget.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
     src/widgets/ResponsiveToolbarWidget.cpp
@@ -261,8 +259,6 @@ set( UTIL_HEADERS
     src/util/ColorMapFilterModel.h
     src/util/ColorMapModel.h
     src/util/ColorSpace.h
-    src/util/Visitable.h
-    src/util/Visitor.h
     src/util/PixelSelectionTool.h
     src/util/PixelSelection.h
     src/util/Preset.h
@@ -286,8 +282,6 @@ set( UTIL_SOURCES
     src/util/ColorMapFilterModel.cpp
     src/util/ColorMapModel.cpp
     src/util/ColorSpace.cpp
-    src/util/Visitable.cpp
-    src/util/Visitor.cpp
     src/util/PixelSelectionTool.cpp
     src/util/PixelSelection.cpp
     src/util/Preset.cpp

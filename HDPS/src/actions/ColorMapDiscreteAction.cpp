@@ -25,22 +25,17 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
     connect(&_numberOfStepsAction, &IntegralAction::resettableChanged, this, &ColorMapSettingsAction::notifyResettable);
 }
 
-void ColorMapDiscreteAction::setValueFromVariant(const QVariant& value)
+void ColorMapDiscreteAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!value.isValid())
+    if (!variantMap.contains("Enabled"))
         return;
 
-    setChecked(value.toBool());
+    setChecked(variantMap["Enabled"].toBool());
 }
 
-QVariant ColorMapDiscreteAction::valueToVariant() const
+QVariantMap ColorMapDiscreteAction::toVariantMap() const
 {
-    return QVariant(isChecked());
-}
-
-QVariant ColorMapDiscreteAction::defaultValueToVariant() const
-{
-    return QVariant(false);
+    return { { "Enabled", isChecked()} };
 }
 
 ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction) :

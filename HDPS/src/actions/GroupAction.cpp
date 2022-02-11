@@ -155,20 +155,6 @@ void GroupAction::reset(bool recursive /*= true*/)
         widgetAction->reset();
 }
 
-void GroupAction::setValueFromVariant(const QVariant& value)
-{
-}
-
-QVariant GroupAction::valueToVariant() const
-{
-    return QVariant();
-}
-
-QVariant GroupAction::defaultValueToVariant() const
-{
-    return QVariant();
-}
-
 GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())

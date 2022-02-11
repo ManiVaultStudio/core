@@ -131,22 +131,17 @@ void StringAction::setSearchMode(bool searchMode)
     updateTrailingActionVisibility();
 }
 
-void StringAction::setValueFromVariant(const QVariant& value)
+void StringAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!value.isValid() || value.type() != QVariant::String)
+    if (!variantMap.contains("Value"))
         return;
 
-    setString(value.toString());
+    setString(variantMap["Value"].toString());
 }
 
-QVariant StringAction::valueToVariant() const
+QVariantMap StringAction::toVariantMap() const
 {
-    return QVariant(_string);
-}
-
-QVariant StringAction::defaultValueToVariant() const
-{
-    return QVariant(_defaultString);
+    return {{ "Value", _string }};
 }
 
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :

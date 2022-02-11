@@ -233,20 +233,6 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     notifyResettable();
 }
 
-void ColorMapAction::setValueFromVariant(const QVariant& value)
-{
-}
-
-QVariant ColorMapAction::valueToVariant() const
-{
-    return QVariant();
-}
-
-QVariant ColorMapAction::defaultValueToVariant() const
-{
-    return QVariant();
-}
-
 ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction) :
     OptionAction::ComboBoxWidget(parent, optionAction),
     _colorMapAction(colorMapAction)

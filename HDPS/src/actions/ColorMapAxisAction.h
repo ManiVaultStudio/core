@@ -54,26 +54,6 @@ protected:
      */
     ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title);
 
-public: // Settings
-
-    /**
-     * Set value from variant
-     * @param value Value
-     */
-    void setValueFromVariant(const QVariant& value) override final;
-
-    /**
-     * Convert value to variant
-     * @return Value as variant
-     */
-    QVariant valueToVariant() const override final;
-
-    /**
-     * Convert default value to variant
-     * @return Default value as variant
-     */
-    QVariant defaultValueToVariant() const override final;
-
 public: // Action getters
 
     DecimalRangeAction& getRangeAction() { return _rangeAction; }

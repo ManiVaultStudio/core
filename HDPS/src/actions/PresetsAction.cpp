@@ -37,6 +37,34 @@ PresetsAction::PresetsAction(QObject* parent) :
     // Save default when triggered
     connect(&_saveAction, &TriggerAction::triggered, this, [this]() -> void {
         _widgetAction->toJsonFile();
+
+        QVector<float> writeFloats{ 1.0f, 2.0f, 3.0f }, readFloats;
+
+        readFloats.resize(3);
+
+        QByteArray writeByteArray = QByteArray::fromRawData((char*)writeFloats.constData(), 3 * sizeof(float));
+
+        //QDataStream writeDataStream(&writeByteArray, QIODevice::ReadWrite);
+
+        //writeDataStream << writeFloats;
+
+        //char *ch;
+
+        //writeDataStream >> ch;
+
+        QString writeString = QString(writeByteArray.toBase64());
+
+        QByteArray readByteArray = QByteArray::fromBase64(writeString.toUtf8());
+
+        //QDataStream readDataStream(&readByteArray, QIODevice::ReadOnly);
+
+        //readDataStream >> readFloats;
+
+        //QVector<float> readFloats(,readByteArray.constData(), readByteArray.constData() + readByteArray.size());
+
+        memcpy(readFloats.data(), readByteArray.data(), 3 * sizeof(float));
+
+        qDebug() << writeFloats << readFloats << writeByteArray.size() << readByteArray.size() << writeString;
     });
 }
 

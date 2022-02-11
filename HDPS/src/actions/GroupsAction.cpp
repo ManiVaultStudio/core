@@ -5,6 +5,8 @@
 
 #include <QDebug>
 
+//#define _VERBOSE
+
 namespace hdps {
 
 namespace gui {
@@ -54,7 +56,7 @@ void GroupsAction::setSourceWidgetAction(WidgetAction* sourceWidgetAction)
 
 void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= true*/)
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug().noquote() << QString("Add %1 to groups action").arg(groupAction->getSettingsPath());
 #endif
 
@@ -85,7 +87,7 @@ void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= tru
 
 void GroupsAction::removeGroupAction(GroupAction* groupAction)
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug().noquote() << QString("Remove %1 from groups action").arg(groupAction->getSettingsPath());
 #endif
 
@@ -115,7 +117,7 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
 
 void GroupsAction::setGroupActions(const GroupActions& groupActions)
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug() << "Set group actions";
 #endif
 
@@ -129,7 +131,7 @@ void GroupsAction::setGroupActions(const GroupActions& groupActions)
 
 void GroupsAction::resetGroupActions()
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug() << "Reset group actions";
 #endif
 
@@ -296,20 +298,6 @@ void GroupsAction::reset(bool recursive /*= true*/)
         groupAction->reset(recursive);
 }
 
-void GroupsAction::setValueFromVariant(const QVariant& value)
-{
-}
-
-QVariant GroupsAction::valueToVariant() const
-{
-    return QVariant();
-}
-
-QVariant GroupsAction::defaultValueToVariant() const
-{
-    return QVariant();
-}
-
 GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
@@ -454,7 +442,7 @@ void GroupsAction::Widget::updateToolbar()
 
 void GroupsAction::Widget::updateFiltering()
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug() << "Updating action filtering";
 #endif
 
@@ -493,7 +481,7 @@ void GroupsAction::Widget::updateFiltering()
 
 void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug().noquote() << QString("Add %1 to tree widget").arg(groupAction->getSettingsPath());
 #endif
 
@@ -509,7 +497,7 @@ void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 
 void GroupsAction::Widget::removeGroupAction(GroupAction* groupAction)
 {
-#ifdef _DEBUG
+#ifdef _VERBOSE
     qDebug().noquote() << QString("Remove %1 from tree widget").arg(groupAction->getSettingsPath());
 #endif
 

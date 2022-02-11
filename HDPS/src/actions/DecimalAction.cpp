@@ -62,33 +62,17 @@ void DecimalAction::setSingleStep(const float& singleStep)
     emit singleStepChanged(_singleStep);
 }
 
-void DecimalAction::setValueFromVariant(const QVariant& value)
+void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!value.isValid())
+    if (!variantMap.contains("Value"))
         return;
 
-    QStringList actionPath;
-
-    auto parentAction = dynamic_cast<WidgetAction*>(parent());
-
-    while (parentAction)
-    {
-        actionPath << parentAction->text();
-
-        parentAction = dynamic_cast<WidgetAction*>(parentAction->parent());
-    }
-
-    NumericalAction::setValue(value.toDouble());
+    setValue(variantMap["Value"].toDouble());
 }
 
-QVariant DecimalAction::valueToVariant() const
+QVariantMap DecimalAction::toVariantMap() const
 {
-    return QVariant(static_cast<double>(_value));
-}
-
-QVariant DecimalAction::defaultValueToVariant() const
-{
-    return QVariant(static_cast<double>(_defaultValue));
+    return { { "Value", static_cast<double>(_value) } };
 }
 
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :

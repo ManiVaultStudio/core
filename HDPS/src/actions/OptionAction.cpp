@@ -108,22 +108,17 @@ const QAbstractItemModel* OptionAction::getModel() const
     return &_defaultModel;
 }
 
-void OptionAction::setValueFromVariant(const QVariant& value)
+void OptionAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!value.isValid() || value.type() != QVariant::Int)
+    if (!variantMap.contains("Value"))
         return;
 
-    setCurrentIndex(value.toInt());
+    setCurrentText(variantMap["Value"].toString());
 }
 
-QVariant OptionAction::valueToVariant() const
+QVariantMap OptionAction::toVariantMap() const
 {
-    return QVariant(_currentIndex);
-}
-
-QVariant OptionAction::defaultValueToVariant() const
-{
-    return QVariant(_defaultIndex);
+    return { { "Value", getCurrentText() } };
 }
 
 void OptionAction::updateCurrentIndex()

@@ -65,6 +65,22 @@ public:
     /** Destructor */
     ~DimensionsPickerAction();
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
+public:
+
     /**
      * Set dimensions
      * @param numDimensions Number of dimensions
@@ -175,26 +191,6 @@ public:
             const ModelResetter modelResetter(_proxyModel.get());
         }
     }
-
-public: // Settings
-
-    /**
-     * Set value from variant
-     * @param value Value
-     */
-    void setValueFromVariant(const QVariant& value) override final;
-
-    /**
-     * Convert value to variant
-     * @return Value as variant
-     */
-    QVariant valueToVariant() const override final;
-
-    /**
-     * Convert default value to variant
-     * @return Default value as variant
-     */
-    QVariant defaultValueToVariant() const override final;
 
 protected:
     

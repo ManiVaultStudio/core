@@ -159,24 +159,6 @@ public: // Settings
      */
     void reset(bool recursive = true) override final;
 
-    /**
-     * Set value from variant
-     * @param value Value
-     */
-    void setValueFromVariant(const QVariant& value) override;
-
-    /**
-     * Convert value to variant
-     * @return Value as variant
-     */
-    QVariant valueToVariant() const override;
-
-    /**
-     * Convert default value to variant
-     * @return Default value as variant
-     */
-    QVariant defaultValueToVariant() const override;
-
 signals:
 
     /** Signals that the actions changed */

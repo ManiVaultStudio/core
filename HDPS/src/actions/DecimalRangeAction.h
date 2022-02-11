@@ -104,26 +104,6 @@ public:
      */
     void setRange(const float& minimum, const float& maximum);
 
-public: // Settings
-
-    /**
-     * Set value from variant
-     * @param value Value
-     */
-    void setValueFromVariant(const QVariant& value) override final;
-
-    /**
-     * Convert value to variant
-     * @return Value as variant
-     */
-    QVariant valueToVariant() const override final;
-
-    /**
-     * Convert default value to variant
-     * @return Default value as variant
-     */
-    QVariant defaultValueToVariant() const override final;
-
 public: // Action getters
 
     DecimalAction& getRangeMinAction() { return _rangeMinAction; }

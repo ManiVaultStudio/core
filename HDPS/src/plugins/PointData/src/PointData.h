@@ -491,6 +491,18 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
+    /**
+     * Load point data from variant map
+     * @param Variant map representation of the point data
+     */
+    virtual void fromVariantMap(const QVariantMap& variantMap) final;
+
+    /**
+     * Save point data to variant map
+     * @return Variant map representation of the point data
+     */
+    virtual QVariantMap toVariantMap() const final;
+
 private:
     VectorHolder _vectorHolder;
 
@@ -844,6 +856,20 @@ public: // Selection
      * @param mapping Map of global selection indices in this dataset to a vector of global indices in the target dataset.
      */
     void addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+        * Save widget action to variant
+        * @return Variant representation of the widget action
+        */
+    QVariantMap toVariantMap() const override;
 
 public:
 

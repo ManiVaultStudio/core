@@ -40,22 +40,17 @@ void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t&
     _defaultValueChanged();
 }
 
-void IntegralAction::setValueFromVariant(const QVariant& value)
+void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!value.isValid() || value.type() != QVariant::Int)
+    if (!variantMap.contains("Value"))
         return;
 
-    setValue(value.toInt());
+    setValue(variantMap["Value"].toInt());
 }
 
-QVariant IntegralAction::valueToVariant() const
+QVariantMap IntegralAction::toVariantMap() const
 {
-    return QVariant(_value);
-}
-
-QVariant IntegralAction::defaultValueToVariant() const
-{
-    return QVariant(_defaultValue);
+    return { { "Value", QVariant::fromValue(_value) } };
 }
 
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :

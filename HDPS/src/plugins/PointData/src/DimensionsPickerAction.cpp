@@ -75,6 +75,36 @@ DimensionsPickerAction::~DimensionsPickerAction()
     disconnect(_summaryUpdateAwakeConnection);
 }
 
+void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (variantMap.contains("EnabledDimensions")) {
+
+        const auto enabledDimensions = variantMap["EnabledDimensions"].toList();
+
+        if (enabledDimensions.count() != _holder.getNumberOfDimensions())
+            return;
+
+        std::int32_t dimensionIndex = 0;
+
+        for (const auto& enabledDimension : enabledDimensions) {
+            _holder.setDimensionEnabled(dimensionIndex, enabledDimension.toBool());
+            dimensionIndex++;
+        }
+
+        const ModelResetter modelResetter(_proxyModel.get());
+    }
+}
+
+QVariantMap DimensionsPickerAction::toVariantMap() const
+{
+    QVariantList enabledDimensions;
+
+    for (const auto enabledDimension : getEnabledDimensions())
+        enabledDimensions << QVariant(enabledDimension);
+
+    return { { "EnabledDimensions", enabledDimensions} };
+}
+
 void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, const std::vector<QString>& names)
 {
     if (names.size() == numDimensions)
@@ -259,43 +289,6 @@ void DimensionsPickerAction::selectDimension(const std::int32_t& dimensionIndex,
         _holder.disableAllDimensions();
 
     _holder.setDimensionEnabled(dimensionIndex, true);
-}
-
-void DimensionsPickerAction::setValueFromVariant(const QVariant& value)
-{
-    const auto enabledDimensions = value.toList();
-
-    if (enabledDimensions.count() != _holder.getNumberOfDimensions())
-        return;
-
-    std::int32_t dimensionIndex = 0;
-
-    for (const auto& enabledDimension : enabledDimensions) {
-        _holder.setDimensionEnabled(dimensionIndex, enabledDimension.toBool());
-        dimensionIndex++;
-    }
-
-    const ModelResetter modelResetter(_proxyModel.get());
-}
-
-QVariant DimensionsPickerAction::valueToVariant() const
-{
-    QVariantList enabledDimensions;
-
-    for (const auto enabledDimension : getEnabledDimensions())
-        enabledDimensions << QVariant(enabledDimension);
-
-    return QVariant(enabledDimensions);
-}
-
-QVariant DimensionsPickerAction::defaultValueToVariant() const
-{
-    QVariantList enabledDimensions;
-
-    for (const auto enabledDimension : getEnabledDimensions())
-        enabledDimensions << true;
-
-    return QVariant(enabledDimensions);
 }
 
 void DimensionsPickerAction::computeStatistics()

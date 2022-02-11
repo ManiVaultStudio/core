@@ -306,24 +306,6 @@ public: // Settings
      */
     void reset(bool recursive = true) override final;
 
-    /**
-     * Set value from variant
-     * @param value Value
-     */
-    void setValueFromVariant(const QVariant& value) override final;
-
-    /**
-     * Convert value to variant
-     * @return Value as variant
-     */
-    QVariant valueToVariant() const override final;
-
-    /**
-     * Convert default value to variant
-     * @return Default value as variant
-     */
-    QVariant defaultValueToVariant() const override final;
-
 public: // Action getters
 
     PresetsAction& getPresetsAction() { return _presetsAction; }

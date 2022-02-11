@@ -122,30 +122,6 @@ public: // Settings
     virtual void saveDefault(bool recursive = true);
 
     /**
-     * Set value from variant
-     * @param value Value
-     */
-    virtual void setValueFromVariant(const QVariant& value);
-
-    /**
-     * Convert value to variant
-     * @return Value as variant
-     */
-    virtual QVariant valueToVariant() const;
-
-    /**
-     * Load saved default value to variant
-     * @return Saved default value as variant
-     */
-    virtual QVariant savedDefaultValueToVariant() const;
-
-    /**
-     * Convert default value to variant
-     * @return Default value as variant
-     */
-    virtual QVariant defaultValueToVariant() const;
-
-    /**
      * Determines whether the action can be reset to its default
      * @param recursive Check recursively
      * @return Whether the action can be reset to its default
@@ -185,6 +161,12 @@ public: // Settings
 public: // Serialization
 
     /**
+     * Get serialization name in the action tree (returns text() by default and objectName() if it is not empty)
+     * @return Serialization name
+     */
+    QString getSerializationName() const;
+
+    /**
      * Get whether the widget action may be serialized
      * @return Boolean indicating whether the widget action is serializable
      */
@@ -204,22 +186,23 @@ public: // Serialization
     bool isSerializing() const;
 
     /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
      */
-    virtual void fromVariant(const QVariant& value) const;
+    virtual void fromVariantMap(const QVariantMap& variantMap);
 
     /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
      */
-    virtual QVariant toVariant() const;
+    virtual QVariantMap toVariantMap() const;
 
     /**
      * Load widget action from variant map
+     * @param widgetAction Pointer to target widget action
      * @param Variant map representation of the widget action and its children
      */
-    virtual void fromVariantMap(const QVariantMap& value) const final;
+    static void fromVariantMap(WidgetAction* widgetAction, const QVariantMap& variantMap);
 
     /**
      * Save widget action to variant map

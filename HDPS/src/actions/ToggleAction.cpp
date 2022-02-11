@@ -45,24 +45,6 @@ void ToggleAction::setDefaultToggled(const bool& defaultToggled)
     emit defaultToggledChanged(_defaultToggled);
 }
 
-void ToggleAction::setValueFromVariant(const QVariant& value)
-{
-    if (!value.isValid())
-        return;
-
-    setChecked(value.toBool());
-}
-
-QVariant ToggleAction::valueToVariant() const
-{
-    return QVariant(isChecked());
-}
-
-QVariant ToggleAction::defaultValueToVariant() const
-{
-    return QVariant(getDefaultToggled());
-}
-
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction) :
     QCheckBox(parent),
     _toggleAction(toggleAction)

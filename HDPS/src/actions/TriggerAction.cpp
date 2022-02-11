@@ -14,23 +14,6 @@ TriggerAction::TriggerAction(QObject* parent, const QString& title /*= ""*/) :
     setDefaultWidgetFlags(WidgetFlag::Text);
 }
 
-void TriggerAction::setValueFromVariant(const QVariant& value)
-{
-    // Trigger action has no value
-}
-
-QVariant TriggerAction::valueToVariant() const
-{
-    // Trigger action has no value
-    return QVariant();
-}
-
-QVariant TriggerAction::defaultValueToVariant() const
-{
-    // Trigger action has no default value
-    return QVariant();
-}
-
 TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction* triggerAction, const std::int32_t& widgetFlags) :
     QPushButton(parent),
     _triggersAction(triggerAction)
