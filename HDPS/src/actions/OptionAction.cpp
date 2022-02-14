@@ -406,7 +406,7 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
             break;
     }
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0,0,0,0);
 
     std::int32_t optionIndex = 0;
 

@@ -125,7 +125,7 @@ void DimensionsPickerAction::setNameFilter(const QString& nameFilter)
         return;
 
     const ModelResetter modelResetter(_proxyModel.get());
-    _proxyModel->setFilterRegExp(nameFilter);
+    _proxyModel->setFilterRegularExpression(nameFilter);
 }
 
 void DimensionsPickerAction::setShowOnlySelectedDimensions(const bool& showOnlySelectedDimensions)
@@ -265,9 +265,7 @@ void DimensionsPickerAction::computeStatistics()
 
         if (_points.isValid())
         {
-            QTime time;
-
-            time.start();
+            auto startTime = QTime::currentTime();
             const auto& pointData = *_points;
 
             pointData.visitFromBeginToEnd([&statistics, &pointData](auto beginOfData, auto endOfData)
@@ -361,7 +359,7 @@ void DimensionsPickerAction::computeStatistics()
                 }
             });
             qDebug()
-                << " Duration: " << time.elapsed() << " microsecond(s)";
+                << " Duration: " << startTime.msecsTo(QTime::currentTime()) << " microsecond(s)";
 
             for (unsigned i{}; i <= 1; ++i)
             {
@@ -463,7 +461,7 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
         setPopupLayout(layout);
     }
     else {
-        layout->setMargin(0);
+        layout->setContentsMargins(0,0,0,0);
         setLayout(layout);
     }
 }

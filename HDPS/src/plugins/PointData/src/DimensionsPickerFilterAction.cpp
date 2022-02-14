@@ -49,7 +49,7 @@ DimensionsPickerFilterAction::Widget::Widget(QWidget* parent, DimensionsPickerFi
         setPopupLayout(layout);
     }
     else {
-        layout->setMargin(0);
+        layout->setContentsMargins(0,0,0,0);
         setLayout(layout);
     }
 }
