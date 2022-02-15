@@ -104,7 +104,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
             pointData.resize(numberOfElements);
 
-            variantMapToRawData(rawData, (char*)pointData.data());
+            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
             setData(pointData, numberOfDimensions);
             break;
         }
@@ -115,7 +115,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
             pointData.resize(numberOfElements);
 
-            variantMapToRawData(rawData, (char*)pointData.data());
+            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
 
             setData(pointData, numberOfDimensions);
             break;

@@ -8,6 +8,8 @@
 
 #include "Application.h"
 
+#include <util/Serialization.h>
+
 #include <QtCore>
 #include <QtDebug>
 
@@ -101,16 +103,8 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         // Resize the cluster indices
         cluster.getIndices().resize(clusterVariantMap["NumberOfIndices"].toInt());
 
-        memcpy(cluster.getIndices().data(), QByteArray::fromBase64(clusterVariantMap["IndicesRaw"].toString().toUtf8()).data(), cluster.getIndices().size() * sizeof(std::uint32_t));
-
-        // Get indices as base64 encoded string and uncompress
-        //const auto compressedIndices    = clusterVariantMap["IndicesRaw"].toString().toUtf8();
-        //const auto indicesData          = qUncompress(QByteArray::fromBase64(compressedIndices)).data();
-
-        // Assign indices
-        //memcpy(cluster.getIndices().data(), indicesData, cluster.getIndices().size() * sizeof(std::uint32_t));
-
-        qDebug() << cluster.getIndices();
+        // Read indices from indices raw variant map
+        populateDataBufferFromVariantMap(clusterVariantMap["IndicesRaw"].toMap(), (char*)cluster.getIndices().data());
     }
 }
 
@@ -124,12 +118,8 @@ QVariantMap ClusterData::toVariantMap() const
         // Get reference to the cluster indices
         auto& clusterIndices = cluster.getIndices();
 
-        // Compress indices and convert to base64 encoded string
-        //const auto compressedIndices    = qCompress(QByteArray::fromRawData((char*)clusterIndices.data(), clusterIndices.size() * sizeof(std::uint32_t)));
-        //const auto indicesRaw           = QString(compressedIndices.toBase64());
-
-        // Get indices as base64 encoded string
-        const auto indicesRaw = QString(QByteArray::fromRawData((char*)clusterIndices.data(), clusterIndices.size() * sizeof(std::uint32_t)).toBase64());
+        // Convert indices to raw data
+        QVariantMap indicesRaw = rawDataToVariantMap((char*)clusterIndices.data(), clusterIndices.size() * sizeof(std::uint32_t));
 
         // Add cluster variant map to the list
         clusters.append(QVariantMap({

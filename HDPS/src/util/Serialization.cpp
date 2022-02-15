@@ -47,7 +47,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfB
     return rawData;
 }
 
-void variantMapToRawData(const QVariantMap& variantMap, const char* bytes)
+void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char* bytes)
 {
     const auto blockSize    = variantMap["BlockSize"].toInt();
     const auto blocks       = variantMap["Blocks"].toList();

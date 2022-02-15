@@ -21,7 +21,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfB
  * @param variantMap Variant map containing the data blocks
  * @param bytes Output buffer to which the data is copied
  */
-void variantMapToRawData(const QVariantMap& variantMap, const char* bytes);
+void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char* bytes);
 
 }
 }
