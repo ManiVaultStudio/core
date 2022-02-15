@@ -208,6 +208,20 @@ protected:
      */
     std::int32_t getPixelIndexFromPixelCoordinate(const QPoint& pixelCoordinate) const;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
     std::vector<std::uint32_t>      _indices;               /** Selection indices */
     ImageData*                      _imageData;             /** Pointer to raw image data */

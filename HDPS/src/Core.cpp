@@ -30,6 +30,9 @@ Core::Core(gui::MainWindow& mainWindow) :
     _plugins(),
     _eventListeners()
 {
+    setText("HDPS Application");
+    setObjectName("HDPS Application");
+
     _datasetGroupingEnabled = Application::current()->getSetting("Core/DatasetGroupingEnabled", false).toBool();
 }
 
@@ -365,6 +368,11 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
     return allDataSets;
 }
 
+const DataManager& Core::getDataManager() const
+{
+    return *_dataManager.get();
+}
+
 hdps::plugin::Plugin& Core::requestAnalysis(const QString& kind)
 {
     try {
@@ -437,20 +445,6 @@ const void Core::viewDatasets(const QString& kind, const Datasets& datasets)
     }
     catch (...) {
         exceptionMessageBox("Unable to view dataset");
-    }
-}
-
-const void Core::transformDatasets(const QString& kind, const Datasets& datasets)
-{
-    try {
-        _pluginManager->createTransformationPlugin(kind, datasets);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to transform dataset(s)", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to transform dataset(s)");
     }
 }
 
@@ -768,6 +762,22 @@ void Core::destroyPlugins()
             kv.second[i].reset();
         }
     }
+}
+
+void Core::fromVariantMap(const QVariantMap& variantMap)
+{
+    _dataHierarchyManager->fromVariantMap(variantMap[_dataHierarchyManager->getSerializationName()].toMap());
+}
+
+QVariantMap Core::toVariantMap() const
+{
+    QVariantMap variantMap;
+
+    // Save data manager and data hierarchy manager
+    //variantMap[_dataManager->getSerializationName()]            = _dataManager->toVariantMap();
+    variantMap[_dataHierarchyManager->getSerializationName()]   = _dataHierarchyManager->toVariantMap();
+
+    return variantMap;
 }
 
 void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)

@@ -13,9 +13,11 @@ namespace hdps
 {
 
 DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
-    QObject(parent),
+    WidgetAction(parent),
     _dataHierarchyItems()
 {
+    setText("Data hierarchy");
+    setObjectName("Hierarchy");
 }
 
 void DataHierarchyManager::addItem(Dataset<DatasetImpl>& dataset, Dataset<DatasetImpl>& parentDataset, const bool& visible /*= true*/)
@@ -25,13 +27,15 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl>& dataset, Dataset<Datase
     try {
 
         // Create new data hierarchy item
-        const auto newDataHierarchyItem = new DataHierarchyItem(this, dataset, parentDataset, visible);
+        const auto newDataHierarchyItem = new DataHierarchyItem(parentDataset.isValid() ? &parentDataset->getDataHierarchyItem() : static_cast<QObject*>(this), dataset, parentDataset, visible);
 
         _dataHierarchyItems << newDataHierarchyItem;
 
         // Add child item if the parent is valid
         if (parentDataset.isValid())
             parentDataset->getDataHierarchyItem().addChild(dataset->getDataHierarchyItem());
+
+        dataset->setParent(newDataHierarchyItem);
 
         // Notify others that an item is added
         emit itemAdded(*newDataHierarchyItem);
@@ -161,6 +165,46 @@ DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem* dataHier
             children << getChildren(child, recursive);
 
     return children;
+}
+
+void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
+{
+    // Load dataset from variant and add to the data hierarchy manager
+    const auto loadDataset = [](const QVariantMap& variantMap, const QString& guiName, Dataset<DatasetImpl> parent) -> Dataset<DatasetImpl> {
+        const auto dataHierarchyItem    = variantMap[guiName].toMap();
+        const auto dataset              = dataHierarchyItem["Dataset"].toMap();
+        const auto pluginKind           = dataset["PluginKind"].toString();
+        const auto children             = dataset["Children"].toMap();
+
+        // Add dataset to the data hierarchy manager
+        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent);
+
+        // And load from variant map
+        loadedDataset->fromVariantMap(dataset);
+
+        return loadedDataset;
+    };
+
+    const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> loadDataHierarchyItem = [&loadDataHierarchyItem, loadDataset](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
+        for (auto name : variantMap.keys())
+            loadDataHierarchyItem(variantMap[name].toMap()["Children"].toMap(), loadDataset(variantMap, name, parent));
+    };
+
+    loadDataHierarchyItem(variantMap, Dataset<DatasetImpl>());
+}
+
+QVariantMap DataHierarchyManager::toVariantMap() const
+{
+    if (_dataHierarchyItems.isEmpty())
+        return QVariantMap();
+
+    QVariantMap variantMap;
+
+    for (auto dataHierarchyItem : _dataHierarchyItems)
+        if (!dataHierarchyItem->hasParent())
+            variantMap[dataHierarchyItem->getGuiName()] = dataHierarchyItem->toVariantMap();
+
+    return variantMap;
 }
 
 }

@@ -17,7 +17,7 @@ namespace hdps {
 
 namespace gui {
 
-WidgetAction::WidgetAction(QObject* parent) :
+WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
     _sortIndex(-1),
@@ -457,6 +457,7 @@ QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
 
     QVariantMap variantMap = widgetAction->toVariantMap();
 
+    /*
     // Loop over all child objects and serialize each
     for (auto child : widgetAction->children()) {
 
@@ -467,14 +468,15 @@ QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
             continue;
 
         // Only go deeper if the child allows for serialization
-        if (!childWidgetAction->isSerializable())
+        if (!childWidgetAction->isSerializable() || childWidgetAction->getSerializationName().isEmpty())
             continue;
 
-        Q_ASSERT(!variantMap.contains(childWidgetAction->getSerializationName()));
+        //Q_ASSERT(!variantMap.contains(childWidgetAction->getSerializationName()));
 
         // Serialize child
         variantMap[childWidgetAction->getSerializationName()] = toVariantMap(childWidgetAction);
     }
+    */
 
     return variantMap;
 }

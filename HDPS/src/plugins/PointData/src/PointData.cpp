@@ -85,10 +85,41 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
 
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("ElementType") || !variantMap.contains("RawData"))
-        return;
+    const auto data                 = variantMap["Data"].toMap();
+    const auto numberOfPoints       = variantMap["NumberOfPoints"].toInt();
+    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toInt();
+    const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
+    const auto rawDataString        = data["Raw"].toString();
 
+    switch (elementTypeIndex)
+    {
+        case PointData::ElementTypeSpecifier::float32:
+            setData(reinterpret_cast<const float*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+            break;
 
+        case PointData::ElementTypeSpecifier::bfloat16:
+            setData(reinterpret_cast<const biovault::bfloat16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+            break;
+
+        case PointData::ElementTypeSpecifier::int16:
+            setData(reinterpret_cast<const std::int16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+            break;
+
+        case PointData::ElementTypeSpecifier::uint16:
+            setData(reinterpret_cast<const std::uint16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+            break;
+
+        case PointData::ElementTypeSpecifier::int8:
+            setData(reinterpret_cast<const std::int8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+            break;
+
+        case PointData::ElementTypeSpecifier::uint8:
+            setData(reinterpret_cast<const std::uint8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+            break;
+
+        default:
+            break;
+    }
 }
 
 QVariantMap PointData::toVariantMap() const
@@ -133,7 +164,8 @@ QVariantMap PointData::toVariantMap() const
     return {
         { "TypeIndex", typeIndex },
         { "TypeName", typeSpecifierName },
-        { "Raw", QVariant::fromValue(rawData) }
+        { "Raw", rawData },
+        { "NumberOfElements", numberOfElements }
     };
 }
 
@@ -568,61 +600,57 @@ void Points::addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet,
 
 void Points::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Data"))
-        return;
+    DatasetImpl::fromVariantMap(variantMap);
 
-    const auto data                 = variantMap["Data"].toMap();
-    const auto numberOfPoints       = variantMap["NumberOfPoints"].toInt();
-    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toInt();
-    const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
-    const auto rawDataString        = data["Raw"].toString();
+    getRawData<PointData>().fromVariantMap(variantMap);
 
-    switch (elementTypeIndex)
-    {
-        case PointData::ElementTypeSpecifier::float32:
-            getRawData<PointData>().setData(reinterpret_cast<const float*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
+    if (!variantMap["Full"].toBool()) {
 
-        case PointData::ElementTypeSpecifier::bfloat16:
-            getRawData<PointData>().setData(reinterpret_cast<const biovault::bfloat16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
+        // Allocate indices
+        indices.resize(variantMap["Indices"].toMap()["Count"].toInt());
 
-        case PointData::ElementTypeSpecifier::int16:
-            getRawData<PointData>().setData(reinterpret_cast<const std::int16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
-
-        case PointData::ElementTypeSpecifier::uint16:
-            getRawData<PointData>().setData(reinterpret_cast<const std::uint16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
-
-        case PointData::ElementTypeSpecifier::int8:
-            getRawData<PointData>().setData(reinterpret_cast<const std::int8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
-
-        case PointData::ElementTypeSpecifier::uint8:
-            getRawData<PointData>().setData(reinterpret_cast<const std::uint8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
-
-        default:
-            break;
+        // And assign them
+        memcpy(indices.data(), QByteArray::fromBase64(variantMap["Indices"].toMap()["Raw"].toString().toUtf8()).data(), indices.size() * sizeof(std::uint32_t));
     }
+
+    std::vector<QString> dimensionNames;
+
+    for (const auto dimensionName : variantMap["DimensionNames"].toList())
+        dimensionNames.push_back(dimensionName.toString());
+
+    setDimensionNames(dimensionNames);
 
     _core->notifyDataChanged(this);
 }
 
 QVariantMap Points::toVariantMap() const
 {
+    auto variantMap = DatasetImpl::toVariantMap();
+
     QStringList dimensionNames;
 
-    for (const auto dimensionName : getDimensionNames())
-        dimensionNames << dimensionName;
+    if (getDimensionNames().size() != getNumPoints()) {
+        for (const auto dimensionName : getDimensionNames())
+            dimensionNames << dimensionName;
+    }
+    else {
+        for (std::uint32_t dimensionIndex = 0; dimensionIndex < getNumDimensions(); dimensionIndex++)
+            dimensionNames << QString("Dim %1").arg(QString::number(dimensionIndex));
+    }
 
-    return {
-        { "Data", getRawData<PointData>().toVariantMap() },
-        { "NumberOfPoints", getNumPoints() },
-        { "DimensionNames", dimensionNames },
-        { "NumberOfDimensions", getNumDimensions() }
-    };
+    QVariantMap indices;
+
+    indices["Count"]    = indices.size();
+    indices["Raw"]      = QString(QByteArray::fromRawData((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t)).toBase64());
+
+    variantMap["Data"]                  = getRawData<PointData>().toVariantMap();
+    variantMap["NumberOfPoints"]        = getNumPoints();
+    variantMap["Full"]                  = isFull();
+    variantMap["Indices"]               = indices;
+    variantMap["DimensionNames"]        = dimensionNames;
+    variantMap["NumberOfDimensions"]    = getNumDimensions();
+
+    return variantMap;
 }
 
 // =============================================================================

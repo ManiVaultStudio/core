@@ -4,6 +4,8 @@
 #include "Core.h"
 #include "Dataset.h"
 
+#include <widgets/Divider.h>
+
 #include <QDebug>
 #include <QInputDialog>
 #include <QHeaderView>
@@ -33,7 +35,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _datasetNameFilterAction(this, "Dataset name filter"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
-    _groupingAction(this, "Grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
+    _groupingAction(this, "Grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled()),
+    _loadAction(this, "Load"),
+    _saveAction(this, "Save")
 {
     // Set filter model input model
     _filterModel.setSourceModel(&_model);
@@ -91,6 +95,17 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Update columns visibility when grouping is editable/disabled
     connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
 
+    _loadAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    _saveAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+
+    connect(&_loadAction, &TriggerAction::triggered, this, [this]() {
+        Application::core()->fromJsonFile();
+    });
+
+    connect(&_saveAction, &TriggerAction::triggered, this, [this]() {
+        Application::core()->toJsonFile();
+    });
+
     // Create layout that will contain the toolbar and the tree view
     auto layout = new QVBoxLayout();
 
@@ -109,6 +124,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::PushButtonIcon));
+    toolbarLayout->addWidget(createVerticalDivider());
+    toolbarLayout->addWidget(_loadAction.createWidget(this));
+    toolbarLayout->addWidget(_saveAction.createWidget(this));
 
     // Add tool bar layout and tree view widget
     layout->addLayout(toolbarLayout);
@@ -139,6 +157,10 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Show/hide the overlay and header widget when the number of rows changes
     connect(&_model, &QAbstractItemModel::rowsInserted, this, &DataHierarchyWidget::numberOfRowsChanged);
     connect(&_model, &QAbstractItemModel::rowsRemoved, this, &DataHierarchyWidget::numberOfRowsChanged);
+
+    // Handle item expanded/collapsed
+    connect(&_treeView, &QTreeView::expanded, this, &DataHierarchyWidget::expanded);
+    connect(&_treeView, &QTreeView::collapsed, this, &DataHierarchyWidget::collapsed);
 
     // Insert new rows expanded
     connect(&_model, &QAbstractItemModel::rowsInserted, this, [&](const QModelIndex& parent, int first, int last) {
@@ -379,6 +401,20 @@ void DataHierarchyWidget::collapseAll()
     // Loop over all indices and collapse them
     for (const auto& modelIndex : allModelIndices)
         _treeView.setExpanded(modelIndex, false);
+}
+
+void DataHierarchyWidget::expanded(const QModelIndex& index)
+{
+    if (!index.isValid())
+        return;
+
+    // Get pointer to data hierarchy item
+    auto dataHierarchyModelItem = _model.getItem(index, Qt::DisplayRole);
+}
+
+void DataHierarchyWidget::collapsed(const QModelIndex& index)
+{
+
 }
 
 void DataHierarchyWidget::updateToolBar()

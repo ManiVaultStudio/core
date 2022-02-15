@@ -562,3 +562,41 @@ std::int32_t Images::getPixelIndexFromPixelCoordinate(const QPoint& pixelCoordin
 {
     return pixelCoordinate.y() * getImageSize().width() + pixelCoordinate.x();
 }
+
+void Images::fromVariantMap(const QVariantMap& variantMap)
+{
+    DatasetImpl::fromVariantMap(variantMap);
+
+    auto& imageData = getRawData<ImageData>();
+
+    if (variantMap.contains("Type"))
+        getRawData<ImageData>().setType(static_cast<ImageData::Type>(variantMap["Type"].toInt()));
+
+    if (variantMap.contains("NumberOfImages"))
+        getRawData<ImageData>().setNumberImages(variantMap["NumberOfImages"].toInt());
+
+    if (variantMap.contains("ImageSize"))
+        getRawData<ImageData>().setImageSize(variantMap["ImageSize"].toSize());
+
+    if (variantMap.contains("NumberOfComponentsPerPixel"))
+        getRawData<ImageData>().setNumberOfComponentsPerPixel(variantMap["NumberOfComponentsPerPixel"].toInt());
+
+    if (variantMap.contains("ImageFilePaths"))
+        getRawData<ImageData>().setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
+
+    _core->notifyDataChanged(this);
+}
+
+QVariantMap Images::toVariantMap() const
+{
+    auto variantMap = DatasetImpl::toVariantMap();
+
+    variantMap["Type"]                          = static_cast<std::int32_t>(getType());
+    variantMap["TypeName"]                      = ImageData::getTypeName(getType());
+    variantMap["NumberOfImages"]                = getNumberOfImages();
+    variantMap["ImageSize"]                     = getImageSize();
+    variantMap["NumberOfComponentsPerPixel"]    = getNumberOfComponentsPerPixel();
+    variantMap["ImageFilePaths"]                = getImageFilePaths();
+
+    return variantMap;
+}

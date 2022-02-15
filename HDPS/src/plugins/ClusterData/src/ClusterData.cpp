@@ -75,6 +75,65 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
+void ClusterData::fromVariantMap(const QVariantMap& variantMap)
+{
+    const auto data         = variantMap["Data"].toMap();
+    const auto clustersList = data["Clusters"].toList();
+
+    // Resize clusters
+    _clusters.resize(clustersList.count());
+
+    // Go over all clusters and assign the cluster to the cluster data
+    for (const auto& clusterVariant : clustersList) {
+
+        // Get the cluster as variant map and the cluster index
+        const auto clusterVariantMap    = clusterVariant.toMap();
+        const auto clusterIndex         = clustersList.indexOf(clusterVariantMap);
+
+        // Get reference to current cluster
+        auto& cluster = _clusters[clusterIndex];
+
+        // Set basic cluster parameters
+        cluster.setName(clusterVariantMap["Name"].toString());
+        cluster.setId(clusterVariantMap["ID"].toString());
+        cluster.setColor(clusterVariantMap["Color"].toString());
+
+        // Resize the cluster indices
+        cluster.getIndices().resize(clusterVariantMap["NumberOfIndices"].toInt());
+
+        // Assign indices
+        memcpy(cluster.getIndices().data(), QByteArray::fromBase64(clusterVariantMap["IndicesRaw"].toString().toUtf8()).data(), cluster.getIndices().size() * sizeof(std::uint32_t));
+    }
+}
+
+QVariantMap ClusterData::toVariantMap() const
+{
+    QVariantList clusters;
+
+    // Go over all clusters and create variant map for each of them
+    for (const auto& cluster : _clusters) {
+
+        // Get reference to the cluster indices
+        auto& clusterIndices = cluster.getIndices();
+
+        // Get indices as base64 encoded string
+        const auto indicesRaw = QString(QByteArray::fromRawData((char*)clusterIndices.data(), clusterIndices.size() * sizeof(std::uint32_t)).toBase64());
+
+        // Add cluster variant map to the list
+        clusters.append(QVariantMap({
+            { "Name", cluster.getName() },
+            { "ID", cluster.getId() },
+            { "Color", cluster.getColor() },
+            { "IndicesRaw", indicesRaw },
+            { "NumberOfIndices", clusterIndices.size() }
+        }));
+    }
+
+    return {
+        { "Clusters", clusters }
+    };
+}
+
 void Clusters::init()
 {
     _infoAction = QSharedPointer<InfoAction>::create(nullptr, *this);
@@ -131,36 +190,6 @@ QIcon Clusters::getIcon() const
     return Application::getIconFont("FontAwesome").getIcon("th-large");
 }
 
-void Clusters::fromVariant(const QVariant& variant)
-{
-    if (variant.type() != QVariant::Type::List)
-        throw std::runtime_error("Clusters variant is not a list");
-
-    QVector<Cluster>& clusters = getClusters();
-
-    const auto variantList = variant.toList();
-
-    clusters.clear();
-    clusters.resize(variantList.count());
-
-    auto clusterIndex = 0;
-
-    for (auto& cluster : clusters) {
-        cluster.fromVariant(variantList.at(clusterIndex));
-        clusterIndex++;
-    }
-}
-
-QVariant Clusters::toVariant() const
-{
-    QVariantList clustersList;
-
-    for (auto cluster : getClusters())
-        clustersList << cluster.toVariant();
-
-    return clustersList;
-}
-
 std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 {
     // Indices that are selected
@@ -181,6 +210,24 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     selectedIndices.erase(unique(selectedIndices.begin(), selectedIndices.end()), selectedIndices.end());
 
     return selectedIndices;
+}
+
+void Clusters::fromVariantMap(const QVariantMap& variantMap)
+{
+    DatasetImpl::fromVariantMap(variantMap);
+
+    getRawData<ClusterData>().fromVariantMap(variantMap);
+
+    _core->notifyDataChanged(this);
+}
+
+QVariantMap Clusters::toVariantMap() const
+{
+    auto variantMap = DatasetImpl::toVariantMap();
+
+    variantMap["Data"] = getRawData<ClusterData>().toVariantMap();
+
+    return variantMap;
 }
 
 std::vector<std::uint32_t>& Clusters::getSelectionIndices()

@@ -163,4 +163,20 @@ const std::unordered_map<QString, Dataset<DatasetImpl>>& DataManager::allSets() 
     return _dataSetMap;
 }
 
+void DataManager::fromVariantMap(const QVariantMap& variantMap)
+{
+
+}
+
+QVariantMap DataManager::toVariantMap() const
+{
+    QVariantMap variantMap;
+
+    // Save all datasets to variant map
+    for (std::pair<QString, Dataset<DatasetImpl>> item : _dataSetMap)
+        variantMap[item.second->getGuid()] = item.second->toVariantMap();
+
+    return variantMap;
+}
+
 } // namespace hdps

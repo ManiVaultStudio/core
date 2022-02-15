@@ -20,6 +20,7 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const Dataset<DatasetImpl>& 
 {
     setText("Remove");
     setIcon(Application::getIconFont("FontAwesome").getIcon("trash-alt"));
+    setSerializable(false);
 
     // Remove dataset and children when triggered
     connect(this, &TriggerAction::triggered, this, [this]() {

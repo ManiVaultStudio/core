@@ -273,8 +273,17 @@ public: // Lock
     /** Unlock the dataset */
     void unlock();
 
-    /** Get whether the dataset is locked */
+    /**
+     * Get whether the dataset is locked
+     * @return Boolean indicating whether the dataset is locked
+     */
     bool isLocked() const;
+
+    /**
+     * Set whether the dataset is locked
+     * @parem locked Boolean indicating whether the dataset is locked
+     */
+    void setLocked(bool locked);
 
 public: // Operators
 
@@ -336,7 +345,21 @@ public: // Properties
         return _properties.keys();
     }
 
-public:
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+        * Save widget action to variant
+        * @return Variant representation of the widget action
+        */
+    QVariantMap toVariantMap() const override;
+
+public: // Grouping
 
     /** Get group index */
     std::int32_t getGroupIndex() const;

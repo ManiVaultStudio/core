@@ -31,7 +31,7 @@ using DataHierarchyItems = QVector<DataHierarchyItem*>;
  *
  * @author Thomas Kroes
  */
-class DataHierarchyItem : public QObject
+class DataHierarchyItem : public hdps::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -130,29 +130,6 @@ public:
     /** De-selects the hierarchy item */
     void deselect();
 
-    /** Gets list of named icons */
-    IconList getIcons() const;
-
-    /**
-     * Add named icon
-     * @param name Name of the icon
-     * @param icon Icon
-     */
-    void addIcon(const QString& name, const QIcon& icon);
-
-    /**
-     * Remove icon by name
-     * @param name Name of the icon
-     */
-    void removeIcon(const QString& name);
-
-    /**
-     * Get icon by name
-     * @param name Name of the icon
-     * @return Icon
-     */
-    QIcon getIconByName(const QString& name) const;
-
     /** Get the full path name of the data hierarchy item (separated by forward slashes) */
     QString getFullPathName() const;
 
@@ -228,7 +205,7 @@ public: // Actions
      */
     void populateContextMenu(QMenu* contextMenu);;
 
-public: // Lock
+public: // Locked
 
     /** Get locked status */
     bool getLocked() const;
@@ -238,6 +215,20 @@ public: // Lock
      * @param locked Whether the dataset is locked
      */
     void setLocked(const bool& locked);
+
+public: // Expanded
+
+    /**
+     * Get expanded status
+     * @return Boolean indicating whether the item is expanded or not
+     */
+    bool getExpanded() const;
+
+    /**
+     * Set expanded status
+     * @param expanded Whether the dataset is expanded
+     */
+    void setExpanded(const bool& expanded);
 
 public: // Tasks
 
@@ -295,6 +286,45 @@ public: // Tasks
     void setTaskFinished();
     void setTaskAborted();
 
+public: // Named icons
+
+    /** Gets list of named icons */
+    IconList getIcons() const;
+
+    /**
+     * Add named icon
+     * @param name Name of the icon
+     * @param icon Icon
+     */
+    void addIcon(const QString& name, const QIcon& icon);
+
+    /**
+     * Remove icon by name
+     * @param name Name of the icon
+     */
+    void removeIcon(const QString& name);
+
+    /**
+     * Get icon by name
+     * @param name Name of the icon
+     * @return Icon
+     */
+    QIcon getIconByName(const QString& name) const;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 signals:
 
     /**
@@ -333,6 +363,12 @@ signals:
      */
     void lockedChanged(const bool& locked);
 
+    /**
+     * Signals that the expansion status changed
+     * @param expanded Whether the item is expanded or not
+     */
+    void expandedChanged(const bool& expanded);
+
 protected:
     Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
@@ -340,7 +376,7 @@ protected:
     bool                        _visible;               /** Whether the dataset is visible */
     bool                        _selected;              /** Whether the hierarchy item is selected */
     bool                        _locked;                /** Whether the dataset is locked */
-    IconList                    _namedIcons;            /** Named icons */
+    bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
     QString                     _taskDescription;       /** Task description */
     float                       _taskProgress;          /** Task progress */
     QBitArray                   _subTasks;              /** Sub-tasks bit array */
@@ -348,6 +384,7 @@ protected:
     TaskStatus                  _taskStatus;            /** Status of the current task */
     QTimer                      _taskDescriptionTimer;  /** Task description timer which prevents excessive successive GUI updates */
     QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
+    IconList                    _namedIcons;            /** Named icons */
     hdps::gui::WidgetActions    _actions;               /** Widget actions */
     DataRemoveAction            _dataRemoveAction;      /** Data remove action */
     DataCopyAction              _dataCopyAction;        /** Data copy action */

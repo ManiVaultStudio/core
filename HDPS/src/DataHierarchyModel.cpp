@@ -51,14 +51,14 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
             break;
 
         case DataHierarchyModelItem::Column::Description:
-            dataHierarchyModelItem->setProgressSection(value.toString());
+            dataHierarchyModelItem->getDataHierarchyItem()->setTaskDescription(value.toString());
             break;
 
         case DataHierarchyModelItem::Column::Analysis:
             break;
 
         case DataHierarchyModelItem::Column::Progress:
-            dataHierarchyModelItem->setProgressPercentage(value.toFloat());
+            dataHierarchyModelItem->getDataHierarchyItem()->setTaskProgress(value.toFloat());
             break;
 
         default:

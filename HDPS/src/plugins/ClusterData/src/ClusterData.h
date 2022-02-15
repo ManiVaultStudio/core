@@ -59,6 +59,20 @@ public:
      */
     std::int32_t getClusterIndex(const QString& clusterName) const;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
 };
@@ -179,16 +193,23 @@ public: // Selection
     /** Invert item selection */
     void selectInvert() override;
 
-public: // IO
-
-    /** Loads cluster from variant list */
-    void fromVariant(const QVariant& variant);
-
-    /** Returns a variant representation of the clusters */
-    QVariant toVariant() const;
-
     /** Gets concatenated indices for all selected clusters */
     std::vector<std::uint32_t> getSelectedIndices() const;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 
     std::vector<unsigned int>       indices;
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */

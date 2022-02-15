@@ -134,6 +134,12 @@ public: // Data access
      */
     QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) override;
 
+    /**
+     * Get data manager
+     * @return Reference to the data manager
+     */
+    const DataManager& getDataManager() const;
+
 protected: // Data access
 
     /**
@@ -187,15 +193,6 @@ public: // Data viewing
      * @param datasets Datasets to view
      */
     const void viewDatasets(const QString& kind, const Datasets& datasets) override;
-
-public: // Data transformation
-
-    /**
-     * Transforms one or more datasets
-     * @param kind Type of transformation plugin
-     * @param datasets Datasets to transform
-     */
-    const void transformDatasets(const QString& kind, const Datasets& datasets) override;
 
 public: // Plugin queries
 
@@ -339,6 +336,20 @@ private:
 
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 private:
     gui::MainWindow&                                                        _mainWindow;                /** Reference to the main window */

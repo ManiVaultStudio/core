@@ -2,17 +2,21 @@
 
 #include "DataHierarchyItem.h"
 
+#include <actions/WidgetAction.h>
+
 #include <QObject>
 #include <QMap>
 #include <QString>
 #include <QDebug>
+
+using namespace hdps::gui;
 
 namespace hdps
 {
 
 class DataManager;
 
-class DataHierarchyManager : public QObject
+class DataHierarchyManager : public WidgetAction
 {
     Q_OBJECT
 
@@ -66,6 +70,20 @@ public:
      * @return Children
      */
     DataHierarchyItems getChildren(DataHierarchyItem* dataHierarchyItem, const bool& recursive = true);
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 signals:
 

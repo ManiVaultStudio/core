@@ -15,6 +15,7 @@ DataCopyAction::DataCopyAction(QObject* parent, const Dataset<DatasetImpl>& data
     setText("Copy");
     setIcon(Application::getIconFont("FontAwesome").getIcon("copy"));
     setEnabled(false);
+    setSerializable(false);
 
     // Copy the dataset when the action is triggered
     connect(this, &TriggerAction::triggered, this, [this, dataset]() {

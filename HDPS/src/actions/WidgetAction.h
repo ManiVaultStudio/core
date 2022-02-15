@@ -33,7 +33,7 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      */
-    WidgetAction(QObject* parent);
+    WidgetAction(QObject* parent = nullptr);
 
     /**
      * Get parent widget action

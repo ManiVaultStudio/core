@@ -14,14 +14,14 @@ namespace hdps
 {
 
 DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
-    QObject(parent),
+    WidgetAction(parent),
     _dataset(dataset),
     _parent(),
     _children(),
     _visible(visible),
     _selected(false),
     _locked(false),
-    _namedIcons(),
+    _expanded(true),
     _taskDescription(""),
     _taskProgress(0.0),
     _subTasks(),
@@ -29,15 +29,18 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _taskStatus(TaskStatus::Idle),
     _taskDescriptionTimer(),
     _taskProgressTimer(),
+    _namedIcons(),
     _actions(),
     _dataRemoveAction(parent, dataset),
     _dataCopyAction(parent, dataset)
 {
+    setText(dataset->getGuiName());
+
     // Set parent item
     if (parentDataset.isValid())
         _parent = &parentDataset->getDataHierarchyItem();
 
-    // Add data icon
+    // Add dataset icon
     addIcon("data", getDataset()->getIcon());
 
     // Task description/progress timer should be a one-off timer
@@ -192,34 +195,6 @@ void DataHierarchyItem::select()
 void DataHierarchyItem::deselect()
 {
     setSelected(false);
-}
-
-hdps::DataHierarchyItem::IconList DataHierarchyItem::getIcons() const
-{
-    return _namedIcons;
-}
-
-void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
-{
-    _namedIcons << NamedIcon(name, icon);
-}
-
-void DataHierarchyItem::removeIcon(const QString& name)
-{
-    // Loop over all icons and remove them from the list if it matches the name
-    for (const auto& namedIcon : _namedIcons)
-        if (name == namedIcon.first)
-            _namedIcons.removeOne(namedIcon);
-}
-
-QIcon DataHierarchyItem::getIconByName(const QString& name) const
-{
-    // Loop over all icons and return it if it matches the name
-    for (const auto& namedIcon : _namedIcons)
-        if (name == namedIcon.first)
-            return namedIcon.second;
-
-    return QIcon();
 }
 
 QString DataHierarchyItem::getFullPathName() const
@@ -379,6 +354,21 @@ void DataHierarchyItem::setLocked(const bool& locked)
     emit lockedChanged(_locked);
 }
 
+bool DataHierarchyItem::getExpanded() const
+{
+    return _expanded;
+}
+
+void DataHierarchyItem::setExpanded(const bool& expanded)
+{
+    if (expanded == _expanded)
+        return;
+
+    _expanded = expanded;
+
+    emit expandedChanged(_expanded);
+}
+
 QString DataHierarchyItem::getTaskName() const
 {
     return _taskName;
@@ -535,6 +525,58 @@ void DataHierarchyItem::setTaskAborted()
 
     // Unlock the item
     setLocked(false);
+}
+
+DataHierarchyItem::IconList DataHierarchyItem::getIcons() const
+{
+    return _namedIcons;
+}
+
+void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
+{
+    _namedIcons << NamedIcon(name, icon);
+}
+
+void DataHierarchyItem::removeIcon(const QString& name)
+{
+    // Loop over all icons and remove them from the list if it matches the name
+    for (const auto& namedIcon : _namedIcons)
+        if (name == namedIcon.first)
+            _namedIcons.removeOne(namedIcon);
+}
+
+QIcon DataHierarchyItem::getIconByName(const QString& name) const
+{
+    // Loop over all icons and return it if it matches the name
+    for (const auto& namedIcon : _namedIcons)
+        if (name == namedIcon.first)
+            return namedIcon.second;
+
+    return QIcon();
+}
+
+void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (variantMap.contains("Locked"))
+        setLocked(variantMap["Locked"].toBool());
+
+    if (variantMap.contains("Expanded"))
+        setExpanded(variantMap["Expanded"].toBool());
+}
+
+QVariantMap DataHierarchyItem::toVariantMap() const
+{
+    QVariantMap variantMap, children;
+
+    for (auto child : getChildren())
+        children[child->getGuiName()] = child->toVariantMap();
+
+    return {
+        { "Locked", _locked },
+        { "Expanded", _locked },
+        { "Dataset", _dataset->toVariantMap() },
+        { "Children", children }
+    };
 }
 
 }

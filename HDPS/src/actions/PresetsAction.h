@@ -2,7 +2,6 @@
 
 #include "WidgetAction.h"
 #include "OptionAction.h"
-#include "TriggerAction.h"
 #include "LoadPresetAction.h"
 #include "SavePresetAction.h"
 
@@ -90,8 +89,6 @@ public: // Action getters
 
     LoadPresetAction& getLoadPresetAction() { return _loadPresetAction; }
     SavePresetAction& getSavePresetAction() { return _savePresetAction; }
-    TriggerAction& getLoadAction() { return _loadAction; }
-    TriggerAction& getSaveAction() { return _saveAction; }
 
 protected:
     WidgetAction*               _widgetAction;              /** Pointer to widget actions for the options */
@@ -99,8 +96,6 @@ protected:
     util::PresetsFilterModel    _presetsFilterModel;        /** Presets filter model */
     LoadPresetAction            _loadPresetAction;          /** Load preset action */
     SavePresetAction            _savePresetAction;          /** Save preset action */
-    TriggerAction               _loadAction;                /** */
-    TriggerAction               _saveAction;                /** */
     bool                        _ignoreResettableSignals;   /** Ignore (factory) resettable signals */
 };
 

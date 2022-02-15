@@ -98,6 +98,12 @@ public:
      */
     void setGroupIndex(const std::int32_t& groupIndex);
 
+    /**
+     * Get corresponding data hierarchy item
+     * @return Pointer to data hierarchy item
+     */
+    DataHierarchyItem* getDataHierarchyItem();
+
 protected:
 
     /**
@@ -112,20 +118,18 @@ public: // Analysis
      * Set analysis progress percentage
      * @param progressPercentage Progress percentage of the analysis
      */
-    void setProgressPercentage(const float& progressPercentage);
+    //void setProgressPercentage(const float& progressPercentage);
 
     /**
      * Set analysis progress section
      * @param progressSection Progress section of the analysis
      */
-    void setProgressSection(const QString& progressSection);
+    //void setProgressSection(const QString& progressSection);
 
 protected:
-    DataHierarchyModelItem*     _parent;                    /** Pointer to parent item */
-    PluginHierarchyItems        _children;                  /** Pointers to child items */
-    DataHierarchyItem*          _dataHierarchyItem;         /** Pointer to data hierarchy item*/
-    QString                     _progressSection;           /** Progress section of the analysis */
-    float                       _progressPercentage;        /** Progress percentage of the analysis */
+    DataHierarchyModelItem* _parent;                /** Pointer to parent item */
+    PluginHierarchyItems    _children;              /** Pointers to child items */
+    DataHierarchyItem*      _dataHierarchyItem;     /** Pointer to data hierarchy item*/
 
     /** Random number generator for pseudo-random group index colors */
     static QRandomGenerator rng;

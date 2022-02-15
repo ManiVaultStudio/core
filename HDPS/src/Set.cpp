@@ -39,17 +39,47 @@ std::int32_t DatasetImpl::getSelectionSize() const
 
 void DatasetImpl::lock()
 {
-    getDataHierarchyItem().setLocked(true);
+    setLocked(true);
 }
 
 void DatasetImpl::unlock()
 {
-    getDataHierarchyItem().setLocked(false);
+    setLocked(false);
 }
 
 bool DatasetImpl::isLocked() const
 {
     return getDataHierarchyItem().getLocked();
+}
+
+void DatasetImpl::setLocked(bool locked)
+{
+    getDataHierarchyItem().setLocked(locked);
+}
+
+void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (variantMap.contains("Name"))
+        setGuiName(variantMap["Name"].toString());
+
+    if (variantMap.contains("Derived")) {
+        _derived = variantMap["Derived"].toBool();
+
+        if (_derived) {
+            _sourceDataset = getParent();
+        }
+    }
+}
+
+QVariantMap DatasetImpl::toVariantMap() const
+{
+    return {
+        { "Name", getGuiName() },
+        { "DataType", getDataType().getTypeString() },
+        { "PluginKind", _rawData->getKind() },
+        { "Derived", isDerivedData() },
+        { "GroupIndex", getGroupIndex() }
+    };
 }
 
 std::int32_t DatasetImpl::getGroupIndex() const

@@ -3,6 +3,8 @@
 #include "PluginType.h"
 #include "Dataset.h"
 
+#include <actions/WidgetAction.h>
+
 #include <QString>
 #include <QSharedPointer>
 
@@ -14,6 +16,7 @@ namespace hdps
     class DatasetImpl;
     class DataType;
     class EventListener;
+    class DataManager;
     class DataHierarchyManager;
     class DataHierarchyItem;
 
@@ -23,8 +26,10 @@ namespace hdps
         class RawData;
     }
 
-class CoreInterface
+class CoreInterface : public hdps::gui::WidgetAction
 {
+public:
+    //CoreInterface() = delete;
 
 public: // Data access
 
@@ -207,15 +212,6 @@ public: // Data viewing
      * @param datasets Datasets to view
      */
     virtual const void viewDatasets(const QString& kind, const Datasets& datasets) = 0;
-
-public: // Data transformation
-
-    /**
-     * Transforms one or more datasets
-     * @param kind Type of transformation plugin
-     * @param datasets Datasets to transform
-     */
-    virtual const void transformDatasets(const QString& kind, const Datasets& datasets) = 0;
 
 public: // Plugin queries
 
