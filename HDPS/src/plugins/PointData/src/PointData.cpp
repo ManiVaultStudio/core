@@ -95,25 +95,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
-    const auto numberOfBlocks       = rawData["NumberOfBlocks"].toInt();
-    const auto blockSize            = rawData["BlockSize"].toInt();
-    const auto blocks               = rawData["Blocks"].toList();
-
-    // Read raw point data from blocks
-    const auto readRawData = [&rawData, blockSize, &blocks](const char* bytes) -> void {
-
-        // Go over all blocks in the blocks map and read them
-        for (const auto& block : blocks) {
-            const auto map          = block.toMap();
-            const auto data         = map["Data"].toString();
-            const auto offset       = map["Offset"].toInt();
-            const auto size         = map["Size"].toInt();
-            const auto blockData    = qUncompress(QByteArray::fromBase64(data.toUtf8()));
-
-            // Copy the block to the output bytes
-            memcpy((void*)&bytes[offset], blockData.data(), size);
-        }
-    };
 
     switch (elementTypeIndex)
     {
@@ -123,8 +104,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
             pointData.resize(numberOfElements);
 
-            readRawData((char*)pointData.data());
-
+            variantMapToRawData(rawData, (char*)pointData.data());
             setData(pointData, numberOfDimensions);
             break;
         }
@@ -135,7 +115,7 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
             pointData.resize(numberOfElements);
 
-            readRawData((char*)pointData.data());
+            variantMapToRawData(rawData, (char*)pointData.data());
 
             setData(pointData, numberOfDimensions);
             break;
@@ -176,27 +156,27 @@ QVariantMap PointData::toVariantMap() const
     switch (typeSpecifier)
     {
         case ElementTypeSpecifier::float32:
-            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<float>().data(), numberOfElements * sizeof(float));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<float>().data(), numberOfElements * sizeof(float));
             break;
 
         case ElementTypeSpecifier::bfloat16:
-            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t));
             break;
 
         case ElementTypeSpecifier::int16:
-            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t));
             break;
 
         case ElementTypeSpecifier::uint16:
-            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t));
             break;
 
         case ElementTypeSpecifier::int8:
-            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t));
             break;
 
         case ElementTypeSpecifier::uint8:
-            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t));
             break;
 
         default:
