@@ -264,6 +264,7 @@ set( UTIL_HEADERS
     src/util/Preset.h
     src/util/PresetsModel.h
     src/util/PresetsFilterModel.h
+    src/util/Serialization.h
 )
 
 set( UTIL_SOURCES
@@ -287,6 +288,7 @@ set( UTIL_SOURCES
     src/util/Preset.cpp
     src/util/PresetsModel.cpp
     src/util/PresetsFilterModel.cpp
+    src/util/Serialization.cpp
 )
 
 set( PLUGIN_HEADERS

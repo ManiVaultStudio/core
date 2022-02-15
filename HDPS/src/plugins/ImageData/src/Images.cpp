@@ -545,7 +545,7 @@ void Images::computeMaskData()
         // Compute pixel coordinate from mask index
         const auto pixelCoordinate = QPoint(maskIndex % getImageSize().width(), static_cast<std::int32_t>(floorf(maskIndex / static_cast<float>(getImageSize().width()))));
 
-        // Add pixel pixel coordinate and possibly inflate the visible rectangle
+        // Add pixel coordinate and possibly inflate the visible rectangle
         _visibleRectangle.setLeft(std::min(_visibleRectangle.left(), pixelCoordinate.x()));
         _visibleRectangle.setRight(std::max(_visibleRectangle.right(), pixelCoordinate.x()));
         _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinate.y()));
@@ -569,20 +569,23 @@ void Images::fromVariantMap(const QVariantMap& variantMap)
 
     auto& imageData = getRawData<ImageData>();
 
-    if (variantMap.contains("Type"))
-        getRawData<ImageData>().setType(static_cast<ImageData::Type>(variantMap["Type"].toInt()));
+    if (variantMap.contains("TypeIndex"))
+        getRawData<ImageData>().setType(static_cast<ImageData::Type>(variantMap["TypeIndex"].toInt()));
 
     if (variantMap.contains("NumberOfImages"))
         getRawData<ImageData>().setNumberImages(variantMap["NumberOfImages"].toInt());
 
-    if (variantMap.contains("ImageSize"))
-        getRawData<ImageData>().setImageSize(variantMap["ImageSize"].toSize());
+    if (variantMap.contains("ImageSize")) {
+        const auto imageSize = variantMap["ImageSize"].toMap();
+
+        setImageSize(QSize(imageSize["Width"].toInt(), imageSize["Height"].toInt()));
+    }
 
     if (variantMap.contains("NumberOfComponentsPerPixel"))
-        getRawData<ImageData>().setNumberOfComponentsPerPixel(variantMap["NumberOfComponentsPerPixel"].toInt());
+        setNumberOfComponentsPerPixel(variantMap["NumberOfComponentsPerPixel"].toInt());
 
     if (variantMap.contains("ImageFilePaths"))
-        getRawData<ImageData>().setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
+        setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
 
     _core->notifyDataChanged(this);
 }
@@ -591,10 +594,10 @@ QVariantMap Images::toVariantMap() const
 {
     auto variantMap = DatasetImpl::toVariantMap();
 
-    variantMap["Type"]                          = static_cast<std::int32_t>(getType());
+    variantMap["TypeIndex"]                     = static_cast<std::int32_t>(getType());
     variantMap["TypeName"]                      = ImageData::getTypeName(getType());
     variantMap["NumberOfImages"]                = getNumberOfImages();
-    variantMap["ImageSize"]                     = getImageSize();
+    variantMap["ImageSize"]                     = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
     variantMap["NumberOfComponentsPerPixel"]    = getNumberOfComponentsPerPixel();
     variantMap["ImageFilePaths"]                = getImageFilePaths();
 

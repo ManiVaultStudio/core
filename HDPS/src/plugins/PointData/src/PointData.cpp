@@ -19,11 +19,15 @@
 #include "graphics/Vector2f.h"
 #include "Application.h"
 
+#include <util/Serialization.h>
+
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
 // =============================================================================
 // PointData
 // =============================================================================
+
+using namespace hdps::util;
 
 PointData::~PointData(void)
 {
@@ -88,34 +92,70 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto data                 = variantMap["Data"].toMap();
     const auto numberOfPoints       = variantMap["NumberOfPoints"].toInt();
     const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toInt();
+    const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
-    const auto rawDataString        = data["Raw"].toString();
+    const auto rawData              = data["Raw"].toMap();
+    const auto numberOfBlocks       = rawData["NumberOfBlocks"].toInt();
+    const auto blockSize            = rawData["BlockSize"].toInt();
+    const auto blocks               = rawData["Blocks"].toList();
+
+    // Read raw point data from blocks
+    const auto readRawData = [&rawData, blockSize, &blocks](const char* bytes) -> void {
+
+        // Go over all blocks in the blocks map and read them
+        for (const auto& block : blocks) {
+            const auto map          = block.toMap();
+            const auto data         = map["Data"].toString();
+            const auto offset       = map["Offset"].toInt();
+            const auto size         = map["Size"].toInt();
+            const auto blockData    = qUncompress(QByteArray::fromBase64(data.toUtf8()));
+
+            // Copy the block to the output bytes
+            memcpy((void*)&bytes[offset], blockData.data(), size);
+        }
+    };
 
     switch (elementTypeIndex)
     {
         case PointData::ElementTypeSpecifier::float32:
-            setData(reinterpret_cast<const float*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+        {
+            std::vector<float> pointData;
+
+            pointData.resize(numberOfElements);
+
+            readRawData((char*)pointData.data());
+
+            setData(pointData, numberOfDimensions);
             break;
+        }
 
         case PointData::ElementTypeSpecifier::bfloat16:
-            setData(reinterpret_cast<const biovault::bfloat16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
+        {
+            std::vector<biovault::bfloat16_t> pointData;
 
-        case PointData::ElementTypeSpecifier::int16:
-            setData(reinterpret_cast<const std::int16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
+            pointData.resize(numberOfElements);
 
-        case PointData::ElementTypeSpecifier::uint16:
-            setData(reinterpret_cast<const std::uint16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
+            readRawData((char*)pointData.data());
 
-        case PointData::ElementTypeSpecifier::int8:
-            setData(reinterpret_cast<const std::int8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+            setData(pointData, numberOfDimensions);
             break;
+        }
 
-        case PointData::ElementTypeSpecifier::uint8:
-            setData(reinterpret_cast<const std::uint8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-            break;
+        //case PointData::ElementTypeSpecifier::int16:
+        //    setData(reinterpret_cast<const std::int16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+        //    break;
+
+        //case PointData::ElementTypeSpecifier::uint16:
+        //    setData(reinterpret_cast<const std::uint16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+        //    break;
+
+        //case PointData::ElementTypeSpecifier::int8:
+        //    setData(reinterpret_cast<const std::int8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+        //    break;
+
+        //case PointData::ElementTypeSpecifier::uint8:
+        //    setData(reinterpret_cast<const std::uint8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
+        //    break;
 
         default:
             break;
@@ -127,34 +167,36 @@ QVariantMap PointData::toVariantMap() const
     const auto typeSpecifier        = _vectorHolder.getElementTypeSpecifier();
     const auto typeSpecifierName    = _vectorHolder.getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
     const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
-    const auto numberOfElements     = getNumPoints() * getNumDimensions();
+    const auto numberOfElements     = static_cast<std::uint64_t>(getNumPoints() * getNumDimensions());
+    const auto maxBlockSize         = 1000000ULL;
 
-    QString rawData;
+    // Variant map which will hold the raw data
+    QVariantMap rawData;
 
     switch (typeSpecifier)
     {
         case ElementTypeSpecifier::float32:
-            rawData = QString(QByteArray::fromRawData((char*)_vectorHolder.getConstVector<float>().data(), numberOfElements * sizeof(float)).toBase64());
+            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<float>().data(), numberOfElements * sizeof(float));
             break;
 
         case ElementTypeSpecifier::bfloat16:
-            rawData = QString(QByteArray::fromRawData((char*)_vectorHolder.getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t)).toBase64());
+            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t));
             break;
 
         case ElementTypeSpecifier::int16:
-            rawData = QString(QByteArray::fromRawData((char*)_vectorHolder.getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t)).toBase64());
+            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t));
             break;
 
         case ElementTypeSpecifier::uint16:
-            rawData = QString(QByteArray::fromRawData((char*)_vectorHolder.getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t)).toBase64());
+            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t));
             break;
 
         case ElementTypeSpecifier::int8:
-            rawData = QString(QByteArray::fromRawData((char*)_vectorHolder.getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t)).toBase64());
+            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t));
             break;
 
         case ElementTypeSpecifier::uint8:
-            rawData = QString(QByteArray::fromRawData((char*)_vectorHolder.getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t)).toBase64());
+            rawData = rawDataToVariant((char*)_vectorHolder.getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t));
             break;
 
         default:

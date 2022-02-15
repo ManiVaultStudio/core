@@ -101,8 +101,16 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         // Resize the cluster indices
         cluster.getIndices().resize(clusterVariantMap["NumberOfIndices"].toInt());
 
-        // Assign indices
         memcpy(cluster.getIndices().data(), QByteArray::fromBase64(clusterVariantMap["IndicesRaw"].toString().toUtf8()).data(), cluster.getIndices().size() * sizeof(std::uint32_t));
+
+        // Get indices as base64 encoded string and uncompress
+        //const auto compressedIndices    = clusterVariantMap["IndicesRaw"].toString().toUtf8();
+        //const auto indicesData          = qUncompress(QByteArray::fromBase64(compressedIndices)).data();
+
+        // Assign indices
+        //memcpy(cluster.getIndices().data(), indicesData, cluster.getIndices().size() * sizeof(std::uint32_t));
+
+        qDebug() << cluster.getIndices();
     }
 }
 
@@ -115,6 +123,10 @@ QVariantMap ClusterData::toVariantMap() const
 
         // Get reference to the cluster indices
         auto& clusterIndices = cluster.getIndices();
+
+        // Compress indices and convert to base64 encoded string
+        //const auto compressedIndices    = qCompress(QByteArray::fromRawData((char*)clusterIndices.data(), clusterIndices.size() * sizeof(std::uint32_t)));
+        //const auto indicesRaw           = QString(compressedIndices.toBase64());
 
         // Get indices as base64 encoded string
         const auto indicesRaw = QString(QByteArray::fromRawData((char*)clusterIndices.data(), clusterIndices.size() * sizeof(std::uint32_t)).toBase64());
