@@ -1,5 +1,7 @@
 #include "Serialization.h"
 
+#include <exception>
+
 namespace hdps {
 
 namespace util {
@@ -40,21 +42,29 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfB
         offset += maxBlockSize;
     }
 
-    rawData["NumberOfBlocks"] = numberOfBlocks;
-    rawData["BlockSize"] = maxBlockSize;
-    rawData["Blocks"] = blocks;
+    rawData["NumberOfBlocks"]   = numberOfBlocks;
+    rawData["BlockSize"]        = maxBlockSize;
+    rawData["Blocks"]           = blocks;
 
     return rawData;
 }
 
 void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char* bytes)
 {
+    variantMapMustContain(variantMap, "BlockSize");
+    variantMapMustContain(variantMap, "Blocks");
+
     const auto blockSize    = variantMap["BlockSize"].toInt();
     const auto blocks       = variantMap["Blocks"].toList();
 
     // Go over all blocks in the blocks map and copy the raw data to the output bytes
     for (const auto& block : blocks) {
-        const auto map          = block.toMap();
+        const auto map = block.toMap();
+
+        variantMapMustContain(map, "Data");
+        variantMapMustContain(map, "Offset");
+        variantMapMustContain(map, "Size");
+
         const auto data         = map["Data"].toString();
         const auto offset       = map["Offset"].toInt();
         const auto size         = map["Size"].toInt();
@@ -63,6 +73,12 @@ void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char
         // Copy the block to the output bytes
         memcpy((void*)&bytes[offset], blockData.data(), size);
     }
+}
+
+void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
+{
+    if (!variantMap.contains(key))
+        throw std::runtime_error(QString("%1 not found in map").arg(key).toLatin1());
 }
 
 }

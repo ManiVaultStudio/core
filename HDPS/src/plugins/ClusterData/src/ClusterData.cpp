@@ -79,32 +79,35 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
 
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
-    const auto data         = variantMap["Data"].toMap();
+    variantMapMustContain(variantMap, "Data");
+
+    const auto data = variantMap["Data"].toMap();
+
+    variantMapMustContain(data, "Clusters");
+
     const auto clustersList = data["Clusters"].toList();
 
-    // Resize clusters
     _clusters.resize(clustersList.count());
 
-    // Go over all clusters and assign the cluster to the cluster data
     for (const auto& clusterVariant : clustersList) {
 
-        // Get the cluster as variant map and the cluster index
-        const auto clusterVariantMap    = clusterVariant.toMap();
-        const auto clusterIndex         = clustersList.indexOf(clusterVariantMap);
+        const auto clusterMap       = clusterVariant.toMap();
+        const auto clusterIndex     = clustersList.indexOf(clusterMap);
 
-        // Get reference to current cluster
+        variantMapMustContain(clusterMap, "NumberOfIndices");
+        variantMapMustContain(clusterMap, "IndicesRaw");
+
         auto& cluster = _clusters[clusterIndex];
 
-        // Set basic cluster parameters
-        cluster.setName(clusterVariantMap["Name"].toString());
-        cluster.setId(clusterVariantMap["ID"].toString());
-        cluster.setColor(clusterVariantMap["Color"].toString());
+        cluster.setName(clusterMap["Name"].toString());
+        cluster.setId(clusterMap["ID"].toString());
+        cluster.setColor(clusterMap["Color"].toString());
 
-        // Resize the cluster indices
-        cluster.getIndices().resize(clusterVariantMap["NumberOfIndices"].toInt());
+        const auto& indicesMap = clusterMap["Indices"].toMap();
 
-        // Read indices from indices raw variant map
-        populateDataBufferFromVariantMap(clusterVariantMap["IndicesRaw"].toMap(), (char*)cluster.getIndices().data());
+        cluster.getIndices().resize(indicesMap["Count"].toInt());
+
+        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)cluster.getIndices().data());
     }
 }
 
@@ -112,22 +115,18 @@ QVariantMap ClusterData::toVariantMap() const
 {
     QVariantList clusters;
 
-    // Go over all clusters and create variant map for each of them
     for (const auto& cluster : _clusters) {
 
-        // Get reference to the cluster indices
-        auto& clusterIndices = cluster.getIndices();
+        QVariantMap indices;
 
-        // Convert indices to raw data
-        QVariantMap indicesRaw = rawDataToVariantMap((char*)clusterIndices.data(), clusterIndices.size() * sizeof(std::uint32_t));
+        indices["Count"]    = indices.size();
+        indices["Raw"]      = rawDataToVariantMap((char*)cluster.getIndices().data(), cluster.getIndices().size() * sizeof(std::uint32_t));
 
-        // Add cluster variant map to the list
         clusters.append(QVariantMap({
             { "Name", cluster.getName() },
             { "ID", cluster.getId() },
             { "Color", cluster.getColor() },
-            { "IndicesRaw", indicesRaw },
-            { "NumberOfIndices", clusterIndices.size() }
+            { "Indices", indices },
         }));
     }
 

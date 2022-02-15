@@ -23,5 +23,12 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfB
  */
 void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char* bytes);
 
+/**
+ * Raises an exception if an item with key is not found in a variant map
+ * @param variantMap Variant map that should contain the key
+ * @param key Item name
+ */
+void variantMapMustContain(const QVariantMap& variantMap, const QString& key);
+
 }
 }

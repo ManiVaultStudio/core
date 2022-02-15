@@ -116,7 +116,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
             pointData.resize(numberOfElements);
 
             populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
-
             setData(pointData, numberOfDimensions);
             break;
         }
@@ -624,15 +623,22 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    getRawData<PointData>().fromVariantMap(variantMap);
+    variantMapMustContain(variantMap, "Derived");
+    variantMapMustContain(variantMap, "Full");
 
-    if (!variantMap["Full"].toBool()) {
+    setAll(variantMap["Full"].toBool());
 
-        // Allocate indices
-        indices.resize(variantMap["Indices"].toMap()["Count"].toInt());
+    if (isFull()) {
+        getRawData<PointData>().fromVariantMap(variantMap);
+    }
+    else {
+        variantMapMustContain(variantMap, "Indices");
 
-        // And assign them
-        memcpy(indices.data(), QByteArray::fromBase64(variantMap["Indices"].toMap()["Raw"].toString().toUtf8()).data(), indices.size() * sizeof(std::uint32_t));
+        const auto& indicesMap = variantMap["Indices"].toMap();
+
+        indices.resize(indicesMap["Count"].toInt());
+
+        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
 
     std::vector<QString> dimensionNames;
@@ -662,8 +668,8 @@ QVariantMap Points::toVariantMap() const
 
     QVariantMap indices;
 
-    indices["Count"]    = indices.size();
-    indices["Raw"]      = QString(QByteArray::fromRawData((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t)).toBase64());
+    indices["Count"]    = this->indices.size();
+    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t));
 
     variantMap["Data"]                  = getRawData<PointData>().toVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
