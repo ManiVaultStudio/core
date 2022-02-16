@@ -94,9 +94,6 @@ void ClusterData::fromVariantMap(const QVariantMap& variantMap)
         const auto clusterMap       = clusterVariant.toMap();
         const auto clusterIndex     = clustersList.indexOf(clusterMap);
 
-        variantMapMustContain(clusterMap, "NumberOfIndices");
-        variantMapMustContain(clusterMap, "IndicesRaw");
-
         auto& cluster = _clusters[clusterIndex];
 
         cluster.setName(clusterMap["Name"].toString());
@@ -117,16 +114,16 @@ QVariantMap ClusterData::toVariantMap() const
 
     for (const auto& cluster : _clusters) {
 
-        QVariantMap indices;
+        QVariantMap indicesMap;
 
-        indices["Count"]    = indices.size();
-        indices["Raw"]      = rawDataToVariantMap((char*)cluster.getIndices().data(), cluster.getIndices().size() * sizeof(std::uint32_t));
+        indicesMap["Count"] = cluster.getIndices().size();
+        indicesMap["Raw"]   = rawDataToVariantMap((char*)cluster.getIndices().data(), cluster.getIndices().size() * sizeof(std::uint32_t));
 
         clusters.append(QVariantMap({
             { "Name", cluster.getName() },
             { "ID", cluster.getId() },
             { "Color", cluster.getColor() },
-            { "Indices", indices },
+            { "Indices", indicesMap }
         }));
     }
 
