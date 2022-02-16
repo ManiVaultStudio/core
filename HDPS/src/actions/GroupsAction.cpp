@@ -19,7 +19,6 @@ GroupsAction::GroupsAction(QObject* parent, WidgetAction* sourceWidgetAction /*=
     _presetsAction(this)
 {
     setDefaultWidgetFlags(Default);
-    setSerializable(false);
 
     if (sourceWidgetAction)
         setSourceWidgetAction(sourceWidgetAction);
@@ -65,9 +64,6 @@ void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= tru
     // Add group action
     _groupActions << groupAction;
 
-    // Route settings through this groups action
-    groupAction->setSerializationProxyParent(this);
-
     // Set group action visibility
     _visibility[groupAction] = visible;
 
@@ -96,9 +92,6 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
 
     if (!_groupActions.contains(groupAction))
         return;
-
-    // Do not route settings through this groups action anymore
-    groupAction->setSerializationProxyParent(this);
 
     // Remove the group action
     _groupActions.removeOne(groupAction);
@@ -321,9 +314,6 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     createToolbar(widgetFlags);
     createTreeWidget(widgetFlags);
 
-    // Filtered actions group action should not be serialized
-    _filteredActionsAction.setSerializable(false);
-
     // Add filtering action to the groups action and hide by default
     _groupsAction->addGroupAction(&_filteredActionsAction, false);
 
@@ -334,9 +324,6 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
 
 void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
 {
-    // Filtered actions may not be serialized
-    _filteredActionsAction.setSerializable(false);
-
     // Filter action is in search mode
     _filterAction.setSearchMode(true);
     _filterAction.setPlaceHolderString("Filter properties by name...");

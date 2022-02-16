@@ -21,7 +21,6 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
     _sortIndex(-1),
-    _serializable(true),
     _isSerializing()
 {
 }
@@ -77,47 +76,6 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;
-}
-
-bool WidgetAction::isSerializable() const
-{
-    if (_serializable)
-        return true;
-
-    // Check whether any of the children is serializable
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (!childWidgetAction)
-            continue;
-
-        if (childWidgetAction->isSerializable())
-            return true;
-    }
-
-    return false;
-}
-
-void WidgetAction::setSerializable(const bool& serializable, bool recursive /*= true*/)
-{
-    // No need in update the same prefix
-    if (serializable == _serializable)
-        return;
-
-    _serializable = serializable;
-
-    if (!recursive)
-        return;
-
-    // Set children serializable
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (!childWidgetAction)
-            continue;
-
-        childWidgetAction->setSerializable(serializable);
-    }
 }
 
 bool WidgetAction::hasSavedDefault() const
@@ -441,10 +399,6 @@ void WidgetAction::fromVariantMap(WidgetAction* widgetAction, const QVariantMap&
         if (!childWidgetAction)
             continue;
 
-        // Only go deeper if the child allows for serialization
-        if (!childWidgetAction->isSerializable())
-            continue;
-
         childWidgetAction->fromVariantMap(variantMap[childWidgetAction->getSerializationName()].toMap());
     }
 }
@@ -455,30 +409,7 @@ QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
     qDebug().noquote() << QString("To variant map: %1").arg(widgetAction->text());
 #endif
 
-    QVariantMap variantMap = widgetAction->toVariantMap();
-
-    /*
-    // Loop over all child objects and serialize each
-    for (auto child : widgetAction->children()) {
-
-        // Cast to widget action
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (!childWidgetAction)
-            continue;
-
-        // Only go deeper if the child allows for serialization
-        if (!childWidgetAction->isSerializable() || childWidgetAction->getSerializationName().isEmpty())
-            continue;
-
-        //Q_ASSERT(!variantMap.contains(childWidgetAction->getSerializationName()));
-
-        // Serialize child
-        variantMap[childWidgetAction->getSerializationName()] = toVariantMap(childWidgetAction);
-    }
-    */
-
-    return variantMap;
+    return widgetAction->toVariantMap();
 }
 
 void WidgetAction::fromJsonDocument(const QJsonDocument& jsonDocument) const
@@ -637,21 +568,6 @@ void WidgetAction::setIsSerializing(bool isSerializing)
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     return new QWidget();
-}
-
-WidgetAction* WidgetAction::getSerializationProxyParent()
-{
-    return _serializationProxyParent;
-}
-
-bool WidgetAction::hasSerializationProxyParent() const
-{
-    return _serializationProxyParent != nullptr;
-}
-
-void WidgetAction::setSerializationProxyParent(WidgetAction* serializationProxyParent)
-{
-    _serializationProxyParent = serializationProxyParent;
 }
 
 }

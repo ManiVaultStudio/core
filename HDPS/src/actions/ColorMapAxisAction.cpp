@@ -20,10 +20,6 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsA
     _mirrorAction(this, "Mirror")
 {
     setText(title);
-    setSerializable(true);
-
-    _rangeAction.setSerializable(true);
-    _mirrorAction.setSerializable(true);
 
     _rangeAction.setToolTip("Range of the color map");
     _resetAction.setToolTip("Reset the color map");

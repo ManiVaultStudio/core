@@ -153,10 +153,10 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     _dataManager->addSet(fullSet);
 
     _dataManager->addSelection(rawDataName, selection);
-    
+
     // Add the dataset to the hierarchy manager and select the dataset
     _dataHierarchyManager->addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
-    _dataHierarchyManager->selectItem(fullSet);
+    //_dataHierarchyManager->selectItem(fullSet);
     
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();

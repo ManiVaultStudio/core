@@ -21,7 +21,6 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, Points& points) :
 {
     setText("Info");
     setEventCore(_core);
-    setSerializable(false);
 
     _numberOfPointsAction.setEnabled(false);
     _numberOfDimensionsAction.setEnabled(false);

@@ -17,7 +17,6 @@ ClustersAction::ClustersAction(QObject* parent, Dataset<Clusters> clustersDatase
     setText("Clusters");
     setDefaultWidgetFlags(WidgetFlag::Default);
     setClustersDataset(clustersDataset);
-    setSerializable(false);
 }
 
 QVector<Cluster>* ClustersAction::getClusters()

@@ -4,6 +4,16 @@
 namespace hdps
 {
 
+void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
+{
+    _rawDataName = fullDataset->_rawDataName;
+
+    if (!_rawDataName.isEmpty())
+        _rawData = &_core->requestRawData(getRawDataName());
+
+    setAll(false);
+}
+
 const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 {
     return const_cast<DatasetImpl*>(this)->getDataHierarchyItem();

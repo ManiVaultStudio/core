@@ -14,7 +14,6 @@ InfoAction::InfoAction(QObject* parent, Clusters& clusters) :
 {
     setText("Clusters");
     setEventCore(Application::core());
-    setSerializable(false);
 
     _numberOfClustersAction.setEnabled(false);
     _numberOfClustersAction.setToolTip("The number of clusters");

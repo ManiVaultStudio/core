@@ -21,7 +21,6 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
-    setSerializable(true);
 
     connect(&_horizontalAxisAction, &ColorMapAxisAction::resettableChanged, this, &ColorMapSettingsAction::notifyResettable);
     connect(&_verticalAxisAction, &ColorMapAxisAction::resettableChanged, this, &ColorMapSettingsAction::notifyResettable);

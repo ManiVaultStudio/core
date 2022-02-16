@@ -167,19 +167,6 @@ public: // Serialization
     QString getSerializationName() const;
 
     /**
-     * Get whether the widget action may be serialized
-     * @return Boolean indicating whether the widget action is serializable
-     */
-    virtual bool isSerializable() const;
-
-    /**
-     * Set whether the widget action is serializable
-     * @param serializable whether the widget action is serializable
-     * @param recursive Set serializable recursively
-     */
-    virtual void setSerializable(const bool& serializable, bool recursive = true);
-
-    /**
      * Get whether serialization is taking place
      * @return Boolean indicating whether serialization is taking place
      */
@@ -252,26 +239,6 @@ protected:
      */
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
-public: // Serialization proxy
-
-    /**
-     * Get serialization proxy parent
-     * @return Pointer to serialization proxy parent
-     */
-    WidgetAction* getSerializationProxyParent();
-
-    /**
-     * Get whether a serialization proxy parent is specified
-     * @return Whether a serialization proxy parent is specified
-     */
-    bool hasSerializationProxyParent() const;
-
-    /**
-     * Set serialization proxy parent
-     * @param Pointer to serialization proxy parent
-     */
-    void setSerializationProxyParent(WidgetAction* serializationProxyParent);
-
 signals:
 
     /**
@@ -293,11 +260,9 @@ signals:
     void isSerializingChanged(bool isSerializing);
 
 protected:
-    std::int32_t    _defaultWidgetFlags;            /** Default widget flags */
-    std::int32_t    _sortIndex;                     /** Sort index (used in the group action to sort actions) */
-    bool            _serializable;                  /** Whether the widget action can be serialized/de-serialized */
-    bool            _isSerializing;                 /** Whether the widget action is currently serializing */
-    WidgetAction*   _serializationProxyParent;      /** If specified, uses this proxy parent widget in stead of the QObject parent for de-serialization */
+    std::int32_t    _defaultWidgetFlags;    /** Default widget flags */
+    std::int32_t    _sortIndex;             /** Sort index (used in the group action to sort actions) */
+    bool            _isSerializing;         /** Whether the widget action is currently serializing */
 };
 
 /** List of widget actions */

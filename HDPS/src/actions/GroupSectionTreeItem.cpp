@@ -51,9 +51,7 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _groupWidget(nullptr),
     _overlayWidget(this),
     _overlayLayout(),
-    _iconLabel(),
-    _settingsLabel(),
-    _widgetActionOptions(groupAction, &_settingsLabel)
+    _iconLabel()
 {
     setFixedHeight(20);
 
@@ -67,20 +65,15 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
     _overlayLayout.addWidget(&_iconLabel);
     _overlayLayout.addStretch(1);
 
-    if (_widgetActionGroup->isSerializable())
-        _overlayLayout.addWidget(&_settingsLabel);
-
     _iconLabel.setAlignment(Qt::AlignCenter);
     _iconLabel.setFont(fontAwesome.getFont(7));
-    _settingsLabel.setFont(fontAwesome.getFont(7));
 
     // Install event filter to synchronize overlay widget size with push button size
     installEventFilter(this);
 
     // Toggle the section expansion when the section push button is clicked
     connect(this, &QPushButton::clicked, this, [this]() {
-        if (!_settingsLabel.rect().contains(QCursor::pos()))
-            _widgetActionGroup->toggle();
+        _widgetActionGroup->toggle();
     });
 
     // Update the state of the push button when the group action changes
@@ -92,7 +85,6 @@ GroupSectionTreeItem::PushButton::PushButton(QTreeWidgetItem* treeWidgetItem, Gr
 
         // Assign the icon characters
         _iconLabel.setText(fontAwesome.getIconCharacter(_widgetActionGroup->isExpanded() ? "angle-down" : "angle-right"));
-        _settingsLabel.setText(fontAwesome.getIconCharacter("ellipsis-h"));
     };
 
     const auto updateText = [this, groupAction]() -> void {

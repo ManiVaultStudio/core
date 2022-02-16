@@ -28,7 +28,6 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
     _directoryAction.setCompleter(&_completer);
 
     // Configure pick action
-    _pickAction.setSerializable(false);
     _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
     _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder"));
     _pickAction.setToolTip("Click to choose a directory");

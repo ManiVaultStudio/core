@@ -20,7 +20,6 @@ PresetsAction::PresetsAction(QObject* parent) :
 {
     setText("Preset");
     setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-    setSerializable(false);
 
     _presetsFilterModel.setSourceModel(&_presetsModel);
 }

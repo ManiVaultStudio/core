@@ -143,14 +143,13 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
 QVariantMap PointData::toVariantMap() const
 {
+    QVariantMap rawData;
+
     const auto typeSpecifier        = _vectorHolder.getElementTypeSpecifier();
     const auto typeSpecifierName    = _vectorHolder.getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
     const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
     const auto numberOfElements     = static_cast<std::uint64_t>(getNumPoints() * getNumDimensions());
     const auto maxBlockSize         = 1000000ULL;
-
-    // Variant map which will hold the raw data
-    QVariantMap rawData;
 
     switch (typeSpecifier)
     {
@@ -625,13 +624,18 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "Full");
+    variantMapMustContain(variantMap, "NumberOfDimensions");
 
     setAll(variantMap["Full"].toBool());
 
-    if (isFull()) {
+    if (isFull())
         getRawData<PointData>().fromVariantMap(variantMap);
-    }
-    else {
+
+    if (!isFull()) {
+        auto parent = getParent();
+
+        makeSubsetOf(getParent());
+
         variantMapMustContain(variantMap, "Indices");
 
         const auto& indicesMap = variantMap["Indices"].toMap();
@@ -671,7 +675,7 @@ QVariantMap Points::toVariantMap() const
     indices["Count"]    = this->indices.size();
     indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t));
 
-    variantMap["Data"]                  = getRawData<PointData>().toVariantMap();
+    variantMap["Data"]                  = isFull() ? getRawData<PointData>().toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();
     variantMap["Full"]                  = isFull();
     variantMap["Indices"]               = indices;

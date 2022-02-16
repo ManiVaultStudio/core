@@ -192,6 +192,11 @@ public:
     /** Get icon for the dataset */
     virtual QIcon getIcon() const = 0;
 
+    /**
+     * Makes this set a subset of a full dataset
+     * @param fullDataset Smart pointer to full dataset
+     */
+    void makeSubsetOf(Dataset<DatasetImpl> fullDataset);
 
 public: // Hierarchy
 
@@ -206,7 +211,7 @@ public: // Hierarchy
 
     /** Get parent dataset (if any) */
     template<typename DatasetType>
-    Dataset<DatasetImpl> getParent() const {
+    Dataset<DatasetType> getParent() const {
         return Dataset<DatasetType>(getParent());
     }
 
@@ -428,6 +433,7 @@ public: // Operators
     {
         _core           = other._core;
         _guiName        = other._guiName;
+        _rawData        = other._rawData;
         _rawDataName    = other._rawDataName;
         _all            = other._all;
         _derived        = other._derived;

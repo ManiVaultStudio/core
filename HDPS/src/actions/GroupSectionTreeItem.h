@@ -1,7 +1,5 @@
 #pragma once
 
-#include "WidgetActionOptions.h"
-
 #include <QTreeWidget>
 #include <QPushButton>
 #include <QLabel>
@@ -58,8 +56,6 @@ public:
         QWidget                 _overlayWidget;             /** Overlay widget for buttons etc. */
         QHBoxLayout             _overlayLayout;             /** Overlay layout */
         QLabel                  _iconLabel;                 /** Left-aligned icon label */
-        QLabel                  _settingsLabel;             /** Right-aligned settings label */
-        WidgetActionOptions     _widgetActionOptions;       /** Widget action options */
     };
 
 public:

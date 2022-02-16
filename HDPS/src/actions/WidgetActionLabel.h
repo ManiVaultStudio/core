@@ -1,7 +1,6 @@
 #pragma once
 
 #include "actions/TriggerAction.h"
-#include "actions/WidgetActionOptions.h"
 
 #include <QWidget>
 #include <QLabel>
@@ -31,9 +30,8 @@ public:
     explicit WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent = nullptr, Qt::WindowFlags windowFlags = Qt::WindowFlags());
 
 protected:
-    WidgetAction*           _widgetAction;      /** Pointer to widget action */
-    QLabel                  _label;             /** Label */
-    WidgetActionOptions     _options;           /** Widget action options */
+    WidgetAction*   _widgetAction;      /** Pointer to widget action */
+    QLabel          _label;             /** Label */
 };
 
 }

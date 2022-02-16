@@ -12,8 +12,7 @@ namespace gui {
 WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
     QWidget(parent, windowFlags),
     _widgetAction(widgetAction),
-    _label(),
-    _options(widgetAction, &_label)
+    _label()
 {
     auto layout = new QVBoxLayout();
 

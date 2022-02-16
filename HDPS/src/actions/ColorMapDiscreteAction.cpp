@@ -18,7 +18,6 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
     setText("Discrete");
     setCheckable(true);
 
-    _numberOfStepsAction.setSerializable(true);
     _numberOfStepsAction.setToolTip("Number of discrete steps");
 
     connect(this, &ColorMapDiscreteAction::toggled, this, &ColorMapSettingsAction::notifyResettable);
