@@ -17,8 +17,6 @@ namespace hdps {
 
 namespace gui {
 
-QString WidgetAction::serializationTemporaryDirectory = "";
-
 WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
@@ -434,38 +432,12 @@ void WidgetAction::fromJsonFile(const QString& filePath /*= ""*/)
 {
     try
     {
-        // Create file info to check if the supplied file path actually exists
-        QFileInfo jsonFileInfo(filePath);
-
-        // JSON file path for loading
-        QString jsonFilePath = filePath;
-
-        // Request user to select a JSON file if the supplied file path is not valid
-        if (!jsonFileInfo.exists()) {
-
-            // Supplied file path is not valid so create a file dialog for opening a JSON file
-            QFileDialog fileDialog;
-
-            // Configure file dialog
-            fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-            fileDialog.setFileMode(QFileDialog::ExistingFile);
-            fileDialog.setNameFilters({ "HDPS preset files (*json)" });
-            fileDialog.setDefaultSuffix(".json");
-
-            // Loading failed when the file dialog is canceled
-            if (fileDialog.exec() == 0)
-                throw std::runtime_error("File selection was canceled");
-
-            // Only load if we have one file
-            if (fileDialog.selectedFiles().count() != 1)
-                throw std::runtime_error("Only one file may be selected");
-
-            // Establish the JSON file path that will be loaded
-            jsonFilePath = fileDialog.selectedFiles().first();
-        }
+        // Except if the supplied file path is not found
+        if (!QFileInfo(filePath).exists())
+            throw std::runtime_error("File does not exist");
 
         // Create the preset file
-        QFile jsonPresetFile(jsonFilePath);
+        QFile jsonPresetFile(filePath);
 
         // And load the file
         if (!jsonPresetFile.open(QIODevice::ReadOnly))
@@ -500,51 +472,12 @@ void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
 {
     try
     {
-        // Create file info to check if the supplied file path actually exists
-        QFileInfo jsonFileInfo(filePath);
+        // Create the JSON file
+        QFile jsonFile(filePath);
 
-        // JSON file path for saving
-        QString jsonFilePath = filePath;
-
-        // Request user to select a JSON file if the supplied file path is not valid
-        if (!jsonFileInfo.exists()) {
-
-            // Supplied file path is not valid so create a file dialog for saving a JSON file
-            QFileDialog fileDialog;
-
-            // Configure file dialog
-            fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-            fileDialog.setNameFilters({ "HDPS preset files (*json)" });
-            fileDialog.setDefaultSuffix(".json");
-
-            // Saving failed when the file dialog is canceled
-            if (fileDialog.exec() == 0)
-                throw std::runtime_error("File selection was canceled");
-
-            // Only save if we have one file
-            if (fileDialog.selectedFiles().count() != 1)
-                throw std::runtime_error("Only one file may be selected");
-
-            // Establish the JSON file path that will be saved
-            jsonFilePath = fileDialog.selectedFiles().first();
-        }
-
-        // Create the preset file
-        QFile jsonFile(jsonFilePath);
-
-        // And save the file
+        // And open the file for writing
         if (!jsonFile.open(QFile::WriteOnly))
             throw std::runtime_error("Unable to open file for writing");
-
-        //QTemporaryDir temporaryDir;
-
-        // Create UUID-based temporary directory name
-        const auto temporaryDirName = QUuid::createUuid().toString(QUuid::WithoutBraces);
-
-        // Create the temporary directory
-        QDir::current().mkdir(temporaryDirName);
-
-        WidgetAction::serializationTemporaryDirectory = temporaryDirName;
 
         // Create JSON document
         auto jsonDocument = toJsonDocument();

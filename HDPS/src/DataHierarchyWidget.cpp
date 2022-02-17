@@ -99,11 +99,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _saveAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
 
     connect(&_loadAction, &TriggerAction::triggered, this, [this]() {
-        Application::core()->fromJsonFile();
+        Application::current()->loadAnalysis();
     });
 
     connect(&_saveAction, &TriggerAction::triggered, this, [this]() {
-        Application::core()->toJsonFile();
+        Application::current()->saveAnalysis();
     });
 
     // Create layout that will contain the toolbar and the tree view

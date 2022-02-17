@@ -265,6 +265,7 @@ set( UTIL_HEADERS
     src/util/PresetsModel.h
     src/util/PresetsFilterModel.h
     src/util/Serialization.h
+    src/util/FolderCompressor.h
 )
 
 set( UTIL_SOURCES
@@ -289,6 +290,7 @@ set( UTIL_SOURCES
     src/util/PresetsModel.cpp
     src/util/PresetsFilterModel.cpp
     src/util/Serialization.cpp
+    src/util/FolderCompressor.cpp
 )
 
 set( PLUGIN_HEADERS

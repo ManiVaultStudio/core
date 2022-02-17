@@ -5,7 +5,8 @@
 #include <QDir>
 #include <QVariantMap>
 
-#define DEFAULT_MAX_BLOCK_SIZE 1000000LL
+// Default maximum block size is two gigabytes (QByteArray maximum size in bytes)
+#define DEFAULT_MAX_BLOCK_SIZE std::numeric_limits<std::int32_t>::max()
 
 namespace hdps {
 

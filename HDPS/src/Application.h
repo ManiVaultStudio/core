@@ -71,10 +71,27 @@ public: // Settings API
      */
     void setSetting(const QString& path, const QVariant& value);
 
+public: // Serialization
+
+    /** Load application from disk */
+    void loadAnalysis();
+
+    /** Save application to disk */
+    void saveAnalysis();
+
+public: // Serialization temporary directory
+
+    /**
+     * Get serialization temporary directory
+     * @return Serialization temporary directory
+     */
+    static QString getSerializationTemporaryDirectory();
+
 protected:
-    CoreInterface*      _core;          /** Shared pointer to HDPS core */
-    IconFonts           _iconFonts;     /** Icon fonts resource */
-    QSettings           _settings;      /** Settings */
+    CoreInterface*      _core;                                  /** Shared pointer to HDPS core */
+    IconFonts           _iconFonts;                             /** Icon fonts resource */
+    QSettings           _settings;                              /** Settings */
+    QString             _serializationTemporaryDirectory;       /** Temporary directory for serialization */
 };
 
 }

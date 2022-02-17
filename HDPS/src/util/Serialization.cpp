@@ -1,4 +1,5 @@
 #include "Serialization.h"
+#include "Application.h"
 
 #include <QUuid>
 
@@ -69,84 +70,86 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfB
     // Save the number of bytes
     rawData["Size"] = numberOfBytes;
 
-    if (saveToDisk) {
+    // Compute the number of blocks
+    const auto numberOfBlocks = static_cast<std::uint64_t>(ceilf(numberOfBytes / static_cast<float>(maxBlockSize)));
 
-        // File name of the external binary file
-        const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + ".bin";
+    // Offset in number of bytes
+    std::int64_t offset = 0;
 
-        // Save the raw data to binary file
-        saveRawDataToBinaryFile(bytes, numberOfBytes, fileName);
+    QVariantList blocks;
 
-        // Set the raw data URL
-        rawData["URL"] = fileName;
-    }
-    else {
+    while (offset < numberOfBytes)
+    {
+        QVariantMap block;
 
-        // Compute the number of blocks
-        const auto numberOfBlocks = static_cast<std::uint64_t>(ceilf(numberOfBytes / static_cast<float>(maxBlockSize)));
+        // Determine the size of the block
+        const auto blockSize = std::min(maxBlockSize, numberOfBytes - offset);
 
-        // Offset in number of bytes
-        std::int64_t offset = 0;
+        block["Offset"] = offset;
+        block["Size"]   = blockSize;
 
-        QVariantList blocks;
+        if (saveToDisk) {
 
-        while (offset < numberOfBytes)
-        {
-            QVariantMap block;
+            // File name and path of the external binary file in the temporary directory
+            const auto fileName = QUuid::createUuid().toString(QUuid::WithoutBraces) + ".bin";
+            const auto filePath = QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + fileName);
 
-            // Determine the size of the block
-            const auto blockSize = std::min(maxBlockSize, numberOfBytes - offset);
+            // Save the raw data to binary file
+            saveRawDataToBinaryFile(&bytes[offset], blockSize, filePath);
+
+            // Set the raw data URL
+            block["URL"] = fileName;
+        }
+        else {
 
             // Create data block
-            block["Data"]   = QString(qCompress(QByteArray::fromRawData(&bytes[offset], blockSize)).toBase64());
-            block["Offset"] = offset;
-            block["Size"]   = blockSize;
-
-            // Append block to the blocks
-            blocks.push_back(block);
-
-            // Advance to next block 
-            offset += maxBlockSize;
+            block["Data"] = QString(qCompress(QByteArray::fromRawData(&bytes[offset], blockSize)).toBase64());
         }
 
-        rawData["NumberOfBlocks"]   = numberOfBlocks;
-        rawData["BlockSize"]        = maxBlockSize;
-        rawData["Blocks"]           = blocks;
+        // Append block to the blocks
+        blocks.push_back(block);
+
+        // Advance to next block 
+        offset += maxBlockSize;
     }
+
+    rawData["NumberOfBlocks"]   = numberOfBlocks;
+    rawData["BlockSize"]        = maxBlockSize;
+    rawData["Blocks"]           = blocks;
 
     return rawData;
 }
 
 void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char* bytes)
 {
-    if (variantMap.contains("URL")) {
-        loadRawDataFromBinaryFile(bytes, variantMap["Size"].toInt(), variantMap["URL"].toString());
-    }
-    else {
-        variantMapMustContain(variantMap, "BlockSize");
-        variantMapMustContain(variantMap, "Blocks");
+    variantMapMustContain(variantMap, "BlockSize");
+    variantMapMustContain(variantMap, "Blocks");
 
-        const auto blockSize = variantMap["BlockSize"].toInt();
-        const auto blocks = variantMap["Blocks"].toList();
+    const auto blockSize    = variantMap["BlockSize"].toInt();
+    const auto blocks       = variantMap["Blocks"].toList();
 
-        // Go over all blocks in the blocks map and copy the raw data to the output bytes
-        for (const auto& block : blocks) {
-            const auto map = block.toMap();
+    // Go over all blocks in the blocks map and copy the raw data to the output bytes
+    for (const auto& block : blocks) {
+        const auto map = block.toMap();
 
-            variantMapMustContain(map, "Data");
-            variantMapMustContain(map, "Offset");
-            variantMapMustContain(map, "Size");
+        variantMapMustContain(map, "Offset");
+        variantMapMustContain(map, "Size");
 
+        const auto offset   = map["Offset"].toInt();
+        const auto size     = map["Size"].toInt();
+
+        if (map.contains("URL")) {
+            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + map["URL"].toString()));
+        }
+
+        if (map.contains("Data")) {
             const auto data         = map["Data"].toString();
-            const auto offset       = map["Offset"].toInt();
-            const auto size         = map["Size"].toInt();
             const auto blockData    = qUncompress(QByteArray::fromBase64(data.toUtf8()));
 
             // Copy the block to the output bytes
             memcpy((void*)&bytes[offset], blockData.data(), size);
         }
     }
-    
 }
 
 void variantMapMustContain(const QVariantMap& variantMap, const QString& key)
