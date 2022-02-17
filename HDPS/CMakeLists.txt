@@ -702,9 +702,17 @@ set(VERSION_SHORT 3.7.0)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
+# Quazip
+set(QUAZIP_USE_QT_ZLIB ON)
+add_subdirectory(external/quazip)
+
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_BINARY_DIR}/HDPS/external/advanced_docking
+        --config $<CONFIGURATION> 
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+    COMMAND "${CMAKE_COMMAND}" 
+        --install ${CMAKE_BINARY_DIR}/HDPS/external/quazip
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )

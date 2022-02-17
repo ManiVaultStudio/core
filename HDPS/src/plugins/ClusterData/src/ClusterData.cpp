@@ -117,7 +117,7 @@ QVariantMap ClusterData::toVariantMap() const
         QVariantMap indicesMap;
 
         indicesMap["Count"] = QVariant::fromValue(cluster.getIndices().size());
-        indicesMap["Raw"]   = rawDataToVariantMap((char*)cluster.getIndices().data(), cluster.getIndices().size() * sizeof(std::uint32_t));
+        indicesMap["Raw"]   = rawDataToVariantMap((char*)cluster.getIndices().data(), cluster.getIndices().size() * sizeof(std::uint32_t), true);
 
         clusters.append(QVariantMap({
             { "Name", cluster.getName() },

@@ -149,32 +149,31 @@ QVariantMap PointData::toVariantMap() const
     const auto typeSpecifierName    = _vectorHolder.getElementTypeNames()[static_cast<std::int32_t>(typeSpecifier)];
     const auto typeIndex            = static_cast<std::int32_t>(typeSpecifier);
     const auto numberOfElements     = static_cast<std::uint64_t>(getNumPoints() * getNumDimensions());
-    const auto maxBlockSize         = 1000000ULL;
 
     switch (typeSpecifier)
     {
         case ElementTypeSpecifier::float32:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<float>().data(), numberOfElements * sizeof(float));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<float>().data(), numberOfElements * sizeof(float), true);
             break;
 
         case ElementTypeSpecifier::bfloat16:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<biovault::bfloat16_t>().data(), numberOfElements * sizeof(biovault::bfloat16_t), true);
             break;
 
         case ElementTypeSpecifier::int16:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::int16_t>().data(), numberOfElements * sizeof(std::int16_t), true);
             break;
 
         case ElementTypeSpecifier::uint16:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::uint16_t>().data(), numberOfElements * sizeof(std::uint16_t), true);
             break;
 
         case ElementTypeSpecifier::int8:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::int8_t>().data(), numberOfElements * sizeof(std::int8_t), true);
             break;
 
         case ElementTypeSpecifier::uint8:
-            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t));
+            rawData = rawDataToVariantMap((char*)_vectorHolder.getConstVector<std::uint8_t>().data(), numberOfElements * sizeof(std::uint8_t), true);
             break;
 
         default:
@@ -673,7 +672,7 @@ QVariantMap Points::toVariantMap() const
     QVariantMap indices;
 
     indices["Count"]    = this->indices.size();
-    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t));
+    indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>().toVariantMap() : QVariantMap();
     variantMap["NumberOfPoints"]        = getNumPoints();

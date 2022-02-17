@@ -17,6 +17,8 @@ namespace hdps {
 
 namespace gui {
 
+QString WidgetAction::serializationTemporaryDirectory = "";
+
 WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
@@ -533,6 +535,16 @@ void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
         // And save the file
         if (!jsonFile.open(QFile::WriteOnly))
             throw std::runtime_error("Unable to open file for writing");
+
+        //QTemporaryDir temporaryDir;
+
+        // Create UUID-based temporary directory name
+        const auto temporaryDirName = QUuid::createUuid().toString(QUuid::WithoutBraces);
+
+        // Create the temporary directory
+        QDir::current().mkdir(temporaryDirName);
+
+        WidgetAction::serializationTemporaryDirectory = temporaryDirName;
 
         // Create JSON document
         auto jsonDocument = toJsonDocument();

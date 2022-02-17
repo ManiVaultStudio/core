@@ -4,6 +4,7 @@
 
 #include <QWidgetAction>
 #include <QJsonDocument>
+#include <QTemporaryDir>
 
 class QLabel;
 class QMenu;
@@ -239,6 +240,8 @@ protected:
      */
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
+public: // Serialization temporary directory
+
 signals:
 
     /**
@@ -263,6 +266,9 @@ protected:
     std::int32_t    _defaultWidgetFlags;    /** Default widget flags */
     std::int32_t    _sortIndex;             /** Sort index (used in the group action to sort actions) */
     bool            _isSerializing;         /** Whether the widget action is currently serializing */
+
+    /** Temporary directory for serialization */
+    static QString serializationTemporaryDirectory;
 };
 
 /** List of widget actions */
