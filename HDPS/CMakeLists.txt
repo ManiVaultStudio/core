@@ -46,7 +46,7 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
+find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL ZLib REQUIRED)
 
 # Normalize the incoming install path
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
@@ -455,9 +455,13 @@ add_library(${PROJECT}_Public ${LINK_TYPE}
 set_property(TARGET ${PROJECT}_Public PROPERTY CXX_STANDARD 14)
 
 target_include_directories(${PROJECT}_Public PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(${PROJECT}_Public PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/zlib)
 
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
+
+include(GenerateExportHeader)
+generate_export_header(${PROJECT}_Public)
 
 add_library(${PROJECT}_Private ${LINK_TYPE}
     src/.editorconfig
@@ -512,6 +516,7 @@ endif(MSVC)
 
 #executable & linklib
 
+target_include_directories(${PROJECT}_Public PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/QArchive")
 
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
@@ -704,9 +709,53 @@ set(VERSION_SHORT 3.7.0)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
-# Quazip
-set(QUAZIP_USE_QT_ZLIB ON)
-add_subdirectory(external/quazip)
+add_subdirectory(external/qarchive)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Retrieve the file name of the generated export header.
+file(GLOB EXPORT_HEADER_FILE_NAME
+    RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
+list(APPEND PUBLIC_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
+
+
+
+
+
+
+
+#add_dependencies(${PROJECT}_Public QArchive)
+
+#add_dependencies(${PROJECT}_Public QArchive)
+if(MSVC)
+    set(LIB_LINK_SUFFIX ".lib")
+else()
+    set(LIB_LINK_SUFFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
+endif(MSVC)
+set(QARCHIVE_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_STATIC_LIBRARY_PREFIX}QArchive${LIB_LINK_SUFFIX}")
+
+#message(STATUS ${QARCHIVE_LIBRARY})
+
+#target_link_libraries(${PROJECT}_Public "$<TARGET_FILE:QArchive>")
+#target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:QArchive>")
+#target_link_libraries(${PROJECT} "$<TARGET_FILE:QArchive>")
+
+
+
+set_target_properties(${PROJECT}_Public PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
+
+#set_target_properties(${PROJECT}_Public PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
@@ -714,7 +763,7 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     COMMAND "${CMAKE_COMMAND}" 
-        --install ${CMAKE_BINARY_DIR}/HDPS/external/quazip
+        --install ${CMAKE_BINARY_DIR}/HDPS/external/qarchive
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )

@@ -1,9 +1,12 @@
 #pragma once
- 
-#include <QFile>
-#include <QObject>
-#include <QDir>
-#include <QDataStream>
+
+#include <QString>
+
+#include "hdps_public_export.h"
+
+namespace hdps {
+
+namespace util {
 
 /**
  * Folder compression class
@@ -12,48 +15,36 @@
  *
  * @author Thomas Kroes
  */
-class FolderCompressor : public QObject
+class FolderCompressor
 {
-    Q_OBJECT
-
 public:
 
     /**
      * Constructor
      * @param parent Pointer to parent object
      */
-    explicit FolderCompressor(QObject* parent = 0);
+    FolderCompressor() = default;
  
-    /**
-     * A recursive function that scans all files inside the source folder 
-     * and serializes all files in a row of file names and compressed binary data in a single file
-     * @param sourceFolder Source folder
-     * @param destinationFile Destination file
-     * @return whether successfully saved
-     */
-    bool compressFolder(const QString& sourceFolder, const QString& destinationFile);
- 
-    /**
-     * A function that de-serializes data from the compressed file and creates any needed subfolders before saving the file
-     * @param sourceFolder Source folder
-     * @param destinationFile Destination file
-     * @return Whether successfully de-serialized
-     */
-    bool decompressFolder(const QString& sourceFile, const QString& destinationFolder);
-
-protected:
-
-    /**
-     * Compress source folder
-     * @param sourceFolder Source folder path
-     * @param prefix Prefix
-     * @return Whether successfully compressed
-     */
-    bool compress(const QString& sourceFolder, const QString& prefix);
-
-private:
-    QFile           _file;          /** In-output file */
-    QDataStream     _dataStream;    /** Data stream */
-
+    
 };
- 
+
+/**
+ * Compresses an entire directory and possibly password-protects it
+ * @param destinationFile Path of the compressed file
+ * @param sourceDirectory Path of the source directory
+ * @param password Password (in case of password-protection)
+ * @return Boolean indicating whether compression was successful
+ */
+bool HDPS_PUBLIC_EXPORT compressFolder(const QString& destinationFile, const QString& sourceDirectory, const QString& password = "");
+
+/**
+ * Decompresses an entire directory
+ * @param compressedFile Path of the compressed source file
+ * @param destinationDirectory Path of the destination directory where files will be extracted
+ * @param password Password (in case of password-protection)
+ * @return Boolean indicating whether decompression was successful
+ */
+bool HDPS_PUBLIC_EXPORT decompressFolder(const QString& compressedFile, const QString& destinationDirectory, const QString& password = "");
+
+}
+}

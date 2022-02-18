@@ -103,16 +103,16 @@ void Application::loadAnalysis()
             throw std::runtime_error("Only one file may be selected");
 
         // Establish the JSON file path that will be loaded
-        const auto filePath = fileDialog.selectedFiles().first();
+        const auto compressedFilePath = fileDialog.selectedFiles().first();
 
         // Create temporary dir for decompressed data
         QTemporaryDir temporaryDir;
 
-        // Create folder compressor
-        FolderCompressor folderCompressor(this);
+        // Create archiver
+        FolderCompressor archiver;
 
         // Decompress folder to temporary directory
-        if (!folderCompressor.decompressFolder(filePath, temporaryDir.path()))
+        if (!decompressFolder(compressedFilePath, temporaryDir.path()))
             throw std::runtime_error("Unable to decompress folder");
 
 #ifdef _VERBOSE
@@ -180,11 +180,11 @@ void Application::saveAnalysis()
         // Establish the JSON file path that will be saved
         const auto outputFileInfo = QFileInfo(fileDialog.selectedFiles().first());
 
-        // Create folder compressor
-        FolderCompressor folderCompressor(this);
+        // Create archiver
+        FolderCompressor archiver;
 
         // Compress the entire directory and save at the picked location
-        if (!folderCompressor.compressFolder(outputDirName, outputFileInfo.fileName()))
+        if (!compressFolder(outputFileInfo.fileName(), outputDirName))
             throw std::runtime_error("Unable to compress folder");
     }
     catch (...)
