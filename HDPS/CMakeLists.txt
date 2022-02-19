@@ -67,6 +67,8 @@ set( CORE_HEADERS
     src/DataHierarchyManager.h
     src/Core.h
     src/DataManager.h
+    src/Archiver.h
+    src/HdpsApplication.h
 )
 
 set( CORE_SOURCES
@@ -78,6 +80,8 @@ set( CORE_SOURCES
     src/DataHierarchyManager.cpp
     src/Core.cpp
     src/DataManager.cpp
+    src/Archiver.cpp
+    src/HdpsApplication.cpp
 )
 
 set(EVENT_HEADERS
@@ -175,7 +179,7 @@ set(ACTIONS_SOURCES
     src/actions/IntegralAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
-	src/actions/PixelSelectionAction.cpp
+    src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/TriggersAction.cpp
     src/actions/ToggleAction.cpp
@@ -265,7 +269,6 @@ set( UTIL_HEADERS
     src/util/PresetsModel.h
     src/util/PresetsFilterModel.h
     src/util/Serialization.h
-    src/util/FolderCompressor.h
 )
 
 set( UTIL_SOURCES
@@ -290,7 +293,6 @@ set( UTIL_SOURCES
     src/util/PresetsModel.cpp
     src/util/PresetsFilterModel.cpp
     src/util/Serialization.cpp
-    src/util/FolderCompressor.cpp
 )
 
 set( PLUGIN_HEADERS
@@ -460,9 +462,6 @@ target_include_directories(${PROJECT}_Public PRIVATE ${INSTALL_DIR}/$<CONFIGURAT
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
 
-include(GenerateExportHeader)
-generate_export_header(${PROJECT}_Public)
-
 add_library(${PROJECT}_Private ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
@@ -473,12 +472,17 @@ set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 14)
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
 target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT}_Private qtadvanceddocking)
+target_link_libraries(${PROJECT}_Private QuaZip)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
 target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
 target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(${PROJECT}_Private PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/QuaZip-Qt5-1.2)
+target_include_directories(${PROJECT}_Private PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/zlib)
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
+add_dependencies(${PROJECT}_Private QuaZip)
+#add_dependencies(${PROJECT}_Private QArchive)
 
 add_executable(${PROJECT} MACOSX_BUNDLE WIN32
     src/.editorconfig
@@ -499,12 +503,14 @@ target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} qtadvanceddocking)
+target_link_libraries(${PROJECT} QuaZip)
 
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Public>")
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Private>")
 
 add_dependencies(${PROJECT} ${PROJECT}_Public)
 add_dependencies(${PROJECT} ${PROJECT}_Private)
+add_dependencies(${PROJECT} QuaZip)
 
 if(MSVC)
     set_target_properties(${PROJECT} PROPERTIES
@@ -709,53 +715,8 @@ set(VERSION_SHORT 3.7.0)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
-add_subdirectory(external/qarchive)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Retrieve the file name of the generated export header.
-file(GLOB EXPORT_HEADER_FILE_NAME
-    RELATIVE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/*_export.h)
-list(APPEND PUBLIC_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_HEADER_FILE_NAME})
-
-
-
-
-
-
-
-#add_dependencies(${PROJECT}_Public QArchive)
-
-#add_dependencies(${PROJECT}_Public QArchive)
-if(MSVC)
-    set(LIB_LINK_SUFFIX ".lib")
-else()
-    set(LIB_LINK_SUFFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
-endif(MSVC)
-set(QARCHIVE_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_STATIC_LIBRARY_PREFIX}QArchive${LIB_LINK_SUFFIX}")
-
-#message(STATUS ${QARCHIVE_LIBRARY})
-
-#target_link_libraries(${PROJECT}_Public "$<TARGET_FILE:QArchive>")
-#target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:QArchive>")
-#target_link_libraries(${PROJECT} "$<TARGET_FILE:QArchive>")
-
-
-
-set_target_properties(${PROJECT}_Public PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
-
-#set_target_properties(${PROJECT}_Public PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+# File compression LIBRARY
+add_subdirectory(external/quazip)
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
@@ -763,7 +724,7 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     COMMAND "${CMAKE_COMMAND}" 
-        --install ${CMAKE_BINARY_DIR}/HDPS/external/qarchive
+        --install ${CMAKE_BINARY_DIR}/HDPS/external/quazip
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )

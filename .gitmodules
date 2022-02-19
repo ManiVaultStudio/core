@@ -4,6 +4,6 @@
 [submodule "advanced_docking"]
 	path = HDPS/external/advanced_docking
 	url = https://github.com/hdps/Qt-Advanced-Docking-System.git
-[submodule "HDPS/external/qarchive"]
-	path = HDPS/external/qarchive
-	url = https://github.com/antony-jr/QArchive.git
+[submodule "HDPS/external/quazip"]
+	path = HDPS/external/quazip
+	url = https://github.com/stachenov/quazip.git

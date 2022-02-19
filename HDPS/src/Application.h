@@ -18,7 +18,7 @@ class CoreInterface;
  */
 class Application : public QApplication
 {
-public: // Construction/destruction
+public: // Construction
 
     /**
      * Constructor
@@ -74,10 +74,10 @@ public: // Settings API
 public: // Serialization
 
     /** Load application from disk */
-    void loadAnalysis();
+    virtual void loadAnalysis() = 0;
 
     /** Save application to disk */
-    void saveAnalysis();
+    virtual void saveAnalysis() = 0;
 
 public: // Serialization temporary directory
 
