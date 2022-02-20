@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QThread>
 
 #include <quazip/JlCompress.h>
 
@@ -13,48 +14,43 @@ namespace hdps {
 
 namespace util {
 
-void Archiver::compressDirectory(const QString& sourceDirectory, const QString& destinationFileName, bool recursive /*= true*/, std::int32_t compressionLevel /*= -1*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)
+void Archiver::compressDirectory(const QString& sourceDirectory, const QString& destinationFileName, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)
 {
-    try
-    {
-#ifdef _DEBUG
-        qDebug().noquote() << "Compress all files in " + sourceDirectory + " to " + destinationFileName;
-#endif
+    // Clean up and throw exception
+    const auto except = [&destinationFileName](const QString& errorMessage) {
 
-        // Clean up and throw exception
-        const auto except = [&destinationFileName](const QString& errorMessage) {
+        // Remove destination file
+        QFile::remove(destinationFileName);
 
-            // Remove destination file
-            QFile::remove(destinationFileName);
+        // Except
+        throw std::runtime_error(errorMessage.toLatin1());
+    };
 
-            // Except
-            throw std::runtime_error(errorMessage.toLatin1());
-        };
+    // Compressed file
+    QuaZip zip(destinationFileName);
 
-        // Compressed file
-        QuaZip zip(destinationFileName);
+    //// Create the destination file
+    QDir().mkpath(QFileInfo(destinationFileName).absolutePath());
 
-        //// Create the destination file
-        QDir().mkpath(QFileInfo(destinationFileName).absolutePath());
+    // Except if not created
+    if (!zip.open(QuaZip::mdCreate))
+        except("Unable to create destination file");
 
-        // Except if not created
-        if (!zip.open(QuaZip::mdCreate))
-            except("Unable to create destination file");
+    // Except if a zip error occurred
+    if (zip.getZipError() != 0)
+        except("Zip error(s) occurred");
 
-        // Except if a zip error occurred
-        if (zip.getZipError() != 0)
-            except("Zip error(s) occurred");
+    // Compress the sub directory
+    Archiver::compressSubDirectory(&zip, sourceDirectory, sourceDirectory, recursive, compressionLevel, password, filters);
 
-        // Compress the sub directory
-        Archiver::compressSubDirectory(&zip, sourceDirectory, sourceDirectory, recursive, compressionLevel, password, filters);
+    // Notify others that directory compression started
+    emit taskStarted("Save to disk");
 
-        // Close the zip file
-        zip.close();
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to compress folder");
-    }
+    // Close the zip file
+    zip.close();
+
+    // Notify others that directory compression finished
+    emit taskFinished("Save to disk");
 }
 
 void Archiver::decompressDirectory(const QString& compressedFile, const QString& destinationDirectory, const QString& password /*= ""*/)
@@ -62,7 +58,49 @@ void Archiver::decompressDirectory(const QString& compressedFile, const QString&
     //JlCompress::extractDir(compressedFile, destinationDirectory);
 }
 
-void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive /*= true*/, std::int32_t compressionLevel /*= -1*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)
+QStringList Archiver::getTaskNamesForDirectoryCompression(const QString& directory, bool recursive /*= true*/, std::int32_t level /*= 0*/)
+{
+    // For scanning files in the directory
+    QDir filesInDirectory(directory);
+
+    // Task names
+    QStringList taskNames;
+
+    // Add root task
+    if (level == 0)
+        taskNames << "Save to disk";
+
+    // Add file paths of the files directly below the directory
+    for (const auto fileInDirectory : filesInDirectory.entryList(QDir::Files | QDir::NoDotAndDotDot))
+        taskNames << "Packing " + fileInDirectory;
+
+    // For scanning subdirectories in the directory
+    QDir subDirectoriesInDirectory(directory);
+
+    // Add number of files of sub directories if required
+    if (recursive) {
+        for (const auto subDirectory : subDirectoriesInDirectory.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+            taskNames << getTaskNamesForDirectoryCompression(subDirectory, recursive, level);
+    }
+
+    return taskNames;
+}
+
+QByteArray Archiver::getFileChecksum(const QString& fileName, const QCryptographicHash::Algorithm& hashAlgorithm)
+{
+    QFile file(fileName);
+
+    if (file.open(QFile::ReadOnly)) {
+        QCryptographicHash hash(hashAlgorithm);
+
+        if (hash.addData(&file))
+            return hash.result();
+    }
+
+    return QByteArray();
+}
+
+void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory, const QString& parentDirectory, bool recursive /*= true*/, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/, QDir::Filters filters /*= QDir::Filter::Files*/)
 {
     // Except if the parent zip is invalid
     if (!parentZip)
@@ -129,8 +167,14 @@ void Archiver::compressSubDirectory(QuaZip* parentZip, const QString& directory,
     }
 }
 
-void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel /*= -1*/, const QString& password /*= ""*/)
+void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel /*= 0*/, const QString& password /*= ""*/)
 {
+    // Establish task name
+    const auto taskName = "Packing " + compressedFilePath;
+
+    // Notify others that a task started
+    emit taskStarted(taskName);
+
     // Except if the zip is invalid
     if (!zip)
         throw std::runtime_error("Invalid zip file");
@@ -142,8 +186,8 @@ void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QS
     // Create compressed file
     QuaZipFile compressedFile(zip);
 
-    // Except if unable to open the output file
-    if (!compressedFile.open(QIODevice::WriteOnly, QuaZipNewInfo(compressedFilePath, sourceFilePath), password.isEmpty() ? nullptr : password.toLocal8Bit().data(), 0U, Z_DEFLATED, compressionLevel, compressionLevel == -1))
+    // Open compressed file and except if an error occurs
+    if (!compressedFile.open(QIODevice::WriteOnly, QuaZipNewInfo(compressedFilePath, sourceFilePath), password.isEmpty() ? nullptr : password.toLocal8Bit().data(), 0U, Z_DEFLATED, compressionLevel))
         throw std::runtime_error("Unable to open zip file");
 
     QFileInfo input(sourceFilePath);
@@ -161,7 +205,7 @@ void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QS
 
         // Set its file name
         inFile.setFileName(sourceFilePath);
-
+        
         // Except if unable to open the input file
         if (!inFile.open(QIODevice::ReadOnly))
             throw std::runtime_error("Unable to open input file");
@@ -180,6 +224,9 @@ void Archiver::compressFile(QuaZip* zip, const QString& sourceFilePath, const QS
     // Except if zipping error(s) occurred
     if (compressedFile.getZipError() != UNZ_OK)
         throw std::runtime_error("Zip error(s) occurred");
+
+    // Notify others that a task finished
+    emit taskFinished(taskName);
 }
 
 }

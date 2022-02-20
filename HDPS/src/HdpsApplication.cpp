@@ -1,4 +1,5 @@
 #include "HdpsApplication.h"
+#include "DataHierarchyManager.h"
 #include "Archiver.h"
 
 #include <CoreInterface.h>
@@ -14,6 +15,7 @@
 #include <QLabel>
 #include <QSpinBox>
 #include <QLineEdit>
+#include <QTemporaryDir>
 
 #define _VERBOSE
 
@@ -23,8 +25,7 @@ namespace hdps {
 
 
 HdpsApplication::HdpsApplication(int& argc, char** argv) :
-    Application(argc, argv),
-    _temporaryDir()
+    Application(argc, argv)
 {
 }
 
@@ -94,10 +95,10 @@ void HdpsApplication::saveAnalysis()
     try
     {
         // Create temporary dir for output files
-        _temporaryDir = QSharedPointer<QTemporaryDir>::create();
+        QTemporaryDir temporaryDir;
 
         // Create UUID-based output directory name in the temporary directory
-        const auto temporaryDirectoryPath = QDir::toNativeSeparators(_temporaryDir->path());
+        const auto temporaryDirectoryPath = QDir::toNativeSeparators(temporaryDir.path());
 
 #ifdef _VERBOSE
         qDebug().noquote() << QString("Temporary directory: %1").arg(temporaryDirectoryPath);
@@ -122,9 +123,9 @@ void HdpsApplication::saveAnalysis()
         QLineEdit   passwordLineEdit;
 
         enableCompressionCheckBox.setChecked(false);
-        compressionLevelSpinBox.setMinimum(0);
+        compressionLevelSpinBox.setMinimum(1);
         compressionLevelSpinBox.setMaximum(9);
-        compressionLevelSpinBox.setValue(7);
+        compressionLevelSpinBox.setValue(2);
         passwordProtectedCheckBox.setChecked(false);
         passwordLineEdit.setPlaceholderText("Enter encryption password...");
 
@@ -156,26 +157,111 @@ void HdpsApplication::saveAnalysis()
         if (fileDialog.selectedFiles().count() != 1)
             throw std::runtime_error("Only one file may be selected");
 
+        // Create an archiver which will be used for directory compression
+        Archiver archiver;
+
+        // List of tasks that need to be performed during saving
+        QStringList tasks;
+
+        // Create list of tasks
+        tasks << "Export data model" << "Temporary task";
+
+        // Create dialog for reporting progress
+        TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving analysis to " + fileDialog.selectedFiles().first(), getIconFont("FontAwesome").getIcon("file-export"));
+
+        // Set current task to JSON + binaries export
+        taskProgressDialog.setCurrentTask("Export data model");
+
         // Output analysis JSON file info
         QFileInfo jsonFileInfo(temporaryDirectoryPath, "analysis.json");
 
         // Set temporary serialization directory so that binaries are saved in the correct location
         _serializationTemporaryDirectory = temporaryDirectoryPath;
 
+        // Report which item in the hierarchy is being exported
+        connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {
+            taskProgressDialog.setCurrentTask("Exporting " + savingItem.getFullPathName());
+        });
+
         // Write JSON file into temporary serialization directory
         _core->toJsonFile(jsonFileInfo.absoluteFilePath());
 
-#ifdef _VERBOSE
-        qDebug() << QDir(temporaryDirectoryPath).entryList((QStringList() << "*.json" << "*.bin", QDir::Files));
-#endif
+        // JSON + binaries export has finished
+        taskProgressDialog.setTaskFinished("Export data model");
+
+        // Add tasks for each file in the temporary directory
+        taskProgressDialog.addTasks(archiver.getTaskNamesForDirectoryCompression(temporaryDirectoryPath));
+
+        // Remove the temporary task
+        taskProgressDialog.setTaskFinished("Temporary task");
+
+        connect(&archiver, &Archiver::taskStarted, &taskProgressDialog, &TaskProgressDialog::setCurrentTask);
+        connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
 
         // Compress the entire output directory
-        Archiver::compressDirectory(temporaryDirectoryPath, QDir::toNativeSeparators(fileDialog.selectedFiles().first()), true, enableCompressionCheckBox.isChecked() ? compressionLevelSpinBox.value() : 0, passwordLineEdit.text());
+        archiver.compressDirectory(temporaryDirectoryPath, QDir::toNativeSeparators(fileDialog.selectedFiles().first()), true, enableCompressionCheckBox.isChecked() ? compressionLevelSpinBox.value() : 0, passwordLineEdit.text());
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to save HDPS analysis", e);
     }
     catch (...)
     {
         exceptionMessageBox("Unable to save HDPS analysis");
     }
+}
+
+HdpsApplication::TaskProgressDialog::TaskProgressDialog(QWidget* parent, const QStringList& tasks, const QString& title, const QIcon& icon) :
+    QProgressDialog(parent),
+    _tasks(tasks)
+{
+    setWindowIcon(icon);
+    setWindowTitle(title);
+    setWindowModality(Qt::WindowModal);
+    setMinimumDuration(0);
+    setFixedWidth(600);
+    setMinimum(0);
+    setMaximum(_tasks.count());
+    setValue(0);
+    setAutoClose(false);
+    setAutoReset(false);
+}
+
+void HdpsApplication::TaskProgressDialog::addTasks(const QStringList& tasks)
+{
+    _tasks << tasks;
+
+    setMaximum(_tasks.count());
+}
+
+void HdpsApplication::TaskProgressDialog::setCurrentTask(const QString& taskName)
+{
+    // Update the label text
+    setLabelText(taskName);
+
+    // Ensure the progress dialog gets updated
+    QCoreApplication::processEvents();
+}
+
+void HdpsApplication::TaskProgressDialog::setTaskFinished(const QString& taskName)
+{
+    // Remove the task from the list
+    _tasks.removeOne(taskName);
+
+    // Update the progress value
+    setValue(maximum() - _tasks.count());
+
+    // Ensure the progress dialog gets updated
+    QCoreApplication::processEvents();
+}
+
+void HdpsApplication::TaskProgressDialog::setCurrentTaskName(const QString& taskName)
+{
+    // Update label text
+    setLabelText(taskName);
+
+    // Ensure the progress dialog gets updated
+    QCoreApplication::processEvents();
 }
 
 }

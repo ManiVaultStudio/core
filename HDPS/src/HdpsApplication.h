@@ -1,7 +1,8 @@
 #pragma once
 
 #include <Application.h>
-#include <QTemporaryDir.h>
+
+#include <QProgressDialog>
 
 namespace hdps {
 
@@ -12,6 +13,29 @@ namespace hdps {
  */
 class HdpsApplication : public Application
 {
+public:
+
+    /**
+     * Task progress dialog class
+     *
+     * Class for reporting task progress
+     *
+     * @author Thomas Kroes
+     */
+    class TaskProgressDialog : public QProgressDialog
+    {
+        public:
+            explicit TaskProgressDialog(QWidget* parent, const QStringList& tasks, const QString& title, const QIcon& icon);
+
+            void addTasks(const QStringList& tasks);
+            void setCurrentTask(const QString& taskName);
+            void setTaskFinished(const QString& taskName);
+            void setCurrentTaskName(const QString& taskName);
+
+        protected:
+            QStringList     _tasks;     /** String list of tasks that need to be performed */
+    };
+    
 public: // Construction
 
     /**
@@ -28,9 +52,6 @@ public: // Serialization
 
     /** Save application to disk */
     void saveAnalysis() override final;
-
-protected:
-    QSharedPointer<QTemporaryDir>   _temporaryDir;      /** Temporary dir for compression */
 };
 
 }

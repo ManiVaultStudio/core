@@ -557,19 +557,27 @@ QIcon DataHierarchyItem::getIconByName(const QString& name) const
 
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 {
+    emit loading();
+
     if (variantMap.contains("Locked"))
         setLocked(variantMap["Locked"].toBool());
 
     if (variantMap.contains("Expanded"))
         setExpanded(variantMap["Expanded"].toBool());
+
+    emit loaded();
 }
 
 QVariantMap DataHierarchyItem::toVariantMap() const
 {
+    emit const_cast<DataHierarchyItem*>(this)->saving();
+
     QVariantMap variantMap, children;
 
     for (auto child : getChildren())
         children[child->getGuiName()] = child->toVariantMap();
+
+    emit const_cast<DataHierarchyItem*>(this)->saved();
 
     return {
         { "Locked", _locked },

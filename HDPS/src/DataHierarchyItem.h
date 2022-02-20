@@ -369,6 +369,18 @@ signals:
      */
     void expandedChanged(const bool& expanded);
 
+    /** Signals that the data hierarchy item is being loaded */
+    void loading();
+
+    /** Signals that the data hierarchy item has been loaded */
+    void loaded();
+
+    /** Signals that the data hierarchy item is being saved */
+    void saving();
+
+    /** Signals that the data hierarchy item has been saved */
+    void saved();
+
 protected:
     Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */

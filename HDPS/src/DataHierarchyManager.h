@@ -117,6 +117,30 @@ signals:
      */
     void itemRelocated(DataHierarchyItem& relocatedItem);
 
+    /**
+     * Signals that a data hierarchy item is being loaded
+     * @param loadingItem Reference to the data hierarchy item that is being loaded
+     */
+    void itemLoading(DataHierarchyItem& loadingItem);
+
+    /**
+     * Signals that a data hierarchy item has been loaded
+     * @param loadedItem Reference to the data hierarchy item that has been loaded
+     */
+    void itemLoaded(DataHierarchyItem& loadedItem);
+
+    /**
+     * Signals that a data hierarchy item is being saved
+     * @param savingItem Reference to the data hierarchy item that is being saved
+     */
+    void itemSaving(DataHierarchyItem& savingItem);
+
+    /**
+     * Signals that a data hierarchy item has been saved
+     * @param loadedItem Reference to the data hierarchy item that has been saved
+     */
+    void itemSaved(DataHierarchyItem& savedItem);
+
 private:
     DataHierarchyItems    _dataHierarchyItems;    /** Shared pointers to data hierarchy items */
 };
