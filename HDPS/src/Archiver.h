@@ -14,7 +14,7 @@ namespace util {
 /**
  * Archiver class
  *
- * Class for archiving files and directories
+ * Class for archiving files and directories (wraps QuaZip)
  *
  * @author Thomas Kroes
  */
@@ -33,23 +33,23 @@ public:
     /**
      * Compresses an entire directory and possibly password-protects it
      * @param sourceDirectory Path of the source directory
-     * @param destinationFileName File name of the destination compressed file
+     * @param compressedFilePath File path of the compressed destination file
      * @param recursive Whether to pack sub-directories as well or only files
      * @param compressionLevel Compression level (zero means no compression)
      * @param password Password string if files need to be secured
      * @param fileDoneFn Callback which is called when a file compression is complete
      * @param filters File include filter
      */
-    void compressDirectory(const QString& sourceDirectory, const QString& destinationFileName, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files);
+    void compressDirectory(const QString& sourceDirectory, const QString& compressedFilePath, bool recursive = true, std::int32_t compressionLevel = 0, const QString& password = "", QDir::Filters filters = QDir::Filter::Files);
 
     /**
-     * Decompresses an entire directory
+     * Decompresses a compressed file to a destination directory
      * @param compressedFile Path of the compressed source file
      * @param destinationDirectory Path of the destination directory where files will be extracted
      * @param password Password string if files need to be secured
      * @return Boolean indicating whether decompression was successful
      */
-    void decompressDirectory(const QString& compressedFile, const QString& destinationDirectory, const QString& password = "");
+    void decompress(const QString& compressedFile, const QString& destinationDirectory, const QString& password = "");
 
     /**
      * Get task names for directory compression
@@ -61,11 +61,12 @@ public:
     QStringList getTaskNamesForDirectoryCompression(const QString& directory, bool recursive = true, std::int32_t level = 0);
 
     /**
-     * Get file checksum
-     * @param fileName Name of the file for which to compute the cryptographic hash
-     * @param hashAlgorithm The hash algorithm
+     * Get task names for archive decompression
+     * @param compressedFilePath File path of the compressed file
+     * @return String list consisting of the task names for the files that will be compressed
      */
-    QByteArray getFileChecksum(const QString& fileName, const QCryptographicHash::Algorithm& hashAlgorithm);
+    QStringList getTaskNamesForDecompression(const QString& compressedFilePath);
+
 protected:
 
     /**
@@ -89,6 +90,21 @@ protected:
      * @param password Password string if files need to be secured
      */
     void compressFile(QuaZip* zip, const QString& sourceFilePath, const QString& compressedFilePath, std::int32_t compressionLevel = 0, const QString& password = "");
+
+    /**
+     * Extracts a file
+     * @param zip Pointer to quazip instance
+     * @param compressedFilePath File path of the compressed input file
+     * @param targetFilePath Path of the extracted target file
+     * @param password Password string if the compressed file is encrypted with a password
+     */
+    void extractFile(QuaZip* zip, const QString& compressedFilePath, const QString& targetFilePath, const QString& password = "");
+
+    /**
+     * Removes a file
+     * @param filesToRemove Files to remove
+     */
+    void removeFiles(const QStringList& filesToRemove);
 
 signals:
 

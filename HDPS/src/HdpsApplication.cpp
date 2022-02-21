@@ -33,7 +33,16 @@ void HdpsApplication::loadAnalysis()
 {
     try
     {
-        // Supplied file path is not valid so create a file dialog for opening a JSON file
+        // Create temporary dir for intermediate files
+        QTemporaryDir temporaryDirectory;
+
+        // Create UUID-based output directory name in the temporary directory
+        const auto temporaryDirectoryPath = temporaryDirectory.path();
+
+        // Set the serialization temporary directory so that we can find the binaries
+        _serializationTemporaryDirectory = temporaryDirectoryPath;
+
+        // Create a file dialog for opening an HDPS analysis file
         QFileDialog fileDialog;
 
         // Configure file dialog
@@ -44,7 +53,7 @@ void HdpsApplication::loadAnalysis()
 
         // Loading failed when the file dialog is canceled
         if (fileDialog.exec() == 0)
-            throw std::runtime_error("File selection was canceled");
+            return;
 
         // Only load if we have one file
         if (fileDialog.selectedFiles().count() != 1)
@@ -53,36 +62,42 @@ void HdpsApplication::loadAnalysis()
         // Establish the JSON file path that will be loaded
         const auto compressedFilePath = fileDialog.selectedFiles().first();
 
-        // Create temporary dir for decompressed data
-        QTemporaryDir temporaryDir;
-
         // Create archiver for decompression
-//        Archiver archiver;
-//
-//        // Decompress folder to temporary directory
-//        archiver.decompressFolder(compressedFilePath, temporaryDir.path());
-//
-//        // Load JSON when finished
-//        connect(&archiver, &Archiver::finished, this, [this, &temporaryDir]() -> void {
-//
-//#ifdef _VERBOSE
-//            qDebug() << QDir(temporaryDir.path()).entryList();
-//#endif
-//
-//            // Set temporary serialization directory so that binaries are loaded from the correct location
-//            _serializationTemporaryDirectory = temporaryDir.path();
-//
-//            // Input JSON file info
-//            QFileInfo inputJsonFileInfo(temporaryDir.path(), "analysis.json");
-//
-//            // Load JSON file from temporary serialization directory
-//            _core->fromJsonFile(inputJsonFileInfo.absoluteFilePath());
-//        });
-//
-//        // Show error message when decompressing failed
-//        connect(&archiver, &Archiver::error, this, [this, &temporaryDir](const QString& error) -> void {
-//            throw std::runtime_error(error.toLatin1());
-//        });
+        Archiver archiver;
+
+        // List of tasks that need to be performed during decompression
+        QStringList tasks = archiver.getTaskNamesForDecompression(compressedFilePath) << "Import data model";
+
+        // Create dialog for reporting load progress
+        TaskProgressDialog taskProgressDialog(nullptr, tasks, "Loading analysis from " + compressedFilePath, getIconFont("FontAwesome").getIcon("file-import"));
+
+        // Report which item in the hierarchy is being imported
+        connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemLoading, this, [&taskProgressDialog](DataHierarchyItem& loadingItem) {
+            taskProgressDialog.setCurrentTask("Importing dataset: " + loadingItem.getFullPathName());
+        });
+
+        // Update task progress dialog when tasks start and finish
+        connect(&archiver, &Archiver::taskStarted, &taskProgressDialog, &TaskProgressDialog::setCurrentTask);
+        connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
+
+        // Decompress folder to temporary directory
+        archiver.decompress(compressedFilePath, temporaryDirectoryPath);
+
+        // Set current task to data model export
+        taskProgressDialog.setCurrentTask("Import data model");
+
+        // Input JSON file info
+        QFileInfo inputJsonFileInfo(temporaryDirectoryPath, "analysis.json");
+
+        // Load JSON file from temporary serialization directory
+        _core->fromJsonFile(inputJsonFileInfo.absoluteFilePath());
+
+        // Data model import has finished
+        taskProgressDialog.setTaskFinished("Import data model");
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to load HDPS analysis", e);
     }
     catch (...)
     {
@@ -94,11 +109,11 @@ void HdpsApplication::saveAnalysis()
 {
     try
     {
-        // Create temporary dir for output files
-        QTemporaryDir temporaryDir;
+        // Create temporary dir for intermediate files
+        QTemporaryDir temporaryDirectory;
 
         // Create UUID-based output directory name in the temporary directory
-        const auto temporaryDirectoryPath = QDir::toNativeSeparators(temporaryDir.path());
+        const auto temporaryDirectoryPath = QDir::toNativeSeparators(temporaryDirectory.path());
 
 #ifdef _VERBOSE
         qDebug().noquote() << QString("Temporary directory: %1").arg(temporaryDirectoryPath);
@@ -113,41 +128,42 @@ void HdpsApplication::saveAnalysis()
         fileDialog.setDefaultSuffix(".hdps");
         fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
+        // Get pointer to the file dialog layout
         auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout());
 
         auto rowCount = fileDialogLayout->rowCount();
 
         QCheckBox   enableCompressionCheckBox("Compression");
         QSpinBox    compressionLevelSpinBox;
-        QCheckBox   passwordProtectedCheckBox("Password protected");
-        QLineEdit   passwordLineEdit;
+        //QCheckBox   passwordProtectedCheckBox("Password protected");
+        //QLineEdit   passwordLineEdit;
 
         enableCompressionCheckBox.setChecked(false);
         compressionLevelSpinBox.setMinimum(1);
         compressionLevelSpinBox.setMaximum(9);
         compressionLevelSpinBox.setValue(2);
-        passwordProtectedCheckBox.setChecked(false);
-        passwordLineEdit.setPlaceholderText("Enter encryption password...");
+        //passwordProtectedCheckBox.setChecked(false);
+        //passwordLineEdit.setPlaceholderText("Enter encryption password...");
 
         // Add controls for compression and password protection
         fileDialogLayout->addWidget(&enableCompressionCheckBox, rowCount, 0);
         fileDialogLayout->addWidget(&compressionLevelSpinBox, rowCount, 1);
-        fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
-        fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
+        //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
+        //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
 
         const auto updateCompressionLevel = [&]() -> void {
             compressionLevelSpinBox.setEnabled(enableCompressionCheckBox.isChecked());
         };
 
-        const auto updatePassword = [&]() -> void {
-            passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
-        };
+        //const auto updatePassword = [&]() -> void {
+        //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
+        //};
 
         connect(&enableCompressionCheckBox, &QCheckBox::toggled, this, updateCompressionLevel);
-        connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
+        //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
 
         updateCompressionLevel();
-        updatePassword();
+        //updatePassword();
 
         // Saving failed when the file dialog is canceled
         if (fileDialog.exec() == 0)
@@ -166,10 +182,10 @@ void HdpsApplication::saveAnalysis()
         // Create list of tasks
         tasks << "Export data model" << "Temporary task";
 
-        // Create dialog for reporting progress
+        // Create dialog for reporting save progress
         TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving analysis to " + fileDialog.selectedFiles().first(), getIconFont("FontAwesome").getIcon("file-export"));
 
-        // Set current task to JSON + binaries export
+        // Set current task to data model export
         taskProgressDialog.setCurrentTask("Export data model");
 
         // Output analysis JSON file info
@@ -180,13 +196,13 @@ void HdpsApplication::saveAnalysis()
 
         // Report which item in the hierarchy is being exported
         connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {
-            taskProgressDialog.setCurrentTask("Exporting " + savingItem.getFullPathName());
+            taskProgressDialog.setCurrentTask("Exporting dataset: " + savingItem.getFullPathName());
         });
 
         // Write JSON file into temporary serialization directory
         _core->toJsonFile(jsonFileInfo.absoluteFilePath());
 
-        // JSON + binaries export has finished
+        // Data model export has finished
         taskProgressDialog.setTaskFinished("Export data model");
 
         // Add tasks for each file in the temporary directory
@@ -199,7 +215,7 @@ void HdpsApplication::saveAnalysis()
         connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
 
         // Compress the entire output directory
-        archiver.compressDirectory(temporaryDirectoryPath, QDir::toNativeSeparators(fileDialog.selectedFiles().first()), true, enableCompressionCheckBox.isChecked() ? compressionLevelSpinBox.value() : 0, passwordLineEdit.text());
+        archiver.compressDirectory(temporaryDirectoryPath, QDir::toNativeSeparators(fileDialog.selectedFiles().first()), true, enableCompressionCheckBox.isChecked() ? compressionLevelSpinBox.value() : 0, "");
     }
     catch (std::exception& e)
     {

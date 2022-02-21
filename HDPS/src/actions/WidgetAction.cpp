@@ -461,10 +461,10 @@ void WidgetAction::fromJsonFile(const QString& filePath /*= ""*/)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to load widget action from JSON file", e);
+        exceptionMessageBox("Unable to load data from JSON file", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to load widget action from JSON file");
+        exceptionMessageBox("Unable to load data from JSON file");
     }
 }
 
@@ -495,10 +495,10 @@ void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to save widget action to JSON file", e);
+        exceptionMessageBox("Unable to save data to JSON file", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to save widget action to JSON file");
+        exceptionMessageBox("Unable to save data to JSON file");
     }
 }
 

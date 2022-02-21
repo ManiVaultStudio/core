@@ -199,6 +199,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         // Add dataset to the data hierarchy manager
         auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent);
 
+        // Load the data hierarchy item
+        loadedDataset->getDataHierarchyItem().fromVariantMap(variantMap);
+
         // And load from variant map
         loadedDataset->fromVariantMap(dataset);
 

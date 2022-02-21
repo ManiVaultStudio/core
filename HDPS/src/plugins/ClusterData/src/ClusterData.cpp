@@ -79,35 +79,46 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
 
 void ClusterData::fromVariantMap(const QVariantMap& variantMap)
 {
-    /*
-    variantMapMustContain(variantMap, "Data");
+    const auto dataMap = variantMap["Data"].toMap();
 
-    const auto data = variantMap["Data"].toMap();
+    variantMapMustContain(dataMap, "Clusters");
+    variantMapMustContain(dataMap, "IndicesRawData");
+    variantMapMustContain(dataMap, "NumberOfIndices");
 
-    variantMapMustContain(data, "Clusters");
+    // Packed indices for all clusters
+    QVector<std::uint32_t> packedIndices;
 
-    const auto clustersList = data["Clusters"].toList();
+    packedIndices.resize(dataMap["NumberOfIndices"].toInt());
+
+    // Convert raw data to indices
+    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data());
+
+    // Get list of clusters
+    const auto clustersList = dataMap["Clusters"].toList();
 
     _clusters.resize(clustersList.count());
 
+    // Populate clusters
     for (const auto& clusterVariant : clustersList) {
 
+        // Get cluster parameters and index
         const auto clusterMap       = clusterVariant.toMap();
         const auto clusterIndex     = clustersList.indexOf(clusterMap);
 
+        // Get reference to current cluster
         auto& cluster = _clusters[clusterIndex];
 
         cluster.setName(clusterMap["Name"].toString());
         cluster.setId(clusterMap["ID"].toString());
         cluster.setColor(clusterMap["Color"].toString());
 
-        const auto& indicesMap = clusterMap["Indices"].toMap();
+        // Get the offset into the packed indices vector and the number of indices in the cluster
+        const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
+        const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
 
-        cluster.getIndices().resize(indicesMap["Count"].toInt());
-
-        populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)cluster.getIndices().data());
+        // Copy packed indices to cluster indices
+        cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
     }
-    */
 }
 
 QVariantMap ClusterData::toVariantMap() const
@@ -123,10 +134,13 @@ QVariantMap ClusterData::toVariantMap() const
 
     QVariantMap indicesRawData = rawDataToVariantMap((char*)indices.data(), indices.size() * sizeof(std::uint32_t), true);
 
-    std::int32_t globalIndicesOffset = 0;
+    std::size_t globalIndicesOffset = 0;
 
     // Create list of clusters
     for (const auto& cluster : _clusters) {
+
+        // Get the number of indices in the cluster
+        const auto numberOfIndicesInCluster = cluster.getIndices().size();
 
         // Add variant map for each cluster
         clusters.append(QVariantMap({
@@ -134,16 +148,17 @@ QVariantMap ClusterData::toVariantMap() const
             { "ID", cluster.getId() },
             { "Color", cluster.getColor() },
             { "GlobalIndicesOffset", globalIndicesOffset },
-            { "NumberOfIndices", cluster.getIndices().size() }
+            { "NumberOfIndices", numberOfIndicesInCluster }
         }));
 
         // Compute global indices offset
-        globalIndicesOffset += cluster.getIndices().size();
+        globalIndicesOffset += numberOfIndicesInCluster;
     }
 
     return {
         { "Clusters", clusters },
-        { "IndicesRawData", indicesRawData }
+        { "IndicesRawData", indicesRawData },
+        { "NumberOfIndices", indices.size() }
     };
 }
 
