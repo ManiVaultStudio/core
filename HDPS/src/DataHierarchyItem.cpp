@@ -574,12 +574,27 @@ QVariantMap DataHierarchyItem::toVariantMap() const
 
     QVariantMap variantMap, children;
 
-    for (auto child : getChildren())
-        children[child->getGuiName()] = child->toVariantMap();
+    // Child items sort index
+    std::uint32_t childSortIndex = 0;
+
+    for (auto child : getChildren()) {
+
+        // Get map of data hierarchy item
+        auto dataHierarchyItemMap = child->toVariantMap();
+
+        // Add sort index
+        dataHierarchyItemMap["SortIndex"] = childSortIndex;
+
+        // Assign child data hierarchy item map
+        children[child->getGuiName()] = dataHierarchyItemMap;
+
+        childSortIndex++;
+    }
 
     emit const_cast<DataHierarchyItem*>(this)->saved();
 
     return {
+        { "Name", getGuiName() },
         { "Locked", _locked },
         { "Expanded", _locked },
         { "Dataset", _dataset->toVariantMap() },

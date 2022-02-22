@@ -141,7 +141,6 @@ void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char
         const auto size     = map["Size"].value<uint64_t>();
 
         if (map.contains("URI")) {
-            qDebug() << "loadRawDataFromBinaryFile" << offset << size;
             loadRawDataFromBinaryFile(&bytes[offset], size, QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + map["URI"].toString()));
         }
 

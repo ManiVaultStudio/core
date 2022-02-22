@@ -96,8 +96,6 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
 
-    qDebug() << numberOfElements;
-
     switch (elementTypeIndex)
     {
         case PointData::ElementTypeSpecifier::float32:
@@ -113,23 +111,13 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         case PointData::ElementTypeSpecifier::bfloat16:
         {
-            qDebug() << "A";
-
             std::vector<biovault::bfloat16_t> pointData;
-
-            qDebug() << "B";
 
             pointData.resize(numberOfElements);
 
-            qDebug() << "C";
-
             populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
-
-            qDebug() << "D";
-
             setData(pointData, numberOfDimensions);
 
-            qDebug() << "E";
             break;
         }
 
