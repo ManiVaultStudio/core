@@ -62,8 +62,6 @@ void loadRawDataFromBinaryFile(const char* bytes, const std::uint64_t& numberOfB
 
 QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= -1*/)
 {
-    Q_ASSERT(bytes != nullptr);
-    Q_ASSERT(numberOfBytes != 0);
     Q_ASSERT(maxBlockSize != 0);
 
     if (maxBlockSize == -1)

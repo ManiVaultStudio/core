@@ -222,7 +222,7 @@ public: // Expanded
      * Get expanded status
      * @return Boolean indicating whether the item is expanded or not
      */
-    bool getExpanded() const;
+    bool isExpanded() const;
 
     /**
      * Set expanded status

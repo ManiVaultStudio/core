@@ -162,13 +162,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     connect(&_treeView, &QTreeView::expanded, this, &DataHierarchyWidget::expanded);
     connect(&_treeView, &QTreeView::collapsed, this, &DataHierarchyWidget::collapsed);
 
-    // Insert new rows expanded
-    connect(&_model, &QAbstractItemModel::rowsInserted, this, [&](const QModelIndex& parent, int first, int last) {
-
-        // Expand by default
-        _treeView.expand(_model.index(first, 0, parent));
-    });
-
     // Add data hierarchy item to the widget when added in the data manager
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, &DataHierarchyWidget::addDataHierarchyItem);
 
@@ -277,7 +270,21 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Locked));
         });
 
-        _selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+        // Update the model when the data hierarchy item expanded status changes
+        connect(&dataHierarchyItem, &DataHierarchyItem::expandedChanged, this, [this, dataset](const bool& expanded) {
+
+            // Get the model index for the dataset
+            const auto modelIndex = getModelIndexByDataset(dataset);
+
+            // No point in updating the tree view when either the model index is invalid or the expansion state did not change
+            if (!modelIndex.isValid() || expanded == _treeView.isExpanded(modelIndex))
+                return;
+
+            // Set model item expanded
+            _treeView.setExpanded(modelIndex, expanded);
+        });
+
+        //_selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
 
         // Notify others that a dataset was selected
         emit selectedDatasetChanged(dataset->getGuid());
@@ -405,16 +412,28 @@ void DataHierarchyWidget::collapseAll()
 
 void DataHierarchyWidget::expanded(const QModelIndex& index)
 {
+    // Only process valid model index
     if (!index.isValid())
         return;
 
     // Get pointer to data hierarchy item
-    auto dataHierarchyModelItem = _model.getItem(index, Qt::DisplayRole);
+    auto dataHierarchyItem = _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
+
+    // Expand the data hierarchy item
+    dataHierarchyItem->setExpanded(true);
 }
 
 void DataHierarchyWidget::collapsed(const QModelIndex& index)
 {
+    // Only process valid model index
+    if (!index.isValid())
+        return;
 
+    // Get pointer to data hierarchy item
+    auto dataHierarchyItem = _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
+
+    // Collapse the data hierarchy item
+    dataHierarchyItem->setExpanded(false);
 }
 
 void DataHierarchyWidget::updateToolBar()

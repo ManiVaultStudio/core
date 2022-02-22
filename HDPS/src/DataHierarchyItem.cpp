@@ -354,16 +354,13 @@ void DataHierarchyItem::setLocked(const bool& locked)
     emit lockedChanged(_locked);
 }
 
-bool DataHierarchyItem::getExpanded() const
+bool DataHierarchyItem::isExpanded() const
 {
     return _expanded;
 }
 
 void DataHierarchyItem::setExpanded(const bool& expanded)
 {
-    if (expanded == _expanded)
-        return;
-
     _expanded = expanded;
 
     emit expandedChanged(_expanded);
@@ -596,7 +593,7 @@ QVariantMap DataHierarchyItem::toVariantMap() const
     return {
         { "Name", getGuiName() },
         { "Locked", _locked },
-        { "Expanded", _locked },
+        { "Expanded", _expanded },
         { "Dataset", _dataset->toVariantMap() },
         { "Children", children }
     };
