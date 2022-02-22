@@ -17,7 +17,7 @@ namespace util {
  * @param numberOfBytes Number of input bytes
  * @param filePath Path of the file on disk
  */
-void saveRawDataToBinaryFile(const char* bytes, const std::int64_t& numberOfBytes, const QString& filePath);
+void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath);
 
 /**
  * Load raw data from binary file on disk
@@ -25,16 +25,16 @@ void saveRawDataToBinaryFile(const char* bytes, const std::int64_t& numberOfByte
  * @param numberOfBytes Number of input bytes
  * @param filePath Path of the file on disk
  */
-void loadRawDataFromBinaryFile(const char* bytes, const std::int64_t& numberOfBytes, const QString& filePath);
+void loadRawDataFromBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath);
 
 /**
- * Convert raw data buffer to variant map
+ * Convert raw data buffer to variant map (divide up in blocks when the total number of bytes exceeds maxBlockSize)
  * @param bytes Pointer to input buffer
  * @param numberOfBytes Number of input bytes 
- * @param saveToDisk Whether to save the raw data to disk
+ * @param saveToDisk Whether to save the raw data to disk or inline in the variant
  * @param maxBlockSize Maximum size per block (DEFAULT_MAX_BLOCK_SIZE when maxBlockSize == -1)
  */
-QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfBytes, bool saveToDisk = false, std::int64_t maxBlockSize = -1);
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk = false, std::uint64_t maxBlockSize = -1);
 
 /**
  * Convert variant map to raw data

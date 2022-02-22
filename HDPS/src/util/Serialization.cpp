@@ -9,7 +9,7 @@ namespace hdps {
 
 namespace util {
 
-void saveRawDataToBinaryFile(const char* bytes, const std::int64_t& numberOfBytes, const QString& filePath)
+void saveRawDataToBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
 {
     // Output directory
     const auto outputDirectory = QFileInfo(filePath).dir();
@@ -33,7 +33,7 @@ void saveRawDataToBinaryFile(const char* bytes, const std::int64_t& numberOfByte
     binaryFile.close();
 }
 
-void loadRawDataFromBinaryFile(const char* bytes, const std::int64_t& numberOfBytes, const QString& filePath)
+void loadRawDataFromBinaryFile(const char* bytes, const std::uint64_t& numberOfBytes, const QString& filePath)
 {
     // Exit prematurely if the target file does not exist
     if (!QFileInfo(filePath).exists())
@@ -60,7 +60,7 @@ void loadRawDataFromBinaryFile(const char* bytes, const std::int64_t& numberOfBy
     memcpy((void*)bytes, (void*)rawData.data(), numberOfBytes);
 }
 
-QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfBytes, bool saveToDisk /*= false*/, std::int64_t maxBlockSize /*= -1*/)
+QVariantMap rawDataToVariantMap(const char* bytes, const std::uint64_t& numberOfBytes, bool saveToDisk /*= false*/, std::uint64_t maxBlockSize /*= -1*/)
 {
     if (maxBlockSize == -1)
         maxBlockSize = DEFAULT_MAX_BLOCK_SIZE;
@@ -85,8 +85,8 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfB
         // Determine the size of the block
         const auto blockSize = std::min(maxBlockSize, numberOfBytes - offset);
 
-        block["Offset"] = offset;
-        block["Size"]   = blockSize;
+        block["Offset"] = QVariant::fromValue(offset);
+        block["Size"]   = QVariant::fromValue(blockSize);
 
         if (saveToDisk) {
 
@@ -98,7 +98,7 @@ QVariantMap rawDataToVariantMap(const char* bytes, const std::int64_t& numberOfB
             saveRawDataToBinaryFile(&bytes[offset], blockSize, filePath);
 
             // Set the raw data URL
-            block["URL"] = fileName;
+            block["URI"] = fileName;
         }
         else {
 
@@ -130,16 +130,19 @@ void populateDataBufferFromVariantMap (const QVariantMap& variantMap, const char
 
     // Go over all blocks in the blocks map and copy the raw data to the output bytes
     for (const auto& block : blocks) {
+
+        // Get block variant map
         const auto map = block.toMap();
 
         variantMapMustContain(map, "Offset");
         variantMapMustContain(map, "Size");
 
-        const auto offset   = map["Offset"].toInt();
-        const auto size     = map["Size"].toInt();
+        const auto offset   = map["Offset"].value<uint64_t>();
+        const auto size     = map["Size"].value<uint64_t>();
 
-        if (map.contains("URL")) {
-            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + map["URL"].toString()));
+        if (map.contains("URI")) {
+            qDebug() << "loadRawDataFromBinaryFile" << offset << size;
+            loadRawDataFromBinaryFile(&bytes[offset], size, QDir::toNativeSeparators(Application::getSerializationTemporaryDirectory() + "/" + map["URI"].toString()));
         }
 
         if (map.contains("Data")) {

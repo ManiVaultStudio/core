@@ -133,12 +133,13 @@ void HdpsApplication::saveAnalysis()
 
         auto rowCount = fileDialogLayout->rowCount();
 
-        QCheckBox   enableCompressionCheckBox("Compression");
+        QCheckBox   enableCompressionCheckBox("Compression:");
         QSpinBox    compressionLevelSpinBox;
         //QCheckBox   passwordProtectedCheckBox("Password protected");
         //QLineEdit   passwordLineEdit;
 
         enableCompressionCheckBox.setChecked(false);
+        compressionLevelSpinBox.setPrefix("Level: ");
         compressionLevelSpinBox.setMinimum(1);
         compressionLevelSpinBox.setMaximum(9);
         compressionLevelSpinBox.setValue(2);

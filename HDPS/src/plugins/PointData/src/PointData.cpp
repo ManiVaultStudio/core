@@ -90,11 +90,13 @@ void PointData::setValueAt(const std::size_t index, const float newValue)
 void PointData::fromVariantMap(const QVariantMap& variantMap)
 {
     const auto data                 = variantMap["Data"].toMap();
-    const auto numberOfPoints       = variantMap["NumberOfPoints"].toInt();
-    const auto numberOfDimensions   = variantMap["NumberOfDimensions"].toInt();
+    const auto numberOfPoints       = static_cast<size_t>(variantMap["NumberOfPoints"].toInt());
+    const auto numberOfDimensions   = static_cast<size_t>(variantMap["NumberOfDimensions"].toInt());
     const auto numberOfElements     = numberOfPoints * numberOfDimensions;
     const auto elementTypeIndex     = static_cast<PointData::ElementTypeSpecifier>(data["TypeIndex"].toInt());
     const auto rawData              = data["Raw"].toMap();
+
+    qDebug() << numberOfElements;
 
     switch (elementTypeIndex)
     {
@@ -111,7 +113,29 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
 
         case PointData::ElementTypeSpecifier::bfloat16:
         {
+            qDebug() << "A";
+
             std::vector<biovault::bfloat16_t> pointData;
+
+            qDebug() << "B";
+
+            pointData.resize(numberOfElements);
+
+            qDebug() << "C";
+
+            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
+
+            qDebug() << "D";
+
+            setData(pointData, numberOfDimensions);
+
+            qDebug() << "E";
+            break;
+        }
+
+        case PointData::ElementTypeSpecifier::int16:
+        {
+            std::vector<std::int16_t> pointData;
 
             pointData.resize(numberOfElements);
 
@@ -120,21 +144,38 @@ void PointData::fromVariantMap(const QVariantMap& variantMap)
             break;
         }
 
-        //case PointData::ElementTypeSpecifier::int16:
-        //    setData(reinterpret_cast<const std::int16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-        //    break;
+        case PointData::ElementTypeSpecifier::uint16:
+        {
+            std::vector<std::uint16_t> pointData;
 
-        //case PointData::ElementTypeSpecifier::uint16:
-        //    setData(reinterpret_cast<const std::uint16_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-        //    break;
+            pointData.resize(numberOfElements);
 
-        //case PointData::ElementTypeSpecifier::int8:
-        //    setData(reinterpret_cast<const std::int8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-        //    break;
+            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
+            setData(pointData, numberOfDimensions);
+            break;
+        }
 
-        //case PointData::ElementTypeSpecifier::uint8:
-        //    setData(reinterpret_cast<const std::uint8_t*>(QByteArray::fromBase64(rawDataString.toUtf8()).data()), numberOfPoints, numberOfDimensions);
-        //    break;
+        case PointData::ElementTypeSpecifier::int8:
+        {
+            std::vector<std::uint16_t> pointData;
+
+            pointData.resize(numberOfElements);
+
+            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
+            setData(pointData, numberOfDimensions);
+            break;
+        }
+
+        case PointData::ElementTypeSpecifier::uint8:
+        {
+            std::vector<std::uint8_t> pointData;
+
+            pointData.resize(numberOfElements);
+
+            populateDataBufferFromVariantMap(rawData, (char*)pointData.data());
+            setData(pointData, numberOfDimensions);
+            break;
+        }
 
         default:
             break;
