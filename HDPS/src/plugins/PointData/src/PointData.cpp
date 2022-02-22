@@ -673,10 +673,30 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         populateDataBufferFromVariantMap(indicesMap["Raw"].toMap(), (char*)indices.data());
     }
 
+    // Fetch dimension names from map
+    const auto fetchDimensionNames = [&variantMap]() -> QStringList {
+        QStringList dimensionNames;
+
+        // Dimension names in byte array format
+        QByteArray dimensionsByteArray;
+
+        // Copy the dimension names raw data into the byte array
+        dimensionsByteArray.resize(variantMap["DimensionNames"].toMap()["Size"].value<std::uint64_t>());
+        populateDataBufferFromVariantMap(variantMap["DimensionNames"].toMap(), (char*)dimensionsByteArray.data());
+
+        // Open input data stream
+        QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::ReadOnly);
+
+        // Stream the data to the dimension names
+        dimensionsDataStream >> dimensionNames;
+
+        return dimensionNames;
+    };
+
     std::vector<QString> dimensionNames;
 
-    for (const auto dimensionName : variantMap["DimensionNames"].toList())
-        dimensionNames.push_back(dimensionName.toString());
+    for (const auto dimensionName : fetchDimensionNames())
+        dimensionNames.push_back(dimensionName);
 
     setDimensionNames(dimensionNames);
 
@@ -698,6 +718,11 @@ QVariantMap Points::toVariantMap() const
             dimensionNames << QString("Dim %1").arg(QString::number(dimensionIndex));
     }
 
+    QByteArray dimensionsByteArray;
+    QDataStream dimensionsDataStream(&dimensionsByteArray, QIODevice::WriteOnly);
+
+    dimensionsDataStream << dimensionNames;
+
     QVariantMap indices;
 
     indices["Count"]    = this->indices.size();
@@ -707,7 +732,7 @@ QVariantMap Points::toVariantMap() const
     variantMap["NumberOfPoints"]        = getNumPoints();
     variantMap["Full"]                  = isFull();
     variantMap["Indices"]               = indices;
-    variantMap["DimensionNames"]        = dimensionNames;
+    variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
 
     return variantMap;
