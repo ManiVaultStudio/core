@@ -23,53 +23,62 @@ jobs:
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
     # See: https://docs.github.com/en/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on:  ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - name: Windows-msvc2017
-          os: windows-2016
-          compiler: msvc-2017
-          build-cversion: 15
-          build-runtime: MD
-          build-config: Release
+          - name: Windows-msvc2017
+            os: windows-2016
+            compiler: msvc-2017
+            build-cversion: 15
+            build-runtime: MD
+            build-config: Release
 
-#        - name: Linux_gcc9
-#          os: ubuntu-18.04
-#          build-cc: gcc
-#          build-cxx: g++
-#          build-compiler: gcc
-#          build-cversion: 9
-#          build-config: Release
-#          build-os: Linux
-#          build-libcxx: libstdc++
+          #        - name: Linux_gcc9
+          #          os: ubuntu-18.04
+          #          build-cc: gcc
+          #          build-cxx: g++
+          #          build-compiler: gcc
+          #          build-cversion: 9
+          #          build-config: Release
+          #          build-os: Linux
+          #          build-libcxx: libstdc++
 
-        - name: Macos_xcode10.3
-          os: macos-10.14
-          build-cc: clang
-          build-cxx: clang++
-          build-compiler: apple-clang
-          build-cversion: "10.0"
-          build-config: Release
-          build-os: Macos
-          build-xcode-version: 10.3
-          build-libcxx: libc++
+          - name: Macos_xcode10.3
+            os: macos-10.14
+            build-cc: clang
+            build-cxx: clang++
+            build-compiler: apple-clang
+            build-cversion: "10.0"
+            build-config: Release
+            build-os: Macos
+            build-xcode-version: 10.3
+            build-libcxx: libc++
+
+          - name: Macos_xcode12.4
+            os: macos-11
+            build-compiler: apple-clang
+            build-cversion: "12.0"
+            build-config: Release
+            build-os: Macos
+            build-xcode-version: 12.4
+            build-libcxx: libc++
 
     steps:
       - name: Checkout the source
         if: ${{ github.event_name != 'pull_request'}}
         uses: actions/checkout@v2
         with:
-            submodules: recursive
-            fetch-depth: 0
+          submodules: recursive
+          fetch-depth: 0
 
       - name: Checkout the source (pull_request version)
         if: ${{ github.event_name == 'pull_request'}}
         uses: actions/checkout@v2
         with:
-            ref: ${{ github.event.pull_request.head.ref }}
-            submodules: recursive
-            fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+          submodules: recursive
+          fetch-depth: 0
 
       - name: Select Xcode for Mac only
         if: startsWith(runner.os, 'macOS')
@@ -85,8 +94,8 @@ jobs:
       - name: Start ssh key agent
         if: matrix.os == 'windows-2016'
         run: |
-            choco install --no-progress -my openssh --params '"/SSHAgentFeature"'
-            refreshenv
+          choco install --no-progress -my openssh --params '"/SSHAgentFeature"'
+          refreshenv
 
       - name: Start ssh key agent
         uses: webfactory/ssh-agent@v0.5.0
