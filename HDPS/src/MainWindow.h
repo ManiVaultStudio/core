@@ -41,14 +41,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
 
     /**
-    * Adds a new item to the import menu.
-    */
-    QAction* addImportOption(QString menuName);
+     * Adds a new item to the import menu
+     * @param menuName Name of the import plugin
+     * @param icon Icon of the import plugin
+     */
+    QAction* addImportOption(const QString& actionName, const QIcon& icon);
 
     /**
     * Adds a new item to the menu drop-down for this particular type.
     */
-    QAction* addMenuAction(plugin::Type type, QString name);
+    QAction* addViewAction(const plugin::Type& type, const QString name, const QIcon& icon);
 
     /**
     * Allows access to the core, which is created by this MainWindow. Useful for
@@ -131,8 +133,11 @@ private: // Docking
 
 protected: // Menu
 
-    /** Setup menus and their handlers */
-    void setupMenus();
+    /** Setup file menu */
+    void setupFileMenu();
+
+    /** Setup view menu */
+    void setupViewMenu();
 
     /** Fill the recent projects menu with entries */
     void populateRecentProjectsMenu();

@@ -74,7 +74,9 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
         setWindowTitle("HDPS: "+ currentProjectFilePath);
     });
 
-    setupMenus();
+    // Setup menus
+    setupFileMenu();
+    setupViewMenu();
 
     initializeDocking();
     restoreWindowGeometryFromSettings();
@@ -85,21 +87,14 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 }
 
-QAction* MainWindow::addImportOption(QString menuName)
+QAction* MainWindow::addImportOption(const QString& actionName, const QIcon& icon)
 {
-    return importDataFileMenu->addAction(menuName);
+    return importDataMenu->addAction(icon, actionName);
 }
 
-QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
+QAction* MainWindow::addViewAction(const plugin::Type& type, const QString name, const QIcon& icon)
 {
-    switch (type)
-    {
-        case plugin::Type::VIEW:
-            return menuVisualization->addAction(name);
-
-        default:
-            return nullptr;
-    }
+    return menuVisualization->addAction(icon, name);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)
@@ -366,7 +361,7 @@ QList<ads::CDockWidget*> MainWindow::getViewPluginDockWidgets(const bool& openOn
     return viewPluginDockWidgets;
 }
 
-void MainWindow::setupMenus()
+void MainWindow::setupFileMenu()
 {
     // Set action icons
     openProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
@@ -374,6 +369,7 @@ void MainWindow::setupMenus()
     saveProjectAsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     recentProjectsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
     resetDataModelAction->setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
+    importDataMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     exitAction->setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
 
     // Set action tooltips
@@ -398,9 +394,6 @@ void MainWindow::setupMenus()
     connect(saveProjectAsAction, &QAction::triggered, [this](bool) {
         Application::current()->saveProject();
     });
-
-    // Populate the recent projects menu when is is about to show
-    connect(recentProjectsMenu, &QMenu::aboutToShow, this, &MainWindow::populateRecentProjectsMenu);
 
     // Reset the data model when the action is triggered
     connect(resetDataModelAction, &QAction::triggered, _core.get(), &Core::resetDataModel);
@@ -429,6 +422,44 @@ void MainWindow::setupMenus()
             _loggingDockArea->hide();
         }
     });
+
+    // Update read-only status of various actions when the main file menu is opened
+    connect(fileMenu, &QMenu::aboutToShow, this, [this]() -> void {
+
+        // Establish whether there are any loaded datasets
+        const auto hasDatasets = _core->requestAllDataSets().size();
+
+        // Update read-only status
+        saveProjectAction->setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
+        saveProjectAsAction->setEnabled(hasDatasets);
+        resetDataModelAction->setEnabled(hasDatasets);
+
+        // Populate the recent projects menu
+        populateRecentProjectsMenu();
+    });
+}
+
+void MainWindow::setupViewMenu()
+{
+    /*
+    // Set action icons
+    dataHierarchyViewerAction->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap"));
+    dataPropertiesViewerAction->setIcon(Application::getIconFont("FontAwesome").getIcon("edit"));
+
+    // Set action tooltips
+    dataHierarchyViewerAction->setToolTip("Show/hide the data hierarchy viewer");
+    dataPropertiesViewerAction->setToolTip("Show/hide the data properties viewer");
+
+    // Show/hide data hierarchy dock widget when the corresponding action is toggled
+    connect(dataHierarchyViewerAction, &QAction::toggled, this, [this](bool toggled) -> void {
+        _dataHierarchyDockWidget->dockAreaWidget()->setVisible(toggled);
+    });
+
+    // Show/hide data properties dock widget when the corresponding action is toggled
+    connect(dataPropertiesViewerAction, &QAction::toggled, this, [this](bool toggled) -> void {
+        _dataPropertiesDockWidget->dockAreaWidget()->setVisible(toggled);
+    });
+    */
 }
 
 void MainWindow::populateRecentProjectsMenu()

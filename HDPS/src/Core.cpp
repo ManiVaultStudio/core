@@ -211,15 +211,18 @@ void Core::removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bo
 
         // Notify listeners that the dataset is about to be removed
         notifyDataAboutToBeRemoved(dataset);
-        
+
+        // Cache the dataset GUID
+        const auto datasetGuid = dataset->getGuid();
+
         // Remove the dataset from the data manager
         _dataManager->removeDataset(dataset);
 
         // Remove the dataset from the data hierarchy manager
-        _dataHierarchyManager->removeItem(datasets.first(), true);
+        _dataHierarchyManager->removeItem(dataset, true);
 
         // Notify listeners that the dataset is removed
-        notifyDataRemoved(dataset->getGuid(), dataType);
+        notifyDataRemoved(datasetGuid, dataType);
     }
 }
 

@@ -95,21 +95,20 @@ void PluginManager::loadPlugins()
 
         if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::ANALYSIS, pluginKind);
         }
         else if (qobject_cast<RawDataFactory*>(pluginFactory))
         {
         }
         else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
         {
-            action = gui.addImportOption(menuName);
+            action = gui.addImportOption(menuName, dynamic_cast<PluginFactory*>(pluginFactory)->getIcon());
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
-            action = gui.addMenuAction(plugin::Type::VIEW, pluginKind);
+            action = gui.addViewAction(plugin::Type::VIEW, pluginKind, dynamic_cast<PluginFactory*>(pluginFactory)->getIcon());
         }
         else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
         {

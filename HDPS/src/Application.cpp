@@ -105,7 +105,7 @@ void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
 
     // Add to recent projects if not already in there
     if (!recentProjects.contains(recentProjectFilePath))
-        recentProjects << recentProjectFilePath;
+        recentProjects.insert(0, recentProjectFilePath);
 
     // Save settings
     setSetting("Projects/Recent", recentProjects);

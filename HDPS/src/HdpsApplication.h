@@ -87,8 +87,8 @@ public: // Project IO
     void saveProject(QString projectFilePath = "") override final;
 
 protected:
-    bool            _enableCompression;     /** Whether projects will be saved with compression or not */
-    std::uint32_t   _compressionLevel;      /** Level of compression for project files */
+    static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
+    static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/
 };
 
 }

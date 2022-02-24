@@ -25,13 +25,13 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="fileMenu">
     <property name="title">
      <string>File</string>
     </property>
-    <widget class="QMenu" name="importDataFileMenu">
+    <widget class="QMenu" name="importDataMenu">
      <property name="title">
-      <string>Import Data File</string>
+      <string>Import data...</string>
      </property>
     </widget>
     <widget class="QMenu" name="recentProjectsMenu">
@@ -46,7 +46,7 @@
     <addaction name="recentProjectsMenu"/>
     <addaction name="separator"/>
     <addaction name="resetDataModelAction"/>
-    <addaction name="importDataFileMenu"/>
+    <addaction name="importDataMenu"/>
     <addaction name="separator"/>
     <addaction name="exitAction"/>
    </widget>
@@ -62,8 +62,16 @@
     <addaction name="findLogFileAction"/>
     <addaction name="logViewAction"/>
    </widget>
-   <addaction name="menuFile"/>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="dataHierarchyViewerAction"/>
+    <addaction name="dataPropertiesViewerAction"/>
+   </widget>
+   <addaction name="fileMenu"/>
    <addaction name="menuVisualization"/>
+   <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="openProjectAction">
@@ -112,6 +120,31 @@
   <action name="resetDataModelAction">
    <property name="text">
     <string>Reset data model</string>
+   </property>
+  </action>
+  <action name="dataHierarchyViewerAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Data hierarchy viewer</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="dataPropertiesViewerAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Data properties viewer</string>
    </property>
   </action>
  </widget>
