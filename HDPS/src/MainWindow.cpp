@@ -430,7 +430,9 @@ void MainWindow::populateRecentProjectsMenu()
         // Create recent project action
         auto recentProjectAction = new QAction(recentProjectFilePath);
 
+        // Set action icon tooltip
         recentProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+        recentProjectAction->setToolTip("Load " + recentProjectFilePath);
 
         // Load the recent project when triggered
         connect(recentProjectAction, &QAction::triggered, this, [recentProjectFilePath]() -> void {
