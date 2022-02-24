@@ -119,6 +119,8 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
 
         // Adjust the current project file path
         setCurrentProjectFilePath(projectFilePath);
+
+        qDebug().noquote() << projectFilePath << "loaded successfully";
     }
     catch (std::exception& e)
     {
@@ -301,6 +303,8 @@ void HdpsApplication::saveProject(QString projectFilePath /*= ""*/)
 
         // Adjust the current project file path
         setCurrentProjectFilePath(projectFilePath);
+
+        qDebug().noquote() << projectFilePath << "saved successfully";
     }
     catch (std::exception& e)
     {
