@@ -223,6 +223,11 @@ void Core::removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bo
     }
 }
 
+void Core::resetDataModel()
+{
+    removeDatasets(requestAllDataSets());
+}
+
 Dataset<DatasetImpl> Core::createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
 {
     // Get the data type of the source dataset
@@ -366,11 +371,6 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
     }
 
     return allDataSets;
-}
-
-void Core::resetDataModel()
-{
-    _dataManager->removeAllDatasets();
 }
 
 const DataManager& Core::getDataManager() const

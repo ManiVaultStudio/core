@@ -75,6 +75,9 @@ public: // Data access
      */
     virtual void removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively = false) = 0;
 
+    /** Resets the data model (removes all datasets */
+    virtual void resetDataModel() = 0;
+
     /**
      * Creates a dataset derived from a source dataset.
      * @param guiName GUI name for the new dataset from the core
@@ -148,12 +151,6 @@ public: // Data access
      * @return Vector of references to datasets
      */
     virtual QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) = 0;
-
-    /**
-     * Resets the data model
-     * Removes all datasets
-     */
-    virtual void resetDataModel() = 0;
 
 protected: // Data access
 
