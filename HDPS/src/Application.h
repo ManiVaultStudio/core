@@ -18,6 +18,8 @@ class CoreInterface;
  */
 class Application : public QApplication
 {
+    Q_OBJECT
+
 public: // Construction
 
     /**
@@ -71,13 +73,37 @@ public: // Settings API
      */
     void setSetting(const QString& path, const QVariant& value);
 
-public: // Serialization
+public: // Project IO
 
-    /** Load application from disk */
-    virtual void loadAnalysis() = 0;
+    /**
+     * Load project from disk
+     * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
+     */
+    virtual void loadProject(QString projectFilePath = "") = 0;
 
-    /** Save application to disk */
-    virtual void saveAnalysis() = 0;
+    /**
+     * Save project to disk
+     * @param projectFilePath File path of the project (if empty, the user will  select a file location by hand)
+     */
+    virtual void saveProject(QString projectFilePath = "") = 0;
+
+    /**
+     * Get current project file path
+     * @return File path of the current project
+     */
+    virtual QString getCurrentProjectFilePath() const final;
+
+    /**
+     * Set current project file path
+     * @param currentProjectFilePath Current project file path
+     */
+    virtual void setCurrentProjectFilePath(const QString& currentProjectFilePath) final;
+
+    /**
+     * Add recent project file path (adds the path to the settings so that users can select the project from a recent list)
+     * @param recentProjectFilePath File path of the recent project
+     */
+    virtual void addRecentProjectFilePath(const QString& recentProjectFilePath) final;
 
 public: // Serialization temporary directory
 
@@ -87,10 +113,18 @@ public: // Serialization temporary directory
      */
     static QString getSerializationTemporaryDirectory();
 
+signals:
+
+    /**
+     * Signals that the current project file changed
+     */
+    void currentProjectFilePathChanged(const QString& currentProjectFilePath);
+
 protected:
     CoreInterface*      _core;                                  /** Shared pointer to HDPS core */
     IconFonts           _iconFonts;                             /** Icon fonts resource */
     QSettings           _settings;                              /** Settings */
+    QString             _currentProjectFilePath;                /** File path of the current project */
     QString             _serializationTemporaryDirectory;       /** Temporary directory for serialization */
 };
 

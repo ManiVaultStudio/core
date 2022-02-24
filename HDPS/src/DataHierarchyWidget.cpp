@@ -35,9 +35,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _datasetNameFilterAction(this, "Dataset name filter"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
-    _groupingAction(this, "Grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled()),
-    _loadAction(this, "Load"),
-    _saveAction(this, "Save")
+    _groupingAction(this, "Grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
 {
     // Set filter model input model
     _filterModel.setSourceModel(&_model);
@@ -95,17 +93,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Update columns visibility when grouping is editable/disabled
     connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
 
-    _loadAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-    _saveAction.setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-
-    connect(&_loadAction, &TriggerAction::triggered, this, [this]() {
-        Application::current()->loadAnalysis();
-    });
-
-    connect(&_saveAction, &TriggerAction::triggered, this, [this]() {
-        Application::current()->saveAnalysis();
-    });
-
     // Create layout that will contain the toolbar and the tree view
     auto layout = new QVBoxLayout();
 
@@ -123,10 +110,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
-    toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::PushButtonIcon));
-    toolbarLayout->addWidget(createVerticalDivider());
-    toolbarLayout->addWidget(_loadAction.createWidget(this));
-    toolbarLayout->addWidget(_saveAction.createWidget(this));
+    toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::Text));
 
     // Add tool bar layout and tree view widget
     layout->addLayout(toolbarLayout);

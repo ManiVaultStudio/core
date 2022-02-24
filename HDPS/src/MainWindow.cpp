@@ -73,6 +73,30 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     Logger::Initialize();
 
+    openProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    saveProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    saveProjectAsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    recentProjectsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("history"));
+
+    connect(openProjectAction, &QAction::triggered, [this](bool) {
+        Application::current()->loadProject();
+    });
+
+    connect(saveProjectAction, &QAction::triggered, [this](bool) {
+        Application::current()->saveProject(Application::current()->getCurrentProjectFilePath());
+    });
+
+    connect(saveProjectAsAction, &QAction::triggered, [this](bool) {
+        Application::current()->saveProject();
+    });
+
+    connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
+        setWindowTitle("HDPS: "+ currentProjectFilePath);
+    });
+
+    // Populate the recent projects menu when is is about to show
+    connect(recentProjectsMenu, &QMenu::aboutToShow, this, &MainWindow::populateRecentProjectsMenu);
+
     QObject::connect(findLogFileAction, &QAction::triggered, [this](bool) {
         const auto filePath = Logger::GetFilePathName();
 
@@ -380,6 +404,42 @@ QList<ads::CDockWidget*> MainWindow::getViewPluginDockWidgets(const bool& openOn
     }
 
     return viewPluginDockWidgets;
+}
+
+void MainWindow::populateRecentProjectsMenu()
+{
+    // Get recent projects
+    const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
+
+    // Disable recent projects menu when there are no recent projects
+    recentProjectsMenu->setEnabled(!recentProjects.isEmpty());
+
+    // Remove existing actions
+    recentProjectsMenu->clear();
+
+    // Get recent projects from settings
+    for (const auto& recentProject : recentProjects) {
+
+        // Get the recent project file path
+        const auto recentProjectFilePath = recentProject.toString();
+
+        // Check if the recent project exists on disk
+        if (!QFileInfo(recentProjectFilePath).exists())
+            continue;
+
+        // Create recent project action
+        auto recentProjectAction = new QAction(recentProjectFilePath);
+
+        recentProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+
+        // Load the recent project when triggered
+        connect(recentProjectAction, &QAction::triggered, this, [recentProjectFilePath]() -> void {
+            Application::current()->loadProject(recentProjectFilePath);
+        });
+
+        // Add recent project action to the menu
+        recentProjectsMenu->addAction(recentProjectAction);
+    }
 }
 
 }

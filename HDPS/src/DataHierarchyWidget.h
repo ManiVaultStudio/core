@@ -138,8 +138,6 @@ private:
     TriggerAction               _expandAllAction;           /** Expand all datasets action */
     TriggerAction               _collapseAllAction;         /** Collapse all datasets action */
     ToggleAction                _groupingAction;            /** Data grouping action */
-    TriggerAction               _loadAction;                /** */
-    TriggerAction               _saveAction;                /** */
 };
 
 }

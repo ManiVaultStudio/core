@@ -251,7 +251,7 @@ QVariantMap DataHierarchyManager::toVariantMap() const
         dataHierarchyItemMap["SortIndex"] = sortIndex;
 
         // Assign data hierarchy item map
-        variantMap[dataHierarchyItem->getGuiName()] = dataHierarchyItemMap;
+        variantMap[dataHierarchyItem->getDataset()->getGuid()] = dataHierarchyItemMap;
 
         sortIndex++;
     }

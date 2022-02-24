@@ -23,7 +23,9 @@ namespace hdps {
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     _iconFonts(),
-    _settings()
+    _settings(),
+    _currentProjectFilePath(),
+    _serializationTemporaryDirectory()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
 }
@@ -78,6 +80,35 @@ QVariant Application::getSetting(const QString& path, const QVariant& defaultVal
 void Application::setSetting(const QString& path, const QVariant& value)
 {
     _settings.setValue(path, value);
+}
+
+QString Application::getCurrentProjectFilePath() const
+{
+    return _currentProjectFilePath;
+}
+
+void Application::setCurrentProjectFilePath(const QString& currentProjectFilePath)
+{
+    if (currentProjectFilePath == _currentProjectFilePath)
+        return;
+
+    _currentProjectFilePath = currentProjectFilePath;
+
+    // Notify others that the current project file path changed
+    emit currentProjectFilePathChanged(_currentProjectFilePath);
+}
+
+void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
+{
+    // Get recent projects from settings
+    auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
+
+    // Add to recent projects if not already in there
+    if (!recentProjects.contains(recentProjectFilePath))
+        recentProjects << recentProjectFilePath;
+
+    // Save settings
+    setSetting("Projects/Recent", recentProjects);
 }
 
 QString Application::getSerializationTemporaryDirectory()

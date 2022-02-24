@@ -129,6 +129,13 @@ private: // Docking
      */
     QList<ads::CDockWidget*> getViewPluginDockWidgets(const bool& openOnly = true);
 
+protected: // Menu
+
+    /**
+     * Fill the recent projects menu with entries
+     */
+    void populateRecentProjectsMenu();
+
 private:
     QSharedPointer<Core>        _core;                          /** HDPS core */
     DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget */

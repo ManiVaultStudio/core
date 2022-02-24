@@ -21,7 +21,7 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _visible(visible),
     _selected(false),
     _locked(false),
-    _expanded(true),
+    _expanded(false),
     _taskDescription(""),
     _taskProgress(0.0),
     _subTasks(),
@@ -583,7 +583,7 @@ QVariantMap DataHierarchyItem::toVariantMap() const
         dataHierarchyItemMap["SortIndex"] = childSortIndex;
 
         // Assign child data hierarchy item map
-        children[child->getGuiName()] = dataHierarchyItemMap;
+        children[child->getDataset()->getGuid()] = dataHierarchyItemMap;
 
         childSortIndex++;
     }

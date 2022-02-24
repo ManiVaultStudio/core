@@ -25,11 +25,13 @@ namespace hdps {
 
 
 HdpsApplication::HdpsApplication(int& argc, char** argv) :
-    Application(argc, argv)
+    Application(argc, argv),
+    _enableCompression(getSetting("Projects/EnableCompression", false).toBool()),
+    _compressionLevel(getSetting("Projects/CompressionLevel", 2).toInt())
 {
 }
 
-void HdpsApplication::loadAnalysis()
+void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
 {
     try
     {
@@ -42,34 +44,39 @@ void HdpsApplication::loadAnalysis()
         // Set the serialization temporary directory so that we can find the binaries
         _serializationTemporaryDirectory = temporaryDirectoryPath;
 
-        // Create a file dialog for opening an HDPS analysis file
-        QFileDialog fileDialog;
+        // Prompt the user for a file path if the current file path is empty
+        if (projectFilePath.isEmpty()) {
 
-        // Configure file dialog
-        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-        fileDialog.setFileMode(QFileDialog::ExistingFile);
-        fileDialog.setNameFilters({ "HDPS analysis files (*.hdps)" });
-        fileDialog.setDefaultSuffix(".hdps");
+            // Create a file dialog for opening an HDPS analysis file
+            QFileDialog fileDialog;
 
-        // Loading failed when the file dialog is canceled
-        if (fileDialog.exec() == 0)
-            return;
+            // Configure file dialog
+            fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+            fileDialog.setFileMode(QFileDialog::ExistingFile);
+            fileDialog.setNameFilters({ "HDPS analysis files (*.hdps)" });
+            fileDialog.setDefaultSuffix(".hdps");
 
-        // Only load if we have one file
-        if (fileDialog.selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
+            // Loading failed when the file dialog is canceled
+            if (fileDialog.exec() == 0)
+                return;
 
-        // Establish the JSON file path that will be loaded
-        const auto compressedFilePath = fileDialog.selectedFiles().first();
+            // Only load if we have one file
+            if (fileDialog.selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
+
+            projectFilePath = fileDialog.selectedFiles().first();
+        }
+
+        qDebug().noquote() << "Loading HDPS project from " << projectFilePath;
 
         // Create archiver for decompression
         Archiver archiver;
 
         // List of tasks that need to be performed during decompression
-        QStringList tasks = archiver.getTaskNamesForDecompression(compressedFilePath) << "Import data model";
+        QStringList tasks = archiver.getTaskNamesForDecompression(projectFilePath) << "Import data model";
 
         // Create dialog for reporting load progress
-        TaskProgressDialog taskProgressDialog(nullptr, tasks, "Loading analysis from " + compressedFilePath, getIconFont("FontAwesome").getIcon("file-import"));
+        TaskProgressDialog taskProgressDialog(nullptr, tasks, "Loading HDPS project from " + projectFilePath, getIconFont("FontAwesome").getIcon("file-import"));
 
         // Report which item in the hierarchy is being imported
         connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemLoading, this, [&taskProgressDialog](DataHierarchyItem& loadingItem) {
@@ -81,7 +88,7 @@ void HdpsApplication::loadAnalysis()
         connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
 
         // Decompress folder to temporary directory
-        archiver.decompress(compressedFilePath, temporaryDirectoryPath);
+        archiver.decompress(projectFilePath, temporaryDirectoryPath);
 
         // Set current task to data model export
         taskProgressDialog.setCurrentTask("Import data model");
@@ -94,18 +101,24 @@ void HdpsApplication::loadAnalysis()
 
         // Data model import has finished
         taskProgressDialog.setTaskFinished("Import data model");
+
+        // Add saved project to recent projects setting
+        addRecentProjectFilePath(projectFilePath);
+
+        // Adjust the current project file path
+        setCurrentProjectFilePath(projectFilePath);
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to load HDPS analysis", e);
+        exceptionMessageBox("Unable to load HDPS project", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to load HDPS analysis");
+        exceptionMessageBox("Unable to load HDPS project");
     }
 }
 
-void HdpsApplication::saveAnalysis()
+void HdpsApplication::saveProject(QString projectFilePath /*= ""*/)
 {
     try
     {
@@ -113,66 +126,78 @@ void HdpsApplication::saveAnalysis()
         QTemporaryDir temporaryDirectory;
 
         // Create UUID-based output directory name in the temporary directory
-        const auto temporaryDirectoryPath = QDir::toNativeSeparators(temporaryDirectory.path());
+        const auto temporaryDirectoryPath = temporaryDirectory.path();
 
 #ifdef _VERBOSE
         qDebug().noquote() << QString("Temporary directory: %1").arg(temporaryDirectoryPath);
 #endif
 
-        // Supplied file path is not valid so create a file dialog for saving a JSON file
-        QFileDialog fileDialog;
+        // Prompt the user for a file path if the current file path is empty
+        if (projectFilePath.isEmpty()) {
 
-        // Configure file dialog
-        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-        fileDialog.setNameFilters({ "HDPS analysis files (*.hdps)" });
-        fileDialog.setDefaultSuffix(".hdps");
-        fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+            // Create a file dialog for saving an HDPS project file
+            QFileDialog fileDialog;
 
-        // Get pointer to the file dialog layout
-        auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout());
+            // Configure file dialog
+            fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+            fileDialog.setNameFilters({ "HDPS analysis files (*.hdps)" });
+            fileDialog.setDefaultSuffix(".hdps");
+            fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
 
-        auto rowCount = fileDialogLayout->rowCount();
+            // Get pointer to the file dialog layout
+            auto fileDialogLayout = dynamic_cast<QGridLayout*>(fileDialog.layout());
 
-        QCheckBox   enableCompressionCheckBox("Compression:");
-        QSpinBox    compressionLevelSpinBox;
-        //QCheckBox   passwordProtectedCheckBox("Password protected");
-        //QLineEdit   passwordLineEdit;
+            auto rowCount = fileDialogLayout->rowCount();
 
-        enableCompressionCheckBox.setChecked(false);
-        compressionLevelSpinBox.setPrefix("Level: ");
-        compressionLevelSpinBox.setMinimum(1);
-        compressionLevelSpinBox.setMaximum(9);
-        compressionLevelSpinBox.setValue(2);
-        //passwordProtectedCheckBox.setChecked(false);
-        //passwordLineEdit.setPlaceholderText("Enter encryption password...");
+            QCheckBox   enableCompressionCheckBox("Compression:");
+            QSpinBox    compressionLevelSpinBox;
+            //QCheckBox   passwordProtectedCheckBox("Password protected");
+            //QLineEdit   passwordLineEdit;
 
-        // Add controls for compression and password protection
-        fileDialogLayout->addWidget(&enableCompressionCheckBox, rowCount, 0);
-        fileDialogLayout->addWidget(&compressionLevelSpinBox, rowCount, 1);
-        //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
-        //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
+            enableCompressionCheckBox.setChecked(_enableCompression);
+            compressionLevelSpinBox.setPrefix("Level: ");
+            compressionLevelSpinBox.setMinimum(1);
+            compressionLevelSpinBox.setMaximum(9);
+            compressionLevelSpinBox.setValue(_compressionLevel);
+            //passwordProtectedCheckBox.setChecked(false);
+            //passwordLineEdit.setPlaceholderText("Enter encryption password...");
 
-        const auto updateCompressionLevel = [&]() -> void {
-            compressionLevelSpinBox.setEnabled(enableCompressionCheckBox.isChecked());
-        };
+            // Add controls for compression and password protection
+            fileDialogLayout->addWidget(&enableCompressionCheckBox, rowCount, 0);
+            fileDialogLayout->addWidget(&compressionLevelSpinBox, rowCount, 1);
+            //fileDialogLayout->addWidget(&passwordProtectedCheckBox, ++rowCount, 0);
+            //fileDialogLayout->addWidget(&passwordLineEdit, rowCount, 1);
 
-        //const auto updatePassword = [&]() -> void {
-        //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
-        //};
+            // Update read only state of the compression level control
+            const auto updateCompressionLevel = [&]() -> void {
+                compressionLevelSpinBox.setEnabled(enableCompressionCheckBox.isChecked());
+            };
 
-        connect(&enableCompressionCheckBox, &QCheckBox::toggled, this, updateCompressionLevel);
-        //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
+            // Update read only state of the password control
+            //const auto updatePassword = [&]() -> void {
+            //    passwordLineEdit.setEnabled(passwordProtectedCheckBox.isChecked());
+            //};
 
-        updateCompressionLevel();
-        //updatePassword();
+            connect(&enableCompressionCheckBox, &QCheckBox::toggled, this, updateCompressionLevel);
+            //connect(&passwordProtectedCheckBox, &QCheckBox::toggled, this, updatePassword);
 
-        // Saving failed when the file dialog is canceled
-        if (fileDialog.exec() == 0)
-            throw std::runtime_error("File selection was canceled");
+            // Initial updates
+            updateCompressionLevel();
+            //updatePassword();
 
-        // Only save if we have one file
-        if (fileDialog.selectedFiles().count() != 1)
-            throw std::runtime_error("Only one file may be selected");
+            // Only save if we have one file
+            if (fileDialog.selectedFiles().count() != 1)
+                throw std::runtime_error("Only one file may be selected");
+
+            // Update compression settings
+            _enableCompression  = enableCompressionCheckBox.isChecked();
+            _compressionLevel   = compressionLevelSpinBox.value();
+
+            // Update the project file path
+            projectFilePath = fileDialog.selectedFiles().first();
+        }
+
+        qDebug().noquote() << "Saving HDPS project to " << projectFilePath;
 
         // Create an archiver which will be used for directory compression
         Archiver archiver;
@@ -184,7 +209,7 @@ void HdpsApplication::saveAnalysis()
         tasks << "Export data model" << "Temporary task";
 
         // Create dialog for reporting save progress
-        TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving analysis to " + fileDialog.selectedFiles().first(), getIconFont("FontAwesome").getIcon("file-export"));
+        TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving analysis to " + projectFilePath, getIconFont("FontAwesome").getIcon("file-export"));
 
         // Set current task to data model export
         taskProgressDialog.setCurrentTask("Export data model");
@@ -216,15 +241,25 @@ void HdpsApplication::saveAnalysis()
         connect(&archiver, &Archiver::taskFinished, &taskProgressDialog, &TaskProgressDialog::setTaskFinished);
 
         // Compress the entire output directory
-        archiver.compressDirectory(temporaryDirectoryPath, QDir::toNativeSeparators(fileDialog.selectedFiles().first()), true, enableCompressionCheckBox.isChecked() ? compressionLevelSpinBox.value() : 0, "");
+        archiver.compressDirectory(temporaryDirectoryPath, projectFilePath, true, _enableCompression ? _compressionLevel : 0, "");
+
+        // Add saved project to recent projects setting
+        addRecentProjectFilePath(projectFilePath);
+
+        // Save settings
+        setSetting("Projects/EnableCompression", _enableCompression);
+        setSetting("Projects/CompressionLevel", _compressionLevel);
+
+        // Adjust the current project file path
+        setCurrentProjectFilePath(projectFilePath);
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to save HDPS analysis", e);
+        exceptionMessageBox("Unable to save HDPS project", e);
     }
     catch (...)
     {
-        exceptionMessageBox("Unable to save HDPS analysis");
+        exceptionMessageBox("Unable to save HDPS project");
     }
 }
 
@@ -272,10 +307,10 @@ void HdpsApplication::TaskProgressDialog::setTaskFinished(const QString& taskNam
     QCoreApplication::processEvents();
 }
 
-void HdpsApplication::TaskProgressDialog::setCurrentTaskName(const QString& taskName)
+void HdpsApplication::TaskProgressDialog::setCurrentTaskText(const QString& taskText)
 {
     // Update label text
-    setLabelText(taskName);
+    setLabelText(taskText);
 
     // Ensure the progress dialog gets updated
     QCoreApplication::processEvents();
