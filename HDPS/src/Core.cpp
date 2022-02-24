@@ -368,6 +368,11 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
     return allDataSets;
 }
 
+void Core::resetDataModel()
+{
+    _dataManager->removeAllDatasets();
+}
+
 const DataManager& Core::getDataManager() const
 {
     return *_dataManager.get();

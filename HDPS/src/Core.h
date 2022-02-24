@@ -135,6 +135,12 @@ public: // Data access
     QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) override;
 
     /**
+     * Resets the data model
+     * Removes all datasets
+     */
+    void resetDataModel() override final;
+
+    /**
      * Get data manager
      * @return Reference to the data manager
      */

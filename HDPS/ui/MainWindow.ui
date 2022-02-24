@@ -45,6 +45,7 @@
     <addaction name="separator"/>
     <addaction name="recentProjectsMenu"/>
     <addaction name="separator"/>
+    <addaction name="resetDataModelAction"/>
     <addaction name="importDataFileMenu"/>
     <addaction name="separator"/>
     <addaction name="exitAction"/>
@@ -106,6 +107,11 @@
   <action name="actionsdf">
    <property name="text">
     <string>sdf</string>
+   </property>
+  </action>
+  <action name="resetDataModelAction">
+   <property name="text">
+    <string>Reset data model</string>
    </property>
   </action>
  </widget>

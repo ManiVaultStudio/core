@@ -69,57 +69,17 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
         _dataPropertiesDockWidget->setWindowTitle(QString("Data properties: %1").arg(datasetName));
     });
 
-    QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
-
-    Logger::Initialize();
-
-    openProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
-    saveProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-    saveProjectAsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
-    recentProjectsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("history"));
-
-    connect(openProjectAction, &QAction::triggered, [this](bool) {
-        Application::current()->loadProject();
-    });
-
-    connect(saveProjectAction, &QAction::triggered, [this](bool) {
-        Application::current()->saveProject(Application::current()->getCurrentProjectFilePath());
-    });
-
-    connect(saveProjectAsAction, &QAction::triggered, [this](bool) {
-        Application::current()->saveProject();
-    });
-
+    // Change the window title when the current project file changed
     connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
         setWindowTitle("HDPS: "+ currentProjectFilePath);
     });
 
-    // Populate the recent projects menu when is is about to show
-    connect(recentProjectsMenu, &QMenu::aboutToShow, this, &MainWindow::populateRecentProjectsMenu);
-
-    QObject::connect(findLogFileAction, &QAction::triggered, [this](bool) {
-        const auto filePath = Logger::GetFilePathName();
-
-        if (!hdps::util::ShowFileInFolder(filePath))
-        {
-            QMessageBox::information(this,
-                QObject::tr("Log file not found"),
-                QObject::tr("The log file is not found:\n%1").arg(filePath));
-        }
-    });
-
-    QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked) {
-        if (checked) {
-            _loggingDockWidget->setWidget(new LogDockWidget(*this));
-            _loggingDockArea->show();
-        } else {
-            delete _loggingDockWidget->takeWidget();
-            _loggingDockArea->hide();
-        }
-    });
+    setupMenus();
 
     initializeDocking();
     restoreWindowGeometryFromSettings();
+
+    Logger::Initialize();
 
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
@@ -404,6 +364,71 @@ QList<ads::CDockWidget*> MainWindow::getViewPluginDockWidgets(const bool& openOn
     }
 
     return viewPluginDockWidgets;
+}
+
+void MainWindow::setupMenus()
+{
+    // Set action icons
+    openProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    saveProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    saveProjectAsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    recentProjectsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
+    resetDataModelAction->setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
+    exitAction->setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
+
+    // Set action tooltips
+    openProjectAction->setToolTip("Open project from disk");
+    saveProjectAction->setToolTip("Save project to disk");
+    saveProjectAsAction->setToolTip("Save project to disk in a chosen location");
+    recentProjectsMenu->setToolTip("Recently opened HDPS projects");
+    resetDataModelAction->setToolTip("Reset the data model");
+    exitAction->setToolTip("Exit the HDPS application");
+
+    // Load project when action is triggered
+    connect(openProjectAction, &QAction::triggered, this, []() -> void {
+        Application::current()->loadProject();
+    });
+
+    // Save project without user interaction when action is triggered
+    connect(saveProjectAction, &QAction::triggered, [this](bool) {
+        Application::current()->saveProject(Application::current()->getCurrentProjectFilePath());
+    });
+
+    // Save project to picked location when action is triggered
+    connect(saveProjectAsAction, &QAction::triggered, [this](bool) {
+        Application::current()->saveProject();
+    });
+
+    // Populate the recent projects menu when is is about to show
+    connect(recentProjectsMenu, &QMenu::aboutToShow, this, &MainWindow::populateRecentProjectsMenu);
+
+    // Reset the data model when the action is triggered
+    connect(resetDataModelAction, &QAction::triggered, _core.get(), &Core::resetDataModel);
+
+    // Close the main window then the exit action is triggered
+    QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
+
+    QObject::connect(findLogFileAction, &QAction::triggered, [this](bool) {
+        const auto filePath = Logger::GetFilePathName();
+
+        if (!hdps::util::ShowFileInFolder(filePath))
+        {
+            QMessageBox::information(this,
+                QObject::tr("Log file not found"),
+                QObject::tr("The log file is not found:\n%1").arg(filePath));
+        }
+    });
+
+    QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked) {
+        if (checked) {
+            _loggingDockWidget->setWidget(new LogDockWidget(*this));
+            _loggingDockArea->show();
+        }
+        else {
+            delete _loggingDockWidget->takeWidget();
+            _loggingDockArea->hide();
+        }
+    });
 }
 
 void MainWindow::populateRecentProjectsMenu()

@@ -79,6 +79,11 @@ public:
     void removeDataset(const Dataset<DatasetImpl>& dataset, const bool& recursively = true);
 
     /**
+     * Removes all datasets
+     */
+    void removeAllDatasets();
+
+    /**
      * Get raw data by name
      * @param name Name of the raw data
      */

@@ -149,6 +149,12 @@ public: // Data access
      */
     virtual QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) = 0;
 
+    /**
+     * Resets the data model
+     * Removes all datasets
+     */
+    virtual void resetDataModel() = 0;
+
 protected: // Data access
 
     /**

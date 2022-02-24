@@ -85,6 +85,22 @@ void DataManager::removeDataset(const Dataset<DatasetImpl>& dataset, const bool&
     }
 }
 
+void DataManager::removeAllDatasets()
+{
+    try
+    {
+        for (auto kv : _dataSetMap)
+            removeDataset(kv.second);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove all datasets", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove all datasets");
+    }
+}
+
 plugin::RawData& DataManager::getRawData(const QString& name)
 {
     try

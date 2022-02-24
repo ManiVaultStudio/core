@@ -131,9 +131,10 @@ private: // Docking
 
 protected: // Menu
 
-    /**
-     * Fill the recent projects menu with entries
-     */
+    /** Setup menus and their handlers */
+    void setupMenus();
+
+    /** Fill the recent projects menu with entries */
     void populateRecentProjectsMenu();
 
 private:
