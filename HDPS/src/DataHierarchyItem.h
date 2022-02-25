@@ -67,7 +67,7 @@ public:
     DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true, const bool& selected = false);
 
     /** Destructor */
-    ~DataHierarchyItem();
+    ~DataHierarchyItem() = default;
 
     /** Get the dataset GUI name */
     QString getGuiName() const;
@@ -145,12 +145,6 @@ public: // Hierarchy
      * @param child Reference to child data hierarchy item
      */
     void addChild(DataHierarchyItem& child);
-
-    /**
-     * Removes a child (name reference to data hierarchy item)
-     * @param dataHierarchyItem Pointer to data hierarchy item
-     */
-    void removeChild(DataHierarchyItem* dataHierarchyItem);
 
 public: // Miscellaneous
 

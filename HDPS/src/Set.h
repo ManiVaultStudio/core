@@ -35,7 +35,7 @@ public:
         WidgetAction(nullptr),
         _core(core),
         _rawData(nullptr),
-        _guid(QUuid::createUuid().toString()),
+        _guid(QUuid::createUuid().toString(QUuid::WithoutBraces)),
         _guiName(),
         _rawDataName(rawDataName),
         _all(false),

@@ -44,6 +44,15 @@ public: // Data access
     virtual Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
 
     /**
+     * Removes a single dataset
+     * @param dataset Smart pointer to the dataset to remove
+     */
+    virtual void removeDataset(Dataset<DatasetImpl> dataset) = 0;
+
+    /** Removes all currently loaded datasets */
+    virtual void removeAllDatasets() = 0;
+
+    /**
      * Copies a dataset and adds it to the data hierarchy
      * @param dataset Smart pointer to dataset to copy
      * @param datasetGuiName Name of the added dataset in the GUI
@@ -65,18 +74,6 @@ public: // Data access
     {
         return Dataset<DatasetType>(addDataset(kind, dataSetGuiName, parentDataset).get<DatasetType>());
     }
-
-    /**
-     * Removes one or more datasets
-     * Other datasets derived from this dataset are converted to non-derived data
-     * Notifies all plug-ins of the removed dataset automatically
-     * @param datasets Smart pointers to the datasets that need to be removed
-     * @param recursively Remove datasets recursively
-     */
-    virtual void removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively = false) = 0;
-
-    /** Resets the data model (removes all datasets */
-    virtual void resetDataModel() = 0;
 
     /**
      * Creates a dataset derived from a source dataset.

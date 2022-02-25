@@ -82,6 +82,15 @@ public: // Data access
     Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
 
     /**
+     * Removes a single dataset
+     * @param dataset Smart pointer to the dataset to remove
+     */
+    void removeDataset(Dataset<DatasetImpl> dataset) override final;
+
+    /** Removes all currently loaded datasets */
+    void removeAllDatasets() override final;
+
+    /**
      * Copies a dataset and adds it to the data hierarchy
      * @param dataset Smart pointer to dataset to copy
      * @param datasetGuiName Name of the added dataset in the GUI
@@ -89,18 +98,6 @@ public: // Data access
      * @return Smart pointer to the copied dataset
      */
     Dataset<DatasetImpl> copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
-
-    /**
-     * Removes one or more datasets
-     * Other datasets derived from this dataset are converted to non-derived data
-     * Notifies all plug-ins of the removed dataset automatically
-     * @param datasets Smart pointers to the datasets that need to be removed
-     * @param recursively Remove datasets recursively
-     */
-    void removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively = false) override;
-
-    /** Resets the data model (removes all datasets */
-    void resetDataModel() override final;
 
     /**
      * Creates a dataset derived from a source dataset.
@@ -361,6 +358,8 @@ private:
     std::unique_ptr<DataHierarchyManager>                                   _dataHierarchyManager;      /** Internal hierarchical data tree */
     std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */
+
+    friend class DataHierarchyManager;
 };
 
 } // namespace hdps

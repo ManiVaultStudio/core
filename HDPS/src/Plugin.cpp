@@ -14,7 +14,7 @@ Plugin::Plugin(const PluginFactory* factory) :
     EventListener(),
     WidgetAction(nullptr),
     _factory(factory),
-    _name(getKind() + QUuid::createUuid().toString()),
+    _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _guiName(QString("%1 %2").arg(getKind(), QString::number(_noInstances[getKind()] + 1))),
     _properties()
 {

@@ -8,7 +8,6 @@
 #include <QPushButton>
 #include <QListView>
 #include <QVBoxLayout>
-#include <QStringListModel>
 
 namespace hdps {
 
@@ -31,22 +30,22 @@ DataRemoveAction::DataRemoveAction(QObject* parent, const Dataset<DatasetImpl>& 
         if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
 
             // Ask for confirmation dialog
-            ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, datasetsToRemove);
+            ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Remove dataset(s)", datasetsToRemove);
 
             // Show the confirm data removal dialog
             confirmDataRemoveDialog.exec();
 
             // Remove dataset and children from the core if accepted
             if (confirmDataRemoveDialog.result() == 1)
-                Application::core()->removeDatasets(datasetsToRemove);
+                Application::core()->removeDataset(_dataset);
         }
         else {
-            Application::core()->removeDatasets(datasetsToRemove);
+            Application::core()->removeDataset(_dataset);
         }
     });
 }
 
-DataRemoveAction::ConfirmDataRemoveDialog::ConfirmDataRemoveDialog(QWidget* parent, const QVector<Dataset<DatasetImpl>>& datasetsToRemove) :
+DataRemoveAction::ConfirmDataRemoveDialog::ConfirmDataRemoveDialog(QWidget* parent, const QString& windowTitle, const QVector<Dataset<DatasetImpl>>& datasetsToRemove) :
     QDialog(parent),
     _showAgainAction(this, "Ask for confirmation next time"),
     _removeAction(this, "Remove"),
@@ -55,20 +54,18 @@ DataRemoveAction::ConfirmDataRemoveDialog::ConfirmDataRemoveDialog(QWidget* pare
     // GUI names of the datasets to remove
     QStringList datasetGuiNames;
 
-    // Add primary dataset GUI name
-    datasetGuiNames << datasetsToRemove.first()->getGuiName();
-
-    // Add child dataset GUI names
-    for (const auto& dataset : datasetsToRemove.first()->getDataHierarchyItem().getChildren(true))
-        datasetGuiNames << dataset->getGuiName();
+    // Add dataset GUI names
+    for (const auto& dataset : datasetsToRemove)
+        datasetGuiNames << dataset->getDataHierarchyItem().getFullPathName();
 
     // Establish number of datasets to remove
-    const auto numberOfDatasetsToRemove = datasetGuiNames.count();
+    const auto numberOfDatasetsToRemove = datasetsToRemove.count();
 
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("trash-alt"));
-    setWindowTitle(QString("Remove %1 %2").arg(datasetsToRemove.first()->getGuiName(), numberOfDatasetsToRemove > 1 ? "+ descendants" : ""));
+    setWindowTitle(windowTitle);
     setModal(true);
-    setFixedWidth(400);
+    setMinimumWidth(400);
+    setMinimumHeight(250);
 
     // Check whether to show the dialog again or not
     _showAgainAction.setChecked(Application::current()->getSetting("ConfirmDataRemoval", true).toBool());
@@ -84,9 +81,8 @@ DataRemoveAction::ConfirmDataRemoveDialog::ConfirmDataRemoveDialog(QWidget* pare
 
     auto datasetsToRemoveListView = new QListView();
 
-    datasetsToRemoveListView->setFixedHeight(100);
-    datasetsToRemoveListView->setEnabled(false);
-    datasetsToRemoveListView->setModel(new QStringListModel(datasetGuiNames));
+    datasetsToRemoveListView->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
+    datasetsToRemoveListView->setModel(reinterpret_cast<QStringListModel*>(new DatasetsStringListModel(datasetGuiNames)));
 
     layout->addWidget(datasetsToRemoveListView);
 

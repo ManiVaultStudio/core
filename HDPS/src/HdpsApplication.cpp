@@ -5,6 +5,7 @@
 #include <CoreInterface.h>
 
 #include <util/Exception.h>
+#include <actions/DataRemoveAction.h>
 
 #include <QDebug>
 #include <QTemporaryDir>
@@ -41,6 +42,29 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
         // Except if the supplied project file path is a directory
         if (QFileInfo(projectFilePath).isDir())
             throw std::runtime_error("Project file path may not be a directory");
+
+        // Get all loaded datasets (irrespective of the data type)
+        const auto loadedDatasets = _core->requestAllDataSets();
+
+        // The project needs to be cleared if there are one or more datasets loaded
+        if (!loadedDatasets.empty()) {
+
+            // Check in the settings if the user has to be prompted with a question whether to automatically remove all datasets
+            if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
+
+                // Ask for confirmation dialog
+                DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Data model will reset", loadedDatasets);
+
+                // Show the confirm data removal dialog
+                confirmDataRemoveDialog.exec();
+
+                // Remove dataset and children from the core if accepted
+                if (confirmDataRemoveDialog.result() == 1)
+                    Application::core()->removeAllDatasets();
+                else
+                    return;
+            }
+        }
 
         // Create temporary dir for intermediate files
         QTemporaryDir temporaryDirectory;

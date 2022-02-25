@@ -61,17 +61,9 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataHierarchyWidget    = new DataHierarchyWidget(this);
     _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
-    connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetChanged, this, [this](const QString& datasetId) {
-        _dataPropertiesWidget->setDatasetId(datasetId);
-    });
-
-    connect(_dataPropertiesWidget, &DataPropertiesWidget::currentDatasetGuiNameChanged, this, [this](const QString& datasetName) {
-        _dataPropertiesDockWidget->setWindowTitle(QString("Data properties: %1").arg(datasetName));
-    });
-
     // Change the window title when the current project file changed
     connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
-        setWindowTitle("HDPS: "+ currentProjectFilePath);
+        setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
     });
 
     // Setup menus
@@ -396,7 +388,29 @@ void MainWindow::setupFileMenu()
     });
 
     // Reset the data model when the action is triggered
-    connect(resetDataModelAction, &QAction::triggered, _core.get(), &Core::resetDataModel);
+    connect(resetDataModelAction, &QAction::triggered, this, [this]() -> void {
+
+        // Get all loaded datasets (irrespective of the data type)
+        const auto loadedDatasets = _core->requestAllDataSets();
+
+        // The project needs to be cleared if there are one or more datasets loaded
+        if (!loadedDatasets.empty()) {
+
+            // Check in the settings if the user has to be prompted with a question whether to automatically remove all datasets
+            if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
+
+                // Ask for confirmation dialog
+                DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Reset the data model", loadedDatasets);
+
+                // Show the confirm data removal dialog
+                confirmDataRemoveDialog.exec();
+
+                // Remove dataset and children from the core if accepted
+                if (confirmDataRemoveDialog.result() == 1)
+                    Application::core()->removeAllDatasets();
+            }
+        }
+    });
 
     // Close the main window then the exit action is triggered
     QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));

@@ -1,6 +1,8 @@
 #include "Set.h"
 #include "DataHierarchyItem.h"
 
+#include <util/Serialization.h>
+
 namespace hdps
 {
 
@@ -69,15 +71,16 @@ void DatasetImpl::setLocked(bool locked)
 
 void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (variantMap.contains("Name"))
-        setGuiName(variantMap["Name"].toString());
+    variantMapMustContain(variantMap, "Name");
+    variantMapMustContain(variantMap, "Derived");
+
+    setGuiName(variantMap["Name"].toString());
 
     if (variantMap.contains("Derived")) {
         _derived = variantMap["Derived"].toBool();
 
-        if (_derived) {
+        if (_derived)
             _sourceDataset = getParent();
-        }
     }
 }
 

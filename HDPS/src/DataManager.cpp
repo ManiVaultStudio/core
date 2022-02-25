@@ -46,7 +46,7 @@ void DataManager::addSelection(const QString& dataName, Dataset<DatasetImpl> sel
     _selections.emplace(dataName, selection);
 }
 
-void DataManager::removeDataset(const Dataset<DatasetImpl>& dataset, const bool& recursively /*= true*/)
+void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 {
     try
     {

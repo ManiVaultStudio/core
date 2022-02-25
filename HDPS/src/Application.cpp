@@ -104,8 +104,11 @@ void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
     auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
 
     // Add to recent projects if not already in there
-    if (!recentProjects.contains(recentProjectFilePath))
-        recentProjects.insert(0, recentProjectFilePath);
+    if (recentProjects.contains(recentProjectFilePath))
+        recentProjects.removeOne(recentProjectFilePath);
+
+    // Insert the entry at the beginning
+    recentProjects.insert(0, recentProjectFilePath);
 
     // Save settings
     setSetting("Projects/Recent", recentProjects);

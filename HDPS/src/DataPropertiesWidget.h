@@ -1,17 +1,15 @@
 #pragma once
 
+#include "DataHierarchyManager.h"
+
 #include <Dataset.h>
 
 #include <actions/GroupsAction.h>
 #include <actions/TriggerAction.h>
 
 #include <QWidget>
-#include <QTreeWidget>
-
-class QTreeWidgetItem;
 
 using namespace hdps::util;
-using namespace hdps::gui;
 
 namespace hdps
 {
@@ -38,18 +36,13 @@ public:
      */
     DataPropertiesWidget(QWidget* parent);
 
-    /**
-     * Set the ID of the current dataset
-     * @param datasetId Globally unique identifier of the dataset
-     */
-    void setDatasetId(const QString& datasetId);
-
 protected:
 
     /**
-     * Load dataset group actions
+     * Callback when is called when the selected items in the data hierarchy changes
+     * @param datasetId Globally unique identifier of the dataset
      */
-    void loadDatasetGroupActions();
+    void selectedItemsChanged(DataHierarchyItems selectedItems);
 
 signals:
 

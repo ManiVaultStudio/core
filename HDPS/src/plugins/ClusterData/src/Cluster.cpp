@@ -7,7 +7,7 @@
 
 Cluster::Cluster(const QString& name /*= ""*/, const QColor& color /*= Qt::gray*/, const std::vector<std::uint32_t>& indices /*= std::vector<std::uint32_t>()*/) :
     _name(name),
-    _id(QUuid::createUuid().toString()),
+    _id(QUuid::createUuid().toString(QUuid::WithoutBraces)),
     _color(color),
     _indices(indices),
     _median(),

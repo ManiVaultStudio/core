@@ -35,7 +35,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _datasetNameFilterAction(this, "Dataset name filter"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
-    _groupingAction(this, "Grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
+    _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
 {
     // Set filter model input model
     _filterModel.setSourceModel(&_model);
@@ -110,7 +110,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
-    toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::Text));
+    toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::CheckBox));
 
     // Add tool bar layout and tree view widget
     layout->addLayout(toolbarLayout);
@@ -130,12 +130,18 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         // Only proceed with a valid selection
         if (selected.indexes().isEmpty())
             return;
-        
-        // Get the globally unique identifier of the selected dataset
-        const auto selectedDatasetId = selected.indexes().first().siblingAtColumn(static_cast<std::int32_t>(DataHierarchyModelItem::Column::GUID)).data(Qt::DisplayRole).toString();
 
-        // Notify others that a dataset was selected
-        emit selectedDatasetChanged(selectedDatasetId);
+        DataHierarchyItems dataHierarchyItems;
+
+        // Gather selected data hierarchy items
+        for (const auto& index : selected.indexes())
+            dataHierarchyItems << _model.getItem(selected.indexes().first(), Qt::DisplayRole)->getDataHierarchyItem();
+
+        // Get pointer to data hierarchy item
+        auto dataHierarchyModelItem = _model.getItem(selected.indexes().first(), Qt::DisplayRole);
+
+        // Select the items in the data hierarchy
+        Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
     });
 
     // Show/hide the overlay and header widget when the number of rows changes
@@ -157,9 +163,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
         // Remove the item from the data hierarchy
         _model.removeDataHierarchyModelItem(getModelIndexByDataset(dataset));
-
-        // Notify others that a dataset was selected
-        emit selectedDatasetChanged("");
     });
 
     // Invoked the custom context menu when requested by the tree view
@@ -244,7 +247,7 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
 
         // Update the model when the data hierarchy item selection status changes
         connect(&dataHierarchyItem, &DataHierarchyItem::selectionChanged, this, [this, dataset](const bool& selection) {
-            _selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+            //_selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
         });
 
         // Update the model when the data hierarchy item locked status changes
@@ -267,11 +270,6 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
             // Set model item expanded
             _treeView.setExpanded(modelIndex, expanded);
         });
-
-        //_selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
-
-        // Notify others that a dataset was selected
-        emit selectedDatasetChanged(dataset->getGuid());
     }
     catch (std::exception& e)
     {

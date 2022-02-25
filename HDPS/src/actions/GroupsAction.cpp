@@ -11,46 +11,12 @@ namespace hdps {
 
 namespace gui {
 
-GroupsAction::GroupsAction(QObject* parent, WidgetAction* sourceWidgetAction /*= nullptr*/) :
+GroupsAction::GroupsAction(QObject* parent) :
     WidgetAction(parent),
     _groupActions(),
-    _sourceWidgetAction(),
-    _visibility(),
-    _presetsAction(this)
+    _visibility()
 {
     setDefaultWidgetFlags(Default);
-
-    if (sourceWidgetAction)
-        setSourceWidgetAction(sourceWidgetAction);
-}
-
-void GroupsAction::setSourceWidgetAction(WidgetAction* sourceWidgetAction)
-{
-    Q_ASSERT(sourceWidgetAction != nullptr);
-
-    if (sourceWidgetAction == nullptr)
-        return;
-
-    _sourceWidgetAction = sourceWidgetAction;
-
-    GroupsAction::GroupActions groupActions;
-
-    // Loop over all child objects and add if it is a group action
-    for (auto childObject : _sourceWidgetAction->children()) {
-        auto groupAction = dynamic_cast<GroupAction*>(childObject);
-
-        // Add when the action is a group action
-        if (groupAction)
-            groupActions << groupAction;
-    }
-
-    _presetsAction.setWidgetAction(_sourceWidgetAction);
-
-    // Set group actions
-    setGroupActions(groupActions);
-
-    // Notify others that the source widget action changed
-    emit sourceWidgetActionChanged(_sourceWidgetAction);
 }
 
 void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= true*/)
@@ -351,13 +317,6 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
 
         _toolbarLayout.addWidget(_expandAllAction.createWidget(this, TriggerAction::Icon));
         _toolbarLayout.addWidget(_collapseAllAction.createWidget(this, TriggerAction::Icon));
-    }
-
-    if (widgetFlags & Presets) {
-        if (widgetFlags & Filtering || widgetFlags & Expansion)
-            _toolbarLayout.addWidget(createVerticalDivider());
-
-        _toolbarLayout.addWidget(_groupsAction->getPresetsAction().createWidget(this));
     }
 
     // Set toolbar widget layout

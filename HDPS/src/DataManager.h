@@ -74,9 +74,8 @@ public:
     /**
      * Removes a Dataset, other datasets derived from this dataset are converted to non-derived data (notifies listeners)
      * @param dataset Smart pointer to dataset to remove
-     * @param recursively Remove datasets recursively
      */
-    void removeDataset(const Dataset<DatasetImpl>& dataset, const bool& recursively = true);
+    void removeDataset(Dataset<DatasetImpl> dataset);
 
     /**
      * Get raw data by name

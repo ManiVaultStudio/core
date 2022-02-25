@@ -34,14 +34,20 @@ public:
      * @param parentDataset Smart pointer to parent dataset (if any)
      * @param visible Whether the dataset is visible in the gui
      */
-    void addItem(Dataset<DatasetImpl>& dataset, Dataset<DatasetImpl>& parentDataset, const bool& visible = true);
+    void addItem(Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible = true);
 
     /**
-     * Removes an item from the hierarchy
-     * @param dataset Smart pointer to the dataset
-     * @return vector of pointers to datasets that need to removed
+     * Removes a data hierarchy item (and its children recursively) from the data hierarchy
+     * @param dataHierarchyItem Reference to data hierarchy item
+     * @return Vector of datasets that were referenced by the data hierarchy items
      */
-    void removeItem(const Dataset<DatasetImpl>& dataset, const bool& recursively = false);
+    Datasets removeItem(DataHierarchyItem& dataHierarchyItem);
+
+    /**
+     * Removes all items from the data hierarchy manager in a top-down manner
+     * @return Vector of datasets that were referenced by the data hierarchy items
+     */
+    Datasets removeAllItems();
 
     /**
      * Get hierarchy item by dataset globally unique identifier
@@ -58,18 +64,26 @@ public:
     DataHierarchyItem& getItem(const QString& datasetGuid);
 
     /**
-     * Selects data hierarchy item with dataset name
-     * @param dataSet Smart pointer to dataset to select
-     */
-    void selectItem(Dataset<DatasetImpl>& dataSet);
-
-    /**
      * Get dataset children
      * @param dataHierarchyItem Pointer to data hierarchy item
      * @param recursive Whether to get all children in a recursive manner
      * @return Children
      */
     DataHierarchyItems getChildren(DataHierarchyItem* dataHierarchyItem, const bool& recursive = true);
+
+    /**
+     * Set selected data hierarchy items
+     * @param selectedItems Pointers to selected data hierarchy items
+     */
+    void selectItems(DataHierarchyItems& selectedItems);
+
+protected:
+
+    /**
+     * Remove data hierarchy item from the selection
+     * @param dataHierarchyItem Reference to data hierarchy item
+     */
+    void removeSelectedItem(DataHierarchyItem& dataHierarchyItem);
 
 public: // Serialization
 
@@ -106,18 +120,6 @@ signals:
     void itemRemoved(const QString& datasetGui);
 
     /**
-     * Signals that a hierarchy item has been re-located
-     * @param itemToBeRelocated Reference to data hierarchy item that will be relocated
-     */
-    void itemAboutToBeRelocated(DataHierarchyItem& itemToBeRelocated);
-
-    /**
-     * Signals that a hierarchy item has been relocated
-     * @param relocatedItem Reference to relocated data hierarchy item
-     */
-    void itemRelocated(DataHierarchyItem& relocatedItem);
-
-    /**
      * Signals that a data hierarchy item is being loaded
      * @param loadingItem Reference to the data hierarchy item that is being loaded
      */
@@ -141,8 +143,15 @@ signals:
      */
     void itemSaved(DataHierarchyItem& savedItem);
 
+    /**
+     * Signals that the selected items changed
+     * @param selectedItems Pointers to selected data hierarchy items
+     */
+    void selectedItemsChanged(DataHierarchyItems selectedItems);
+
 private:
-    DataHierarchyItems    _dataHierarchyItems;    /** Shared pointers to data hierarchy items */
+    DataHierarchyItems    _items;           /** Shared pointers to data hierarchy items */
+    DataHierarchyItems    _selectedItems;   /** Shared pointers to selected data hierarchy items */
 };
 
 }

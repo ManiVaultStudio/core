@@ -58,16 +58,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     });
 }
 
-DataHierarchyItem::~DataHierarchyItem()
-{
-    // Only proceed if we have a valid parent
-    if (_parent == nullptr)
-        return;
-
-    // Remove child from parent
-    _parent->removeChild(this);
-}
-
 QString DataHierarchyItem::getGuiName() const
 {
     return _dataset->getGuiName();
@@ -221,11 +211,6 @@ void DataHierarchyItem::addChild(DataHierarchyItem& child)
     _children << &child;
 }
 
-void DataHierarchyItem::removeChild(DataHierarchyItem* dataHierarchyItem)
-{
-    _children.removeOne(dataHierarchyItem);
-}
-
 QString DataHierarchyItem::toString() const
 {
     return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), _visible ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
@@ -307,8 +292,8 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 
     menu->addSeparator();
 
-    //_dataRemoveAction.setEnabled(!_locked);
-    _dataRemoveAction.setEnabled(false);
+    _dataRemoveAction.setEnabled(!_locked);
+    //_dataRemoveAction.setEnabled(false);
 
     menu->addAction(&_dataRemoveAction);
     menu->addAction(&_dataCopyAction);

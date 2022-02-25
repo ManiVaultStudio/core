@@ -25,6 +25,7 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
 
     _selectionChangedTimer.setSingleShot(true);
 
+    /*
     // Register to points data events
     registerDataEventByType(PointType, [this](hdps::DataEvent* dataEvent) {
         if (!_points.isValid())
@@ -59,6 +60,7 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
                 break;
         }
     });
+    */
 
     connect(&_selectionChangedTimer, &QTimer::timeout, this, [this]() {
 

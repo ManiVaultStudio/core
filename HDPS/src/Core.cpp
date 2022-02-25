@@ -167,6 +167,40 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     return fullSet;
 }
 
+void Core::removeDataset(Dataset<DatasetImpl> dataset)
+{
+    try
+    {
+        // Except when the smart pointer to the dataset is invalid
+        if (!dataset.isValid())
+            throw std::runtime_error("Dataset is invalid");
+
+        // Remove all data hierarchy items and get a list all datasets that need to be removed
+        const auto datasetsToRemove = _dataHierarchyManager->removeItem(dataset->getDataHierarchyItem());
+
+        // Remove the datasets that are flagged for removal
+        for (const auto& datasetToRemove : datasetsToRemove)
+            _dataManager->removeDataset(datasetToRemove);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to remove dataset", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to remove dataset");
+    }
+}
+
+void Core::removeAllDatasets()
+{
+    // Remove all items fro the data hierarchy manager and get a vector of datasets to remove
+    const auto datasetsToRemove = _dataHierarchyManager->removeAllItems();
+
+    // Remove the datasets that are flagged for removal
+    for (const auto& datasetToRemove : datasetsToRemove)
+        _dataManager->removeDataset(datasetToRemove);
+}
+
 Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
 {
     try
@@ -199,36 +233,6 @@ Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, cons
     }
 
     return Dataset<DatasetImpl>();
-}
-
-void Core::removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively /*= false*/)
-{
-    // Remove datasets one by one
-    for (const auto& dataset : datasets) {
-
-        // Cache the data type because later on the dataset has already been removed
-        const auto dataType = dataset->getDataType();
-
-        // Notify listeners that the dataset is about to be removed
-        notifyDataAboutToBeRemoved(dataset);
-
-        // Cache the dataset GUID
-        const auto datasetGuid = dataset->getGuid();
-
-        // Remove the dataset from the data manager
-        _dataManager->removeDataset(dataset);
-
-        // Remove the dataset from the data hierarchy manager
-        _dataHierarchyManager->removeItem(dataset, true);
-
-        // Notify listeners that the dataset is removed
-        notifyDataRemoved(datasetGuid, dataType);
-    }
-}
-
-void Core::resetDataModel()
-{
-    removeDatasets(requestAllDataSets());
 }
 
 Dataset<DatasetImpl> Core::createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)

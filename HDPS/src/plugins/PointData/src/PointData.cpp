@@ -650,7 +650,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 {
     DatasetImpl::fromVariantMap(variantMap);
 
-    variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "Full");
     variantMapMustContain(variantMap, "NumberOfDimensions");
 
