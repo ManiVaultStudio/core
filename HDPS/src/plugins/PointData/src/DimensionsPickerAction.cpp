@@ -454,7 +454,7 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     WidgetActionWidget(parent, dimensionSelectionAction)
 {
     setMinimumHeight(300);
-    /*
+    
     auto layout = new QVBoxLayout();
 
     auto tableView = new QTableView();
@@ -498,5 +498,4 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
         layout->setMargin(0);
         setLayout(layout);
     }
-    */
 }

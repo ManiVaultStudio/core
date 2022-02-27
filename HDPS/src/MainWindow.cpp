@@ -258,18 +258,57 @@ void MainWindow::initializeDocking()
 
 void MainWindow::initializeCentralDockingArea()
 {
-    QLabel* welcomeLabel = new QLabel();
+    auto welcomeWidget          = new QWidget();
+    auto welcomeWidgetLayout    = new QVBoxLayout();
+    auto welcomeLabel           = new QLabel();
+
+    welcomeWidget->setLayout(welcomeWidgetLayout);
 
     // choose the icon for different-dpi screens
     const int pixelRatio = devicePixelRatio();
+
     QString iconName = ":/Images/AppBackground256";
-    if (pixelRatio > 1) iconName = ":/Images/AppBackground512";
-    if (pixelRatio > 2) iconName = ":/Images/AppBackground1024";
+
+    if (pixelRatio > 1)
+        iconName = ":/Images/AppBackground512";
+
+    if (pixelRatio > 2)
+        iconName = ":/Images/AppBackground1024";
     
     welcomeLabel->setPixmap(QPixmap(iconName).scaled(256, 256));
     welcomeLabel->setAlignment(Qt::AlignCenter);
 
-    _centralDockWidget->setWidget(welcomeLabel);
+    welcomeWidgetLayout->addStretch(1);
+    welcomeWidgetLayout->addWidget(welcomeLabel);
+
+    /*
+    // Get recent projects
+    const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
+
+    // Disable recent projects menu when there are no recent projects
+    recentProjectsMenu->setEnabled(!recentProjects.isEmpty());
+
+    // Remove existing actions
+    recentProjectsMenu->clear();
+
+    // Add click able label for each recent project
+    for (const auto& recentProject : recentProjects) {
+
+        // Get the recent project file path
+        const auto recentProjectFilePath = recentProject.toString();
+
+        // Check if the recent project exists on disk
+        if (!QFileInfo(recentProjectFilePath).exists())
+            continue;
+
+        // Create recent project label and add it to the layout
+        welcomeWidgetLayout->addWidget(new RecentProjectLabel(recentProjectFilePath));
+    }
+    */
+
+    welcomeWidgetLayout->addStretch(1);
+
+    _centralDockWidget->setWidget(welcomeWidget);
 
     _centralDockArea = _dockManager->setCentralWidget(_centralDockWidget);
    
@@ -487,7 +526,7 @@ void MainWindow::populateRecentProjectsMenu()
     // Remove existing actions
     recentProjectsMenu->clear();
 
-    // Get recent projects from settings
+    // Add action for each recent project
     for (const auto& recentProject : recentProjects) {
 
         // Get the recent project file path

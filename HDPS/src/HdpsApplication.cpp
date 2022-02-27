@@ -289,6 +289,11 @@ void HdpsApplication::saveProject(QString projectFilePath /*= ""*/)
         // Set current task to data model export
         taskProgressDialog.setCurrentTask("Export data model");
 
+        // Throw an exception when save is canceled
+        connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, []() -> void {
+            throw std::runtime_error("Canceled before project was saved");
+        });
+
         // Output analysis JSON file info
         QFileInfo jsonFileInfo(temporaryDirectoryPath, "analysis.json");
 

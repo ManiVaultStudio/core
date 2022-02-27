@@ -64,7 +64,7 @@ void Archiver::decompress(const QString& compressedFile, const QString& destinat
 
         // Except if unable to open the zip file
         if (!zip.open(QuaZip::mdUnzip))
-            throw std::runtime_error("Enable to open");
+            throw std::runtime_error("Unable to open ZIP file");
 
         // Clean the destination directory
         QString cleanDir = QDir::cleanPath(destinationDirectory);
@@ -145,7 +145,7 @@ QStringList Archiver::getTaskNamesForDecompression(const QString& compressedFile
 
     // Except if unable to open the zip file
     if (!zip.open(QuaZip::mdUnzip))
-        throw std::runtime_error("Enable to open");
+        throw std::runtime_error("Unable to open ZIP file");
 
     QStringList taskNames;
 
