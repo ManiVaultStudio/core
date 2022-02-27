@@ -146,6 +146,9 @@
    <property name="text">
     <string>Data properties viewer</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
  </widget>
  <resources/>

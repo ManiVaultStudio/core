@@ -21,6 +21,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     setAutoFillBackground(true);
     setLayout(&_layout);
 
+    _layout.setMargin(6);
     _layout.addWidget(_groupsAction.createWidget(this));
 
     emit currentDatasetGuiNameChanged("");
@@ -32,7 +33,6 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
 {
     try
     {
-        /*
         // Reset when the selection is empty
         if (selectedItems.isEmpty())
             _groupsAction.setGroupActions({});
@@ -66,19 +66,10 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
         qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->getGuiName());
 #endif
 
-        
-        // Populate groups action with group actions from the dataset
-        _groupsAction.setSourceWidgetAction(_dataset.get());
-
-        if (sourceWidgetAction == nullptr) {
-            setGroupActions(GroupsAction::GroupActions());
-            return;
-        }
-
         GroupsAction::GroupActions groupActions;
 
         // Loop over all child objects and add if it is a group action
-        for (auto childObject : _sourceWidgetAction->children()) {
+        for (auto childObject : _dataset->children()) {
             auto groupAction = dynamic_cast<GroupAction*>(childObject);
 
             // Add when the action is a group action
@@ -87,9 +78,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
         }
 
         // Set group actions
-        setGroupActions(groupActions);
-        */
-
+        _groupsAction.setGroupActions(groupActions);
     }
     catch (std::exception& e)
     {

@@ -97,7 +97,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     auto layout = new QVBoxLayout();
 
     // Remove the layout margin and spacing
-    layout->setMargin(3);
+    layout->setMargin(6);
     layout->setSpacing(3);
 
     // Create tool bar layout
@@ -107,9 +107,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     toolbarLayout->setContentsMargins(0, 3, 0, 3);
     toolbarLayout->setSpacing(4);
     //toolbarLayout->addWidget(_datasetNameFilterAction.createWidget(this), 1);
-    toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
+    toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::CheckBox));
 
     // Add tool bar layout and tree view widget
@@ -131,17 +131,14 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         if (selected.indexes().isEmpty())
             return;
 
-        DataHierarchyItems dataHierarchyItems;
+        QSet<DataHierarchyItem*> dataHierarchyItems;
 
         // Gather selected data hierarchy items
         for (const auto& index : selected.indexes())
-            dataHierarchyItems << _model.getItem(selected.indexes().first(), Qt::DisplayRole)->getDataHierarchyItem();
-
-        // Get pointer to data hierarchy item
-        auto dataHierarchyModelItem = _model.getItem(selected.indexes().first(), Qt::DisplayRole);
+            dataHierarchyItems.insert(_model.getItem(selected.indexes().first(), Qt::DisplayRole)->getDataHierarchyItem());
 
         // Select the items in the data hierarchy
-        Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
+        Application::core()->getDataHierarchyManager().selectItems(QVector<DataHierarchyItem*>(dataHierarchyItems.begin(), dataHierarchyItems.end()));
     });
 
     // Show/hide the overlay and header widget when the number of rows changes

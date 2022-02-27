@@ -428,7 +428,7 @@ void GroupsAction::Widget::updateFiltering()
 void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 {
 #ifdef _VERBOSE
-    qDebug().noquote() << QString("Add %1 to tree widget").arg(groupAction->getSettingsPath());
+    qDebug().noquote() << QString("Add %1 to tree widget %2").arg(groupAction->getSettingsPath(), groupAction->isExpanded() ? "expanded" : "collapsed");
 #endif
 
     // Create new tree widget item for the section expand/collapse button
