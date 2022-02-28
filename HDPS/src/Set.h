@@ -13,6 +13,8 @@
 
 #include <memory>
 
+#define _SET_VERBOSE
+
 namespace hdps
 {
 
@@ -49,6 +51,9 @@ public:
     /** Destructor */
     virtual ~DatasetImpl()
     {
+#ifdef _SET_VERBOSE
+        qDebug() << _guiName << "destructed";
+#endif
     }
 
     /** Performs startup initialization */
@@ -124,6 +129,9 @@ public:
     Dataset<DatasetType> getSourceDataset() const
     {
         if (!isDerivedData())
+            return toSmartPointer<DatasetType>();
+
+        if (!_sourceDataset.isValid())
             return toSmartPointer<DatasetType>();
 
         return Dataset<DatasetType>(_sourceDataset->getSourceDataset<DatasetType>());

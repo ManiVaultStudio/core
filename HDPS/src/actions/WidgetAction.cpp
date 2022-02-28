@@ -486,7 +486,7 @@ void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");
 
-#if _VERBOSE
+#ifdef _VERBOSE
         qDebug().noquote() << jsonDocument.toJson(QJsonDocument::Indented);
 #endif
 

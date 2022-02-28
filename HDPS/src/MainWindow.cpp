@@ -399,7 +399,7 @@ void MainWindow::setupFileMenu()
     saveProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     saveProjectAsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
     recentProjectsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
-    resetDataModelAction->setIcon(Application::getIconFont("FontAwesome").getIcon("undo"));
+    clearDatasetsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
     importDataMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
     exitAction->setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
 
@@ -408,7 +408,7 @@ void MainWindow::setupFileMenu()
     saveProjectAction->setToolTip("Save project to disk");
     saveProjectAsAction->setToolTip("Save project to disk in a chosen location");
     recentProjectsMenu->setToolTip("Recently opened HDPS projects");
-    resetDataModelAction->setToolTip("Reset the data model");
+    clearDatasetsAction->setToolTip("Reset the data model");
     exitAction->setToolTip("Exit the HDPS application");
 
     // Load project when action is triggered
@@ -427,7 +427,7 @@ void MainWindow::setupFileMenu()
     });
 
     // Reset the data model when the action is triggered
-    connect(resetDataModelAction, &QAction::triggered, this, [this]() -> void {
+    connect(clearDatasetsAction, &QAction::triggered, this, [this]() -> void {
 
         // Get all loaded datasets (irrespective of the data type)
         const auto loadedDatasets = _core->requestAllDataSets();
@@ -485,7 +485,7 @@ void MainWindow::setupFileMenu()
         // Update read-only status
         saveProjectAction->setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
         saveProjectAsAction->setEnabled(hasDatasets);
-        resetDataModelAction->setEnabled(hasDatasets);
+        clearDatasetsAction->setEnabled(hasDatasets);
 
         // Populate the recent projects menu
         populateRecentProjectsMenu();
