@@ -4,6 +4,8 @@
 
 #include "PluginFactory.h"
 
+#include <actions/WidgetAction.h>
+
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -20,7 +22,8 @@ namespace hdps
 namespace plugin
 {
 
-class PluginManager : public QObject {
+class PluginManager : public WidgetAction
+{
 public:
     PluginManager(Core& core);
     ~PluginManager(void) override;
@@ -92,7 +95,22 @@ public:
      */
     QIcon getPluginIcon(const QString& pluginKind) const;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
+
     /**
     * Resolves plugin dependencies, returns list of resolved plugin filenames.
     */

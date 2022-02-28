@@ -18,6 +18,10 @@
 namespace hdps
 {
 
+namespace plugin {
+    class AnalysisPlugin;
+}
+
 class DataHierarchyItem;
 
 /**
@@ -44,7 +48,8 @@ public:
         _derived(false),
         _sourceDataset(),
         _properties(),
-        _groupIndex(-1)
+        _groupIndex(-1),
+        _analysis(nullptr)
     {
     }
 
@@ -358,6 +363,20 @@ public: // Properties
         return _properties.keys();
     }
 
+public: // Analysis
+
+    /**
+     * Set analysis
+     * @param analysis Pointer to analysis plugin
+     */
+    void setAnalysis(plugin::AnalysisPlugin* analysis);
+
+    /**
+     * Get analysis
+     * @return Pointer to analysis plugin
+     */
+    plugin::AnalysisPlugin* getAnalysis();
+
 public: // Serialization
 
     /**
@@ -367,9 +386,9 @@ public: // Serialization
     void fromVariantMap(const QVariantMap& variantMap) override;
 
     /**
-        * Save widget action to variant
-        * @return Variant representation of the widget action
-        */
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
     QVariantMap toVariantMap() const override;
 
 public: // Grouping
@@ -464,6 +483,7 @@ private:
     Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
     QMap<QString, QVariant>     _properties;        /** Properties map */
     std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
+    plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
 
     friend class Core;
     friend class DataManager;

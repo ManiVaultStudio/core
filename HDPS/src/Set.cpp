@@ -1,5 +1,6 @@
 #include "Set.h"
 #include "DataHierarchyItem.h"
+#include "AnalysisPlugin.h"
 
 #include <util/Serialization.h>
 
@@ -69,10 +70,22 @@ void DatasetImpl::setLocked(bool locked)
     getDataHierarchyItem().setLocked(locked);
 }
 
+void DatasetImpl::setAnalysis(plugin::AnalysisPlugin* analysis)
+{
+    _analysis = analysis;
+}
+
+hdps::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
+{
+    return _analysis;
+}
+
 void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Name");
     variantMapMustContain(variantMap, "Derived");
+    variantMapMustContain(variantMap, "HasAnalysis");
+    variantMapMustContain(variantMap, "Analysis");
 
     setGuiName(variantMap["Name"].toString());
 
@@ -82,16 +95,27 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         if (_derived)
             _sourceDataset = getParent();
     }
+
+    auto analysisMap = variantMap["Analysis"];
+
 }
 
 QVariantMap DatasetImpl::toVariantMap() const
 {
+    QVariantMap analysisMap;
+
+    if (_analysis)
+        analysisMap = _analysis->toVariantMap();
+
     return {
         { "Name", getGuiName() },
         { "DataType", getDataType().getTypeString() },
         { "PluginKind", _rawData->getKind() },
+        { "PluginVersion", _rawData->getVersion() },
         { "Derived", isDerivedData() },
-        { "GroupIndex", getGroupIndex() }
+        { "GroupIndex", getGroupIndex() },
+        { "HasAnalysis", _analysis != nullptr },
+        { "Analysis", analysisMap }
     };
 }
 

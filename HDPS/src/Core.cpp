@@ -778,6 +778,7 @@ void Core::destroyPlugins()
 
 void Core::fromVariantMap(const QVariantMap& variantMap)
 {
+    _pluginManager->fromVariantMap(variantMap[_pluginManager->getSerializationName()].toMap());
     _dataHierarchyManager->fromVariantMap(variantMap[_dataHierarchyManager->getSerializationName()].toMap());
 }
 
@@ -785,8 +786,7 @@ QVariantMap Core::toVariantMap() const
 {
     QVariantMap variantMap;
 
-    // Save data manager and data hierarchy manager
-    //variantMap[_dataManager->getSerializationName()]            = _dataManager->toVariantMap();
+    variantMap[_pluginManager->getSerializationName()]          = _pluginManager->toVariantMap();
     variantMap[_dataHierarchyManager->getSerializationName()]   = _dataHierarchyManager->toVariantMap();
 
     return variantMap;

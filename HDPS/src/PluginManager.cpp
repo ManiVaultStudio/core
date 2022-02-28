@@ -19,6 +19,8 @@
 #include "TransformationPlugin.h"
 #include "PluginType.h"
 
+#include <util/Serialization.h>
+
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
@@ -29,10 +31,12 @@ namespace hdps {
 
 namespace plugin {
 
-PluginManager::PluginManager(Core& core)
-: _core(core)
+PluginManager::PluginManager(Core& core) :
+    WidgetAction(),
+    _core(core)
 {
-    
+    setText("Plugin manager");
+    setObjectName("Plugins");
 }
 
 PluginManager::~PluginManager(void)
@@ -72,8 +76,9 @@ void PluginManager::loadPlugins()
         gui::MainWindow& gui = _core.gui();
 
         // Get metadata about plugin from the accompanying .json file compiled in the shared library
-        QString pluginKind = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
-        QString menuName = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
+        QString pluginKind  = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+        QString menuName    = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
+        QString version     = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
 
         // Create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
@@ -89,6 +94,7 @@ void PluginManager::loadPlugins()
         _pluginFactories[pluginKind] = qobject_cast<PluginFactory*>(pluginFactory);
         _pluginFactories[pluginKind]->setKind(pluginKind);
         _pluginFactories[pluginKind]->setGuiName(menuName);
+        _pluginFactories[pluginKind]->setVersion(version);
 
         // Add the plugin to a menu item and link the triggering of the menu item to triggering of the plugin
         QAction* action = NULL;
@@ -243,6 +249,10 @@ void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImp
         if (!pluginInstance)
             return;
 
+        _pluginFactories[kind]->_numberOfInstances++;
+
+        dataset->setAnalysis(pluginInstance);
+
         pluginInstance->setInputDataset(dataset);
 
         _core.addPlugin(pluginInstance);
@@ -264,6 +274,8 @@ void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImp
 
         if (!pluginInstance)
             return;
+
+        _pluginFactories[kind]->_numberOfInstances++;
 
         pluginInstance->setInputDataset(dataset);
 
@@ -287,6 +299,8 @@ void PluginManager::createViewPlugin(const QString& kind, const Datasets& datase
         if (!pluginInstance)
             return;
 
+        _pluginFactories[kind]->_numberOfInstances++;
+
         _core.addPlugin(pluginInstance);
 
         pluginInstance->loadData(datasets);
@@ -308,6 +322,8 @@ void PluginManager::createTransformationPlugin(const QString& kind, const Datase
 
         if (!pluginInstance)
             return;
+
+        _pluginFactories[kind]->_numberOfInstances++;
 
         _core.addPlugin(pluginInstance);
 
@@ -377,10 +393,40 @@ QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
     return _pluginFactories[pluginKind]->getIcon();
 }
 
+void PluginManager::fromVariantMap(const QVariantMap& variantMap)
+{
+    variantMapMustContain(variantMap, "UsedPlugins");
+
+    QStringList missingPluginKinds;
+
+    for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
+        if (!_pluginFactories.contains(usedPlugin.toString()))
+            missingPluginKinds << usedPlugin.toString();
+
+    if (!missingPluginKinds.isEmpty())
+        throw std::runtime_error(QString("Plugins not loaded: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
+}
+
+QVariantMap PluginManager::toVariantMap() const
+{
+    QVariantMap pluginsMap;
+    QVariantList usedPluginsList;
+
+    for (auto pluginFactory : _pluginFactories.values())
+        if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->_numberOfInstances > 0)
+            usedPluginsList << pluginFactory->getKind();
+
+    return {
+        { "UsedPlugins", usedPluginsList }
+    };
+}
+
 QString PluginManager::pluginTriggered(const QString& kind)
 {
     PluginFactory *pluginFactory = _pluginFactories[kind];
     Plugin* plugin = pluginFactory->produce();
+    
+    pluginFactory->_numberOfInstances++;
 
     _core.addPlugin(plugin);
     qDebug() << "Added plugin" << plugin->getKind() << "with version" << plugin->getVersion();
