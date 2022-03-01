@@ -85,8 +85,8 @@ public:
 protected:
     GroupSectionTreeItem*   _groupSectionTreeItem;      /** Pointer to group section tree item */
     GroupAction*            _groupAction;               /** Pointer to group action */
-    QWidget                 _containerWidget;           /** Container widget */
-    QVBoxLayout             _containerLayout;           /** Container widget layout */
+    QWidget*                _containerWidget;           /** Pointer to container widget */
+    QVBoxLayout*            _containerLayout;           /** Pointer to container widget layout */
     QWidget*                _groupWidget;               /** Pointer to group widget */
     SizeSynchronizer        _sizeSynchronizer;          /** Synchronizer for widget size */
 };

@@ -8,6 +8,8 @@
 #include <QScrollBar>
 #include <QCoreApplication>
 
+//#define GROUP_WIDGET_TREE_ITEM_VERBOSE
+
 namespace hdps {
 
 namespace gui {
@@ -16,21 +18,22 @@ GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeI
     QTreeWidgetItem(groupSectionTreeItem),
     _groupSectionTreeItem(groupSectionTreeItem),
     _groupAction(groupAction),
-    _containerWidget(),
-    _containerLayout(),
+    _containerWidget(new QWidget(treeWidget())),
+    _containerLayout(new QVBoxLayout()),
     _groupWidget(groupAction->createWidget(treeWidget())),
     _sizeSynchronizer(this)
 {
     groupSectionTreeItem->addChild(this);
+    
+    _containerWidget->setLayout(_containerLayout);
 
-    _containerWidget.setLayout(&_containerLayout);
     _groupWidget->setFixedWidth(treeWidget()->width());
 
-    _containerLayout.setMargin(0);
-    _containerLayout.setSizeConstraint(QLayout::SetFixedSize);
-    _containerLayout.addWidget(_groupWidget);
+    _containerLayout->setMargin(0);
+    _containerLayout->setSizeConstraint(QLayout::SetFixedSize);
+    _containerLayout->addWidget(_groupWidget);
 
-    treeWidget()->setItemWidget(this, 0, &_containerWidget);
+    treeWidget()->setItemWidget(this, 0, _containerWidget);
 
     QCoreApplication::processEvents();
 
@@ -39,7 +42,9 @@ GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeI
 
 GroupWidgetTreeItem::~GroupWidgetTreeItem()
 {
-    //qDebug() << QString("Destructing %1 group widget item").arg(_groupAction->getSettingsPath());
+#ifdef GROUP_WIDGET_TREE_ITEM_VERBOSE
+    qDebug() << QString("Destructing %1 group widget item").arg(_groupAction->getSettingsPath());
+#endif
 }
 
 GroupSectionTreeItem* GroupWidgetTreeItem::getGroupSectionTreeItem()

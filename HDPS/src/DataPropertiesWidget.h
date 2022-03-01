@@ -5,7 +5,6 @@
 #include <Dataset.h>
 
 #include <actions/GroupsAction.h>
-#include <actions/TriggerAction.h>
 
 #include <QWidget>
 

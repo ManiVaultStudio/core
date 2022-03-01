@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QMenu>
 
+//#define GROUP_SECTION_TREE_ITEM_VERBOSE
+
 namespace hdps {
 
 namespace gui {
@@ -13,20 +15,22 @@ namespace gui {
 GroupSectionTreeItem::GroupSectionTreeItem(QTreeWidget* treeWidget, GroupAction* groupAction) :
     QTreeWidgetItem(),
     _groupAction(groupAction),
-    _pushButton(this, groupAction),
+    _pushButton(new PushButton(this, groupAction)),
     _groupWidgetTreeItem(nullptr)
 {
     setSizeHint(0, QSize(0, 24));
 
     treeWidget->addTopLevelItem(this);
-    treeWidget->setItemWidget(this, 0, &_pushButton);
+    treeWidget->setItemWidget(this, 0, _pushButton);
 
     _groupWidgetTreeItem = new GroupWidgetTreeItem(this, groupAction);
 }
 
 GroupSectionTreeItem::~GroupSectionTreeItem()
 {
-    //qDebug() << QString("Destructing %1 group tree item").arg(_groupAction->getSettingsPath());
+#ifdef GROUP_SECTION_TREE_ITEM_VERBOSE
+    qDebug() << QString("Destructing %1 group tree item").arg(_groupAction->getSettingsPath());
+#endif
 
     takeChildren();
 
@@ -35,7 +39,7 @@ GroupSectionTreeItem::~GroupSectionTreeItem()
 
 GroupSectionTreeItem::PushButton& GroupSectionTreeItem::getPushButton()
 {
-    return _pushButton;
+    return *_pushButton;
 }
 
 GroupAction* GroupSectionTreeItem::getGroupAction()

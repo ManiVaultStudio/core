@@ -16,13 +16,13 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _dataset(),
     _layout(),
-    _groupsAction(this)
+    _groupsAction(parent)
 {
     setAutoFillBackground(true);
     setLayout(&_layout);
 
     _layout.setMargin(6);
-    _layout.addWidget(_groupsAction.createWidget(this));
+    _layout.addWidget(_groupsAction.createWidget(parent));
 
     emit currentDatasetGuiNameChanged("");
 

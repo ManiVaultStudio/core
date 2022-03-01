@@ -84,7 +84,7 @@ public:
 
 protected:
     GroupAction*            _groupAction;               /** Pointer to group action (used for toggling) */
-    PushButton              _pushButton;                /** Push button for toggling expansion */
+    PushButton*             _pushButton;                /** Push button for toggling expansion */
     GroupWidgetTreeItem*    _groupWidgetTreeItem;       /** Pointer to child group widget tree item */
 };
 

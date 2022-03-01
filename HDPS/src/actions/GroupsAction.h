@@ -40,9 +40,15 @@ public:
 
 public:
 
+    /**
+     * Tree widget class
+     * Implemented solely to be able to update geometries by hand
+     */
     class TreeWidget : public QTreeWidget
     {
     public:
+
+        /** Update item geometries */
         void updateGeometries()
         {
             QTreeWidget::updateGeometries();
@@ -138,7 +144,7 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      */
-    GroupsAction(QObject* parent);
+    GroupsAction(QObject* parent = nullptr);
 
 public: // Adding/removing group action(s)
 
