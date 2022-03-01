@@ -85,6 +85,8 @@ Datasets DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
         // Get dataset
         auto dataset = dataHierarchyItem.getDataset();
 
+        const auto datasetGuid = dataset->getGuid();
+
         // Build a list of referenced datasets (needed for dataset removal at a later stage)
         Datasets referencedDatasets{ dataHierarchyItem.getDataset() };
 
@@ -98,12 +100,15 @@ Datasets DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
             _items.removeOne(&dataHierarchyItem);
 
             // Remove the item from the selection (if possible)
-            removeSelectedItem(dataHierarchyItem);
+            //removeSelectedItem(dataHierarchyItem);
 
             // Physically remove the data hierarchy item
-            delete &dataHierarchyItem;
+            //delete &dataHierarchyItem;
         }
-        emit itemRemoved(dataset->getGuid());
+        //emit itemRemoved(datasetGuid);
+
+        //for (auto referencedDataset : referencedDatasets)
+        //    delete &referencedDataset->getDataHierarchyItem();
 
         return referencedDatasets;
     }

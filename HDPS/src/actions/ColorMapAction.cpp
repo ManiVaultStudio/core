@@ -31,7 +31,6 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
 
     const auto notifyColorMapImageChanged = [this]() -> void {
         emit imageChanged(getColorMapImage());
-        notifyResettable();
     };
 
     connect(&_currentColorMapAction, &OptionAction::currentIndexChanged, this, notifyColorMapImageChanged);
@@ -39,16 +38,12 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     connect(&_settingsAction.getVerticalAxisAction().getMirrorAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
     connect(&_settingsAction.getDiscreteAction(), &ToggleAction::toggled, this, notifyColorMapImageChanged);
     connect(&_settingsAction.getDiscreteAction().getNumberOfStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
-    connect(&_currentColorMapAction, &OptionAction::resettableChanged, this, &ColorMapAction::notifyResettable);
-    connect(&_settingsAction, &ColorMapSettingsAction::resettableChanged, this, &ColorMapAction::notifyResettable);
 }
 
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
 {
     _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
     _currentColorMapAction.initialize(_colorMapFilterModel, colorMap, defaultColorMap);
-
-    notifyResettable();
 }
 
 hdps::util::ColorMap::Type ColorMapAction::getColorMapType() const
@@ -62,8 +57,6 @@ void ColorMapAction::setColorMapType(const util::ColorMap::Type& colorMapType)
     _currentColorMapAction.reset();
 
     emit typeChanged(colorMapType);
-
-    notifyResettable();
 }
 
 QString ColorMapAction::getColorMap() const
@@ -215,8 +208,6 @@ void ColorMapAction::setColorMap(const QString& colorMap)
     Q_ASSERT(!colorMap.isEmpty());
 
     _currentColorMapAction.setCurrentText(colorMap);
-
-    notifyResettable();
 }
 
 QString ColorMapAction::getDefaultColorMap() const
@@ -229,8 +220,6 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     Q_ASSERT(!defaultColorMap.isEmpty());
 
     _currentColorMapAction.setDefaultText(defaultColorMap);
-
-    notifyResettable();
 }
 
 ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction) :

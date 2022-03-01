@@ -89,8 +89,6 @@ public:
         _value = std::max(_minimum, std::min(value, _maximum));
 
         _valueChanged();
-
-        notifyResettable();
     }
 
     /** Gets the default value */
@@ -109,8 +107,6 @@ public:
         _defaultValue = std::max(_minimum, std::min(defaultValue, _maximum));
 
         _defaultValueChanged();
-
-        notifyResettable();
     }
 
     /** Gets the minimum value */
@@ -268,7 +264,6 @@ protected: // Callbacks for implementations of the numerical action
     PrefixChangedCB             _prefixChanged;                 /** Callback which is called when the prefix changed */
     SuffixChangedCB             _suffixChanged;                 /** Callback which is called when the suffix changed */
     NumberOfDecimalsChangedCB   _numberOfDecimalsChanged;       /** Callback which is called when the number of decimals changed */
-    ResettableChangedCB         _resettableChanged;             /** Callback which is called when the resettable-ness changed */
 
     static constexpr std::uint32_t  INIT_NUMBER_OF_DECIMALS = 1;        /** Initialization number of decimals */
 };

@@ -25,7 +25,6 @@ void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QCol
 {
     setColor(color);
     setDefaultColor(defaultColor);
-    notifyResettable();
 }
 
 QColor ColorAction::getColor() const
@@ -41,8 +40,6 @@ void ColorAction::setColor(const QColor& color)
     _color = color;
 
     emit colorChanged(_color);
-
-    notifyResettable();
 }
 
 QColor ColorAction::getDefaultColor() const

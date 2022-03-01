@@ -34,12 +34,8 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsA
     });
 
     connect(&_rangeAction, &DecimalRangeAction::rangeChanged, this, update);
-    connect(&_rangeAction, &DecimalRangeAction::resettableChanged, this, update);
 
     update();
-
-    connect(&_rangeAction, &DecimalRangeAction::resettableChanged, this, &ColorMapAxisAction::notifyResettable);
-    connect(&_mirrorAction, &ToggleAction::resettableChanged, this, &ColorMapAxisAction::notifyResettable);
 }
 
 ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMapAxisAction) :

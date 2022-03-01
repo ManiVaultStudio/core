@@ -110,51 +110,6 @@ QVector<WidgetAction*> GroupAction::getSortedWidgetActions() const
     return sortedActions;
 }
 
-void GroupAction::loadDefault(bool recursive /*= true*/)
-{
-    for (auto widgetAction : getSortedWidgetActions())
-        widgetAction->loadDefault();
-}
-
-void GroupAction::saveDefault(bool recursive /*= true*/)
-{
-    for (auto widgetAction : getSortedWidgetActions())
-        widgetAction->saveDefault();
-}
-
-bool GroupAction::canSaveDefault(bool recursive /*= true*/) const
-{
-    for (auto widgetAction : getSortedWidgetActions())
-        if (widgetAction->canSaveDefault())
-            return true;
-
-    return false;
-}
-
-bool GroupAction::isResettable(bool recursive /*= true*/) const
-{
-    for (auto widgetAction : getSortedWidgetActions())
-        if (widgetAction->isResettable())
-            return true;
-
-    return false;
-}
-
-bool GroupAction::isFactoryResettable(bool recursive /*= true*/) const
-{
-    for (auto widgetAction : getSortedWidgetActions())
-        if (widgetAction->isFactoryResettable())
-            return true;
-
-    return false;
-}
-
-void GroupAction::reset(bool recursive /*= true*/)
-{
-    for (auto widgetAction : getSortedWidgetActions())
-        widgetAction->reset();
-}
-
 GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())

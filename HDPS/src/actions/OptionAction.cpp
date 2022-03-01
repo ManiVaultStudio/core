@@ -29,7 +29,6 @@ void OptionAction::initialize(const QStringList& options /*= QStringList()*/, co
     setOptions(options);
     setCurrentText(currentOption);
     setDefaultText(defaultOption);
-    notifyResettable();
 }
 
 void OptionAction::initialize(QAbstractItemModel& customModel, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
@@ -37,7 +36,6 @@ void OptionAction::initialize(QAbstractItemModel& customModel, const QString& cu
     setCustomModel(&customModel);
     setCurrentText(currentOption);
     setDefaultText(defaultOption);
-    notifyResettable();
 }
 
 QStringList OptionAction::getOptions() const
@@ -96,8 +94,6 @@ void OptionAction::setOptions(const QStringList& options)
     // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
-
-    notifyResettable();
 }
 
 const QAbstractItemModel* OptionAction::getModel() const
@@ -177,8 +173,6 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
-
-    notifyResettable();
 }
 
 std::int32_t OptionAction::getDefaultIndex() const
@@ -195,8 +189,6 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
 
     // Notify others that the default index changed
     emit defaultIndexChanged(_defaultIndex);
-
-    notifyResettable();
 }
 
 QString OptionAction::getDefaultText() const
@@ -244,8 +236,6 @@ void OptionAction::setCurrentText(const QString& currentText)
 
     emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
-
-    notifyResettable();
 }
 
 bool OptionAction::hasSelection() const

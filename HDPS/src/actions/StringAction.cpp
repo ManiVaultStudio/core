@@ -29,7 +29,6 @@ void StringAction::initialize(const QString& string /*= ""*/, const QString& def
 {
     setString(string);
     setDefaultString(defaultString);
-    notifyResettable();
 }
 
 QString StringAction::getString() const
@@ -45,8 +44,6 @@ void StringAction::setString(const QString& string)
     _string = string;
 
     emit stringChanged(_string);
-
-    notifyResettable();
 }
 
 QString StringAction::getDefaultString() const
@@ -62,8 +59,6 @@ void StringAction::setDefaultString(const QString& defaultString)
     _defaultString = defaultString;
 
     emit defaultStringChanged(_defaultString);
-
-    notifyResettable();
 }
 
 QString StringAction::getPlaceholderString() const
@@ -103,17 +98,21 @@ void StringAction::setCompleter(QCompleter* completer)
     emit completerChanged(_completer);
 }
 
+bool StringAction::getSearchMode() const
+{
+    return _searchMode;
+}
+
 void StringAction::setSearchMode(bool searchMode)
 {
-    if (!searchMode)
-        return;
+    _searchMode = searchMode;
 
     // Configure leading action
-    _leadingAction.setVisible(true);
+    _leadingAction.setVisible(_searchMode);
     _leadingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
 
     // Configure trailing action
-    _trailingAction.setVisible(true);
+    _trailingAction.setVisible(false);
     _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
 
     // Reset the string when the trailing action is triggered
@@ -121,7 +120,7 @@ void StringAction::setSearchMode(bool searchMode)
 
     // Update trailing action visibility depending on the string
     const auto updateTrailingActionVisibility = [this]() -> void {
-        _trailingAction.setVisible(!_string.isEmpty());
+        _trailingAction.setVisible(_searchMode && !_string.isEmpty());
     };
 
     // Update trailing action visibility when the string changes
@@ -129,6 +128,16 @@ void StringAction::setSearchMode(bool searchMode)
 
     // Perform initial update of trailing action visibility
     updateTrailingActionVisibility();
+}
+
+bool StringAction::isResettable()
+{
+    return _string != _defaultString;
+}
+
+void StringAction::reset()
+{
+    setString(_defaultString);
 }
 
 void StringAction::fromVariantMap(const QVariantMap& variantMap)

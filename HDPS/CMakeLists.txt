@@ -69,6 +69,7 @@ set( CORE_HEADERS
     src/DataManager.h
     src/Archiver.h
     src/HdpsApplication.h
+    src/StartPageWidget.h
 )
 
 set( CORE_SOURCES
@@ -82,6 +83,7 @@ set( CORE_SOURCES
     src/DataManager.cpp
     src/Archiver.cpp
     src/HdpsApplication.cpp
+    src/StartPageWidget.cpp
 )
 
 set(EVENT_HEADERS

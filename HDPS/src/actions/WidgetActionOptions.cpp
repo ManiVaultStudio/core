@@ -31,16 +31,6 @@ WidgetActionOptions::WidgetActionOptions(WidgetAction* widgetAction, QLabel* lab
     _saveDefaultAction.setToolTip("Save default value to disk");
     _loadFactoryDefaultAction.setToolTip("Load factory default value");
 
-    // Load when triggered
-    connect(&_loadDefaultAction, &TriggerAction::triggered, _widgetAction, [this]() {
-        _widgetAction->loadDefault();
-    });
-
-    // Save default when triggered
-    connect(&_saveDefaultAction, &TriggerAction::triggered, _widgetAction, [this]() {
-        _widgetAction->saveDefault(true);
-    });
-
     // Load factory default when triggered
     connect(&_loadFactoryDefaultAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::reset);
 
@@ -61,8 +51,6 @@ bool WidgetActionOptions::eventFilter(QObject* target, QEvent* event)
                 break;
 
             _loadDefaultAction.setEnabled(_widgetAction->isResettable());
-            _saveDefaultAction.setEnabled(_widgetAction->canSaveDefault());
-            _loadFactoryDefaultAction.setEnabled(_widgetAction->isFactoryResettable());
 
             // Create main context menu
             auto contextMenu = new QMenu();

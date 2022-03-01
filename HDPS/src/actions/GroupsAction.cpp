@@ -21,7 +21,7 @@ GroupsAction::GroupsAction(QObject* parent /*= nullptr*/) :
 
 void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= true*/)
 {
-#ifdef _VERBOSE
+#ifdef GROUPS_ACTION_VERBOSE
     qDebug().noquote() << QString("Add %1 to groups action").arg(groupAction->getSettingsPath());
 #endif
 
@@ -212,51 +212,6 @@ bool GroupsAction::isGroupActionHidden(GroupAction* groupAction) const
     return !isGroupActionVisible(groupAction);
 }
 
-void GroupsAction::loadDefault(bool recursive /*= true*/)
-{
-    for (auto groupAction : _groupActions)
-        groupAction->loadDefault(recursive);
-}
-
-void GroupsAction::saveDefault(bool recursive /*= true*/)
-{
-    for (auto groupAction : _groupActions)
-        groupAction->saveDefault(recursive);
-}
-
-bool GroupsAction::canSaveDefault(bool recursive /*= true*/) const
-{
-    for (auto groupAction : _groupActions)
-        if (groupAction->canSaveDefault(recursive))
-            return true;
-
-    return false;
-}
-
-bool GroupsAction::isResettable(bool recursive /*= true*/) const
-{
-    for (auto groupAction : _groupActions)
-        if (groupAction->isResettable(recursive))
-            return true;
-
-    return false;
-}
-
-bool GroupsAction::isFactoryResettable(bool recursive /*= true*/) const
-{
-    for (auto groupAction : _groupActions)
-        if (groupAction->isFactoryResettable(recursive))
-            return true;
-
-    return false;
-}
-
-void GroupsAction::reset(bool recursive /*= true*/)
-{
-    for (auto groupAction : _groupActions)
-        groupAction->reset(recursive);
-}
-
 GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupsAction, widgetFlags),
     _groupsAction(groupsAction),
@@ -388,41 +343,41 @@ void GroupsAction::Widget::updateToolbar()
 
 void GroupsAction::Widget::updateFiltering()
 {
-//#ifdef GROUPS_ACTION_VERBOSE
-//    qDebug() << "Updating action filtering";
-//#endif
-//
-//    // Get filter string
-//    const auto filterString = _filterAction.getString();
-//
-//    // Establish whether we are filtering out actions or not
-//    const auto areFiltering = !filterString.isEmpty();
-//
-//    // Get group actions
-//    auto groupActions = _groupsAction->getGroupActions();
-//
-//    // Set actions visibility
-//    for (auto groupAction : groupActions) {
-//        if (groupAction == groupActions.first())
-//            _groupsAction->setGroupActionVisibility(groupAction, areFiltering);
-//        else
-//            _groupsAction->setGroupActionVisibility(groupAction, !areFiltering);
-//    }
-//
-//    // Do not include actions from the special filtering group action
-//    if (!groupActions.isEmpty())
-//        groupActions.removeFirst();
-//
-//    // Found child widget actions
-//    QVector<WidgetAction*> foundActions;
-//
-//    for (auto groupAction : groupActions)
-//        foundActions << groupAction->findChildren(filterString, false);
-//
-//    // Update filtered actions group action
-//    _filteredActionsAction.setExpanded(true);
-//    _filteredActionsAction.setActions(foundActions);
-//    _filteredActionsAction.setText(foundActions.count() == 0 ? "No properties found" : QString("Found %1 proper%2").arg(QString::number(foundActions.count()), foundActions.count() == 1 ? "ty": "ties"));
+#ifdef GROUPS_ACTION_VERBOSE
+    qDebug() << "Updating action filtering";
+#endif
+
+    // Get filter string
+    const auto filterString = _filterAction.getString();
+
+    // Establish whether we are filtering out actions or not
+    const auto areFiltering = !filterString.isEmpty();
+
+    // Get group actions
+    auto groupActions = _groupsAction->getGroupActions();
+
+    // Set actions visibility
+    for (auto groupAction : groupActions) {
+        if (groupAction == groupActions.first())
+            _groupsAction->setGroupActionVisibility(groupAction, areFiltering);
+        else
+            _groupsAction->setGroupActionVisibility(groupAction, !areFiltering);
+    }
+
+    // Do not include actions from the special filtering group action
+    if (!groupActions.isEmpty())
+        groupActions.removeFirst();
+
+    // Found child widget actions
+    QVector<WidgetAction*> foundActions;
+
+    for (auto groupAction : groupActions)
+        foundActions << groupAction->findChildren(filterString, false);
+
+    // Update filtered actions group action
+    _filteredActionsAction.setExpanded(true);
+    _filteredActionsAction.setActions(foundActions);
+    _filteredActionsAction.setText(foundActions.count() == 0 ? "No properties found" : QString("Found %1 proper%2").arg(QString::number(foundActions.count()), foundActions.count() == 1 ? "ty": "ties"));
 }
 
 void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)

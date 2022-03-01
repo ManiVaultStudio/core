@@ -13,7 +13,7 @@
 
 #include <memory>
 
-#define _SET_VERBOSE
+#define DATASET_IMPL_VERBOSE
 
 namespace hdps
 {
@@ -56,7 +56,7 @@ public:
     /** Destructor */
     virtual ~DatasetImpl()
     {
-#ifdef _SET_VERBOSE
+#ifdef DATASET_IMPL_VERBOSE
         qDebug() << _guiName << "destructed";
 #endif
     }

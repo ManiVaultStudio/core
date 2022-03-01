@@ -11,7 +11,7 @@
 #include <QFileDialog>
 #include <QJsonArray>
 
-//#define _VERBOSE
+//#define WIDGET_ACTION_VERBOSE
 
 namespace hdps {
 
@@ -76,232 +76,6 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;
-}
-
-bool WidgetAction::hasSavedDefault() const
-{
-    /*
-    if (isSerializable() && Application::current()->getSetting(getSettingsPath() + "/Default").isValid())
-        return true;
-
-    // Check whether any of the children has a saved default
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (!childWidgetAction)
-            continue;
-
-        // Load child default
-        if (childWidgetAction->hasSavedDefault())
-            return true;
-    }
-    */
-
-    return false;
-}
-
-bool WidgetAction::canSaveDefault(bool recursive /*= true*/) const
-{
-    /*
-    if (isSerializable()) {
-        const auto valueVariant             = valueToVariant();
-        const auto defaultValueVariant      = defaultValueToVariant();
-        const auto savedDefaultValueVariant = savedDefaultValueToVariant();
-
-        if (valueVariant.isValid()) {
-            if (savedDefaultValueVariant.isValid() && (valueVariant != savedDefaultValueVariant))
-                return true;
-
-            if (defaultValueVariant.isValid() && (valueVariant != savedDefaultValueVariant && valueVariant != defaultValueVariant))
-                return true;
-        }
-    }
-
-    if (!recursive)
-        return false;
-
-    // Check whether any of the children can save to default
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (!childWidgetAction)
-            continue;
-
-        // Check whether child can save to default
-        if (childWidgetAction->canSaveDefault())
-            return true;
-    }
-    */
-
-    return false;
-}
-
-void WidgetAction::loadDefault(bool recursive /*= true*/)
-{
-#ifdef _VERBOSE
-    qDebug().noquote() << QString("Load default for: %1").arg(getSettingsPath());
-#endif
-
-    /*
-    setIsSerializing(true);
-    {
-        if (isSerializable())
-            setValueFromVariant(Application::current()->getSetting(getSettingsPath() + "/Default"));
-
-        if (!recursive)
-            return;
-
-        // Load default for all children
-        for (auto child : children()) {
-            auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-            if (!childWidgetAction)
-                continue;
-
-            // Load child default
-            childWidgetAction->loadDefault();
-        }
-    }
-    setIsSerializing(false);
-    */
-}
-
-void WidgetAction::saveDefault(bool recursive /*= true*/)
-{
-#ifdef _VERBOSE
-    qDebug().noquote() << QString("Save default for: %1").arg(getSettingsPath());
-#endif
-
-    /*
-    setIsSerializing(true);
-    {
-        if (isSerializable())
-            Application::current()->setSetting(getSettingsPath() + "/Default", valueToVariant());
-
-        if (!recursive)
-            return;
-
-        // Save default for all children
-        for (auto child : children()) {
-            auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-            if (!childWidgetAction)
-                continue;
-
-            // Save child default
-            childWidgetAction->saveDefault();
-        }
-    }
-    setIsSerializing(false);
-    */
-}
-
-bool WidgetAction::isResettable(bool recursive /*= true*/) const
-{
-    /*
-    if (isSerializable() && hasSavedDefault() && (valueToVariant() != savedDefaultValueToVariant()))
-        return true;
-
-    if (!recursive)
-        return false;
-
-    // Determine whether any of the children is resettable
-    const auto anyChildResettable = [](const WidgetAction* widgetAction) -> bool {
-        for (auto child : widgetAction->children()) {
-            auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-            if (!childWidgetAction)
-                continue;
-
-            if (childWidgetAction->isResettable())
-                return true;
-        }
-
-        return false;
-    };
-
-    if (anyChildResettable(this))
-        return true;
-    */
-
-    return false;
-}
-
-bool WidgetAction::isFactoryResettable(bool recursive /*= true*/) const
-{
-    /*
-    if (isSerializable() && (valueToVariant() != defaultValueToVariant()))
-        return true;
-
-    if (!recursive)
-        return false;
-
-    // Determine whether any of the children is factory resettable
-    const auto anyChildFactoryResettable = [](const WidgetAction* widgetAction) -> bool {
-        for (auto child : widgetAction->children()) {
-            auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-            if (!childWidgetAction)
-                continue;
-
-            if (childWidgetAction->isFactoryResettable())
-                return true;
-        }
-
-        return false;
-    };
-
-    if (anyChildFactoryResettable(this))
-        return true;
-    */
-
-    return false;
-}
-
-void WidgetAction::notifyResettable()
-{
-#ifdef _VERBOSE
-    qDebug().noquote() << QString("Notify resettable: %1").arg(getSettingsPath());
-#endif
-
-    return;
-
-    if (isSerializing())
-        return;
-
-    emit resettableChanged(isResettable());
-    emit factoryResettableChanged(isFactoryResettable());
-
-    const auto widgetActionParent = dynamic_cast<WidgetAction*>(parent());
-
-    if (widgetActionParent)
-        widgetActionParent->notifyResettable();
-}
-
-void WidgetAction::reset(bool recursive /*= true*/)
-{
-    /*
-    // Get default value as variant
-    const auto defaultValue = defaultValueToVariant();
-
-    // And assign it to the value if valid
-    if (isSerializable() && defaultValue.isValid())
-        setValueFromVariant(defaultValue);
-
-    if (!recursive)
-        return;
-
-    // Reset all children
-    for (auto child : children()) {
-        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
-
-        if (!childWidgetAction)
-            continue;
-
-        // Reset the child
-        childWidgetAction->reset();
-    }
-    */
 }
 
 QString WidgetAction::getSettingsPath() const
@@ -384,7 +158,7 @@ QVariantMap WidgetAction::toVariantMap() const
 
 void WidgetAction::fromVariantMap(WidgetAction* widgetAction, const QVariantMap& variantMap)
 {
-#ifdef _VERBOSE
+#ifdef WIDGET_ACTION_VERBOSE
     qDebug().noquote() << QString("From variant map: %1").arg(widgetAction->text());
 #endif
 
@@ -405,7 +179,7 @@ void WidgetAction::fromVariantMap(WidgetAction* widgetAction, const QVariantMap&
 
 QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
 {
-#ifdef _VERBOSE
+#ifdef WIDGET_ACTION_VERBOSE
     qDebug().noquote() << QString("To variant map: %1").arg(widgetAction->text());
 #endif
 
@@ -486,7 +260,7 @@ void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
         if (jsonDocument.isNull() || jsonDocument.isEmpty())
             throw std::runtime_error("JSON document is invalid");
 
-#ifdef _VERBOSE
+#ifdef WIDGET_ACTION_VERBOSE
         qDebug().noquote() << jsonDocument.toJson(QJsonDocument::Indented);
 #endif
 

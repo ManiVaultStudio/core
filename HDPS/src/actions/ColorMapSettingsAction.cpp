@@ -21,10 +21,6 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
-
-    connect(&_horizontalAxisAction, &ColorMapAxisAction::resettableChanged, this, &ColorMapSettingsAction::notifyResettable);
-    connect(&_verticalAxisAction, &ColorMapAxisAction::resettableChanged, this, &ColorMapSettingsAction::notifyResettable);
-    connect(&_discreteAction, &ColorMapDiscreteAction::resettableChanged, this, &ColorMapSettingsAction::notifyResettable);
 }
 
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :

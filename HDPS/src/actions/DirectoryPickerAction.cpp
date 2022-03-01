@@ -65,7 +65,6 @@ void DirectoryPickerAction::initialize(const QString& directory /*= QString()*/,
 {
     setDirectory(directory);
     setDefaultDirectory(defaultDirectory);
-    notifyResettable();
 }
 
 QString DirectoryPickerAction::getDirectory() const
@@ -79,8 +78,6 @@ void DirectoryPickerAction::setDirectory(const QString& directory)
         return;
 
     _directoryAction.setString(directory);
-
-    notifyResettable();
 }
 
 QString DirectoryPickerAction::getDefaultDirectory() const
@@ -94,8 +91,6 @@ void DirectoryPickerAction::setDefaultDirectory(const QString& defaultDirectory)
         return;
 
     _directoryAction.setDefaultString(defaultDirectory);
-
-    notifyResettable();
 }
 
 QString DirectoryPickerAction::getPlaceholderString() const

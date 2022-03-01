@@ -98,52 +98,20 @@ public:
 public: // Settings
 
     /**
-     * Establish whether there is a saved default
-     * @return Whether there is a saved default
-     */
-    virtual bool hasSavedDefault() const;
-
-    /**
-     * Establish whether a default can be saved
-     * @param recursive Check recursively
-     * @return Whether a default can be saved
-     */
-    virtual bool canSaveDefault(bool recursive = true) const;
-
-    /**
-     * Load default from settings
-     * @param recursive Load recursively
-     */
-    virtual void loadDefault(bool recursive = true);
-
-    /**
-     * Save default to settings
-     * @param recursive Save recursively
-     */
-    virtual void saveDefault(bool recursive = true);
-
-    /**
      * Determines whether the action can be reset to its default
      * @param recursive Check recursively
      * @return Whether the action can be reset to its default
      */
-    virtual bool isResettable(bool recursive = true) const;
-
-    /**
-     * Determines whether the action can be reset to its factory default
-     * @param recursive Check recursively
-     * @return Whether the action can be reset to its factory default
-     */
-    virtual bool isFactoryResettable(bool recursive = true) const;
-
-    /** Notify others if the action is (factory) resettable */
-    virtual void notifyResettable() final;
+    virtual bool isResettable()
+    {
+        return false;
+    };
 
     /**
      * Reset to factory default
      * @param recursive Reset to factory default recursively
      */
-    virtual void reset(bool recursive = true);
+    virtual void reset() {};
 
     /**
      * Get settings path
@@ -241,18 +209,6 @@ protected:
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
 signals:
-
-    /**
-     * Signals that the resettable-ness changed
-     * @param isResettable Whether the widget action can be reset to default
-     */
-    void resettableChanged(bool isResettable);
-
-    /**
-     * Signals that the factory resettable-ness changed
-     * @param isFactoryResettable Whether the widget action can be reset to factory default
-     */
-    void factoryResettableChanged(bool isFactoryResettable);
 
     /**
      * Signals that serializing is currently being performed or not

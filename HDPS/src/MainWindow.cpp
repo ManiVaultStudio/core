@@ -1,8 +1,10 @@
 #include "MainWindow.h"
 #include "DataHierarchyWidget.h"
 #include "DataPropertiesWidget.h"
-#include "DataManager.h" // To connect changed data signal to dataHierarchy
+#include "DataManager.h"
 #include "Logger.h"
+#include "StartPageWidget.h"
+
 #include "PluginManager.h"
 #include "PluginType.h"
 #include "Application.h"
@@ -46,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _settingsDockArea(nullptr),
     _loggingDockArea(nullptr),
     _centralDockWidget(new CDockWidget("Views")),
+    _startPageDockWidget(new CDockWidget("Start page")),
     _dataHierarchyDockWidget(new CDockWidget("Data hierarchy")),
     _dataPropertiesDockWidget(new CDockWidget("Data properties")),
     _loggingDockWidget(new CDockWidget("Logging"))
@@ -258,65 +261,10 @@ void MainWindow::initializeDocking()
 
 void MainWindow::initializeCentralDockingArea()
 {
-    auto welcomeWidget          = new QWidget();
-    auto welcomeWidgetLayout    = new QVBoxLayout();
-    auto welcomeLabel           = new QLabel();
+    _startPageDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("door-open", QSize(16, 16)));
+    _startPageDockWidget->setWidget(new StartPageWidget());
 
-    welcomeWidget->setLayout(welcomeWidgetLayout);
-
-    // choose the icon for different-dpi screens
-    const int pixelRatio = devicePixelRatio();
-
-    QString iconName = ":/Images/AppBackground256";
-
-    if (pixelRatio > 1)
-        iconName = ":/Images/AppBackground512";
-
-    if (pixelRatio > 2)
-        iconName = ":/Images/AppBackground1024";
-    
-    welcomeLabel->setPixmap(QPixmap(iconName).scaled(256, 256));
-    welcomeLabel->setAlignment(Qt::AlignCenter);
-
-    welcomeWidgetLayout->addStretch(1);
-    welcomeWidgetLayout->addWidget(welcomeLabel);
-
-    /*
-    // Get recent projects
-    const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
-
-    // Disable recent projects menu when there are no recent projects
-    recentProjectsMenu->setEnabled(!recentProjects.isEmpty());
-
-    // Remove existing actions
-    recentProjectsMenu->clear();
-
-    // Add click able label for each recent project
-    for (const auto& recentProject : recentProjects) {
-
-        // Get the recent project file path
-        const auto recentProjectFilePath = recentProject.toString();
-
-        // Check if the recent project exists on disk
-        if (!QFileInfo(recentProjectFilePath).exists())
-            continue;
-
-        // Create recent project label and add it to the layout
-        welcomeWidgetLayout->addWidget(new RecentProjectLabel(recentProjectFilePath));
-    }
-    */
-
-    welcomeWidgetLayout->addStretch(1);
-
-    _centralDockWidget->setWidget(welcomeWidget);
-
-    _centralDockArea = _dockManager->setCentralWidget(_centralDockWidget);
-   
-    _centralDockWidget->setFeature(CDockWidget::DockWidgetClosable, true);
-    _centralDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _centralDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _centralDockWidget->setFeature(CDockWidget::NoTab, true);
-    _centralDockWidget->tabWidget()->setVisible(false);
+    _dockManager->addDockWidget(CenterDockWidgetArea, _startPageDockWidget);
 }
 
 void MainWindow::initializeSettingsDockingArea()

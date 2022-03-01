@@ -202,6 +202,8 @@ void Core::removeAllDatasets()
     // Remove the datasets that are flagged for removal
     for (const auto& datasetToRemove : datasetsToRemove)
         _dataManager->removeDataset(datasetToRemove);
+
+    Application::current()->setCurrentProjectFilePath("");
 }
 
 Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)

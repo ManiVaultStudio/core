@@ -25,7 +25,6 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
     _prefixChanged              = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged              = [this]() -> void { emit suffixChanged(_suffix); };
     _numberOfDecimalsChanged    = [this]() -> void { emit numberOfDecimalsChanged(_numberOfDecimals); };
-    _resettableChanged          = [this]() -> void { emit resettableChanged(isResettable()); };
 
     initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
 }

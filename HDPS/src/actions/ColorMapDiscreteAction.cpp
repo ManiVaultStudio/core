@@ -19,9 +19,6 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
     setCheckable(true);
 
     _numberOfStepsAction.setToolTip("Number of discrete steps");
-
-    connect(this, &ColorMapDiscreteAction::toggled, this, &ColorMapSettingsAction::notifyResettable);
-    connect(&_numberOfStepsAction, &IntegralAction::resettableChanged, this, &ColorMapSettingsAction::notifyResettable);
 }
 
 void ColorMapDiscreteAction::fromVariantMap(const QVariantMap& variantMap)

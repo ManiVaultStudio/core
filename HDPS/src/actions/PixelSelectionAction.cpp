@@ -227,8 +227,6 @@ void PixelSelectionAction::initType()
         _polygonAction.setChecked(type == PixelSelectionType::Polygon);
         _sampleAction.setChecked(type == PixelSelectionType::Sample);
         _roiAction.setChecked(type == PixelSelectionType::ROI);
-
-        notifyResettable();
     };
 
     // Toggle type actions based on selected selection type
@@ -264,11 +262,6 @@ void PixelSelectionAction::initModifier()
     connect(&_modifierSubtractAction, &QAction::toggled, [this](bool checked) {
         _pixelSelectionTool.setModifier(checked ? PixelSelectionModifierType::Remove : PixelSelectionModifierType::Replace);
     });
-
-    connect(&_modifierAddAction, &ColorAction::resettableChanged, this, &PixelSelectionAction::notifyResettable);
-    connect(&_modifierSubtractAction, &DecimalAction::resettableChanged, this, &PixelSelectionAction::notifyResettable);
-
-    notifyResettable();
 }
 
 void PixelSelectionAction::initOperations()
