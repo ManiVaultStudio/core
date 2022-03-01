@@ -5,7 +5,7 @@
 
 #include <QDebug>
 
-//#define _VERBOSE
+//#define GROUPS_ACTION_VERBOSE
 
 namespace hdps {
 
@@ -49,7 +49,7 @@ void GroupsAction::addGroupAction(GroupAction* groupAction, bool visible /*= tru
 
 void GroupsAction::removeGroupAction(GroupAction* groupAction)
 {
-#ifdef _VERBOSE
+#ifdef GROUPS_ACTION_VERBOSE
     qDebug().noquote() << QString("Remove %1 from groups action").arg(groupAction->getSettingsPath());
 #endif
 
@@ -76,7 +76,7 @@ void GroupsAction::removeGroupAction(GroupAction* groupAction)
 
 void GroupsAction::setGroupActions(const GroupActions& groupActions)
 {
-#ifdef _VERBOSE
+#ifdef GROUPS_ACTION_VERBOSE
     qDebug() << "Set group actions";
 #endif
 
@@ -90,7 +90,7 @@ void GroupsAction::setGroupActions(const GroupActions& groupActions)
 
 void GroupsAction::resetGroupActions()
 {
-#ifdef _VERBOSE
+#ifdef GROUPS_ACTION_VERBOSE
     qDebug() << "Reset group actions";
 #endif
 
@@ -388,7 +388,7 @@ void GroupsAction::Widget::updateToolbar()
 
 void GroupsAction::Widget::updateFiltering()
 {
-//#ifdef _VERBOSE
+//#ifdef GROUPS_ACTION_VERBOSE
 //    qDebug() << "Updating action filtering";
 //#endif
 //
@@ -427,7 +427,7 @@ void GroupsAction::Widget::updateFiltering()
 
 void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 {
-#ifdef _VERBOSE
+#ifdef GROUPS_ACTION_VERBOSE
     qDebug().noquote() << QString("Add %1 to tree widget %2").arg(groupAction->getSettingsPath(), groupAction->isExpanded() ? "expanded" : "collapsed");
 #endif
 
@@ -443,7 +443,7 @@ void GroupsAction::Widget::addGroupAction(GroupAction* groupAction)
 
 void GroupsAction::Widget::removeGroupAction(GroupAction* groupAction)
 {
-#ifdef _VERBOSE
+#ifdef GROUPS_ACTION_VERBOSE
     qDebug().noquote() << QString("Remove %1 from tree widget").arg(groupAction->getSettingsPath());
 #endif
 

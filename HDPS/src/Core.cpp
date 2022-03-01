@@ -38,6 +38,9 @@ Core::Core(gui::MainWindow& mainWindow) :
 
 Core::~Core()
 {
+    // Remove all existing dataset
+    removeAllDatasets();
+
     // Delete the plugin manager
     _pluginManager.reset();
 

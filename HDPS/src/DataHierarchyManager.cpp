@@ -99,6 +99,9 @@ Datasets DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
 
             // Remove the item from the selection (if possible)
             removeSelectedItem(dataHierarchyItem);
+
+            // Physically remove the data hierarchy item
+            delete &dataHierarchyItem;
         }
         emit itemRemoved(dataset->getGuid());
 
