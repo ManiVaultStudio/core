@@ -55,12 +55,12 @@ public:
 
         /**
          * Constructor
-         * @param icon Icon character (Font Awesome)
+         * @param icon Icon
          * @param title Title of the file action
          * @param description Description of the file action
          * @param parent Pointer to parent widget
          */
-        FileActionWidget(const QString& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent = nullptr);
+        FileActionWidget(const QIcon& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent = nullptr);
 
         /**
          * Invoked when the mouse starts to hover over the widget
@@ -107,9 +107,68 @@ public:
         ProjectsWidget(QWidget* parent = nullptr);
 
     protected:
-        QHBoxLayout     _layout;            /** Main layout */
-        QVBoxLayout     _recentLayout;      /** Layout for recent projects actions */
-        QVBoxLayout     _openLayout;        /** Layout for project open actions */
+
+        /** Create left column actions */
+        void createLeftColumn();
+
+        /** Create right column actions */
+        void createRightColumn();
+
+
+        /**
+         * Create header label
+         * @param title Title of the header
+         * @param tooltip Tooltip of the header
+         * @return Pointer to newly created header label
+         */
+        QLabel* createHeaderLabel(const QString& title, const QString& tooltip);
+
+    protected:
+        QHBoxLayout     _layout;                /** Main layout */
+        QVBoxLayout     _leftColumnLayout;      /** Layout for left column */
+        QVBoxLayout     _rightColumnLayout;     /** Layout for right column */
+    };
+
+    /**
+     * Recent projects widget class
+     *
+     * Widget class for recent projects
+     *
+     * @author Thomas Kroes
+     */
+    class RecentProjectsWidget : public QWidget
+    {
+    public:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         */
+        RecentProjectsWidget(QWidget* parent = nullptr);
+
+    protected:
+        QVBoxLayout     _layout;    /** Main layout */
+    };
+
+    /**
+     * Import data widget class
+     *
+     * Widget class for importing data
+     *
+     * @author Thomas Kroes
+     */
+    class ImportDataWidget : public QWidget
+    {
+    public:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         */
+        ImportDataWidget(QWidget* parent = nullptr);
+
+    protected:
+        QVBoxLayout     _layout;    /** Main layout */
     };
 
 public:

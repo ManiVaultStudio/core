@@ -1,6 +1,7 @@
 #include "ProjectBarWidget.h"
 
 #include <Application.h>
+#include <CoreInterface.h>
 
 #include <widgets/Divider.h>
 
@@ -80,7 +81,7 @@ ProjectBarWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-ProjectBarWidget::FileActionWidget::FileActionWidget(const QString& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent /*= nullptr*/) :
+ProjectBarWidget::FileActionWidget::FileActionWidget(const QIcon& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _fileLayout(),
@@ -95,11 +96,8 @@ ProjectBarWidget::FileActionWidget::FileActionWidget(const QString& icon, const 
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    //_iconLabel.setFixedWidth(30);
-    _iconLabel.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    _iconLabel.setFont(fontAwesome.getFont(11));
-    _iconLabel.setText(fontAwesome.getIconCharacter(icon));
-    _iconLabel.setStyleSheet("QLabel { padding-left: 1px; padding-right: 2px; }");
+    _iconLabel.setPixmap(icon.pixmap(32, 32));
+    _iconLabel.setFixedWidth(24);
 
     _titleLabel.setStyleSheet("QLabel { font-size: 8pt; font-weight: bold; }");
     _descriptionLabel.setStyleSheet("QLabel { font-size: 7pt; }");
@@ -139,8 +137,77 @@ void ProjectBarWidget::FileActionWidget::mousePressEvent(QMouseEvent* mouseEvent
 ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
-    _recentLayout(),
-    _openLayout()
+    _leftColumnLayout(),
+    _rightColumnLayout()
+{
+    setAutoFillBackground(true);
+
+    // Change the background color
+    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+
+    _layout.setMargin(50);
+
+    _leftColumnLayout.setAlignment(Qt::AlignTop);
+    _rightColumnLayout.setAlignment(Qt::AlignTop);
+
+    _layout.addLayout(&_leftColumnLayout, 1);
+    _layout.addLayout(&_rightColumnLayout, 1);
+
+    // Create left and right column
+    createLeftColumn();
+    createRightColumn();
+
+    // Apply the layout
+    setLayout(&_layout);
+}
+
+void ProjectBarWidget::ProjectsWidget::createLeftColumn()
+{
+    // Add header and widget for recent projects
+    _leftColumnLayout.addWidget(createHeaderLabel("Recent", "Recently opened HDPS projects"));
+    _leftColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
+    _leftColumnLayout.addWidget(new RecentProjectsWidget());
+
+    // Stretch to bottom
+    _leftColumnLayout.addStretch(1);
+}
+
+void ProjectBarWidget::ProjectsWidget::createRightColumn()
+{
+    // Add header
+    _rightColumnLayout.addWidget(createHeaderLabel("Open", "Project open options"));
+    _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
+
+    // Add file action for opening a project from a picked location
+    _rightColumnLayout.addWidget(new FileActionWidget(Application::getIconFont("FontAwesome").getIcon("folder-open"), QFileInfo("Open").baseName(), "Open an existing project from disk", []() {
+        Application::current()->loadProject();
+    }));
+
+    _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 40));
+
+    // Add header and widget for import data
+    _rightColumnLayout.addWidget(createHeaderLabel("Import data", "Import data into HDPS"));
+    _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
+    _rightColumnLayout.addWidget(new ImportDataWidget());
+
+    // Stretch to bottom
+    _rightColumnLayout.addStretch(1);
+}
+
+QLabel* ProjectBarWidget::ProjectsWidget::createHeaderLabel(const QString& title, const QString& tooltip)
+{
+    auto label = new QLabel(title);
+
+    label->setAlignment(Qt::AlignLeft);
+    label->setStyleSheet("QLabel { font-weight: bold; font-size: 11pt; color: #606060; }");
+    label->setStyleSheet("QLabel { font-size: 11pt; }");
+
+    return label;
+}
+
+ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
+    _layout()
 {
     setAutoFillBackground(true);
 
@@ -157,13 +224,7 @@ ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) 
         return label;
     };
 
-    _layout.setMargin(20);
-
-    _layout.addLayout(&_recentLayout, 1);
-    _layout.addLayout(&_openLayout, 1);
-
-    _recentLayout.addWidget(createHeaderLabel("Recent"));
-    _openLayout.addWidget(createHeaderLabel("Open"));
+    _layout.setMargin(0);
 
     // Get recent projects
     const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
@@ -179,19 +240,32 @@ ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) 
             continue;
 
         // Create recent project widget and add it to the layout
-        _recentLayout.addWidget(new FileActionWidget("file", QFileInfo(recentProjectFilePath).baseName(), recentProjectFilePath, [recentProjectFilePath]() {
+        _layout.addWidget(new FileActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), QFileInfo(recentProjectFilePath).baseName(), recentProjectFilePath, [recentProjectFilePath]() {
             Application::current()->loadProject(recentProjectFilePath);
         }));
     }
 
-    _recentLayout.addStretch(1);
+    setLayout(&_layout);
+}
 
-    // Add file action for opening a project from a picked location
-    _openLayout.addWidget(new FileActionWidget("folder-open", QFileInfo("Open").baseName(), "Open an existing project from disk", []() {
-        Application::current()->loadProject();
-    }));
+ProjectBarWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
+    _layout()
+{
+    setAutoFillBackground(true);
 
-    _openLayout.addStretch(1);
+    _layout.setMargin(0);
+
+    // Change the background color
+    ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+
+    for (auto pluginKind : Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER)) {
+
+        // Create import data option
+        _layout.addWidget(new FileActionWidget(Application::core()->getPluginIcon(pluginKind), Application::core()->getPluginGuiName(pluginKind), "Import data", [pluginKind]() {
+            Application::core()->importDataset(pluginKind);
+        }));
+    }
 
     setLayout(&_layout);
 }
