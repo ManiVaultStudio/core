@@ -272,7 +272,6 @@ void MainWindow::initializeCentralDockingArea()
     _startPageDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("door-open", QSize(16, 16)));
     _startPageDockWidget->setWidget(_startPageWidget);
 
-    //_centralDockArea = _dockManager->setCentralWidget(_startPageDockWidget);
     _centralDockArea = _dockManager->addDockWidget(DockWidgetArea::CenterDockWidgetArea, _startPageDockWidget);
 
     _startPageDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
@@ -304,7 +303,7 @@ void MainWindow::initializeSettingsDockingArea()
         splitter->setSizes({ height * 1 / 3, height * 2 / 3 });
     }
 
-    //_settingsDockArea->setMinimumWidth(500);
+    _settingsDockArea->setFixedWidth(500);
 }
 
 void MainWindow::initializeLoggingDockingArea()
@@ -329,7 +328,9 @@ void MainWindow::updateCentralWidget()
 
         // The only valid docking area is in the center when there is only one view plugin loaded
         _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
-        
+
+        _centralDockArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
         // Show the start page dock widget and set the mode
         _startPageDockWidget->toggleView(true);
         _startPageWidget->setMode(_core->requestAllDataSets().size() == 0 ? StartPageWidget::Mode::ProjectBar : StartPageWidget::Mode::LogoOnly);

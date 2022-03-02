@@ -9,7 +9,6 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/, const Mode& mode
     _logoWidget(this)
 {
     setAutoFillBackground(true);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     _layout.setMargin(0);
     _layout.setSpacing(0);
