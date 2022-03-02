@@ -81,7 +81,7 @@ ProjectBarWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-ProjectBarWidget::FileActionWidget::FileActionWidget(const QIcon& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent /*= nullptr*/) :
+ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _fileLayout(),
@@ -92,20 +92,19 @@ ProjectBarWidget::FileActionWidget::FileActionWidget(const QIcon& icon, const QS
 {
     setAutoFillBackground(true);
 
-    _layout.setMargin(2);
-
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _iconLabel.setPixmap(icon.pixmap(32, 32));
+    _iconLabel.setPixmap(icon.pixmap(QSize(32, 32)));
     _iconLabel.setFixedWidth(24);
 
-    _titleLabel.setStyleSheet("QLabel { font-size: 8pt; font-weight: bold; }");
-    _descriptionLabel.setStyleSheet("QLabel { font-size: 7pt; }");
+    _titleLabel.setStyleSheet("QLabel { font-size: 9pt; font-weight: bold; }");
+    _descriptionLabel.setStyleSheet("QLabel { font-size: 8pt; }"); // padding-top: 2px;
 
     // Create file layout
     _fileLayout.addWidget(&_titleLabel);
     _fileLayout.addWidget(&_descriptionLabel);
 
+    _layout.setMargin(1);
     _layout.setSpacing(0);
     _layout.addWidget(&_iconLabel);
     _layout.addLayout(&_fileLayout);
@@ -117,19 +116,19 @@ ProjectBarWidget::FileActionWidget::FileActionWidget(const QIcon& icon, const QS
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-void ProjectBarWidget::FileActionWidget::enterEvent(QEvent* event)
+void ProjectBarWidget::ProjectActionWidget::enterEvent(QEvent* event)
 {
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Dark);
 }
 
-void ProjectBarWidget::FileActionWidget::leaveEvent(QEvent* event)
+void ProjectBarWidget::ProjectActionWidget::leaveEvent(QEvent* event)
 {
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-void ProjectBarWidget::FileActionWidget::mousePressEvent(QMouseEvent* mouseEvent)
+void ProjectBarWidget::ProjectActionWidget::mousePressEvent(QMouseEvent* mouseEvent)
 {
     _actionCallback();
 }
@@ -179,7 +178,7 @@ void ProjectBarWidget::ProjectsWidget::createRightColumn()
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
 
     // Add file action for opening a project from a picked location
-    _rightColumnLayout.addWidget(new FileActionWidget(Application::getIconFont("FontAwesome").getIcon("folder-open"), QFileInfo("Open").baseName(), "Open an existing project from disk", []() {
+    _rightColumnLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("folder-open"), QFileInfo("Open").baseName(), "Open an existing project from disk", []() {
         Application::current()->loadProject();
     }));
 
@@ -207,7 +206,8 @@ QLabel* ProjectBarWidget::ProjectsWidget::createHeaderLabel(const QString& title
 
 ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
-    _layout()
+    _layout(),
+    _scrollArea()
 {
     setAutoFillBackground(true);
 
@@ -240,12 +240,16 @@ ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*=
             continue;
 
         // Create recent project widget and add it to the layout
-        _layout.addWidget(new FileActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), QFileInfo(recentProjectFilePath).baseName(), recentProjectFilePath, [recentProjectFilePath]() {
+        _layout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), QFileInfo(recentProjectFilePath).baseName(), recentProjectFilePath, [recentProjectFilePath]() {
             Application::current()->loadProject(recentProjectFilePath);
         }));
     }
 
     setLayout(&_layout);
+
+    _scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _scrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    _scrollArea.setWidget(this);
 }
 
 ProjectBarWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr*/) :
@@ -262,7 +266,7 @@ ProjectBarWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr
     for (auto pluginKind : Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER)) {
 
         // Create import data option
-        _layout.addWidget(new FileActionWidget(Application::core()->getPluginIcon(pluginKind), Application::core()->getPluginGuiName(pluginKind), "Import data", [pluginKind]() {
+        _layout.addWidget(new ProjectActionWidget(Application::core()->getPluginIcon(pluginKind), Application::core()->getPluginGuiName(pluginKind), "Import data", [pluginKind]() {
             Application::core()->importDataset(pluginKind);
         }));
     }

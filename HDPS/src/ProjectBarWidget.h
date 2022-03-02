@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QGridLayout>
 #include <QLabel>
+#include <QScrollArea>
 
 /**
  * Project bar widget class
@@ -38,17 +39,17 @@ public:
     };
 
     /**
-     * File action widget class
+     * Project action widget class
      *
-     * Widget class for file action
+     * Widget class for project action (open, import data etc.)
      *
      * @author Thomas Kroes
      */
-    class FileActionWidget : public QWidget
+    class ProjectActionWidget : public QWidget
     {
     public:
 
-        /** Called when the file action widget is pressed */
+        /** Called when the project action widget is pressed */
         using ActionCallBack = std::function<void()>;
 
     public:
@@ -60,7 +61,7 @@ public:
          * @param description Description of the file action
          * @param parent Pointer to parent widget
          */
-        FileActionWidget(const QIcon& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent = nullptr);
+        ProjectActionWidget(const QIcon& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent = nullptr);
 
         /**
          * Invoked when the mouse starts to hover over the widget
@@ -147,7 +148,8 @@ public:
         RecentProjectsWidget(QWidget* parent = nullptr);
 
     protected:
-        QVBoxLayout     _layout;    /** Main layout */
+        QVBoxLayout     _layout;        /** Main layout */
+        QScrollArea     _scrollArea;    /** Scroll area */
     };
 
     /**

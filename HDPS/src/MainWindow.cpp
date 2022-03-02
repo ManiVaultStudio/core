@@ -270,7 +270,7 @@ void MainWindow::initializeDocking()
 void MainWindow::initializeCentralDockingArea()
 {
     _startPageDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("door-open", QSize(16, 16)));
-    _startPageDockWidget->setWidget(_startPageWidget);
+    _startPageDockWidget->setWidget(_startPageWidget, CDockWidget::ForceNoScrollArea);
 
     _centralDockArea = _dockManager->addDockWidget(DockWidgetArea::CenterDockWidgetArea, _startPageDockWidget);
 
