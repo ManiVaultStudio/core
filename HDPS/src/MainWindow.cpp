@@ -31,6 +31,8 @@
 #include <QTimer>
 #include <QLabel>
 
+#define MAIN_WINDOW_VERBOSE
+
 using namespace ads;
 
 namespace hdps
@@ -41,6 +43,7 @@ namespace gui
 
 MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
+    _startPageWidget(nullptr),
     _dataHierarchyWidget(nullptr),
     _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),
@@ -61,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     _core->init();
 
+    _startPageWidget        = new StartPageWidget(this);
     _dataHierarchyWidget    = new DataHierarchyWidget(this);
     _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
@@ -80,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
+
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, &MainWindow::updateCentralWidget);
 }
 
 QAction* MainWindow::addImportOption(const QString& actionName, const QIcon& icon)
@@ -139,18 +145,20 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
             
             QObject::connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
-                updateCentralWidgetVisibility();
+                updateCentralWidget();
             });
             
             QObject::connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
                 _dockManager->removeDockWidget(dockWidget);
-                updateCentralWidgetVisibility();
+                updateCentralWidget();
             });
 
             QObject::connect(dockWidget, &CDockWidget::topLevelChanged, [this, dockWidget](bool topLevel) {
-                updateCentralWidgetVisibility();
+                updateCentralWidget();
             });
             
+            updateCentralWidget();
+
             break;
         }
 
@@ -255,16 +263,21 @@ void MainWindow::initializeDocking()
     initializeSettingsDockingArea();
     initializeLoggingDockingArea();
 
-    connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidgetVisibility);
-    connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidgetVisibility);
+    connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidget);
+    connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidget);
 }
 
 void MainWindow::initializeCentralDockingArea()
 {
     _startPageDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("door-open", QSize(16, 16)));
-    _startPageDockWidget->setWidget(new StartPageWidget());
+    _startPageDockWidget->setWidget(_startPageWidget);
 
-    _dockManager->addDockWidget(CenterDockWidgetArea, _startPageDockWidget);
+    //_centralDockArea = _dockManager->setCentralWidget(_startPageDockWidget);
+    _centralDockArea = _dockManager->addDockWidget(DockWidgetArea::CenterDockWidgetArea, _startPageDockWidget);
+
+    _startPageDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _startPageDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+    _startPageDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
 }
 
 void MainWindow::initializeSettingsDockingArea()
@@ -291,7 +304,7 @@ void MainWindow::initializeSettingsDockingArea()
         splitter->setSizes({ height * 1 / 3, height * 2 / 3 });
     }
 
-    _settingsDockArea->setMinimumWidth(500);
+    //_settingsDockArea->setMinimumWidth(500);
 }
 
 void MainWindow::initializeLoggingDockingArea()
@@ -306,17 +319,28 @@ void MainWindow::initializeLoggingDockingArea()
     _loggingDockArea->resize(QSize(0, 150));
 }
 
-void MainWindow::updateCentralWidgetVisibility()
+void MainWindow::updateCentralWidget()
 {
+#ifdef MAIN_WINDOW_VERBOSE
+    qDebug().noquote() << "Update central widget with" << getViewPluginDockWidgets().count() << "view plugins";
+#endif
+
     if (getViewPluginDockWidgets().count() == 0) {
+
+        // The only valid docking area is in the center when there is only one view plugin loaded
         _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
-        _centralDockArea->dockWidget(0)->toggleView(true);
+        
+        // Show the start page dock widget and set the mode
+        _startPageDockWidget->toggleView(true);
+        _startPageWidget->setMode(_core->requestAllDataSets().size() == 0 ? StartPageWidget::Mode::ProjectBar : StartPageWidget::Mode::LogoOnly);
     }
     else {
+
+        // Docking may occur anywhere
         _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
 
-        if (_centralDockArea->dockWidgets().size() == 1)
-            _centralDockArea->dockWidget(0)->toggleView(false);
+        // Hide the start page dock widget
+        _startPageDockWidget->toggleView(false);
     }
 }
 
@@ -387,7 +411,7 @@ void MainWindow::setupFileMenu()
             if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
 
                 // Ask for confirmation dialog
-                DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Reset the data model", loadedDatasets);
+                DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Remove all datasets", loadedDatasets);
 
                 // Show the confirm data removal dialog
                 confirmDataRemoveDialog.exec();

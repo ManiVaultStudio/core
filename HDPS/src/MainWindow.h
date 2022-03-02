@@ -17,6 +17,8 @@ namespace Ui
     class MainWindow;
 }
 
+class StartPageWidget;
+
 namespace hdps
 {
 
@@ -153,7 +155,7 @@ private: // Docking
     void initializeLoggingDockingArea();
     
     /** Updates the visibility of the central dock widget (depending on its content) */
-    void updateCentralWidgetVisibility();
+    void updateCentralWidget();
 
     /**
      * Return a list of (open) view plugin dock widgets
@@ -175,8 +177,9 @@ protected: // Menu
 
 private:
     QSharedPointer<Core>        _core;                          /** HDPS core */
-    DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget */
-    DataPropertiesWidget*       _dataPropertiesWidget;          /** Data properties widget */
+    StartPageWidget*            _startPageWidget;               /** Pointer to the start page widget */
+    DataHierarchyWidget*        _dataHierarchyWidget;           /** Pointer to the data hierarchy tree widget */
+    DataPropertiesWidget*       _dataPropertiesWidget;          /** Pointer to the data properties widget */
 
 private: // Docking
     ads::CDockManager*          _dockManager;                   /** Manager for docking */

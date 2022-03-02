@@ -1,18 +1,10 @@
 #pragma once
 
-#include <Dataset.h>
+#include "ProjectBarWidget.h"
+#include "LogoWidget.h"
 
 #include <QWidget>
-#include <QGridLayout>
-#include <QLabel>
-
-using namespace hdps::util;
-
-namespace hdps
-{
-
-namespace gui
-{
+#include <QHBoxLayout>
 
 /**
  * Start page widget class
@@ -25,103 +17,12 @@ class StartPageWidget : public QWidget
 {
     Q_OBJECT
 
-protected:
+public:
 
-    /**
-     * Logo widget class
-     *
-     * Widget class with the HDPS logo
-     *
-     * @author Thomas Kroes
-     */
-    class LogoWidget : public QWidget
-    {
-    public:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         */
-        LogoWidget(QWidget* parent = nullptr);
-
-    protected:
-        QVBoxLayout     _layout;        /** Main layout */
-        QLabel          _headerLabel;   /** Header label */
-    };
-
-    /**
-     * File action widget class
-     *
-     * Widget class for file action
-     *
-     * @author Thomas Kroes
-     */
-    class FileActionWidget : public QWidget
-    {
-    public:
-
-        /** Called when the file action widget is pressed */
-        using ActionCallBack = std::function<void()>;
-
-    public:
-
-        /**
-         * Constructor
-         * @param icon Icon character (Font Awesome)
-         * @param title Title of the file action
-         * @param description Description of the file action
-         * @param parent Pointer to parent widget
-         */
-        FileActionWidget(const QString& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent = nullptr);
-
-        /**
-         * Invoked when the mouse starts to hover over the widget
-         * @param event Pointer to event
-         */
-        void enterEvent(QEvent* event);
-
-        /**
-         * Invoked when the mouse leaves the widget
-         * @param event Pointer to event
-         */
-        void leaveEvent(QEvent* event);
-
-        /**
-         * Invoked when the mouse presses inside the widget
-         * @param mouseEvent Pointer to mouse event
-         */
-        void mousePressEvent(QMouseEvent* mouseEvent);
-
-    protected:
-        QHBoxLayout         _layout;                /** Main layout */
-        QVBoxLayout         _fileLayout;            /** File layout */
-        QLabel              _iconLabel;             /** Icon label */
-        QLabel              _titleLabel;            /** Title label */
-        QLabel              _descriptionLabel;      /** Description label */
-        ActionCallBack      _actionCallback;        /** Called when the file action widget is pressed */
-    };
-
-    /**
-     * Projects widget class
-     *
-     * Widget class for opening projects
-     *
-     * @author Thomas Kroes
-     */
-    class ProjectsWidget : public QWidget
-    {
-    public:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         */
-        ProjectsWidget(QWidget* parent = nullptr);
-
-    protected:
-        QHBoxLayout     _layout;            /** Main layout */
-        QVBoxLayout     _recentLayout;      /** Layout for recent projects actions */
-        QVBoxLayout     _openLayout;        /** Layout for project open actions */
+    /** Start page modes */
+    enum class Mode {
+        ProjectBar,     /** Show user interface for project open, recent projects etc. */
+        LogoOnly        /** Show logo only */
     };
 
 public:
@@ -129,20 +30,25 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent widget
+     * @param mode Start page modus
      */
-    StartPageWidget(QWidget* parent = nullptr);
+    StartPageWidget(QWidget* parent = nullptr, const Mode& mode = Mode::ProjectBar);
 
     /**
-     * Set the widget background color role
-     * @param widget Pointer to widget to apply the background color to
-     * @param colorRole Background color role
+     * Set mode
+     * @param mode Mode
      */
-    static void setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole);
+    void setMode(const Mode& mode);
+
+    /**
+     * Get mode
+     * @return Mode
+     */
+    Mode getMode() const;
 
 protected:
-    QHBoxLayout     _mainLayout;        /** Main layout */
-    QVBoxLayout     _centerLayout;      /** Center layout */
+    Mode                _mode;                  /** Start page mode */
+    QHBoxLayout         _layout;                /** Main layout */
+    ProjectBarWidget    _projectBarWidget;      /** Project bar for project management */
+    LogoWidget          _logoWidget;            /** Logo widget */
 };
-
-}
-}

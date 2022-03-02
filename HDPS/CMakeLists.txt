@@ -70,6 +70,8 @@ set( CORE_HEADERS
     src/Archiver.h
     src/HdpsApplication.h
     src/StartPageWidget.h
+    src/ProjectBarWidget.h
+    src/LogoWidget.h
 )
 
 set( CORE_SOURCES
@@ -84,6 +86,8 @@ set( CORE_SOURCES
     src/Archiver.cpp
     src/HdpsApplication.cpp
     src/StartPageWidget.cpp
+    src/ProjectBarWidget.cpp
+    src/LogoWidget.cpp
 )
 
 set(EVENT_HEADERS
