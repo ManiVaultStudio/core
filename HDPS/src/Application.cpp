@@ -12,6 +12,7 @@
 #include <QTemporaryDir>
 #include <QFileDialog>
 #include <QDir>
+#include <QDateTime>
 
 #define _VERBOSE
 
@@ -103,12 +104,19 @@ void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
     // Get recent projects from settings
     auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
 
+    // Create recent project map
+    QVariantMap recentProject{
+        { "FilePath", recentProjectFilePath },
+        { "Date", QDateTime::currentDateTime() }
+    };
+
     // Add to recent projects if not already in there
-    if (recentProjects.contains(recentProjectFilePath))
-        recentProjects.removeOne(recentProjectFilePath);
+    for (auto recentProject : recentProjects)
+        if (recentProject.toMap()["FilePath"].toString() == recentProjectFilePath)
+            recentProjects.removeOne(recentProject);
 
     // Insert the entry at the beginning
-    recentProjects.insert(0, recentProjectFilePath);
+    recentProjects.insert(0, recentProject);
 
     // Save settings
     setSetting("Projects/Recent", recentProjects);

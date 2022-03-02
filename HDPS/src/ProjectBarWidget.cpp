@@ -172,7 +172,7 @@ ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) 
     for (const auto& recentProject : recentProjects) {
 
         // Get the recent project file path
-        const auto recentProjectFilePath = recentProject.toString();
+        const auto recentProjectFilePath = recentProject.toMap()["FilePath"].toString();
 
         // Check if the recent project exists on disk
         if (!QFileInfo(recentProjectFilePath).exists())

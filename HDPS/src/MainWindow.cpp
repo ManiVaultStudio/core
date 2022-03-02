@@ -503,7 +503,7 @@ void MainWindow::populateRecentProjectsMenu()
     for (const auto& recentProject : recentProjects) {
 
         // Get the recent project file path
-        const auto recentProjectFilePath = recentProject.toString();
+        const auto recentProjectFilePath = recentProject.toMap()["FilePath"].toString();
 
         // Check if the recent project exists on disk
         if (!QFileInfo(recentProjectFilePath).exists())
@@ -514,7 +514,7 @@ void MainWindow::populateRecentProjectsMenu()
 
         // Set action icon tooltip
         recentProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
-        recentProjectAction->setToolTip("Load " + recentProjectFilePath);
+        recentProjectAction->setToolTip("Load " + recentProjectFilePath + "(last opened on " + recentProject.toMap()["DateTime"].toDate().toString() + ")");
 
         // Load the recent project when triggered
         connect(recentProjectAction, &QAction::triggered, this, [recentProjectFilePath]() -> void {
