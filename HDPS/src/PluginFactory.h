@@ -69,21 +69,13 @@ public: // Version
 
 public:
 
-    /**
-     * Get the plugin icon
-     * @param size Size of the icon
-     * @return Plugin icon
-     */
-    virtual QIcon getIcon(const QSize& size = QSize(16, 16)) const = 0;
+    /** Returns the plugin icon */
+    virtual QIcon getIcon() const = 0;
 
-    /**
-     * Produces an instance of a plugin
-     * @return Pointer to produced plugin
-     */
     virtual Plugin* produce() = 0;
 
     /**
-     * Returns a list of data types that are supported for operations by
+     * Returns a list of datatypes that are supported for operations by
      * the plugin produced in this factory.
      */
     virtual DataTypes supportedDataTypes() const = 0;

@@ -45,13 +45,9 @@ public:
         return _guiName;
     }
 
-    /**
-     * Get the plugin icon
-     * @param size Size of the icon
-     * @return Plugin icon
-     */
-    virtual QIcon getIcon(const QSize& size = QSize(16, 16)) const final {
-        return _factory->getIcon(size);
+    /** Returns the icon of this plugin */
+    virtual QIcon getIcon() const final {
+        return _factory->getIcon();
     }
 
     /**

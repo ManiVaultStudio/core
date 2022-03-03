@@ -213,9 +213,9 @@ void Clusters::removeClustersById(const QStringList& ids)
     getRawData<ClusterData>().removeClustersById(ids);
 }
 
-QIcon Clusters::getIcon(const QSize& size /*= QSize(16, 16)*/) const
+QIcon Clusters::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("th-large", size);
+    return Application::getIconFont("FontAwesome").getIcon("th-large");
 }
 
 std::vector<std::uint32_t> Clusters::getSelectedIndices() const
@@ -405,9 +405,9 @@ void Clusters::selectInvert()
     _core->notifyDataSelectionChanged(this);
 }
 
-QIcon ClusterDataFactory::getIcon(const QSize& size /*= QSize(16, 16)*/) const
+QIcon ClusterDataFactory::getIcon() const
 {
-    return Application::getIconFont("FontAwesome").getIcon("th-large", size);
+    return Application::getIconFont("FontAwesome").getIcon("th-large");
 }
 
 hdps::plugin::RawData* ClusterDataFactory::produce()

@@ -8,8 +8,6 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QStyleOption>
-#include <QScrollBar>
-#include <QResizeEvent>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -96,10 +94,8 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    //_iconLabel.setAlignment(Qt::AlignCenter | Qt::AlignLeft);
     _iconLabel.setPixmap(icon.pixmap(QSize(32, 32)));
     _iconLabel.setFixedWidth(24);
-    _iconLabel.setStyleSheet("QLabel { margin-left: 2px}"); // padding-top: 2px;
 
     _titleLabel.setStyleSheet("QLabel { font-size: 9pt; font-weight: bold; }");
     _descriptionLabel.setStyleSheet("QLabel { font-size: 8pt; }"); // padding-top: 2px;
@@ -108,8 +104,8 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
     _fileLayout.addWidget(&_titleLabel);
     _fileLayout.addWidget(&_descriptionLabel);
 
-    _layout.setContentsMargins(1, 3, 3, 3);
-    _layout.setSpacing(2);
+    _layout.setMargin(1);
+    _layout.setSpacing(0);
     _layout.addWidget(&_iconLabel);
     _layout.addLayout(&_fileLayout);
     _layout.addStretch(1);
@@ -124,16 +120,12 @@ void ProjectBarWidget::ProjectActionWidget::enterEvent(QEvent* event)
 {
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Dark);
-
-    event->ignore();
 }
 
 void ProjectBarWidget::ProjectActionWidget::leaveEvent(QEvent* event)
 {
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
-
-    event->ignore();
 }
 
 void ProjectBarWidget::ProjectActionWidget::mousePressEvent(QMouseEvent* mouseEvent)
@@ -174,6 +166,9 @@ void ProjectBarWidget::ProjectsWidget::createLeftColumn()
     _leftColumnLayout.addWidget(createHeaderLabel("Recent", "Recently opened HDPS projects"));
     _leftColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
     _leftColumnLayout.addWidget(new RecentProjectsWidget());
+
+    // Stretch to bottom
+    _leftColumnLayout.addStretch(1);
 }
 
 void ProjectBarWidget::ProjectsWidget::createRightColumn()
@@ -203,54 +198,33 @@ QLabel* ProjectBarWidget::ProjectsWidget::createHeaderLabel(const QString& title
     auto label = new QLabel(title);
 
     label->setAlignment(Qt::AlignLeft);
-    label->setStyleSheet("QLabel { font-weight: 200; font-size: 14pt; }");
+    label->setStyleSheet("QLabel { font-weight: bold; font-size: 11pt; color: #606060; }");
+    label->setStyleSheet("QLabel { font-size: 11pt; }");
 
     return label;
 }
 
-ProjectBarWidget::ScrollArea::ScrollArea(QWidget* parent /*= nullptr*/) :
-    QScrollArea(parent)
-{
-}
-
-void ProjectBarWidget::ScrollArea::enterEvent(QEvent* event)
-{
-    verticalScrollBar()->show();
-}
-
-void ProjectBarWidget::ScrollArea::leaveEvent(QEvent* event)
-{
-    verticalScrollBar()->hide();
-}
-
-void ProjectBarWidget::ScrollArea::resizeEvent(QResizeEvent* resizeEvent)
-{
-    QScrollArea::resizeEvent(resizeEvent);
-
-    widget()->setFixedWidth(resizeEvent->size().width());
-}
-
 ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*= nullptr*/) :
-    ScrollArea(parent),
-    _containerWidget(),
-    _containerLayout()
+    QWidget(parent),
+    _layout(),
+    _scrollArea()
 {
     setAutoFillBackground(true);
-    setFrameShape(QFrame::NoFrame);
-    createContainerWidget();
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    setWidget(&_containerWidget);
 
+    // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
-}
 
-void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
-{
-    ProjectBarWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
+    const auto createHeaderLabel = [](const QString& title) ->QLabel* {
+        auto label = new QLabel(title);
 
-    _containerWidget.setAutoFillBackground(true);
-    _containerLayout.setMargin(0);
+        label->setAlignment(Qt::AlignLeft);
+        label->setStyleSheet("QLabel { font-weight: bold; font-size: 11pt; color: #606060; }");
+        label->setStyleSheet("QLabel { font-size: 11pt; }");
+
+        return label;
+    };
+
+    _layout.setMargin(0);
 
     // Get recent projects
     const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
@@ -266,12 +240,16 @@ void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
             continue;
 
         // Create recent project widget and add it to the layout
-        _containerLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), QFileInfo(recentProjectFilePath).baseName(), recentProjectFilePath, [recentProjectFilePath]() {
+        _layout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), QFileInfo(recentProjectFilePath).baseName(), recentProjectFilePath, [recentProjectFilePath]() {
             Application::current()->loadProject(recentProjectFilePath);
         }));
     }
 
-    _containerWidget.setLayout(&_containerLayout);
+    setLayout(&_layout);
+
+    _scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _scrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    _scrollArea.setWidget(this);
 }
 
 ProjectBarWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr*/) :

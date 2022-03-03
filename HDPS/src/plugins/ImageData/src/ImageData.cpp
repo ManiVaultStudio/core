@@ -87,9 +87,9 @@ Dataset<DatasetImpl> ImageData::createDataSet() const
     return Dataset<DatasetImpl>(new Images(_core, getName()));
 }
 
-QIcon ImageDataFactory::getIcon(const QSize& size /*= QSize(16, 16)*/) const
+QIcon ImageDataFactory::getIcon() const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("images", size);
+    return hdps::Application::getIconFont("FontAwesome").getIcon("images");
 }
 
 hdps::plugin::RawData* ImageDataFactory::produce()

@@ -60,12 +60,8 @@ public:
         return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
-    /**
-     * Get the plugin icon
-     * @param size Size of the icon
-     * @return Plugin icon
-     */
-    QIcon getIcon(const QSize& size = QSize(16, 16)) const override;
+    /** Get icon for the dataset */
+    QIcon getIcon() const override;
 
 public: // Selection
 
@@ -121,16 +117,8 @@ public:
     TextDataFactory(void) {}
     ~TextDataFactory(void) override {}
 
-    /**
-     * Get the plugin icon
-     * @param size Size of the icon
-     * @return Plugin icon
-     */
-    QIcon getIcon(const QSize& size = QSize(16, 16)) const override
-    {
-        return Application::getIconFont("FontAwesome").getIcon("font", size);
-    }
-
+    /** Returns the plugin icon */
+    QIcon getIcon() const override;
 
     hdps::plugin::RawData* produce() override;
 };

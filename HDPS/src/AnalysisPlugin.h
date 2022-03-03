@@ -147,13 +147,9 @@ public:
     }
     ~AnalysisPluginFactory() override {};
     
-    /**
-     * Get the plugin icon
-     * @param size Size of the icon
-     * @return Plugin icon
-     */
-    QIcon getIcon(const QSize& size = QSize(16, 16)) const override {
-        return Application::getIconFont("FontAwesome").getIcon("square-root-alt", size);
+    /** Returns the plugin icon */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("square-root-alt");
     }
 
     /**

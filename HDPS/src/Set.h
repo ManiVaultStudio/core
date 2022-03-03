@@ -202,12 +202,8 @@ public:
         return _core;
     }
 
-    /**
-     * Get the dataset icon
-     * @param size Size of the icon
-     * @return Dataset icon
-     */
-    virtual QIcon getIcon(const QSize& size = QSize(16, 16)) const = 0;
+    /** Get icon for the dataset */
+    virtual QIcon getIcon() const = 0;
 
     /**
      * Makes this set a subset of a full dataset

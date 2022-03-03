@@ -115,6 +115,7 @@ public:
         /** Create right column actions */
         void createRightColumn();
 
+
         /**
          * Create header label
          * @param title Title of the header
@@ -130,49 +131,13 @@ public:
     };
 
     /**
-     * Scroll area class
-     *
-     * Slightly modified scroll area to show automaticaly show vertical scrollbar when in mouse focus
-     *
-     * @author Thomas Kroes
-     */
-    class ScrollArea : public QScrollArea
-    {
-    public:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         */
-        ScrollArea(QWidget* parent = nullptr);
-
-        /**
-         * Invoked when the mouse starts to hover over the widget
-         * @param event Pointer to event
-         */
-        void enterEvent(QEvent* event);
-
-        /**
-         * Invoked when the mouse leaves the widget
-         * @param event Pointer to event
-         */
-        void leaveEvent(QEvent* event);
-
-        /**
-         * Invoked when the scroll area is resized
-         * @param resizeEvent Pointer to resize event
-         */
-        void resizeEvent(QResizeEvent* resizeEvent) override;
-    };
-
-    /**
      * Recent projects widget class
      *
      * Widget class for recent projects
      *
      * @author Thomas Kroes
      */
-    class RecentProjectsWidget : public ScrollArea
+    class RecentProjectsWidget : public QWidget
     {
     public:
 
@@ -183,13 +148,8 @@ public:
         RecentProjectsWidget(QWidget* parent = nullptr);
 
     protected:
-
-        /** Create recent projects entries */
-        void createContainerWidget();
-
-    protected:
-        QWidget         _containerWidget;   /** Container widget */
-        QVBoxLayout     _containerLayout;   /** Container layout */
+        QVBoxLayout     _layout;        /** Main layout */
+        QScrollArea     _scrollArea;    /** Scroll area */
     };
 
     /**

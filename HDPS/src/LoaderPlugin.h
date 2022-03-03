@@ -78,13 +78,9 @@ public:
         QObject::setObjectName("Plugins/Loader/" + name);
     }
 
-    /**
-     * Get the plugin icon
-     * @param size Size of the icon
-     * @return Plugin icon
-     */
-    QIcon getIcon(const QSize& size) const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-import", size);
+    /** Returns the plugin icon */
+    QIcon getIcon() const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-import");
     }
 
     /**
