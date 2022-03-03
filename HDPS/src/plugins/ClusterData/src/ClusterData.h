@@ -143,8 +143,12 @@ public:
         return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
-    /** Get icon for the dataset */
-    QIcon getIcon() const override;
+    /**
+     * Get the dataset icon
+     * @param size Size of the icon
+     * @return Dataset icon
+     */
+    QIcon getIcon(const QSize& size = QSize(16, 16)) const override;
 
 public: // Selection
 
@@ -229,9 +233,13 @@ class ClusterDataFactory : public hdps::plugin::RawDataFactory
 public:
     ClusterDataFactory(void) {}
     ~ClusterDataFactory(void) override {}
-    
-    /** Returns the plugin icon */
-    QIcon getIcon() const override;
+
+    /**
+     * Get the plugin icon
+     * @param size Size of the icon
+     * @return Plugin icon
+     */
+    QIcon getIcon(const QSize& size = QSize(16, 16)) const override;
 
     hdps::plugin::RawData* produce() override;
 };

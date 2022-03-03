@@ -79,9 +79,13 @@ public:
     }
     ~ViewPluginFactory() override {};
 
-    /** Returns the plugin icon */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("eye");
+    /**
+     * Get the plugin icon
+     * @param size Size of the icon
+     * @return Plugin icon
+     */
+    QIcon getIcon(const QSize& size) const override {
+        return Application::getIconFont("FontAwesome").getIcon("eye", size);
     }
 
     /**

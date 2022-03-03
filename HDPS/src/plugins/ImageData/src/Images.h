@@ -112,8 +112,12 @@ public: // Image retrieval functions
     /** Get the rectangle which bounds the visible pixels */
     QRect getVisibleRectangle() const;
 
-    /** Get icon for the dataset */
-    QIcon getIcon() const override;
+    /**
+     * Get the dataset icon
+     * @param size Size of the icon
+     * @return Dataset icon
+     */
+    QIcon getIcon(const QSize& size = QSize(16, 16)) const override;
 
 public: // Selection
 

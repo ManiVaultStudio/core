@@ -73,9 +73,13 @@ public:
         QObject::setObjectName("Plugins/Writer/" + name);
     }
 
-    /** Returns the plugin icon */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-export");
+    /**
+     * Get the plugin icon
+     * @param size Size of the icon
+     * @return Plugin icon
+     */
+    QIcon getIcon(const QSize& size) const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-export", size);
     }
 
     WriterPlugin* produce() override = 0;

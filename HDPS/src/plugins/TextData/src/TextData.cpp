@@ -18,19 +18,14 @@ Dataset<DatasetImpl> TextData::createDataSet() const
     return Dataset<DatasetImpl>(new Text(_core, getName()));
 }
 
-QIcon TextDataFactory::getIcon() const
-{
-    return Application::getIconFont("FontAwesome").getIcon("font");
-}
-
 hdps::plugin::RawData* TextDataFactory::produce()
 {
     return new TextData(this);
 }
 
-QIcon Text::getIcon() const
+QIcon Text::getIcon(const QSize& size /*= QSize(16, 16)*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("font");
+    return QIcon();
 }
 
 std::vector<std::uint32_t>& Text::getSelectionIndices()
