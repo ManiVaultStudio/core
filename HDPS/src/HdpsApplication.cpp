@@ -84,7 +84,7 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
             // Configure file dialog
             fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
             fileDialog.setFileMode(QFileDialog::ExistingFile);
-            fileDialog.setNameFilters({ "HDPS analysis files (*.hdps)" });
+            fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
             fileDialog.setDefaultSuffix(".hdps");
             fileDialog.setDirectory(getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
 
@@ -187,7 +187,7 @@ void HdpsApplication::saveProject(QString projectFilePath /*= ""*/)
 
             // Configure file dialog
             fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-            fileDialog.setNameFilters({ "HDPS analysis files (*.hdps)" });
+            fileDialog.setNameFilters({ "HDPS project files (*.hdps)" });
             fileDialog.setDefaultSuffix(".hdps");
             fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
             fileDialog.setDirectory(getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());

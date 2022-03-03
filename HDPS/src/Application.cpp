@@ -107,7 +107,7 @@ void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
     // Create recent project map
     QVariantMap recentProject{
         { "FilePath", recentProjectFilePath },
-        { "Date", QDateTime::currentDateTime() }
+        { "DateTime", QDateTime::currentDateTime() }
     };
 
     // Add to recent projects if not already in there

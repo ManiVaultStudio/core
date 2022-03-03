@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QStyleOption>
+#include <QScrollBar>
+#include <QResizeEvent>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -71,17 +73,17 @@ ProjectBarWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
     if (pixelRatio > 2)
         iconName = ":/Images/AppBackground1024";
 
-    _headerLabel.setPixmap(QPixmap(iconName).scaled(200, 200));
+    _headerLabel.setPixmap(QPixmap(iconName).scaled(256, 256));
     _headerLabel.setAlignment(Qt::AlignCenter);
 
-    _layout.setMargin(36);
+    _layout.setMargin(50);
     _layout.addWidget(&_headerLabel);
 
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, const QString& title, const QString& description, const ActionCallBack& actionCallback, QWidget* parent /*= nullptr*/) :
+ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, const QString& title, const QString& description, const QString& tooltip, const ActionCallBack& actionCallback, QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
     _fileLayout(),
@@ -91,21 +93,24 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
     _actionCallback(actionCallback)
 {
     setAutoFillBackground(true);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    setToolTip(tooltip);
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     _iconLabel.setPixmap(icon.pixmap(QSize(32, 32)));
     _iconLabel.setFixedWidth(24);
+    _iconLabel.setStyleSheet("QLabel { margin-left: 2px}");
 
     _titleLabel.setStyleSheet("QLabel { font-size: 9pt; font-weight: bold; }");
-    _descriptionLabel.setStyleSheet("QLabel { font-size: 8pt; }"); // padding-top: 2px;
+    _descriptionLabel.setStyleSheet("QLabel { font-size: 8pt; }");
 
     // Create file layout
     _fileLayout.addWidget(&_titleLabel);
     _fileLayout.addWidget(&_descriptionLabel);
 
-    _layout.setMargin(1);
-    _layout.setSpacing(0);
+    _layout.setContentsMargins(1, 3, 3, 3);
+    _layout.setSpacing(2);
     _layout.addWidget(&_iconLabel);
     _layout.addLayout(&_fileLayout);
     _layout.addStretch(1);
@@ -120,12 +125,16 @@ void ProjectBarWidget::ProjectActionWidget::enterEvent(QEvent* event)
 {
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Dark);
+
+    event->ignore();
 }
 
 void ProjectBarWidget::ProjectActionWidget::leaveEvent(QEvent* event)
 {
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+
+    event->ignore();
 }
 
 void ProjectBarWidget::ProjectActionWidget::mousePressEvent(QMouseEvent* mouseEvent)
@@ -144,7 +153,8 @@ ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) 
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
-    _layout.setMargin(50);
+    _layout.setMargin(35);
+    //_layout.setSpacing(30);
 
     _leftColumnLayout.setAlignment(Qt::AlignTop);
     _rightColumnLayout.setAlignment(Qt::AlignTop);
@@ -166,9 +176,6 @@ void ProjectBarWidget::ProjectsWidget::createLeftColumn()
     _leftColumnLayout.addWidget(createHeaderLabel("Recent", "Recently opened HDPS projects"));
     _leftColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
     _leftColumnLayout.addWidget(new RecentProjectsWidget());
-
-    // Stretch to bottom
-    _leftColumnLayout.addStretch(1);
 }
 
 void ProjectBarWidget::ProjectsWidget::createRightColumn()
@@ -177,8 +184,13 @@ void ProjectBarWidget::ProjectsWidget::createRightColumn()
     _rightColumnLayout.addWidget(createHeaderLabel("Open", "Project open options"));
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
 
+    // Establish title, description and tooltip
+    const auto title        = "Open project";
+    const auto description  = "Open an existing project from disk";
+    const auto tooltip      = "Use the file navigator to open an existing project from disk";
+
     // Add file action for opening a project from a picked location
-    _rightColumnLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("folder-open"), QFileInfo("Open").baseName(), "Open an existing project from disk", []() {
+    _rightColumnLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("folder-open"), title, description, tooltip, []() {
         Application::current()->loadProject();
     }));
 
@@ -198,33 +210,55 @@ QLabel* ProjectBarWidget::ProjectsWidget::createHeaderLabel(const QString& title
     auto label = new QLabel(title);
 
     label->setAlignment(Qt::AlignLeft);
-    label->setStyleSheet("QLabel { font-weight: bold; font-size: 11pt; color: #606060; }");
-    label->setStyleSheet("QLabel { font-size: 11pt; }");
+    label->setStyleSheet("QLabel { font-weight: 200; font-size: 13pt; }");
+    label->setToolTip(tooltip);
 
     return label;
 }
 
+ProjectBarWidget::ScrollArea::ScrollArea(QWidget* parent /*= nullptr*/) :
+    QScrollArea(parent)
+{
+}
+
+void ProjectBarWidget::ScrollArea::enterEvent(QEvent* event)
+{
+    verticalScrollBar()->show();
+}
+
+void ProjectBarWidget::ScrollArea::leaveEvent(QEvent* event)
+{
+    verticalScrollBar()->hide();
+}
+
+void ProjectBarWidget::ScrollArea::resizeEvent(QResizeEvent* resizeEvent)
+{
+    QScrollArea::resizeEvent(resizeEvent);
+
+    widget()->setFixedWidth(resizeEvent->size().width());
+}
+
 ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _layout(),
-    _scrollArea()
+    ScrollArea(parent),
+    _containerWidget(),
+    _containerLayout()
 {
     setAutoFillBackground(true);
+    setFrameShape(QFrame::NoFrame);
+    createContainerWidget();
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    setWidget(&_containerWidget);
 
-    // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+}
 
-    const auto createHeaderLabel = [](const QString& title) ->QLabel* {
-        auto label = new QLabel(title);
+void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
+{
+    ProjectBarWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
 
-        label->setAlignment(Qt::AlignLeft);
-        label->setStyleSheet("QLabel { font-weight: bold; font-size: 11pt; color: #606060; }");
-        label->setStyleSheet("QLabel { font-size: 11pt; }");
-
-        return label;
-    };
-
-    _layout.setMargin(0);
+    _containerWidget.setAutoFillBackground(true);
+    _containerLayout.setMargin(0);
 
     // Get recent projects
     const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
@@ -232,44 +266,61 @@ ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*=
     // Add click able label for each recent project
     for (const auto& recentProject : recentProjects) {
 
-        // Get the recent project file path
-        const auto recentProjectFilePath = recentProject.toMap()["FilePath"].toString();
+        // Establish file path, title, description and tooltip
+        const auto filePath     = recentProject.toMap()["FilePath"].toString();
+        const auto title        = QFileInfo(filePath).baseName();
+        const auto description  = filePath;
+        const auto tooltip      = "Open " + title + ", last opened on " + recentProject.toMap()["DateTime"].toDateTime().toString();
 
         // Check if the recent project exists on disk
-        if (!QFileInfo(recentProjectFilePath).exists())
+        if (!QFileInfo(filePath).exists())
             continue;
 
         // Create recent project widget and add it to the layout
-        _layout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), QFileInfo(recentProjectFilePath).baseName(), recentProjectFilePath, [recentProjectFilePath]() {
-            Application::current()->loadProject(recentProjectFilePath);
+        _containerLayout.addWidget(new ProjectActionWidget(Application::getIconFont("FontAwesome").getIcon("file"), title, description, tooltip, [filePath]() {
+            Application::current()->loadProject(filePath);
         }));
     }
 
-    setLayout(&_layout);
+    _containerWidget.setLayout(&_containerLayout);
 
-    _scrollArea.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _scrollArea.setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    _scrollArea.setWidget(this);
+    _containerWidget.setVisible(!recentProjects.isEmpty());
 }
 
 ProjectBarWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr*/) :
-    QWidget(parent),
-    _layout()
+    ScrollArea(parent),
+    _containerWidget(),
+    _containerLayout()
 {
     setAutoFillBackground(true);
+    setFrameShape(QFrame::NoFrame);
+    createContainerWidget();
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    setWidget(&_containerWidget);
 
-    _layout.setMargin(0);
-
-    // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+}
+
+void ProjectBarWidget::ImportDataWidget::createContainerWidget()
+{
+    ProjectBarWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
+
+    _containerWidget.setAutoFillBackground(true);
+    _containerLayout.setMargin(0);
 
     for (auto pluginKind : Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER)) {
 
+        // Establish title, description and tooltip
+        const auto title        = Application::core()->getPluginGuiName(pluginKind);
+        const auto description  = "Import data";
+        const auto tooltip      = "Import data into HDPS with the " + pluginKind;
+
         // Create import data option
-        _layout.addWidget(new ProjectActionWidget(Application::core()->getPluginIcon(pluginKind), Application::core()->getPluginGuiName(pluginKind), "Import data", [pluginKind]() {
+        _containerLayout.addWidget(new ProjectActionWidget(Application::core()->getPluginIcon(pluginKind), title, description, tooltip, [pluginKind]() {
             Application::core()->importDataset(pluginKind);
         }));
     }
 
-    setLayout(&_layout);
+    _containerWidget.setLayout(&_containerLayout);
 }
