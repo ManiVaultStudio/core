@@ -741,9 +741,11 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 )
 
 if(WIN32)
+    # Note! the quazip lib is named differently in Debug & Release
+    # simply copy the bin directory contents to let HDPS.exe run.
     add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy 
-            ${INSTALL_DIR}/$<CONFIGURATION>/bin/${CMAKE_SHARED_LIBRARY_PREFIX}quazip1-qt5${CMAKE_SHARED_LIBRARY_SUFFIX}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${INSTALL_DIR}/$<CONFIGURATION>/bin/
             ${INSTALL_DIR}/$<CONFIGURATION>/
     )
 endif()
