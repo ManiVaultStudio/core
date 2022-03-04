@@ -64,6 +64,13 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         // Notify others that a child is added
         if (parentDataset.isValid())
             Application::core()->notifyDataChildAdded(parentDataset, dataset);
+
+        connect(&newDataHierarchyItem->getDataset(), &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, newDataHierarchyItem]() {
+            if (!newDataHierarchyItem->getDataset().isValid())
+                return;
+
+            removeItem(*newDataHierarchyItem);
+        });
     }
     catch (std::exception& e)
     {
@@ -74,43 +81,22 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
     }
 }
 
-Datasets DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
+void DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
 {
     try {
         qDebug() << "Removing" << dataHierarchyItem.getDataset()->getGuiName() << "from the data hierarchy";
 
-        // Lock the item
-        dataHierarchyItem.setLocked(true);
-
         // Get dataset
-        auto dataset = dataHierarchyItem.getDataset();
-
-        const auto datasetGuid = dataset->getGuid();
-
-        // Build a list of referenced datasets (needed for dataset removal at a later stage)
-        Datasets referencedDatasets{ dataHierarchyItem.getDataset() };
-
-        // Remove child data hierarchy items
-        for (auto childDataHierarchyItem : dataHierarchyItem.getChildren())
-            referencedDatasets << removeItem(*childDataHierarchyItem);
+        auto dataset        = dataHierarchyItem.getDataset();
+        auto datasetGuid    = dataset->getGuid();
 
         emit itemAboutToBeRemoved(dataset);
         {
-            // Remove self from the vector
             _items.removeOne(&dataHierarchyItem);
 
-            // Remove the item from the selection (if possible)
-            //removeSelectedItem(dataHierarchyItem);
-
-            // Physically remove the data hierarchy item
             //delete &dataHierarchyItem;
         }
-        //emit itemRemoved(datasetGuid);
-
-        //for (auto referencedDataset : referencedDatasets)
-        //    delete &referencedDataset->getDataHierarchyItem();
-
-        return referencedDatasets;
+        emit itemRemoved(datasetGuid);
     }
     catch (std::exception& e)
     {
@@ -121,20 +107,15 @@ Datasets DataHierarchyManager::removeItem(DataHierarchyItem& dataHierarchyItem)
     }
 }
 
-Datasets DataHierarchyManager::removeAllItems()
+void DataHierarchyManager::removeAllItems()
 {
-    // Build a list of referenced datasets (needed for dataset removal at a later stage)
-    Datasets referencedDatasets;
-
     // Cache the data hierarchy items vector as we are modifying the member on-the-fly
     const auto dataHierarchyItems = _items;
 
     // Remove all top-level items (and their children recursively)
     for (auto dataHierarchyItem : dataHierarchyItems)
         if (!dataHierarchyItem->hasParent())
-            referencedDatasets << removeItem(*dataHierarchyItem);
-
-    return referencedDatasets;
+            removeItem(*dataHierarchyItem);
 }
 
 const DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid) const
@@ -161,18 +142,27 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
     }
 }
 
-DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem* dataHierarchyItem, const bool& recursive /*= true*/)
+hdps::DataHierarchyItems DataHierarchyManager::getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive /*= true*/)
 {
-    Q_ASSERT(dataHierarchyItem != nullptr);
-
-    auto children = dataHierarchyItem->getChildren();
+    auto children = dataHierarchyItem.getChildren();
 
     // Get children recursively
     if (recursive)
         for (auto child : children)
-            children << getChildren(child, recursive);
+            children << getChildren(*child, recursive);
 
     return children;
+}
+
+DataHierarchyItems DataHierarchyManager::getTopLevelItems()
+{
+    DataHierarchyItems topLevelItems;
+
+    for (auto item : _items)
+        if (!item->hasParent())
+            topLevelItems << item;
+
+    return topLevelItems;
 }
 
 void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)

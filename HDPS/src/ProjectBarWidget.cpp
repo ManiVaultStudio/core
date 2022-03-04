@@ -257,7 +257,7 @@ void ProjectBarWidget::ScrollArea::resizeEvent(QResizeEvent* resizeEvent)
 
 ProjectBarWidget::RecentProjectsWidget::RecentProjectsWidget(QWidget* parent /*= nullptr*/) :
     ScrollArea(parent),
-    _containerWidget(),
+    _containerWidget(this),
     _containerLayout()
 {
     setAutoFillBackground(true);
@@ -305,7 +305,7 @@ void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
 
 ProjectBarWidget::ImportDataWidget::ImportDataWidget(QWidget* parent /*= nullptr*/) :
     ScrollArea(parent),
-    _containerWidget(),
+    _containerWidget(this),
     _containerLayout()
 {
     setAutoFillBackground(true);

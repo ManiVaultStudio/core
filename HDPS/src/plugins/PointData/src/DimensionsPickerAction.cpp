@@ -457,7 +457,7 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     
     auto layout = new QVBoxLayout();
 
-    auto tableView = new QTableView();
+    auto tableView = new QTableView(this);
 
     tableView->setSortingEnabled(true);
     tableView->setModel(&dimensionSelectionAction->getProxyModel());

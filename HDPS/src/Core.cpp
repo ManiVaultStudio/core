@@ -17,6 +17,8 @@
 
 #include <algorithm>
 
+#define CORE_VERBOSE
+
 using namespace hdps::util;
 
 namespace hdps
@@ -178,12 +180,29 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
         if (!dataset.isValid())
             throw std::runtime_error("Dataset is invalid");
 
-        // Remove all data hierarchy items and get a list all datasets that need to be removed
-        const auto datasetsToRemove = _dataHierarchyManager->removeItem(dataset->getDataHierarchyItem());
+#ifdef CORE_VERBOSE
+        qDebug() << "Removing" << dataset->getGuiName() << "from the core";
+#endif
 
-        // Remove the datasets that are flagged for removal
-        for (const auto& datasetToRemove : datasetsToRemove)
-            _dataManager->removeDataset(datasetToRemove);
+        Datasets datasetsToRemove{ dataset };
+
+        for (auto child : _dataHierarchyManager->getChildren(dataset->getDataHierarchyItem()))
+            datasetsToRemove << child->getDataset();
+
+        std::reverse(datasetsToRemove.begin(), datasetsToRemove.end());
+
+        for (auto datasetToRemove : datasetsToRemove) {
+
+            // Cache dataset GUID and type
+            const auto guid = dataset->getGuid();
+            const auto type = dataset->getDataType();
+
+            notifyDataAboutToBeRemoved(datasetToRemove);
+            {
+                _dataManager->removeDataset(datasetToRemove);
+            }
+            notifyDataRemoved(guid, type);
+        }
     }
     catch (std::exception& e)
     {
@@ -196,12 +215,12 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
 
 void Core::removeAllDatasets()
 {
-    // Remove all items fro the data hierarchy manager and get a vector of datasets to remove
-    const auto datasetsToRemove = _dataHierarchyManager->removeAllItems();
+#ifdef CORE_VERBOSE
+    qDebug() << "Removing all datasets from the core";
+#endif
 
-    // Remove the datasets that are flagged for removal
-    for (const auto& datasetToRemove : datasetsToRemove)
-        _dataManager->removeDataset(datasetToRemove);
+    for (auto topLevelItem : _dataHierarchyManager->getTopLevelItems())
+        removeDataset(topLevelItem->getDataset());
 
     Application::current()->setCurrentProjectFilePath("");
 }

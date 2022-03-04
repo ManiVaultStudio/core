@@ -116,7 +116,7 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
 
         // Report which item in the hierarchy is being imported
         connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemLoading, this, [&taskProgressDialog](DataHierarchyItem& loadingItem) {
-            taskProgressDialog.setCurrentTask("Importing dataset: " + loadingItem.getFullPathName());
+            //taskProgressDialog.setCurrentTask("Importing dataset: " + loadingItem.getFullPathName());
         });
 
         // Update task progress dialog when tasks start and finish
