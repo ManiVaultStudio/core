@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 3.17)
 set(PROJECT "HDPS")
 project(${PROJECT})
 
+if(NOT EXISTS $ENV{HDPS_INSTALL_DIR})
+    message(FATAL_ERROR, "$ENV{HDPS_INSTALL_DIR}
+    ***************************************************
+    Supply an environment variable HDPS_INSTALL_DIR 
+    to indicate where the HDPS output will be installed,
+    make sure the directory exists.
+    ***************************************************" )
+endif()
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -717,6 +726,7 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY
+set(QUAZIP_USE_QT_ZLIB TRUE)  # Use the Qt supplied zlib
 add_subdirectory(external/quazip)
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
