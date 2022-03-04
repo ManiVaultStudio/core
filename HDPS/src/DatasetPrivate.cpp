@@ -69,7 +69,7 @@ void DatasetPrivate::registerDatasetEvents()
         registerDataEvent([this](DataEvent* dataEvent) {
 
             // Only process dataset that we reference
-            if (dataEvent->getDataset()->getGuid() != getDatasetGuid())
+            if (dataEvent->getDataset().getDatasetGuid() != getDatasetGuid())
                 return;
 
             switch (dataEvent->getType()) {
@@ -90,7 +90,7 @@ void DatasetPrivate::registerDatasetEvents()
                     reset();
 
                     // Notify others that the dataset is removed
-                    emit dataRemoved(getDatasetGuid());
+                    emit dataRemoved(_datasetId);
 
                     break;
                 }

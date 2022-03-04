@@ -39,15 +39,11 @@ public:
     /**
      * Removes a data hierarchy item (and its children recursively) from the data hierarchy
      * @param dataHierarchyItem Reference to data hierarchy item
-     * @return Vector of datasets that were referenced by the data hierarchy items
      */
-    Datasets removeItem(DataHierarchyItem& dataHierarchyItem);
+    void removeItem(DataHierarchyItem& dataHierarchyItem);
 
-    /**
-     * Removes all items from the data hierarchy manager in a top-down manner
-     * @return Vector of datasets that were referenced by the data hierarchy items
-     */
-    Datasets removeAllItems();
+    /** Removes all items from the data hierarchy manager in a top-down manner */
+    void removeAllItems();
 
     /**
      * Get hierarchy item by dataset globally unique identifier
@@ -65,11 +61,17 @@ public:
 
     /**
      * Get dataset children
-     * @param dataHierarchyItem Pointer to data hierarchy item
+     * @param dataHierarchyItem Reference to data hierarchy item
      * @param recursive Whether to get all children in a recursive manner
      * @return Children
      */
-    DataHierarchyItems getChildren(DataHierarchyItem* dataHierarchyItem, const bool& recursive = true);
+    DataHierarchyItems getChildren(DataHierarchyItem& dataHierarchyItem, const bool& recursive = true);
+
+    /**
+     * Get top-level items
+     * @return Top-level items
+     */
+    DataHierarchyItems getTopLevelItems();
 
     /**
      * Set selected data hierarchy items

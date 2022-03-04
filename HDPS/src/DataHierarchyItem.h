@@ -152,12 +152,12 @@ public: // Miscellaneous
     QString toString() const;
 
     /** Get the dataset */
-    Dataset<DatasetImpl> getDataset() const;
+    Dataset<DatasetImpl>& getDataset();
 
     /** Get the dataset */
     template<typename DatasetType>
-    Dataset<DatasetType> getDataset() const {
-        return Dataset<DatasetType>(getDataset().get<DatasetType>());
+    Dataset<DatasetType>& getDataset() const {
+        return Dataset<DatasetType>(const_cast<DataHierarchyItem*>(this)->getDataset().get<DatasetType>());
     };
 
     /** Get the dataset type */

@@ -99,8 +99,10 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
         _dataEventHandlersById[dataEvent->getDataset()->getGuid()](dataEvent);
 
     // Find data handlers with the same type and call them
-    if (_dataEventHandlersByType.find(dataEvent->getDataset()->getDataType()) != _dataEventHandlersByType.end())
-        _dataEventHandlersByType[dataEvent->getDataset()->getDataType()](dataEvent);
+    if (dataEvent->getType() != EventType::DataRemoved) {
+        if (_dataEventHandlersByType.find(dataEvent->getDataset()->getDataType()) != _dataEventHandlersByType.end())
+            _dataEventHandlersByType[dataEvent->getDataset()->getDataType()](dataEvent);
+    }
 
     // Call all data handlers
     for (auto dataEventHandler : _dataEventHandlers)

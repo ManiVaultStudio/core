@@ -216,7 +216,7 @@ QString DataHierarchyItem::toString() const
     return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), _visible ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
 }
 
-Dataset<DatasetImpl> DataHierarchyItem::getDataset() const
+Dataset<DatasetImpl>& DataHierarchyItem::getDataset()
 {
     return _dataset;
 }
