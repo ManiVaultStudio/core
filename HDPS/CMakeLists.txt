@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.17)
 set(PROJECT "HDPS")
 project(${PROJECT})
 
-if(NOT EXISTS $ENV{HDPS_INSTALL_DIR})
+if(NOT DEFINED ENV{HDPS_INSTALL_DIR})
     message(FATAL_ERROR, "$ENV{HDPS_INSTALL_DIR}
     ***************************************************
     Supply an environment variable HDPS_INSTALL_DIR 
@@ -739,6 +739,14 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )
+
+if(WIN32)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy 
+            ${INSTALL_DIR}/$<CONFIGURATION>/bin/${CMAKE_SHARED_LIBRARY_PREFIX}quazip1-qt5${CMAKE_SHARED_LIBRARY_SUFFIX}
+            ${INSTALL_DIR}/$<CONFIGURATION>/
+    )
+endif()
 
 if(APPLE)
     add_custom_command(TARGET ${PROJECT} POST_BUILD
