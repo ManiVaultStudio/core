@@ -10,6 +10,7 @@
 #include <QStyleOption>
 #include <QScrollBar>
 #include <QResizeEvent>
+#include <QPainter>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -17,9 +18,9 @@ using namespace hdps::gui;
 ProjectBarWidget::ProjectBarWidget(QWidget* parent /*= nullptr*/) :
     QWidget(parent),
     _layout(),
-    _barLayout()
+    _barLayout(),
+    _backgroundImage(":/Images/StartPageBackground")
 {
-    setAutoFillBackground(true);
     setLayout(&_layout);
     setMinimumWidth(500);
 
@@ -33,6 +34,22 @@ ProjectBarWidget::ProjectBarWidget(QWidget* parent /*= nullptr*/) :
     _barLayout.addWidget(new HeaderWidget());
     //_barLayout.addWidget(createHorizontalDivider());
     _barLayout.addWidget(new ProjectsWidget());
+}
+
+void ProjectBarWidget::paintEvent(QPaintEvent* paintEvent)
+{
+    QPainter painter(this);
+
+    // Get scaled background image and rectangles for positioning the background image
+    auto backgroundImage    = _backgroundImage.scaled(width(), height(), Qt::KeepAspectRatioByExpanding);
+    auto centerOfWidget     = rect().center();
+    auto pixmapRectangle    = backgroundImage.rect();
+
+    // Position in the center
+    pixmapRectangle.moveCenter(centerOfWidget);
+
+    // Draw the background
+    painter.drawPixmap(pixmapRectangle.topLeft(), QPixmap(backgroundImage));
 }
 
 void ProjectBarWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole)
@@ -270,7 +287,7 @@ void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
         const auto filePath     = recentProject.toMap()["FilePath"].toString();
         const auto title        = QFileInfo(filePath).baseName();
         const auto description  = filePath;
-        const auto tooltip      = "Open " + title + ", last opened on " + recentProject.toMap()["DateTime"].toDateTime().toString();
+        const auto tooltip      = title + ", last opened on " + recentProject.toMap()["DateTime"].toDateTime().toString();
 
         // Check if the recent project exists on disk
         if (!QFileInfo(filePath).exists())
@@ -283,7 +300,6 @@ void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
     }
 
     _containerWidget.setLayout(&_containerLayout);
-
     _containerWidget.setVisible(!recentProjects.isEmpty());
 }
 
@@ -309,7 +325,10 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
     _containerWidget.setAutoFillBackground(true);
     _containerLayout.setMargin(0);
 
-    for (auto pluginKind : Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER)) {
+    // Get loader plugin kinds from the core
+    const auto loaderPluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER);
+
+    for (const auto& pluginKind : loaderPluginKinds) {
 
         // Establish title, description and tooltip
         const auto title        = Application::core()->getPluginGuiName(pluginKind);
@@ -323,4 +342,5 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
     }
 
     _containerWidget.setLayout(&_containerLayout);
+    _containerWidget.setVisible(!loaderPluginKinds.isEmpty());
 }

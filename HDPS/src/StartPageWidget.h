@@ -15,8 +15,6 @@
  */
 class StartPageWidget : public QWidget
 {
-    Q_OBJECT
-
 public:
 
     /** Start page modes */

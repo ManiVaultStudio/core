@@ -303,7 +303,7 @@ void MainWindow::initializeSettingsDockingArea()
         splitter->setSizes({ height * 1 / 3, height * 2 / 3 });
     }
 
-    _settingsDockArea->setFixedWidth(500);
+    _settingsDockArea->setFixedWidth(450);
 }
 
 void MainWindow::initializeLoggingDockingArea()

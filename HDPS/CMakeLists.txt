@@ -465,6 +465,7 @@ target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
 add_library(${PROJECT}_Private ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
+	${RESOURCE_FILES}
 )
 
 set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 14)

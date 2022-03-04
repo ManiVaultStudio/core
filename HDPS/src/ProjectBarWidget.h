@@ -228,6 +228,8 @@ public:
      */
     ProjectBarWidget(QWidget* parent = nullptr);
 
+    void paintEvent(QPaintEvent* paintEvent);
+
 protected:
 
     /**
@@ -238,6 +240,7 @@ protected:
     static void setWidgetBackgroundColorRole(QWidget* widget, const QPalette::ColorRole& colorRole);
 
 protected:
-    QHBoxLayout     _layout;        /** Main layout */
-    QVBoxLayout     _barLayout;     /** Bar layout */
+    QHBoxLayout     _layout;            /** Main layout */
+    QVBoxLayout     _barLayout;         /** Bar layout */
+    QPixmap         _backgroundImage;   /** Background image */
 };
