@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.17)
 set(PROJECT "HDPS")
 project(${PROJECT})
 
-if(NOT EXISTS $ENV{HDPS_INSTALL_DIR})
+if(NOT DEFINED ENV{HDPS_INSTALL_DIR})
     message(FATAL_ERROR, "$ENV{HDPS_INSTALL_DIR}
     ***************************************************
     Supply an environment variable HDPS_INSTALL_DIR 
