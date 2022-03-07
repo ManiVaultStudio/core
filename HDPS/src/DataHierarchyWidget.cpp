@@ -138,7 +138,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             dataHierarchyItems.insert(_model.getItem(selected.indexes().first(), Qt::DisplayRole)->getDataHierarchyItem());
 
         // Select the items in the data hierarchy
-        Application::core()->getDataHierarchyManager().selectItems(QVector<DataHierarchyItem*>(dataHierarchyItems.begin(), dataHierarchyItems.end()));
+        auto selectedItems = QVector<DataHierarchyItem*>(dataHierarchyItems.begin(), dataHierarchyItems.end());
+        Application::core()->getDataHierarchyManager().selectItems(selectedItems);
     });
 
     // Show/hide the overlay and header widget when the number of rows changes

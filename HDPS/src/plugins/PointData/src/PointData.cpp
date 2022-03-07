@@ -724,7 +724,7 @@ QVariantMap Points::toVariantMap() const
 
     QVariantMap indices;
 
-    indices["Count"]    = this->indices.size();
+    indices["Count"]    = QVariant::fromValue(this->indices.size());
     indices["Raw"]      = rawDataToVariantMap((char*)this->indices.data(), this->indices.size() * sizeof(std::uint32_t), true);
 
     variantMap["Data"]                  = isFull() ? getRawData<PointData>().toVariantMap() : QVariantMap();

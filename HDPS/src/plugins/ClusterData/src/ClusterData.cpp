@@ -147,8 +147,8 @@ QVariantMap ClusterData::toVariantMap() const
             { "Name", cluster.getName() },
             { "ID", cluster.getId() },
             { "Color", cluster.getColor() },
-            { "GlobalIndicesOffset", globalIndicesOffset },
-            { "NumberOfIndices", numberOfIndicesInCluster }
+            { "GlobalIndicesOffset", QVariant::fromValue(globalIndicesOffset) },
+            { "NumberOfIndices", QVariant::fromValue(numberOfIndicesInCluster) }
         }));
 
         // Compute global indices offset
@@ -158,7 +158,7 @@ QVariantMap ClusterData::toVariantMap() const
     return {
         { "Clusters", clusters },
         { "IndicesRawData", indicesRawData },
-        { "NumberOfIndices", indices.size() }
+        { "NumberOfIndices", QVariant::fromValue(indices.size()) }
     };
 }
 
