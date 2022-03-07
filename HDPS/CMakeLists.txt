@@ -726,7 +726,19 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY
-set(QUAZIP_USE_QT_ZLIB TRUE)  # Use the Qt supplied zlib
+set(QUAZIP_USE_QT_ZLIB FALSE)
+if (WIN32)
+    set(QUAZIP_USE_QT_ZLIB TRUE)  # Use the Qt supplied zlib
+elseif (APPLE)
+    find_program(BREW_BIN brew)
+    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
+else ()
+    message(FATAL_ERROR,
+    "*****************************
+    zlib needed for linux build.
+    ******************************" )
+endif()
+
 add_subdirectory(external/quazip)
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
