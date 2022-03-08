@@ -255,11 +255,8 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Locked));
         });
 
-        // Update the model when the data hierarchy item expanded status changes
-        connect(&dataHierarchyItem, &DataHierarchyItem::expandedChanged, this, [this, dataset](const bool& expanded) {
-
-            // Get the model index for the dataset
-            const auto modelIndex = getModelIndexByDataset(dataset);
+        // Set model item expansion
+        const auto setModelItemExpansion = [this](const QModelIndex& modelIndex, const bool& expanded) -> void {
 
             // No point in updating the tree view when either the model index is invalid or the expansion state did not change
             if (!modelIndex.isValid() || expanded == _treeView.isExpanded(modelIndex))
@@ -267,7 +264,18 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
 
             // Set model item expanded
             _treeView.setExpanded(modelIndex, expanded);
+        };
+
+        // Update the model when the data hierarchy item expansion changes
+        connect(&dataHierarchyItem, &DataHierarchyItem::expandedChanged, this, [this, dataset, setModelItemExpansion](const bool& expanded) {
+            setModelItemExpansion(getModelIndexByDataset(dataset), expanded);
         });
+
+        // Wait for the item to be added to the tree view
+        QCoreApplication::processEvents();
+
+        // And then set the model item expansion
+        setModelItemExpansion(getModelIndexByDataset(dataset), dataHierarchyItem.isExpanded());
     }
     catch (std::exception& e)
     {

@@ -293,7 +293,7 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
     menu->addSeparator();
 
     _dataRemoveAction.setEnabled(!_locked);
-    //_dataRemoveAction.setEnabled(false);
+    _dataRemoveAction.setEnabled(false);
 
     menu->addAction(&_dataRemoveAction);
     menu->addAction(&_dataCopyAction);

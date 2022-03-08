@@ -161,8 +161,8 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
 
     // Add the dataset to the hierarchy manager and select the dataset
     _dataHierarchyManager->addItem(fullSet, const_cast<Dataset<DatasetImpl>&>(parentDataset));
-    //_dataHierarchyManager->selectItem(fullSet);
-    
+    //_dataHierarchyManager->selectItems(DataHierarchyItems({ &fullSet->getDataHierarchyItem() }));
+
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
@@ -186,7 +186,7 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
 
         Datasets datasetsToRemove{ dataset };
 
-        // Get chhildren in a top-down manner
+        // Get children in a top-down manner
         for (auto child : _dataHierarchyManager->getChildren(dataset->getDataHierarchyItem()))
             datasetsToRemove << child->getDataset();
 
