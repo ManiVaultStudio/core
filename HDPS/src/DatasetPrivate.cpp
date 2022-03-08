@@ -12,7 +12,7 @@ using namespace util;
 
 DatasetPrivate::DatasetPrivate() :
     EventListener(),
-    _datasetId(),
+    _datasetGuid(),
     _dataset(nullptr)
 {
     // Register for data events from the core
@@ -21,7 +21,7 @@ DatasetPrivate::DatasetPrivate() :
 
 DatasetPrivate::DatasetPrivate(const DatasetPrivate& other) :
     EventListener(),
-    _datasetId(),
+    _datasetGuid(),
     _dataset(nullptr)
 {
     // Register for data events from the core
@@ -42,8 +42,8 @@ void DatasetPrivate::set(DatasetImpl* dataset)
             return;
 
         // Set internal dataset pointer and dataset GUID
-        _dataset    = dataset;
-        _datasetId  = _dataset->getGuid();
+        _dataset        = dataset;
+        _datasetGuid    = _dataset->getGuid();
 
         // Inform others that the pointer to the dataset changed
         emit changed(_dataset);
@@ -67,37 +67,44 @@ void DatasetPrivate::registerDatasetEvents()
 
         // Register for data events
         registerDataEvent([this](DataEvent* dataEvent) {
-
-            // Only process dataset that we reference
-            if (dataEvent->getDataset().getDatasetGuid() != getDatasetGuid())
-                return;
-
             switch (dataEvent->getType()) {
 
                 // Data is about to be removed
                 case EventType::DataAboutToBeRemoved:
                 {
+                    // Only process dataset that we reference
+                    if (dataEvent->getDataset().getDatasetGuid() != getDatasetGuid())
+                        break;
+
                     // Notify others that the dataset is about to be removed
                     emit dataAboutToBeRemoved();
 
                     break;
                 }
 
-                // Reset the reference when the data is removed
                 case EventType::DataRemoved:
                 {
-                    // Reset the reference
+                    // Get the data remove event
+                    const auto dataRemovedEvent = static_cast<DataRemovedEvent*>(dataEvent);
+
+                    // Only process dataset that we reference
+                    if (_datasetGuid != dataRemovedEvent->getDatasetGuid())
+                        break;
+
+                    // Reset the internal pointer
                     reset();
 
-                    // Notify others that the dataset is removed
-                    emit dataRemoved(_datasetId);
-
-                    break;
+                    // And notify others that the dataset is removed
+                    emit dataRemoved(_datasetGuid);
                 }
 
                 // Data contents changed
                 case EventType::DataChanged:
                 {
+                    // Only process dataset that we reference
+                    if (dataEvent->getDataset().getDatasetGuid() != getDatasetGuid())
+                        break;
+
                     // Notify others that the dataset contents changed
                     emit dataChanged();
 
@@ -107,6 +114,10 @@ void DatasetPrivate::registerDatasetEvents()
                 // Data selection changed
                 case EventType::DataSelectionChanged:
                 {
+                    // Only process dataset that we reference
+                    if (dataEvent->getDataset().getDatasetGuid() != getDatasetGuid())
+                        break;
+
                     // Notify others that the dataset selection changed
                     emit dataSelectionChanged();
 
@@ -116,6 +127,10 @@ void DatasetPrivate::registerDatasetEvents()
                 // Dataset GUI name changed
                 case EventType::DataGuiNameChanged:
                 {
+                    // Only process dataset that we reference
+                    if (dataEvent->getDataset().getDatasetGuid() != getDatasetGuid())
+                        break;
+
                     // Get dataset GUI name changed event
                     auto datasetGuiNameChangedEvent = static_cast<hdps::DataGuiNameChangedEvent*>(dataEvent);
 
@@ -128,6 +143,10 @@ void DatasetPrivate::registerDatasetEvents()
                 // Dataset child was added
                 case EventType::DataChildAdded:
                 {
+                    // Only process dataset that we reference
+                    if (dataEvent->getDataset().getDatasetGuid() != getDatasetGuid())
+                        break;
+
                     // Get data child added event
                     auto dataChildAddedEvent = static_cast<hdps::DataChildAddedEvent*>(dataEvent);
 
@@ -140,6 +159,10 @@ void DatasetPrivate::registerDatasetEvents()
                 // Dataset child was removed
                 case EventType::DataChildRemoved:
                 {
+                    // Only process dataset that we reference
+                    if (dataEvent->getDataset().getDatasetGuid() != getDatasetGuid())
+                        break;
+
                     // Get data child removed event
                     auto dataChildRemovedEvent = static_cast<hdps::DataChildRemovedEvent*>(dataEvent);
 

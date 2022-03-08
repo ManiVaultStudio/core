@@ -115,9 +115,11 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
 
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _iconLabel.setPixmap(icon.pixmap(QSize(32, 32)));
-    _iconLabel.setFixedWidth(24);
-    _iconLabel.setStyleSheet("QLabel { margin-left: 2px}");
+    if (!icon.isNull()) {
+        _iconLabel.setPixmap(icon.pixmap(QSize(32, 32)));
+        _iconLabel.setFixedWidth(24);
+        _iconLabel.setStyleSheet("QLabel { margin-left: 2px}");
+    }
 
     _titleLabel.setStyleSheet("QLabel { font-size: 9pt; font-weight: bold; }");
     _descriptionLabel.setStyleSheet("QLabel { font-size: 8pt; }");
@@ -217,9 +219,6 @@ void ProjectBarWidget::ProjectsWidget::createRightColumn()
     _rightColumnLayout.addWidget(createHeaderLabel("Import data", "Import data into HDPS"));
     _rightColumnLayout.addSpacerItem(new QSpacerItem(0, 10));
     _rightColumnLayout.addWidget(new ImportDataWidget());
-
-    // Stretch to bottom
-    _rightColumnLayout.addStretch(1);
 }
 
 QLabel* ProjectBarWidget::ProjectsWidget::createHeaderLabel(const QString& title, const QString& tooltip)
@@ -335,8 +334,10 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
         const auto description  = "Import data";
         const auto tooltip      = "Import data into HDPS with the " + pluginKind;
 
+        // Application::core()->getPluginIcon(pluginKind)
+
         // Create import data option
-        _containerLayout.addWidget(new ProjectActionWidget(Application::core()->getPluginIcon(pluginKind), title, description, tooltip, [pluginKind]() {
+        _containerLayout.addWidget(new ProjectActionWidget(QIcon(), title, description, tooltip, [pluginKind]() {
             Application::core()->importDataset(pluginKind);
         }));
     }

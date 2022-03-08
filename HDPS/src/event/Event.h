@@ -193,9 +193,10 @@ public:
      * @param dataset Smart pointer to the dataset
      * @param datasetGuid GUID of the dataset that has been removed
      */
-    DataRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& datasetGuid) :
+    DataRemovedEvent(const Dataset<DatasetImpl>& dataset, const QString& datasetGuid, const DataType& dataType) :
         DataEvent(EventType::DataRemoved, nullptr),
-        _datasetGuid(datasetGuid)
+        _datasetGuid(datasetGuid),
+        _dataType(dataType)
     {
     }
 
@@ -204,8 +205,14 @@ public:
         return _datasetGuid;
     }
 
+    /** Get the data type of the dataset that has been removed */
+    DataType getDataType() const {
+        return _dataType;
+    }
+
 protected:
-    QString     _datasetGuid;     /** GUID of the dataset that has been removed */
+    QString     _datasetGuid;       /** GUID of the dataset that has been removed */
+    DataType    _dataType;          /** Dataset type */
 };
 
 /**

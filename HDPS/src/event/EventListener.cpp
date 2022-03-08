@@ -43,6 +43,24 @@ void EventListener::registerDataEvent(DataEventHandler callback)
 
 void EventListener::onDataEvent(DataEvent* dataEvent)
 {
+    if (dataEvent->getType() == EventType::DataRemoved) {
+
+        // Get the data remove event
+        const auto dataRemovedEvent = static_cast<DataRemovedEvent*>(dataEvent);
+
+        // Find data handlers with identical GUID and call them
+        if (_dataEventHandlersById.find(dataRemovedEvent->getDatasetGuid()) != _dataEventHandlersById.end())
+            _dataEventHandlersById[dataRemovedEvent->getDatasetGuid()](dataEvent);
+
+        // Find data handlers with the same type and call them
+        if (_dataEventHandlersByType.find(dataRemovedEvent->getDataType()) != _dataEventHandlersByType.end())
+            _dataEventHandlersByType[dataRemovedEvent->getDataType()](dataEvent);
+
+        // Call all data handlers
+        for (auto dataEventHandler : _dataEventHandlers)
+            dataEventHandler(dataEvent);
+    }
+
     // Only process data events which are valid
     if (!dataEvent->getDataset().isValid())
         return;
@@ -99,10 +117,8 @@ void EventListener::onDataEvent(DataEvent* dataEvent)
         _dataEventHandlersById[dataEvent->getDataset()->getGuid()](dataEvent);
 
     // Find data handlers with the same type and call them
-    if (dataEvent->getType() != EventType::DataRemoved) {
-        if (_dataEventHandlersByType.find(dataEvent->getDataset()->getDataType()) != _dataEventHandlersByType.end())
-            _dataEventHandlersByType[dataEvent->getDataset()->getDataType()](dataEvent);
-    }
+    if (_dataEventHandlersByType.find(dataEvent->getDataset()->getDataType()) != _dataEventHandlersByType.end())
+        _dataEventHandlersByType[dataEvent->getDataset()->getDataType()](dataEvent);
 
     // Call all data handlers
     for (auto dataEventHandler : _dataEventHandlers)

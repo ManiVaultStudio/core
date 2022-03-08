@@ -128,14 +128,14 @@ public: // Miscellaneous
     /** Get the current dataset globally unique identifier */
     QString getDatasetGuid() const override
     {
-        return _datasetId;
+        return _datasetGuid;
     }
 
     /** Resets the internals (dataset pointer to nullptr etc.) */
     void reset() override
     {
         _dataset    = nullptr;
-        _datasetId  = "";
+        _datasetGuid  = "";
     }
 
 public: // Operators

@@ -186,16 +186,18 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
 
         Datasets datasetsToRemove{ dataset };
 
+        // Get chhildren in a top-down manner
         for (auto child : _dataHierarchyManager->getChildren(dataset->getDataHierarchyItem()))
             datasetsToRemove << child->getDataset();
 
+        // Remove datasets bottom-up (this prevents issues with the data hierarchy manager)
         std::reverse(datasetsToRemove.begin(), datasetsToRemove.end());
 
         for (auto datasetToRemove : datasetsToRemove) {
 
             // Cache dataset GUID and type
-            const auto guid = dataset->getGuid();
-            const auto type = dataset->getDataType();
+            const auto guid = datasetToRemove->getGuid();
+            const auto type = datasetToRemove->getDataType();
 
             notifyDataAboutToBeRemoved(datasetToRemove);
             {
@@ -577,7 +579,7 @@ void Core::notifyDataRemoved(const QString& datasetId, const DataType& dataType)
     try {
 
         // Create data removed event
-        DataRemovedEvent dataRemovedEvent(nullptr, datasetId);
+        DataRemovedEvent dataRemovedEvent(nullptr, datasetId, dataType);
 
         // Cache the event listeners to prevent timing issues
         const auto eventListeners = _eventListeners;
