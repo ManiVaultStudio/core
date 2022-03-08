@@ -24,9 +24,13 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     _layout.setMargin(6);
     _layout.addWidget(_groupsAction.createWidget(parent));
 
-    emit currentDatasetGuiNameChanged("");
-
+    // Update the UI when the data hierarchy item selection changes
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
+
+    // Reset when the dataset is removed
+    connect(&_dataset, &Dataset<DatasetImpl>::dataRemoved, this, [this]() -> void {
+        _groupsAction.setGroupActions({});
+    });
 }
 
 void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
@@ -55,9 +59,6 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                     _groupsAction.addGroupAction(groupAction);
             });
         }
-
-        // Inform others that the loaded dataset changed
-        emit currentDatasetGuiNameChanged(_dataset.isValid() ? _dataset->getDataHierarchyItem().getFullPathName() : "");
 
         if (!_dataset.isValid())
             return;

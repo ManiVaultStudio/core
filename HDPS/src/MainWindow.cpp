@@ -86,6 +86,14 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
 
     connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, &MainWindow::updateCentralWidget);
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::selectedItemsChanged, this, [](DataHierarchyItems selectedItems) -> void {
+        //auto windowTitle = "Data properties" + ;
+
+        //_dataPropertiesDockWidget->setWindowTitle(selectedItems.isEmpty() ? )
+    });
+
+    // Notify others that the current dataset GUI name changed
+    //emit currentDatasetGuiNameChanged(_dataset->getDataHierarchyItem().getFullPathName());
 }
 
 QAction* MainWindow::addImportOption(const QString& actionName, const QIcon& icon)

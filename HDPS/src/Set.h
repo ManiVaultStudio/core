@@ -415,7 +415,7 @@ public: // Actions
      * @param parent Parent widget
      * @return Context menu
      */
-    QMenu* getContextMenu(QWidget* parent = nullptr);
+    QMenu* getContextMenu(QWidget* parent = nullptr) override;
 
     /**
      * Populates existing menu with actions menus

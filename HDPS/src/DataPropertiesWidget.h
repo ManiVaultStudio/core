@@ -43,14 +43,6 @@ protected:
      */
     void selectedItemsChanged(DataHierarchyItems selectedItems);
 
-signals:
-
-    /**
-     * Signals that the current dataset gui name changed (used to change the docking widget title)
-     * @param datasetGuiName GUI name of the current dataset
-     */
-    void currentDatasetGuiNameChanged(const QString& datasetGuiName);
-
 protected:
     Dataset<DatasetImpl>    _dataset;           /** Smart point to current dataset */
     QVBoxLayout             _layout;            /** Main layout */

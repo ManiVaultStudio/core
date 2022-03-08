@@ -5,6 +5,8 @@
 
 #include <exception>
 
+#include <math.h>
+
 namespace hdps {
 
 namespace util {
