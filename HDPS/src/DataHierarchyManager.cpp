@@ -65,11 +65,10 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         if (parentDataset.isValid())
             Application::core()->notifyDataChildAdded(parentDataset, dataset);
 
-        connect(&newDataHierarchyItem->getDataset(), &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, newDataHierarchyItem]() {
-            if (!newDataHierarchyItem->getDataset().isValid())
-                return;
-
-            removeItem(*newDataHierarchyItem);
+        // Remove the data hierarchy item when the corresponding dataset is about to be removed
+        connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, newDataHierarchyItem]() {
+            if (newDataHierarchyItem->getDatasetReference().isValid())
+                removeItem(*newDataHierarchyItem);
         });
     }
     catch (std::exception& e)

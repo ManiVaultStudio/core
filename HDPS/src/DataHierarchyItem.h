@@ -152,11 +152,26 @@ public: // Miscellaneous
     QString toString() const;
 
     /** Get the dataset */
-    Dataset<DatasetImpl>& getDataset();
+    Dataset<DatasetImpl> getDataset();
 
     /** Get the dataset */
     template<typename DatasetType>
-    Dataset<DatasetType>& getDataset() const {
+    Dataset<DatasetType> getDataset() const {
+        return Dataset<DatasetType>(const_cast<DataHierarchyItem*>(this)->getDataset().get<DatasetType>());
+    };
+
+    /**
+     * Get reference to dataset smart pointer
+     * @return Reference to dataset smart pointer
+     */
+    Dataset<DatasetImpl>& getDatasetReference();
+
+    /**
+     * Get reference to dataset smart pointer of a specific type
+     * @return Reference to dataset smart pointer of a specific type
+     */
+    template<typename DatasetType>
+    Dataset<DatasetType>& getDatasetReference() const {
         return Dataset<DatasetType>(const_cast<DataHierarchyItem*>(this)->getDataset().get<DatasetType>());
     };
 
