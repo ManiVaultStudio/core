@@ -30,7 +30,7 @@ SubsetAction::SubsetAction(ClustersActionWidget* clustersActionWidget) :
 
     // Create the subset when the create subset action is triggered
     connect(&_createSubsetAction, &TriggerAction::triggered, this, [this, getItemSelection]() {
-        _clustersActionWidget->getClustersAction().createSubset(_subsetNameAction.getString());
+        _clustersActionWidget->getClustersAction().createSubsetFromSelection(_subsetNameAction.getString());
         _subsetNameAction.reset();
     });
 

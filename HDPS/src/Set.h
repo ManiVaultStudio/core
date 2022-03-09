@@ -73,13 +73,13 @@ public:
     virtual Dataset<DatasetImpl> copy() const = 0;
 
     /**
-     * Create subset and specify where the subset will be placed in the data hierarchy
+     * Create subset from the current selection and specify where the subset will be placed in the data hierarchy
      * @param guiName Name of the subset in the GUI
      * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    virtual Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const = 0;
+    virtual Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const = 0;
 
     /** Get the globally unique identifier of the dataset in string format */
     QString getGuid() const

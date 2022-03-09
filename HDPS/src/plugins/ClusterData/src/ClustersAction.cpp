@@ -51,9 +51,9 @@ void ClustersAction::setClustersDataset(Dataset<Clusters> clustersDataset)
     }
 }
 
-void ClustersAction::createSubset(const QString& datasetName)
+void ClustersAction::createSubsetFromSelection(const QString& datasetName)
 {
-    _clustersDataset->getParent()->createSubset(datasetName, _clustersDataset->getParent());
+    _clustersDataset->getParent()->createSubsetFromSelection(datasetName, _clustersDataset->getParent());
 }
 
 void ClustersAction::removeClustersById(const QStringList& ids)

@@ -87,7 +87,7 @@ public:
      * Create subset from selected clusters
      * @param datasetName Name of the subset
      */
-    void createSubset(const QString& datasetName);
+    void createSubsetFromSelection(const QString& datasetName);
 
     /**
      * Remove clusters by their unique identifiers
