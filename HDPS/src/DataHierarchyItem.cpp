@@ -4,6 +4,8 @@
 #include "Set.h"
 #include "Dataset.h"
 
+#include <QMenu>
+
 #include <stdexcept>
 
 using namespace hdps::gui;
@@ -12,14 +14,14 @@ namespace hdps
 {
 
 DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> dataset, Dataset<DatasetImpl> parentDataset, const bool& visible /*= true*/, const bool& selected /*= false*/) :
-    QObject(parent),
+    WidgetAction(parent),
     _dataset(dataset),
     _parent(),
     _children(),
     _visible(visible),
     _selected(false),
     _locked(false),
-    _namedIcons(),
+    _expanded(false),
     _taskDescription(""),
     _taskProgress(0.0),
     _subTasks(),
@@ -27,15 +29,18 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _taskStatus(TaskStatus::Idle),
     _taskDescriptionTimer(),
     _taskProgressTimer(),
+    _namedIcons(),
     _actions(),
     _dataRemoveAction(parent, dataset),
     _dataCopyAction(parent, dataset)
 {
+    setText(dataset->getGuiName());
+
     // Set parent item
     if (parentDataset.isValid())
         _parent = &parentDataset->getDataHierarchyItem();
 
-    // Add data icon
+    // Add dataset icon
     addIcon("data", getDataset()->getIcon());
 
     // Task description/progress timer should be a one-off timer
@@ -51,16 +56,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     connect(&_taskProgressTimer, &QTimer::timeout, [this]() {
         emit taskProgressChanged(getTaskProgress());
     });
-}
-
-DataHierarchyItem::~DataHierarchyItem()
-{
-    // Only proceed if we have a valid parent
-    if (_parent == nullptr)
-        return;
-
-    // Remove child from parent
-    _parent->removeChild(this);
 }
 
 QString DataHierarchyItem::getGuiName() const
@@ -192,34 +187,6 @@ void DataHierarchyItem::deselect()
     setSelected(false);
 }
 
-hdps::DataHierarchyItem::IconList DataHierarchyItem::getIcons() const
-{
-    return _namedIcons;
-}
-
-void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
-{
-    _namedIcons << NamedIcon(name, icon);
-}
-
-void DataHierarchyItem::removeIcon(const QString& name)
-{
-    // Loop over all icons and remove them from the list if it matches the name
-    for (const auto& namedIcon : _namedIcons)
-        if (name == namedIcon.first)
-            _namedIcons.removeOne(namedIcon);
-}
-
-QIcon DataHierarchyItem::getIconByName(const QString& name) const
-{
-    // Loop over all icons and return it if it matches the name
-    for (const auto& namedIcon : _namedIcons)
-        if (name == namedIcon.first)
-            return namedIcon.second;
-
-    return QIcon();
-}
-
 QString DataHierarchyItem::getFullPathName() const
 {
     DataHierarchyItems parents;
@@ -244,17 +211,17 @@ void DataHierarchyItem::addChild(DataHierarchyItem& child)
     _children << &child;
 }
 
-void DataHierarchyItem::removeChild(DataHierarchyItem* dataHierarchyItem)
-{
-    _children.removeOne(dataHierarchyItem);
-}
-
 QString DataHierarchyItem::toString() const
 {
     return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), _visible ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
 }
 
-Dataset<DatasetImpl> DataHierarchyItem::getDataset() const
+Dataset<DatasetImpl> DataHierarchyItem::getDataset()
+{
+    return _dataset;
+}
+
+Dataset<hdps::DatasetImpl>& DataHierarchyItem::getDatasetReference()
 {
     return _dataset;
 }
@@ -262,16 +229,6 @@ Dataset<DatasetImpl> DataHierarchyItem::getDataset() const
 DataType DataHierarchyItem::getDataType() const
 {
     return _dataset->getDataType();
-}
-
-void DataHierarchyItem::notifyDataChanged()
-{
-    // Do not notify if we don't have a valid dataset
-    if (!_dataset.isValid())
-        return;
-
-    // Notify others that the dataset data changed
-    Application::core()->notifyDataChanged(_dataset);
 }
 
 void DataHierarchyItem::analyzeDataset(const QString& pluginName)
@@ -330,7 +287,7 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 
     menu->addSeparator();
 
-    //_dataRemoveAction.setEnabled(!_locked);
+    _dataRemoveAction.setEnabled(!_locked);
     _dataRemoveAction.setEnabled(false);
 
     menu->addAction(&_dataRemoveAction);
@@ -369,12 +326,24 @@ void DataHierarchyItem::setLocked(const bool& locked)
 
     // Notify others that the data got locked/unlocked through the core
     if (_locked)
-        Application::core()->notifyDataLocked(_dataset);
+        Application::core()->notifyDatasetLocked(_dataset);
     else
-        Application::core()->notifyDataUnlocked(_dataset);
+        Application::core()->notifyDatasetUnlocked(_dataset);
 
     // Notify others that the data got locked/unlocked
     emit lockedChanged(_locked);
+}
+
+bool DataHierarchyItem::isExpanded() const
+{
+    return _expanded;
+}
+
+void DataHierarchyItem::setExpanded(const bool& expanded)
+{
+    _expanded = expanded;
+
+    emit expandedChanged(_expanded);
 }
 
 QString DataHierarchyItem::getTaskName() const
@@ -533,6 +502,81 @@ void DataHierarchyItem::setTaskAborted()
 
     // Unlock the item
     setLocked(false);
+}
+
+DataHierarchyItem::IconList DataHierarchyItem::getIcons() const
+{
+    return _namedIcons;
+}
+
+void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
+{
+    _namedIcons << NamedIcon(name, icon);
+}
+
+void DataHierarchyItem::removeIcon(const QString& name)
+{
+    // Loop over all icons and remove them from the list if it matches the name
+    for (const auto& namedIcon : _namedIcons)
+        if (name == namedIcon.first)
+            _namedIcons.removeOne(namedIcon);
+}
+
+QIcon DataHierarchyItem::getIconByName(const QString& name) const
+{
+    // Loop over all icons and return it if it matches the name
+    for (const auto& namedIcon : _namedIcons)
+        if (name == namedIcon.first)
+            return namedIcon.second;
+
+    return QIcon();
+}
+
+void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
+{
+    emit loading();
+
+    if (variantMap.contains("Locked"))
+        setLocked(variantMap["Locked"].toBool());
+
+    if (variantMap.contains("Expanded"))
+        setExpanded(variantMap["Expanded"].toBool());
+
+    emit loaded();
+}
+
+QVariantMap DataHierarchyItem::toVariantMap() const
+{
+    emit const_cast<DataHierarchyItem*>(this)->saving();
+
+    QVariantMap variantMap, children;
+
+    // Child items sort index
+    std::uint32_t childSortIndex = 0;
+
+    for (auto child : getChildren()) {
+
+        // Get map of data hierarchy item
+        auto dataHierarchyItemMap = child->toVariantMap();
+
+        // Add sort index
+        dataHierarchyItemMap["SortIndex"] = childSortIndex;
+
+        // Assign child data hierarchy item map
+        children[child->getDataset()->getGuid()] = dataHierarchyItemMap;
+
+        childSortIndex++;
+    }
+
+    emit const_cast<DataHierarchyItem*>(this)->saved();
+
+    return {
+        { "Name", getGuiName() },
+        { "Locked", _locked },
+        { "Expanded", _expanded },
+        { "Dataset", _dataset->toVariantMap() },
+        { "Children", children }
+    };
 }
 
 }

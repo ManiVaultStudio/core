@@ -6,6 +6,7 @@
 #include "PluginType.h"
 #include "Application.h"
 #include "event/EventListener.h"
+#include "actions/WidgetAction.h"
 
 #include <QString>
 #include <QMap>
@@ -21,7 +22,7 @@ namespace hdps
 namespace plugin
 {
 
-class Plugin : public EventListener
+class Plugin : public EventListener, public hdps::gui::WidgetAction
 {
 public:
     Plugin(const PluginFactory* factory);
@@ -145,19 +146,45 @@ public: // Settings
      */
     void setSetting(const QString& path, const QVariant& value);
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
+public: // Miscellaneous
+
+    /**
+     * Get number of plugin instances
+     * @param pluginKind The kind of plugin
+     * @return The number of plugin instances
+     */
+    static std::uint32_t getNumberOfInstances(const QString& pluginKind)
+    {
+        return Plugin::noInstances[pluginKind];
+    }
+
 protected:
     CoreInterface* _core;
 
 protected:
-    const PluginFactory* _factory;
-
+    const PluginFactory*        _factory;           /** Pointer to plugin factory */
     const QString               _name;              /** Unique plugin name */
     const QString               _guiName;           /** Name in the GUI */
-
     QMap<QString, QVariant>     _properties;        /** Properties map */
 
     /** Keeps track of how many instance have been created per plugin kind */
-    static QMap<QString, std::int32_t> _noInstances;
+    static QMap<QString, std::int32_t> noInstances;
+
+    friend class PluginFactory;
 };
 
 } // namespace plugin

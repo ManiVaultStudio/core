@@ -1,22 +1,33 @@
 #include "WidgetAction.h"
+#include "WidgetActionLabel.h"
 #include "WidgetActionCollapsedWidget.h"
-#include "DataHierarchyItem.h"
 #include "Application.h"
+#include "DataHierarchyItem.h"
+#include "Plugin.h"
+#include "util/Exception.h"
 
 #include <QDebug>
+#include <QMenu>
+#include <QFileDialog>
+#include <QJsonArray>
+
+//#define WIDGET_ACTION_VERBOSE
 
 namespace hdps {
 
 namespace gui {
 
-WidgetAction::WidgetAction(QObject* parent) :
+WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
-    _dataHierarchyItemContext(nullptr),
     _defaultWidgetFlags(),
-    _resettable(false),
-    _mayReset(false),
-    _sortIndex(-1)
+    _sortIndex(-1),
+    _isSerializing()
 {
+}
+
+WidgetAction* WidgetAction::getParentWidgetAction()
+{
+    return dynamic_cast<WidgetAction*>(this->parent());
 }
 
 QWidget* WidgetAction::createWidget(QWidget* parent)
@@ -30,16 +41,6 @@ QWidget* WidgetAction::createWidget(QWidget* parent)
 QWidget* WidgetAction::createWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     return getWidget(parent, widgetFlags);
-}
-
-bool WidgetAction::getMayReset() const
-{
-    return _mayReset;
-}
-
-void WidgetAction::setMayReset(const bool& mayReset)
-{
-    _mayReset = mayReset;
 }
 
 std::int32_t WidgetAction::getSortIndex() const
@@ -57,34 +58,14 @@ QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
     return new WidgetActionCollapsedWidget(parent, this);
 }
 
-WidgetActionLabel* WidgetAction::createLabelWidget(QWidget* parent)
+QWidget* WidgetAction::createLabelWidget(QWidget* parent)
 {
     return new WidgetActionLabel(this, parent);
 }
 
-WidgetActionResetButton* WidgetAction::createResetButton(QWidget* parent)
+QMenu* WidgetAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    return new WidgetActionResetButton(this, parent);
-}
-
-bool WidgetAction::isResettable() const
-{
-    return _resettable;
-}
-
-void WidgetAction::setResettable(const bool& resettable)
-{
-    if (resettable == _resettable)
-        return;
-
-    _resettable = resettable;
-
-    emit resettableChanged(_resettable);
-}
-
-void WidgetAction::reset()
-{
-    qDebug() << text() << "Does not implement a reset function";
+    return nullptr;
 }
 
 std::int32_t WidgetAction::getDefaultWidgetFlags() const
@@ -95,6 +76,212 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;
+}
+
+QString WidgetAction::getSettingsPath() const
+{
+    QStringList actionPath;
+
+    // Get the first action parent
+    auto currentParent = dynamic_cast<WidgetAction*>(parent());
+
+    // Get path name from widget action
+    const auto getPathName = [](const WidgetAction* widgetAction) -> QString {
+        if (!widgetAction->objectName().isEmpty())
+            return widgetAction->objectName();
+
+        return widgetAction->text();
+    };
+
+    // Add our own title
+    actionPath << getPathName(this);
+
+    // Walk up the action tree
+    while (currentParent)
+    {
+        // Insert the action text at the beginning
+        actionPath.insert(actionPath.begin(), getPathName(currentParent));
+
+        // Get the next parent action
+        currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
+    }
+
+    return actionPath.join("/");
+}
+
+QString WidgetAction::getSerializationName() const
+{
+    return !objectName().isEmpty() ? objectName() : text();
+}
+
+bool WidgetAction::isSerializing() const
+{
+    return _isSerializing;
+}
+
+QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, bool recursive /*= true*/) const
+{
+    QVector<WidgetAction*> foundChildren;
+
+    // Loop over all children
+    for (auto child : children()) {
+
+        // Cast to widget action
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        // Add child widget action if the name (text) contains the search string
+        if (searchString.isEmpty())
+            foundChildren << childWidgetAction;
+        else
+            if (childWidgetAction->text().contains(searchString, Qt::CaseInsensitive))
+                foundChildren << childWidgetAction;
+
+        // Find recursively
+        if (recursive)
+            foundChildren << childWidgetAction->findChildren(searchString, recursive);
+    }
+
+    return foundChildren;
+}
+
+void WidgetAction::fromVariantMap(const QVariantMap& variantMap)
+{
+}
+
+QVariantMap WidgetAction::toVariantMap() const
+{
+    return QVariantMap();
+}
+
+void WidgetAction::fromVariantMap(WidgetAction* widgetAction, const QVariantMap& variantMap)
+{
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug().noquote() << QString("From variant map: %1").arg(widgetAction->text());
+#endif
+
+    widgetAction->fromVariantMap(variantMap);
+
+    // Loop over all child objects and serialize each
+    for (auto child : widgetAction->children()) {
+
+        // Cast to widget action
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (!childWidgetAction)
+            continue;
+
+        childWidgetAction->fromVariantMap(variantMap[childWidgetAction->getSerializationName()].toMap());
+    }
+}
+
+QVariantMap WidgetAction::toVariantMap(const WidgetAction* widgetAction)
+{
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug().noquote() << QString("To variant map: %1").arg(widgetAction->text());
+#endif
+
+    return widgetAction->toVariantMap();
+}
+
+void WidgetAction::fromJsonDocument(const QJsonDocument& jsonDocument) const
+{
+    const auto variantMap = jsonDocument.toVariant().toMap();
+
+    fromVariantMap(const_cast<WidgetAction*>(this), variantMap[getSerializationName()].toMap());
+}
+
+QJsonDocument WidgetAction::toJsonDocument() const
+{
+    QVariantMap variantMap;
+
+    variantMap[getSerializationName()] = toVariantMap(this);
+
+    return QJsonDocument::fromVariant(variantMap);
+}
+
+void WidgetAction::fromJsonFile(const QString& filePath /*= ""*/)
+{
+    try
+    {
+        // Except if the supplied file path is not found
+        if (!QFileInfo(filePath).exists())
+            throw std::runtime_error("File does not exist");
+
+        // Create the preset file
+        QFile jsonPresetFile(filePath);
+
+        // And load the file
+        if (!jsonPresetFile.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Unable to open file for reading");
+
+        // Get the cluster data
+        QByteArray presetData = jsonPresetFile.readAll();
+
+        // Create JSON document
+        QJsonDocument jsonDocument;
+
+        // Convert preset raw data to JSON document
+        jsonDocument = QJsonDocument::fromJson(presetData);
+
+        // Shallow sanity check
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+        // Load the preset
+        fromJsonDocument(jsonDocument);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to load data from JSON file", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to load data from JSON file");
+    }
+}
+
+void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
+{
+    try
+    {
+        // Create the JSON file
+        QFile jsonFile(filePath);
+
+        // And open the file for writing
+        if (!jsonFile.open(QFile::WriteOnly))
+            throw std::runtime_error("Unable to open file for writing");
+
+        // Create JSON document
+        auto jsonDocument = toJsonDocument();
+
+        // Shallow sanity check
+        if (jsonDocument.isNull() || jsonDocument.isEmpty())
+            throw std::runtime_error("JSON document is invalid");
+
+#ifdef WIDGET_ACTION_VERBOSE
+        qDebug().noquote() << jsonDocument.toJson(QJsonDocument::Indented);
+#endif
+
+        // Write the JSON document to disk
+        jsonFile.write(jsonDocument.toJson());
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to save data to JSON file", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to save data to JSON file");
+    }
+}
+
+void WidgetAction::setIsSerializing(bool isSerializing)
+{
+    _isSerializing = isSerializing;
+
+    // Notify others that the serialization started/ended
+    emit isSerializingChanged(_isSerializing);
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

@@ -65,6 +65,22 @@ public:
     /** Destructor */
     ~DimensionsPickerAction();
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
+public:
+
     /**
      * Set dimensions
      * @param numDimensions Number of dimensions

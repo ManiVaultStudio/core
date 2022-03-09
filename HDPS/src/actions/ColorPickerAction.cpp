@@ -1,4 +1,5 @@
 #include "ColorPickerAction.h"
+#include "WidgetActionLabel.h"
 #include "Application.h"
 
 #include <QDebug>
@@ -52,16 +53,6 @@ void ColorPickerAction::setDefaultColor(const QColor& defaultColor)
     _defaultColor = defaultColor;
 
     emit defaultColorChanged(_defaultColor);
-}
-
-bool ColorPickerAction::isResettable() const
-{
-    return _color != _defaultColor;
-}
-
-void ColorPickerAction::reset()
-{
-    setColor(_defaultColor);
 }
 
 ColorPickerAction::Widget::Widget(QWidget* parent, ColorPickerAction* colorPickerAction) :

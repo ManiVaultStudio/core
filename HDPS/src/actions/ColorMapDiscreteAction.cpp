@@ -1,5 +1,6 @@
 #include "ColorMapDiscreteAction.h"
 #include "ColorMapAction.h"
+#include "ColorMapSettingsAction.h"
 
 #include <QVBoxLayout>
 #include <QGroupBox>
@@ -10,33 +11,27 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapAction& colorMapAction) :
-    WidgetAction(&colorMapAction),
-    _colorMapAction(colorMapAction),
+ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction) :
+    WidgetAction(&colorMapSettingsAction),
     _numberOfStepsAction(this, "Number of steps", 2, 10, 5, 5)
 {
     setText("Discrete");
     setCheckable(true);
 
     _numberOfStepsAction.setToolTip("Number of discrete steps");
-
-    const auto updateResettable = [this]() {
-        setResettable(isResettable());
-    };
-
-    connect(this, &ColorMapDiscreteAction::toggled, this, updateResettable);
-    connect(&_numberOfStepsAction, &IntegralAction::resettableChanged, this, updateResettable);
 }
 
-bool ColorMapDiscreteAction::isResettable() const
+void ColorMapDiscreteAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    return isChecked() |_numberOfStepsAction.isResettable();
+    if (!variantMap.contains("Enabled"))
+        return;
+
+    setChecked(variantMap["Enabled"].toBool());
 }
 
-void ColorMapDiscreteAction::reset()
+QVariantMap ColorMapDiscreteAction::toVariantMap() const
 {
-    setChecked(false);
-    _numberOfStepsAction.reset();
+    return { { "Enabled", isChecked()} };
 }
 
 ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* colorMapDiscreteAction) :

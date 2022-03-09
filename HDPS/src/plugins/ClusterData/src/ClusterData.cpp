@@ -8,6 +8,8 @@
 
 #include "Application.h"
 
+#include <util/Serialization.h>
+
 #include <QtCore>
 #include <QtDebug>
 
@@ -75,6 +77,91 @@ std::int32_t ClusterData::getClusterIndex(const QString& clusterName) const
     return -1;
 }
 
+void ClusterData::fromVariantMap(const QVariantMap& variantMap)
+{
+    const auto dataMap = variantMap["Data"].toMap();
+
+    variantMapMustContain(dataMap, "Clusters");
+    variantMapMustContain(dataMap, "IndicesRawData");
+    variantMapMustContain(dataMap, "NumberOfIndices");
+
+    // Packed indices for all clusters
+    QVector<std::uint32_t> packedIndices;
+
+    packedIndices.resize(dataMap["NumberOfIndices"].toInt());
+
+    // Convert raw data to indices
+    populateDataBufferFromVariantMap(dataMap["IndicesRawData"].toMap(), (char*)packedIndices.data());
+
+    // Get list of clusters
+    const auto clustersList = dataMap["Clusters"].toList();
+
+    _clusters.resize(clustersList.count());
+
+    // Populate clusters
+    for (const auto& clusterVariant : clustersList) {
+
+        // Get cluster parameters and index
+        const auto clusterMap       = clusterVariant.toMap();
+        const auto clusterIndex     = clustersList.indexOf(clusterMap);
+
+        // Get reference to current cluster
+        auto& cluster = _clusters[clusterIndex];
+
+        cluster.setName(clusterMap["Name"].toString());
+        cluster.setId(clusterMap["ID"].toString());
+        cluster.setColor(clusterMap["Color"].toString());
+
+        // Get the offset into the packed indices vector and the number of indices in the cluster
+        const auto globalIndicesOffset  = clusterMap["GlobalIndicesOffset"].toInt();
+        const auto numberOfIndices      = clusterMap["NumberOfIndices"].toInt();
+
+        // Copy packed indices to cluster indices
+        cluster.getIndices() = std::vector<std::uint32_t>(packedIndices.begin() + globalIndicesOffset, packedIndices.begin() + globalIndicesOffset + numberOfIndices);
+    }
+}
+
+QVariantMap ClusterData::toVariantMap() const
+{
+    QVariantList clusters;
+
+    // All cluster indices
+    std::vector<std::uint32_t> indices;
+
+    // Build vector that includes all cluster indices
+    for (const auto& cluster : _clusters)
+        indices.insert(indices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
+
+    QVariantMap indicesRawData = rawDataToVariantMap((char*)indices.data(), indices.size() * sizeof(std::uint32_t), true);
+
+    std::size_t globalIndicesOffset = 0;
+
+    // Create list of clusters
+    for (const auto& cluster : _clusters) {
+
+        // Get the number of indices in the cluster
+        const auto numberOfIndicesInCluster = cluster.getIndices().size();
+
+        // Add variant map for each cluster
+        clusters.append(QVariantMap({
+            { "Name", cluster.getName() },
+            { "ID", cluster.getId() },
+            { "Color", cluster.getColor() },
+            { "GlobalIndicesOffset", QVariant::fromValue(globalIndicesOffset) },
+            { "NumberOfIndices", QVariant::fromValue(numberOfIndicesInCluster) }
+        }));
+
+        // Compute global indices offset
+        globalIndicesOffset += numberOfIndicesInCluster;
+    }
+
+    return {
+        { "Clusters", clusters },
+        { "IndicesRawData", indicesRawData },
+        { "NumberOfIndices", QVariant::fromValue(indices.size()) }
+    };
+}
+
 void Clusters::init()
 {
     _infoAction = QSharedPointer<InfoAction>::create(nullptr, *this);
@@ -131,36 +218,6 @@ QIcon Clusters::getIcon() const
     return Application::getIconFont("FontAwesome").getIcon("th-large");
 }
 
-void Clusters::fromVariant(const QVariant& variant)
-{
-    if (variant.type() != QVariant::Type::List)
-        throw std::runtime_error("Clusters variant is not a list");
-
-    QVector<Cluster>& clusters = getClusters();
-
-    const auto variantList = variant.toList();
-
-    clusters.clear();
-    clusters.resize(variantList.count());
-
-    auto clusterIndex = 0;
-
-    for (auto& cluster : clusters) {
-        cluster.fromVariant(variantList.at(clusterIndex));
-        clusterIndex++;
-    }
-}
-
-QVariant Clusters::toVariant() const
-{
-    QVariantList clustersList;
-
-    for (auto cluster : getClusters())
-        clustersList << cluster.toVariant();
-
-    return clustersList;
-}
-
 std::vector<std::uint32_t> Clusters::getSelectedIndices() const
 {
     // Indices that are selected
@@ -183,6 +240,24 @@ std::vector<std::uint32_t> Clusters::getSelectedIndices() const
     return selectedIndices;
 }
 
+void Clusters::fromVariantMap(const QVariantMap& variantMap)
+{
+    DatasetImpl::fromVariantMap(variantMap);
+
+    getRawData<ClusterData>().fromVariantMap(variantMap);
+
+    _core->notifyDatasetChanged(this);
+}
+
+QVariantMap Clusters::toVariantMap() const
+{
+    auto variantMap = DatasetImpl::toVariantMap();
+
+    variantMap["Data"] = getRawData<ClusterData>().toVariantMap();
+
+    return variantMap;
+}
+
 std::vector<std::uint32_t>& Clusters::getSelectionIndices()
 {
     return getSelection<Clusters>()->indices;
@@ -194,7 +269,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     getSelection<Clusters>()->indices = indices;
 
     // Notify others that the cluster selection has changed
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 
     // Get reference to input dataset
     auto points                 = getDataHierarchyItem().getParent().getDataset<Points>();
@@ -225,7 +300,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
         pointSelectionIndex = globalIndices[pointSelectionIndex];
 
     // Notify others that the parent points selection has changed
-    _core->notifyDataSelectionChanged(points);
+    _core->notifyDatasetSelectionChanged(points);
 }
 
 QStringList Clusters::getSelectionNames() const
@@ -293,7 +368,7 @@ void Clusters::selectAll()
     std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
 
     // Notify others that the selection changed
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 void Clusters::selectNone()
@@ -302,7 +377,7 @@ void Clusters::selectNone()
     getSelectionIndices().clear();
 
     // Notify others that the selection changed
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 void Clusters::selectInvert()
@@ -327,7 +402,7 @@ void Clusters::selectInvert()
     }
 
     // Notify others that the selection changed
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 QIcon ClusterDataFactory::getIcon() const

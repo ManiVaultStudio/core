@@ -31,7 +31,7 @@ void Images::init()
     addAction(*_infoAction.get());
 }
 
-Dataset<DatasetImpl> Images::createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
+Dataset<DatasetImpl> Images::createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet /*= Dataset<DatasetImpl>()*/, const bool& visible /*= true*/) const
 {
     return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
@@ -545,7 +545,7 @@ void Images::computeMaskData()
         // Compute pixel coordinate from mask index
         const auto pixelCoordinate = QPoint(maskIndex % getImageSize().width(), static_cast<std::int32_t>(floorf(maskIndex / static_cast<float>(getImageSize().width()))));
 
-        // Add pixel pixel coordinate and possibly inflate the visible rectangle
+        // Add pixel coordinate and possibly inflate the visible rectangle
         _visibleRectangle.setLeft(std::min(_visibleRectangle.left(), pixelCoordinate.x()));
         _visibleRectangle.setRight(std::max(_visibleRectangle.right(), pixelCoordinate.x()));
         _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinate.y()));
@@ -561,4 +561,45 @@ QPoint Images::getPixelCoordinateFromPixelIndex(const std::int32_t& pixelIndex) 
 std::int32_t Images::getPixelIndexFromPixelCoordinate(const QPoint& pixelCoordinate) const
 {
     return pixelCoordinate.y() * getImageSize().width() + pixelCoordinate.x();
+}
+
+void Images::fromVariantMap(const QVariantMap& variantMap)
+{
+    DatasetImpl::fromVariantMap(variantMap);
+
+    auto& imageData = getRawData<ImageData>();
+
+    if (variantMap.contains("TypeIndex"))
+        getRawData<ImageData>().setType(static_cast<ImageData::Type>(variantMap["TypeIndex"].toInt()));
+
+    if (variantMap.contains("NumberOfImages"))
+        getRawData<ImageData>().setNumberImages(variantMap["NumberOfImages"].toInt());
+
+    if (variantMap.contains("ImageSize")) {
+        const auto imageSize = variantMap["ImageSize"].toMap();
+
+        setImageSize(QSize(imageSize["Width"].toInt(), imageSize["Height"].toInt()));
+    }
+
+    if (variantMap.contains("NumberOfComponentsPerPixel"))
+        setNumberOfComponentsPerPixel(variantMap["NumberOfComponentsPerPixel"].toInt());
+
+    if (variantMap.contains("ImageFilePaths"))
+        setImageFilePaths(variantMap["ImageFilePaths"].toStringList());
+
+    _core->notifyDatasetChanged(this);
+}
+
+QVariantMap Images::toVariantMap() const
+{
+    auto variantMap = DatasetImpl::toVariantMap();
+
+    variantMap["TypeIndex"]                     = static_cast<std::int32_t>(getType());
+    variantMap["TypeName"]                      = ImageData::getTypeName(getType());
+    variantMap["NumberOfImages"]                = getNumberOfImages();
+    variantMap["ImageSize"]                     = QVariantMap({ { "Width", getImageSize().width() }, { "Height", getImageSize().height() } });
+    variantMap["NumberOfComponentsPerPixel"]    = getNumberOfComponentsPerPixel();
+    variantMap["ImageFilePaths"]                = getImageFilePaths();
+
+    return variantMap;
 }

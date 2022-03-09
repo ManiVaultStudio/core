@@ -26,12 +26,10 @@ public:
 
     /** Describes the widget configurations (a color map combobox always exists) */
     enum WidgetFlag {
-        Settings        = 0x00001,      /** Widgets have a settings popup to adjust range and other settings */
-        EditRange       = 0x00002,      /** Users are allowed to change the color map range */
-        ResetPushButton = 0x00004,      /** There is a button to reset the color map */
+        Settings    = 0x00001,      /** Widgets have a settings popup to adjust range and other settings */
+        EditRange   = 0x00002,      /** Users are allowed to change the color map range */
 
-        Basic   = Settings | EditRange,
-        All     = Settings | EditRange | ResetPushButton
+        Default = Settings | EditRange
     };
 
 public:
@@ -87,12 +85,6 @@ public:
      * @param defaultColorMap Default color map
      */
     void initialize(const QString& colorMap = "", const QString& defaultColorMap = "");
-
-    /** Determines whether the current color can be reset to its default */
-    bool isResettable() const override;
-
-    /** Reset the current color to the default color */
-    void reset() override;
 
     /** Gets the current color map type */
     util::ColorMap::Type getColorMapType() const;

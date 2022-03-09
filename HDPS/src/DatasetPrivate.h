@@ -109,8 +109,8 @@ signals:
     void dataChildRemoved(const QString& childDatasetGuid);
 
 protected:
-    QString         _datasetId;     /** Globally unique dataset identifier */
-    DatasetImpl*    _dataset;       /** Pointer to the dataset (if any) */
+    QString         _datasetGuid;       /** Globally unique dataset identifier */
+    DatasetImpl*    _dataset;           /** Pointer to the dataset (if any) */
 };
 
 }

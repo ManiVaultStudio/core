@@ -82,8 +82,8 @@ public: // Event handling
 
 public: // Action getters
 
-    ColorAction& getOverlayColor() { return _overlayColor; }
-    DecimalAction& getOverlayOpacity() { return _overlayOpacity; }
+    ColorAction& getOverlayColorAction() { return _overlayColorAction; }
+    DecimalAction& getOverlayOpacityAction() { return _overlayOpacityAction; }
     OptionAction& getTypeAction() { return _typeAction; }
     ToggleAction& getRectangleAction() { return _rectangleAction; }
     ToggleAction& getBrushAction() { return _brushAction; }
@@ -104,8 +104,8 @@ protected:
     QWidget*                        _targetWidget;                      /** Pointer to target widget */
     util::PixelSelectionTool&       _pixelSelectionTool;                /** Reference to pixel selection tool */
     util::PixelSelectionTypes       _pixelSelectionTypes;               /** Pixel selection types */
-    ColorAction                     _overlayColor;                      /** Selection overlay color action */
-    DecimalAction                   _overlayOpacity;                    /** Selection overlay opacity action */
+    ColorAction                     _overlayColorAction;                /** Selection overlay color action */
+    DecimalAction                   _overlayOpacityAction;              /** Selection overlay opacity action */
     util::PixelSelectionTypeModel   _typeModel;                         /** Selection type model */
     OptionAction                    _typeAction;                        /** Selection type action */
     ToggleAction                    _rectangleAction;                   /** Switch to rectangle selection action */

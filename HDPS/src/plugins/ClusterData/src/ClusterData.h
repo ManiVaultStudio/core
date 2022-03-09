@@ -59,6 +59,20 @@ public:
      */
     std::int32_t getClusterIndex(const QString& clusterName) const;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
     QVector<Cluster>    _clusters;      /** Clusters data */
 };
@@ -118,13 +132,13 @@ public:
     }
 
     /**
-     * Create subset and specify where the subset will be placed in the data hierarchy
+     * Create subset from the current selection and specify where the subset will be placed in the data hierarchy
      * @param guiName Name of the subset in the GUI
      * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const  override
+    Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const  override
     {
         return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
@@ -179,16 +193,23 @@ public: // Selection
     /** Invert item selection */
     void selectInvert() override;
 
-public: // IO
-
-    /** Loads cluster from variant list */
-    void fromVariant(const QVariant& variant);
-
-    /** Returns a variant representation of the clusters */
-    QVariant toVariant() const;
-
     /** Gets concatenated indices for all selected clusters */
     std::vector<std::uint32_t> getSelectedIndices() const;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 
     std::vector<unsigned int>       indices;
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */

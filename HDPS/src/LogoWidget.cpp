@@ -1,0 +1,29 @@
+#include "LogoWidget.h"
+
+LogoWidget::LogoWidget(QWidget* parent /*= nullptr*/) :
+    QWidget(parent),
+    _layout(),
+    _headerLabel()
+{
+    setAutoFillBackground(true);
+    setLayout(&_layout);
+
+    const int pixelRatio = devicePixelRatio();
+
+    QString iconName = ":/Images/AppBackground256";
+
+    if (pixelRatio > 1)
+        iconName = ":/Images/AppBackground512";
+
+    if (pixelRatio > 2)
+        iconName = ":/Images/AppBackground1024";
+
+    _headerLabel.setPixmap(QPixmap(iconName).scaled(200, 200));
+    _headerLabel.setAlignment(Qt::AlignCenter);
+
+    _layout.setMargin(36);
+    _layout.addWidget(&_headerLabel);
+
+    // Change the background color
+    //ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
+}

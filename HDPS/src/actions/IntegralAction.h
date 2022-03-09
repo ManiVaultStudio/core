@@ -102,6 +102,20 @@ public:
      */
     void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 signals:
 
     /**

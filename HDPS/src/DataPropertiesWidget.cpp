@@ -1,12 +1,10 @@
 #include "DataPropertiesWidget.h"
-#include "Application.h"
-#include "Core.h"
-#include "DataHierarchyItem.h"
 
-#include "actions/GroupAction.h"
+#include <Application.h>
+#include <DataHierarchyItem.h>
+#include <actions/GroupAction.h>
 
 #include <QDebug>
-#include <QVBoxLayout>
 
 namespace hdps
 {
@@ -17,49 +15,71 @@ namespace gui
 DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _dataset(),
-    _groupsAction(this)
+    _layout(),
+    _groupsAction(parent)
 {
     setAutoFillBackground(true);
+    setLayout(&_layout);
 
-    auto layout = new QVBoxLayout();
+    _layout.setMargin(6);
+    _layout.addWidget(_groupsAction.createWidget(parent));
 
-    setLayout(layout);
+    // Update the UI when the data hierarchy item selection changes
+    connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
 
-    layout->setMargin(0);
-    layout->setAlignment(Qt::AlignTop);
-    layout->addWidget(_groupsAction.createWidget(this));
-
-    emit currentDatasetGuiNameChanged("");
+    // Reset when the dataset is removed
+    connect(&_dataset, &Dataset<DatasetImpl>::dataRemoved, this, [this]() -> void {
+        _groupsAction.setGroupActions({});
+    });
 }
 
-void DataPropertiesWidget::setDatasetId(const QString& datasetId)
+void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
 {
     try
     {
+        // Reset when the selection is empty
+        if (selectedItems.isEmpty())
+            _groupsAction.setGroupActions({});
+
         // Disconnect any previous connection to data hierarchy item
         if (_dataset.isValid())
             disconnect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
-        // Assign the dataset reference
-        if (!datasetId.isEmpty())
-            _dataset = Application::core()->requestDataset(datasetId);
-        else
-            _dataset.reset();
+        // Get dataset to display
+        _dataset = selectedItems.first()->getDataset();
 
-        // Only proceed if we have a valid reference
+        // Only proceed if we have a valid pointer to a dataset
         if (_dataset.isValid())
         {
             // Reload when actions are added on-the-fly
             connect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
-                if (dynamic_cast<GroupAction*>(&widgetAction) == nullptr)
-                    return;
+                auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
 
-                loadDataset();
+                if (groupAction)
+                    _groupsAction.addGroupAction(groupAction);
             });
         }
 
-        // Initial dataset load
-        loadDataset();
+        if (!_dataset.isValid())
+            return;
+
+#ifdef _DEBUG
+        qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->getGuiName());
+#endif
+
+        GroupsAction::GroupActions groupActions;
+
+        // Loop over all child objects and add if it is a group action
+        for (auto childObject : _dataset->children()) {
+            auto groupAction = dynamic_cast<GroupAction*>(childObject);
+
+            // Add when the action is a group action
+            if (groupAction)
+                groupActions << groupAction;
+        }
+
+        // Set group actions
+        _groupsAction.setGroupActions(groupActions);
     }
     catch (std::exception& e)
     {
@@ -68,36 +88,6 @@ void DataPropertiesWidget::setDatasetId(const QString& datasetId)
     catch (...) {
         exceptionMessageBox("Cannot update data properties");
     }
-}
-
-void DataPropertiesWidget::loadDataset()
-{
-    // Inform others that the loaded dataset changed
-    emit currentDatasetGuiNameChanged(_dataset.isValid() ? _dataset->getDataHierarchyItem().getFullPathName() : "");
-
-    // Clear groups if the reference is invalid
-    if (!_dataset.isValid()) {
-        _groupsAction.set(QVector<GroupAction*>());
-        return;
-    }
-
-    // Section in the data properties
-    GroupsAction::GroupActions groupActions;
-
-    // Loop over all actions in the dataset and to section if the action is a group action
-    for (auto action : _dataset->getDataHierarchyItem().getActions()) {
-        auto groupAction = dynamic_cast<GroupAction*>(action);
-
-        // Only add groups action to accordion
-        if (groupAction == nullptr)
-            continue;
-
-        // Add the group action
-        groupActions << groupAction;
-    }
-
-    // Assign the groups to the accordion
-    _groupsAction.set(groupActions);
 }
 
 }

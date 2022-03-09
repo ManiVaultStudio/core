@@ -18,8 +18,6 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
     _selectClustersAction(this),
     _subsetAction(this),
     _refreshClustersAction(this),
-    _importClustersAction(this),
-    _exportClustersAction(this),
     _clustersTreeView()
 {
     // Configure filter model
@@ -122,14 +120,6 @@ ClustersActionWidget::ClustersActionWidget(QWidget* parent, ClustersAction* clus
             toolbarLayout->addWidget(_refreshClustersAction.createWidget(this, TriggerAction::Icon));
 
         toolbarLayout->addStretch(1);
-
-        // Add import clusters widget if required
-        if (widgetFlags & ClustersAction::Import)
-            toolbarLayout->addWidget(_importClustersAction.createWidget(this, TriggerAction::Icon));
-
-        // Add export clusters widget if required
-        if (widgetFlags & ClustersAction::Export)
-            toolbarLayout->addWidget(_exportClustersAction.createWidget(this, TriggerAction::Icon));
 
         // Add toolbar to main layout
         layout->addLayout(toolbarLayout);

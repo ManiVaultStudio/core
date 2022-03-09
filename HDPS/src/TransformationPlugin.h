@@ -53,6 +53,15 @@ public:
     {
     }
 
+    /**
+     * Set name of the object
+     * @param name Name of the object
+     */
+    void setObjectName(const QString& name)
+    {
+        QObject::setObjectName("Plugins/Transformation/" + name);
+    }
+
     /** Destructor */
     ~TransformationPluginFactory() = default;
     

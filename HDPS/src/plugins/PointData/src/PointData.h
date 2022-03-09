@@ -491,6 +491,18 @@ public:
     // However, may not perform well when setting a large number of values.
     void setValueAt(std::size_t index, float newValue);
 
+    /**
+     * Load point data from variant map
+     * @param Variant map representation of the point data
+     */
+    virtual void fromVariantMap(const QVariantMap& variantMap) final;
+
+    /**
+     * Save point data to variant map
+     * @return Variant map representation of the point data
+     */
+    virtual QVariantMap toVariantMap() const final;
+
 private:
     VectorHolder _vectorHolder;
 
@@ -792,13 +804,13 @@ public:
     hdps::Dataset<hdps::DatasetImpl> copy() const override;
 
     /**
-     * Create subset and specify where the subset will be placed in the data hierarchy
+     * Create subset from the current selection and specify where the subset will be placed in the data hierarchy
      * @param guiName Name of the subset in the GUI
      * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    hdps::Dataset<hdps::DatasetImpl> createSubset(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
+    hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
     /** Get icon for the dataset */
     QIcon getIcon() const override;
@@ -844,6 +856,20 @@ public: // Selection
      * @param mapping Map of global selection indices in this dataset to a vector of global indices in the target dataset.
      */
     void addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+        * Save widget action to variant
+        * @return Variant representation of the widget action
+        */
+    QVariantMap toVariantMap() const override;
 
 public:
 

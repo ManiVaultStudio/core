@@ -5,6 +5,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QMenu>
 
 namespace hdps
 {
@@ -15,9 +16,7 @@ DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyI
     QObject(parent),
     _parent(parent),
     _children(),
-    _dataHierarchyItem(dataHierarchyItem),
-    _progressSection(),
-    _progressPercentage(0.0f)
+    _dataHierarchyItem(dataHierarchyItem)
 {
 }
 
@@ -141,13 +140,13 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     return _dataHierarchyItem->getDataset()->getGroupIndex();
 
                 case Column::Description:
-                    return _progressSection;
+                    return _dataHierarchyItem->getTaskDescription();
 
                 case Column::Analysis:
                     return "";
 
                 case Column::Progress:
-                    return _dataHierarchyItem->isRunning() ? 100.0f * _progressPercentage : 0.0f;
+                    return _dataHierarchyItem->isRunning() ? 100.0f * _dataHierarchyItem->getTaskProgress() : 0.0f;
 
                 case Column::Analyzing:
                     return "";
@@ -300,19 +299,14 @@ void DataHierarchyModelItem::setGroupIndex(const std::int32_t& groupIndex)
     _dataHierarchyItem->getDataset()->setGroupIndex(groupIndex);
 }
 
+DataHierarchyItem* DataHierarchyModelItem::getDataHierarchyItem()
+{
+    return _dataHierarchyItem;
+}
+
 void DataHierarchyModelItem::removeChild(DataHierarchyModelItem* dataHierarchyModelItem)
 {
     _children.removeOne(dataHierarchyModelItem);
-}
-
-void DataHierarchyModelItem::setProgressPercentage(const float& progressPercentage)
-{
-    _progressPercentage = progressPercentage;
-}
-
-void DataHierarchyModelItem::setProgressSection(const QString& progressSection)
-{
-    _progressSection = progressSection;
 }
 
 }

@@ -10,7 +10,7 @@ namespace hdps {
 namespace gui {
 
 /**
- * Image widget action class
+ * Image widget action class (WIP)
  *
  * For image display and storage
  *

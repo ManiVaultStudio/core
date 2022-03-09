@@ -71,11 +71,6 @@ protected:
 
 public:
 
-    /** Reset to default */
-    void reset() override {};
-
-public:
-
     /**
      * Constructor
      * @param parent Pointer to parent object

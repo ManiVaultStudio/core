@@ -51,9 +51,9 @@ void ClustersAction::setClustersDataset(Dataset<Clusters> clustersDataset)
     }
 }
 
-void ClustersAction::createSubset(const QString& datasetName)
+void ClustersAction::createSubsetFromSelection(const QString& datasetName)
 {
-    _clustersDataset->getParent()->createSubset(datasetName, _clustersDataset->getParent());
+    _clustersDataset->getParent()->createSubsetFromSelection(datasetName, _clustersDataset->getParent());
 }
 
 void ClustersAction::removeClustersById(const QStringList& ids)
@@ -90,5 +90,5 @@ void ClustersAction::updateClustersDataset()
     _clustersDataset->getClusters() = _clustersModel.getClusters();
 
     // Notify others that the clusters changed
-    Application::core()->notifyDataChanged(_clustersDataset);
+    Application::core()->notifyDatasetChanged(_clustersDataset);
 }

@@ -41,10 +41,8 @@ public:
         Prefix      = 0x00020,      /** Includes prefix clusters user interface */
         Subset      = 0x00040,      /** Includes subset user interface */
         Refresh     = 0x00080,      /** Includes refresh clusters user interface */
-        Import      = 0x00100,      /** Includes import user interface */
-        Export      = 0x00200,      /** Includes export user interface */
 
-        Default = Remove | Merge | Filter | Select | Colorize | Prefix | Subset | Import | Export
+        Default = Remove | Merge | Filter | Select | Colorize | Prefix | Subset
     };
 
 protected:
@@ -89,7 +87,7 @@ public:
      * Create subset from selected clusters
      * @param datasetName Name of the subset
      */
-    void createSubset(const QString& datasetName);
+    void createSubsetFromSelection(const QString& datasetName);
 
     /**
      * Remove clusters by their unique identifiers

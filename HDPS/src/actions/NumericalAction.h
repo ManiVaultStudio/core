@@ -33,15 +33,11 @@ public:
 
     /** Describes the widget settings */
     enum WidgetFlag {
-        SpinBox             = 0x00001,      /** Widget includes a spin box */
-        Slider              = 0x00002,      /** Widget includes a slider */
-        LineEdit            = 0x00004,      /** Widget includes a line edit */
-        ResetPushButton     = 0x00008,      /** Widget includes a reset push button */
+        SpinBox     = 0x00001,      /** Widget includes a spin box */
+        Slider      = 0x00002,      /** Widget includes a slider */
+        LineEdit    = 0x00004,      /** Widget includes a line edit */
 
-        Basic               = SpinBox | Slider,
-        SpinBoxAndReset     = SpinBox | ResetPushButton,
-        SliderAndReset      = Slider | ResetPushButton,
-        All                 = SpinBox | Slider | ResetPushButton
+        Default = SpinBox | Slider
     };
 
 public:
@@ -74,8 +70,7 @@ public:
         _numberOfDecimalsChanged()
     {
         setText(title);
-        setMayReset(true);
-        setDefaultWidgetFlags(WidgetFlag::Basic);
+        setDefaultWidgetFlags(WidgetFlag::Default);
     }
 
     /** Gets the current value */
@@ -91,14 +86,9 @@ public:
         if (value == _value)
             return;
 
-        const auto couldReset = isResettable();
-
         _value = std::max(_minimum, std::min(value, _maximum));
 
         _valueChanged();
-
-        if (isResettable() != couldReset)
-            _resettableChanged();
     }
 
     /** Gets the default value */
@@ -117,16 +107,6 @@ public:
         _defaultValue = std::max(_minimum, std::min(defaultValue, _maximum));
 
         _defaultValueChanged();
-    }
-
-    /** Determines whether the current value can be reset to its default */
-    virtual bool isResettable() const final {
-        return _value != _defaultValue;
-    }
-
-    /** Reset the current value to the default value */
-    virtual void reset() final {
-        setValue(_defaultValue);
     }
 
     /** Gets the minimum value */
@@ -267,14 +247,14 @@ public:
     }
 
 protected: // Numerical and auxiliary data
-    NumericalType   _value;                 /** Current value */
-    NumericalType   _defaultValue;          /** Default value */
-    NumericalType   _minimum;               /** Minimum value */
-    NumericalType   _maximum;               /** Maximum value */
-    QString         _prefix;                /** Prefix string */
-    QString         _suffix;                /** Suffix string */
-    std::uint32_t   _numberOfDecimals;      /** Number of decimals */
-    bool            _updateDuringDrag;      /** Whether the value should update during interaction */
+    NumericalType       _value;                 /** Current value */
+    NumericalType       _defaultValue;          /** Default value */
+    NumericalType       _minimum;               /** Minimum value */
+    NumericalType       _maximum;               /** Maximum value */
+    QString             _prefix;                /** Prefix string */
+    QString             _suffix;                /** Suffix string */
+    std::uint32_t       _numberOfDecimals;      /** Number of decimals */
+    bool                _updateDuringDrag;      /** Whether the value should update during interaction */
 
 protected: // Callbacks for implementations of the numerical action
     ValueChangedCB              _valueChanged;                  /** Callback which is called when the value changed */
@@ -284,7 +264,6 @@ protected: // Callbacks for implementations of the numerical action
     PrefixChangedCB             _prefixChanged;                 /** Callback which is called when the prefix changed */
     SuffixChangedCB             _suffixChanged;                 /** Callback which is called when the suffix changed */
     NumberOfDecimalsChangedCB   _numberOfDecimalsChanged;       /** Callback which is called when the number of decimals changed */
-    ResettableChangedCB         _resettableChanged;             /** Callback which is called when the resettable-ness changed */
 
     static constexpr std::uint32_t  INIT_NUMBER_OF_DECIMALS = 1;        /** Initialization number of decimals */
 };

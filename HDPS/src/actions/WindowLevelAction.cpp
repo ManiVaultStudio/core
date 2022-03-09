@@ -1,4 +1,5 @@
 #include "WindowLevelAction.h"
+#include "WidgetActionLabel.h"
 #include "Application.h"
 
 #include <QGridLayout>
@@ -40,11 +41,9 @@ WindowLevelAction::Widget::Widget(QWidget* parent, WindowLevelAction* windowLeve
 
     layout->addWidget(windowLevelAction->getWindowAction().createLabelWidget(this), 0, 0);
     layout->addWidget(windowLevelAction->getWindowAction().createWidget(this), 0, 1);
-    layout->addWidget(windowLevelAction->getWindowAction().createResetButton(this), 0, 2);
 
     layout->addWidget(windowLevelAction->getLevelAction().createLabelWidget(this), 1, 0);
     layout->addWidget(windowLevelAction->getLevelAction().createWidget(this), 1, 1);
-    layout->addWidget(windowLevelAction->getLevelAction().createResetButton(this), 1, 2);
 
     setPopupLayout(layout);
 }

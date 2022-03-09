@@ -198,22 +198,30 @@ public:
      */
     void setPlaceHolderString(const QString& placeholderString);
 
-    /** Determines whether the current value can be reset to its default */
-    bool isResettable() const override;
-
-    /** Reset the current value to the default value */
-    void reset() override;
-
     /** Determines whether an option has been selected */
     bool hasSelection() const;
 
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 protected:
 
     void updateCurrentIndex();
-
+     
 signals:
 
     /** Signals that the model changed */

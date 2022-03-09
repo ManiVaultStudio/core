@@ -18,7 +18,6 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
 {
     setText(title);
     initialize(color, defaultColor);
-    setMayReset(true);
     setDefaultWidgetFlags(WidgetFlag::Basic);
 }
 
@@ -26,8 +25,6 @@ void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QCol
 {
     setColor(color);
     setDefaultColor(defaultColor);
-
-    setResettable(isResettable());
 }
 
 QColor ColorAction::getColor() const
@@ -43,8 +40,6 @@ void ColorAction::setColor(const QColor& color)
     _color = color;
 
     emit colorChanged(_color);
-
-    setResettable(isResettable());
 }
 
 QColor ColorAction::getDefaultColor() const
@@ -62,14 +57,17 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-bool ColorAction::isResettable() const
+void ColorAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    return _color != _defaultColor;
+    if (!variantMap.contains("Value"))
+        return;
+
+    setColor(variantMap["Value"].value<QColor>());
 }
 
-void ColorAction::reset()
+QVariantMap ColorAction::toVariantMap() const
 {
-    setColor(_defaultColor);
+    return { { "Value", _color } };
 }
 
 ColorAction::PushButtonWidget::PushButtonWidget(QWidget* parent, ColorAction* colorAction) :
@@ -174,9 +172,6 @@ QWidget* ColorAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags
 
     if (widgetFlags & WidgetFlag::Picker)
         layout->addWidget(new PushButtonWidget(parent, this));
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
 

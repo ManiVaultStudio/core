@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 3.17)
 set(PROJECT "HDPS")
 project(${PROJECT})
 
+if(NOT DEFINED ENV{HDPS_INSTALL_DIR})
+    message(FATAL_ERROR, "$ENV{HDPS_INSTALL_DIR}
+    ***************************************************
+    Supply an environment variable HDPS_INSTALL_DIR 
+    to indicate where the HDPS output will be installed,
+    make sure the directory exists.
+    ***************************************************" )
+endif()
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -46,7 +55,11 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
+if (WIN32)
+    find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL ZLib REQUIRED)
+elseif (APPLE)
+    find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
+endif()
 
 # Normalize the incoming install path
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
@@ -67,6 +80,11 @@ set( CORE_HEADERS
     src/DataHierarchyManager.h
     src/Core.h
     src/DataManager.h
+    src/Archiver.h
+    src/HdpsApplication.h
+    src/StartPageWidget.h
+    src/ProjectBarWidget.h
+    src/LogoWidget.h
 )
 
 set( CORE_SOURCES
@@ -78,6 +96,11 @@ set( CORE_SOURCES
     src/DataHierarchyManager.cpp
     src/Core.cpp
     src/DataManager.cpp
+    src/Archiver.cpp
+    src/HdpsApplication.cpp
+    src/StartPageWidget.cpp
+    src/ProjectBarWidget.cpp
+    src/LogoWidget.cpp
 )
 
 set(EVENT_HEADERS
@@ -93,21 +116,21 @@ set(EVENT_SOURCES
 set( WIDGET_HEADERS
     src/widgets/CollapsedWidget.h
     src/widgets/WebWidget.h
-    src/widgets/ColormapWidget.h
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
     src/widgets/ResponsiveToolbarWidget.h
     src/widgets/ToolbarItemWidget.h
+    src/widgets/Divider.h
 )
 
 set( WIDGET_SOURCES
     src/widgets/CollapsedWidget.cpp
     src/widgets/WebWidget.cpp
-    src/widgets/ColormapWidget.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
     src/widgets/ResponsiveToolbarWidget.cpp
     src/widgets/ToolbarItemWidget.cpp
+    src/widgets/Divider.cpp
 )
 
 set(ACTIONS_HEADERS
@@ -137,7 +160,7 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
-    src/actions/WidgetActionResetButton.h
+    src/actions/WidgetActionOptions.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
     src/actions/DataAction.h
@@ -151,6 +174,8 @@ set(ACTIONS_HEADERS
     src/actions/DataTransformationAction.h
     src/actions/DirectoryPickerAction.h
     src/actions/StatusAction.h
+    src/actions/GroupSectionTreeItem.h
+    src/actions/GroupWidgetTreeItem.h
 )
 
 set(ACTIONS_SOURCES
@@ -170,7 +195,7 @@ set(ACTIONS_SOURCES
     src/actions/IntegralAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
-	src/actions/PixelSelectionAction.cpp
+    src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/TriggersAction.cpp
     src/actions/ToggleAction.cpp
@@ -179,7 +204,7 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
-    src/actions/WidgetActionResetButton.cpp
+    src/actions/WidgetActionOptions.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
     src/actions/DataAction.cpp
@@ -193,6 +218,8 @@ set(ACTIONS_SOURCES
     src/actions/DataTransformationAction.cpp
     src/actions/DirectoryPickerAction.cpp
     src/actions/StatusAction.cpp
+    src/actions/GroupSectionTreeItem.cpp
+    src/actions/GroupWidgetTreeItem.cpp
 )
 
 set( RENDERER_HEADERS
@@ -249,10 +276,12 @@ set( UTIL_HEADERS
     src/util/ColorMapFilterModel.h
     src/util/ColorMapModel.h
     src/util/ColorSpace.h
-    src/util/Visitable.h
-    src/util/Visitor.h
     src/util/PixelSelectionTool.h
     src/util/PixelSelection.h
+    src/util/Preset.h
+    src/util/PresetsModel.h
+    src/util/PresetsFilterModel.h
+    src/util/Serialization.h
 )
 
 set( UTIL_SOURCES
@@ -271,10 +300,12 @@ set( UTIL_SOURCES
     src/util/ColorMapFilterModel.cpp
     src/util/ColorMapModel.cpp
     src/util/ColorSpace.cpp
-    src/util/Visitable.cpp
-    src/util/Visitor.cpp
     src/util/PixelSelectionTool.cpp
     src/util/PixelSelection.cpp
+    src/util/Preset.cpp
+    src/util/PresetsModel.cpp
+    src/util/PresetsFilterModel.cpp
+    src/util/Serialization.cpp
 )
 
 set( PLUGIN_HEADERS
@@ -439,6 +470,7 @@ add_library(${PROJECT}_Public ${LINK_TYPE}
 set_property(TARGET ${PROJECT}_Public PROPERTY CXX_STANDARD 14)
 
 target_include_directories(${PROJECT}_Public PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(${PROJECT}_Public PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/zlib)
 
 target_link_libraries(${PROJECT}_Public Qt5::Widgets)
 target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
@@ -446,6 +478,7 @@ target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
 add_library(${PROJECT}_Private ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
+	${RESOURCE_FILES}
 )
 
 set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 14)
@@ -453,12 +486,17 @@ set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 14)
 target_link_libraries(${PROJECT}_Private Qt5::Widgets)
 target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT}_Private qtadvanceddocking)
+target_link_libraries(${PROJECT}_Private QuaZip)
 target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
 
 target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
 target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(${PROJECT}_Private PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/QuaZip-Qt5-1.2)
+target_include_directories(${PROJECT}_Private PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/zlib)
 
 add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
+add_dependencies(${PROJECT}_Private QuaZip)
+#add_dependencies(${PROJECT}_Private QArchive)
 
 add_executable(${PROJECT} MACOSX_BUNDLE WIN32
     src/.editorconfig
@@ -479,12 +517,14 @@ target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} qtadvanceddocking)
+target_link_libraries(${PROJECT} QuaZip)
 
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Public>")
 target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Private>")
 
 add_dependencies(${PROJECT} ${PROJECT}_Public)
 add_dependencies(${PROJECT} ${PROJECT}_Private)
+add_dependencies(${PROJECT} QuaZip)
 
 if(MSVC)
     set_target_properties(${PROJECT} PROPERTIES
@@ -496,6 +536,7 @@ endif(MSVC)
 
 #executable & linklib
 
+target_include_directories(${PROJECT}_Public PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/QArchive")
 
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
@@ -688,12 +729,44 @@ set(VERSION_SHORT 3.7.0)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
 add_subdirectory(external/advanced_docking)
 
+# File compression LIBRARY
+if (WIN32)
+    message(status, "********Using QTZLIB for QUAZIP *********")
+    set(QUAZIP_USE_QT_ZLIB ON)  # Use the Qt supplied zlib
+elseif (APPLE)
+    message(status, "********Using brew zlib for QUAZIP *********")
+    set(QUAZIP_USE_QT_ZLIB OFF)
+    find_program(BREW_BIN brew)
+    execute_process(COMMAND ${BREW_BIN} install pkg-config) 
+else ()
+    message(FATAL_ERROR,
+    "*****************************
+    zlib needed for linux build.
+    ******************************" )
+endif()
+add_subdirectory(external/quazip)
+
+
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_BINARY_DIR}/HDPS/external/advanced_docking
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
+    COMMAND "${CMAKE_COMMAND}" 
+        --install ${CMAKE_BINARY_DIR}/HDPS/external/quazip
+        --config $<CONFIGURATION> 
+        --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )
+
+if(WIN32)
+    # Note! the quazip lib is named differently in Debug & Release
+    # simply copy the bin directory contents to let HDPS.exe run.
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${INSTALL_DIR}/$<CONFIGURATION>/bin/
+            ${INSTALL_DIR}/$<CONFIGURATION>/
+    )
+endif()
 
 if(APPLE)
     add_custom_command(TARGET ${PROJECT} POST_BUILD

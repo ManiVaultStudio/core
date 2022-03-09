@@ -12,8 +12,6 @@
 #include "SelectClustersAction.h"
 #include "SubsetAction.h"
 #include "RefreshClustersAction.h"
-#include "ImportClustersAction.h"
-#include "ExportClustersAction.h"
 
 #include <QItemSelectionModel>
 #include <QTreeView>
@@ -74,7 +72,5 @@ protected:
     SelectClustersAction        _selectClustersAction;      /** Select clusters action */
     SubsetAction                _subsetAction;              /** Subset action */
     RefreshClustersAction       _refreshClustersAction;     /** Refresh clusters action */
-    ImportClustersAction        _importClustersAction;      /** Import clusters action */
-    ExportClustersAction        _exportClustersAction;      /** Export clusters action */
     QTreeView                   _clustersTreeView;          /** Clusters tree view */
 };

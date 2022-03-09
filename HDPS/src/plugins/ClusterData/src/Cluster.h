@@ -27,7 +27,10 @@ public:
 
 public: // Getters/setters
 
-    /** Get cluster name */
+    /**
+     * Get cluster name
+     * @return Cluster name
+     */
     QString getName() const;
 
     /** Set cluster name
@@ -35,10 +38,22 @@ public: // Getters/setters
      */
     void setName(const QString& name);
 
-    /** Get unique identifier */
+    /**
+     * Get unique identifier
+     * @return Unique identifier
+     */
     QString getId() const;
 
-    /** Get cluster color */
+    /**
+     * Set unique identifier
+     * @param id Unique identifier
+     */
+    void setId(const QString& id);
+
+    /**
+     * Get cluster color
+     * @return Cluster color
+     */
     QColor getColor() const;
 
     /**
@@ -47,13 +62,22 @@ public: // Getters/setters
      */
     void setColor(const QColor& color);
 
-    /** Get contained indices */
+    /**
+     * Get indices the cluster refers to
+     * @return Indices the cluster refers to
+     */
     const std::vector<std::uint32_t>& getIndices() const;
 
-    /** Get contained indices */
+    /**
+     * Get indices the cluster refers to
+     * @return Indices the cluster refers to
+     */
     std::vector<std::uint32_t>& getIndices();
 
-    /** Get number of indices */
+    /**
+     * Get number of indices
+     * @return Number of indices
+     */
     std::uint32_t getNumberOfIndices() const;
 
     /**
@@ -73,12 +97,6 @@ public: // Getters/setters
     /** Get standard deviation values for every dimension of the cluster */
     std::vector<float>& getStandardDeviation() { return _stddev; }
     const std::vector<float>& getStandardDeviation() const { return _stddev; }
-
-    /** Loads cluster from a variant */
-    void fromVariant(const QVariant& variant);
-
-    /** Returns a variant representation of the cluster */
-    QVariant toVariant() const;
 
     /**
      * Colorize clusters by pseudo-random colors

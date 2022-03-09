@@ -89,12 +89,6 @@ public:
     /** Sets the default color */
     void setDefaultColor(const QColor& defaultColor);
 
-    /** Determines whether the current color can be reset to its default */
-    bool isResettable() const override;
-
-    /** Reset the current color to the default color */
-    void reset() override;
-
 signals:
 
     /**

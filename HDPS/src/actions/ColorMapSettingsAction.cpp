@@ -15,41 +15,12 @@ namespace gui {
 ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction),
-    _horizontalAxisAction(colorMapAction, "Horizontal"),
-    _verticalAxisAction(colorMapAction, "Vertical"),
-    _discreteAction(colorMapAction)
+    _horizontalAxisAction(*this, "Horizontal Axis"),
+    _verticalAxisAction(*this, "Vertical Axis"),
+    _discreteAction(*this)
 {
     setText("Settings");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
-    setMayReset(true);
-
-    const auto updateRangeActions = [this]() -> void {
-        _horizontalAxisAction.setText(_colorMapAction.getColorMapType() == ColorMap::Type::OneDimensional ? "Range" : "Horizontal");
-    };
-
-    connect(&colorMapAction, &ColorMapAction::typeChanged, this, updateRangeActions);
-
-    const auto updateResettable = [this]() {
-        setResettable(isResettable());
-    };
-
-    connect(&_horizontalAxisAction, &ColorMapAxisAction::resettableChanged, this, updateResettable);
-    connect(&_verticalAxisAction, &ColorMapAxisAction::resettableChanged, this, updateResettable);
-    connect(&_discreteAction, &ColorMapDiscreteAction::resettableChanged, this, updateResettable);
-
-    updateRangeActions();
-}
-
-bool ColorMapSettingsAction::isResettable() const
-{
-    return _horizontalAxisAction.isResettable() | _verticalAxisAction.isResettable() | _discreteAction.isResettable();
-}
-
-void ColorMapSettingsAction::reset()
-{
-    _horizontalAxisAction.reset();
-    _verticalAxisAction.reset();
-    _discreteAction.reset();
 }
 
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :

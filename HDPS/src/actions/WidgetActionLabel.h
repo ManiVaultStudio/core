@@ -1,5 +1,8 @@
 #pragma once
 
+#include "actions/TriggerAction.h"
+
+#include <QWidget>
 #include <QLabel>
 
 namespace hdps {
@@ -15,36 +18,20 @@ class WidgetAction;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionLabel : public QLabel {
+class WidgetActionLabel : public QWidget {
 public:
+
+    /**
+     * Constructor
+     * @param widgetAction Pointer to widget action
+     * @param parent Pointer to parent widget
+     * @param windowFlags Window flags
+     */
     explicit WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent = nullptr, Qt::WindowFlags windowFlags = Qt::WindowFlags());
 
-    /*
-    void enterEvent(QEvent *ev) override
-    {
-        setStyleSheet("QLabel { text-decoration: underline; }");
-    }
-
-    void leaveEvent(QEvent *ev) override
-    {
-        setStyleSheet("QLabel { text-decoration: none; }");
-    }
-    */
-
-public: // Drag and drop
-
-    void dragEnterEvent(QDragEnterEvent* dragEnterEvent);
-    void dragLeaveEvent(QDragLeaveEvent* dragLeaveEvent);
-    void dropEvent(QDropEvent* dropEvent);
-
-public: // Mouse events
-
-    void mousePressEvent(QMouseEvent* mouseEvent);
-    void mouseMoveEvent(QMouseEvent* mouseEvent);
-
 protected:
-    WidgetAction*   _widgetAction;          /** Pointer to widget action */
-    QPoint          _dragStartPosition;     /** Start position of the drag operation */
+    WidgetAction*   _widgetAction;      /** Pointer to widget action */
+    QLabel          _label;             /** Label */
 };
 
 }

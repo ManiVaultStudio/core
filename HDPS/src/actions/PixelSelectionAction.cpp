@@ -5,6 +5,7 @@
 #include "util/PixelSelectionTool.h"
 
 #include <QKeyEvent>
+#include <QMenu>
 
 using namespace hdps::util;
 
@@ -17,8 +18,8 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidge
     _targetWidget(targetWidget),
     _pixelSelectionTool(pixelSelectionTool),
     _pixelSelectionTypes(pixelSelectionTypes),
-    _overlayColor(this, "Overlay color", QColor(255, 0, 0), QColor(255, 0, 0)),
-    _overlayOpacity(this, "Overlay opacity", 0.0f, 100.0f, 75.0f, 75.0f, 1),
+    _overlayColorAction(this, "Overlay color", QColor(255, 0, 0), QColor(255, 0, 0)),
+    _overlayOpacityAction(this, "Overlay opacity", 0.0f, 100.0f, 75.0f, 75.0f, 1),
     _typeModel(pixelSelectionTypes, this),
     _typeAction(this, "Type"),
     _rectangleAction(this, "Rectangle"),
@@ -38,7 +39,7 @@ PixelSelectionAction::PixelSelectionAction(QObject* parent, QWidget* targetWidge
     _brushRadiusAction(this, "Brush radius", PixelSelectionTool::BRUSH_RADIUS_MIN, PixelSelectionTool::BRUSH_RADIUS_MAX, PixelSelectionTool::BRUSH_RADIUS_DEFAULT, PixelSelectionTool::BRUSH_RADIUS_DEFAULT),
     _notifyDuringSelectionAction(this, "Notify during selection", true, true)
 {
-    setText("Selection");
+    setText("Pixel selection");
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
 
     initOverlay();
@@ -96,7 +97,7 @@ void PixelSelectionAction::setShortcutsEnabled(const bool& shortcutsEnabled)
 
 void PixelSelectionAction::initOverlay()
 {
-    _overlayOpacity.setSuffix("%");
+    _overlayOpacityAction.setSuffix("%");
 }
 
 void PixelSelectionAction::initType()
@@ -226,8 +227,6 @@ void PixelSelectionAction::initType()
         _polygonAction.setChecked(type == PixelSelectionType::Polygon);
         _sampleAction.setChecked(type == PixelSelectionType::Sample);
         _roiAction.setChecked(type == PixelSelectionType::ROI);
-
-        setResettable(_typeAction.isResettable());
     };
 
     // Toggle type actions based on selected selection type
@@ -263,15 +262,6 @@ void PixelSelectionAction::initModifier()
     connect(&_modifierSubtractAction, &QAction::toggled, [this](bool checked) {
         _pixelSelectionTool.setModifier(checked ? PixelSelectionModifierType::Remove : PixelSelectionModifierType::Replace);
     });
-
-    const auto updateResettable = [this]() -> void {
-        setResettable(_modifierAddAction.isResettable() || _modifierSubtractAction.isResettable());
-    };
-
-    connect(&_modifierAddAction, &ColorAction::resettableChanged, this, updateResettable);
-    connect(&_modifierSubtractAction, &DecimalAction::resettableChanged, this, updateResettable);
-
-    updateResettable();
 }
 
 void PixelSelectionAction::initOperations()

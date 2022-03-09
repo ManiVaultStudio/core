@@ -1,4 +1,5 @@
 #include "StringAction.h"
+#include "Application.h"
 
 #include <QHBoxLayout>
 #include <QCompleter>
@@ -17,8 +18,7 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
     _completer(nullptr)
 {
     setText(title);
-    setMayReset(true);
-    setDefaultWidgetFlags(WidgetFlag::Basic);
+    setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(string, defaultString);
 
     _leadingAction.setVisible(false);
@@ -29,8 +29,6 @@ void StringAction::initialize(const QString& string /*= ""*/, const QString& def
 {
     setString(string);
     setDefaultString(defaultString);
-
-    setResettable(isResettable());
 }
 
 QString StringAction::getString() const
@@ -46,8 +44,6 @@ void StringAction::setString(const QString& string)
     _string = string;
 
     emit stringChanged(_string);
-
-    setResettable(isResettable());
 }
 
 QString StringAction::getDefaultString() const
@@ -63,18 +59,6 @@ void StringAction::setDefaultString(const QString& defaultString)
     _defaultString = defaultString;
 
     emit defaultStringChanged(_defaultString);
-
-    setResettable(isResettable());
-}
-
-bool StringAction::isResettable() const
-{
-    return _string != _defaultString;
-}
-
-void StringAction::reset()
-{
-    setString(_defaultString);
 }
 
 QString StringAction::getPlaceholderString() const
@@ -112,6 +96,61 @@ void StringAction::setCompleter(QCompleter* completer)
     _completer = completer;
 
     emit completerChanged(_completer);
+}
+
+bool StringAction::getSearchMode() const
+{
+    return _searchMode;
+}
+
+void StringAction::setSearchMode(bool searchMode)
+{
+    _searchMode = searchMode;
+
+    // Configure leading action
+    _leadingAction.setVisible(_searchMode);
+    _leadingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
+
+    // Configure trailing action
+    _trailingAction.setVisible(false);
+    _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
+
+    // Reset the string when the trailing action is triggered
+    connect(&_trailingAction, &QAction::triggered, this, &StringAction::reset);
+
+    // Update trailing action visibility depending on the string
+    const auto updateTrailingActionVisibility = [this]() -> void {
+        _trailingAction.setVisible(_searchMode && !_string.isEmpty());
+    };
+
+    // Update trailing action visibility when the string changes
+    connect(this, &StringAction::stringChanged, this, updateTrailingActionVisibility);
+
+    // Perform initial update of trailing action visibility
+    updateTrailingActionVisibility();
+}
+
+bool StringAction::isResettable()
+{
+    return _string != _defaultString;
+}
+
+void StringAction::reset()
+{
+    setString(_defaultString);
+}
+
+void StringAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (!variantMap.contains("Value"))
+        return;
+
+    setString(variantMap["Value"].toString());
+}
+
+QVariantMap StringAction::toVariantMap() const
+{
+    return {{ "Value", _string }};
 }
 
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :

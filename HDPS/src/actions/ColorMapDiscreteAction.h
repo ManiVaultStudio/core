@@ -7,7 +7,7 @@ namespace hdps {
 
 namespace gui {
 
-class ColorMapAction;
+class ColorMapSettingsAction;
 
 /**
  * Color map discrete action class
@@ -47,23 +47,29 @@ protected:
 
     /**
      * Constructor
-     * @param colorMapAction Reference to color map action
+     * @param colorMapSettingsAction Reference to color map settings action
      */
-    ColorMapDiscreteAction(ColorMapAction& colorMapAction);
+    ColorMapDiscreteAction(ColorMapSettingsAction& colorMapSettingsAction);
 
-    /** Determines whether the current color can be reset to its default */
-    bool isResettable() const override;
+public: // Serialization
 
-    /** Reset to default */
-    void reset() override;
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 public: // Action getters
 
-    ColorMapAction& getColorMapAction() { return _colorMapAction; }
     IntegralAction& getNumberOfStepsAction() { return _numberOfStepsAction; }
 
 protected:
-    ColorMapAction&     _colorMapAction;            /** Reference to color map action */
     IntegralAction      _numberOfStepsAction;       /** Number of discrete steps action */
 
     /** Only color map settings action may instantiate this class */

@@ -6,6 +6,10 @@
 
 namespace hdps
 {
+    namespace Plugin {
+        class RawData;
+    }
+
     class DataType
     {
     public:
@@ -18,6 +22,14 @@ namespace hdps
         inline friend bool operator==(const DataType& lhs, const DataType& rhs) { return lhs._type == rhs._type; }
         inline friend bool operator!=(const DataType& lhs, const DataType& rhs) { return !(lhs == rhs); }
         inline friend QString operator+(const QString& lhs, const DataType& rhs) { return lhs + rhs._type; }
+
+        /**
+         * Get the type of raw data as string
+         * @return String representation of the data type
+         */
+        QString getTypeString() const {
+            return _type;
+        }
 
     private:
         QString _type;

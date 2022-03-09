@@ -39,8 +39,6 @@ set(CLUSTER_HEADERS
     src/FilterClustersAction.h
     src/SelectClustersAction.h
     src/SubsetAction.h
-    src/ImportClustersAction.h
-    src/ExportClustersAction.h
     src/RefreshClustersAction.h
     src/ColorizeClustersAction.h
     src/PrefixClustersAction.h
@@ -56,10 +54,6 @@ set(ACTIONS_SOURCES
     src/ClustersActionWidget.cpp
     src/SubsetAction.h
     src/SubsetAction.cpp
-    src/ImportClustersAction.h
-    src/ImportClustersAction.cpp
-    src/ExportClustersAction.h
-    src/ExportClustersAction.cpp
     src/RemoveClustersAction.h
     src/RemoveClustersAction.cpp
     src/MergeClustersAction.h

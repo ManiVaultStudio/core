@@ -1,5 +1,5 @@
 #include "Plugin.h"
-
+#include "actions/WidgetAction.h"
 #include "Application.h"
 
 namespace hdps
@@ -8,16 +8,17 @@ namespace hdps
 namespace plugin
 {
 
-QMap<QString, std::int32_t> hdps::plugin::Plugin::_noInstances = QMap<QString, std::int32_t>();
+QMap<QString, std::int32_t> hdps::plugin::Plugin::noInstances = QMap<QString, std::int32_t>();
 
 Plugin::Plugin(const PluginFactory* factory) :
-    _factory(factory),
     EventListener(),
-    _name(getKind() + QUuid::createUuid().toString()),
-    _guiName(QString("%1 %2").arg(getKind(), QString::number(_noInstances[getKind()] + 1))),
+    WidgetAction(nullptr),
+    _factory(factory),
+    _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
+    _guiName(QString("%1 %2").arg(getKind(), QString::number(noInstances[getKind()] + 1))),
     _properties()
 {
-    _noInstances[getKind()]++;
+    noInstances[getKind()]++;
 }
 
 QVariant Plugin::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
@@ -28,6 +29,26 @@ QVariant Plugin::getSetting(const QString& path, const QVariant& defaultValue /*
 void Plugin::setSetting(const QString& path, const QVariant& value)
 {
     Application::current()->setSetting(QString("%1/%2").arg(getKind(), path), value);
+}
+
+void Plugin::fromVariantMap(const QVariantMap& variantMap)
+{
+
+}
+
+QVariantMap Plugin::toVariantMap() const
+{
+    QVariantMap plugin {
+        { "Kind", _factory->getKind() },
+        { "Type", static_cast<std::uint32_t>(_factory->getType()) },
+        { "Version", _factory->getVersion() }
+    };
+
+    return {
+        { "Name", _name },
+        { "GuiName", _guiName },
+        { "Plugin", plugin }
+    };
 }
 
 }

@@ -24,7 +24,9 @@ public:
     PluginFactory(Type type) :
         _kind(),
         _type(type),
-        _guiName()
+        _guiName(),
+        _version(),
+        _numberOfInstances(0)
     {
     }
 
@@ -34,6 +36,8 @@ public:
     QString getKind() const { return _kind; }
 
     Type getType() const { return _type; }
+
+public: // GUI name
 
     /** Get the menu name of the plugin */
     QString getGuiName() const {
@@ -47,6 +51,23 @@ public:
     void setGuiName(const QString& guiName) {
         _guiName = guiName;
     }
+
+public: // Version
+
+    /** Get the plugin version */
+    QString getVersion() const {
+        return _version;
+    }
+
+    /**
+     * Set the plugin version
+     * @param version Plugin version
+     */
+    void setVersion(const QString& version) {
+        _version = version;
+    }
+
+public:
 
     /** Returns the plugin icon */
     virtual QIcon getIcon() const = 0;
@@ -62,9 +83,15 @@ public:
     //virtual bool isCompatible(DataSet& dataSet) = 0;
 
 private:
-    QString     _kind;      /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
-    Type        _type;      /** Type of plugin (e.g. analysis, data, loader, writer & view) */
-    QString     _guiName;   /** Name of the plugin in the GUI */
+    QString         _kind;                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
+    Type            _type;                  /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+    QString         _guiName;               /** Name of the plugin in the GUI */
+    QString         _version;               /** Plugin version */
+
+protected:
+    std::uint32_t   _numberOfInstances;     /** Number of plugin instances */
+
+    friend class PluginManager;
 };
 
 } // namespace plugin

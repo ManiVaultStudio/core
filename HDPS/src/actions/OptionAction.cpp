@@ -20,7 +20,6 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
     _placeholderString()
 {
     setText(title);
-    setMayReset(true);
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(options, currentOption, defaultOption);
 }
@@ -30,7 +29,6 @@ void OptionAction::initialize(const QStringList& options /*= QStringList()*/, co
     setOptions(options);
     setCurrentText(currentOption);
     setDefaultText(defaultOption);
-    setResettable(isResettable());
 }
 
 void OptionAction::initialize(QAbstractItemModel& customModel, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
@@ -38,7 +36,6 @@ void OptionAction::initialize(QAbstractItemModel& customModel, const QString& cu
     setCustomModel(&customModel);
     setCurrentText(currentOption);
     setDefaultText(defaultOption);
-    setResettable(isResettable());
 }
 
 QStringList OptionAction::getOptions() const
@@ -97,9 +94,6 @@ void OptionAction::setOptions(const QStringList& options)
     // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
-
-    // Set resettable status
-    setResettable(isResettable());
 }
 
 const QAbstractItemModel* OptionAction::getModel() const
@@ -108,6 +102,19 @@ const QAbstractItemModel* OptionAction::getModel() const
         return _customModel;
 
     return &_defaultModel;
+}
+
+void OptionAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (!variantMap.contains("Value"))
+        return;
+
+    setCurrentText(variantMap["Value"].toString());
+}
+
+QVariantMap OptionAction::toVariantMap() const
+{
+    return { { "Value", getCurrentText() } };
 }
 
 void OptionAction::updateCurrentIndex()
@@ -166,8 +173,6 @@ void OptionAction::setCurrentIndex(const std::int32_t& currentIndex)
     // Notify others that the current index and text changed
     emit currentIndexChanged(_currentIndex);
     emit currentTextChanged(getCurrentText());
-
-    setResettable(isResettable());
 }
 
 std::int32_t OptionAction::getDefaultIndex() const
@@ -184,8 +189,6 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
 
     // Notify others that the default index changed
     emit defaultIndexChanged(_defaultIndex);
-
-    setResettable(isResettable());
 }
 
 QString OptionAction::getDefaultText() const
@@ -233,18 +236,6 @@ void OptionAction::setCurrentText(const QString& currentText)
 
     emit currentTextChanged(getCurrentText());
     emit currentIndexChanged(_currentIndex);
-
-    setResettable(isResettable());
-}
-
-bool OptionAction::isResettable() const
-{
-    return _currentIndex != _defaultIndex;
-}
-
-void OptionAction::reset()
-{
-    setCurrentIndex(_defaultIndex);
 }
 
 bool OptionAction::hasSelection() const

@@ -13,8 +13,14 @@
 
 #include <memory>
 
+#define DATASET_IMPL_VERBOSE
+
 namespace hdps
 {
+
+namespace plugin {
+    class AnalysisPlugin;
+}
 
 class DataHierarchyItem;
 
@@ -22,7 +28,7 @@ class DataHierarchyItem;
  * Dataset implementation class
  * Base dataset class from which concrete dataset classes derive
   */
-class DatasetImpl
+class DatasetImpl : public gui::WidgetAction
 {
 public:
 
@@ -32,22 +38,27 @@ public:
      * @param rawDataName Name of the raw data
      */
     DatasetImpl(CoreInterface* core, const QString& rawDataName) :
+        WidgetAction(nullptr),
         _core(core),
         _rawData(nullptr),
-        _guid(QUuid::createUuid().toString()),
+        _guid(QUuid::createUuid().toString(QUuid::WithoutBraces)),
         _guiName(),
         _rawDataName(rawDataName),
         _all(false),
         _derived(false),
         _sourceDataset(),
         _properties(),
-        _groupIndex(-1)
+        _groupIndex(-1),
+        _analysis(nullptr)
     {
     }
 
     /** Destructor */
     virtual ~DatasetImpl()
     {
+#ifdef DATASET_IMPL_VERBOSE
+        qDebug() << _guiName << "destructed";
+#endif
     }
 
     /** Performs startup initialization */
@@ -62,13 +73,13 @@ public:
     virtual Dataset<DatasetImpl> copy() const = 0;
 
     /**
-     * Create subset and specify where the subset will be placed in the data hierarchy
+     * Create subset from the current selection and specify where the subset will be placed in the data hierarchy
      * @param guiName Name of the subset in the GUI
      * @param parentDataSet Smart pointer to parent dataset in the data hierarchy (default is below the set)
      * @param visible Whether the subset will be visible in the UI
      * @return Smart pointer to the created subset
      */
-    virtual Dataset<DatasetImpl> createSubset(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const = 0;
+    virtual Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const = 0;
 
     /** Get the globally unique identifier of the dataset in string format */
     QString getGuid() const
@@ -94,8 +105,10 @@ public:
         // Assign new GUI name
         _guiName = guiName;
 
+        setText(_guiName);
+
         // Notify others that the data GUI name changed
-        Application::core()->notifyDataGuiNameChanged(*this, previousGuiName);
+        Application::core()->notifyDatasetGuiNameChanged(*this, previousGuiName);
     }
 
     /** Returns true if this set represents the full data and false if it's a subset */
@@ -121,6 +134,9 @@ public:
     Dataset<DatasetType> getSourceDataset() const
     {
         if (!isDerivedData())
+            return toSmartPointer<DatasetType>();
+
+        if (!_sourceDataset.isValid())
             return toSmartPointer<DatasetType>();
 
         return Dataset<DatasetType>(_sourceDataset->getSourceDataset<DatasetType>());
@@ -189,6 +205,11 @@ public:
     /** Get icon for the dataset */
     virtual QIcon getIcon() const = 0;
 
+    /**
+     * Makes this set a subset of a full dataset
+     * @param fullDataset Smart pointer to full dataset
+     */
+    void makeSubsetOf(Dataset<DatasetImpl> fullDataset);
 
 public: // Hierarchy
 
@@ -203,7 +224,7 @@ public: // Hierarchy
 
     /** Get parent dataset (if any) */
     template<typename DatasetType>
-    Dataset<DatasetImpl> getParent() const {
+    Dataset<DatasetType> getParent() const {
         return Dataset<DatasetType>(getParent());
     }
 
@@ -270,8 +291,17 @@ public: // Lock
     /** Unlock the dataset */
     void unlock();
 
-    /** Get whether the dataset is locked */
+    /**
+     * Get whether the dataset is locked
+     * @return Boolean indicating whether the dataset is locked
+     */
     bool isLocked() const;
+
+    /**
+     * Set whether the dataset is locked
+     * @parem locked Boolean indicating whether the dataset is locked
+     */
+    void setLocked(bool locked);
 
 public: // Operators
 
@@ -333,7 +363,35 @@ public: // Properties
         return _properties.keys();
     }
 
-public:
+public: // Analysis
+
+    /**
+     * Set analysis
+     * @param analysis Pointer to analysis plugin
+     */
+    void setAnalysis(plugin::AnalysisPlugin* analysis);
+
+    /**
+     * Get analysis
+     * @return Pointer to analysis plugin
+     */
+    plugin::AnalysisPlugin* getAnalysis();
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
+public: // Grouping
 
     /** Get group index */
     std::int32_t getGroupIndex() const;
@@ -357,7 +415,7 @@ public: // Actions
      * @param parent Parent widget
      * @return Context menu
      */
-    QMenu* getContextMenu(QWidget* parent = nullptr);
+    QMenu* getContextMenu(QWidget* parent = nullptr) override;
 
     /**
      * Populates existing menu with actions menus
@@ -402,6 +460,7 @@ public: // Operators
     {
         _core           = other._core;
         _guiName        = other._guiName;
+        _rawData        = other._rawData;
         _rawDataName    = other._rawDataName;
         _all            = other._all;
         _derived        = other._derived;
@@ -424,6 +483,7 @@ private:
     Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
     QMap<QString, QVariant>     _properties;        /** Properties map */
     std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
+    plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
 
     friend class Core;
     friend class DataManager;

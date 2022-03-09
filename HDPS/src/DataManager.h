@@ -3,6 +3,8 @@
 #include "Set.h"
 #include "CoreInterface.h"
 
+#include <actions/WidgetAction.h>
+
 #include <QObject> // To support signals
 #include <QString>
 
@@ -32,7 +34,7 @@ namespace plugin {
     class RawData;
 }
 
-class DataManager : public QObject
+class DataManager : public hdps::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -43,8 +45,11 @@ public:
      * @param core Pointer to the core
      */
     DataManager(CoreInterface* core) :
+        WidgetAction(),
         _core(core)
     {
+        setText("Data manager");
+        setObjectName("Datasets");
     }
 
     /**
@@ -69,9 +74,8 @@ public:
     /**
      * Removes a Dataset, other datasets derived from this dataset are converted to non-derived data (notifies listeners)
      * @param dataset Smart pointer to dataset to remove
-     * @param recursively Remove datasets recursively
      */
-    void removeDataset(const Dataset<DatasetImpl>& dataset, const bool& recursively = true);
+    void removeDataset(Dataset<DatasetImpl> dataset);
 
     /**
      * Get raw data by name
@@ -95,6 +99,20 @@ public:
 
     /** Get all sets from the data manager */
     const std::unordered_map<QString, Dataset<DatasetImpl>>& allSets() const;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 signals:
     void dataChanged();

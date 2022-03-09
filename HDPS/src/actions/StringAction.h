@@ -26,11 +26,9 @@ public:
 
     /** Describes the widget configurations */
     enum WidgetFlag {
-        LineEdit        = 0x00001,      /** Widget includes a line edit */
-        ResetPushButton = 0x00002,      /** There is a button to reset the string action */
+        LineEdit    = 0x00001,      /** Widget includes a line edit */
 
-        Basic   = LineEdit,
-        All     = LineEdit | ResetPushButton
+        Default = LineEdit,
     };
 
 public:
@@ -95,12 +93,6 @@ public:
      */
     void setDefaultString(const QString& defaultString);
 
-    /** Determines whether the current string can be reset to its default string */
-    bool isResettable() const override;
-
-    /** Reset the current string to the default string */
-    void reset() override;
-
     /** Get placeholder text */
     QString getPlaceholderString() const;
 
@@ -133,6 +125,47 @@ public:
      * @param completer Pointer to completer
      */
     void setCompleter(QCompleter* completer);
+
+    /**
+     * Get search mode (if on, there will be a leading action with a search icon and a trailing action to clear the string)
+     * @return Search mode
+     */
+    bool getSearchMode() const;
+
+    /**
+     * Set search mode (if on, there will be a leading action with a search icon and a trailing action to clear the string)
+     * @param searchMode Whether search mode is on/off
+     */
+    void setSearchMode(bool searchMode);
+
+    public: // Settings
+
+    /**
+     * Determines whether the action can be reset to its default
+     * @param recursive Check recursively
+     * @return Whether the action can be reset to its default
+     */
+    bool isResettable() override final;
+
+    /**
+     * Reset to factory default
+     * @param recursive Reset to factory default recursively
+     */
+    void reset() override final;
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 signals:
 
@@ -167,6 +200,7 @@ protected:
     QAction         _leadingAction;         /** Action at the leading position */
     QAction         _trailingAction;        /** Action at the trailing position */
     QCompleter*     _completer;             /** Pointer to completer */
+    bool            _searchMode;            /** Whether the string action is in search mode */
 };
 
 }

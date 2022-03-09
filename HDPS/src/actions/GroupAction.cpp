@@ -80,7 +80,14 @@ void GroupAction::setReadOnly(const bool& readOnly)
     emit readOnlyChanged(_readOnly);
 }
 
-QVector<WidgetAction*> GroupAction::getSortedWidgetActions()
+void GroupAction::setActions(const QVector<WidgetAction*>& widgetActions /*= QVector<WidgetAction*>()*/)
+{
+    _widgetActions = widgetActions;
+
+    emit actionsChanged(_widgetActions);
+}
+
+QVector<WidgetAction*> GroupAction::getSortedWidgetActions() const
 {
     auto sortedActions = _widgetActions;
 
@@ -107,32 +114,44 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())
 {
-    _layout->setColumnStretch(0, 2);
+    _layout->setColumnStretch(0, 3);
     _layout->setColumnStretch(1, 5);
 
     auto contentsMargin = _layout->contentsMargins();
-    
-    _layout->setMargin(15);
+
+    _layout->setMargin(10);
 
     setLayout(_layout);
 
-    for (auto widgetAction : groupAction->getSortedWidgetActions()) {
-        const auto numRows          = _layout->rowCount();
-        const auto isToggleAction   = dynamic_cast<ToggleAction*>(widgetAction);
-        const auto isTriggerAction  = dynamic_cast<TriggerAction*>(widgetAction);
-        const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
+    const auto actionsChanged = [this, groupAction]() -> void {
+        QLayoutItem* layoutItem;
 
-        if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
-            auto labelWidget = widgetAction->createLabelWidget(this);
-            labelWidget->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-            _layout->addWidget(labelWidget, numRows, 0);
+        while ((layoutItem = layout()->takeAt(0)) != NULL)
+        {
+            delete layoutItem->widget();
+            delete layoutItem;
         }
 
-        _layout->addWidget(widgetAction->createWidget(this), numRows, 1);
+        for (auto widgetAction : groupAction->getSortedWidgetActions()) {
+            const auto numRows          = _layout->rowCount();
+            const auto isToggleAction   = dynamic_cast<ToggleAction*>(widgetAction);
+            const auto isTriggerAction  = dynamic_cast<TriggerAction*>(widgetAction);
+            const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
 
-        if (widgetAction->getMayReset())
-            _layout->addWidget(widgetAction->createResetButton(this), numRows, 2);
-    }
+            if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
+                auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this));
+                _layout->addWidget(labelWidget, numRows, 0);
+            }
+
+            _layout->addWidget(widgetAction->createWidget(this), numRows, 1);
+        }
+    };
+
+    // Update UI when the group actions change
+    connect(groupAction, &GroupAction::actionsChanged, this, actionsChanged);
+
+    // Initial update of the actions
+    actionsChanged();
 }
 
 QGridLayout* GroupAction::FormWidget::layout()

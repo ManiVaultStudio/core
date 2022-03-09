@@ -18,6 +18,7 @@
         <file alias="AppBackground256">images/AppBackground256.png</file>
         <file alias="AppBackground512">images/AppBackground512.png</file>
         <file alias="AppBackground1024">images/AppBackground1024.png</file>
+        <file alias="StartPageBackground">images/StartPageBackground.png</file>
     </qresource>
     <qresource prefix="/">
         <file>shaders/Quad.vert</file>

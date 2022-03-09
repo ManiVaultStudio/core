@@ -3,6 +3,7 @@
 #include <Application.h>
 
 #include <QVBoxLayout>
+#include <QLabel>
 
 using namespace hdps;
 

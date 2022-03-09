@@ -1,21 +1,21 @@
 #pragma once
 
 #include "WidgetActionWidget.h"
-#include "WidgetActionLabel.h"
-#include "WidgetActionResetButton.h"
 
 #include <QWidgetAction>
-#include <QMenu>
-#include <QDebug>
-#include <QFlags>
+#include <QJsonDocument>
 
 class QLabel;
+class QMenu;
 
 namespace hdps {
 
 class DataHierarchyItem;
+class Application;
 
 namespace gui {
+
+class WidgetActionLabel;
 
 /**
  * Widget action class
@@ -29,7 +29,18 @@ class WidgetAction : public QWidgetAction
     Q_OBJECT
 
 public:
-    WidgetAction(QObject* parent);
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
+    WidgetAction(QObject* parent = nullptr);
+
+    /**
+     * Get parent widget action
+     * @return Pointer to parent widget action (if any)
+     */
+    WidgetAction* getParentWidgetAction();
 
     /**
      * Create standard widget
@@ -48,25 +59,16 @@ public:
     /**
      * Create label widget
      * @param parent Parent widget
-     * @return Pointer to label widget
+     * @return Pointer to widget
      */
-    WidgetActionLabel* createLabelWidget(QWidget* parent);
-
-    /**
-     * Create reset button
-     * @param parent Parent widget
-     * @return Pointer to reset button
-     */
-    WidgetActionResetButton* createResetButton(QWidget* parent);
+    QWidget* createLabelWidget(QWidget* parent);
 
     /**
      * Get the context menu for the action
      * @param parent Parent widget
      * @return Context menu
      */
-    virtual QMenu* getContextMenu(QWidget* parent = nullptr) {
-        return nullptr;
-    };
+    virtual QMenu* getContextMenu(QWidget* parent = nullptr);
 
     /**
      * Create widget for the action
@@ -75,12 +77,6 @@ public:
      */
     QWidget* createWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
-    /** Determines whether a user may reset the action to the default value */
-    virtual bool getMayReset() const;
-
-    /** Set whether a user may reset the action to the default value */
-    virtual void setMayReset(const bool& mayReset);
-    
     /** Get the sort index */
     std::int32_t getSortIndex() const;
 
@@ -90,15 +86,6 @@ public:
      */
     void setSortIndex(const std::int32_t& sortIndex);
 
-    /** Determines whether the action can be reset to its default */
-    virtual bool isResettable() const;
-
-    /** Sets the action resettable */
-    virtual void setResettable(const bool& resettable);
-
-    /** Reset to default */
-    virtual void reset();
-
     /** Gets the default widget flags */
     std::int32_t getDefaultWidgetFlags() const;
 
@@ -107,6 +94,110 @@ public:
      * @param widgetFlags Widget flags
      */
     void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
+
+public: // Settings
+
+    /**
+     * Determines whether the action can be reset to its default
+     * @param recursive Check recursively
+     * @return Whether the action can be reset to its default
+     */
+    virtual bool isResettable()
+    {
+        return false;
+    };
+
+    /**
+     * Reset to factory default
+     * @param recursive Reset to factory default recursively
+     */
+    virtual void reset() {};
+
+    /**
+     * Get settings path
+     * @return Path of the action w.r.t. to the top-level action
+     */
+    QString getSettingsPath() const;
+
+    /**
+     * Find child widget action of which the GUI name contains the search string
+     * @param searchString The search string
+     * @param recursive Whether to search recursively
+     * @return Found vector of pointers to widget action(s)
+     */
+    QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
+
+public: // Serialization
+
+    /**
+     * Get serialization name in the action tree (returns text() by default and objectName() if it is not empty)
+     * @return Serialization name
+     */
+    QString getSerializationName() const;
+
+    /**
+     * Get whether serialization is taking place
+     * @return Boolean indicating whether serialization is taking place
+     */
+    bool isSerializing() const;
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    virtual void fromVariantMap(const QVariantMap& variantMap);
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    virtual QVariantMap toVariantMap() const;
+
+    /**
+     * Load widget action from variant map
+     * @param widgetAction Pointer to target widget action
+     * @param Variant map representation of the widget action and its children
+     */
+    static void fromVariantMap(WidgetAction* widgetAction, const QVariantMap& variantMap);
+
+    /**
+     * Save widget action to variant map
+     * @param widgetAction Pointer to target widget action
+     * @return Variant map representation of the widget action and its children
+     */
+    static QVariantMap toVariantMap(const WidgetAction* widgetAction);
+
+    /**
+     * Load widget action from JSON document
+     * @param JSON document
+     */
+    virtual void fromJsonDocument(const QJsonDocument& jsonDocument) const final;
+
+    /**
+     * Save widget action to JSON document
+     * @return JSON document
+     */
+    virtual QJsonDocument toJsonDocument() const final;
+
+    /**
+     * Load widget action from JSON file
+     * @param filePath Path to the JSON file (if none/invalid a file open dialog is automatically opened)
+     */
+    virtual void fromJsonFile(const QString& filePath = "") final;
+
+    /**
+     * Save widget action from JSON file
+     * @param filePath Path to the JSON file (if none/invalid a file save dialog is automatically opened)
+     */
+    virtual void toJsonFile(const QString& filePath = "") final;
+
+protected:
+
+    /**
+     * Set whether serialization is taking place
+     * @param isSerializing Whether serialization is taking place
+     */
+    void setIsSerializing(bool isSerializing);
 
 protected:
 
@@ -120,17 +211,15 @@ protected:
 signals:
 
     /**
-     * Signals that the resettable-ness changed
-     * @param isResettable Whether the widget action can be reset
+     * Signals that serializing is currently being performed or not
+     * @param isSerializing Whether serializing is currently being performed or not
      */
-    void resettableChanged(const bool& isResettable);
+    void isSerializingChanged(bool isSerializing);
 
 protected:
-    const DataHierarchyItem*    _dataHierarchyItemContext;      /** The widget action resides somewhere in the data hierarchy item */
-    std::int32_t                _defaultWidgetFlags;            /** Default widget flags */
-    bool                        _resettable;                    /** Whether the action can be reset */
-    bool                        _mayReset;                      /** Whether the action may be reset (from the user interface) */
-    std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
+    std::int32_t    _defaultWidgetFlags;    /** Default widget flags */
+    std::int32_t    _sortIndex;             /** Sort index (used in the group action to sort actions) */
+    bool            _isSerializing;         /** Whether the widget action is currently serializing */
 };
 
 /** List of widget actions */

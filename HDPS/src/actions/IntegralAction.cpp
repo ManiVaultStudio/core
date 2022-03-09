@@ -22,7 +22,6 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     _maximumChanged         = [this]() -> void { emit maximumChanged(_maximum); };
     _prefixChanged          = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged          = [this]() -> void { emit suffixChanged(_suffix); };
-    _resettableChanged      = [this]() -> void { emit resettableChanged(isResettable()); };
 
     initialize(minimum, maximum, value, defaultValue);
 }
@@ -38,6 +37,19 @@ void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t&
     _maximumChanged();
     _valueChanged();
     _defaultValueChanged();
+}
+
+void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (!variantMap.contains("Value"))
+        return;
+
+    setValue(variantMap["Value"].toInt());
+}
+
+QVariantMap IntegralAction::toVariantMap() const
+{
+    return { { "Value", QVariant::fromValue(_value) } };
 }
 
 IntegralAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, IntegralAction* integralAction) :
@@ -224,9 +236,6 @@ QWidget* IntegralAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
 
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new LineEditWidget(parent, this));
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
 

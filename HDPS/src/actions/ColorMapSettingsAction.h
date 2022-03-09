@@ -62,14 +62,6 @@ protected:
      */
     ColorMapSettingsAction(ColorMapAction& colorMapAction);
 
-public:
-
-    /** Determines whether the current color can be reset to its default */
-    bool isResettable() const override;
-
-    /** Reset to default */
-    void reset() override;
-
 public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }

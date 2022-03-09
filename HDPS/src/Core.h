@@ -7,7 +7,7 @@
 #include "DataManager.h"
 #include "DataHierarchyManager.h"
 
-#include "event/EventListener.h"
+#include <event/EventListener.h>
 
 #include <memory>
 #include <unordered_map>
@@ -82,6 +82,15 @@ public: // Data access
     Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
 
     /**
+     * Removes a single dataset
+     * @param dataset Smart pointer to the dataset to remove
+     */
+    void removeDataset(Dataset<DatasetImpl> dataset) override final;
+
+    /** Removes all currently loaded datasets */
+    void removeAllDatasets() override final;
+
+    /**
      * Copies a dataset and adds it to the data hierarchy
      * @param dataset Smart pointer to dataset to copy
      * @param datasetGuiName Name of the added dataset in the GUI
@@ -91,22 +100,13 @@ public: // Data access
     Dataset<DatasetImpl> copyDataset(const Dataset<DatasetImpl>& dataset, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
 
     /**
-     * Removes one or more datasets
-     * Other datasets derived from this dataset are converted to non-derived data
-     * Notifies all plug-ins of the removed dataset automatically
-     * @param datasets Smart pointers to the datasets that need to be removed
-     * @param recursively Remove datasets recursively
-     */
-    void removeDatasets(const QVector<Dataset<DatasetImpl>> datasets, const bool& recursively = false) override;
-
-    /**
      * Creates a dataset derived from a source dataset.
      * @param guiName GUI name for the new dataset from the core
      * @param sourceDataset Smart pointer to the source dataset from which this dataset will be derived
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
      * @return Smart pointer to the created derived dataset
      */
-    Dataset<DatasetImpl> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
+    Dataset<DatasetImpl> createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
 
     /**
      * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set
@@ -133,6 +133,12 @@ public: // Data access
      * @return Vector of references to datasets
      */
     QVector<Dataset<DatasetImpl>> requestAllDataSets(const QVector<DataType>& dataTypes = QVector<DataType>()) override;
+
+    /**
+     * Get data manager
+     * @return Reference to the data manager
+     */
+    const DataManager& getDataManager() const;
 
 protected: // Data access
 
@@ -188,15 +194,6 @@ public: // Data viewing
      */
     const void viewDatasets(const QString& kind, const Datasets& datasets) override;
 
-public: // Data transformation
-
-    /**
-     * Transforms one or more datasets
-     * @param kind Type of transformation plugin
-     * @param datasets Datasets to transform
-     */
-    const void transformDatasets(const QString& kind, const Datasets& datasets) override;
-
 public: // Plugin queries
 
     /**
@@ -247,65 +244,51 @@ public: // Events & notifications
      * Notify listeners that a new dataset has been added to the core
      * @param dataset Smart pointer to the dataset that was added
      */
-    void notifyDataAdded(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetAdded(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify listeners that a dataset is about to be removed
      * @param dataset Smart pointer to the dataset which is about to be removed
      */
-    void notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify listeners that a dataset is removed
      * @param datasetGuid GUID of the dataset that was removed
      * @param dataType Type of the data
      */
-    void notifyDataRemoved(const QString& datasetGuid, const DataType& dataType) override;
+    void notifyDatasetRemoved(const QString& datasetGuid, const DataType& dataType) override;
 
     /**
      * Notify listeners that a dataset has changed
      * @param dataset Smart pointer to the dataset of which the data changed
      */
-    void notifyDataChanged(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetChanged(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify listeners that data selection has changed
      * @param dataset Smart pointer to the dataset of which the selection changed
      */
-    void notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify all listeners that a dataset GUI name has changed
      * @param dataset Smart pointer to the dataset of which the GUI name changed
      * @param previousGuiName Previous dataset name
      */
-    void notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) override;
-
-    /**
-     * Notify all listeners that a dataset child was added
-     * @param parentDataset Smart pointer to the parent dataset
-     * @param childDataset Smart pointer to the child dataset that was added
-     */
-    void notifyDataChildAdded(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset) override;
-
-    /**
-     * Notify all listeners that a dataset child was removed
-     * @param parentDataset Smart pointer to the parent dataset
-     * @param childDatasetGuid GUID of the child dataset that was removed
-     */
-    void notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const QString& childDatasetGuid) override;
+    void notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) override;
 
     /**
      * Notify all listeners that a dataset is locked
      * @param dataset Smart pointer to the dataset
      */
-    void notifyDataLocked(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetLocked(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify all listeners that a dataset is unlocked
      * @param dataset Smart pointer to the dataset
      */
-    void notifyDataUnlocked(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Register an event listener
@@ -340,6 +323,20 @@ private:
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();
 
+public: // Serialization
+
+    /**
+     * Load widget action from variant
+     * @param Variant representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant
+     * @return Variant representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
+
 private:
     gui::MainWindow&                                                        _mainWindow;                /** Reference to the main window */
     std::unique_ptr<plugin::PluginManager>                                  _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core. */
@@ -347,6 +344,8 @@ private:
     std::unique_ptr<DataHierarchyManager>                                   _dataHierarchyManager;      /** Internal hierarchical data tree */
     std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */
+
+    friend class DataHierarchyManager;
 };
 
 } // namespace hdps

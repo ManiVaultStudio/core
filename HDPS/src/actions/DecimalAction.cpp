@@ -25,7 +25,6 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
     _prefixChanged              = [this]() -> void { emit prefixChanged(_prefix); };
     _suffixChanged              = [this]() -> void { emit suffixChanged(_suffix); };
     _numberOfDecimalsChanged    = [this]() -> void { emit numberOfDecimalsChanged(_numberOfDecimals); };
-    _resettableChanged          = [this]() -> void { emit resettableChanged(isResettable()); };
 
     initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
 }
@@ -60,6 +59,19 @@ void DecimalAction::setSingleStep(const float& singleStep)
     _singleStep = std::max(0.0f, singleStep);
 
     emit singleStepChanged(_singleStep);
+}
+
+void DecimalAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (!variantMap.contains("Value"))
+        return;
+
+    setValue(variantMap["Value"].toDouble());
+}
+
+QVariantMap DecimalAction::toVariantMap() const
+{
+    return { { "Value", static_cast<double>(_value) } };
 }
 
 DecimalAction::SpinBoxWidget::SpinBoxWidget(QWidget* parent, DecimalAction* decimalAction) :
@@ -202,9 +214,6 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
 
     if (widgetFlags & WidgetFlag::Slider)
         layout->addWidget(new SliderWidget(parent, this), 2);
-
-    if (widgetFlags & WidgetFlag::ResetPushButton)
-        layout->addWidget(createResetButton(parent));
 
     widget->setLayout(layout);
 

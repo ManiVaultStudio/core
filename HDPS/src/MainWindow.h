@@ -17,6 +17,8 @@ namespace Ui
     class MainWindow;
 }
 
+class StartPageWidget;
+
 namespace hdps
 {
 
@@ -38,17 +40,50 @@ class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
 
 public:
+
+    class RecentProjectLabel : public QLabel
+    {
+    public:
+        RecentProjectLabel(const QString& recentProjectFilePath, QWidget* parent = nullptr) :
+            QLabel(recentProjectFilePath, parent),
+            _recentProjectFilePath(recentProjectFilePath)
+        {
+        }
+
+    protected:
+
+        void mousePressEvent(QMouseEvent* mouseEvent)
+        {
+            Application::current()->loadProject(_recentProjectFilePath);
+        }
+
+        void enterEvent(QEvent* event)
+        {
+            setStyleSheet("QLabel { text-decoration: underline; }");
+        }
+
+        void leaveEvent(QEvent* event)
+        {
+            setStyleSheet("QLabel { text-decoration: none; }");
+        }
+
+    protected:
+        QString     _recentProjectFilePath;     /** Recent project file path */
+    };
+public:
     MainWindow(QWidget *parent = nullptr);
 
     /**
-    * Adds a new item to the import menu.
-    */
-    QAction* addImportOption(QString menuName);
+     * Adds a new item to the import menu
+     * @param menuName Name of the import plugin
+     * @param icon Icon of the import plugin
+     */
+    QAction* addImportOption(const QString& actionName, const QIcon& icon);
 
     /**
     * Adds a new item to the menu drop-down for this particular type.
     */
-    QAction* addMenuAction(plugin::Type type, QString name);
+    QAction* addViewAction(const plugin::Type& type, const QString name, const QIcon& icon);
 
     /**
     * Allows access to the core, which is created by this MainWindow. Useful for
@@ -120,7 +155,7 @@ private: // Docking
     void initializeLoggingDockingArea();
     
     /** Updates the visibility of the central dock widget (depending on its content) */
-    void updateCentralWidgetVisibility();
+    void updateCentralWidget();
 
     /**
      * Return a list of (open) view plugin dock widgets
@@ -129,10 +164,22 @@ private: // Docking
      */
     QList<ads::CDockWidget*> getViewPluginDockWidgets(const bool& openOnly = true);
 
+protected: // Menu
+
+    /** Setup file menu */
+    void setupFileMenu();
+
+    /** Setup view menu */
+    void setupViewMenu();
+
+    /** Fill the recent projects menu with entries */
+    void populateRecentProjectsMenu();
+
 private:
     QSharedPointer<Core>        _core;                          /** HDPS core */
-    DataHierarchyWidget*        _dataHierarchyWidget;           /** Data hierarchy tree widget */
-    DataPropertiesWidget*       _dataPropertiesWidget;          /** Data properties widget */
+    StartPageWidget*            _startPageWidget;               /** Pointer to the start page widget */
+    DataHierarchyWidget*        _dataHierarchyWidget;           /** Pointer to the data hierarchy tree widget */
+    DataPropertiesWidget*       _dataPropertiesWidget;          /** Pointer to the data properties widget */
 
 private: // Docking
     ads::CDockManager*          _dockManager;                   /** Manager for docking */
@@ -140,6 +187,7 @@ private: // Docking
     ads::CDockAreaWidget*       _settingsDockArea;              /** Docking area for settings */
     ads::CDockAreaWidget*       _loggingDockArea;               /** Docking area for logging */
     ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */
+    ads::CDockWidget*           _startPageDockWidget;           /** Dock widget for the start page */
     ads::CDockWidget*           _dataHierarchyDockWidget;       /** Dock widget for data hierarchy */
     ads::CDockWidget*           _dataPropertiesDockWidget;      /** Dock widget for data properties */
     ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */

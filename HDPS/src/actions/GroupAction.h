@@ -2,6 +2,10 @@
 
 #include "WidgetAction.h"
 
+#include <QTreeWidget>
+#include <QResizeEvent>
+#include <QVBoxLayout>
+
 class QWidget;
 class QGridLayout;
 
@@ -98,12 +102,26 @@ public:
     void operator << (WidgetAction& widgetAction)
     {
         _widgetActions << &widgetAction;
+
+        emit actionsChanged(_widgetActions);
     }
 
-    /** Get sorted widget actions */
-    QVector<WidgetAction*> getSortedWidgetActions();
+    /**
+     * Set actions
+     * @param widgetActions Widget actions
+     */
+    void setActions(const QVector<WidgetAction*>& widgetActions = QVector<WidgetAction*>());
+
+    /**
+     * Get sorted widget actions
+     * @return Vector of sorted widget actions
+     */
+    QVector<WidgetAction*> getSortedWidgetActions() const;
 
 signals:
+
+    /** Signals that the actions changed */
+    void actionsChanged(const QVector<WidgetAction*>& widgetActions);
 
     /** Signals that the group got expanded */
     void expanded();
@@ -119,6 +137,32 @@ protected:
     bool                        _readOnly;          /** Whether or not the group is read-only */
     QVector<WidgetAction*>      _widgetActions;     /** Widget actions */
 };
+
+/**
+ * Print group action to console
+ * @param debug Debug
+ * @param groupAction Reference to group action
+ */
+inline QDebug operator << (QDebug debug, const GroupAction& groupAction)
+{
+    debug << groupAction.getSettingsPath();
+
+    return debug.space();
+}
+
+/**
+ * Print group action to console
+ * @param debug Debug
+ * @param groupAction Pointer to group action
+ */
+inline QDebug operator << (QDebug debug, const GroupAction* groupAction)
+{
+    Q_ASSERT(groupAction != nullptr);
+
+    debug << groupAction->getSettingsPath();
+
+    return debug.space();
+}
 
 }
 }

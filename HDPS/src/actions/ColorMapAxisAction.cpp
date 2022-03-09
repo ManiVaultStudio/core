@@ -1,6 +1,8 @@
 #include "ColorMapAxisAction.h"
 #include "ColorMapAction.h"
-#include "Application.h"
+#include "ColorMapSettingsAction.h"
+
+#include <Application.h>
 
 #include <QGridLayout>
 #include <QGroupBox>
@@ -11,15 +13,14 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapAxisAction::ColorMapAxisAction(ColorMapAction& colorMapAction, const QString& title) :
-    WidgetAction(&colorMapAction),
-    _colorMapAction(colorMapAction),
+ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title) :
+    WidgetAction(&colorMapSettingsAction),
     _rangeAction(this, "Range", 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1),
     _resetAction(this, "Reset"),
     _mirrorAction(this, "Mirror")
 {
     setText(title);
-    
+
     _rangeAction.setToolTip("Range of the color map");
     _resetAction.setToolTip("Reset the color map");
     _mirrorAction.setToolTip("Mirror the color map");
@@ -33,27 +34,8 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapAction& colorMapAction, const QSt
     });
 
     connect(&_rangeAction, &DecimalRangeAction::rangeChanged, this, update);
-    connect(&_rangeAction, &DecimalRangeAction::resettableChanged, this, update);
 
     update();
-
-    const auto updateResettable = [this]() {
-        setResettable(isResettable());
-    };
-
-    connect(&_rangeAction, &DecimalRangeAction::resettableChanged, this, updateResettable);
-    connect(&_mirrorAction, &ToggleAction::resettableChanged, this, updateResettable);
-}
-
-bool ColorMapAxisAction::isResettable() const
-{
-    return _rangeAction.isResettable() | _mirrorAction.isResettable();
-}
-
-void ColorMapAxisAction::reset()
-{
-    _rangeAction.reset();
-    _mirrorAction.reset();
 }
 
 ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMapAxisAction) :

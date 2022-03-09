@@ -60,12 +60,44 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent, const QString& t
     });
 
     updateReadOnly();
-    computeStatistics();
+
+    // Compute statistics when triggered
+    connect(&_selectAction.getComputeStatisticsAction(), &TriggerAction::triggered, this, &DimensionsPickerAction::computeStatistics);
 }
 
 DimensionsPickerAction::~DimensionsPickerAction()
 {
     disconnect(_summaryUpdateAwakeConnection);
+}
+
+void DimensionsPickerAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (variantMap.contains("EnabledDimensions")) {
+
+        const auto enabledDimensions = variantMap["EnabledDimensions"].toList();
+
+        if (enabledDimensions.count() != _holder.getNumberOfDimensions())
+            return;
+
+        std::int32_t dimensionIndex = 0;
+
+        for (const auto& enabledDimension : enabledDimensions) {
+            _holder.setDimensionEnabled(dimensionIndex, enabledDimension.toBool());
+            dimensionIndex++;
+        }
+
+        const ModelResetter modelResetter(_proxyModel.get());
+    }
+}
+
+QVariantMap DimensionsPickerAction::toVariantMap() const
+{
+    QVariantList enabledDimensions;
+
+    for (const auto enabledDimension : getEnabledDimensions())
+        enabledDimensions << QVariant(enabledDimension);
+
+    return { { "EnabledDimensions", enabledDimensions} };
 }
 
 void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, const std::vector<QString>& names)
@@ -101,7 +133,7 @@ void DimensionsPickerAction::setPointsDataset(const Dataset<Points>& points)
     _points = points;
 
     setDimensions(_points->getNumDimensions(), _points->getDimensionNames());
-    computeStatistics();
+    setObjectName(QString("%1/Selection").arg(_points->getGuiName()));
 }
 
 DimensionsPickerHolder& DimensionsPickerAction::getHolder()
@@ -422,10 +454,10 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     WidgetActionWidget(parent, dimensionSelectionAction)
 {
     setMinimumHeight(300);
-
+    
     auto layout = new QVBoxLayout();
 
-    auto tableView = new QTableView();
+    auto tableView = new QTableView(this);
 
     tableView->setSortingEnabled(true);
     tableView->setModel(&dimensionSelectionAction->getProxyModel());

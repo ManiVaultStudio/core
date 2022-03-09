@@ -1,8 +1,10 @@
 #include "MainWindow.h"
 #include "DataHierarchyWidget.h"
 #include "DataPropertiesWidget.h"
-#include "DataManager.h" // To connect changed data signal to dataHierarchy
+#include "DataManager.h"
 #include "Logger.h"
+#include "StartPageWidget.h"
+
 #include "PluginManager.h"
 #include "PluginType.h"
 #include "Application.h"
@@ -29,6 +31,8 @@
 #include <QTimer>
 #include <QLabel>
 
+#define MAIN_WINDOW_VERBOSE
+
 using namespace ads;
 
 namespace hdps
@@ -39,6 +43,7 @@ namespace gui
 
 MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
+    _startPageWidget(nullptr),
     _dataHierarchyWidget(nullptr),
     _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),
@@ -46,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _settingsDockArea(nullptr),
     _loggingDockArea(nullptr),
     _centralDockWidget(new CDockWidget("Views")),
+    _startPageDockWidget(new CDockWidget("Start page")),
     _dataHierarchyDockWidget(new CDockWidget("Data hierarchy")),
     _dataPropertiesDockWidget(new CDockWidget("Data properties")),
     _loggingDockWidget(new CDockWidget("Logging"))
@@ -58,64 +64,46 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     _core->init();
 
+    _startPageWidget        = new StartPageWidget(this);
     _dataHierarchyWidget    = new DataHierarchyWidget(this);
     _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
-    connect(_dataHierarchyWidget, &DataHierarchyWidget::selectedDatasetChanged, this, [this](const QString& datasetId) {
-        _dataPropertiesWidget->setDatasetId(datasetId);
+    // Change the window title when the current project file changed
+    connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
+        setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
     });
 
-    connect(_dataPropertiesWidget, &DataPropertiesWidget::currentDatasetGuiNameChanged, this, [this](const QString& datasetName) {
-        _dataPropertiesDockWidget->setWindowTitle(QString("Data properties: %1").arg(datasetName));
-    });
-
-    QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
-
-    Logger::Initialize();
-
-    QObject::connect(findLogFileAction, &QAction::triggered, [this](bool) {
-        const auto filePath = Logger::GetFilePathName();
-
-        if (!hdps::util::ShowFileInFolder(filePath))
-        {
-            QMessageBox::information(this,
-                QObject::tr("Log file not found"),
-                QObject::tr("The log file is not found:\n%1").arg(filePath));
-        }
-    });
-
-    QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked) {
-        if (checked) {
-            _loggingDockWidget->setWidget(new LogDockWidget(*this));
-            _loggingDockArea->show();
-        } else {
-            delete _loggingDockWidget->takeWidget();
-            _loggingDockArea->hide();
-        }
-    });
+    // Setup menus
+    setupFileMenu();
+    setupViewMenu();
 
     initializeDocking();
     restoreWindowGeometryFromSettings();
 
+    Logger::Initialize();
+
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
+
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, &MainWindow::updateCentralWidget);
+    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::selectedItemsChanged, this, [this](DataHierarchyItems selectedItems) -> void {
+        if (selectedItems.isEmpty())
+            _dataPropertiesDockWidget->setWindowTitle("Data properties");
+        else
+            _dataPropertiesDockWidget->setWindowTitle("Data properties: " + selectedItems.first()->getFullPathName());
+    });
+
+    _dataPropertiesDockWidget->setWindowTitle("Data properties");
 }
 
-QAction* MainWindow::addImportOption(QString menuName)
+QAction* MainWindow::addImportOption(const QString& actionName, const QIcon& icon)
 {
-    return importDataFileMenu->addAction(menuName);
+    return importDataMenu->addAction(icon, actionName);
 }
 
-QAction* MainWindow::addMenuAction(plugin::Type type, QString name)
+QAction* MainWindow::addViewAction(const plugin::Type& type, const QString name, const QIcon& icon)
 {
-    switch (type)
-    {
-        case plugin::Type::VIEW:
-            return menuVisualization->addAction(name);
-
-        default:
-            return nullptr;
-    }
+    return menuVisualization->addAction(icon, name);
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)
@@ -149,41 +137,15 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
         {
             auto viewPlugin = dynamic_cast<plugin::ViewPlugin*>(plugin);
 
-            dockWidget->setWidget(viewPlugin, CDockWidget::ForceNoScrollArea);
+            dockWidget->setWidget(&viewPlugin->getWidget(), CDockWidget::ForceNoScrollArea);
             dockWidget->setProperty("PluginType", "View");
             //dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
 
-            connect(viewPlugin, &QWidget::windowTitleChanged, [this, dockWidget](const QString& title) {
+            connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, [this, dockWidget](const QString& title) {
                 dockWidget->setWindowTitle(title);
             });
 
             auto dockWidgetArea = LeftDockWidgetArea;
-
-            switch (viewPlugin->getDockingLocation())
-            {
-                case plugin::ViewPlugin::DockingLocation::Left:
-                    dockWidgetArea = LeftDockWidgetArea;
-                    break;
-
-                case plugin::ViewPlugin::DockingLocation::Right:
-                    dockWidgetArea = RightDockWidgetArea;
-                    break;
-
-                case plugin::ViewPlugin::DockingLocation::Top:
-                    dockWidgetArea = TopDockWidgetArea;
-                    break;
-
-                case plugin::ViewPlugin::DockingLocation::Bottom:
-                    dockWidgetArea = BottomDockWidgetArea;
-                    break;
-
-                case plugin::ViewPlugin::DockingLocation::Center:
-                    dockWidgetArea = CenterDockWidgetArea;
-                    break;
-
-                default:
-                    break;
-            }
 
             if (getViewPluginDockWidgets().isEmpty())
                 dockWidgetArea = CenterDockWidgetArea;
@@ -191,18 +153,20 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
             
             QObject::connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
-                updateCentralWidgetVisibility();
+                updateCentralWidget();
             });
             
             QObject::connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
                 _dockManager->removeDockWidget(dockWidget);
-                updateCentralWidgetVisibility();
+                updateCentralWidget();
             });
 
             QObject::connect(dockWidget, &CDockWidget::topLevelChanged, [this, dockWidget](bool topLevel) {
-                updateCentralWidgetVisibility();
+                updateCentralWidget();
             });
             
+            updateCentralWidget();
+
             break;
         }
 
@@ -307,32 +271,20 @@ void MainWindow::initializeDocking()
     initializeSettingsDockingArea();
     initializeLoggingDockingArea();
 
-    connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidgetVisibility);
-    connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidgetVisibility);
+    connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidget);
+    connect(_dockManager, &CDockManager::dockAreasRemoved, this, &MainWindow::updateCentralWidget);
 }
 
 void MainWindow::initializeCentralDockingArea()
 {
-    QLabel* welcomeLabel = new QLabel();
+    _startPageDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("door-open", QSize(16, 16)));
+    _startPageDockWidget->setWidget(_startPageWidget, CDockWidget::ForceNoScrollArea);
 
-    // choose the icon for different-dpi screens
-    const int pixelRatio = devicePixelRatio();
-    QString iconName = ":/Images/AppBackground256";
-    if (pixelRatio > 1) iconName = ":/Images/AppBackground512";
-    if (pixelRatio > 2) iconName = ":/Images/AppBackground1024";
-    
-    welcomeLabel->setPixmap(QPixmap(iconName).scaled(256, 256));
-    welcomeLabel->setAlignment(Qt::AlignCenter);
+    _centralDockArea = _dockManager->addDockWidget(DockWidgetArea::CenterDockWidgetArea, _startPageDockWidget);
 
-    _centralDockWidget->setWidget(welcomeLabel);
-
-    _centralDockArea = _dockManager->setCentralWidget(_centralDockWidget);
-   
-    _centralDockWidget->setFeature(CDockWidget::DockWidgetClosable, true);
-    _centralDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _centralDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _centralDockWidget->setFeature(CDockWidget::NoTab, true);
-    _centralDockWidget->tabWidget()->setVisible(false);
+    _startPageDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _startPageDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
+    _startPageDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
 }
 
 void MainWindow::initializeSettingsDockingArea()
@@ -359,7 +311,7 @@ void MainWindow::initializeSettingsDockingArea()
         splitter->setSizes({ height * 1 / 3, height * 2 / 3 });
     }
 
-    _settingsDockArea->setMinimumWidth(500);
+    _settingsDockArea->setFixedWidth(500);
 }
 
 void MainWindow::initializeLoggingDockingArea()
@@ -374,17 +326,30 @@ void MainWindow::initializeLoggingDockingArea()
     _loggingDockArea->resize(QSize(0, 150));
 }
 
-void MainWindow::updateCentralWidgetVisibility()
+void MainWindow::updateCentralWidget()
 {
+#ifdef MAIN_WINDOW_VERBOSE
+    qDebug().noquote() << "Update central widget with" << getViewPluginDockWidgets().count() << "view plugins";
+#endif
+
     if (getViewPluginDockWidgets().count() == 0) {
+
+        // The only valid docking area is in the center when there is only one view plugin loaded
         _centralDockArea->setAllowedAreas(DockWidgetArea::CenterDockWidgetArea);
-        _centralDockArea->dockWidget(0)->toggleView(true);
+
+        _centralDockArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+        // Show the start page dock widget and set the mode
+        _startPageDockWidget->toggleView(true);
+        _startPageWidget->setMode(_core->requestAllDataSets().size() == 0 ? StartPageWidget::Mode::ProjectBar : StartPageWidget::Mode::LogoOnly);
     }
     else {
+
+        // Docking may occur anywhere
         _centralDockArea->setAllowedAreas(DockWidgetArea::AllDockAreas);
 
-        if (_centralDockArea->dockWidgets().size() == 1)
-            _centralDockArea->dockWidget(0)->toggleView(false);
+        // Hide the start page dock widget
+        _startPageDockWidget->toggleView(false);
     }
 }
 
@@ -406,6 +371,167 @@ QList<ads::CDockWidget*> MainWindow::getViewPluginDockWidgets(const bool& openOn
     }
 
     return viewPluginDockWidgets;
+}
+
+void MainWindow::setupFileMenu()
+{
+    // Set action icons
+    openProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+    saveProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    saveProjectAsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+    recentProjectsMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("clock"));
+    clearDatasetsAction->setIcon(Application::getIconFont("FontAwesome").getIcon("trash"));
+    importDataMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+    exitAction->setIcon(Application::getIconFont("FontAwesome").getIcon("sign-out-alt"));
+
+    // Set action tooltips
+    openProjectAction->setToolTip("Open project from disk");
+    saveProjectAction->setToolTip("Save project to disk");
+    saveProjectAsAction->setToolTip("Save project to disk in a chosen location");
+    recentProjectsMenu->setToolTip("Recently opened HDPS projects");
+    clearDatasetsAction->setToolTip("Reset the data model");
+    exitAction->setToolTip("Exit the HDPS application");
+
+    // Load project when action is triggered
+    connect(openProjectAction, &QAction::triggered, this, []() -> void {
+        Application::current()->loadProject();
+    });
+
+    // Save project without user interaction when action is triggered
+    connect(saveProjectAction, &QAction::triggered, [this](bool) {
+        Application::current()->saveProject(Application::current()->getCurrentProjectFilePath());
+    });
+
+    // Save project to picked location when action is triggered
+    connect(saveProjectAsAction, &QAction::triggered, [this](bool) {
+        Application::current()->saveProject();
+    });
+
+    // Reset the data model when the action is triggered
+    connect(clearDatasetsAction, &QAction::triggered, this, [this]() -> void {
+
+        // Get all loaded datasets (irrespective of the data type)
+        const auto loadedDatasets = _core->requestAllDataSets();
+
+        // The project needs to be cleared if there are one or more datasets loaded
+        if (!loadedDatasets.empty()) {
+
+            // Check in the settings if the user has to be prompted with a question whether to automatically remove all datasets
+            if (Application::current()->getSetting("ConfirmDataRemoval", true).toBool()) {
+
+                // Ask for confirmation dialog
+                DataRemoveAction::ConfirmDataRemoveDialog confirmDataRemoveDialog(nullptr, "Remove all datasets", loadedDatasets);
+
+                // Show the confirm data removal dialog
+                confirmDataRemoveDialog.exec();
+
+                // Remove dataset and children from the core if accepted
+                if (confirmDataRemoveDialog.result() == 1)
+                    Application::core()->removeAllDatasets();
+            }
+        }
+    });
+
+    // Close the main window then the exit action is triggered
+    QObject::connect(exitAction, SIGNAL(triggered()), this, SLOT(close()));
+
+    QObject::connect(findLogFileAction, &QAction::triggered, [this](bool) {
+        const auto filePath = Logger::GetFilePathName();
+
+        if (!hdps::util::ShowFileInFolder(filePath))
+        {
+            QMessageBox::information(this,
+                QObject::tr("Log file not found"),
+                QObject::tr("The log file is not found:\n%1").arg(filePath));
+        }
+    });
+
+    QObject::connect(logViewAction, &QAction::triggered, [this](const bool checked) {
+        if (checked) {
+            _loggingDockWidget->setWidget(new LogDockWidget(*this));
+            _loggingDockArea->show();
+        }
+        else {
+            delete _loggingDockWidget->takeWidget();
+            _loggingDockArea->hide();
+        }
+    });
+
+    // Update read-only status of various actions when the main file menu is opened
+    connect(fileMenu, &QMenu::aboutToShow, this, [this]() -> void {
+
+        // Establish whether there are any loaded datasets
+        const auto hasDatasets = _core->requestAllDataSets().size();
+
+        // Update read-only status
+        saveProjectAction->setEnabled(!Application::current()->getCurrentProjectFilePath().isEmpty());
+        saveProjectAsAction->setEnabled(hasDatasets);
+        clearDatasetsAction->setEnabled(hasDatasets);
+
+        // Populate the recent projects menu
+        populateRecentProjectsMenu();
+    });
+}
+
+void MainWindow::setupViewMenu()
+{
+    /*
+    // Set action icons
+    dataHierarchyViewerAction->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap"));
+    dataPropertiesViewerAction->setIcon(Application::getIconFont("FontAwesome").getIcon("edit"));
+
+    // Set action tooltips
+    dataHierarchyViewerAction->setToolTip("Show/hide the data hierarchy viewer");
+    dataPropertiesViewerAction->setToolTip("Show/hide the data properties viewer");
+
+    // Show/hide data hierarchy dock widget when the corresponding action is toggled
+    connect(dataHierarchyViewerAction, &QAction::toggled, this, [this](bool toggled) -> void {
+        _dataHierarchyDockWidget->dockAreaWidget()->setVisible(toggled);
+    });
+
+    // Show/hide data properties dock widget when the corresponding action is toggled
+    connect(dataPropertiesViewerAction, &QAction::toggled, this, [this](bool toggled) -> void {
+        _dataPropertiesDockWidget->dockAreaWidget()->setVisible(toggled);
+    });
+    */
+}
+
+void MainWindow::populateRecentProjectsMenu()
+{
+    // Get recent projects
+    const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
+
+    // Disable recent projects menu when there are no recent projects
+    recentProjectsMenu->setEnabled(!recentProjects.isEmpty());
+
+    // Remove existing actions
+    recentProjectsMenu->clear();
+
+    // Add action for each recent project
+    for (const auto& recentProject : recentProjects) {
+
+        // Get the recent project file path
+        const auto recentProjectFilePath = recentProject.toMap()["FilePath"].toString();
+
+        // Check if the recent project exists on disk
+        if (!QFileInfo(recentProjectFilePath).exists())
+            continue;
+
+        // Create recent project action
+        auto recentProjectAction = new QAction(recentProjectFilePath);
+
+        // Set action icon tooltip
+        recentProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+        recentProjectAction->setToolTip("Load " + recentProjectFilePath + "(last opened on " + recentProject.toMap()["DateTime"].toDate().toString() + ")");
+
+        // Load the recent project when triggered
+        connect(recentProjectAction, &QAction::triggered, this, [recentProjectFilePath]() -> void {
+            Application::current()->loadProject(recentProjectFilePath);
+        });
+
+        // Add recent project action to the menu
+        recentProjectsMenu->addAction(recentProjectAction);
+    }
 }
 
 }

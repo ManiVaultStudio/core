@@ -88,28 +88,36 @@ protected:
      */
     QModelIndexList getModelIndexList(QModelIndex parent = QModelIndex()) const;
 
-    /** Establishes whether one or more items may be expanded */
+protected: // Item expansion
+
+    /**
+     * Get whether one or more items may be expanded 
+     * @return Boolean indicating whether one or more items may be expanded
+     */
     bool mayExpandAll() const;
 
     /** Expand all items in the hierarchy */
     void expandAll();
 
-    /** Establishes whether one or more items may be collapse */
+    /**
+     * Get whether one or more items may be collapse
+     * @return Boolean indicating whether one or more items may be collapse
+     */
     bool mayCollapseAll() const;
 
     /** Collapse all items in the hierarchy */
     void collapseAll();
 
+    /** Called when the user expands an item in the tree view */
+    void expanded(const QModelIndex& index);
+
+    /** Called when the user collapses an item in the tree view */
+    void collapsed(const QModelIndex& index);
+
+protected:
+
     /** Updates the toolbar (enables/disables items) */
     void updateToolBar();
-
-signals:
-
-    /**
-     * Invoked when the selected dataset changed
-     * @param datasetId Globally unique identifier of the selected dataset
-     */
-    void selectedDatasetChanged(const QString& datasetId);
 
 private:
     DataHierarchyModel          _model;                     /** Model containing data to be displayed in the hierarchy */

@@ -1,17 +1,32 @@
 #include "Application.h"
+
+#include "CoreInterface.h"
 #include "util/FontAwesome.h"
+#include "util/Exception.h"
+#include "actions/WidgetAction.h"
 
 #include <stdexcept>
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QTemporaryDir>
+#include <QFileDialog>
+#include <QDir>
+#include <QDateTime>
+
+#define _VERBOSE
+
+using namespace hdps::gui;
+using namespace hdps::util;
 
 namespace hdps {
 
 hdps::Application::Application(int& argc, char** argv) :
     QApplication(argc, argv),
     _iconFonts(),
-    _settings()
+    _settings(),
+    _currentProjectFilePath(),
+    _serializationTemporaryDirectory()
 {
     _iconFonts.add(QSharedPointer<IconFont>(new FontAwesome(5, 14)));
 }
@@ -66,6 +81,50 @@ QVariant Application::getSetting(const QString& path, const QVariant& defaultVal
 void Application::setSetting(const QString& path, const QVariant& value)
 {
     _settings.setValue(path, value);
+}
+
+QString Application::getCurrentProjectFilePath() const
+{
+    return _currentProjectFilePath;
+}
+
+void Application::setCurrentProjectFilePath(const QString& currentProjectFilePath)
+{
+    if (currentProjectFilePath == _currentProjectFilePath)
+        return;
+
+    _currentProjectFilePath = currentProjectFilePath;
+
+    // Notify others that the current project file path changed
+    emit currentProjectFilePathChanged(_currentProjectFilePath);
+}
+
+void Application::addRecentProjectFilePath(const QString& recentProjectFilePath)
+{
+    // Get recent projects from settings
+    auto recentProjects = getSetting("Projects/Recent", QVariantList()).toList();
+
+    // Create recent project map
+    QVariantMap recentProject{
+        { "FilePath", recentProjectFilePath },
+        { "DateTime", QDateTime::currentDateTime() }
+    };
+
+    // Add to recent projects if not already in there
+    for (auto recentProject : recentProjects)
+        if (recentProject.toMap()["FilePath"].toString() == recentProjectFilePath)
+            recentProjects.removeOne(recentProject);
+
+    // Insert the entry at the beginning
+    recentProjects.insert(0, recentProject);
+
+    // Save settings
+    setSetting("Projects/Recent", recentProjects);
+}
+
+QString Application::getSerializationTemporaryDirectory()
+{
+    return current()->_serializationTemporaryDirectory;
 }
 
 }

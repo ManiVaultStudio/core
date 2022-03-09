@@ -89,7 +89,7 @@ protected:
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
-    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;;
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
 
 public:
 
@@ -124,11 +124,19 @@ public:
     /** Sets the default color */
     void setDefaultColor(const QColor& defaultColor);
 
-    /** Determines whether the current color can be reset to its default */
-    bool isResettable() const override;
+public: // Serialization
 
-    /** Reset the current color to the default color */
-    void reset() override;
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+     * Save widget action to variant map
+     * @return Variant map representation of the widget action
+     */
+    QVariantMap toVariantMap() const override;
 
 signals:
 
