@@ -108,7 +108,7 @@ public:
         setText(_guiName);
 
         // Notify others that the data GUI name changed
-        Application::core()->notifyDataGuiNameChanged(*this, previousGuiName);
+        Application::core()->notifyDatasetGuiNameChanged(*this, previousGuiName);
     }
 
     /** Returns true if this set represents the full data and false if it's a subset */

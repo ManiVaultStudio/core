@@ -90,5 +90,5 @@ void ClustersAction::updateClustersDataset()
     _clustersDataset->getClusters() = _clustersModel.getClusters();
 
     // Notify others that the clusters changed
-    Application::core()->notifyDataChanged(_clustersDataset);
+    Application::core()->notifyDatasetChanged(_clustersDataset);
 }

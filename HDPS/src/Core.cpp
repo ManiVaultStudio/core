@@ -107,7 +107,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
             _dataHierarchyManager->getItem(outputDataset->getGuid()).addIcon("analysis", analysisPlugin->getIcon());
 
             // Notify listeners that a dataset was added
-            notifyDataAdded(outputDataset);
+            notifyDatasetAdded(outputDataset);
 
             break;
         }
@@ -199,11 +199,11 @@ void Core::removeDataset(Dataset<DatasetImpl> dataset)
             const auto guid = datasetToRemove->getGuid();
             const auto type = datasetToRemove->getDataType();
 
-            notifyDataAboutToBeRemoved(datasetToRemove);
+            notifyDatasetAboutToBeRemoved(datasetToRemove);
             {
                 _dataManager->removeDataset(datasetToRemove);
             }
-            notifyDataRemoved(guid, type);
+            notifyDatasetRemoved(guid, type);
         }
     }
     catch (std::exception& e)
@@ -248,7 +248,7 @@ Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, cons
         _dataHierarchyManager->addItem(const_cast<Dataset<DatasetImpl>&>(datasetCopy), parent);
 
         // Notify others that data was added
-        notifyDataAdded(dataset);
+        notifyDatasetAdded(dataset);
     }
     catch (std::exception& e)
     {
@@ -261,7 +261,7 @@ Dataset<DatasetImpl> Core::copyDataset(const Dataset<DatasetImpl>& dataset, cons
     return Dataset<DatasetImpl>();
 }
 
-Dataset<DatasetImpl> Core::createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
+Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
 {
     // Get the data type of the source dataset
     const auto dataType = sourceDataset->getDataType();
@@ -314,7 +314,7 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
         _dataManager->addSet(*subset);
     
         // Notify listeners that data was added
-        notifyDataAdded(*subset);
+        notifyDatasetAdded(*subset);
 
         // Add the dataset to the hierarchy manager
         _dataHierarchyManager->addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
@@ -526,7 +526,7 @@ QIcon Core::getPluginIcon(const QString& pluginKind) const
     return _pluginManager->getPluginIcon(pluginKind);
 }
 
-void Core::notifyDataAdded(const Dataset<DatasetImpl>& dataset)
+void Core::notifyDatasetAdded(const Dataset<DatasetImpl>& dataset)
 {
     try {
 
@@ -550,7 +550,7 @@ void Core::notifyDataAdded(const Dataset<DatasetImpl>& dataset)
     }
 }
 
-void Core::notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset)
+void Core::notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset)
 {
     try {
 
@@ -574,7 +574,7 @@ void Core::notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset)
     }
 }
 
-void Core::notifyDataRemoved(const QString& datasetId, const DataType& dataType)
+void Core::notifyDatasetRemoved(const QString& datasetId, const DataType& dataType)
 {
     try {
 
@@ -598,7 +598,7 @@ void Core::notifyDataRemoved(const QString& datasetId, const DataType& dataType)
     }
 }
 
-void Core::notifyDataChanged(const Dataset<DatasetImpl>& dataset)
+void Core::notifyDatasetChanged(const Dataset<DatasetImpl>& dataset)
 {
     try {
     
@@ -622,7 +622,7 @@ void Core::notifyDataChanged(const Dataset<DatasetImpl>& dataset)
     }
 }
 
-void Core::notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset)
+void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset)
 {
     try {
 
@@ -646,7 +646,7 @@ void Core::notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset)
     }
 }
 
-void Core::notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName)
+void Core::notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName)
 {
     try {
 
@@ -670,67 +670,7 @@ void Core::notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const Q
     }
 }
 
-void Core::notifyDataChildAdded(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset)
-{
-    try {
-
-        // Except if parent dataset is not valid
-        if (!parentDataset.isValid())
-            throw std::runtime_error("Parent dataset is invalid");
-
-        // Except if child dataset is not valid
-        if (!childDataset.isValid())
-            throw std::runtime_error("Child dataset is invalid");
-
-        // Create data child added event
-        DataChildAddedEvent dataChildAddedEvent(parentDataset, childDataset);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataChildAddedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that a data child was added", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that a data child was added");
-    }
-}
-
-void Core::notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const QString& childDatasetGuid)
-{
-    try {
-
-        // Except if parent dataset is not valid
-        if (!parentDataset.isValid())
-            throw std::runtime_error("Parent dataset is invalid");
-
-        // Create data child removed event
-        DataChildRemovedEvent dataChildRemovedEvent(parentDataset, childDatasetGuid);
-
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
-
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataChildRemovedEvent);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to notify that a data child was removed", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to notify that a data child was removed");
-    }
-}
-
-void Core::notifyDataLocked(const Dataset<DatasetImpl>& dataset)
+void Core::notifyDatasetLocked(const Dataset<DatasetImpl>& dataset)
 {
     try {
 
@@ -758,7 +698,7 @@ void Core::notifyDataLocked(const Dataset<DatasetImpl>& dataset)
     }
 }
 
-void Core::notifyDataUnlocked(const Dataset<DatasetImpl>& dataset)
+void Core::notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset)
 {
     try {
 

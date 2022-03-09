@@ -231,16 +231,6 @@ DataType DataHierarchyItem::getDataType() const
     return _dataset->getDataType();
 }
 
-void DataHierarchyItem::notifyDataChanged()
-{
-    // Do not notify if we don't have a valid dataset
-    if (!_dataset.isValid())
-        return;
-
-    // Notify others that the dataset data changed
-    Application::core()->notifyDataChanged(_dataset);
-}
-
 void DataHierarchyItem::analyzeDataset(const QString& pluginName)
 {
     Q_ASSERT(!pluginName.isEmpty());
@@ -336,9 +326,9 @@ void DataHierarchyItem::setLocked(const bool& locked)
 
     // Notify others that the data got locked/unlocked through the core
     if (_locked)
-        Application::core()->notifyDataLocked(_dataset);
+        Application::core()->notifyDatasetLocked(_dataset);
     else
-        Application::core()->notifyDataUnlocked(_dataset);
+        Application::core()->notifyDatasetUnlocked(_dataset);
 
     // Notify others that the data got locked/unlocked
     emit lockedChanged(_locked);

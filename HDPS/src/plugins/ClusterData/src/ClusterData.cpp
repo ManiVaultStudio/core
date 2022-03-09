@@ -246,7 +246,7 @@ void Clusters::fromVariantMap(const QVariantMap& variantMap)
 
     getRawData<ClusterData>().fromVariantMap(variantMap);
 
-    _core->notifyDataChanged(this);
+    _core->notifyDatasetChanged(this);
 }
 
 QVariantMap Clusters::toVariantMap() const
@@ -269,7 +269,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     getSelection<Clusters>()->indices = indices;
 
     // Notify others that the cluster selection has changed
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 
     // Get reference to input dataset
     auto points                 = getDataHierarchyItem().getParent().getDataset<Points>();
@@ -300,7 +300,7 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
         pointSelectionIndex = globalIndices[pointSelectionIndex];
 
     // Notify others that the parent points selection has changed
-    _core->notifyDataSelectionChanged(points);
+    _core->notifyDatasetSelectionChanged(points);
 }
 
 QStringList Clusters::getSelectionNames() const
@@ -368,7 +368,7 @@ void Clusters::selectAll()
     std::iota(selectionIndices.begin(), selectionIndices.end(), 0);
 
     // Notify others that the selection changed
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 void Clusters::selectNone()
@@ -377,7 +377,7 @@ void Clusters::selectNone()
     getSelectionIndices().clear();
 
     // Notify others that the selection changed
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 void Clusters::selectInvert()
@@ -402,7 +402,7 @@ void Clusters::selectInvert()
     }
 
     // Notify others that the selection changed
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 QIcon ClusterDataFactory::getIcon() const

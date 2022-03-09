@@ -128,7 +128,7 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
 {
     _groupIndex = groupIndex;
 
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)

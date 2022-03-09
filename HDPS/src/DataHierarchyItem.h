@@ -178,9 +178,6 @@ public: // Miscellaneous
     /** Get the dataset type */
     DataType getDataType() const;
 
-    /** Let's subscribers know that the data changed (through the core) */
-    void notifyDataChanged();
-
     /**
      * Analyze the dataset
      * @param pluginName Name of the analysis plugin

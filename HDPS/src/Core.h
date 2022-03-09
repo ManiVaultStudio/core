@@ -106,7 +106,7 @@ public: // Data access
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (will attach to root in hierarchy if not valid)
      * @return Smart pointer to the created derived dataset
      */
-    Dataset<DatasetImpl> createDerivedData(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
+    Dataset<DatasetImpl> createDerivedDataset(const QString& guiName, const Dataset<DatasetImpl>& sourceDataset, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
 
     /**
      * Creates a copy of the given selection set, adds the new set to the data manager and notifies all data consumers of the new set
@@ -244,65 +244,51 @@ public: // Events & notifications
      * Notify listeners that a new dataset has been added to the core
      * @param dataset Smart pointer to the dataset that was added
      */
-    void notifyDataAdded(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetAdded(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify listeners that a dataset is about to be removed
      * @param dataset Smart pointer to the dataset which is about to be removed
      */
-    void notifyDataAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetAboutToBeRemoved(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify listeners that a dataset is removed
      * @param datasetGuid GUID of the dataset that was removed
      * @param dataType Type of the data
      */
-    void notifyDataRemoved(const QString& datasetGuid, const DataType& dataType) override;
+    void notifyDatasetRemoved(const QString& datasetGuid, const DataType& dataType) override;
 
     /**
      * Notify listeners that a dataset has changed
      * @param dataset Smart pointer to the dataset of which the data changed
      */
-    void notifyDataChanged(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetChanged(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify listeners that data selection has changed
      * @param dataset Smart pointer to the dataset of which the selection changed
      */
-    void notifyDataSelectionChanged(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify all listeners that a dataset GUI name has changed
      * @param dataset Smart pointer to the dataset of which the GUI name changed
      * @param previousGuiName Previous dataset name
      */
-    void notifyDataGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) override;
-
-    /**
-     * Notify all listeners that a dataset child was added
-     * @param parentDataset Smart pointer to the parent dataset
-     * @param childDataset Smart pointer to the child dataset that was added
-     */
-    void notifyDataChildAdded(const Dataset<DatasetImpl>& parentDataset, const Dataset<DatasetImpl>& childDataset) override;
-
-    /**
-     * Notify all listeners that a dataset child was removed
-     * @param parentDataset Smart pointer to the parent dataset
-     * @param childDatasetGuid GUID of the child dataset that was removed
-     */
-    void notifyDataChildRemoved(const Dataset<DatasetImpl>& parentDataset, const QString& childDatasetGuid) override;
+    void notifyDatasetGuiNameChanged(const Dataset<DatasetImpl>& dataset, const QString& previousGuiName) override;
 
     /**
      * Notify all listeners that a dataset is locked
      * @param dataset Smart pointer to the dataset
      */
-    void notifyDataLocked(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetLocked(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Notify all listeners that a dataset is unlocked
      * @param dataset Smart pointer to the dataset
      */
-    void notifyDataUnlocked(const Dataset<DatasetImpl>& dataset) override;
+    void notifyDatasetUnlocked(const Dataset<DatasetImpl>& dataset) override;
 
     /**
      * Register an event listener

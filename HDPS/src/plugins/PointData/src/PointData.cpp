@@ -333,7 +333,7 @@ void Points::init()
         targetIndices = sourceIndices;
 
         // Notify others that the cluster selection has changed
-        _core->notifyDataSelectionChanged(this);
+        _core->notifyDatasetSelectionChanged(this);
     });
 }
 
@@ -609,7 +609,7 @@ void Points::selectAll()
             selectionIndices.push_back(index);
     }
 
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 void Points::selectNone()
@@ -618,7 +618,7 @@ void Points::selectNone()
 
     selectionIndices.clear();
 
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 void Points::selectInvert()
@@ -637,7 +637,7 @@ void Points::selectInvert()
             selectionIndices.push_back(i);
     }
 
-    _core->notifyDataSelectionChanged(this);
+    _core->notifyDatasetSelectionChanged(this);
 }
 
 void Points::addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
@@ -699,7 +699,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     setDimensionNames(dimensionNames);
 
-    _core->notifyDataChanged(this);
+    _core->notifyDatasetChanged(this);
 }
 
 QVariantMap Points::toVariantMap() const

@@ -61,10 +61,6 @@ void DataHierarchyManager::addItem(Dataset<DatasetImpl> dataset, Dataset<Dataset
         // Notify others that an item is added
         emit itemAdded(*newDataHierarchyItem);
 
-        // Notify others that a child is added
-        if (parentDataset.isValid())
-            Application::core()->notifyDataChildAdded(parentDataset, dataset);
-
         // Remove the data hierarchy item when the corresponding dataset is about to be removed
         connect(&newDataHierarchyItem->getDatasetReference(), &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, newDataHierarchyItem]() {
             if (newDataHierarchyItem->getDatasetReference().isValid())
