@@ -77,7 +77,10 @@ void ClustersAction::invalidateClusters()
 
 void ClustersAction::updateClustersModel()
 {
-    _clustersModel.setClusters(*getClusters());
+    auto clusters = getClusters();
+
+    if (clusters)
+        _clustersModel.setClusters(*clusters);
 }
 
 void ClustersAction::updateClustersDataset()
