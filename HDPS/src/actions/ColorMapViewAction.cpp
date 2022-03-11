@@ -26,7 +26,7 @@ ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMap
 
     auto colorMapPreviewLabel = new QLabel();
 
-    colorMapPreviewLabel->setFixedWidth(100);
+    colorMapPreviewLabel->setFixedWidth(200);
     colorMapPreviewLabel->setFrameShape(QFrame::Panel);
     colorMapPreviewLabel->setFrameShadow(QFrame::Sunken);
     colorMapPreviewLabel->setScaledContents(true);
