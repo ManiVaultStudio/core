@@ -130,7 +130,7 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
         taskProgressDialog.setCurrentTask("Import data model");
 
         // Input JSON file info
-        QFileInfo inputJsonFileInfo(temporaryDirectoryPath, "analysis.json");
+        QFileInfo inputJsonFileInfo(temporaryDirectoryPath, "project.json");
 
         // Load JSON file from temporary serialization directory
         _core->fromJsonFile(inputJsonFileInfo.absoluteFilePath());
@@ -295,7 +295,7 @@ void HdpsApplication::saveProject(QString projectFilePath /*= ""*/)
         });
 
         // Output analysis JSON file info
-        QFileInfo jsonFileInfo(temporaryDirectoryPath, "analysis.json");
+        QFileInfo jsonFileInfo(temporaryDirectoryPath, "project.json");
 
         // Set temporary serialization directory so that binaries are saved in the correct location
         _serializationTemporaryDirectory = temporaryDirectoryPath;
