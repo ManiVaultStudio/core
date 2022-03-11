@@ -727,6 +727,7 @@ add_subdirectory(src/plugins/ImageData)
 # Qt Advanced docking system
 set(VERSION_SHORT 3.7.0)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")
+add_subdirectory(external)
 add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY
@@ -746,14 +747,13 @@ else ()
 endif()
 add_subdirectory(external/quazip)
 
-
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
-        --install ${CMAKE_BINARY_DIR}/HDPS/external/advanced_docking
+        --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     COMMAND "${CMAKE_COMMAND}" 
-        --install ${CMAKE_BINARY_DIR}/HDPS/external/quazip
+        --install ${CMAKE_CURRENT_BINARY_DIR}/external/quazip
         --config $<CONFIGURATION> 
         --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
 )
