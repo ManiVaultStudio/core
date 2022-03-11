@@ -26,7 +26,7 @@ ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMap
 
     auto colorMapPreviewLabel = new QLabel();
 
-    colorMapPreviewLabel->setFixedWidth(100);
+    colorMapPreviewLabel->setFixedWidth(200);
     colorMapPreviewLabel->setFrameShape(QFrame::Panel);
     colorMapPreviewLabel->setFrameShadow(QFrame::Sunken);
     colorMapPreviewLabel->setScaledContents(true);
@@ -42,7 +42,7 @@ ColorMapViewAction::Widget::Widget(QWidget* parent, ColorMapViewAction* colorMap
         const auto colorMapImage        = colorMapViewAction->getColorMapAction().getColorMapImage();
         const auto scaledColorMapImage  = colorMapImage.scaled(colorMapPreviewLabel->size(), Qt::IgnoreAspectRatio);
 
-        colorMapPreviewLabel->setPixmap(QPixmap::fromImage(scaledColorMapImage));
+        colorMapPreviewLabel->setPixmap(QPixmap::fromImage(scaledColorMapImage.mirrored(false, true)));
     };
 
     connect(&colorMapViewAction->getColorMapAction(), &ColorMapAction::imageChanged, this, updateColorMapImagePreview);

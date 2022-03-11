@@ -94,13 +94,21 @@ public: // Getters/setters
     /** Trigger signals */
     void setChanged();
 
-    /** Returns whether the selection process is currently active */
+    /**
+     * Get whether the selection process is cBurrently active
+     * @return Boolean indicating whether the selection process is currently active
+     */
     bool isActive() const {
         return _active;
     }
 
-    /** Aborts the selection process */
-    void abort();
+    /**
+     * Get whether the selection process is aborted
+     * @return Boolean indicating whether the selection process is aborted
+     */
+    bool isAborted() const {
+        return _aborted;
+    }
 
     /** Get the pixmap overlay that contains the selection tool visualization */
     QPixmap& getShapePixmap() {
@@ -174,6 +182,7 @@ protected:
     QPixmap                     _shapePixmap;               /** Pixmap for the selection tool shape */
     QPixmap                     _areaPixmap;                /** Pixmap for the selection area */
     bool                        _preventContextMenu;        /** Whether to prevent a context menu */
+    bool                        _aborted;                   /** Whether the selection process was aborted */
 
 protected:
     QColor      _mainColor;                 /** Main drawing color */
@@ -182,12 +191,15 @@ protected:
     QPen        _penLineForeGround;         /** Foreground pen */
     QPen        _penLineBackGround;         /** Background pen */
     QPen        _penControlPoint;           /** Control point pen */
+    QPen        _penClosingPoint;           /** Closing point pen (e.g. for finishing polygon selection) */
 
 public:
-    static constexpr float BRUSH_RADIUS_MIN       = 10.0f;      /** Minimum radius */
-    static constexpr float BRUSH_RADIUS_MAX       = 500.0f;     /** Maximum radius */
-    static constexpr float BRUSH_RADIUS_DEFAULT   = 50.0f;      /** Default radius */
-    static constexpr float BRUSH_RADIUS_DELTA     = 10.0f;      /** Radius increment */
+    static constexpr float BRUSH_RADIUS_MIN     = 10.0f;                    /** Minimum radius */
+    static constexpr float BRUSH_RADIUS_MAX     = 500.0f;                   /** Maximum radius */
+    static constexpr float BRUSH_RADIUS_DEFAULT = 50.0f;                    /** Default radius */
+    static constexpr float BRUSH_RADIUS_DELTA   = 10.0f;                    /** Radius increment */
+    static constexpr float CP_RADIUS_LINE       = 8.0f;                     /** Radius of line control points */
+    static constexpr float CP_RADIUS_CLOSING    = 2.5f * CP_RADIUS_LINE;    /** Radius of the closing control point (e.g. for finishing polygon selection) */
 };
 
 }

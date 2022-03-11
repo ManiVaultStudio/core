@@ -12,6 +12,15 @@ namespace hdps {
 
 namespace util {
 
+#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
+    constexpr float PixelSelectionTool::BRUSH_RADIUS_MIN;
+    constexpr float PixelSelectionTool::BRUSH_RADIUS_MAX;
+    constexpr float PixelSelectionTool::BRUSH_RADIUS_DEFAULT;
+    constexpr float PixelSelectionTool::BRUSH_RADIUS_DELTA;
+    constexpr float PixelSelectionTool::CP_RADIUS_LINE;
+    constexpr float PixelSelectionTool::CP_RADIUS_CLOSING;
+#endif
+
 PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enabled /*= true*/) :
     QObject(targetWidget),
     _enabled(enabled),
@@ -31,7 +40,8 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _areaBrush(),
     _penLineForeGround(),
     _penLineBackGround(),
-    _penControlPoint()
+    _penControlPoint(),
+    _penClosingPoint()
 {
     setMainColor(QColor(Qt::black));
 
@@ -69,8 +79,8 @@ void PixelSelectionTool::setType(const PixelSelectionType& type)
     _type = type;
 
     emit typeChanged(_type);
-    
-    abort();
+
+    endSelection();
     paint();
 }
 
@@ -135,7 +145,8 @@ void PixelSelectionTool::setMainColor(const QColor& mainColor)
     _areaBrush          = QBrush(_fillColor);
     _penLineForeGround  = QPen(_mainColor, 1.7f, Qt::SolidLine);
     _penLineBackGround  = QPen(QColor(_mainColor.red(), _mainColor.green(), _mainColor.blue(), 140), 1.7f, Qt::DotLine);
-    _penControlPoint    = QPen(_mainColor, 7.0f, Qt::SolidLine, Qt::RoundCap);
+    _penControlPoint    = QPen(_mainColor, CP_RADIUS_LINE, Qt::SolidLine, Qt::RoundCap);
+    _penClosingPoint    = QPen(QColor(_mainColor.red(), _mainColor.green(), _mainColor.blue(), 100), CP_RADIUS_CLOSING, Qt::SolidLine, Qt::RoundCap);
 }
 
 void PixelSelectionTool::setChanged()
@@ -144,11 +155,6 @@ void PixelSelectionTool::setChanged()
     emit modifierChanged(_modifier);
     emit notifyDuringSelectionChanged(_notifyDuringSelection);
     emit brushRadiusChanged(_brushRadius);
-}
-
-void PixelSelectionTool::abort()
-{
-    endSelection();
 }
 
 void PixelSelectionTool::update()
@@ -181,13 +187,21 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
         {
             // Get key that was pressed
             auto keyEvent = static_cast<QKeyEvent*>(event);
-            
+
             // Do not handle repeating keys
             if (!keyEvent->isAutoRepeat()) {
-                // Start navigating when the space key is pressed
-                if (keyEvent->key() == Qt::Key_Escape && _type == PixelSelectionType::Polygon) {
-                    endSelection();
-                    shouldPaint = true;
+
+                // Abort selection when the escape key is pressed
+                if (keyEvent->key() == Qt::Key_Escape) {
+
+                    // In polygon or lasso mode
+                    if (_type == PixelSelectionType::Polygon || _type == PixelSelectionType::Lasso) {
+                        _aborted = true;
+
+                        paint();
+                        endSelection();
+                        paint();
+                    }
                 }
             }
 
@@ -208,7 +222,46 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
 
             break;
         }
-        
+
+        case QEvent::MouseButtonDblClick:
+        {
+            auto mouseEvent = static_cast<QMouseEvent*>(event);
+
+            switch (mouseEvent->button())
+            {
+                case Qt::LeftButton:
+                {
+                    switch (_type)
+                    {
+                        case PixelSelectionType::Rectangle:
+                        case PixelSelectionType::Brush:
+                        case PixelSelectionType::Lasso:
+                        case PixelSelectionType::Sample:
+                            break;
+
+                        case PixelSelectionType::Polygon:
+                        {
+                            endSelection();
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+
+                    break;
+                }
+
+                case Qt::RightButton:
+                    break;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
         case QEvent::MouseButtonPress:
         {
             auto mouseEvent = static_cast<QMouseEvent*>(event);
@@ -258,6 +311,9 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
                         default:
                             break;
                     }
+
+                    if (_mousePositions.count() > 3 && (_mousePositions.last() - _mousePositions.first()).manhattanLength() < CP_RADIUS_CLOSING)
+                        endSelection();
 
                     break;
                 }
@@ -593,6 +649,11 @@ void PixelSelectionTool::paint()
 
             textRectangle = QRectF(textCenter - QPointF(size, size), textCenter + QPointF(size, size));
 
+            if (_mousePositions.count() > 3 && (_mousePositions.last() - _mousePositions.first()).manhattanLength() < CP_RADIUS_CLOSING) {
+                shapePainter.setPen(_penClosingPoint);
+                shapePainter.drawPoints(QVector<QPoint>({ _mousePositions.first() }));
+            }
+
             break;
         }
 
@@ -656,10 +717,10 @@ void PixelSelectionTool::paint()
         default:
             break;
     }
-    
+
     shapePainter.setPen(_penControlPoint);
     shapePainter.drawPoints(controlPoints);
-    
+
     switch (_type)
     {
         case PixelSelectionType::Rectangle:
@@ -705,7 +766,8 @@ void PixelSelectionTool::paint()
 
 void PixelSelectionTool::startSelection()
 {
-    _active = true;
+    _active     = true;
+    _aborted    = false;
 
     emit started();
 }
@@ -715,15 +777,10 @@ void PixelSelectionTool::endSelection()
     emit ended();
 
     _mousePositions.clear();
-    _active = false;
-}
 
-#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
-constexpr float PixelSelectionTool::BRUSH_RADIUS_MIN;
-constexpr float PixelSelectionTool::BRUSH_RADIUS_MAX;
-constexpr float PixelSelectionTool::BRUSH_RADIUS_DEFAULT;
-constexpr float PixelSelectionTool::BRUSH_RADIUS_DELTA;
-#endif
+    _active     = false;
+    _aborted    = false;
+}
 
 }
 }
