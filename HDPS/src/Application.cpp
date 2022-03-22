@@ -127,4 +127,9 @@ QString Application::getSerializationTemporaryDirectory()
     return current()->_serializationTemporaryDirectory;
 }
 
+bool Application::isSerializationAborted()
+{
+    return current()->_serializationAborted;
+}
+
 }

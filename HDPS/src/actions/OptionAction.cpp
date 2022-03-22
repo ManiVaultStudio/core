@@ -6,6 +6,7 @@
 #include <QComboBox>
 #include <QListView>
 #include <QPushButton>
+#include <QStylePainter>
 
 namespace hdps {
 
@@ -244,7 +245,8 @@ bool OptionAction::hasSelection() const
 }
 
 OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction) :
-    QComboBox(parent)
+    QComboBox(parent),
+    _optionAction(optionAction)
 {
     setObjectName("ComboBox");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -254,9 +256,17 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
     };
 
+    // Update the read-only status, depending on the number of options
+    const auto updateReadOnly = [this, optionAction]() -> void {
+        if (optionAction->getCurrentIndex() < 0)
+            setEnabled(optionAction->getNumberOfOptions() >= 1);
+        else
+            setEnabled(optionAction->getNumberOfOptions() >= 2);
+    };
+
     // Assign option action model to combobox
-    const auto updateComboBoxModel = [this, optionAction, updateToolTip]() -> void {
-        
+    const auto updateComboBoxModel = [this, optionAction, updateToolTip, updateReadOnly]() -> void {
+
         // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
 
@@ -267,10 +277,8 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         // Update model and enable/disable based on the row count
         setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
 
-        // Enabled/disable the combobox depending on the number of items
-        connect(model(), &QAbstractItemModel::layoutChanged, this, [this, optionAction](const QList<QPersistentModelIndex>& parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint) {
-            setEnabled(optionAction->getNumberOfOptions() >= 2);
-        });
+        // Enable/disable the combobox depending on the number of options
+        connect(model(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
         updateToolTip();
     };
@@ -299,26 +307,48 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 
         updateComboBoxSelection();
         updateToolTip();
+
+        update();
+    });
+
+    // Update the combobox placeholder string when the action placeholder string changes
+    connect(optionAction, &OptionAction::placeholderStringChanged, this, [this]() -> void {
+        update();
     });
 
     // Update the option action when the combobox selection changes
-    connect(this, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, optionAction](const int& currentIndex) {
+    connect(this, qOverload<int>(&QComboBox::activated), this, [this, optionAction](const int& currentIndex) {
         optionAction->setCurrentIndex(currentIndex);
     });
 
-    // Update the place holder text in the combobox
-    const auto updatePlaceHolderText = [this, optionAction]() -> void {
-        setPlaceholderText(optionAction->getPlaceholderString());
-    };
-
-    // Update the combobox placeholder string when the action placeholder string changes
-    connect(optionAction, &OptionAction::placeholderStringChanged, this, updatePlaceHolderText);
-
     // Perform initial updates
+    updateReadOnly();
     updateComboBoxModel();
     updateComboBoxSelection();
     updateToolTip();
-    updatePlaceHolderText();
+}
+
+void OptionAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
+{
+    auto painter = QSharedPointer<QStylePainter>::create(this);
+
+    painter->setPen(palette().color(QPalette::Text));
+
+    // Draw the combobox frame, focus rectangle and selected etc.
+    auto styleOptionComboBox = QStyleOptionComboBox();
+
+    initStyleOption(&styleOptionComboBox);
+
+    painter->drawComplexControl(QStyle::CC_ComboBox, styleOptionComboBox);
+
+    if (_optionAction->getCurrentIndex() < 0) {
+        styleOptionComboBox.palette.setBrush(QPalette::ButtonText, styleOptionComboBox.palette.brush(QPalette::ButtonText).color().lighter());
+
+        if (!_optionAction->getPlaceholderString().isEmpty())
+            styleOptionComboBox.currentText = _optionAction->getPlaceholderString();
+    }
+
+    painter->drawControl(QStyle::CE_ComboBoxLabel, styleOptionComboBox);
 }
 
 OptionAction::LineEditWidget::LineEditWidget(QWidget* parent, OptionAction* optionAction) :
@@ -448,8 +478,6 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
 
     return widget;
 }
-
-
 
 }
 }

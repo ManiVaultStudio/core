@@ -16,7 +16,7 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
     setIcon(Application::getIconFont("FontAwesome").getIcon("database"));
     setToolTip("Pick a dataset");
     setCustomModel(&_datasetsModel);
-    setPlaceHolderString("Pick a dataset");
+    setPlaceHolderString("--choose dataset--");
 
     // Inform others that a dataset is picked when the dataset selection action current index changes
     connect(this, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
@@ -86,6 +86,9 @@ int DatasetPickerAction::DatasetsModel::columnCount(const QModelIndex& parent /*
 
 QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int role) const
 {
+    if (!index.isValid())
+        return QVariant();
+
     const auto column   = index.column();
     const auto dataset  = _datasets.at(index.row());
 

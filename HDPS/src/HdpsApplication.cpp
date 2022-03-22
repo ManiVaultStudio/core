@@ -75,10 +75,13 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
         // Set the serialization temporary directory so that we can find the binaries
         _serializationTemporaryDirectory = temporaryDirectoryPath;
 
+        // Reset serialization aborted state
+        _serializationAborted = false;
+
         // Prompt the user for a file path if the current file path is empty
         if (projectFilePath.isEmpty()) {
 
-            // Create a file dialog for opening an HDPS analysis file
+            // Create a file dialog for opening an HDPS project file
             QFileDialog fileDialog;
 
             // Configure file dialog
@@ -114,6 +117,13 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
         // Create dialog for reporting load progress
         TaskProgressDialog taskProgressDialog(nullptr, tasks, "Loading HDPS project from " + projectFilePath, getIconFont("FontAwesome").getIcon("folder-open"));
 
+        // Throw an exception when project open is canceled
+        connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
+            _serializationAborted = true;
+
+            throw std::runtime_error("Canceled before project was loaded");
+        });
+
         // Report which item in the hierarchy is being imported
         connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemLoading, this, [&taskProgressDialog](DataHierarchyItem& loadingItem) {
             //taskProgressDialog.setCurrentTask("Importing dataset: " + loadingItem.getFullPathName());
@@ -148,10 +158,14 @@ void HdpsApplication::loadProject(QString projectFilePath /*= ""*/)
     }
     catch (std::exception& e)
     {
+        _core->removeAllDatasets();
+
         exceptionMessageBox("Unable to load HDPS project", e);
     }
     catch (...)
     {
+        _core->removeAllDatasets();
+
         exceptionMessageBox("Unable to load HDPS project");
     }
 }
@@ -284,21 +298,26 @@ void HdpsApplication::saveProject(QString projectFilePath /*= ""*/)
         tasks << "Export data model" << "Temporary task";
 
         // Create dialog for reporting save progress
-        TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving analysis to " + projectFilePath, getIconFont("FontAwesome").getIcon("save"));
+        TaskProgressDialog taskProgressDialog(nullptr, tasks, "Saving HDPS project to " + projectFilePath, getIconFont("FontAwesome").getIcon("save"));
 
         // Set current task to data model export
         taskProgressDialog.setCurrentTask("Export data model");
 
-        // Throw an exception when save is canceled
-        connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, []() -> void {
+        // Throw an exception when project save is canceled
+        connect(&taskProgressDialog, &TaskProgressDialog::canceled, this, [this]() -> void {
+            _serializationAborted = true;
+
             throw std::runtime_error("Canceled before project was saved");
         });
 
-        // Output analysis JSON file info
+        // Output project JSON file info
         QFileInfo jsonFileInfo(temporaryDirectoryPath, "project.json");
 
         // Set temporary serialization directory so that binaries are saved in the correct location
         _serializationTemporaryDirectory = temporaryDirectoryPath;
+
+        // Reset serialization aborted state
+        _serializationAborted = false;
 
         // Report which item in the hierarchy is being exported
         connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemSaving, this, [&taskProgressDialog](DataHierarchyItem& savingItem) {

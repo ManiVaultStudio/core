@@ -105,13 +105,19 @@ public: // Project IO
      */
     virtual void addRecentProjectFilePath(const QString& recentProjectFilePath) final;
 
-public: // Serialization temporary directory
+public: // Serialization
 
     /**
      * Get serialization temporary directory
      * @return Serialization temporary directory
      */
     static QString getSerializationTemporaryDirectory();
+
+    /**
+     * Get whether (de)serialization was aborted
+     * @return Boolean indicating whether (de)serialization was aborted
+     */
+    static bool isSerializationAborted();
 
 signals:
 
@@ -126,6 +132,7 @@ protected:
     QSettings           _settings;                              /** Settings */
     QString             _currentProjectFilePath;                /** File path of the current project */
     QString             _serializationTemporaryDirectory;       /** Temporary directory for serialization */
+    bool                _serializationAborted;                  /** Whether (de)serialization was aborted */
 };
 
 }

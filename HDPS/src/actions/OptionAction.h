@@ -6,6 +6,8 @@
 #include <QLineEdit>
 #include <QCompleter>
 #include <QStringListModel>
+#include <QAbstractProxyModel>
+#include <QItemSelection>
 
 class QWidget;
 class QPushButton;
@@ -51,6 +53,15 @@ public: // Widgets
          */
         ComboBoxWidget(QWidget* parent, OptionAction* optionAction);
 
+        /**
+         * Paint event (overridden to show placeholder text)
+         * @param paintEvent Pointer to paint event
+         */
+        void paintEvent(QPaintEvent* paintEvent) override;
+
+    protected:
+        OptionAction*   _optionAction;  /** Pointer to owning option action */
+
         friend class OptionAction;
     };
 
@@ -66,7 +77,7 @@ public: // Widgets
         LineEditWidget(QWidget* parent, OptionAction* optionAction);
 
     protected:
-        OptionAction*   _optionAction;  /** Pointer to option action */
+        OptionAction*   _optionAction;  /** Pointer to owning option action */
         QCompleter      _completer;     /** Completer for searching and filtering */
 
         friend class OptionAction;

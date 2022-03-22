@@ -210,6 +210,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
 
     const std::function<void(const QVariantMap&, Dataset<DatasetImpl>)> loadDataHierarchyItem = [&loadDataHierarchyItem, loadDataset](const QVariantMap& variantMap, Dataset<DatasetImpl> parent) -> void {
 
+        if (Application::isSerializationAborted())
+            return;
+
         // Sorted data hierarchy items (according to their sort index)
         QVector<QVariantMap> sortedItems;
 

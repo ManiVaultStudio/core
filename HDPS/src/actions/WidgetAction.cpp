@@ -204,6 +204,10 @@ QJsonDocument WidgetAction::toJsonDocument() const
 
 void WidgetAction::fromJsonFile(const QString& filePath /*= ""*/)
 {
+    // Exit loading prematurely if the serialization process was aborted
+    if (Application::isSerializationAborted())
+        return;
+
     try
     {
         // Except if the supplied file path is not found
@@ -244,6 +248,10 @@ void WidgetAction::fromJsonFile(const QString& filePath /*= ""*/)
 
 void WidgetAction::toJsonFile(const QString& filePath /*= ""*/)
 {
+    // Exit saving prematurely if the serialization process was aborted
+    if (Application::isSerializationAborted())
+        return;
+
     try
     {
         // Create the JSON file
