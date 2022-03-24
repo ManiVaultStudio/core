@@ -777,3 +777,21 @@ if(APPLE)
             --prefix ${INSTALL_DIR}/$<CONFIGURATION>/
     )
 endif()
+
+# Automatically set the debug environment (command + working directory) for MSVC in debug and release mode
+if(MSVC)	
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}.vcxproj.user"
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>     \
+    <Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
+    <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\">
+        <LocalDebuggerCommand>${INSTALL_DIR}/debug/HDPS.exe</LocalDebuggerCommand>
+        <LocalDebuggerWorkingDirectory>${INSTALL_DIR}/debug/</LocalDebuggerWorkingDirectory>
+        <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    </PropertyGroup>
+    <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\">
+        <LocalDebuggerCommand>${INSTALL_DIR}/release/HDPS.exe</LocalDebuggerCommand>
+        <LocalDebuggerWorkingDirectory>${INSTALL_DIR}/release/</LocalDebuggerWorkingDirectory>
+        <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    </PropertyGroup>
+    </Project>")
+endif(MSVC)
