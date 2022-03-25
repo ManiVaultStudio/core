@@ -95,6 +95,37 @@ public:
      */
     void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
+public: // Action publishing
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    virtual bool mayPublish() const;
+
+    /**
+     * Get whether the action is public (visible to other actions)
+     * @return Boolean indicating whether the action is public (visible to other actions)
+     */
+    bool isPublic() const;
+
+    /**
+     * Publish this action so that other actions can connect to it
+     * @param text Name of the published widget action
+     */
+    void publish(const QString& name);
+
+    /** Un-publish this action and disconnect other actions */
+    void unPublish();
+
+protected:  // Action publishing
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
+
 public: // Settings
 
     /**
@@ -217,9 +248,12 @@ signals:
     void isSerializingChanged(bool isSerializing);
 
 protected:
-    std::int32_t    _defaultWidgetFlags;    /** Default widget flags */
-    std::int32_t    _sortIndex;             /** Sort index (used in the group action to sort actions) */
-    bool            _isSerializing;         /** Whether the widget action is currently serializing */
+    std::int32_t            _defaultWidgetFlags;    /** Default widget flags */
+    std::int32_t            _sortIndex;             /** Sort index (used in the group action to sort actions) */
+    bool                    _isSerializing;         /** Whether the widget action is currently serializing */
+    bool                    _isPublished;           /** Whether this action is published or not (whether other actions can connect to it) */
+    QVector<WidgetAction*>  _subscribedActions;     /** Pointers to widget action that are subscribed to this action (provided this action is public, the first one is the publisher) */
+    WidgetAction*           _publishedAction;       /** Pointer to widget action that is published (nullptr if this action is not public) */
 };
 
 /** List of widget actions */

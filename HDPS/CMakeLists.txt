@@ -327,6 +327,7 @@ set( PLUGIN_HEADERS
     src/LinkedSelection.h
     src/Dataset.h
     src/DatasetPrivate.h
+    src/ActionsManager.h
 )
 
 set( PLUGIN_SOURCES
@@ -339,6 +340,7 @@ set( PLUGIN_SOURCES
     src/LinkedSelection.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp
+    src/ActionsManager.cpp
 )
 
 set(DATA_HIERARCHY_HEADERS

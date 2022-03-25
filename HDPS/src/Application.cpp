@@ -73,6 +73,11 @@ hdps::CoreInterface* Application::core()
     return current()->getCore();
 }
 
+hdps::ActionsManager& Application::getActionsManager()
+{
+    return current()->_actionsManager;
+}
+
 QVariant Application::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
 {
     return _settings.value(path, defaultValue);

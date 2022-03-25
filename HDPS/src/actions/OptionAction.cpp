@@ -105,6 +105,16 @@ const QAbstractItemModel* OptionAction::getModel() const
     return &_defaultModel;
 }
 
+bool OptionAction::mayPublish() const
+{
+    return true;
+}
+
+WidgetAction* OptionAction::getPublicCopy() const
+{
+    return new OptionAction(parent(), text(), getOptions(), getCurrentText(), getDefaultText());
+}
+
 void OptionAction::fromVariantMap(const QVariantMap& variantMap)
 {
     if (!variantMap.contains("Value"))

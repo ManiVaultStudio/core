@@ -21,7 +21,10 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
     _sortIndex(-1),
-    _isSerializing()
+    _isSerializing(),
+    _isPublished(false),
+    _subscribedActions(),
+    _publishedAction(nullptr)
 {
 }
 
@@ -76,6 +79,73 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;
+}
+
+bool WidgetAction::mayPublish() const
+{
+    return false;
+}
+
+bool WidgetAction::isPublic() const
+{
+    return _isPublished;
+}
+
+void WidgetAction::publish(const QString& name)
+{
+    try
+    {
+        if (_isPublished)
+            throw std::runtime_error("Action is already public");
+
+        auto publicCopy = getPublicCopy();
+
+        if (publicCopy == nullptr)
+            throw std::runtime_error("Public copy not created");
+
+        _publishedAction = publicCopy;
+
+        publicCopy->_subscribedActions << this;
+
+        _isPublished = true;
+
+        Application::getActionsManager().addPublicAction(publicCopy);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to publish " + text(), e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to publish " + text());
+    }
+}
+
+void WidgetAction::unPublish()
+{
+    try
+    {
+        if (!_isPublished)
+            throw std::runtime_error("Action is not public");
+
+        if (_publishedAction == nullptr)
+            throw std::runtime_error("Published action is not valid");
+
+        Application::getActionsManager().removePublicAction(_publishedAction);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to un-publish " + text(), e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to un-publish " + text());
+    }
+}
+
+WidgetAction* WidgetAction::getPublicCopy() const
+{
+    return nullptr;
 }
 
 QString WidgetAction::getSettingsPath() const

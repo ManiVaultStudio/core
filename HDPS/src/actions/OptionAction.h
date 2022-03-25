@@ -215,6 +215,22 @@ public:
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
+public: // Action publishing
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+protected:  // Action publishing
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
+
 public: // Serialization
 
     /**
