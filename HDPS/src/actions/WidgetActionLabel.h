@@ -36,11 +36,18 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+private:
+
+    /** Update the text of the the prefix label (depends on whether the action is published or not) */
+    void updatePrefixLabel();
+
 protected:
     WidgetAction*       _widgetAction;          /** Pointer to widget action */
-    QLabel              _label;                 /** Label */
+    QLabel              _prefixLabel;           /** Prefix label (for linking cue(s)) */
+    QLabel              _nameLabel;             /** Action name label */
     TriggerAction       _publishAction;         /** Publish action (so that other actions can connect) */
-    TriggerAction       _unPublishAction;       /** Un-publish action (disconnect other actions) */
+    TriggerAction       _connectAction;         /** Connect to public action */
+    TriggerAction       _disconnectAction;      /** Disconnect from public action */
 };
 
 }

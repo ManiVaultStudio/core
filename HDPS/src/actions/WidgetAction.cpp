@@ -22,9 +22,11 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _isSerializing(),
-    _isPublished(false),
-    _subscribedActions(),
-    _publishedAction(nullptr)
+    _connectedActions()
+{
+}
+
+WidgetAction::~WidgetAction()
 {
 }
 
@@ -88,28 +90,40 @@ bool WidgetAction::mayPublish() const
 
 bool WidgetAction::isPublic() const
 {
-    return _isPublished;
+    return Application::getActionsManager().isActionPublic(this);
+}
+
+bool WidgetAction::isPublished() const
+{
+    return Application::getActionsManager().isActionPublished(this);
+}
+
+bool WidgetAction::isConnected() const
+{
+    return Application::getActionsManager().isActionConnected(this);
 }
 
 void WidgetAction::publish(const QString& name)
 {
     try
     {
-        if (_isPublished)
-            throw std::runtime_error("Action is already public");
+        if (name.isEmpty())
+            throw std::runtime_error("Parameter name may not be empty");
+
+        if (Application::getActionsManager().isActionPublished(this))
+            throw std::runtime_error("Action is already published");
 
         auto publicCopy = getPublicCopy();
 
         if (publicCopy == nullptr)
             throw std::runtime_error("Public copy not created");
 
-        _publishedAction = publicCopy;
-
-        publicCopy->_subscribedActions << this;
-
-        _isPublished = true;
+        publicCopy->setText(name);
+        publicCopy->connectAction(this);
 
         Application::getActionsManager().addPublicAction(publicCopy);
+
+        emit isPublishedChanged(Application::getActionsManager().isActionPublished(this));
     }
     catch (std::exception& e)
     {
@@ -121,26 +135,43 @@ void WidgetAction::publish(const QString& name)
     }
 }
 
-void WidgetAction::unPublish()
+void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 {
-    try
-    {
-        if (!_isPublished)
-            throw std::runtime_error("Action is not public");
+    publicAction->connectAction(this);
 
-        if (_publishedAction == nullptr)
-            throw std::runtime_error("Published action is not valid");
+    emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+}
 
-        Application::getActionsManager().removePublicAction(_publishedAction);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to un-publish " + text(), e);
-    }
-    catch (...)
-    {
-        exceptionMessageBox("Unable to un-publish " + text());
-    }
+void WidgetAction::disconnectFromPublicAction()
+{
+    emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+}
+
+void WidgetAction::connectAction(WidgetAction* action)
+{
+    Q_ASSERT(action != nullptr);
+
+    _connectedActions << action;
+
+    emit actionConnected(action);
+
+    connect(action, &WidgetAction::destroyed, this, [this, action]() -> void {
+        disconnectAction(action);
+    });
+}
+
+void WidgetAction::disconnectAction(WidgetAction* action)
+{
+    Q_ASSERT(action != nullptr);
+
+    _connectedActions.removeOne(action);
+
+    emit actionDisconnected(action);
+}
+
+const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
+{
+    return _connectedActions;
 }
 
 WidgetAction* WidgetAction::getPublicCopy() const

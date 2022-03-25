@@ -36,6 +36,9 @@ public:
      */
     WidgetAction(QObject* parent = nullptr);
 
+    /** Destructor */
+    ~WidgetAction();
+
     /**
      * Get parent widget action
      * @return Pointer to parent widget action (if any)
@@ -95,7 +98,7 @@ public:
      */
     void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
-public: // Action publishing
+public: // Connection
 
     /**
      * Get whether the action may be published or not
@@ -107,18 +110,54 @@ public: // Action publishing
      * Get whether the action is public (visible to other actions)
      * @return Boolean indicating whether the action is public (visible to other actions)
      */
-    bool isPublic() const;
+    virtual bool isPublic() const;
+
+    /**
+     * Get whether the action is published
+     * @return Boolean indicating whether the action is published
+     */
+    virtual bool isPublished() const;
+
+    /**
+     * Get whether the action is connect to a public action
+     * @return Boolean indicating whether the action is connect to a public action
+     */
+    virtual bool isConnected() const;
 
     /**
      * Publish this action so that other actions can connect to it
      * @param text Name of the published widget action
      */
-    void publish(const QString& name);
+    virtual void publish(const QString& name);
 
-    /** Un-publish this action and disconnect other actions */
-    void unPublish();
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    virtual void connectToPublicAction(WidgetAction* publicAction);
 
-protected:  // Action publishing
+    /** Disconnect this action from a public action */
+    virtual void disconnectFromPublicAction();
+
+    /**
+     * Connect action
+     * @param action Pointer to action to connect
+     */
+    void connectAction(WidgetAction* action);
+
+    /**
+     * Disconnect action
+     * @param action Pointer to action to disconnect
+     */
+    void disconnectAction(WidgetAction* action);
+
+    /**
+     * Get connected actions
+     * @return Vector of pointers to connected actions
+     */
+    const QVector<WidgetAction*> getConnectedActions() const;
+
+protected: // Connection
 
     /**
      * Get public copy of the action (other compatible actions can connect to it)
@@ -247,13 +286,35 @@ signals:
      */
     void isSerializingChanged(bool isSerializing);
 
+    /**
+     * Signals that the published states changed
+     * @param isPublished Whether the action is published or not
+     */
+    void isPublishedChanged(const bool& isPublished);
+
+    /**
+     * Signals that the connected state changed
+     * @param isConnected Whether the action is connected or not
+     */
+    void isConnectedChanged(const bool& isConnected);
+
+    /**
+     * Signals that an action connected
+     * @param action Action that connected
+     */
+    void actionConnected(const WidgetAction* action);
+
+    /**
+     * Signals that an action disconnected
+     * @param action Action that disconnected
+     */
+    void actionDisconnected(const WidgetAction* action);
+
 protected:
     std::int32_t            _defaultWidgetFlags;    /** Default widget flags */
     std::int32_t            _sortIndex;             /** Sort index (used in the group action to sort actions) */
     bool                    _isSerializing;         /** Whether the widget action is currently serializing */
-    bool                    _isPublished;           /** Whether this action is published or not (whether other actions can connect to it) */
-    QVector<WidgetAction*>  _subscribedActions;     /** Pointers to widget action that are subscribed to this action (provided this action is public, the first one is the publisher) */
-    WidgetAction*           _publishedAction;       /** Pointer to widget action that is published (nullptr if this action is not public) */
+    QVector<WidgetAction*>  _connectedActions;      /** Pointers to widget action that are connected to this action */
 };
 
 /** List of widget actions */
