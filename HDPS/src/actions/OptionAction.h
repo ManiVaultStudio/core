@@ -122,6 +122,12 @@ public:
     OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QString& currentOption = "", const QString& defaultOption = "");
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
+    /**
      * Initialize the option action
      * @param options Options
      * @param currentOption Current option

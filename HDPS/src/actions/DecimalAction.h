@@ -79,6 +79,12 @@ public:
     DecimalAction(QObject * parent, const QString& title, const float& minimum = INIT_MIN, const float& maximum = INIT_MAX, const float& value = INIT_VALUE, const float& defaultValue = INIT_DEFAULT_VALUE, const std::uint32_t& numberOfDecimals = INIT_NUMBER_OF_DECIMALS);
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
+    /**
      * Initialize the decimal action
      * @param minimum Minimum value
      * @param maximum Maximum value
@@ -95,6 +101,22 @@ public:
      * @param singleStep Single step
      */
     void setSingleStep(const float& singleStep);
+
+public: // Action publishing
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+protected:  // Action publishing
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
 
 public: // Serialization
 

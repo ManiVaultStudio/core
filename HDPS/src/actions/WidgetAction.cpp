@@ -30,6 +30,11 @@ WidgetAction::~WidgetAction()
 {
 }
 
+QString WidgetAction::getTypeString() const
+{
+    return "";
+}
+
 WidgetAction* WidgetAction::getParentWidgetAction()
 {
     return dynamic_cast<WidgetAction*>(this->parent());
@@ -119,9 +124,9 @@ void WidgetAction::publish(const QString& name)
             throw std::runtime_error("Public copy not created");
 
         publicCopy->setText(name);
-        publicCopy->connectAction(this);
+        publicCopy->connectPrivateAction(this);
 
-        Application::getActionsManager().addPublicAction(publicCopy);
+        Application::getActionsManager().addAction(publicCopy);
 
         emit isPublishedChanged(Application::getActionsManager().isActionPublished(this));
     }
@@ -137,7 +142,7 @@ void WidgetAction::publish(const QString& name)
 
 void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 {
-    publicAction->connectAction(this);
+    publicAction->connectPrivateAction(this);
 
     emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
 }
@@ -147,26 +152,26 @@ void WidgetAction::disconnectFromPublicAction()
     emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
 }
 
-void WidgetAction::connectAction(WidgetAction* action)
+void WidgetAction::connectPrivateAction(WidgetAction* privateAction)
 {
-    Q_ASSERT(action != nullptr);
+    Q_ASSERT(privateAction != nullptr);
 
-    _connectedActions << action;
+    _connectedActions << privateAction;
 
-    emit actionConnected(action);
+    emit actionConnected(privateAction);
 
-    connect(action, &WidgetAction::destroyed, this, [this, action]() -> void {
-        disconnectAction(action);
+    connect(privateAction, &WidgetAction::destroyed, this, [this, privateAction]() -> void {
+        disconnectPrivateAction(privateAction);
     });
 }
 
-void WidgetAction::disconnectAction(WidgetAction* action)
+void WidgetAction::disconnectPrivateAction(WidgetAction* privateAction)
 {
-    Q_ASSERT(action != nullptr);
+    Q_ASSERT(privateAction != nullptr);
 
-    _connectedActions.removeOne(action);
+    _connectedActions.removeOne(privateAction);
 
-    emit actionDisconnected(action);
+    emit actionDisconnected(privateAction);
 }
 
 const QVector<WidgetAction*> WidgetAction::getConnectedActions() const

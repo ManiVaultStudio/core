@@ -1,10 +1,8 @@
 #pragma once
 
+#include "ActionsModel.h"
+
 #include <QObject>
-#include <QMap>
-#include <QString>
-#include <QDebug>
-#include <QAbstractListModel>
 
 namespace hdps
 {
@@ -21,81 +19,6 @@ class ActionsManager : public QObject
 
 public:
 
-    class PublicActionsModel : public QAbstractListModel
-    {
-    public:
-
-        /** Public action columns */
-        enum Column {
-            Name,                   /** Name of the public action */
-            NumberOfConnections     /** Number of private actions connected to the public action */
-        };
-
-    public:
-
-        /**
-         * Returns the number of rows in the model given the parent model index
-         * @param parent Parent model index
-         * @return Number of rows in the model given the parent model index
-         */
-        int rowCount(const QModelIndex& parent = QModelIndex()) const;
-
-        /**
-         * Returns the number of columns in the model given the parent model index
-         * @param parent Parent model index
-         * @return Number of columns in the model given the parent model index
-         */
-        int columnCount(const QModelIndex& parent = QModelIndex()) const;
-
-        /**
-         * Returns the model index for the given row, column and parent model index
-         * @param row Row
-         * @param column Column
-         * @param parent Parent model index
-         * @return Model index
-         */
-        QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-
-        /**
-         * Returns the data for the given model index and data role
-         * @param index Model index
-         * @param role Data role
-         * @return Data in variant form
-         */
-        QVariant data(const QModelIndex& index, int role) const;
-
-        /**
-         * Get header data
-         * @param section Section
-         * @param orientation Orientation
-         * @param role Data role
-         * @return Header
-         */
-        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-        /**
-         * Add public action to the model
-         * @param publicAction Pointer to public action
-         */
-        void addPublicAction(WidgetAction* publicAction);
-
-        /**
-         * Remove public action
-         * @param publicAction Pointer to public action
-         */
-        void removePublicAction(WidgetAction* publicAction);
-
-    //private:
-    //    QIcon getDecorationRole(const LineType& lineType) const;
-
-    protected:
-        QVector<WidgetAction*>  _publicActions;        /** Shared pointers to public widget actions */
-
-        friend class ActionsManager;
-};
-
-public:
-
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -103,22 +26,22 @@ public:
     ActionsManager(QObject* parent = nullptr);
 
     /**
-     * Add public action
-     * @param publicAction Pointer to public action
+     * Add action to the model
+     * @param action Pointer to action
      */
-    void addPublicAction(WidgetAction* publicAction);
+    void addAction(WidgetAction* action);
 
     /**
-     * Remove public action
-     * @param publicAction Pointer to public action
+     * Remove action from the model
+     * @param action Pointer to action
      */
-    void removePublicAction(WidgetAction* publicAction);
+    void removeAction(WidgetAction* action);
 
     /**
-     * Get public actions model
-     * @return List model for public actions
+     * Get actions model
+     * @return List model for actions
      */
-    const PublicActionsModel& getPublicActionsModel() const;
+    const ActionsModel& getActionsModel() const;
 
     /**
      * Establish whether an action is public
@@ -142,7 +65,7 @@ public:
     bool isActionConnected(const WidgetAction* action) const;
 
 private:
-    PublicActionsModel      _publicActionsModel;        /** List model for public actions */
+    ActionsModel    _actionsModel;        /** List model for actions */
 };
 
 }

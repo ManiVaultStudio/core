@@ -1,5 +1,6 @@
 #include "WidgetActionLabel.h"
 #include "WidgetAction.h"
+#include "ActionsFilterModel.h"
 #include "Application.h"
 
 #include <QDebug>
@@ -85,10 +86,14 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
         connectDialog.setWindowIcon(fontAwesome.getIcon("link"));
         connectDialog.setWindowTitle("Connect " + _widgetAction->text() + " to public parameter");
 
-        auto mainLayout = new QVBoxLayout();
-        auto treeView   = new QTreeView();
+        auto mainLayout         = new QVBoxLayout();
+        auto treeView           = new QTreeView();
+        auto actionsFilterModel = new ActionsFilterModel(this);
 
-        treeView->setModel(const_cast<ActionsManager::PublicActionsModel*>(&Application::getActionsManager().getPublicActionsModel()));
+        actionsFilterModel->setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
+        actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
+
+        treeView->setModel(actionsFilterModel);
         treeView->setRootIsDecorated(false);
         treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
         treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -118,8 +123,10 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
         updateOkButtonReadOnly();
 
-        if (connectDialog.exec() == QDialog::Accepted)
-            _widgetAction->connectToPublicAction(static_cast<WidgetAction*>(treeView->selectionModel()->selectedRows().first().internalPointer()));
+        if (connectDialog.exec() == QDialog::Accepted) {
+            const auto selectedAction = actionsFilterModel->mapToSource(treeView->selectionModel()->selectedRows().first());
+            _widgetAction->connectToPublicAction(static_cast<WidgetAction*>(selectedAction.internalPointer()));
+        }
     });
 
     connect(&_disconnectAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::disconnectFromPublicAction);

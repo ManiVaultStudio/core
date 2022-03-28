@@ -40,6 +40,12 @@ public:
     ~WidgetAction();
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    virtual QString getTypeString() const;
+
+    /**
      * Get parent widget action
      * @return Pointer to parent widget action (if any)
      */
@@ -140,16 +146,16 @@ public: // Connection
     virtual void disconnectFromPublicAction();
 
     /**
-     * Connect action
-     * @param action Pointer to action to connect
+     * Connect a private action to this action
+     * @param action Pointer to private action to connect to this action
      */
-    void connectAction(WidgetAction* action);
+    void connectPrivateAction(WidgetAction* privateAction);
 
     /**
-     * Disconnect action
-     * @param action Pointer to action to disconnect
+     * Disconnect a private action from this action
+     * @param action Pointer to private action to disconnect from this action
      */
-    void disconnectAction(WidgetAction* action);
+    void disconnectPrivateAction(WidgetAction* privateAction);
 
     /**
      * Get connected actions

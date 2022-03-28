@@ -25,6 +25,11 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
     initialize(options, currentOption, defaultOption);
 }
 
+QString OptionAction::getTypeString() const
+{
+    return "Option";
+}
+
 void OptionAction::initialize(const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
 {
     setOptions(options);

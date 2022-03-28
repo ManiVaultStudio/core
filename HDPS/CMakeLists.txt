@@ -327,6 +327,8 @@ set( PLUGIN_HEADERS
     src/LinkedSelection.h
     src/Dataset.h
     src/DatasetPrivate.h
+    src/ActionsModel.h
+    src/ActionsFilterModel.h
     src/ActionsManager.h
 )
 
@@ -340,6 +342,8 @@ set( PLUGIN_SOURCES
     src/LinkedSelection.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp
+    src/ActionsModel.cpp
+    src/ActionsFilterModel.cpp
     src/ActionsManager.cpp
 )
 
