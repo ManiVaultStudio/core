@@ -66,6 +66,13 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
+     * Get item flags
+     * @param index Model index
+     * @return Item flags
+     */
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+    /**
      * Add public action to the model
      * @param publicAction Pointer to public action
      */

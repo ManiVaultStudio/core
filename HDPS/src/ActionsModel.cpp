@@ -182,7 +182,7 @@ QVariant ActionsModel::headerData(int section, Qt::Orientation orientation, int 
                         return "Name";
 
                     case Column::Type:
-                        return "Parameter type";
+                        return "Type";
 
                     case Column::IsPublic:
                         return "Public";
@@ -226,6 +226,19 @@ QVariant ActionsModel::headerData(int section, Qt::Orientation orientation, int 
     }
 
     return QVariant();
+}
+
+Qt::ItemFlags ActionsModel::flags(const QModelIndex& index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
+
+    if (index.column() == Column::Name)
+        itemFlags |= Qt::ItemIsEditable;
+
+    return itemFlags;
 }
 
 }

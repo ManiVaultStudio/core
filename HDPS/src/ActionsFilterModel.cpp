@@ -15,7 +15,7 @@ ActionsFilterModel::ActionsFilterModel(QObject* parent /*= nullptr*/) :
 
 bool ActionsFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
-    return filterType(sourceModel()->index(row, ActionsModel::Column::Type)) && filterScope(sourceModel()->index(row, ActionsModel::Column::IsPublic));
+    return filterName(sourceModel()->index(row, ActionsModel::Column::Name)) && filterType(sourceModel()->index(row, ActionsModel::Column::Type)) && filterScope(sourceModel()->index(row, ActionsModel::Column::IsPublic));
 }
 
 bool ActionsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
@@ -44,6 +44,21 @@ bool ActionsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs
     }
 
     return false;
+}
+
+QString ActionsFilterModel::getNameFilter() const
+{
+    return _nameFilter;
+}
+
+void ActionsFilterModel::setNameFilter(const QString& nameFilter)
+{
+    if (nameFilter == _nameFilter)
+        return;
+
+    _nameFilter = nameFilter;
+
+    invalidateFilter();
 }
 
 QString ActionsFilterModel::getTypeFilter() const
@@ -76,15 +91,26 @@ void ActionsFilterModel::setScopeFilter(const ScopeFilter& scopeFilter)
     invalidateFilter();
 }
 
+bool ActionsFilterModel::filterName(const QModelIndex& index) const
+{
+    const auto actionName = sourceModel()->data(index, Qt::EditRole).toString();
+
+    if (_nameFilter.isEmpty())
+        return true;
+    else
+        return actionName.contains(_nameFilter, Qt::CaseInsensitive);
+
+    return false;
+}
+
 bool ActionsFilterModel::filterType(const QModelIndex& index) const
 {
     const auto actionType = sourceModel()->data(index, Qt::EditRole).toString();
 
-    if (_typeFilter.isEmpty()) {
+    if (_typeFilter.isEmpty())
         return true;
-    } else {
+    else
         return actionType.contains(_typeFilter, Qt::CaseInsensitive);
-    }
 
     return false;
 }

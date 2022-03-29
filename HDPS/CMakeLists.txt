@@ -353,6 +353,7 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
     src/DataPropertiesWidget.h
+    src/ActionsViewerWidget.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -361,6 +362,7 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp
+    src/ActionsViewerWidget.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

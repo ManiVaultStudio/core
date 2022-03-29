@@ -39,8 +39,20 @@ public:
     bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
 
     /**
+     * Get action name filter string
+     * @return Action name filter string
+     */
+    QString getNameFilter() const;
+
+    /**
+     * Set action name filter string
+     * @param nameFilter Action name filter string
+     */
+    void setNameFilter(const QString& nameFilter);
+
+    /**
      * Get action type filter string
-     * @return Action type string
+     * @return Action type filter string
      */
     QString getTypeFilter() const;
 
@@ -65,6 +77,13 @@ public:
 protected:
 
     /**
+     * Filter by action name
+     * @param index Model index for the action name column
+     * @return Whether the action name passes the filter
+     */
+    bool filterName(const QModelIndex& index) const;
+
+    /**
      * Filter by action type
      * @param index Model index for the action type column
      * @return Whether the action type passes the filter
@@ -79,6 +98,7 @@ protected:
     bool filterScope(const QModelIndex& index) const;
 
 private:
+    QString         _nameFilter;        /** Action name filter */
     QString         _typeFilter;        /** Action type filter */
     ScopeFilter     _scopeFilter;       /** Action scope filter */
 };
