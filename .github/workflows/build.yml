@@ -30,7 +30,7 @@ jobs:
           - name: Windows-msvc2019
             os: windows-2019
             compiler: msvc-2019
-            build-cversion: 15
+            build-cversion: 16
             build-runtime: MD
             build-config: Release
 
