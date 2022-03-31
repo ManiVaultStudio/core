@@ -80,9 +80,9 @@ void ActionsModel::removePublicAction(WidgetAction* publicAction)
 
 QVariant ActionsModel::data(const QModelIndex& index, int role) const
 {
-    const auto row          = index.row();
-    const auto column       = index.column();
-    const auto publicAction = static_cast<WidgetAction*>(index.internalPointer());
+    const auto row      = index.row();
+    const auto column   = index.column();
+    const auto action   = static_cast<WidgetAction*>(index.internalPointer());
 
     switch (role)
     {
@@ -91,13 +91,13 @@ QVariant ActionsModel::data(const QModelIndex& index, int role) const
             switch (column)
             {
                 case Column::Name:
-                    return publicAction->text();
+                    return action->text();
 
                 case Column::Type:
-                    return publicAction->getTypeString();
+                    return action->getTypeString();
 
                 case Column::IsPublic:
-                    return publicAction->isPublic();
+                    return action->isPublic();
 
                 case Column::NumberOfConnections:
                     return QVariant::fromValue(_publicActions[row]->getConnectedActions().count());
@@ -149,7 +149,7 @@ QVariant ActionsModel::data(const QModelIndex& index, int role) const
                 {
                     QStringList connectedActionNames;
 
-                    for (auto connectedAction : publicAction->getConnectedActions())
+                    for (auto connectedAction : action->getConnectedActions())
                         connectedActionNames << connectedAction->getSettingsPath();
 
                     return QVariant::fromValue(connectedActionNames.join("\n"));
@@ -167,6 +167,42 @@ QVariant ActionsModel::data(const QModelIndex& index, int role) const
     }
 
     return QVariant();
+}
+
+bool ActionsModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
+{
+    const auto row      = index.row();
+    const auto column   = index.column();
+    const auto action   = static_cast<WidgetAction*>(index.internalPointer());
+
+    switch (role) {
+        case Qt::EditRole:
+        {
+            switch (column)
+            {
+                case Column::Name:
+                    action->setText(value.toString());
+                    break;
+
+                case Column::Type:
+                case Column::IsPublic:
+                case Column::NumberOfConnections:
+                    break;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    emit dataChanged(index, index);
+
+    return true;
 }
 
 QVariant ActionsModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const

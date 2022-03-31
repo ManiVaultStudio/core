@@ -58,6 +58,8 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
     connect(this, &IntegralAction::valueChanged, publicIntegralAction, &IntegralAction::setValue);
     connect(publicIntegralAction, &IntegralAction::valueChanged, this, &IntegralAction::setValue);
 
+    setValue(publicIntegralAction->getValue());
+
     WidgetAction::connectToPublicAction(publicAction);
 }
 

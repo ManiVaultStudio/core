@@ -80,6 +80,8 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
     connect(this, &DecimalAction::valueChanged, publicDecimalAction, &DecimalAction::setValue);
     connect(publicDecimalAction, &DecimalAction::valueChanged, this, &DecimalAction::setValue);
 
+    setValue(publicDecimalAction->getValue());
+
     WidgetAction::connectToPublicAction(publicAction);
 }
 

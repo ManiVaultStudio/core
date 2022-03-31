@@ -293,17 +293,17 @@ void MainWindow::initializeCentralDockingArea()
 
 void MainWindow::initializeSettingsDockingArea()
 {
-    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _dataHierarchyDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap", QSize(16, 16)));
-    _dataHierarchyDockWidget->setWidget(_dataHierarchyWidget);
-
     _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
     _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
     _actionsViewerDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("link", QSize(16, 16)));
     _actionsViewerDockWidget->setWidget(_actionsViewerWidget);
+
+    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
+    _dataHierarchyDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap", QSize(16, 16)));
+    _dataHierarchyDockWidget->setWidget(_dataHierarchyWidget);
 
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
@@ -314,6 +314,9 @@ void MainWindow::initializeSettingsDockingArea()
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
     _settingsDockArea = _dockManager->addDockWidget(CenterDockWidgetArea, _actionsViewerDockWidget, _settingsDockArea);
     _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataPropertiesDockWidget, _settingsDockArea);
+
+    //_actionsViewerDockWidget->tabWidget()->setActiveTab(false);
+    //_dataHierarchyDockWidget->tabWidget()->setActiveTab(true);
 
     auto splitter = ads::internal::findParent<ads::CDockSplitter*>(_settingsDockArea);
 

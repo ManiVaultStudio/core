@@ -22,8 +22,7 @@ ActionsViewerWidget::ActionsViewerWidget(QWidget* parent) :
     _treeView(this),
     _overlayWidget(this),
     _filterModel(this),
-    _nameFilterAction(this, "Name filter"),
-    _typeFilterAction(this, "Type filter")
+    _nameFilterAction(this, "Name filter")
 {
     _filterModel.setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
 
@@ -69,7 +68,6 @@ ActionsViewerWidget::ActionsViewerWidget(QWidget* parent) :
     toolbarLayout->setContentsMargins(0, 3, 0, 3);
     toolbarLayout->setSpacing(4);
     toolbarLayout->addWidget(_nameFilterAction.createWidget(this), 1);
-    toolbarLayout->addWidget(_typeFilterAction.createCollapsedWidget(this));
 
     layout->addLayout(toolbarLayout);
     layout->addWidget(&_treeView);
@@ -141,8 +139,8 @@ ActionsViewerWidget::OverlayWidget::OverlayWidget(QWidget* parent) :
 
     parent->installEventFilter(this);
 
-    setObjectName("NoSharedParametersWidget");
-    setStyleSheet("QWidget#NoSharedParametersWidget > QLabel { color: gray; }");
+    setObjectName("ActionsOverlayWidget");
+    setStyleSheet("QWidget#ActionsOverlayWidget > QLabel { color: gray; }");
 }
 
 bool ActionsViewerWidget::OverlayWidget::eventFilter(QObject* target, QEvent* event)

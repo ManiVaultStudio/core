@@ -11,27 +11,25 @@
 #include <QDialogButtonBox>
 #include <QLineEdit>
 #include <QTreeView>
+#include <QHeaderView>
 
 namespace hdps {
 
 namespace gui {
 
-WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, Qt::WindowFlags windowFlags /*= Qt::WindowFlags()*/) :
-    QWidget(parent, windowFlags),
+WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= 0*/) :
+    QWidget(parent),
+    _flags(flags == 0 ? ColonAfterName : flags),
     _widgetAction(widgetAction),
-    _prefixLabel(),
     _nameLabel(),
     _publishAction(this, "Publish..."),
     _connectAction(this, "Connect..."),
-    _disconnectAction(this, "Disconnect")
+    _disconnectAction(this, "Disconnect...")
 {
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    _prefixLabel.setFont(fontAwesome.getFont(8));
-
-    connect(_widgetAction, &WidgetAction::isPublishedChanged, this, &WidgetActionLabel::updatePrefixLabel);
-
-    updatePrefixLabel();
+    connect(_widgetAction, &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateLabel);
+    connect(_widgetAction, &WidgetAction::isPublishedChanged, this, &WidgetActionLabel::updatePublishAction);
 
     _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
     _connectAction.setIcon(fontAwesome.getIcon("link"));
@@ -99,6 +97,9 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
         treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
         treeView->setSortingEnabled(false);
 
+        treeView->header()->hideSection(ActionsModel::Column::Type);
+        treeView->header()->hideSection(ActionsModel::Column::IsPublic);
+
         mainLayout->addWidget(treeView);
 
         auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -137,7 +138,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
     layout->setMargin(0);
     layout->addStretch(1);
-    layout->addWidget(&_prefixLabel);
     layout->addWidget(&_nameLabel);
 
     setLayout(layout);
@@ -146,7 +146,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
     const auto update = [this, widgetAction]() -> void {
         _nameLabel.setEnabled(widgetAction->isEnabled());
-        _nameLabel.setText(QString("%1: ").arg(widgetAction->text()));
+        _nameLabel.setText(QString("%1%2 ").arg(widgetAction->text(), (_flags & ColonAfterName) ? ":" : ""));
         _nameLabel.setToolTip(widgetAction->text());
         _nameLabel.setVisible(widgetAction->isVisible());
     };
@@ -155,13 +155,21 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
     update();
 
+    updateLabel();
+    updatePublishAction();
+
     _nameLabel.installEventFilter(this);
+
+    connect(_widgetAction, &QObject::destroyed, this, [this]() -> void {
+        _nameLabel.removeEventFilter(this);
+    });
 }
 
 bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 {
     auto contextMenu = new QMenu();
 
+    /*
     if (_widgetAction->mayPublish()) {
         if (!_widgetAction->isPublic())
             contextMenu->addAction(&_publishAction);
@@ -174,6 +182,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
         else
             contextMenu->addAction(&_connectAction);
     }
+    */
 
     if (contextMenu->actions().isEmpty())
         return QWidget::eventFilter(target, event);
@@ -213,13 +222,17 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
     return QWidget::eventFilter(target, event);
 }
 
-void WidgetActionLabel::updatePrefixLabel()
+void WidgetActionLabel::updatePublishAction()
+{
+    _publishAction.setEnabled(!_widgetAction->isPublished());
+}
+
+void WidgetActionLabel::updateLabel()
 {
     if (_widgetAction->mayPublish()) {
-        if (_widgetAction->isPublic())
-            _prefixLabel.setText("<sup>" + Application::getIconFont("FontAwesome").getIconCharacter("link") + "</sup>");
-        else
-            _prefixLabel.setText("");
+        auto font = _nameLabel.font();
+        font.setItalic(_widgetAction->isConnected());
+        _nameLabel.setFont(font);
     }
 }
 

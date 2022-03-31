@@ -69,9 +69,9 @@ QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
     return new WidgetActionCollapsedWidget(parent, this);
 }
 
-QWidget* WidgetAction::createLabelWidget(QWidget* parent)
+QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0*/)
 {
-    return new WidgetActionLabel(this, parent);
+    return new WidgetActionLabel(this, parent, widgetFlags);
 }
 
 QMenu* WidgetAction::getContextMenu(QWidget* parent /*= nullptr*/)
@@ -131,6 +131,7 @@ void WidgetAction::publish(const QString& name)
         Application::getActionsManager().addAction(publicCopy);
 
         emit isPublishedChanged(Application::getActionsManager().isActionPublished(this));
+        emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
     }
     catch (std::exception& e)
     {
@@ -155,6 +156,10 @@ void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 
 void WidgetAction::disconnectFromPublicAction()
 {
+    Q_ASSERT(_publicAction != nullptr);
+
+    _publicAction->disconnectPrivateAction(this);
+
     emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
 }
 
@@ -178,6 +183,11 @@ void WidgetAction::disconnectPrivateAction(WidgetAction* privateAction)
     _connectedActions.removeOne(privateAction);
 
     emit actionDisconnected(privateAction);
+}
+
+WidgetAction* WidgetAction::getPublicAction()
+{
+    return _publicAction;
 }
 
 const QVector<WidgetAction*> WidgetAction::getConnectedActions() const

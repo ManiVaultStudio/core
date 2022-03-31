@@ -100,6 +100,12 @@ public:
     ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = false, const bool& defaultToggled = false);
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
+    /**
      * Initialize the toggle action
      * @param toggled Toggled
      * @param defaultToggled Default toggled

@@ -80,6 +80,12 @@ public:
     ColorMapAction(QObject* parent, const QString& title = "", const util::ColorMap::Type& colorMapType = util::ColorMap::Type::OneDimensional, const QString& colorMap = "RdYlBu", const QString& defaultColorMap = "RdYlBu");
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
+    /**
      * Initialize the color map action
      * @param colorMap Current color map
      * @param defaultColorMap Default color map
@@ -115,10 +121,30 @@ public: // Option action wrappers
      */
     void setDefaultColorMap(const QString& defaultColorMap);
 
-public: // Action getters
+public: // Linking
 
-    OptionAction& getCurrentColorMapAction() { return _currentColorMapAction; }
-    ColorMapSettingsAction& getSettingsAction() { return _settingsAction; }
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
 
 signals:
 
@@ -133,6 +159,11 @@ signals:
      * @param image Current color map image
      */
     void imageChanged(const QImage& image);
+
+public: // Action getters
+
+    OptionAction& getCurrentColorMapAction() { return _currentColorMapAction; }
+    ColorMapSettingsAction& getSettingsAction() { return _settingsAction; }
 
 protected:
     OptionAction                _currentColorMapAction;     /** Current color map selection action */

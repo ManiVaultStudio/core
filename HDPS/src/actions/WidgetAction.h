@@ -68,9 +68,10 @@ public:
     /**
      * Create label widget
      * @param parent Parent widget
+     * @param widgetFlags Label widget configuration flags
      * @return Pointer to widget
      */
-    QWidget* createLabelWidget(QWidget* parent);
+    QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0);
 
     /**
      * Get the context menu for the action
@@ -156,6 +157,12 @@ public: // Linking
      * @param action Pointer to private action to disconnect from this action
      */
     void disconnectPrivateAction(WidgetAction* privateAction);
+
+    /**
+     * Get the public action (if any)
+     * @return Pointer to the public action
+     */
+    WidgetAction* getPublicAction();
 
     /**
      * Get connected actions

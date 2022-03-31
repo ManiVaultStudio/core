@@ -40,6 +40,11 @@ ColorMapAction::ColorMapAction(QObject* parent, const QString& title /*= ""*/, c
     connect(&_settingsAction.getDiscreteAction().getNumberOfStepsAction(), &IntegralAction::valueChanged, this, notifyColorMapImageChanged);
 }
 
+QString ColorMapAction::getTypeString() const
+{
+    return "ColorMap";
+}
+
 void ColorMapAction::initialize(const QString& colorMap /*= ""*/, const QString& defaultColorMap /*= ""*/)
 {
     _colorMapFilterModel.setSourceModel(ColorMapModel::getGlobalInstance());
@@ -222,6 +227,38 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     _currentColorMapAction.setDefaultText(defaultColorMap);
 }
 
+bool ColorMapAction::mayPublish() const
+{
+    return true;
+}
+
+void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicColorMapAction = dynamic_cast<ColorMapAction*>(publicAction);
+
+    Q_ASSERT(publicColorMapAction != nullptr);
+
+    _currentColorMapAction.connectToPublicAction(&publicColorMapAction->getCurrentColorMapAction());
+
+    _settingsAction.connectToPublicAction(&publicColorMapAction->getSettingsAction());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void ColorMapAction::disconnectFromPublicAction()
+{
+    _currentColorMapAction.disconnectFromPublicAction();
+
+    _settingsAction.disconnectFromPublicAction();
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+WidgetAction* ColorMapAction::getPublicCopy() const
+{
+    return new ColorMapAction(parent(), text(), _colorMapFilterModel.getType(), _currentColorMapAction.getCurrentText(), _currentColorMapAction.getDefaultText());
+}
+
 ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* optionAction, ColorMapAction* colorMapAction) :
     OptionAction::ComboBoxWidget(parent, optionAction),
     _colorMapAction(colorMapAction)
@@ -320,7 +357,7 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
-    //layout->setSpacing(3);
+    layout->setSpacing(3);
 
     auto comboBoxWidget = new ComboBoxWidget(parent, &_currentColorMapAction, this);
 

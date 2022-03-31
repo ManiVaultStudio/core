@@ -88,7 +88,6 @@ public:
      * @param title Title of the action
      * @param minimum Minimum value
      * @param maximum Maximum value
-     * @param value Value
      * @param defaultValue Default value
      */
     IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);

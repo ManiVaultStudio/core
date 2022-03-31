@@ -38,6 +38,24 @@ ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsA
     update();
 }
 
+void ColorMapAxisAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicColorMapAxisAction = dynamic_cast<ColorMapAxisAction*>(publicAction);
+
+    Q_ASSERT(publicColorMapAxisAction != nullptr);
+
+    _mirrorAction.connectToPublicAction(&publicColorMapAxisAction->getMirrorAction());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void ColorMapAxisAction::disconnectFromPublicAction()
+{
+    _mirrorAction.disconnectFromPublicAction();
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
 ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMapAxisAction) :
     WidgetActionWidget(parent, colorMapAxisAction)
 {

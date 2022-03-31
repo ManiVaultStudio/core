@@ -18,7 +18,15 @@ class WidgetAction;
  * 
  * @author Thomas Kroes
  */
-class WidgetActionLabel : public QWidget {
+class WidgetActionLabel : public QWidget
+{
+public:
+
+    /** Describes the widget flags */
+    enum WidgetFlag {
+        ColonAfterName  = 0x00001,      /** The name label includes a post-fix colon */
+    };
+
 public:
 
     /**
@@ -27,7 +35,7 @@ public:
      * @param parent Pointer to parent widget
      * @param windowFlags Window flags
      */
-    explicit WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent = nullptr, Qt::WindowFlags windowFlags = Qt::WindowFlags());
+    explicit WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent = nullptr, const std::uint32_t& flags = 0);
 
     /**
      * Respond to target object events
@@ -38,12 +46,15 @@ public:
 
 private:
 
-    /** Update the text of the the prefix label (depends on whether the action is published or not) */
-    void updatePrefixLabel();
+    /** Update the state of the publish action */
+    void updatePublishAction();
+
+    /** Update the text of the the postfix label (depends on whether the action is published or not) */
+    void updateLabel();
 
 protected:
+    std::uint32_t       _flags;                 /** Configuration flags */
     WidgetAction*       _widgetAction;          /** Pointer to widget action */
-    QLabel              _prefixLabel;           /** Prefix label (for linking cue(s)) */
     QLabel              _nameLabel;             /** Action name label */
     TriggerAction       _publishAction;         /** Publish action (so that other actions can connect) */
     TriggerAction       _connectAction;         /** Connect to public action */

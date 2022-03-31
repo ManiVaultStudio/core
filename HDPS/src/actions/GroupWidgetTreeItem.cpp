@@ -24,7 +24,9 @@ GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeI
     _sizeSynchronizer(this)
 {
     groupSectionTreeItem->addChild(this);
-    
+
+    _containerWidget->setFocusPolicy(Qt::NoFocus);
+    _groupWidget->setFocusPolicy(Qt::NoFocus);
     _containerWidget->setLayout(_containerLayout);
 
     _groupWidget->setFixedWidth(treeWidget()->width());

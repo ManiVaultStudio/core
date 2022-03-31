@@ -2,8 +2,25 @@
 
 #include <QSurfaceFormat>
 #include <QStyleFactory>
+#include <QProxyStyle>
 
 #include <HdpsApplication.h>
+
+class NoFocusProxyStyle : public QProxyStyle {
+public:
+    NoFocusProxyStyle(QStyle *baseStyle = 0) :
+        QProxyStyle(baseStyle)
+    {
+    }
+
+    void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const {
+        if (element == QStyle::PE_FrameFocusRect)
+            return;
+
+        QProxyStyle::drawPrimitive(element, option, painter, widget);
+    }
+
+};
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +40,8 @@ int main(int argc, char *argv[])
 #endif
 
     hdps::HdpsApplication hdpsApplication(argc, argv);
+
+    hdpsApplication.setStyle(new NoFocusProxyStyle);
 
     // Retina display support for Mac OS and X11:
     // AA_UseHighDpiPixmaps attribute is off by default in Qt 5.1 but will most

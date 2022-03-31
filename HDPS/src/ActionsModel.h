@@ -57,6 +57,15 @@ public:
     QVariant data(const QModelIndex& index, int role) const;
 
     /**
+     * Sets the data value for the given model index and data role
+     * @param index Model index
+     * @param value Data value in variant form
+     * @param role Data role
+     * @return Whether the data was properly set or not
+     */
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+
+    /**
      * Get header data
      * @param section Section
      * @param orientation Orientation

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <actions/StringAction.h>
-#include <actions/OptionAction.h>
 
 #include <ActionsFilterModel.h>
 
@@ -94,7 +93,6 @@ protected:
     OverlayWidget           _overlayWidget;         /** Overlay help widget which is shown when there are no shared parameters */
     ActionsFilterModel      _filterModel;           /** Actions filter model */
     StringAction            _nameFilterAction;      /** String action for filtering based on parameter name */
-    OptionAction            _typeFilterAction;      /** Option action for filtering based on parameter type */
 };
 
 }

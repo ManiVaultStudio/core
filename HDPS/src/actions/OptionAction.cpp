@@ -124,6 +124,8 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction)
     connect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
     connect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
 
+    setCurrentIndex(publicOptionAction->getCurrentIndex());
+
     WidgetAction::connectToPublicAction(publicAction);
 }
 

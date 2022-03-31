@@ -23,6 +23,24 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
 }
 
+void ColorMapSettingsAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicColorMapSettingsAction = dynamic_cast<ColorMapSettingsAction*>(publicAction);
+
+    Q_ASSERT(publicColorMapSettingsAction != nullptr);
+
+    _horizontalAxisAction.connectToPublicAction(&publicColorMapSettingsAction->getHorizontalAxisAction());
+    _verticalAxisAction.connectToPublicAction(&publicColorMapSettingsAction->getVerticalAxisAction());
+    _discreteAction.connectToPublicAction(&publicColorMapSettingsAction->getDiscreteAction());
+}
+
+void ColorMapSettingsAction::disconnectFromPublicAction()
+{
+    _horizontalAxisAction.disconnectFromPublicAction();
+    _verticalAxisAction.disconnectFromPublicAction();
+    _discreteAction.disconnectFromPublicAction();
+}
+
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :
     WidgetActionWidget(parent, colorMapSettingsAction),
     _colorMapViewAction(colorMapSettingsAction->getColorMapAction())
