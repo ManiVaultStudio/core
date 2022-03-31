@@ -115,6 +115,30 @@ bool OptionAction::mayPublish() const
     return true;
 }
 
+void OptionAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicOptionAction = dynamic_cast<OptionAction*>(publicAction);
+
+    Q_ASSERT(publicOptionAction != nullptr);
+
+    connect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
+    connect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void OptionAction::disconnectFromPublicAction()
+{
+    auto publicOptionAction = dynamic_cast<OptionAction*>(_publicAction);
+
+    Q_ASSERT(publicOptionAction != nullptr);
+
+    disconnect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
+    disconnect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
 WidgetAction* OptionAction::getPublicCopy() const
 {
     return new OptionAction(parent(), text(), getOptions(), getCurrentText(), getDefaultText());

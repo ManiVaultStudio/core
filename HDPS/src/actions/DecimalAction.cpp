@@ -71,6 +71,30 @@ bool DecimalAction::mayPublish() const
     return true;
 }
 
+void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicDecimalAction = dynamic_cast<DecimalAction*>(publicAction);
+
+    Q_ASSERT(publicDecimalAction != nullptr);
+
+    connect(this, &DecimalAction::valueChanged, publicDecimalAction, &DecimalAction::setValue);
+    connect(publicDecimalAction, &DecimalAction::valueChanged, this, &DecimalAction::setValue);
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void DecimalAction::disconnectFromPublicAction()
+{
+    auto publicDecimalAction = dynamic_cast<DecimalAction*>(_publicAction);
+
+    Q_ASSERT(publicDecimalAction != nullptr);
+
+    disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, &DecimalAction::setValue);
+    disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, &DecimalAction::setValue);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
 WidgetAction* DecimalAction::getPublicCopy() const
 {
     return new DecimalAction(parent(), text(), getMinimum(), getMaximum(), getValue(), getDefaultValue(), getNumberOfDecimals());

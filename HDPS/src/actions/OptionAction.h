@@ -221,7 +221,7 @@ public:
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
 
-public: // Action publishing
+public: // Linking
 
     /**
      * Get whether the action may be published or not
@@ -229,7 +229,16 @@ public: // Action publishing
      */
     bool mayPublish() const override;
 
-protected:  // Action publishing
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
 
     /**
      * Get public copy of the action (other compatible actions can connect to it)

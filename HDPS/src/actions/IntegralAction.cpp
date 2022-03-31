@@ -49,6 +49,30 @@ bool IntegralAction::mayPublish() const
     return true;
 }
 
+void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicIntegralAction = dynamic_cast<IntegralAction*>(publicAction);
+
+    Q_ASSERT(publicIntegralAction != nullptr);
+
+    connect(this, &IntegralAction::valueChanged, publicIntegralAction, &IntegralAction::setValue);
+    connect(publicIntegralAction, &IntegralAction::valueChanged, this, &IntegralAction::setValue);
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void IntegralAction::disconnectFromPublicAction()
+{
+    auto publicIntegralAction = dynamic_cast<IntegralAction*>(_publicAction);
+
+    Q_ASSERT(publicIntegralAction != nullptr);
+
+    connect(this, &IntegralAction::valueChanged, publicIntegralAction, &IntegralAction::setValue);
+    connect(publicIntegralAction, &IntegralAction::valueChanged, this, &IntegralAction::setValue);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
 WidgetAction* IntegralAction::getPublicCopy() const
 {
     return new IntegralAction(parent(), text(), getMinimum(), getMaximum(), getValue(), getDefaultValue());

@@ -40,6 +40,40 @@ void ToggleAction::setDefaultToggled(const bool& defaultToggled)
     emit defaultToggledChanged(_defaultToggled);
 }
 
+bool ToggleAction::mayPublish() const
+{
+    return true;
+}
+
+void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicToggleAction = dynamic_cast<ToggleAction*>(publicAction);
+
+    Q_ASSERT(publicToggleAction != nullptr);
+
+    connect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
+    connect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void ToggleAction::disconnectFromPublicAction()
+{
+    auto publicToggleAction = dynamic_cast<ToggleAction*>(_publicAction);
+
+    Q_ASSERT(publicToggleAction != nullptr);
+
+    disconnect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
+    disconnect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+WidgetAction* ToggleAction::getPublicCopy() const
+{
+    return new ToggleAction(parent(), text(), isChecked(), _defaultToggled);
+}
+
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction) :
     QCheckBox(parent),
     _toggleAction(toggleAction)

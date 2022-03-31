@@ -104,7 +104,7 @@ public:
      */
     void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
-public: // Connection
+public: // Linking
 
     /**
      * Get whether the action may be published or not
@@ -163,7 +163,7 @@ public: // Connection
      */
     const QVector<WidgetAction*> getConnectedActions() const;
 
-protected: // Connection
+protected: // Linking
 
     /**
      * Get public copy of the action (other compatible actions can connect to it)
@@ -317,10 +317,11 @@ signals:
     void actionDisconnected(const WidgetAction* action);
 
 protected:
-    std::int32_t            _defaultWidgetFlags;    /** Default widget flags */
-    std::int32_t            _sortIndex;             /** Sort index (used in the group action to sort actions) */
-    bool                    _isSerializing;         /** Whether the widget action is currently serializing */
-    QVector<WidgetAction*>  _connectedActions;      /** Pointers to widget action that are connected to this action */
+    std::int32_t                _defaultWidgetFlags;    /** Default widget flags */
+    std::int32_t                _sortIndex;             /** Sort index (used in the group action to sort actions) */
+    bool                        _isSerializing;         /** Whether the widget action is currently serializing */
+    WidgetAction*               _publicAction;          /** Public action to which this action might be connected */
+    QVector<WidgetAction*>      _connectedActions;      /** Pointers to widget action that are connected to this action */
 };
 
 /** List of widget actions */

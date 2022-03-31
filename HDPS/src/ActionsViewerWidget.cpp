@@ -139,7 +139,6 @@ ActionsViewerWidget::OverlayWidget::OverlayWidget(QWidget* parent) :
 
     setLayout(layout);
 
-    // Install event filter for synchronizing widget size
     parent->installEventFilter(this);
 
     setObjectName("NoSharedParametersWidget");

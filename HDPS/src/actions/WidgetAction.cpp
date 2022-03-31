@@ -22,6 +22,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _defaultWidgetFlags(),
     _sortIndex(-1),
     _isSerializing(),
+    _publicAction(nullptr),
     _connectedActions()
 {
 }
@@ -124,7 +125,8 @@ void WidgetAction::publish(const QString& name)
             throw std::runtime_error("Public copy not created");
 
         publicCopy->setText(name);
-        publicCopy->connectPrivateAction(this);
+
+        connectToPublicAction(publicCopy);
 
         Application::getActionsManager().addAction(publicCopy);
 
@@ -142,7 +144,11 @@ void WidgetAction::publish(const QString& name)
 
 void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
 {
-    publicAction->connectPrivateAction(this);
+    Q_ASSERT(publicAction != nullptr);
+
+    _publicAction = publicAction;
+
+    _publicAction->connectPrivateAction(this);
 
     emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
 }

@@ -108,7 +108,7 @@ public:
      */
     void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
 
-public: // Action publishing
+public: // Linking
 
     /**
      * Get whether the action may be published or not
@@ -116,7 +116,16 @@ public: // Action publishing
      */
     bool mayPublish() const override;
 
-protected:  // Action publishing
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
 
     /**
      * Get public copy of the action (other compatible actions can connect to it)
