@@ -14,7 +14,11 @@ class WidgetAction;
 /**
  * Widget action label class
  *
- * Label widget that display the widget action text
+ * Creates an interactive widget action based label 
+ * Linkable actions provide a left-lick context menu that provides linking commands:
+ * - Publish an action (create a public shared action)
+ * - Connect to a shared action
+ * - Disconnect from a shared action
  * 
  * @author Thomas Kroes
  */
@@ -51,6 +55,12 @@ private:
 
     /** Update the text of the the postfix label (depends on whether the action is published or not) */
     void updateLabel();
+
+    /** Publish _widgetAction */
+    void publishAction();
+
+    /** Connect _widgetAction to a public action */
+    void connectAction();
 
 protected:
     std::uint32_t       _flags;                 /** Configuration flags */

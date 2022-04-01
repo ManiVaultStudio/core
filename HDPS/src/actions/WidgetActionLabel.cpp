@@ -35,101 +35,8 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _connectAction.setIcon(fontAwesome.getIcon("link"));
     _disconnectAction.setIcon(fontAwesome.getIcon("unlink"));
 
-    connect(&_publishAction, &TriggerAction::triggered, this, [this, &fontAwesome]() -> void {
-        QDialog publishDialog(this);
-
-        publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
-        publishDialog.setWindowTitle("Publish " + _widgetAction->text() + " parameter");
-
-        auto mainLayout         = new QVBoxLayout();
-        auto parameterLayout    = new QHBoxLayout();
-
-        auto label      = new QLabel("Name:");
-        auto lineEdit   = new QLineEdit();
-
-        parameterLayout->addWidget(label);
-        parameterLayout->addWidget(lineEdit);
-
-        mainLayout->addLayout(parameterLayout);
-
-        auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-        dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Publish");
-        dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Publish the parameter");
-        dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel publishing");
-
-        connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &publishDialog, &QDialog::accept);
-        connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &publishDialog, &QDialog::reject);
-
-        mainLayout->addWidget(dialogButtonBox);
-
-        publishDialog.setLayout(mainLayout);
-        publishDialog.setFixedWidth(300);
-
-        const auto updateOkButtonReadOnly = [dialogButtonBox, lineEdit]() -> void {
-            dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!lineEdit->text().isEmpty());
-        };
-
-        connect(lineEdit, &QLineEdit::textChanged, this, updateOkButtonReadOnly);
-
-        updateOkButtonReadOnly();
-
-        if (publishDialog.exec() == QDialog::Accepted)
-            _widgetAction->publish(lineEdit->text());
-    });
-
-    connect(&_connectAction, &TriggerAction::triggered, this, [this, &fontAwesome]() -> void {
-        QDialog connectDialog(this);
-
-        connectDialog.setWindowIcon(fontAwesome.getIcon("link"));
-        connectDialog.setWindowTitle("Connect " + _widgetAction->text() + " to public parameter");
-
-        auto mainLayout         = new QVBoxLayout();
-        auto treeView           = new QTreeView();
-        auto actionsFilterModel = new ActionsFilterModel(this);
-
-        actionsFilterModel->setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
-        actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
-
-        treeView->setModel(actionsFilterModel);
-        treeView->setRootIsDecorated(false);
-        treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
-        treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        treeView->setSortingEnabled(false);
-
-        treeView->header()->hideSection(ActionsModel::Column::Type);
-        treeView->header()->hideSection(ActionsModel::Column::IsPublic);
-
-        mainLayout->addWidget(treeView);
-
-        auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-        dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Connect");
-        dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Connect to the selected parameter");
-        dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel connection");
-
-        connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &connectDialog, &QDialog::accept);
-        connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &connectDialog, &QDialog::reject);
-
-        mainLayout->addWidget(dialogButtonBox);
-
-        connectDialog.setLayout(mainLayout);
-        connectDialog.setMinimumSize(400, 400);
-
-        const auto updateOkButtonReadOnly = [dialogButtonBox, treeView]() -> void {
-            dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(treeView->selectionModel()->selectedRows().count() == 1);
-        };
-
-        connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, updateOkButtonReadOnly);
-
-        updateOkButtonReadOnly();
-
-        if (connectDialog.exec() == QDialog::Accepted) {
-            const auto selectedAction = actionsFilterModel->mapToSource(treeView->selectionModel()->selectedRows().first());
-            _widgetAction->connectToPublicAction(static_cast<WidgetAction*>(selectedAction.internalPointer()));
-        }
-    });
-
+    connect(&_publishAction, &TriggerAction::triggered, this, &WidgetActionLabel::publishAction);
+    connect(&_connectAction, &TriggerAction::triggered, this, &WidgetActionLabel::connectAction);
     connect(&_disconnectAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::disconnectFromPublicAction);
 
     auto layout = new QHBoxLayout();
@@ -158,19 +65,12 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     updateLabel();
     updatePublishAction();
 
+    // Intercept name label events so that we can highlight and provide a context menu to the label
     _nameLabel.installEventFilter(this);
-
-    connect(&_nameLabel, &QObject::destroyed, this, [this]() -> void {
-        qDebug() << "_widgetAction, &QObject::destroyed";
-        //_widgetAction = nullptr;
-        //_nameLabel.removeEventFilter(this);
-    });
 }
 
 bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 {
-    
-
     switch (event->type())
     {
         case QEvent::MouseButtonPress:
@@ -182,13 +82,11 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
             auto contextMenu = QSharedPointer<QMenu>::create();
 
-            qDebug() << _widgetAction->mayPublish() << _widgetAction->isPublic();
-
             if (_widgetAction && _widgetAction->mayPublish()) {
 
                 if (!_widgetAction->isPublic())
                     contextMenu->addAction(&_publishAction);
-                /*
+
                 if (!contextMenu->actions().isEmpty())
                     contextMenu->addSeparator();
 
@@ -196,7 +94,6 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
                     contextMenu->addAction(&_disconnectAction);
                 else
                     contextMenu->addAction(&_connectAction);
-                */
             }
 
             if (contextMenu->actions().isEmpty())
@@ -239,6 +136,107 @@ void WidgetActionLabel::updateLabel()
         auto font = _nameLabel.font();
         font.setItalic(_widgetAction->isConnected());
         _nameLabel.setFont(font);
+    }
+}
+
+void WidgetActionLabel::publishAction()
+{
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    QDialog publishDialog(this);
+
+    publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
+    publishDialog.setWindowTitle("Publish " + _widgetAction->text() + " parameter");
+
+    auto mainLayout = new QVBoxLayout();
+    auto parameterLayout = new QHBoxLayout();
+
+    auto label = new QLabel("Name:");
+    auto lineEdit = new QLineEdit();
+
+    parameterLayout->addWidget(label);
+    parameterLayout->addWidget(lineEdit);
+
+    mainLayout->addLayout(parameterLayout);
+
+    auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+    dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Publish");
+    dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Publish the parameter");
+    dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel publishing");
+
+    connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &publishDialog, &QDialog::accept);
+    connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &publishDialog, &QDialog::reject);
+
+    mainLayout->addWidget(dialogButtonBox);
+
+    publishDialog.setLayout(mainLayout);
+    publishDialog.setFixedWidth(300);
+
+    const auto updateOkButtonReadOnly = [dialogButtonBox, lineEdit]() -> void {
+        dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!lineEdit->text().isEmpty());
+    };
+
+    connect(lineEdit, &QLineEdit::textChanged, this, updateOkButtonReadOnly);
+
+    updateOkButtonReadOnly();
+
+    if (publishDialog.exec() == QDialog::Accepted)
+        _widgetAction->publish(lineEdit->text());
+}
+
+void WidgetActionLabel::connectAction()
+{
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    QDialog connectDialog(this);
+
+    connectDialog.setWindowIcon(fontAwesome.getIcon("link"));
+    connectDialog.setWindowTitle("Connect " + _widgetAction->text() + " to public parameter");
+
+    auto mainLayout = new QVBoxLayout();
+    auto treeView = new QTreeView();
+    auto actionsFilterModel = new ActionsFilterModel(this);
+
+    actionsFilterModel->setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
+    actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
+
+    treeView->setModel(actionsFilterModel);
+    treeView->setRootIsDecorated(false);
+    treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    treeView->setSortingEnabled(false);
+
+    treeView->header()->hideSection(ActionsModel::Column::Type);
+    treeView->header()->hideSection(ActionsModel::Column::IsPublic);
+
+    mainLayout->addWidget(treeView);
+
+    auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+    dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Connect");
+    dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Connect to the selected parameter");
+    dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel connection");
+
+    connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &connectDialog, &QDialog::accept);
+    connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &connectDialog, &QDialog::reject);
+
+    mainLayout->addWidget(dialogButtonBox);
+
+    connectDialog.setLayout(mainLayout);
+    connectDialog.setMinimumSize(400, 400);
+
+    const auto updateOkButtonReadOnly = [dialogButtonBox, treeView]() -> void {
+        dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(treeView->selectionModel()->selectedRows().count() == 1);
+    };
+
+    connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, updateOkButtonReadOnly);
+
+    updateOkButtonReadOnly();
+
+    if (connectDialog.exec() == QDialog::Accepted) {
+        const auto selectedAction = actionsFilterModel->mapToSource(treeView->selectionModel()->selectedRows().first());
+        _widgetAction->connectToPublicAction(static_cast<WidgetAction*>(selectedAction.internalPointer()));
     }
 }
 
