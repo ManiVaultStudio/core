@@ -19,7 +19,7 @@ namespace gui {
 
 WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= 0*/) :
     QWidget(parent),
-    _flags(flags == 0 ? ColonAfterName : flags),
+    _flags(flags),
     _widgetAction(widgetAction),
     _nameLabel(),
     _publishAction(this, "Publish..."),

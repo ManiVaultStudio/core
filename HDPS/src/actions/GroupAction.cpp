@@ -140,7 +140,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
             const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
 
             if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
-                auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, isToggleAction ? WidgetActionLabel::ColonAfterName : 0));
+                auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
                 _layout->addWidget(labelWidget, numRows, 0);
             }
 
