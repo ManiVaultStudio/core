@@ -160,32 +160,16 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
     _nameLabel.installEventFilter(this);
 
-    connect(_widgetAction, &QObject::destroyed, this, [this]() -> void {
-        _nameLabel.removeEventFilter(this);
+    connect(&_nameLabel, &QObject::destroyed, this, [this]() -> void {
+        qDebug() << "_widgetAction, &QObject::destroyed";
+        //_widgetAction = nullptr;
+        //_nameLabel.removeEventFilter(this);
     });
 }
 
 bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 {
-    auto contextMenu = new QMenu();
-
-    /*
-    if (_widgetAction->mayPublish()) {
-        if (!_widgetAction->isPublic())
-            contextMenu->addAction(&_publishAction);
-
-        if (!contextMenu->actions().isEmpty())
-            contextMenu->addSeparator();
-
-        if (_widgetAction->isConnected())
-            contextMenu->addAction(&_disconnectAction);
-        else
-            contextMenu->addAction(&_connectAction);
-    }
-    */
-
-    if (contextMenu->actions().isEmpty())
-        return QWidget::eventFilter(target, event);
+    
 
     switch (event->type())
     {
@@ -195,6 +179,28 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
             if (mouseButtonPress->button() != Qt::LeftButton)
                 break;
+
+            auto contextMenu = QSharedPointer<QMenu>::create();
+
+            qDebug() << _widgetAction->mayPublish() << _widgetAction->isPublic();
+
+            if (_widgetAction && _widgetAction->mayPublish()) {
+
+                if (!_widgetAction->isPublic())
+                    contextMenu->addAction(&_publishAction);
+                /*
+                if (!contextMenu->actions().isEmpty())
+                    contextMenu->addSeparator();
+
+                if (_widgetAction->isConnected())
+                    contextMenu->addAction(&_disconnectAction);
+                else
+                    contextMenu->addAction(&_connectAction);
+                */
+            }
+
+            if (contextMenu->actions().isEmpty())
+                return QWidget::eventFilter(target, event);
 
             contextMenu->exec(cursor().pos());
 
