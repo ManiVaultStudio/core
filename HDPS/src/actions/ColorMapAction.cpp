@@ -62,6 +62,7 @@ void ColorMapAction::setColorMapType(const util::ColorMap::Type& colorMapType)
     _currentColorMapAction.reset();
 
     emit typeChanged(colorMapType);
+    emit imageChanged(getColorMapImage());
 }
 
 QString ColorMapAction::getColorMap() const

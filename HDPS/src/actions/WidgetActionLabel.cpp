@@ -152,7 +152,7 @@ void WidgetActionLabel::publishAction()
     auto parameterLayout = new QHBoxLayout();
 
     auto label = new QLabel("Name:");
-    auto lineEdit = new QLineEdit();
+    auto lineEdit = new QLineEdit(_widgetAction->text());
 
     parameterLayout->addWidget(label);
     parameterLayout->addWidget(lineEdit);
