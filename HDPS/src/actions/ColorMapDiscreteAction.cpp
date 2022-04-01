@@ -21,6 +21,29 @@ ColorMapDiscreteAction::ColorMapDiscreteAction(ColorMapSettingsAction& colorMapS
     _numberOfStepsAction.setToolTip("Number of discrete steps");
 }
 
+void ColorMapDiscreteAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicColorMapDiscreteAction = dynamic_cast<ColorMapDiscreteAction*>(publicAction);
+
+    Q_ASSERT(publicColorMapDiscreteAction != nullptr);
+
+    _numberOfStepsAction.connectToPublicAction(&publicColorMapDiscreteAction->getNumberOfStepsAction());
+
+    connect(this, &WidgetAction::toggled, publicColorMapDiscreteAction, &WidgetAction::setChecked);
+    connect(publicColorMapDiscreteAction, &WidgetAction::toggled, this, &WidgetAction::setChecked);
+
+    setChecked(publicColorMapDiscreteAction->isChecked());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void ColorMapDiscreteAction::disconnectFromPublicAction()
+{
+    _numberOfStepsAction.disconnectFromPublicAction();
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
 void ColorMapDiscreteAction::fromVariantMap(const QVariantMap& variantMap)
 {
     if (!variantMap.contains("Enabled"))

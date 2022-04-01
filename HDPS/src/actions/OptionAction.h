@@ -122,6 +122,12 @@ public:
     OptionAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QString& currentOption = "", const QString& defaultOption = "");
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
+    /**
      * Initialize the option action
      * @param options Options
      * @param currentOption Current option
@@ -214,6 +220,31 @@ public:
 
     /** Get the used item model */
     const QAbstractItemModel* getModel() const;
+
+public: // Linking
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
 
 public: // Serialization
 

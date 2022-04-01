@@ -31,7 +31,11 @@ public:
     class NoDataOverlayWidget : public QWidget
     {
     public:
-        /** Default constructor */
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         */
         NoDataOverlayWidget(QWidget* parent);
 
         /**

@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "DataHierarchyWidget.h"
+#include "ActionsViewerWidget.h"
 #include "DataPropertiesWidget.h"
 #include "DataManager.h"
 #include "Logger.h"
@@ -45,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
     _startPageWidget(nullptr),
     _dataHierarchyWidget(nullptr),
+    _actionsViewerWidget(nullptr),
     _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),
     _centralDockArea(nullptr),
@@ -53,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _centralDockWidget(new CDockWidget("Views")),
     _startPageDockWidget(new CDockWidget("Start page")),
     _dataHierarchyDockWidget(new CDockWidget("Data hierarchy")),
+    _actionsViewerDockWidget(new CDockWidget("Shared parameters")),
     _dataPropertiesDockWidget(new CDockWidget("Data properties")),
     _loggingDockWidget(new CDockWidget("Logging"))
 {
@@ -66,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     _startPageWidget        = new StartPageWidget(this);
     _dataHierarchyWidget    = new DataHierarchyWidget(this);
+    _actionsViewerWidget    = new ActionsViewerWidget(this);
     _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
     // Change the window title when the current project file changed
@@ -295,6 +299,12 @@ void MainWindow::initializeSettingsDockingArea()
     _dataHierarchyDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap", QSize(16, 16)));
     _dataHierarchyDockWidget->setWidget(_dataHierarchyWidget);
 
+    _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
+    _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
+    _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
+    _actionsViewerDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("link", QSize(16, 16)));
+    _actionsViewerDockWidget->setWidget(_actionsViewerWidget);
+
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
@@ -302,7 +312,14 @@ void MainWindow::initializeSettingsDockingArea()
     _dataPropertiesDockWidget->setWidget(_dataPropertiesWidget);
 
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
+    _settingsDockArea = _dockManager->addDockWidget(CenterDockWidgetArea, _actionsViewerDockWidget, _settingsDockArea);
+
+    _settingsDockArea->setCurrentIndex(0);
+
     _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataPropertiesDockWidget, _settingsDockArea);
+
+    //_actionsViewerDockWidget->tabWidget()->setActiveTab(false);
+    //_dataHierarchyDockWidget->tabWidget()->setActiveTab(true);
 
     auto splitter = ads::internal::findParent<ads::CDockSplitter*>(_settingsDockArea);
 

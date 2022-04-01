@@ -247,7 +247,7 @@ void GroupsAction::Widget::createToolbar(const std::int32_t& widgetFlags)
 {
     // Filter action is in search mode
     _filterAction.setSearchMode(true);
-    _filterAction.setPlaceHolderString("Filter properties by name...");
+    _filterAction.setPlaceHolderString("Filter by name...");
 
     // Set action icon
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));

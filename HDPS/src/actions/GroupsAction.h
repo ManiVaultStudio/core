@@ -4,6 +4,8 @@
 #include "StringAction.h"
 #include "TriggerAction.h"
 
+#include <QStyledItemDelegate>
+
 class QWidget;
 
 namespace hdps {

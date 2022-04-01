@@ -100,6 +100,12 @@ public:
     ToggleAction(QObject* parent, const QString& title = "", const bool& toggled = false, const bool& defaultToggled = false);
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
+    /**
      * Initialize the toggle action
      * @param toggled Toggled
      * @param defaultToggled Default toggled
@@ -114,6 +120,31 @@ public:
      * @param defaultToggled Default toggled
      */
     void setDefaultToggled(const bool& defaultToggled);
+
+public: // Linking
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
 
 signals:
 

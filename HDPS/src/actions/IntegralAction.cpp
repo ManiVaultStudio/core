@@ -26,6 +26,11 @@ IntegralAction::IntegralAction(QObject * parent, const QString& title, const std
     initialize(minimum, maximum, value, defaultValue);
 }
 
+QString IntegralAction::getTypeString() const
+{
+    return "Integral";
+}
+
 void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue)
 {
     _minimum        = std::min(minimum, _maximum);
@@ -37,6 +42,42 @@ void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t&
     _maximumChanged();
     _valueChanged();
     _defaultValueChanged();
+}
+
+bool IntegralAction::mayPublish() const
+{
+    return true;
+}
+
+void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicIntegralAction = dynamic_cast<IntegralAction*>(publicAction);
+
+    Q_ASSERT(publicIntegralAction != nullptr);
+
+    connect(this, &IntegralAction::valueChanged, publicIntegralAction, &IntegralAction::setValue);
+    connect(publicIntegralAction, &IntegralAction::valueChanged, this, &IntegralAction::setValue);
+
+    setValue(publicIntegralAction->getValue());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void IntegralAction::disconnectFromPublicAction()
+{
+    auto publicIntegralAction = dynamic_cast<IntegralAction*>(_publicAction);
+
+    Q_ASSERT(publicIntegralAction != nullptr);
+
+    connect(this, &IntegralAction::valueChanged, publicIntegralAction, &IntegralAction::setValue);
+    connect(publicIntegralAction, &IntegralAction::valueChanged, this, &IntegralAction::setValue);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+WidgetAction* IntegralAction::getPublicCopy() const
+{
+    return new IntegralAction(parent(), text(), getMinimum(), getMaximum(), getValue(), getDefaultValue());
 }
 
 void IntegralAction::fromVariantMap(const QVariantMap& variantMap)

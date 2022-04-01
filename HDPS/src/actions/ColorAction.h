@@ -103,6 +103,12 @@ public:
     ColorAction(QObject* parent, const QString& title = "", const QColor& color = DEFAULT_COLOR, const QColor& defaultColor = DEFAULT_COLOR);
 
     /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
+    /**
      * Initialize the color action
      * @param color Initial color
      * @param defaultColor Default color
@@ -123,6 +129,31 @@ public:
 
     /** Sets the default color */
     void setDefaultColor(const QColor& defaultColor);
+
+public: // Linking
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
 
 public: // Serialization
 

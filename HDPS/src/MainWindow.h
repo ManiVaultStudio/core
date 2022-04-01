@@ -34,6 +34,7 @@ namespace gui
 
 class LogDockWidget;
 class DataHierarchyWidget;
+class ActionsViewerWidget;
 class DataPropertiesWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
@@ -179,6 +180,7 @@ private:
     QSharedPointer<Core>        _core;                          /** HDPS core */
     StartPageWidget*            _startPageWidget;               /** Pointer to the start page widget */
     DataHierarchyWidget*        _dataHierarchyWidget;           /** Pointer to the data hierarchy tree widget */
+    ActionsViewerWidget*        _actionsViewerWidget;           /** Pointer to the actions viewer widget */
     DataPropertiesWidget*       _dataPropertiesWidget;          /** Pointer to the data properties widget */
 
 private: // Docking
@@ -189,6 +191,7 @@ private: // Docking
     ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */
     ads::CDockWidget*           _startPageDockWidget;           /** Dock widget for the start page */
     ads::CDockWidget*           _dataHierarchyDockWidget;       /** Dock widget for data hierarchy */
+    ads::CDockWidget*           _actionsViewerDockWidget;       /** Dock widget for actions viewer */
     ads::CDockWidget*           _dataPropertiesDockWidget;      /** Dock widget for data properties */
     ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
 };

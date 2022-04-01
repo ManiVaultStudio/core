@@ -21,8 +21,19 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
     _sortIndex(-1),
-    _isSerializing()
+    _isSerializing(),
+    _publicAction(nullptr),
+    _connectedActions()
 {
+}
+
+WidgetAction::~WidgetAction()
+{
+}
+
+QString WidgetAction::getTypeString() const
+{
+    return "";
 }
 
 WidgetAction* WidgetAction::getParentWidgetAction()
@@ -58,9 +69,9 @@ QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
     return new WidgetActionCollapsedWidget(parent, this);
 }
 
-QWidget* WidgetAction::createLabelWidget(QWidget* parent)
+QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0*/)
 {
-    return new WidgetActionLabel(this, parent);
+    return new WidgetActionLabel(this, parent, widgetFlags);
 }
 
 QMenu* WidgetAction::getContextMenu(QWidget* parent /*= nullptr*/)
@@ -76,6 +87,117 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;
+}
+
+bool WidgetAction::mayPublish() const
+{
+    return false;
+}
+
+bool WidgetAction::isPublic() const
+{
+    return Application::getActionsManager().isActionPublic(this);
+}
+
+bool WidgetAction::isPublished() const
+{
+    return Application::getActionsManager().isActionPublished(this);
+}
+
+bool WidgetAction::isConnected() const
+{
+    return Application::getActionsManager().isActionConnected(this);
+}
+
+void WidgetAction::publish(const QString& name)
+{
+    try
+    {
+        if (name.isEmpty())
+            throw std::runtime_error("Parameter name may not be empty");
+
+        if (Application::getActionsManager().isActionPublished(this))
+            throw std::runtime_error("Action is already published");
+
+        auto publicCopy = getPublicCopy();
+
+        if (publicCopy == nullptr)
+            throw std::runtime_error("Public copy not created");
+
+        publicCopy->setText(name);
+
+        connectToPublicAction(publicCopy);
+
+        Application::getActionsManager().addAction(publicCopy);
+
+        emit isPublishedChanged(Application::getActionsManager().isActionPublished(this));
+        emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to publish " + text(), e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to publish " + text());
+    }
+}
+
+void WidgetAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    Q_ASSERT(publicAction != nullptr);
+
+    _publicAction = publicAction;
+
+    _publicAction->connectPrivateAction(this);
+
+    emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+}
+
+void WidgetAction::disconnectFromPublicAction()
+{
+    Q_ASSERT(_publicAction != nullptr);
+
+    _publicAction->disconnectPrivateAction(this);
+
+    emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+}
+
+void WidgetAction::connectPrivateAction(WidgetAction* privateAction)
+{
+    Q_ASSERT(privateAction != nullptr);
+
+    _connectedActions << privateAction;
+
+    emit actionConnected(privateAction);
+
+    connect(privateAction, &WidgetAction::destroyed, this, [this, privateAction]() -> void {
+        disconnectPrivateAction(privateAction);
+    });
+}
+
+void WidgetAction::disconnectPrivateAction(WidgetAction* privateAction)
+{
+    Q_ASSERT(privateAction != nullptr);
+
+    _connectedActions.removeOne(privateAction);
+
+    emit actionDisconnected(privateAction);
+}
+
+WidgetAction* WidgetAction::getPublicAction()
+{
+    return _publicAction;
+}
+
+const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
+{
+    return _connectedActions;
+}
+
+WidgetAction* WidgetAction::getPublicCopy() const
+{
+    return nullptr;
 }
 
 QString WidgetAction::getSettingsPath() const

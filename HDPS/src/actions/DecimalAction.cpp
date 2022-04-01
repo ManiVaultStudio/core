@@ -29,6 +29,11 @@ DecimalAction::DecimalAction(QObject * parent, const QString& title, const float
     initialize(minimum, maximum, value, defaultValue, numberOfDecimals);
 }
 
+QString DecimalAction::getTypeString() const
+{
+    return "Decimal";
+}
+
 void DecimalAction::initialize(const float& minimum, const float& maximum, const float& value, const float& defaultValue, const std::uint32_t& numberOfDecimals /*= INIT_NUMBER_OF_DECIMALS*/)
 {
     _minimum            = std::min(minimum, _maximum);
@@ -59,6 +64,42 @@ void DecimalAction::setSingleStep(const float& singleStep)
     _singleStep = std::max(0.0f, singleStep);
 
     emit singleStepChanged(_singleStep);
+}
+
+bool DecimalAction::mayPublish() const
+{
+    return true;
+}
+
+void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicDecimalAction = dynamic_cast<DecimalAction*>(publicAction);
+
+    Q_ASSERT(publicDecimalAction != nullptr);
+
+    connect(this, &DecimalAction::valueChanged, publicDecimalAction, &DecimalAction::setValue);
+    connect(publicDecimalAction, &DecimalAction::valueChanged, this, &DecimalAction::setValue);
+
+    setValue(publicDecimalAction->getValue());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void DecimalAction::disconnectFromPublicAction()
+{
+    auto publicDecimalAction = dynamic_cast<DecimalAction*>(_publicAction);
+
+    Q_ASSERT(publicDecimalAction != nullptr);
+
+    disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, &DecimalAction::setValue);
+    disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, &DecimalAction::setValue);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+WidgetAction* DecimalAction::getPublicCopy() const
+{
+    return new DecimalAction(parent(), text(), getMinimum(), getMaximum(), getValue(), getDefaultValue(), getNumberOfDecimals());
 }
 
 void DecimalAction::fromVariantMap(const QVariantMap& variantMap)

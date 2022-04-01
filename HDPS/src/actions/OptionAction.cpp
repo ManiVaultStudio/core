@@ -25,6 +25,11 @@ OptionAction::OptionAction(QObject* parent, const QString& title /*= ""*/, const
     initialize(options, currentOption, defaultOption);
 }
 
+QString OptionAction::getTypeString() const
+{
+    return "Option";
+}
+
 void OptionAction::initialize(const QStringList& options /*= QStringList()*/, const QString& currentOption /*= ""*/, const QString& defaultOption /*= ""*/)
 {
     setOptions(options);
@@ -103,6 +108,42 @@ const QAbstractItemModel* OptionAction::getModel() const
         return _customModel;
 
     return &_defaultModel;
+}
+
+bool OptionAction::mayPublish() const
+{
+    return true;
+}
+
+void OptionAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicOptionAction = dynamic_cast<OptionAction*>(publicAction);
+
+    Q_ASSERT(publicOptionAction != nullptr);
+
+    connect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
+    connect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
+
+    setCurrentIndex(publicOptionAction->getCurrentIndex());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void OptionAction::disconnectFromPublicAction()
+{
+    auto publicOptionAction = dynamic_cast<OptionAction*>(_publicAction);
+
+    Q_ASSERT(publicOptionAction != nullptr);
+
+    disconnect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
+    disconnect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+WidgetAction* OptionAction::getPublicCopy() const
+{
+    return new OptionAction(parent(), text(), getOptions(), getCurrentText(), getDefaultText());
 }
 
 void OptionAction::fromVariantMap(const QVariantMap& variantMap)

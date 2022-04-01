@@ -21,6 +21,11 @@ ColorAction::ColorAction(QObject* parent, const QString& title /*= ""*/, const Q
     setDefaultWidgetFlags(WidgetFlag::Basic);
 }
 
+QString ColorAction::getTypeString() const
+{
+    return "Color";
+}
+
 void ColorAction::initialize(const QColor& color /*= DEFAULT_COLOR*/, const QColor& defaultColor /*= DEFAULT_COLOR*/)
 {
     setColor(color);
@@ -55,6 +60,42 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     _defaultColor = defaultColor;
 
     emit defaultColorChanged(_defaultColor);
+}
+
+bool ColorAction::mayPublish() const
+{
+    return true;
+}
+
+void ColorAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicColorAction = dynamic_cast<ColorAction*>(publicAction);
+
+    Q_ASSERT(publicColorAction != nullptr);
+
+    connect(this, &ColorAction::colorChanged, publicColorAction, &ColorAction::setColor);
+    connect(publicColorAction, &ColorAction::colorChanged, this, &ColorAction::setColor);
+
+    setColor(publicColorAction->getColor());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void ColorAction::disconnectFromPublicAction()
+{
+    auto publicColorAction = dynamic_cast<ColorAction*>(_publicAction);
+
+    Q_ASSERT(publicColorAction != nullptr);
+
+    disconnect(this, &ColorAction::colorChanged, publicColorAction, &ColorAction::setColor);
+    disconnect(publicColorAction, &ColorAction::colorChanged, this, &ColorAction::setColor);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+WidgetAction* ColorAction::getPublicCopy() const
+{
+    return new ColorAction(parent(), text(), getColor(), getDefaultColor());
 }
 
 void ColorAction::fromVariantMap(const QVariantMap& variantMap)

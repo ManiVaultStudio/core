@@ -96,7 +96,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Create layout that will contain the toolbar and the tree view
     auto layout = new QVBoxLayout();
 
-    // Remove the layout margin and spacing
     layout->setMargin(6);
     layout->setSpacing(3);
 

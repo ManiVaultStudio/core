@@ -327,6 +327,9 @@ set( PLUGIN_HEADERS
     src/LinkedSelection.h
     src/Dataset.h
     src/DatasetPrivate.h
+    src/ActionsModel.h
+    src/ActionsFilterModel.h
+    src/ActionsManager.h
 )
 
 set( PLUGIN_SOURCES
@@ -339,6 +342,9 @@ set( PLUGIN_SOURCES
     src/LinkedSelection.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp
+    src/ActionsModel.cpp
+    src/ActionsFilterModel.cpp
+    src/ActionsManager.cpp
 )
 
 set(DATA_HIERARCHY_HEADERS
@@ -347,6 +353,7 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
     src/DataPropertiesWidget.h
+    src/ActionsViewerWidget.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -355,6 +362,7 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp
+    src/ActionsViewerWidget.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

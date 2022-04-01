@@ -120,6 +120,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     auto contentsMargin = _layout->contentsMargins();
 
     _layout->setMargin(10);
+    
 
     setLayout(_layout);
 
@@ -139,11 +140,16 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
             const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
 
             if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
-                auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this));
+                auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
                 _layout->addWidget(labelWidget, numRows, 0);
             }
 
-            _layout->addWidget(widgetAction->createWidget(this), numRows, 1);
+            auto actionWidget = widgetAction->createWidget(this);
+
+            _layout->addWidget(actionWidget, numRows, 1);
+
+            if (isToggleAction)
+                _layout->setAlignment(actionWidget, Qt::AlignLeft);
         }
     };
 

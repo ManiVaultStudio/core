@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QHBoxLayout>
+#include <QLabel>
 
 namespace hdps {
 
@@ -17,6 +18,11 @@ ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
     initialize(toggled, defaultToggled);
+}
+
+QString ToggleAction::getTypeString() const
+{
+    return "Toggle";
 }
 
 void ToggleAction::initialize(const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/)
@@ -40,15 +46,58 @@ void ToggleAction::setDefaultToggled(const bool& defaultToggled)
     emit defaultToggledChanged(_defaultToggled);
 }
 
+bool ToggleAction::mayPublish() const
+{
+    return true;
+}
+
+void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicToggleAction = dynamic_cast<ToggleAction*>(publicAction);
+
+    Q_ASSERT(publicToggleAction != nullptr);
+
+    connect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
+    connect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);
+
+    setChecked(publicToggleAction->isChecked());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void ToggleAction::disconnectFromPublicAction()
+{
+    auto publicToggleAction = dynamic_cast<ToggleAction*>(_publicAction);
+
+    Q_ASSERT(publicToggleAction != nullptr);
+
+    disconnect(this, &ToggleAction::toggled, publicToggleAction, &ToggleAction::setChecked);
+    disconnect(publicToggleAction, &ToggleAction::toggled, this, &ToggleAction::setChecked);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+WidgetAction* ToggleAction::getPublicCopy() const
+{
+    return new ToggleAction(parent(), text(), isChecked(), _defaultToggled);
+}
+
 ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* toggleAction) :
     QCheckBox(parent),
     _toggleAction(toggleAction)
 {
     setAcceptDrops(true);
+    setText("");
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(20, 0, 0, 0);
+
+    layout->addWidget(toggleAction->createLabelWidget(this));
+    layout->setSizeConstraint(QLayout::SetFixedSize);
+
+    setLayout(layout);
 
     connect(this, &QCheckBox::toggled, this, [this](bool toggled) {
         _toggleAction->setChecked(toggled);
@@ -58,7 +107,6 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
         QSignalBlocker blocker(this);
 
         setEnabled(_toggleAction->isEnabled());
-        setText(_toggleAction->text());
         setToolTip(_toggleAction->toolTip());
         setVisible(_toggleAction->isVisible());
     };

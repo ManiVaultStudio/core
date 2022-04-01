@@ -88,10 +88,15 @@ public:
      * @param title Title of the action
      * @param minimum Minimum value
      * @param maximum Maximum value
-     * @param value Value
      * @param defaultValue Default value
      */
     IntegralAction(QObject * parent, const QString& title, const std::int32_t& minimum = INIT_MIN, const std::int32_t& maximum = INIT_MAX, const std::int32_t& value = INIT_VALUE, const std::int32_t& defaultValue = INIT_DEFAULT_VALUE);
+
+    /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
 
     /**
      * Initialize the integral action
@@ -101,6 +106,31 @@ public:
      * @param defaultValue Default value
      */
     void initialize(const std::int32_t& minimum, const std::int32_t& maximum, const std::int32_t& value, const std::int32_t& defaultValue);
+
+public: // Linking
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
 
 public: // Serialization
 
