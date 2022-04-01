@@ -76,17 +76,17 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
 
     // Load dimension selection from file when the corresponding action is triggered
     connect(&_loadSelectionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
-        _dimensionsPickerAction.loadSelectionFromFile(QFileDialog::getOpenFileName(nullptr, tr("Dimension selection"), {}, selectionFileFilter));
+        _dimensionsPickerAction.loadSelectionFromFile(QFileDialog::getOpenFileName(nullptr, tr("Load dimension selection from file"), {}, selectionFileFilter));
     });
 
     // Save dimension selection to file when the corresponding action is triggered
     connect(&_saveSelectionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
-        _dimensionsPickerAction.saveSelectionToFile(QFileDialog::getOpenFileName(nullptr, tr("Dimension selection"), {}, selectionFileFilter));
+        _dimensionsPickerAction.saveSelectionToFile(QFileDialog::getSaveFileName(nullptr, tr("Save dimension selection to file"), {}, selectionFileFilter));
     });
 
     // Load dimension exclusion from file when the corresponding action is triggered
     connect(&_loadExclusionAction, &TriggerAction::triggered, this, [this, selectionFileFilter]() {
-        _dimensionsPickerAction.loadExclusionFromFile(QFileDialog::getOpenFileName(nullptr, tr("Exclusion list"), {}, selectionFileFilter));
+        _dimensionsPickerAction.loadExclusionFromFile(QFileDialog::getOpenFileName(nullptr, tr("Load dimension exclusion list from file"), {}, selectionFileFilter));
     });
 }
 
