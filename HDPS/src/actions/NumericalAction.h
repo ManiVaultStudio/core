@@ -81,12 +81,18 @@ public:
     /**
      * Sets the current value
      * @param value Current value
+     * @param silent Prevent notification of value change
      */
-    virtual void setValue(const NumericalType& value) {
-        if (value == _value)
+    virtual void setValue(const NumericalType& value, const bool& silent = false) {
+        const auto clampedValue = std::max(_minimum, std::min(value, _maximum));
+
+        if (clampedValue == _value)
             return;
 
-        _value = std::max(_minimum, std::min(value, _maximum));
+        _value = clampedValue;
+
+        if (silent)
+            return;
 
         _valueChanged();
     }

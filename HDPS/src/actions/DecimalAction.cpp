@@ -77,8 +77,13 @@ void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicDecimalAction != nullptr);
 
-    connect(this, &DecimalAction::valueChanged, publicDecimalAction, &DecimalAction::setValue);
-    connect(publicDecimalAction, &DecimalAction::valueChanged, this, &DecimalAction::setValue);
+    connect(this, &DecimalAction::valueChanged, publicDecimalAction, [publicDecimalAction](const float& value) -> void {
+        publicDecimalAction->setValue(value);
+    });
+
+    connect(publicDecimalAction, &DecimalAction::valueChanged, this, [this](const float& value) -> void {
+        setValue(value);
+    });
 
     setValue(publicDecimalAction->getValue());
 
@@ -91,15 +96,15 @@ void DecimalAction::disconnectFromPublicAction()
 
     Q_ASSERT(publicDecimalAction != nullptr);
 
-    disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, &DecimalAction::setValue);
-    disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, &DecimalAction::setValue);
+    disconnect(this, &DecimalAction::valueChanged, publicDecimalAction, nullptr);
+    disconnect(publicDecimalAction, &DecimalAction::valueChanged, this, nullptr);
 
     WidgetAction::disconnectFromPublicAction();
 }
 
 WidgetAction* DecimalAction::getPublicCopy() const
 {
-    return new DecimalAction(parent(), text(), getMinimum(), getMaximum(), getValue(), getDefaultValue(), getNumberOfDecimals());
+    return new DecimalAction(parent(), text(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), getValue(), getDefaultValue(), getNumberOfDecimals());
 }
 
 void DecimalAction::fromVariantMap(const QVariantMap& variantMap)

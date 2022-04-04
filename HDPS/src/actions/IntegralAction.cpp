@@ -55,8 +55,13 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicIntegralAction != nullptr);
 
-    connect(this, &IntegralAction::valueChanged, publicIntegralAction, &IntegralAction::setValue);
-    connect(publicIntegralAction, &IntegralAction::valueChanged, this, &IntegralAction::setValue);
+    connect(this, &IntegralAction::valueChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& value) -> void {
+        publicIntegralAction->setValue(value, true);
+    });
+
+    connect(publicIntegralAction, &IntegralAction::valueChanged, [this](const std::int32_t& value) -> void {
+        setValue(value);
+    });
 
     setValue(publicIntegralAction->getValue());
 
@@ -69,15 +74,15 @@ void IntegralAction::disconnectFromPublicAction()
 
     Q_ASSERT(publicIntegralAction != nullptr);
 
-    connect(this, &IntegralAction::valueChanged, publicIntegralAction, &IntegralAction::setValue);
-    connect(publicIntegralAction, &IntegralAction::valueChanged, this, &IntegralAction::setValue);
+    disconnect(this, &IntegralAction::valueChanged, publicIntegralAction, nullptr);
+    disconnect(publicIntegralAction, &IntegralAction::valueChanged, this, nullptr);
 
     WidgetAction::disconnectFromPublicAction();
 }
 
 WidgetAction* IntegralAction::getPublicCopy() const
 {
-    return new IntegralAction(parent(), text(), getMinimum(), getMaximum(), getValue(), getDefaultValue());
+    return new IntegralAction(parent(), text(), std::numeric_limits<std::int32_t>::lowest(), std::numeric_limits<std::int32_t>::max(), getValue(), getDefaultValue());
 }
 
 void IntegralAction::fromVariantMap(const QVariantMap& variantMap)
