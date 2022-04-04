@@ -56,7 +56,7 @@ void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
     Q_ASSERT(publicIntegralAction != nullptr);
 
     connect(this, &IntegralAction::valueChanged, publicIntegralAction, [publicIntegralAction](const std::int32_t& value) -> void {
-        publicIntegralAction->setValue(value, true);
+        publicIntegralAction->setValue(value);
     });
 
     connect(publicIntegralAction, &IntegralAction::valueChanged, [this](const std::int32_t& value) -> void {

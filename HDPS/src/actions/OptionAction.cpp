@@ -320,6 +320,8 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
 
         // Enable/disable the combobox depending on the number of options
         connect(model(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
+        connect(model(), &QAbstractItemModel::rowsInserted, this, updateReadOnly);
+        connect(model(), &QAbstractItemModel::rowsRemoved, this, updateReadOnly);
 
         updateToolTip();
 
