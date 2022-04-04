@@ -108,7 +108,7 @@ bool ActionsFilterModel::filterType(const QModelIndex& index) const
     const auto actionType = sourceModel()->data(index, Qt::EditRole).toString();
 
     if (_typeFilter.isEmpty())
-        return false;
+        return true;
     else
         return actionType == _typeFilter;
 
