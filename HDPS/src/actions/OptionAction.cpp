@@ -322,6 +322,8 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         connect(model(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
 
         updateToolTip();
+
+        updateReadOnly();
     };
 
     // Assign model when changed in the option action

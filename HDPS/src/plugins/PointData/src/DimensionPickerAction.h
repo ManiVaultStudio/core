@@ -115,6 +115,35 @@ public:
     /** Establishes whether the dimensions can be searched (number of options exceeds the search threshold) */
     bool maySearch() const;
 
+public: // Action publishing
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+    /**
+     * Get whether the action is public (visible to other actions)
+     * @return Boolean indicating whether the action is public (visible to other actions)
+     */
+    bool isPublic() const override;
+
+    /**
+     * Publish this action so that other actions can connect to it
+     * @param text Name of the published widget action
+     */
+    void publish(const QString& name) override;
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
 signals:
 
     /**

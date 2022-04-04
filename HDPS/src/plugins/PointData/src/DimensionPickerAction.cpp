@@ -121,6 +121,35 @@ bool DimensionPickerAction::maySearch() const
     return _currentDimensionAction.getNumberOfOptions() >= _searchThreshold;
 }
 
+bool DimensionPickerAction::mayPublish() const
+{
+    return true;
+}
+
+bool DimensionPickerAction::isPublic() const
+{
+    return _currentDimensionAction.isPublic();
+}
+
+void DimensionPickerAction::publish(const QString& name)
+{
+    _currentDimensionAction.publish(name);
+}
+
+void DimensionPickerAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    _currentDimensionAction.connectToPublicAction(publicAction);
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void DimensionPickerAction::disconnectFromPublicAction()
+{
+    _currentDimensionAction.disconnectFromPublicAction();
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
 DimensionPickerAction::Widget::Widget(QWidget* parent, DimensionPickerAction* dimensionPickerAction) :
     WidgetActionWidget(parent, dimensionPickerAction)
 {
