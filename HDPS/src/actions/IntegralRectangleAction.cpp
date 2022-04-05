@@ -12,6 +12,7 @@ IntegralRectangleAction::IntegralRectangleAction(QObject * parent, const QString
     _defaultRectangle()
 {
     setText(title);
+    setDefaultWidgetFlags(WidgetFlag::Default);
 
     initialize(rectangle, defaultRectangle);
 }

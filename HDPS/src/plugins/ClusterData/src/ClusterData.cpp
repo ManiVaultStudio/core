@@ -272,12 +272,12 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     _core->notifyDatasetSelectionChanged(this);
 
     // Get reference to input dataset
-    auto points                 = getDataHierarchyItem().getParent().getDataset<Points>();
-    auto selection              = points->getSelection<Points>();
-    auto& pointSelectionIndices = selection->indices;
+    auto points             = getDataHierarchyItem().getParent().getDataset<Points>();
+    auto selection          = points->getSelection<Points>();
+    auto selectionIndices   = selection->indices;
 
-    pointSelectionIndices.clear();
-    pointSelectionIndices.reserve(indices.size());
+    selectionIndices.clear();
+    selectionIndices.reserve(indices.size());
 
     std::vector<std::uint32_t> globalIndices;
 
@@ -285,21 +285,19 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 
     // Append point indices per cluster
     for (auto clusterSelectionIndex : getSelection<Clusters>()->indices) {
-
-        // Get cluster point indices and append
         const auto cluster = getClusters().at(clusterSelectionIndex);
-
-        pointSelectionIndices.insert(pointSelectionIndices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
+        selectionIndices.insert(selectionIndices.end(), cluster.getIndices().begin(), cluster.getIndices().end());
     }
 
     // Remove duplicates
-    std::sort(pointSelectionIndices.begin(), pointSelectionIndices.end());
-    pointSelectionIndices.erase(unique(pointSelectionIndices.begin(), pointSelectionIndices.end()), pointSelectionIndices.end());
+    std::sort(selectionIndices.begin(), selectionIndices.end());
+    selectionIndices.erase(unique(selectionIndices.begin(), selectionIndices.end()), selectionIndices.end());
 
-    for (auto& pointSelectionIndex : pointSelectionIndices)
+    for (auto& pointSelectionIndex : selectionIndices)
         pointSelectionIndex = globalIndices[pointSelectionIndex];
 
-    // Notify others that the parent points selection has changed
+    points->setSelectionIndices(selectionIndices);
+
     _core->notifyDatasetSelectionChanged(points);
 }
 
