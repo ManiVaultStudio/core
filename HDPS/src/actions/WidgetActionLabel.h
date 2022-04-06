@@ -59,9 +59,6 @@ private:
     /** Publish _widgetAction */
     void publishAction();
 
-    /** Connect _widgetAction to a public action */
-    void connectAction();
-
 protected:
     std::uint32_t       _flags;                 /** Configuration flags */
     WidgetAction*       _widgetAction;          /** Pointer to widget action */

@@ -107,7 +107,6 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
                         auto connectAction = new QAction(publicAction->text());
 
-                        connectAction->setIcon(connectMenu->icon());
                         connectAction->setToolTip("Connect " + _widgetAction->text() + " to " + publicAction->text());
 
                         connect(connectAction, &QAction::triggered, this, [this, publicAction]() -> void {
@@ -212,63 +211,6 @@ void WidgetActionLabel::publishAction()
 
     if (publishDialog.exec() == QDialog::Accepted)
         _widgetAction->publish(lineEdit->text());
-}
-
-void WidgetActionLabel::connectAction()
-{
-    /*
-    auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    QDialog connectDialog(this);
-
-    connectDialog.setWindowIcon(fontAwesome.getIcon("link"));
-    connectDialog.setWindowTitle("Connect " + _widgetAction->text() + " to public parameter");
-
-    auto mainLayout = new QVBoxLayout();
-    auto treeView = new QTreeView();
-    auto actionsFilterModel = new ActionsFilterModel(this);
-
-    actionsFilterModel->setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
-    actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
-
-    treeView->setModel(actionsFilterModel);
-    treeView->setRootIsDecorated(false);
-    treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    treeView->setSortingEnabled(false);
-
-    treeView->header()->hideSection(ActionsModel::Column::Type);
-    treeView->header()->hideSection(ActionsModel::Column::IsPublic);
-
-    mainLayout->addWidget(treeView);
-
-    auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-    dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Connect");
-    dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Connect to the selected parameter");
-    dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel connection");
-
-    connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &connectDialog, &QDialog::accept);
-    connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &connectDialog, &QDialog::reject);
-
-    mainLayout->addWidget(dialogButtonBox);
-
-    connectDialog.setLayout(mainLayout);
-    connectDialog.setMinimumSize(400, 400);
-
-    const auto updateOkButtonReadOnly = [dialogButtonBox, treeView]() -> void {
-        dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(treeView->selectionModel()->selectedRows().count() == 1);
-    };
-
-    connect(treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, updateOkButtonReadOnly);
-
-    updateOkButtonReadOnly();
-
-    if (connectDialog.exec() == QDialog::Accepted) {
-        const auto selectedAction = actionsFilterModel->mapToSource(treeView->selectionModel()->selectedRows().first());
-        _widgetAction->connectToPublicAction(static_cast<WidgetAction*>(selectedAction.internalPointer()));
-    }
-    */
 }
 
 }
