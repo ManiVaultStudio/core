@@ -45,12 +45,12 @@ ActionsViewerWidget::ActionsViewerWidget(QWidget* parent) :
     _treeView.header()->hideSection(ActionsModel::Column::IsPublic);
 
     _treeView.header()->resizeSection(ActionsModel::Column::Name, 200);
-    _treeView.header()->resizeSection(ActionsModel::Column::Type, 80);
+    _treeView.header()->resizeSection(ActionsModel::Column::Type, 130);
     _treeView.header()->resizeSection(ActionsModel::Column::IsPublic, 50);
     _treeView.header()->resizeSection(ActionsModel::Column::NumberOfConnections, 50);
 
     _treeView.header()->setSectionResizeMode(ActionsModel::Column::Name, QHeaderView::Interactive);
-    _treeView.header()->setSectionResizeMode(ActionsModel::Column::Type, QHeaderView::Fixed);
+    _treeView.header()->setSectionResizeMode(ActionsModel::Column::Type, QHeaderView::Interactive);
     _treeView.header()->setSectionResizeMode(ActionsModel::Column::IsPublic, QHeaderView::Fixed);
     _treeView.header()->setSectionResizeMode(ActionsModel::Column::NumberOfConnections, QHeaderView::Stretch);
 

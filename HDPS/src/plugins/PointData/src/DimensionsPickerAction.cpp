@@ -495,11 +495,16 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
         layout->setMargin(0);
         setLayout(layout);
     }
+
+    updateTableViewModel(&dimensionSelectionAction->getProxyModel());
 }
 
 void DimensionsPickerAction::Widget::updateTableViewModel(QAbstractItemModel* model)
 {
     _tableView.setModel(model);
+
+    if (model->rowCount() == 0 || model->columnCount() == 0)
+        return;
 
     auto horizontalHeader = _tableView.horizontalHeader();
 

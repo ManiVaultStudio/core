@@ -51,7 +51,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     const auto update = [this, widgetAction]() -> void {
         _nameLabel.setEnabled(widgetAction->isEnabled());
         _nameLabel.setText(QString("%1%2 ").arg(widgetAction->text(), (_flags & ColonAfterName) ? ":" : ""));
-        _nameLabel.setToolTip(widgetAction->text());
+        _nameLabel.setToolTip(widgetAction->toolTip());
         _nameLabel.setVisible(widgetAction->isVisible());
     };
 
@@ -176,11 +176,10 @@ void WidgetActionLabel::publishAction()
     publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
     publishDialog.setWindowTitle("Publish " + _widgetAction->text() + " parameter");
 
-    auto mainLayout = new QVBoxLayout();
-    auto parameterLayout = new QHBoxLayout();
-
-    auto label = new QLabel("Name:");
-    auto lineEdit = new QLineEdit(_widgetAction->text());
+    auto mainLayout         = new QVBoxLayout();
+    auto parameterLayout    = new QHBoxLayout();
+    auto label              = new QLabel("Name:");
+    auto lineEdit           = new QLineEdit(_widgetAction->text());
 
     parameterLayout->addWidget(label);
     parameterLayout->addWidget(lineEdit);
