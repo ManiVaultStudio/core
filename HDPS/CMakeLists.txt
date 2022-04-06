@@ -149,7 +149,9 @@ set(ACTIONS_HEADERS
     src/actions/GroupsAction.h
     src/actions/ImageAction.h
     src/actions/IntegralAction.h
+    src/actions/RectangleAction.h
     src/actions/IntegralRectangleAction.h
+    src/actions/DecimalRectangleAction.h
     src/actions/NumericalAction.h
     src/actions/OptionAction.h
     src/actions/PixelSelectionAction.h
@@ -194,7 +196,9 @@ set(ACTIONS_SOURCES
     src/actions/GroupsAction.cpp
     src/actions/ImageAction.cpp
     src/actions/IntegralAction.cpp
+    src/actions/RectangleAction.cpp
     src/actions/IntegralRectangleAction.cpp
+    src/actions/DecimalRectangleAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
     src/actions/PixelSelectionAction.cpp

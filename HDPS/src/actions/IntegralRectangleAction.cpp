@@ -7,12 +7,10 @@ namespace hdps {
 namespace gui {
 
 IntegralRectangleAction::IntegralRectangleAction(QObject * parent, const QString& title, const QRect& rectangle /*= QRect()*/, const QRect& defaultRectangle /*= QRect()*/) :
-    WidgetAction(parent),
-    _rectangle(),
-    _defaultRectangle()
+    RectangleAction<QRect>(parent, title, rectangle, defaultRectangle)
 {
-    setText(title);
-    setDefaultWidgetFlags(WidgetFlag::Default);
+    _rectangleChanged           = [this]() -> void { emit rectangleChanged(_rectangle); };
+    _defaultRectangleChanged    = [this]() -> void { emit defaultRectangleChanged(_defaultRectangle); };
 
     initialize(rectangle, defaultRectangle);
 }
@@ -28,36 +26,6 @@ void IntegralRectangleAction::initialize(const QRect& rectangle /*= QRect()*/, c
     _defaultRectangle   = defaultRectangle;
 
     emit rectangleChanged(_rectangle);
-    emit defaultRectangleChanged(_defaultRectangle);
-}
-
-QRect IntegralRectangleAction::getRectangle() const
-{
-    return _rectangle;
-}
-
-void IntegralRectangleAction::setRectangle(const QRect& rectangle)
-{
-    if (rectangle == _rectangle)
-        return;
-
-    _rectangle = rectangle;
-
-    emit rectangleChanged(_rectangle);
-}
-
-QRect IntegralRectangleAction::getDefaultRectangle() const
-{
-    return _defaultRectangle;
-}
-
-void IntegralRectangleAction::setDefaultRectangle(const QRect& defaultRectangle)
-{
-    if (defaultRectangle == _defaultRectangle)
-        return;
-
-    _defaultRectangle = defaultRectangle;
-
     emit defaultRectangleChanged(_defaultRectangle);
 }
 

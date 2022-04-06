@@ -11,19 +11,19 @@ namespace hdps {
 namespace gui {
 
 /**
- * Integral rectangle action class
+ * Decimal rectangle action class
  *
- * Stores an integral rectangle and creates interfaces to interact with it
+ * Stores a decimal rectangle and creates interfaces to interact with it
  *
  * @author Thomas Kroes
  */
-class IntegralRectangleAction : public RectangleAction<QRect>
+class DecimalRectangleAction : public RectangleAction<QRectF>
 {
     Q_OBJECT
 
 public:
 
-    /** Line edit widget class for integral rectangle action */
+    /** Line edit widget class for decimal rectangle action */
     class LineEditWidget : public QLineEdit
     {
     protected:
@@ -31,17 +31,17 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param integralRectangleAction Pointer to integral rectangle action
+         * @param decimalRectangleAction Pointer to decimal rectangle action
          */
-        LineEditWidget(QWidget* parent, IntegralRectangleAction* integralRectangleAction);
+        LineEditWidget(QWidget* parent, DecimalRectangleAction* decimalRectangleAction);
 
-        friend class IntegralRectangleAction;
+        friend class DecimalRectangleAction;
     };
 
 protected:
 
     /**
-     * Get widget representation of the integral rectangle action
+     * Get widget representation of the decimal rectangle action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
@@ -56,7 +56,7 @@ public:
      * @param rectangle Rectangle
      * @param defaultRectangle Default rectangle
      */
-    IntegralRectangleAction(QObject * parent, const QString& title, const QRect& rectangle = QRect(), const QRect& defaultRectangle = QRect());
+    DecimalRectangleAction(QObject * parent, const QString& title, const QRectF& rectangle = QRectF(), const QRectF& defaultRectangle = QRectF());
 
     /**
      * Get type string
@@ -69,7 +69,7 @@ public:
      * @param rectangle Rectangle
      * @param defaultRectangle Default rectangle
      */
-    void initialize(const QRect& rectangle = QRect(), const QRect& defaultRectangle = QRect());
+    void initialize(const QRectF& rectangle = QRectF(), const QRectF& defaultRectangle = QRectF());
 
 public: // Linking
 
@@ -116,13 +116,13 @@ signals:
      * Signals that the rectangle changed
      * @param rectangle Rectangle
      */
-    void rectangleChanged(const QRect& rectangle);
+    void rectangleChanged(const QRectF& rectangle);
 
     /**
      * Signals that the default rectangle changed
      * @param defaultRectangle Default rectangle
      */
-    void defaultRectangleChanged(const QRect& defaultRectangle);
+    void defaultRectangleChanged(const QRectF& defaultRectangle);
 };
 
 }
