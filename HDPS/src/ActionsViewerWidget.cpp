@@ -25,6 +25,7 @@ ActionsViewerWidget::ActionsViewerWidget(QWidget* parent) :
     _nameFilterAction(this, "Name filter")
 {
     _filterModel.setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
+    _filterModel.setScopeFilter(ActionsFilterModel::ScopeFilter::Public);
 
     connect(&_filterModel, &QAbstractItemModel::rowsInserted, this, &ActionsViewerWidget::numberOfRowsChanged);
     connect(&_filterModel, &QAbstractItemModel::rowsRemoved, this, &ActionsViewerWidget::numberOfRowsChanged);

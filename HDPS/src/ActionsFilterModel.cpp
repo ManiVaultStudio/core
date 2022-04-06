@@ -123,11 +123,11 @@ bool ActionsFilterModel::filterScope(const QModelIndex& index) const
         return true;
     }
     else {
-        if (_scopeFilter & ScopeFilter::Private && actionIsPublic)
-            return false;
+        if ((_scopeFilter & ScopeFilter::Public) && actionIsPublic)
+            return true;
 
-        if (_scopeFilter & ScopeFilter::Public && !actionIsPublic)
-            return false;
+        if ((_scopeFilter & ScopeFilter::Private) && !actionIsPublic)
+            return true;
     }
 
     return false;

@@ -116,11 +116,13 @@ void DimensionsPickerAction::setDimensions(const std::uint32_t numDimensions, co
     auto proxyModel = std::make_unique<DimensionsPickerProxyModel>(_holder);
 
     proxyModel->setSourceModel(dimensionSelectionItemModel.get());
-    
+
     _proxyModel    = std::move(proxyModel);
     _itemModel     = std::move(dimensionSelectionItemModel);
 
     updateSlider();
+
+    emit proxyModelChanged(_proxyModel.get());
 }
 
 std::vector<bool> DimensionsPickerAction::getEnabledDimensions() const
@@ -451,19 +453,19 @@ void DimensionsPickerAction::updateSummary()
 }
 
 DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* dimensionSelectionAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, dimensionSelectionAction)
+    WidgetActionWidget(parent, dimensionSelectionAction),
+    _tableView(this)
 {
     setMinimumHeight(300);
-    
+
+    connect(dimensionSelectionAction, &DimensionsPickerAction::proxyModelChanged, this, &DimensionsPickerAction::Widget::updateTableViewModel);
+
     auto layout = new QVBoxLayout();
 
-    auto tableView = new QTableView(this);
+    _tableView.setSortingEnabled(true);
+    _tableView.setStyleSheet("QTableView::indicator:checked{ padding: 0px; margin: 0px;}");
 
-    tableView->setSortingEnabled(true);
-    tableView->setModel(&dimensionSelectionAction->getProxyModel());
-    tableView->setStyleSheet("QTableView::indicator:checked{ padding: 0px; margin: 0px;}");
-
-    auto horizontalHeader = tableView->horizontalHeader();
+    auto horizontalHeader = _tableView.horizontalHeader();
 
     horizontalHeader->setStretchLastSection(false);
     horizontalHeader->setDefaultAlignment(Qt::AlignLeft);
@@ -472,15 +474,10 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
     horizontalHeader->resizeSection(1, 85);
     horizontalHeader->resizeSection(2, 85);
 
-    // Set column resize modes
-    horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
-    horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
+    _tableView.verticalHeader()->hide();
+    _tableView.verticalHeader()->setDefaultSectionSize(5);
 
-    tableView->verticalHeader()->hide();
-    tableView->verticalHeader()->setDefaultSectionSize(5);
-
-    layout->addWidget(tableView);
+    layout->addWidget(&_tableView);
 
     auto toolbarLayout = new QHBoxLayout();
 
@@ -498,4 +495,15 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
         layout->setMargin(0);
         setLayout(layout);
     }
+}
+
+void DimensionsPickerAction::Widget::updateTableViewModel(QAbstractItemModel* model)
+{
+    _tableView.setModel(model);
+
+    auto horizontalHeader = _tableView.horizontalHeader();
+
+    horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
+    horizontalHeader->setSectionResizeMode(1, QHeaderView::Interactive);
+    horizontalHeader->setSectionResizeMode(2, QHeaderView::Interactive);
 }

@@ -23,7 +23,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _widgetAction(widgetAction),
     _nameLabel(),
     _publishAction(this, "Publish..."),
-    _connectAction(this, "Connect..."),
     _disconnectAction(this, "Disconnect...")
 {
     auto& fontAwesome = Application::getIconFont("FontAwesome");
@@ -32,11 +31,9 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     connect(_widgetAction, &WidgetAction::isPublishedChanged, this, &WidgetActionLabel::updatePublishAction);
 
     _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
-    _connectAction.setIcon(fontAwesome.getIcon("link"));
     _disconnectAction.setIcon(fontAwesome.getIcon("unlink"));
 
     connect(&_publishAction, &TriggerAction::triggered, this, &WidgetActionLabel::publishAction);
-    connect(&_connectAction, &TriggerAction::triggered, this, &WidgetActionLabel::connectAction);
     connect(&_disconnectAction, &TriggerAction::triggered, _widgetAction, &WidgetAction::disconnectFromPublicAction);
 
     auto layout = new QHBoxLayout();
@@ -82,7 +79,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
             auto contextMenu = QSharedPointer<QMenu>::create();
 
-            if (_widgetAction && _widgetAction->mayPublish()) {
+            if (_widgetAction->isEnabled() && _widgetAction->mayPublish()) {
 
                 if (!_widgetAction->isPublic())
                     contextMenu->addAction(&_publishAction);
@@ -92,8 +89,38 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
                 if (_widgetAction->isConnected())
                     contextMenu->addAction(&_disconnectAction);
-                else
-                    contextMenu->addAction(&_connectAction);
+                else {
+                    auto connectMenu = new QMenu("Connect to:");
+
+                    connectMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
+
+                    auto actionsFilterModel = new ActionsFilterModel(this);
+
+                    actionsFilterModel->setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
+                    actionsFilterModel->setScopeFilter(ActionsFilterModel::Public);
+                    actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
+
+                    const auto numberOfRows = actionsFilterModel->rowCount();
+
+                    for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
+                        const auto publicAction = static_cast<WidgetAction*>(actionsFilterModel->mapToSource(actionsFilterModel->index(rowIndex, 0)).internalPointer());
+
+                        auto connectAction = new QAction(publicAction->text());
+
+                        connectAction->setIcon(connectMenu->icon());
+                        connectAction->setToolTip("Connect " + _widgetAction->text() + " to " + publicAction->text());
+
+                        connect(connectAction, &QAction::triggered, this, [this, publicAction]() -> void {
+                            _widgetAction->connectToPublicAction(publicAction);
+                        });
+
+                        connectMenu->addAction(connectAction);
+                    }
+
+                    connectMenu->setEnabled(!connectMenu->actions().isEmpty());
+
+                    contextMenu->addMenu(connectMenu);
+                }
             }
 
             if (contextMenu->actions().isEmpty())
@@ -106,14 +133,16 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Enter:
         {
-            setStyleSheet("QLabel { text-decoration: underline; }");
+            if (_widgetAction->isEnabled() && _widgetAction->mayPublish())
+                setStyleSheet("QLabel { text-decoration: underline; }");
 
             break;
         }
 
         case QEvent::Leave:
         {
-            setStyleSheet("QLabel { text-decoration: none; }");
+            if (_widgetAction->isEnabled() && _widgetAction->mayPublish())
+                setStyleSheet("QLabel { text-decoration: none; }");
 
             break;
         }
@@ -187,6 +216,7 @@ void WidgetActionLabel::publishAction()
 
 void WidgetActionLabel::connectAction()
 {
+    /*
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     QDialog connectDialog(this);
@@ -238,6 +268,7 @@ void WidgetActionLabel::connectAction()
         const auto selectedAction = actionsFilterModel->mapToSource(treeView->selectionModel()->selectedRows().first());
         _widgetAction->connectToPublicAction(static_cast<WidgetAction*>(selectedAction.internalPointer()));
     }
+    */
 }
 
 }

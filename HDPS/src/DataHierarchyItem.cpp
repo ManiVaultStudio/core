@@ -21,7 +21,7 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _visible(visible),
     _selected(false),
     _locked(false),
-    _expanded(false),
+    _expanded(true),
     _taskDescription(""),
     _taskProgress(0.0),
     _subTasks(),

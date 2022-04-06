@@ -14,6 +14,8 @@
 
 #include "actions/Actions.h"
 
+#include <QTableView>
+
 using namespace hdps;
 using namespace hdps::gui;
 
@@ -29,6 +31,9 @@ class Points;
  */
 class POINTDATA_EXPORT DimensionsPickerAction : public GroupAction
 {
+
+    Q_OBJECT
+
 protected:
 
     /** Widget class for dimension selection action */
@@ -42,6 +47,17 @@ protected:
          * @param widgetFlags Widget flags for the configuration of the widget
          */
         Widget(QWidget* parent, DimensionsPickerAction* dimensionSelectionAction, const std::int32_t& widgetFlags);
+
+    protected:
+
+        /**
+         * Update the table view source model
+         * @param model Pointer to table view source model
+         */
+        void updateTableViewModel(QAbstractItemModel* model);
+
+    protected:
+        QTableView      _tableView;
     };
 
     /**
@@ -202,6 +218,14 @@ protected:
 
     /** Update the dimension selection summary */
     void updateSummary();
+
+signals:
+
+    /**
+     * Signals that the proxy model changed
+     * @param dimensionsPickerProxyModel Pointer to dimensions picker proxy model
+     */
+    void proxyModelChanged(DimensionsPickerProxyModel* dimensionsPickerProxyModel);
 
 protected: // Action getters
 

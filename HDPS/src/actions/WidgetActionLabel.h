@@ -67,7 +67,6 @@ protected:
     WidgetAction*       _widgetAction;          /** Pointer to widget action */
     QLabel              _nameLabel;             /** Action name label */
     TriggerAction       _publishAction;         /** Publish action (so that other actions can connect) */
-    TriggerAction       _connectAction;         /** Connect to public action */
     TriggerAction       _disconnectAction;      /** Disconnect from public action */
 };
 
