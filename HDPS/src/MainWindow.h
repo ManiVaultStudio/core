@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QAction>
 #include <QSharedPointer>
+#include <QLabel>
 
 // Advanced docking system
 #include "DockManager.h"

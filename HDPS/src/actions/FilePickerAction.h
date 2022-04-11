@@ -16,13 +16,13 @@ namespace hdps {
 namespace gui {
 
 /**
- * Directory picker action class
+ * File picker action class
  *
- * Action class for picking a directory
+ * Action class for picking a file
  *
  * @author Thomas Kroes
  */
-class DirectoryPickerAction : public WidgetAction
+class FilePickerAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -39,7 +39,7 @@ public:
 protected:
 
     /**
-     * Get widget representation of the directory picker action
+     * Get widget representation of the file picker action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget
      */
@@ -51,41 +51,41 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param title Title of the action
-     * @param directory Directory
-     * @param defaultDirectory Default directory
+     * @param filePath File path
+     * @param defaultFilePath Default file path
      */
-    DirectoryPickerAction(QObject* parent, const QString& title = "", const QString& directory = QString(), const QString& defaultDirectory = QString());
+    FilePickerAction(QObject* parent, const QString& title = "", const QString& filePath = QString(), const QString& defaultFilePath = QString());
 
     /**
      * Initialize the directory picker action
-     * @param directory Directory
-     * @param defaultDirectory Default directory
+     * @param filePath File path
+     * @param defaultFilePath Default file path
      */
-    void initialize(const QString& directory = QString(), const QString& defaultDirectory = QString());
+    void initialize(const QString& filePath = QString(), const QString& defaultFilePath = QString());
 
     /**
-     * Get the current directory
-     * @return Current directory
+     * Get the current file path
+     * @return Current file path
      */
-    QString getDirectory() const;
+    QString getFilePath() const;
 
     /**
-     * Set the current directory
-     * @param directory Current directory
+     * Set the file path
+     * @param filePath Current file path
      */
-    void setDirectory(const QString& directory);
+    void setFilePath(const QString& filePath);
 
     /**
-     * Get the default directory
-     * @return Default directory
+     * Get the default file path
+     * @return Default file path
      */
-    QString getDefaultDirectory() const;
+    QString getDefaultFilePath() const;
 
     /**
-     * Set the default directory
-     * @param defaultDirectory Default directory
+     * Set the default file path
+     * @param defaultFilePath Default file path
      */
-    void setDefaultDirectory(const QString& defaultDirectory);
+    void setDefaultFilePath(const QString& defaultFilePath);
 
     /**
      * Get placeholder text
@@ -134,8 +134,8 @@ signals:
 protected:
     QFileSystemModel    _dirModel;              /** Directory model */
     QCompleter          _completer;             /** Completer */
-    StringAction        _directoryAction;       /** Directory action */
-    TriggerAction       _pickAction;            /** Pick directory action */
+    StringAction        _filePathAction;        /** File path action */
+    TriggerAction       _pickAction;            /** Pick file action */
 };
 
 }

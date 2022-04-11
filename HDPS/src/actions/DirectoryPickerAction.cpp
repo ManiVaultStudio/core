@@ -49,7 +49,7 @@ DirectoryPickerAction::DirectoryPickerAction(QObject* parent, const QString& tit
 
     // Open file dialog when pick action is triggered
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
-        const auto directory = QFileDialog::getExistingDirectory(nullptr, tr("Open Directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        const auto directory = QFileDialog::getExistingDirectory(nullptr, tr("Open directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
         if (!directory.isEmpty())
             setDirectory(directory);
@@ -133,11 +133,6 @@ QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& w
     widget->setLayout(layout);
 
     return widget;
-}
-
-DirectoryPickerAction::Widget::Widget(QWidget* parent, DirectoryPickerAction* directoryPickerAction)
-{
-
 }
 
 }

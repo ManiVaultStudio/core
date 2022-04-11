@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QListView>
 #include <QVBoxLayout>
+#include <QLabel>
 
 namespace hdps {
 

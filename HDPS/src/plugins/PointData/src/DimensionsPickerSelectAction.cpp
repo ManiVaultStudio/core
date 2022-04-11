@@ -2,6 +2,7 @@
 #include "DimensionsPickerAction.h"
 
 #include <QFileDialog>
+#include <QLabel>
 
 namespace hdps {
 

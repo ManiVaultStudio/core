@@ -13,6 +13,7 @@
 #include <QResizeEvent>
 #include <QVBoxLayout>
 #include <QMenu>
+#include <QLabel>
 
 #include <stdexcept>
 
