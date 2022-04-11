@@ -138,10 +138,13 @@ set(ACTIONS_HEADERS
     src/actions/ColorAction.h
     src/actions/ColorPickerAction.h
     src/actions/ColorMapAction.h
+    src/actions/ColorMapEditorOneDimensionalAction.h
     src/actions/ColorMapAxisAction.h
     src/actions/ColorMapDiscreteAction.h
     src/actions/ColorMapViewAction.h
     src/actions/ColorMapSettingsAction.h
+    src/actions/ColorMapSettingsOneDimensionalAction.h
+    src/actions/ColorMapSettingsTwoDimensionalAction.h
     src/actions/DatasetPickerAction.h
     src/actions/DecimalAction.h
     src/actions/DecimalRangeAction.h
@@ -186,10 +189,13 @@ set(ACTIONS_SOURCES
     src/actions/ColorAction.cpp
     src/actions/ColorPickerAction.cpp
     src/actions/ColorMapAction.cpp
+    src/actions/ColorMapEditorOneDimensionalAction.cpp
     src/actions/ColorMapAxisAction.cpp
     src/actions/ColorMapDiscreteAction.cpp
     src/actions/ColorMapViewAction.cpp
     src/actions/ColorMapSettingsAction.cpp
+	src/actions/ColorMapSettingsOneDimensionalAction.cpp
+    src/actions/ColorMapSettingsTwoDimensionalAction.cpp
 	src/actions/DatasetPickerAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/DecimalRangeAction.cpp

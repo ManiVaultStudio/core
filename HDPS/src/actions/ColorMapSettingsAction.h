@@ -3,6 +3,9 @@
 #include "ColorMapAxisAction.h"
 #include "ColorMapViewAction.h"
 #include "ColorMapDiscreteAction.h"
+#include "ColorMapSettingsOneDimensionalAction.h"
+#include "ColorMapSettingsTwoDimensionalAction.h"
+#include "ColorMapEditorOneDimensionalAction.h"
 
 #include "WidgetAction.h"
 #include "DecimalAction.h"
@@ -40,9 +43,6 @@ public:
          * @param colorMapSettingsAction Pointer to clusters action
          */
         Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction);
-
-    protected:
-        ColorMapViewAction      _colorMapViewAction;    /** Color map view action */
     };
 
     /**
@@ -62,6 +62,11 @@ protected:
      */
     ColorMapSettingsAction(ColorMapAction& colorMapAction);
 
+protected:
+
+    /** Update read-only status of various actions */
+    void updateActionsReadOnly();
+
 public: // Linking
 
     /**
@@ -79,12 +84,18 @@ public: // Action getters
     ColorMapAxisAction& getHorizontalAxisAction() { return _horizontalAxisAction; }
     ColorMapAxisAction& getVerticalAxisAction() { return _verticalAxisAction; }
     ColorMapDiscreteAction& getDiscreteAction() { return _discreteAction; }
+    ColorMapSettingsOneDimensionalAction& getSettingsOneDimensionalAction() { return _settingsOneDimensionalAction; }
+    ColorMapSettingsTwoDimensionalAction& getSettingsTwoDimensionalAction() { return _settingsTwoDimensionalAction; }
+    ColorMapEditorOneDimensionalAction& getEditorOneDimensionalAction() { return _editorOneDimensionalAction; }
 
 protected:
-    ColorMapAction&             _colorMapAction;            /** Reference to color map action */
-    ColorMapAxisAction          _horizontalAxisAction;      /** Horizontal axis action */
-    ColorMapAxisAction          _verticalAxisAction;        /** Vertical axis action */
-    ColorMapDiscreteAction      _discreteAction;            /** Discrete action */
+    ColorMapAction&                         _colorMapAction;                        /** Reference to color map action */
+    ColorMapAxisAction                      _horizontalAxisAction;                  /** Horizontal axis action (used in 1D settings action) */
+    ColorMapAxisAction                      _verticalAxisAction;                    /** Vertical axis action (used in 1D + 2D settings action) */
+    ColorMapDiscreteAction                  _discreteAction;                        /** Discrete action (used in 1D + 2D settings action) */
+    ColorMapSettingsOneDimensionalAction    _settingsOneDimensionalAction;          /** One-dimensional settings action */
+    ColorMapSettingsTwoDimensionalAction    _settingsTwoDimensionalAction;          /** Two-dimensional settings action */
+    ColorMapEditorOneDimensionalAction      _editorOneDimensionalAction;            /** One-dimensional editor action */
 
     /** Only color map actions may instantiate this class */
     friend class ColorMapAction;

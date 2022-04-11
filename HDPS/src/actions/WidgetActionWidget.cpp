@@ -39,13 +39,21 @@ void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
     auto groupBox = new QGroupBox(_widgetAction->text());
 
     groupBox->setLayout(popupLayout);
+    groupBox->setCheckable(_widgetAction->isCheckable());
 
     mainLayout->addWidget(groupBox);
 
     const auto update = [this, groupBox]() -> void {
+        QSignalBlocker blocker(_widgetAction);
+
         groupBox->setTitle(_widgetAction->text());
         groupBox->setToolTip(_widgetAction->text());
+        groupBox->setChecked(_widgetAction->isChecked());
     };
+
+    connect(groupBox, &QGroupBox::toggled, this, [this](bool toggled) {
+        _widgetAction->setChecked(toggled);
+    });
 
     connect(_widgetAction, &WidgetAction::changed, this, [update]() {
         update();

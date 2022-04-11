@@ -3,8 +3,6 @@
 #include "Application.h"
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGroupBox>
 
 using namespace hdps::util;
 
@@ -17,10 +15,22 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     _colorMapAction(colorMapAction),
     _horizontalAxisAction(*this, "Horizontal Axis"),
     _verticalAxisAction(*this, "Vertical Axis"),
-    _discreteAction(*this)
+    _discreteAction(*this),
+    _settingsOneDimensionalAction(colorMapAction),
+    _settingsTwoDimensionalAction(colorMapAction),
+    _editorOneDimensionalAction(colorMapAction)
 {
     setText("Settings");
-    setIcon(hdps::Application::getIconFont("FontAwesome").getIcon("sliders-h"));
+    setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
+
+    connect(&_editorOneDimensionalAction, &ColorMapEditorOneDimensionalAction::toggled, this, &ColorMapSettingsAction::updateActionsReadOnly);
+
+    updateActionsReadOnly();
+}
+
+void ColorMapSettingsAction::updateActionsReadOnly()
+{
+    _discreteAction.setEnabled(!_editorOneDimensionalAction.isChecked());
 }
 
 void ColorMapSettingsAction::connectToPublicAction(WidgetAction* publicAction)
@@ -42,41 +52,29 @@ void ColorMapSettingsAction::disconnectFromPublicAction()
 }
 
 ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* colorMapSettingsAction) :
-    WidgetActionWidget(parent, colorMapSettingsAction),
-    _colorMapViewAction(colorMapSettingsAction->getColorMapAction())
+    WidgetActionWidget(parent, colorMapSettingsAction)
 {
-    auto mainLayout     = new QHBoxLayout();
-    auto settingsLayout = new QVBoxLayout();
-    auto rangeLayout    = new QHBoxLayout();
+    auto layout = new QHBoxLayout();
 
-    mainLayout->setMargin(0);
-
-    mainLayout->addLayout(settingsLayout);
-
-    settingsLayout->addLayout(rangeLayout);
-    settingsLayout->addWidget(colorMapSettingsAction->getDiscreteAction().createWidget(this));
+    layout->setMargin(0);
 
     switch (colorMapSettingsAction->getColorMapAction().getColorMapType())
     {
         case ColorMap::Type::OneDimensional:
-        {
-            rangeLayout->addWidget(colorMapSettingsAction->getHorizontalAxisAction().createWidget(this));
+            layout->addWidget(colorMapSettingsAction->getSettingsOneDimensionalAction().createWidget(this));
             break;
-        }
 
         case ColorMap::Type::TwoDimensional:
-        {
-            rangeLayout->addWidget(colorMapSettingsAction->getHorizontalAxisAction().createWidget(this));
-            rangeLayout->addWidget(colorMapSettingsAction->getVerticalAxisAction().createWidget(this));
-            mainLayout->addWidget(_colorMapViewAction.createWidget(this));
+            layout->addWidget(colorMapSettingsAction->getSettingsTwoDimensionalAction().createWidget(this));
             break;
-        }
 
         default:
             break;
     }
 
-    setLayout(mainLayout);
+    layout->addWidget(colorMapSettingsAction->getEditorOneDimensionalAction().createWidget(this));
+
+    setLayout(layout);
 }
 
 }
