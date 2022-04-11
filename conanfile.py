@@ -86,9 +86,9 @@ class HdpsCoreConan(ConanFile):
                         "utf-8"
                     ).rstrip()
                     print(f'Cmake at {os.environ["CONAN_CMAKE_PROGRAM"]}')
-        if tools.os_info.is_macos:
-            installer = tools.SystemPackageTool()
-            installer.install("libomp", update=False)
+        # if tools.os_info.is_macos:
+        #    installer = tools.SystemPackageTool()
+        #    installer.install("libomp", update=False)
 
     def config_options(self):
         if self.settings.os == "Windows":
