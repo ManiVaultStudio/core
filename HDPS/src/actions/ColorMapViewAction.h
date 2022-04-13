@@ -58,8 +58,8 @@ protected:
     ColorMapAction&     _colorMapAction;    /** Reference to color map action */
 
     /** Only color map settings action classes may instantiate this class */
-    friend class ColorMapSettingsOneDimensionalAction;
-    friend class ColorMapSettingsTwoDimensionalAction;
+    friend class ColorMapSettings1DAction;
+    friend class ColorMapSettings2DAction;
 };
 
 }

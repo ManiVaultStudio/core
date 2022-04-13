@@ -16,14 +16,14 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
     _horizontalAxisAction(*this, "Horizontal Axis"),
     _verticalAxisAction(*this, "Vertical Axis"),
     _discreteAction(*this),
-    _settingsOneDimensionalAction(colorMapAction),
+    _settings1DAction(colorMapAction),
     _settingsTwoDimensionalAction(colorMapAction),
     _editorOneDimensionalAction(colorMapAction)
 {
     setText("Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
 
-    connect(&_editorOneDimensionalAction, &ColorMapEditorOneDimensionalAction::toggled, this, &ColorMapSettingsAction::updateActionsReadOnly);
+    connect(&_editorOneDimensionalAction, &ColorMapEditor1DAction::toggled, this, &ColorMapSettingsAction::updateActionsReadOnly);
 
     updateActionsReadOnly();
 }
@@ -61,18 +61,16 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
     switch (colorMapSettingsAction->getColorMapAction().getColorMapType())
     {
         case ColorMap::Type::OneDimensional:
-            layout->addWidget(colorMapSettingsAction->getSettingsOneDimensionalAction().createWidget(this));
+            layout->addWidget(colorMapSettingsAction->getSettings1DAction().createWidget(this));
             break;
 
         case ColorMap::Type::TwoDimensional:
-            layout->addWidget(colorMapSettingsAction->getSettingsTwoDimensionalAction().createWidget(this));
+            layout->addWidget(colorMapSettingsAction->getSettings2DAction().createWidget(this));
             break;
 
         default:
             break;
     }
-
-    layout->addWidget(colorMapSettingsAction->getEditorOneDimensionalAction().createWidget(this));
 
     setLayout(layout);
 }

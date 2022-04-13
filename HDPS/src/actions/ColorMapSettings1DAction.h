@@ -9,32 +9,32 @@ namespace gui {
 class ColorMapAction;
 
 /**
- * Color map editor action class
+ * Color map settings one-dimensional action class
  *
- * Action class for manually defining a one-dimensional color map
+ * Widget action class for one-dimensional color map settings
  *
  * @author Thomas Kroes
  */
-class ColorMapEditorOneDimensionalAction : public WidgetAction
+class ColorMapSettings1DAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
-    /** Widget class for color map editor action */
+    /** Widget class for one-dimensional color map settings action */
     class Widget : public WidgetActionWidget {
     public:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param colorMapEditorAction Pointer to color map editor action
+         * @param colorMapSettings1DAction Pointer to one-dimensional color map settings action
          */
-        Widget(QWidget* parent, ColorMapEditorOneDimensionalAction* colorMapEditorOneDimensionalAction);
+        Widget(QWidget* parent, ColorMapSettings1DAction* colorMapSettings1DAction);
     };
 
     /**
-     * Get widget representation of the color map editor action
+     * Get widget representation of the one-dimensional color map settings action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
@@ -48,18 +48,7 @@ protected:
      * Constructor
      * @param colorMapAction Reference to color map action
      */
-    ColorMapEditorOneDimensionalAction(ColorMapAction& colorMapAction);
-
-public: // Linking
-
-    /**
-     * Connect this action to a public action
-     * @param publicAction Pointer to public action to connect to
-     */
-    void connectToPublicAction(WidgetAction* publicAction) override;
-
-    /** Disconnect this action from a public action */
-    void disconnectFromPublicAction() override;
+    ColorMapSettings1DAction(ColorMapAction& colorMapAction);
 
 public: // Action getters
 

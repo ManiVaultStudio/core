@@ -1,0 +1,91 @@
+#pragma once
+
+#include "actions/WidgetAction.h"
+#include "actions/ToggleAction.h"
+#include "actions/DecimalAction.h"
+#include "actions/ColorAction.h"
+
+namespace hdps {
+
+namespace gui {
+
+class ColorMapEditor1DNode;
+class ColorMapEditor1DAction;
+
+/**
+ * Color map editor 1D node action class
+ *
+ * Action class for editing one-dimensional color map editor node parameters
+ *
+ * @author Thomas Kroes and Mitchell M. de Boer
+ */
+class ColorMapEditor1DNodeAction : public WidgetAction
+{
+    Q_OBJECT
+
+public:
+
+    /** Widget class for one-dimensional color map editor node action */
+    class Widget : public WidgetActionWidget {
+    public:
+
+        /**
+         * Constructor
+         * @param parent Pointer to parent widget
+         * @param colorMapEditor1DNodeAction Pointer to one-dimensional color map editor node action
+         */
+        Widget(QWidget* parent, ColorMapEditor1DNodeAction* colorMapEditor1DNodeAction);
+    };
+
+    /**
+     * Get widget representation of the color map editor action
+     * @param parent Pointer to parent widget
+     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     */
+    QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+        return new Widget(parent, this);
+    };
+
+public:
+
+    /**
+     * Constructor
+     * @param colorMapEditor1DAction Reference to owning one-dimensional color map action
+     */
+    ColorMapEditor1DNodeAction(ColorMapEditor1DAction& colorMapEditor1DAction);
+
+    void connectToNode(ColorMapEditor1DNode* node);
+    void disconnectFromNode(ColorMapEditor1DNode* node);
+
+    /**
+     * Change node position
+     * @param xPosition X-position of the node
+     * @param yPosition Y-position of the node
+     */
+    void changeNodePosition(float xPosition, float yPosition);
+
+    /**
+     * Change node color
+     * @param color Node color
+     */
+    void changeNodeColor(const QColor& color);
+
+
+    void nodeChanged();
+
+public: // Action getters
+
+    ColorAction& getColorAction() { return _colorAction; }
+    DecimalAction& getValueAction() { return _valueAction; }
+    DecimalAction& getOpacityAction() { return _opacityAction; }
+
+protected:
+    ColorMapEditor1DAction&     _colorMapEditor1DAction;    /** Reference to owning one-dimensional color map action */
+    ColorMapEditor1DNode*       _currentNode;               /** Pointer to current node (if any) */
+    ColorAction                 _colorAction;               /** Node color action */
+    DecimalAction               _valueAction;               /** Value action */
+    DecimalAction               _opacityAction;             /** Opacity action */
+};
+
+}
+}

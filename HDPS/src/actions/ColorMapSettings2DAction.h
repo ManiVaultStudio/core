@@ -15,7 +15,7 @@ class ColorMapAction;
  *
  * @author Thomas Kroes
  */
-class ColorMapSettingsTwoDimensionalAction : public WidgetAction
+class ColorMapSettings2DAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -28,9 +28,9 @@ public:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param colorMapSettingsTwoDimensionalAction Pointer to two-dimensional color map settings action
+         * @param colorMapSettings2DAction Pointer to two-dimensional color map settings action
          */
-        Widget(QWidget* parent, ColorMapSettingsTwoDimensionalAction* colorMapSettingsTwoDimensionalAction);
+        Widget(QWidget* parent, ColorMapSettings2DAction* colorMapSettings2DAction);
 
     protected:
         ColorMapViewAction  _colorMapViewAction;    /** Color map view action */
@@ -51,14 +51,14 @@ protected:
      * Constructor
      * @param colorMapAction Reference to color map action
      */
-    ColorMapSettingsTwoDimensionalAction(ColorMapAction& colorMapAction);
+    ColorMapSettings2DAction(ColorMapAction& colorMapAction);
 
 public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }
 
 protected:
-    ColorMapAction&             _colorMapAction;            /** Reference to color map action */
+    ColorMapAction&     _colorMapAction;        /** Reference to color map action */
 
     /** Only color map settings action may instantiate this class */
     friend class ColorMapSettingsAction;

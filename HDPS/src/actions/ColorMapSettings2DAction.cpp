@@ -1,4 +1,4 @@
-#include "ColorMapSettingsTwoDimensionalAction.h"
+#include "ColorMapSettings2DAction.h"
 #include "ColorMapAction.h"
 #include "Application.h"
 
@@ -9,7 +9,7 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapSettingsTwoDimensionalAction::ColorMapSettingsTwoDimensionalAction(ColorMapAction& colorMapAction) :
+ColorMapSettings2DAction::ColorMapSettings2DAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction)
 {
@@ -17,13 +17,13 @@ ColorMapSettingsTwoDimensionalAction::ColorMapSettingsTwoDimensionalAction(Color
     setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
 }
 
-ColorMapSettingsTwoDimensionalAction::Widget::Widget(QWidget* parent, ColorMapSettingsTwoDimensionalAction* colorMapSettingsTwoDimensionalAction) :
-    WidgetActionWidget(parent, colorMapSettingsTwoDimensionalAction),
-    _colorMapViewAction(colorMapSettingsTwoDimensionalAction->getColorMapAction())
+ColorMapSettings2DAction::Widget::Widget(QWidget* parent, ColorMapSettings2DAction* colorMapSettings2DAction) :
+    WidgetActionWidget(parent, colorMapSettings2DAction),
+    _colorMapViewAction(colorMapSettings2DAction->getColorMapAction())
 {
     setAutoFillBackground(true);
 
-    auto& settingsAction = colorMapSettingsTwoDimensionalAction->getColorMapAction().getSettingsAction();
+    auto& settingsAction = colorMapSettings2DAction->getColorMapAction().getSettingsAction();
 
     auto mainLayout     = new QHBoxLayout();
     auto settingsLayout = new QVBoxLayout();
