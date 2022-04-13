@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ColorMapEditor1DScene.h"
+#include "ColorMapEditor1DNode.h"
 
 #include <QWidget>
 #include <QResizeEvent>
@@ -11,7 +12,6 @@ namespace hdps {
 namespace gui {
 
 class ColorMapEditor1DAction;
-class ColorMapEditor1DNode;
 
 class ColorMapEditor1DWidget : public QGraphicsView
 {
@@ -44,6 +44,12 @@ public:
     void selectNode(ColorMapEditor1DNode* node);
 
 public:
+
+    /**
+     * Get nodes
+     * @return Nodes
+     */
+    QVector<ColorMapEditor1DNode*> getNodes();
 
     /**
      * Get previous node

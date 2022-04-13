@@ -1,6 +1,5 @@
 #include "ColorMapEditor1DWidget.h"
 #include "ColorMapEditor1DScene.h"
-#include "ColorMapEditor1DNode.h"
 #include "ColorMapEditor1DEdge.h"
 #include "ColorMapEditor1DAction.h"
 
@@ -43,42 +42,23 @@ ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1D
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
 
-    // Initialize the border nodes and save them in the node vectors.
     auto node1 = new ColorMapEditor1DNode(*this);
     auto node2 = new ColorMapEditor1DNode(*this);
+
     _nodes[0] = node1;
     _nodes[1] = node2;
+
     _scene.addItem(_nodes[0]);
     _scene.addItem(_nodes[1]);    
+
     auto edge1 = new ColorMapEditor1DEdge(*this, node1, node2);
+
     _edgeList[0] = edge1;
+
     _scene.addItem(_edgeList[0]);
-    node1->setPos(QPointF(0, height()));
-    node2->setPos(QPointF(width(), 0));
-    _currentNode = node2;
 
-    auto& nodeAction = _colorMapEditor1DAction.getNodeAction();
-
-    connect(&_colorMapEditor1DAction.getGoToFirstNodeAction(), &TriggerAction::triggered, this, [this, &nodeAction] {
-        selectNode(_nodes.first());
-    });
-
-    connect(&_colorMapEditor1DAction.getGoToPreviousNodeAction(), &TriggerAction::triggered, this, [this, &nodeAction] {
-        selectNode(getPreviousNode(_currentNode));
-    });
-
-    connect(&_colorMapEditor1DAction.getGoToNextNodeAction(), &TriggerAction::triggered, this, [this, &nodeAction] {
-        selectNode(getNextNode(_currentNode));
-    });
-
-    connect(&_colorMapEditor1DAction.getGoToLastNodeAction(), &TriggerAction::triggered, this, [this, &nodeAction] {
-        selectNode(_nodes.last());
-    });
-
-    connect(&_colorMapEditor1DAction.getRemoveNodeAction(), &TriggerAction::triggered, this, [this, &nodeAction] {
-        if (_currentNode != _nodes.first() && _currentNode != _nodes.last())
-            removeNode(_currentNode);
-    });
+    node1->setPos(_graphRectangle.bottomLeft());
+    node2->setPos(_graphRectangle.topRight());
 }
 
 // This function is used to gather all data created by this widget and cummulates this into a QImage with a height of 1 and a width of 256, this QImage is the created as a colormap.
@@ -149,6 +129,11 @@ void ColorMapEditor1DWidget::selectNode(ColorMapEditor1DNode* node)
     emit currentNodeChanged(_currentNode);
 
     _colorMapEditor1DAction.getNodeAction().connectToNode(_currentNode);
+}
+
+QVector<ColorMapEditor1DNode*> ColorMapEditor1DWidget::getNodes()
+{
+    return _nodes;
 }
 
 ColorMapEditor1DNode* ColorMapEditor1DWidget::getPreviousNode(ColorMapEditor1DNode* node) const

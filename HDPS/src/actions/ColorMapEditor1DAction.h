@@ -38,6 +38,11 @@ public:
 
     protected:
         ColorMapEditor1DWidget      _colorMapEditor1DWidget;        /** Color map editor widget */
+        TriggerAction               _goToFirstNodeAction;       /** Go to first node action */
+        TriggerAction               _goToPreviousNodeAction;    /** Go to previous node action */
+        TriggerAction               _goToNextNodeAction;        /** Go to next node action */
+        TriggerAction               _goToLastNodeAction;        /** Go to last node action */
+        TriggerAction               _removeNodeAction;          /** Remove node action */
     };
 
     /**
@@ -72,20 +77,10 @@ public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }
     ColorMapEditor1DNodeAction& getNodeAction() { return _nodeAction; }
-    TriggerAction& getGoToFirstNodeAction() { return _goToFirstNodeAction; }
-    TriggerAction& getGoToPreviousNodeAction() { return _goToPreviousNodeAction; }
-    TriggerAction& getGoToNextNodeAction() { return _goToNextNodeAction; }
-    TriggerAction& getGoToLastNodeAction() { return _goToLastNodeAction; }
-    TriggerAction& getRemoveNodeAction() { return _removeNodeAction; }
 
 protected:
-    ColorMapAction&                 _colorMapAction;            /** Reference to color map action */
-    ColorMapEditor1DNodeAction      _nodeAction;                /** Node action */
-    TriggerAction                   _goToFirstNodeAction;       /** Go to first node action */
-    TriggerAction                   _goToPreviousNodeAction;    /** Go to previous node action */
-    TriggerAction                   _goToNextNodeAction;        /** Go to next node action */
-    TriggerAction                   _goToLastNodeAction;        /** Go to last node action */
-    TriggerAction                   _removeNodeAction;          /** Remove node action */
+    ColorMapAction&                 _colorMapAction;    /** Reference to color map action */
+    ColorMapEditor1DNodeAction      _nodeAction;        /** Node action */
 
     /** Only color map settings action may instantiate this class */
     friend class ColorMapSettingsAction;

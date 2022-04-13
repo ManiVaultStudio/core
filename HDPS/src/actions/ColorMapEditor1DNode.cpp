@@ -20,13 +20,13 @@ ColorMapEditor1DNode::ColorMapEditor1DNode(ColorMapEditor1DWidget& colorMapEdito
     _colorMapEditor1DWidget(colorMapEditor1DWidget),
     _index(),
     _color(Qt::gray),
-    _radius(4.0f),
+    _radius(3.0f),
     _edgeList()
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
-    //setZValue(-1);
+    setZValue(10);
 
     connect(&_colorMapEditor1DWidget, &ColorMapEditor1DWidget::currentNodeChanged, this, [this]() -> void {
         update();
@@ -56,6 +56,8 @@ void ColorMapEditor1DNode::setColor(const QColor& color)
         return;
 
     _color = color;
+
+    update();
 
     emit colorChanged(_color);
 }
@@ -118,7 +120,7 @@ QPainterPath ColorMapEditor1DNode::shape() const
 {
     QPainterPath path;
 
-    path.addEllipse(0, 0, 2 * _radius, 2 * _radius);
+    path.addEllipse(-_radius, -_radius, 2 * _radius, 2 * _radius);
 
     return path;
 }
@@ -131,7 +133,7 @@ void ColorMapEditor1DNode::paint(QPainter* painter, const QStyleOptionGraphicsIt
 
     QPen perimeterPen;
 
-    perimeterPen.setWidth(_colorMapEditor1DWidget.getCurrentNode() == this ? 3 : 2);
+    perimeterPen.setWidth(_colorMapEditor1DWidget.getCurrentNode() == this ? 3.0f : 1.5f);
     perimeterPen.setColor(_colorMapEditor1DWidget.isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText));
 
     painter->setPen(perimeterPen);
@@ -179,10 +181,22 @@ void ColorMapEditor1DNode::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     qDebug() << __FUNCTION__;
 #endif
 
-    const auto valueMin = _colorMapEditor1DWidget.getPreviousNode(this)->x();
-    const auto valueMax = _colorMapEditor1DWidget.getNextNode(this)->x();
+    const auto nodes        = _colorMapEditor1DWidget.getNodes();
+    const auto isFirstNode  = this == nodes.first();
+    const auto isLastNode   = this == nodes.last();
 
-    event->setPos(QPointF(std::max(valueMin, std::min(event->pos().x(), valueMax)), event->pos().y()));
+    auto valueMin = _colorMapEditor1DWidget.getPreviousNode(this)->x();
+    auto valueMax = _colorMapEditor1DWidget.getNextNode(this)->x();
+
+    if (isFirstNode)
+        valueMin = valueMax = _colorMapEditor1DWidget.getGraphRectangle().left();
+
+    if (isLastNode)
+        valueMin = valueMax = _colorMapEditor1DWidget.getGraphRectangle().right();
+
+    qDebug() << isFirstNode << isLastNode << valueMin << valueMax;
+
+    //event->setScenePos(QPoint(std::max(valueMin, std::min(event->pos().x(), valueMax)), event->pos().y()));
 
     QGraphicsItem::mouseMoveEvent(event);
 

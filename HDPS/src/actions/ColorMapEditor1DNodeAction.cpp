@@ -63,7 +63,10 @@ void ColorMapEditor1DNodeAction::connectToNode(ColorMapEditor1DNode* node)
 
     _colorAction.setEnabled(enable);
     _opacityAction.setEnabled(enable);
-    _valueAction.setEnabled(enable);
+
+    const auto nodes = _currentNode->getColorMapEditor1DWidget().getNodes();
+
+    _valueAction.setEnabled(_currentNode != nodes.first() && _currentNode != nodes.last());
 
     connect(_currentNode, &ColorMapEditor1DNode::normalizedCoordinateChanged, this, &ColorMapEditor1DNodeAction::nodeChanged);
 
@@ -101,6 +104,7 @@ void ColorMapEditor1DNodeAction::nodeChanged()
     const auto x            = minimum + (coordinate.x() * length);
     const auto y            = coordinate.y();
 
+    _colorAction.initialize(_currentNode->getColor(), _currentNode->getColor());
     _valueAction.initialize(minimum, maximum, x, x, 1);
     _opacityAction.setValue(y * 100.0f);
 }
