@@ -17,20 +17,20 @@ struct DataLoadException : public std::exception
 public:
     DataLoadException(QString filePath, QString reason)
         : _filePath(filePath),
-        _reason(reason),
-        _what("Failed to load file at: " + _filePath + "\nReason: " + _reason)
+        _reason(reason)
     {
+        _what = ("Failed to load file at: " + _filePath + "\nReason: " + _reason).toStdString();
     }
 
     const char* what() const throw () override
     {
-        return _what.toStdString().c_str();
+        return _what.c_str();
     }
 
 private:
     QString _filePath;
     QString _reason;
-    QString _what;
+    std::string _what;
 };
 
 
