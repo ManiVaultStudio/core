@@ -5,6 +5,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
+#ifdef _DEBUG
+    #define COLOR_MAP_EDITOR_1D_ACTION
+#endif
+
 namespace hdps {
 
 namespace gui {
@@ -12,11 +16,17 @@ namespace gui {
 ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction),
+    _nodes(),
     _nodeAction(*this)
 {
     setText("Custom");
     setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
     setCheckable(true);
+}
+
+QVector<ColorMapEditor1DNode*>& ColorMapEditor1DAction::getNodes()
+{
+    return _nodes;
 }
 
 void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction)
@@ -109,20 +119,31 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
         _colorMapEditor1DWidget.removeNode(currentNode);
     });
 
+    /*
     const auto updateActions = [this]() -> void {
         const auto currentNode  = _colorMapEditor1DWidget.getCurrentNode();
         const auto nodes        = _colorMapEditor1DWidget.getNodes();
 
-        _goToFirstNodeAction.setEnabled(currentNode && currentNode != nodes.first());
-        _goToPreviousNodeAction.setEnabled(currentNode && _colorMapEditor1DWidget.getPreviousNode(currentNode) != currentNode);
-        _goToNextNodeAction.setEnabled(currentNode && _colorMapEditor1DWidget.getNextNode(currentNode) != currentNode);
-        _goToLastNodeAction.setEnabled(currentNode && currentNode != nodes.last());
-        _removeNodeAction.setEnabled(currentNode && currentNode != nodes.first() && currentNode != nodes.last());
+        if (currentNode) {
+            _goToFirstNodeAction.setEnabled(currentNode && currentNode != nodes.first());
+            _goToPreviousNodeAction.setEnabled(currentNode && _colorMapEditor1DWidget.getPreviousNode(currentNode) != currentNode);
+            _goToNextNodeAction.setEnabled(currentNode && _colorMapEditor1DWidget.getNextNode(currentNode) != currentNode);
+            _goToLastNodeAction.setEnabled(currentNode && currentNode != nodes.last());
+            _removeNodeAction.setEnabled(currentNode && currentNode != nodes.first() && currentNode != nodes.last());
+        }
+        else {
+            _goToFirstNodeAction.setEnabled(false);
+            _goToPreviousNodeAction.setEnabled(false);
+            _goToNextNodeAction.setEnabled(false);
+            _goToLastNodeAction.setEnabled(false);
+            _removeNodeAction.setEnabled(false);
+        }
     };
-
+    
     connect(&_colorMapEditor1DWidget, &ColorMapEditor1DWidget::currentNodeChanged, this, updateActions);
 
     updateActions();
+    */
 }
 
 }

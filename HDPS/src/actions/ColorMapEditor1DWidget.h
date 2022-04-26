@@ -21,14 +21,28 @@ public:
 
     ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1DAction& colorMapEditor1DAction);
 
-    /**Function used to add a node at a given position. */
+    /** Destructor */
+    ~ColorMapEditor1DWidget();
+
+    /**
+     * Invoked when the widget is shown 
+     * @param Pointer to show event
+     */
+    void showEvent(QShowEvent* event);
+
+    /**
+     * Respond to target object events
+     * @param target Object of which an event occurred
+     * @param event The event that took place
+     */
+    bool eventFilter(QObject* target, QEvent* event) override;
+
     void addNode(QPointF position);
+
+    void redrawEdges();
 
     /** Function used to remove a node at a given position. */
     void removeNode(ColorMapEditor1DNode* node);
-
-    /** Function used to redraw the lines between the nodes. */
-    void redrawEdges();
 
     /** Function used to draw the axes in the transferfunction. */
     void drawBackground(QPainter* painter, const QRectF& rect);
@@ -49,7 +63,13 @@ public:
      * Get nodes
      * @return Nodes
      */
-    QVector<ColorMapEditor1DNode*> getNodes();
+    QVector<ColorMapEditor1DNode*>& getNodes();
+
+    /**
+     * Get nodes
+     * @return Nodes
+     */
+    const QVector<ColorMapEditor1DNode*>& getNodes() const;
 
     /**
      * Get previous node
@@ -82,12 +102,11 @@ public: // Action getters
     ColorMapEditor1DAction& getColorMapEditor1DAction() { return _colorMapEditor1DAction; }
 
 private:
-    ColorMapEditor1DAction&         _colorMapEditor1DAction;
+    ColorMapEditor1DAction&         _colorMapEditor1DAction;    
     QCursor                         _cursor;
     ColorMapEditor1DScene           _scene;
-    std::uint32_t                   _margin;
-    QRectF                          _graphRectangle;        /** Nodes graph rectangle */
-    QVector<ColorMapEditor1DNode*>  _nodes;                 /** All sorted nodes */
+    QMargins                        _margins;
+    QRectF                          _graphRectangle;            /** Nodes graph rectangle */
     QVector<QGraphicsItem*>         _edgeList;
     ColorMapEditor1DNode*           _currentNode;
     QImage                          _colorMap;

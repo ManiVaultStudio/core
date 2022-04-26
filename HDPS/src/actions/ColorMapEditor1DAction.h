@@ -62,6 +62,20 @@ protected:
      */
     ColorMapEditor1DAction(ColorMapAction& colorMapAction);
 
+public:
+
+    /**
+     * Get nodes
+     * @return Nodes
+     */
+    QVector<ColorMapEditor1DNode*>& getNodes();
+
+    /**
+     * Add node at the specified position
+     * @param position Node position
+     */
+    //void addNode(const QPointF& position);
+
 public: // Linking
 
     /**
@@ -80,6 +94,7 @@ public: // Action getters
 
 protected:
     ColorMapAction&                 _colorMapAction;    /** Reference to color map action */
+    QVector<ColorMapEditor1DNode*>  _nodes;             /** All sorted nodes */
     ColorMapEditor1DNodeAction      _nodeAction;        /** Node action */
 
     /** Only color map settings action may instantiate this class */

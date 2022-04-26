@@ -32,7 +32,6 @@ protected:
 
 private:
     ColorMapEditor1DWidget&     _colorMapEditor1DWidget;        /** Reference to owning one-dimensional color map edit widget */
-    QCursor                     _cursor;                        /** Current cursor */
 
 signals:
     void pressed(QGraphicsSceneMouseEvent* graphicsSceneMouseEvent);

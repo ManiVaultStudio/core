@@ -3,10 +3,15 @@
 #include "ColorMapEditor1DEdge.h"
 #include "ColorMapEditor1DAction.h"
 
-#include <QPainter.h>
+#include <QPainter>
 #include <QMessageBox>
+#include <QStyleOption>
 
 #include <algorithm>
+
+#ifdef _DEBUG
+    #define COLOR_MAP_EDITOR_WIDGET_VERBOSE
+#endif
 
 namespace hdps {
 
@@ -17,48 +22,55 @@ ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1D
     _colorMapEditor1DAction(colorMapEditor1DAction),
     _cursor(),
     _scene(*this),
-    _margin(10),
+    _margins(60, 10, 10, 10),
     _graphRectangle(),
-    _nodes(QVector<ColorMapEditor1DNode*> (2)),
-    _edgeList(QVector<QGraphicsItem*> (1)),
+    _edgeList(),
     _currentNode(),
     _colorMap()
 {
-    setMinimumHeight(250);
+    setMinimumHeight(200);
+    installEventFilter(this);
+}
 
+ColorMapEditor1DWidget::~ColorMapEditor1DWidget()
+{
+    selectNode(nullptr);
+}
+
+void ColorMapEditor1DWidget::showEvent(QShowEvent* event)
+{
     _scene.setItemIndexMethod(QGraphicsScene::NoIndex);
 
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    //_scene.setSceneRect(rect());
+    _scene.setSceneRect(rect());
 
-    _graphRectangle = rect().marginsRemoved(QMargins(_margin, _margin, _margin, _margin));
+    _graphRectangle = rect().marginsRemoved(_margins);
 
     setScene(&_scene);
-    setCacheMode(CacheBackground);
-    setCacheMode(QGraphicsView::CacheBackground);
-    setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    //setCacheMode(QGraphicsView::CacheBackground);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
 
-    auto node1 = new ColorMapEditor1DNode(*this);
-    auto node2 = new ColorMapEditor1DNode(*this);
+    addNode(_graphRectangle.bottomLeft());
+    addNode(_graphRectangle.topRight());
+}
 
-    _nodes[0] = node1;
-    _nodes[1] = node2;
+bool ColorMapEditor1DWidget::eventFilter(QObject* target, QEvent* event)
+{
+    switch (event->type())
+    {
+        case QEvent::EnabledChange:
+            repaint();
+            break;
 
-    _scene.addItem(_nodes[0]);
-    _scene.addItem(_nodes[1]);    
+        default:
+            break;
+    }
 
-    auto edge1 = new ColorMapEditor1DEdge(*this, node1, node2);
-
-    _edgeList[0] = edge1;
-
-    _scene.addItem(_edgeList[0]);
-
-    node1->setPos(_graphRectangle.bottomLeft());
-    node2->setPos(_graphRectangle.topRight());
+    return QWidget::eventFilter(target, event);
 }
 
 // This function is used to gather all data created by this widget and cummulates this into a QImage with a height of 1 and a width of 256, this QImage is the created as a colormap.
@@ -121,9 +133,6 @@ void ColorMapEditor1DWidget::createColorMap()
 
 void ColorMapEditor1DWidget::selectNode(ColorMapEditor1DNode* node)
 {
-    if (node == _currentNode)
-        return;
-
     _currentNode = node;
 
     emit currentNodeChanged(_currentNode);
@@ -131,29 +140,34 @@ void ColorMapEditor1DWidget::selectNode(ColorMapEditor1DNode* node)
     _colorMapEditor1DAction.getNodeAction().connectToNode(_currentNode);
 }
 
-QVector<ColorMapEditor1DNode*> ColorMapEditor1DWidget::getNodes()
+QVector<ColorMapEditor1DNode*>& ColorMapEditor1DWidget::getNodes()
 {
-    return _nodes;
+    return _colorMapEditor1DAction.getNodes();
+}
+
+const QVector<ColorMapEditor1DNode*>& ColorMapEditor1DWidget::getNodes() const
+{
+    return _colorMapEditor1DAction.getNodes();
 }
 
 ColorMapEditor1DNode* ColorMapEditor1DWidget::getPreviousNode(ColorMapEditor1DNode* node) const
 {
-    const auto indexOfSelectedNode = _nodes.indexOf(_currentNode);
+    const auto indexOfSelectedNode = getNodes().indexOf(_currentNode);
 
     if (indexOfSelectedNode >= 1)
-        return _nodes[indexOfSelectedNode - 1];
+        return getNodes()[indexOfSelectedNode - 1];
 
-    return _nodes.first();
+    return getNodes().first();
 }
 
 ColorMapEditor1DNode* ColorMapEditor1DWidget::getNextNode(ColorMapEditor1DNode* node) const
 {
-    const auto indexOfSelectedNode = _nodes.indexOf(_currentNode);
+    const auto indexOfSelectedNode = getNodes().indexOf(_currentNode);
 
-    if (indexOfSelectedNode < (_nodes.count() - 1))
-        return _nodes[indexOfSelectedNode + 1];
+    if (indexOfSelectedNode < (getNodes().count() - 1))
+        return getNodes()[indexOfSelectedNode + 1];
 
-    return _nodes.last();
+    return getNodes().last();
 }
 
 ColorMapEditor1DNode* ColorMapEditor1DWidget::getCurrentNode()
@@ -171,62 +185,67 @@ void ColorMapEditor1DWidget::removeNode(ColorMapEditor1DNode* node)
     Q_ASSERT(node != nullptr);
 
     _scene.removeItem(node);
-    _nodes.removeOne(node);
 
-    redrawEdges();
+    getNodes().removeOne(node);
 }
 
-// This function is used to add a node at a given position.
 void ColorMapEditor1DWidget::addNode(QPointF position) {
+
+#ifdef COLOR_MAP_EDITOR_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
     // Create a new node at the stated position and create data for this node.
     auto newNode = new ColorMapEditor1DNode(*this);
 
     _scene.addItem(newNode);
 
     newNode->setPos(position);
-    _nodes.push_back(newNode);
+
+    getNodes().push_back(newNode);
+    
     _currentNode = newNode;
 
-    std::sort(_nodes.begin(), _nodes.end(), [](auto nodeA, auto nodeB) -> bool {
+    std::sort(getNodes().begin(), getNodes().end(), [](auto nodeA, auto nodeB) -> bool {
         return nodeA->x() < nodeB->x();
     });
 
-    for (auto node : _nodes)
-        node->setIndex(_nodes.indexOf(node));
+    for (auto node : getNodes())
+        node->setIndex(getNodes().indexOf(node));
 
-    _colorMapEditor1DAction.getNodeAction().changeNodeColor(Qt::yellow);
-    redrawEdges();
     createColorMap();
 }
 
-// This function redraws the lines between the nodes that indicate the transferfunction.
 void ColorMapEditor1DWidget::redrawEdges() {
-    // Remove all edges in the list.
-    for (int i = 0; i < _edgeList.size(); i++) {
+    
+    // Remove all edges in the list
+    for (int i = 0; i < _edgeList.size(); i++)
         _scene.removeItem(_edgeList[i]);
-    }
+
     _edgeList.clear();
 
-    /*
-    // Add lines between all nodes.    
-    for (int i = 0; i < sortedIndices.size() - 1; i++) {
-        auto newEdge = new ColorMapEditor1DEdge(_nodeList[sortedIndices[i].second], _nodeList[sortedIndices[i + 1].second]);
-        _edgeList.push_back(newEdge);
+    // Add lines between all nodes
+    for (int i = 0; i < getNodes().size() - 1; i++) {
+        _edgeList.push_back(new ColorMapEditor1DEdge(*this, getNodes()[i], getNodes()[i + 1]));
         _scene.addItem(_edgeList[i]);
     }
-    */
 
-    // Recreate colormap after the edges and nodes have been changed.
     createColorMap();
 }
 
-// This function draws the axis inside the transferfunction.
 void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect)
 {
     Q_UNUSED(rect);
 
+    QStyleOption styleOption;
+
+    styleOption.init(this);
+
     QPen pen;
+
     pen.setWidth(2);
+    pen.setColor(isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText));
+
     painter->setPen(pen);
 
     painter->drawRect(_graphRectangle);

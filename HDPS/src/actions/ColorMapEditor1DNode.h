@@ -81,11 +81,19 @@ public:
 
     enum { Type = UserType + 1 };
     int type() const override { return Type; }
-    
+
     QRectF boundingRect() const override;
+
+    /**
+     * Get movement limits in graph coordinates
+     * @return Limits rectangle
+     */
+    QRectF getLimits() const;
+
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     void pressed(QGraphicsSceneMouseEvent* event);
+
 
     ColorMapEditor1DWidget& getColorMapEditor1DWidget() {
         return _colorMapEditor1DWidget;
@@ -97,6 +105,18 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
+    /**
+     * Invoked when the mouse over the node
+     * @param graphicsSceneHoverEvent Pointer to graphics scene hover event
+     */
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent) override;
+
+    /**
+     * Invoked when the mouse leaves the node after hovering
+     * @param graphicsSceneHoverEvent Pointer to graphics scene hover event
+     */
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent) override;
 
 signals:
 
@@ -118,7 +138,7 @@ private:
     QColor                              _color;                     /** Node color */
     float                               _radius;                    /** Node radius */
     QVector<ColorMapEditor1DEdge*>      _edgeList;                  /** Pointers to node edges */
-    
+    bool                                _hover;                     /** Whether the mouse is hovering over the node */
 };
 
 }

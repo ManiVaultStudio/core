@@ -52,8 +52,6 @@ ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& c
 
 void ColorMapEditor1DNodeAction::connectToNode(ColorMapEditor1DNode* node)
 {
-    Q_ASSERT(node != nullptr);
-
     if (_currentNode)
         disconnectFromNode(_currentNode);
 
@@ -64,7 +62,10 @@ void ColorMapEditor1DNodeAction::connectToNode(ColorMapEditor1DNode* node)
     _colorAction.setEnabled(enable);
     _opacityAction.setEnabled(enable);
 
-    const auto nodes = _currentNode->getColorMapEditor1DWidget().getNodes();
+    if (_currentNode == nullptr)
+        return;
+
+    const auto& nodes = _currentNode->getColorMapEditor1DWidget().getNodes();
 
     _valueAction.setEnabled(_currentNode != nodes.first() && _currentNode != nodes.last());
 
@@ -75,7 +76,8 @@ void ColorMapEditor1DNodeAction::connectToNode(ColorMapEditor1DNode* node)
 
 void ColorMapEditor1DNodeAction::disconnectFromNode(ColorMapEditor1DNode* node)
 {
-    Q_ASSERT(node != nullptr);
+    if (node == nullptr)
+        return;
 
     disconnect(node, &ColorMapEditor1DNode::normalizedCoordinateChanged, this, nullptr);
 

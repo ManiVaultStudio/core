@@ -7,8 +7,11 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QStyle>
 #include <QDebug>
+#include <QRadialGradient>
 
-#define COLOR_MAP_EDITOR_1D_NODE_VERBOSE
+#ifdef _DEBUG
+    #define COLOR_MAP_EDITOR_1D_NODE_VERBOSE
+#endif
 
 namespace hdps {
 
@@ -20,13 +23,15 @@ ColorMapEditor1DNode::ColorMapEditor1DNode(ColorMapEditor1DWidget& colorMapEdito
     _colorMapEditor1DWidget(colorMapEditor1DWidget),
     _index(),
     _color(Qt::gray),
-    _radius(3.0f),
-    _edgeList()
+    _radius(5.0f),
+    _edgeList(),
+    _hover(false)
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
-    setCacheMode(DeviceCoordinateCache);
+    //setCacheMode(DeviceCoordinateCache);
     setZValue(10);
+    setAcceptHoverEvents(true);
 
     connect(&_colorMapEditor1DWidget, &ColorMapEditor1DWidget::currentNodeChanged, this, [this]() -> void {
         update();
@@ -113,14 +118,29 @@ bool ColorMapEditor1DNode::eventFilter(QObject* target, QEvent* event)
 
 QRectF ColorMapEditor1DNode::boundingRect() const
 {
-    return QRectF(-_radius, -_radius, 2 * _radius, 2 *_radius).marginsAdded(QMargins(3, 3, 3, 3));
+    return QRectF(-_radius, -_radius, 2 * _radius, 2 *_radius).marginsRemoved(QMargins(3, 3, 3, 3));
+}
+
+QRectF ColorMapEditor1DNode::getLimits() const
+{
+    const auto previousNode     = _colorMapEditor1DWidget.getPreviousNode(const_cast<ColorMapEditor1DNode*>(this));
+    const auto nextNode         = _colorMapEditor1DWidget.getNextNode(const_cast<ColorMapEditor1DNode*>(this));
+    const auto graphRectangle   = _colorMapEditor1DWidget.getGraphRectangle();
+
+    if (this == previousNode)
+        return QRectF(QPointF(graphRectangle.left(), graphRectangle.top()), QPointF(graphRectangle.left(), graphRectangle.bottom()));
+
+    if (this == nextNode)
+        return QRectF(QPointF(graphRectangle.right(), graphRectangle.top()), QPointF(graphRectangle.right(), graphRectangle.bottom()));
+
+    return QRectF(QPointF(previousNode->scenePos().x(), graphRectangle.top()), QPointF(nextNode->scenePos().x(), graphRectangle.bottom()));
 }
 
 QPainterPath ColorMapEditor1DNode::shape() const
 {
     QPainterPath path;
 
-    path.addEllipse(-_radius, -_radius, 2 * _radius, 2 * _radius);
+    path.addEllipse(boundingRect().center(), _radius, _radius);
 
     return path;
 }
@@ -131,6 +151,20 @@ void ColorMapEditor1DNode::paint(QPainter* painter, const QStyleOptionGraphicsIt
 
     styleOption.init(&_colorMapEditor1DWidget);
 
+    if (_colorMapEditor1DWidget.isEnabled() && _hover) {
+        QRadialGradient radialGradient;
+
+        radialGradient.setCenter(boundingRect().center());
+        radialGradient.setCenterRadius(0.5 * boundingRect().width());
+        radialGradient.setColorAt(0.0, QColor(100, 100, 100, 100));
+        radialGradient.setColorAt(0.9, QColor(100, 100, 100, 100));
+        radialGradient.setColorAt(1.0, QColor(100, 100, 100, 100));
+
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QBrush(Qt::red));
+        painter->drawEllipse(boundingRect());
+    }
+
     QPen perimeterPen;
 
     perimeterPen.setWidth(_colorMapEditor1DWidget.getCurrentNode() == this ? 3.0f : 1.5f);
@@ -138,8 +172,8 @@ void ColorMapEditor1DNode::paint(QPainter* painter, const QStyleOptionGraphicsIt
 
     painter->setPen(perimeterPen);
 
-    painter->setBrush(_color);
-    painter->drawEllipse(boundingRect());
+    painter->setBrush(_colorMapEditor1DWidget.isEnabled() ? _color : QColor::fromHsl(_color.hue(), 0, _color.lightness()));
+    painter->drawPath(shape());
 }
 
 QVariant ColorMapEditor1DNode::itemChange(GraphicsItemChange change, const QVariant& value)
@@ -181,26 +215,22 @@ void ColorMapEditor1DNode::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     qDebug() << __FUNCTION__;
 #endif
 
-    const auto nodes        = _colorMapEditor1DWidget.getNodes();
-    const auto isFirstNode  = this == nodes.first();
-    const auto isLastNode   = this == nodes.last();
+    const auto limits = getLimits();
 
-    auto valueMin = _colorMapEditor1DWidget.getPreviousNode(this)->x();
-    auto valueMax = _colorMapEditor1DWidget.getNextNode(this)->x();
+    qDebug() << limits;
 
-    if (isFirstNode)
-        valueMin = valueMax = _colorMapEditor1DWidget.getGraphRectangle().left();
+    QPoint scenePos;
 
-    if (isLastNode)
-        valueMin = valueMax = _colorMapEditor1DWidget.getGraphRectangle().right();
+    scenePos.setX(std::max(limits.left(), std::min(event->scenePos().x(), limits.right())));
+    scenePos.setY(std::max(limits.top(), std::min(event->scenePos().y(), limits.bottom())));
 
-    qDebug() << isFirstNode << isLastNode << valueMin << valueMax;
-
-    //event->setScenePos(QPoint(std::max(valueMin, std::min(event->pos().x(), valueMax)), event->pos().y()));
+    event->setScenePos(scenePos);
 
     QGraphicsItem::mouseMoveEvent(event);
 
     emit normalizedCoordinateChanged(getNormalizedCoordinate());
+
+    update();
 }
 
 void ColorMapEditor1DNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
@@ -208,8 +238,28 @@ void ColorMapEditor1DNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     update();
 
     QGraphicsItem::mouseReleaseEvent(event);
+}
 
-    _colorMapEditor1DWidget.redrawEdges();
+void ColorMapEditor1DNode::hoverEnterEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent)
+{
+#ifdef COLOR_MAP_EDITOR_1D_NODE_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    _hover = true;
+
+    update();
+}
+
+void ColorMapEditor1DNode::hoverLeaveEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent)
+{
+#ifdef COLOR_MAP_EDITOR_1D_NODE_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    _hover = false;
+
+    update();
 }
 
 void ColorMapEditor1DNode::addEdge(ColorMapEditor1DEdge* edge)

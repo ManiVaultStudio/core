@@ -2,6 +2,7 @@
 #include "ColorMapEditor1DWidget.h"
 
 #include <QGraphicsSceneMouseEvent>
+#include <QDebug>
 
 namespace hdps {
 
@@ -9,27 +10,24 @@ namespace gui {
 
 ColorMapEditor1DScene::ColorMapEditor1DScene(ColorMapEditor1DWidget& colorMapEditor1DWidget) :
     QGraphicsScene(&colorMapEditor1DWidget),
-    _cursor(),
     _colorMapEditor1DWidget(colorMapEditor1DWidget)
 {
 }
 
 void ColorMapEditor1DScene::mousePressEvent(QGraphicsSceneMouseEvent* graphicsSceneMouseEvent) {
-    const auto position = graphicsSceneMouseEvent->scenePos();
+    const auto scenePosition = graphicsSceneMouseEvent->scenePos();
 
-    QGraphicsScene::mousePressEvent(graphicsSceneMouseEvent);
+    qDebug() << items(scenePosition);
 
-    /*
-    if (graphicsSceneMouseEvent->buttons() & Qt::LeftButton) {
-        _colorMapEditor1DWidget.findNode(position, "Left");
+    if ((graphicsSceneMouseEvent->buttons() & Qt::LeftButton) && items(scenePosition).count()) {
+        QGraphicsScene::mousePressEvent(graphicsSceneMouseEvent);
     }
-    else if (graphicsSceneMouseEvent->buttons() & Qt::RightButton) {
-        _colorMapEditor1DWidget.findNode(position, "Right");
+    else {
+        graphicsSceneMouseEvent->accept();
+
+        if (_colorMapEditor1DWidget.getGraphRectangle().contains(scenePosition))
+            _colorMapEditor1DWidget.addNode(scenePosition);
     }
-    else if (graphicsSceneMouseEvent->buttons() & Qt::MiddleButton) {
-        _colorMapEditor1DWidget.findNode(position, "Middle");
-    }
-    */
 }
 
 }
