@@ -154,6 +154,7 @@ set(ACTIONS_HEADERS
     src/actions/DecimalRectangleAction.h
     src/actions/NumericalAction.h
     src/actions/OptionAction.h
+    src/actions/OptionsAction.h
     src/actions/PixelSelectionAction.h
     src/actions/TriggerAction.h
     src/actions/TriggersAction.h
@@ -202,6 +203,7 @@ set(ACTIONS_SOURCES
     src/actions/DecimalRectangleAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
+    src/actions/OptionsAction.cpp
     src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/TriggersAction.cpp

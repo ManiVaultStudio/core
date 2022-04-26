@@ -3,6 +3,7 @@
 #include <Application.h>
 #include <DataHierarchyItem.h>
 #include <actions/GroupAction.h>
+#include <actions/OptionsAction.h>
 
 #include <QDebug>
 
@@ -23,6 +24,10 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
     _layout.setMargin(6);
     _layout.addWidget(_groupsAction.createWidget(parent));
+
+    auto optionsAction = new OptionsAction(this, "Options", { "A", "B", "C" }, { "A", "B", });
+    
+    _layout.addWidget(optionsAction->createWidget(parent));
 
     // Update the UI when the data hierarchy item selection changes
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
