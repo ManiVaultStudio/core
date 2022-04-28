@@ -54,7 +54,16 @@ public:
      */
     ColorMapEditor1DNodeAction(ColorMapEditor1DAction& colorMapEditor1DAction);
 
+    /**
+     * Connect to a node
+     * @param node Pointer to node
+     */
     void connectToNode(ColorMapEditor1DNode* node);
+
+    /**
+     * Disconnect from a node
+     * @param node Pointer to node
+     */
     void disconnectFromNode(ColorMapEditor1DNode* node);
 
     /**

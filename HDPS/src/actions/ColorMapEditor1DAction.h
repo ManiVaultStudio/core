@@ -62,7 +62,7 @@ protected:
      */
     ColorMapEditor1DAction(ColorMapAction& colorMapAction);
 
-public:
+public: // Nodes
 
     /**
      * Get nodes
@@ -71,10 +71,34 @@ public:
     QVector<ColorMapEditor1DNode*>& getNodes();
 
     /**
-     * Add node at the specified position
-     * @param position Node position
+     * Add node at the normalized coordinate
+     * @param normalizedCoordinate Normalized coordinate
+     * @return Pointer to created node
      */
-    //void addNode(const QPointF& position);
+    ColorMapEditor1DNode* addNode(const QPointF& normalizedCoordinate);
+
+    /**
+     * Remove node
+     * @param node Pointer to node which is to be removed
+     */
+    void removeNode(ColorMapEditor1DNode* node);
+
+    /**
+     * Get previous node
+     * @param node Pointer to node of which to obtain the previous node
+     * @return Pointer to previous node (node if it has no previous node)
+     */
+    ColorMapEditor1DNode* getPreviousNode(ColorMapEditor1DNode* node) const;
+
+    /**
+     * Get next node
+     * @param node Pointer to node of which to obtain the next node
+     * @return Pointer to next node (node if it has no previous node)
+     */
+    ColorMapEditor1DNode* getNextNode(ColorMapEditor1DNode* node) const;
+
+    /** Sort nodes and update their index */
+    void sortNodes();
 
 public: // Linking
 
@@ -91,6 +115,26 @@ public: // Action getters
 
     ColorMapAction& getColorMapAction() { return _colorMapAction; }
     ColorMapEditor1DNodeAction& getNodeAction() { return _nodeAction; }
+
+signals:
+
+    /**
+     * Signals that a node is added
+     * @param node Pointer to added node
+     */
+    void nodeAdded(ColorMapEditor1DNode* node);
+
+    /**
+     * Signals that a node is about to be removed
+     * @param node Pointer to node which is about to be removed
+     */
+    void nodeAboutToBeRemoved(ColorMapEditor1DNode* node);
+
+    /**
+     * Signals that a node is removed
+     * @param index Index of the node which is removed
+     */
+    void nodeRemoved(const std::uint32_t& index);
 
 protected:
     ColorMapAction&                 _colorMapAction;    /** Reference to color map action */

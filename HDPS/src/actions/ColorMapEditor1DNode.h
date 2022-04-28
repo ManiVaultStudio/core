@@ -1,24 +1,33 @@
 #pragma once
 
 #include <QObject>
-#include <QGraphicsItem>
-#include <QCursor>
-
-class QGraphicsSceneMouseEvent;
+#include <QColor>
 
 namespace hdps {
 
 namespace gui {
 
-class ColorMapEditor1DWidget;
-class ColorMapEditor1DEdge;
+class ColorMapEditor1DAction;
 
-class ColorMapEditor1DNode : public QObject, public QGraphicsItem
+/**
+ * Color map editor one-dimensional node class
+ * 
+ * Container class for one-dimension color map editor node
+ *
+ * @author Thomas Kroes and Mitchell M. de Boer
+ */
+class ColorMapEditor1DNode : public QObject
 {
     Q_OBJECT
 
 public:
-    ColorMapEditor1DNode(ColorMapEditor1DWidget& colorMapEditor1DWidget);
+
+    /**
+     * Constructor
+     * @param colorMapEditor1DAction Reference to owning one-dimensional color map editor
+     * @param normalizedCoordinate Normalized node coordinates
+     */
+    ColorMapEditor1DNode(ColorMapEditor1DAction& colorMapEditor1DAction, const QPointF& normalizedCoordinate);
 
     /**
      * Get sorted node index
@@ -69,54 +78,10 @@ public:
     void setNormalizedCoordinate(const QPointF& normalizedCoordinate);
 
     /**
-     * Respond to target object events
-     * @param target Object of which an event occurred
-     * @param event The event that took place
-     */
-    bool eventFilter(QObject* target, QEvent* event) override;
-
-    void addEdge(ColorMapEditor1DEdge* edge);
-
-    QVector<ColorMapEditor1DEdge*> edges() const;
-
-    enum { Type = UserType + 1 };
-    int type() const override { return Type; }
-
-    QRectF boundingRect() const override;
-
-    /**
-     * Get movement limits in graph coordinates
+     * Get movement limits
      * @return Limits rectangle
      */
     QRectF getLimits() const;
-
-    QPainterPath shape() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    void pressed(QGraphicsSceneMouseEvent* event);
-
-
-    ColorMapEditor1DWidget& getColorMapEditor1DWidget() {
-        return _colorMapEditor1DWidget;
-    }
-protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-
-    /**
-     * Invoked when the mouse over the node
-     * @param graphicsSceneHoverEvent Pointer to graphics scene hover event
-     */
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent) override;
-
-    /**
-     * Invoked when the mouse leaves the node after hovering
-     * @param graphicsSceneHoverEvent Pointer to graphics scene hover event
-     */
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent) override;
 
 signals:
 
@@ -133,12 +98,11 @@ signals:
     void normalizedCoordinateChanged(const QPointF& normalizedCoordinate);
 
 private:
-    ColorMapEditor1DWidget&             _colorMapEditor1DWidget;    /** Reference to owning one-dimensional color map editor widget */
-    std::uint32_t                       _index;                     /** Sorted node index */
-    QColor                              _color;                     /** Node color */
-    float                               _radius;                    /** Node radius */
-    QVector<ColorMapEditor1DEdge*>      _edgeList;                  /** Pointers to node edges */
-    bool                                _hover;                     /** Whether the mouse is hovering over the node */
+    ColorMapEditor1DAction&     _colorMapEditor1DAction;    /** Reference to owning one-dimensional color map editor */
+    std::uint32_t               _index;                     /** Sorted node index */
+    QPointF                     _normalizedCoordinate;      /** Normalized coordinate */
+    QColor                      _color;                     /** Node color */
+    float                       _radius;                    /** Node radius */
 };
 
 }

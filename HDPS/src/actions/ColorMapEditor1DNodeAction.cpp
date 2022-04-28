@@ -16,7 +16,7 @@ ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& c
     _currentNode(nullptr),
     _colorAction(this, "Color", Qt::yellow),
     _opacityAction(this, "Intensity", 0.0f, 100.0f, 0.0f, 0.0f, 0),
-    _valueAction(this, "Value", 0.0f, 100.0f, 0.0f, 0.0f, 0)
+    _valueAction(this, "Value", 0.0f, 100.0f, 0.0f, 0.0f, 2)
 {
     _colorAction.setEnabled(false);
     _opacityAction.setEnabled(false);
@@ -48,6 +48,13 @@ ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& c
 
     connect(&_valueAction, &DecimalAction::valueChanged, this, updateNodeNormalizedCoordinate);
     connect(&_opacityAction, &DecimalAction::valueChanged, this, updateNodeNormalizedCoordinate);
+
+    connect(&_colorMapEditor1DAction, &ColorMapEditor1DAction::nodeAboutToBeRemoved, this, [this](ColorMapEditor1DNode* node) -> void {
+        if (node != _currentNode)
+            return;
+
+        disconnectFromNode(node);
+    });
 }
 
 void ColorMapEditor1DNodeAction::connectToNode(ColorMapEditor1DNode* node)
@@ -65,7 +72,7 @@ void ColorMapEditor1DNodeAction::connectToNode(ColorMapEditor1DNode* node)
     if (_currentNode == nullptr)
         return;
 
-    const auto& nodes = _currentNode->getColorMapEditor1DWidget().getNodes();
+    const auto& nodes = _colorMapEditor1DAction.getNodes();
 
     _valueAction.setEnabled(_currentNode != nodes.first() && _currentNode != nodes.last());
 
@@ -97,18 +104,22 @@ void ColorMapEditor1DNodeAction::changeNodeColor(const QColor& color)
 
 void ColorMapEditor1DNodeAction::nodeChanged()
 {
-    auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction();
+    const auto normalizedValueToRange = [this](const float& normalizedValue) -> float {
+        auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction();
 
-    const auto minimum      = rangeAction.getMinimum();
-    const auto maximum      = rangeAction.getMaximum();
-    const auto length       = maximum - minimum;
-    const auto coordinate   = _currentNode->getNormalizedCoordinate();
-    const auto x            = minimum + (coordinate.x() * length);
-    const auto y            = coordinate.y();
+        const auto minimum      = rangeAction.getMinimum();
+        const auto maximum      = rangeAction.getMaximum();
+        const auto length       = maximum - minimum;
+        
+        return minimum + (normalizedValue * length);
+    };
+
+    const auto normalizedCoordinate = _currentNode->getNormalizedCoordinate();
+    const auto limits               = _currentNode->getLimits();
 
     _colorAction.initialize(_currentNode->getColor(), _currentNode->getColor());
-    _valueAction.initialize(minimum, maximum, x, x, 1);
-    _opacityAction.setValue(y * 100.0f);
+    _valueAction.initialize(normalizedValueToRange(limits.left()), normalizedValueToRange(limits.right()), normalizedValueToRange(normalizedCoordinate.x()), normalizedValueToRange(normalizedCoordinate.x()), 2);
+    _opacityAction.setValue(normalizedCoordinate.y() * 100.0f);
 }
 
 ColorMapEditor1DNodeAction::Widget::Widget(QWidget* parent, ColorMapEditor1DNodeAction* colorMapEditor1DNodeAction) :

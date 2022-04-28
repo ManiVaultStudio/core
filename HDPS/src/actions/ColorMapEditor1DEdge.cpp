@@ -26,8 +26,8 @@ ColorMapEditor1DEdge::ColorMapEditor1DEdge(ColorMapEditor1DWidget& colorMapEdito
 
     setAcceptedMouseButtons(Qt::NoButton);
 
-    _sourceNode->addEdge(this);
-    _targetNode->addEdge(this);
+    //_sourceNode->addEdge(this);
+    //_targetNode->addEdge(this);
 
     _colorMapEditor1DWidget.installEventFilter(this);
 }
@@ -66,7 +66,7 @@ QLineF ColorMapEditor1DEdge::getLine() const
     if (!_sourceNode || !_targetNode)
         return QLineF();
 
-    return QLineF(_sourceNode->pos(), _targetNode->pos());
+    return QLineF();// _sourceNode->pos(), _targetNode->pos());
 }
 
 QRectF ColorMapEditor1DEdge::boundingRect() const

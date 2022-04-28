@@ -22,11 +22,77 @@ ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
     setText("Custom");
     setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
     setCheckable(true);
+
+    addNode(QPointF(0.0f, 0.0f));
+    addNode(QPointF(1.0f, 1.0f));
 }
 
 QVector<ColorMapEditor1DNode*>& ColorMapEditor1DAction::getNodes()
 {
     return _nodes;
+}
+
+ColorMapEditor1DNode* ColorMapEditor1DAction::addNode(const QPointF& normalizedCoordinate)
+{
+    auto node = new ColorMapEditor1DNode(*this, normalizedCoordinate);
+
+    _nodes << node;
+
+    sortNodes();
+
+    emit nodeAdded(node);
+
+    return node;
+}
+
+void ColorMapEditor1DAction::removeNode(ColorMapEditor1DNode* node)
+{
+    Q_ASSERT(node != nullptr);
+
+    if (!_nodes.contains(node))
+        return;
+
+    _nodes.removeOne(node);
+
+    sortNodes();
+
+    const auto index = node->getIndex();
+
+    emit nodeAboutToBeRemoved(node);
+
+    delete node;
+
+    emit nodeRemoved(index);
+}
+
+ColorMapEditor1DNode* ColorMapEditor1DAction::getPreviousNode(ColorMapEditor1DNode* node) const
+{
+    const auto indexOfSelectedNode = _nodes.indexOf(node);
+
+    if (indexOfSelectedNode >= 1)
+        return _nodes[indexOfSelectedNode - 1];
+
+    return _nodes.first();
+}
+
+ColorMapEditor1DNode* ColorMapEditor1DAction::getNextNode(ColorMapEditor1DNode* node) const
+{
+    const auto indexOfSelectedNode = _nodes.indexOf(node);
+
+    if (indexOfSelectedNode < (_nodes.count() - 1))
+        return _nodes[indexOfSelectedNode + 1];
+
+    return _nodes.last();
+}
+
+void ColorMapEditor1DAction::sortNodes()
+{
+    std::sort(_nodes.begin(), _nodes.end(), [](auto nodeA, auto nodeB) -> bool {
+        return nodeA->getNormalizedCoordinate().x() < nodeB->getNormalizedCoordinate().x();
+    });
+
+    for (auto node : _nodes)
+        node->setIndex(_nodes.indexOf(node));
 }
 
 void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction)
@@ -97,37 +163,36 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
         _colorMapEditor1DWidget.selectNode(_colorMapEditor1DWidget.getNodes().first());
     });
 
-    connect(&_goToPreviousNodeAction, &TriggerAction::triggered, this, [this] {
-        _colorMapEditor1DWidget.selectNode(_colorMapEditor1DWidget.getPreviousNode(_colorMapEditor1DWidget.getCurrentNode()));
+    connect(&_goToPreviousNodeAction, &TriggerAction::triggered, this, [this, colorMapEditor1DAction] {
+        _colorMapEditor1DWidget.selectNode(colorMapEditor1DAction->getPreviousNode(_colorMapEditor1DWidget.getCurrentNode()));
     });
 
-    connect(&_goToNextNodeAction, &TriggerAction::triggered, this, [this] {
-        _colorMapEditor1DWidget.selectNode(_colorMapEditor1DWidget.getNextNode(_colorMapEditor1DWidget.getCurrentNode()));
+    connect(&_goToNextNodeAction, &TriggerAction::triggered, this, [this, colorMapEditor1DAction] {
+        _colorMapEditor1DWidget.selectNode(colorMapEditor1DAction->getNextNode(_colorMapEditor1DWidget.getCurrentNode()));
     });
 
     connect(&_goToLastNodeAction, &TriggerAction::triggered, this, [this] {
         _colorMapEditor1DWidget.selectNode(_colorMapEditor1DWidget.getNodes().last());
     });
 
-    connect(&_removeNodeAction, &TriggerAction::triggered, this, [this] {
+    connect(&_removeNodeAction, &TriggerAction::triggered, this, [this, colorMapEditor1DAction] {
         const auto currentNode  = _colorMapEditor1DWidget.getCurrentNode();
         const auto nodes        = _colorMapEditor1DWidget.getNodes();
 
-        if (currentNode != nodes.first() || currentNode != nodes.last())
+        if (currentNode == nodes.first() || currentNode == nodes.last())
             return;
 
-        _colorMapEditor1DWidget.removeNode(currentNode);
+        colorMapEditor1DAction->removeNode(currentNode);
     });
 
-    /*
-    const auto updateActions = [this]() -> void {
+    const auto updateActions = [this, colorMapEditor1DAction]() -> void {
         const auto currentNode  = _colorMapEditor1DWidget.getCurrentNode();
-        const auto nodes        = _colorMapEditor1DWidget.getNodes();
+        const auto nodes        = colorMapEditor1DAction->getNodes();
 
         if (currentNode) {
             _goToFirstNodeAction.setEnabled(currentNode && currentNode != nodes.first());
-            _goToPreviousNodeAction.setEnabled(currentNode && _colorMapEditor1DWidget.getPreviousNode(currentNode) != currentNode);
-            _goToNextNodeAction.setEnabled(currentNode && _colorMapEditor1DWidget.getNextNode(currentNode) != currentNode);
+            _goToPreviousNodeAction.setEnabled(currentNode && colorMapEditor1DAction->getPreviousNode(currentNode) != currentNode);
+            _goToNextNodeAction.setEnabled(currentNode && colorMapEditor1DAction->getNextNode(currentNode) != currentNode);
             _goToLastNodeAction.setEnabled(currentNode && currentNode != nodes.last());
             _removeNodeAction.setEnabled(currentNode && currentNode != nodes.first() && currentNode != nodes.last());
         }
@@ -139,11 +204,10 @@ ColorMapEditor1DAction::Widget::Widget(QWidget* parent, ColorMapEditor1DAction* 
             _removeNodeAction.setEnabled(false);
         }
     };
-    
+
     connect(&_colorMapEditor1DWidget, &ColorMapEditor1DWidget::currentNodeChanged, this, updateActions);
 
     updateActions();
-    */
 }
 
 }

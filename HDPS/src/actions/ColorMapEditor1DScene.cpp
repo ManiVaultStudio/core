@@ -26,7 +26,7 @@ void ColorMapEditor1DScene::mousePressEvent(QGraphicsSceneMouseEvent* graphicsSc
         graphicsSceneMouseEvent->accept();
 
         if (_colorMapEditor1DWidget.getGraphRectangle().contains(scenePosition))
-            _colorMapEditor1DWidget.addNode(scenePosition);
+            _colorMapEditor1DWidget.addNodeAtScenePosition(scenePosition);
     }
 }
 

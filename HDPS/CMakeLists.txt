@@ -141,6 +141,7 @@ set(ACTIONS_HEADERS
     src/actions/ColorMapEditor1DAction.h
     src/actions/ColorMapEditor1DEdge.h
     src/actions/ColorMapEditor1DNode.h
+    src/actions/ColorMapEditor1DNodeGraphicsItem.h
     src/actions/ColorMapEditor1DNodeAction.h
     src/actions/ColorMapEditor1DScene.h
     src/actions/ColorMapEditor1DWidget.h
@@ -197,6 +198,7 @@ set(ACTIONS_SOURCES
     src/actions/ColorMapEditor1DAction.cpp
 	src/actions/ColorMapEditor1DEdge.cpp
     src/actions/ColorMapEditor1DNode.cpp
+    src/actions/ColorMapEditor1DNodeGraphicsItem.cpp
     src/actions/ColorMapEditor1DNodeAction.cpp
     src/actions/ColorMapEditor1DScene.cpp
     src/actions/ColorMapEditor1DWidget.cpp
