@@ -19,16 +19,18 @@ public:
         : _filePath(filePath),
         _reason(reason)
     {
+        _what = ("Failed to load file at: " + _filePath + "\nReason: " + _reason).toStdString();
     }
 
     const char* what() const throw () override
     {
-        return ("Failed to load file at: " + _filePath + "\nReason: " + _reason).toStdString().c_str();
+        return _what.c_str();
     }
 
 private:
     QString _filePath;
     QString _reason;
+    std::string _what;
 };
 
 

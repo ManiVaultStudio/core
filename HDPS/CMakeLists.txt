@@ -163,6 +163,7 @@ set(ACTIONS_HEADERS
     src/actions/DecimalRectangleAction.h
     src/actions/NumericalAction.h
     src/actions/OptionAction.h
+    src/actions/OptionsAction.h
     src/actions/PixelSelectionAction.h
     src/actions/TriggerAction.h
     src/actions/TriggersAction.h
@@ -172,7 +173,6 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionWidget.h
     src/actions/WidgetActionCollapsedWidget.h
     src/actions/WidgetActionLabel.h
-    src/actions/WidgetActionOptions.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
     src/actions/DataAction.h
@@ -220,6 +220,7 @@ set(ACTIONS_SOURCES
     src/actions/DecimalRectangleAction.cpp
     src/actions/NumericalAction.cpp
     src/actions/OptionAction.cpp
+    src/actions/OptionsAction.cpp
     src/actions/PixelSelectionAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/TriggersAction.cpp
@@ -229,7 +230,6 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionWidget.cpp
     src/actions/WidgetActionCollapsedWidget.cpp
     src/actions/WidgetActionLabel.cpp
-    src/actions/WidgetActionOptions.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
     src/actions/DataAction.cpp
