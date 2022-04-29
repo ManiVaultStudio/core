@@ -12,6 +12,7 @@ ColorMapEditor1DScene::ColorMapEditor1DScene(ColorMapEditor1DWidget& colorMapEdi
     QGraphicsScene(&colorMapEditor1DWidget),
     _colorMapEditor1DWidget(colorMapEditor1DWidget)
 {
+    setBackgroundBrush(QColor(150, 150, 150));
 }
 
 void ColorMapEditor1DScene::mousePressEvent(QGraphicsSceneMouseEvent* graphicsSceneMouseEvent) {

@@ -1,6 +1,5 @@
 #include "ColorMapEditor1DNodeGraphicsItem.h"
 #include "ColorMapEditor1DNode.h"
-#include "ColorMapEditor1DEdge.h"
 #include "ColorMapEditor1DWidget.h"
 
 #include <QPainter>
@@ -23,7 +22,6 @@ ColorMapEditor1DNodeGraphicsItem::ColorMapEditor1DNodeGraphicsItem(ColorMapEdito
     QGraphicsItem(),
     _colorMapEditor1DWidget(colorMapEditor1DWidget),
     _node(node),
-    _edgeList(),
     _hover(false)
 {
     setFlag(ItemIsMovable);
@@ -41,6 +39,8 @@ ColorMapEditor1DNodeGraphicsItem::ColorMapEditor1DNodeGraphicsItem(ColorMapEdito
         const auto normalizedCoordinate = _node.getNormalizedCoordinate();
 
         setPos(graphRectangle.x() + (normalizedCoordinate.x() * graphRectangle.width()), graphRectangle.bottom() - (normalizedCoordinate.y() * graphRectangle.height()));
+
+        _colorMapEditor1DWidget.update();
     };
 
     connect(&_node, &ColorMapEditor1DNode::normalizedCoordinateChanged, this, updatePos);
@@ -74,7 +74,7 @@ bool ColorMapEditor1DNodeGraphicsItem::eventFilter(QObject* target, QEvent* even
 
 QRectF ColorMapEditor1DNodeGraphicsItem::boundingRect() const
 {
-    return QRectF(-_node.getRadius(), -_node.getRadius(), 2 * _node.getRadius(), 2 * _node.getRadius()).marginsRemoved(QMargins(3, 3, 3, 3));
+    return QRectF(-_node.getRadius(), -_node.getRadius(), 2 * _node.getRadius(), 2 * _node.getRadius());// .marginsRemoved(QMargins(3, 3, 3, 3));
 }
 
 QPainterPath ColorMapEditor1DNodeGraphicsItem::shape() const
@@ -93,46 +93,26 @@ void ColorMapEditor1DNodeGraphicsItem::paint(QPainter* painter, const QStyleOpti
     styleOption.init(&_colorMapEditor1DWidget);
 
     if (_colorMapEditor1DWidget.isEnabled() && _hover) {
-        QRadialGradient radialGradient;
+        QPen hoverPen;
 
-        radialGradient.setCenter(boundingRect().center());
-        radialGradient.setCenterRadius(0.5 * boundingRect().width());
-        radialGradient.setColorAt(0.0, QColor(100, 100, 100, 100));
-        radialGradient.setColorAt(0.9, QColor(100, 100, 100, 100));
-        radialGradient.setColorAt(1.0, QColor(100, 100, 100, 100));
+        hoverPen.setWidth(7.0f);
+        hoverPen.setColor(QColor(10, 10, 10, 100));
 
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QBrush(Qt::red));
+        painter->setPen(hoverPen);
+        painter->setBrush(Qt::NoBrush);
         painter->drawEllipse(boundingRect());
+        painter->drawPath(shape());
     }
 
     QPen perimeterPen;
 
-    perimeterPen.setWidth(_colorMapEditor1DWidget.getCurrentNode() == &_node ? 3.0f : 1.5f);
+    perimeterPen.setWidth(_colorMapEditor1DWidget.getCurrentNode() == &_node ? 3.0f : 2.0f);
     perimeterPen.setColor(_colorMapEditor1DWidget.isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText));
 
     painter->setPen(perimeterPen);
 
     painter->setBrush(_colorMapEditor1DWidget.isEnabled() ? _node.getColor() : QColor::fromHsl(_node.getColor().hue(), 0, _node.getColor().lightness()));
     painter->drawPath(shape());
-}
-
-QVariant ColorMapEditor1DNodeGraphicsItem::itemChange(GraphicsItemChange change, const QVariant& value)
-{
-    switch (change) {
-        case ItemPositionHasChanged:
-        {
-            for (auto edge : qAsConst(_edgeList))
-                edge->update();
-
-            break;
-        }
-
-        default:
-            break;
-    };
-
-    return QGraphicsItem::itemChange(change, value);
 }
 
 void ColorMapEditor1DNodeGraphicsItem::pressed(QGraphicsSceneMouseEvent* event) {
@@ -166,11 +146,9 @@ void ColorMapEditor1DNodeGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent* 
     scenePos.setX(std::max(left, std::min(event->scenePos().x(), right)));
     scenePos.setY(std::max(graphRectangle.top(), std::min(event->scenePos().y(), graphRectangle.bottom())));
 
-    event->setScenePos(scenePos);
+    //event->setScenePos(scenePos);
 
     _node.setNormalizedCoordinate(QPointF((scenePos.x() - graphRectangle.left()) / graphRectangle.width(), ((_colorMapEditor1DWidget.height() - scenePos.y()) - graphRectangle.top()) / graphRectangle.height()));
-
-    QGraphicsItem::mouseMoveEvent(event);
 
     update();
 }
@@ -202,16 +180,6 @@ void ColorMapEditor1DNodeGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent*
     _hover = false;
 
     update();
-}
-
-void ColorMapEditor1DNodeGraphicsItem::addEdge(ColorMapEditor1DEdge* edge)
-{
-    _edgeList << edge;
-}
-
-QVector<ColorMapEditor1DEdge*> ColorMapEditor1DNodeGraphicsItem::edges() const
-{
-    return _edgeList;
 }
 
 }

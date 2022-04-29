@@ -11,12 +11,12 @@ namespace hdps {
 
 namespace gui {
 
-ColorMapEditor1DNode::ColorMapEditor1DNode(ColorMapEditor1DAction& colorMapEditor1DAction, const QPointF& normalizedCoordinate) :
+ColorMapEditor1DNode::ColorMapEditor1DNode(ColorMapEditor1DAction& colorMapEditor1DAction, const QPointF& normalizedCoordinate, const QColor& color /*= Qt::gray*/) :
     QObject(&colorMapEditor1DAction),
     _colorMapEditor1DAction(colorMapEditor1DAction),
     _index(),
     _normalizedCoordinate(normalizedCoordinate),
-    _color(Qt::gray),
+    _color(color),
     _radius(5.0f)
 {
 }

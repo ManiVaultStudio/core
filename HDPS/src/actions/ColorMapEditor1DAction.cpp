@@ -4,6 +4,7 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QLinearGradient>
 
 #ifdef _DEBUG
     #define COLOR_MAP_EDITOR_1D_ACTION
@@ -13,18 +14,30 @@ namespace hdps {
 
 namespace gui {
 
+#if (__cplusplus < 201703L)   // definition needed for pre C++17 gcc and clang
+    constexpr QSize ColorMapEditor1DAction::colorMapImageSize;
+#endif
+
 ColorMapEditor1DAction::ColorMapEditor1DAction(ColorMapAction& colorMapAction) :
     WidgetAction(&colorMapAction),
     _colorMapAction(colorMapAction),
     _nodes(),
-    _nodeAction(*this)
+    _nodeAction(*this),
+    _colorMapImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied)
 {
     setText("Custom");
     setIcon(Application::getIconFont("FontAwesome").getIcon("chart-line"));
     setCheckable(true);
 
-    addNode(QPointF(0.0f, 0.0f));
-    addNode(QPointF(1.0f, 1.0f));
+    addNode(QPointF(0.0f, 0.0f), Qt::black);
+    addNode(QPointF(1.0f, 1.0f), Qt::white);
+
+    connect(this, &ColorMapEditor1DAction::toggled, this, &ColorMapEditor1DAction::updateColorMap);
+}
+
+QImage ColorMapEditor1DAction::getColorMapImage()
+{
+    return _colorMapImage;
 }
 
 QVector<ColorMapEditor1DNode*>& ColorMapEditor1DAction::getNodes()
@@ -32,9 +45,12 @@ QVector<ColorMapEditor1DNode*>& ColorMapEditor1DAction::getNodes()
     return _nodes;
 }
 
-ColorMapEditor1DNode* ColorMapEditor1DAction::addNode(const QPointF& normalizedCoordinate)
+ColorMapEditor1DNode* ColorMapEditor1DAction::addNode(const QPointF& normalizedCoordinate, const QColor& color /*= Qt::gray*/)
 {
-    auto node = new ColorMapEditor1DNode(*this, normalizedCoordinate);
+    auto node = new ColorMapEditor1DNode(*this, normalizedCoordinate, color);
+
+    connect(node, &ColorMapEditor1DNode::normalizedCoordinateChanged, this, &ColorMapEditor1DAction::updateColorMap);
+    connect(node, &ColorMapEditor1DNode::colorChanged, this, &ColorMapEditor1DAction::updateColorMap);
 
     _nodes << node;
 
@@ -93,6 +109,43 @@ void ColorMapEditor1DAction::sortNodes()
 
     for (auto node : _nodes)
         node->setIndex(_nodes.indexOf(node));
+}
+
+void ColorMapEditor1DAction::updateColorMap()
+{
+#ifdef COLOR_MAP_EDITOR_1D_ACTION
+    qDebug() << __FUNCTION__;
+#endif
+
+    QLinearGradient linearGradient(0, 0, colorMapImageSize.width(), colorMapImageSize.height());
+
+    for (auto node : _nodes) {
+        auto color = node->getColor();
+
+        color.setAlphaF(node->getNormalizedCoordinate().y());
+
+        linearGradient.setColorAt(node->getNormalizedCoordinate().x(), color);
+    }
+
+    _colorMapImage = QImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied);
+
+    auto colorImage = QImage(colorMapImageSize, QImage::Format::Format_ARGB32);
+
+    QPainter painter(&_colorMapImage);
+
+    const auto colorMaprectangle = QRect(QPoint(), colorMapImageSize);
+
+    //for (int pixelX = 0; pixelX < colorMapImageSize.width(); pixelX) {
+    //}
+
+    //painter.eraseRect(colorMaprectangle);
+    //painter.fillRect(colorMaprectangle, QColor(0, 0, 0, 0));
+    //painter.fillRect(colorMaprectangle, QColor(255, 0, 0, 0));
+    //painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
+    painter.setBrush(Qt::NoBrush);
+    painter.fillRect(colorMaprectangle, linearGradient);
+
+    emit _colorMapAction.imageChanged(_colorMapImage);
 }
 
 void ColorMapEditor1DAction::connectToPublicAction(WidgetAction* publicAction)

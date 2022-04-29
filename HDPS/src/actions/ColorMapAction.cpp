@@ -72,6 +72,8 @@ QString ColorMapAction::getColorMap() const
 
 QImage ColorMapAction::getColorMapImage() const
 {
+    //if (_settingsAction.getEditor1DAction().isChecked())
+
     if (_currentColorMapAction.getModel() == nullptr)
         return QImage();
 
@@ -83,6 +85,9 @@ QImage ColorMapAction::getColorMapImage() const
 
     // Cast away the const-ness of the this pointer and get the settings action
     auto& settingsAction = const_cast<ColorMapAction*>(this)->getSettingsAction();
+
+    if (settingsAction.getEditor1DAction().isChecked())
+        return settingsAction.getEditor1DAction().getColorMapImage();
 
     // Establish whether the color map needs to be mirrored in the horizontally and vertical direction
     const auto mirrorHorizontally   = settingsAction.getHorizontalAxisAction().getMirrorAction().isChecked();
@@ -320,7 +325,7 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     const auto margin = 8;
 
     // Deflated fill rectangle for color map inset
-    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 28, margin + 1));
+    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 32, margin + 1));
 
     // Get color map image from the model
     auto colorMapImage = _colorMapAction->getColorMapImage();
@@ -335,12 +340,36 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     // Get scaled copy of the color map image so that it fits correctly
     colorMapImage = colorMapImage.scaled(colorMapRectangle.size(), Qt::AspectRatioMode::IgnoreAspectRatio);
 
+    colorMapImage.save("test.jpg");
+
     // Create a textured brush
     QBrush colorMapPixMapBrush(colorMapImage);
 
     // And set the texture offset such that it aligns properly
     colorMapPixMapBrush.setTransform(QTransform::fromTranslate(margin, margin));
 
+    QSize checkerBoardSize(22, 22);
+
+    QImage checkerBoardImage(checkerBoardSize, QImage::Format::Format_ARGB32);
+
+    QPainter checkerBoardPainter(&checkerBoardImage);
+
+    checkerBoardPainter.setPen(Qt::NoPen);
+    checkerBoardPainter.setBrush(QColor(100, 100, 100));
+    checkerBoardPainter.drawRect(QRect(QPoint(0, 0), QSize(22, 22)));
+    checkerBoardPainter.setBrush(QColor(200, 200, 200));
+    checkerBoardPainter.drawRect(QRect(QPoint(0, 0), QSize(11, 11)));
+    checkerBoardPainter.drawRect(QRect(QPoint(11, 11), QSize(11, 11)));
+
+    // Create a checkerboard brush
+    QBrush checkerBoardBrush(Qt::black);
+
+    checkerBoardBrush.setTransform(QTransform::fromTranslate(margin, margin));
+    checkerBoardBrush.setTexture(QPixmap::fromImage(checkerBoardImage));
+
+    painter.setBrush(checkerBoardBrush);
+    painter.drawRoundedRect(colorMapRectangle, 4, 4);
+    
     // Do the painting
     painter.setPen(QPen(penColor, 1.5, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
     painter.setBrush(colorMapPixMapBrush);

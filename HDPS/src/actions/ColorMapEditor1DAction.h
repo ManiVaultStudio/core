@@ -26,7 +26,8 @@ class ColorMapEditor1DAction : public WidgetAction
 public:
 
     /** Widget class for one-dimensional color map editor action */
-    class Widget : public WidgetActionWidget {
+    class Widget : public WidgetActionWidget
+    {
     public:
 
         /**
@@ -37,7 +38,7 @@ public:
         Widget(QWidget* parent, ColorMapEditor1DAction* colorMapEditor1DAction);
 
     protected:
-        ColorMapEditor1DWidget      _colorMapEditor1DWidget;        /** Color map editor widget */
+        ColorMapEditor1DWidget      _colorMapEditor1DWidget;    /** Color map editor widget */
         TriggerAction               _goToFirstNodeAction;       /** Go to first node action */
         TriggerAction               _goToPreviousNodeAction;    /** Go to previous node action */
         TriggerAction               _goToNextNodeAction;        /** Go to next node action */
@@ -62,6 +63,14 @@ protected:
      */
     ColorMapEditor1DAction(ColorMapAction& colorMapAction);
 
+public:
+
+    /**
+     * Get color map image
+     * @return Color map image
+     */
+    QImage getColorMapImage();
+
 public: // Nodes
 
     /**
@@ -73,9 +82,10 @@ public: // Nodes
     /**
      * Add node at the normalized coordinate
      * @param normalizedCoordinate Normalized coordinate
+     * @param color Node color
      * @return Pointer to created node
      */
-    ColorMapEditor1DNode* addNode(const QPointF& normalizedCoordinate);
+    ColorMapEditor1DNode* addNode(const QPointF& normalizedCoordinate, const QColor& color = Qt::gray);
 
     /**
      * Remove node
@@ -97,8 +107,13 @@ public: // Nodes
      */
     ColorMapEditor1DNode* getNextNode(ColorMapEditor1DNode* node) const;
 
+protected:
+
     /** Sort nodes and update their index */
     void sortNodes();
+
+    /** Update the color map image */
+    void updateColorMap();
 
 public: // Linking
 
@@ -140,6 +155,9 @@ protected:
     ColorMapAction&                 _colorMapAction;    /** Reference to color map action */
     QVector<ColorMapEditor1DNode*>  _nodes;             /** All sorted nodes */
     ColorMapEditor1DNodeAction      _nodeAction;        /** Node action */
+    QImage                          _colorMapImage;     /** Output color map image */
+
+    static constexpr QSize colorMapImageSize = QSize(256, 1);
 
     /** Only color map settings action may instantiate this class */
     friend class ColorMapSettingsAction;

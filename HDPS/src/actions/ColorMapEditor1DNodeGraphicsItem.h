@@ -10,7 +10,6 @@ namespace gui {
 
 class ColorMapEditor1DWidget;
 class ColorMapEditor1DNode;
-class ColorMapEditor1DEdge;
 
 /**
  * Color map editor one-dimensional node graphics item class
@@ -45,10 +44,6 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
-    void addEdge(ColorMapEditor1DEdge* edge);
-
-    QVector<ColorMapEditor1DEdge*> edges() const;
-
     enum { Type = UserType + 1 };
     int type() const override { return Type; }
 
@@ -63,8 +58,6 @@ public:
         return _colorMapEditor1DWidget;
     }
 protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 
@@ -97,10 +90,9 @@ signals:
     void normalizedCoordinateChanged(const QPointF& normalizedCoordinate);
 
 private:
-    ColorMapEditor1DWidget&             _colorMapEditor1DWidget;    /** Reference to owning one-dimensional color map editor widget */
-    ColorMapEditor1DNode&               _node;                      /** Reference to source node */
-    QVector<ColorMapEditor1DEdge*>      _edgeList;                  /** Pointers to node edges */
-    bool                                _hover;                     /** Whether the mouse is hovering over the node */
+    ColorMapEditor1DWidget&     _colorMapEditor1DWidget;    /** Reference to owning one-dimensional color map editor widget */
+    ColorMapEditor1DNode&       _node;                      /** Reference to source node */
+    bool                        _hover;                     /** Whether the mouse is hovering over the node */
 };
 
 }

@@ -59,9 +59,6 @@ public:
     /** Function used to draw the axes in the transferfunction. */
     void drawBackground(QPainter* painter, const QRectF& rect);
 
-    /** Function used to recreate the colormap. */
-    void createColorMap();
-
     /** Get the color map. */
     QImage getColorMap() {
         return _colorMap;

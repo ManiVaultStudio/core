@@ -26,8 +26,9 @@ public:
      * Constructor
      * @param colorMapEditor1DAction Reference to owning one-dimensional color map editor
      * @param normalizedCoordinate Normalized node coordinates
+     * @param color Node color
      */
-    ColorMapEditor1DNode(ColorMapEditor1DAction& colorMapEditor1DAction, const QPointF& normalizedCoordinate);
+    ColorMapEditor1DNode(ColorMapEditor1DAction& colorMapEditor1DAction, const QPointF& normalizedCoordinate, const QColor& color = Qt::gray);
 
     /**
      * Get sorted node index

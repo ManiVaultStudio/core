@@ -139,7 +139,7 @@ set(ACTIONS_HEADERS
     src/actions/ColorPickerAction.h
     src/actions/ColorMapAction.h
     src/actions/ColorMapEditor1DAction.h
-    src/actions/ColorMapEditor1DEdge.h
+    src/actions/ColorMapEditor1DEdgesGraphicsItem.h
     src/actions/ColorMapEditor1DNode.h
     src/actions/ColorMapEditor1DNodeGraphicsItem.h
     src/actions/ColorMapEditor1DNodeAction.h
@@ -196,7 +196,7 @@ set(ACTIONS_SOURCES
     src/actions/ColorPickerAction.cpp
     src/actions/ColorMapAction.cpp
     src/actions/ColorMapEditor1DAction.cpp
-	src/actions/ColorMapEditor1DEdge.cpp
+	src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
     src/actions/ColorMapEditor1DNode.cpp
     src/actions/ColorMapEditor1DNodeGraphicsItem.cpp
     src/actions/ColorMapEditor1DNodeAction.cpp
