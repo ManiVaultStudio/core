@@ -270,6 +270,7 @@ ColorMapAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* op
     _colorMapAction(colorMapAction)
 {
     setObjectName("ComboBox");
+    setStyleSheet("QComboBox::down-arrow { image: none; }");
 
     // Make text color transparent
     QPalette palette = this->palette();
@@ -301,6 +302,21 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 {
     OptionAction::ComboBoxWidget::paintEvent(paintEvent);
 
+    /*
+    QPainter stylePainter;
+    
+    stylePainter.begin(this);
+    
+    QStyleOptionComboBox styleOptionComboBox;
+    
+    styleOptionComboBox.initFrom(this);
+
+    style()->drawPrimitive(QStyle::PE_PanelButtonBevel, &styleOptionComboBox, &stylePainter, this);
+    style()->drawPrimitive(QStyle::PE_PanelButtonCommand, &styleOptionComboBox, &stylePainter, this);
+
+    stylePainter.end();
+    */
+
     // Draw at a higher resolution to get better anti-aliasing
     const auto pixmapSize = 2 * size();
     const auto pixmapRect = QRect(QPoint(), pixmapSize);
@@ -325,7 +341,7 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     const auto margin = 8;
 
     // Deflated fill rectangle for color map inset
-    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 32, margin + 1));
+    const auto colorMapRectangle = pixmapRect.marginsRemoved(QMargins(margin, margin, margin + 1, margin + 1));
 
     // Get color map image from the model
     auto colorMapImage = _colorMapAction->getColorMapImage();
@@ -339,8 +355,6 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 
     // Get scaled copy of the color map image so that it fits correctly
     colorMapImage = colorMapImage.scaled(colorMapRectangle.size(), Qt::AspectRatioMode::IgnoreAspectRatio);
-
-    colorMapImage.save("test.jpg");
 
     // Create a textured brush
     QBrush colorMapPixMapBrush(colorMapImage);

@@ -146,7 +146,6 @@ void ColorMapEditor1DAction::updateColorMap()
 
         _colorMapImage.setPixelColor(pixelCoordinate, pixelColor);
     }
-        
 
     //painter.eraseRect(colorMaprectangle);
     //painter.fillRect(colorMaprectangle, QColor(0, 0, 0, 0));
