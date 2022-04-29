@@ -117,33 +117,43 @@ void ColorMapEditor1DAction::updateColorMap()
     qDebug() << __FUNCTION__;
 #endif
 
-    QLinearGradient linearGradient(0, 0, colorMapImageSize.width(), colorMapImageSize.height());
+    QLinearGradient colorGradient(0, 0, colorMapImageSize.width(), colorMapImageSize.height()), alphaGradient(0, 0, colorMapImageSize.width(), colorMapImageSize.height());
 
     for (auto node : _nodes) {
         auto color = node->getColor();
 
-        color.setAlphaF(node->getNormalizedCoordinate().y());
-
-        linearGradient.setColorAt(node->getNormalizedCoordinate().x(), color);
+        colorGradient.setColorAt(node->getNormalizedCoordinate().x(), color);
+        alphaGradient.setColorAt(node->getNormalizedCoordinate().x(), QColor(node->getNormalizedCoordinate().y() * 255.0f, 0, 0, 255));
     }
 
     _colorMapImage = QImage(colorMapImageSize, QImage::Format::Format_ARGB32_Premultiplied);
 
-    auto colorImage = QImage(colorMapImageSize, QImage::Format::Format_ARGB32);
-
-    QPainter painter(&_colorMapImage);
-
     const auto colorMaprectangle = QRect(QPoint(), colorMapImageSize);
 
-    //for (int pixelX = 0; pixelX < colorMapImageSize.width(); pixelX) {
-    //}
+    auto colorImage = QImage(colorMapImageSize, QImage::Format::Format_ARGB32);
+    auto alphaImage = QImage(colorMapImageSize, QImage::Format::Format_ARGB32);
+
+    QPainter colorPainter(&colorImage), alphaPainter(&alphaImage);
+
+    colorPainter.fillRect(colorMaprectangle, colorGradient);
+    alphaPainter.fillRect(colorMaprectangle, alphaGradient);
+
+    for (int pixelX = 0; pixelX < colorMapImageSize.width(); pixelX++) {
+        const auto pixelCoordinate = QPoint(pixelX, 0);
+
+        auto pixelColor = colorImage.pixelColor(pixelCoordinate);
+        pixelColor.setAlpha(alphaImage.pixelColor(pixelCoordinate).red());
+
+        _colorMapImage.setPixelColor(pixelCoordinate, pixelColor);
+    }
+        
 
     //painter.eraseRect(colorMaprectangle);
     //painter.fillRect(colorMaprectangle, QColor(0, 0, 0, 0));
     //painter.fillRect(colorMaprectangle, QColor(255, 0, 0, 0));
     //painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
-    painter.setBrush(Qt::NoBrush);
-    painter.fillRect(colorMaprectangle, linearGradient);
+    //painter.setBrush(Qt::NoBrush);
+    //painter.fillRect(colorMaprectangle, colorGradient);
 
     emit _colorMapAction.imageChanged(_colorMapImage);
 }
