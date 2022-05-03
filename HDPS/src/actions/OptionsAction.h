@@ -336,6 +336,11 @@ public: // Serialization
      */
     QVariantMap toVariantMap() const override;
 
+public: // Action getters
+
+    SelectionAction& getSelectionAction() { return _selectionAction; }
+    FileAction& getFileAction() { return _fileAction; }
+
 signals:
 
     /**
