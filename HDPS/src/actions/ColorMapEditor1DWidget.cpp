@@ -2,6 +2,7 @@
 #include "ColorMapEditor1DScene.h"
 #include "ColorMapEditor1DNodeGraphicsItem.h"
 #include "ColorMapEditor1DEdgesGraphicsItem.h"
+#include "ColorMapEditor1DHistogramGraphicsItem.h"
 #include "ColorMapEditor1DAction.h"
 #include "ColorMapAction.h"
 
@@ -12,7 +13,7 @@
 #include <algorithm>
 
 #ifdef _DEBUG
-    #define COLOR_MAP_EDITOR_WIDGET_VERBOSE
+    #define COLOR_MAP_EDITOR_1D_WIDGET_VERBOSE
 #endif
 
 namespace hdps {
@@ -24,7 +25,7 @@ ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1D
     _colorMapEditor1DAction(colorMapEditor1DAction),
     _cursor(),
     _scene(*this),
-    _margins(50, 15, 15, 36),
+    _margins(52, 15, 15, 40),
     _graphRectangle(),
     _currentNode(),
     _nodes(),
@@ -35,6 +36,7 @@ ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1D
     installEventFilter(this);
 
     _scene.addItem(new ColorMapEditor1DEdgesGraphicsItem(*this));
+    _scene.addItem(new ColorMapEditor1DHistogramGraphicsItem(*this));
 }
 
 ColorMapEditor1DWidget::~ColorMapEditor1DWidget()
@@ -117,7 +119,7 @@ QRectF ColorMapEditor1DWidget::getGraphRectangle() const
 
 void ColorMapEditor1DWidget::addNodeAtScenePosition(const QPointF& scenePosition)
 {
-#ifdef COLOR_MAP_EDITOR_WIDGET_VERBOSE
+#ifdef COLOR_MAP_EDITOR_1D_WIDGET_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -129,7 +131,7 @@ void ColorMapEditor1DWidget::addNodeAtScenePosition(const QPointF& scenePosition
 
 void ColorMapEditor1DWidget::addNodeGraphicsItem(ColorMapEditor1DNode* node)
 {
-#ifdef COLOR_MAP_EDITOR_WIDGET_VERBOSE
+#ifdef COLOR_MAP_EDITOR_1D_WIDGET_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -144,7 +146,7 @@ void ColorMapEditor1DWidget::addNodeGraphicsItem(ColorMapEditor1DNode* node)
 
 void ColorMapEditor1DWidget::removeNodeGraphicsItem(ColorMapEditor1DNode* node)
 {
-#ifdef COLOR_MAP_EDITOR_WIDGET_VERBOSE
+#ifdef COLOR_MAP_EDITOR_1D_WIDGET_VERBOSE
     qDebug() << __FUNCTION__;
 #endif
 
@@ -164,7 +166,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
     styleOption.init(this);
 
-    painter->fillRect(rect, isEnabled() ? QColor(248, 248, 248) : styleOption.palette.color(QPalette::Normal, QPalette::Window));
+    painter->fillRect(rect, isEnabled() ? QColor(244, 244, 244) : styleOption.palette.color(QPalette::Normal, QPalette::Window));
 
     const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
@@ -185,8 +187,8 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
     painter->setFont(QFont("Arial", 7));
 
-    axisPen.setWidthF(0.7f);
-    dashedAxisPen.setWidthF(0.5f);
+    axisPen.setWidthF(1.0f);
+    dashedAxisPen.setWidthF(1.0f);
 
     QVector<qreal> dashes;
 
@@ -241,7 +243,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
     painter->drawText(_graphRectangle.translated(QPoint(0, _graphRectangle.height() + 18)), "Value", QTextOption(Qt::AlignHCenter | Qt::AlignTop));
 
-    painter->translate(QPoint(15, _graphRectangle.center().y()));
+    painter->translate(QPoint(18, _graphRectangle.center().y()));
     painter->rotate(-90);
     painter->drawText(QRectF(QPointF(-50, -20), QPointF(50, 0)), "Opacity", QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
 }

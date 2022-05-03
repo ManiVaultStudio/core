@@ -95,8 +95,8 @@ void ColorMapEditor1DNodeGraphicsItem::paint(QPainter* painter, const QStyleOpti
     if (_colorMapEditor1DWidget.isEnabled() && _hover) {
         QPen hoverPen;
 
-        hoverPen.setWidth(7.0f);
-        hoverPen.setColor(QColor(10, 10, 10, 100));
+        hoverPen.setWidthF(8.0f);
+        hoverPen.setColor(QColor(60, 60, 60, 100));
 
         painter->setPen(hoverPen);
         painter->setBrush(Qt::NoBrush);
@@ -106,7 +106,7 @@ void ColorMapEditor1DNodeGraphicsItem::paint(QPainter* painter, const QStyleOpti
 
     QPen perimeterPen;
 
-    perimeterPen.setWidth(_colorMapEditor1DWidget.getCurrentNode() == &_node ? 3.0f : 2.0f);
+    perimeterPen.setWidthF(_colorMapEditor1DWidget.getCurrentNode() == &_node ? 2.0f : 1.5f);
     perimeterPen.setColor(_colorMapEditor1DWidget.isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText));
 
     painter->setPen(perimeterPen);

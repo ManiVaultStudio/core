@@ -101,6 +101,21 @@ ColorMapEditor1DNode* ColorMapEditor1DAction::getNextNode(ColorMapEditor1DNode* 
     return _nodes.last();
 }
 
+const hdps::gui::ColorMapEditor1DAction::Histogram& ColorMapEditor1DAction::getHistogram() const
+{
+    return _histogram;
+}
+
+void ColorMapEditor1DAction::setHistogram(const Histogram& histogram)
+{
+    if (histogram == _histogram)
+        return;
+
+    _histogram = histogram;
+
+    emit histogramChanged(_histogram);
+}
+
 void ColorMapEditor1DAction::sortNodes()
 {
     std::sort(_nodes.begin(), _nodes.end(), [](auto nodeA, auto nodeB) -> bool {

@@ -25,6 +25,10 @@ class ColorMapEditor1DAction : public WidgetAction
 
 public:
 
+    using Histogram = QVector<std::uint32_t>;
+
+public:
+
     /** Widget class for one-dimensional color map editor action */
     class Widget : public WidgetActionWidget
     {
@@ -107,6 +111,20 @@ public: // Nodes
      */
     ColorMapEditor1DNode* getNextNode(ColorMapEditor1DNode* node) const;
 
+public: // Histogram
+
+    /**
+     * Get one-dimensional histogram
+     * @return One-dimensional histogram
+     */
+    const Histogram& getHistogram() const;
+
+    /**
+     * Set background one-dimensional histogram
+     * @param histogram One-dimensional histogram
+     */
+    void setHistogram(const Histogram& histogram);
+
 protected:
 
     /** Sort nodes and update their index */
@@ -151,11 +169,18 @@ signals:
      */
     void nodeRemoved(const std::uint32_t& index);
 
+    /**
+     * Signals that the histogram changed
+     * @param histogram Histogram
+     */
+    void histogramChanged(const Histogram& histogram);
+
 protected:
     ColorMapAction&                 _colorMapAction;    /** Reference to color map action */
     QVector<ColorMapEditor1DNode*>  _nodes;             /** All sorted nodes */
     ColorMapEditor1DNodeAction      _nodeAction;        /** Node action */
     QImage                          _colorMapImage;     /** Output color map image */
+    Histogram                       _histogram;         /** Histogram */
 
     static constexpr QSize colorMapImageSize = QSize(256, 1);
 
