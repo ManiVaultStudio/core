@@ -3,6 +3,7 @@
 #include "ColorMapEditor1DNodeGraphicsItem.h"
 #include "ColorMapEditor1DEdgesGraphicsItem.h"
 #include "ColorMapEditor1DAction.h"
+#include "ColorMapAction.h"
 
 #include <QPainter>
 #include <QMessageBox>
@@ -23,13 +24,13 @@ ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1D
     _colorMapEditor1DAction(colorMapEditor1DAction),
     _cursor(),
     _scene(*this),
-    _margins(60, 20, 20, 20),
+    _margins(50, 15, 15, 60),
     _graphRectangle(),
     _currentNode(),
     _nodes(),
     _colorMap()
 {
-    setMinimumHeight(200);
+    setMinimumHeight(100);
 
     installEventFilter(this);
 
@@ -165,57 +166,78 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
     painter->fillRect(rect, isEnabled() ? QColor(248, 248, 248) : styleOption.palette.color(QPalette::Normal, QPalette::Window));
 
+    const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
+
     QPen pen;
 
-    pen.setWidth(2);
-    pen.setColor(isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::ButtonText) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText));
+    pen.setWidthF(1.5f);
+    pen.setColor(penColor);
 
     painter->setPen(pen);
 
     painter->drawRect(_graphRectangle);
 
-    /*
-    pen.setWidth(1);
-    painter->setPen(pen);
+    QPen labelPen, axisPen, dashedAxisPen;
 
-    //QRectF colorMapRect(QPoint(0, height()+50), QPoint(width(), height() + 45));
-    //painter->drawRect(colorMapRect);
+    labelPen.setColor(penColor);
+    axisPen.setColor(penColor);
+    dashedAxisPen.setColor(penColor);
 
-    // Divide the windowheight in 4.
-    auto lineHeightWidth = (float)height() / 4;
+    painter->setFont(QFont("Arial", 7));
 
-    painter->drawText(QPoint(-30, 0), "100%");
-    painter->drawText(QPoint(-30, lineHeightWidth), "75%");
-    painter->drawText(QPoint(-30, lineHeightWidth * 2), "50%");
-    painter->drawText(QPoint(-30, lineHeightWidth * 3), "25%");
-    painter->drawText(QPoint(-30, lineHeightWidth * 4), "0%");
-
-    pen.setWidth(1);
-    pen.setStyle(Qt::DashLine);
-    pen.setColor(Qt::lightGray);
+    axisPen.setWidthF(0.7f);
+    dashedAxisPen.setWidthF(0.5f);
 
     QVector<qreal> dashes;
-    qreal space = 5;
-    dashes << 5 << space  << 5 << space ;
 
-    pen.setDashPattern(dashes);
-    painter->setPen(pen);
+    dashes << 5 << 5;
 
-    // Draw dashed lines to indicate color alpha for the transferfunction.
-    QLine dashedLine75(QPoint(0,lineHeightWidth), QPoint(width(),lineHeightWidth));
-    painter->drawLine(dashedLine75);
+    dashedAxisPen.setDashPattern(dashes);
 
-    QLine dashedLine50(QPoint(0, lineHeightWidth*2), QPoint(width(), lineHeightWidth*2));
-    painter->drawLine(dashedLine50);
+    const auto drawHorizontalAxis = [this, painter, labelPen, axisPen, dashedAxisPen](const float& percentage) -> void {
+        auto origin = _graphRectangle.bottomLeft();
 
-    QLine dashedLine25(QPoint(0, lineHeightWidth*3), QPoint(width(), lineHeightWidth*3));
-    painter->drawLine(dashedLine25);
+        origin.setY(origin.y() - (percentage * _graphRectangle.height()));
 
-    //QPixmap pixelMap;
-    //pixelMap.fromImage(_colorMap);
-    //painter->drawPixmap(colorMapRect.topLeft(), pixelMap);
+        const auto textRectangleSize    = QSizeF(50, 20);
+        const auto textRectangle        = QRectF(origin - QPointF(textRectangleSize.width() + 10, textRectangleSize.height() / 2), textRectangleSize);
+        const auto startOrEndAxis       = percentage == 0.0f || percentage == 1.0f;
 
-    */
+        painter->setPen(labelPen);
+        painter->drawText(textRectangle, QString("%1%").arg(percentage * 100.0f), QTextOption(Qt::AlignVCenter | Qt::AlignRight));
+
+        painter->setPen(axisPen);
+        painter->drawLine(QPointF(textRectangle.right() + 3, textRectangle.center().y()), QPointF(_graphRectangle.left(), textRectangle.center().y()));
+
+        if (!startOrEndAxis) {
+            painter->setPen(dashedAxisPen);
+            painter->drawLine(QPointF(_graphRectangle.left() + 1, textRectangle.center().y()), QPointF(_graphRectangle.right(), textRectangle.center().y()));
+        }
+    };
+
+    for (float axisPercentage = 0.0f; axisPercentage <= 1.0f; axisPercentage += 0.2f)
+        drawHorizontalAxis(axisPercentage);
+
+    const auto drawVerticalAxis = [this, painter, labelPen, axisPen](const float& percentage, const float& value) -> void {
+        auto origin = _graphRectangle.bottomLeft();
+
+        origin.setX(origin.x() + (percentage * _graphRectangle.width()));
+
+        const auto textRectangleSize    = QSizeF(20, 50);
+        const auto textRectangle        = QRectF(origin - QPointF(textRectangleSize.width() / 2, -10), textRectangleSize);
+        const auto startOrEndAxis       = percentage == 0.0f || percentage == 1.0f;
+
+        painter->setPen(labelPen);
+        painter->drawText(textRectangle, QString("%1").arg(value), QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+
+        painter->setPen(axisPen);
+        painter->drawLine(QPointF(textRectangle.center().x(), textRectangle.top() - 3), QPointF(textRectangle.center().x(), _graphRectangle.bottom()));
+    };
+
+    auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction();
+
+    drawVerticalAxis(0.0f, rangeAction.getMinimum());
+    drawVerticalAxis(1.0f, rangeAction.getMaximum());
 }
 
 }

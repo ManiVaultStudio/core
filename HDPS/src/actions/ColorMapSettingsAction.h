@@ -62,11 +62,6 @@ protected:
      */
     ColorMapSettingsAction(ColorMapAction& colorMapAction);
 
-protected:
-
-    /** Update read-only status of various actions */
-    void updateActionsReadOnly();
-
 public: // Linking
 
     /**

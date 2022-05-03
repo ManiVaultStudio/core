@@ -22,15 +22,6 @@ ColorMapSettingsAction::ColorMapSettingsAction(ColorMapAction& colorMapAction) :
 {
     setText("Settings");
     setIcon(Application::getIconFont("FontAwesome").getIcon("sliders-h"));
-
-    connect(&_editorOneDimensionalAction, &ColorMapEditor1DAction::toggled, this, &ColorMapSettingsAction::updateActionsReadOnly);
-
-    updateActionsReadOnly();
-}
-
-void ColorMapSettingsAction::updateActionsReadOnly()
-{
-    _discreteAction.setEnabled(!_editorOneDimensionalAction.isChecked());
 }
 
 void ColorMapSettingsAction::connectToPublicAction(WidgetAction* publicAction)

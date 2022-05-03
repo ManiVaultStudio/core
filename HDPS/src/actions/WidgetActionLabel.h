@@ -39,7 +39,7 @@ public:
      * @param parent Pointer to parent widget
      * @param windowFlags Window flags
      */
-    explicit WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent = nullptr, const std::uint32_t& flags = 0);
+    explicit WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent = nullptr, const std::uint32_t& flags = ColonAfterName);
 
     /**
      * Respond to target object events

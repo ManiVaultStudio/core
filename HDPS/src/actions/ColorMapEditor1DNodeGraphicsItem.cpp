@@ -26,7 +26,6 @@ ColorMapEditor1DNodeGraphicsItem::ColorMapEditor1DNodeGraphicsItem(ColorMapEdito
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
-    //setCacheMode(DeviceCoordinateCache);
     setZValue(10);
     setAcceptHoverEvents(true);
 
@@ -111,7 +110,7 @@ void ColorMapEditor1DNodeGraphicsItem::paint(QPainter* painter, const QStyleOpti
 
     painter->setPen(perimeterPen);
 
-    painter->setBrush(_colorMapEditor1DWidget.isEnabled() ? _node.getColor() : QColor::fromHsl(_node.getColor().hue(), 0, _node.getColor().lightness()));
+    painter->setBrush(_colorMapEditor1DWidget.isEnabled() ? _node.getColor() : Qt::lightGray);
     painter->drawPath(shape());
 }
 

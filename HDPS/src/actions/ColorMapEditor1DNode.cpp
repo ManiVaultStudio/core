@@ -17,7 +17,7 @@ ColorMapEditor1DNode::ColorMapEditor1DNode(ColorMapEditor1DAction& colorMapEdito
     _index(),
     _normalizedCoordinate(normalizedCoordinate),
     _color(color),
-    _radius(5.0f)
+    _radius(4.0f)
 {
 }
 
@@ -61,12 +61,6 @@ void ColorMapEditor1DNode::setRadius(const float& radius)
 
 QPointF ColorMapEditor1DNode::getNormalizedCoordinate() const
 {
-    /*
-    const auto graphRectangle = _colorMapEditor1DWidget.getGraphRectangle();
-
-    return QPointF((x() - graphRectangle.x()) / graphRectangle.width(), 1.0f - (y() - graphRectangle.y()) / graphRectangle.height());
-    */
-
     return _normalizedCoordinate;
 }
 
@@ -78,17 +72,6 @@ void ColorMapEditor1DNode::setNormalizedCoordinate(const QPointF& normalizedCoor
     _normalizedCoordinate = normalizedCoordinate;
 
     emit normalizedCoordinateChanged(normalizedCoordinate);
-
-    /*
-    if (normalizedCoordinate == getNormalizedCoordinate())
-        return;
-
-    const auto graphRectangle = _colorMapEditor1DWidget.getGraphRectangle();
-
-    setPos(graphRectangle.x() + (normalizedCoordinate.x() * graphRectangle.width()), graphRectangle.bottom() - (normalizedCoordinate.y() * graphRectangle.height()));
-
-    emit normalizedCoordinateChanged(normalizedCoordinate);
-    */
 }
 
 QRectF ColorMapEditor1DNode::getLimits() const

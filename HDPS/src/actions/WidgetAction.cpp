@@ -69,7 +69,7 @@ QWidget* WidgetAction::createCollapsedWidget(QWidget* parent)
     return new WidgetActionCollapsedWidget(parent, this);
 }
 
-QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0*/)
+QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags /*= 0x00001*/)
 {
     return new WidgetActionLabel(this, parent, widgetFlags);
 }
