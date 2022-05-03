@@ -18,17 +18,20 @@ ColorMapEditor1DScene::ColorMapEditor1DScene(ColorMapEditor1DWidget& colorMapEdi
 void ColorMapEditor1DScene::mousePressEvent(QGraphicsSceneMouseEvent* graphicsSceneMouseEvent) {
     const auto scenePosition = graphicsSceneMouseEvent->scenePos();
 
-    qDebug() << items(scenePosition);
+    if ((graphicsSceneMouseEvent->buttons() & Qt::LeftButton)) {
+        if (items(scenePosition).count() >= 1) {
+            QGraphicsScene::mousePressEvent(graphicsSceneMouseEvent);
+        }
+        else {
+            graphicsSceneMouseEvent->accept();
 
-    if ((graphicsSceneMouseEvent->buttons() & Qt::LeftButton) && items(scenePosition).count()) {
+            if (_colorMapEditor1DWidget.getGraphRectangle().contains(scenePosition))
+                _colorMapEditor1DWidget.addNodeAtScenePosition(scenePosition);
+        }
+    }
+
+    if ((graphicsSceneMouseEvent->buttons() & Qt::RightButton))
         QGraphicsScene::mousePressEvent(graphicsSceneMouseEvent);
-    }
-    else {
-        graphicsSceneMouseEvent->accept();
-
-        if (_colorMapEditor1DWidget.getGraphRectangle().contains(scenePosition))
-            _colorMapEditor1DWidget.addNodeAtScenePosition(scenePosition);
-    }
 }
 
 }

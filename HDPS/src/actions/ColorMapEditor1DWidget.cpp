@@ -24,7 +24,7 @@ ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1D
     _colorMapEditor1DAction(colorMapEditor1DAction),
     _cursor(),
     _scene(*this),
-    _margins(50, 15, 15, 30),
+    _margins(50, 15, 15, 36),
     _graphRectangle(),
     _currentNode(),
     _nodes(),
@@ -190,7 +190,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
     QVector<qreal> dashes;
 
-    dashes << 5 << 5;
+    dashes << 3 << 3;
 
     dashedAxisPen.setDashPattern(dashes);
 
@@ -238,6 +238,12 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
     drawVerticalAxis(0.0f, rangeAction.getMinimum());
     drawVerticalAxis(1.0f, rangeAction.getMaximum());
+
+    painter->drawText(_graphRectangle.translated(QPoint(0, _graphRectangle.height() + 18)), "Value", QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+
+    painter->translate(QPoint(15, _graphRectangle.center().y()));
+    painter->rotate(-90);
+    painter->drawText(QRectF(QPointF(-50, -20), QPointF(50, 0)), "Opacity", QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
 }
 
 }

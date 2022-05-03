@@ -1,6 +1,7 @@
 #include "ColorMapEditor1DNodeGraphicsItem.h"
 #include "ColorMapEditor1DNode.h"
 #include "ColorMapEditor1DWidget.h"
+#include "ColorMapEditor1DAction.h"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -124,7 +125,15 @@ void ColorMapEditor1DNodeGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent*
     qDebug() << __FUNCTION__;
 #endif
 
-    _colorMapEditor1DWidget.selectNode(&_node);
+    switch (event->button()) {
+        case Qt::LeftButton:
+            _colorMapEditor1DWidget.selectNode(&_node);
+            break;
+
+        case Qt::RightButton:
+            _colorMapEditor1DWidget.getColorMapEditor1DAction().removeNode(&_node);
+            break;
+    }
 
     QGraphicsItem::mousePressEvent(event);
 }
@@ -144,10 +153,6 @@ void ColorMapEditor1DNodeGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent* 
 
     scenePos.setX(std::max(left, std::min(event->scenePos().x(), right)));
     scenePos.setY(std::max(graphRectangle.top(), std::min(event->scenePos().y(), graphRectangle.bottom())));
-
-    //event->setScenePos(scenePos);
-
-    qDebug() << scenePos.y() << graphRectangle.top() << graphRectangle.bottom();
 
     _node.setNormalizedCoordinate(QPointF((scenePos.x() - graphRectangle.left()) / graphRectangle.width(), (graphRectangle.bottom() - scenePos.y()) / graphRectangle.height()));
 
