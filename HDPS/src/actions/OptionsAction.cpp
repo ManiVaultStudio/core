@@ -4,6 +4,10 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QStylePainter>
+#include <QFileDialog>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 namespace hdps {
 
@@ -11,7 +15,9 @@ namespace gui {
 
 OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
     WidgetAction(parent),
-    _optionsModel()
+    _optionsModel(),
+    _selectionAction(*this),
+    _fileAction(*this)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -122,6 +128,14 @@ void OptionsAction::selectOption(const QString& option, const bool& replaceSelec
 
 void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 {
+    if (selectedOptions == getSelectedOptions())
+        return;
+
+    QSignalBlocker optionsModelBlocker(&_optionsModel);
+
+    for (int i = 0; i < _optionsModel.rowCount(); i++)
+        _optionsModel.item(i, 0)->setData(Qt::Unchecked, Qt::CheckStateRole);
+
     for (int i = 0; i < selectedOptions.count(); i++)
         selectOption(selectedOptions.at(i));
 
@@ -135,32 +149,28 @@ bool OptionsAction::mayPublish() const
 
 void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
 {
-    /*
-    auto publicOptionAction = dynamic_cast<OptionAction*>(publicAction);
+    auto publicOptionsAction = dynamic_cast<OptionsAction*>(publicAction);
 
-    Q_ASSERT(publicOptionAction != nullptr);
+    Q_ASSERT(publicOptionsAction != nullptr);
 
-    connect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
-    connect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
+    connect(this, &OptionsAction::selectedOptionsChanged, publicOptionsAction, &OptionsAction::setSelectedOptions);
+    connect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, &OptionsAction::setSelectedOptions);
 
-    setCurrentIndex(publicOptionAction->getCurrentIndex());
+    setSelectedOptions(publicOptionsAction->getSelectedOptions());
 
     WidgetAction::connectToPublicAction(publicAction);
-    */
 }
 
 void OptionsAction::disconnectFromPublicAction()
 {
-    /*
-    auto publicOptionAction = dynamic_cast<OptionAction*>(_publicAction);
+    auto publicOptionsAction = dynamic_cast<OptionsAction*>(_publicAction);
 
-    Q_ASSERT(publicOptionAction != nullptr);
+    Q_ASSERT(publicOptionsAction != nullptr);
 
-    disconnect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
-    disconnect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
+    disconnect(this, &OptionsAction::selectedOptionsChanged, publicOptionsAction, &OptionsAction::setSelectedOptions);
+    disconnect(publicOptionsAction, &OptionsAction::selectedOptionsChanged, this, &OptionsAction::setSelectedOptions);
 
     WidgetAction::disconnectFromPublicAction();
-    */
 }
 
 WidgetAction* OptionsAction::getPublicCopy() const
@@ -224,6 +234,7 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     auto layout = new QHBoxLayout();
 
     layout->setMargin(0);
+    layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::ComboBox)
         layout->addWidget(new OptionsAction::ComboBoxWidget(parent, this));
@@ -231,9 +242,160 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     //if (widgetFlags & WidgetFlag::ListView)
     //    layout->addWidget(new OptionAction::ListViewWidget(parent, this));
 
+    if (widgetFlags & WidgetFlag::Selection)
+        layout->addWidget(_selectionAction.createCollapsedWidget(parent));
+
+    if (widgetFlags & WidgetFlag::File)
+        layout->addWidget(_fileAction.createCollapsedWidget(parent));
+
     widget->setLayout(layout);
 
     return widget;
+}
+
+OptionsAction::SelectionAction::SelectionAction(OptionsAction& optionsAction) :
+    WidgetAction(&optionsAction),
+    _optionsAction(optionsAction),
+    _selectAllAction(this, "All"),
+    _clearSelectionAction(this, "Clear"),
+    _invertSelectionAction(this, "Invert")
+{
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    setText("Selection");
+    setToolTip("Change selection");
+    setIcon(fontAwesome.getIcon("mouse-pointer"));
+
+    const auto updateReadOnly = [this]() -> void {
+        _selectAllAction.setEnabled(_optionsAction.getSelectedOptions().count() < _optionsAction.getOptions().count());
+        _clearSelectionAction.setEnabled(_optionsAction.getSelectedOptions().count() >= 1);
+    };
+
+    connect(&_optionsAction, &OptionsAction::selectedOptionsChanged, this, updateReadOnly);
+
+    connect(&_selectAllAction, &TriggerAction::triggered, this, [this]() -> void {
+        _optionsAction.setSelectedOptions(_optionsAction.getOptions());
+    });
+
+    connect(&_clearSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
+        _optionsAction.setSelectedOptions(QStringList());
+    });
+
+    connect(&_invertSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
+        auto invertedSelectedOptions = _optionsAction.getOptions();
+
+        for (const auto& selectedOption : _optionsAction.getSelectedOptions())
+            invertedSelectedOptions.removeOne(selectedOption);
+
+        _optionsAction.setSelectedOptions(invertedSelectedOptions);
+    });
+}
+
+OptionsAction::SelectionAction::Widget::Widget(QWidget* parent, SelectionAction* selectionAction) :
+    WidgetActionWidget(parent, selectionAction)
+{
+    auto layout = new QHBoxLayout();
+
+    layout->addWidget(selectionAction->getSelectAllAction().createWidget(this));
+    layout->addWidget(selectionAction->getClearSelectionAction().createWidget(this));
+    layout->addWidget(selectionAction->getInvertSelectionAction().createWidget(this));
+
+    setPopupLayout(layout);
+}
+
+OptionsAction::FileAction::FileAction(OptionsAction& optionsAction) :
+    WidgetAction(&optionsAction),
+    _optionsAction(optionsAction),
+    _loadSelectionAction(this, "Load selection"),
+    _saveSelectionAction(this, "Save selection")
+{
+    auto& fontAwesome = Application::getIconFont("FontAwesome");
+
+    setText("File");
+    setToolTip("Load/save selection");
+    setIcon(fontAwesome.getIcon("file"));
+
+    const auto updateReadOnly = [this]() -> void {
+        _loadSelectionAction.setEnabled(_optionsAction.getOptions().count() >= 1);
+        _saveSelectionAction.setEnabled(_optionsAction.getOptions().count() >= 1);
+    };
+
+    connect(&_optionsAction, &OptionsAction::selectedOptionsChanged, this, updateReadOnly);
+
+    connect(&_loadSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
+        QFileDialog fileDialog;
+
+        fileDialog.setWindowTitle("Open selection from file");
+        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("folder-open"));
+        fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+        fileDialog.setFileMode(QFileDialog::ExistingFile);
+        fileDialog.setNameFilters({ "Selection files (*.json)" });
+        fileDialog.setDefaultSuffix(".json");
+        //fileDialog.setDirectory(ApplicationgetSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+
+        if (fileDialog.exec() == 0)
+            return;
+
+        if (fileDialog.selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
+
+        QFile jsonFile(fileDialog.selectedFiles().first());
+
+        jsonFile.open(QFile::ReadOnly);
+
+        const auto jsonDocument = QJsonDocument::fromJson(jsonFile.readAll());
+        const auto variantMap = jsonDocument.toVariant().toMap();
+        const auto selection = variantMap["selection"].toStringList();
+
+        _optionsAction.setSelectedOptions(selection);
+
+        _loadSelectionAction.setEnabled(false);
+    });
+
+    connect(&_saveSelectionAction, &TriggerAction::triggered, this, [this]() -> void {
+        QFileDialog fileDialog;
+
+        fileDialog.setWindowTitle("Save selection to file");
+        fileDialog.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("save"));
+        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+        fileDialog.setNameFilters({ "Selection files (*.json)" });
+        fileDialog.setDefaultSuffix(".json");
+        fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
+        //fileDialog.setDirectory(getSetting("Projects/WorkingDirectory", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString());
+
+        fileDialog.exec();
+
+        if (fileDialog.selectedFiles().count() != 1)
+            throw std::runtime_error("Only one file may be selected");
+
+        QJsonDocument jsonDocument;
+
+        QJsonObject jsonObject;
+
+        jsonObject.insert("selection", QJsonArray::fromStringList(_optionsAction.getSelectedOptions()));
+
+        jsonDocument.setObject(jsonObject);
+
+        QFile jsonFile(fileDialog.selectedFiles().first());
+
+        jsonFile.open(QFile::WriteOnly);
+        jsonFile.write(jsonDocument.toJson());
+
+        _saveSelectionAction.setEnabled(false);
+    });
+
+    updateReadOnly();
+}
+
+OptionsAction::FileAction::Widget::Widget(QWidget* parent, FileAction* fileAction) :
+    WidgetActionWidget(parent, fileAction)
+{
+    auto layout = new QHBoxLayout();
+
+    layout->addWidget(fileAction->getLoadSelectionAction().createWidget(this));
+    layout->addWidget(fileAction->getSaveSelectionAction().createWidget(this));
+
+    setPopupLayout(layout);
 }
 
 }
