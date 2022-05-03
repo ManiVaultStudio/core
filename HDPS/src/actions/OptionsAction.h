@@ -1,6 +1,7 @@
 #pragma once
 
 #include "WidgetAction.h"
+#include "TriggerAction.h"
 
 #include <QStandardItemModel>
 #include <QComboBox>
@@ -25,8 +26,10 @@ public:
 
     /** Describes the widget flags */
     enum WidgetFlag {
-        ComboBox    = 0x00001,      /** The widget includes a combobox widget */
-        ListView    = 0x00002,      /** The widget includes a list view widget */
+        ComboBox        = 0x00001,      /** The widget includes a combobox widget */
+        ListView        = 0x00002,      /** The widget includes a list view widget */
+        Selection       = 0x00004,      /** The widget includes a selection control */
+        File            = 0x00008,      /** The widget includes a file control */
 
         Default = ComboBox
     };
@@ -82,6 +85,124 @@ protected:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override;
+
+protected:
+
+    /**
+     * Selection action class
+     *
+     * Action class for manipulating selections
+     *
+     * @author Thomas Kroes
+     */
+    class SelectionAction : public WidgetAction
+    {
+    protected:
+
+        /** Widget class for selection action */
+        class Widget : public WidgetActionWidget
+        {
+        protected:
+
+            /**
+             * Constructor
+             * @param parent Pointer to parent widget
+             * @param selectionAction Pointer to selection action
+             */
+            Widget(QWidget* parent, SelectionAction* selectionAction);
+
+        protected:
+            friend class SelectionAction;
+        };
+
+    public:
+
+        /**
+         * Constructor
+         * @param optionsAction Reference to owning options action
+         */
+        SelectionAction(OptionsAction& optionsAction);
+
+    protected:
+
+        /**
+         * Get widget representation of the selection action
+         * @param parent Pointer to parent widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+            return new Widget(parent, this);
+        };
+
+    public: // Action getters
+
+        TriggerAction& getSelectAllAction() { return _selectAllAction; }
+        TriggerAction& getClearSelectionAction() { return _clearSelectionAction; }
+        TriggerAction& getInvertSelectionAction() { return _invertSelectionAction; }
+
+    protected:
+        OptionsAction&      _optionsAction;             /** Reference to owning options action */
+        TriggerAction       _selectAllAction;           /** Select all action */
+        TriggerAction       _clearSelectionAction;      /** Clear selection action */
+        TriggerAction       _invertSelectionAction;     /** Invert selection action */
+    };
+
+    /**
+     * File action class
+     *
+     * Action class for loading/saving selections
+     *
+     * @author Thomas Kroes
+     */
+    class FileAction : public WidgetAction
+    {
+    protected:
+
+        /** Widget class for file action */
+        class Widget : public WidgetActionWidget
+        {
+        protected:
+
+            /**
+             * Constructor
+             * @param parent Pointer to parent widget
+             * @param fileAction Pointer to file action
+             */
+            Widget(QWidget* parent, FileAction* fileAction);
+
+        protected:
+            friend class FileAction;
+        };
+
+    public:
+
+        /**
+         * Constructor
+         * @param optionsAction Reference to owning options action
+         */
+        FileAction(OptionsAction& optionsAction);
+
+    protected:
+
+        /**
+         * Get widget representation of the file action
+         * @param parent Pointer to parent widget
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
+         */
+        QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
+            return new Widget(parent, this);
+        };
+
+    public: // Action getters
+
+        TriggerAction& getLoadSelectionAction() { return _loadSelectionAction; }
+        TriggerAction& getSaveSelectionAction() { return _saveSelectionAction; }
+
+    protected:
+        OptionsAction&      _optionsAction;             /** Reference to owning options action */
+        TriggerAction       _loadSelectionAction;       /** Load selection action */
+        TriggerAction       _saveSelectionAction;       /** Save selection action */
+    };
 
 public:
 
@@ -230,7 +351,10 @@ signals:
     void selectedOptionsChanged(const QStringList& selectedOptions);
 
 protected:
-    QStandardItemModel      _optionsModel;      /** Options model */
+    QStandardItemModel      _optionsModel;          /** Options model */
+    SelectionAction         _selectionAction;       /** Selection action */
+    FileAction              _fileAction;            /** File action */
+
 };
 
 }   
