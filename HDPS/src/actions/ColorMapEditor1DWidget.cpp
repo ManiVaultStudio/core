@@ -24,7 +24,7 @@ ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1D
     _colorMapEditor1DAction(colorMapEditor1DAction),
     _cursor(),
     _scene(*this),
-    _margins(50, 15, 15, 60),
+    _margins(50, 15, 15, 30),
     _graphRectangle(),
     _currentNode(),
     _nodes(),
@@ -211,7 +211,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
         if (!startOrEndAxis) {
             painter->setPen(dashedAxisPen);
-            painter->drawLine(QPointF(_graphRectangle.left() + 1, textRectangle.center().y()), QPointF(_graphRectangle.right(), textRectangle.center().y()));
+            painter->drawLine(QPointF(_graphRectangle.left() + 3, textRectangle.center().y()), QPointF(_graphRectangle.right(), textRectangle.center().y()));
         }
     };
 
@@ -228,7 +228,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
         const auto startOrEndAxis       = percentage == 0.0f || percentage == 1.0f;
 
         painter->setPen(labelPen);
-        painter->drawText(textRectangle, QString("%1").arg(value), QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+        painter->drawText(textRectangle, QString::number(value, 'f', 2), QTextOption(Qt::AlignHCenter | Qt::AlignTop));
 
         painter->setPen(axisPen);
         painter->drawLine(QPointF(textRectangle.center().x(), textRectangle.top() - 3), QPointF(textRectangle.center().x(), _graphRectangle.bottom()));

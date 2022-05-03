@@ -73,7 +73,7 @@ bool ColorMapEditor1DNodeGraphicsItem::eventFilter(QObject* target, QEvent* even
 
 QRectF ColorMapEditor1DNodeGraphicsItem::boundingRect() const
 {
-    return QRectF(-_node.getRadius(), -_node.getRadius(), 2 * _node.getRadius(), 2 * _node.getRadius());// .marginsRemoved(QMargins(3, 3, 3, 3));
+    return QRectF(-_node.getRadius(), -_node.getRadius(), 2 * _node.getRadius(), 2 * _node.getRadius());
 }
 
 QPainterPath ColorMapEditor1DNodeGraphicsItem::shape() const
@@ -147,7 +147,9 @@ void ColorMapEditor1DNodeGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent* 
 
     //event->setScenePos(scenePos);
 
-    _node.setNormalizedCoordinate(QPointF((scenePos.x() - graphRectangle.left()) / graphRectangle.width(), ((_colorMapEditor1DWidget.height() - scenePos.y()) - graphRectangle.top()) / graphRectangle.height()));
+    qDebug() << scenePos.y() << graphRectangle.top() << graphRectangle.bottom();
+
+    _node.setNormalizedCoordinate(QPointF((scenePos.x() - graphRectangle.left()) / graphRectangle.width(), (graphRectangle.bottom() - scenePos.y()) / graphRectangle.height()));
 
     update();
 }
