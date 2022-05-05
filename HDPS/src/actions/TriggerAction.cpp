@@ -53,7 +53,17 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     if (dynamic_cast<QMenu*>(parent))
         return QWidgetAction::createWidget(parent);
 
-    return new TriggerAction::PushButtonWidget(parent, this, widgetFlags);
+    auto widget = new WidgetActionWidget(parent, this);
+    auto layout = new QHBoxLayout();
+
+    layout->setMargin(0);
+    layout->setSpacing(3);
+
+    layout->addWidget(new TriggerAction::PushButtonWidget(parent, this, widgetFlags));
+
+    widget->setLayout(layout);
+
+    return widget;
 }
 
 }
