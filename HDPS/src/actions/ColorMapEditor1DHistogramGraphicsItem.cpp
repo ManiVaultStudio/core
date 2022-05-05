@@ -99,8 +99,6 @@ void ColorMapEditor1DHistogramGraphicsItem::paint(QPainter* painter, const QStyl
     painter->setPen(Qt::NoPen);
     painter->setBrush(QColor(150, 150, 150, _colorMapEditor1DWidget.isEnabled() ? 50 : 20));
     painter->drawPolygon(points.data(), points.count());
-
-    
 }
 
 }
