@@ -92,10 +92,10 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
 
     auto layout = new QHBoxLayout();
 
-    layout->setContentsMargins(20, 0, 0, 0);
-
-    layout->addWidget(toggleAction->createLabelWidget(this));
-    layout->setSizeConstraint(QLayout::SetFixedSize);
+    layout->setContentsMargins(18, 0, 0, 0);
+    layout->setSizeConstraint(QLayout::SetMinimumSize);
+    layout->addWidget(toggleAction->createLabelWidget(this, 0));
+    layout->addStretch(1);
 
     setLayout(layout);
 

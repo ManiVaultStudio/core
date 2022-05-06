@@ -16,26 +16,12 @@ namespace gui {
 ColorMapAxisAction::ColorMapAxisAction(ColorMapSettingsAction& colorMapSettingsAction, const QString& title) :
     WidgetAction(&colorMapSettingsAction),
     _rangeAction(this, "Range", 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1),
-    _resetAction(this, "Reset"),
     _mirrorAction(this, "Mirror")
 {
     setText(title);
 
     _rangeAction.setToolTip("Range of the color map");
-    _resetAction.setToolTip("Reset the color map");
     _mirrorAction.setToolTip("Mirror the color map");
-
-    const auto update = [this]() {
-        _resetAction.setEnabled(_rangeAction.isResettable());
-    };
-
-    connect(&_resetAction, &TriggerAction::triggered, this, [this, update]() {
-        _rangeAction.reset();
-    });
-
-    connect(&_rangeAction, &DecimalRangeAction::rangeChanged, this, update);
-
-    update();
 }
 
 void ColorMapAxisAction::connectToPublicAction(WidgetAction* publicAction)
@@ -72,12 +58,9 @@ ColorMapAxisAction::Widget::Widget(QWidget* parent, ColorMapAxisAction* colorMap
     layout->addWidget(rangeMaxAction.createLabelWidget(this), 1, 0);
     layout->addWidget(rangeMaxAction.createWidget(this), 1, 1);
 
-    auto miscellaneousLayout = new QHBoxLayout();
+    layout->addWidget(colorMapAxisAction->getMirrorAction().createWidget(this), 2, 1);
 
-    miscellaneousLayout->addWidget(colorMapAxisAction->getMirrorAction().createWidget(this));
-    miscellaneousLayout->addWidget(colorMapAxisAction->getResetAction().createWidget(this));
-    
-    layout->addLayout(miscellaneousLayout, layout->rowCount(), 0, 1, 2);
+    layout->setColumnStretch(1, 1);
 
     setPopupLayout(layout);
 }

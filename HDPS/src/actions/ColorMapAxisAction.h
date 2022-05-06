@@ -68,12 +68,10 @@ public: // Linking
 public: // Action getters
 
     DecimalRangeAction& getRangeAction() { return _rangeAction; }
-    TriggerAction& getResetAction() { return _resetAction; }
     ToggleAction& getMirrorAction() { return _mirrorAction; }
 
 protected:
     DecimalRangeAction  _rangeAction;       /** Range action */
-    TriggerAction       _resetAction;       /** Reset to default range action */
     ToggleAction        _mirrorAction;      /** Mirror along the axis action */
 
     /** Only color map settings action may instantiate this class */

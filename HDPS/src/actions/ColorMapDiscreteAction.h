@@ -2,6 +2,7 @@
 
 #include "WidgetAction.h"
 #include "IntegralAction.h"
+#include "ToggleAction.h"
 
 namespace hdps {
 
@@ -79,9 +80,11 @@ public: // Serialization
 public: // Action getters
 
     IntegralAction& getNumberOfStepsAction() { return _numberOfStepsAction; }
+    ToggleAction& getDiscretizeAlphaAction() { return _discretizeAlphaAction; }
 
 protected:
     IntegralAction      _numberOfStepsAction;       /** Number of discrete steps action */
+    ToggleAction        _discretizeAlphaAction;     /** Whether to also discretize the alpha channel of the color map */
 
     /** Only color map settings action may instantiate this class */
     friend class ColorMapSettingsAction;

@@ -9,32 +9,32 @@ namespace gui {
 class ColorMapAction;
 
 /**
- * Color map view action class
+ * Color map settings one-dimensional action class
  *
- * Action class for color map display in a widget
+ * Widget action class for one-dimensional color map settings
  *
  * @author Thomas Kroes
  */
-class ColorMapViewAction : public WidgetAction
+class ColorMapSettings1DAction : public WidgetAction
 {
     Q_OBJECT
 
 public:
 
-    /** Widget class for color map view action */
+    /** Widget class for one-dimensional color map settings action */
     class Widget : public WidgetActionWidget {
     public:
 
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param colorMapViewAction Pointer to color map view action
+         * @param colorMapSettings1DAction Pointer to one-dimensional color map settings action
          */
-        Widget(QWidget* parent, ColorMapViewAction* colorMapViewAction);
+        Widget(QWidget* parent, ColorMapSettings1DAction* colorMapSettings1DAction);
     };
 
     /**
-     * Get widget representation of the color map view action
+     * Get widget representation of the one-dimensional color map settings action
      * @param parent Pointer to parent widget
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
@@ -48,7 +48,7 @@ protected:
      * Constructor
      * @param colorMapAction Reference to color map action
      */
-    ColorMapViewAction(ColorMapAction& colorMapAction);
+    ColorMapSettings1DAction(ColorMapAction& colorMapAction);
 
 public: // Action getters
 
@@ -57,9 +57,8 @@ public: // Action getters
 protected:
     ColorMapAction&     _colorMapAction;    /** Reference to color map action */
 
-    /** Only color map settings action classes may instantiate this class */
-    friend class ColorMapSettings1DAction;
-    friend class ColorMapSettings2DAction;
+    /** Only color map settings action may instantiate this class */
+    friend class ColorMapSettingsAction;
 };
 
 }

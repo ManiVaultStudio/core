@@ -138,10 +138,20 @@ set(ACTIONS_HEADERS
     src/actions/ColorAction.h
     src/actions/ColorPickerAction.h
     src/actions/ColorMapAction.h
+    src/actions/ColorMapEditor1DAction.h
+    src/actions/ColorMapEditor1DEdgesGraphicsItem.h
+    src/actions/ColorMapEditor1DHistogramGraphicsItem.h
+    src/actions/ColorMapEditor1DNode.h
+    src/actions/ColorMapEditor1DNodeGraphicsItem.h
+    src/actions/ColorMapEditor1DNodeAction.h
+    src/actions/ColorMapEditor1DScene.h
+    src/actions/ColorMapEditor1DWidget.h
     src/actions/ColorMapAxisAction.h
     src/actions/ColorMapDiscreteAction.h
     src/actions/ColorMapViewAction.h
     src/actions/ColorMapSettingsAction.h
+    src/actions/ColorMapSettings1DAction.h
+    src/actions/ColorMapSettings2DAction.h
     src/actions/DatasetPickerAction.h
     src/actions/DecimalAction.h
     src/actions/DecimalRangeAction.h
@@ -186,10 +196,20 @@ set(ACTIONS_SOURCES
     src/actions/ColorAction.cpp
     src/actions/ColorPickerAction.cpp
     src/actions/ColorMapAction.cpp
+    src/actions/ColorMapEditor1DAction.cpp
+	src/actions/ColorMapEditor1DEdgesGraphicsItem.cpp
+	src/actions/ColorMapEditor1DHistogramGraphicsItem.cpp
+    src/actions/ColorMapEditor1DNode.cpp
+    src/actions/ColorMapEditor1DNodeGraphicsItem.cpp
+    src/actions/ColorMapEditor1DNodeAction.cpp
+    src/actions/ColorMapEditor1DScene.cpp
+    src/actions/ColorMapEditor1DWidget.cpp
     src/actions/ColorMapAxisAction.cpp
     src/actions/ColorMapDiscreteAction.cpp
     src/actions/ColorMapViewAction.cpp
     src/actions/ColorMapSettingsAction.cpp
+	src/actions/ColorMapSettings1DAction.cpp
+    src/actions/ColorMapSettings2DAction.cpp
 	src/actions/DatasetPickerAction.cpp
     src/actions/DecimalAction.cpp
     src/actions/DecimalRangeAction.cpp

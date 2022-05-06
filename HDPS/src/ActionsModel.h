@@ -30,14 +30,14 @@ public:
      * @param parent Parent model index
      * @return Number of rows in the model given the parent model index
      */
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Returns the number of columns in the model given the parent model index
      * @param parent Parent model index
      * @return Number of columns in the model given the parent model index
      */
-    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
     /**
      * Returns the model index for the given row, column and parent model index
@@ -54,7 +54,7 @@ public:
      * @param role Data role
      * @return Data in variant form
      */
-    QVariant data(const QModelIndex& index, int role) const;
+    QVariant data(const QModelIndex& index, int role) const override;
 
     /**
      * Sets the data value for the given model index and data role

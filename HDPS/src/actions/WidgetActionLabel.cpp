@@ -17,7 +17,7 @@ namespace hdps {
 
 namespace gui {
 
-WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= 0*/) :
+WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent /*= nullptr*/, const std::uint32_t& flags /*= ColonAfterName*/) :
     QWidget(parent),
     _flags(flags),
     _widgetAction(widgetAction),

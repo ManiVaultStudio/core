@@ -71,7 +71,7 @@ public:
      * @param widgetFlags Label widget configuration flags
      * @return Pointer to widget
      */
-    QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0);
+    QWidget* createLabelWidget(QWidget* parent, const std::int32_t& widgetFlags = 0x00001);
 
     /**
      * Get the context menu for the action
