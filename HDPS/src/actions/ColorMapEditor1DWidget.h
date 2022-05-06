@@ -57,7 +57,7 @@ public:
     void removeNodeGraphicsItem(ColorMapEditor1DNode* node);
 
     /** Function used to draw the axes in the transferfunction. */
-    void drawBackground(QPainter* painter, const QRectF& rect);
+    void drawBackground(QPainter* painter, const QRectF& rect) override;
 
     /** Get the color map. */
     QImage getColorMap() {

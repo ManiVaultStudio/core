@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QColor>
+#include <QPointF>
 
 namespace hdps {
 
