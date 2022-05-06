@@ -109,13 +109,13 @@ QImage ColorMapAction::getColorMapImage() const
                 QImage discreteColorMapImage(numberOfDiscreteSteps, 1, QImage::Format::Format_ARGB32);
 
                 // Compute step size in source image coordinates 
-                const auto sourceStepSizeX = static_cast<std::int32_t>(floorf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
+                const auto sourceStepSizeX = static_cast<std::int32_t>(ceilf(colorMapImage.width()) / static_cast<float>(numberOfDiscreteSteps));
 
                 // Create average color for each discrete color section
-                for (int stepX = 0; stepX < numberOfDiscreteSteps; stepX++) {
+                for (int discreteStepIndex = 0; discreteStepIndex < numberOfDiscreteSteps; discreteStepIndex++) {
 
                     // Compute source image pixel range
-                    const auto rangeStartX  = stepX * sourceStepSizeX;
+                    const auto rangeStartX  = discreteStepIndex * sourceStepSizeX;
                     const auto rangeEndR    = rangeStartX + sourceStepSizeX;
 
                     // Create channel for RGB color components
@@ -143,13 +143,11 @@ QImage ColorMapAction::getColorMapImage() const
                     discreteColor.setAlphaF(std::accumulate(channels[3].begin(), channels[3].end(), 0.0f) / noPixels);
 
                     // Assign the pixel color
-                    discreteColorMapImage.setPixelColor(stepX, 0, discreteColor);
+                    discreteColorMapImage.setPixelColor(discreteStepIndex, 0, discreteColor);
                 }
 
                 for (int pixelX = 0; pixelX < colorMapImage.width(); pixelX++) {
-                    auto pixelColor = discreteColorMapImage.pixelColor(QPoint(floorf(static_cast<std::int32_t>(static_cast<float>(pixelX) / sourceStepSizeX)), 0));
-
-                    //qDebug() << pixelX << sourceStepSizeX;
+                    auto pixelColor = discreteColorMapImage.pixelColor(QPoint(std::min(numberOfDiscreteSteps - 1, static_cast<std::int32_t>(floorf(static_cast<float>(pixelX) / sourceStepSizeX))), 0));
 
                     if (!settingsAction.getDiscreteAction().getDiscretizeAlphaAction().isChecked())
                         pixelColor.setAlphaF(colorMapImage.pixelColor(QPoint(pixelX, 0)).alphaF());
