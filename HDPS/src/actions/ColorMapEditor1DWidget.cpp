@@ -7,7 +7,6 @@
 #include "ColorMapAction.h"
 
 #include <QPainter>
-#include <QMessageBox>
 #include <QStyleOption>
 
 #include <algorithm>
@@ -23,9 +22,8 @@ namespace gui {
 ColorMapEditor1DWidget::ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1DAction& colorMapEditor1DAction) :
     QGraphicsView(parent),
     _colorMapEditor1DAction(colorMapEditor1DAction),
-    _cursor(),
     _scene(*this),
-    _margins(52, 15, 15, 40),
+    _margins(52, 15, 25, 40),
     _graphRectangle(),
     _currentNode(),
     _nodes(),
@@ -71,6 +69,10 @@ void ColorMapEditor1DWidget::showEvent(QShowEvent* event)
 
     for (auto node : _colorMapEditor1DAction.getNodes())
         addNodeGraphicsItem(node);
+
+    connect(&_colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction(), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
+        _scene.update();
+    });
 }
 
 bool ColorMapEditor1DWidget::eventFilter(QObject* target, QEvent* event)
@@ -225,7 +227,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
         origin.setX(origin.x() + (percentage * _graphRectangle.width()));
 
-        const auto textRectangleSize    = QSizeF(20, 50);
+        const auto textRectangleSize    = QSizeF(100, 50);
         const auto textRectangle        = QRectF(origin - QPointF(textRectangleSize.width() / 2, -10), textRectangleSize);
         const auto startOrEndAxis       = percentage == 0.0f || percentage == 1.0f;
 
@@ -245,7 +247,12 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 
     painter->translate(QPoint(18, _graphRectangle.center().y()));
     painter->rotate(-90);
-    painter->drawText(QRectF(QPointF(-50, -20), QPointF(50, 0)), "Opacity", QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
+    painter->drawText(QRectF(QPointF(-200, -20), QPointF(200, 0)), "Opacity", QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
+}
+
+QImage ColorMapEditor1DWidget::getColorMap()
+{
+    return _colorMap;
 }
 
 }

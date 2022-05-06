@@ -9,6 +9,13 @@ namespace gui {
 class ColorMapEditor1DWidget;
 class ColorMapEditor1DNode;
 
+/**
+ * Color map editor 1D edges graphics item class
+ *
+ * Graphics item class which visually connected nodes in a one-dimensional color map
+ *
+ * @author Thomas Kroes and Mitchell M. de Boer
+ */
 class ColorMapEditor1DEdgesGraphicsItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT

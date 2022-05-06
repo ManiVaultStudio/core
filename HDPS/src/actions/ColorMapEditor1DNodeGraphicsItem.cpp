@@ -119,6 +119,11 @@ void ColorMapEditor1DNodeGraphicsItem::pressed(QGraphicsSceneMouseEvent* event) 
     this->mousePressEvent(event);
 }
 
+hdps::gui::ColorMapEditor1DWidget& ColorMapEditor1DNodeGraphicsItem::getColorMapEditor1DWidget()
+{
+    return _colorMapEditor1DWidget;
+}
+
 void ColorMapEditor1DNodeGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
 #ifdef COLOR_MAP_EDITOR_1D_NODE_GRAPHICS_ITEM_VERBOSE
@@ -166,7 +171,7 @@ void ColorMapEditor1DNodeGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEven
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-void ColorMapEditor1DNodeGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent)
+void ColorMapEditor1DNodeGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
 #ifdef COLOR_MAP_EDITOR_1D_NODE_GRAPHICS_ITEM_VERBOSE
     qDebug() << __FUNCTION__;
@@ -177,7 +182,7 @@ void ColorMapEditor1DNodeGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent*
     update();
 }
 
-void ColorMapEditor1DNodeGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent)
+void ColorMapEditor1DNodeGraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
 #ifdef COLOR_MAP_EDITOR_1D_NODE_GRAPHICS_ITEM_VERBOSE
     qDebug() << __FUNCTION__;

@@ -13,11 +13,11 @@ namespace gui {
 class ColorMapAction;
 
 /**
- * Color map editor action class
+ * Color map editor 1D action class
  *
  * Action class for manually defining a one-dimensional color map
  *
- * @author Thomas Kroes
+ * @author Thomas Kroes and Mitchell M. de Boer
  */
 class ColorMapEditor1DAction : public WidgetAction
 {
@@ -51,9 +51,9 @@ public:
     };
 
     /**
-     * Get widget representation of the color map editor action
+     * Get widget representation of the one-dimensional color map editor action
      * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     * @param widgetFlags Widget flags for the configuration of the widget
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
         return new Widget(parent, this);
@@ -84,7 +84,7 @@ public: // Nodes
     QVector<ColorMapEditor1DNode*>& getNodes();
 
     /**
-     * Add node at the normalized coordinate
+     * Add node at normalized coordinate
      * @param normalizedCoordinate Normalized coordinate
      * @param color Node color
      * @return Pointer to created node

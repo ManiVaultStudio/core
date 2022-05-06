@@ -14,12 +14,24 @@ namespace gui {
 class ColorMapEditor1DAction;
 class ColorMapEditor1DNodeGraphicsItem;
 
+/**
+ * Color map editor one-dimensional widget class
+ *
+ * Widget class for drawing the one-dimensional color map editor
+ *
+ * @author Thomas Kroes and Mitchell M. de Boer
+ */
 class ColorMapEditor1DWidget : public QGraphicsView
 {
     Q_OBJECT
 
 public:
 
+    /**
+     * Constructor
+     * @param parent Pointer to parent widget
+     * @param colorMapEditor1DAction Reference to one-dimensional color map editor action
+     */
     ColorMapEditor1DWidget(QWidget* parent, ColorMapEditor1DAction& colorMapEditor1DAction);
 
     /** Destructor */
@@ -56,14 +68,23 @@ public:
      */
     void removeNodeGraphicsItem(ColorMapEditor1DNode* node);
 
-    /** Function used to draw the axes in the transferfunction. */
+    /**
+     * Draws the editor background elements (axes etc.)
+     * @param painter Pointer to painter
+     * @param rect Background rectangle
+     */
     void drawBackground(QPainter* painter, const QRectF& rect) override;
 
-    /** Get the color map. */
-    QImage getColorMap() {
-        return _colorMap;
-    }
+    /**
+     * Get the color map
+     * @return Color map image
+     */
+    QImage getColorMap();
 
+    /**
+     * Select a single node
+     * @param node Pointer to a node
+     */
     void selectNode(ColorMapEditor1DNode* node);
 
 public:
@@ -97,19 +118,21 @@ public: // Action getters
     ColorMapEditor1DAction& getColorMapEditor1DAction() { return _colorMapEditor1DAction; }
 
 private:
-    ColorMapEditor1DAction&                         _colorMapEditor1DAction;
-    QCursor                                         _cursor;
-    ColorMapEditor1DScene                           _scene;
-    QMargins                                        _margins;
+    ColorMapEditor1DAction&                         _colorMapEditor1DAction;    /** Reference to one-dimensional color map editor action */
+    ColorMapEditor1DScene                           _scene;                     /** Editor graphics scene */
+    QMargins                                        _margins;                   /** Graph rectangle margins */
     QRectF                                          _graphRectangle;            /** Nodes graph rectangle */
-    ColorMapEditor1DNode*                           _currentNode;
-    QVector<ColorMapEditor1DNodeGraphicsItem*>      _nodes;
-    QImage                                          _colorMap;
+    ColorMapEditor1DNode*                           _currentNode;               /** Currently selected node */
+    QVector<ColorMapEditor1DNodeGraphicsItem*>      _nodes;                     /** Nodes in the editor */
+    QImage                                          _colorMap;                  /** Current color map */
 
 signals:
 
-    void colorMapChanged(const QImage& colorMap); // Signal when the colormap has been altered.
-    void valueChanged(const QPointF& currentNodePosition);
+    /**
+     * Signals that the color map changed
+     * @param colorMap Reference to color map
+     */
+    void colorMapChanged(const QImage& colorMap);
 
     /**
      * Signals that the current node changed

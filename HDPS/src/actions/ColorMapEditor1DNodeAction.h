@@ -40,7 +40,7 @@ public:
     /**
      * Get widget representation of the color map editor action
      * @param parent Pointer to parent widget
-     * @param widgetFlags Widget flags for the configuration of the widget (type)
+     * @param widgetFlags Widget flags for the configuration of the widget
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
         return new Widget(parent, this);
@@ -66,20 +66,7 @@ public:
      */
     void disconnectFromNode(ColorMapEditor1DNode* node);
 
-    /**
-     * Change node position
-     * @param xPosition X-position of the node
-     * @param yPosition Y-position of the node
-     */
-    void changeNodePosition(float xPosition, float yPosition);
-
-    /**
-     * Change node color
-     * @param color Node color
-     */
-    void changeNodeColor(const QColor& color);
-
-
+    /** Invoked when the node changes one of its parameters and updates the user interface accordingly */
     void nodeChanged();
 
 public: // Action getters

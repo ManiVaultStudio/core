@@ -13,7 +13,7 @@ class ColorMapEditor1DAction;
 /**
  * Color map editor one-dimensional node class
  * 
- * Container class for one-dimension color map editor node
+ * Container class for one-dimension color map editor node settings
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */

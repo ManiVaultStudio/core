@@ -14,7 +14,7 @@ class ColorMapEditor1DNode;
 /**
  * Color map editor one-dimensional node graphics item class
  *
- * Visual node item for display in a graphics view
+ * Graphics item for drawing a node in a graphics view
  *
  * @author Thomas Kroes and Mitchell M. de Boer
  */
@@ -44,36 +44,69 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
-    enum { Type = UserType + 1 };
-    int type() const override { return Type; }
-
+    /**
+     * Get the node bounding rectangle
+     * @return Bounding rectangle
+     */
     QRectF boundingRect() const override;
 
+    /**
+     * Get node shape
+     * @return Shape as a painter path
+     */
     QPainterPath shape() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    void pressed(QGraphicsSceneMouseEvent* event);
-
-
-    ColorMapEditor1DWidget& getColorMapEditor1DWidget() {
-        return _colorMapEditor1DWidget;
-    }
-protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
     /**
-     * Invoked when the mouse over the node
-     * @param graphicsSceneHoverEvent Pointer to graphics scene hover event
+     * Paint the node
+     * @param painter Pointer to painter
+     * @param option Pointer to graphics item style options
+     * @param widget Pointer to widget
      */
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
+    /**
+     * Invoked when the node is pressed
+     * @param event Pointer to graphics mouse event
+     */
+    void pressed(QGraphicsSceneMouseEvent* event);
+
+    /**
+     * Get the one-dimensional color map editor widget
+     * @return Reference to one-dimensional color map editor widget
+     */
+    ColorMapEditor1DWidget& getColorMapEditor1DWidget();
+
+protected:
+
+    /**
+     * Invoked when the mouse presses the node
+     * @param event Pointer to graphics scene mouse event
+     */
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+
+    /**
+     * Invoked when the mouse moves over the node
+     * @param event Pointer to graphics scene mouse event
+     */
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+
+    /**
+     * Invoked when the mouse button releases
+     * @param event Pointer to graphics scene mouse event
+     */
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+
+    /**
+     * Invoked when the mouse starts to hover over the node
+     * @param event Pointer to graphics scene hover event
+     */
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
 
     /**
      * Invoked when the mouse leaves the node after hovering
-     * @param graphicsSceneHoverEvent Pointer to graphics scene hover event
+     * @param event Pointer to graphics scene hover event
      */
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent* graphicsSceneHoverEvent) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
 
 signals:
 

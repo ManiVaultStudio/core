@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QGraphicsScene>
-#include <QCursor>
 
 class QGraphicsSceneMouseEvent;
 
@@ -11,6 +10,13 @@ namespace gui {
 
 class ColorMapEditor1DWidget;
 
+/**
+ * Color map editor one-dimensional graphics scene class
+ *
+ * Graphics scene class for drawing the one-dimensional color map editor
+ *
+ * @author Thomas Kroes and Mitchell M. de Boer
+ */
 class ColorMapEditor1DScene : public QGraphicsScene
 {
     Q_OBJECT

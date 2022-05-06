@@ -5,6 +5,7 @@
 #include "ColorMapSettingsAction.h"
 
 #include <QGridLayout>
+#include <QSpinBox>
 
 namespace hdps {
 
@@ -55,6 +56,10 @@ ColorMapEditor1DNodeAction::ColorMapEditor1DNodeAction(ColorMapEditor1DAction& c
 
         disconnectFromNode(node);
     });
+
+    connect(&_colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction(), &DecimalRangeAction::rangeChanged, this, [this]() -> void {
+        nodeChanged();
+    });
 }
 
 void ColorMapEditor1DNodeAction::connectToNode(ColorMapEditor1DNode* node)
@@ -91,19 +96,11 @@ void ColorMapEditor1DNodeAction::disconnectFromNode(ColorMapEditor1DNode* node)
     _currentNode = nullptr;
 }
 
-void ColorMapEditor1DNodeAction::changeNodePosition(float xPosition, float yPosition)
-{
-    _valueAction.setValue(xPosition);
-    _opacityAction.setValue(yPosition);
-}
-
-void ColorMapEditor1DNodeAction::changeNodeColor(const QColor& color)
-{
-    _colorAction.setColor(color);
-}
-
 void ColorMapEditor1DNodeAction::nodeChanged()
 {
+    if (_currentNode == nullptr)
+        return;
+
     const auto normalizedValueToRange = [this](const float& normalizedValue) -> float {
         auto& rangeAction = _colorMapEditor1DAction.getColorMapAction().getSettingsAction().getHorizontalAxisAction().getRangeAction();
 
@@ -134,12 +131,19 @@ ColorMapEditor1DNodeAction::Widget::Widget(QWidget* parent, ColorMapEditor1DNode
     layout->addWidget(colorMapEditor1DNodeAction->getColorAction().createLabelWidget(this), 0, 0);
     layout->addWidget(colorMapEditor1DNodeAction->getColorAction().createWidget(this), 0, 1);
 
+    auto opacityWidget  = colorMapEditor1DNodeAction->getOpacityAction().createWidget(this);
+    auto valueWidget    = colorMapEditor1DNodeAction->getValueAction().createWidget(this);
+
+    dynamic_cast<QDoubleSpinBox*>(opacityWidget->findChild<QDoubleSpinBox*>("SpinBox"))->setMinimumWidth(80);
+    dynamic_cast<QDoubleSpinBox*>(valueWidget->findChild<QDoubleSpinBox*>("SpinBox"))->setMinimumWidth(80);
+
     layout->addWidget(colorMapEditor1DNodeAction->getOpacityAction().createLabelWidget(this), 1, 0);
-    layout->addWidget(colorMapEditor1DNodeAction->getOpacityAction().createWidget(this), 1, 1);
+    layout->addWidget(opacityWidget, 1, 1);
 
     layout->addWidget(colorMapEditor1DNodeAction->getValueAction().createLabelWidget(this), 2, 0);
-    layout->addWidget(colorMapEditor1DNodeAction->getValueAction().createWidget(this), 2, 1);
+    layout->addWidget(valueWidget, 2, 1);
 
+    
     setLayout(layout);
 }
 

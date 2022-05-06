@@ -8,6 +8,13 @@ namespace gui {
 
 class ColorMapEditor1DWidget;
 
+/**
+ * Color map editor 1D histogram graphics item class
+ *
+ * Graphics item class which visually draws a histogram in a one-dimensional color map
+ *
+ * @author Thomas Kroes and Mitchell M. de Boer
+ */
 class ColorMapEditor1DHistogramGraphicsItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT
