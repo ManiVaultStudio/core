@@ -74,9 +74,8 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param title Title of the action
      */
-    DimensionsPickerAction(QObject* parent, const QString& title = "Dimensions");
+    DimensionsPickerAction(QObject* parent);
 
     /** Destructor */
     ~DimensionsPickerAction();
@@ -104,8 +103,23 @@ public:
      */
     void setDimensions(const std::uint32_t numDimensions, const std::vector<QString>& names);
 
-    /** Get list of enabled dimensions */
+    /**
+     * Get indices of the currently selected dimensions
+     * @return Indices of the currently selected dimensions
+     */
+    const QVector<std::int32_t> getSelectedDimensions() const;
+
+    /**
+     * Get enabled dimension
+     * @return Vector of booleans where each boolean indicates whether the dimension is enabled or not
+     */
     std::vector<bool> getEnabledDimensions() const;
+
+    /**
+     * Get the input points dataset
+     * @param Input points dataset
+     */
+    Dataset<Points> getPointsDataset() const;
 
     /**
      * Set the input points dataset
@@ -176,18 +190,25 @@ public:
     void saveSelectionToFile(const QString& fileName);
 
     /**
-     * Clear the selection and select a single dimension by name
+     * Select a single dimension by name (and possibly clear the selection)
      * @param dimensionName Name of the dimension to select
      * @param clearExisiting Whether to clear the current selection
      */
     void selectDimension(const QString& dimensionName, bool clearExisiting = false);
 
     /**
-     * Clear the selection and select a single dimension by index
+     * Select a single dimension by index (and possibly clear the selection)
      * @param dimensionIndex Index of the dimension to select
      * @param clearExisiting Whether to clear the current selection
      */
     void selectDimension(const std::int32_t& dimensionIndex, bool clearExisiting = false);
+
+    /**
+     * Select one or more dimensions by index (and possibly clear the selection)
+     * @param dimensionIndices Indices of the dimensions to select
+     * @param clearExisiting Whether to clear the current selection
+     */
+    void selectDimensions(const QVector<std::int32_t>& dimensionIndices, bool clearExisiting = true);
 
     /** Select dimensions based on visibility */
     template <bool selectVisible>
@@ -219,6 +240,31 @@ protected:
     /** Update the dimension selection summary */
     void updateSummary();
 
+public: // Linking
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const;
+
 signals:
 
     /**
@@ -226,6 +272,12 @@ signals:
      * @param dimensionsPickerProxyModel Pointer to dimensions picker proxy model
      */
     void proxyModelChanged(DimensionsPickerProxyModel* dimensionsPickerProxyModel);
+
+    /**
+     * Signals that the selected dimensions changed
+     * @param selectedDimensionIndices Indices of the currently selected dimensions
+     */
+    void selectedDimensionsChanged(const QVector<std::int32_t>& selectedDimensionIndices);
 
 protected: // Action getters
 

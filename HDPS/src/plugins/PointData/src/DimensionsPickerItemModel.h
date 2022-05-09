@@ -22,11 +22,13 @@ namespace hdps
 
         explicit DimensionsPickerItemModel(DimensionsPickerHolder&);
 
+        QModelIndex index(int, int, const QModelIndex &) const  override;
+        int rowCount(const QModelIndex &) const override;
     private:
         // Implementation of pure virtual member functions of QAbstractItemModel
-        int rowCount(const QModelIndex &) const override;
+        
         int columnCount(const QModelIndex &) const noexcept override;
-        QModelIndex index(int, int, const QModelIndex &) const  override;
+        
         QModelIndex parent(const QModelIndex &) const noexcept override;
         QVariant data(const QModelIndex &, int) const override;
 
