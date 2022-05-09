@@ -94,14 +94,11 @@ const std::vector<std::uint32_t>& SelectedIndicesAction::getSelectedIndices() co
 
 void SelectedIndicesAction::updateSelectedIndices()
 {
-    // Only proceed if we have a valid points reference
     if (!_points.isValid())
         return;
 
-    // Get points selection
     auto selection = _points->getSelection<Points>();
 
-    // Generate 
     if (_points->isFull()) {
         _selectedIndices = selection->indices;
     }
