@@ -876,6 +876,7 @@ public:
     std::vector<unsigned int> indices;
 
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
+    EventListener                   _eventListener;     /** Listen to HDPS events */
 
 private:
     std::vector<hdps::LinkedSelection> _linkedSelections;
