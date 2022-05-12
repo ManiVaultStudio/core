@@ -22,7 +22,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class SelectedIndicesAction : public WidgetAction, public hdps::EventListener
+class SelectedIndicesAction : public WidgetAction
 {
     Q_OBJECT
 
@@ -87,6 +87,7 @@ protected:
     ToggleAction                _manualUpdateAction;        /** Manual update action */
     QTimer                      _selectionChangedTimer;     /** Timer to control when selection changes are processed */
     std::vector<std::uint32_t>  _selectedIndices;           /** Selected indices */
+    hdps::EventListener         _eventListener;             /** Listen to HDPS events */
 
     static const std::int32_t MANUAL_UPDATE_THRESHOLD = 10000;
 };

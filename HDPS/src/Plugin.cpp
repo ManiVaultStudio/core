@@ -11,7 +11,6 @@ namespace plugin
 QMap<QString, std::int32_t> hdps::plugin::Plugin::noInstances = QMap<QString, std::int32_t>();
 
 Plugin::Plugin(const PluginFactory* factory) :
-    EventListener(),
     WidgetAction(nullptr),
     _factory(factory),
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),

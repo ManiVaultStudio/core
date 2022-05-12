@@ -22,7 +22,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class InfoAction : public GroupAction, public hdps::EventListener
+class InfoAction : public GroupAction
 {
     Q_OBJECT
 
@@ -40,7 +40,8 @@ public: // Action getters
     StringAction& getNumberOfClustersAction() { return _numberOfClustersAction; }
 
 protected:
-    Dataset<Clusters>   _clusters;                  /** Clusters dataset smart pointer */
-    StringAction        _numberOfClustersAction;    /** Number of points action */
-    ClustersAction      _clustersAction;            /** Clusters action */
+    Dataset<Clusters>       _clusters;                  /** Clusters dataset smart pointer */
+    StringAction            _numberOfClustersAction;    /** Number of points action */
+    ClustersAction          _clustersAction;            /** Clusters action */
+    hdps::EventListener     _eventListener;             /** Listen to HDPS events */
 };

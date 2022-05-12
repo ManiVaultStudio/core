@@ -2,6 +2,8 @@
 
 #include "DataType.h"
 
+#include <QSet>
+
 #include <unordered_map>
 #include <functional>
 
@@ -11,7 +13,7 @@ namespace hdps
 class CoreInterface;
 class DataEvent;
 
-class EventListener
+class EventListener final
 {
 public:
 
@@ -24,7 +26,10 @@ public:
     void registerDataEventByType(DataType dataType, DataEventHandler callback);
     void registerDataEvent(DataEventHandler callback);
 
-protected:
+public:
+
+    /** Destructor, unregisters the event listener from the core */
+    virtual ~EventListener();
 
     /**
      * Sets internal static event core, called once upon plugin creation
@@ -32,8 +37,32 @@ protected:
      */
     void setEventCore(CoreInterface* core);
 
-    /** Destructor, unregisters the event listener from the core */
-    ~EventListener();
+public: // Event filtering
+
+    /**
+     * Determines whether the listener should listen to a specific event type or not
+     * @param eventType Type of event
+     * @return Boolean indicating whether the listener should listen to a specific event type or not
+     */
+    bool isEventTypeSupported(std::uint32_t eventType) const;
+
+    /**
+     * Add supported event type
+     * @param eventType Type of event that should be supported
+     */
+    void addSupportedEventType(std::uint32_t eventType);
+
+    /**
+     * Remove supported event type
+     * @param eventType Type of event that should be not be supported anymore
+     */
+    void removeSupportedEventType(std::uint32_t eventType);
+
+    /**
+     * Add supported event types
+     * @param eventType Types of events that should be supported
+     */
+    void setSupportedEventTypes(const QSet<std::uint32_t>& eventTypes);
 
 private:
 
@@ -46,6 +75,7 @@ private:
     std::unordered_map<QString, DataEventHandler>   _dataEventHandlersById;         /** Data event handlers by dataset globally unique identifier */
     std::unordered_map<DataType, DataEventHandler>  _dataEventHandlersByType;       /** Data event handlers by data type */
     std::vector<DataEventHandler>                   _dataEventHandlers;             /** Non-specific Data event handlers */
+    QSet<std::uint32_t>                             _supportEventTypes;             /** Event types this listener should listen to (will listen to all if left empty) */
 
     /** Pointer to the the (event) core */
     static CoreInterface* _eventCore;

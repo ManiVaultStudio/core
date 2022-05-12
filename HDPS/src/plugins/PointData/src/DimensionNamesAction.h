@@ -20,7 +20,7 @@ using namespace hdps::gui;
  *
  * @author Thomas Kroes
  */
-class DimensionNamesAction : public hdps::gui::WidgetAction, public hdps::EventListener
+class DimensionNamesAction : public hdps::gui::WidgetAction
 {
     Q_OBJECT
 
@@ -73,8 +73,9 @@ signals:
     void dimensionNamesChanged(const QStringList& dimensionNames);
 
 protected:
-    Dataset<Points>     _points;                /** Points dataset reference */
-    QStringList         _dimensionNames;        /** Dimension names */
-    TriggerAction       _updateAction;          /** Update action */
-    ToggleAction        _manualUpdateAction;    /** Manual update action */
+    Dataset<Points>         _points;                /** Points dataset reference */
+    QStringList             _dimensionNames;        /** Dimension names */
+    TriggerAction           _updateAction;          /** Update action */
+    ToggleAction            _manualUpdateAction;    /** Manual update action */
+    hdps::EventListener     _eventListener;         /** Listen to HDPS events */
 };

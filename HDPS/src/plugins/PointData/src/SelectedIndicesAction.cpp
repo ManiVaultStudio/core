@@ -12,7 +12,6 @@ using namespace hdps::gui;
 
 SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, Points& points) :
     WidgetAction(parent),
-    EventListener(),
     _core(core),
     _points(&points),
     _updateAction(this, "Update"),
@@ -21,12 +20,15 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
     _selectedIndices()
 {
     setText("Selected indices");
-    setEventCore(_core);
 
     _selectionChangedTimer.setSingleShot(true);
 
     // Register to points data events
-    registerDataEventByType(PointType, [this](hdps::DataEvent* dataEvent) {
+    _eventListener.setEventCore(Application::core());
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
+    _eventListener.registerDataEventByType(PointType, [this](hdps::DataEvent* dataEvent) {
         if (!_points.isValid())
             return;
 

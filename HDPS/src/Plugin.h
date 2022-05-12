@@ -22,7 +22,7 @@ namespace hdps
 namespace plugin
 {
 
-class Plugin : public EventListener, public hdps::gui::WidgetAction
+class Plugin : public hdps::gui::WidgetAction
 {
 public:
     Plugin(const PluginFactory* factory);
@@ -84,7 +84,7 @@ public:
     {
         this->_core = core;
 
-        setEventCore(core);
+        _eventListener.setEventCore(core);
     }
 
 public: // Properties
@@ -180,6 +180,7 @@ protected:
     const QString               _name;              /** Unique plugin name */
     const QString               _guiName;           /** Name in the GUI */
     QMap<QString, QVariant>     _properties;        /** Properties map */
+    EventListener               _eventListener;     /** TODO */
 
     /** Keeps track of how many instance have been created per plugin kind */
     static QMap<QString, std::int32_t> noInstances;

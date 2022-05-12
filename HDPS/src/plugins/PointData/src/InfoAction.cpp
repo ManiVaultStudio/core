@@ -9,7 +9,6 @@ using namespace hdps::util;
 
 InfoAction::InfoAction(QObject* parent, CoreInterface* core, Points& points) :
     GroupAction(parent, true),
-    EventListener(),
     _core(core),
     _points(&points),
     _numberOfPointsAction(this, "Number of points"),
@@ -20,7 +19,6 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, Points& points) :
     _dimensionNamesAction(this, core, points)
 {
     setText("Info");
-    setEventCore(_core);
 
     _numberOfPointsAction.setEnabled(false);
     _numberOfDimensionsAction.setEnabled(false);
@@ -46,7 +44,11 @@ InfoAction::InfoAction(QObject* parent, CoreInterface* core, Points& points) :
 
     connect(&_selectedIndicesAction, &SelectedIndicesAction::selectedIndicesChanged, this, updateActions);
 
-    registerDataEventByType(PointType, [this, updateActions](hdps::DataEvent* dataEvent) {
+    _eventListener.setEventCore(Application::core());
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
+    _eventListener.registerDataEventByType(PointType, [this, updateActions](hdps::DataEvent* dataEvent) {
         if (!_points.isValid())
             return;
 

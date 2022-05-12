@@ -26,6 +26,26 @@ EventListener::~EventListener()
         _eventCore->unregisterEventListener(this);
 }
 
+bool EventListener::isEventTypeSupported(std::uint32_t eventType) const
+{
+    return _supportEventTypes.contains(eventType);
+}
+
+void EventListener::addSupportedEventType(std::uint32_t eventType)
+{
+    _supportEventTypes << eventType;
+}
+
+void EventListener::removeSupportedEventType(std::uint32_t eventType)
+{
+    _supportEventTypes.remove(eventType);
+}
+
+void EventListener::setSupportedEventTypes(const QSet<std::uint32_t>& eventTypes)
+{
+    _supportEventTypes = eventTypes;
+}
+
 //void EventListener::registerDataEventByName(QString dataSetName, DataEventHandler callback)
 //{
 //    _dataEventHandlersByName[dataSetName] = callback;
@@ -43,6 +63,9 @@ void EventListener::registerDataEvent(DataEventHandler callback)
 
 void EventListener::onDataEvent(DataEvent* dataEvent)
 {
+    if (!isEventTypeSupported(static_cast<std::uint32_t>(dataEvent->getType())))
+        return;
+
     if (dataEvent->getType() == EventType::DataRemoved) {
 
         // Get the data remove event

@@ -81,7 +81,7 @@ private:
 // Cluster Set
 // =============================================================================
 
-class CLUSTERDATA_EXPORT Clusters : public DatasetImpl, public hdps::EventListener
+class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
 {
 public:
     Clusters(CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
@@ -213,6 +213,7 @@ public: // Serialization
 
     std::vector<unsigned int>       indices;
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
+    EventListener                   _eventListener;     /** Listen to HDPS events */
 };
 
 // =============================================================================

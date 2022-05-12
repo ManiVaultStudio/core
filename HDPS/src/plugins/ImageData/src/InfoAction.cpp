@@ -7,7 +7,6 @@ using namespace hdps::gui;
 
 InfoAction::InfoAction(QObject* parent, Images& images) :
     GroupAction(parent, true),
-    EventListener(),
     _images(&images),
     _typeAction(this, "Image collection type"),
     _numberOfImagesAction(this, "Number of images"),
@@ -16,7 +15,6 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
     _numberComponentsPerPixelAction(this, "Number of components per pixel")
 {
     setText("Info");
-    setEventCore(Application::core());
 
     _typeAction.setEnabled(false);
     _numberOfImagesAction.setEnabled(false);
@@ -43,7 +41,11 @@ InfoAction::InfoAction(QObject* parent, Images& images) :
         _numberComponentsPerPixelAction.setString(QString::number(_images->getNumberOfComponentsPerPixel()));
     };
 
-    registerDataEventByType(ImageType, [this, updateActions](hdps::DataEvent* dataEvent) {
+    _eventListener.setEventCore(Application::core());
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
+    _eventListener.registerDataEventByType(ImageType, [this, updateActions](hdps::DataEvent* dataEvent) {
         if (!_images.isValid())
             return;
 

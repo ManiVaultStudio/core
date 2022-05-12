@@ -21,7 +21,7 @@ template<typename> class Dataset;
  *
  * @author T. Kroes
  */
-class DatasetPrivate : public QObject, public EventListener
+class DatasetPrivate : public QObject
 {
     Q_OBJECT
 
@@ -44,6 +44,22 @@ protected:
      * @param other Object to assign from
      */
     DatasetPrivate& operator=(const DatasetPrivate& other) = delete;
+
+public:
+
+    ~DatasetPrivate() override = default;
+
+    /**
+     * This function is called when something has been connected to signal
+     * @param signal The signal to which a connection has been made
+     */
+    void connectNotify(const QMetaMethod& signal) override;
+
+    /**
+     * This function is called when something has been disconnected from signal
+     * @param signal The signal of which a connection has been broken
+     */
+    void disconnectNotify(const QMetaMethod& signal) override;
 
 public:
 
@@ -111,6 +127,7 @@ signals:
 protected:
     QString         _datasetGuid;       /** Globally unique dataset identifier */
     DatasetImpl*    _dataset;           /** Pointer to the dataset (if any) */
+    EventListener   _eventListener;     /** Listen to HDPS events */
 };
 
 }

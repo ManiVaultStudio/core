@@ -16,7 +16,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class InfoAction : public GroupAction, public hdps::EventListener
+class InfoAction : public GroupAction
 {
     Q_OBJECT
 
@@ -30,10 +30,11 @@ public:
     InfoAction(QObject* parent, Images& images);
 
 protected:
-    Dataset<Images>     _images;                            /** Points dataset reference */
-    StringAction        _typeAction;                        /** Image collection type action */
-    StringAction        _numberOfImagesAction;              /** Number of images action */
-    StringAction        _imageResolutionAction;             /** Image resolution action */
-    StringAction        _numberOfPixelsAction;              /** Number of pixels per image action */
-    StringAction        _numberComponentsPerPixelAction;    /** Number of components action */
+    Dataset<Images>         _images;                            /** Points dataset reference */
+    StringAction            _typeAction;                        /** Image collection type action */
+    StringAction            _numberOfImagesAction;              /** Number of images action */
+    StringAction            _imageResolutionAction;             /** Image resolution action */
+    StringAction            _numberOfPixelsAction;              /** Number of pixels per image action */
+    StringAction            _numberComponentsPerPixelAction;    /** Number of components action */
+    hdps::EventListener     _eventListener;                     /** Listen to HDPS events */
 };
