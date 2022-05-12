@@ -279,7 +279,6 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
 
 Points::Points(hdps::CoreInterface* core, QString dataName) :
     hdps::DatasetImpl(core, dataName),
-    EventListener(),
     _infoAction()
 {
 }

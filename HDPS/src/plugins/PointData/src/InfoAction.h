@@ -25,7 +25,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class InfoAction : public GroupAction, public hdps::EventListener
+class InfoAction : public GroupAction
 {
     Q_OBJECT
 
@@ -57,4 +57,5 @@ protected:
     StringAction            _numberOfSelectedPointsAction;      /** Number of selected points action */
     SelectedIndicesAction   _selectedIndicesAction;             /** Selected indices action */
     DimensionNamesAction    _dimensionNamesAction;              /** Dimension names action */
+    hdps::EventListener     _eventListener;                     /** Listen to HDPS events */
 };

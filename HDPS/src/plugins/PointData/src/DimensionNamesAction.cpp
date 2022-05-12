@@ -9,14 +9,12 @@ using namespace hdps;
 
 DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, Points& points) :
     WidgetAction(parent),
-    EventListener(),
     _points(&points),
     _dimensionNames(),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update")
 {
     setText("Dimension names");
-    setEventCore(core);
 
     _updateAction.setToolTip("Update the dimension names");
     _manualUpdateAction.setToolTip("Update the dimension names manually");
@@ -48,7 +46,10 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
         _updateAction.trigger();
     };
 
-    registerDataEventByType(PointType, [this, dataChanged](hdps::DataEvent* dataEvent) {
+    _eventListener.setEventCore(Application::core());
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
+    _eventListener.registerDataEventByType(PointType, [this, dataChanged](hdps::DataEvent* dataEvent) {
         if (!_points.isValid())
             return;
 

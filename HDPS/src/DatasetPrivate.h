@@ -127,7 +127,7 @@ signals:
 protected:
     QString         _datasetGuid;       /** Globally unique dataset identifier */
     DatasetImpl*    _dataset;           /** Pointer to the dataset (if any) */
-    EventListener   _eventListener;     /** TODO */
+    EventListener   _eventListener;     /** Listen to HDPS events */
 };
 
 }

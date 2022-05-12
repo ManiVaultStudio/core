@@ -13,7 +13,7 @@ namespace hdps
 class CoreInterface;
 class DataEvent;
 
-class EventListener
+class EventListener final
 {
 public:
 

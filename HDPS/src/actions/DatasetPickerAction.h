@@ -19,7 +19,7 @@ using namespace hdps::util;
  *
  * @author Thomas Kroes
  */
-class DatasetPickerAction : public OptionAction, public hdps::EventListener
+class DatasetPickerAction : public OptionAction
 {
 Q_OBJECT
 

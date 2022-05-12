@@ -516,7 +516,7 @@ private:
 // Point Set
 // =============================================================================
 
-class POINTDATA_EXPORT Points : public hdps::DatasetImpl, public hdps::EventListener
+class POINTDATA_EXPORT Points : public hdps::DatasetImpl
 {
 private:
     /* Private helper function for visitData. Helps to reduces duplicate
@@ -876,7 +876,7 @@ public:
     std::vector<unsigned int> indices;
 
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
-    EventListener                   _eventListener;     /** Listen to HDPS events */
+    hdps::EventListener             _eventListener;     /** Listen to HDPS events */
 
 private:
     std::vector<hdps::LinkedSelection> _linkedSelections;
