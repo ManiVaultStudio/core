@@ -494,6 +494,7 @@ source_group( Resources FILES ${UI_FILES})
 source_group( Resources FILES win/hdps.rc)
 source_group( Resources\\generated FILES ${UI_HEADERS})
 
+set(LINK_TYPE SHARED)
 if(APPLE)
     set(LINK_TYPE SHARED)
 endif(APPLE)
