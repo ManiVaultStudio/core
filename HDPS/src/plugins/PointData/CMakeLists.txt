@@ -84,7 +84,9 @@ add_library(${PROJECT} SHARED ${POINTS_SOURCES} ${ACTIONS_SOURCES})
 set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 17)
 
 target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16)
-
+if(UNIX)
+target_include_directories(${PROJECT} PRIVATE tbb)
+endif(UNIX)
 add_dependencies(${PROJECT} HDPS_Public)
 
 # Generate a header file that contains the EXPORT macro for this library.
@@ -106,6 +108,9 @@ set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRAR
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
+if(UNIX)
+target_link_libraries(${PROJECT} tbb)
+endif(UNIX)
 
 set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
 
