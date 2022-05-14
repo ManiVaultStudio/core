@@ -15,7 +15,7 @@
 #include <deque>
 #include <set>
 
-#ifndef __APPLE__
+#if !defined(Q_OS_MAC)
     #include <execution>
 #endif
 
