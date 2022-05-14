@@ -705,7 +705,7 @@ install(FILES
 
 # Install the HDPSPUBLIC components needed for the Plugin builds
 add_custom_command(
-    TARGET ${PROJECT}_Public
+    TARGET ${PROJECT}_Public POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
