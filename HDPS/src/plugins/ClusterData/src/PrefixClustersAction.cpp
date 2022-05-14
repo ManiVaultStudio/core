@@ -1,4 +1,5 @@
 #include "PrefixClustersAction.h"
+#include "ClusterData.h"
 #include "ClustersAction.h"
 #include "ClustersFilterModel.h"
 #include "ClustersActionWidget.h"
