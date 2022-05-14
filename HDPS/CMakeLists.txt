@@ -59,6 +59,9 @@ if (WIN32)
     find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL ZLib REQUIRED)
 elseif (APPLE)
     find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
+else()
+    find_package(ZLIB REQUIRED)
+    find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
 endif()
 
 # Normalize the incoming install path
