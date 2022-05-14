@@ -210,10 +210,10 @@ QVariantMap PointData::toVariantMap() const
     }
 
     return {
-        { "TypeIndex", typeIndex },
-        { "TypeName", typeSpecifierName },
-        { "Raw", rawData },
-        { "NumberOfElements", numberOfElements }
+        { "TypeIndex", QVariant::fromValue(typeIndex) },
+        { "TypeName", QVariant(typeSpecifierName) },
+        { "Raw", QVariant::fromValue(rawData) },
+        { "NumberOfElements", QVariant::fromValue(numberOfElements) }
     };
 }
 
