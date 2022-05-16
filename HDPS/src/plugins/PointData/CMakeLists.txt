@@ -108,9 +108,9 @@ set(HDPS_LINK_LIBRARY "${INSTALL_DIR}/$<CONFIGURATION>/lib/${CMAKE_SHARED_LIBRAR
 target_link_libraries(${PROJECT} Qt5::Widgets)
 target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
 target_link_libraries(${PROJECT} "${HDPS_LINK_LIBRARY}")
-if(UNIX)
+if(UNIX AND NOT APPLE)
 target_link_libraries(${PROJECT} tbb)
-endif(UNIX)
+endif()
 
 set_target_properties(${PROJECT} PROPERTIES PUBLIC_HEADER "${POINTS_HEADERS}")
 
