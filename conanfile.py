@@ -40,7 +40,7 @@ class HdpsCoreConan(ConanFile):
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
     requires = (
-        "qt/5.15.1@lkeb/stable",
+        "qt/5.15.2@lkeb/stable",
         "bzip2/1.0.8@conan/stable"
     )
 
