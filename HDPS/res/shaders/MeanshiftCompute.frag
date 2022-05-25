@@ -1,7 +1,7 @@
 #version 330 core
 
-#define EPSILON 0.002
-#define MAX_STEPS 1000
+#define EPSILON 0.001
+#define MAX_STEPS 10000
 
 uniform sampler2D gradientTexture;
 
@@ -15,15 +15,11 @@ void main()
 {
     vec2 texelSize = renderParams.zw;
     
-    vec3 t = texture(gradientTexture, pass_texCoord).xyz;
-    vec2 gradient = t.xy;
-    float density = t.z;
-    float threshold = EPSILON * renderParams.y;
-    
-    float len = length(gradient);
-    
-    if (density < threshold) {
-        fragColor = vec4(0, 0, 0, 1);
+    vec2 gradient = texture(gradientTexture, pass_texCoord).xy;
+
+    if( all(equal(gradient, vec2(0.0))) )
+    {
+        fragColor = vec4(0.0);
         return;
     }
     
@@ -32,14 +28,12 @@ void main()
     int count = 0;
     for (int i = 0; i < MAX_STEPS; i++)
     {
-        vec2 ngradient = texture(gradientTexture, pos).xy;
-        if (dot(ngradient, gradient) < 0) break;
-        gradient = ngradient;
+        gradient = texture(gradientTexture, pos).xy;
+
+        if (length(gradient) < EPSILON) break;
         
-        pos = pos + normalize(gradient) * texelSize;
-        
-        count = i;
+        pos = pos + normalize(gradient) * texelSize * renderParams.x;
     }
 
-    fragColor = vec4(pos, count / (MAX_STEPS-1), 1);
+    fragColor = vec4(pos, 1, 1);
 }

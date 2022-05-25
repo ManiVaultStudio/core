@@ -11,6 +11,16 @@
 namespace hdps
 {
 
+Matrix3f createProjectionMatrix(QRectF bounds)
+{
+    Matrix3f m;
+    m.setIdentity();
+    m[0] = 2 / (bounds.right() - bounds.left());
+    m[4] = 2 / (bounds.top() - bounds.bottom());
+    m[6] = -((bounds.right() + bounds.left()) / (bounds.right() - bounds.left()));
+    m[7] = -((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom()));
+    return m;
+}
 void MeanShift::init()
 {
     initializeOpenGLFunctions();
@@ -69,19 +79,20 @@ void MeanShift::cleanup()
 
 QRectF getDataBounds(const std::vector<Vector2f>& points)
 {
-    QRectF bounds;
-    bounds.setLeft(FLT_MAX);
-    bounds.setRight(-FLT_MAX);
-    bounds.setTop(-FLT_MAX);
-    bounds.setBottom(FLT_MAX);
-    float maxDimension = 0;
+    float maxDimension = -FLT_MAX;
     for (const Vector2f& point : points)
     {
-        bounds.setLeft(std::min(point.x, (float)bounds.left()));
-        bounds.setRight(std::max(point.x, (float)bounds.right()));
-        bounds.setBottom(std::min(point.y, (float)bounds.bottom()));
-        bounds.setTop(std::max(point.y, (float)bounds.top()));
+        maxDimension = std::max(std::abs(point.x), maxDimension);
+        maxDimension = std::max(std::abs(point.y), maxDimension);
     }
+
+    // setting a square to make sure that the gaussian is not squished
+    QRectF bounds;
+    bounds.setLeft(-maxDimension);
+    bounds.setRight(maxDimension);
+    bounds.setBottom(-maxDimension);
+    bounds.setTop(maxDimension);
+
     return bounds;
 }
 
@@ -123,7 +134,7 @@ void MeanShift::computeGradient()
     densityComputation.getDensityTexture().bind(0);
     _shaderGradientCompute.uniform1i("densityTexture", 0);
 
-    _shaderGradientCompute.uniform2f("renderParams", 1.0f / densityComputation.getMaxDensity(), 1.0f / 100000);
+    _shaderGradientCompute.uniform4f("renderParams", 1.0f / densityComputation.getMaxDensity(), 1.0f / 100000, 1.0f / RESOLUTION, 1.0f);
 
     drawFullscreenQuad();
 
@@ -136,16 +147,50 @@ void MeanShift::computeGradient()
     glReadBuffer(GL_COLOR_ATTACHMENT1);
     glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RGB, GL_FLOAT, gradientValues.data());
 
-    QImage pluto(RESOLUTION, RESOLUTION, QImage::Format::Format_ARGB32);
+    QImage gradients(RESOLUTION, RESOLUTION, QImage::Format::Format_RGB32);
+    float maxL = 0.0f;
     for (int j = 0; j < RESOLUTION; ++j)
     {
         for (int i = 0; i < RESOLUTION; ++i)
         {
             int idx = j * RESOLUTION + i;
-            pluto.setPixel(i, j, qRgb(gradientValues[idx * 3] * 255, gradientValues[idx * 3 + 1] * 255, gradientValues[idx * 3 + 2] * 255));
+
+            Vector2f p(gradientValues[idx * 3], gradientValues[idx * 3 + 1]);
+            float l = p.length();
+            
+            maxL = std::max(l, maxL);
         }
     }
-    pluto.save("gradient.png");
+
+    qDebug() << "Max gradient magnitude = " << maxL << "\n";
+
+    for (int j = 0; j < RESOLUTION; ++j)
+    {
+        for (int i = 0; i < RESOLUTION; ++i)
+        {
+            int idx = j * RESOLUTION + i;
+
+            Vector2f p(gradientValues[idx * 3], gradientValues[idx * 3 + 1]);
+            float l = p.length();
+            p = p / l;
+
+            // angle between (1,0) and p
+            float a = acos(p.x) / 3.14159265f * 0.5;
+
+            if (p.y < 0.0f)
+            {
+                a = 1.0f - a;
+            }
+            
+
+            QColor col;
+            col.setHsvF(a, l / maxL, 1.0);
+            
+            gradients.setPixelColor(i, RESOLUTION - j - 1, col);
+
+        }
+    }
+    gradients.save("gradient.png");
     qDebug() << "Saved gradients";
 #endif
 }
@@ -168,7 +213,7 @@ void MeanShift::computeMeanShift()
     _shaderMeanshiftCompute.uniform4f("renderParams", 0.25f, densityComputation.getMaxDensity(), 1.0f / RESOLUTION, 1.0f / RESOLUTION);
 
     drawFullscreenQuad();
-    qDebug() << "Drawing meanshift";
+//    qDebug() << "Drawing meanshift";
     _shaderMeanshiftCompute.release();
 
     _meanshiftPixels.resize(RESOLUTION * RESOLUTION);
@@ -177,29 +222,31 @@ void MeanShift::computeMeanShift()
     glReadPixels(0, 0, RESOLUTION, RESOLUTION, GL_RG, GL_FLOAT, _meanshiftPixels.data());
 
 #ifdef MEANSHIFT_IMAGE_DEBUG
-    QImage pluto(RESOLUTION, RESOLUTION, QImage::Format::Format_ARGB32);
+    QImage centers(RESOLUTION, RESOLUTION, QImage::Format::Format_RGB32);
     for (int j = 0; j < RESOLUTION; ++j)
     {
         for (int i = 0; i < RESOLUTION; ++i)
     	{
             int idx = j * RESOLUTION + i;
-    		pluto.setPixel(i, j, qRgb(_meanshiftPixels[idx].x * 255, _meanshiftPixels[idx].y * 255, 0));
+            centers.setPixel(i, RESOLUTION - j - 1, qRgb(_meanshiftPixels[idx].x * 255, _meanshiftPixels[idx].y * 255, 0));
     	}
     }
-    pluto.save("meanshift.png");
+    centers.save("meanshift_centers.png");
+    Matrix3f ortho = createProjectionMatrix(_bounds);
+    for (int i = 0; i < _points->size(); i++) {
+        // Calculate the coordinate of the pixel center on the texture
+        Vector2f p = (ortho * (*_points)[i]);
+
+        const Vector2f point = p * 0.5 + 0.5;
+        int x = (int)(point.x * (RESOLUTION - 1) + 0.5);
+        int y = (int)(point.y * (RESOLUTION - 1) + 0.5);
+
+        centers.setPixel(x, y, qRgb(255, 0, 0));
+    }
+
+    centers.save("meanshift_centers_points.png");
     qDebug() << "Saved meanshift";
 #endif
-}
-
-Matrix3f createProjectionMatrix(QRectF bounds)
-{
-    Matrix3f m;
-    m.setIdentity();
-    m[0] = 2 / (bounds.right() - bounds.left());
-    m[4] = 2 / (bounds.top() - bounds.bottom());
-    m[6] = -((bounds.right() + bounds.left()) / (bounds.right() - bounds.left()));
-    m[7] = -((bounds.top() + bounds.bottom()) / (bounds.top() - bounds.bottom()));
-    return m;
 }
 
 void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::vector<unsigned int>>& clusters)
@@ -217,7 +264,8 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
     // Stores centers of all clusters that are found in meanshift segmentation
     std::vector<Vector2f> clusterCenters;
 
-    float epsilon = (float) 0.05f;
+    // we take a distance of 2 pixels as maximum to assume points ended in the same peak
+    float epsilon = 2.0f/RESOLUTION;// 0.05f;
     // For every pixel in Mean Shift Map
     for (int i = 0; i < _meanshiftPixels.size(); i++) {
         // Set center to red and green component of pixel
@@ -257,9 +305,11 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
         }
     }
 
+#ifdef MEANSHIFT_IMAGE_DEBUG
     for (int i = 0; i < clusterCenters.size(); i++) {
         qDebug() << "Cluster center: " << clusterCenters[i].x << " " << clusterCenters[i].y;
     }
+#endif //MEANSHIFT_IMAGE_DEBUG
 
     // Create a vector with the same size as the number of clusters, and set all IDs to -1
     std::vector<int> activeIds(clusterCenters.size(), -1);
@@ -284,9 +334,9 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
         // If the clusterID is 0 or more and cluster is not active
         if (cId >= 0 && activeIds[cId] < 0) {
             // Get the cluster center
-            std::vector<Vector2f> center = { clusterCenters[cId] };
+            Vector2f center = clusterCenters[cId];
             // Store the cluster center as the position of the cluster
-            _clusterPositions.push_back(center[0]);
+            _clusterPositions.push_back(center);
 
             activeIds[cId] = runningIdx++;
         }
@@ -298,9 +348,26 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
         if (_clusterIdsOriginal[i] >= 0){ _clusterIdsOriginal[i] = activeIds[_clusterIdsOriginal[i]]; }
         _clusterIds[i] = _clusterIdsOriginal[i];
     }
+
+    // Check if clusters contain their own cluster center.
+    // If not it is likely that the center is just a variation of an exisiting cluster and those should be merged
+#pragma omp parallel for
+    for (int i = 0; i < _clusterIds.size(); i++) {
+
+        Vector2f currentCenter = _meanshiftPixels[i];
+        int x = (int)(currentCenter.x * (RESOLUTION - 1) + 0.5);
+        int y = (int)(currentCenter.y * (RESOLUTION - 1) + 0.5);
+        int centerIdx = (x + y * RESOLUTION);
+
+        if (_clusterIds[i] != _clusterIds[centerIdx] && _clusterIds[i] >= 0 && _clusterIds[centerIdx] >= 0)
+        {
+            //qDebug() << "Assigned from cluster " << _clusterIds[i] << " to " << _clusterIds[centerIdx] << "index: " << i << ", pos(" << currentCenter.x << ", " << currentCenter.y << ")";
+            _clusterIds[i] = _clusterIds[centerIdx];
+        }
+    }
     
     // Divide points into their corresponding clusters
-    qDebug() << "Matrix: " << ortho[0] << "," << ortho[1] << "," << ortho[2] << "," << ortho[3] << "," << ortho[4] << "," << ortho[5] << "," << ortho[6] << "," << ortho[7] << "," << ortho[8];
+    //qDebug() << "Matrix: " << ortho[0] << "," << ortho[1] << "," << ortho[2] << "," << ortho[3] << "," << ortho[4] << "," << ortho[5] << "," << ortho[6] << "," << ortho[7] << "," << ortho[8];
     clusters.resize(runningIdx);
     for (int i = 0; i < _points->size(); i++) {
         Vector2f p = (ortho * (*_points)[i]);
@@ -312,23 +379,34 @@ void MeanShift::cluster(const std::vector<Vector2f>& points, std::vector<std::ve
         int pixelIndex = (x + y * RESOLUTION);
         //_clusterIds[pixelIndex] = qRgb(255, 0, 0);
 
-        int cId = _clusterIdsOriginal[pixelIndex];
+        int cId = _clusterIds[pixelIndex];
         if (cId >= 0) { clusters[cId].push_back(i); }
     }
+
+    //qDebug() << "Final clusters size (including empty clusters): " << clusters.size();
+
+    for (int i = clusters.size() - 1; i >= 0; i--)
+    {
+        if (clusters[i].size() == 0)
+        {
+            clusters.erase(clusters.begin() + i);
+        }
+    }
+
     qDebug() << "Final clusters size: " << clusters.size();
 
 #ifdef MEANSHIFT_IMAGE_DEBUG
-    QImage pluto(RESOLUTION, RESOLUTION, QImage::Format::Format_ARGB32);
+    QImage clustersImg(RESOLUTION, RESOLUTION, QImage::Format::Format_RGB32);
     float scale = 255.0 / clusterCenters.size();
     for (int j = 0; j < RESOLUTION; ++j)
     {
         for (int i = 0; i < RESOLUTION; ++i)
         {
             int idx = j * RESOLUTION + i;
-            pluto.setPixel(i, j, qRgb(_clusterIds[idx] * scale, _clusterIds[idx] * scale, _clusterIds[idx] * scale));
+            clustersImg.setPixel(i, RESOLUTION - j - 1, qRgb(_clusterIds[idx] * scale, _clusterIds[idx] * scale, _clusterIds[idx] * scale));
         }
     }
-    pluto.save("meanshift_clusters.png");
+    clustersImg.save("meanshift_clusters.png");
     qDebug() << "Saved image of clusters";
 #endif
 }
