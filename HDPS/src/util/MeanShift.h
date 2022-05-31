@@ -31,7 +31,7 @@ public:
     Texture2D& getMeanShiftTexture();
 
 private:
-    const unsigned int RESOLUTION = 512;
+    const unsigned int RESOLUTION = 256;
 
     DensityComputation densityComputation;
 
