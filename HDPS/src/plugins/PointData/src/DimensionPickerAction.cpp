@@ -62,8 +62,10 @@ void DimensionPickerAction::setPointsDataset(const Dataset<Points>& points)
     _currentDimensionAction.setOptions(options);
 
     // And set current dimensions
-    if (getNumberOfDimensions() >= 1)
+    if (getNumberOfDimensions() >= 1) {
         setCurrentDimensionIndex(0);
+        setDefaultDimensionName(getCurrentDimensionName());
+    }
 }
 
 QStringList DimensionPickerAction::getDimensionNames() const
