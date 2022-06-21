@@ -399,60 +399,42 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
-    // Get reference to input dataset
-    auto dataset = getParent();
+    auto parent = getParent();
 
-    if (dataset->getDataType() == PointType) {
+    if (parent->getDataType() == PointType) {
+        auto sourcePoints = Dataset<Points>(parent->getSourceDataset<DatasetImpl>());
 
-        // Obtain reference to the points dataset
-        auto points = Dataset<Points>(dataset);
-
-        // Global indices into data
         std::vector<std::uint32_t> globalIndices;
 
-        // Get global indices from points
-        points->getGlobalIndices(globalIndices);
+        sourcePoints->getGlobalIndices(globalIndices);
 
-        if (points->isFull()) {
-
-            // Points dataset is full, so populate scalar data with elements
-            points->visitData([this, &points, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
-
-                // Populate scalar data vector with pixel data
+        if (sourcePoints->isFull()) {
+            sourcePoints->visitData([this, &sourcePoints, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
                 for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
-
-                    // Establish the target pixel index
                     const auto targetPixelIndex = globalIndices[localPointIndex];
-
-                    // And assign the scalar data
                     scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
                 }
             });
         }
         else {
-
-            // Get smart pointer to the full points dataset
-            auto fullPoints = points->getParent().get<Points>();
-
-            // And copy all points
-            fullPoints->visitData([this, &fullPoints, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
-                for (std::uint32_t pointIndex = 0; pointIndex < fullPoints->getNumPoints(); pointIndex++)
-                    scalarData[pointIndex] = pointData[pointIndex][dimensionIndex];
+            sourcePoints->visitData([this, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
+                for (std::uint32_t pointIndex = 0; pointIndex < pointData.size(); pointIndex++)
+                    scalarData[globalIndices[pointIndex]] = pointData[pointIndex][dimensionIndex];
             });
         }
     }
 
     // Generate scalars for clusters
-    if (dataset->getDataType() == ClusterType) {
+    if (parent->getDataType() == ClusterType) {
 
         // Obtain reference to the clusters dataset
-        auto clusters = Dataset<Clusters>(dataset);
+        auto clusters = Dataset<Clusters>(parent);
 
         // All masked by default
         //std::fill(scalarData.begin(), scalarData.end(), -1.0f);
 
         // Get clusters input points dataset
-        auto points = dataset->getParent()->getSourceDataset<Points>();
+        auto points = parent->getParent()->getSourceDataset<Points>();
 
         // Global indices into data
         std::vector<std::uint32_t> globalIndices;
