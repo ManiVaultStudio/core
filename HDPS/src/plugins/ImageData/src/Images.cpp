@@ -402,14 +402,14 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
     auto parent = getParent();
 
     if (parent->getDataType() == PointType) {
-        auto sourcePoints = Dataset<Points>(parent->getSourceDataset<DatasetImpl>());
+        auto points = Dataset<Points>(parent);
 
         std::vector<std::uint32_t> globalIndices;
 
-        sourcePoints->getGlobalIndices(globalIndices);
+        points->getGlobalIndices(globalIndices);
 
-        if (sourcePoints->isFull()) {
-            sourcePoints->visitData([this, &sourcePoints, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
+        if (points->isFull()) {
+            points->visitData([this, &points, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
                 for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
                     const auto targetPixelIndex = globalIndices[localPointIndex];
                     scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
@@ -417,7 +417,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
             });
         }
         else {
-            sourcePoints->visitData([this, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
+            points->visitData([this, dimensionIndex, &globalIndices, &scalarData](auto pointData) {
                 for (std::uint32_t pointIndex = 0; pointIndex < pointData.size(); pointIndex++)
                     scalarData[globalIndices[pointIndex]] = pointData[pointIndex][dimensionIndex];
             });
