@@ -21,9 +21,6 @@ LogoWidget::LogoWidget(QWidget* parent /*= nullptr*/) :
     _headerLabel.setPixmap(QPixmap(iconName).scaled(200, 200));
     _headerLabel.setAlignment(Qt::AlignCenter);
 
-    _layout.setMargin(36);
+    _layout.setContentsMargins(36, 36, 36, 36);
     _layout.addWidget(&_headerLabel);
-
-    // Change the background color
-    //ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }

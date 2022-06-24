@@ -15,7 +15,7 @@ ToolbarItemWidget::ToolbarItemWidget(QWidget* parent, GetWidgetFN getWidget, con
     _layout(),
     _collapsedWidget(this, nullptr)
 {
-    _layout.setMargin(0);
+    _layout.setContentsMargins(0, 0, 0, 0);
 
     setLayout(&_layout);
     setState(state);

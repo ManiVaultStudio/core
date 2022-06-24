@@ -225,7 +225,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     _treeWidget()
 {
     // Configure layout
-    _layout.setMargin(0);
+    _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setAlignment(Qt::AlignTop);
 
     // Apply layout to widget

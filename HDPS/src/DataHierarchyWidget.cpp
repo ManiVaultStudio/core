@@ -97,7 +97,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Create layout that will contain the toolbar and the tree view
     auto layout = new QVBoxLayout();
 
-    layout->setMargin(6);
+    layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(3);
 
     // Create tool bar layout
@@ -467,7 +467,7 @@ DataHierarchyWidget::NoDataOverlayWidget::NoDataOverlayWidget(QWidget* parent) :
 
     descriptionLabel->setAlignment(Qt::AlignCenter);
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->setAlignment(Qt::AlignCenter);
 

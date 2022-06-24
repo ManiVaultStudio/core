@@ -47,7 +47,7 @@ ColorMapSettingsAction::Widget::Widget(QWidget* parent, ColorMapSettingsAction* 
 {
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     switch (colorMapSettingsAction->getColorMapAction().getColorMapType())
     {
