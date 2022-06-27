@@ -311,7 +311,7 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
 
     QStyleOption styleOption;
 
-    styleOption.init(&_treeWidget);
+    styleOption.initFrom(&_treeWidget);
 
     auto palette = _treeWidget.palette();
 

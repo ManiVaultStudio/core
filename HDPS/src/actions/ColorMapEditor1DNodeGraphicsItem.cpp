@@ -90,7 +90,7 @@ void ColorMapEditor1DNodeGraphicsItem::paint(QPainter* painter, const QStyleOpti
 {
     QStyleOption styleOption;
 
-    styleOption.init(&_colorMapEditor1DWidget);
+    styleOption.initFrom(&_colorMapEditor1DWidget);
 
     if (_colorMapEditor1DWidget.isEnabled() && _hover) {
         QPen hoverPen;

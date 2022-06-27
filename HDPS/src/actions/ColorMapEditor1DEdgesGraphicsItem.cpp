@@ -66,7 +66,7 @@ void ColorMapEditor1DEdgesGraphicsItem::paint(QPainter* painter, const QStyleOpt
 
     QStyleOption styleOption;
 
-    styleOption.init(&_colorMapEditor1DWidget);
+    styleOption.initFrom(&_colorMapEditor1DWidget);
 
     QPen pen;
 

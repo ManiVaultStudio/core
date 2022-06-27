@@ -170,7 +170,7 @@ void ColorAction::PushButtonWidget::ToolButton::paintEvent(QPaintEvent* paintEve
 
     QStyleOption styleOption;
 
-    styleOption.init(this);
+    styleOption.initFrom(this);
 
     // Set inset margins
     const auto margin = 10;

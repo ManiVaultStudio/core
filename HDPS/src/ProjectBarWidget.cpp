@@ -63,7 +63,7 @@ void ProjectBarWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPale
     QStyleOption styleOption;
 
     // Initialize the style options from this widget
-    styleOption.init(widget);
+    styleOption.initFrom(widget);
 
     // Set the palette color for the background
     palette.setColor(QPalette::Window, styleOption.palette.color(QPalette::Normal, colorRole));

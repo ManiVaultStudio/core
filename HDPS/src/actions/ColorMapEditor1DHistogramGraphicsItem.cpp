@@ -83,7 +83,7 @@ void ColorMapEditor1DHistogramGraphicsItem::paint(QPainter* painter, const QStyl
 
     QStyleOption styleOption;
 
-    styleOption.init(&_colorMapEditor1DWidget);
+    styleOption.initFrom(&_colorMapEditor1DWidget);
 
     QPen pen;
 

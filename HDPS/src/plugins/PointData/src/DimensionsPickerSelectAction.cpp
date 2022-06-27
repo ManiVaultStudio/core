@@ -139,7 +139,7 @@ DimensionsPickerSelectAction::Widget::Widget(QWidget* parent, DimensionsPickerSe
         setPopupLayout(layout);
     }
     else {
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         setLayout(layout);
     }
 }

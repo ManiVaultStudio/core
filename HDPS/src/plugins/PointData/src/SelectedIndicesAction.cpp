@@ -130,7 +130,7 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
 
     auto selectedIndicesLayout = new QHBoxLayout();
 
-    selectedIndicesLayout->setMargin(0);
+    selectedIndicesLayout->setContentsMargins(0, 0, 0, 0);
     selectedIndicesLayout->addWidget(selectedIndicesListWidget);
 
     auto updateLayout = new QVBoxLayout();
