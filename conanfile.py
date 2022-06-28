@@ -97,7 +97,7 @@ class HdpsCoreConan(ConanFile):
     def _configure_cmake(self, build_type):
         # locate Qt root to allow find_package to work
         qtpath = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
-        qt_root = str(list(qtpath.glob("**/Qt5Config.cmake"))[0].parents[3])
+        qt_root = str(list(qtpath.glob("**/Qt6Config.cmake"))[0].parents[3])
         print("Qt root ", qt_root)
 
         cmake = CMake(self, build_type=build_type)
