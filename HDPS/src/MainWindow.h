@@ -38,40 +38,10 @@ class DataHierarchyWidget;
 class ActionsViewerWidget;
 class DataPropertiesWidget;
 
-class MainWindow : public QMainWindow, private Ui::MainWindow {
+class MainWindow : public QMainWindow, private Ui::MainWindow
+{
     Q_OBJECT
 
-public:
-
-    class RecentProjectLabel : public QLabel
-    {
-    public:
-        RecentProjectLabel(const QString& recentProjectFilePath, QWidget* parent = nullptr) :
-            QLabel(recentProjectFilePath, parent),
-            _recentProjectFilePath(recentProjectFilePath)
-        {
-        }
-
-    protected:
-
-        void mousePressEvent(QMouseEvent* mouseEvent)
-        {
-            Application::current()->loadProject(_recentProjectFilePath);
-        }
-
-        void enterEvent(QEvent* event)
-        {
-            setStyleSheet("QLabel { text-decoration: underline; }");
-        }
-
-        void leaveEvent(QEvent* event)
-        {
-            setStyleSheet("QLabel { text-decoration: none; }");
-        }
-
-    protected:
-        QString     _recentProjectFilePath;     /** Recent project file path */
-    };
 public:
     MainWindow(QWidget *parent = nullptr);
 
@@ -92,6 +62,12 @@ public:
     * unit tests that may need to call addData and requestData.
     */
     CoreInterface& getCore() { return *_core;  }
+    
+    /**
+     * Callback invoked when the window shows
+     * @param closeEvent Close event
+     */
+    void showEvent(QShowEvent* showEvent) override;
 
     /**
      * Callback invoked when the window closes
