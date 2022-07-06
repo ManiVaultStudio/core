@@ -77,11 +77,9 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
         setWindowTitle(currentProjectFilePath + (currentProjectFilePath.isEmpty() ? " HDPS" : " - HDPS"));
     });
 
-    // Setup menus
     setupFileMenu();
     setupViewMenu();
 
-    initializeDocking();
     restoreWindowGeometryFromSettings();
 
     Logger::Initialize();
@@ -108,6 +106,13 @@ QAction* MainWindow::addImportOption(const QString& actionName, const QIcon& ico
 QAction* MainWindow::addViewAction(const plugin::Type& type, const QString name, const QIcon& icon)
 {
     return menuVisualization->addAction(icon, name);
+}
+
+void MainWindow::showEvent(QShowEvent* showEvent)
+{
+    QMainWindow::showEvent(showEvent);
+
+    initializeDocking();
 }
 
 void MainWindow::closeEvent(QCloseEvent* closeEvent)
@@ -318,17 +323,26 @@ void MainWindow::initializeSettingsDockingArea()
 
     _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataPropertiesDockWidget, _settingsDockArea);
 
+    _settingsDockArea->setMinimumWidth(500);
+    _settingsDockArea->setMaximumWidth(1500);
+    _settingsDockArea->resize(QSize(500, 0));
+
     //_actionsViewerDockWidget->tabWidget()->setActiveTab(false);
     //_dataHierarchyDockWidget->tabWidget()->setActiveTab(true);
 
-    auto splitter = ads::internal::findParent<ads::CDockSplitter*>(_settingsDockArea);
+    // Get pointer to the settings splitter (splits between data hierarchy dock widget and data properties dock widget)
+    auto settingsSplitter = ads::internal::findParent<ads::CDockSplitter*>(_settingsDockArea);
 
-    if (splitter != nullptr) {
-        const auto height = splitter->height();
-        splitter->setSizes({ height * 1 / 3, height * 2 / 3 });
-    }
+    // By default, the data hierarchy dock widget occupies 2/3 of the available height and the data properties dock widget 1/3
+    if (settingsSplitter != nullptr)
+        settingsSplitter->setSizes({ height() * 1 / 3, height() * 2 / 3 });
 
-    _settingsDockArea->setFixedWidth(500);
+    // Get pointer to the main splitter (splits between view plugins and the settings dock area)
+    auto mainSplitter = ads::internal::findParent<ads::CDockSplitter*>(_centralDockArea);
+    
+    // By default, the central dock area occupies 4/5 of the width of the available width and the settings dock area 1/5
+    if (mainSplitter != nullptr)
+        mainSplitter->setSizes({ width() * 4 / 5, width() * 1 / 5 });
 }
 
 void MainWindow::initializeLoggingDockingArea()
@@ -515,7 +529,6 @@ void MainWindow::setupViewMenu()
 
 void MainWindow::populateRecentProjectsMenu()
 {
-    // Get recent projects
     const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
 
     // Disable recent projects menu when there are no recent projects
@@ -537,7 +550,7 @@ void MainWindow::populateRecentProjectsMenu()
         // Create recent project action
         auto recentProjectAction = new QAction(recentProjectFilePath);
 
-        // Set action icon tooltip
+        // Set action icon + tooltip
         recentProjectAction->setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
         recentProjectAction->setToolTip("Load " + recentProjectFilePath + "(last opened on " + recentProject.toMap()["DateTime"].toDate().toString() + ")");
 
