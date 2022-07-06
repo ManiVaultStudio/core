@@ -33,8 +33,6 @@ class HdpsCoreConan(ConanFile):
     license = (
         "MIT"  # Indicates license: use SPDX Identifiers https://spdx.org/licenses/
     )
-    # exports_sources = "README.md"
-    # exports = "*"
     short_paths = True
     generators = "CMakeDeps"
 
@@ -101,7 +99,9 @@ class HdpsCoreConan(ConanFile):
             del self.options.fPIC
 
     def generate(self):
-        print("In generate")
+        # This prevents overlap between the hdps/core (source folder)
+        # and the HDPS (build) folder. This happens in the Macos build
+        self.build_folder = self.build_folder + '/hdps-common'
         deps = CMakeDeps(self)
         deps.generate()
 
@@ -139,6 +139,7 @@ class HdpsCoreConan(ConanFile):
 
     def build(self):
         print("Build OS is : ", self.settings.os)
+        print(f"In build, build folder {self.build_folder}")
         # If the user has no preference in HDPS_INSTALL_DIR simply set the install dir
         if not os.environ.get("HDPS_INSTALL_DIR", None):
             os.environ["HDPS_INSTALL_DIR"] = os.path.join(self.build_folder, "install")
