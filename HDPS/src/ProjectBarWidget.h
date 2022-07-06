@@ -68,13 +68,13 @@ public:
          * Invoked when the mouse starts to hover over the widget
          * @param event Pointer to event
          */
-        void enterEvent(QEvent* event);
+        void enterEvent(QEnterEvent* event) override;
 
         /**
          * Invoked when the mouse leaves the widget
          * @param event Pointer to event
          */
-        void leaveEvent(QEvent* event);
+        void leaveEvent(QEvent* event) override;
 
         /**
          * Invoked when the mouse presses inside the widget

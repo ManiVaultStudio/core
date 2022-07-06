@@ -112,7 +112,7 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
     setAutoFillBackground(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setToolTip(tooltip);
-
+    
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     if (!icon.isNull()) {
@@ -140,7 +140,7 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-void ProjectBarWidget::ProjectActionWidget::enterEvent(QEvent* event)
+void ProjectBarWidget::ProjectActionWidget::enterEvent(QEnterEvent* event)
 {
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Dark);
