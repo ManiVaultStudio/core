@@ -27,6 +27,11 @@ class GroupAction : public WidgetAction
 
 public:
 
+    enum class LabelSizing {
+        Percentage,
+        Width
+    };
+
     /**
      * Group widget class for widget action group
      */
