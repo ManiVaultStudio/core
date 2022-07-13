@@ -225,7 +225,7 @@ GroupsAction::Widget::Widget(QWidget* parent, GroupsAction* groupsAction, const 
     _treeWidget()
 {
     // Configure layout
-    _layout.setMargin(0);
+    _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setAlignment(Qt::AlignTop);
 
     // Apply layout to widget
@@ -311,7 +311,7 @@ void GroupsAction::Widget::createTreeWidget(const std::int32_t& widgetFlags)
 
     QStyleOption styleOption;
 
-    styleOption.init(&_treeWidget);
+    styleOption.initFrom(&_treeWidget);
 
     auto palette = _treeWidget.palette();
 

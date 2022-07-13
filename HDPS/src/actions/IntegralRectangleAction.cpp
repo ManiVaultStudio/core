@@ -104,7 +104,7 @@ QWidget* IntegralRectangleAction::getWidget(QWidget* parent, const std::int32_t&
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::LineEdit)
         layout->addWidget(new LineEditWidget(parent, this), 1);

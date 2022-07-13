@@ -28,7 +28,7 @@ ColorMapSettings1DAction::Widget::Widget(QWidget* parent, ColorMapSettings1DActi
 
     auto layout = new QVBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(settingsAction.getHorizontalAxisAction().createWidget(this));
     layout->addWidget(settingsAction.getDiscreteAction().createWidget(this));

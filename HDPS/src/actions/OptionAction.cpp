@@ -472,7 +472,7 @@ OptionAction::ButtonsWidget::ButtonsWidget(QWidget* parent, OptionAction* option
             break;
     }
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     std::int32_t optionIndex = 0;
 
@@ -505,7 +505,7 @@ QWidget* OptionAction::getWidget(QWidget* parent, const std::int32_t& widgetFlag
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::ComboBox)
         layout->addWidget(new OptionAction::ComboBoxWidget(parent, this));

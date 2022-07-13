@@ -121,7 +121,7 @@ QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& w
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(3);
 
     if (widgetFlags & WidgetFlag::LineEdit)

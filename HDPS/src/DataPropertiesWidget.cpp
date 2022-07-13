@@ -22,7 +22,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     setAutoFillBackground(true);
     setLayout(&_layout);
 
-    _layout.setMargin(6);
+    _layout.setContentsMargins(6, 6, 6, 6);
     _layout.addWidget(_groupsAction.createWidget(parent));
 
     // Update the UI when the data hierarchy item selection changes

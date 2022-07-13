@@ -44,7 +44,7 @@ DimensionsPickerMiscellaneousAction::Widget::Widget(QWidget* parent, DimensionsP
         setPopupLayout(layout);
     }
     else {
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         setLayout(layout);
     }
 }

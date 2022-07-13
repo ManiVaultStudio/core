@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMakeDeps, CMake, CMakeToolchain
+from conans import tools
 import os
+import sys
 import pathlib
 from rules_support import CoreBranchInfo
 import subprocess
+import traceback
 
 
 class HdpsCoreConan(ConanFile):
@@ -29,10 +33,8 @@ class HdpsCoreConan(ConanFile):
     license = (
         "MIT"  # Indicates license: use SPDX Identifiers https://spdx.org/licenses/
     )
-    # exports_sources = "README.md"
-    # exports = "*"
     short_paths = True
-    generators = "cmake"
+    generators = "CMakeDeps"
 
     # Options may need to change depending on the packaged library
     settings = {"os": None, "build_type": None, "compiler": None, "arch": None}
@@ -43,7 +45,7 @@ class HdpsCoreConan(ConanFile):
     install_dir = None
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    requires = ("qt/5.15.2@lkeb/stable", "bzip2/1.0.8@")
+    requires = ("qt/6.3.1@lkeb/stable", "bzip2/1.0.8@", "zlib/1.2.8@")
 
     scm = {"type": "git", "subfolder": "hdps/core", "url": "auto", "revision": "auto"}
 
@@ -54,8 +56,10 @@ class HdpsCoreConan(ConanFile):
 
     # Remove runtime and use always default (MD/MDd)
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            del self.settings.compiler.runtime
+        pass
+        # Needed for toolchain
+        # if self.settings.compiler == "Visual Studio":
+        #    del self.settings.compiler.runtime
 
     def system_requirements(self):
         if tools.os_info.is_linux:
@@ -94,36 +98,61 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def _configure_cmake(self, build_type):
-        # locate Qt root to allow find_package to work
-        qtpath = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
-        qt_root = str(list(qtpath.glob("**/Qt5Config.cmake"))[0].parents[3])
-        print("Qt root ", qt_root)
+    def generate(self):
+        # This prevents overlap between the hdps/core (source folder)
+        # and the HDPS (build) folder. This happens in the Macos build
+        self.build_folder = self.build_folder + '/hdps-common'
+        deps = CMakeDeps(self)
+        deps.generate()
 
-        cmake = CMake(self, build_type=build_type)
+        generator = None
+        # TODO Generators can be moved to profiles
+        if self.settings.os == "Macos":
+            generator = "Xcode"
+        if self.settings.os == "Linux":
+            generator = "Ninja Multi-Config"
+        tc = CMakeToolchain(self, generator=generator)
         if self.settings.os == "Windows" and self.options.shared:
-            cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if self.settings.os == "Linux" or self.settings.os == "Macos":
-            cmake.definitions["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
-        # print("Source folder {}".format(self.source_folder))
-        cmake.definitions["CMAKE_PREFIX_PATH"] = qt_root
+            tc.variables["CMAKE_CXX_STANDARD_REQUIRED"] = "ON"
+        # Use the Qt provided .cmake files
+        qtpath = pathlib.Path(self.deps_cpp_info["qt"].rootpath)
+        qt_root = str(list(qtpath.glob("**/Qt6Config.cmake"))[0].parents[3].as_posix())
+        zlibpath = qtpath = pathlib.Path(self.deps_cpp_info["zlib"].rootpath).as_posix()
+        tc.variables["CMAKE_PREFIX_PATH"] = f"{qt_root};{zlibpath}"
+        if self.settings.os == "Linux":
+            tc.variables["CMAKE_CONFIGURATION_TYPES"] = "Debug;Release"
+        try:
+            tc.generate()
+        except KeyError as e:
+            print("Exception!", sys.exc_info()[0])
+            print(e)
+            traceback.print_exc()
+            raise e
+
+    def _configure_cmake(self):
+        cmake = CMake(self)
         cmake.verbose = True
-        cmake.configure(source_folder="hdps/core")  # needed for scm
+        cmake.configure(build_script_folder="hdps/core")
         return cmake
 
     def build(self):
         print("Build OS is : ", self.settings.os)
+        print(f"In build, build folder {self.build_folder}")
         # If the user has no preference in HDPS_INSTALL_DIR simply set the install dir
         if not os.environ.get("HDPS_INSTALL_DIR", None):
             os.environ["HDPS_INSTALL_DIR"] = os.path.join(self.build_folder, "install")
         print("HDPS_INSTALL_DIR: ", os.environ["HDPS_INSTALL_DIR"])
         self.install_dir = os.environ["HDPS_INSTALL_DIR"]
 
-        cmake_debug = self._configure_cmake("Debug")
-        cmake_debug.build()
+        cmake = self._configure_cmake()
+        cmake.build(build_type="Debug")
+        cmake.install(build_type="Debug")
 
-        cmake_release = self._configure_cmake("Release")
-        cmake_release.build()
+        # cmake_release = self._configure_cmake()
+        cmake.build(build_type="Release")
+        cmake.install(build_type="Release")
 
     def package(self):
         print("Packaging install dir: ", self.install_dir)

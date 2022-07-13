@@ -6,7 +6,7 @@ StartPageWidget::StartPageWidget(QWidget* parent /*= nullptr*/, const Mode& mode
     _projectBarWidget(this),
     _logoWidget(this)
 {
-    _layout.setMargin(0);
+    _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setSpacing(0);
 
     _layout.addWidget(&_projectBarWidget);

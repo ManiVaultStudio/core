@@ -253,7 +253,7 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     if (widgetFlags & WidgetFlag::SpinBox)
         layout->addWidget(new SpinBoxWidget(parent, this), 1);

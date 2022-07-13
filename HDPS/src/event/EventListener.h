@@ -6,6 +6,7 @@
 
 #include <unordered_map>
 #include <functional>
+#include <vector>
 
 namespace hdps
 {

@@ -68,7 +68,7 @@ ColorMapDiscreteAction::Widget::Widget(QWidget* parent, ColorMapDiscreteAction* 
     auto groupBox       = new QGroupBox();
     auto groupBoxLayout = new QGridLayout();
 
-    layout->setMargin(4);
+    layout->setContentsMargins(4, 4, 4, 4);
     layout->addWidget(groupBox);
 
     groupBox->setCheckable(true);

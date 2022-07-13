@@ -3,6 +3,7 @@
 #include <QSurfaceFormat>
 #include <QStyleFactory>
 #include <QProxyStyle>
+#include <QQuickWindow>
 
 #include <HdpsApplication.h>
 
@@ -39,15 +40,12 @@ int main(int argc, char *argv[])
     QSurfaceFormat::setDefaultFormat(defaultFormat);
 #endif
 
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+
     hdps::HdpsApplication hdpsApplication(argc, argv);
 
     hdpsApplication.setStyle(new NoFocusProxyStyle);
 
-    // Retina display support for Mac OS and X11:
-    // AA_UseHighDpiPixmaps attribute is off by default in Qt 5.1 but will most
-    // likely be on by default in a future release of Qt.
-    hdpsApplication.setAttribute(Qt::AA_UseHighDpiPixmaps);
-    
     QFile styleSheetFile(":/styles/default.qss");
 
     styleSheetFile.open(QFile::ReadOnly);

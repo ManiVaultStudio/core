@@ -39,7 +39,6 @@ QVariant ColorMapModel::data(const QModelIndex& index, int role /* = Qt::Display
         QPainter painter(&pixmap);
 
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.setRenderHint(QPainter::HighQualityAntialiasing);
         painter.setPen(QPen(QBrush(Qt::black), 1.0));
         painter.drawRect(QRect(QPoint(), size));
 

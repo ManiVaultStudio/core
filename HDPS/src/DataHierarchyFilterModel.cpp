@@ -11,5 +11,5 @@ DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/
 bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
 {
     QString key = sourceModel()->data(sourceModel()->index(row, 0, parent), filterRole()).toString();
-    return key.contains(filterRegExp());
+    return key.contains(filterRegularExpression());
 }

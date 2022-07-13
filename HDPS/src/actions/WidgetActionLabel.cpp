@@ -40,7 +40,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
     layout->setAlignment(Qt::AlignRight | Qt::AlignCenter);
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addStretch(1);
     layout->addWidget(&_nameLabel);
 

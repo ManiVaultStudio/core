@@ -13,7 +13,7 @@ WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, Widget
     _layout(),
     _toolButton()
 {
-    _layout.setMargin(0);
+    _layout.setContentsMargins(0, 0, 0, 0);
 
     _toolButton.setIcon(widgetAction->icon());
     _toolButton.setToolTip(widgetAction->toolTip());
