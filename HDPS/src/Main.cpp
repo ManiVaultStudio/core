@@ -3,6 +3,7 @@
 #include <QSurfaceFormat>
 #include <QStyleFactory>
 #include <QProxyStyle>
+#include <QQuickWindow>
 
 #include <HdpsApplication.h>
 
@@ -38,6 +39,8 @@ int main(int argc, char *argv[])
     defaultFormat.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     QSurfaceFormat::setDefaultFormat(defaultFormat);
 #endif
+
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 
     hdps::HdpsApplication hdpsApplication(argc, argv);
 
