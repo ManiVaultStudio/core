@@ -157,7 +157,7 @@ DimensionPickerAction::Widget::Widget(QWidget* parent, DimensionPickerAction* di
 {
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     // Create widgets
     auto comboBoxWidget = dimensionPickerAction->getCurrentDimensionAction().createWidget(this, OptionAction::ComboBox);

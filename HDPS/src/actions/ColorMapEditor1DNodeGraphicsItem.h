@@ -21,6 +21,7 @@ class ColorMapEditor1DNode;
 class ColorMapEditor1DNodeGraphicsItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT
+    Q_INTERFACES(QGraphicsItem)
 
 public:
 

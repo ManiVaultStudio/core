@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.17)
 
-set(PROJECT "HDPS")
+set(PROJECT "hdps-common")
 project(${PROJECT})
+
+# These three targets defined in this CMakeLists.txt
+set(HDPS_EXE HDPS)  # The HDPS executable
+set(HDPS_PUBLIC_LIB HDPS_Public) # A public shared library used by plugin builders and the HDPS executable
+set(HDPS_PRIVATE_LIB HDPS_Private) # A private shared library contain code for the HDPS executable
 
 if(NOT DEFINED ENV{HDPS_INSTALL_DIR})
     message(FATAL_ERROR, "$ENV{HDPS_INSTALL_DIR}
@@ -55,14 +60,7 @@ endif(MSVC)
 
 add_definitions(-DQT_MESSAGELOGCONTEXT)
 
-if (WIN32)
-    find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL ZLib REQUIRED)
-elseif (APPLE)
-    find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
-else()
-    find_package(ZLIB REQUIRED)
-    find_package(Qt5 5.15 COMPONENTS Widgets WebEngineWidgets OpenGL REQUIRED)
-endif()
+find_package(Qt6 6.3 COMPONENTS Widgets WebEngineWidgets OpenGL Core REQUIRED)
 
 # Normalize the incoming install path
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
@@ -477,8 +475,10 @@ set(UI_FILES
     ui/MainWindow.ui
 )
 
-QT5_WRAP_UI(UI_HEADERS ${UI_FILES})
-QT5_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
+
+QT6_WRAP_UI(UI_HEADERS ${UI_FILES})
+QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
 source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
@@ -502,43 +502,41 @@ if(MSVC)
     set(LINK_TYPE STATIC)
 endif(MSVC)
 
-add_library(${PROJECT}_Public ${LINK_TYPE}
+add_library(${HDPS_PUBLIC_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PUBLIC_SOURCES}
 )
 
-set_property(TARGET ${PROJECT}_Public PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_PUBLIC_LIB} PROPERTY CXX_STANDARD 14)
 
-target_include_directories(${PROJECT}_Public PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_include_directories(${PROJECT}_Public PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/zlib)
+target_include_directories(${HDPS_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(${PROJECT}_Public Qt5::Widgets)
-target_link_libraries(${PROJECT}_Public Qt5::WebEngineWidgets)
+target_link_libraries(${HDPS_PUBLIC_LIB} Qt6::Widgets)
+target_link_libraries(${HDPS_PUBLIC_LIB} Qt6::WebEngineWidgets)
 
-add_library(${PROJECT}_Private ${LINK_TYPE}
+add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
 	${RESOURCE_FILES}
 )
 
-set_property(TARGET ${PROJECT}_Private PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 14)
 
-target_link_libraries(${PROJECT}_Private Qt5::Widgets)
-target_link_libraries(${PROJECT}_Private Qt5::WebEngineWidgets)
-target_link_libraries(${PROJECT}_Private qtadvanceddocking)
-target_link_libraries(${PROJECT}_Private QuaZip)
-target_link_libraries(${PROJECT}_Private "$<TARGET_FILE:${PROJECT}_Public>")
+target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::Widgets)
+target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::WebEngineWidgets)
+target_link_libraries(${HDPS_PRIVATE_LIB} qtadvanceddocking)
+target_link_libraries(${HDPS_PRIVATE_LIB} QuaZip)
+target_link_libraries(${HDPS_PRIVATE_LIB} "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
 
-target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
-target_include_directories(${PROJECT}_Private PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_include_directories(${PROJECT}_Private PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/QuaZip-Qt5-1.2)
-target_include_directories(${PROJECT}_Private PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/zlib)
+target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/external/advanced_docking/src)
+target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(${HDPS_PRIVATE_LIB} PRIVATE ${INSTALL_DIR}/$<CONFIGURATION>/include/QuaZip-Qt6-1.2)
 
-add_dependencies(${PROJECT}_Private ${PROJECT}_Public)
-add_dependencies(${PROJECT}_Private QuaZip)
-#add_dependencies(${PROJECT}_Private QArchive)
+add_dependencies(${HDPS_PRIVATE_LIB} ${HDPS_PUBLIC_LIB})
+add_dependencies(${HDPS_PRIVATE_LIB} QuaZip)
+#add_dependencies(${HDPS_PRIVATE_LIB} QArchive)
 
-add_executable(${PROJECT} MACOSX_BUNDLE WIN32
+add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     src/.editorconfig
     ${MAIN_SOURCES}
     ${UI_HEADERS}
@@ -546,28 +544,28 @@ add_executable(${PROJECT} MACOSX_BUNDLE WIN32
     ${RESOURCE_FILES}
 )
 
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_EXE} PROPERTY CXX_STANDARD 14)
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
-    set_target_properties( ${PROJECT} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
+    set_target_properties( ${HDPS_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
 endif()
 
-target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(${HDPS_EXE} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-target_link_libraries(${PROJECT} Qt5::Widgets)
-target_link_libraries(${PROJECT} Qt5::WebEngineWidgets)
-target_link_libraries(${PROJECT} qtadvanceddocking)
-target_link_libraries(${PROJECT} QuaZip)
+target_link_libraries(${HDPS_EXE} Qt6::Widgets)
+target_link_libraries(${HDPS_EXE} Qt6::WebEngineWidgets)
+target_link_libraries(${HDPS_EXE} qtadvanceddocking)
+target_link_libraries(${HDPS_EXE} QuaZip)
 
-target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Public>")
-target_link_libraries(${PROJECT} "$<TARGET_FILE:${PROJECT}_Private>")
+target_link_libraries(${HDPS_EXE} "$<TARGET_FILE:${HDPS_PUBLIC_LIB}>")
+target_link_libraries(${HDPS_EXE} "$<TARGET_FILE:${HDPS_PRIVATE_LIB}>")
 
-add_dependencies(${PROJECT} ${PROJECT}_Public)
-add_dependencies(${PROJECT} ${PROJECT}_Private)
-add_dependencies(${PROJECT} QuaZip)
+add_dependencies(${HDPS_EXE} ${HDPS_PUBLIC_LIB})
+add_dependencies(${HDPS_EXE} ${HDPS_PRIVATE_LIB})
+add_dependencies(${HDPS_EXE} QuaZip)
 
 if(MSVC)
-    set_target_properties(${PROJECT} PROPERTIES
+    set_target_properties(${HDPS_EXE} PROPERTIES
         WIN32_EXECUTABLE YES
         LINK_FLAGS "/ENTRY:mainCRTStartup"
         LINK_FLAGS "/SUBSYSTEM:CONSOLE"
@@ -576,12 +574,12 @@ endif(MSVC)
 
 #executable & linklib
 
-target_include_directories(${PROJECT}_Public PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/QArchive")
+target_include_directories(${HDPS_PUBLIC_LIB} PRIVATE "${INSTALL_DIR}/$<CONFIGURATION>/include/QArchive")
 
 if(APPLE)
     set(BUNDLE_DIR "${INSTALL_DIR}/$<CONFIGURATION>/${MACOSX_BUNDLE_BUNDLE_NAME}.app")
     set(WEBENGINEINSTALL_CMD "${CMAKE_CURRENT_SOURCE_DIR}/macos_webengineinstall.sh")
-    install(TARGETS ${PROJECT}
+    install(TARGETS ${HDPS_EXE}
         RUNTIME DESTINATION bin COMPONENT MACOS_BUNDLE
         BUNDLE DESTINATION . COMPONENT MACOS_BUNDLE
         # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
@@ -596,11 +594,11 @@ if(APPLE)
                     \"${INSTALL_DIR}/$<CONFIGURATION>/lib/libqtadvanceddocking.3.6.3.dylib\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
             COMMAND ${CMAKE_COMMAND} -E copy 
-                    \"$<TARGET_FILE:${PROJECT}_Public>\" 
+                    \"$<TARGET_FILE:${HDPS_PUBLIC_LIB}\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
                     
             COMMAND ${CMAKE_COMMAND} -E copy 
-                    \"$<TARGET_FILE:${PROJECT}_Private>\" 
+                    \"$<TARGET_FILE:${HDPS_PRIVATE_LIB}>\" 
                     \"${BUNDLE_DIR}/Contents/Frameworks/\"
         )
         
@@ -611,12 +609,12 @@ if(APPLE)
         COMPONENT MACOS_BUNDLE
     )
     install(CODE "execute_process(
-            COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt5_DIR} ${BUNDLE_DIR}
+            COMMAND bash ${WEBENGINEINSTALL_CMD} ${Qt6_DIR} ${BUNDLE_DIR}
         )"
         COMPONENT MACOS_BUNDLE
     )
 else()
-    install(TARGETS ${PROJECT}
+    install(TARGETS ${HDPS_EXE}
         RUNTIME DESTINATION . COMPONENT HDPS_EXECUTABLE
         # ARCHIVE DESTINATION lib COMPONENT HDPS_LINKLIB
     )
@@ -635,7 +633,7 @@ install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
     COMPONENT HDPSPUBLIC_HEADERS
 )
 
-install(TARGETS ${PROJECT}_Public
+install(TARGETS ${HDPS_PUBLIC_LIB}
     EXPORT HdpsPublicExport
     ARCHIVE DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
     LIBRARY DESTINATION lib COMPONENT HDPSPUBLIC_LINKLIB
@@ -654,7 +652,7 @@ install(EXPORT HdpsPublicExport
         COMPONENT HDPSPUBLIC_TARGET
 )
 
-target_include_directories(${PROJECT}_Public PUBLIC
+target_include_directories(${HDPS_PUBLIC_LIB} PUBLIC
     $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
@@ -705,7 +703,7 @@ install(FILES
 
 # Install the HDPSPUBLIC components needed for the Plugin builds
 add_custom_command(
-    TARGET ${PROJECT}_Public POST_BUILD
+    TARGET ${HDPS_PUBLIC_LIB} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
@@ -734,7 +732,7 @@ add_custom_command(
 
 # Install the HDPS executable and lib
 add_custom_command(
-    TARGET ${PROJECT} POST_BUILD
+    TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}"
         --install ${CMAKE_BINARY_DIR}
         --config $<CONFIGURATION>
@@ -772,11 +770,11 @@ add_subdirectory(external/advanced_docking)
 
 # File compression LIBRARY
 if (WIN32)
-    message(status, "********Using QTZLIB for QUAZIP *********")
-    set(QUAZIP_USE_QT_ZLIB ON)  # Use the Qt supplied zlib
+    #message(status, "********Using QTZLIB for QUAZIP *********")
+    #set(QUAZIP_USE_QT_ZLIB ON)  # Use the Qt supplied zlib
 elseif (APPLE)
     message(status, "********Using brew zlib for QUAZIP *********")
-    set(QUAZIP_USE_QT_ZLIB OFF)
+    #set(QUAZIP_USE_QT_ZLIB OFF)
     find_program(BREW_BIN brew)
     execute_process(COMMAND ${BREW_BIN} install pkg-config) 
 else ()
@@ -785,9 +783,11 @@ else ()
     zlib needed for linux build.
     ******************************" )
 endif()
+
+set(QUAZIP_QT_MAJOR_VERSION 6)
 add_subdirectory(external/quazip)
 
-add_custom_command(TARGET ${PROJECT} POST_BUILD
+add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
     COMMAND "${CMAKE_COMMAND}" 
         --install ${CMAKE_CURRENT_BINARY_DIR}/external/advanced_docking
         --config $<CONFIGURATION> 
@@ -801,7 +801,7 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 if(WIN32)
     # Note! the quazip lib is named differently in Debug & Release
     # simply copy the bin directory contents to let HDPS.exe run.
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
+    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${INSTALL_DIR}/$<CONFIGURATION>/bin/
             ${INSTALL_DIR}/$<CONFIGURATION>/
@@ -809,7 +809,7 @@ if(WIN32)
 endif()
 
 if(APPLE)
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
+    add_custom_command(TARGET ${HDPS_EXE} POST_BUILD
         COMMAND "${CMAKE_COMMAND}" 
             --install ${CMAKE_BINARY_DIR}
             --config $<CONFIGURATION> 
@@ -819,5 +819,5 @@ if(APPLE)
 endif()
 
 # Automatically set the debug environment (command + working directory) for MSVC in debug mode
-set_property(TARGET ${PROJECT} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
-set_property(TARGET ${PROJECT} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/HDPS.exe,${INSTALL_DIR}/release/HDPS.exe>)
+set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY  $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug,${INSTALL_DIR}/release>)
+set_property(TARGET ${HDPS_EXE} PROPERTY VS_DEBUGGER_COMMAND $<IF:$<CONFIG:DEBUG>,${INSTALL_DIR}/debug/${HDPS_EXE}.exe,${INSTALL_DIR}/release/${HDPS_EXE}.exe>)

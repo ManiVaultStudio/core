@@ -205,7 +205,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
 
     auto contentsMargin = _layout->contentsMargins();
 
-    _layout->setMargin(10);
+    layout->setContentsMargins(10, 10, 10, 10);
     
     setLayout(_layout);
 

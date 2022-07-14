@@ -328,7 +328,7 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
 
     QStyleOption styleOption;
 
-    styleOption.init(this);
+    styleOption.initFrom(this);
 
     // Set inset margins
     const auto margin = 8;
@@ -393,7 +393,7 @@ QWidget* ColorMapAction::getWidget(QWidget* parent, const std::int32_t& widgetFl
     auto widget = new WidgetActionWidget(parent, this);
     auto layout = new QHBoxLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(3);
 
     auto comboBoxWidget = new ComboBoxWidget(parent, &_currentColorMapAction, this);

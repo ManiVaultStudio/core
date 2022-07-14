@@ -14,7 +14,6 @@
 
 #include "util/FileUtil.h"
 
-#include <QDesktopWidget>
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QScreen>

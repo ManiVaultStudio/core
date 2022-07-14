@@ -89,7 +89,7 @@ DecimalRangeAction::DecimalRangeWidget::DecimalRangeWidget(QWidget* parent, Deci
     else {
         auto layout = new QHBoxLayout();
 
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
 
         layout->addWidget(decimalRangeAction->getRangeMinAction().createWidget(this, DecimalAction::SpinBox));
         layout->addWidget(decimalRangeAction->getRangeMaxAction().createWidget(this, DecimalAction::SpinBox));
