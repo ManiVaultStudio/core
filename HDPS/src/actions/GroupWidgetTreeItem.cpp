@@ -31,7 +31,7 @@ GroupWidgetTreeItem::GroupWidgetTreeItem(GroupSectionTreeItem* groupSectionTreeI
 
     _groupWidget->setFixedWidth(treeWidget()->width());
 
-    _containerLayout->setMargin(0);
+    _containerLayout->setContentsMargins(0, 0, 0, 0);
     _containerLayout->setSizeConstraint(QLayout::SetFixedSize);
     _containerLayout->addWidget(_groupWidget);
 

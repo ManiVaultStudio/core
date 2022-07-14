@@ -166,7 +166,7 @@ void ColorMapEditor1DWidget::drawBackground(QPainter* painter,const QRectF& rect
 {
     QStyleOption styleOption;
 
-    styleOption.init(this);
+    styleOption.initFrom(this);
 
     painter->fillRect(rect, isEnabled() ? QColor(244, 244, 244) : styleOption.palette.color(QPalette::Normal, QPalette::Window));
 

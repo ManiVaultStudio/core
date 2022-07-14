@@ -24,7 +24,7 @@ ProjectBarWidget::ProjectBarWidget(QWidget* parent /*= nullptr*/) :
     setLayout(&_layout);
     setMinimumWidth(500);
 
-    _layout.setMargin(0);
+    _layout.setContentsMargins(0, 0, 0, 0);
     _layout.setSpacing(0);
 
     _layout.addStretch(1);
@@ -63,7 +63,7 @@ void ProjectBarWidget::setWidgetBackgroundColorRole(QWidget* widget, const QPale
     QStyleOption styleOption;
 
     // Initialize the style options from this widget
-    styleOption.init(widget);
+    styleOption.initFrom(widget);
 
     // Set the palette color for the background
     palette.setColor(QPalette::Window, styleOption.palette.color(QPalette::Normal, colorRole));
@@ -93,7 +93,7 @@ ProjectBarWidget::HeaderWidget::HeaderWidget(QWidget* parent /*= nullptr*/) :
     _headerLabel.setPixmap(QPixmap(iconName).scaled(256, 256));
     _headerLabel.setAlignment(Qt::AlignCenter);
 
-    _layout.setMargin(50);
+    _layout.setContentsMargins(50, 50, 50, 50);
     _layout.addWidget(&_headerLabel);
 
     // Change the background color
@@ -112,7 +112,7 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
     setAutoFillBackground(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setToolTip(tooltip);
-
+    
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     if (!icon.isNull()) {
@@ -140,7 +140,7 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 }
 
-void ProjectBarWidget::ProjectActionWidget::enterEvent(QEvent* event)
+void ProjectBarWidget::ProjectActionWidget::enterEvent(QEnterEvent* event)
 {
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Dark);
@@ -172,7 +172,7 @@ ProjectBarWidget::ProjectsWidget::ProjectsWidget(QWidget* parent /*= nullptr*/) 
     // Change the background color
     ProjectBarWidget::setWidgetBackgroundColorRole(this, QPalette::Midlight);
 
-    _layout.setMargin(35);
+    _layout.setContentsMargins(35, 35, 35, 35);
     //_layout.setSpacing(30);
 
     _leftColumnLayout.setAlignment(Qt::AlignTop);
@@ -274,7 +274,7 @@ void ProjectBarWidget::RecentProjectsWidget::createContainerWidget()
     ProjectBarWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
 
     _containerWidget.setAutoFillBackground(true);
-    _containerLayout.setMargin(0);
+    _containerLayout.setContentsMargins(0, 0, 0, 0);
 
     // Get recent projects
     const auto recentProjects = Application::current()->getSetting("Projects/Recent", QVariantList()).toList();
@@ -322,7 +322,7 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
     ProjectBarWidget::setWidgetBackgroundColorRole(&_containerWidget, QPalette::Midlight);
 
     _containerWidget.setAutoFillBackground(true);
-    _containerLayout.setMargin(0);
+    _containerLayout.setContentsMargins(0, 0, 0, 0);
 
     // Get loader plugin kinds from the core
     const auto loaderPluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER);

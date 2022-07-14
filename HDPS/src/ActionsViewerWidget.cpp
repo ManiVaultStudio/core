@@ -61,7 +61,7 @@ ActionsViewerWidget::ActionsViewerWidget(QWidget* parent) :
 
     auto layout = new QVBoxLayout();
 
-    layout->setMargin(6);
+    layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(3);
 
     auto toolbarLayout = new QHBoxLayout();
@@ -126,7 +126,7 @@ ActionsViewerWidget::OverlayWidget::OverlayWidget(QWidget* parent) :
 
     _descriptionLabel.setAlignment(Qt::AlignCenter);
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->setAlignment(Qt::AlignCenter);
 

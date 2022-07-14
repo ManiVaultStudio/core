@@ -83,7 +83,7 @@ TriggersAction::Widget::Widget(QWidget* parent, TriggersAction* triggersAction, 
 {
     // Apply layout to widget
     const auto applyLayout = [this](QLayout* layout) {
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         setLayout(layout);
     };
 

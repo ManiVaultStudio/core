@@ -124,7 +124,7 @@ ColorMapEditor1DNodeAction::Widget::Widget(QWidget* parent, ColorMapEditor1DNode
 {
     auto layout = new QGridLayout();
 
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(1, 3);
 
