@@ -12,6 +12,7 @@
 #include <QLineEdit>
 #include <QTreeView>
 #include <QHeaderView>
+#include <QTimer>
 
 namespace hdps {
 
@@ -41,16 +42,18 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     layout->setAlignment(Qt::AlignRight | Qt::AlignCenter);
 
     layout->setMargin(0);
-    layout->addStretch(1);
+    //layout->addStretch(1);
     layout->addWidget(&_nameLabel);
+    //layout->setSizeConstraint(QLayout::SetFixedSize);
 
     setLayout(layout);
 
     _nameLabel.setAlignment(Qt::AlignRight);
+    //_nameLabel.setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    //_nameLabel.setMinimumWidth(1);
 
     const auto update = [this, widgetAction]() -> void {
         _nameLabel.setEnabled(widgetAction->isEnabled());
-        _nameLabel.setText(QString("%1%2 ").arg(widgetAction->text(), (_flags & ColonAfterName) ? ":" : ""));
         _nameLabel.setToolTip(widgetAction->toolTip());
         _nameLabel.setVisible(widgetAction->isVisible());
     };
@@ -151,6 +154,26 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
     }
 
     return QWidget::eventFilter(target, event);
+}
+
+void WidgetActionLabel::resizeEvent(QResizeEvent* resizeEvent)
+{
+    QWidget::resizeEvent(resizeEvent);
+    
+    _nameLabel.setText("");
+
+    QTimer::singleShot(25, this, [this]() {
+        elide();
+     });
+}
+
+void WidgetActionLabel::elide()
+{
+    QFontMetrics metrics(font());
+
+    const auto labelText = QString("%1%2 ").arg(_widgetAction->text(), (_flags & ColonAfterName) ? ":" : "");
+
+    _nameLabel.setText(metrics.elidedText(labelText, Qt::ElideMiddle, width()));
 }
 
 void WidgetActionLabel::updatePublishAction()
