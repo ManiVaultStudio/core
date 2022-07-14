@@ -48,6 +48,12 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    /**
+     * Invoked when the widget is resized
+     * @param resizeEvent Pointer to the resize event
+     */
+    void resizeEvent(QResizeEvent* resizeEvent) override;
+
 private:
 
     /** Update the state of the publish action */
@@ -58,6 +64,8 @@ private:
 
     /** Publish _widgetAction */
     void publishAction();
+
+    void elide();
 
 protected:
     std::uint32_t       _flags;                 /** Configuration flags */

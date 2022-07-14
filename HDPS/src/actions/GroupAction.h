@@ -27,9 +27,11 @@ class GroupAction : public WidgetAction
 
 public:
 
-    enum class LabelSizing {
-        Percentage,
-        Width
+    /** Label sizing types */
+    enum class LabelSizingType {
+        Auto,           /** The widest label in the group action determines the width for the other labels */
+        Percentage,     /** The label width is a percentage of the available width */
+        Fixed           /** The label width is fixed width in pixels */
     };
 
     /**
@@ -100,6 +102,42 @@ public:
      */
     void setReadOnly(const bool& readOnly);
 
+    /** Gets whether the group should show labels or not */
+    bool getShowLabels() const;
+
+    /**
+     * Sets whether the group should show labels or not
+     * @param showLabels Whether the group should show labels or not
+     */
+    void setShowLabels(bool showLabels);
+
+    /** Gets the label sizing type */
+    LabelSizingType getLabelSizingType() const;
+
+    /**
+     * Sets the label sizing type
+     * @param labelSizingType Type of label sizing
+     */
+    void setLabelSizingType(const LabelSizingType& labelSizingType);
+
+    /** Gets the user label width in percentages */
+    std::uint32_t getLabelWidthPercentage() const;
+
+    /**
+     * Sets the user label width in percentages
+     * @param labelWidthPercentage User label width in percentages
+     */
+    void setLabelWidthPercentage(std::uint32_t labelWidthPercentage);
+
+    /** Gets the user label width in pixels */
+    std::uint32_t getLabelWidthFixed() const;
+
+    /**
+     * Sets the user label width in pixels
+     * @param labelWidthFixed User label width in pixels
+     */
+    void setLabelWidthFixed(std::uint32_t labelWidthFixed);
+
     /**
      * Add widget action using stream in operator
      * @param widgetAction Reference to widget action
@@ -134,13 +172,22 @@ signals:
     /** Signals that the group got collapsed */
     void collapsed();
 
-    /** Signals that the group read-only status changed */
+    /**
+     * Signals that the group read-only status changed
+     * @param readOnly Read-only status
+     */
     void readOnlyChanged(const bool& readOnly);
 
-protected:
-    bool                        _expanded;          /** Whether or not the group is expanded */
-    bool                        _readOnly;          /** Whether or not the group is read-only */
-    QVector<WidgetAction*>      _widgetActions;     /** Widget actions */
+private:
+    bool                            _expanded;                      /** Whether or not the group is expanded */
+    bool                            _readOnly;                      /** Whether or not the group is read-only */
+    QVector<WidgetAction*>          _widgetActions;                 /** Widget actions */
+    bool                            _showLabels;                    /** Whether to show labels or not */
+    LabelSizingType                 _labelSizingType;               /** Type of label sizing */
+    std::uint32_t                   _labelWidthPercentage;          /** User label width in percentages [0..100] */
+    std::uint32_t                   _labelWidthFixed;               /** User label width in pixels */
+    static const std::uint32_t      globalLabelWidthPercentage;     /** Global label width in percentages */
+    static const std::uint32_t      globalLabelWidthFixed;          /** Global label width in pixels */
 };
 
 /**

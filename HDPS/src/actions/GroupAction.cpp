@@ -11,11 +11,18 @@ namespace hdps {
 
 namespace gui {
 
+const std::uint32_t GroupAction::globalLabelWidthPercentage = 25;
+const std::uint32_t GroupAction::globalLabelWidthFixed      = 200;
+
 GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
     WidgetAction(parent),
     _expanded(expanded),
     _readOnly(false),
-    _widgetActions()
+    _widgetActions(),
+    _showLabels(true),
+    _labelSizingType(LabelSizingType::Percentage),
+    _labelWidthPercentage(GroupAction::globalLabelWidthPercentage),
+    _labelWidthFixed(GroupAction::globalLabelWidthFixed)
 {
 }
 
@@ -80,6 +87,66 @@ void GroupAction::setReadOnly(const bool& readOnly)
     emit readOnlyChanged(_readOnly);
 }
 
+bool GroupAction::getShowLabels() const
+{
+    return _showLabels;
+}
+
+void GroupAction::setShowLabels(bool showLabels)
+{
+    if (showLabels == _showLabels)
+        return;
+
+    _showLabels = showLabels;
+
+    emit actionsChanged(_widgetActions);
+}
+
+GroupAction::LabelSizingType GroupAction::getLabelSizingType() const
+{
+    return _labelSizingType;
+}
+
+void GroupAction::setLabelSizingType(const LabelSizingType& labelSizingType)
+{
+    if (labelSizingType == _labelSizingType)
+        return;
+
+    _labelSizingType = labelSizingType;
+
+    emit actionsChanged(_widgetActions);
+}
+
+std::uint32_t GroupAction::getLabelWidthPercentage() const
+{
+    return _labelWidthPercentage;
+}
+
+void GroupAction::setLabelWidthPercentage(std::uint32_t labelWidthPercentage)
+{
+    if (labelWidthPercentage == _labelWidthPercentage)
+        return;
+
+    _labelWidthPercentage = labelWidthPercentage;
+
+    emit actionsChanged(_widgetActions);
+}
+
+std::uint32_t GroupAction::getLabelWidthFixed() const
+{
+    return _labelWidthFixed;
+}
+
+void GroupAction::setLabelWidthFixed(std::uint32_t labelWidthFixed)
+{
+    if (labelWidthFixed == _labelWidthFixed)
+        return;
+
+    _labelWidthFixed = labelWidthFixed;
+
+    emit actionsChanged(_widgetActions);
+}
+
 void GroupAction::setActions(const QVector<WidgetAction*>& widgetActions /*= QVector<WidgetAction*>()*/)
 {
     _widgetActions = widgetActions;
@@ -114,10 +181,32 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())
 {
-    _layout->setColumnStretch(0, 3);
-    _layout->setColumnStretch(1, 5);
-    _layout->setContentsMargins(10, 10, 10, 10);    
+    if (groupAction->getShowLabels()) {
+        switch (groupAction->getLabelSizingType())
+        {
+            case LabelSizingType::Auto:
+            {
+                _layout->setColumnStretch(1, 1);
+                break;
+            }
 
+            case LabelSizingType::Percentage:
+            {
+                _layout->setColumnStretch(0, groupAction->getLabelWidthPercentage());
+                _layout->setColumnStretch(1, 100 - groupAction->getLabelWidthPercentage());
+                break;
+            }
+
+            default:
+                break;
+        }
+        
+    }
+
+    auto contentsMargin = _layout->contentsMargins();
+
+    layout->setContentsMargins(10, 10, 10, 10);
+    
     setLayout(_layout);
 
     const auto actionsChanged = [this, groupAction]() -> void {
@@ -135,8 +224,12 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
             const auto isTriggerAction  = dynamic_cast<TriggerAction*>(widgetAction);
             const auto isTriggersAction = dynamic_cast<TriggersAction*>(widgetAction);
 
-            if (!isToggleAction && !isTriggerAction && !isTriggersAction) {
+            if (groupAction->getShowLabels() && !isToggleAction && !isTriggerAction && !isTriggersAction) {
                 auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
+
+                if (groupAction->getLabelSizingType() == LabelSizingType::Fixed)
+                    labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+
                 _layout->addWidget(labelWidget, numRows, 0);
             }
 
