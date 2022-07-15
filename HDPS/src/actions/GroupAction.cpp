@@ -11,7 +11,7 @@ namespace hdps {
 
 namespace gui {
 
-const std::uint32_t GroupAction::globalLabelWidthPercentage = 40;
+const std::uint32_t GroupAction::globalLabelWidthPercentage = 35;
 const std::uint32_t GroupAction::globalLabelWidthFixed      = 200;
 
 GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
@@ -231,6 +231,8 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
 
                 if (groupAction->getLabelSizingType() == LabelSizingType::Fixed)
                     labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+
+                labelWidget->setElide(true);
 
                 _layout->addWidget(labelWidget, numRows, 0);
             }

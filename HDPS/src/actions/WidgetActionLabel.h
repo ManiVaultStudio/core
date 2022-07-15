@@ -54,6 +54,15 @@ public:
      */
     void resizeEvent(QResizeEvent* resizeEvent) override;
 
+    /** Gets whether label elide is enabled or not */
+    bool geElide() const;
+
+    /**
+     * Set whether label elide is enabled or not
+     * @param labelElide Whether label elide is enabled or not
+     */
+    void setElide(bool elide);
+
 private:
 
     /** Update the state of the publish action */
@@ -71,6 +80,7 @@ protected:
     std::uint32_t       _flags;                 /** Configuration flags */
     WidgetAction*       _widgetAction;          /** Pointer to widget action */
     QLabel              _nameLabel;             /** Action name label */
+    bool                _elide;            /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
     TriggerAction       _publishAction;         /** Publish action (so that other actions can connect) */
     TriggerAction       _disconnectAction;      /** Disconnect from public action */
 };

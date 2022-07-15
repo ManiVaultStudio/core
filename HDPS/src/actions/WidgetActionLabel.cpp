@@ -23,6 +23,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _flags(flags),
     _widgetAction(widgetAction),
     _nameLabel(),
+    _elide(false),
     _publishAction(this, "Publish..."),
     _disconnectAction(this, "Disconnect...")
 {
@@ -168,13 +169,31 @@ void WidgetActionLabel::resizeEvent(QResizeEvent* resizeEvent)
      });
 }
 
+bool WidgetActionLabel::geElide() const
+{
+    return _elide;
+}
+
+void WidgetActionLabel::setElide(bool elide)
+{
+    if (elide == _elide)
+        return;
+
+    _elide = elide;
+}
+
 void WidgetActionLabel::elide()
 {
-    QFontMetrics metrics(font());
-
     const auto labelText = QString("%1%2 ").arg(_widgetAction->text(), (_flags & ColonAfterName) ? ":" : "");
 
-    _nameLabel.setText(metrics.elidedText(labelText, Qt::ElideMiddle, width()));
+    if (!_elide) {
+        _nameLabel.setText(labelText);
+    }
+    else {
+        QFontMetrics metrics(font());
+
+        _nameLabel.setText(metrics.elidedText(labelText, Qt::ElideMiddle, width()));
+    }    
 }
 
 void WidgetActionLabel::updatePublishAction()
