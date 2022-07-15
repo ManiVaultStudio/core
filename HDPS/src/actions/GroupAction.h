@@ -124,7 +124,7 @@ public:
     std::uint32_t getLabelWidthPercentage() const;
 
     /**
-     * Sets the user label width in percentages
+     * Sets the user label width in percentages (sets the label sizing type to LabelSizingType::Percentage)
      * @param labelWidthPercentage User label width in percentages
      */
     void setLabelWidthPercentage(std::uint32_t labelWidthPercentage);
@@ -133,7 +133,7 @@ public:
     std::uint32_t getLabelWidthFixed() const;
 
     /**
-     * Sets the user label width in pixels
+     * Sets the user label width in pixels (sets the label sizing type to LabelSizingType::Fixed)
      * @param labelWidthFixed User label width in pixels
      */
     void setLabelWidthFixed(std::uint32_t labelWidthFixed);

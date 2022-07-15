@@ -11,7 +11,7 @@ namespace hdps {
 
 namespace gui {
 
-const std::uint32_t GroupAction::globalLabelWidthPercentage = 25;
+const std::uint32_t GroupAction::globalLabelWidthPercentage = 40;
 const std::uint32_t GroupAction::globalLabelWidthFixed      = 200;
 
 GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
@@ -127,7 +127,8 @@ void GroupAction::setLabelWidthPercentage(std::uint32_t labelWidthPercentage)
     if (labelWidthPercentage == _labelWidthPercentage)
         return;
 
-    _labelWidthPercentage = labelWidthPercentage;
+    _labelSizingType        = LabelSizingType::Percentage;
+    _labelWidthPercentage   = labelWidthPercentage;
 
     emit actionsChanged(_widgetActions);
 }
@@ -142,7 +143,8 @@ void GroupAction::setLabelWidthFixed(std::uint32_t labelWidthFixed)
     if (labelWidthFixed == _labelWidthFixed)
         return;
 
-    _labelWidthFixed = labelWidthFixed;
+    _labelSizingType    = LabelSizingType::Fixed;
+    _labelWidthFixed    = labelWidthFixed;
 
     emit actionsChanged(_widgetActions);
 }
@@ -205,7 +207,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
 
     auto contentsMargin = _layout->contentsMargins();
 
-    layout->setContentsMargins(10, 10, 10, 10);
+    _layout->setContentsMargins(10, 10, 10, 10);
     
     setLayout(_layout);
 
