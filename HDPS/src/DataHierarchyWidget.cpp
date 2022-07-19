@@ -48,7 +48,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView.setSelectionModel(&_selectionModel);
     _treeView.setDragEnabled(true);
     _treeView.setDragDropMode(QAbstractItemView::DragOnly);
-    _treeView.setSelectionMode(QAbstractItemView::SingleSelection);
+    _treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
+    _treeView.setSelectionMode(QAbstractItemView::MultiSelection);
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
 
@@ -127,6 +128,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Notify others that the dataset selection changed when the current row in the model changed
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
 
+        /*
         // Only proceed with a valid selection
         if (selected.indexes().isEmpty())
             return;
@@ -140,6 +142,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         // Select the items in the data hierarchy
         auto selectedItems = QVector<DataHierarchyItem*>(dataHierarchyItems.begin(), dataHierarchyItems.end());
         Application::core()->getDataHierarchyManager().selectItems(selectedItems);
+        */
     });
 
     // Show/hide the overlay and header widget when the number of rows changes
@@ -166,6 +169,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     // Invoked the custom context menu when requested by the tree view
     connect(&_treeView, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
 
+        const auto selectedRows = _selectionModel.selectedRows();
+
+        /*
         // Get the model index at the required position
         const auto modelIndexBelowCursor = _treeView.indexAt(position);
 
@@ -190,6 +196,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             if (contextMenu)
                 contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
         }
+        */
     });
 
     // Update tool bar when items got expanded/collapsed

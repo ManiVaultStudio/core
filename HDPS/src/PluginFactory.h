@@ -80,6 +80,11 @@ public:
      */
     virtual DataTypes supportedDataTypes() const = 0;
 
+    /**
+     * 
+     */
+    virtual getProducerActions(const QStringList& datasetTypes) const;
+
     //virtual bool isCompatible(DataSet& dataSet) = 0;
 
 private:
