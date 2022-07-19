@@ -1,5 +1,6 @@
 {
     "name" : "TextData",
     "version" : "1",
-    "dependencies" : []
+    "dependencies" : [],
+	"inputs": []
 }

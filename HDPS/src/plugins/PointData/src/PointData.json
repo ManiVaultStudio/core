@@ -1,5 +1,12 @@
 {
     "name" : "Points",
     "version" : "1",
-    "dependencies" : []
+    "dependencies" : [],
+	"inputs": [
+		{
+			"sets_re": "Points, Points",
+			"action": "Group points",
+			"description": "Group points"
+		}
+	]
 }

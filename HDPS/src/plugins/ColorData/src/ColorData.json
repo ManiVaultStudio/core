@@ -1,5 +1,6 @@
 {
     "name" : "ColorData",
     "version" : "1",
-    "dependencies" : []
+    "dependencies" : [],
+	"inputs": []
 }
