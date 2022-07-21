@@ -76,10 +76,11 @@ void PluginManager::loadPlugins()
         gui::MainWindow& gui = _core.gui();
 
         // Get metadata about plugin from the accompanying .json file compiled in the shared library
-        QString pluginKind  = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
-        QString menuName    = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
-        QString version     = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
-
+        QString pluginKind      = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+        QString menuName        = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
+        QString version         = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
+        const auto producers   = pluginLoader.metaData().value("MetaData").toObject().value("producers");
+        
         // Create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
 
@@ -95,6 +96,7 @@ void PluginManager::loadPlugins()
         _pluginFactories[pluginKind]->setKind(pluginKind);
         _pluginFactories[pluginKind]->setGuiName(menuName);
         _pluginFactories[pluginKind]->setVersion(version);
+        _pluginFactories[pluginKind]->setProducers(producers);
 
         // Add the plugin to a menu item and link the triggering of the menu item to triggering of the plugin
         QAction* action = NULL;
@@ -232,12 +234,12 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
     return resolvedOrderedPluginNames;
 }
 
-QString PluginManager::createPlugin(const QString kind)
+QString PluginManager::createPlugin(const QString& kind, const QStringList& datasetTypes /*= QStringList()*/, const Datasets& datasets /*= Datasets()*/)
 {
     return pluginTriggered(kind);
 }
 
-void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImpl>& dataset)
+void PluginManager::createAnalysisPlugin(const QString& kind, Datasets datasets)
 {
     try
     {
@@ -251,9 +253,10 @@ void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImp
 
         _pluginFactories[kind]->_numberOfInstances++;
 
-        dataset->setAnalysis(pluginInstance);
+        for (auto dataset : datasets)
+            dataset->setAnalysis(pluginInstance);
 
-        pluginInstance->setInputDataset(dataset);
+        pluginInstance->setInputDataset(datasets.first());
 
         _core.addPlugin(pluginInstance);
     }
@@ -263,7 +266,7 @@ void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImp
     }
 }
 
-void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImpl>& dataset)
+void PluginManager::createExporterPlugin(const QString& kind, Datasets datasets)
 {
     try
     {
@@ -277,7 +280,7 @@ void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImp
 
         _pluginFactories[kind]->_numberOfInstances++;
 
-        pluginInstance->setInputDataset(dataset);
+        pluginInstance->setInputDataset(datasets.first());
 
         _core.addPlugin(pluginInstance);
     }
@@ -335,30 +338,33 @@ void PluginManager::createTransformationPlugin(const QString& kind, const Datase
     }
 }
 
-QStringList PluginManager::getPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
+QList<QAction*> PluginManager::getPluginActionsByPluginTypeAndDatasets(const Type& pluginType, const Datasets& datasets) const
 {
-    QStringList pluginKinds;
+    QList<QAction*> pluginProducerActions;
+
+    QStringList datasetTypes;
+
+    for (const auto& dataset : datasets)
+        datasetTypes << dataset->getDataType().getTypeString();
 
     for (auto pluginFactory : _pluginFactories) {
         if (pluginFactory->getType() != pluginType)
             continue;
 
-        auto pluginCompatible = dataTypes.isEmpty();
+        for (auto pluginProducerMetaData : pluginFactory->getProducers(datasetTypes)) {
+            auto pluginProducerAction = new QAction(pluginFactory->getIcon(), pluginProducerMetaData.getTitle());
 
-        for (auto dataType : dataTypes) {
-            if (pluginFactory->supportedDataTypes().contains(dataType)) {
-                pluginCompatible = true;
-                break;
-            }
+            pluginProducerAction->setToolTip(pluginProducerMetaData.getDescription());
+
+            connect(pluginProducerAction, &QAction::triggered, [this, pluginProducerMetaData]() -> void {
+                const_cast<PluginManager*>(this)->createPlugin(pluginProducerMetaData.getPluginKind());
+            });
+
+            pluginProducerActions << pluginProducerAction;
         }
-
-        if (pluginCompatible)
-            pluginKinds << pluginFactory->getKind();
     }
 
-    pluginKinds.sort();
-
-    return pluginKinds;
+    return pluginProducerActions;
 }
 
 QString PluginManager::getPluginGuiName(const QString& pluginKind) const

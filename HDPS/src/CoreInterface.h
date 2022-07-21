@@ -11,6 +11,8 @@
 #include <vector>
 #include <functional>
 
+class QAction;
+
 namespace hdps
 {
     class DatasetImpl;
@@ -183,11 +185,11 @@ public: // Analysis
     virtual plugin::Plugin& requestAnalysis(const QString& kind) = 0;
 
     /**
-     * Analyze a dataset
+     * Analyze one or more datasets
      * @param kind Type of analysis
-     * @param dataSet Smart pointer to the dataset to analyze
+     * @param datasets Dataset(s) to analyze
      */
-    virtual const void analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataSet) = 0;
+    virtual void analyzeDatasets(const QString& kind, Datasets datasets) = 0;
 
 public: // Import/export
 
@@ -195,33 +197,33 @@ public: // Import/export
      * Imports a dataset
      * @param kind Type of import plugin
      */
-    virtual const void importDataset(const QString& kind) = 0;
+    virtual void importDatasets(const QString& kind) = 0;
 
     /**
-     * Exports a dataset
+     * Exports one or more datasets
      * @param kind Type of export plugin
-     * @param dataSet Smart pointer to the dataset to export
+     * @param datasets Dataset(s) to export
      */
-    virtual const void exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSet) = 0;
+    virtual void exportDatasets(const QString& kind, Datasets datasets) = 0;
 
 public: // Data viewing
 
     /**
-     * Views a dataset
+     * View one or more datasets
      * @param kind Type of import plugin
-     * @param datasets Datasets to view
+     * @param datasets Dataset(s) to view
      */
-    virtual const void viewDatasets(const QString& kind, const Datasets& datasets) = 0;
+    virtual void viewDatasets(const QString& kind, Datasets datasets) = 0;
 
 public: // Plugin queries
 
     /**
-     * Get a list of plugin kinds (names) given a plugin type and data type(s)
+     * Get plugin actions by plugin type and data types (of the selected datasets in the data hierarchy)
      * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param dataTypes Types of data that the plugin should be compatible with (data type ignored when empty)
-     * @return List of compatible plugin kinds that can handle the data type
+     * @param datasets Selected dataset(s)
+     * @return Vector of plugin producer actions
      */
-    virtual QStringList getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>()) const = 0;
+    virtual QList<QAction*> getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const = 0;
 
     /**
      * Get plugin GUI name from plugin kind

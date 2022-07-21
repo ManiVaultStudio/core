@@ -3,6 +3,7 @@
 #include "DataHierarchyModelItem.h"
 #include "Core.h"
 #include "Dataset.h"
+#include "PluginFactory.h"
 
 #include <widgets/Divider.h>
 
@@ -18,6 +19,7 @@
 #include <stdexcept>
 
 using namespace hdps::util;
+using namespace hdps::plugin;
 
 namespace hdps
 {
@@ -32,7 +34,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView(this),
     _selectionModel(&_model),
     _noDataOverlayWidget(new NoDataOverlayWidget(this)),
-    _dataImportAction(this),
     _datasetNameFilterAction(this, "Dataset name filter"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
@@ -171,32 +172,74 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
         const auto selectedRows = _selectionModel.selectedRows();
 
-        /*
-        // Get the model index at the required position
-        const auto modelIndexBelowCursor = _treeView.indexAt(position);
+        Datasets selectedDatasets;
 
-        // Show dataset context menu when over a dataset, give options to load data otherwise
-        if (modelIndexBelowCursor.isValid())
-        {
-            // Get pointer to data hierarchy item
-            auto dataHierarchyModelItem = _model.getItem(modelIndexBelowCursor, Qt::DisplayRole);
+        for (const auto& selectedRow : selectedRows)
+            selectedDatasets << _model.getItem(selectedRow, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
 
-            // Get the data hierarchy item context menu
-            QSharedPointer<QMenu> contextMenu(dataHierarchyModelItem->getContextMenu());
+        if (selectedDatasets.isEmpty())
+            return;
 
-            // And show it
-            contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
-        }
-        else {
+        auto contextMenu = new QMenu();
 
-            // Get dataset import context menu
-            auto contextMenu = _dataImportAction.getContextMenu();
+        const auto addMenu = [contextMenu, selectedDatasets](const plugin::Type& pluginType) -> void {
+            auto menu = new QMenu();
 
-            // Show it
-            if (contextMenu)
-                contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
-        }
-        */
+            switch (pluginType)
+            {
+                case plugin::Type::ANALYSIS:
+                {
+                    menu->setTitle("Analyze");
+                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
+                    break;
+                }
+
+                case plugin::Type::LOADER:
+                {
+                    menu->setTitle("Import");
+                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+                    break;
+                }
+
+                case plugin::Type::WRITER:
+                {
+                    menu->setTitle("Export");
+                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+                    break;
+                }
+
+                case plugin::Type::TRANSFORMATION:
+                {
+                    menu->setTitle("Transform");
+                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
+                    break;
+                }
+
+                case plugin::Type::VIEW:
+                {
+                    menu->setTitle("View");
+                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+            for (auto pluginProducerAction : Application::core()->getPluginActionsByPluginTypeAndDatasets(pluginType, selectedDatasets))
+                menu->addAction(pluginProducerAction);
+
+            if (!menu->actions().isEmpty())
+                contextMenu->addMenu(menu);
+        };
+
+        addMenu(plugin::Type::ANALYSIS);
+        addMenu(plugin::Type::LOADER);
+        addMenu(plugin::Type::WRITER);
+        addMenu(plugin::Type::TRANSFORMATION);
+        addMenu(plugin::Type::VIEW);
+        
+        contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
     });
 
     // Update tool bar when items got expanded/collapsed

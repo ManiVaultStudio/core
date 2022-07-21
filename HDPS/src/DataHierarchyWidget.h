@@ -2,7 +2,10 @@
 
 #include "DataHierarchyModel.h"
 #include "DataHierarchyFilterModel.h"
-#include "actions/DataImportAction.h"
+#include "Dataset.h"
+#include "actions/StringAction.h"
+#include "actions/TriggerAction.h"
+#include "actions/ToggleAction.h"
 
 #include <QWidget>
 #include <QTreeView>
@@ -129,7 +132,6 @@ private:
     QTreeView                   _treeView;                  /** Tree view that contains the data hierarchy */
     QItemSelectionModel         _selectionModel;            /** Selection model */
     NoDataOverlayWidget*        _noDataOverlayWidget;       /** Overlay help widget which is shown when no data is loaded */
-    DataImportAction            _dataImportAction;          /** Data import action */
     StringAction                _datasetNameFilterAction;   /** String action for filtering dataset GUI name */
     TriggerAction               _expandAllAction;           /** Expand all datasets action */
     TriggerAction               _collapseAllAction;         /** Collapse all datasets action */

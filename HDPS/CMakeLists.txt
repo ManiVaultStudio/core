@@ -177,15 +177,9 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
-    src/actions/DataAction.h
-    src/actions/DataImportAction.h
-    src/actions/DataExportAction.h
     src/actions/DataCopyAction.h
     src/actions/DataRemoveAction.h
-    src/actions/DataViewAction.h
-    src/actions/DataAnalysisAction.h
     src/actions/DataGroupingAction.h
-    src/actions/DataTransformationAction.h
     src/actions/DirectoryPickerAction.h
     src/actions/FilePickerAction.h
     src/actions/StatusAction.h
@@ -235,15 +229,9 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
-    src/actions/DataAction.cpp
-    src/actions/DataImportAction.cpp
-    src/actions/DataExportAction.cpp
     src/actions/DataCopyAction.cpp
     src/actions/DataRemoveAction.cpp
-    src/actions/DataViewAction.cpp
-    src/actions/DataAnalysisAction.cpp
     src/actions/DataGroupingAction.cpp
-    src/actions/DataTransformationAction.cpp
     src/actions/DirectoryPickerAction.cpp
     src/actions/FilePickerAction.cpp
     src/actions/StatusAction.cpp
@@ -347,6 +335,7 @@ set( PLUGIN_HEADERS
     src/LoaderPlugin.h
     src/WriterPlugin.h
     src/ViewPlugin.h
+    src/PluginProducerMetaData.h
     src/PluginFactory.h
     src/Plugin.h
     src/PluginType.h
@@ -368,6 +357,7 @@ set( PLUGIN_SOURCES
     src/Application.cpp
     src/Plugin.cpp
     src/Set.cpp
+    src/PluginProducerMetaData.cpp
     src/LinkedSelection.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp

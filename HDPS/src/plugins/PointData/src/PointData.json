@@ -2,10 +2,10 @@
     "name" : "Points",
     "version" : "1",
     "dependencies" : [],
-	"inputs": [
+	"producers": [
 		{
-			"sets_re": "Points, Points",
-			"action": "Group points",
+			"re": "Points, Points",
+			"title": "Group points",
 			"description": "Group points"
 		}
 	]

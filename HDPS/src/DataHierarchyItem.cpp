@@ -231,30 +231,6 @@ DataType DataHierarchyItem::getDataType() const
     return _dataset->getDataType();
 }
 
-void DataHierarchyItem::analyzeDataset(const QString& pluginName)
-{
-    Q_ASSERT(!pluginName.isEmpty());
-
-    // Do not analyze if the plugin name is invalid
-    if (pluginName.isEmpty())
-        return;
-
-    // Instruct the core to analyze the dataset
-    Application::core()->analyzeDataset(pluginName, _dataset);
-}
-
-void DataHierarchyItem::exportDataset(const QString& pluginName)
-{
-    Q_ASSERT(!pluginName.isEmpty());
-
-    // Do not export if the plugin name is invalid
-    if (pluginName.isEmpty())
-        return;
-
-    // Instruct the core to export the dataset
-    Application::core()->exportDataset(pluginName, _dataset);
-}
-
 void DataHierarchyItem::addAction(WidgetAction& widgetAction)
 {
     // Add action to the vector

@@ -2,5 +2,5 @@
     "name" : "ColorData",
     "version" : "1",
     "dependencies" : [],
-	"inputs": []
+	"producers": []
 }

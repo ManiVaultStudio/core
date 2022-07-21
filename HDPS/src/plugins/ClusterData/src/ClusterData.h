@@ -235,4 +235,6 @@ public:
     QIcon getIcon() const override;
 
     hdps::plugin::RawData* produce() override;
+
+
 };

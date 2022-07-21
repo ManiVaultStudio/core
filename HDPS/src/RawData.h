@@ -54,10 +54,11 @@ public:
     }
     ~RawDataFactory() override {};
     
+    /**
+     * Produces the plugin
+     * @return Pointer to the produced plugin
+     */
     RawData* produce() override = 0;
-
-    // Override supportedDataTypes function, so custom data types don't need to supply it.
-    virtual DataTypes supportedDataTypes() const override { return DataTypes(); }
 };
 
 }

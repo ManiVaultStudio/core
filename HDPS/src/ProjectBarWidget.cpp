@@ -324,6 +324,7 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
     _containerWidget.setAutoFillBackground(true);
     _containerLayout.setContentsMargins(0, 0, 0, 0);
 
+    /* TODO: multi_input_plugin
     // Get loader plugin kinds from the core
     const auto loaderPluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER);
 
@@ -344,4 +345,5 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
 
     _containerWidget.setLayout(&_containerLayout);
     _containerWidget.setVisible(!loaderPluginKinds.isEmpty());
+    */
 }

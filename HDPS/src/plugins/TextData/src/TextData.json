@@ -2,5 +2,5 @@
     "name" : "TextData",
     "version" : "1",
     "dependencies" : [],
-	"inputs": []
+	"producers": []
 }

@@ -2,5 +2,5 @@
     "name" : "Images",
     "version" : "1",
     "dependencies" : ["Points"],
-	"inputs": []
+	"producers": []
 }

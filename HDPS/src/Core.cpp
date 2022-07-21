@@ -12,14 +12,14 @@
 #include "ViewPlugin.h"
 #include "RawData.h"
 #include "Set.h"
-
-#include "actions/DataAction.h"
+#include "PluginFactory.h"
 
 #include <algorithm>
 
 #define CORE_VERBOSE
 
 using namespace hdps::util;
+using namespace hdps::plugin;
 
 namespace hdps
 {
@@ -166,9 +166,6 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
 
-    // Add data action (available as right-click menu in the data hierarchy widget)
-    new DataAction(&_mainWindow, *fullSet);
-
     return fullSet;
 }
 
@@ -291,9 +288,6 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();
 
-    // Add data action (available as right-click menu in the data hierarchy widget)
-    new DataAction(&_mainWindow, *derivedDataset);
-
     return Dataset<DatasetImpl>(*derivedDataset);
 }
 
@@ -321,9 +315,6 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
 
         // Initialize the dataset (e.g. setup default actions for info)
         subset->init();
-
-        // Add data action (available as right-click menu in the data hierarchy widget)
-        new DataAction(&_mainWindow, *subset);
 
         return subset;
     }
@@ -430,10 +421,10 @@ hdps::plugin::Plugin& Core::requestAnalysis(const QString& kind)
     }
 }
 
-const void Core::analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataSet)
+void Core::analyzeDatasets(const QString& kind, Datasets datasets)
 {
     try {
-        _pluginManager->createAnalysisPlugin(kind, dataSet);
+        _pluginManager->createAnalysisPlugin(kind, datasets);
     }
     catch (std::exception& e)
     {
@@ -444,7 +435,7 @@ const void Core::analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataS
     }
 }
 
-const void Core::importDataset(const QString& kind)
+void Core::importDatasets(const QString& kind)
 {
     try {
         _pluginManager->createPlugin(kind);
@@ -458,10 +449,10 @@ const void Core::importDataset(const QString& kind)
     }
 }
 
-const void Core::exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSet)
+void Core::exportDatasets(const QString& kind, Datasets datasets)
 {
     try {
-        _pluginManager->createExporterPlugin(kind, dataSet);
+        _pluginManager->createExporterPlugin(kind, datasets);
     }
     catch (std::exception& e)
     {
@@ -472,7 +463,7 @@ const void Core::exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSe
     }
 }
 
-const void Core::viewDatasets(const QString& kind, const Datasets& datasets)
+void Core::viewDatasets(const QString& kind, Datasets datasets)
 {
     try {
         _pluginManager->createViewPlugin(kind, datasets);
@@ -496,9 +487,9 @@ bool Core::isDatasetGroupingEnabled() const
     return _datasetGroupingEnabled;
 }
 
-QStringList Core::getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
+QList<QAction*> Core::getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const
 {
-    return _pluginManager->getPluginKindsByPluginTypeAndDataTypes(pluginType, dataTypes);
+    return _pluginManager->getPluginActionsByPluginTypeAndDatasets(pluginType, datasets);
 }
 
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)
