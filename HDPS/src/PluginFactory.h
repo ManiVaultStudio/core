@@ -108,6 +108,15 @@ protected:
      */
     bool areAllDatasetsOfTheSameType(const Datasets& datasets, const QString& datasetType) const;
 
+    /**
+     * Convenience function for generating a plugin producer action
+     * @param title Title of the producer
+     * @param description Description of the producer
+     * @param iconName Name of the icon
+     * @return Pointer to plugin producer action
+     */
+    QAction* createProducerAction(const QString& title, const QString& description, const QString& iconName) const;
+
 private:
     QString     _kind;          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
     Type        _type;          /** Type of plugin (e.g. analysis, data, loader, writer & view) */

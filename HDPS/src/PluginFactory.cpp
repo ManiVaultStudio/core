@@ -26,6 +26,16 @@ bool PluginFactory::areAllDatasetsOfTheSameType(const Datasets& datasets, const 
     return true;
 }
 
+QAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QString& iconName) const
+{
+    auto action = new QAction(title);
+
+    action->setToolTip(description);
+    action->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon(iconName));
+
+    return action;
+}
+
 }
 
 }
