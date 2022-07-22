@@ -175,42 +175,38 @@ protected: // Data access
         return Dataset<DatasetType>(dynamic_cast<DatasetType*>(requestSelection(rawDataName).get()));
     }
 
-public: // Analysis
+public: // Plugin creation
 
     /**
-     * Request an analysis plugin by its kind
-     * @param kind Type of analysis
-     * @return Reference to created plugin
-     */
-    virtual plugin::Plugin& requestAnalysis(const QString& kind) = 0;
-
-    /**
-     * Analyze one or more datasets
-     * @param kind Type of analysis
-     * @param datasets Dataset(s) to analyze
-     */
-    virtual void analyzeDatasets(const QString& kind, Datasets datasets) = 0;
-
-public: // Import/export
-
-    /**
-     * Imports a dataset
+     * Imports a dataset (creates an import plugin of \p kind)
      * @param kind Type of import plugin
      */
     virtual void importDatasets(const QString& kind) = 0;
 
     /**
-     * Exports one or more datasets
+     * Exports one or more datasets (creates an export plugin of \p kind)
      * @param kind Type of export plugin
      * @param datasets Dataset(s) to export
      */
     virtual void exportDatasets(const QString& kind, Datasets datasets) = 0;
 
-public: // Data viewing
+    /**
+     * Analyze one or more datasets (creates an analysis plugin of \p kind)
+     * @param kind Type of analysis plugin
+     * @param datasets Dataset(s) to analyze
+     */
+    virtual void analyzeDatasets(const QString& kind, Datasets datasets) = 0;
 
     /**
-     * View one or more datasets
-     * @param kind Type of import plugin
+     * Transform one or more datasets (creates a transformation plugin of \p kind)
+     * @param kind Type of transformation plugin
+     * @param datasets Dataset(s) to transform
+     */
+    virtual void transformDatasets(const QString& kind, Datasets datasets) = 0;
+
+    /**
+     * View one or more datasets (creates a view plugin of \p kind)
+     * @param kind Type of view plugin
      * @param datasets Dataset(s) to view
      */
     virtual void viewDatasets(const QString& kind, Datasets datasets) = 0;

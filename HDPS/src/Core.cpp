@@ -402,39 +402,6 @@ const DataManager& Core::getDataManager() const
     return *_dataManager.get();
 }
 
-hdps::plugin::Plugin& Core::requestAnalysis(const QString& kind)
-{
-    try {
-        auto analysisPluginsMap = std::map<QString, hdps::plugin::Plugin*>();
-
-        for (const auto& analysisPlugin : _plugins[plugin::Type::ANALYSIS])
-            analysisPluginsMap[analysisPlugin->getName()] = analysisPlugin.get();
-
-        return *analysisPluginsMap[kind];
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to request analysis", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to request analysis");
-    }
-}
-
-void Core::analyzeDatasets(const QString& kind, Datasets datasets)
-{
-    try {
-        _pluginManager->createAnalysisPlugin(kind, datasets);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create analysis plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create analysis plugin");
-    }
-}
-
 void Core::importDatasets(const QString& kind)
 {
     try {
@@ -461,6 +428,25 @@ void Core::exportDatasets(const QString& kind, Datasets datasets)
     catch (...) {
         exceptionMessageBox("Unable to create export plugin");
     }
+}
+
+void Core::analyzeDatasets(const QString& kind, Datasets datasets)
+{
+    try {
+        _pluginManager->createAnalysisPlugin(kind, datasets);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to create analysis plugin", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to create analysis plugin");
+    }
+}
+
+void Core::transformDatasets(const QString& kind, Datasets datasets)
+{
+
 }
 
 void Core::viewDatasets(const QString& kind, Datasets datasets)
