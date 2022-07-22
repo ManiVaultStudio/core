@@ -157,38 +157,11 @@ protected: // Data access
 public: // Plugin creation
 
     /**
-     * Imports a dataset (creates an import plugin of \p kind)
-     * @param kind Type of import plugin
+     * Create a plugin of \p kind
+     * @param kind Kind of plugin (name of the plugin)
+     * @return Pointer to created plugin
      */
-    void importDatasets(const QString& kind) override;
-
-    /**
-     * Exports one or more datasets (creates an export plugin of \p kind)
-     * @param kind Type of export plugin
-     * @param datasets Dataset(s) to export
-     */
-    void exportDatasets(const QString& kind, Datasets datasets) override;
-
-    /**
-     * Analyze one or more datasets (creates an analysis plugin of \p kind)
-     * @param kind Type of analysis plugin
-     * @param datasets Dataset(s) to analyze
-     */
-    void analyzeDatasets(const QString& kind, Datasets datasets) override;
-
-    /**
-     * Transform one or more datasets (creates a transformation plugin of \p kind)
-     * @param kind Type of transformation plugin
-     * @param datasets Dataset(s) to transform
-     */
-    void transformDatasets(const QString& kind, Datasets datasets) override;
-
-    /**
-     * View one or more datasets (creates a view plugin of \p kind)
-     * @param kind Type of view plugin
-     * @param datasets Dataset(s) to view
-     */
-    void viewDatasets(const QString& kind, Datasets datasets) override;
+    plugin::Plugin* requestPlugin(const QString& kind) override;
 
 public: // Plugin queries
 

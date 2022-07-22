@@ -4,11 +4,12 @@
 #include "PluginType.h"
 #include "DataType.h"
 #include "PluginProducerMetaData.h"
+#include "Dataset.h"
 
 #include <QObject>
 #include <QIcon>
 #include <QVariant>
-#include <QRegularExpression>
+#include <QAction>
 
 namespace hdps
 {
@@ -97,28 +98,30 @@ public:
     virtual Plugin* produce() = 0;
 
     /**
-     * Get a list of producer meta data given a sequence of input dataset types
-     * @param datasetTypes Sequence of input dataset types
-     * @return List of producer meta data with which the user interface can be configured (menu's etc)
+     * Get a list of producer actions given a sequence of input dataset types
+     * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
+     * @return List of producer actions with which one (or more) plugins can be triggered
      */
-    virtual PluginProducersMetaData getProducers(const QStringList& datasetTypes) const final {
-        PluginProducersMetaData producersMetaData;
-
-        QRegularExpression re;
-
-        for (auto input : _producers.toList()) {
-            const auto inputMap = input.toMap();
-
-            re.setPattern(inputMap["re"].toString());
-
-            if (!re.match(datasetTypes.join(", ")).hasMatch())
-                continue;
-
-            producersMetaData << PluginProducerMetaData(_type, _kind, datasetTypes, inputMap["title"].toString(), inputMap["description"].toString());
-        }
-
-        return producersMetaData;
+    virtual QList<QAction*> getProducers(const Datasets& datasets) const {
+        return QList<QAction*>();
     }
+
+protected:
+
+    /**
+     * Get sequence of input datasets as a string list
+     * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
+     * @return String list of input dataset types
+     */
+    QStringList getDatasetTypes(const Datasets& datasets) const;
+
+    /**
+     * Determine whether each dataset in the sequence is of the same type
+     * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
+     * @param datasetType Type of input datasets to check for
+     * @return Whether each dataset in the sequence is of the same type
+     */
+    bool areAllDatasetsOfTheSameType(const Datasets& datasets, const QString& datasetType) const;
 
 private:
     QString     _kind;          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */

@@ -141,7 +141,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
 Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
 {
     // Create a new plugin of the given kind
-    QString rawDataName = _pluginManager->createPlugin(kind);
+    QString rawDataName = _pluginManager->createPlugin(kind)->getName();
 
     // Request it from the core
     const plugin::RawData& rawData = requestRawData(rawDataName);
@@ -264,7 +264,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     const auto dataType = sourceDataset->getDataType();
 
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager->createPlugin(dataType._type);
+    QString pluginName = _pluginManager->createPlugin(dataType._type)->getName();
 
     // Request it from the core
     plugin::RawData& rawData = requestRawData(pluginName);
@@ -402,67 +402,6 @@ const DataManager& Core::getDataManager() const
     return *_dataManager.get();
 }
 
-void Core::importDatasets(const QString& kind)
-{
-    try {
-        _pluginManager->createPlugin(kind);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create import plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create import plugin");
-    }
-}
-
-void Core::exportDatasets(const QString& kind, Datasets datasets)
-{
-    try {
-        _pluginManager->createExporterPlugin(kind, datasets);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create export plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create export plugin");
-    }
-}
-
-void Core::analyzeDatasets(const QString& kind, Datasets datasets)
-{
-    try {
-        _pluginManager->createAnalysisPlugin(kind, datasets);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create analysis plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create analysis plugin");
-    }
-}
-
-void Core::transformDatasets(const QString& kind, Datasets datasets)
-{
-
-}
-
-void Core::viewDatasets(const QString& kind, Datasets datasets)
-{
-    try {
-        _pluginManager->createViewPlugin(kind, datasets);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to view dataset", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to view dataset");
-    }
-}
-
 hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 {
     return _dataHierarchyManager->getItem(dataSetId);
@@ -471,6 +410,22 @@ hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 bool Core::isDatasetGroupingEnabled() const
 {
     return _datasetGroupingEnabled;
+}
+
+hdps::plugin::Plugin* Core::requestPlugin(const QString& kind)
+{
+    try {
+        return _pluginManager->createPlugin(kind);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to request plugin from the core", e);
+        return nullptr;
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to request plugin from the core");
+        return nullptr;
+    }
 }
 
 QList<QAction*> Core::getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const

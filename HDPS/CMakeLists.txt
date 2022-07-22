@@ -358,6 +358,7 @@ set( PLUGIN_SOURCES
     src/Plugin.cpp
     src/Set.cpp
     src/PluginProducerMetaData.cpp
+    src/PluginFactory.cpp
     src/LinkedSelection.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp

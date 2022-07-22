@@ -26,6 +26,11 @@ namespace hdps
     {
         class Plugin;
         class RawData;
+        class LoaderPlugin;
+        class WriterPlugin;
+        class AnalysisPlugin;
+        class ViewPlugin;
+        class TransformationPlugin;
     }
 
 class CoreInterface : public hdps::gui::WidgetAction
@@ -178,38 +183,22 @@ protected: // Data access
 public: // Plugin creation
 
     /**
-     * Imports a dataset (creates an import plugin of \p kind)
-     * @param kind Type of import plugin
+     * Create a plugin of \p kind
+     * @param kind Kind of plugin (name of the plugin)
+     * @return Pointer to created plugin
      */
-    virtual void importDatasets(const QString& kind) = 0;
+    virtual plugin::Plugin* requestPlugin(const QString& kind) = 0;
 
     /**
-     * Exports one or more datasets (creates an export plugin of \p kind)
-     * @param kind Type of export plugin
-     * @param datasets Dataset(s) to export
+     * Create a plugin of \p kind
+     * @param kind Kind of plugin (name of the plugin)
+     * @return Pointer to created plugin
      */
-    virtual void exportDatasets(const QString& kind, Datasets datasets) = 0;
-
-    /**
-     * Analyze one or more datasets (creates an analysis plugin of \p kind)
-     * @param kind Type of analysis plugin
-     * @param datasets Dataset(s) to analyze
-     */
-    virtual void analyzeDatasets(const QString& kind, Datasets datasets) = 0;
-
-    /**
-     * Transform one or more datasets (creates a transformation plugin of \p kind)
-     * @param kind Type of transformation plugin
-     * @param datasets Dataset(s) to transform
-     */
-    virtual void transformDatasets(const QString& kind, Datasets datasets) = 0;
-
-    /**
-     * View one or more datasets (creates a view plugin of \p kind)
-     * @param kind Type of view plugin
-     * @param datasets Dataset(s) to view
-     */
-    virtual void viewDatasets(const QString& kind, Datasets datasets) = 0;
+    template<typename PluginType>
+    PluginType* requestPlugin(const QString& kind)
+    {
+        return dynamic_cast<PluginType*>(requestPlugin(PluginType, kind));
+    }
 
 public: // Plugin queries
 

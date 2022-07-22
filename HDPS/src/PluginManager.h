@@ -36,38 +36,20 @@ public:
     /**
     * Creates a new plugin instance of the given kind and adds it to the core
     * @param kind Kind of plugin
-    * @param datasetTypes Sequence of dataset types for which this plugin producer is valid
-    * @param datasets Input datasets
+    * @return Pointer to created plugin
     */
-    QString createPlugin(const QString& kind, const QStringList& datasetTypes =  QStringList(), const Datasets& datasets = Datasets());
+    Plugin* createPlugin(const QString& kind);
     
     /**
-     * Create an analysis plugin for one one or more datasets
-     * @param kind Kind of analysis plugin
-     * @param datasets Datasets to analyze
+     * Create a plugin of \p kind
+     * @param kind Kind of plugin (name of the plugin)
+     * @return Pointer to created plugin
      */
-    void createAnalysisPlugin(const QString& kind, Datasets datasets);
-
-    /**
-     * Create an exporter plugin for one one or more datasets
-     * @param kind Kind of exporter plugin
-     * @param datasets Datasets to export
-     */
-    void createExporterPlugin(const QString& kind, Datasets datasets);
-
-    /**
-     * Create a view plugin for one one or more datasets
-     * @param kind Kind of view plugin
-     * @param datasets Input dataset(s)
-     */
-    void createViewPlugin(const QString& kind, const Datasets& datasets);
-
-    /**
-     * Create a transformation plugin for one one or more datasets
-     * @param kind Kind of transformation plugin
-     * @param datasets Input dataset(s)
-     */
-    void createTransformationPlugin(const QString& kind, const Datasets& datasets);
+    template<typename PluginType>
+    PluginType* requestPlugin(const QString& kind)
+    {
+        return dynamic_cast<PluginType*>(createPlugin(PluginType, kind));
+    }
 
     /**
      * Get plugin actions by plugin type and data types (of the selected datasets in the data hierarchy)
