@@ -71,21 +71,6 @@ public: // Version
         _version = version;
     }
 
-public: // Producer(s) with which the plugin may be created
-
-    /** Get the plugin producers(s) */
-    QVariant getProducers() const {
-        return _producers;
-    }
-
-    /**
-     * Set the plugin producers(s)
-     * @param producers Plugin producers
-     */
-    void setProducers(const QVariant& producers) {
-        _producers = producers;
-    }
-
 public:
 
     /** Returns the plugin icon */
@@ -128,7 +113,6 @@ private:
     Type        _type;          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
     QString     _guiName;       /** Name of the plugin in the GUI */
     QString     _version;       /** Plugin version */
-    QVariant    _producers;     /** Available producers */
 
 protected:
     std::uint32_t   _numberOfInstances;     /** Number of plugin instances */

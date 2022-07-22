@@ -1,6 +1,5 @@
 {
     "name" : "ColorData",
     "version" : "1",
-    "dependencies" : [],
-	"producers": []
+    "dependencies" : []
 }

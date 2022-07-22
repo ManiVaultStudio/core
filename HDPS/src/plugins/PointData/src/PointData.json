@@ -1,12 +1,5 @@
 {
     "name" : "Points",
     "version" : "1",
-    "dependencies" : [],
-	"producers": [
-		{
-			"re": "Points, Points",
-			"title": "Group points",
-			"description": "Group points"
-		}
-	]
+    "dependencies" : []
 }

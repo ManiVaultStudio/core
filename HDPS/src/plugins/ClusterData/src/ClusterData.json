@@ -1,6 +1,5 @@
 {
     "name" : "Cluster",
     "version" : "1",
-    "dependencies" : ["Points"],
-	"producers": []
+    "dependencies" : ["Points"]
 }

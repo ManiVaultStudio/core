@@ -79,7 +79,6 @@ void PluginManager::loadPlugins()
         QString pluginKind      = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
         QString menuName        = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
         QString version         = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
-        const auto producers   = pluginLoader.metaData().value("MetaData").toObject().value("producers");
         
         // Create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
@@ -96,7 +95,6 @@ void PluginManager::loadPlugins()
         _pluginFactories[pluginKind]->setKind(pluginKind);
         _pluginFactories[pluginKind]->setGuiName(menuName);
         _pluginFactories[pluginKind]->setVersion(version);
-        _pluginFactories[pluginKind]->setProducers(producers);
 
         // Add the plugin to a menu item and link the triggering of the menu item to triggering of the plugin
         QAction* action = NULL;
