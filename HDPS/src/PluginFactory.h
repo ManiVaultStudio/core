@@ -116,6 +116,14 @@ protected:
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const QString& datasetType);
 
     /**
+     * Convenience function for generating a plugin producer action (icon from the plugin factory)
+     * @param title Title of the producer
+     * @param description Description of the producer
+     * @return Pointer to plugin producer action
+     */
+    QAction* createProducerAction(const QString& title, const QString& description) const;
+
+    /**
      * Convenience function for generating a plugin producer action
      * @param title Title of the producer
      * @param description Description of the producer
@@ -123,6 +131,15 @@ protected:
      * @return Pointer to plugin producer action
      */
     QAction* createProducerAction(const QString& title, const QString& description, const QString& iconName) const;
+
+    /**
+     * Convenience function for generating a plugin producer action
+     * @param title Title of the producer
+     * @param description Description of the producer
+     * @param icon Icon
+     * @return Pointer to plugin producer action
+     */
+    QAction* createProducerAction(const QString& title, const QString& description, const QIcon& icon) const;
 
 private:
     QString     _kind;          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */

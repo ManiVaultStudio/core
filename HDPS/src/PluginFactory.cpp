@@ -37,12 +37,32 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
     return numberOfDatasetsForType;
 }
 
+QAction* PluginFactory::createProducerAction(const QString& title, const QString& description) const
+{
+    auto action = new QAction(title);
+
+    action->setToolTip(description);
+    action->setIcon(getIcon());
+
+    return action;
+}
+
 QAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QString& iconName) const
 {
     auto action = new QAction(title);
 
     action->setToolTip(description);
     action->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon(iconName));
+
+    return action;
+}
+
+QAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QIcon& icon) const
+{
+    auto action = new QAction(title);
+
+    action->setToolTip(description);
+    action->setIcon(icon);
 
     return action;
 }

@@ -159,9 +159,10 @@ public: // Plugin creation
     /**
      * Create a plugin of \p kind
      * @param kind Kind of plugin (name of the plugin)
+     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
      * @return Pointer to created plugin
      */
-    plugin::Plugin* requestPlugin(const QString& kind) override;
+    plugin::Plugin* requestPlugin(const QString& kind, const Datasets& datasets = Datasets()) override;
 
 public: // Plugin queries
 

@@ -232,19 +232,36 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
     return resolvedOrderedPluginNames;
 }
 
-Plugin* PluginManager::createPlugin(const QString& kind)
+Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
 {
     try
     {
         if (!_pluginFactories.keys().contains(kind))
             throw std::runtime_error("Unrecognized plugin kind");
 
-        auto pluginInstance = _pluginFactories[kind]->produce();
+        auto pluginFactory = _pluginFactories[kind];
+
+        auto pluginInstance = pluginFactory->produce();
 
         if (!pluginInstance)
             return nullptr;
 
-        _pluginFactories[kind]->_numberOfInstances++;
+        pluginFactory->_numberOfInstances++;
+
+        // Plugin-type specific behavior
+        switch (pluginFactory->getType()) {
+            case plugin::Type::ANALYSIS: {
+                auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance);
+
+                for (auto dataset : datasets)
+                    dataset->setAnalysis(analysisPlugin);
+
+                analysisPlugin->setInputDataset(datasets.first());
+            }
+
+            default:
+                break;
+        }
 
         _core.addPlugin(pluginInstance);
 

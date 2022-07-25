@@ -36,9 +36,10 @@ public:
     /**
     * Creates a new plugin instance of the given kind and adds it to the core
     * @param kind Kind of plugin
+    * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
     * @return Pointer to created plugin
     */
-    Plugin* createPlugin(const QString& kind);
+    Plugin* createPlugin(const QString& kind, const Datasets& datasets = Datasets());
     
     /**
      * Create a plugin of \p kind
@@ -46,9 +47,9 @@ public:
      * @return Pointer to created plugin
      */
     template<typename PluginType>
-    PluginType* requestPlugin(const QString& kind)
+    PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
     {
-        return dynamic_cast<PluginType*>(createPlugin(PluginType, kind));
+        return dynamic_cast<PluginType*>(createPlugin(PluginType, kind, datasets));
     }
 
     /**

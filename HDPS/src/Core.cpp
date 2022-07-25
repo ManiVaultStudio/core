@@ -412,10 +412,10 @@ bool Core::isDatasetGroupingEnabled() const
     return _datasetGroupingEnabled;
 }
 
-hdps::plugin::Plugin* Core::requestPlugin(const QString& kind)
+hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
 {
     try {
-        return _pluginManager->createPlugin(kind);
+        return _pluginManager->createPlugin(kind, datasets);
     }
     catch (std::exception& e)
     {
