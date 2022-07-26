@@ -211,6 +211,12 @@ public:
      */
     void makeSubsetOf(Dataset<DatasetImpl> fullDataset);
 
+    /**
+     * Get plugin kind of the raw data
+     * @return Plugin kind of the raw data
+     */
+    QString getRawDataKind() const;
+
 public: // Hierarchy
 
     /** Get reference to data hierarchy item */
@@ -402,6 +408,31 @@ public: // Grouping
      */
     void setGroupIndex(const std::int32_t& groupIndex);
 
+    /**
+     * Get proxy datasets
+     * @return Proxy datasets
+     */
+    Datasets getProxyDatasets() const;
+
+    /**
+     * Set the proxy datasets
+     * @param proxyDatasets Proxy datasets
+     */
+    void setProxyDatasets(const Datasets& proxyDatasets);
+
+    /**
+     * Establish whether a proxy dataset may be created with candidate \p proxyDatasets
+     * @param proxyDatasets Candidate proxy datasets
+     * @return Boolean indicating whether a proxy dataset may be created with candidate \p proxyDatasets
+     */
+    virtual bool mayProxy(const Datasets& proxyDatasets) const;
+
+    /**
+     * Establish whether the set is a proxy dataset (comprised of foreign datasets)
+     * @return Boolean indicating whether the set is a proxy dataset
+     */
+    bool isProxy() const;
+
 public: // Actions
 
     /** Returns list of shared action widgets*/
@@ -466,6 +497,9 @@ public: // Operators
         _derived        = other._derived;
         _sourceDataset  = other._sourceDataset;
         _properties     = other._properties;
+        _groupIndex     = other._groupIndex;
+        _analysis       = other._analysis;
+        _proxyDatasets  = other._proxyDatasets;
 
         return *this;
     }
@@ -484,6 +518,7 @@ private:
     QMap<QString, QVariant>     _properties;        /** Properties map */
     std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
+    Datasets                    _proxyDatasets;     /** Datasets which together form a group */
 
     friend class Core;
     friend class DataManager;

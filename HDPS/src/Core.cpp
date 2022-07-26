@@ -412,6 +412,15 @@ bool Core::isDatasetGroupingEnabled() const
     return _datasetGroupingEnabled;
 }
 
+hdps::Dataset<hdps::DatasetImpl> Core::groupData(const Datasets& datasets, const QString& guiName)
+{
+    auto groupDataset = addDataset(datasets.first()->getRawDataKind(), guiName);
+
+    groupDataset->setProxyDatasets(datasets);
+
+    return groupDataset;
+}
+
 hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
 {
     try {

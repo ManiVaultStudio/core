@@ -770,15 +770,37 @@ public:
         return getRawData<PointData>().getNumPoints();
     }
 
+    /**
+     * Establish whether a proxy dataset may be created with candidate \p proxyDatasets
+     * @param proxyDatasets Candidate proxy datasets
+     * @return Boolean indicating whether a proxy dataset may be created with candidate \p proxyDatasets
+     */
+    bool mayProxy(const hdps::Datasets& proxyDatasets) const override;
+
     unsigned int getNumPoints() const
     {
-        if (isFull()) return getRawData<PointData>().getNumPoints();
-        else return static_cast<std::uint32_t>(indices.size());
+        if (isProxy()) {
+            auto numberOfPoints = 0;
+
+            for (auto proxyDataset : getProxyDatasets())
+                numberOfPoints += hdps::Dataset<Points>(proxyDataset)->getNumPoints();
+
+            return numberOfPoints;
+        }
+        else {
+            if (isFull()) return getRawData<PointData>().getNumPoints();
+                else return static_cast<std::uint32_t>(indices.size());
+        }
     }
 
     unsigned int getNumDimensions() const
     {
-        return getRawData<PointData>().getNumDimensions();
+        if (isProxy()) {
+            return hdps::Dataset<Points>(getProxyDatasets().first())->getNumDimensions();
+        }
+        else {
+            return getRawData<PointData>().getNumDimensions();
+        }
     }
 
     const std::vector<QString>& getDimensionNames() const;

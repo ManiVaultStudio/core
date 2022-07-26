@@ -154,6 +154,15 @@ protected: // Data access
      */
     Dataset<DatasetImpl> requestSelection(const QString& rawDataName) override;
 
+public: // Data grouping
+
+    /**
+     * Groups \p datasets into one dataset
+     * @param datasets Two or more datasets to group
+     * @return Smart pointer to created dataset
+     */
+    Dataset<DatasetImpl> groupData(const Datasets& datasets, const QString& guiName);
+
 public: // Plugin creation
 
     /**

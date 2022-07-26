@@ -352,22 +352,36 @@ void Points::extractDataForDimension(std::vector<float>& result, const int dimen
     // Please remove the assert once non-full support is implemented (if necessary).
     assert(isFull());
 
-    const auto& rawPointData = getRawData<PointData>();
-    rawPointData.extractFullDataForDimension(result, dimensionIndex);
+    if (isProxy()) {
+
+    }
+    else {
+        getRawData<PointData>().extractFullDataForDimension(result, dimensionIndex);
+    }
 }
 
 
 void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
-    const auto& rawPointData = getRawData<PointData>();
+    if (isProxy()) {
+        result.resize(getNumPoints());
 
-    if (isFull())
-    {
-        rawPointData.extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
+        auto offset = 0;
+
+        for (auto proxyDataset : getProxyDatasets())
+            hdps::Dataset<Points>(proxyDataset)->extractDataForDimensions(reinterpret_cast<std::vector<hdps::Vector2f>&>(result[offset]), dimensionIndex1, dimensionIndex2);
     }
-    else
-    {
-        rawPointData.extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
+    else {
+        const auto& rawPointData = getRawData<PointData>();
+
+        if (isFull())
+        {
+            rawPointData.extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
+        }
+        else
+        {
+            rawPointData.extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
+        }
     }
 }
 
@@ -410,57 +424,83 @@ void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 
 void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
 {
-    // Find the global indices of this dataset
-    std::vector<unsigned int> localGlobalIndices;
-    getGlobalIndices(localGlobalIndices);
+    if (isProxy()) {
 
-    // In an array the size of the full raw data, mark selected points as true
-    std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+    }
+    else {
+        // Find the global indices of this dataset
+        std::vector<unsigned int> localGlobalIndices;
+        getGlobalIndices(localGlobalIndices);
 
-    for (const unsigned int& selectionIndex : selectionIndices)
-        globalSelection[selectionIndex] = true;
+        // In an array the size of the full raw data, mark selected points as true
+        std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
 
-    // For all local points find out which are selected
-    selected.resize(localGlobalIndices.size(), false);
-    for (int i = 0; i < localGlobalIndices.size(); i++)
-    {
-        if (globalSelection[localGlobalIndices[i]])
-            selected[i] = true;
+        for (const unsigned int& selectionIndex : selectionIndices)
+            globalSelection[selectionIndex] = true;
+
+        // For all local points find out which are selected
+        selected.resize(localGlobalIndices.size(), false);
+        for (int i = 0; i < localGlobalIndices.size(); i++)
+        {
+            if (globalSelection[localGlobalIndices[i]])
+                selected[i] = true;
+        }
     }
 }
 
 void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
 {
-    auto selection = getSelection<Points>();
+    if (isProxy()) {
 
-    // Find the global indices of this dataset
-    std::vector<unsigned int> localGlobalIndices;
-    getGlobalIndices(localGlobalIndices);
+    }
+    else {
+        auto selection = getSelection<Points>();
 
-    // In an array the size of the full raw data, mark selected points as true
-    std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
-    for (const unsigned int& selectionIndex : selection->indices)
-        globalSelection[selectionIndex] = true;
+        // Find the global indices of this dataset
+        std::vector<unsigned int> localGlobalIndices;
+        getGlobalIndices(localGlobalIndices);
 
-    // For all local points find out which are selected
-    std::vector<bool> selected(localGlobalIndices.size(), false);
-    int indexCount = 0;
-    for (int i = 0; i < localGlobalIndices.size(); i++)
-    {
-        if (globalSelection[localGlobalIndices[i]])
+        // In an array the size of the full raw data, mark selected points as true
+        std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+        for (const unsigned int& selectionIndex : selection->indices)
+            globalSelection[selectionIndex] = true;
+
+        // For all local points find out which are selected
+        std::vector<bool> selected(localGlobalIndices.size(), false);
+        int indexCount = 0;
+        for (int i = 0; i < localGlobalIndices.size(); i++)
         {
-            selected[i] = true;
-            indexCount++;
+            if (globalSelection[localGlobalIndices[i]])
+            {
+                selected[i] = true;
+                indexCount++;
+            }
+        }
+
+        localSelectionIndices.resize(indexCount);
+        int c = 0;
+        for (int i = 0; i < selected.size(); i++)
+        {
+            if (selected[i])
+                localSelectionIndices[c++] = i;
         }
     }
+}
 
-    localSelectionIndices.resize(indexCount);
-    int c = 0;
-    for (int i = 0; i < selected.size(); i++)
-    {
-        if (selected[i])
-            localSelectionIndices[c++] = i;
-    }
+bool Points::mayProxy(const Datasets& proxyDatasets) const
+{
+    if (!DatasetImpl::mayProxy(proxyDatasets))
+        return false;
+
+    QSet<std::int32_t> numberOfDimensionsSet;
+
+    for (auto proxyDataset : proxyDatasets)
+        numberOfDimensionsSet.insert(Dataset<Points>(proxyDataset)->getNumDimensions());
+    
+    if (numberOfDimensionsSet.count() > 1)
+        return false;
+
+    return true;
 }
 
 Dataset<DatasetImpl> Points::copy() const
@@ -526,7 +566,12 @@ std::vector<std::uint32_t>& Points::getSelectionIndices()
 
 const std::vector<QString>& Points::getDimensionNames() const
 {
-    return getRawData<PointData>().getDimensionNames();
+    if (isProxy()) {
+        return hdps::Dataset<Points>(getProxyDatasets().first())->getDimensionNames();
+    }
+    else {
+        return getRawData<PointData>().getDimensionNames();
+    }
 }
 
 void Points::setDimensionNames(const std::vector<QString>& dimNames)

@@ -17,6 +17,11 @@ void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
     setAll(false);
 }
 
+QString DatasetImpl::getRawDataKind() const
+{
+    return _rawData->getKind();
+}
+
 const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 {
     return const_cast<DatasetImpl*>(this)->getDataHierarchyItem();
@@ -129,6 +134,48 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
     _groupIndex = groupIndex;
 
     _core->notifyDatasetSelectionChanged(this);
+}
+
+hdps::Datasets DatasetImpl::getProxyDatasets() const
+{
+    return _proxyDatasets;
+}
+
+void DatasetImpl::setProxyDatasets(const Datasets& proxyDatasets)
+{
+    try
+    {
+        if (proxyDatasets.isEmpty())
+            throw std::runtime_error("Proxy dataset requires at least one input dataset");
+
+        for (auto proxyDataset : proxyDatasets)
+            if (proxyDataset->getDataType() != getDataType())
+                throw std::runtime_error("All datasets should be of the same data type");
+
+        _proxyDatasets = proxyDatasets;
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to set proxy datasets for " + getGuiName(), e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to set proxy datasets for " + getGuiName());
+    }
+}
+
+bool DatasetImpl::mayProxy(const Datasets& proxyDatasets) const
+{
+    for (auto proxyDataset : proxyDatasets)
+        if (proxyDataset->getDataType() != getDataType())
+            return false;
+
+    return true;
+}
+
+bool DatasetImpl::isProxy() const
+{
+    return !_proxyDatasets.isEmpty();
 }
 
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)

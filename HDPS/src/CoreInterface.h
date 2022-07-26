@@ -180,6 +180,16 @@ protected: // Data access
         return Dataset<DatasetType>(dynamic_cast<DatasetType*>(requestSelection(rawDataName).get()));
     }
 
+public: // Data grouping
+
+    /**
+     * Groups \p datasets into one dataset
+     * @param datasets Two or more datasets to group
+     * @param guiName Name of the created dataset in the GUI
+     * @return Smart pointer to created dataset
+     */
+    virtual Dataset<DatasetImpl> groupData(const Datasets& datasets, const QString& guiName) = 0;
+
 public: // Plugin creation
 
     /**

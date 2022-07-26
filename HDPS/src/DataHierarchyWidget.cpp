@@ -50,7 +50,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView.setDragEnabled(true);
     _treeView.setDragDropMode(QAbstractItemView::DragOnly);
     _treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
-    _treeView.setSelectionMode(QAbstractItemView::MultiSelection);
+    _treeView.setSelectionMode(QAbstractItemView::ExtendedSelection);
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
 
@@ -239,6 +239,17 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         addMenu(plugin::Type::TRANSFORMATION);
         addMenu(plugin::Type::VIEW);
         
+        auto groupDataAction = new QAction("Group");
+
+        groupDataAction->setToolTip("Group datasets into one");
+        groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("layer-group"));
+
+        connect(groupDataAction, &QAction::triggered, [this, selectedDatasets]() -> void {
+            Application::core()->groupData(selectedDatasets, "Group");
+        });
+
+        contextMenu->addAction(groupDataAction);
+
         contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
     });
 
