@@ -32,7 +32,7 @@ Dataset<DatasetImpl> ColorData::createDataSet() const
 // Color Data Set
 // =============================================================================
 
-QIcon Colors::getIcon() const
+QIcon Colors::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return QIcon();
 }
@@ -79,9 +79,9 @@ void Colors::selectInvert()
 {
 }
 
-QIcon ColorDataFactory::getIcon() const
+QIcon ColorDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("palette");
+    return hdps::Application::getIconFont("FontAwesome").getIcon("palette", color);
 }
 
 // =============================================================================

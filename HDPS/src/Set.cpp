@@ -4,6 +4,8 @@
 
 #include <util/Serialization.h>
 
+#include <QPainter>
+
 namespace hdps
 {
 
@@ -153,6 +155,8 @@ void DatasetImpl::setProxyDatasets(const Datasets& proxyDatasets)
                 throw std::runtime_error("All datasets should be of the same data type");
 
         _proxyDatasets = proxyDatasets;
+
+        setStorageType(StorageType::Proxy);
     }
     catch (std::exception& e)
     {
@@ -200,6 +204,51 @@ QMenu* DatasetImpl::getContextMenu(QWidget* parent /*= nullptr*/)
 void DatasetImpl::populateContextMenu(QMenu* contextMenu)
 {
     return getDataHierarchyItem().populateContextMenu(contextMenu);
+}
+
+hdps::DatasetImpl::StorageType DatasetImpl::getStorageType() const
+{
+    return _storageType;
+}
+
+void DatasetImpl::setStorageType(const StorageType& storageType)
+{
+    if (storageType == _storageType)
+        return;
+
+    _storageType = storageType;
+
+    getDataHierarchyItem().setIconByName("data", getIcon(_storageType));
+}
+
+QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::black*/) const
+{
+    switch (storageType)
+    {
+        case StorageType::Owner:
+            return getIcon(color);
+
+        case StorageType::Proxy:
+        {
+            /*
+            const QSize size(64, 64);
+
+            QPixmap pixmap(size);
+
+            QPainter painter(&pixmap);
+
+            painter.setOpacity(0.5);
+            painter.drawPixmap(0, 0, ownerIcon.pixmap(size));
+            */
+
+            return getIcon(color.lighter());
+        }
+
+        default:
+            break;
+    }
+
+    return QIcon();
 }
 
 }

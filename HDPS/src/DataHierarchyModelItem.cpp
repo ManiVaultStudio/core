@@ -176,43 +176,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     break;
 
                 case Column::GroupIndex:
-                {
                     break;
-
-                    // Get the group index of the dataset
-                    const auto groupIndex = getDataAtColumn(column, Qt::EditRole).toInt();
-
-                    if (groupIndex < 0)
-                        break;
-
-                    const auto size = QSize(100, 100);
-
-                    QPixmap pixmap(size);
-
-                    pixmap.fill(Qt::transparent);
-
-                    const auto iconRectangle = QRect(0, 0, size.width(), size.height());
-
-                    QPainter painter(&pixmap);
-
-                    painter.setRenderHint(QPainter::Antialiasing);
-
-                    // Seed the random number generator with the group index
-                    rng.seed(groupIndex);
-
-                    const auto randomHue        = rng.bounded(360);
-                    const auto randomSaturation = rng.bounded(150, 255);
-                    const auto randomLightness  = rng.bounded(50, 200);
-
-                    painter.setBrush(QColor::fromHsl(randomHue, randomSaturation, randomLightness));
-                    painter.drawEllipse(iconRectangle);
-
-                    painter.setPen(Qt::white);
-                    painter.setFont(QFont("Arial", 50, 200));
-                    painter.drawText(iconRectangle, QString::number(groupIndex), QTextOption(Qt::AlignCenter));
-
-                    return QIcon(pixmap);
-                }
 
                 case Column::Analysis:
                     return _dataHierarchyItem->getIconByName("analysis");

@@ -834,8 +834,12 @@ public:
      */
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
-    /** Get icon for the dataset */
-    QIcon getIcon() const override;
+    /**
+     * Get set icon
+     * @param color Global icon color (for font icons)
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
 public: // Selection
 
@@ -919,8 +923,12 @@ public:
     PointDataFactory(void) {}
     ~PointDataFactory(void) override {}
 
-    /** Returns the plugin icon */
-    QIcon getIcon() const override;
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     hdps::plugin::RawData* produce() override;
 };

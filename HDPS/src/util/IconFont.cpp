@@ -77,35 +77,64 @@ QFont IconFont::getFont(const int& pointSize /*= -1*/) const
     return QFont(_fontFamily, pointSize);
 }
 
-QIcon IconFont::getIcon(const QString& name, const QSize& size /*= QSize(16, 16)*/, const QColor& foregroundColor/*= QColor(0, 0, 0, 255)*/, const QColor& backgroundColor/*= Qt::transparent*/) const
+QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QColor(0, 0, 0, 255)*/, const QColor& backgroundColor/*= Qt::transparent*/) const
 {
     try
     {
-        QPixmap pixmap(size);
+        QSize pixmapSize(64, 64);
+
+        QPixmap pixmap(pixmapSize);
 
         pixmap.fill(backgroundColor);
 
-        const auto iconRectangle    = QRect(0, 0, size.width(), size.height());
+        const auto iconRectangle    = QRect(0, 0, pixmapSize.width(), pixmapSize.height());
         const auto iconText         = getIconCharacter(name);
 
         QPainter painter(&pixmap);
 
         painter.setRenderHint(QPainter::Antialiasing);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+        painter.setRenderHint(QPainter::LosslessImageRendering, true);
         painter.setPen(foregroundColor);
-        painter.setFont(getFont(9.5));
+        painter.setFont(getFont(100.0));
 
         QFontMetrics fontMetrics(painter.font());
 
-        const auto scaleX       = iconRectangle.width() * 1.0 / fontMetrics.horizontalAdvance(iconText);
-        const auto scaleY       = iconRectangle.height() * 1.0 / fontMetrics.height();
-        const auto scaleOverall = std::min(scaleX, scaleY);
+        const auto boundingRectangle = fontMetrics.boundingRect(iconText);
 
-        //painter.translate(iconRectangle.center());
-        //painter.scale(scaleOverall, scaleOverall);
-        //painter.translate(-iconRectangle.center());
-        painter.drawText(iconRectangle, Qt::AlignCenter, iconText);
+        QRect windowRectangle = boundingRectangle;
 
-        return QIcon(pixmap);
+        if (windowRectangle.height() > windowRectangle.width())
+            windowRectangle.setWidth(windowRectangle.height());
+
+        if (windowRectangle.width() > windowRectangle.height())
+            windowRectangle.setHeight(windowRectangle.width());
+
+        const auto margin = 5;
+
+        windowRectangle = windowRectangle.marginsAdded(QMargins(margin, margin, margin, margin));
+
+        painter.setWindow(windowRectangle);
+        painter.drawText(windowRectangle, Qt::AlignCenter, iconText);
+
+        const auto iconSizes = QList({
+            QSize(64, 64),
+            QSize(32, 32),
+            QSize(24, 24),
+            QSize(16, 16),
+            QSize(8, 8)
+        });
+
+        QIcon icon;
+
+        const auto addPixmap = [&icon, &pixmap, &pixmapSize](const QSize& iconSize) -> void {
+            icon.addPixmap(pixmap.scaled(iconSize, Qt::AspectRatioMode::KeepAspectRatio, Qt::TransformationMode::SmoothTransformation));
+        };
+        
+        for (const auto& iconSize : iconSizes)
+            addPixmap(iconSize);
+
+        return icon;
     }
     catch (std::exception& e)
     {

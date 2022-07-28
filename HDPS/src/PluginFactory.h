@@ -73,8 +73,12 @@ public: // Version
 
 public:
 
-    /** Returns the plugin icon */
-    virtual QIcon getIcon() const = 0;
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    virtual QIcon getIcon(const QColor& color = Qt::black) const = 0;
 
     /**
      * Produces the plugin

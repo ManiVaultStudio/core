@@ -60,14 +60,13 @@ public: // Getters
     const IconFont& getIconFont(const QString& name, const std::int32_t& majorVersion = -1, const std::int32_t& minorVersion = -1) const;
 
     /**
-     * Get icon by \p fontName, \p iconName, \p iconSize, \p iconForegroundGolor and \p iconBackgroundColor
+     * Get icon by \p fontName, \p iconName, \p iconForegroundGolor and \p iconBackgroundColor
      * @param fontName Name of the icon font
      * @param iconName Name of the icon
-     * @param iconSize Size of the icon
      * @param iconForegroundGolor Foreground color of the icon
      * @param iconBackgroundColor Background color of the icon
     */
-    QIcon getIcon(const QString& fontName, const QString& iconName, const QSize& iconSize = QSize(24, 24), const QColor& iconForegroundGolor = QColor(0, 0, 0, 255), const QColor& iconBackgroundColor = Qt::transparent) const;
+    QIcon getIcon(const QString& fontName, const QString& iconName, const QColor& iconForegroundGolor = QColor(0, 0, 0, 255), const QColor& iconBackgroundColor = Qt::transparent) const;
 
     /** Returns a list of the installed icon font names */
     QStringList getFontNames() const;

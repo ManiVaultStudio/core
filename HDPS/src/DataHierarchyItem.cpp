@@ -480,32 +480,37 @@ void DataHierarchyItem::setTaskAborted()
     setLocked(false);
 }
 
-DataHierarchyItem::IconList DataHierarchyItem::getIcons() const
+DataHierarchyItem::IconMap DataHierarchyItem::getIcons() const
 {
     return _namedIcons;
 }
 
 void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
 {
-    _namedIcons << NamedIcon(name, icon);
+    _namedIcons[name] = icon;
+}
+
+void DataHierarchyItem::setIconByName(const QString& name, const QIcon& icon)
+{
+    if (!_namedIcons.contains(name))
+        return;
+
+    _namedIcons[name] = icon;
+
+    emit iconChanged(name, icon);
 }
 
 void DataHierarchyItem::removeIcon(const QString& name)
 {
-    // Loop over all icons and remove them from the list if it matches the name
-    for (const auto& namedIcon : _namedIcons)
-        if (name == namedIcon.first)
-            _namedIcons.removeOne(namedIcon);
+    _namedIcons.remove(name);
 }
 
 QIcon DataHierarchyItem::getIconByName(const QString& name) const
 {
-    // Loop over all icons and return it if it matches the name
-    for (const auto& namedIcon : _namedIcons)
-        if (name == namedIcon.first)
-            return namedIcon.second;
+    if (!_namedIcons.contains(name))
+        return QIcon();
 
-    return QIcon();
+    return _namedIcons[name];
 }
 
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)

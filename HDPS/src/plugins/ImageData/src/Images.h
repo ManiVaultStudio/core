@@ -112,8 +112,12 @@ public: // Image retrieval functions
     /** Get the rectangle which bounds the visible pixels */
     QRect getVisibleRectangle() const;
 
-    /** Get icon for the dataset */
-    QIcon getIcon() const override;
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
 public: // Selection
 

@@ -116,7 +116,7 @@ ProjectBarWidget::ProjectActionWidget::ProjectActionWidget(const QIcon& icon, co
     const auto& fontAwesome = Application::getIconFont("FontAwesome");
 
     if (!icon.isNull()) {
-        _iconLabel.setPixmap(icon.pixmap(QSize(32, 32)));
+        _iconLabel.setPixmap(icon.pixmap(QSize(24, 24)));
         _iconLabel.setFixedWidth(24);
         _iconLabel.setStyleSheet("QLabel { margin-left: 2px}");
     }

@@ -115,9 +115,9 @@ QRect Images::getVisibleRectangle() const
     return _visibleRectangle;
 }
 
-QIcon Images::getIcon() const
+QIcon Images::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("images");
+    return hdps::Application::getIconFont("FontAwesome").getIcon("images", color);
 }
 
 std::vector<std::uint32_t>& Images::getSelectionIndices()

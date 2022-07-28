@@ -518,9 +518,9 @@ Dataset<DatasetImpl> Points::createSubsetFromSelection(const QString& guiName, c
     return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
-QIcon Points::getIcon() const
+QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("database");
+    return hdps::Application::getIconFont("FontAwesome").getIcon("database", color);
 
     /*
     const auto size = QSize(100, 100);
@@ -785,9 +785,9 @@ QVariantMap Points::toVariantMap() const
 // Factory
 // =============================================================================
 
-QIcon PointDataFactory::getIcon() const
+QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("circle");
+    return Application::getIconFont("FontAwesome").getIcon("circle", color);
 }
 
 hdps::plugin::RawData* PointDataFactory::produce()

@@ -46,13 +46,8 @@ public:
         Aborted             /** Task has been aborted */
     };
 
-public:
-
-    /** Named icon */
-    using NamedIcon = QPair<QString, QIcon>;
-
-    /** List of named icons */
-    using IconList = QList<NamedIcon>;
+    /** Map of named icons */
+    using IconMap = QMap<QString, QIcon>;
 
 public:
 
@@ -282,8 +277,8 @@ public: // Tasks
 
 public: // Named icons
 
-    /** Gets list of named icons */
-    IconList getIcons() const;
+    /** Gets map of named icons */
+    IconMap getIcons() const;
 
     /**
      * Add named icon
@@ -291,6 +286,13 @@ public: // Named icons
      * @param icon Icon
      */
     void addIcon(const QString& name, const QIcon& icon);
+
+    /**
+     * Set icon by \p name
+     * @param name Name of the icon
+     * @param icon Icon
+     */
+    void setIconByName(const QString& name, const QIcon& icon);
 
     /**
      * Remove icon by name
@@ -346,6 +348,13 @@ signals:
     void actionAdded(hdps::gui::WidgetAction& widgetAction);
 
     /**
+     * Signals that the set icon has changed
+     * @param name Name of the icon
+     * @param icon Set icon
+     */
+    void iconChanged(const QString& name, const QIcon& icon);
+
+    /**
      * Signals that the dataset name changed
      * @param datasetName New name of the dataset
      */
@@ -390,7 +399,7 @@ protected:
     TaskStatus                  _taskStatus;            /** Status of the current task */
     QTimer                      _taskDescriptionTimer;  /** Task description timer which prevents excessive successive GUI updates */
     QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
-    IconList                    _namedIcons;            /** Named icons */
+    IconMap                     _namedIcons;            /** Named icons */
     hdps::gui::WidgetActions    _actions;               /** Widget actions */
     DataRemoveAction            _dataRemoveAction;      /** Data remove action */
     DataCopyAction              _dataCopyAction;        /** Data copy action */
@@ -418,15 +427,4 @@ inline QDebug operator << (QDebug debug, const DataHierarchyItem& dataHierarchyI
     return debug.space();
 }
 
-}
-
-/**
- * Compares two named icons
- * @param lhs Left hand side icon
- * @param rhs Right hand side icon
- * @return Whether the icons are equal
- */
-inline bool operator == (const hdps::DataHierarchyItem::NamedIcon& lhs, const hdps::DataHierarchyItem::NamedIcon& rhs)
-{
-    return lhs.first == rhs.first;
 }

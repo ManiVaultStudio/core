@@ -53,6 +53,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView.setSelectionMode(QAbstractItemView::ExtendedSelection);
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
+    _treeView.setIconSize(QSize(14, 14));
 
     _treeView.header()->setStretchLastSection(false);
     _treeView.header()->setMinimumSectionSize(18);
@@ -289,17 +290,11 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
 
         // Update the model when the data hierarchy item task description changes
         connect(&dataHierarchyItem, &DataHierarchyItem::taskDescriptionChanged, this, [this, dataset](const QString& description) {
-
-            // Notify others that the description changed
             _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Description), description);
         });
 
         // Update the model when the data hierarchy item task progress changes
         connect(&dataHierarchyItem, &DataHierarchyItem::taskProgressChanged, this, [this, dataset](const float& progress) {
-
-            //qDebug() << "DataHierarchyItem::taskProgressChanged" << progress;
-
-            // Notify others that the progress changed
             _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Progress), progress);
             _model.setData(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Analyzing), progress > 0.0f);
         });
@@ -317,9 +312,12 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
 
         // Update the model when the data hierarchy item locked status changes
         connect(&dataHierarchyItem, &DataHierarchyItem::lockedChanged, this, [this, dataset](const bool& locked) {
-
-            // Notify others that the locked state changed
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Locked));
+        });
+
+        // Update the model when the data hierarchy item icon changes
+        connect(&dataHierarchyItem, &DataHierarchyItem::iconChanged, this, [this, dataset](const QString& name, const QIcon& icon) {
+            emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name));
         });
 
         // Set model item expansion
