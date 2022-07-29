@@ -154,6 +154,9 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     fullSet->setGuiName(dataSetGuiName);
     fullSet->setAll(true);
 
+    // Set pointer of full dataset to itself just to avoid having to be wary of this not being set
+    fullSet->_fullDataset = fullSet;
+
     // Add them to the data manager
     _dataManager->addSet(fullSet);
 
@@ -309,6 +312,9 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
 
         subset->setAll(false);
         subset->setGuiName(guiName);
+
+        // Set a pointer to the original full dataset, if the source is another subset, we take their pointer
+        subset->_fullDataset = sourceDataset->isFull() ? sourceDataset : sourceDataset->_fullDataset;
 
         // Add the set the core and publish the name of the set to all plug-ins
         _dataManager->addSet(*subset);
