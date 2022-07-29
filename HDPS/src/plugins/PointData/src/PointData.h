@@ -812,6 +812,8 @@ public:
      */
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
+    std::vector<hdps::LinkedSelection>& getLinkedSelection() { return _linkedSelections; }
+
     /** Get icon for the dataset */
     QIcon getIcon() const override;
 
