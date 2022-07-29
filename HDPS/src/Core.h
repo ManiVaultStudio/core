@@ -176,12 +176,12 @@ public: // Plugin creation
 public: // Plugin queries
 
     /**
-     * Get plugin actions by plugin type and data types (of the selected datasets in the data hierarchy)
+     * Get plugin trigger actions by plugin type and data types (of the selected datasets in the data hierarchy)
      * @param pluginType Type of plugin e.g. analysis, exporter
      * @param datasets Selected dataset(s)
-     * @return Vector of plugin producer actions
+     * @return Vector of plugin producer trigger actions
      */
-    QList<QAction*> getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const;
+    QList<gui::TriggerAction*> getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const;
 
     /**
      * Get plugin GUI name from plugin kind

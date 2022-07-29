@@ -15,6 +15,11 @@ namespace hdps
 {
     class DatasetImpl;
 
+    namespace gui
+    {
+        class TriggerAction;
+    }
+
 namespace plugin
 {
 
@@ -87,12 +92,12 @@ public:
     virtual Plugin* produce() = 0;
 
     /**
-     * Get a list of producer actions given a sequence of input dataset types
+     * Get a list of producer trigger actions given a sequence of input dataset types
      * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
-     * @return List of producer actions with which one (or more) plugins can be triggered
+     * @return List of producer trigger actions with which one (or more) plugins can be triggered
      */
-    virtual QList<QAction*> getProducers(const Datasets& datasets) const {
-        return QList<QAction*>();
+    virtual QList<gui::TriggerAction*> getProducers(const Datasets& datasets) const {
+        return QList<gui::TriggerAction*>();
     }
 
 protected:
@@ -120,30 +125,30 @@ protected:
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const QString& datasetType);
 
     /**
-     * Convenience function for generating a plugin producer action (icon from the plugin factory)
+     * Convenience function for generating a plugin producer trigger action (icon from the plugin factory)
      * @param title Title of the producer
      * @param description Description of the producer
-     * @return Pointer to plugin producer action
+     * @return Pointer to plugin producer trigger action
      */
-    QAction* createProducerAction(const QString& title, const QString& description) const;
+    gui::TriggerAction* createProducerAction(const QString& title, const QString& description) const;
 
     /**
-     * Convenience function for generating a plugin producer action
+     * Convenience function for generating a plugin producer trigger action
      * @param title Title of the producer
      * @param description Description of the producer
      * @param iconName Name of the icon
-     * @return Pointer to plugin producer action
+     * @return Pointer to plugin producer trigger action
      */
-    QAction* createProducerAction(const QString& title, const QString& description, const QString& iconName) const;
+    gui::TriggerAction* createProducerAction(const QString& title, const QString& description, const QString& iconName) const;
 
     /**
-     * Convenience function for generating a plugin producer action
+     * Convenience function for generating a plugin producer trigger action
      * @param title Title of the producer
      * @param description Description of the producer
      * @param icon Icon
-     * @return Pointer to plugin producer action
+     * @return Pointer to plugin producer trigger action
      */
-    QAction* createProducerAction(const QString& title, const QString& description, const QIcon& icon) const;
+    gui::TriggerAction* createProducerAction(const QString& title, const QString& description, const QIcon& icon) const;
 
 private:
     QString     _kind;          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */

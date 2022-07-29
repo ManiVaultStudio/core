@@ -11,8 +11,6 @@
 #include <vector>
 #include <functional>
 
-class QAction;
-
 namespace hdps
 {
     class DatasetImpl;
@@ -31,6 +29,11 @@ namespace hdps
         class AnalysisPlugin;
         class ViewPlugin;
         class TransformationPlugin;
+    }
+
+    namespace gui
+    {
+        class TriggerAction;
     }
 
 class CoreInterface : public hdps::gui::WidgetAction
@@ -215,12 +218,12 @@ public: // Plugin creation
 public: // Plugin queries
 
     /**
-     * Get plugin actions by plugin type and data types (of the selected datasets in the data hierarchy)
+     * Get plugin trigger actions by plugin type and data types (of the selected datasets in the data hierarchy)
      * @param pluginType Type of plugin e.g. analysis, exporter
      * @param datasets Selected dataset(s)
-     * @return Vector of plugin producer actions
+     * @return Vector of plugin producer trigger actions
      */
-    virtual QList<QAction*> getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const = 0;
+    virtual QList<gui::TriggerAction*> getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const = 0;
 
     /**
      * Get plugin GUI name from plugin kind

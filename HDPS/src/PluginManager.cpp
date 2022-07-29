@@ -277,9 +277,9 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
     }
 }
 
-QList<QAction*> PluginManager::getPluginActionsByPluginTypeAndDatasets(const Type& pluginType, const Datasets& datasets) const
+QList<TriggerAction*> PluginManager::getPluginActionsByPluginTypeAndDatasets(const Type& pluginType, const Datasets& datasets) const
 {
-    QList<QAction*> pluginProducerActions;
+    QList<TriggerAction*> pluginProducerActions;
 
     for (auto pluginFactory : _pluginFactories)
         if (pluginFactory->getType() == pluginType)

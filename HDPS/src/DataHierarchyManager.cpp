@@ -1,7 +1,7 @@
 #include "DataHierarchyManager.h"
 #include "DataManager.h"
 
-#include "util/Exception.h"
+#include <util/Exception.h>
 
 #include <QMessageBox>
 
@@ -14,8 +14,7 @@ namespace hdps
 
 DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     WidgetAction(parent),
-    _items(),
-    _selectedItems()
+    _items()
 {
     setText("Data hierarchy");
     setObjectName("Hierarchy");
@@ -179,19 +178,6 @@ void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
     // Notify others that the selected items changed
     */
     emit selectedItemsChanged(selectedItems);
-}
-
-void DataHierarchyManager::removeSelectedItem(DataHierarchyItem& dataHierarchyItem)
-{
-    // Only remove the item if it is part of the selection
-    if (!_selectedItems.contains(&dataHierarchyItem))
-        return;
-
-    // Remove the item from the selected items
-    _selectedItems.removeOne(&dataHierarchyItem);
-
-    // Notify others that the selected items changed
-    emit selectedItemsChanged(_selectedItems);
 }
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)

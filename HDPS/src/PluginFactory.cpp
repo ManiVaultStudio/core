@@ -1,6 +1,6 @@
 #include "PluginFactory.h"
-
 #include "Set.h"
+#include "actions/TriggerAction.h"
 
 namespace hdps
 {
@@ -37,9 +37,9 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
     return numberOfDatasetsForType;
 }
 
-QAction* PluginFactory::createProducerAction(const QString& title, const QString& description) const
+TriggerAction* PluginFactory::createProducerAction(const QString& title, const QString& description) const
 {
-    auto action = new QAction(title);
+    auto action = new TriggerAction(nullptr, title);
 
     action->setToolTip(description);
     action->setIcon(getIcon());
@@ -47,9 +47,9 @@ QAction* PluginFactory::createProducerAction(const QString& title, const QString
     return action;
 }
 
-QAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QString& iconName) const
+TriggerAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QString& iconName) const
 {
-    auto action = new QAction(title);
+    auto action = new TriggerAction(nullptr, title);
 
     action->setToolTip(description);
     action->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon(iconName));
@@ -57,9 +57,9 @@ QAction* PluginFactory::createProducerAction(const QString& title, const QString
     return action;
 }
 
-QAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QIcon& icon) const
+TriggerAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QIcon& icon) const
 {
-    auto action = new QAction(title);
+    auto action = new TriggerAction(nullptr, title);
 
     action->setToolTip(description);
     action->setIcon(icon);

@@ -34,8 +34,6 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
 void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
 {
-    qDebug() << "selectedItemsChanged" << selectedItems.count();
-
     try
     {
         // Reset when the selection is empty
@@ -43,35 +41,76 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
             _groupsAction.setGroupActions({});
         }
         else {
-            if (_dataset.isValid())
-                disconnect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
-
-            _dataset = selectedItems.first()->getDataset();
-
-            if (_dataset.isValid())
-            {
-                connect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
-                    auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
-
-                    if (groupAction)
-                        _groupsAction.addGroupAction(groupAction);
-                    });
-            }
-
-            if (!_dataset.isValid())
-                return;
-
-#ifdef _DEBUG
-            qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->getGuiName());
-#endif
-
             GroupsAction::GroupActions groupActions;
 
-            for (auto childObject : _dataset->children()) {
-                auto groupAction = dynamic_cast<GroupAction*>(childObject);
+            if (selectedItems.count() == 1) {
+                if (_dataset.isValid())
+                    disconnect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, nullptr);
 
-                if (groupAction)
+                _dataset = selectedItems.first()->getDataset();
+
+                if (_dataset.isValid())
+                {
+                    connect(&_dataset->getDataHierarchyItem(), &DataHierarchyItem::actionAdded, this, [this](WidgetAction& widgetAction) {
+                        auto groupAction = dynamic_cast<GroupAction*>(&widgetAction);
+
+                        if (groupAction)
+                            _groupsAction.addGroupAction(groupAction);
+                     });
+                }
+
+                if (!_dataset.isValid())
+                    return;
+
+#ifdef _DEBUG
+                qDebug().noquote() << QString("Loading %1 into data properties").arg(_dataset->getGuiName());
+#endif
+
+                for (auto childObject : _dataset->children()) {
+                    auto groupAction = dynamic_cast<GroupAction*>(childObject);
+
+                    if (groupAction)
+                        groupActions << groupAction;
+                }
+            }
+            else {
+                Datasets datasets;
+
+                for (const auto& selectedItem : selectedItems)
+                    datasets << selectedItem->getDataset();
+
+                auto groupAction = new GroupAction(nullptr, true);
+
+                groupAction->setText("Actions");
+                groupAction->setToolTip("Actions for the current selection");
+                groupAction->setShowLabels(false);
+
+                QVector<WidgetAction*> triggerActions;
+
+                const auto createPluginTypeActionsGroup = [datasets, &groupActions, groupAction, &triggerActions](const plugin::Type& type) -> void {
+                    for (auto triggerAction : hdps::Application::core()->getPluginActionsByPluginTypeAndDatasets(type, datasets)) {
+                        switch (type)
+                        {
+                            case plugin::Type::VIEW:        triggerAction->setText(QString("View %1").arg(triggerAction->text()));      break;
+                            case plugin::Type::ANALYSIS:    triggerAction->setText(QString("Analyze %1").arg(triggerAction->text()));   break;
+                            case plugin::Type::WRITER:      triggerAction->setText(QString("Export %1").arg(triggerAction->text()));    break;
+
+                            default:
+                                break;
+                        }
+
+                        triggerActions << triggerAction;
+                    }
+                };
+
+                createPluginTypeActionsGroup(plugin::Type::VIEW);
+                createPluginTypeActionsGroup(plugin::Type::ANALYSIS);
+                createPluginTypeActionsGroup(plugin::Type::WRITER);
+
+                if (!triggerActions.isEmpty()) {
+                    groupAction->setActions(triggerActions);
                     groupActions << groupAction;
+                }
             }
 
             _groupsAction.setGroupActions(groupActions);

@@ -26,9 +26,7 @@ class GroupsAction : public WidgetAction
     Q_OBJECT
 
 public:
-    class GroupActions : public QVector<GroupAction*>
-    {
-    };
+    using GroupActions = QVector<GroupAction*>;
 
 public:
 
