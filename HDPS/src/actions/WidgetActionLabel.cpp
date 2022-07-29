@@ -51,6 +51,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     setLayout(layout);
 
     _nameLabel.setAlignment(Qt::AlignRight);
+    _nameLabel.setStyleSheet("color: black;");
     //_nameLabel.setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     //_nameLabel.setMinimumWidth(1);
 
@@ -138,7 +139,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
         case QEvent::Enter:
         {
             if (_widgetAction->isEnabled() && _widgetAction->mayPublish())
-                setStyleSheet("QLabel { text-decoration: underline; }");
+                _nameLabel.setStyleSheet("color: gray;");
 
             break;
         }
@@ -146,7 +147,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
         case QEvent::Leave:
         {
             if (_widgetAction->isEnabled() && _widgetAction->mayPublish())
-                setStyleSheet("QLabel { text-decoration: none; }");
+                _nameLabel.setStyleSheet("color: black;");
 
             break;
         }
@@ -203,11 +204,12 @@ void WidgetActionLabel::updatePublishAction()
 
 void WidgetActionLabel::updateLabel()
 {
-    if (_widgetAction->mayPublish()) {
-        auto font = _nameLabel.font();
-        font.setItalic(_widgetAction->isConnected());
-        _nameLabel.setFont(font);
-    }
+    auto font = _nameLabel.font();
+
+    font.setUnderline(_widgetAction->mayPublish());
+    font.setItalic(_widgetAction->mayPublish() && _widgetAction->isConnected());
+
+    _nameLabel.setFont(font);
 }
 
 void WidgetActionLabel::publishAction()

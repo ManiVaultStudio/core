@@ -285,6 +285,7 @@ set( UTIL_HEADERS
     src/util/Exception.h
     src/util/Math.h
     src/util/Timer.h
+    src/util/Icon.h
     src/util/IconFont.h
     src/util/IconFonts.h
     src/util/Interpolation.h
@@ -309,6 +310,7 @@ set( UTIL_SOURCES
     src/util/Exception.cpp
     src/util/Math.cpp
     src/util/Timer.cpp
+    src/util/Icon.cpp
     src/util/IconFont.cpp
     src/util/IconFonts.cpp
     src/util/Interpolation.cpp

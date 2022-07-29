@@ -3,8 +3,11 @@
 #include "AnalysisPlugin.h"
 
 #include <util/Serialization.h>
+#include <util/Icon.h>
 
 #include <QPainter>
+
+using namespace hdps::gui;
 
 namespace hdps
 {
@@ -230,18 +233,46 @@ QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::
 
         case StorageType::Proxy:
         {
-            /*
+            auto backgroundColor = color, foregroundColor = color;
+
+            const auto maxContrast = 0.6f;
+
+            backgroundColor.setHslF(color.hueF(), color.saturationF(), 0.6f);
+            foregroundColor.setHslF(color.hueF(), color.saturationF(), 0.1f);
+
+            
             const QSize size(64, 64);
 
             QPixmap pixmap(size);
 
+            pixmap.fill(Qt::transparent);
+
             QPainter painter(&pixmap);
 
-            painter.setOpacity(0.5);
-            painter.drawPixmap(0, 0, ownerIcon.pixmap(size));
-            */
+            const auto rectangle = QRect(QPoint(), QSize(64, 64));
 
-            return getIcon(color.lighter());
+            /**/
+            //const auto badgeLocation = QPoint(20, 20);
+
+            QVector<QPoint> points {
+                rectangle.center()
+            };
+
+            //painter.setPen(QPen(foregroundColor, 40.0, Qt::SolidLine, Qt::RoundCap));
+            //painter.drawPoints(points);
+            
+            //painter.drawPixmap(0, 0, Application::getIconFont("FontAwesome").getIcon("long-arrow-alt-right", foregroundColor).pixmap(QSize(64, 64)));
+
+            auto font = QFont("Arial", 36);
+
+            font.setBold(true);
+
+            painter.setFont(font);
+            painter.setPen(foregroundColor);
+            painter.drawText(rectangle, "*", QTextOption(Qt::AlignCenter));
+
+            return createOverlayIcon(getIcon(backgroundColor), pixmap);
+            //return createOverlayIcon(getIcon(backgroundColor), );
         }
 
         default:

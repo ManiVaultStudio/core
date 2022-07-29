@@ -1,4 +1,5 @@
 #include "IconFont.h"
+#include "Icon.h"
 
 #include <stdexcept>
 
@@ -6,6 +7,8 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QPainter>
+
+using namespace hdps::gui;
 
 namespace hdps {
 
@@ -110,31 +113,14 @@ QIcon IconFont::getIcon(const QString& name, const QColor& foregroundColor/*= QC
         if (windowRectangle.width() > windowRectangle.height())
             windowRectangle.setHeight(windowRectangle.width());
 
-        const auto margin = 5;
+        const auto margin = 2;
 
         windowRectangle = windowRectangle.marginsAdded(QMargins(margin, margin, margin, margin));
 
         painter.setWindow(windowRectangle);
         painter.drawText(windowRectangle, Qt::AlignCenter, iconText);
 
-        const auto iconSizes = QList({
-            QSize(64, 64),
-            QSize(32, 32),
-            QSize(24, 24),
-            QSize(16, 16),
-            QSize(8, 8)
-        });
-
-        QIcon icon;
-
-        const auto addPixmap = [&icon, &pixmap, &pixmapSize](const QSize& iconSize) -> void {
-            icon.addPixmap(pixmap.scaled(iconSize, Qt::AspectRatioMode::KeepAspectRatio, Qt::TransformationMode::SmoothTransformation));
-        };
-        
-        for (const auto& iconSize : iconSizes)
-            addPixmap(iconSize);
-
-        return icon;
+        return createIcon(pixmap);
     }
     catch (std::exception& e)
     {

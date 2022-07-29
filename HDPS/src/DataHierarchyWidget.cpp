@@ -127,11 +127,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         _filterModel.setFilterRegularExpression(value);
     });
 
-    // Notify others that the dataset selection changed when the current row in the model changed
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-
         /*
-        // Only proceed with a valid selection
         if (selected.indexes().isEmpty())
             return;
 
