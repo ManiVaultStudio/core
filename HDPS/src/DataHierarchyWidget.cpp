@@ -128,20 +128,17 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        /*
+        
         if (selected.indexes().isEmpty())
             return;
 
-        QSet<DataHierarchyItem*> dataHierarchyItems;
+        DataHierarchyItems dataHierarchyItems;
 
         // Gather selected data hierarchy items
-        for (const auto& index : selected.indexes())
-            dataHierarchyItems.insert(_model.getItem(selected.indexes().first(), Qt::DisplayRole)->getDataHierarchyItem());
+        for (const auto& index : _selectionModel.selectedRows())
+            dataHierarchyItems << _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
 
-        // Select the items in the data hierarchy
-        auto selectedItems = QVector<DataHierarchyItem*>(dataHierarchyItems.begin(), dataHierarchyItems.end());
-        Application::core()->getDataHierarchyManager().selectItems(selectedItems);
-        */
+        Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
     });
 
     // Show/hide the overlay and header widget when the number of rows changes

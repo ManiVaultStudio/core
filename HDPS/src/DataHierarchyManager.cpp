@@ -160,11 +160,16 @@ DataHierarchyItems DataHierarchyManager::getTopLevelItems()
     return topLevelItems;
 }
 
+// TODO
 void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
 {
+    qDebug() << selectedItems.count();
+
+    /*
     if (selectedItems == _selectedItems)
         return;
 
+    
     _selectedItems = selectedItems;
 
     // Select data hierarchy items
@@ -172,7 +177,8 @@ void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
         item->setSelected(selectedItems.contains(item));
 
     // Notify others that the selected items changed
-    emit selectedItemsChanged(_selectedItems);
+    */
+    emit selectedItemsChanged(selectedItems);
 }
 
 void DataHierarchyManager::removeSelectedItem(DataHierarchyItem& dataHierarchyItem)
