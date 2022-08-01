@@ -178,6 +178,30 @@ signals:
      */
     void readOnlyChanged(const bool& readOnly);
 
+    /**
+     * Signals that the group show labels option changed
+     * @param showLabels Whether label are visible or not
+     */
+    void showLabelsChanged(const bool& showLabels);
+
+    /**
+     * Signals that the label sizing type changed
+     * @param labelSizingType Label sizing type
+     */
+    void labelSizingTypeChanged(const LabelSizingType& labelSizingType);
+
+    /**
+     * Signals that the label width in percentages changed
+     * @param labelWidthPercentage Label width in percentages
+     */
+    void labelWidthPercentageChanged(const std::uint32_t& labelWidthPercentage);
+
+    /**
+     * Signals that the label width in fixed pixels changed
+     * @param labelWidthFixed Label width in fixed pixels
+     */
+    void labelWidthFixedChanged(const std::uint32_t& labelWidthFixed);
+
 private:
     bool                            _expanded;                      /** Whether or not the group is expanded */
     bool                            _readOnly;                      /** Whether or not the group is read-only */

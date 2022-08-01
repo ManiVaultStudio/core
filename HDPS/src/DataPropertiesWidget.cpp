@@ -17,13 +17,17 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _dataset(),
     _layout(),
-    _groupsAction(parent)
+    _groupsAction(parent),
+    _groupsActionWidget(nullptr)
 {
     setAutoFillBackground(true);
     setLayout(&_layout);
 
     _layout.setContentsMargins(6, 6, 6, 6);
-    _layout.addWidget(_groupsAction.createWidget(parent));
+
+    _groupsActionWidget = dynamic_cast<GroupsAction::Widget*>(_groupsAction.createWidget(parent));
+
+    _layout.addWidget(_groupsActionWidget);
 
     connect(&Application::core()->getDataHierarchyManager(), &DataHierarchyManager::selectedItemsChanged, this, &DataPropertiesWidget::selectedItemsChanged);
 
@@ -72,6 +76,8 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                     if (groupAction)
                         groupActions << groupAction;
                 }
+
+                _groupsActionWidget->getFilteredActionsAction().setShowLabels(true);
             }
             else {
                 Datasets datasets;
@@ -99,6 +105,8 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                                 break;
                         }
 
+                        triggerAction->setParent(groupAction);
+
                         triggerActions << triggerAction;
                     }
                 };
@@ -107,10 +115,10 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 createPluginTypeActionsGroup(plugin::Type::ANALYSIS);
                 createPluginTypeActionsGroup(plugin::Type::WRITER);
 
-                if (!triggerActions.isEmpty()) {
-                    groupAction->setActions(triggerActions);
+                if (!triggerActions.isEmpty())
                     groupActions << groupAction;
-                }
+
+                _groupsActionWidget->getFilteredActionsAction().setShowLabels(false);
             }
 
             _groupsAction.setGroupActions(groupActions);

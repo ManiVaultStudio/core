@@ -68,6 +68,16 @@ public:
          */
         Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags);
 
+    public:
+
+        /**
+         * Get action that contains filtered actions
+         * @return Reference to filtered actions action
+         */
+        GroupAction& getFilteredActionsAction() {
+            return _filteredActionsAction;
+        }
+
     protected: // Internals
 
         /**

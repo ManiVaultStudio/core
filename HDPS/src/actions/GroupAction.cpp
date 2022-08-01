@@ -99,7 +99,7 @@ void GroupAction::setShowLabels(bool showLabels)
 
     _showLabels = showLabels;
 
-    emit actionsChanged(_widgetActions);
+    emit showLabelsChanged(_showLabels);
 }
 
 GroupAction::LabelSizingType GroupAction::getLabelSizingType() const
@@ -114,7 +114,7 @@ void GroupAction::setLabelSizingType(const LabelSizingType& labelSizingType)
 
     _labelSizingType = labelSizingType;
 
-    emit actionsChanged(_widgetActions);
+    emit labelSizingTypeChanged(_labelSizingType);
 }
 
 std::uint32_t GroupAction::getLabelWidthPercentage() const
@@ -130,7 +130,7 @@ void GroupAction::setLabelWidthPercentage(std::uint32_t labelWidthPercentage)
     _labelSizingType        = LabelSizingType::Percentage;
     _labelWidthPercentage   = labelWidthPercentage;
 
-    emit actionsChanged(_widgetActions);
+    emit labelWidthPercentageChanged(_labelWidthPercentage);
 }
 
 std::uint32_t GroupAction::getLabelWidthFixed() const
@@ -146,7 +146,7 @@ void GroupAction::setLabelWidthFixed(std::uint32_t labelWidthFixed)
     _labelSizingType    = LabelSizingType::Fixed;
     _labelWidthFixed    = labelWidthFixed;
 
-    emit actionsChanged(_widgetActions);
+    emit labelWidthFixedChanged(_labelWidthFixed);
 }
 
 void GroupAction::setActions(const QVector<WidgetAction*>& widgetActions /*= QVector<WidgetAction*>()*/)
@@ -183,35 +183,41 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())
 {
-    if (groupAction->getShowLabels()) {
-        switch (groupAction->getLabelSizingType())
-        {
-            case LabelSizingType::Auto:
-            {
-                _layout->setColumnStretch(1, 1);
-                break;
-            }
-
-            case LabelSizingType::Percentage:
-            {
-                _layout->setColumnStretch(0, groupAction->getLabelWidthPercentage());
-                _layout->setColumnStretch(1, 100 - groupAction->getLabelWidthPercentage());
-                break;
-            }
-
-            default:
-                break;
-        }
-        
-    }
-
     auto contentsMargin = _layout->contentsMargins();
 
     _layout->setContentsMargins(10, 10, 10, 10);
     
     setLayout(_layout);
 
-    const auto actionsChanged = [this, groupAction]() -> void {
+    const auto reset = [this, groupAction]() -> void {
+        qDebug() << groupAction->text() << groupAction->getShowLabels();
+
+        if (groupAction->getShowLabels()) {
+            switch (groupAction->getLabelSizingType())
+            {
+                case LabelSizingType::Auto:
+                {
+                    _layout->setColumnStretch(1, 1);
+                    break;
+                }
+
+                case LabelSizingType::Percentage:
+                {
+                    _layout->setColumnStretch(0, groupAction->getLabelWidthPercentage());
+                    _layout->setColumnStretch(1, 100 - groupAction->getLabelWidthPercentage());
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+        }
+        else {
+            _layout->setColumnStretch(0, 0);
+            _layout->setColumnStretch(1, 1);
+        }
+
         QLayoutItem* layoutItem;
 
         while ((layoutItem = layout()->takeAt(0)) != NULL)
@@ -246,11 +252,13 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
         }
     };
 
-    // Update UI when the group actions change
-    connect(groupAction, &GroupAction::actionsChanged, this, actionsChanged);
+    connect(groupAction, &GroupAction::actionsChanged, this, reset);
+    connect(groupAction, &GroupAction::showLabelsChanged, this, reset);
+    connect(groupAction, &GroupAction::labelSizingTypeChanged, this, reset);
+    connect(groupAction, &GroupAction::labelWidthPercentageChanged, this, reset);
+    connect(groupAction, &GroupAction::labelWidthFixedChanged, this, reset);
 
-    // Initial update of the actions
-    actionsChanged();
+    reset();
 }
 
 QGridLayout* GroupAction::FormWidget::layout()
