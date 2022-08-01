@@ -189,9 +189,9 @@ public: // Data grouping
      * Groups \p datasets into one dataset
      * @param datasets Two or more datasets to group
      * @param guiName Name of the created dataset in the GUI (if empty, the user will be prompted for a name)
-     * @return Smart pointer to created dataset
+     * @return Smart pointer to created group dataset
      */
-    virtual Dataset<DatasetImpl> groupData(const Datasets& datasets, const QString& guiName = "") = 0;
+    virtual Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "") = 0;
 
 public: // Plugin creation
 

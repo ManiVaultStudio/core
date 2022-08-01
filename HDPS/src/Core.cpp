@@ -413,7 +413,7 @@ bool Core::isDatasetGroupingEnabled() const
     return _datasetGroupingEnabled;
 }
 
-Dataset<DatasetImpl> Core::groupData(const Datasets& datasets, const QString& guiName /*= ""*/)
+Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString& guiName /*= ""*/)
 {
     try {
         const auto createGroupDataset = [this, &datasets](const QString& guiName) -> Dataset<DatasetImpl> {
