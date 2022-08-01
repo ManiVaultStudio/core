@@ -114,7 +114,7 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 auto groupDataAction = new TriggerAction(groupAction, "Group data");
 
                 connect(groupDataAction, &TriggerAction::triggered, this, [datasets]() -> void {
-                    hdps::Application::core()->groupData(datasets);
+                    hdps::Application::core()->groupDatasets(datasets);
                 });
 
                 triggerActions << groupDataAction;

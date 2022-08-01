@@ -240,7 +240,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("layer-group"));
 
         connect(groupDataAction, &QAction::triggered, [this, selectedDatasets]() -> void {
-            Application::core()->groupData(selectedDatasets);
+            Application::core()->groupDatasets(selectedDatasets);
         });
 
         contextMenu->addAction(groupDataAction);
