@@ -166,6 +166,18 @@ public:
     }
 
     /**
+     * Returns the original full dataset this subset was created from
+     */
+    template<typename DatasetType>
+    Dataset<DatasetType> getFullDataset() const
+    {
+        if (!_fullDataset.isValid())
+            return toSmartPointer<DatasetType>();
+
+        return _fullDataset;
+    }
+
+    /**
      * Gets the selection associated with this data set. If the data set is
      * derived then the selection of the source data will be returned. Otherwise,
      * the selection of the set's data will be returned.
@@ -529,6 +541,7 @@ private:
     bool                        _all;               /** Whether this is the full dataset */
     bool                        _derived;           /** Whether this dataset is derived from another dataset */
     Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
+    Dataset<DatasetImpl>        _fullDataset;       /** Smart pointer to the original full dataset (if this is a subset) */
     QMap<QString, QVariant>     _properties;        /** Properties map */
     std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */

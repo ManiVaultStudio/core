@@ -322,16 +322,25 @@ QIcon PluginManager::getPluginIcon(const QString& pluginKind) const
 
 void PluginManager::fromVariantMap(const QVariantMap& variantMap)
 {
-    variantMapMustContain(variantMap, "UsedPlugins");
+    try {
+        variantMapMustContain(variantMap, "UsedPlugins");
 
-    QStringList missingPluginKinds;
+        QStringList missingPluginKinds;
 
-    for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
-        if (!_pluginFactories.contains(usedPlugin.toString()))
-            missingPluginKinds << usedPlugin.toString();
+        for (const auto& usedPlugin : variantMap["UsedPlugins"].toList())
+            if (!_pluginFactories.contains(usedPlugin.toString()))
+                missingPluginKinds << usedPlugin.toString();
 
-    if (!missingPluginKinds.isEmpty())
-        throw std::runtime_error(QString("Plugins not loaded: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
+        if (!missingPluginKinds.isEmpty())
+            throw std::runtime_error(QString("One or more plugins are not available: %1").arg(missingPluginKinds.join(", ")).toLocal8Bit());
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Error(s) occurred during project loading", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Error(s) occurred during project loading");
+    }
 }
 
 QVariantMap PluginManager::toVariantMap() const

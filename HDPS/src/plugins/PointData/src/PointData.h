@@ -834,6 +834,8 @@ public:
      */
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
+    std::vector<hdps::LinkedSelection>& getLinkedSelection() { return _linkedSelections; }
+
     /**
      * Get set icon
      * @param color Global icon color (for font icons)

@@ -347,7 +347,7 @@ void ColorMapAction::ComboBoxWidget::paintEvent(QPaintEvent* paintEvent)
     const auto penColor = isEnabled() ? styleOption.palette.color(QPalette::Normal, QPalette::Shadow) : styleOption.palette.color(QPalette::Disabled, QPalette::ButtonText);
 
     // Get scaled copy of the color map image so that it fits correctly
-    colorMapImage = colorMapImage.scaled(colorMapRectangle.size(), Qt::AspectRatioMode::IgnoreAspectRatio);
+    colorMapImage = colorMapImage.scaled(colorMapRectangle.size(), Qt::AspectRatioMode::IgnoreAspectRatio).mirrored(false, true);
 
     // Create a textured brush
     QBrush colorMapPixMapBrush(colorMapImage);
