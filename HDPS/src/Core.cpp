@@ -13,6 +13,7 @@
 #include "RawData.h"
 #include "Set.h"
 #include "PluginFactory.h"
+#include "GroupDataDialog.h"
 
 #include <algorithm>
 
@@ -412,13 +413,43 @@ bool Core::isDatasetGroupingEnabled() const
     return _datasetGroupingEnabled;
 }
 
-hdps::Dataset<hdps::DatasetImpl> Core::groupData(const Datasets& datasets, const QString& guiName)
+Dataset<DatasetImpl> Core::groupData(const Datasets& datasets, const QString& guiName /*= ""*/)
 {
-    auto groupDataset = addDataset(datasets.first()->getRawDataKind(), guiName);
+    try {
+        const auto createGroupDataset = [this, &datasets](const QString& guiName) -> Dataset<DatasetImpl> {
+            auto groupDataset = addDataset(datasets.first()->getRawDataKind(), guiName);
 
-    groupDataset->setProxyDatasets(datasets);
+            groupDataset->setProxyDatasets(datasets);
 
-    return groupDataset;
+            return groupDataset;
+        };
+
+        if (guiName.isEmpty()) {
+            if (Application::current()->getSetting("AskForGroupName", true).toBool()) {
+                GroupDataDialog groupDataDialog(nullptr, datasets);
+
+                if (groupDataDialog.exec() == 1)
+                    return createGroupDataset(groupDataDialog.getGroupName());
+                else
+                    return Dataset<DatasetImpl>();
+            }
+            else {
+                throw std::runtime_error("Group name may not be empty");
+            }
+        }
+        else {
+            return createGroupDataset(guiName);
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to group data", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to group data");
+    }
+        
+    return Dataset<DatasetImpl>();
 }
 
 hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)

@@ -190,8 +190,6 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
     setLayout(_layout);
 
     const auto reset = [this, groupAction]() -> void {
-        qDebug() << groupAction->text() << groupAction->getShowLabels();
-
         if (groupAction->getShowLabels()) {
             switch (groupAction->getLabelSizingType())
             {

@@ -94,9 +94,7 @@ DataGroupingAction::GroupingDialog::GroupingDialog(QWidget* parent, const Datase
     QDialog(parent),
     _dataset(dataset),
     _groupIndexAction(this, "Start index", 0, 100, 0, 0),
-    _recursiveAction(this, "Recursively", true, true),
-    _applyAction(this, "Apply"),
-    _cancelAction(this, "Cancel")
+    _recursiveAction(this, "Recursively", true, true)
 {
     // Exit if no dataset is present
     if (!_dataset.isValid())

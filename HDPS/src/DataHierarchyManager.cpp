@@ -162,21 +162,6 @@ DataHierarchyItems DataHierarchyManager::getTopLevelItems()
 // TODO
 void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
 {
-    qDebug() << selectedItems.count();
-
-    /*
-    if (selectedItems == _selectedItems)
-        return;
-
-    
-    _selectedItems = selectedItems;
-
-    // Select data hierarchy items
-    for (auto item : _items)
-        item->setSelected(selectedItems.contains(item));
-
-    // Notify others that the selected items changed
-    */
     emit selectedItemsChanged(selectedItems);
 }
 

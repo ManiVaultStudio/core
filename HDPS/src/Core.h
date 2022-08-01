@@ -158,10 +158,10 @@ public: // Data grouping
 
     /**
      * Groups \p datasets into one dataset
-     * @param datasets Two or more datasets to group
+     * @param datasets Two or more datasets to group  (if empty, the user will be prompted for a name)
      * @return Smart pointer to created dataset
      */
-    Dataset<DatasetImpl> groupData(const Datasets& datasets, const QString& guiName);
+    Dataset<DatasetImpl> groupData(const Datasets& datasets, const QString& guiName = "");
 
 public: // Plugin creation
 

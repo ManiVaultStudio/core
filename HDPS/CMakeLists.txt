@@ -86,6 +86,7 @@ set( CORE_HEADERS
     src/StartPageWidget.h
     src/ProjectBarWidget.h
     src/LogoWidget.h
+    src/GroupDataDialog.h
 )
 
 set( CORE_SOURCES
@@ -102,6 +103,7 @@ set( CORE_SOURCES
     src/StartPageWidget.cpp
     src/ProjectBarWidget.cpp
     src/LogoWidget.cpp
+    src/GroupDataDialog.cpp
 )
 
 set(EVENT_HEADERS

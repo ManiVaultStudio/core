@@ -237,7 +237,7 @@ QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::
 
             const auto maxContrast = 0.6f;
 
-            backgroundColor.setHslF(color.hueF(), color.saturationF(), 0.6f);
+            backgroundColor.setHslF(color.hueF(), color.saturationF(), 0.4f);
             foregroundColor.setHslF(color.hueF(), color.saturationF(), 0.1f);
 
             
@@ -269,7 +269,7 @@ QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::
 
             painter.setFont(font);
             painter.setPen(foregroundColor);
-            painter.drawText(rectangle, "*", QTextOption(Qt::AlignCenter));
+            //painter.drawText(rectangle, "*", QTextOption(Qt::AlignCenter));
 
             return createOverlayIcon(getIcon(backgroundColor), pixmap);
             //return createOverlayIcon(getIcon(backgroundColor), );
