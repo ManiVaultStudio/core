@@ -1,15 +1,13 @@
 #pragma once
 
 #include "actions/Actions.h"
-#include "event/EventListener.h"
 
 #include "PointData.h"
 
-#include <QTimer>
+#include <actions/TriggerAction.h>
+#include <actions/ToggleAction.h>
 
-namespace hdps {
-    class CoreInterface;
-}
+#include <QTimer>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -54,10 +52,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
-     * @param points Reference to points dataset
+     * @param points Smart pointer to points dataset
      */
-    SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, Points& points);
+    SelectedIndicesAction(QObject* parent, const Dataset<Points>& points);
 
     /** Get selected indices in the points dataset */
     const std::vector<std::uint32_t>& getSelectedIndices() const;
@@ -81,13 +78,11 @@ signals:
     void selectedIndicesChanged(const std::vector<std::uint32_t>& selectedIndices);
 
 protected:
-    CoreInterface*              _core;                      /** Pointer to the core */
     Dataset<Points>             _points;                    /** Points dataset reference */
     TriggerAction               _updateAction;              /** Update action */
     ToggleAction                _manualUpdateAction;        /** Manual update action */
     QTimer                      _selectionChangedTimer;     /** Timer to control when selection changes are processed */
     std::vector<std::uint32_t>  _selectedIndices;           /** Selected indices */
-    hdps::EventListener         _eventListener;             /** Listen to HDPS events */
 
     static const std::int32_t MANUAL_UPDATE_THRESHOLD = 10000;
 };

@@ -1,13 +1,9 @@
 #pragma once
 
-#include "actions/Actions.h"
-#include "event/EventListener.h"
-
 #include "PointData.h"
 
-namespace hdps {
-    class CoreInterface;
-}
+#include <actions/TriggerAction.h>
+#include <actions/ToggleAction.h>
 
 using namespace hdps;
 using namespace hdps::util;
@@ -52,10 +48,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
-     * @param points Reference to points dataset
+     * @param points Smart pointer to points dataset
      */
-    DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, Points& points);
+    DimensionNamesAction(QObject* parent, const Dataset<Points>& points);
 
     /** Get the dimension names */
     QStringList getDimensionNames() const;
@@ -77,5 +72,4 @@ protected:
     QStringList             _dimensionNames;        /** Dimension names */
     TriggerAction           _updateAction;          /** Update action */
     ToggleAction            _manualUpdateAction;    /** Manual update action */
-    hdps::EventListener     _eventListener;         /** Listen to HDPS events */
 };

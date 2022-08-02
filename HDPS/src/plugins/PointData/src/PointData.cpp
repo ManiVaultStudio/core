@@ -289,7 +289,7 @@ Points::~Points()
 
 void Points::init()
 {
-    _infoAction = QSharedPointer<InfoAction>::create(this, _core, *this);
+    _infoAction = QSharedPointer<InfoAction>::create(this, *this);
 
     addAction(*_infoAction.get());
 

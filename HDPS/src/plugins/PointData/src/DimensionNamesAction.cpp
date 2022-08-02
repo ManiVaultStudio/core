@@ -1,19 +1,21 @@
 #include "DimensionNamesAction.h"
 
-#include "event/Event.h"
+#include <event/Event.h>
 
 #include <QHBoxLayout>
 #include <QListView>
+#include <QStringListModel>
 
 using namespace hdps;
 
-DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, Points& points) :
+DimensionNamesAction::DimensionNamesAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent),
-    _points(&points),
+    _points(points),
     _dimensionNames(),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update")
 {
+    /*
     setText("Dimension names");
 
     _updateAction.setToolTip("Update the dimension names");
@@ -85,6 +87,7 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface*
     });
 
     updateUpdateAction();
+    */
 }
 
 QStringList DimensionNamesAction::getDimensionNames() const

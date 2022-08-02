@@ -160,6 +160,8 @@ void DatasetImpl::setProxyDatasets(const Datasets& proxyDatasets)
         _proxyDatasets = proxyDatasets;
 
         setStorageType(StorageType::Proxy);
+
+        _core->notifyDatasetChanged(this);
     }
     catch (std::exception& e)
     {

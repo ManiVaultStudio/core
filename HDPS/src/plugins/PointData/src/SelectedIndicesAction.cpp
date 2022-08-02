@@ -1,6 +1,6 @@
 #include "SelectedIndicesAction.h"
 
-#include "event/Event.h"
+#include <event/Event.h>
 
 #include <QGridLayout>
 #include <QListView>
@@ -10,10 +10,9 @@
 using namespace hdps;
 using namespace hdps::gui;
 
-SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, Points& points) :
+SelectedIndicesAction::SelectedIndicesAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent),
-    _core(core),
-    _points(&points),
+    _points(points),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update"),
     _selectionChangedTimer(),
@@ -23,6 +22,7 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
 
     _selectionChangedTimer.setSingleShot(true);
 
+    /*
     // Register to points data events
     _eventListener.setEventCore(Application::core());
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
@@ -87,6 +87,7 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, hdps::CoreInterfac
     });
 
     updateActions();
+    */
 }
 
 const std::vector<std::uint32_t>& SelectedIndicesAction::getSelectedIndices() const
