@@ -41,8 +41,6 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
         _rawDataSizeAction.setString(_points->getRawDataSizeHumanReadable());
     };
 
-    connect(&_selectedIndicesAction, &SelectedIndicesAction::selectedIndicesChanged, this, updateActions);
-
     connect(&_points, &Dataset<Points>::dataChanged, this, updateActions);
 
     updateActions();

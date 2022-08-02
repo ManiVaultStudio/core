@@ -14,116 +14,48 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, const Dataset<Poin
     WidgetAction(parent),
     _points(points),
     _updateAction(this, "Update"),
-    _manualUpdateAction(this, "Manual update"),
-    _selectionChangedTimer(),
-    _selectedIndices()
+    _manualUpdateAction(this, "Manual update")
 {
     setText("Selected indices");
 
-    _selectionChangedTimer.setSingleShot(true);
-
-    /*
-    // Register to points data events
-    _eventListener.setEventCore(Application::core());
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
-    _eventListener.registerDataEventByType(PointType, [this](hdps::DataEvent* dataEvent) {
-        if (!_points.isValid())
-            return;
-
-        // Only process points that we reference
-        if (dataEvent->getDataset() != _points->getSourceDataset<DatasetImpl>())
-            return;
-
-        switch (dataEvent->getType()) {
-
-            case EventType::DataAdded:
-            {
-                break;
-            }
-
-            case EventType::DataChanged:
-            case EventType::DataSelectionChanged:
-            {
-                // Turn manual update on if there are more than one million points (for performance reasons)
-                if (dataEvent->getType() == EventType::DataChanged)
-                    _manualUpdateAction.setChecked(_points->getNumPoints() > MANUAL_UPDATE_THRESHOLD);
-
-                // Update selected indices
-                if (_points->getNumPoints() < MANUAL_UPDATE_THRESHOLD)
-                    _selectionChangedTimer.start(100);
-                
-                break;
-            }
-            
-            default:
-                break;
-        }
-    });
-
-    connect(&_selectionChangedTimer, &QTimer::timeout, this, [this]() {
-
-        // Do not update if manual update is chosen
-        if (_manualUpdateAction.isChecked())
-            return;
-
-        // Compute the selected indices
-        updateSelectedIndices();
-    });
-
-    // Update actions
-    const auto updateActions = [this]() -> void {
-        _updateAction.setEnabled(_manualUpdateAction.isChecked());
-    };
-
-    connect(&_manualUpdateAction, &ToggleAction::toggled, this, [this, updateActions]() {
-        updateActions();
-    });
-
-    connect(&_updateAction, &TriggerAction::triggered, this, [this]() {
-        updateSelectedIndices();
-        emit selectedIndicesChanged(getSelectedIndices());
-    });
-
-    updateActions();
-    */
+    _updateAction.setDefaultWidgetFlags(TriggerAction::IconText);
 }
 
-const std::vector<std::uint32_t>& SelectedIndicesAction::getSelectedIndices() const
+Dataset<Points>& SelectedIndicesAction::getPoints()
 {
-    return _selectedIndices;
+    return _points;
 }
 
-void SelectedIndicesAction::updateSelectedIndices()
+std::vector<std::uint32_t> SelectedIndicesAction::getSelectedIndices() const
 {
     if (!_points.isValid())
-        return;
+        return std::vector<std::uint32_t>();
 
     auto selection = _points->getSelection<Points>();
 
+    std::vector<std::uint32_t> selectedIndices;
+
     if (_points->isFull()) {
-        _selectedIndices = selection->indices;
+        selectedIndices = selection->indices;
     }
     else {
-        _selectedIndices.clear();
-        _selectedIndices.reserve(_points->indices.size());
+        selectedIndices.clear();
+        selectedIndices.reserve(_points->indices.size());
 
-        // Create points indices set
         QSet<std::uint32_t> indicesSet(_points->indices.begin(), _points->indices.end());
 
-        // Add selection indices if they belong to the subset
         for (const auto& selectionIndex : selection->indices)
             if (indicesSet.contains(selectionIndex))
-                _selectedIndices.push_back(selectionIndex);
+                selectedIndices.push_back(selectionIndex);
     }
 
-    // Notify others that the selection indices changed
-    emit selectedIndicesChanged(getSelectedIndices());
+    return selectedIndices;
 }
 
 SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction) :
-    WidgetActionWidget(parent, selectedIndicesAction)
+    WidgetActionWidget(parent, selectedIndicesAction),
+    _timer(),
+    _dirty(false)
 {
     auto selectedIndicesListWidget = new QListView();
 
@@ -144,6 +76,8 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
 
     setLayout(selectedIndicesLayout);
 
+    _timer.setSingleShot(true);
+
     const auto updateSelectedIndicesWidget = [this, selectedIndicesAction, selectedIndicesListWidget]() -> void {
         QStringList items;
 
@@ -153,9 +87,51 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
         selectedIndicesListWidget->setModel(new QStringListModel(items));
     };
 
-    connect(selectedIndicesAction, &SelectedIndicesAction::selectedIndicesChanged, this, [this, updateSelectedIndicesWidget]() {
+    const auto updateActions = [this, selectedIndicesAction]() -> void {
+        selectedIndicesAction->getUpdateAction().setEnabled(selectedIndicesAction->getManualUpdateAction().isChecked() && _dirty);
+    };
+
+    connect(&selectedIndicesAction->getUpdateAction(), &TriggerAction::triggered, this, [this, updateSelectedIndicesWidget, updateActions]() -> void {
         updateSelectedIndicesWidget();
+
+        _dirty = false;
+
+        updateActions();
     });
 
+    connect(&selectedIndicesAction->getManualUpdateAction(), &TriggerAction::triggered, this, updateActions);
+
+    connect(&_timer, &QTimer::timeout, this, [this, updateSelectedIndicesWidget]() -> void {
+        if (_timer.isActive())
+            _timer.start(LAZY_UPDATE_INTERVAL);
+        else {
+            _timer.stop();
+            updateSelectedIndicesWidget();
+        }
+    });
+
+    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataChanged, this, [this, selectedIndicesAction]() -> void {
+        selectedIndicesAction->getManualUpdateAction().setChecked(selectedIndicesAction->getPoints()->getNumPoints() > MANUAL_UPDATE_THRESHOLD);
+
+        if (selectedIndicesAction->getPoints()->getNumPoints() < MANUAL_UPDATE_THRESHOLD)
+            _timer.start(LAZY_UPDATE_INTERVAL);
+    });
+
+    connect(&selectedIndicesAction->getPoints(), &Dataset<Points>::dataSelectionChanged, this, [this, selectedIndicesAction, updateActions]() -> void {
+        if (selectedIndicesAction->getManualUpdateAction().isChecked()) {
+            _dirty = true;
+
+            updateActions();
+            return;
+        }
+
+        _timer.start(LAZY_UPDATE_INTERVAL);
+
+        _dirty = false;
+
+        updateActions();
+    });
+
+    updateActions();
     updateSelectedIndicesWidget();
 }

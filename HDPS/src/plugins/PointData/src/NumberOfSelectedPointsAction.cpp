@@ -21,7 +21,8 @@ Dataset<Points>& NumberOfSelectedPointsAction::getPoints()
 }
 
 NumberOfSelectedPointsAction::Widget::Widget(QWidget* parent, NumberOfSelectedPointsAction* numberOfSelectedPointsAction) :
-    WidgetActionWidget(parent, numberOfSelectedPointsAction)
+    WidgetActionWidget(parent, numberOfSelectedPointsAction),
+    _timer()
 {
     auto layout = new QHBoxLayout();
 
@@ -60,8 +61,6 @@ NumberOfSelectedPointsAction::Widget::Widget(QWidget* parent, NumberOfSelectedPo
     };
 
     connect(&_timer, &QTimer::timeout, this, [this, updateNumberOfSelectedPoints]() -> void {
-        qDebug() << _timer.isActive();
-
         if (_timer.isActive())
             _timer.start(LAZY_UPDATE_INTERVAL);
         else {
