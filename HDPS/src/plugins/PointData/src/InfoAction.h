@@ -44,7 +44,7 @@ public: // Action getters
     ProxyDatasetsAction& getProxyDatasetsAction() { return _proxyDatasetsAction; }
     StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
     StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
-    StringAction& getMemorySizeAction() { return _memorySizeAction; }
+    StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
     StringAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
     SelectedIndicesAction& getSelectedIndicesAction() { return _selectedIndicesAction; }
     DimensionNamesAction& getDimensionNamesAction() { return _dimensionNamesAction; }
@@ -55,7 +55,7 @@ protected:
     ProxyDatasetsAction     _proxyDatasetsAction;               /** Proxy datasets action */
     StringAction            _numberOfPointsAction;              /** Number of points action */
     StringAction            _numberOfDimensionsAction;          /** Number of dimensions action */
-    StringAction            _memorySizeAction;                  /** Memory size action */
+    StringAction            _rawDataSizeAction;                 /** Amount of memory for raw data */
     StringAction            _numberOfSelectedPointsAction;      /** Number of selected points action */
     SelectedIndicesAction   _selectedIndicesAction;             /** Selected indices action */
     DimensionNamesAction    _dimensionNamesAction;              /** Dimension names action */

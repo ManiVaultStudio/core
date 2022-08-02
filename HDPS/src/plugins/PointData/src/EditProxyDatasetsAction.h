@@ -49,6 +49,12 @@ public:
      */
     EditProxyDatasetsAction(QObject* parent, const Dataset<Points>& points);
 
+    /**
+     * Get points
+     * @return Smart pointer to points dataset
+     */
+    Dataset<Points> getPoints();
+
 public: // Action getters
 
 protected:

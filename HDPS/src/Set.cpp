@@ -97,7 +97,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "HasAnalysis");
     variantMapMustContain(variantMap, "Analysis");
 
-    setGuiName();
+    setGuiName(variantMap["Name"].toString());
 
     if (variantMap.contains("Derived")) {
         _derived = variantMap["Derived"].toBool();

@@ -16,13 +16,15 @@ ProxyDatasetsAction::ProxyDatasetsAction(QObject* parent, const Dataset<Points>&
     _countAction.setEnabled(false);
     _countAction.setToolTip("Number of proxy datasets");
 
-    const auto updateCount = [this]() -> void {
+    const auto updateActions = [this]() -> void {
         _countAction.setString(QString::number(_points->getProxyDatasets().count()));
+        _countAction.setToolTip(QString("%1 proxy datasets").arg(QString::number(_points->getProxyDatasets().count())));
+        _editProxyDatasetsAction.setEnabled(_points->isProxy());
     };
 
-    connect(&_points, &Dataset<Points>::dataChanged, this, updateCount);
+    connect(&_points, &Dataset<Points>::dataChanged, this, updateActions);
 
-    updateCount();
+    updateActions();
 }
 
 ProxyDatasetsAction::Widget::Widget(QWidget* parent, ProxyDatasetsAction* proxyDatasetsAction) :

@@ -14,7 +14,7 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     _proxyDatasetsAction(this, points),
     _numberOfPointsAction(this, "Number of points"),
     _numberOfDimensionsAction(this, "Number of dimensions"),
-    _memorySizeAction(this, "Occupied memory"),
+    _rawDataSizeAction(this, "Raw data size"),
     _numberOfSelectedPointsAction(this, "Number of selected points"),
     _selectedIndicesAction(this, points),
     _dimensionNamesAction(this, points)
@@ -24,14 +24,14 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     _dataStorageAction.setEnabled(false);
     _numberOfPointsAction.setEnabled(false);
     _numberOfDimensionsAction.setEnabled(false);
-    _memorySizeAction.setEnabled(false);
+    _rawDataSizeAction.setEnabled(false);
     _numberOfSelectedPointsAction.setEnabled(false);
 
     _dataStorageAction.setToolTip("The type of data storage (e.g. owner or proxy)");
     _proxyDatasetsAction.setToolTip("Proxy datasets");
     _numberOfPointsAction.setToolTip("The number of points");
     _numberOfDimensionsAction.setToolTip("The number of dimensions in the point data");
-    _memorySizeAction.setToolTip("The amount of memory occupied by the dataset");
+    _rawDataSizeAction.setToolTip("The amount of memory occupied for raw data by the dataset");
     _numberOfSelectedPointsAction.setToolTip("The number of selected points in the dataset");
 
     const auto updateActions = [this]() -> void {
@@ -43,7 +43,7 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
         _dataStorageAction.setString(_points->isProxy() ? "Proxy" : "Owner");
         _numberOfPointsAction.setString(QString::number(_points->getNumPoints()));
         _numberOfDimensionsAction.setString(QString::number(_points->getNumDimensions()));
-        _memorySizeAction.setString(getNoBytesHumanReadable(_points->getNumPoints() * _points->getNumDimensions() * 4));
+        _rawDataSizeAction.setString(_points->getRawDataSizeHumanReadable());
         _numberOfSelectedPointsAction.setString(QString::number(selectedIndices.size()));
     };
 

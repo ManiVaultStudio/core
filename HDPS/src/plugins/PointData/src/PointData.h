@@ -807,6 +807,19 @@ public:
 
     void setDimensionNames(const std::vector<QString>& dimNames);
 
+    /**
+     * Get amount of data occupied by the raw data
+     * @return Size of the raw data in bytes
+     */
+    std::uint64_t getRawDataSize() const override {
+        if (isProxy()) {
+            return 0;
+        }
+        else {
+            return getNumPoints() * getNumDimensions() * 4;
+        }
+    }
+
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
     // Will work fine, even when the internal data element type is not float.

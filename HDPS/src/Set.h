@@ -6,6 +6,7 @@
 #include "Dataset.h"
 
 #include "actions/WidgetAction.h"
+#include "util/Miscellaneous.h"
 
 #include <QString>
 #include <QVector>
@@ -249,6 +250,22 @@ public:
      * @return Plugin kind of the raw data
      */
     QString getRawDataKind() const;
+
+    /**
+     * Get amount of data occupied by the raw data
+     * @return Size of the raw data in bytes
+     */
+    virtual std::uint64_t getRawDataSize() const {
+        return 0;
+    }
+
+    /**
+     * Get amount of data occupied by the raw data in human readable string format
+     * @return Size of the raw data in bytes in human readable string format
+     */
+    QString getRawDataSizeHumanReadable() const {
+        return util::getNoBytesHumanReadable(getRawDataSize());
+    }
 
 public: // Hierarchy
 

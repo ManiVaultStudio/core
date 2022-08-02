@@ -6,123 +6,44 @@
 #include <QListView>
 #include <QStringListModel>
 
-using namespace hdps;
-
 EditProxyDatasetsAction::EditProxyDatasetsAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent),
     _points(points)
 {
-    setText("Edit");
-    setToolTip("Edit proxy datasets");
+    setText("View proxy datasets");
+    setToolTip("View proxy datasets");
+    setIcon(Application::getIconFont("FontAwesome").getIcon("list"));
+}
 
-    /*
-    _updateAction.setToolTip("Update the dimension names");
-    _manualUpdateAction.setToolTip("Update the dimension names manually");
-
-    const auto updateDimensionNames = [this]() -> void {
-        if (!_points.isValid())
-            return;
-
-        _dimensionNames.clear();
-
-        auto& dimensionNames = _points->getDimensionNames();
-
-        if (dimensionNames.empty()) {
-            for (std::uint32_t dimensionId = 0; dimensionId < _points->getNumDimensions(); dimensionId++)
-                _dimensionNames << QString("Dim %1").arg(dimensionId);
-        }
-        else {
-            for (auto dimensionName : dimensionNames)
-                _dimensionNames << dimensionName;
-        }
-    };
-
-    const auto dataChanged = [this]() -> void {
-        _manualUpdateAction.setChecked(_points->getNumDimensions() > 1000);
-
-        if (_manualUpdateAction.isChecked())
-            return;
-
-        _updateAction.trigger();
-    };
-
-    _eventListener.setEventCore(Application::core());
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
-    _eventListener.registerDataEventByType(PointType, [this, dataChanged](hdps::DataEvent* dataEvent) {
-        if (!_points.isValid())
-            return;
-
-        if (dataEvent->getDataset() != _points)
-            return;
-
-        switch (dataEvent->getType()) {
-            case EventType::DataAdded:
-            case EventType::DataChanged:
-            {
-                dataChanged();
-                break;
-            }
-
-            default:
-                break;
-        }
-    });
-
-    dataChanged();
-
-    const auto updateUpdateAction = [this]() -> void {
-        _updateAction.setEnabled(_manualUpdateAction.isChecked());
-    };
-
-    connect(&_manualUpdateAction, &ToggleAction::toggled, this, [this, updateUpdateAction]() {
-        updateUpdateAction();
-    });
-
-    connect(&_updateAction, &TriggerAction::triggered, this, [this, updateDimensionNames]() {
-        updateDimensionNames();
-        emit dimensionNamesChanged(_dimensionNames);
-    });
-
-    updateUpdateAction();
-    */
+Dataset<Points> EditProxyDatasetsAction::getPoints()
+{
+    return _points;
 }
 
 EditProxyDatasetsAction::Widget::Widget(QWidget* parent, EditProxyDatasetsAction* editProxyDatasetsAction) :
     WidgetActionWidget(parent, editProxyDatasetsAction)
 {
-    /*
     auto layout     = new QHBoxLayout();
     auto listView   = new QListView();
 
     listView->setFixedHeight(100);
 
-    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(listView);
 
-    auto updateLayout = new QVBoxLayout();
+    setPopupLayout(layout);
+    
+    auto points = editProxyDatasetsAction->getPoints();
 
-    updateLayout->addWidget(dimensionNamesAction->getUpdateAction().createWidget(this));
-    updateLayout->addWidget(dimensionNamesAction->getManualUpdateAction().createWidget(this));
-    updateLayout->addStretch(1);
+    const auto updateListView = [this, points, listView]() -> void {
+        QStringList proxyDatasetNames;
 
-    layout->addLayout(updateLayout);
+        for (const auto& proxyDataset : points->getProxyDatasets())
+            proxyDatasetNames << proxyDataset->getGuiName();
 
-    setLayout(layout);
-
-    const auto updateListView = [this, dimensionNamesAction, listView]() -> void {
-        QStringList items;
-
-        for (auto dimensionName : dimensionNamesAction->getDimensionNames())
-            items << dimensionName;
-
-        listView->setModel(new QStringListModel(items));
+        listView->setModel(new QStringListModel(proxyDatasetNames));
     };
 
-    connect(dimensionNamesAction, &DimensionNamesAction::dimensionNamesChanged, this, [this, updateListView](const QStringList& dimensionNames) {
-        updateListView();
-    });
+    connect(&points, &Dataset<Points>::dataChanged, this, updateListView);
 
     updateListView();
-    */
 }
