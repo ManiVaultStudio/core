@@ -97,7 +97,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "HasAnalysis");
     variantMapMustContain(variantMap, "Analysis");
 
-    setGuiName(variantMap["Name"].toString());
+    setGuiName();
 
     if (variantMap.contains("Derived")) {
         _derived = variantMap["Derived"].toBool();
@@ -106,8 +106,8 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
             _sourceDataset = getParent();
     }
 
-    auto analysisMap = variantMap["Analysis"];
-
+    if (variantMap.contains("StorageType"))
+        setStorageType(static_cast<StorageType>(variantMap["Name"].toInt()));
 }
 
 QVariantMap DatasetImpl::toVariantMap() const
@@ -118,6 +118,7 @@ QVariantMap DatasetImpl::toVariantMap() const
         analysisMap = _analysis->toVariantMap();
 
     return {
+        { "StorageType", static_cast<std::int32_t>(getStorageType()) },
         { "Name", getGuiName() },
         { "DataType", getDataType().getTypeString() },
         { "PluginKind", _rawData->getKind() },

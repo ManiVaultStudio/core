@@ -2,6 +2,7 @@
 
 #include "PointData.h"
 
+#include "ProxyDatasetsAction.h"
 #include "SelectedIndicesAction.h"
 #include "DimensionNamesAction.h"
 
@@ -40,7 +41,7 @@ public:
 public: // Action getters
 
     StringAction& getDataStorageAction() { return _dataStorageAction; }
-    StringAction& getNumberOfProxyDatasetsAction() { return _numberOfProxyDatasetsAction; }
+    ProxyDatasetsAction& getProxyDatasetsAction() { return _proxyDatasetsAction; }
     StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
     StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
     StringAction& getMemorySizeAction() { return _memorySizeAction; }
@@ -51,7 +52,7 @@ public: // Action getters
 protected:
     Dataset<Points>         _points;                            /** Points dataset reference */
     StringAction            _dataStorageAction;                 /** Type of data storage action */
-    StringAction            _numberOfProxyDatasetsAction;       /** Number of points action */
+    ProxyDatasetsAction     _proxyDatasetsAction;               /** Proxy datasets action */
     StringAction            _numberOfPointsAction;              /** Number of points action */
     StringAction            _numberOfDimensionsAction;          /** Number of dimensions action */
     StringAction            _memorySizeAction;                  /** Memory size action */
