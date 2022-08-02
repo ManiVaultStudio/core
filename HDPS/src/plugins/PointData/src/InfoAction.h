@@ -3,16 +3,11 @@
 #include "PointData.h"
 
 #include "ProxyDatasetsAction.h"
+#include "NumberOfSelectedPointsAction.h"
 #include "SelectedIndicesAction.h"
 #include "DimensionNamesAction.h"
 
 #include <actions/StringAction.h>
-
-#include <QTimer>
-
-namespace hdps {
-    class CoreInterface;
-}
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -45,18 +40,18 @@ public: // Action getters
     StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
     StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
     StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
-    StringAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
+    NumberOfSelectedPointsAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
     SelectedIndicesAction& getSelectedIndicesAction() { return _selectedIndicesAction; }
     DimensionNamesAction& getDimensionNamesAction() { return _dimensionNamesAction; }
 
 protected:
-    Dataset<Points>         _points;                            /** Points dataset reference */
-    StringAction            _dataStorageAction;                 /** Type of data storage action */
-    ProxyDatasetsAction     _proxyDatasetsAction;               /** Proxy datasets action */
-    StringAction            _numberOfPointsAction;              /** Number of points action */
-    StringAction            _numberOfDimensionsAction;          /** Number of dimensions action */
-    StringAction            _rawDataSizeAction;                 /** Amount of memory for raw data */
-    StringAction            _numberOfSelectedPointsAction;      /** Number of selected points action */
-    SelectedIndicesAction   _selectedIndicesAction;             /** Selected indices action */
-    DimensionNamesAction    _dimensionNamesAction;              /** Dimension names action */
+    Dataset<Points>                 _points;                            /** Points dataset reference */
+    StringAction                    _dataStorageAction;                 /** Type of data storage action */
+    ProxyDatasetsAction             _proxyDatasetsAction;               /** Proxy datasets action */
+    StringAction                    _numberOfPointsAction;              /** Number of points action */
+    StringAction                    _numberOfDimensionsAction;          /** Number of dimensions action */
+    StringAction                    _rawDataSizeAction;                 /** Amount of memory for raw data */    
+    NumberOfSelectedPointsAction    _numberOfSelectedPointsAction;      /** Number of selected points action */
+    SelectedIndicesAction           _selectedIndicesAction;             /** Selected indices action */
+    DimensionNamesAction            _dimensionNamesAction;              /** Dimension names action */
 };

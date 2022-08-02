@@ -1,0 +1,78 @@
+#include "NumberOfSelectedPointsAction.h"
+
+#include <QHBoxLayout>
+#include <QListView>
+#include <QStringListModel>
+
+NumberOfSelectedPointsAction::NumberOfSelectedPointsAction(QObject* parent, const Dataset<Points>& points) :
+    WidgetAction(parent),
+    _points(points),
+    _numberOfSelectedPointsAction(this, "Number of selected points")
+{
+    setText("Number of selected points");
+    setToolTip("Number of selected points");
+
+    _numberOfSelectedPointsAction.setEnabled(false);
+}
+
+Dataset<Points>& NumberOfSelectedPointsAction::getPoints()
+{
+    return _points;
+}
+
+NumberOfSelectedPointsAction::Widget::Widget(QWidget* parent, NumberOfSelectedPointsAction* numberOfSelectedPointsAction) :
+    WidgetActionWidget(parent, numberOfSelectedPointsAction)
+{
+    auto layout = new QHBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(numberOfSelectedPointsAction->getNumberOfSelectedPointsAction().createWidget(this));
+
+    setLayout(layout);
+    
+    _timer.setSingleShot(true);
+
+    const auto updateNumberOfSelectedPoints = [this, numberOfSelectedPointsAction]() -> void {
+        auto points = numberOfSelectedPointsAction->getPoints();
+
+        if (!points.isValid())
+            return;
+        
+        auto selection = points->getSelection<Points>();
+
+        std::vector<std::uint32_t> selectedIndices;
+
+        if (points->isFull()) {
+            selectedIndices = selection->indices;
+        }
+        else {
+            selectedIndices.clear();
+            selectedIndices.reserve(points->indices.size());
+
+            QSet<std::uint32_t> indicesSet(points->indices.begin(), points->indices.end());
+
+            for (const auto& selectionIndex : selection->indices)
+                if (indicesSet.contains(selectionIndex))
+                    selectedIndices.push_back(selectionIndex);
+        }
+
+        numberOfSelectedPointsAction->getNumberOfSelectedPointsAction().setString(QString::number(selectedIndices.size()));
+    };
+
+    connect(&_timer, &QTimer::timeout, this, [this, updateNumberOfSelectedPoints]() -> void {
+        qDebug() << _timer.isActive();
+
+        if (_timer.isActive())
+            _timer.start(LAZY_UPDATE_INTERVAL);
+        else {
+            _timer.stop();
+            updateNumberOfSelectedPoints();
+        }
+    });
+
+    connect(&numberOfSelectedPointsAction->getPoints(), &Dataset<Points>::dataSelectionChanged, this, [this]() -> void {
+        _timer.start(LAZY_UPDATE_INTERVAL);
+    });
+
+    updateNumberOfSelectedPoints();
+}

@@ -15,9 +15,8 @@ DimensionNamesAction::DimensionNamesAction(QObject* parent, const Dataset<Points
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update")
 {
-    /*
     setText("Dimension names");
-
+/*
     _updateAction.setToolTip("Update the dimension names");
     _manualUpdateAction.setToolTip("Update the dimension names manually");
 

@@ -1,7 +1,5 @@
 #include "EditProxyDatasetsAction.h"
 
-#include <event/Event.h>
-
 #include <QHBoxLayout>
 #include <QListView>
 #include <QStringListModel>
