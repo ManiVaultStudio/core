@@ -17,8 +17,6 @@ SelectedIndicesAction::SelectedIndicesAction(QObject* parent, const Dataset<Poin
     _manualUpdateAction(this, "Manual update")
 {
     setText("Selected indices");
-
-    _updateAction.setDefaultWidgetFlags(TriggerAction::IconText);
 }
 
 Dataset<Points>& SelectedIndicesAction::getPoints()

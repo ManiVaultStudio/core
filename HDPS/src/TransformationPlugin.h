@@ -25,7 +25,8 @@ public:
      * @param factory Pointer to transformation plugin factory
      */
     TransformationPlugin(const PluginFactory* factory) :
-        Plugin(factory)
+        Plugin(factory),
+        _inputDatasets()
     {
     }
 
@@ -34,6 +35,25 @@ public:
      * @param datasets Input datasets
      */
     virtual void transform(const Datasets& datasets) = 0;
+
+    /**
+     * Get input datasets
+     * @return Input datasets
+     */
+    Datasets getInputDatasets() const {
+        return _inputDatasets;
+    }
+    
+    /**
+     * Set input datasets
+     * @inputDatasets Input datasets
+     */
+    void setInputDatasets(const Datasets& inputDatasets) {
+        _inputDatasets = inputDatasets;
+    }
+
+private:
+    Datasets    _inputDatasets;        /** One, or more, input dataset */
 };
 
 /**
@@ -51,15 +71,6 @@ public:
     TransformationPluginFactory() :
         PluginFactory(Type::TRANSFORMATION)
     {
-    }
-
-    /**
-     * Set name of the object
-     * @param name Name of the object
-     */
-    void setObjectName(const QString& name)
-    {
-        QObject::setObjectName("Plugins/Transformation/" + name);
     }
 
     /** Destructor */
