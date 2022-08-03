@@ -28,6 +28,13 @@ QIcon createIcon(const QPixmap& pixmap, const QList<QSize>& pixmapSizes = defaul
  */
 QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay);
 
+/**
+ * Convenience function to create a plugin icon, which consists of maximum of four characters laid out in a grid
+ * @param characters Characters
+ * @return Plugin icon
+ */
+QIcon createPluginIcon(const QString& characters);
+
 }
 
 }

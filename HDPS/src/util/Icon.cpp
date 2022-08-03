@@ -1,6 +1,8 @@
 #include "Icon.h"
 
 #include <QPainter>
+#include <QApplication>
+#include <QPalette>
 
 namespace hdps {
 
@@ -27,6 +29,48 @@ QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay)
     QPainter painter(&pixmap);
 
     painter.drawPixmap(0, 0, overlay);
+
+    return createIcon(pixmap);
+}
+
+QIcon createPluginIcon(const QString& characters)
+{
+    const auto margin       = 8;
+    const auto pixmapSize   = QSize(256, 256);
+    const auto pixmapRect   = QRect(QPoint(), pixmapSize).marginsRemoved(QMargins(margin, margin, margin, margin));
+    const auto halfSize     = pixmapRect.size() / 2;
+
+    QPixmap pixmap(pixmapSize);
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    const auto textColor = QApplication::palette().text().color();
+
+    painter.setPen(QPen(textColor, 1, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+
+    auto font = QFont("Arial", 100);
+
+    font.setBold(true);
+
+    painter.setFont(font);
+
+    const auto textOption = QTextOption(Qt::AlignCenter);
+
+    if (characters.length() >= 1)
+        painter.drawText(QRect(pixmapRect.topLeft(), halfSize), characters[0], textOption);
+
+    if (characters.length() >= 2)
+        painter.drawText(QRect(QPoint(halfSize.width(), pixmapRect.top()), halfSize), characters[1], textOption);
+
+    if (characters.length() >= 3)
+        painter.drawText(QRect(QPoint(pixmapRect.left(), halfSize.height()), halfSize), characters[2], textOption);
+
+    if (characters.length() >= 4)
+        painter.drawText(QRect(QPoint(halfSize.width(), halfSize.height()), halfSize), characters[3], textOption);
 
     return createIcon(pixmap);
 }

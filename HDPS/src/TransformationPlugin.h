@@ -30,11 +30,8 @@ public:
     {
     }
 
-    /**
-     * The method which handles the data transformation
-     * @param datasets Input datasets
-     */
-    virtual void transform(const Datasets& datasets) = 0;
+    /** Performs the data transformation */
+    virtual void transform() = 0;
 
     /**
      * Get input datasets
