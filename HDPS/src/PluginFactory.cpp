@@ -17,21 +17,21 @@ QStringList PluginFactory::getDatasetTypesAsStringList(const Datasets& datasets)
     return datasetTypes;
 }
 
-bool PluginFactory::areAllDatasetsOfTheSameType(const Datasets& datasets, const QString& datasetType)
+bool PluginFactory::areAllDatasetsOfTheSameType(const Datasets& datasets, const DataType& dataType)
 {
     for (auto dataset : datasets)
-        if (dataset->getDataType().getTypeString() != datasetType)
+        if (dataset->getDataType() != dataType)
             return false;
 
     return true;
 }
 
-std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets, const QString& datasetType)
+std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType)
 {
     std::uint16_t numberOfDatasetsForType = 0;
 
     for (auto dataset : datasets)
-        if (dataset->getDataType().getTypeString() == datasetType)
+        if (dataset->getDataType() == dataType)
             numberOfDatasetsForType++;
 
     return numberOfDatasetsForType;

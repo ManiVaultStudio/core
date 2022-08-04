@@ -120,19 +120,19 @@ protected:
     static QStringList getDatasetTypesAsStringList(const Datasets& datasets);
 
     /**
-     * Determine whether each dataset in the sequence is of the same type
+     * Determine whether all datasets are of the same data type
      * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
-     * @param datasetType Type of input datasets to check for
-     * @return Whether each dataset in the sequence is of the same type
+     * @param dataType Type of data
+     * @return Whether each dataset is of the same data type
      */
-    static bool areAllDatasetsOfTheSameType(const Datasets& datasets, const QString& datasetType);
+    static bool areAllDatasetsOfTheSameType(const Datasets& datasets, const DataType& dataType);
 
     /**
-     * Get number of datasets for \p datasetType
-     * @param datasetType Dataset type as string
+     * Get number of datasets for \p dataType
+     * @param dataType Data type
      * @return Number of datasets of \p datasetType
      */
-    static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const QString& datasetType);
+    static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType);
 
     /**
      * Convenience function for generating a plugin trigger action (icon from the plugin factory)
