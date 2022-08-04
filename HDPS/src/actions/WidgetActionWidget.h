@@ -43,6 +43,18 @@ public:
      */
     WidgetActionWidget(QWidget* parent, WidgetAction* widgetAction, const std::int32_t& widgetFlags = 0);
 
+    /**
+     * Get the widget action
+     * @return Pointer to widget action
+     */
+    WidgetAction* getWidgetAction();
+
+    /**
+     * Set the widget action
+     * @param widgetAction Pointer to widget action
+     */
+    virtual void setWidgetAction(WidgetAction* widgetAction);
+
 protected: // Miscellaneous
 
     /**

@@ -33,6 +33,12 @@ public:
     PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets);
 
     /**
+     * Get hash
+     * @return Cryptographic hash of the plugin kind and trigger title
+     */
+    QString getHash() const;
+
+    /**
      * Get type of plugin
      * @return Type of plugin
      */
@@ -63,6 +69,7 @@ public:
     void setConfigurationAction(WidgetAction* configurationAction);
 
 private:
+    const QString       _hash;                  /** Cryptographic hash of the plugin kind and trigger title */
     const plugin::Type  _pluginType;            /** Type of plugin e.g. analysis, exporter */
     const QString       _pluginKind;            /** Kind of plugin */
     const Datasets      _datasets;              /** Input datasets */
