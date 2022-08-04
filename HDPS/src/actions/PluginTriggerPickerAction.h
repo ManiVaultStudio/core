@@ -56,42 +56,52 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param title Plugin trigger picker title
      */
-    PluginTriggerPickerAction(QObject* parent);
+    PluginTriggerPickerAction(QObject* parent, const QString& title = "");
 
     /**
-     * Initializes the plugin trigger actions
-     * @param title Plugin trigger picker title
+     * Establishes the plugin trigger actions for \p pluginType and \p datasets
      * @param pluginType Type of plugin e.g. analysis, exporter
      * @param datasets Input datasets
      */
-    void initialize(const QString& title, const plugin::Type& pluginType, const Datasets& datasets);
+    void initialize(const plugin::Type& pluginType, const Datasets& datasets);
 
     /**
-     * Initializes the plugin trigger actions
-     * @param title Plugin trigger picker title
+     * Establishes the plugin trigger actions for \p pluginKind and \p datasets
      * @param pluginKind Kind of plugin
      * @param datasets Input datasets
      */
-    void initialize(const QString& title, const QString& pluginKind, const Datasets& datasets);
+    void initialize(const QString& pluginKind, const Datasets& datasets);
+
+    /**
+     * Set the input datasets
+     * @param datasets Input datasets
+     */
+    void setInputDatasets(const Datasets& datasets);
 
     /**
      * Get plugin trigger actions
      * @return List of plugin trigger actions
      */
-    QList<PluginTriggerAction*> getPluginTriggerActions();
+    PluginTriggerActions getPluginTriggerActions();
 
+private:
+
+    /** Updates the list of available plugin trigger actions */
+    void updatePluginTriggerActions();
+    
 signals:
 
     /**
      * Signals that the plugin trigger actions have changed
      * @param pluginTriggerActions List of plugin trigger actions
      */
-    void pluginTriggerActionsChanged(const QList<PluginTriggerAction*>& pluginTriggerActions);
+    void pluginTriggerActionsChanged(const PluginTriggerActions& pluginTriggerActions);
 
 private:
-    Datasets                        _datasets;                  /** Input datasets */
-    QList<PluginTriggerAction*>     _pluginTriggerActions;      /** Plugin trigger actions */
+    Datasets                _datasets;                  /** Input datasets */
+    PluginTriggerActions    _pluginTriggerActions;      /** Plugin trigger actions */
 };
 
 }

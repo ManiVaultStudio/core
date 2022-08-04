@@ -3,7 +3,6 @@
 
 #include "PluginType.h"
 #include "DataType.h"
-#include "PluginProducerMetaData.h"
 #include "Dataset.h"
 
 #include <QObject>
@@ -18,6 +17,8 @@ namespace hdps
     namespace gui
     {
         class PluginTriggerAction;
+
+        using PluginTriggerActions = QVector<PluginTriggerAction*>;
     }
 
 namespace plugin
@@ -92,12 +93,21 @@ public:
     virtual Plugin* produce() = 0;
 
     /**
-     * Get a list of plugin trigger actions given a vector of input datasets
+     * Get plugin trigger actions given \p datasets
      * @param datasets Vector of input datasets
-     * @return List of plugin trigger actions
+     * @return Vector of plugin trigger actions
      */
-    virtual QList<gui::PluginTriggerAction*> getPluginTriggerActions(const Datasets& datasets) const {
-        return QList<gui::PluginTriggerAction*>();
+    virtual gui::PluginTriggerActions getPluginTriggerActions(const Datasets& datasets) const {
+        return gui::PluginTriggerActions();
+    }
+
+    /**
+     * Get plugin trigger actions given \p dataTypes
+     * @param datasetTypes Vector of input data types
+     * @return Vector of plugin trigger actions
+     */
+    virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {
+        return gui::PluginTriggerActions();
     }
 
 protected:

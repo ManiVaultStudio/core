@@ -21,6 +21,7 @@
 
 using namespace hdps::util;
 using namespace hdps::plugin;
+using namespace hdps::gui;
 
 namespace hdps
 {
@@ -474,14 +475,24 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& d
     }
 }
 
-QList<PluginTriggerAction*> Core::getPluginTriggerActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const
+PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const
 {
-    return _pluginManager->getPluginTriggerActionsByPluginTypeAndDatasets(pluginType, datasets);
+    return _pluginManager->getPluginTriggerActions(pluginType, datasets);
 }
 
-QList<PluginTriggerAction*> Core::getPluginTriggerActionsByPluginKindAndDatasets(const QString& pluginKind, const Datasets& datasets) const
+PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const
 {
-    return _pluginManager->getPluginTriggerActionsByPluginKindAndDatasets(pluginKind, datasets);
+    return _pluginManager->getPluginTriggerActions(pluginType, dataTypes);
+}
+
+PluginTriggerActions Core::getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const
+{
+    return _pluginManager->getPluginTriggerActions(pluginKind, datasets);
+}
+
+PluginTriggerActions Core::getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const
+{
+    return _pluginManager->getPluginTriggerActions(pluginKind, dataTypes);
 }
 
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)

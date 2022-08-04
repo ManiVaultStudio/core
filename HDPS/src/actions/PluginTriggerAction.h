@@ -76,5 +76,7 @@ private:
     WidgetAction*       _configurationAction;   /** Action for configuring the plugin creation */
 };
 
+using PluginTriggerActions = QVector<PluginTriggerAction*>;
+
 }
 }

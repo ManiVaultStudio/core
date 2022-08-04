@@ -343,7 +343,6 @@ set( PLUGIN_HEADERS
     src/LoaderPlugin.h
     src/WriterPlugin.h
     src/ViewPlugin.h
-    src/PluginProducerMetaData.h
     src/PluginFactory.h
     src/Plugin.h
     src/PluginType.h
@@ -365,7 +364,6 @@ set( PLUGIN_SOURCES
     src/Application.cpp
     src/Plugin.cpp
     src/Set.cpp
-    src/PluginProducerMetaData.cpp
     src/PluginFactory.cpp
     src/LinkedSelection.cpp
     src/Dataset.cpp

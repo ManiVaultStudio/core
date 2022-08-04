@@ -223,7 +223,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
                     break;
             }
 
-            for (auto pluginTriggerAction : Application::core()->getPluginTriggerActionsByPluginTypeAndDatasets(pluginType, selectedDatasets))
+            for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, selectedDatasets))
                 menu->addAction(pluginTriggerAction);
 
             if (!menu->actions().isEmpty())

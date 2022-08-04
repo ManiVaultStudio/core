@@ -53,20 +53,36 @@ public:
     }
 
     /**
-     * Get plugin trigger actions by plugin type and datasets
+     * Get plugin trigger actions by \p pluginType and \p datasets
      * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param datasets Input datasets
-     * @return List of plugin trigger actions
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
      */
-    QList<PluginTriggerAction*> getPluginTriggerActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const;
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const;
 
     /**
-     * Get plugin trigger actions by plugin kind and datasets
-     * @param pluginKind Kind of plugin
-     * @param datasets Input datasets
-     * @return List of plugin trigger actions
+     * Get plugin trigger actions by \p pluginType and \p dataTypes
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param dataTypes Vector of input data types
+     * @return Vector of plugin trigger actions
      */
-    QList<PluginTriggerAction*> getPluginTriggerActionsByPluginKindAndDatasets(const QString& pluginKind, const Datasets& datasets) const;
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const;
+
+    /**
+     * Get plugin trigger actions by \p pluginKind and \p datasets
+     * @param pluginKind Kind of plugin
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const;
+
+    /**
+     * Get plugin trigger actions by \p pluginKind and \p dataTypes
+     * @param pluginKind Kind of plugin
+     * @param dataTypes Vector of input data types
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const;
 
     /**
      * Get plugin GUI name from plugin kind

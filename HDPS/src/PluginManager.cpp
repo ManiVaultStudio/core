@@ -277,9 +277,9 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
     }
 }
 
-QList<PluginTriggerAction*> PluginManager::getPluginTriggerActionsByPluginTypeAndDatasets(const Type& pluginType, const Datasets& datasets) const
+PluginTriggerActions PluginManager::getPluginTriggerActions(const Type& pluginType, const Datasets& datasets) const
 {
-    QList<PluginTriggerAction*> pluginProducerActions;
+    PluginTriggerActions pluginProducerActions;
 
     for (auto pluginFactory : _pluginFactories)
         if (pluginFactory->getType() == pluginType)
@@ -288,13 +288,35 @@ QList<PluginTriggerAction*> PluginManager::getPluginTriggerActionsByPluginTypeAn
     return pluginProducerActions;
 }
 
-QList<PluginTriggerAction*> PluginManager::getPluginTriggerActionsByPluginKindAndDatasets(const QString& pluginKind, const Datasets& datasets) const
+PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const
 {
-    QList<PluginTriggerAction*> pluginProducerActions;
+    PluginTriggerActions pluginProducerActions;
+
+    for (auto pluginFactory : _pluginFactories)
+        if (pluginFactory->getType() == pluginType)
+            pluginProducerActions << pluginFactory->getPluginTriggerActions(dataTypes);
+
+    return pluginProducerActions;
+}
+
+PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const
+{
+    PluginTriggerActions pluginProducerActions;
 
     for (auto pluginFactory : _pluginFactories)
         if (pluginFactory->getKind() == pluginKind)
             pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
+
+    return pluginProducerActions;
+}
+
+PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const
+{
+    PluginTriggerActions pluginProducerActions;
+
+    for (auto pluginFactory : _pluginFactories)
+        if (pluginFactory->getKind() == pluginKind)
+            pluginProducerActions << pluginFactory->getPluginTriggerActions(dataTypes);
 
     return pluginProducerActions;
 }

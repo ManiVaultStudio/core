@@ -9,11 +9,12 @@ namespace hdps {
 
 namespace gui {
 
-PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent) :
+PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent, const QString& title /*= ""*/) :
     TriggerAction(parent),
     _datasets(),
     _pluginTriggerActions()
 {
+    setText(title);
 }
 
 QWidget* PluginTriggerPickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -21,29 +22,35 @@ QWidget* PluginTriggerPickerAction::getWidget(QWidget* parent, const std::int32_
     return new Widget(parent, this, widgetFlags);
 }
 
-void PluginTriggerPickerAction::initialize(const QString& title, const plugin::Type& pluginType, const Datasets& datasets)
+void PluginTriggerPickerAction::initialize(const plugin::Type& pluginType, const Datasets& datasets)
 {
-    setText(title);
+    _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginType, datasets);
 
-    _datasets               = datasets;
-    _pluginTriggerActions   = Application::core()->getPluginTriggerActionsByPluginTypeAndDatasets(pluginType, datasets);
+    setInputDatasets(datasets);
 
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
 
-void PluginTriggerPickerAction::initialize(const QString& title, const QString& pluginKind, const Datasets& datasets)
+void PluginTriggerPickerAction::initialize(const QString& pluginKind, const Datasets& datasets)
 {
-    setText(title);
-
-    _datasets               = datasets;
-    _pluginTriggerActions   = Application::core()->getPluginTriggerActionsByPluginKindAndDatasets(pluginKind, datasets);
+    _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginKind, datasets);
 
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
 
-QList<PluginTriggerAction*> PluginTriggerPickerAction::getPluginTriggerActions()
+void PluginTriggerPickerAction::setInputDatasets(const Datasets& datasets)
+{
+    _datasets = datasets;
+}
+
+PluginTriggerActions PluginTriggerPickerAction::getPluginTriggerActions()
 {
     return _pluginTriggerActions;
+}
+
+void PluginTriggerPickerAction::updatePluginTriggerActions()
+{
+
 }
 
 PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAction* pluginTriggerPickerAction, const std::int32_t& widgetFlags) :
