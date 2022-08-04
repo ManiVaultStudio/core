@@ -2,8 +2,10 @@
 
 #include <Application.h>
 #include <DataHierarchyItem.h>
+
 #include <actions/GroupAction.h>
 #include <actions/OptionsAction.h>
+#include <actions/PluginTriggerAction.h>
 
 #include <QDebug>
 
@@ -94,20 +96,20 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
                 QVector<WidgetAction*> triggerActions;
 
                 const auto createPluginTypeActionsGroup = [datasets, &groupActions, groupAction, &triggerActions](const plugin::Type& type) -> void {
-                    for (auto triggerAction : hdps::Application::core()->getPluginActionsByPluginTypeAndDatasets(type, datasets)) {
+                    for (auto pluginTriggerAction : hdps::Application::core()->getPluginTriggerActionsByPluginTypeAndDatasets(type, datasets)) {
                         switch (type)
                         {
-                            case plugin::Type::VIEW:        triggerAction->setText(QString("View %1").arg(triggerAction->text()));      break;
-                            case plugin::Type::ANALYSIS:    triggerAction->setText(QString("Analyze %1").arg(triggerAction->text()));   break;
-                            case plugin::Type::WRITER:      triggerAction->setText(QString("Export %1").arg(triggerAction->text()));    break;
+                            case plugin::Type::VIEW:        pluginTriggerAction->setText(QString("View %1").arg(pluginTriggerAction->text()));      break;
+                            case plugin::Type::ANALYSIS:    pluginTriggerAction->setText(QString("Analyze %1").arg(pluginTriggerAction->text()));   break;
+                            case plugin::Type::WRITER:      pluginTriggerAction->setText(QString("Export %1").arg(pluginTriggerAction->text()));    break;
 
                             default:
                                 break;
                         }
 
-                        triggerAction->setParent(groupAction);
+                        pluginTriggerAction->setParent(groupAction);
 
-                        triggerActions << triggerAction;
+                        triggerActions << pluginTriggerAction;
                     }
                 };
 

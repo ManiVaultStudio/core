@@ -474,9 +474,14 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& d
     }
 }
 
-QList<TriggerAction*> Core::getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const
+QList<PluginTriggerAction*> Core::getPluginTriggerActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const
 {
-    return _pluginManager->getPluginActionsByPluginTypeAndDatasets(pluginType, datasets);
+    return _pluginManager->getPluginTriggerActionsByPluginTypeAndDatasets(pluginType, datasets);
+}
+
+QList<PluginTriggerAction*> Core::getPluginTriggerActionsByPluginKindAndDatasets(const QString& pluginKind, const Datasets& datasets) const
+{
+    return _pluginManager->getPluginTriggerActionsByPluginKindAndDatasets(pluginKind, datasets);
 }
 
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)

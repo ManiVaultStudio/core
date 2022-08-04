@@ -277,13 +277,24 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
     }
 }
 
-QList<TriggerAction*> PluginManager::getPluginActionsByPluginTypeAndDatasets(const Type& pluginType, const Datasets& datasets) const
+QList<PluginTriggerAction*> PluginManager::getPluginTriggerActionsByPluginTypeAndDatasets(const Type& pluginType, const Datasets& datasets) const
 {
-    QList<TriggerAction*> pluginProducerActions;
+    QList<PluginTriggerAction*> pluginProducerActions;
 
     for (auto pluginFactory : _pluginFactories)
         if (pluginFactory->getType() == pluginType)
-            pluginProducerActions << pluginFactory->getProducers(datasets);
+            pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
+
+    return pluginProducerActions;
+}
+
+QList<PluginTriggerAction*> PluginManager::getPluginTriggerActionsByPluginKindAndDatasets(const QString& pluginKind, const Datasets& datasets) const
+{
+    QList<PluginTriggerAction*> pluginProducerActions;
+
+    for (auto pluginFactory : _pluginFactories)
+        if (pluginFactory->getKind() == pluginKind)
+            pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
 
     return pluginProducerActions;
 }

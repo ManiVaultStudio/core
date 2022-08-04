@@ -1,6 +1,6 @@
 #include "PluginFactory.h"
 #include "Set.h"
-#include "actions/TriggerAction.h"
+#include "actions/PluginTriggerAction.h"
 
 namespace hdps
 {
@@ -37,9 +37,9 @@ std::uint16_t PluginFactory::getNumberOfDatasetsForType(const Datasets& datasets
     return numberOfDatasetsForType;
 }
 
-TriggerAction* PluginFactory::createProducerAction(const QString& title, const QString& description) const
+PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const
 {
-    auto action = new TriggerAction(nullptr, title);
+    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
 
     action->setToolTip(description);
     action->setIcon(getIcon());
@@ -47,9 +47,9 @@ TriggerAction* PluginFactory::createProducerAction(const QString& title, const Q
     return action;
 }
 
-TriggerAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QString& iconName) const
+PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const
 {
-    auto action = new TriggerAction(nullptr, title);
+    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
 
     action->setToolTip(description);
     action->setIcon(hdps::Application::getIconFont("FontAwesome").getIcon(iconName));
@@ -57,9 +57,9 @@ TriggerAction* PluginFactory::createProducerAction(const QString& title, const Q
     return action;
 }
 
-TriggerAction* PluginFactory::createProducerAction(const QString& title, const QString& description, const QIcon& icon) const
+PluginTriggerAction* PluginFactory::createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const
 {
-    auto action = new TriggerAction(nullptr, title);
+    auto action = new PluginTriggerAction(nullptr, title, _type, _kind, datasets);
 
     action->setToolTip(description);
     action->setIcon(icon);

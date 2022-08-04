@@ -53,12 +53,20 @@ public:
     }
 
     /**
-     * Get plugin trigger actions by plugin type and data types (of the selected datasets in the data hierarchy)
+     * Get plugin trigger actions by plugin type and datasets
      * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param datasets Selected dataset(s)
-     * @return Vector of plugin producer trigger actions
+     * @param datasets Input datasets
+     * @return List of plugin trigger actions
      */
-    QList<TriggerAction*> getPluginActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const;
+    QList<PluginTriggerAction*> getPluginTriggerActionsByPluginTypeAndDatasets(const plugin::Type& pluginType, const Datasets& datasets) const;
+
+    /**
+     * Get plugin trigger actions by plugin kind and datasets
+     * @param pluginKind Kind of plugin
+     * @param datasets Input datasets
+     * @return List of plugin trigger actions
+     */
+    QList<PluginTriggerAction*> getPluginTriggerActionsByPluginKindAndDatasets(const QString& pluginKind, const Datasets& datasets) const;
 
     /**
      * Get plugin GUI name from plugin kind

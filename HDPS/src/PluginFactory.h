@@ -17,7 +17,7 @@ namespace hdps
 
     namespace gui
     {
-        class TriggerAction;
+        class PluginTriggerAction;
     }
 
 namespace plugin
@@ -92,12 +92,12 @@ public:
     virtual Plugin* produce() = 0;
 
     /**
-     * Get a list of producer trigger actions given a sequence of input dataset types
-     * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
-     * @return List of producer trigger actions with which one (or more) plugins can be triggered
+     * Get a list of plugin trigger actions given a vector of input datasets
+     * @param datasets Vector of input datasets
+     * @return List of plugin trigger actions
      */
-    virtual QList<gui::TriggerAction*> getProducers(const Datasets& datasets) const {
-        return QList<gui::TriggerAction*>();
+    virtual QList<gui::PluginTriggerAction*> getPluginTriggerActions(const Datasets& datasets) const {
+        return QList<gui::PluginTriggerAction*>();
     }
 
 protected:
@@ -125,30 +125,33 @@ protected:
     static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const QString& datasetType);
 
     /**
-     * Convenience function for generating a plugin producer trigger action (icon from the plugin factory)
-     * @param title Title of the producer
-     * @param description Description of the producer
-     * @return Pointer to plugin producer trigger action
+     * Convenience function for generating a plugin trigger action (icon from the plugin factory)
+     * @param title Title of the plugin trigger action
+     * @param description Description of the plugin trigger action
+     * @param datasets Input datasets
+     * @return Pointer to plugin trigger action
      */
-    gui::TriggerAction* createProducerAction(const QString& title, const QString& description) const;
+    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const;
 
     /**
-     * Convenience function for generating a plugin producer trigger action
-     * @param title Title of the producer
-     * @param description Description of the producer
+     * Convenience function for generating a plugin trigger action
+     * @param title Title of the plugin trigger action
+     * @param description Description of the plugin trigger action
+     * @param datasets Input datasets
      * @param iconName Name of the icon
-     * @return Pointer to plugin producer trigger action
+     * @return Pointer to plugin trigger action
      */
-    gui::TriggerAction* createProducerAction(const QString& title, const QString& description, const QString& iconName) const;
+    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const;
 
     /**
-     * Convenience function for generating a plugin producer trigger action
-     * @param title Title of the producer
-     * @param description Description of the producer
+     * Convenience function for generating a plugin trigger action
+     * @param title Title of the plugin trigger action
+     * @param description Description of the plugin trigger action
+     * @param datasets Input datasets
      * @param icon Icon
-     * @return Pointer to plugin producer trigger action
+     * @return Pointer to plugin trigger action
      */
-    gui::TriggerAction* createProducerAction(const QString& title, const QString& description, const QIcon& icon) const;
+    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const;
 
 private:
     QString     _kind;          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */

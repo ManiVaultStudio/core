@@ -7,6 +7,8 @@
 
 #include <widgets/Divider.h>
 
+#include <actions/PluginTriggerAction.h>
+
 #include <QDebug>
 #include <QInputDialog>
 #include <QHeaderView>
@@ -221,8 +223,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
                     break;
             }
 
-            for (auto pluginProducerAction : Application::core()->getPluginActionsByPluginTypeAndDatasets(pluginType, selectedDatasets))
-                menu->addAction(pluginProducerAction);
+            for (auto pluginTriggerAction : Application::core()->getPluginTriggerActionsByPluginTypeAndDatasets(pluginType, selectedDatasets))
+                menu->addAction(pluginTriggerAction);
 
             if (!menu->actions().isEmpty())
                 contextMenu->addMenu(menu);
