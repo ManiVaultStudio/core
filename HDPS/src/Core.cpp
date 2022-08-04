@@ -475,6 +475,11 @@ hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& d
     }
 }
 
+QStringList Core::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const
+{
+    return _pluginManager->getPluginKindsByPluginTypes(pluginTypes);
+}
+
 PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const
 {
     return _pluginManager->getPluginTriggerActions(pluginType, datasets);

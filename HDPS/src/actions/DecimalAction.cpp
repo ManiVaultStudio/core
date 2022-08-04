@@ -261,8 +261,6 @@ QWidget* DecimalAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     if (widgetFlags & WidgetFlag::Slider)
         layout->addWidget(new SliderWidget(parent, this), 2);
 
-    widget->setLayout(layout);
-
     return widget;
 }
 

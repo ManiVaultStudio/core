@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TriggerAction.h"
+#include "DecimalAction.h"
 
 #include "PluginType.h"
 #include "Dataset.h"

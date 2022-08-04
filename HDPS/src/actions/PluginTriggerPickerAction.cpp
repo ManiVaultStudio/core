@@ -11,7 +11,6 @@ namespace gui {
 
 PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent, const QString& title /*= ""*/) :
     TriggerAction(parent),
-    _datasets(),
     _pluginTriggerActions()
 {
     setText(title);
@@ -26,7 +25,12 @@ void PluginTriggerPickerAction::initialize(const plugin::Type& pluginType, const
 {
     _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginType, datasets);
 
-    setInputDatasets(datasets);
+    emit pluginTriggerActionsChanged(_pluginTriggerActions);
+}
+
+void PluginTriggerPickerAction::initialize(const plugin::Type& pluginType, const DataTypes& dataTypes)
+{
+    _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginType, dataTypes);
 
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
@@ -38,19 +42,16 @@ void PluginTriggerPickerAction::initialize(const QString& pluginKind, const Data
     emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
 
-void PluginTriggerPickerAction::setInputDatasets(const Datasets& datasets)
+void PluginTriggerPickerAction::initialize(const QString& pluginKind, const DataTypes& dataTypes)
 {
-    _datasets = datasets;
+    _pluginTriggerActions = Application::core()->getPluginTriggerActions(pluginKind, dataTypes);
+
+    emit pluginTriggerActionsChanged(_pluginTriggerActions);
 }
 
 PluginTriggerActions PluginTriggerPickerAction::getPluginTriggerActions()
 {
     return _pluginTriggerActions;
-}
-
-void PluginTriggerPickerAction::updatePluginTriggerActions()
-{
-
 }
 
 PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAction* pluginTriggerPickerAction, const std::int32_t& widgetFlags) :
@@ -60,8 +61,9 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
     _configurationToolButton(this, nullptr)
 {
     _selectTriggerAction.setToolTip("Select plugin to create");
+    _selectTriggerAction.setPlaceHolderString("Pick conversion algorithm");
 
-    _configurationToolButton.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
 
     auto layout = new QHBoxLayout();
 
@@ -79,9 +81,8 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
         for (const auto& pluginTriggerAction : pluginTriggerActions)
             options << pluginTriggerAction->text();
 
-        qDebug() << options;
-
         _selectTriggerAction.setOptions(options);
+        _selectTriggerAction.setCurrentIndex(-1);
     };
 
     const auto updateConfigurationToolButton = [this]() -> void {

@@ -324,26 +324,19 @@ void ProjectBarWidget::ImportDataWidget::createContainerWidget()
     _containerWidget.setAutoFillBackground(true);
     _containerLayout.setContentsMargins(0, 0, 0, 0);
 
-    /* TODO: multi_input_plugin
-    // Get loader plugin kinds from the core
-    const auto loaderPluginKinds = Application::core()->getPluginKindsByPluginTypeAndDataTypes(plugin::Type::LOADER);
+    const auto loaderPluginKinds = Application::core()->getPluginKindsByPluginTypes({ plugin::Type::LOADER });
 
     for (const auto& pluginKind : loaderPluginKinds) {
 
-        // Establish title, description and tooltip
         const auto title        = Application::core()->getPluginGuiName(pluginKind);
         const auto description  = "Import data";
         const auto tooltip      = "Import data into HDPS with the " + pluginKind;
 
-        // Application::core()->getPluginIcon(pluginKind)
-
-        // Create import data option
         _containerLayout.addWidget(new ProjectActionWidget(QIcon(), title, description, tooltip, [pluginKind]() {
-            Application::core()->importDataset(pluginKind);
+            Application::core()->requestPlugin(pluginKind);
         }));
     }
 
     _containerWidget.setLayout(&_containerLayout);
     _containerWidget.setVisible(!loaderPluginKinds.isEmpty());
-    */
 }

@@ -68,6 +68,13 @@ public:
     void initialize(const plugin::Type& pluginType, const Datasets& datasets);
 
     /**
+     * Establishes the plugin trigger actions for \p pluginType and \p dataTypes
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param dataTypes Vector of dataTypes
+     */
+    void initialize(const plugin::Type& pluginType, const DataTypes& dataTypes);
+
+    /**
      * Establishes the plugin trigger actions for \p pluginKind and \p datasets
      * @param pluginKind Kind of plugin
      * @param datasets Input datasets
@@ -75,10 +82,11 @@ public:
     void initialize(const QString& pluginKind, const Datasets& datasets);
 
     /**
-     * Set the input datasets
-     * @param datasets Input datasets
+     * Establishes the plugin trigger actions for \p pluginKind and \p dataTypes
+     * @param pluginKind Kind of plugin
+     * @param dataTypes Vector of dataTypes
      */
-    void setInputDatasets(const Datasets& datasets);
+    void initialize(const QString& pluginKind, const DataTypes& dataTypes);
 
     /**
      * Get plugin trigger actions
@@ -86,11 +94,6 @@ public:
      */
     PluginTriggerActions getPluginTriggerActions();
 
-private:
-
-    /** Updates the list of available plugin trigger actions */
-    void updatePluginTriggerActions();
-    
 signals:
 
     /**
@@ -100,7 +103,6 @@ signals:
     void pluginTriggerActionsChanged(const PluginTriggerActions& pluginTriggerActions);
 
 private:
-    Datasets                _datasets;                  /** Input datasets */
     PluginTriggerActions    _pluginTriggerActions;      /** Plugin trigger actions */
 };
 

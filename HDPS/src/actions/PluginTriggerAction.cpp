@@ -44,8 +44,6 @@ WidgetAction* PluginTriggerAction::getConfigurationAction()
 
 void PluginTriggerAction::setConfigurationAction(WidgetAction* configurationAction)
 {
-    Q_ASSERT(configurationAction != nullptr);
-
     _configurationAction = configurationAction;
 }
 

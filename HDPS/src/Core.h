@@ -176,6 +176,13 @@ public: // Plugin creation
 public: // Plugin queries
 
     /**
+     * Get plugin kinds by plugin type(s)
+     * @param pluginTypes Plugin type(s)
+     * @return Plugin kinds
+     */
+    QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const override;
+
+    /**
      * Get plugin trigger actions by \p pluginType and \p datasets
      * @param pluginType Type of plugin e.g. analysis, exporter
      * @param datasets Vector of input datasets

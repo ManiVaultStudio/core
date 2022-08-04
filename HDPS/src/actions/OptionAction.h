@@ -206,11 +206,11 @@ public:
      */
     void setDefaultText(const QString& defaultText);
 
-    /** Get placeholder text */
+    /** Get placeholder text (shown when no option selected) */
     QString getPlaceholderString() const;
 
     /**
-     * Set placeholder text
+     * Set placeholder text (shown when no option selected)
      * @param placeholderText Placeholder text
      */
     void setPlaceHolderString(const QString& placeholderString);
