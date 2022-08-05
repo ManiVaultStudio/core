@@ -9,6 +9,7 @@ NumberOfSelectedPointsAction::NumberOfSelectedPointsAction(QObject* parent, cons
     _points(points),
     _numberOfSelectedPointsAction(this, "Number of selected points")
 {
+    setEnabled(false);
     setText("Number of selected points");
     setToolTip("Number of selected points");
 

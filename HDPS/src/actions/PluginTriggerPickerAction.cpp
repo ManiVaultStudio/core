@@ -63,8 +63,6 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
     _selectTriggerAction.setToolTip("Select plugin to create");
     _selectTriggerAction.setPlaceHolderString("Pick conversion algorithm");
 
-    _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
-
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -83,6 +81,8 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
 
         _selectTriggerAction.setOptions(options);
         _selectTriggerAction.setCurrentIndex(-1);
+
+        _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     };
 
     const auto updateConfigurationToolButton = [this]() -> void {
@@ -94,6 +94,7 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
             _configurationToolButton.setWidgetAction(nullptr);
 
         _configurationToolButton.setEnabled(_configurationToolButton.getWidgetAction());
+        _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     };
 
     connect(pluginTriggerPickerAction, &PluginTriggerPickerAction::pluginTriggerActionsChanged, this, updateSelectTriggerAction);

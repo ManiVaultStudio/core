@@ -29,7 +29,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 {
     auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-    connect(_widgetAction, &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateLabel);
+    connect(_widgetAction, &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
     connect(_widgetAction, &WidgetAction::isPublishedChanged, this, &WidgetActionLabel::updatePublishAction);
 
     _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
@@ -43,32 +43,21 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     layout->setAlignment(Qt::AlignRight | Qt::AlignCenter);
 
     layout->setContentsMargins(0, 0, 0, 0);
-    //layout->addStretch(1);
-
     layout->addWidget(&_nameLabel);
-    //layout->setSizeConstraint(QLayout::SetFixedSize);
 
     setLayout(layout);
 
+    _nameLabel.setText(getLabelText());
     _nameLabel.setAlignment(Qt::AlignRight);
     _nameLabel.setStyleSheet("color: black;");
-    //_nameLabel.setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-    //_nameLabel.setMinimumWidth(1);
 
-    const auto update = [this, widgetAction]() -> void {
-        _nameLabel.setEnabled(widgetAction->isEnabled());
-        _nameLabel.setToolTip(widgetAction->toolTip());
-        _nameLabel.setVisible(widgetAction->isVisible());
-    };
+    connect(widgetAction, &WidgetAction::changed, this, &WidgetActionLabel::updateNameLabel);
 
-    connect(widgetAction, &WidgetAction::changed, this, update);
+    updateNameLabel();
 
-    update();
-
-    updateLabel();
+    updateNameLabel();
     updatePublishAction();
 
-    // Intercept name label events so that we can highlight and provide a context menu to the label
     _nameLabel.installEventFilter(this);
 }
 
@@ -137,20 +126,9 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
         }
 
         case QEvent::Enter:
-        {
-            if (_widgetAction->isEnabled() && _widgetAction->mayPublish())
-                _nameLabel.setStyleSheet("color: gray;");
-
-            break;
-        }
-
         case QEvent::Leave:
-        {
-            if (_widgetAction->isEnabled() && _widgetAction->mayPublish())
-                _nameLabel.setStyleSheet("color: black;");
-
+            updateNameLabel();
             break;
-        }
 
         default:
             break;
@@ -163,6 +141,9 @@ void WidgetActionLabel::resizeEvent(QResizeEvent* resizeEvent)
 {
     QWidget::resizeEvent(resizeEvent);
     
+    if (!_elide)
+        return;
+
     _nameLabel.setText("");
 
     QTimer::singleShot(25, this, [this]() {
@@ -185,16 +166,19 @@ void WidgetActionLabel::setElide(bool elide)
 
 void WidgetActionLabel::elide()
 {
-    const auto labelText = QString("%1%2 ").arg(_widgetAction->text(), (_flags & ColonAfterName) ? ":" : "");
-
     if (!_elide) {
-        _nameLabel.setText(labelText);
+        _nameLabel.setText(getLabelText());
     }
     else {
         QFontMetrics metrics(font());
 
-        _nameLabel.setText(metrics.elidedText(labelText, Qt::ElideMiddle, width()));
+        _nameLabel.setText(metrics.elidedText(getLabelText(), Qt::ElideMiddle, width()));
     }    
+}
+
+QString WidgetActionLabel::getLabelText() const
+{
+    return QString("%1%2 ").arg(_widgetAction->text(), (_flags & ColonAfterName) ? ":" : "");
 }
 
 void WidgetActionLabel::updatePublishAction()
@@ -202,14 +186,26 @@ void WidgetActionLabel::updatePublishAction()
     _publishAction.setEnabled(!_widgetAction->isPublished());
 }
 
-void WidgetActionLabel::updateLabel()
+void WidgetActionLabel::updateNameLabel()
 {
     auto font = _nameLabel.font();
 
-    font.setUnderline(_widgetAction->mayPublish());
+    font.setUnderline(_widgetAction->isEnabled() && _widgetAction->mayPublish());
     font.setItalic(_widgetAction->mayPublish() && _widgetAction->isConnected());
 
     _nameLabel.setFont(font);
+    _nameLabel.setEnabled(_widgetAction->isEnabled());
+    _nameLabel.setToolTip(_widgetAction->toolTip());
+    _nameLabel.setVisible(_widgetAction->isVisible());
+
+    if (_widgetAction->isEnabled()) {
+        if (_widgetAction->mayPublish() && _nameLabel.underMouse())
+            _nameLabel.setStyleSheet("color: gray;");
+        else
+            _nameLabel.setStyleSheet("color: black;");
+    } else {
+        _nameLabel.setStyleSheet("color: gray;");
+    }
 }
 
 void WidgetActionLabel::publishAction()

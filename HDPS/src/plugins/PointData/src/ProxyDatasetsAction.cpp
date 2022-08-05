@@ -17,6 +17,8 @@ ProxyDatasetsAction::ProxyDatasetsAction(QObject* parent, const Dataset<Points>&
     _countAction.setToolTip("Number of proxy datasets");
 
     const auto updateActions = [this]() -> void {
+        setEnabled(_points->getProxyDatasets().count() >= 1);
+
         _countAction.setString(QString::number(_points->getProxyDatasets().count()));
         _countAction.setToolTip(QString("%1 proxy datasets").arg(QString::number(_points->getProxyDatasets().count())));
         _editProxyDatasetsAction.setEnabled(_points->isProxy());

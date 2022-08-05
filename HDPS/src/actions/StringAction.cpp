@@ -158,7 +158,7 @@ StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stri
 {
     setObjectName("LineEdit");
     setAcceptDrops(true);
-
+    
     // Update the line edit text from the string action
     const auto updateLineEdit = [this, stringAction]() {
         QSignalBlocker blocker(this);

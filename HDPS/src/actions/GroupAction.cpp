@@ -26,6 +26,19 @@ GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
 {
 }
 
+GroupAction::GroupAction(QObject* parent, const WidgetActions& widgetActions, const bool& expanded /*= false*/) :
+    WidgetAction(parent),
+    _expanded(expanded),
+    _readOnly(false),
+    _widgetActions(),
+    _showLabels(true),
+    _labelSizingType(LabelSizingType::Percentage),
+    _labelWidthPercentage(GroupAction::globalLabelWidthPercentage),
+    _labelWidthFixed(GroupAction::globalLabelWidthFixed)
+{
+    setActions(widgetActions);
+}
+
 void GroupAction::setExpanded(const bool& expanded)
 {
     if (expanded == _expanded)
@@ -149,14 +162,14 @@ void GroupAction::setLabelWidthFixed(std::uint32_t labelWidthFixed)
     emit labelWidthFixedChanged(_labelWidthFixed);
 }
 
-void GroupAction::setActions(const QVector<WidgetAction*>& widgetActions /*= QVector<WidgetAction*>()*/)
+void GroupAction::setActions(const WidgetActions& widgetActions /*= WidgetActions()*/)
 {
     _widgetActions = widgetActions;
 
     emit actionsChanged(_widgetActions);
 }
 
-QVector<WidgetAction*> GroupAction::getSortedWidgetActions() const
+WidgetActions GroupAction::getSortedWidgetActions() const
 {
     auto sortedActions = _widgetActions;
 
@@ -179,13 +192,13 @@ QVector<WidgetAction*> GroupAction::getSortedWidgetActions() const
     return sortedActions;
 }
 
-GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
+GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())
 {
     auto contentsMargin = _layout->contentsMargins();
 
-    _layout->setContentsMargins(10, 10, 10, 10);
+    //_layout->setContentsMargins(10, 10, 10, 10);
     
     setLayout(_layout);
 
@@ -195,7 +208,7 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
             {
                 case LabelSizingType::Auto:
                 {
-                    _layout->setColumnStretch(1, 1);
+                    //_layout->setColumnStretch(1, 1);
                     break;
                 }
 
@@ -233,10 +246,25 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
             if (groupAction->getShowLabels() && !isToggleAction && !isTriggerAction && !isTriggersAction) {
                 auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
 
-                if (groupAction->getLabelSizingType() == LabelSizingType::Fixed)
-                    labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                switch (groupAction->getLabelSizingType())
+                {
+                    case LabelSizingType::Auto:
+                        labelWidget->setElide(false);
+                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                        break;
 
-                labelWidget->setElide(true);
+                    case LabelSizingType::Percentage:
+                        labelWidget->setElide(true);
+                        break;
+
+                    case LabelSizingType::Fixed:
+                        labelWidget->setElide(true);
+                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                        break;
+
+                    default:
+                        break;
+                }
 
                 _layout->addWidget(labelWidget, numRows, 0);
             }
