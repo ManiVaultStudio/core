@@ -36,7 +36,6 @@ public:
 
     protected:
         PluginTriggerPickerAction*      _pluginTriggerPickerAction;     /** Pointer to plugin trigger picker action */
-        OptionAction                    _selectTriggerAction;           /** Select trigger action */
         WidgetActionCollapsedWidget     _configurationToolButton;       /** Tool button which opens the configuration widget */
 
         friend class PluginTriggerPickerAction;
@@ -94,7 +93,40 @@ public:
      */
     PluginTriggerActions getPluginTriggerActions();
 
+    /**
+     * Get current plugin trigger action (if any)
+     * @return Pointer to current plugin trigger action (if any)
+     */
+    PluginTriggerAction* getCurrentPluginTriggerAction();
+
+    /**
+     * Set current plugin trigger action by \p pluginTriggerAction
+     * @param pluginTriggerAction Pointer to plugin trigger action
+     */
+    void setCurrentPluginTriggerAction(PluginTriggerAction* pluginTriggerAction);
+
+    /**
+     * Set current plugin trigger action by \p sha
+     * @param sha Plugin trigger action sha
+     */
+    void setCurrentPluginTriggerAction(const QString& sha);
+
+    /**
+     * Get trigger selection option action
+     * @return Reference to trigger selection option action
+     */
+    OptionAction& getSelectTriggerAction();
+
+    /** Resets to default (no plugin trigger selected) */
+    void reset();
+
 signals:
+
+    /**
+     * Signals that the current plugin trigger action changed
+     * @param currentPluginTriggerAction Pointer to current plugin trigger action that changed
+     */
+    void currentPluginTriggerActionChanged(const PluginTriggerAction* currentPluginTriggerAction);
 
     /**
      * Signals that the plugin trigger actions have changed
@@ -104,6 +136,7 @@ signals:
 
 private:
     PluginTriggerActions    _pluginTriggerActions;      /** Plugin trigger actions */
+    OptionAction            _selectTriggerAction;       /** Select trigger action */
 };
 
 }

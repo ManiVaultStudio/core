@@ -11,9 +11,17 @@ namespace gui {
 
 PluginTriggerPickerAction::PluginTriggerPickerAction(QObject* parent, const QString& title /*= ""*/) :
     TriggerAction(parent),
-    _pluginTriggerActions()
+    _pluginTriggerActions(),
+    _selectTriggerAction(this, "Pick plugin")
 {
     setText(title);
+
+    _selectTriggerAction.setToolTip("Select plugin to create");
+    _selectTriggerAction.setPlaceHolderString("Pick conversion algorithm");
+
+    connect(&_selectTriggerAction, &OptionAction::currentIndexChanged, this, [this]() -> void {
+        emit currentPluginTriggerActionChanged(getCurrentPluginTriggerAction());
+    });
 }
 
 QWidget* PluginTriggerPickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
@@ -54,24 +62,53 @@ PluginTriggerActions PluginTriggerPickerAction::getPluginTriggerActions()
     return _pluginTriggerActions;
 }
 
+PluginTriggerAction* PluginTriggerPickerAction::getCurrentPluginTriggerAction()
+{
+    if (!_selectTriggerAction.hasSelection())
+        return nullptr;
+
+    return _pluginTriggerActions[_selectTriggerAction.getCurrentIndex()];
+}
+
+void PluginTriggerPickerAction::setCurrentPluginTriggerAction(const QString& sha)
+{
+    for (const auto& pluginTriggerAction : _pluginTriggerActions)
+        if (pluginTriggerAction->getSha() == sha)
+            setCurrentPluginTriggerAction(pluginTriggerAction);
+}
+
+void PluginTriggerPickerAction::setCurrentPluginTriggerAction(PluginTriggerAction* pluginTriggerAction)
+{
+    if (!_pluginTriggerActions.contains(pluginTriggerAction))
+        return;
+
+    _selectTriggerAction.setCurrentIndex(_pluginTriggerActions.indexOf(pluginTriggerAction));
+}
+
+OptionAction& PluginTriggerPickerAction::getSelectTriggerAction()
+{
+    return _selectTriggerAction;
+}
+
+void PluginTriggerPickerAction::reset()
+{
+    _selectTriggerAction.setCurrentIndex(-1);
+}
+
 PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAction* pluginTriggerPickerAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, pluginTriggerPickerAction, widgetFlags),
     _pluginTriggerPickerAction(pluginTriggerPickerAction),
-    _selectTriggerAction(this, "Pick plugin"),
     _configurationToolButton(this, nullptr)
 {
-    _selectTriggerAction.setToolTip("Select plugin to create");
-    _selectTriggerAction.setPlaceHolderString("Pick conversion algorithm");
-
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(4);
 
-    layout->addWidget(_selectTriggerAction.createWidget(this));
+    layout->addWidget(pluginTriggerPickerAction->getSelectTriggerAction().createWidget(this));
     layout->addWidget(&_configurationToolButton);
 
-    const auto updateSelectTriggerAction = [this]() -> void {
+    const auto updateSelectTriggerAction = [this, pluginTriggerPickerAction]() -> void {
         const auto pluginTriggerActions = _pluginTriggerPickerAction->getPluginTriggerActions();
 
         QStringList options;
@@ -79,17 +116,17 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
         for (const auto& pluginTriggerAction : pluginTriggerActions)
             options << pluginTriggerAction->text();
 
-        _selectTriggerAction.setOptions(options);
-        _selectTriggerAction.setCurrentIndex(-1);
+        pluginTriggerPickerAction->getSelectTriggerAction().setOptions(options);
+        pluginTriggerPickerAction->getSelectTriggerAction().setCurrentIndex(-1);
 
         _configurationToolButton.getToolButton().setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     };
 
-    const auto updateConfigurationToolButton = [this]() -> void {
+    const auto updateConfigurationToolButton = [this, pluginTriggerPickerAction]() -> void {
         const auto pluginTriggerActions  = _pluginTriggerPickerAction->getPluginTriggerActions();
 
-        if (_selectTriggerAction.getCurrentIndex() >= 0)
-            _configurationToolButton.setWidgetAction(pluginTriggerActions[_selectTriggerAction.getCurrentIndex()]->getConfigurationAction());
+        if (pluginTriggerPickerAction->getSelectTriggerAction().getCurrentIndex() >= 0)
+            _configurationToolButton.setWidgetAction(pluginTriggerActions[pluginTriggerPickerAction->getSelectTriggerAction().getCurrentIndex()]->getConfigurationAction());
         else
             _configurationToolButton.setWidgetAction(nullptr);
 
@@ -98,7 +135,7 @@ PluginTriggerPickerAction::Widget::Widget(QWidget* parent, PluginTriggerPickerAc
     };
 
     connect(pluginTriggerPickerAction, &PluginTriggerPickerAction::pluginTriggerActionsChanged, this, updateSelectTriggerAction);
-    connect(&_selectTriggerAction, &OptionAction::currentIndexChanged, this, updateConfigurationToolButton);
+    connect(&pluginTriggerPickerAction->getSelectTriggerAction(), &OptionAction::currentIndexChanged, this, updateConfigurationToolButton);
 
     updateSelectTriggerAction();
     updateConfigurationToolButton();

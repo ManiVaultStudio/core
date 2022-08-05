@@ -8,7 +8,7 @@ namespace gui {
 
 PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets) :
     TriggerAction(parent),
-    _hash(QString(QCryptographicHash::hash(QString("%1_%2").arg(pluginKind, title).toUtf8(), QCryptographicHash::Sha1).toHex())),
+    _sha(QString(QCryptographicHash::hash(QString("%1_%2").arg(pluginKind, title).toUtf8(), QCryptographicHash::Sha1).toHex())),
     _pluginType(pluginType),
     _pluginKind(pluginKind),
     _datasets(datasets),
@@ -17,9 +17,9 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, 
     setText(title);
 }
 
-QString PluginTriggerAction::getHash() const
+QString PluginTriggerAction::getSha() const
 {
-    return _hash;
+    return _sha;
 }
 
 plugin::Type PluginTriggerAction::getPluginType() const
@@ -35,6 +35,11 @@ QString PluginTriggerAction::getPluginKind() const
 Datasets PluginTriggerAction::getDatasets() const
 {
     return _datasets;
+}
+
+void PluginTriggerAction::setDatasets(const Datasets& datasets)
+{
+    _datasets = datasets;
 }
 
 WidgetAction* PluginTriggerAction::getConfigurationAction()

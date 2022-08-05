@@ -330,9 +330,6 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& plugi
         if (pluginFactory->getKind() == pluginKind)
             pluginProducerActions << pluginFactory->getPluginTriggerActions(dataTypes);
 
-    for (auto pluginFactory : _pluginFactories)
-        qDebug() << pluginFactory->getKind();
-
     return pluginProducerActions;
 }
 

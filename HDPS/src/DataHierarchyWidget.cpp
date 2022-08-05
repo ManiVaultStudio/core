@@ -174,8 +174,8 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         for (const auto& selectedRow : selectedRows)
             selectedDatasets << _model.getItem(selectedRow, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
 
-        if (selectedDatasets.isEmpty())
-            return;
+        /*if (selectedDatasets.isEmpty())
+            return;*/
 
         auto contextMenu = new QMenu();
 
@@ -236,16 +236,18 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         addMenu(plugin::Type::TRANSFORMATION);
         addMenu(plugin::Type::VIEW);
         
-        auto groupDataAction = new QAction("Group");
+        if (!selectedDatasets.isEmpty()) {
+            auto groupDataAction = new QAction("Group");
 
-        groupDataAction->setToolTip("Group datasets into one");
-        groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("layer-group"));
+            groupDataAction->setToolTip("Group datasets into one");
+            groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("layer-group"));
 
-        connect(groupDataAction, &QAction::triggered, [this, selectedDatasets]() -> void {
-            Application::core()->groupDatasets(selectedDatasets);
-        });
+            connect(groupDataAction, &QAction::triggered, [this, selectedDatasets]() -> void {
+                Application::core()->groupDatasets(selectedDatasets);
+            });
 
-        contextMenu->addAction(groupDataAction);
+            contextMenu->addAction(groupDataAction);
+        }
 
         contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
     });

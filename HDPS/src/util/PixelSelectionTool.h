@@ -111,17 +111,22 @@ public: // Getters/setters
     }
 
     /** Get the pixmap overlay that contains the selection tool visualization */
-    QPixmap& getShapePixmap() {
+    QPixmap getShapePixmap() {
         return _shapePixmap;
     }
 
     /** Get the pixmap overlay that contains the selected pixels*/
-    QPixmap& getAreaPixmap() {
+    QPixmap getAreaPixmap() {
         return _areaPixmap;
     }
 
     /** Updates the pixel selection tool (wraps internal paint method) */
     void update();
+
+private:
+
+    void setAreaPixmap(const QPixmap& areaPixmap);
+    void setShapePixmap(const QPixmap& shapePixmap);
 
 public: // Event handling
 
@@ -183,6 +188,8 @@ protected:
     QPixmap                     _areaPixmap;                /** Pixmap for the selection area */
     bool                        _preventContextMenu;        /** Whether to prevent a context menu */
     bool                        _aborted;                   /** Whether the selection process was aborted */
+
+    static const std::int32_t LAZY_UPDATE_INTERVAL = 10;
 
 protected:
     QColor      _mainColor;                 /** Main drawing color */

@@ -35,6 +35,7 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
     _shapePixmap(),
     _areaPixmap(),
     _preventContextMenu(false),
+    _aborted(false),
     _mainColor(),
     _fillColor(),
     _areaBrush(),
@@ -45,7 +46,6 @@ PixelSelectionTool::PixelSelectionTool(QWidget* targetWidget, const bool& enable
 {
     setMainColor(QColor(Qt::black));
 
-    // Tap into events from the target widget (necessary for drawing)
     targetWidget->installEventFilter(this);
 }
 
@@ -159,7 +159,21 @@ void PixelSelectionTool::setChanged()
 
 void PixelSelectionTool::update()
 {
-    paint();
+    //paint();
+}
+
+void PixelSelectionTool::setAreaPixmap(const QPixmap& areaPixmap)
+{
+    _areaPixmap = areaPixmap;
+
+    emit areaChanged();
+}
+
+void PixelSelectionTool::setShapePixmap(const QPixmap& shapePixmap)
+{
+    _shapePixmap = shapePixmap;
+
+    emit shapeChanged();
 }
 
 bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
@@ -215,8 +229,8 @@ bool PixelSelectionTool::eventFilter(QObject* target, QEvent* event)
             _shapePixmap    = QPixmap(resizeEvent->size());
             _areaPixmap     = QPixmap(resizeEvent->size());
 
-            _shapePixmap.fill(Qt::transparent);
-            _areaPixmap.fill(Qt::transparent);
+            //_shapePixmap.fill(Qt::transparent);
+            //_areaPixmap.fill(Qt::transparent);
 
             shouldPaint = true;
 
@@ -510,10 +524,15 @@ void PixelSelectionTool::paint()
     if (_type != PixelSelectionType::ROI && !_enabled)
         return;
 
-    _shapePixmap.fill(Qt::transparent);
-    _areaPixmap.fill(Qt::transparent);
+    //qDebug() << __FUNCTION__;
 
-    QPainter shapePainter(&_shapePixmap), areaPainter(&_areaPixmap);
+    auto shapePixmap    = _shapePixmap;
+    auto areaPixmap     = _areaPixmap;
+
+    shapePixmap.fill(Qt::transparent);
+    areaPixmap.fill(Qt::transparent);
+
+    QPainter shapePainter(&shapePixmap), areaPainter(&areaPixmap);
 
     shapePainter.setRenderHint(QPainter::Antialiasing);
     areaPainter.setRenderHint(QPainter::Antialiasing);
@@ -673,12 +692,12 @@ void PixelSelectionTool::paint()
 
             shapePainter.drawPolyline(QVector<QPoint>({
                 QPoint(mousePosition.x(), 0),
-                QPoint(mousePosition.x(), _shapePixmap.size().height())
+                QPoint(mousePosition.x(), shapePixmap.size().height())
             }));
 
             shapePainter.drawPolyline(QVector<QPoint>({
                 QPoint(0, mousePosition.y()),
-                QPoint(_shapePixmap.size().width(), mousePosition.y())
+                QPoint(shapePixmap.size().width(), mousePosition.y())
                 }));
 
             break;
@@ -687,7 +706,7 @@ void PixelSelectionTool::paint()
         case PixelSelectionType::ROI:
         {
             const auto topLeft      = QPointF(0.0f, 0.0f);
-            const auto bottomRight  = QPointF(_shapePixmap.size().width(), _shapePixmap.size().height());
+            const auto bottomRight  = QPointF(shapePixmap.size().width(), shapePixmap.size().height());
             const auto rectangle    = QRectF(topLeft, bottomRight);
 
             auto boundsPen = _penLineBackGround;
@@ -760,8 +779,8 @@ void PixelSelectionTool::paint()
             break;
     }
 
-    emit shapeChanged();
-    emit areaChanged();
+    setAreaPixmap(areaPixmap);
+    setShapePixmap(shapePixmap);
 }
 
 void PixelSelectionTool::startSelection()

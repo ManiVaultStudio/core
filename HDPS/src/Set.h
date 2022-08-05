@@ -497,7 +497,7 @@ public: // Actions
      * Populates existing menu with actions menus
      * @param contextMenu Context menu to populate
      */
-    void populateContextMenu(QMenu* contextMenu);;
+    void populateContextMenu(QMenu* contextMenu);
 
 protected:
 

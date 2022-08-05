@@ -34,10 +34,10 @@ public:
     PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets);
 
     /**
-     * Get hash
-     * @return Cryptographic hash of the plugin kind and trigger title
+     * Get sha of plugin kind + trigger title
+     * @return Sha
      */
-    QString getHash() const;
+    QString getSha() const;
 
     /**
      * Get type of plugin
@@ -58,6 +58,12 @@ public:
     Datasets getDatasets() const;
 
     /**
+     * Set input datasets
+     * @param Vector of input datasets
+     */
+    void setDatasets(const Datasets& datasets);
+
+    /**
      * Get configuration action
      * @return Action for configuring the plugin creation (if available)
      */
@@ -70,10 +76,10 @@ public:
     void setConfigurationAction(WidgetAction* configurationAction);
 
 private:
-    const QString       _hash;                  /** Cryptographic hash of the plugin kind and trigger title */
+    const QString       _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
     const plugin::Type  _pluginType;            /** Type of plugin e.g. analysis, exporter */
     const QString       _pluginKind;            /** Kind of plugin */
-    const Datasets      _datasets;              /** Input datasets */
+    Datasets            _datasets;              /** Input datasets */
     WidgetAction*       _configurationAction;   /** Action for configuring the plugin creation */
 };
 

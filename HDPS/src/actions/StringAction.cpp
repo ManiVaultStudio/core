@@ -110,7 +110,7 @@ void StringAction::setSearchMode(bool searchMode)
     // Configure leading action
     _leadingAction.setVisible(_searchMode);
     _leadingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
-
+    
     // Configure trailing action
     _trailingAction.setVisible(false);
     _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
