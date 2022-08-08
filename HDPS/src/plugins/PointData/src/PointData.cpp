@@ -353,35 +353,45 @@ void Points::extractDataForDimension(std::vector<float>& result, const int dimen
     assert(isFull());
 
     if (isProxy()) {
+        for (auto proxyDataset : getProxyDatasets()) {
+            auto points = hdps::Dataset<Points>(proxyDataset);
 
+            std::vector<float> proxyPoints;
+
+            proxyPoints.resize(points->getNumPoints());
+
+            points->extractDataForDimension(proxyPoints, dimensionIndex);
+
+            result.insert(result.end(), proxyPoints.begin(), proxyPoints.end());
+        }
     }
     else {
         getRawData<PointData>().extractFullDataForDimension(result, dimensionIndex);
     }
 }
 
-
 void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
     if (isProxy()) {
-        result.resize(getNumPoints());
+        for (auto proxyDataset : getProxyDatasets()) {
+            auto points = hdps::Dataset<Points>(proxyDataset);
 
-        auto offset = 0;
+            std::vector<hdps::Vector2f> proxyPoints;
 
-        for (auto proxyDataset : getProxyDatasets())
-            hdps::Dataset<Points>(proxyDataset)->extractDataForDimensions(reinterpret_cast<std::vector<hdps::Vector2f>&>(result[offset]), dimensionIndex1, dimensionIndex2);
+            proxyPoints.resize(points->getNumPoints());
+
+            points->extractDataForDimensions(proxyPoints, dimensionIndex1, dimensionIndex2);
+
+            result.insert(result.end(), proxyPoints.begin(), proxyPoints.end());
+        }
     }
     else {
         const auto& rawPointData = getRawData<PointData>();
 
         if (isFull())
-        {
             rawPointData.extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
-        }
         else
-        {
             rawPointData.extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
-        }
     }
 }
 

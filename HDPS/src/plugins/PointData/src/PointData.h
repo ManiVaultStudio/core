@@ -735,15 +735,38 @@ public:
     template <typename ResultContainer, typename DimensionIndices>
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
-        const auto& rawPointData = getRawData<PointData>();
+        if (isProxy()) {
+            auto offset = 0;
 
-        if (isFull())
-        {
-            rawPointData.populateFullDataForDimensions(resultContainer, dimensionIndices);
+            for (auto proxyDataset : getProxyDatasets()) {
+                auto points = hdps::Dataset<Points>(proxyDataset);
+
+                ResultContainer proxyPoints;
+
+                const auto numberOfElements = points->getNumPoints() * dimensionIndices.size();
+
+                proxyPoints.resize(numberOfElements);
+
+                const auto& rawPointData = points->getRawData<PointData>();
+
+                if (points->isFull())
+                    rawPointData.populateFullDataForDimensions(proxyPoints, dimensionIndices);
+                else
+                    rawPointData.populateDataForDimensions(proxyPoints, dimensionIndices, indices);
+
+                resultContainer.erase(resultContainer.begin() + offset, resultContainer.begin() + offset + numberOfElements);
+                resultContainer.insert(resultContainer.begin() + offset, proxyPoints.begin(), proxyPoints.end());
+
+                offset += numberOfElements;
+            }
         }
-        else
-        {
-            rawPointData.populateDataForDimensions(resultContainer, dimensionIndices, indices);
+        else {
+            const auto& rawPointData = getRawData<PointData>();
+
+            if (isFull())
+                rawPointData.populateFullDataForDimensions(resultContainer, dimensionIndices);
+            else
+                rawPointData.populateDataForDimensions(resultContainer, dimensionIndices, indices);
         }
     }
 
