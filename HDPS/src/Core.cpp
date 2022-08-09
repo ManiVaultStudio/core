@@ -631,7 +631,6 @@ void Core::notifyDatasetChanged(const Dataset<DatasetImpl>& dataset)
 void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset)
 {
     try {
-
         // Create data selection changed event
         DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
 
@@ -642,6 +641,21 @@ void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset)
         for (auto listener : eventListeners)
             if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
                 listener->onDataEvent(&dataSelectionChangedEvent);
+
+        // Notify linked data
+        for (const LinkedData& ld : dataset->getLinkedData())
+        {
+            // Create data selection changed event
+            DataSelectionChangedEvent dataSelectionChangedEvent(ld.getTargetDataset());
+
+            // Cache the event listeners to prevent timing issues
+            const auto eventListeners = _eventListeners;
+
+            // And notify all listeners
+            for (auto listener : eventListeners)
+                if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                    listener->onDataEvent(&dataSelectionChangedEvent);
+        }
     }
     catch (std::exception& e)
     {

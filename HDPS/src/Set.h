@@ -4,6 +4,7 @@
 #include "CoreInterface.h"
 #include "RawData.h"
 #include "Dataset.h"
+#include "LinkedData.h"
 
 #include "actions/WidgetAction.h"
 
@@ -187,6 +188,22 @@ public:
     Dataset<DatasetType> getSelection() const
     {
         return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
+    }
+
+    void addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
+    {
+        _linkedData.emplace_back(toSmartPointer(), targetDataSet);
+        _linkedData.back().setMapping(mapping);
+    }
+
+    const std::vector<hdps::LinkedData>& getLinkedData() const
+    {
+        return _linkedData;
+    }
+
+    std::vector<hdps::LinkedData>& getLinkedData()
+    {
+        return _linkedData;
     }
 
     /**
@@ -497,6 +514,7 @@ private:
     QMap<QString, QVariant>     _properties;        /** Properties map */
     std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
+    std::vector<LinkedData>     _linkedData;        /** List of linked datasets */
 
     friend class Core;
     friend class DataManager;

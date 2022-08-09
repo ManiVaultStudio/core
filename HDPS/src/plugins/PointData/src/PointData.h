@@ -6,7 +6,7 @@
 
 #include "Set.h"
 #include "PointDataRange.h"
-#include "LinkedSelection.h"
+#include "LinkedData.h"
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16.h>
@@ -812,8 +812,6 @@ public:
      */
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
-    std::vector<hdps::LinkedSelection>& getLinkedSelection() { return _linkedSelections; }
-
     /** Get icon for the dataset */
     QIcon getIcon() const override;
 
@@ -879,9 +877,6 @@ public:
 
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
     hdps::EventListener             _eventListener;     /** Listen to HDPS events */
-
-private:
-    std::vector<hdps::LinkedSelection> _linkedSelections;
 };
 
 // =============================================================================

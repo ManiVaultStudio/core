@@ -414,7 +414,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                     const auto targetPixelIndex = globalIndices[localPointIndex];
                     
                     // If the data has any linked data
-                    for (LinkedSelection& ls : points->getLinkedSelection())
+                    for (LinkedData& ls : points->getLinkedData())
                     {
                         // Check if the linked data has the same original full data, because we don't want to
                         // add data here that belongs to a different dataset
@@ -501,7 +501,7 @@ void Images::computeMaskData()
                 const auto targetPixelIndex = globalIndices[localPointIndex];
 
                 // If the data has any linked data
-                for (LinkedSelection& ls : points->getLinkedSelection())
+                for (LinkedData& ls : points->getLinkedData())
                 {
                     // Check if the linked data has the same original full data, because we don't want to
                     // add data here that belongs to a different dataset
