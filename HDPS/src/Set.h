@@ -4,6 +4,7 @@
 #include "CoreInterface.h"
 #include "RawData.h"
 #include "Dataset.h"
+#include "LinkedSelection.h"
 
 #include "actions/WidgetAction.h"
 #include "util/Miscellaneous.h"
@@ -463,7 +464,7 @@ public: // Grouping
      * Set the proxy datasets (automatically sets the dataset type to Type::Proxy)
      * @param proxyDatasets Proxy datasets
      */
-    void setProxyDatasets(const Datasets& proxyDatasets);
+    virtual void setProxyDatasets(const Datasets& proxyDatasets);
 
     /**
      * Establish whether a proxy dataset may be created with candidate \p proxyDatasets
@@ -498,6 +499,29 @@ public: // Actions
      * @param contextMenu Context menu to populate
      */
     void populateContextMenu(QMenu* contextMenu);
+
+public: // Linked selections
+
+    /**
+     * Adds a mapping of global selection indices from this dataset to a target dataset
+     * @param targetDataSet The target dataset
+     * @param mapping Map of global selection indices in this dataset to a vector of global indices in the target dataset.
+     */
+    void addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
+
+    std::vector<hdps::LinkedSelection>& getLinkedSelections();
+
+    /**
+     * Resolves the linked selection for \p sourceDataset
+     * @param sourceDataSet Smart pointer to the source dataset
+     */
+    virtual void resolveLinkedSelectionFromSourceDataset(const hdps::Dataset<DatasetImpl>& sourceDataSet) {};
+
+    /**
+     * Resolves the linked selection for \p targetDataSet
+     * @param targetDataSet Smart pointer to the target dataset
+     */
+    virtual void resolveLinkedSelectionFromTargetDataset(const hdps::Dataset<DatasetImpl>& targetDataSet) {};
 
 protected:
 
@@ -550,19 +574,20 @@ protected:
     CoreInterface*              _core;              /** Pointer to the core interface */
 
 private:
-    StorageType                 _storageType;       /** Type of storage (own raw data or act as proxy for other datasets) */
-    mutable plugin::RawData*    _rawData;           /** Pointer to the raw data referenced in this set */
-    QString                     _guid;              /** Globally unique dataset name */
-    QString                     _guiName;           /** Name of the dataset in the graphical user interface */
-    QString                     _rawDataName;       /** Name of the raw data */
-    bool                        _all;               /** Whether this is the full dataset */
-    bool                        _derived;           /** Whether this dataset is derived from another dataset */
-    Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
-    Dataset<DatasetImpl>        _fullDataset;       /** Smart pointer to the original full dataset (if this is a subset) */
-    QMap<QString, QVariant>     _properties;        /** Properties map */
-    std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
-    plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
-    Datasets                    _proxyDatasets;     /** Datasets which together form a group */
+    StorageType                         _storageType;       /** Type of storage (own raw data or act as proxy for other datasets) */
+    mutable plugin::RawData*            _rawData;           /** Pointer to the raw data referenced in this set */
+    QString                             _guid;              /** Globally unique dataset name */
+    QString                             _guiName;           /** Name of the dataset in the graphical user interface */
+    QString                             _rawDataName;       /** Name of the raw data */
+    bool                                _all;               /** Whether this is the full dataset */
+    bool                                _derived;           /** Whether this dataset is derived from another dataset */
+    Dataset<DatasetImpl>                _sourceDataset;     /** Smart pointer to the source dataset (if any) */
+    Dataset<DatasetImpl>                _fullDataset;       /** Smart pointer to the original full dataset (if this is a subset) */
+    QMap<QString, QVariant>             _properties;        /** Properties map */
+    std::int32_t                        _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
+    plugin::AnalysisPlugin*             _analysis;          /** Pointer to analysis plugin that created the set (if any) */
+    Datasets                            _proxyDatasets;     /** Datasets which together form a group */
+    std::vector<hdps::LinkedSelection>  _linkedSelections;  /** Linked selections */
 
     friend class Core;
     friend class DataManager;

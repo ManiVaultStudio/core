@@ -2,6 +2,8 @@
 
 #include "Dataset.h"
 
+#include "event/EventListener.h"
+
 #include <QString>
 
 #include <map>
@@ -18,6 +20,8 @@ class LinkedSelection
 public:
     LinkedSelection(const Dataset<DatasetImpl>& sourceDataSet, const Dataset<DatasetImpl>& targetDataSet);
 
+    void init();
+
     Dataset<DatasetImpl> getTargetDataset() { return _targetDataSet; }
 
     const SelectionMap& getMapping();
@@ -27,7 +31,8 @@ private:
     Dataset<DatasetImpl>    _sourceDataSet;
     Dataset<DatasetImpl>    _targetDataSet;
 
-    SelectionMap _mapping;
+    SelectionMap            _mapping;
+    EventListener           _eventListener;     /** Listen to HDPS events */
 };
 
 }

@@ -6,7 +6,6 @@
 
 #include "Set.h"
 #include "PointDataRange.h"
-#include "LinkedSelection.h"
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16.h>
@@ -754,8 +753,7 @@ public:
                 else
                     rawPointData.populateDataForDimensions(proxyPoints, dimensionIndices, indices);
 
-                resultContainer.erase(resultContainer.begin() + offset, resultContainer.begin() + offset + numberOfElements);
-                resultContainer.insert(resultContainer.begin() + offset, proxyPoints.begin(), proxyPoints.end());
+                std::copy(proxyPoints.begin(), proxyPoints.end(), resultContainer.begin() + offset);
 
                 offset += numberOfElements;
             }
@@ -790,7 +788,12 @@ public:
 
     unsigned int getNumRawPoints() const
     {
-        return getRawData<PointData>().getNumPoints();
+        if (isProxy()) {
+            return getNumPoints();
+        }
+        else {
+            return getRawData<PointData>().getNumPoints();
+        }
     }
 
     /**
@@ -870,14 +873,18 @@ public:
      */
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
-    std::vector<hdps::LinkedSelection>& getLinkedSelection() { return _linkedSelections; }
-
     /**
      * Get set icon
      * @param color Global icon color (for font icons)
      * @return Icon
      */
     QIcon getIcon(const QColor& color = Qt::black) const override;
+
+    /**
+     * Set the proxy datasets (automatically sets the dataset type to Type::Proxy)
+     * @param proxyDatasets Proxy datasets
+     */
+    void setProxyDatasets(const hdps::Datasets& proxyDatasets) override;
 
 public: // Selection
 
@@ -914,13 +921,6 @@ public: // Selection
     /** Invert item selection */
     void selectInvert() override;
 
-    /**
-     * Adds a mapping of global selection indices from this dataset to a target dataset
-     * @param targetDataSet The target dataset
-     * @param mapping Map of global selection indices in this dataset to a vector of global indices in the target dataset.
-     */
-    void addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
-
 public: // Serialization
 
     /**
@@ -935,6 +935,20 @@ public: // Serialization
         */
     QVariantMap toVariantMap() const override;
 
+public: // Linked selections
+
+    /**
+     * Resolves the linked selection for \p sourceDataset
+     * @param sourceDataSet Smart pointer to the source dataset
+     */
+    void resolveLinkedSelectionFromSourceDataset(const hdps::Dataset<DatasetImpl>& sourceDataSet) override;
+
+    /**
+     * Resolves the linked selection for \p targetDataSet
+     * @param targetDataSet Smart pointer to the target dataset
+     */
+    void resolveLinkedSelectionFromTargetDataset(const hdps::Dataset<DatasetImpl>& targetDataSet) override;
+
 public:
 
     std::vector<unsigned int> indices;
@@ -943,7 +957,7 @@ public:
     hdps::EventListener             _eventListener;     /** Listen to HDPS events */
 
 private:
-    std::vector<hdps::LinkedSelection> _linkedSelections;
+    
 };
 
 // =============================================================================
