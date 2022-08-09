@@ -496,9 +496,6 @@ void Images::computeMaskData()
         points->getGlobalIndices(globalIndices);
 
         // Loop over all point indices and unmask them
-        for (const auto& globalIndex : globalIndices)
-            _maskData[globalIndex] = 255;
-
         points->visitData([this, &points, &globalIndices](auto pointData) {
             for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
                 const auto targetPixelIndex = globalIndices[localPointIndex];
