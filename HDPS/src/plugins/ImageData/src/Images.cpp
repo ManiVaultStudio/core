@@ -480,8 +480,28 @@ void Images::computeMaskData()
         points->getGlobalIndices(globalIndices);
 
         // Loop over all point indices and unmask them
-        for (const auto& globalIndex : globalIndices)
-            _maskData[globalIndex] = 255;
+        points->visitData([this, &points, &globalIndices](auto pointData) {
+            for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
+                const auto targetPixelIndex = globalIndices[localPointIndex];
+
+                // If the data has any linked data
+                for (LinkedSelection& ls : points->getLinkedSelection())
+                {
+                    // Check if the linked data has the same original full data, because we don't want to
+                    // add data here that belongs to a different dataset
+                    if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
+                    {
+                        const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+
+                        // Fill in the data for all the linked data indices based on the location of the original id
+                        for (unsigned int linkedIndex : v)
+                            _maskData[linkedIndex] = 255;
+                    }
+                }
+
+                _maskData[targetPixelIndex] = 255;
+            }
+        });
     }
 
     // Generate mask data for clusters
