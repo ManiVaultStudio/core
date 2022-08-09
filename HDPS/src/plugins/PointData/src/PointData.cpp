@@ -550,8 +550,12 @@ void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 
     selection->indices = indices;
 
+    // Set selection indices on linked data
     for (hdps::LinkedSelection& linkedSelection : _linkedSelections)
     {
+        Dataset<Points> targetDataset = linkedSelection.getTargetDataset();
+        Dataset<Points> targetSelection = targetDataset->getSelection();
+
         const hdps::SelectionMap& mapping = linkedSelection.getMapping();
 
         // Create separate vector of additional linked selected points
@@ -569,7 +573,7 @@ void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
             }
         }
 
-        selection->indices.insert(selection->indices.end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
+        targetSelection->indices.insert(targetSelection->indices.end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
     }
 }
 
