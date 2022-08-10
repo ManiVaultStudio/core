@@ -598,20 +598,37 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
     auto pointIndexOffset = 0u;
 
     for (auto proxyDataset : getProxyDatasets()) {
-        auto points = Dataset<Points>(proxyDataset);
+        auto targetPoints = Dataset<Points>(proxyDataset);
 
-        LinkedSelection linkedSelection(toSmartPointer(), proxyDataset);
+        // Source to target
+        {
+            LinkedSelection linkedSelectionToTarget(toSmartPointer(), targetPoints);
 
-        SelectionMap selectionMap;
+            SelectionMap selectionMapToTarget;
 
-        for (std::uint32_t pointIndex = 0; pointIndex < points->getNumPoints(); ++pointIndex)
-            selectionMap[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ pointIndex });
-        
-        linkedSelection.setMapping(selectionMap);
+            for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
+                selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ pointIndex });
 
-        getLinkedSelections().push_back(linkedSelection);
+            linkedSelectionToTarget.setMapping(selectionMapToTarget);
 
-        pointIndexOffset += points->getNumPoints();
+            getLinkedSelections().push_back(linkedSelectionToTarget);
+        }
+
+        // Target to source
+        {
+            LinkedSelection linkedSelectionToSource(targetPoints, toSmartPointer());
+
+            SelectionMap selectionMapToSource;
+
+            for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
+                selectionMapToSource[pointIndex] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
+
+            linkedSelectionToSource.setMapping(selectionMapToSource);
+
+            targetPoints->getLinkedSelections().push_back(linkedSelectionToSource);
+        }
+
+        pointIndexOffset += targetPoints->getNumPoints();
     }
 }
 
@@ -645,36 +662,49 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
+void resolveLinkedData(LinkedSelection& ls, const std::vector<std::uint32_t>& indices)
+{
+    Dataset<Points> targetDataset = ls.getTargetDataset();
+    Dataset<Points> targetSelection = targetDataset->getSelection();
+
+    const hdps::SelectionMap& mapping = ls.getMapping();
+
+    // Create separate vector of additional linked selected points
+    std::vector<unsigned int> extraSelectionIndices;
+
+    // Reserve at least as much space as required for a 1-1 mapping
+    extraSelectionIndices.reserve(indices.size());
+
+    for (const int selectionIndex : indices)
+    {
+        if (mapping.find(selectionIndex) != mapping.end())
+        {
+            const std::vector<unsigned int>& mappedSelection = mapping.at(selectionIndex);
+            extraSelectionIndices.insert(extraSelectionIndices.end(), mappedSelection.begin(), mappedSelection.end());
+        }
+    }
+
+    targetSelection->indices = extraSelectionIndices;// .end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
+
+    Application::core()->notifyDatasetSelectionChanged(targetDataset);
+}
+
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
     auto selection = getSelection<Points>();
 
     selection->indices = indices;
 
-    // Set selection indices on linked data
+    // Check for linked data in this dataset and in potential source data, and resolve it
     for (hdps::LinkedSelection& linkedSelection : getLinkedSelections())
+        resolveLinkedData(linkedSelection, indices);
+
+    // Check if the dataset is derived, and if so, resolve the linked selections of the source dataset as well
+    if (isDerivedData())
     {
-        Dataset<Points> targetDataset = linkedSelection.getTargetDataset();
-        Dataset<Points> targetSelection = targetDataset->getSelection();
-
-        const hdps::SelectionMap& mapping = linkedSelection.getMapping();
-
-        // Create separate vector of additional linked selected points
-        std::vector<unsigned int> extraSelectionIndices;
-
-        // Reserve at least as much space as required for a 1-1 mapping
-        extraSelectionIndices.reserve(indices.size());
-
-        for (const int selectionIndex : indices)
-        {
-            if (mapping.find(selectionIndex) != mapping.end())
-            {
-                const std::vector<unsigned int>& mappedSelection = mapping.at(selectionIndex);
-                extraSelectionIndices.insert(extraSelectionIndices.end(), mappedSelection.begin(), mappedSelection.end());
-            }
-        }
-
-        targetSelection->indices.insert(targetSelection->indices.end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
+        Dataset<Points> sourceData = getSourceDataset<Points>();
+        for (hdps::LinkedSelection& linkedSelection : sourceData->getLinkedSelections())
+            resolveLinkedData(linkedSelection, indices);
     }
 }
 
@@ -833,16 +863,6 @@ QVariantMap Points::toVariantMap() const
     variantMap["NumberOfDimensions"]    = getNumDimensions();
 
     return variantMap;
-}
-
-void Points::resolveLinkedSelectionFromSourceDataset(const hdps::Dataset<DatasetImpl>& sourceDataSet)
-{
-    qDebug() << sourceDataSet->getGuiName();
-}
-
-void Points::resolveLinkedSelectionFromTargetDataset(const hdps::Dataset<DatasetImpl>& targetDataSet)
-{
-
 }
 
 // =============================================================================

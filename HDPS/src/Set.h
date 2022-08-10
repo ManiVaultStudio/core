@@ -511,18 +511,6 @@ public: // Linked selections
 
     std::vector<hdps::LinkedSelection>& getLinkedSelections();
 
-    /**
-     * Resolves the linked selection for \p sourceDataset
-     * @param sourceDataSet Smart pointer to the source dataset
-     */
-    virtual void resolveLinkedSelectionFromSourceDataset(const hdps::Dataset<DatasetImpl>& sourceDataSet) {};
-
-    /**
-     * Resolves the linked selection for \p targetDataSet
-     * @param targetDataSet Smart pointer to the target dataset
-     */
-    virtual void resolveLinkedSelectionFromTargetDataset(const hdps::Dataset<DatasetImpl>& targetDataSet) {};
-
 protected:
 
     /** Get raw data */

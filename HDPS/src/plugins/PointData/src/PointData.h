@@ -935,20 +935,6 @@ public: // Serialization
         */
     QVariantMap toVariantMap() const override;
 
-public: // Linked selections
-
-    /**
-     * Resolves the linked selection for \p sourceDataset
-     * @param sourceDataSet Smart pointer to the source dataset
-     */
-    void resolveLinkedSelectionFromSourceDataset(const hdps::Dataset<DatasetImpl>& sourceDataSet) override;
-
-    /**
-     * Resolves the linked selection for \p targetDataSet
-     * @param targetDataSet Smart pointer to the target dataset
-     */
-    void resolveLinkedSelectionFromTargetDataset(const hdps::Dataset<DatasetImpl>& targetDataSet) override;
-
 public:
 
     std::vector<unsigned int> indices;

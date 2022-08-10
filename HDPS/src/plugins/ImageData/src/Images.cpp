@@ -485,7 +485,7 @@ void Images::computeMaskData()
                 const auto targetPixelIndex = globalIndices[localPointIndex];
 
                 // If the data has any linked data
-                for (LinkedSelection& ls : points->getLinkedSelection())
+                for (LinkedSelection& ls : points->getLinkedSelections())
                 {
                     // Check if the linked data has the same original full data, because we don't want to
                     // add data here that belongs to a different dataset
