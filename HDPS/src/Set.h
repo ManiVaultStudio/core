@@ -516,17 +516,6 @@ public: // Actions
      */
     void populateContextMenu(QMenu* contextMenu);
 
-public: // Linked selections
-
-    /**
-     * Adds a mapping of global selection indices from this dataset to a target dataset
-     * @param targetDataSet The target dataset
-     * @param mapping Map of global selection indices in this dataset to a vector of global indices in the target dataset.
-     */
-    void addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
-
-    std::vector<hdps::LinkedSelection>& getLinkedSelections();
-
 protected:
 
     /** Get raw data */
@@ -579,6 +568,7 @@ protected:
 
 private:
     mutable plugin::RawData*    _rawData;           /** Pointer to the raw data referenced in this set */
+    StorageType                 _storageType;       /** Type of storage (own raw data or act as proxy for other datasets) */
     QString                     _guid;              /** Globally unique dataset name */
     QString                     _guiName;           /** Name of the dataset in the graphical user interface */
     QString                     _rawDataName;       /** Name of the raw data */
@@ -589,6 +579,7 @@ private:
     QMap<QString, QVariant>     _properties;        /** Properties map */
     std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
+    Datasets                    _proxyDatasets;     /** Datasets which together form a group */
     std::vector<LinkedData>     _linkedData;        /** List of linked datasets */
 
     friend class Core;

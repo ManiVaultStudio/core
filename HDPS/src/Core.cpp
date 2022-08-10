@@ -441,7 +441,12 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
                     return Dataset<DatasetImpl>();
             }
             else {
-                throw std::runtime_error("Group name may not be empty");
+                QStringList datasetNames;
+
+                for (const auto& dataset : datasets)
+                    datasetNames << dataset->getGuiName();
+
+                return createGroupDataset(datasetNames.join("+"));
             }
         }
         else {

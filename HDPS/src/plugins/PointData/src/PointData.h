@@ -322,6 +322,37 @@ public:
 
     unsigned int getNumDimensions() const;
 
+    /**
+     * Get amount of data occupied by the raw data
+     * @return Size of the raw data in bytes
+     */
+    std::uint64_t getRawDataSize() const {
+        auto elementSize = 0u;
+
+        switch (_vectorHolder.getElementTypeSpecifier())
+        {
+            case ElementTypeSpecifier::float32:
+                elementSize = 4;
+                break;
+
+            case ElementTypeSpecifier::bfloat16:
+            case ElementTypeSpecifier::int16:
+            case ElementTypeSpecifier::uint16:
+                elementSize = 4;
+                break;
+
+            case ElementTypeSpecifier::int8:
+            case ElementTypeSpecifier::uint8:
+                elementSize = 4;
+                break;
+
+            default:
+                break;
+        }
+
+        return getNumPoints() * getNumDimensions() * elementSize;
+    }
+
     // Similar to C++17 std::visit.
     template <typename ReturnType = void, typename FunctionObject>
     ReturnType constVisitFromBeginToEnd(FunctionObject functionObject) const
@@ -840,12 +871,10 @@ public:
      * @return Size of the raw data in bytes
      */
     std::uint64_t getRawDataSize() const override {
-        if (isProxy()) {
+        if (isProxy())
             return 0;
-        }
-        else {
-            return getNumPoints() * getNumDimensions() * 4;
-        }
+        else
+            return getRawData<PointData>().getRawDataSize();
     }
 
     // Returns the value of the element at the specified position in the current
@@ -874,6 +903,13 @@ public:
      * @return Smart pointer to the created subset
      */
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
+
+    /**
+     * Get set icon
+     * @param color Global icon color (for font icons)
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
      * Set the proxy datasets (automatically sets the dataset type to Type::Proxy)

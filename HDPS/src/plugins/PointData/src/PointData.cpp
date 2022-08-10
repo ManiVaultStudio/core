@@ -602,30 +602,34 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
 
         // Source to target
         {
-            LinkedSelection linkedSelectionToTarget(toSmartPointer(), targetPoints);
+            LinkedData linkedDataToTarget(toSmartPointer(), targetPoints);
 
             SelectionMap selectionMapToTarget;
 
+            std::vector<std::uint32_t> globalIndices;
+            
+            targetPoints->getGlobalIndices(globalIndices);
+
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ pointIndex });
+                selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ globalIndices[pointIndex] });
 
-            linkedSelectionToTarget.setMapping(selectionMapToTarget);
+            linkedDataToTarget.setMapping(selectionMapToTarget);
 
-            getLinkedSelections().push_back(linkedSelectionToTarget);
+            getLinkedData().push_back(linkedDataToTarget);
         }
 
         // Target to source
         {
-            LinkedSelection linkedSelectionToSource(targetPoints, toSmartPointer());
+            LinkedData linkedDataToSource(targetPoints, toSmartPointer());
 
             SelectionMap selectionMapToSource;
 
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
                 selectionMapToSource[pointIndex] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
 
-            linkedSelectionToSource.setMapping(selectionMapToSource);
+            linkedDataToSource.setMapping(selectionMapToSource);
 
-            targetPoints->getLinkedSelections().push_back(linkedSelectionToSource);
+            targetPoints->getLinkedData().push_back(linkedDataToSource);
         }
 
         pointIndexOffset += targetPoints->getNumPoints();
@@ -664,14 +668,17 @@ void Points::setValueAt(const std::size_t index, const float newValue)
 
 void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices)
 {
-    Dataset<Points> targetDataset = ls.getTargetDataset();
+    qDebug() << __FUNCTION__;
+
+    Dataset<Points> sourceDataset   = ls.getSourceDataSet();
+    Dataset<Points> targetDataset   = ls.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
     const hdps::SelectionMap& mapping = ls.getMapping();
 
     // Create separate vector of additional linked selected points
     std::vector<unsigned int> linkedIndices;
-
+    /*
     // Reserve at least as much space as required for a 1-1 mapping
     linkedIndices.reserve(indices.size());
 
@@ -684,12 +691,25 @@ void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices
         }
     }
 
-    // FIXME Should retain the indices already in the selection
-    targetSelection->indices = linkedIndices;
+    
+    std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
+
+    for (auto& [key, value] : mapping)
+        targetIndicesSet.erase(value[0]);
+
+    for (const auto& linkedIndex : linkedIndices)
+        targetIndicesSet.insert(linkedIndex);
+
+    targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
+    */
+
+    //Application::core()->notifyDatasetSelectionChanged(targetDataset);
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
+    qDebug() << __FUNCTION__;
+
     auto selection = getSelection<Points>();
 
     selection->indices = indices;

@@ -212,17 +212,6 @@ void DatasetImpl::populateContextMenu(QMenu* contextMenu)
     return getDataHierarchyItem().populateContextMenu(contextMenu);
 }
 
-void DatasetImpl::addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
-{
-    _linkedSelections.emplace_back(toSmartPointer(), targetDataSet);
-    _linkedSelections.back().setMapping(mapping);
-}
-
-std::vector<hdps::LinkedSelection>& DatasetImpl::getLinkedSelections()
-{
-    return _linkedSelections;
-}
-
 hdps::DatasetImpl::StorageType DatasetImpl::getStorageType() const
 {
     return _storageType;
