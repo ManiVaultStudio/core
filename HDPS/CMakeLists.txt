@@ -349,7 +349,7 @@ set( PLUGIN_HEADERS
     src/SelectionListener.h
     src/Set.h
     src/Application.h
-    src/LinkedSelection.h
+    src/LinkedData.h
     src/Dataset.h
     src/DatasetPrivate.h
     src/ActionsModel.h
@@ -365,7 +365,7 @@ set( PLUGIN_SOURCES
     src/Plugin.cpp
     src/Set.cpp
     src/PluginFactory.cpp
-    src/LinkedSelection.cpp
+    src/LinkedData.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp
     src/ActionsModel.cpp

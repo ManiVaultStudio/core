@@ -662,7 +662,7 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedData(LinkedSelection& ls, const std::vector<std::uint32_t>& indices)
+void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices)
 {
     Dataset<Points> targetDataset = ls.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
@@ -670,23 +670,22 @@ void resolveLinkedData(LinkedSelection& ls, const std::vector<std::uint32_t>& in
     const hdps::SelectionMap& mapping = ls.getMapping();
 
     // Create separate vector of additional linked selected points
-    std::vector<unsigned int> extraSelectionIndices;
+    std::vector<unsigned int> linkedIndices;
 
     // Reserve at least as much space as required for a 1-1 mapping
-    extraSelectionIndices.reserve(indices.size());
+    linkedIndices.reserve(indices.size());
 
     for (const int selectionIndex : indices)
     {
         if (mapping.find(selectionIndex) != mapping.end())
         {
             const std::vector<unsigned int>& mappedSelection = mapping.at(selectionIndex);
-            extraSelectionIndices.insert(extraSelectionIndices.end(), mappedSelection.begin(), mappedSelection.end());
+            linkedIndices.insert(linkedIndices.end(), mappedSelection.begin(), mappedSelection.end());
         }
     }
 
-    targetSelection->indices = extraSelectionIndices;// .end(), extraSelectionIndices.begin(), extraSelectionIndices.end());
-
-    Application::core()->notifyDatasetSelectionChanged(targetDataset);
+    // FIXME Should retain the indices already in the selection
+    targetSelection->indices = linkedIndices;
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
@@ -696,15 +695,15 @@ void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     selection->indices = indices;
 
     // Check for linked data in this dataset and in potential source data, and resolve it
-    for (hdps::LinkedSelection& linkedSelection : getLinkedSelections())
-        resolveLinkedData(linkedSelection, indices);
+    for (hdps::LinkedData& linkedData : getLinkedData())
+        resolveLinkedData(linkedData, indices);
 
     // Check if the dataset is derived, and if so, resolve the linked selections of the source dataset as well
     if (isDerivedData())
     {
         Dataset<Points> sourceData = getSourceDataset<Points>();
-        for (hdps::LinkedSelection& linkedSelection : sourceData->getLinkedSelections())
-            resolveLinkedData(linkedSelection, indices);
+        for (hdps::LinkedData& linkedData : sourceData->getLinkedData())
+            resolveLinkedData(linkedData, indices);
     }
 }
 

@@ -6,6 +6,8 @@
 
 #include "Set.h"
 #include "PointDataRange.h"
+#include "LinkedData.h"
+
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16.h>
@@ -874,13 +876,6 @@ public:
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
     /**
-     * Get set icon
-     * @param color Global icon color (for font icons)
-     * @return Icon
-     */
-    QIcon getIcon(const QColor& color = Qt::black) const override;
-
-    /**
      * Set the proxy datasets (automatically sets the dataset type to Type::Proxy)
      * @param proxyDatasets Proxy datasets
      */
@@ -941,9 +936,6 @@ public:
 
     QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
     hdps::EventListener             _eventListener;     /** Listen to HDPS events */
-
-private:
-    
 };
 
 // =============================================================================
