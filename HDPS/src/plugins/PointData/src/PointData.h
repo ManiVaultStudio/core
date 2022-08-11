@@ -747,6 +747,12 @@ public:
         }
     }
 
+    template <typename ResultContainer, typename DimensionIndices, typename Indices>
+    void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices, const Indices& indices) const
+    {
+        getRawData<PointData>().populateDataForDimensions(resultContainer, dimensionIndices, indices);
+    }
+
     /**
      * Get the indices over the original source data that this dataset
      * indexes into through being a subset or derived data or a combination.
