@@ -2,9 +2,10 @@
 #include "ImageData.h"
 #include "InfoAction.h"
 
-#include "util/Exception.h"
+#include <util/Exception.h>
+#include "util/Timer.h"
 
-#include "DataHierarchyItem.h"
+#include <DataHierarchyItem.h>
 
 #include "PointData.h"
 #include "ClusterData.h"
@@ -399,6 +400,8 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
+    Timer timer(__FUNCTION__);
+
     auto parent = getParent();
 
     if (parent->getDataType() == PointType) {
@@ -474,11 +477,14 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
 void Images::computeMaskData()
 {
+    Timer timer(__FUNCTION__);
+
     // Get reference to input dataset
     auto inputDataset = getParent();
 
     // Allocate mask data
-    _maskData.resize(getNumberOfPixels());
+    if (_maskData.size() != getNumberOfPixels())
+        _maskData.resize(getNumberOfPixels());
 
     // Generate mask data for points
     if (inputDataset->getDataType() == PointType) {
@@ -497,8 +503,7 @@ void Images::computeMaskData()
 
         // Loop over all point indices and unmask them
         points->visitData([this, &points, &globalIndices](auto pointData) {
-            for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
-                const auto targetPixelIndex = globalIndices[localPointIndex];
+            if (points->getLinkedData().size() >= 1) {
 
                 // If the data has any linked data
                 for (LinkedData& ls : points->getLinkedData())
@@ -507,15 +512,23 @@ void Images::computeMaskData()
                     // add data here that belongs to a different dataset
                     if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
                     {
-                        const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+                        qDebug() << "LinkedData";
 
-                        // Fill in the data for all the linked data indices based on the location of the original id
-                        for (unsigned int linkedIndex : v)
-                            _maskData[linkedIndex] = 255;
+                        for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
+                            const auto targetPixelIndex = globalIndices[localPointIndex];
+
+                            const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+
+                            // Fill in the data for all the linked data indices based on the location of the original id
+                            for (unsigned int linkedIndex : v)
+                                _maskData[linkedIndex] = 255;
+                        }
                     }
                 }
-
-                _maskData[targetPixelIndex] = 255;
+            }
+            else {
+                for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++)
+                    _maskData[globalIndices[localPointIndex]] = 255;
             }
         });
     }

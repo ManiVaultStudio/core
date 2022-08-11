@@ -178,7 +178,7 @@ void WidgetActionLabel::elide()
 
 QString WidgetActionLabel::getLabelText() const
 {
-    return QString("%1%2 ").arg(_widgetAction->text(), (_flags & ColonAfterName) ? ":" : "");
+    return QString("%1%2").arg(_widgetAction->text(), (_flags & ColonAfterName) ? ":" : "");
 }
 
 void WidgetActionLabel::updatePublishAction()

@@ -82,6 +82,12 @@ public:
     /** Get dataset GUID */
     virtual QString getDatasetGuid() const = 0;
 
+    /**
+     * Get dataset
+     * @return Pointer to dataset
+     */
+    const DatasetImpl* getDataset() const;
+
 signals:
 
     /**

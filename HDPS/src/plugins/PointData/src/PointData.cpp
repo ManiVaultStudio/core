@@ -20,6 +20,7 @@
 #include "Application.h"
 
 #include <util/Serialization.h>
+#include <util/Timer.h>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
@@ -409,6 +410,8 @@ void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const
 
 void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 {
+    Timer timer(__FUNCTION__);
+
     if (isProxy()) {
         globalIndices.resize(getNumPoints(), 0);
         std::iota(globalIndices.begin(), globalIndices.end(), 0);
@@ -668,7 +671,7 @@ void Points::setValueAt(const std::size_t index, const float newValue)
 
 void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices)
 {
-    qDebug() << __FUNCTION__;
+    //qDebug() << __FUNCTION__;
 
     Dataset<Points> sourceDataset   = ls.getSourceDataSet();
     Dataset<Points> targetDataset   = ls.getTargetDataset();
@@ -678,7 +681,7 @@ void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices
 
     // Create separate vector of additional linked selected points
     std::vector<unsigned int> linkedIndices;
-    /*
+    
     // Reserve at least as much space as required for a 1-1 mapping
     linkedIndices.reserve(indices.size());
 
@@ -690,7 +693,6 @@ void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices
             linkedIndices.insert(linkedIndices.end(), mappedSelection.begin(), mappedSelection.end());
         }
     }
-
     
     std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
 
@@ -701,14 +703,13 @@ void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices
         targetIndicesSet.insert(linkedIndex);
 
     targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
-    */
 
-    //Application::core()->notifyDatasetSelectionChanged(targetDataset);
+    Application::core()->notifyDatasetSelectionChanged(targetDataset);
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
-    qDebug() << __FUNCTION__;
+    //qDebug() << __FUNCTION__;
 
     auto selection = getSelection<Points>();
 
