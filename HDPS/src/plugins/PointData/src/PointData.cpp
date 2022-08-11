@@ -410,7 +410,7 @@ void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const
 
 void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 {
-    Timer timer(__FUNCTION__);
+    //Timer timer(__FUNCTION__);
 
     if (isProxy()) {
         globalIndices.resize(getNumPoints(), 0);
@@ -455,17 +455,20 @@ void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 
 void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
 {
+    //Timer timer(__FUNCTION__);
+
+    // Find the global indices of this dataset
+    std::vector<unsigned int> localGlobalIndices;
+    getGlobalIndices(localGlobalIndices);
+
     if (isProxy()) {
         selected.resize(getNumPoints(), false);
 
         for (const auto& selectionIndex : selectionIndices) {
-            selected[selectionIndex] = true;
+            selected[localGlobalIndices[selectionIndex]] = true;
         }
     }
     else {
-        // Find the global indices of this dataset
-        std::vector<unsigned int> localGlobalIndices;
-        getGlobalIndices(localGlobalIndices);
 
         // In an array the size of the full raw data, mark selected points as true
         std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
@@ -485,6 +488,8 @@ void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndi
 
 void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
 {
+    //Timer timer(__FUNCTION__);
+
     if (isProxy()) {
         localSelectionIndices = getSelection<Points>()->indices;
     }
@@ -603,18 +608,18 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
     for (auto proxyDataset : getProxyDatasets()) {
         auto targetPoints = Dataset<Points>(proxyDataset);
 
+        std::vector<std::uint32_t> targetGlobalIndices;
+
+        targetPoints->getGlobalIndices(targetGlobalIndices);
+
         // Source to target
         {
             LinkedData linkedDataToTarget(toSmartPointer(), targetPoints);
 
             SelectionMap selectionMapToTarget;
 
-            std::vector<std::uint32_t> globalIndices;
-            
-            targetPoints->getGlobalIndices(globalIndices);
-
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ globalIndices[pointIndex] });
+                selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
 
             linkedDataToTarget.setMapping(selectionMapToTarget);
 
@@ -628,7 +633,7 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
             SelectionMap selectionMapToSource;
 
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToSource[pointIndex] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
+                selectionMapToSource[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
 
             linkedDataToSource.setMapping(selectionMapToSource);
 
@@ -677,7 +682,7 @@ void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices
     Dataset<Points> targetDataset   = ls.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
-    const hdps::SelectionMap& mapping = ls.getMapping();
+    const hdps::SelectionMap& mapping = ls.getMapping();   
 
     // Create separate vector of additional linked selected points
     std::vector<unsigned int> linkedIndices;
@@ -709,7 +714,7 @@ void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
-    //qDebug() << __FUNCTION__;
+    //qDebug() << __FUNCTION__ << indices;
 
     auto selection = getSelection<Points>();
 

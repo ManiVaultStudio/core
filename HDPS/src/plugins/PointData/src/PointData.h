@@ -773,20 +773,20 @@ public:
             for (auto proxyDataset : getProxyDatasets()) {
                 auto points = hdps::Dataset<Points>(proxyDataset);
 
-                ResultContainer proxyPoints;
+                ResultContainer proxyPointsData;
 
                 const auto numberOfElements = points->getNumPoints() * dimensionIndices.size();
 
-                proxyPoints.resize(numberOfElements);
+                proxyPointsData.resize(numberOfElements);
 
                 const auto& rawPointData = points->getRawData<PointData>();
 
                 if (points->isFull())
-                    rawPointData.populateFullDataForDimensions(proxyPoints, dimensionIndices);
+                    rawPointData.populateFullDataForDimensions(proxyPointsData, dimensionIndices);
                 else
-                    rawPointData.populateDataForDimensions(proxyPoints, dimensionIndices, indices);
+                    rawPointData.populateDataForDimensions(proxyPointsData, dimensionIndices, points->indices);
 
-                std::copy(proxyPoints.begin(), proxyPoints.end(), resultContainer.begin() + offset);
+                std::copy(proxyPointsData.begin(), proxyPointsData.end(), resultContainer.begin() + offset);
 
                 offset += numberOfElements;
             }

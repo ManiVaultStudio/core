@@ -163,6 +163,7 @@ private:
 private: // Docking
     ads::CDockManager*          _dockManager;                   /** Manager for docking */
     ads::CDockAreaWidget*       _centralDockArea;               /** Docking area for view plugins */
+    ads::CDockAreaWidget*       _lastDockAreaWidget;            /** Last docking area widget (if any) */
     ads::CDockAreaWidget*       _settingsDockArea;              /** Docking area for settings */
     ads::CDockAreaWidget*       _loggingDockArea;               /** Docking area for logging */
     ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */

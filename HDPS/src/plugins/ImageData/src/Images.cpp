@@ -503,16 +503,21 @@ void Images::computeMaskData()
 
         // Loop over all point indices and unmask them
         points->visitData([this, &points, &globalIndices](auto pointData) {
+            /*
             if (points->getLinkedData().size() >= 1) {
+                
+                qDebug() << "A";
 
                 // If the data has any linked data
                 for (LinkedData& ls : points->getLinkedData())
                 {
+                    qDebug() << "B";
+
                     // Check if the linked data has the same original full data, because we don't want to
                     // add data here that belongs to a different dataset
-                    if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
-                    {
-                        qDebug() << "LinkedData";
+                    //if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
+                    //{
+                        qDebug() << "C";
 
                         for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
                             const auto targetPixelIndex = globalIndices[localPointIndex];
@@ -523,13 +528,16 @@ void Images::computeMaskData()
                             for (unsigned int linkedIndex : v)
                                 _maskData[linkedIndex] = 255;
                         }
-                    }
+                    //}
                 }
             }
             else {
                 for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++)
                     _maskData[globalIndices[localPointIndex]] = 255;
             }
+            */
+            for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++)
+                _maskData[globalIndices[localPointIndex]] = 255;
         });
     }
 
@@ -560,6 +568,7 @@ void Images::computeMaskData()
         }
     }
 
+    /*
     // Initialize visible rectangle with numeric extremes
     _visibleRectangle.setTop(std::numeric_limits<int>::max());
     _visibleRectangle.setBottom(std::numeric_limits<int>::lowest());
@@ -582,6 +591,7 @@ void Images::computeMaskData()
         _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinate.y()));
         _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), pixelCoordinate.y()));
     }
+    */
 }
 
 QPoint Images::getPixelCoordinateFromPixelIndex(const std::int32_t& pixelIndex) const

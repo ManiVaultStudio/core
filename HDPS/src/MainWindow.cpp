@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),
     _centralDockArea(nullptr),
+    _lastDockAreaWidget(nullptr),
     _settingsDockArea(nullptr),
     _loggingDockArea(nullptr),
     _centralDockWidget(new CDockWidget("Views")),
@@ -153,12 +154,16 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 dockWidget->setWindowTitle(title);
             });
 
-            auto dockWidgetArea = LeftDockWidgetArea;
+            auto dockWidgetArea = RightDockWidgetArea;
 
             if (getViewPluginDockWidgets().isEmpty())
                 dockWidgetArea = CenterDockWidgetArea;
 
-            _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
+            //_lastDockAreaWidget->d
+            if (_lastDockAreaWidget == nullptr)
+                _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
+            else
+                _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _lastDockAreaWidget);
             
             QObject::connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
                 updateCentralWidget();
