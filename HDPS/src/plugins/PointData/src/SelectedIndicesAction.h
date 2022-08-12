@@ -41,7 +41,7 @@ protected:
         QTimer  _timer;     /** Timer to sparingly update the number of selected points */
         bool    _dirty;     /** Whether the current selected indices display is dirty or not */
 
-        static const std::int32_t LAZY_UPDATE_INTERVAL = 250;
+        static const std::int32_t LAZY_UPDATE_INTERVAL = 500;
     };
 
     /**

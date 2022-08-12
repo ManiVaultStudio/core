@@ -524,8 +524,6 @@ void PixelSelectionTool::paint()
     if (_type != PixelSelectionType::ROI && !_enabled)
         return;
 
-    //qDebug() << __FUNCTION__;
-
     auto shapePixmap    = _shapePixmap;
     auto areaPixmap     = _areaPixmap;
 

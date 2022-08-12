@@ -674,15 +674,13 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices)
+void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices)
 {
-    //qDebug() << __FUNCTION__;
-
-    Dataset<Points> sourceDataset   = ls.getSourceDataSet();
-    Dataset<Points> targetDataset   = ls.getTargetDataset();
+    Dataset<Points> sourceDataset   = ld.getSourceDataSet();
+    Dataset<Points> targetDataset   = ld.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
-    const hdps::SelectionMap& mapping = ls.getMapping();   
+    const hdps::SelectionMap& mapping = ld.getMapping();   
 
     // Create separate vector of additional linked selected points
     std::vector<unsigned int> linkedIndices;
@@ -708,14 +706,10 @@ void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices
         targetIndicesSet.insert(linkedIndex);
 
     targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
-
-    Application::core()->notifyDatasetSelectionChanged(targetDataset);
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
-    //qDebug() << __FUNCTION__ << indices;
-
     auto selection = getSelection<Points>();
 
     selection->indices = indices;

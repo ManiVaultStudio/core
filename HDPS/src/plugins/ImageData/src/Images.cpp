@@ -400,7 +400,7 @@ void Images::getScalarDataForImageSequence(const std::uint32_t& dimensionIndex, 
 
 void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVector<float>& scalarData, QPair<float, float>& scalarDataRange)
 {
-    Timer timer(__FUNCTION__);
+    //Timer timer(__FUNCTION__);
 
     auto parent = getParent();
 
@@ -477,7 +477,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
 void Images::computeMaskData()
 {
-    Timer timer(__FUNCTION__);
+    //Timer timer(__FUNCTION__);
 
     // Get reference to input dataset
     auto inputDataset = getParent();
