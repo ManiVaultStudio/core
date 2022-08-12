@@ -19,6 +19,12 @@ Q_OBJECT
 public:
     using PluginHierarchyItems = QVector<DataHierarchyModelItem*>;
 
+    enum SupplementaryIcons {
+        Icon1 = Qt::UserRole + 100,
+        Icon2,
+        Icon3
+    };
+
     /** Columns */
     enum Column {
         Name,

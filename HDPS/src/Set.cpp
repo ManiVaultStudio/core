@@ -225,6 +225,7 @@ void DatasetImpl::setStorageType(const StorageType& storageType)
     _storageType = storageType;
 
     getDataHierarchyItem().setIconByName("data", getIcon(_storageType));
+    getDataHierarchyItem().setIconByName("storage", Application::getIconFont("FontAwesome").getIcon("exchange-alt"));
 }
 
 QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::black*/) const
@@ -232,51 +233,8 @@ QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::
     switch (storageType)
     {
         case StorageType::Owner:
-            return getIcon(color);
-
         case StorageType::Proxy:
-        {
-            auto backgroundColor = color, foregroundColor = color;
-
-            const auto maxContrast = 0.6f;
-
-            backgroundColor.setHslF(color.hueF(), color.saturationF(), 0.4f);
-            foregroundColor.setHslF(color.hueF(), color.saturationF(), 0.1f);
-
-            
-            const QSize size(64, 64);
-
-            QPixmap pixmap(size);
-
-            pixmap.fill(Qt::transparent);
-
-            QPainter painter(&pixmap);
-
-            const auto rectangle = QRect(QPoint(), QSize(64, 64));
-
-            /**/
-            //const auto badgeLocation = QPoint(20, 20);
-
-            QVector<QPoint> points {
-                rectangle.center()
-            };
-
-            //painter.setPen(QPen(foregroundColor, 40.0, Qt::SolidLine, Qt::RoundCap));
-            //painter.drawPoints(points);
-            
-            //painter.drawPixmap(0, 0, Application::getIconFont("FontAwesome").getIcon("long-arrow-alt-right", foregroundColor).pixmap(QSize(64, 64)));
-
-            auto font = QFont("Arial", 36);
-
-            font.setBold(true);
-
-            painter.setFont(font);
-            painter.setPen(foregroundColor);
-            //painter.drawText(rectangle, "*", QTextOption(Qt::AlignCenter));
-
-            return createOverlayIcon(getIcon(backgroundColor), pixmap);
-            //return createOverlayIcon(getIcon(backgroundColor), );
-        }
+            return getIcon(color);
 
         default:
             break;

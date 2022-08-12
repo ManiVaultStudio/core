@@ -159,7 +159,6 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             if (getViewPluginDockWidgets().isEmpty())
                 dockWidgetArea = CenterDockWidgetArea;
 
-            //_lastDockAreaWidget->d
             if (_lastDockAreaWidget == nullptr)
                 _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
             else

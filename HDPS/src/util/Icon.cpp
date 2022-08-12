@@ -75,5 +75,42 @@ QIcon createPluginIcon(const QString& characters)
     return createIcon(pixmap);
 }
 
+QIcon combineIconsHorizontally(const QVector<QIcon>& icons)
+{
+    QSet<QSize> sizes;
+
+    auto combinedWidth = 0u;
+
+    for (const auto& icon : icons) {
+        const auto largestSize = icon.availableSizes().first();
+
+        sizes.insert(largestSize);
+
+        combinedWidth += largestSize.width();
+    }
+        
+    if (sizes.count() >= 2)
+        return QIcon();
+
+    const auto iconSize = sizes.values().first();
+
+    QPixmap pixmap(QSize(combinedWidth, iconSize.height()));
+
+    pixmap.fill(Qt::transparent);
+
+    QPainter painter(&pixmap);
+
+    painter.setRenderHint(QPainter::Antialiasing);
+
+    auto offset = 0u;
+
+    for (const auto& icon : icons) {
+        painter.drawPixmap(offset, 0, icon.pixmap(iconSize));
+        offset += iconSize.width();
+    }
+
+    return createIcon(pixmap);
+}
+
 }
 }

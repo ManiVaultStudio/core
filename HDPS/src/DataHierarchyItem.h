@@ -347,12 +347,8 @@ signals:
      */
     void actionAdded(hdps::gui::WidgetAction& widgetAction);
 
-    /**
-     * Signals that the set icon has changed
-     * @param name Name of the icon
-     * @param icon Set icon
-     */
-    void iconChanged(const QString& name, const QIcon& icon);
+    /** Signals that the set icon has changed */
+    void iconsChanged();
 
     /**
      * Signals that the dataset name changed

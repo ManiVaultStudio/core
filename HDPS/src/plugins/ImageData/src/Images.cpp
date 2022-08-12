@@ -568,7 +568,6 @@ void Images::computeMaskData()
         }
     }
 
-    /*
     // Initialize visible rectangle with numeric extremes
     _visibleRectangle.setTop(std::numeric_limits<int>::max());
     _visibleRectangle.setBottom(std::numeric_limits<int>::lowest());
@@ -591,7 +590,7 @@ void Images::computeMaskData()
         _visibleRectangle.setTop(std::min(_visibleRectangle.top(), pixelCoordinate.y()));
         _visibleRectangle.setBottom(std::max(_visibleRectangle.bottom(), pixelCoordinate.y()));
     }
-    */
+    
 }
 
 QPoint Images::getPixelCoordinateFromPixelIndex(const std::int32_t& pixelIndex) const

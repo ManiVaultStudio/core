@@ -35,6 +35,13 @@ QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay);
  */
 QIcon createPluginIcon(const QString& characters);
 
+/**
+ * Combines two (or more) icons into a horizontal icon
+ * @param icons Vector of input icons (need to be the same height)
+ * @return Combined icon
+ */
+QIcon combineIconsHorizontally(const QVector<QIcon>& icons);
+
 }
 
 }

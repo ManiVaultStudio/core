@@ -492,12 +492,9 @@ void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
 
 void DataHierarchyItem::setIconByName(const QString& name, const QIcon& icon)
 {
-    if (!_namedIcons.contains(name))
-        return;
-
     _namedIcons[name] = icon;
 
-    emit iconChanged(name, icon);
+    emit iconsChanged();
 }
 
 void DataHierarchyItem::removeIcon(const QString& name)

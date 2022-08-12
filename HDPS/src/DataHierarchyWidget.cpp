@@ -1,6 +1,7 @@
 #include "DataHierarchyWidget.h"
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
+#include "DataHierarchyTreeWidgetItemDelegate.h"
 #include "Core.h"
 #include "Dataset.h"
 #include "PluginFactory.h"
@@ -56,6 +57,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
+    _treeView.setItemDelegateForColumn(0, new DataHierarchyTreeWidgetItemDelegate());
 
     _treeView.header()->setStretchLastSection(false);
     _treeView.header()->setMinimumSectionSize(18);
@@ -313,8 +315,8 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Locked));
         });
 
-        // Update the model when the data hierarchy item icon changes
-        connect(&dataHierarchyItem, &DataHierarchyItem::iconChanged, this, [this, dataset](const QString& name, const QIcon& icon) {
+        // Update the model when the data hierarchy item icons change
+        connect(&dataHierarchyItem, &DataHierarchyItem::iconsChanged, this, [this, dataset]() {
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name));
         });
 

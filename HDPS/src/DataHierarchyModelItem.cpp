@@ -3,12 +3,16 @@
 #include "Application.h"
 #include "DataHierarchyManager.h"
 
+#include <util/Icon.h>
+
 #include <QDebug>
 #include <QPainter>
 #include <QMenu>
 
 namespace hdps
 {
+
+using namespace gui;
 
 QRandomGenerator DataHierarchyModelItem::rng = QRandomGenerator();
 
@@ -80,7 +84,6 @@ QString DataHierarchyModelItem::serialize() const
 
 QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, int role /*= Qt::DisplayRole*/) const
 {
-    // Only proceed if we have a valid data hierarchy item
     if (_dataHierarchyItem == nullptr)
         return QVariant();
 
@@ -161,10 +164,8 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
             break;
         }
 
-        // For icons
         case Qt::DecorationRole:
         {
-            // Get reference to Font Awesome icon font
             auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
             switch (static_cast<Column>(column))
@@ -206,6 +207,30 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
             }
 
             break;
+        }
+
+        case SupplementaryIcons::Icon1:
+        {
+            if (_dataHierarchyItem->getIcons().values().count() < 2)
+                break;
+
+            return _dataHierarchyItem->getIcons().values()[1];
+        }
+
+        case SupplementaryIcons::Icon2:
+        {
+            if (_dataHierarchyItem->getIcons().values().count() < 3)
+                break;
+
+            return _dataHierarchyItem->getIcons().values()[2];
+        }
+
+        case SupplementaryIcons::Icon3:
+        {
+            if (_dataHierarchyItem->getIcons().values().count() < 4)
+                break;
+
+            return _dataHierarchyItem->getIcons().values()[3];
         }
 
         // Grayed out text when locked
