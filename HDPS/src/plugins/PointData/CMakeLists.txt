@@ -15,64 +15,7 @@ file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
-set(POINTS_SOURCES
-    src/PointData.h
-    src/PointData.cpp
-    src/PointData.json
-    src/PointDataIterator.h
-    src/PointDataRange.h
-    src/PointView.h
-    src/RandomAccessRange.h
-)
-
-set(POINTS_HEADERS
-    src/PointData.h
-    src/PointDataIterator.h
-    src/PointDataRange.h
-    src/PointView.h
-    src/RandomAccessRange.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../external/biovault_bfloat16/biovault_bfloat16.h
-
-    src/InfoAction.h
-    src/SelectedIndicesAction.h
-    src/DimensionNamesAction.h
-    src/DimensionPickerAction.h
-    src/DimensionsPickerAction.h
-    src/DimensionsPickerFilterAction.h
-    src/DimensionsPickerSelectAction.h
-    src/DimensionsPickerMiscellaneousAction.h
-    src/DimensionsPickerHolder.h
-    src/DimensionsPickerItemModel.h
-    src/DimensionsPickerProxyModel.h
-    src/ModelResetter.h
-)
-
-set(ACTIONS_SOURCES
-    src/InfoAction.h
-    src/InfoAction.cpp
-    src/SelectedIndicesAction.h
-    src/SelectedIndicesAction.cpp
-    src/DimensionNamesAction.h
-    src/DimensionNamesAction.cpp
-    src/DimensionPickerAction.h
-    src/DimensionPickerAction.cpp
-    src/DimensionsPickerAction.h
-    src/DimensionsPickerAction.cpp
-    src/DimensionsPickerHolder.h
-    src/DimensionsPickerHolder.cpp
-    src/DimensionsPickerItemModel.h
-    src/DimensionsPickerItemModel.cpp
-    src/DimensionsPickerProxyModel.h
-    src/DimensionsPickerProxyModel.cpp
-    src/DimensionsPickerFilterAction.h
-    src/DimensionsPickerFilterAction.cpp
-    src/DimensionsPickerSelectAction.h
-    src/DimensionsPickerSelectAction.cpp
-    src/DimensionsPickerMiscellaneousAction.h
-    src/DimensionsPickerMiscellaneousAction.cpp
-    src/ModelResetter.h
-    src/ModelResetter.cpp
-)
+add_subdirectory(src)
 
 source_group(Plugin FILES ${POINTS_SOURCES})
 source_group(Actions FILES ${ACTIONS_SOURCES})

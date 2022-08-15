@@ -1,0 +1,63 @@
+set(DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(POINTS_SOURCES
+    ${DIR}/PointData.h
+    ${DIR}/PointData.cpp
+    ${DIR}/PointData.json
+    ${DIR}/PointDataIterator.h
+    ${DIR}/PointDataRange.h
+    ${DIR}/PointView.h
+    ${DIR}/RandomAccessRange.h
+    PARENT_SCOPE
+)
+
+set(POINTS_HEADERS
+    ${DIR}/PointData.h
+    ${DIR}/PointDataIterator.h
+    ${DIR}/PointDataRange.h
+    ${DIR}/PointView.h
+    ${DIR}/RandomAccessRange.h
+    ${DIR}/../../../../../external/biovault_bfloat16/biovault_bfloat16.h
+
+    ${DIR}/InfoAction.h
+    ${DIR}/SelectedIndicesAction.h
+    ${DIR}/DimensionNamesAction.h
+    ${DIR}/DimensionPickerAction.h
+    ${DIR}/DimensionsPickerAction.h
+    ${DIR}/DimensionsPickerFilterAction.h
+    ${DIR}/DimensionsPickerSelectAction.h
+    ${DIR}/DimensionsPickerMiscellaneousAction.h
+    ${DIR}/DimensionsPickerHolder.h
+    ${DIR}/DimensionsPickerItemModel.h
+    ${DIR}/DimensionsPickerProxyModel.h
+    ${DIR}/ModelResetter.h
+    PARENT_SCOPE
+)
+
+set(ACTIONS_SOURCES
+    ${DIR}/InfoAction.h
+    ${DIR}/InfoAction.cpp
+    ${DIR}/SelectedIndicesAction.h
+    ${DIR}/SelectedIndicesAction.cpp
+    ${DIR}/DimensionNamesAction.h
+    ${DIR}/DimensionNamesAction.cpp
+    ${DIR}/DimensionPickerAction.h
+    ${DIR}/DimensionPickerAction.cpp
+    ${DIR}/DimensionsPickerAction.h
+    ${DIR}/DimensionsPickerAction.cpp
+    ${DIR}/DimensionsPickerHolder.h
+    ${DIR}/DimensionsPickerHolder.cpp
+    ${DIR}/DimensionsPickerItemModel.h
+    ${DIR}/DimensionsPickerItemModel.cpp
+    ${DIR}/DimensionsPickerProxyModel.h
+    ${DIR}/DimensionsPickerProxyModel.cpp
+    ${DIR}/DimensionsPickerFilterAction.h
+    ${DIR}/DimensionsPickerFilterAction.cpp
+    ${DIR}/DimensionsPickerSelectAction.h
+    ${DIR}/DimensionsPickerSelectAction.cpp
+    ${DIR}/DimensionsPickerMiscellaneousAction.h
+    ${DIR}/DimensionsPickerMiscellaneousAction.cpp
+    ${DIR}/ModelResetter.h
+    ${DIR}/ModelResetter.cpp
+    PARENT_SCOPE
+)

@@ -14,7 +14,7 @@ target_include_directories(PointDataGTest BEFORE PRIVATE
 target_link_libraries(PointDataGTest
     HDPS_Private # For MainWindow
     PointData
-    Qt5::Widgets
+    Qt6::Widgets
     gtest_main
 )
 

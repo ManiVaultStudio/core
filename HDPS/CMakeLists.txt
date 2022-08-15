@@ -517,7 +517,7 @@ target_link_libraries(${HDPS_PUBLIC_LIB} Qt6::WebEngineWidgets)
 add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
     src/.editorconfig
     ${PRIVATE_SOURCES}
-	${RESOURCE_FILES}
+    ${RESOURCE_FILES}
 )
 
 set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 14)
