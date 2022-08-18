@@ -29,7 +29,7 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*
 
     // Configure pick action
     _pickAction.setDefaultWidgetFlags(TriggerAction::Icon);
-    _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("file"));
+    _pickAction.setIcon(Application::getIconFont("FontAwesome").getIcon("folder"));
     _pickAction.setToolTip("Click to choose a file");
 
     // Disable trailing action
@@ -51,8 +51,8 @@ FilePickerAction::FilePickerAction(QObject* parent, const QString& title /*= ""*
     connect(&_pickAction, &TriggerAction::triggered, this, [this]() {
         const auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, tr("Open file"));
 
-        if (!fileUrl.isValid())
-            setFilePath(fileUrl.toString());
+        if (fileUrl.isValid())
+            setFilePath(fileUrl.toLocalFile());
     });
 
     // Pass-through action signals
@@ -113,7 +113,7 @@ QString FilePickerAction::getDirectoryName() const
 
 bool FilePickerAction::isValid() const
 {
-    return !getFilePath().isEmpty() && QDir(getFilePath()).exists();
+    return !getFilePath().isEmpty() && QFileInfo(getFilePath()).exists();
 }
 
 QWidget* FilePickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
