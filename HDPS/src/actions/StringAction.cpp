@@ -15,7 +15,9 @@ StringAction::StringAction(QObject* parent, const QString& title /*= ""*/, const
     _placeholderString(),
     _leadingAction(),
     _trailingAction(),
-    _completer(nullptr)
+    _completer(nullptr),
+    _searchMode(false),
+    _clearable(false)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -44,6 +46,8 @@ void StringAction::setString(const QString& string)
     _string = string;
 
     emit stringChanged(_string);
+
+    saveToSettings();
 }
 
 QString StringAction::getDefaultString() const
@@ -107,27 +111,43 @@ void StringAction::setSearchMode(bool searchMode)
 {
     _searchMode = searchMode;
 
-    // Configure leading action
     _leadingAction.setVisible(_searchMode);
     _leadingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("search"));
     
-    // Configure trailing action
+    setClearable(searchMode);
+}
+
+bool StringAction::isClearable() const
+{
+    return _clearable;
+}
+
+void StringAction::setClearable(bool clearable)
+{
+    if (clearable == _clearable)
+        return;
+
+    _clearable = clearable;
+
     _trailingAction.setVisible(false);
-    _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
 
-    // Reset the string when the trailing action is triggered
-    connect(&_trailingAction, &QAction::triggered, this, &StringAction::reset);
+    if (_clearable) {
+        _trailingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("times-circle"));
 
-    // Update trailing action visibility depending on the string
-    const auto updateTrailingActionVisibility = [this]() -> void {
-        _trailingAction.setVisible(_searchMode && !_string.isEmpty());
-    };
+        connect(&_trailingAction, &QAction::triggered, this, &StringAction::reset);
 
-    // Update trailing action visibility when the string changes
-    connect(this, &StringAction::stringChanged, this, updateTrailingActionVisibility);
+        const auto updateTrailingActionVisibility = [this]() -> void {
+            _trailingAction.setVisible(!_string.isEmpty());
+        };
 
-    // Perform initial update of trailing action visibility
-    updateTrailingActionVisibility();
+        connect(this, &StringAction::stringChanged, this, updateTrailingActionVisibility);
+
+        updateTrailingActionVisibility();
+    }
+    else {
+        disconnect(&_trailingAction, &QAction::triggered, this, nullptr);
+        disconnect(this, &StringAction::stringChanged, this, nullptr);
+    }
 }
 
 bool StringAction::isResettable()
@@ -142,15 +162,17 @@ void StringAction::reset()
 
 void StringAction::fromVariantMap(const QVariantMap& variantMap)
 {
-    if (!variantMap.contains("Value"))
+    if (!variantMap.contains("value"))
         return;
 
-    setString(variantMap["Value"].toString());
+    setString(variantMap["value"].toString());
 }
 
 QVariantMap StringAction::toVariantMap() const
 {
-    return {{ "Value", _string }};
+    return {
+        { "value", QVariant::fromValue(_string) }
+    };
 }
 
 StringAction::LineEditWidget::LineEditWidget(QWidget* parent, StringAction* stringAction) :

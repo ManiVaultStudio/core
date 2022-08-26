@@ -102,13 +102,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
 
             _mainWindow.addPlugin(plugin);
 
-            // Get reference to the analysis output dataset
             auto outputDataset = analysisPlugin->getOutputDataset();
 
-            // Adjust the data hierarchy icon
-            _dataHierarchyManager->getItem(outputDataset->getGuid()).addIcon("analysis", analysisPlugin->getIcon());
-
-            // Notify listeners that a dataset was added
             notifyDatasetAdded(outputDataset);
 
             break;
@@ -140,7 +135,7 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
+Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& guid /*= ""*/)
 {
     // Create a new plugin of the given kind
     QString rawDataName = _pluginManager->createPlugin(kind)->getName();
@@ -149,7 +144,7 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
     const plugin::RawData& rawData = requestRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    auto fullSet    = rawData.createDataSet();
+    auto fullSet    = rawData.createDataSet(guid);
     auto selection  = rawData.createDataSet();
 
     // Set the properties of the new sets
@@ -371,26 +366,20 @@ Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)
 
 QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
 {
-    // Resulting smart pointers to datasets
     QVector<Dataset<DatasetImpl>> allDataSets;
 
     try
     {
-        // Get a map of all datasets
-        const auto& dataSetsMap = _dataManager->allSets();
+        const auto& datasets = _dataManager->allSets();
 
-        // And reserve the proper amount of dataset references
-        allDataSets.reserve(static_cast<std::int32_t>(dataSetsMap.size()));
-
-        // Add dataset references one by one
-        for (auto it = dataSetsMap.begin(); it != dataSetsMap.end(); it++) {
+        for (const auto dataset : datasets) {
             if (dataTypes.isEmpty()) {
-                allDataSets << it->second.get();
+                allDataSets << datasets;
             }
             else {
                 for (const auto& dataType : dataTypes)
-                    if (it->second.get()->getDataType() == dataType)
-                        allDataSets << it->second.get();
+                    if (dataset->getDataType() == dataType)
+                        allDataSets << dataset;
             }
         }
     }

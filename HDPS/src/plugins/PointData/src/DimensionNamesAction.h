@@ -5,6 +5,8 @@
 #include <actions/TriggerAction.h>
 #include <actions/ToggleAction.h>
 
+#include <QTimer>
+
 using namespace hdps;
 using namespace hdps::util;
 using namespace hdps::gui;
@@ -32,6 +34,12 @@ protected:
          * @param dimensionNamesAction Pointer to dimension names action
          */
         Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction);
+
+    private:
+        QTimer  _timer;     /** Timer to sparingly update the number of selected points */
+        bool    _dirty;     /** Whether the current selected indices display is dirty or not */
+
+        static const std::int32_t LAZY_UPDATE_INTERVAL = 500;
     };
 
     /**
@@ -51,6 +59,12 @@ public:
      * @param points Smart pointer to points dataset
      */
     DimensionNamesAction(QObject* parent, const Dataset<Points>& points);
+
+    /**
+     * Get points
+     * @return Smart pointer to points dataset
+     */
+    Dataset<Points>& getPoints();
 
     /** Get the dimension names */
     QStringList getDimensionNames() const;
@@ -72,4 +86,7 @@ protected:
     QStringList             _dimensionNames;        /** Dimension names */
     TriggerAction           _updateAction;          /** Update action */
     ToggleAction            _manualUpdateAction;    /** Manual update action */
+
+    /** Above this threshold, dimension names need to be updated manually */
+    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 1000;
 };

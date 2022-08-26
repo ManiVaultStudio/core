@@ -23,9 +23,9 @@ uint ColorData::count()
     return static_cast<std::uint32_t>(_colors.size());
 }
 
-Dataset<DatasetImpl> ColorData::createDataSet() const
+Dataset<DatasetImpl> ColorData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Colors(_core, getName()));
+    return Dataset<DatasetImpl>(new Colors(_core, getName(), guid));
 }
 
 // =============================================================================

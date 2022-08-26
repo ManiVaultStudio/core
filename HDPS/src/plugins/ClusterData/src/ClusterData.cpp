@@ -32,9 +32,9 @@ void ClusterData::init()
 {
 }
 
-Dataset<DatasetImpl> ClusterData::createDataSet() const
+Dataset<DatasetImpl> ClusterData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Clusters(_core, getName()));
+    return Dataset<DatasetImpl>(new Clusters(_core, getName(), guid));
 }
 
 QVector<Cluster>& ClusterData::getClusters()

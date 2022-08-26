@@ -51,9 +51,10 @@ public: // Data access
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
+     * @param guid Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to the added dataset
      */
-    virtual Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) = 0;
+    virtual Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& guid = "") = 0;
 
     /**
      * Removes a single dataset

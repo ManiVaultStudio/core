@@ -53,7 +53,7 @@ public:
      * Get points
      * @return Smart pointer to points dataset
      */
-    Dataset<Points> getPoints();
+    Dataset<Points>& getPoints();
 
 public: // Action getters
 

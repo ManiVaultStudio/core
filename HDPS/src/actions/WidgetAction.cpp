@@ -11,7 +11,9 @@
 #include <QFileDialog>
 #include <QJsonArray>
 
-//#define WIDGET_ACTION_VERBOSE
+#ifdef _DEBUG
+    #define WIDGET_ACTION_VERBOSE
+#endif
 
 namespace hdps {
 
@@ -23,7 +25,8 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _sortIndex(-1),
     _isSerializing(),
     _publicAction(nullptr),
-    _connectedActions()
+    _connectedActions(),
+    _settingsPrefix()
 {
 }
 
@@ -198,6 +201,48 @@ const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
 WidgetAction* WidgetAction::getPublicCopy() const
 {
     return nullptr;
+}
+
+void WidgetAction::setSettingsPrefix(const QString& settingsPrefix, const bool& load /*= true*/)
+{
+    _settingsPrefix = settingsPrefix;
+
+    if (load)
+        loadFromSettings();
+}
+
+void WidgetAction::setSettingsPrefix(plugin::Plugin* plugin, const QString& settingsPrefix, const bool& load /*= true*/)
+{
+    setSettingsPrefix(QString("Plugins/%1/%2").arg(plugin->getKind(), settingsPrefix), load);
+}
+
+QString WidgetAction::getSettingsPrefix() const
+{
+    return _settingsPrefix;
+}
+
+void WidgetAction::loadFromSettings()
+{
+    if (getSettingsPrefix().isEmpty())
+        return;
+
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << QString("Load from settings: %1").arg(getSettingsPrefix());
+#endif
+
+    fromVariantMap(Application::current()->getSetting(_settingsPrefix).toMap());
+}
+
+void WidgetAction::saveToSettings()
+{
+    if (getSettingsPrefix().isEmpty())
+        return;
+
+#ifdef WIDGET_ACTION_VERBOSE
+    qDebug() << QString("Save to settings: %1").arg(getSettingsPrefix());
+#endif
+
+    Application::current()->setSetting(_settingsPrefix, toVariantMap());
 }
 
 QString WidgetAction::getSettingsPath() const

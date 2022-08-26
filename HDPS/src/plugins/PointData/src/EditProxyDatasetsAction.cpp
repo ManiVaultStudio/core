@@ -13,7 +13,7 @@ EditProxyDatasetsAction::EditProxyDatasetsAction(QObject* parent, const Dataset<
     setIcon(Application::getIconFont("FontAwesome").getIcon("list"));
 }
 
-Dataset<Points> EditProxyDatasetsAction::getPoints()
+hdps::Dataset<Points>& EditProxyDatasetsAction::getPoints()
 {
     return _points;
 }
@@ -30,18 +30,16 @@ EditProxyDatasetsAction::Widget::Widget(QWidget* parent, EditProxyDatasetsAction
 
     setPopupLayout(layout);
     
-    auto points = editProxyDatasetsAction->getPoints();
-
-    const auto updateListView = [this, points, listView]() -> void {
+    const auto updateListView = [this, editProxyDatasetsAction, listView]() -> void {
         QStringList proxyDatasetNames;
 
-        for (const auto& proxyDataset : points->getProxyDatasets())
+        for (const auto& proxyDataset : editProxyDatasetsAction->getPoints()->getProxyDatasets())
             proxyDatasetNames << proxyDataset->getGuiName();
 
         listView->setModel(new QStringListModel(proxyDatasetNames));
     };
 
-    connect(&points, &Dataset<Points>::dataChanged, this, updateListView);
+    connect(&editProxyDatasetsAction->getPoints(), &Dataset<Points>::dataChanged, this, updateListView);
 
     updateListView();
 }

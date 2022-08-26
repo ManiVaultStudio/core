@@ -46,9 +46,6 @@ public:
         Aborted             /** Task has been aborted */
     };
 
-    /** Map of named icons */
-    using IconMap = QMap<QString, QIcon>;
-
 public:
 
     /**
@@ -277,35 +274,14 @@ public: // Tasks
 
 public: // Named icons
 
-    /** Gets map of named icons */
-    IconMap getIcons() const;
+    /** Get icon */
+    QIcon getIcon() const;
 
     /**
-     * Add named icon
-     * @param name Name of the icon
+     * Set icon
      * @param icon Icon
      */
-    void addIcon(const QString& name, const QIcon& icon);
-
-    /**
-     * Set icon by \p name
-     * @param name Name of the icon
-     * @param icon Icon
-     */
-    void setIconByName(const QString& name, const QIcon& icon);
-
-    /**
-     * Remove icon by name
-     * @param name Name of the icon
-     */
-    void removeIcon(const QString& name);
-
-    /**
-     * Get icon by name
-     * @param name Name of the icon
-     * @return Icon
-     */
-    QIcon getIconByName(const QString& name) const;
+    void setIcon(const QIcon& icon);
 
 public: // Serialization
 
@@ -348,7 +324,7 @@ signals:
     void actionAdded(hdps::gui::WidgetAction& widgetAction);
 
     /** Signals that the set icon has changed */
-    void iconsChanged();
+    void iconChanged();
 
     /**
      * Signals that the dataset name changed
@@ -395,7 +371,7 @@ protected:
     TaskStatus                  _taskStatus;            /** Status of the current task */
     QTimer                      _taskDescriptionTimer;  /** Task description timer which prevents excessive successive GUI updates */
     QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
-    IconMap                     _namedIcons;            /** Named icons */
+    QIcon                       _icon;                  /** Icon */
     hdps::gui::WidgetActions    _actions;               /** Widget actions */
     DataRemoveAction            _dataRemoveAction;      /** Data remove action */
     DataCopyAction              _dataCopyAction;        /** Data copy action */

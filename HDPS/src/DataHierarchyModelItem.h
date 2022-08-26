@@ -19,25 +19,19 @@ Q_OBJECT
 public:
     using PluginHierarchyItems = QVector<DataHierarchyModelItem*>;
 
-    enum SupplementaryIcons {
-        Icon1 = Qt::UserRole + 100,
-        Icon2,
-        Icon3
-    };
-
     /** Columns */
     enum Column {
-        Name,
-        GUID,
-        Description,
-        GroupIndex,
-        Analysis,
-        Progress,
-        Analyzing,
-        Locked,
+        Name,           /** Name of the dataset */
+        GUID,           /** Globally unique dataset identifier */
+        Info,           /** Info (e.g. to report progress) */
+        Progress,       /** Task progress in percentage */
+        GroupIndex,     /** Dataset group index */
+        IsGroup,        /** Whether the dataset is composed of other datasets */
+        IsAnalyzing,    /** Whether an analysis is taking place on the dataset */
+        IsLocked,       /** Whether the dataset is locked */
 
         _start = Name,
-        _end = Locked
+        _end = IsLocked
     };
 
 public:

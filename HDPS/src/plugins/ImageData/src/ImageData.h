@@ -103,10 +103,11 @@ public:
     void setImageFilePaths(const QStringList& imageFilePaths);
 
     /**
-     * Create images dataset
+     * Create dataset for raw data
+     * @param guid Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to dataset
      */
-    hdps::Dataset<hdps::DatasetImpl> createDataSet() const override;
+    hdps::Dataset<hdps::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
 private:
     Type                _type;                          /** Image collection type e.g. stack or sequence */

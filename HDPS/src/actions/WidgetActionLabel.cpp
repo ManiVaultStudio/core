@@ -127,6 +127,7 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
         case QEvent::Enter:
         case QEvent::Leave:
+        case QEvent::EnabledChange:
             updateNameLabel();
             break;
 
@@ -198,7 +199,7 @@ void WidgetActionLabel::updateNameLabel()
     _nameLabel.setToolTip(_widgetAction->toolTip());
     _nameLabel.setVisible(_widgetAction->isVisible());
 
-    if (_widgetAction->isEnabled()) {
+    if (_widgetAction->isEnabled() && isEnabled()) {
         if (_widgetAction->mayPublish() && _nameLabel.underMouse())
             _nameLabel.setStyleSheet("color: gray;");
         else

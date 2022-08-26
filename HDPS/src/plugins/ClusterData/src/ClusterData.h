@@ -28,8 +28,12 @@ public:
 
     void init() override;
 
-    /** Create dataset for raw data */
-    Dataset<DatasetImpl> createDataSet() const override;
+    /**
+     * Create dataset for raw data
+     * @param guid Globally unique dataset identifier (use only for deserialization)
+     * @return Smart pointer to dataset
+     */
+    Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     /** Returns reference to the clusters */
     QVector<Cluster>& getClusters();
@@ -84,7 +88,11 @@ private:
 class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
 {
 public:
-    Clusters(CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
+    Clusters(CoreInterface* core, QString dataName, const QString& guid = "") :
+        DatasetImpl(core, dataName, guid)
+    {
+    }
+
     ~Clusters() override { }
 
     void init() override;

@@ -1,10 +1,7 @@
 #include "SelectedIndicesAction.h"
 
-#include <event/Event.h>
-
 #include <QGridLayout>
 #include <QListView>
-
 #include <QSet>
 
 using namespace hdps;
@@ -55,14 +52,14 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
     _timer(),
     _dirty(false)
 {
-    auto selectedIndicesListWidget = new QListView();
+    auto selectedIndicesListView = new QListView();
 
-    selectedIndicesListWidget->setFixedHeight(100);
+    selectedIndicesListView->setFixedHeight(100);
 
     auto selectedIndicesLayout = new QHBoxLayout();
 
     selectedIndicesLayout->setContentsMargins(0, 0, 0, 0);
-    selectedIndicesLayout->addWidget(selectedIndicesListWidget);
+    selectedIndicesLayout->addWidget(selectedIndicesListView);
 
     auto updateLayout = new QVBoxLayout();
 
@@ -76,21 +73,21 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
 
     _timer.setSingleShot(true);
 
-    const auto updateSelectedIndicesWidget = [this, selectedIndicesAction, selectedIndicesListWidget]() -> void {
+    const auto updateListView = [this, selectedIndicesAction, selectedIndicesListView]() -> void {
         QStringList items;
 
         for (auto selectedIndex : selectedIndicesAction->getSelectedIndices())
             items << QString::number(selectedIndex);
 
-        selectedIndicesListWidget->setModel(new QStringListModel(items));
+        selectedIndicesListView->setModel(new QStringListModel(items));
     };
 
     const auto updateActions = [this, selectedIndicesAction]() -> void {
         selectedIndicesAction->getUpdateAction().setEnabled(selectedIndicesAction->getManualUpdateAction().isChecked() && _dirty);
     };
 
-    connect(&selectedIndicesAction->getUpdateAction(), &TriggerAction::triggered, this, [this, updateSelectedIndicesWidget, updateActions]() -> void {
-        updateSelectedIndicesWidget();
+    connect(&selectedIndicesAction->getUpdateAction(), &TriggerAction::triggered, this, [this, updateListView, updateActions]() -> void {
+        updateListView();
 
         _dirty = false;
 
@@ -99,12 +96,12 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
 
     connect(&selectedIndicesAction->getManualUpdateAction(), &TriggerAction::triggered, this, updateActions);
 
-    connect(&_timer, &QTimer::timeout, this, [this, updateSelectedIndicesWidget]() -> void {
+    connect(&_timer, &QTimer::timeout, this, [this, updateListView]() -> void {
         if (_timer.isActive())
             _timer.start(LAZY_UPDATE_INTERVAL);
         else {
             _timer.stop();
-            updateSelectedIndicesWidget();
+            updateListView();
         }
     });
 
@@ -131,5 +128,5 @@ SelectedIndicesAction::Widget::Widget(QWidget* parent, SelectedIndicesAction* se
     });
 
     updateActions();
-    updateSelectedIndicesWidget();
+    updateListView();
 }

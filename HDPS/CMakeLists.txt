@@ -378,7 +378,6 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyFilterModel.h
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
-    src/DataHierarchyTreeWidgetItemDelegate.h
     src/DataPropertiesWidget.h
     src/ActionsViewerWidget.h
 )
@@ -388,7 +387,6 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyFilterModel.cpp
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
-    src/DataHierarchyTreeWidgetItemDelegate.cpp
     src/DataPropertiesWidget.cpp
     src/ActionsViewerWidget.cpp
 )

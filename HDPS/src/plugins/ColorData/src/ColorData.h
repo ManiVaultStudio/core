@@ -24,8 +24,12 @@ public:
 
     uint count();
 
-    /** Create dataset for for raw data */
-    Dataset<DatasetImpl> createDataSet() const override;
+    /**
+     * Create dataset for raw data
+     * @param guid Globally unique dataset identifier (use only for deserialization)
+     * @return Smart pointer to dataset
+     */
+    Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
 private:
     std::vector<QColor> _colors;
@@ -34,7 +38,11 @@ private:
 class Colors : public hdps::DatasetImpl
 {
 public:
-    Colors(CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
+    Colors(CoreInterface* core, QString dataName, const QString& guid = "") :
+        DatasetImpl(core, dataName, guid)
+    {
+    }
+
     ~Colors() override { }
 
     /**

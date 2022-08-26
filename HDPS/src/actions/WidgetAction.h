@@ -13,6 +13,10 @@ namespace hdps {
 class DataHierarchyItem;
 class Application;
 
+namespace plugin {
+    class Plugin;
+}
+
 namespace gui {
 
 class WidgetActionLabel;
@@ -203,6 +207,33 @@ public: // Settings
     QString getSettingsPath() const;
 
     /**
+     * Set settings prefix
+     * @param load Whether to restore settings after setting the prefix
+     * @param settingsPrefix Settings prefix
+     */
+    void setSettingsPrefix(const QString& settingsPrefix, const bool& load = true);
+
+    /**
+     * Set settings prefix in the context of a plugin (the combined settings prefix will be: Plugins/PluginKind/SettingsPrefix)
+     * @param load Whether to restore settings after setting the prefix
+     * @param plugin Pointer to plugin context
+     * @param settingsPrefix Settings prefix
+     */
+    void setSettingsPrefix(plugin::Plugin* plugin, const QString& settingsPrefix, const bool& load = true);
+
+    /**
+     * Get settings prefix
+     * @return Settings prefix
+     */
+    QString getSettingsPrefix() const;
+
+    /** Load from settings (if the settings prefix is set) */
+    void loadFromSettings();
+
+    /** Save to settings (if the settings prefix is set) */
+    void saveToSettings();
+
+    /**
      * Find child widget action of which the GUI name contains the search string
      * @param searchString The search string
      * @param recursive Whether to search recursively
@@ -324,11 +355,12 @@ signals:
     void actionDisconnected(const WidgetAction* action);
 
 protected:
-    std::int32_t                _defaultWidgetFlags;    /** Default widget flags */
+    std::int32_t                _defaultWidgetFlags;    /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;             /** Sort index (used in the group action to sort actions) */
     bool                        _isSerializing;         /** Whether the widget action is currently serializing */
     WidgetAction*               _publicAction;          /** Public action to which this action might be connected */
     QVector<WidgetAction*>      _connectedActions;      /** Pointers to widget action that are connected to this action */
+    QString                     _settingsPrefix;        /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
 };
 
 /** List of widget actions */

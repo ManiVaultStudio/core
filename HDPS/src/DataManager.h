@@ -98,7 +98,7 @@ public:
     Dataset<DatasetImpl> getSelection(const QString& dataName);
 
     /** Get all sets from the data manager */
-    const std::unordered_map<QString, Dataset<DatasetImpl>>& allSets() const;
+    const QVector<Dataset<DatasetImpl>>& allSets() const;
 
 public: // Serialization
 
@@ -126,10 +126,9 @@ private:
     std::unordered_map<QString, std::unique_ptr<plugin::RawData>> _rawDataMap;
 
     /**
-     * Stores all data sets in the system. Data sets are stored by the name
-     * retrieved from their DataSet::getName() function.
+     * Stores all data sets in the system
      */
-    std::unordered_map<QString, Dataset<DatasetImpl>> _dataSetMap;
+    QVector<Dataset<DatasetImpl>> _datasets;
 
     /**
     * Stores selection sets on all data plug-ins

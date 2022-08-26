@@ -27,7 +27,12 @@ public:
     
     void init() override;
 
-    Dataset<DatasetImpl> createDataSet() const override;
+    /**
+     * Create dataset for raw data
+     * @param guid Globally unique dataset identifier (use only for deserialization)
+     * @return Smart pointer to dataset
+     */
+    Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
 private:
     std::vector<QString> _data;
@@ -36,7 +41,11 @@ private:
 class Text : public DatasetImpl
 {
 public:
-    Text(hdps::CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
+    Text(hdps::CoreInterface* core, QString dataName, const QString& guid = "") :
+        DatasetImpl(core, dataName, guid)
+    {
+    }
+
     ~Text() override { }
 
     Dataset<DatasetImpl> copy() const override

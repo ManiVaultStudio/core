@@ -35,7 +35,7 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
         if (!_points.isValid())
             return;
 
-        _dataStorageAction.setString(_points->isProxy() ? "Proxy" : "Owner");
+        _dataStorageAction.setString(_points->isProxy() ? "Group" : "Owner");
         _numberOfPointsAction.setString(QString::number(_points->getNumPoints()));
         _numberOfDimensionsAction.setString(QString::number(_points->getNumDimensions()));
         _rawDataSizeAction.setString(_points->getRawDataSizeHumanReadable());

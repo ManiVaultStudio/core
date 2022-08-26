@@ -88,6 +88,13 @@ public:
     void initialize(const QString& pluginKind, const DataTypes& dataTypes);
 
     /**
+     * Get plugin trigger action by its SHA
+     * @return sha SHA of the plugin trigger action to find
+     * @return Pointer to plugin trigger action (if found)
+     */
+    PluginTriggerAction* getPluginTriggerAction(const QString& sha);
+
+    /**
      * Get plugin trigger actions
      * @return List of plugin trigger actions
      */

@@ -35,8 +35,12 @@ public:
         return _dataType;
     }
 
-    /** Create dataset for raw data */
-    virtual Dataset<DatasetImpl> createDataSet() const = 0;
+    /**
+     * Create dataset for raw data
+     * @param guid Globally unique dataset identifier (use only for deserialization)
+     * @return Smart pointer to dataset
+     */
+    virtual Dataset<DatasetImpl> createDataSet(const QString& guid = "") const = 0;
 
 private:
     DataType    _dataType;  /** Type of data */

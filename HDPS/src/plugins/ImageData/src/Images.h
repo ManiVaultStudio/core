@@ -33,8 +33,9 @@ public: // Construction
      * Constructor
      * @param core Pointer to core interface
      * @param dataName Name of the dataset
+     * @param guid Globally unique dataset identifier (use only for deserialization)
      */
-    Images(hdps::CoreInterface* core, QString dataName);
+    Images(hdps::CoreInterface* core, QString dataName, const QString& guid = "");
 
     /** Initializes the dataset */
     void init() override;

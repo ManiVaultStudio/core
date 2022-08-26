@@ -3,19 +3,19 @@
 #include "InfoAction.h"
 
 #include <util/Exception.h>
-#include "util/Timer.h"
+#include <util/Timer.h>
 
 #include <DataHierarchyItem.h>
 
-#include "PointData.h"
-#include "ClusterData.h"
+#include <PointData.h>
+#include <ClusterData.h>
 
 #include <QDebug>
 
 using namespace hdps::util;
 
-Images::Images(hdps::CoreInterface* core, QString dataName) :
-    DatasetImpl(core, dataName),
+Images::Images(hdps::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
+    DatasetImpl(core, dataName, guid),
     _indices(),
     _imageData(nullptr),
     _infoAction(),

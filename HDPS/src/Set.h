@@ -47,12 +47,12 @@ public:
      * @param core Pointer to the core
      * @param rawDataName Name of the raw data
      */
-    DatasetImpl(CoreInterface* core, const QString& rawDataName) :
+    DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& guid = "") :
         WidgetAction(nullptr),
         _core(core),
         _storageType(StorageType::Owner),
         _rawData(nullptr),
-        _guid(QUuid::createUuid().toString(QUuid::WithoutBraces)),
+        _guid(guid.isEmpty() ? QUuid::createUuid().toString(QUuid::WithoutBraces) : guid),
         _guiName(),
         _rawDataName(rawDataName),
         _all(false),

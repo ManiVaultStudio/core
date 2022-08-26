@@ -316,7 +316,7 @@ public:
 
     void init() override;
 
-    hdps::Dataset<hdps::DatasetImpl> createDataSet() const override;
+    hdps::Dataset<hdps::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     unsigned int getNumPoints() const;
 
@@ -645,7 +645,7 @@ private:
     }
 
 public:
-    Points(hdps::CoreInterface* core, QString dataName);
+    Points(hdps::CoreInterface* core, QString dataName, const QString& guid = "");
     ~Points() override;
 
     void init() override;

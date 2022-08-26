@@ -40,9 +40,9 @@ void PointData::init()
 
 }
 
-hdps::Dataset<DatasetImpl> PointData::createDataSet() const
+hdps::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return hdps::Dataset<DatasetImpl>(new Points(_core, getName()));
+    return hdps::Dataset<DatasetImpl>(new Points(_core, getName(), guid));
 }
 
 unsigned int PointData::getNumPoints() const
@@ -278,8 +278,8 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
         });
 }
 
-Points::Points(hdps::CoreInterface* core, QString dataName) :
-    hdps::DatasetImpl(core, dataName),
+Points::Points(hdps::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
+    hdps::DatasetImpl(core, dataName, guid),
     _infoAction()
 {
 }

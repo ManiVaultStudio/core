@@ -173,13 +173,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto pluginKind   = dataset["PluginKind"].toString();
         const auto children     = dataset["Children"].toMap();
 
-        // Add dataset to the data hierarchy manager
-        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent);
+        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["GUID"].toString());
 
-        // Load the data hierarchy item
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
-
-        // And load from variant map
         loadedDataset->fromVariantMap(dataset);
 
         return loadedDataset;
