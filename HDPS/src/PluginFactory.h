@@ -93,6 +93,14 @@ public:
     virtual Plugin* produce() = 0;
 
     /**
+     * Get the data types that the plugin supports
+     * @return Supported data types
+     */
+    virtual hdps::DataTypes supportedDataTypes() const {
+        return hdps::DataTypes();
+    }
+
+    /**
      * Get plugin trigger actions given \p datasets
      * @param datasets Vector of input datasets
      * @return Vector of plugin trigger actions

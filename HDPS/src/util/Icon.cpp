@@ -33,7 +33,7 @@ QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay)
     return createIcon(pixmap);
 }
 
-QIcon createPluginIcon(const QString& characters)
+QIcon createPluginIcon(const QString& characters, const QColor& color)
 {
     const auto margin       = 8;
     const auto pixmapSize   = QSize(256, 256);
@@ -48,9 +48,7 @@ QIcon createPluginIcon(const QString& characters)
 
     painter.setRenderHint(QPainter::Antialiasing);
 
-    const auto textColor = QApplication::palette().text().color();
-
-    painter.setPen(QPen(textColor, 1, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
+    painter.setPen(QPen(color, 1, Qt::SolidLine, Qt::SquareCap, Qt::SvgMiterJoin));
 
     auto font = QFont("Arial", 100);
 
