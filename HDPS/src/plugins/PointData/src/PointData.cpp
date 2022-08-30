@@ -612,7 +612,7 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
 
         targetPoints->getGlobalIndices(targetGlobalIndices);
 
-        // Source to target
+        // Group dataset to member dataset
         {
             LinkedData linkedDataToTarget(toSmartPointer(), targetPoints);
 
@@ -626,7 +626,7 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
             getLinkedData().push_back(linkedDataToTarget);
         }
 
-        // Target to source
+        // Member dataset to group dataset
         {
             LinkedData linkedDataToSource(targetPoints, toSmartPointer());
 
@@ -635,9 +635,10 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
                 selectionMapToSource[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
 
-            linkedDataToSource.setMapping(selectionMapToSource);
+            targetPoints->addLinkedData(toSmartPointer(), selectionMapToSource);
 
-            targetPoints->getLinkedData().push_back(linkedDataToSource);
+            if (!targetPoints->isFull())
+                targetPoints->getFullDataset<Points>()->addLinkedData(toSmartPointer(), selectionMapToSource);
         }
 
         pointIndexOffset += targetPoints->getNumPoints();

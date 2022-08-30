@@ -19,6 +19,8 @@ void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
     if (!_rawDataName.isEmpty())
         _rawData = &_core->requestRawData(getRawDataName());
 
+    _fullDataset = fullDataset;
+
     setAll(false);
 }
 
