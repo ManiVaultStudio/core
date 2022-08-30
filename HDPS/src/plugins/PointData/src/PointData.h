@@ -7,6 +7,7 @@
 #include "Set.h"
 #include "PointDataRange.h"
 #include "LinkedData.h"
+
 #include "event/EventListener.h"
 
 #include <biovault_bfloat16.h>
@@ -315,11 +316,42 @@ public:
 
     void init() override;
 
-    hdps::Dataset<hdps::DatasetImpl> createDataSet() const override;
+    hdps::Dataset<hdps::DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     unsigned int getNumPoints() const;
 
     unsigned int getNumDimensions() const;
+
+    /**
+     * Get amount of data occupied by the raw data
+     * @return Size of the raw data in bytes
+     */
+    std::uint64_t getRawDataSize() const {
+        auto elementSize = 0u;
+
+        switch (_vectorHolder.getElementTypeSpecifier())
+        {
+            case ElementTypeSpecifier::float32:
+                elementSize = 4;
+                break;
+
+            case ElementTypeSpecifier::bfloat16:
+            case ElementTypeSpecifier::int16:
+            case ElementTypeSpecifier::uint16:
+                elementSize = 4;
+                break;
+
+            case ElementTypeSpecifier::int8:
+            case ElementTypeSpecifier::uint8:
+                elementSize = 4;
+                break;
+
+            default:
+                break;
+        }
+
+        return getNumPoints() * getNumDimensions() * elementSize;
+    }
 
     // Similar to C++17 std::visit.
     template <typename ReturnType = void, typename FunctionObject>
@@ -613,7 +645,7 @@ private:
     }
 
 public:
-    Points(hdps::CoreInterface* core, QString dataName);
+    Points(hdps::CoreInterface* core, QString dataName, const QString& guid = "");
     ~Points() override;
 
     void init() override;
@@ -735,15 +767,37 @@ public:
     template <typename ResultContainer, typename DimensionIndices>
     void populateDataForDimensions(ResultContainer& resultContainer, const DimensionIndices& dimensionIndices) const
     {
-        const auto& rawPointData = getRawData<PointData>();
+        if (isProxy()) {
+            auto offset = 0;
 
-        if (isFull())
-        {
-            rawPointData.populateFullDataForDimensions(resultContainer, dimensionIndices);
+            for (auto proxyDataset : getProxyDatasets()) {
+                auto points = hdps::Dataset<Points>(proxyDataset);
+
+                ResultContainer proxyPointsData;
+
+                const auto numberOfElements = points->getNumPoints() * dimensionIndices.size();
+
+                proxyPointsData.resize(numberOfElements);
+
+                const auto& rawPointData = points->getRawData<PointData>();
+
+                if (points->isFull())
+                    rawPointData.populateFullDataForDimensions(proxyPointsData, dimensionIndices);
+                else
+                    rawPointData.populateDataForDimensions(proxyPointsData, dimensionIndices, points->indices);
+
+                std::copy(proxyPointsData.begin(), proxyPointsData.end(), resultContainer.begin() + offset);
+
+                offset += numberOfElements;
+            }
         }
-        else
-        {
-            rawPointData.populateDataForDimensions(resultContainer, dimensionIndices, indices);
+        else {
+            const auto& rawPointData = getRawData<PointData>();
+
+            if (isFull())
+                rawPointData.populateFullDataForDimensions(resultContainer, dimensionIndices);
+            else
+                rawPointData.populateDataForDimensions(resultContainer, dimensionIndices, indices);
         }
     }
 
@@ -773,23 +827,61 @@ public:
 
     unsigned int getNumRawPoints() const
     {
-        return getRawData<PointData>().getNumPoints();
+        if (isProxy()) {
+            return getNumPoints();
+        }
+        else {
+            return getRawData<PointData>().getNumPoints();
+        }
     }
+
+    /**
+     * Establish whether a proxy dataset may be created with candidate \p proxyDatasets
+     * @param proxyDatasets Candidate proxy datasets
+     * @return Boolean indicating whether a proxy dataset may be created with candidate \p proxyDatasets
+     */
+    bool mayProxy(const hdps::Datasets& proxyDatasets) const override;
 
     unsigned int getNumPoints() const
     {
-        if (isFull()) return getRawData<PointData>().getNumPoints();
-        else return static_cast<std::uint32_t>(indices.size());
+        if (isProxy()) {
+            auto numberOfPoints = 0;
+
+            for (auto proxyDataset : getProxyDatasets())
+                numberOfPoints += hdps::Dataset<Points>(proxyDataset)->getNumPoints();
+
+            return numberOfPoints;
+        }
+        else {
+            if (isFull()) return getRawData<PointData>().getNumPoints();
+                else return static_cast<std::uint32_t>(indices.size());
+        }
     }
 
     unsigned int getNumDimensions() const
     {
-        return getRawData<PointData>().getNumDimensions();
+        if (isProxy()) {
+            return hdps::Dataset<Points>(getProxyDatasets().first())->getNumDimensions();
+        }
+        else {
+            return getRawData<PointData>().getNumDimensions();
+        }
     }
 
     const std::vector<QString>& getDimensionNames() const;
 
     void setDimensionNames(const std::vector<QString>& dimNames);
+
+    /**
+     * Get amount of data occupied by the raw data
+     * @return Size of the raw data in bytes
+     */
+    std::uint64_t getRawDataSize() const override {
+        if (isProxy())
+            return 0;
+        else
+            return getRawData<PointData>().getRawDataSize();
+    }
 
     // Returns the value of the element at the specified position in the current
     // data vector, converted to float.
@@ -818,8 +910,18 @@ public:
      */
     hdps::Dataset<hdps::DatasetImpl> createSubsetFromSelection(const QString& guiName, const hdps::Dataset<hdps::DatasetImpl>& parentDataSet = hdps::Dataset<hdps::DatasetImpl>(), const bool& visible = true) const override;
 
-    /** Get icon for the dataset */
-    QIcon getIcon() const override;
+    /**
+     * Get set icon
+     * @param color Global icon color (for font icons)
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
+
+    /**
+     * Set the proxy datasets (automatically sets the dataset type to Type::Proxy)
+     * @param proxyDatasets Proxy datasets
+     */
+    void setProxyDatasets(const hdps::Datasets& proxyDatasets) override;
 
 public: // Selection
 
@@ -855,13 +957,6 @@ public: // Selection
 
     /** Invert item selection */
     void selectInvert() override;
-
-    /**
-     * Adds a mapping of global selection indices from this dataset to a target dataset
-     * @param targetDataSet The target dataset
-     * @param mapping Map of global selection indices in this dataset to a vector of global indices in the target dataset.
-     */
-    void addLinkedSelection(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
 
 public: // Serialization
 
@@ -900,8 +995,12 @@ public:
     PointDataFactory(void) {}
     ~PointDataFactory(void) override {}
 
-    /** Returns the plugin icon */
-    QIcon getIcon() const override;
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     hdps::plugin::RawData* produce() override;
 };

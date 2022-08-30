@@ -1,7 +1,7 @@
 #include "DataHierarchyManager.h"
 #include "DataManager.h"
 
-#include "util/Exception.h"
+#include <util/Exception.h>
 
 #include <QMessageBox>
 
@@ -14,8 +14,7 @@ namespace hdps
 
 DataHierarchyManager::DataHierarchyManager(QObject* parent /*= nullptr*/) :
     WidgetAction(parent),
-    _items(),
-    _selectedItems()
+    _items()
 {
     setText("Data hierarchy");
     setObjectName("Hierarchy");
@@ -160,32 +159,10 @@ DataHierarchyItems DataHierarchyManager::getTopLevelItems()
     return topLevelItems;
 }
 
+// TODO
 void DataHierarchyManager::selectItems(DataHierarchyItems& selectedItems)
 {
-    if (selectedItems == _selectedItems)
-        return;
-
-    _selectedItems = selectedItems;
-
-    // Select data hierarchy items
-    for (auto item : _items)
-        item->setSelected(selectedItems.contains(item));
-
-    // Notify others that the selected items changed
-    emit selectedItemsChanged(_selectedItems);
-}
-
-void DataHierarchyManager::removeSelectedItem(DataHierarchyItem& dataHierarchyItem)
-{
-    // Only remove the item if it is part of the selection
-    if (!_selectedItems.contains(&dataHierarchyItem))
-        return;
-
-    // Remove the item from the selected items
-    _selectedItems.removeOne(&dataHierarchyItem);
-
-    // Notify others that the selected items changed
-    emit selectedItemsChanged(_selectedItems);
+    emit selectedItemsChanged(selectedItems);
 }
 
 void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
@@ -196,13 +173,9 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         const auto pluginKind   = dataset["PluginKind"].toString();
         const auto children     = dataset["Children"].toMap();
 
-        // Add dataset to the data hierarchy manager
-        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent);
+        auto loadedDataset = Application::core()->addDataset(pluginKind, guiName, parent, dataset["GUID"].toString());
 
-        // Load the data hierarchy item
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
-
-        // And load from variant map
         loadedDataset->fromVariantMap(dataset);
 
         return loadedDataset;

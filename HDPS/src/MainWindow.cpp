@@ -49,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),
     _centralDockArea(nullptr),
+    _lastDockAreaWidget(nullptr),
     _settingsDockArea(nullptr),
     _loggingDockArea(nullptr),
     _centralDockWidget(new CDockWidget("Views")),
@@ -153,12 +154,15 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 dockWidget->setWindowTitle(title);
             });
 
-            auto dockWidgetArea = LeftDockWidgetArea;
+            auto dockWidgetArea = RightDockWidgetArea;
 
             if (getViewPluginDockWidgets().isEmpty())
                 dockWidgetArea = CenterDockWidgetArea;
 
-            _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
+            if (_lastDockAreaWidget == nullptr)
+                _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _centralDockArea);
+            else
+                _lastDockAreaWidget = _dockManager->addDockWidget(dockWidgetArea, dockWidget, _lastDockAreaWidget);
             
             QObject::connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
                 updateCentralWidget();
@@ -285,7 +289,7 @@ void MainWindow::initializeDocking()
 
 void MainWindow::initializeCentralDockingArea()
 {
-    _startPageDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("door-open", QSize(16, 16)));
+    _startPageDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("door-open"));
     _startPageDockWidget->setWidget(_startPageWidget, CDockWidget::ForceNoScrollArea);
 
     _centralDockArea = _dockManager->addDockWidget(DockWidgetArea::CenterDockWidgetArea, _startPageDockWidget);
@@ -300,19 +304,19 @@ void MainWindow::initializeSettingsDockingArea()
     _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
     _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _dataHierarchyDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap", QSize(16, 16)));
+    _dataHierarchyDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap"));
     _dataHierarchyDockWidget->setWidget(_dataHierarchyWidget);
 
     _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
     _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _actionsViewerDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("link", QSize(16, 16)));
+    _actionsViewerDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
     _actionsViewerDockWidget->setWidget(_actionsViewerWidget);
 
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
     _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _dataPropertiesDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("edit", QSize(16, 16)));
+    _dataPropertiesDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("edit"));
     _dataPropertiesDockWidget->setWidget(_dataPropertiesWidget);
 
     _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);

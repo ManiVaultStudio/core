@@ -3,13 +3,23 @@
 
 #include "PluginType.h"
 #include "DataType.h"
+#include "Dataset.h"
 
 #include <QObject>
 #include <QIcon>
+#include <QVariant>
+#include <QAction>
 
 namespace hdps
 {
     class DatasetImpl;
+
+    namespace gui
+    {
+        class PluginTriggerAction;
+
+        using PluginTriggerActions = QVector<PluginTriggerAction*>;
+    }
 
 namespace plugin
 {
@@ -69,24 +79,103 @@ public: // Version
 
 public:
 
-    /** Returns the plugin icon */
-    virtual QIcon getIcon() const = 0;
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    virtual QIcon getIcon(const QColor& color = Qt::black) const = 0;
 
+    /**
+     * Produces the plugin
+     * @return Pointer to the produced plugin
+     */
     virtual Plugin* produce() = 0;
 
     /**
-     * Returns a list of datatypes that are supported for operations by
-     * the plugin produced in this factory.
+     * Get the data types that the plugin supports
+     * @return Supported data types
      */
-    virtual DataTypes supportedDataTypes() const = 0;
+    virtual hdps::DataTypes supportedDataTypes() const {
+        return hdps::DataTypes();
+    }
 
-    //virtual bool isCompatible(DataSet& dataSet) = 0;
+    /**
+     * Get plugin trigger actions given \p datasets
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
+     */
+    virtual gui::PluginTriggerActions getPluginTriggerActions(const Datasets& datasets) const {
+        return gui::PluginTriggerActions();
+    }
+
+    /**
+     * Get plugin trigger actions given \p dataTypes
+     * @param datasetTypes Vector of input data types
+     * @return Vector of plugin trigger actions
+     */
+    virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {
+        return gui::PluginTriggerActions();
+    }
+
+protected:
+
+    /**
+     * Get sequence of input datasets as a string list
+     * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
+     * @return String list of input dataset types
+     */
+    static QStringList getDatasetTypesAsStringList(const Datasets& datasets);
+
+    /**
+     * Determine whether all datasets are of the same data type
+     * @param datasets Sequence of input datasets (order in which they were selected in the data hierarchy)
+     * @param dataType Type of data
+     * @return Whether each dataset is of the same data type
+     */
+    static bool areAllDatasetsOfTheSameType(const Datasets& datasets, const DataType& dataType);
+
+    /**
+     * Get number of datasets for \p dataType
+     * @param dataType Data type
+     * @return Number of datasets of \p datasetType
+     */
+    static std::uint16_t getNumberOfDatasetsForType(const Datasets& datasets, const DataType& dataType);
+
+    /**
+     * Convenience function for generating a plugin trigger action (icon from the plugin factory)
+     * @param title Title of the plugin trigger action
+     * @param description Description of the plugin trigger action
+     * @param datasets Input datasets
+     * @return Pointer to plugin trigger action
+     */
+    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets) const;
+
+    /**
+     * Convenience function for generating a plugin trigger action
+     * @param title Title of the plugin trigger action
+     * @param description Description of the plugin trigger action
+     * @param datasets Input datasets
+     * @param iconName Name of the icon
+     * @return Pointer to plugin trigger action
+     */
+    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QString& iconName) const;
+
+    /**
+     * Convenience function for generating a plugin trigger action
+     * @param title Title of the plugin trigger action
+     * @param description Description of the plugin trigger action
+     * @param datasets Input datasets
+     * @param icon Icon
+     * @return Pointer to plugin trigger action
+     */
+    gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const;
 
 private:
-    QString         _kind;                  /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
-    Type            _type;                  /** Type of plugin (e.g. analysis, data, loader, writer & view) */
-    QString         _guiName;               /** Name of the plugin in the GUI */
-    QString         _version;               /** Plugin version */
+    QString     _kind;          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
+    Type        _type;          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+    QString     _guiName;       /** Name of the plugin in the GUI */
+    QString     _version;       /** Plugin version */
 
 protected:
     std::uint32_t   _numberOfInstances;     /** Number of plugin instances */

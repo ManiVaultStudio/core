@@ -33,8 +33,9 @@ public: // Construction
      * Constructor
      * @param core Pointer to core interface
      * @param dataName Name of the dataset
+     * @param guid Globally unique dataset identifier (use only for deserialization)
      */
-    Images(hdps::CoreInterface* core, QString dataName);
+    Images(hdps::CoreInterface* core, QString dataName, const QString& guid = "");
 
     /** Initializes the dataset */
     void init() override;
@@ -112,8 +113,12 @@ public: // Image retrieval functions
     /** Get the rectangle which bounds the visible pixels */
     QRect getVisibleRectangle() const;
 
-    /** Get icon for the dataset */
-    QIcon getIcon() const override;
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
 public: // Selection
 

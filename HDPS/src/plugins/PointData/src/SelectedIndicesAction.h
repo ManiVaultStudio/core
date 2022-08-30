@@ -1,15 +1,13 @@
 #pragma once
 
 #include "actions/Actions.h"
-#include "event/EventListener.h"
 
 #include "PointData.h"
 
-#include <QTimer>
+#include <actions/TriggerAction.h>
+#include <actions/ToggleAction.h>
 
-namespace hdps {
-    class CoreInterface;
-}
+#include <QTimer>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -38,6 +36,12 @@ protected:
          * @param selectedIndicesAction Pointer to selected indices action
          */
         Widget(QWidget* parent, SelectedIndicesAction* selectedIndicesAction);
+
+    private:
+        QTimer  _timer;     /** Timer to sparingly update the number of selected points */
+        bool    _dirty;     /** Whether the current selected indices display is dirty or not */
+
+        static const std::int32_t LAZY_UPDATE_INTERVAL = 500;
     };
 
     /**
@@ -54,13 +58,21 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
-     * @param points Reference to points dataset
+     * @param points Smart pointer to points dataset
      */
-    SelectedIndicesAction(QObject* parent, hdps::CoreInterface* core, Points& points);
+    SelectedIndicesAction(QObject* parent, const Dataset<Points>& points);
 
-    /** Get selected indices in the points dataset */
-    const std::vector<std::uint32_t>& getSelectedIndices() const;
+    /**
+     * Get points
+     * @return Smart pointer to points dataset
+     */
+    Dataset<Points>& getPoints();
+
+    /**
+     * Get selected indices
+     * @return Selected indices
+     */
+    std::vector<std::uint32_t> getSelectedIndices() const;
 
 public: // Action getters
 
@@ -68,26 +80,10 @@ public: // Action getters
     ToggleAction& getManualUpdateAction() { return _manualUpdateAction; }
 
 protected:
+    Dataset<Points>     _points;                    /** Points dataset reference */
+    TriggerAction       _updateAction;              /** Update action */
+    ToggleAction        _manualUpdateAction;        /** Manual update action */
 
-    /** Update the selected indices */
-    void updateSelectedIndices();
-
-signals:
-
-    /**
-     * Signals that the selected indices changed
-     * @param selectedIndices Selected indices
-     */
-    void selectedIndicesChanged(const std::vector<std::uint32_t>& selectedIndices);
-
-protected:
-    CoreInterface*              _core;                      /** Pointer to the core */
-    Dataset<Points>             _points;                    /** Points dataset reference */
-    TriggerAction               _updateAction;              /** Update action */
-    ToggleAction                _manualUpdateAction;        /** Manual update action */
-    QTimer                      _selectionChangedTimer;     /** Timer to control when selection changes are processed */
-    std::vector<std::uint32_t>  _selectedIndices;           /** Selected indices */
-    hdps::EventListener         _eventListener;             /** Listen to HDPS events */
-
+    /** Above this threshold, selected indices need to be updated manually */
     static const std::int32_t MANUAL_UPDATE_THRESHOLD = 10000;
 };

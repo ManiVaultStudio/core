@@ -138,7 +138,19 @@ public:
      */
     void setSearchMode(bool searchMode);
 
-    public: // Settings
+    /**
+     * Get whether the string can be cleared by clicking the trailing action
+     * @return Boolean indicating whether the string can be cleared
+     */
+    bool isClearable() const;
+
+    /**
+     * Set whether the string can be cleared by clicking the trailing action
+     * @param clearable Boolean indicating whether the string can be cleared
+     */
+    void setClearable(bool clearable);
+
+public: // Settings
 
     /**
      * Determines whether the action can be reset to its default
@@ -201,6 +213,7 @@ protected:
     QAction         _trailingAction;        /** Action at the trailing position */
     QCompleter*     _completer;             /** Pointer to completer */
     bool            _searchMode;            /** Whether the string action is in search mode */
+    bool            _clearable;             /** Whether the string can be cleared by clicking the trailing action */
 };
 
 }

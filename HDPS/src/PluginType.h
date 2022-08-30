@@ -1,6 +1,8 @@
 #ifndef HDPS_PLUGINTYPE_H
 #define HDPS_PLUGINTYPE_H
 
+#include <QVector>
+
 #include <cstddef>
 
 /**
@@ -27,6 +29,8 @@ namespace plugin
             return static_cast<std::size_t>(type);
         }
     };
+    
+    using Types = QVector<Type>;
 
 } // namespace plugin
 

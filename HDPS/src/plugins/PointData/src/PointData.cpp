@@ -20,6 +20,7 @@
 #include "Application.h"
 
 #include <util/Serialization.h>
+#include <util/Timer.h>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
@@ -39,9 +40,9 @@ void PointData::init()
 
 }
 
-hdps::Dataset<DatasetImpl> PointData::createDataSet() const
+hdps::Dataset<DatasetImpl> PointData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return hdps::Dataset<DatasetImpl>(new Points(_core, getName()));
+    return hdps::Dataset<DatasetImpl>(new Points(_core, getName(), guid));
 }
 
 unsigned int PointData::getNumPoints() const
@@ -277,8 +278,8 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
         });
 }
 
-Points::Points(hdps::CoreInterface* core, QString dataName) :
-    hdps::DatasetImpl(core, dataName),
+Points::Points(hdps::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
+    hdps::DatasetImpl(core, dataName, guid),
     _infoAction()
 {
 }
@@ -289,7 +290,7 @@ Points::~Points()
 
 void Points::init()
 {
-    _infoAction = QSharedPointer<InfoAction>::create(this, _core, *this);
+    _infoAction = QSharedPointer<InfoAction>::create(this, *this);
 
     addAction(*_infoAction.get());
 
@@ -352,115 +353,194 @@ void Points::extractDataForDimension(std::vector<float>& result, const int dimen
     // Please remove the assert once non-full support is implemented (if necessary).
     assert(isFull());
 
-    const auto& rawPointData = getRawData<PointData>();
-    rawPointData.extractFullDataForDimension(result, dimensionIndex);
-}
+    if (isProxy()) {
+        result.resize(getNumPoints());
 
+        auto pointIndexOffset = 0u;
+
+        for (auto proxyDataset : getProxyDatasets()) {
+            auto points = hdps::Dataset<Points>(proxyDataset);
+
+            std::vector<float> proxyPoints;
+
+            proxyPoints.resize(points->getNumPoints());
+
+            points->extractDataForDimension(proxyPoints, dimensionIndex);
+
+            std::copy(proxyPoints.begin(), proxyPoints.end(), result.begin() + pointIndexOffset);
+
+            pointIndexOffset += points->getNumPoints();
+        }
+    }
+    else {
+        getRawData<PointData>().extractFullDataForDimension(result, dimensionIndex);
+    }
+}
 
 void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const int dimensionIndex1, const int dimensionIndex2) const
 {
-    const auto& rawPointData = getRawData<PointData>();
+    if (isProxy()) {
+        result.resize(getNumPoints());
 
-    if (isFull())
-    {
-        rawPointData.extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
+        auto pointIndexOffset = 0u;
+
+        for (auto proxyDataset : getProxyDatasets()) {
+            auto points = hdps::Dataset<Points>(proxyDataset);
+
+            std::vector<hdps::Vector2f> proxyPoints;
+
+            proxyPoints.resize(points->getNumPoints());
+
+            points->extractDataForDimensions(proxyPoints, dimensionIndex1, dimensionIndex2);
+
+            std::copy(proxyPoints.begin(), proxyPoints.end(), result.begin() + pointIndexOffset);
+
+            pointIndexOffset += points->getNumPoints();
+        }
     }
-    else
-    {
-        rawPointData.extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
+    else {
+        const auto& rawPointData = getRawData<PointData>();
+
+        if (isFull())
+            rawPointData.extractFullDataForDimensions(result, dimensionIndex1, dimensionIndex2);
+        else
+            rawPointData.extractDataForDimensions(result, dimensionIndex1, dimensionIndex2, indices);
     }
 }
 
 void Points::getGlobalIndices(std::vector<unsigned int>& globalIndices) const
 {
-    auto currentDataset = toSmartPointer<Points>();
+    //Timer timer(__FUNCTION__);
 
-    std::queue<Dataset<Points>> subsetChain;
-
-    // Walk back in the chain of derived data until we find the original source
-    while (currentDataset->isDerivedData())
-    {
-        // If the current set is a subset then store it on the stack to traverse later
-        if (!isFull())
-        {
-            subsetChain.push(currentDataset);
-        }
-        currentDataset = getSourceDataset<Points>();
+    if (isProxy()) {
+        globalIndices.resize(getNumPoints(), 0);
+        std::iota(globalIndices.begin(), globalIndices.end(), 0);
     }
+    else {
+        auto currentDataset = toSmartPointer<Points>();
 
-    // We now have a non-derived dataset bound, push it if its also a subset
-    if (!currentDataset->isFull())
-        subsetChain.push(currentDataset);
+        std::queue<Dataset<Points>> subsetChain;
 
-    // Traverse down the stack applying indexing
-    globalIndices.resize(getNumPoints(), 0);
-    std::iota(globalIndices.begin(), globalIndices.end(), 0);
-
-    while (!subsetChain.empty())
-    {
-        const Points& subset = *subsetChain.front();
-        subsetChain.pop();
-
-        for (int i = 0; i < globalIndices.size(); i++)
+        // Walk back in the chain of derived data until we find the original source
+        while (currentDataset->isDerivedData())
         {
-            globalIndices[i] = subset.indices[globalIndices[i]];
+            // If the current set is a subset then store it on the stack to traverse later
+            if (!isFull())
+            {
+                subsetChain.push(currentDataset);
+            }
+            currentDataset = getSourceDataset<Points>();
+        }
+
+        // We now have a non-derived dataset bound, push it if its also a subset
+        if (!currentDataset->isFull())
+            subsetChain.push(currentDataset);
+
+        // Traverse down the stack applying indexing
+        globalIndices.resize(getNumPoints(), 0);
+        std::iota(globalIndices.begin(), globalIndices.end(), 0);
+
+        while (!subsetChain.empty())
+        {
+            const Points& subset = *subsetChain.front();
+            subsetChain.pop();
+
+            for (int i = 0; i < globalIndices.size(); i++)
+            {
+                globalIndices[i] = subset.indices[globalIndices[i]];
+            }
         }
     }
 }
 
 void Points::selectedLocalIndices(const std::vector<unsigned int>& selectionIndices, std::vector<bool>& selected) const
 {
+    //Timer timer(__FUNCTION__);
+
     // Find the global indices of this dataset
     std::vector<unsigned int> localGlobalIndices;
     getGlobalIndices(localGlobalIndices);
 
-    // In an array the size of the full raw data, mark selected points as true
-    std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+    if (isProxy()) {
+        selected.resize(getNumPoints(), false);
 
-    for (const unsigned int& selectionIndex : selectionIndices)
-        globalSelection[selectionIndex] = true;
+        for (const auto& selectionIndex : selectionIndices) {
+            selected[localGlobalIndices[selectionIndex]] = true;
+        }
+    }
+    else {
 
-    // For all local points find out which are selected
-    selected.resize(localGlobalIndices.size(), false);
-    for (int i = 0; i < localGlobalIndices.size(); i++)
-    {
-        if (globalSelection[localGlobalIndices[i]])
-            selected[i] = true;
+        // In an array the size of the full raw data, mark selected points as true
+        std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+
+        for (const unsigned int& selectionIndex : selectionIndices)
+            globalSelection[selectionIndex] = true;
+
+        // For all local points find out which are selected
+        selected.resize(localGlobalIndices.size(), false);
+        for (int i = 0; i < localGlobalIndices.size(); i++)
+        {
+            if (globalSelection[localGlobalIndices[i]])
+                selected[i] = true;
+        }
     }
 }
 
 void Points::getLocalSelectionIndices(std::vector<unsigned int>& localSelectionIndices) const
 {
-    auto selection = getSelection<Points>();
+    //Timer timer(__FUNCTION__);
 
-    // Find the global indices of this dataset
-    std::vector<unsigned int> localGlobalIndices;
-    getGlobalIndices(localGlobalIndices);
+    if (isProxy()) {
+        localSelectionIndices = getSelection<Points>()->indices;
+    }
+    else {
+        auto selection = getSelection<Points>();
 
-    // In an array the size of the full raw data, mark selected points as true
-    std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
-    for (const unsigned int& selectionIndex : selection->indices)
-        globalSelection[selectionIndex] = true;
+        // Find the global indices of this dataset
+        std::vector<unsigned int> localGlobalIndices;
+        getGlobalIndices(localGlobalIndices);
 
-    // For all local points find out which are selected
-    std::vector<bool> selected(localGlobalIndices.size(), false);
-    int indexCount = 0;
-    for (int i = 0; i < localGlobalIndices.size(); i++)
-    {
-        if (globalSelection[localGlobalIndices[i]])
+        // In an array the size of the full raw data, mark selected points as true
+        std::vector<bool> globalSelection(getSourceDataset<Points>()->getNumRawPoints(), false);
+        for (const unsigned int& selectionIndex : selection->indices)
+            globalSelection[selectionIndex] = true;
+
+        // For all local points find out which are selected
+        std::vector<bool> selected(localGlobalIndices.size(), false);
+        int indexCount = 0;
+        for (int i = 0; i < localGlobalIndices.size(); i++)
         {
-            selected[i] = true;
-            indexCount++;
+            if (globalSelection[localGlobalIndices[i]])
+            {
+                selected[i] = true;
+                indexCount++;
+            }
+        }
+
+        localSelectionIndices.resize(indexCount);
+        int c = 0;
+        for (int i = 0; i < selected.size(); i++)
+        {
+            if (selected[i])
+                localSelectionIndices[c++] = i;
         }
     }
+}
 
-    localSelectionIndices.resize(indexCount);
-    int c = 0;
-    for (int i = 0; i < selected.size(); i++)
-    {
-        if (selected[i])
-            localSelectionIndices[c++] = i;
-    }
+bool Points::mayProxy(const Datasets& proxyDatasets) const
+{
+    if (!DatasetImpl::mayProxy(proxyDatasets))
+        return false;
+
+    QSet<std::int32_t> numberOfDimensionsSet;
+
+    for (auto proxyDataset : proxyDatasets)
+        numberOfDimensionsSet.insert(Dataset<Points>(proxyDataset)->getNumDimensions());
+    
+    if (numberOfDimensionsSet.count() > 1)
+        return false;
+
+    return true;
 }
 
 Dataset<DatasetImpl> Points::copy() const
@@ -478,9 +558,9 @@ Dataset<DatasetImpl> Points::createSubsetFromSelection(const QString& guiName, c
     return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
 }
 
-QIcon Points::getIcon() const
+QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("database");
+    return hdps::Application::getIconFont("FontAwesome").getIcon("database", color);
 
     /*
     const auto size = QSize(100, 100);
@@ -519,6 +599,51 @@ QIcon Points::getIcon() const
     */
 }
 
+void Points::setProxyDatasets(const Datasets& proxyDatasets)
+{
+    DatasetImpl::setProxyDatasets(proxyDatasets);
+
+    auto pointIndexOffset = 0u;
+
+    for (auto proxyDataset : getProxyDatasets()) {
+        auto targetPoints = Dataset<Points>(proxyDataset);
+
+        std::vector<std::uint32_t> targetGlobalIndices;
+
+        targetPoints->getGlobalIndices(targetGlobalIndices);
+
+        // Source to target
+        {
+            LinkedData linkedDataToTarget(toSmartPointer(), targetPoints);
+
+            SelectionMap selectionMapToTarget;
+
+            for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
+                selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
+
+            linkedDataToTarget.setMapping(selectionMapToTarget);
+
+            getLinkedData().push_back(linkedDataToTarget);
+        }
+
+        // Target to source
+        {
+            LinkedData linkedDataToSource(targetPoints, toSmartPointer());
+
+            SelectionMap selectionMapToSource;
+
+            for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
+                selectionMapToSource[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
+
+            linkedDataToSource.setMapping(selectionMapToSource);
+
+            targetPoints->getLinkedData().push_back(linkedDataToSource);
+        }
+
+        pointIndexOffset += targetPoints->getNumPoints();
+    }
+}
+
 std::vector<std::uint32_t>& Points::getSelectionIndices()
 {
     return getSelection<Points>()->indices;
@@ -526,7 +651,12 @@ std::vector<std::uint32_t>& Points::getSelectionIndices()
 
 const std::vector<QString>& Points::getDimensionNames() const
 {
-    return getRawData<PointData>().getDimensionNames();
+    if (isProxy()) {
+        return hdps::Dataset<Points>(getProxyDatasets().first())->getDimensionNames();
+    }
+    else {
+        return getRawData<PointData>().getDimensionNames();
+    }
 }
 
 void Points::setDimensionNames(const std::vector<QString>& dimNames)
@@ -544,16 +674,17 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices)
+void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices)
 {
-    Dataset<Points> targetDataset = ls.getTargetDataset();
+    Dataset<Points> sourceDataset   = ld.getSourceDataSet();
+    Dataset<Points> targetDataset   = ld.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
-    const hdps::SelectionMap& mapping = ls.getMapping();
+    const hdps::SelectionMap& mapping = ld.getMapping();   
 
     // Create separate vector of additional linked selected points
     std::vector<unsigned int> linkedIndices;
-
+    
     // Reserve at least as much space as required for a 1-1 mapping
     linkedIndices.reserve(indices.size());
 
@@ -565,10 +696,16 @@ void resolveLinkedData(LinkedData& ls, const std::vector<std::uint32_t>& indices
             linkedIndices.insert(linkedIndices.end(), mappedSelection.begin(), mappedSelection.end());
         }
     }
+    
+    std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
 
-    // FIXME Should retain the indices already in the selection
-    targetSelection->indices = linkedIndices;
-    //targetSelection->indices.insert(targetSelection->indices.end(), linkedIndices.begin(), linkedIndices.end());
+    for (auto& [key, value] : mapping)
+        targetIndicesSet.erase(value[0]);
+
+    for (const auto& linkedIndex : linkedIndices)
+        targetIndicesSet.insert(linkedIndex);
+
+    targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
@@ -751,9 +888,9 @@ QVariantMap Points::toVariantMap() const
 // Factory
 // =============================================================================
 
-QIcon PointDataFactory::getIcon() const
+QIcon PointDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("circle");
+    return Application::getIconFont("FontAwesome").getIcon("circle", color);
 }
 
 hdps::plugin::RawData* PointDataFactory::produce()

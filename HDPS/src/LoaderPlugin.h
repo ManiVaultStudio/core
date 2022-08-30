@@ -80,15 +80,33 @@ public:
         QObject::setObjectName("Plugins/Loader/" + name);
     }
 
-    /** Returns the plugin icon */
-    QIcon getIcon() const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-import");
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override {
+        return Application::getIconFont("FontAwesome").getIcon("file-import", color);
     }
 
     /**
     * Produces an instance of a loader plugin. This function gets called by the plugin manager.
     */
     LoaderPlugin* produce() override = 0;
+
+    /**
+     * Get plugin trigger actions given \p datasets
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
+     */
+    PluginTriggerActions getPluginTriggerActions(const hdps::Datasets& datasets) const override;
+
+    /**
+     * Get plugin trigger actions given \p dataTypes
+     * @param datasetTypes Vector of input data types
+     * @return Vector of plugin trigger actions
+     */
+    PluginTriggerActions getPluginTriggerActions(const hdps::DataTypes& dataTypes) const override;
 };
 
 } // namespace plugin

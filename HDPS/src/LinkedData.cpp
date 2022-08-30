@@ -47,5 +47,4 @@ namespace hdps
     {
         _mapping = mapping;
     }
-
 }

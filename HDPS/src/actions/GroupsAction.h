@@ -26,9 +26,7 @@ class GroupsAction : public WidgetAction
     Q_OBJECT
 
 public:
-    class GroupActions : public QVector<GroupAction*>
-    {
-    };
+    using GroupActions = QVector<GroupAction*>;
 
 public:
 
@@ -69,6 +67,16 @@ public:
          * @param widgetFlags Widget flags for the configuration of the widget
          */
         Widget(QWidget* parent, GroupsAction* groupsAction, const std::int32_t& widgetFlags);
+
+    public:
+
+        /**
+         * Get action that contains filtered actions
+         * @return Reference to filtered actions action
+         */
+        GroupAction& getFilteredActionsAction() {
+            return _filteredActionsAction;
+        }
 
     protected: // Internals
 

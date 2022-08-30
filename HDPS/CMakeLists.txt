@@ -86,6 +86,7 @@ set( CORE_HEADERS
     src/StartPageWidget.h
     src/ProjectBarWidget.h
     src/LogoWidget.h
+    src/GroupDataDialog.h
 )
 
 set( CORE_SOURCES
@@ -102,6 +103,7 @@ set( CORE_SOURCES
     src/StartPageWidget.cpp
     src/ProjectBarWidget.cpp
     src/LogoWidget.cpp
+    src/GroupDataDialog.cpp
 )
 
 set(EVENT_HEADERS
@@ -167,6 +169,8 @@ set(ACTIONS_HEADERS
     src/actions/OptionAction.h
     src/actions/OptionsAction.h
     src/actions/PixelSelectionAction.h
+    src/actions/PluginTriggerPickerAction.h
+    src/actions/PluginTriggerAction.h
     src/actions/TriggerAction.h
     src/actions/TriggersAction.h
     src/actions/ToggleAction.h
@@ -177,15 +181,9 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
-    src/actions/DataAction.h
-    src/actions/DataImportAction.h
-    src/actions/DataExportAction.h
     src/actions/DataCopyAction.h
     src/actions/DataRemoveAction.h
-    src/actions/DataViewAction.h
-    src/actions/DataAnalysisAction.h
     src/actions/DataGroupingAction.h
-    src/actions/DataTransformationAction.h
     src/actions/DirectoryPickerAction.h
     src/actions/FilePickerAction.h
     src/actions/StatusAction.h
@@ -225,6 +223,8 @@ set(ACTIONS_SOURCES
     src/actions/OptionAction.cpp
     src/actions/OptionsAction.cpp
     src/actions/PixelSelectionAction.cpp
+    src/actions/PluginTriggerPickerAction.cpp
+    src/actions/PluginTriggerAction.cpp
     src/actions/TriggerAction.cpp
     src/actions/TriggersAction.cpp
     src/actions/ToggleAction.cpp
@@ -235,15 +235,9 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
-    src/actions/DataAction.cpp
-    src/actions/DataImportAction.cpp
-    src/actions/DataExportAction.cpp
     src/actions/DataCopyAction.cpp
     src/actions/DataRemoveAction.cpp
-    src/actions/DataViewAction.cpp
-    src/actions/DataAnalysisAction.cpp
     src/actions/DataGroupingAction.cpp
-    src/actions/DataTransformationAction.cpp
     src/actions/DirectoryPickerAction.cpp
     src/actions/FilePickerAction.cpp
     src/actions/StatusAction.cpp
@@ -297,6 +291,7 @@ set( UTIL_HEADERS
     src/util/Exception.h
     src/util/Math.h
     src/util/Timer.h
+    src/util/Icon.h
     src/util/IconFont.h
     src/util/IconFonts.h
     src/util/Interpolation.h
@@ -321,6 +316,7 @@ set( UTIL_SOURCES
     src/util/Exception.cpp
     src/util/Math.cpp
     src/util/Timer.cpp
+    src/util/Icon.cpp
     src/util/IconFont.cpp
     src/util/IconFonts.cpp
     src/util/Interpolation.cpp
@@ -368,6 +364,7 @@ set( PLUGIN_SOURCES
     src/Application.cpp
     src/Plugin.cpp
     src/Set.cpp
+    src/PluginFactory.cpp
     src/LinkedData.cpp
     src/Dataset.cpp
     src/DatasetPrivate.cpp

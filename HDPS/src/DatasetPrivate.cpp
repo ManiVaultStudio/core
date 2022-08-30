@@ -240,4 +240,9 @@ void DatasetPrivate::registerDatasetEvents()
     }
 }
 
+const hdps::DatasetImpl* DatasetPrivate::getDataset() const
+{
+    return _dataset;
+}
+
 }

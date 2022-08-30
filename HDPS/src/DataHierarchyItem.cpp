@@ -29,30 +29,25 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _taskStatus(TaskStatus::Idle),
     _taskDescriptionTimer(),
     _taskProgressTimer(),
-    _namedIcons(),
+    _icon(),
     _actions(),
     _dataRemoveAction(parent, dataset),
     _dataCopyAction(parent, dataset)
 {
     setText(dataset->getGuiName());
 
-    // Set parent item
     if (parentDataset.isValid())
         _parent = &parentDataset->getDataHierarchyItem();
 
-    // Add dataset icon
-    addIcon("data", getDataset()->getIcon());
+    setIcon(getDataset()->getIcon());
 
-    // Task description/progress timer should be a one-off timer
     _taskDescriptionTimer.setSingleShot(true);
     _taskProgressTimer.setSingleShot(true);
 
-    // Notify others that the task description changed when the task description timer timed out
     connect(&_taskDescriptionTimer, &QTimer::timeout, [this]() {
         emit taskDescriptionChanged(_taskDescription);
     });
 
-    // Notify others that the task progress changed when the task progress timer timed out
     connect(&_taskProgressTimer, &QTimer::timeout, [this]() {
         emit taskProgressChanged(getTaskProgress());
     });
@@ -72,22 +67,17 @@ void DataHierarchyItem::renameDataset(const QString& newGuiName)
 {
     try {
 
-        // Except if the don't have a valid dataset
         if (!_dataset.isValid())
             throw std::runtime_error("Dataset is invalid");
 
-        // Except if the new GUI name is empty
         if (newGuiName.isEmpty())
             throw std::runtime_error("New GUI name is empty");
 
-        // Do not proceed if the new GUI name matches the old GUI name
         if (newGuiName == _dataset->getGuiName())
             return;
 
-        // Set the GUI name of the dataset dataset
         _dataset->setGuiName(newGuiName);
 
-        // Rename has an effect on the full path name of children, so trigger a GUI rename of the children
         for (const auto& child : getChildren())
             child->getDataset()->setGuiName(child->getDataset()->getGuiName());
     }
@@ -105,10 +95,8 @@ void DataHierarchyItem::getParents(DataHierarchyItem& dataHierarchyItem, DataHie
 {
     if (dataHierarchyItem.hasParent()) {
 
-        // Recurse up the tree
         getParents(dataHierarchyItem.getParent(), parents);
 
-        // Add parent
         parents << &dataHierarchyItem.getParent();
     }
 }
@@ -229,30 +217,6 @@ Dataset<hdps::DatasetImpl>& DataHierarchyItem::getDatasetReference()
 DataType DataHierarchyItem::getDataType() const
 {
     return _dataset->getDataType();
-}
-
-void DataHierarchyItem::analyzeDataset(const QString& pluginName)
-{
-    Q_ASSERT(!pluginName.isEmpty());
-
-    // Do not analyze if the plugin name is invalid
-    if (pluginName.isEmpty())
-        return;
-
-    // Instruct the core to analyze the dataset
-    Application::core()->analyzeDataset(pluginName, _dataset);
-}
-
-void DataHierarchyItem::exportDataset(const QString& pluginName)
-{
-    Q_ASSERT(!pluginName.isEmpty());
-
-    // Do not export if the plugin name is invalid
-    if (pluginName.isEmpty())
-        return;
-
-    // Instruct the core to export the dataset
-    Application::core()->exportDataset(pluginName, _dataset);
 }
 
 void DataHierarchyItem::addAction(WidgetAction& widgetAction)
@@ -504,32 +468,14 @@ void DataHierarchyItem::setTaskAborted()
     setLocked(false);
 }
 
-DataHierarchyItem::IconList DataHierarchyItem::getIcons() const
+QIcon DataHierarchyItem::getIcon() const
 {
-    return _namedIcons;
+    return _icon;
 }
 
-void DataHierarchyItem::addIcon(const QString& name, const QIcon& icon)
+void DataHierarchyItem::setIcon(const QIcon& icon)
 {
-    _namedIcons << NamedIcon(name, icon);
-}
-
-void DataHierarchyItem::removeIcon(const QString& name)
-{
-    // Loop over all icons and remove them from the list if it matches the name
-    for (const auto& namedIcon : _namedIcons)
-        if (name == namedIcon.first)
-            _namedIcons.removeOne(namedIcon);
-}
-
-QIcon DataHierarchyItem::getIconByName(const QString& name) const
-{
-    // Loop over all icons and return it if it matches the name
-    for (const auto& namedIcon : _namedIcons)
-        if (name == namedIcon.first)
-            return namedIcon.second;
-
-    return QIcon();
+    _icon = icon;
 }
 
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)

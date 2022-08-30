@@ -39,7 +39,7 @@ namespace hdps
         friend struct std::hash<DataType>;
     };
 
-    using DataTypes = QList<DataType>;
+    using DataTypes = QVector<DataType>;
 } // namespace hdps
 
 namespace std {

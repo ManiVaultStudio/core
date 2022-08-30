@@ -33,7 +33,7 @@ protected:
         void paintEvent(QPaintEvent* paintEvent);
     };
 
-protected:
+public:
 
     /**
      * Constructor
@@ -41,6 +41,12 @@ protected:
      * @param widgetAction Pointer to the widget action that will be displayed in a popup
      */
     WidgetActionCollapsedWidget(QWidget* parent, WidgetAction* widgetAction);
+
+    /**
+     * Set the widget action
+     * @param widgetAction Pointer to widget action
+     */
+    void setWidgetAction(WidgetAction* widgetAction) override;
 
     /** Get reference to the tool button */
     ToolButton& getToolButton() { return _toolButton; }

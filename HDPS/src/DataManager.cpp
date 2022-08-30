@@ -28,7 +28,7 @@ void DataManager::addSet(const Dataset<DatasetImpl>& dataset)
             throw std::runtime_error("Dataset smart pointer is invalid");
 
         // Add the data set to the map
-        _dataSetMap.emplace(dataset->getGuid(), dataset);
+        _datasets.push_back(dataset);
 
         emit dataChanged();
     }
@@ -50,29 +50,21 @@ void DataManager::removeDataset(Dataset<DatasetImpl> dataset)
 {
     try
     {
-        // Except when the dataset smart pointer is invalid
         if (!dataset.isValid())
             throw std::runtime_error("Dataset smart pointer is invalid");
 
         qDebug() << "Removing" << dataset->getGuiName() << "from the data manager";
 
-        // Turn all derived datasets referring to the dataset to be removed to non-derived
-        for (auto it = _dataSetMap.begin(); it != _dataSetMap.end();)
-        {
-            auto& set = *it->second;
+        for (auto& underiveDataset : _datasets) {
+            if (underiveDataset->isDerivedData() && underiveDataset->getSourceDataset<DatasetImpl>()->getGuid() == dataset->getGuid()) {
+                qDebug() << "Un-derive" << underiveDataset->getGuiName();
 
-            if (set.isDerivedData() && set.getGuid() == dataset->getGuid())
-            {
-                qDebug() << "Un-derive" << set.getGuiName();
-
-                set._derived = false;
-                set.setSourceDataSet(Dataset<DatasetImpl>());
+                underiveDataset->_derived = false;
+                underiveDataset->setSourceDataSet(Dataset<DatasetImpl>());
             }
-            it++;
         }
 
-        // Remove dataset
-        _dataSetMap.erase(dataset->getGuid());
+        _datasets.removeOne(dataset);
 
         emit dataChanged();
     }
@@ -112,15 +104,17 @@ Dataset<DatasetImpl> DataManager::getSet(const QString& datasetGuid)
 {
     try
     {
-        // Except when the dataset GUI is invalid
         if (datasetGuid.isEmpty())
             throw std::runtime_error("Dataset GUID is invalid");
 
-        // Except when the dataset is not found
-        if (_dataSetMap.find(datasetGuid) == _dataSetMap.end())
+        const auto it = std::find_if(_datasets.begin(), _datasets.end(), [datasetGuid](Dataset<DatasetImpl> dataset) -> bool {
+            return datasetGuid == dataset->getGuid();
+        });
+
+        if (it == _datasets.end())
             throw std::runtime_error("Set not found");
 
-        return _dataSetMap[datasetGuid];
+        return *it;
     }
     catch (std::exception& e)
     {
@@ -158,23 +152,21 @@ Dataset<DatasetImpl> DataManager::getSelection(const QString& dataName)
     return Dataset<DatasetImpl>();
 }
 
-const std::unordered_map<QString, Dataset<DatasetImpl>>& DataManager::allSets() const
+const QVector<Dataset<DatasetImpl>>& DataManager::allSets() const
 {
-    return _dataSetMap;
+    return _datasets;
 }
 
 void DataManager::fromVariantMap(const QVariantMap& variantMap)
 {
-
 }
 
 QVariantMap DataManager::toVariantMap() const
 {
     QVariantMap variantMap;
 
-    // Save all datasets to variant map
-    for (std::pair<QString, Dataset<DatasetImpl>> item : _dataSetMap)
-        variantMap[item.second->getGuid()] = item.second->toVariantMap();
+    for (const auto& dataset : _datasets)
+        variantMap[dataset->getGuid()] = dataset->toVariantMap();
 
     return variantMap;
 }

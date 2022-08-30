@@ -3,6 +3,11 @@
 #include "AnalysisPlugin.h"
 
 #include <util/Serialization.h>
+#include <util/Icon.h>
+
+#include <QPainter>
+
+using namespace hdps::gui;
 
 namespace hdps
 {
@@ -15,6 +20,11 @@ void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
         _rawData = &_core->requestRawData(getRawDataName());
 
     setAll(false);
+}
+
+QString DatasetImpl::getRawDataKind() const
+{
+    return _rawData->getKind();
 }
 
 const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
@@ -34,10 +44,8 @@ hdps::Dataset<hdps::DatasetImpl> DatasetImpl::getParent() const
 
 QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
 {
-    // Found children
     QVector<Dataset<DatasetImpl>> children;
 
-    // Loop over all data hierarchy children and add to the list if occur in the data types
     for (auto dataHierarchyChild : getDataHierarchyItem().getChildren())
         if (dataTypes.contains(dataHierarchyChild->getDataType()))
             children << dataHierarchyChild->getDataset();
@@ -83,11 +91,14 @@ hdps::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
 void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Name");
+    variantMapMustContain(variantMap, "GUID");
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "HasAnalysis");
     variantMapMustContain(variantMap, "Analysis");
 
     setGuiName(variantMap["Name"].toString());
+    
+    _guid = variantMap["GUID"].toString();
 
     if (variantMap.contains("Derived")) {
         _derived = variantMap["Derived"].toBool();
@@ -96,8 +107,17 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
             _sourceDataset = getParent();
     }
 
-    auto analysisMap = variantMap["Analysis"];
+    if (variantMap.contains("StorageType"))
+        setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
 
+    if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyDatasets")) {
+        Datasets proxyDatasets;
+
+        for (const auto& proxyDatasetGuid : variantMap["ProxyDatasets"].toStringList())
+            proxyDatasets << _core->requestDataset(proxyDatasetGuid);
+
+        setProxyDatasets(proxyDatasets);
+    }
 }
 
 QVariantMap DatasetImpl::toVariantMap() const
@@ -107,14 +127,22 @@ QVariantMap DatasetImpl::toVariantMap() const
     if (_analysis)
         analysisMap = _analysis->toVariantMap();
 
+    QStringList proxyDatasetsGuids;
+
+    for (auto proxyDataset : _proxyDatasets)
+        proxyDatasetsGuids << proxyDataset->getGuid();
+
     return {
-        { "Name", getGuiName() },
-        { "DataType", getDataType().getTypeString() },
-        { "PluginKind", _rawData->getKind() },
-        { "PluginVersion", _rawData->getVersion() },
-        { "Derived", isDerivedData() },
-        { "GroupIndex", getGroupIndex() },
-        { "HasAnalysis", _analysis != nullptr },
+        { "Name", QVariant::fromValue(getGuiName()) },
+        { "GUID", QVariant::fromValue(getGuid()) },
+        { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
+        { "ProxyDatasets", QVariant::fromValue(proxyDatasetsGuids) },
+        { "DataType", QVariant::fromValue(getDataType().getTypeString()) },
+        { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
+        { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
+        { "Derived", QVariant::fromValue(isDerivedData()) },
+        { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
+        { "HasAnalysis", QVariant::fromValue(_analysis != nullptr) },
         { "Analysis", analysisMap }
     };
 }
@@ -129,6 +157,54 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
     _groupIndex = groupIndex;
 
     _core->notifyDatasetSelectionChanged(this);
+}
+
+hdps::Datasets DatasetImpl::getProxyDatasets() const
+{
+    return _proxyDatasets;
+}
+
+void DatasetImpl::setProxyDatasets(const Datasets& proxyDatasets)
+{
+    try
+    {
+        if (proxyDatasets.isEmpty()) {
+            setStorageType(StorageType::Owner);
+            throw std::runtime_error("Proxy dataset requires at least one input dataset");
+        }
+
+        for (auto proxyDataset : proxyDatasets)
+            if (proxyDataset->getDataType() != getDataType())
+                throw std::runtime_error("All datasets should be of the same data type");
+
+        _proxyDatasets = proxyDatasets;
+
+        setStorageType(StorageType::Proxy);
+
+        _core->notifyDatasetChanged(this);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to set proxy datasets for " + getGuiName(), e);
+    }
+    catch (...)
+    {
+        exceptionMessageBox("Unable to set proxy datasets for " + getGuiName());
+    }
+}
+
+bool DatasetImpl::mayProxy(const Datasets& proxyDatasets) const
+{
+    for (auto proxyDataset : proxyDatasets)
+        if (proxyDataset->getDataType() != getDataType())
+            return false;
+
+    return true;
+}
+
+bool DatasetImpl::isProxy() const
+{
+    return !_proxyDatasets.isEmpty();
 }
 
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)
@@ -153,6 +229,34 @@ QMenu* DatasetImpl::getContextMenu(QWidget* parent /*= nullptr*/)
 void DatasetImpl::populateContextMenu(QMenu* contextMenu)
 {
     return getDataHierarchyItem().populateContextMenu(contextMenu);
+}
+
+hdps::DatasetImpl::StorageType DatasetImpl::getStorageType() const
+{
+    return _storageType;
+}
+
+void DatasetImpl::setStorageType(const StorageType& storageType)
+{
+    if (storageType == _storageType)
+        return;
+
+    _storageType = storageType;
+}
+
+QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::black*/) const
+{
+    switch (storageType)
+    {
+        case StorageType::Owner:
+        case StorageType::Proxy:
+            return getIcon(color);
+
+        default:
+            break;
+    }
+
+    return QIcon();
 }
 
 }

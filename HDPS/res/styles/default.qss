@@ -3,31 +3,22 @@ QWidget#PopupWidget {
 }
 
 QPushButton {
-    padding-left: 5px;
-    padding-right: 5px;
-    height: 20px;
     qproperty-iconSize: 12px;
-    margin: -1px;
 }
 
 .square-button {
-    padding-left: 1px;
-    padding-right: 1px;
     width: 20px;
 }
 
 QComboBox {
-    margin: 0px;
     padding-left: 5px;
-    height: 18px;
+    margin: 0px;
 }
 
 QSpinBox, QDoubleSpinBox {
-    height: 18px;
 }
 
 QLineEdit {
-    height: 16px;
 }
 
 QLineEdit:read-only {

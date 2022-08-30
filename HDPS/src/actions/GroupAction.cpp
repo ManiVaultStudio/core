@@ -26,6 +26,19 @@ GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
 {
 }
 
+GroupAction::GroupAction(QObject* parent, const WidgetActions& widgetActions, const bool& expanded /*= false*/) :
+    WidgetAction(parent),
+    _expanded(expanded),
+    _readOnly(false),
+    _widgetActions(),
+    _showLabels(true),
+    _labelSizingType(LabelSizingType::Percentage),
+    _labelWidthPercentage(GroupAction::globalLabelWidthPercentage),
+    _labelWidthFixed(GroupAction::globalLabelWidthFixed)
+{
+    setActions(widgetActions);
+}
+
 void GroupAction::setExpanded(const bool& expanded)
 {
     if (expanded == _expanded)
@@ -99,7 +112,7 @@ void GroupAction::setShowLabels(bool showLabels)
 
     _showLabels = showLabels;
 
-    emit actionsChanged(_widgetActions);
+    emit showLabelsChanged(_showLabels);
 }
 
 GroupAction::LabelSizingType GroupAction::getLabelSizingType() const
@@ -114,7 +127,7 @@ void GroupAction::setLabelSizingType(const LabelSizingType& labelSizingType)
 
     _labelSizingType = labelSizingType;
 
-    emit actionsChanged(_widgetActions);
+    emit labelSizingTypeChanged(_labelSizingType);
 }
 
 std::uint32_t GroupAction::getLabelWidthPercentage() const
@@ -130,7 +143,7 @@ void GroupAction::setLabelWidthPercentage(std::uint32_t labelWidthPercentage)
     _labelSizingType        = LabelSizingType::Percentage;
     _labelWidthPercentage   = labelWidthPercentage;
 
-    emit actionsChanged(_widgetActions);
+    emit labelWidthPercentageChanged(_labelWidthPercentage);
 }
 
 std::uint32_t GroupAction::getLabelWidthFixed() const
@@ -146,17 +159,17 @@ void GroupAction::setLabelWidthFixed(std::uint32_t labelWidthFixed)
     _labelSizingType    = LabelSizingType::Fixed;
     _labelWidthFixed    = labelWidthFixed;
 
-    emit actionsChanged(_widgetActions);
+    emit labelWidthFixedChanged(_labelWidthFixed);
 }
 
-void GroupAction::setActions(const QVector<WidgetAction*>& widgetActions /*= QVector<WidgetAction*>()*/)
+void GroupAction::setActions(const WidgetActions& widgetActions /*= WidgetActions()*/)
 {
     _widgetActions = widgetActions;
 
     emit actionsChanged(_widgetActions);
 }
 
-QVector<WidgetAction*> GroupAction::getSortedWidgetActions() const
+WidgetActions GroupAction::getSortedWidgetActions() const
 {
     auto sortedActions = _widgetActions;
 
@@ -179,39 +192,43 @@ QVector<WidgetAction*> GroupAction::getSortedWidgetActions() const
     return sortedActions;
 }
 
-GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
+GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
     WidgetActionWidget(parent, groupAction),
     _layout(new QGridLayout())
 {
-    if (groupAction->getShowLabels()) {
-        switch (groupAction->getLabelSizingType())
-        {
-            case LabelSizingType::Auto:
-            {
-                _layout->setColumnStretch(1, 1);
-                break;
-            }
-
-            case LabelSizingType::Percentage:
-            {
-                _layout->setColumnStretch(0, groupAction->getLabelWidthPercentage());
-                _layout->setColumnStretch(1, 100 - groupAction->getLabelWidthPercentage());
-                break;
-            }
-
-            default:
-                break;
-        }
-        
-    }
-
     auto contentsMargin = _layout->contentsMargins();
 
-    _layout->setContentsMargins(10, 10, 10, 10);
+    //_layout->setContentsMargins(10, 10, 10, 10);
     
     setLayout(_layout);
 
-    const auto actionsChanged = [this, groupAction]() -> void {
+    const auto reset = [this, groupAction]() -> void {
+        if (groupAction->getShowLabels()) {
+            switch (groupAction->getLabelSizingType())
+            {
+                case LabelSizingType::Auto:
+                {
+                    //_layout->setColumnStretch(1, 1);
+                    break;
+                }
+
+                case LabelSizingType::Percentage:
+                {
+                    _layout->setColumnStretch(0, groupAction->getLabelWidthPercentage());
+                    _layout->setColumnStretch(1, 100 - groupAction->getLabelWidthPercentage());
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+        }
+        else {
+            _layout->setColumnStretch(0, 0);
+            _layout->setColumnStretch(1, 1);
+        }
+
         QLayoutItem* layoutItem;
 
         while ((layoutItem = layout()->takeAt(0)) != NULL)
@@ -229,10 +246,25 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
             if (groupAction->getShowLabels() && !isToggleAction && !isTriggerAction && !isTriggersAction) {
                 auto labelWidget = dynamic_cast<WidgetActionLabel*>(widgetAction->createLabelWidget(this, WidgetActionLabel::ColonAfterName));
 
-                if (groupAction->getLabelSizingType() == LabelSizingType::Fixed)
-                    labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                switch (groupAction->getLabelSizingType())
+                {
+                    case LabelSizingType::Auto:
+                        labelWidget->setElide(false);
+                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                        break;
 
-                labelWidget->setElide(true);
+                    case LabelSizingType::Percentage:
+                        labelWidget->setElide(true);
+                        break;
+
+                    case LabelSizingType::Fixed:
+                        labelWidget->setElide(true);
+                        labelWidget->setFixedWidth(groupAction->getLabelWidthFixed());
+                        break;
+
+                    default:
+                        break;
+                }
 
                 _layout->addWidget(labelWidget, numRows, 0);
             }
@@ -246,11 +278,13 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction) :
         }
     };
 
-    // Update UI when the group actions change
-    connect(groupAction, &GroupAction::actionsChanged, this, actionsChanged);
+    connect(groupAction, &GroupAction::actionsChanged, this, reset);
+    connect(groupAction, &GroupAction::showLabelsChanged, this, reset);
+    connect(groupAction, &GroupAction::labelSizingTypeChanged, this, reset);
+    connect(groupAction, &GroupAction::labelWidthPercentageChanged, this, reset);
+    connect(groupAction, &GroupAction::labelWidthFixedChanged, this, reset);
 
-    // Initial update of the actions
-    actionsChanged();
+    reset();
 }
 
 QGridLayout* GroupAction::FormWidget::layout()

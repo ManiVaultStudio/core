@@ -12,14 +12,16 @@
 #include "ViewPlugin.h"
 #include "RawData.h"
 #include "Set.h"
-
-#include "actions/DataAction.h"
+#include "PluginFactory.h"
+#include "GroupDataDialog.h"
 
 #include <algorithm>
 
 #define CORE_VERBOSE
 
 using namespace hdps::util;
+using namespace hdps::plugin;
+using namespace hdps::gui;
 
 namespace hdps
 {
@@ -100,13 +102,8 @@ void Core::addPlugin(plugin::Plugin* plugin)
 
             _mainWindow.addPlugin(plugin);
 
-            // Get reference to the analysis output dataset
             auto outputDataset = analysisPlugin->getOutputDataset();
 
-            // Adjust the data hierarchy icon
-            _dataHierarchyManager->getItem(outputDataset->getGuid()).addIcon("analysis", analysisPlugin->getIcon());
-
-            // Notify listeners that a dataset was added
             notifyDatasetAdded(outputDataset);
 
             break;
@@ -138,16 +135,16 @@ void Core::addPlugin(plugin::Plugin* plugin)
     }
 }
 
-Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/)
+Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset /*= Dataset<DatasetImpl>()*/, const QString& guid /*= ""*/)
 {
     // Create a new plugin of the given kind
-    QString rawDataName = _pluginManager->createPlugin(kind);
+    QString rawDataName = _pluginManager->createPlugin(kind)->getName();
 
     // Request it from the core
     const plugin::RawData& rawData = requestRawData(rawDataName);
 
     // Create an initial full set and an empty selection belonging to the raw data
-    auto fullSet    = rawData.createDataSet();
+    auto fullSet    = rawData.createDataSet(guid);
     auto selection  = rawData.createDataSet();
 
     // Set the properties of the new sets
@@ -168,9 +165,6 @@ Dataset<DatasetImpl> Core::addDataset(const QString& kind, const QString& dataSe
 
     // Initialize the dataset (e.g. setup default actions for info)
     fullSet->init();
-
-    // Add data action (available as right-click menu in the data hierarchy widget)
-    new DataAction(&_mainWindow, *fullSet);
 
     return fullSet;
 }
@@ -270,7 +264,7 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
     const auto dataType = sourceDataset->getDataType();
 
     // Create a new plugin of the given kind
-    QString pluginName = _pluginManager->createPlugin(dataType._type);
+    QString pluginName = _pluginManager->createPlugin(dataType._type)->getName();
 
     // Request it from the core
     plugin::RawData& rawData = requestRawData(pluginName);
@@ -293,9 +287,6 @@ Dataset<DatasetImpl> Core::createDerivedDataset(const QString& guiName, const Da
 
     // Initialize the dataset (e.g. setup default actions for info)
     derivedDataset->init();
-
-    // Add data action (available as right-click menu in the data hierarchy widget)
-    new DataAction(&_mainWindow, *derivedDataset);
 
     return Dataset<DatasetImpl>(*derivedDataset);
 }
@@ -327,9 +318,6 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
 
         // Initialize the dataset (e.g. setup default actions for info)
         subset->init();
-
-        // Add data action (available as right-click menu in the data hierarchy widget)
-        new DataAction(&_mainWindow, *subset);
 
         return subset;
     }
@@ -378,26 +366,20 @@ Dataset<DatasetImpl> Core::requestDataset(const QString& dataSetId)
 
 QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
 {
-    // Resulting smart pointers to datasets
     QVector<Dataset<DatasetImpl>> allDataSets;
 
     try
     {
-        // Get a map of all datasets
-        const auto& dataSetsMap = _dataManager->allSets();
+        const auto& datasets = _dataManager->allSets();
 
-        // And reserve the proper amount of dataset references
-        allDataSets.reserve(static_cast<std::int32_t>(dataSetsMap.size()));
-
-        // Add dataset references one by one
-        for (auto it = dataSetsMap.begin(); it != dataSetsMap.end(); it++) {
+        for (const auto dataset : datasets) {
             if (dataTypes.isEmpty()) {
-                allDataSets << it->second.get();
+                allDataSets << datasets;
             }
             else {
                 for (const auto& dataType : dataTypes)
-                    if (it->second.get()->getDataType() == dataType)
-                        allDataSets << it->second.get();
+                    if (dataset->getDataType() == dataType)
+                        allDataSets << dataset;
             }
         }
     }
@@ -417,81 +399,6 @@ const DataManager& Core::getDataManager() const
     return *_dataManager.get();
 }
 
-hdps::plugin::Plugin& Core::requestAnalysis(const QString& kind)
-{
-    try {
-        auto analysisPluginsMap = std::map<QString, hdps::plugin::Plugin*>();
-
-        for (const auto& analysisPlugin : _plugins[plugin::Type::ANALYSIS])
-            analysisPluginsMap[analysisPlugin->getName()] = analysisPlugin.get();
-
-        return *analysisPluginsMap[kind];
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to request analysis", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to request analysis");
-    }
-}
-
-const void Core::analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataSet)
-{
-    try {
-        _pluginManager->createAnalysisPlugin(kind, dataSet);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create analysis plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create analysis plugin");
-    }
-}
-
-const void Core::importDataset(const QString& kind)
-{
-    try {
-        _pluginManager->createPlugin(kind);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create import plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create import plugin");
-    }
-}
-
-const void Core::exportDataset(const QString& kind, Dataset<DatasetImpl>& dataSet)
-{
-    try {
-        _pluginManager->createExporterPlugin(kind, dataSet);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to create export plugin", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to create export plugin");
-    }
-}
-
-const void Core::viewDatasets(const QString& kind, const Datasets& datasets)
-{
-    try {
-        _pluginManager->createViewPlugin(kind, datasets);
-    }
-    catch (std::exception& e)
-    {
-        exceptionMessageBox("Unable to view dataset", e);
-    }
-    catch (...) {
-        exceptionMessageBox("Unable to view dataset");
-    }
-}
-
 hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
 {
     return _dataHierarchyManager->getItem(dataSetId);
@@ -502,9 +409,89 @@ bool Core::isDatasetGroupingEnabled() const
     return _datasetGroupingEnabled;
 }
 
-QStringList Core::getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/) const
+Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString& guiName /*= ""*/)
 {
-    return _pluginManager->getPluginKindsByPluginTypeAndDataTypes(pluginType, dataTypes);
+    try {
+        const auto createGroupDataset = [this, &datasets](const QString& guiName) -> Dataset<DatasetImpl> {
+            auto groupDataset = addDataset(datasets.first()->getRawDataKind(), guiName);
+
+            groupDataset->setProxyDatasets(datasets);
+
+            return groupDataset;
+        };
+
+        if (guiName.isEmpty()) {
+            if (Application::current()->getSetting("AskForGroupName", true).toBool()) {
+                GroupDataDialog groupDataDialog(nullptr, datasets);
+
+                if (groupDataDialog.exec() == 1)
+                    return createGroupDataset(groupDataDialog.getGroupName());
+                else
+                    return Dataset<DatasetImpl>();
+            }
+            else {
+                QStringList datasetNames;
+
+                for (const auto& dataset : datasets)
+                    datasetNames << dataset->getGuiName();
+
+                return createGroupDataset(datasetNames.join("+"));
+            }
+        }
+        else {
+            return createGroupDataset(guiName);
+        }
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to group data", e);
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to group data");
+    }
+        
+    return Dataset<DatasetImpl>();
+}
+
+hdps::plugin::Plugin* Core::requestPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
+{
+    try {
+        return _pluginManager->createPlugin(kind, datasets);
+    }
+    catch (std::exception& e)
+    {
+        exceptionMessageBox("Unable to request plugin from the core", e);
+        return nullptr;
+    }
+    catch (...) {
+        exceptionMessageBox("Unable to request plugin from the core");
+        return nullptr;
+    }
+}
+
+QStringList Core::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const
+{
+    return _pluginManager->getPluginKindsByPluginTypes(pluginTypes);
+}
+
+PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const
+{
+    return _pluginManager->getPluginTriggerActions(pluginType, datasets);
+}
+
+PluginTriggerActions Core::getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const
+{
+    return _pluginManager->getPluginTriggerActions(pluginType, dataTypes);
+}
+
+PluginTriggerActions Core::getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const
+{
+    return _pluginManager->getPluginTriggerActions(pluginKind, datasets);
+}
+
+PluginTriggerActions Core::getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const
+{
+    return _pluginManager->getPluginTriggerActions(pluginKind, dataTypes);
 }
 
 Dataset<DatasetImpl> Core::requestSelection(const QString& name)

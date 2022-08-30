@@ -12,7 +12,8 @@ namespace gui {
 
 ToggleAction::ToggleAction(QObject* parent, const QString& title /*= ""*/, const bool& toggled /*= false*/, const bool& defaultToggled /*= false*/) :
     WidgetAction(parent),
-    _defaultToggled(defaultToggled)
+    _defaultToggled(defaultToggled),
+    _indeterminate(false)
 {
     setCheckable(true);
     setText(title);
@@ -44,6 +45,43 @@ void ToggleAction::setDefaultToggled(const bool& defaultToggled)
     _defaultToggled = defaultToggled;
 
     emit defaultToggledChanged(_defaultToggled);
+}
+
+void ToggleAction::setChecked(bool checked)
+{
+    QAction::setChecked(checked);
+
+    _indeterminate = false;
+
+    saveToSettings();
+}
+
+bool ToggleAction::getIndeterminate() const
+{
+    return _indeterminate;
+}
+
+void ToggleAction::setIndeterminate(bool indeterminate)
+{
+    if (indeterminate == _indeterminate)
+        return;
+
+    _indeterminate = indeterminate;
+
+    emit indeterminateChanged(_indeterminate);
+}
+
+void ToggleAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (variantMap.contains("value"))
+        setChecked(variantMap["value"].toBool());
+}
+
+QVariantMap ToggleAction::toVariantMap() const
+{
+    return {
+        { "value", QVariant::fromValue(isChecked()) }
+    };
 }
 
 bool ToggleAction::mayPublish() const
@@ -118,10 +156,17 @@ ToggleAction::CheckBoxWidget::CheckBoxWidget(QWidget* parent, ToggleAction* togg
     const auto updateToggle = [this]() -> void {
         QSignalBlocker blocker(this);
 
-        setChecked(_toggleAction->isChecked());
+        if (_toggleAction->getIndeterminate())
+            setCheckState(Qt::CheckState::PartiallyChecked);
+        else
+            setChecked(_toggleAction->isChecked());
     };
 
     connect(_toggleAction, &ToggleAction::toggled, this, [this, updateToggle]() {
+        updateToggle();
+    });
+
+    connect(_toggleAction, &ToggleAction::indeterminateChanged, this, [this, updateToggle]() {
         updateToggle();
     });
 

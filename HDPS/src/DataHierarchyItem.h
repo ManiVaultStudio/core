@@ -48,14 +48,6 @@ public:
 
 public:
 
-    /** Named icon */
-    using NamedIcon = QPair<QString, QIcon>;
-
-    /** List of named icons */
-    using IconList = QList<NamedIcon>;
-
-public:
-
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -178,18 +170,6 @@ public: // Miscellaneous
     /** Get the dataset type */
     DataType getDataType() const;
 
-    /**
-     * Analyze the dataset
-     * @param pluginName Name of the analysis plugin
-     */
-    void analyzeDataset(const QString& pluginName);
-
-    /**
-     * Export the dataset
-     * @param pluginName Name of the exporter plugin
-     */
-    void exportDataset(const QString& pluginName);
-
 public: // Actions
 
     /** Add action */
@@ -294,28 +274,14 @@ public: // Tasks
 
 public: // Named icons
 
-    /** Gets list of named icons */
-    IconList getIcons() const;
+    /** Get icon */
+    QIcon getIcon() const;
 
     /**
-     * Add named icon
-     * @param name Name of the icon
+     * Set icon
      * @param icon Icon
      */
-    void addIcon(const QString& name, const QIcon& icon);
-
-    /**
-     * Remove icon by name
-     * @param name Name of the icon
-     */
-    void removeIcon(const QString& name);
-
-    /**
-     * Get icon by name
-     * @param name Name of the icon
-     * @return Icon
-     */
-    QIcon getIconByName(const QString& name) const;
+    void setIcon(const QIcon& icon);
 
 public: // Serialization
 
@@ -356,6 +322,9 @@ signals:
      * @param widgetAction Widget action that was added
      */
     void actionAdded(hdps::gui::WidgetAction& widgetAction);
+
+    /** Signals that the set icon has changed */
+    void iconChanged();
 
     /**
      * Signals that the dataset name changed
@@ -402,7 +371,7 @@ protected:
     TaskStatus                  _taskStatus;            /** Status of the current task */
     QTimer                      _taskDescriptionTimer;  /** Task description timer which prevents excessive successive GUI updates */
     QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
-    IconList                    _namedIcons;            /** Named icons */
+    QIcon                       _icon;                  /** Icon */
     hdps::gui::WidgetActions    _actions;               /** Widget actions */
     DataRemoveAction            _dataRemoveAction;      /** Data remove action */
     DataCopyAction              _dataCopyAction;        /** Data copy action */
@@ -430,15 +399,4 @@ inline QDebug operator << (QDebug debug, const DataHierarchyItem& dataHierarchyI
     return debug.space();
 }
 
-}
-
-/**
- * Compares two named icons
- * @param lhs Left hand side icon
- * @param rhs Right hand side icon
- * @return Whether the icons are equal
- */
-inline bool operator == (const hdps::DataHierarchyItem::NamedIcon& lhs, const hdps::DataHierarchyItem::NamedIcon& rhs)
-{
-    return lhs.first == rhs.first;
 }

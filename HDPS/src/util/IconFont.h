@@ -59,13 +59,12 @@ public: // Getters
     QFont getFont(const int& pointSize = -1) const;
 
     /**
-     * Get icon by \p name, \p size and \p color
+     * Get icon by \p name and \p color
      * @param name Name of the icon
-     * @param size Size of the icon
      * @param foregroundColor Foreground color of the icon
      * @param backgroundColor Background color of the icon
      */
-    QIcon getIcon(const QString& name, const QSize& size = QSize(16, 16), const QColor& foregroundColor = QColor(0, 0, 0, 255), const QColor& backgroundColor = Qt::transparent) const;
+    QIcon getIcon(const QString& name, const QColor& foregroundColor = QColor(0, 0, 0, 255), const QColor& backgroundColor = Qt::transparent) const;
 
 public: // Initialization
 

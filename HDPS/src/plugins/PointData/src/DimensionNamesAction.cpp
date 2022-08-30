@@ -1,99 +1,49 @@
 #include "DimensionNamesAction.h"
 
-#include "event/Event.h"
-
 #include <QHBoxLayout>
 #include <QListView>
+#include <QStringListModel>
 
 using namespace hdps;
 
-DimensionNamesAction::DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, Points& points) :
+DimensionNamesAction::DimensionNamesAction(QObject* parent, const Dataset<Points>& points) :
     WidgetAction(parent),
-    _points(&points),
+    _points(points),
     _dimensionNames(),
     _updateAction(this, "Update"),
     _manualUpdateAction(this, "Manual update")
 {
     setText("Dimension names");
+}
 
-    _updateAction.setToolTip("Update the dimension names");
-    _manualUpdateAction.setToolTip("Update the dimension names manually");
-
-    const auto updateDimensionNames = [this]() -> void {
-        if (!_points.isValid())
-            return;
-
-        _dimensionNames.clear();
-
-        auto& dimensionNames = _points->getDimensionNames();
-
-        if (dimensionNames.empty()) {
-            for (std::uint32_t dimensionId = 0; dimensionId < _points->getNumDimensions(); dimensionId++)
-                _dimensionNames << QString("Dim %1").arg(dimensionId);
-        }
-        else {
-            for (auto dimensionName : dimensionNames)
-                _dimensionNames << dimensionName;
-        }
-    };
-
-    const auto dataChanged = [this]() -> void {
-        _manualUpdateAction.setChecked(_points->getNumDimensions() > 1000);
-
-        if (_manualUpdateAction.isChecked())
-            return;
-
-        _updateAction.trigger();
-    };
-
-    _eventListener.setEventCore(Application::core());
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
-    _eventListener.registerDataEventByType(PointType, [this, dataChanged](hdps::DataEvent* dataEvent) {
-        if (!_points.isValid())
-            return;
-
-        if (dataEvent->getDataset() != _points)
-            return;
-
-        switch (dataEvent->getType()) {
-            case EventType::DataAdded:
-            case EventType::DataChanged:
-            {
-                dataChanged();
-                break;
-            }
-
-            default:
-                break;
-        }
-    });
-
-    dataChanged();
-
-    const auto updateUpdateAction = [this]() -> void {
-        _updateAction.setEnabled(_manualUpdateAction.isChecked());
-    };
-
-    connect(&_manualUpdateAction, &ToggleAction::toggled, this, [this, updateUpdateAction]() {
-        updateUpdateAction();
-    });
-
-    connect(&_updateAction, &TriggerAction::triggered, this, [this, updateDimensionNames]() {
-        updateDimensionNames();
-        emit dimensionNamesChanged(_dimensionNames);
-    });
-
-    updateUpdateAction();
+hdps::Dataset<Points>& DimensionNamesAction::getPoints()
+{
+    return _points;
 }
 
 QStringList DimensionNamesAction::getDimensionNames() const
 {
-    return _dimensionNames;
+    if (!_points.isValid())
+        return QStringList();
+
+    QStringList dimensionNames;
+
+    if (_points->getDimensionNames().empty()) {
+        for (std::uint32_t dimensionId = 0; dimensionId < _points->getNumDimensions(); dimensionId++)
+            dimensionNames << QString("Dim %1").arg(dimensionId);
+    }
+    else {
+        for (auto dimensionName : _points->getDimensionNames())
+            dimensionNames << dimensionName;
+    }
+
+    return dimensionNames;
 }
 
 DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction) :
-    WidgetActionWidget(parent, dimensionNamesAction)
+    WidgetActionWidget(parent, dimensionNamesAction),
+    _timer(),
+    _dirty(false)
 {
     auto layout     = new QHBoxLayout();
     auto listView   = new QListView();
@@ -113,18 +63,57 @@ DimensionNamesAction::Widget::Widget(QWidget* parent, DimensionNamesAction* dime
 
     setLayout(layout);
 
+    _timer.setSingleShot(true);
+
     const auto updateListView = [this, dimensionNamesAction, listView]() -> void {
-        QStringList items;
-
-        for (auto dimensionName : dimensionNamesAction->getDimensionNames())
-            items << dimensionName;
-
-        listView->setModel(new QStringListModel(items));
+        listView->setModel(new QStringListModel(dimensionNamesAction->getDimensionNames()));
     };
 
-    connect(dimensionNamesAction, &DimensionNamesAction::dimensionNamesChanged, this, [this, updateListView](const QStringList& dimensionNames) {
+    const auto updateActions = [this, dimensionNamesAction]() -> void {
+        dimensionNamesAction->getUpdateAction().setEnabled(dimensionNamesAction->getManualUpdateAction().isChecked() && _dirty);
+    };
+
+    connect(&dimensionNamesAction->getUpdateAction(), &TriggerAction::triggered, this, [this, updateListView, updateActions]() -> void {
         updateListView();
+
+        _dirty = false;
+
+        updateActions();
     });
 
+    connect(&dimensionNamesAction->getManualUpdateAction(), &TriggerAction::triggered, this, updateActions);
+
+    connect(&_timer, &QTimer::timeout, this, [this, updateListView]() -> void {
+        if (_timer.isActive())
+            _timer.start(LAZY_UPDATE_INTERVAL);
+        else {
+            _timer.stop();
+            updateListView();
+        }
+    });
+
+    connect(&dimensionNamesAction->getPoints(), &Dataset<Points>::dataChanged, this, [this, dimensionNamesAction]() -> void {
+        dimensionNamesAction->getManualUpdateAction().setChecked(dimensionNamesAction->getPoints()->getNumDimensions() > MANUAL_UPDATE_THRESHOLD);
+
+        if (dimensionNamesAction->getPoints()->getNumDimensions() < MANUAL_UPDATE_THRESHOLD)
+            _timer.start(LAZY_UPDATE_INTERVAL);
+    });
+
+    connect(&dimensionNamesAction->getPoints(), &Dataset<Points>::dataSelectionChanged, this, [this, dimensionNamesAction, updateActions]() -> void {
+        if (dimensionNamesAction->getManualUpdateAction().isChecked()) {
+            _dirty = true;
+
+            updateActions();
+            return;
+        }
+
+        _timer.start(LAZY_UPDATE_INTERVAL);
+
+        _dirty = false;
+
+        updateActions();
+    });
+
+    updateActions();
     updateListView();
 }

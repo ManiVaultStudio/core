@@ -34,45 +34,62 @@ public:
     void loadPlugins();
 
     /**
-    * Creates a new plugin instance of the given kind and adds it to the core.
+    * Creates a new plugin instance of the given kind and adds it to the core
+    * @param kind Kind of plugin
+    * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+    * @return Pointer to created plugin
     */
-    QString createPlugin(const QString kind);
+    Plugin* createPlugin(const QString& kind, const Datasets& datasets = Datasets());
     
     /**
-     * Create an analysis plugin
-     * @param kind Kind of analysis plugin
-     * @param dataset Reference to input dataset
+     * Create a plugin of \p kind
+     * @param kind Kind of plugin (name of the plugin)
+     * @return Pointer to created plugin
      */
-    void createAnalysisPlugin(const QString& kind, Dataset<DatasetImpl>& dataset);
+    template<typename PluginType>
+    PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
+    {
+        return dynamic_cast<PluginType*>(createPlugin(PluginType, kind, datasets));
+    }
 
     /**
-     * Create an exporter plugin
-     * @param kind Kind of exporter plugin
-     * @param dataset Reference to input dataset
+     * Get plugin kinds by plugin type(s)
+     * @param pluginTypes Plugin type(s)
+     * @return Plugin kinds
      */
-    void createExporterPlugin(const QString& kind, Dataset<DatasetImpl>& dataset);
+    QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const;
 
     /**
-     * Create a view plugin
-     * @param kind Kind of view plugin
-     * @param datasets Input dataset(s)
-     */
-    void createViewPlugin(const QString& kind, const Datasets& datasets);
-
-    /**
-     * Create a transformation plugin
-     * @param kind Kind of transformation plugin
-     * @param datasets Input dataset(s)
-     */
-    void createTransformationPlugin(const QString& kind, const Datasets& datasets);
-
-    /**
-     * Get a list of plugin kinds (names) given a plugin type and data type(s)
+     * Get plugin trigger actions by \p pluginType and \p datasets
      * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param dataTypes Types of data that the plugin should be compatible with (data type ignored when empty)
-     * @return List of compatible plugin kinds that can handle the data type
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
      */
-    QStringList getPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>());
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const;
+
+    /**
+     * Get plugin trigger actions by \p pluginType and \p dataTypes
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param dataTypes Vector of input data types
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const;
+
+    /**
+     * Get plugin trigger actions by \p pluginKind and \p datasets
+     * @param pluginKind Kind of plugin
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const;
+
+    /**
+     * Get plugin trigger actions by \p pluginKind and \p dataTypes
+     * @param pluginKind Kind of plugin
+     * @param dataTypes Vector of input data types
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const;
 
     /**
      * Get plugin GUI name from plugin kind

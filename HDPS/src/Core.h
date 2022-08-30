@@ -77,9 +77,10 @@ public: // Data access
      * @param kind Kind of plugin
      * @param datasetGuiName Name of the added dataset in the GUI
      * @param parentDataset Smart pointer to the parent dataset in the data hierarchy (root if not valid)
+     * @param guid Globally unique dataset identifier (use only for deserialization)
      * @return Smart pointer to the added dataset
      */
-    Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>()) override;
+    Dataset<DatasetImpl> addDataset(const QString& kind, const QString& dataSetGuiName, const Dataset<DatasetImpl>& parentDataset = Dataset<DatasetImpl>(), const QString& guid = "") override;
 
     /**
      * Removes a single dataset
@@ -154,55 +155,65 @@ protected: // Data access
      */
     Dataset<DatasetImpl> requestSelection(const QString& rawDataName) override;
 
-public: // Analysis
+public: // Data grouping
 
     /**
-     * Request an analysis plugin by its kind
-     * @param kind Type of analysis
-     * @return Reference to created plugin
+     * Groups \p datasets into one dataset
+     * @param datasets Two or more datasets to group  (if empty, the user will be prompted for a name)
+     * @return Smart pointer to created group dataset
      */
-    plugin::Plugin& requestAnalysis(const QString& kind) override;
+    Dataset<DatasetImpl> groupDatasets(const Datasets& datasets, const QString& guiName = "");
+
+public: // Plugin creation
 
     /**
-     * Analyze a dataset
-     * @param kind Type of analysis
-     * @param dataSet Smart pointer to the dataset to analyze
+     * Create a plugin of \p kind
+     * @param kind Kind of plugin (name of the plugin)
+     * @param datasets Zero or more datasets upon which the plugin is based (e.g. analysis plugin)
+     * @return Pointer to created plugin
      */
-    const void analyzeDataset(const QString& kind, Dataset<DatasetImpl>& dataset) override;
-
-public: // Import/export
-
-    /**
-     * Imports a dataset
-     * @param kind Type of import plugin
-     */
-    const void importDataset(const QString& kind) override;
-
-    /**
-     * Exports a dataset
-     * @param kind Type of export plugin
-     * @param dataSet Smart pointer to the dataset to export
-     */
-    const void exportDataset(const QString& kind, Dataset<DatasetImpl>& dataset) override;
-
-public: // Data viewing
-
-    /**
-     * Views a dataset
-     * @param kind Type of import plugin
-     * @param datasets Datasets to view
-     */
-    const void viewDatasets(const QString& kind, const Datasets& datasets) override;
+    plugin::Plugin* requestPlugin(const QString& kind, const Datasets& datasets = Datasets()) override;
 
 public: // Plugin queries
 
     /**
-     * Get a list of plugin kinds (names) given a plugin type and data type(s)
-     * @param pluginType Type of plugin e.g. analysis, exporter
-     * @param dataTypes Types of data that the plugin should be compatible with (data type ignored when empty)
-     * @return List of compatible plugin kinds that can handle the data type
+     * Get plugin kinds by plugin type(s)
+     * @param pluginTypes Plugin type(s)
+     * @return Plugin kinds
      */
-    QStringList getPluginKindsByPluginTypeAndDataTypes(const plugin::Type& pluginType, const QVector<DataType>& dataTypes = QVector<DataType>()) const override;
+    QStringList getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const override;
+
+    /**
+     * Get plugin trigger actions by \p pluginType and \p datasets
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const Datasets& datasets) const override;
+
+    /**
+     * Get plugin trigger actions by \p pluginType and \p dataTypes
+     * @param pluginType Type of plugin e.g. analysis, exporter
+     * @param dataTypes Vector of input data types
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const override;
+
+    /**
+     * Get plugin trigger actions by \p pluginKind and \p datasets
+     * @param pluginKind Kind of plugin
+     * @param datasets Vector of input datasets
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const override;
+
+    /**
+     * Get plugin trigger actions by \p pluginKind and \p dataTypes
+     * @param pluginKind Kind of plugin
+     * @param dataTypes Vector of input data types
+     * @return Vector of plugin trigger actions
+     */
+    gui::PluginTriggerActions getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const override;
 
     /**
      * Get plugin GUI name from plugin kind

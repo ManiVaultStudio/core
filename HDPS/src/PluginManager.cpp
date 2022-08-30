@@ -76,10 +76,10 @@ void PluginManager::loadPlugins()
         gui::MainWindow& gui = _core.gui();
 
         // Get metadata about plugin from the accompanying .json file compiled in the shared library
-        QString pluginKind  = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
-        QString menuName    = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
-        QString version     = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
-
+        QString pluginKind      = pluginLoader.metaData().value("MetaData").toObject().value("name").toString();
+        QString menuName        = pluginLoader.metaData().value("MetaData").toObject().value("menuName").toString();
+        QString version         = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
+        
         // Create an instance of the plugin, i.e. the factory
         QObject *pluginFactory = pluginLoader.instance();
 
@@ -232,133 +232,105 @@ QStringList PluginManager::resolveDependencies(QDir pluginDir) const
     return resolvedOrderedPluginNames;
 }
 
-QString PluginManager::createPlugin(const QString kind)
-{
-    return pluginTriggered(kind);
-}
-
-void PluginManager::createAnalysisPlugin(const QString& kind, Dataset<DatasetImpl>& dataset)
+Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& datasets /*= Datasets()*/)
 {
     try
     {
         if (!_pluginFactories.keys().contains(kind))
             throw std::runtime_error("Unrecognized plugin kind");
 
-        auto pluginInstance = dynamic_cast<AnalysisPlugin*>(_pluginFactories[kind]->produce());
+        auto pluginFactory = _pluginFactories[kind];
+
+        auto pluginInstance = pluginFactory->produce();
 
         if (!pluginInstance)
-            return;
+            return nullptr;
 
-        _pluginFactories[kind]->_numberOfInstances++;
+        pluginFactory->_numberOfInstances++;
 
-        dataset->setAnalysis(pluginInstance);
+        // Plugin-type specific behavior
+        switch (pluginFactory->getType()) {
+            case plugin::Type::ANALYSIS: {
+                auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance);
 
-        pluginInstance->setInputDataset(dataset);
+                for (auto dataset : datasets)
+                    dataset->setAnalysis(analysisPlugin);
 
-        _core.addPlugin(pluginInstance);
-    }
-    catch (std::exception& e)
-    {
-        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create analysis plugin: %1").arg(e.what()));
-    }
-}
+                analysisPlugin->setInputDataset(datasets.first());
+            }
 
-void PluginManager::createExporterPlugin(const QString& kind, Dataset<DatasetImpl>& dataset)
-{
-    try
-    {
-        if (!_pluginFactories.keys().contains(kind))
-            throw std::runtime_error("Unrecognized plugin kind");
-
-        auto pluginInstance = dynamic_cast<WriterPlugin*>(_pluginFactories[kind]->produce());
-
-        if (!pluginInstance)
-            return;
-
-        _pluginFactories[kind]->_numberOfInstances++;
-
-        pluginInstance->setInputDataset(dataset);
-
-        _core.addPlugin(pluginInstance);
-    }
-    catch (std::exception& e)
-    {
-        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create analysis plugin: %1").arg(e.what()));
-    }
-}
-
-void PluginManager::createViewPlugin(const QString& kind, const Datasets& datasets)
-{
-    try
-    {
-        if (!_pluginFactories.keys().contains(kind))
-            throw std::runtime_error("Unrecognized plugin kind");
-
-        auto pluginInstance = dynamic_cast<ViewPlugin*>(_pluginFactories[kind]->produce());
-
-        if (!pluginInstance)
-            return;
-
-        _pluginFactories[kind]->_numberOfInstances++;
+            default:
+                break;
+        }
 
         _core.addPlugin(pluginInstance);
 
-        pluginInstance->loadData(datasets);
+        qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
+
+        return pluginInstance;
     }
     catch (std::exception& e)
     {
-        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create analysis plugin: %1").arg(e.what()));
+        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create plugin: %1").arg(e.what()));
+
+        return nullptr;
     }
 }
 
-void PluginManager::createTransformationPlugin(const QString& kind, const Datasets& datasets)
-{
-    try
-    {
-        if (!_pluginFactories.keys().contains(kind))
-            throw std::runtime_error("Unrecognized plugin kind");
-
-        auto pluginInstance = dynamic_cast<TransformationPlugin*>(_pluginFactories[kind]->produce());
-
-        if (!pluginInstance)
-            return;
-
-        _pluginFactories[kind]->_numberOfInstances++;
-
-        _core.addPlugin(pluginInstance);
-
-        pluginInstance->transform(datasets);
-    }
-    catch (std::exception& e)
-    {
-        QMessageBox::warning(nullptr, "HDPS", QString("Unable to create analysis plugin: %1").arg(e.what()));
-    }
-}
-
-QStringList PluginManager::getPluginKindsByPluginTypeAndDataTypes(const Type& pluginType, const QVector<DataType>& dataTypes /*= QVector<DataType>()*/)
+QStringList PluginManager::getPluginKindsByPluginTypes(const plugin::Types& pluginTypes) const
 {
     QStringList pluginKinds;
 
-    for (auto pluginFactory : _pluginFactories) {
-        if (pluginFactory->getType() != pluginType)
-            continue;
-
-        auto pluginCompatible = dataTypes.isEmpty();
-
-        for (auto dataType : dataTypes) {
-            if (pluginFactory->supportedDataTypes().contains(dataType)) {
-                pluginCompatible = true;
-                break;
-            }
-        }
-
-        if (pluginCompatible)
-            pluginKinds << pluginFactory->getKind();
-    }
-
-    pluginKinds.sort();
+    for (const auto& pluginType : pluginTypes)
+        for (auto pluginFactory : _pluginFactories)
+            if (pluginFactory->getType() == pluginType)
+                pluginKinds << pluginFactory->getKind();
 
     return pluginKinds;
+}
+
+PluginTriggerActions PluginManager::getPluginTriggerActions(const Type& pluginType, const Datasets& datasets) const
+{
+    PluginTriggerActions pluginProducerActions;
+
+    for (auto pluginFactory : _pluginFactories)
+        if (pluginFactory->getType() == pluginType)
+            pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
+
+    return pluginProducerActions;
+}
+
+PluginTriggerActions PluginManager::getPluginTriggerActions(const plugin::Type& pluginType, const DataTypes& dataTypes) const
+{
+    PluginTriggerActions pluginProducerActions;
+
+    for (auto pluginFactory : _pluginFactories)
+        if (pluginFactory->getType() == pluginType)
+            pluginProducerActions << pluginFactory->getPluginTriggerActions(dataTypes);
+
+    return pluginProducerActions;
+}
+
+PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& pluginKind, const Datasets& datasets) const
+{
+    PluginTriggerActions pluginProducerActions;
+
+    for (auto pluginFactory : _pluginFactories)
+        if (pluginFactory->getKind() == pluginKind)
+            pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
+
+    return pluginProducerActions;
+}
+
+PluginTriggerActions PluginManager::getPluginTriggerActions(const QString& pluginKind, const DataTypes& dataTypes) const
+{
+    PluginTriggerActions pluginProducerActions;
+
+    for (auto pluginFactory : _pluginFactories) 
+        if (pluginFactory->getKind() == pluginKind)
+            pluginProducerActions << pluginFactory->getPluginTriggerActions(dataTypes);
+
+    return pluginProducerActions;
 }
 
 QString PluginManager::getPluginGuiName(const QString& pluginKind) const

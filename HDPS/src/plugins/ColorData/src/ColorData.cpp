@@ -23,16 +23,16 @@ uint ColorData::count()
     return static_cast<std::uint32_t>(_colors.size());
 }
 
-Dataset<DatasetImpl> ColorData::createDataSet() const
+Dataset<DatasetImpl> ColorData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Colors(_core, getName()));
+    return Dataset<DatasetImpl>(new Colors(_core, getName(), guid));
 }
 
 // =============================================================================
 // Color Data Set
 // =============================================================================
 
-QIcon Colors::getIcon() const
+QIcon Colors::getIcon(const QColor& color /*= Qt::black*/) const
 {
     return QIcon();
 }
@@ -79,9 +79,9 @@ void Colors::selectInvert()
 {
 }
 
-QIcon ColorDataFactory::getIcon() const
+QIcon ColorDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("palette");
+    return hdps::Application::getIconFont("FontAwesome").getIcon("palette", color);
 }
 
 // =============================================================================

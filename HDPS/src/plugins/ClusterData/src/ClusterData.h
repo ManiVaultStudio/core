@@ -28,8 +28,12 @@ public:
 
     void init() override;
 
-    /** Create dataset for raw data */
-    Dataset<DatasetImpl> createDataSet() const override;
+    /**
+     * Create dataset for raw data
+     * @param guid Globally unique dataset identifier (use only for deserialization)
+     * @return Smart pointer to dataset
+     */
+    Dataset<DatasetImpl> createDataSet(const QString& guid = "") const override;
 
     /** Returns reference to the clusters */
     QVector<Cluster>& getClusters();
@@ -84,7 +88,11 @@ private:
 class CLUSTERDATA_EXPORT Clusters : public DatasetImpl
 {
 public:
-    Clusters(CoreInterface* core, QString dataName) : DatasetImpl(core, dataName) { }
+    Clusters(CoreInterface* core, QString dataName, const QString& guid = "") :
+        DatasetImpl(core, dataName, guid)
+    {
+    }
+
     ~Clusters() override { }
 
     void init() override;
@@ -143,8 +151,12 @@ public:
         return _core->createSubsetFromSelection(getSelection(), toSmartPointer(), guiName, parentDataSet, visible);
     }
 
-    /** Get icon for the dataset */
-    QIcon getIcon() const override;
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
 public: // Selection
 
@@ -231,8 +243,14 @@ public:
     ClusterDataFactory(void) {}
     ~ClusterDataFactory(void) override {}
     
-    /** Returns the plugin icon */
-    QIcon getIcon() const override;
+    /**
+     * Get plugin icon
+     * @param color Icon color for flat (font) icons
+     * @return Icon
+     */
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     hdps::plugin::RawData* produce() override;
+
+
 };

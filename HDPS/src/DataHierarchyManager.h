@@ -79,14 +79,6 @@ public:
      */
     void selectItems(DataHierarchyItems& selectedItems);
 
-protected:
-
-    /**
-     * Remove data hierarchy item from the selection
-     * @param dataHierarchyItem Reference to data hierarchy item
-     */
-    void removeSelectedItem(DataHierarchyItem& dataHierarchyItem);
-
 public: // Serialization
 
     /**
@@ -153,7 +145,6 @@ signals:
 
 private:
     DataHierarchyItems    _items;           /** Shared pointers to data hierarchy items */
-    DataHierarchyItems    _selectedItems;   /** Shared pointers to selected data hierarchy items */
 };
 
 }

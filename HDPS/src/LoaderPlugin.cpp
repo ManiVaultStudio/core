@@ -1,5 +1,7 @@
 #include "LoaderPlugin.h"
 
+#include <actions/PluginTriggerAction.h>
+
 #include <QFileDialog>
 #include <QSettings>
 #include <QString>
@@ -22,6 +24,22 @@ QString LoaderPlugin::AskForFileName(const QString& fileNameFilter)
         settings.setValue(directoryPathKey, QFileInfo(fileName).absolutePath());
     }
     return fileName;
+}
+
+PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const Datasets& datasets) const
+{
+    const auto pluginTriggerAction = createPluginTriggerAction("Images", "Load images", Datasets());
+
+    connect(pluginTriggerAction, &QAction::triggered, this, [this]() -> void {
+        Application::core()->requestPlugin(getKind());
+    });
+
+    return { pluginTriggerAction };
+}
+
+PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const DataTypes& dataTypes) const
+{
+    return getPluginTriggerActions(DataTypes({}));
 }
 
 }

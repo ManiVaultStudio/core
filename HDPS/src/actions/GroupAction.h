@@ -45,8 +45,9 @@ public:
          * Constructor
          * @param parent Pointer to parent widget
          * @param groupAction Pointer to group action
+         * @param widgetFlags Widget flags for the configuration of the widget (type)
          */
-        FormWidget(QWidget* parent, GroupAction* groupAction);
+        FormWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags);
 
         /** Get grid layout */
         QGridLayout* layout();
@@ -63,7 +64,7 @@ public:
      * @param widgetFlags Widget flags for the configuration of the widget (type)
      */
     QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags) override {
-        return new FormWidget(parent, this);
+        return new FormWidget(parent, this, widgetFlags);
     };
 
 public:
@@ -74,6 +75,14 @@ public:
      * @param expanded Whether the group is initially expanded/collapsed
      */
     GroupAction(QObject* parent, const bool& expanded = false);
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     * @param widgetActions Widget actions to initialize with
+     * @param expanded Whether the group is initially expanded/collapsed
+     */
+    GroupAction(QObject* parent, const WidgetActions& widgetActions, const bool& expanded = false);
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);
@@ -153,18 +162,18 @@ public:
      * Set actions
      * @param widgetActions Widget actions
      */
-    void setActions(const QVector<WidgetAction*>& widgetActions = QVector<WidgetAction*>());
+    void setActions(const WidgetActions& widgetActions = WidgetActions());
 
     /**
      * Get sorted widget actions
      * @return Vector of sorted widget actions
      */
-    QVector<WidgetAction*> getSortedWidgetActions() const;
+    WidgetActions getSortedWidgetActions() const;
 
 signals:
 
     /** Signals that the actions changed */
-    void actionsChanged(const QVector<WidgetAction*>& widgetActions);
+    void actionsChanged(const WidgetActions& widgetActions);
 
     /** Signals that the group got expanded */
     void expanded();
@@ -178,10 +187,34 @@ signals:
      */
     void readOnlyChanged(const bool& readOnly);
 
+    /**
+     * Signals that the group show labels option changed
+     * @param showLabels Whether label are visible or not
+     */
+    void showLabelsChanged(const bool& showLabels);
+
+    /**
+     * Signals that the label sizing type changed
+     * @param labelSizingType Label sizing type
+     */
+    void labelSizingTypeChanged(const LabelSizingType& labelSizingType);
+
+    /**
+     * Signals that the label width in percentages changed
+     * @param labelWidthPercentage Label width in percentages
+     */
+    void labelWidthPercentageChanged(const std::uint32_t& labelWidthPercentage);
+
+    /**
+     * Signals that the label width in fixed pixels changed
+     * @param labelWidthFixed Label width in fixed pixels
+     */
+    void labelWidthFixedChanged(const std::uint32_t& labelWidthFixed);
+
 private:
     bool                            _expanded;                      /** Whether or not the group is expanded */
     bool                            _readOnly;                      /** Whether or not the group is read-only */
-    QVector<WidgetAction*>          _widgetActions;                 /** Widget actions */
+    WidgetActions          _widgetActions;                 /** Widget actions */
     bool                            _showLabels;                    /** Whether to show labels or not */
     LabelSizingType                 _labelSizingType;               /** Type of label sizing */
     std::uint32_t                   _labelWidthPercentage;          /** User label width in percentages [0..100] */

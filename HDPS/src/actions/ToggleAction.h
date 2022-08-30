@@ -121,6 +121,38 @@ public:
      */
     void setDefaultToggled(const bool& defaultToggled);
 
+    /**
+     * Overrides the base class setChecked()
+     * @param checked Checked status
+     */
+    void setChecked(bool checked);
+
+    /**
+     * Get indeterminate state
+     * @return Whether the toggle action is in an indeterminate state
+     */
+    bool getIndeterminate() const;
+
+    /**
+     * Set indeterminate state
+     * @param indeterminate Whether the toggle action is in an indeterminate state
+     */
+    void setIndeterminate(bool indeterminate);
+
+public: // Serialization
+
+    /**
+     * Load widget action from variant map
+     * @param Variant map representation of the widget action
+     */
+    void fromVariantMap(const QVariantMap& variantMap) override;
+
+    /**
+        * Save widget action to variant map
+        * @return Variant map representation of the widget action
+        */
+    QVariantMap toVariantMap() const override;
+
 public: // Linking
 
     /**
@@ -154,8 +186,15 @@ signals:
      */
     void defaultToggledChanged(const bool& defaultToggled);
 
+    /**
+     * Signals that the indeterminate value changed
+     * @param indeterminate Whether the toggle action is in an indeterminate state
+     */
+    void indeterminateChanged(bool indeterminate);
+
 protected:
     bool    _defaultToggled;        /** Whether toggled by default */
+    bool    _indeterminate;         /** Whether the toggle action is in an indeterminate state */
 };
 
 }

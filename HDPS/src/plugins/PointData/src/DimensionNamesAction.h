@@ -1,13 +1,11 @@
 #pragma once
 
-#include "actions/Actions.h"
-#include "event/EventListener.h"
-
 #include "PointData.h"
 
-namespace hdps {
-    class CoreInterface;
-}
+#include <actions/TriggerAction.h>
+#include <actions/ToggleAction.h>
+
+#include <QTimer>
 
 using namespace hdps;
 using namespace hdps::util;
@@ -36,6 +34,12 @@ protected:
          * @param dimensionNamesAction Pointer to dimension names action
          */
         Widget(QWidget* parent, DimensionNamesAction* dimensionNamesAction);
+
+    private:
+        QTimer  _timer;     /** Timer to sparingly update the number of selected points */
+        bool    _dirty;     /** Whether the current selected indices display is dirty or not */
+
+        static const std::int32_t LAZY_UPDATE_INTERVAL = 500;
     };
 
     /**
@@ -52,10 +56,15 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
-     * @param points Reference to points dataset
+     * @param points Smart pointer to points dataset
      */
-    DimensionNamesAction(QObject* parent, hdps::CoreInterface* core, Points& points);
+    DimensionNamesAction(QObject* parent, const Dataset<Points>& points);
+
+    /**
+     * Get points
+     * @return Smart pointer to points dataset
+     */
+    Dataset<Points>& getPoints();
 
     /** Get the dimension names */
     QStringList getDimensionNames() const;
@@ -77,5 +86,7 @@ protected:
     QStringList             _dimensionNames;        /** Dimension names */
     TriggerAction           _updateAction;          /** Update action */
     ToggleAction            _manualUpdateAction;    /** Manual update action */
-    hdps::EventListener     _eventListener;         /** Listen to HDPS events */
+
+    /** Above this threshold, dimension names need to be updated manually */
+    static const std::int32_t MANUAL_UPDATE_THRESHOLD = 1000;
 };

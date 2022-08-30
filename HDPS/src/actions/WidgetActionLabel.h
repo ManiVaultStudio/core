@@ -68,19 +68,25 @@ private:
     /** Update the state of the publish action */
     void updatePublishAction();
 
-    /** Update the text of the the postfix label (depends on whether the action is published or not) */
-    void updateLabel();
+    /** Update the state of the name label */
+    void updateNameLabel();
 
     /** Publish _widgetAction */
     void publishAction();
 
     void elide();
 
+    /**
+     * Get label text (possibly with a post-fix colon)
+     * @return Label text
+     */
+    QString getLabelText() const;
+
 protected:
     std::uint32_t       _flags;                 /** Configuration flags */
     WidgetAction*       _widgetAction;          /** Pointer to widget action */
     QLabel              _nameLabel;             /** Action name label */
-    bool                _elide;            /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
+    bool                _elide;                 /** Whether to enable label elide (e.g. whether to truncate text and show an ellipsis when there is insufficient space for the text) */
     TriggerAction       _publishAction;         /** Publish action (so that other actions can connect) */
     TriggerAction       _disconnectAction;      /** Disconnect from public action */
 };

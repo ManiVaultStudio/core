@@ -49,9 +49,9 @@ const hdps::IconFont& IconFonts::getIconFont(const QString& name, const std::int
     }   
 }
 
-QIcon IconFonts::getIcon(const QString& fontName, const QString& iconName, const QSize& iconSize /*= QSize(24, 24)*/, const QColor& iconForegroundGolor/*= QColor(0, 0, 0, 255)*/, const QColor& iconBackgroundColor/*= Qt::transparent*/) const
+QIcon IconFonts::getIcon(const QString& fontName, const QString& iconName, const QColor& iconForegroundGolor/*= QColor(0, 0, 0, 255)*/, const QColor& iconBackgroundColor/*= Qt::transparent*/) const
 {
-    return getIconFont(fontName).getIcon(iconName, iconSize, iconForegroundGolor, iconBackgroundColor);
+    return getIconFont(fontName).getIcon(iconName, iconForegroundGolor, iconBackgroundColor);
 }
 
 QStringList IconFonts::getFontNames() const

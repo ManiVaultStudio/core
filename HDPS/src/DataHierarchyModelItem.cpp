@@ -10,6 +10,8 @@
 namespace hdps
 {
 
+using namespace gui;
+
 QRandomGenerator DataHierarchyModelItem::rng = QRandomGenerator();
 
 DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent /*= nullptr*/) :
@@ -80,16 +82,13 @@ QString DataHierarchyModelItem::serialize() const
 
 QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, int role /*= Qt::DisplayRole*/) const
 {
-    // Only proceed if we have a valid data hierarchy item
     if (_dataHierarchyItem == nullptr)
         return QVariant();
 
     switch (role)
     {
-        // String representation
         case Qt::DisplayRole:
         {
-            // Get edit value role for column
             const auto editValue = getDataAtColumn(column, Qt::EditRole);
 
             switch (static_cast<Column>(column))
@@ -100,22 +99,22 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                 case Column::GUID:
                     return editValue;
 
-                case Column::GroupIndex:
-                    return editValue.toInt() >= 0 ? editValue : "";
-
-                case Column::Description:
-                    return editValue;
-
-                case Column::Analysis:
+                case Column::Info:
                     return editValue;
 
                 case Column::Progress:
                     return _dataHierarchyItem->isRunning() ? QString("%1%").arg(QString::number(editValue.toFloat(), 'f', 1)) : "";
 
-                case Column::Analyzing:
-                    return editValue;
+                case Column::GroupIndex:
+                    return editValue.toInt() >= 0 ? editValue : "";
 
-                case Column::Locked:
+                case Column::IsGroup:
+                    return "";
+
+                case Column::IsAnalyzing:
+                    return "";
+
+                case Column::IsLocked:
                     return "";
 
                 default:
@@ -125,7 +124,6 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
             break;
         }
 
-        // Actual value
         case Qt::EditRole:
         {
             switch (static_cast<Column>(column))
@@ -136,22 +134,22 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                 case Column::GUID:
                     return _dataHierarchyItem->getDataset()->getGuid();
 
-                case Column::GroupIndex:
-                    return _dataHierarchyItem->getDataset()->getGroupIndex();
-
-                case Column::Description:
+                case Column::Info:
                     return _dataHierarchyItem->getTaskDescription();
-
-                case Column::Analysis:
-                    return "";
 
                 case Column::Progress:
                     return _dataHierarchyItem->isRunning() ? 100.0f * _dataHierarchyItem->getTaskProgress() : 0.0f;
 
-                case Column::Analyzing:
+                case Column::GroupIndex:
+                    return _dataHierarchyItem->getDataset()->getGroupIndex();
+
+                case Column::IsGroup:
+                    return _dataHierarchyItem->getDataset()->isProxy();
+
+                case Column::IsAnalyzing:
                     return "";
 
-                case Column::Locked:
+                case Column::IsLocked:
                     return _dataHierarchyItem->getLocked();
 
                 default:
@@ -161,67 +159,75 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
             break;
         }
 
-        // For icons
+        case Qt::ToolTipRole:
+        {
+            switch (static_cast<Column>(column))
+            {
+                case Column::Name:
+                    return _dataHierarchyItem->getGuiName();
+
+                case Column::GUID:
+                    return _dataHierarchyItem->getDataset()->getGuid();
+
+                case Column::Info:
+                    return _dataHierarchyItem->getTaskDescription();
+
+                case Column::Progress:
+                    return _dataHierarchyItem->isRunning() ? 100.0f * _dataHierarchyItem->getTaskProgress() : 0.0f;
+
+                case Column::GroupIndex:
+                    return _dataHierarchyItem->getDataset()->getGroupIndex();
+
+                case Column::IsGroup:
+                {
+                    if (!_dataHierarchyItem->getDataset()->isProxy())
+                        return "";
+
+                    QStringList proxyDatasetNames;
+
+                    for (const auto& proxyDataset : _dataHierarchyItem->getDataset()->getProxyDatasets())
+                        proxyDatasetNames << proxyDataset->getGuiName();
+
+                    return proxyDatasetNames.join("\n");
+                }
+
+                case Column::IsAnalyzing:
+                    return "";
+
+                case Column::IsLocked:
+                    return _dataHierarchyItem->getLocked();
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
         case Qt::DecorationRole:
         {
-            // Get reference to Font Awesome icon font
             auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
 
             switch (static_cast<Column>(column))
             {
                 case Column::Name:
-                    return _dataHierarchyItem->getIconByName("data");
+                    return _dataHierarchyItem->getIcon();
 
                 case Column::GUID:
-                    break;
-
+                case Column::Info:
+                case Column::Progress:
                 case Column::GroupIndex:
-                {
                     break;
+                
+                case Column::IsGroup:
+                {
+                    if (_dataHierarchyItem->getDataset()->isProxy())
+                        return fontAwesome.getIcon("object-group");
 
-                    // Get the group index of the dataset
-                    const auto groupIndex = getDataAtColumn(column, Qt::EditRole).toInt();
-
-                    if (groupIndex < 0)
-                        break;
-
-                    const auto size = QSize(100, 100);
-
-                    QPixmap pixmap(size);
-
-                    pixmap.fill(Qt::transparent);
-
-                    const auto iconRectangle = QRect(0, 0, size.width(), size.height());
-
-                    QPainter painter(&pixmap);
-
-                    painter.setRenderHint(QPainter::Antialiasing);
-
-                    // Seed the random number generator with the group index
-                    rng.seed(groupIndex);
-
-                    const auto randomHue        = rng.bounded(360);
-                    const auto randomSaturation = rng.bounded(150, 255);
-                    const auto randomLightness  = rng.bounded(50, 200);
-
-                    painter.setBrush(QColor::fromHsl(randomHue, randomSaturation, randomLightness));
-                    painter.drawEllipse(iconRectangle);
-
-                    painter.setPen(Qt::white);
-                    painter.setFont(QFont("Arial", 50, 200));
-                    painter.drawText(iconRectangle, QString::number(groupIndex), QTextOption(Qt::AlignCenter));
-
-                    return QIcon(pixmap);
+                    break;
                 }
 
-                case Column::Analysis:
-                    return _dataHierarchyItem->getIconByName("analysis");
-
-                case Column::Progress:
-                case Column::Description:
-                    break;
-
-                case Column::Analyzing:
+                case Column::IsAnalyzing:
                 {
                     if (_dataHierarchyItem->isRunning())
                         return fontAwesome.getIcon("microchip");
@@ -229,7 +235,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     break;
                 }
 
-                case Column::Locked:
+                case Column::IsLocked:
                 {
                     if (_dataHierarchyItem->getDataset()->isLocked())
                         return fontAwesome.getIcon("lock");
@@ -244,23 +250,22 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
             break;
         }
 
-        // Grayed out text when locked
         case Qt::TextAlignmentRole:
         {
             switch (static_cast<Column>(column))
             {
                 case Column::Name:
                 case Column::GUID:
+                case Column::Info:
+                case Column::Progress:
                     break;
 
                 case Column::GroupIndex:
                     return static_cast<std::int32_t>(Qt::AlignVCenter | Qt::AlignRight);
 
-                case Column::Analysis:
-                case Column::Progress:
-                case Column::Description:
-                case Column::Analyzing:
-                case Column::Locked:
+                case Column::IsGroup:
+                case Column::IsAnalyzing:
+                case Column::IsLocked:
                     break;
 
                 default:
@@ -270,7 +275,6 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
             break;
         }
 
-        // Grayed out text when locked
         case Qt::ForegroundRole:
             return _dataHierarchyItem->getLocked() ? QColor(Qt::gray) : QColor(Qt::black);
 

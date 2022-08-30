@@ -82,14 +82,14 @@ void ImageData::setNumberImages(const std::uint32_t& numberOfImages)
     _numberOfImages = numberOfImages;
 }
 
-Dataset<DatasetImpl> ImageData::createDataSet() const
+Dataset<DatasetImpl> ImageData::createDataSet(const QString& guid /*= ""*/) const
 {
-    return Dataset<DatasetImpl>(new Images(_core, getName()));
+    return Dataset<DatasetImpl>(new Images(_core, getName(), guid));
 }
 
-QIcon ImageDataFactory::getIcon() const
+QIcon ImageDataFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return hdps::Application::getIconFont("FontAwesome").getIcon("images");
+    return hdps::Application::getIconFont("FontAwesome").getIcon("images", color);
 }
 
 hdps::plugin::RawData* ImageDataFactory::produce()

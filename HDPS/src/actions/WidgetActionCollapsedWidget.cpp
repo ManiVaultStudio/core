@@ -15,22 +15,36 @@ WidgetActionCollapsedWidget::WidgetActionCollapsedWidget(QWidget* parent, Widget
 {
     _layout.setContentsMargins(0, 0, 0, 0);
 
-    _toolButton.setIcon(widgetAction->icon());
-    _toolButton.setToolTip(widgetAction->toolTip());
-    _toolButton.addAction(widgetAction);
     _toolButton.setPopupMode(QToolButton::InstantPopup);
     _toolButton.setIconSize(QSize(12, 12));
-    //_toolButton.setFixedSize(QSize(24, 24));
     _toolButton.setStyleSheet("QToolButton::menu-indicator { image: none; }");
 
     _layout.addWidget(&_toolButton);
 
     setLayout(&_layout);
+    setWidgetAction(widgetAction);
+}
 
-    connect(widgetAction, &WidgetAction::changed, this, [this, widgetAction]() {
+void WidgetActionCollapsedWidget::setWidgetAction(WidgetAction* widgetAction)
+{
+    WidgetActionWidget::setWidgetAction(widgetAction);
+
+    if (_widgetAction != nullptr)
+        _toolButton.removeAction(_widgetAction);
+
+    if (widgetAction == nullptr)
+        return;
+
+    _toolButton.addAction(_widgetAction);
+
+    const auto updateToolButton = [this, widgetAction]() {
         _toolButton.setIcon(widgetAction->icon());
         _toolButton.setToolTip(widgetAction->toolTip());
-    });
+    };
+
+    connect(_widgetAction, &WidgetAction::changed, this, updateToolButton);
+
+    updateToolButton();
 }
 
 void WidgetActionCollapsedWidget::ToolButton::paintEvent(QPaintEvent* paintEvent)

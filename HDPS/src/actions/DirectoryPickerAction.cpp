@@ -78,6 +78,8 @@ void DirectoryPickerAction::setDirectory(const QString& directory)
         return;
 
     _directoryAction.setString(directory);
+
+    saveToSettings();
 }
 
 QString DirectoryPickerAction::getDefaultDirectory() const
@@ -114,6 +116,19 @@ QString DirectoryPickerAction::getDirectoryName() const
 bool DirectoryPickerAction::isValid() const
 {
     return !getDirectory().isEmpty() && QDir(getDirectory()).exists();
+}
+
+void DirectoryPickerAction::fromVariantMap(const QVariantMap& variantMap)
+{
+    if (variantMap.contains("value"))
+        setDirectory(variantMap["value"].toString());
+}
+
+QVariantMap DirectoryPickerAction::toVariantMap() const
+{
+    return {
+        { "value", getDirectory() }
+    };
 }
 
 QWidget* DirectoryPickerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

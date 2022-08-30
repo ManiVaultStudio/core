@@ -46,19 +46,21 @@ bool DataHierarchyModel::setData(const QModelIndex& index, const QVariant& value
         case DataHierarchyModelItem::Column::GUID:
             break;
 
-        case DataHierarchyModelItem::Column::GroupIndex:
-            dataHierarchyModelItem->setGroupIndex(value.toInt());
-            break;
-
-        case DataHierarchyModelItem::Column::Description:
+        case DataHierarchyModelItem::Column::Info:
             dataHierarchyModelItem->getDataHierarchyItem()->setTaskDescription(value.toString());
-            break;
-
-        case DataHierarchyModelItem::Column::Analysis:
             break;
 
         case DataHierarchyModelItem::Column::Progress:
             dataHierarchyModelItem->getDataHierarchyItem()->setTaskProgress(value.toFloat());
+            break;
+
+        case DataHierarchyModelItem::Column::GroupIndex:
+            dataHierarchyModelItem->setGroupIndex(value.toInt());
+            break;
+
+        case DataHierarchyModelItem::Column::IsGroup:
+        case DataHierarchyModelItem::Column::IsAnalyzing:
+        case DataHierarchyModelItem::Column::IsLocked:
             break;
 
         default:
@@ -156,7 +158,7 @@ Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
     auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(index.internalPointer());
 
     // Determine whether the data hierarchy item is locked
-    const auto itemIsLocked = dataHierarchyModelItem->getDataAtColumn(DataHierarchyModelItem::Column::Locked, Qt::EditRole).toBool();
+    const auto itemIsLocked = dataHierarchyModelItem->getDataAtColumn(DataHierarchyModelItem::Column::IsLocked, Qt::EditRole).toBool();
 
     // Make name column editable
     if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::Name)
@@ -187,15 +189,18 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                     case DataHierarchyModelItem::Column::GUID:
                         return "ID";
 
-                    case DataHierarchyModelItem::Column::Description:
-                        return "Description";
+                    case DataHierarchyModelItem::Column::Info:
+                        return "Info";
+
+                    case DataHierarchyModelItem::Column::Progress:
+                        return "";
 
                     case DataHierarchyModelItem::Column::GroupIndex:
                         return "Group ID";
 
-                    case DataHierarchyModelItem::Column::Analysis:
-                    case DataHierarchyModelItem::Column::Analyzing:
-                    case DataHierarchyModelItem::Column::Progress:
+                    case DataHierarchyModelItem::Column::IsGroup:
+                    case DataHierarchyModelItem::Column::IsAnalyzing:
+                    case DataHierarchyModelItem::Column::IsLocked:
                         return "";
 
                     default:
@@ -205,28 +210,35 @@ QVariant DataHierarchyModel::headerData(int section, Qt::Orientation orientation
                 break;
             }
 
-            case Qt::DecorationRole:
+            case Qt::ToolTipRole:
             {
                 const auto iconSize = QSize(14, 14);
 
                 switch (static_cast<DataHierarchyModelItem::Column>(section))
                 {
                     case DataHierarchyModelItem::Column::Name:
+                        return "Name of the dataset";
+
                     case DataHierarchyModelItem::Column::GUID:
-                        break;
+                        return "Globally unique dataset identifier";
 
-                    case DataHierarchyModelItem::Column::Description:
-                    case DataHierarchyModelItem::Column::GroupIndex:
-                    case DataHierarchyModelItem::Column::Analysis:
-                        break;
-
-                    case DataHierarchyModelItem::Column::Analyzing:
-                        break;
-                        //return Application::getIconFont("FontAwesome").getIcon("check", iconSize);
+                    case DataHierarchyModelItem::Column::Info:
+                        return "Dataset additional information";
 
                     case DataHierarchyModelItem::Column::Progress:
-                        break;
-                        //return Application::getIconFont("FontAwesome").getIcon("percentage", iconSize);
+                        return "Task progress in percentage";
+
+                    case DataHierarchyModelItem::Column::GroupIndex:
+                        return "Dataset group index";
+
+                    case DataHierarchyModelItem::Column::IsGroup:
+                        return "Whether the dataset is composed of other datasets";
+
+                    case DataHierarchyModelItem::Column::IsAnalyzing:
+                        return "Whether an analysis is taking place on the dataset";
+
+                    case DataHierarchyModelItem::Column::IsLocked:
+                        return "Whether the dataset is locked";
 
                     default:
                         break;

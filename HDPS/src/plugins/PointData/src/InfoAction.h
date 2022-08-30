@@ -1,18 +1,13 @@
 #pragma once
 
-#include "actions/Actions.h"
-#include "event/EventListener.h"
+#include "PointData.h"
 
+#include "ProxyDatasetsAction.h"
+#include "NumberOfSelectedPointsAction.h"
 #include "SelectedIndicesAction.h"
 #include "DimensionNamesAction.h"
 
-#include "PointData.h"
-
-#include <QTimer>
-
-namespace hdps {
-    class CoreInterface;
-}
+#include <actions/StringAction.h>
 
 using namespace hdps;
 using namespace hdps::gui;
@@ -34,28 +29,29 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
-     * @param core Pointer to the core
-     * @param points Reference to points dataset
+     * @param points Smart pointer to points dataset
      */
-    InfoAction(QObject* parent, CoreInterface* core, Points& points);
+    InfoAction(QObject* parent, const Dataset<Points>& points);
 
 public: // Action getters
 
+    StringAction& getDataStorageAction() { return _dataStorageAction; }
+    ProxyDatasetsAction& getProxyDatasetsAction() { return _proxyDatasetsAction; }
     StringAction& getNumberOfPointsAction() { return _numberOfPointsAction; }
     StringAction& getNumberOfDimensionsAction() { return _numberOfDimensionsAction; }
-    StringAction& getMemorySizeAction() { return _memorySizeAction; }
-    StringAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
+    StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
+    NumberOfSelectedPointsAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
     SelectedIndicesAction& getSelectedIndicesAction() { return _selectedIndicesAction; }
     DimensionNamesAction& getDimensionNamesAction() { return _dimensionNamesAction; }
 
 protected:
-    CoreInterface*          _core;                              /** Pointer to the core */
-    Dataset<Points>         _points;                            /** Points dataset reference */
-    StringAction            _numberOfPointsAction;              /** Number of points action */
-    StringAction            _numberOfDimensionsAction;          /** Number of dimensions action */
-    StringAction            _memorySizeAction;                  /** Memory size action */
-    StringAction            _numberOfSelectedPointsAction;      /** Number of selected points action */
-    SelectedIndicesAction   _selectedIndicesAction;             /** Selected indices action */
-    DimensionNamesAction    _dimensionNamesAction;              /** Dimension names action */
-    hdps::EventListener     _eventListener;                     /** Listen to HDPS events */
+    Dataset<Points>                 _points;                            /** Points dataset reference */
+    StringAction                    _dataStorageAction;                 /** Type of data storage action */
+    ProxyDatasetsAction             _proxyDatasetsAction;               /** Proxy datasets action */
+    StringAction                    _numberOfPointsAction;              /** Number of points action */
+    StringAction                    _numberOfDimensionsAction;          /** Number of dimensions action */
+    StringAction                    _rawDataSizeAction;                 /** Amount of memory for raw data */    
+    NumberOfSelectedPointsAction    _numberOfSelectedPointsAction;      /** Number of selected points action */
+    SelectedIndicesAction           _selectedIndicesAction;             /** Selected indices action */
+    DimensionNamesAction            _dimensionNamesAction;              /** Dimension names action */
 };

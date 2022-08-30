@@ -7,9 +7,7 @@ using namespace hdps::util;
 namespace hdps {
 
 /**
- * Data export action class
- *
- * Data type dependent data export options
+ * Data grouping action class
  *
  * @author Thomas Kroes
  */
@@ -42,8 +40,6 @@ protected:
         Dataset<DatasetImpl>    _dataset;               /** Smart pointer to the dataset */
         IntegralAction          _groupIndexAction;      /** Starting group index action */
         ToggleAction            _recursiveAction;       /** Apply group indices recursively action */
-        TriggerAction           _applyAction;           /** Apply grouping action */
-        TriggerAction           _cancelAction;          /** Cancel action */
     };
 
 public:
