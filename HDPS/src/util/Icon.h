@@ -31,9 +31,10 @@ QIcon createOverlayIcon(const QIcon& icon, const QPixmap& overlay);
 /**
  * Convenience function to create a plugin icon, which consists of maximum of four characters laid out in a grid
  * @param characters Characters
+ * @param color Icon color
  * @return Plugin icon
  */
-QIcon createPluginIcon(const QString& characters);
+QIcon createPluginIcon(const QString& characters, const QColor& color);
 
 /**
  * Combines two (or more) icons into a horizontal icon
