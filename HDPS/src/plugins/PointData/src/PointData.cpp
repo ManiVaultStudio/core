@@ -700,7 +700,8 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
     std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
 
     for (auto& [key, value] : mapping)
-        targetIndicesSet.erase(value[0]);
+        for (const auto& v : value)
+            targetIndicesSet.erase(v);
 
     for (const auto& linkedIndex : linkedIndices)
         targetIndicesSet.insert(linkedIndex);
