@@ -675,8 +675,6 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
     Dataset<Points> targetDataset   = ld.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
-    qDebug() << __FUNCTION__ << sourceDataset->getGuiName() << targetDataset->getGuiName() << targetSelection->indices.size();
-
     const hdps::SelectionMap& mapping = ld.getMapping();   
 
     // Create separate vector of additional linked selected points
@@ -717,8 +715,6 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
-    //qDebug() << __FUNCTION__ << indices;
-
     auto selection = getSelection<Points>();
 
     selection->indices = indices;
