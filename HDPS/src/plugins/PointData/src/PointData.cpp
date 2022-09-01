@@ -614,22 +614,16 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
 
         // Group dataset to member dataset
         {
-            LinkedData linkedDataToTarget(toSmartPointer(), targetPoints);
-
             SelectionMap selectionMapToTarget;
 
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
                 selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
 
-            linkedDataToTarget.setMapping(selectionMapToTarget);
-
-            getLinkedData().push_back(linkedDataToTarget);
+            addLinkedData(targetPoints, selectionMapToTarget);
         }
 
         // Member dataset to group dataset
         {
-            LinkedData linkedDataToSource(targetPoints, toSmartPointer());
-
             SelectionMap selectionMapToSource;
 
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
@@ -681,6 +675,8 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
     Dataset<Points> targetDataset   = ld.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
+    qDebug() << __FUNCTION__ << sourceDataset->getGuiName() << targetDataset->getGuiName() << targetSelection->indices.size();
+
     const hdps::SelectionMap& mapping = ld.getMapping();   
 
     // Create separate vector of additional linked selected points
@@ -708,10 +704,21 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
         targetIndicesSet.insert(linkedIndex);
 
     targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
+
+    if (targetDataset->isProxy()) {
+        
+        for (auto targetLd : targetDataset->getLinkedData())
+        {
+            resolveLinkedData(targetLd, targetSelection->indices);
+            Application::core()->notifyDatasetSelectionChanged(targetLd.getTargetDataset());
+        }
+    }
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
+    //qDebug() << __FUNCTION__ << indices;
+
     auto selection = getSelection<Points>();
 
     selection->indices = indices;
