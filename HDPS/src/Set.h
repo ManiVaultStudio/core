@@ -471,16 +471,16 @@ public: // Grouping
     void setGroupIndex(const std::int32_t& groupIndex);
 
     /**
-     * Get proxy datasets
-     * @return Proxy datasets
+     * Get member datasets
+     * @return Proxy member datasets
      */
-    Datasets getProxyDatasets() const;
+    Datasets getProxyMembers() const;
 
     /**
-     * Set the proxy datasets (automatically sets the dataset type to Type::Proxy)
-     * @param proxyDatasets Proxy datasets
+     * Set the proxy member datasets (automatically sets the dataset type to Type::Proxy)
+     * @param proxyMembers Proxy member datasets
      */
-    virtual void setProxyDatasets(const Datasets& proxyDatasets);
+    virtual void setProxyMembers(const Datasets& proxyMembers);
 
     /**
      * Establish whether a proxy dataset may be created with candidate \p proxyDatasets
@@ -558,7 +558,7 @@ public: // Operators
         _properties     = other._properties;
         _groupIndex     = other._groupIndex;
         _analysis       = other._analysis;
-        _proxyDatasets  = other._proxyDatasets;
+        _proxyMembers  = other._proxyMembers;
 
         return *this;
     }
@@ -579,7 +579,7 @@ private:
     QMap<QString, QVariant>     _properties;        /** Properties map */
     std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
     plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
-    Datasets                    _proxyDatasets;     /** Datasets which together form a group */
+    Datasets                    _proxyMembers;      /** Member datasets in case of a proxy dataset */
     std::vector<LinkedData>     _linkedData;        /** List of linked datasets */
 
     friend class Core;

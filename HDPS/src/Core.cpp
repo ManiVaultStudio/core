@@ -415,7 +415,7 @@ Dataset<DatasetImpl> Core::groupDatasets(const Datasets& datasets, const QString
         const auto createGroupDataset = [this, &datasets](const QString& guiName) -> Dataset<DatasetImpl> {
             auto groupDataset = addDataset(datasets.first()->getRawDataKind(), guiName);
 
-            groupDataset->setProxyDatasets(datasets);
+            groupDataset->setProxyMembers(datasets);
 
             return groupDataset;
         };
@@ -618,22 +618,17 @@ void Core::notifyDatasetChanged(const Dataset<DatasetImpl>& dataset)
 void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset)
 {
     try {
-        // Create data selection changed event
-        DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
+        //qDebug() << "=====" << dataset->getGuiName() << "notifyDatasetSelectionChanged";
 
-        // Cache the event listeners to prevent timing issues
-        const auto eventListeners = _eventListeners;
+        Datasets datasetsNotified;
 
-        // And notify all listeners
-        for (auto listener : eventListeners)
-            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                listener->onDataEvent(&dataSelectionChangedEvent);
+        const auto emitDataSelectionChangedEvent = [this, &datasetsNotified](const Dataset<DatasetImpl>& dataset) -> void {
+            if (datasetsNotified.contains(dataset))
+                return;
 
-        // Notify linked data
-        for (const LinkedData& ld : dataset->getLinkedData())
-        {
-            // Create data selection changed event
-            DataSelectionChangedEvent dataSelectionChangedEvent(ld.getTargetDataset());
+            //qDebug() << dataset->getGuiName() << "emitDataSelectionChangedEvent";
+
+            DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
 
             // Cache the event listeners to prevent timing issues
             const auto eventListeners = _eventListeners;
@@ -642,7 +637,37 @@ void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset)
             for (auto listener : eventListeners)
                 if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
                     listener->onDataEvent(&dataSelectionChangedEvent);
+
+            datasetsNotified << dataset;
+        };
+
+        if (dataset->isProxy()) {
+            for (auto proxyMember : dataset->getProxyMembers()) {
+                notifyDatasetSelectionChanged(proxyMember->getSourceDataset<DatasetImpl>());
+                datasetsNotified << proxyMember->getSourceDataset<DatasetImpl>();
+            }
         }
+
+        emitDataSelectionChangedEvent(dataset);
+
+        for (auto candidateDataset : requestAllDataSets()) {
+            if (candidateDataset == dataset)
+                continue;
+
+            //qDebug() << candidateDataset->getGuiName() << candidateDataset->isDerivedData() << candidateDataset->getSourceDataset<DatasetImpl>()->getRawDataName() << dataset->getSourceDataset<DatasetImpl>()->getRawDataName();
+
+            if (candidateDataset->isDerivedData() && candidateDataset->getSourceDataset<DatasetImpl>()->getRawDataName() == dataset->getSourceDataset<DatasetImpl>()->getRawDataName())
+                emitDataSelectionChangedEvent(candidateDataset);
+
+            if (candidateDataset->getRawDataName() == dataset->getRawDataName())
+                emitDataSelectionChangedEvent(candidateDataset);
+
+            if (candidateDataset->isProxy() && candidateDataset->getProxyMembers().contains(dataset))
+                emitDataSelectionChangedEvent(candidateDataset);
+        }
+
+        for (const LinkedData& ld : dataset->getLinkedData())
+            emitDataSelectionChangedEvent(ld.getTargetDataset());
     }
     catch (std::exception& e)
     {

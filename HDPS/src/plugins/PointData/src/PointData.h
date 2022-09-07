@@ -770,8 +770,8 @@ public:
         if (isProxy()) {
             auto offset = 0;
 
-            for (auto proxyDataset : getProxyDatasets()) {
-                auto points = hdps::Dataset<Points>(proxyDataset);
+            for (auto proxyMember : getProxyMembers()) {
+                auto points = hdps::Dataset<Points>(proxyMember);
 
                 ResultContainer proxyPointsData;
 
@@ -847,8 +847,8 @@ public:
         if (isProxy()) {
             auto numberOfPoints = 0;
 
-            for (auto proxyDataset : getProxyDatasets())
-                numberOfPoints += hdps::Dataset<Points>(proxyDataset)->getNumPoints();
+            for (auto proxyMember : getProxyMembers())
+                numberOfPoints += hdps::Dataset<Points>(proxyMember)->getNumPoints();
 
             return numberOfPoints;
         }
@@ -861,7 +861,7 @@ public:
     unsigned int getNumDimensions() const
     {
         if (isProxy()) {
-            return hdps::Dataset<Points>(getProxyDatasets().first())->getNumDimensions();
+            return hdps::Dataset<Points>(getProxyMembers().first())->getNumDimensions();
         }
         else {
             return getRawData<PointData>().getNumDimensions();
@@ -918,10 +918,10 @@ public:
     QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
-     * Set the proxy datasets (automatically sets the dataset type to Type::Proxy)
-     * @param proxyDatasets Proxy datasets
+     * Set the proxy member datasets (automatically sets the dataset type to Type::Proxy)
+     * @param proxyMembers Proxy member datasets
      */
-    void setProxyDatasets(const hdps::Datasets& proxyDatasets) override;
+    void setProxyMembers(const hdps::Datasets& proxyMembers) override;
 
 public: // Selection
 

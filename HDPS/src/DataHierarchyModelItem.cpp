@@ -185,8 +185,8 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
 
                     QStringList proxyDatasetNames;
 
-                    for (const auto& proxyDataset : _dataHierarchyItem->getDataset()->getProxyDatasets())
-                        proxyDatasetNames << proxyDataset->getGuiName();
+                    for (const auto& proxyMember : _dataHierarchyItem->getDataset()->getProxyMembers())
+                        proxyDatasetNames << proxyMember->getGuiName();
 
                     return proxyDatasetNames.join("\n");
                 }

@@ -21,6 +21,7 @@
 
 #include <util/Serialization.h>
 #include <util/Timer.h>
+#include <DataHierarchyItem.h>
 
 Q_PLUGIN_METADATA(IID "nl.tudelft.PointData")
 
@@ -358,8 +359,8 @@ void Points::extractDataForDimension(std::vector<float>& result, const int dimen
 
         auto pointIndexOffset = 0u;
 
-        for (auto proxyDataset : getProxyDatasets()) {
-            auto points = hdps::Dataset<Points>(proxyDataset);
+        for (auto proxyMember : getProxyMembers()) {
+            auto points = hdps::Dataset<Points>(proxyMember);
 
             std::vector<float> proxyPoints;
 
@@ -384,8 +385,8 @@ void Points::extractDataForDimensions(std::vector<hdps::Vector2f>& result, const
 
         auto pointIndexOffset = 0u;
 
-        for (auto proxyDataset : getProxyDatasets()) {
-            auto points = hdps::Dataset<Points>(proxyDataset);
+        for (auto proxyMember : getProxyMembers()) {
+            auto points = hdps::Dataset<Points>(proxyMember);
 
             std::vector<hdps::Vector2f> proxyPoints;
 
@@ -599,20 +600,25 @@ QIcon Points::getIcon(const QColor& color /*= Qt::black*/) const
     */
 }
 
-void Points::setProxyDatasets(const Datasets& proxyDatasets)
+void Points::setProxyMembers(const Datasets& proxyMembers)
 {
-    DatasetImpl::setProxyDatasets(proxyDatasets);
+    DatasetImpl::setProxyMembers(proxyMembers);
+
+    getDataHierarchyItem().setTaskName("Creating proxy");
+    getDataHierarchyItem().setTaskRunning();
 
     auto pointIndexOffset = 0u;
 
-    for (auto proxyDataset : getProxyDatasets()) {
-        auto targetPoints = Dataset<Points>(proxyDataset);
+    QCoreApplication::processEvents();
+
+    for (auto proxyMember : getProxyMembers()) {
+        auto targetPoints = Dataset<Points>(proxyMember);
 
         std::vector<std::uint32_t> targetGlobalIndices;
 
         targetPoints->getGlobalIndices(targetGlobalIndices);
 
-        // Group dataset to member dataset
+        // Selection map from proxy to member
         {
             SelectionMap selectionMapToTarget;
 
@@ -622,7 +628,7 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
             addLinkedData(targetPoints, selectionMapToTarget);
         }
 
-        // Member dataset to group dataset
+        // Selection map from member to proxy
         {
             SelectionMap selectionMapToSource;
 
@@ -636,7 +642,14 @@ void Points::setProxyDatasets(const Datasets& proxyDatasets)
         }
 
         pointIndexOffset += targetPoints->getNumPoints();
+
+        getDataHierarchyItem().setTaskDescription(QString("Creating mappings for %1").arg(proxyMember->getGuiName()));
+        getDataHierarchyItem().setTaskProgress(static_cast<float>(getProxyMembers().indexOf(proxyMember)) / static_cast<float>(getProxyMembers().count()));
+
+        QCoreApplication::processEvents();
     }
+
+    getDataHierarchyItem().setTaskFinished();
 }
 
 std::vector<std::uint32_t>& Points::getSelectionIndices()
@@ -647,7 +660,7 @@ std::vector<std::uint32_t>& Points::getSelectionIndices()
 const std::vector<QString>& Points::getDimensionNames() const
 {
     if (isProxy()) {
-        return hdps::Dataset<Points>(getProxyDatasets().first())->getDimensionNames();
+        return hdps::Dataset<Points>(getProxyMembers().first())->getDimensionNames();
     }
     else {
         return getRawData<PointData>().getDimensionNames();
@@ -703,14 +716,9 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
 
     targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
 
-    if (targetDataset->isProxy()) {
-        
+    if (targetDataset->isProxy())
         for (auto targetLd : targetDataset->getLinkedData())
-        {
             resolveLinkedData(targetLd, targetSelection->indices);
-            Application::core()->notifyDatasetSelectionChanged(targetLd.getTargetDataset());
-        }
-    }
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
@@ -851,6 +859,16 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     setDimensionNames(dimensionNames);
 
+    if (variantMap.contains("LinkedData")) {
+        for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
+            LinkedData linkedData;
+
+            linkedData.fromVariantMap(linkedDataVariant.toMap());
+
+            getLinkedData().push_back(linkedData);
+        }
+    }
+
     _core->notifyDatasetChanged(this);
 }
 
@@ -885,6 +903,13 @@ QVariantMap Points::toVariantMap() const
     variantMap["Indices"]               = indices;
     variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
+
+    QVariantList linkedData;
+
+    for (const auto& ld : getLinkedData())
+        linkedData.push_back(ld.toVariantMap());
+
+    variantMap["LinkedData"] = linkedData;
 
     return variantMap;
 }

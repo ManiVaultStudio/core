@@ -1,9 +1,9 @@
 #pragma once
 
 #include "WidgetActionWidget.h"
+#include "Serializable.h"
 
 #include <QWidgetAction>
-#include <QJsonDocument>
 
 class QLabel;
 class QMenu;
@@ -28,7 +28,7 @@ class WidgetActionLabel;
  * 
  * @author Thomas Kroes
  */
-class WidgetAction : public QWidgetAction
+class WidgetAction : public QWidgetAction, public Serializable
 {
     Q_OBJECT
 
@@ -241,78 +241,6 @@ public: // Settings
      */
     QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
 
-public: // Serialization
-
-    /**
-     * Get serialization name in the action tree (returns text() by default and objectName() if it is not empty)
-     * @return Serialization name
-     */
-    QString getSerializationName() const;
-
-    /**
-     * Get whether serialization is taking place
-     * @return Boolean indicating whether serialization is taking place
-     */
-    bool isSerializing() const;
-
-    /**
-     * Load widget action from variant map
-     * @param Variant map representation of the widget action
-     */
-    virtual void fromVariantMap(const QVariantMap& variantMap);
-
-    /**
-     * Save widget action to variant map
-     * @return Variant map representation of the widget action
-     */
-    virtual QVariantMap toVariantMap() const;
-
-    /**
-     * Load widget action from variant map
-     * @param widgetAction Pointer to target widget action
-     * @param Variant map representation of the widget action and its children
-     */
-    static void fromVariantMap(WidgetAction* widgetAction, const QVariantMap& variantMap);
-
-    /**
-     * Save widget action to variant map
-     * @param widgetAction Pointer to target widget action
-     * @return Variant map representation of the widget action and its children
-     */
-    static QVariantMap toVariantMap(const WidgetAction* widgetAction);
-
-    /**
-     * Load widget action from JSON document
-     * @param JSON document
-     */
-    virtual void fromJsonDocument(const QJsonDocument& jsonDocument) const final;
-
-    /**
-     * Save widget action to JSON document
-     * @return JSON document
-     */
-    virtual QJsonDocument toJsonDocument() const final;
-
-    /**
-     * Load widget action from JSON file
-     * @param filePath Path to the JSON file (if none/invalid a file open dialog is automatically opened)
-     */
-    virtual void fromJsonFile(const QString& filePath = "") final;
-
-    /**
-     * Save widget action from JSON file
-     * @param filePath Path to the JSON file (if none/invalid a file save dialog is automatically opened)
-     */
-    virtual void toJsonFile(const QString& filePath = "") final;
-
-protected:
-
-    /**
-     * Set whether serialization is taking place
-     * @param isSerializing Whether serialization is taking place
-     */
-    void setIsSerializing(bool isSerializing);
-
 protected:
 
     /**
@@ -323,12 +251,6 @@ protected:
     virtual QWidget* getWidget(QWidget* parent, const std::int32_t& widgetFlags);
 
 signals:
-
-    /**
-     * Signals that serializing is currently being performed or not
-     * @param isSerializing Whether serializing is currently being performed or not
-     */
-    void isSerializingChanged(bool isSerializing);
 
     /**
      * Signals that the published states changed
@@ -357,7 +279,6 @@ signals:
 protected:
     std::int32_t                _defaultWidgetFlags;    /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;             /** Sort index (used in the group action to sort actions) */
-    bool                        _isSerializing;         /** Whether the widget action is currently serializing */
     WidgetAction*               _publicAction;          /** Public action to which this action might be connected */
     QVector<WidgetAction*>      _connectedActions;      /** Pointers to widget action that are connected to this action */
     QString                     _settingsPrefix;        /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */

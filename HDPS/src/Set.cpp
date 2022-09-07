@@ -112,13 +112,13 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     if (variantMap.contains("StorageType"))
         setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
 
-    if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyDatasets")) {
-        Datasets proxyDatasets;
+    if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
+        Datasets proxyMembers;
 
-        for (const auto& proxyDatasetGuid : variantMap["ProxyDatasets"].toStringList())
-            proxyDatasets << _core->requestDataset(proxyDatasetGuid);
+        for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
+            proxyMembers << _core->requestDataset(proxyMemberGuid);
 
-        setProxyDatasets(proxyDatasets);
+        setProxyMembers(proxyMembers);
     }
 }
 
@@ -129,16 +129,16 @@ QVariantMap DatasetImpl::toVariantMap() const
     if (_analysis)
         analysisMap = _analysis->toVariantMap();
 
-    QStringList proxyDatasetsGuids;
+    QStringList proxyMemberGuids;
 
-    for (auto proxyDataset : _proxyDatasets)
-        proxyDatasetsGuids << proxyDataset->getGuid();
+    for (auto proxyMember : _proxyMembers)
+        proxyMemberGuids << proxyMember->getGuid();
 
     return {
         { "Name", QVariant::fromValue(getGuiName()) },
         { "GUID", QVariant::fromValue(getGuid()) },
         { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
-        { "ProxyDatasets", QVariant::fromValue(proxyDatasetsGuids) },
+        { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },
         { "DataType", QVariant::fromValue(getDataType().getTypeString()) },
         { "PluginKind", QVariant::fromValue(_rawData->getKind()) },
         { "PluginVersion", QVariant::fromValue(_rawData->getVersion()) },
@@ -161,12 +161,12 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
     _core->notifyDatasetSelectionChanged(this);
 }
 
-hdps::Datasets DatasetImpl::getProxyDatasets() const
+hdps::Datasets DatasetImpl::getProxyMembers() const
 {
-    return _proxyDatasets;
+    return _proxyMembers;
 }
 
-void DatasetImpl::setProxyDatasets(const Datasets& proxyDatasets)
+void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
 {
     try
     {
@@ -179,7 +179,7 @@ void DatasetImpl::setProxyDatasets(const Datasets& proxyDatasets)
             if (proxyDataset->getDataType() != getDataType())
                 throw std::runtime_error("All datasets should be of the same data type");
 
-        _proxyDatasets = proxyDatasets;
+        _proxyMembers = proxyDatasets;
 
         setStorageType(StorageType::Proxy);
 
@@ -206,7 +206,7 @@ bool DatasetImpl::mayProxy(const Datasets& proxyDatasets) const
 
 bool DatasetImpl::isProxy() const
 {
-    return !_proxyDatasets.isEmpty();
+    return !_proxyMembers.isEmpty();
 }
 
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)

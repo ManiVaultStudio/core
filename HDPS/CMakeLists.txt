@@ -355,6 +355,7 @@ set( PLUGIN_HEADERS
     src/ActionsModel.h
     src/ActionsFilterModel.h
     src/ActionsManager.h
+    src/Serializable.h
 )
 
 set( PLUGIN_SOURCES
@@ -371,6 +372,7 @@ set( PLUGIN_SOURCES
     src/ActionsModel.cpp
     src/ActionsFilterModel.cpp
     src/ActionsManager.cpp
+    src/Serializable.cpp
 )
 
 set(DATA_HIERARCHY_HEADERS

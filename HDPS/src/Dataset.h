@@ -131,6 +131,15 @@ public: // Miscellaneous
         return _datasetGuid;
     }
 
+    /**
+     * Set the globally unique identifier of the dataset
+     * @param datasetGuid Globally unique identifier of the dataset
+     */
+    void setDatasetGuid(const QString& datasetGuid)
+    {
+        _datasetGuid;
+    }
+
     /** Resets the internals (dataset pointer to nullptr etc.) */
     void reset() override
     {

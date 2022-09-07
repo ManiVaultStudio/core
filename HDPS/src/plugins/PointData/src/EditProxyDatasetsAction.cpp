@@ -31,12 +31,12 @@ EditProxyDatasetsAction::Widget::Widget(QWidget* parent, EditProxyDatasetsAction
     setPopupLayout(layout);
     
     const auto updateListView = [this, editProxyDatasetsAction, listView]() -> void {
-        QStringList proxyDatasetNames;
+        QStringList proxyMemberNames;
 
-        for (const auto& proxyDataset : editProxyDatasetsAction->getPoints()->getProxyDatasets())
-            proxyDatasetNames << proxyDataset->getGuiName();
+        for (const auto& proxyMember : editProxyDatasetsAction->getPoints()->getProxyMembers())
+            proxyMemberNames << proxyMember->getGuiName();
 
-        listView->setModel(new QStringListModel(proxyDatasetNames));
+        listView->setModel(new QStringListModel(proxyMemberNames));
     };
 
     connect(&editProxyDatasetsAction->getPoints(), &Dataset<Points>::dataChanged, this, updateListView);
