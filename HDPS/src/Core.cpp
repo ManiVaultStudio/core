@@ -374,7 +374,7 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
 
         for (const auto dataset : datasets) {
             if (dataTypes.isEmpty()) {
-                allDataSets << datasets;
+                allDataSets << dataset;
             }
             else {
                 for (const auto& dataType : dataTypes)
@@ -615,59 +615,66 @@ void Core::notifyDatasetChanged(const Dataset<DatasetImpl>& dataset)
     }
 }
 
-void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset)
+void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets datasetsNotified /*= Datasets()*/)
 {
     try {
-        //qDebug() << "=====" << dataset->getGuiName() << "notifyDatasetSelectionChanged";
 
-        Datasets datasetsNotified;
+        // Do not notify if the dataset has already been notified
+        if (datasetsNotified.contains(dataset))
+            return;
 
-        const auto emitDataSelectionChangedEvent = [this, &datasetsNotified](const Dataset<DatasetImpl>& dataset) -> void {
-            if (datasetsNotified.contains(dataset))
-                return;
+        QStringList datasetNotifiedString;
 
-            //qDebug() << dataset->getGuiName() << "emitDataSelectionChangedEvent";
+        for (auto datasetNotified : datasetsNotified)
+            datasetNotifiedString << datasetNotified->getGuiName();
 
-            DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
+        // Add the dataset to the list of notified datasets (to prevent redundant notifications)
+        datasetsNotified << dataset;
 
-            // Cache the event listeners to prevent timing issues
-            const auto eventListeners = _eventListeners;
+        //qDebug() << "=====" << "notifyDatasetSelectionChanged" << dataset->getGuiName() << datasetNotifiedString;
 
-            // And notify all listeners
-            for (auto listener : eventListeners)
-                if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
-                    listener->onDataEvent(&dataSelectionChangedEvent);
+        // Create the dataset Selection changed event
+        DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
 
-            datasetsNotified << dataset;
-        };
+        // Cache the event listeners to prevent timing issues
+        const auto eventListeners = _eventListeners;
 
-        if (dataset->isProxy()) {
-            for (auto proxyMember : dataset->getProxyMembers()) {
-                notifyDatasetSelectionChanged(proxyMember->getSourceDataset<DatasetImpl>());
-                datasetsNotified << proxyMember->getSourceDataset<DatasetImpl>();
-            }
-        }
+        // And notify all listeners
+        for (auto listener : eventListeners)
+            if (std::find(_eventListeners.begin(), _eventListeners.end(), listener) != _eventListeners.end())
+                listener->onDataEvent(&dataSelectionChangedEvent);
 
-        emitDataSelectionChangedEvent(dataset);
+        // Notify full dataset if dataset is not full
+        if (!dataset->isFull())
+            notifyDatasetSelectionChanged(dataset->getFullDataset<DatasetImpl>(), datasetsNotified);
 
+        // Notify all proxy members if the dataset is a proxy
+        if (dataset->isProxy())
+            for (auto proxyMember : dataset->getProxyMembers())
+                notifyDatasetSelectionChanged(proxyMember->getSourceDataset<DatasetImpl>(), datasetsNotified);
+
+        // Iterate over all datasets, establish if they somehow have a relation with the supplied dataset and possibly notify the candidate dataset
         for (auto candidateDataset : requestAllDataSets()) {
-            if (candidateDataset == dataset)
+
+            //qDebug() << "candidateDataset" << candidateDataset->getGuiName() << requestAllDataSets().size();
+
+            // Do not notify the supplied dataset (it has been notified earlier)
+            if (candidateDataset == dataset || datasetsNotified.contains(candidateDataset))
                 continue;
 
-            //qDebug() << candidateDataset->getGuiName() << candidateDataset->isDerivedData() << candidateDataset->getSourceDataset<DatasetImpl>()->getRawDataName() << dataset->getSourceDataset<DatasetImpl>()->getRawDataName();
-
             if (candidateDataset->isDerivedData() && candidateDataset->getSourceDataset<DatasetImpl>()->getRawDataName() == dataset->getSourceDataset<DatasetImpl>()->getRawDataName())
-                emitDataSelectionChangedEvent(candidateDataset);
+                notifyDatasetSelectionChanged(candidateDataset, datasetsNotified);
 
             if (candidateDataset->getRawDataName() == dataset->getRawDataName())
-                emitDataSelectionChangedEvent(candidateDataset);
+                notifyDatasetSelectionChanged(candidateDataset, datasetsNotified);
 
             if (candidateDataset->isProxy() && candidateDataset->getProxyMembers().contains(dataset))
-                emitDataSelectionChangedEvent(candidateDataset);
+                notifyDatasetSelectionChanged(candidateDataset, datasetsNotified);
         }
 
+        // Notify linked data
         for (const LinkedData& ld : dataset->getLinkedData())
-            emitDataSelectionChangedEvent(ld.getTargetDataset());
+            notifyDatasetSelectionChanged(ld.getTargetDataset(), datasetsNotified);
     }
     catch (std::exception& e)
     {

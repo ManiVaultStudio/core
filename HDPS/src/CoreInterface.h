@@ -323,8 +323,9 @@ public: // Events & notifications
     /**
      * Notify listeners that dataset selection has changed
      * @param dataset Smart pointer to the dataset of which the selection changed
+     * @param datasetsNotified Datasets that have been notified prior to the current call
      */
-    virtual void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset) = 0;
+    virtual void notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets datasetsNotified = Datasets()) = 0;
 
     /**
      * Notify all listeners that a dataset GUI name has changed
