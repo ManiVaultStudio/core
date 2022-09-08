@@ -17,7 +17,7 @@
 
 #include <algorithm>
 
-#define CORE_VERBOSE
+//#define CORE_VERBOSE
 
 using namespace hdps::util;
 using namespace hdps::plugin;
@@ -615,25 +615,39 @@ void Core::notifyDatasetChanged(const Dataset<DatasetImpl>& dataset)
     }
 }
 
-void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets datasetsNotified /*= Datasets()*/)
+void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Datasets* ignoreDatasets /*= nullptr*/)
 {
     try {
 
         // Do not notify if the dataset has already been notified
-        if (datasetsNotified.contains(dataset))
+        if (ignoreDatasets != nullptr && ignoreDatasets->contains(dataset))
             return;
+
+        if (ignoreDatasets != nullptr)
+            *ignoreDatasets << dataset;
 
         QStringList datasetNotifiedString;
 
-        for (auto datasetNotified : datasetsNotified)
-            datasetNotifiedString << datasetNotified->getGuiName();
+#ifdef CORE_VERBOSE
+        if (ignoreDatasets != nullptr)
+            for (auto datasetNotified : *ignoreDatasets)
+                datasetNotifiedString << datasetNotified->getGuiName();
 
-        // Add the dataset to the list of notified datasets (to prevent redundant notifications)
-        datasetsNotified << dataset;
+        qDebug() << __FUNCTION__ << dataset->getGuiName() << datasetNotifiedString;
+#endif
 
-        //qDebug() << "=====" << "notifyDatasetSelectionChanged" << dataset->getGuiName() << datasetNotifiedString;
+        Datasets notified{ dataset };
 
-        // Create the dataset Selection changed event
+        if (ignoreDatasets == nullptr)
+            ignoreDatasets = &notified;
+
+        const auto callNotifyDatasetSelectionChanged = [this, dataset, ignoreDatasets](Dataset<DatasetImpl> notifyDataset) -> void {
+            if (ignoreDatasets != nullptr && ignoreDatasets->contains(notifyDataset))
+                return;
+
+            notifyDatasetSelectionChanged(notifyDataset, ignoreDatasets);
+        };
+
         DataSelectionChangedEvent dataSelectionChangedEvent(dataset);
 
         // Cache the event listeners to prevent timing issues
@@ -646,35 +660,37 @@ void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Da
 
         // Notify full dataset if dataset is not full
         if (!dataset->isFull())
-            notifyDatasetSelectionChanged(dataset->getFullDataset<DatasetImpl>(), datasetsNotified);
+            callNotifyDatasetSelectionChanged(dataset->getFullDataset<DatasetImpl>());
 
         // Notify all proxy members if the dataset is a proxy
         if (dataset->isProxy())
             for (auto proxyMember : dataset->getProxyMembers())
-                notifyDatasetSelectionChanged(proxyMember->getSourceDataset<DatasetImpl>(), datasetsNotified);
+                callNotifyDatasetSelectionChanged(proxyMember->getSourceDataset<DatasetImpl>());
 
         // Iterate over all datasets, establish if they somehow have a relation with the supplied dataset and possibly notify the candidate dataset
         for (auto candidateDataset : requestAllDataSets()) {
 
-            //qDebug() << "candidateDataset" << candidateDataset->getGuiName() << requestAllDataSets().size();
+            // Continue to the next candidate if it should be ignored
+            if (ignoreDatasets != nullptr && ignoreDatasets->contains(candidateDataset))
+                continue;
 
-            // Do not notify the supplied dataset (it has been notified earlier)
-            if (candidateDataset == dataset || datasetsNotified.contains(candidateDataset))
+            // Do not notify the supplied dataset
+            if (candidateDataset == dataset)
                 continue;
 
             if (candidateDataset->isDerivedData() && candidateDataset->getSourceDataset<DatasetImpl>()->getRawDataName() == dataset->getSourceDataset<DatasetImpl>()->getRawDataName())
-                notifyDatasetSelectionChanged(candidateDataset, datasetsNotified);
-
+                callNotifyDatasetSelectionChanged(candidateDataset);
+                
             if (candidateDataset->getRawDataName() == dataset->getRawDataName())
-                notifyDatasetSelectionChanged(candidateDataset, datasetsNotified);
+                callNotifyDatasetSelectionChanged(candidateDataset);
 
             if (candidateDataset->isProxy() && candidateDataset->getProxyMembers().contains(dataset))
-                notifyDatasetSelectionChanged(candidateDataset, datasetsNotified);
+                callNotifyDatasetSelectionChanged(candidateDataset);
         }
 
         // Notify linked data
         for (const LinkedData& ld : dataset->getLinkedData())
-            notifyDatasetSelectionChanged(ld.getTargetDataset(), datasetsNotified);
+            callNotifyDatasetSelectionChanged(ld.getTargetDataset());
     }
     catch (std::exception& e)
     {
