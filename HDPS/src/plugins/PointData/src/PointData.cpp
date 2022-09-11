@@ -682,11 +682,23 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices)
+void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
 {
     Dataset<Points> sourceDataset   = ld.getSourceDataSet();
     Dataset<Points> targetDataset   = ld.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
+
+    Datasets notified;
+
+    if (ignoreDatasets == nullptr)
+        ignoreDatasets = &notified;
+
+    // Do not notify if the dataset has already been notified
+    if (ignoreDatasets != nullptr && ignoreDatasets->contains(targetDataset))
+        return;
+
+    if (ignoreDatasets != nullptr)
+        *ignoreDatasets << targetDataset;
 
     const hdps::SelectionMap& mapping = ld.getMapping();   
 
@@ -716,9 +728,8 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
 
     targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
 
-    if (targetDataset->isProxy())
-        for (auto targetLd : targetDataset->getLinkedData())
-            resolveLinkedData(targetLd, targetSelection->indices);
+    for (auto targetLd : targetDataset->getLinkedData())
+        resolveLinkedData(targetLd, targetSelection->indices, ignoreDatasets);
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)

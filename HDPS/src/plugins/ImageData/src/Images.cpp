@@ -417,21 +417,21 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                     const auto targetPixelIndex = globalIndices[localPointIndex];
                     
                     // If the data has any linked data
-                    for (LinkedData& ls : points->getLinkedData())
-                    {
-                        // Check if the linked data has the same original full data, because we don't want to
-                        // add data here that belongs to a different dataset
-                        if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
-                        {
-                            const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
-                            
-                            // Fill in the data for all the linked data indices based on the location of the original id
-                            for (unsigned int linkedIndex : v)
-                            {
-                                scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
-                            }
-                        }
-                    }
+                    //for (LinkedData& ls : points->getLinkedData())
+                    //{
+                    //    // Check if the linked data has the same original full data, because we don't want to
+                    //    // add data here that belongs to a different dataset
+                    //    if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
+                    //    {
+                    //        const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+                    //        
+                    //        // Fill in the data for all the linked data indices based on the location of the original id
+                    //        for (unsigned int linkedIndex : v)
+                    //        {
+                    //            scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
+                    //        }
+                    //    }
+                    //}
 
                     scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
                 }
@@ -528,19 +528,19 @@ void Images::computeMaskData()
                 const auto targetPixelIndex = globalIndices[localPointIndex];
 
                 // If the data has any linked data
-                for (LinkedData& ls : points->getLinkedData())
-                {
-                    // Check if the linked data has the same original full data, because we don't want to
-                    // add data here that belongs to a different dataset
-                    if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
-                    {
-                        const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+                //for (LinkedData& ls : points->getLinkedData())
+                //{
+                //    // Check if the linked data has the same original full data, because we don't want to
+                //    // add data here that belongs to a different dataset
+                //    if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
+                //    {
+                //        const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
 
-                        // Fill in the data for all the linked data indices based on the location of the original id
-                        for (unsigned int linkedIndex : v)
-                            _maskData[linkedIndex] = 255;
-                    }
-                }
+                //        // Fill in the data for all the linked data indices based on the location of the original id
+                //        for (unsigned int linkedIndex : v)
+                //            _maskData[linkedIndex] = 255;
+                //    }
+                //}
 
                 _maskData[targetPixelIndex] = 255;
             }
