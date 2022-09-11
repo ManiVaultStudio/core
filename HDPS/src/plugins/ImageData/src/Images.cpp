@@ -23,6 +23,8 @@ Images::Images(hdps::CoreInterface* core, QString dataName, const QString& guid 
     _maskData()
 {
     _imageData = &getRawData<ImageData>();
+
+    setLinkedDataFlags(0);
 }
 
 void Images::init()
@@ -416,22 +418,25 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                 for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
                     const auto targetPixelIndex = globalIndices[localPointIndex];
                     
-                    // If the data has any linked data
-                    //for (LinkedData& ls : points->getLinkedData())
-                    //{
-                    //    // Check if the linked data has the same original full data, because we don't want to
-                    //    // add data here that belongs to a different dataset
-                    //    if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
-                    //    {
-                    //        const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
-                    //        
-                    //        // Fill in the data for all the linked data indices based on the location of the original id
-                    //        for (unsigned int linkedIndex : v)
-                    //        {
-                    //            scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
-                    //        }
-                    //    }
-                    //}
+                    if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
+                        
+                        // If the data has any linked data
+                        for (LinkedData& ls : points->getLinkedData())
+                        {
+                            // Check if the linked data has the same original full data, because we don't want to
+                            // add data here that belongs to a different dataset
+                            if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
+                            {
+                                const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+                                
+                                // Fill in the data for all the linked data indices based on the location of the original id
+                                for (unsigned int linkedIndex : v)
+                                {
+                                    scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
+                                }
+                            }
+                        }
+                    }
 
                     scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
                 }
@@ -468,30 +473,33 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
         // Iterate over all clusters
         for (auto& cluster : clusters->getClusters()) {
-            // If the data has any linked data
-            for (LinkedData& ls : embedding->getLinkedData())
-            {
-                // Check if the linked data has the same original full data, because we don't want to
-                // add data here that belongs to a different dataset
-                if (ls.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
-                {
-                    for (const auto localIndex : cluster.getIndices())
-                    {
-                        const std::vector<unsigned int>& v = ls.getMapping().at(globalIndices[localIndex]);
+            if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
 
-                        // Fill in the data for all the linked data indices based on the location of the original id
-                        for (unsigned int linkedIndex : v)
+                // If the data has any linked data
+                for (LinkedData& ls : embedding->getLinkedData())
+                {
+                    // Check if the linked data has the same original full data, because we don't want to
+                    // add data here that belongs to a different dataset
+                    if (ls.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
+                    {
+                        for (const auto localIndex : cluster.getIndices())
                         {
-                            scalarData[linkedIndex] = clusterIndex;
+                            const std::vector<unsigned int>& v = ls.getMapping().at(globalIndices[localIndex]);
+
+                            // Fill in the data for all the linked data indices based on the location of the original id
+                            for (unsigned int linkedIndex : v)
+                            {
+                                scalarData[linkedIndex] = clusterIndex;
+                            }
                         }
                     }
                 }
-            }
-            // Iterate over all indices in the cluster and assign cluster index to scalar data
-            for (const auto localIndex : cluster.getIndices())
-                scalarData[globalIndices[localIndex]] = clusterIndex;
+                // Iterate over all indices in the cluster and assign cluster index to scalar data
+                for (const auto localIndex : cluster.getIndices())
+                    scalarData[globalIndices[localIndex]] = clusterIndex;
 
-            clusterIndex++;
+                clusterIndex++;
+            }
         }
     }
 }
@@ -527,20 +535,23 @@ void Images::computeMaskData()
             for (std::int32_t localPointIndex = 0; localPointIndex < globalIndices.size(); localPointIndex++) {
                 const auto targetPixelIndex = globalIndices[localPointIndex];
 
-                // If the data has any linked data
-                //for (LinkedData& ls : points->getLinkedData())
-                //{
-                //    // Check if the linked data has the same original full data, because we don't want to
-                //    // add data here that belongs to a different dataset
-                //    if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
-                //    {
-                //        const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+                if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
 
-                //        // Fill in the data for all the linked data indices based on the location of the original id
-                //        for (unsigned int linkedIndex : v)
-                //            _maskData[linkedIndex] = 255;
-                //    }
-                //}
+                    // If the data has any linked data
+                    for (LinkedData& ls : points->getLinkedData())
+                    {
+                        // Check if the linked data has the same original full data, because we don't want to
+                        // add data here that belongs to a different dataset
+                        if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
+                        {
+                            const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+
+                            // Fill in the data for all the linked data indices based on the location of the original id
+                            for (unsigned int linkedIndex : v)
+                                _maskData[linkedIndex] = 255;
+                        }
+                    }
+                }
 
                 _maskData[targetPixelIndex] = 255;
             }
@@ -568,21 +579,25 @@ void Images::computeMaskData()
 
         // Iterate over all clusters
         for (auto& cluster : clusters->getClusters()) {
-            // If the data has any linked data
-            for (LinkedData& ls : embedding->getLinkedData())
-            {
-                // Check if the linked data has the same original full data, because we don't want to
-                // add data here that belongs to a different dataset
-                if (ls.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
-                {
-                    for (const auto localIndex : cluster.getIndices())
-                    {
-                        const std::vector<unsigned int>& v = ls.getMapping().at(globalIndices[localIndex]);
 
-                        // Fill in the data for all the linked data indices based on the location of the original id
-                        for (unsigned int linkedIndex : v)
+            if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
+
+                // If the data has any linked data
+                for (LinkedData& ls : embedding->getLinkedData())
+                {
+                    // Check if the linked data has the same original full data, because we don't want to
+                    // add data here that belongs to a different dataset
+                    if (ls.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
+                    {
+                        for (const auto localIndex : cluster.getIndices())
                         {
-                            _maskData[linkedIndex] = 255;
+                            const std::vector<unsigned int>& v = ls.getMapping().at(globalIndices[localIndex]);
+
+                            // Fill in the data for all the linked data indices based on the location of the original id
+                            for (unsigned int linkedIndex : v)
+                            {
+                                _maskData[linkedIndex] = 255;
+                            }
                         }
                     }
                 }

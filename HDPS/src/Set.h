@@ -40,6 +40,13 @@ public:
         Proxy       /** The set does not have raw data, it relies on proxy datasets to obtain data */
     };
 
+    /** Linked data propagation flags */
+    enum LinkedDataFlag {
+        Send        = 0x00001,          /** The set may send linked propagate linked data */
+        Receive     = 0x00002,          /** The set may receive linked data */
+        SendReceive = Send | Receive    /** The set may send and receive linked data */
+    };
+
 public:
 
     /**
@@ -60,7 +67,9 @@ public:
         _sourceDataset(),
         _properties(),
         _groupIndex(-1),
-        _analysis(nullptr)
+        _analysis(nullptr),
+        _linkedData(),
+        _linkedDataFlags(LinkedDataFlag::SendReceive)
     {
     }
 
@@ -202,21 +211,6 @@ public:
         return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
-    void addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
-    {
-        _linkedData.emplace_back(toSmartPointer(), targetDataSet);
-        _linkedData.back().setMapping(mapping);
-    }
-
-    const std::vector<hdps::LinkedData>& getLinkedData() const
-    {
-        return _linkedData;
-    }
-
-    std::vector<hdps::LinkedData>& getLinkedData()
-    {
-        return _linkedData;
-    }
 
     /**
      * Get smart pointer to set
@@ -516,6 +510,60 @@ public: // Actions
      */
     void populateContextMenu(QMenu* contextMenu);
 
+public: // Linked data
+
+    void addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
+    {
+        _linkedData.emplace_back(toSmartPointer(), targetDataSet);
+        _linkedData.back().setMapping(mapping);
+    }
+
+    const std::vector<hdps::LinkedData>& getLinkedData() const
+    {
+        return _linkedData;
+    }
+
+    std::vector<hdps::LinkedData>& getLinkedData()
+    {
+        return _linkedData;
+    }
+
+    /**
+     * Get flags for linked data
+     * @return Flags for linked data
+     */
+    std::int32_t getLinkedDataFlags() {
+        return _linkedDataFlags;
+    }
+
+    /**
+     * Set flags for linked data
+     * @param linkedDataFlags Flags for linked data
+     */
+    void setLinkedDataFlags(std::int32_t linkedDataFlags) {
+        _linkedDataFlags = linkedDataFlags;
+    }
+
+    /**
+     * Set linked data flag
+     * @param linkedDataFlag Linked data
+     */
+    void setLinkedDataFlag(std::int32_t linkedDataFlag, bool set = true) {
+        if (set)
+            _linkedDataFlags |= linkedDataFlag;
+        else
+            _linkedDataFlags &= ~linkedDataFlag;
+    }
+
+    /**
+     * Determine whether \p linkedDataFlag is set or not
+     * @param linkedDataFlag Linked data
+     * @return Boolean determining  linkedDataFlag Linked data
+     */
+    bool hasLinkedDataFlag(std::int32_t linkedDataFlag) {
+        return _linkedDataFlags & linkedDataFlag;
+    }
+
 protected:
 
     /** Get raw data */
@@ -547,18 +595,20 @@ public: // Operators
      * @param other Reference to assign from
      */
     DatasetImpl& operator=(const DatasetImpl& other) {
-        _core           = other._core;
-        _storageType    = other._storageType;
-        _guiName        = other._guiName;
-        _rawData        = other._rawData;
-        _rawDataName    = other._rawDataName;
-        _all            = other._all;
-        _derived        = other._derived;
-        _sourceDataset  = other._sourceDataset;
-        _properties     = other._properties;
-        _groupIndex     = other._groupIndex;
-        _analysis       = other._analysis;
-        _proxyMembers  = other._proxyMembers;
+        _core               = other._core;
+        _storageType        = other._storageType;
+        _guiName            = other._guiName;
+        _rawData            = other._rawData;
+        _rawDataName        = other._rawDataName;
+        _all                = other._all;
+        _derived            = other._derived;
+        _sourceDataset      = other._sourceDataset;
+        _properties         = other._properties;
+        _groupIndex         = other._groupIndex;
+        _analysis           = other._analysis;
+        _proxyMembers       = other._proxyMembers;
+        _linkedData         = other._linkedData;
+        _linkedDataFlags    = other._linkedDataFlags;
 
         return *this;
     }
@@ -567,20 +617,21 @@ protected:
     CoreInterface*              _core;              /** Pointer to the core interface */
 
 private:
-    mutable plugin::RawData*    _rawData;           /** Pointer to the raw data referenced in this set */
-    StorageType                 _storageType;       /** Type of storage (own raw data or act as proxy for other datasets) */
-    QString                     _guid;              /** Globally unique dataset name */
-    QString                     _guiName;           /** Name of the dataset in the graphical user interface */
-    QString                     _rawDataName;       /** Name of the raw data */
-    bool                        _all;               /** Whether this is the full dataset */
-    bool                        _derived;           /** Whether this dataset is derived from another dataset */
-    Dataset<DatasetImpl>        _sourceDataset;     /** Smart pointer to the source dataset (if any) */
-    Dataset<DatasetImpl>        _fullDataset;       /** Smart pointer to the original full dataset (if this is a subset) */
-    QMap<QString, QVariant>     _properties;        /** Properties map */
-    std::int32_t                _groupIndex;        /** Group index (sets with identical indices can for instance share selection) */
-    plugin::AnalysisPlugin*     _analysis;          /** Pointer to analysis plugin that created the set (if any) */
-    Datasets                    _proxyMembers;      /** Member datasets in case of a proxy dataset */
-    std::vector<LinkedData>     _linkedData;        /** List of linked datasets */
+    mutable plugin::RawData*    _rawData;                   /** Pointer to the raw data referenced in this set */
+    StorageType                 _storageType;               /** Type of storage (own raw data or act as proxy for other datasets) */
+    QString                     _guid;                      /** Globally unique dataset name */
+    QString                     _guiName;                   /** Name of the dataset in the graphical user interface */
+    QString                     _rawDataName;               /** Name of the raw data */
+    bool                        _all;                       /** Whether this is the full dataset */
+    bool                        _derived;                   /** Whether this dataset is derived from another dataset */
+    Dataset<DatasetImpl>        _sourceDataset;             /** Smart pointer to the source dataset (if any) */
+    Dataset<DatasetImpl>        _fullDataset;               /** Smart pointer to the original full dataset (if this is a subset) */
+    QMap<QString, QVariant>     _properties;                /** Properties map */
+    std::int32_t                _groupIndex;                /** Group index (sets with identical indices can for instance share selection) */
+    plugin::AnalysisPlugin*     _analysis;                  /** Pointer to analysis plugin that created the set (if any) */
+    Datasets                    _proxyMembers;              /** Member datasets in case of a proxy dataset */
+    std::vector<LinkedData>     _linkedData;                /** List of linked datasets */
+    std::int32_t                _linkedDataFlags;           /** Flags for linked data */
 
     friend class Core;
     friend class DataManager;
