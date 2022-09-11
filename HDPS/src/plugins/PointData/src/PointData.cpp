@@ -291,6 +291,8 @@ Points::~Points()
 
 void Points::init()
 {
+    DatasetImpl::init();
+
     _infoAction = QSharedPointer<InfoAction>::create(this, *this);
 
     addAction(*_infoAction.get());
@@ -688,17 +690,16 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
     Dataset<Points> targetDataset   = ld.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
+    Timer timer(QString("%1 %2 %3").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName()));
+
     Datasets notified;
 
     if (ignoreDatasets == nullptr)
         ignoreDatasets = &notified;
 
     // Do not notify if the dataset has already been notified
-    if (ignoreDatasets != nullptr && ignoreDatasets->contains(targetDataset))
+    if (ignoreDatasets->contains(targetDataset))
         return;
-
-    if (ignoreDatasets != nullptr)
-        *ignoreDatasets << targetDataset;
 
     const hdps::SelectionMap& mapping = ld.getMapping();   
 
@@ -717,16 +718,23 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
         }
     }
     
-    std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
+    if (targetDataset->isProxy()) {
+        std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
 
-    for (auto& [key, value] : mapping)
-        for (const auto& v : value)
-            targetIndicesSet.erase(v);
+        for (auto& [key, value] : mapping)
+            for (const auto& v : value)
+                targetIndicesSet.erase(v);
 
-    for (const auto& linkedIndex : linkedIndices)
-        targetIndicesSet.insert(linkedIndex);
+        for (const auto& linkedIndex : linkedIndices)
+            targetIndicesSet.insert(linkedIndex);
 
-    targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
+        targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
+    }
+    else {
+        targetSelection->indices = linkedIndices;
+    }
+
+    *ignoreDatasets << targetDataset;
 
     for (auto targetLd : targetDataset->getLinkedData())
         resolveLinkedData(targetLd, targetSelection->indices, ignoreDatasets);
