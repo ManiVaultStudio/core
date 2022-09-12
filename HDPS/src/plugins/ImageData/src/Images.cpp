@@ -439,7 +439,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                             }
                         }
                     }
-
+                    
                     scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
                 }
             });
