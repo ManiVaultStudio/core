@@ -684,13 +684,13 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
+void resolveLinkedPointData(LinkedData& ld, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr, bool force = false)
 {
     Dataset<Points> sourceDataset   = ld.getSourceDataSet();
     Dataset<Points> targetDataset   = ld.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
-    if (!targetDataset->hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive))
+    if (!force && !targetDataset->hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive))
         return;
 
     Datasets notified;
@@ -702,10 +702,10 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
     if (ignoreDatasets->contains(targetDataset))
         return;
 
-    qDebug() << QString("%1, %2, %3").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName());
+    //qDebug() << QString("%1, %2, %3, %4").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName(), (force ? "force" : ""));
 
     {
-        Timer timer("Creating maps");
+        //Timer timer("Creating maps");
 
         const hdps::SelectionMap& mapping = ld.getMapping();
 
@@ -745,29 +745,25 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
     *ignoreDatasets << targetDataset;
 
     for (auto targetLd : targetDataset->getLinkedData())
-        resolveLinkedData(targetLd, targetSelection->indices, ignoreDatasets);
+        resolveLinkedPointData(targetLd, targetSelection->indices, ignoreDatasets, force);
+}
+
+void Points::resolveLinkedData(bool force /*= false*/)
+{
+    // Check for linked data in this dataset and resolve it
+    for (hdps::LinkedData& linkedData : getLinkedData())
+        resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr, force);
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
     //qDebug() << QString("%1, %2").arg(__FUNCTION__, getGuiName());
-    //Timer timer(QString("%1, %2").arg(__FUNCTION__, getGuiName()));
 
     auto selection = getSelection<Points>();
 
     selection->indices = indices;
 
-    // Check for linked data in this dataset and in potential source data, and resolve it
-    for (hdps::LinkedData& linkedData : getLinkedData())
-        resolveLinkedData(linkedData, indices);
-
-    // Check if the dataset is derived, and if so, resolve the linked selections of the source dataset as well
-    //if (isDerivedData())
-    //{
-    //    Dataset<Points> sourceData = getSourceDataset<Points>();
-    //    for (hdps::LinkedData& linkedData : sourceData->getLinkedData())
-    //        resolveLinkedData(linkedData, indices);
-    //}
+    resolveLinkedData();
 }
 
 bool Points::canSelect() const

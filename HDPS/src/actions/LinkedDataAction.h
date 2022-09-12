@@ -4,6 +4,7 @@
 
 #include "GroupAction.h"
 #include "ToggleAction.h"
+#include "TriggerAction.h"
 
 namespace hdps {
     class DatasetImpl;
@@ -32,8 +33,15 @@ public:
      */
     LinkedDataAction(QObject* parent, Dataset<DatasetImpl> dataset);
 
+public: // Action getters
+
+    ToggleAction& getMayReceiveAction() { return _mayReceiveAction; }
+    ToggleAction& getMaySendAction() { return _maySendAction; }
+    TriggerAction& getResolveAction() { return _resolveAction; }
+
 protected:
     Dataset<DatasetImpl>    _dataset;               /** Smart pointer to dataset */
     ToggleAction            _mayReceiveAction;      /** May receive linked data action */
     ToggleAction            _maySendAction;         /** May send linked data action */
+    TriggerAction           _resolveAction;         /** Resolve linked data */
 };

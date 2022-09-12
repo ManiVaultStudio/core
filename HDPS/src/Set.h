@@ -515,57 +515,42 @@ public: // Actions
 
 public: // Linked data
 
-    void addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
-    {
-        _linkedData.emplace_back(toSmartPointer(), targetDataSet);
-        _linkedData.back().setMapping(mapping);
-    }
+    void addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping);
 
-    const std::vector<hdps::LinkedData>& getLinkedData() const
-    {
-        return _linkedData;
-    }
+    const std::vector<hdps::LinkedData>& getLinkedData() const;
 
-    std::vector<hdps::LinkedData>& getLinkedData()
-    {
-        return _linkedData;
-    }
+    std::vector<hdps::LinkedData>& getLinkedData();
 
     /**
      * Get flags for linked data
      * @return Flags for linked data
      */
-    std::int32_t getLinkedDataFlags() {
-        return _linkedDataFlags;
-    }
+    std::int32_t getLinkedDataFlags();
 
     /**
      * Set flags for linked data
      * @param linkedDataFlags Flags for linked data
      */
-    void setLinkedDataFlags(std::int32_t linkedDataFlags) {
-        _linkedDataFlags = linkedDataFlags;
-    }
+    void setLinkedDataFlags(std::int32_t linkedDataFlags);
 
     /**
      * Set linked data flag
      * @param linkedDataFlag Linked data
      */
-    void setLinkedDataFlag(std::int32_t linkedDataFlag, bool set = true) {
-        if (set)
-            _linkedDataFlags |= linkedDataFlag;
-        else
-            _linkedDataFlags &= ~linkedDataFlag;
-    }
+    void setLinkedDataFlag(std::int32_t linkedDataFlag, bool set = true);
 
     /**
      * Determine whether \p linkedDataFlag is set or not
      * @param linkedDataFlag Linked data
      * @return Boolean determining  linkedDataFlag Linked data
      */
-    bool hasLinkedDataFlag(std::int32_t linkedDataFlag) {
-        return _linkedDataFlags & linkedDataFlag;
-    }
+    bool hasLinkedDataFlag(std::int32_t linkedDataFlag);
+
+    /**
+     * Resolves linked data for the dataset
+     * @param force Force update of all linked data (ignores linked data flags)
+     */
+    virtual void resolveLinkedData(bool force = false) {};
 
 protected:
 

@@ -247,6 +247,49 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             contextMenu->addAction(groupDataAction);
         }
 
+        auto linkedDataMenu = new QMenu("Linked data");
+
+        linkedDataMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
+
+        auto linkedDataReceiveMenu  = new QMenu("Receive");
+        auto receiveEnableAction    = new QAction("Enable");
+        auto receiveDisableAction   = new QAction("Disable");
+
+        connect(receiveEnableAction, &QAction::triggered, this, [this, datasets]() -> void {
+            for (auto dataset : datasets)
+                dataset->setLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive);
+        });
+
+        connect(receiveDisableAction, &QAction::triggered, this, [this, datasets]() -> void {
+            for (auto dataset : datasets)
+                dataset->setLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive, false);
+        });
+
+        linkedDataReceiveMenu->addAction(receiveEnableAction);
+        linkedDataReceiveMenu->addAction(receiveDisableAction);
+
+        auto linkedDataSendMenu     = new QMenu("Send");
+        auto sendEnableAction       = new QAction("Enable");
+        auto sendDisableAction      = new QAction("Disable");
+
+        connect(sendEnableAction, &QAction::triggered, this, [this, datasets]() -> void {
+            for (auto dataset : datasets)
+                dataset->setLinkedDataFlag(DatasetImpl::LinkedDataFlag::Send);
+        });
+
+        connect(sendDisableAction, &QAction::triggered, this, [this, datasets]() -> void {
+            for (auto dataset : datasets)
+                dataset->setLinkedDataFlag(DatasetImpl::LinkedDataFlag::Send, false);
+        });
+
+        linkedDataSendMenu->addAction(sendEnableAction);
+        linkedDataSendMenu->addAction(sendDisableAction);
+
+        linkedDataMenu->addMenu(linkedDataReceiveMenu);
+        linkedDataMenu->addMenu(linkedDataSendMenu);
+
+        contextMenu->addMenu(linkedDataMenu);
+
         contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
     });
 

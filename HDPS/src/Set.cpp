@@ -233,6 +233,12 @@ void DatasetImpl::populateContextMenu(QMenu* contextMenu)
     return getDataHierarchyItem().populateContextMenu(contextMenu);
 }
 
+void DatasetImpl::addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
+{
+    _linkedData.emplace_back(toSmartPointer(), targetDataSet);
+    _linkedData.back().setMapping(mapping);
+}
+
 hdps::DatasetImpl::StorageType DatasetImpl::getStorageType() const
 {
     return _storageType;
@@ -259,6 +265,42 @@ QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::
     }
 
     return QIcon();
+}
+
+const std::vector<hdps::LinkedData>& DatasetImpl::getLinkedData() const
+{
+    return _linkedData;
+}
+
+std::vector<hdps::LinkedData>& DatasetImpl::getLinkedData()
+{
+    return _linkedData;
+}
+
+std::int32_t DatasetImpl::getLinkedDataFlags()
+{
+    return _linkedDataFlags;
+}
+
+void DatasetImpl::setLinkedDataFlags(std::int32_t linkedDataFlags)
+{
+    _linkedDataFlags = linkedDataFlags;
+}
+
+void DatasetImpl::setLinkedDataFlag(std::int32_t linkedDataFlag, bool set /*= true*/)
+{
+    if (set)
+        _linkedDataFlags |= linkedDataFlag;
+    else
+        _linkedDataFlags &= ~linkedDataFlag;
+
+    _linkedDataAction.getMayReceiveAction().setChecked(hasLinkedDataFlag(LinkedDataFlag::Receive));
+    _linkedDataAction.getMaySendAction().setChecked(hasLinkedDataFlag(LinkedDataFlag::Send));
+}
+
+bool DatasetImpl::hasLinkedDataFlag(std::int32_t linkedDataFlag)
+{
+    return _linkedDataFlags & linkedDataFlag;
 }
 
 }
