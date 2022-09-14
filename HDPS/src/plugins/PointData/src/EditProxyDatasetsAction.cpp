@@ -1,5 +1,7 @@
 #include "EditProxyDatasetsAction.h"
 
+#include <DataHierarchyItem.h>
+
 #include <QHBoxLayout>
 #include <QListView>
 #include <QStringListModel>
@@ -34,7 +36,7 @@ EditProxyDatasetsAction::Widget::Widget(QWidget* parent, EditProxyDatasetsAction
         QStringList proxyMemberNames;
 
         for (const auto& proxyMember : editProxyDatasetsAction->getPoints()->getProxyMembers())
-            proxyMemberNames << proxyMember->getGuiName();
+            proxyMemberNames << proxyMember->getDataHierarchyItem().getFullPathName();
 
         listView->setModel(new QStringListModel(proxyMemberNames));
     };

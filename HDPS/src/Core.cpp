@@ -636,8 +636,6 @@ void Core::notifyDatasetSelectionChanged(const Dataset<DatasetImpl>& dataset, Da
         qDebug() << __FUNCTION__ << dataset->getGuiName() << datasetNotifiedString;
 #endif
 
-        qDebug() << __FUNCTION__ << dataset->getGuiName();
-
         Datasets notified{ dataset };
 
         if (ignoreDatasets == nullptr)

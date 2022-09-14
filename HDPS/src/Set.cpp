@@ -62,22 +62,33 @@ std::int32_t DatasetImpl::getSelectionSize() const
 
 void DatasetImpl::lock()
 {
-    setLocked(true);
+    _locked = true;
+
+    Application::core()->notifyDatasetLocked(toSmartPointer());
+
+    emit getDataHierarchyItem().lockedChanged(_locked);
 }
 
 void DatasetImpl::unlock()
 {
-    setLocked(false);
+    _locked = false;
+
+    Application::core()->notifyDatasetUnlocked(toSmartPointer());
+
+    emit getDataHierarchyItem().lockedChanged(_locked);
 }
 
 bool DatasetImpl::isLocked() const
 {
-    return getDataHierarchyItem().getLocked();
+    return _locked;
 }
 
 void DatasetImpl::setLocked(bool locked)
 {
-    getDataHierarchyItem().setLocked(locked);
+    if (locked)
+        lock();
+    else
+        unlock();
 }
 
 void DatasetImpl::setAnalysis(plugin::AnalysisPlugin* analysis)
@@ -93,6 +104,7 @@ hdps::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
 void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Name");
+    variantMapMustContain(variantMap, "Locked");
     variantMapMustContain(variantMap, "GUID");
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "HasAnalysis");
@@ -100,6 +112,9 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     setGuiName(variantMap["Name"].toString());
     
+    if (variantMap.contains("Locked"))
+        setLocked(variantMap["Locked"].toBool());
+
     _guid = variantMap["GUID"].toString();
 
     if (variantMap.contains("Derived")) {
@@ -136,6 +151,7 @@ QVariantMap DatasetImpl::toVariantMap() const
 
     return {
         { "Name", QVariant::fromValue(getGuiName()) },
+        { "Locked", _locked },
         { "GUID", QVariant::fromValue(getGuid()) },
         { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
         { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },
@@ -293,9 +309,6 @@ void DatasetImpl::setLinkedDataFlag(std::int32_t linkedDataFlag, bool set /*= tr
         _linkedDataFlags |= linkedDataFlag;
     else
         _linkedDataFlags &= ~linkedDataFlag;
-
-    _linkedDataAction.getMayReceiveAction().setChecked(hasLinkedDataFlag(LinkedDataFlag::Receive));
-    _linkedDataAction.getMaySendAction().setChecked(hasLinkedDataFlag(LinkedDataFlag::Send));
 }
 
 bool DatasetImpl::hasLinkedDataFlag(std::int32_t linkedDataFlag)

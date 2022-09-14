@@ -7,7 +7,6 @@
 #include "LinkedData.h"
 
 #include "actions/WidgetAction.h"
-#include "actions/LinkedDataAction.h"
 #include "util/Miscellaneous.h"
 
 #include <QString>
@@ -71,7 +70,7 @@ public:
         _analysis(nullptr),
         _linkedData(),
         _linkedDataFlags(LinkedDataFlag::SendReceive),
-        _linkedDataAction(this, *this)
+        _locked(false)
     {
     }
 
@@ -86,7 +85,6 @@ public:
     /** Performs startup initialization */
     virtual void init()
     {
-        addAction(_linkedDataAction);
     };
 
     /**
@@ -620,7 +618,7 @@ private:
     Datasets                    _proxyMembers;              /** Member datasets in case of a proxy dataset */
     std::vector<LinkedData>     _linkedData;                /** List of linked datasets */
     std::int32_t                _linkedDataFlags;           /** Flags for linked data */
-    LinkedDataAction            _linkedDataAction;          /** Linked data action */
+    bool                        _locked;                    /** Whether the dataset is locked */
 
     friend class Core;
     friend class DataManager;

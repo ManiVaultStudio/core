@@ -362,7 +362,6 @@ protected:
     DataHierarchyItems          _children;              /** Pointers to child items (if any) */
     bool                        _visible;               /** Whether the dataset is visible */
     bool                        _selected;              /** Whether the hierarchy item is selected */
-    bool                        _locked;                /** Whether the dataset is locked */
     bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
     QString                     _taskDescription;       /** Task description */
     float                       _taskProgress;          /** Task progress */

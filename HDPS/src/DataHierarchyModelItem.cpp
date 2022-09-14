@@ -195,7 +195,7 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
                     return "";
 
                 case Column::IsLocked:
-                    return _dataHierarchyItem->getLocked();
+                    return QString("Dataset is %1").arg(_dataHierarchyItem->getLocked() ? "locked" : "unlocked");
 
                 default:
                     break;

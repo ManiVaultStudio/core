@@ -169,8 +169,8 @@ Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
         itemFlags |= Qt::ItemIsEditable;
 
     // Disable when locked
-    if (itemIsLocked)
-        itemFlags &= ~Qt::ItemIsEnabled;
+    //if (itemIsLocked)// && index.column() != DataHierarchyModelItem::Column::IsLocked)
+    //    itemFlags &= ~Qt::ItemIsEnabled;
 
     return itemFlags;
 }

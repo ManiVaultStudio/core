@@ -15,6 +15,7 @@
 #include <QVBoxLayout>
 #include <QMenu>
 #include <QLabel>
+#include <QStyleOptionViewItem>
 
 #include <stdexcept>
 
@@ -26,6 +27,37 @@ namespace hdps
 
 namespace gui
 {
+
+/**
+ * Tree view item delegate class
+ * Qt natively does not support disabled items to be selected, this class solves that
+ * When an item (dataset) is locked, merely the visual representation is changed and not the item flags (only appears disabled)
+ */
+class ItemDelegate : public QStyledItemDelegate {
+public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
+    explicit ItemDelegate(QObject* parent = nullptr) :
+        QStyledItemDelegate(parent)
+    {
+    }
+
+protected:
+
+    /**
+     * Init the style option(s) for the item delegate (we override the options to paint disabled when locked)
+     */
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
+    {
+        QStyledItemDelegate::initStyleOption(option, index);
+
+        if (index.siblingAtColumn(DataHierarchyModelItem::Column::IsLocked).data(Qt::EditRole).toBool())
+            option->state &= ~QStyle::State_Enabled;
+    }
+};
 
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     QWidget(parent),
@@ -52,6 +84,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
+    _treeView.setItemDelegate(new ItemDelegate());
 
     _treeView.header()->setStretchLastSection(false);
     _treeView.header()->setMinimumSectionSize(18);
@@ -162,7 +195,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     // Invoked the custom context menu when requested by the tree view
     connect(&_treeView, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
-
         const auto selectedRows = _selectionModel.selectedRows();
 
         Datasets datasets;
@@ -177,43 +209,43 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             switch (pluginType)
             {
-                case plugin::Type::ANALYSIS:
-                {
-                    menu->setTitle("Analyze");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
-                    break;
-                }
+            case plugin::Type::ANALYSIS:
+            {
+                menu->setTitle("Analyze");
+                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
+                break;
+            }
 
-                case plugin::Type::LOADER:
-                {
-                    menu->setTitle("Import");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-                    break;
-                }
+            case plugin::Type::LOADER:
+            {
+                menu->setTitle("Import");
+                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+                break;
+            }
 
-                case plugin::Type::WRITER:
-                {
-                    menu->setTitle("Export");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-                    break;
-                }
+            case plugin::Type::WRITER:
+            {
+                menu->setTitle("Export");
+                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+                break;
+            }
 
-                case plugin::Type::TRANSFORMATION:
-                {
-                    menu->setTitle("Transform");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
-                    break;
-                }
+            case plugin::Type::TRANSFORMATION:
+            {
+                menu->setTitle("Transform");
+                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
+                break;
+            }
 
-                case plugin::Type::VIEW:
-                {
-                    menu->setTitle("View");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
-                    break;
-                }
+            case plugin::Type::VIEW:
+            {
+                menu->setTitle("View");
+                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+                break;
+            }
 
-                default:
-                    break;
+            default:
+                break;
             }
 
             for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, datasets))
@@ -228,7 +260,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         addMenu(plugin::Type::WRITER);
         addMenu(plugin::Type::TRANSFORMATION);
         addMenu(plugin::Type::VIEW);
-        
+
         QSet<DataType> dataTypes;
 
         for (const auto& dataset : datasets)
@@ -242,53 +274,72 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             connect(groupDataAction, &QAction::triggered, [this, datasets]() -> void {
                 Application::core()->groupDatasets(datasets);
-            });
+                });
 
             contextMenu->addAction(groupDataAction);
         }
 
-        auto linkedDataMenu = new QMenu("Linked data");
+        auto lockMenu   = new QMenu("Lock");
+        auto unlockMenu = new QMenu("Unlock");
+        
+        lockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
+        unlockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));
 
-        linkedDataMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
+        auto lockAllAction = new QAction("All");
 
-        auto linkedDataReceiveMenu  = new QMenu("Receive");
-        auto receiveEnableAction    = new QAction("Enable");
-        auto receiveDisableAction   = new QAction("Disable");
-
-        connect(receiveEnableAction, &QAction::triggered, this, [this, datasets]() -> void {
-            for (auto dataset : datasets)
-                dataset->setLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive);
+        connect(lockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
+            for (auto dataset : Application::core()->requestAllDataSets())
+                dataset->lock();
         });
 
-        connect(receiveDisableAction, &QAction::triggered, this, [this, datasets]() -> void {
-            for (auto dataset : datasets)
-                dataset->setLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive, false);
+        lockMenu->setEnabled(false);
+        unlockMenu->setEnabled(false);
+
+        QVector<bool> locked;
+
+        for (auto dataset : Application::core()->requestAllDataSets())
+            locked << dataset->isLocked();
+
+        const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
+
+        unlockMenu->setEnabled(numberOfLockedDatasets >= 1);
+        lockMenu->setEnabled(numberOfLockedDatasets < Application::core()->requestAllDataSets().size());
+
+        auto unlockAllAction = new QAction("All");
+
+        connect(unlockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
+            for (auto dataset : Application::core()->requestAllDataSets())
+                dataset->unlock();
         });
 
-        linkedDataReceiveMenu->addAction(receiveEnableAction);
-        linkedDataReceiveMenu->addAction(receiveDisableAction);
+        auto lockSelectedAction = new QAction("Selected");
+        
+        lockSelectedAction->setEnabled(!datasets.isEmpty());
 
-        auto linkedDataSendMenu     = new QMenu("Send");
-        auto sendEnableAction       = new QAction("Enable");
-        auto sendDisableAction      = new QAction("Disable");
-
-        connect(sendEnableAction, &QAction::triggered, this, [this, datasets]() -> void {
+        connect(lockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
             for (auto dataset : datasets)
-                dataset->setLinkedDataFlag(DatasetImpl::LinkedDataFlag::Send);
+                dataset->lock();
         });
 
-        connect(sendDisableAction, &QAction::triggered, this, [this, datasets]() -> void {
+        auto unlockSelectedAction   = new QAction("Selected");
+
+        unlockSelectedAction->setEnabled(!datasets.isEmpty());
+
+        connect(unlockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
             for (auto dataset : datasets)
-                dataset->setLinkedDataFlag(DatasetImpl::LinkedDataFlag::Send, false);
+                dataset->unlock();
         });
+        
+        lockMenu->addAction(lockSelectedAction);
+        lockMenu->addAction(lockAllAction);
 
-        linkedDataSendMenu->addAction(sendEnableAction);
-        linkedDataSendMenu->addAction(sendDisableAction);
+        unlockMenu->addAction(unlockSelectedAction);
+        unlockMenu->addAction(unlockAllAction);
 
-        linkedDataMenu->addMenu(linkedDataReceiveMenu);
-        linkedDataMenu->addMenu(linkedDataSendMenu);
+        contextMenu->addSeparator();
 
-        contextMenu->addMenu(linkedDataMenu);
+        contextMenu->addMenu(lockMenu);
+        contextMenu->addMenu(unlockMenu);
 
         contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
     });

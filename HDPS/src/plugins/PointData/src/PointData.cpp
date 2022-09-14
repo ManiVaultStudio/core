@@ -625,7 +625,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
             SelectionMap selectionMapToTarget;
 
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
+                selectionMapToTarget.getMap()[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
 
             addLinkedData(targetPoints, selectionMapToTarget);
         }
@@ -635,7 +635,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
             SelectionMap selectionMapToSource;
 
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToSource[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
+                selectionMapToSource.getMap()[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
 
             targetPoints->addLinkedData(toSmartPointer(), selectionMapToSource);
 
@@ -684,10 +684,10 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedPointData(LinkedData& ld, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr, bool force = false)
+void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr, bool force = false)
 {
-    Dataset<Points> sourceDataset   = ld.getSourceDataSet();
-    Dataset<Points> targetDataset   = ld.getTargetDataset();
+    Dataset<Points> sourceDataset   = linkedData.getSourceDataSet();
+    Dataset<Points> targetDataset   = linkedData.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
     if (!force && !targetDataset->hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive))
@@ -702,12 +702,12 @@ void resolveLinkedPointData(LinkedData& ld, const std::vector<std::uint32_t>& in
     if (ignoreDatasets->contains(targetDataset))
         return;
 
-    //qDebug() << QString("%1, %2, %3, %4").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName(), (force ? "force" : ""));
+    qDebug() << QString("%1, %2, %3, %4").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName(), (force ? "force" : ""));
 
     {
         //Timer timer("Creating maps");
 
-        const hdps::SelectionMap& mapping = ld.getMapping();
+        const SelectionMap& mapping = linkedData.getMapping();
 
         // Create separate vector of additional linked selected points
         std::vector<unsigned int> linkedIndices;
@@ -715,11 +715,12 @@ void resolveLinkedPointData(LinkedData& ld, const std::vector<std::uint32_t>& in
         // Reserve at least as much space as required for a 1-1 mapping
         linkedIndices.reserve(indices.size());
 
-        for (const int selectionIndex : indices)
+        for (const auto& selectionIndex : indices)
         {
-            if (mapping.find(selectionIndex) != mapping.end())
+            if (mapping.hasMappingForPointIndex(selectionIndex))
             {
-                const std::vector<unsigned int>& mappedSelection = mapping.at(selectionIndex);
+                std::vector<std::uint32_t> mappedSelection;
+                mapping.populateMappingIndices(selectionIndex, mappedSelection);
                 linkedIndices.insert(linkedIndices.end(), mappedSelection.begin(), mappedSelection.end());
             }
         }
@@ -727,7 +728,7 @@ void resolveLinkedPointData(LinkedData& ld, const std::vector<std::uint32_t>& in
         if (targetDataset->isProxy()) {
             std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
 
-            for (auto& [key, value] : mapping)
+            for (auto& [key, value] : const_cast<SelectionMap&>(mapping).getMap())
                 for (const auto& v : value)
                     targetIndicesSet.erase(v);
 
@@ -742,15 +743,16 @@ void resolveLinkedPointData(LinkedData& ld, const std::vector<std::uint32_t>& in
     }
     
     // Add the target of the linked data (of which we updated the selection indices) to the ignore list
-    *ignoreDatasets << targetDataset;
+    *ignoreDatasets << sourceDataset << targetDataset;
 
+    // Recursively resolve linked point data
     for (auto targetLd : targetDataset->getLinkedData())
         resolveLinkedPointData(targetLd, targetSelection->indices, ignoreDatasets, force);
 }
 
 void Points::resolveLinkedData(bool force /*= false*/)
 {
-    // Check for linked data in this dataset and resolve it
+    // Check for linked data in this dataset and resolve them
     for (hdps::LinkedData& linkedData : getLinkedData())
         resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr, force);
 }

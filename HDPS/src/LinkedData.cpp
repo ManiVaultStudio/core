@@ -6,80 +6,193 @@ using namespace hdps::util;
 
 namespace hdps
 {
-    LinkedData::LinkedData() :
-        Serializable("LinkedData"),
-        _sourceDataSet(),
-        _targetDataSet()
+
+SelectionMap::SelectionMap(Type type /*= Indexed*/) :
+    Serializable("SelectionMapping"),
+    _type(type),
+    _map(),
+    _sourceImageSize(),
+    _targetImageSize()
+{
+}
+
+SelectionMap::SelectionMap(const QSize& sourceImageSize, const QSize& targetImageSize) :
+    Serializable("SelectionMapping"),
+    _type(Type::ImagePyramid),
+    _map(),
+    _sourceImageSize(sourceImageSize),
+    _targetImageSize(targetImageSize)
+{
+}
+
+void SelectionMap::populateMappingIndices(std::uint32_t pointIndex, Indices& indices) const
+{
+    switch (_type)
     {
-    }
+        case Type::Indexed:
+            indices = _map.at(pointIndex);
+            break;
 
-    LinkedData::LinkedData(const Dataset<DatasetImpl>& sourceDataSet, const Dataset<DatasetImpl>& targetDataSet) :
-        Serializable("LinkedData"),
-        _sourceDataSet(sourceDataSet),
-        _targetDataSet(targetDataSet)
-    {
-        Q_ASSERT(_sourceDataSet.isValid());
-        Q_ASSERT(_targetDataSet.isValid());
-    }
+        case Type::ImagePyramid:
+        {
+            const QPoint sourcePixelPosition(pointIndex % _sourceImageSize.width(), static_cast<std::int32_t>(floorf(static_cast<float>(pointIndex) / static_cast<float>(_sourceImageSize.width()))));
 
-    const SelectionMap& LinkedData::getMapping() const
-    {
-        return _mapping;
-    }
+            const auto scaleFactor = static_cast<float>(_targetImageSize.width()) / static_cast<float>(_sourceImageSize.width());
 
-    void LinkedData::setMapping(SelectionMap& mapping)
-    {
-        _mapping = mapping;
-    }
+            if (scaleFactor == 1.0f)
+                indices = Indices({ pointIndex });
 
-    void LinkedData::fromVariantMap(const QVariantMap& variantMap)
-    {
-        variantMapMustContain(variantMap, "SourceDataSet");
-        variantMapMustContain(variantMap, "TargetDataSet");
-        variantMapMustContain(variantMap, "Indices");
-        variantMapMustContain(variantMap, "IndicesSize");
-        variantMapMustContain(variantMap, "Ranges");
-        variantMapMustContain(variantMap, "RangesSize");
+            if (scaleFactor < 1.0f) {
+                const auto levelFactor = static_cast<std::uint32_t>(floorf(1.0f / scaleFactor));
 
-        _sourceDataSet.setDatasetGuid(variantMap["SourceDataSet"].toString());
-        _targetDataSet.setDatasetGuid(variantMap["TargetDataSet"].toString());
+                const QPoint targetPixelPosition(
+                    static_cast<std::int32_t>(floorf(static_cast<float>(sourcePixelPosition.x()) / static_cast<float>(levelFactor))),
+                    static_cast<std::int32_t>(floorf(static_cast<float>(sourcePixelPosition.y()) / static_cast<float>(levelFactor)))
+                );
 
-        std::vector<std::uint32_t> indices;
-        std::vector<std::uint32_t> ranges;
+                indices = Indices({ static_cast<std::uint32_t>(targetPixelPosition.y() * _targetImageSize.width() + targetPixelPosition.x()) });
+            }
 
-        indices.resize(variantMap["IndicesSize"].toInt());
-        ranges.resize(variantMap["RangesSize"].toInt());
+            if (scaleFactor > 1.0f) {
+                const auto levelFactor = static_cast<std::uint32_t>(floorf(scaleFactor));
 
-        populateDataBufferFromVariantMap(variantMap["Indices"].toMap(), (char*)indices.data());
-        populateDataBufferFromVariantMap(variantMap["Ranges"].toMap(), (char*)ranges.data());
+                const QPoint targetPixelPositionStart(sourcePixelPosition.x() * levelFactor, sourcePixelPosition.y() * levelFactor);
+                const QPoint targetPixelPositionEnd(targetPixelPositionStart + QPoint(levelFactor, levelFactor));
 
-        for (int i = 0; i < ranges.size(); i += 3)
-            _mapping[ranges[i]] = std::vector<std::uint32_t>(indices.begin() + ranges[i + 1], indices.begin() + ranges[i + 2]);
-    }
+                indices.clear();
+                indices.reserve(static_cast<size_t>(levelFactor) * static_cast<size_t>(levelFactor));
 
-    QVariantMap LinkedData::toVariantMap() const
-    {
-        std::vector<std::uint32_t> indices;
-        std::vector<std::uint32_t> ranges;
+                for (std::int32_t targetPixelX = targetPixelPositionStart.x(); targetPixelX < targetPixelPositionEnd.x(); ++targetPixelX) {
+                    for (std::int32_t targetPixelY = targetPixelPositionStart.y(); targetPixelY < targetPixelPositionEnd.y(); ++targetPixelY) {
+                        if (targetPixelX >= _targetImageSize.width() || targetPixelY >= _targetImageSize.height())
+                            break;
 
-        ranges.reserve(_mapping.size() * 3);
-        
-        for (const auto& item : _mapping) {
-            ranges.push_back(item.first);
-            ranges.push_back(indices.size());
-            indices.insert(indices.end(), item.second.begin(), item.second.end());
-            ranges.push_back(indices.size() - 1);
+                        indices.push_back(targetPixelY * _targetImageSize.width() + targetPixelX);
+                    }
+                }
+            }
+
+            break;
         }
-
-        return {
-            { "SourceDataSet", QVariant::fromValue(_sourceDataSet.getDatasetGuid()) },
-            { "TargetDataSet", QVariant::fromValue(_targetDataSet.getDatasetGuid()) },
-            { "NumberOfIndices", QVariant::fromValue(indices.size()) },
-            { "Indices", rawDataToVariantMap((char*)indices.data(), indices.size() * sizeof(std::uint32_t), true) },
-            { "IndicesSize", QVariant::fromValue(indices.size()) },
-            { "Ranges", rawDataToVariantMap((char*)ranges.data(), ranges.size() * sizeof(std::uint32_t), true) },
-            { "RangesSize", QVariant::fromValue(ranges.size()) }
-        };
     }
+}
+
+SelectionMap::Map& SelectionMap::getMap()
+{
+    return _map;
+}
+
+bool SelectionMap::hasMappingForPointIndex(std::uint32_t pointIndex) const
+{
+    switch (_type)
+    {
+        case Type::Indexed:
+            return _map.find(pointIndex) != _map.end();
+
+        case Type::ImagePyramid:
+            return pointIndex < static_cast<std::uint32_t>(_sourceImageSize.width() * _sourceImageSize.height());
+    }
+
+    return false;
+}
+
+void SelectionMap::fromVariantMap(const QVariantMap& variantMap)
+{
+    variantMapMustContain(variantMap, "Type");
+    variantMapMustContain(variantMap, "Indices");
+    variantMapMustContain(variantMap, "IndicesSize");
+    variantMapMustContain(variantMap, "Ranges");
+    variantMapMustContain(variantMap, "RangesSize");
+    variantMapMustContain(variantMap, "SourceImageSize");
+    variantMapMustContain(variantMap, "TargetImageSize");
+
+    std::vector<std::uint32_t> indices;
+    std::vector<std::uint32_t> ranges;
+
+    indices.resize(variantMap["IndicesSize"].toInt());
+    ranges.resize(variantMap["RangesSize"].toInt());
+
+    populateDataBufferFromVariantMap(variantMap["Indices"].toMap(), (char*)indices.data());
+    populateDataBufferFromVariantMap(variantMap["Ranges"].toMap(), (char*)ranges.data());
+
+    for (int i = 0; i < ranges.size(); i += 3)
+        _map[ranges[i]] = std::vector<std::uint32_t>(indices.begin() + ranges[i + 1], indices.begin() + ranges[i + 2]);
+
+    _sourceImageSize = variantMap["SourceImageSize"].toSize();
+    _targetImageSize = variantMap["TargetImageSize"].toSize();
+}
+
+QVariantMap SelectionMap::toVariantMap() const
+{
+    std::vector<std::uint32_t> indices;
+    std::vector<std::uint32_t> ranges;
+
+    ranges.reserve(_map.size() * 3);
+
+    for (const auto& item : _map) {
+        ranges.push_back(item.first);
+        ranges.push_back(static_cast<std::uint32_t>(indices.size()));
+        indices.insert(indices.end(), item.second.begin(), item.second.end());
+        ranges.push_back(static_cast<std::uint32_t>(indices.size()) - 1);
+    }
+
+    return {
+        { "Type", QVariant::fromValue(static_cast<std::int32_t>(_type)) },
+        { "NumberOfIndices", QVariant::fromValue(indices.size()) },
+        { "Indices", rawDataToVariantMap((char*)indices.data(), indices.size() * sizeof(std::uint32_t), true) },
+        { "IndicesSize", QVariant::fromValue(indices.size()) },
+        { "Ranges", rawDataToVariantMap((char*)ranges.data(), ranges.size() * sizeof(std::uint32_t), true) },
+        { "RangesSize", QVariant::fromValue(ranges.size()) },
+        { "SourceImageSize", QVariant::fromValue(_sourceImageSize) },
+        { "TargetImageSize", QVariant::fromValue(_targetImageSize) }
+    };
+}
+
+LinkedData::LinkedData() :
+    Serializable("LinkedData"),
+    _sourceDataSet(),
+    _targetDataSet()
+{
+}
+
+LinkedData::LinkedData(const Dataset<DatasetImpl>& sourceDataSet, const Dataset<DatasetImpl>& targetDataSet) :
+    Serializable("LinkedData"),
+    _sourceDataSet(sourceDataSet),
+    _targetDataSet(targetDataSet)
+{
+    Q_ASSERT(_sourceDataSet.isValid());
+    Q_ASSERT(_targetDataSet.isValid());
+}
+
+const SelectionMap& LinkedData::getMapping() const
+{
+    return _mapping;
+}
+
+void LinkedData::setMapping(SelectionMap& mapping)
+{
+    _mapping = mapping;
+}
+
+void LinkedData::fromVariantMap(const QVariantMap& variantMap)
+{
+    variantMapMustContain(variantMap, "SourceDataSet");
+    variantMapMustContain(variantMap, "TargetDataSet");
+    variantMapMustContain(variantMap, "Mapping");
+
+    _sourceDataSet.setDatasetGuid(variantMap["SourceDataSet"].toString());
+    _targetDataSet.setDatasetGuid(variantMap["TargetDataSet"].toString());
+
+    _mapping.fromVariantMap(variantMap["Mapping"].toMap());
+}
+
+QVariantMap LinkedData::toVariantMap() const
+{
+    return {
+        { "SourceDataSet", QVariant::fromValue(_sourceDataSet.getDatasetGuid()) },
+        { "TargetDataSet", QVariant::fromValue(_targetDataSet.getDatasetGuid()) },
+        { "Mapping", _mapping.toVariantMap() }
+    };
+}
 
 }

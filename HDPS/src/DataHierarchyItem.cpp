@@ -20,7 +20,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _children(),
     _visible(visible),
     _selected(false),
-    _locked(false),
     _expanded(true),
     _taskDescription(""),
     _taskProgress(0.0),
@@ -251,7 +250,7 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 
     menu->addSeparator();
 
-    _dataRemoveAction.setEnabled(!_locked);
+    _dataRemoveAction.setEnabled(!_dataset->isLocked());
     _dataRemoveAction.setEnabled(false);
 
     menu->addAction(&_dataRemoveAction);
@@ -276,26 +275,13 @@ void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
 
 bool DataHierarchyItem::getLocked() const
 {
-    return _locked;
+    return _dataset->isLocked();
 }
 
 void DataHierarchyItem::setLocked(const bool& locked)
 {
-    // Prevent unnecessary updates
-    if (locked == _locked)
-        return;
-
-    // Assign new locked status
-    _locked = locked;
-
-    // Notify others that the data got locked/unlocked through the core
-    if (_locked)
-        Application::core()->notifyDatasetLocked(_dataset);
-    else
-        Application::core()->notifyDatasetUnlocked(_dataset);
-
-    // Notify others that the data got locked/unlocked
-    emit lockedChanged(_locked);
+    _dataset->setLocked(locked);
+   
 }
 
 bool DataHierarchyItem::isExpanded() const
@@ -482,9 +468,6 @@ void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 {
     emit loading();
 
-    if (variantMap.contains("Locked"))
-        setLocked(variantMap["Locked"].toBool());
-
     if (variantMap.contains("Expanded"))
         setExpanded(variantMap["Expanded"].toBool());
 
@@ -518,7 +501,6 @@ QVariantMap DataHierarchyItem::toVariantMap() const
 
     return {
         { "Name", getGuiName() },
-        { "Locked", _locked },
         { "Expanded", _expanded },
         { "Dataset", _dataset->toVariantMap() },
         { "Children", children }
