@@ -215,7 +215,7 @@ public: // Plugin creation
     template<typename PluginType>
     PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
     {
-        return dynamic_cast<PluginType*>(requestPlugin(PluginType, kind));
+        return dynamic_cast<PluginType*>(requestPlugin(kind, datasets));
     }
 
 public: // Plugin queries
