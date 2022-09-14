@@ -349,31 +349,21 @@ namespace hdps
 
             _shader.bind();
 
+            // Point size uniforms
+            bool absoluteRendering = _pointSettings._scalingMode == PointScaling::Absolute;
             _shader.uniform1f("pointSize", _pointSettings._pointSize);
-
-            switch (_pointSettings._scalingMode) {
-                case Relative:
-                {
-                    _shader.uniform1f("pointSize", _pointSettings._pointSize);
-                    break;
-                }
-
-                case Absolute:
-                {
-                    _shader.uniform1f("pointSize", _pointSettings._pointSize);
-                    _shader.uniform1f("pointSizeScale", _pointSettings._pointSize / size);
-                    break;
-                }
-            }
+            _shader.uniform1f("pointSizeScale", absoluteRendering ? 1.0f / size : 1.0f);
 
             _shader.uniformMatrix3f("orthoM", _orthoM);
-            _shader.uniform1f("alpha", _pointSettings._alpha);
+            _shader.uniform1f("pointOpacity", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
             _shader.uniform3f("outlineColor", _outlineColor);
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
             _shader.uniform1i("hasColors", _gpuPoints.hasColors());
+            _shader.uniform1i("hasSizes", _gpuPoints.hasSizeScalars());
+            _shader.uniform1i("hasOpacities", _gpuPoints.hasOpacityScalars());
             _shader.uniform1i("numSelectedPoints", _numSelectedPoints);
 
             if (_gpuPoints.hasColorScalars())
