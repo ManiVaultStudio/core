@@ -684,13 +684,13 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr, bool force = false)
+void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
 {
     Dataset<Points> sourceDataset   = linkedData.getSourceDataSet();
     Dataset<Points> targetDataset   = linkedData.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
-    if (!force && !targetDataset->hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive))
+    if (sourceDataset->isLocked() || targetDataset->isLocked())
         return;
 
     Datasets notified;
@@ -702,7 +702,7 @@ void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint3
     if (ignoreDatasets->contains(targetDataset))
         return;
 
-    qDebug() << QString("%1, %2, %3, %4").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName(), (force ? "force" : ""));
+    qDebug() << QString("%1, %2, %3").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName());
 
     {
         //Timer timer("Creating maps");
@@ -747,14 +747,17 @@ void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint3
 
     // Recursively resolve linked point data
     for (auto targetLd : targetDataset->getLinkedData())
-        resolveLinkedPointData(targetLd, targetSelection->indices, ignoreDatasets, force);
+        resolveLinkedPointData(targetLd, targetSelection->indices, ignoreDatasets);
 }
 
 void Points::resolveLinkedData(bool force /*= false*/)
 {
+    if (isLocked())
+        return;
+
     // Check for linked data in this dataset and resolve them
     for (hdps::LinkedData& linkedData : getLinkedData())
-        resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr, force);
+        resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)

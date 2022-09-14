@@ -279,67 +279,70 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
             contextMenu->addAction(groupDataAction);
         }
 
-        auto lockMenu   = new QMenu("Lock");
-        auto unlockMenu = new QMenu("Unlock");
+        if (!Application::core()->requestAllDataSets().isEmpty()) {
+            auto lockMenu   = new QMenu("Lock");
+            auto unlockMenu = new QMenu("Unlock");
         
-        lockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
-        unlockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));
+            lockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
+            unlockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));
 
-        auto lockAllAction = new QAction("All");
+            auto lockAllAction = new QAction("All");
 
-        connect(lockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
+            connect(lockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
+                for (auto dataset : Application::core()->requestAllDataSets())
+                    dataset->lock();
+            });
+
+            lockMenu->setEnabled(false);
+            unlockMenu->setEnabled(false);
+
+            QVector<bool> locked;
+
             for (auto dataset : Application::core()->requestAllDataSets())
-                dataset->lock();
-        });
+                locked << dataset->isLocked();
 
-        lockMenu->setEnabled(false);
-        unlockMenu->setEnabled(false);
+            const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
 
-        QVector<bool> locked;
+            unlockMenu->setEnabled(numberOfLockedDatasets >= 1);
+            lockMenu->setEnabled(numberOfLockedDatasets < Application::core()->requestAllDataSets().size());
 
-        for (auto dataset : Application::core()->requestAllDataSets())
-            locked << dataset->isLocked();
+            auto unlockAllAction = new QAction("All");
 
-        const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
+            connect(unlockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
+                for (auto dataset : Application::core()->requestAllDataSets())
+                    dataset->unlock();
+            });
 
-        unlockMenu->setEnabled(numberOfLockedDatasets >= 1);
-        lockMenu->setEnabled(numberOfLockedDatasets < Application::core()->requestAllDataSets().size());
-
-        auto unlockAllAction = new QAction("All");
-
-        connect(unlockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
-            for (auto dataset : Application::core()->requestAllDataSets())
-                dataset->unlock();
-        });
-
-        auto lockSelectedAction = new QAction("Selected");
+            auto lockSelectedAction = new QAction("Selected");
         
-        lockSelectedAction->setEnabled(!datasets.isEmpty());
+            lockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+            lockSelectedAction->setEnabled(!datasets.isEmpty());
 
-        connect(lockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
-            for (auto dataset : datasets)
-                dataset->lock();
-        });
+            connect(lockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
+                for (auto dataset : datasets)
+                    dataset->lock();
+            });
 
-        auto unlockSelectedAction   = new QAction("Selected");
+            auto unlockSelectedAction   = new QAction("Selected");
 
-        unlockSelectedAction->setEnabled(!datasets.isEmpty());
+            unlockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+            unlockSelectedAction->setEnabled(!datasets.isEmpty());
 
-        connect(unlockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
-            for (auto dataset : datasets)
-                dataset->unlock();
-        });
+            connect(unlockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
+                for (auto dataset : datasets)
+                    dataset->unlock();
+            });
         
-        lockMenu->addAction(lockSelectedAction);
-        lockMenu->addAction(lockAllAction);
+            lockMenu->addAction(lockSelectedAction);
+            lockMenu->addAction(lockAllAction);
+            unlockMenu->addAction(unlockSelectedAction);
+            unlockMenu->addAction(unlockAllAction);
 
-        unlockMenu->addAction(unlockSelectedAction);
-        unlockMenu->addAction(unlockAllAction);
+            contextMenu->addSeparator();
 
-        contextMenu->addSeparator();
-
-        contextMenu->addMenu(lockMenu);
-        contextMenu->addMenu(unlockMenu);
+            contextMenu->addMenu(lockMenu);
+            contextMenu->addMenu(unlockMenu);
+        }
 
         contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
     });
