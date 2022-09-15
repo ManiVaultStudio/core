@@ -160,6 +160,42 @@ void StringAction::reset()
     setString(_defaultString);
 }
 
+bool StringAction::mayPublish() const
+{
+    return true;
+}
+
+void StringAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicStringAction = dynamic_cast<StringAction*>(publicAction);
+
+    Q_ASSERT(publicStringAction != nullptr);
+
+    connect(this, &StringAction::stringChanged, publicStringAction, &StringAction::setString);
+    connect(publicStringAction, &StringAction::stringChanged, this, &StringAction::setString);
+
+    setString(publicStringAction->getString());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void StringAction::disconnectFromPublicAction()
+{
+    auto publicStringAction = dynamic_cast<StringAction*>(_publicAction);
+
+    Q_ASSERT(publicStringAction != nullptr);
+
+    disconnect(this, &StringAction::stringChanged, publicStringAction, &StringAction::setString);
+    disconnect(publicStringAction, &StringAction::stringChanged, this, &StringAction::setString);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+WidgetAction* StringAction::getPublicCopy() const
+{
+    return new StringAction(parent(), text(), getString(), getDefaultString());
+}
+
 void StringAction::fromVariantMap(const QVariantMap& variantMap)
 {
     if (!variantMap.contains("value"))
