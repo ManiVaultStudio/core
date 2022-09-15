@@ -77,14 +77,14 @@ namespace hdps
          * Assignment operator
          * @param other Reference to assign from
          */
-        SelectionMap& operator=(const SelectionMap& other) {
-            _type               = other._type;
-            _map                = other._map;
-            _sourceImageSize    = other._sourceImageSize;
-            _targetImageSize    = other._targetImageSize;
+        //SelectionMap& operator=(const SelectionMap& other) {
+        //    _type               = other._type;
+        //    _map                = other._map;
+        //    _sourceImageSize    = other._sourceImageSize;
+        //    _targetImageSize    = other._targetImageSize;
 
-            return *this;
-        }
+        //    return *this;
+        //}
 
     private:
         Type    _type;              /** The type of selection map */
@@ -98,7 +98,7 @@ namespace hdps
     public:
         LinkedData();
         LinkedData(const Dataset<DatasetImpl>& sourceDataSet, const Dataset<DatasetImpl>& targetDataSet);
-        LinkedData(const LinkedData& linkedData);
+        //LinkedData(const LinkedData& linkedData);
 
         const Dataset<DatasetImpl> getSourceDataSet() const { return _sourceDataSet; }
         const Dataset<DatasetImpl> getTargetDataset() const { return _targetDataSet; }
@@ -122,13 +122,13 @@ namespace hdps
          * Assignment operator
          * @param other Reference to assign from
          */
-        LinkedData& operator=(const LinkedData& other) {
-            _sourceDataSet  = other._sourceDataSet;
-            _targetDataSet  = other._targetDataSet;
-            _mapping        = other._mapping;
+        //LinkedData& operator=(const LinkedData& other) {
+        //    _sourceDataSet  = other._sourceDataSet;
+        //    _targetDataSet  = other._targetDataSet;
+        //    _mapping        = other._mapping;
 
-            return *this;
-        }
+        //    return *this;
+        //}
 
     private:
         Dataset<DatasetImpl>    _sourceDataSet;

@@ -743,7 +743,8 @@ void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint3
     }
     
     // Add the target of the linked data (of which we updated the selection indices) to the ignore list
-    *ignoreDatasets << sourceDataset << targetDataset;
+    //*ignoreDatasets << sourceDataset << targetDataset;
+    *ignoreDatasets << targetDataset;
 
     // Recursively resolve linked point data
     for (auto targetLd : targetDataset->getLinkedData())
@@ -763,6 +764,9 @@ void Points::resolveLinkedData(bool force /*= false*/)
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
     //qDebug() << QString("%1, %2").arg(__FUNCTION__, getGuiName());
+
+    if (isLocked())
+        return;
 
     auto selection = getSelection<Points>();
 

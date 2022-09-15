@@ -12,7 +12,8 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, 
     _pluginType(pluginType),
     _pluginKind(pluginKind),
     _datasets(datasets),
-    _configurationAction(nullptr)
+    _configurationAction(nullptr),
+    _menuPathPrefix()
 {
     setText(title);
 }
@@ -50,6 +51,19 @@ WidgetAction* PluginTriggerAction::getConfigurationAction()
 void PluginTriggerAction::setConfigurationAction(WidgetAction* configurationAction)
 {
     _configurationAction = configurationAction;
+}
+
+QString PluginTriggerAction::getMenuPathPrefix()
+{
+    return _menuPathPrefix;
+}
+
+void PluginTriggerAction::setMenuPathPrefix(const QString& menuPathPrefix)
+{
+    if (menuPathPrefix.split("/").isEmpty())
+        return;
+
+    _menuPathPrefix = menuPathPrefix;
 }
 
 }

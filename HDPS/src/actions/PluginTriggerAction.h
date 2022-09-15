@@ -75,12 +75,25 @@ public:
      */
     void setConfigurationAction(WidgetAction* configurationAction);
 
+    /**
+     * Get the menu path prefix
+     * @return Menu path prefix
+     */
+    QString getMenuPathPrefix();
+
+    /**
+     * Set the menu prefix
+     * @param menuPathPrefix Path prefix
+     */
+    void setMenuPathPrefix(const QString& menuPathPrefix);
+
 private:
     const QString       _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
     const plugin::Type  _pluginType;            /** Type of plugin e.g. analysis, exporter */
     const QString       _pluginKind;            /** Kind of plugin */
     Datasets            _datasets;              /** Input datasets */
     WidgetAction*       _configurationAction;   /** Action for configuring the plugin creation */
+    QString             _menuPathPrefix;        /** If valid, the trigger action will be added to a hierarchical context menu structure in the data hierarchy (e.g. Image viewer/Arranged/Vertically) */
 };
 
 using PluginTriggerActions = QVector<PluginTriggerAction*>;

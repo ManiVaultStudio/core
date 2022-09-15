@@ -101,33 +101,48 @@ public: // Operators
 
 public: // Pointer access
 
-    /** Arrow operator */
+    /**
+     * Overloaded arrow operator
+     * @return Pointer to dataset (if any, maybe nullptr)
+     */
     DatasetType* operator-> ()
     {
         return get<DatasetType>();
     }
 
-    /** Arrow operator */
+    /**
+     * Const overloaded arrow operator
+     * @return Const pointer to dataset (if any, maybe nullptr)
+     */
     const DatasetType* operator-> () const
     {
         return get<DatasetType>();
     }
 
-    /** Parenthesis operator */
+    /**
+     * Parenthesis operator
+     * @return Pointer to dataset (if any, maybe nullptr)
+     */
     DatasetType* operator() () const
     {
         return get<DatasetType>();
     }
 
-    /** Get the dataset pointer in the target dataset type */
+    /**
+     * Get pointer of \p TargetSetType to dataset
+     * @return Pointer of \p TargetSetType to dataset (if any, maybe nullptr)
+     */
     template<typename TargetSetType>
     TargetSetType* get() const
     {
         return reinterpret_cast<TargetSetType*>(const_cast<DatasetImpl*>(getDataset()));
     }
 
-    /** Get the dataset implementation pointer */
-    DatasetType* () const
+    /**
+     * Get pointer to dataset
+     * @return Pointer to dataset (if any, maybe nullptr)
+     */
+    DatasetType* get() const
     {
         return get<DatasetType>();
     }
@@ -137,7 +152,7 @@ public: // Pointer access
      */
     bool isValid() const
     {
-        return getDataset() != nullgetptr;
+        return getDataset() != nullptr;
     }
 };
 

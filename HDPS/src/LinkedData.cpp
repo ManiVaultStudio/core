@@ -9,17 +9,13 @@ namespace hdps
 
 SelectionMap::SelectionMap(Type type /*= Indexed*/) :
     Serializable("SelectionMapping"),
-    _type(type),
-    _map(),
-    _sourceImageSize(),
-    _targetImageSize()
+    _type(type)
 {
 }
 
 SelectionMap::SelectionMap(const QSize& sourceImageSize, const QSize& targetImageSize) :
     Serializable("SelectionMapping"),
     _type(Type::ImagePyramid),
-    _map(),
     _sourceImageSize(sourceImageSize),
     _targetImageSize(targetImageSize)
 {
@@ -188,9 +184,7 @@ QVariantMap SelectionMap::toVariantMap() const
 }
 
 LinkedData::LinkedData() :
-    Serializable("LinkedData"),
-    _sourceDataSet(),
-    _targetDataSet()
+    Serializable("LinkedData")
 {
 }
 
@@ -203,10 +197,10 @@ LinkedData::LinkedData(const Dataset<DatasetImpl>& sourceDataSet, const Dataset<
     Q_ASSERT(_targetDataSet.isValid());
 }
 
-LinkedData::LinkedData(const LinkedData& linkedData)
-{
-    *this = linkedData;
-}
+//LinkedData::LinkedData(const LinkedData& linkedData)
+//{
+//    *this = linkedData;
+//}
 
 const SelectionMap& LinkedData::getMapping() const
 {
