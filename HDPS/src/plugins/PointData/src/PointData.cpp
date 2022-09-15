@@ -702,7 +702,7 @@ void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint3
     if (ignoreDatasets->contains(targetDataset))
         return;
 
-    qDebug() << QString("%1, %2, %3").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName());
+    //qDebug() << QString("%1, %2, %3").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName());
 
     {
         //Timer timer("Creating maps");
@@ -890,16 +890,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     setDimensionNames(dimensionNames);
 
-    if (variantMap.contains("LinkedData")) {
-        for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
-            LinkedData linkedData;
-
-            linkedData.fromVariantMap(linkedDataVariant.toMap());
-
-            getLinkedData().push_back(linkedData);
-        }
-    }
-
     _core->notifyDatasetChanged(this);
 }
 
@@ -934,13 +924,6 @@ QVariantMap Points::toVariantMap() const
     variantMap["Indices"]               = indices;
     variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
-
-    QVariantList linkedData;
-
-    for (const auto& ld : getLinkedData())
-        linkedData.push_back(ld.toVariantMap());
-
-    variantMap["LinkedData"] = linkedData;
 
     return variantMap;
 }

@@ -109,6 +109,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "HasAnalysis");
     variantMapMustContain(variantMap, "Analysis");
+    variantMapMustContain(variantMap, "LinkedData");
 
     setGuiName(variantMap["Name"].toString());
     
@@ -135,6 +136,16 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
         setProxyMembers(proxyMembers);
     }
+
+    if (variantMap.contains("LinkedData")) {
+        for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
+            LinkedData linkedData;
+
+            linkedData.fromVariantMap(linkedDataVariant.toMap());
+
+            getLinkedData().push_back(linkedData);
+        }
+    }
 }
 
 QVariantMap DatasetImpl::toVariantMap() const
@@ -149,6 +160,11 @@ QVariantMap DatasetImpl::toVariantMap() const
     for (auto proxyMember : _proxyMembers)
         proxyMemberGuids << proxyMember->getGuid();
 
+    QVariantList linkedData;
+
+    for (const auto& ld : getLinkedData())
+        linkedData.push_back(ld.toVariantMap());
+
     return {
         { "Name", QVariant::fromValue(getGuiName()) },
         { "Locked", _locked },
@@ -161,7 +177,8 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "Derived", QVariant::fromValue(isDerivedData()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
         { "HasAnalysis", QVariant::fromValue(_analysis != nullptr) },
-        { "Analysis", analysisMap }
+        { "Analysis", analysisMap },
+        { "LinkedData", linkedData }
     };
 }
 

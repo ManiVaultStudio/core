@@ -27,7 +27,7 @@ class CoreInterface;
 template<typename DatasetType>
 class Dataset : public DatasetPrivate
 {
-public:
+public: // Construction
 
     /**
      * (Default) constructor
@@ -36,17 +36,17 @@ public:
     Dataset(DatasetType* dataset = nullptr) :
         DatasetPrivate()
     {
-        set(dataset);
+        setDataset(dataset);
     }
 
     /**
-     * Constructor
+     * Construct from dataset reference
      * @param dataset Reference to dataset
      */
     Dataset(DatasetType& dataset) :
         DatasetPrivate()
     {
-        set(&dataset);
+        setDataset(&dataset);
     }
 
     /**
@@ -55,7 +55,7 @@ public:
      */
     Dataset(const Dataset<DatasetType>& other)
     {
-        set(other.get());
+        setDataset(other.get());
 
         *this = other;
     }
@@ -67,21 +67,36 @@ public:
     template<typename OtherDatasetType>
     Dataset(const Dataset<OtherDatasetType>& other)
     {
-        set(other.template get<DatasetType>());
+        setDataset(other.template get<DatasetType>());
     }
 
 public: // Operators
 
-    /** Dereference operator */
+    /** Dereference operator
+     * @return Reference to dataset 
+     */
     DatasetType& operator* ()
     {
-        return dynamic_cast<DatasetType&>(*_dataset);
+        return dynamic_cast<DatasetType&>(*getDataset());
     }
 
-    /** Const dereference operator */
+    /** Const dereference operator
+     * @return Reference to dataset
+     */
     const DatasetType& operator* () const
     {
-        return dynamic_cast<DatasetType&>(*_dataset);
+        return dynamic_cast<DatasetType&>(*getDataset());
+    }
+
+    /**
+     * Assignment operator
+     * @param rhs Right hand side operator
+     */
+    Dataset<DatasetType>& operator=(const Dataset<DatasetType>& rhs)
+    {
+        setDataset(rhs.get());
+
+        return *this;
     }
 
 public: // Pointer access
@@ -108,81 +123,24 @@ public: // Pointer access
     template<typename TargetSetType>
     TargetSetType* get() const
     {
-        return reinterpret_cast<TargetSetType*>(_dataset);
+        return reinterpret_cast<TargetSetType*>(const_cast<DatasetImpl*>(getDataset()));
     }
 
     /** Get the dataset implementation pointer */
-    DatasetType* get() const
+    DatasetType* () const
     {
         return get<DatasetType>();
     }
 
-public: // Miscellaneous
-
-    /** Returns whether the dataset pointer is valid (if the dataset actually exists) */
+    /** Returns smart pointer validity
+     * @return Boolean determining whether the dataset pointer is valid (if the dataset actually exists)
+     */
     bool isValid() const
     {
-        return _dataset != nullptr;
-    }
-
-    /** Get the current dataset globally unique identifier */
-    QString getDatasetGuid() const override
-    {
-        return _datasetGuid;
-    }
-
-    /**
-     * Set the globally unique identifier of the dataset
-     * @param datasetGuid Globally unique identifier of the dataset
-     */
-    void setDatasetGuid(const QString& datasetGuid)
-    {
-        _datasetGuid;
-    }
-
-    /** Resets the internals (dataset pointer to nullptr etc.) */
-    void reset() override
-    {
-        _dataset    = nullptr;
-        _datasetGuid  = "";
-    }
-
-public: // Operators
-
-    /**
-     * Assignment operator
-     * @param other Reference to assign from
-     */
-    Dataset<DatasetType>& operator=(const Dataset<DatasetType>& other)
-    {
-        set(other.get());
-
-        return *this;
+        return getDataset() != nullgetptr;
     }
 };
 
 using Datasets = QVector<Dataset<DatasetImpl>>;
-
-/**
- * Compares two dataset smart pointers for equality
- * @param lhs Left hand side dataset smart pointer
- * @param rhs Right hand side dataset smart pointer
- * @return Whether lhs and rhs are equal
- */
-inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
-{
-    return lhs.getDatasetGuid() == rhs.getDatasetGuid();
-}
-
-/**
- * Compares two dataset smart pointers for inequality
- * @param lhs Left hand side dataset smart pointer
- * @param rhs Right hand side dataset smart pointer
- * @return Whether lhs and rhs are not equal
- */
-inline bool operator != (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
-{
-    return lhs.getDatasetGuid() != rhs.getDatasetGuid();
-}
 
 }
