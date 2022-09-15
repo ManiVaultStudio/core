@@ -8,6 +8,7 @@ namespace gui {
 
 PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets) :
     TriggerAction(parent),
+    _title(title),
     _sha(QString(QCryptographicHash::hash(QString("%1_%2").arg(pluginKind, title).toUtf8(), QCryptographicHash::Sha1).toHex())),
     _pluginType(pluginType),
     _pluginKind(pluginKind),
@@ -15,7 +16,7 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, 
     _configurationAction(nullptr),
     _menuPathPrefix()
 {
-    setText(title);
+    setText(_title.split("/").last());
 }
 
 QString PluginTriggerAction::getSha() const
