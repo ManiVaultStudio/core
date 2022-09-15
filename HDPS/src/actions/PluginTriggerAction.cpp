@@ -13,10 +13,44 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, 
     _pluginType(pluginType),
     _pluginKind(pluginKind),
     _datasets(datasets),
-    _configurationAction(nullptr),
-    _menuPathPrefix()
+    _configurationAction(nullptr)
 {
+    //switch (_pluginType)
+    //{
+    //    case plugin::Type::ANALYSIS:
+    //        _title.insert(0, "Analyze/");
+    //	    break;
+
+    //    case plugin::Type::DATA:
+    //        _title.insert(0, "Data/");
+    //        break;
+
+    //    case plugin::Type::LOADER:
+    //        _title.insert(0, "Import/");
+    //        break;
+
+    //    case plugin::Type::TRANSFORMATION:
+    //        _title.insert(0, "Transform/");
+    //        break;
+
+    //    case plugin::Type::VIEW:
+    //        _title.insert(0, "View/");
+    //        break;
+
+    //    case plugin::Type::WRITER:
+    //        _title.insert(0, "Export/");
+    //        break;
+
+    //    default:
+    //        break;
+    //}
+
     setText(_title.split("/").last());
+}
+
+QString PluginTriggerAction::getTitle() const
+{
+    return _title;
 }
 
 QString PluginTriggerAction::getSha() const
@@ -52,19 +86,6 @@ WidgetAction* PluginTriggerAction::getConfigurationAction()
 void PluginTriggerAction::setConfigurationAction(WidgetAction* configurationAction)
 {
     _configurationAction = configurationAction;
-}
-
-QString PluginTriggerAction::getMenuPathPrefix()
-{
-    return _menuPathPrefix;
-}
-
-void PluginTriggerAction::setMenuPathPrefix(const QString& menuPathPrefix)
-{
-    if (menuPathPrefix.split("/").isEmpty())
-        return;
-
-    _menuPathPrefix = menuPathPrefix;
 }
 
 }

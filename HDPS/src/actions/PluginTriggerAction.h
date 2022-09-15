@@ -34,6 +34,12 @@ public:
     PluginTriggerAction(QObject* parent, const QString& title, const plugin::Type& pluginType, const QString& pluginKind, const Datasets& datasets);
 
     /**
+     * Get title
+     * @return Title
+     */
+    QString getTitle() const;
+
+    /**
      * Get sha of plugin kind + trigger title
      * @return Sha
      */
@@ -75,26 +81,13 @@ public:
      */
     void setConfigurationAction(WidgetAction* configurationAction);
 
-    /**
-     * Get the menu path prefix
-     * @return Menu path prefix
-     */
-    QString getMenuPathPrefix();
-
-    /**
-     * Set the menu prefix
-     * @param menuPathPrefix Path prefix
-     */
-    void setMenuPathPrefix(const QString& menuPathPrefix);
-
 private:
-    const QString       _title;                 /** Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion) */
+    QString             _title;                 /** Plugin trigger title (if title is in path format, the trigger will be added to the data hierarchy context menu in a hierarchical fashion) */
     const QString       _sha;                   /** Cryptographic hash of the plugin kind and trigger title */
     const plugin::Type  _pluginType;            /** Type of plugin e.g. analysis, exporter */
     const QString       _pluginKind;            /** Kind of plugin */
     Datasets            _datasets;              /** Input datasets */
     WidgetAction*       _configurationAction;   /** Action for configuring the plugin creation */
-    QString             _menuPathPrefix;        /** If valid, the trigger action will be added to a hierarchical context menu structure in the data hierarchy (e.g. Image viewer/Arranged/Vertically) */
 };
 
 using PluginTriggerActions = QVector<PluginTriggerAction*>;

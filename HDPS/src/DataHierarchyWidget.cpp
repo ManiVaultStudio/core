@@ -205,54 +205,83 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         auto contextMenu = new QMenu();
 
         const auto addMenu = [contextMenu, datasets](const plugin::Type& pluginType) -> void {
-            auto menu = new QMenu();
+            //auto menu = new QMenu();
 
-            switch (pluginType)
-            {
-            case plugin::Type::ANALYSIS:
-            {
-                menu->setTitle("Analyze");
-                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
-                break;
+            //switch (pluginType)
+            //{
+            //    case plugin::Type::ANALYSIS:
+            //    {
+            //        menu->setTitle("Analyze");
+            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
+            //        break;
+            //    }
+
+            //    case plugin::Type::LOADER:
+            //    {
+            //        menu->setTitle("Import");
+            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+            //        break;
+            //    }
+
+            //    case plugin::Type::WRITER:
+            //    {
+            //        menu->setTitle("Export");
+            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+            //        break;
+            //    }
+
+            //    case plugin::Type::TRANSFORMATION:
+            //    {
+            //        menu->setTitle("Transform");
+            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
+            //        break;
+            //    }
+
+            //    case plugin::Type::VIEW:
+            //    {
+            //        menu->setTitle("View");
+            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+            //        break;
+            //    }
+
+            //    default:
+            //        break;
+            //}
+
+            QMap<QString, QMenu*> menus;
+
+            for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, datasets)) {
+                const auto titleSegments = pluginTriggerAction->getTitle().split("/");
+
+                qDebug() << titleSegments;
+
+                QString menuPath, previousMenuPath = titleSegments.first();
+
+                for (auto titleSegment : titleSegments) {
+                    if (titleSegment != titleSegments.first() && titleSegment != titleSegments.last())
+                        menuPath += "/";
+
+                    menuPath += titleSegment;
+
+                    if (!menus.contains(menuPath)) {
+                        menus[menuPath] = new QMenu(titleSegment);
+
+                        if (titleSegment != titleSegments.first()) {
+                            if (titleSegment == titleSegments.last())
+                                menus[previousMenuPath]->addAction(pluginTriggerAction);
+                            else
+                                menus[previousMenuPath]->addMenu(menus[menuPath]);
+                        } else
+                            contextMenu->addMenu(menus[titleSegments.first()]);
+                    }
+
+                    previousMenuPath = menuPath;
+                }
             }
+                //menu->addAction(pluginTriggerAction);
 
-            case plugin::Type::LOADER:
-            {
-                menu->setTitle("Import");
-                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-                break;
-            }
-
-            case plugin::Type::WRITER:
-            {
-                menu->setTitle("Export");
-                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-                break;
-            }
-
-            case plugin::Type::TRANSFORMATION:
-            {
-                menu->setTitle("Transform");
-                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
-                break;
-            }
-
-            case plugin::Type::VIEW:
-            {
-                menu->setTitle("View");
-                menu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
-                break;
-            }
-
-            default:
-                break;
-            }
-
-            for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, datasets))
-                menu->addAction(pluginTriggerAction);
-
-            if (!menu->actions().isEmpty())
-                contextMenu->addMenu(menu);
+            //if (!menu->actions().isEmpty())
+            //    contextMenu->addMenu(menu);
         };
 
         addMenu(plugin::Type::ANALYSIS);
