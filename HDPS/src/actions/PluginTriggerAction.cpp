@@ -15,35 +15,36 @@ PluginTriggerAction::PluginTriggerAction(QObject* parent, const QString& title, 
     _datasets(datasets),
     _configurationAction(nullptr)
 {
-    //switch (_pluginType)
-    //{
-    //    case plugin::Type::ANALYSIS:
-    //        _title.insert(0, "Analyze/");
-    //	    break;
+    // Prefix the title with the plugin type string
+    switch (_pluginType)
+    {
+        case plugin::Type::ANALYSIS:
+            _title.insert(0, "Analyze/");
+    	    break;
 
-    //    case plugin::Type::DATA:
-    //        _title.insert(0, "Data/");
-    //        break;
+        case plugin::Type::DATA:
+            _title.insert(0, "Data/");
+            break;
 
-    //    case plugin::Type::LOADER:
-    //        _title.insert(0, "Import/");
-    //        break;
+        case plugin::Type::LOADER:
+            _title.insert(0, "Import/");
+            break;
 
-    //    case plugin::Type::TRANSFORMATION:
-    //        _title.insert(0, "Transform/");
-    //        break;
+        case plugin::Type::TRANSFORMATION:
+            _title.insert(0, "Transform/");
+            break;
 
-    //    case plugin::Type::VIEW:
-    //        _title.insert(0, "View/");
-    //        break;
+        case plugin::Type::VIEW:
+            _title.insert(0, "View/");
+            break;
 
-    //    case plugin::Type::WRITER:
-    //        _title.insert(0, "Export/");
-    //        break;
+        case plugin::Type::WRITER:
+            _title.insert(0, "Export/");
+            break;
 
-    //    default:
-    //        break;
-    //}
+        default:
+            break;
+    }
 
     setText(_title.split("/").last());
 }

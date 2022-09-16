@@ -204,52 +204,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
         auto contextMenu = new QMenu();
 
-        const auto addMenu = [contextMenu, datasets](const plugin::Type& pluginType) -> void {
-            //auto menu = new QMenu();
+        QMap<QString, QMenu*> menus;
 
-            //switch (pluginType)
-            //{
-            //    case plugin::Type::ANALYSIS:
-            //    {
-            //        menu->setTitle("Analyze");
-            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
-            //        break;
-            //    }
-
-            //    case plugin::Type::LOADER:
-            //    {
-            //        menu->setTitle("Import");
-            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-            //        break;
-            //    }
-
-            //    case plugin::Type::WRITER:
-            //    {
-            //        menu->setTitle("Export");
-            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-            //        break;
-            //    }
-
-            //    case plugin::Type::TRANSFORMATION:
-            //    {
-            //        menu->setTitle("Transform");
-            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
-            //        break;
-            //    }
-
-            //    case plugin::Type::VIEW:
-            //    {
-            //        menu->setTitle("View");
-            //        menu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
-            //        break;
-            //    }
-
-            //    default:
-            //        break;
-            //}
-
-            QMap<QString, QMenu*> menus;
-
+        const auto addMenu = [contextMenu, &menus, datasets](const plugin::Type& pluginType) -> void {
             for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, datasets)) {
                 const auto titleSegments = pluginTriggerAction->getTitle().split("/");
 
@@ -269,8 +226,21 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
                         if (titleSegment != titleSegments.first()) {
                             if (titleSegment == titleSegments.last())
                                 menus[previousMenuPath]->addAction(pluginTriggerAction);
-                            else
-                                menus[previousMenuPath]->addMenu(menus[menuPath]);
+                            else {
+                                if (titleSegment == "Group") {
+                                    //menus[menuPath]->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
+
+                                    if (menus[previousMenuPath]->actions().isEmpty())
+                                        menus[previousMenuPath]->addMenu(menus[menuPath]);
+                                    else
+                                        menus[previousMenuPath]->insertMenu(menus[previousMenuPath]->actions().first(), menus[menuPath]);
+
+                                    if (menus[previousMenuPath]->actions().count() >= 2)
+                                        menus[previousMenuPath]->insertSeparator(menus[previousMenuPath]->actions()[1]);
+                                } else
+                                    menus[previousMenuPath]->addMenu(menus[menuPath]);
+                            }
+                                
                         } else
                             contextMenu->addMenu(menus[titleSegments.first()]);
                     }
@@ -278,10 +248,62 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
                     previousMenuPath = menuPath;
                 }
             }
-                //menu->addAction(pluginTriggerAction);
+            
+            switch (pluginType)
+            {
+                case plugin::Type::ANALYSIS:
+                {
+                    if (!menus.contains("Analyze"))
+                        break;
 
-            //if (!menu->actions().isEmpty())
-            //    contextMenu->addMenu(menu);
+                    menus["Analyze"]->setTitle("Analyze");
+                    menus["Analyze"]->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
+                    break;
+                }
+
+                case plugin::Type::LOADER:
+                {
+                    if (!menus.contains("Import"))
+                        break;
+
+                    menus["Import"]->setTitle("Import");
+                    menus["Import"]->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+                    break;
+                }
+
+                case plugin::Type::WRITER:
+                {
+                    if (!menus.contains("Export"))
+                        break;
+
+                    menus["Export"]->setTitle("Export");
+                    menus["Export"]->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+                    break;
+                }
+
+                case plugin::Type::TRANSFORMATION:
+                {
+                    if (!menus.contains("Transform"))
+                        break;
+
+                    menus["Transform"]->setTitle("Transform");
+                    menus["Transform"]->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
+                    break;
+                }
+
+                case plugin::Type::VIEW:
+                {
+                    if (!menus.contains("View"))
+                        break;
+
+                    menus["View"]->setTitle("View");
+                    menus["View"]->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+                    break;
+                }
+
+                default:
+                    break;
+            }
         };
 
         addMenu(plugin::Type::ANALYSIS);
@@ -303,8 +325,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
             connect(groupDataAction, &QAction::triggered, [this, datasets]() -> void {
                 Application::core()->groupDatasets(datasets);
-                });
+            });
 
+            contextMenu->addSeparator();
             contextMenu->addAction(groupDataAction);
         }
 
