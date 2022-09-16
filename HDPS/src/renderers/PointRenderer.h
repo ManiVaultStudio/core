@@ -50,6 +50,7 @@ namespace hdps
             bool hasHighlights() const { return !_highlights.empty(); }
             bool hasColorScalars() const { return !_colorScalars.empty(); }
             bool hasSizeScalars() const { return !_sizeScalars.empty(); }
+            bool hasOpacityScalars() const { return !_opacityScalars.empty(); }
             bool hasColors() const { return !_colors.empty(); }
 
             Vector3f getColorMapRange() const {

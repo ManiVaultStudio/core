@@ -101,7 +101,9 @@ class HdpsCoreConan(ConanFile):
     def generate(self):
         # This prevents overlap between the hdps/core (source folder)
         # and the HDPS (build) folder. This happens in the Macos build
-        self.build_folder = self.build_folder + '/hdps-common'
+        # Build folder can't be set here since conan 1.50 
+        # possibly via CMakeDeps and CMakeToolchain 
+        # self.build_folder = self.build_folder + '/hdps-common'
         deps = CMakeDeps(self)
         deps.generate()
 

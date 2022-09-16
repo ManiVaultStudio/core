@@ -38,9 +38,9 @@ void main()
     
     // Set point color
     vec3 color = vColor;
-	
+    
     if (scalarEffect == EFFECT_COLOR) {
-		color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
+        color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
     }
     
     // Change color if point is highlighted
@@ -48,7 +48,7 @@ void main()
         color = len > 0.5 ? outlineColor : color;
     }
     
-	bool isHighlighted = vHighlight == 1;
-	
-	fragColor = vec4(color, a * vOpacity);
+    bool isHighlighted = vHighlight == 1;
+    
+    fragColor = vec4(color, a * vOpacity);
 }

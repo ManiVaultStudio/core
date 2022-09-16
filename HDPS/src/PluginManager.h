@@ -49,7 +49,7 @@ public:
     template<typename PluginType>
     PluginType* requestPlugin(const QString& kind, const Datasets& datasets)
     {
-        return dynamic_cast<PluginType*>(createPlugin(PluginType, kind, datasets));
+        return dynamic_cast<PluginType*>(createPlugin(kind, datasets));
     }
 
     /**
