@@ -136,6 +136,16 @@ bool DataHierarchyItem::getVisible() const
     return _visible;
 }
 
+void DataHierarchyItem::setVisible(bool visible)
+{
+    if (visible == _visible)
+        return;
+
+    _visible = visible;
+
+    emit visibilityChanged(_visible);
+}
+
 bool DataHierarchyItem::isHidden() const
 {
     return !_visible;

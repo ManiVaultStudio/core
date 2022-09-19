@@ -151,7 +151,7 @@ QVariantMap SelectionMap::toVariantMap() const
                 ranges.push_back(item.first);
                 ranges.push_back(static_cast<std::uint32_t>(indices.size()));
                 indices.insert(indices.end(), item.second.begin(), item.second.end());
-                ranges.push_back(static_cast<std::uint32_t>(indices.size()) - 1);
+                ranges.push_back(static_cast<std::uint32_t>(indices.size()));
             }
 
             break;

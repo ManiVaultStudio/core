@@ -854,9 +854,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         getRawData<PointData>().fromVariantMap(variantMap);
 
     if (!isFull()) {
-        auto parent = getParent();
-
-        makeSubsetOf(getParent());
+        makeSubsetOf(getFullDataset<Points>());
 
         variantMapMustContain(variantMap, "Indices");
 

@@ -105,6 +105,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Name");
     variantMapMustContain(variantMap, "Locked");
+    variantMapMustContain(variantMap, "Visible");
     variantMapMustContain(variantMap, "GUID");
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "HasAnalysis");
@@ -112,21 +113,16 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
     variantMapMustContain(variantMap, "LinkedData");
 
     setGuiName(variantMap["Name"].toString());
-    
-    if (variantMap.contains("Locked"))
-        setLocked(variantMap["Locked"].toBool());
+    setLocked(variantMap["Locked"].toBool());
+    getDataHierarchyItem().setVisible(variantMap["Visible"].toBool());
 
-    _guid = variantMap["GUID"].toString();
+    _guid       = variantMap["GUID"].toString();
+    _derived    = variantMap["Derived"].toBool();
 
-    if (variantMap.contains("Derived")) {
-        _derived = variantMap["Derived"].toBool();
+    if (_derived)
+        _sourceDataset = getParent();
 
-        if (_derived)
-            _sourceDataset = getParent();
-    }
-
-    if (variantMap.contains("StorageType"))
-        setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
+    setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;
@@ -137,14 +133,12 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         setProxyMembers(proxyMembers);
     }
 
-    if (variantMap.contains("LinkedData")) {
-        for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
-            LinkedData linkedData;
+    for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
+        LinkedData linkedData;
 
-            linkedData.fromVariantMap(linkedDataVariant.toMap());
+        linkedData.fromVariantMap(linkedDataVariant.toMap());
 
-            getLinkedData().push_back(linkedData);
-        }
+        getLinkedData().push_back(linkedData);
     }
 }
 
@@ -167,7 +161,8 @@ QVariantMap DatasetImpl::toVariantMap() const
 
     return {
         { "Name", QVariant::fromValue(getGuiName()) },
-        { "Locked", _locked },
+        { "Locked", QVariant::fromValue(_locked) },
+        { "Visible", QVariant::fromValue(getDataHierarchyItem().getVisible()) },
         { "GUID", QVariant::fromValue(getGuid()) },
         { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
         { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },

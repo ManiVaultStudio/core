@@ -412,19 +412,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
 void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
 {
-    // Do not add hidden data hierarchy items
-    if (dataHierarchyItem.isHidden())
-        return;
-
-    // Get smart pointer to the dataset
     auto dataset = dataHierarchyItem.getDataset();
 
     try {
-
-        // Model index of the parent
         QModelIndex parentModelIndex;
 
-        // Establish parent model index
         if (!dataHierarchyItem.hasParent())
             parentModelIndex = QModelIndex();
         else

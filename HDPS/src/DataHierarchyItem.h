@@ -104,6 +104,12 @@ public:
     /** Gets whether the dataset is visible */
     bool getVisible() const;
 
+    /**
+     * Set visibility
+     * @param visible Whether the data hierarchy item is visible or not
+     */
+    void setVisible(bool visible);
+
     /** Gets whether the dataset is hidden */
     bool isHidden() const;
 
@@ -336,13 +342,19 @@ signals:
      * Signals that the locked status changed
      * @param locked Locked
      */
-    void lockedChanged(const bool& locked);
+    void lockedChanged(bool locked);
+
+    /**
+     * Signals that the visibility status changed
+     * @param visibility Visibility
+     */
+    void visibilityChanged(bool visibility);
 
     /**
      * Signals that the expansion status changed
      * @param expanded Whether the item is expanded or not
      */
-    void expandedChanged(const bool& expanded);
+    void expandedChanged(bool expanded);
 
     /** Signals that the data hierarchy item is being loaded */
     void loading();
