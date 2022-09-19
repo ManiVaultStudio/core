@@ -56,8 +56,8 @@ void DatasetPrivate::setDatasetGuid(const QString& datasetGuid)
 
 DatasetImpl* DatasetPrivate::getDataset()
 {
-    //if (_dataset == nullptr && !_datasetGuid.isEmpty())
-    //    _dataset = Application::core()->requestDataset(_datasetGuid).get();
+    if (_dataset == nullptr && !_datasetGuid.isEmpty())
+        _dataset = Application::core()->requestDataset(_datasetGuid).get();
 
     return _dataset;
 }

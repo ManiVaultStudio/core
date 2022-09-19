@@ -55,8 +55,6 @@ public: // Construction
      */
     Dataset(const Dataset<DatasetType>& other)
     {
-        setDataset(other.get());
-
         *this = other;
     }
 
@@ -94,7 +92,10 @@ public: // Operators
      */
     Dataset<DatasetType>& operator=(const Dataset<DatasetType>& rhs)
     {
-        setDataset(rhs.get());
+        if (rhs.isValid())
+            setDataset(rhs.get());
+        else
+            setDatasetGuid(rhs.getDatasetGuid());
 
         return *this;
     }
