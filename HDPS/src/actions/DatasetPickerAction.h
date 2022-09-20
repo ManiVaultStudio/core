@@ -5,6 +5,7 @@
 
 #include "actions/WidgetAction.h"
 #include "actions/OptionAction.h"
+#include "event/EventListener.h"
 
 #include <QAbstractListModel>
 
@@ -34,6 +35,12 @@ protected:
      */
     class DatasetsModel : public QAbstractListModel {
     public:
+
+        /** Model columns */
+        enum class Column {
+            Name,
+            GUID
+        };
 
         /** (Default) constructor */
         DatasetsModel(QObject* parent = nullptr);
@@ -120,18 +127,24 @@ protected:
 
 public:
 
-    /** 
+    /**
      * Constructor
      * @param parent Pointer to parent object
      * @param title Title of the action
+     * @param allDatasets Select from all datasets in the data hierarchy
+     * @param datasets Selectable datasets
+     * @param currentDataset Current dataset
      */
-    DatasetPickerAction(QObject* parent, const QString& title);
+    DatasetPickerAction(QObject* parent, const QString& title, bool allDatasets = false, hdps::Datasets datasets = hdps::Datasets(), hdps::Dataset<hdps::DatasetImpl> currentDataset = hdps::Dataset<hdps::DatasetImpl>());
+
+    /** Get whether to synchronizes the selectable datasets with all core datasets */
+    bool getAllDatasetsFromCore() const;
 
     /**
      * Set the datasets from which can be picked
      * @param datasets Datasets from which can be picked
      */
-    void setDatasets(const QVector<hdps::Dataset<hdps::DatasetImpl>>& datasets);
+    void setDatasets(Datasets datasets);
 
     /** Get the current dataset */
     hdps::Dataset<hdps::DatasetImpl> getCurrentDataset() const;
@@ -145,18 +158,68 @@ public:
 
     /**
      * Set the current dataset
-     * @param currentDataset Current dataset reference
+     * @param currentDataset Smart pointer to current dataset
      */
-    void setCurrentDataset(const hdps::Dataset<hdps::DatasetImpl>& currentDataset);
+    void setCurrentDataset(hdps::Dataset<hdps::DatasetImpl> currentDataset);
+
+    /**
+     * Set the current dataset by \p guid
+     * @param guid Current dataset globally unique identifier
+     */
+    void setCurrentDataset(const QString& guid);
+
+    /**
+     * Get current dataset globally unique identifier
+     * @return The globally unique identifier of the currently selected dataset (if any)
+     */
+    QString getCurrentDatasetGuid() const;
+
+private:
+
+    /** Updates the datasets with all from the core */
+    void fetchAllDatasetsFromCore();
+
+public: // Linking
+
+    /**
+     * Get whether the action may be published or not
+     * @return Boolean indicating whether the action may be published or not
+     */
+    bool mayPublish() const override;
+
+    /**
+     * Connect this action to a public action
+     * @param publicAction Pointer to public action to connect to
+     */
+    void connectToPublicAction(WidgetAction* publicAction) override;
+
+    /** Disconnect this action from a public action */
+    void disconnectFromPublicAction() override;
+
+protected:  // Linking
+
+    /**
+     * Get public copy of the action (other compatible actions can connect to it)
+     * @return Pointer to public copy of the action
+     */
+    virtual WidgetAction* getPublicCopy() const override;
 
 signals:
 
     /**
      * Signals that a dataset has been picked
-     * @param Dataset reference to picked dataset
+     * @param Smart pointer to picked dataset
      */
-    void datasetPicked(const hdps::Dataset<hdps::DatasetImpl>& pickedDataset);
+    void datasetPicked(hdps::Dataset<hdps::DatasetImpl> pickedDataset);
+
+    /**
+     * Signals that selectable datasets changed
+     * @param Selectable datasets
+     */
+    void datasetsChanged(hdps::Datasets datasets);
 
 protected:
-    DatasetsModel       _datasetsModel;     /** Datasets list model */
+    bool            _allDatasets;       /** Select from all datasets in the data hierarchy */
+    DatasetsModel   _datasetsModel;     /** Datasets list model */
+    EventListener   _eventListener;     /** Listen to events from the core */
 };

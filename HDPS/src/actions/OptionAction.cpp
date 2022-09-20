@@ -121,10 +121,10 @@ void OptionAction::connectToPublicAction(WidgetAction* publicAction)
 
     Q_ASSERT(publicOptionAction != nullptr);
 
-    connect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
-    connect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
+    connect(this, &OptionAction::currentTextChanged, publicOptionAction, &OptionAction::setCurrentText);
+    connect(publicOptionAction, &OptionAction::currentTextChanged, this, &OptionAction::setCurrentText);
 
-    setCurrentIndex(publicOptionAction->getCurrentIndex());
+    setCurrentText(publicOptionAction->getCurrentText());
 
     WidgetAction::connectToPublicAction(publicAction);
 }
@@ -135,8 +135,8 @@ void OptionAction::disconnectFromPublicAction()
 
     Q_ASSERT(publicOptionAction != nullptr);
 
-    disconnect(this, &OptionAction::currentIndexChanged, publicOptionAction, &OptionAction::setCurrentIndex);
-    disconnect(publicOptionAction, &OptionAction::currentIndexChanged, this, &OptionAction::setCurrentIndex);
+    disconnect(this, &OptionAction::currentTextChanged, publicOptionAction, &OptionAction::setCurrentText);
+    disconnect(publicOptionAction, &OptionAction::currentTextChanged, this, &OptionAction::setCurrentText);
 
     WidgetAction::disconnectFromPublicAction();
 }
@@ -235,6 +235,15 @@ void OptionAction::setDefaultIndex(const std::int32_t& defaultIndex)
 
 QString OptionAction::getDefaultText() const
 {
+    if (getOptions().isEmpty())
+        return "";
+
+    if (_defaultIndex < 0)
+        return "";
+
+    if (_defaultIndex >= getOptions().count())
+        return "";
+
     return getOptions()[_defaultIndex];
 }
 
@@ -297,35 +306,39 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
         setToolTip(optionAction->hasOptions() ? QString("%1: %2").arg(optionAction->toolTip(), optionAction->getCurrentText()) : optionAction->toolTip());
     };
 
-    // Update the read-only status, depending on the number of options
-    const auto updateReadOnly = [this, optionAction]() -> void {
+    const auto updateReadOnlyAndSelection = [this, optionAction]() -> void {
         if (optionAction->getCurrentIndex() < 0)
             setEnabled(optionAction->getNumberOfOptions() >= 1);
         else
             setEnabled(optionAction->getNumberOfOptions() >= 2);
+
+        setCurrentText(optionAction->getCurrentText());
     };
 
     // Assign option action model to combobox
-    const auto updateComboBoxModel = [this, optionAction, updateToolTip, updateReadOnly]() -> void {
+    const auto updateComboBoxModel = [this, optionAction, updateToolTip, updateReadOnlyAndSelection]() -> void {
 
         // Prevent signals from being emitted
         QSignalBlocker comboBoxSignalBlocker(this);
 
         // Disconnect from any previous list model
-        if (model())
+        if (model()) {
             disconnect(model(), &QAbstractItemModel::layoutChanged, this, nullptr);
+            disconnect(model(), &QAbstractItemModel::rowsInserted, this, nullptr);
+            disconnect(model(), &QAbstractItemModel::rowsRemoved, this, nullptr);
+        }
 
         // Update model and enable/disable based on the row count
         setModel(const_cast<QAbstractItemModel*>(optionAction->getModel()));
 
         // Enable/disable the combobox depending on the number of options
-        connect(model(), &QAbstractItemModel::layoutChanged, this, updateReadOnly);
-        connect(model(), &QAbstractItemModel::rowsInserted, this, updateReadOnly);
-        connect(model(), &QAbstractItemModel::rowsRemoved, this, updateReadOnly);
+        connect(model(), &QAbstractItemModel::layoutChanged, this, updateReadOnlyAndSelection);
+        connect(model(), &QAbstractItemModel::rowsInserted, this, updateReadOnlyAndSelection);
+        connect(model(), &QAbstractItemModel::rowsRemoved, this, updateReadOnlyAndSelection);
 
         updateToolTip();
 
-        updateReadOnly();
+        updateReadOnlyAndSelection();
     };
 
     // Assign model when changed in the option action
@@ -367,7 +380,7 @@ OptionAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionAction* opti
     });
 
     // Perform initial updates
-    updateReadOnly();
+    updateReadOnlyAndSelection();
     updateComboBoxModel();
     updateComboBoxSelection();
     updateToolTip();
