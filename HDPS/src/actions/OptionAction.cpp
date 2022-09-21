@@ -282,6 +282,9 @@ QString OptionAction::getCurrentText() const
 
 void OptionAction::setCurrentText(const QString& currentText)
 {
+    if (currentText == getCurrentText())
+        return;
+
     if (hasOption(currentText))
         _currentIndex = getModel()->match(getModel()->index(0, 0), Qt::DisplayRole, currentText).first().row();
 

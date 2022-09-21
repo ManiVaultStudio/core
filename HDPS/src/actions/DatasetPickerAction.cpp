@@ -46,6 +46,11 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, 
     setCurrentDataset(currentDataset);
 }
 
+QString DatasetPickerAction::getTypeString() const
+{
+    return "Dataset";
+}
+
 void DatasetPickerAction::setDatasets(Datasets datasets)
 {
     _datasetsModel.setDatasets(datasets);

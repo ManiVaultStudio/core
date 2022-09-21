@@ -137,6 +137,12 @@ public:
      */
     DatasetPickerAction(QObject* parent, const QString& title, bool allDatasets = false, hdps::Datasets datasets = hdps::Datasets(), hdps::Dataset<hdps::DatasetImpl> currentDataset = hdps::Dataset<hdps::DatasetImpl>());
 
+    /**
+     * Get type string
+     * @return Widget action type in string format
+     */
+    QString getTypeString() const override;
+
     /** Get whether to synchronizes the selectable datasets with all core datasets */
     bool getAllDatasetsFromCore() const;
 
