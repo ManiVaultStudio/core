@@ -8,9 +8,11 @@
 
 using namespace hdps;
 
-DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) :
+DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, bool allDatasets /*= false*/, hdps::Datasets datasets /*= hdps::Datasets()*/, hdps::Dataset<hdps::DatasetImpl> currentDataset /*= hdps::Dataset<hdps::DatasetImpl>()*/) :
     OptionAction(parent, "Pick dataset"),
-    _datasetsModel()
+    _allDatasets(allDatasets),
+    _datasetsModel(),
+    _eventListener()
 {
     setText(title);
     setIcon(Application::getIconFont("FontAwesome").getIcon("database"));
@@ -18,30 +20,54 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title) 
     setCustomModel(&_datasetsModel);
     setPlaceHolderString("--choose dataset--");
 
-    // Inform others that a dataset is picked when the dataset selection action current index changes
     connect(this, &OptionAction::currentIndexChanged, this, [this](const std::int32_t& currentIndex) {
         emit datasetPicked(_datasetsModel.getDataset(currentIndex));
     });
+
+    if (_allDatasets) {
+        _eventListener.setEventCore(Application::core());
+        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
+        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
+        _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
+            switch (dataEvent->getType()) {
+            case EventType::DataAdded:
+            case EventType::DataAboutToBeRemoved:
+                fetchAllDatasetsFromCore();
+                break;
+            }
+            });
+
+        fetchAllDatasetsFromCore();
+    }
+    else {
+        setDatasets(datasets);
+    }
+
+    setCurrentDataset(currentDataset);
 }
 
-void DatasetPickerAction::setDatasets(const QVector<Dataset<DatasetImpl>>& datasets)
+QString DatasetPickerAction::getTypeString() const
 {
-    // Set model datasets
+    return "Dataset";
+}
+
+void DatasetPickerAction::setDatasets(Datasets datasets)
+{
     _datasetsModel.setDatasets(datasets);
 
-    // Create connections
     for (auto& dataset : _datasetsModel.getDatasets()) {
 
-        // Update the datasets when the dataset is removed
         connect(&dataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, dataset]() {
-
-            // Remove the dataset from the model
             _datasetsModel.removeDataset(dataset);
         });
 
-        // Update the datasets model when the dataset is renamed
         connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
     }
+
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+
+    if (publicDatasetPickerAction)
+        setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 }
 
 Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
@@ -49,17 +75,70 @@ Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
     return _datasetsModel.getDataset(getCurrentIndex());
 }
 
-void DatasetPickerAction::setCurrentDataset(const Dataset<DatasetImpl>& currentDataset)
+void DatasetPickerAction::setCurrentDataset(Dataset<DatasetImpl> currentDataset)
 {
-    // Get index of current dataset
     const auto currentIndex = _datasetsModel.rowIndex(currentDataset);
 
-    // Only proceed if dataset was found
     if (currentIndex < 0)
         return;
 
-    // Change current index
     setCurrentIndex(currentIndex);
+}
+
+void DatasetPickerAction::setCurrentDataset(const QString& guid)
+{
+    const auto matches = _datasetsModel.match(QModelIndex(), Qt::EditRole, guid, 1);
+
+    if (matches.isEmpty())
+        return;
+
+    setCurrentIndex(matches.first().row());
+}
+
+QString DatasetPickerAction::getCurrentDatasetGuid() const
+{
+    return getCurrentDataset().getDatasetGuid();
+}
+
+void DatasetPickerAction::fetchAllDatasetsFromCore()
+{
+    setDatasets(Application::core()->requestAllDataSets());
+}
+
+bool DatasetPickerAction::mayPublish() const
+{
+    return true;
+}
+
+void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(publicAction);
+
+    Q_ASSERT(publicDatasetPickerAction != nullptr);
+
+    connect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    connect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+
+    setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void DatasetPickerAction::disconnectFromPublicAction()
+{
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+
+    Q_ASSERT(publicDatasetPickerAction != nullptr);
+
+    disconnect(this, &DatasetPickerAction::datasetPicked, publicDatasetPickerAction, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+    disconnect(publicDatasetPickerAction, &DatasetPickerAction::datasetPicked, this, qOverload<hdps::Dataset<hdps::DatasetImpl>>(&DatasetPickerAction::setCurrentDataset));
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+hdps::gui::WidgetAction* DatasetPickerAction::getPublicCopy() const
+{
+    return new DatasetPickerAction(parent(), text(), true, _datasetsModel.getDatasets(), getCurrentDataset());
 }
 
 DatasetPickerAction::DatasetsModel::DatasetsModel(QObject* parent /*= nullptr*/) :
@@ -81,7 +160,7 @@ int DatasetPickerAction::DatasetsModel::rowIndex(const Dataset<DatasetImpl>& dat
 
 int DatasetPickerAction::DatasetsModel::columnCount(const QModelIndex& parent /*= QModelIndex()*/) const
 {
-    return 1;
+    return 2;
 }
 
 QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int role) const
@@ -89,7 +168,7 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
     if (!index.isValid())
         return QVariant();
 
-    const auto column   = index.column();
+    const auto column   = static_cast<Column>(index.column());
     const auto dataset  = _datasets.at(index.row());
 
     switch (role)
@@ -98,7 +177,19 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
             return dataset->getIcon();
 
         case Qt::DisplayRole:
-            return _showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName();
+        {
+            switch (column)
+            {
+                case Column::Name:
+                    return _showFullPathName ? dataset->getDataHierarchyItem().getFullPathName() : dataset->getGuiName();
+
+                case Column::GUID:
+                    return dataset->getGuid();
+
+                default:
+                    break;
+            }
+        }
 
         default:
             break;
@@ -124,60 +215,45 @@ void DatasetPickerAction::DatasetsModel::setDatasets(const QVector<Dataset<Datas
 {
     removeAllDatasets();
 
-    // Add datasets one-by-one
     for (const auto& dataset : datasets)
         addDataset(dataset);
 }
 
 void DatasetPickerAction::DatasetsModel::addDataset(const Dataset<DatasetImpl>& dataset)
 {
-    // Insert row into model
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     {
-        // Add the dataset
         _datasets << dataset;
     }
     endInsertRows();
 
-    // Get smart pointer to last added dataset
     auto& addedDataset = _datasets.last();
 
-    // Remove a dataset from the model when it is about to be deleted
     connect(&addedDataset, &Dataset<DatasetImpl>::dataAboutToBeRemoved, this, [this, &addedDataset]() {
         removeDataset(addedDataset);
     });
 
-    // Notify others that the model has updated when the dataset GUI name changes
     connect(&addedDataset, &Dataset<DatasetImpl>::dataGuiNameChanged, this, [this, &addedDataset]() {
-
-        // Get row index of the dataset
         const auto colorDatasetRowIndex = rowIndex(addedDataset);
 
-        // Only proceed if we found a valid row index
         if (colorDatasetRowIndex < 0)
             return;
 
-        // Establish model index
         const auto modelIndex = index(colorDatasetRowIndex, 0);
 
-        // Only proceed if we have a valid model index
         if (!modelIndex.isValid())
             return;
 
-        // Notify others that the data changed
         emit dataChanged(modelIndex, modelIndex);
     });
 }
 
 void DatasetPickerAction::DatasetsModel::removeDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset)
 {
-    // Get row index of the dataset
     const auto datasetRowIndex = rowIndex(dataset);
 
-    // Remove row from model
     beginRemoveRows(QModelIndex(), datasetRowIndex, datasetRowIndex);
     {
-        // Remove dataset from internal vector
         _datasets.removeOne(dataset);
     }
     endRemoveRows();
@@ -185,19 +261,15 @@ void DatasetPickerAction::DatasetsModel::removeDataset(const hdps::Dataset<hdps:
 
 void DatasetPickerAction::DatasetsModel::removeAllDatasets()
 {
-    // No point in removing zero rows
     if (rowCount() == 0)
         return;
 
-    // Remove row from model
     beginRemoveRows(QModelIndex(), 0, std::max(0, rowCount() - 1));
     {
-        // Remove all datasets
         _datasets.clear();
     }
     endRemoveRows();
 
-    // And update model data with altered datasets
     updateData();
 }
 
@@ -215,17 +287,13 @@ void DatasetPickerAction::DatasetsModel::setShowFullPathName(const bool& showFul
 
 void DatasetPickerAction::DatasetsModel::updateData()
 {
-    // Update the datasets string list model
     for (auto dataset : _datasets) {
 
-        // Continue if the dataset is not valid
         if (!dataset.isValid())
             continue;
 
-        // Get dataset model index
         const auto datasetModelIndex = index(_datasets.indexOf(dataset), 0);
 
-        // Notify others that the data changed
         emit dataChanged(datasetModelIndex, datasetModelIndex);
     }
 }
