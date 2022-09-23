@@ -175,7 +175,7 @@ public:
      * Set the datasets from which can be picked (mode is set to Mode::Manual)
      * @param datasets Datasets from which can be picked
      */
-    void setDatasets(Datasets datasets);
+    void setDatasets(hdps::Datasets datasets);
 
     /**
      * Set datasets filter function (mode is set to Mode::Automatic)
