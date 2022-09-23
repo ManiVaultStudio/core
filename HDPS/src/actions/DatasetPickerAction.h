@@ -287,5 +287,5 @@ protected:
     Mode                        _mode;                      /** Picker mode (e.g. manual or automatic) */
     DatasetsFilterFunction      _datasetsFilterFunction;    /** Datasets filter lambda */
     DatasetsModel               _datasetsModel;             /** Datasets list model */
-    EventListener               _eventListener;             /** Listen to events from the core */
+    hdps::EventListener         _eventListener;             /** Listen to events from the core */
 };
