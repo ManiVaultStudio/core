@@ -144,7 +144,7 @@ public:
     };
 
     /** Filter function signature, the input are all datasets in the core and it returns the filtered datasets */
-    using DatasetsFilterFunction = std::function<hdps::Datasets(const Datasets&)>;
+    using DatasetsFilterFunction = std::function<hdps::Datasets(const hdps::Datasets&)>;
 
 public:
 
