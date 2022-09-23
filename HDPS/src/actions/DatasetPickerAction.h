@@ -108,6 +108,15 @@ protected:
         /** Remove all datasets from the model */
         void removeAllDatasets();
 
+        /** Get whether to show the dataset icon */
+        bool getShowIcon() const;
+
+        /**
+         * Set whether to show the icon
+         * @param showFullPathName Whether to show the icon
+         */
+        void setShowIcon(bool showIcon);
+
         /** Get whether to show the full path name in the GUI */
         bool getShowFullPathName() const;
 
@@ -122,8 +131,20 @@ protected:
 
     protected:
         QVector<hdps::Dataset<hdps::DatasetImpl>>   _datasets;              /** Datasets from which can be picked */
-        bool                                        _showFullPathName;      /** Whether to show the full path name in the GUI */
+        bool                                        _showIcon;              /** Whether to show the dataset icon */
+        bool                                        _showFullPathName;      /** Whether to show the full path name */
     };
+
+public:
+
+    /** Pickable datasets */
+    enum class Mode {
+        Manual,         /** ...are set manually with \p setDatasets() */
+        Automatic       /** ...are a continuous reflection of the datasets in the data model and can be possibly filtered with \p setDatasetsFilterFunction() */
+    };
+
+    /** Filter function signature, the input are all datasets in the core and it returns the filtered datasets */
+    using DatasetsFilterFunction = std::function<hdps::Datasets(const Datasets&)>;
 
 public:
 
@@ -131,11 +152,9 @@ public:
      * Constructor
      * @param parent Pointer to parent object
      * @param title Title of the action
-     * @param allDatasets Select from all datasets in the data hierarchy
-     * @param datasets Selectable datasets
-     * @param currentDataset Current dataset
+     * @param mode Picker mode
      */
-    DatasetPickerAction(QObject* parent, const QString& title, bool allDatasets = false, hdps::Datasets datasets = hdps::Datasets(), hdps::Dataset<hdps::DatasetImpl> currentDataset = hdps::Dataset<hdps::DatasetImpl>());
+    DatasetPickerAction(QObject* parent, const QString& title, Mode mode = Mode::Automatic);
 
     /**
      * Get type string
@@ -143,14 +162,26 @@ public:
      */
     QString getTypeString() const override;
 
-    /** Get whether to synchronizes the selectable datasets with all core datasets */
-    bool getAllDatasetsFromCore() const;
+    /** Get current mode */
+    Mode getMode() const;
 
     /**
-     * Set the datasets from which can be picked
+     * Set current mode
+     * @param mode Mode
+     */
+    void setMode(Mode mode);
+
+    /**
+     * Set the datasets from which can be picked (mode is set to Mode::Manual)
      * @param datasets Datasets from which can be picked
      */
     void setDatasets(Datasets datasets);
+
+    /**
+     * Set datasets filter function (mode is set to Mode::Automatic)
+     * @param datasetsFilterFunction Filter lambda (triggered when datasets are added and/or removed from the datasets model)
+     */
+    void setDatasetsFilterFunction(const DatasetsFilterFunction& datasetsFilterFunction);
 
     /** Get the current dataset */
     hdps::Dataset<hdps::DatasetImpl> getCurrentDataset() const;
@@ -180,10 +211,38 @@ public:
      */
     QString getCurrentDatasetGuid() const;
 
+public: // Datasets model facade
+
+    /** Get whether to show the dataset icon */
+    bool getShowIcon() const {
+        return _datasetsModel.getShowIcon();
+    }
+
+    /**
+     * Set whether to show the icon
+     * @param showFullPathName Whether to show the icon
+     */
+    void setShowIcon(bool showIcon) {
+        _datasetsModel.setShowIcon(showIcon);
+    }
+
+    /** Get whether to show the full path name in the GUI */
+    bool getShowFullPathName() const {
+        return _datasetsModel.getShowFullPathName();
+    }
+
+    /**
+     * Set whether to show the full path name in the GUI
+     * @param showFullPathName Whether to show the full path name in the GUI
+     */
+    void setShowFullPathName(const bool& showFullPathName) {
+        _datasetsModel.setShowFullPathName(showFullPathName);
+    }
+
 private:
 
-    /** Updates the datasets with all from the core */
-    void fetchAllDatasetsFromCore();
+    /** Populates the datasets from the core */
+    void populateDatasetsFromCore();
 
 public: // Linking
 
@@ -225,7 +284,8 @@ signals:
     void datasetsChanged(hdps::Datasets datasets);
 
 protected:
-    bool            _allDatasets;       /** Select from all datasets in the data hierarchy */
-    DatasetsModel   _datasetsModel;     /** Datasets list model */
-    EventListener   _eventListener;     /** Listen to events from the core */
+    Mode                        _mode;                      /** Picker mode (e.g. manual or automatic) */
+    DatasetsFilterFunction      _datasetsFilterFunction;    /** Datasets filter lambda */
+    DatasetsModel               _datasetsModel;             /** Datasets list model */
+    EventListener               _eventListener;             /** Listen to events from the core */
 };
