@@ -48,6 +48,11 @@ TriggerAction::PushButtonWidget::PushButtonWidget(QWidget* parent, TriggerAction
     update();
 }
 
+QString TriggerAction::getTypeString() const
+{
+    return "Trigger";
+}
+
 QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     if (dynamic_cast<QMenu*>(parent))
@@ -64,6 +69,40 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     widget->setLayout(layout);
 
     return widget;
+}
+
+bool TriggerAction::mayPublish() const
+{
+    return true;
+}
+
+void TriggerAction::connectToPublicAction(WidgetAction* publicAction)
+{
+    auto publicTriggerAction = dynamic_cast<TriggerAction*>(publicAction);
+
+    Q_ASSERT(publicTriggerAction != nullptr);
+
+    connect(this, &TriggerAction::triggered, publicTriggerAction, &TriggerAction::trigger);
+    connect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
+
+    WidgetAction::connectToPublicAction(publicAction);
+}
+
+void TriggerAction::disconnectFromPublicAction()
+{
+    auto publicTriggerAction = dynamic_cast<TriggerAction*>(_publicAction);
+
+    Q_ASSERT(publicTriggerAction != nullptr);
+
+    disconnect(this, &TriggerAction::triggered, publicTriggerAction, &TriggerAction::trigger);
+    disconnect(publicTriggerAction, &TriggerAction::triggered, this, &TriggerAction::trigger);
+
+    WidgetAction::disconnectFromPublicAction();
+}
+
+hdps::gui::WidgetAction* TriggerAction::getPublicCopy() const
+{
+    return new TriggerAction(parent(), text());
 }
 
 }
