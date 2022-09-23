@@ -6,11 +6,16 @@
 
 #include <QHBoxLayout>
 
+#ifdef _DEBUG
+    #define DATASET_PICKER_ACTION_VERBOSE
+#endif
+
 using namespace hdps;
 
-DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, bool allDatasets /*= false*/, hdps::Datasets datasets /*= hdps::Datasets()*/, hdps::Dataset<hdps::DatasetImpl> currentDataset /*= hdps::Dataset<hdps::DatasetImpl>()*/) :
+DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, Mode mode /*= Mode::Automatic*/) :
     OptionAction(parent, "Pick dataset"),
-    _allDatasets(allDatasets),
+    _mode(mode),
+    _datasetsFilterFunction(),
     _datasetsModel(),
     _eventListener()
 {
@@ -24,26 +29,30 @@ DatasetPickerAction::DatasetPickerAction(QObject* parent, const QString& title, 
         emit datasetPicked(_datasetsModel.getDataset(currentIndex));
     });
 
-    if (_allDatasets) {
-        _eventListener.setEventCore(Application::core());
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
-        _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
-        _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
-            switch (dataEvent->getType()) {
+    _eventListener.setEventCore(Application::core());
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAdded));
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataAboutToBeRemoved));
+    _eventListener.registerDataEvent([this](DataEvent* dataEvent) {
+        switch (dataEvent->getType()) {
             case EventType::DataAdded:
             case EventType::DataAboutToBeRemoved:
-                fetchAllDatasetsFromCore();
+                populateDatasetsFromCore();
                 break;
-            }
-            });
+        }
+    });
 
-        fetchAllDatasetsFromCore();
-    }
-    else {
-        setDatasets(datasets);
-    }
+    switch (_mode)
+    {
+        case DatasetPickerAction::Mode::Manual:
+            break;
 
-    setCurrentDataset(currentDataset);
+        case DatasetPickerAction::Mode::Automatic:
+            populateDatasetsFromCore();
+            break;
+        
+        default:
+            break;
+    }
 }
 
 QString DatasetPickerAction::getTypeString() const
@@ -51,8 +60,44 @@ QString DatasetPickerAction::getTypeString() const
     return "Dataset";
 }
 
+DatasetPickerAction::Mode DatasetPickerAction::getMode() const
+{
+    return _mode;
+}
+
+void DatasetPickerAction::setMode(Mode mode)
+{
+#ifdef DATASET_PICKER_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    if (mode == _mode)
+        return;
+
+    _mode = mode;
+
+    switch (_mode)
+    {
+        case DatasetPickerAction::Mode::Manual:
+            break;
+
+        case DatasetPickerAction::Mode::Automatic:
+            populateDatasetsFromCore();
+            break;
+
+        default:
+            break;
+    }
+}
+
 void DatasetPickerAction::setDatasets(Datasets datasets)
 {
+#ifdef DATASET_PICKER_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    _mode = Mode::Manual;
+
     _datasetsModel.setDatasets(datasets);
 
     for (auto& dataset : _datasetsModel.getDatasets()) {
@@ -68,6 +113,18 @@ void DatasetPickerAction::setDatasets(Datasets datasets)
 
     if (publicDatasetPickerAction)
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
+}
+
+void DatasetPickerAction::setDatasetsFilterFunction(const DatasetsFilterFunction& datasetsFilterFunction)
+{
+#ifdef DATASET_PICKER_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    _mode                   = Mode::Automatic;
+    _datasetsFilterFunction = datasetsFilterFunction;
+
+    populateDatasetsFromCore();
 }
 
 Dataset<DatasetImpl> DatasetPickerAction::getCurrentDataset() const
@@ -100,9 +157,29 @@ QString DatasetPickerAction::getCurrentDatasetGuid() const
     return getCurrentDataset().getDatasetGuid();
 }
 
-void DatasetPickerAction::fetchAllDatasetsFromCore()
+void DatasetPickerAction::populateDatasetsFromCore()
 {
-    setDatasets(Application::core()->requestAllDataSets());
+    if (_mode == Mode::Manual)
+        return;
+
+#ifdef DATASET_PICKER_ACTION_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    auto datasets = Application::core()->requestAllDataSets();
+
+    if (_datasetsFilterFunction)
+        datasets = _datasetsFilterFunction(datasets);
+
+    _datasetsModel.setDatasets(datasets);
+
+    for (auto& dataset : datasets)
+        connect(&dataset, &Dataset<DatasetImpl>::dataGuiNameChanged, &_datasetsModel, &DatasetsModel::updateData);
+
+    auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(_publicAction);
+
+    if (publicDatasetPickerAction)
+        setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 }
 
 bool DatasetPickerAction::mayPublish() const
@@ -138,13 +215,18 @@ void DatasetPickerAction::disconnectFromPublicAction()
 
 hdps::gui::WidgetAction* DatasetPickerAction::getPublicCopy() const
 {
-    return new DatasetPickerAction(parent(), text(), true, _datasetsModel.getDatasets(), getCurrentDataset());
+    auto publicCopy = new DatasetPickerAction(parent(), text());
+
+    publicCopy->setCurrentDataset(getCurrentDataset());
+    
+    return publicCopy;
 }
 
 DatasetPickerAction::DatasetsModel::DatasetsModel(QObject* parent /*= nullptr*/) :
     QAbstractListModel(parent),
     _datasets(),
-    _showFullPathName(true)
+    _showFullPathName(true),
+    _showIcon(true)
 {
 }
 
@@ -174,7 +256,7 @@ QVariant DatasetPickerAction::DatasetsModel::data(const QModelIndex& index, int 
     switch (role)
     {
         case Qt::DecorationRole:
-            return dataset->getIcon();
+            return _showIcon ? dataset->getIcon() : QVariant();
 
         case Qt::DisplayRole:
         {
@@ -269,6 +351,21 @@ void DatasetPickerAction::DatasetsModel::removeAllDatasets()
         _datasets.clear();
     }
     endRemoveRows();
+
+    updateData();
+}
+
+bool DatasetPickerAction::DatasetsModel::getShowIcon() const
+{
+    return _showIcon;
+}
+
+void DatasetPickerAction::DatasetsModel::setShowIcon(bool showIcon)
+{
+    if (showIcon == _showIcon)
+        return;
+
+    _showIcon = showIcon;
 
     updateData();
 }

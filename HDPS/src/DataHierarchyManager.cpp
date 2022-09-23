@@ -178,6 +178,8 @@ void DataHierarchyManager::fromVariantMap(const QVariantMap& variantMap)
         loadedDataset->getDataHierarchyItem().fromVariantMap(dataHierarchyItemMap);
         loadedDataset->fromVariantMap(dataset);
 
+        Application::core()->notifyDatasetAdded(loadedDataset);
+
         return loadedDataset;
     };
 
