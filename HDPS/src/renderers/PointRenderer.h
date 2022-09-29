@@ -99,13 +99,13 @@ namespace hdps
         struct PointSettings
         {
             // Constants
-            const float         DEFAULT_POINT_SIZE       = 15;
-            const float         DEFAULT_ALPHA_VALUE      = 0.5f;
-            const PointScaling  DEFAULT_POINT_SCALING    = PointScaling::Relative;
+            const float         DEFAULT_POINT_SIZE      = 15;
+            const float         DEFAULT_ALPHA_VALUE     = 0.5f;
+            const PointScaling  DEFAULT_POINT_SCALING   = PointScaling::Relative;
 
-            PointScaling        _scalingMode             = DEFAULT_POINT_SCALING;
-            float               _pointSize               = DEFAULT_POINT_SIZE;
-            float               _alpha                   = DEFAULT_ALPHA_VALUE;
+            PointScaling        _scalingMode            = DEFAULT_POINT_SCALING;
+            float               _pointSize              = DEFAULT_POINT_SIZE;
+            float               _alpha                  = DEFAULT_ALPHA_VALUE;
         };
 
         class PointRenderer : public Renderer
@@ -124,7 +124,11 @@ namespace hdps
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
+            Vector3f getOutlineColor() const;
             void setOutlineColor(Vector3f color);
+
+            float getSelectionOutlineScale() const;
+            void setSelectionOutlineScale(float selectionOutlineScale);
 
             void init() override;
             void resize(QSize renderSize) override;
@@ -139,6 +143,7 @@ namespace hdps
             PointSettings _pointSettings;
             PointEffect   _pointEffect = PointEffect::Size;
             Vector3f      _outlineColor = Vector3f(0, 0, 1);
+            float         _selectionOutlineScale = 0.5f;
 
             /* Window properties */
             QSize _windowSize;

@@ -309,9 +309,24 @@ namespace hdps
             _pointSettings._scalingMode = scalingMode;
         }
 
+        hdps::Vector3f PointRenderer::getOutlineColor() const
+        {
+            return _outlineColor;
+        }
+
         void PointRenderer::setOutlineColor(Vector3f color)
         {
             _outlineColor = color;
+        }
+
+        float PointRenderer::getSelectionOutlineScale() const
+        {
+            return _selectionOutlineScale;
+        }
+
+        void PointRenderer::setSelectionOutlineScale(float selectionOutlineScale)
+        {
+            _selectionOutlineScale = selectionOutlineScale;
         }
 
         void PointRenderer::init()
@@ -357,7 +372,8 @@ namespace hdps
             _shader.uniformMatrix3f("orthoM", _orthoM);
             _shader.uniform1f("pointOpacity", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
-            _shader.uniform3f("outlineColor", _outlineColor);
+            _shader.uniform3f("selectionOutlineColor", _outlineColor);
+            _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());

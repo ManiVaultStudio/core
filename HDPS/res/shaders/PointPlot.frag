@@ -8,11 +8,8 @@
 
 // Point properties
 uniform int   scalarEffect;
-uniform vec3  outlineColor;
-
-/** Focus selection parameters */
-uniform int numSelectedPoints;
-uniform bool focusSelection;
+uniform vec3  selectionOutlineColor;		/** Selection outline color */
+uniform float selectionOutlineScale;     	/** Selection outline scale */
 
 // Colormap to use if current effect is EFFECT_COLOR
 uniform sampler2D colormap;
@@ -45,7 +42,7 @@ void main()
     
     // Change color if point is highlighted
     if (vHighlight == 1) {
-        color = len > 0.5 ? outlineColor : color;
+        color = len > (1.0 - selectionOutlineScale) ? selectionOutlineColor : color;
     }
     
     bool isHighlighted = vHighlight == 1;

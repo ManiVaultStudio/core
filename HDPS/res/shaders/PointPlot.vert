@@ -49,13 +49,6 @@ void main()
     vOpacity = pointOpacity;
     if (hasOpacities)
         vOpacity = opacity;
-    
-    // Point properties
-    float scale = 1.0;
-
-    // Scale up the point if highlighted
-    if (hasHighlights && highlight == 1)
-        scale *= 1.2;
 
     // Transform position to clip space
     vec2 pos = (orthoM * vec3(position, 1)).xy;
