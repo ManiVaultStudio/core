@@ -101,8 +101,8 @@ class HdpsCoreConan(ConanFile):
     def generate(self):
         # This prevents overlap between the hdps/core (source folder)
         # and the HDPS (build) folder. This happens in the Macos build
-        # Build folder can't be set here since conan 1.50 
-        # possibly via CMakeDeps and CMakeToolchain 
+        # Build folder can't be set here since conan 1.50
+        # possibly via CMakeDeps and CMakeToolchain
         # self.build_folder = self.build_folder + '/hdps-common'
         deps = CMakeDeps(self)
         deps.generate()
@@ -159,6 +159,11 @@ class HdpsCoreConan(ConanFile):
     def package(self):
         print("Packaging install dir: ", self.install_dir)
         self.copy(pattern="*", src=self.install_dir)
+        if self.settings.os == "Macos":
+            # remove the bundle before packaging -
+            # it contains the complete QtWebEngine > 1GB
+            pathlib.Path(self.install_dir, "Debug/HDPS.app").unlink()
+            pathlib.Path(self.install_dir, "Release/HDPS.app").unlink()
 
     def package_info(self):
         self.cpp_info.debug.libdirs = ["Debug/lib"]
