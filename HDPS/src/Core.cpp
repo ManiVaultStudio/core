@@ -309,12 +309,12 @@ Dataset<DatasetImpl> Core::createSubsetFromSelection(const Dataset<DatasetImpl>&
 
         // Add the set the core and publish the name of the set to all plug-ins
         _dataManager->addSet(*subset);
-    
-        // Notify listeners that data was added
-        notifyDatasetAdded(*subset);
 
         // Add the dataset to the hierarchy manager
         _dataHierarchyManager->addItem(subset, const_cast<Dataset<DatasetImpl>&>(parentDataset), visible);
+
+        // Notify listeners that data was added
+        notifyDatasetAdded(*subset);
 
         // Initialize the dataset (e.g. setup default actions for info)
         subset->init();
