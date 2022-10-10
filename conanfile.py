@@ -6,6 +6,7 @@ from conans import tools
 import os
 import sys
 import pathlib
+import shutil
 from rules_support import CoreBranchInfo
 import subprocess
 import traceback
@@ -162,8 +163,8 @@ class HdpsCoreConan(ConanFile):
         if self.settings.os == "Macos":
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
-            pathlib.Path(self.install_dir, "Debug/HDPS.app").unlink()
-            pathlib.Path(self.install_dir, "Release/HDPS.app").unlink()
+            shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/HDPS.app")))
+            shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/HDPS.app")))
 
     def package_info(self):
         self.cpp_info.debug.libdirs = ["Debug/lib"]
