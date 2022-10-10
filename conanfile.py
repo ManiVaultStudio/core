@@ -159,12 +159,12 @@ class HdpsCoreConan(ConanFile):
 
     def package(self):
         print("Packaging install dir: ", self.install_dir)
-        self.copy(pattern="*", src=self.install_dir)
         if self.settings.os == "Macos":
             # remove the bundle before packaging -
             # it contains the complete QtWebEngine > 1GB
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Debug/HDPS.app")))
             shutil.rmtree(str(pathlib.Path(self.install_dir, "Release/HDPS.app")))
+        self.copy(pattern="*", src=self.install_dir)
 
     def package_info(self):
         self.cpp_info.debug.libdirs = ["Debug/lib"]
