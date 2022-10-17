@@ -309,14 +309,34 @@ namespace hdps
             _pointSettings._scalingMode = scalingMode;
         }
 
-        hdps::Vector3f PointRenderer::getOutlineColor() const
+        hdps::Vector3f PointRenderer::getSelectionOutlineColor() const
         {
-            return _outlineColor;
+            return _selectionOutlineColor;
         }
 
-        void PointRenderer::setOutlineColor(Vector3f color)
+        void PointRenderer::setSelectionOutlineColor(Vector3f color)
         {
-            _outlineColor = color;
+            _selectionOutlineColor = color;
+        }
+
+        bool PointRenderer::getSelectionOutlineOverrideColor() const
+        {
+            return _selectionOutlineOverrideColor;
+        }
+
+        void PointRenderer::setSelectionOutlineOverrideColor(float selectionOutlineOverrideColor)
+        {
+            _selectionOutlineOverrideColor = selectionOutlineOverrideColor;
+        }
+
+        bool PointRenderer::getSelectionOutlineEnabled() const
+        {
+            return _selectionOutlineEnabled;
+        }
+
+        void PointRenderer::setSelectionOutlineEnabled(float selectionOutlineEnabled)
+        {
+            _selectionOutlineEnabled = selectionOutlineEnabled;
         }
 
         float PointRenderer::getSelectionOutlineScale() const
@@ -327,6 +347,26 @@ namespace hdps
         void PointRenderer::setSelectionOutlineScale(float selectionOutlineScale)
         {
             _selectionOutlineScale = selectionOutlineScale;
+        }
+
+        float PointRenderer::getSelectionOutlineOpacity() const
+        {
+            return _selectionOutlineOpacity;
+        }
+
+        void PointRenderer::setSelectionOutlineOpacity(float selectionOutlineOpacity)
+        {
+            _selectionOutlineOpacity = selectionOutlineOpacity;
+        }
+
+        bool PointRenderer::getSelectionHaloEnabled() const
+        {
+            return _selectionHaloEnabled;
+        }
+
+        void PointRenderer::setSelectionHaloEnabled(float selectionHaloEnabled)
+        {
+            _selectionHaloEnabled = selectionHaloEnabled;
         }
 
         void PointRenderer::init()
@@ -372,8 +412,13 @@ namespace hdps
             _shader.uniformMatrix3f("orthoM", _orthoM);
             _shader.uniform1f("pointOpacity", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
-            _shader.uniform3f("selectionOutlineColor", _outlineColor);
+            
+            _shader.uniform1f("selectionOutlineEnabled", _selectionOutlineEnabled);
             _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
+            _shader.uniform3f("selectionOutlineColor", _selectionOutlineColor);
+            _shader.uniform1i("selectionOutlineOverrideColor", _selectionOutlineOverrideColor);
+            _shader.uniform1f("selectionOutlineOpacity", _selectionOutlineOpacity);
+            _shader.uniform1i("selectionHaloEnabled", _selectionHaloEnabled);
 
             _shader.uniform1i("hasHighlights", _gpuPoints.hasHighlights());
             _shader.uniform1i("hasScalars", _gpuPoints.hasColorScalars());
