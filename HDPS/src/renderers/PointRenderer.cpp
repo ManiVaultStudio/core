@@ -309,6 +309,16 @@ namespace hdps
             _pointSettings._scalingMode = scalingMode;
         }
 
+        hdps::gui::PointSelectionDisplayMode PointRenderer::getSelectionDisplayMode() const
+        {
+            return _selectionDisplayMode;
+        }
+
+        void PointRenderer::setSelectionDisplayMode(PointSelectionDisplayMode selectionDisplayMode)
+        {
+            _selectionDisplayMode = selectionDisplayMode;
+        }
+
         hdps::Vector3f PointRenderer::getSelectionOutlineColor() const
         {
             return _selectionOutlineColor;
@@ -327,16 +337,6 @@ namespace hdps
         void PointRenderer::setSelectionOutlineOverrideColor(float selectionOutlineOverrideColor)
         {
             _selectionOutlineOverrideColor = selectionOutlineOverrideColor;
-        }
-
-        bool PointRenderer::getSelectionOutlineEnabled() const
-        {
-            return _selectionOutlineEnabled;
-        }
-
-        void PointRenderer::setSelectionOutlineEnabled(float selectionOutlineEnabled)
-        {
-            _selectionOutlineEnabled = selectionOutlineEnabled;
         }
 
         float PointRenderer::getSelectionOutlineScale() const
@@ -413,7 +413,7 @@ namespace hdps
             _shader.uniform1f("pointOpacity", _pointSettings._alpha);
             _shader.uniform1i("scalarEffect", _pointEffect);
             
-            _shader.uniform1f("selectionOutlineEnabled", _selectionOutlineEnabled);
+            _shader.uniform1i("selectionDisplayMode", static_cast<std::int32_t>(_selectionDisplayMode));
             _shader.uniform1f("selectionOutlineScale", _selectionOutlineScale);
             _shader.uniform3f("selectionOutlineColor", _selectionOutlineColor);
             _shader.uniform1i("selectionOutlineOverrideColor", _selectionOutlineOverrideColor);

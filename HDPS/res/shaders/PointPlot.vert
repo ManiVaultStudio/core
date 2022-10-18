@@ -20,7 +20,7 @@ uniform bool hasSizes;          				/** Whether a point size buffer is used */
 uniform bool hasOpacities;      				/** Whether an opacity buffer is used */
 
 // Selection visualization
-uniform bool selectionOutlineEnabled; 			/** Whether selection outline is enabled */
+uniform int	selectionDisplayMode;				/** Type of selection display (e.g. outline, override) */
 uniform float selectionOutlineScale;     		/** Selection outline scale */
 uniform float selectionOutlineOpacity;     		/** Selection outline opacity */
 uniform vec3  selectionOutlineColor;			/** Selection outline color */
@@ -61,11 +61,11 @@ void main()
     vec2 pos = (orthoM * vec3(position, 1)).xy;
     
     // Resize point quad according to properties
-    vec2 scaledVertex = vertex * pointSize * pointSizeScale * (selectionOutlineEnabled ? selectionOutlineScale : 1);
+    vec2 scaledVertex = vertex * pointSize * pointSizeScale * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
 	
     if (hasSizes)
-        scaledVertex = vertex * size * pointSizeScale * (selectionOutlineEnabled ? selectionOutlineScale : 1);
+        scaledVertex = vertex * size * pointSizeScale * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
     
     // Move quad by position and output
-    gl_Position = vec4(scaledVertex + pos, 0, 1);
+    gl_Position = vec4(scaledVertex + pos, (highlight == 1) ? 0.3 : 0.2, 1);
 }
