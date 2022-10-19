@@ -7,18 +7,25 @@
 #define EFFECT_OUTLINE 3
 
 // Point properties
-uniform float pointSize;        /** Point size */
-uniform float pointSizeScale;   /** Scale factor in absolute point size mode */
+uniform float pointSize;        				/** Point size */
+uniform float pointSizeScale;   				/** Scale factor in absolute point size mode */
 uniform int   scalarEffect;
-uniform float pointOpacity;     /** Point opacity */
+uniform float pointOpacity;     				/** Point opacity */
+uniform mat3 orthoM;            				/** Projection matrix from bounds space to clip space */
+uniform bool hasHighlights;     				/** Whether a highlight buffer is used */
+uniform bool hasScalars;        				/** Whether a scalar buffer is used */
+uniform vec3 colorMapRange;     				/** Color map scalar range */
+uniform bool hasColors;         				/** Whether a color buffer is used */
+uniform bool hasSizes;          				/** Whether a point size buffer is used */
+uniform bool hasOpacities;      				/** Whether an opacity buffer is used */
 
-uniform mat3 orthoM;            /** Projection matrix from bounds space to clip space */
-uniform bool hasHighlights;     /** Whether a highlight buffer is used */
-uniform bool hasScalars;        /** Whether a scalar buffer is used */
-uniform vec3 colorMapRange;     /** Color map scalar range */
-uniform bool hasColors;         /** Whether a color buffer is used */
-uniform bool hasSizes;          /** Whether a point size buffer is used */
-uniform bool hasOpacities;      /** Whether an opacity buffer is used */
+// Selection visualization
+uniform bool selectionOutlineEnabled; 			/** Whether selection outline is enabled */
+uniform float selectionOutlineScale;     		/** Selection outline scale */
+uniform float selectionOutlineOpacity;     		/** Selection outline opacity */
+uniform vec3  selectionOutlineColor;			/** Selection outline color */
+uniform bool selectionHaloEnabled; 				/** Whether selection halo is enabled */
+uniform float selectionHaloScale;     			/** Selection halo scale */
 
 layout(location = 0) in vec2    vertex;         /** Vertex input, always a [-1, 1] quad */
 layout(location = 1) in vec2    position;       /** 2-Dimensional positions of points */
@@ -49,21 +56,15 @@ void main()
     vOpacity = pointOpacity;
     if (hasOpacities)
         vOpacity = opacity;
-    
-    // Point properties
-    float scale = 1.0;
-
-    // Scale up the point if highlighted
-    if (hasHighlights && highlight == 1)
-        scale *= 1.2;
 
     // Transform position to clip space
     vec2 pos = (orthoM * vec3(position, 1)).xy;
     
     // Resize point quad according to properties
-    vec2 scaledVertex = vertex * pointSize * pointSizeScale;
+    vec2 scaledVertex = vertex * pointSize * pointSizeScale * (selectionOutlineEnabled ? selectionOutlineScale : 1);
+	
     if (hasSizes)
-        scaledVertex = vertex * size * pointSizeScale;
+        scaledVertex = vertex * size * pointSizeScale * (selectionOutlineEnabled ? selectionOutlineScale : 1);
     
     // Move quad by position and output
     gl_Position = vec4(scaledVertex + pos, 0, 1);

@@ -126,6 +126,9 @@ DataHierarchyItem& DataHierarchyManager::getItem(const QString& datasetGuid)
         for (auto dataHierarchyItem : _items)
             if (dataHierarchyItem->getDataset().getDatasetGuid() == datasetGuid)
                 return *dataHierarchyItem;
+
+        QString errorMessage = QString("Failed to find data hierarchy item with guid: %1").arg(datasetGuid);
+        throw std::runtime_error(errorMessage.toStdString());
     }
     catch (std::exception& e)
     {

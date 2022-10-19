@@ -99,13 +99,13 @@ namespace hdps
         struct PointSettings
         {
             // Constants
-            const float         DEFAULT_POINT_SIZE       = 15;
-            const float         DEFAULT_ALPHA_VALUE      = 0.5f;
-            const PointScaling  DEFAULT_POINT_SCALING    = PointScaling::Relative;
+            const float         DEFAULT_POINT_SIZE      = 15;
+            const float         DEFAULT_ALPHA_VALUE     = 0.5f;
+            const PointScaling  DEFAULT_POINT_SCALING   = PointScaling::Relative;
 
-            PointScaling        _scalingMode             = DEFAULT_POINT_SCALING;
-            float               _pointSize               = DEFAULT_POINT_SIZE;
-            float               _alpha                   = DEFAULT_ALPHA_VALUE;
+            PointScaling        _scalingMode            = DEFAULT_POINT_SCALING;
+            float               _pointSize              = DEFAULT_POINT_SIZE;
+            float               _alpha                  = DEFAULT_ALPHA_VALUE;
         };
 
         class PointRenderer : public Renderer
@@ -124,7 +124,21 @@ namespace hdps
             void setPointSize(const float size);
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
-            void setOutlineColor(Vector3f color);
+            
+
+            bool getSelectionOutlineEnabled() const;
+            void setSelectionOutlineEnabled(float selectionOutlineEnabled);
+            Vector3f getSelectionOutlineColor() const;
+            void setSelectionOutlineColor(Vector3f color);
+            bool getSelectionOutlineOverrideColor() const;
+            void setSelectionOutlineOverrideColor(float selectionOutlineOverrideColor);
+            float getSelectionOutlineScale() const;
+            void setSelectionOutlineScale(float selectionOutlineScale);
+            float getSelectionOutlineOpacity() const;
+            void setSelectionOutlineOpacity(float selectionOutlineOpacity);
+
+            bool getSelectionHaloEnabled() const;
+            void setSelectionHaloEnabled(float selectionHaloEnabled);
 
             void init() override;
             void resize(QSize renderSize) override;
@@ -138,7 +152,13 @@ namespace hdps
             /* Point properties */
             PointSettings _pointSettings;
             PointEffect   _pointEffect = PointEffect::Size;
-            Vector3f      _outlineColor = Vector3f(0, 0, 1);
+            
+            bool          _selectionOutlineEnabled          = true;
+            Vector3f      _selectionOutlineColor            = Vector3f(0, 0, 1);
+            bool          _selectionOutlineOverrideColor    = true;
+            float         _selectionOutlineScale            = 2.0f;
+            float         _selectionOutlineOpacity          = 0.75f;
+            bool          _selectionHaloEnabled             = false;
 
             /* Window properties */
             QSize _windowSize;
