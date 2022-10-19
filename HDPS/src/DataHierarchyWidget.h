@@ -90,10 +90,17 @@ protected:
     void updateColumnsVisibility();
 
     /**
-     * Get indices
-     * @param parent Parent model index
+     * Get selected row
+     * @return Model indexes of the selected rows
      */
-    QModelIndexList getModelIndexList(QModelIndex parent = QModelIndex()) const;
+    QModelIndexList getSelectedRows() const;
+
+    /**
+     * Get indices of parent and all children recursively
+     * @param filterModelParentIndex Parent filter model index
+     * @return Filter model indices
+     */
+    QModelIndexList gatherIndicesRecursively(QModelIndex filterModelParentIndex = QModelIndex()) const;
 
 protected: // Item expansion
 
@@ -116,10 +123,10 @@ protected: // Item expansion
     void collapseAll();
 
     /** Called when the user expands an item in the tree view */
-    void expanded(const QModelIndex& index);
+    void expanded(const QModelIndex& filterModelIndex);
 
     /** Called when the user collapses an item in the tree view */
-    void collapsed(const QModelIndex& index);
+    void collapsed(const QModelIndex& filterModelIndex);
 
 protected:
 

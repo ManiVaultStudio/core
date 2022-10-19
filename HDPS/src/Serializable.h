@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/Serialization.h"
+
 #include <QString>
 #include <QJsonDocument>
 

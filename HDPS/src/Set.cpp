@@ -105,7 +105,6 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Name");
     variantMapMustContain(variantMap, "Locked");
-    variantMapMustContain(variantMap, "Visible");
     variantMapMustContain(variantMap, "GUID");
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "HasAnalysis");
@@ -114,7 +113,6 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 
     setGuiName(variantMap["Name"].toString());
     setLocked(variantMap["Locked"].toBool());
-    getDataHierarchyItem().setVisible(variantMap["Visible"].toBool());
 
     _guid       = variantMap["GUID"].toString();
     _derived    = variantMap["Derived"].toBool();
@@ -162,7 +160,6 @@ QVariantMap DatasetImpl::toVariantMap() const
     return {
         { "Name", QVariant::fromValue(getGuiName()) },
         { "Locked", QVariant::fromValue(_locked) },
-        { "Visible", QVariant::fromValue(getDataHierarchyItem().getVisible()) },
         { "GUID", QVariant::fromValue(getGuid()) },
         { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
         { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },

@@ -101,17 +101,11 @@ public:
     /** Establishes whether the item has any children */
     bool hasChildren() const;
 
-    /** Gets whether the dataset is visible */
-    bool getVisible() const;
-
     /**
      * Set visibility
      * @param visible Whether the data hierarchy item is visible or not
      */
     void setVisible(bool visible);
-
-    /** Gets whether the dataset is hidden */
-    bool isHidden() const;
 
     /** Gets whether the hierarchy item is selected */
     bool isSelected() const;
@@ -372,7 +366,6 @@ protected:
     Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
     DataHierarchyItems          _children;              /** Pointers to child items (if any) */
-    bool                        _visible;               /** Whether the dataset is visible */
     bool                        _selected;              /** Whether the hierarchy item is selected */
     bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
     QString                     _taskDescription;       /** Task description */

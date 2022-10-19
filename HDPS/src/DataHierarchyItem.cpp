@@ -18,7 +18,6 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _dataset(dataset),
     _parent(),
     _children(),
-    _visible(visible),
     _selected(false),
     _expanded(true),
     _taskDescription(""),
@@ -131,24 +130,14 @@ bool DataHierarchyItem::hasChildren() const
     return getNumberOfChildren() > 0;
 }
 
-bool DataHierarchyItem::getVisible() const
-{
-    return _visible;
-}
-
 void DataHierarchyItem::setVisible(bool visible)
 {
-    if (visible == _visible)
+    if (visible == isVisible())
         return;
 
-    _visible = visible;
+    WidgetAction::setVisible(visible);
 
-    emit visibilityChanged(_visible);
-}
-
-bool DataHierarchyItem::isHidden() const
-{
-    return !_visible;
+    emit visibilityChanged(isVisible());
 }
 
 QString DataHierarchyItem::getTaskDescription() const
@@ -210,7 +199,7 @@ void DataHierarchyItem::addChild(DataHierarchyItem& child)
 
 QString DataHierarchyItem::toString() const
 {
-    return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), _visible ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
+    return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), isVisible() ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
 }
 
 Dataset<DatasetImpl> DataHierarchyItem::getDataset()
@@ -477,10 +466,13 @@ void DataHierarchyItem::setIcon(const QIcon& icon)
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 {
     emit loading();
+    {
+        variantMapMustContain(variantMap, "Expanded");
+        variantMapMustContain(variantMap, "Visible");
 
-    if (variantMap.contains("Expanded"))
         setExpanded(variantMap["Expanded"].toBool());
-
+        setVisible(variantMap["Visible"].toBool());
+    }
     emit loaded();
 }
 
@@ -511,7 +503,8 @@ QVariantMap DataHierarchyItem::toVariantMap() const
 
     return {
         { "Name", getGuiName() },
-        { "Expanded", _expanded },
+        { "Expanded", QVariant::fromValue(_expanded) },
+        { "Visible", QVariant::fromValue(isVisible()) },
         { "Dataset", _dataset->toVariantMap() },
         { "Children", children }
     };

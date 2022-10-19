@@ -285,14 +285,6 @@ QVariant DataHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, in
     return QVariant();
 }
 
-QMenu* DataHierarchyModelItem::getContextMenu()
-{
-    if (_dataHierarchyItem == nullptr || _dataHierarchyItem->getGuiName().isEmpty())
-        return new QMenu();
-
-    return _dataHierarchyItem->getContextMenu();
-}
-
 void DataHierarchyModelItem::renameDataset(const QString& intendedDatasetName)
 {
     _dataHierarchyItem->renameDataset(intendedDatasetName);
@@ -306,6 +298,14 @@ void DataHierarchyModelItem::setGroupIndex(const std::int32_t& groupIndex)
 DataHierarchyItem* DataHierarchyModelItem::getDataHierarchyItem()
 {
     return _dataHierarchyItem;
+}
+
+bool DataHierarchyModelItem::isVisible() const
+{
+    if (_dataHierarchyItem == nullptr)
+        return false;
+
+    return _dataHierarchyItem->isVisible();
 }
 
 void DataHierarchyModelItem::removeChild(DataHierarchyModelItem* dataHierarchyModelItem)
