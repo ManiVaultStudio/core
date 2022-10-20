@@ -2,12 +2,11 @@
 
 #include "DataHierarchyModel.h"
 #include "DataHierarchyFilterModel.h"
+#include "DataHierarchyFilterAction.h"
 #include "Dataset.h"
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
-
-#include "actions/DataHierarchyFilterAction.h"
 
 #include <QWidget>
 #include <QTreeView>

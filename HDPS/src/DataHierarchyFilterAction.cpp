@@ -1,4 +1,5 @@
 #include "DataHierarchyFilterAction.h"
+#include "DataHierarchyFilterModel.h"
 
 #include <Application.h>
 
@@ -6,8 +7,9 @@
 
 using namespace hdps;
 
-DataHierarchyFilterAction::DataHierarchyFilterAction(QObject* parent) :
+DataHierarchyFilterAction::DataHierarchyFilterAction(QObject* parent, DataHierarchyFilterModel& dataHierarchyFilterModel) :
     WidgetAction(parent),
+    _dataHierarchyFilterModel(dataHierarchyFilterModel),
     _showHiddenAction(this, "Show hidden")
 {
     setText("Filtering");
@@ -15,6 +17,15 @@ DataHierarchyFilterAction::DataHierarchyFilterAction(QObject* parent) :
     setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
 
     _showHiddenAction.setToolTip("Show hidden datasets");
+
+    connect(&_showHiddenAction, &ToggleAction::toggled, this, &DataHierarchyFilterAction::updateFilterModel);
+
+    updateFilterModel();
+}
+
+void DataHierarchyFilterAction::updateFilterModel()
+{
+    _dataHierarchyFilterModel.setFilterHidden(!_showHiddenAction.isChecked());
 }
 
 DataHierarchyFilterAction::Widget::Widget(QWidget* parent, DataHierarchyFilterAction* dataHierarchyFilterAction, const std::int32_t& widgetFlags /*= 0*/) :

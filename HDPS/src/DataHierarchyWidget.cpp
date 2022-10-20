@@ -67,7 +67,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _selectionModel(&_filterModel),
     _noDataOverlayWidget(new NoDataOverlayWidget(this)),
     _datasetNameFilterAction(this, "Dataset name filter"),
-    _dataHierarchyFilterAction(this),
+    _dataHierarchyFilterAction(this, _filterModel),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())

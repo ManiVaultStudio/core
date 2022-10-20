@@ -3,6 +3,8 @@
 #include <actions/WidgetAction.h>
 #include <actions/ToggleAction.h>
 
+class DataHierarchyFilterModel;
+
 using namespace hdps::gui;
 
 class DataHierarchyFilterAction : public WidgetAction
@@ -24,11 +26,15 @@ protected:
     };
 
 public:
-    DataHierarchyFilterAction(QObject* parent);
+    DataHierarchyFilterAction(QObject* parent, DataHierarchyFilterModel& dataHierarchyFilterModel);
 
 protected:
     ToggleAction& getShowHiddenAction() { return _showHiddenAction; }
 
 private:
-    ToggleAction    _showHiddenAction;      /** Show hidden datasets action */
+    void updateFilterModel();
+
+private:
+    DataHierarchyFilterModel&   _dataHierarchyFilterModel;      /** Reference to data hierarchy filter model owned by the data hierarchy widget */
+    ToggleAction                _showHiddenAction;              /** Show hidden datasets action */
 };

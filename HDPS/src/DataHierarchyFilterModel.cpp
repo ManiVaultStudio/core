@@ -6,7 +6,8 @@
 using namespace hdps;
 
 DataHierarchyFilterModel::DataHierarchyFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent)
+    QSortFilterProxyModel(parent),
+    _filterHidden(false)
 {
     setRecursiveFilteringEnabled(true);
 }
@@ -20,7 +21,7 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
 
     auto modelItem = static_cast<DataHierarchyModelItem*>(index.internalPointer());
 
-    if (!modelItem->isVisible())
+    if (_filterHidden && !modelItem->isVisible())
         return false;
 
     if (filterRegularExpression().isValid()) {
@@ -29,4 +30,19 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
     }
        
     return false;
+}
+
+bool DataHierarchyFilterModel::getFilterHidden() const
+{
+	return _filterHidden;
+}
+
+void DataHierarchyFilterModel::setFilterHidden(bool filterHidden)
+{
+    if (filterHidden == _filterHidden)
+        return;
+
+    _filterHidden = filterHidden;
+
+    invalidate();
 }
