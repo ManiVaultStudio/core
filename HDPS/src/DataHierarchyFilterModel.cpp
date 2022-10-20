@@ -18,7 +18,9 @@ bool DataHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pare
     if (!index.isValid())
         return true;
 
-    if (!static_cast<DataHierarchyModelItem*>(index.internalPointer())->isVisible())
+    auto modelItem = static_cast<DataHierarchyModelItem*>(index.internalPointer());
+
+    if (!modelItem->isVisible())
         return false;
 
     if (filterRegularExpression().isValid()) {

@@ -382,6 +382,7 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyWidget.h
     src/DataPropertiesWidget.h
     src/ActionsViewerWidget.h
+    src/actions/DataHierarchyFilterAction.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -391,6 +392,7 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp
     src/ActionsViewerWidget.cpp
+    src/actions/DataHierarchyFilterAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS

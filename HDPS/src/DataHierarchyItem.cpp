@@ -49,6 +49,8 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     connect(&_taskProgressTimer, &QTimer::timeout, [this]() {
         emit taskProgressChanged(getTaskProgress());
     });
+
+    setVisible(visible);
 }
 
 QString DataHierarchyItem::getGuiName() const

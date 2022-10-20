@@ -7,6 +7,8 @@
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
 
+#include "actions/DataHierarchyFilterAction.h"
+
 #include <QWidget>
 #include <QTreeView>
 #include <QGraphicsOpacityEffect>
@@ -134,15 +136,16 @@ protected:
     void updateToolBar();
 
 private:
-    DataHierarchyModel          _model;                     /** Model containing data to be displayed in the hierarchy */
-    DataHierarchyFilterModel    _filterModel;               /** Data hierarchy filter model */
-    QTreeView                   _treeView;                  /** Tree view that contains the data hierarchy */
-    QItemSelectionModel         _selectionModel;            /** Selection model */
-    NoDataOverlayWidget*        _noDataOverlayWidget;       /** Overlay help widget which is shown when no data is loaded */
-    StringAction                _datasetNameFilterAction;   /** String action for filtering dataset GUI name */
-    TriggerAction               _expandAllAction;           /** Expand all datasets action */
-    TriggerAction               _collapseAllAction;         /** Collapse all datasets action */
-    ToggleAction                _groupingAction;            /** Data grouping action */
+    DataHierarchyModel          _model;                         /** Model containing data to be displayed in the hierarchy */
+    DataHierarchyFilterModel    _filterModel;                   /** Data hierarchy filter model */
+    QTreeView                   _treeView;                      /** Tree view that contains the data hierarchy */
+    QItemSelectionModel         _selectionModel;                /** Selection model */
+    NoDataOverlayWidget*        _noDataOverlayWidget;           /** Overlay help widget which is shown when no data is loaded */
+    StringAction                _datasetNameFilterAction;       /** String action for filtering dataset GUI name */
+    DataHierarchyFilterAction   _dataHierarchyFilterAction;     /** Filter action */
+    TriggerAction               _expandAllAction;               /** Expand all datasets action */
+    TriggerAction               _collapseAllAction;             /** Collapse all datasets action */
+    ToggleAction                _groupingAction;                /** Data grouping action */
 };
 
 }

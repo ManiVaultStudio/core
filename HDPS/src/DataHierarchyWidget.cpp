@@ -67,6 +67,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _selectionModel(&_filterModel),
     _noDataOverlayWidget(new NoDataOverlayWidget(this)),
     _datasetNameFilterAction(this, "Dataset name filter"),
+    _dataHierarchyFilterAction(this),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
@@ -134,6 +135,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     toolbarLayout->setContentsMargins(0, 3, 0, 3);
     toolbarLayout->setSpacing(4);
     toolbarLayout->addWidget(_datasetNameFilterAction.createWidget(this), 1);
+    toolbarLayout->addWidget(_dataHierarchyFilterAction.createCollapsedWidget(this));
     toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::CheckBox));
@@ -434,6 +436,12 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
         connect(&dataHierarchyItem, &DataHierarchyItem::lockedChanged, this, [this, dataset](const bool& locked) {
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::IsLocked));
         });
+
+        connect(&dataHierarchyItem, &DataHierarchyItem::visibilityChanged, this, [this](const bool& visible) {
+            _filterModel.invalidate();
+        });
+        
+        _filterModel.invalidate();
 
         connect(&dataHierarchyItem, &DataHierarchyItem::iconChanged, this, [this, dataset]() {
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name));
