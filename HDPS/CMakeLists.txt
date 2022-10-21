@@ -629,7 +629,7 @@ install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
                 \"${CMAKE_CURRENT_SOURCE_DIR}/\${PUBLIC_HEADER}\" 
                 \"${INSTALL_DIR}/$<CONFIGURATION>/include/\${STRIPPED_PUBLIC_HEADER}\"
         )
-
+	MESSAGE(STATUS \"Installing: \${PUBLIC_HEADER}\")
     endforeach(PUBLIC_HEADER)"
     COMPONENT HDPSPUBLIC_HEADERS
 )
