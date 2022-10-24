@@ -466,10 +466,10 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         auto embedding = parent->getParent();
 
         // Global indices into data
-        std::vector<std::uint32_t> globalIndices;
+        //std::vector<std::uint32_t> globalIndices;
 
         // Get global indices from points
-        points->getGlobalIndices(globalIndices);
+        //points->getGlobalIndices(globalIndices);
 
         auto clusterIndex = 0;
 
@@ -484,11 +484,11 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                     // add data here that belongs to a different dataset
                     if (linkedData.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
                     {
-                        for (const auto localIndex : cluster.getIndices())
+                        for (const auto globalPointIndex : cluster.getIndices())
                         {
                             SelectionMap::Indices linkedIndices;
                             
-                            linkedData.getMapping().populateMappingIndices(globalIndices[localIndex], linkedIndices);
+                            linkedData.getMapping().populateMappingIndices(globalPointIndex, linkedIndices);
 
                             // Fill in the data for all the linked data indices based on the location of the original id
                             for (unsigned int linkedIndex : linkedIndices)
@@ -497,8 +497,8 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                     }
                 }
                 // Iterate over all indices in the cluster and assign cluster index to scalar data
-                for (const auto localIndex : cluster.getIndices())
-                    scalarData[globalIndices[localIndex]] = clusterIndex;
+                for (const auto globalPointIndex : cluster.getIndices())
+                    scalarData[globalPointIndex] = clusterIndex;
 
                 clusterIndex++;
             }
@@ -576,10 +576,10 @@ void Images::computeMaskData()
         auto embedding = clusters->getParent();
 
         // Global indices into data
-        std::vector<std::uint32_t> globalIndices;
+        //std::vector<std::uint32_t> globalIndices;
 
         // Get global indices from points
-        points->getGlobalIndices(globalIndices);
+        //points->getGlobalIndices(globalIndices);
 
         // Iterate over all clusters
         for (auto& cluster : clusters->getClusters()) {
@@ -593,11 +593,11 @@ void Images::computeMaskData()
                     // add data here that belongs to a different dataset
                     if (linkedData.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
                     {
-                        for (const auto localIndex : cluster.getIndices())
+                        for (const auto globalPointIndex : cluster.getIndices())
                         {
                             SelectionMap::Indices linkedIndices;
 
-                            linkedData.getMapping().populateMappingIndices(globalIndices[localIndex], linkedIndices);
+                            linkedData.getMapping().populateMappingIndices(globalPointIndex, linkedIndices);
 
                             // Fill in the data for all the linked data indices based on the location of the original id
                             for (unsigned int linkedIndex : linkedIndices)
@@ -608,8 +608,8 @@ void Images::computeMaskData()
             }
 
             // Iterate over all indices in the cluster and assign cluster index to scalar data
-            for (const auto localIndex : cluster.getIndices())
-                _maskData[globalIndices[localIndex]] = 255;
+            for (const auto globalPointIndex : cluster.getIndices())
+                _maskData[globalPointIndex] = 255;
         }
     }
 
