@@ -293,9 +293,6 @@ void Clusters::setSelectionIndices(const std::vector<std::uint32_t>& indices)
     std::sort(selectionIndices.begin(), selectionIndices.end());
     selectionIndices.erase(unique(selectionIndices.begin(), selectionIndices.end()), selectionIndices.end());
 
-    for (auto& pointSelectionIndex : selectionIndices)
-        pointSelectionIndex = globalIndices[pointSelectionIndex];
-
     points->setSelectionIndices(selectionIndices);
 
     _core->notifyDatasetSelectionChanged(points);
