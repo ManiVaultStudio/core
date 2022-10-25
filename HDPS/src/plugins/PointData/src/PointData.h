@@ -36,6 +36,7 @@ namespace hdps
 const hdps::DataType PointType = hdps::DataType(QString("Points"));
 
 class InfoAction;
+class DimensionsPickerAction;
 class ClusterAction;
 
 // =============================================================================
@@ -923,6 +924,12 @@ public:
      */
     void setProxyMembers(const hdps::Datasets& proxyMembers) override;
 
+public: // Actions
+    DimensionsPickerAction& getDimensionPicker()
+    {
+        return *_dimensionPickerAction;
+    }
+
 public: // Selection
 
     /**
@@ -976,8 +983,9 @@ public:
 
     std::vector<unsigned int> indices;
 
-    QSharedPointer<InfoAction>      _infoAction;        /** Shared pointer to info action */
-    hdps::EventListener             _eventListener;     /** Listen to HDPS events */
+    QSharedPointer<InfoAction>    _infoAction;               /** Shared pointer to info action */
+    DimensionsPickerAction*       _dimensionPickerAction;    /** Non-owning pointer to dimension picker action */
+    hdps::EventListener           _eventListener;            /** Listen to HDPS events */
 };
 
 // =============================================================================

@@ -5,6 +5,7 @@
 
 #include "PointData.h"
 #include "InfoAction.h"
+#include "DimensionsPickerAction.h"
 #include "event/Event.h"
 
 #include <QtCore>
@@ -19,6 +20,7 @@
 #include "graphics/Vector2f.h"
 #include "Application.h"
 
+#include <actions/GroupAction.h>
 #include <util/Serialization.h>
 #include <util/Timer.h>
 #include <DataHierarchyItem.h>
@@ -294,49 +296,66 @@ void Points::init()
     DatasetImpl::init();
 
     _infoAction = QSharedPointer<InfoAction>::create(this, *this);
-
     addAction(*_infoAction.get());
 
     _eventListener.setEventCore(_core);
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
-    _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent) {
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
+    _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent)
+    {
+        switch (dataEvent->getType())
+        {
+        case EventType::DataChanged:
+        {
+            // If the data doesn't have a dimension picker, add one
+            if (_dimensionPickerAction == nullptr)
+            {
+                GroupAction* dimensionPickerGroupAction = new GroupAction(this);
+                dimensionPickerGroupAction->setText("Dimensions");
+                dimensionPickerGroupAction->setShowLabels(false);
 
-        // Only process selection changes
-        if (dataEvent->getType() != EventType::DataSelectionChanged)
-            return;
+                _dimensionPickerAction = new DimensionsPickerAction(dimensionPickerGroupAction);
+                _dimensionPickerAction->setPointsDataset(*this);
+            }
 
-        // Do not process our own selection changes
-        if (dataEvent->getDataset() == Dataset<Points>(this))
-            return;
+            break;
+        }
+        case EventType::DataSelectionChanged:
+            // Do not process our own selection changes
+            if (dataEvent->getDataset() == Dataset<Points>(this))
+                return;
 
-        // Only synchronize when dataset grouping is enabled and our own group index is non-negative
-        if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
-            return;
+            // Only synchronize when dataset grouping is enabled and our own group index is non-negative
+            if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
+                return;
 
-        // Only synchronize of the group indexes match
-        if (dataEvent->getDataset()->getGroupIndex() != getGroupIndex())
-            return;
+            // Only synchronize of the group indexes match
+            if (dataEvent->getDataset()->getGroupIndex() != getGroupIndex())
+                return;
 
-        // Get smart pointer to foreign points dataset
-        auto foreignPoints = dataEvent->getDataset<Points>();
+            // Get smart pointer to foreign points dataset
+            auto foreignPoints = dataEvent->getDataset<Points>();
 
-        // Only synchronize when the number of points matches
-        if (foreignPoints->getNumPoints() != getNumPoints())
-            return;
+            // Only synchronize when the number of points matches
+            if (foreignPoints->getNumPoints() != getNumPoints())
+                return;
 
-        // Get source target indices
-        auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
-        auto& targetIndices = getSelection<Points>()->indices;
+            // Get source target indices
+            auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
+            auto& targetIndices = getSelection<Points>()->indices;
 
-        // Do nothing if the indices have not changed
-        if (sourceIndices == targetIndices)
-            return;
+            // Do nothing if the indices have not changed
+            if (sourceIndices == targetIndices)
+                return;
 
-        // Copy indices from source to target if the indices have changed
-        targetIndices = sourceIndices;
+            // Copy indices from source to target if the indices have changed
+            targetIndices = sourceIndices;
 
-        // Notify others that the cluster selection has changed
-        _core->notifyDatasetSelectionChanged(this);
+            // Notify others that the cluster selection has changed
+            _core->notifyDatasetSelectionChanged(this);
+
+            break;
+        }
     });
 }
 
