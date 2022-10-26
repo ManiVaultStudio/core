@@ -70,7 +70,8 @@ public:
         _analysis(nullptr),
         _linkedData(),
         _linkedDataFlags(LinkedDataFlag::SendReceive),
-        _locked(false)
+        _locked(false),
+        _smartPointer(this)
     {
     }
 
@@ -212,6 +213,13 @@ public:
         return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
+    /**
+     * Get reference to smart pointer which is owned by the set
+     * @return Reference to smart pointer which is owned by the set
+     */
+    Dataset<DatasetImpl>& getSmartPointer() {
+        return _smartPointer;
+    }
 
     /**
      * Get smart pointer to set
@@ -619,6 +627,7 @@ private:
     std::vector<LinkedData>     _linkedData;                /** List of linked datasets */
     std::int32_t                _linkedDataFlags;           /** Flags for linked data */
     bool                        _locked;                    /** Whether the dataset is locked */
+    Dataset<DatasetImpl>        _smartPointer;              /** Smart pointer to own dataset */
 
     friend class Core;
     friend class DataManager;

@@ -283,7 +283,8 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
 
 Points::Points(hdps::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
     hdps::DatasetImpl(core, dataName, guid),
-    _infoAction()
+    _infoAction(),
+    _dimensionPickerAction(nullptr)
 {
 }
 
@@ -296,65 +297,65 @@ void Points::init()
     DatasetImpl::init();
 
     _infoAction = QSharedPointer<InfoAction>::create(this, *this);
+
     addAction(*_infoAction.get());
+
+    connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
+        // If the data doesn't have a dimension picker, add one
+        if (_dimensionPickerAction == nullptr)
+        {
+            GroupAction* dimensionPickerGroupAction = new GroupAction(this, true);
+            dimensionPickerGroupAction->setText("Dimensions");
+            dimensionPickerGroupAction->setShowLabels(false);
+
+            _dimensionPickerAction = new DimensionsPickerAction(dimensionPickerGroupAction);
+            _dimensionPickerAction->setPointsDataset(*this);
+        }
+    });
 
     _eventListener.setEventCore(_core);
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
-    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
     _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent)
     {
         switch (dataEvent->getType())
         {
-        case EventType::DataChanged:
-        {
-            // If the data doesn't have a dimension picker, add one
-            if (_dimensionPickerAction == nullptr)
+            case EventType::DataSelectionChanged:
             {
-                GroupAction* dimensionPickerGroupAction = new GroupAction(this);
-                dimensionPickerGroupAction->setText("Dimensions");
-                dimensionPickerGroupAction->setShowLabels(false);
+                // Do not process our own selection changes
+                if (dataEvent->getDataset() == Dataset<Points>(this))
+                    return;
 
-                _dimensionPickerAction = new DimensionsPickerAction(dimensionPickerGroupAction);
-                _dimensionPickerAction->setPointsDataset(*this);
+                // Only synchronize when dataset grouping is enabled and our own group index is non-negative
+                if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
+                    return;
+
+                // Only synchronize of the group indexes match
+                if (dataEvent->getDataset()->getGroupIndex() != getGroupIndex())
+                    return;
+
+                // Get smart pointer to foreign points dataset
+                auto foreignPoints = dataEvent->getDataset<Points>();
+
+                // Only synchronize when the number of points matches
+                if (foreignPoints->getNumPoints() != getNumPoints())
+                    return;
+
+                // Get source target indices
+                auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
+                auto& targetIndices = getSelection<Points>()->indices;
+
+                // Do nothing if the indices have not changed
+                if (sourceIndices == targetIndices)
+                    return;
+
+                // Copy indices from source to target if the indices have changed
+                targetIndices = sourceIndices;
+
+                // Notify others that the cluster selection has changed
+                _core->notifyDatasetSelectionChanged(this);
+
+                break;
             }
-
-            break;
-        }
-        case EventType::DataSelectionChanged:
-            // Do not process our own selection changes
-            if (dataEvent->getDataset() == Dataset<Points>(this))
-                return;
-
-            // Only synchronize when dataset grouping is enabled and our own group index is non-negative
-            if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
-                return;
-
-            // Only synchronize of the group indexes match
-            if (dataEvent->getDataset()->getGroupIndex() != getGroupIndex())
-                return;
-
-            // Get smart pointer to foreign points dataset
-            auto foreignPoints = dataEvent->getDataset<Points>();
-
-            // Only synchronize when the number of points matches
-            if (foreignPoints->getNumPoints() != getNumPoints())
-                return;
-
-            // Get source target indices
-            auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
-            auto& targetIndices = getSelection<Points>()->indices;
-
-            // Do nothing if the indices have not changed
-            if (sourceIndices == targetIndices)
-                return;
-
-            // Copy indices from source to target if the indices have changed
-            targetIndices = sourceIndices;
-
-            // Notify others that the cluster selection has changed
-            _core->notifyDatasetSelectionChanged(this);
-
-            break;
         }
     });
 }
