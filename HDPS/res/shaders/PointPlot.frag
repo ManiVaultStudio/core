@@ -95,7 +95,7 @@ void main()
 			if (vHighlight == 1)
 				fragColor = vec4(selectionOutlineColor, a);
 			else
-				fragColor = vec4(color, a);
+				fragColor = vec4(color, a * vOpacity);
 				
 			break;
 		}
