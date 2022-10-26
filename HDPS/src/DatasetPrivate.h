@@ -15,9 +15,12 @@ class CoreInterface;
 template<typename> class Dataset;
 
 /**
- * Smart dataset pointer private class
+ * Smart dataset pointer private base class
  *
- * Private internals for the dataset smart pointer
+ * The primary aim of this class is to:
+ * - Save the globally unique identifier of the dataset
+ * - Save a pointer to a dataset (if initialized properly)
+ * - Intercept events related to the dataset and rebroadcast them using Qt signals
  *
  * @author T. Kroes
  */
@@ -28,7 +31,7 @@ class DatasetPrivate : public QObject
     template<typename>
     friend class Dataset;
 
-protected:
+protected: // Construction/destruction
 
     /** Default constructor */
     DatasetPrivate();
@@ -45,12 +48,44 @@ protected:
      */
     DatasetPrivate& operator=(const DatasetPrivate& other) = delete;
 
-public:
-
+    /** Remove the destructor */
     ~DatasetPrivate() override = default;
 
+public: // Member access and reset
+
+    /** Get the globally unique identifier of the dataset */
+    QString getDatasetGuid() const;
+
+    /** Set the globally unique identifier of the dataset
+     * @param datasetGuid Globally unique identifier of the dataset
+     */
+    void setDatasetGuid(const QString& datasetGuid);
+
     /**
-     * This function is called when something has been connected to signal
+     * Get pointer to the dataset
+     * @return Pointer to the dataset
+     */
+    DatasetImpl* getDataset();
+
+    /**
+     * Get pointer to the dataset
+     * @return Const pointer to the dataset
+     */
+    const DatasetImpl* getDataset() const;
+
+    /**
+     * Set pointer to the dataset
+     * @param dataset Pointer to the dataset
+     */
+    void setDataset(DatasetImpl* dataset);
+
+    /** Resets the smart pointer */
+    void reset();
+
+public: // Keep track of when someone connects/disconnects from our signal(s)
+
+    /**
+     * This function is called when something has been connected to \p signal
      * @param signal The signal to which a connection has been made
      */
     void connectNotify(const QMetaMethod& signal) override;
@@ -61,32 +96,10 @@ public:
      */
     void disconnectNotify(const QMetaMethod& signal) override;
 
-public:
-
-    /** Reset the smart pointer */
-    virtual void reset() = 0;
-
-    /**
-     * Set the smart pointer
-     * @param dataset Pointer to dataset
-     */
-    void set(DatasetImpl* dataset);
-
 protected:
 
-    /** Register to dataset events initialization */
+    /** Register for data events from the core */
     void registerDatasetEvents();
-
-public:
-
-    /** Get dataset GUID */
-    virtual QString getDatasetGuid() const = 0;
-
-    /**
-     * Get dataset
-     * @return Pointer to dataset
-     */
-    const DatasetImpl* getDataset() const;
 
 signals:
 
@@ -130,10 +143,32 @@ signals:
      */
     void dataChildRemoved(const QString& childDatasetGuid);
 
-protected:
-    QString         _datasetGuid;       /** Globally unique dataset identifier */
+private:
+    QString         _datasetGuid;       /** Globally unique identifier of the dataset */
     DatasetImpl*    _dataset;           /** Pointer to the dataset (if any) */
     EventListener   _eventListener;     /** Listen to HDPS events */
 };
+
+/**
+ * Compares two dataset smart pointers for equality
+ * @param lhs Left hand side dataset smart pointer
+ * @param rhs Right hand side dataset smart pointer
+ * @return Whether lhs and rhs are equal
+ */
+inline bool operator == (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
+{
+    return lhs.getDatasetGuid() == rhs.getDatasetGuid();
+}
+
+/**
+ * Compares two dataset smart pointers for inequality
+ * @param lhs Left hand side dataset smart pointer
+ * @param rhs Right hand side dataset smart pointer
+ * @return Whether lhs and rhs are not equal
+ */
+inline bool operator != (const DatasetPrivate& lhs, const DatasetPrivate& rhs)
+{
+    return lhs.getDatasetGuid() != rhs.getDatasetGuid();
+}
 
 }

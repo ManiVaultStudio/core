@@ -5,6 +5,7 @@
 
 #include "PointData.h"
 #include "InfoAction.h"
+#include "DimensionsPickerAction.h"
 #include "event/Event.h"
 
 #include <QtCore>
@@ -19,6 +20,7 @@
 #include "graphics/Vector2f.h"
 #include "Application.h"
 
+#include <actions/GroupAction.h>
 #include <util/Serialization.h>
 #include <util/Timer.h>
 #include <DataHierarchyItem.h>
@@ -294,49 +296,66 @@ void Points::init()
     DatasetImpl::init();
 
     _infoAction = QSharedPointer<InfoAction>::create(this, *this);
-
     addAction(*_infoAction.get());
 
     _eventListener.setEventCore(_core);
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
-    _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent) {
+    _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataChanged));
+    _eventListener.registerDataEventByType(PointType, [this](DataEvent* dataEvent)
+    {
+        switch (dataEvent->getType())
+        {
+        case EventType::DataChanged:
+        {
+            // If the data doesn't have a dimension picker, add one
+            if (_dimensionPickerAction == nullptr)
+            {
+                GroupAction* dimensionPickerGroupAction = new GroupAction(this);
+                dimensionPickerGroupAction->setText("Dimensions");
+                dimensionPickerGroupAction->setShowLabels(false);
 
-        // Only process selection changes
-        if (dataEvent->getType() != EventType::DataSelectionChanged)
-            return;
+                _dimensionPickerAction = new DimensionsPickerAction(dimensionPickerGroupAction);
+                _dimensionPickerAction->setPointsDataset(*this);
+            }
 
-        // Do not process our own selection changes
-        if (dataEvent->getDataset() == Dataset<Points>(this))
-            return;
+            break;
+        }
+        case EventType::DataSelectionChanged:
+            // Do not process our own selection changes
+            if (dataEvent->getDataset() == Dataset<Points>(this))
+                return;
 
-        // Only synchronize when dataset grouping is enabled and our own group index is non-negative
-        if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
-            return;
+            // Only synchronize when dataset grouping is enabled and our own group index is non-negative
+            if (!_core->isDatasetGroupingEnabled() || getGroupIndex() < 0)
+                return;
 
-        // Only synchronize of the group indexes match
-        if (dataEvent->getDataset()->getGroupIndex() != getGroupIndex())
-            return;
+            // Only synchronize of the group indexes match
+            if (dataEvent->getDataset()->getGroupIndex() != getGroupIndex())
+                return;
 
-        // Get smart pointer to foreign points dataset
-        auto foreignPoints = dataEvent->getDataset<Points>();
+            // Get smart pointer to foreign points dataset
+            auto foreignPoints = dataEvent->getDataset<Points>();
 
-        // Only synchronize when the number of points matches
-        if (foreignPoints->getNumPoints() != getNumPoints())
-            return;
+            // Only synchronize when the number of points matches
+            if (foreignPoints->getNumPoints() != getNumPoints())
+                return;
 
-        // Get source target indices
-        auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
-        auto& targetIndices = getSelection<Points>()->indices;
+            // Get source target indices
+            auto& sourceIndices = foreignPoints->getSelection<Points>()->indices;
+            auto& targetIndices = getSelection<Points>()->indices;
 
-        // Do nothing if the indices have not changed
-        if (sourceIndices == targetIndices)
-            return;
+            // Do nothing if the indices have not changed
+            if (sourceIndices == targetIndices)
+                return;
 
-        // Copy indices from source to target if the indices have changed
-        targetIndices = sourceIndices;
+            // Copy indices from source to target if the indices have changed
+            targetIndices = sourceIndices;
 
-        // Notify others that the cluster selection has changed
-        _core->notifyDatasetSelectionChanged(this);
+            // Notify others that the cluster selection has changed
+            _core->notifyDatasetSelectionChanged(this);
+
+            break;
+        }
     });
 }
 
@@ -625,7 +644,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
             SelectionMap selectionMapToTarget;
 
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToTarget[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
+                selectionMapToTarget.getMap()[pointIndexOffset + pointIndex] = std::vector<std::uint32_t>({ targetGlobalIndices[pointIndex] });
 
             addLinkedData(targetPoints, selectionMapToTarget);
         }
@@ -635,7 +654,7 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
             SelectionMap selectionMapToSource;
 
             for (std::uint32_t pointIndex = 0; pointIndex < targetPoints->getNumPoints(); ++pointIndex)
-                selectionMapToSource[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
+                selectionMapToSource.getMap()[targetGlobalIndices[pointIndex]] = std::vector<std::uint32_t>({ pointIndexOffset + pointIndex });
 
             targetPoints->addLinkedData(toSmartPointer(), selectionMapToSource);
 
@@ -684,13 +703,14 @@ void Points::setValueAt(const std::size_t index, const float newValue)
     getRawData<PointData>().setValueAt(index, newValue);
 }
 
-void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
+void resolveLinkedPointData(LinkedData& linkedData, const std::vector<std::uint32_t>& indices, Datasets* ignoreDatasets = nullptr)
 {
-    Dataset<Points> sourceDataset   = ld.getSourceDataSet();
-    Dataset<Points> targetDataset   = ld.getTargetDataset();
+    Dataset<Points> sourceDataset   = linkedData.getSourceDataSet();
+    Dataset<Points> targetDataset   = linkedData.getTargetDataset();
     Dataset<Points> targetSelection = targetDataset->getSelection();
 
-    Timer timer(QString("%1 %2 %3").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName()));
+    if (sourceDataset->isLocked() || targetDataset->isLocked())
+        return;
 
     Datasets notified;
 
@@ -701,62 +721,77 @@ void resolveLinkedData(LinkedData& ld, const std::vector<std::uint32_t>& indices
     if (ignoreDatasets->contains(targetDataset))
         return;
 
-    const hdps::SelectionMap& mapping = ld.getMapping();   
+    //qDebug() << QString("%1, %2, %3").arg(__FUNCTION__, sourceDataset->getGuiName(), targetDataset->getGuiName());
 
-    // Create separate vector of additional linked selected points
-    std::vector<unsigned int> linkedIndices;
-    
-    // Reserve at least as much space as required for a 1-1 mapping
-    linkedIndices.reserve(indices.size());
-
-    for (const int selectionIndex : indices)
     {
-        if (mapping.find(selectionIndex) != mapping.end())
+        //Timer timer("Creating maps");
+
+        const SelectionMap& mapping = linkedData.getMapping();
+
+        // Create separate vector of additional linked selected points
+        std::vector<unsigned int> linkedIndices;
+
+        // Reserve at least as much space as required for a 1-1 mapping
+        linkedIndices.reserve(indices.size());
+
+        for (const auto& selectionIndex : indices)
         {
-            const std::vector<unsigned int>& mappedSelection = mapping.at(selectionIndex);
-            linkedIndices.insert(linkedIndices.end(), mappedSelection.begin(), mappedSelection.end());
+            if (mapping.hasMappingForPointIndex(selectionIndex))
+            {
+                std::vector<std::uint32_t> mappedSelection;
+                mapping.populateMappingIndices(selectionIndex, mappedSelection);
+                linkedIndices.insert(linkedIndices.end(), mappedSelection.begin(), mappedSelection.end());
+            }
+        }
+
+        if (targetDataset->isProxy()) {
+            std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
+
+            for (auto& [key, value] : const_cast<SelectionMap&>(mapping).getMap())
+                for (const auto& v : value)
+                    targetIndicesSet.erase(v);
+
+            for (const auto& linkedIndex : linkedIndices)
+                targetIndicesSet.insert(linkedIndex);
+
+            targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
+        }
+        else {
+            targetSelection->indices = linkedIndices;
         }
     }
     
-    if (targetDataset->isProxy()) {
-        std::set<std::uint32_t> targetIndicesSet(targetSelection->indices.begin(), targetSelection->indices.end());
-
-        for (auto& [key, value] : mapping)
-            for (const auto& v : value)
-                targetIndicesSet.erase(v);
-
-        for (const auto& linkedIndex : linkedIndices)
-            targetIndicesSet.insert(linkedIndex);
-
-        targetSelection->indices = std::vector<std::uint32_t>(targetIndicesSet.begin(), targetIndicesSet.end());
-    }
-    else {
-        targetSelection->indices = linkedIndices;
-    }
-
+    // Add the target of the linked data (of which we updated the selection indices) to the ignore list
+    //*ignoreDatasets << sourceDataset << targetDataset;
     *ignoreDatasets << targetDataset;
 
+    // Recursively resolve linked point data
     for (auto targetLd : targetDataset->getLinkedData())
-        resolveLinkedData(targetLd, targetSelection->indices, ignoreDatasets);
+        resolveLinkedPointData(targetLd, targetSelection->indices, ignoreDatasets);
+}
+
+void Points::resolveLinkedData(bool force /*= false*/)
+{
+    if (isLocked())
+        return;
+
+    // Check for linked data in this dataset and resolve them
+    for (hdps::LinkedData& linkedData : getLinkedData())
+        resolveLinkedPointData(linkedData, getSelection<Points>()->indices, nullptr);
 }
 
 void Points::setSelectionIndices(const std::vector<std::uint32_t>& indices)
 {
+    //qDebug() << QString("%1, %2").arg(__FUNCTION__, getGuiName());
+
+    if (isLocked())
+        return;
+
     auto selection = getSelection<Points>();
 
     selection->indices = indices;
 
-    // Check for linked data in this dataset and in potential source data, and resolve it
-    for (hdps::LinkedData& linkedData : getLinkedData())
-        resolveLinkedData(linkedData, indices);
-
-    // Check if the dataset is derived, and if so, resolve the linked selections of the source dataset as well
-    if (isDerivedData())
-    {
-        Dataset<Points> sourceData = getSourceDataset<Points>();
-        for (hdps::LinkedData& linkedData : sourceData->getLinkedData())
-            resolveLinkedData(linkedData, indices);
-    }
+    resolveLinkedData();
 }
 
 bool Points::canSelect() const
@@ -838,9 +873,7 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
         getRawData<PointData>().fromVariantMap(variantMap);
 
     if (!isFull()) {
-        auto parent = getParent();
-
-        makeSubsetOf(getParent());
+        makeSubsetOf(getFullDataset<Points>());
 
         variantMapMustContain(variantMap, "Indices");
 
@@ -878,16 +911,6 @@ void Points::fromVariantMap(const QVariantMap& variantMap)
 
     setDimensionNames(dimensionNames);
 
-    if (variantMap.contains("LinkedData")) {
-        for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
-            LinkedData linkedData;
-
-            linkedData.fromVariantMap(linkedDataVariant.toMap());
-
-            getLinkedData().push_back(linkedData);
-        }
-    }
-
     _core->notifyDatasetChanged(this);
 }
 
@@ -922,13 +945,6 @@ QVariantMap Points::toVariantMap() const
     variantMap["Indices"]               = indices;
     variantMap["DimensionNames"]        = rawDataToVariantMap((char*)dimensionsByteArray.data(), dimensionsByteArray.size(), true);
     variantMap["NumberOfDimensions"]    = getNumDimensions();
-
-    QVariantList linkedData;
-
-    for (const auto& ld : getLinkedData())
-        linkedData.push_back(ld.toVariantMap());
-
-    variantMap["LinkedData"] = linkedData;
 
     return variantMap;
 }

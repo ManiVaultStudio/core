@@ -83,9 +83,6 @@ public:
      */
     QVariant getDataAtColumn(const std::uint32_t& column, int role = Qt::DisplayRole) const;
 
-    /** Returns the item context menu */
-    QMenu* getContextMenu();
-
     /**
      * Renames the dataset
      * @param intendedDatasetName Intended new name of the dataset
@@ -104,6 +101,9 @@ public:
      */
     DataHierarchyItem* getDataHierarchyItem();
 
+    /** Get whether the item is visible or not */
+    bool isVisible() const;
+
 protected:
 
     /**
@@ -111,20 +111,6 @@ protected:
      * @param dataHierarchyModelItem Pointer to data hierarchy model item
      */
     void removeChild(DataHierarchyModelItem* dataHierarchyModelItem);
-
-public: // Analysis
-
-    /**
-     * Set analysis progress percentage
-     * @param progressPercentage Progress percentage of the analysis
-     */
-    //void setProgressPercentage(const float& progressPercentage);
-
-    /**
-     * Set analysis progress section
-     * @param progressSection Progress section of the analysis
-     */
-    //void setProgressSection(const QString& progressSection);
 
 protected:
     DataHierarchyModelItem* _parent;                /** Pointer to parent item */

@@ -101,11 +101,11 @@ public:
     /** Establishes whether the item has any children */
     bool hasChildren() const;
 
-    /** Gets whether the dataset is visible */
-    bool getVisible() const;
-
-    /** Gets whether the dataset is hidden */
-    bool isHidden() const;
+    /**
+     * Set visibility
+     * @param visible Whether the data hierarchy item is visible or not
+     */
+    void setVisible(bool visible);
 
     /** Gets whether the hierarchy item is selected */
     bool isSelected() const;
@@ -336,13 +336,19 @@ signals:
      * Signals that the locked status changed
      * @param locked Locked
      */
-    void lockedChanged(const bool& locked);
+    void lockedChanged(bool locked);
+
+    /**
+     * Signals that the visibility status changed
+     * @param visibility Visibility
+     */
+    void visibilityChanged(bool visibility);
 
     /**
      * Signals that the expansion status changed
      * @param expanded Whether the item is expanded or not
      */
-    void expandedChanged(const bool& expanded);
+    void expandedChanged(bool expanded);
 
     /** Signals that the data hierarchy item is being loaded */
     void loading();
@@ -360,9 +366,7 @@ protected:
     Dataset<DatasetImpl>        _dataset;               /** Smart pointer to dataset */
     DataHierarchyItem*          _parent;                /** Pointer to parent data hierarchy item */
     DataHierarchyItems          _children;              /** Pointers to child items (if any) */
-    bool                        _visible;               /** Whether the dataset is visible */
     bool                        _selected;              /** Whether the hierarchy item is selected */
-    bool                        _locked;                /** Whether the dataset is locked */
     bool                        _expanded;              /** Whether the item is expanded or not (when it has children) */
     QString                     _taskDescription;       /** Task description */
     float                       _taskProgress;          /** Task progress */

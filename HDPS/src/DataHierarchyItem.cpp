@@ -18,9 +18,7 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _dataset(dataset),
     _parent(),
     _children(),
-    _visible(visible),
     _selected(false),
-    _locked(false),
     _expanded(true),
     _taskDescription(""),
     _taskProgress(0.0),
@@ -51,6 +49,8 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     connect(&_taskProgressTimer, &QTimer::timeout, [this]() {
         emit taskProgressChanged(getTaskProgress());
     });
+
+    setVisible(visible);
 }
 
 QString DataHierarchyItem::getGuiName() const
@@ -132,14 +132,14 @@ bool DataHierarchyItem::hasChildren() const
     return getNumberOfChildren() > 0;
 }
 
-bool DataHierarchyItem::getVisible() const
+void DataHierarchyItem::setVisible(bool visible)
 {
-    return _visible;
-}
+    if (visible == isVisible())
+        return;
 
-bool DataHierarchyItem::isHidden() const
-{
-    return !_visible;
+    WidgetAction::setVisible(visible);
+
+    emit visibilityChanged(isVisible());
 }
 
 QString DataHierarchyItem::getTaskDescription() const
@@ -201,7 +201,7 @@ void DataHierarchyItem::addChild(DataHierarchyItem& child)
 
 QString DataHierarchyItem::toString() const
 {
-    return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), _visible ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
+    return QString("DataHierarchyItem[name=%1, parent=%2, children=[%3], visible=%4, description=%5, progress=%6]").arg(_dataset->getGuiName(), _parent->getGuiName(), QString::number(_children.count()), isVisible() ? "true" : "false", _taskDescription, QString::number(_taskProgress, 'f', 1));
 }
 
 Dataset<DatasetImpl> DataHierarchyItem::getDataset()
@@ -251,7 +251,7 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 
     menu->addSeparator();
 
-    _dataRemoveAction.setEnabled(!_locked);
+    _dataRemoveAction.setEnabled(!_dataset->isLocked());
     _dataRemoveAction.setEnabled(false);
 
     menu->addAction(&_dataRemoveAction);
@@ -276,26 +276,13 @@ void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
 
 bool DataHierarchyItem::getLocked() const
 {
-    return _locked;
+    return _dataset->isLocked();
 }
 
 void DataHierarchyItem::setLocked(const bool& locked)
 {
-    // Prevent unnecessary updates
-    if (locked == _locked)
-        return;
-
-    // Assign new locked status
-    _locked = locked;
-
-    // Notify others that the data got locked/unlocked through the core
-    if (_locked)
-        Application::core()->notifyDatasetLocked(_dataset);
-    else
-        Application::core()->notifyDatasetUnlocked(_dataset);
-
-    // Notify others that the data got locked/unlocked
-    emit lockedChanged(_locked);
+    _dataset->setLocked(locked);
+   
 }
 
 bool DataHierarchyItem::isExpanded() const
@@ -481,13 +468,13 @@ void DataHierarchyItem::setIcon(const QIcon& icon)
 void DataHierarchyItem::fromVariantMap(const QVariantMap& variantMap)
 {
     emit loading();
+    {
+        variantMapMustContain(variantMap, "Expanded");
+        variantMapMustContain(variantMap, "Visible");
 
-    if (variantMap.contains("Locked"))
-        setLocked(variantMap["Locked"].toBool());
-
-    if (variantMap.contains("Expanded"))
         setExpanded(variantMap["Expanded"].toBool());
-
+        setVisible(variantMap["Visible"].toBool());
+    }
     emit loaded();
 }
 
@@ -518,8 +505,8 @@ QVariantMap DataHierarchyItem::toVariantMap() const
 
     return {
         { "Name", getGuiName() },
-        { "Locked", _locked },
-        { "Expanded", _expanded },
+        { "Expanded", QVariant::fromValue(_expanded) },
+        { "Visible", QVariant::fromValue(isVisible()) },
         { "Dataset", _dataset->toVariantMap() },
         { "Children", children }
     };

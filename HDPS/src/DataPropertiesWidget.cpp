@@ -121,9 +121,9 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
 
                 triggerActions << groupDataAction;
 
-                createPluginTypeActionsGroup(plugin::Type::VIEW);
-                createPluginTypeActionsGroup(plugin::Type::ANALYSIS);
-                createPluginTypeActionsGroup(plugin::Type::WRITER);
+                //createPluginTypeActionsGroup(plugin::Type::VIEW);
+                //createPluginTypeActionsGroup(plugin::Type::ANALYSIS);
+                //createPluginTypeActionsGroup(plugin::Type::WRITER);
 
                 if (!triggerActions.isEmpty())
                     groupActions << groupAction;

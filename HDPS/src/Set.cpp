@@ -62,22 +62,33 @@ std::int32_t DatasetImpl::getSelectionSize() const
 
 void DatasetImpl::lock()
 {
-    setLocked(true);
+    _locked = true;
+
+    Application::core()->notifyDatasetLocked(toSmartPointer());
+
+    emit getDataHierarchyItem().lockedChanged(_locked);
 }
 
 void DatasetImpl::unlock()
 {
-    setLocked(false);
+    _locked = false;
+
+    Application::core()->notifyDatasetUnlocked(toSmartPointer());
+
+    emit getDataHierarchyItem().lockedChanged(_locked);
 }
 
 bool DatasetImpl::isLocked() const
 {
-    return getDataHierarchyItem().getLocked();
+    return _locked;
 }
 
 void DatasetImpl::setLocked(bool locked)
 {
-    getDataHierarchyItem().setLocked(locked);
+    if (locked)
+        lock();
+    else
+        unlock();
 }
 
 void DatasetImpl::setAnalysis(plugin::AnalysisPlugin* analysis)
@@ -93,24 +104,23 @@ hdps::plugin::AnalysisPlugin* DatasetImpl::getAnalysis()
 void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
 {
     variantMapMustContain(variantMap, "Name");
+    variantMapMustContain(variantMap, "Locked");
     variantMapMustContain(variantMap, "GUID");
     variantMapMustContain(variantMap, "Derived");
     variantMapMustContain(variantMap, "HasAnalysis");
     variantMapMustContain(variantMap, "Analysis");
+    variantMapMustContain(variantMap, "LinkedData");
 
     setGuiName(variantMap["Name"].toString());
-    
-    _guid = variantMap["GUID"].toString();
+    setLocked(variantMap["Locked"].toBool());
 
-    if (variantMap.contains("Derived")) {
-        _derived = variantMap["Derived"].toBool();
+    _guid       = variantMap["GUID"].toString();
+    _derived    = variantMap["Derived"].toBool();
 
-        if (_derived)
-            _sourceDataset = getParent();
-    }
+    if (_derived)
+        _sourceDataset = getParent();
 
-    if (variantMap.contains("StorageType"))
-        setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
+    setStorageType(static_cast<StorageType>(variantMap["StorageType"].toInt()));
 
     if (getStorageType() == StorageType::Proxy && variantMap.contains("ProxyMembers")) {
         Datasets proxyMembers;
@@ -119,6 +129,14 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
             proxyMembers << _core->requestDataset(proxyMemberGuid);
 
         setProxyMembers(proxyMembers);
+    }
+
+    for (auto linkedDataVariant : variantMap["LinkedData"].toList()) {
+        LinkedData linkedData;
+
+        linkedData.fromVariantMap(linkedDataVariant.toMap());
+
+        getLinkedData().push_back(linkedData);
     }
 }
 
@@ -134,8 +152,14 @@ QVariantMap DatasetImpl::toVariantMap() const
     for (auto proxyMember : _proxyMembers)
         proxyMemberGuids << proxyMember->getGuid();
 
+    QVariantList linkedData;
+
+    for (const auto& ld : getLinkedData())
+        linkedData.push_back(ld.toVariantMap());
+
     return {
         { "Name", QVariant::fromValue(getGuiName()) },
+        { "Locked", QVariant::fromValue(_locked) },
         { "GUID", QVariant::fromValue(getGuid()) },
         { "StorageType", QVariant::fromValue(static_cast<std::int32_t>(getStorageType())) },
         { "ProxyMembers", QVariant::fromValue(proxyMemberGuids) },
@@ -145,7 +169,8 @@ QVariantMap DatasetImpl::toVariantMap() const
         { "Derived", QVariant::fromValue(isDerivedData()) },
         { "GroupIndex", QVariant::fromValue(getGroupIndex()) },
         { "HasAnalysis", QVariant::fromValue(_analysis != nullptr) },
-        { "Analysis", analysisMap }
+        { "Analysis", analysisMap },
+        { "LinkedData", linkedData }
     };
 }
 
@@ -233,6 +258,12 @@ void DatasetImpl::populateContextMenu(QMenu* contextMenu)
     return getDataHierarchyItem().populateContextMenu(contextMenu);
 }
 
+void DatasetImpl::addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet, hdps::SelectionMap& mapping)
+{
+    _linkedData.emplace_back(toSmartPointer(), targetDataSet);
+    _linkedData.back().setMapping(mapping);
+}
+
 hdps::DatasetImpl::StorageType DatasetImpl::getStorageType() const
 {
     return _storageType;
@@ -259,6 +290,39 @@ QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::
     }
 
     return QIcon();
+}
+
+const std::vector<hdps::LinkedData>& DatasetImpl::getLinkedData() const
+{
+    return _linkedData;
+}
+
+std::vector<hdps::LinkedData>& DatasetImpl::getLinkedData()
+{
+    return _linkedData;
+}
+
+std::int32_t DatasetImpl::getLinkedDataFlags()
+{
+    return _linkedDataFlags;
+}
+
+void DatasetImpl::setLinkedDataFlags(std::int32_t linkedDataFlags)
+{
+    _linkedDataFlags = linkedDataFlags;
+}
+
+void DatasetImpl::setLinkedDataFlag(std::int32_t linkedDataFlag, bool set /*= true*/)
+{
+    if (set)
+        _linkedDataFlags |= linkedDataFlag;
+    else
+        _linkedDataFlags &= ~linkedDataFlag;
+}
+
+bool DatasetImpl::hasLinkedDataFlag(std::int32_t linkedDataFlag)
+{
+    return _linkedDataFlags & linkedDataFlag;
 }
 
 }

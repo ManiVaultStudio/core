@@ -16,7 +16,8 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     _rawDataSizeAction(this, "Raw data size"),
     _numberOfSelectedPointsAction(this, points),
     _selectedIndicesAction(this, points),
-    _dimensionNamesAction(this, points)
+    _dimensionNamesAction(this, points),
+    _createSetFromSelection(this, points)
 {
     setText("Info");
 
@@ -30,6 +31,8 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     _numberOfPointsAction.setToolTip("The number of points");
     _numberOfDimensionsAction.setToolTip("The number of dimensions in the point data");
     _rawDataSizeAction.setToolTip("The amount of memory occupied for raw data by the dataset");
+
+    _createSetFromSelection.setVisible(false);
 
     const auto updateActions = [this]() -> void {
         if (!_points.isValid())

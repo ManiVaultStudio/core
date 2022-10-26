@@ -21,14 +21,11 @@ DataHierarchyModel::~DataHierarchyModel()
 
 QVariant DataHierarchyModel::data(const QModelIndex& index, int role) const
 {
-    // Only proceed if we have a valid model index
     if (!index.isValid())
         return QVariant();
 
-    // Get pointer to the data hierarchy model item
     auto item = static_cast<DataHierarchyModelItem*>(index.internalPointer());
 
-    // Get data for role at column
     return item->getDataAtColumn(index.column(), role);
 }
 
@@ -147,30 +144,20 @@ DataHierarchyModelItem* DataHierarchyModel::getItem(const QModelIndex& index, in
 
 Qt::ItemFlags DataHierarchyModel::flags(const QModelIndex& index) const
 {
-    // Only proceed with valid model index
     if (!index.isValid())
         return Qt::NoItemFlags;
 
-    // Default item flags
     auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 
-    // Get pointer to data hierarchy model item
     auto dataHierarchyModelItem = static_cast<DataHierarchyModelItem*>(index.internalPointer());
 
-    // Determine whether the data hierarchy item is locked
     const auto itemIsLocked = dataHierarchyModelItem->getDataAtColumn(DataHierarchyModelItem::Column::IsLocked, Qt::EditRole).toBool();
 
-    // Make name column editable
     if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::Name)
         itemFlags |= Qt::ItemIsEditable;
 
-    // Make group index column editable
     if (!itemIsLocked && static_cast<DataHierarchyModelItem::Column>(index.column()) == DataHierarchyModelItem::Column::GroupIndex)
         itemFlags |= Qt::ItemIsEditable;
-
-    // Disable when locked
-    if (itemIsLocked)
-        itemFlags &= ~Qt::ItemIsEnabled;
 
     return itemFlags;
 }
@@ -271,23 +258,18 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
 
 bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem& dataHierarchyItem)
 {
-    // Get pointer to parent data hierarchy model item
     auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
 
-    // Notify others the layout is about to be changed
     emit layoutAboutToBeChanged();
-
-    // Insert the row
-    beginInsertRows(parentModelIndex, rowCount(parentModelIndex), rowCount(parentModelIndex) + 1);
     {
-        parentItem->addChild(new DataHierarchyModelItem(&dataHierarchyItem));
+        beginInsertRows(parentModelIndex, rowCount(parentModelIndex), rowCount(parentModelIndex) + 1);
+        {
+            parentItem->addChild(new DataHierarchyModelItem(&dataHierarchyItem));
+        }
+        endInsertRows();
     }
-    endInsertRows();
-
-    // Notify others the layout is changed
     emit layoutChanged();
 
-    // Add children as well
     for (auto child : dataHierarchyItem.getChildren())
         addDataHierarchyModelItem(index(rowCount(parentModelIndex) - 1, 0, parentModelIndex), *child);
 

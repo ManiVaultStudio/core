@@ -61,6 +61,8 @@ set(ACTIONS_SOURCES
     src/NumberOfSelectedPointsAction.cpp
     src/SelectedIndicesAction.h
     src/SelectedIndicesAction.cpp
+    src/CreateSetFromSelectionAction.h
+    src/CreateSetFromSelectionAction.cpp
     src/DimensionNamesAction.h
     src/DimensionNamesAction.cpp
     src/DimensionPickerAction.h

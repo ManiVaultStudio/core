@@ -6,6 +6,7 @@
 #include "NumberOfSelectedPointsAction.h"
 #include "SelectedIndicesAction.h"
 #include "DimensionNamesAction.h"
+#include "CreateSetFromSelectionAction.h"
 
 #include <actions/StringAction.h>
 
@@ -43,6 +44,7 @@ public: // Action getters
     NumberOfSelectedPointsAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
     SelectedIndicesAction& getSelectedIndicesAction() { return _selectedIndicesAction; }
     DimensionNamesAction& getDimensionNamesAction() { return _dimensionNamesAction; }
+    CreateSetFromSelectionAction& getCreateSetFromSelection() { return _createSetFromSelection; }
 
 protected:
     Dataset<Points>                 _points;                            /** Points dataset reference */
@@ -54,4 +56,5 @@ protected:
     NumberOfSelectedPointsAction    _numberOfSelectedPointsAction;      /** Number of selected points action */
     SelectedIndicesAction           _selectedIndicesAction;             /** Selected indices action */
     DimensionNamesAction            _dimensionNamesAction;              /** Dimension names action */
+    CreateSetFromSelectionAction    _createSetFromSelection;            /** Create set from selection action */
 };

@@ -189,7 +189,6 @@ set(ACTIONS_HEADERS
     src/actions/StatusAction.h
     src/actions/GroupSectionTreeItem.h
     src/actions/GroupWidgetTreeItem.h
-    src/actions/LinkedDataAction.h
 )
 
 set(ACTIONS_SOURCES
@@ -244,7 +243,6 @@ set(ACTIONS_SOURCES
     src/actions/StatusAction.cpp
     src/actions/GroupSectionTreeItem.cpp
     src/actions/GroupWidgetTreeItem.cpp
-    src/actions/LinkedDataAction.cpp
 )
 
 set( RENDERER_HEADERS
@@ -384,6 +382,7 @@ set(DATA_HIERARCHY_HEADERS
     src/DataHierarchyWidget.h
     src/DataPropertiesWidget.h
     src/ActionsViewerWidget.h
+    src/DataHierarchyFilterAction.h
 )
 
 set(DATA_HIERARCHY_SOURCES
@@ -393,6 +392,7 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp
     src/ActionsViewerWidget.cpp
+    src/DataHierarchyFilterAction.cpp
 )
 
 list(APPEND PRIVATE_HEADERS
@@ -629,7 +629,7 @@ install(CODE "foreach(PUBLIC_HEADER ${PUBLIC_HEADERS})
                 \"${CMAKE_CURRENT_SOURCE_DIR}/\${PUBLIC_HEADER}\" 
                 \"${INSTALL_DIR}/$<CONFIGURATION>/include/\${STRIPPED_PUBLIC_HEADER}\"
         )
-
+	MESSAGE(STATUS \"Installing: \${PUBLIC_HEADER}\")
     endforeach(PUBLIC_HEADER)"
     COMPONENT HDPSPUBLIC_HEADERS
 )
