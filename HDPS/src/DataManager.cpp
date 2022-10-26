@@ -112,16 +112,16 @@ Dataset<DatasetImpl> DataManager::getSet(const QString& datasetGuid)
         });
 
         if (it == _datasets.end())
-            throw std::runtime_error("Set not found");
+            return Dataset<DatasetImpl>();
 
         return *it;
     }
     catch (std::exception& e)
     {
-        exceptionMessageBox("Unable to get raw data from data manager", e);
+        exceptionMessageBox("Unable to get set from data manager", e);
     }
     catch (...) {
-        exceptionMessageBox("Unable to get raw data from data manager");
+        exceptionMessageBox("Unable to get set from data manager");
     }
 
     return Dataset<DatasetImpl>();

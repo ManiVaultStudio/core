@@ -402,7 +402,7 @@ void GroupsAction::Widget::removeGroupAction(GroupAction* groupAction)
     qDebug().noquote() << QString("Remove %1 from tree widget").arg(groupAction->getSettingsPath());
 #endif
 
-    Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
+    //Q_ASSERT(_groupSectionTreeItems.contains(groupAction));
 
     if (!_groupSectionTreeItems.contains(groupAction))
         return;

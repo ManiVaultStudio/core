@@ -979,6 +979,14 @@ public: // Serialization
         */
     QVariantMap toVariantMap() const override;
 
+public: // Linked data
+
+    /**
+     * Resolves linked data for the dataset
+     * @param force Force update of all linked data (ignores linked data flags)
+     */
+    void resolveLinkedData(bool force = false) override;
+
 public:
 
     std::vector<unsigned int> indices;

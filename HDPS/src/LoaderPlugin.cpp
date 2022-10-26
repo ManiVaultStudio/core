@@ -28,7 +28,7 @@ QString LoaderPlugin::AskForFileName(const QString& fileNameFilter)
 
 PluginTriggerActions LoaderPluginFactory::getPluginTriggerActions(const Datasets& datasets) const
 {
-    const auto pluginTriggerAction = createPluginTriggerAction(getKind(), QString("Load %1").arg(getKind()), Datasets());
+    const auto pluginTriggerAction = createPluginTriggerAction(QString("%1").arg(getKind()), QString("Load %1").arg(getKind()), Datasets());
 
     connect(pluginTriggerAction, &QAction::triggered, this, [this]() -> void {
         Application::core()->requestPlugin(getKind());

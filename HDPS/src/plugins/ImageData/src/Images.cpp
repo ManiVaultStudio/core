@@ -423,23 +423,23 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
                     if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
                         
                         // If the data has any linked data
-                        for (LinkedData& ls : points->getLinkedData())
+                        for (LinkedData& linkedData : points->getLinkedData())
                         {
                             // Check if the linked data has the same original full data, because we don't want to
                             // add data here that belongs to a different dataset
-                            if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
+                            if (linkedData.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
                             {
-                                const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+                                SelectionMap::Indices linkedIndices;
+
+                                linkedData.getMapping().populateMappingIndices(targetPixelIndex, linkedIndices);
                                 
                                 // Fill in the data for all the linked data indices based on the location of the original id
-                                for (unsigned int linkedIndex : v)
-                                {
+                                for (unsigned int linkedIndex : linkedIndices)
                                     scalarData[linkedIndex] = pointData[localPointIndex][dimensionIndex];
-                                }
                             }
                         }
                     }
-
+                    
                     scalarData[targetPixelIndex] = pointData[localPointIndex][dimensionIndex];
                 }
             });
@@ -466,10 +466,10 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
         auto embedding = parent->getParent();
 
         // Global indices into data
-        std::vector<std::uint32_t> globalIndices;
+        //std::vector<std::uint32_t> globalIndices;
 
         // Get global indices from points
-        points->getGlobalIndices(globalIndices);
+        //points->getGlobalIndices(globalIndices);
 
         auto clusterIndex = 0;
 
@@ -478,27 +478,27 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
             if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
 
                 // If the data has any linked data
-                for (LinkedData& ls : embedding->getLinkedData())
+                for (LinkedData& linkedData : embedding->getLinkedData())
                 {
                     // Check if the linked data has the same original full data, because we don't want to
                     // add data here that belongs to a different dataset
-                    if (ls.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
+                    if (linkedData.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
                     {
-                        for (const auto localIndex : cluster.getIndices())
+                        for (const auto globalPointIndex : cluster.getIndices())
                         {
-                            const std::vector<unsigned int>& v = ls.getMapping().at(globalIndices[localIndex]);
+                            SelectionMap::Indices linkedIndices;
+                            
+                            linkedData.getMapping().populateMappingIndices(globalPointIndex, linkedIndices);
 
                             // Fill in the data for all the linked data indices based on the location of the original id
-                            for (unsigned int linkedIndex : v)
-                            {
+                            for (unsigned int linkedIndex : linkedIndices)
                                 scalarData[linkedIndex] = clusterIndex;
-                            }
                         }
                     }
                 }
                 // Iterate over all indices in the cluster and assign cluster index to scalar data
-                for (const auto localIndex : cluster.getIndices())
-                    scalarData[globalIndices[localIndex]] = clusterIndex;
+                for (const auto globalPointIndex : cluster.getIndices())
+                    scalarData[globalPointIndex] = clusterIndex;
 
                 clusterIndex++;
             }
@@ -508,7 +508,7 @@ void Images::getScalarDataForImageStack(const std::uint32_t& dimensionIndex, QVe
 
 void Images::computeMaskData()
 {
-    Timer timer(__FUNCTION__);
+    //Timer timer(__FUNCTION__);
 
     // Get reference to input dataset
     auto inputDataset = getParent();
@@ -540,16 +540,18 @@ void Images::computeMaskData()
                 if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
 
                     // If the data has any linked data
-                    for (LinkedData& ls : points->getLinkedData())
+                    for (LinkedData& linkedData : points->getLinkedData())
                     {
                         // Check if the linked data has the same original full data, because we don't want to
                         // add data here that belongs to a different dataset
-                        if (ls.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
+                        if (linkedData.getTargetDataset()->getFullDataset<Points>() == points->getSourceDataset<Points>()->getFullDataset<Points>())
                         {
-                            const std::vector<unsigned int>& v = ls.getMapping().at(targetPixelIndex);
+                            SelectionMap::Indices linkedIndices;
+
+                            linkedData.getMapping().populateMappingIndices(targetPixelIndex, linkedIndices);
 
                             // Fill in the data for all the linked data indices based on the location of the original id
-                            for (unsigned int linkedIndex : v)
+                            for (unsigned int linkedIndex : linkedIndices)
                                 _maskData[linkedIndex] = 255;
                         }
                     }
@@ -574,10 +576,10 @@ void Images::computeMaskData()
         auto embedding = clusters->getParent();
 
         // Global indices into data
-        std::vector<std::uint32_t> globalIndices;
+        //std::vector<std::uint32_t> globalIndices;
 
         // Get global indices from points
-        points->getGlobalIndices(globalIndices);
+        //points->getGlobalIndices(globalIndices);
 
         // Iterate over all clusters
         for (auto& cluster : clusters->getClusters()) {
@@ -585,29 +587,29 @@ void Images::computeMaskData()
             if (hasLinkedDataFlag(DatasetImpl::LinkedDataFlag::Receive)) {
 
                 // If the data has any linked data
-                for (LinkedData& ls : embedding->getLinkedData())
+                for (LinkedData& linkedData : embedding->getLinkedData())
                 {
                     // Check if the linked data has the same original full data, because we don't want to
                     // add data here that belongs to a different dataset
-                    if (ls.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
+                    if (linkedData.getTargetDataset()->getFullDataset<Points>() == embedding->getSourceDataset<Points>()->getFullDataset<Points>())
                     {
-                        for (const auto localIndex : cluster.getIndices())
+                        for (const auto globalPointIndex : cluster.getIndices())
                         {
-                            const std::vector<unsigned int>& v = ls.getMapping().at(globalIndices[localIndex]);
+                            SelectionMap::Indices linkedIndices;
+
+                            linkedData.getMapping().populateMappingIndices(globalPointIndex, linkedIndices);
 
                             // Fill in the data for all the linked data indices based on the location of the original id
-                            for (unsigned int linkedIndex : v)
-                            {
+                            for (unsigned int linkedIndex : linkedIndices)
                                 _maskData[linkedIndex] = 255;
-                            }
                         }
                     }
                 }
             }
 
             // Iterate over all indices in the cluster and assign cluster index to scalar data
-            for (const auto localIndex : cluster.getIndices())
-                _maskData[globalIndices[localIndex]] = 255;
+            for (const auto globalPointIndex : cluster.getIndices())
+                _maskData[globalPointIndex] = 255;
         }
     }
 

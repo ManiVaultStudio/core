@@ -31,7 +31,6 @@ namespace plugin
     };
     
     using Types = QVector<Type>;
-
 } // namespace plugin
 
 } // namespace hdps

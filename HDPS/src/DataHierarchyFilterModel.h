@@ -18,9 +18,16 @@ public:
     DataHierarchyFilterModel(QObject* parent = nullptr);
 
     /**
-     * Returns whether a give row with give parent is filtered out (false) or in (true)
+     * Returns whether a given row with give parent is filtered out (false) or in (true)
      * @param row Row index
      * @param parent Parent index
      */
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+
+    /** Get/set whether hidden datasets should be filtered or not */
+    bool getFilterHidden() const;
+    void setFilterHidden(bool filterHidden);
+
+private:
+    bool    _filterHidden;        /** Whether hidden datasets are show or not */
 };

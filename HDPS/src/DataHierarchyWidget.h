@@ -2,6 +2,7 @@
 
 #include "DataHierarchyModel.h"
 #include "DataHierarchyFilterModel.h"
+#include "DataHierarchyFilterAction.h"
 #include "Dataset.h"
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
@@ -90,10 +91,17 @@ protected:
     void updateColumnsVisibility();
 
     /**
-     * Get indices
-     * @param parent Parent model index
+     * Get selected row
+     * @return Model indexes of the selected rows
      */
-    QModelIndexList getModelIndexList(QModelIndex parent = QModelIndex()) const;
+    QModelIndexList getSelectedRows() const;
+
+    /**
+     * Get indices of parent and all children recursively
+     * @param filterModelParentIndex Parent filter model index
+     * @return Filter model indices
+     */
+    QModelIndexList gatherIndicesRecursively(QModelIndex filterModelParentIndex = QModelIndex()) const;
 
 protected: // Item expansion
 
@@ -116,10 +124,10 @@ protected: // Item expansion
     void collapseAll();
 
     /** Called when the user expands an item in the tree view */
-    void expanded(const QModelIndex& index);
+    void expanded(const QModelIndex& filterModelIndex);
 
     /** Called when the user collapses an item in the tree view */
-    void collapsed(const QModelIndex& index);
+    void collapsed(const QModelIndex& filterModelIndex);
 
 protected:
 
@@ -127,15 +135,16 @@ protected:
     void updateToolBar();
 
 private:
-    DataHierarchyModel          _model;                     /** Model containing data to be displayed in the hierarchy */
-    DataHierarchyFilterModel    _filterModel;               /** Data hierarchy filter model */
-    QTreeView                   _treeView;                  /** Tree view that contains the data hierarchy */
-    QItemSelectionModel         _selectionModel;            /** Selection model */
-    NoDataOverlayWidget*        _noDataOverlayWidget;       /** Overlay help widget which is shown when no data is loaded */
-    StringAction                _datasetNameFilterAction;   /** String action for filtering dataset GUI name */
-    TriggerAction               _expandAllAction;           /** Expand all datasets action */
-    TriggerAction               _collapseAllAction;         /** Collapse all datasets action */
-    ToggleAction                _groupingAction;            /** Data grouping action */
+    DataHierarchyModel          _model;                         /** Model containing data to be displayed in the hierarchy */
+    DataHierarchyFilterModel    _filterModel;                   /** Data hierarchy filter model */
+    QTreeView                   _treeView;                      /** Tree view that contains the data hierarchy */
+    QItemSelectionModel         _selectionModel;                /** Selection model */
+    NoDataOverlayWidget*        _noDataOverlayWidget;           /** Overlay help widget which is shown when no data is loaded */
+    StringAction                _datasetNameFilterAction;       /** String action for filtering dataset GUI name */
+    DataHierarchyFilterAction   _dataHierarchyFilterAction;     /** Filter action */
+    TriggerAction               _expandAllAction;               /** Expand all datasets action */
+    TriggerAction               _collapseAllAction;             /** Collapse all datasets action */
+    ToggleAction                _groupingAction;                /** Data grouping action */
 };
 
 }

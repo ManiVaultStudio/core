@@ -15,6 +15,7 @@
 #include <QVBoxLayout>
 #include <QMenu>
 #include <QLabel>
+#include <QStyleOptionViewItem>
 
 #include <stdexcept>
 
@@ -27,21 +28,53 @@ namespace hdps
 namespace gui
 {
 
+/**
+ * Tree view item delegate class
+ * Qt natively does not support disabled items to be selected, this class solves that
+ * When an item (dataset) is locked, merely the visual representation is changed and not the item flags (only appears disabled)
+ */
+class ItemDelegate : public QStyledItemDelegate {
+public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
+    explicit ItemDelegate(QObject* parent = nullptr) :
+        QStyledItemDelegate(parent)
+    {
+    }
+
+protected:
+
+    /**
+     * Init the style option(s) for the item delegate (we override the options to paint disabled when locked)
+     */
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
+    {
+        QStyledItemDelegate::initStyleOption(option, index);
+
+        if (index.siblingAtColumn(DataHierarchyModelItem::Column::IsLocked).data(Qt::EditRole).toBool())
+            option->state &= ~QStyle::State_Enabled;
+    }
+};
+
 DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     QWidget(parent),
     _model(this),
     _filterModel(this),
     _treeView(this),
-    _selectionModel(&_model),
+    _selectionModel(&_filterModel),
     _noDataOverlayWidget(new NoDataOverlayWidget(this)),
     _datasetNameFilterAction(this, "Dataset name filter"),
+    _dataHierarchyFilterAction(this, _filterModel),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _groupingAction(this, "Selection grouping", Application::core()->isDatasetGroupingEnabled(), Application::core()->isDatasetGroupingEnabled())
 {
     _filterModel.setSourceModel(&_model);
 
-    _treeView.setModel(&_model);
+    _treeView.setModel(&_filterModel);
 
     _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
     _treeView.setSelectionModel(&_selectionModel);
@@ -52,6 +85,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
+    _treeView.setItemDelegate(new ItemDelegate());
 
     _treeView.header()->setStretchLastSection(false);
     _treeView.header()->setMinimumSectionSize(18);
@@ -72,78 +106,69 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::IsAnalyzing, QHeaderView::Fixed);
     _treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::IsLocked, QHeaderView::Fixed);
 
-    _datasetNameFilterAction.setPlaceHolderString("Search by name...");
+    _datasetNameFilterAction.setPlaceHolderString("Filter by name or regular expression...");
+    _datasetNameFilterAction.setSearchMode(true);
+    _datasetNameFilterAction.setClearable(true);
 
-    // Configure expand all action
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
     _expandAllAction.setToolTip("Expand all datasets in the hierarchy");
 
-    // Expand all items when the expand all action is triggered
     connect(&_expandAllAction, &TriggerAction::triggered, this, &DataHierarchyWidget::expandAll);
 
-    // Configure collapse all action
     _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
     _collapseAllAction.setToolTip("Collapse all datasets in the hierarchy");
 
-    // Collapse all items when the collapse all action is triggered
     connect(&_collapseAllAction, &TriggerAction::triggered, this, &DataHierarchyWidget::collapseAll);
 
-    // Configure grouping action
     _groupingAction.setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
     _groupingAction.setToolTip("Enable/disable dataset grouping");
 
-    // Update columns visibility when grouping is editable/disabled
     connect(&_groupingAction, &ToggleAction::toggled, this, &DataHierarchyWidget::onGroupingActionToggled);
 
-    // Create layout that will contain the toolbar and the tree view
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(3);
 
-    // Create tool bar layout
     auto toolbarLayout = new QHBoxLayout();
 
-    // Add toolbar items
     toolbarLayout->setContentsMargins(0, 3, 0, 3);
     toolbarLayout->setSpacing(4);
-    //toolbarLayout->addWidget(_datasetNameFilterAction.createWidget(this), 1);
+    toolbarLayout->addWidget(_datasetNameFilterAction.createWidget(this), 1);
+    toolbarLayout->addWidget(_dataHierarchyFilterAction.createCollapsedWidget(this));
     toolbarLayout->addWidget(_expandAllAction.createWidget(this, ToggleAction::PushButtonIcon));
     toolbarLayout->addWidget(_collapseAllAction.createWidget(this, ToggleAction::PushButtonIcon));
-    toolbarLayout->addStretch(1);
     toolbarLayout->addWidget(_groupingAction.createWidget(this, ToggleAction::CheckBox));
 
-    // Add tool bar layout and tree view widget
     layout->addLayout(toolbarLayout);
     layout->addWidget(&_treeView);
 
-    // Apply layout
     setLayout(layout);
 
-    // Update the data hierarchy filter model filter when the dataset filter name action changes
     connect(&_datasetNameFilterAction, &StringAction::stringChanged, this, [this](const QString& value) {
-        _filterModel.setFilterRegularExpression(value);
+        auto re = QRegularExpression(value);
+
+        if (re.isValid())
+            _filterModel.setFilterRegularExpression(re);
+        else
+            _filterModel.setFilterFixedString(value);
     });
 
     connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, [this](const QItemSelection& selected, const QItemSelection& deselected) {
-        
-        if (selected.indexes().isEmpty())
-            return;
-
         DataHierarchyItems dataHierarchyItems;
 
-        // Gather selected data hierarchy items
-        for (const auto& index : _selectionModel.selectedRows())
+        for (const auto& index : getSelectedRows())
             dataHierarchyItems << _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
 
         Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
     });
 
-    // Show/hide the overlay and header widget when the number of rows changes
     connect(&_model, &QAbstractItemModel::rowsInserted, this, &DataHierarchyWidget::numberOfRowsChanged);
     connect(&_model, &QAbstractItemModel::rowsRemoved, this, &DataHierarchyWidget::numberOfRowsChanged);
 
-    // Handle item expanded/collapsed
+    connect(&_filterModel, &QAbstractItemModel::rowsInserted, this, &DataHierarchyWidget::updateToolBar);
+    connect(&_filterModel, &QAbstractItemModel::rowsRemoved, this, &DataHierarchyWidget::updateToolBar);
+
     connect(&_treeView, &QTreeView::expanded, this, &DataHierarchyWidget::expanded);
     connect(&_treeView, &QTreeView::collapsed, this, &DataHierarchyWidget::collapsed);
 
@@ -162,8 +187,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
     // Invoked the custom context menu when requested by the tree view
     connect(&_treeView, &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
-
-        const auto selectedRows = _selectionModel.selectedRows();
+        const auto selectedRows = getSelectedRows();
 
         Datasets datasets;
 
@@ -172,55 +196,104 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
         auto contextMenu = new QMenu();
 
-        const auto addMenu = [contextMenu, datasets](const plugin::Type& pluginType) -> void {
-            auto menu = new QMenu();
+        QMap<QString, QMenu*> menus;
 
+        const auto addMenu = [contextMenu, &menus, datasets](const plugin::Type& pluginType) -> void {
+            for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, datasets)) {
+                const auto titleSegments = pluginTriggerAction->getTitle().split("/");
+
+                QString menuPath, previousMenuPath = titleSegments.first();
+
+                for (auto titleSegment : titleSegments) {
+                    if (titleSegment != titleSegments.first() && titleSegment != titleSegments.last())
+                        menuPath += "/";
+
+                    menuPath += titleSegment;
+
+                    if (!menus.contains(menuPath)) {
+                        menus[menuPath] = new QMenu(titleSegment);
+
+                        if (titleSegment != titleSegments.first()) {
+                            if (titleSegment == titleSegments.last())
+                                menus[previousMenuPath]->addAction(pluginTriggerAction);
+                            else {
+                                if (titleSegment == "Group") {
+                                    //menus[menuPath]->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
+
+                                    if (menus[previousMenuPath]->actions().isEmpty())
+                                        menus[previousMenuPath]->addMenu(menus[menuPath]);
+                                    else
+                                        menus[previousMenuPath]->insertMenu(menus[previousMenuPath]->actions().first(), menus[menuPath]);
+
+                                    if (menus[previousMenuPath]->actions().count() >= 2)
+                                        menus[previousMenuPath]->insertSeparator(menus[previousMenuPath]->actions()[1]);
+                                } else
+                                    menus[previousMenuPath]->addMenu(menus[menuPath]);
+                            }
+                                
+                        } else
+                            contextMenu->addMenu(menus[titleSegments.first()]);
+                    }
+
+                    previousMenuPath = menuPath;
+                }
+            }
+            
             switch (pluginType)
             {
                 case plugin::Type::ANALYSIS:
                 {
-                    menu->setTitle("Analyze");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
+                    if (!menus.contains("Analyze"))
+                        break;
+
+                    menus["Analyze"]->setTitle("Analyze");
+                    menus["Analyze"]->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
                     break;
                 }
 
                 case plugin::Type::LOADER:
                 {
-                    menu->setTitle("Import");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
+                    if (!menus.contains("Import"))
+                        break;
+
+                    menus["Import"]->setTitle("Import");
+                    menus["Import"]->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
                     break;
                 }
 
                 case plugin::Type::WRITER:
                 {
-                    menu->setTitle("Export");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
+                    if (!menus.contains("Export"))
+                        break;
+
+                    menus["Export"]->setTitle("Export");
+                    menus["Export"]->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
                     break;
                 }
 
                 case plugin::Type::TRANSFORMATION:
                 {
-                    menu->setTitle("Transform");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
+                    if (!menus.contains("Transform"))
+                        break;
+
+                    menus["Transform"]->setTitle("Transform");
+                    menus["Transform"]->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
                     break;
                 }
 
                 case plugin::Type::VIEW:
                 {
-                    menu->setTitle("View");
-                    menu->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
+                    if (!menus.contains("View"))
+                        break;
+
+                    menus["View"]->setTitle("View");
+                    menus["View"]->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
                     break;
                 }
 
                 default:
                     break;
             }
-
-            for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, datasets))
-                menu->addAction(pluginTriggerAction);
-
-            if (!menu->actions().isEmpty())
-                contextMenu->addMenu(menu);
         };
 
         addMenu(plugin::Type::ANALYSIS);
@@ -228,7 +301,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         addMenu(plugin::Type::WRITER);
         addMenu(plugin::Type::TRANSFORMATION);
         addMenu(plugin::Type::VIEW);
-        
+
         QSet<DataType> dataTypes;
 
         for (const auto& dataset : datasets)
@@ -244,7 +317,73 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
                 Application::core()->groupDatasets(datasets);
             });
 
+            contextMenu->addSeparator();
             contextMenu->addAction(groupDataAction);
+        }
+
+        if (!Application::core()->requestAllDataSets().isEmpty()) {
+            auto lockMenu   = new QMenu("Lock");
+            auto unlockMenu = new QMenu("Unlock");
+        
+            lockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
+            unlockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));
+
+            auto lockAllAction = new QAction("All");
+
+            connect(lockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
+                for (auto dataset : Application::core()->requestAllDataSets())
+                    dataset->lock();
+            });
+
+            lockMenu->setEnabled(false);
+            unlockMenu->setEnabled(false);
+
+            QVector<bool> locked;
+
+            for (auto dataset : Application::core()->requestAllDataSets())
+                locked << dataset->isLocked();
+
+            const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
+
+            unlockMenu->setEnabled(numberOfLockedDatasets >= 1);
+            lockMenu->setEnabled(numberOfLockedDatasets < Application::core()->requestAllDataSets().size());
+
+            auto unlockAllAction = new QAction("All");
+
+            connect(unlockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
+                for (auto dataset : Application::core()->requestAllDataSets())
+                    dataset->unlock();
+            });
+
+            auto lockSelectedAction = new QAction("Selected");
+        
+            lockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+            lockSelectedAction->setEnabled(!datasets.isEmpty());
+
+            connect(lockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
+                for (auto dataset : datasets)
+                    dataset->lock();
+            });
+
+            auto unlockSelectedAction   = new QAction("Selected");
+
+            unlockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+            unlockSelectedAction->setEnabled(!datasets.isEmpty());
+
+            connect(unlockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
+                for (auto dataset : datasets)
+                    dataset->unlock();
+            });
+        
+            lockMenu->addAction(lockSelectedAction);
+            lockMenu->addAction(lockAllAction);
+            unlockMenu->addAction(unlockSelectedAction);
+            unlockMenu->addAction(unlockAllAction);
+
+            contextMenu->addSeparator();
+
+            contextMenu->addMenu(lockMenu);
+            contextMenu->addMenu(unlockMenu);
         }
 
         contextMenu->exec(_treeView.viewport()->mapToGlobal(position));
@@ -263,19 +402,11 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
 
 void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
 {
-    // Do not add hidden data hierarchy items
-    if (dataHierarchyItem.isHidden())
-        return;
-
-    // Get smart pointer to the dataset
     auto dataset = dataHierarchyItem.getDataset();
 
     try {
-
-        // Model index of the parent
         QModelIndex parentModelIndex;
 
-        // Establish parent model index
         if (!dataHierarchyItem.hasParent())
             parentModelIndex = QModelIndex();
         else
@@ -296,15 +427,21 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
             if (!selection)
                 return;
 
-            if (_selectionModel.selectedRows().contains(getModelIndexByDataset(dataset)))
+            if (getSelectedRows().contains(getModelIndexByDataset(dataset)))
                 return;
 
-            _selectionModel.select(getModelIndexByDataset(dataset), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
+            _selectionModel.select(_filterModel.mapFromSource(getModelIndexByDataset(dataset)), QItemSelectionModel::SelectionFlag::ClearAndSelect | QItemSelectionModel::SelectionFlag::Rows);
         });
 
         connect(&dataHierarchyItem, &DataHierarchyItem::lockedChanged, this, [this, dataset](const bool& locked) {
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::IsLocked));
         });
+
+        connect(&dataHierarchyItem, &DataHierarchyItem::visibilityChanged, this, [this](const bool& visible) {
+            _filterModel.invalidate();
+        });
+        
+        _filterModel.invalidate();
 
         connect(&dataHierarchyItem, &DataHierarchyItem::iconChanged, this, [this, dataset]() {
             emit _model.dataChanged(getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name), getModelIndexByDataset(dataset).siblingAtColumn(DataHierarchyModelItem::Column::Name));
@@ -349,16 +486,12 @@ QModelIndex DataHierarchyWidget::getModelIndexByDataset(const Dataset<DatasetImp
 
 void DataHierarchyWidget::numberOfRowsChanged()
 {
-    // Establish whether any data is loaded
     const auto dataIsLoaded = _model.rowCount() >= 1;
 
-    // Show the no data overlay widget when no data is loaded
     _noDataOverlayWidget->setVisible(!dataIsLoaded);
 
-    // Show the header when data is loaded
     _treeView.setHeaderHidden(!dataIsLoaded);
 
-    // Update the toolbar
     updateToolBar();
 }
 
@@ -377,22 +510,28 @@ void DataHierarchyWidget::updateColumnsVisibility()
     _treeView.setColumnHidden(DataHierarchyModelItem::Column::GroupIndex, !_groupingAction.isChecked());
 }
 
-QModelIndexList DataHierarchyWidget::getModelIndexList(QModelIndex parent /*= QModelIndex()*/) const
+QModelIndexList DataHierarchyWidget::getSelectedRows() const
+{
+    QModelIndexList selectedRows;
+
+    for (const auto& index : _selectionModel.selectedRows())
+        selectedRows << _filterModel.mapToSource(index);
+
+    return selectedRows;
+}
+
+QModelIndexList DataHierarchyWidget::gatherIndicesRecursively(QModelIndex filterModelParentIndex /*= QModelIndex()*/) const
 {
     QModelIndexList modelIndexList;
 
-    if (parent.isValid())
-        modelIndexList << parent;
+    if (filterModelParentIndex.isValid())
+        modelIndexList << filterModelParentIndex;
 
-    // Loop over all children of parent
-    for (int rowIndex = 0; rowIndex < _model.rowCount(parent); ++rowIndex) {
+    for (int rowIndex = 0; rowIndex < _filterModel.rowCount(filterModelParentIndex); ++rowIndex) {
+        QModelIndex index = _filterModel.index(rowIndex, 0, filterModelParentIndex);
 
-        // Get model index of child
-        QModelIndex index = _model.index(rowIndex, 0, parent);
-
-        // Recursive
-        if (_model.hasChildren(index))
-            modelIndexList << getModelIndexList(index);
+        if (_filterModel.hasChildren(index))
+            modelIndexList << gatherIndicesRecursively(index);
     }
 
     return modelIndexList;
@@ -400,36 +539,29 @@ QModelIndexList DataHierarchyWidget::getModelIndexList(QModelIndex parent /*= QM
 
 bool DataHierarchyWidget::mayExpandAll() const
 {
-    // Get all model indices in the model
-    const auto allModelIndices = getModelIndexList();
+    const auto allModelIndexes = gatherIndicesRecursively();
 
-    // Loop over all indices and return true if one item is collapsed
-    for (const auto& modelIndex : allModelIndices) {
+    for (const auto& modelIndex : allModelIndexes)
         if (_model.rowCount(modelIndex) > 0 && !_treeView.isExpanded(modelIndex))
             return true;
-    }
 
     return false;
 }
 
 void DataHierarchyWidget::expandAll()
 {
-    // Get all model indices in the model
-    const auto allModelIndices = getModelIndexList();
+    const auto allFilterModelIndices = gatherIndicesRecursively();
 
-    // Loop over all indices and expand them
-    for (const auto& modelIndex : allModelIndices)
-        _treeView.setExpanded(modelIndex, true);
+    for (const auto& filterModelIndex : allFilterModelIndices)
+        _treeView.setExpanded(filterModelIndex, true);
 }
 
 bool DataHierarchyWidget::mayCollapseAll() const
 {
-    // Get all model indices in the model
-    const auto allModelIndices = getModelIndexList();
+    const auto allFilterModelIndices = gatherIndicesRecursively();
 
-    // Loop over all indices and return true if one item is expanded
-    for (const auto& modelIndex : allModelIndices)
-        if (_model.rowCount(modelIndex) > 0 && _treeView.isExpanded(modelIndex))
+    for (const auto& filterModelIndex : allFilterModelIndices)
+        if (_model.rowCount(filterModelIndex) > 0 && _treeView.isExpanded(filterModelIndex))
             return true;
 
     return false;
@@ -437,49 +569,35 @@ bool DataHierarchyWidget::mayCollapseAll() const
 
 void DataHierarchyWidget::collapseAll()
 {
-    // Get all model indices in the model
-    const auto allModelIndices = getModelIndexList();
+    const auto allFilterModelIndices = gatherIndicesRecursively();
 
-    // Loop over all indices and collapse them
-    for (const auto& modelIndex : allModelIndices)
-        _treeView.setExpanded(modelIndex, false);
+    for (const auto& filterModelIndex : allFilterModelIndices)
+        _treeView.setExpanded(filterModelIndex, false);
 }
 
-void DataHierarchyWidget::expanded(const QModelIndex& index)
+void DataHierarchyWidget::expanded(const QModelIndex& filterModelIndex)
 {
-    // Only process valid model index
-    if (!index.isValid())
+    if (!filterModelIndex.isValid())
         return;
 
-    // Get pointer to data hierarchy item
-    auto dataHierarchyItem = _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
-
-    // Expand the data hierarchy item
-    dataHierarchyItem->setExpanded(true);
+    _model.getItem(_filterModel.mapToSource(filterModelIndex), Qt::DisplayRole)->getDataHierarchyItem()->setExpanded(true);
 }
 
-void DataHierarchyWidget::collapsed(const QModelIndex& index)
+void DataHierarchyWidget::collapsed(const QModelIndex& filterModelIndex)
 {
-    // Only process valid model index
-    if (!index.isValid())
+    if (!filterModelIndex.isValid())
         return;
 
-    // Get pointer to data hierarchy item
-    auto dataHierarchyItem = _model.getItem(index, Qt::DisplayRole)->getDataHierarchyItem();
-
-    // Collapse the data hierarchy item
-    dataHierarchyItem->setExpanded(false);
+    _model.getItem(_filterModel.mapToSource(filterModelIndex), Qt::DisplayRole)->getDataHierarchyItem()->setExpanded(false);
 }
 
 void DataHierarchyWidget::updateToolBar()
 {
-    // Establish whether any data is loaded
-    const auto dataIsLoaded = _model.rowCount() >= 1;
+    const auto dataHierarchyEmpty = _model.rowCount() <= 0;
 
-    // Enable/disable the items
-    _expandAllAction.setEnabled(dataIsLoaded && mayExpandAll());
-    _collapseAllAction.setEnabled(dataIsLoaded && mayCollapseAll());
-    _groupingAction.setEnabled(dataIsLoaded);
+    _expandAllAction.setEnabled(!dataHierarchyEmpty && mayExpandAll());
+    _collapseAllAction.setEnabled(!dataHierarchyEmpty && mayCollapseAll());
+    _groupingAction.setEnabled(!dataHierarchyEmpty);
 }
 
 DataHierarchyWidget::NoDataOverlayWidget::NoDataOverlayWidget(QWidget* parent) :
