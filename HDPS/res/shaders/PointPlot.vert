@@ -67,5 +67,5 @@ void main()
         scaledVertex = vertex * size * pointSizeScale * ((selectionDisplayMode == 0) ? selectionOutlineScale : 1);
     
     // Move quad by position and output
-    gl_Position = vec4(scaledVertex + pos, (highlight == 1) ? 0.3 : 0.2, 1);
+    gl_Position = vec4(scaledVertex + pos, 0, 1);
 }
