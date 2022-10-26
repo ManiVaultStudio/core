@@ -25,6 +25,10 @@ namespace hdps
             None, Color, Size, Outline
         };
 
+        enum class PointSelectionDisplayMode {
+            Outline, Override
+        };
+
         struct PointArrayObject : private QOpenGLFunctions_3_3_Core
         {
         public:
@@ -125,9 +129,8 @@ namespace hdps
             void setAlpha(const float alpha);
             void setPointScaling(PointScaling scalingMode);
             
-
-            bool getSelectionOutlineEnabled() const;
-            void setSelectionOutlineEnabled(float selectionOutlineEnabled);
+            PointSelectionDisplayMode getSelectionDisplayMode() const;
+            void setSelectionDisplayMode(PointSelectionDisplayMode selectionDisplayMode);
             Vector3f getSelectionOutlineColor() const;
             void setSelectionOutlineColor(Vector3f color);
             bool getSelectionOutlineOverrideColor() const;
@@ -153,12 +156,12 @@ namespace hdps
             PointSettings _pointSettings;
             PointEffect   _pointEffect = PointEffect::Size;
             
-            bool          _selectionOutlineEnabled          = true;
-            Vector3f      _selectionOutlineColor            = Vector3f(0, 0, 1);
-            bool          _selectionOutlineOverrideColor    = true;
-            float         _selectionOutlineScale            = 2.0f;
-            float         _selectionOutlineOpacity          = 0.75f;
-            bool          _selectionHaloEnabled             = false;
+            PointSelectionDisplayMode   _selectionDisplayMode               = PointSelectionDisplayMode::Outline;
+            Vector3f                    _selectionOutlineColor              = Vector3f(0, 0, 1);
+            bool                        _selectionOutlineOverrideColor      = true;
+            float                       _selectionOutlineScale              = 1.75f;
+            float                       _selectionOutlineOpacity            = 0.5f;
+            bool                        _selectionHaloEnabled               = false;
 
             /* Window properties */
             QSize _windowSize;

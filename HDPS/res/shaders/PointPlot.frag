@@ -10,7 +10,7 @@
 uniform int   scalarEffect;
 
 // Selection
-uniform bool selectionOutlineEnabled; 			/** Whether selection outline is enabled */
+uniform int	selectionDisplayMode;				/** Type of selection display (e.g. outline, override) */
 uniform float selectionOutlineScale;     		/** Selection outline scale (relative to point size) */
 uniform vec3  selectionOutlineColor;			/** Selection outline color (when mode is override) */
 uniform bool  selectionOutlineOverrideColor;	/** Whether the selection outline color should be the point color or a custom color */
@@ -39,51 +39,68 @@ void main()
 	
 	float outlineStart = (1.0 / selectionOutlineScale);
 	
-    // If the fragment is outside of the circle + outline, discard it
 	if (isHighlighted) {
-		if (len > 1.0)
-			discard;
+		switch (selectionDisplayMode) {
+			case 0: // Outline
+				if (len > 1.0) discard;
+				break;
+			
+			case 1: // Override
+				if (len > 1.0) discard;
+				break;
+		}
 	} else {
-		if (selectionOutlineEnabled) {
-			if (len > outlineStart)
-				discard;
-		} else {
-			if (len > 1.0)
-				discard;
+		switch (selectionDisplayMode) {
+			case 0: // Outline
+				if (len > outlineStart)	discard;
+				break;
+			
+			case 1: // Override
+				if (len > 1.0) discard;
+				break;
 		}
 	}
 	
-    float edge = fwidth(len);
-    float a = smoothstep(1, 1 - edge, len);
+    float a = smoothstep(1, 1 - fwidth(len), len);
     
     // Set point color
     vec3 color = vColor;
     
-    if (scalarEffect == EFFECT_COLOR) {
-        color = texture(colormap, vec2(vScalar, 1-vScalar)).rgb;
-    }
+    if (scalarEffect == EFFECT_COLOR)
+        color = texture(colormap, vec2(vScalar, 1 - vScalar)).rgb;
     
 	float opacity = 1.0;
 	
-    // Change color if point is highlighted
-    if (vHighlight == 1) {
-		if (selectionOutlineEnabled) {
-			if (len > outlineStart) {
+	switch (selectionDisplayMode) {
+		case 0:
+		{
+			if (vHighlight == 1 && len > outlineStart) {
 				if (selectionOutlineOverrideColor)
 					color = selectionOutlineColor;
-					//color = (selectionOutlineColor * selectionOutlineOpacity) + (color * (1 - selectionOutlineOpacity));
 					
 				opacity = selectionOutlineOpacity;
 
 				if (selectionHaloEnabled)
 					opacity *= 1.0 - smoothstep(outlineStart, 1.0, len);
-					//opacity *= ((len - outlineStart) / (1.0 - outlineStart));
 			} else {
-				if (selectionOutlineOverrideColor)
-					color = (selectionOutlineColor * selectionOutlineOpacity) + (color * (1 - selectionOutlineOpacity));
-			}
+				opacity *= a * vOpacity;
+			}		
+			
+			fragColor = vec4(color, opacity);
+			break;
 		}
-    }
-	
-    fragColor = vec4(color, opacity * a * vOpacity);
+		
+		case 1:
+		{
+			if (vHighlight == 1)
+				fragColor = vec4(selectionOutlineColor, a);
+			else
+				fragColor = vec4(color, a * vOpacity);
+				
+			break;
+		}
+	}
 }
+
+// For color blending:
+// color = (selectionOutlineColor * selectionOutlineOpacity) + (color * (1 - selectionOutlineOpacity));
