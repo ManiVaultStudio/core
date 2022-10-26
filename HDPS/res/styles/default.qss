@@ -8,7 +8,6 @@ QPushButton {
 
 .square-button {
     width: 21px;
-    height: 21px;
 }
 
 QComboBox {

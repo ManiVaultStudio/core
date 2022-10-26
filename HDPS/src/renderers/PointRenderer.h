@@ -156,12 +156,12 @@ namespace hdps
             PointSettings _pointSettings;
             PointEffect   _pointEffect = PointEffect::Size;
             
-            PointSelectionDisplayMode    _selectionDisplayMode               = PointSelectionDisplayMode::Outline;
-            Vector3f                _selectionOutlineColor              = Vector3f(0, 0, 1);
-            bool                    _selectionOutlineOverrideColor      = true;
-            float                   _selectionOutlineScale              = 2.0f;
-            float                   _selectionOutlineOpacity            = 0.75f;
-            bool                    _selectionHaloEnabled               = false;
+            PointSelectionDisplayMode   _selectionDisplayMode               = PointSelectionDisplayMode::Outline;
+            Vector3f                    _selectionOutlineColor              = Vector3f(0, 0, 1);
+            bool                        _selectionOutlineOverrideColor      = true;
+            float                       _selectionOutlineScale              = 1.75f;
+            float                       _selectionOutlineOpacity            = 0.5f;
+            bool                        _selectionHaloEnabled               = false;
 
             /* Window properties */
             QSize _windowSize;
