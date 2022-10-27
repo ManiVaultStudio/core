@@ -5,7 +5,6 @@
 #include "ProxyDatasetsAction.h"
 #include "NumberOfSelectedPointsAction.h"
 #include "SelectedIndicesAction.h"
-#include "DimensionNamesAction.h"
 #include "CreateSetFromSelectionAction.h"
 
 #include <actions/StringAction.h>
@@ -43,7 +42,6 @@ public: // Action getters
     StringAction& getRawDataSizeAction() { return _rawDataSizeAction; }
     NumberOfSelectedPointsAction& getNumberOfSelectedPointsAction() { return _numberOfSelectedPointsAction; }
     SelectedIndicesAction& getSelectedIndicesAction() { return _selectedIndicesAction; }
-    DimensionNamesAction& getDimensionNamesAction() { return _dimensionNamesAction; }
     CreateSetFromSelectionAction& getCreateSetFromSelection() { return _createSetFromSelection; }
 
 protected:
@@ -55,6 +53,5 @@ protected:
     StringAction                    _rawDataSizeAction;                 /** Amount of memory for raw data */    
     NumberOfSelectedPointsAction    _numberOfSelectedPointsAction;      /** Number of selected points action */
     SelectedIndicesAction           _selectedIndicesAction;             /** Selected indices action */
-    DimensionNamesAction            _dimensionNamesAction;              /** Dimension names action */
     CreateSetFromSelectionAction    _createSetFromSelection;            /** Create set from selection action */
 };

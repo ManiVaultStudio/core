@@ -16,7 +16,6 @@ InfoAction::InfoAction(QObject* parent, const Dataset<Points>& points) :
     _rawDataSizeAction(this, "Raw data size"),
     _numberOfSelectedPointsAction(this, points),
     _selectedIndicesAction(this, points),
-    _dimensionNamesAction(this, points),
     _createSetFromSelection(this, points)
 {
     setText("Info");

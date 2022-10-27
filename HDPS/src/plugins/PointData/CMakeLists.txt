@@ -35,7 +35,6 @@ set(POINTS_HEADERS
 
     src/InfoAction.h
     src/SelectedIndicesAction.h
-    src/DimensionNamesAction.h
     src/ProxyDatasetsAction.h
     src/EditProxyDatasetsAction.h
     src/NumberOfSelectedPointsAction.h
@@ -63,8 +62,6 @@ set(ACTIONS_SOURCES
     src/SelectedIndicesAction.cpp
     src/CreateSetFromSelectionAction.h
     src/CreateSetFromSelectionAction.cpp
-    src/DimensionNamesAction.h
-    src/DimensionNamesAction.cpp
     src/DimensionPickerAction.h
     src/DimensionPickerAction.cpp
     src/DimensionsPickerAction.h
