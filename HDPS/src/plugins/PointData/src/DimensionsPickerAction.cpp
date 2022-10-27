@@ -23,7 +23,7 @@ using namespace hdps;
 using namespace hdps::gui;
 
 DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
-    GroupAction(parent),
+    WidgetAction(parent),
     _points(nullptr),
     _holder(),
     _itemModel(new DimensionsPickerItemModel(_holder)),
@@ -45,6 +45,7 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
         updateSummary();
     });
 
+    /*
     const auto updateReadOnly = [this]() -> void {
         const auto enable = !isReadOnly();
 
@@ -60,6 +61,7 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
     });
 
     updateReadOnly();
+    */
 
     // Compute statistics when triggered
     connect(&_selectAction.getComputeStatisticsAction(), &TriggerAction::triggered, this, &DimensionsPickerAction::computeStatistics);
@@ -481,7 +483,7 @@ void DimensionsPickerAction::updateSlider()
         _selectAction.getSelectionThresholdAction().setMaximum(1);
     }
 
-    _selectAction.getSelectionThresholdAction().setEnabled(!isReadOnly() && !_holder._statistics.empty());
+    //_selectAction.getSelectionThresholdAction().setEnabled(!isReadOnly() && !_holder._statistics.empty());
 }
 
 void DimensionsPickerAction::updateSummary()

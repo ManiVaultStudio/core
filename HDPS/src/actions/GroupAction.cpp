@@ -26,7 +26,7 @@ GroupAction::GroupAction(QObject* parent, const bool& expanded /*= false*/) :
 {
 }
 
-GroupAction::GroupAction(QObject* parent, const WidgetActions& widgetActions, const bool& expanded /*= false*/) :
+GroupAction::GroupAction(QObject* parent, WidgetActions widgetActions, const bool& expanded /*= false*/) :
     WidgetAction(parent),
     _expanded(expanded),
     _readOnly(false),

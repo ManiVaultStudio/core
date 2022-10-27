@@ -82,7 +82,7 @@ public:
      * @param widgetActions Widget actions to initialize with
      * @param expanded Whether the group is initially expanded/collapsed
      */
-    GroupAction(QObject* parent, const WidgetActions& widgetActions, const bool& expanded = false);
+    GroupAction(QObject* parent, WidgetActions widgetActions, const bool& expanded = false);
 
     /** Set expanded/collapsed */
     void setExpanded(const bool& expanded);

@@ -29,7 +29,7 @@ class Points;
  *
  * @author Thomas Kroes
  */
-class POINTDATA_EXPORT DimensionsPickerAction : public GroupAction
+class POINTDATA_EXPORT DimensionsPickerAction : public WidgetAction
 {
 
     Q_OBJECT
