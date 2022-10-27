@@ -304,7 +304,7 @@ void Points::init()
         // If the data doesn't have a dimension picker, add one
         if (_dimensionPickerAction == nullptr)
         {
-            GroupAction* dimensionPickerGroupAction = new GroupAction(this, true);
+            GroupAction* dimensionPickerGroupAction = new GroupAction(this);
             dimensionPickerGroupAction->setText("Dimensions");
             dimensionPickerGroupAction->setShowLabels(false);
 
