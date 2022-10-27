@@ -284,6 +284,7 @@ void PointData::extractDataForDimensions(std::vector<hdps::Vector2f>& result, co
 Points::Points(hdps::CoreInterface* core, QString dataName, const QString& guid /*= ""*/) :
     hdps::DatasetImpl(core, dataName, guid),
     _infoAction(nullptr),
+    _dimensionsPickerGroupAction(nullptr),
     _dimensionsPickerAction(nullptr)
 {
 }
@@ -298,17 +299,18 @@ void Points::init()
 
     _infoAction = new InfoAction(this, *this);
 
+    _dimensionsPickerGroupAction = new GroupAction(this);
+
+    _dimensionsPickerGroupAction->setText("Dimensions");
+    _dimensionsPickerGroupAction->setShowLabels(false);
+
     connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
+        
         // If the data doesn't have a dimension picker, add one
         if (_dimensionsPickerAction == nullptr)
-        {
-            GroupAction* dimensionPickerGroupAction = new GroupAction(this);
-            dimensionPickerGroupAction->setText("Dimensions");
-            dimensionPickerGroupAction->setShowLabels(false);
+            _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction);
 
-            _dimensionsPickerAction = new DimensionsPickerAction(dimensionPickerGroupAction);
-            _dimensionsPickerAction->setPointsDataset(*this);
-        }
+        _dimensionsPickerAction->setPointsDataset(*this);
     });
 
     _eventListener.setEventCore(_core);
@@ -675,6 +677,11 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
 InfoAction& Points::getInfoAction()
 {
     return *_infoAction;
+}
+
+hdps::gui::GroupAction& Points::getDimensionsPickerGroupAction()
+{
+    return *_dimensionsPickerGroupAction;
 }
 
 DimensionsPickerAction& Points::getDimensionsPickerAction()

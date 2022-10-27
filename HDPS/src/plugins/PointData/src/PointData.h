@@ -27,6 +27,10 @@ namespace hdps
 {
     // From "graphics/Vector2f.h"
     class Vector2f;
+
+    namespace gui {
+        class GroupAction;
+    }
 }
 
 // =============================================================================
@@ -927,6 +931,7 @@ public:
 public: // Action getters
 
     InfoAction& getInfoAction();
+    hdps::gui::GroupAction& getDimensionsPickerGroupAction();
     DimensionsPickerAction& getDimensionsPickerAction();
 
 public: // Selection
@@ -990,9 +995,10 @@ public:
 
     std::vector<unsigned int> indices;
 
-    InfoAction*                 _infoAction;                /** Non-owning pointer to info action */
-    DimensionsPickerAction*     _dimensionsPickerAction;    /** Non-owning pointer to dimension picker action */
-    hdps::EventListener         _eventListener;             /** Listen to HDPS events */
+    InfoAction*                 _infoAction;                    /** Non-owning pointer to info action */
+    hdps::gui::GroupAction*     _dimensionsPickerGroupAction;   /** Group action for dimensions picker action */
+    DimensionsPickerAction*     _dimensionsPickerAction;        /** Non-owning pointer to dimensions picker action */
+    hdps::EventListener         _eventListener;                 /** Listen to HDPS events */
 };
 
 // =============================================================================
