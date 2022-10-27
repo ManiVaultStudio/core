@@ -43,10 +43,10 @@ protected:
         /**
          * Constructor
          * @param parent Pointer to parent widget
-         * @param dimensionSelectionAction Pointer to dimension selection action
+         * @param dimensionsPickerAction Pointer to dimensions picker action
          * @param widgetFlags Widget flags for the configuration of the widget
          */
-        Widget(QWidget* parent, DimensionsPickerAction* dimensionSelectionAction, const std::int32_t& widgetFlags);
+        Widget(QWidget* parent, DimensionsPickerAction* dimensionsPickerAction, const std::int32_t& widgetFlags);
 
     protected:
 

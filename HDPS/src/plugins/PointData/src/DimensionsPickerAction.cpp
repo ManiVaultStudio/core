@@ -542,13 +542,13 @@ WidgetAction* DimensionsPickerAction::getPublicCopy() const
     return dimensionsPickerActionCopy;
 }
 
-DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* dimensionSelectionAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, dimensionSelectionAction),
+DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* dimensionsPickerAction, const std::int32_t& widgetFlags) :
+    WidgetActionWidget(parent, dimensionsPickerAction),
     _tableView(this)
 {
     setMinimumHeight(300);
 
-    connect(dimensionSelectionAction, &DimensionsPickerAction::proxyModelChanged, this, &DimensionsPickerAction::Widget::updateTableViewModel);
+    connect(dimensionsPickerAction, &DimensionsPickerAction::proxyModelChanged, this, &DimensionsPickerAction::Widget::updateTableViewModel);
 
     auto layout = new QVBoxLayout();
 
@@ -571,10 +571,10 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
 
     auto toolbarLayout = new QHBoxLayout();
 
-    toolbarLayout->addWidget(dimensionSelectionAction->getFilterAction().createCollapsedWidget(this));
-    toolbarLayout->addWidget(dimensionSelectionAction->getSelectAction().createCollapsedWidget(this));
-    toolbarLayout->addWidget(dimensionSelectionAction->getMiscellaneousAction().createCollapsedWidget(this));
-    toolbarLayout->addWidget(dimensionSelectionAction->getSummaryAction().createWidget(this), 1);
+    toolbarLayout->addWidget(dimensionsPickerAction->getFilterAction().createCollapsedWidget(this));
+    toolbarLayout->addWidget(dimensionsPickerAction->getSelectAction().createCollapsedWidget(this));
+    toolbarLayout->addWidget(dimensionsPickerAction->getMiscellaneousAction().createCollapsedWidget(this));
+    toolbarLayout->addWidget(dimensionsPickerAction->getSummaryAction().createWidget(this), 1);
 
     layout->addLayout(toolbarLayout);
 
@@ -586,7 +586,7 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
         setLayout(layout);
     }
 
-    updateTableViewModel(&dimensionSelectionAction->getProxyModel());
+    updateTableViewModel(&dimensionsPickerAction->getProxyModel());
 }
 
 void DimensionsPickerAction::Widget::updateTableViewModel(QAbstractItemModel* model)
