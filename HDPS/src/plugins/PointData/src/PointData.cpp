@@ -674,6 +674,11 @@ void Points::setProxyMembers(const Datasets& proxyMembers)
     getDataHierarchyItem().setTaskFinished();
 }
 
+DimensionsPickerAction& Points::getDimensionPickerAction()
+{
+	return *_dimensionPickerAction;
+}
+
 std::vector<std::uint32_t>& Points::getSelectionIndices()
 {
     return getSelection<Points>()->indices;

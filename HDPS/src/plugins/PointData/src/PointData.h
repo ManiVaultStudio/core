@@ -924,11 +924,10 @@ public:
      */
     void setProxyMembers(const hdps::Datasets& proxyMembers) override;
 
-public: // Actions
-    DimensionsPickerAction& getDimensionPicker()
-    {
-        return *_dimensionPickerAction;
-    }
+public: // Action getters
+
+    /** Get standard points dimension picker action */
+    DimensionsPickerAction& getDimensionPickerAction();
 
 public: // Selection
 
