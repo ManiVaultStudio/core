@@ -926,8 +926,8 @@ public:
 
 public: // Action getters
 
-    /** Get standard points dimension picker action */
-    DimensionsPickerAction& getDimensionPickerAction();
+    InfoAction& getInfoAction();
+    DimensionsPickerAction& getDimensionsPickerAction();
 
 public: // Selection
 
@@ -990,9 +990,9 @@ public:
 
     std::vector<unsigned int> indices;
 
-    QSharedPointer<InfoAction>    _infoAction;               /** Shared pointer to info action */
-    DimensionsPickerAction*       _dimensionPickerAction;    /** Non-owning pointer to dimension picker action */
-    hdps::EventListener           _eventListener;            /** Listen to HDPS events */
+    InfoAction*                 _infoAction;                /** Non-owning pointer to info action */
+    DimensionsPickerAction*     _dimensionsPickerAction;    /** Non-owning pointer to dimension picker action */
+    hdps::EventListener         _eventListener;             /** Listen to HDPS events */
 };
 
 // =============================================================================
