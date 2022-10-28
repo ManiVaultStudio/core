@@ -47,6 +47,7 @@ set(POINTS_HEADERS
     src/DimensionsPickerItemModel.h
     src/DimensionsPickerProxyModel.h
     src/ModelResetter.h
+    src/CreateSetFromSelectionAction.h
 )
 
 set(ACTIONS_SOURCES
