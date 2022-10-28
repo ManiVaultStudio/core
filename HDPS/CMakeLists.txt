@@ -87,6 +87,11 @@ set( CORE_HEADERS
     src/ProjectBarWidget.h
     src/LogoWidget.h
     src/GroupDataDialog.h
+    src/ActionHierarchyWidget.h
+    src/ActionHierarchyModelItem.h
+    src/ActionHierarchyModel.h
+    src/ActionHierarchyFilterModel.h
+    src/ActionHierarchyDialog.h
 )
 
 set( CORE_SOURCES
@@ -104,6 +109,11 @@ set( CORE_SOURCES
     src/ProjectBarWidget.cpp
     src/LogoWidget.cpp
     src/GroupDataDialog.cpp
+    src/ActionHierarchyWidget.cpp
+    src/ActionHierarchyModelItem.cpp
+    src/ActionHierarchyModel.cpp
+    src/ActionHierarchyFilterModel.cpp
+    src/ActionHierarchyDialog.cpp
 )
 
 set(EVENT_HEADERS
