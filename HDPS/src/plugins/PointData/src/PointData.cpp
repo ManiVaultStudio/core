@@ -299,19 +299,19 @@ void Points::init()
 
     _infoAction = new InfoAction(this, *this);
 
-    _dimensionsPickerGroupAction = new GroupAction(this);
+    if (isFull()) {
+        _dimensionsPickerGroupAction = new GroupAction(this);
 
-    _dimensionsPickerGroupAction->setText("Dimensions");
-    _dimensionsPickerGroupAction->setShowLabels(false);
+        _dimensionsPickerGroupAction->setText("Dimensions");
+        _dimensionsPickerGroupAction->setShowLabels(false);
 
-    connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
-        
-        // If the data doesn't have a dimension picker, add one
-        if (_dimensionsPickerAction == nullptr)
-            _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction);
+        connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
+            if (_dimensionsPickerAction == nullptr)
+                _dimensionsPickerAction = new DimensionsPickerAction(_dimensionsPickerGroupAction);
 
-        _dimensionsPickerAction->setPointsDataset(*this);
-    });
+            _dimensionsPickerAction->setPointsDataset(*this);
+        });
+    }
 
     _eventListener.setEventCore(_core);
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));
@@ -681,11 +681,17 @@ InfoAction& Points::getInfoAction()
 
 hdps::gui::GroupAction& Points::getDimensionsPickerGroupAction()
 {
+    if (!isFull())
+        return getFullDataset<Points>()->getDimensionsPickerGroupAction();
+
     return *_dimensionsPickerGroupAction;
 }
 
 DimensionsPickerAction& Points::getDimensionsPickerAction()
 {
+    if (!isFull())
+        return getFullDataset<Points>()->getDimensionsPickerAction();
+
 	return *_dimensionsPickerAction;
 }
 
