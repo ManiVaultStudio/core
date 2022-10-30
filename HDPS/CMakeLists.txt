@@ -121,6 +121,8 @@ set( WIDGET_HEADERS
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
     src/widgets/Divider.h
+    src/widgets/HierarchyWidget.h
+    src/widgets/OverlayWidget.h
 )
 
 set( WIDGET_SOURCES
@@ -128,6 +130,8 @@ set( WIDGET_SOURCES
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
     src/widgets/Divider.cpp
+    src/widgets/HierarchyWidget.cpp
+    src/widgets/OverlayWidget.cpp
 )
 
 set(ACTIONS_HEADERS
