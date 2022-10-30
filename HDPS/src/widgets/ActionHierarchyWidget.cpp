@@ -22,14 +22,7 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent) :
 {
     auto layout = new QVBoxLayout();
 
-    auto toolbarLayout = new QHBoxLayout();
-
-    toolbarLayout->addStretch(1);
-    toolbarLayout->addWidget(_hierarchyWidget.getExpandAllAction().createWidget(this));
-    toolbarLayout->addWidget(_hierarchyWidget.getCollapseAllAction().createWidget(this));
-
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addLayout(toolbarLayout);
     layout->addWidget(&_hierarchyWidget, 1);
 
     setLayout(layout);

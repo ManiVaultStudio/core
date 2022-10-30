@@ -16,18 +16,42 @@ namespace hdps
 namespace gui
 {
 
-HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/) :
+HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/) :
     QWidget(parent),
     _model(model),
     _filterModel(filterModel),
     _selectionModel(_filterModel != nullptr ? _filterModel : &_model),
     _treeView(this),
+    _nameFilterAction(this, "Name filter"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all")
 {
+    _nameFilterAction.setPlaceHolderString("Filter by name or regular expression...");
+    _nameFilterAction.setSearchMode(true);
+    _nameFilterAction.setClearable(true);
+
+    _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
+    _expandAllAction.setToolTip("Expand all datasets in the hierarchy");
+    _expandAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
+    _collapseAllAction.setToolTip("Collapse all datasets in the hierarchy");
+    _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
+
+    if (showToolbar) {
+        auto toolbarLayout = new QHBoxLayout();
+
+        toolbarLayout->addWidget(_nameFilterAction.createWidget(this), 1);
+        toolbarLayout->addWidget(_expandAllAction.createWidget(this));
+        toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
+
+        layout->addLayout(toolbarLayout);
+    }
+    
     layout->addWidget(&_treeView);
 
     setLayout(layout);
@@ -55,14 +79,18 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSo
 
     header->setMinimumSectionSize(18);
     header->setIconSize(QSize(4, 10));
-    
-    _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
-    _expandAllAction.setToolTip("Expand all datasets in the hierarchy");
-    _expandAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
-    _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
-    _collapseAllAction.setToolTip("Collapse all datasets in the hierarchy");
-    _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
+    connect(&_nameFilterAction, &StringAction::stringChanged, this, [this](const QString& value) {
+        if (_filterModel == nullptr)
+            return;
+
+        const auto re = QRegularExpression(value);
+
+        if (re.isValid())
+            _filterModel->setFilterRegularExpression(re);
+        else
+            _filterModel->setFilterFixedString(value);
+    });
 
     connect(&_expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
         //if (!filterModelIndex.isValid())
@@ -81,6 +109,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSo
     const auto numberOfRowsChanged = [this]() -> void {
         const auto noItems = _model.rowCount() <= 0;
 
+        _nameFilterAction.setEnabled(!noItems && mayExpandAll());
         _expandAllAction.setEnabled(!noItems && mayExpandAll());
         _collapseAllAction.setEnabled(!noItems && mayCollapseAll());
 

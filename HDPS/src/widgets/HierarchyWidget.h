@@ -1,5 +1,6 @@
 #pragma once
 
+#include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 
 #include <QWidget>
@@ -32,8 +33,9 @@ public:
      * @param parent Parent widget
      * @param model Reference to input model
      * @param filterModel Pointer to input filter model (if present)
+     * @param showToolbar Whether to add a default toolbar for filtering and expand/collapse
      */
-    HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr);
+    HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true);
 
     /**
      * Get input model
@@ -65,6 +67,14 @@ public:
      */
     QTreeView& getTreeView() {
         return _treeView;
+    }
+
+    /**
+     * Get name filter action
+     * @return Reference to name filter action
+     */
+    StringAction& getNameFilterAction() {
+        return _nameFilterAction;
     }
 
     /**
@@ -130,6 +140,7 @@ private:
     QSortFilterProxyModel*      _filterModel;                   /** Pointer to filter model (maybe nullptr) */
     QItemSelectionModel         _selectionModel;                /** Selection model */
     QTreeView                   _treeView;                      /** Tree view that contains the data hierarchy */
+    StringAction                _nameFilterAction;              /** String action for filtering by name */
     TriggerAction               _expandAllAction;               /** Expand all datasets action */
     TriggerAction               _collapseAllAction;             /** Collapse all datasets action */
     //NoDataOverlayWidget*        _noDataOverlayWidget;           /** Overlay help widget which is shown when no data is loaded */

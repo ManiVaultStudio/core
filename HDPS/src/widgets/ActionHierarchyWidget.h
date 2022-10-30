@@ -33,9 +33,9 @@ public:
     ActionHierarchyWidget(QWidget* parent);
 
 private:
-    ActionHierarchyModel        _model;             /** Hierarchical action model */
-    ActionHierarchyFilterModel  _filterModel;       /** Hierarchical action filter model */
-    HierarchyWidget             _hierarchyWidget;   /** Widget for displaying hierarchy */
+    ActionHierarchyModel        _model;                 /** Hierarchical action model */
+    ActionHierarchyFilterModel  _filterModel;           /** Hierarchical action filter model */
+    HierarchyWidget             _hierarchyWidget;       /** Widget for displaying hierarchy */
 };
 
 }
