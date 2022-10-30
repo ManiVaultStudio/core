@@ -145,22 +145,28 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
 
     auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 
-    auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(index.internalPointer());
+    switch (static_cast<ActionHierarchyModelItem::Column>(index.column()))
+    {
+        case ActionHierarchyModelItem::Column::Name:
+            break;
 
-    const auto itemIsLocked = actionHierarchyModelItem->getDataAtColumn(ActionHierarchyModelItem::Column::IsLocked, Qt::EditRole).toBool();
+        case ActionHierarchyModelItem::Column::Visible:
+            itemFlags |= Qt::ItemIsUserCheckable;
+            break;
 
-    if (!itemIsLocked && static_cast<ActionHierarchyModelItem::Column>(index.column()) == ActionHierarchyModelItem::Column::Name)
-        itemFlags |= Qt::ItemIsEditable;
+        case ActionHierarchyModelItem::Column::Linkable:
+            itemFlags |= Qt::ItemIsUserCheckable;
+            break;
 
-    if (!itemIsLocked && static_cast<ActionHierarchyModelItem::Column>(index.column()) == ActionHierarchyModelItem::Column::GroupIndex)
-        itemFlags |= Qt::ItemIsEditable;
+        default:
+            break;
+    }
 
     return itemFlags;
 }
 
 QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    /*
     if (orientation == Qt::Horizontal) {
         switch (role) {
             case Qt::DisplayRole:
@@ -170,22 +176,11 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
                     case ActionHierarchyModelItem::Column::Name:
                         return "Name";
 
-                    case ActionHierarchyModelItem::Column::GUID:
-                        return "ID";
+                    case ActionHierarchyModelItem::Column::Visible:
+                        return "Visible";
 
-                    case ActionHierarchyModelItem::Column::Info:
-                        return "Info";
-
-                    case ActionHierarchyModelItem::Column::Progress:
-                        return "";
-
-                    case ActionHierarchyModelItem::Column::GroupIndex:
-                        return "Group ID";
-
-                    case ActionHierarchyModelItem::Column::IsGroup:
-                    case ActionHierarchyModelItem::Column::IsAnalyzing:
-                    case ActionHierarchyModelItem::Column::IsLocked:
-                        return "";
+                    case ActionHierarchyModelItem::Column::Linkable:
+                        return "Linkable";
 
                     default:
                         break;
@@ -196,33 +191,16 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
 
             case Qt::ToolTipRole:
             {
-                const auto iconSize = QSize(14, 14);
-
                 switch (static_cast<ActionHierarchyModelItem::Column>(section))
                 {
                     case ActionHierarchyModelItem::Column::Name:
                         return "Name of the dataset";
 
-                    case ActionHierarchyModelItem::Column::GUID:
-                        return "Globally unique dataset identifier";
+                    case ActionHierarchyModelItem::Column::Visible:
+                        return "Whether the action is visible or not";
 
-                    case ActionHierarchyModelItem::Column::Info:
-                        return "Dataset additional information";
-
-                    case ActionHierarchyModelItem::Column::Progress:
-                        return "Task progress in percentage";
-
-                    case ActionHierarchyModelItem::Column::GroupIndex:
-                        return "Dataset group index";
-
-                    case ActionHierarchyModelItem::Column::IsGroup:
-                        return "Whether the dataset is composed of other datasets";
-
-                    case ActionHierarchyModelItem::Column::IsAnalyzing:
-                        return "Whether an analysis is taking place on the dataset";
-
-                    case ActionHierarchyModelItem::Column::IsLocked:
-                        return "Whether the dataset is locked";
+                    case ActionHierarchyModelItem::Column::Linkable:
+                        return "Whether the action may is linkable or not";
 
                     default:
                         break;
@@ -235,7 +213,6 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
                 break;
         }
     }
-    */
 
     return QVariant();
 }

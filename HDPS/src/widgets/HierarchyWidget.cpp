@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QSortFilterProxyModel>
+#include <QHeaderView>
 
 #include <stdexcept>
 
@@ -24,6 +25,13 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSo
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all")
 {
+    auto layout = new QVBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(&_treeView);
+
+    setLayout(layout);
+
     if (_filterModel) {
         _filterModel->setSourceModel(&_model);
         _treeView.setModel(_filterModel);
@@ -41,12 +49,20 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSo
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
+    _treeView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    
+    auto header = _treeView.header();
 
+    header->setMinimumSectionSize(18);
+    header->setIconSize(QSize(4, 10));
+    
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
     _expandAllAction.setToolTip("Expand all datasets in the hierarchy");
+    _expandAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
     _collapseAllAction.setToolTip("Collapse all datasets in the hierarchy");
+    _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     connect(&_expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
         //if (!filterModelIndex.isValid())
@@ -68,13 +84,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSo
         _expandAllAction.setEnabled(!noItems && mayExpandAll());
         _collapseAllAction.setEnabled(!noItems && mayCollapseAll());
 
-        /*
-        const auto dataIsLoaded = _model.rowCount() >= 1;
-
-        _noDataOverlayWidget->setVisible(!dataIsLoaded);
-
-        _treeView.setHeaderHidden(!dataIsLoaded);
-        */
+        //_noDataOverlayWidget->setVisible(!dataIsLoaded);
+        //_treeView.setHeaderHidden(!dataIsLoaded);
     };
 
     connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);

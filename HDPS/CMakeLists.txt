@@ -116,6 +116,22 @@ set(EVENT_SOURCES
     src/event/EventListener.cpp
 )
 
+set(ACTION_HIERARCHY_HEADERS
+    src/widgets/ActionHierarchyWidget.h
+    src/widgets/ActionHierarchyModelItem.h
+    src/widgets/ActionHierarchyModel.h
+    src/widgets/ActionHierarchyFilterModel.h
+    src/widgets/ActionHierarchyDialog.h
+)
+
+set(ACTION_HIERARCHY_SOURCES
+    src/widgets/ActionHierarchyWidget.cpp
+    src/widgets/ActionHierarchyModelItem.cpp
+    src/widgets/ActionHierarchyModel.cpp
+    src/widgets/ActionHierarchyFilterModel.cpp
+    src/widgets/ActionHierarchyDialog.cpp
+)
+
 set( WIDGET_HEADERS
     src/widgets/WebWidget.h
     src/widgets/DockableWidget.h
@@ -123,6 +139,7 @@ set( WIDGET_HEADERS
     src/widgets/Divider.h
     src/widgets/HierarchyWidget.h
     src/widgets/OverlayWidget.h
+    ${ACTION_HIERARCHY_HEADERS}
 )
 
 set( WIDGET_SOURCES
@@ -132,6 +149,7 @@ set( WIDGET_SOURCES
     src/widgets/Divider.cpp
     src/widgets/HierarchyWidget.cpp
     src/widgets/OverlayWidget.cpp
+    ${ACTION_HIERARCHY_SOURCES}
 )
 
 set(ACTIONS_HEADERS
@@ -393,33 +411,15 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyFilterAction.cpp
 )
 
-set(ACTION_HIERARCHY_HEADERS
-    src/ActionHierarchyWidget.h
-    src/ActionHierarchyModelItem.h
-    src/ActionHierarchyModel.h
-    src/ActionHierarchyFilterModel.h
-    src/ActionHierarchyDialog.h
-)
-
-set(ACTION_HIERARCHY_SOURCES
-    src/ActionHierarchyWidget.cpp
-    src/ActionHierarchyModelItem.cpp
-    src/ActionHierarchyModel.cpp
-    src/ActionHierarchyFilterModel.cpp
-    src/ActionHierarchyDialog.cpp
-)
-
 list(APPEND PRIVATE_HEADERS
     ${CORE_HEADERS}
     ${DATA_HIERARCHY_HEADERS}
-    ${ACTION_HIERARCHY_HEADERS}
 )
 
 list(APPEND PRIVATE_SOURCES
     ${CORE_SOURCES}
     ${PRIVATE_HEADERS}
     ${DATA_HIERARCHY_SOURCES}
-    ${ACTION_HIERARCHY_SOURCES}
 )
 
 list(APPEND DATA_HIERARCHY_FILES
@@ -507,6 +507,7 @@ source_group( Private\\DataHierarchy FILES ${DATA_HIERARCHY_FILES})
 source_group( Private\\ActionHierarchy FILES ${ACTION_HIERARCHY_FILES})
 source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
+source_group( Public\\Widgets\\ActionHierarchy FILES ${ACTION_HIERARCHY_FILES})
 source_group(Public\\Actions FILES ${ACTIONS_FILES})
 source_group( Public\\Renderers FILES ${RENDERER_FILES})
 source_group( Public\\Util FILES ${UTIL_FILES})

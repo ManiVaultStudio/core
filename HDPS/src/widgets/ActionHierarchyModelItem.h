@@ -20,17 +20,12 @@ public:
 
     /** Columns */
     enum Column {
-        Name,           /** Name of the dataset */
-        GUID,           /** Globally unique dataset identifier */
-        Info,           /** Info (e.g. to report progress) */
-        Progress,       /** Task progress in percentage */
-        GroupIndex,     /** Dataset group index */
-        IsGroup,        /** Whether the dataset is composed of other datasets */
-        IsAnalyzing,    /** Whether an analysis is taking place on the dataset */
-        IsLocked,       /** Whether the dataset is locked */
+        Name,           /** Name of the action */
+        Visible,        /** Whether the action is visible or not */
+        Linkable,       /** Whether the action may is linkable or not */
 
         _start = Name,
-        _end = IsLocked
+        _end = Linkable
     };
 
 public:

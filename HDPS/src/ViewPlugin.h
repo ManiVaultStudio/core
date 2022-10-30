@@ -7,9 +7,9 @@
 */
 
 #include "widgets/DockableWidget.h"
+#include "widgets/ActionHierarchyDialog.h"
 #include "actions/TriggerAction.h"
 #include "Plugin.h"
-#include "Application.h"
 
 #include <QWidget>
 #include <QGridLayout>
@@ -31,13 +31,16 @@ public:
         _widget(),
         _editActionsAction(&_widget, "Edit view plugin actions")
     {
+        setText(getGuiName());
+
         _widget.addAction(&_editActionsAction);
 
         _editActionsAction.setShortcut(tr("F12"));
         _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
         connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
-            Application::current()->editActionHierarchy(this);
+            ActionHierarchyDialog actionHierarchyDialog(nullptr, this);
+            actionHierarchyDialog.exec();
         });
     }
 

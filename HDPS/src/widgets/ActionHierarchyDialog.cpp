@@ -2,7 +2,7 @@
 
 #include <Application.h>
 
-#include <QGridLayout>
+#include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QPushButton>
 
@@ -10,21 +10,23 @@ using namespace hdps;
 
 ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent, WidgetAction* action) :
     QDialog(parent),
-    _action(action)
+    _action(action),
+    _actionHierarchyWidget(this)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
-    setWindowTitle(QString("Edit %1 actions").arg(action->text()));
+    setWindowTitle(QString("Edit actions (%1)").arg(action->text()));
+    setMinimumSize(QSize(320, 240));
 
-    auto layout = new QGridLayout();
+    auto layout = new QVBoxLayout();
 
-    layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding), 2, 0, 1, 2);
+    layout->addWidget(&_actionHierarchyWidget);
 
     setLayout(layout);
 
     auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
 
-    layout->addWidget(dialogButtonBox, 3, 0, 1, 2);
+    layout->addWidget(dialogButtonBox);
 
     connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ActionHierarchyDialog::accept);
 }

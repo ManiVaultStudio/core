@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ActionHierarchyWidget.h"
+
 #include <actions/WidgetAction.h>
 
 #include <QDialog>
@@ -35,5 +37,6 @@ public:
     }
 
 private:
-    WidgetAction*   _action;    /** Pointer to action to edit */
+    WidgetAction*           _action;                    /** Pointer to action to edit */
+    ActionHierarchyWidget   _actionHierarchyWidget;     /** Widget for displaying an action hierarchy */
 };
