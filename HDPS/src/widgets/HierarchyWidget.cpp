@@ -28,7 +28,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all")
 {
-    _nameFilterAction.setPlaceHolderString("Filter by name or regular expression...");
+    _nameFilterAction.setPlaceHolderString(QString("Search for %1 by name or regular expression...").arg(_itemTypeName.toLower()));
     _nameFilterAction.setSearchMode(true);
     _nameFilterAction.setClearable(true);
 
@@ -75,12 +75,21 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _treeView.setRootIsDecorated(true);
     _treeView.setItemsExpandable(true);
     _treeView.setIconSize(QSize(14, 14));
-    _treeView.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     
     auto header = _treeView.header();
 
     header->setMinimumSectionSize(18);
     header->setIconSize(QSize(4, 10));
+
+    const auto numberOfRowsChanged = [this]() -> void {
+        const auto hasItems = _model.rowCount() >= 1;
+
+        _nameFilterAction.setEnabled(hasItems);
+        _treeView.setHeaderHidden(!hasItems);
+
+        updateExpandCollapseActionsReadOnly();
+        updateOverlayWidget();
+    };
 
     connect(&_nameFilterAction, &StringAction::stringChanged, this, [this](const QString& value) {
         if (_filterModel != nullptr) {
@@ -95,34 +104,50 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         updateOverlayWidget();
     });
 
-    connect(&_expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
-        //if (!filterModelIndex.isValid())
-        //    return;
-
-        //_model.getItem(toSourceModelIndex(filterModelIndex), Qt::DisplayRole)->getDataHierarchyItem()->setExpanded(true);
-    });
-
-    connect(&_collapseAllAction, &TriggerAction::triggered, this, [this]() -> void {
-        //if (!filterModelIndex.isValid())
-        //    return;
-
-        //_model.getItem(_filterModel.mapToSource(filterModelIndex), Qt::DisplayRole)->getDataHierarchyItem()->setExpanded(false);
-    });
-
-    const auto numberOfRowsChanged = [this]() -> void {
-        const auto noItems = _model.rowCount() <= 0;
-
-        _nameFilterAction.setEnabled(!noItems && mayExpandAll());
-        _expandAllAction.setEnabled(!noItems && mayExpandAll());
-        _collapseAllAction.setEnabled(!noItems && mayCollapseAll());
-
-        _treeView.setHeaderHidden(!noItems);
-
-        updateOverlayWidget();
+    const auto connectExpandCollapseActionsReadOnly = [this]() -> void {
+        connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
+        connect(&_treeView, &QTreeView::collapsed, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
     };
+
+    const auto disconnectExpandCollapseActionsReadOnly = [this]() -> void {
+        disconnect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
+        disconnect(&_treeView, &QTreeView::collapsed, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
+    };
+
+    connect(&_expandAllAction, &TriggerAction::triggered, this, [this, connectExpandCollapseActionsReadOnly, disconnectExpandCollapseActionsReadOnly]() -> void {
+        disconnectExpandCollapseActionsReadOnly();
+        {
+            for (const auto& filterModelIndex : fetchFilterModelIndices())
+                if (_filterModel->hasChildren(filterModelIndex))
+                    _treeView.setExpanded(filterModelIndex, true);
+
+            updateExpandCollapseActionsReadOnly();
+        }
+        connectExpandCollapseActionsReadOnly();
+    });
+
+    connect(&_collapseAllAction, &TriggerAction::triggered, this, [this, connectExpandCollapseActionsReadOnly, disconnectExpandCollapseActionsReadOnly]() -> void {
+        disconnectExpandCollapseActionsReadOnly();
+        {
+            for (const auto& filterModelIndex : fetchFilterModelIndices())
+                if (_filterModel->hasChildren(filterModelIndex))
+                    _treeView.setExpanded(filterModelIndex, false);
+
+            updateExpandCollapseActionsReadOnly();
+        }
+        connectExpandCollapseActionsReadOnly();
+    });
 
     connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
     connect(&_model, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+
+    if (_filterModel) {
+        connect(_filterModel, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
+        connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+    }
+
+    connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
+    connect(&_treeView, &QTreeView::collapsed, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
 
     numberOfRowsChanged();
 }
@@ -167,10 +192,13 @@ QModelIndexList HierarchyWidget::fetchFilterModelIndices(QModelIndex filterModel
 
 bool HierarchyWidget::mayExpandAll() const
 {
+    if (_model.rowCount() == 0)
+        return false;
+
     const auto allFilterModelIndices = fetchFilterModelIndices();
 
     for (const auto& filterModelIndex : allFilterModelIndices)
-        if (_model.rowCount(filterModelIndex) > 0 && !_treeView.isExpanded(filterModelIndex))
+        if (_filterModel->hasChildren(filterModelIndex) && !_treeView.isExpanded(filterModelIndex))
             return true;
 
     return false;
@@ -186,10 +214,13 @@ void HierarchyWidget::expandAll()
 
 bool HierarchyWidget::mayCollapseAll() const
 {
+    if (_model.rowCount() == 0)
+        return false;
+
     const auto allFilterModelIndices = fetchFilterModelIndices();
 
     for (const auto& filterModelIndex : allFilterModelIndices)
-        if (_model.rowCount(filterModelIndex) > 0 && _treeView.isExpanded(filterModelIndex))
+        if (_filterModel->hasChildren(filterModelIndex) && _treeView.isExpanded(filterModelIndex))
             return true;
 
     return false;
@@ -223,6 +254,14 @@ void HierarchyWidget::updateOverlayWidget()
             _overlayWidget.hide();
         }
     }
+}
+
+void HierarchyWidget::updateExpandCollapseActionsReadOnly()
+{
+    const auto hasItems = _model.rowCount() >= 1;
+
+    _expandAllAction.setEnabled(hasItems && mayExpandAll());
+    _collapseAllAction.setEnabled(hasItems && mayCollapseAll());
 }
 
 }

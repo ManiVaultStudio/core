@@ -7,11 +7,20 @@ namespace hdps
 
 using namespace gui;
 
-ActionHierarchyModelItem::ActionHierarchyModelItem(ActionHierarchyModelItem* parent /*= nullptr*/) :
+ActionHierarchyModelItem::ActionHierarchyModelItem(WidgetAction* action, ActionHierarchyModelItem* parent /*= nullptr*/) :
     QObject(parent),
+    _action(action),
     _parent(parent),
     _children()
 {
+    for (auto child : _action->children()) {
+        auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
+
+        if (childWidgetAction == nullptr)
+            continue;
+
+        _children.append(new ActionHierarchyModelItem(childWidgetAction, this));
+    }
 }
 
 ActionHierarchyModelItem::~ActionHierarchyModelItem()
@@ -20,12 +29,6 @@ ActionHierarchyModelItem::~ActionHierarchyModelItem()
         _parent->removeChild(this);
 
     qDeleteAll(_children);
-}
-
-void ActionHierarchyModelItem::addChild(ActionHierarchyModelItem* item)
-{
-    item->setParent(this);
-    _children.append(item);
 }
 
 ActionHierarchyModelItem* ActionHierarchyModelItem::getParent()
@@ -66,8 +69,8 @@ std::int32_t ActionHierarchyModelItem::getNumColumns() const
 
 QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, int role /*= Qt::DisplayRole*/) const
 {
-    /*
-    if (_dataHierarchyItem == nullptr)
+    
+    if (_action == nullptr)
         return QVariant();
 
     switch (role)
@@ -81,25 +84,10 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
                 case Column::Name:
                     return editValue;
 
-                case Column::GUID:
-                    return editValue;
-
-                case Column::Info:
-                    return editValue;
-
-                case Column::Progress:
-                    return _dataHierarchyItem->isRunning() ? QString("%1%").arg(QString::number(editValue.toFloat(), 'f', 1)) : "";
-
-                case Column::GroupIndex:
-                    return editValue.toInt() >= 0 ? editValue : "";
-
-                case Column::IsGroup:
+                case Column::Visible:
                     return "";
 
-                case Column::IsAnalyzing:
-                    return "";
-
-                case Column::IsLocked:
+                case Column::Linkable:
                     return "";
 
                 default:
@@ -114,28 +102,13 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
             switch (static_cast<Column>(column))
             {
                 case Column::Name:
-                    return _dataHierarchyItem->getGuiName();
+                    return _action->text();
 
-                case Column::GUID:
-                    return _dataHierarchyItem->getDataset()->getGuid();
+                case Column::Visible:
+                    return _action->isVisible();
 
-                case Column::Info:
-                    return _dataHierarchyItem->getTaskDescription();
-
-                case Column::Progress:
-                    return _dataHierarchyItem->isRunning() ? 100.0f * _dataHierarchyItem->getTaskProgress() : 0.0f;
-
-                case Column::GroupIndex:
-                    return _dataHierarchyItem->getDataset()->getGroupIndex();
-
-                case Column::IsGroup:
-                    return _dataHierarchyItem->getDataset()->isProxy();
-
-                case Column::IsAnalyzing:
-                    return "";
-
-                case Column::IsLocked:
-                    return _dataHierarchyItem->getLocked();
+                case Column::Linkable:
+                    return true;
 
                 default:
                     break;
@@ -149,38 +122,13 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
             switch (static_cast<Column>(column))
             {
                 case Column::Name:
-                    return _dataHierarchyItem->getGuiName();
+                    return _action->text();
 
-                case Column::GUID:
-                    return _dataHierarchyItem->getDataset()->getGuid();
+                case Column::Visible:
+                    return QString("%1 is %2").arg(_action->text(), _action->isVisible() ? "visible" : "not visible");
 
-                case Column::Info:
-                    return _dataHierarchyItem->getTaskDescription();
-
-                case Column::Progress:
-                    return _dataHierarchyItem->isRunning() ? 100.0f * _dataHierarchyItem->getTaskProgress() : 0.0f;
-
-                case Column::GroupIndex:
-                    return _dataHierarchyItem->getDataset()->getGroupIndex();
-
-                case Column::IsGroup:
-                {
-                    if (!_dataHierarchyItem->getDataset()->isProxy())
-                        return "";
-
-                    QStringList proxyDatasetNames;
-
-                    for (const auto& proxyMember : _dataHierarchyItem->getDataset()->getProxyMembers())
-                        proxyDatasetNames << proxyMember->getGuiName();
-
-                    return proxyDatasetNames.join("\n");
-                }
-
-                case Column::IsAnalyzing:
-                    return "";
-
-                case Column::IsLocked:
-                    return QString("Dataset is %1").arg(_dataHierarchyItem->getLocked() ? "locked" : "unlocked");
+                case Column::Linkable:
+                    return QString("%1 is %2").arg(_action->text(), _action->isVisible() ? "linkable" : "not linkable");
 
                 default:
                     break;
@@ -189,44 +137,19 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
             break;
         }
 
-        case Qt::DecorationRole:
+        
+        case Qt::CheckStateRole:
         {
-            auto& fontAwesome = hdps::Application::getIconFont("FontAwesome");
-
             switch (static_cast<Column>(column))
             {
                 case Column::Name:
-                    return _dataHierarchyItem->getIcon();
-
-                case Column::GUID:
-                case Column::Info:
-                case Column::Progress:
-                case Column::GroupIndex:
                     break;
+
+                case Column::Visible:
+                    return _action->isVisible() ? Qt::Checked : Qt::Unchecked;
                 
-                case Column::IsGroup:
-                {
-                    if (_dataHierarchyItem->getDataset()->isProxy())
-                        return fontAwesome.getIcon("object-group");
-
-                    break;
-                }
-
-                case Column::IsAnalyzing:
-                {
-                    if (_dataHierarchyItem->isRunning())
-                        return fontAwesome.getIcon("microchip");
-
-                    break;
-                }
-
-                case Column::IsLocked:
-                {
-                    if (_dataHierarchyItem->getDataset()->isLocked())
-                        return fontAwesome.getIcon("lock");
-
-                    break;
-                }
+                case Column::Linkable:
+                    return false;
 
                 default:
                     break;
@@ -234,41 +157,22 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
 
             break;
         }
-
-        case Qt::TextAlignmentRole:
-        {
-            switch (static_cast<Column>(column))
-            {
-                case Column::Name:
-                case Column::GUID:
-                case Column::Info:
-                case Column::Progress:
-                    break;
-
-                case Column::GroupIndex:
-                    return static_cast<std::int32_t>(Qt::AlignVCenter | Qt::AlignRight);
-
-                case Column::IsGroup:
-                case Column::IsAnalyzing:
-                case Column::IsLocked:
-                    break;
-
-                default:
-                    break;
-            }
-
-            break;
-        }
-
-        case Qt::ForegroundRole:
-            return _dataHierarchyItem->getLocked() ? QColor(Qt::gray) : QColor(Qt::black);
 
         default:
             break;
     }
-    */
 
     return QVariant();
+}
+
+bool ActionHierarchyModelItem::isVisible() const
+{
+    return _action->isVisible();
+}
+
+void ActionHierarchyModelItem::setVisible(bool visible)
+{
+    _action->setVisible(visible);
 }
 
 void ActionHierarchyModelItem::removeChild(ActionHierarchyModelItem* actionHierarchyModelItem)

@@ -2,7 +2,6 @@
 #include "ActionHierarchyModelItem.h"
 
 #include <QDebug>
-#include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QHeaderView>
 
@@ -14,9 +13,9 @@ namespace hdps
 namespace gui
 {
 
-ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent) :
+ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* rootAction) :
     QWidget(parent),
-    _model(this),
+    _model(this, rootAction),
     _filterModel(this),
     _hierarchyWidget(this, "Action", _model, &_filterModel)
 {
@@ -31,9 +30,14 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent) :
 
     header->setStretchLastSection(false);
 
+    header->resizeSection(ActionHierarchyModelItem::Column::Visible, 60);
+    header->resizeSection(ActionHierarchyModelItem::Column::Linkable, 60);
+
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Name, QHeaderView::Stretch);
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Visible, QHeaderView::ResizeToContents);
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Linkable, QHeaderView::ResizeToContents);
+
+    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
 }
 
 }

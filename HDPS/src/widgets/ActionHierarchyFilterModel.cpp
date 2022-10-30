@@ -9,6 +9,7 @@ ActionHierarchyFilterModel::ActionHierarchyFilterModel(QObject* parent /*= nullp
     QSortFilterProxyModel(parent)
 {
     setRecursiveFilteringEnabled(true);
+    setFilterCaseSensitivity(Qt::CaseInsensitive);
 }
 
 bool ActionHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const

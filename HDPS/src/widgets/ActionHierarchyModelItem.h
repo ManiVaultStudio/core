@@ -33,18 +33,13 @@ public:
     /**
      * Constructor
      * @param parent Parent action hierarchy item (if any)
+     * @param action Pointer to non-owning action
      */
-    explicit ActionHierarchyModelItem(ActionHierarchyModelItem* parent = nullptr);
+    explicit ActionHierarchyModelItem(WidgetAction* action, ActionHierarchyModelItem* parent = nullptr);
 
     /** Destructor */
     virtual ~ActionHierarchyModelItem();
 
-    /**
-     * Add a child item
-     * @param item Child item to add
-     */
-    void addChild(ActionHierarchyModelItem* item);
-    
     /** Get/set parent item */
     ActionHierarchyModelItem* getParent();
     void setParent(ActionHierarchyModelItem* parent);
@@ -65,9 +60,6 @@ public:
     /** Returns the number of columns */
     std::int32_t getNumColumns() const;
 
-    /** Returns the serialized item string */
-    QString serialize() const;
-
     /**
      * Get data at column
      * @param column Column index
@@ -76,7 +68,19 @@ public:
      */
     QVariant getDataAtColumn(const std::uint32_t& column, int role = Qt::DisplayRole) const;
 
-protected:
+    /**
+     * Get whether the action is visible or not
+     * @return Boolean determining whether the action is visible or not
+     */
+    bool isVisible() const;
+
+    /**
+     * Set whether the action is visible or not
+     * @param visible Boolean determining whether the action is visible or not
+     */
+    void setVisible(bool visible);
+
+private:
 
     /**
      * Removes child
@@ -85,8 +89,9 @@ protected:
     void removeChild(ActionHierarchyModelItem* actionHierarchyModelItem);
 
 protected:
-    ActionHierarchyModelItem*   _parent;        /** Pointer to parent item */
-    ActionHierarchyModelItems   _children;      /** Pointers to child items */
+    WidgetAction*               _action;        /** Pointer to non-owning action */
+    ActionHierarchyModelItem*   _parent;        /** Pointer to non-owning parent item */
+    ActionHierarchyModelItems   _children;      /** Pointers to owning child items */
 };
 
 }

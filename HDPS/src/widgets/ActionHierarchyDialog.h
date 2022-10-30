@@ -22,9 +22,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent widget
-     * @param action Pointer to action to edit
+     * @param rootAction Pointer to non-owning root action
      */
-    ActionHierarchyDialog(QWidget* parent, WidgetAction* action);
+    ActionHierarchyDialog(QWidget* parent, WidgetAction* rootAction);
 
     /** Get preferred size */
     QSize sizeHint() const override {

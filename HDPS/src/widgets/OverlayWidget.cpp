@@ -34,6 +34,7 @@ OverlayWidget::OverlayWidget(QWidget* parent, const QIcon& icon, const QString& 
 
 void OverlayWidget::set(const QIcon& icon, const QString& title, const QString& description /*= ""*/)
 {
+    _iconLabel.setPixmap(icon.pixmap(QSize(24, 24)));
     _titleLabel.setText(title);
     _descriptionLabel.setText(description);
 }
@@ -68,13 +69,7 @@ void OverlayWidget::initialize()
 
     auto layout = new QVBoxLayout();
 
-
-    //const auto& fontAwesome = Application::getIconFont("FontAwesome");
-
-    //iconLabel->setAlignment(Qt::AlignCenter);
-    //iconLabel->setFont(fontAwesome.getFont(14));
-    //iconLabel->setText(fontAwesome.getIconCharacter("database"));
-    //iconLabel->setStyleSheet("QLabel { padding: 10px; }");
+    _iconLabel.setAlignment(Qt::AlignCenter);
 
     _titleLabel.setAlignment(Qt::AlignCenter);
     _titleLabel.setStyleSheet("font-weight: bold");

@@ -2,14 +2,13 @@
 #include "ActionHierarchyModelItem.h"
 
 #include <QDebug>
-#include <QIcon>
 
 namespace hdps
 {
 
-ActionHierarchyModel::ActionHierarchyModel(QObject* parent) :
+ActionHierarchyModel::ActionHierarchyModel(QObject* parent, gui::WidgetAction* rootAction) :
     QAbstractItemModel(parent),
-    _rootItem(new ActionHierarchyModelItem(nullptr))
+    _rootItem(new ActionHierarchyModelItem(rootAction, nullptr))
 {
 }
 
@@ -30,42 +29,35 @@ QVariant ActionHierarchyModel::data(const QModelIndex& index, int role) const
 
 bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
 {
-    /*
-    const auto column = static_cast<ActionHierarchyModelItem::Column>(index.column());
-
-    auto ActionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>((void*)index.internalPointer());
+    auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>((void*)index.internalPointer());
     
-    switch (column) {
-        case ActionHierarchyModelItem::Column::Name:
-            ActionHierarchyModelItem->renameDataset(value.toString());
-            break;
+    switch (role) {
+        case Qt::CheckStateRole:
+        {
+            switch (index.column()) {
+                case ActionHierarchyModelItem::Column::Name:
+                    break;
 
-        case ActionHierarchyModelItem::Column::GUID:
-            break;
+                case ActionHierarchyModelItem::Column::Visible:
+                {
+                    actionHierarchyModelItem->setVisible(value.toBool());
+                    
+                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
+                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Visible), value.toBool(), Qt::CheckStateRole);
+                }
 
-        case ActionHierarchyModelItem::Column::Info:
-            ActionHierarchyModelItem->getDataHierarchyItem()->setTaskDescription(value.toString());
-            break;
+                case ActionHierarchyModelItem::Column::Linkable:
+                    break;
 
-        case ActionHierarchyModelItem::Column::Progress:
-            ActionHierarchyModelItem->getDataHierarchyItem()->setTaskProgress(value.toFloat());
-            break;
+                default:
+                    break;
+            }
 
-        case ActionHierarchyModelItem::Column::GroupIndex:
-            ActionHierarchyModelItem->setGroupIndex(value.toInt());
             break;
-
-        case ActionHierarchyModelItem::Column::IsGroup:
-        case ActionHierarchyModelItem::Column::IsAnalyzing:
-        case ActionHierarchyModelItem::Column::IsLocked:
-            break;
-
-        default:
-            break;
+        }
     }
 
     emit dataChanged(index, index);
-    */
 
     return true;
 }
@@ -145,6 +137,8 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
 
     auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 
+    auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(index.internalPointer());
+
     switch (static_cast<ActionHierarchyModelItem::Column>(index.column()))
     {
         case ActionHierarchyModelItem::Column::Name:
@@ -200,7 +194,7 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
                         return "Whether the action is visible or not";
 
                     case ActionHierarchyModelItem::Column::Linkable:
-                        return "Whether the action may is linkable or not";
+                        return "Whether the action is linkable or not";
 
                     default:
                         break;
@@ -215,6 +209,28 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
     }
 
     return QVariant();
+}
+
+QModelIndexList ActionHierarchyModel::fetchModelIndices(QModelIndex modelIndex /*= QModelIndex()*/, bool childrenOnly /*= false*/) const
+{
+    QModelIndexList modelIndexList;
+
+    if (!modelIndex.isValid())
+        return modelIndexList;
+
+    if (!childrenOnly)
+        modelIndexList << modelIndex;
+
+    for (int rowIndex = 0; rowIndex < rowCount(modelIndex); ++rowIndex) {
+        QModelIndex index = this->index(rowIndex, 0, modelIndex);
+
+        modelIndexList << index;
+
+        if (hasChildren(index))
+            modelIndexList << fetchModelIndices(index, false);
+    }
+
+    return modelIndexList;
 }
 
 }

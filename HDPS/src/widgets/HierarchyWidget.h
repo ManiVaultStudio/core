@@ -143,6 +143,9 @@ private:
     /** Updates the overlay widget icon, title and description based on the state of the hierarchy */
     void updateOverlayWidget();
 
+    /** Update the read-only state of the expand/collapse action in reponse to change in the model and the tree view */
+    void updateExpandCollapseActionsReadOnly();
+
 private:
     QString                     _itemTypeName;          /** Name of the item type */
     QAbstractItemModel&         _model;                 /** Model containing data to be displayed in the hierarchy */

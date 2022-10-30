@@ -29,8 +29,9 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
+     * @param rootAction Pointer to non-owning root action
      */
-    ActionHierarchyWidget(QWidget* parent);
+    ActionHierarchyWidget(QWidget* parent, WidgetAction* rootAction);
 
 private:
     ActionHierarchyModel        _model;                 /** Hierarchical action model */

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "actions/WidgetAction.h"
+
 #include <QAbstractItemModel>
 #include <QMimeData>
 
@@ -24,8 +26,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent object
+     * @param rootAction Pointer to non-owning root action
      */
-    explicit ActionHierarchyModel(QObject* parent = nullptr);
+    explicit ActionHierarchyModel(QObject* parent, gui::WidgetAction* rootAction);
 
     /** Destructor */
     ~ActionHierarchyModel();
@@ -90,6 +93,16 @@ public:
      * @return Header
      */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+private:
+
+    /**
+     * Fetches model indices of \p modelIndex and its children recursively
+     * @param modelIndex Filter model index
+     * @param childrenOnly Whether to only include children
+     * @return Fetched model indices
+     */
+    QModelIndexList fetchModelIndices(QModelIndex modelIndex = QModelIndex(), bool childrenOnly = false) const;
 
 private:
     ActionHierarchyModelItem*     _rootItem;      /** Root node of the action hierarchy */
