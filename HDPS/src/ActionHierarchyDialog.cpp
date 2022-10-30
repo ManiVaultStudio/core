@@ -8,12 +8,13 @@
 
 using namespace hdps;
 
-ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent) :
-    QDialog(parent)
+ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent, WidgetAction* action) :
+    QDialog(parent),
+    _action(action)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
-    setWindowTitle("Edit actions");
+    setWindowTitle(QString("Edit %1 actions").arg(action->text()));
 
     auto layout = new QGridLayout();
 
@@ -21,13 +22,9 @@ ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent) :
 
     setLayout(layout);
 
-    auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-    dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Create");
-    dialogButtonBox->button(QDialogButtonBox::Cancel)->setText("Cancel");
+    auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok);
 
     layout->addWidget(dialogButtonBox, 3, 0, 1, 2);
 
     connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ActionHierarchyDialog::accept);
-    connect(dialogButtonBox, &QDialogButtonBox::rejected, this, &ActionHierarchyDialog::reject);
 }

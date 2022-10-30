@@ -87,11 +87,6 @@ set( CORE_HEADERS
     src/ProjectBarWidget.h
     src/LogoWidget.h
     src/GroupDataDialog.h
-    src/ActionHierarchyWidget.h
-    src/ActionHierarchyModelItem.h
-    src/ActionHierarchyModel.h
-    src/ActionHierarchyFilterModel.h
-    src/ActionHierarchyDialog.h
 )
 
 set( CORE_SOURCES
@@ -109,11 +104,6 @@ set( CORE_SOURCES
     src/ProjectBarWidget.cpp
     src/LogoWidget.cpp
     src/GroupDataDialog.cpp
-    src/ActionHierarchyWidget.cpp
-    src/ActionHierarchyModelItem.cpp
-    src/ActionHierarchyModel.cpp
-    src/ActionHierarchyFilterModel.cpp
-    src/ActionHierarchyDialog.cpp
 )
 
 set(EVENT_HEADERS
@@ -127,22 +117,16 @@ set(EVENT_SOURCES
 )
 
 set( WIDGET_HEADERS
-    src/widgets/CollapsedWidget.h
     src/widgets/WebWidget.h
     src/widgets/DockableWidget.h
     src/widgets/DropWidget.h
-    src/widgets/ResponsiveToolbarWidget.h
-    src/widgets/ToolbarItemWidget.h
     src/widgets/Divider.h
 )
 
 set( WIDGET_SOURCES
-    src/widgets/CollapsedWidget.cpp
     src/widgets/WebWidget.cpp
     src/widgets/DockableWidget.cpp
     src/widgets/DropWidget.cpp
-    src/widgets/ResponsiveToolbarWidget.cpp
-    src/widgets/ToolbarItemWidget.cpp
     src/widgets/Divider.cpp
 )
 
@@ -405,15 +389,43 @@ set(DATA_HIERARCHY_SOURCES
     src/DataHierarchyFilterAction.cpp
 )
 
+set(ACTION_HIERARCHY_HEADERS
+    src/ActionHierarchyWidget.h
+    src/ActionHierarchyModelItem.h
+    src/ActionHierarchyModel.h
+    src/ActionHierarchyFilterModel.h
+    src/ActionHierarchyDialog.h
+)
+
+set(ACTION_HIERARCHY_SOURCES
+    src/ActionHierarchyWidget.cpp
+    src/ActionHierarchyModelItem.cpp
+    src/ActionHierarchyModel.cpp
+    src/ActionHierarchyFilterModel.cpp
+    src/ActionHierarchyDialog.cpp
+)
+
 list(APPEND PRIVATE_HEADERS
     ${CORE_HEADERS}
     ${DATA_HIERARCHY_HEADERS}
+    ${ACTION_HIERARCHY_HEADERS}
 )
 
 list(APPEND PRIVATE_SOURCES
     ${CORE_SOURCES}
     ${PRIVATE_HEADERS}
     ${DATA_HIERARCHY_SOURCES}
+    ${ACTION_HIERARCHY_SOURCES}
+)
+
+list(APPEND DATA_HIERARCHY_FILES
+    ${DATA_HIERARCHY_HEADERS}
+    ${DATA_HIERARCHY_SOURCES}
+)
+
+list(APPEND ACTION_HIERARCHY_FILES
+    ${ACTION_HIERARCHY_HEADERS}
+    ${ACTION_HIERARCHY_SOURCES}
 )
 
 list(APPEND PUBLIC_HEADERS
@@ -454,7 +466,6 @@ list(APPEND ACTIONS_FILES
 
 list(APPEND RENDERER_FILES
     ${RENDERER_HEADERS}
-
     ${RENDERER_SOURCES}
 )
 
@@ -466,11 +477,6 @@ list(APPEND UTIL_FILES
 list(APPEND EVENT_FILES
     ${EVENT_HEADERS}
     ${EVENT_SOURCES}
-)
-
-list(APPEND HIERARCHY_FILES
-    ${DATA_HIERARCHY_SOURCES}
-    ${DATA_HIERARCHY_HEADERS}
 )
 
 if(WIN32)
@@ -493,6 +499,8 @@ QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
 source_group( GUI FILES ${CORE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
+source_group( Private\\DataHierarchy FILES ${DATA_HIERARCHY_FILES})
+source_group( Private\\ActionHierarchy FILES ${ACTION_HIERARCHY_FILES})
 source_group( Public FILES ${PLUGIN_HEADERS})
 source_group( Public\\Widgets FILES ${WIDGET_FILES})
 source_group(Public\\Actions FILES ${ACTIONS_FILES})

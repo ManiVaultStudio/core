@@ -1,9 +1,9 @@
 #include "HdpsApplication.h"
-#include "DataHierarchyManager.h"
 #include "Archiver.h"
+#include "DataHierarchyManager.h"
+#include "ActionHierarchyDialog.h"
 
 #include <CoreInterface.h>
-
 #include <util/Exception.h>
 #include <actions/DataRemoveAction.h>
 
@@ -362,6 +362,13 @@ void HdpsApplication::saveProject(QString projectFilePath /*= ""*/)
     {
         exceptionMessageBox("Unable to save HDPS project");
     }
+}
+
+void HdpsApplication::editActionHierarchy(WidgetAction* action)
+{
+    ActionHierarchyDialog actionHierarchyDialog(nullptr, action);
+
+    actionHierarchyDialog.exec();
 }
 
 HdpsApplication::TaskProgressDialog::TaskProgressDialog(QWidget* parent, const QStringList& tasks, const QString& title, const QIcon& icon) :

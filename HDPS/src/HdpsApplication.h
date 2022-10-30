@@ -86,6 +86,14 @@ public: // Project IO
      */
     void saveProject(QString projectFilePath = "") override final;
 
+public: // Edit action hierarchy
+
+    /**
+     * Edit action hierarchy
+     * @param action Pointer to widget action to edit
+     */
+    void editActionHierarchy(WidgetAction* action) override;
+
 protected:
     static constexpr bool           DEFAULT_ENABLE_COMPRESSION  = false;    /** No compression by default */
     static constexpr std::uint32_t  DEFAULT_COMPRESSION_LEVEL   = 2;        /** Default compression level*/

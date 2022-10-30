@@ -7,7 +7,9 @@
 */
 
 #include "widgets/DockableWidget.h"
+#include "actions/TriggerAction.h"
 #include "Plugin.h"
+#include "Application.h"
 
 #include <QWidget>
 #include <QGridLayout>
@@ -26,8 +28,17 @@ class ViewPlugin : public Plugin
 public:
     ViewPlugin(const PluginFactory* factory) :
         Plugin(factory),
-        _widget()
+        _widget(),
+        _editActionsAction(&_widget, "Edit view plugin actions")
     {
+        _widget.addAction(&_editActionsAction);
+
+        _editActionsAction.setShortcut(tr("F12"));
+        _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
+        connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
+            Application::current()->editActionHierarchy(this);
+        });
     }
 
     ~ViewPlugin() override {};
@@ -47,7 +58,7 @@ public:
     };
 
     /**
-     * Load one (or more datasets in the view)
+     * Load one (or more) datasets in the view
      * @param datasets Dataset(s) to load
      */
     virtual void loadData(const Datasets& datasets) {
@@ -64,7 +75,8 @@ public:
     }
 
 protected:
-    QWidget     _widget;        /** Widget representation of the plugin */
+    QWidget             _widget;                /** Widget representation of the plugin */
+    gui::TriggerAction  _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
 };
 
 class ViewPluginFactory : public PluginFactory

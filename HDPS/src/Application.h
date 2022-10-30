@@ -129,6 +129,14 @@ public: // Serialization
      */
     static bool isSerializationAborted();
 
+public: // Edit action hierarchy
+
+    /**
+     * Edit action hierarchy
+     * @param action Pointer to widget action to edit
+     */
+    virtual void editActionHierarchy(WidgetAction* action) = 0;
+
 signals:
 
     /**
