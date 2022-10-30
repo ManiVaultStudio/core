@@ -18,7 +18,7 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent) :
     QWidget(parent),
     _model(this),
     _filterModel(this),
-    _hierarchyWidget(this, _model, &_filterModel)
+    _hierarchyWidget(this, "Action", _model, &_filterModel)
 {
     auto layout = new QVBoxLayout();
 
@@ -30,10 +30,6 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent) :
     auto header = _hierarchyWidget.getTreeView().header();
 
     header->setStretchLastSection(false);
-
-    //header->resizeSection(ActionHierarchyModelItem::Column::Name, 180);
-    //header->resizeSection(ActionHierarchyModelItem::Column::Visible, header->minimumSectionSize());
-    //header->resizeSection(ActionHierarchyModelItem::Column::Linkable, header->minimumSectionSize());
 
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Name, QHeaderView::Stretch);
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Visible, QHeaderView::ResizeToContents);

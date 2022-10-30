@@ -2,6 +2,7 @@
 
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
+#include "OverlayWidget.h"
 
 #include <QWidget>
 #include <QTreeView>
@@ -31,11 +32,13 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
+     * @param itemTypeName Type name of the item (e.g. dataset or action)
      * @param model Reference to input model
      * @param filterModel Pointer to input filter model (if present)
      * @param showToolbar Whether to add a default toolbar for filtering and expand/collapse
+     * @param showOverlay Whether to show an overlay when the (filter) model is empty
      */
-    HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true);
+    HierarchyWidget(QWidget* parent, const QString& itemTypeName, QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true, bool showOverlay = true);
 
     /**
      * Get input model
@@ -136,14 +139,20 @@ protected: // Item expansion
     void collapseAll();
 
 private:
-    QAbstractItemModel&         _model;                         /** Model containing data to be displayed in the hierarchy */
-    QSortFilterProxyModel*      _filterModel;                   /** Pointer to filter model (maybe nullptr) */
-    QItemSelectionModel         _selectionModel;                /** Selection model */
-    QTreeView                   _treeView;                      /** Tree view that contains the data hierarchy */
-    StringAction                _nameFilterAction;              /** String action for filtering by name */
-    TriggerAction               _expandAllAction;               /** Expand all datasets action */
-    TriggerAction               _collapseAllAction;             /** Collapse all datasets action */
-    //NoDataOverlayWidget*        _noDataOverlayWidget;           /** Overlay help widget which is shown when no data is loaded */
+    
+    /** Updates the overlay widget icon, title and description based on the state of the hierarchy */
+    void updateOverlayWidget();
+
+private:
+    QString                     _itemTypeName;          /** Name of the item type */
+    QAbstractItemModel&         _model;                 /** Model containing data to be displayed in the hierarchy */
+    QSortFilterProxyModel*      _filterModel;           /** Pointer to filter model (maybe nullptr) */
+    QItemSelectionModel         _selectionModel;        /** Selection model */
+    QTreeView                   _treeView;              /** Tree view that contains the data hierarchy */
+    OverlayWidget               _overlayWidget;         /** Overlay widget that show information when there are no items in the model */
+    StringAction                _nameFilterAction;      /** String action for filtering by name */
+    TriggerAction               _expandAllAction;       /** Expand all datasets action */
+    TriggerAction               _collapseAllAction;     /** Collapse all datasets action */
 };
 
 }

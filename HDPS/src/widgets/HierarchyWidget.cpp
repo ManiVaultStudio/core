@@ -16,12 +16,14 @@ namespace hdps
 namespace gui
 {
 
-HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/) :
+HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, QAbstractItemModel& model, QSortFilterProxyModel* filterModel /*= nullptr*/, bool showToolbar /*= true*/, bool showOverlay /*= true*/) :
     QWidget(parent),
+    _itemTypeName(itemTypeName),
     _model(model),
     _filterModel(filterModel),
     _selectionModel(_filterModel != nullptr ? _filterModel : &_model),
     _treeView(this),
+    _overlayWidget(this),
     _nameFilterAction(this, "Name filter"),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all")
@@ -81,15 +83,16 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSo
     header->setIconSize(QSize(4, 10));
 
     connect(&_nameFilterAction, &StringAction::stringChanged, this, [this](const QString& value) {
-        if (_filterModel == nullptr)
-            return;
+        if (_filterModel != nullptr) {
+            const auto re = QRegularExpression(value);
 
-        const auto re = QRegularExpression(value);
+            if (re.isValid())
+                _filterModel->setFilterRegularExpression(re);
+            else
+                _filterModel->setFilterFixedString(value);
+        }
 
-        if (re.isValid())
-            _filterModel->setFilterRegularExpression(re);
-        else
-            _filterModel->setFilterFixedString(value);
+        updateOverlayWidget();
     });
 
     connect(&_expandAllAction, &TriggerAction::triggered, this, [this]() -> void {
@@ -113,8 +116,9 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, QAbstractItemModel& model, QSo
         _expandAllAction.setEnabled(!noItems && mayExpandAll());
         _collapseAllAction.setEnabled(!noItems && mayCollapseAll());
 
-        //_noDataOverlayWidget->setVisible(!dataIsLoaded);
-        //_treeView.setHeaderHidden(!dataIsLoaded);
+        _treeView.setHeaderHidden(!noItems);
+
+        updateOverlayWidget();
     };
 
     connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
@@ -197,6 +201,28 @@ void HierarchyWidget::collapseAll()
 
     for (const auto& filterModelIndex : allFilterModelIndices)
         _treeView.setExpanded(filterModelIndex, false);
+}
+
+void HierarchyWidget::updateOverlayWidget()
+{
+    if (_filterModel == nullptr) {
+        if (_model.rowCount() == 0) {
+            _overlayWidget.set(windowIcon(), QString("No %1s loaded").arg(_itemTypeName.toLower()), "");
+            _overlayWidget.show();
+        }
+        else {
+            _overlayWidget.hide();
+        }
+    }
+    else {
+        if (_model.rowCount() >= 1 && _filterModel->rowCount() == 0) {
+            _overlayWidget.set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the search parameters...");
+            _overlayWidget.show();
+        }
+        else {
+            _overlayWidget.hide();
+        }
+    }
 }
 
 }
