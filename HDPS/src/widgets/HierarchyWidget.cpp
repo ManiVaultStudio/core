@@ -247,7 +247,7 @@ void HierarchyWidget::updateOverlayWidget()
     }
     else {
         if (_model.rowCount() >= 1 && _filterModel->rowCount() == 0) {
-            _overlayWidget.set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the search parameters...");
+            _overlayWidget.set(windowIcon(), QString("No %1s found for %2").arg(_itemTypeName.toLower(), _nameFilterAction.getString()), "Try changing the search parameters...");
             _overlayWidget.show();
         }
         else {

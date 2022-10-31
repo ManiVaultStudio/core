@@ -85,8 +85,7 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
                     return editValue;
 
                 case Column::Visible:
-                    return "";
-
+                case Column::Enabled:
                 case Column::Linkable:
                     return "";
 
@@ -106,6 +105,9 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
 
                 case Column::Visible:
                     return _action->isVisible();
+
+                case Column::Enabled:
+                    return _action->isEnabled();
 
                 case Column::Linkable:
                     return true;
@@ -127,6 +129,9 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
                 case Column::Visible:
                     return QString("%1 is %2").arg(_action->text(), _action->isVisible() ? "visible" : "not visible");
 
+                case Column::Enabled:
+                    return QString("%1 is %2").arg(_action->text(), _action->isEnabled() ? "enabled" : "disabled");
+
                 case Column::Linkable:
                     return QString("%1 is %2").arg(_action->text(), _action->isVisible() ? "linkable" : "not linkable");
 
@@ -147,9 +152,31 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
 
                 case Column::Visible:
                     return _action->isVisible() ? Qt::Checked : Qt::Unchecked;
+
+                case Column::Enabled:
+                    return _action->isEnabled() ? Qt::Checked : Qt::Unchecked;
                 
                 case Column::Linkable:
                     return false;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        case Qt::TextAlignmentRole:
+        {
+            switch (static_cast<Column>(column))
+            {
+                case Column::Name:
+                    break;
+
+                case Column::Visible:
+                case Column::Enabled:
+                case Column::Linkable:
+                    return Qt::AlignCenter;
 
                 default:
                     break;
@@ -165,14 +192,9 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
     return QVariant();
 }
 
-bool ActionHierarchyModelItem::isVisible() const
+WidgetAction* ActionHierarchyModelItem::getAction()
 {
-    return _action->isVisible();
-}
-
-void ActionHierarchyModelItem::setVisible(bool visible)
-{
-    _action->setVisible(visible);
+    return _action;
 }
 
 void ActionHierarchyModelItem::removeChild(ActionHierarchyModelItem* actionHierarchyModelItem)

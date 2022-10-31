@@ -22,7 +22,8 @@ public:
     enum Column {
         Name,           /** Name of the action */
         Visible,        /** Whether the action is visible or not */
-        Linkable,       /** Whether the action may is linkable or not */
+        Enabled,        /** Whether the action is enabled or not */
+        Linkable,       /** Whether the action is linkable or not */
 
         _start = Name,
         _end = Linkable
@@ -69,16 +70,10 @@ public:
     QVariant getDataAtColumn(const std::uint32_t& column, int role = Qt::DisplayRole) const;
 
     /**
-     * Get whether the action is visible or not
-     * @return Boolean determining whether the action is visible or not
+     * Get the action
+     * @return Pointer to action
      */
-    bool isVisible() const;
-
-    /**
-     * Set whether the action is visible or not
-     * @param visible Boolean determining whether the action is visible or not
-     */
-    void setVisible(bool visible);
+    WidgetAction* getAction();
 
 private:
 

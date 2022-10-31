@@ -30,12 +30,16 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
 
     header->setStretchLastSection(false);
 
-    header->resizeSection(ActionHierarchyModelItem::Column::Visible, 60);
-    header->resizeSection(ActionHierarchyModelItem::Column::Linkable, 60);
+    const auto checkColumnSize = 55;
+
+    header->resizeSection(ActionHierarchyModelItem::Column::Visible, checkColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::Enabled, checkColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::Linkable, checkColumnSize);
 
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Name, QHeaderView::Stretch);
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Visible, QHeaderView::ResizeToContents);
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Linkable, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Visible, QHeaderView::Fixed);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Enabled, QHeaderView::Fixed);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Linkable, QHeaderView::Fixed);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
 }

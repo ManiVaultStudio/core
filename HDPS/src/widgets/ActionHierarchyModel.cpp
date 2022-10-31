@@ -40,10 +40,22 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
 
                 case ActionHierarchyModelItem::Column::Visible:
                 {
-                    actionHierarchyModelItem->setVisible(value.toBool());
+                    actionHierarchyModelItem->getAction()->setVisible(value.toBool());
                     
                     for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
                         setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Visible), value.toBool(), Qt::CheckStateRole);
+
+                    break;
+                }
+
+                case ActionHierarchyModelItem::Column::Enabled:
+                {
+                    actionHierarchyModelItem->getAction()->setEnabled(value.toBool());
+
+                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
+                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Enabled), value.toBool(), Qt::CheckStateRole);
+
+                    break;
                 }
 
                 case ActionHierarchyModelItem::Column::Linkable:
@@ -148,6 +160,10 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
             itemFlags |= Qt::ItemIsUserCheckable;
             break;
 
+        case ActionHierarchyModelItem::Column::Enabled:
+            itemFlags |= Qt::ItemIsUserCheckable;
+            break;
+
         case ActionHierarchyModelItem::Column::Linkable:
             itemFlags |= Qt::ItemIsUserCheckable;
             break;
@@ -173,6 +189,9 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
                     case ActionHierarchyModelItem::Column::Visible:
                         return "Visible";
 
+                    case ActionHierarchyModelItem::Column::Enabled:
+                        return "Enabled";
+
                     case ActionHierarchyModelItem::Column::Linkable:
                         return "Linkable";
 
@@ -192,6 +211,9 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
 
                     case ActionHierarchyModelItem::Column::Visible:
                         return "Whether the action is visible or not";
+
+                    case ActionHierarchyModelItem::Column::Enabled:
+                        return "Whether the action is enabled or not";
 
                     case ActionHierarchyModelItem::Column::Linkable:
                         return "Whether the action is linkable or not";
