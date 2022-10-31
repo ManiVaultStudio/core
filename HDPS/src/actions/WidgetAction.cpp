@@ -213,6 +213,21 @@ const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
     return _connectedActions;
 }
 
+bool WidgetAction::mayPublish() const
+{
+    return _linkFlags & LinkFlag::MayPublish;
+}
+
+bool WidgetAction::mayConnect() const
+{
+    return _linkFlags & LinkFlag::MayConnect;
+}
+
+bool WidgetAction::mayPublishAndConnect() const
+{
+    return mayPublish() & mayConnect();
+}
+
 WidgetAction* WidgetAction::getPublicCopy() const
 {
     return nullptr;

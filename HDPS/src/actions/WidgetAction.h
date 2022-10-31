@@ -34,6 +34,16 @@ class WidgetAction : public QWidgetAction, public Serializable
 
 public:
 
+    /** Describes the link options */
+    enum LinkFlag {
+        MayPublish      = 0x00001,      /** Widget may publish itself (make a shared public copy) */
+        MayConnect      = 0x00002,      /** Widget may connect to a public action */
+
+        Default = MayPublish | MayConnect
+    };
+
+public:
+
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -188,6 +198,24 @@ public: // Linking
      */
     const QVector<WidgetAction*> getConnectedActions() const;
 
+    /**
+     * Get whether a copy of this action may published and shared
+     * @return Boolean determining whether a copy of this action may published and shared
+     */
+    bool mayPublish() const;
+
+    /**
+     * Get whether this action may connect to a public action
+     * @return Boolean determining whether this action may connect to a public action
+     */
+    bool mayConnect() const;
+
+    /**
+     * Get whether this action may connect to a public action and whether it may connect to a public action
+     * @return Boolean determining whether this action may connect to a public action and whether it may connect to a public action
+     */
+    bool mayPublishAndConnect() const;
+
 protected: // Linking
 
     /**
@@ -299,6 +327,7 @@ signals:
 protected:
     std::int32_t                _defaultWidgetFlags;    /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;             /** Sort index (used in the group action to sort actions) */
+    std::int32_t                _linkFlags;             /**  */
     WidgetAction*               _publicAction;          /** Public action to which this action might be connected */
     QVector<WidgetAction*>      _connectedActions;      /** Pointers to widget action that are connected to this action */
     QString                     _settingsPrefix;        /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
