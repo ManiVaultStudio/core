@@ -17,7 +17,8 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     QWidget(parent),
     _model(this, rootAction),
     _filterModel(this),
-    _hierarchyWidget(this, "Action", _model, &_filterModel)
+    _hierarchyWidget(this, "Action", _model, &_filterModel),
+    _lastHoverModelIndex()
 {
     auto layout = new QVBoxLayout();
 
@@ -42,6 +43,33 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Linkable, QHeaderView::Fixed);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
+    _hierarchyWidget.getTreeView().setMouseTracking(true);
+
+    connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) -> void {
+        setActionHighlighted(_hierarchyWidget.toSourceModelIndex(current.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
+        setActionHighlighted(_hierarchyWidget.toSourceModelIndex(previous.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+
+        _lastHoverModelIndex = _hierarchyWidget.toSourceModelIndex(current.siblingAtColumn(ActionHierarchyModelItem::Column::Name));
+    });
+}
+
+ActionHierarchyWidget::~ActionHierarchyWidget()
+{
+    if (_lastHoverModelIndex.isValid())
+        setActionHighlighted(_lastHoverModelIndex, false);
+}
+
+void ActionHierarchyWidget::setActionHighlighted(const QModelIndex& index, bool highlighted)
+{
+    if (!index.isValid())
+        return;
+
+    if (index.internalPointer() == nullptr)
+        return;
+
+    auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(index.internalPointer());
+
+    actionHierarchyModelItem->getAction()->setHighlighted(highlighted);
 }
 
 }

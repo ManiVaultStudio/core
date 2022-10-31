@@ -11,7 +11,8 @@ using namespace hdps;
 ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent, WidgetAction* rootAction) :
     QDialog(parent),
     _action(rootAction),
-    _actionHierarchyWidget(this, rootAction)
+    _actionHierarchyWidget(this, rootAction),
+    _mayCloseAction(this, "May close", true, true)
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
@@ -21,6 +22,7 @@ ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent, WidgetAction* root
     auto layout = new QVBoxLayout();
 
     layout->addWidget(&_actionHierarchyWidget);
+    layout->addWidget(_mayCloseAction.createWidget(this));
 
     setLayout(layout);
 

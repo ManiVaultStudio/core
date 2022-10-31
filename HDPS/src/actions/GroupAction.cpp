@@ -200,7 +200,11 @@ GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, c
 
     //_layout->setContentsMargins(10, 10, 10, 10);
     
-    setLayout(_layout);
+    if (widgetFlags & PopupLayout)
+        setPopupLayout(_layout);
+    else {
+        setLayout(_layout);
+    }
 
     const auto reset = [this, groupAction]() -> void {
         if (groupAction->getShowLabels()) {

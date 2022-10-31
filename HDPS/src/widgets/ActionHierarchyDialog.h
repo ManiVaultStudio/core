@@ -3,6 +3,7 @@
 #include "ActionHierarchyWidget.h"
 
 #include <actions/WidgetAction.h>
+#include <actions/ToggleAction.h>
 
 #include <QDialog>
 
@@ -39,4 +40,5 @@ public:
 private:
     WidgetAction*           _action;                    /** Pointer to action to edit */
     ActionHierarchyWidget   _actionHierarchyWidget;     /** Widget for displaying an action hierarchy */
+    ToggleAction            _mayCloseAction;            /** Action for toggling whether a view plugin may be closed */
 };

@@ -25,7 +25,8 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _sortIndex(-1),
     _publicAction(nullptr),
     _connectedActions(),
-    _settingsPrefix()
+    _settingsPrefix(),
+    _highlighted(false)
 {
 }
 
@@ -89,6 +90,21 @@ std::int32_t WidgetAction::getDefaultWidgetFlags() const
 void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
 {
     _defaultWidgetFlags = widgetFlags;
+}
+
+void WidgetAction::setHighlighted(bool highlighted)
+{
+    if (highlighted == _highlighted)
+        return;
+
+    _highlighted = highlighted;
+
+    emit highlightedChanged(_highlighted);
+}
+
+bool WidgetAction::isHighlighted() const
+{
+    return _highlighted;
 }
 
 bool WidgetAction::mayPublish() const

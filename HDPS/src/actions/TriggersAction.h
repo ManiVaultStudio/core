@@ -68,7 +68,7 @@ public:
 public:
 
     /** Widget class for triggers action */
-    class Widget : public QWidget {
+    class Widget : public WidgetActionWidget {
     protected:
 
         /**

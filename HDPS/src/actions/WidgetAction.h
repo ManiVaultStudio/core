@@ -109,6 +109,20 @@ public:
      */
     void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
+public: // Highlighting
+
+    /**
+     * Highlight the action (draw the background in a different color)
+     * @param highlighted Whether the action is highlighted or not
+     */
+    void setHighlighted(bool highlighted);
+
+    /**
+     * Determine whether the action is in a highlighted state or not
+     * @return Boolean determining whether the action is in a highlighted state or not
+     */
+    bool isHighlighted() const;
+
 public: // Linking
 
     /**
@@ -253,7 +267,13 @@ protected:
 signals:
 
     /**
-     * Signals that the published states changed
+     * Signals that the highlighted state changed
+     * @param highlighted Whether the action is in a highlighted state or not
+     */
+    void highlightedChanged(bool highlighted);
+
+    /**
+     * Signals that the published state changed
      * @param isPublished Whether the action is published or not
      */
     void isPublishedChanged(const bool& isPublished);
@@ -282,6 +302,7 @@ protected:
     WidgetAction*               _publicAction;          /** Public action to which this action might be connected */
     QVector<WidgetAction*>      _connectedActions;      /** Pointers to widget action that are connected to this action */
     QString                     _settingsPrefix;        /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
+    bool                        _highlighted;           /** Whether the action is in a highlighted state or not */
 };
 
 /** List of widget actions */

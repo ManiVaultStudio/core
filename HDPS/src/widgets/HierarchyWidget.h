@@ -2,6 +2,8 @@
 
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
+#include "actions/GroupAction.h"
+
 #include "OverlayWidget.h"
 
 #include <QWidget>
@@ -17,9 +19,15 @@ namespace gui
 {
 
 /**
- * Base widget for display a hierarchical model in a tree view
+ * Base widget for displaying a hierarchical model in a tree view
+ * 
  * It sets up the tree view and links up the filter and selection models
- * Contains expand/collapse all actions
+ * May show a toolbar for:
+ * - Filtering by name
+ * - Expanding all items
+ * - Collapsing all items
+ * - Selecting all items
+ * - De-selecting all items
  * 
  * @author Thomas Kroes
  */
@@ -138,6 +146,26 @@ protected: // Item expansion
     /** Collapse all items in the hierarchy */
     void collapseAll();
 
+protected: // Item selection
+
+    /**
+     * Get whether all items may be selected
+     * @return Boolean determining whether all items may be selected
+     */
+    bool maySelectAll() const;
+
+    /** Select all items in the hierarchy */
+    void selectAll();
+
+    /**
+     * Get whether one (or more) items can be de-selected
+     * @return Boolean determining whether one (or more) items can be de-selected
+     */
+    bool maySelectNone() const;
+
+    /** Deselect all selected items in the hierarchy */
+    void selectNone();
+
 private:
     
     /** Updates the overlay widget icon, title and description based on the state of the hierarchy */
@@ -156,6 +184,9 @@ private:
     StringAction                _nameFilterAction;      /** String action for filtering by name */
     TriggerAction               _expandAllAction;       /** Expand all datasets action */
     TriggerAction               _collapseAllAction;     /** Collapse all datasets action */
+    TriggerAction               _selectAllAction;       /** Select all action */
+    TriggerAction               _selectNoneAction;      /** Select none action */
+    GroupAction                 _selectionGroupAction;  /** Selection action */
 };
 
 }

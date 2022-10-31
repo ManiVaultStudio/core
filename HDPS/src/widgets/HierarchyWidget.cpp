@@ -26,19 +26,31 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _overlayWidget(this),
     _nameFilterAction(this, "Name filter"),
     _expandAllAction(this, "Expand all"),
-    _collapseAllAction(this, "Collapse all")
+    _collapseAllAction(this, "Collapse all"),
+    _selectAllAction(this, "Select all"),
+    _selectNoneAction(this, "Select none"),
+    _selectionGroupAction(this)
 {
     _nameFilterAction.setPlaceHolderString(QString("Search for %1 by name or regular expression...").arg(_itemTypeName.toLower()));
     _nameFilterAction.setSearchMode(true);
     _nameFilterAction.setClearable(true);
 
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
-    _expandAllAction.setToolTip("Expand all datasets in the hierarchy");
+    _expandAllAction.setToolTip(QString("Expand all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _expandAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
 
     _collapseAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-up"));
-    _collapseAllAction.setToolTip("Collapse all datasets in the hierarchy");
+    _collapseAllAction.setToolTip(QString("Collapse all %1s in the hierarchy").arg(_itemTypeName.toLower()));
     _collapseAllAction.setDefaultWidgetFlags(TriggerAction::Icon);
+
+    _selectAllAction.setToolTip(QString("Select all %1s in the hierarchy").arg(_itemTypeName.toLower()));
+    _selectNoneAction.setToolTip(QString("De-select all %1s in the hierarchy").arg(_itemTypeName.toLower()));
+
+    _selectionGroupAction.setText("Selection");
+    _selectionGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
+
+    _selectionGroupAction << _selectAllAction;
+    _selectionGroupAction << _selectNoneAction;
 
     auto layout = new QVBoxLayout();
 
@@ -47,9 +59,12 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     if (showToolbar) {
         auto toolbarLayout = new QHBoxLayout();
 
+        toolbarLayout->setSpacing(3);
+
         toolbarLayout->addWidget(_nameFilterAction.createWidget(this), 1);
         toolbarLayout->addWidget(_expandAllAction.createWidget(this));
         toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
+        toolbarLayout->addWidget(_selectionGroupAction.createCollapsedWidget(this));
 
         layout->addLayout(toolbarLayout);
     }
@@ -149,7 +164,18 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
     connect(&_treeView, &QTreeView::collapsed, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
 
+    const auto selectionChanged = [this]() -> void {
+        _selectAllAction.setEnabled(maySelectAll());
+        _selectNoneAction.setEnabled(maySelectNone());
+    };
+
+    connect(&_selectionModel, &QItemSelectionModel::selectionChanged, this, selectionChanged);
+
+    connect(&_selectAllAction, &TriggerAction::triggered, this, &HierarchyWidget::selectAll);
+    connect(&_selectNoneAction, &TriggerAction::triggered, this, &HierarchyWidget::selectNone);
+
     numberOfRowsChanged();
+    selectionChanged();
 }
 
 QModelIndex HierarchyWidget::toSourceModelIndex(const QModelIndex& modelIndex) const
@@ -182,6 +208,8 @@ QModelIndexList HierarchyWidget::fetchFilterModelIndices(QModelIndex filterModel
 
     for (int rowIndex = 0; rowIndex < _filterModel->rowCount(filterModelIndex); ++rowIndex) {
         QModelIndex index = _filterModel->index(rowIndex, 0, filterModelIndex);
+
+        modelIndexList << index;
 
         if (_filterModel->hasChildren(index))
             modelIndexList << fetchFilterModelIndices(index);
@@ -232,6 +260,31 @@ void HierarchyWidget::collapseAll()
 
     for (const auto& filterModelIndex : allFilterModelIndices)
         _treeView.setExpanded(filterModelIndex, false);
+}
+
+bool HierarchyWidget::maySelectAll() const
+{
+    return _selectionModel.selectedRows().count() < _filterModel->rowCount();
+}
+
+void HierarchyWidget::selectAll()
+{
+    for (const auto& filterModelIndex : fetchFilterModelIndices())
+        _selectionModel.select(filterModelIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+}
+
+bool HierarchyWidget::maySelectNone() const
+{
+    if (_filterModel->rowCount() == 0)
+        return false;
+
+    return _selectionModel.selectedRows().count() >= 1;
+}
+
+void HierarchyWidget::selectNone()
+{
+    for (const auto& filterModelIndex : fetchFilterModelIndices())
+        _selectionModel.select(filterModelIndex, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
 }
 
 void HierarchyWidget::updateOverlayWidget()
