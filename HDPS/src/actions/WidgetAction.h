@@ -345,6 +345,11 @@ public: // Settings
      */
     QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
 
+public:
+
+    QSize getPopupSizeHint() const;
+    void setPopupSizeHint(const QSize& popupSizeHint);
+
 protected:
 
     /**
@@ -393,13 +398,14 @@ signals:
     void connectionPermissionsChanged(std::int32_t connectionPermissionFlags);
 
 protected:
-    std::int32_t                _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
-    std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
-    std::int32_t                _connectionPermissions;         /** Allowed connection options flags */
-    WidgetAction*               _publicAction;                  /** Public action to which this action might be connected */
-    QVector<WidgetAction*>      _connectedActions;              /** Pointers to widget action that are connected to this action */
-    QString                     _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
-    bool                        _highlighted;                   /** Whether the action is in a highlighted state or not */
+    std::int32_t                _defaultWidgetFlags;        /** Default widget flags which are used to configure newly created widget action widgets */
+    std::int32_t                _sortIndex;                 /** Sort index (used in the group action to sort actions) */
+    std::int32_t                _connectionPermissions;     /** Allowed connection options flags */
+    WidgetAction*               _publicAction;              /** Public action to which this action might be connected */
+    QVector<WidgetAction*>      _connectedActions;          /** Pointers to widget action that are connected to this action */
+    QString                     _settingsPrefix;            /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
+    bool                        _highlighted;               /** Whether the action is in a highlighted state or not */
+    QSize                       _popupSizeHint;             /** Size hint of the popup */
 };
 
 /** List of widget actions */

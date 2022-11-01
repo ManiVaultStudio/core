@@ -56,6 +56,8 @@ public:
      */
     virtual void setWidgetAction(WidgetAction* widgetAction);
 
+    QSize sizeHint() const override;
+
 protected: // Miscellaneous
 
     /**

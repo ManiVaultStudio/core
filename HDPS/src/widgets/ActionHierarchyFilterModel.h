@@ -1,6 +1,11 @@
 #pragma once
 
+#include "actions/OptionsAction.h"
+#include "actions/TriggerAction.h"
+
 #include <QSortFilterProxyModel>
+
+using namespace hdps::gui;
 
 /**
  * Action hierarchy filter model class
@@ -9,7 +14,8 @@
  *
  * @author Thomas Kroes
  */
-class ActionHierarchyFilterModel : public QSortFilterProxyModel {
+class ActionHierarchyFilterModel : public QSortFilterProxyModel
+{
 public:
 
     /** Constructor
@@ -23,4 +29,19 @@ public:
      * @param parent Parent index
      */
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+
+public: // Action getters
+
+    OptionsAction& getFilterVisibilityAction() { return _filterVisibilityAction; }
+    OptionsAction& getFilterMayPublishAction() { return _filterMayPublishAction; }
+    OptionsAction& getFilterMayConnectAction() { return _filterMayConnectAction; }
+    OptionsAction& getFilterMayDisconnectAction() { return _filterMayDisconnectAction; }
+    TriggerAction& getRemoveFiltersAction() { return _removeFiltersAction; }
+
+private:
+    OptionsAction   _filterVisibilityAction;        /** Filter visibility action */
+    OptionsAction   _filterMayPublishAction;        /** Filter may publish action */
+    OptionsAction   _filterMayConnectAction;        /** Filter may connect action */
+    OptionsAction   _filterMayDisconnectAction;     /** Filter may disconnect action */
+    TriggerAction   _removeFiltersAction;           /** Remove filters action */
 };

@@ -65,25 +65,8 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     _model(this, rootAction),
     _filterModel(this),
     _hierarchyWidget(this, "Action", _model, &_filterModel),
-    _lastHoverModelIndex(),
-    _filterVisibleAction(this, "Visible", true, true),
-    _filterNotVisibleAction(this, "Not visible", true, true),
-    _filterMayPublishAction(this, "May publish", true, true),
-    _filterMayNotPublishAction(this, "May not publish", true, true),
-    _filterMayConnectAction(this, "May connect", true, true),
-    _filterMayNotConnectAction(this, "May not connect", true, true),
-    _filterMayDisconnectAction(this, "May disconnect", true, true),
-    _filterMayNotDisconnectAction(this, "May not disconnect", true, true)
+    _lastHoverModelIndex()
 {
-    _filterVisibleAction.setConnectionPermissions(WidgetAction::None);
-    _filterNotVisibleAction.setConnectionPermissions(WidgetAction::None);
-    _filterMayPublishAction.setConnectionPermissions(WidgetAction::None);
-    _filterMayNotPublishAction.setConnectionPermissions(WidgetAction::None);
-    _filterMayConnectAction.setConnectionPermissions(WidgetAction::None);
-    _filterMayNotConnectAction.setConnectionPermissions(WidgetAction::None);
-    _filterMayDisconnectAction.setConnectionPermissions(WidgetAction::None);
-    _filterMayNotDisconnectAction.setConnectionPermissions(WidgetAction::None);
-
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -133,14 +116,13 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
-    filterGroupAction << _filterVisibleAction;
-    filterGroupAction << _filterNotVisibleAction;
-    filterGroupAction << _filterMayPublishAction;
-    filterGroupAction << _filterMayNotPublishAction;
-    filterGroupAction << _filterMayConnectAction;
-    filterGroupAction << _filterMayNotConnectAction;
-    filterGroupAction << _filterMayDisconnectAction;
-    filterGroupAction << _filterMayNotDisconnectAction;
+    filterGroupAction << _filterModel.getFilterVisibilityAction();
+    filterGroupAction << _filterModel.getFilterMayPublishAction();
+    filterGroupAction << _filterModel.getFilterMayConnectAction();
+    filterGroupAction << _filterModel.getFilterMayDisconnectAction();
+    filterGroupAction << _filterModel.getRemoveFiltersAction();
+
+    filterGroupAction.setPopupSizeHint(QSize(400, 0));
 }
 
 ActionHierarchyWidget::~ActionHierarchyWidget()

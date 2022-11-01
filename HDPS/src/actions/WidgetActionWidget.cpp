@@ -153,6 +153,14 @@ void WidgetActionWidget::setWidgetAction(WidgetAction* widgetAction)
     updateHighlighted();
 }
 
+QSize WidgetActionWidget::sizeHint() const
+{
+    if (_widgetFlags & PopupLayout)
+        return _widgetAction->getPopupSizeHint();
+
+    return QWidget::sizeHint();
+}
+
 void WidgetActionWidget::setPopupLayout(QLayout* popupLayout)
 {
     auto mainLayout = new QVBoxLayout();

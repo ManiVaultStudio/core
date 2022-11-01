@@ -189,7 +189,7 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     setObjectName("ComboBox");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setModel(&const_cast<QStandardItemModel&>(optionsAction->getOptionsModel()));
-
+    
     const auto updateToolTip = [this, optionsAction]() -> void {
         setToolTip("Selected: " + optionsAction->getSelectedOptions().join(", "));
     };

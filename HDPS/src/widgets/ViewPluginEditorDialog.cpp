@@ -16,7 +16,7 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, WidgetAction* ro
 {
     setWindowIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
     setModal(true);
-    setWindowTitle(QString("Edit actions (%1)").arg(rootAction->text()));
+    setWindowTitle(QString("Edit view (%1)").arg(rootAction->text()));
     setMinimumSize(QSize(320, 240));
 
     auto layout = new QVBoxLayout();

@@ -6,10 +6,40 @@
 using namespace hdps;
 
 ActionHierarchyFilterModel::ActionHierarchyFilterModel(QObject* parent /*= nullptr*/) :
-    QSortFilterProxyModel(parent)
+    QSortFilterProxyModel(parent),
+    _filterVisibilityAction(this, "Visibility", { "Visible", "Hidden" }),
+    _filterMayPublishAction(this, "May publish", { "Yes", "No" }),
+    _filterMayConnectAction(this, "May connect", { "Yes", "No" }),
+    _filterMayDisconnectAction(this, "May disconnect", { "Yes", "No" }),
+    _removeFiltersAction(this, "Remove filters")
 {
     setRecursiveFilteringEnabled(true);
     setFilterCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
+
+    //_filterVisibilityAction.setDefaultWidgetFlags(OptionsAction::ListView);
+
+    _filterVisibilityAction.setToolTip("Filter actions based on their visibility");
+    _filterMayPublishAction.setToolTip("Filter actions based on whether they may publish");
+    _filterMayConnectAction.setToolTip("Filter actions based on whether they may connect to a public action");
+    _filterMayDisconnectAction.setToolTip("Filter actions based on whether they may disconnect from a public action");
+    _removeFiltersAction.setToolTip("Remove all filters");
+
+    _filterVisibilityAction.setConnectionPermissions(WidgetAction::None);
+    _filterMayPublishAction.setConnectionPermissions(WidgetAction::None);
+    _filterMayConnectAction.setConnectionPermissions(WidgetAction::None);
+    _filterMayDisconnectAction.setConnectionPermissions(WidgetAction::None);
+
+    connect(&_filterVisibilityAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
+    connect(&_filterMayPublishAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
+    connect(&_filterMayConnectAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
+    connect(&_filterMayDisconnectAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
+    
+    connect(&_removeFiltersAction, &TriggerAction::triggered, this, [this]() -> void {
+        _filterVisibilityAction.reset();
+        _filterMayPublishAction.reset();
+        _filterMayConnectAction.reset();
+        _filterMayDisconnectAction.reset();
+    });
 }
 
 bool ActionHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -19,12 +49,51 @@ bool ActionHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pa
     if (!index.isValid())
         return true;
 
-    auto modelItem = static_cast<ActionHierarchyModelItem*>(index.internalPointer());
+    auto action = static_cast<ActionHierarchyModelItem*>(index.internalPointer())->getAction();
 
-    if (filterRegularExpression().isValid()) {
-        const auto key = sourceModel()->data(index, filterRole()).toString();
-        return key.contains(filterRegularExpression());
+    //if (filterRegularExpression().isValid()) {
+    //    const auto key = sourceModel()->data(index, filterRole()).toString();
+    //    return key.contains(filterRegularExpression());
+    //}
+
+    std::int32_t numberOfActiveFilters  = 0;
+    std::int32_t numberOfMatches        = 0;
+
+    if (_filterVisibilityAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
+
+        const auto selectedOptions = _filterVisibilityAction.getSelectedOptions();
+
+        if (selectedOptions.contains("Visible") && action->isVisible() || selectedOptions.contains("Hidden") && !action->isVisible())
+            numberOfMatches++;
     }
-       
-    return false;
+
+    if (_filterMayPublishAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
+
+        const auto selectedOptions = _filterMayPublishAction.getSelectedOptions();
+
+        if (selectedOptions.contains("Yes") && action->mayPublish(WidgetAction::Gui) || selectedOptions.contains("No") && !action->mayPublish(WidgetAction::Gui))
+            numberOfMatches++;
+    }
+
+    if (_filterMayConnectAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
+
+        const auto selectedOptions = _filterMayConnectAction.getSelectedOptions();
+
+        if (selectedOptions.contains("Yes") && action->mayConnect(WidgetAction::Gui) || selectedOptions.contains("No") && !action->mayConnect(WidgetAction::Gui))
+            numberOfMatches++;
+    }
+
+    if (_filterMayDisconnectAction.hasSelectedOptions()) {
+        numberOfActiveFilters++;
+
+        const auto selectedOptions = _filterMayDisconnectAction.getSelectedOptions();
+
+        if (selectedOptions.contains("Yes") && action->mayDisconnect(WidgetAction::Gui) || selectedOptions.contains("No") && !action->mayDisconnect(WidgetAction::Gui))
+            numberOfMatches++;
+    }
+
+    return numberOfMatches == numberOfActiveFilters;
 }

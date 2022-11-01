@@ -27,7 +27,8 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),
-    _highlighted(false)
+    _highlighted(false),
+    _popupSizeHint(QSize(0, 0))
 {
 }
 
@@ -313,6 +314,16 @@ QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, b
     }
 
     return foundChildren;
+}
+
+QSize WidgetAction::getPopupSizeHint() const
+{
+    return _popupSizeHint;
+}
+
+void WidgetAction::setPopupSizeHint(const QSize& popupSizeHint)
+{
+    _popupSizeHint = popupSizeHint;
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
