@@ -36,7 +36,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _nameFilterAction.setSearchMode(true);
     _nameFilterAction.setClearable(true);
 
-    _filterGroupAction.setText("Filtering");
+    _filterGroupAction.setText(QString("%1 filtering").arg(_itemTypeName));
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
     _filterGroupAction.setToolTip("Adjust filtering parameters");
 
