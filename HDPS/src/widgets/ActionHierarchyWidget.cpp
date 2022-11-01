@@ -31,16 +31,18 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
 
     header->setStretchLastSection(false);
 
-    const auto checkColumnSize = 55;
+    const auto toggleColumnSize = 16;
 
-    header->resizeSection(ActionHierarchyModelItem::Column::Visible, checkColumnSize);
-    header->resizeSection(ActionHierarchyModelItem::Column::Enabled, checkColumnSize);
-    header->resizeSection(ActionHierarchyModelItem::Column::Linkable, checkColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::Visible, toggleColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::MayPublish, toggleColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::MayConnect, toggleColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::MayDisconnect, toggleColumnSize);
 
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Name, QHeaderView::Stretch);
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::Visible, QHeaderView::Fixed);
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Enabled, QHeaderView::Fixed);
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Linkable, QHeaderView::Fixed);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayPublish, QHeaderView::Fixed);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayConnect, QHeaderView::Fixed);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayDisconnect, QHeaderView::Fixed);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
     _hierarchyWidget.getTreeView().setMouseTracking(true);
@@ -51,6 +53,16 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
 
         _lastHoverModelIndex = _hierarchyWidget.toSourceModelIndex(current.siblingAtColumn(ActionHierarchyModelItem::Column::Name));
     });
+
+    connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
+        if (index.column() == ActionHierarchyModelItem::Column::Name)
+            return;
+
+        auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
+
+        _model.setData(sourceModelIndex, !_model.data(sourceModelIndex, Qt::EditRole).toBool());
+    });
+    
 }
 
 ActionHierarchyWidget::~ActionHierarchyWidget()

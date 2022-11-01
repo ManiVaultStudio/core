@@ -52,6 +52,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _nameLabel.setStyleSheet("color: black;");
 
     connect(widgetAction, &WidgetAction::changed, this, &WidgetActionLabel::updateNameLabel);
+    connect(widgetAction, &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
 
     updateNameLabel();
 

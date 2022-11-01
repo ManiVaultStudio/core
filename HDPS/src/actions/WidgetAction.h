@@ -51,20 +51,20 @@ public:
 
     /** Describes the connection permission options */
     enum ConnectionPermissionFlag {
-        MayPublishViaApi            = ConnectionTypeFlag::Publish | ConnectionContextFlag::Api,     /** Widget may be published via the API */
-        MayPublishViaGui            = ConnectionTypeFlag::Publish | ConnectionContextFlag::Gui,     /** Widget may be published via the GUI */
-        MayPublishViaApiAndGui      = MayPublishViaApi | MayPublishViaGui,                          /** Widget may be published via the API and the GUI */
+        PublishViaApi           = ConnectionTypeFlag::Publish | ConnectionContextFlag::Api,         /** Widget may be published via the API */
+        PublishViaGui           = ConnectionTypeFlag::Publish | ConnectionContextFlag::Gui,         /** Widget may be published via the GUI */
+        PublishViaApiAndGui     = PublishViaApi | PublishViaGui,                                    /** Widget may be published via the API and the GUI */
 
-        MayConnectViaApi            = ConnectionTypeFlag::Connect | ConnectionContextFlag::Api,     /** Widget may connect to a public action via the API */
-        MayConnectViaGui            = ConnectionTypeFlag::Connect | ConnectionContextFlag::Gui,     /** Widget may connect to a public action via the GUI */
-        MayConnectViaApiAndGui      = MayConnectViaApi | MayConnectViaGui,                          /** Widget may connect to a public action via the API and the GUI */
+        ConnectViaApi           = ConnectionTypeFlag::Connect | ConnectionContextFlag::Api,         /** Widget may connect to a public action via the API */
+        ConnectViaGui           = ConnectionTypeFlag::Connect | ConnectionContextFlag::Gui,         /** Widget may connect to a public action via the GUI */
+        ConnectViaApiAndGui     = ConnectViaApi | ConnectViaGui,                                    /** Widget may connect to a public action via the API and the GUI */
 
-        MayDisconnectViaApi         = ConnectionTypeFlag::Disconnect | ConnectionContextFlag::Api,  /** Widget may disconnect from a public action via the API */
-        MayDisconnectViaGui         = ConnectionTypeFlag::Disconnect | ConnectionContextFlag::Gui,  /** Widget may disconnect from a public action via the GUI */
-        MayDisconnectViaApiAndGui   = MayDisconnectViaApi | MayConnectViaGui,                       /** Widget may disconnect from a public action via the API and the GUI */
+        DisconnectViaApi        = ConnectionTypeFlag::Disconnect | ConnectionContextFlag::Api,      /** Widget may disconnect from a public action via the API */
+        DisconnectViaGui        = ConnectionTypeFlag::Disconnect | ConnectionContextFlag::Gui,      /** Widget may disconnect from a public action via the GUI */
+        DisconnectViaApiAndGui  = DisconnectViaApi | ConnectViaGui,                                 /** Widget may disconnect from a public action via the API and the GUI */
 
         /** Default allows all connection options */
-        Default = MayPublishViaApiAndGui | MayConnectViaApiAndGui | MayDisconnectViaApiAndGui
+        Default = PublishViaApiAndGui | ConnectViaApiAndGui | DisconnectViaApiAndGui
     };
 
 public:
@@ -245,14 +245,15 @@ public: // Linking
     }
 
     /**
-     * Set flags which determine the connection permission(s)
-     * @param connectionPermissionFlags Flags which determine the connection behavior permission(s)
+     * Set connection permissions
+     * @param connectionPermissions Connection permission flag(s) to set
+     * @param unset Whether to unset the connection permission flag(s)
      */
-    virtual void setConnectionPermissionFlags(std::int32_t connectionPermissionFlags) final {
-        if (connectionPermissionFlags == _connectionPermissions)
-            return;
-
-        _connectionPermissions = connectionPermissionFlags;
+    virtual void setConnectionPermissions(std::int32_t connectionPermissions, bool unset = false) final {
+        if (unset)
+            _connectionPermissions = _connectionPermissions & ~connectionPermissions;
+        else
+            _connectionPermissions |= connectionPermissions;
 
         emit connectionPermissionsChanged(_connectionPermissions);
     }

@@ -20,13 +20,14 @@ public:
 
     /** Columns */
     enum Column {
-        Name,           /** Name of the action */
-        Visible,        /** Whether the action is visible or not */
-        Enabled,        /** Whether the action is enabled or not */
-        Linkable,       /** Whether the action is linkable or not */
+        Name,               /** Name of the action */
+        Visible,            /** Whether the action is visible or not */
+        MayPublish,         /** Whether the action may be published or not */
+        MayConnect,         /** Whether the action may connect to a public action or not */
+        MayDisconnect,      /** Whether the action may disconnect from a public action or not */
 
         _start = Name,
-        _end = Linkable
+        _end = MayDisconnect
     };
 
 public:

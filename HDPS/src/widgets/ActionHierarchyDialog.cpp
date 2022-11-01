@@ -31,4 +31,6 @@ ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent, WidgetAction* root
     layout->addWidget(dialogButtonBox);
 
     connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ActionHierarchyDialog::accept);
+
+    _mayCloseAction.setConnectionPermissions(WidgetAction::Gui, true);
 }

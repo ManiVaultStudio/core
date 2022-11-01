@@ -36,7 +36,14 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
         {
             switch (index.column()) {
                 case ActionHierarchyModelItem::Column::Name:
+                {
+                    actionHierarchyModelItem->getAction()->setEnabled(value.toBool());
+
+                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
+                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name), value.toBool(), Qt::CheckStateRole);
+
                     break;
+                }
 
                 case ActionHierarchyModelItem::Column::Visible:
                 {
@@ -48,18 +55,35 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
                     break;
                 }
 
-                case ActionHierarchyModelItem::Column::Enabled:
+                case ActionHierarchyModelItem::Column::MayPublish:
                 {
-                    actionHierarchyModelItem->getAction()->setEnabled(value.toBool());
+                    actionHierarchyModelItem->getAction()->setConnectionPermissions(WidgetAction::PublishViaGui, !value.toBool());
 
                     for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
-                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Enabled), value.toBool(), Qt::CheckStateRole);
+                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::MayPublish), value.toBool(), Qt::CheckStateRole);
 
                     break;
                 }
 
-                case ActionHierarchyModelItem::Column::Linkable:
+                case ActionHierarchyModelItem::Column::MayConnect:
+                {
+                    actionHierarchyModelItem->getAction()->setConnectionPermissions(WidgetAction::ConnectViaGui, !value.toBool());
+
+                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
+                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::MayConnect), value.toBool(), Qt::CheckStateRole);
+
                     break;
+                }
+
+                case ActionHierarchyModelItem::Column::MayDisconnect:
+                {
+                    actionHierarchyModelItem->getAction()->setConnectionPermissions(WidgetAction::DisconnectViaGui, !value.toBool());
+
+                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
+                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::MayDisconnect), value.toBool(), Qt::CheckStateRole);
+
+                    break;
+                }
 
                 default:
                     break;
@@ -149,24 +173,45 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
 
     auto itemFlags = Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | QAbstractItemModel::flags(index);
 
-    auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(index.internalPointer());
+    auto action = static_cast<ActionHierarchyModelItem*>(index.internalPointer())->getAction();
 
     switch (static_cast<ActionHierarchyModelItem::Column>(index.column()))
     {
         case ActionHierarchyModelItem::Column::Name:
+            itemFlags |= Qt::ItemIsUserCheckable;
             break;
 
         case ActionHierarchyModelItem::Column::Visible:
-            itemFlags |= Qt::ItemIsUserCheckable;
+        {
+            if (!action->isVisible())
+                itemFlags |= Qt::ItemIsSelectable;
+            
             break;
+        }
 
-        case ActionHierarchyModelItem::Column::Enabled:
-            itemFlags |= Qt::ItemIsUserCheckable;
-            break;
+        case ActionHierarchyModelItem::Column::MayPublish:
+        {
+            if (!action->mayPublish(WidgetAction::Gui))
+                itemFlags |= Qt::ItemIsSelectable;
 
-        case ActionHierarchyModelItem::Column::Linkable:
-            itemFlags |= Qt::ItemIsUserCheckable;
             break;
+        }
+
+        case ActionHierarchyModelItem::Column::MayConnect:
+        {
+            if (!action->mayConnect(WidgetAction::Gui))
+                itemFlags |= Qt::ItemIsSelectable;
+
+            break;
+        }
+
+        case ActionHierarchyModelItem::Column::MayDisconnect:
+        {
+            if (!action->mayDisconnect(WidgetAction::Gui))
+                itemFlags |= Qt::ItemIsSelectable;
+
+            break;
+        }
 
         default:
             break;
@@ -187,13 +232,16 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
                         return "Name";
 
                     case ActionHierarchyModelItem::Column::Visible:
-                        return "Visible";
+                        return "";
 
-                    case ActionHierarchyModelItem::Column::Enabled:
-                        return "Enabled";
+                    case ActionHierarchyModelItem::Column::MayPublish:
+                        return "";
 
-                    case ActionHierarchyModelItem::Column::Linkable:
-                        return "Linkable";
+                    case ActionHierarchyModelItem::Column::MayConnect:
+                        return "";
+
+                    case ActionHierarchyModelItem::Column::MayDisconnect:
+                        return "";
 
                     default:
                         break;
@@ -207,16 +255,19 @@ QVariant ActionHierarchyModel::headerData(int section, Qt::Orientation orientati
                 switch (static_cast<ActionHierarchyModelItem::Column>(section))
                 {
                     case ActionHierarchyModelItem::Column::Name:
-                        return "Name of the dataset";
+                        return "Name of the action";
 
                     case ActionHierarchyModelItem::Column::Visible:
                         return "Whether the action is visible or not";
 
-                    case ActionHierarchyModelItem::Column::Enabled:
-                        return "Whether the action is enabled or not";
+                    case ActionHierarchyModelItem::Column::MayPublish:
+                        return "Whether the action may be published or not";
 
-                    case ActionHierarchyModelItem::Column::Linkable:
-                        return "Whether the action is linkable or not";
+                    case ActionHierarchyModelItem::Column::MayConnect:
+                        return "Whether the action may connect to a public action or not";
+
+                    case ActionHierarchyModelItem::Column::MayDisconnect:
+                        return "Whether the action may disconnect from a public action or not";
 
                     default:
                         break;

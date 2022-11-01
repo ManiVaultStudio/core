@@ -85,8 +85,9 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
                     return editValue;
 
                 case Column::Visible:
-                case Column::Enabled:
-                case Column::Linkable:
+                case Column::MayPublish:
+                case Column::MayConnect:
+                case Column::MayDisconnect:
                     return "";
 
                 default:
@@ -106,11 +107,14 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
                 case Column::Visible:
                     return _action->isVisible();
 
-                case Column::Enabled:
-                    return _action->isEnabled();
+                case Column::MayPublish:
+                    return _action->mayPublish(WidgetAction::Gui);
 
-                case Column::Linkable:
-                    return true;
+                case Column::MayConnect:
+                    return _action->mayConnect(WidgetAction::Gui);
+
+                case Column::MayDisconnect:
+                    return _action->mayDisconnect(WidgetAction::Gui);
 
                 default:
                     break;
@@ -129,11 +133,14 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
                 case Column::Visible:
                     return QString("%1 is %2").arg(_action->text(), _action->isVisible() ? "visible" : "not visible");
 
-                case Column::Enabled:
-                    return QString("%1 is %2").arg(_action->text(), _action->isEnabled() ? "enabled" : "disabled");
+                case Column::MayPublish:
+                    return QString("%1 %2").arg(_action->text(), _action->isVisible() ? "may be published" : "may not be published");
 
-                case Column::Linkable:
-                    return QString("%1 is %2").arg(_action->text(), _action->isVisible() ? "linkable" : "not linkable");
+                case Column::MayConnect:
+                    return QString("%1 %2").arg(_action->text(), _action->isVisible() ? "may be connected to a public action" : "may not be connected to a public action");
+
+                case Column::MayDisconnect:
+                    return QString("%1 %2").arg(_action->text(), _action->isVisible() ? "may be disconnected from a public action" : "may not be disconnected from a public action");
 
                 default:
                     break;
@@ -148,16 +155,41 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
             switch (static_cast<Column>(column))
             {
                 case Column::Name:
+                    return _action->isEnabled() ? Qt::Checked : Qt::Unchecked;
+
+                case Column::Visible:
+                case Column::MayPublish:
+                case Column::MayConnect:
+                case Column::MayDisconnect:
+                    break;
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        case Qt::DecorationRole:
+        {
+            auto& fa = Application::getIconFont("FontAwesome");
+
+            switch (static_cast<Column>(column))
+            {
+                case Column::Name:
                     break;
 
                 case Column::Visible:
-                    return _action->isVisible() ? Qt::Checked : Qt::Unchecked;
+                    return fa.getIcon("eye");
 
-                case Column::Enabled:
-                    return _action->isEnabled() ? Qt::Checked : Qt::Unchecked;
-                
-                case Column::Linkable:
-                    return false;
+                case Column::MayPublish:
+                    return fa.getIcon("cloud-upload-alt");
+
+                case Column::MayConnect:
+                    return fa.getIcon("link");
+
+                case Column::MayDisconnect:
+                    return fa.getIcon("unlink");
 
                 default:
                     break;
@@ -174,8 +206,9 @@ QVariant ActionHierarchyModelItem::getDataAtColumn(const std::uint32_t& column, 
                     break;
 
                 case Column::Visible:
-                case Column::Enabled:
-                case Column::Linkable:
+                case Column::MayPublish:
+                case Column::MayConnect:
+                case Column::MayDisconnect:
                     return Qt::AlignCenter;
 
                 default:
