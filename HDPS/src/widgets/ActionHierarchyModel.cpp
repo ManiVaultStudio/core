@@ -31,56 +31,65 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
 {
     auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>((void*)index.internalPointer());
     
+    QModelIndexList childIndices;
+
+    const auto nameIndex = index.siblingAtColumn(ActionHierarchyModelItem::Column::Name);
+
+    for (int rowIndex = 0; rowIndex < rowCount(nameIndex); ++rowIndex)
+        childIndices << this->index(rowIndex, index.column(), nameIndex);
+
+    auto action = actionHierarchyModelItem->getAction();
+
     switch (role) {
         case Qt::CheckStateRole:
         {
             switch (index.column()) {
                 case ActionHierarchyModelItem::Column::Name:
                 {
-                    actionHierarchyModelItem->getAction()->setEnabled(value.toBool());
+                    action->setEnabled(value.toBool());
 
-                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
-                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name), value.toBool(), Qt::CheckStateRole);
+                    for (const auto& childIndex : childIndices)
+                        setData(childIndex, value.toBool(), Qt::CheckStateRole);
 
                     break;
                 }
 
                 case ActionHierarchyModelItem::Column::Visible:
                 {
-                    actionHierarchyModelItem->getAction()->setVisible(value.toBool());
+                    action->setVisible(value.toBool());
                     
-                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
-                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Visible), value.toBool(), Qt::CheckStateRole);
+                    for (const auto& childIndex : childIndices)
+                        setData(childIndex, value.toBool(), Qt::CheckStateRole);
 
                     break;
                 }
 
                 case ActionHierarchyModelItem::Column::MayPublish:
                 {
-                    actionHierarchyModelItem->getAction()->setConnectionPermissions(WidgetAction::PublishViaGui, !value.toBool());
+                    action->setConnectionPermissions(WidgetAction::PublishViaGui, !value.toBool());
 
-                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
-                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::MayPublish), value.toBool(), Qt::CheckStateRole);
+                    for (const auto& childIndex : childIndices)
+                        setData(childIndex, value.toBool(), Qt::CheckStateRole);
 
                     break;
                 }
 
                 case ActionHierarchyModelItem::Column::MayConnect:
                 {
-                    actionHierarchyModelItem->getAction()->setConnectionPermissions(WidgetAction::ConnectViaGui, !value.toBool());
+                    action->setConnectionPermissions(WidgetAction::ConnectViaGui, !value.toBool());
 
-                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
-                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::MayConnect), value.toBool(), Qt::CheckStateRole);
+                    for (const auto& childIndex : childIndices)
+                        setData(childIndex, value.toBool(), Qt::CheckStateRole);
 
                     break;
                 }
 
                 case ActionHierarchyModelItem::Column::MayDisconnect:
                 {
-                    actionHierarchyModelItem->getAction()->setConnectionPermissions(WidgetAction::DisconnectViaGui, !value.toBool());
+                    action->setConnectionPermissions(WidgetAction::DisconnectViaGui, !value.toBool());
 
-                    for (const auto& modelIndex : fetchModelIndices(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name), true))
-                        setData(modelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::MayDisconnect), value.toBool(), Qt::CheckStateRole);
+                    for (const auto& childIndex : childIndices)
+                        setData(childIndex, value.toBool(), Qt::CheckStateRole);
 
                     break;
                 }
@@ -175,43 +184,43 @@ Qt::ItemFlags ActionHierarchyModel::flags(const QModelIndex& index) const
 
     auto action = static_cast<ActionHierarchyModelItem*>(index.internalPointer())->getAction();
 
-    switch (static_cast<ActionHierarchyModelItem::Column>(index.column()))
+    switch (index.column())
     {
         case ActionHierarchyModelItem::Column::Name:
             itemFlags |= Qt::ItemIsUserCheckable;
             break;
 
-        case ActionHierarchyModelItem::Column::Visible:
-        {
-            if (!action->isVisible())
-                itemFlags |= Qt::ItemIsSelectable;
-            
-            break;
-        }
+        //case ActionHierarchyModelItem::Column::Visible:
+        //{
+        //    if (!action->isVisible())
+        //        itemFlags |= Qt::ItemIsSelectable;
+        //    
+        //    break;
+        //}
 
-        case ActionHierarchyModelItem::Column::MayPublish:
-        {
-            if (!action->mayPublish(WidgetAction::Gui))
-                itemFlags |= Qt::ItemIsSelectable;
+        //case ActionHierarchyModelItem::Column::MayPublish:
+        //{
+        //    if (!action->mayPublish(WidgetAction::Gui))
+        //        itemFlags |= Qt::ItemIsSelectable;
 
-            break;
-        }
+        //    break;
+        //}
 
-        case ActionHierarchyModelItem::Column::MayConnect:
-        {
-            if (!action->mayConnect(WidgetAction::Gui))
-                itemFlags |= Qt::ItemIsSelectable;
+        //case ActionHierarchyModelItem::Column::MayConnect:
+        //{
+        //    if (!action->mayConnect(WidgetAction::Gui))
+        //        itemFlags |= Qt::ItemIsSelectable;
 
-            break;
-        }
+        //    break;
+        //}
 
-        case ActionHierarchyModelItem::Column::MayDisconnect:
-        {
-            if (!action->mayDisconnect(WidgetAction::Gui))
-                itemFlags |= Qt::ItemIsSelectable;
+        //case ActionHierarchyModelItem::Column::MayDisconnect:
+        //{
+        //    if (!action->mayDisconnect(WidgetAction::Gui))
+        //        itemFlags |= Qt::ItemIsSelectable;
 
-            break;
-        }
+        //    break;
+        //}
 
         default:
             break;

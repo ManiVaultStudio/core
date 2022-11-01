@@ -13,6 +13,53 @@ namespace hdps
 namespace gui
 {
 
+/**
+ * Tree view item delegate class
+ * Qt natively does not support disabled items to be selected, this class solves that
+ * When an item (dataset) is locked, merely the visual representation is changed and not the item flags (only appears disabled)
+ */
+class ItemDelegate : public QStyledItemDelegate {
+public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
+    explicit ItemDelegate(QObject* parent = nullptr) :
+        QStyledItemDelegate(parent)
+    {
+    }
+
+protected:
+
+    /**
+     * Init the style option(s) for the item delegate (we override the options to paint disabled when not visible etc.)
+     */
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
+    {
+        QStyledItemDelegate::initStyleOption(option, index);
+
+        switch (index.column())
+        {
+            case ActionHierarchyModelItem::Column::Name:
+                break;
+
+            case ActionHierarchyModelItem::Column::Visible:
+            case ActionHierarchyModelItem::Column::MayPublish:
+            case ActionHierarchyModelItem::Column::MayConnect:
+            case ActionHierarchyModelItem::Column::MayDisconnect:
+            {
+                if (!index.data(Qt::EditRole).toBool())
+                    option->state &= ~QStyle::State_Enabled;
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+};
+
 ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* rootAction) :
     QWidget(parent),
     _model(this, rootAction),
@@ -45,7 +92,11 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayDisconnect, QHeaderView::Fixed);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
-    _hierarchyWidget.getTreeView().setMouseTracking(true);
+    
+    auto& treeView = _hierarchyWidget.getTreeView();
+
+    treeView.setMouseTracking(true);
+    treeView.setItemDelegate(new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) -> void {
         setActionHighlighted(_hierarchyWidget.toSourceModelIndex(current.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
@@ -60,7 +111,7 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
 
         auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
 
-        _model.setData(sourceModelIndex, !_model.data(sourceModelIndex, Qt::EditRole).toBool());
+        _model.setData(sourceModelIndex, !_model.data(sourceModelIndex, Qt::EditRole).toBool(), Qt::CheckStateRole);
     });
     
 }
