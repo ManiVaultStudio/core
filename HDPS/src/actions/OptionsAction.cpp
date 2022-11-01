@@ -142,11 +142,6 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
     emit selectedOptionsChanged(getSelectedOptions());
 }
 
-bool OptionsAction::mayPublish() const
-{
-    return true;
-}
-
 void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicOptionsAction = dynamic_cast<OptionsAction*>(publicAction);

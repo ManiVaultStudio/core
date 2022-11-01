@@ -182,11 +182,6 @@ void DatasetPickerAction::populateDatasetsFromCore()
         setCurrentDataset(publicDatasetPickerAction->getCurrentDataset());
 }
 
-bool DatasetPickerAction::mayPublish() const
-{
-    return true;
-}
-
 void DatasetPickerAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicDatasetPickerAction = dynamic_cast<DatasetPickerAction*>(publicAction);

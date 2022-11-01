@@ -247,12 +247,6 @@ private:
 public: // Linking
 
     /**
-     * Get whether the action may be published or not
-     * @return Boolean indicating whether the action may be published or not
-     */
-    bool mayPublish() const override;
-
-    /**
      * Connect this action to a public action
      * @param publicAction Pointer to public action to connect to
      */

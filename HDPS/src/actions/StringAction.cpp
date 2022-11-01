@@ -160,11 +160,6 @@ void StringAction::reset()
     setString(_defaultString);
 }
 
-bool StringAction::mayPublish() const
-{
-    return true;
-}
-
 void StringAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicStringAction = dynamic_cast<StringAction*>(publicAction);

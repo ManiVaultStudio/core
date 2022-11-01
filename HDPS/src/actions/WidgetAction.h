@@ -34,12 +34,23 @@ class WidgetAction : public QWidgetAction, public Serializable
 
 public:
 
-    /** Describes the link options */
-    enum LinkFlag {
-        MayPublish      = 0x00001,      /** Widget may publish itself (make a shared public copy) */
-        MayConnect      = 0x00002,      /** Widget may connect to a public action */
+    /** Describes the connection options */
+    enum ConnectionFlag {
+        MayPublish              = 0x00001,                                              /** Widget may publish itself (make a shared public copy) */
+        MayConnect              = 0x00002,                                              /** Widget may connect to a public action */
 
-        Default = MayPublish | MayConnect
+        API                     = 0x00004,                                              /** In the context of the API */
+        GUI                     = 0x00008,                                              /** In the context of the GUI */
+
+        MayPublishViaApi        = MayPublish | API,                                     /** Widget may be published via the API */
+        MayPublishViaGui        = MayPublish | GUI,                                     /** Widget may be published via the GUI */
+        MayPublishViaApiAndGui  = MayPublishViaApi | MayPublishViaGui,                  /** Widget may be published via the API ánd the GUI */
+
+        MayConnectViaApi        = MayConnect | API,                                     /** Widget may connect to a public action via the API */
+        MayConnectViaGui        = MayConnect | GUI,                                     /** Widget may connect to a public action via the GUI */
+        MayConnectViaApiAndGui  = MayConnectViaApi | MayConnectViaGui,                  /** Widget may connect to a public action via the API ánd the GUI */
+
+        Default                 = MayPublishViaApiAndGui | MayConnectViaApiAndGui       /** Default allows all connection options */
     };
 
 public:
@@ -136,12 +147,6 @@ public: // Highlighting
 public: // Linking
 
     /**
-     * Get whether the action may be published or not
-     * @return Boolean indicating whether the action may be published or not
-     */
-    virtual bool mayPublish() const;
-
-    /**
      * Get whether the action is public (visible to other actions)
      * @return Boolean indicating whether the action is public (visible to other actions)
      */
@@ -199,22 +204,87 @@ public: // Linking
     const QVector<WidgetAction*> getConnectedActions() const;
 
     /**
-     * Get whether a copy of this action may published and shared
-     * @return Boolean determining whether a copy of this action may published and shared
+     * Get whether a copy of this action may published and shared via the API
+     * @return Boolean determining whether a copy of this action may published and shared via the API
      */
-    bool mayPublish() const;
+    virtual bool mayPublishViaApi() const final {
+        return _connectionFlags & ConnectionFlag::MayPublishViaApi;
+    }
 
     /**
-     * Get whether this action may connect to a public action
-     * @return Boolean determining whether this action may connect to a public action
+     * Get whether a copy of this action may published and shared via the GUI
+     * @return Boolean determining whether a copy of this action may published and shared via the GUI
      */
-    bool mayConnect() const;
+    virtual bool mayPublishViaGui() const final {
+        return _connectionFlags & ConnectionFlag::MayPublishViaGui;
+    }
 
     /**
-     * Get whether this action may connect to a public action and whether it may connect to a public action
-     * @return Boolean determining whether this action may connect to a public action and whether it may connect to a public action
+     * Get whether a copy of this action may published and shared via the API and/or GUI
+     * @return Boolean determining whether a copy of this action may published and shared via the API and/or GUI
      */
-    bool mayPublishAndConnect() const;
+    virtual bool mayPublish() const final {
+        return mayPublishViaGui() & mayPublishViaGui();
+    }
+
+    /**
+     * Get whether this action may connect to a public action via the API
+     * @return Boolean determining whether this action may connect to a public action via the API
+     */
+    virtual bool mayConnectViaApi() const final{
+        return _connectionFlags & ConnectionFlag::MayConnectViaApi;
+    }
+
+    /**
+     * Get whether this action may connect to a public action via the GUI
+     * @return Boolean determining whether this action may connect to a public action via the GUI
+     */
+    bool mayConnectViaGui() const {
+        return _connectionFlags & ConnectionFlag::MayConnectViaApi;
+    }
+
+    /**
+     * Get whether this action may connect to a public action via the API and/or GUI
+     * @return Boolean determining whether this action may connect to a public action via the API and/or GUI
+     */
+    virtual bool mayConnect() const final {
+        return mayConnectViaApi() & mayConnectViaGui();
+    }
+
+    /**
+     * Get whether this action may connect to a public action and whether it may connect to a public action via the API
+     * @return Boolean determining whether this action may connect to a public action and whether it may connect to a public action via the API
+     */
+    virtual bool mayPublishAndConnectViaApi() const final {
+        return mayPublishViaApi() & mayConnectViaApi();
+    }
+
+    /**
+     * Get whether this action may connect to a public action and whether it may connect to a public action via the GUI
+     * @return Boolean determining whether this action may connect to a public action and whether it may connect to a public action via the GUI
+     */
+    virtual bool mayPublishAndConnectViaGui() const final {
+        return mayPublishViaGui() & mayConnectViaGui();
+    }
+
+    /**
+     * Get whether this action may connect to a public action and whether it may connect to a public action via the API and/or GUI
+     * @return Boolean determining whether this action may connect to a public action and whether it may connect to a public action via the API and/or GUI
+     */
+    virtual bool mayPublishAndConnect() const final {
+        return mayPublishAndConnectViaApi() & mayPublishAndConnectViaGui();
+    }
+
+    /**
+     * Set flags which determine the connection behavior
+     * @param connectionFlags Flags which determine the connection behavior
+     */
+    virtual void setConnectionFlags(std::int32_t connectionFlags) final {
+        if (connectionFlags == _connectionFlags)
+            return;
+
+        _connectionFlags = connectionFlags;
+    }
 
 protected: // Linking
 
@@ -327,7 +397,7 @@ signals:
 protected:
     std::int32_t                _defaultWidgetFlags;    /** Default widget flags which are used to configure newly created widget action widgets */
     std::int32_t                _sortIndex;             /** Sort index (used in the group action to sort actions) */
-    std::int32_t                _linkFlags;             /**  */
+    std::int32_t                _connectionFlags;       /** Allowed connection options flags */
     WidgetAction*               _publicAction;          /** Public action to which this action might be connected */
     QVector<WidgetAction*>      _connectedActions;      /** Pointers to widget action that are connected to this action */
     QString                     _settingsPrefix;        /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */

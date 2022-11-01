@@ -23,6 +23,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
     _sortIndex(-1),
+    _connectionFlags(ConnectionFlag::Default),
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),
@@ -105,11 +106,6 @@ void WidgetAction::setHighlighted(bool highlighted)
 bool WidgetAction::isHighlighted() const
 {
     return _highlighted;
-}
-
-bool WidgetAction::mayPublish() const
-{
-    return false;
 }
 
 bool WidgetAction::isPublic() const
@@ -211,21 +207,6 @@ WidgetAction* WidgetAction::getPublicAction()
 const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
 {
     return _connectedActions;
-}
-
-bool WidgetAction::mayPublish() const
-{
-    return _linkFlags & LinkFlag::MayPublish;
-}
-
-bool WidgetAction::mayConnect() const
-{
-    return _linkFlags & LinkFlag::MayConnect;
-}
-
-bool WidgetAction::mayPublishAndConnect() const
-{
-    return mayPublish() & mayConnect();
 }
 
 WidgetAction* WidgetAction::getPublicCopy() const

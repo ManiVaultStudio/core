@@ -110,11 +110,6 @@ const QAbstractItemModel* OptionAction::getModel() const
     return &_defaultModel;
 }
 
-bool OptionAction::mayPublish() const
-{
-    return true;
-}
-
 void OptionAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicOptionAction = dynamic_cast<OptionAction*>(publicAction);

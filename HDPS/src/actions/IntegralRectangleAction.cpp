@@ -29,11 +29,6 @@ void IntegralRectangleAction::initialize(const QRect& rectangle /*= QRect()*/, c
     emit defaultRectangleChanged(_defaultRectangle);
 }
 
-bool IntegralRectangleAction::mayPublish() const
-{
-    return true;
-}
-
 void IntegralRectangleAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicIntegralRectangleAction = dynamic_cast<IntegralRectangleAction*>(publicAction);

@@ -74,46 +74,48 @@ bool WidgetActionLabel::eventFilter(QObject* target, QEvent* event)
 
             auto contextMenu = QSharedPointer<QMenu>::create();
 
-            if (_widgetAction->isEnabled() && _widgetAction->mayPublish()) {
+            if (_widgetAction->isEnabled() && _widgetAction->mayPublishViaGui()) {
 
-                if (!_widgetAction->isPublic())
+                if (!_widgetAction->isPublic() && _widgetAction->mayPublishViaGui())
                     contextMenu->addAction(&_publishAction);
 
                 if (!contextMenu->actions().isEmpty())
                     contextMenu->addSeparator();
 
-                if (_widgetAction->isConnected())
-                    contextMenu->addAction(&_disconnectAction);
-                else {
-                    auto connectMenu = new QMenu("Connect to:");
+                if (_widgetAction->mayConnectViaGui()) {
+                    if (_widgetAction->isConnected())
+                        contextMenu->addAction(&_disconnectAction);
+                    else {
+                        auto connectMenu = new QMenu("Connect to:");
 
-                    connectMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
+                        connectMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
 
-                    auto actionsFilterModel = new ActionsFilterModel(this);
+                        auto actionsFilterModel = new ActionsFilterModel(this);
 
-                    actionsFilterModel->setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
-                    actionsFilterModel->setScopeFilter(ActionsFilterModel::Public);
-                    actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
+                        actionsFilterModel->setSourceModel(const_cast<ActionsModel*>(&Application::getActionsManager().getActionsModel()));
+                        actionsFilterModel->setScopeFilter(ActionsFilterModel::Public);
+                        actionsFilterModel->setTypeFilter(_widgetAction->getTypeString());
 
-                    const auto numberOfRows = actionsFilterModel->rowCount();
+                        const auto numberOfRows = actionsFilterModel->rowCount();
 
-                    for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
-                        const auto publicAction = static_cast<WidgetAction*>(actionsFilterModel->mapToSource(actionsFilterModel->index(rowIndex, 0)).internalPointer());
+                        for (int rowIndex = 0; rowIndex < numberOfRows; ++rowIndex) {
+                            const auto publicAction = static_cast<WidgetAction*>(actionsFilterModel->mapToSource(actionsFilterModel->index(rowIndex, 0)).internalPointer());
 
-                        auto connectAction = new QAction(publicAction->text());
+                            auto connectAction = new QAction(publicAction->text());
 
-                        connectAction->setToolTip("Connect " + _widgetAction->text() + " to " + publicAction->text());
+                            connectAction->setToolTip("Connect " + _widgetAction->text() + " to " + publicAction->text());
 
-                        connect(connectAction, &QAction::triggered, this, [this, publicAction]() -> void {
-                            _widgetAction->connectToPublicAction(publicAction);
-                        });
+                            connect(connectAction, &QAction::triggered, this, [this, publicAction]() -> void {
+                                _widgetAction->connectToPublicAction(publicAction);
+                                });
 
-                        connectMenu->addAction(connectAction);
+                            connectMenu->addAction(connectAction);
+                        }
+
+                        connectMenu->setEnabled(!connectMenu->actions().isEmpty());
+
+                        contextMenu->addMenu(connectMenu);
                     }
-
-                    connectMenu->setEnabled(!connectMenu->actions().isEmpty());
-
-                    contextMenu->addMenu(connectMenu);
                 }
             }
 
