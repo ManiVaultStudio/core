@@ -121,7 +121,7 @@ set(ACTION_HIERARCHY_HEADERS
     src/widgets/ActionHierarchyModelItem.h
     src/widgets/ActionHierarchyModel.h
     src/widgets/ActionHierarchyFilterModel.h
-    src/widgets/ActionHierarchyDialog.h
+    src/widgets/ViewPluginEditorDialog.h
 )
 
 set(ACTION_HIERARCHY_SOURCES
@@ -129,7 +129,7 @@ set(ACTION_HIERARCHY_SOURCES
     src/widgets/ActionHierarchyModelItem.cpp
     src/widgets/ActionHierarchyModel.cpp
     src/widgets/ActionHierarchyFilterModel.cpp
-    src/widgets/ActionHierarchyDialog.cpp
+    src/widgets/ViewPluginEditorDialog.cpp
 )
 
 set( WIDGET_HEADERS

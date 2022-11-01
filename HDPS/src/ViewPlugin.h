@@ -7,7 +7,7 @@
 */
 
 #include "widgets/DockableWidget.h"
-#include "widgets/ActionHierarchyDialog.h"
+#include "widgets/ViewPluginEditorDialog.h"
 #include "actions/TriggerAction.h"
 #include "Plugin.h"
 
@@ -39,8 +39,8 @@ public:
         _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
         connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
-            ActionHierarchyDialog actionHierarchyDialog(nullptr, this);
-            actionHierarchyDialog.exec();
+            ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
+            viewPluginEditorDialog.exec();
         });
     }
 

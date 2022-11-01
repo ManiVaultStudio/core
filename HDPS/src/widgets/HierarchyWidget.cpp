@@ -25,6 +25,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _treeView(this),
     _overlayWidget(this),
     _nameFilterAction(this, "Name filter"),
+    _filterGroupAction(this),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _selectAllAction(this, "Select all"),
@@ -34,6 +35,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _nameFilterAction.setPlaceHolderString(QString("Search for %1 by name or regular expression...").arg(_itemTypeName.toLower()));
     _nameFilterAction.setSearchMode(true);
     _nameFilterAction.setClearable(true);
+
+    _filterGroupAction.setText("Filtering");
+    _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
+    _filterGroupAction.setToolTip("Adjust filtering parameters");
 
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
     _expandAllAction.setToolTip(QString("Expand all %1s in the hierarchy").arg(_itemTypeName.toLower()));
@@ -62,6 +67,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         toolbarLayout->setSpacing(3);
 
         toolbarLayout->addWidget(_nameFilterAction.createWidget(this), 1);
+        toolbarLayout->addWidget(_filterGroupAction.createCollapsedWidget(this));
         toolbarLayout->addWidget(_expandAllAction.createWidget(this));
         toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
         toolbarLayout->addWidget(_selectionGroupAction.createCollapsedWidget(this));

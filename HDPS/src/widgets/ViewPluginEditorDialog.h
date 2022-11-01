@@ -10,13 +10,13 @@
 using namespace hdps::gui;
 
 /**
- * Action hierarchy dialog
+ * View plugin editor hierarchy dialog
  * 
- * Dialog class for configuring an action and its children in a tree widget
+ * Dialog class for configuring a view plugin
  *
  * @author Thomas Kroes
  */
-class ActionHierarchyDialog : public QDialog
+class ViewPluginEditorDialog : public QDialog
 {
 public:
 
@@ -25,7 +25,7 @@ public:
      * @param parent Pointer to parent widget
      * @param rootAction Pointer to non-owning root action
      */
-    ActionHierarchyDialog(QWidget* parent, WidgetAction* rootAction);
+    ViewPluginEditorDialog(QWidget* parent, WidgetAction* rootAction);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -38,7 +38,7 @@ public:
     }
 
 private:
-    WidgetAction*           _action;                    /** Pointer to action to edit */
+    WidgetAction*           _action;                    /** Pointer to view plugin action to edit */
     ActionHierarchyWidget   _actionHierarchyWidget;     /** Widget for displaying an action hierarchy */
     ToggleAction            _mayCloseAction;            /** Action for toggling whether a view plugin may be closed */
 };

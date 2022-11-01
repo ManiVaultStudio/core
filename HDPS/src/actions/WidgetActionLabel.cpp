@@ -31,6 +31,7 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
 
     connect(_widgetAction, &WidgetAction::isConnectedChanged, this, &WidgetActionLabel::updateNameLabel);
     connect(_widgetAction, &WidgetAction::isPublishedChanged, this, &WidgetActionLabel::updatePublishAction);
+    connect(_widgetAction, &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
 
     _publishAction.setIcon(fontAwesome.getIcon("cloud-upload-alt"));
     _disconnectAction.setIcon(fontAwesome.getIcon("unlink"));
@@ -52,9 +53,6 @@ WidgetActionLabel::WidgetActionLabel(WidgetAction* widgetAction, QWidget* parent
     _nameLabel.setStyleSheet("color: black;");
 
     connect(widgetAction, &WidgetAction::changed, this, &WidgetActionLabel::updateNameLabel);
-    connect(widgetAction, &WidgetAction::connectionPermissionsChanged, this, &WidgetActionLabel::updateNameLabel);
-
-    updateNameLabel();
 
     updateNameLabel();
     updatePublishAction();

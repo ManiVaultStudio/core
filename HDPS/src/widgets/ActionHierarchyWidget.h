@@ -4,6 +4,8 @@
 #include "ActionHierarchyModel.h"
 #include "ActionHierarchyFilterModel.h"
 
+#include "actions/ToggleAction.h"
+
 #include <QWidget>
 #include <QTreeView>
 
@@ -45,10 +47,18 @@ private:
     void setActionHighlighted(const QModelIndex& index, bool highlighted);
 
 private:
-    ActionHierarchyModel        _model;                     /** Hierarchical action model */
-    ActionHierarchyFilterModel  _filterModel;               /** Hierarchical action filter model */
-    HierarchyWidget             _hierarchyWidget;           /** Widget for displaying hierarchy */
-    QModelIndex                 _lastHoverModelIndex;       /** Model index of the item that was last hovered */
+    ActionHierarchyModel        _model;                             /** Hierarchical action model */
+    ActionHierarchyFilterModel  _filterModel;                       /** Hierarchical action filter model */
+    HierarchyWidget             _hierarchyWidget;                   /** Widget for displaying hierarchy */
+    QModelIndex                 _lastHoverModelIndex;               /** Model index of the item that was last hovered */
+    ToggleAction                _filterVisibleAction;               /** Filter visible action */
+    ToggleAction                _filterNotVisibleAction;            /** Filter not visible action */
+    ToggleAction                _filterMayPublishAction;            /** Filter may publish action */
+    ToggleAction                _filterMayNotPublishAction;         /** Filter may not publish action */
+    ToggleAction                _filterMayConnectAction;            /** Filter may connect action */
+    ToggleAction                _filterMayNotConnectAction;         /** Filter may not connect action */
+    ToggleAction                _filterMayDisconnectAction;         /** Filter may disconnect action */
+    ToggleAction                _filterMayNotDisconnectAction;      /** Filter may not disconnect action */
 };
 
 }

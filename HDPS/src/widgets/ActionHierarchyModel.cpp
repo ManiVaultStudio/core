@@ -66,7 +66,7 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
 
                 case ActionHierarchyModelItem::Column::MayPublish:
                 {
-                    action->setConnectionPermissions(WidgetAction::PublishViaGui, !value.toBool());
+                    action->setConnectionPermissionsFlag(WidgetAction::PublishViaGui, !value.toBool());
 
                     for (const auto& childIndex : childIndices)
                         setData(childIndex, value.toBool(), Qt::CheckStateRole);
@@ -76,7 +76,7 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
 
                 case ActionHierarchyModelItem::Column::MayConnect:
                 {
-                    action->setConnectionPermissions(WidgetAction::ConnectViaGui, !value.toBool());
+                    action->setConnectionPermissionsFlag(WidgetAction::ConnectViaGui, !value.toBool());
 
                     for (const auto& childIndex : childIndices)
                         setData(childIndex, value.toBool(), Qt::CheckStateRole);
@@ -86,7 +86,7 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
 
                 case ActionHierarchyModelItem::Column::MayDisconnect:
                 {
-                    action->setConnectionPermissions(WidgetAction::DisconnectViaGui, !value.toBool());
+                    action->setConnectionPermissionsFlag(WidgetAction::DisconnectViaGui, !value.toBool());
 
                     for (const auto& childIndex : childIndices)
                         setData(childIndex, value.toBool(), Qt::CheckStateRole);

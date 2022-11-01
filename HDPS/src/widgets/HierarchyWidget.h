@@ -89,6 +89,14 @@ public:
     }
 
     /**
+     * Get filter group action
+     * @return Reference to filter group action
+     */
+    GroupAction& getFilterGroupAction() {
+        return _filterGroupAction;
+    }
+
+    /**
      * Get expand all action
      * @return Reference to expand all action
      */
@@ -171,7 +179,7 @@ private:
     /** Updates the overlay widget icon, title and description based on the state of the hierarchy */
     void updateOverlayWidget();
 
-    /** Update the read-only state of the expand/collapse action in reponse to change in the model and the tree view */
+    /** Update the read-only state of the expand/collapse action in response to change in the model and the tree view */
     void updateExpandCollapseActionsReadOnly();
 
 private:
@@ -182,6 +190,7 @@ private:
     QTreeView                   _treeView;              /** Tree view that contains the data hierarchy */
     OverlayWidget               _overlayWidget;         /** Overlay widget that show information when there are no items in the model */
     StringAction                _nameFilterAction;      /** String action for filtering by name */
+    GroupAction                 _filterGroupAction;     /** Filter group action */
     TriggerAction               _expandAllAction;       /** Expand all datasets action */
     TriggerAction               _collapseAllAction;     /** Collapse all datasets action */
     TriggerAction               _selectAllAction;       /** Select all action */

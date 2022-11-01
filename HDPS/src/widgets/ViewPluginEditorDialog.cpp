@@ -1,4 +1,4 @@
-#include "ActionHierarchyDialog.h"
+#include "ViewPluginEditorDialog.h"
 
 #include <Application.h>
 
@@ -8,7 +8,7 @@
 
 using namespace hdps;
 
-ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent, WidgetAction* rootAction) :
+ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, WidgetAction* rootAction) :
     QDialog(parent),
     _action(rootAction),
     _actionHierarchyWidget(this, rootAction),
@@ -30,7 +30,7 @@ ActionHierarchyDialog::ActionHierarchyDialog(QWidget* parent, WidgetAction* root
 
     layout->addWidget(dialogButtonBox);
 
-    connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ActionHierarchyDialog::accept);
+    connect(dialogButtonBox, &QDialogButtonBox::accepted, this, &ViewPluginEditorDialog::accept);
 
-    _mayCloseAction.setConnectionPermissions(WidgetAction::Gui, true);
+    _mayCloseAction.setConnectionPermissions(WidgetAction::None);
 }

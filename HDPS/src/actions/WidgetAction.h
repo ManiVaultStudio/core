@@ -51,6 +51,7 @@ public:
 
     /** Describes the connection permission options */
     enum ConnectionPermissionFlag {
+        None                    = 0x00000,                                                          /** Widget may not published nor connect nor disconnect via API and GUI */
         PublishViaApi           = ConnectionTypeFlag::Publish | ConnectionContextFlag::Api,         /** Widget may be published via the API */
         PublishViaGui           = ConnectionTypeFlag::Publish | ConnectionContextFlag::Gui,         /** Widget may be published via the GUI */
         PublishViaApiAndGui     = PublishViaApi | PublishViaGui,                                    /** Widget may be published via the API and the GUI */
@@ -245,15 +246,34 @@ public: // Linking
     }
 
     /**
-     * Set connection permissions
-     * @param connectionPermissions Connection permission flag(s) to set
-     * @param unset Whether to unset the connection permission flag(s)
+     * Check whether \p connectionPermissionsFlag is set or not
+     * @param connectionPermissionsFlag Connection permissions flag
+     * @return Boolean determining whether \p connectionPermissionsFlag is set or not
      */
-    virtual void setConnectionPermissions(std::int32_t connectionPermissions, bool unset = false) final {
+    virtual bool isConnectionPermissionFlagSet(std::int32_t connectionPermissionsFlag) final {
+        return _connectionPermissions & connectionPermissionsFlag;
+    }
+
+    /**
+     * Set connection permissions flag
+     * @param connectionPermissionsFlag Connection permissions flag to set
+     * @param unset Whether to unset the connection permissions flag
+     */
+    virtual void setConnectionPermissionsFlag(std::int32_t connectionPermissionsFlag, bool unset = false) final {
         if (unset)
-            _connectionPermissions = _connectionPermissions & ~connectionPermissions;
+            _connectionPermissions = _connectionPermissions & ~connectionPermissionsFlag;
         else
-            _connectionPermissions |= connectionPermissions;
+            _connectionPermissions |= connectionPermissionsFlag;
+
+        emit connectionPermissionsChanged(_connectionPermissions);
+    }
+
+    /**
+     * Set connection permissions
+     * @param connectionPermissions Connection permissions value
+     */
+    virtual void setConnectionPermissions(std::int32_t connectionPermissions) final {
+        _connectionPermissions = connectionPermissions;
 
         emit connectionPermissionsChanged(_connectionPermissions);
     }
