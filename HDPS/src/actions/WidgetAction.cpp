@@ -23,7 +23,7 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
     _sortIndex(-1),
-    _connectionFlags(ConnectionFlag::Default),
+    _connectionPermissions(ConnectionPermissionFlag::Default),
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),

@@ -496,11 +496,6 @@ void DimensionsPickerAction::updateSummary()
     _summaryAction.setString(tr("%1 available, %2 visible, %3 selected").arg(numberOfDimensions).arg(numberOfVisibleDimensions).arg(holder.getNumberOfSelectedDimensions()));
 }
 
-bool DimensionsPickerAction::mayPublish() const
-{
-    return true;
-}
-
 void DimensionsPickerAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicDimensionsPickerAction = dynamic_cast<DimensionsPickerAction*>(publicAction);

@@ -34,23 +34,37 @@ class WidgetAction : public QWidgetAction, public Serializable
 
 public:
 
-    /** Describes the connection options */
-    enum ConnectionFlag {
-        MayPublish              = 0x00001,                                              /** Widget may publish itself (make a shared public copy) */
-        MayConnect              = 0x00002,                                              /** Widget may connect to a public action */
+    /** Describes the connection type options */
+    enum ConnectionTypeFlag {
+        Publish = 0x00001,                                      /** Widget may publish itself (make a shared public copy) */
+        Connect = 0x00002,                                      /** Widget may connect to a public action */
+        Disconnect = 0x00004,                                      /** Widget may disconnect from a public action */
+    };
 
-        API                     = 0x00004,                                              /** In the context of the API */
-        GUI                     = 0x00008,                                              /** In the context of the GUI */
+    /** Describes the connection context options */
+    enum ConnectionContextFlag {
+        Api = 0x00008,      /** In the context of the API */
+        Gui = 0x00010,      /** In the context of the GUI */
 
-        MayPublishViaApi        = MayPublish | API,                                     /** Widget may be published via the API */
-        MayPublishViaGui        = MayPublish | GUI,                                     /** Widget may be published via the GUI */
-        MayPublishViaApiAndGui  = MayPublishViaApi | MayPublishViaGui,                  /** Widget may be published via the API ánd the GUI */
+        ApiAndGui = Api | Gui
+    };
 
-        MayConnectViaApi        = MayConnect | API,                                     /** Widget may connect to a public action via the API */
-        MayConnectViaGui        = MayConnect | GUI,                                     /** Widget may connect to a public action via the GUI */
-        MayConnectViaApiAndGui  = MayConnectViaApi | MayConnectViaGui,                  /** Widget may connect to a public action via the API ánd the GUI */
+    /** Describes the connection permission options */
+    enum ConnectionPermissionFlag {
+        MayPublishViaApi            = ConnectionTypeFlag::Publish | ConnectionContextFlag::Api,     /** Widget may be published via the API */
+        MayPublishViaGui            = ConnectionTypeFlag::Publish | ConnectionContextFlag::Gui,     /** Widget may be published via the GUI */
+        MayPublishViaApiAndGui      = MayPublishViaApi | MayPublishViaGui,                          /** Widget may be published via the API and the GUI */
 
-        Default                 = MayPublishViaApiAndGui | MayConnectViaApiAndGui       /** Default allows all connection options */
+        MayConnectViaApi            = ConnectionTypeFlag::Connect | ConnectionContextFlag::Api,     /** Widget may connect to a public action via the API */
+        MayConnectViaGui            = ConnectionTypeFlag::Connect | ConnectionContextFlag::Gui,     /** Widget may connect to a public action via the GUI */
+        MayConnectViaApiAndGui      = MayConnectViaApi | MayConnectViaGui,                          /** Widget may connect to a public action via the API and the GUI */
+
+        MayDisconnectViaApi         = ConnectionTypeFlag::Disconnect | ConnectionContextFlag::Api,  /** Widget may disconnect from a public action via the API */
+        MayDisconnectViaGui         = ConnectionTypeFlag::Disconnect | ConnectionContextFlag::Gui,  /** Widget may disconnect from a public action via the GUI */
+        MayDisconnectViaApiAndGui   = MayDisconnectViaApi | MayConnectViaGui,                       /** Widget may disconnect from a public action via the API and the GUI */
+
+        /** Default allows all connection options */
+        Default = MayPublishViaApiAndGui | MayConnectViaApiAndGui | MayDisconnectViaApiAndGui
     };
 
 public:
@@ -204,86 +218,43 @@ public: // Linking
     const QVector<WidgetAction*> getConnectedActions() const;
 
     /**
-     * Get whether a copy of this action may published and shared via the API
-     * @return Boolean determining whether a copy of this action may published and shared via the API
+     * Get whether a copy of this action may published and shared, depending on the \p connectionContextFlags
+     * @param connectionContextFlags The context from which the action will be published (API and/or GUI)
+     * @return Boolean determining whether a copy of this action may published and shared, depending on the \p connectionContextFlags
      */
-    virtual bool mayPublishViaApi() const final {
-        return _connectionFlags & ConnectionFlag::MayPublishViaApi;
+    virtual bool mayPublish(ConnectionContextFlag connectionContextFlags) const final {
+        return _connectionPermissions & (ConnectionTypeFlag::Publish | connectionContextFlags);
     }
 
     /**
-     * Get whether a copy of this action may published and shared via the GUI
-     * @return Boolean determining whether a copy of this action may published and shared via the GUI
+     * Get whether this action may connect to a public action, depending on the \p connectionContextFlags
+     * @param connectionContextFlags The context from which the connection will be made (API and/or GUI)
+     * @return Boolean determining whether this action may connect to a public action, depending on the \p connectionContextFlags
      */
-    virtual bool mayPublishViaGui() const final {
-        return _connectionFlags & ConnectionFlag::MayPublishViaGui;
+    virtual bool mayConnect(ConnectionContextFlag connectionContextFlags) const final {
+        return _connectionPermissions & (ConnectionTypeFlag::Connect | connectionContextFlags);
     }
 
     /**
-     * Get whether a copy of this action may published and shared via the API and/or GUI
-     * @return Boolean determining whether a copy of this action may published and shared via the API and/or GUI
+     * Get whether this action may disconnect from a public action, depending on the \p connectionContextFlags
+     * @param connectionContextFlags The context from which the disconnection will be initiated (API and/or GUI)
+     * @return Boolean determining whether this action may disconnect from a public action, depending on the \p connectionContextFlags
      */
-    virtual bool mayPublish() const final {
-        return mayPublishViaGui() & mayPublishViaGui();
+    virtual bool mayDisconnect(ConnectionContextFlag connectionContextFlags) const final {
+        return _connectionPermissions & (ConnectionTypeFlag::Disconnect | connectionContextFlags);
     }
 
     /**
-     * Get whether this action may connect to a public action via the API
-     * @return Boolean determining whether this action may connect to a public action via the API
+     * Set flags which determine the connection permission(s)
+     * @param connectionPermissionFlags Flags which determine the connection behavior permission(s)
      */
-    virtual bool mayConnectViaApi() const final{
-        return _connectionFlags & ConnectionFlag::MayConnectViaApi;
-    }
-
-    /**
-     * Get whether this action may connect to a public action via the GUI
-     * @return Boolean determining whether this action may connect to a public action via the GUI
-     */
-    bool mayConnectViaGui() const {
-        return _connectionFlags & ConnectionFlag::MayConnectViaApi;
-    }
-
-    /**
-     * Get whether this action may connect to a public action via the API and/or GUI
-     * @return Boolean determining whether this action may connect to a public action via the API and/or GUI
-     */
-    virtual bool mayConnect() const final {
-        return mayConnectViaApi() & mayConnectViaGui();
-    }
-
-    /**
-     * Get whether this action may connect to a public action and whether it may connect to a public action via the API
-     * @return Boolean determining whether this action may connect to a public action and whether it may connect to a public action via the API
-     */
-    virtual bool mayPublishAndConnectViaApi() const final {
-        return mayPublishViaApi() & mayConnectViaApi();
-    }
-
-    /**
-     * Get whether this action may connect to a public action and whether it may connect to a public action via the GUI
-     * @return Boolean determining whether this action may connect to a public action and whether it may connect to a public action via the GUI
-     */
-    virtual bool mayPublishAndConnectViaGui() const final {
-        return mayPublishViaGui() & mayConnectViaGui();
-    }
-
-    /**
-     * Get whether this action may connect to a public action and whether it may connect to a public action via the API and/or GUI
-     * @return Boolean determining whether this action may connect to a public action and whether it may connect to a public action via the API and/or GUI
-     */
-    virtual bool mayPublishAndConnect() const final {
-        return mayPublishAndConnectViaApi() & mayPublishAndConnectViaGui();
-    }
-
-    /**
-     * Set flags which determine the connection behavior
-     * @param connectionFlags Flags which determine the connection behavior
-     */
-    virtual void setConnectionFlags(std::int32_t connectionFlags) final {
-        if (connectionFlags == _connectionFlags)
+    virtual void setConnectionPermissionFlags(std::int32_t connectionPermissionFlags) final {
+        if (connectionPermissionFlags == _connectionPermissions)
             return;
 
-        _connectionFlags = connectionFlags;
+        _connectionPermissions = connectionPermissionFlags;
+
+        emit connectionPermissionsChanged(_connectionPermissions);
     }
 
 protected: // Linking
@@ -394,14 +365,20 @@ signals:
      */
     void actionDisconnected(const WidgetAction* action);
 
+    /**
+     * Signals that the connection permission changed
+     * @param connectionPermissionFlags New connection permission flags
+     */
+    void connectionPermissionsChanged(std::int32_t connectionPermissionFlags);
+
 protected:
-    std::int32_t                _defaultWidgetFlags;    /** Default widget flags which are used to configure newly created widget action widgets */
-    std::int32_t                _sortIndex;             /** Sort index (used in the group action to sort actions) */
-    std::int32_t                _connectionFlags;       /** Allowed connection options flags */
-    WidgetAction*               _publicAction;          /** Public action to which this action might be connected */
-    QVector<WidgetAction*>      _connectedActions;      /** Pointers to widget action that are connected to this action */
-    QString                     _settingsPrefix;        /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
-    bool                        _highlighted;           /** Whether the action is in a highlighted state or not */
+    std::int32_t                _defaultWidgetFlags;            /** Default widget flags which are used to configure newly created widget action widgets */
+    std::int32_t                _sortIndex;                     /** Sort index (used in the group action to sort actions) */
+    std::int32_t                _connectionPermissions;         /** Allowed connection options flags */
+    WidgetAction*               _publicAction;                  /** Public action to which this action might be connected */
+    QVector<WidgetAction*>      _connectedActions;              /** Pointers to widget action that are connected to this action */
+    QString                     _settingsPrefix;                /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
+    bool                        _highlighted;                   /** Whether the action is in a highlighted state or not */
 };
 
 /** List of widget actions */
