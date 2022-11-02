@@ -270,6 +270,18 @@ public:
     QStringList getSelectedOptions() const;
 
     /**
+     * Get default selected options
+     * @return Default selected options
+     */
+    QStringList getDefaultSelectedOptions() const;
+
+    /**
+     * Set default selected options
+     * @param defaultSelectedOptions Default selected options
+     */
+    void setDefaultSelectedOptions(const QStringList& defaultSelectedOptions);
+
+    /**
      * Get whether a specific option is selected
      * @param option Name of the option to check for
      * @return Boolean indicating whether the option is selected or not
@@ -350,10 +362,17 @@ signals:
      */
     void selectedOptionsChanged(const QStringList& selectedOptions);
 
+    /**
+     * Signals that the default selected options changed
+     * @param defaultSelectedOptions Default selected options
+     */
+    void defaultSelectedOptionsChanged(const QStringList& defaultSelectedOptions);
+
 protected:
-    QStandardItemModel      _optionsModel;          /** Options model */
-    SelectionAction         _selectionAction;       /** Selection action */
-    FileAction              _fileAction;            /** File action */
+    QStandardItemModel      _optionsModel;              /** Options model */
+    SelectionAction         _selectionAction;           /** Selection action */
+    FileAction              _fileAction;                /** File action */
+    QStringList             _defaultSelectedOptions;    /** Default selection options */
 
 };
 

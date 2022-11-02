@@ -17,7 +17,8 @@ OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, con
     WidgetAction(parent),
     _optionsModel(),
     _selectionAction(*this),
-    _fileAction(*this)
+    _fileAction(*this),
+    _defaultSelectedOptions(defaultSelectedOptions)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -99,6 +100,21 @@ QStringList OptionsAction::getSelectedOptions() const
     return selectedOptions;
 }
 
+QStringList OptionsAction::getDefaultSelectedOptions() const
+{
+    return _defaultSelectedOptions;
+}
+
+void OptionsAction::setDefaultSelectedOptions(const QStringList& defaultSelectedOptions)
+{
+    if (defaultSelectedOptions == _defaultSelectedOptions)
+        return;
+
+    _defaultSelectedOptions = defaultSelectedOptions;
+
+    emit defaultSelectedOptionsChanged(_defaultSelectedOptions);
+}
+
 bool OptionsAction::isOptionSelected(const QString& option) const
 {
     const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option);
@@ -144,7 +160,7 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
 
 void OptionsAction::reset()
 {
-    //setSelectedOptions(getde)
+    setSelectedOptions(getDefaultSelectedOptions());
 }
 
 void OptionsAction::connectToPublicAction(WidgetAction* publicAction)

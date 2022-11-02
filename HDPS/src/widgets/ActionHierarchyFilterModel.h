@@ -32,6 +32,7 @@ public:
 
 public: // Action getters
 
+    OptionsAction& getFilterEnabledAction() { return _filterEnabledAction; }
     OptionsAction& getFilterVisibilityAction() { return _filterVisibilityAction; }
     OptionsAction& getFilterMayPublishAction() { return _filterMayPublishAction; }
     OptionsAction& getFilterMayConnectAction() { return _filterMayConnectAction; }
@@ -39,6 +40,7 @@ public: // Action getters
     TriggerAction& getRemoveFiltersAction() { return _removeFiltersAction; }
 
 private:
+    OptionsAction   _filterEnabledAction;           /** Filter enabled action */
     OptionsAction   _filterVisibilityAction;        /** Filter visibility action */
     OptionsAction   _filterMayPublishAction;        /** Filter may publish action */
     OptionsAction   _filterMayConnectAction;        /** Filter may connect action */

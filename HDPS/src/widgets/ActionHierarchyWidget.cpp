@@ -133,7 +133,8 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     filterGroupAction << _filterModel.getFilterMayPublishAction();
     filterGroupAction << _filterModel.getFilterMayConnectAction();
     filterGroupAction << _filterModel.getFilterMayDisconnectAction();
-    //filterGroupAction << _filterModel.getRemoveFiltersAction();
+    filterGroupAction << _filterModel.getFilterEnabledAction();
+    filterGroupAction << _filterModel.getRemoveFiltersAction();
 
     filterGroupAction.setPopupSizeHint(QSize(300, 0));
 }
