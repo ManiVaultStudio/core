@@ -31,7 +31,7 @@ public:
         Plugin(factory),
         _widget(),
         _editActionsAction(&_widget, "Edit view plugin actions"),
-        _mayCloseAction(&_widget, "May close", true, true)
+        _mayCloseAction(this, "May close", true, true)
     {
         setText(getGuiName());
 
