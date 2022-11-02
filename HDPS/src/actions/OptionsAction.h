@@ -57,24 +57,6 @@ public: // Widgets
         friend class OptionsAction;
     };
 
-    /** Line edit widget (with auto completion) class for option action */
-    //class LineEditWidget : public QLineEdit {
-    //protected:
-
-    //    /**
-    //     * Constructor
-    //     * @param parent Pointer to parent widget
-    //     * @param optionAction Pointer to option action
-    //     */
-    //    LineEditWidget(QWidget* parent, OptionAction* optionAction);
-
-    //protected:
-    //    OptionAction*   _optionAction;  /** Pointer to owning option action */
-    //    QCompleter      _completer;     /** Completer for searching and filtering */
-
-    //    friend class OptionAction;
-    //};
-
 protected:
 
     /**
@@ -306,6 +288,12 @@ public:
      * @param selectedOptions Selected options
      */
     void setSelectedOptions(const QStringList& selectedOptions);
+
+    /**
+     * Determines whether the action can be reset to its default
+     * @return Whether the action can be reset to its default
+     */
+    bool isResettable() override;;
 
     /** Reset to default */
     void reset() override;

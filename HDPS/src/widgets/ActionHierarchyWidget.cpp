@@ -100,6 +100,7 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     treeView.setItemDelegate(new ItemDelegate(this));
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
+        return;
         setActionHighlighted(_hierarchyWidget.toSourceModelIndex(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
 
         if (_lastHoverModelIndex.isValid())
@@ -129,11 +130,11 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     
     auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
 
+    filterGroupAction << _filterModel.getFilterEnabledAction();
     filterGroupAction << _filterModel.getFilterVisibilityAction();
     filterGroupAction << _filterModel.getFilterMayPublishAction();
     filterGroupAction << _filterModel.getFilterMayConnectAction();
     filterGroupAction << _filterModel.getFilterMayDisconnectAction();
-    filterGroupAction << _filterModel.getFilterEnabledAction();
     filterGroupAction << _filterModel.getRemoveFiltersAction();
 
     filterGroupAction.setPopupSizeHint(QSize(300, 0));

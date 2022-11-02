@@ -158,6 +158,11 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
     emit selectedOptionsChanged(getSelectedOptions());
 }
 
+bool OptionsAction::isResettable()
+{
+    return getSelectedOptions() != getDefaultSelectedOptions();
+}
+
 void OptionsAction::reset()
 {
     setSelectedOptions(getDefaultSelectedOptions());

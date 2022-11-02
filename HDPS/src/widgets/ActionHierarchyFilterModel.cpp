@@ -35,11 +35,25 @@ ActionHierarchyFilterModel::ActionHierarchyFilterModel(QObject* parent /*= nullp
     _filterMayConnectAction.setConnectionPermissions(WidgetAction::None);
     _filterMayDisconnectAction.setConnectionPermissions(WidgetAction::None);
 
-    connect(&_filterEnabledAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
-    connect(&_filterVisibilityAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
-    connect(&_filterMayPublishAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
-    connect(&_filterMayConnectAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
-    connect(&_filterMayDisconnectAction, &OptionsAction::selectedOptionsChanged, this, &ActionHierarchyFilterModel::invalidate);
+    const auto selectedOptionsChanged = [this]() -> void {
+        invalidate();
+
+        QList<bool> resettable;
+
+        resettable << _filterEnabledAction.isResettable();
+        resettable << _filterVisibilityAction.isResettable();
+        resettable << _filterMayPublishAction.isResettable();
+        resettable << _filterMayConnectAction.isResettable();
+        resettable << _filterMayDisconnectAction.isResettable();
+        
+        _removeFiltersAction.setEnabled(resettable.contains(true));
+    };
+
+    connect(&_filterEnabledAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
+    connect(&_filterVisibilityAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
+    connect(&_filterMayPublishAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
+    connect(&_filterMayConnectAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
+    connect(&_filterMayDisconnectAction, &OptionsAction::selectedOptionsChanged, this, selectedOptionsChanged);
     
     connect(&_removeFiltersAction, &TriggerAction::triggered, this, [this]() -> void {
         _filterEnabledAction.reset();
@@ -48,6 +62,8 @@ ActionHierarchyFilterModel::ActionHierarchyFilterModel(QObject* parent /*= nullp
         _filterMayConnectAction.reset();
         _filterMayDisconnectAction.reset();
     });
+
+    selectedOptionsChanged();
 }
 
 bool ActionHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& parent) const

@@ -344,7 +344,6 @@ public: // Settings
 
     /**
      * Determines whether the action can be reset to its default
-     * @param recursive Check recursively
      * @return Whether the action can be reset to its default
      */
     virtual bool isResettable()
