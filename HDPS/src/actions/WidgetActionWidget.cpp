@@ -1,5 +1,6 @@
 #include "WidgetActionWidget.h"
 #include "WidgetAction.h"
+#include "WidgetActionCollapsedWidget.h"
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -155,7 +156,7 @@ void WidgetActionWidget::setWidgetAction(WidgetAction* widgetAction)
 
 QSize WidgetActionWidget::sizeHint() const
 {
-    if (_widgetFlags & PopupLayout)
+    if (_widgetFlags & WidgetFlag::PopupLayout)
         return _widgetAction->getPopupSizeHint();
 
     return QWidget::sizeHint();
