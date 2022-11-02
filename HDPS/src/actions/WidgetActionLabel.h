@@ -65,15 +65,10 @@ public:
 
 private:
 
-    /** Update the state of the publish action */
-    void updatePublishAction();
-
     /** Update the state of the name label */
     void updateNameLabel();
 
-    /** Publish _widgetAction */
-    void publishAction();
-
+    /** Elides the label text */
     void elide();
 
     /**

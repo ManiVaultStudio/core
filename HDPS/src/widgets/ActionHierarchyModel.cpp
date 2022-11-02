@@ -38,6 +38,8 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
     for (int rowIndex = 0; rowIndex < rowCount(nameIndex); ++rowIndex)
         childIndices << this->index(rowIndex, index.column(), nameIndex);
 
+    //qDebug() << childIndices;
+
     auto action = actionHierarchyModelItem->getAction();
 
     switch (role) {

@@ -14,7 +14,6 @@ ActionHierarchyFilterModel::ActionHierarchyFilterModel(QObject* parent /*= nullp
     _removeFiltersAction(this, "Remove filters")
 {
     setRecursiveFilteringEnabled(true);
-    setFilterCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
 
     _filterVisibilityAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
     _filterMayPublishAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
@@ -56,11 +55,13 @@ bool ActionHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pa
 
     if (filterRegularExpression().isValid()) {
         const auto key = sourceModel()->data(index, filterRole()).toString();
-        return key.contains(filterRegularExpression());
+        
+        if (!key.contains(filterRegularExpression()))
+            return false;
     }
 
-    std::int32_t numberOfActiveFilters  = 0;
-    std::int32_t numberOfMatches        = 0;
+    std::int32_t numberOfActiveFilters = 0;
+    std::int32_t numberOfMatches = 0;
 
     if (_filterVisibilityAction.hasSelectedOptions()) {
         numberOfActiveFilters++;

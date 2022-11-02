@@ -34,14 +34,14 @@ class WidgetAction : public QWidgetAction, public Serializable
 
 public:
 
-    /** Describes the connection type options */
-    enum ConnectionTypeFlag {
-        Publish = 0x00001,                                      /** Widget may publish itself (make a shared public copy) */
-        Connect = 0x00002,                                      /** Widget may connect to a public action */
-        Disconnect = 0x00004,                                      /** Widget may disconnect from a public action */
-    };
+    ///** Describes the connection type options */
+    //enum ConnectionTypeFlag {
+    //    Publish     = 0x00001,      /** Widget may publish itself (make a shared public copy) */
+    //    Connect     = 0x00002,      /** Widget may connect to a public action */
+    //    Disconnect  = 0x00004       /** Widget may disconnect from a public action */
+    //};
 
-    /** Describes the connection context options */
+    ///** Describes the connection context options */
     enum ConnectionContextFlag {
         Api = 0x00008,      /** In the context of the API */
         Gui = 0x00010,      /** In the context of the GUI */
@@ -51,18 +51,18 @@ public:
 
     /** Describes the connection permission options */
     enum ConnectionPermissionFlag {
-        None                    = 0x00000,                                                          /** Widget may not published nor connect nor disconnect via API and GUI */
-        PublishViaApi           = ConnectionTypeFlag::Publish | ConnectionContextFlag::Api,         /** Widget may be published via the API */
-        PublishViaGui           = ConnectionTypeFlag::Publish | ConnectionContextFlag::Gui,         /** Widget may be published via the GUI */
-        PublishViaApiAndGui     = PublishViaApi | PublishViaGui,                                    /** Widget may be published via the API and the GUI */
+        None                    = 0x00000,      /** Widget may not published nor connect nor disconnect via API and GUI */
+        PublishViaApi           = 0x00001,      /** Widget may be published via the API */
+        PublishViaGui           = 0x00002,      /** Widget may be published via the GUI */
+        PublishViaApiAndGui     = 0x00004,      /** Widget may be published via the API and the GUI */
 
-        ConnectViaApi           = ConnectionTypeFlag::Connect | ConnectionContextFlag::Api,         /** Widget may connect to a public action via the API */
-        ConnectViaGui           = ConnectionTypeFlag::Connect | ConnectionContextFlag::Gui,         /** Widget may connect to a public action via the GUI */
-        ConnectViaApiAndGui     = ConnectViaApi | ConnectViaGui,                                    /** Widget may connect to a public action via the API and the GUI */
+        ConnectViaApi           = 0x00008,      /** Widget may connect to a public action via the API */
+        ConnectViaGui           = 0x00010,      /** Widget may connect to a public action via the GUI */
+        ConnectViaApiAndGui     = 0x00020,      /** Widget may connect to a public action via the API and the GUI */
 
-        DisconnectViaApi        = ConnectionTypeFlag::Disconnect | ConnectionContextFlag::Api,      /** Widget may disconnect from a public action via the API */
-        DisconnectViaGui        = ConnectionTypeFlag::Disconnect | ConnectionContextFlag::Gui,      /** Widget may disconnect from a public action via the GUI */
-        DisconnectViaApiAndGui  = DisconnectViaApi | ConnectViaGui,                                 /** Widget may disconnect from a public action via the API and the GUI */
+        DisconnectViaApi        = 0x00040,      /** Widget may disconnect from a public action via the API */
+        DisconnectViaGui        = 0x00080,      /** Widget may disconnect from a public action via the GUI */
+        DisconnectViaApiAndGui  = 0x00100,      /** Widget may disconnect from a public action via the API and the GUI */
 
         /** Default allows all connection options */
         Default = PublishViaApiAndGui | ConnectViaApiAndGui | DisconnectViaApiAndGui
@@ -181,9 +181,9 @@ public: // Linking
 
     /**
      * Publish this action so that other actions can connect to it
-     * @param text Name of the published widget action
+     * @param text Name of the published widget action (if empty, a configuration dialog will popup)
      */
-    virtual void publish(const QString& name);
+    virtual void publish(const QString& name = "");
 
     /**
      * Connect this action to a public action
@@ -224,7 +224,22 @@ public: // Linking
      * @return Boolean determining whether a copy of this action may published and shared, depending on the \p connectionContextFlags
      */
     virtual bool mayPublish(ConnectionContextFlag connectionContextFlags) const final {
-        return _connectionPermissions & (ConnectionTypeFlag::Publish | connectionContextFlags);
+        switch (connectionContextFlags)
+        {
+            case WidgetAction::Api:
+                return _connectionPermissions & ConnectionPermissionFlag::PublishViaApi;
+
+            case WidgetAction::Gui:
+                return _connectionPermissions & ConnectionPermissionFlag::PublishViaGui;
+
+            case WidgetAction::ApiAndGui:
+                break;
+
+            default:
+                break;
+        }
+
+        return false;
     }
 
     /**
@@ -233,7 +248,22 @@ public: // Linking
      * @return Boolean determining whether this action may connect to a public action, depending on the \p connectionContextFlags
      */
     virtual bool mayConnect(ConnectionContextFlag connectionContextFlags) const final {
-        return _connectionPermissions & (ConnectionTypeFlag::Connect | connectionContextFlags);
+        switch (connectionContextFlags)
+        {
+            case WidgetAction::Api:
+                return _connectionPermissions & ConnectionPermissionFlag::ConnectViaApi;
+
+            case WidgetAction::Gui:
+                return _connectionPermissions & ConnectionPermissionFlag::ConnectViaGui;
+
+            case WidgetAction::ApiAndGui:
+                break;
+
+            default:
+                break;
+        }
+
+        return false;
     }
 
     /**
@@ -242,7 +272,30 @@ public: // Linking
      * @return Boolean determining whether this action may disconnect from a public action, depending on the \p connectionContextFlags
      */
     virtual bool mayDisconnect(ConnectionContextFlag connectionContextFlags) const final {
-        return _connectionPermissions & (ConnectionTypeFlag::Disconnect | connectionContextFlags);
+        switch (connectionContextFlags)
+        {
+            case hdps::gui::WidgetAction::Api:
+                return _connectionPermissions & ConnectionPermissionFlag::DisconnectViaApi;
+
+            case hdps::gui::WidgetAction::Gui:
+                return _connectionPermissions & ConnectionPermissionFlag::DisconnectViaGui;
+
+            case hdps::gui::WidgetAction::ApiAndGui:
+                break;
+
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get connection permission flags
+     * @return Connection permission flags
+     */
+    virtual std::int32_t getConnectionPermissions() const final {
+        return _connectionPermissions;
     }
 
     /**
@@ -250,7 +303,7 @@ public: // Linking
      * @param connectionPermissionsFlag Connection permissions flag
      * @return Boolean determining whether \p connectionPermissionsFlag is set or not
      */
-    virtual bool isConnectionPermissionFlagSet(std::int32_t connectionPermissionsFlag) final {
+    virtual bool isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag) final {
         return _connectionPermissions & connectionPermissionsFlag;
     }
 
@@ -342,9 +395,18 @@ public: // Settings
      */
     QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
 
-public:
+public: // Popups
 
+    /**
+     * Get size hint of popups (in case of collapsed actions)
+     * @return Popup size hint
+     */
     QSize getPopupSizeHint() const;
+
+    /**
+     * Set size hint of popups (in case of collapsed actions)
+     * @param popupSizeHint Popup size hint
+     */
     void setPopupSizeHint(const QSize& popupSizeHint);
 
 protected:

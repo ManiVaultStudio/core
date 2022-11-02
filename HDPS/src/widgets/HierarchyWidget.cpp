@@ -40,7 +40,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _filterGroupAction.setText(QString("%1 filtering").arg(_itemTypeName));
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
     _filterGroupAction.setToolTip("Adjust filtering parameters");
-    _filterGroupAction.setLabelWidthFixed(100);
 
     _filterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
     _filterCaseSensitiveAction.setConnectionPermissions(WidgetAction::None);
@@ -143,6 +142,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         else {
             _filterNameAction.setPlaceHolderString(QString("Search for %1 by name (%2)").arg(_itemTypeName.toLower(), caseSensitivity));
             _filterModel->setFilterFixedString(_filterNameAction.getString());
+
+            //auto regularExpression = QRegularExpression();
+
+            //_filterModel->setFilterRegularExpression(regularExpression);
         }
             
         _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
@@ -304,6 +307,8 @@ bool HierarchyWidget::maySelectAll() const
 
 void HierarchyWidget::selectAll()
 {
+    _treeView.setFocus(Qt::NoFocusReason);
+
     for (const auto& filterModelIndex : fetchFilterModelIndices())
         _selectionModel.select(filterModelIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }

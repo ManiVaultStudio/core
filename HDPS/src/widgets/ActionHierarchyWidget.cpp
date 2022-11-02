@@ -51,6 +51,7 @@ protected:
             {
                 if (!index.data(Qt::EditRole).toBool())
                     option->state &= ~QStyle::State_Enabled;
+
                 break;
             }
 
@@ -98,12 +99,24 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     treeView.setMouseTracking(true);
     treeView.setItemDelegate(new ItemDelegate(this));
 
-    connect(&_hierarchyWidget.getSelectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) -> void {
-        setActionHighlighted(_hierarchyWidget.toSourceModelIndex(current.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
-        setActionHighlighted(_hierarchyWidget.toSourceModelIndex(previous.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+    connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
+        setActionHighlighted(_hierarchyWidget.toSourceModelIndex(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
 
-        _lastHoverModelIndex = _hierarchyWidget.toSourceModelIndex(current.siblingAtColumn(ActionHierarchyModelItem::Column::Name));
+        if (_lastHoverModelIndex.isValid())
+            setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+
+        _lastHoverModelIndex = index;
     });
+
+    const auto numberOfRowsChanged = [this]() -> void {
+        if (_lastHoverModelIndex.isValid())
+            setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+
+        _lastHoverModelIndex = QModelIndex();
+    };
+    
+    connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeInserted, this, numberOfRowsChanged);
+    connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, numberOfRowsChanged);
 
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
         if (index.column() == ActionHierarchyModelItem::Column::Name)
