@@ -51,21 +51,22 @@ public:
 
     /** Describes the connection permission options */
     enum ConnectionPermissionFlag {
-        None                    = 0x00000,      /** Widget may not published nor connect nor disconnect via API and GUI */
-        PublishViaApi           = 0x00001,      /** Widget may be published via the API */
-        PublishViaGui           = 0x00002,      /** Widget may be published via the GUI */
-        PublishViaApiAndGui     = 0x00004,      /** Widget may be published via the API and the GUI */
+        None                    = 0x00000,                              /** Widget may not published nor connect nor disconnect via API and GUI */
 
-        ConnectViaApi           = 0x00008,      /** Widget may connect to a public action via the API */
-        ConnectViaGui           = 0x00010,      /** Widget may connect to a public action via the GUI */
-        ConnectViaApiAndGui     = 0x00020,      /** Widget may connect to a public action via the API and the GUI */
+        PublishViaApi           = 0x00001,                              /** Widget may be published via the API */
+        PublishViaGui           = 0x00002,                              /** Widget may be published via the GUI */
+        PublishViaApiAndGui     = PublishViaApi | PublishViaGui,        /** Widget may be published via the API and the GUI */
 
-        DisconnectViaApi        = 0x00040,      /** Widget may disconnect from a public action via the API */
-        DisconnectViaGui        = 0x00080,      /** Widget may disconnect from a public action via the GUI */
-        DisconnectViaApiAndGui  = 0x00100,      /** Widget may disconnect from a public action via the API and the GUI */
+        ConnectViaApi           = 0x00008,                              /** Widget may connect to a public action via the API */
+        ConnectViaGui           = 0x00010,                              /** Widget may connect to a public action via the GUI */
+        ConnectViaApiAndGui     = ConnectViaApi | ConnectViaGui,        /** Widget may connect to a public action via the API and the GUI */
 
-        /** Default allows all connection options */
-        Default = PublishViaApiAndGui | ConnectViaApiAndGui | DisconnectViaApiAndGui
+        DisconnectViaApi        = 0x00040,                              /** Widget may disconnect from a public action via the API */
+        DisconnectViaGui        = 0x00080,                              /** Widget may disconnect from a public action via the GUI */
+        DisconnectViaApiAndGui  = DisconnectViaApi | DisconnectViaGui,  /** Widget may disconnect from a public action via the API and the GUI */
+
+        All     = PublishViaApiAndGui | ConnectViaApiAndGui | DisconnectViaApiAndGui,
+        Default = All
     };
 
 public:

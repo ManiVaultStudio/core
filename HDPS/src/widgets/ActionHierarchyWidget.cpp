@@ -141,7 +141,7 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
 ActionHierarchyWidget::~ActionHierarchyWidget()
 {
     if (_lastHoverModelIndex.isValid())
-        setActionHighlighted(_lastHoverModelIndex, false);
+        setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
 }
 
 void ActionHierarchyWidget::setActionHighlighted(const QModelIndex& index, bool highlighted)

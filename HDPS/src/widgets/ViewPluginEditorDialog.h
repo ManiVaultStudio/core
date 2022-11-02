@@ -9,6 +9,12 @@
 
 using namespace hdps::gui;
 
+namespace hdps {
+    namespace plugin {
+        class ViewPlugin;
+    }
+}
+
 /**
  * View plugin editor hierarchy dialog
  * 
@@ -23,9 +29,9 @@ public:
     /**
      * Constructor
      * @param parent Pointer to parent widget
-     * @param rootAction Pointer to non-owning root action
+     * @param viewPlugin Pointer to view plugin to edit
      */
-    ViewPluginEditorDialog(QWidget* parent, WidgetAction* rootAction);
+    ViewPluginEditorDialog(QWidget* parent, hdps::plugin::ViewPlugin* viewPlugin);
 
     /** Get preferred size */
     QSize sizeHint() const override {
@@ -38,7 +44,6 @@ public:
     }
 
 private:
-    WidgetAction*           _action;                    /** Pointer to view plugin action to edit */
-    ActionHierarchyWidget   _actionHierarchyWidget;     /** Widget for displaying an action hierarchy */
-    ToggleAction            _mayCloseAction;            /** Action for toggling whether a view plugin may be closed */
+    hdps::plugin::ViewPlugin*   _viewPlugin;                /** Pointer to view plugin to edit */
+    ActionHierarchyWidget       _actionHierarchyWidget;     /** Widget for displaying an action hierarchy */
 };

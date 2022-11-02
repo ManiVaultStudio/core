@@ -9,6 +9,7 @@
 #include "widgets/DockableWidget.h"
 #include "widgets/ViewPluginEditorDialog.h"
 #include "actions/TriggerAction.h"
+#include "actions/ToggleAction.h"
 #include "Plugin.h"
 
 #include <QWidget>
@@ -29,7 +30,8 @@ public:
     ViewPlugin(const PluginFactory* factory) :
         Plugin(factory),
         _widget(),
-        _editActionsAction(&_widget, "Edit view plugin actions")
+        _editActionsAction(&_widget, "Edit view plugin actions"),
+        _mayCloseAction(&_widget, "May close", true, true)
     {
         setText(getGuiName());
 
@@ -37,6 +39,9 @@ public:
 
         _editActionsAction.setShortcut(tr("F12"));
         _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
+        _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
+        _mayCloseAction.setConnectionPermissions(WidgetAction::None);
 
         connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
             ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
@@ -77,9 +82,15 @@ public:
         return _widget;
     }
 
-protected:
-    QWidget             _widget;                /** Widget representation of the plugin */
-    gui::TriggerAction  _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
+public: // Action getters
+
+    gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }
+    gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
+
+private:
+    QWidget                 _widget;                /** Widget representation of the plugin */
+    gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
+    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether a view plugin may be closed */
 };
 
 class ViewPluginFactory : public PluginFactory
