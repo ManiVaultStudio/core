@@ -24,22 +24,32 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _selectionModel(_filterModel != nullptr ? _filterModel : &_model),
     _treeView(this),
     _overlayWidget(this),
-    _nameFilterAction(this, "Name filter"),
+    _filterNameAction(this, "Name filter"),
     _filterGroupAction(this),
+    _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
+    _filterRegularExpressionAction(this, "Regular expression", false, false),
     _expandAllAction(this, "Expand all"),
     _collapseAllAction(this, "Collapse all"),
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
     _selectionGroupAction(this)
 {
-    _nameFilterAction.setPlaceHolderString(QString("Search for %1 by name or regular expression...").arg(_itemTypeName.toLower()));
-    _nameFilterAction.setSearchMode(true);
-    _nameFilterAction.setClearable(true);
+    _filterNameAction.setSearchMode(true);
+    _filterNameAction.setClearable(true);
 
     _filterGroupAction.setText(QString("%1 filtering").arg(_itemTypeName));
     _filterGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("filter"));
     _filterGroupAction.setToolTip("Adjust filtering parameters");
     _filterGroupAction.setLabelWidthFixed(100);
+
+    _filterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
+    _filterCaseSensitiveAction.setConnectionPermissions(WidgetAction::None);
+
+    _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
+    _filterRegularExpressionAction.setConnectionPermissions(WidgetAction::None);
+
+    _filterGroupAction << _filterCaseSensitiveAction;
+    _filterGroupAction << _filterRegularExpressionAction;
 
     _expandAllAction.setIcon(Application::getIconFont("FontAwesome").getIcon("angle-double-down"));
     _expandAllAction.setToolTip(QString("Expand all %1s in the hierarchy").arg(_itemTypeName.toLower()));
@@ -67,7 +77,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
 
         toolbarLayout->setSpacing(3);
 
-        toolbarLayout->addWidget(_nameFilterAction.createWidget(this), 1);
+        toolbarLayout->addWidget(_filterNameAction.createWidget(this), 1);
         toolbarLayout->addWidget(_filterGroupAction.createCollapsedWidget(this));
         toolbarLayout->addWidget(_expandAllAction.createWidget(this));
         toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
@@ -106,25 +116,42 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     const auto numberOfRowsChanged = [this]() -> void {
         const auto hasItems = _model.rowCount() >= 1;
 
-        _nameFilterAction.setEnabled(hasItems);
+        _filterNameAction.setEnabled(hasItems);
         _treeView.setHeaderHidden(!hasItems);
 
         updateExpandCollapseActionsReadOnly();
         updateOverlayWidget();
     };
 
-    connect(&_nameFilterAction, &StringAction::stringChanged, this, [this](const QString& value) {
-        if (_filterModel != nullptr) {
-            const auto re = QRegularExpression(value);
+    const auto updateFilterModel = [this]() -> void {
+        if (_filterModel == nullptr)
+            return;
 
-            if (re.isValid())
-                _filterModel->setFilterRegularExpression(re);
-            else
-                _filterModel->setFilterFixedString(value);
+        const auto caseSensitivity = _filterCaseSensitiveAction.isChecked() ? "case-sensitive" : "case-insensitive";
+
+        if (_filterRegularExpressionAction.isChecked()) {
+            _filterNameAction.setPlaceHolderString(QString("Search for %1 by regular expression (%2)").arg(_itemTypeName.toLower(), caseSensitivity));
+
+            auto regularExpression = QRegularExpression(_filterNameAction.getString());
+
+            if (!_filterCaseSensitiveAction.isChecked())
+                regularExpression.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
+
+            if (regularExpression.isValid())
+                _filterModel->setFilterRegularExpression(regularExpression);
         }
+        else {
+            _filterNameAction.setPlaceHolderString(QString("Search for %1 by name (%2)").arg(_itemTypeName.toLower(), caseSensitivity));
+            _filterModel->setFilterFixedString(_filterNameAction.getString());
+        }
+            
+        _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
+        _filterModel->invalidate();
+    };
 
-        updateOverlayWidget();
-    });
+    connect(&_filterNameAction, &StringAction::stringChanged, this, updateFilterModel);
+    connect(&_filterCaseSensitiveAction, &ToggleAction::toggled, this, updateFilterModel);
+    connect(&_filterRegularExpressionAction, &ToggleAction::toggled, this, updateFilterModel);
 
     const auto connectExpandCollapseActionsReadOnly = [this]() -> void {
         connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -183,6 +210,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
 
     numberOfRowsChanged();
     selectionChanged();
+    updateFilterModel();
 }
 
 QModelIndex HierarchyWidget::toSourceModelIndex(const QModelIndex& modelIndex) const
@@ -307,7 +335,7 @@ void HierarchyWidget::updateOverlayWidget()
     }
     else {
         if (_model.rowCount() >= 1 && _filterModel->rowCount() == 0) {
-            _overlayWidget.set(windowIcon(), QString("No %1s found for %2").arg(_itemTypeName.toLower(), _nameFilterAction.getString()), "Try changing the search parameters...");
+            _overlayWidget.set(windowIcon(), QString("No %1s found for %2").arg(_itemTypeName.toLower(), _filterNameAction.getString()), "Try changing the filter parameters...");
             _overlayWidget.show();
         }
         else {

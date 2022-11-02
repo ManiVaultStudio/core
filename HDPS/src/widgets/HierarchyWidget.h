@@ -3,6 +3,7 @@
 #include "actions/StringAction.h"
 #include "actions/TriggerAction.h"
 #include "actions/GroupAction.h"
+#include "actions/ToggleAction.h"
 
 #include "OverlayWidget.h"
 
@@ -23,7 +24,7 @@ namespace gui
  * 
  * It sets up the tree view and links up the filter and selection models
  * May show a toolbar for:
- * - Filtering by name
+ * - Filtering by name (possibly with regular expression)
  * - Expanding all items
  * - Collapsing all items
  * - Selecting all items
@@ -81,11 +82,11 @@ public:
     }
 
     /**
-     * Get name filter action
-     * @return Reference to name filter action
+     * Get filter name action
+     * @return Reference to filter name action
      */
-    StringAction& getNameFilterAction() {
-        return _nameFilterAction;
+    StringAction& getFilterNameAction() {
+        return _filterNameAction;
     }
 
     /**
@@ -94,6 +95,22 @@ public:
      */
     GroupAction& getFilterGroupAction() {
         return _filterGroupAction;
+    }
+
+    /**
+     * Get filter regular expression action
+     * @return Reference to filter regular expression action
+     */
+    ToggleAction& getFilterRegularExpressionAction() {
+        return _filterRegularExpressionAction;
+    }
+
+    /**
+     * Get filter case sensitive action
+     * @return Reference to filter case sensitive action
+     */
+    ToggleAction& getFilterCaseSensitiveAction() {
+        return _filterCaseSensitiveAction;
     }
 
     /**
@@ -183,19 +200,21 @@ private:
     void updateExpandCollapseActionsReadOnly();
 
 private:
-    QString                     _itemTypeName;          /** Name of the item type */
-    QAbstractItemModel&         _model;                 /** Model containing data to be displayed in the hierarchy */
-    QSortFilterProxyModel*      _filterModel;           /** Pointer to filter model (maybe nullptr) */
-    QItemSelectionModel         _selectionModel;        /** Selection model */
-    QTreeView                   _treeView;              /** Tree view that contains the data hierarchy */
-    OverlayWidget               _overlayWidget;         /** Overlay widget that show information when there are no items in the model */
-    StringAction                _nameFilterAction;      /** String action for filtering by name */
-    GroupAction                 _filterGroupAction;     /** Filter group action */
-    TriggerAction               _expandAllAction;       /** Expand all datasets action */
-    TriggerAction               _collapseAllAction;     /** Collapse all datasets action */
-    TriggerAction               _selectAllAction;       /** Select all action */
-    TriggerAction               _selectNoneAction;      /** Select none action */
-    GroupAction                 _selectionGroupAction;  /** Selection action */
+    QString                     _itemTypeName;                      /** Name of the item type */
+    QAbstractItemModel&         _model;                             /** Model containing data to be displayed in the hierarchy */
+    QSortFilterProxyModel*      _filterModel;                       /** Pointer to filter model (maybe nullptr) */
+    QItemSelectionModel         _selectionModel;                    /** Selection model */
+    QTreeView                   _treeView;                          /** Tree view that contains the data hierarchy */
+    OverlayWidget               _overlayWidget;                     /** Overlay widget that show information when there are no items in the model */
+    StringAction                _filterNameAction;                  /** String action for filtering by name */
+    GroupAction                 _filterGroupAction;                 /** Filter group action */
+    ToggleAction                _filterCaseSensitiveAction;         /** Filter case-sensitive action */
+    ToggleAction                _filterRegularExpressionAction;     /** Enable filter with regular expression action */
+    TriggerAction               _expandAllAction;                   /** Expand all items action */
+    TriggerAction               _collapseAllAction;                 /** Collapse all items action */
+    TriggerAction               _selectAllAction;                   /** Select all action */
+    TriggerAction               _selectNoneAction;                  /** Select none action */
+    GroupAction                 _selectionGroupAction;              /** Selection action */
 };
 
 }

@@ -211,7 +211,7 @@ public:
      * @param options Options to select from
      * @param selectedOptions Initial selected options
      */
-    OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList());
+    OptionsAction(QObject* parent, const QString& title = "", const QStringList& options = QStringList(), const QStringList& selectedOptions = QStringList(), const QStringList& defaultSelectedOptions = QStringList());
 
     /**
      * Get type string
@@ -294,6 +294,9 @@ public:
      * @param selectedOptions Selected options
      */
     void setSelectedOptions(const QStringList& selectedOptions);
+
+    /** Reset to default */
+    void reset() override;
 
 public: // Linking
 

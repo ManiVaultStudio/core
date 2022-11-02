@@ -13,7 +13,7 @@ namespace hdps {
 
 namespace gui {
 
-OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
+OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/, const QStringList& defaultSelectedOptions /*= QStringList()*/) :
     WidgetAction(parent),
     _optionsModel(),
     _selectionAction(*this),
@@ -140,6 +140,11 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
         selectOption(selectedOptions.at(i));
 
     emit selectedOptionsChanged(getSelectedOptions());
+}
+
+void OptionsAction::reset()
+{
+    //setSelectedOptions(getde)
 }
 
 void OptionsAction::connectToPublicAction(WidgetAction* publicAction)

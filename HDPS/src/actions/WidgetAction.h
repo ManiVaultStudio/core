@@ -298,10 +298,7 @@ public: // Settings
         return false;
     };
 
-    /**
-     * Reset to factory default
-     * @param recursive Reset to factory default recursively
-     */
+    /** Reset to default */
     virtual void reset() {};
 
     /**

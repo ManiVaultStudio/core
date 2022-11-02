@@ -54,10 +54,10 @@ bool ActionHierarchyFilterModel::filterAcceptsRow(int row, const QModelIndex& pa
 
     auto action = static_cast<ActionHierarchyModelItem*>(index.internalPointer())->getAction();
 
-    //if (filterRegularExpression().isValid()) {
-    //    const auto key = sourceModel()->data(index, filterRole()).toString();
-    //    return key.contains(filterRegularExpression());
-    //}
+    if (filterRegularExpression().isValid()) {
+        const auto key = sourceModel()->data(index, filterRole()).toString();
+        return key.contains(filterRegularExpression());
+    }
 
     std::int32_t numberOfActiveFilters  = 0;
     std::int32_t numberOfMatches        = 0;
