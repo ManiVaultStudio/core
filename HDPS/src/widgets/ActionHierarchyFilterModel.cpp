@@ -16,7 +16,10 @@ ActionHierarchyFilterModel::ActionHierarchyFilterModel(QObject* parent /*= nullp
     setRecursiveFilteringEnabled(true);
     setFilterCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
 
-    //_filterVisibilityAction.setDefaultWidgetFlags(OptionsAction::ListView);
+    _filterVisibilityAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _filterMayPublishAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _filterMayConnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
+    _filterMayDisconnectAction.setDefaultWidgetFlags(OptionsAction::ComboBox | OptionsAction::Selection);
 
     _filterVisibilityAction.setToolTip("Filter actions based on their visibility");
     _filterMayPublishAction.setToolTip("Filter actions based on whether they may publish");

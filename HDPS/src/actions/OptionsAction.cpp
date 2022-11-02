@@ -229,13 +229,10 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
+    layout->setSpacing(4);
 
     if (widgetFlags & WidgetFlag::ComboBox)
         layout->addWidget(new OptionsAction::ComboBoxWidget(parent, this));
-
-    //if (widgetFlags & WidgetFlag::ListView)
-    //    layout->addWidget(new OptionAction::ListViewWidget(parent, this));
 
     if (widgetFlags & WidgetFlag::Selection)
         layout->addWidget(_selectionAction.createCollapsedWidget(parent));

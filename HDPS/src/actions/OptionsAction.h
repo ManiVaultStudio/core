@@ -5,7 +5,6 @@
 
 #include <QStandardItemModel>
 #include <QComboBox>
-#include <QListView>
 
 namespace hdps {
 
@@ -27,7 +26,6 @@ public:
     /** Describes the widget flags */
     enum WidgetFlag {
         ComboBox        = 0x00001,      /** The widget includes a combobox widget */
-        ListView        = 0x00002,      /** The widget includes a list view widget */
         Selection       = 0x00004,      /** The widget includes a selection control */
         File            = 0x00008,      /** The widget includes a file control */
 

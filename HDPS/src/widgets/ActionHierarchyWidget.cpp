@@ -122,7 +122,7 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
     filterGroupAction << _filterModel.getFilterMayDisconnectAction();
     //filterGroupAction << _filterModel.getRemoveFiltersAction();
 
-    filterGroupAction.setPopupSizeHint(QSize(400, 0));
+    filterGroupAction.setPopupSizeHint(QSize(300, 0));
 }
 
 ActionHierarchyWidget::~ActionHierarchyWidget()
