@@ -46,16 +46,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
 
     /**
-     * Adds a new item to the import menu
-     * @param menuName Name of the import plugin
-     * @param icon Icon of the import plugin
+     * Adds an import plugin trigger action to the visualize menu
+     * @param action Pointer to action to add
      */
-    QAction* addImportOption(const QString& actionName, const QIcon& icon);
+    void addImportOption(QAction* action);
 
     /**
-    * Adds a new item to the menu drop-down for this particular type.
+    * Adds a view plugin trigger action to the visualize menu
+    * @param action Pointer to action to add
     */
-    QAction* addViewAction(const plugin::Type& type, const QString name, const QIcon& icon);
+    void addViewAction(QAction* action);
 
     /**
     * Allows access to the core, which is created by this MainWindow. Useful for
