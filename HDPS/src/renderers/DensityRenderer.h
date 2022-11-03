@@ -17,7 +17,7 @@ namespace hdps
     namespace gui
     {
 
-        class DensityRenderer : public Renderer, public plugin::SelectionListener
+        class DensityRenderer : public Renderer
         {
 
         public:
@@ -48,9 +48,6 @@ namespace hdps
             void render() override;
             void destroy() override;
 
-            void onSelecting(Selection selection) override;
-            void onSelection(Selection selection) override;
-
             void setColorMapRange(const float& min, const float& max);
 
         private:
@@ -65,7 +62,6 @@ namespace hdps
             bool _isSelecting = false;
             bool _hasColorMap = false;
 
-            Selection _selection;
             ShaderProgram _shaderDensityDraw;
             ShaderProgram _shaderIsoDensityDraw;
             DensityComputation _densityComputation;

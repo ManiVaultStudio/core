@@ -158,18 +158,6 @@ namespace hdps
             drawFullscreenQuad();
         }
 
-        void DensityRenderer::onSelecting(Selection selection)
-        {
-            _selection = selection;
-
-            _isSelecting = true;
-        }
-
-        void DensityRenderer::onSelection(Selection selection)
-        {
-            _isSelecting = false;
-        }
-
         void DensityRenderer::setColorMapRange(const float& min, const float& max)
         {
             _colorMapRange = Vector3f(min, max, max - min);
