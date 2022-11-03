@@ -22,7 +22,7 @@ DimensionsPickerSelectAction::DimensionsPickerSelectAction(DimensionsPickerActio
     setText("Select");
     setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
 
-    _selectionThresholdAction.setEnabled(false);
+    //_selectionThresholdAction.setEnabled(false);
 
     _selectionThresholdAction.setToolTip("Threshold for selecting dimensions");
     _computeStatisticsAction.setToolTip("Compute the dimension statistics");
