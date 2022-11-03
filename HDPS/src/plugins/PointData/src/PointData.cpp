@@ -21,7 +21,7 @@
 #include "Application.h"
 
 #include <actions/GroupAction.h>
-#include <util/Serialization.h>
+#include <Serialization.h>
 #include <util/Timer.h>
 #include <DataHierarchyItem.h>
 

@@ -293,14 +293,12 @@ set(PUBLIC_RENDERERS_HEADERS
     src/renderers/Renderer.h
     src/renderers/PointRenderer.h
     src/renderers/DensityRenderer.h
-    src/renderers/SelectionRenderer.h
     src/renderers/ImageRenderer.h
 )
 
 set(PUBLIC_RENDERERS_SOURCES
     src/renderers/PointRenderer.cpp
     src/renderers/DensityRenderer.cpp
-    src/renderers/SelectionRenderer.cpp
     src/renderers/ImageRenderer.cpp
 )
 
@@ -418,6 +416,19 @@ list(APPEND PUBLIC_SERIALIZATION_FILES
     ${PUBLIC_SERIALIZATION_SOURCES}
 )
 
+set(PUBLIC_LAYOUT_MANAGER_HEADERS
+    src/LayoutManager.h
+)
+
+set(PUBLIC_LAYOUT_MANAGER_SOURCES
+    src/LayoutManager.cpp
+)
+
+list(APPEND PUBLIC_ACTIONS_MANAGER_FILES
+    ${PUBLIC_LAYOUT_MANAGER_HEADERS}
+    ${PUBLIC_LAYOUT_MANAGER_SOURCES}
+)
+
 set(PUBLIC_ACTIONS_MANAGER_HEADERS
     src/ActionsModel.h
     src/ActionsFilterModel.h
@@ -530,7 +541,7 @@ set(PUBLIC_HEADERS
     ${PUBLIC_ACTIONS_HEADERS}
     ${PUBLIC_ACTION_HIERARCHY_HEADERS}
     ${PUBLIC_WIDGET_HEADERS}
-    ${PUBLIC_RENDERER_HEADERS}
+    ${PUBLIC_RENDERERS_HEADERS}
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
@@ -546,8 +557,8 @@ set(PUBLIC_SOURCES
     ${PUBLIC_ACTIONS_SOURCES}
     ${PUBLIC_ACTION_HIERARCHY_SOURCES}
     ${PUBLIC_WIDGET_SOURCES}
-    ${PUBLIC_RENDERER_HEADER}
-    ${PUBLIC_GRAPHICS_HEADER}
+    ${PUBLIC_RENDERERS_SOURCES}
+    ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
     ${PUBLIC_SERIALIZATION_SOURCES}
@@ -589,6 +600,7 @@ source_group(Public\\Util FILES ${PUBLIC_UTIL_FILES})
 source_group(Public\\Application FILES ${PUBLIC_APPLICATION_FILES})
 source_group(Public\\Serialization FILES ${PUBLIC_SERIALIZATION_FILES})
 source_group(Public\\Managers\\Actions FILES ${PUBLIC_ACTIONS_MANAGER_FILES})
+source_group(Public\\Managers\\Layout FILES ${PUBLIC_LAYOUT_MANAGER_FILES})
 source_group(Public\\Hierarchy\\Data FILES ${PUBLIC_DATA_HIERARCHY_FILES})
 source_group(Public\\Hierarchy\\Action FILES ${PUBLIC_ACTION_HIERARCHY_FILES})
 source_group(Public\\Dataset FILES ${PUBLIC_DATASET_FILES})
