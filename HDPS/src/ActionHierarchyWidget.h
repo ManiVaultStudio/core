@@ -3,6 +3,8 @@
 #include "ActionHierarchyModel.h"
 #include "ActionHierarchyFilterModel.h"
 
+#include "widgets/HierarchyWidget.h"
+
 #include <QWidget>
 #include <QTreeView>
 
@@ -15,7 +17,7 @@ namespace gui
 /**
  * Action hierarchy widget class
  *
- * Widget class or interaction with an action hierarchy
+ * Widget class for configuring an action hierarchy
  *
  * @author Thomas Kroes
  */
@@ -28,14 +30,26 @@ public:
     /**
      * Constructor
      * @param parent Parent widget
+     * @param rootAction Pointer to non-owning root action
      */
-    ActionHierarchyWidget(QWidget* parent);
+    ActionHierarchyWidget(QWidget* parent, WidgetAction* rootAction);
+
+    /** Destructor */
+    ~ActionHierarchyWidget();
 
 private:
-    ActionHierarchyModel        _model;             /** Model containing actions to be displayed in the hierarchy */
-    ActionHierarchyFilterModel  _filterModel;       /** Action hierarchy filter model */
-    QTreeView                   _treeView;          /** Tree view that contains the action hierarchy */
-    QItemSelectionModel         _selectionModel;    /** Selection model */
+
+    /**
+     * Set action highlight state
+     * @param index Model index of the action to highlight
+     */
+    void setActionHighlighted(const QModelIndex& index, bool highlighted);
+
+private:
+    ActionHierarchyModel        _model;                             /** Hierarchical action model */
+    ActionHierarchyFilterModel  _filterModel;                       /** Hierarchical action filter model */
+    HierarchyWidget             _hierarchyWidget;                   /** Widget for displaying hierarchy */
+    QModelIndex                 _lastHoverModelIndex;               /** Model index of the item that was last hovered */
 };
 
 }

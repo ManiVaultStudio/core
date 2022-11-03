@@ -2,7 +2,7 @@
 #include "DataHierarchyItem.h"
 #include "AnalysisPlugin.h"
 
-#include <util/Serialization.h>
+#include <Serialization.h>
 #include <util/Icon.h>
 
 #include <QPainter>

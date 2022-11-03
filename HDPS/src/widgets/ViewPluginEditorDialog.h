@@ -45,5 +45,5 @@ public:
 
 private:
     hdps::plugin::ViewPlugin*   _viewPlugin;                /** Pointer to view plugin to edit */
-    ActionHierarchyWidget       _actionHierarchyWidget;     /** Widget for displaying an action hierarchy */
+    //ActionHierarchyWidget       _actionHierarchyWidget;     /** Widget for displaying an action hierarchy */
 };

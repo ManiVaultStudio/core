@@ -17,12 +17,7 @@ class AnalysisPlugin : public Plugin
 {
 
 public:
-    AnalysisPlugin(const PluginFactory* factory) :
-        Plugin(factory),
-        _input(),
-        _output()
-    {
-    }
+    AnalysisPlugin(const PluginFactory* factory);
 
     ~AnalysisPlugin() override {};
 
@@ -30,18 +25,13 @@ public:
      * Set name of the object
      * @param name Name of the object
      */
-    void setObjectName(const QString& name)
-    {
-        QObject::setObjectName("Plugins/Analysis/" + name);
-    }
+    void setObjectName(const QString& name);
 
     /**
      * Set input dataset smart pointer
      * @param inputDataset Smart pointer to the input dataset
      */
-    void setInputDataset(Dataset<DatasetImpl> inputDataset) {
-        _input = inputDataset;
-    }
+    void setInputDataset(Dataset<DatasetImpl> inputDataset);
 
     /** Get input dataset smart pointer */
     template<typename DatasetType = DatasetImpl>
@@ -53,9 +43,7 @@ public:
      * Set output dataset smart pointer
      * @param outputDataset Smart pointer to output dataset
      */
-    void setOutputDataset(Dataset<DatasetImpl> outputDataset) {
-        _output = outputDataset;
-    }
+    void setOutputDataset(Dataset<DatasetImpl> outputDataset);
 
     /** Get output dataset smart pointer */
     template<typename DatasetType = DatasetImpl>
@@ -66,69 +54,34 @@ public:
 protected: // Status
 
     /** Get task status */
-    DataHierarchyItem::TaskStatus getTaskStatus() const {
-        if (!_output.isValid())
-            return DataHierarchyItem::TaskStatus::Undefined;
-
-        return _output->getDataHierarchyItem().getTaskStatus();
-    }
+    DataHierarchyItem::TaskStatus getTaskStatus() const;
 
     /**
      * Set name of the task
      * @param taskName Name of the task
      */
-    void setTaskName(const QString& taskName) {
-        if (!_output.isValid())
-            return;
-
-        _output->getDataHierarchyItem().setTaskName(taskName);
-    }
+    void setTaskName(const QString& taskName);
 
     /**
      * Set the task progress
      * @param taskProgress Progress of the task (%)
      */
-    void setTaskProgress(const float& taskProgress) {
-        if (!_output.isValid())
-            return;
-
-        _output->getDataHierarchyItem().setTaskProgress(taskProgress);
-    }
+    void setTaskProgress(const float& taskProgress);
 
     /**
      * Set the task description
      * @param taskDescription Description of the task
      */
-    void setTaskDescription(const QString& taskDescription) {
-        if (!_output.isValid())
-            return;
-
-        _output->getDataHierarchyItem().setTaskDescription(taskDescription);
-    }
+    void setTaskDescription(const QString& taskDescription);
 
     /** Set the task status to running */
-    void setTaskRunning() {
-        if (!_output.isValid())
-            return;
-
-        _output->getDataHierarchyItem().setTaskRunning();
-    }
+    void setTaskRunning();
 
     /** Set the task status to finished */
-    void setTaskFinished() {
-        if (!_output.isValid())
-            return;
-
-        _output->getDataHierarchyItem().setTaskFinished();
-    }
+    void setTaskFinished();
 
     /** Set the task status to aborted */
-    void setTaskAborted() {
-        if (!_output.isValid())
-            return;
-
-        _output->getDataHierarchyItem().setTaskAborted();
-    }
+    void setTaskAborted();
 
 protected:
     Dataset<DatasetImpl>    _input;       /** Input dataset smart pointer */
@@ -152,9 +105,7 @@ public:
      * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("square-root-alt", color);
-    }
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
     * Produces an instance of an analysis plugin. This function gets called by the plugin manager.

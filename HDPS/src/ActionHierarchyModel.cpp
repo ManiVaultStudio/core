@@ -29,6 +29,9 @@ QVariant ActionHierarchyModel::data(const QModelIndex& index, int role) const
 
 bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
 {
+    if (!index.isValid())
+        return false;
+
     auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>((void*)index.internalPointer());
     
     QModelIndexList childIndices;
@@ -37,8 +40,6 @@ bool ActionHierarchyModel::setData(const QModelIndex& index, const QVariant& val
 
     for (int rowIndex = 0; rowIndex < rowCount(nameIndex); ++rowIndex)
         childIndices << this->index(rowIndex, index.column(), nameIndex);
-
-    //qDebug() << childIndices;
 
     auto action = actionHierarchyModelItem->getAction();
 

@@ -71,14 +71,13 @@ set( MAIN_SOURCES
     res/styles/default.qss
 )
 
-set( CORE_HEADERS
+set(PRIVATE_HEADERS
     ui/MainWindow.ui
     src/Logger.h
     src/LogItemModel.h
     src/LogDockWidget.h
     src/MainWindow.h
     src/PluginManager.h
-    src/DataHierarchyManager.h
     src/Core.h
     src/DataManager.h
     src/Archiver.h
@@ -89,13 +88,12 @@ set( CORE_HEADERS
     src/GroupDataDialog.h
 )
 
-set( CORE_SOURCES
+set(PRIVATE_SOURCES
     src/Logger.cpp
     src/LogItemModel.cpp
     src/LogDockWidget.cpp
     src/MainWindow.cpp
     src/PluginManager.cpp
-    src/DataHierarchyManager.cpp
     src/Core.cpp
     src/DataManager.cpp
     src/Archiver.cpp
@@ -104,55 +102,33 @@ set( CORE_SOURCES
     src/ProjectBarWidget.cpp
     src/LogoWidget.cpp
     src/GroupDataDialog.cpp
+    ${PRIVATE_HEADERS}
 )
 
-set(EVENT_HEADERS
+set(PUBLIC_CORE_INTERFACE_HEADERS
+    src/CoreInterface.h
+)
+
+set(PUBLIC_CORE_INTERFACE_FILES
+    ${PUBLIC_CORE_INTERFACE_HEADERS}
+)
+
+set(PUBLIC_EVENT_HEADERS
     src/event/Event.h
     src/event/EventListener.h
 )
 
-set(EVENT_SOURCES
+set(PUBLIC_EVENT_SOURCES
     src/event/Event.cpp
     src/event/EventListener.cpp
 )
 
-set(ACTION_HIERARCHY_HEADERS
-    src/widgets/ActionHierarchyWidget.h
-    src/widgets/ActionHierarchyModelItem.h
-    src/widgets/ActionHierarchyModel.h
-    src/widgets/ActionHierarchyFilterModel.h
-    src/widgets/ViewPluginEditorDialog.h
+list(APPEND PUBLIC_EVENT_FILES
+    ${PUBLIC_EVENT_HEADERS}
+    ${PUBLIC_EVENT_SOURCES}
 )
 
-set(ACTION_HIERARCHY_SOURCES
-    src/widgets/ActionHierarchyWidget.cpp
-    src/widgets/ActionHierarchyModelItem.cpp
-    src/widgets/ActionHierarchyModel.cpp
-    src/widgets/ActionHierarchyFilterModel.cpp
-    src/widgets/ViewPluginEditorDialog.cpp
-)
-
-set( WIDGET_HEADERS
-    src/widgets/WebWidget.h
-    src/widgets/DockableWidget.h
-    src/widgets/DropWidget.h
-    src/widgets/Divider.h
-    src/widgets/HierarchyWidget.h
-    src/widgets/OverlayWidget.h
-    ${ACTION_HIERARCHY_HEADERS}
-)
-
-set( WIDGET_SOURCES
-    src/widgets/WebWidget.cpp
-    src/widgets/DockableWidget.cpp
-    src/widgets/DropWidget.cpp
-    src/widgets/Divider.cpp
-    src/widgets/HierarchyWidget.cpp
-    src/widgets/OverlayWidget.cpp
-    ${ACTION_HIERARCHY_SOURCES}
-)
-
-set(ACTIONS_HEADERS
+set(PUBLIC_ACTIONS_HEADERS
     src/actions/Actions.h
     src/actions/ColorAction.h
     src/actions/ColorPickerAction.h
@@ -208,7 +184,7 @@ set(ACTIONS_HEADERS
     src/actions/WidgetActionContextMenu.h
 )
 
-set(ACTIONS_SOURCES
+set(PUBLIC_ACTIONS_SOURCES
     src/actions/ColorAction.cpp
     src/actions/ColorPickerAction.cpp
     src/actions/ColorMapAction.cpp
@@ -263,7 +239,57 @@ set(ACTIONS_SOURCES
     src/actions/WidgetActionContextMenu.cpp
 )
 
-set( RENDERER_HEADERS
+set(PUBLIC_ACTIONS_FILES
+    ${PUBLIC_ACTIONS_HEADERS}    
+    ${PUBLIC_ACTIONS_SOURCES}
+)
+
+set(PUBLIC_ACTION_HIERARCHY_HEADERS
+    src/ActionHierarchyWidget.h
+    src/ActionHierarchyModelItem.h
+    src/ActionHierarchyModel.h
+    src/ActionHierarchyFilterModel.h
+)
+
+set(PUBLIC_ACTION_HIERARCHY_SOURCES
+    src/ActionHierarchyWidget.cpp
+    src/ActionHierarchyModelItem.cpp
+    src/ActionHierarchyModel.cpp
+    src/ActionHierarchyFilterModel.cpp
+)
+
+list(APPEND PUBLIC_ACTION_HIERARCHY_FILES
+    ${PUBLIC_ACTION_HIERARCHY_HEADERS}
+    ${PUBLIC_ACTION_HIERARCHY_SOURCES}
+)
+
+set(PUBLIC_WIDGET_HEADERS
+    src/widgets/WebWidget.h
+    src/widgets/DockableWidget.h
+    src/widgets/DropWidget.h
+    src/widgets/Divider.h
+    src/widgets/HierarchyWidget.h
+    src/widgets/OverlayWidget.h
+    src/widgets/ViewPluginEditorDialog.h
+)
+
+set(PUBLIC_WIDGET_SOURCES
+    src/widgets/WebWidget.cpp
+    src/widgets/DockableWidget.cpp
+    src/widgets/DropWidget.cpp
+    src/widgets/Divider.cpp
+    src/widgets/HierarchyWidget.cpp
+    src/widgets/OverlayWidget.cpp
+    src/widgets/ViewPluginEditorDialog.cpp
+    ${ACTION_HIERARCHY_SOURCES}
+)
+
+list(APPEND PUBLIC_WIDGET_FILES
+    ${PUBLIC_WIDGET_HEADERS}
+    ${PUBLIC_WIDGET_SOURCES}
+)
+
+set(PUBLIC_RENDERERS_HEADERS
     src/renderers/Renderer.h
     src/renderers/PointRenderer.h
     src/renderers/DensityRenderer.h
@@ -271,14 +297,19 @@ set( RENDERER_HEADERS
     src/renderers/ImageRenderer.h
 )
 
-set( RENDERER_SOURCES
+set(PUBLIC_RENDERERS_SOURCES
     src/renderers/PointRenderer.cpp
     src/renderers/DensityRenderer.cpp
     src/renderers/SelectionRenderer.cpp
     src/renderers/ImageRenderer.cpp
 )
 
-set( GRAPHICS_HEADERS
+list(APPEND PUBLIC_RENDERERS_FILES
+    ${PUBLIC_RENDERERS_HEADERS}
+    ${PUBLIC_RENDERERS_SOURCES}
+)
+
+set(PUBLIC_GRAPHICS_HEADERS
     src/graphics/BufferObject.h
     src/graphics/Vector2f.h
     src/graphics/Vector3f.h
@@ -291,7 +322,7 @@ set( GRAPHICS_HEADERS
     src/graphics/Bounds.h
 )
 
-set( GRAPHICS_SOURCES
+set(PUBLIC_GRAPHICS_SOURCES
     src/graphics/BufferObject.cpp
     src/graphics/Shader.cpp
     src/graphics/Selection.cpp
@@ -301,7 +332,12 @@ set( GRAPHICS_SOURCES
     src/graphics/Bounds.cpp
 )
 
-set( UTIL_HEADERS
+list(APPEND PUBLIC_GRAPHICS_FILES
+    ${PUBLIC_GRAPHICS_HEADERS}
+    ${PUBLIC_GRAPHICS_SOURCES}
+)
+
+set(PUBLIC_UTIL_HEADERS
     src/util/Miscellaneous.h
     src/util/FileUtil.h
     src/util/MeanShift.h
@@ -323,10 +359,9 @@ set( UTIL_HEADERS
     src/util/Preset.h
     src/util/PresetsModel.h
     src/util/PresetsFilterModel.h
-    src/util/Serialization.h
 )
 
-set( UTIL_SOURCES
+set(PUBLIC_UTIL_SOURCES
     src/util/Miscellaneous.cpp
     src/util/FileUtil.cpp
     src/util/MeanShift.cpp
@@ -348,141 +383,179 @@ set( UTIL_SOURCES
     src/util/Preset.cpp
     src/util/PresetsModel.cpp
     src/util/PresetsFilterModel.cpp
-    src/util/Serialization.cpp
 )
 
-set( PLUGIN_HEADERS
-    src/CoreInterface.h
-    src/DataHierarchyItem.h
-    src/AnalysisPlugin.h
-    src/TransformationPlugin.h
-    src/DataType.h
-    src/RawData.h
-    src/LoaderPlugin.h
-    src/WriterPlugin.h
-    src/ViewPlugin.h
-    src/PluginFactory.h
-    src/Plugin.h
-    src/PluginType.h
-    src/SelectionListener.h
-    src/Set.h
+list(APPEND PUBLIC_UTIL_FILES
+    ${PUBLIC_UTIL_HEADERS}    
+    ${PUBLIC_UTIL_SOURCES}
+)
+
+set(PUBLIC_APPLICATION_HEADERS
     src/Application.h
-    src/LinkedData.h
-    src/Dataset.h
-    src/DatasetPrivate.h
-    src/ActionsModel.h
-    src/ActionsFilterModel.h
-    src/ActionsManager.h
+)
+
+set(PUBLIC_APPLICATION_SOURCES
+    src/Application.cpp
+)
+
+list(APPEND PUBLIC_APPLICATION_FILES
+    ${PUBLIC_APPLICATION_HEADERS}
+    ${PUBLIC_APPLICATION_SOURCES}
+)
+
+set(PUBLIC_SERIALIZATION_HEADERS
+    src/Serialization.h
     src/Serializable.h
 )
 
-set( PLUGIN_SOURCES
-    src/DataHierarchyItem.cpp
-    src/Plugin.cpp
-    src/LoaderPlugin.cpp
-    src/Application.cpp
-    src/Plugin.cpp
-    src/Set.cpp
-    src/PluginFactory.cpp
-    src/LinkedData.cpp
-    src/Dataset.cpp
-    src/DatasetPrivate.cpp
-    src/ActionsModel.cpp
-    src/ActionsFilterModel.cpp
-    src/ActionsManager.cpp
+set(PUBLIC_SERIALIZATION_SOURCES
+    src/Serialization.cpp
     src/Serializable.cpp
 )
 
-set(DATA_HIERARCHY_HEADERS
+list(APPEND PUBLIC_SERIALIZATION_FILES
+    ${PUBLIC_SERIALIZATION_HEADERS}
+    ${PUBLIC_SERIALIZATION_SOURCES}
+)
+
+set(PUBLIC_ACTIONS_MANAGER_HEADERS
+    src/ActionsModel.h
+    src/ActionsFilterModel.h
+    src/ActionsManager.h
+    src/ActionsViewerWidget.h
+)
+
+set(PUBLIC_ACTIONS_MANAGER_SOURCES
+    src/ActionsModel.cpp
+    src/ActionsFilterModel.cpp
+    src/ActionsManager.cpp
+    src/ActionsViewerWidget.cpp
+)
+
+list(APPEND PUBLIC_ACTIONS_MANAGER_FILES
+    ${PUBLIC_ACTIONS_MANAGER_HEADERS}
+    ${PUBLIC_ACTIONS_MANAGER_SOURCES}
+)
+
+set(PUBLIC_LAYOUT_MANAGER_HEADERS
+    src/LayoutManager.h
+)
+
+set(PUBLIC_LAYOUT_MANAGER_SOURCES
+    src/LayoutManager.cpp
+)
+
+list(APPEND PUBLIC_LAYOUT_MANAGER_FILES
+    ${PUBLIC_LAYOUT_MANAGER_HEADERS}
+    ${PUBLIC_LAYOUT_MANAGER_SOURCES}
+)
+
+set(PUBLIC_DATASET_HEADERS
+    src/DataType.h
+    src/RawData.h
+    src/Set.h
+    src/LinkedData.h
+    src/Dataset.h
+    src/DatasetPrivate.h
+)
+
+set(PUBLIC_DATASET_SOURCES
+    src/Set.cpp
+    src/LinkedData.cpp
+    src/Dataset.cpp
+    src/DatasetPrivate.cpp
+)
+
+list(APPEND PUBLIC_DATASET_FILES
+    ${PUBLIC_DATASET_HEADERS}
+    ${PUBLIC_DATASET_SOURCES}
+)
+
+set(PUBLIC_PLUGIN_HEADERS
+    src/Plugin.h
+    src/PluginType.h
+    src/PluginFactory.h
+    src/LoaderPlugin.h
+    src/WriterPlugin.h
+    src/AnalysisPlugin.h
+    src/TransformationPlugin.h
+    src/ViewPlugin.h
+)
+
+set(PUBLIC_PLUGIN_SOURCES
+    src/Plugin.cpp
+    src/PluginFactory.cpp
+    src/LoaderPlugin.cpp
+    src/WriterPlugin.cpp
+    src/AnalysisPlugin.cpp
+    src/TransformationPlugin.cpp
+    src/ViewPlugin.cpp
+)
+
+list(APPEND PUBLIC_PLUGIN_FILES
+    ${PUBLIC_PLUGIN_HEADERS}
+    ${PUBLIC_PLUGIN_SOURCES}
+)
+
+set(PUBLIC_DATA_HIERARCHY_HEADERS
+    src/DataHierarchyManager.h
+    src/DataHierarchyItem.h
     src/DataHierarchyModelItem.h
     src/DataHierarchyFilterModel.h
     src/DataHierarchyModel.h
     src/DataHierarchyWidget.h
     src/DataPropertiesWidget.h
-    src/ActionsViewerWidget.h
     src/DataHierarchyFilterAction.h
 )
 
-set(DATA_HIERARCHY_SOURCES
+set(PUBLIC_DATA_HIERARCHY_SOURCES
+    src/DataHierarchyManager.cpp
+    src/DataHierarchyItem.cpp
     src/DataHierarchyModelItem.cpp
     src/DataHierarchyFilterModel.cpp
     src/DataHierarchyModel.cpp
     src/DataHierarchyWidget.cpp
     src/DataPropertiesWidget.cpp
-    src/ActionsViewerWidget.cpp
     src/DataHierarchyFilterAction.cpp
 )
 
-list(APPEND PRIVATE_HEADERS
-    ${CORE_HEADERS}
-    ${DATA_HIERARCHY_HEADERS}
+list(APPEND PUBLIC_DATA_HIERARCHY_FILES
+    ${PUBLIC_DATA_HIERARCHY_HEADERS}
+    ${PUBLIC_DATA_HIERARCHY_SOURCES}
 )
 
-list(APPEND PRIVATE_SOURCES
-    ${CORE_SOURCES}
-    ${PRIVATE_HEADERS}
-    ${DATA_HIERARCHY_SOURCES}
+set(PUBLIC_HEADERS
+    ${PUBLIC_CORE_INTERFACE_HEADERS}
+    ${PUBLIC_EVENT_HEADERS}
+    ${PUBLIC_ACTIONS_HEADERS}
+    ${PUBLIC_ACTION_HIERARCHY_HEADERS}
+    ${PUBLIC_WIDGET_HEADERS}
+    ${PUBLIC_RENDERER_HEADERS}
+    ${PUBLIC_GRAPHICS_HEADERS}
+    ${PUBLIC_UTIL_HEADERS}
+    ${PUBLIC_APPLICATION_HEADERS}
+    ${PUBLIC_SERIALIZATION_HEADERS}
+    ${PUBLIC_ACTIONS_MANAGER_HEADERS}
+    ${PUBLIC_DATASET_HEADERS}
+    ${PUBLIC_PLUGIN_HEADERS}
+    ${PUBLIC_DATA_HIERARCHY_HEADERS}
 )
 
-list(APPEND DATA_HIERARCHY_FILES
-    ${DATA_HIERARCHY_HEADERS}
-    ${DATA_HIERARCHY_SOURCES}
-)
-
-list(APPEND ACTION_HIERARCHY_FILES
-    ${ACTION_HIERARCHY_HEADERS}
-    ${ACTION_HIERARCHY_SOURCES}
-)
-
-list(APPEND PUBLIC_HEADERS
-    ${GRAPHICS_HEADERS}
-    ${WIDGET_HEADERS}
-    ${ACTIONS_HEADERS}
-    ${RENDERER_HEADERS}
-    ${UTIL_HEADERS}
-    ${PLUGIN_HEADERS}
-    ${EVENT_HEADERS}
-)
-
-list(APPEND PUBLIC_SOURCES
-    ${GRAPHICS_SOURCES}
-    ${WIDGET_SOURCES}
-    ${ACTIONS_SOURCES}
-    ${RENDERER_SOURCES}
-    ${UTIL_SOURCES}
-    ${PLUGIN_SOURCES}
-    ${EVENT_SOURCES}
+set(PUBLIC_SOURCES
+    ${PUBLIC_EVENT_SOURCES}
+    ${PUBLIC_ACTIONS_SOURCES}
+    ${PUBLIC_ACTION_HIERARCHY_SOURCES}
+    ${PUBLIC_WIDGET_SOURCES}
+    ${PUBLIC_RENDERER_HEADER}
+    ${PUBLIC_GRAPHICS_HEADER}
+    ${PUBLIC_UTIL_SOURCES}
+    ${PUBLIC_APPLICATION_SOURCES}
+    ${PUBLIC_SERIALIZATION_SOURCES}
+    ${PUBLIC_ACTIONS_MANAGER_SOURCES}
+    ${PUBLIC_DATASET_SOURCES}
+    ${PUBLIC_PLUGIN_SOURCES}
+    ${PUBLIC_DATA_HIERARCHY_SOURCES}
     ${PUBLIC_HEADERS}
-)
-
-list(APPEND GRAPHICS_FILES
-    ${GRAPHICS_HEADERS}
-    ${GRAPHICS_SOURCES}
-)
-
-list(APPEND WIDGET_FILES
-    ${WIDGET_SOURCES}
-    ${WIDGET_HEADERS}
-)
-
-list(APPEND ACTIONS_FILES
-    ${ACTIONS_SOURCES}
-    ${ACTIONS_HEADERS}
-)
-
-list(APPEND RENDERER_FILES
-    ${RENDERER_HEADERS}
-    ${RENDERER_SOURCES}
-)
-
-list(APPEND UTIL_FILES
-    ${UTIL_SOURCES}
-    ${UTIL_HEADERS}
-)
-
-list(APPEND EVENT_FILES
-    ${EVENT_HEADERS}
-    ${EVENT_SOURCES}
 )
 
 if(WIN32)
@@ -503,18 +576,24 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 QT6_WRAP_UI(UI_HEADERS ${UI_FILES})
 QT6_ADD_RESOURCES(RESOURCE_FILES res/resources.qrc)
 
-source_group( GUI FILES ${CORE_SOURCES})
+source_group( GUI FILES ${PRIVATE_SOURCES})
 source_group( Private FILES ${PRIVATE_SOURCES})
-source_group( Private\\DataHierarchy FILES ${DATA_HIERARCHY_FILES})
-source_group( Private\\ActionHierarchy FILES ${ACTION_HIERARCHY_FILES})
-source_group( Public FILES ${PLUGIN_HEADERS})
-source_group( Public\\Widgets FILES ${WIDGET_FILES})
-source_group( Public\\Widgets\\ActionHierarchy FILES ${ACTION_HIERARCHY_FILES})
-source_group(Public\\Actions FILES ${ACTIONS_FILES})
-source_group( Public\\Renderers FILES ${RENDERER_FILES})
-source_group( Public\\Util FILES ${UTIL_FILES})
-source_group( Public\\Graphics FILES ${GRAPHICS_FILES})
-source_group( Public\\Event FILES ${EVENT_FILES})
+
+source_group(Public\\CoreInterface FILES ${PUBLIC_CORE_INTERFACE_FILES})
+source_group(Public\\Event FILES ${PUBLIC_EVENT_FILES})
+source_group(Public\\Actions FILES ${PUBLIC_ACTIONS_FILES})
+source_group(Public\\Widgets FILES ${PUBLIC_WIDGET_FILES})
+source_group(Public\\Renderers FILES ${PUBLIC_RENDERERS_FILES})
+source_group(Public\\Graphics FILES ${PUBLIC_GRAPHICS_FILES})
+source_group(Public\\Util FILES ${PUBLIC_UTIL_FILES})
+source_group(Public\\Application FILES ${PUBLIC_APPLICATION_FILES})
+source_group(Public\\Serialization FILES ${PUBLIC_SERIALIZATION_FILES})
+source_group(Public\\Managers\\Actions FILES ${PUBLIC_ACTIONS_MANAGER_FILES})
+source_group(Public\\Hierarchy\\Data FILES ${PUBLIC_DATA_HIERARCHY_FILES})
+source_group(Public\\Hierarchy\\Action FILES ${PUBLIC_ACTION_HIERARCHY_FILES})
+source_group(Public\\Dataset FILES ${PUBLIC_DATASET_FILES})
+source_group(Public\\Plugin FILES ${PUBLIC_PLUGIN_FILES})
+
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})
 source_group( Resources FILES win/hdps.rc)

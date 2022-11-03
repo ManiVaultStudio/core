@@ -27,27 +27,7 @@ class ViewPlugin : public Plugin
     Q_OBJECT
     
 public:
-    ViewPlugin(const PluginFactory* factory) :
-        Plugin(factory),
-        _widget(),
-        _editActionsAction(&_widget, "Edit view plugin actions"),
-        _mayCloseAction(this, "May close", true, true)
-    {
-        setText(getGuiName());
-
-        _widget.addAction(&_editActionsAction);
-
-        _editActionsAction.setShortcut(tr("F12"));
-        _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
-
-        _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
-        _mayCloseAction.setConnectionPermissions(WidgetAction::None);
-
-        connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
-            ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
-            viewPluginEditorDialog.exec();
-        });
-    }
+    ViewPlugin(const PluginFactory* factory);
 
     ~ViewPlugin() override {};
 
@@ -55,23 +35,13 @@ public:
      * Set name of the object
      * @param name Name of the object
      */
-    void setObjectName(const QString& name)
-    {
-        QObject::setObjectName("Plugins/View/" + name);
-    }
-
-    /** Returns the toolbar which is shown at the top of the view plugin (dock) widget */
-    virtual QToolBar* getToolBar() {
-        return nullptr;
-    };
+    void setObjectName(const QString& name);
 
     /**
      * Load one (or more) datasets in the view
      * @param datasets Dataset(s) to load
      */
-    virtual void loadData(const Datasets& datasets) {
-        qDebug() << "Load function not implemented in view plugin implementation";
-    }
+    virtual void loadData(const Datasets& datasets);
 
     /**
      * Get widget representation of the plugin
@@ -98,11 +68,8 @@ class ViewPluginFactory : public PluginFactory
     Q_OBJECT
 
 public:
-    ViewPluginFactory() :
-        PluginFactory(Type::VIEW)
-    {
+    ViewPluginFactory();
 
-    }
     ~ViewPluginFactory() override {};
 
     /**
@@ -110,9 +77,7 @@ public:
      * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("eye", color);
-    }
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
      * Produces an instance of a view plugin. This function gets called by the plugin manager.

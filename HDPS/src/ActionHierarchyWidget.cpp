@@ -1,12 +1,9 @@
 #include "ActionHierarchyWidget.h"
-#include "ActionHierarchyModel.h"
 #include "ActionHierarchyModelItem.h"
 
 #include <QDebug>
-#include <QHeaderView>
 #include <QVBoxLayout>
-
-#include <stdexcept>
+#include <QHeaderView>
 
 using namespace hdps::util;
 
@@ -16,51 +13,152 @@ namespace hdps
 namespace gui
 {
 
-ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent) :
+/** Tree view item delegate class for overriding painting of toggle columns */
+class ItemDelegate : public QStyledItemDelegate {
+public:
+
+    /**
+     * Constructor
+     * @param parent Pointer to parent object
+     */
+    explicit ItemDelegate(QObject* parent = nullptr) :
+        QStyledItemDelegate(parent)
+    {
+    }
+
+protected:
+
+    /** Init the style option(s) for the item delegate (we override the options to paint disabled when not visible etc.) */
+    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override
+    {
+        QStyledItemDelegate::initStyleOption(option, index);
+
+        switch (index.column())
+        {
+            case ActionHierarchyModelItem::Column::Name:
+                break;
+
+            case ActionHierarchyModelItem::Column::Visible:
+            case ActionHierarchyModelItem::Column::MayPublish:
+            case ActionHierarchyModelItem::Column::MayConnect:
+            case ActionHierarchyModelItem::Column::MayDisconnect:
+            {
+                if (!index.data(Qt::EditRole).toBool())
+                    option->state &= ~QStyle::State_Enabled;
+
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+};
+
+ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* rootAction) :
     QWidget(parent),
-    _model(this),
+    _model(this, rootAction),
     _filterModel(this),
-    _treeView(this),
-    _selectionModel(&_filterModel)
+    _hierarchyWidget(this, "Action", _model, &_filterModel),
+    _lastHoverModelIndex()
 {
-    _filterModel.setSourceModel(&_model);
-
-    _treeView.setModel(&_filterModel);
-
-    _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
-    _treeView.setSelectionModel(&_selectionModel);
-    _treeView.setDragEnabled(true);
-    _treeView.setDragDropMode(QAbstractItemView::DragOnly);
-    _treeView.setSelectionBehavior(QAbstractItemView::SelectRows);
-    _treeView.setSelectionMode(QAbstractItemView::ExtendedSelection);
-    _treeView.setRootIsDecorated(true);
-    _treeView.setItemsExpandable(true);
-    _treeView.setIconSize(QSize(14, 14));
-
-    _treeView.header()->setStretchLastSection(false);
-    _treeView.header()->setMinimumSectionSize(18);
-
-    //_treeView.header()->resizeSection(DataHierarchyModelItem::Column::Name, 180);
-    //_treeView.header()->resizeSection(DataHierarchyModelItem::Column::GroupIndex, 60);
-    //_treeView.header()->resizeSection(DataHierarchyModelItem::Column::Progress, 45);
-    //_treeView.header()->resizeSection(DataHierarchyModelItem::Column::IsGroup, _treeView.header()->minimumSectionSize());
-    //_treeView.header()->resizeSection(DataHierarchyModelItem::Column::IsAnalyzing, _treeView.header()->minimumSectionSize());
-    //_treeView.header()->resizeSection(DataHierarchyModelItem::Column::IsLocked, _treeView.header()->minimumSectionSize());
-
-    //_treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Name, QHeaderView::Interactive);
-    //_treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::GUID, QHeaderView::Fixed);
-    //_treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::GroupIndex, QHeaderView::Fixed);
-    //_treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Info, QHeaderView::Stretch);
-    //_treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::Progress, QHeaderView::Fixed);
-    //_treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::IsGroup, QHeaderView::Fixed);
-    //_treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::IsAnalyzing, QHeaderView::Fixed);
-    //_treeView.header()->setSectionResizeMode(DataHierarchyModelItem::Column::IsLocked, QHeaderView::Fixed);
-
     auto layout = new QVBoxLayout();
 
-    layout->addWidget(&_treeView);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(&_hierarchyWidget, 1);
 
     setLayout(layout);
+
+    auto header = _hierarchyWidget.getTreeView().header();
+
+    header->setStretchLastSection(false);
+
+    const auto toggleColumnSize = 16;
+
+    header->resizeSection(ActionHierarchyModelItem::Column::Visible, toggleColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::MayPublish, toggleColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::MayConnect, toggleColumnSize);
+    header->resizeSection(ActionHierarchyModelItem::Column::MayDisconnect, toggleColumnSize);
+
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Name, QHeaderView::Stretch);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Visible, QHeaderView::Fixed);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayPublish, QHeaderView::Fixed);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayConnect, QHeaderView::Fixed);
+    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayDisconnect, QHeaderView::Fixed);
+
+    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
+    
+    auto& treeView = _hierarchyWidget.getTreeView();
+
+    treeView.setMouseTracking(true);
+    treeView.setItemDelegate(new ItemDelegate(this));
+
+    connect(&_hierarchyWidget.getTreeView(), &QTreeView::entered, this, [this](const QModelIndex& index) -> void {
+        return;
+        setActionHighlighted(_hierarchyWidget.toSourceModelIndex(index.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), true);
+
+        if (_lastHoverModelIndex.isValid())
+            setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+
+        _lastHoverModelIndex = index;
+    });
+
+    const auto numberOfRowsChanged = [this]() -> void {
+        if (_lastHoverModelIndex.isValid())
+            setActionHighlighted(_hierarchyWidget.toSourceModelIndex(_lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name)), false);
+
+        _lastHoverModelIndex = QModelIndex();
+    };
+    
+    connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeInserted, this, numberOfRowsChanged);
+    connect(&_filterModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, numberOfRowsChanged);
+
+    connect(&_hierarchyWidget.getTreeView(), &QTreeView::clicked, this, [this](const QModelIndex& index) -> void {
+        if (index.column() == ActionHierarchyModelItem::Column::Name)
+            return;
+
+        auto sourceModelIndex = _hierarchyWidget.toSourceModelIndex(index);
+
+        _model.setData(sourceModelIndex, !_model.data(sourceModelIndex, Qt::EditRole).toBool(), Qt::CheckStateRole);
+    });
+    
+    auto& filterGroupAction = _hierarchyWidget.getFilterGroupAction();
+
+    filterGroupAction << _filterModel.getFilterEnabledAction();
+    filterGroupAction << _filterModel.getFilterVisibilityAction();
+    filterGroupAction << _filterModel.getFilterMayPublishAction();
+    filterGroupAction << _filterModel.getFilterMayConnectAction();
+    filterGroupAction << _filterModel.getFilterMayDisconnectAction();
+    filterGroupAction << _filterModel.getRemoveFiltersAction();
+
+    filterGroupAction.setPopupSizeHint(QSize(300, 0));
+
+    //connect(this, QWidget::clo)
+}
+
+ActionHierarchyWidget::~ActionHierarchyWidget()
+{
+    //const auto lastSourceHoverModelIndex = _lastHoverModelIndex.siblingAtColumn(ActionHierarchyModelItem::Column::Name);
+
+    //if (!lastSourceHoverModelIndex.isValid())
+    //    return;
+
+    //auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(lastSourceHoverModelIndex.internalPointer());
+
+    //actionHierarchyModelItem->getAction()->setHighlighted(false);
+}
+
+void ActionHierarchyWidget::setActionHighlighted(const QModelIndex& index, bool highlighted)
+{
+    if (!index.isValid())
+        return;
+
+    if (index.internalPointer() == nullptr)
+        return;
+
+    auto actionHierarchyModelItem = static_cast<ActionHierarchyModelItem*>(index.internalPointer());
+
+    actionHierarchyModelItem->getAction()->setHighlighted(highlighted);
 }
 
 }
