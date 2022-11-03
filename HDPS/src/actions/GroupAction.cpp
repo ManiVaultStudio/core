@@ -193,14 +193,18 @@ WidgetActions GroupAction::getSortedWidgetActions() const
 }
 
 GroupAction::FormWidget::FormWidget(QWidget* parent, GroupAction* groupAction, const std::int32_t& widgetFlags) :
-    WidgetActionWidget(parent, groupAction),
+    WidgetActionWidget(parent, groupAction, widgetFlags),
     _layout(new QGridLayout())
 {
     auto contentsMargin = _layout->contentsMargins();
 
     //_layout->setContentsMargins(10, 10, 10, 10);
     
-    setLayout(_layout);
+    if (widgetFlags & PopupLayout)
+        setPopupLayout(_layout);
+    else {
+        setLayout(_layout);
+    }
 
     const auto reset = [this, groupAction]() -> void {
         if (groupAction->getShowLabels()) {

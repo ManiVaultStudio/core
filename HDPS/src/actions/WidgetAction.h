@@ -34,6 +34,43 @@ class WidgetAction : public QWidgetAction, public Serializable
 
 public:
 
+    ///** Describes the connection type options */
+    //enum ConnectionTypeFlag {
+    //    Publish     = 0x00001,      /** Widget may publish itself (make a shared public copy) */
+    //    Connect     = 0x00002,      /** Widget may connect to a public action */
+    //    Disconnect  = 0x00004       /** Widget may disconnect from a public action */
+    //};
+
+    ///** Describes the connection context options */
+    enum ConnectionContextFlag {
+        Api = 0x00008,      /** In the context of the API */
+        Gui = 0x00010,      /** In the context of the GUI */
+
+        ApiAndGui = Api | Gui
+    };
+
+    /** Describes the connection permission options */
+    enum ConnectionPermissionFlag {
+        None                    = 0x00000,                              /** Widget may not published nor connect nor disconnect via API and GUI */
+
+        PublishViaApi           = 0x00001,                              /** Widget may be published via the API */
+        PublishViaGui           = 0x00002,                              /** Widget may be published via the GUI */
+        PublishViaApiAndGui     = PublishViaApi | PublishViaGui,        /** Widget may be published via the API and the GUI */
+
+        ConnectViaApi           = 0x00008,                              /** Widget may connect to a public action via the API */
+        ConnectViaGui           = 0x00010,                              /** Widget may connect to a public action via the GUI */
+        ConnectViaApiAndGui     = ConnectViaApi | ConnectViaGui,        /** Widget may connect to a public action via the API and the GUI */
+
+        DisconnectViaApi        = 0x00040,                              /** Widget may disconnect from a public action via the API */
+        DisconnectViaGui        = 0x00080,                              /** Widget may disconnect from a public action via the GUI */
+        DisconnectViaApiAndGui  = DisconnectViaApi | DisconnectViaGui,  /** Widget may disconnect from a public action via the API and the GUI */
+
+        All     = PublishViaApiAndGui | ConnectViaApiAndGui | DisconnectViaApiAndGui,
+        Default = All
+    };
+
+public:
+
     /**
      * Constructor
      * @param parent Pointer to parent object
@@ -109,13 +146,21 @@ public:
      */
     void setDefaultWidgetFlags(const std::int32_t& widgetFlags);
 
-public: // Linking
+public: // Highlighting
 
     /**
-     * Get whether the action may be published or not
-     * @return Boolean indicating whether the action may be published or not
+     * Highlight the action (draw the background in a different color)
+     * @param highlighted Whether the action is highlighted or not
      */
-    virtual bool mayPublish() const;
+    void setHighlighted(bool highlighted);
+
+    /**
+     * Determine whether the action is in a highlighted state or not
+     * @return Boolean determining whether the action is in a highlighted state or not
+     */
+    bool isHighlighted() const;
+
+public: // Linking
 
     /**
      * Get whether the action is public (visible to other actions)
@@ -137,9 +182,9 @@ public: // Linking
 
     /**
      * Publish this action so that other actions can connect to it
-     * @param text Name of the published widget action
+     * @param text Name of the published widget action (if empty, a configuration dialog will popup)
      */
-    virtual void publish(const QString& name);
+    virtual void publish(const QString& name = "");
 
     /**
      * Connect this action to a public action
@@ -174,6 +219,119 @@ public: // Linking
      */
     const QVector<WidgetAction*> getConnectedActions() const;
 
+    /**
+     * Get whether a copy of this action may published and shared, depending on the \p connectionContextFlags
+     * @param connectionContextFlags The context from which the action will be published (API and/or GUI)
+     * @return Boolean determining whether a copy of this action may published and shared, depending on the \p connectionContextFlags
+     */
+    virtual bool mayPublish(ConnectionContextFlag connectionContextFlags) const final {
+        switch (connectionContextFlags)
+        {
+            case WidgetAction::Api:
+                return _connectionPermissions & ConnectionPermissionFlag::PublishViaApi;
+
+            case WidgetAction::Gui:
+                return _connectionPermissions & ConnectionPermissionFlag::PublishViaGui;
+
+            case WidgetAction::ApiAndGui:
+                break;
+
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get whether this action may connect to a public action, depending on the \p connectionContextFlags
+     * @param connectionContextFlags The context from which the connection will be made (API and/or GUI)
+     * @return Boolean determining whether this action may connect to a public action, depending on the \p connectionContextFlags
+     */
+    virtual bool mayConnect(ConnectionContextFlag connectionContextFlags) const final {
+        switch (connectionContextFlags)
+        {
+            case WidgetAction::Api:
+                return _connectionPermissions & ConnectionPermissionFlag::ConnectViaApi;
+
+            case WidgetAction::Gui:
+                return _connectionPermissions & ConnectionPermissionFlag::ConnectViaGui;
+
+            case WidgetAction::ApiAndGui:
+                break;
+
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get whether this action may disconnect from a public action, depending on the \p connectionContextFlags
+     * @param connectionContextFlags The context from which the disconnection will be initiated (API and/or GUI)
+     * @return Boolean determining whether this action may disconnect from a public action, depending on the \p connectionContextFlags
+     */
+    virtual bool mayDisconnect(ConnectionContextFlag connectionContextFlags) const final {
+        switch (connectionContextFlags)
+        {
+            case hdps::gui::WidgetAction::Api:
+                return _connectionPermissions & ConnectionPermissionFlag::DisconnectViaApi;
+
+            case hdps::gui::WidgetAction::Gui:
+                return _connectionPermissions & ConnectionPermissionFlag::DisconnectViaGui;
+
+            case hdps::gui::WidgetAction::ApiAndGui:
+                break;
+
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get connection permission flags
+     * @return Connection permission flags
+     */
+    virtual std::int32_t getConnectionPermissions() const final {
+        return _connectionPermissions;
+    }
+
+    /**
+     * Check whether \p connectionPermissionsFlag is set or not
+     * @param connectionPermissionsFlag Connection permissions flag
+     * @return Boolean determining whether \p connectionPermissionsFlag is set or not
+     */
+    virtual bool isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag) final {
+        return _connectionPermissions & connectionPermissionsFlag;
+    }
+
+    /**
+     * Set connection permissions flag
+     * @param connectionPermissionsFlag Connection permissions flag to set
+     * @param unset Whether to unset the connection permissions flag
+     */
+    virtual void setConnectionPermissionsFlag(std::int32_t connectionPermissionsFlag, bool unset = false) final {
+        if (unset)
+            _connectionPermissions = _connectionPermissions & ~connectionPermissionsFlag;
+        else
+            _connectionPermissions |= connectionPermissionsFlag;
+
+        emit connectionPermissionsChanged(_connectionPermissions);
+    }
+
+    /**
+     * Set connection permissions
+     * @param connectionPermissions Connection permissions value
+     */
+    virtual void setConnectionPermissions(std::int32_t connectionPermissions) final {
+        _connectionPermissions = connectionPermissions;
+
+        emit connectionPermissionsChanged(_connectionPermissions);
+    }
+
 protected: // Linking
 
     /**
@@ -186,7 +344,6 @@ public: // Settings
 
     /**
      * Determines whether the action can be reset to its default
-     * @param recursive Check recursively
      * @return Whether the action can be reset to its default
      */
     virtual bool isResettable()
@@ -194,10 +351,7 @@ public: // Settings
         return false;
     };
 
-    /**
-     * Reset to factory default
-     * @param recursive Reset to factory default recursively
-     */
+    /** Reset to default */
     virtual void reset() {};
 
     /**
@@ -241,6 +395,20 @@ public: // Settings
      */
     QVector<WidgetAction*> findChildren(const QString& searchString, bool recursive = true) const;
 
+public: // Popups
+
+    /**
+     * Get size hint of popups (in case of collapsed actions)
+     * @return Popup size hint
+     */
+    QSize getPopupSizeHint() const;
+
+    /**
+     * Set size hint of popups (in case of collapsed actions)
+     * @param popupSizeHint Popup size hint
+     */
+    void setPopupSizeHint(const QSize& popupSizeHint);
+
 protected:
 
     /**
@@ -253,7 +421,13 @@ protected:
 signals:
 
     /**
-     * Signals that the published states changed
+     * Signals that the highlighted state changed
+     * @param highlighted Whether the action is in a highlighted state or not
+     */
+    void highlightedChanged(bool highlighted);
+
+    /**
+     * Signals that the published state changed
      * @param isPublished Whether the action is published or not
      */
     void isPublishedChanged(const bool& isPublished);
@@ -276,12 +450,21 @@ signals:
      */
     void actionDisconnected(const WidgetAction* action);
 
+    /**
+     * Signals that the connection permission changed
+     * @param connectionPermissionFlags New connection permission flags
+     */
+    void connectionPermissionsChanged(std::int32_t connectionPermissionFlags);
+
 protected:
-    std::int32_t                _defaultWidgetFlags;    /** Default widget flags which are used to configure newly created widget action widgets */
-    std::int32_t                _sortIndex;             /** Sort index (used in the group action to sort actions) */
-    WidgetAction*               _publicAction;          /** Public action to which this action might be connected */
-    QVector<WidgetAction*>      _connectedActions;      /** Pointers to widget action that are connected to this action */
-    QString                     _settingsPrefix;        /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
+    std::int32_t                _defaultWidgetFlags;        /** Default widget flags which are used to configure newly created widget action widgets */
+    std::int32_t                _sortIndex;                 /** Sort index (used in the group action to sort actions) */
+    std::int32_t                _connectionPermissions;     /** Allowed connection options flags */
+    WidgetAction*               _publicAction;              /** Public action to which this action might be connected */
+    QVector<WidgetAction*>      _connectedActions;          /** Pointers to widget action that are connected to this action */
+    QString                     _settingsPrefix;            /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
+    bool                        _highlighted;               /** Whether the action is in a highlighted state or not */
+    QSize                       _popupSizeHint;             /** Size hint of the popup */
 };
 
 /** List of widget actions */

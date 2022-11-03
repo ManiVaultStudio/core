@@ -8,7 +8,7 @@
 
 #include "Application.h"
 
-#include <util/Serialization.h>
+#include <Serialization.h>
 
 #include <QtCore>
 #include <QtDebug>

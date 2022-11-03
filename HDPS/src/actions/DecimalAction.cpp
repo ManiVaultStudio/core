@@ -66,11 +66,6 @@ void DecimalAction::setSingleStep(const float& singleStep)
     emit singleStepChanged(_singleStep);
 }
 
-bool DecimalAction::mayPublish() const
-{
-    return true;
-}
-
 void DecimalAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicDecimalAction = dynamic_cast<DecimalAction*>(publicAction);

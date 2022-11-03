@@ -19,7 +19,7 @@
 #include "TransformationPlugin.h"
 #include "PluginType.h"
 
-#include <util/Serialization.h>
+#include <Serialization.h>
 
 #include <QJsonObject>
 #include <QJsonValue>

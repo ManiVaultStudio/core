@@ -13,11 +13,12 @@ namespace hdps {
 
 namespace gui {
 
-OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/) :
+OptionsAction::OptionsAction(QObject* parent, const QString& title /*= ""*/, const QStringList& options /*= QStringList()*/, const QStringList& selectedOptions /*= QStringList()*/, const QStringList& defaultSelectedOptions /*= QStringList()*/) :
     WidgetAction(parent),
     _optionsModel(),
     _selectionAction(*this),
-    _fileAction(*this)
+    _fileAction(*this),
+    _defaultSelectedOptions(defaultSelectedOptions)
 {
     setText(title);
     setDefaultWidgetFlags(WidgetFlag::Default);
@@ -99,6 +100,21 @@ QStringList OptionsAction::getSelectedOptions() const
     return selectedOptions;
 }
 
+QStringList OptionsAction::getDefaultSelectedOptions() const
+{
+    return _defaultSelectedOptions;
+}
+
+void OptionsAction::setDefaultSelectedOptions(const QStringList& defaultSelectedOptions)
+{
+    if (defaultSelectedOptions == _defaultSelectedOptions)
+        return;
+
+    _defaultSelectedOptions = defaultSelectedOptions;
+
+    emit defaultSelectedOptionsChanged(_defaultSelectedOptions);
+}
+
 bool OptionsAction::isOptionSelected(const QString& option) const
 {
     const auto matches = _optionsModel.match(_optionsModel.index(0, 0), Qt::DisplayRole, option);
@@ -142,9 +158,14 @@ void OptionsAction::setSelectedOptions(const QStringList& selectedOptions)
     emit selectedOptionsChanged(getSelectedOptions());
 }
 
-bool OptionsAction::mayPublish() const
+bool OptionsAction::isResettable()
 {
-    return true;
+    return getSelectedOptions() != getDefaultSelectedOptions();
+}
+
+void OptionsAction::reset()
+{
+    setSelectedOptions(getDefaultSelectedOptions());
 }
 
 void OptionsAction::connectToPublicAction(WidgetAction* publicAction)
@@ -194,7 +215,7 @@ OptionsAction::ComboBoxWidget::ComboBoxWidget(QWidget* parent, OptionsAction* op
     setObjectName("ComboBox");
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setModel(&const_cast<QStandardItemModel&>(optionsAction->getOptionsModel()));
-
+    
     const auto updateToolTip = [this, optionsAction]() -> void {
         setToolTip("Selected: " + optionsAction->getSelectedOptions().join(", "));
     };
@@ -234,13 +255,10 @@ QWidget* OptionsAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     auto layout = new QHBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
+    layout->setSpacing(4);
 
     if (widgetFlags & WidgetFlag::ComboBox)
         layout->addWidget(new OptionsAction::ComboBoxWidget(parent, this));
-
-    //if (widgetFlags & WidgetFlag::ListView)
-    //    layout->addWidget(new OptionAction::ListViewWidget(parent, this));
 
     if (widgetFlags & WidgetFlag::Selection)
         layout->addWidget(_selectionAction.createCollapsedWidget(parent));

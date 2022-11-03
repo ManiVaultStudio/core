@@ -154,6 +154,10 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 dockWidget->setWindowTitle(title);
             });
 
+            connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, [this, dockWidget](bool toggled) {
+                dockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
+            });
+
             auto dockWidgetArea = RightDockWidgetArea;
 
             if (getViewPluginDockWidgets().isEmpty())

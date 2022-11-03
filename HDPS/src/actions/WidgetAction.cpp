@@ -1,6 +1,7 @@
 #include "WidgetAction.h"
 #include "WidgetActionLabel.h"
 #include "WidgetActionCollapsedWidget.h"
+#include "WidgetActionContextMenu.h"
 #include "Application.h"
 #include "DataHierarchyItem.h"
 #include "Plugin.h"
@@ -10,6 +11,8 @@
 #include <QMenu>
 #include <QFileDialog>
 #include <QJsonArray>
+#include <QDialog>
+#include <QDialogButtonBox>
 
 #ifdef _DEBUG
     #define WIDGET_ACTION_VERBOSE
@@ -23,9 +26,12 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
     _sortIndex(-1),
+    _connectionPermissions(ConnectionPermissionFlag::Default),
     _publicAction(nullptr),
     _connectedActions(),
-    _settingsPrefix()
+    _settingsPrefix(),
+    _highlighted(false),
+    _popupSizeHint(QSize(0, 0))
 {
 }
 
@@ -78,7 +84,7 @@ QWidget* WidgetAction::createLabelWidget(QWidget* parent, const std::int32_t& wi
 
 QMenu* WidgetAction::getContextMenu(QWidget* parent /*= nullptr*/)
 {
-    return nullptr;
+    return new WidgetActionContextMenu(parent, this);
 }
 
 std::int32_t WidgetAction::getDefaultWidgetFlags() const
@@ -91,9 +97,19 @@ void WidgetAction::setDefaultWidgetFlags(const std::int32_t& widgetFlags)
     _defaultWidgetFlags = widgetFlags;
 }
 
-bool WidgetAction::mayPublish() const
+void WidgetAction::setHighlighted(bool highlighted)
 {
-    return false;
+    if (highlighted == _highlighted)
+        return;
+
+    _highlighted = highlighted;
+
+    emit highlightedChanged(_highlighted);
+}
+
+bool WidgetAction::isHighlighted() const
+{
+    return _highlighted;
 }
 
 bool WidgetAction::isPublic() const
@@ -111,29 +127,71 @@ bool WidgetAction::isConnected() const
     return Application::getActionsManager().isActionConnected(this);
 }
 
-void WidgetAction::publish(const QString& name)
+void WidgetAction::publish(const QString& name /*= ""*/)
 {
     try
     {
-        if (name.isEmpty())
-            throw std::runtime_error("Parameter name may not be empty");
+        if (name.isEmpty()) {
+            auto& fontAwesome = Application::getIconFont("FontAwesome");
 
-        if (Application::getActionsManager().isActionPublished(this))
-            throw std::runtime_error("Action is already published");
+            QDialog publishDialog;
 
-        auto publicCopy = getPublicCopy();
+            publishDialog.setWindowIcon(fontAwesome.getIcon("cloud-upload-alt"));
+            publishDialog.setWindowTitle("Publish " + text() + " parameter");
 
-        if (publicCopy == nullptr)
-            throw std::runtime_error("Public copy not created");
+            auto mainLayout         = new QVBoxLayout();
+            auto parameterLayout    = new QHBoxLayout();
+            auto label              = new QLabel("Name:");
+            auto lineEdit           = new QLineEdit(text());
 
-        publicCopy->setText(name);
+            parameterLayout->addWidget(label);
+            parameterLayout->addWidget(lineEdit);
 
-        connectToPublicAction(publicCopy);
+            mainLayout->addLayout(parameterLayout);
 
-        Application::getActionsManager().addAction(publicCopy);
+            auto dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-        emit isPublishedChanged(Application::getActionsManager().isActionPublished(this));
-        emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+            dialogButtonBox->button(QDialogButtonBox::Ok)->setText("Publish");
+            dialogButtonBox->button(QDialogButtonBox::Ok)->setToolTip("Publish the parameter");
+            dialogButtonBox->button(QDialogButtonBox::Cancel)->setToolTip("Cancel publishing");
+
+            connect(dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked, &publishDialog, &QDialog::accept);
+            connect(dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, &publishDialog, &QDialog::reject);
+
+            mainLayout->addWidget(dialogButtonBox);
+
+            publishDialog.setLayout(mainLayout);
+            publishDialog.setFixedWidth(300);
+
+            const auto updateOkButtonReadOnly = [dialogButtonBox, lineEdit]() -> void {
+                dialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!lineEdit->text().isEmpty());
+            };
+
+            connect(lineEdit, &QLineEdit::textChanged, this, updateOkButtonReadOnly);
+
+            updateOkButtonReadOnly();
+
+            if (publishDialog.exec() == QDialog::Accepted)
+                publish(lineEdit->text());
+        }
+        else {
+            if (Application::getActionsManager().isActionPublished(this))
+                throw std::runtime_error("Action is already published");
+
+            auto publicCopy = getPublicCopy();
+
+            if (publicCopy == nullptr)
+                throw std::runtime_error("Public copy not created");
+
+            publicCopy->setText(name);
+
+            connectToPublicAction(publicCopy);
+
+            Application::getActionsManager().addAction(publicCopy);
+
+            emit isPublishedChanged(Application::getActionsManager().isActionPublished(this));
+            emit isConnectedChanged(Application::getActionsManager().isActionConnected(this));
+        }
     }
     catch (std::exception& e)
     {
@@ -248,10 +306,8 @@ QString WidgetAction::getSettingsPath() const
 {
     QStringList actionPath;
 
-    // Get the first action parent
     auto currentParent = dynamic_cast<WidgetAction*>(parent());
 
-    // Get path name from widget action
     const auto getPathName = [](const WidgetAction* widgetAction) -> QString {
         if (!widgetAction->objectName().isEmpty())
             return widgetAction->objectName();
@@ -259,16 +315,11 @@ QString WidgetAction::getSettingsPath() const
         return widgetAction->text();
     };
 
-    // Add our own title
     actionPath << getPathName(this);
 
-    // Walk up the action tree
-    while (currentParent)
-    {
-        // Insert the action text at the beginning
+    while (currentParent) {
         actionPath.insert(actionPath.begin(), getPathName(currentParent));
 
-        // Get the next parent action
         currentParent = dynamic_cast<WidgetAction*>(currentParent->parent());
     }
 
@@ -279,28 +330,34 @@ QVector<WidgetAction*> WidgetAction::findChildren(const QString& searchString, b
 {
     QVector<WidgetAction*> foundChildren;
 
-    // Loop over all children
     for (auto child : children()) {
 
-        // Cast to widget action
         auto childWidgetAction = dynamic_cast<WidgetAction*>(child);
 
         if (!childWidgetAction)
             continue;
 
-        // Add child widget action if the name (text) contains the search string
         if (searchString.isEmpty())
             foundChildren << childWidgetAction;
         else
             if (childWidgetAction->text().contains(searchString, Qt::CaseInsensitive))
                 foundChildren << childWidgetAction;
 
-        // Find recursively
         if (recursive)
             foundChildren << childWidgetAction->findChildren(searchString, recursive);
     }
 
     return foundChildren;
+}
+
+QSize WidgetAction::getPopupSizeHint() const
+{
+    return _popupSizeHint;
+}
+
+void WidgetAction::setPopupSizeHint(const QSize& popupSizeHint)
+{
+    _popupSizeHint = popupSizeHint;
 }
 
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)

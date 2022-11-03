@@ -78,13 +78,19 @@ QPushButton* TriggersAction::createTriggerPushButton(const Trigger& trigger)
 }
 
 TriggersAction::Widget::Widget(QWidget* parent, TriggersAction* triggersAction, const std::int32_t& widgetFlags) :
-    QWidget(parent),
+    WidgetActionWidget(parent, triggersAction, widgetFlags),
     _triggersAction(triggersAction)
 {
     // Apply layout to widget
-    const auto applyLayout = [this](QLayout* layout) {
+    const auto applyLayout = [&](QLayout* layout) {
         layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
+
+        if (widgetFlags & PopupLayout)
+            setPopupLayout(layout);
+        else {
+            layout->setContentsMargins(0, 0, 0, 0);
+            setLayout(layout);
+        }
     };
 
     // Horizontal trigger buttons layout

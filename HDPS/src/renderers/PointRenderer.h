@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Renderer.h"
-#include "../SelectionListener.h"
 
 #include "../graphics/BufferObject.h"
-
 #include "../graphics/Vector2f.h"
 #include "../graphics/Vector3f.h"
 #include "../graphics/Matrix3f.h"

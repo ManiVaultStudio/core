@@ -1,9 +1,8 @@
 #include "HdpsApplication.h"
-#include "DataHierarchyManager.h"
 #include "Archiver.h"
+#include "DataHierarchyManager.h"
 
 #include <CoreInterface.h>
-
 #include <util/Exception.h>
 #include <actions/DataRemoveAction.h>
 

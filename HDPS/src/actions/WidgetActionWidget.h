@@ -7,6 +7,7 @@ namespace hdps {
 namespace gui {
 
 class WidgetAction;
+class HighlightWidget;
 
 /**
  * Widget action widget class
@@ -55,6 +56,8 @@ public:
      */
     virtual void setWidgetAction(WidgetAction* widgetAction);
 
+    QSize sizeHint() const override;
+
 protected: // Miscellaneous
 
     /**
@@ -64,8 +67,9 @@ protected: // Miscellaneous
     void setPopupLayout(QLayout* popupLayout);
 
 protected:
-    WidgetAction*   _widgetAction;      /** Pointer to widget action that will be displayed */
-    std::int32_t    _widgetFlags;       /** Widget creation flags */
+    WidgetAction*       _widgetAction;      /** Pointer to widget action that will be displayed */
+    std::int32_t        _widgetFlags;       /** Widget creation flags */
+    HighlightWidget*    _highlightWidget;   /** Pointer to highlight widget (if any) */
 };
 
 }

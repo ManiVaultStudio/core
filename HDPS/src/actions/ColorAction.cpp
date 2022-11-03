@@ -62,11 +62,6 @@ void ColorAction::setDefaultColor(const QColor& defaultColor)
     emit defaultColorChanged(_defaultColor);
 }
 
-bool ColorAction::mayPublish() const
-{
-    return true;
-}
-
 void ColorAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicColorAction = dynamic_cast<ColorAction*>(publicAction);

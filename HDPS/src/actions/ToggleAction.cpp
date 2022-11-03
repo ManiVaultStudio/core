@@ -84,11 +84,6 @@ QVariantMap ToggleAction::toVariantMap() const
     };
 }
 
-bool ToggleAction::mayPublish() const
-{
-    return true;
-}
-
 void ToggleAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicToggleAction = dynamic_cast<ToggleAction*>(publicAction);

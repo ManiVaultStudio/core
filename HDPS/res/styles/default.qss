@@ -7,12 +7,14 @@ QPushButton {
 }
 
 .square-button {
-    width: 21px;
+    width: 16px;
+    height: 16px;
 }
 
 QComboBox {
     padding-left: 5px;
     margin: 0px;
+    height: 20px;
 }
 
 QSpinBox, QDoubleSpinBox {
@@ -26,7 +28,7 @@ QLineEdit:read-only {
 }
 
 QToolButton {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     qproperty-iconSize: 12px;
 }

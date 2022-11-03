@@ -71,11 +71,6 @@ QWidget* TriggerAction::getWidget(QWidget* parent, const std::int32_t& widgetFla
     return widget;
 }
 
-bool TriggerAction::mayPublish() const
-{
-    return true;
-}
-
 void TriggerAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicTriggerAction = dynamic_cast<TriggerAction*>(publicAction);

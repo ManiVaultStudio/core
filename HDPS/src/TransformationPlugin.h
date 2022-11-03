@@ -24,11 +24,7 @@ public:
      * Constructor
      * @param factory Pointer to transformation plugin factory
      */
-    TransformationPlugin(const PluginFactory* factory) :
-        Plugin(factory),
-        _inputDatasets()
-    {
-    }
+    TransformationPlugin(const PluginFactory* factory);
 
     /** Performs the data transformation */
     virtual void transform() = 0;
@@ -37,17 +33,13 @@ public:
      * Get input datasets
      * @return Input datasets
      */
-    Datasets getInputDatasets() const {
-        return _inputDatasets;
-    }
+    Datasets getInputDatasets() const;
     
     /**
      * Set input datasets
      * @inputDatasets Input datasets
      */
-    void setInputDatasets(const Datasets& inputDatasets) {
-        _inputDatasets = inputDatasets;
-    }
+    void setInputDatasets(const Datasets& inputDatasets);
 
 private:
     Datasets    _inputDatasets;        /** One, or more, input dataset */
@@ -65,10 +57,7 @@ class TransformationPluginFactory : public PluginFactory
 public:
 
     /** Default constructor */
-    TransformationPluginFactory() :
-        PluginFactory(Type::TRANSFORMATION)
-    {
-    }
+    TransformationPluginFactory();
 
     /** Destructor */
     ~TransformationPluginFactory() = default;
@@ -78,9 +67,7 @@ public:
      * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("random", color);
-    }
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /** Produces an instance of a transformation plugin */
     TransformationPlugin* produce() override = 0;

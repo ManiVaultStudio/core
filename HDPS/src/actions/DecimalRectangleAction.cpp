@@ -29,11 +29,6 @@ void DecimalRectangleAction::initialize(const QRectF& rectangle /*= QRectF()*/, 
     emit defaultRectangleChanged(_defaultRectangle);
 }
 
-bool DecimalRectangleAction::mayPublish() const
-{
-    return true;
-}
-
 void DecimalRectangleAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicDecimalRectangleAction = dynamic_cast<DecimalRectangleAction*>(publicAction);

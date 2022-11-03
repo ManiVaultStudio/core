@@ -1,5 +1,5 @@
 #include "LinkedData.h"
-#include "util/Serialization.h"
+#include "Serialization.h"
 #include "Set.h"
 
 using namespace hdps::util;

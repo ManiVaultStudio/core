@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/Serialization.h"
+#include "Serialization.h"
 
 #include <QString>
 #include <QJsonDocument>
@@ -51,13 +51,13 @@ public:
     virtual QJsonDocument toJsonDocument() const final;
 
     /**
-     * Load widget action from JSON file
+     * Load from JSON file
      * @param filePath Path to the JSON file (if none/invalid a file open dialog is automatically opened)
      */
     virtual void fromJsonFile(const QString& filePath = "") final;
 
     /**
-     * Save widget action from JSON file
+     * Save to JSON file
      * @param filePath Path to the JSON file (if none/invalid a file save dialog is automatically opened)
      */
     virtual void toJsonFile(const QString& filePath = "") final;

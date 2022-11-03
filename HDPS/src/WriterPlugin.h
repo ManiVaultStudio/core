@@ -21,11 +21,7 @@ namespace plugin
 class WriterPlugin : public Plugin
 {
 public:
-    WriterPlugin(const PluginFactory* factory) :
-        Plugin(factory),
-        _input()
-    {
-    }
+    WriterPlugin(const PluginFactory* factory);
 
     ~WriterPlugin() override {};
 
@@ -37,9 +33,7 @@ public:
      * Set input dataset smart pointer
      * @param inputDataset Smart pointer to input dataset
      */
-    void setInputDataset(Dataset<DatasetImpl>& inputDataset) {
-        _input = inputDataset;
-    }
+    void setInputDataset(Dataset<DatasetImpl>& inputDataset);
 
     /** Get input dataset smart pointer */
     template<typename DatasetType>
@@ -57,30 +51,16 @@ class WriterPluginFactory : public PluginFactory
     Q_OBJECT
     
 public:
-    WriterPluginFactory() :
-        PluginFactory(Type::WRITER)
-    {
+    WriterPluginFactory();
 
-    }
     ~WriterPluginFactory() override {};
-
-    /**
-     * Set name of the object
-     * @param name Name of the object
-     */
-    void setObjectName(const QString& name)
-    {
-        QObject::setObjectName("Plugins/Writer/" + name);
-    }
 
     /**
      * Get plugin icon
      * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("file-export", color);
-    }
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     WriterPlugin* produce() override = 0;
 };

@@ -44,11 +44,6 @@ void IntegralAction::initialize(const std::int32_t& minimum, const std::int32_t&
     _defaultValueChanged();
 }
 
-bool IntegralAction::mayPublish() const
-{
-    return true;
-}
-
 void IntegralAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicIntegralAction = dynamic_cast<IntegralAction*>(publicAction);

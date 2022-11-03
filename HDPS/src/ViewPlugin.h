@@ -7,6 +7,9 @@
 */
 
 #include "widgets/DockableWidget.h"
+#include "widgets/ViewPluginEditorDialog.h"
+#include "actions/TriggerAction.h"
+#include "actions/ToggleAction.h"
 #include "Plugin.h"
 
 #include <QWidget>
@@ -24,11 +27,7 @@ class ViewPlugin : public Plugin
     Q_OBJECT
     
 public:
-    ViewPlugin(const PluginFactory* factory) :
-        Plugin(factory),
-        _widget()
-    {
-    }
+    ViewPlugin(const PluginFactory* factory);
 
     ~ViewPlugin() override {};
 
@@ -36,23 +35,13 @@ public:
      * Set name of the object
      * @param name Name of the object
      */
-    void setObjectName(const QString& name)
-    {
-        QObject::setObjectName("Plugins/View/" + name);
-    }
-
-    /** Returns the toolbar which is shown at the top of the view plugin (dock) widget */
-    virtual QToolBar* getToolBar() {
-        return nullptr;
-    };
+    void setObjectName(const QString& name);
 
     /**
-     * Load one (or more datasets in the view)
+     * Load one (or more) datasets in the view
      * @param datasets Dataset(s) to load
      */
-    virtual void loadData(const Datasets& datasets) {
-        qDebug() << "Load function not implemented in view plugin implementation";
-    }
+    virtual void loadData(const Datasets& datasets);
 
     /**
      * Get widget representation of the plugin
@@ -63,8 +52,15 @@ public:
         return _widget;
     }
 
-protected:
-    QWidget     _widget;        /** Widget representation of the plugin */
+public: // Action getters
+
+    gui::TriggerAction& getEditActionsAction() { return _editActionsAction; }
+    gui::ToggleAction& getMayCloseAction() { return _mayCloseAction; }
+
+private:
+    QWidget                 _widget;                /** Widget representation of the plugin */
+    gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
+    gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether a view plugin may be closed */
 };
 
 class ViewPluginFactory : public PluginFactory
@@ -72,11 +68,8 @@ class ViewPluginFactory : public PluginFactory
     Q_OBJECT
 
 public:
-    ViewPluginFactory() :
-        PluginFactory(Type::VIEW)
-    {
+    ViewPluginFactory();
 
-    }
     ~ViewPluginFactory() override {};
 
     /**
@@ -84,9 +77,7 @@ public:
      * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    QIcon getIcon(const QColor& color = Qt::black) const override {
-        return Application::getIconFont("FontAwesome").getIcon("eye", color);
-    }
+    QIcon getIcon(const QColor& color = Qt::black) const override;
 
     /**
      * Produces an instance of a view plugin. This function gets called by the plugin manager.

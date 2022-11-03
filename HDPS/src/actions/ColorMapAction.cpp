@@ -240,11 +240,6 @@ void ColorMapAction::setDefaultColorMap(const QString& defaultColorMap)
     _currentColorMapAction.setDefaultText(defaultColorMap);
 }
 
-bool ColorMapAction::mayPublish() const
-{
-    return true;
-}
-
 void ColorMapAction::connectToPublicAction(WidgetAction* publicAction)
 {
     auto publicColorMapAction = dynamic_cast<ColorMapAction*>(publicAction);

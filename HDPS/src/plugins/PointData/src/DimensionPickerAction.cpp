@@ -123,11 +123,6 @@ bool DimensionPickerAction::maySearch() const
     return _currentDimensionAction.getNumberOfOptions() >= _searchThreshold;
 }
 
-bool DimensionPickerAction::mayPublish() const
-{
-    return true;
-}
-
 bool DimensionPickerAction::isPublic() const
 {
     return _currentDimensionAction.isPublic();
