@@ -63,6 +63,7 @@ private:
     gui::TriggerAction      _editActionsAction;     /** Trigger action to start editing the view plugin action hierarchy */
     gui::ToggleAction       _mayCloseAction;        /** Action for toggling whether a view plugin may be closed */
     gui::ToggleAction       _visibleAction;         /** Action which determines whether the view plugin is visible or not */
+    gui::TriggerAction      _triggerHelpAction;     /** Action which shows help (internal use only) */
 };
 
 class ViewPluginFactory : public PluginFactory

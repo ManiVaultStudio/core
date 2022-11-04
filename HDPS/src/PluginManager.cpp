@@ -95,12 +95,16 @@ void PluginManager::loadPlugins()
         _pluginFactories[pluginKind]->setKind(pluginKind);
         _pluginFactories[pluginKind]->setVersion(version);
 
+        if (pluginFactory->hasHelp())
+            gui.addPluginTriggerHelpAction(&pluginFactory->getTriggerHelpAction());
+
         const auto getProducePluginTriggerAction = [&](const QString& guiName) -> TriggerAction& {
             pluginFactory->setGuiName(guiName);
 
             auto& producePluginTriggerAction = pluginFactory->getProducePluginTriggerAction();
 
             producePluginTriggerAction.setIcon(pluginFactory->getIcon());
+            pluginFactory->getTriggerHelpAction().setIcon(pluginFactory->getIcon());
 
             connect(&producePluginTriggerAction, &TriggerAction::triggered, this, [this, pluginFactory]() -> void {
                 pluginTriggered(pluginFactory->getKind());
