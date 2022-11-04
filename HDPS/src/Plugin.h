@@ -7,6 +7,7 @@
 #include "Application.h"
 #include "event/EventListener.h"
 #include "actions/WidgetAction.h"
+#include "actions/StringAction.h"
 
 #include <QString>
 #include <QMap>
@@ -42,7 +43,7 @@ public:
 
     /** Returns the GUI name of this plugin */
     QString getGuiName() const {
-        return _guiName;
+        return _guiNameAction.getString();
     }
 
     /** Returns the icon of this plugin */
@@ -172,15 +173,19 @@ public: // Miscellaneous
         return Plugin::noInstances[pluginKind];
     }
 
+public: // Action getters
+
+    gui::StringAction& getGuiNameAction() { return _guiNameAction; }
+
 protected:
     CoreInterface* _core;
 
 protected:
     const PluginFactory*        _factory;           /** Pointer to plugin factory */
     const QString               _name;              /** Unique plugin name */
-    const QString               _guiName;           /** Name in the GUI */
     QMap<QString, QVariant>     _properties;        /** Properties map */
-    EventListener               _eventListener;     /** TODO */
+    EventListener               _eventListener;     /** Listen to public events */
+    gui::StringAction           _guiNameAction;     /** Action for the GUI name */
 
     /** Keeps track of how many instance have been created per plugin kind */
     static QMap<QString, std::int32_t> noInstances;

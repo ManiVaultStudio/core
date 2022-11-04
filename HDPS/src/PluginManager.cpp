@@ -124,7 +124,7 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
-            gui.addViewAction(&getProducePluginTriggerAction(pluginKind));
+            gui.addViewMenuAction(&getProducePluginTriggerAction(pluginKind));
         }
         else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
         {
@@ -413,6 +413,12 @@ QString PluginManager::pluginTriggered(const QString& kind)
 
     _core.addPlugin(plugin);
     qDebug() << "Added plugin" << plugin->getKind() << "with version" << plugin->getVersion();
+
+    auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
+
+    if (viewPlugin)
+        _core.gui().addLoadedViewPluginAction(&viewPlugin->getVisibleAction());
+
     return plugin->getName();
 }
 

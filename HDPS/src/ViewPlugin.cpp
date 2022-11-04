@@ -12,7 +12,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     Plugin(factory),
     _widget(),
     _editActionsAction(&_widget, "Edit view plugin actions"),
-    _mayCloseAction(this, "May close", true, true)
+    _mayCloseAction(this, "May close", true, true),
+    _visibleAction(this, "Visible", true, true)
 {
     setText(getGuiName());
 
@@ -24,10 +25,24 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
     _mayCloseAction.setConnectionPermissions(WidgetAction::None);
 
+    _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
+    _visibleAction.setConnectionPermissions(WidgetAction::None);
+
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
         ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
         viewPluginEditorDialog.exec();
     });
+
+    const auto updateVisibleAction = [this]() -> void {
+        _visibleAction.setEnabled(_mayCloseAction.isChecked());
+    };
+
+    connect(&_mayCloseAction, &ToggleAction::toggled, this, updateVisibleAction);
+
+    _visibleAction.setText(getGuiName());
+    //_visibleAction.setIcon(factory->getIcon());
+
+    updateVisibleAction();
 }
 
 void ViewPlugin::setObjectName(const QString& name)
