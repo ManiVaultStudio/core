@@ -136,9 +136,6 @@ private:
     Core& _core;
 
     QHash<QString, PluginFactory*> _pluginFactories;
-
-private slots:
-    QString pluginTriggered(const QString& kind);
 };
 
 }
