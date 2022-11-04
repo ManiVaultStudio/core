@@ -53,6 +53,12 @@ public:
      */
     ActionHierarchyModelItem* getChild(const std::int32_t& row);
 
+    /**
+     * Add child
+     * @param child Pointer to child action hierarchy model item
+     */
+    void addChild(ActionHierarchyModelItem* child);
+
     /** Returns the child index w.r.t. the parent */
     std::int32_t row() const;
 

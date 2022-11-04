@@ -304,6 +304,7 @@ void Points::init()
 
         _dimensionsPickerGroupAction->setText("Dimensions");
         _dimensionsPickerGroupAction->setShowLabels(false);
+        _dimensionsPickerGroupAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
         connect(&getSmartPointer(), &Dataset<Points>::dataChanged, this, [this]() -> void {
             if (_dimensionsPickerAction == nullptr)
@@ -312,6 +313,8 @@ void Points::init()
             _dimensionsPickerAction->setPointsDataset(*this);
         });
     }
+
+    _infoAction->setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 
     _eventListener.setEventCore(_core);
     _eventListener.addSupportedEventType(static_cast<std::uint32_t>(EventType::DataSelectionChanged));

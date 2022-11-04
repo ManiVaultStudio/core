@@ -26,12 +26,13 @@ WidgetAction::WidgetAction(QObject* parent /*= nullptr*/) :
     QWidgetAction(parent),
     _defaultWidgetFlags(),
     _sortIndex(-1),
-    _connectionPermissions(ConnectionPermissionFlag::Default),
+    _connectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::Default)),
     _publicAction(nullptr),
     _connectedActions(),
     _settingsPrefix(),
     _highlighted(false),
-    _popupSizeHint(QSize(0, 0))
+    _popupSizeHint(QSize(0, 0)),
+    _configuration(static_cast<std::int32_t>(ConfigurationFlag::Default))
 {
 }
 
@@ -255,6 +256,26 @@ const QVector<WidgetAction*> WidgetAction::getConnectedActions() const
     return _connectedActions;
 }
 
+bool WidgetAction::mayPublish(ConnectionContextFlag connectionContextFlags) const
+{
+    switch (connectionContextFlags)
+    {
+    case WidgetAction::Api:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaApi);
+
+    case WidgetAction::Gui:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::PublishViaGui);
+
+    case WidgetAction::ApiAndGui:
+        break;
+
+    default:
+        break;
+    }
+
+    return false;
+}
+
 WidgetAction* WidgetAction::getPublicCopy() const
 {
     return nullptr;
@@ -363,6 +384,110 @@ void WidgetAction::setPopupSizeHint(const QSize& popupSizeHint)
 QWidget* WidgetAction::getWidget(QWidget* parent, const std::int32_t& widgetFlags)
 {
     return new QWidget();
+}
+
+bool WidgetAction::mayConnect(ConnectionContextFlag connectionContextFlags) const
+{
+    switch (connectionContextFlags)
+    {
+    case WidgetAction::Api:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaApi);
+
+    case WidgetAction::Gui:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::ConnectViaGui);
+
+    case WidgetAction::ApiAndGui:
+        break;
+
+    default:
+        break;
+    }
+
+    return false;
+}
+
+bool WidgetAction::mayDisconnect(ConnectionContextFlag connectionContextFlags) const
+{
+    switch (connectionContextFlags)
+    {
+    case hdps::gui::WidgetAction::Api:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaApi);
+
+    case hdps::gui::WidgetAction::Gui:
+        return _connectionPermissions & static_cast<std::int32_t>(ConnectionPermissionFlag::DisconnectViaGui);
+
+    case hdps::gui::WidgetAction::ApiAndGui:
+        break;
+
+    default:
+        break;
+    }
+
+    return false;
+}
+
+std::int32_t WidgetAction::getConnectionPermissions() const
+{
+    return _connectionPermissions;
+}
+
+bool WidgetAction::isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag)
+{
+    return _connectionPermissions & static_cast<std::int32_t>(connectionPermissionsFlag);
+}
+
+void WidgetAction::setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset /*= false*/)
+{
+    if (unset)
+        _connectionPermissions = _connectionPermissions & ~static_cast<std::int32_t>(connectionPermissionsFlag);
+    else
+        _connectionPermissions |= static_cast<std::int32_t>(connectionPermissionsFlag);
+
+    emit connectionPermissionsChanged(_connectionPermissions);
+}
+
+void WidgetAction::setConnectionPermissions(std::int32_t connectionPermissions)
+{
+    _connectionPermissions = connectionPermissions;
+
+    emit connectionPermissionsChanged(_connectionPermissions);
+}
+
+void WidgetAction::setConnectionPermissionsToNone()
+{
+    setConnectionPermissions(static_cast<std::int32_t>(ConnectionPermissionFlag::None));
+}
+
+bool WidgetAction::isResettable()
+{
+    return false;
+}
+
+std::int32_t WidgetAction::getConfiguration() const
+{
+    return _configuration;
+}
+
+bool WidgetAction::isConfigurationFlagSet(ConfigurationFlag configurationFlag)
+{
+    return _configuration & static_cast<std::int32_t>(configurationFlag);
+}
+
+void WidgetAction::setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset /*= false*/)
+{
+    if (unset)
+        _configuration = _configuration & ~static_cast<std::int32_t>(configurationFlag);
+    else
+        _configuration |= static_cast<std::int32_t>(configurationFlag);
+
+    emit configurationChanged(_configuration);
+}
+
+void WidgetAction::setConfiguration(std::int32_t configuration)
+{
+    _configuration = configuration;
+
+    emit configurationChanged(_configuration);
 }
 
 }

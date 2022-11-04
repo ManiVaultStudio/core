@@ -42,10 +42,10 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _filterGroupAction.setToolTip("Adjust filtering parameters");
 
     _filterCaseSensitiveAction.setToolTip("Enable/disable search filter case-sensitive");
-    _filterCaseSensitiveAction.setConnectionPermissions(WidgetAction::None);
+    _filterCaseSensitiveAction.setConnectionPermissionsToNone();
 
     _filterRegularExpressionAction.setToolTip("Enable/disable search filter with regular expression");
-    _filterRegularExpressionAction.setConnectionPermissions(WidgetAction::None);
+    _filterRegularExpressionAction.setConnectionPermissionsToNone();
 
     _filterGroupAction << _filterCaseSensitiveAction;
     _filterGroupAction << _filterRegularExpressionAction;

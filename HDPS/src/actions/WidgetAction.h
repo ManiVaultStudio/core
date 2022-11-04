@@ -34,12 +34,13 @@ class WidgetAction : public QWidgetAction, public Serializable
 
 public:
 
-    ///** Describes the connection type options */
-    //enum ConnectionTypeFlag {
-    //    Publish     = 0x00001,      /** Widget may publish itself (make a shared public copy) */
-    //    Connect     = 0x00002,      /** Widget may connect to a public action */
-    //    Disconnect  = 0x00004       /** Widget may disconnect from a public action */
-    //};
+    /** Describes the configuration options */
+    enum class ConfigurationFlag {
+        VisibleInMenu       = 0x00001,      /** Whether the action may show itself in (context) menus */
+        VisibleInHierarchy  = 0x00002,      /** Whether the action may be edited in the actions hierarchy */
+
+        Default = VisibleInMenu | VisibleInHierarchy
+    };
 
     ///** Describes the connection context options */
     enum ConnectionContextFlag {
@@ -50,7 +51,7 @@ public:
     };
 
     /** Describes the connection permission options */
-    enum ConnectionPermissionFlag {
+    enum class ConnectionPermissionFlag {
         None                    = 0x00000,                              /** Widget may not published nor connect nor disconnect via API and GUI */
 
         PublishViaApi           = 0x00001,                              /** Widget may be published via the API */
@@ -224,113 +225,50 @@ public: // Linking
      * @param connectionContextFlags The context from which the action will be published (API and/or GUI)
      * @return Boolean determining whether a copy of this action may published and shared, depending on the \p connectionContextFlags
      */
-    virtual bool mayPublish(ConnectionContextFlag connectionContextFlags) const final {
-        switch (connectionContextFlags)
-        {
-            case WidgetAction::Api:
-                return _connectionPermissions & ConnectionPermissionFlag::PublishViaApi;
-
-            case WidgetAction::Gui:
-                return _connectionPermissions & ConnectionPermissionFlag::PublishViaGui;
-
-            case WidgetAction::ApiAndGui:
-                break;
-
-            default:
-                break;
-        }
-
-        return false;
-    }
+    virtual bool mayPublish(ConnectionContextFlag connectionContextFlags) const final;
 
     /**
      * Get whether this action may connect to a public action, depending on the \p connectionContextFlags
      * @param connectionContextFlags The context from which the connection will be made (API and/or GUI)
      * @return Boolean determining whether this action may connect to a public action, depending on the \p connectionContextFlags
      */
-    virtual bool mayConnect(ConnectionContextFlag connectionContextFlags) const final {
-        switch (connectionContextFlags)
-        {
-            case WidgetAction::Api:
-                return _connectionPermissions & ConnectionPermissionFlag::ConnectViaApi;
-
-            case WidgetAction::Gui:
-                return _connectionPermissions & ConnectionPermissionFlag::ConnectViaGui;
-
-            case WidgetAction::ApiAndGui:
-                break;
-
-            default:
-                break;
-        }
-
-        return false;
-    }
+    virtual bool mayConnect(ConnectionContextFlag connectionContextFlags) const final;
 
     /**
      * Get whether this action may disconnect from a public action, depending on the \p connectionContextFlags
      * @param connectionContextFlags The context from which the disconnection will be initiated (API and/or GUI)
      * @return Boolean determining whether this action may disconnect from a public action, depending on the \p connectionContextFlags
      */
-    virtual bool mayDisconnect(ConnectionContextFlag connectionContextFlags) const final {
-        switch (connectionContextFlags)
-        {
-            case hdps::gui::WidgetAction::Api:
-                return _connectionPermissions & ConnectionPermissionFlag::DisconnectViaApi;
-
-            case hdps::gui::WidgetAction::Gui:
-                return _connectionPermissions & ConnectionPermissionFlag::DisconnectViaGui;
-
-            case hdps::gui::WidgetAction::ApiAndGui:
-                break;
-
-            default:
-                break;
-        }
-
-        return false;
-    }
+    virtual bool mayDisconnect(ConnectionContextFlag connectionContextFlags) const final;
 
     /**
      * Get connection permission flags
      * @return Connection permission flags
      */
-    virtual std::int32_t getConnectionPermissions() const final {
-        return _connectionPermissions;
-    }
+    virtual std::int32_t getConnectionPermissions() const final;
 
     /**
      * Check whether \p connectionPermissionsFlag is set or not
      * @param connectionPermissionsFlag Connection permissions flag
      * @return Boolean determining whether \p connectionPermissionsFlag is set or not
      */
-    virtual bool isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag) final {
-        return _connectionPermissions & connectionPermissionsFlag;
-    }
+    virtual bool isConnectionPermissionFlagSet(ConnectionPermissionFlag connectionPermissionsFlag) final;
 
     /**
      * Set connection permissions flag
      * @param connectionPermissionsFlag Connection permissions flag to set
      * @param unset Whether to unset the connection permissions flag
      */
-    virtual void setConnectionPermissionsFlag(std::int32_t connectionPermissionsFlag, bool unset = false) final {
-        if (unset)
-            _connectionPermissions = _connectionPermissions & ~connectionPermissionsFlag;
-        else
-            _connectionPermissions |= connectionPermissionsFlag;
-
-        emit connectionPermissionsChanged(_connectionPermissions);
-    }
+    virtual void setConnectionPermissionsFlag(ConnectionPermissionFlag connectionPermissionsFlag, bool unset = false) final;
 
     /**
      * Set connection permissions
      * @param connectionPermissions Connection permissions value
      */
-    virtual void setConnectionPermissions(std::int32_t connectionPermissions) final {
-        _connectionPermissions = connectionPermissions;
+    virtual void setConnectionPermissions(std::int32_t connectionPermissions) final;
 
-        emit connectionPermissionsChanged(_connectionPermissions);
-    }
+    /** Reset connection permissions to ConnectionPermissionFlag::None */
+    virtual void setConnectionPermissionsToNone() final;
 
 protected: // Linking
 
@@ -346,10 +284,7 @@ public: // Settings
      * Determines whether the action can be reset to its default
      * @return Whether the action can be reset to its default
      */
-    virtual bool isResettable()
-    {
-        return false;
-    };
+    virtual bool isResettable();;
 
     /** Reset to default */
     virtual void reset() {};
@@ -409,6 +344,34 @@ public: // Popups
      */
     void setPopupSizeHint(const QSize& popupSizeHint);
 
+public: // Configuration flags
+
+    /**
+     * Get configuration
+     * @return Configuration
+     */
+    virtual std::int32_t getConfiguration() const final;
+
+    /**
+     * Check whether \p configurationFlag is set or not
+     * @param configurationFlag Configuration flag
+     * @return Boolean determining whether \p configurationFlag is set or not
+     */
+    virtual bool isConfigurationFlagSet(ConfigurationFlag configurationFlag) final;
+
+    /**
+     * Set configuration flag
+     * @param configurationFlag Configuration flag to set
+     * @param unset Whether to unset the \p configurationFlag flag
+     */
+    virtual void setConfigurationFlag(ConfigurationFlag configurationFlag, bool unset = false) final;
+
+    /**
+     * Set configuration
+     * @param configuration Configuration value
+     */
+    virtual void setConfiguration(std::int32_t configuration) final;
+
 protected:
 
     /**
@@ -451,10 +414,16 @@ signals:
     void actionDisconnected(const WidgetAction* action);
 
     /**
-     * Signals that the connection permission changed
-     * @param connectionPermissionFlags New connection permission flags
+     * Signals that the connection permissions changed
+     * @param connectionPermissions New connection permissions
      */
-    void connectionPermissionsChanged(std::int32_t connectionPermissionFlags);
+    void connectionPermissionsChanged(std::int32_t connectionPermissions);
+
+    /**
+     * Signals that the configuration changed
+     * @param configuration New configuration
+     */
+    void configurationChanged(std::int32_t configuration);
 
 protected:
     std::int32_t                _defaultWidgetFlags;        /** Default widget flags which are used to configure newly created widget action widgets */
@@ -465,6 +434,7 @@ protected:
     QString                     _settingsPrefix;            /** If non-empty, the prefix is used to save the contents of the widget action to settings with the Qt settings API */
     bool                        _highlighted;               /** Whether the action is in a highlighted state or not */
     QSize                       _popupSizeHint;             /** Size hint of the popup */
+    std::int32_t                _configuration;             /** Configuration flags */
 };
 
 /** List of widget actions */
