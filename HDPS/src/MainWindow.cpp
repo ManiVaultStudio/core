@@ -57,7 +57,8 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataHierarchyDockWidget(new CDockWidget("Data hierarchy")),
     _actionsViewerDockWidget(new CDockWidget("Shared parameters")),
     _dataPropertiesDockWidget(new CDockWidget("Data properties")),
-    _loggingDockWidget(new CDockWidget("Logging"))
+    _loggingDockWidget(new CDockWidget("Logging")),
+    _loadedViewPluginsMenu("Loaded views")
 {
     setupUi(this);
 
@@ -96,6 +97,9 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     });
 
     _dataPropertiesDockWidget->setWindowTitle("Data properties");
+
+    menuVisualization->addSection("Loaded");
+    menuVisualization->addMenu(&_loadedViewPluginsMenu);
 }
 
 void MainWindow::addImportOption(QAction* action)
@@ -103,9 +107,17 @@ void MainWindow::addImportOption(QAction* action)
     importDataMenu->addAction(action);
 }
 
-void MainWindow::addViewAction(QAction* action)
+void MainWindow::addViewMenuAction(QAction* action)
 {
-    menuVisualization->addAction(action);
+    menuVisualization->insertAction(0, action);
+
+    //if (menuVisualization->actions().count() == 2)
+    //    menuVisualization->insertAction(1, &_loadedViewPluginsMenu);
+}
+
+void MainWindow::addLoadedViewPluginAction(QAction* action)
+{
+    _loadedViewPluginsMenu.addAction(action);
 }
 
 void MainWindow::showEvent(QShowEvent* showEvent)
@@ -158,6 +170,10 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 dockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
             });
 
+            connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, [this, dockWidget](bool toggled) {
+                dockWidget->toggleView(toggled);
+            });
+
             auto dockWidgetArea = RightDockWidgetArea;
 
             if (getViewPluginDockWidgets().isEmpty())
@@ -173,7 +189,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             });
             
             QObject::connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
-                _dockManager->removeDockWidget(dockWidget);
+                //_dockManager->removeDockWidget(dockWidget);
                 updateCentralWidget();
             });
 

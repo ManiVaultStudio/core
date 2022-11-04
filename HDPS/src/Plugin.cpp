@@ -14,8 +14,9 @@ Plugin::Plugin(const PluginFactory* factory) :
     WidgetAction(nullptr),
     _factory(factory),
     _name(getKind() + QUuid::createUuid().toString(QUuid::WithoutBraces)),
-    _guiName(QString("%1 %2").arg(getKind(), QString::number(noInstances[getKind()] + 1))),
-    _properties()
+    _properties(),
+    _eventListener(),
+    _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), QString::number(noInstances[getKind()] + 1)))
 {
     noInstances[getKind()]++;
 }
@@ -32,7 +33,6 @@ void Plugin::setSetting(const QString& path, const QVariant& value)
 
 void Plugin::fromVariantMap(const QVariantMap& variantMap)
 {
-
 }
 
 QVariantMap Plugin::toVariantMap() const
@@ -45,7 +45,7 @@ QVariantMap Plugin::toVariantMap() const
 
     return {
         { "Name", _name },
-        { "GuiName", _guiName },
+        { "GuiName", _guiNameAction.getString() },
         { "Plugin", plugin }
     };
 }

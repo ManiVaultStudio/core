@@ -55,7 +55,13 @@ public:
     * Adds a view plugin trigger action to the visualize menu
     * @param action Pointer to action to add
     */
-    void addViewAction(QAction* action);
+    void addViewMenuAction(QAction* action);
+
+    /**
+    * Adds a loaded view plugin action to the visualize menu
+    * @param action Pointer to action to add
+    */
+    void addLoadedViewPluginAction(QAction* action);
 
     /**
     * Allows access to the core, which is created by this MainWindow. Useful for
@@ -172,6 +178,7 @@ private: // Docking
     ads::CDockWidget*           _actionsViewerDockWidget;       /** Dock widget for actions viewer */
     ads::CDockWidget*           _dataPropertiesDockWidget;      /** Dock widget for data properties */
     ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
+    QMenu                       _loadedViewPluginsMenu;         /** Menu for loaded view plugins */
 };
 
 }
