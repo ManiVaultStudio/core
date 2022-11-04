@@ -98,14 +98,14 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _dataPropertiesDockWidget->setWindowTitle("Data properties");
 }
 
-QAction* MainWindow::addImportOption(const QString& actionName, const QIcon& icon)
+void MainWindow::addImportOption(QAction* action)
 {
-    return importDataMenu->addAction(icon, actionName);
+    importDataMenu->addAction(action);
 }
 
-QAction* MainWindow::addViewAction(const plugin::Type& type, const QString name, const QIcon& icon)
+void MainWindow::addViewAction(QAction* action)
 {
-    return menuVisualization->addAction(icon, name);
+    menuVisualization->addAction(action);
 }
 
 void MainWindow::showEvent(QShowEvent* showEvent)

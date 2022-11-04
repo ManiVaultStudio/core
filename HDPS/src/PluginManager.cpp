@@ -81,7 +81,7 @@ void PluginManager::loadPlugins()
         QString version         = pluginLoader.metaData().value("MetaData").toObject().value("version").toString();
         
         // Create an instance of the plugin, i.e. the factory
-        QObject *pluginFactory = pluginLoader.instance();
+        auto pluginFactory = dynamic_cast<PluginFactory*>(pluginLoader.instance());
 
         // If pluginFactory is a nullptr then loading of the plugin failed for some reason. Print the reason to output.
         if (!pluginFactory)
@@ -91,13 +91,23 @@ void PluginManager::loadPlugins()
         }
 
         // Loading of the plugin succeeded so cast it to its original class
-        _pluginFactories[pluginKind] = qobject_cast<PluginFactory*>(pluginFactory);
+        _pluginFactories[pluginKind] = pluginFactory;
         _pluginFactories[pluginKind]->setKind(pluginKind);
-        _pluginFactories[pluginKind]->setGuiName(menuName);
         _pluginFactories[pluginKind]->setVersion(version);
 
-        // Add the plugin to a menu item and link the triggering of the menu item to triggering of the plugin
-        QAction* action = NULL;
+        const auto getProducePluginTriggerAction = [&](const QString& guiName) -> TriggerAction& {
+            pluginFactory->setGuiName(guiName);
+
+            auto& producePluginTriggerAction = pluginFactory->getProducePluginTriggerAction();
+
+            producePluginTriggerAction.setIcon(pluginFactory->getIcon());
+
+            connect(&producePluginTriggerAction, &TriggerAction::triggered, this, [this, pluginFactory]() -> void {
+                pluginTriggered(pluginFactory->getKind());
+            });
+
+            return producePluginTriggerAction;
+        };
 
         if (qobject_cast<AnalysisPluginFactory*>(pluginFactory))
         {
@@ -107,14 +117,14 @@ void PluginManager::loadPlugins()
         }
         else if (qobject_cast<LoaderPluginFactory*>(pluginFactory))
         {
-            action = gui.addImportOption(menuName, dynamic_cast<PluginFactory*>(pluginFactory)->getIcon());
+            gui.addImportOption(&getProducePluginTriggerAction(menuName));
         }
         else if (qobject_cast<WriterPluginFactory*>(pluginFactory))
         {
         }
         else if (qobject_cast<ViewPluginFactory*>(pluginFactory))
         {
-            action = gui.addViewAction(plugin::Type::VIEW, pluginKind, dynamic_cast<PluginFactory*>(pluginFactory)->getIcon());
+            gui.addViewAction(&getProducePluginTriggerAction(pluginKind));
         }
         else if (qobject_cast<TransformationPluginFactory*>(pluginFactory))
         {
@@ -124,15 +134,7 @@ void PluginManager::loadPlugins()
             qDebug() << "Plugin " << fileName << " does not implement any of the possible interfaces!";
             return;
         }
-        
-        if (action)
-        {
-            QObject::connect(action, &QAction::triggered, signalMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-            signalMapper->setMapping(action, pluginKind);
-        }
     }
-
-    QObject::connect(signalMapper, &QSignalMapper::mappedString, this, &PluginManager::pluginTriggered);
 }
 
 QStringList PluginManager::resolveDependencies(QDir pluginDir) const
@@ -246,7 +248,7 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
         if (!pluginInstance)
             return nullptr;
 
-        pluginFactory->_numberOfInstances++;
+        pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() + 1);
 
         // Plugin-type specific behavior
         switch (pluginFactory->getType()) {
@@ -294,7 +296,7 @@ PluginTriggerActions PluginManager::getPluginTriggerActions(const Type& pluginTy
     PluginTriggerActions pluginProducerActions;
 
     for (auto pluginFactory : _pluginFactories)
-        if (pluginFactory->getType() == pluginType)
+        if (pluginFactory->getType() == pluginType && pluginFactory->mayProduce())
             pluginProducerActions << pluginFactory->getPluginTriggerActions(datasets);
 
     return pluginProducerActions;
@@ -394,7 +396,7 @@ QVariantMap PluginManager::toVariantMap() const
     QVariantList usedPluginsList;
 
     for (auto pluginFactory : _pluginFactories.values())
-        if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->_numberOfInstances > 0)
+        if ((pluginFactory->getType() == Type::DATA || pluginFactory->getType() == Type::ANALYSIS || pluginFactory->getType() == Type::VIEW) && pluginFactory->getNumberOfInstances() > 0)
             usedPluginsList << pluginFactory->getKind();
 
     return {
@@ -407,7 +409,7 @@ QString PluginManager::pluginTriggered(const QString& kind)
     PluginFactory *pluginFactory = _pluginFactories[kind];
     Plugin* plugin = pluginFactory->produce();
     
-    pluginFactory->_numberOfInstances++;
+    pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() + 1);
 
     _core.addPlugin(plugin);
     qDebug() << "Added plugin" << plugin->getKind() << "with version" << plugin->getVersion();

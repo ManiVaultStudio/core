@@ -4,6 +4,7 @@
 #include "PluginType.h"
 #include "DataType.h"
 #include "Dataset.h"
+#include "actions/TriggerAction.h"
 
 #include <QObject>
 #include <QIcon>
@@ -31,51 +32,52 @@ class PluginFactory : public QObject
     Q_OBJECT
 
 public:
-    PluginFactory(Type type) :
-        _kind(),
-        _type(type),
-        _guiName(),
-        _version(),
-        _numberOfInstances(0)
-    {
-    }
 
-    ~PluginFactory() override {};
+    /**
+     * Constructor
+     * @param type The plugin type
+     */
+    PluginFactory(Type type);
 
-    void setKind(QString kind) { _kind = kind; }
-    QString getKind() const { return _kind; }
+    /**
+     * Get plugin kind
+     * @return Plugin kind
+     */
+    QString getKind() const;
 
-    Type getType() const { return _type; }
+    /**
+     * Set plugin kind
+     * @param kind Plugin kind
+     */
+    void setKind(const QString& kind);
+
+    /**
+     * Get the plugin type
+     * @return Plugin type
+     */
+    Type getType() const;
 
 public: // GUI name
 
     /** Get the menu name of the plugin */
-    QString getGuiName() const {
-        return _guiName;
-    }
+    QString getGuiName() const;
 
     /**
      * Set the GUI name of the plugin
      * @param guiName GUI name of the plugin
      */
-    void setGuiName(const QString& guiName) {
-        _guiName = guiName;
-    }
+    void setGuiName(const QString& guiName);
 
 public: // Version
 
     /** Get the plugin version */
-    QString getVersion() const {
-        return _version;
-    }
+    QString getVersion() const;
 
     /**
      * Set the plugin version
      * @param version Plugin version
      */
-    void setVersion(const QString& version) {
-        _version = version;
-    }
+    void setVersion(const QString& version);
 
 public:
 
@@ -84,7 +86,7 @@ public:
      * @param color Icon color for flat (font) icons
      * @return Icon
      */
-    virtual QIcon getIcon(const QColor& color = Qt::black) const = 0;
+    virtual QIcon getIcon(const QColor& color = Qt::black) const;
 
     /**
      * Produces the plugin
@@ -93,12 +95,24 @@ public:
     virtual Plugin* produce() = 0;
 
     /**
+     * Get whether a plugin may be produced
+     * @return Boolean determining whether a plugin may be produced
+     */
+    virtual bool mayProduce() const final;
+
+    /**
      * Get the data types that the plugin supports
      * @return Supported data types
      */
     virtual hdps::DataTypes supportedDataTypes() const {
         return hdps::DataTypes();
     }
+
+    /**
+     * Get the trigger action that produces an instance of the plugin
+     * @return Reference to the trigger action that produces an instance of the plugin
+     */
+    gui::TriggerAction& getProducePluginTriggerAction();
 
     /**
      * Get plugin trigger actions given \p datasets
@@ -117,6 +131,26 @@ public:
     virtual gui::PluginTriggerActions getPluginTriggerActions(const DataTypes& dataTypes) const {
         return gui::PluginTriggerActions();
     }
+
+public: // Number of instances
+
+    /** Get number of plugin instances currently loaded */
+    std::uint32_t getNumberOfInstances() const;
+
+    /**
+     * Set number of plugin instances currently loaded
+     * @param numberOfInstances Number of plugin instances currently loaded
+     */
+    void setNumberOfInstances(std::uint32_t numberOfInstances);
+
+    /** Get maximum number of allowed plugin instances */
+    std::uint32_t getMaximumNumberOfInstances() const;
+
+    /**
+     * Set maximum number of allowed plugin instances
+     * @param maximumNumberOfInstances Maximum number of allowed plugin instances
+     */
+    void setMaximumNumberOfInstances(std::uint32_t maximumNumberOfInstances);
 
 protected:
 
@@ -172,15 +206,13 @@ protected:
     gui::PluginTriggerAction* createPluginTriggerAction(const QString& title, const QString& description, const Datasets& datasets, const QIcon& icon) const;
 
 private:
-    QString     _kind;          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
-    Type        _type;          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
-    QString     _guiName;       /** Name of the plugin in the GUI */
-    QString     _version;       /** Plugin version */
-
-protected:
-    std::uint32_t   _numberOfInstances;     /** Number of plugin instances */
-
-    friend class PluginManager;
+    QString                 _kind;                          /** Kind of plugin (e.g. scatter plot plugin & TSNE analysis plugin) */
+    Type                    _type;                          /** Type of plugin (e.g. analysis, data, loader, writer & view) */
+    QString                 _guiName;                       /** Name of the plugin in the GUI */
+    QString                 _version;                       /** Plugin version */
+    gui::TriggerAction      _producePluginTriggerAction;    /** Trigger action that produces an instance of the plugin (respects the maximum number of allowed instances) */
+    std::uint32_t           _numberOfInstances;             /** Number of plugin instances */
+    std::uint32_t           _maximumNumberOfInstances;      /** Maximum number of plugin instances (unlimited when -1) */
 };
 
 } // namespace plugin

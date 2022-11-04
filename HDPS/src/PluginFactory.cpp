@@ -7,6 +7,91 @@ namespace hdps
 namespace plugin
 {
 
+PluginFactory::PluginFactory(Type type) :
+    _kind(),
+    _type(type),
+    _guiName(),
+    _version(),
+    _numberOfInstances(0),
+    _maximumNumberOfInstances(-1),
+    _producePluginTriggerAction(this, "")
+{
+}
+
+QString PluginFactory::getKind() const
+{
+    return _kind;
+}
+
+void PluginFactory::setKind(const QString& kind)
+{
+    _kind = kind;
+}
+
+hdps::plugin::Type PluginFactory::getType() const
+{
+    return _type;
+}
+
+QString PluginFactory::getGuiName() const
+{
+    return _guiName;
+}
+
+void PluginFactory::setGuiName(const QString& guiName)
+{
+    _guiName = guiName;
+
+    _producePluginTriggerAction.setText(_guiName);
+}
+
+QString PluginFactory::getVersion() const
+{
+    return _version;
+}
+
+void PluginFactory::setVersion(const QString& version)
+{
+    _version = version;
+}
+
+QIcon PluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
+{
+    return QIcon();
+}
+
+bool PluginFactory::mayProduce() const
+{
+    return _numberOfInstances < _maximumNumberOfInstances;
+}
+
+hdps::gui::TriggerAction& PluginFactory::getProducePluginTriggerAction()
+{
+    return _producePluginTriggerAction;
+}
+
+std::uint32_t PluginFactory::getNumberOfInstances() const
+{
+    return _numberOfInstances;
+}
+
+void PluginFactory::setNumberOfInstances(std::uint32_t numberOfInstances)
+{
+    _numberOfInstances = numberOfInstances;
+
+    _producePluginTriggerAction.setEnabled(mayProduce());
+}
+
+std::uint32_t PluginFactory::getMaximumNumberOfInstances() const
+{
+    return _maximumNumberOfInstances;
+}
+
+void PluginFactory::setMaximumNumberOfInstances(std::uint32_t maximumNumberOfInstances)
+{
+    _maximumNumberOfInstances = maximumNumberOfInstances;
+}
+
 QStringList PluginFactory::getDatasetTypesAsStringList(const Datasets& datasets)
 {
     QStringList datasetTypes;
