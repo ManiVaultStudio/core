@@ -57,6 +57,20 @@ public:
      */
     Type getType() const;
 
+public: // Help
+
+    /**
+     * Get whether the plugin has help information or not
+     * @return Boolean determining whether the plugin has help information or not
+     */
+    virtual bool hasHelp();
+
+    /**
+     * Get trigger action that shows help in some form (will be added to help menu, and if it is a view plugin also to the tab toolbar)
+     * @return Reference to show help trigger action (maybe nullptr if the plugin does not provide any help)
+     */
+    virtual gui::TriggerAction& getTriggerHelpAction() final;
+
 public: // GUI name
 
     /** Get the menu name of the plugin */
@@ -213,6 +227,7 @@ private:
     gui::TriggerAction      _producePluginTriggerAction;    /** Trigger action that produces an instance of the plugin (respects the maximum number of allowed instances) */
     std::uint32_t           _numberOfInstances;             /** Number of plugin instances */
     std::uint32_t           _maximumNumberOfInstances;      /** Maximum number of plugin instances (unlimited when -1) */
+    gui::TriggerAction      _triggerHelpAction;             /** Trigger action that triggers help (icon and text are already set) */
 };
 
 } // namespace plugin

@@ -21,6 +21,16 @@ Plugin::Plugin(const PluginFactory* factory) :
     noInstances[getKind()]++;
 }
 
+bool Plugin::hasHelp()
+{
+    return const_cast<PluginFactory*>(_factory)->hasHelp();
+}
+
+hdps::gui::TriggerAction& Plugin::getTriggerHelpAction()
+{
+    return const_cast<PluginFactory*>(_factory)->getTriggerHelpAction();
+}
+
 QVariant Plugin::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
 {
     return Application::current()->getSetting(QString("%1/%2").arg(getKind(), path), defaultValue);

@@ -64,6 +64,12 @@ public:
     void addLoadedViewPluginAction(QAction* action);
 
     /**
+    * Adds a loaded plugin show help action to the help menu
+    * @param action Pointer to action to add
+    */
+    void addPluginTriggerHelpAction(QAction* action);
+
+    /**
     * Allows access to the core, which is created by this MainWindow. Useful for
     * unit tests that may need to call addData and requestData.
     */
@@ -179,6 +185,7 @@ private: // Docking
     ads::CDockWidget*           _dataPropertiesDockWidget;      /** Dock widget for data properties */
     ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
     QMenu                       _loadedViewPluginsMenu;         /** Menu for loaded view plugins */
+    QMenu                       _pluginsHelpMenu;         /** Menu for loaded plugins help */
 };
 
 }

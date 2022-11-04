@@ -14,7 +14,8 @@ PluginFactory::PluginFactory(Type type) :
     _version(),
     _numberOfInstances(0),
     _maximumNumberOfInstances(-1),
-    _producePluginTriggerAction(this, "")
+    _producePluginTriggerAction(this, ""),
+    _triggerHelpAction(nullptr, "Trigger plugin help")
 {
 }
 
@@ -33,6 +34,16 @@ hdps::plugin::Type PluginFactory::getType() const
     return _type;
 }
 
+bool PluginFactory::hasHelp()
+{
+    return false;
+}
+
+hdps::gui::TriggerAction& PluginFactory::getTriggerHelpAction()
+{
+    return _triggerHelpAction;
+}
+
 QString PluginFactory::getGuiName() const
 {
     return _guiName;
@@ -43,6 +54,7 @@ void PluginFactory::setGuiName(const QString& guiName)
     _guiName = guiName;
 
     _producePluginTriggerAction.setText(_guiName);
+    _triggerHelpAction.setText(_guiName);
 }
 
 QString PluginFactory::getVersion() const

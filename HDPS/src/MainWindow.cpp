@@ -58,7 +58,8 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _actionsViewerDockWidget(new CDockWidget("Shared parameters")),
     _dataPropertiesDockWidget(new CDockWidget("Data properties")),
     _loggingDockWidget(new CDockWidget("Logging")),
-    _loadedViewPluginsMenu("Loaded views")
+    _loadedViewPluginsMenu("Loaded views"),
+    _pluginsHelpMenu("Plugins")
 {
     setupUi(this);
 
@@ -100,6 +101,13 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     menuVisualization->addSection("Loaded");
     menuVisualization->addMenu(&_loadedViewPluginsMenu);
+
+    _pluginsHelpMenu.setIcon(Application::getIconFont("FontAwesome").getIcon("plug"));
+
+    menuHelp->addSeparator();
+    menuHelp->addMenu(&_pluginsHelpMenu);
+
+    _loadedViewPluginsMenu.setEnabled(false);
 }
 
 void MainWindow::addImportOption(QAction* action)
@@ -118,6 +126,13 @@ void MainWindow::addViewMenuAction(QAction* action)
 void MainWindow::addLoadedViewPluginAction(QAction* action)
 {
     _loadedViewPluginsMenu.addAction(action);
+
+    _loadedViewPluginsMenu.setEnabled(true);
+}
+
+void MainWindow::addPluginTriggerHelpAction(QAction* action)
+{
+    _pluginsHelpMenu.addAction(action);
 }
 
 void MainWindow::showEvent(QShowEvent* showEvent)

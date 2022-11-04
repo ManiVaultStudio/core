@@ -13,11 +13,13 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget(),
     _editActionsAction(&_widget, "Edit view plugin actions"),
     _mayCloseAction(this, "May close", true, true),
-    _visibleAction(this, "Visible", true, true)
+    _visibleAction(this, "Visible", true, true),
+    _triggerHelpAction(this, "Trigger help")
 {
     setText(getGuiName());
 
     _widget.addAction(&_editActionsAction);
+    _widget.addAction(&_triggerHelpAction);
 
     _editActionsAction.setShortcut(tr("F12"));
     _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -28,9 +30,16 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
     _visibleAction.setConnectionPermissions(WidgetAction::None);
 
+    _triggerHelpAction.setShortcut(tr("F1"));
+    _triggerHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
         ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
         viewPluginEditorDialog.exec();
+    });
+
+    connect(&_triggerHelpAction, &TriggerAction::triggered, this, [this]() -> void {
+        getTriggerHelpAction().trigger();
     });
 
     const auto updateVisibleAction = [this]() -> void {
@@ -40,7 +49,6 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     connect(&_mayCloseAction, &ToggleAction::toggled, this, updateVisibleAction);
 
     _visibleAction.setText(getGuiName());
-    //_visibleAction.setIcon(factory->getIcon());
 
     updateVisibleAction();
 }
