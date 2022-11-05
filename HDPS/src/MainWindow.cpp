@@ -154,7 +154,6 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
             dockWidget->setWidget(&viewPlugin->getWidget(), CDockWidget::ForceNoScrollArea);
             dockWidget->setProperty("PluginType", "View");
-            //dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
 
             connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, dockWidget](const QString& title) {
                 dockWidget->setWindowTitle(title);
@@ -162,6 +161,10 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
 
             connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
                 dockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
+            });
+
+            connect(&viewPlugin->getMayFloatAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
+                dockWidget->setFeature(CDockWidget::DockWidgetFloatable, toggled);
             });
 
             const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {

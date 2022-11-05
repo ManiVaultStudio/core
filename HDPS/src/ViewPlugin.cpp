@@ -13,6 +13,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _widget(),
     _editActionsAction(&_widget, "Edit view plugin actions"),
     _mayCloseAction(this, "May close", true, true),
+    _mayFloatAction(this, "May float", true, true),
     _visibleAction(this, "Visible", true, true),
     _triggerHelpAction(this, "Trigger help")
 {
@@ -30,6 +31,11 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _mayCloseAction.setConnectionPermissionsToNone();
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
     _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
+
+    _mayFloatAction.setToolTip("Determines whether this view plugin may float or not");
+    _mayFloatAction.setConnectionPermissionsToNone();
+    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
+    _mayFloatAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
     _visibleAction.setConnectionPermissionsToNone();
@@ -74,7 +80,6 @@ void ViewPlugin::loadData(const Datasets& datasets)
 ViewPluginFactory::ViewPluginFactory() :
     PluginFactory(Type::VIEW)
 {
-
 }
 
 QIcon ViewPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
