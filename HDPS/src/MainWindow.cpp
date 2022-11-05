@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "DataHierarchyWidget.h"
 #include "ActionsViewerWidget.h"
 #include "DataPropertiesWidget.h"
 #include "DataManager.h"
@@ -44,19 +43,12 @@ namespace gui
 MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     QMainWindow(parent),
     _startPageWidget(nullptr),
-    _dataHierarchyWidget(nullptr),
-    _actionsViewerWidget(nullptr),
-    _dataPropertiesWidget(nullptr),
     _dockManager(new CDockManager(this)),
     _centralDockArea(nullptr),
     _lastDockAreaWidget(nullptr),
-    _settingsDockArea(nullptr),
     _loggingDockArea(nullptr),
     _centralDockWidget(new CDockWidget("Views")),
     _startPageDockWidget(new CDockWidget("Start page")),
-    _dataHierarchyDockWidget(new CDockWidget("Data hierarchy")),
-    _actionsViewerDockWidget(new CDockWidget("Shared parameters")),
-    _dataPropertiesDockWidget(new CDockWidget("Data properties")),
     _loggingDockWidget(new CDockWidget("Logging")),
     _loadedViewPluginsMenu("Loaded views"),
     _pluginsHelpMenu("Plugins")
@@ -70,9 +62,6 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
     _core->init();
 
     _startPageWidget        = new StartPageWidget(this);
-    _dataHierarchyWidget    = new DataHierarchyWidget(this);
-    _actionsViewerWidget    = new ActionsViewerWidget(this);
-    _dataPropertiesWidget   = new DataPropertiesWidget(this);
 
     // Change the window title when the current project file changed
     connect(Application::current(), &Application::currentProjectFilePathChanged, [this](const QString& currentProjectFilePath) {
@@ -88,16 +77,6 @@ MainWindow::MainWindow(QWidget *parent /*= nullptr*/) :
 
     // Delay execution till the event loop has started, otherwise we cannot quit the application
     QTimer::singleShot(1000, this, &MainWindow::checkGraphicsCapabilities);
-
-    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::itemAdded, this, &MainWindow::updateCentralWidget);
-    connect(&_core->getDataHierarchyManager(), &DataHierarchyManager::selectedItemsChanged, this, [this](DataHierarchyItems selectedItems) -> void {
-        if (selectedItems.isEmpty())
-            _dataPropertiesDockWidget->setWindowTitle("Data properties");
-        else
-            _dataPropertiesDockWidget->setWindowTitle("Data properties: " + selectedItems.first()->getFullPathName());
-    });
-
-    _dataPropertiesDockWidget->setWindowTitle("Data properties");
 
     menuVisualization->addSection("Loaded");
     menuVisualization->addMenu(&_loadedViewPluginsMenu);
@@ -177,17 +156,35 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             dockWidget->setProperty("PluginType", "View");
             //dockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
 
-            connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, [this, dockWidget](const QString& title) {
+            connect(&viewPlugin->getWidget(), &QWidget::windowTitleChanged, this, [this, dockWidget](const QString& title) {
                 dockWidget->setWindowTitle(title);
             });
 
-            connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, [this, dockWidget](bool toggled) {
+            connect(&viewPlugin->getMayCloseAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
                 dockWidget->setFeature(CDockWidget::DockWidgetClosable, toggled);
             });
 
-            connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, [this, dockWidget](bool toggled) {
-                dockWidget->toggleView(toggled);
+            const auto connectToViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
+                connect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, [this, dockWidget](bool toggled) {
+                    dockWidget->toggleView(toggled);
+                });
+            };
+
+            const auto disconnectFromViewPluginVisibleAction = [this, viewPlugin](CDockWidget* dockWidget) -> void {
+                disconnect(&viewPlugin->getVisibleAction(), &ToggleAction::toggled, this, nullptr);
+            };
+
+            QObject::connect(dockWidget, &CDockWidget::closed, this, [this, viewPlugin, dockWidget, connectToViewPluginVisibleAction, disconnectFromViewPluginVisibleAction]() {
+                disconnectFromViewPluginVisibleAction(dockWidget);
+                {
+                    viewPlugin->getVisibleAction().setChecked(false);
+                }
+                connectToViewPluginVisibleAction(dockWidget);
+                
+                updateCentralWidget();
             });
+
+            connectToViewPluginVisibleAction(dockWidget);
 
             auto dockWidgetArea = RightDockWidgetArea;
 
@@ -203,10 +200,7 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
                 updateCentralWidget();
             });
             
-            QObject::connect(dockWidget, &CDockWidget::closed, [this, dockWidget]() {
-                //_dockManager->removeDockWidget(dockWidget);
-                updateCentralWidget();
-            });
+            
 
             QObject::connect(dockWidget, &CDockWidget::topLevelChanged, [this, dockWidget](bool topLevel) {
                 updateCentralWidget();
@@ -315,7 +309,6 @@ void MainWindow::initializeDocking()
     CDockManager::setConfigFlag(CDockManager::DockAreaHasUndockButton, true);
 
     initializeCentralDockingArea();
-    initializeSettingsDockingArea();
     initializeLoggingDockingArea();
 
     connect(_dockManager, &CDockManager::dockAreasAdded, this, &MainWindow::updateCentralWidget);
@@ -332,55 +325,6 @@ void MainWindow::initializeCentralDockingArea()
     _startPageDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
     _startPageDockWidget->setFeature(CDockWidget::DockWidgetFloatable, false);
     _startPageDockWidget->setFeature(CDockWidget::DockWidgetMovable, false);
-}
-
-void MainWindow::initializeSettingsDockingArea()
-{
-    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _dataHierarchyDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _dataHierarchyDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("sitemap"));
-    _dataHierarchyDockWidget->setWidget(_dataHierarchyWidget);
-
-    _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _actionsViewerDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _actionsViewerDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("link"));
-    _actionsViewerDockWidget->setWidget(_actionsViewerWidget);
-
-    _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetClosable, false);
-    _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetFloatable, true);
-    _dataPropertiesDockWidget->setFeature(CDockWidget::DockWidgetMovable, true);
-    _dataPropertiesDockWidget->setIcon(Application::getIconFont("FontAwesome").getIcon("edit"));
-    _dataPropertiesDockWidget->setWidget(_dataPropertiesWidget);
-
-    _settingsDockArea = _dockManager->addDockWidget(RightDockWidgetArea, _dataHierarchyDockWidget);
-    _settingsDockArea = _dockManager->addDockWidget(CenterDockWidgetArea, _actionsViewerDockWidget, _settingsDockArea);
-
-    _settingsDockArea->setCurrentIndex(0);
-
-    _settingsDockArea = _dockManager->addDockWidget(BottomDockWidgetArea, _dataPropertiesDockWidget, _settingsDockArea);
-
-    _settingsDockArea->setMinimumWidth(500);
-    _settingsDockArea->setMaximumWidth(1500);
-    _settingsDockArea->resize(QSize(500, 0));
-
-    //_actionsViewerDockWidget->tabWidget()->setActiveTab(false);
-    //_dataHierarchyDockWidget->tabWidget()->setActiveTab(true);
-
-    // Get pointer to the settings splitter (splits between data hierarchy dock widget and data properties dock widget)
-    auto settingsSplitter = ads::internal::findParent<ads::CDockSplitter*>(_settingsDockArea);
-
-    // By default, the data hierarchy dock widget occupies 2/3 of the available height and the data properties dock widget 1/3
-    if (settingsSplitter != nullptr)
-        settingsSplitter->setSizes({ height() * 1 / 3, height() * 2 / 3 });
-
-    // Get pointer to the main splitter (splits between view plugins and the settings dock area)
-    auto mainSplitter = ads::internal::findParent<ads::CDockSplitter*>(_centralDockArea);
-    
-    // By default, the central dock area occupies 4/5 of the width of the available width and the settings dock area 1/5
-    if (mainSplitter != nullptr)
-        mainSplitter->setSizes({ width() * 4 / 5, width() * 1 / 5 });
 }
 
 void MainWindow::initializeLoggingDockingArea()

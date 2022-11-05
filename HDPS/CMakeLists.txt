@@ -511,23 +511,11 @@ list(APPEND PUBLIC_PLUGIN_FILES
 set(PUBLIC_DATA_HIERARCHY_HEADERS
     src/DataHierarchyManager.h
     src/DataHierarchyItem.h
-    src/DataHierarchyModelItem.h
-    src/DataHierarchyFilterModel.h
-    src/DataHierarchyModel.h
-    src/DataHierarchyWidget.h
-    src/DataPropertiesWidget.h
-    src/DataHierarchyFilterAction.h
 )
 
 set(PUBLIC_DATA_HIERARCHY_SOURCES
     src/DataHierarchyManager.cpp
     src/DataHierarchyItem.cpp
-    src/DataHierarchyModelItem.cpp
-    src/DataHierarchyFilterModel.cpp
-    src/DataHierarchyModel.cpp
-    src/DataHierarchyWidget.cpp
-    src/DataPropertiesWidget.cpp
-    src/DataHierarchyFilterAction.cpp
 )
 
 list(APPEND PUBLIC_DATA_HIERARCHY_FILES
@@ -881,8 +869,9 @@ add_subdirectory(src/plugins/ClusterData)
 # Image Data
 add_subdirectory(src/plugins/ImageData)
 
-add_subdirectory(src/plugins/DataHierarchy)
-add_subdirectory(src/plugins/DataProperties)
+add_subdirectory(src/plugins/DataHierarchyPlugin)
+add_subdirectory(src/plugins/DataPropertiesPlugin)
+add_subdirectory(src/plugins/PublicActionsPlugin)
 
 # Qt Advanced docking system
 set(VERSION_SHORT 3.7.0)

@@ -18,23 +18,40 @@ endif(MSVC)
 
 file(TO_CMAKE_PATH $ENV{HDPS_INSTALL_DIR} INSTALL_DIR)
 
-find_package(Qt6 6.3.1 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 6.3.1 COMPONENTS Widgets WebEngineWidgets REQUIRED)
 
-set(SOURCES
+set(PLUGIN
     src/DataPropertiesPlugin.h
     src/DataPropertiesPlugin.cpp
+)
+
+set(WIDGETS
     src/DataPropertiesWidget.h
     src/DataPropertiesWidget.cpp
+)
+
+set(AUX
     src/DataPropertiesPlugin.json
 )
 
-source_group(Plugin FILES ${SOURCES})
+set(SOURCES
+	${PLUGIN}
+	${WIDGETS}
+	${AUX}
+)
+
+source_group(Plugin FILES ${PLUGIN})
+source_group(Widgets FILES ${WIDGETS})
+source_group(Aux FILES ${AUX})
 
 include_directories("$ENV{HDPS_INSTALL_DIR}/$<CONFIGURATION>/include/")
 
 add_library(${PROJECT} SHARED ${SOURCES})
 
+add_dependencies(${PROJECT} HDPS_Public)
+
 target_link_libraries(${PROJECT} Qt6::Widgets)
+target_link_libraries(${PROJECT} Qt6::WebEngineWidgets)
 
 if(MSVC)
     set(LIB_LINK_SUFFIX ".lib") 

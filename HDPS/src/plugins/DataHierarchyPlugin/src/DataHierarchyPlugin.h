@@ -21,7 +21,7 @@ public:
     void init() override;
 };
 
-class DataHierarchyFactory : public ViewPluginFactory
+class DataHierarchyPluginFactory : public ViewPluginFactory
 {
     Q_INTERFACES(hdps::plugin::ViewPluginFactory hdps::plugin::PluginFactory)
     Q_OBJECT

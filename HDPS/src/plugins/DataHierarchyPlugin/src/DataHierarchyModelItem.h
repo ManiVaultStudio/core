@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core.h"
 #include "DataHierarchyManager.h"
 
 #include <QObject>
@@ -119,9 +118,6 @@ protected:
 
     /** Random number generator for pseudo-random group index colors */
     static QRandomGenerator rng;
-
-public:
-    static Core* core;  /** Static pointer to the core */
 };
 
 }

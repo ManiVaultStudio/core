@@ -1,7 +1,6 @@
 #include "DataHierarchyWidget.h"
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
-#include "Core.h"
 #include "Dataset.h"
 #include "PluginFactory.h"
 

@@ -34,9 +34,6 @@ namespace gui
 {
 
 class LogDockWidget;
-class DataHierarchyWidget;
-class ActionsViewerWidget;
-class DataPropertiesWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -138,9 +135,6 @@ private: // Docking
     /** Sets up the docking area for view plugins (central widget) */
     void initializeCentralDockingArea();
 
-    /** Sets up the docking area for settings */
-    void initializeSettingsDockingArea();
-
     /** Sets up the docking area for logging */
     void initializeLoggingDockingArea();
     
@@ -168,21 +162,14 @@ protected: // Menu
 private:
     QSharedPointer<Core>        _core;                          /** HDPS core */
     StartPageWidget*            _startPageWidget;               /** Pointer to the start page widget */
-    DataHierarchyWidget*        _dataHierarchyWidget;           /** Pointer to the data hierarchy tree widget */
-    ActionsViewerWidget*        _actionsViewerWidget;           /** Pointer to the actions viewer widget */
-    DataPropertiesWidget*       _dataPropertiesWidget;          /** Pointer to the data properties widget */
 
 private: // Docking
     ads::CDockManager*          _dockManager;                   /** Manager for docking */
     ads::CDockAreaWidget*       _centralDockArea;               /** Docking area for view plugins */
     ads::CDockAreaWidget*       _lastDockAreaWidget;            /** Last docking area widget (if any) */
-    ads::CDockAreaWidget*       _settingsDockArea;              /** Docking area for settings */
     ads::CDockAreaWidget*       _loggingDockArea;               /** Docking area for logging */
     ads::CDockWidget*           _centralDockWidget;             /** Dock widget for view plugins */
     ads::CDockWidget*           _startPageDockWidget;           /** Dock widget for the start page */
-    ads::CDockWidget*           _dataHierarchyDockWidget;       /** Dock widget for data hierarchy */
-    ads::CDockWidget*           _actionsViewerDockWidget;       /** Dock widget for actions viewer */
-    ads::CDockWidget*           _dataPropertiesDockWidget;      /** Dock widget for data properties */
     ads::CDockWidget*           _loggingDockWidget;             /** Dock widget for logging */
     QMenu                       _loadedViewPluginsMenu;         /** Menu for loaded view plugins */
     QMenu                       _pluginsHelpMenu;         /** Menu for loaded plugins help */
