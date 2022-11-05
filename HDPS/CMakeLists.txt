@@ -881,6 +881,9 @@ add_subdirectory(src/plugins/ClusterData)
 # Image Data
 add_subdirectory(src/plugins/ImageData)
 
+add_subdirectory(src/plugins/DataHierarchy)
+add_subdirectory(src/plugins/DataProperties)
+
 # Qt Advanced docking system
 set(VERSION_SHORT 3.7.0)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Qt-ads examples")

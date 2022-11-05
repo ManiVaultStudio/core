@@ -1,0 +1,5 @@
+{
+    "name" : "Heatmap View",
+    "version" : "1",
+    "dependencies" : ["Points"]
+}
