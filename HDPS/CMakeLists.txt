@@ -433,14 +433,12 @@ set(PUBLIC_ACTIONS_MANAGER_HEADERS
     src/ActionsModel.h
     src/ActionsFilterModel.h
     src/ActionsManager.h
-    src/ActionsViewerWidget.h
 )
 
 set(PUBLIC_ACTIONS_MANAGER_SOURCES
     src/ActionsModel.cpp
     src/ActionsFilterModel.cpp
     src/ActionsManager.cpp
-    src/ActionsViewerWidget.cpp
 )
 
 set(PUBLIC_ACTIONS_MANAGER_FILES

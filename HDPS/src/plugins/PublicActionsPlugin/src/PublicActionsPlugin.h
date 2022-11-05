@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PublicActionsWidget.h"
+
 #include <ViewPlugin.h>
 
 using namespace hdps::plugin;
@@ -19,6 +21,9 @@ public:
     PublicActionsPlugin(const PluginFactory* factory);
     
     void init() override;
+
+private:
+    PublicActionsWidget     _publicActionsWidget;       /** Widget for interaction with public widgets */
 };
 
 class PublicActionsPluginFactory : public ViewPluginFactory

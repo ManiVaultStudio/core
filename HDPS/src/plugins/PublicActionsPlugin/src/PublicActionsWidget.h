@@ -1,17 +1,18 @@
 #pragma once
 
+#include <widgets/HierarchyWidget.h>
+
+#include <ActionsFilterModel.h>
+
 #include <QWidget>
 
-namespace hdps
-{
-
-namespace gui
-{
+using namespace hdps;
+using namespace hdps::gui;
 
 /**
  * Public actions widget class
  *
- * Widget class for viewing/editing public actions
+ * Widget class for viewing/editing public actions.
  *
  * @author Thomas Kroes
  */
@@ -26,7 +27,8 @@ public:
      * @param parent Pointer to parent widget
      */
     PublicActionsWidget(QWidget* parent);
-};
 
-}
-}
+private:
+    HierarchyWidget         _hierarchyWidget;       /** Hierarchy widget */
+    ActionsFilterModel      _filterModel;           /** Actions filter model */
+};

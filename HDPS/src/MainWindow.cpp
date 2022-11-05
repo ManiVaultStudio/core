@@ -1,6 +1,4 @@
 #include "MainWindow.h"
-#include "ActionsViewerWidget.h"
-#include "DataPropertiesWidget.h"
 #include "DataManager.h"
 #include "Logger.h"
 #include "StartPageWidget.h"
