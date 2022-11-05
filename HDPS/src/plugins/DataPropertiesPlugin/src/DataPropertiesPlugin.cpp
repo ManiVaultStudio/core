@@ -5,7 +5,8 @@ Q_PLUGIN_METADATA(IID "nl.BioVault.DataPropertiesPlugin")
 using namespace hdps;
 
 DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
-    ViewPlugin(factory)
+    ViewPlugin(factory),
+    _dataPropertiesWidget(nullptr)
 {
     const_cast<PluginFactory*>(factory)->setMaximumNumberOfInstances(1);
 
@@ -24,6 +25,14 @@ DataPropertiesPlugin::DataPropertiesPlugin(const PluginFactory* factory) :
 
 void DataPropertiesPlugin::init()
 {
+    auto layout = new QVBoxLayout();
+
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    layout->addWidget(&_dataPropertiesWidget);
+
+    getWidget().setLayout(layout);
 }
 
 QIcon DataPropertiesPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const

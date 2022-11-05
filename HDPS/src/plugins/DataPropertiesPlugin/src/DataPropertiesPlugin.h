@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DataPropertiesWidget.h"
+
 #include <ViewPlugin.h>
 
 using namespace hdps::plugin;
@@ -19,6 +21,9 @@ public:
     DataPropertiesPlugin(const PluginFactory* factory);
     
     void init() override;
+
+private:
+    DataPropertiesWidget    _dataPropertiesWidget;      /** Data properties widget */
 };
 
 class DataPropertiesPluginFactory : public ViewPluginFactory
