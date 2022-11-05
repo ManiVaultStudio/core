@@ -19,6 +19,8 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 {
     setText(getGuiName());
 
+    _widget.setAutoFillBackground(true);
+
     _widget.addAction(&_editActionsAction);
     _widget.addAction(&_triggerHelpAction);
 

@@ -1,11 +1,11 @@
 #include "DataHierarchyWidget.h"
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
-#include "Dataset.h"
-#include "PluginFactory.h"
 
+#include <Application.h>
+#include <Dataset.h>
+#include <PluginFactory.h>
 #include <widgets/Divider.h>
-
 #include <actions/PluginTriggerAction.h>
 
 #include <QDebug>
@@ -18,14 +18,9 @@
 
 #include <stdexcept>
 
+using namespace hdps;
 using namespace hdps::util;
 using namespace hdps::plugin;
-
-namespace hdps
-{
-
-namespace gui
-{
 
 /**
  * Tree view item delegate class
@@ -665,7 +660,4 @@ bool DataHierarchyWidget::NoDataOverlayWidget::eventFilter(QObject* target, QEve
     }
 
     return QWidget::eventFilter(target, event);
-}
-
-}
 }

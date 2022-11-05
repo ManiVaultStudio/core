@@ -4,12 +4,12 @@
 
 #include <QObject>
 #include <QVector>
-#include <QRandomGenerator>
 
 class QMenu;
 
-namespace hdps
-{
+namespace hdps {
+    class DataHierarchyItem;
+}
 
 class DataHierarchyModelItem : public QObject
 {
@@ -40,7 +40,7 @@ public:
      * @param dataHierarchyItem Pointer to data hierarchy item
      * @param parent Parent (if any)
      */
-    explicit DataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent = nullptr);
+    explicit DataHierarchyModelItem(hdps::DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent = nullptr);
 
     /** Destructor */
     virtual ~DataHierarchyModelItem();
@@ -98,7 +98,7 @@ public:
      * Get corresponding data hierarchy item
      * @return Pointer to data hierarchy item
      */
-    DataHierarchyItem* getDataHierarchyItem();
+    hdps::DataHierarchyItem* getDataHierarchyItem();
 
     /** Get whether the item is visible or not */
     bool isVisible() const;
@@ -112,12 +112,7 @@ protected:
     void removeChild(DataHierarchyModelItem* dataHierarchyModelItem);
 
 protected:
-    DataHierarchyModelItem* _parent;                /** Pointer to parent item */
-    PluginHierarchyItems    _children;              /** Pointers to child items */
-    DataHierarchyItem*      _dataHierarchyItem;     /** Pointer to data hierarchy item*/
-
-    /** Random number generator for pseudo-random group index colors */
-    static QRandomGenerator rng;
+    DataHierarchyModelItem*     _parent;                /** Pointer to parent item */
+    PluginHierarchyItems        _children;              /** Pointers to child items */
+    hdps::DataHierarchyItem*    _dataHierarchyItem;     /** Pointer to data hierarchy item*/
 };
-
-}

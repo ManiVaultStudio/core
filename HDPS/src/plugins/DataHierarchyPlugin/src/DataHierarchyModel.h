@@ -3,11 +3,11 @@
 #include <QAbstractItemModel>
 #include <QMimeData>
 
-namespace hdps
-{
-
 class DataHierarchyModelItem;
-class DataHierarchyItem;
+
+namespace hdps {
+    class DataHierarchyItem;
+}
 
 /**
  * Underlying data model for a data hierarchy tree
@@ -102,7 +102,7 @@ public:
      * @param parentModelIndex Model index of the parent data hierarchy item 
      * @param dataHierarchyItem Reference to the data hierarchy item
      */
-    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem& dataHierarchyItem);
+    bool addDataHierarchyModelItem(const QModelIndex& parentModelIndex, hdps::DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Remove a data hierarchy item from the model
@@ -113,5 +113,3 @@ public:
 private:
     DataHierarchyModelItem*     _rootItem;      /** Root node of the data hierarchy */
 };
-
-}

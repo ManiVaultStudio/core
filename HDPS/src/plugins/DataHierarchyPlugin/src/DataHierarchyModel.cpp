@@ -1,12 +1,12 @@
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
-#include "DataHierarchyItem.h"
+
+#include <DataHierarchyItem.h>
 
 #include <QDebug>
 #include <QIcon>
 
-namespace hdps
-{
+using namespace hdps;
 
 DataHierarchyModel::DataHierarchyModel(QObject* parent) :
     QAbstractItemModel(parent),
@@ -256,7 +256,7 @@ QMimeData* DataHierarchyModel::mimeData(const QModelIndexList &indexes) const
     return mimeData;
 }
 
-bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, DataHierarchyItem& dataHierarchyItem)
+bool DataHierarchyModel::addDataHierarchyModelItem(const QModelIndex& parentModelIndex, hdps::DataHierarchyItem& dataHierarchyItem)
 {
     auto parentItem = !parentModelIndex.isValid() ? _rootItem : getItem(parentModelIndex, Qt::DisplayRole);
 
@@ -287,6 +287,4 @@ bool DataHierarchyModel::removeDataHierarchyModelItem(const QModelIndex& modelIn
     endRemoveRows();
 
     return true;
-}
-
 }

@@ -7,12 +7,8 @@
 #include <QPainter>
 #include <QMenu>
 
-namespace hdps
-{
-
-using namespace gui;
-
-QRandomGenerator DataHierarchyModelItem::rng = QRandomGenerator();
+using namespace hdps;
+using namespace hdps::gui;
 
 DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyItem, DataHierarchyModelItem* parent /*= nullptr*/) :
     QObject(parent),
@@ -311,6 +307,4 @@ bool DataHierarchyModelItem::isVisible() const
 void DataHierarchyModelItem::removeChild(DataHierarchyModelItem* dataHierarchyModelItem)
 {
     _children.removeOne(dataHierarchyModelItem);
-}
-
 }

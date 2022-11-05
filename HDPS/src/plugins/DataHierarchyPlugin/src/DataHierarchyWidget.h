@@ -12,15 +12,15 @@
 #include <QTreeView>
 #include <QGraphicsOpacityEffect>
 
-namespace hdps
-{
-
-namespace gui
-{
+namespace hdps {
+    class DataHierarchyItem;
+}
 
 /**
-* Widget for displaying the data hierarchy
-*/
+ * Widget for displaying the data hierarchy
+ * 
+ * @author Thomas Kroes
+ */
 class DataHierarchyWidget : public QWidget
 {
     Q_OBJECT
@@ -67,14 +67,14 @@ protected:
      * Add a data hierarchy to the tree widget
      * @param dataHierarchyItem Reference to the data hierarchy item
      */
-    void addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem);
+    void addDataHierarchyItem(hdps::DataHierarchyItem& dataHierarchyItem);
 
     /**
      * Get model index of the dataset
      * @param dataset Smart pointer to dataset
      * @return Dataset model index
      */
-    QModelIndex getModelIndexByDataset(const Dataset<DatasetImpl>& dataset);
+    QModelIndex getModelIndexByDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset);
 
     /** Invoked when the number of rows changed (shows/hides the tree view header) */
     void numberOfRowsChanged();
@@ -146,6 +146,3 @@ private:
     TriggerAction               _collapseAllAction;             /** Collapse all datasets action */
     ToggleAction                _groupingAction;                /** Data grouping action */
 };
-
-}
-}

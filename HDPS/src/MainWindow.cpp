@@ -202,8 +202,6 @@ void MainWindow::addPlugin(plugin::Plugin* plugin)
             QObject::connect(dockWidget->dockAreaWidget(), &CDockAreaWidget::currentChanged, [this](int index) {
                 updateCentralWidget();
             });
-            
-            
 
             QObject::connect(dockWidget, &CDockWidget::topLevelChanged, [this, dockWidget](bool topLevel) {
                 updateCentralWidget();

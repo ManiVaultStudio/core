@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DataHierarchyWidget.h"
+
 #include <ViewPlugin.h>
 
 using namespace hdps::plugin;
@@ -19,6 +21,9 @@ public:
     DataHierarchyPlugin(const PluginFactory* factory);
     
     void init() override;
+
+private:
+    DataHierarchyWidget     _dataHierarchyWidget;       /** Data hierarchy widget */
 };
 
 class DataHierarchyPluginFactory : public ViewPluginFactory
