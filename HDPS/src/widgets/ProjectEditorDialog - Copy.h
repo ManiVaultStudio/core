@@ -3,7 +3,6 @@
 #include "ActionHierarchyWidget.h"
 
 #include <actions/GroupsAction.h>
-#include <actions/GroupAction.h>
 
 #include <QDialog>
 
@@ -44,6 +43,6 @@ public:
     }
 
 private:
-    GroupsAction    _groupsAction;          /** Groups action */
-    GroupAction     _menusGroupAction;      /** Group action */
+    hdps::plugin::ViewPlugin*   _viewPlugin;                /** Pointer to view plugin to edit */
+    ActionHierarchyWidget       _actionHierarchyWidget;     /** Widget for displaying an action hierarchy */
 };

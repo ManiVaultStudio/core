@@ -1,5 +1,7 @@
 #include "ViewPlugin.h"
 
+#include "widgets/ProjectEditorDialog.h"
+
 #include <QWidget>
 
 namespace hdps
@@ -50,7 +52,7 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
     _triggerHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
     
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
-        ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
+        ProjectEditorDialog viewPluginEditorDialog(nullptr, this);
         viewPluginEditorDialog.exec();
     });
 

@@ -15,7 +15,7 @@ void DataHierarchyPlugin::init()
 {
     auto layout = new QVBoxLayout();
 
-    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(6, 6, 6, 6);
     layout->setSpacing(0);
 
     layout->addWidget(&_dataHierarchyWidget);

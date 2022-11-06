@@ -7,7 +7,6 @@
 */
 
 #include "widgets/DockableWidget.h"
-#include "widgets/ViewPluginEditorDialog.h"
 #include "actions/TriggerAction.h"
 #include "actions/ToggleAction.h"
 #include "Plugin.h"

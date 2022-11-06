@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/HierarchyWidget.h"
 #include "DataHierarchyModel.h"
 #include "DataHierarchyFilterModel.h"
 #include "DataHierarchyFilterAction.h"
@@ -28,34 +29,6 @@ class DataHierarchyWidget : public QWidget
 public:
 
     /**
-     * No data overlay widget class
-     *
-     * @author Thomas Kroes
-     */
-    class NoDataOverlayWidget : public QWidget
-    {
-    public:
-
-        /**
-         * Constructor
-         * @param parent Pointer to parent widget
-         */
-        NoDataOverlayWidget(QWidget* parent);
-
-        /**
-         * Respond to \p target events
-         * @param target Object of which an event occurred
-         * @param event The event that took place
-         */
-        bool eventFilter(QObject* target, QEvent* event) override;
-
-    protected:
-        QGraphicsOpacityEffect*     _opacityEffect;     /** Effect for modulating opacity */
-    };
-
-public:
-
-    /**
      * Constructor
      * @param parent Parent widget
      */
@@ -76,9 +49,6 @@ protected:
      */
     QModelIndex getModelIndexByDataset(const hdps::Dataset<hdps::DatasetImpl>& dataset);
 
-    /** Invoked when the number of rows changed (shows/hides the tree view header) */
-    void numberOfRowsChanged();
-
 protected:
 
     /**
@@ -90,59 +60,9 @@ protected:
     /** Update the visibility of the tree view columns */
     void updateColumnsVisibility();
 
-    /**
-     * Get selected row
-     * @return Model indexes of the selected rows
-     */
-    QModelIndexList getSelectedRows() const;
-
-    /**
-     * Get indices of parent and all children recursively
-     * @param filterModelParentIndex Parent filter model index
-     * @return Filter model indices
-     */
-    QModelIndexList gatherIndicesRecursively(QModelIndex filterModelParentIndex = QModelIndex()) const;
-
-protected: // Item expansion
-
-    /**
-     * Get whether one or more items may be expanded 
-     * @return Boolean indicating whether one or more items may be expanded
-     */
-    bool mayExpandAll() const;
-
-    /** Expand all items in the hierarchy */
-    void expandAll();
-
-    /**
-     * Get whether one or more items may be collapse
-     * @return Boolean indicating whether one or more items may be collapse
-     */
-    bool mayCollapseAll() const;
-
-    /** Collapse all items in the hierarchy */
-    void collapseAll();
-
-    /** Called when the user expands an item in the tree view */
-    void expanded(const QModelIndex& filterModelIndex);
-
-    /** Called when the user collapses an item in the tree view */
-    void collapsed(const QModelIndex& filterModelIndex);
-
-protected:
-
-    /** Updates the toolbar (enables/disables items) */
-    void updateToolBar();
-
 private:
-    DataHierarchyModel          _model;                         /** Model containing data to be displayed in the hierarchy */
-    DataHierarchyFilterModel    _filterModel;                   /** Data hierarchy filter model */
-    QTreeView                   _treeView;                      /** Tree view that contains the data hierarchy */
-    QItemSelectionModel         _selectionModel;                /** Selection model */
-    NoDataOverlayWidget*        _noDataOverlayWidget;           /** Overlay help widget which is shown when no data is loaded */
-    StringAction                _datasetNameFilterAction;       /** String action for filtering dataset GUI name */
-    DataHierarchyFilterAction   _dataHierarchyFilterAction;     /** Filter action */
-    TriggerAction               _expandAllAction;               /** Expand all datasets action */
-    TriggerAction               _collapseAllAction;             /** Collapse all datasets action */
-    ToggleAction                _groupingAction;                /** Data grouping action */
+    DataHierarchyModel          _model;                 /** Model containing data to be displayed in the hierarchy */
+    DataHierarchyFilterModel    _filterModel;           /** Data hierarchy filter model */
+    HierarchyWidget             _hierarchyWidget;       /** Widget for displaying hierarchy */
+    ToggleAction                _groupingAction;        /** Data grouping action */
 };

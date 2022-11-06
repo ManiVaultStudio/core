@@ -69,26 +69,26 @@ ActionHierarchyWidget::ActionHierarchyWidget(QWidget* parent, WidgetAction* root
 
     setLayout(layout);
 
-    auto header = _hierarchyWidget.getTreeView().header();
+    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
 
-    header->setStretchLastSection(false);
+    auto& treeView = _hierarchyWidget.getTreeView();
+
+    auto treeViewHeader = treeView.header();
+
+    treeViewHeader->setStretchLastSection(false);
 
     const auto toggleColumnSize = 16;
 
-    header->resizeSection(ActionHierarchyModelItem::Column::Visible, toggleColumnSize);
-    header->resizeSection(ActionHierarchyModelItem::Column::MayPublish, toggleColumnSize);
-    header->resizeSection(ActionHierarchyModelItem::Column::MayConnect, toggleColumnSize);
-    header->resizeSection(ActionHierarchyModelItem::Column::MayDisconnect, toggleColumnSize);
+    treeViewHeader->resizeSection(ActionHierarchyModelItem::Column::Visible, toggleColumnSize);
+    treeViewHeader->resizeSection(ActionHierarchyModelItem::Column::MayPublish, toggleColumnSize);
+    treeViewHeader->resizeSection(ActionHierarchyModelItem::Column::MayConnect, toggleColumnSize);
+    treeViewHeader->resizeSection(ActionHierarchyModelItem::Column::MayDisconnect, toggleColumnSize);
 
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Name, QHeaderView::Stretch);
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::Visible, QHeaderView::Fixed);
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayPublish, QHeaderView::Fixed);
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayConnect, QHeaderView::Fixed);
-    header->setSectionResizeMode(ActionHierarchyModelItem::Column::MayDisconnect, QHeaderView::Fixed);
-
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
-    
-    auto& treeView = _hierarchyWidget.getTreeView();
+    treeViewHeader->setSectionResizeMode(ActionHierarchyModelItem::Column::Name, QHeaderView::Stretch);
+    treeViewHeader->setSectionResizeMode(ActionHierarchyModelItem::Column::Visible, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(ActionHierarchyModelItem::Column::MayPublish, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(ActionHierarchyModelItem::Column::MayConnect, QHeaderView::Fixed);
+    treeViewHeader->setSectionResizeMode(ActionHierarchyModelItem::Column::MayDisconnect, QHeaderView::Fixed);
 
     treeView.setMouseTracking(true);
     treeView.setItemDelegate(new ItemDelegate(this));

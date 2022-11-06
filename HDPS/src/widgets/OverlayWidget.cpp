@@ -16,21 +16,27 @@ namespace gui
 
 OverlayWidget::OverlayWidget(QWidget* parent) :
     QWidget(parent),
-    _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 150, 75),
+    _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 120, 60),
     _iconLabel(),
     _titleLabel(),
-    _descriptionLabel()
+    _descriptionLabel(),
+    _backgroundColor(),
+    _textColor()
 {
+    setColors(Qt::gray, Qt::black);
     initialize();
 }
 
-OverlayWidget::OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/) :
+OverlayWidget::OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor backgroundColor /*= Qt::gray*/, const QColor textColor /*= Qt::black*/) :
     QWidget(parent),
-    _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 150, 75),
+    _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 120, 60),
     _iconLabel(),
     _titleLabel(),
-    _descriptionLabel()
+    _descriptionLabel(),
+    _backgroundColor(),
+    _textColor()
 {
+    setColors(backgroundColor, textColor);
     initialize();
 }
 
@@ -39,6 +45,14 @@ void OverlayWidget::set(const QIcon& icon, const QString& title, const QString& 
     _iconLabel.setPixmap(icon.pixmap(QSize(24, 24)));
     _titleLabel.setText(title);
     _descriptionLabel.setText(description);
+}
+
+void OverlayWidget::setColors(const QColor backgroundColor, const QColor textColor)
+{
+    _backgroundColor    = backgroundColor;
+    _textColor          = textColor;
+
+    setStyleSheet(QString("QWidget#OverlayWidget { background-color: %1; } QWidget#OverlayWidget > QLabel { color: %2; }").arg(_backgroundColor.name(), _textColor.name()));
 }
 
 bool OverlayWidget::eventFilter(QObject* target, QEvent* event)
@@ -110,7 +124,6 @@ void OverlayWidget::initialize()
     parent()->installEventFilter(this);
 
     setObjectName("OverlayWidget");
-    setStyleSheet("QWidget#OverlayWidget > QLabel { color: gray; }");
 }
 
 }

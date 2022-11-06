@@ -23,7 +23,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _filterModel(filterModel),
     _selectionModel(_filterModel != nullptr ? _filterModel : &_model),
     _treeView(this),
-    _overlayWidget(this),
+    _overlayWidget(&_treeView),
     _filterNameAction(this, "Name filter"),
     _filterGroupAction(this),
     _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
@@ -115,21 +115,13 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     header->setIconSize(QSize(4, 10));
 
     const auto numberOfRowsChanged = [this]() -> void {
-        qDebug() << "numberOfRowsChanged";
-
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
         _filterGroupAction.setEnabled(hasItems);
         _selectionGroupAction.setEnabled(hasItems);
 
-        _treeView.setEnabled(hasItems);
-
-        QPalette palette = QPalette();
-
-        palette.setColor(QPalette::Window, _model.rowCount() >= 1 ? Qt::red : Qt::green);// QPalette::Window : QPalette::Disabled);
-
-        //_treeView.setPalette(palette);
+        //_treeView.setEnabled(hasItems);
         _treeView.setHeaderHidden(!hasItems);
         
         updateExpandCollapseActionsReadOnly();

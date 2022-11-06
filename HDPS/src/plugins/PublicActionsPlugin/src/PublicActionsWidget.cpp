@@ -15,7 +15,7 @@ PublicActionsWidget::PublicActionsWidget(QWidget* parent) :
 
     auto layout = new QVBoxLayout();
 
-    layout->setContentsMargins(6, 6, 6, 6);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     layout->addWidget(&_hierarchyWidget);
 

@@ -142,7 +142,7 @@ public:
      */
     QModelIndex toSourceModelIndex(const QModelIndex& modelIndex) const;
 
-protected:
+public:
 
     /**
      * Get selected rows
