@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 
-#define OVERLAY_WIDGET_VERBOSE
+//#define OVERLAY_WIDGET_VERBOSE
 
 namespace hdps
 {

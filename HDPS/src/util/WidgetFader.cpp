@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QWidget>
 
-#define WIDGET_FADER_VERBOSE
+//#define WIDGET_FADER_VERBOSE
 
 namespace hdps {
 
