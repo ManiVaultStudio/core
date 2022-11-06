@@ -6,6 +6,8 @@
 
 #include <stdexcept>
 
+#define OVERLAY_WIDGET_VERBOSE
+
 namespace hdps
 {
 
@@ -14,7 +16,7 @@ namespace gui
 
 OverlayWidget::OverlayWidget(QWidget* parent) :
     QWidget(parent),
-    _opacityEffect(new QGraphicsOpacityEffect(this)),
+    _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 150, 75),
     _iconLabel(),
     _titleLabel(),
     _descriptionLabel()
@@ -24,7 +26,7 @@ OverlayWidget::OverlayWidget(QWidget* parent) :
 
 OverlayWidget::OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/) :
     QWidget(parent),
-    _opacityEffect(new QGraphicsOpacityEffect(this)),
+    _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 150, 75),
     _iconLabel(),
     _titleLabel(),
     _descriptionLabel()
@@ -60,12 +62,29 @@ bool OverlayWidget::eventFilter(QObject* target, QEvent* event)
     return QWidget::eventFilter(target, event);
 }
 
+void OverlayWidget::show()
+{
+#ifdef OVERLAY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    _widgetFader.fadeIn();
+}
+
+void OverlayWidget::hide()
+{
+#ifdef OVERLAY_WIDGET_VERBOSE
+    qDebug() << __FUNCTION__;
+#endif
+
+    _widgetFader.fadeOut();
+}
+
 void OverlayWidget::initialize()
 {
-    setAttribute(Qt::WA_TransparentForMouseEvents);
-    setGraphicsEffect(_opacityEffect);
+    QWidget::show();
 
-    _opacityEffect->setOpacity(0.35);
+    setAttribute(Qt::WA_TransparentForMouseEvents);
 
     auto layout = new QVBoxLayout();
 
@@ -88,7 +107,6 @@ void OverlayWidget::initialize()
 
     setLayout(layout);
 
-    // Install event filter for synchronizing widget size
     parent()->installEventFilter(this);
 
     setObjectName("OverlayWidget");

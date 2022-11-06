@@ -50,6 +50,12 @@ public:
     HierarchyWidget(QWidget* parent, const QString& itemTypeName, QAbstractItemModel& model, QSortFilterProxyModel* filterModel = nullptr, bool showToolbar = true, bool showOverlay = true);
 
     /**
+     * Override set window icon to update the overlay icons as well
+     * @param icon Window icon
+     */
+    void setWindowIcon(const QIcon& icon);
+
+    /**
      * Get input model
      * @return Input model
      */
@@ -214,7 +220,7 @@ private:
     TriggerAction               _collapseAllAction;                 /** Collapse all items action */
     TriggerAction               _selectAllAction;                   /** Select all action */
     TriggerAction               _selectNoneAction;                  /** Select none action */
-    GroupAction                 _selectionGroupAction;              /** Selection action */
+    GroupAction                 _selectionGroupAction;              /** Selection group action */
 };
 
 }

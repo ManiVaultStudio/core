@@ -46,21 +46,6 @@ bool ActionsFilterModel::lessThan(const QModelIndex& lhs, const QModelIndex& rhs
     return false;
 }
 
-QString ActionsFilterModel::getNameFilter() const
-{
-    return _nameFilter;
-}
-
-void ActionsFilterModel::setNameFilter(const QString& nameFilter)
-{
-    if (nameFilter == _nameFilter)
-        return;
-
-    _nameFilter = nameFilter;
-
-    invalidateFilter();
-}
-
 QString ActionsFilterModel::getTypeFilter() const
 {
     return _typeFilter;
@@ -93,14 +78,14 @@ void ActionsFilterModel::setScopeFilter(const ScopeFilter& scopeFilter)
 
 bool ActionsFilterModel::filterName(const QModelIndex& index) const
 {
-    const auto actionName = sourceModel()->data(index, Qt::EditRole).toString();
+    if (filterRegularExpression().isValid()) {
+        const auto key = sourceModel()->data(index, filterRole()).toString();
 
-    if (_nameFilter.isEmpty())
-        return true;
-    else
-        return actionName.contains(_nameFilter, Qt::CaseInsensitive);
+        if (!key.contains(filterRegularExpression()))
+            return false;
+    }
 
-    return false;
+    return true;
 }
 
 bool ActionsFilterModel::filterType(const QModelIndex& index) const

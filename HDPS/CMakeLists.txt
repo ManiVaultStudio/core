@@ -357,6 +357,7 @@ set(PUBLIC_UTIL_HEADERS
     src/util/Preset.h
     src/util/PresetsModel.h
     src/util/PresetsFilterModel.h
+    src/util/WidgetFader.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -381,6 +382,7 @@ set(PUBLIC_UTIL_SOURCES
     src/util/Preset.cpp
     src/util/PresetsModel.cpp
     src/util/PresetsFilterModel.cpp
+    src/util/WidgetFader.cpp
 )
 
 set(PUBLIC_UTIL_FILES

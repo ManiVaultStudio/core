@@ -58,6 +58,10 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
         getTriggerHelpAction().trigger();
     });
 
+    connect(&getGuiNameAction(), &StringAction::stringChanged, this, [this](const QString& guiName) -> void {
+        _widget.setWindowTitle(guiName);
+    });
+
     const auto updateVisibleAction = [this]() -> void {
         _visibleAction.setEnabled(_mayCloseAction.isChecked());
     };

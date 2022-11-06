@@ -97,6 +97,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         _treeView.setModel(&_model);
     }
 
+    _treeView.setAutoFillBackground(true);
+    _treeView.setAutoExpandDelay(300);
     _treeView.setContextMenuPolicy(Qt::CustomContextMenu);
     _treeView.setSelectionModel(&_selectionModel);
     _treeView.setDragEnabled(true);
@@ -113,11 +115,23 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     header->setIconSize(QSize(4, 10));
 
     const auto numberOfRowsChanged = [this]() -> void {
-        const auto hasItems = _model.rowCount() >= 1;
+        qDebug() << "numberOfRowsChanged";
 
-        _filterNameAction.setEnabled(hasItems);
+        const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
+
+        _filterNameAction.setEnabled(_model.rowCount() >= 1);
+        _filterGroupAction.setEnabled(hasItems);
+        _selectionGroupAction.setEnabled(hasItems);
+
+        _treeView.setEnabled(hasItems);
+
+        QPalette palette = QPalette();
+
+        palette.setColor(QPalette::Window, _model.rowCount() >= 1 ? Qt::red : Qt::green);// QPalette::Window : QPalette::Disabled);
+
+        //_treeView.setPalette(palette);
         _treeView.setHeaderHidden(!hasItems);
-
+        
         updateExpandCollapseActionsReadOnly();
         updateOverlayWidget();
     };
@@ -142,10 +156,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         else {
             _filterNameAction.setPlaceHolderString(QString("Search for %1 by name (%2)").arg(_itemTypeName.toLower(), caseSensitivity));
             _filterModel->setFilterFixedString(_filterNameAction.getString());
-
-            //auto regularExpression = QRegularExpression();
-
-            //_filterModel->setFilterRegularExpression(regularExpression);
         }
             
         _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
@@ -190,12 +200,14 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         connectExpandCollapseActionsReadOnly();
     });
 
-    connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
-    connect(&_model, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
-
     if (_filterModel) {
         connect(_filterModel, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
         connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
+        //connect(_filterModel, &QAbstractItemModel::layoutChanged, this, numberOfRowsChanged);
+    }
+    else {
+        connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
+        connect(&_model, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
     }
 
     connect(&_treeView, &QTreeView::expanded, this, &HierarchyWidget::updateExpandCollapseActionsReadOnly);
@@ -214,6 +226,13 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     numberOfRowsChanged();
     selectionChanged();
     updateFilterModel();
+}
+
+void HierarchyWidget::setWindowIcon(const QIcon& icon)
+{
+    QWidget::setWindowIcon(icon);
+
+    updateOverlayWidget();
 }
 
 QModelIndex HierarchyWidget::toSourceModelIndex(const QModelIndex& modelIndex) const
@@ -302,6 +321,9 @@ void HierarchyWidget::collapseAll()
 
 bool HierarchyWidget::maySelectAll() const
 {
+    if (_filterModel == nullptr)
+        return _selectionModel.selectedRows().count() < _model.rowCount();
+
     return _selectionModel.selectedRows().count() < _filterModel->rowCount();
 }
 
@@ -315,7 +337,10 @@ void HierarchyWidget::selectAll()
 
 bool HierarchyWidget::maySelectNone() const
 {
-    if (_filterModel->rowCount() == 0)
+    if (_filterModel != nullptr && _filterModel->rowCount() == 0)
+        return false;
+
+    if (_model.rowCount() == 0)
         return false;
 
     return _selectionModel.selectedRows().count() >= 1;
@@ -340,7 +365,7 @@ void HierarchyWidget::updateOverlayWidget()
     }
     else {
         if (_model.rowCount() >= 1 && _filterModel->rowCount() == 0) {
-            _overlayWidget.set(windowIcon(), QString("No %1s found for %2").arg(_itemTypeName.toLower(), _filterNameAction.getString()), "Try changing the filter parameters...");
+            _overlayWidget.set(windowIcon(), QString("No %1s found for: %2").arg(_itemTypeName.toLower(), _filterNameAction.getString()), "Try changing the filter parameters...");
             _overlayWidget.show();
         }
         else {

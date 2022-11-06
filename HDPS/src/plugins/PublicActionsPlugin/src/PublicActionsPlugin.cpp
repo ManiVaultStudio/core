@@ -25,7 +25,7 @@ void PublicActionsPlugin::init()
 
 QIcon PublicActionsPluginFactory::getIcon(const QColor& color /*= Qt::black*/) const
 {
-    return Application::getIconFont("FontAwesome").getIcon("play", color);
+    return Application::getIconFont("FontAwesome").getIcon("link", color);
 }
 
 ViewPlugin* PublicActionsPluginFactory::produce()

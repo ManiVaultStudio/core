@@ -1,7 +1,8 @@
 #pragma once
 
+#include "util/WidgetFader.h"
+
 #include <QWidget>
-#include <QGraphicsOpacityEffect>
 #include <QLabel>
 
 namespace hdps
@@ -52,16 +53,22 @@ public:
      */
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    /** Override the show member to fade the opacity over time */
+    void show();
+
+    /** Override the hide member to fade the opacity over time */
+    void hide();
+
 private:
 
     /** Setups the layout etc. */
     void initialize();
 
 private:
-    QGraphicsOpacityEffect*     _opacityEffect;         /** Effect for modulating opacity */
-    QLabel                      _iconLabel;             /** Label for displaying the icon */
-    QLabel                      _titleLabel;            /** Label for displaying the title */
-    QLabel                      _descriptionLabel;      /** Label for displaying the description */
+    util::WidgetFader   _widgetFader;           /** Widget fader for the overlay widget */
+    QLabel              _iconLabel;             /** Label for displaying the icon */
+    QLabel              _titleLabel;            /** Label for displaying the title */
+    QLabel              _descriptionLabel;      /** Label for displaying the description */
 };
 
 }

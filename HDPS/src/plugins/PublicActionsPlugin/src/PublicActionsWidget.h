@@ -29,6 +29,6 @@ public:
     PublicActionsWidget(QWidget* parent);
 
 private:
-    HierarchyWidget         _hierarchyWidget;       /** Hierarchy widget */
     ActionsFilterModel      _filterModel;           /** Actions filter model */
+    HierarchyWidget         _hierarchyWidget;       /** Hierarchy widget */
 };

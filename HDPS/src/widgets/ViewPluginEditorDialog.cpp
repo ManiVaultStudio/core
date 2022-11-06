@@ -25,6 +25,7 @@ ViewPluginEditorDialog::ViewPluginEditorDialog(QWidget* parent, ViewPlugin* view
     layout->addWidget(&_actionHierarchyWidget);
     layout->addWidget(_viewPlugin->getMayCloseAction().createWidget(this));
     layout->addWidget(_viewPlugin->getMayFloatAction().createWidget(this));
+    layout->addWidget(_viewPlugin->getGuiNameAction().createWidget(this));
 
     setLayout(layout);
 
