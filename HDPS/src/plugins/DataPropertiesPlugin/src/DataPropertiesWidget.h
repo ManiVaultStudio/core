@@ -8,13 +8,8 @@
 
 #include <QWidget>
 
+using namespace hdps;
 using namespace hdps::util;
-
-namespace hdps
-{
-
-namespace gui
-{
 
 /**
  * Data properties widget class
@@ -49,6 +44,3 @@ protected:
     GroupsAction            _groupsAction;          /** Groups action */
     GroupsAction::Widget*   _groupsActionWidget;    /** Pointer to groups action widget (used to change label sizing) */
 };
-
-}
-}

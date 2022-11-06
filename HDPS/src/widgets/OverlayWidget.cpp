@@ -23,11 +23,11 @@ OverlayWidget::OverlayWidget(QWidget* parent) :
     _backgroundColor(),
     _textColor()
 {
-    setColors(Qt::gray, Qt::black);
+    setColors(Qt::lightGray, Qt::black);
     initialize();
 }
 
-OverlayWidget::OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor backgroundColor /*= Qt::gray*/, const QColor textColor /*= Qt::black*/) :
+OverlayWidget::OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description /*= ""*/, const QColor backgroundColor /*= Qt::lightgray*/, const QColor textColor /*= Qt::black*/) :
     QWidget(parent),
     _widgetFader(this, this, 0.0f, 0.0f, 0.35f, 120, 60),
     _iconLabel(),

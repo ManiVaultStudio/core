@@ -39,8 +39,9 @@ protected:
     /**
      * Add a data hierarchy to the tree widget
      * @param dataHierarchyItem Reference to the data hierarchy item
+     * @param recursive Whether to recursively add children as well
      */
-    void addDataHierarchyItem(hdps::DataHierarchyItem& dataHierarchyItem);
+    void addDataHierarchyItem(hdps::DataHierarchyItem& dataHierarchyItem, bool recursive = false);
 
     /**
      * Get model index of the dataset
@@ -59,11 +60,6 @@ protected:
 
     /** Update the visibility of the tree view columns */
     void updateColumnsVisibility();
-
-private:
-
-    /** Populate the model from the data hierarchy manager */
-    void initializeItems();
 
 private:
     DataHierarchyModel          _model;                 /** Model containing data to be displayed in the hierarchy */

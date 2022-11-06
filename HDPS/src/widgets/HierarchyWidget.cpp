@@ -153,6 +153,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
             
         _filterModel->setFilterCaseSensitivity(_filterCaseSensitiveAction.isChecked() ? Qt::CaseSensitive : Qt::CaseInsensitive);
         _filterModel->invalidate();
+
+        updateOverlayWidget();
     };
 
     connect(&_filterNameAction, &StringAction::stringChanged, this, updateFilterModel);

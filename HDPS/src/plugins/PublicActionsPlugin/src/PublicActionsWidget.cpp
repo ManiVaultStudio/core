@@ -11,7 +11,7 @@ PublicActionsWidget::PublicActionsWidget(QWidget* parent) :
     _filterModel(this),
     _hierarchyWidget(this, "Public action", const_cast<ActionsModel&>(Application::getActionsManager().getActionsModel()), &_filterModel)
 {
-    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("play"));
+    _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("running"));
     _hierarchyWidget.getTreeView().setRootIsDecorated(false);
 
     auto layout = new QVBoxLayout();

@@ -36,7 +36,7 @@ public:
      * @param title Title of the overlay
      * @param description Overlay description
      */
-    OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "", const QColor backgroundColor = Qt::gray, const QColor textColor = Qt::black);
+    OverlayWidget(QWidget* parent, const QIcon& icon, const QString& title, const QString& description = "", const QColor backgroundColor = Qt::lightGray, const QColor textColor = Qt::black);
     
     /**
      * Set overlay parameters

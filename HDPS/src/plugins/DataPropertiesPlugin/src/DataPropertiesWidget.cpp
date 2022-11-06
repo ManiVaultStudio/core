@@ -9,12 +9,6 @@
 
 #include <QDebug>
 
-namespace hdps
-{
-
-namespace gui
-{
-
 DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     QWidget(parent),
     _dataset(),
@@ -25,7 +19,7 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
     setAutoFillBackground(true);
     setLayout(&_layout);
 
-    _layout.setContentsMargins(6, 6, 6, 6);
+    _layout.setContentsMargins(0, 0, 0, 0);
 
     _groupsActionWidget = dynamic_cast<GroupsAction::Widget*>(_groupsAction.createWidget(parent));
 
@@ -40,9 +34,10 @@ DataPropertiesWidget::DataPropertiesWidget(QWidget* parent) :
 
 void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems)
 {
+    return;
+    
     try
     {
-        // Reset when the selection is empty
         if (selectedItems.isEmpty()) {
             _groupsAction.setGroupActions({});
         }
@@ -141,7 +136,4 @@ void DataPropertiesWidget::selectedItemsChanged(DataHierarchyItems selectedItems
     catch (...) {
         exceptionMessageBox("Cannot update data properties");
     }
-}
-
-}
 }
