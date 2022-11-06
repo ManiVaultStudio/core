@@ -270,7 +270,7 @@ set(PUBLIC_WIDGET_HEADERS
     src/widgets/Divider.h
     src/widgets/HierarchyWidget.h
     src/widgets/OverlayWidget.h
-    src/widgets/ViewPluginEditorDialog.h
+    src/widgets/ProjectEditorDialog.h
 )
 
 set(PUBLIC_WIDGET_SOURCES
@@ -280,7 +280,7 @@ set(PUBLIC_WIDGET_SOURCES
     src/widgets/Divider.cpp
     src/widgets/HierarchyWidget.cpp
     src/widgets/OverlayWidget.cpp
-    src/widgets/ViewPluginEditorDialog.cpp
+    src/widgets/ProjectEditorDialog.cpp
     ${ACTION_HIERARCHY_SOURCES}
 )
 
