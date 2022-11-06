@@ -67,6 +67,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     setLayout(layout);
 
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
+    _hierarchyWidget.setNoItemsDescription("Right-click > Import to load data into HDPS");
     
     auto& treeView = _hierarchyWidget.getTreeView();
 
@@ -320,6 +321,7 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     updateColumnsVisibility();
+    initializeItems();
 }
 
 void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
@@ -416,4 +418,19 @@ void DataHierarchyWidget::updateColumnsVisibility()
 
     treeView.setColumnHidden(DataHierarchyModelItem::Column::GUID, true);
     treeView.setColumnHidden(DataHierarchyModelItem::Column::GroupIndex, !_groupingAction.isChecked());
+}
+
+void DataHierarchyWidget::initializeItems()
+{
+    std::function<void(DataHierarchyItem* dataHierarchyItem)> addItem;
+
+    addItem = [this](DataHierarchyItem* dataHierarchyItem) -> void {
+        addDataHierarchyItem(*dataHierarchyItem);
+
+        for (const auto childDataHierarchyItem : dataHierarchyItem->getChildren())
+            addDataHierarchyItem(*childDataHierarchyItem);
+    };
+
+    for (const auto topLevelItem : Application::core()->getDataHierarchyManager().getTopLevelItems())
+        addItem(topLevelItem);
 }

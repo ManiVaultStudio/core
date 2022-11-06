@@ -61,6 +61,11 @@ protected:
     void updateColumnsVisibility();
 
 private:
+
+    /** Populate the model from the data hierarchy manager */
+    void initializeItems();
+
+private:
     DataHierarchyModel          _model;                 /** Model containing data to be displayed in the hierarchy */
     DataHierarchyFilterModel    _filterModel;           /** Data hierarchy filter model */
     HierarchyWidget             _hierarchyWidget;       /** Widget for displaying hierarchy */

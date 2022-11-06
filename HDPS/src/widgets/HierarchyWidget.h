@@ -56,6 +56,12 @@ public:
     void setWindowIcon(const QIcon& icon);
 
     /**
+     * Set overlay widget description when no items are loaded
+     * @param noItemsDescription Overlay widget description when no items are loaded
+     */
+    void setNoItemsDescription(const QString& noItemsDescription);
+
+    /**
      * Get input model
      * @return Input model
      */
@@ -212,6 +218,7 @@ private:
     QItemSelectionModel         _selectionModel;                    /** Selection model */
     QTreeView                   _treeView;                          /** Tree view that contains the data hierarchy */
     OverlayWidget               _overlayWidget;                     /** Overlay widget that show information when there are no items in the model */
+    QString                     _noItemsDescription;                /** Overlay widget description when no items are loaded */
     StringAction                _filterNameAction;                  /** String action for filtering by name */
     GroupAction                 _filterGroupAction;                 /** Filter group action */
     ToggleAction                _filterCaseSensitiveAction;         /** Filter case-sensitive action */

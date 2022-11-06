@@ -24,6 +24,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _selectionModel(_filterModel != nullptr ? _filterModel : &_model),
     _treeView(this),
     _overlayWidget(&_treeView),
+    _noItemsDescription(""),
     _filterNameAction(this, "Name filter"),
     _filterGroupAction(this),
     _filterCaseSensitiveAction(this, "Case-sensitive", false, false),
@@ -195,7 +196,6 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     if (_filterModel) {
         connect(_filterModel, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
         connect(_filterModel, &QAbstractItemModel::rowsRemoved, this, numberOfRowsChanged);
-        //connect(_filterModel, &QAbstractItemModel::layoutChanged, this, numberOfRowsChanged);
     }
     else {
         connect(&_model, &QAbstractItemModel::rowsInserted, this, numberOfRowsChanged);
@@ -223,6 +223,16 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
 void HierarchyWidget::setWindowIcon(const QIcon& icon)
 {
     QWidget::setWindowIcon(icon);
+
+    updateOverlayWidget();
+}
+
+void HierarchyWidget::setNoItemsDescription(const QString& noItemsDescription)
+{
+    if (noItemsDescription == _noItemsDescription)
+        return;
+
+    _noItemsDescription = noItemsDescription;
 
     updateOverlayWidget();
 }
@@ -348,7 +358,7 @@ void HierarchyWidget::updateOverlayWidget()
 {
     if (_filterModel == nullptr) {
         if (_model.rowCount() == 0) {
-            _overlayWidget.set(windowIcon(), QString("No %1s loaded").arg(_itemTypeName.toLower()), "");
+            _overlayWidget.set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
             _overlayWidget.show();
         }
         else {
@@ -356,12 +366,18 @@ void HierarchyWidget::updateOverlayWidget()
         }
     }
     else {
-        if (_model.rowCount() >= 1 && _filterModel->rowCount() == 0) {
-            _overlayWidget.set(windowIcon(), QString("No %1s found for: %2").arg(_itemTypeName.toLower(), _filterNameAction.getString()), "Try changing the filter parameters...");
-            _overlayWidget.show();
+        if (_model.rowCount() >= 1) {
+            if (_filterModel->rowCount() == 0) {
+                _overlayWidget.set(windowIcon(), QString("No %1s found for: %2").arg(_itemTypeName.toLower(), _filterNameAction.getString()), "Try changing the filter parameters...");
+                _overlayWidget.show();
+            }
+            else {
+                _overlayWidget.hide();
+            }
         }
         else {
-            _overlayWidget.hide();
+            _overlayWidget.set(windowIcon(), QString("No %1s to display").arg(_itemTypeName.toLower()), _noItemsDescription);
+            _overlayWidget.show();
         }
     }
 }
