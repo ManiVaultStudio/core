@@ -262,14 +262,16 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
                 for (auto dataset : datasets)
                     dataset->setAnalysis(analysisPlugin);
 
-                analysisPlugin->setInputDataset(datasets.first());
+                if (!datasets.isEmpty())
+                    analysisPlugin->setInputDataset(datasets.first());
 
                 break;
             }
             case plugin::Type::WRITER: {
                 auto writerPlugin = dynamic_cast<WriterPlugin*>(pluginInstance);
 
-                writerPlugin->setInputDataset(datasets.first());
+                if (!datasets.isEmpty())
+                    writerPlugin->setInputDataset(datasets.first());
 
                 break;
             }
