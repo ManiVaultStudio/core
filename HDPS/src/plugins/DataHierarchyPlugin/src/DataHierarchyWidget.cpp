@@ -1,6 +1,7 @@
 #include "DataHierarchyWidget.h"
 #include "DataHierarchyModel.h"
 #include "DataHierarchyModelItem.h"
+#include "DatasetsContextMenu.h"
 
 #include <Application.h>
 #include <Dataset.h>
@@ -10,7 +11,6 @@
 
 #include <QDebug>
 #include <QHeaderView>
-#include <QResizeEvent>
 #include <QVBoxLayout>
 #include <QMenu>
 #include <QLabel>
@@ -127,7 +127,6 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         Application::core()->getDataHierarchyManager().selectItems(dataHierarchyItems);
     });
 
-    // Invoked the custom context menu when requested by the tree view
     connect(&_hierarchyWidget.getTreeView(), &QTreeView::customContextMenuRequested, this, [this](const QPoint& position) {
         const auto selectedRows = _hierarchyWidget.getSelectedRows();
 
@@ -136,199 +135,9 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
         for (const auto& selectedRow : selectedRows)
             datasets << _model.getItem(selectedRow, Qt::DisplayRole)->getDataHierarchyItem()->getDataset();
 
-        auto contextMenu = new QMenu();
+        auto datasetsContextMenu = new DatasetsContextMenu(this, datasets);
 
-        QMap<QString, QMenu*> menus;
-
-        const auto addMenu = [contextMenu, &menus, datasets](const plugin::Type& pluginType) -> void {
-            for (auto pluginTriggerAction : Application::core()->getPluginTriggerActions(pluginType, datasets)) {
-                const auto titleSegments = pluginTriggerAction->getTitle().split("/");
-
-                QString menuPath, previousMenuPath = titleSegments.first();
-
-                for (auto titleSegment : titleSegments) {
-                    if (titleSegment != titleSegments.first() && titleSegment != titleSegments.last())
-                        menuPath += "/";
-
-                    menuPath += titleSegment;
-
-                    if (!menus.contains(menuPath)) {
-                        menus[menuPath] = new QMenu(titleSegment);
-
-                        if (titleSegment != titleSegments.first()) {
-                            if (titleSegment == titleSegments.last())
-                                menus[previousMenuPath]->addAction(pluginTriggerAction);
-                            else {
-                                if (titleSegment == "Group") {
-                                    //menus[menuPath]->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
-
-                                    if (menus[previousMenuPath]->actions().isEmpty())
-                                        menus[previousMenuPath]->addMenu(menus[menuPath]);
-                                    else
-                                        menus[previousMenuPath]->insertMenu(menus[previousMenuPath]->actions().first(), menus[menuPath]);
-
-                                    if (menus[previousMenuPath]->actions().count() >= 2)
-                                        menus[previousMenuPath]->insertSeparator(menus[previousMenuPath]->actions()[1]);
-                                } else
-                                    menus[previousMenuPath]->addMenu(menus[menuPath]);
-                            }
-                                
-                        } else
-                            contextMenu->addMenu(menus[titleSegments.first()]);
-                    }
-
-                    previousMenuPath = menuPath;
-                }
-            }
-            
-            switch (pluginType)
-            {
-                case plugin::Type::ANALYSIS:
-                {
-                    if (!menus.contains("Analyze"))
-                        break;
-
-                    menus["Analyze"]->setTitle("Analyze");
-                    menus["Analyze"]->setIcon(Application::getIconFont("FontAwesome").getIcon("square-root-alt"));
-                    break;
-                }
-
-                case plugin::Type::LOADER:
-                {
-                    if (!menus.contains("Import"))
-                        break;
-
-                    menus["Import"]->setTitle("Import");
-                    menus["Import"]->setIcon(Application::getIconFont("FontAwesome").getIcon("file-import"));
-                    break;
-                }
-
-                case plugin::Type::WRITER:
-                {
-                    if (!menus.contains("Export"))
-                        break;
-
-                    menus["Export"]->setTitle("Export");
-                    menus["Export"]->setIcon(Application::getIconFont("FontAwesome").getIcon("file-export"));
-                    break;
-                }
-
-                case plugin::Type::TRANSFORMATION:
-                {
-                    if (!menus.contains("Transform"))
-                        break;
-
-                    menus["Transform"]->setTitle("Transform");
-                    menus["Transform"]->setIcon(Application::getIconFont("FontAwesome").getIcon("random"));
-                    break;
-                }
-
-                case plugin::Type::VIEW:
-                {
-                    if (!menus.contains("View"))
-                        break;
-
-                    menus["View"]->setTitle("View");
-                    menus["View"]->setIcon(Application::getIconFont("FontAwesome").getIcon("eye"));
-                    break;
-                }
-
-                default:
-                    break;
-            }
-        };
-
-        addMenu(plugin::Type::ANALYSIS);
-        addMenu(plugin::Type::LOADER);
-        addMenu(plugin::Type::WRITER);
-        addMenu(plugin::Type::TRANSFORMATION);
-        addMenu(plugin::Type::VIEW);
-
-        QSet<DataType> dataTypes;
-
-        for (const auto& dataset : datasets)
-            dataTypes.insert(dataset->getDataType());
-
-        if (datasets.count() >= 2 && dataTypes.count() == 1) {
-            auto groupDataAction = new QAction("Group...");
-
-            groupDataAction->setToolTip("Group datasets into one");
-            groupDataAction->setIcon(Application::getIconFont("FontAwesome").getIcon("object-group"));
-
-            connect(groupDataAction, &QAction::triggered, [this, datasets]() -> void {
-                Application::core()->groupDatasets(datasets);
-            });
-
-            contextMenu->addSeparator();
-            contextMenu->addAction(groupDataAction);
-        }
-
-        if (!Application::core()->requestAllDataSets().isEmpty()) {
-            auto lockMenu   = new QMenu("Lock");
-            auto unlockMenu = new QMenu("Unlock");
-        
-            lockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("lock"));
-            unlockMenu->setIcon(Application::getIconFont("FontAwesome").getIcon("unlock"));
-
-            auto lockAllAction = new QAction("All");
-
-            connect(lockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
-                for (auto dataset : Application::core()->requestAllDataSets())
-                    dataset->lock();
-            });
-
-            lockMenu->setEnabled(false);
-            unlockMenu->setEnabled(false);
-
-            QVector<bool> locked;
-
-            for (auto dataset : Application::core()->requestAllDataSets())
-                locked << dataset->isLocked();
-
-            const auto numberOfLockedDatasets = std::accumulate(locked.begin(), locked.end(), 0);
-
-            unlockMenu->setEnabled(numberOfLockedDatasets >= 1);
-            lockMenu->setEnabled(numberOfLockedDatasets < Application::core()->requestAllDataSets().size());
-
-            auto unlockAllAction = new QAction("All");
-
-            connect(unlockAllAction, &QAction::triggered, this, [this, datasets]() -> void {
-                for (auto dataset : Application::core()->requestAllDataSets())
-                    dataset->unlock();
-            });
-
-            auto lockSelectedAction = new QAction("Selected");
-        
-            lockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
-            lockSelectedAction->setEnabled(!datasets.isEmpty());
-
-            connect(lockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
-                for (auto dataset : datasets)
-                    dataset->lock();
-            });
-
-            auto unlockSelectedAction   = new QAction("Selected");
-
-            unlockSelectedAction->setIcon(Application::getIconFont("FontAwesome").getIcon("mouse-pointer"));
-            unlockSelectedAction->setEnabled(!datasets.isEmpty());
-
-            connect(unlockSelectedAction, &QAction::triggered, this, [this, datasets]() -> void {
-                for (auto dataset : datasets)
-                    dataset->unlock();
-            });
-        
-            lockMenu->addAction(lockSelectedAction);
-            lockMenu->addAction(lockAllAction);
-            unlockMenu->addAction(unlockSelectedAction);
-            unlockMenu->addAction(unlockAllAction);
-
-            contextMenu->addSeparator();
-
-            contextMenu->addMenu(lockMenu);
-            contextMenu->addMenu(unlockMenu);
-        }
-
-        contextMenu->exec(_hierarchyWidget.getTreeView().viewport()->mapToGlobal(position));
+        datasetsContextMenu->exec(_hierarchyWidget.getTreeView().viewport()->mapToGlobal(position));
     });
 
     for (const auto topLevelItem : Application::core()->getDataHierarchyManager().getTopLevelItems())

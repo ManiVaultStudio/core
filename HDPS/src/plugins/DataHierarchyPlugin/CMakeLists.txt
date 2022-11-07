@@ -41,6 +41,8 @@ set(PLUGIN
 set(WIDGETS
     src/DataHierarchyWidget.h
     src/DataHierarchyWidget.cpp
+    src/DatasetsContextMenu.h
+    src/DatasetsContextMenu.cpp
 )
 
 set(AUX
