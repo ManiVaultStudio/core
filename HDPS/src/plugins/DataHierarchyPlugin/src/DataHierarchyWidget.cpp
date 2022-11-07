@@ -141,13 +141,15 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     });
 
     for (const auto topLevelItem : Application::core()->getDataHierarchyManager().getTopLevelItems())
-        addDataHierarchyItem(*topLevelItem, true);
+        addDataHierarchyItem(*topLevelItem);
 
     updateColumnsVisibility();
 }
 
-void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem, bool recursive /*= false*/)
+void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyItem)
 {
+    qDebug() << __FUNCTION__ << dataHierarchyItem.getDataset<DatasetImpl>()->getGuiName();
+
     auto dataset = dataHierarchyItem.getDataset();
 
     try {
@@ -207,9 +209,6 @@ void DataHierarchyWidget::addDataHierarchyItem(DataHierarchyItem& dataHierarchyI
         QCoreApplication::processEvents();
 
         setModelItemExpansion(getModelIndexByDataset(dataset), dataHierarchyItem.isExpanded());
-
-        for (auto childDataHierarchyItem : dataHierarchyItem.getChildren())
-            addDataHierarchyItem(*childDataHierarchyItem);
     }
     catch (std::exception& e)
     {

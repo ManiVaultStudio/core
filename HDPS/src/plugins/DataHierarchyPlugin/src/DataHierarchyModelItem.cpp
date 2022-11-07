@@ -1,7 +1,8 @@
 #include "DataHierarchyModelItem.h"
-#include "Set.h"
-#include "Application.h"
-#include "DataHierarchyManager.h"
+
+#include <Set.h>
+#include <Application.h>
+#include <DataHierarchyManager.h>
 
 #include <QDebug>
 #include <QPainter>
@@ -16,6 +17,8 @@ DataHierarchyModelItem::DataHierarchyModelItem(DataHierarchyItem* dataHierarchyI
     _children(),
     _dataHierarchyItem(dataHierarchyItem)
 {
+    if (_dataHierarchyItem)
+        qDebug() << "    " << __FUNCTION__ << _dataHierarchyItem->getDataset<DatasetImpl>()->getGuiName();
 }
 
 DataHierarchyModelItem::~DataHierarchyModelItem()
