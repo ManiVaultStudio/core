@@ -12,7 +12,7 @@ WriterPlugin::WriterPlugin(const PluginFactory* factory) :
 
 }
 
-void WriterPlugin::setInputDataset(Dataset<DatasetImpl>& inputDataset)
+void WriterPlugin::setInputDataset(Dataset<DatasetImpl> inputDataset)
 {
     _input = inputDataset;
 }
