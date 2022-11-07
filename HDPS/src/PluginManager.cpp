@@ -107,7 +107,7 @@ void PluginManager::loadPlugins()
             pluginFactory->getTriggerHelpAction().setIcon(pluginFactory->getIcon());
 
             connect(&producePluginTriggerAction, &TriggerAction::triggered, this, [this, pluginFactory]() -> void {
-                pluginTriggered(pluginFactory->getKind());
+                createPlugin(pluginFactory->getKind());
             });
 
             return producePluginTriggerAction;
@@ -245,8 +245,7 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
         if (!_pluginFactories.keys().contains(kind))
             throw std::runtime_error("Unrecognized plugin kind");
 
-        auto pluginFactory = _pluginFactories[kind];
-
+        auto pluginFactory  = _pluginFactories[kind];
         auto pluginInstance = pluginFactory->produce();
 
         if (!pluginInstance)
@@ -254,7 +253,6 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
 
         pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() + 1);
 
-        // Plugin-type specific behavior
         switch (pluginFactory->getType()) {
             case plugin::Type::ANALYSIS: {
                 auto analysisPlugin = dynamic_cast<AnalysisPlugin*>(pluginInstance);
@@ -281,6 +279,11 @@ Plugin* PluginManager::createPlugin(const QString& kind, const Datasets& dataset
         }
 
         _core.addPlugin(pluginInstance);
+
+        auto viewPlugin = dynamic_cast<ViewPlugin*>(pluginInstance);
+
+        if (viewPlugin)
+            _core.gui().addLoadedViewPluginAction(&viewPlugin->getVisibleAction());
 
         qDebug() << "Added plugin" << pluginInstance->getKind() << "with version" << pluginInstance->getVersion();
 
@@ -419,24 +422,6 @@ QVariantMap PluginManager::toVariantMap() const
     };
 }
 
-QString PluginManager::pluginTriggered(const QString& kind)
-{
-    PluginFactory *pluginFactory = _pluginFactories[kind];
-    Plugin* plugin = pluginFactory->produce();
-    
-    pluginFactory->setNumberOfInstances(pluginFactory->getNumberOfInstances() + 1);
-
-    _core.addPlugin(plugin);
-    qDebug() << "Added plugin" << plugin->getKind() << "with version" << plugin->getVersion();
-
-    auto viewPlugin = dynamic_cast<ViewPlugin*>(plugin);
-
-    if (viewPlugin)
-        _core.gui().addLoadedViewPluginAction(&viewPlugin->getVisibleAction());
-
-    return plugin->getName();
 }
 
-} // namespace plugin
-
-} // namespace hdps
+}

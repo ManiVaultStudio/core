@@ -19,6 +19,8 @@ Plugin::Plugin(const PluginFactory* factory) :
     _guiNameAction(this, "Plugin title", QString("%1 %2").arg(getKind(), QString::number(noInstances[getKind()] + 1)))
 {
     noInstances[getKind()]++;
+
+    _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
 }
 
 bool Plugin::hasHelp()

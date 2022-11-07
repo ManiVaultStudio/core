@@ -262,13 +262,12 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
 
 void DataHierarchyItem::populateContextMenu(QMenu* contextMenu)
 {
-    // Populate context menu with items from actions
     for (auto action : _actions) {
+        if (!action->isConfigurationFlagSet(WidgetAction::ConfigurationFlag::VisibleInMenu))
+            continue;
 
-        // Get pointer to action context menu
         auto actionContextMenu = action->getContextMenu();
 
-        // Add context menu when it is valid
         if (actionContextMenu)
             contextMenu->addMenu(actionContextMenu);
     }

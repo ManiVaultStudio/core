@@ -23,15 +23,23 @@ ViewPlugin::ViewPlugin(const PluginFactory* factory) :
 
     _editActionsAction.setShortcut(tr("F12"));
     _editActionsAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
+    _editActionsAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
 
     _mayCloseAction.setToolTip("Determines whether this view plugin may be closed or not");
-    _mayCloseAction.setConnectionPermissions(WidgetAction::None);
+    _mayCloseAction.setConnectionPermissionsToNone();
+    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
+    _mayCloseAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
 
     _visibleAction.setToolTip("Determines whether the view plugin is visible in the user interface or not");
-    _visibleAction.setConnectionPermissions(WidgetAction::None);
+    _visibleAction.setConnectionPermissionsToNone();
+    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
+    _visibleAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
 
     _triggerHelpAction.setShortcut(tr("F1"));
     _triggerHelpAction.setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    _triggerHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
+    _triggerHelpAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInHierarchy, false);
     
     connect(&_editActionsAction, &TriggerAction::triggered, this, [this]() -> void {
         ViewPluginEditorDialog viewPluginEditorDialog(nullptr, this);
