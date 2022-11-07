@@ -45,6 +45,7 @@ DimensionsPickerAction::DimensionsPickerAction(QObject* parent) :
         updateSummary();
     });
 
+
     /*
     const auto updateReadOnly = [this]() -> void {
         const auto enable = !isReadOnly();
@@ -543,7 +544,9 @@ DimensionsPickerAction::Widget::Widget(QWidget* parent, DimensionsPickerAction* 
 {
     setMinimumHeight(300);
 
-    connect(dimensionsPickerAction, &DimensionsPickerAction::proxyModelChanged, this, &DimensionsPickerAction::Widget::updateTableViewModel);
+    connect(dimensionsPickerAction, &DimensionsPickerAction::proxyModelChanged, this, [&](DimensionsPickerProxyModel* dimensionsPickerProxyModel) {
+        Widget::updateTableViewModel(dimensionsPickerProxyModel);
+        });
 
     auto layout = new QVBoxLayout();
 

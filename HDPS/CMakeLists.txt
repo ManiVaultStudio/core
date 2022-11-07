@@ -17,7 +17,7 @@ if(NOT DEFINED ENV{HDPS_INSTALL_DIR})
     ***************************************************" )
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -52,7 +52,7 @@ if(APPLE)
 endif()
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /DWIN32 /EHsc /MP /permissive- /Zc:__cplusplus")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
@@ -626,7 +626,7 @@ add_library(${HDPS_PUBLIC_LIB} ${LINK_TYPE}
     ${PUBLIC_SOURCES}
 )
 
-set_property(TARGET ${HDPS_PUBLIC_LIB} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_PUBLIC_LIB} PROPERTY CXX_STANDARD 17)
 
 target_include_directories(${HDPS_PUBLIC_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -639,7 +639,7 @@ add_library(${HDPS_PRIVATE_LIB} ${LINK_TYPE}
 	${RESOURCE_FILES}
 )
 
-set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_PRIVATE_LIB} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::Widgets)
 target_link_libraries(${HDPS_PRIVATE_LIB} Qt6::WebEngineWidgets)
@@ -663,7 +663,7 @@ add_executable(${HDPS_EXE} MACOSX_BUNDLE WIN32
     ${RESOURCE_FILES}
 )
 
-set_property(TARGET ${HDPS_EXE} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${HDPS_EXE} PROPERTY CXX_STANDARD 17)
 # find libraries relative to the executable in the macOS .app tree
 if(APPLE)
     set_target_properties( ${HDPS_EXE} PROPERTIES BUILD_WITH_INSTALL_RPATH True)
