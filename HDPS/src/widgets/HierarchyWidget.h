@@ -22,13 +22,18 @@ namespace gui
 /**
  * Base widget for displaying a hierarchical model in a tree view
  * 
- * It sets up the tree view and links up the filter and selection models
- * May show a toolbar for:
- * - Filtering by name (possibly with regular expression)
+ * It sets up the tree view and links up the filter and selection models.
+ * 
+ * Features a toolbar for interaction with the model built with actions:
+ * - Filter by name (possibly with regular expression)
  * - Expanding all items
  * - Collapsing all items
  * - Selecting all items
  * - De-selecting all items
+ * - Edit settings
+ * 
+ * In addition, it shows an overlay widget (with icon, title and description) when no items are loaded
+ * or filtering did not yield any items.
  * 
  * @author Thomas Kroes
  */
@@ -142,6 +147,22 @@ public:
     }
 
     /**
+     * Get selection group action
+     * @return Reference to selection group
+     */
+    GroupAction& getSelectionGroupAction() {
+        return _selectionGroupAction;
+    }
+
+    /**
+     * Get selection group action
+     * @return Reference to selection group
+     */
+    GroupAction& getSettingsGroupAction() {
+        return _settingsGroupAction;
+    }
+
+    /**
      * Maps a model index to source model index
      * @param modelIndex Model index to map
      * @return The mapped model index if a filter model is present, other wise the input model index
@@ -228,6 +249,7 @@ private:
     TriggerAction               _selectAllAction;                   /** Select all action */
     TriggerAction               _selectNoneAction;                  /** Select none action */
     GroupAction                 _selectionGroupAction;              /** Selection group action */
+    GroupAction                 _settingsGroupAction;               /** Settings group action */
 };
 
 }

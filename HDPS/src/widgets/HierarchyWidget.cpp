@@ -33,7 +33,8 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _collapseAllAction(this, "Collapse all"),
     _selectAllAction(this, "Select all"),
     _selectNoneAction(this, "Select none"),
-    _selectionGroupAction(this)
+    _selectionGroupAction(this),
+    _settingsGroupAction(this)
 {
     _filterNameAction.setSearchMode(true);
     _filterNameAction.setClearable(true);
@@ -68,6 +69,11 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
     _selectionGroupAction << _selectAllAction;
     _selectionGroupAction << _selectNoneAction;
 
+    _settingsGroupAction.setText("Settings");
+    _settingsGroupAction.setToolTip(QString("Edit %1s hierarchy settings").arg(_itemTypeName.toLower()));
+    _settingsGroupAction.setIcon(Application::getIconFont("FontAwesome").getIcon("cog"));
+    _settingsGroupAction.setVisible(false);
+
     auto layout = new QVBoxLayout();
 
     layout->setContentsMargins(0, 0, 0, 0);
@@ -82,6 +88,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         toolbarLayout->addWidget(_expandAllAction.createWidget(this));
         toolbarLayout->addWidget(_collapseAllAction.createWidget(this));
         toolbarLayout->addWidget(_selectionGroupAction.createCollapsedWidget(this));
+        toolbarLayout->addWidget(_settingsGroupAction.createCollapsedWidget(this));
 
         layout->addLayout(toolbarLayout);
     }
@@ -119,7 +126,7 @@ HierarchyWidget::HierarchyWidget(QWidget* parent, const QString& itemTypeName, Q
         const auto hasItems = _filterModel != nullptr ? _filterModel->rowCount() >= 1 : _model.rowCount() >= 1;
 
         _filterNameAction.setEnabled(_model.rowCount() >= 1);
-        _filterGroupAction.setEnabled(hasItems);
+        _filterGroupAction.setEnabled(_model.rowCount() >= 1);
         _selectionGroupAction.setEnabled(hasItems);
 
         //_treeView.setEnabled(hasItems);
@@ -370,7 +377,7 @@ void HierarchyWidget::updateOverlayWidget()
     else {
         if (_model.rowCount() >= 1) {
             if (_filterModel->rowCount() == 0) {
-                _overlayWidget.set(windowIcon(), QString("No %1s found for: %2").arg(_itemTypeName.toLower(), _filterNameAction.getString()), "Try changing the filter parameters...");
+                _overlayWidget.set(windowIcon(), QString("No %1s found").arg(_itemTypeName.toLower()), "Try changing the filter parameters...");
                 _overlayWidget.show();
             }
             else {

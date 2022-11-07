@@ -69,6 +69,15 @@ DataHierarchyWidget::DataHierarchyWidget(QWidget* parent) :
     _hierarchyWidget.setWindowIcon(Application::getIconFont("FontAwesome").getIcon("database"));
     _hierarchyWidget.setNoItemsDescription("Right-click > Import to load data into HDPS");
     
+    auto& settingsGroupAction = _hierarchyWidget.getSettingsGroupAction();
+
+    settingsGroupAction.setVisible(true);
+    settingsGroupAction.setShowLabels(false);
+
+    settingsGroupAction << _groupingAction;
+
+    _groupingAction.setConnectionPermissionsToNone();
+
     auto& treeView = _hierarchyWidget.getTreeView();
 
     auto treeViewHeader = treeView.header();
