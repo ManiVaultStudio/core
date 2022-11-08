@@ -107,6 +107,9 @@ set(PRIVATE_SOURCES
 
 set(PUBLIC_CORE_INTERFACE_HEADERS
     src/CoreInterface.h
+    src/AbstractDataManager.h
+    src/AbstractPluginManager.h
+    src/AbstractActionsManager.h
 )
 
 set(PUBLIC_CORE_INTERFACE_FILES
@@ -173,9 +176,6 @@ set(PUBLIC_ACTIONS_HEADERS
     src/actions/WidgetActionLabel.h
     src/actions/WidgetActionStateWidget.h
     src/actions/WindowLevelAction.h
-    src/actions/DataCopyAction.h
-    src/actions/DataRemoveAction.h
-    src/actions/DataGroupingAction.h
     src/actions/DirectoryPickerAction.h
     src/actions/FilePickerAction.h
     src/actions/StatusAction.h
@@ -228,9 +228,6 @@ set(PUBLIC_ACTIONS_SOURCES
     src/actions/WidgetActionLabel.cpp
     src/actions/WidgetActionStateWidget.cpp
     src/actions/WindowLevelAction.cpp
-    src/actions/DataCopyAction.cpp
-    src/actions/DataRemoveAction.cpp
-    src/actions/DataGroupingAction.cpp
     src/actions/DirectoryPickerAction.cpp
     src/actions/FilePickerAction.cpp
     src/actions/StatusAction.cpp
@@ -358,6 +355,8 @@ set(PUBLIC_UTIL_HEADERS
     src/util/PresetsModel.h
     src/util/PresetsFilterModel.h
     src/util/WidgetFader.h
+    src/util/Serialization.h
+    src/util/Serializable.h
 )
 
 set(PUBLIC_UTIL_SOURCES
@@ -383,6 +382,8 @@ set(PUBLIC_UTIL_SOURCES
     src/util/PresetsModel.cpp
     src/util/PresetsFilterModel.cpp
     src/util/WidgetFader.cpp
+    src/util/Serialization.cpp
+    src/util/Serializable.cpp
 )
 
 set(PUBLIC_UTIL_FILES
@@ -401,21 +402,6 @@ set(PUBLIC_APPLICATION_SOURCES
 set(PUBLIC_APPLICATION_FILES
     ${PUBLIC_APPLICATION_HEADERS}
     ${PUBLIC_APPLICATION_SOURCES}
-)
-
-set(PUBLIC_SERIALIZATION_HEADERS
-    src/Serialization.h
-    src/Serializable.h
-)
-
-set(PUBLIC_SERIALIZATION_SOURCES
-    src/Serialization.cpp
-    src/Serializable.cpp
-)
-
-set(PUBLIC_SERIALIZATION_FILES
-    ${PUBLIC_SERIALIZATION_HEADERS}
-    ${PUBLIC_SERIALIZATION_SOURCES}
 )
 
 set(PUBLIC_LAYOUT_MANAGER_HEADERS
@@ -531,7 +517,7 @@ set(PUBLIC_PROJECT_SOURCES
     src/Project.cpp
 )
 
-list(APPEND PROJECT_FILES
+list(APPEND PUBLIC_PROJECT_FILES
     ${PUBLIC_PROJECT_HEADERS}
     ${PUBLIC_PROJECT_SOURCES}
 )
@@ -546,11 +532,11 @@ set(PUBLIC_HEADERS
     ${PUBLIC_GRAPHICS_HEADERS}
     ${PUBLIC_UTIL_HEADERS}
     ${PUBLIC_APPLICATION_HEADERS}
-    ${PUBLIC_SERIALIZATION_HEADERS}
     ${PUBLIC_ACTIONS_MANAGER_HEADERS}
     ${PUBLIC_LAYOUT_MANAGER_HEADERS}
     ${PUBLIC_DATASET_HEADERS}
     ${PUBLIC_PLUGIN_HEADERS}
+    ${PUBLIC_PROJECT_HEADERS}
     ${PUBLIC_DATA_HIERARCHY_HEADERS}
 )
 
@@ -563,12 +549,12 @@ set(PUBLIC_SOURCES
     ${PUBLIC_GRAPHICS_SOURCES}
     ${PUBLIC_UTIL_SOURCES}
     ${PUBLIC_APPLICATION_SOURCES}
-    ${PUBLIC_SERIALIZATION_SOURCES}
     ${PUBLIC_ACTIONS_MANAGER_SOURCES}
     ${PUBLIC_LAYOUT_MANAGER_SOURCES}
     ${PUBLIC_DATASET_SOURCES}
     ${PUBLIC_PLUGIN_SOURCES}
     ${PUBLIC_DATA_HIERARCHY_SOURCES}
+    ${PUBLIC_PROJECT_SOURCES}
     ${PUBLIC_HEADERS}
 )
 
@@ -601,13 +587,13 @@ source_group(Public\\Renderers FILES ${PUBLIC_RENDERERS_FILES})
 source_group(Public\\Graphics FILES ${PUBLIC_GRAPHICS_FILES})
 source_group(Public\\Util FILES ${PUBLIC_UTIL_FILES})
 source_group(Public\\Application FILES ${PUBLIC_APPLICATION_FILES})
-source_group(Public\\Serialization FILES ${PUBLIC_SERIALIZATION_FILES})
 source_group(Public\\Managers\\Actions FILES ${PUBLIC_ACTIONS_MANAGER_FILES})
 source_group(Public\\Managers\\Layout FILES ${PUBLIC_LAYOUT_MANAGER_FILES})
 source_group(Public\\Managers\\DataHierarchy FILES ${PUBLIC_DATA_HIERARCHY_FILES})
 source_group(Public\\Managers\\ActionHierarchy FILES ${PUBLIC_ACTION_HIERARCHY_FILES})
 source_group(Public\\Dataset FILES ${PUBLIC_DATASET_FILES})
 source_group(Public\\Plugin FILES ${PUBLIC_PLUGIN_FILES})
+source_group(Public\\Project FILES ${PUBLIC_PROJECT_FILES})
 
 source_group( Resources FILES res/resources.qrc)
 source_group( Resources FILES ${UI_FILES})

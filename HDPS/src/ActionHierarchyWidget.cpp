@@ -1,9 +1,11 @@
 #include "ActionHierarchyWidget.h"
 #include "ActionHierarchyModelItem.h"
+#include "Application.h"
 
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QHeaderView>
+#include <QStyledItemDelegate>
 
 using namespace hdps::util;
 

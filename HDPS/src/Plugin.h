@@ -1,10 +1,9 @@
-#ifndef HDPS_PLUGIN_H
-#define HDPS_PLUGIN_H
+#pragma once
 
 #include "PluginFactory.h"
-#include "CoreInterface.h"
 #include "PluginType.h"
 #include "Application.h"
+
 #include "event/EventListener.h"
 #include "actions/WidgetAction.h"
 #include "actions/StringAction.h"
@@ -28,7 +27,7 @@ class Plugin : public hdps::gui::WidgetAction
 public:
     Plugin(const PluginFactory* factory);
 
-    virtual ~Plugin() {};
+    virtual ~Plugin();
 
     /**
      * Can be implemented to initialize the plugin to a certain state.
@@ -37,56 +36,30 @@ public:
     virtual void init() = 0;
 
     /** Returns the unique name of this plugin */
-    QString getName() const {
-        return _name;
-    }
+    QString getName() const;
 
     /** Returns the GUI name of this plugin */
-    QString getGuiName() const {
-        return _guiNameAction.getString();
-    }
+    QString getGuiName() const;
 
     /** Returns the icon of this plugin */
-    virtual QIcon getIcon() const final {
-        return _factory->getIcon();
-    }
+    virtual QIcon getIcon() const final;
 
     /**
     * Returns the kind of plugin. The kind is specific to the
     * particular implementation of a plugin type.
     */
-    QString getKind() const
-    {
-        return _factory->getKind();
-    }
+    QString getKind() const;
 
     /**
      * Returns the type of plugin, see all types in PluginType
      */
-    Type getType() const
-    {
-        return _factory->getType();
-    }
+    Type getType() const;
 
     /**
      * Returns the version of the plugin. If no version string is implemented 
      * by this particular plugin it will return the "No version" string.
      */
-    virtual QString getVersion() const
-    {
-        return "No Version";
-    }
-
-    /**
-     * Stores a reference to the core in the plugin via the CoreInterface
-     * class, which provides restricted access to the core.
-     */
-    void setCore(CoreInterface* core)
-    {
-        this->_core = core;
-
-        _eventListener.setEventCore(core);
-    }
+    virtual QString getVersion() const;
 
 public: // Help
 
@@ -110,39 +83,24 @@ public: // Properties
      * @param defaultValue Default value
      * @return Property in variant form
      */
-    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const
-    {
-        if (!hasProperty(name))
-            return defaultValue;
-
-        return _properties[name];
-    }
+    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const;
 
     /**
     * Set property
     * @param name Name of the property
     * @param value Property value
     */
-    void setProperty(const QString& name, const QVariant& value)
-    {
-        _properties[name] = value;
-    }
+    void setProperty(const QString& name, const QVariant& value);
 
     /**
     * Determines whether a property with a give name exists
     * @param name Name of the property
     * @param value If property with the given name exists
     */
-    bool hasProperty(const QString& name) const
-    {
-        return _properties.contains(name);
-    }
+    bool hasProperty(const QString& name) const;
 
     /** Returns a list of available property names */
-    QStringList propertyNames() const
-    {
-        return _properties.keys();
-    }
+    QStringList propertyNames() const;
 
 public: // Settings
 
@@ -182,17 +140,11 @@ public: // Miscellaneous
      * @param pluginKind The kind of plugin
      * @return The number of plugin instances
      */
-    static std::uint32_t getNumberOfInstances(const QString& pluginKind)
-    {
-        return Plugin::noInstances[pluginKind];
-    }
+    static std::uint32_t getNumberOfInstances(const QString& pluginKind);
 
 public: // Action getters
 
-    gui::StringAction& getGuiNameAction() { return _guiNameAction; }
-
-protected:
-    CoreInterface* _core;
+    gui::StringAction& getGuiNameAction();
 
 protected:
     const PluginFactory*        _factory;           /** Pointer to plugin factory */
@@ -207,8 +159,6 @@ protected:
     friend class PluginFactory;
 };
 
-} // namespace plugin
+}
 
-} // namespace hdps
-
-#endif // HDPS_PLUGIN_H
+}

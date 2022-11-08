@@ -18,6 +18,8 @@
     #define WIDGET_ACTION_VERBOSE
 #endif
 
+using namespace hdps::util;
+
 namespace hdps {
 
 namespace gui {

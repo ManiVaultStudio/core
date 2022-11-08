@@ -5,6 +5,7 @@
 #include "RawData.h"
 #include "Dataset.h"
 #include "LinkedData.h"
+#include "Application.h"
 
 #include "actions/WidgetAction.h"
 #include "util/Miscellaneous.h"
@@ -54,39 +55,13 @@ public:
      * @param core Pointer to the core
      * @param rawDataName Name of the raw data
      */
-    DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& guid = "") :
-        WidgetAction(nullptr),
-        _core(core),
-        _storageType(StorageType::Owner),
-        _rawData(nullptr),
-        _guid(guid.isEmpty() ? QUuid::createUuid().toString(QUuid::WithoutBraces) : guid),
-        _guiName(),
-        _rawDataName(rawDataName),
-        _all(false),
-        _derived(false),
-        _sourceDataset(),
-        _properties(),
-        _groupIndex(-1),
-        _analysis(nullptr),
-        _linkedData(),
-        _linkedDataFlags(LinkedDataFlag::SendReceive),
-        _locked(false),
-        _smartPointer(this)
-    {
-    }
+    DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& guid = "");
 
     /** Destructor */
-    virtual ~DatasetImpl()
-    {
-#ifdef DATASET_IMPL_VERBOSE
-        qDebug() << _guiName << "destructed";
-#endif
-    }
+    virtual ~DatasetImpl();
 
     /** Performs startup initialization */
-    virtual void init()
-    {
-    };
+    virtual void init();;
 
     /**
      * Get a copy of the dataset
@@ -104,9 +79,7 @@ public:
     virtual Dataset<DatasetImpl> createSubsetFromSelection(const QString& guiName, const Dataset<DatasetImpl>& parentDataSet = Dataset<DatasetImpl>(), const bool& visible = true) const = 0;
 
     /** Get the globally unique identifier of the dataset in string format */
-    QString getGuid() const {
-        return _guid;
-    }
+    QString getGuid() const;
 
     /**
      * Get the data storage type
@@ -121,41 +94,22 @@ public:
     void setStorageType(const StorageType& storageType);
 
     /** Get the GUI name of the dataset */
-    QString getGuiName() const {
-        return _guiName;
-    }
+    QString getGuiName() const;
 
     /**
      * Set the GUI name of the dataset
      * @param guiName Name of the dataset in the graphical user interface
      */
-    void setGuiName(const QString& guiName) {
-        // Cache the old GUI name
-        const auto previousGuiName = _guiName;
-
-        // Assign new GUI name
-        _guiName = guiName;
-
-        setText(_guiName);
-
-        // Notify others that the data GUI name changed
-        Application::core()->notifyDatasetGuiNameChanged(*this, previousGuiName);
-    }
+    void setGuiName(const QString& guiName);
 
     /** Returns true if this set represents the full data and false if it's a subset */
-    bool isFull() const {
-        return _all;
-    }
+    bool isFull() const;
 
     /** Returns whether the dataset is derived */
-    bool isDerivedData() const {
-        return _derived;
-    }
+    bool isDerivedData() const;
 
     /** Returns the data type of the raw data associated with this dataset */
-    DataType getDataType() const {
-        return _core->requestRawData(getRawDataName()).getDataType();
-    }
+    DataType getDataType() const;
 
     /** Get source dataset if the given set is derived */
     template<typename DatasetType>
@@ -173,10 +127,7 @@ public:
      * Marks this dataset as derived and sets the source dataset globally unique identifier
      * @param dataset Smart pointer to the source dataset
      */
-    void setSourceDataSet(const Dataset<DatasetImpl>& dataset) {
-        _sourceDataset  = dataset;
-        _derived        = true;
-    }
+    void setSourceDataSet(const Dataset<DatasetImpl>& dataset);
 
     /**
      * Returns the original full dataset this subset was created from
@@ -197,9 +148,7 @@ public:
      *
      * @return The selection associated with this data set
      */
-    Dataset<DatasetImpl> getSelection() const {
-        return _core->requestSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
-    }
+    Dataset<DatasetImpl> getSelection() const;
 
     /**
      * Gets the selection associated with this data set. If the data set is
@@ -210,24 +159,20 @@ public:
      */
     template<typename DatasetType>
     Dataset<DatasetType> getSelection() const {
-        return _core->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
+        return Application::core()->requestSelection<DatasetType>(getSourceDataset<DatasetImpl>()->getRawDataName());
     }
 
     /**
      * Get reference to smart pointer which is owned by the set
      * @return Reference to smart pointer which is owned by the set
      */
-    Dataset<DatasetImpl>& getSmartPointer() {
-        return _smartPointer;
-    }
+    Dataset<DatasetImpl>& getSmartPointer();
 
     /**
      * Get smart pointer to set
      * @return Smart pointer to the set
      */
-    Dataset<DatasetImpl> toSmartPointer() const {
-        return Dataset<DatasetImpl>(const_cast<DatasetImpl*>(this));
-    }
+    Dataset<DatasetImpl> toSmartPointer() const;
 
     /**
      * Get smart pointer to set
@@ -237,11 +182,6 @@ public:
     Dataset<DatasetType> toSmartPointer() const {
         auto nonConstThis = const_cast<DatasetImpl*>(this);
         return Dataset<DatasetType>(dynamic_cast<DatasetType*>(nonConstThis));
-    }
-
-    /** Get pointer to the core */
-    CoreInterface* getCore() {
-        return _core;
     }
 
     /**
@@ -275,17 +215,13 @@ public:
      * Get amount of data occupied by the raw data
      * @return Size of the raw data in bytes
      */
-    virtual std::uint64_t getRawDataSize() const {
-        return 0;
-    }
+    virtual std::uint64_t getRawDataSize() const;
 
     /**
      * Get amount of data occupied by the raw data in human readable string format
      * @return Size of the raw data in bytes in human readable string format
      */
-    QString getRawDataSizeHumanReadable() const {
-        return util::getNoBytesHumanReadable(getRawDataSize());
-    }
+    QString getRawDataSizeHumanReadable() const;
 
 public: // Hierarchy
 
@@ -316,9 +252,7 @@ public: // Hierarchy
      * @param filterDataType Type of data to filter
      * @return Child datasets of the dataset type
      */
-    QVector<Dataset<DatasetImpl>> getChildren(const DataType& filterDataType) {
-        return getChildren(QVector<DataType>({ filterDataType }));
-    }
+    QVector<Dataset<DatasetImpl>> getChildren(const DataType& filterDataType);
 
 public: // Selection
 
@@ -404,35 +338,24 @@ public: // Properties
      * @param defaultValue Default value
      * @return Property in variant form
      */
-    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const {
-        if (!hasProperty(name))
-            return defaultValue;
-
-        return _properties[name];
-    }
+    QVariant getProperty(const QString& name, const QVariant& defaultValue = QVariant()) const;
 
     /**
     * Set property
     * @param name Name of the property
     * @param value Property value
     */
-    void setProperty(const QString& name, const QVariant& value) {
-        _properties[name] = value;
-    }
+    void setProperty(const QString& name, const QVariant& value);
 
     /**
     * Determines whether a property with a give name exists
     * @param name Name of the property
     * @param value If property with the given name exists
     */
-    bool hasProperty(const QString& name) const {
-        return _properties.contains(name);
-    }
+    bool hasProperty(const QString& name) const;
 
     /** Returns a list of available property names */
-    QStringList propertyNames() const {
-        return _properties.keys();
-    }
+    QStringList propertyNames() const;
 
 public: // Analysis
 
@@ -564,23 +487,19 @@ protected:
     template <class DataType>
     DataType& getRawData() const {
         if (_rawData == nullptr)
-            _rawData = &dynamic_cast<DataType&>(_core->requestRawData(getRawDataName()));
+            _rawData = &dynamic_cast<DataType&>(Application::core()->requestRawData(getRawDataName()));
 
         return *static_cast<DataType*>(_rawData);
     }
 
     /** Get the name of the raw data */
-    QString getRawDataName() const {
-        return _rawDataName;
-    }
+    QString getRawDataName() const;
 
     /**
      * Set whether this set represents all the data or only a subset
      * @param all Whether this is a full dataset
      */
-    void setAll(bool all) {
-        _all = all;
-    }
+    void setAll(bool all);
 
 public: // Operators
 
@@ -589,7 +508,6 @@ public: // Operators
      * @param other Reference to assign from
      */
     DatasetImpl& operator=(const DatasetImpl& other) {
-        _core               = other._core;
         _storageType        = other._storageType;
         _guiName            = other._guiName;
         _rawData            = other._rawData;
@@ -606,9 +524,6 @@ public: // Operators
 
         return *this;
     }
-
-protected:
-    CoreInterface*              _core;              /** Pointer to the core interface */
 
 private:
     mutable plugin::RawData*    _rawData;                   /** Pointer to the raw data referenced in this set */
@@ -629,7 +544,7 @@ private:
     bool                        _locked;                    /** Whether the dataset is locked */
     Dataset<DatasetImpl>        _smartPointer;              /** Smart pointer to own dataset */
 
-    friend class Core;
+    friend class CoreInterface;
     friend class DataManager;
     friend class EventListener;
 

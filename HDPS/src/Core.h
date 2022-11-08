@@ -322,11 +322,6 @@ public:
     /** Initializes the core; loads all plugins from the designated plugin directory */
     void init();
 
-    /** Returns a reference to the internal data manager */
-    DataManager& getDataManager() {
-        return *_dataManager;
-    }
-
     /** Adds the given plugin to the list of plugins kept by the core */
     void addPlugin(plugin::Plugin* plugin);
 
@@ -335,24 +330,21 @@ private:
     /** Destroys all plug-ins kept by the core */
     void destroyPlugins();
 
-public: // Serialization
+public: // Managers
 
-    /**
-     * Load widget action from variant
-     * @param Variant representation of the widget action
-     */
-    void fromVariantMap(const QVariantMap& variantMap) override;
+    /** Get a pointer to the data manager */
+    AbstractDataManager* getDataManager() override;
 
-    /**
-     * Save widget action to variant
-     * @return Variant representation of the widget action
-     */
-    QVariantMap toVariantMap() const override;
+    /** Get a pointer to the plugin manager */
+    AbstractPluginManager* getPluginManager() override;
+
+    /** Get a pointer to the actions manager */
+    AbstractActionsManager* getActionsManager() override;
 
 private:
     gui::MainWindow&                                                        _mainWindow;                /** Reference to the main window */
-    std::unique_ptr<plugin::PluginManager>                                  _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core. */
-    std::unique_ptr<DataManager>                                            _dataManager;               /** Data manager responsible for storing data sets and data selections */
+    PluginManager                                                           _pluginManager;             /** Plugin manager responsible for loading plug-ins and adding them to the core. */
+    DataManager                                                             _dataManager;               /** Data manager responsible for storing data sets and data selections */
     std::unique_ptr<DataHierarchyManager>                                   _dataHierarchyManager;      /** Internal hierarchical data tree */
     std::unordered_map<plugin::Type, UniquePtrsPlugin, plugin::TypeHash>    _plugins;                   /** List of plugin instances currently present in the application. Instances are stored by type. */
     std::vector<EventListener*>                                             _eventListeners;            /** List of classes listening for core events */

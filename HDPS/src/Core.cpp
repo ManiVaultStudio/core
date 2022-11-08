@@ -394,9 +394,19 @@ QVector<Dataset<DatasetImpl>> Core::requestAllDataSets(const QVector<DataType>& 
     return allDataSets;
 }
 
-const DataManager& Core::getDataManager() const
+hdps::AbstractDataManager* Core::getDataManager()
 {
-    return *_dataManager.get();
+    return &_dataManager;
+}
+
+PluginManager* Core::getPluginManager()
+{
+    return &_pluginManager;
+}
+
+hdps::AbstractActionsManager* Core::getActionsManager()
+{
+    return nullptr;
 }
 
 hdps::DataHierarchyItem& Core::getDataHierarchyItem(const QString& dataSetId)
@@ -797,22 +807,6 @@ void Core::destroyPlugins()
             kv.second[i].reset();
         }
     }
-}
-
-void Core::fromVariantMap(const QVariantMap& variantMap)
-{
-    _pluginManager->fromVariantMap(variantMap[_pluginManager->getSerializationName()].toMap());
-    _dataHierarchyManager->fromVariantMap(variantMap[_dataHierarchyManager->getSerializationName()].toMap());
-}
-
-QVariantMap Core::toVariantMap() const
-{
-    QVariantMap variantMap;
-
-    variantMap[_pluginManager->getSerializationName()]          = _pluginManager->toVariantMap();
-    variantMap[_dataHierarchyManager->getSerializationName()]   = _dataHierarchyManager->toVariantMap();
-
-    return variantMap;
 }
 
 void Core::setDatasetGroupingEnabled(const bool& datasetGroupingEnabled)

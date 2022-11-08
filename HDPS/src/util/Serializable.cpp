@@ -16,6 +16,8 @@ using namespace hdps::util;
 
 namespace hdps {
 
+namespace util {
+
 Serializable::Serializable(const QString& name /*= ""*/) :
     _name(name)
 {
@@ -157,6 +159,8 @@ QVariantMap Serializable::toVariantMap(const Serializable* serializable)
 #endif
 
     return serializable->toVariantMap();
+}
+
 }
 
 }

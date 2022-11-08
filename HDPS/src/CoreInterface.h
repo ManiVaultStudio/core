@@ -3,6 +3,11 @@
 #include "PluginType.h"
 #include "Dataset.h"
 
+// Abstract managers
+#include "AbstractDataManager.h"
+#include "AbstractPluginManager.h"
+#include "AbstractActionsManager.h"
+
 #include <actions/WidgetAction.h>
 
 #include <QString>
@@ -16,7 +21,6 @@ namespace hdps
     class DatasetImpl;
     class DataType;
     class EventListener;
-    class DataManager;
     class DataHierarchyManager;
     class DataHierarchyItem;
 
@@ -358,6 +362,17 @@ public: // Events & notifications
      */
     virtual void unregisterEventListener(EventListener* eventListener) = 0;
 
+public: // Managers
+
+    /** Get a pointer to the data manager */
+    virtual AbstractDataManager* getDataManager() = 0;
+
+    /** Get a pointer to the plugin manager */
+    virtual AbstractPluginManager* getPluginManager() = 0;
+
+    /** Get a pointer to the actions manager */
+    virtual AbstractActionsManager* getActionsManager() = 0;
+    
 protected:
     bool    _datasetGroupingEnabled;        /** Whether datasets can be grouped or not */
 

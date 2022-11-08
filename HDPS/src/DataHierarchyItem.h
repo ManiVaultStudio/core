@@ -5,8 +5,6 @@
 #include "actions/WidgetAction.h"
 #include "event/Event.h"
 #include "Set.h"
-#include "actions/DataRemoveAction.h"
-#include "actions/DataCopyAction.h"
 
 #include <QObject>
 #include <QMap>
@@ -377,8 +375,6 @@ protected:
     QTimer                      _taskProgressTimer;     /** Task progress timer which prevents excessive GUI updates */
     QIcon                       _icon;                  /** Icon */
     hdps::gui::WidgetActions    _actions;               /** Widget actions */
-    DataRemoveAction            _dataRemoveAction;      /** Data remove action */
-    DataCopyAction              _dataCopyAction;        /** Data copy action */
 
 protected:
     friend class DataHierarchyManager;

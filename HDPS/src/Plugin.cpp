@@ -20,9 +20,45 @@ Plugin::Plugin(const PluginFactory* factory) :
 {
     noInstances[getKind()]++;
 
+    _eventListener.setEventCore(Application::core());
+
     _guiNameAction.setConnectionPermissionsToNone();
     _guiNameAction.setConfigurationFlag(WidgetAction::ConfigurationFlag::VisibleInMenu, false);
     _guiNameAction.setPlaceHolderString("Enter plugin name here...");
+}
+
+Plugin::~Plugin()
+{
+}
+
+QString Plugin::getName() const
+{
+    return _name;
+}
+
+QString Plugin::getGuiName() const
+{
+    return _guiNameAction.getString();
+}
+
+QIcon Plugin::getIcon() const
+{
+    return _factory->getIcon();
+}
+
+QString Plugin::getKind() const
+{
+    return _factory->getKind();
+}
+
+hdps::plugin::Type Plugin::getType() const
+{
+    return _factory->getType();
+}
+
+QString Plugin::getVersion() const
+{
+    return "No Version";
 }
 
 bool Plugin::hasHelp()
@@ -33,6 +69,29 @@ bool Plugin::hasHelp()
 hdps::gui::TriggerAction& Plugin::getTriggerHelpAction()
 {
     return const_cast<PluginFactory*>(_factory)->getTriggerHelpAction();
+}
+
+QVariant Plugin::getProperty(const QString& name, const QVariant& defaultValue /*= QVariant()*/) const
+{
+    if (!hasProperty(name))
+        return defaultValue;
+
+    return _properties[name];
+}
+
+void Plugin::setProperty(const QString& name, const QVariant& value)
+{
+    _properties[name] = value;
+}
+
+bool Plugin::hasProperty(const QString& name) const
+{
+    return _properties.contains(name);
+}
+
+QStringList Plugin::propertyNames() const
+{
+    return _properties.keys();
 }
 
 QVariant Plugin::getSetting(const QString& path, const QVariant& defaultValue /*= QVariant()*/) const
@@ -62,6 +121,16 @@ QVariantMap Plugin::toVariantMap() const
         { "GuiName", _guiNameAction.getString() },
         { "Plugin", plugin }
     };
+}
+
+std::uint32_t Plugin::getNumberOfInstances(const QString& pluginKind)
+{
+    return Plugin::noInstances[pluginKind];
+}
+
+hdps::gui::StringAction& Plugin::getGuiNameAction()
+{
+    return _guiNameAction;
 }
 
 }

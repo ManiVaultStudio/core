@@ -3,10 +3,12 @@
 
 #include <QDebug>
 
+using namespace hdps::gui;
+
 namespace hdps
 {
 
-ActionHierarchyModel::ActionHierarchyModel(QObject* parent, gui::WidgetAction* rootAction) :
+ActionHierarchyModel::ActionHierarchyModel(QObject* parent, WidgetAction* rootAction) :
     QAbstractItemModel(parent),
     _rootItem(new ActionHierarchyModelItem(rootAction, nullptr))
 {

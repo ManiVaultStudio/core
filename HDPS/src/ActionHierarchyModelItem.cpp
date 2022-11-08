@@ -1,4 +1,5 @@
 #include "ActionHierarchyModelItem.h"
+#include "Application.h"
 
 #include <QDebug>
 

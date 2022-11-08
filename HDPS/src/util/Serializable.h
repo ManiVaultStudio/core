@@ -7,6 +7,8 @@
 
 namespace hdps {
 
+namespace util {
+
 /**
  * @author Thomas Kroes
  */
@@ -81,5 +83,7 @@ protected:
 private:
     QString     _name;      /** Serialization name */
 };
+
+}
 
 }

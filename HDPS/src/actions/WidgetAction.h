@@ -1,7 +1,8 @@
 #pragma once
 
 #include "WidgetActionWidget.h"
-#include "Serializable.h"
+
+#include "util/Serializable.h"
 
 #include <QWidgetAction>
 
@@ -28,7 +29,7 @@ class WidgetActionLabel;
  * 
  * @author Thomas Kroes
  */
-class WidgetAction : public QWidgetAction, public Serializable
+class WidgetAction : public QWidgetAction, public util::Serializable
 {
     Q_OBJECT
 

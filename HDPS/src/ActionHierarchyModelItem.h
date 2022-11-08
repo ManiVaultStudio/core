@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core.h"
+#include "actions/WidgetAction.h"
 
 #include <QObject>
 #include <QVector>
@@ -37,7 +37,7 @@ public:
      * @param parent Parent action hierarchy item (if any)
      * @param action Pointer to non-owning action
      */
-    explicit ActionHierarchyModelItem(WidgetAction* action, ActionHierarchyModelItem* parent = nullptr);
+    explicit ActionHierarchyModelItem(gui::WidgetAction* action, ActionHierarchyModelItem* parent = nullptr);
 
     /** Destructor */
     virtual ~ActionHierarchyModelItem();
@@ -80,7 +80,7 @@ public:
      * Get the action
      * @return Pointer to action
      */
-    WidgetAction* getAction();
+    gui::WidgetAction* getAction();
 
 private:
 
@@ -91,7 +91,7 @@ private:
     void removeChild(ActionHierarchyModelItem* actionHierarchyModelItem);
 
 protected:
-    WidgetAction*               _action;        /** Pointer to non-owning action */
+    gui::WidgetAction*          _action;        /** Pointer to non-owning action */
     ActionHierarchyModelItem*   _parent;        /** Pointer to non-owning parent item */
     ActionHierarchyModelItems   _children;      /** Pointers to owning child items */
 };

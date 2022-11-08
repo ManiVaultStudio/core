@@ -1,14 +1,16 @@
 #include "DataHierarchyItem.h"
-#include "Core.h"
 #include "DataManager.h"
 #include "Set.h"
 #include "Dataset.h"
+
+#include "util/Serialization.h"
 
 #include <QMenu>
 
 #include <stdexcept>
 
 using namespace hdps::gui;
+using namespace hdps::util;
 
 namespace hdps
 {
@@ -28,9 +30,7 @@ DataHierarchyItem::DataHierarchyItem(QObject* parent, Dataset<DatasetImpl> datas
     _taskDescriptionTimer(),
     _taskProgressTimer(),
     _icon(),
-    _actions(),
-    _dataRemoveAction(parent, dataset),
-    _dataCopyAction(parent, dataset)
+    _actions()
 {
     setText(dataset->getGuiName());
 
@@ -235,14 +235,6 @@ QMenu* DataHierarchyItem::getContextMenu(QWidget* parent /*= nullptr*/)
         if (contextMenu)
             menu->addMenu(contextMenu);
     }
-
-    menu->addSeparator();
-
-    _dataRemoveAction.setEnabled(!_dataset->isLocked());
-    _dataRemoveAction.setEnabled(false);
-
-    menu->addAction(&_dataRemoveAction);
-    menu->addAction(&_dataCopyAction);
 
     return menu;
 }

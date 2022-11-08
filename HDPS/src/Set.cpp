@@ -17,7 +17,7 @@ void DatasetImpl::makeSubsetOf(Dataset<DatasetImpl> fullDataset)
     _rawDataName = fullDataset->_rawDataName;
 
     if (!_rawDataName.isEmpty())
-        _rawData = &_core->requestRawData(getRawDataName());
+        _rawData = &Application::core()->requestRawData(getRawDataName());
 
     _fullDataset = fullDataset;
 
@@ -29,6 +29,11 @@ QString DatasetImpl::getRawDataKind() const
     return _rawData->getKind();
 }
 
+std::uint64_t DatasetImpl::getRawDataSize() const
+{
+    return 0;
+}
+
 const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 {
     return const_cast<DatasetImpl*>(this)->getDataHierarchyItem();
@@ -36,7 +41,7 @@ const DataHierarchyItem& DatasetImpl::getDataHierarchyItem() const
 
 DataHierarchyItem& DatasetImpl::getDataHierarchyItem()
 {
-    return _core->getDataHierarchyItem(_guid);
+    return Application::core()->getDataHierarchyItem(_guid);
 }
 
 hdps::Dataset<hdps::DatasetImpl> DatasetImpl::getParent() const
@@ -53,6 +58,11 @@ QVector<Dataset<DatasetImpl>> DatasetImpl::getChildren(const QVector<DataType>& 
             children << dataHierarchyChild->getDataset();
 
     return children;
+}
+
+QVector<hdps::Dataset<hdps::DatasetImpl>> DatasetImpl::getChildren(const DataType& filterDataType)
+{
+    return getChildren(QVector<DataType>({ filterDataType }));
 }
 
 std::int32_t DatasetImpl::getSelectionSize() const
@@ -126,7 +136,7 @@ void DatasetImpl::fromVariantMap(const QVariantMap& variantMap)
         Datasets proxyMembers;
 
         for (const auto& proxyMemberGuid : variantMap["ProxyMembers"].toStringList())
-            proxyMembers << _core->requestDataset(proxyMemberGuid);
+            proxyMembers << Application::core()->requestDataset(proxyMemberGuid);
 
         setProxyMembers(proxyMembers);
     }
@@ -183,7 +193,7 @@ void DatasetImpl::setGroupIndex(const std::int32_t& groupIndex)
 {
     _groupIndex = groupIndex;
 
-    _core->notifyDatasetSelectionChanged(this);
+    Application::core()->notifyDatasetSelectionChanged(this);
 }
 
 hdps::Datasets DatasetImpl::getProxyMembers() const
@@ -208,7 +218,7 @@ void DatasetImpl::setProxyMembers(const Datasets& proxyDatasets)
 
         setStorageType(StorageType::Proxy);
 
-        _core->notifyDatasetChanged(this);
+        Application::core()->notifyDatasetChanged(this);
     }
     catch (std::exception& e)
     {
@@ -236,10 +246,8 @@ bool DatasetImpl::isProxy() const
 
 void DatasetImpl::addAction(hdps::gui::WidgetAction& widgetAction)
 {
-    // Re-parent the widget action
     widgetAction.setParent(this);
 
-   // And add to the data hierarchy item
     getDataHierarchyItem().addAction(widgetAction);
 }
 
@@ -264,6 +272,44 @@ void DatasetImpl::addLinkedData(const hdps::Dataset<DatasetImpl>& targetDataSet,
     _linkedData.back().setMapping(mapping);
 }
 
+DatasetImpl::DatasetImpl(CoreInterface* core, const QString& rawDataName, const QString& guid /*= ""*/) :
+    WidgetAction(nullptr),
+    _storageType(StorageType::Owner),
+    _rawData(nullptr),
+    _guid(guid.isEmpty() ? QUuid::createUuid().toString(QUuid::WithoutBraces) : guid),
+    _guiName(),
+    _rawDataName(rawDataName),
+    _all(false),
+    _derived(false),
+    _sourceDataset(),
+    _properties(),
+    _groupIndex(-1),
+    _analysis(nullptr),
+    _linkedData(),
+    _linkedDataFlags(LinkedDataFlag::SendReceive),
+    _locked(false),
+    _smartPointer(this)
+{
+
+}
+
+DatasetImpl::~DatasetImpl()
+{
+#ifdef DATASET_IMPL_VERBOSE
+    qDebug() << _guiName << "destructed";
+#endif
+}
+
+void DatasetImpl::init()
+{
+
+}
+
+QString DatasetImpl::getGuid() const
+{
+    return _guid;
+}
+
 hdps::DatasetImpl::StorageType DatasetImpl::getStorageType() const
 {
     return _storageType;
@@ -275,6 +321,58 @@ void DatasetImpl::setStorageType(const StorageType& storageType)
         return;
 
     _storageType = storageType;
+}
+
+QString DatasetImpl::getGuiName() const
+{
+    return _guiName;
+}
+
+void DatasetImpl::setGuiName(const QString& guiName)
+{
+    const auto previousGuiName = _guiName;
+
+    _guiName = guiName;
+
+    setText(_guiName);
+
+    Application::core()->notifyDatasetGuiNameChanged(*this, previousGuiName);
+}
+
+bool DatasetImpl::isFull() const
+{
+    return _all;
+}
+
+bool DatasetImpl::isDerivedData() const
+{
+    return _derived;
+}
+
+hdps::DataType DatasetImpl::getDataType() const
+{
+    return Application::core()->requestRawData(getRawDataName()).getDataType();
+}
+
+void DatasetImpl::setSourceDataSet(const Dataset<DatasetImpl>& dataset)
+{
+    _sourceDataset = dataset;
+    _derived = true;
+}
+
+hdps::Dataset<hdps::DatasetImpl> DatasetImpl::getSelection() const
+{
+    return Application::core()->requestSelection(getSourceDataset<DatasetImpl>()->getRawDataName());
+}
+
+hdps::Dataset<hdps::DatasetImpl>& DatasetImpl::getSmartPointer()
+{
+    return _smartPointer;
+}
+
+hdps::Dataset<hdps::DatasetImpl> DatasetImpl::toSmartPointer() const
+{
+    return Dataset<DatasetImpl>(const_cast<DatasetImpl*>(this));
 }
 
 QIcon DatasetImpl::getIcon(StorageType storageType, const QColor& color /*= Qt::black*/) const
@@ -323,6 +421,44 @@ void DatasetImpl::setLinkedDataFlag(std::int32_t linkedDataFlag, bool set /*= tr
 bool DatasetImpl::hasLinkedDataFlag(std::int32_t linkedDataFlag)
 {
     return _linkedDataFlags & linkedDataFlag;
+}
+
+QString DatasetImpl::getRawDataSizeHumanReadable() const
+{
+    return util::getNoBytesHumanReadable(getRawDataSize());
+}
+
+QVariant DatasetImpl::getProperty(const QString& name, const QVariant& defaultValue /*= QVariant()*/) const
+{
+    if (!hasProperty(name))
+        return defaultValue;
+
+    return _properties[name];
+}
+
+void DatasetImpl::setProperty(const QString& name, const QVariant& value)
+{
+    _properties[name] = value;
+}
+
+bool DatasetImpl::hasProperty(const QString& name) const
+{
+    return _properties.contains(name);
+}
+
+QStringList DatasetImpl::propertyNames() const
+{
+    return _properties.keys();
+}
+
+QString DatasetImpl::getRawDataName() const
+{
+    return _rawDataName;
+}
+
+void DatasetImpl::setAll(bool all)
+{
+    _all = all;
 }
 
 }
